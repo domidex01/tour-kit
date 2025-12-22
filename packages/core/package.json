@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Headless onboarding and product tour library for React - Core package",
   "author": "Tour Kit Team",
   "license": "MIT",
