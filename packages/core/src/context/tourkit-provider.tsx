@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { TourKitContext, type TourKitContextValue } from './tourkit-context'
-import type { BeaconConfig } from '../types'
+import type { TourKitConfig } from '../types'
 
 export interface TourKitProviderProps {
   children: React.ReactNode
-  config?: BeaconConfig
+  config?: TourKitConfig
   onTourStart?: (tourId: string) => void
   onTourComplete?: (tourId: string) => void
   onTourSkip?: (tourId: string, stepIndex: number) => void

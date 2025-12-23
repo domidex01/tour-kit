@@ -1,8 +1,8 @@
 import { createContext } from 'react'
-import type { BeaconConfig } from '../types'
+import type { TourKitConfig } from '../types'
 
 export interface TourKitContextValue {
-  config: BeaconConfig
+  config: TourKitConfig
   // Global callbacks
   onTourStart?: (tourId: string) => void
   onTourComplete?: (tourId: string) => void

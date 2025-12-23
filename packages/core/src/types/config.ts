@@ -98,9 +98,9 @@ export interface ScrollConfig {
 }
 
 /**
- * Global beacon configuration
+ * Global TourKit configuration
  */
-export interface BeaconConfig {
+export interface TourKitConfig {
   keyboard?: KeyboardConfig
   spotlight?: SpotlightConfig
   persistence?: PersistenceConfig
@@ -134,7 +134,7 @@ export const defaultPersistenceConfig: Required<
 } = {
   enabled: true,
   storage: 'localStorage',
-  keyPrefix: 'beacon',
+  keyPrefix: 'tourkit',
   rememberStep: true,
   trackCompleted: true,
   dontShowAgain: false,
