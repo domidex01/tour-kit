@@ -1,6 +1,6 @@
 import type React from 'react'
 import type { Placement } from './config'
-import type { TourContext } from './state'
+import type { TourCallbackContext } from './state'
 
 /**
  * Single step in a tour
@@ -26,17 +26,17 @@ export interface TourStep {
   }
   route?: string
   routeDelay?: number
-  when?: (context: TourContext) => boolean | Promise<boolean>
+  when?: (context: TourCallbackContext) => boolean | Promise<boolean>
   waitForTarget?: boolean
   waitTimeout?: number
   onBeforeShow?: (
-    context: TourContext
+    context: TourCallbackContext
   ) => void | boolean | Promise<void | boolean>
-  onShow?: (context: TourContext) => void
+  onShow?: (context: TourCallbackContext) => void
   onBeforeHide?: (
-    context: TourContext
+    context: TourCallbackContext
   ) => void | boolean | Promise<void | boolean>
-  onHide?: (context: TourContext) => void
+  onHide?: (context: TourCallbackContext) => void
 }
 
 export type StepOptions = Omit<TourStep, 'id'>

@@ -17,9 +17,9 @@ export interface TourState {
 }
 
 /**
- * Extended tour context
+ * Extended tour context data (passed to callbacks)
  */
-export interface TourContext extends TourState {
+export interface TourCallbackContext extends TourState {
   tour: Tour | null
   data: Record<string, unknown>
 }
