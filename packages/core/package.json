@@ -4,14 +4,14 @@
   "description": "Headless onboarding and product tour library for React - Core package",
   "author": "Tour Kit Team",
   "license": "MIT",
-  "homepage": "https://github.com/tour-kit/tour-kit#readme",
+  "homepage": "https://github.com/DomiDex/tour-kit#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tour-kit/tour-kit.git",
+    "url": "git+https://github.com/DomiDex/tour-kit.git",
     "directory": "packages/core"
   },
   "bugs": {
-    "url": "https://github.com/tour-kit/tour-kit/issues"
+    "url": "https://github.com/DomiDex/tour-kit/issues"
   },
   "keywords": [
     "react",
