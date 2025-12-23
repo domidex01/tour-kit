@@ -11,10 +11,7 @@ const defaultScrollConfig: Required<ScrollConfig> = {
 /**
  * Scroll element into view with configuration
  */
-export function scrollIntoView(
-  element: HTMLElement,
-  config?: ScrollConfig
-): Promise<void> {
+export function scrollIntoView(element: HTMLElement, config?: ScrollConfig): Promise<void> {
   const mergedConfig = { ...defaultScrollConfig, ...config }
 
   if (!mergedConfig.enabled) {

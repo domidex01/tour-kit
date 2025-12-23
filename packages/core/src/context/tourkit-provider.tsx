@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { TourKitContext, type TourKitContextValue } from './tourkit-context'
 import type { TourKitConfig } from '../types'
+import { TourKitContext, type TourKitContextValue } from './tourkit-context'
 
 export interface TourKitProviderProps {
   children: React.ReactNode
@@ -30,7 +30,5 @@ export function TourKitProvider({
     [config, onTourStart, onTourComplete, onTourSkip, onStepView]
   )
 
-  return (
-    <TourKitContext.Provider value={value}>{children}</TourKitContext.Provider>
-  )
+  return <TourKitContext.Provider value={value}>{children}</TourKitContext.Provider>
 }

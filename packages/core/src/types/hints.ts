@@ -1,12 +1,7 @@
 import type React from 'react'
 import type { Placement } from './config'
 
-export type BeaconPosition =
-  | 'top-left'
-  | 'top-right'
-  | 'bottom-left'
-  | 'bottom-right'
-  | 'center'
+export type BeaconPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
 
 export interface HintConfig {
   id: string

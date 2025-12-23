@@ -24,16 +24,10 @@ export function getElement(
  */
 export function isElementVisible(element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect()
-  const windowHeight =
-    window.innerHeight || document.documentElement.clientHeight
+  const windowHeight = window.innerHeight || document.documentElement.clientHeight
   const windowWidth = window.innerWidth || document.documentElement.clientWidth
 
-  return (
-    rect.top >= 0 &&
-    rect.left >= 0 &&
-    rect.bottom <= windowHeight &&
-    rect.right <= windowWidth
-  )
+  return rect.top >= 0 && rect.left >= 0 && rect.bottom <= windowHeight && rect.right <= windowWidth
 }
 
 /**
@@ -41,25 +35,16 @@ export function isElementVisible(element: HTMLElement): boolean {
  */
 export function isElementPartiallyVisible(element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect()
-  const windowHeight =
-    window.innerHeight || document.documentElement.clientHeight
+  const windowHeight = window.innerHeight || document.documentElement.clientHeight
   const windowWidth = window.innerWidth || document.documentElement.clientWidth
 
-  return (
-    rect.top < windowHeight &&
-    rect.bottom > 0 &&
-    rect.left < windowWidth &&
-    rect.right > 0
-  )
+  return rect.top < windowHeight && rect.bottom > 0 && rect.left < windowWidth && rect.right > 0
 }
 
 /**
  * Wait for element to appear in DOM
  */
-export function waitForElement(
-  selector: string,
-  timeout = 5000
-): Promise<HTMLElement> {
+export function waitForElement(selector: string, timeout = 5000): Promise<HTMLElement> {
   return new Promise((resolve, reject) => {
     const element = document.querySelector<HTMLElement>(selector)
     if (element) {
@@ -107,9 +92,9 @@ const FOCUSABLE_SELECTOR = [
  * Get all focusable elements within a container
  */
 export function getFocusableElements(container: HTMLElement): HTMLElement[] {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-  ).filter((el) => el.offsetParent !== null)
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (el) => el.offsetParent !== null
+  )
 }
 
 /**

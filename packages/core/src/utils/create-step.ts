@@ -1,4 +1,4 @@
-import type { TourStep, StepOptions } from '../types'
+import type { StepOptions, TourStep } from '../types'
 
 let stepIdCounter = 0
 

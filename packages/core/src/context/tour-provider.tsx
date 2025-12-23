@@ -1,7 +1,7 @@
 import * as React from 'react'
+import type { Tour, TourContextValue, TourState } from '../types'
 import { TourContext } from './tour-context'
 import { TourKitContext } from './tourkit-context'
-import type { Tour, TourState, TourContextValue } from '../types'
 
 // Action types for reducer
 type TourAction =
@@ -22,10 +22,7 @@ interface TourReducerState extends TourState {
   tours: Map<string, Tour>
 }
 
-function tourReducer(
-  state: TourReducerState,
-  action: TourAction
-): TourReducerState {
+function tourReducer(state: TourReducerState, action: TourAction): TourReducerState {
   switch (action.type) {
     case 'START_TOUR': {
       const tour = state.tours.get(action.tourId)
@@ -78,11 +75,7 @@ function tourReducer(
 
     case 'GO_TO_STEP': {
       const tour = state.tours.get(state.tourId ?? '')
-      if (
-        !tour ||
-        action.stepIndex < 0 ||
-        action.stepIndex >= tour.steps.length
-      ) {
+      if (!tour || action.stepIndex < 0 || action.stepIndex >= tour.steps.length) {
         return state
       }
 
@@ -131,9 +124,7 @@ function tourReducer(
       if (action.tourId) {
         return {
           ...state,
-          completedTours: state.completedTours.filter(
-            (id) => id !== action.tourId
-          ),
+          completedTours: state.completedTours.filter((id) => id !== action.tourId),
           skippedTours: state.skippedTours.filter((id) => id !== action.tourId),
         }
       }
@@ -174,9 +165,7 @@ export function TourProvider({ children, tours = [] }: TourProviderProps) {
   const [state, dispatch] = React.useReducer(tourReducer, initialState)
 
   // Get current tour
-  const currentTour = state.tourId
-    ? (state.tours.get(state.tourId) ?? null)
-    : null
+  const currentTour = state.tourId ? (state.tours.get(state.tourId) ?? null) : null
 
   // Actions
   const start = React.useCallback(
@@ -209,11 +198,7 @@ export function TourProvider({ children, tours = [] }: TourProviderProps) {
 
       const nextStep = currentTour.steps[state.currentStepIndex + 1]
       if (nextStep) {
-        tourKitContext?.onStepView?.(
-          currentTour.id,
-          nextStep.id,
-          state.currentStepIndex + 1
-        )
+        tourKitContext?.onStepView?.(currentTour.id, nextStep.id, state.currentStepIndex + 1)
         currentTour.onStepChange?.(nextStep, state.currentStepIndex + 1, {
           ...state,
           tour: currentTour,
@@ -231,11 +216,7 @@ export function TourProvider({ children, tours = [] }: TourProviderProps) {
 
     const prevStep = currentTour.steps[state.currentStepIndex - 1]
     if (prevStep) {
-      tourKitContext?.onStepView?.(
-        currentTour.id,
-        prevStep.id,
-        state.currentStepIndex - 1
-      )
+      tourKitContext?.onStepView?.(currentTour.id, prevStep.id, state.currentStepIndex - 1)
       currentTour.onStepChange?.(prevStep, state.currentStepIndex - 1, {
         ...state,
         tour: currentTour,
@@ -286,12 +267,9 @@ export function TourProvider({ children, tours = [] }: TourProviderProps) {
     dispatch({ type: 'STOP_TOUR' })
   }, [])
 
-  const setDontShowAgain = React.useCallback(
-    (_tourId: string, _value: boolean) => {
-      // Implemented in usePersistence hook
-    },
-    []
-  )
+  const setDontShowAgain = React.useCallback((_tourId: string, _value: boolean) => {
+    // Implemented in usePersistence hook
+  }, [])
 
   const reset = React.useCallback((tourId?: string) => {
     dispatch({ type: 'RESET', tourId })
@@ -317,23 +295,8 @@ export function TourProvider({ children, tours = [] }: TourProviderProps) {
       reset,
       setData,
     }),
-    [
-      state,
-      currentTour,
-      data,
-      start,
-      next,
-      prev,
-      goTo,
-      skip,
-      complete,
-      stop,
-      reset,
-      setData,
-    ]
+    [state, currentTour, data, start, next, prev, goTo, skip, complete, stop, reset, setData]
   )
 
-  return (
-    <TourContext.Provider value={contextValue}>{children}</TourContext.Provider>
-  )
+  return <TourContext.Provider value={contextValue}>{children}</TourContext.Provider>
 }

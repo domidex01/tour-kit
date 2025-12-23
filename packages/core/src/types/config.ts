@@ -127,9 +127,7 @@ export const defaultSpotlightConfig: Required<SpotlightConfig> = {
   clickToExit: false,
 }
 
-export const defaultPersistenceConfig: Required<
-  Omit<PersistenceConfig, 'storage'>
-> & {
+export const defaultPersistenceConfig: Required<Omit<PersistenceConfig, 'storage'>> & {
   storage: 'localStorage'
 } = {
   enabled: true,

@@ -1,11 +1,9 @@
-import type { Storage, PersistenceConfig } from '../types'
+import type { PersistenceConfig, Storage } from '../types'
 
 /**
  * Create storage adapter from config
  */
-export function createStorageAdapter(
-  storageType: PersistenceConfig['storage']
-): Storage {
+export function createStorageAdapter(storageType: PersistenceConfig['storage']): Storage {
   if (typeof storageType === 'object') {
     return storageType
   }
@@ -38,9 +36,7 @@ export function createNoopStorage(): Storage {
 /**
  * Cookie-based storage adapter
  */
-export function createCookieStorage(
-  options: { expires?: number; path?: string } = {}
-): Storage {
+export function createCookieStorage(options: { expires?: number; path?: string } = {}): Storage {
   const { expires = 365, path = '/' } = options
 
   return {
@@ -82,16 +78,12 @@ export function safeJSONParse<T>(value: string | null, fallback: T): T {
 /**
  * Create storage with key prefix
  */
-export function createPrefixedStorage(
-  storage: Storage,
-  prefix: string
-): Storage {
+export function createPrefixedStorage(storage: Storage, prefix: string): Storage {
   const prefixKey = (key: string) => `${prefix}:${key}`
 
   return {
     getItem: (key: string) => storage.getItem(prefixKey(key)),
-    setItem: (key: string, value: string) =>
-      storage.setItem(prefixKey(key), value),
+    setItem: (key: string, value: string) => storage.setItem(prefixKey(key), value),
     removeItem: (key: string) => storage.removeItem(prefixKey(key)),
   }
 }

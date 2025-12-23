@@ -1,5 +1,5 @@
-import type { Tour } from './tour'
 import type { TourStep } from './step'
+import type { Tour } from './tour'
 
 /**
  * Current tour state

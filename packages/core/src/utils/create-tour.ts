@@ -1,4 +1,4 @@
-import type { Tour, TourStep, TourOptions } from '../types'
+import type { Tour, TourOptions, TourStep } from '../types'
 
 let tourIdCounter = 0
 
@@ -16,11 +16,7 @@ export function createTour(steps: TourStep[], options?: TourOptions): Tour {
 /**
  * Create a tour with explicit ID
  */
-export function createNamedTour(
-  id: string,
-  steps: TourStep[],
-  options?: TourOptions
-): Tour {
+export function createNamedTour(id: string, steps: TourStep[], options?: TourOptions): Tour {
   return {
     id,
     steps,

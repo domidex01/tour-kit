@@ -1,12 +1,12 @@
-import type { TourStep } from './step'
 import type {
-  KeyboardConfig,
-  SpotlightConfig,
-  PersistenceConfig,
   A11yConfig,
+  KeyboardConfig,
+  PersistenceConfig,
   ScrollConfig,
+  SpotlightConfig,
 } from './config'
 import type { TourCallbackContext } from './state'
+import type { TourStep } from './step'
 
 /**
  * Tour definition

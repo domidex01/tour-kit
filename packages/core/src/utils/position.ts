@@ -1,4 +1,4 @@
-import type { Rect, Position, Placement, Side, Alignment } from '../types'
+import type { Alignment, Placement, Position, Rect, Side } from '../types'
 
 /**
  * Get element's position including scroll offset
@@ -107,8 +107,7 @@ export function calculatePosition(
         break
       case 'center':
       default:
-        y =
-          targetRect.y + (targetRect.height - tooltipSize.height) / 2 + offsetY
+        y = targetRect.y + (targetRect.height - tooltipSize.height) / 2 + offsetY
     }
   }
 

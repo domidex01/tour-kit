@@ -1,10 +1,7 @@
 /**
  * Announce message to screen readers
  */
-export function announce(
-  message: string,
-  politeness: 'polite' | 'assertive' = 'polite'
-): void {
+export function announce(message: string, politeness: 'polite' | 'assertive' = 'polite'): void {
   if (typeof document === 'undefined') return
 
   const announcer = document.createElement('div')
