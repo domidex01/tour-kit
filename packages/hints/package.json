@@ -42,11 +42,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "CHANGELOG.md"
-  ],
+  "files": ["dist", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
