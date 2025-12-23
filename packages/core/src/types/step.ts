@@ -29,9 +29,13 @@ export interface TourStep {
   when?: (context: TourCallbackContext) => boolean | Promise<boolean>
   waitForTarget?: boolean
   waitTimeout?: number
-  onBeforeShow?: (context: TourCallbackContext) => void | boolean | Promise<void | boolean>
+  onBeforeShow?: (
+    context: TourCallbackContext
+  ) => boolean | undefined | Promise<boolean | undefined>
   onShow?: (context: TourCallbackContext) => void
-  onBeforeHide?: (context: TourCallbackContext) => void | boolean | Promise<void | boolean>
+  onBeforeHide?: (
+    context: TourCallbackContext
+  ) => boolean | undefined | Promise<boolean | undefined>
   onHide?: (context: TourCallbackContext) => void
 }
 

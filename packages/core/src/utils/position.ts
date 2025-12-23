@@ -93,7 +93,6 @@ export function calculatePosition(
       case 'end':
         x = targetRect.x + targetRect.width - tooltipSize.width - offsetX
         break
-      case 'center':
       default:
         x = targetRect.x + (targetRect.width - tooltipSize.width) / 2 + offsetX
     }
@@ -105,7 +104,6 @@ export function calculatePosition(
       case 'end':
         y = targetRect.y + targetRect.height - tooltipSize.height - offsetY
         break
-      case 'center':
       default:
         y = targetRect.y + (targetRect.height - tooltipSize.height) / 2 + offsetY
     }

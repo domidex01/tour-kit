@@ -52,10 +52,24 @@ export function waitForElement(selector: string, timeout = 5000): Promise<HTMLEl
       return
     }
 
-    const observer = new MutationObserver((_, obs) => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+    let observer: MutationObserver | null = null
+
+    const cleanup = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
+      if (observer) {
+        observer.disconnect()
+        observer = null
+      }
+    }
+
+    observer = new MutationObserver(() => {
       const el = document.querySelector<HTMLElement>(selector)
       if (el) {
-        obs.disconnect()
+        cleanup()
         resolve(el)
       }
     })
@@ -65,17 +79,10 @@ export function waitForElement(selector: string, timeout = 5000): Promise<HTMLEl
       subtree: true,
     })
 
-    const timeoutId = setTimeout(() => {
-      observer.disconnect()
+    timeoutId = setTimeout(() => {
+      cleanup()
       reject(new Error(`Element "${selector}" not found within ${timeout}ms`))
     }, timeout)
-
-    // Cleanup on success
-    const originalResolve = resolve
-    resolve = (el) => {
-      clearTimeout(timeoutId)
-      originalResolve(el)
-    }
   })
 }
 

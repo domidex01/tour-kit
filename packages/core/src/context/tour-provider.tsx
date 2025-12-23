@@ -22,119 +22,95 @@ interface TourReducerState extends TourState {
   tours: Map<string, Tour>
 }
 
+function createStoppedState(state: TourReducerState): TourReducerState {
+  return {
+    ...state,
+    tourId: null,
+    isActive: false,
+    currentStepIndex: 0,
+    currentStep: null,
+    totalSteps: 0,
+    isLoading: false,
+    isTransitioning: false,
+  }
+}
+
+function handleStartTour(
+  state: TourReducerState,
+  tourId: string,
+  stepIndex?: number
+): TourReducerState {
+  const tour = state.tours.get(tourId)
+  if (!tour) return state
+
+  const index = stepIndex ?? tour.startAt ?? 0
+  const step = tour.steps[index]
+
+  return {
+    ...state,
+    tourId,
+    isActive: true,
+    currentStepIndex: index,
+    currentStep: step ?? null,
+    totalSteps: tour.steps.length,
+    isLoading: false,
+    isTransitioning: false,
+  }
+}
+
+function handleStepNavigation(state: TourReducerState, newIndex: number): TourReducerState {
+  const tour = state.tours.get(state.tourId ?? '')
+  if (!tour || newIndex < 0 || newIndex >= tour.steps.length) {
+    return state
+  }
+
+  return {
+    ...state,
+    currentStepIndex: newIndex,
+    currentStep: tour.steps[newIndex] ?? null,
+    isTransitioning: false,
+  }
+}
+
+function handleReset(state: TourReducerState, tourId?: string): TourReducerState {
+  if (tourId) {
+    return {
+      ...state,
+      completedTours: state.completedTours.filter((id) => id !== tourId),
+      skippedTours: state.skippedTours.filter((id) => id !== tourId),
+    }
+  }
+  return {
+    ...state,
+    completedTours: [],
+    skippedTours: [],
+  }
+}
+
 function tourReducer(state: TourReducerState, action: TourAction): TourReducerState {
   switch (action.type) {
-    case 'START_TOUR': {
-      const tour = state.tours.get(action.tourId)
-      if (!tour) return state
-
-      const stepIndex = action.stepIndex ?? tour.startAt ?? 0
-      const step = tour.steps[stepIndex]
-
-      return {
-        ...state,
-        tourId: action.tourId,
-        isActive: true,
-        currentStepIndex: stepIndex,
-        currentStep: step ?? null,
-        totalSteps: tour.steps.length,
-        isLoading: false,
-        isTransitioning: false,
-      }
-    }
-
-    case 'NEXT_STEP': {
-      const tour = state.tours.get(state.tourId ?? '')
-      if (!tour || state.currentStepIndex >= tour.steps.length - 1) {
-        return state
-      }
-
-      const nextIndex = state.currentStepIndex + 1
-      return {
-        ...state,
-        currentStepIndex: nextIndex,
-        currentStep: tour.steps[nextIndex] ?? null,
-        isTransitioning: false,
-      }
-    }
-
-    case 'PREV_STEP': {
-      const tour = state.tours.get(state.tourId ?? '')
-      if (!tour || state.currentStepIndex <= 0) {
-        return state
-      }
-
-      const prevIndex = state.currentStepIndex - 1
-      return {
-        ...state,
-        currentStepIndex: prevIndex,
-        currentStep: tour.steps[prevIndex] ?? null,
-        isTransitioning: false,
-      }
-    }
-
-    case 'GO_TO_STEP': {
-      const tour = state.tours.get(state.tourId ?? '')
-      if (!tour || action.stepIndex < 0 || action.stepIndex >= tour.steps.length) {
-        return state
-      }
-
-      return {
-        ...state,
-        currentStepIndex: action.stepIndex,
-        currentStep: tour.steps[action.stepIndex] ?? null,
-        isTransitioning: false,
-      }
-    }
-
+    case 'START_TOUR':
+      return handleStartTour(state, action.tourId, action.stepIndex)
+    case 'NEXT_STEP':
+      return handleStepNavigation(state, state.currentStepIndex + 1)
+    case 'PREV_STEP':
+      return handleStepNavigation(state, state.currentStepIndex - 1)
+    case 'GO_TO_STEP':
+      return handleStepNavigation(state, action.stepIndex)
     case 'SKIP_TOUR':
     case 'COMPLETE_TOUR':
-    case 'STOP_TOUR': {
-      return {
-        ...state,
-        tourId: null,
-        isActive: false,
-        currentStepIndex: 0,
-        currentStep: null,
-        totalSteps: 0,
-        isLoading: false,
-        isTransitioning: false,
-      }
-    }
-
+    case 'STOP_TOUR':
+      return createStoppedState(state)
     case 'SET_LOADING':
       return { ...state, isLoading: action.isLoading }
-
     case 'SET_TRANSITIONING':
       return { ...state, isTransitioning: action.isTransitioning }
-
     case 'ADD_COMPLETED':
-      return {
-        ...state,
-        completedTours: [...state.completedTours, action.tourId],
-      }
-
+      return { ...state, completedTours: [...state.completedTours, action.tourId] }
     case 'ADD_SKIPPED':
-      return {
-        ...state,
-        skippedTours: [...state.skippedTours, action.tourId],
-      }
-
-    case 'RESET': {
-      if (action.tourId) {
-        return {
-          ...state,
-          completedTours: state.completedTours.filter((id) => id !== action.tourId),
-          skippedTours: state.skippedTours.filter((id) => id !== action.tourId),
-        }
-      }
-      return {
-        ...state,
-        completedTours: [],
-        skippedTours: [],
-      }
-    }
-
+      return { ...state, skippedTours: [...state.skippedTours, action.tourId] }
+    case 'RESET':
+      return handleReset(state, action.tourId)
     default:
       return state
   }
@@ -295,7 +271,21 @@ export function TourProvider({ children, tours = [] }: TourProviderProps) {
       reset,
       setData,
     }),
-    [state, currentTour, data, start, next, prev, goTo, skip, complete, stop, reset, setData]
+    [
+      state,
+      currentTour,
+      data,
+      start,
+      next,
+      prev,
+      goTo,
+      skip,
+      complete,
+      stop,
+      setDontShowAgain,
+      reset,
+      setData,
+    ]
   )
 
   return <TourContext.Provider value={contextValue}>{children}</TourContext.Provider>
