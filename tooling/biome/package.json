@@ -1,0 +1,6 @@
+{
+  "name": "@tour-kit/biome-config",
+  "private": true,
+  "version": "0.0.0",
+  "files": ["biome.json"]
+}

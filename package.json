@@ -15,7 +15,9 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules",
@@ -24,6 +26,7 @@
     "release": "turbo run build && changeset publish"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.8.0",
     "@changesets/cli": "^2.29.8",
     "turbo": "^2.7.1",
     "typescript": "^5.9.3"

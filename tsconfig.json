@@ -1,17 +1,18 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tooling/tsconfig/base.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "noEmit": true,
-    "isolatedModules": true
-  }
+    "baseUrl": ".",
+    "paths": {
+      "@tour-kit/core": ["packages/core/src"],
+      "@tour-kit/react": ["packages/react/src"],
+      "@tour-kit/hints": ["packages/hints/src"]
+    }
+  },
+  "include": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/react" },
+    { "path": "./packages/hints" }
+  ]
 }
