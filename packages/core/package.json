@@ -50,11 +50,15 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@floating-ui/react": "^0.26.0"
   },
   "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react": "^18.0.0 || >=19.2.0",
+    "react-dom": "^18.0.0 || >=19.2.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
