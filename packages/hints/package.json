@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/hints",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Headless onboarding and product tour library for React - Hints package",
   "author": "Tour Kit Team",
   "license": "MIT",
@@ -42,7 +42,11 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
