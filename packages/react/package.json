@@ -51,8 +51,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm build"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@tour-kit/core": "workspace:*"

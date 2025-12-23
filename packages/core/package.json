@@ -50,8 +50,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm build"
+    "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
