@@ -54,7 +54,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tour-kit/core": "workspace:*"
+    "@tour-kit/core": "workspace:*",
+    "@floating-ui/react": "^0.26.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.3.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || >=19.2.0",

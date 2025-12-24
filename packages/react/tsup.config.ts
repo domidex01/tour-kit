@@ -7,5 +7,13 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
-  external: ['react', 'react-dom', '@tour-kit/core'],
+  treeshake: true,
+  minify: true,
+  target: 'es2020',
+  external: ['react', 'react-dom', '@tour-kit/core', '@floating-ui/react'],
+  esbuildOptions(options) {
+    options.banner = {
+      js: '"use client";',
+    }
+  },
 })

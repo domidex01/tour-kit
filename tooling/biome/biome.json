@@ -21,10 +21,14 @@
         "useImportType": "error"
       },
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "warn",
+        "noArrayIndexKey": "warn"
       },
       "a11y": {
-        "recommended": true
+        "recommended": true,
+        "useSemanticElements": "warn",
+        "useKeyWithClickEvents": "warn",
+        "noSvgWithoutTitle": "warn"
       }
     }
   },

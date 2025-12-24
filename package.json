@@ -8,7 +8,7 @@
     "url": "git+https://github.com/DomiDex/tour-kit.git"
   },
   "license": "MIT",
-  "packageManager": "pnpm@9.15.1",
+  "packageManager": "pnpm@10.26.1",
   "engines": {
     "node": ">=18"
   },
@@ -23,7 +23,9 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build && changeset publish"
+    "release": "turbo run build && changeset publish",
+    "example:vite": "pnpm --filter vite-tour-kit-demo dev",
+    "example:next": "pnpm --filter next-tour-kit-demo dev"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.0",
@@ -32,6 +34,13 @@
     "typescript": "^5.9.3"
   },
   "pnpm": {
-    "overrides": {}
+    "overrides": {},
+    "ignoredBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ],
+    "onlyBuiltDependencies": [
+      "@biomejs/biome"
+    ]
   }
 }
