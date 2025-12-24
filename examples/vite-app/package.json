@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tour-kit/hints": "workspace:*",
     "@tour-kit/react": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -1,7 +1,9 @@
 import { Tour, TourStep, useTour } from '@tour-kit/react'
+import { HintsProvider, Hint, useHints } from '@tour-kit/hints'
 
 function DemoContent() {
   const { start } = useTour('demo-tour')
+  const { resetAllHints } = useHints()
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -10,13 +12,22 @@ function DemoContent() {
           <h1 id="title" className="text-3xl font-bold text-foreground">
             TourKit Demo
           </h1>
-          <button
-            type="button"
-            onClick={() => start()}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Start Tour
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => resetAllHints()}
+              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors"
+            >
+              Reset Hints
+            </button>
+            <button
+              type="button"
+              onClick={() => start()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Start Tour
+            </button>
+          </div>
         </header>
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -48,6 +59,35 @@ function DemoContent() {
             Click the button above to take a tour of our features.
           </p>
         </section>
+
+        {/* Hints - persist means closing dismisses them permanently until reset */}
+        <Hint
+          id="feature-1-hint"
+          target="#feature-1"
+          content="Click here to learn about Feature One!"
+          position="top-right"
+          tooltipPlacement="left"
+          pulse
+          persist
+        />
+        <Hint
+          id="feature-2-hint"
+          target="#feature-2"
+          content="Feature Two has exciting capabilities."
+          position="top-right"
+          tooltipPlacement="left"
+          pulse
+          persist
+        />
+        <Hint
+          id="feature-3-hint"
+          target="#feature-3"
+          content="Feature Three completes the experience."
+          position="top-right"
+          tooltipPlacement="left"
+          pulse
+          persist
+        />
       </div>
     </div>
   )
@@ -55,48 +95,50 @@ function DemoContent() {
 
 function App() {
   return (
-    <Tour
-      id="demo-tour"
-      onComplete={() => console.log('Tour completed!')}
-      onSkip={() => console.log('Tour skipped!')}
-    >
-      <TourStep
-        id="welcome"
-        target="#title"
-        title="Welcome to TourKit!"
-        content="This is a demo of the TourKit library. Let's explore the features together."
-        placement="bottom"
-      />
-      <TourStep
-        id="feature-1"
-        target="#feature-1"
-        title="Feature One"
-        content="Here's our first amazing feature. Click Next to continue."
-        placement="bottom"
-      />
-      <TourStep
-        id="feature-2"
-        target="#feature-2"
-        title="Feature Two"
-        content="The second feature is highlighted here. Notice the spotlight effect."
-        placement="bottom"
-      />
-      <TourStep
-        id="feature-3"
-        target="#feature-3"
-        title="Feature Three"
-        content="And here's the third feature. Almost done with the tour!"
-        placement="bottom"
-      />
-      <TourStep
-        id="cta"
-        target="#cta"
-        title="Get Started"
-        content="That's it! You've completed the tour. Click Finish to close."
-        placement="top"
-      />
-      <DemoContent />
-    </Tour>
+    <HintsProvider>
+      <Tour
+        id="demo-tour"
+        onComplete={() => console.log('Tour completed!')}
+        onSkip={() => console.log('Tour skipped!')}
+      >
+        <TourStep
+          id="welcome"
+          target="#title"
+          title="Welcome to TourKit!"
+          content="This is a demo of the TourKit library. Let's explore the features together."
+          placement="bottom"
+        />
+        <TourStep
+          id="feature-1"
+          target="#feature-1"
+          title="Feature One"
+          content="Here's our first amazing feature. Click Next to continue."
+          placement="bottom"
+        />
+        <TourStep
+          id="feature-2"
+          target="#feature-2"
+          title="Feature Two"
+          content="The second feature is highlighted here. Notice the spotlight effect."
+          placement="bottom"
+        />
+        <TourStep
+          id="feature-3"
+          target="#feature-3"
+          title="Feature Three"
+          content="And here's the third feature. Almost done with the tour!"
+          placement="bottom"
+        />
+        <TourStep
+          id="cta"
+          target="#cta"
+          title="Get Started"
+          content="That's it! You've completed the tour. Click Finish to close."
+          placement="top"
+        />
+        <DemoContent />
+      </Tour>
+    </HintsProvider>
   )
 }
 

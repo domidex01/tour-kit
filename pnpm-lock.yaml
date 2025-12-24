@@ -60,6 +60,9 @@ importers:
 
   examples/vite-app:
     dependencies:
+      '@tour-kit/hints':
+        specifier: workspace:*
+        version: link:../../packages/hints
       '@tour-kit/react':
         specifier: workspace:*
         version: link:../../packages/react
@@ -122,9 +125,18 @@ importers:
 
   packages/hints:
     dependencies:
+      '@floating-ui/react':
+        specifier: ^0.26.0
+        version: 0.26.28(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.1
+      tailwind-merge:
+        specifier: ^2.3.0
+        version: 2.6.0
     devDependencies:
       '@types/react':
         specifier: ^19.2.0

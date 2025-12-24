@@ -32,7 +32,7 @@ export type {
   HintConfig,
   HintState,
   HintsState,
-  BeaconPosition,
+  HotspotPosition,
 } from '@tour-kit/core'
 
 // Re-export hooks and utilities
