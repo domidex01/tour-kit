@@ -1,16 +1,16 @@
-import * as React from 'react'
 import {
-  useFloating,
+  type Placement as FloatingPlacement,
+  FloatingPortal,
   autoUpdate,
-  offset,
   flip,
+  offset,
   shift,
   useDismiss,
-  useRole,
+  useFloating,
   useInteractions,
-  FloatingPortal,
-  type Placement as FloatingPlacement,
+  useRole,
 } from '@floating-ui/react'
+import type * as React from 'react'
 import type { Placement } from '../types'
 
 // Convert core Placement to floating-ui Placement
@@ -73,7 +73,7 @@ export function HintTooltip({
         {...getFloatingProps()}
       >
         <button
-          type='button'
+          type="button"
           onClick={onClose}
           style={{
             position: 'absolute',
@@ -86,19 +86,21 @@ export function HintTooltip({
             opacity: 0.7,
             borderRadius: 4,
           }}
-          aria-label='Dismiss hint'
+          aria-label="Dismiss hint"
         >
           <svg
-            xmlns='http://www.w3.org/2000/svg'
-            width='12'
-            height='12'
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            aria-hidden="true"
           >
-            <path d='M18 6 6 18' />
-            <path d='m6 6 12 12' />
+            <title>Close</title>
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
           </svg>
         </button>
         <div style={{ paddingRight: 16 }}>{children}</div>

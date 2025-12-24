@@ -1,5 +1,5 @@
+import { Hint, HintsProvider, useHints } from '@tour-kit/hints'
 import { Tour, TourStep, useTour } from '@tour-kit/react'
-import { HintsProvider, Hint, useHints } from '@tour-kit/hints'
 
 function DemoContent() {
   const { start } = useTour('demo-tour')

@@ -1,10 +1,10 @@
 // Re-export types from core
 export type {
-  HotspotPosition,
   HintConfig,
-  HintState,
-  HintsState,
   HintsActions,
   HintsContextValue,
+  HintsState,
+  HintState,
+  HotspotPosition,
   Placement,
 } from '@tour-kit/core'

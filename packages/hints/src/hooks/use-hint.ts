@@ -2,15 +2,8 @@ import { useEffect } from 'react'
 import { useHintsContext } from '../context/hints-context'
 
 export function useHint(id: string) {
-  const {
-    hints,
-    registerHint,
-    unregisterHint,
-    showHint,
-    hideHint,
-    dismissHint,
-    resetHint,
-  } = useHintsContext()
+  const { hints, registerHint, unregisterHint, showHint, hideHint, dismissHint, resetHint } =
+    useHintsContext()
   const hint = hints.get(id)
 
   useEffect(() => {

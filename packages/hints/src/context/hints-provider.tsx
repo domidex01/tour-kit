@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { HintsContext } from './hints-context'
 import type { HintState, HintsContextValue } from '../types'
+import { HintsContext } from './hints-context'
 
 type HintsAction =
   | { type: 'REGISTER'; id: string }
@@ -16,90 +16,104 @@ interface HintsState {
   activeHint: string | null
 }
 
+function handleRegister(state: HintsState, id: string): HintsState {
+  const newHints = new Map(state.hints)
+  if (!newHints.has(id)) {
+    newHints.set(id, {
+      id,
+      isOpen: false,
+      isDismissed: false,
+    })
+  }
+  return { ...state, hints: newHints }
+}
+
+function handleUnregister(state: HintsState, id: string): HintsState {
+  const newHints = new Map(state.hints)
+  newHints.delete(id)
+  return {
+    ...state,
+    hints: newHints,
+    activeHint: state.activeHint === id ? null : state.activeHint,
+  }
+}
+
+function handleShow(state: HintsState, id: string): HintsState {
+  const newHints = new Map(state.hints)
+  const hint = newHints.get(id)
+  if (hint && !hint.isDismissed) {
+    // Close currently active hint
+    if (state.activeHint && state.activeHint !== id) {
+      const activeHint = newHints.get(state.activeHint)
+      if (activeHint) {
+        newHints.set(state.activeHint, { ...activeHint, isOpen: false })
+      }
+    }
+    newHints.set(id, { ...hint, isOpen: true })
+    return { hints: newHints, activeHint: id }
+  }
+  return state
+}
+
+function handleHide(state: HintsState, id: string): HintsState {
+  const newHints = new Map(state.hints)
+  const hint = newHints.get(id)
+  if (hint) {
+    newHints.set(id, { ...hint, isOpen: false })
+    return {
+      hints: newHints,
+      activeHint: state.activeHint === id ? null : state.activeHint,
+    }
+  }
+  return state
+}
+
+function handleDismiss(state: HintsState, id: string): HintsState {
+  const newHints = new Map(state.hints)
+  const hint = newHints.get(id)
+  if (hint) {
+    newHints.set(id, { ...hint, isOpen: false, isDismissed: true })
+    return {
+      hints: newHints,
+      activeHint: state.activeHint === id ? null : state.activeHint,
+    }
+  }
+  return state
+}
+
+function handleReset(state: HintsState, id: string): HintsState {
+  const newHints = new Map(state.hints)
+  const hint = newHints.get(id)
+  if (hint) {
+    newHints.set(id, { ...hint, isDismissed: false })
+  }
+  return { ...state, hints: newHints }
+}
+
+function handleResetAll(state: HintsState): HintsState {
+  const newHints = new Map(state.hints)
+  newHints.forEach((hint, id) => {
+    newHints.set(id, { ...hint, isDismissed: false })
+  })
+  return { ...state, hints: newHints }
+}
+
 function hintsReducer(state: HintsState, action: HintsAction): HintsState {
   switch (action.type) {
-    case 'REGISTER': {
-      const newHints = new Map(state.hints)
-      if (!newHints.has(action.id)) {
-        newHints.set(action.id, {
-          id: action.id,
-          isOpen: false,
-          isDismissed: false,
-        })
-      }
-      return { ...state, hints: newHints }
-    }
-
-    case 'UNREGISTER': {
-      const newHints = new Map(state.hints)
-      newHints.delete(action.id)
-      return {
-        ...state,
-        hints: newHints,
-        activeHint: state.activeHint === action.id ? null : state.activeHint,
-      }
-    }
-
-    case 'SHOW': {
-      const newHints = new Map(state.hints)
-      const hint = newHints.get(action.id)
-      if (hint && !hint.isDismissed) {
-        // Close currently active hint
-        if (state.activeHint && state.activeHint !== action.id) {
-          const activeHint = newHints.get(state.activeHint)
-          if (activeHint) {
-            newHints.set(state.activeHint, { ...activeHint, isOpen: false })
-          }
-        }
-        newHints.set(action.id, { ...hint, isOpen: true })
-        return { hints: newHints, activeHint: action.id }
-      }
-      return state
-    }
-
-    case 'HIDE': {
-      const newHints = new Map(state.hints)
-      const hint = newHints.get(action.id)
-      if (hint) {
-        newHints.set(action.id, { ...hint, isOpen: false })
-        return {
-          hints: newHints,
-          activeHint: state.activeHint === action.id ? null : state.activeHint,
-        }
-      }
-      return state
-    }
-
-    case 'DISMISS': {
-      const newHints = new Map(state.hints)
-      const hint = newHints.get(action.id)
-      if (hint) {
-        newHints.set(action.id, { ...hint, isOpen: false, isDismissed: true })
-        return {
-          hints: newHints,
-          activeHint: state.activeHint === action.id ? null : state.activeHint,
-        }
-      }
-      return state
-    }
-
-    case 'RESET': {
-      const newHints = new Map(state.hints)
-      const hint = newHints.get(action.id)
-      if (hint) {
-        newHints.set(action.id, { ...hint, isDismissed: false })
-      }
-      return { ...state, hints: newHints }
-    }
-
-    case 'RESET_ALL': {
-      const newHints = new Map(state.hints)
-      newHints.forEach((hint, id) => {
-        newHints.set(id, { ...hint, isDismissed: false })
-      })
-      return { ...state, hints: newHints }
-    }
-
+    case 'REGISTER':
+      return handleRegister(state, action.id)
+    case 'UNREGISTER':
+      return handleUnregister(state, action.id)
+    case 'SHOW':
+      return handleShow(state, action.id)
+    case 'HIDE':
+      return handleHide(state, action.id)
+    case 'DISMISS':
+      return handleDismiss(state, action.id)
+    case 'RESET':
+      return handleReset(state, action.id)
+    case 'RESET_ALL':
+      return handleResetAll(state)
     default:
       return state
   }
@@ -116,34 +130,13 @@ export function HintsProvider({ children }: HintsProviderProps) {
   })
 
   // Stable callbacks that don't change between renders
-  const registerHint = React.useCallback(
-    (id: string) => dispatch({ type: 'REGISTER', id }),
-    []
-  )
-  const unregisterHint = React.useCallback(
-    (id: string) => dispatch({ type: 'UNREGISTER', id }),
-    []
-  )
-  const showHint = React.useCallback(
-    (id: string) => dispatch({ type: 'SHOW', id }),
-    []
-  )
-  const hideHint = React.useCallback(
-    (id: string) => dispatch({ type: 'HIDE', id }),
-    []
-  )
-  const dismissHint = React.useCallback(
-    (id: string) => dispatch({ type: 'DISMISS', id }),
-    []
-  )
-  const resetHint = React.useCallback(
-    (id: string) => dispatch({ type: 'RESET', id }),
-    []
-  )
-  const resetAllHints = React.useCallback(
-    () => dispatch({ type: 'RESET_ALL' }),
-    []
-  )
+  const registerHint = React.useCallback((id: string) => dispatch({ type: 'REGISTER', id }), [])
+  const unregisterHint = React.useCallback((id: string) => dispatch({ type: 'UNREGISTER', id }), [])
+  const showHint = React.useCallback((id: string) => dispatch({ type: 'SHOW', id }), [])
+  const hideHint = React.useCallback((id: string) => dispatch({ type: 'HIDE', id }), [])
+  const dismissHint = React.useCallback((id: string) => dispatch({ type: 'DISMISS', id }), [])
+  const resetHint = React.useCallback((id: string) => dispatch({ type: 'RESET', id }), [])
+  const resetAllHints = React.useCallback(() => dispatch({ type: 'RESET_ALL' }), [])
 
   const contextValue = React.useMemo<HintsContextValue>(
     () => ({
@@ -170,9 +163,5 @@ export function HintsProvider({ children }: HintsProviderProps) {
     ]
   )
 
-  return (
-    <HintsContext.Provider value={contextValue}>
-      {children}
-    </HintsContext.Provider>
-  )
+  return <HintsContext.Provider value={contextValue}>{children}</HintsContext.Provider>
 }

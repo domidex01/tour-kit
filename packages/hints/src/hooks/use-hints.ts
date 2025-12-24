@@ -12,7 +12,6 @@ export function useHints() {
     resetHint: context.resetHint,
     resetAllHints: context.resetAllHints,
     isHintVisible: (id: string) => context.hints.get(id)?.isOpen ?? false,
-    isHintDismissed: (id: string) =>
-      context.hints.get(id)?.isDismissed ?? false,
+    isHintDismissed: (id: string) => context.hints.get(id)?.isDismissed ?? false,
   }
 }

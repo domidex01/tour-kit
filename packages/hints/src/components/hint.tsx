@@ -1,5 +1,5 @@
-import * as React from 'react'
 import { useElementPosition } from '@tour-kit/core'
+import * as React from 'react'
 import { useHint } from '../hooks/use-hint'
 import type { HintConfig } from '../types'
 import { HintHotspot } from './hint-hotspot'

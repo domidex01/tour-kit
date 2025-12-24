@@ -51,7 +51,7 @@ export const HintHotspot = React.forwardRef<HTMLButtonElement, HintHotspotProps>
         <style>{pulseKeyframes}</style>
         <button
           ref={ref}
-          type='button'
+          type="button"
           onClick={onClick}
           className={className}
           style={{
@@ -69,7 +69,7 @@ export const HintHotspot = React.forwardRef<HTMLButtonElement, HintHotspotProps>
             padding: 0,
             animation: pulse && !isOpen ? 'tourkit-pulse 1.5s ease-in-out infinite' : 'none',
           }}
-          aria-label='Show hint'
+          aria-label="Show hint"
           aria-expanded={isOpen}
         />
       </>
