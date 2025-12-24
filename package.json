@@ -35,12 +35,7 @@
   },
   "pnpm": {
     "overrides": {},
-    "ignoredBuiltDependencies": [
-      "esbuild",
-      "sharp"
-    ],
-    "onlyBuiltDependencies": [
-      "@biomejs/biome"
-    ]
+    "ignoredBuiltDependencies": ["esbuild", "sharp"],
+    "onlyBuiltDependencies": ["@biomejs/biome"]
   }
 }

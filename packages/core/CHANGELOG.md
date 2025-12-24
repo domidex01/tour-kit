@@ -1,5 +1,24 @@
 # @tour-kit/core
 
+## 0.3.0
+
+### Minor Changes
+
+- ### @tour-kit/react
+
+  - Fix `Tour` component to properly render children content alongside tour steps
+  - Add `TourCard`, `TourOverlay`, and navigation components with Floating UI positioning
+  - Add primitive components: `TourPortal`, `TourArrow`
+
+  ### @tour-kit/core
+
+  - Export hooks and utilities for tour state management
+  - Add focus trap, keyboard navigation, and spotlight hooks
+
+  ### @tour-kit/hints
+
+  - Initial hints package setup
+
 ## 0.2.0
 
 ### Minor Changes

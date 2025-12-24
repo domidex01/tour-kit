@@ -13,6 +13,7 @@ function DemoContent() {
             TourKit Next.js Demo
           </h1>
           <button
+            type="button"
             onClick={() => start()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
           >
@@ -21,34 +22,23 @@ function DemoContent() {
         </header>
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div
-            id="feature-1"
-            className="p-6 rounded-lg border bg-popover shadow-sm"
-          >
+          <div id="feature-1" className="p-6 rounded-lg border bg-popover shadow-sm">
             <h2 className="text-xl font-semibold mb-2">Server Components</h2>
             <p className="text-muted-foreground">
               Next.js 15 with React Server Components support.
             </p>
           </div>
 
-          <div
-            id="feature-2"
-            className="p-6 rounded-lg border bg-popover shadow-sm"
-          >
+          <div id="feature-2" className="p-6 rounded-lg border bg-popover shadow-sm">
             <h2 className="text-xl font-semibold mb-2">App Router</h2>
             <p className="text-muted-foreground">
               Built for the new Next.js App Router architecture.
             </p>
           </div>
 
-          <div
-            id="feature-3"
-            className="p-6 rounded-lg border bg-popover shadow-sm"
-          >
+          <div id="feature-3" className="p-6 rounded-lg border bg-popover shadow-sm">
             <h2 className="text-xl font-semibold mb-2">Headless UI</h2>
-            <p className="text-muted-foreground">
-              Fully customizable with Tailwind CSS styling.
-            </p>
+            <p className="text-muted-foreground">Fully customizable with Tailwind CSS styling.</p>
           </div>
         </section>
 

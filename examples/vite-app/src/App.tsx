@@ -11,6 +11,7 @@ function DemoContent() {
             TourKit Demo
           </h1>
           <button
+            type="button"
             onClick={() => start()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
           >
@@ -19,30 +20,21 @@ function DemoContent() {
         </header>
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div
-            id="feature-1"
-            className="p-6 rounded-lg border bg-popover shadow-sm"
-          >
+          <div id="feature-1" className="p-6 rounded-lg border bg-popover shadow-sm">
             <h2 className="text-xl font-semibold mb-2">Feature One</h2>
             <p className="text-muted-foreground">
               This is the first feature of our application. It does amazing things.
             </p>
           </div>
 
-          <div
-            id="feature-2"
-            className="p-6 rounded-lg border bg-popover shadow-sm"
-          >
+          <div id="feature-2" className="p-6 rounded-lg border bg-popover shadow-sm">
             <h2 className="text-xl font-semibold mb-2">Feature Two</h2>
             <p className="text-muted-foreground">
               The second feature is even better. Users love this one.
             </p>
           </div>
 
-          <div
-            id="feature-3"
-            className="p-6 rounded-lg border bg-popover shadow-sm"
-          >
+          <div id="feature-3" className="p-6 rounded-lg border bg-popover shadow-sm">
             <h2 className="text-xl font-semibold mb-2">Feature Three</h2>
             <p className="text-muted-foreground">
               And finally, the third feature completes the experience.
