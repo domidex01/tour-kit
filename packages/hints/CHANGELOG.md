@@ -1,5 +1,11 @@
 # @tour-kit/hints
 
+## 0.4.0
+
+### Minor Changes
+
+- Add hints functionality with persistent state and improved performance optimizations
+
 ## 0.3.0
 
 ### Minor Changes

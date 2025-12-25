@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/hints",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Persistent hints and hotspots for TourKit",
   "author": "Tour Kit Team",
   "license": "MIT",
@@ -13,7 +13,14 @@
   "bugs": {
     "url": "https://github.com/DomiDex/tour-kit/issues"
   },
-  "keywords": ["react", "hints", "hotspot", "tooltips", "onboarding", "tour-kit"],
+  "keywords": [
+    "react",
+    "hints",
+    "hotspot",
+    "tooltips",
+    "onboarding",
+    "tour-kit"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -31,7 +38,11 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
