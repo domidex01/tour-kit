@@ -32,6 +32,7 @@ export function TourProgress({ current, total, variant = 'dots', className }: To
     <div className={cn('flex gap-1', className)}>
       {Array.from({ length: total }, (_, i) => (
         <div
+          // biome-ignore lint/suspicious/noArrayIndexKey: Static progress dots never reorder
           key={i}
           className={cn(
             'h-2 w-2 rounded-full transition-colors',

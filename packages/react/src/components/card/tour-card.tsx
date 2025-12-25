@@ -85,6 +85,7 @@ export function TourCard({ className }: TourCardProps) {
 
   return (
     <TourPortal>
+      {/* biome-ignore lint/a11y/useSemanticElements: Using div for floating-ui positioning compatibility */}
       <div
         ref={(node) => {
           refs.setFloating(node)

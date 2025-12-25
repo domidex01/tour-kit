@@ -37,6 +37,7 @@ export function TourOverlay({ className, onClick }: TourOverlayProps) {
 
   return (
     <TourPortal>
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: Overlay is decorative and aria-hidden */}
       <div
         className={cn('fixed inset-0 z-40', className)}
         style={overlayStyle}
