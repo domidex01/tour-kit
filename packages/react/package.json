@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/react",
-  "version": "0.3.0",
+  "version": "0.4.1",
   "description": "Headless onboarding and product tour library for React - React components",
   "author": "Tour Kit Team",
   "license": "MIT",
@@ -42,7 +42,11 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",

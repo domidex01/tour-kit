@@ -1,5 +1,11 @@
 # @tour-kit/react
 
+## 0.4.1
+
+### Patch Changes
+
+- Fix lint errors and add biome-ignore comments for valid accessibility patterns
+
 ## 0.3.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/hints",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Persistent hints and hotspots for TourKit",
   "author": "Tour Kit Team",
   "license": "MIT",
