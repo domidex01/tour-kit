@@ -1,0 +1,82 @@
+---
+title: Step Types
+description: TypeScript types for tour steps
+---
+
+# Step Types
+
+## TourStep
+
+```typescript
+interface TourStep<T = unknown> {
+  id: string;
+  target: string | HTMLElement | (() => HTMLElement | null);
+  title?: string;
+  content?: ReactNode;
+  placement?: Placement;
+  offset?: number | { x: number; y: number };
+  spotlight?: SpotlightConfig | boolean;
+  scroll?: ScrollConfig | boolean;
+  beforeEnter?: (context: StepContext) => void | Promise<void>;
+  afterEnter?: (context: StepContext) => void;
+  beforeLeave?: (context: StepContext) => void | Promise<void>;
+  afterLeave?: (context: StepContext) => void;
+  data?: T;
+}
+```
+
+## StepContext
+
+```typescript
+interface StepContext {
+  step: TourStep;
+  index: number;
+  targetElement: HTMLElement | null;
+  isFirst: boolean;
+  isLast: boolean;
+  direction: 'forward' | 'backward';
+}
+```
+
+## Target Types
+
+The `target` property accepts multiple types:
+
+```typescript
+// CSS selector
+const step1: TourStep = {
+  id: 'step-1',
+  target: '#my-button',
+};
+
+// Direct element reference
+const step2: TourStep = {
+  id: 'step-2',
+  target: document.getElementById('my-button')!,
+};
+
+// Function (for dynamic elements)
+const step3: TourStep = {
+  id: 'step-3',
+  target: () => document.querySelector('.dynamic-element'),
+};
+```
+
+## Generic Step Data
+
+```typescript
+interface MyStepData {
+  videoUrl?: string;
+  actionRequired?: boolean;
+}
+
+const step: TourStep<MyStepData> = {
+  id: 'video-step',
+  target: '#player',
+  title: 'Watch the video',
+  data: {
+    videoUrl: 'https://example.com/video.mp4',
+    actionRequired: true,
+  },
+};
+```

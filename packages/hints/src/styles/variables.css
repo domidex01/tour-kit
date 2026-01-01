@@ -1,0 +1,55 @@
+/**
+ * TourKit Hints CSS Custom Properties
+ */
+
+:root {
+  /* Hotspot */
+  --tour-hotspot-color: #6366f1;
+  --tour-hotspot-size: 12px;
+  --tour-hotspot-pulse-scale: 1.5;
+  --tour-hotspot-pulse-opacity: 0;
+
+  /* Tooltip */
+  --tour-hint-bg: #ffffff;
+  --tour-hint-fg: #171717;
+  --tour-hint-border: #e5e7eb;
+  --tour-hint-radius: 0.5rem;
+  --tour-hint-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --tour-hint-padding: 0.75rem;
+  --tour-hint-max-width: 18rem;
+
+  /* Z-index */
+  --tour-hint-z: 9999;
+
+  /* Animation */
+  --tour-transition-duration: 200ms;
+  --tour-transition-timing: ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tour-hint-bg: #262626;
+    --tour-hint-fg: #fafafa;
+    --tour-hint-border: #404040;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --tour-transition-duration: 0ms;
+  }
+}
+
+/* Hotspot pulse animation */
+@keyframes tour-hotspot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(var(--tour-hotspot-pulse-scale));
+    opacity: var(--tour-hotspot-pulse-opacity);
+  }
+}

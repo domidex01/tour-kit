@@ -1,0 +1,71 @@
+---
+title: useFocusTrap
+description: Hook for trapping focus within tour elements
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useFocusTrap
+
+Traps focus within the tour UI for accessibility compliance.
+
+## Usage
+
+```tsx
+import { useFocusTrap } from '@tour-kit/core';
+
+function TourTooltip() {
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(tooltipRef, {
+    enabled: true,
+    restoreFocus: true,
+  });
+
+  return (
+    <div ref={tooltipRef} role="dialog" aria-modal="true">
+      <button>Previous</button>
+      <button>Next</button>
+    </div>
+  );
+}
+```
+
+## Options
+
+| Option         | Type      | Default | Description                           |
+| -------------- | --------- | ------- | ------------------------------------- |
+| `enabled`      | `boolean` | `true`  | Enable focus trapping                 |
+| `restoreFocus` | `boolean` | `true`  | Restore focus when trap is disabled   |
+| `initialFocus` | `string`  | -       | Selector for initial focus element    |
+| `finalFocus`   | `string`  | -       | Selector for focus on trap disable    |
+
+<Callout type="info">
+  Focus trapping is essential for keyboard accessibility. It ensures users can't tab outside the tour UI while it's active.
+</Callout>
+
+## With Initial Focus
+
+```tsx
+useFocusTrap(ref, {
+  enabled: isActive,
+  initialFocus: '[data-tour-next]',
+  restoreFocus: true,
+});
+```
+
+## Manual Focus Management
+
+```tsx
+const { activate, deactivate, focusFirst, focusLast } = useFocusTrap(ref);
+
+// Manually activate/deactivate
+useEffect(() => {
+  if (isActive) {
+    activate();
+    focusFirst();
+  } else {
+    deactivate();
+  }
+}, [isActive]);
+```

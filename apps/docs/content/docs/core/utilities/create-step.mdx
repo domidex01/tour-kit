@@ -1,0 +1,93 @@
+---
+title: createStep
+description: Factory function for creating typed step configurations
+---
+
+# createStep
+
+Factory function that creates a fully typed step configuration.
+
+## Usage
+
+```tsx
+import { createStep } from '@tour-kit/core';
+
+const welcomeStep = createStep({
+  id: 'welcome',
+  target: '#hero',
+  title: 'Welcome!',
+  content: 'This is the first step.',
+  placement: 'bottom',
+});
+```
+
+## With Custom Data
+
+```tsx
+interface StepData {
+  videoUrl?: string;
+  requiredAction?: boolean;
+}
+
+const videoStep = createStep<StepData>({
+  id: 'video-step',
+  target: '#video-player',
+  title: 'Watch this video',
+  content: 'Click play to continue.',
+  data: {
+    videoUrl: 'https://example.com/intro.mp4',
+    requiredAction: true,
+  },
+});
+```
+
+## With Lifecycle Hooks
+
+```tsx
+const asyncStep = createStep({
+  id: 'async-step',
+  target: '#dynamic-content',
+  title: 'Loading...',
+  beforeEnter: async (context) => {
+    // Wait for content to load
+    await fetchContent();
+  },
+  afterEnter: (context) => {
+    // Track analytics
+    analytics.track('step_viewed', { stepId: context.step.id });
+  },
+  beforeLeave: async (context) => {
+    // Validate before proceeding
+    if (!isValid) {
+      throw new Error('Please complete the action first');
+    }
+  },
+});
+```
+
+## Composing Steps
+
+```tsx
+const steps = [
+  createStep({
+    id: 'step-1',
+    target: '#first',
+    title: 'First',
+  }),
+  createStep({
+    id: 'step-2',
+    target: '#second',
+    title: 'Second',
+  }),
+  createStep({
+    id: 'step-3',
+    target: '#third',
+    title: 'Third',
+  }),
+];
+
+const tour = createTour({
+  id: 'my-tour',
+  steps,
+});
+```

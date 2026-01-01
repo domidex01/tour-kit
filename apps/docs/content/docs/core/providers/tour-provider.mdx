@@ -1,0 +1,67 @@
+---
+title: TourProvider
+description: Context provider for individual tours
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# TourProvider
+
+Provides context for a single tour.
+
+## Usage
+
+```tsx
+import { TourProvider } from '@tour-kit/core';
+
+function App() {
+  return (
+    <TourProvider
+      tour={{
+        id: 'onboarding',
+        steps: [{ id: 'step-1', target: '#btn', content: 'Click here' }],
+      }}
+    >
+      <MyApp />
+    </TourProvider>
+  );
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    tour: {
+      type: 'TourConfig',
+      required: true,
+      description: 'Tour configuration object',
+    },
+    children: {
+      type: 'ReactNode',
+      required: true,
+      description: 'Child components',
+    },
+  }}
+/>
+
+## With Options
+
+```tsx
+<TourProvider
+  tour={{
+    id: 'onboarding',
+    steps: steps,
+    autoStart: false,
+    startAt: 0,
+    keyboard: true,
+    spotlight: {
+      padding: 8,
+      borderRadius: 4,
+    },
+    onComplete: () => console.log('Tour completed!'),
+  }}
+>
+  <App />
+</TourProvider>
+```

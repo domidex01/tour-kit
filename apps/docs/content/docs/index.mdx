@@ -1,0 +1,92 @@
+---
+title: TourKit
+description: The most developer-friendly, accessible product tour library for React
+icon: Sparkles
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Code2, Accessibility, FileCode, Package } from 'lucide-react';
+
+# TourKit
+
+A headless, accessible, and beautifully styled product tour library for React.
+Works seamlessly with shadcn/ui and Tailwind CSS.
+
+## Why TourKit?
+
+<Cards>
+  <Card
+    title="Headless First"
+    icon={<Code2 className="w-5 h-5" />}
+    href="/docs/core"
+  >
+    All logic in hooks. Build your own UI or use our pre-styled components.
+  </Card>
+  <Card
+    title="Accessible"
+    icon={<Accessibility className="w-5 h-5" />}
+    href="/docs/guides/accessibility"
+  >
+    WCAG 2.1 AA compliant. Focus management, keyboard nav, screen reader support.
+  </Card>
+  <Card
+    title="TypeScript"
+    icon={<FileCode className="w-5 h-5" />}
+    href="/docs/core/types"
+  >
+    Full type safety with comprehensive type definitions.
+  </Card>
+  <Card
+    title="Tiny Bundle"
+    icon={<Package className="w-5 h-5" />}
+    href="/docs/getting-started"
+  >
+    Core is under 8KB gzipped. Tree-shakeable exports.
+  </Card>
+</Cards>
+
+## Packages
+
+| Package | Description | Size |
+|---------|-------------|------|
+| `@tour-kit/core` | Headless hooks & logic | < 8KB |
+| `@tour-kit/react` | Pre-styled React components | < 12KB |
+| `@tour-kit/hints` | Persistent hints/hotspots | < 5KB |
+
+## Quick Start
+
+```bash
+pnpm add @tour-kit/react
+```
+
+```tsx
+import { Tour, TourStep, useTour } from '@tour-kit/react';
+
+function App() {
+  const { start } = useTour('onboarding');
+
+  return (
+    <Tour id="onboarding">
+      <TourStep
+        target="#welcome"
+        title="Welcome!"
+        content="Let's take a quick tour."
+        placement="bottom"
+      />
+      <button onClick={() => start()}>Start Tour</button>
+      <div id="welcome">Welcome Section</div>
+    </Tour>
+  );
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Installation" href="/docs/getting-started/installation">
+    Install TourKit in your project
+  </Card>
+  <Card title="Quick Start" href="/docs/getting-started/quick-start">
+    Get up and running in 5 minutes
+  </Card>
+</Cards>

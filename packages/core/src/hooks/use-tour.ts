@@ -15,7 +15,7 @@ export interface UseTourReturn {
   progress: number
 
   // Actions
-  start: (stepIndex?: number) => void
+  start: (tourIdOrStepIndex?: string | number, stepIndex?: number) => void
   next: () => void
   prev: () => void
   goTo: (stepIndex: number) => void
@@ -57,8 +57,17 @@ export function useTour(tourId?: string): UseTourReturn {
   const isThisTourActive = tourId ? isActive && activeTourId === tourId : isActive
 
   const start = useCallback(
-    (stepIndex?: number) => {
-      contextStart(tourId, stepIndex)
+    (tourIdOrStepIndex?: string | number, stepIndex?: number) => {
+      // If first arg is a string, it's a tourId
+      if (typeof tourIdOrStepIndex === 'string') {
+        contextStart(tourIdOrStepIndex, stepIndex)
+      } else if (typeof tourIdOrStepIndex === 'number') {
+        // First arg is a step index, use hook's tourId
+        contextStart(tourId, tourIdOrStepIndex)
+      } else {
+        // No args, use hook's tourId
+        contextStart(tourId)
+      }
     },
     [contextStart, tourId]
   )

@@ -1,0 +1,143 @@
+---
+title: CSS Variables
+description: Customize TourKit with CSS variables
+---
+
+# CSS Variables
+
+TourKit exposes CSS variables for easy theming without modifying component code.
+
+## Available Variables
+
+### Card Variables
+
+```css
+:root {
+  --tour-kit-card-bg: var(--popover);
+  --tour-kit-card-fg: var(--popover-foreground);
+  --tour-kit-card-border: var(--border);
+  --tour-kit-card-radius: 0.5rem;
+  --tour-kit-card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --tour-kit-card-padding: 1rem;
+}
+```
+
+### Spotlight Variables
+
+```css
+:root {
+  --tour-kit-spotlight-color: rgba(0, 0, 0, 0.5);
+  --tour-kit-spotlight-padding: 8px;
+  --tour-kit-spotlight-radius: 4px;
+  --tour-kit-spotlight-transition: all 200ms ease;
+}
+```
+
+### Button Variables
+
+```css
+:root {
+  --tour-kit-button-bg: var(--primary);
+  --tour-kit-button-fg: var(--primary-foreground);
+  --tour-kit-button-hover: var(--primary) / 0.9;
+  --tour-kit-button-radius: 0.375rem;
+  --tour-kit-button-padding: 0.5rem 1rem;
+}
+```
+
+### Progress Variables
+
+```css
+:root {
+  --tour-kit-progress-bg: var(--muted);
+  --tour-kit-progress-fg: var(--primary);
+  --tour-kit-progress-dot-size: 8px;
+  --tour-kit-progress-bar-height: 4px;
+}
+```
+
+## Dark Mode
+
+Override variables for dark mode:
+
+```css
+.dark {
+  --tour-kit-card-bg: hsl(220 20% 10%);
+  --tour-kit-card-border: hsl(220 20% 20%);
+  --tour-kit-spotlight-color: rgba(0, 0, 0, 0.7);
+}
+```
+
+## Custom Theme Example
+
+```css
+/* Brand theme */
+:root {
+  --tour-kit-card-bg: #ffffff;
+  --tour-kit-card-border: #e5e7eb;
+  --tour-kit-button-bg: #6366f1;
+  --tour-kit-button-fg: #ffffff;
+  --tour-kit-spotlight-color: rgba(99, 102, 241, 0.3);
+}
+
+.dark {
+  --tour-kit-card-bg: #1f2937;
+  --tour-kit-card-border: #374151;
+  --tour-kit-button-bg: #818cf8;
+  --tour-kit-spotlight-color: rgba(129, 140, 248, 0.2);
+}
+```
+
+## Per-Component Variables
+
+Scope variables to specific components:
+
+```css
+/* Only affect TourCard */
+[data-tour-card] {
+  --tour-kit-card-radius: 1rem;
+  --tour-kit-card-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+/* Only affect overlay */
+[data-tour-overlay] {
+  --tour-kit-spotlight-color: rgba(0, 0, 50, 0.6);
+}
+```
+
+## Dynamic Theming
+
+Change variables with JavaScript:
+
+```tsx
+function setTourTheme(theme: 'light' | 'dark' | 'brand') {
+  const root = document.documentElement;
+
+  if (theme === 'brand') {
+    root.style.setProperty('--tour-kit-button-bg', '#6366f1');
+    root.style.setProperty('--tour-kit-spotlight-color', 'rgba(99, 102, 241, 0.3)');
+  }
+}
+```
+
+## Integration with CSS-in-JS
+
+```tsx
+import { styled } from 'styled-components';
+
+const StyledTourCard = styled(TourCard)`
+  --tour-kit-card-bg: ${props => props.theme.cardBg};
+  --tour-kit-card-border: ${props => props.theme.cardBorder};
+`;
+```
+
+## Resetting Variables
+
+Reset to defaults:
+
+```css
+[data-tour-kit] {
+  --tour-kit-card-bg: initial;
+  --tour-kit-card-border: initial;
+}
+```

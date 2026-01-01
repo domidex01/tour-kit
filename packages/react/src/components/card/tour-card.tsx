@@ -25,9 +25,11 @@ function toFloatingPlacement(placement?: Placement): FloatingPlacement {
 
 interface TourCardProps {
   className?: string
+  /** Use CSS variables instead of Tailwind classes */
+  unstyled?: boolean
 }
 
-export function TourCard({ className }: TourCardProps) {
+export function TourCard({ className, unstyled = false }: TourCardProps) {
   const {
     isActive,
     currentStep,
@@ -83,9 +85,25 @@ export function TourCard({ className }: TourCardProps) {
   const showClose = currentStep.showClose ?? true
   const showProgress = currentStep.showProgress ?? true
 
+  // CSS variable-based styles (works without Tailwind)
+  const cssVarStyles: React.CSSProperties = unstyled
+    ? {}
+    : {
+        zIndex: 'var(--tour-z-card, 9999)',
+        width: 'var(--tour-card-width, 20rem)',
+        padding: 'var(--tour-card-padding, 1rem)',
+        backgroundColor: 'var(--tour-card-bg, #ffffff)',
+        color: 'var(--tour-card-fg, #171717)',
+        border: '1px solid var(--tour-card-border, #e5e7eb)',
+        borderRadius: 'var(--tour-card-radius, 0.5rem)',
+        boxShadow: 'var(--tour-card-shadow, 0 10px 15px -3px rgb(0 0 0 / 0.1))',
+        fontFamily: 'var(--tour-font-family, inherit)',
+        fontSize: 'var(--tour-font-size, 0.875rem)',
+        lineHeight: 'var(--tour-line-height, 1.5)',
+      }
+
   return (
     <TourPortal>
-      {/* biome-ignore lint/a11y/useSemanticElements: Using div for floating-ui positioning compatibility */}
       <div
         ref={(node) => {
           refs.setFloating(node)
@@ -93,12 +111,15 @@ export function TourCard({ className }: TourCardProps) {
             ;(containerRef as React.MutableRefObject<HTMLElement | null>).current = node
           }
         }}
-        style={floatingStyles}
+        style={{ ...floatingStyles, ...cssVarStyles }}
         className={cn(
-          'z-50 w-80 rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg',
+          // Only apply Tailwind classes if not unstyled
+          !unstyled &&
+            'z-50 w-80 rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg',
           currentStep.className,
           className
         )}
+        // biome-ignore lint/a11y/useSemanticElements: Using div for floating-ui positioning compatibility
         role="dialog"
         aria-modal="true"
         aria-labelledby={`tour-step-title-${currentStep.id}`}
@@ -107,9 +128,10 @@ export function TourCard({ className }: TourCardProps) {
           title={currentStep.title}
           titleId={`tour-step-title-${currentStep.id}`}
           showClose={showClose}
+          unstyled={unstyled}
         />
 
-        <TourCardContent content={currentStep.content} />
+        <TourCardContent content={currentStep.content} unstyled={unstyled} />
 
         <TourCardFooter
           currentStep={currentStepIndex + 1}
@@ -121,6 +143,7 @@ export function TourCard({ className }: TourCardProps) {
           onPrev={prev}
           onNext={next}
           onSkip={skip}
+          unstyled={unstyled}
         />
 
         <TourArrow ref={arrowRef} context={context} />

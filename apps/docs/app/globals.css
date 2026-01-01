@@ -1,0 +1,287 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* Tell Tailwind to scan Fumadocs UI classes */
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+
+/* Apply Geist fonts */
+body {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+code, pre, kbd, samp {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+@layer base {
+  :root {
+    /* ========================================
+       PRIMARY COLORS
+       ======================================== */
+    --color-fd-primary: #0056ff;
+    --color-fd-primary-foreground: #fff;
+
+    /* ========================================
+       BACKGROUND & SURFACE
+       ======================================== */
+    --color-fd-background: #fbfcfe;
+    --color-fd-foreground: #000023;
+
+    /* ========================================
+       MUTED
+       ======================================== */
+    --color-fd-muted: #f3f4f6;
+    --color-fd-muted-foreground: #2b2e33;
+
+    /* ========================================
+       CARDS & POPOVERS
+       ======================================== */
+    --color-fd-card: #f8f9fb;
+    --color-fd-card-foreground: #000023;
+    --color-fd-popover: #fbfcfe;
+    --color-fd-popover-foreground: #000023;
+
+    /* ========================================
+       BORDERS & RINGS
+       ======================================== */
+    --color-fd-border: #d0d3d8;
+    --color-fd-ring: #0056ff;
+
+    /* ========================================
+       SECONDARY (Light Blue)
+       ======================================== */
+    --color-fd-secondary: #e8f1ff;
+    --color-fd-secondary-foreground: #0056ff;
+
+    /* ========================================
+       ACCENT
+       ======================================== */
+    --color-fd-accent: #f0f6ff;
+    --color-fd-accent-foreground: #000023;
+
+    /* ========================================
+       DESTRUCTIVE
+       ======================================== */
+    --color-fd-destructive: #861309;
+    --color-fd-destructive-foreground: #fff;
+
+    /* ========================================
+       CUSTOM TOURKIT TOKENS
+       ======================================== */
+    --tk-primary: #0056ff;
+    --tk-primary-container: #c6dfff;
+    --tk-secondary: #a1790d;
+    --tk-tertiary: #d5ba8a;
+    --tk-surface: #fbfcfe;
+    --tk-surface-variant: #f8f9fb;
+    --tk-container: #f8f9fb;
+    --tk-container-dim: #f3f4f6;
+    --tk-outline: #45484d;
+    --tk-outline-variant: #9b9ea5;
+    --tk-error: #861309;
+    --tk-success: #005900;
+    --tk-warning: #835c00;
+    --tk-on-surface: #000023;
+    --tk-on-surface-variant: #2b2e33;
+  }
+
+  .dark {
+    /* ========================================
+       PRIMARY COLORS (Dark)
+       ======================================== */
+    --color-fd-primary: #5c9aff;
+    --color-fd-primary-foreground: #000023;
+
+    /* ========================================
+       BACKGROUND & SURFACE (Dark)
+       ======================================== */
+    --color-fd-background: #151618;
+    --color-fd-foreground: #edeef2;
+
+    /* ========================================
+       MUTED (Dark)
+       ======================================== */
+    --color-fd-muted: #292c30;
+    --color-fd-muted-foreground: #9b9ea5;
+
+    /* ========================================
+       CARDS & POPOVERS (Dark)
+       ======================================== */
+    --color-fd-card: #1e2023;
+    --color-fd-card-foreground: #edeef2;
+    --color-fd-popover: #1e2023;
+    --color-fd-popover-foreground: #edeef2;
+
+    /* ========================================
+       BORDERS & RINGS (Dark)
+       ======================================== */
+    --color-fd-border: #d3d3d5;
+    --color-fd-ring: #5c9aff;
+
+    /* ========================================
+       SECONDARY (Dark - Golden Amber)
+       ======================================== */
+    --color-fd-secondary: #edeef2;
+    --color-fd-secondary-foreground: #000;
+
+    /* ========================================
+       ACCENT (Dark)
+       ======================================== */
+    --color-fd-accent: #1a3a5c;
+    --color-fd-accent-foreground: #c6dfff;
+
+    /* ========================================
+       DESTRUCTIVE (Dark)
+       ======================================== */
+    --color-fd-destructive: #ff6b6b;
+    --color-fd-destructive-foreground: #151618;
+
+    /* ========================================
+       CUSTOM TOURKIT TOKENS (Dark)
+       ======================================== */
+    --tk-primary: #5c9aff;
+    --tk-primary-container: #1a3a5c;
+    --tk-secondary: #c9a033;
+    --tk-tertiary: #e8d4b0;
+    --tk-surface: #151618;
+    --tk-surface-variant: #1e2023;
+    --tk-container: #1e2023;
+    --tk-container-dim: #292c30;
+    --tk-outline: #9b9ea5;
+    --tk-outline-variant: #45484d;
+    --tk-error: #ff6b6b;
+    --tk-success: #4caf50;
+    --tk-warning: #f5b800;
+    --tk-on-surface: #edeef2;
+    --tk-on-surface-variant: #9b9ea5;
+  }
+}
+
+/* ========================================
+   CUSTOM COMPONENT STYLES
+   ======================================== */
+@layer components {
+  /* Primary button style (Electric Blue) */
+  .btn-primary {
+    background-color: var(--tk-primary);
+    color: var(--color-on-primary, #fff);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+    box-shadow: 0 4px 12px
+      color-mix(in srgb, var(--tk-primary) 30%, transparent);
+  }
+
+  /* Secondary button style (Golden Amber) */
+  .btn-secondary {
+    background-color: var(--tk-secondary);
+    color: var(--color-on-secondary, #000);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    opacity: 0.9;
+    box-shadow: 0 4px 12px
+      color-mix(in srgb, var(--tk-secondary) 30%, transparent);
+  }
+
+  /* Tertiary button style (Gold/Tan) */
+  .btn-tertiary {
+    background-color: var(--tk-tertiary);
+    color: var(--color-on-tertiary, #000);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn-tertiary:hover {
+    opacity: 0.9;
+  }
+
+  /* Outline button style */
+  .btn-outline {
+    background-color: transparent;
+    color: var(--tk-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    border: 1px solid var(--tk-outline-variant);
+    transition: all 0.2s;
+  }
+
+  .btn-outline:hover {
+    background-color: var(--tk-container);
+    border-color: var(--tk-primary);
+  }
+
+  /* Code block customization */
+  .prose pre {
+    background-color: #f8fafc;
+    border: none;
+  }
+
+  .dark .prose pre {
+    background-color: var(--tk-container);
+    border: none;
+  }
+
+  /* Callout styles */
+  .callout-info {
+    border-left-color: var(--tk-primary);
+    background-color: var(--tk-primary-container);
+  }
+
+  .callout-warning {
+    border-left-color: var(--tk-warning);
+    background-color: color-mix(in srgb, var(--tk-warning) 15%, transparent);
+  }
+
+  .callout-error {
+    border-left-color: var(--tk-error);
+    background-color: color-mix(in srgb, var(--tk-error) 15%, transparent);
+  }
+
+  .callout-success {
+    border-left-color: var(--tk-success);
+    background-color: color-mix(in srgb, var(--tk-success) 15%, transparent);
+  }
+
+  /* Badge styles */
+  .badge-primary {
+    background-color: var(--tk-primary-container);
+    color: var(--tk-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .badge-secondary {
+    background-color: color-mix(in srgb, var(--tk-secondary) 20%, transparent);
+    color: var(--tk-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+}
+
+/* ========================================
+   LAYOUT ADJUSTMENTS
+   ======================================== */
+@layer utilities {
+  /* Wider docs layout */
+  :root {
+    --fd-layout-width: 1400px;
+  }
+}

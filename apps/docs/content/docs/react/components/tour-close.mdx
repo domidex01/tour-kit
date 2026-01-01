@@ -1,0 +1,141 @@
+---
+title: TourClose
+description: Close button for dismissing the tour
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# TourClose
+
+A button to dismiss or skip the tour.
+
+## Usage
+
+```tsx
+import { TourClose } from '@tour-kit/react';
+
+<TourClose />
+```
+
+## Props
+
+<TypeTable
+  type={{
+    className: { type: 'string', description: 'Additional CSS classes' },
+    children: { type: 'ReactNode', description: 'Custom button content' },
+    asChild: { type: 'boolean', default: 'false', description: 'Render as child element' },
+    action: { type: '"skip" | "complete"', default: '"skip"', description: 'Action when clicked' },
+    ariaLabel: { type: 'string', default: '"Close tour"', description: 'Accessible label' },
+  }}
+/>
+
+## Default Appearance
+
+By default, renders an X icon button:
+
+```tsx
+<TourClose />
+// Renders: [X]
+```
+
+## Custom Content
+
+```tsx
+<TourClose>
+  <span>Dismiss</span>
+</TourClose>
+```
+
+## With Icon
+
+```tsx
+import { X } from 'lucide-react';
+
+<TourClose>
+  <X className="w-4 h-4" />
+</TourClose>
+```
+
+## Action Types
+
+### Skip (Default)
+
+Marks the tour as skipped and closes it:
+
+```tsx
+<TourClose action="skip" />
+```
+
+### Complete
+
+Marks the tour as completed:
+
+```tsx
+<TourClose action="complete" />
+```
+
+## Styling
+
+```tsx
+<TourClose className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100" />
+```
+
+## In Card Header
+
+```tsx
+<TourCardHeader className="flex items-center justify-between">
+  <h3 className="font-semibold">Welcome!</h3>
+  <TourClose className="ml-auto" />
+</TourCardHeader>
+```
+
+## As Child
+
+Use with custom button components:
+
+```tsx
+import { Button } from '@/components/ui/button';
+
+<TourClose asChild>
+  <Button variant="ghost" size="icon">
+    <X className="w-4 h-4" />
+  </Button>
+</TourClose>
+```
+
+## Custom Close Logic
+
+For advanced scenarios:
+
+```tsx
+import { useTour } from '@tour-kit/react';
+
+function CustomClose() {
+  const { skip } = useTour('my-tour');
+
+  const handleClose = () => {
+    // Custom logic before closing
+    analytics.track('tour_dismissed');
+    skip();
+  };
+
+  return (
+    <button
+      onClick={handleClose}
+      className="text-gray-400 hover:text-gray-600"
+      aria-label="Close tour"
+    >
+      <X className="w-4 h-4" />
+    </button>
+  );
+}
+```
+
+## Accessibility
+
+The component includes proper ARIA attributes:
+
+```tsx
+<TourClose ariaLabel="Dismiss tutorial" />
+// Renders with aria-label="Dismiss tutorial"
+```

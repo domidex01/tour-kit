@@ -1,0 +1,5 @@
+{
+  "title": "@tour-kit/hints",
+  "icon": "Lightbulb",
+  "pages": ["index", "components", "hooks", "persistence"]
+}

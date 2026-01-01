@@ -1,0 +1,80 @@
+---
+title: TypeScript
+description: TypeScript configuration and type usage
+---
+
+# TypeScript
+
+TourKit is written in TypeScript and provides full type definitions.
+
+## Type Imports
+
+```tsx
+import type {
+  TourConfig,
+  TourStepConfig,
+  TourState,
+  Placement,
+  SpotlightConfig,
+} from '@tour-kit/react';
+```
+
+## Typed Tour Configuration
+
+```tsx
+import { createTour, createStep } from '@tour-kit/react';
+
+const tour = createTour({
+  id: 'onboarding',
+  steps: [
+    createStep({
+      id: 'welcome',
+      target: '#hero',
+      title: 'Welcome',
+      content: 'Hello!',
+      placement: 'bottom',
+    }),
+  ],
+});
+```
+
+## Hook Return Types
+
+```tsx
+import { useTour, type UseTourReturn } from '@tour-kit/react';
+
+function MyComponent() {
+  const tour: UseTourReturn = useTour('my-tour');
+  // tour.start, tour.next, tour.prev, etc.
+}
+```
+
+## Generic Step Data
+
+You can type custom data attached to steps:
+
+```tsx
+interface MyStepData {
+  videoUrl?: string;
+  requiredRole?: 'admin' | 'user';
+}
+
+const { currentStep } = useTour<MyStepData>('my-tour');
+
+if (currentStep?.data?.videoUrl) {
+  // TypeScript knows videoUrl is a string
+}
+```
+
+## Strict Mode Compatibility
+
+TourKit is fully compatible with React Strict Mode and follows all TypeScript strict mode guidelines:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true
+  }
+}
+```

@@ -1,0 +1,229 @@
+---
+title: Custom Components
+description: Build your own tour components
+---
+
+# Custom Components
+
+Use headless exports for full customization.
+
+## Headless Components
+
+```tsx
+import {
+  TourCard as HeadlessTourCard,
+  TourNavigation as HeadlessNav,
+} from '@tour-kit/react/headless';
+
+function CustomCard() {
+  return (
+    <HeadlessTourCard>
+      {({ currentStep, next, prev }) => (
+        <div className="my-custom-card">
+          <h3>{currentStep?.title}</h3>
+          <p>{currentStep?.content}</p>
+          <button onClick={prev}>Back</button>
+          <button onClick={next}>Next</button>
+        </div>
+      )}
+    </HeadlessTourCard>
+  );
+}
+```
+
+## Using with useTour
+
+```tsx
+import { useTour } from '@tour-kit/react';
+
+function FullyCustomTour() {
+  const { isActive, currentStep, next, prev, skip } = useTour('my-tour');
+
+  if (!isActive) return null;
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute bg-white p-6 rounded-xl shadow-2xl">
+        <h2>{currentStep?.title}</h2>
+        <p>{currentStep?.content}</p>
+        <div className="flex gap-2 mt-4">
+          <button onClick={prev}>Previous</button>
+          <button onClick={next}>Next</button>
+          <button onClick={skip}>Skip</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+## Custom Overlay
+
+```tsx
+import { useSpotlight } from '@tour-kit/core';
+
+function CustomOverlay() {
+  const { isVisible, targetRect, padding } = useSpotlight();
+
+  if (!isVisible || !targetRect) return null;
+
+  return (
+    <div className="fixed inset-0 pointer-events-none">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* Cutout */}
+      <div
+        className="absolute bg-transparent ring-[9999px] ring-black/50"
+        style={{
+          top: targetRect.top - padding,
+          left: targetRect.left - padding,
+          width: targetRect.width + padding * 2,
+          height: targetRect.height + padding * 2,
+          borderRadius: 8,
+        }}
+      />
+    </div>
+  );
+}
+```
+
+## Custom Progress
+
+```tsx
+import { useTour } from '@tour-kit/react';
+
+function StepIndicator() {
+  const { currentStepIndex, totalSteps } = useTour('my-tour');
+
+  return (
+    <div className="flex gap-1">
+      {Array.from({ length: totalSteps }, (_, i) => (
+        <div
+          key={i}
+          className={cn(
+            'w-2 h-2 rounded-full transition-colors',
+            i === currentStepIndex ? 'bg-blue-500' : 'bg-gray-300',
+            i < currentStepIndex && 'bg-green-500'
+          )}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+## Custom Navigation
+
+```tsx
+import { useTour } from '@tour-kit/react';
+import { Button } from '@/components/ui/button';
+
+function TourButtons() {
+  const {
+    next,
+    prev,
+    skip,
+    complete,
+    isFirstStep,
+    isLastStep,
+  } = useTour('my-tour');
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="ghost"
+        onClick={skip}
+        size="sm"
+      >
+        Skip tour
+      </Button>
+
+      <div className="flex gap-2 ml-auto">
+        {!isFirstStep && (
+          <Button variant="outline" onClick={prev}>
+            Back
+          </Button>
+        )}
+        {isLastStep ? (
+          <Button onClick={complete}>
+            Get Started
+          </Button>
+        ) : (
+          <Button onClick={next}>
+            Continue
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+## Complete Custom Implementation
+
+```tsx
+import { Tour, TourStep, useTour, useSpotlight } from '@tour-kit/react';
+import { AnimatePresence, motion } from 'framer-motion';
+
+function CustomTourUI() {
+  const { isActive, currentStep, currentStepIndex, totalSteps, next, prev, skip } = useTour('custom');
+  const { targetRect } = useSpotlight();
+
+  if (!isActive || !currentStep) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="fixed z-50 bg-white rounded-2xl shadow-2xl p-6 w-80"
+        style={{
+          top: targetRect ? targetRect.bottom + 16 : '50%',
+          left: targetRect ? targetRect.left : '50%',
+        }}
+      >
+        <div className="flex items-start justify-between mb-4">
+          <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+            Step {currentStepIndex + 1} of {totalSteps}
+          </span>
+          <button onClick={skip} className="text-gray-400 hover:text-gray-600">
+            &times;
+          </button>
+        </div>
+
+        <h3 className="text-lg font-semibold mb-2">{currentStep.title}</h3>
+        <p className="text-gray-600 mb-6">{currentStep.content}</p>
+
+        <div className="flex justify-between">
+          <button
+            onClick={prev}
+            disabled={currentStepIndex === 0}
+            className="text-gray-500 hover:text-gray-700 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={next}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+          >
+            {currentStepIndex === totalSteps - 1 ? 'Finish' : 'Next'}
+          </button>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+// Usage
+function App() {
+  return (
+    <Tour id="custom">
+      <TourStep target="#feature" title="New Feature" content="Check this out!" />
+      <CustomTourUI />
+      <YourApp />
+    </Tour>
+  );
+}
+```

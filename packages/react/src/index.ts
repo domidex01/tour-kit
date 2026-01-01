@@ -1,5 +1,8 @@
-// Components
+// Components (styled by default)
 export * from './components'
+
+// Headless components (explicit import)
+export * from './components/headless'
 
 // Utilities
 export { cn } from './utils/cn'

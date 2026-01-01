@@ -1,0 +1,79 @@
+---
+title: useTour
+description: Main hook for controlling tours
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# useTour
+
+The primary hook for controlling tour state and actions.
+
+## Usage
+
+```tsx
+import { useTour } from '@tour-kit/core';
+
+function MyComponent() {
+  const {
+    isActive,
+    currentStep,
+    currentStepIndex,
+    totalSteps,
+    start,
+    next,
+    prev,
+    skip,
+    complete,
+  } = useTour('my-tour');
+
+  return (
+    <button onClick={() => start()}>
+      {isActive ? 'Tour Running' : 'Start Tour'}
+    </button>
+  );
+}
+```
+
+## Return Value
+
+<TypeTable
+  type={{
+    isActive: { type: 'boolean', description: 'Whether tour is running' },
+    currentStep: { type: 'TourStep | null', description: 'Current step data' },
+    currentStepIndex: { type: 'number', description: 'Current step index' },
+    totalSteps: { type: 'number', description: 'Total number of steps' },
+    isFirstStep: { type: 'boolean', description: 'Is first step' },
+    isLastStep: { type: 'boolean', description: 'Is last step' },
+    start: { type: '(index?: number) => void', description: 'Start tour' },
+    next: { type: '() => void', description: 'Go to next step' },
+    prev: { type: '() => void', description: 'Go to previous step' },
+    skip: { type: '() => void', description: 'Skip tour' },
+    complete: { type: '() => void', description: 'Complete tour' },
+    goTo: { type: '(index: number) => void', description: 'Go to specific step' },
+  }}
+/>
+
+## Starting at a Specific Step
+
+```tsx
+const { start } = useTour('my-tour');
+
+// Start at step index 2
+start(2);
+```
+
+## Conditional Navigation
+
+```tsx
+const { next, currentStep } = useTour('my-tour');
+
+function handleNext() {
+  if (currentStep?.data?.requiresValidation) {
+    // Perform validation first
+    if (isValid) next();
+  } else {
+    next();
+  }
+}
+```

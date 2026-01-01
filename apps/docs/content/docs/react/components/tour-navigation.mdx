@@ -1,0 +1,135 @@
+---
+title: TourNavigation
+description: Navigation buttons for tour steps
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# TourNavigation
+
+Provides previous, next, and complete buttons for navigating the tour.
+
+## Usage
+
+```tsx
+import { TourNavigation } from '@tour-kit/react';
+
+<TourNavigation />
+```
+
+## Props
+
+<TypeTable
+  type={{
+    className: { type: 'string', description: 'Additional CSS classes' },
+    prevLabel: { type: 'ReactNode', default: '"Previous"', description: 'Previous button label' },
+    nextLabel: { type: 'ReactNode', default: '"Next"', description: 'Next button label' },
+    completeLabel: { type: 'ReactNode', default: '"Complete"', description: 'Complete button label (last step)' },
+    skipLabel: { type: 'ReactNode', default: '"Skip"', description: 'Skip button label' },
+    showSkip: { type: 'boolean', default: 'false', description: 'Show skip button' },
+    showPrev: { type: 'boolean', default: 'true', description: 'Show previous button' },
+    hideOnFirst: { type: 'boolean', default: 'true', description: 'Hide prev on first step' },
+    hideOnLast: { type: 'boolean', default: 'false', description: 'Hide next on last step' },
+  }}
+/>
+
+## Custom Labels
+
+```tsx
+<TourNavigation
+  prevLabel="Back"
+  nextLabel="Continue"
+  completeLabel="Finish Tour"
+  skipLabel="Maybe Later"
+  showSkip={true}
+/>
+```
+
+## With Icons
+
+```tsx
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+
+<TourNavigation
+  prevLabel={<><ChevronLeft className="w-4 h-4" /> Back</>}
+  nextLabel={<>Next <ChevronRight className="w-4 h-4" /></>}
+  completeLabel={<><Check className="w-4 h-4" /> Done</>}
+/>
+```
+
+## Custom Styling
+
+```tsx
+<TourNavigation
+  className="gap-4"
+  prevLabel={
+    <span className="px-4 py-2 border rounded-md hover:bg-gray-100">
+      Previous
+    </span>
+  }
+  nextLabel={
+    <span className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+      Next
+    </span>
+  }
+/>
+```
+
+## Conditional Visibility
+
+```tsx
+// Always show previous (even on first step)
+<TourNavigation hideOnFirst={false} />
+
+// Hide next on last step (only show complete)
+<TourNavigation hideOnLast={true} />
+```
+
+## Skip Option
+
+```tsx
+<TourNavigation showSkip={true} skipLabel="Skip Tour" />
+```
+
+## In Card Footer
+
+```tsx
+<TourCardFooter className="flex justify-between items-center">
+  <TourProgress />
+  <TourNavigation />
+</TourCardFooter>
+```
+
+## Custom Navigation
+
+For full control, build your own:
+
+```tsx
+import { useTour } from '@tour-kit/react';
+
+function CustomNavigation() {
+  const { next, prev, skip, complete, isFirstStep, isLastStep } = useTour('my-tour');
+
+  return (
+    <div className="flex gap-2">
+      {!isFirstStep && (
+        <button onClick={prev} className="btn-secondary">
+          Back
+        </button>
+      )}
+      <button onClick={skip} className="btn-ghost">
+        Skip
+      </button>
+      {isLastStep ? (
+        <button onClick={complete} className="btn-primary">
+          Finish
+        </button>
+      ) : (
+        <button onClick={next} className="btn-primary">
+          Continue
+        </button>
+      )}
+    </div>
+  );
+}
+```

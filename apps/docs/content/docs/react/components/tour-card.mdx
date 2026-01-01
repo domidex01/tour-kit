@@ -1,0 +1,140 @@
+---
+title: TourCard
+description: Tooltip card component for tour steps
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# TourCard
+
+The tooltip card that displays step content. Uses compound components for maximum flexibility.
+
+## Usage
+
+```tsx
+import {
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+} from '@tour-kit/react';
+
+<TourCard>
+  <TourCardHeader />
+  <TourCardContent />
+  <TourCardFooter />
+</TourCard>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    className: { type: 'string', description: 'Additional CSS classes' },
+    children: { type: 'ReactNode', description: 'Card content (use compound components)' },
+    asChild: { type: 'boolean', default: 'false', description: 'Render as child element' },
+  }}
+/>
+
+## Compound Components
+
+### TourCardHeader
+
+Displays the step title and close button.
+
+```tsx
+<TourCardHeader>
+  <TourClose />
+</TourCardHeader>
+```
+
+### TourCardContent
+
+Displays the step content.
+
+```tsx
+<TourCardContent className="text-muted-foreground" />
+```
+
+### TourCardFooter
+
+Contains navigation and progress.
+
+```tsx
+<TourCardFooter>
+  <TourProgress />
+  <TourNavigation />
+</TourCardFooter>
+```
+
+## Complete Example
+
+```tsx
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+  TourProgress,
+  TourNavigation,
+  TourClose,
+  TourOverlay,
+} from '@tour-kit/react';
+
+function App() {
+  return (
+    <Tour id="demo">
+      <TourStep target="#btn" title="Welcome" content="Hello world!" />
+      <TourStep target="#nav" title="Navigation" content="Explore here." />
+
+      <TourOverlay />
+
+      <TourCard className="w-80">
+        <TourCardHeader>
+          <TourClose />
+        </TourCardHeader>
+        <TourCardContent />
+        <TourCardFooter>
+          <TourProgress />
+          <TourNavigation />
+        </TourCardFooter>
+      </TourCard>
+
+      <MainApp />
+    </Tour>
+  );
+}
+```
+
+## Custom Card Layout
+
+```tsx
+<TourCard className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+  <div className="flex items-start justify-between p-4">
+    <div>
+      <TourCardHeader className="text-white font-bold" />
+      <TourCardContent className="text-white/80 mt-2" />
+    </div>
+    <TourClose className="text-white hover:bg-white/20" />
+  </div>
+  <TourCardFooter className="border-t border-white/20 p-4">
+    <TourNavigation
+      prevLabel="Back"
+      nextLabel="Continue"
+      completeLabel="Finish"
+    />
+  </TourCardFooter>
+</TourCard>
+```
+
+## Without Compound Components
+
+For simpler use cases:
+
+```tsx
+<TourCard>
+  {/* Renders default layout with title, content, and navigation */}
+</TourCard>
+```

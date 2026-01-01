@@ -1,0 +1,214 @@
+---
+title: HeadlessTourOverlay
+description: Unstyled spotlight overlay component
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# HeadlessTourOverlay
+
+An unstyled overlay that exposes spotlight positioning data via render props.
+
+## Usage
+
+```tsx
+import { HeadlessTourOverlay } from '@tour-kit/react/headless';
+
+<HeadlessTourOverlay>
+  {(props) => (
+    <div className="my-overlay">
+      {/* Custom spotlight rendering */}
+    </div>
+  )}
+</HeadlessTourOverlay>
+```
+
+## Render Props
+
+<TypeTable
+  type={{
+    isVisible: { type: 'boolean', description: 'Whether overlay should be visible' },
+    targetRect: { type: 'DOMRect | null', description: 'Target element bounding rect' },
+    padding: { type: 'number', description: 'Spotlight padding' },
+    borderRadius: { type: 'number', description: 'Spotlight border radius' },
+  }}
+/>
+
+## SVG Mask Example
+
+```tsx
+<HeadlessTourOverlay>
+  {({ isVisible, targetRect, padding, borderRadius }) => {
+    if (!isVisible || !targetRect) return null;
+
+    return (
+      <svg className="fixed inset-0 w-full h-full z-40 pointer-events-none">
+        <defs>
+          <mask id="spotlight-mask">
+            <rect width="100%" height="100%" fill="white" />
+            <rect
+              x={targetRect.left - padding}
+              y={targetRect.top - padding}
+              width={targetRect.width + padding * 2}
+              height={targetRect.height + padding * 2}
+              rx={borderRadius}
+              fill="black"
+            />
+          </mask>
+        </defs>
+        <rect
+          width="100%"
+          height="100%"
+          fill="rgba(0, 0, 0, 0.5)"
+          mask="url(#spotlight-mask)"
+        />
+      </svg>
+    );
+  }}
+</HeadlessTourOverlay>
+```
+
+## CSS Box-Shadow Approach
+
+```tsx
+<HeadlessTourOverlay>
+  {({ isVisible, targetRect, padding }) => {
+    if (!isVisible || !targetRect) return null;
+
+    return (
+      <div
+        className="fixed z-40 pointer-events-none"
+        style={{
+          top: targetRect.top - padding,
+          left: targetRect.left - padding,
+          width: targetRect.width + padding * 2,
+          height: targetRect.height + padding * 2,
+          borderRadius: 8,
+          boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+        }}
+      />
+    );
+  }}
+</HeadlessTourOverlay>
+```
+
+## Animated Overlay
+
+```tsx
+import { motion } from 'framer-motion';
+
+<HeadlessTourOverlay>
+  {({ isVisible, targetRect, padding, borderRadius }) => {
+    if (!isVisible || !targetRect) return null;
+
+    return (
+      <>
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 z-40"
+        />
+
+        {/* Spotlight cutout */}
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="fixed z-40 bg-transparent"
+          style={{
+            top: targetRect.top - padding,
+            left: targetRect.left - padding,
+            width: targetRect.width + padding * 2,
+            height: targetRect.height + padding * 2,
+            borderRadius,
+            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+          }}
+        />
+      </>
+    );
+  }}
+</HeadlessTourOverlay>
+```
+
+## Click Handling
+
+Add click-through for the target or click-outside handling:
+
+```tsx
+<HeadlessTourOverlay>
+  {({ isVisible, targetRect, padding }) => {
+    if (!isVisible) return null;
+
+    const handleClickOutside = (e: React.MouseEvent) => {
+      if (!targetRect) return;
+
+      const { clientX, clientY } = e;
+      const inSpotlight =
+        clientX >= targetRect.left - padding &&
+        clientX <= targetRect.right + padding &&
+        clientY >= targetRect.top - padding &&
+        clientY <= targetRect.bottom + padding;
+
+      if (!inSpotlight) {
+        // Handle click outside spotlight
+        console.log('Clicked outside');
+      }
+    };
+
+    return (
+      <div
+        className="fixed inset-0 z-40"
+        onClick={handleClickOutside}
+      >
+        {/* Your overlay rendering */}
+      </div>
+    );
+  }}
+</HeadlessTourOverlay>
+```
+
+## Canvas Rendering
+
+For complex effects:
+
+```tsx
+<HeadlessTourOverlay>
+  {({ isVisible, targetRect, padding, borderRadius }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(() => {
+      if (!isVisible || !targetRect || !canvasRef.current) return;
+
+      const ctx = canvasRef.current.getContext('2d');
+      if (!ctx) return;
+
+      // Clear and draw overlay
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+      // Cut out spotlight
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.roundRect(
+        targetRect.left - padding,
+        targetRect.top - padding,
+        targetRect.width + padding * 2,
+        targetRect.height + padding * 2,
+        borderRadius
+      );
+      ctx.fill();
+    }, [isVisible, targetRect, padding, borderRadius]);
+
+    return (
+      <canvas
+        ref={canvasRef}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        className="fixed inset-0 z-40 pointer-events-none"
+      />
+    );
+  }}
+</HeadlessTourOverlay>
+```

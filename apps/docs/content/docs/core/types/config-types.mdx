@@ -1,0 +1,110 @@
+---
+title: Config Types
+description: TypeScript types for configuration options
+---
+
+# Config Types
+
+## SpotlightConfig
+
+```typescript
+interface SpotlightConfig {
+  enabled?: boolean;
+  padding?: number;
+  borderRadius?: number;
+  animate?: boolean;
+  duration?: number;
+  overlayColor?: string;
+  overlayOpacity?: number;
+  clickThrough?: boolean;
+}
+```
+
+## KeyboardConfig
+
+```typescript
+interface KeyboardConfig {
+  enabled?: boolean;
+  bindings?: {
+    next?: string[];
+    prev?: string[];
+    skip?: string[];
+    complete?: string[];
+  };
+  trapFocus?: boolean;
+}
+```
+
+## ScrollConfig
+
+```typescript
+interface ScrollConfig {
+  enabled?: boolean;
+  behavior?: 'smooth' | 'instant' | 'auto';
+  block?: 'start' | 'center' | 'end' | 'nearest';
+  inline?: 'start' | 'center' | 'end' | 'nearest';
+  offset?: number | { top: number; left: number };
+}
+```
+
+## PersistenceConfig
+
+```typescript
+interface PersistenceConfig {
+  enabled?: boolean;
+  strategy?: 'localStorage' | 'sessionStorage' | 'custom';
+  key?: string;
+  version?: number;
+  storage?: {
+    get: (key: string) => Promise<unknown> | unknown;
+    set: (key: string, value: unknown) => Promise<void> | void;
+    remove: (key: string) => Promise<void> | void;
+  };
+}
+```
+
+## A11yConfig
+
+```typescript
+interface A11yConfig {
+  announcements?: boolean;
+  liveRegion?: 'polite' | 'assertive';
+  ariaLabel?: string;
+  closeLabel?: string;
+  nextLabel?: string;
+  prevLabel?: string;
+  skipLabel?: string;
+}
+```
+
+## Default Values
+
+```typescript
+const defaultSpotlight: SpotlightConfig = {
+  enabled: true,
+  padding: 8,
+  borderRadius: 4,
+  animate: true,
+  duration: 200,
+  overlayColor: '#000',
+  overlayOpacity: 0.5,
+  clickThrough: false,
+};
+
+const defaultKeyboard: KeyboardConfig = {
+  enabled: true,
+  bindings: {
+    next: ['ArrowRight', 'Enter'],
+    prev: ['ArrowLeft'],
+    skip: ['Escape'],
+  },
+  trapFocus: true,
+};
+
+const defaultScroll: ScrollConfig = {
+  enabled: true,
+  behavior: 'smooth',
+  block: 'center',
+  inline: 'nearest',
+};
+```

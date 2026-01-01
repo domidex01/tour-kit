@@ -8,6 +8,7 @@ interface HintHotspotProps {
   isOpen?: boolean
   onClick: () => void
   className?: string
+  unstyled?: boolean
 }
 
 function getHotspotPosition(position: HotspotPosition, rect: DOMRect) {
@@ -41,34 +42,43 @@ const pulseKeyframes = `
 
 export const HintHotspot = React.forwardRef<HTMLButtonElement, HintHotspotProps>(
   function HintHotspot(
-    { targetRect, position, pulse = true, isOpen = false, onClick, className },
+    { targetRect, position, pulse = true, isOpen = false, onClick, className, unstyled = false },
     ref
   ) {
     const pos = getHotspotPosition(position, targetRect)
 
+    const cssVarStyles: React.CSSProperties = unstyled
+      ? {
+          position: 'fixed',
+          zIndex: 9999,
+          top: pos.top,
+          left: pos.left,
+        }
+      : {
+          position: 'fixed',
+          zIndex: 'var(--tour-hint-z, 9999)',
+          top: pos.top,
+          left: pos.left,
+          width: 'var(--tour-hotspot-size, 20px)',
+          height: 'var(--tour-hotspot-size, 20px)',
+          borderRadius: '50%',
+          backgroundColor: 'var(--tour-hotspot-color, #3b82f6)',
+          border: '3px solid #ffffff',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          cursor: 'pointer',
+          padding: 0,
+          animation: pulse && !isOpen ? 'tourkit-pulse 1.5s ease-in-out infinite' : 'none',
+        }
+
     return (
       <>
-        <style>{pulseKeyframes}</style>
+        {!unstyled && <style>{pulseKeyframes}</style>}
         <button
           ref={ref}
           type="button"
           onClick={onClick}
           className={className}
-          style={{
-            position: 'fixed',
-            zIndex: 9999,
-            top: pos.top,
-            left: pos.left,
-            width: 20,
-            height: 20,
-            borderRadius: '50%',
-            backgroundColor: '#3b82f6',
-            border: '3px solid #ffffff',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-            cursor: 'pointer',
-            padding: 0,
-            animation: pulse && !isOpen ? 'tourkit-pulse 1.5s ease-in-out infinite' : 'none',
-          }}
+          style={cssVarStyles}
           aria-label="Show hint"
           aria-expanded={isOpen}
         />

@@ -1,0 +1,109 @@
+---
+title: Headless Components
+description: Unstyled components for complete customization
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Headless Components
+
+Headless components provide all the tour logic without any styling, giving you complete control over the UI.
+
+## Import
+
+```tsx
+import {
+  HeadlessTourCard,
+  HeadlessTourOverlay,
+  HeadlessTourNavigation,
+  HeadlessTourProgress,
+} from '@tour-kit/react/headless';
+```
+
+<Callout type="info">
+  Headless components use render props to expose state and actions, letting you build completely custom UIs.
+</Callout>
+
+## Why Headless?
+
+- **Full Design Control** - No default styles to override
+- **Framework Agnostic Styling** - Use any CSS approach
+- **Smaller Bundle** - Only includes logic, not styles
+- **Design System Integration** - Match your existing components
+
+## Basic Example
+
+```tsx
+import { HeadlessTourCard } from '@tour-kit/react/headless';
+
+function MyTourCard() {
+  return (
+    <HeadlessTourCard>
+      {({ currentStep, currentStepIndex, totalSteps, next, prev, skip }) => (
+        <div className="my-card">
+          <span>{currentStepIndex + 1} / {totalSteps}</span>
+          <h3>{currentStep?.title}</h3>
+          <p>{currentStep?.content}</p>
+          <div>
+            <button onClick={prev}>Back</button>
+            <button onClick={next}>Next</button>
+            <button onClick={skip}>Skip</button>
+          </div>
+        </div>
+      )}
+    </HeadlessTourCard>
+  );
+}
+```
+
+## Available Headless Components
+
+| Component | Description |
+|-----------|-------------|
+| `HeadlessTourCard` | Tour card container with step data |
+| `HeadlessTourOverlay` | Spotlight overlay with position data |
+| `HeadlessTourNavigation` | Navigation controls |
+| `HeadlessTourProgress` | Progress indicator data |
+
+## Hooks for Full Control
+
+For maximum flexibility, use hooks directly:
+
+```tsx
+import { useTour, useStep, useSpotlight } from '@tour-kit/core';
+
+function CompletelyCustomTour() {
+  const tour = useTour('my-tour');
+  const step = useStep();
+  const spotlight = useSpotlight();
+
+  // Build your entire UI from scratch
+  return (
+    <>
+      {spotlight.isVisible && <MyCustomOverlay rect={spotlight.targetRect} />}
+      {tour.isActive && <MyCustomCard step={step} tour={tour} />}
+    </>
+  );
+}
+```
+
+## Combining with Styled Components
+
+Mix headless and styled components:
+
+```tsx
+import { Tour, TourStep, TourOverlay } from '@tour-kit/react';
+import { HeadlessTourCard } from '@tour-kit/react/headless';
+
+<Tour id="mixed">
+  <TourStep target="#btn" title="Hello" content="World" />
+
+  {/* Use styled overlay */}
+  <TourOverlay />
+
+  {/* Use headless card with custom UI */}
+  <HeadlessTourCard>
+    {(props) => <MyCustomCard {...props} />}
+  </HeadlessTourCard>
+</Tour>
+```

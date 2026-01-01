@@ -1,0 +1,60 @@
+---
+title: useStep
+description: Hook for accessing current step data
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# useStep
+
+Access the current step data and computed properties.
+
+## Usage
+
+```tsx
+import { useStep } from '@tour-kit/core';
+
+function StepContent() {
+  const {
+    step,
+    index,
+    isFirst,
+    isLast,
+    progress,
+  } = useStep();
+
+  return (
+    <div>
+      <h2>{step.title}</h2>
+      <p>{step.content}</p>
+      <span>Step {index + 1} of {progress.total}</span>
+    </div>
+  );
+}
+```
+
+## Return Value
+
+<TypeTable
+  type={{
+    step: { type: 'TourStep', description: 'Current step configuration' },
+    index: { type: 'number', description: 'Current step index' },
+    isFirst: { type: 'boolean', description: 'Whether this is the first step' },
+    isLast: { type: 'boolean', description: 'Whether this is the last step' },
+    progress: { type: '{ current: number, total: number }', description: 'Progress info' },
+    targetElement: { type: 'HTMLElement | null', description: 'Target DOM element' },
+  }}
+/>
+
+## Accessing Target Element
+
+```tsx
+const { targetElement } = useStep();
+
+useEffect(() => {
+  if (targetElement) {
+    // Scroll target into view
+    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}, [targetElement]);
+```

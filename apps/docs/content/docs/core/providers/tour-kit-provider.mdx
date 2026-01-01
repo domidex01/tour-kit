@@ -1,0 +1,77 @@
+---
+title: TourKitProvider
+description: Global provider for managing multiple tours
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# TourKitProvider
+
+Global provider that manages multiple tours across your application.
+
+## Usage
+
+```tsx
+import { TourKitProvider } from '@tour-kit/core';
+
+function App() {
+  return (
+    <TourKitProvider>
+      <YourApp />
+    </TourKitProvider>
+  );
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    children: {
+      type: 'ReactNode',
+      required: true,
+      description: 'Child components',
+    },
+    defaultConfig: {
+      type: 'Partial<TourConfig>',
+      description: 'Default configuration for all tours',
+    },
+    persistence: {
+      type: 'PersistenceConfig',
+      description: 'Global persistence settings',
+    },
+  }}
+/>
+
+## With Global Config
+
+```tsx
+<TourKitProvider
+  defaultConfig={{
+    keyboard: true,
+    spotlight: {
+      padding: 8,
+    },
+  }}
+  persistence={{
+    strategy: 'localStorage',
+    key: 'tour-kit-state',
+  }}
+>
+  <App />
+</TourKitProvider>
+```
+
+## Multiple Tours
+
+When using `TourKitProvider`, you can define multiple tours:
+
+```tsx
+<TourKitProvider>
+  <TourProvider tour={onboardingTour}>
+    <TourProvider tour={featureTour}>
+      <App />
+    </TourProvider>
+  </TourProvider>
+</TourKitProvider>
+```

@@ -1,0 +1,149 @@
+---
+title: Tailwind CSS
+description: Using TourKit with Tailwind CSS
+---
+
+# Tailwind CSS
+
+TourKit components are styled with Tailwind CSS by default.
+
+## Default Styles
+
+Components use these Tailwind classes:
+
+```tsx
+// TourCard default classes
+"rounded-lg border bg-popover p-4 shadow-lg"
+
+// TourCardHeader
+"flex items-center justify-between mb-2"
+
+// TourCardContent
+"text-sm text-muted-foreground"
+
+// TourCardFooter
+"flex items-center justify-between mt-4 pt-4 border-t"
+
+// Navigation button classes
+"px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+
+// Secondary button
+"px-4 py-2 rounded-md border hover:bg-accent"
+```
+
+## Customization
+
+Override with className prop:
+
+```tsx
+<TourCard className="bg-blue-500 text-white rounded-xl">
+  <TourCardContent>Custom styled!</TourCardContent>
+</TourCard>
+```
+
+## shadcn/ui Integration
+
+TourKit uses the same CSS variable naming conventions as shadcn/ui:
+
+```css
+/* These variables are automatically used */
+--background
+--foreground
+--primary
+--primary-foreground
+--secondary
+--secondary-foreground
+--muted
+--muted-foreground
+--accent
+--accent-foreground
+--popover
+--popover-foreground
+--border
+--ring
+```
+
+## Theme-Aware Components
+
+Components automatically adapt to light/dark mode:
+
+```tsx
+<TourCard className="dark:bg-gray-800 dark:border-gray-700">
+  <TourCardContent className="dark:text-gray-300">
+    Theme-aware content
+  </TourCardContent>
+</TourCard>
+```
+
+## Custom Theme
+
+```css
+/* globals.css */
+:root {
+  --tour-card-bg: hsl(var(--popover));
+  --tour-card-border: hsl(var(--border));
+  --tour-button-bg: hsl(var(--primary));
+  --tour-button-text: hsl(var(--primary-foreground));
+}
+
+.dark {
+  --tour-card-bg: hsl(220 20% 10%);
+  --tour-card-border: hsl(220 20% 20%);
+}
+```
+
+## Utility Classes
+
+Common customization patterns:
+
+```tsx
+// Rounded corners
+<TourCard className="rounded-2xl" />
+
+// Shadow
+<TourCard className="shadow-2xl" />
+
+// Width
+<TourCard className="w-80 max-w-sm" />
+
+// Animation
+<TourCard className="animate-in fade-in-0 zoom-in-95" />
+```
+
+## Tailwind Config
+
+Add TourKit to your content paths:
+
+```js
+// tailwind.config.js
+module.exports = {
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@tour-kit/react/**/*.{js,ts,jsx,tsx}',
+  ],
+  // ...
+}
+```
+
+## Component Variants
+
+Create reusable styled variants:
+
+```tsx
+import { cn } from '@/lib/utils';
+import { TourCard as BaseTourCard } from '@tour-kit/react';
+
+export function TourCard({ className, ...props }) {
+  return (
+    <BaseTourCard
+      className={cn(
+        'bg-gradient-to-br from-purple-50 to-blue-50',
+        'dark:from-purple-950 dark:to-blue-950',
+        'border-purple-200 dark:border-purple-800',
+        className
+      )}
+      {...props}
+    />
+  );
+}
+```

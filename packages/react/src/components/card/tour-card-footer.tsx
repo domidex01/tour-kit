@@ -1,3 +1,4 @@
+import type * as React from 'react'
 import { cn } from '../../utils/cn'
 import { TourNavigation } from '../navigation/tour-navigation'
 import { TourProgress } from '../navigation/tour-progress'
@@ -13,6 +14,7 @@ interface TourCardFooterProps {
   onNext: () => void
   onSkip: () => void
   className?: string
+  unstyled?: boolean
 }
 
 export function TourCardFooter({
@@ -26,10 +28,25 @@ export function TourCardFooter({
   onNext,
   onSkip,
   className,
+  unstyled = false,
 }: TourCardFooterProps) {
+  const cssVarStyles: React.CSSProperties = unstyled
+    ? {}
+    : {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingTop: '0.5rem',
+      }
+
   return (
-    <div className={cn('flex items-center justify-between pt-2', className)}>
-      {showProgress && <TourProgress current={currentStep} total={totalSteps} />}
+    <div
+      className={cn(!unstyled && 'flex items-center justify-between pt-2', className)}
+      style={cssVarStyles}
+    >
+      {showProgress && (
+        <TourProgress current={currentStep} total={totalSteps} unstyled={unstyled} />
+      )}
       {showNavigation && (
         <TourNavigation
           isFirstStep={isFirstStep}
@@ -37,6 +54,7 @@ export function TourCardFooter({
           onPrev={onPrev}
           onNext={onNext}
           onSkip={onSkip}
+          unstyled={unstyled}
         />
       )}
     </div>

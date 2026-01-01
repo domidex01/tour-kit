@@ -1,0 +1,59 @@
+---
+title: Installation
+description: Install TourKit in your React project
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Installation
+
+## Quick Install
+
+<Tabs items={['pnpm', 'npm', 'yarn', 'bun']}>
+  <Tab value='pnpm'>
+    ```bash
+    pnpm add @tour-kit/react
+    ```
+  </Tab>
+  <Tab value='npm'>
+    ```bash
+    npm install @tour-kit/react
+    ```
+  </Tab>
+  <Tab value='yarn'>
+    ```bash
+    yarn add @tour-kit/react
+    ```
+  </Tab>
+  <Tab value='bun'>
+    ```bash
+    bun add @tour-kit/react
+    ```
+  </Tab>
+</Tabs>
+
+## Package Options
+
+| Package           | Use Case                            |
+| ----------------- | ----------------------------------- |
+| `@tour-kit/react` | Pre-styled components (recommended) |
+| `@tour-kit/core`  | Headless hooks only                 |
+| `@tour-kit/hints` | Persistent hints system             |
+
+## Peer Dependencies
+
+TourKit requires React 18 or 19:
+
+```json
+{
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  }
+}
+```
+
+<Callout type="info">
+  If using Tailwind CSS, TourKit components are pre-styled and ready to use.
+</Callout>

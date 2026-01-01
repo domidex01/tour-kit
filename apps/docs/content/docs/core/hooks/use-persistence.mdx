@@ -1,0 +1,93 @@
+---
+title: usePersistence
+description: Hook for persisting tour state
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# usePersistence
+
+Persists tour completion state across sessions.
+
+## Usage
+
+```tsx
+import { usePersistence } from '@tour-kit/core';
+
+function App() {
+  const {
+    isCompleted,
+    isSkipped,
+    markCompleted,
+    markSkipped,
+    reset,
+  } = usePersistence('onboarding-tour');
+
+  if (isCompleted) {
+    return <div>Tour already completed!</div>;
+  }
+
+  return <Tour />;
+}
+```
+
+## Return Value
+
+<TypeTable
+  type={{
+    isCompleted: { type: 'boolean', description: 'Whether tour was completed' },
+    isSkipped: { type: 'boolean', description: 'Whether tour was skipped' },
+    currentStep: { type: 'number | null', description: 'Last visited step' },
+    markCompleted: { type: '() => void', description: 'Mark tour as completed' },
+    markSkipped: { type: '() => void', description: 'Mark tour as skipped' },
+    saveProgress: { type: '(step: number) => void', description: 'Save current progress' },
+    reset: { type: '() => void', description: 'Reset persistence state' },
+  }}
+/>
+
+## Configuration
+
+```tsx
+usePersistence('tour-id', {
+  strategy: 'localStorage', // 'localStorage' | 'sessionStorage' | 'custom'
+  key: 'my-app-tours',
+  version: 1,
+});
+```
+
+## Custom Storage
+
+```tsx
+usePersistence('tour-id', {
+  strategy: 'custom',
+  storage: {
+    get: async (key) => {
+      const response = await fetch(`/api/tours/${key}`);
+      return response.json();
+    },
+    set: async (key, value) => {
+      await fetch(`/api/tours/${key}`, {
+        method: 'POST',
+        body: JSON.stringify(value),
+      });
+    },
+    remove: async (key) => {
+      await fetch(`/api/tours/${key}`, { method: 'DELETE' });
+    },
+  },
+});
+```
+
+## Resume Tour
+
+```tsx
+const { currentStep } = usePersistence('tour-id');
+const { start } = useTour('tour-id');
+
+// Resume from last position
+useEffect(() => {
+  if (currentStep !== null && currentStep > 0) {
+    start(currentStep);
+  }
+}, []);
+```

@@ -1,0 +1,70 @@
+---
+title: useKeyboard
+description: Hook for keyboard navigation
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# useKeyboard
+
+Manages keyboard navigation within tours.
+
+## Usage
+
+```tsx
+import { useKeyboard } from '@tour-kit/core';
+
+function TourWithKeyboard() {
+  useKeyboard({
+    enabled: true,
+    bindings: {
+      next: ['ArrowRight', 'Enter'],
+      prev: ['ArrowLeft'],
+      skip: ['Escape'],
+    },
+  });
+
+  return <TourContent />;
+}
+```
+
+## Configuration
+
+<TypeTable
+  type={{
+    enabled: { type: 'boolean', default: 'true', description: 'Enable keyboard navigation' },
+    bindings: { type: 'KeyboardBindings', description: 'Custom key bindings' },
+    trapFocus: { type: 'boolean', default: 'true', description: 'Trap focus within tour UI' },
+  }}
+/>
+
+## Default Key Bindings
+
+| Action   | Keys                   |
+| -------- | ---------------------- |
+| Next     | `ArrowRight`, `Enter`  |
+| Previous | `ArrowLeft`            |
+| Skip     | `Escape`               |
+
+## Custom Bindings
+
+```tsx
+useKeyboard({
+  bindings: {
+    next: ['ArrowRight', 'ArrowDown', 'n'],
+    prev: ['ArrowLeft', 'ArrowUp', 'p'],
+    skip: ['Escape', 'q'],
+    complete: ['c'],
+  },
+});
+```
+
+## Disabling Keyboard
+
+```tsx
+// Disable for the entire tour
+<TourProvider tour={{ ...config, keyboard: false }}>
+
+// Or conditionally
+useKeyboard({ enabled: !isInputFocused });
+```

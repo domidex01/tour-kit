@@ -1,0 +1,101 @@
+---
+title: Helper Functions
+description: Utility functions for common tour operations
+---
+
+# Helper Functions
+
+## getElement
+
+Resolves a target selector to an HTMLElement.
+
+```tsx
+import { getElement } from '@tour-kit/core';
+
+const element = getElement('#my-button');
+// Returns: HTMLElement | null
+
+// Also works with functions
+const dynamicElement = getElement(() => document.querySelector('.dynamic'));
+```
+
+## waitForElement
+
+Waits for an element to appear in the DOM.
+
+```tsx
+import { waitForElement } from '@tour-kit/core';
+
+// Wait up to 5 seconds for element to appear
+const element = await waitForElement('#lazy-loaded', {
+  timeout: 5000,
+  interval: 100,
+});
+```
+
+## scrollToElement
+
+Scrolls an element into view with options.
+
+```tsx
+import { scrollToElement } from '@tour-kit/core';
+
+await scrollToElement(element, {
+  behavior: 'smooth',
+  block: 'center',
+  offset: { top: -20 },
+});
+```
+
+## calculatePlacement
+
+Calculates optimal tooltip placement based on viewport.
+
+```tsx
+import { calculatePlacement } from '@tour-kit/core';
+
+const placement = calculatePlacement(targetRect, tooltipRect, {
+  preferred: 'bottom',
+  fallback: ['top', 'right', 'left'],
+  padding: 8,
+});
+// Returns: 'bottom' | 'top' | 'right' | 'left' | ...
+```
+
+## mergeConfig
+
+Deep merges tour configurations.
+
+```tsx
+import { mergeConfig } from '@tour-kit/core';
+
+const baseConfig = {
+  keyboard: true,
+  spotlight: { padding: 8 },
+};
+
+const tourConfig = mergeConfig(baseConfig, {
+  id: 'my-tour',
+  steps: [...],
+  spotlight: { borderRadius: 4 },
+});
+
+// Result:
+// {
+//   id: 'my-tour',
+//   steps: [...],
+//   keyboard: true,
+//   spotlight: { padding: 8, borderRadius: 4 },
+// }
+```
+
+## isElementVisible
+
+Checks if an element is visible in the viewport.
+
+```tsx
+import { isElementVisible } from '@tour-kit/core';
+
+const visible = isElementVisible(element);
+// Returns: boolean
+```

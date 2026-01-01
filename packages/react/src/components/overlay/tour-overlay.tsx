@@ -6,9 +6,10 @@ import { TourPortal } from '../primitives/tour-portal'
 interface TourOverlayProps {
   className?: string
   onClick?: () => void
+  unstyled?: boolean
 }
 
-export function TourOverlay({ className, onClick }: TourOverlayProps) {
+export function TourOverlay({ className, onClick, unstyled = false }: TourOverlayProps) {
   const { isActive, currentStep } = useTour()
   const { overlayStyle, cutoutStyle, show, hide, targetRect } = useSpotlight()
   const prefersReducedMotion = usePrefersReducedMotion()
@@ -35,18 +36,26 @@ export function TourOverlay({ className, onClick }: TourOverlayProps) {
 
   if (!isActive) return null
 
+  const cssVarStyles: React.CSSProperties = unstyled
+    ? {}
+    : {
+        position: 'fixed',
+        inset: 0,
+        zIndex: 'var(--tour-z-overlay, 9998)',
+      }
+
   return (
     <TourPortal>
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: Overlay is decorative and aria-hidden */}
       <div
-        className={cn('fixed inset-0 z-40', className)}
-        style={overlayStyle}
+        className={cn(!unstyled && 'fixed inset-0 z-40', className)}
+        style={{ ...overlayStyle, ...cssVarStyles }}
         onClick={onClick}
         aria-hidden="true"
       >
         {targetRect && (
           <div
-            className="absolute bg-transparent"
+            className={cn(!unstyled && 'absolute bg-transparent')}
             style={{
               ...cutoutStyle,
               pointerEvents: currentStep?.interactive ? 'auto' : 'none',

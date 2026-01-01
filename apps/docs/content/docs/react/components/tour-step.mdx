@@ -1,0 +1,133 @@
+---
+title: TourStep
+description: Define individual tour steps
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# TourStep
+
+Defines a single step in the tour.
+
+## Usage
+
+```tsx
+<TourStep
+  id="welcome"
+  target="#hero"
+  title="Welcome!"
+  content="This is step one."
+  placement="bottom"
+  spotlightPadding={8}
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: { type: 'string', description: 'Step identifier (auto-generated if not provided)' },
+    target: { type: 'string | RefObject', required: true, description: 'CSS selector or ref to target element' },
+    title: { type: 'ReactNode', description: 'Step title' },
+    content: { type: 'ReactNode', required: true, description: 'Step content' },
+    placement: { type: 'Placement', default: '"bottom"', description: 'Tooltip placement relative to target' },
+    spotlightPadding: { type: 'number', default: '4', description: 'Padding around spotlight cutout' },
+    interactive: { type: 'boolean', default: 'false', description: 'Allow clicking through to target element' },
+    beforeEnter: { type: '(context) => void | Promise', description: 'Called before step enters' },
+    afterEnter: { type: '(context) => void', description: 'Called after step enters' },
+    beforeLeave: { type: '(context) => void | Promise', description: 'Called before step leaves' },
+    afterLeave: { type: '(context) => void', description: 'Called after step leaves' },
+  }}
+/>
+
+## Placement Options
+
+```tsx
+// Side placements
+placement="top"
+placement="bottom"
+placement="left"
+placement="right"
+
+// With alignment
+placement="top-start"
+placement="top-end"
+placement="bottom-start"
+placement="bottom-end"
+placement="left-start"
+placement="left-end"
+placement="right-start"
+placement="right-end"
+```
+
+## Using Refs
+
+```tsx
+import { useRef } from 'react';
+
+function MyComponent() {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  return (
+    <Tour id="my-tour">
+      <TourStep
+        target={buttonRef}
+        title="Click me"
+        content="This button does something cool."
+      />
+      <button ref={buttonRef}>My Button</button>
+    </Tour>
+  );
+}
+```
+
+## Async Step Transitions
+
+```tsx
+<TourStep
+  target="#form"
+  title="Fill the form"
+  content="Complete this form to continue."
+  beforeLeave={async (context) => {
+    // Validate form before moving to next step
+    const isValid = await validateForm();
+    if (!isValid) {
+      throw new Error('Please complete the form');
+    }
+  }}
+/>
+```
+
+## Interactive Steps
+
+```tsx
+<TourStep
+  target="#input"
+  title="Enter your name"
+  content="Type your name in this field."
+  interactive={true}
+/>
+```
+
+When `interactive` is true, users can click and interact with the target element while the tour step is active.
+
+## Custom Step Data
+
+```tsx
+<TourStep
+  target="#video"
+  title="Watch the video"
+  content="Learn more by watching this tutorial."
+  data={{
+    videoUrl: 'https://example.com/tutorial.mp4',
+    duration: 120,
+  }}
+/>
+```
+
+Access custom data in your components:
+
+```tsx
+const { currentStep } = useTour('my-tour');
+const videoUrl = currentStep?.data?.videoUrl;
+```

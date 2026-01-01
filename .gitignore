@@ -38,5 +38,6 @@ coverage/
 #tour kit plan
 tour-kit/*
 #claude
-claude/*
+.claude/*
 CLAUDE.md
+doc-prompts/*

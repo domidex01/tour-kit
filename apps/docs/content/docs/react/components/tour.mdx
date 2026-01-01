@@ -1,0 +1,92 @@
+---
+title: Tour
+description: Main tour wrapper component
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# Tour
+
+The main wrapper component that provides tour context.
+
+## Usage
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react';
+
+<Tour
+  id="onboarding"
+  onComplete={() => console.log('Done!')}
+>
+  <TourStep target="#btn" content="Click here" />
+  <YourAppContent />
+</Tour>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: { type: 'string', required: true, description: 'Unique tour identifier' },
+    autoStart: { type: 'boolean', default: 'false', description: 'Start automatically' },
+    startAt: { type: 'number', default: '0', description: 'Starting step index' },
+    keyboard: { type: 'KeyboardConfig | boolean', default: 'true', description: 'Keyboard config' },
+    spotlight: { type: 'SpotlightConfig | boolean', default: 'true', description: 'Spotlight config' },
+    onStart: { type: '() => void', description: 'Called when tour starts' },
+    onComplete: { type: '() => void', description: 'Called when tour completes' },
+    onSkip: { type: '() => void', description: 'Called when tour is skipped' },
+    children: { type: 'ReactNode', required: true, description: 'Tour steps and content' },
+  }}
+/>
+
+## Full Example
+
+```tsx
+import { Tour, TourStep, TourCard, TourOverlay } from '@tour-kit/react';
+
+function App() {
+  return (
+    <Tour
+      id="welcome-tour"
+      autoStart={false}
+      keyboard={{ enabled: true, trapFocus: true }}
+      spotlight={{ padding: 8, borderRadius: 4 }}
+      onStart={() => analytics.track('tour_started')}
+      onComplete={() => analytics.track('tour_completed')}
+      onSkip={() => analytics.track('tour_skipped')}
+    >
+      <TourStep
+        target="#header"
+        title="Welcome!"
+        content="Let's get started with a quick tour."
+        placement="bottom"
+      />
+      <TourStep
+        target="#sidebar"
+        title="Navigation"
+        content="Use the sidebar to explore features."
+        placement="right"
+      />
+      <TourOverlay />
+      <TourCard />
+      <MainContent />
+    </Tour>
+  );
+}
+```
+
+## Controlling the Tour
+
+```tsx
+import { useTour } from '@tour-kit/react';
+
+function StartButton() {
+  const { start, isActive } = useTour('welcome-tour');
+
+  return (
+    <button onClick={() => start()} disabled={isActive}>
+      Start Tour
+    </button>
+  );
+}
+```

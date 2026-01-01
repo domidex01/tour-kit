@@ -1,0 +1,5 @@
+{
+  "title": "API Reference",
+  "icon": "FileCode",
+  "pages": ["index", "core", "react", "hints"]
+}

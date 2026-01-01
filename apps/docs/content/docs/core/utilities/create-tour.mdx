@@ -1,0 +1,90 @@
+---
+title: createTour
+description: Factory function for creating typed tour configurations
+---
+
+# createTour
+
+Factory function that creates a fully typed tour configuration.
+
+## Usage
+
+```tsx
+import { createTour } from '@tour-kit/core';
+
+const onboardingTour = createTour({
+  id: 'onboarding',
+  steps: [
+    {
+      id: 'welcome',
+      target: '#hero',
+      title: 'Welcome!',
+      content: 'Let us show you around.',
+    },
+    {
+      id: 'features',
+      target: '#features',
+      title: 'Features',
+      content: 'Check out our features.',
+    },
+  ],
+  onComplete: () => {
+    console.log('Tour completed!');
+  },
+});
+```
+
+## With Options
+
+```tsx
+const tour = createTour({
+  id: 'feature-tour',
+  steps: [...],
+  autoStart: false,
+  startAt: 0,
+  keyboard: {
+    enabled: true,
+    bindings: {
+      next: ['ArrowRight', 'Enter'],
+      prev: ['ArrowLeft'],
+    },
+  },
+  spotlight: {
+    padding: 12,
+    borderRadius: 8,
+  },
+  persistence: {
+    strategy: 'localStorage',
+    key: 'feature-tour-state',
+  },
+});
+```
+
+## Type Safety
+
+The function provides full type inference:
+
+```tsx
+const tour = createTour({
+  id: 'typed-tour',
+  steps: [
+    {
+      id: 'step-1',
+      target: '#btn',
+      // TypeScript will error on invalid properties
+      // @ts-expect-error
+      invalidProp: true,
+    },
+  ],
+});
+```
+
+## Return Type
+
+Returns a `TourConfig` object that can be passed directly to `TourProvider`:
+
+```tsx
+<TourProvider tour={onboardingTour}>
+  <App />
+</TourProvider>
+```

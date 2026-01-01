@@ -1,0 +1,145 @@
+---
+title: HeadlessTourCard
+description: Unstyled tour card component
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# HeadlessTourCard
+
+An unstyled tour card that exposes all state and actions via render props.
+
+## Usage
+
+```tsx
+import { HeadlessTourCard } from '@tour-kit/react/headless';
+
+<HeadlessTourCard>
+  {(props) => (
+    <div className="my-card">
+      <h3>{props.currentStep?.title}</h3>
+      <p>{props.currentStep?.content}</p>
+    </div>
+  )}
+</HeadlessTourCard>
+```
+
+## Render Props
+
+<TypeTable
+  type={{
+    currentStep: { type: 'TourStep | null', description: 'Current step data' },
+    currentStepIndex: { type: 'number', description: 'Current step index' },
+    totalSteps: { type: 'number', description: 'Total number of steps' },
+    isFirstStep: { type: 'boolean', description: 'Is first step' },
+    isLastStep: { type: 'boolean', description: 'Is last step' },
+    isActive: { type: 'boolean', description: 'Is tour active' },
+    next: { type: '() => void', description: 'Go to next step' },
+    prev: { type: '() => void', description: 'Go to previous step' },
+    skip: { type: '() => void', description: 'Skip tour' },
+    complete: { type: '() => void', description: 'Complete tour' },
+    goTo: { type: '(index: number) => void', description: 'Go to specific step' },
+    targetRect: { type: 'DOMRect | null', description: 'Target element rect' },
+  }}
+/>
+
+## Complete Example
+
+```tsx
+<HeadlessTourCard>
+  {({
+    currentStep,
+    currentStepIndex,
+    totalSteps,
+    isFirstStep,
+    isLastStep,
+    next,
+    prev,
+    skip,
+    complete,
+  }) => (
+    <div className="bg-white rounded-lg shadow-xl p-6 w-80">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <span className="text-sm text-gray-500">
+          {currentStepIndex + 1} of {totalSteps}
+        </span>
+        <button onClick={skip} className="text-gray-400 hover:text-gray-600">
+          &times;
+        </button>
+      </div>
+
+      {/* Content */}
+      <h3 className="text-lg font-semibold mb-2">
+        {currentStep?.title}
+      </h3>
+      <p className="text-gray-600 mb-6">
+        {currentStep?.content}
+      </p>
+
+      {/* Navigation */}
+      <div className="flex justify-between">
+        {!isFirstStep && (
+          <button
+            onClick={prev}
+            className="px-4 py-2 border rounded hover:bg-gray-50"
+          >
+            Back
+          </button>
+        )}
+        <button
+          onClick={isLastStep ? complete : next}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 ml-auto"
+        >
+          {isLastStep ? 'Done' : 'Next'}
+        </button>
+      </div>
+    </div>
+  )}
+</HeadlessTourCard>
+```
+
+## With Framer Motion
+
+```tsx
+import { motion, AnimatePresence } from 'framer-motion';
+
+<HeadlessTourCard>
+  {({ isActive, currentStep, ...actions }) => (
+    <AnimatePresence>
+      {isActive && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="tour-card"
+        >
+          {/* Your custom UI */}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )}
+</HeadlessTourCard>
+```
+
+## Positioning
+
+Use `targetRect` to position the card:
+
+```tsx
+<HeadlessTourCard>
+  {({ targetRect, currentStep }) => {
+    const style = targetRect ? {
+      position: 'fixed',
+      top: targetRect.bottom + 16,
+      left: targetRect.left,
+    } : {};
+
+    return (
+      <div style={style} className="tour-card">
+        {currentStep?.content}
+      </div>
+    );
+  }}
+</HeadlessTourCard>
+```

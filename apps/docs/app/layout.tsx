@@ -1,0 +1,58 @@
+import './globals.css';
+import { RootProvider } from 'fumadocs-ui/provider/next';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
+import type { ReactNode } from 'react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | TourKit',
+    default: 'TourKit - Product Tours for React',
+  },
+  description:
+    'The most developer-friendly, accessible product tour library for React. Headless hooks and pre-styled components.',
+  keywords: [
+    'react',
+    'product tour',
+    'onboarding',
+    'tutorial',
+    'walkthrough',
+    'hints',
+    'tooltip',
+    'headless',
+    'typescript',
+    'tailwind',
+    'shadcn',
+  ],
+  authors: [{ name: 'TourKit Team' }],
+  openGraph: {
+    title: 'TourKit - Product Tours for React',
+    description:
+      'The most developer-friendly, accessible product tour library for React.',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TourKit - Product Tours for React',
+    description:
+      'The most developer-friendly, accessible product tour library for React.',
+  },
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang='en' className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
+      <body
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}
+      >
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}

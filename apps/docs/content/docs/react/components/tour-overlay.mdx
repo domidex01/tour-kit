@@ -1,0 +1,133 @@
+---
+title: TourOverlay
+description: Spotlight overlay component
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# TourOverlay
+
+Creates a spotlight effect that highlights the target element.
+
+## Usage
+
+```tsx
+import { Tour, TourStep, TourOverlay } from '@tour-kit/react';
+
+<Tour id="demo">
+  <TourStep target="#btn" content="Click here" />
+  <TourOverlay />
+</Tour>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    className: { type: 'string', description: 'Additional CSS classes' },
+    padding: { type: 'number', default: '8', description: 'Padding around spotlight cutout' },
+    borderRadius: { type: 'number', default: '4', description: 'Border radius of cutout' },
+    animate: { type: 'boolean', default: 'true', description: 'Animate transitions' },
+    duration: { type: 'number', default: '200', description: 'Animation duration in ms' },
+    color: { type: 'string', default: '"rgba(0,0,0,0.5)"', description: 'Overlay background color' },
+    clickThrough: { type: 'boolean', default: 'false', description: 'Allow clicks through overlay' },
+    onClickOutside: { type: '() => void', description: 'Called when clicking outside spotlight' },
+  }}
+/>
+
+## Customization
+
+### Custom Colors
+
+```tsx
+<TourOverlay
+  color="rgba(0, 0, 50, 0.7)"
+  padding={12}
+  borderRadius={8}
+/>
+```
+
+### Click Behavior
+
+```tsx
+// Allow clicking outside to skip tour
+<TourOverlay
+  onClickOutside={() => {
+    const { skip } = useTour('my-tour');
+    skip();
+  }}
+/>
+
+// Allow interaction with page
+<TourOverlay clickThrough={true} />
+```
+
+### Disable Animation
+
+```tsx
+<TourOverlay animate={false} />
+```
+
+## CSS Variables
+
+Override default styles with CSS:
+
+```css
+.tour-overlay {
+  --tour-kit-spotlight-color: rgba(0, 0, 0, 0.6);
+  --tour-kit-spotlight-padding: 12px;
+  --tour-kit-spotlight-radius: 8px;
+}
+```
+
+## Without Overlay
+
+To create a tour without the spotlight effect, simply omit the `TourOverlay` component:
+
+```tsx
+<Tour id="demo">
+  <TourStep target="#btn" content="Click here" />
+  <TourCard />
+  {/* No overlay - target is not highlighted */}
+</Tour>
+```
+
+## Custom Overlay
+
+For full control, use the headless hook:
+
+```tsx
+import { useSpotlight } from '@tour-kit/core';
+
+function CustomOverlay() {
+  const { isVisible, targetRect, padding, borderRadius } = useSpotlight();
+
+  if (!isVisible || !targetRect) return null;
+
+  return (
+    <div className="fixed inset-0 z-40">
+      <svg className="w-full h-full">
+        <defs>
+          <mask id="spotlight-mask">
+            <rect width="100%" height="100%" fill="white" />
+            <rect
+              x={targetRect.left - padding}
+              y={targetRect.top - padding}
+              width={targetRect.width + padding * 2}
+              height={targetRect.height + padding * 2}
+              rx={borderRadius}
+              fill="black"
+            />
+          </mask>
+        </defs>
+        <rect
+          width="100%"
+          height="100%"
+          fill="rgba(0,0,0,0.5)"
+          mask="url(#spotlight-mask)"
+        />
+      </svg>
+    </div>
+  );
+}
+```

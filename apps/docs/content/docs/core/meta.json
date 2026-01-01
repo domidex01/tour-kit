@@ -1,0 +1,5 @@
+{
+  "title": "@tour-kit/core",
+  "icon": "Cpu",
+  "pages": ["index", "providers", "hooks", "utilities", "types"]
+}

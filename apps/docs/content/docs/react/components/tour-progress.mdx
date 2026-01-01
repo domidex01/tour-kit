@@ -1,0 +1,143 @@
+---
+title: TourProgress
+description: Progress indicator for tour steps
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# TourProgress
+
+Displays the current progress through the tour.
+
+## Usage
+
+```tsx
+import { TourProgress } from '@tour-kit/react';
+
+<TourProgress />
+```
+
+## Props
+
+<TypeTable
+  type={{
+    className: { type: 'string', description: 'Additional CSS classes' },
+    variant: { type: '"dots" | "text" | "bar"', default: '"text"', description: 'Progress display style' },
+    showTotal: { type: 'boolean', default: 'true', description: 'Show total step count' },
+    format: { type: '(current, total) => string', description: 'Custom format function' },
+  }}
+/>
+
+## Variants
+
+### Text (Default)
+
+```tsx
+<TourProgress variant="text" />
+// Renders: "Step 1 of 5"
+```
+
+### Dots
+
+```tsx
+<TourProgress variant="dots" />
+// Renders: ● ○ ○ ○ ○
+```
+
+### Bar
+
+```tsx
+<TourProgress variant="bar" />
+// Renders: [====    ] 40%
+```
+
+## Custom Format
+
+```tsx
+<TourProgress
+  variant="text"
+  format={(current, total) => `${current}/${total}`}
+/>
+// Renders: "1/5"
+```
+
+```tsx
+<TourProgress
+  variant="text"
+  format={(current, total) => `Step ${current} • ${total} total`}
+/>
+// Renders: "Step 1 • 5 total"
+```
+
+## Styling Dots
+
+```tsx
+<TourProgress
+  variant="dots"
+  className="gap-2"
+/>
+```
+
+```css
+/* Custom dot styles */
+.tour-progress-dot {
+  @apply w-2 h-2 rounded-full bg-gray-300;
+}
+
+.tour-progress-dot[data-active="true"] {
+  @apply bg-blue-500;
+}
+
+.tour-progress-dot[data-completed="true"] {
+  @apply bg-green-500;
+}
+```
+
+## Progress Bar Styling
+
+```tsx
+<TourProgress
+  variant="bar"
+  className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden"
+/>
+```
+
+```css
+.tour-progress-bar {
+  @apply h-full bg-blue-500 transition-all duration-300;
+}
+```
+
+## In Card Footer
+
+```tsx
+<TourCardFooter className="flex items-center justify-between">
+  <TourProgress variant="dots" />
+  <TourNavigation />
+</TourCardFooter>
+```
+
+## Custom Progress Component
+
+```tsx
+import { useTour } from '@tour-kit/react';
+
+function CustomProgress() {
+  const { currentStepIndex, totalSteps } = useTour('my-tour');
+  const percentage = ((currentStepIndex + 1) / totalSteps) * 100;
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-24 h-1.5 bg-gray-200 rounded-full">
+        <div
+          className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+      <span className="text-sm text-muted-foreground">
+        {currentStepIndex + 1} of {totalSteps}
+      </span>
+    </div>
+  );
+}
+```

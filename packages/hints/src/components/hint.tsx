@@ -8,6 +8,7 @@ import { HintTooltip } from './hint-tooltip'
 type HintProps = HintConfig & {
   children?: React.ReactNode
   className?: string
+  unstyled?: boolean
 }
 
 export function Hint({
@@ -24,6 +25,7 @@ export function Hint({
   onShow,
   onDismiss,
   className,
+  unstyled = false,
 }: HintProps) {
   const { isOpen, isDismissed, show, hide, dismiss } = useHint(id)
   const hotspotRef = React.useRef<HTMLButtonElement>(null)
@@ -74,6 +76,7 @@ export function Hint({
         pulse={pulse}
         isOpen={isOpen}
         onClick={handleHotspotClick}
+        unstyled={unstyled}
       />
       {isOpen && hotspotRef.current && (
         <HintTooltip
@@ -81,6 +84,7 @@ export function Hint({
           placement={tooltipPlacement}
           onClose={handleDismiss}
           className={className}
+          unstyled={unstyled}
         >
           {children ?? content}
         </HintTooltip>

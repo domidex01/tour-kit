@@ -1,0 +1,200 @@
+/**
+ * TourKit Base Component Styles
+ *
+ * Optional CSS for users who don't use Tailwind.
+ * These styles use the CSS variables defined in variables.css.
+ */
+
+/* Tour Card */
+.tour-card {
+  position: relative;
+  z-index: var(--tour-z-card);
+  width: var(--tour-card-width);
+  padding: var(--tour-card-padding);
+  background-color: var(--tour-card-bg);
+  color: var(--tour-card-fg);
+  border: 1px solid var(--tour-card-border);
+  border-radius: var(--tour-card-radius);
+  box-shadow: var(--tour-card-shadow);
+  font-family: var(--tour-font-family);
+  font-size: var(--tour-font-size);
+  line-height: var(--tour-line-height);
+}
+
+/* Tour Card Header */
+.tour-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tour-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+/* Tour Card Content */
+.tour-card-content {
+  padding: 0.75rem 0;
+  color: var(--tour-muted-fg);
+}
+
+/* Tour Card Footer */
+.tour-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+}
+
+/* Tour Overlay */
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--tour-z-overlay);
+  pointer-events: auto;
+}
+
+.tour-overlay-cutout {
+  position: absolute;
+  background: transparent;
+  pointer-events: none;
+}
+
+/* Buttons */
+.tour-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem 0.75rem;
+  font-size: var(--tour-font-size);
+  font-weight: 500;
+  border-radius: calc(var(--tour-card-radius) - 2px);
+  transition: background-color var(--tour-transition-duration) var(--tour-transition-timing), color
+    var(--tour-transition-duration) var(--tour-transition-timing);
+  cursor: pointer;
+  border: none;
+}
+
+.tour-button:focus-visible {
+  outline: 2px solid var(--tour-ring);
+  outline-offset: var(--tour-ring-offset);
+}
+
+.tour-button-primary {
+  background-color: var(--tour-primary);
+  color: var(--tour-primary-fg);
+}
+
+.tour-button-primary:hover {
+  background-color: var(--tour-primary-hover);
+}
+
+.tour-button-secondary {
+  background-color: var(--tour-secondary-bg);
+  color: var(--tour-secondary-fg);
+  border: 1px solid var(--tour-secondary-border);
+}
+
+.tour-button-secondary:hover {
+  background-color: var(--tour-secondary-hover);
+}
+
+.tour-button-ghost {
+  background: transparent;
+  color: var(--tour-muted-fg);
+  padding: 0.25rem 0.5rem;
+}
+
+.tour-button-ghost:hover {
+  color: var(--tour-card-fg);
+}
+
+/* Close button */
+.tour-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--tour-card-radius) - 4px);
+  color: var(--tour-muted-fg);
+  cursor: pointer;
+  transition: color var(--tour-transition-duration) var(--tour-transition-timing), opacity
+    var(--tour-transition-duration) var(--tour-transition-timing);
+  opacity: 0.7;
+}
+
+.tour-close:hover {
+  opacity: 1;
+  color: var(--tour-card-fg);
+}
+
+.tour-close:focus-visible {
+  outline: 2px solid var(--tour-ring);
+  outline-offset: var(--tour-ring-offset);
+}
+
+/* Progress indicators */
+.tour-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tour-progress-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--tour-card-border);
+  transition: background-color var(--tour-transition-duration) var(--tour-transition-timing);
+}
+
+.tour-progress-dot[data-active="true"] {
+  background-color: var(--tour-primary);
+}
+
+.tour-progress-text {
+  font-size: var(--tour-font-size-sm);
+  color: var(--tour-muted-fg);
+}
+
+.tour-progress-bar {
+  width: 5rem;
+  height: 0.375rem;
+  background-color: var(--tour-card-border);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.tour-progress-bar-fill {
+  height: 100%;
+  background-color: var(--tour-primary);
+  transition: width var(--tour-transition-duration) var(--tour-transition-timing);
+}
+
+/* Navigation */
+.tour-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Screen reader only */
+.tour-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

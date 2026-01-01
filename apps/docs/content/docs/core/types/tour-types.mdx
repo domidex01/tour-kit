@@ -1,0 +1,69 @@
+---
+title: Tour Types
+description: TypeScript types for tour configuration
+---
+
+# Tour Types
+
+## TourConfig
+
+```typescript
+interface TourConfig {
+  id: string;
+  steps: TourStep[];
+  autoStart?: boolean;
+  startAt?: number;
+  keyboard?: KeyboardConfig | boolean;
+  spotlight?: SpotlightConfig | boolean;
+  persistence?: PersistenceConfig | boolean;
+  a11y?: A11yConfig;
+  scroll?: ScrollConfig;
+  onStart?: (context: TourContext) => void;
+  onComplete?: (context: TourContext) => void;
+  onSkip?: (context: TourContext) => void;
+  onStepChange?: (step: TourStep, index: number) => void;
+}
+```
+
+## TourState
+
+```typescript
+interface TourState {
+  tourId: string | null;
+  isActive: boolean;
+  currentStepIndex: number;
+  currentStep: TourStep | null;
+  totalSteps: number;
+  isLoading: boolean;
+  isTransitioning: boolean;
+  completedTours: string[];
+  skippedTours: string[];
+}
+```
+
+## TourContext
+
+```typescript
+interface TourContext {
+  tourId: string;
+  currentStep: TourStep | null;
+  currentStepIndex: number;
+  totalSteps: number;
+  isFirstStep: boolean;
+  isLastStep: boolean;
+}
+```
+
+## Placement
+
+```typescript
+type Side = 'top' | 'bottom' | 'left' | 'right';
+type Alignment = 'start' | 'center' | 'end';
+type Placement = Side | `${Side}-${Alignment}`;
+
+// All valid placements:
+// 'top' | 'top-start' | 'top-end'
+// 'bottom' | 'bottom-start' | 'bottom-end'
+// 'left' | 'left-start' | 'left-end'
+// 'right' | 'right-start' | 'right-end'
+```

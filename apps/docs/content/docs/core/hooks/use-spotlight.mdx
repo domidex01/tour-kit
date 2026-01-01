@@ -1,0 +1,75 @@
+---
+title: useSpotlight
+description: Hook for spotlight overlay control
+---
+
+# useSpotlight
+
+Controls the spotlight overlay that highlights target elements.
+
+## Usage
+
+```tsx
+import { useSpotlight } from '@tour-kit/core';
+
+function CustomOverlay() {
+  const { isVisible, targetRect, overlayStyle } = useSpotlight();
+
+  if (!isVisible) return null;
+
+  return (
+    <div style={overlayStyle} className="spotlight-overlay">
+      {/* Custom spotlight rendering */}
+    </div>
+  );
+}
+```
+
+## Return Value
+
+| Property       | Type                         | Description                  |
+| -------------- | ---------------------------- | ---------------------------- |
+| `isVisible`    | `boolean`                    | Whether spotlight is visible |
+| `targetRect`   | `DOMRect \| null`            | Target element bounding rect |
+| `overlayStyle` | `CSSProperties`              | Computed overlay styles      |
+| `padding`      | `number`                     | Spotlight padding            |
+| `borderRadius` | `number`                     | Spotlight border radius      |
+| `show`         | `(element, config?) => void` | Show spotlight               |
+| `hide`         | `() => void`                 | Hide spotlight               |
+
+## Manual Control
+
+```tsx
+const { show, hide } = useSpotlight();
+
+// Highlight an element manually
+const element = document.getElementById('my-element');
+show(element, { padding: 16, borderRadius: 8 });
+
+// Hide spotlight
+hide();
+```
+
+## Custom Spotlight Rendering
+
+```tsx
+function CustomSpotlight() {
+  const { isVisible, targetRect, padding } = useSpotlight();
+
+  if (!isVisible || !targetRect) return null;
+
+  const cutoutStyle = {
+    position: 'absolute',
+    top: targetRect.top - padding,
+    left: targetRect.left - padding,
+    width: targetRect.width + padding * 2,
+    height: targetRect.height + padding * 2,
+  };
+
+  return (
+    <div className="spotlight-overlay">
+      <div style={cutoutStyle} className="spotlight-cutout" />
+    </div>
+  );
+}
+```
