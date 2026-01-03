@@ -1,20 +1,56 @@
 /**
- * @tour-kit/react/headless
+ * Headless components for @tour-kit/react
  *
- * Unstyled, logic-only components for full customization.
- * Use these when you want complete control over styling.
+ * These components provide all the logic without any styling.
+ * Use them when you want full control over the UI.
+ *
+ * @example
+ * import { TourCardHeadless } from '@tour-kit/react/headless'
+ *
+ * function CustomTourCard() {
+ *   return (
+ *     <TourCardHeadless
+ *       render={({ currentStep, next, prev, floatingStyles }) => (
+ *         <div style={floatingStyles}>
+ *           <h2>{currentStep?.title}</h2>
+ *           <button onClick={prev}>Back</button>
+ *           <button onClick={next}>Next</button>
+ *         </div>
+ *       )}
+ *     />
+ *   )
+ * }
  */
 
-// Headless components
-export * from './components/headless'
+export {
+  TourCardHeadless,
+  type TourCardHeadlessProps,
+  type TourCardRenderProps,
+} from './components/headless/tour-card'
 
-// Primitives (already unstyled)
-export { TourPortal } from './components/primitives/tour-portal'
-export { TourArrow } from './components/primitives/tour-arrow'
+export {
+  TourCloseHeadless,
+  type TourCloseHeadlessProps,
+} from './components/headless/tour-close'
 
-// Tour wrapper components
-export { Tour } from './components/tour/tour'
-export { TourStep } from './components/tour/tour-step'
+export {
+  TourNavigationHeadless,
+  type TourNavigationHeadlessProps,
+  type TourNavigationRenderProps,
+} from './components/headless/tour-navigation'
 
-// Re-export core hooks and types
-export * from '@tour-kit/core'
+export {
+  TourOverlayHeadless,
+  type TourOverlayHeadlessProps,
+  type TourOverlayRenderProps,
+} from './components/headless/tour-overlay'
+
+export {
+  TourProgressHeadless,
+  type TourProgressHeadlessProps,
+  type TourProgressRenderProps,
+} from './components/headless/tour-progress'
+
+// Re-export utilities that are useful for headless components
+export { cn } from './lib/utils'
+export { Slot, Slottable } from './lib/slot'

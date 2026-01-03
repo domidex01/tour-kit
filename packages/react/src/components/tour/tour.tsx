@@ -5,7 +5,7 @@ import { TourOverlay } from '../overlay/tour-overlay'
 import { useTourRegistryContextOptional } from '../provider/tourkit-provider'
 import { TourStep } from './tour-step'
 
-interface TourProps {
+export interface TourProps {
   id: string
   autoStart?: boolean
   startAt?: number

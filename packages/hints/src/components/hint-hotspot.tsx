@@ -1,14 +1,20 @@
 import * as React from 'react'
+import { Slot } from '../lib/slot'
+import { cn } from '../lib/utils'
 import type { HotspotPosition } from '../types'
+import { type HintHotspotVariants, hintHotspotVariants } from './ui/hint-variants'
 
-interface HintHotspotProps {
+export interface HintHotspotProps
+  extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'>,
+    HintHotspotVariants {
+  /** Target element's bounding rect */
   targetRect: DOMRect
+  /** Position relative to the target element */
   position: HotspotPosition
-  pulse?: boolean
+  /** Whether the hint tooltip is open */
   isOpen?: boolean
-  onClick: () => void
-  className?: string
-  unstyled?: boolean
+  /** Use custom element via Slot */
+  asChild?: boolean
 }
 
 function getHotspotPosition(position: HotspotPosition, rect: DOMRect) {
@@ -33,56 +39,45 @@ function getHotspotPosition(position: HotspotPosition, rect: DOMRect) {
   }
 }
 
-const pulseKeyframes = `
-@keyframes tourkit-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-  50% { opacity: 1; box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
-}
-`
-
 export const HintHotspot = React.forwardRef<HTMLButtonElement, HintHotspotProps>(
-  function HintHotspot(
-    { targetRect, position, pulse = true, isOpen = false, onClick, className, unstyled = false },
+  (
+    {
+      targetRect,
+      position,
+      size,
+      color,
+      pulse = true,
+      zIndex,
+      isOpen = false,
+      asChild = false,
+      className,
+      children,
+      ...props
+    },
     ref
-  ) {
+  ) => {
     const pos = getHotspotPosition(position, targetRect)
+    const Comp = asChild ? Slot : 'button'
 
-    const cssVarStyles: React.CSSProperties = unstyled
-      ? {
-          position: 'fixed',
-          zIndex: 9999,
-          top: pos.top,
-          left: pos.left,
-        }
-      : {
-          position: 'fixed',
-          zIndex: 'var(--tour-hint-z, 9999)',
-          top: pos.top,
-          left: pos.left,
-          width: 'var(--tour-hotspot-size, 20px)',
-          height: 'var(--tour-hotspot-size, 20px)',
-          borderRadius: '50%',
-          backgroundColor: 'var(--tour-hotspot-color, #3b82f6)',
-          border: '3px solid #ffffff',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-          cursor: 'pointer',
-          padding: 0,
-          animation: pulse && !isOpen ? 'tourkit-pulse 1.5s ease-in-out infinite' : 'none',
-        }
+    // Don't pulse when tooltip is open
+    const shouldPulse = pulse && !isOpen
 
     return (
-      <>
-        {!unstyled && <style>{pulseKeyframes}</style>}
-        <button
-          ref={ref}
-          type="button"
-          onClick={onClick}
-          className={className}
-          style={cssVarStyles}
-          aria-label="Show hint"
-          aria-expanded={isOpen}
-        />
-      </>
+      <Comp
+        ref={ref}
+        type={asChild ? undefined : 'button'}
+        className={cn(hintHotspotVariants({ size, color, pulse: shouldPulse, zIndex }), className)}
+        style={{
+          top: pos.top,
+          left: pos.left,
+        }}
+        aria-label="Show hint"
+        aria-expanded={isOpen}
+        {...props}
+      >
+        {children ?? <span className="sr-only">Show hint</span>}
+      </Comp>
     )
   }
 )
+HintHotspot.displayName = 'HintHotspot'

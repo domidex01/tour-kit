@@ -148,7 +148,7 @@ describe('Hint Accessibility', () => {
     })
   })
 
-  it('close button has visible close icon with title', async () => {
+  it('close button has visible close icon with aria-hidden', async () => {
     const user = userEvent.setup()
 
     render(<Hint id="test" target="#target" content="Help text" />, { wrapper })
@@ -159,7 +159,8 @@ describe('Hint Accessibility', () => {
     const svg = dismissButton.querySelector('svg')
 
     expect(svg).toBeInTheDocument()
-    expect(svg?.querySelector('title')).toHaveTextContent('Close')
+    // SVG is decorative, button has aria-label for accessibility
+    expect(svg).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('hotspot is focusable', () => {

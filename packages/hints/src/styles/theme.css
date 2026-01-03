@@ -1,0 +1,50 @@
+/**
+ * TourKit Hints Tailwind v4 Theme Extension
+ *
+ * Import this file in your main CSS when using Tailwind v4.
+ *
+ * @example
+ * // app/globals.css (Tailwind v4)
+ * @import "tailwindcss";
+ * @import "@tour-kit/hints/styles/theme.css";
+ */
+
+@theme {
+  /* ===== Keyframe Animations ===== */
+  --animate-tour-pulse: tour-pulse 1.5s ease-in-out infinite;
+  --animate-hint-bounce: hint-bounce 1s ease-in-out infinite;
+
+  /* ===== Z-Index Scale ===== */
+  --z-tour-hint: 9999;
+}
+
+/* ===== Keyframes ===== */
+@keyframes tour-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 8px hsl(var(--primary) / 0);
+  }
+}
+
+@keyframes hint-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  @theme {
+    --animate-tour-pulse: none;
+    --animate-hint-bounce: none;
+  }
+}

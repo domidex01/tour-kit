@@ -1,7 +1,13 @@
+import { hintsPlugin } from '@tour-kit/hints/tailwind'
+import { tourKitPlugin } from '@tour-kit/react/tailwind'
 import type { Config } from 'tailwindcss'
 
 export default {
-  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}', '../../packages/react/src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
+    '../../packages/react/dist/**/*.js',
+    '../../packages/hints/dist/**/*.js',
+  ],
   theme: {
     extend: {
       colors: {
@@ -38,5 +44,6 @@ export default {
       },
     },
   },
-  plugins: [],
+  // biome-ignore lint/suspicious/noExplicitAny: Tailwind v3/v4 plugin type compatibility
+  plugins: [tourKitPlugin as any, hintsPlugin as any],
 } satisfies Config

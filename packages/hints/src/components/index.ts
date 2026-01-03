@@ -1,3 +1,3 @@
-export { Hint } from './hint'
-export { HintHotspot } from './hint-hotspot'
-export { HintTooltip } from './hint-tooltip'
+export { Hint, type HintProps } from './hint'
+export { HintHotspot, type HintHotspotProps } from './hint-hotspot'
+export { HintTooltip, type HintTooltipProps } from './hint-tooltip'

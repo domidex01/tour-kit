@@ -5,6 +5,14 @@
  * These styles use the CSS variables defined in variables.css.
  */
 
+@layer components {
+  /* Spotlight cutout utility */
+  .tour-spotlight-cutout {
+    box-shadow: 0 0 0 9999px var(--tour-overlay-bg, rgba(0, 0, 0, 0.5));
+    border-radius: inherit;
+  }
+}
+
 /* Tour Card */
 .tour-card {
   position: relative;
@@ -73,8 +81,8 @@
   font-size: var(--tour-font-size);
   font-weight: 500;
   border-radius: calc(var(--tour-card-radius) - 2px);
-  transition: background-color var(--tour-transition-duration) var(--tour-transition-timing), color
-    var(--tour-transition-duration) var(--tour-transition-timing);
+  transition: background-color var(--tour-duration-normal) var(--tour-timing), color
+    var(--tour-duration-normal) var(--tour-timing);
   cursor: pointer;
   border: none;
 }
@@ -126,8 +134,8 @@
   border-radius: calc(var(--tour-card-radius) - 4px);
   color: var(--tour-muted-fg);
   cursor: pointer;
-  transition: color var(--tour-transition-duration) var(--tour-transition-timing), opacity
-    var(--tour-transition-duration) var(--tour-transition-timing);
+  transition: color var(--tour-duration-normal) var(--tour-timing), opacity
+    var(--tour-duration-normal) var(--tour-timing);
   opacity: 0.7;
 }
 
@@ -153,7 +161,7 @@
   height: 0.5rem;
   border-radius: 50%;
   background-color: var(--tour-card-border);
-  transition: background-color var(--tour-transition-duration) var(--tour-transition-timing);
+  transition: background-color var(--tour-duration-normal) var(--tour-timing);
 }
 
 .tour-progress-dot[data-active="true"] {
@@ -176,7 +184,7 @@
 .tour-progress-bar-fill {
   height: 100%;
   background-color: var(--tour-primary);
-  transition: width var(--tour-transition-duration) var(--tour-transition-timing);
+  transition: width var(--tour-duration-normal) var(--tour-timing);
 }
 
 /* Navigation */

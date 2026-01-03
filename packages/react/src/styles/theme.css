@@ -1,0 +1,76 @@
+/**
+ * TourKit Tailwind v4 Theme Extension
+ *
+ * Import this file in your main CSS when using Tailwind v4.
+ *
+ * @example
+ * // app/globals.css (Tailwind v4)
+ * @import "tailwindcss";
+ * @import "@tour-kit/react/styles/theme.css";
+ */
+
+@theme {
+  /* ===== Keyframe Animations ===== */
+  --animate-tour-pulse: tour-pulse 1.5s ease-in-out infinite;
+  --animate-tour-spotlight-in: tour-spotlight-in 200ms ease-out;
+  --animate-tour-card-in: tour-card-in 200ms ease-out;
+
+  /* ===== Z-Index Scale ===== */
+  --z-tour-overlay: 9998;
+  --z-tour-card: 9999;
+}
+
+/* ===== Keyframes ===== */
+@keyframes tour-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 8px hsl(var(--primary) / 0);
+  }
+}
+
+@keyframes tour-spotlight-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tour-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== Utility Classes ===== */
+@utility tour-spotlight-cutout {
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+@utility tour-spotlight-cutout-light {
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
+}
+
+@utility tour-spotlight-cutout-dark {
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  @theme {
+    --animate-tour-pulse: none;
+    --animate-tour-spotlight-in: none;
+    --animate-tour-card-in: none;
+  }
+}

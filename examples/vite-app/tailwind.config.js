@@ -1,9 +1,13 @@
+import { hintsPlugin } from '@tour-kit/hints/tailwind'
+import { tourKitPlugin } from '@tour-kit/react/tailwind'
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
-    '../../packages/react/src/**/*.{js,ts,jsx,tsx}',
+    '../../packages/react/dist/**/*.js',
+    '../../packages/hints/dist/**/*.js',
   ],
   theme: {
     extend: {
@@ -41,5 +45,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [tourKitPlugin, hintsPlugin],
 }

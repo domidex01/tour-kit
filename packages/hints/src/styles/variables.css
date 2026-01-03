@@ -1,55 +1,81 @@
 /**
  * TourKit Hints CSS Custom Properties
+ *
+ * Integrates with shadcn/ui design tokens.
  */
 
-:root {
-  /* Hotspot */
-  --tour-hotspot-color: #6366f1;
-  --tour-hotspot-size: 12px;
-  --tour-hotspot-pulse-scale: 1.5;
-  --tour-hotspot-pulse-opacity: 0;
-
-  /* Tooltip */
-  --tour-hint-bg: #ffffff;
-  --tour-hint-fg: #171717;
-  --tour-hint-border: #e5e7eb;
-  --tour-hint-radius: 0.5rem;
-  --tour-hint-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --tour-hint-padding: 0.75rem;
-  --tour-hint-max-width: 18rem;
-
-  /* Z-index */
-  --tour-hint-z: 9999;
-
-  /* Animation */
-  --tour-transition-duration: 200ms;
-  --tour-transition-timing: ease-out;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --tour-hint-bg: #262626;
-    --tour-hint-fg: #fafafa;
-    --tour-hint-border: #404040;
+    /* Z-index */
+    --tour-hint-z: 9999;
+
+    /* Animation */
+    --tour-hint-duration: 200ms;
+    --tour-hint-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Hotspot (fallbacks for non-shadcn projects) */
+    --tour-hotspot-color: #6366f1;
+    --tour-hotspot-size: 12px;
+
+    /* Tooltip (fallbacks for non-shadcn projects) */
+    --tour-hint-bg: #ffffff;
+    --tour-hint-fg: #171717;
+    --tour-hint-border: #e5e7eb;
+    --tour-hint-radius: 0.5rem;
+    --tour-hint-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --tour-hint-padding: 0.75rem;
+    --tour-hint-max-width: 18rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --tour-hint-bg: #262626;
+      --tour-hint-fg: #fafafa;
+      --tour-hint-border: #404040;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --tour-hint-duration: 0ms;
+    }
   }
 }
 
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --tour-transition-duration: 0ms;
-  }
-}
-
-/* Hotspot pulse animation */
-@keyframes tour-hotspot-pulse {
+/* Keyframes for non-Tailwind projects */
+@keyframes tour-pulse {
   0%,
   100% {
-    transform: scale(1);
     opacity: 1;
+    box-shadow: 0 0 0 0 hsl(var(--primary, 239 84% 67%) / 0.7);
   }
   50% {
-    transform: scale(var(--tour-hotspot-pulse-scale));
-    opacity: var(--tour-hotspot-pulse-opacity);
+    opacity: 1;
+    box-shadow: 0 0 0 8px hsl(var(--primary, 239 84% 67%) / 0);
+  }
+}
+
+@keyframes hint-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-tour-pulse {
+  animation: tour-pulse 1.5s ease-in-out infinite;
+}
+
+.animate-hint-bounce {
+  animation: hint-bounce 1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-tour-pulse,
+  .animate-hint-bounce {
+    animation: none;
   }
 }

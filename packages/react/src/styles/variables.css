@@ -1,72 +1,142 @@
 /**
  * TourKit CSS Custom Properties
  *
- * Include this file or define these variables in your own CSS.
- * Compatible with Tailwind v3, v4, and non-Tailwind projects.
+ * These variables integrate with shadcn/ui's design tokens.
+ * Include this file in your project OR use the Tailwind plugin.
+ *
+ * Compatible with:
+ * - shadcn/ui (uses hsl(var(--token)) pattern)
+ * - Tailwind CSS v3 and v4
+ * - Non-Tailwind projects (fallback values provided)
  */
 
-:root {
-  /* Card styles */
-  --tour-card-bg: #ffffff;
-  --tour-card-fg: #171717;
-  --tour-card-border: #e5e7eb;
-  --tour-card-radius: 0.5rem;
-  --tour-card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --tour-card-width: 20rem;
-  --tour-card-padding: 1rem;
-
-  /* Typography */
-  --tour-font-family: inherit;
-  --tour-font-size: 0.875rem;
-  --tour-font-size-sm: 0.75rem;
-  --tour-line-height: 1.5;
-
-  /* Primary (action buttons) */
-  --tour-primary: #6366f1;
-  --tour-primary-fg: #ffffff;
-  --tour-primary-hover: #4f46e5;
-
-  /* Secondary (back buttons) */
-  --tour-secondary-bg: transparent;
-  --tour-secondary-fg: #171717;
-  --tour-secondary-border: #e5e7eb;
-  --tour-secondary-hover: #f5f5f5;
-
-  /* Muted (skip, progress text) */
-  --tour-muted-fg: #737373;
-
-  /* Overlay/spotlight */
-  --tour-overlay-bg: rgba(0, 0, 0, 0.5);
-
-  /* Focus ring */
-  --tour-ring: #6366f1;
-  --tour-ring-offset: 2px;
-
-  /* Animation */
-  --tour-transition-duration: 200ms;
-  --tour-transition-timing: ease-out;
-
-  /* Z-index layers */
-  --tour-z-overlay: 9998;
-  --tour-z-card: 9999;
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --tour-card-bg: #262626;
-    --tour-card-fg: #fafafa;
-    --tour-card-border: #404040;
-    --tour-secondary-fg: #fafafa;
-    --tour-secondary-border: #404040;
-    --tour-secondary-hover: #404040;
-    --tour-muted-fg: #a3a3a3;
+    /* ===== Core Z-Index Layers ===== */
+    --tour-z-overlay: 9998;
+    --tour-z-card: 9999;
+
+    /* ===== Animation Timing ===== */
+    --tour-duration-fast: 150ms;
+    --tour-duration-normal: 200ms;
+    --tour-duration-slow: 300ms;
+    --tour-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ===== Spotlight/Overlay ===== */
+    --tour-overlay-bg: rgba(0, 0, 0, 0.5);
+    --tour-overlay-blur: 0px;
+
+    /* ===== Focus Ring (matches shadcn) ===== */
+    --tour-ring-width: 2px;
+    --tour-ring-offset: 2px;
+
+    /* ===== Card styles (fallbacks for non-shadcn projects) ===== */
+    --tour-card-bg: #ffffff;
+    --tour-card-fg: #171717;
+    --tour-card-border: #e5e7eb;
+    --tour-card-radius: 0.5rem;
+    --tour-card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --tour-card-width: 20rem;
+    --tour-card-padding: 1rem;
+
+    /* ===== Typography ===== */
+    --tour-font-family: inherit;
+    --tour-font-size: 0.875rem;
+    --tour-font-size-sm: 0.75rem;
+    --tour-line-height: 1.5;
+
+    /* ===== Primary (action buttons) ===== */
+    --tour-primary: #6366f1;
+    --tour-primary-fg: #ffffff;
+    --tour-primary-hover: #4f46e5;
+
+    /* ===== Secondary (back buttons) ===== */
+    --tour-secondary-bg: transparent;
+    --tour-secondary-fg: #171717;
+    --tour-secondary-border: #e5e7eb;
+    --tour-secondary-hover: #f5f5f5;
+
+    /* ===== Muted (skip, progress text) ===== */
+    --tour-muted-fg: #737373;
+
+    /* ===== Focus ring ===== */
+    --tour-ring: #6366f1;
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --tour-card-bg: #262626;
+      --tour-card-fg: #fafafa;
+      --tour-card-border: #404040;
+      --tour-secondary-fg: #fafafa;
+      --tour-secondary-border: #404040;
+      --tour-secondary-hover: #404040;
+      --tour-muted-fg: #a3a3a3;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --tour-duration-fast: 0ms;
+      --tour-duration-normal: 0ms;
+      --tour-duration-slow: 0ms;
+    }
   }
 }
 
-/* Reduced motion support */
+/* ===== Keyframes (for non-Tailwind projects) ===== */
+@keyframes tour-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 hsl(var(--primary, 239 84% 67%) / 0.7);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 8px hsl(var(--primary, 239 84% 67%) / 0);
+  }
+}
+
+@keyframes tour-spotlight-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tour-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation classes for non-Tailwind projects */
+.animate-tour-pulse {
+  animation: tour-pulse 1.5s ease-in-out infinite;
+}
+
+.animate-tour-spotlight-in {
+  animation: tour-spotlight-in var(--tour-duration-normal) var(--tour-timing);
+}
+
+.animate-tour-card-in {
+  animation: tour-card-in var(--tour-duration-normal) var(--tour-timing);
+}
+
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  :root {
-    --tour-transition-duration: 0ms;
+  .animate-tour-pulse,
+  .animate-tour-spotlight-in,
+  .animate-tour-card-in {
+    animation: none;
   }
 }

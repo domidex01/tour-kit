@@ -1,17 +1,96 @@
-// Components (styled by default)
-export * from './components'
+// ============================================
+// STYLED COMPONENTS
+// ============================================
 
-// Headless components (explicit import)
-export * from './components/headless'
+// Tour components
+export { Tour } from './components/tour/tour'
+export { TourStep } from './components/tour/tour-step'
+export type { TourProps } from './components/tour/tour'
 
-// UI variants (for customization)
-export * from './components/ui'
+// Card components
+export { TourCard } from './components/card/tour-card'
+export { TourCardHeader } from './components/card/tour-card-header'
+export { TourCardContent } from './components/card/tour-card-content'
+export { TourCardFooter } from './components/card/tour-card-footer'
+export type {
+  TourCardProps,
+  TourCardHeaderProps,
+  TourCardContentProps,
+  TourCardFooterProps,
+} from './components/card'
 
-// React-specific hooks
-export { useTours, type TourInfo, type UseToursReturn } from './hooks'
-export { useTourRoute } from './hooks'
+// Navigation components
+export { TourNavigation } from './components/navigation/tour-navigation'
+export { TourProgress } from './components/navigation/tour-progress'
+export { TourClose } from './components/navigation/tour-close'
+export { TourRoutePrompt } from './components/navigation/tour-route-prompt'
+export type {
+  TourNavigationProps,
+  TourProgressProps,
+  TourCloseProps,
+} from './components/navigation'
 
-// Router adapters
+// Overlay components
+export { TourOverlay } from './components/overlay/tour-overlay'
+export type { TourOverlayProps } from './components/overlay'
+
+// Primitives
+export { TourPortal } from './components/primitives/tour-portal'
+export { TourArrow } from './components/primitives/tour-arrow'
+export type { TourPortalProps } from './components/primitives'
+
+// Provider components
+export {
+  MultiTourKitProvider,
+  type MultiTourKitProviderProps,
+} from './components/provider'
+
+// ============================================
+// UI VARIANTS (for customization)
+// ============================================
+
+export {
+  // Button variants
+  tourButtonVariants,
+  type TourButtonVariants,
+  // Card variants
+  tourCardVariants,
+  tourCardHeaderVariants,
+  tourCardContentVariants,
+  tourCardFooterVariants,
+  type TourCardVariants,
+  type TourCardHeaderVariants,
+  type TourCardContentVariants,
+  type TourCardFooterVariants,
+  // Progress variants
+  tourProgressVariants,
+  tourProgressDotVariants,
+  type TourProgressVariants,
+  type TourProgressDotVariants,
+  // Overlay variants
+  tourOverlayVariants,
+  type TourOverlayVariants,
+} from './components/ui'
+
+// ============================================
+// UTILITIES
+// ============================================
+
+export { cn } from './lib/utils'
+export { Slot, Slottable } from './lib/slot'
+
+// ============================================
+// HOOKS
+// ============================================
+
+export { useTours } from './hooks/use-tours'
+export { useTourRoute } from './hooks/use-tour-route'
+export type { TourInfo, UseToursReturn } from './hooks/use-tours'
+
+// ============================================
+// ADAPTERS
+// ============================================
+
 export {
   useNextAppRouter,
   useNextPagesRouter,
@@ -21,11 +100,60 @@ export {
   createReactRouterAdapter,
 } from './adapters'
 
-// Utilities
-export { cn } from './lib/utils'
-export { Slot, Slottable } from './lib/slot'
+// ============================================
+// RE-EXPORTS FROM @tour-kit/core
+// ============================================
 
-// Re-export core types (with explicit exports to avoid conflicts)
+// Context & Providers
+export {
+  TourContext,
+  TourProvider,
+  TourKitContext,
+  TourKitProvider,
+} from '@tour-kit/core'
+
+// Hooks
+export {
+  useTour,
+  useStep,
+  useSpotlight,
+  useElementPosition,
+  useKeyboardNavigation,
+  useFocusTrap,
+  usePersistence,
+  useRoutePersistence,
+  useMediaQuery,
+  usePrefersReducedMotion,
+} from '@tour-kit/core'
+
+// Utilities
+export {
+  createTour,
+  createStep,
+  waitForElement,
+  isElementVisible,
+  getScrollParent,
+  scrollIntoView,
+  generateId,
+  announce,
+  prefersReducedMotion,
+  getStepAnnouncement,
+  createStorageAdapter,
+  createPrefixedStorage,
+  safeJSONParse,
+  calculatePosition,
+} from '@tour-kit/core'
+
+// Default configs
+export {
+  defaultSpotlightConfig,
+  defaultKeyboardConfig,
+  defaultPersistenceConfig,
+  defaultA11yConfig,
+  defaultScrollConfig,
+} from '@tour-kit/core'
+
+// Types
 export type {
   // Config types
   Side,
@@ -57,51 +185,7 @@ export type {
   // Router types
   RouterAdapter,
   MultiPagePersistenceConfig,
-} from '@tour-kit/core'
-
-// Re-export hooks and utilities
-export {
-  // Context
-  TourContext,
-  TourProvider,
-  TourKitContext,
-  TourKitProvider,
-  // Hooks
-  useTour,
-  useStep,
-  useSpotlight,
-  useElementPosition,
-  useKeyboardNavigation,
-  useFocusTrap,
-  usePersistence,
-  useRoutePersistence,
-  useMediaQuery,
-  usePrefersReducedMotion,
-  // Utilities
-  createTour,
-  createStep,
-  waitForElement,
-  isElementVisible,
-  getScrollParent,
-  scrollIntoView,
-  generateId,
-  announce,
-  prefersReducedMotion,
-  getStepAnnouncement,
-  createStorageAdapter,
-  createPrefixedStorage,
-  safeJSONParse,
-  calculatePosition,
-  // Default configs
-  defaultSpotlightConfig,
-  defaultKeyboardConfig,
-  defaultPersistenceConfig,
-  defaultA11yConfig,
-  defaultScrollConfig,
-} from '@tour-kit/core'
-
-// Re-export hook return types
-export type {
+  // Hook return types
   UseTourReturn,
   UseStepReturn,
   UseSpotlightReturn,

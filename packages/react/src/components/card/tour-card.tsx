@@ -27,6 +27,27 @@ export interface TourCardProps
   extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
     TourCardVariants {}
 
+/**
+ * TourCard - The main tour step card component
+ *
+ * Displays the current tour step with title, content, navigation, and progress.
+ * Follows shadcn/ui patterns and can be customized via variants and className.
+ *
+ * @example
+ * // Basic usage (automatically positioned by useTour)
+ * <TourCard />
+ *
+ * @example
+ * // With size variant
+ * <TourCard size="lg" />
+ *
+ * @example
+ * // With custom className
+ * <TourCard className="my-custom-class" />
+ *
+ * @see {@link TourCardProps} for available props
+ * @see {@link tourCardVariants} for available variants
+ */
 export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
   ({ className, size, ...props }, ref) => {
     const {

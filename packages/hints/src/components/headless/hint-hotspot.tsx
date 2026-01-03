@@ -1,6 +1,23 @@
 import * as React from 'react'
 import type { HotspotPosition } from '../../types'
 
+export interface HintHotspotHeadlessProps extends React.ComponentPropsWithoutRef<'button'> {
+  /** Target element's bounding rect */
+  targetRect: DOMRect
+  /** Position relative to the target element */
+  position: HotspotPosition
+  /** Whether the hint tooltip is open */
+  isOpen?: boolean
+  /** Render prop for custom rendering */
+  render?: (props: HintHotspotRenderProps) => React.ReactNode
+}
+
+export interface HintHotspotRenderProps {
+  position: { top: number; left: number }
+  isOpen: boolean
+  targetRect: DOMRect
+}
+
 function getHotspotPosition(position: HotspotPosition, rect: DOMRect) {
   const offset = 4
 
@@ -23,72 +40,30 @@ function getHotspotPosition(position: HotspotPosition, rect: DOMRect) {
   }
 }
 
-export interface HintHotspotHeadlessProps {
-  targetRect: DOMRect
-  position: HotspotPosition
-  pulse?: boolean
-  isOpen?: boolean
-  onClick: () => void
-  className?: string
-  style?: React.CSSProperties
-  children?: React.ReactNode
-  /** Render prop */
-  render?: (props: HintHotspotRenderProps) => React.ReactNode
-}
-
-export interface HintHotspotRenderProps {
-  position: { top: number; left: number }
-  pulse: boolean
-  isOpen: boolean
-  onClick: () => void
-}
-
 export const HintHotspotHeadless = React.forwardRef<HTMLButtonElement, HintHotspotHeadlessProps>(
-  function HintHotspotHeadless(
-    {
-      targetRect,
-      position,
-      pulse = true,
-      isOpen = false,
-      onClick,
-      className,
-      style,
-      children,
-      render,
-    },
-    ref
-  ) {
+  ({ targetRect, position, isOpen = false, render, className, style, ...props }, ref) => {
     const pos = getHotspotPosition(position, targetRect)
 
-    const renderProps: HintHotspotRenderProps = {
-      position: pos,
-      pulse,
-      isOpen,
-      onClick,
-    }
-
     if (render) {
-      return <>{render(renderProps)}</>
+      return <>{render({ position: pos, isOpen, targetRect })}</>
     }
 
     return (
       <button
         ref={ref}
         type="button"
-        onClick={onClick}
         className={className}
         style={{
           position: 'fixed',
-          zIndex: 9999,
           top: pos.top,
           left: pos.left,
           ...style,
         }}
         aria-label="Show hint"
         aria-expanded={isOpen}
-      >
-        {children}
-      </button>
+        {...props}
+      />
     )
   }
 )
+HintHotspotHeadless.displayName = 'HintHotspotHeadless'

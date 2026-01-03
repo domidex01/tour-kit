@@ -80,25 +80,25 @@ describe('HintHotspot', () => {
     expect(button).toHaveStyle({ top: '144px', left: '194px' })
   })
 
-  it('has pulse animation when enabled and closed', () => {
+  it('has pulse animation class when enabled and closed', () => {
     render(<HintHotspot {...defaultProps} pulse={true} isOpen={false} />)
 
     const button = screen.getByRole('button')
-    expect(button).toHaveStyle({ animation: 'tourkit-pulse 1.5s ease-in-out infinite' })
+    expect(button).toHaveClass('animate-tour-pulse')
   })
 
-  it('has no pulse animation when open', () => {
+  it('has no pulse animation class when open', () => {
     render(<HintHotspot {...defaultProps} pulse={true} isOpen={true} />)
 
     const button = screen.getByRole('button')
-    expect(button).toHaveStyle({ animation: 'none' })
+    expect(button).not.toHaveClass('animate-tour-pulse')
   })
 
-  it('has no pulse animation when disabled', () => {
+  it('has no pulse animation class when disabled', () => {
     render(<HintHotspot {...defaultProps} pulse={false} isOpen={false} />)
 
     const button = screen.getByRole('button')
-    expect(button).toHaveStyle({ animation: 'none' })
+    expect(button).not.toHaveClass('animate-tour-pulse')
   })
 
   it('calls onClick when clicked', async () => {
@@ -126,28 +126,33 @@ describe('HintHotspot', () => {
     expect(screen.getByRole('button')).toHaveClass('custom-hotspot')
   })
 
-  it('has fixed positioning', () => {
+  it('has fixed positioning class', () => {
     render(<HintHotspot {...defaultProps} />)
 
     const button = screen.getByRole('button')
-    expect(button).toHaveStyle({ position: 'fixed' })
+    expect(button).toHaveClass('fixed')
   })
 
-  it('has high z-index', () => {
+  it('has z-index class by default', () => {
     render(<HintHotspot {...defaultProps} />)
 
     const button = screen.getByRole('button')
-    // Uses CSS variable with fallback
-    expect(button.style.zIndex).toBe('var(--tour-hint-z, 9999)')
+    expect(button).toHaveClass('z-50')
   })
 
-  it('has correct dimensions', () => {
+  it('has high z-index class when specified', () => {
+    render(<HintHotspot {...defaultProps} zIndex="high" />)
+
+    const button = screen.getByRole('button')
+    expect(button).toHaveClass('z-[9999]')
+  })
+
+  it('has size classes by default', () => {
     render(<HintHotspot {...defaultProps} />)
 
     const button = screen.getByRole('button')
-    // Uses CSS variables with fallbacks
-    expect(button.style.width).toBe('var(--tour-hotspot-size, 20px)')
-    expect(button.style.height).toBe('var(--tour-hotspot-size, 20px)')
+    // Default size is 'default' which gives h-3 w-3
+    expect(button).toHaveClass('h-3', 'w-3')
   })
 
   it('has button type', () => {

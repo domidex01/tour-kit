@@ -1,23 +1,51 @@
 /**
- * @tour-kit/hints/headless
+ * Headless components for @tour-kit/hints
  *
- * Unstyled, logic-only hint components for full customization.
- * Use these when you want complete control over styling.
+ * These components provide all the logic without any styling.
+ * Use them when you want full control over the UI.
+ *
+ * @example
+ * import { HintHeadless } from '@tour-kit/hints/headless'
+ *
+ * function CustomHint({ id, target }) {
+ *   return (
+ *     <HintHeadless
+ *       id={id}
+ *       target={target}
+ *       render={({ isOpen, show, hide, targetRect }) => (
+ *         <>
+ *           <button
+ *             onClick={isOpen ? hide : show}
+ *             style={{ position: 'fixed', top: targetRect.top, left: targetRect.right }}
+ *           >
+ *             ?
+ *           </button>
+ *           {isOpen && <div>Custom tooltip content</div>}
+ *         </>
+ *       )}
+ *     />
+ *   )
+ * }
  */
 
-// Headless components
-export * from './components/headless'
+export {
+  HintHeadless,
+  type HintHeadlessProps,
+  type HintHeadlessRenderProps,
+} from './components/headless/hint'
 
-// Context and provider
-export { HintsProvider } from './context/hints-provider'
-export { HintsContext, useHintsContext } from './context/hints-context'
+export {
+  HintHotspotHeadless,
+  type HintHotspotHeadlessProps,
+  type HintHotspotRenderProps,
+} from './components/headless/hint-hotspot'
 
-// Hooks
-export { useHint } from './hooks/use-hint'
-export { useHints } from './hooks/use-hints'
+export {
+  HintTooltipHeadless,
+  type HintTooltipHeadlessProps,
+  type HintTooltipRenderProps,
+} from './components/headless/hint-tooltip'
 
-// Types
-export * from './types'
-
-// Re-export core hooks and types
-export * from '@tour-kit/core'
+// Re-export utilities
+export { cn } from './lib/utils'
+export { Slot, Slottable } from './lib/slot'

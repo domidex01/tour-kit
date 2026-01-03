@@ -1,27 +1,54 @@
-// Context
-export { HintsContext } from './context/hints-context'
+// ============================================
+// STYLED COMPONENTS
+// ============================================
+
+export { Hint } from './components/hint'
+export { HintHotspot } from './components/hint-hotspot'
+export { HintTooltip } from './components/hint-tooltip'
+export type { HintProps, HintHotspotProps, HintTooltipProps } from './components'
+
+// ============================================
+// CONTEXT & PROVIDERS
+// ============================================
+
 export { HintsProvider } from './context/hints-provider'
+export { HintsContext, useHintsContext } from './context/hints-context'
 
-// Components (styled by default)
-export { Hint, HintHotspot, HintTooltip } from './components'
+// ============================================
+// UI VARIANTS (for customization)
+// ============================================
 
-// Headless components (explicit import)
-export * from './components/headless'
+export {
+  hintHotspotVariants,
+  hintTooltipVariants,
+  hintCloseVariants,
+  type HintHotspotVariants,
+  type HintTooltipVariants,
+  type HintCloseVariants,
+} from './components/ui'
 
-// UI variants (for customization)
-export * from './components/ui'
+// ============================================
+// HOOKS
+// ============================================
 
-// Hooks
-export { useHint, useHints } from './hooks'
+export { useHints } from './hooks/use-hints'
+export { useHint } from './hooks/use-hint'
 
-// Utilities
+// ============================================
+// UTILITIES
+// ============================================
+
 export { cn } from './lib/utils'
 export { Slot, Slottable } from './lib/slot'
 
-// Types
+// ============================================
+// TYPES
+// ============================================
+
 export type {
   HintConfig,
-  HintsContextValue,
   HintState,
   HotspotPosition,
+  HintsContextValue,
+  Placement,
 } from './types'
