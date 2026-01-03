@@ -2,6 +2,13 @@
   "$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
   "extends": ["./tooling/biome/biome.json"],
   "files": {
-    "ignore": ["**/dist/**", "**/node_modules/**", "**/.next/**", "**/.turbo/**", "**/coverage/**"]
+    "ignore": [
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/.turbo/**",
+      "**/coverage/**",
+      "**/.source/**"
+    ]
   }
 }

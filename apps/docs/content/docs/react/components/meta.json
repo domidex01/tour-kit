@@ -1,4 +1,12 @@
 {
   "title": "Components",
-  "pages": ["tour", "tour-step", "tour-card", "tour-overlay", "tour-navigation", "tour-progress", "tour-close"]
+  "pages": [
+    "tour",
+    "tour-step",
+    "tour-card",
+    "tour-overlay",
+    "tour-navigation",
+    "tour-progress",
+    "tour-close"
+  ]
 }

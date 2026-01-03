@@ -1,6 +1,6 @@
-@import 'tailwindcss';
-@import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/preset.css';
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
 
 /* Tell Tailwind to scan Fumadocs UI classes */
 @source '../node_modules/fumadocs-ui/dist/**/*.js';
@@ -10,7 +10,10 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-code, pre, kbd, samp {
+code,
+pre,
+kbd,
+samp {
   font-family: var(--font-geist-mono), monospace;
 }
 
@@ -174,8 +177,7 @@ code, pre, kbd, samp {
 
   .btn-primary:hover {
     opacity: 0.9;
-    box-shadow: 0 4px 12px
-      color-mix(in srgb, var(--tk-primary) 30%, transparent);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--tk-primary) 30%, transparent);
   }
 
   /* Secondary button style (Golden Amber) */
@@ -190,8 +192,7 @@ code, pre, kbd, samp {
 
   .btn-secondary:hover {
     opacity: 0.9;
-    box-shadow: 0 4px 12px
-      color-mix(in srgb, var(--tk-secondary) 30%, transparent);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--tk-secondary) 30%, transparent);
   }
 
   /* Tertiary button style (Gold/Tan) */

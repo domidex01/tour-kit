@@ -24,8 +24,11 @@ export interface TourStep {
     selector?: string
     handler?: () => boolean
   }
+  // Multi-page support
   route?: string
   routeDelay?: number
+  /** Route matching mode (default: 'exact') */
+  routeMatch?: 'exact' | 'startsWith' | 'contains'
   when?: (context: TourCallbackContext) => boolean | Promise<boolean>
   waitForTarget?: boolean
   waitTimeout?: number

@@ -1,9 +1,9 @@
-import './globals.css';
-import { RootProvider } from 'fumadocs-ui/provider/next';
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
-import type { ReactNode } from 'react';
-import type { Metadata } from 'next';
+import './globals.css'
+import { RootProvider } from 'fumadocs-ui/provider/next'
+import { GeistMono } from 'geist/font/mono'
+import { GeistSans } from 'geist/font/sans'
+import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
   title: {
@@ -28,22 +28,24 @@ export const metadata: Metadata = {
   authors: [{ name: 'TourKit Team' }],
   openGraph: {
     title: 'TourKit - Product Tours for React',
-    description:
-      'The most developer-friendly, accessible product tour library for React.',
+    description: 'The most developer-friendly, accessible product tour library for React.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'TourKit - Product Tours for React',
-    description:
-      'The most developer-friendly, accessible product tour library for React.',
+    description: 'The most developer-friendly, accessible product tour library for React.',
   },
-};
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang='en' className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      suppressHydrationWarning
+    >
       <body
         style={{
           display: 'flex',
@@ -54,5 +56,5 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
-  );
+  )
 }

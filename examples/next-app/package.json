@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@tour-kit/hints": "workspace:*",
     "@tour-kit/react": "workspace:*",
     "next": "^15.1.3",
     "react": "^19.0.0",

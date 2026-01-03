@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from 'tailwindcss'
 
 const config: Config = {
   darkMode: 'class',
@@ -18,8 +18,7 @@ const config: Config = {
           'primary-container': 'var(--tk-primary-container)',
           secondary: 'var(--tk-secondary)',
           tertiary: 'var(--tk-tertiary)',
-          'secondary-container':
-            'color-mix(in srgb, var(--tk-secondary) 20%, transparent)',
+          'secondary-container': 'color-mix(in srgb, var(--tk-secondary) 20%, transparent)',
           surface: 'var(--tk-surface)',
           'surface-variant': 'var(--tk-surface-variant)',
           container: 'var(--tk-container)',
@@ -39,6 +38,6 @@ const config: Config = {
       },
     },
   },
-};
+}
 
-export default config;
+export default config

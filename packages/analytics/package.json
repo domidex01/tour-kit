@@ -1,0 +1,77 @@
+{
+  "name": "@tour-kit/analytics",
+  "version": "0.1.0",
+  "description": "Analytics plugins for TourKit - track tour engagement",
+  "author": "Tour Kit Team",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./posthog": {
+      "import": "./dist/plugins/posthog.js",
+      "require": "./dist/plugins/posthog.cjs"
+    },
+    "./mixpanel": {
+      "import": "./dist/plugins/mixpanel.js",
+      "require": "./dist/plugins/mixpanel.cjs"
+    },
+    "./amplitude": {
+      "import": "./dist/plugins/amplitude.js",
+      "require": "./dist/plugins/amplitude.cjs"
+    },
+    "./google-analytics": {
+      "import": "./dist/plugins/google-analytics.js",
+      "require": "./dist/plugins/google-analytics.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tour-kit/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@amplitude/analytics-browser": {
+      "optional": true
+    },
+    "mixpanel-browser": {
+      "optional": true
+    },
+    "posthog-js": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@amplitude/analytics-browser": "^2.11.0",
+    "@tour-kit/tsconfig": "workspace:*",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "mixpanel-browser": "^2.56.0",
+    "posthog-js": "^1.250.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

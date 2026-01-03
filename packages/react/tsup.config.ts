@@ -8,7 +8,17 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['react', 'react-dom', '@tour-kit/core', '@floating-ui/react'],
+  external: [
+    'react',
+    'react-dom',
+    '@tour-kit/core',
+    '@floating-ui/react',
+    // Router adapters - these are optional peer dependencies
+    'next/navigation',
+    'next/router',
+    'react-router',
+    'react-router-dom',
+  ],
   treeshake: true,
   splitting: false,
   minify: true,

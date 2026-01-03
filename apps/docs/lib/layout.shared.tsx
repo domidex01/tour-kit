@@ -1,5 +1,5 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { BookOpen, Code2, Sparkles, Layers } from 'lucide-react';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared'
+import { BookOpen, Code2, Layers, Sparkles } from 'lucide-react'
 
 /**
  * Shared layout options used by both home and docs layouts
@@ -8,8 +8,8 @@ export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: (
-        <span className='font-semibold flex items-center gap-2'>
-          <Sparkles className='w-5 h-5 text-[var(--tk-primary)]' />
+        <span className="font-semibold flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-[var(--tk-primary)]" />
           <span>TourKit</span>
         </span>
       ),
@@ -18,19 +18,19 @@ export function baseOptions(): BaseLayoutProps {
       {
         text: 'Docs',
         url: '/docs',
-        icon: <BookOpen className='w-4 h-4' />,
+        icon: <BookOpen className="w-4 h-4" />,
       },
       {
         text: 'API',
         url: '/docs/api',
-        icon: <Code2 className='w-4 h-4' />,
+        icon: <Code2 className="w-4 h-4" />,
       },
       {
         text: 'Examples',
         url: '/docs/examples',
-        icon: <Layers className='w-4 h-4' />,
+        icon: <Layers className="w-4 h-4" />,
       },
     ],
     githubUrl: 'https://github.com/your-username/tour-kit',
-  };
+  }
 }

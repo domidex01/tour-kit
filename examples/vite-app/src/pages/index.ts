@@ -1,0 +1,4 @@
+export { HomePage } from './HomePage'
+export { FeaturesPage } from './FeaturesPage'
+export { PricingPage } from './PricingPage'
+export { ContactPage } from './ContactPage'

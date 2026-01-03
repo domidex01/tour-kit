@@ -1,145 +1,133 @@
-import { Hint, HintsProvider, useHints } from '@tour-kit/hints'
-import { Tour, TourStep, useTour } from '@tour-kit/react'
+import { HintsProvider } from '@tour-kit/hints'
+import {
+  MultiTourKitProvider,
+  Tour,
+  TourCard,
+  TourOverlay,
+  TourStep,
+  createReactRouterAdapter,
+} from '@tour-kit/react'
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Layout } from './components/Layout'
+import { ContactPage, FeaturesPage, HomePage, PricingPage } from './pages'
 
-function DemoContent() {
-  const { start } = useTour('demo-tour')
-  const { resetAllHints } = useHints()
+// Create the adapter hook with React Router hooks
+const useReactRouter = createReactRouterAdapter(useLocation, useNavigate)
+
+function AppContent() {
+  const router = useReactRouter()
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <header className="flex items-center justify-between">
-          <h1 id="title" className="text-3xl font-bold text-foreground">
-            TourKit Demo
-          </h1>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => resetAllHints()}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors"
-            >
-              Reset Hints
-            </button>
-            <button
-              type="button"
-              onClick={() => start()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Start Tour
-            </button>
-          </div>
-        </header>
-
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div id="feature-1" className="p-6 rounded-lg border bg-popover shadow-sm">
-            <h2 className="text-xl font-semibold mb-2">Feature One</h2>
-            <p className="text-muted-foreground">
-              This is the first feature of our application. It does amazing things.
-            </p>
-          </div>
-
-          <div id="feature-2" className="p-6 rounded-lg border bg-popover shadow-sm">
-            <h2 className="text-xl font-semibold mb-2">Feature Two</h2>
-            <p className="text-muted-foreground">
-              The second feature is even better. Users love this one.
-            </p>
-          </div>
-
-          <div id="feature-3" className="p-6 rounded-lg border bg-popover shadow-sm">
-            <h2 className="text-xl font-semibold mb-2">Feature Three</h2>
-            <p className="text-muted-foreground">
-              And finally, the third feature completes the experience.
-            </p>
-          </div>
-        </section>
-
-        <section id="cta" className="p-8 rounded-lg bg-secondary text-center">
-          <h2 className="text-2xl font-bold mb-4">Ready to get started?</h2>
-          <p className="text-muted-foreground mb-4">
-            Click the button above to take a tour of our features.
-          </p>
-        </section>
-
-        {/* Hints - persist means closing dismisses them permanently until reset */}
-        <Hint
-          id="feature-1-hint"
-          target="#feature-1"
-          content="Click here to learn about Feature One!"
-          position="top-right"
-          tooltipPlacement="left"
-          pulse
-          persist
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true, storage: 'sessionStorage' }}
+      onTourComplete={(tourId) => console.log(`Tour "${tourId}" completed!`)}
+      onTourSkip={(tourId, stepIndex) =>
+        console.log(`Tour "${tourId}" skipped at step ${stepIndex}`)
+      }
+    >
+      {/* Multi-page product tour */}
+      <Tour id="product-tour">
+        {/* Home page steps */}
+        <TourStep
+          id="welcome"
+          route="/"
+          target="#hero-title"
+          title="Welcome to TourKit!"
+          content="This is a multi-page tour demo using React Router. We'll guide you through different pages of the app."
+          placement="bottom"
+          waitForTarget
         />
-        <Hint
-          id="feature-2-hint"
-          target="#feature-2"
-          content="Feature Two has exciting capabilities."
-          position="top-right"
-          tooltipPlacement="left"
-          pulse
-          persist
+        <TourStep
+          id="nav-intro"
+          route="/"
+          target="#main-nav"
+          title="Navigation"
+          content="Use these links to navigate between pages. The tour will follow you!"
+          placement="bottom"
+          waitForTarget
         />
-        <Hint
-          id="feature-3-hint"
-          target="#feature-3"
-          content="Feature Three completes the experience."
-          position="top-right"
-          tooltipPlacement="left"
-          pulse
-          persist
+
+        {/* Features page steps */}
+        <TourStep
+          id="features-intro"
+          route="/features"
+          target="#features-header"
+          title="Features Page"
+          content="We've automatically navigated you to the Features page. Let's explore what TourKit can do."
+          placement="bottom"
+          waitForTarget
         />
-      </div>
-    </div>
+        <TourStep
+          id="feature-multipage"
+          route="/features"
+          target="#feature-multipage"
+          title="Multi-Page Tours"
+          content="Tours can span multiple pages and automatically navigate between them."
+          placement="bottom"
+          waitForTarget
+        />
+        <TourStep
+          id="feature-persistence"
+          route="/features"
+          target="#feature-persistence"
+          title="State Persistence"
+          content="Tour progress is saved, so users can refresh or return later."
+          placement="bottom"
+          waitForTarget
+        />
+
+        {/* Pricing page steps */}
+        <TourStep
+          id="pricing-intro"
+          route="/pricing"
+          target="#pricing-header"
+          title="Pricing Page"
+          content="Now let's check out the pricing options."
+          placement="bottom"
+          waitForTarget
+        />
+        <TourStep
+          id="pricing-free"
+          route="/pricing"
+          target="#plan-free"
+          title="Free Plan"
+          content="TourKit is open source and free to use!"
+          placement="right"
+          waitForTarget
+        />
+
+        {/* Contact page step */}
+        <TourStep
+          id="contact-final"
+          route="/contact"
+          target="#contact-form"
+          title="Get in Touch"
+          content="That's the end of our multi-page tour! Feel free to reach out with questions."
+          placement="top"
+          waitForTarget
+        />
+      </Tour>
+
+      <HintsProvider>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+          </Routes>
+        </Layout>
+      </HintsProvider>
+
+      <TourOverlay />
+      <TourCard />
+    </MultiTourKitProvider>
   )
 }
 
 function App() {
-  return (
-    <HintsProvider>
-      <Tour
-        id="demo-tour"
-        onComplete={() => console.log('Tour completed!')}
-        onSkip={() => console.log('Tour skipped!')}
-      >
-        <TourStep
-          id="welcome"
-          target="#title"
-          title="Welcome to TourKit!"
-          content="This is a demo of the TourKit library. Let's explore the features together."
-          placement="bottom"
-        />
-        <TourStep
-          id="feature-1"
-          target="#feature-1"
-          title="Feature One"
-          content="Here's our first amazing feature. Click Next to continue."
-          placement="bottom"
-        />
-        <TourStep
-          id="feature-2"
-          target="#feature-2"
-          title="Feature Two"
-          content="The second feature is highlighted here. Notice the spotlight effect."
-          placement="bottom"
-        />
-        <TourStep
-          id="feature-3"
-          target="#feature-3"
-          title="Feature Three"
-          content="And here's the third feature. Almost done with the tour!"
-          placement="bottom"
-        />
-        <TourStep
-          id="cta"
-          target="#cta"
-          title="Get Started"
-          content="That's it! You've completed the tour. Click Finish to close."
-          placement="top"
-        />
-        <DemoContent />
-      </Tour>
-    </HintsProvider>
-  )
+  return <AppContent />
 }
 
 export default App

@@ -1,3 +1,4 @@
+export * from './provider'
 export * from './tour'
 export * from './card'
 export * from './overlay'

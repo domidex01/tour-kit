@@ -4,6 +4,20 @@ export * from './components'
 // Headless components (explicit import)
 export * from './components/headless'
 
+// React-specific hooks
+export { useTours, type TourInfo, type UseToursReturn } from './hooks'
+export { useTourRoute } from './hooks'
+
+// Router adapters
+export {
+  useNextAppRouter,
+  useNextPagesRouter,
+  useReactRouter,
+  createNextAppRouterAdapter,
+  createNextPagesRouterAdapter,
+  createReactRouterAdapter,
+} from './adapters'
+
 // Utilities
 export { cn } from './utils/cn'
 
@@ -36,6 +50,9 @@ export type {
   HintState,
   HintsState,
   HotspotPosition,
+  // Router types
+  RouterAdapter,
+  MultiPagePersistenceConfig,
 } from '@tour-kit/core'
 
 // Re-export hooks and utilities
@@ -53,6 +70,7 @@ export {
   useKeyboardNavigation,
   useFocusTrap,
   usePersistence,
+  useRoutePersistence,
   useMediaQuery,
   usePrefersReducedMotion,
   // Utilities
@@ -85,4 +103,5 @@ export type {
   UseSpotlightReturn,
   UseFocusTrapReturn,
   UsePersistenceReturn,
+  UseRoutePersistenceReturn,
 } from '@tour-kit/core'
