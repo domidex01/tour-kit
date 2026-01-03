@@ -296,7 +296,7 @@ describe('TourProvider', () => {
     expect(onSkip).toHaveBeenCalled()
   })
 
-  it('calls onStepChange callback', () => {
+  it('calls onStepChange callback', async () => {
     const onStepChange = vi.fn()
     const tours: Tour[] = [
       {
@@ -315,8 +315,8 @@ describe('TourProvider', () => {
       result.current.start()
     })
 
-    act(() => {
-      result.current.next()
+    await act(async () => {
+      await result.current.next()
     })
 
     expect(onStepChange).toHaveBeenCalled()

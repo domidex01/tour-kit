@@ -1,26 +1,21 @@
-import type * as React from 'react'
-import { cn } from '../../utils/cn'
+import * as React from 'react'
+import { cn } from '../../lib/utils'
+import { type TourCardContentVariants, tourCardContentVariants } from '../ui/card-variants'
 
-interface TourCardContentProps {
-  content: React.ReactNode
-  className?: string
-  unstyled?: boolean
+export interface TourCardContentProps
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+    TourCardContentVariants {
+  /** Content to display */
+  content?: React.ReactNode
 }
 
-export function TourCardContent({ content, className, unstyled = false }: TourCardContentProps) {
-  const cssVarStyles: React.CSSProperties = unstyled
-    ? {}
-    : {
-        padding: '0.75rem 0',
-        color: 'var(--tour-muted-fg, #737373)',
-      }
-
-  return (
-    <div
-      className={cn(!unstyled && 'py-3 text-sm text-muted-foreground', className)}
-      style={cssVarStyles}
-    >
-      {content}
-    </div>
-  )
-}
+export const TourCardContent = React.forwardRef<HTMLDivElement, TourCardContentProps>(
+  ({ content, spacing, className, children, ...props }, ref) => {
+    return (
+      <div ref={ref} className={cn(tourCardContentVariants({ spacing }), className)} {...props}>
+        {children ?? content}
+      </div>
+    )
+  }
+)
+TourCardContent.displayName = 'TourCardContent'

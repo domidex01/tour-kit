@@ -1,1 +1,1 @@
-export { TourOverlay } from './tour-overlay'
+export { TourOverlay, type TourOverlayProps } from './tour-overlay'

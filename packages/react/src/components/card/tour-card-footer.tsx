@@ -1,9 +1,12 @@
-import type * as React from 'react'
-import { cn } from '../../utils/cn'
+import * as React from 'react'
+import { cn } from '../../lib/utils'
 import { TourNavigation } from '../navigation/tour-navigation'
 import { TourProgress } from '../navigation/tour-progress'
+import { type TourCardFooterVariants, tourCardFooterVariants } from '../ui/card-variants'
 
-interface TourCardFooterProps {
+export interface TourCardFooterProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    TourCardFooterVariants {
   currentStep: number
   totalSteps: number
   showNavigation?: boolean
@@ -13,50 +16,47 @@ interface TourCardFooterProps {
   onPrev: () => void
   onNext: () => void
   onSkip: () => void
-  className?: string
-  unstyled?: boolean
 }
 
-export function TourCardFooter({
-  currentStep,
-  totalSteps,
-  showNavigation = true,
-  showProgress = true,
-  isFirstStep,
-  isLastStep,
-  onPrev,
-  onNext,
-  onSkip,
-  className,
-  unstyled = false,
-}: TourCardFooterProps) {
-  const cssVarStyles: React.CSSProperties = unstyled
-    ? {}
-    : {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: '0.5rem',
-      }
-
-  return (
-    <div
-      className={cn(!unstyled && 'flex items-center justify-between pt-2', className)}
-      style={cssVarStyles}
-    >
-      {showProgress && (
-        <TourProgress current={currentStep} total={totalSteps} unstyled={unstyled} />
-      )}
-      {showNavigation && (
-        <TourNavigation
-          isFirstStep={isFirstStep}
-          isLastStep={isLastStep}
-          onPrev={onPrev}
-          onNext={onNext}
-          onSkip={onSkip}
-          unstyled={unstyled}
-        />
-      )}
-    </div>
-  )
-}
+export const TourCardFooter = React.forwardRef<HTMLDivElement, TourCardFooterProps>(
+  (
+    {
+      currentStep,
+      totalSteps,
+      showNavigation = true,
+      showProgress = true,
+      isFirstStep,
+      isLastStep,
+      onPrev,
+      onNext,
+      onSkip,
+      justify,
+      spacing,
+      className,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(tourCardFooterVariants({ justify, spacing }), className)}
+        {...props}
+      >
+        {showProgress && <TourProgress current={currentStep} total={totalSteps} />}
+        {children}
+        {showNavigation && (
+          <TourNavigation
+            isFirstStep={isFirstStep}
+            isLastStep={isLastStep}
+            onPrev={onPrev}
+            onNext={onNext}
+            onSkip={onSkip}
+          />
+        )}
+      </div>
+    )
+  }
+)
+TourCardFooter.displayName = 'TourCardFooter'

@@ -4,6 +4,9 @@ export * from './components'
 // Headless components (explicit import)
 export * from './components/headless'
 
+// UI variants (for customization)
+export * from './components/ui'
+
 // React-specific hooks
 export { useTours, type TourInfo, type UseToursReturn } from './hooks'
 export { useTourRoute } from './hooks'
@@ -19,7 +22,8 @@ export {
 } from './adapters'
 
 // Utilities
-export { cn } from './utils/cn'
+export { cn } from './lib/utils'
+export { Slot, Slottable } from './lib/slot'
 
 // Re-export core types (with explicit exports to avoid conflicts)
 export type {

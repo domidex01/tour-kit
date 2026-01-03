@@ -1,68 +1,66 @@
 import { usePrefersReducedMotion, useSpotlight, useTour } from '@tour-kit/core'
 import * as React from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '../../lib/utils'
 import { TourPortal } from '../primitives/tour-portal'
+import { type TourOverlayVariants, tourOverlayVariants } from '../ui/overlay-variants'
 
-interface TourOverlayProps {
-  className?: string
+export interface TourOverlayProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    TourOverlayVariants {
+  /** Called when the overlay is clicked */
   onClick?: () => void
-  unstyled?: boolean
 }
 
-export function TourOverlay({ className, onClick, unstyled = false }: TourOverlayProps) {
-  const { isActive, currentStep } = useTour()
-  const { overlayStyle, cutoutStyle, show, hide, targetRect } = useSpotlight()
-  const prefersReducedMotion = usePrefersReducedMotion()
+export const TourOverlay = React.forwardRef<HTMLDivElement, TourOverlayProps>(
+  ({ className, zIndex, onClick, ...props }, ref) => {
+    const { isActive, currentStep } = useTour()
+    const { overlayStyle, cutoutStyle, show, hide, targetRect } = useSpotlight()
+    const prefersReducedMotion = usePrefersReducedMotion()
 
-  const targetElement = React.useMemo(() => {
-    if (!currentStep?.target) return null
-    if (typeof currentStep.target === 'string') {
-      return document.querySelector<HTMLElement>(currentStep.target)
-    }
-    return currentStep.target.current
-  }, [currentStep?.target])
-
-  React.useEffect(() => {
-    if (isActive && targetElement) {
-      show(targetElement, {
-        padding: currentStep?.spotlightPadding,
-        borderRadius: currentStep?.spotlightRadius,
-        animate: !prefersReducedMotion,
-      })
-    } else {
-      hide()
-    }
-  }, [isActive, targetElement, currentStep, show, hide, prefersReducedMotion])
-
-  if (!isActive) return null
-
-  const cssVarStyles: React.CSSProperties = unstyled
-    ? {}
-    : {
-        position: 'fixed',
-        inset: 0,
-        zIndex: 'var(--tour-z-overlay, 9998)',
+    const targetElement = React.useMemo(() => {
+      if (!currentStep?.target) return null
+      if (typeof currentStep.target === 'string') {
+        return document.querySelector<HTMLElement>(currentStep.target)
       }
+      return currentStep.target.current
+    }, [currentStep?.target])
 
-  return (
-    <TourPortal>
-      {/* biome-ignore lint/a11y/useKeyWithClickEvents: Overlay is decorative and aria-hidden */}
-      <div
-        className={cn(!unstyled && 'fixed inset-0 z-40', className)}
-        style={{ ...overlayStyle, ...cssVarStyles }}
-        onClick={onClick}
-        aria-hidden="true"
-      >
-        {targetRect && (
-          <div
-            className={cn(!unstyled && 'absolute bg-transparent')}
-            style={{
-              ...cutoutStyle,
-              pointerEvents: currentStep?.interactive ? 'auto' : 'none',
-            }}
-          />
-        )}
-      </div>
-    </TourPortal>
-  )
-}
+    React.useEffect(() => {
+      if (isActive && targetElement) {
+        show(targetElement, {
+          padding: currentStep?.spotlightPadding,
+          borderRadius: currentStep?.spotlightRadius,
+          animate: !prefersReducedMotion,
+        })
+      } else {
+        hide()
+      }
+    }, [isActive, targetElement, currentStep, show, hide, prefersReducedMotion])
+
+    if (!isActive) return null
+
+    return (
+      <TourPortal>
+        <div
+          ref={ref}
+          className={cn(tourOverlayVariants({ zIndex }), className)}
+          style={overlayStyle}
+          onClick={onClick}
+          aria-hidden="true"
+          {...props}
+        >
+          {targetRect && (
+            <div
+              className="absolute bg-transparent"
+              style={{
+                ...cutoutStyle,
+                pointerEvents: currentStep?.interactive ? 'auto' : 'none',
+              }}
+            />
+          )}
+        </div>
+      </TourPortal>
+    )
+  }
+)
+TourOverlay.displayName = 'TourOverlay'

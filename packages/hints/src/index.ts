@@ -8,8 +8,15 @@ export { Hint, HintHotspot, HintTooltip } from './components'
 // Headless components (explicit import)
 export * from './components/headless'
 
+// UI variants (for customization)
+export * from './components/ui'
+
 // Hooks
 export { useHint, useHints } from './hooks'
+
+// Utilities
+export { cn } from './lib/utils'
+export { Slot, Slottable } from './lib/slot'
 
 // Types
 export type {

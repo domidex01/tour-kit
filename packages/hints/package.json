@@ -59,6 +59,8 @@
   "dependencies": {
     "@tour-kit/core": "workspace:*",
     "@floating-ui/react": "^0.26.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "tailwind-merge": "^2.3.0"
   },

@@ -1,57 +1,34 @@
-import type * as React from 'react'
-import { cn } from '../../utils/cn'
+import * as React from 'react'
+import { cn } from '../../lib/utils'
 import { TourClose } from '../navigation/tour-close'
+import { type TourCardHeaderVariants, tourCardHeaderVariants } from '../ui/card-variants'
 
-interface TourCardHeaderProps {
+export interface TourCardHeaderProps
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'title'>,
+    TourCardHeaderVariants {
+  /** Title content */
   title?: React.ReactNode
+  /** ID for accessibility (aria-labelledby) */
   titleId: string
+  /** Whether to show the close button */
   showClose?: boolean
-  className?: string
-  unstyled?: boolean
 }
 
-export function TourCardHeader({
-  title,
-  titleId,
-  showClose = true,
-  className,
-  unstyled = false,
-}: TourCardHeaderProps) {
-  if (!title && !showClose) return null
+export const TourCardHeader = React.forwardRef<HTMLDivElement, TourCardHeaderProps>(
+  ({ title, titleId, showClose = true, spacing, className, children, ...props }, ref) => {
+    if (!title && !showClose && !children) return null
 
-  const headerCssVarStyles: React.CSSProperties = unstyled
-    ? {}
-    : {
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        gap: '0.5rem',
-      }
-
-  const titleCssVarStyles: React.CSSProperties = unstyled
-    ? {}
-    : {
-        margin: 0,
-        fontSize: '1rem',
-        fontWeight: 600,
-        lineHeight: 1.25,
-      }
-
-  return (
-    <div
-      className={cn(!unstyled && 'flex items-start justify-between gap-2', className)}
-      style={headerCssVarStyles}
-    >
-      {title && (
-        <h3
-          id={titleId}
-          className={cn(!unstyled && 'font-semibold leading-none tracking-tight')}
-          style={titleCssVarStyles}
-        >
-          {title}
-        </h3>
-      )}
-      {showClose && <TourClose unstyled={unstyled} />}
-    </div>
-  )
-}
+    return (
+      <div ref={ref} className={cn(tourCardHeaderVariants({ spacing }), className)} {...props}>
+        {title && (
+          <h3 id={titleId} className="font-semibold leading-none tracking-tight">
+            {title}
+          </h3>
+        )}
+        {children}
+        {showClose && <TourClose />}
+      </div>
+    )
+  }
+)
+TourCardHeader.displayName = 'TourCardHeader'

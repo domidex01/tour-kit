@@ -1,19 +1,25 @@
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-interface TourPortalProps {
+export interface TourPortalProps {
   children: React.ReactNode
-  container?: HTMLElement
+  /** Container element for the portal. Defaults to document.body */
+  container?: HTMLElement | null
 }
 
-export function TourPortal({ children, container }: TourPortalProps) {
-  const [mounted, setMounted] = React.useState(false)
+export const TourPortal = React.forwardRef<HTMLDivElement, TourPortalProps>(
+  ({ children, container }, ref) => {
+    const [mounted, setMounted] = React.useState(false)
 
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    React.useEffect(() => {
+      setMounted(true)
+    }, [])
 
-  if (!mounted) return null
+    if (!mounted) return null
 
-  return createPortal(children, container ?? document.body)
-}
+    const portalContainer = container ?? document.body
+
+    return createPortal(<div ref={ref}>{children}</div>, portalContainer)
+  }
+)
+TourPortal.displayName = 'TourPortal'

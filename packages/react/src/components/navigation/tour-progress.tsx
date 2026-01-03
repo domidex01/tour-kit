@@ -1,113 +1,74 @@
-import type * as React from 'react'
-import { cn } from '../../utils/cn'
+import * as React from 'react'
+import { cn } from '../../lib/utils'
+import {
+  type TourProgressVariants,
+  tourProgressDotVariants,
+  tourProgressVariants,
+} from '../ui/progress-variants'
 
-interface TourProgressProps {
+export interface TourProgressProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    TourProgressVariants {
+  /** Current step (1-indexed) */
   current: number
+  /** Total number of steps */
   total: number
-  variant?: 'dots' | 'bar' | 'text'
-  className?: string
-  unstyled?: boolean
 }
 
-export function TourProgress({
-  current,
-  total,
-  variant = 'dots',
-  className,
-  unstyled = false,
-}: TourProgressProps) {
-  const textStyles: React.CSSProperties = unstyled
-    ? {}
-    : {
-        fontSize: 'var(--tour-font-size-sm, 0.75rem)',
-        color: 'var(--tour-muted-fg, #737373)',
-      }
+export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
+  ({ current, total, variant = 'dots', className, ...props }, ref) => {
+    if (variant === 'text') {
+      return (
+        <span
+          ref={ref as React.Ref<HTMLSpanElement>}
+          className={cn(tourProgressVariants({ variant }), className)}
+          {...props}
+        >
+          {current} of {total}
+        </span>
+      )
+    }
 
-  const barContainerStyles: React.CSSProperties = unstyled
-    ? {}
-    : {
-        width: '5rem',
-        height: '0.375rem',
-        backgroundColor: 'var(--tour-card-border, #e5e7eb)',
-        borderRadius: '9999px',
-        overflow: 'hidden',
-      }
+    if (variant === 'bar') {
+      const percentage = (current / total) * 100
+      return (
+        // biome-ignore lint/a11y/useFocusableInteractive: Progress bar is read-only indicator
+        <div
+          ref={ref}
+          className={cn(tourProgressVariants({ variant }), className)}
+          role="progressbar"
+          aria-valuenow={current}
+          aria-valuemin={1}
+          aria-valuemax={total}
+          aria-label={`Step ${current} of ${total}`}
+          {...props}
+        >
+          <div
+            className="h-full bg-primary transition-all duration-300"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+      )
+    }
 
-  const barFillStyles: React.CSSProperties = unstyled
-    ? {}
-    : {
-        height: '100%',
-        backgroundColor: 'var(--tour-primary, #6366f1)',
-        transition:
-          'width var(--tour-transition-duration, 200ms) var(--tour-transition-timing, ease-out)',
-      }
-
-  const dotsContainerStyles: React.CSSProperties = unstyled
-    ? {}
-    : {
-        display: 'flex',
-        gap: '0.25rem',
-      }
-
-  if (variant === 'text') {
-    return (
-      <span
-        className={cn(!unstyled && 'text-sm text-muted-foreground', className)}
-        style={textStyles}
-      >
-        {current} of {total}
-      </span>
-    )
-  }
-
-  if (variant === 'bar') {
-    const percentage = (current / total) * 100
+    // Default: dots variant
     return (
       <div
-        className={cn(
-          !unstyled && 'h-1.5 w-20 overflow-hidden rounded-full bg-secondary',
-          className
-        )}
-        style={barContainerStyles}
+        ref={ref}
+        className={cn(tourProgressVariants({ variant }), className)}
+        role="group"
+        aria-label={`Step ${current} of ${total}`}
+        {...props}
       >
-        <div
-          className={cn(!unstyled && 'h-full bg-primary transition-all duration-300')}
-          style={{ ...barFillStyles, width: `${percentage}%` }}
-        />
+        {Array.from({ length: total }, (_, i) => (
+          <div
+            key={`dot-${i}`}
+            className={cn(tourProgressDotVariants({ active: i + 1 === current }))}
+            aria-current={i + 1 === current ? 'step' : undefined}
+          />
+        ))}
       </div>
     )
   }
-
-  return (
-    <div className={cn(!unstyled && 'flex gap-1', className)} style={dotsContainerStyles}>
-      {Array.from({ length: total }, (_, i) => {
-        const isActive = i + 1 === current
-        const dotStyles: React.CSSProperties = unstyled
-          ? {}
-          : {
-              width: '0.5rem',
-              height: '0.5rem',
-              borderRadius: '50%',
-              backgroundColor: isActive
-                ? 'var(--tour-primary, #6366f1)'
-                : 'var(--tour-card-border, #e5e7eb)',
-              transition:
-                'background-color var(--tour-transition-duration, 200ms) var(--tour-transition-timing, ease-out)',
-            }
-
-        return (
-          <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: Static progress dots never reorder
-            key={i}
-            className={cn(
-              !unstyled && 'h-2 w-2 rounded-full transition-colors',
-              !unstyled && (isActive ? 'bg-primary' : 'bg-secondary')
-            )}
-            style={dotStyles}
-            data-active={isActive}
-          />
-        )
-      })}
-    </div>
-  )
-}
+)
+TourProgress.displayName = 'TourProgress'

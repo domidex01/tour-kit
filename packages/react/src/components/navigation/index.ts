@@ -1,4 +1,4 @@
-export { TourProgress } from './tour-progress'
-export { TourNavigation } from './tour-navigation'
-export { TourClose } from './tour-close'
+export { TourProgress, type TourProgressProps } from './tour-progress'
+export { TourNavigation, type TourNavigationProps } from './tour-navigation'
+export { TourClose, type TourCloseProps } from './tour-close'
 export { TourRoutePrompt } from './tour-route-prompt'

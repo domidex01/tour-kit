@@ -1,7 +1,7 @@
 import { useTour } from '@tour-kit/core'
 import type { RouterAdapter, TourStep } from '@tour-kit/core'
 import * as React from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '../../lib/utils'
 import { TourPortal } from '../primitives/tour-portal'
 
 interface TourRoutePromptProps {

@@ -29,7 +29,8 @@ describe('TourPortal', () => {
 
     await waitFor(() => {
       const content = screen.getByTestId('content')
-      expect(content.parentElement).toBe(customContainer)
+      // Content is wrapped in a div for ref, which is inside the container
+      expect(content.parentElement?.parentElement).toBe(customContainer)
     })
   })
 
@@ -42,7 +43,8 @@ describe('TourPortal', () => {
 
     await waitFor(() => {
       const content = screen.getByTestId('body-content')
-      expect(content.parentElement).toBe(document.body)
+      // Content is wrapped in a div for ref, which is inside body
+      expect(content.parentElement?.parentElement).toBe(document.body)
     })
   })
 })
