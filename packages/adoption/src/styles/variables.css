@@ -1,0 +1,22 @@
+/**
+ * TourKit Adoption CSS Custom Properties
+ *
+ * Integrates with shadcn/ui design tokens.
+ */
+
+@layer base {
+  :root {
+    /* Z-index */
+    --tour-adoption-z: 9999;
+
+    /* Animation */
+    --tour-adoption-duration: 200ms;
+    --tour-adoption-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --tour-adoption-duration: 0ms;
+    }
+  }
+}

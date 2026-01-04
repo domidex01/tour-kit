@@ -8,9 +8,13 @@
     "start": "next start"
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^2.11.0",
+    "@tour-kit/analytics": "workspace:*",
     "@tour-kit/hints": "workspace:*",
     "@tour-kit/react": "workspace:*",
+    "mixpanel-browser": "^2.56.0",
     "next": "^15.1.3",
+    "posthog-js": "^1.250.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

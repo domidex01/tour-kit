@@ -1,0 +1,22 @@
+/**
+ * TourKit Adoption Tailwind v4 Theme Extension
+ *
+ * Import this file in your main CSS when using Tailwind v4.
+ *
+ * @example
+ * // app/globals.css (Tailwind v4)
+ * @import "tailwindcss";
+ * @import "@tour-kit/adoption/styles/theme.css";
+ */
+
+@theme {
+  /* ===== Z-Index Scale ===== */
+  --z-adoption-nudge: 9999;
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  @theme {
+    --tour-adoption-duration: 0ms;
+  }
+}

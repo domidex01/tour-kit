@@ -1,3 +1,13 @@
+import {
+  type AnalyticsPlugin,
+  AnalyticsProvider,
+  amplitudePlugin,
+  consolePlugin,
+  googleAnalyticsPlugin,
+  mixpanelPlugin,
+  posthogPlugin,
+  useAnalytics,
+} from '@tour-kit/analytics'
 import { HintsProvider } from '@tour-kit/hints'
 import {
   MultiTourKitProvider,
@@ -7,24 +17,121 @@ import {
   TourStep,
   createReactRouterAdapter,
 } from '@tour-kit/react'
+import { useEffect } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { ContactPage, FeaturesPage, HomePage, PricingPage } from './pages'
 
+// Load Google Analytics script dynamically
+function useGoogleAnalytics() {
+  useEffect(() => {
+    const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID
+    if (!measurementId) return
+
+    // Check if already loaded
+    if (window.gtag) return
+
+    // Load gtag.js script
+    const script = document.createElement('script')
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`
+    script.async = true
+    document.head.appendChild(script)
+
+    // Initialize gtag
+    window.dataLayer = window.dataLayer || []
+    function gtag(...args: unknown[]) {
+      window.dataLayer.push(args)
+    }
+    window.gtag = gtag
+    gtag('js', new Date())
+    gtag('config', measurementId)
+  }, [])
+}
+
+// Extend Window interface for gtag
+declare global {
+  interface Window {
+    dataLayer: unknown[]
+    gtag: (...args: unknown[]) => void
+  }
+}
+
 // Create the adapter hook with React Router hooks
 const useReactRouter = createReactRouterAdapter(useLocation, useNavigate)
 
+// Build analytics plugins array based on available environment variables
+function getAnalyticsPlugins(): AnalyticsPlugin[] {
+  const plugins: AnalyticsPlugin[] = [
+    // Always include console plugin for development debugging
+    consolePlugin({ prefix: '🎯 TourKit Demo' }),
+  ]
+
+  // PostHog
+  if (import.meta.env.VITE_POSTHOG_API_KEY) {
+    plugins.push(
+      posthogPlugin({
+        apiKey: import.meta.env.VITE_POSTHOG_API_KEY,
+      })
+    )
+  }
+
+  // Mixpanel
+  if (import.meta.env.VITE_MIXPANEL_TOKEN) {
+    plugins.push(
+      mixpanelPlugin({
+        token: import.meta.env.VITE_MIXPANEL_TOKEN,
+        debug: true,
+      })
+    )
+  }
+
+  // Amplitude
+  if (import.meta.env.VITE_AMPLITUDE_API_KEY) {
+    plugins.push(
+      amplitudePlugin({
+        apiKey: import.meta.env.VITE_AMPLITUDE_API_KEY,
+      })
+    )
+  }
+
+  // Google Analytics (requires gtag script in index.html)
+  if (import.meta.env.VITE_GA_MEASUREMENT_ID) {
+    plugins.push(
+      googleAnalyticsPlugin({
+        measurementId: import.meta.env.VITE_GA_MEASUREMENT_ID,
+      })
+    )
+  }
+
+  return plugins
+}
+
+// Analytics configuration with all available plugins
+const analyticsConfig = {
+  plugins: getAnalyticsPlugins(),
+  debug: true,
+}
+
 function AppContent() {
   const router = useReactRouter()
+  const analytics = useAnalytics()
 
   return (
     <MultiTourKitProvider
       router={router}
       routePersistence={{ enabled: true, storage: 'sessionStorage' }}
-      onTourComplete={(tourId) => console.log(`Tour "${tourId}" completed!`)}
-      onTourSkip={(tourId, stepIndex) =>
-        console.log(`Tour "${tourId}" skipped at step ${stepIndex}`)
-      }
+      onTourStart={(tourId) => {
+        analytics.tourStarted(tourId, 8) // 8 steps in the product tour
+      }}
+      onTourComplete={(tourId) => {
+        analytics.tourCompleted(tourId)
+      }}
+      onTourSkip={(tourId, stepIndex) => {
+        analytics.tourSkipped(tourId, stepIndex)
+      }}
+      onStepView={(tourId, stepId, stepIndex) => {
+        analytics.stepViewed(tourId, stepId, stepIndex, 8)
+      }}
     >
       {/* Multi-page product tour */}
       <Tour id="product-tour">
@@ -127,7 +234,14 @@ function AppContent() {
 }
 
 function App() {
-  return <AppContent />
+  // Load Google Analytics if configured
+  useGoogleAnalytics()
+
+  return (
+    <AnalyticsProvider config={analyticsConfig}>
+      <AppContent />
+    </AnalyticsProvider>
+  )
 }
 
 export default App

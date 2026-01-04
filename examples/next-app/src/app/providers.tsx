@@ -1,5 +1,15 @@
 'use client'
 
+import {
+  type AnalyticsPlugin,
+  AnalyticsProvider,
+  amplitudePlugin,
+  consolePlugin,
+  googleAnalyticsPlugin,
+  mixpanelPlugin,
+  posthogPlugin,
+  useAnalytics,
+} from '@tour-kit/analytics'
 import { HintsProvider } from '@tour-kit/hints'
 import {
   MultiTourKitProvider,
@@ -14,17 +24,79 @@ import { usePathname, useRouter } from 'next/navigation'
 // Create the adapter hook with Next.js navigation hooks
 const useNextAppRouter = createNextAppRouterAdapter(usePathname, useRouter)
 
-export function Providers({ children }: { children: React.ReactNode }) {
+// Build analytics plugins array based on available environment variables
+function getAnalyticsPlugins(): AnalyticsPlugin[] {
+  const plugins: AnalyticsPlugin[] = [
+    // Always include console plugin for development debugging
+    consolePlugin({ prefix: '🎯 TourKit Next.js' }),
+  ]
+
+  // PostHog
+  if (process.env.NEXT_PUBLIC_POSTHOG_API_KEY) {
+    plugins.push(
+      posthogPlugin({
+        apiKey: process.env.NEXT_PUBLIC_POSTHOG_API_KEY,
+      })
+    )
+  }
+
+  // Mixpanel
+  if (process.env.NEXT_PUBLIC_MIXPANEL_TOKEN) {
+    plugins.push(
+      mixpanelPlugin({
+        token: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN,
+        debug: true,
+      })
+    )
+  }
+
+  // Amplitude
+  if (process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY) {
+    plugins.push(
+      amplitudePlugin({
+        apiKey: process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY,
+      })
+    )
+  }
+
+  // Google Analytics (requires gtag script in layout)
+  if (process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) {
+    plugins.push(
+      googleAnalyticsPlugin({
+        measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+      })
+    )
+  }
+
+  return plugins
+}
+
+// Analytics configuration with all available plugins
+const analyticsConfig = {
+  plugins: getAnalyticsPlugins(),
+  debug: true,
+}
+
+function ProvidersInner({ children }: { children: React.ReactNode }) {
   const router = useNextAppRouter()
+  const analytics = useAnalytics()
 
   return (
     <MultiTourKitProvider
       router={router}
       routePersistence={{ enabled: true, storage: 'sessionStorage' }}
-      onTourComplete={(tourId) => console.log(`Tour "${tourId}" completed!`)}
-      onTourSkip={(tourId, stepIndex) =>
-        console.log(`Tour "${tourId}" skipped at step ${stepIndex}`)
-      }
+      onTourStart={(tourId) => {
+        analytics.tourStarted(tourId, 8) // 8 steps in the onboarding tour
+      }}
+      onTourComplete={(tourId) => {
+        analytics.tourCompleted(tourId)
+      }}
+      onTourSkip={(tourId, stepIndex) => {
+        analytics.tourSkipped(tourId, stepIndex)
+      }}
+      onStepView={(tourId, stepId, stepIndex) => {
+        analytics.stepViewed(tourId, stepId, stepIndex, 8)
+      }}
     >
       {/* Multi-page onboarding tour */}
       <Tour id="onboarding-tour">
@@ -113,5 +185,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <TourOverlay />
       <TourCard />
     </MultiTourKitProvider>
+  )
+}
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <AnalyticsProvider config={analyticsConfig}>
+      <ProvidersInner>{children}</ProvidersInner>
+    </AnalyticsProvider>
   )
 }
