@@ -20,7 +20,7 @@ import {
 import { useEffect } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { Layout } from './components/Layout'
-import { ContactPage, FeaturesPage, HomePage, PricingPage } from './pages'
+import { AdoptionPage, ContactPage, FeaturesPage, HomePage, PricingPage } from './pages'
 
 // Load Google Analytics script dynamically
 function useGoogleAnalytics() {
@@ -39,20 +39,20 @@ function useGoogleAnalytics() {
 
     // Initialize gtag
     window.dataLayer = window.dataLayer || []
-    function gtag(...args: unknown[]) {
+    const gtag = (...args: unknown[]) => {
       window.dataLayer.push(args)
     }
-    window.gtag = gtag
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    window.gtag = gtag as any
     gtag('js', new Date())
     gtag('config', measurementId)
   }, [])
 }
 
-// Extend Window interface for gtag
+// Extend Window interface for dataLayer (gtag is already declared in @tour-kit/analytics)
 declare global {
   interface Window {
     dataLayer: unknown[]
-    gtag: (...args: unknown[]) => void
   }
 }
 
@@ -223,6 +223,7 @@ function AppContent() {
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/adoption" element={<AdoptionPage />} />
           </Routes>
         </Layout>
       </HintsProvider>

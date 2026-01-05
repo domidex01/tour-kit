@@ -2,10 +2,41 @@ import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { afterEach, vi } from 'vitest'
 
+// Mock @floating-ui/react globally
+vi.mock('@floating-ui/react', () => ({
+  useFloating: vi.fn(() => ({
+    refs: {
+      setReference: vi.fn(),
+      setFloating: vi.fn(),
+    },
+    floatingStyles: { position: 'absolute', top: 0, left: 0 },
+    context: {},
+    middlewareData: { arrow: {} },
+  })),
+  autoUpdate: vi.fn(),
+  offset: vi.fn(),
+  flip: vi.fn(),
+  shift: vi.fn(),
+  arrow: vi.fn(),
+  FloatingArrow: vi.fn(() => null),
+  FloatingPortal: vi.fn(({ children }) => children),
+  useDismiss: vi.fn(() => ({})),
+  useRole: vi.fn(() => ({})),
+  useInteractions: vi.fn(() => ({
+    getReferenceProps: vi.fn((props) => props),
+    getFloatingProps: vi.fn((props) => props),
+  })),
+}))
+
 // Cleanup after each test
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  // Clear all timers more aggressively for cross-package test isolation
+  if (vi.isFakeTimers?.()) {
+    vi.clearAllTimers()
+    vi.useRealTimers()
+  }
   document.body.innerHTML = ''
 })
 

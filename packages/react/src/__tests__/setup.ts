@@ -19,12 +19,24 @@ vi.mock('@floating-ui/react', () => ({
   shift: vi.fn(),
   arrow: vi.fn(),
   FloatingArrow: vi.fn(() => null),
+  FloatingPortal: vi.fn(({ children }) => children),
+  useDismiss: vi.fn(() => ({})),
+  useRole: vi.fn(() => ({})),
+  useInteractions: vi.fn(() => ({
+    getReferenceProps: vi.fn((props) => props),
+    getFloatingProps: vi.fn((props) => props),
+  })),
 }))
 
 // Cleanup after each test
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  // Clear all timers more aggressively for cross-package test isolation
+  if (vi.isFakeTimers?.()) {
+    vi.clearAllTimers()
+    vi.useRealTimers()
+  }
   document.body.innerHTML = ''
 })
 

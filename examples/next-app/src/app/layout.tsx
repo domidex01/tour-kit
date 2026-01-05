@@ -46,6 +46,12 @@ function Navigation() {
           >
             Contact
           </Link>
+          <Link
+            href="/adoption"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Adoption
+          </Link>
         </div>
       </div>
     </nav>

@@ -6,6 +6,11 @@ import { afterEach, vi } from 'vitest'
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  // Clear all timers more aggressively for cross-package test isolation
+  if (vi.isFakeTimers?.()) {
+    vi.clearAllTimers()
+    vi.useRealTimers()
+  }
 })
 
 // Mock ResizeObserver

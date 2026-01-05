@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^2.11.0",
+    "@tour-kit/adoption": "workspace:*",
     "@tour-kit/analytics": "workspace:*",
     "@tour-kit/hints": "workspace:*",
     "@tour-kit/react": "workspace:*",

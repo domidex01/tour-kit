@@ -6,7 +6,11 @@ import { afterEach, beforeEach, vi } from 'vitest'
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
-  vi.useRealTimers()
+  // Clear all timers more aggressively for cross-package test isolation
+  if (vi.isFakeTimers?.()) {
+    vi.clearAllTimers()
+    vi.useRealTimers()
+  }
 })
 
 // Reset modules before each test to ensure clean state

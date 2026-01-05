@@ -36,6 +36,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               Contact
             </Link>
+            <Link
+              to="/adoption"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Adoption
+            </Link>
           </div>
         </div>
       </nav>

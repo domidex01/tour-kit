@@ -30,21 +30,27 @@
     "./styles/variables.css": "./src/styles/variables.css",
     "./styles/theme.css": "./src/styles/theme.css"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@tour-kit/core": "workspace:*",
     "@radix-ui/react-slot": "^1.1.0",
+    "@tour-kit/core": "workspace:*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "tailwind-merge": "^2.3.0"
   },
   "peerDependencies": {
+    "@tour-kit/analytics": "workspace:*",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "tailwindcss": "^3.4.0 || ^4.0.0"
@@ -52,14 +58,23 @@
   "peerDependenciesMeta": {
     "tailwindcss": {
       "optional": true
+    },
+    "@tour-kit/analytics": {
+      "optional": true
     }
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@tour-kit/analytics": "workspace:*",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "jsdom": "^26.0.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^4.0.16"
   }
 }

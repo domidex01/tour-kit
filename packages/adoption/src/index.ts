@@ -47,6 +47,19 @@ export { Slot, Slottable } from './lib/slot'
 export { emitFeatureEvent } from './engine/usage-tracker'
 
 // ============================================
+// ANALYTICS HELPERS
+// ============================================
+export {
+  useAdoptionAnalytics,
+  buildFeatureAdoptedEvent,
+  buildFeatureChurnedEvent,
+  buildFeatureUsedEvent,
+  buildNudgeClickedEvent,
+  buildNudgeDismissedEvent,
+  buildNudgeShownEvent,
+} from './analytics'
+
+// ============================================
 // TYPES
 // ============================================
 export type {
@@ -61,3 +74,27 @@ export type {
   NudgeConfig,
   AdoptionProviderProps,
 } from './types'
+
+// ============================================
+// DASHBOARD COMPONENTS
+// ============================================
+export {
+  AdoptionDashboard,
+  AdoptionStatCard,
+  AdoptionStatsGrid,
+  AdoptionTable,
+  AdoptionCategoryChart,
+  AdoptionStatusBadge,
+  AdoptionFilters,
+} from './components/dashboard'
+
+export type {
+  AdoptionDashboardProps,
+  AdoptionStatCardProps,
+  AdoptionStatsGridProps,
+  AdoptionTableProps,
+  AdoptionCategoryChartProps,
+  AdoptionStatusBadgeProps,
+  AdoptionFiltersProps,
+  AdoptionFiltersState,
+} from './components/dashboard'

@@ -7,7 +7,17 @@ export default defineConfig([
     format: ['esm', 'cjs'],
     dts: true,
     clean: true,
-    external: ['react', 'react-dom', '@tour-kit/core', 'tailwindcss', 'tailwindcss/plugin'],
+    external: [
+      'react',
+      'react-dom',
+      '@tour-kit/core',
+      '@tour-kit/analytics',
+      'tailwindcss',
+      'tailwindcss/plugin',
+      'class-variance-authority',
+      'clsx',
+      'tailwind-merge',
+    ],
     treeshake: true,
     splitting: false,
     minify: true,
@@ -21,10 +31,14 @@ export default defineConfig([
     },
     // Copy CSS files to dist
     onSuccess: async () => {
-      const fs = await import('node:fs/promises')
-      await fs.mkdir('dist/styles', { recursive: true })
-      await fs.copyFile('src/styles/variables.css', 'dist/styles/variables.css')
-      await fs.copyFile('src/styles/theme.css', 'dist/styles/theme.css')
+      try {
+        const fs = await import('node:fs/promises')
+        await fs.mkdir('dist/styles', { recursive: true })
+        await fs.copyFile('src/styles/variables.css', 'dist/styles/variables.css')
+        await fs.copyFile('src/styles/theme.css', 'dist/styles/theme.css')
+      } catch (e) {
+        console.warn('Failed to copy CSS files:', e)
+      }
     },
   },
   // Tailwind plugin entry

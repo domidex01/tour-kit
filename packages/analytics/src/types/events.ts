@@ -13,6 +13,13 @@ export type TourEventName =
   | 'hint_shown'
   | 'hint_dismissed'
   | 'hint_clicked'
+  // Feature adoption events
+  | 'feature_used'
+  | 'feature_adopted'
+  | 'feature_churned'
+  | 'nudge_shown'
+  | 'nudge_clicked'
+  | 'nudge_dismissed'
 
 /**
  * Tour analytics event payload
