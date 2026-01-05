@@ -56,7 +56,7 @@ const features: Feature[] = [
 ]
 
 function FeatureCard({ featureId }: { featureId: string }) {
-  const { feature, usage, trackUsage, isAdopted } = useFeature(featureId)
+  const { feature, usage, isAdopted } = useFeature(featureId)
 
   if (!feature) return null
 

@@ -5,7 +5,7 @@
  * individual feature adoption state and tracking functionality.
  */
 import { act, renderHook } from '@testing-library/react'
-import * as React from 'react'
+import type * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdoptionProvider } from '../../context/adoption-provider'
 import { useFeature } from '../../hooks/use-feature'
@@ -29,11 +29,7 @@ function createMockFeature(overrides: Partial<Feature> = {}): Feature {
 function createWrapper(features: Feature[] = [createMockFeature()]) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return (
-      <AdoptionProvider
-        features={features}
-        storage={{ type: 'memory' }}
-        nudge={{ enabled: false }}
-      >
+      <AdoptionProvider features={features} storage={{ type: 'memory' }} nudge={{ enabled: false }}>
         {children}
       </AdoptionProvider>
     )

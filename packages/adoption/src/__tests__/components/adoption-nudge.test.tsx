@@ -6,7 +6,7 @@
  */
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import * as React from 'react'
+import type * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdoptionNudge } from '../../components/adoption-nudge'
 import { AdoptionProvider } from '../../context/adoption-provider'
@@ -27,11 +27,13 @@ function createMockFeature(overrides: Partial<Feature> = {}): Feature {
 }
 
 // Provider wrapper factory
-function createWrapper(options: {
-  features?: Feature[]
-  nudge?: NudgeConfig
-  onNudge?: (feature: Feature, action: string) => void
-} = {}) {
+function createWrapper(
+  options: {
+    features?: Feature[]
+    nudge?: NudgeConfig
+    onNudge?: (feature: Feature, action: string) => void
+  } = {}
+) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <AdoptionProvider
@@ -252,9 +254,7 @@ describe('AdoptionNudge', () => {
         <Wrapper>
           <AdoptionNudge
             delay={100}
-            render={({ feature }) => (
-              <div data-testid="feature-id">{feature.id}</div>
-            )}
+            render={({ feature }) => <div data-testid="feature-id">{feature.id}</div>}
           />
         </Wrapper>
       )
@@ -276,7 +276,7 @@ describe('AdoptionNudge', () => {
           <AdoptionNudge
             delay={100}
             render={({ onDismiss }) => (
-              <button onClick={onDismiss} data-testid="dismiss-btn">
+              <button type="button" onClick={onDismiss} data-testid="dismiss-btn">
                 Custom Dismiss
               </button>
             )}
@@ -310,7 +310,7 @@ describe('AdoptionNudge', () => {
           <AdoptionNudge
             delay={100}
             render={({ onSnooze }) => (
-              <button onClick={() => onSnooze(60000)} data-testid="snooze-btn">
+              <button type="button" onClick={() => onSnooze(60000)} data-testid="snooze-btn">
                 Snooze 1 minute
               </button>
             )}
@@ -344,7 +344,7 @@ describe('AdoptionNudge', () => {
           <AdoptionNudge
             delay={100}
             render={({ onClick }) => (
-              <button onClick={onClick} data-testid="click-btn">
+              <button type="button" onClick={onClick} data-testid="click-btn">
                 Try Feature
               </button>
             )}
@@ -502,10 +502,7 @@ describe('AdoptionNudge', () => {
       })
 
       await waitFor(() => {
-        expect(onNudge).toHaveBeenCalledWith(
-          expect.objectContaining({ id: feature.id }),
-          'shown'
-        )
+        expect(onNudge).toHaveBeenCalledWith(expect.objectContaining({ id: feature.id }), 'shown')
       })
     })
   })

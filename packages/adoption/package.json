@@ -30,9 +30,7 @@
     "./styles/variables.css": "./src/styles/variables.css",
     "./styles/theme.css": "./src/styles/theme.css"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
