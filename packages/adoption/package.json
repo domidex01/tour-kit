@@ -31,6 +31,10 @@
     "./styles/theme.css": "./src/styles/theme.css"
   },
   "files": ["dist"],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

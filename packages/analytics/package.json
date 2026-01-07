@@ -38,6 +38,10 @@
     "./package.json": "./package.json"
   },
   "files": ["dist", "README.md", "CHANGELOG.md"],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
