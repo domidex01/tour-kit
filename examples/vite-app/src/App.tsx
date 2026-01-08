@@ -8,6 +8,7 @@ import {
   posthogPlugin,
   useAnalytics,
 } from '@tour-kit/analytics'
+import { type ChecklistConfig, ChecklistLauncher, ChecklistProvider } from '@tour-kit/checklists'
 import { HintsProvider } from '@tour-kit/hints'
 import {
   MultiTourKitProvider,
@@ -16,6 +17,8 @@ import {
   TourOverlay,
   TourStep,
   createReactRouterAdapter,
+  useTour,
+  useTours,
 } from '@tour-kit/react'
 import { useEffect } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
@@ -110,6 +113,66 @@ function getAnalyticsPlugins(): AnalyticsPlugin[] {
 const analyticsConfig = {
   plugins: getAnalyticsPlugins(),
   debug: true,
+}
+
+// Onboarding checklist configuration
+const onboardingChecklist: ChecklistConfig = {
+  id: 'onboarding',
+  title: 'Getting Started',
+  description: 'Complete these steps to get the most out of TourKit',
+  tasks: [
+    {
+      id: 'take-tour',
+      title: 'Take the product tour',
+      description: 'Learn the basics with our interactive tour',
+      action: { type: 'tour', tourId: 'product-tour' },
+      completedWhen: { tourCompleted: 'product-tour' },
+    },
+    {
+      id: 'explore-features',
+      title: 'Explore features',
+      description: 'Check out what TourKit can do',
+      action: { type: 'navigate', url: '/features' },
+    },
+    {
+      id: 'view-pricing',
+      title: 'View pricing plans',
+      description: 'See our pricing options',
+      action: { type: 'navigate', url: '/pricing' },
+    },
+    {
+      id: 'try-adoption',
+      title: 'Try feature adoption',
+      description: 'See how feature adoption tracking works',
+      action: { type: 'navigate', url: '/adoption' },
+    },
+  ],
+}
+
+function ChecklistWrapper({ children }: { children: React.ReactNode }) {
+  const { start: startTour } = useTour('product-tour')
+  const { isTourCompleted } = useTours()
+
+  return (
+    <ChecklistProvider
+      checklists={[onboardingChecklist]}
+      persistence={{ enabled: true, storage: 'localStorage' }}
+      onTaskAction={(_checklistId: string, _taskId: string, action: unknown) => {
+        if (action && typeof action === 'object' && 'type' in action) {
+          const taskAction = action as { type: string; tourId?: string }
+          if (taskAction.type === 'tour' && taskAction.tourId === 'product-tour') {
+            startTour()
+          }
+        }
+      }}
+      context={{
+        completedTours: isTourCompleted('product-tour') ? ['product-tour'] : [],
+      }}
+    >
+      {children}
+      <ChecklistLauncher checklistId="onboarding" position="bottom-right" />
+    </ChecklistProvider>
+  )
 }
 
 function AppContent() {
@@ -216,17 +279,19 @@ function AppContent() {
         />
       </Tour>
 
-      <HintsProvider>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/features" element={<FeaturesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/adoption" element={<AdoptionPage />} />
-          </Routes>
-        </Layout>
-      </HintsProvider>
+      <ChecklistWrapper>
+        <HintsProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/adoption" element={<AdoptionPage />} />
+            </Routes>
+          </Layout>
+        </HintsProvider>
+      </ChecklistWrapper>
 
       <TourOverlay />
       <TourCard />

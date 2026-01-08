@@ -11,6 +11,7 @@
     "@amplitude/analytics-browser": "^2.11.0",
     "@tour-kit/adoption": "workspace:*",
     "@tour-kit/analytics": "workspace:*",
+    "@tour-kit/checklists": "workspace:*",
     "@tour-kit/hints": "workspace:*",
     "@tour-kit/react": "workspace:*",
     "mixpanel-browser": "^2.56.0",

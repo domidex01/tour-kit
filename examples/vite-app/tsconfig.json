@@ -18,7 +18,11 @@
     "baseUrl": ".",
     "paths": {
       "@tour-kit/react": ["../../packages/react/dist/index.d.ts"],
-      "@tour-kit/core": ["../../packages/core/dist/index.d.ts"]
+      "@tour-kit/core": ["../../packages/core/dist/index.d.ts"],
+      "@tour-kit/checklists": ["../../packages/checklists/dist/index.d.ts"],
+      "@tour-kit/hints": ["../../packages/hints/dist/index.d.ts"],
+      "@tour-kit/analytics": ["../../packages/analytics/dist/index.d.ts"],
+      "@tour-kit/adoption": ["../../packages/adoption/dist/index.d.ts"]
     }
   },
   "include": ["src"]

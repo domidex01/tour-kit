@@ -10,6 +10,7 @@ import {
   posthogPlugin,
   useAnalytics,
 } from '@tour-kit/analytics'
+import { type ChecklistConfig, ChecklistLauncher, ChecklistProvider } from '@tour-kit/checklists'
 import { HintsProvider } from '@tour-kit/hints'
 import {
   MultiTourKitProvider,
@@ -18,11 +19,73 @@ import {
   TourOverlay,
   TourStep,
   createNextAppRouterAdapter,
+  useTour,
+  useTours,
 } from '@tour-kit/react'
 import { usePathname, useRouter } from 'next/navigation'
 
 // Create the adapter hook with Next.js navigation hooks
 const useNextAppRouter = createNextAppRouterAdapter(usePathname, useRouter)
+
+// Onboarding checklist configuration
+const onboardingChecklist: ChecklistConfig = {
+  id: 'onboarding',
+  title: 'Getting Started',
+  description: 'Complete these steps to get the most out of TourKit',
+  tasks: [
+    {
+      id: 'take-tour',
+      title: 'Take the product tour',
+      description: 'Learn the basics with our interactive tour',
+      action: { type: 'tour', tourId: 'onboarding-tour' },
+      completedWhen: { tourCompleted: 'onboarding-tour' },
+    },
+    {
+      id: 'explore-features',
+      title: 'Explore features',
+      description: 'Check out what TourKit can do',
+      action: { type: 'navigate', url: '/features' },
+    },
+    {
+      id: 'view-pricing',
+      title: 'View pricing plans',
+      description: 'See our pricing options',
+      action: { type: 'navigate', url: '/pricing' },
+    },
+    {
+      id: 'contact-us',
+      title: 'Get in touch',
+      description: 'Reach out with questions',
+      action: { type: 'navigate', url: '/contact' },
+    },
+  ],
+}
+
+function ChecklistWrapper({ children }: { children: React.ReactNode }) {
+  const { start: startTour } = useTour('onboarding-tour')
+  const { isTourCompleted } = useTours()
+
+  return (
+    <ChecklistProvider
+      checklists={[onboardingChecklist]}
+      persistence={{ enabled: true, storage: 'localStorage' }}
+      onTaskAction={(_checklistId: string, _taskId: string, action: unknown) => {
+        if (action && typeof action === 'object' && 'type' in action) {
+          const taskAction = action as { type: string; tourId?: string }
+          if (taskAction.type === 'tour' && taskAction.tourId === 'onboarding-tour') {
+            startTour()
+          }
+        }
+      }}
+      context={{
+        completedTours: isTourCompleted('onboarding-tour') ? ['onboarding-tour'] : [],
+      }}
+    >
+      {children}
+      <ChecklistLauncher checklistId="onboarding" position="bottom-right" />
+    </ChecklistProvider>
+  )
+}
 
 // Build analytics plugins array based on available environment variables
 function getAnalyticsPlugins(): AnalyticsPlugin[] {
@@ -181,7 +244,9 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
         />
       </Tour>
 
-      <HintsProvider>{children}</HintsProvider>
+      <ChecklistWrapper>
+        <HintsProvider>{children}</HintsProvider>
+      </ChecklistWrapper>
       <TourOverlay />
       <TourCard />
     </MultiTourKitProvider>
