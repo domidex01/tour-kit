@@ -56,10 +56,10 @@ describe('Hint', () => {
     <HintsProvider>{children}</HintsProvider>
   )
 
-  it('renders hotspot when target exists', () => {
+  it('renders hotspot when target exists', async () => {
     render(<Hint id="test" target="#target" content="Help text" />, { wrapper })
 
-    expect(screen.getByRole('button', { name: /show hint/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /show hint/i })).toBeInTheDocument()
   })
 
   it('returns null when target not found', () => {

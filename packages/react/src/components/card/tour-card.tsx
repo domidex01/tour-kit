@@ -122,6 +122,7 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
           }}
           style={floatingStyles}
           className={cn(tourCardVariants({ size }), 'z-50', currentStep.className, className)}
+          // biome-ignore lint/a11y/useSemanticElements: Native dialog has default centering/backdrop incompatible with floating-ui
           role="dialog"
           aria-modal="true"
           aria-labelledby={`tour-step-title-${currentStep.id}`}

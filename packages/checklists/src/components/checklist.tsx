@@ -1,4 +1,3 @@
-import { Slot } from '@radix-ui/react-slot'
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'
 import { ChecklistProgress } from './checklist-progress'
@@ -57,6 +56,7 @@ export const Checklist = React.forwardRef<HTMLDivElement, ChecklistProps>(
       showDismiss = true,
       asChild = false,
       renderTask,
+      children,
       ...props
     },
     ref
@@ -76,10 +76,8 @@ export const Checklist = React.forwardRef<HTMLDivElement, ChecklistProps>(
     if (!checklist || isDismissed) return null
     if (isComplete && checklist.config.hideOnComplete) return null
 
-    const Comp = asChild ? Slot : 'div'
-
-    return (
-      <Comp ref={ref} className={cn(checklistVariants({ size }), className)} {...props}>
+    const internalContent = (
+      <>
         {/* Header */}
         {showHeader && (
           <div className={checklistHeaderVariants({})}>
@@ -152,7 +150,32 @@ export const Checklist = React.forwardRef<HTMLDivElement, ChecklistProps>(
             <p className="text-sm font-medium text-primary">All tasks completed!</p>
           </div>
         )}
-      </Comp>
+      </>
+    )
+
+    // When asChild is true, clone the child element and inject internal content
+    if (asChild && React.isValidElement(children)) {
+      const childElement = children as React.ReactElement<{
+        className?: string
+        children?: React.ReactNode
+        ref?: React.Ref<HTMLElement>
+      }>
+      return React.cloneElement(
+        childElement,
+        {
+          ...childElement.props,
+          ref,
+          className: cn(checklistVariants({ size }), className, childElement.props.className),
+          ...props,
+        } as React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> },
+        internalContent
+      )
+    }
+
+    return (
+      <div ref={ref} className={cn(checklistVariants({ size }), className)} {...props}>
+        {internalContent}
+      </div>
     )
   }
 )

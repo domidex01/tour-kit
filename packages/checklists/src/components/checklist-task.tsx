@@ -9,6 +9,32 @@ import {
   taskTitleVariants,
 } from './ui/task-variants'
 
+type TaskSize = ChecklistTaskVariants['size']
+
+function getIconSizeClasses(size: TaskSize): string {
+  if (size === 'sm') return 'w-2.5 h-2.5'
+  if (size === 'lg') return 'w-4 h-4'
+  return 'w-3 h-3'
+}
+
+function getContainerIconSizeClasses(size: TaskSize): string {
+  if (size === 'sm') return 'w-4 h-4'
+  if (size === 'lg') return 'w-6 h-6'
+  return 'w-5 h-5'
+}
+
+function getArrowSizeClasses(size: TaskSize): string {
+  if (size === 'sm') return 'w-3 h-3'
+  if (size === 'lg') return 'w-5 h-5'
+  return 'w-4 h-4'
+}
+
+function getTaskState(locked: boolean, completed: boolean): 'locked' | 'completed' | 'default' {
+  if (locked) return 'locked'
+  if (completed) return 'completed'
+  return 'default'
+}
+
 export interface ChecklistTaskProps
   extends Omit<React.ComponentPropsWithoutRef<'div'>, 'onClick'>,
     Omit<ChecklistTaskVariants, 'state'> {
@@ -46,11 +72,12 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
 
     if (!visible) return null
 
-    const state = locked ? 'locked' : completed ? 'completed' : 'default'
+    const state = getTaskState(locked, completed)
+    const showArrow = config.action && !locked && !completed
+    const checkboxLabel = completed ? 'Mark as incomplete' : 'Mark as complete'
 
     const handleClick = () => {
-      if (locked) return
-      onClick?.()
+      if (!locked) onClick?.()
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -62,8 +89,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
 
     const handleToggle = (e: React.MouseEvent) => {
       e.stopPropagation()
-      if (locked) return
-      onToggle?.()
+      if (!locked) onToggle?.()
     }
 
     return (
@@ -72,6 +98,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
         className={cn(checklistTaskVariants({ size, state }), className)}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
+        // biome-ignore lint/a11y/useSemanticElements: Cannot use button element because it contains nested interactive checkbox button
         role="button"
         tabIndex={locked ? -1 : 0}
         aria-disabled={locked}
@@ -83,11 +110,11 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
           onClick={handleToggle}
           className={taskCheckboxVariants({ size, state })}
           disabled={locked}
-          aria-label={completed ? 'Mark as incomplete' : 'Mark as complete'}
+          aria-label={checkboxLabel}
         >
           {completed && (
             <svg
-              className={size === 'sm' ? 'w-2.5 h-2.5' : size === 'lg' ? 'w-4 h-4' : 'w-3 h-3'}
+              className={getIconSizeClasses(size)}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -102,10 +129,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
         {/* Icon */}
         {(config.icon || renderIcon) && (
           <div
-            className={cn(
-              'flex-shrink-0 text-muted-foreground',
-              size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5'
-            )}
+            className={cn('flex-shrink-0 text-muted-foreground', getContainerIconSizeClasses(size))}
           >
             {renderIcon ? renderIcon(task) : config.icon}
           </div>
@@ -120,11 +144,11 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
         </div>
 
         {/* Arrow */}
-        {config.action && !locked && !completed && (
+        {showArrow && (
           <svg
             className={cn(
               'flex-shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity',
-              size === 'sm' ? 'w-3 h-3' : size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'
+              getArrowSizeClasses(size)
             )}
             fill="none"
             viewBox="0 0 24 24"

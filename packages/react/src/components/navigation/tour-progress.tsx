@@ -56,12 +56,14 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
       <div
         ref={ref}
         className={cn(tourProgressVariants({ variant }), className)}
+        // biome-ignore lint/a11y/useSemanticElements: fieldset requires legend and has unwanted default styling
         role="group"
         aria-label={`Step ${current} of ${total}`}
         {...props}
       >
         {Array.from({ length: total }, (_, i) => (
           <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: Fixed-length dot array never reorders
             key={`dot-${i}`}
             className={cn(tourProgressDotVariants({ active: i + 1 === current }))}
             aria-current={i + 1 === current ? 'step' : undefined}

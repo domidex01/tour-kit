@@ -45,8 +45,7 @@ function useGoogleAnalytics() {
     const gtag = (...args: unknown[]) => {
       window.dataLayer.push(args)
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window.gtag = gtag as any
+    window.gtag = gtag as unknown as typeof window.gtag
     gtag('js', new Date())
     gtag('config', measurementId)
   }, [])

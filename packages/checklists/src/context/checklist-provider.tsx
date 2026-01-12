@@ -81,114 +81,133 @@ function createChecklistState(
   }
 }
 
+interface ReducerContext {
+  configs: ChecklistConfig[]
+  context: ChecklistContextType
+}
+
+function handleTaskCompletion(
+  state: ChecklistReducerState,
+  checklistId: string,
+  taskId: string,
+  complete: boolean,
+  { configs, context }: ReducerContext
+): ChecklistReducerState {
+  const newCompleted = { ...state.completed }
+  const tasks = new Set(newCompleted[checklistId] ?? [])
+  if (complete) {
+    tasks.add(taskId)
+  } else {
+    tasks.delete(taskId)
+  }
+  newCompleted[checklistId] = tasks
+
+  const config = configs.find((c) => c.id === checklistId)
+  if (!config) return state
+
+  const newChecklists = new Map(state.checklists)
+  newChecklists.set(
+    checklistId,
+    createChecklistState(
+      config,
+      { ...context, completedTasks: Array.from(tasks) },
+      tasks,
+      state.dismissed.has(checklistId),
+      state.checklists.get(checklistId)?.isExpanded ?? true
+    )
+  )
+
+  return { ...state, completed: newCompleted, checklists: newChecklists }
+}
+
+function handleDismissRestore(
+  state: ChecklistReducerState,
+  checklistId: string,
+  dismiss: boolean
+): ChecklistReducerState {
+  const newDismissed = new Set(state.dismissed)
+  if (dismiss) {
+    newDismissed.add(checklistId)
+  } else {
+    newDismissed.delete(checklistId)
+  }
+
+  const newChecklists = new Map(state.checklists)
+  const existing = newChecklists.get(checklistId)
+  if (existing) {
+    newChecklists.set(checklistId, { ...existing, isDismissed: dismiss })
+  }
+
+  return { ...state, dismissed: newDismissed, checklists: newChecklists }
+}
+
+function handleLoadPersisted(
+  state: PersistedChecklistState,
+  { configs, context }: ReducerContext
+): ChecklistReducerState {
+  const newCompleted: Record<string, Set<string>> = {}
+  for (const [id, tasks] of Object.entries(state.completed)) {
+    newCompleted[id] = new Set(tasks)
+  }
+  const newDismissed = new Set(state.dismissed)
+
+  const newChecklists = new Map<string, ChecklistState>()
+  for (const config of configs) {
+    const tasks = newCompleted[config.id] ?? new Set()
+    newChecklists.set(
+      config.id,
+      createChecklistState(
+        config,
+        { ...context, completedTasks: Array.from(tasks) },
+        tasks,
+        newDismissed.has(config.id),
+        true
+      )
+    )
+  }
+
+  return { completed: newCompleted, dismissed: newDismissed, checklists: newChecklists }
+}
+
 function checklistReducer(
   state: ChecklistReducerState,
   action: ChecklistAction,
   configs: ChecklistConfig[],
   context: ChecklistContextType
 ): ChecklistReducerState {
+  const reducerCtx: ReducerContext = { configs, context }
+
   switch (action.type) {
-    case 'COMPLETE_TASK': {
-      const newCompleted = { ...state.completed }
-      const tasks = new Set(newCompleted[action.checklistId] ?? [])
-      tasks.add(action.taskId)
-      newCompleted[action.checklistId] = tasks
+    case 'COMPLETE_TASK':
+      return handleTaskCompletion(state, action.checklistId, action.taskId, true, reducerCtx)
 
-      const config = configs.find((c) => c.id === action.checklistId)
-      if (!config) return state
+    case 'UNCOMPLETE_TASK':
+      return handleTaskCompletion(state, action.checklistId, action.taskId, false, reducerCtx)
 
-      const newChecklists = new Map(state.checklists)
-      newChecklists.set(
-        action.checklistId,
-        createChecklistState(
-          config,
-          { ...context, completedTasks: Array.from(tasks) },
-          tasks,
-          state.dismissed.has(action.checklistId),
-          state.checklists.get(action.checklistId)?.isExpanded ?? true
-        )
-      )
+    case 'DISMISS_CHECKLIST':
+      return handleDismissRestore(state, action.checklistId, true)
 
-      return { ...state, completed: newCompleted, checklists: newChecklists }
-    }
-
-    case 'UNCOMPLETE_TASK': {
-      const newCompleted = { ...state.completed }
-      const tasks = new Set(newCompleted[action.checklistId] ?? [])
-      tasks.delete(action.taskId)
-      newCompleted[action.checklistId] = tasks
-
-      const config = configs.find((c) => c.id === action.checklistId)
-      if (!config) return state
-
-      const newChecklists = new Map(state.checklists)
-      newChecklists.set(
-        action.checklistId,
-        createChecklistState(
-          config,
-          { ...context, completedTasks: Array.from(tasks) },
-          tasks,
-          state.dismissed.has(action.checklistId),
-          state.checklists.get(action.checklistId)?.isExpanded ?? true
-        )
-      )
-
-      return { ...state, completed: newCompleted, checklists: newChecklists }
-    }
-
-    case 'DISMISS_CHECKLIST': {
-      const newDismissed = new Set(state.dismissed)
-      newDismissed.add(action.checklistId)
-
-      const newChecklists = new Map(state.checklists)
-      const existing = newChecklists.get(action.checklistId)
-      if (existing) {
-        newChecklists.set(action.checklistId, {
-          ...existing,
-          isDismissed: true,
-        })
-      }
-
-      return { ...state, dismissed: newDismissed, checklists: newChecklists }
-    }
-
-    case 'RESTORE_CHECKLIST': {
-      const newDismissed = new Set(state.dismissed)
-      newDismissed.delete(action.checklistId)
-
-      const newChecklists = new Map(state.checklists)
-      const existing = newChecklists.get(action.checklistId)
-      if (existing) {
-        newChecklists.set(action.checklistId, {
-          ...existing,
-          isDismissed: false,
-        })
-      }
-
-      return { ...state, dismissed: newDismissed, checklists: newChecklists }
-    }
+    case 'RESTORE_CHECKLIST':
+      return handleDismissRestore(state, action.checklistId, false)
 
     case 'SET_EXPANDED': {
       const newChecklists = new Map(state.checklists)
       const existing = newChecklists.get(action.checklistId)
       if (existing) {
-        newChecklists.set(action.checklistId, {
-          ...existing,
-          isExpanded: action.expanded,
-        })
+        newChecklists.set(action.checklistId, { ...existing, isExpanded: action.expanded })
       }
       return { ...state, checklists: newChecklists }
     }
 
     case 'RESET_CHECKLIST': {
+      const config = configs.find((c) => c.id === action.checklistId)
+      if (!config) return state
+
       const newCompleted = { ...state.completed }
       delete newCompleted[action.checklistId]
 
       const newDismissed = new Set(state.dismissed)
       newDismissed.delete(action.checklistId)
-
-      const config = configs.find((c) => c.id === action.checklistId)
-      if (!config) return state
 
       const newChecklists = new Map(state.checklists)
       newChecklists.set(
@@ -196,11 +215,7 @@ function checklistReducer(
         createChecklistState(config, context, new Set(), false, true)
       )
 
-      return {
-        completed: newCompleted,
-        dismissed: newDismissed,
-        checklists: newChecklists,
-      }
+      return { completed: newCompleted, dismissed: newDismissed, checklists: newChecklists }
     }
 
     case 'RESET_ALL': {
@@ -208,41 +223,11 @@ function checklistReducer(
       for (const config of configs) {
         newChecklists.set(config.id, createChecklistState(config, context, new Set(), false, true))
       }
-      return {
-        completed: {},
-        dismissed: new Set(),
-        checklists: newChecklists,
-      }
+      return { completed: {}, dismissed: new Set(), checklists: newChecklists }
     }
 
-    case 'LOAD_PERSISTED': {
-      const newCompleted: Record<string, Set<string>> = {}
-      for (const [id, tasks] of Object.entries(action.state.completed)) {
-        newCompleted[id] = new Set(tasks)
-      }
-      const newDismissed = new Set(action.state.dismissed)
-
-      const newChecklists = new Map<string, ChecklistState>()
-      for (const config of configs) {
-        const tasks = newCompleted[config.id] ?? new Set()
-        newChecklists.set(
-          config.id,
-          createChecklistState(
-            config,
-            { ...context, completedTasks: Array.from(tasks) },
-            tasks,
-            newDismissed.has(config.id),
-            true
-          )
-        )
-      }
-
-      return {
-        completed: newCompleted,
-        dismissed: newDismissed,
-        checklists: newChecklists,
-      }
-    }
+    case 'LOAD_PERSISTED':
+      return handleLoadPersisted(action.state, reducerCtx)
 
     default:
       return state
