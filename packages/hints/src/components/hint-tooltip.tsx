@@ -11,7 +11,8 @@ import {
   useRole,
 } from '@floating-ui/react'
 import * as React from 'react'
-import { Slot } from '../lib/slot'
+import { Slot, UnifiedSlot } from '../lib/slot'
+import { useUILibrary } from '../lib/ui-library-context'
 import { cn } from '../lib/utils'
 import type { Placement } from '../types'
 import {
@@ -61,6 +62,7 @@ export const HintTooltip = React.forwardRef<HTMLDivElement, HintTooltipProps>(
     },
     ref
   ) => {
+    const library = useUILibrary()
     const floatingPlacement = toFloatingPlacement(placement)
 
     const { refs, floatingStyles, context } = useFloating({
@@ -77,7 +79,7 @@ export const HintTooltip = React.forwardRef<HTMLDivElement, HintTooltipProps>(
     const role = useRole(context, { role: 'tooltip' })
     const { getFloatingProps } = useInteractions([dismiss, role])
 
-    const Comp = asChild ? Slot : 'div'
+    const Comp = asChild ? (library === 'base-ui' ? UnifiedSlot : Slot) : 'div'
 
     return (
       <FloatingPortal>

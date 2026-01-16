@@ -1,5 +1,5 @@
 {
   "title": "Guides",
   "icon": "BookOpen",
-  "pages": ["index", "nextjs", "vite", "accessibility", "animations", "persistence"]
+  "pages": ["index", "nextjs", "vite", "accessibility", "animations", "persistence", "base-ui"]
 }

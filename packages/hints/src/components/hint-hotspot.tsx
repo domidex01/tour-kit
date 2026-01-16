@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { Slot } from '../lib/slot'
+import { Slot, UnifiedSlot } from '../lib/slot'
+import { useUILibrary } from '../lib/ui-library-context'
 import { cn } from '../lib/utils'
 import type { HotspotPosition } from '../types'
 import { type HintHotspotVariants, hintHotspotVariants } from './ui/hint-variants'
@@ -56,8 +57,9 @@ export const HintHotspot = React.forwardRef<HTMLButtonElement, HintHotspotProps>
     },
     ref
   ) => {
+    const library = useUILibrary()
     const pos = getHotspotPosition(position, targetRect)
-    const Comp = asChild ? Slot : 'button'
+    const Comp = asChild ? (library === 'base-ui' ? UnifiedSlot : Slot) : 'button'
 
     // Don't pulse when tooltip is open
     const shouldPulse = pulse && !isOpen

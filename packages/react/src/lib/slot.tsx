@@ -1,5 +1,8 @@
 'use client'
 
-import { Slot, Slottable } from '@radix-ui/react-slot'
+// Export Radix Slot for backward compatibility
+export { Slot, Slottable } from '@radix-ui/react-slot'
 
-export { Slot, Slottable }
+// Export Unified Slot for Base UI support
+export { UnifiedSlot } from './unified-slot'
+export type { RenderProp, UnifiedSlotProps } from './unified-slot'

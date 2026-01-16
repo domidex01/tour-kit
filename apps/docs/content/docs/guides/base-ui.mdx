@@ -1,0 +1,204 @@
+---
+title: Base UI Support
+description: Use TourKit with Base UI instead of Radix UI
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Base UI Support
+
+TourKit supports both Radix UI (default) and Base UI for headless component primitives. This allows you to choose your preferred headless UI library while using the same TourKit components.
+
+## Installation
+
+First, install Base UI as an additional dependency:
+
+<Tabs items={['pnpm', 'npm', 'yarn', 'bun']}>
+  <Tab value='pnpm'>
+    ```bash
+    pnpm add @mui/base
+    ```
+  </Tab>
+  <Tab value='npm'>
+    ```bash
+    npm install @mui/base
+    ```
+  </Tab>
+  <Tab value='yarn'>
+    ```bash
+    yarn add @mui/base
+    ```
+  </Tab>
+  <Tab value='bun'>
+    ```bash
+    bun add @mui/base
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+  Base UI is an optional peer dependency. Radix UI remains the default and works without any additional setup.
+</Callout>
+
+## Enabling Base UI Mode
+
+Wrap your application (or a portion of it) with `UILibraryProvider` and set the `library` prop to `"base-ui"`:
+
+```tsx
+import { UILibraryProvider, Tour, TourStep } from '@tour-kit/react';
+
+function App() {
+  return (
+    <UILibraryProvider library="base-ui">
+      <Tour id="my-tour">
+        <TourStep target="#step-1" title="Welcome">
+          This tour uses Base UI primitives.
+        </TourStep>
+      </Tour>
+    </UILibraryProvider>
+  );
+}
+```
+
+## Available Packages
+
+Base UI support is available in all TourKit packages:
+
+| Package | Components with Base UI support |
+|---------|--------------------------------|
+| `@tour-kit/react` | `TourClose` |
+| `@tour-kit/hints` | `HintHotspot`, `HintTooltip` |
+| `@tour-kit/adoption` | `AdoptionNudge`, `FeatureButton` |
+| `@tour-kit/checklists` | `Checklist`, `ChecklistPanel` |
+
+## How It Works
+
+### The `asChild` Pattern
+
+TourKit components use the `asChild` pattern to allow custom element composition:
+
+```tsx
+// Radix UI style - passes an element as child
+<TourClose asChild>
+  <button className="my-button">Close</button>
+</TourClose>
+
+// Base UI style - uses render props
+<TourClose asChild>
+  {(props) => <button {...props} className="my-button">Close</button>}
+</TourClose>
+```
+
+The `UILibraryProvider` automatically switches between these patterns based on the selected library.
+
+### UnifiedSlot Component
+
+Under the hood, TourKit uses a `UnifiedSlot` component that handles both patterns:
+
+- **Radix UI mode**: Clones the child element and merges props (like `@radix-ui/react-slot`)
+- **Base UI mode**: Calls the render prop function with props
+
+You can also use `UnifiedSlot` directly in custom components:
+
+```tsx
+import { UnifiedSlot, useUILibrary } from '@tour-kit/react';
+
+function CustomButton({ asChild, children, ...props }) {
+  const library = useUILibrary();
+  const Comp = asChild
+    ? (library === 'base-ui' ? UnifiedSlot : Slot)
+    : 'button';
+
+  return <Comp {...props}>{children}</Comp>;
+}
+```
+
+## API Reference
+
+### UILibraryProvider
+
+Provider component for selecting the UI library.
+
+```tsx
+interface UILibraryProviderProps {
+  library?: 'radix-ui' | 'base-ui';  // Default: 'radix-ui'
+  children: React.ReactNode;
+}
+```
+
+### useUILibrary
+
+Hook to get the current UI library.
+
+```tsx
+function useUILibrary(): 'radix-ui' | 'base-ui';
+```
+
+### UnifiedSlot
+
+Slot component that works with both Radix UI and Base UI patterns.
+
+```tsx
+interface UnifiedSlotProps {
+  children: ReactNode | ((props: Record<string, unknown>) => ReactElement);
+  [key: string]: unknown;  // Additional props to pass through
+}
+```
+
+## Migration Guide
+
+### From Radix UI (Default)
+
+No changes needed - Radix UI is the default behavior.
+
+### To Base UI
+
+1. Install `@mui/base`
+2. Wrap your app with `UILibraryProvider`:
+
+```tsx
+import { UILibraryProvider } from '@tour-kit/react';
+
+function App() {
+  return (
+    <UILibraryProvider library="base-ui">
+      {/* Your app */}
+    </UILibraryProvider>
+  );
+}
+```
+
+3. Update any `asChild` usage to use render props:
+
+```tsx
+// Before (Radix UI style)
+<TourClose asChild>
+  <MyButton />
+</TourClose>
+
+// After (Base UI style)
+<TourClose asChild>
+  {(props) => <MyButton {...props} />}
+</TourClose>
+```
+
+<Callout type="info">
+  The element-based syntax still works in Base UI mode, but render props are recommended for full compatibility.
+</Callout>
+
+## Mixing Libraries
+
+You can nest providers to use different libraries in different parts of your app:
+
+```tsx
+<UILibraryProvider library="radix-ui">
+  <Header />  {/* Uses Radix UI */}
+
+  <UILibraryProvider library="base-ui">
+    <MainContent />  {/* Uses Base UI */}
+  </UILibraryProvider>
+
+  <Footer />  {/* Uses Radix UI */}
+</UILibraryProvider>
+```

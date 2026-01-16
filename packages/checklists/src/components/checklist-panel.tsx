@@ -1,6 +1,7 @@
-import { Slot } from '@radix-ui/react-slot'
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'
+import { Slot, UnifiedSlot } from '../lib/slot'
+import { useUILibrary } from '../lib/ui-library-context'
 import { Checklist } from './checklist'
 import { ChecklistProgress } from './checklist-progress'
 import { cn } from './cn'
@@ -54,6 +55,7 @@ export const ChecklistPanel = React.forwardRef<HTMLDivElement, ChecklistPanelPro
     },
     ref
   ) => {
+    const library = useUILibrary()
     const {
       checklist,
       progress,
@@ -72,7 +74,7 @@ export const ChecklistPanel = React.forwardRef<HTMLDivElement, ChecklistPanelPro
     if (!checklist || isDismissed) return null
     if (isComplete && checklist.config.hideOnComplete) return null
 
-    const Comp = asChild ? Slot : 'div'
+    const Comp = asChild ? (library === 'base-ui' ? UnifiedSlot : Slot) : 'div'
 
     return (
       <Comp ref={ref} className={cn(checklistPanelVariants({ size }), className)} {...props}>

@@ -44,6 +44,15 @@ export {
   hasCircularDependency,
 } from './utils/dependencies'
 
+// Slot & UI Library (Base UI support)
+export { Slot, Slottable, UnifiedSlot, type UnifiedSlotProps } from './lib/slot'
+export {
+  UILibraryProvider,
+  useUILibrary,
+  type UILibrary,
+  type UILibraryProviderProps,
+} from './lib/ui-library-context'
+
 // Types
 export type {
   // Checklist types

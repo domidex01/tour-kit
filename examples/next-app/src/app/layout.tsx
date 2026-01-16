@@ -52,6 +52,12 @@ function Navigation() {
           >
             Adoption
           </Link>
+          <Link
+            href="/base-ui"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Base UI
+          </Link>
         </div>
       </div>
     </nav>

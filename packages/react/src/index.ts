@@ -77,7 +77,15 @@ export {
 // ============================================
 
 export { cn } from './lib/utils'
-export { Slot, Slottable } from './lib/slot'
+export { Slot, Slottable, UnifiedSlot, type RenderProp, type UnifiedSlotProps } from './lib/slot'
+
+// UI Library Provider (Base UI support)
+export {
+  UILibraryProvider,
+  useUILibrary,
+  type UILibrary,
+  type UILibraryProviderProps,
+} from './lib/ui-library-context'
 
 // ============================================
 // HOOKS

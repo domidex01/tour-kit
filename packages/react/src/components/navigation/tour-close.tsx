@@ -1,6 +1,7 @@
 import { useTour } from '@tour-kit/core'
 import * as React from 'react'
-import { Slot } from '../../lib/slot'
+import { Slot, UnifiedSlot } from '../../lib/slot'
+import { useUILibrary } from '../../lib/ui-library-context'
 import { cn } from '../../lib/utils'
 import { tourButtonVariants } from '../ui/button-variants'
 
@@ -11,6 +12,7 @@ export interface TourCloseProps extends React.ComponentPropsWithoutRef<'button'>
 export const TourClose = React.forwardRef<HTMLButtonElement, TourCloseProps>(
   ({ className, asChild = false, children, onClick, ...props }, ref) => {
     const { skip } = useTour()
+    const library = useUILibrary()
 
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -22,7 +24,7 @@ export const TourClose = React.forwardRef<HTMLButtonElement, TourCloseProps>(
       [onClick, skip]
     )
 
-    const Comp = asChild ? Slot : 'button'
+    const Comp = asChild ? (library === 'base-ui' ? UnifiedSlot : Slot) : 'button'
 
     return (
       <Comp

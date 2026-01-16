@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useFeature } from '../hooks'
-import { Slot } from '../lib/slot'
+import { Slot, UnifiedSlot } from '../lib/slot'
+import { useUILibrary } from '../lib/ui-library-context'
 import { cn } from '../lib/utils'
 import { type FeatureButtonVariants, featureButtonVariants } from './ui/button-variants'
 
@@ -34,6 +35,7 @@ export const FeatureButton = React.forwardRef<HTMLButtonElement, FeatureButtonPr
     },
     ref
   ) => {
+    const library = useUILibrary()
     const { isAdopted, trackUsage } = useFeature(featureId)
 
     const handleClick = React.useCallback(
@@ -44,7 +46,7 @@ export const FeatureButton = React.forwardRef<HTMLButtonElement, FeatureButtonPr
       [trackUsage, onClick]
     )
 
-    const Comp = asChild ? Slot : 'button'
+    const Comp = asChild ? (library === 'base-ui' ? UnifiedSlot : Slot) : 'button'
 
     return (
       <Comp

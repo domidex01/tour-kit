@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'
+import { useUILibrary } from '../lib/ui-library-context'
 import { ChecklistProgress } from './checklist-progress'
 import { ChecklistTask } from './checklist-task'
 import { cn } from './cn'
@@ -61,6 +62,10 @@ export const Checklist = React.forwardRef<HTMLDivElement, ChecklistProps>(
     },
     ref
   ) => {
+    // UILibrary context for future Base UI support
+    // Note: This component uses manual cloneElement which works universally
+    useUILibrary()
+
     const {
       checklist,
       visibleTasks,

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useNudge } from '../hooks'
-import { Slot } from '../lib/slot'
+import { Slot, UnifiedSlot } from '../lib/slot'
+import { useUILibrary } from '../lib/ui-library-context'
 import { cn } from '../lib/utils'
 import type { Feature } from '../types'
 import { featureButtonVariants } from './ui/button-variants'
@@ -30,6 +31,7 @@ export interface AdoptionNudgeProps
  */
 export const AdoptionNudge = React.forwardRef<HTMLDivElement, AdoptionNudgeProps>(
   ({ render, delay = 5000, className, position, size, asChild = false, ...props }, ref) => {
+    const library = useUILibrary()
     const { pendingNudges, showNudge, dismissNudge, snoozeNudge, handleNudgeClick } = useNudge()
     const [activeFeature, setActiveFeature] = React.useState<Feature | null>(null)
     const [visible, setVisible] = React.useState(false)
@@ -85,7 +87,7 @@ export const AdoptionNudge = React.forwardRef<HTMLDivElement, AdoptionNudgeProps
       )
     }
 
-    const Comp = asChild ? Slot : 'div'
+    const Comp = asChild ? (library === 'base-ui' ? UnifiedSlot : Slot) : 'div'
 
     // Default render with shadcn/ui styling
     return (
