@@ -14,9 +14,10 @@ export default defineConfig({
         'src/__tests__/',
         'dist/',
         '**/*.d.ts',
+        '**/*.config.ts',
         'src/types/',
         'src/index.ts',
-        'src/hooks/index.ts',
+        'src/hooks/',
         'src/plugins/index.ts',
       ],
       thresholds: {

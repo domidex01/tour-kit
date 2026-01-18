@@ -295,10 +295,7 @@ describe('useAdvanceOn', () => {
       await result.current.start()
     })
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
-      'click',
-      expect.any(Function)
-    )
+    expect(addEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function))
 
     addEventListenerSpy.mockRestore()
   })
@@ -342,10 +339,7 @@ describe('useAdvanceOn', () => {
   })
 
   it('cleans up listener on step change', async () => {
-    const removeEventListenerSpy = vi.spyOn(
-      HTMLElement.prototype,
-      'removeEventListener'
-    )
+    const removeEventListenerSpy = vi.spyOn(HTMLElement.prototype, 'removeEventListener')
 
     const tours: Tour[] = [
       {
@@ -379,19 +373,13 @@ describe('useAdvanceOn', () => {
       await result.current.next()
     })
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      'click',
-      expect.any(Function)
-    )
+    expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function))
 
     removeEventListenerSpy.mockRestore()
   })
 
   it('cleans up listener on tour stop', async () => {
-    const removeEventListenerSpy = vi.spyOn(
-      HTMLElement.prototype,
-      'removeEventListener'
-    )
+    const removeEventListenerSpy = vi.spyOn(HTMLElement.prototype, 'removeEventListener')
 
     const tours: Tour[] = [
       {
@@ -424,10 +412,7 @@ describe('useAdvanceOn', () => {
       result.current.stop()
     })
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      'click',
-      expect.any(Function)
-    )
+    expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function))
 
     removeEventListenerSpy.mockRestore()
   })

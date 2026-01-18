@@ -45,9 +45,7 @@ describe('when condition', () => {
     it('handles async when condition', async () => {
       const asyncWhen = vi
         .fn()
-        .mockImplementation(
-          () => new Promise((resolve) => setTimeout(() => resolve(false), 10))
-        )
+        .mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(false), 10)))
 
       const tours: Tour[] = [
         {
@@ -245,9 +243,7 @@ describe('when condition', () => {
 
       // Tour should not be active
       expect(result.current.isActive).toBe(false)
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('has no visible steps')
-      )
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('has no visible steps'))
 
       consoleSpy.mockRestore()
     })

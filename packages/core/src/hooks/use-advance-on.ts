@@ -37,7 +37,7 @@ export function useAdvanceOn(options: UseAdvanceOnOptions = {}): void {
 
     // Get target element (defaults to document)
     const targetElement: Element | Document = selector
-      ? getElement(selector) ?? document
+      ? (getElement(selector) ?? document)
       : document
 
     if (selector && targetElement === document) {
@@ -58,10 +58,7 @@ export function useAdvanceOn(options: UseAdvanceOnOptions = {}): void {
           const shouldAdvance = handler()
           if (!shouldAdvance) return
         } catch (error) {
-          console.warn(
-            `[tour-kit] advanceOn handler error for step "${currentStep.id}":`,
-            error
-          )
+          console.warn(`[tour-kit] advanceOn handler error for step "${currentStep.id}":`, error)
           return
         }
       }

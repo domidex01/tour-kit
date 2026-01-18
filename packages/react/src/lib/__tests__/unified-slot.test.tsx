@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import * as React from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import { UnifiedSlot, type RenderProp } from '../unified-slot'
+import { type RenderProp, UnifiedSlot } from '../unified-slot'
 
 describe('UnifiedSlot', () => {
   describe('Element Children (Radix UI style)', () => {
@@ -184,11 +184,7 @@ describe('UnifiedSlot', () => {
     it('passes additional props to render prop', () => {
       const renderFn: RenderProp = (props) => <div data-testid="child" {...props} />
 
-      render(
-        <UnifiedSlot data-custom="custom-value">
-          {renderFn}
-        </UnifiedSlot>
-      )
+      render(<UnifiedSlot data-custom="custom-value">{renderFn}</UnifiedSlot>)
 
       const div = screen.getByTestId('child')
       expect(div).toHaveAttribute('data-custom', 'custom-value')

@@ -74,10 +74,7 @@ function buildCallbackContext(
  * Evaluate step's when condition
  * @returns true if step should be shown, false if it should be skipped
  */
-async function evaluateStepWhen(
-  step: TourStep,
-  context: TourCallbackContext
-): Promise<boolean> {
+async function evaluateStepWhen(step: TourStep, context: TourCallbackContext): Promise<boolean> {
   if (!step.when) return true
 
   try {
@@ -124,6 +121,24 @@ async function findNextVisibleStepIndex(
   }
 
   return -1 // No visible step found
+}
+
+/**
+ * Find the nearest visible step from a starting index
+ * Tries forward first, then backward
+ * @returns Index of nearest visible step, or -1 if none found
+ */
+async function findNearestVisibleStepIndex(
+  startIndex: number,
+  steps: TourStep[],
+  context: TourCallbackContext
+): Promise<number> {
+  // Try forward first
+  const forwardIndex = await findNextVisibleStepIndex(startIndex, 1, steps, context)
+  if (forwardIndex !== -1) return forwardIndex
+
+  // Try backward
+  return findNextVisibleStepIndex(startIndex - 1, -1, steps, context)
 }
 
 // Action types for reducer
@@ -363,12 +378,7 @@ export function TourProvider({
       )
 
       // Find first visible step from the initial index
-      const visibleIndex = await findNextVisibleStepIndex(
-        initialIndex,
-        1,
-        tour.steps,
-        context
-      )
+      const visibleIndex = await findNextVisibleStepIndex(initialIndex, 1, tour.steps, context)
 
       if (visibleIndex === -1) {
         console.warn(`[tour-kit] Tour "${id}" has no visible steps`)
@@ -382,55 +392,56 @@ export function TourProvider({
     [tours, state, data, tourKitContext]
   )
 
+  // Helper to complete the current tour
+  const completeTour = React.useCallback(() => {
+    if (!currentTour) return
+    dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
+    dispatch({ type: 'COMPLETE_TOUR' })
+    clear()
+    tourKitContext?.onTourComplete?.(currentTour.id)
+    currentTour.onComplete?.({ ...state, tour: currentTour, data })
+  }, [currentTour, state, data, tourKitContext, clear])
+
   const next = React.useCallback(async () => {
     if (!state.isActive || !currentTour) return
 
     const isLastStep = state.currentStepIndex >= currentTour.steps.length - 1
-
     if (isLastStep) {
-      dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
-      dispatch({ type: 'COMPLETE_TOUR' })
-      clear() // Clear persisted state on complete
-      tourKitContext?.onTourComplete?.(currentTour.id)
-      currentTour.onComplete?.({ ...state, tour: currentTour, data })
-    } else {
-      dispatch({ type: 'SET_TRANSITIONING', isTransitioning: true })
-
-      // Build context and find next visible step (skipping steps where when returns false)
-      const context = buildCallbackContext(state, currentTour, data)
-      const nextStepIndex = await findNextVisibleStepIndex(
-        state.currentStepIndex + 1,
-        1, // forward direction
-        currentTour.steps,
-        context
-      )
-
-      // No more visible steps - complete the tour
-      if (nextStepIndex === -1) {
-        dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
-        dispatch({ type: 'COMPLETE_TOUR' })
-        clear()
-        tourKitContext?.onTourComplete?.(currentTour.id)
-        currentTour.onComplete?.({ ...state, tour: currentTour, data })
-        return
-      }
-
-      // Navigate to the next visible step
-      const navigated = await navigateToStep(nextStepIndex)
-
-      if (navigated) {
-        const nextStep = currentTour.steps[nextStepIndex]
-        if (nextStep) {
-          tourKitContext?.onStepView?.(currentTour.id, nextStep.id, nextStepIndex)
-          currentTour.onStepChange?.(nextStep, nextStepIndex, {
-            ...state,
-            tour: currentTour,
-            data,
-          })
-        }
-      }
+      completeTour()
+      return
     }
-  }, [state, currentTour, data, tourKitContext, navigateToStep, clear])
+
+    dispatch({ type: 'SET_TRANSITIONING', isTransitioning: true })
+
+    // Build context and find next visible step (skipping steps where when returns false)
+    const context = buildCallbackContext(state, currentTour, data)
+    const nextStepIndex = await findNextVisibleStepIndex(
+      state.currentStepIndex + 1,
+      1, // forward direction
+      currentTour.steps,
+      context
+    )
+
+    // No more visible steps - complete the tour
+    if (nextStepIndex === -1) {
+      completeTour()
+      return
+    }
+
+    // Navigate to the next visible step
+    const navigated = await navigateToStep(nextStepIndex)
+    if (!navigated) return
+
+    const nextStep = currentTour.steps[nextStepIndex]
+    if (nextStep) {
+      tourKitContext?.onStepView?.(currentTour.id, nextStep.id, nextStepIndex)
+      currentTour.onStepChange?.(nextStep, nextStepIndex, {
+        ...state,
+        tour: currentTour,
+        data,
+      })
+    }
+  }, [state, currentTour, data, tourKitContext, navigateToStep, completeTour])
 
   const prev = React.useCallback(async () => {
     if (!state.isActive || state.currentStepIndex <= 0 || !currentTour) return
@@ -486,52 +497,28 @@ export function TourProvider({
       }
       const shouldShow = await evaluateStepWhen(targetStep, stepContext)
 
-      let targetIndex = stepIndex
+      // If target step can be shown, use it; otherwise find nearest visible step
+      const targetIndex = shouldShow
+        ? stepIndex
+        : await findNearestVisibleStepIndex(stepIndex + 1, currentTour.steps, context)
 
-      // If target step cannot be shown, find nearest visible step
-      if (!shouldShow) {
-        // Try forward first
-        const forwardIndex = await findNextVisibleStepIndex(
-          stepIndex + 1,
-          1,
-          currentTour.steps,
-          context
-        )
-
-        if (forwardIndex !== -1) {
-          targetIndex = forwardIndex
-        } else {
-          // Try backward
-          const backwardIndex = await findNextVisibleStepIndex(
-            stepIndex - 1,
-            -1,
-            currentTour.steps,
-            context
-          )
-
-          if (backwardIndex !== -1) {
-            targetIndex = backwardIndex
-          } else {
-            // No visible steps found
-            dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
-            return
-          }
-        }
+      if (targetIndex === -1) {
+        dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+        return
       }
 
       // Navigate to the target visible step
       const navigated = await navigateToStep(targetIndex)
+      if (!navigated) return
 
-      if (navigated) {
-        const step = currentTour.steps[targetIndex]
-        if (step) {
-          tourKitContext?.onStepView?.(currentTour.id, step.id, targetIndex)
-          currentTour.onStepChange?.(step, targetIndex, {
-            ...state,
-            tour: currentTour,
-            data,
-          })
-        }
+      const step = currentTour.steps[targetIndex]
+      if (step) {
+        tourKitContext?.onStepView?.(currentTour.id, step.id, targetIndex)
+        currentTour.onStepChange?.(step, targetIndex, {
+          ...state,
+          tour: currentTour,
+          data,
+        })
       }
     },
     [state, currentTour, data, tourKitContext, navigateToStep]

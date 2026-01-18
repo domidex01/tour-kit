@@ -4,7 +4,7 @@
  * Tests for the feature usage tracking functions.
  * These tests require JSDOM environment for DOM event testing.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { emitFeatureEvent, setupFeatureTracking } from '../../engine/usage-tracker'
 import type { Feature } from '../../types'
 
@@ -84,9 +84,9 @@ describe('setupFeatureTracking', () => {
       document.body.innerHTML = '<button class="feature-btn">Click me</button>'
 
       cleanup = setupFeatureTracking(feature, onUsage)
-      document.querySelector('.feature-btn')?.dispatchEvent(
-        new MouseEvent('click', { bubbles: true })
-      )
+      document
+        .querySelector('.feature-btn')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
 
       expect(onUsage).toHaveBeenCalledWith('test-feature')
     })
@@ -97,9 +97,9 @@ describe('setupFeatureTracking', () => {
       document.body.innerHTML = '<button data-feature="test">Click me</button>'
 
       cleanup = setupFeatureTracking(feature, onUsage)
-      document.querySelector('[data-feature="test"]')?.dispatchEvent(
-        new MouseEvent('click', { bubbles: true })
-      )
+      document
+        .querySelector('[data-feature="test"]')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
 
       expect(onUsage).toHaveBeenCalledWith('test-feature')
     })

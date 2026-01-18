@@ -1,11 +1,11 @@
-import { useState } from 'react'
 import {
+  type RenderProp,
   TourClose,
+  type UILibrary,
   UILibraryProvider,
   useUILibrary,
-  type UILibrary,
-  type RenderProp,
 } from '@tour-kit/react'
+import { useState } from 'react'
 
 // Demo component that shows current UI library mode
 function UILibraryBadge() {
@@ -13,9 +13,7 @@ function UILibraryBadge() {
   return (
     <span
       className={`px-2 py-1 rounded text-xs font-medium ${
-        library === 'base-ui'
-          ? 'bg-blue-100 text-blue-800'
-          : 'bg-purple-100 text-purple-800'
+        library === 'base-ui' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
       }`}
     >
       {library === 'base-ui' ? 'Base UI Mode' : 'Radix UI Mode'}
@@ -66,7 +64,7 @@ function RadixUIDemo() {
         <div className="p-4 bg-muted rounded-md">
           <h4 className="font-medium mb-2">Code Pattern:</h4>
           <pre className="text-sm bg-background p-2 rounded overflow-x-auto">
-{`<TourClose asChild>
+            {`<TourClose asChild>
   <CustomButton>Close Tour</CustomButton>
 </TourClose>`}
           </pre>
@@ -74,13 +72,11 @@ function RadixUIDemo() {
 
         <div className="flex items-center gap-4">
           <TourClose asChild>
-            <CustomButton variant="destructive" onClick={() => setCloseCount(c => c + 1)}>
+            <CustomButton variant="destructive" onClick={() => setCloseCount((c) => c + 1)}>
               Close Tour (Radix)
             </CustomButton>
           </TourClose>
-          <span className="text-sm text-muted-foreground">
-            Clicked: {closeCount} times
-          </span>
+          <span className="text-sm text-muted-foreground">Clicked: {closeCount} times</span>
         </div>
       </div>
     </div>
@@ -96,7 +92,7 @@ function BaseUIDemo() {
       {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
       variant="destructive"
       onClick={(e) => {
-        setCloseCount(c => c + 1)
+        setCloseCount((c) => c + 1)
         // Call original onClick if present
         const onClick = props.onClick as React.MouseEventHandler<HTMLButtonElement> | undefined
         onClick?.(e)
@@ -121,7 +117,7 @@ function BaseUIDemo() {
           <div className="p-4 bg-muted rounded-md">
             <h4 className="font-medium mb-2">Code Pattern:</h4>
             <pre className="text-sm bg-background p-2 rounded overflow-x-auto">
-{`<TourClose asChild>
+              {`<TourClose asChild>
   {(props) => (
     <CustomButton {...props}>
       Close Tour
@@ -132,12 +128,8 @@ function BaseUIDemo() {
           </div>
 
           <div className="flex items-center gap-4">
-            <TourClose asChild>
-              {renderButton}
-            </TourClose>
-            <span className="text-sm text-muted-foreground">
-              Clicked: {closeCount} times
-            </span>
+            <TourClose asChild>{renderButton}</TourClose>
+            <span className="text-sm text-muted-foreground">Clicked: {closeCount} times</span>
           </div>
         </div>
       </div>
@@ -156,7 +148,7 @@ function InteractiveDemo() {
       className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"
       {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
       onClick={(e) => {
-        setClickCount(c => c + 1)
+        setClickCount((c) => c + 1)
         const onClick = props.onClick as React.MouseEventHandler<HTMLButtonElement> | undefined
         onClick?.(e)
       }}
@@ -208,7 +200,7 @@ function InteractiveDemo() {
                 <button
                   type="button"
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"
-                  onClick={() => setClickCount(c => c + 1)}
+                  onClick={() => setClickCount((c) => c + 1)}
                 >
                   Click Me ({mode})
                 </button>
@@ -216,9 +208,7 @@ function InteractiveDemo() {
                 renderButton
               )}
             </TourClose>
-            <span className="text-sm text-muted-foreground">
-              Clicked: {clickCount} times
-            </span>
+            <span className="text-sm text-muted-foreground">Clicked: {clickCount} times</span>
           </div>
         </div>
       </UILibraryProvider>
@@ -239,7 +229,7 @@ function NestedProvidersDemo() {
         <div className="p-4 bg-muted rounded-md">
           <h4 className="font-medium mb-2">Code Pattern:</h4>
           <pre className="text-sm bg-background p-2 rounded overflow-x-auto">
-{`<UILibraryProvider library="radix-ui">
+            {`<UILibraryProvider library="radix-ui">
   <Header />  {/* Uses Radix UI */}
 
   <UILibraryProvider library="base-ui">
@@ -320,14 +310,12 @@ export function BaseUIPage() {
           <div className="space-y-4">
             <div>
               <h3 className="font-medium mb-2">1. Install Base UI (optional)</h3>
-              <pre className="text-sm bg-background p-2 rounded">
-                pnpm add @mui/base
-              </pre>
+              <pre className="text-sm bg-background p-2 rounded">pnpm add @mui/base</pre>
             </div>
             <div>
               <h3 className="font-medium mb-2">2. Wrap your app with UILibraryProvider</h3>
               <pre className="text-sm bg-background p-2 rounded overflow-x-auto">
-{`import { UILibraryProvider } from '@tour-kit/react'
+                {`import { UILibraryProvider } from '@tour-kit/react'
 
 function App() {
   return (
@@ -341,7 +329,7 @@ function App() {
             <div>
               <h3 className="font-medium mb-2">3. Use render props for asChild components</h3>
               <pre className="text-sm bg-background p-2 rounded overflow-x-auto">
-{`<TourClose asChild>
+                {`<TourClose asChild>
   {(props) => <MyButton {...props}>Close</MyButton>}
 </TourClose>`}
               </pre>
