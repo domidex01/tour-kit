@@ -1,0 +1,346 @@
+---
+title: Router Integration
+description: Set up multi-page tours with Next.js, React Router, and custom routers
+---
+
+# Router Integration
+
+Tour Kit supports multi-page tours that navigate users across different routes. This guide covers integration with popular routers.
+
+## Why Router Integration?
+
+Multi-page tours allow you to:
+
+- Guide users through workflows spanning multiple pages
+- Automatically navigate to the correct page when a tour step requires it
+- Persist tour state across page transitions
+- Resume tours when users return to your app
+
+## Next.js App Router
+
+The most common setup for Next.js 13+ applications.
+
+### Installation
+
+```bash
+npm install @tour-kit/react
+```
+
+### Setup
+
+```tsx title="app/providers.tsx"
+'use client'
+
+import { TourKitProvider, TourProvider, useNextAppRouter } from '@tour-kit/react'
+
+export function Providers({ children }) {
+  const router = useNextAppRouter()
+
+  return (
+    <TourKitProvider>
+      <TourProvider tours={tours} router={router}>
+        {children}
+      </TourProvider>
+    </TourKitProvider>
+  )
+}
+```
+
+### Multi-Page Tour Example
+
+```tsx title="tours/onboarding.ts"
+import { createTour, createStep } from '@tour-kit/core'
+
+export const onboardingTour = createTour({
+  id: 'onboarding',
+  steps: [
+    createStep({
+      id: 'welcome',
+      target: '#welcome-banner',
+      route: '/', // Step requires this route
+      content: {
+        title: 'Welcome!',
+        description: 'Let\'s explore your dashboard.',
+      },
+    }),
+    createStep({
+      id: 'settings',
+      target: '#settings-panel',
+      route: '/settings', // Automatically navigates here
+      content: {
+        title: 'Settings',
+        description: 'Customize your experience.',
+      },
+    }),
+    createStep({
+      id: 'profile',
+      target: '#profile-form',
+      route: '/settings/profile',
+      content: {
+        title: 'Your Profile',
+        description: 'Complete your profile to get started.',
+      },
+    }),
+  ],
+})
+```
+
+## Next.js Pages Router
+
+For Next.js 12 and earlier, or apps using the Pages Router.
+
+### Setup
+
+```tsx title="pages/_app.tsx"
+import { TourKitProvider, TourProvider, useNextPagesRouter } from '@tour-kit/react'
+
+function MyApp({ Component, pageProps }) {
+  const router = useNextPagesRouter()
+
+  return (
+    <TourKitProvider>
+      <TourProvider tours={tours} router={router}>
+        <Component {...pageProps} />
+      </TourProvider>
+    </TourKitProvider>
+  )
+}
+
+export default MyApp
+```
+
+## React Router v6+
+
+For single-page applications using React Router.
+
+### Setup
+
+```tsx title="App.tsx"
+import { BrowserRouter } from 'react-router-dom'
+import { TourKitProvider, TourProvider, useReactRouter } from '@tour-kit/react'
+
+function AppProviders({ children }) {
+  const router = useReactRouter()
+
+  return (
+    <TourKitProvider>
+      <TourProvider tours={tours} router={router}>
+        {children}
+      </TourProvider>
+    </TourKitProvider>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppProviders>
+        <Routes>
+          {/* Your routes */}
+        </Routes>
+      </AppProviders>
+    </BrowserRouter>
+  )
+}
+```
+
+## Custom Router Adapter
+
+For other routing libraries, create a custom adapter implementing the `RouterAdapter` interface.
+
+### Interface
+
+```tsx
+interface RouterAdapter {
+  // Get the current route path
+  getCurrentRoute(): string
+
+  // Navigate to a route (can be async)
+  navigate(route: string): void | Promise<boolean | undefined>
+
+  // Check if current route matches a pattern
+  matchRoute(
+    pattern: string,
+    mode?: 'exact' | 'startsWith' | 'contains'
+  ): boolean
+
+  // Subscribe to route changes
+  onRouteChange(callback: (route: string) => void): () => void
+}
+```
+
+### Example: Custom Adapter
+
+```tsx
+import { useCallback, useEffect, useRef } from 'react'
+import type { RouterAdapter } from '@tour-kit/core'
+
+export function useMyRouter(): RouterAdapter {
+  const pathnameRef = useRef(window.location.pathname)
+  const callbacksRef = useRef(new Set<(route: string) => void>())
+
+  // Update ref when pathname changes
+  useEffect(() => {
+    const handlePopState = () => {
+      const newPath = window.location.pathname
+      pathnameRef.current = newPath
+      callbacksRef.current.forEach(cb => cb(newPath))
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  const getCurrentRoute = useCallback(() => pathnameRef.current, [])
+
+  const navigate = useCallback((route: string) => {
+    window.history.pushState({}, '', route)
+    pathnameRef.current = route
+    callbacksRef.current.forEach(cb => cb(route))
+  }, [])
+
+  const matchRoute = useCallback((pattern: string, mode = 'exact') => {
+    const current = pathnameRef.current
+    switch (mode) {
+      case 'startsWith': return current.startsWith(pattern)
+      case 'contains': return current.includes(pattern)
+      default: return current === pattern
+    }
+  }, [])
+
+  const onRouteChange = useCallback((callback: (route: string) => void) => {
+    // Call immediately with current route
+    callback(pathnameRef.current)
+    callbacksRef.current.add(callback)
+    return () => callbacksRef.current.delete(callback)
+  }, [])
+
+  return { getCurrentRoute, navigate, matchRoute, onRouteChange }
+}
+```
+
+## Route Matching Modes
+
+The `matchRoute` function supports three modes:
+
+| Mode | Description | Example |
+|------|-------------|---------|
+| `exact` | Path must match exactly | `/settings` matches only `/settings` |
+| `startsWith` | Path must start with pattern | `/settings` matches `/settings/profile` |
+| `contains` | Path must contain pattern | `settings` matches `/app/settings/profile` |
+
+### Usage in Steps
+
+```tsx
+createStep({
+  id: 'settings-step',
+  target: '#settings',
+  route: '/settings', // Uses exact match by default
+  routeMatchMode: 'startsWith', // Match any /settings/* route
+})
+```
+
+## Navigation Behavior
+
+### Automatic Navigation
+
+When a step requires a different route, Tour Kit automatically navigates:
+
+```tsx
+const tour = createTour({
+  id: 'multi-page',
+  steps: [
+    { id: 'step-1', route: '/page-a', target: '#element-a' },
+    { id: 'step-2', route: '/page-b', target: '#element-b' }, // Auto-navigates
+  ],
+})
+```
+
+### Navigation Callbacks
+
+Control navigation behavior with callbacks:
+
+```tsx
+<TourProvider
+  tours={tours}
+  router={router}
+  onBeforeNavigate={(route, step) => {
+    // Return false to prevent navigation
+    if (hasUnsavedChanges()) {
+      return confirm('Leave without saving?')
+    }
+    return true
+  }}
+  onAfterNavigate={(route, step) => {
+    analytics.track('tour_navigated', { route, stepId: step.id })
+  }}
+/>
+```
+
+## State Persistence
+
+Tour state is automatically persisted across page loads:
+
+```tsx
+<TourKitProvider
+  persistence={{
+    enabled: true,
+    storage: 'localStorage',
+    prefix: 'my-app-tours',
+  }}
+>
+```
+
+### Resume Tours
+
+When a user returns to your app, tours can resume automatically:
+
+```tsx
+const { resumeLastTour } = useTour()
+
+useEffect(() => {
+  // Check if there's a tour to resume
+  resumeLastTour()
+}, [])
+```
+
+## Troubleshooting
+
+### Step not showing after navigation
+
+Ensure the target element exists on the page. Use `waitForTarget` to wait for dynamic content:
+
+```tsx
+createStep({
+  id: 'dynamic-step',
+  route: '/dashboard',
+  target: '#dynamic-widget',
+  waitForTarget: true, // Wait up to 5 seconds for element
+  waitForTargetTimeout: 5000,
+})
+```
+
+### Route changes not detected
+
+Make sure `onRouteChange` is called immediately with the current route:
+
+```tsx
+const onRouteChange = (callback) => {
+  // Important: Call immediately!
+  callback(getCurrentRoute())
+
+  // Then subscribe to changes
+  return subscribe(callback)
+}
+```
+
+### Navigation not working
+
+Check that your router adapter's `navigate` function actually changes the route:
+
+```tsx
+const navigate = (route) => {
+  console.log('Navigating to:', route)
+  router.push(route) // Make sure this works
+}
+```

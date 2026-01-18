@@ -39,11 +39,11 @@ describe('useTour', () => {
     expect(result.current.totalSteps).toBe(0)
   })
 
-  it('starts tour when start is called', () => {
+  it('starts tour when start is called', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     expect(result.current.isActive).toBe(true)
@@ -52,81 +52,81 @@ describe('useTour', () => {
     expect(result.current.totalSteps).toBe(3)
   })
 
-  it('advances to next step', () => {
+  it('advances to next step', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
-    act(() => {
-      result.current.next()
+    await act(async () => {
+      await result.current.next()
     })
 
     expect(result.current.currentStepIndex).toBe(1)
     expect(result.current.currentStep?.id).toBe('step-2')
   })
 
-  it('goes to previous step', () => {
+  it('goes to previous step', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
-    act(() => {
-      result.current.next()
+    await act(async () => {
+      await result.current.next()
     })
 
-    act(() => {
-      result.current.prev()
+    await act(async () => {
+      await result.current.prev()
     })
 
     expect(result.current.currentStepIndex).toBe(0)
     expect(result.current.currentStep?.id).toBe('step-1')
   })
 
-  it('does not go to previous step when on first step', () => {
+  it('does not go to previous step when on first step', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
-    act(() => {
-      result.current.prev()
+    await act(async () => {
+      await result.current.prev()
     })
 
     expect(result.current.currentStepIndex).toBe(0)
     expect(result.current.isFirstStep).toBe(true)
   })
 
-  it('completes tour on last step next', () => {
+  it('completes tour on last step next', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     // Go to last step
-    act(() => {
-      result.current.goTo(2)
+    await act(async () => {
+      await result.current.goTo(2)
     })
 
     expect(result.current.isLastStep).toBe(true)
 
-    act(() => {
-      result.current.next()
+    await act(async () => {
+      await result.current.next()
     })
 
     expect(result.current.isActive).toBe(false)
   })
 
-  it('skips tour', () => {
+  it('skips tour', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     act(() => {
@@ -136,11 +136,11 @@ describe('useTour', () => {
     expect(result.current.isActive).toBe(false)
   })
 
-  it('stops tour', () => {
+  it('stops tour', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     act(() => {
@@ -150,11 +150,11 @@ describe('useTour', () => {
     expect(result.current.isActive).toBe(false)
   })
 
-  it('completes tour manually', () => {
+  it('completes tour manually', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     act(() => {
@@ -164,19 +164,19 @@ describe('useTour', () => {
     expect(result.current.isActive).toBe(false)
   })
 
-  it('calculates progress correctly', () => {
+  it('calculates progress correctly', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     expect(result.current.progress).toBeCloseTo(1 / 3)
     expect(result.current.isFirstStep).toBe(true)
     expect(result.current.isLastStep).toBe(false)
 
-    act(() => {
-      result.current.goTo(2)
+    await act(async () => {
+      await result.current.goTo(2)
     })
 
     expect(result.current.progress).toBe(1)
@@ -184,44 +184,44 @@ describe('useTour', () => {
     expect(result.current.isFirstStep).toBe(false)
   })
 
-  it('goes to specific step with goTo', () => {
+  it('goes to specific step with goTo', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
-    act(() => {
-      result.current.goTo(1)
+    await act(async () => {
+      await result.current.goTo(1)
     })
 
     expect(result.current.currentStepIndex).toBe(1)
     expect(result.current.currentStep?.id).toBe('step-2')
   })
 
-  it('isStepActive returns correct value', () => {
+  it('isStepActive returns correct value', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     expect(result.current.isStepActive('step-1')).toBe(true)
     expect(result.current.isStepActive('step-2')).toBe(false)
 
-    act(() => {
-      result.current.next()
+    await act(async () => {
+      await result.current.next()
     })
 
     expect(result.current.isStepActive('step-1')).toBe(false)
     expect(result.current.isStepActive('step-2')).toBe(true)
   })
 
-  it('getStep returns step by id', () => {
+  it('getStep returns step by id', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     const step = result.current.getStep('step-2')
@@ -229,18 +229,18 @@ describe('useTour', () => {
     expect(step?.content).toBe('Step 2')
   })
 
-  it('getStep returns undefined for non-existent step', () => {
+  it('getStep returns undefined for non-existent step', async () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     const step = result.current.getStep('nonexistent')
     expect(step).toBeUndefined()
   })
 
-  it('starts tour with specific tourId', () => {
+  it('starts tour with specific tourId', async () => {
     const multipleTours: Tour[] = [
       testTour,
       {
@@ -255,8 +255,8 @@ describe('useTour', () => {
 
     const { result } = renderHook(() => useTour('second-tour'), { wrapper: multiWrapper })
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     expect(result.current.isActive).toBe(true)

@@ -195,6 +195,48 @@ function AppContent() {
         analytics.stepViewed(tourId, stepId, stepIndex, 8)
       }}
     >
+      {/* Demo tour for conditional logic (when) and wait-for-action (advanceOn) */}
+      <Tour id="conditional-demo">
+        <TourStep
+          id="conditional-intro"
+          route="/"
+          target="#hero-title"
+          title="Conditional Steps Demo"
+          content="This tour demonstrates conditional steps (when) and wait-for-action (advanceOn) features."
+          placement="bottom"
+          waitForTarget
+        />
+        <TourStep
+          id="click-to-continue"
+          route="/"
+          target="#start-tour-btn"
+          title="Click to Continue"
+          content="Click the 'Start Tour' button below to advance to the next step. This demonstrates advanceOn with click events."
+          placement="bottom"
+          waitForTarget
+          advanceOn={{ event: 'click', selector: '#start-tour-btn' }}
+        />
+        <TourStep
+          id="conditional-features"
+          route="/features"
+          target="#features-header"
+          title="Conditional Step"
+          content="This step only shows when the tour data has 'showAdvanced' set to true. It was skipped if you didn't set it!"
+          placement="bottom"
+          waitForTarget
+          when={(ctx) => ctx.data.showAdvanced === true}
+        />
+        <TourStep
+          id="conditional-complete"
+          route="/features"
+          target="#feature-multipage"
+          title="Demo Complete!"
+          content="You've seen how conditional steps and wait-for-action work. Use 'when' for conditional visibility and 'advanceOn' for automatic advancement."
+          placement="bottom"
+          waitForTarget
+        />
+      </Tour>
+
       {/* Multi-page product tour */}
       <Tour id="product-tour">
         {/* Home page steps */}

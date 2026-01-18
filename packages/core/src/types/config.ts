@@ -98,6 +98,11 @@ export interface ScrollConfig {
 }
 
 /**
+ * Text direction for RTL/LTR layouts
+ */
+export type Direction = 'ltr' | 'rtl' | 'auto'
+
+/**
  * Global TourKit configuration
  */
 export interface TourKitConfig {
@@ -106,6 +111,14 @@ export interface TourKitConfig {
   persistence?: PersistenceConfig
   a11y?: A11yConfig
   scroll?: ScrollConfig
+  /**
+   * Text direction for RTL/LTR support
+   * - 'ltr': Left-to-right (default)
+   * - 'rtl': Right-to-left (Arabic, Hebrew, Persian, etc.)
+   * - 'auto': Detect from document.dir
+   * @default 'auto'
+   */
+  dir?: Direction
 }
 
 // Default configurations

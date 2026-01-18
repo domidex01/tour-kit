@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { useAdvanceOn } from '../hooks/use-advance-on'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
-import type { Tour, TourContextValue, TourState, TourStep } from '../types'
+import type { Tour, TourCallbackContext, TourContextValue, TourState, TourStep } from '../types'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
 import { waitForElement } from '../utils/dom'
 import { TourContext } from './tour-context'
@@ -44,6 +45,85 @@ function isNavigationNeeded(
   const matchMode = step.routeMatch ?? 'exact'
   const isOnRoute = router.matchRoute(step.route, matchMode)
   return { needed: !isOnRoute, isOnRoute }
+}
+
+/**
+ * Build TourCallbackContext for when/lifecycle callbacks
+ */
+function buildCallbackContext(
+  state: TourState,
+  tour: Tour | null,
+  data: Record<string, unknown>
+): TourCallbackContext {
+  return {
+    tourId: state.tourId,
+    isActive: state.isActive,
+    currentStepIndex: state.currentStepIndex,
+    currentStep: state.currentStep,
+    totalSteps: state.totalSteps,
+    isLoading: state.isLoading,
+    isTransitioning: state.isTransitioning,
+    completedTours: state.completedTours,
+    skippedTours: state.skippedTours,
+    tour,
+    data,
+  }
+}
+
+/**
+ * Evaluate step's when condition
+ * @returns true if step should be shown, false if it should be skipped
+ */
+async function evaluateStepWhen(
+  step: TourStep,
+  context: TourCallbackContext
+): Promise<boolean> {
+  if (!step.when) return true
+
+  try {
+    return await step.when(context)
+  } catch (error) {
+    console.warn(`[tour-kit] Error evaluating when condition for step "${step.id}":`, error)
+    return false // Skip step on error
+  }
+}
+
+/**
+ * Find the next visible step index starting from a given index
+ * @param startIndex - Index to start searching from (inclusive)
+ * @param direction - 1 for forward, -1 for backward
+ * @param steps - Array of tour steps
+ * @param context - Callback context for when evaluation
+ * @returns Index of next visible step, or -1 if none found
+ */
+async function findNextVisibleStepIndex(
+  startIndex: number,
+  direction: 1 | -1,
+  steps: TourStep[],
+  context: TourCallbackContext
+): Promise<number> {
+  let index = startIndex
+
+  while (index >= 0 && index < steps.length) {
+    const step = steps[index]
+    if (!step) break
+
+    // Update context with the potential new index for accurate evaluation
+    const stepContext: TourCallbackContext = {
+      ...context,
+      currentStepIndex: index,
+      currentStep: step,
+    }
+    const shouldShow = await evaluateStepWhen(step, stepContext)
+
+    if (shouldShow) {
+      return index
+    }
+
+    index += direction
+  }
+
+  return -1 // No visible step found
 }
 
 // Action types for reducer
@@ -259,15 +339,45 @@ export function TourProvider({
 
   // Actions
   const start = React.useCallback(
-    (tourId?: string, stepIndex?: number) => {
+    async (tourId?: string, stepIndex?: number) => {
       const id = tourId ?? tours[0]?.id
       if (!id) return
 
-      dispatch({ type: 'START_TOUR', tourId: id, stepIndex })
-      tourKitContext?.onTourStart?.(id)
-
       const tour = state.tours.get(id)
-      tour?.onStart?.({ ...state, tour, data })
+      if (!tour) return
+
+      const initialIndex = stepIndex ?? tour.startAt ?? 0
+
+      // Build context for when evaluation
+      const context = buildCallbackContext(
+        {
+          ...state,
+          tourId: id,
+          isActive: true,
+          totalSteps: tour.steps.length,
+          currentStepIndex: initialIndex,
+          currentStep: tour.steps[initialIndex] ?? null,
+        },
+        tour,
+        data
+      )
+
+      // Find first visible step from the initial index
+      const visibleIndex = await findNextVisibleStepIndex(
+        initialIndex,
+        1,
+        tour.steps,
+        context
+      )
+
+      if (visibleIndex === -1) {
+        console.warn(`[tour-kit] Tour "${id}" has no visible steps`)
+        return
+      }
+
+      dispatch({ type: 'START_TOUR', tourId: id, stepIndex: visibleIndex })
+      tourKitContext?.onTourStart?.(id)
+      tour.onStart?.({ ...state, tour, data })
     },
     [tours, state, data, tourKitContext]
   )
@@ -286,8 +396,26 @@ export function TourProvider({
     } else {
       dispatch({ type: 'SET_TRANSITIONING', isTransitioning: true })
 
-      // Use route-aware navigation
-      const nextStepIndex = state.currentStepIndex + 1
+      // Build context and find next visible step (skipping steps where when returns false)
+      const context = buildCallbackContext(state, currentTour, data)
+      const nextStepIndex = await findNextVisibleStepIndex(
+        state.currentStepIndex + 1,
+        1, // forward direction
+        currentTour.steps,
+        context
+      )
+
+      // No more visible steps - complete the tour
+      if (nextStepIndex === -1) {
+        dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
+        dispatch({ type: 'COMPLETE_TOUR' })
+        clear()
+        tourKitContext?.onTourComplete?.(currentTour.id)
+        currentTour.onComplete?.({ ...state, tour: currentTour, data })
+        return
+      }
+
+      // Navigate to the next visible step
       const navigated = await navigateToStep(nextStepIndex)
 
       if (navigated) {
@@ -309,8 +437,22 @@ export function TourProvider({
 
     dispatch({ type: 'SET_TRANSITIONING', isTransitioning: true })
 
-    // Use route-aware navigation
-    const prevStepIndex = state.currentStepIndex - 1
+    // Build context and find previous visible step (skipping steps where when returns false)
+    const context = buildCallbackContext(state, currentTour, data)
+    const prevStepIndex = await findNextVisibleStepIndex(
+      state.currentStepIndex - 1,
+      -1, // backward direction
+      currentTour.steps,
+      context
+    )
+
+    // No previous visible step - stay on current step
+    if (prevStepIndex === -1) {
+      dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+      return
+    }
+
+    // Navigate to the previous visible step
     const navigated = await navigateToStep(prevStepIndex)
 
     if (navigated) {
@@ -330,16 +472,61 @@ export function TourProvider({
     async (stepIndex: number) => {
       if (!state.isActive || !currentTour) return
 
+      const targetStep = currentTour.steps[stepIndex]
+      if (!targetStep) return
+
       dispatch({ type: 'SET_TRANSITIONING', isTransitioning: true })
 
-      // Use route-aware navigation
-      const navigated = await navigateToStep(stepIndex)
+      // Build context and evaluate when condition for target step
+      const context = buildCallbackContext(state, currentTour, data)
+      const stepContext: TourCallbackContext = {
+        ...context,
+        currentStepIndex: stepIndex,
+        currentStep: targetStep,
+      }
+      const shouldShow = await evaluateStepWhen(targetStep, stepContext)
+
+      let targetIndex = stepIndex
+
+      // If target step cannot be shown, find nearest visible step
+      if (!shouldShow) {
+        // Try forward first
+        const forwardIndex = await findNextVisibleStepIndex(
+          stepIndex + 1,
+          1,
+          currentTour.steps,
+          context
+        )
+
+        if (forwardIndex !== -1) {
+          targetIndex = forwardIndex
+        } else {
+          // Try backward
+          const backwardIndex = await findNextVisibleStepIndex(
+            stepIndex - 1,
+            -1,
+            currentTour.steps,
+            context
+          )
+
+          if (backwardIndex !== -1) {
+            targetIndex = backwardIndex
+          } else {
+            // No visible steps found
+            dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+            return
+          }
+        }
+      }
+
+      // Navigate to the target visible step
+      const navigated = await navigateToStep(targetIndex)
 
       if (navigated) {
-        const step = currentTour.steps[stepIndex]
+        const step = currentTour.steps[targetIndex]
         if (step) {
-          tourKitContext?.onStepView?.(currentTour.id, step.id, stepIndex)
-          currentTour.onStepChange?.(step, stepIndex, {
+          tourKitContext?.onStepView?.(currentTour.id, step.id, targetIndex)
+          currentTour.onStepChange?.(step, targetIndex, {
             ...state,
             tour: currentTour,
             data,
@@ -419,5 +606,20 @@ export function TourProvider({
     ]
   )
 
-  return <TourContext.Provider value={contextValue}>{children}</TourContext.Provider>
+  return (
+    <TourContext.Provider value={contextValue}>
+      <AdvanceOnEffect />
+      {children}
+    </TourContext.Provider>
+  )
+}
+
+/**
+ * Internal component to handle advanceOn behavior
+ * This needs to be a separate component because hooks can't be called
+ * conditionally, and useAdvanceOn needs access to the TourContext
+ */
+function AdvanceOnEffect() {
+  useAdvanceOn()
+  return null
 }

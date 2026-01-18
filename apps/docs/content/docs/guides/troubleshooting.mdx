@@ -1,0 +1,404 @@
+---
+title: Troubleshooting
+description: Common issues and solutions when using Tour Kit
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+# Troubleshooting
+
+Solutions to common issues when using Tour Kit.
+
+## Tour Not Starting
+
+### Symptoms
+- Calling `start()` does nothing
+- Tour never appears
+
+### Solutions
+
+**1. Check provider setup**
+
+Ensure your app is wrapped with the required providers:
+
+```tsx
+// Correct setup
+<TourKitProvider>
+  <TourProvider tours={[myTour]}>
+    <App />
+  </TourProvider>
+</TourKitProvider>
+```
+
+**2. Verify tour ID matches**
+
+The tour ID passed to `start()` must match the tour definition:
+
+```tsx
+const myTour = createTour({ id: 'welcome', ... })
+
+// Correct
+start('welcome')
+
+// Wrong - ID mismatch
+start('my-tour')
+```
+
+**3. Check if tour was already completed**
+
+Tours are skipped if previously completed. Clear persisted state:
+
+```tsx
+const { reset } = useTour()
+reset() // Clears completion status
+```
+
+## Target Element Not Found
+
+### Symptoms
+- Tour starts but step doesn't show
+- Console error: "Target element not found"
+
+### Solutions
+
+**1. Verify selector**
+
+Check the CSS selector is correct:
+
+```tsx
+// Check element exists
+document.querySelector('#my-button') // Should not be null
+
+// Use in step
+createStep({ target: '#my-button', ... })
+```
+
+**2. Wait for dynamic content**
+
+For dynamically loaded elements:
+
+```tsx
+createStep({
+  target: '#dynamic-element',
+  waitForTarget: true,
+  waitForTargetTimeout: 5000, // Wait up to 5 seconds
+})
+```
+
+**3. Check element visibility**
+
+Hidden elements (`display: none`) cannot be targeted. Ensure element is visible.
+
+## Tooltip Positioned Incorrectly
+
+### Symptoms
+- Tooltip appears in wrong position
+- Tooltip is cut off by viewport edge
+- Tooltip jumps around
+
+### Solutions
+
+**1. Check z-index conflicts**
+
+Tour elements need high z-index. Override if needed:
+
+```css
+:root {
+  --tour-z-overlay: 10000;
+  --tour-z-card: 10001;
+}
+```
+
+**2. Handle scrollable containers**
+
+If target is inside a scrollable container:
+
+```tsx
+// Scroll target into view first
+createStep({
+  target: '#nested-element',
+  scrollIntoView: true,
+})
+```
+
+**3. Try different placement**
+
+```tsx
+createStep({
+  target: '#element',
+  placement: 'top', // Try: top, bottom, left, right
+})
+```
+
+## Keyboard Navigation Not Working
+
+### Symptoms
+- Arrow keys don't navigate
+- Escape doesn't close tour
+
+### Solutions
+
+**1. Check keyboard config**
+
+```tsx
+<TourProvider
+  tours={tours}
+  keyboard={{
+    enabled: true, // Must be true
+    nextKeys: ['ArrowRight', 'Enter'],
+    prevKeys: ['ArrowLeft'],
+    exitKeys: ['Escape'],
+  }}
+/>
+```
+
+**2. Check focus**
+
+Keyboard events require focus on tour card. Check focus trap:
+
+```tsx
+createStep({
+  focusTrap: true, // Enable focus trap
+})
+```
+
+**3. Input field interference**
+
+Keyboard navigation is disabled when typing in input fields (by design).
+
+## SSR Hydration Errors
+
+### Symptoms
+- "Text content does not match server-rendered HTML"
+- "Hydration failed because the initial UI does not match"
+
+### Solutions
+
+**1. Use 'use client' directive**
+
+Tour components must be client components:
+
+```tsx
+'use client'
+
+import { Tour, TourStep } from '@tour-kit/react'
+```
+
+**2. Defer tour rendering**
+
+Use dynamic import with `ssr: false`:
+
+```tsx
+import dynamic from 'next/dynamic'
+
+const Tour = dynamic(
+  () => import('@tour-kit/react').then(m => m.Tour),
+  { ssr: false }
+)
+```
+
+**3. Check for server-only code**
+
+Don't access `window` or `document` during SSR.
+
+## Portal Issues
+
+### Symptoms
+- Tour card not visible
+- Overlay covers entire page including card
+
+### Solutions
+
+**1. Check portal container**
+
+Ensure `<body>` exists and isn't `display: none`:
+
+```tsx
+// Portal renders to document.body by default
+```
+
+**2. Z-index stacking**
+
+Adjust CSS variables:
+
+```css
+:root {
+  --tour-z-overlay: 9998;
+  --tour-z-card: 9999;
+}
+```
+
+## Multi-Page Tour Issues
+
+### Symptoms
+- Tour doesn't continue after navigation
+- State lost between pages
+
+### Solutions
+
+**1. Configure router adapter**
+
+```tsx
+import { useNextAppRouter } from '@tour-kit/react'
+
+const router = useNextAppRouter()
+
+<TourProvider tours={tours} router={router}>
+```
+
+**2. Enable persistence**
+
+```tsx
+<TourKitProvider
+  persistence={{
+    enabled: true,
+    storage: 'localStorage',
+  }}
+>
+```
+
+**3. Verify route patterns**
+
+```tsx
+createStep({
+  route: '/dashboard', // Exact match
+  routeMatchMode: 'exact', // or 'startsWith'
+})
+```
+
+## Performance Issues
+
+### Symptoms
+- Laggy animations
+- High CPU usage
+- Slow step transitions
+
+### Solutions
+
+**1. Reduce motion**
+
+Respect user preferences:
+
+```tsx
+<TourKitProvider
+  accessibility={{
+    reduceMotion: 'system', // Respects prefers-reduced-motion
+  }}
+>
+```
+
+**2. Optimize step content**
+
+Avoid heavy components in step content:
+
+```tsx
+// Avoid
+createStep({
+  content: <HeavyComponent />, // Re-renders on every update
+})
+
+// Better
+createStep({
+  content: { title: 'Simple', description: 'Text only' },
+})
+```
+
+**3. Limit spotlight updates**
+
+Use debounced position updates for moving targets.
+
+## Styling Not Applied
+
+### Symptoms
+- Tour looks unstyled
+- CSS variables not working
+
+### Solutions
+
+**1. Import CSS**
+
+```tsx
+import '@tour-kit/react/styles.css'
+```
+
+**2. Tailwind config**
+
+Add Tour Kit to content paths:
+
+```js title="tailwind.config.js"
+module.exports = {
+  content: [
+    './node_modules/@tour-kit/react/**/*.{js,ts,jsx,tsx}',
+    // Your paths...
+  ],
+}
+```
+
+**3. CSS variable scope**
+
+Define variables at root level:
+
+```css
+:root {
+  --tour-primary: #6366f1;
+  --tour-radius: 8px;
+}
+```
+
+## FAQ
+
+### Can I have multiple tours active at once?
+
+No, only one tour can be active at a time. This is by design for UX consistency.
+
+### How do I skip specific steps conditionally?
+
+Use the `when` callback:
+
+```tsx
+createStep({
+  id: 'admin-only',
+  when: () => user.isAdmin, // Only show for admins
+})
+```
+
+### Can I use Tour Kit with React Native?
+
+No, Tour Kit is designed for web only. It uses DOM APIs extensively.
+
+### How do I track tour analytics?
+
+Use the analytics package:
+
+```tsx
+import { AnalyticsProvider } from '@tour-kit/analytics'
+
+<AnalyticsProvider plugins={[myPlugin]}>
+```
+
+### Is Tour Kit accessible?
+
+Yes! Tour Kit is WCAG 2.1 AA compliant with:
+- Full keyboard navigation
+- Focus trapping
+- Screen reader announcements
+- Reduced motion support
+
+### How do I style tours differently per-step?
+
+Use step-specific class names:
+
+```tsx
+createStep({
+  className: 'my-special-step',
+  content: { ... },
+})
+```
+
+### Can tours span iframe content?
+
+No, Tour Kit cannot target elements inside iframes due to browser security restrictions.
+
+<Callout type="info">
+  Still having issues? [Open an issue on GitHub](https://github.com/your-org/tour-kit/issues).
+</Callout>

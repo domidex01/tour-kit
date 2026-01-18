@@ -45,7 +45,6 @@ jobs:
 
       - name: Test
         run: pnpm test
-        continue-on-error: true
 
   size:
     name: Bundle Size

@@ -52,7 +52,7 @@ describe('useStep', () => {
     expect(result.current.isActive).toBe(false)
   })
 
-  it('returns isActive true when step is current', () => {
+  it('returns isActive true when step is current', async () => {
     const wrapper = createWrapper()
     const { result } = renderHook(
       () => ({
@@ -62,14 +62,14 @@ describe('useStep', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.tour.start()
+    await act(async () => {
+      await result.current.tour.start()
     })
 
     expect(result.current.step.isActive).toBe(true)
   })
 
-  it('returns isActive false for non-current step', () => {
+  it('returns isActive false for non-current step', async () => {
     const wrapper = createWrapper()
     const { result } = renderHook(
       () => ({
@@ -79,14 +79,14 @@ describe('useStep', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.tour.start()
+    await act(async () => {
+      await result.current.tour.start()
     })
 
     expect(result.current.step.isActive).toBe(false)
   })
 
-  it('show() navigates to the step', () => {
+  it('show() navigates to the step', async () => {
     const wrapper = createWrapper()
     const { result } = renderHook(
       () => ({
@@ -96,20 +96,20 @@ describe('useStep', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.tour.start()
+    await act(async () => {
+      await result.current.tour.start()
     })
 
     expect(result.current.tour.currentStepIndex).toBe(0)
 
-    act(() => {
-      result.current.step.show()
+    await act(async () => {
+      await result.current.step.show()
     })
 
     expect(result.current.tour.currentStepIndex).toBe(1)
   })
 
-  it('hide() sets isVisible false', () => {
+  it('hide() sets isVisible false', async () => {
     const wrapper = createWrapper()
     const { result } = renderHook(
       () => ({
@@ -119,8 +119,8 @@ describe('useStep', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.tour.start()
+    await act(async () => {
+      await result.current.tour.start()
     })
 
     expect(result.current.step.isVisible).toBe(true)
@@ -132,7 +132,7 @@ describe('useStep', () => {
     expect(result.current.step.isVisible).toBe(false)
   })
 
-  it('complete() advances to next step', () => {
+  it('complete() advances to next step', async () => {
     const wrapper = createWrapper()
     const { result } = renderHook(
       () => ({
@@ -142,19 +142,19 @@ describe('useStep', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.tour.start()
+    await act(async () => {
+      await result.current.tour.start()
     })
 
-    act(() => {
-      result.current.step.complete()
+    await act(async () => {
+      await result.current.step.complete()
     })
 
     expect(result.current.tour.currentStepIndex).toBe(1)
     expect(result.current.step.hasCompleted).toBe(true)
   })
 
-  it('sets isVisible true on active', () => {
+  it('sets isVisible true on active', async () => {
     const wrapper = createWrapper()
     const { result } = renderHook(
       () => ({
@@ -166,14 +166,14 @@ describe('useStep', () => {
 
     expect(result.current.step.isVisible).toBe(false)
 
-    act(() => {
-      result.current.tour.start()
+    await act(async () => {
+      await result.current.tour.start()
     })
 
     expect(result.current.step.isVisible).toBe(true)
   })
 
-  it('resolves target from selector', () => {
+  it('resolves target from selector', async () => {
     const wrapper = createWrapper()
     const { result } = renderHook(
       () => ({
@@ -183,8 +183,8 @@ describe('useStep', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.tour.start()
+    await act(async () => {
+      await result.current.tour.start()
     })
 
     expect(result.current.step.targetElement).toBe(document.getElementById('target-1'))

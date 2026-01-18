@@ -14,6 +14,13 @@ export {
   calculatePosition,
   wouldOverflow,
   getOppositeSide,
+  getFallbackPlacements,
+  calculatePositionWithCollision,
+  getDocumentDirection,
+  mirrorSide,
+  mirrorAlignment,
+  mirrorPlacementForRTL,
+  type PositionResult,
 } from './position'
 
 export {

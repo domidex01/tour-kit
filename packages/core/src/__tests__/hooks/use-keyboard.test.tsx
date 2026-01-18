@@ -65,7 +65,7 @@ describe('useKeyboardNavigation', () => {
     expect(result.current.currentStepIndex).toBe(0)
   })
 
-  it('calls next on ArrowRight when tour is active', () => {
+  it('calls next on ArrowRight when tour is active', async () => {
     const wrapper = createWrapper()
 
     const { result } = renderHook(
@@ -77,20 +77,20 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     expect(result.current.currentStepIndex).toBe(0)
 
-    act(() => {
+    await act(async () => {
       dispatchKeyEvent('ArrowRight')
     })
 
     expect(result.current.currentStepIndex).toBe(1)
   })
 
-  it('calls next on Enter when tour is active', () => {
+  it('calls next on Enter when tour is active', async () => {
     const wrapper = createWrapper()
 
     const { result } = renderHook(
@@ -102,18 +102,18 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
-    act(() => {
+    await act(async () => {
       dispatchKeyEvent('Enter')
     })
 
     expect(result.current.currentStepIndex).toBe(1)
   })
 
-  it('calls prev on ArrowLeft when tour is active', () => {
+  it('calls prev on ArrowLeft when tour is active', async () => {
     const wrapper = createWrapper()
 
     const { result } = renderHook(
@@ -125,25 +125,25 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     // First go to step 1
-    act(() => {
-      result.current.next()
+    await act(async () => {
+      await result.current.next()
     })
 
     expect(result.current.currentStepIndex).toBe(1)
 
-    act(() => {
+    await act(async () => {
       dispatchKeyEvent('ArrowLeft')
     })
 
     expect(result.current.currentStepIndex).toBe(0)
   })
 
-  it('calls skip on Escape when tour is active', () => {
+  it('calls skip on Escape when tour is active', async () => {
     const wrapper = createWrapper()
 
     const { result } = renderHook(
@@ -155,8 +155,8 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     expect(result.current.isActive).toBe(true)
@@ -168,7 +168,7 @@ describe('useKeyboardNavigation', () => {
     expect(result.current.isActive).toBe(false)
   })
 
-  it('ignores keyboard when focus is in input', () => {
+  it('ignores keyboard when focus is in input', async () => {
     const wrapper = createWrapper()
 
     // Create and focus an input
@@ -185,8 +185,8 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     input.focus()
@@ -201,7 +201,7 @@ describe('useKeyboardNavigation', () => {
     document.body.removeChild(input)
   })
 
-  it('ignores keyboard when focus is in textarea', () => {
+  it('ignores keyboard when focus is in textarea', async () => {
     const wrapper = createWrapper()
 
     // Create and focus a textarea
@@ -217,8 +217,8 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     textarea.focus()
@@ -233,7 +233,7 @@ describe('useKeyboardNavigation', () => {
     document.body.removeChild(textarea)
   })
 
-  it('uses custom key configuration for next', () => {
+  it('uses custom key configuration for next', async () => {
     const wrapper = createWrapper()
 
     const { result } = renderHook(
@@ -245,18 +245,18 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
-    act(() => {
+    await act(async () => {
       dispatchKeyEvent('n')
     })
 
     expect(result.current.currentStepIndex).toBe(1)
   })
 
-  it('uses custom key configuration for prev', () => {
+  it('uses custom key configuration for prev', async () => {
     const wrapper = createWrapper()
 
     const { result } = renderHook(
@@ -268,24 +268,24 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
-    act(() => {
-      result.current.next()
+    await act(async () => {
+      await result.current.next()
     })
 
     expect(result.current.currentStepIndex).toBe(1)
 
-    act(() => {
+    await act(async () => {
       dispatchKeyEvent('p')
     })
 
     expect(result.current.currentStepIndex).toBe(0)
   })
 
-  it('uses custom key configuration for exit', () => {
+  it('uses custom key configuration for exit', async () => {
     const wrapper = createWrapper()
 
     const { result } = renderHook(
@@ -297,8 +297,8 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     expect(result.current.isActive).toBe(true)
@@ -310,7 +310,7 @@ describe('useKeyboardNavigation', () => {
     expect(result.current.isActive).toBe(false)
   })
 
-  it('does nothing when keyboard navigation is disabled', () => {
+  it('does nothing when keyboard navigation is disabled', async () => {
     const wrapper = createWrapper()
 
     const { result } = renderHook(
@@ -322,8 +322,8 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     act(() => {
@@ -334,7 +334,7 @@ describe('useKeyboardNavigation', () => {
     expect(result.current.currentStepIndex).toBe(0)
   })
 
-  it('cleans up event listener on unmount', () => {
+  it('cleans up event listener on unmount', async () => {
     const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener')
     const wrapper = createWrapper()
 
@@ -347,8 +347,8 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     unmount()
@@ -358,7 +358,7 @@ describe('useKeyboardNavigation', () => {
     removeEventListenerSpy.mockRestore()
   })
 
-  it('prevents default on recognized keys', () => {
+  it('prevents default on recognized keys', async () => {
     const wrapper = createWrapper()
 
     const { result } = renderHook(
@@ -370,8 +370,8 @@ describe('useKeyboardNavigation', () => {
       { wrapper }
     )
 
-    act(() => {
-      result.current.start()
+    await act(async () => {
+      await result.current.start()
     })
 
     const event = new KeyboardEvent('keydown', {
@@ -381,7 +381,7 @@ describe('useKeyboardNavigation', () => {
     })
     const preventDefaultSpy = vi.spyOn(event, 'preventDefault')
 
-    act(() => {
+    await act(async () => {
       document.dispatchEvent(event)
     })
 
