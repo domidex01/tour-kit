@@ -1,0 +1,80 @@
+/**
+ * @tour-kit/announcements CSS Variables
+ * Import this file to get default styling without Tailwind
+ */
+
+:root {
+  /* Modal */
+  --announcement-modal-overlay-bg: rgba(0, 0, 0, 0.8);
+  --announcement-modal-bg: hsl(0 0% 100%);
+  --announcement-modal-border: hsl(214.3 31.8% 91.4%);
+  --announcement-modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --announcement-modal-radius: 0.5rem;
+
+  /* Slideout */
+  --announcement-slideout-bg: hsl(0 0% 100%);
+  --announcement-slideout-border: hsl(214.3 31.8% 91.4%);
+
+  /* Banner */
+  --announcement-banner-info-bg: hsl(213.1 93.9% 94.8%);
+  --announcement-banner-info-text: hsl(224.3 76.3% 48%);
+  --announcement-banner-info-border: hsl(213.1 93.9% 87.8%);
+
+  --announcement-banner-success-bg: hsl(138.5 76.5% 95.7%);
+  --announcement-banner-success-text: hsl(140.8 53.3% 31.2%);
+  --announcement-banner-success-border: hsl(138.5 76.5% 85.7%);
+
+  --announcement-banner-warning-bg: hsl(47.9 95.8% 90.1%);
+  --announcement-banner-warning-text: hsl(32.1 95% 44.1%);
+  --announcement-banner-warning-border: hsl(47.9 95.8% 80.1%);
+
+  --announcement-banner-error-bg: hsl(0 93.5% 94.1%);
+  --announcement-banner-error-text: hsl(0 72.2% 50.6%);
+  --announcement-banner-error-border: hsl(0 93.5% 87.1%);
+
+  /* Toast */
+  --announcement-toast-bg: hsl(0 0% 100%);
+  --announcement-toast-border: hsl(214.3 31.8% 91.4%);
+  --announcement-toast-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* Spotlight */
+  --announcement-spotlight-overlay-opacity: 0.5;
+  --announcement-spotlight-content-bg: hsl(0 0% 100%);
+  --announcement-spotlight-content-border: hsl(214.3 31.8% 91.4%);
+
+  /* Animations */
+  --announcement-animation-duration: 200ms;
+  --announcement-animation-timing: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark mode */
+.dark,
+[data-theme="dark"] {
+  --announcement-modal-bg: hsl(222.2 84% 4.9%);
+  --announcement-modal-border: hsl(217.2 32.6% 17.5%);
+
+  --announcement-slideout-bg: hsl(222.2 84% 4.9%);
+  --announcement-slideout-border: hsl(217.2 32.6% 17.5%);
+
+  --announcement-banner-info-bg: hsl(217.2 32.6% 12.5%);
+  --announcement-banner-info-text: hsl(213.1 93.9% 84.8%);
+  --announcement-banner-info-border: hsl(217.2 32.6% 22.5%);
+
+  --announcement-banner-success-bg: hsl(140.8 53.3% 12%);
+  --announcement-banner-success-text: hsl(138.5 76.5% 85.7%);
+  --announcement-banner-success-border: hsl(140.8 53.3% 22%);
+
+  --announcement-banner-warning-bg: hsl(32.1 95% 12%);
+  --announcement-banner-warning-text: hsl(47.9 95.8% 80.1%);
+  --announcement-banner-warning-border: hsl(32.1 95% 22%);
+
+  --announcement-banner-error-bg: hsl(0 72.2% 12%);
+  --announcement-banner-error-text: hsl(0 93.5% 84.1%);
+  --announcement-banner-error-border: hsl(0 72.2% 22%);
+
+  --announcement-toast-bg: hsl(222.2 84% 4.9%);
+  --announcement-toast-border: hsl(217.2 32.6% 17.5%);
+
+  --announcement-spotlight-content-bg: hsl(222.2 84% 4.9%);
+  --announcement-spotlight-content-border: hsl(217.2 32.6% 17.5%);
+}

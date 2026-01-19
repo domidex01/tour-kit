@@ -1,0 +1,33 @@
+/* @tour-kit/media CSS variables */
+
+:root {
+  /* Container */
+  --tk-media-border-radius: 0.5rem;
+  --tk-media-background: hsl(var(--muted, 240 4.8% 95.9%));
+
+  /* Overlay */
+  --tk-media-overlay-bg: rgba(0, 0, 0, 0.3);
+  --tk-media-overlay-bg-loading: hsl(var(--muted, 240 4.8% 95.9%));
+  --tk-media-overlay-bg-error: rgba(239, 68, 68, 0.1);
+
+  /* Play button */
+  --tk-media-play-button-bg: rgba(255, 255, 255, 0.9);
+  --tk-media-play-button-color: #000;
+  --tk-media-play-button-size: 3.5rem;
+  --tk-media-play-button-icon-size: 1.5rem;
+
+  /* Loading */
+  --tk-media-loading-text-color: hsl(var(--muted-foreground, 240 3.8% 46.1%));
+
+  /* Error */
+  --tk-media-error-text-color: hsl(var(--destructive, 0 84.2% 60.2%));
+}
+
+/* Dark mode overrides */
+.dark,
+[data-theme="dark"] {
+  --tk-media-background: hsl(240 3.7% 15.9%);
+  --tk-media-overlay-bg-loading: hsl(240 3.7% 15.9%);
+  --tk-media-play-button-bg: rgba(255, 255, 255, 0.9);
+  --tk-media-play-button-color: #000;
+}

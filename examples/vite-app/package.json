@@ -14,6 +14,7 @@
     "@tour-kit/analytics": "workspace:*",
     "@tour-kit/checklists": "workspace:*",
     "@tour-kit/hints": "workspace:*",
+    "@tour-kit/media": "workspace:*",
     "@tour-kit/react": "workspace:*",
     "mixpanel-browser": "^2.56.0",
     "posthog-js": "^1.250.0",
