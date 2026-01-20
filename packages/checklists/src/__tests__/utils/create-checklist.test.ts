@@ -80,9 +80,18 @@ describe('create-checklist', () => {
       createChecklist(config)
 
       // Should log error for each unknown dependency
-      expect(consoleErrorSpy).toHaveBeenCalledWith('[tour-kit]', expect.stringContaining('unknown-1'))
-      expect(consoleErrorSpy).toHaveBeenCalledWith('[tour-kit]', expect.stringContaining('unknown-2'))
-      expect(consoleErrorSpy).toHaveBeenCalledWith('[tour-kit]', expect.stringContaining('unknown-3'))
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
+        expect.stringContaining('unknown-1')
+      )
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
+        expect.stringContaining('unknown-2')
+      )
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
+        expect.stringContaining('unknown-3')
+      )
     })
 
     it('does not throw for invalid config (logs only)', () => {
