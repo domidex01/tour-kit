@@ -144,7 +144,7 @@ describe('consolePlugin', () => {
 
       plugin.track(event)
 
-      const stepLogCalls = consoleSpy.log.mock.calls.filter((call) => call[0] === 'Step:')
+      const stepLogCalls = consoleSpy.log.mock.calls.filter((call: unknown[]) => call[0] === 'Step:')
       expect(stepLogCalls).toHaveLength(0)
     })
 
@@ -163,7 +163,7 @@ describe('consolePlugin', () => {
 
       plugin.track(event)
 
-      const durationLogCalls = consoleSpy.log.mock.calls.filter((call) => call[0] === 'Duration:')
+      const durationLogCalls = consoleSpy.log.mock.calls.filter((call: unknown[]) => call[0] === 'Duration:')
       expect(durationLogCalls).toHaveLength(0)
     })
 
@@ -187,7 +187,7 @@ describe('consolePlugin', () => {
 
       plugin.track(event)
 
-      const metadataLogCalls = consoleSpy.log.mock.calls.filter((call) => call[0] === 'Metadata:')
+      const metadataLogCalls = consoleSpy.log.mock.calls.filter((call: unknown[]) => call[0] === 'Metadata:')
       expect(metadataLogCalls).toHaveLength(0)
     })
 
@@ -197,7 +197,7 @@ describe('consolePlugin', () => {
 
       plugin.track(event)
 
-      const metadataLogCalls = consoleSpy.log.mock.calls.filter((call) => call[0] === 'Metadata:')
+      const metadataLogCalls = consoleSpy.log.mock.calls.filter((call: unknown[]) => call[0] === 'Metadata:')
       expect(metadataLogCalls).toHaveLength(0)
     })
 

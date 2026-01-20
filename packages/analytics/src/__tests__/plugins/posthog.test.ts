@@ -121,16 +121,16 @@ describe('posthogPlugin', () => {
 
     it('does nothing in SSR environment', async () => {
       // Mock window as undefined
-      const originalWindow = global.window
+      const originalWindow = globalThis.window
       // @ts-expect-error - intentionally setting to undefined for SSR test
-      global.window = undefined
+      globalThis.window = undefined
 
       const plugin = posthogPlugin({ apiKey: 'phc_test-api-key' })
 
       await plugin.init?.()
 
       // Restore window first
-      global.window = originalWindow
+      globalThis.window = originalWindow
     })
   })
 

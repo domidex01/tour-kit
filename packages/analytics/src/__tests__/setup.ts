@@ -30,7 +30,7 @@ const originalConsole = {
 }
 
 // Store original console for tests that need it
-;(global as Record<string, unknown>).__originalConsole = originalConsole
+;(globalThis as Record<string, unknown>).__originalConsole = originalConsole
 
 // Mock ResizeObserver (required for jsdom)
 class ResizeObserverMock {

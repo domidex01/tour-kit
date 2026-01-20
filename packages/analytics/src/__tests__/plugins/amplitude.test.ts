@@ -107,9 +107,9 @@ describe('amplitudePlugin', () => {
 
     it('does nothing in SSR environment', async () => {
       // Mock window as undefined
-      const originalWindow = global.window
+      const originalWindow = globalThis.window
       // @ts-expect-error - intentionally setting to undefined for SSR test
-      global.window = undefined
+      globalThis.window = undefined
 
       const plugin = amplitudePlugin({ apiKey: 'test-api-key' })
 
@@ -120,7 +120,7 @@ describe('amplitudePlugin', () => {
       // Consider E2E testing for true SSR behavior
 
       // Restore window
-      global.window = originalWindow
+      globalThis.window = originalWindow
     })
   })
 

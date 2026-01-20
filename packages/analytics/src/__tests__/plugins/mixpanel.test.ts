@@ -96,16 +96,16 @@ describe('mixpanelPlugin', () => {
 
     it('does nothing in SSR environment', async () => {
       // Mock window as undefined
-      const originalWindow = global.window
+      const originalWindow = globalThis.window
       // @ts-expect-error - intentionally setting to undefined for SSR test
-      global.window = undefined
+      globalThis.window = undefined
 
       const plugin = mixpanelPlugin({ token: 'test-token' })
 
       await plugin.init?.()
 
       // Restore window first before assertions
-      global.window = originalWindow
+      globalThis.window = originalWindow
 
       // The mock will still be called because we're in jsdom
       // Real SSR test would require different environment
