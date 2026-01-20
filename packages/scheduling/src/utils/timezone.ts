@@ -72,12 +72,12 @@ export function getDateInTimezone(
   }
 
   return {
-    year: parseInt(partMap.year, 10),
-    month: parseInt(partMap.month, 10),
-    day: parseInt(partMap.day, 10),
-    hours: parseInt(partMap.hour, 10),
-    minutes: parseInt(partMap.minute, 10),
-    seconds: parseInt(partMap.second, 10),
+    year: Number.parseInt(partMap.year, 10),
+    month: Number.parseInt(partMap.month, 10),
+    day: Number.parseInt(partMap.day, 10),
+    hours: Number.parseInt(partMap.hour, 10),
+    minutes: Number.parseInt(partMap.minute, 10),
+    seconds: Number.parseInt(partMap.second, 10),
     dayOfWeek: weekdayMap[partMap.weekday] ?? 0,
   }
 }
@@ -88,8 +88,8 @@ export function getDateInTimezone(
 export function parseTimeString(time: TimeString): { hours: number; minutes: number } {
   const [hoursStr, minutesStr] = time.split(':')
   return {
-    hours: parseInt(hoursStr, 10),
-    minutes: parseInt(minutesStr, 10),
+    hours: Number.parseInt(hoursStr, 10),
+    minutes: Number.parseInt(minutesStr, 10),
   }
 }
 

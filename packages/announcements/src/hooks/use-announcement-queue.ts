@@ -31,15 +31,9 @@ export interface UseAnnouncementQueueReturn {
 export function useAnnouncementQueue(): UseAnnouncementQueueReturn {
   const context = useAnnouncementsContext()
 
-  const isQueued = useMemo(
-    () => (id: string) => context.queue.includes(id),
-    [context.queue]
-  )
+  const isQueued = useMemo(() => (id: string) => context.queue.includes(id), [context.queue])
 
-  const getPosition = useMemo(
-    () => (id: string) => context.queue.indexOf(id),
-    [context.queue]
-  )
+  const getPosition = useMemo(() => (id: string) => context.queue.indexOf(id), [context.queue])
 
   return useMemo(
     () => ({
@@ -52,6 +46,13 @@ export function useAnnouncementQueue(): UseAnnouncementQueueReturn {
       isQueued,
       getPosition,
     }),
-    [context.queue, context.queueConfig, context.showNext, context.clearQueue, isQueued, getPosition]
+    [
+      context.queue,
+      context.queueConfig,
+      context.showNext,
+      context.clearQueue,
+      isQueued,
+      getPosition,
+    ]
   )
 }

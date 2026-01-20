@@ -22,17 +22,22 @@ export const toastVariants = cva(
     variants: {
       intent: {
         info: 'bg-background text-foreground border-border',
-        success: 'bg-green-50 text-green-900 border-green-200 dark:bg-green-950 dark:text-green-100 dark:border-green-800',
-        warning: 'bg-yellow-50 text-yellow-900 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-100 dark:border-yellow-800',
-        error: 'bg-red-50 text-red-900 border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800',
+        success:
+          'bg-green-50 text-green-900 border-green-200 dark:bg-green-950 dark:text-green-100 dark:border-green-800',
+        warning:
+          'bg-yellow-50 text-yellow-900 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-100 dark:border-yellow-800',
+        error:
+          'bg-red-50 text-red-900 border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800',
       },
       position: {
         'top-left': 'data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
         'top-right': 'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
         'top-center': 'data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
         'bottom-left': 'data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
-        'bottom-right': 'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
-        'bottom-center': 'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+        'bottom-right':
+          'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+        'bottom-center':
+          'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
       },
     },
     defaultVariants: {
@@ -42,16 +47,19 @@ export const toastVariants = cva(
   }
 )
 
-export const toastProgressVariants = cva('absolute bottom-0 left-0 h-1 rounded-b-lg transition-all', {
-  variants: {
-    intent: {
-      info: 'bg-primary',
-      success: 'bg-green-600 dark:bg-green-400',
-      warning: 'bg-yellow-600 dark:bg-yellow-400',
-      error: 'bg-red-600 dark:bg-red-400',
+export const toastProgressVariants = cva(
+  'absolute bottom-0 left-0 h-1 rounded-b-lg transition-all',
+  {
+    variants: {
+      intent: {
+        info: 'bg-primary',
+        success: 'bg-green-600 dark:bg-green-400',
+        warning: 'bg-yellow-600 dark:bg-yellow-400',
+        error: 'bg-red-600 dark:bg-red-400',
+      },
     },
-  },
-  defaultVariants: {
-    intent: 'info',
-  },
-})
+    defaultVariants: {
+      intent: 'info',
+    },
+  }
+)

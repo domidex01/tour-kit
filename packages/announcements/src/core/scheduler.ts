@@ -1,11 +1,8 @@
-import type {
-  AnnouncementConfig,
-  AnnouncementState,
-} from '../types/announcement'
+import type { AnnouncementConfig, AnnouncementState } from '../types/announcement'
 import type { QueueConfig } from '../types/queue'
-import { PriorityQueue } from './priority-queue'
-import { canShowByFrequency } from './frequency'
 import { matchesAudience } from './audience'
+import { canShowByFrequency } from './frequency'
+import { PriorityQueue } from './priority-queue'
 
 /**
  * Announcement scheduler manages the queue and determines when announcements should show
@@ -13,7 +10,7 @@ import { matchesAudience } from './audience'
 export class AnnouncementScheduler {
   private queue: PriorityQueue
   private config: QueueConfig
-  private activeCount: number = 0
+  private activeCount = 0
 
   constructor(config: QueueConfig) {
     this.config = config

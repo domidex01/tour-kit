@@ -1,4 +1,4 @@
-import type { FrequencyRule, AnnouncementState } from '../types/announcement'
+import type { AnnouncementState, FrequencyRule } from '../types/announcement'
 
 /**
  * Check if an announcement can be shown based on frequency rules
@@ -96,7 +96,7 @@ export function canShowAfterDismissal(rule: FrequencyRule | undefined): boolean 
  */
 export function getViewLimit(rule: FrequencyRule | undefined): number {
   if (!rule) {
-    return Infinity
+    return Number.POSITIVE_INFINITY
   }
 
   if (typeof rule === 'string') {
@@ -104,11 +104,11 @@ export function getViewLimit(rule: FrequencyRule | undefined): number {
       case 'once':
         return 1
       case 'session':
-        return Infinity // Handled per session
+        return Number.POSITIVE_INFINITY // Handled per session
       case 'always':
-        return Infinity
+        return Number.POSITIVE_INFINITY
       default:
-        return Infinity
+        return Number.POSITIVE_INFINITY
     }
   }
 
@@ -116,5 +116,5 @@ export function getViewLimit(rule: FrequencyRule | undefined): number {
     return rule.count
   }
 
-  return Infinity
+  return Number.POSITIVE_INFINITY
 }

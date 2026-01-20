@@ -1,8 +1,8 @@
 'use client'
 
+import { cva } from 'class-variance-authority'
 import * as React from 'react'
 import { cn } from '../lib/utils'
-import { cva } from 'class-variance-authority'
 import type { AnnouncementAction } from '../types/announcement'
 
 const buttonVariants = cva(
@@ -10,10 +10,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary:
-          'bg-primary text-primary-foreground hover:bg-primary/90',
-        secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
       },
@@ -132,11 +130,7 @@ function ActionButton({ action, defaultVariant, onClick }: ActionButtonProps) {
   }
 
   return (
-    <button
-      type="button"
-      className={cn(buttonVariants({ variant, size: 'md' }))}
-      onClick={onClick}
-    >
+    <button type="button" className={cn(buttonVariants({ variant, size: 'md' }))} onClick={onClick}>
       {action.label}
     </button>
   )

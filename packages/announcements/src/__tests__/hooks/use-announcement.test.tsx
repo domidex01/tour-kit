@@ -1,8 +1,8 @@
-import { renderHook, act } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
+import type * as React from 'react'
 import { describe, expect, it } from 'vitest'
-import * as React from 'react'
-import { useAnnouncement } from '../../hooks/use-announcement'
 import { AnnouncementsProvider } from '../../context/announcements-provider'
+import { useAnnouncement } from '../../hooks/use-announcement'
 import type { AnnouncementConfig } from '../../types/announcement'
 
 const testConfig: AnnouncementConfig = {

@@ -61,7 +61,11 @@ export function getNextDayOccurrence(date: Date, targetDay: DayOfWeek, timezone:
  * @param timezone - Timezone
  * @returns The next allowed date, or undefined if no days allowed
  */
-export function getNextAllowedDay(date: Date, allowedDays: DayOfWeek[], timezone: string): Date | undefined {
+export function getNextAllowedDay(
+  date: Date,
+  allowedDays: DayOfWeek[],
+  timezone: string
+): Date | undefined {
   if (allowedDays.length === 0) return undefined
 
   const currentDay = getDayOfWeek(date, timezone)

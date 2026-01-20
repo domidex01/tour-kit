@@ -1,12 +1,12 @@
 'use client'
 
-import * as React from 'react'
-import { cn } from '../lib/utils'
-import { bannerVariants } from './ui/banner-variants'
-import { AnnouncementClose } from './announcement-close'
-import { useAnnouncement } from '../hooks/use-announcement'
-import type { BannerOptions, DismissalReason } from '../types/announcement'
 import type { VariantProps } from 'class-variance-authority'
+import * as React from 'react'
+import { useAnnouncement } from '../hooks/use-announcement'
+import { cn } from '../lib/utils'
+import type { BannerOptions, DismissalReason } from '../types/announcement'
+import { AnnouncementClose } from './announcement-close'
+import { bannerVariants } from './ui/banner-variants'
 
 export interface AnnouncementBannerProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
@@ -87,13 +87,9 @@ export const AnnouncementBanner = React.forwardRef<HTMLDivElement, AnnouncementB
         <div className="flex-1">
           {useConfig && config ? (
             <>
-              {config.title && (
-                <span className="font-medium">{config.title}</span>
-              )}
+              {config.title && <span className="font-medium">{config.title}</span>}
               {config.title && config.description && ' — '}
-              {config.description && (
-                <span>{config.description}</span>
-              )}
+              {config.description && <span>{config.description}</span>}
             </>
           ) : (
             children

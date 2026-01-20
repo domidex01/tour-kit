@@ -5,8 +5,7 @@ import { useUILibrary } from '../../lib/ui-library-context'
 import { cn } from '../../lib/utils'
 import { tourButtonVariants } from '../ui/button-variants'
 
-export interface TourCloseProps
-  extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'> {
+export interface TourCloseProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'> {
   asChild?: boolean
   children?: React.ReactNode | RenderProp
 }
@@ -63,9 +62,7 @@ export const TourClose = React.forwardRef<HTMLButtonElement, TourCloseProps>(
 
     // When asChild is true and using Radix UI, use Slot
     if (asChild) {
-      return (
-        <Slot {...sharedProps}>{(children as React.ReactNode) ?? defaultIcon}</Slot>
-      )
+      return <Slot {...sharedProps}>{(children as React.ReactNode) ?? defaultIcon}</Slot>
     }
 
     // Default: render as button

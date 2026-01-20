@@ -1,15 +1,15 @@
 'use client'
 
-import * as React from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
+import type { VariantProps } from 'class-variance-authority'
+import * as React from 'react'
+import { useAnnouncement } from '../hooks/use-announcement'
 import { cn } from '../lib/utils'
-import { slideoutContentVariants, slideoutOverlayVariants } from './ui/slideout-variants'
+import type { DismissalReason, SlideoutOptions } from '../types/announcement'
+import { AnnouncementActions } from './announcement-actions'
 import { AnnouncementClose } from './announcement-close'
 import { AnnouncementContent } from './announcement-content'
-import { AnnouncementActions } from './announcement-actions'
-import { useAnnouncement } from '../hooks/use-announcement'
-import type { DismissalReason, SlideoutOptions } from '../types/announcement'
-import type { VariantProps } from 'class-variance-authority'
+import { slideoutContentVariants, slideoutOverlayVariants } from './ui/slideout-variants'
 
 export interface AnnouncementSlideoutProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
@@ -95,9 +95,7 @@ export const AnnouncementSlideout = React.forwardRef<HTMLDivElement, Announcemen
           <Dialog.Overlay
             className={cn(slideoutOverlayVariants())}
             onClick={
-              slideoutOptions.closeOnOverlayClick
-                ? () => handleDismiss('overlay_click')
-                : undefined
+              slideoutOptions.closeOnOverlayClick ? () => handleDismiss('overlay_click') : undefined
             }
           />
           <Dialog.Content

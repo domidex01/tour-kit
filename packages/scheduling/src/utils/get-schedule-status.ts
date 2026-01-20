@@ -91,7 +91,9 @@ function getStatusMessage(
     case 'ended': {
       if (schedule.endAt) {
         const endStr =
-          schedule.endAt instanceof Date ? formatDateString(schedule.endAt, timezone) : schedule.endAt
+          schedule.endAt instanceof Date
+            ? formatDateString(schedule.endAt, timezone)
+            : schedule.endAt
         return `Schedule ended on ${endStr}`
       }
       return 'Schedule has ended'
@@ -99,7 +101,15 @@ function getStatusMessage(
 
     case 'wrong_day': {
       const dayOfWeek = getDayOfWeek(now, timezone)
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      const dayNames = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ]
       return `Not available on ${dayNames[dayOfWeek]}`
     }
 

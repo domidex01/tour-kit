@@ -78,7 +78,13 @@ export interface AnnouncementMedia {
  */
 export type BannerPosition = 'top' | 'bottom'
 export type SlideoutPosition = 'left' | 'right'
-export type ToastPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center'
+export type ToastPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'top-center'
+  | 'bottom-center'
 
 /**
  * Variant-specific options
@@ -190,7 +196,15 @@ export interface AudienceCondition {
   key: string
 
   /** Comparison operator */
-  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'in' | 'not_in' | 'exists' | 'not_exists'
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'contains'
+    | 'not_contains'
+    | 'in'
+    | 'not_in'
+    | 'exists'
+    | 'not_exists'
 
   /** Expected value(s) */
   value?: unknown

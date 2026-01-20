@@ -1,5 +1,5 @@
-import type { QueueItem, QueueConfig, PriorityOrder } from '../types/queue'
 import type { AnnouncementPriority } from '../types/announcement'
+import type { PriorityOrder, QueueConfig, QueueItem } from '../types/queue'
 
 /**
  * Priority queue implementation for announcement ordering
@@ -7,7 +7,7 @@ import type { AnnouncementPriority } from '../types/announcement'
 export class PriorityQueue {
   private items: QueueItem[] = []
   private config: QueueConfig
-  private sequenceCounter: number = 0
+  private sequenceCounter = 0
 
   constructor(config: QueueConfig) {
     this.config = config
@@ -48,7 +48,7 @@ export class PriorityQueue {
    * Remove a specific item by ID
    */
   remove(id: string): boolean {
-    const index = this.items.findIndex(item => item.id === id)
+    const index = this.items.findIndex((item) => item.id === id)
     if (index !== -1) {
       this.items.splice(index, 1)
       return true
@@ -60,21 +60,21 @@ export class PriorityQueue {
    * Check if an item is in the queue
    */
   has(id: string): boolean {
-    return this.items.some(item => item.id === id)
+    return this.items.some((item) => item.id === id)
   }
 
   /**
    * Get position of an item in the queue (0-indexed)
    */
   getPosition(id: string): number {
-    return this.items.findIndex(item => item.id === id)
+    return this.items.findIndex((item) => item.id === id)
   }
 
   /**
    * Get all item IDs in order
    */
   getIds(): string[] {
-    return this.items.map(item => item.id)
+    return this.items.map((item) => item.id)
   }
 
   /**
@@ -104,7 +104,7 @@ export class PriorityQueue {
   updateConfig(config: QueueConfig): void {
     this.config = config
     // Update weights for existing items
-    this.items = this.items.map(item => ({
+    this.items = this.items.map((item) => ({
       ...item,
       weight: this.config.priorityWeights[item.priority],
     }))

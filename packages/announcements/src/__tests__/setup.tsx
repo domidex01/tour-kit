@@ -38,9 +38,9 @@ vi.mock('@radix-ui/react-dialog', () => ({
     </div>
   )),
   Content: vi.fn(({ children, className, ...props }) => (
-    <div data-testid="dialog-content" role="dialog" className={className} {...props}>
+    <dialog data-testid="dialog-content" open className={className} {...props}>
       {children}
-    </div>
+    </dialog>
   )),
   Title: vi.fn(({ children, ...props }) => <h2 {...props}>{children}</h2>),
   Description: vi.fn(({ children, ...props }) => <p {...props}>{children}</p>),

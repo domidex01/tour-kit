@@ -1,10 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { cn } from '../lib/utils'
 import { Slot, UnifiedSlot } from '../lib/slot'
 import { useUILibrary } from '../lib/ui-library-context'
 import type { RenderProp } from '../lib/unified-slot'
+import { cn } from '../lib/utils'
 
 const defaultIcon = (
   <svg
@@ -65,17 +65,11 @@ export const AnnouncementClose = React.forwardRef<HTMLButtonElement, Announcemen
 
     // When asChild is true and using Radix UI, use Slot
     if (asChild) {
-      return (
-        <Slot {...sharedProps}>{(children as React.ReactNode) ?? defaultIcon}</Slot>
-      )
+      return <Slot {...sharedProps}>{(children as React.ReactNode) ?? defaultIcon}</Slot>
     }
 
     // Default: render as button
-    return (
-      <button {...sharedProps}>
-        {(children as React.ReactNode) ?? defaultIcon}
-      </button>
-    )
+    return <button {...sharedProps}>{(children as React.ReactNode) ?? defaultIcon}</button>
   }
 )
 AnnouncementClose.displayName = 'AnnouncementClose'

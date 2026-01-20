@@ -1,23 +1,16 @@
 'use client'
 
+import { type Placement, autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/react'
+import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
-import {
-  useFloating,
-  autoUpdate,
-  offset,
-  flip,
-  shift,
-  type Placement,
-} from '@floating-ui/react'
+import { useAnnouncement } from '../hooks/use-announcement'
 import { cn } from '../lib/utils'
-import { spotlightContentVariants, spotlightOverlayVariants } from './ui/spotlight-variants'
+import type { DismissalReason, SpotlightOptions } from '../types/announcement'
+import { AnnouncementActions } from './announcement-actions'
 import { AnnouncementClose } from './announcement-close'
 import { AnnouncementContent } from './announcement-content'
-import { AnnouncementActions } from './announcement-actions'
-import { useAnnouncement } from '../hooks/use-announcement'
-import type { DismissalReason, SpotlightOptions } from '../types/announcement'
-import type { VariantProps } from 'class-variance-authority'
+import { spotlightContentVariants, spotlightOverlayVariants } from './ui/spotlight-variants'
 
 export interface AnnouncementSpotlightProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
@@ -90,11 +83,7 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
 
     const { refs, floatingStyles } = useFloating({
       placement: effectivePlacement as Placement,
-      middleware: [
-        offset(spotlightOptions.offset ?? 8),
-        flip(),
-        shift({ padding: 8 }),
-      ],
+      middleware: [offset(spotlightOptions.offset ?? 8), flip(), shift({ padding: 8 })],
       whileElementsMounted: autoUpdate,
     })
 
@@ -138,6 +127,19 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
                 ? () => handleDismiss('overlay_click')
                 : undefined
             }
+            onKeyDown={
+              spotlightOptions.closeOnOverlayClick
+                ? (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleDismiss('overlay_click')
+                    }
+                  }
+                : undefined
+            }
+            role={spotlightOptions.closeOnOverlayClick ? 'button' : undefined}
+            tabIndex={spotlightOptions.closeOnOverlayClick ? 0 : undefined}
+            aria-label={spotlightOptions.closeOnOverlayClick ? 'Close spotlight' : undefined}
           />
         )}
 

@@ -18,7 +18,10 @@ export interface AnnouncementContentProps extends React.HTMLAttributes<HTMLDivEl
 }
 
 export const AnnouncementContent = React.forwardRef<HTMLDivElement, AnnouncementContentProps>(
-  ({ className, title, description, media, titleProps, descriptionProps, children, ...props }, ref) => {
+  (
+    { className, title, description, media, titleProps, descriptionProps, children, ...props },
+    ref
+  ) => {
     return (
       <div ref={ref} className={cn('space-y-4', className)} {...props}>
         {media && (

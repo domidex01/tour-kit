@@ -1,13 +1,13 @@
 'use client'
 
+import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
-import { cn } from '../lib/utils'
-import { toastContainerVariants, toastVariants, toastProgressVariants } from './ui/toast-variants'
-import { AnnouncementClose } from './announcement-close'
 import { useAnnouncement } from '../hooks/use-announcement'
+import { cn } from '../lib/utils'
 import type { DismissalReason, ToastOptions } from '../types/announcement'
-import type { VariantProps } from 'class-variance-authority'
+import { AnnouncementClose } from './announcement-close'
+import { toastContainerVariants, toastProgressVariants, toastVariants } from './ui/toast-variants'
 
 export interface AnnouncementToastProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
@@ -116,9 +116,7 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
           <div className="flex-1 space-y-1">
             {useConfig && config ? (
               <>
-                {config.title && (
-                  <div className="font-medium">{config.title}</div>
-                )}
+                {config.title && <div className="font-medium">{config.title}</div>}
                 {config.description && (
                   <div className="text-sm opacity-90">{config.description}</div>
                 )}

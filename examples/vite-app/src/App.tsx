@@ -23,7 +23,15 @@ import {
 import { useEffect } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { Layout } from './components/Layout'
-import { AdoptionPage, BaseUIPage, ContactPage, FeaturesPage, HomePage, MediaPage, PricingPage } from './pages'
+import {
+  AdoptionPage,
+  BaseUIPage,
+  ContactPage,
+  FeaturesPage,
+  HomePage,
+  MediaPage,
+  PricingPage,
+} from './pages'
 
 // Load Google Analytics script dynamically
 function useGoogleAnalytics() {

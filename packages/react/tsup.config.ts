@@ -1,5 +1,5 @@
+import * as fs from 'node:fs'
 import { defineConfig } from 'tsup'
-import * as fs from 'fs'
 
 // Single config to avoid parallel DTS worker crashes on WSL2
 export default defineConfig({

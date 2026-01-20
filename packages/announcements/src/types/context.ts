@@ -1,8 +1,4 @@
-import type {
-  AnnouncementConfig,
-  AnnouncementState,
-  DismissalReason,
-} from './announcement'
+import type { AnnouncementConfig, AnnouncementState, DismissalReason } from './announcement'
 import type { QueueConfig } from './queue'
 
 /**

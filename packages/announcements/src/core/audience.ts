@@ -14,7 +14,7 @@ export function matchesAudience(
 
   // No user context means only 'exists' checks can pass
   if (!userContext) {
-    return conditions.every(condition => {
+    return conditions.every((condition) => {
       if (condition.operator === 'not_exists') {
         return true
       }
@@ -23,7 +23,7 @@ export function matchesAudience(
   }
 
   // All conditions must match (AND logic)
-  return conditions.every(condition => matchesCondition(condition, userContext))
+  return conditions.every((condition) => matchesCondition(condition, userContext))
 }
 
 /**

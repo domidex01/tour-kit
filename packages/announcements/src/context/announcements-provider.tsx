@@ -1,14 +1,10 @@
 import * as React from 'react'
-import type {
-  AnnouncementConfig,
-  AnnouncementState,
-  DismissalReason,
-} from '../types/announcement'
+import { AnnouncementScheduler } from '../core/scheduler'
+import type { AnnouncementConfig, AnnouncementState, DismissalReason } from '../types/announcement'
 import type { AnnouncementsContextValue, AnnouncementsProviderProps } from '../types/context'
 import type { QueueConfig } from '../types/queue'
 import { DEFAULT_QUEUE_CONFIG } from '../types/queue'
 import { AnnouncementsContext } from './announcements-context'
-import { AnnouncementScheduler } from '../core/scheduler'
 
 // Action types
 type AnnouncementsAction =
@@ -72,8 +68,9 @@ function announcementsReducer(
         ...state,
         announcements: newAnnouncements,
         configs: newConfigs,
-        activeAnnouncement: state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
-        queue: state.queue.filter(id => id !== action.id),
+        activeAnnouncement:
+          state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
+        queue: state.queue.filter((id) => id !== action.id),
       }
     }
 
@@ -111,7 +108,8 @@ function announcementsReducer(
         return {
           ...state,
           announcements: newAnnouncements,
-          activeAnnouncement: state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
+          activeAnnouncement:
+            state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
         }
       }
       return state
@@ -133,8 +131,9 @@ function announcementsReducer(
         return {
           ...state,
           announcements: newAnnouncements,
-          activeAnnouncement: state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
-          queue: state.queue.filter(id => id !== action.id),
+          activeAnnouncement:
+            state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
+          queue: state.queue.filter((id) => id !== action.id),
         }
       }
       return state
@@ -154,7 +153,8 @@ function announcementsReducer(
         return {
           ...state,
           announcements: newAnnouncements,
-          activeAnnouncement: state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
+          activeAnnouncement:
+            state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
         }
       }
       return state
@@ -242,9 +242,7 @@ export function AnnouncementsProvider({
     queue: [],
   })
 
-  const schedulerRef = React.useRef<AnnouncementScheduler>(
-    new AnnouncementScheduler(queueConfig)
-  )
+  const schedulerRef = React.useRef<AnnouncementScheduler>(new AnnouncementScheduler(queueConfig))
 
   // Update scheduler config when it changes
   React.useEffect(() => {
@@ -477,10 +475,7 @@ export function AnnouncementsProvider({
     [state.announcements]
   )
 
-  const getConfig = React.useCallback(
-    (id: string) => state.configs.get(id),
-    [state.configs]
-  )
+  const getConfig = React.useCallback((id: string) => state.configs.get(id), [state.configs])
 
   const canShow = React.useCallback(
     (id: string): boolean => {
@@ -549,8 +544,6 @@ export function AnnouncementsProvider({
   )
 
   return (
-    <AnnouncementsContext.Provider value={contextValue}>
-      {children}
-    </AnnouncementsContext.Provider>
+    <AnnouncementsContext.Provider value={contextValue}>{children}</AnnouncementsContext.Provider>
   )
 }

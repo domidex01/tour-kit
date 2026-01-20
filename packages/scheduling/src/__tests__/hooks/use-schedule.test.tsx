@@ -1,7 +1,7 @@
-import { renderHook, act } from '@testing-library/react'
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import type { Schedule } from '../../types'
+import { act, renderHook } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSchedule } from '../../hooks/use-schedule'
+import type { Schedule } from '../../types'
 
 describe('useSchedule', () => {
   beforeEach(() => {
@@ -57,9 +57,7 @@ describe('useSchedule', () => {
 
   it('auto-refreshes at specified interval', () => {
     const schedule: Schedule = {}
-    const { result } = renderHook(() =>
-      useSchedule(schedule, { refreshInterval: 30000 })
-    )
+    const { result } = renderHook(() => useSchedule(schedule, { refreshInterval: 30000 }))
 
     const initialCheckedAt = result.current.lastCheckedAt
 
@@ -72,9 +70,7 @@ describe('useSchedule', () => {
 
   it('can disable auto-refresh', () => {
     const schedule: Schedule = {}
-    const { result } = renderHook(() =>
-      useSchedule(schedule, { disableAutoRefresh: true })
-    )
+    const { result } = renderHook(() => useSchedule(schedule, { disableAutoRefresh: true }))
 
     const initialCheckedAt = result.current.lastCheckedAt
 

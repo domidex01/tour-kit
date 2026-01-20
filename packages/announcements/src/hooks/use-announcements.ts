@@ -1,6 +1,10 @@
 import { useMemo } from 'react'
 import { useAnnouncementsContext } from '../context/announcements-context'
-import type { AnnouncementConfig, AnnouncementState, AnnouncementVariant } from '../types/announcement'
+import type {
+  AnnouncementConfig,
+  AnnouncementState,
+  AnnouncementVariant,
+} from '../types/announcement'
 
 /**
  * Filter options for announcements
@@ -47,10 +51,7 @@ export interface UseAnnouncementsReturn {
 export function useAnnouncements(): UseAnnouncementsReturn {
   const context = useAnnouncementsContext()
 
-  const ids = useMemo(
-    () => Array.from(context.announcements.keys()),
-    [context.announcements]
-  )
+  const ids = useMemo(() => Array.from(context.announcements.keys()), [context.announcements])
 
   const getFiltered = useMemo(
     () =>
@@ -95,15 +96,9 @@ export function useAnnouncements(): UseAnnouncementsReturn {
     [context]
   )
 
-  const visible = useMemo(
-    () => getFiltered({ isVisible: true }),
-    [getFiltered]
-  )
+  const visible = useMemo(() => getFiltered({ isVisible: true }), [getFiltered])
 
-  const dismissed = useMemo(
-    () => getFiltered({ isDismissed: true }),
-    [getFiltered]
-  )
+  const dismissed = useMemo(() => getFiltered({ isDismissed: true }), [getFiltered])
 
   return useMemo(
     () => ({
@@ -116,6 +111,14 @@ export function useAnnouncements(): UseAnnouncementsReturn {
       count: context.announcements.size,
       resetAll: context.resetAll,
     }),
-    [context.announcements, context.activeAnnouncement, context.resetAll, ids, getFiltered, visible, dismissed]
+    [
+      context.announcements,
+      context.activeAnnouncement,
+      context.resetAll,
+      ids,
+      getFiltered,
+      visible,
+      dismissed,
+    ]
   )
 }

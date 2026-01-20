@@ -51,7 +51,7 @@ export function useScheduleStatus(
     }
     const status = getScheduleStatus(schedule, { userTimezone: timezone })
     if (!debug) {
-      delete status.debug
+      status.debug = undefined
     }
     return status
   }, [schedule, timezone, debug])
@@ -71,7 +71,7 @@ export function useScheduleStatus(
     const now = new Date()
     const newStatus = getScheduleStatus(schedule, { now, userTimezone: timezone })
     if (!debug) {
-      delete newStatus.debug
+      newStatus.debug = undefined
     }
     setStatus(newStatus)
   }, [schedule, timezone, debug])

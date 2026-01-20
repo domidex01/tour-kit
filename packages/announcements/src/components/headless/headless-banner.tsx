@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useAnnouncement } from '../../hooks/use-announcement'
-import type { DismissalReason, BannerOptions } from '../../types/announcement'
+import type { BannerOptions, DismissalReason } from '../../types/announcement'
 
 export interface HeadlessBannerRenderProps {
   /** Whether the banner is visible */

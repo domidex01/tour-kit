@@ -1,7 +1,7 @@
 import type { Schedule, ScheduleEvaluationOptions, ScheduleResult } from '../types'
 import { isInAnyBlackout } from './blackout'
-import { isAllowedDay } from './day-of-week'
 import { isWithinDateRange } from './date-range'
+import { isAllowedDay } from './day-of-week'
 import { matchesRecurringPattern } from './recurring'
 import { isWithinTimeRange } from './time-of-day'
 import { getUserTimezone } from './timezone'
@@ -26,7 +26,9 @@ export function isScheduleActive(
   options: ScheduleEvaluationOptions = {}
 ): ScheduleResult {
   const now = options.now ?? new Date()
-  const timezone = schedule.timezone ?? (schedule.useUserTimezone !== false ? (options.userTimezone ?? getUserTimezone()) : 'UTC')
+  const timezone =
+    schedule.timezone ??
+    (schedule.useUserTimezone !== false ? (options.userTimezone ?? getUserTimezone()) : 'UTC')
 
   // 1. Check if explicitly disabled
   if (schedule.enabled === false) {

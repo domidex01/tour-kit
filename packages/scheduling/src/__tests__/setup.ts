@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest'
+import { afterAll, beforeAll, vi } from 'vitest'
 
 // Mock timezones for consistent testing
 const originalDateTimeFormat = Intl.DateTimeFormat

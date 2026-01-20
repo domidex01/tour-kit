@@ -6,7 +6,15 @@ export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6
 /**
  * Day names for configuration convenience
  */
-export const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const
+export const DAY_NAMES = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+] as const
 export type DayName = (typeof DAY_NAMES)[number]
 
 /**

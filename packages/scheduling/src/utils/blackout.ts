@@ -25,7 +25,10 @@ export function isInBlackoutPeriod(date: Date, blackout: BlackoutPeriod): boolea
 /**
  * Find the current blackout period (if any)
  */
-export function getCurrentBlackout(date: Date, blackouts: BlackoutPeriod[]): BlackoutPeriod | undefined {
+export function getCurrentBlackout(
+  date: Date,
+  blackouts: BlackoutPeriod[]
+): BlackoutPeriod | undefined {
   return blackouts.find((blackout) => isInBlackoutPeriod(date, blackout))
 }
 
@@ -39,7 +42,10 @@ export function isInAnyBlackout(date: Date, blackouts: BlackoutPeriod[]): boolea
 /**
  * Get the next blackout period start after a given date
  */
-export function getNextBlackout(date: Date, blackouts: BlackoutPeriod[]): BlackoutPeriod | undefined {
+export function getNextBlackout(
+  date: Date,
+  blackouts: BlackoutPeriod[]
+): BlackoutPeriod | undefined {
   const futureBlackouts = blackouts
     .map((blackout) => ({
       ...blackout,

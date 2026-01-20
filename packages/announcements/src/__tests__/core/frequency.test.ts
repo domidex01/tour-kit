@@ -116,11 +116,11 @@ describe('getViewLimit', () => {
   })
 
   it('returns Infinity for session', () => {
-    expect(getViewLimit('session')).toBe(Infinity)
+    expect(getViewLimit('session')).toBe(Number.POSITIVE_INFINITY)
   })
 
   it('returns Infinity for always', () => {
-    expect(getViewLimit('always')).toBe(Infinity)
+    expect(getViewLimit('always')).toBe(Number.POSITIVE_INFINITY)
   })
 
   it('returns count for times', () => {
@@ -128,10 +128,10 @@ describe('getViewLimit', () => {
   })
 
   it('returns Infinity for interval', () => {
-    expect(getViewLimit({ type: 'interval', days: 7 })).toBe(Infinity)
+    expect(getViewLimit({ type: 'interval', days: 7 })).toBe(Number.POSITIVE_INFINITY)
   })
 
   it('returns Infinity for undefined', () => {
-    expect(getViewLimit(undefined)).toBe(Infinity)
+    expect(getViewLimit(undefined)).toBe(Number.POSITIVE_INFINITY)
   })
 })

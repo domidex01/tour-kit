@@ -32,7 +32,11 @@ export function isWithinTimeRange(date: Date, timeRange: TimeRange, timezone: st
  * @param timezone - Timezone for time calculation
  * @returns Whether the time is within any of the ranges
  */
-export function isWithinAnyTimeRange(date: Date, timeRanges: TimeRange[], timezone: string): boolean {
+export function isWithinAnyTimeRange(
+  date: Date,
+  timeRanges: TimeRange[],
+  timezone: string
+): boolean {
   return timeRanges.some((range) => isWithinTimeRange(date, range, timezone))
 }
 
@@ -43,7 +47,11 @@ export function isWithinAnyTimeRange(date: Date, timeRanges: TimeRange[], timezo
  * @param timezone - Timezone
  * @returns The next start time, or undefined if already in range
  */
-export function getNextTimeRangeStart(date: Date, timeRange: TimeRange, timezone: string): Date | undefined {
+export function getNextTimeRangeStart(
+  date: Date,
+  timeRange: TimeRange,
+  timezone: string
+): Date | undefined {
   if (isWithinTimeRange(date, timeRange, timezone)) {
     return undefined // Already in range
   }

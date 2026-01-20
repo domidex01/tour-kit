@@ -34,7 +34,11 @@ export function useSchedule(
   schedule: Schedule | undefined | null,
   options: UseScheduleOptions = {}
 ): UseScheduleReturn {
-  const { refreshInterval = 60000, disableAutoRefresh = false, timezone: timezoneOverride } = options
+  const {
+    refreshInterval = 60000,
+    disableAutoRefresh = false,
+    timezone: timezoneOverride,
+  } = options
 
   const timezone = useUserTimezone(timezoneOverride ?? schedule?.timezone)
   const [lastCheckedAt, setLastCheckedAt] = useState<Date>(() => new Date())

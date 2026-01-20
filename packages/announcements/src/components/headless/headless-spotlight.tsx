@@ -1,14 +1,7 @@
 'use client'
 
+import { type Placement, autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/react'
 import * as React from 'react'
-import {
-  useFloating,
-  autoUpdate,
-  offset,
-  flip,
-  shift,
-  type Placement,
-} from '@floating-ui/react'
 import { useAnnouncement } from '../../hooks/use-announcement'
 import type { DismissalReason, SpotlightOptions } from '../../types/announcement'
 
@@ -104,11 +97,7 @@ export function HeadlessSpotlight({
 
   const { refs, floatingStyles } = useFloating({
     placement: spotlightOptions.placement as Placement,
-    middleware: [
-      offset(spotlightOptions.offset ?? 8),
-      flip(),
-      shift({ padding: 8 }),
-    ],
+    middleware: [offset(spotlightOptions.offset ?? 8), flip(), shift({ padding: 8 })],
     whileElementsMounted: autoUpdate,
   })
 

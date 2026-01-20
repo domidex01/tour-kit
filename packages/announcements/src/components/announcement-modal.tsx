@@ -1,15 +1,15 @@
 'use client'
 
-import * as React from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
+import type { VariantProps } from 'class-variance-authority'
+import * as React from 'react'
+import { useAnnouncement } from '../hooks/use-announcement'
 import { cn } from '../lib/utils'
-import { modalContentVariants, modalOverlayVariants } from './ui/modal-variants'
+import type { DismissalReason, ModalOptions } from '../types/announcement'
+import { AnnouncementActions } from './announcement-actions'
 import { AnnouncementClose } from './announcement-close'
 import { AnnouncementContent } from './announcement-content'
-import { AnnouncementActions } from './announcement-actions'
-import { useAnnouncement } from '../hooks/use-announcement'
-import type { DismissalReason, ModalOptions } from '../types/announcement'
-import type { VariantProps } from 'class-variance-authority'
+import { modalContentVariants, modalOverlayVariants } from './ui/modal-variants'
 
 export interface AnnouncementModalProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
@@ -93,9 +93,7 @@ export const AnnouncementModal = React.forwardRef<HTMLDivElement, AnnouncementMo
           <Dialog.Overlay
             className={cn(modalOverlayVariants())}
             onClick={
-              modalOptions.closeOnOverlayClick
-                ? () => handleDismiss('overlay_click')
-                : undefined
+              modalOptions.closeOnOverlayClick ? () => handleDismiss('overlay_click') : undefined
             }
           />
           <Dialog.Content

@@ -1,10 +1,10 @@
 import {
-  TourMedia,
-  YouTubeEmbed,
-  VimeoEmbed,
-  NativeVideo,
   GifPlayer,
   MediaHeadless,
+  NativeVideo,
+  TourMedia,
+  VimeoEmbed,
+  YouTubeEmbed,
 } from '@tour-kit/media'
 
 function Section({
@@ -103,9 +103,7 @@ export default function MediaPage() {
                 muted={true}
                 aspectRatio="16/9"
               />
-              <p className="text-xs text-muted-foreground">
-                Uses dnt=1 parameter for privacy
-              </p>
+              <p className="text-xs text-muted-foreground">Uses dnt=1 parameter for privacy</p>
             </MediaCard>
           </div>
         </Section>
@@ -162,15 +160,7 @@ export default function MediaPage() {
         >
           <MediaCard title="MediaHeadless with custom UI">
             <MediaHeadless src="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
-              {({
-                mediaType,
-                embedUrl,
-                videoId,
-                isPlaying,
-                play,
-                pause,
-                prefersReducedMotion,
-              }) => (
+              {({ mediaType, embedUrl, videoId, isPlaying, play, pause, prefersReducedMotion }) => (
                 <div className="space-y-2">
                   <div className="p-3 bg-muted rounded text-sm space-y-1">
                     <p>
@@ -187,8 +177,7 @@ export default function MediaPage() {
                       <strong>Playing:</strong> {isPlaying ? 'Yes' : 'No'}
                     </p>
                     <p>
-                      <strong>Reduced Motion:</strong>{' '}
-                      {prefersReducedMotion ? 'Yes' : 'No'}
+                      <strong>Reduced Motion:</strong> {prefersReducedMotion ? 'Yes' : 'No'}
                     </p>
                   </div>
                   <div className="flex gap-2">

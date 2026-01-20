@@ -1,19 +1,16 @@
 import { cva } from 'class-variance-authority'
 
-export const spotlightOverlayVariants = cva(
-  'fixed inset-0 z-40 pointer-events-none',
-  {
-    variants: {
-      visible: {
-        true: 'opacity-100',
-        false: 'opacity-0',
-      },
+export const spotlightOverlayVariants = cva('fixed inset-0 z-40 pointer-events-none', {
+  variants: {
+    visible: {
+      true: 'opacity-100',
+      false: 'opacity-0',
     },
-    defaultVariants: {
-      visible: true,
-    },
-  }
-)
+  },
+  defaultVariants: {
+    visible: true,
+  },
+})
 
 export const spotlightContentVariants = cva(
   'z-50 w-full max-w-sm rounded-lg border bg-background p-4 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
