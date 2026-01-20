@@ -243,7 +243,10 @@ describe('when condition', () => {
 
       // Tour should not be active
       expect(result.current.isActive).toBe(false)
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('has no visible steps'))
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
+        expect.stringContaining('has no visible steps')
+      )
 
       consoleSpy.mockRestore()
     })
@@ -381,6 +384,7 @@ describe('when condition', () => {
       // Should skip erroring step
       expect(result.current.currentStep?.id).toBe('s3')
       expect(consoleSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
         expect.stringContaining('Error evaluating when condition'),
         expect.any(Error)
       )

@@ -80,7 +80,8 @@ describe('googleAnalyticsPlugin', () => {
       plugin.init?.()
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[TourKit Analytics] gtag not found. Make sure Google Analytics is loaded on the page.'
+        '[tour-kit]',
+        'Analytics: gtag not found. Make sure Google Analytics is loaded on the page.'
       )
     })
   })

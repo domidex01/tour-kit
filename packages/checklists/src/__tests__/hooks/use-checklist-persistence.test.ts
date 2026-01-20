@@ -108,6 +108,7 @@ describe('useChecklistPersistence', () => {
 
       expect(() => result.current.save(mockState)).not.toThrow()
       expect(consoleWarnSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
         expect.stringContaining('Failed to save state'),
         expect.any(DOMException)
       )
@@ -129,6 +130,7 @@ describe('useChecklistPersistence', () => {
 
       expect(loaded).toBeNull()
       expect(consoleWarnSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
         expect.stringContaining('Failed to load state'),
         expect.any(SyntaxError)
       )

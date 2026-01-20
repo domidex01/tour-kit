@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef } from 'react'
 import { TourContext } from '../context/tour-context'
 import { getElement } from '../utils/dom'
+import { logger } from '../utils/logger'
 
 export interface UseAdvanceOnOptions {
   /** Enable/disable the advanceOn behavior (default: true) */
@@ -41,9 +42,7 @@ export function useAdvanceOn(options: UseAdvanceOnOptions = {}): void {
       : document
 
     if (selector && targetElement === document) {
-      console.warn(
-        `[tour-kit] advanceOn: Element "${selector}" not found for step "${currentStep.id}"`
-      )
+      logger.warn(`advanceOn: Element "${selector}" not found for step "${currentStep.id}"`)
     }
 
     // Debounce flag to prevent multiple rapid advances
@@ -58,7 +57,7 @@ export function useAdvanceOn(options: UseAdvanceOnOptions = {}): void {
           const shouldAdvance = handler()
           if (!shouldAdvance) return
         } catch (error) {
-          console.warn(`[tour-kit] advanceOn handler error for step "${currentStep.id}":`, error)
+          logger.warn(`advanceOn handler error for step "${currentStep.id}":`, error)
           return
         }
       }

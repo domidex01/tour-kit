@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import type { PersistedState, StorageAdapter } from '../types'
 
 const CURRENT_VERSION = 1
@@ -24,7 +25,7 @@ export function createLocalStorageAdapter(key: string): StorageAdapter {
 
         return state
       } catch (e) {
-        console.warn('[TourKit/Adoption] Failed to load state:', e)
+        logger.warn('Adoption: Failed to load state:', e)
         return null
       }
     },
@@ -36,7 +37,7 @@ export function createLocalStorageAdapter(key: string): StorageAdapter {
         state.updatedAt = new Date().toISOString()
         localStorage.setItem(key, JSON.stringify(state))
       } catch (e) {
-        console.warn('[TourKit/Adoption] Failed to save state:', e)
+        logger.warn('Adoption: Failed to save state:', e)
       }
     },
 
@@ -68,7 +69,7 @@ export function createSessionStorageAdapter(key: string): StorageAdapter {
         state.updatedAt = new Date().toISOString()
         sessionStorage.setItem(key, JSON.stringify(state))
       } catch (e) {
-        console.warn('[TourKit/Adoption] Failed to save state:', e)
+        logger.warn('Adoption: Failed to save state:', e)
       }
     },
 

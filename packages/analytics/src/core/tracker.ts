@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import type { TourEvent, TourEventData, TourEventName } from '../types/events'
 import type { AnalyticsConfig, AnalyticsPlugin } from '../types/plugin'
 
@@ -30,7 +31,7 @@ export class TourAnalytics {
         await plugin.init?.()
       } catch (error) {
         if (this.config.debug) {
-          console.error(`[TourKit Analytics] Failed to init plugin ${plugin.name}:`, error)
+          logger.error(`Analytics: Failed to init plugin ${plugin.name}:`, error)
         }
       }
     }
@@ -51,7 +52,7 @@ export class TourAnalytics {
         plugin.identify?.(userId, properties)
       } catch (error) {
         if (this.config.debug) {
-          console.error(`[TourKit Analytics] Failed to identify in ${plugin.name}:`, error)
+          logger.error(`Analytics: Failed to identify in ${plugin.name}:`, error)
         }
       }
     }
@@ -70,7 +71,7 @@ export class TourAnalytics {
     }
 
     if (this.config.debug) {
-      console.log('[TourKit Analytics]', eventName, event)
+      logger.debug('Analytics:', eventName, event)
     }
 
     for (const plugin of this.plugins) {
@@ -78,7 +79,7 @@ export class TourAnalytics {
         plugin.track(event)
       } catch (error) {
         if (this.config.debug) {
-          console.error(`[TourKit Analytics] Failed to track in ${plugin.name}:`, error)
+          logger.error(`Analytics: Failed to track in ${plugin.name}:`, error)
         }
       }
     }
@@ -254,7 +255,7 @@ export class TourAnalytics {
         await plugin.flush?.()
       } catch (error) {
         if (this.config.debug) {
-          console.error(`[TourKit Analytics] Failed to flush ${plugin.name}:`, error)
+          logger.error(`Analytics: Failed to flush ${plugin.name}:`, error)
         }
       }
     }
@@ -269,7 +270,7 @@ export class TourAnalytics {
         plugin.destroy?.()
       } catch (error) {
         if (this.config.debug) {
-          console.error(`[TourKit Analytics] Failed to destroy ${plugin.name}:`, error)
+          logger.error(`Analytics: Failed to destroy ${plugin.name}:`, error)
         }
       }
     }

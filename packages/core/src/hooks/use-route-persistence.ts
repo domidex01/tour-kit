@@ -1,6 +1,7 @@
 import * as React from 'react'
 import type { TourState } from '../types'
 import type { MultiPagePersistenceConfig } from '../types/router'
+import { logger } from '../utils/logger'
 
 interface PersistedRouteState {
   tourId: string | null
@@ -103,7 +104,7 @@ export function useRoutePersistence(config: MultiPagePersistenceConfig): UseRout
           )
         }
       } catch (e) {
-        console.warn('[TourKit] Failed to save route state:', e)
+        logger.warn('Failed to save route state:', e)
       }
     },
     [config.enabled, config.syncTabs, config.storage, getStorage, storageKey]
@@ -128,7 +129,7 @@ export function useRoutePersistence(config: MultiPagePersistenceConfig): UseRout
 
       return data
     } catch (e) {
-      console.warn('[TourKit] Failed to load route state:', e)
+      logger.warn('Failed to load route state:', e)
       return null
     }
   }, [config.enabled, getStorage, storageKey, expiryMs])

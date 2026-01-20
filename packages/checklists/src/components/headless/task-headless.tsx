@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import type * as React from 'react'
 import { useTask } from '../../hooks/use-task'
 import type { ChecklistTaskState } from '../../types'
@@ -83,7 +84,7 @@ export function TaskHeadless({
 
   const renderFn = render || children
   if (!renderFn) {
-    console.warn('[TourKit Checklists] TaskHeadless requires render prop or children')
+    logger.warn('Checklists: TaskHeadless requires render prop or children')
     return null
   }
 

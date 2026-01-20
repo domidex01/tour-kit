@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import { useCallback } from 'react'
 import type { ChecklistPersistenceConfig, PersistedChecklistState } from '../types'
 
@@ -69,7 +70,7 @@ export function useChecklistPersistence(
       try {
         storage.setItem(storageKey, JSON.stringify(state))
       } catch (e) {
-        console.warn('[TourKit Checklists] Failed to save state:', e)
+        logger.warn('Checklists: Failed to save state:', e)
       }
     },
     [config.enabled, config.onSave, getStorage, storageKey]
@@ -96,7 +97,7 @@ export function useChecklistPersistence(
       if (!raw) return null
       return JSON.parse(raw)
     } catch (e) {
-      console.warn('[TourKit Checklists] Failed to load state:', e)
+      logger.warn('Checklists: Failed to load state:', e)
       return null
     }
   }, [config.enabled, config.onLoad, getStorage, storageKey])

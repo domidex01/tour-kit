@@ -47,3 +47,5 @@ export {
 
 export { createTour, createNamedTour } from './create-tour'
 export { createStep, createNamedStep } from './create-step'
+
+export { logger, type LogLevel, type LoggerConfig } from './logger'

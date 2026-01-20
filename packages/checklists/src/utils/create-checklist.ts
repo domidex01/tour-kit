@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import type { ChecklistConfig, ChecklistTaskConfig } from '../types'
 import { hasCircularDependency } from './dependencies'
 
@@ -19,7 +20,7 @@ import { hasCircularDependency } from './dependencies'
 export function createChecklist(config: ChecklistConfig): ChecklistConfig {
   // Validate no circular dependencies
   if (hasCircularDependency(config.tasks)) {
-    console.error(`[TourKit Checklists] Circular dependency detected in checklist "${config.id}"`)
+    logger.error(`Checklists: Circular dependency detected in checklist "${config.id}"`)
   }
 
   // Validate dependency references
@@ -28,7 +29,7 @@ export function createChecklist(config: ChecklistConfig): ChecklistConfig {
     if (task.dependsOn) {
       for (const depId of task.dependsOn) {
         if (!taskIds.has(depId)) {
-          console.error(`[TourKit Checklists] Task "${task.id}" depends on unknown task "${depId}"`)
+          logger.error(`Checklists: Task "${task.id}" depends on unknown task "${depId}"`)
         }
       }
     }

@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { TourAnalytics, createAnalytics } from '../../core/tracker'
 import type { TourEvent } from '../../types/events'
@@ -84,7 +85,8 @@ describe('TourAnalytics', () => {
       await vi.runAllTimersAsync()
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[TourKit Analytics] Failed to init plugin failing-plugin:',
+        '[tour-kit]',
+        'Analytics: Failed to init plugin failing-plugin:',
         expect.any(Error)
       )
       consoleSpy.mockRestore()
@@ -180,7 +182,8 @@ describe('TourAnalytics', () => {
       expect(() => analytics.identify('user-123')).not.toThrow()
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[TourKit Analytics] Failed to identify in failing-plugin:',
+        '[tour-kit]',
+        'Analytics: Failed to identify in failing-plugin:',
         expect.any(Error)
       )
       consoleSpy.mockRestore()
@@ -265,13 +268,18 @@ describe('TourAnalytics', () => {
       expect(() => analytics.track('tour_started', { tourId: 'tour-1' })).not.toThrow()
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[TourKit Analytics] Failed to track in failing-plugin:',
+        '[tour-kit]',
+        'Analytics: Failed to track in failing-plugin:',
         expect.any(Error)
       )
       consoleSpy.mockRestore()
     })
 
     it('logs events to console in debug mode', () => {
+      // Configure logger for debug level
+      const originalConfig = logger.getConfig()
+      logger.configure({ level: 'debug' })
+
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
       const mockPlugin = createMockPlugin()
       const config = createConfig({
@@ -284,11 +292,14 @@ describe('TourAnalytics', () => {
       analytics.track('tour_started', { tourId: 'tour-1' })
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[TourKit Analytics]',
+        '[tour-kit]',
+        'Analytics:',
         'tour_started',
         expect.objectContaining({ tourId: 'tour-1' })
       )
       consoleSpy.mockRestore()
+      // Restore original logger config
+      logger.configure(originalConfig)
     })
 
     it('uses default empty tourId when data not provided', () => {
@@ -554,7 +565,8 @@ describe('TourAnalytics', () => {
       await expect(analytics.flush()).resolves.toBeUndefined()
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[TourKit Analytics] Failed to flush failing-plugin:',
+        '[tour-kit]',
+        'Analytics: Failed to flush failing-plugin:',
         expect.any(Error)
       )
       consoleSpy.mockRestore()
@@ -604,7 +616,8 @@ describe('TourAnalytics', () => {
       expect(() => analytics.destroy()).not.toThrow()
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[TourKit Analytics] Failed to destroy failing-plugin:',
+        '[tour-kit]',
+        'Analytics: Failed to destroy failing-plugin:',
         expect.any(Error)
       )
       consoleSpy.mockRestore()

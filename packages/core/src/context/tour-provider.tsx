@@ -4,6 +4,7 @@ import { useRoutePersistence } from '../hooks/use-route-persistence'
 import type { Tour, TourCallbackContext, TourContextValue, TourState, TourStep } from '../types'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
 import { waitForElement } from '../utils/dom'
+import { logger } from '../utils/logger'
 import { TourContext } from './tour-context'
 import { TourKitContext } from './tourkit-context'
 
@@ -80,7 +81,7 @@ async function evaluateStepWhen(step: TourStep, context: TourCallbackContext): P
   try {
     return await step.when(context)
   } catch (error) {
-    console.warn(`[tour-kit] Error evaluating when condition for step "${step.id}":`, error)
+    logger.warn(`Error evaluating when condition for step "${step.id}":`, error)
     return false // Skip step on error
   }
 }
@@ -381,7 +382,7 @@ export function TourProvider({
       const visibleIndex = await findNextVisibleStepIndex(initialIndex, 1, tour.steps, context)
 
       if (visibleIndex === -1) {
-        console.warn(`[tour-kit] Tour "${id}" has no visible steps`)
+        logger.warn(`Tour "${id}" has no visible steps`)
         return
       }
 

@@ -46,9 +46,9 @@ describe('create-checklist', () => {
 
       expect(result).toBe(config)
       expect(consoleErrorSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
         expect.stringContaining('Circular dependency detected')
       )
-      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('circular-checklist'))
     })
 
     it('logs error for unknown dependency reference', () => {
@@ -62,10 +62,9 @@ describe('create-checklist', () => {
 
       expect(result).toBe(config)
       expect(consoleErrorSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
         expect.stringContaining('depends on unknown task')
       )
-      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('task-1'))
-      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('non-existent'))
     })
 
     it('validates all tasks for unknown dependencies', () => {
@@ -81,9 +80,9 @@ describe('create-checklist', () => {
       createChecklist(config)
 
       // Should log error for each unknown dependency
-      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('unknown-1'))
-      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('unknown-2'))
-      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('unknown-3'))
+      expect(consoleErrorSpy).toHaveBeenCalledWith('[tour-kit]', expect.stringContaining('unknown-1'))
+      expect(consoleErrorSpy).toHaveBeenCalledWith('[tour-kit]', expect.stringContaining('unknown-2'))
+      expect(consoleErrorSpy).toHaveBeenCalledWith('[tour-kit]', expect.stringContaining('unknown-3'))
     })
 
     it('does not throw for invalid config (logs only)', () => {

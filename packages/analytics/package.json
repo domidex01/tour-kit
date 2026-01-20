@@ -71,19 +71,19 @@
   },
   "devDependencies": {
     "@amplitude/analytics-browser": "^2.11.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
     "@tour-kit/tsconfig": "workspace:*",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "jsdom": "^26.1.0",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
     "mixpanel-browser": "^2.56.0",
     "posthog-js": "^1.250.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

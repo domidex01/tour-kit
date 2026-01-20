@@ -258,6 +258,7 @@ describe('useAdvanceOn', () => {
     })
 
     expect(consoleSpy).toHaveBeenCalledWith(
+      '[tour-kit]',
       expect.stringContaining('advanceOn: Element "#nonexistent" not found')
     )
 
@@ -468,6 +469,7 @@ describe('useAdvanceOn', () => {
     // Should not advance due to handler error
     expect(result.current.currentStep?.id).toBe('s1')
     expect(consoleSpy).toHaveBeenCalledWith(
+      '[tour-kit]',
       expect.stringContaining('advanceOn handler error'),
       expect.any(Error)
     )

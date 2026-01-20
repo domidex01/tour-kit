@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import type { TourEvent } from '../types/events'
 import type { AnalyticsPlugin } from '../types/plugin'
 
@@ -54,7 +55,7 @@ export function posthogPlugin(options: PostHogPluginOptions): AnalyticsPlugin {
           persistence: 'localStorage',
         })
       } catch (error) {
-        console.warn('[TourKit Analytics] PostHog not available:', error)
+        logger.warn('Analytics: PostHog not available:', error)
       }
     },
 

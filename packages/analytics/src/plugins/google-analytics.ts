@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import type { TourEvent } from '../types/events'
 import type { AnalyticsPlugin } from '../types/plugin'
 
@@ -48,9 +49,7 @@ export function googleAnalyticsPlugin(options: GoogleAnalyticsPluginOptions): An
 
     init() {
       if (!getGtag()) {
-        console.warn(
-          '[TourKit Analytics] gtag not found. Make sure Google Analytics is loaded on the page.'
-        )
+        logger.warn('Analytics: gtag not found. Make sure Google Analytics is loaded on the page.')
       }
     },
 

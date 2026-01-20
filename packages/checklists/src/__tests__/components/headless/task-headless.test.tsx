@@ -103,6 +103,7 @@ describe('TaskHeadless', () => {
       )
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
+        '[tour-kit]',
         expect.stringContaining('requires render prop or children')
       )
     })

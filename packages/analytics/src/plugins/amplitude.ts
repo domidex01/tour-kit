@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import type { TourEvent } from '../types/events'
 import type { AnalyticsPlugin } from '../types/plugin'
 
@@ -56,7 +57,7 @@ export function amplitudePlugin(options: AmplitudePluginOptions): AnalyticsPlugi
           defaultTracking: false,
         })
       } catch (error) {
-        console.warn('[TourKit Analytics] Amplitude not available:', error)
+        logger.warn('Analytics: Amplitude not available:', error)
       }
     },
 
