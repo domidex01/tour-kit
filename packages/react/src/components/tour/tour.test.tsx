@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useTour } from '@tour-kit/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -179,8 +179,9 @@ describe('Tour', () => {
     )
 
     await user.click(screen.getByText('Start'))
-    // Click the Skip button from TourCard navigation
-    await user.click(screen.getByRole('button', { name: /skip/i }))
+    // Wait for tour to be active, then click the Skip button from TourCard navigation
+    const skipButton = await screen.findByRole('button', { name: /skip/i })
+    await user.click(skipButton)
 
     expect(onSkip).toHaveBeenCalledTimes(1)
   })
@@ -207,8 +208,9 @@ describe('Tour', () => {
     )
 
     await user.click(screen.getByText('Start'))
-    // Click the Next button from TourCard navigation
-    await user.click(screen.getByRole('button', { name: /next/i }))
+    // Wait for tour to be active, then click the Next button from TourCard navigation
+    const nextButton = await screen.findByRole('button', { name: /next/i })
+    await user.click(nextButton)
 
     expect(onStepChange).toHaveBeenCalledWith(expect.objectContaining({ id: 's2' }), 1)
   })
@@ -235,7 +237,9 @@ describe('Tour', () => {
     await user.click(screen.getByText('Start'))
 
     // Overlay should be present with aria-hidden
-    expect(document.querySelector('[aria-hidden="true"]')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(document.querySelector('[aria-hidden="true"]')).toBeInTheDocument()
+    })
   })
 
   it('renders TourCard when active', async () => {
@@ -260,7 +264,7 @@ describe('Tour', () => {
     await user.click(screen.getByText('Start'))
 
     // Card should be present as dialog
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
     expect(screen.getByText('Step 1 Content')).toBeInTheDocument()
   })
 

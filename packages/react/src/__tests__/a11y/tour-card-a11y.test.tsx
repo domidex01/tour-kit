@@ -51,7 +51,7 @@ describe('TourCard Accessibility', () => {
 
     await user.click(screen.getByText('Start'))
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
   })
 
   it('has aria-modal', async () => {
@@ -75,7 +75,7 @@ describe('TourCard Accessibility', () => {
 
     await user.click(screen.getByText('Start'))
 
-    expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true')
+    expect(await screen.findByRole('dialog')).toHaveAttribute('aria-modal', 'true')
   })
 
   it('has aria-labelledby linked to title', async () => {
@@ -99,7 +99,7 @@ describe('TourCard Accessibility', () => {
 
     await user.click(screen.getByText('Start'))
 
-    const dialog = screen.getByRole('dialog')
+    const dialog = await screen.findByRole('dialog')
     expect(dialog).toHaveAttribute('aria-labelledby')
 
     const labelledBy = dialog.getAttribute('aria-labelledby')
@@ -128,7 +128,7 @@ describe('TourCard Accessibility', () => {
 
     await user.click(screen.getByText('Start'))
 
-    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /close/i })).toBeInTheDocument()
   })
 
   it('navigation buttons have accessible names', async () => {
@@ -161,7 +161,7 @@ describe('TourCard Accessibility', () => {
     await user.click(screen.getByText('Start'))
 
     // On first step
-    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /next/i })).toBeInTheDocument()
 
     // Navigate to second step
     await user.click(screen.getByRole('button', { name: /next/i }))
@@ -192,7 +192,7 @@ describe('TourCard Accessibility', () => {
 
     await user.click(screen.getByText('Start'))
 
-    const closeButton = screen.getByRole('button', { name: /close/i })
+    const closeButton = await screen.findByRole('button', { name: /close/i })
     const svg = closeButton.querySelector('svg')
     expect(svg).toHaveAttribute('aria-hidden', 'true')
   })
@@ -217,6 +217,9 @@ describe('TourCard Accessibility', () => {
     )
 
     await user.click(screen.getByText('Start'))
+
+    // Wait for tour to be active
+    await screen.findByRole('dialog')
 
     // Tab through the dialog buttons
     await user.tab()
@@ -252,7 +255,7 @@ describe('TourCard Accessibility', () => {
 
     await user.click(screen.getByText('Start'))
 
-    const heading = screen.getByRole('heading', { level: 3 })
+    const heading = await screen.findByRole('heading', { level: 3 })
     expect(heading).toHaveTextContent('Title')
   })
 })

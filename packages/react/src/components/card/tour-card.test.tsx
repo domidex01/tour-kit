@@ -84,7 +84,7 @@ describe('TourCard', () => {
 
     await user.click(screen.getByText('Start'))
 
-    const dialog = screen.getByRole('dialog')
+    const dialog = await screen.findByRole('dialog')
     expect(dialog).toBeInTheDocument()
     expect(dialog).toHaveAttribute('aria-modal', 'true')
   })
@@ -110,7 +110,7 @@ describe('TourCard', () => {
 
     await user.click(screen.getByText('Start'))
 
-    const dialog = screen.getByRole('dialog')
+    const dialog = await screen.findByRole('dialog')
     const labelledBy = dialog.getAttribute('aria-labelledby')
     const title = labelledBy ? document.getElementById(labelledBy) : null
 
@@ -138,7 +138,7 @@ describe('TourCard', () => {
 
     await user.click(screen.getByText('Start'))
 
-    expect(screen.getByText('Welcome')).toBeInTheDocument()
+    expect(await screen.findByText('Welcome')).toBeInTheDocument()
   })
 
   it('renders step content', async () => {
@@ -162,7 +162,7 @@ describe('TourCard', () => {
 
     await user.click(screen.getByText('Start'))
 
-    expect(screen.getByText('This is the first step')).toBeInTheDocument()
+    expect(await screen.findByText('This is the first step')).toBeInTheDocument()
   })
 
   it('renders TourCardHeader with close button by default', async () => {
@@ -186,7 +186,7 @@ describe('TourCard', () => {
 
     await user.click(screen.getByText('Start'))
 
-    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /close/i })).toBeInTheDocument()
   })
 
   it('respects showClose step option', async () => {
@@ -222,6 +222,8 @@ describe('TourCard', () => {
 
     await user.click(screen.getByText('Start'))
 
+    // Wait for tour to be active, then check close button is not present
+    await screen.findByRole('dialog')
     expect(screen.queryByRole('button', { name: /close/i })).not.toBeInTheDocument()
   })
 
@@ -247,7 +249,7 @@ describe('TourCard', () => {
     await user.click(screen.getByText('Start'))
 
     // On last (and only) step, should show Finish
-    expect(screen.getByRole('button', { name: /finish/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /finish/i })).toBeInTheDocument()
   })
 
   it('respects showNavigation step option', async () => {
@@ -283,6 +285,8 @@ describe('TourCard', () => {
 
     await user.click(screen.getByText('Start'))
 
+    // Wait for tour to be active, then check navigation buttons are not present
+    await screen.findByRole('dialog')
     expect(screen.queryByRole('button', { name: /finish/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument()
   })
@@ -316,6 +320,9 @@ describe('TourCard', () => {
 
     await user.click(screen.getByText('Start'))
 
+    // Wait for tour to be active
+    await screen.findByRole('dialog')
+
     // Progress dots should be rendered (2 dots for 2 steps)
     const dots = document.querySelectorAll('.rounded-full')
     expect(dots.length).toBeGreaterThan(0)
@@ -342,7 +349,7 @@ describe('TourCard', () => {
 
     await user.click(screen.getByText('Start'))
 
-    const dialog = screen.getByRole('dialog')
+    const dialog = await screen.findByRole('dialog')
     expect(dialog).toHaveClass('custom-card-class')
   })
 })

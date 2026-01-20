@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { type Tour, TourProvider, useTour } from '@tour-kit/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -68,8 +68,10 @@ describe('TourOverlay', () => {
 
     await user.click(screen.getByText('Start'))
 
-    const overlay = document.body.querySelector('[aria-hidden="true"]')
-    expect(overlay).toBeInTheDocument()
+    await waitFor(() => {
+      const overlay = document.body.querySelector('[aria-hidden="true"]')
+      expect(overlay).toBeInTheDocument()
+    })
   })
 
   it('has aria-hidden for accessibility', async () => {
@@ -93,8 +95,10 @@ describe('TourOverlay', () => {
 
     await user.click(screen.getByText('Start'))
 
-    const overlay = document.body.querySelector('[aria-hidden="true"]')
-    expect(overlay).toHaveAttribute('aria-hidden', 'true')
+    await waitFor(() => {
+      const overlay = document.body.querySelector('[aria-hidden="true"]')
+      expect(overlay).toHaveAttribute('aria-hidden', 'true')
+    })
   })
 
   it('calls onClick when overlay is clicked', async () => {
@@ -118,6 +122,10 @@ describe('TourOverlay', () => {
     )
 
     await user.click(screen.getByText('Start'))
+
+    await waitFor(() => {
+      expect(document.body.querySelector('[aria-hidden="true"]')).toBeInTheDocument()
+    })
 
     const overlay = document.body.querySelector('[aria-hidden="true"]')
     if (overlay) {
@@ -148,8 +156,10 @@ describe('TourOverlay', () => {
 
     await user.click(screen.getByText('Start'))
 
-    const overlay = document.body.querySelector('[aria-hidden="true"]')
-    expect(overlay).toHaveClass('custom-overlay')
+    await waitFor(() => {
+      const overlay = document.body.querySelector('[aria-hidden="true"]')
+      expect(overlay).toHaveClass('custom-overlay')
+    })
   })
 
   it('respects interactive step option', async () => {
@@ -186,8 +196,10 @@ describe('TourOverlay', () => {
     await user.click(screen.getByText('Start'))
 
     // The cutout should have pointer-events: auto when interactive
-    const overlay = document.body.querySelector('[aria-hidden="true"]')
-    expect(overlay).toBeInTheDocument()
+    await waitFor(() => {
+      const overlay = document.body.querySelector('[aria-hidden="true"]')
+      expect(overlay).toBeInTheDocument()
+    })
   })
 
   it('hides overlay when tour becomes inactive', async () => {
@@ -220,7 +232,9 @@ describe('TourOverlay', () => {
 
     // Start tour
     await user.click(screen.getByText('Start'))
-    expect(document.body.querySelector('[aria-hidden="true"]')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(document.body.querySelector('[aria-hidden="true"]')).toBeInTheDocument()
+    })
 
     // Skip tour
     await user.click(screen.getByText('Skip'))
