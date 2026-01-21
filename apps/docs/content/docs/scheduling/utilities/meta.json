@@ -1,0 +1,14 @@
+{
+  "title": "Utilities",
+  "pages": [
+    "index",
+    "schedule-evaluation",
+    "timezone",
+    "date-range",
+    "time-range",
+    "day-of-week",
+    "blackouts",
+    "business-hours",
+    "recurring"
+  ]
+}

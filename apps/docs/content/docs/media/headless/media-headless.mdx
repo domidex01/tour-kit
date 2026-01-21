@@ -1,0 +1,580 @@
+---
+title: MediaHeadless
+description: Headless media component with render props for complete UI control
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`MediaHeadless` provides all the logic for media playback without any UI. Use render props to build completely custom media players that match your design system perfectly.
+
+## Basic Usage
+
+```tsx
+import { MediaHeadless } from '@tour-kit/media'
+
+<MediaHeadless src="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+  {({ isPlaying, play, pause }) => (
+    <div>
+      <div className="video-embed">{/* Embed rendered here */}</div>
+      <button onClick={isPlaying ? pause : play}>
+        {isPlaying ? '⏸ Pause' : '▶ Play'}
+      </button>
+    </div>
+  )}
+</MediaHeadless>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    src: {
+      type: 'string',
+      required: true,
+      description: 'Media source URL. Auto-detects YouTube, Vimeo, Loom, Wistia, or uses native video',
+    },
+    type: {
+      type: 'MediaType',
+      required: false,
+      description: 'Explicitly set media type. Auto-detected from URL if not provided',
+    },
+    children: {
+      type: '(props: MediaHeadlessRenderProps) => React.ReactNode',
+      required: true,
+      description: 'Render function receiving media state and controls',
+    },
+    onLoaded: {
+      type: '() => void',
+      required: false,
+      description: 'Called when media finishes loading',
+    },
+    onPlay: {
+      type: '() => void',
+      required: false,
+      description: 'Called when playback starts',
+    },
+    onPause: {
+      type: '() => void',
+      required: false,
+      description: 'Called when playback pauses',
+    },
+    onComplete: {
+      type: '() => void',
+      required: false,
+      description: 'Called when playback reaches the end',
+    },
+    onError: {
+      type: '(error: Error) => void',
+      required: false,
+      description: 'Called when media fails to load or play',
+    },
+  }}
+/>
+
+## Render Props
+
+The render function receives an object with the following properties:
+
+<TypeTable
+  type={{
+    mediaType: {
+      type: 'MediaType',
+      description: 'Detected or specified media type (youtube, vimeo, loom, wistia, video, gif, lottie)',
+    },
+    src: {
+      type: 'string',
+      description: 'Original source URL',
+    },
+    embedUrl: {
+      type: 'string | null',
+      description: 'Generated embed URL for video platforms (YouTube, Vimeo, etc.)',
+    },
+    videoId: {
+      type: 'string | null',
+      description: 'Extracted video ID for embed platforms',
+    },
+    isPlaying: {
+      type: 'boolean',
+      description: 'Whether media is currently playing',
+    },
+    isLoaded: {
+      type: 'boolean',
+      description: 'Whether media has finished loading',
+    },
+    hasError: {
+      type: 'boolean',
+      description: 'Whether an error occurred during loading or playback',
+    },
+    errorMessage: {
+      type: 'string | null',
+      description: 'Error message if hasError is true',
+    },
+    currentTime: {
+      type: 'number',
+      description: 'Current playback position in seconds',
+    },
+    duration: {
+      type: 'number',
+      description: 'Total media duration in seconds',
+    },
+    play: {
+      type: '() => void',
+      description: 'Function to start playback',
+    },
+    pause: {
+      type: '() => void',
+      description: 'Function to pause playback',
+    },
+    seek: {
+      type: '(time: number) => void',
+      description: 'Function to seek to specific time in seconds',
+    },
+    markLoaded: {
+      type: '() => void',
+      description: 'Function to manually mark media as loaded',
+    },
+    markError: {
+      type: '(error: string) => void',
+      description: 'Function to manually set error state',
+    },
+    updateDuration: {
+      type: '(duration: number) => void',
+      description: 'Function to update total duration',
+    },
+    updateCurrentTime: {
+      type: '(time: number) => void',
+      description: 'Function to update current playback time',
+    },
+    prefersReducedMotion: {
+      type: 'boolean',
+      description: 'Whether user prefers reduced motion',
+    },
+    containerRef: {
+      type: 'React.RefObject<HTMLDivElement>',
+      description: 'Ref to the media container element',
+    },
+  }}
+/>
+
+## Examples
+
+### Custom YouTube Player
+
+Build a branded video player with custom controls:
+
+```tsx
+<MediaHeadless src="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+  {({
+    embedUrl,
+    isPlaying,
+    isLoaded,
+    currentTime,
+    duration,
+    play,
+    pause,
+    containerRef
+  }) => (
+    <div className="custom-player">
+      {/* Video iframe */}
+      <div ref={containerRef} className="video-container">
+        {embedUrl && (
+          <iframe
+            src={embedUrl}
+            className="w-full h-full"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+          />
+        )}
+      </div>
+
+      {/* Custom controls */}
+      <div className="controls">
+        <button
+          onClick={isPlaying ? pause : play}
+          disabled={!isLoaded}
+          className="play-button"
+        >
+          {isPlaying ? '⏸' : '▶'}
+        </button>
+
+        <div className="progress-bar">
+          <div
+            className="progress-fill"
+            style={{ width: `${(currentTime / duration) * 100}%` }}
+          />
+        </div>
+
+        <span className="time">
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </span>
+      </div>
+    </div>
+  )}
+</MediaHeadless>
+```
+
+### Native Video with Seek Controls
+
+Full control over native video playback:
+
+```tsx
+<MediaHeadless src="/videos/tutorial.mp4" type="video">
+  {({ src, isPlaying, currentTime, duration, play, pause, seek }) => (
+    <div className="video-player">
+      <video
+        src={src}
+        onPlay={play}
+        onPause={pause}
+        onTimeUpdate={(e) => updateCurrentTime(e.currentTarget.currentTime)}
+        onLoadedMetadata={(e) => updateDuration(e.currentTarget.duration)}
+      />
+
+      <div className="controls">
+        <button onClick={isPlaying ? pause : play}>
+          {isPlaying ? 'Pause' : 'Play'}
+        </button>
+
+        <input
+          type="range"
+          min="0"
+          max={duration}
+          value={currentTime}
+          onChange={(e) => seek(Number(e.target.value))}
+          className="seek-bar"
+        />
+
+        <div className="skip-buttons">
+          <button onClick={() => seek(Math.max(0, currentTime - 10))}>
+            ⏪ -10s
+          </button>
+          <button onClick={() => seek(Math.min(duration, currentTime + 10))}>
+            +10s ⏩
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+</MediaHeadless>
+```
+
+### Loading and Error States
+
+Handle all media states gracefully:
+
+```tsx
+<MediaHeadless
+  src="https://vimeo.com/123456789"
+  onError={(error) => console.error('Media failed:', error)}
+>
+  {({ isLoaded, hasError, errorMessage, embedUrl, containerRef }) => (
+    <div className="media-wrapper">
+      {!isLoaded && !hasError && (
+        <div className="loading-state">
+          <Spinner />
+          <p>Loading video...</p>
+        </div>
+      )}
+
+      {hasError && (
+        <div className="error-state">
+          <p>Failed to load video</p>
+          <p className="error-message">{errorMessage}</p>
+        </div>
+      )}
+
+      {isLoaded && !hasError && (
+        <div ref={containerRef}>
+          <iframe src={embedUrl} />
+        </div>
+      )}
+    </div>
+  )}
+</MediaHeadless>
+```
+
+### Responsive Player with Thumbnails
+
+Show thumbnails while loading:
+
+```tsx
+<MediaHeadless src="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+  {({ embedUrl, isLoaded, isPlaying, play, containerRef }) => (
+    <div className="responsive-player">
+      {!isPlaying && (
+        <div className="thumbnail" onClick={play}>
+          <img
+            src="/thumbnails/video.jpg"
+            alt="Video thumbnail"
+            className="w-full"
+          />
+          <button className="play-overlay">▶ Play Video</button>
+        </div>
+      )}
+
+      {(isPlaying || isLoaded) && (
+        <div ref={containerRef} className="video-embed">
+          <iframe src={embedUrl} />
+        </div>
+      )}
+    </div>
+  )}
+</MediaHeadless>
+```
+
+### Playlist Navigation
+
+Build a custom video playlist:
+
+```tsx
+function VideoPlaylist({ videos }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const currentVideo = videos[currentIndex]
+
+  return (
+    <div className="playlist">
+      <MediaHeadless
+        key={currentVideo.id}
+        src={currentVideo.url}
+        onComplete={() => {
+          // Auto-advance to next video
+          if (currentIndex < videos.length - 1) {
+            setCurrentIndex(currentIndex + 1)
+          }
+        }}
+      >
+        {({ embedUrl, containerRef }) => (
+          <div ref={containerRef}>
+            <iframe src={embedUrl} />
+          </div>
+        )}
+      </MediaHeadless>
+
+      <div className="playlist-nav">
+        {videos.map((video, index) => (
+          <button
+            key={video.id}
+            onClick={() => setCurrentIndex(index)}
+            className={index === currentIndex ? 'active' : ''}
+          >
+            {video.title}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+### Picture-in-Picture Mode
+
+Add custom PiP controls:
+
+```tsx
+<MediaHeadless src="/videos/demo.mp4" type="video">
+  {({ containerRef, isPlaying }) => {
+    const [isPiP, setIsPiP] = useState(false)
+
+    const togglePiP = async () => {
+      const video = containerRef.current?.querySelector('video')
+      if (!video) return
+
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture()
+        setIsPiP(false)
+      } else {
+        await video.requestPictureInPicture()
+        setIsPiP(true)
+      }
+    }
+
+    return (
+      <div className="pip-player">
+        <div ref={containerRef}>
+          <video src="/videos/demo.mp4" />
+        </div>
+        <button onClick={togglePiP}>
+          {isPiP ? '📺 Exit PiP' : '🖼 Picture-in-Picture'}
+        </button>
+      </div>
+    )
+  }}
+</MediaHeadless>
+```
+
+### Analytics Integration
+
+Track detailed engagement metrics:
+
+```tsx
+<MediaHeadless
+  src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  onPlay={() => analytics.track('Video Play')}
+  onPause={() => analytics.track('Video Pause')}
+  onComplete={() => analytics.track('Video Complete')}
+>
+  {({ embedUrl, currentTime, duration, containerRef }) => {
+    // Track watch progress
+    useEffect(() => {
+      if (currentTime > 0) {
+        const progress = (currentTime / duration) * 100
+        if (progress >= 25 && progress < 26) {
+          analytics.track('Video 25% Complete')
+        }
+        if (progress >= 50 && progress < 51) {
+          analytics.track('Video 50% Complete')
+        }
+        if (progress >= 75 && progress < 76) {
+          analytics.track('Video 75% Complete')
+        }
+      }
+    }, [currentTime, duration])
+
+    return (
+      <div ref={containerRef}>
+        <iframe src={embedUrl} />
+      </div>
+    )
+  }}
+</MediaHeadless>
+```
+
+### GIF Player with Custom Controls
+
+Build a custom GIF player:
+
+```tsx
+<MediaHeadless src="/animations/demo.gif" type="gif">
+  {({ src, isPlaying, play, pause }) => {
+    const [showStatic, setShowStatic] = useState(true)
+
+    return (
+      <div className="gif-player">
+        <img
+          src={isPlaying ? src : '/images/demo-poster.jpg'}
+          alt="Demo animation"
+        />
+
+        <button
+          onClick={() => {
+            if (isPlaying) {
+              pause()
+              setShowStatic(true)
+            } else {
+              play()
+              setShowStatic(false)
+            }
+          }}
+          className="control-button"
+        >
+          {isPlaying ? '⏸ Pause' : '▶ Play'}
+        </button>
+      </div>
+    )
+  }}
+</MediaHeadless>
+```
+
+## Accessibility
+
+When building custom UIs, ensure accessibility:
+
+### Keyboard Navigation
+
+Add keyboard support to custom controls:
+
+```tsx
+<MediaHeadless src="video.mp4">
+  {({ isPlaying, play, pause, seek, currentTime }) => (
+    <div
+      onKeyDown={(e) => {
+        if (e.key === ' ' || e.key === 'k') {
+          e.preventDefault()
+          isPlaying ? pause() : play()
+        }
+        if (e.key === 'ArrowLeft') {
+          seek(currentTime - 5)
+        }
+        if (e.key === 'ArrowRight') {
+          seek(currentTime + 5)
+        }
+      }}
+      tabIndex={0}
+    >
+      {/* Player UI */}
+    </div>
+  )}
+</MediaHeadless>
+```
+
+### ARIA Attributes
+
+Properly label interactive elements:
+
+```tsx
+<button
+  onClick={isPlaying ? pause : play}
+  aria-label={isPlaying ? 'Pause video' : 'Play video'}
+  aria-pressed={isPlaying}
+>
+  {isPlaying ? '⏸' : '▶'}
+</button>
+
+<div
+  role="progressbar"
+  aria-valuenow={currentTime}
+  aria-valuemin={0}
+  aria-valuemax={duration}
+  aria-label="Video progress"
+>
+  {/* Progress bar */}
+</div>
+```
+
+### Reduced Motion
+
+Respect motion preferences:
+
+```tsx
+<MediaHeadless src="animation.json" type="lottie">
+  {({ prefersReducedMotion, containerRef }) => (
+    <div ref={containerRef}>
+      {prefersReducedMotion ? (
+        <img src="/fallback-image.svg" alt="Static illustration" />
+      ) : (
+        <LottieAnimation />
+      )}
+    </div>
+  )}
+</MediaHeadless>
+```
+
+## TypeScript
+
+Full type safety with render props:
+
+```tsx
+import type { MediaHeadlessRenderProps } from '@tour-kit/media'
+
+function CustomPlayer({ src }: { src: string }) {
+  return (
+    <MediaHeadless src={src}>
+      {(props: MediaHeadlessRenderProps) => {
+        const { isPlaying, play, pause, currentTime, duration } = props
+
+        return (
+          <div>
+            {/* Your custom UI with full type safety */}
+          </div>
+        )
+      }}
+    </MediaHeadless>
+  )
+}
+```
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Pre-built media component
+- [useMediaEvents](/docs/media/hooks/use-media-events) - Media event tracking hook
+- [URL Parsing](/docs/media/utilities/url-parsing) - Media detection utilities

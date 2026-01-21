@@ -1,0 +1,432 @@
+# Tour Kit - LLM Documentation Reference
+
+> Tour Kit is a headless onboarding and product tour library for React.
+> Documentation: apps/docs/content/docs/
+> This file provides a quick reference for LLMs working with the codebase.
+
+## Package Overview
+
+| Package | Purpose | Key Exports |
+|---------|---------|-------------|
+| @tour-kit/core | Framework-agnostic logic | useTour, useStep, TourProvider, createTour |
+| @tour-kit/react | React components | Tour, TourCard, TourStep, TourOverlay |
+| @tour-kit/hints | Hint beacons | Hint, HintHotspot, HintTooltip, useHint |
+| @tour-kit/adoption | Feature tracking | AdoptionProvider, useFeature, useNudge, AdoptionNudge |
+| @tour-kit/analytics | Analytics plugins | AnalyticsProvider, useAnalytics, createAnalytics |
+| @tour-kit/announcements | Announcements | AnnouncementsProvider, useAnnouncement, Modal/Toast/Banner/Slideout/Spotlight |
+| @tour-kit/checklists | Onboarding checklists | ChecklistProvider, useChecklist, Checklist, ChecklistPanel |
+| @tour-kit/media | Media embedding | TourMedia, YouTubeEmbed, VimeoEmbed, LoomEmbed, WistiaEmbed, GifPlayer, LottiePlayer |
+| @tour-kit/scheduling | Time scheduling | useSchedule, checkSchedule, isScheduleActive, BUSINESS_HOURS_PRESETS |
+
+## Key Patterns
+
+### Headless-First Architecture
+- Logic in @tour-kit/core
+- Components are thin wrappers
+- Headless variants available for all UI packages
+
+### Unified Slot Pattern
+All UI packages support asChild via UnifiedSlot:
+- Radix UI style: `<Button asChild><Link /></Button>`
+- Base UI style: `<Button>{(props) => <Link {...props} />}</Button>`
+
+### Provider Hierarchy
+```jsx
+<AnalyticsProvider>
+  <TourKitProvider>
+    <AdoptionProvider>
+      <AnnouncementsProvider>
+        <ChecklistProvider>
+          <App />
+        </ChecklistProvider>
+      </AnnouncementsProvider>
+    </AdoptionProvider>
+  </TourKitProvider>
+</AnalyticsProvider>
+```
+
+## Common Tasks
+
+### Creating a Tour
+```tsx
+import { TourProvider, Tour } from '@tour-kit/react'
+
+const tour = createTour({
+  id: 'onboarding',
+  steps: [
+    { id: 'welcome', target: '#welcome', title: 'Welcome!' },
+    { id: 'features', target: '#features', title: 'Features' },
+  ],
+})
+
+<TourProvider tour={tour}>
+  <Tour />
+</TourProvider>
+```
+
+### Tracking Analytics
+```tsx
+import { AnalyticsProvider, createAnalytics, posthogPlugin } from '@tour-kit/analytics'
+
+const analytics = createAnalytics({
+  plugins: [posthogPlugin()],
+})
+
+<AnalyticsProvider analytics={analytics}>
+  <App />
+</AnalyticsProvider>
+```
+
+### Creating Announcements
+```tsx
+import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements'
+
+<AnnouncementsProvider announcements={[
+  { id: 'welcome', variant: 'modal', title: 'Welcome!', frequency: 'once' }
+]}>
+  <AnnouncementModal id="welcome" />
+</AnnouncementsProvider>
+```
+
+### Creating Checklists
+```tsx
+import { ChecklistProvider, ChecklistPanel, createChecklist } from '@tour-kit/checklists'
+
+<ChecklistProvider checklists={[createChecklist({
+  id: 'setup',
+  title: 'Get Started',
+  tasks: [
+    { id: 'profile', title: 'Complete profile', action: { type: 'navigate', url: '/settings' } },
+    { id: 'invite', title: 'Invite team', dependsOn: ['profile'] },
+  ]
+})]}>
+  <ChecklistPanel checklistId="setup" />
+</ChecklistProvider>
+```
+
+### Tracking Feature Adoption
+```tsx
+import { AdoptionProvider, useFeature, AdoptionNudge } from '@tour-kit/adoption'
+
+<AdoptionProvider features={[
+  { id: 'export', name: 'Export', trigger: 'click', adoptionCriteria: { minUses: 3 } }
+]}>
+  <FeatureButton featureId="export">Export</FeatureButton>
+  <AdoptionNudge />
+</AdoptionProvider>
+```
+
+### Embedding Media
+```tsx
+import { TourMedia } from '@tour-kit/media'
+
+// Auto-detects media type from URL
+<TourMedia src="https://youtube.com/watch?v=abc123" alt="Tutorial" />
+<TourMedia src="/demo.gif" alt="Demo animation" />
+<TourMedia src="/animation.json" alt="Success animation" /> // Lottie
+```
+
+### Schedule-Based Content
+```tsx
+import { useSchedule } from '@tour-kit/scheduling'
+
+const isActive = useSchedule({
+  daysOfWeek: [1, 2, 3, 4, 5], // Monday-Friday
+  timeOfDay: { start: '09:00', end: '17:00' },
+  timezone: 'America/New_York',
+})
+
+{isActive && <AnnouncementBanner id="promo" />}
+```
+
+## Accessibility
+
+- WCAG 2.1 AA compliant
+- Focus trap in tour cards (useFocusTrap)
+- Keyboard navigation (Arrow keys, Escape, Tab)
+- Screen reader announcements (aria-live)
+- Reduced motion support (prefers-reduced-motion)
+
+## File Locations
+
+- Documentation: apps/docs/content/docs/
+- Core hooks: packages/core/src/hooks/
+- React components: packages/react/src/components/
+- Types: packages/*/src/types/
+- Tests: packages/*/src/__tests__/
+- Coding rules: tour-kit/rules/
+
+## Commands
+
+```bash
+pnpm install          # Install dependencies
+pnpm build            # Build all packages
+pnpm dev              # Watch mode
+pnpm typecheck        # Type checking
+pnpm test             # Run tests
+pnpm --filter @tour-kit/core build  # Build single package
+```
+
+## Documentation Site Structure
+
+```
+apps/docs/content/docs/
+├── index.mdx                  # Landing
+├── getting-started/           # Installation, quick start (4 pages)
+├── core/                      # @tour-kit/core (15 pages)
+│   ├── hooks/                 # useTour, useStep, useFocusTrap, etc.
+│   ├── providers/             # TourProvider, TourKitProvider
+│   ├── utilities/             # createTour, createStep, helpers
+│   └── types/                 # TourConfig, StepConfig, etc.
+├── react/                     # @tour-kit/react (14 pages)
+│   ├── components/            # Tour, TourCard, TourStep, etc.
+│   ├── headless/              # TourCardHeadless, TourOverlayHeadless
+│   ├── adapters/              # Next.js, React Router
+│   └── styling/               # CSS variables, Tailwind
+├── hints/                     # @tour-kit/hints (4+ pages)
+│   ├── components/            # Hint, HintHotspot, HintTooltip
+│   └── headless/              # HintHeadless variants
+├── adoption/                  # @tour-kit/adoption (16 pages)
+│   ├── providers/             # AdoptionProvider
+│   ├── hooks/                 # useFeature, useNudge, useAdoptionStats
+│   ├── components/            # AdoptionNudge, FeatureButton, IfAdopted
+│   ├── dashboard/             # AdoptionDashboard, AdoptionTable, Charts
+│   └── analytics/             # Analytics integration
+├── analytics/                 # @tour-kit/analytics (15 pages)
+│   ├── providers/             # AnalyticsProvider
+│   ├── hooks/                 # useAnalytics, useAnalyticsOptional
+│   └── plugins/               # console, posthog, mixpanel, amplitude, ga4
+├── announcements/             # @tour-kit/announcements (21 pages)
+│   ├── providers/             # AnnouncementsProvider
+│   ├── hooks/                 # useAnnouncement, useAnnouncementQueue
+│   ├── components/            # Modal, Slideout, Banner, Toast, Spotlight
+│   ├── headless/              # HeadlessModal, HeadlessBanner, etc.
+│   └── configuration/         # Frequency, Audience, Queue
+├── checklists/                # @tour-kit/checklists (26 pages)
+│   ├── providers/             # ChecklistProvider
+│   ├── hooks/                 # useChecklist, useTask, useChecklistPersistence
+│   ├── components/            # Checklist, ChecklistTask, ChecklistPanel
+│   ├── headless/              # ChecklistHeadless, TaskHeadless
+│   └── utilities/             # createChecklist, dependencies, progress
+├── media/                     # @tour-kit/media (21 pages)
+│   ├── components/            # TourMedia, YouTubeEmbed, GifPlayer, etc.
+│   ├── headless/              # MediaHeadless
+│   ├── hooks/                 # useMediaEvents, usePrefersReducedMotion
+│   └── utilities/             # URL parsing, embed builders
+├── scheduling/                # @tour-kit/scheduling (18 pages)
+│   ├── hooks/                 # useSchedule, useScheduleStatus
+│   ├── utilities/             # checkSchedule, timezone, blackouts
+│   └── presets/               # BUSINESS_HOURS_PRESETS
+├── guides/                    # Tutorials and guides (14 pages)
+│   ├── nextjs.mdx             # Next.js integration
+│   ├── vite.mdx               # Vite setup
+│   ├── accessibility.mdx      # A11y best practices
+│   ├── analytics-integration.mdx
+│   ├── adoption-analytics.mdx
+│   └── checklists-tours.mdx
+├── examples/                  # Code examples (3 pages)
+│   ├── basic-tour.mdx
+│   ├── onboarding-flow.mdx
+│   └── headless-custom.mdx
+└── api/                       # API reference (10 pages)
+    ├── core.mdx
+    ├── react.mdx
+    ├── hints.mdx
+    ├── adoption.mdx
+    ├── analytics.mdx
+    ├── announcements.mdx
+    ├── checklists.mdx
+    ├── media.mdx
+    └── scheduling.mdx
+```
+
+**Total: ~150+ documentation pages**
+
+## Extended Package APIs
+
+### @tour-kit/adoption
+```typescript
+// Hooks
+useFeature(featureId) → { feature, usage, isAdopted, status, trackUsage }
+useAdoptionStats() → { totalFeatures, adoptedCount, adoptionRate, byCategory }
+useNudge() → { currentNudge, queue, show, dismiss, skip }
+
+// Components
+AdoptionNudge, FeatureButton, IfAdopted, IfNotAdopted, NewFeatureBadge
+AdoptionDashboard, AdoptionTable, AdoptionCategoryChart, AdoptionStatsGrid
+
+// Types
+type AdoptionStatus = 'not_started' | 'exploring' | 'adopted' | 'churned'
+interface Feature { id, name, trigger, adoptionCriteria, category?, priority? }
+```
+
+### @tour-kit/analytics
+```typescript
+// Core
+createAnalytics(config) → TourAnalytics
+TourAnalytics.track(eventName, data), .tourStarted(), .stepViewed(), .hintShown()
+
+// Hooks
+useAnalytics() → TourAnalytics (throws if not in provider)
+useAnalyticsOptional() → TourAnalytics | null
+
+// Plugins
+consolePlugin(), posthogPlugin(), mixpanelPlugin(), amplitudePlugin(), googleAnalyticsPlugin()
+
+// Event Types
+type TourEventName = 'tour_started' | 'tour_completed' | 'step_viewed' | 'hint_shown' | ...
+```
+
+### @tour-kit/announcements
+```typescript
+// Hooks
+useAnnouncement(id) → { announcement, isVisible, show, dismiss, complete }
+useAnnouncements() → { announcements, visible, showAnnouncement }
+useAnnouncementQueue() → { queue, current, next, clear }
+
+// Components (5 variants)
+AnnouncementModal, AnnouncementSlideout, AnnouncementBanner, AnnouncementToast, AnnouncementSpotlight
+// Headless versions: HeadlessModal, HeadlessSlideout, HeadlessBanner, HeadlessToast, HeadlessSpotlight
+
+// Types
+type AnnouncementVariant = 'modal' | 'slideout' | 'banner' | 'toast' | 'spotlight'
+type FrequencyRule = 'once' | 'session' | 'always' | { type: 'times', count: N } | { type: 'interval', days: N }
+type AnnouncementPriority = 'low' | 'normal' | 'high' | 'critical'
+```
+
+### @tour-kit/checklists
+```typescript
+// Hooks
+useChecklist(id) → { checklist, tasks, progress, completeTask, reset }
+useTask(checklistId, taskId) → { task, isCompleted, isLocked, complete }
+useChecklistPersistence(id) → { save, load, clear }
+
+// Components
+Checklist, ChecklistTask, ChecklistProgress, ChecklistLauncher, ChecklistPanel
+// Headless: ChecklistHeadless, TaskHeadless
+
+// Utilities
+createChecklist(config), createTask(config)
+calculateProgress(state), canCompleteTask(taskId, state), hasCircularDependency(tasks)
+
+// Types
+type TaskAction = { type: 'navigate', url } | { type: 'callback', handler } | { type: 'tour', tourId }
+interface ChecklistProgress { completed, total, percentage, remaining }
+```
+
+### @tour-kit/media
+```typescript
+// Components
+TourMedia - Auto-detecting media component
+YouTubeEmbed, VimeoEmbed, LoomEmbed, WistiaEmbed, NativeVideo, GifPlayer, LottiePlayer
+MediaHeadless - Render prop version
+
+// Hooks
+useMediaEvents(options) → { isPlaying, currentTime, duration, play, pause, seek }
+usePrefersReducedMotion() → boolean
+useResponsiveSource(sources) → ResponsiveSource
+
+// Utilities
+parseMediaUrl(url) → { type, id, embedUrl }
+detectMediaType(url) → MediaType
+extractYouTubeId(url), extractVimeoId(url), extractLoomId(url), extractWistiaId(url)
+buildYouTubeEmbedUrl(id, options), buildVimeoEmbedUrl(id, options)
+
+// Types
+type MediaType = 'youtube' | 'vimeo' | 'loom' | 'wistia' | 'video' | 'gif' | 'lottie' | 'image'
+```
+
+### @tour-kit/scheduling
+```typescript
+// Hooks
+useSchedule(schedule, options?) → isActive: boolean
+useScheduleStatus(schedule) → { isActive, reason, nextCheck }
+useUserTimezone() → { timezone, isSupported, isDST }
+
+// Core Functions
+checkSchedule(schedule, options?) → boolean
+isScheduleActive(schedule) → boolean
+getScheduleStatus(schedule) → { isActive, reason }
+
+// Utilities
+isWithinDateRange(), isWithinTimeRange(), isWithinBusinessHours()
+isInBlackoutPeriod(), matchesRecurringPattern()
+getDayOfWeek(), isAllowedDay(), DAY_GROUPS.weekdays, DAY_GROUPS.weekend
+
+// Constants
+BUSINESS_HOURS_PRESETS.standard  // 9-5 Mon-Fri
+BUSINESS_HOURS_PRESETS.extended  // 8-8 Mon-Sat
+
+// Types
+interface Schedule { startAt?, endAt?, daysOfWeek?, timeOfDay?, timezone?, blackouts?, recurring? }
+type ScheduleInactiveReason = 'before_start_date' | 'after_end_date' | 'wrong_day_of_week' | 'in_blackout' | ...
+```
+
+## Key TypeScript Types
+
+```typescript
+// Tour
+interface TourStep { id: string; target: string; title?: string; description?: string }
+interface TourConfig { id: string; steps: TourStep[] }
+
+// Announcements
+type AnnouncementVariant = 'modal' | 'toast' | 'banner' | 'slideout' | 'spotlight'
+type FrequencyRule = 'once' | 'session' | 'always' | { type: 'times'; count: number }
+
+// Checklists
+interface ChecklistTaskConfig { id: string; title: string; dependsOn?: string[]; action?: TaskAction }
+
+// Scheduling
+interface Schedule { startAt?: string; endAt?: string; daysOfWeek?: number[]; timeOfDay?: TimeRange }
+
+// Adoption
+type AdoptionStatus = 'not_started' | 'exploring' | 'adopted' | 'churned'
+
+// Analytics
+type TourEventName = 'tour_started' | 'tour_completed' | 'step_viewed' | 'hint_shown' | ...
+
+// Media
+type MediaType = 'youtube' | 'vimeo' | 'loom' | 'wistia' | 'video' | 'gif' | 'lottie' | 'image'
+```
+
+## Cross-Package Integration Patterns
+
+### Analytics + Adoption
+```tsx
+// Adoption events auto-track if analytics provider exists
+<AnalyticsProvider analytics={analytics}>
+  <AdoptionProvider features={features}>
+    {/* feature_used, feature_adopted, nudge_shown events auto-tracked */}
+  </AdoptionProvider>
+</AnalyticsProvider>
+```
+
+### Announcements + Scheduling
+```tsx
+// Show announcement only during business hours
+const announcement = {
+  id: 'promo',
+  variant: 'banner',
+  schedule: {
+    daysOfWeek: [1, 2, 3, 4, 5],
+    timeOfDay: { start: '09:00', end: '17:00' },
+  }
+}
+```
+
+### Checklists + Tours
+```tsx
+// Launch tour from checklist task
+const task = {
+  id: 'learn-feature',
+  title: 'Learn the feature',
+  action: { type: 'tour', tourId: 'feature-tour' }
+}
+```
+
+## Related Files
+
+- CLAUDE.md - Main project documentation for Claude
+- packages/*/CLAUDE.md - Package-specific documentation
+- apps/docs/CLAUDE.md - Documentation site conventions
+- tour-kit/rules/ - Coding rules and standards

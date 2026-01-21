@@ -1,0 +1,271 @@
+---
+title: Blackout Utilities
+description: Functions for checking blackout periods
+---
+
+# Blackout Utilities
+
+Utilities for checking if a date falls within blackout periods when content should not be shown.
+
+## isInBlackoutPeriod
+
+Check if a date is in a single blackout period.
+
+```ts
+import { isInBlackoutPeriod } from '@tour-kit/scheduling'
+
+const blackout = {
+  id: 'maintenance',
+  start: '2024-02-15T00:00:00Z',
+  end: '2024-02-15T06:00:00Z',
+  reason: 'Scheduled maintenance',
+}
+
+const isBlocked = isInBlackoutPeriod(new Date(), blackout)
+```
+
+## isInAnyBlackout
+
+Check if a date is in any of multiple blackout periods.
+
+```ts
+import { isInAnyBlackout } from '@tour-kit/scheduling'
+
+const blackouts = [
+  { id: 'holiday', start: '2024-12-24', end: '2024-12-26' },
+  { id: 'maintenance', start: '2024-06-15', end: '2024-06-15' },
+]
+
+const isBlocked = isInAnyBlackout(new Date(), blackouts)
+```
+
+## getCurrentBlackout
+
+Get the active blackout period if there is one.
+
+```ts
+import { getCurrentBlackout } from '@tour-kit/scheduling'
+
+const blackout = getCurrentBlackout(new Date(), blackouts)
+
+if (blackout) {
+  console.log(`Blocked: ${blackout.reason}`)
+  console.log(`Until: ${blackout.end}`)
+}
+```
+
+Returns the blackout object or `undefined` if not in a blackout.
+
+## getBlackoutEndTime
+
+Get the end time of a blackout period as a Date object.
+
+```ts
+import { getBlackoutEndTime } from '@tour-kit/scheduling'
+
+const blackout = {
+  id: 'maintenance',
+  start: '2024-02-15',
+  end: '2024-02-16',
+}
+
+const endTime = getBlackoutEndTime(blackout)
+// Date object for Feb 16, 2024
+```
+
+## Examples
+
+### Holiday Blackouts
+
+```ts
+import { isInAnyBlackout } from '@tour-kit/scheduling'
+
+const holidayBlackouts = [
+  {
+    id: 'christmas',
+    start: '2024-12-24',
+    end: '2024-12-26',
+    reason: 'Christmas Holiday',
+  },
+  {
+    id: 'new-year',
+    start: '2024-12-31',
+    end: '2025-01-02',
+    reason: 'New Year Holiday',
+  },
+]
+
+if (!isInAnyBlackout(new Date(), holidayBlackouts)) {
+  showTour()
+}
+```
+
+### Maintenance Windows
+
+```ts
+import { getCurrentBlackout } from '@tour-kit/scheduling'
+
+const maintenanceWindows = [
+  {
+    id: 'weekly-maintenance',
+    start: '2024-02-15T02:00:00Z',
+    end: '2024-02-15T06:00:00Z',
+    reason: 'Weekly maintenance',
+  },
+]
+
+const currentBlackout = getCurrentBlackout(new Date(), maintenanceWindows)
+
+if (currentBlackout) {
+  const endTime = new Date(currentBlackout.end)
+  showMaintenanceBanner(`Maintenance until ${endTime.toLocaleTimeString()}`)
+}
+```
+
+### Schedule with Blackouts
+
+```ts
+import { isScheduleActive } from '@tour-kit/scheduling'
+
+const schedule = {
+  enabled: true,
+  daysOfWeek: [1, 2, 3, 4, 5],
+  blackouts: [
+    {
+      id: 'year-end-freeze',
+      start: '2024-12-20',
+      end: '2024-12-31',
+      reason: 'Year-end code freeze',
+    },
+  ],
+}
+
+const { isActive, reason } = isScheduleActive(schedule)
+
+if (!isActive && reason === 'blackout') {
+  console.log('Blocked during year-end freeze')
+}
+```
+
+### Countdown to Blackout End
+
+```tsx
+import { getCurrentBlackout, getBlackoutEndTime } from '@tour-kit/scheduling'
+
+function BlackoutCountdown() {
+  const blackout = getCurrentBlackout(new Date(), blackouts)
+
+  if (!blackout) return null
+
+  const endTime = getBlackoutEndTime(blackout)
+  const hoursRemaining = Math.ceil((endTime.getTime() - Date.now()) / 3600000)
+
+  return (
+    <div>
+      <p>{blackout.reason || 'Currently unavailable'}</p>
+      <p>Resumes in {hoursRemaining} hours</p>
+    </div>
+  )
+}
+```
+
+### Region-Specific Blackouts
+
+```ts
+import { isInAnyBlackout } from '@tour-kit/scheduling'
+
+const usBlackouts = [
+  {
+    id: 'us-thanksgiving',
+    start: '2024-11-28',
+    end: '2024-11-29',
+    reason: 'US Thanksgiving',
+  },
+]
+
+const ukBlackouts = [
+  {
+    id: 'uk-bank-holiday',
+    start: '2024-08-26',
+    end: '2024-08-27',
+    reason: 'UK Bank Holiday',
+  },
+]
+
+function getBlackoutsForRegion(region: string) {
+  switch (region) {
+    case 'us':
+      return usBlackouts
+    case 'uk':
+      return ukBlackouts
+    default:
+      return []
+  }
+}
+
+const isBlocked = isInAnyBlackout(new Date(), getBlackoutsForRegion(userRegion))
+```
+
+### Overlapping Blackouts
+
+If multiple blackouts overlap, `getCurrentBlackout` returns the first matching one:
+
+```ts
+const blackouts = [
+  { id: 'a', start: '2024-02-15', end: '2024-02-20' },
+  { id: 'b', start: '2024-02-17', end: '2024-02-22' }, // Overlaps
+]
+
+const current = getCurrentBlackout(new Date('2024-02-18'), blackouts)
+// Returns blackout 'a' (first match)
+```
+
+### Next Blackout
+
+```ts
+function getNextBlackout(blackouts: BlackoutPeriod[]): BlackoutPeriod | undefined {
+  const now = new Date()
+
+  return blackouts
+    .filter((b) => new Date(b.start) > now)
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())[0]
+}
+
+const next = getNextBlackout(blackouts)
+if (next) {
+  console.log(`Next blackout: ${next.reason} starting ${next.start}`)
+}
+```
+
+## Blackout Format
+
+Blackouts accept both date strings and Date objects:
+
+```ts
+// Date strings (YYYY-MM-DD or ISO 8601)
+{
+  id: 'blackout-1',
+  start: '2024-02-15',
+  end: '2024-02-16',
+}
+
+// With time
+{
+  id: 'blackout-2',
+  start: '2024-02-15T00:00:00Z',
+  end: '2024-02-15T06:00:00Z',
+}
+
+// Date objects
+{
+  id: 'blackout-3',
+  start: new Date('2024-02-15'),
+  end: new Date('2024-02-16'),
+}
+```
+
+## Related
+
+- [Schedule.blackouts](/docs/scheduling/types#schedule) - Schedule blackouts
+- [BlackoutPeriod type](/docs/scheduling/types#blackoutperiod) - Blackout type
+- [getScheduleStatus](/docs/scheduling/utilities/schedule-evaluation#get-schedule-status) - Returns current blackout info

@@ -1,0 +1,164 @@
+---
+title: Timezone Utilities
+description: Functions for timezone detection, validation, and conversion
+---
+
+# Timezone Utilities
+
+Utilities for working with IANA timezones, converting dates, and parsing time strings.
+
+## getUserTimezone
+
+Detect the user's browser timezone.
+
+```ts
+import { getUserTimezone } from '@tour-kit/scheduling'
+
+const timezone = getUserTimezone()
+// "America/New_York"
+```
+
+Returns the IANA timezone string from the browser. Falls back to `"UTC"` if unavailable.
+
+## isValidTimezone
+
+Validate an IANA timezone string.
+
+```ts
+import { isValidTimezone } from '@tour-kit/scheduling'
+
+isValidTimezone('America/New_York') // true
+isValidTimezone('Invalid/Zone') // false
+```
+
+Use this before passing user input to other timezone functions.
+
+## getDateInTimezone
+
+Get date components in a specific timezone.
+
+```ts
+import { getDateInTimezone } from '@tour-kit/scheduling'
+
+const date = new Date('2024-02-14T20:00:00Z')
+const components = getDateInTimezone(date, 'America/New_York')
+
+// {
+//   year: 2024,
+//   month: 2,
+//   day: 14,
+//   hours: 15,
+//   minutes: 0,
+//   seconds: 0,
+//   dayOfWeek: 3 (Wednesday)
+// }
+```
+
+This is the core function for timezone-aware date handling. All other utilities use it internally.
+
+## formatDateString
+
+Format a date as YYYY-MM-DD in a timezone.
+
+```ts
+import { formatDateString } from '@tour-kit/scheduling'
+
+const date = new Date('2024-02-14T20:00:00Z')
+
+formatDateString(date, 'America/New_York')
+// "2024-02-14"
+
+formatDateString(date, 'Asia/Tokyo')
+// "2024-02-15" (next day in Tokyo)
+```
+
+Useful for date range comparisons in a specific timezone.
+
+## parseDateString
+
+Parse a YYYY-MM-DD string to a Date object.
+
+```ts
+import { parseDateString } from '@tour-kit/scheduling'
+
+const date = parseDateString('2024-02-14')
+// Date object at midnight UTC
+```
+
+Returns a Date at midnight UTC for the given date. Use with `getDateInTimezone` for timezone-aware operations.
+
+## parseTimeString
+
+Parse a HH:MM time string.
+
+```ts
+import { parseTimeString } from '@tour-kit/scheduling'
+
+const { hours, minutes } = parseTimeString('14:30')
+// { hours: 14, minutes: 30 }
+```
+
+Converts 24-hour format time strings to component values.
+
+## Examples
+
+### Compare Times Across Timezones
+
+```ts
+import { getDateInTimezone } from '@tour-kit/scheduling'
+
+const now = new Date()
+
+const nyTime = getDateInTimezone(now, 'America/New_York')
+const tokyoTime = getDateInTimezone(now, 'Asia/Tokyo')
+
+console.log(`NY: ${nyTime.hours}:${nyTime.minutes}`)
+console.log(`Tokyo: ${tokyoTime.hours}:${tokyoTime.minutes}`)
+```
+
+### Validate User Timezone Input
+
+```ts
+import { isValidTimezone } from '@tour-kit/scheduling'
+
+function setUserTimezone(tz: string) {
+  if (!isValidTimezone(tz)) {
+    throw new Error('Invalid timezone')
+  }
+  localStorage.setItem('timezone', tz)
+}
+```
+
+### Format Date in User Timezone
+
+```ts
+import { formatDateString, getUserTimezone } from '@tour-kit/scheduling'
+
+const userTz = getUserTimezone()
+const today = formatDateString(new Date(), userTz)
+
+console.log(`Today in your timezone: ${today}`)
+```
+
+### DST Handling
+
+These utilities automatically handle Daylight Saving Time transitions:
+
+```ts
+import { getDateInTimezone } from '@tour-kit/scheduling'
+
+// Before DST (EST = UTC-5)
+const winterDate = new Date('2024-01-15T15:00:00Z')
+const winterNY = getDateInTimezone(winterDate, 'America/New_York')
+// hours: 10 (15 - 5)
+
+// After DST (EDT = UTC-4)
+const summerDate = new Date('2024-07-15T15:00:00Z')
+const summerNY = getDateInTimezone(summerDate, 'America/New_York')
+// hours: 11 (15 - 4)
+```
+
+## Related
+
+- [useUserTimezone](/docs/scheduling/hooks/use-user-timezone) - React hook wrapper
+- [Schedule.timezone](/docs/scheduling/types#schedule) - Schedule timezone option

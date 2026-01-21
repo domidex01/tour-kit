@@ -1,0 +1,459 @@
+---
+title: GifPlayer
+description: Animated GIF player with play/pause controls and accessibility features
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`GifPlayer` provides user-controlled playback for animated GIFs with accessibility features and reduced motion support. Perfect for feature demos, quick tutorials, and lightweight animations without video overhead.
+
+## Why Use GifPlayer?
+
+- **User control**: Play/pause prevents distracting auto-play
+- **Lightweight**: No video codec overhead, smaller file sizes
+- **Accessibility**: Respects `prefers-reduced-motion`, keyboard controls
+- **Simple creation**: Easier to create than videos
+- **Universal support**: Works everywhere, no codec issues
+
+## Basic Usage
+
+```tsx
+import { GifPlayer } from '@tour-kit/media'
+
+export function FeatureDemo() {
+  return (
+    <GifPlayer
+      src="/animations/feature-demo.gif"
+      alt="Feature demonstration animation"
+      poster="/images/feature-poster.jpg"
+    />
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    src: {
+      type: 'string',
+      required: true,
+      description: 'GIF file URL or path',
+    },
+    alt: {
+      type: 'string',
+      required: true,
+      description: 'Accessible description of animation content. Required for screen readers',
+    },
+    poster: {
+      type: 'string',
+      required: false,
+      description: 'Static thumbnail image shown before playback. Uses first GIF frame if not provided',
+    },
+    autoplay: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Auto-start animation on load',
+    },
+    loop: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Loop animation continuously. GIFs typically loop by default',
+    },
+    aspectRatio: {
+      type: "'16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'",
+      required: false,
+      default: "'auto'",
+      description: 'Container aspect ratio. Use auto to preserve GIF dimensions',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: "'md'",
+      description: 'Preset size for the container',
+    },
+    rounded: {
+      type: "boolean | 'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: 'false',
+      description: 'Border radius styling',
+    },
+    reducedMotionFallback: {
+      type: 'string',
+      required: false,
+      description: 'Static image shown when prefers-reduced-motion is enabled',
+    },
+    showControls: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Show play/pause control overlay',
+    },
+    controlPosition: {
+      type: "'center' | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'",
+      required: false,
+      default: "'center'",
+      description: 'Position of play/pause button',
+    },
+    className: {
+      type: 'string',
+      required: false,
+      description: 'Additional CSS classes',
+    },
+    style: {
+      type: 'React.CSSProperties',
+      required: false,
+      description: 'Inline styles',
+    },
+    onPlay: {
+      type: '() => void',
+      required: false,
+      description: 'Callback when animation starts',
+    },
+    onPause: {
+      type: '() => void',
+      required: false,
+      description: 'Callback when animation pauses',
+    },
+  }}
+/>
+
+## Examples
+
+### Basic GIF with Controls
+
+```tsx
+<GifPlayer
+  src="/animations/dashboard-tour.gif"
+  alt="Dashboard navigation tutorial"
+  poster="/images/dashboard-poster.jpg"
+/>
+```
+
+### Auto-playing GIF
+
+Start playing automatically on load:
+
+```tsx
+<GifPlayer
+  src="/animations/quick-demo.gif"
+  alt="Quick feature demonstration"
+  autoplay
+/>
+```
+
+<Callout type="warn">
+  Use `autoplay` sparingly. Auto-playing animations can be distracting and inaccessible for users with motion sensitivity.
+</Callout>
+
+### Custom Control Position
+
+Place controls in the corner for less obstruction:
+
+```tsx
+<GifPlayer
+  src="/animations/feature.gif"
+  alt="Feature walkthrough"
+  controlPosition="bottom-right"
+/>
+```
+
+### Hidden Controls
+
+Auto-play without user controls:
+
+```tsx
+<GifPlayer
+  src="/animations/background.gif"
+  alt="Background animation"
+  autoplay
+  showControls={false}
+/>
+```
+
+### Square GIF for Mobile
+
+```tsx
+<GifPlayer
+  src="/animations/mobile-demo.gif"
+  alt="Mobile app demonstration"
+  aspectRatio="1/1"
+  size="sm"
+  rounded="lg"
+/>
+```
+
+### Reduced Motion Fallback
+
+Show static image for motion-sensitive users:
+
+```tsx
+<GifPlayer
+  src="/animations/animated-feature.gif"
+  alt="Animated feature showcase"
+  poster="/images/feature-static.jpg"
+  reducedMotionFallback="/images/feature-static.jpg"
+/>
+```
+
+### Event Tracking
+
+Track when users play animations:
+
+```tsx
+<GifPlayer
+  src="/animations/tutorial.gif"
+  alt="Tutorial animation"
+  onPlay={() => {
+    analytics.track('GIF Played', { animation: 'tutorial' })
+  }}
+  onPause={() => {
+    analytics.track('GIF Paused', { animation: 'tutorial' })
+  }}
+/>
+```
+
+## Creating Effective GIFs
+
+### File Size Optimization
+
+GIFs can be large. Optimize before using:
+
+**Tools:**
+- [Gifski](https://gif.ski/) - High-quality GIF encoder
+- [ezgif.com](https://ezgif.com/) - Online GIF optimizer
+- [Gifsicle](https://www.lcdf.org/gifsicle/) - Command-line optimizer
+
+**Best practices:**
+- Keep duration under 10 seconds
+- Reduce frame rate (10-15 FPS is often sufficient)
+- Limit dimensions (max 800px wide)
+- Reduce colors (256 or fewer)
+- Compress with tools like Gifski
+
+### Recording Screen GIFs
+
+**Tools for screen recordings:**
+- [LICEcap](https://www.cockos.com/licecap/) - Windows/Mac
+- [Kap](https://getkap.co/) - Mac only
+- [ScreenToGif](https://www.screentogif.com/) - Windows
+
+**Recording tips:**
+- Use consistent mouse movements
+- Pause briefly before and after actions
+- Keep recording area small
+- Record at 2x speed, play at 1x
+
+### When to Use GIF vs Video
+
+**Choose GIF when:**
+- Animation is short (< 10 seconds)
+- File size < 2MB after optimization
+- Universal compatibility required
+- Simple animations without audio
+
+**Choose Video when:**
+- Duration > 10 seconds
+- Audio is needed
+- File size > 2MB
+- Need better quality at smaller sizes
+
+## Accessibility
+
+### Required Alt Text
+
+Describe what the animation shows:
+
+```tsx
+// Good - describes the action
+<GifPlayer
+  src="signup-flow.gif"
+  alt="Step-by-step animation of the sign-up process"
+/>
+
+// Bad - too vague
+<GifPlayer
+  src="signup-flow.gif"
+  alt="GIF animation"
+/>
+```
+
+### Reduced Motion Support
+
+**Always provide a fallback** for users who prefer reduced motion:
+
+```tsx
+<GifPlayer
+  src="animated-demo.gif"
+  alt="Feature demo"
+  reducedMotionFallback="static-demo.jpg"
+/>
+```
+
+This respects the `prefers-reduced-motion: reduce` CSS media query.
+
+### User Control
+
+Never auto-play without user control:
+
+```tsx
+// Good - user can control playback
+<GifPlayer
+  src="demo.gif"
+  alt="Demo"
+  showControls
+/>
+
+// Bad - auto-plays without control
+<GifPlayer
+  src="demo.gif"
+  alt="Demo"
+  autoplay
+  showControls={false}
+/>
+```
+
+### Keyboard Accessibility
+
+The play/pause button is keyboard accessible:
+- **Tab** - Focus the play/pause button
+- **Enter** or **Space** - Toggle playback
+- **Escape** - Pause (if playing)
+
+## Use Cases
+
+### Feature Announcements
+
+Show new features with quick GIFs:
+
+```tsx
+<Announcement id="new-search">
+  <h2>Introducing: Advanced Search</h2>
+  <GifPlayer
+    src="/animations/advanced-search.gif"
+    alt="Advanced search feature demonstration"
+    autoplay
+  />
+  <p>Find what you need faster with filters and operators.</p>
+</Announcement>
+```
+
+### Inline Help
+
+Embed small tutorial GIFs in documentation:
+
+```tsx
+<div className="help-section">
+  <h3>How to Export Data</h3>
+  <GifPlayer
+    src="/help/export-data.gif"
+    alt="Steps to export data from the dashboard"
+    size="sm"
+    controlPosition="bottom-right"
+  />
+  <p>Click the export button and select your format.</p>
+</div>
+```
+
+### Tour Steps
+
+Use in onboarding flows:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { GifPlayer } from '@tour-kit/media'
+
+<Tour id="feature-tour">
+  <TourStep id="navigation">
+    <h2>Navigating the Dashboard</h2>
+    <GifPlayer
+      src="/tours/navigation.gif"
+      alt="Dashboard navigation demonstration"
+      autoplay
+    />
+  </TourStep>
+</Tour>
+```
+
+### Loading States
+
+Show what's happening during long operations:
+
+```tsx
+<div className="processing">
+  <GifPlayer
+    src="/animations/processing.gif"
+    alt="Data processing animation"
+    autoplay
+    showControls={false}
+    size="sm"
+  />
+  <p>Processing your data...</p>
+</div>
+```
+
+## Performance Considerations
+
+### Lazy Loading
+
+Load GIFs only when visible:
+
+```tsx
+import { useInView } from 'react-intersection-observer'
+
+function LazyGif() {
+  const { ref, inView } = useInView({ triggerOnce: true })
+
+  return (
+    <div ref={ref}>
+      {inView && (
+        <GifPlayer
+          src="/large-animation.gif"
+          alt="Feature demo"
+        />
+      )}
+    </div>
+  )
+}
+```
+
+### Poster Images
+
+Always provide poster images to reduce initial load:
+
+```tsx
+<GifPlayer
+  src="large-demo.gif"
+  alt="Demo"
+  poster="demo-poster.jpg" // Loads immediately, GIF loads on demand
+/>
+```
+
+## TypeScript
+
+Full type safety with autocompletion:
+
+```tsx
+import type { GifPlayerProps } from '@tour-kit/media'
+
+const config: GifPlayerProps = {
+  src: '/animations/demo.gif',
+  alt: 'Feature demonstration',
+  poster: '/images/demo-poster.jpg',
+  autoplay: false,
+  showControls: true,
+  controlPosition: 'bottom-right'
+}
+
+<GifPlayer {...config} />
+```
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
+- [NativeVideo](/docs/media/components/native-video) - HTML5 video alternative
+- [LottiePlayer](/docs/media/components/lottie-player) - Vector animation alternative
+- [useMediaEvents](/docs/media/hooks/use-media-events) - Track media engagement

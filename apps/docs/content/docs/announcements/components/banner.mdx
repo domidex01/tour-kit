@@ -1,0 +1,159 @@
+---
+title: AnnouncementBanner
+description: Full-width bar component for persistent notices
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# AnnouncementBanner
+
+A full-width bar at the top or bottom of the page. Best for persistent, non-blocking notices.
+
+## When to Use
+
+- System maintenance notices
+- Cookie consent
+- Important non-urgent updates
+- Promotions and offers
+- Status messages
+
+---
+
+## Basic Usage
+
+```tsx
+import { AnnouncementsProvider, AnnouncementBanner } from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'maintenance',
+    variant: 'banner',
+    title: 'Scheduled maintenance tonight at 2 AM EST',
+    bannerOptions: {
+      position: 'top',
+      sticky: true,
+      intent: 'warning',
+    },
+  },
+];
+
+<AnnouncementBanner id="maintenance" />
+```
+
+---
+
+## Banner Options
+
+<TypeTable
+  type={{
+    position: {
+      type: "'top' | 'bottom'",
+      default: "'top'",
+      description: 'Position on page',
+    },
+    sticky: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Stick to viewport when scrolling',
+    },
+    dismissable: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show dismiss button',
+    },
+    intent: {
+      type: "'default' | 'info' | 'success' | 'warning' | 'error'",
+      default: "'default'",
+      description: 'Visual style/color scheme',
+    },
+  }}
+/>
+
+---
+
+## Intent Colors
+
+```tsx
+// Default - neutral gray
+bannerOptions: { intent: 'default' }
+
+// Info - blue
+bannerOptions: { intent: 'info' }
+
+// Success - green
+bannerOptions: { intent: 'success' }
+
+// Warning - yellow/orange
+bannerOptions: { intent: 'warning' }
+
+// Error - red
+bannerOptions: { intent: 'error' }
+```
+
+---
+
+## Complete Example
+
+```tsx
+{
+  id: 'promo',
+  variant: 'banner',
+  title: 'Limited Time Offer: 50% off Pro plan',
+
+  primaryAction: {
+    label: 'Upgrade Now',
+    onClick: () => router.push('/pricing'),
+  },
+
+  secondaryAction: {
+    label: 'Learn More',
+    onClick: () => router.push('/pricing#features'),
+  },
+
+  bannerOptions: {
+    position: 'top',
+    sticky: true,
+    dismissable: true,
+    intent: 'success',
+  },
+
+  frequency: { type: 'interval', days: 7 },
+}
+```
+
+---
+
+## Sticky Positioning
+
+```tsx
+// Stick to top when scrolling
+bannerOptions: {
+  position: 'top',
+  sticky: true,
+}
+
+// Stick to bottom
+bannerOptions: {
+  position: 'bottom',
+  sticky: true,
+}
+```
+
+---
+
+## Non-Dismissable
+
+For critical persistent messages:
+
+```tsx
+bannerOptions: {
+  dismissable: false, // No close button
+}
+```
+
+---
+
+## Related
+
+- [Headless Banner](/docs/announcements/headless/banner)
+- [useAnnouncement](/docs/announcements/hooks/use-announcement)

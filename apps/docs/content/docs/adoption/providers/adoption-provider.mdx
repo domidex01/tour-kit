@@ -1,0 +1,485 @@
+---
+title: AdoptionProvider
+description: Configure feature tracking, storage, and nudge behavior
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`AdoptionProvider` is the root context provider that manages feature tracking, usage persistence, and nudge scheduling. Wrap your application with this provider to enable adoption tracking.
+
+## Basic Usage
+
+```tsx title="app/layout.tsx"
+import { AdoptionProvider } from '@tour-kit/adoption'
+
+const features = [
+  {
+    id: 'dark-mode',
+    name: 'Dark Mode',
+    trigger: '#dark-mode-toggle',
+  },
+  {
+    id: 'export',
+    name: 'Export Data',
+    trigger: { event: 'export:complete' },
+  },
+]
+
+export default function RootLayout({ children }) {
+  return (
+    <AdoptionProvider features={features}>
+      {children}
+    </AdoptionProvider>
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    features: {
+      type: 'Feature[]',
+      required: true,
+      description: 'Array of features to track',
+    },
+    storage: {
+      type: 'StorageConfig',
+      default: '{ type: "localStorage" }',
+      description: 'Storage configuration for persisting usage data',
+    },
+    nudge: {
+      type: 'NudgeConfig',
+      default: '{ enabled: true, cooldown: 86400000, ... }',
+      description: 'Nudge scheduling configuration',
+    },
+    userId: {
+      type: 'string',
+      description: 'Optional user ID for multi-user tracking',
+    },
+    onAdoption: {
+      type: '(feature: Feature) => void',
+      description: 'Callback when a feature becomes adopted',
+    },
+    onChurn: {
+      type: '(feature: Feature) => void',
+      description: 'Callback when a feature churns (was adopted, now inactive)',
+    },
+    onNudge: {
+      type: '(feature: Feature, action: "shown" | "clicked" | "dismissed") => void',
+      description: 'Callback for nudge interactions',
+    },
+  }}
+/>
+
+## Feature Configuration
+
+Each feature in the `features` array defines what to track and when it's considered adopted.
+
+### Basic Feature
+
+```tsx
+const feature = {
+  id: 'search',
+  name: 'Search',
+  trigger: '[data-feature="search"]',
+}
+```
+
+### Complete Feature Definition
+
+```tsx
+const feature = {
+  id: 'advanced-search',
+  name: 'Advanced Search',
+  trigger: '#advanced-search-btn',
+
+  adoptionCriteria: {
+    minUses: 5,
+    recencyDays: 30,
+  },
+
+  category: 'productivity',
+  description: 'Find exactly what you need with filters and operators',
+  priority: 10,
+  premium: true,
+
+  resources: {
+    tourId: 'advanced-search-tour',
+    hintIds: ['search-filter-hint', 'search-operator-hint'],
+  },
+}
+```
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Unique feature identifier',
+    },
+    name: {
+      type: 'string',
+      required: true,
+      description: 'Human-readable feature name',
+    },
+    trigger: {
+      type: 'FeatureTrigger',
+      required: true,
+      description: 'How to detect feature usage (selector, event, or callback)',
+    },
+    adoptionCriteria: {
+      type: 'AdoptionCriteria',
+      default: '{ minUses: 3, recencyDays: 30 }',
+      description: 'When feature is considered adopted',
+    },
+    category: {
+      type: 'string',
+      description: 'Category for grouping features',
+    },
+    description: {
+      type: 'string',
+      description: 'Feature description shown in nudges',
+    },
+    priority: {
+      type: 'number',
+      default: '0',
+      description: 'Nudge priority (higher = shown first)',
+    },
+    premium: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Whether this is a premium feature',
+    },
+    resources: {
+      type: 'FeatureResources',
+      description: 'Related tour/hint IDs',
+    },
+  }}
+/>
+
+## Trigger Types
+
+### CSS Selector (Click Tracking)
+
+Track clicks on elements matching the selector:
+
+```tsx
+const feature = {
+  id: 'sidebar',
+  name: 'Sidebar',
+  trigger: '[data-sidebar-toggle]',
+}
+```
+
+The provider automatically sets up event delegation to track clicks. Elements can be added/removed dynamically.
+
+<Callout type="info">
+Use data attributes for reliable tracking: `data-feature="name"` is better than classes that might change.
+</Callout>
+
+### Custom Event
+
+Track custom events dispatched in your code:
+
+```tsx
+const feature = {
+  id: 'pdf-export',
+  name: 'PDF Export',
+  trigger: { event: 'pdf:exported' },
+}
+
+// In your component
+async function handleExport() {
+  await generatePDF()
+  window.dispatchEvent(new CustomEvent('pdf:exported'))
+}
+```
+
+### Callback (Polling)
+
+For complex conditions, provide a callback that's polled periodically:
+
+```tsx
+const feature = {
+  id: 'full-screen',
+  name: 'Full Screen Mode',
+  trigger: {
+    callback: () => document.fullscreenElement !== null,
+  },
+}
+```
+
+<Callout type="warn">
+Callbacks are polled every 1 second. Keep them lightweight to avoid performance issues.
+</Callout>
+
+## Storage Configuration
+
+### LocalStorage (Default)
+
+```tsx
+<AdoptionProvider
+  features={features}
+  storage={{
+    type: 'localStorage',
+    key: 'my-app-adoption', // Default: 'tour-kit-adoption'
+  }}
+/>
+```
+
+### Memory Storage (Testing)
+
+For tests or temporary sessions:
+
+```tsx
+<AdoptionProvider
+  features={features}
+  storage={{
+    type: 'memory',
+  }}
+/>
+```
+
+### Custom Storage Adapter
+
+Integrate with your own storage:
+
+```tsx
+const customStorage = {
+  getItem: async (key: string) => {
+    return await db.settings.get(key)
+  },
+  setItem: async (key: string, value: string) => {
+    await db.settings.set(key, value)
+  },
+  removeItem: async (key: string) => {
+    await db.settings.delete(key)
+  },
+}
+
+<AdoptionProvider
+  features={features}
+  storage={{
+    type: 'custom',
+    adapter: customStorage,
+  }}
+/>
+```
+
+<Callout type="info">
+Custom adapters can be async. The provider handles loading states automatically.
+</Callout>
+
+## Nudge Configuration
+
+Control when and how nudges are shown:
+
+```tsx
+<AdoptionProvider
+  features={features}
+  nudge={{
+    enabled: true,
+    initialDelay: 5000, // Wait 5s before first nudge
+    cooldown: 86400000, // 24 hours between nudges
+    maxPerSession: 3, // Max 3 nudges per session
+    maxFeatures: 1, // Show 1 feature nudge at a time
+  }}
+/>
+```
+
+<TypeTable
+  type={{
+    enabled: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Enable automatic nudge scheduling',
+    },
+    initialDelay: {
+      type: 'number',
+      default: '5000',
+      description: 'Delay before first nudge (milliseconds)',
+    },
+    cooldown: {
+      type: 'number',
+      default: '86400000',
+      description: 'Minimum time between nudges (milliseconds)',
+    },
+    maxPerSession: {
+      type: 'number',
+      default: '3',
+      description: 'Maximum nudges shown per session',
+    },
+    maxFeatures: {
+      type: 'number',
+      default: '1',
+      description: 'Maximum features to nudge about simultaneously',
+    },
+  }}
+/>
+
+### Disabling Nudges
+
+To track adoption without showing nudges:
+
+```tsx
+<AdoptionProvider
+  features={features}
+  nudge={{ enabled: false }}
+/>
+```
+
+## Event Callbacks
+
+Track adoption milestones in your analytics:
+
+```tsx
+<AdoptionProvider
+  features={features}
+  onAdoption={(feature) => {
+    analytics.track('Feature Adopted', {
+      featureId: feature.id,
+      featureName: feature.name,
+      category: feature.category,
+    })
+  }}
+  onChurn={(feature) => {
+    analytics.track('Feature Churned', {
+      featureId: feature.id,
+      featureName: feature.name,
+    })
+  }}
+  onNudge={(feature, action) => {
+    analytics.track('Nudge Interaction', {
+      featureId: feature.id,
+      action, // 'shown', 'clicked', or 'dismissed'
+    })
+  }}
+/>
+```
+
+<Callout type="info">
+For automatic analytics integration, see the [Analytics Guide](/docs/adoption/analytics).
+</Callout>
+
+## Multi-User Tracking
+
+Use the `userId` prop to track adoption per user:
+
+```tsx
+function App() {
+  const { userId } = useAuth()
+
+  return (
+    <AdoptionProvider
+      features={features}
+      userId={userId} // Storage key becomes: tour-kit-adoption-user-123
+    >
+      {children}
+    </AdoptionProvider>
+  )
+}
+```
+
+This is essential for:
+- Multi-user applications
+- Different adoption states per user
+- User-specific nudge history
+
+<Callout type="warn">
+Changing `userId` clears the current adoption state and loads the new user's data. Use stable IDs.
+</Callout>
+
+## TypeScript
+
+The provider is fully typed:
+
+```tsx
+import type { Feature, AdoptionProviderProps } from '@tour-kit/adoption'
+
+const features: Feature[] = [
+  {
+    id: 'feature-1',
+    name: 'Feature 1',
+    trigger: '#btn',
+  },
+]
+
+const config: AdoptionProviderProps = {
+  features,
+  storage: { type: 'localStorage' },
+  nudge: { enabled: true },
+  onAdoption: (feature) => {
+    // feature is typed as Feature
+  },
+}
+```
+
+## Accessibility
+
+The provider:
+
+- Does not render any UI itself (fully headless)
+- Tracks usage without interfering with user interactions
+- Supports keyboard navigation when using trigger selectors
+- Respects `prefers-reduced-motion` for nudge animations
+
+## Best Practices
+
+1. **Define features at the module level** to prevent re-initialization:
+
+```tsx
+// Good: Stable reference
+const features = [{ id: 'search', name: 'Search', trigger: '#search' }]
+
+function App() {
+  return <AdoptionProvider features={features}>...</AdoptionProvider>
+}
+
+// Bad: New array every render
+function App() {
+  return (
+    <AdoptionProvider features={[{ id: 'search', name: 'Search', trigger: '#search' }]}>
+      ...
+    </AdoptionProvider>
+  )
+}
+```
+
+2. **Use specific selectors** to avoid false positives:
+
+```tsx
+// Good
+trigger: '[data-feature="export-pdf"]'
+
+// Bad (too generic, might match other buttons)
+trigger: 'button'
+```
+
+3. **Set appropriate cooldowns** to avoid annoying users:
+
+```tsx
+nudge: {
+  cooldown: 86400000, // 24 hours minimum
+  maxPerSession: 2, // Don't overwhelm
+}
+```
+
+4. **Test adoption criteria** with real usage patterns:
+
+```tsx
+// Too aggressive: Users will hit this accidentally
+adoptionCriteria: { minUses: 1 }
+
+// Better: Indicates deliberate usage
+adoptionCriteria: { minUses: 3, recencyDays: 30 }
+```
+
+## Next Steps
+
+- [useFeature Hook](/docs/adoption/hooks/use-feature) - Track individual features
+- [useNudge Hook](/docs/adoption/hooks/use-nudge) - Manage nudge state
+- [Analytics Integration](/docs/adoption/analytics) - Automatic analytics tracking

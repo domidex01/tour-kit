@@ -1,0 +1,357 @@
+---
+title: useResponsiveSource
+description: Select media sources based on viewport size for optimized delivery
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`useResponsiveSource` automatically selects the best media source based on current viewport width. Use it to serve optimized videos for mobile, tablet, and desktop without manually checking screen size.
+
+## Why Responsive Sources?
+
+- **Reduce bandwidth**: Serve smaller files to mobile users
+- **Faster loading**: Match file size to device capabilities
+- **Better UX**: Appropriate quality for each screen size
+- **Cost savings**: Lower CDN costs with smaller files
+
+## Basic Usage
+
+```tsx
+import { useResponsiveSource } from '@tour-kit/media'
+
+const sources = [
+  { src: '/videos/demo-480p.mp4', maxWidth: 640 },
+  { src: '/videos/demo-720p.mp4', maxWidth: 1024 },
+  { src: '/videos/demo-1080p.mp4', maxWidth: Infinity }
+]
+
+function ResponsiveVideo() {
+  const selectedSrc = useResponsiveSource(sources, '/videos/demo-1080p.mp4')
+
+  return (
+    <video src={selectedSrc} controls />
+  )
+}
+```
+
+## Parameters
+
+<TypeTable
+  type={{
+    sources: {
+      type: 'ResponsiveSource[]',
+      required: true,
+      description: 'Array of source objects with src and maxWidth properties',
+    },
+    fallback: {
+      type: 'string',
+      required: true,
+      description: 'Fallback source URL if no sources match or on server',
+    },
+  }}
+/>
+
+## ResponsiveSource Type
+
+```ts
+interface ResponsiveSource {
+  src: string         // Video file URL
+  maxWidth?: number   // Maximum viewport width for this source
+  type?: string       // MIME type (e.g., 'video/mp4', 'video/webm')
+}
+```
+
+## Return Value
+
+Returns the `src` string of the selected source based on current viewport width.
+
+## Examples
+
+### Mobile, Tablet, Desktop
+
+Serve different quality levels:
+
+```tsx
+const sources = [
+  { src: '/videos/demo-mobile.mp4', maxWidth: 640 },    // 0-640px
+  { src: '/videos/demo-tablet.mp4', maxWidth: 1024 },   // 641-1024px
+  { src: '/videos/demo-desktop.mp4', maxWidth: Infinity } // 1025px+
+]
+
+const selectedSrc = useResponsiveSource(sources, '/videos/demo-desktop.mp4')
+```
+
+### With NativeVideo
+
+Integrate with the NativeVideo component:
+
+```tsx
+import { useResponsiveSource } from '@tour-kit/media'
+import { NativeVideo } from '@tour-kit/media'
+
+function OptimizedVideo() {
+  const sources = [
+    { src: '/videos/tutorial-480p.mp4', maxWidth: 640 },
+    { src: '/videos/tutorial-720p.mp4', maxWidth: 1024 },
+    { src: '/videos/tutorial-1080p.mp4', maxWidth: Infinity }
+  ]
+
+  const selectedSrc = useResponsiveSource(
+    sources,
+    '/videos/tutorial-1080p.mp4'
+  )
+
+  return (
+    <NativeVideo
+      src={selectedSrc}
+      alt="Tutorial video"
+      poster="/thumbnails/tutorial.jpg"
+      controls
+    />
+  )
+}
+```
+
+### Multiple Formats
+
+Combine responsive sizing with format fallbacks:
+
+```tsx
+const sources = [
+  // Mobile - WebM and MP4
+  { src: '/videos/demo-480p.webm', maxWidth: 640, type: 'video/webm' },
+  { src: '/videos/demo-480p.mp4', maxWidth: 640, type: 'video/mp4' },
+
+  // Desktop - WebM and MP4
+  { src: '/videos/demo-1080p.webm', maxWidth: Infinity, type: 'video/webm' },
+  { src: '/videos/demo-1080p.mp4', maxWidth: Infinity, type: 'video/mp4' }
+]
+
+const selectedSrc = useResponsiveSource(sources, '/videos/demo-1080p.mp4')
+```
+
+### Bandwidth-Based Selection
+
+Combine with Network Information API:
+
+```tsx
+import { useResponsiveSource } from '@tour-kit/media'
+
+function BandwidthAwareVideo() {
+  const connection = (navigator as any).connection
+  const isSlowConnection = connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g'
+
+  const sources = isSlowConnection ? [
+    // Low quality for slow connections
+    { src: '/videos/demo-360p.mp4', maxWidth: Infinity }
+  ] : [
+    // Normal responsive sources
+    { src: '/videos/demo-480p.mp4', maxWidth: 640 },
+    { src: '/videos/demo-1080p.mp4', maxWidth: Infinity }
+  ]
+
+  const selectedSrc = useResponsiveSource(sources, '/videos/demo-480p.mp4')
+
+  return <video src={selectedSrc} controls />
+}
+```
+
+### Custom Breakpoints
+
+Define custom breakpoints for your design:
+
+```tsx
+const BREAKPOINTS = {
+  mobile: 480,
+  tablet: 768,
+  desktop: 1280,
+  wide: Infinity
+}
+
+const sources = [
+  { src: '/videos/demo-sm.mp4', maxWidth: BREAKPOINTS.mobile },
+  { src: '/videos/demo-md.mp4', maxWidth: BREAKPOINTS.tablet },
+  { src: '/videos/demo-lg.mp4', maxWidth: BREAKPOINTS.desktop },
+  { src: '/videos/demo-xl.mp4', maxWidth: BREAKPOINTS.wide }
+]
+
+const selectedSrc = useResponsiveSource(sources, '/videos/demo-xl.mp4')
+```
+
+### Portrait vs Landscape
+
+Serve different videos for orientation:
+
+```tsx
+import { useState, useEffect } from 'react'
+
+function OrientationVideo() {
+  const [isPortrait, setIsPortrait] = useState(
+    window.innerHeight > window.innerWidth
+  )
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const sources = isPortrait ? [
+    { src: '/videos/demo-portrait-480p.mp4', maxWidth: 640 },
+    { src: '/videos/demo-portrait-720p.mp4', maxWidth: Infinity }
+  ] : [
+    { src: '/videos/demo-landscape-720p.mp4', maxWidth: 1024 },
+    { src: '/videos/demo-landscape-1080p.mp4', maxWidth: Infinity }
+  ]
+
+  const selectedSrc = useResponsiveSource(sources, '/videos/demo-landscape-1080p.mp4')
+
+  return <video src={selectedSrc} controls />
+}
+```
+
+### Dynamic Loading
+
+Update source when viewport changes:
+
+```tsx
+function DynamicVideo() {
+  const sources = [
+    { src: '/videos/demo-480p.mp4', maxWidth: 640 },
+    { src: '/videos/demo-1080p.mp4', maxWidth: Infinity }
+  ]
+
+  const selectedSrc = useResponsiveSource(sources, '/videos/demo-1080p.mp4')
+  const [currentSrc, setCurrentSrc] = useState(selectedSrc)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    // Only update if source actually changed
+    if (selectedSrc !== currentSrc) {
+      const currentTime = videoRef.current?.currentTime || 0
+      setCurrentSrc(selectedSrc)
+
+      // Restore playback position
+      if (videoRef.current) {
+        videoRef.current.currentTime = currentTime
+      }
+    }
+  }, [selectedSrc, currentSrc])
+
+  return (
+    <video
+      ref={videoRef}
+      src={currentSrc}
+      controls
+    />
+  )
+}
+```
+
+## Selection Logic
+
+Sources are evaluated in order, selecting the first where `viewport width <= maxWidth`:
+
+```tsx
+const sources = [
+  { src: 'small.mp4', maxWidth: 640 },    // Used when width ≤ 640px
+  { src: 'medium.mp4', maxWidth: 1024 },  // Used when 641px ≤ width ≤ 1024px
+  { src: 'large.mp4', maxWidth: Infinity } // Used when width > 1024px
+]
+
+// At 500px viewport: selects 'small.mp4'
+// At 800px viewport: selects 'medium.mp4'
+// At 1920px viewport: selects 'large.mp4'
+```
+
+## Server-Side Rendering
+
+On the server (SSR), the hook returns the `fallback` value since window dimensions aren't available:
+
+```tsx
+// During SSR
+const selectedSrc = useResponsiveSource(sources, '/videos/fallback.mp4')
+// Returns: '/videos/fallback.mp4'
+
+// After hydration in browser
+// Returns: appropriate source based on viewport
+```
+
+Choose a sensible fallback (usually desktop size) that works for most users.
+
+## Performance Considerations
+
+### Debounce Resize Events
+
+The hook automatically debounces resize events to prevent excessive re-renders.
+
+### Preload Strategy
+
+Consider preload attributes for better UX:
+
+```tsx
+<video
+  src={selectedSrc}
+  preload="metadata" // Load metadata only
+  controls
+/>
+```
+
+### Lazy Loading
+
+Combine with lazy loading for off-screen videos:
+
+```tsx
+import { useInView } from 'react-intersection-observer'
+
+function LazyResponsiveVideo() {
+  const { ref, inView } = useInView({ triggerOnce: true })
+  const selectedSrc = useResponsiveSource(sources, fallback)
+
+  return (
+    <div ref={ref}>
+      {inView && <video src={selectedSrc} controls />}
+    </div>
+  )
+}
+```
+
+## File Size Guidelines
+
+Recommended file sizes for different qualities:
+
+| Quality | Resolution | Bitrate | Mobile | Tablet | Desktop |
+|---------|-----------|---------|--------|--------|---------|
+| Low | 480p | 1 Mbps | ✓ | - | - |
+| Medium | 720p | 2.5 Mbps | - | ✓ | - |
+| High | 1080p | 5 Mbps | - | - | ✓ |
+| Ultra | 4K | 10+ Mbps | - | - | ✓ (wide) |
+
+Keep file sizes reasonable:
+- Mobile: < 5 MB per minute
+- Tablet: < 10 MB per minute
+- Desktop: < 20 MB per minute
+
+## TypeScript
+
+Full type safety with source definitions:
+
+```tsx
+import type { ResponsiveSource } from '@tour-kit/media'
+
+const sources: ResponsiveSource[] = [
+  { src: '/videos/demo-480p.mp4', maxWidth: 640 },
+  { src: '/videos/demo-1080p.mp4', maxWidth: Infinity }
+]
+
+const selectedSrc: string = useResponsiveSource(sources, '/videos/demo-1080p.mp4')
+```
+
+## See Also
+
+- [NativeVideo](/docs/media/components/native-video) - Native video component with responsive sources
+- [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
+- [useMediaEvents](/docs/media/hooks/use-media-events) - Track media engagement

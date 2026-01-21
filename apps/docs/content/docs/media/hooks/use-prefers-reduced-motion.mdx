@@ -1,0 +1,492 @@
+---
+title: usePrefersReducedMotion
+description: Detect user motion preferences for accessible animations
+---
+
+## Overview
+
+`usePrefersReducedMotion` detects whether the user has enabled "reduce motion" in their operating system accessibility settings. Use it to respect user preferences and provide accessible alternatives to animations and videos.
+
+## Why Respect Motion Preferences?
+
+- **Accessibility**: Users with vestibular disorders can experience discomfort from motion
+- **WCAG compliance**: Required for WCAG 2.1 Level AAA (2.3.3 Animation from Interactions)
+- **Better UX**: Respects explicit user preference
+- **Battery saving**: Reduces animation overhead on mobile devices
+
+## Basic Usage
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/media'
+
+function ConditionalAnimation() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  return prefersReducedMotion ? (
+    <img src="/static-image.jpg" alt="Feature" />
+  ) : (
+    <LottiePlayer src="/animation.json" alt="Feature" autoplay loop />
+  )
+}
+```
+
+## Return Value
+
+Returns `boolean`:
+- `true` - User prefers reduced motion
+- `false` - User has no motion preference (animations OK)
+
+## Examples
+
+### Video vs Static Image
+
+Show static image instead of auto-playing video:
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/media'
+import { TourMedia } from '@tour-kit/media'
+
+function AccessibleVideo() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  return prefersReducedMotion ? (
+    <img
+      src="/thumbnails/demo.jpg"
+      alt="Product demo screenshot"
+      className="w-full rounded-lg"
+    />
+  ) : (
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      alt="Product demo video"
+      autoplay
+      muted
+    />
+  )
+}
+```
+
+### Conditional Autoplay
+
+Disable autoplay for motion-sensitive users:
+
+```tsx
+function RespectfulAutoplay() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  return (
+    <TourMedia
+      src="/videos/intro.mp4"
+      alt="Introduction video"
+      autoplay={!prefersReducedMotion}
+      poster="/thumbnails/intro.jpg"
+    />
+  )
+}
+```
+
+### GIF vs Static
+
+Replace animated GIFs with static images:
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/media'
+
+function AnimatedFeature() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  if (prefersReducedMotion) {
+    return (
+      <img
+        src="/images/feature-static.png"
+        alt="Feature demonstration"
+      />
+    )
+  }
+
+  return (
+    <GifPlayer
+      src="/animations/feature.gif"
+      alt="Feature demonstration"
+      autoplay
+    />
+  )
+}
+```
+
+### Lottie Animation
+
+Disable or simplify animations:
+
+```tsx
+function LottieWithFallback() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  if (prefersReducedMotion) {
+    return (
+      <img
+        src="/animations/success-static.svg"
+        alt="Success checkmark"
+        className="w-16 h-16"
+      />
+    )
+  }
+
+  return (
+    <LottiePlayer
+      src="/animations/success.json"
+      alt="Success animation"
+      autoplay
+      size="sm"
+    />
+  )
+}
+```
+
+### Reduced Animation Speed
+
+Slow down instead of removing:
+
+```tsx
+function SlowedAnimation() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  return (
+    <LottiePlayer
+      src="/animations/loading.json"
+      alt="Loading animation"
+      autoplay
+      loop
+      speed={prefersReducedMotion ? 0.5 : 1}
+    />
+  )
+}
+```
+
+### CSS Animations
+
+Disable CSS transitions and animations:
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/media'
+
+function AnimatedComponent() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  return (
+    <div
+      className={prefersReducedMotion ? 'no-animation' : 'with-animation'}
+    >
+      <h2>Animated Header</h2>
+    </div>
+  )
+}
+
+// In CSS
+.with-animation {
+  transition: all 0.3s ease;
+  animation: slideIn 0.5s ease-out;
+}
+
+.no-animation {
+  transition: none;
+  animation: none;
+}
+```
+
+### Tour Steps with Motion
+
+Disable slide animations in tours:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { usePrefersReducedMotion } from '@tour-kit/media'
+
+function AccessibleTour() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  return (
+    <Tour
+      id="onboarding"
+      animateTransitions={!prefersReducedMotion}
+    >
+      <TourStep id="welcome">
+        <h2>Welcome</h2>
+        {!prefersReducedMotion && (
+          <LottiePlayer src="/animations/welcome.json" autoplay />
+        )}
+      </TourStep>
+    </Tour>
+  )
+}
+```
+
+### Conditional Loading
+
+Don't even load animation files if not needed:
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/media'
+import { lazy, Suspense } from 'react'
+
+// Lazy load animation component
+const LottieAnimation = lazy(() => import('./LottieAnimation'))
+
+function OptimizedAnimation() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <img src="/static-fallback.svg" alt="Feature" />
+  }
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LottieAnimation />
+    </Suspense>
+  )
+}
+```
+
+### Global Motion Provider
+
+Create a context for app-wide motion preferences:
+
+```tsx
+import { createContext, useContext } from 'react'
+import { usePrefersReducedMotion } from '@tour-kit/media'
+
+const MotionContext = createContext(false)
+
+export function MotionProvider({ children }) {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  return (
+    <MotionContext.Provider value={prefersReducedMotion}>
+      {children}
+    </MotionContext.Provider>
+  )
+}
+
+export function useMotion() {
+  return useContext(MotionContext)
+}
+
+// Usage
+function AnimatedButton() {
+  const prefersReducedMotion = useMotion()
+
+  return (
+    <button className={prefersReducedMotion ? 'static' : 'animated'}>
+      Click me
+    </button>
+  )
+}
+```
+
+## How It Works
+
+The hook checks the CSS media query `prefers-reduced-motion`:
+
+```tsx
+// Equivalent CSS media query
+@media (prefers-reduced-motion: reduce) {
+  /* User prefers reduced motion */
+  .animation {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* User has no preference - animations OK */
+  .animation {
+    animation: slideIn 0.5s ease;
+  }
+}
+```
+
+## Operating System Settings
+
+Users enable reduced motion in:
+
+**macOS:**
+System Preferences → Accessibility → Display → Reduce motion
+
+**Windows 10/11:**
+Settings → Ease of Access → Display → Show animations
+
+**iOS:**
+Settings → Accessibility → Motion → Reduce Motion
+
+**Android:**
+Settings → Accessibility → Remove animations
+
+## Server-Side Rendering
+
+On the server, the hook returns `false` (no motion preference):
+
+```tsx
+// During SSR
+const prefersReducedMotion = usePrefersReducedMotion()
+// Returns: false
+
+// After hydration in browser
+// Returns: actual user preference
+```
+
+To avoid hydration mismatches, consider showing static content initially:
+
+```tsx
+import { useState, useEffect } from 'react'
+import { usePrefersReducedMotion } from '@tour-kit/media'
+
+function SSRSafeAnimation() {
+  const [mounted, setMounted] = useState(false)
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    // Show static version during SSR
+    return <img src="/static.svg" alt="Feature" />
+  }
+
+  return prefersReducedMotion ? (
+    <img src="/static.svg" alt="Feature" />
+  ) : (
+    <LottiePlayer src="/animation.json" alt="Feature" autoplay />
+  )
+}
+```
+
+## Accessibility Best Practices
+
+### Always Provide Alternatives
+
+Never remove functionality, only motion:
+
+```tsx
+// Good - same functionality, different presentation
+{prefersReducedMotion ? (
+  <img src="/static-tutorial.jpg" alt="Tutorial steps" />
+) : (
+  <video src="/animated-tutorial.mp4" alt="Tutorial demonstration" autoplay />
+)}
+
+// Bad - removes content entirely
+{!prefersReducedMotion && (
+  <video src="/tutorial.mp4" autoplay />
+)}
+```
+
+### Meaningful Static Alternatives
+
+Ensure static versions convey the same information:
+
+```tsx
+// Good - informative static image
+<img
+  src="/dashboard-annotated.jpg"
+  alt="Dashboard showing navigation menu, analytics panel, and settings"
+/>
+
+// Bad - generic placeholder
+<img src="/placeholder.jpg" alt="Dashboard" />
+```
+
+### User Control
+
+Allow users to override preferences:
+
+```tsx
+function UserControlledAnimation() {
+  const systemPrefersReduced = usePrefersReducedMotion()
+  const [userPreference, setUserPreference] = useState<boolean | null>(null)
+
+  const prefersReducedMotion = userPreference ?? systemPrefersReduced
+
+  return (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={!prefersReducedMotion}
+          onChange={(e) => setUserPreference(!e.target.checked)}
+        />
+        Enable animations
+      </label>
+
+      {prefersReducedMotion ? (
+        <img src="/static.jpg" alt="Feature" />
+      ) : (
+        <video src="/animated.mp4" autoplay />
+      )}
+    </div>
+  )
+}
+```
+
+## Testing
+
+### Testing in Development
+
+Temporarily override the preference:
+
+```tsx
+// In browser DevTools Console
+// Enable reduced motion
+matchMedia('(prefers-reduced-motion: reduce)').matches = true
+
+// Disable reduced motion
+matchMedia('(prefers-reduced-motion: no-preference)').matches = true
+```
+
+### Browser DevTools
+
+**Chrome/Edge:**
+DevTools → Command Menu (Cmd+Shift+P) → "Emulate CSS prefers-reduced-motion"
+
+**Firefox:**
+DevTools → Settings → Advanced settings → Enable prefers-reduced-motion
+
+### Unit Testing
+
+Mock the hook in tests:
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/media'
+
+jest.mock('@tour-kit/media', () => ({
+  usePrefersReducedMotion: jest.fn()
+}))
+
+test('shows static image for reduced motion users', () => {
+  (usePrefersReducedMotion as jest.Mock).mockReturnValue(true)
+
+  render(<AnimatedComponent />)
+
+  expect(screen.getByAlt('Static image')).toBeInTheDocument()
+})
+```
+
+## TypeScript
+
+The hook has a simple boolean return type:
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/media'
+
+const prefersReducedMotion: boolean = usePrefersReducedMotion()
+
+if (prefersReducedMotion) {
+  // User prefers reduced motion
+}
+```
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Media component with reduced motion support
+- [GifPlayer](/docs/media/components/gif-player) - GIF player with reduced motion fallback
+- [LottiePlayer](/docs/media/components/lottie-player) - Lottie animations with reduced motion
+- [MediaHeadless](/docs/media/headless/media-headless) - Headless API with motion detection

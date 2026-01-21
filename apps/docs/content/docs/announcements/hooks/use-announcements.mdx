@@ -1,0 +1,607 @@
+---
+title: useAnnouncements
+description: Hook for accessing and managing all announcements
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useAnnouncements
+
+Hook for accessing all announcements and global announcement state. Use this to query, filter, and manage multiple announcements at once.
+
+## Why Use This Hook?
+
+Use `useAnnouncements` when you need to:
+
+- Access all announcements in the provider
+- Filter announcements by variant, priority, or dismissal state
+- Get counts of visible or dismissed announcements
+- Reset multiple announcements at once
+- Build announcement management UIs
+
+---
+
+## Basic Usage
+
+```tsx
+import { useAnnouncements } from '@tour-kit/announcements';
+
+function AnnouncementList() {
+  const { announcements } = useAnnouncements();
+
+  return (
+    <div>
+      <h2>All Announcements</h2>
+      <ul>
+        {announcements.all.map(a => (
+          <li key={a.id}>{a.config.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+---
+
+## Return Value
+
+```tsx
+const {
+  // Collections
+  announcements,
+
+  // State
+  activeId,
+
+  // Arrays
+  ids,
+  visible,
+  dismissed,
+
+  // Count
+  count,
+
+  // Methods
+  getFiltered,
+  resetAll,
+} = useAnnouncements();
+```
+
+### Properties
+
+<TypeTable
+  type={{
+    announcements: {
+      type: 'AnnouncementsCollection',
+      description: 'Object containing `all`, `byId`, and `byVariant` collections',
+    },
+    activeId: {
+      type: 'string | null',
+      description: 'ID of the currently active announcement',
+    },
+    ids: {
+      type: 'string[]',
+      description: 'Array of all announcement IDs',
+    },
+    visible: {
+      type: 'string[]',
+      description: 'Array of IDs for currently visible announcements',
+    },
+    dismissed: {
+      type: 'string[]',
+      description: 'Array of IDs for dismissed announcements',
+    },
+    count: {
+      type: 'AnnouncementCounts',
+      description: 'Object with counts: total, visible, dismissed, canShow',
+    },
+  }}
+/>
+
+### Methods
+
+<TypeTable
+  type={{
+    getFiltered: {
+      type: '(filter: AnnouncementsFilter) => Announcement[]',
+      description: 'Get announcements matching filter criteria',
+    },
+    resetAll: {
+      type: '() => void',
+      description: 'Reset state for all announcements',
+    },
+  }}
+/>
+
+---
+
+## Announcements Collection
+
+The `announcements` object provides different ways to access announcements:
+
+```tsx
+const { announcements } = useAnnouncements();
+
+// Get all announcements
+announcements.all // Announcement[]
+
+// Get by ID
+announcements.byId['feature-1'] // Announcement | undefined
+
+// Get by variant
+announcements.byVariant.modal // Announcement[]
+announcements.byVariant.slideout // Announcement[]
+announcements.byVariant.banner // Announcement[]
+announcements.byVariant.toast // Announcement[]
+announcements.byVariant.spotlight // Announcement[]
+```
+
+---
+
+## Examples
+
+### Display All Announcements
+
+```tsx
+import { useAnnouncements } from '@tour-kit/announcements';
+
+function AnnouncementsDashboard() {
+  const { announcements, count } = useAnnouncements();
+
+  return (
+    <div>
+      <h2>Announcements ({count.total})</h2>
+
+      <div className="stats">
+        <p>Visible: {count.visible}</p>
+        <p>Dismissed: {count.dismissed}</p>
+        <p>Can show: {count.canShow}</p>
+      </div>
+
+      <ul>
+        {announcements.all.map(a => (
+          <li key={a.id}>
+            <strong>{a.config.title}</strong>
+            <span>Variant: {a.config.variant}</span>
+            <span>Priority: {a.config.priority}</span>
+            <span>Views: {a.state.viewCount}</span>
+            {a.state.isDismissed && <span>Dismissed</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### Filter by Variant
+
+```tsx
+function ModalAnnouncements() {
+  const { announcements } = useAnnouncements();
+
+  const modals = announcements.byVariant.modal;
+
+  return (
+    <div>
+      <h2>Modal Announcements</h2>
+      <ul>
+        {modals.map(a => (
+          <li key={a.id}>{a.config.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### Filter with Custom Criteria
+
+```tsx
+function FilteredAnnouncements() {
+  const { getFiltered } = useAnnouncements();
+
+  // Get high priority announcements that haven't been dismissed
+  const highPriority = getFiltered({
+    priority: ['high', 'critical'],
+    dismissed: false,
+  });
+
+  // Get visible modals
+  const visibleModals = getFiltered({
+    variant: ['modal'],
+    visible: true,
+  });
+
+  // Get announcements with specific IDs
+  const specific = getFiltered({
+    ids: ['feature-1', 'feature-2'],
+  });
+
+  return (
+    <div>
+      <section>
+        <h3>High Priority</h3>
+        {highPriority.map(a => (
+          <p key={a.id}>{a.config.title}</p>
+        ))}
+      </section>
+
+      <section>
+        <h3>Visible Modals</h3>
+        {visibleModals.map(a => (
+          <p key={a.id}>{a.config.title}</p>
+        ))}
+      </section>
+    </div>
+  );
+}
+```
+
+### Active Announcement
+
+```tsx
+function ActiveAnnouncementIndicator() {
+  const { activeId, announcements } = useAnnouncements();
+
+  if (!activeId) {
+    return <p>No active announcement</p>;
+  }
+
+  const active = announcements.byId[activeId];
+
+  return (
+    <div className="active-indicator">
+      <p>Currently showing: {active.config.title}</p>
+      <p>Variant: {active.config.variant}</p>
+    </div>
+  );
+}
+```
+
+### Reset All Announcements
+
+```tsx
+function AnnouncementSettings() {
+  const { resetAll, count } = useAnnouncements();
+
+  const handleReset = () => {
+    if (confirm('Reset all announcement state? This cannot be undone.')) {
+      resetAll();
+    }
+  };
+
+  return (
+    <div>
+      <h2>Settings</h2>
+      <p>You have dismissed {count.dismissed} announcements</p>
+      <button onClick={handleReset}>
+        Reset All Announcements
+      </button>
+    </div>
+  );
+}
+```
+
+### Visible/Dismissed Lists
+
+```tsx
+function AnnouncementStatus() {
+  const { visible, dismissed, announcements } = useAnnouncements();
+
+  return (
+    <div>
+      <section>
+        <h3>Visible Announcements ({visible.length})</h3>
+        <ul>
+          {visible.map(id => (
+            <li key={id}>
+              {announcements.byId[id].config.title}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h3>Dismissed Announcements ({dismissed.length})</h3>
+        <ul>
+          {dismissed.map(id => (
+            <li key={id}>
+              {announcements.byId[id].config.title}
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+```
+
+---
+
+## Filter Interface
+
+The `getFiltered` method accepts this filter interface:
+
+```tsx
+interface AnnouncementsFilter {
+  ids?: string[];
+  variant?: AnnouncementVariant[];
+  priority?: AnnouncementPriority[];
+  visible?: boolean;
+  dismissed?: boolean;
+  canShow?: boolean;
+}
+```
+
+### Filter Examples
+
+```tsx
+const { getFiltered } = useAnnouncements();
+
+// Get all modals and slideouts
+const sidePanels = getFiltered({
+  variant: ['modal', 'slideout'],
+});
+
+// Get critical and high priority
+const important = getFiltered({
+  priority: ['critical', 'high'],
+});
+
+// Get announcements that can be shown
+const available = getFiltered({
+  canShow: true,
+  dismissed: false,
+});
+
+// Combine filters
+const criticalModals = getFiltered({
+  variant: ['modal'],
+  priority: ['critical'],
+  visible: false,
+});
+```
+
+---
+
+## Count Object
+
+The `count` object provides quick access to announcement statistics:
+
+```tsx
+const { count } = useAnnouncements();
+
+console.log(count);
+// {
+//   total: 10,
+//   visible: 2,
+//   dismissed: 5,
+//   canShow: 3,
+// }
+```
+
+Use in UI:
+
+```tsx
+function AnnouncementStats() {
+  const { count } = useAnnouncements();
+
+  return (
+    <div className="stats-grid">
+      <div>
+        <h4>Total</h4>
+        <p>{count.total}</p>
+      </div>
+      <div>
+        <h4>Visible</h4>
+        <p>{count.visible}</p>
+      </div>
+      <div>
+        <h4>Dismissed</h4>
+        <p>{count.dismissed}</p>
+      </div>
+      <div>
+        <h4>Available</h4>
+        <p>{count.canShow}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Advanced Patterns
+
+### Conditional Rendering Based on Counts
+
+```tsx
+function ConditionalUI() {
+  const { count, announcements } = useAnnouncements();
+
+  if (count.visible === 0 && count.canShow > 0) {
+    return (
+      <button onClick={() => announcements.all[0].show()}>
+        Show Announcements ({count.canShow})
+      </button>
+    );
+  }
+
+  if (count.dismissed === count.total) {
+    return <p>You've seen all announcements!</p>;
+  }
+
+  return <AnnouncementList />;
+}
+```
+
+### Build Announcement Manager
+
+```tsx
+import { useAnnouncements, useAnnouncement } from '@tour-kit/announcements';
+
+function AnnouncementManager() {
+  const { announcements, count, resetAll } = useAnnouncements();
+
+  return (
+    <div className="manager">
+      <header>
+        <h2>Manage Announcements</h2>
+        <p>{count.total} total, {count.dismissed} dismissed</p>
+        <button onClick={resetAll}>Reset All</button>
+      </header>
+
+      <div className="announcement-list">
+        {announcements.all.map(a => (
+          <AnnouncementCard key={a.id} id={a.id} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AnnouncementCard({ id }: { id: string }) {
+  const announcement = useAnnouncement(id);
+
+  return (
+    <div className="card">
+      <h3>{announcement.config.title}</h3>
+      <p>{announcement.config.description}</p>
+
+      <div className="meta">
+        <span>Variant: {announcement.config.variant}</span>
+        <span>Priority: {announcement.config.priority}</span>
+        <span>Views: {announcement.viewCount}</span>
+      </div>
+
+      <div className="actions">
+        <button onClick={announcement.show} disabled={!announcement.canShow}>
+          Show
+        </button>
+        <button onClick={announcement.hide} disabled={!announcement.isVisible}>
+          Hide
+        </button>
+        <button onClick={() => announcement.dismiss()} disabled={announcement.isDismissed}>
+          Dismiss
+        </button>
+        <button onClick={announcement.reset}>
+          Reset
+        </button>
+      </div>
+
+      {announcement.isDismissed && (
+        <p className="status">Dismissed</p>
+      )}
+    </div>
+  );
+}
+```
+
+### Group by Priority
+
+```tsx
+function PriorityGroupedAnnouncements() {
+  const { getFiltered } = useAnnouncements();
+
+  const critical = getFiltered({ priority: ['critical'] });
+  const high = getFiltered({ priority: ['high'] });
+  const normal = getFiltered({ priority: ['normal'] });
+  const low = getFiltered({ priority: ['low'] });
+
+  return (
+    <div>
+      {critical.length > 0 && (
+        <section>
+          <h3>Critical ({critical.length})</h3>
+          {critical.map(a => <AnnouncementCard key={a.id} id={a.id} />)}
+        </section>
+      )}
+
+      {high.length > 0 && (
+        <section>
+          <h3>High Priority ({high.length})</h3>
+          {high.map(a => <AnnouncementCard key={a.id} id={a.id} />)}
+        </section>
+      )}
+
+      {normal.length > 0 && (
+        <section>
+          <h3>Normal ({normal.length})</h3>
+          {normal.map(a => <AnnouncementCard key={a.id} id={a.id} />)}
+        </section>
+      )}
+
+      {low.length > 0 && (
+        <section>
+          <h3>Low Priority ({low.length})</h3>
+          {low.map(a => <AnnouncementCard key={a.id} id={a.id} />)}
+        </section>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## TypeScript
+
+The hook is fully typed:
+
+```tsx
+import { useAnnouncements } from '@tour-kit/announcements';
+import type {
+  Announcement,
+  AnnouncementsFilter,
+  AnnouncementCounts,
+} from '@tour-kit/announcements';
+
+function TypedComponent() {
+  const {
+    announcements,
+    activeId,
+    ids,
+    count,
+    getFiltered,
+  } = useAnnouncements();
+
+  // All properties are typed
+  const all: Announcement[] = announcements.all;
+  const id: string | null = activeId;
+  const idList: string[] = ids;
+  const counts: AnnouncementCounts = count;
+
+  // Methods are typed
+  const filter: AnnouncementsFilter = {
+    variant: ['modal'],
+    priority: ['high'],
+  };
+  const filtered: Announcement[] = getFiltered(filter);
+}
+```
+
+---
+
+## Performance Considerations
+
+The hook uses memoization to prevent unnecessary re-renders:
+
+```tsx
+// These are memoized and only update when state changes
+const { announcements, count, visible, dismissed } = useAnnouncements();
+```
+
+<Callout type="info">
+  The hook automatically subscribes to the announcements context. It will re-render when any announcement state changes.
+</Callout>
+
+---
+
+## Related
+
+- [useAnnouncement](/docs/announcements/hooks/use-announcement) - Control a single announcement
+- [useAnnouncementQueue](/docs/announcements/hooks/use-announcement-queue) - Control the queue
+- [AnnouncementsProvider](/docs/announcements/providers/announcements-provider) - Provider configuration

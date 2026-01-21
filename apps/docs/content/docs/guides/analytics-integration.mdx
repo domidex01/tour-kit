@@ -1,0 +1,582 @@
+---
+title: Analytics Integration
+description: Integrating @tour-kit/analytics with tours, hints, checklists, and adoption tracking
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Analytics Integration
+
+Track user interactions across all Tour Kit features with the analytics plugin system.
+
+---
+
+## Why Track Product Tour Analytics
+
+Understanding how users engage with your onboarding flows helps you:
+
+- Identify where users drop off in tours
+- Measure feature adoption success
+- Optimize hint placement and timing
+- Track checklist completion rates
+- Make data-driven improvements to your onboarding
+
+Tour Kit's analytics system is plugin-based, allowing you to send events to multiple services simultaneously.
+
+---
+
+## Installation
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @tour-kit/analytics
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install @tour-kit/analytics
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @tour-kit/analytics
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Setting Up Analytics Provider
+
+<Steps>
+<Step>
+### Create Analytics Plugins
+
+Choose from pre-built plugins or create your own:
+
+```tsx title="lib/analytics.ts"
+import {
+  createAnalyticsPlugin,
+  createSegmentPlugin,
+  createPostHogPlugin,
+  createConsolePlugin,
+} from '@tour-kit/analytics';
+
+// Pre-built Segment plugin
+export const segmentPlugin = createSegmentPlugin({
+  writeKey: process.env.NEXT_PUBLIC_SEGMENT_KEY!,
+});
+
+// Pre-built PostHog plugin
+export const posthogPlugin = createPostHogPlugin({
+  apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!,
+  host: 'https://app.posthog.com',
+});
+
+// Custom plugin for your backend
+export const backendPlugin = createAnalyticsPlugin({
+  name: 'backend',
+  track: async (event, properties) => {
+    await fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event, properties }),
+    });
+  },
+  identify: async (userId, traits) => {
+    await fetch('/api/analytics/identify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, traits }),
+    });
+  },
+});
+
+// Debug plugin for development
+export const debugPlugin = createConsolePlugin({
+  prefix: '[Analytics]',
+  enabled: process.env.NODE_ENV === 'development',
+});
+```
+</Step>
+
+<Step>
+### Wrap Your App with AnalyticsProvider
+
+Place the `AnalyticsProvider` at the top of your component tree:
+
+```tsx title="app/layout.tsx"
+import { AnalyticsProvider } from '@tour-kit/analytics';
+import { segmentPlugin, posthogPlugin, debugPlugin } from '@/lib/analytics';
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <AnalyticsProvider
+          plugins={[segmentPlugin, posthogPlugin, debugPlugin]}
+          enabled={true}
+          debug={process.env.NODE_ENV === 'development'}
+        >
+          {children}
+        </AnalyticsProvider>
+      </body>
+    </html>
+  );
+}
+```
+</Step>
+</Steps>
+
+<Callout type="info">
+Events are sent to all registered plugins in parallel. Use the debug plugin to verify events during development.
+</Callout>
+
+---
+
+## Auto-Tracking Tours
+
+Tours automatically emit analytics events when wrapped with `AnalyticsProvider`:
+
+```tsx title="components/product-tour.tsx"
+'use client';
+
+import { Tour, TourStep, TourCard, TourOverlay } from '@tour-kit/react';
+
+export function ProductTour() {
+  return (
+    <Tour id="onboarding">
+      <TourStep
+        target="#welcome"
+        title="Welcome!"
+        content="Let's get you started"
+      />
+      <TourStep
+        target="#dashboard"
+        title="Your Dashboard"
+        content="View your key metrics here"
+      />
+      <TourStep
+        target="#settings"
+        title="Settings"
+        content="Customize your experience"
+      />
+
+      <TourOverlay />
+      <TourCard />
+    </Tour>
+  );
+}
+```
+
+### Tracked Tour Events
+
+| Event | When Fired | Properties |
+|-------|------------|------------|
+| `tour_started` | Tour begins | `tourId`, `totalSteps`, `sessionId` |
+| `tour_step_viewed` | Step is displayed | `tourId`, `stepId`, `stepIndex`, `totalSteps` |
+| `tour_step_completed` | User advances from step | `tourId`, `stepId`, `stepIndex`, `totalSteps` |
+| `tour_completed` | All steps finished | `tourId`, `totalSteps`, `duration` |
+| `tour_skipped` | User closes/exits early | `tourId`, `stepIndex`, `totalSteps` |
+
+---
+
+## Auto-Tracking Hints
+
+Hints from `@tour-kit/hints` also emit events automatically:
+
+```tsx title="components/feature-hint.tsx"
+import { Hint, HintHotspot, HintTooltip } from '@tour-kit/hints';
+
+export function FeatureHint() {
+  return (
+    <Hint id="export-feature" dismissible>
+      <HintHotspot target="#export-button" pulse />
+      <HintTooltip
+        title="New Feature"
+        content="Export your data to CSV or PDF"
+      />
+    </Hint>
+  );
+}
+```
+
+### Tracked Hint Events
+
+| Event | When Fired | Properties |
+|-------|------------|------------|
+| `hint_shown` | Hint becomes visible | `hintId`, `targetElement`, `sessionId` |
+| `hint_dismissed` | User dismisses hint | `hintId`, `dismissMethod` (click, esc, outside) |
+| `hint_interacted` | User clicks hint hotspot | `hintId`, `interactionType` |
+
+---
+
+## Tracking Checklist Progress
+
+Checklists from `@tour-kit/checklists` emit events for task completion:
+
+```tsx title="components/onboarding-checklist.tsx"
+import { ChecklistProvider, Checklist, ChecklistItem } from '@tour-kit/checklists';
+
+const checklistConfig = {
+  id: 'onboarding',
+  title: 'Get Started',
+  items: [
+    { id: 'profile', label: 'Complete your profile' },
+    { id: 'invite', label: 'Invite a teammate', requires: ['profile'] },
+    { id: 'project', label: 'Create your first project' },
+  ],
+};
+
+export function OnboardingChecklist() {
+  return (
+    <ChecklistProvider checklists={[checklistConfig]}>
+      <Checklist id="onboarding">
+        <ChecklistItem id="profile" />
+        <ChecklistItem id="invite" />
+        <ChecklistItem id="project" />
+      </Checklist>
+    </ChecklistProvider>
+  );
+}
+```
+
+### Tracked Checklist Events
+
+| Event | When Fired | Properties |
+|-------|------------|------------|
+| `checklist_started` | First item attempted | `checklistId`, `totalItems` |
+| `checklist_item_completed` | Task marked complete | `checklistId`, `itemId`, `progress` |
+| `checklist_completed` | All tasks done | `checklistId`, `totalItems`, `duration` |
+
+---
+
+## Tracking Feature Adoption
+
+Use `@tour-kit/adoption` to track feature usage and adoption:
+
+```tsx title="components/adoption-tracking.tsx"
+import { AdoptionProvider, useFeature } from '@tour-kit/adoption';
+
+const features = [
+  {
+    id: 'dark-mode',
+    name: 'Dark Mode',
+    trigger: '#dark-mode-toggle',
+    adoptionCriteria: { minUses: 3, recencyDays: 30 },
+  },
+  {
+    id: 'keyboard-shortcuts',
+    name: 'Keyboard Shortcuts',
+    trigger: { event: 'keyboard:shortcut' },
+    adoptionCriteria: { minUses: 5 },
+  },
+];
+
+export function AppWithAdoption({ children }) {
+  return (
+    <AdoptionProvider features={features}>
+      {children}
+    </AdoptionProvider>
+  );
+}
+
+// Track feature usage manually
+export function KeyboardShortcutHandler() {
+  const { trackUsage } = useFeature('keyboard-shortcuts');
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.metaKey && e.key === 'k') {
+        trackUsage(); // Emits analytics event
+        // ... handle shortcut
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [trackUsage]);
+
+  return null;
+}
+```
+
+### Tracked Adoption Events
+
+| Event | When Fired | Properties |
+|-------|------------|------------|
+| `feature_used` | Feature is used | `featureId`, `usageCount`, `status` |
+| `feature_adopted` | Meets adoption criteria | `featureId`, `adoptionDate`, `totalUses` |
+| `feature_churned` | Becomes inactive after adoption | `featureId`, `lastUsedDate`, `daysSinceUse` |
+
+---
+
+## Custom Event Tracking
+
+Track custom events using the `useTrack` hook:
+
+```tsx title="components/custom-tracking.tsx"
+import { useTrack } from '@tour-kit/analytics';
+
+export function VideoPlayer({ videoId }: { videoId: string }) {
+  const track = useTrack();
+
+  const handlePlay = () => {
+    track('video_played', {
+      videoId,
+      source: 'tour_step',
+      timestamp: new Date().toISOString(),
+    });
+  };
+
+  const handleComplete = (watchTime: number) => {
+    track('video_completed', {
+      videoId,
+      watchTime,
+      completionRate: (watchTime / totalDuration) * 100,
+    });
+  };
+
+  return <video onPlay={handlePlay} onEnded={() => handleComplete(watchTime)} />;
+}
+```
+
+---
+
+## Building Dashboards with Tracked Data
+
+Use the tracked events to build analytics dashboards:
+
+```tsx title="components/analytics-dashboard.tsx"
+import { useAnalytics } from '@tour-kit/analytics';
+import { useEffect, useState } from 'react';
+
+export function TourAnalyticsDashboard() {
+  const [metrics, setMetrics] = useState({
+    toursStarted: 0,
+    toursCompleted: 0,
+    averageStepsCompleted: 0,
+    dropoffRate: 0,
+  });
+
+  useEffect(() => {
+    // Fetch analytics from your backend
+    async function fetchMetrics() {
+      const response = await fetch('/api/analytics/tours');
+      const data = await response.json();
+      setMetrics(data);
+    }
+
+    fetchMetrics();
+  }, []);
+
+  return (
+    <div className="grid grid-cols-4 gap-4">
+      <StatCard
+        title="Tours Started"
+        value={metrics.toursStarted}
+        icon="play"
+      />
+      <StatCard
+        title="Tours Completed"
+        value={metrics.toursCompleted}
+        icon="check"
+      />
+      <StatCard
+        title="Avg Steps Completed"
+        value={metrics.averageStepsCompleted.toFixed(1)}
+        icon="steps"
+      />
+      <StatCard
+        title="Drop-off Rate"
+        value={`${metrics.dropoffRate.toFixed(1)}%`}
+        icon="trending-down"
+      />
+    </div>
+  );
+}
+```
+
+---
+
+## Complete Example: Multi-Package Analytics
+
+Here's a complete example integrating analytics with tours, hints, checklists, and adoption:
+
+```tsx title="app/providers.tsx"
+'use client';
+
+import { AnalyticsProvider } from '@tour-kit/analytics';
+import { TourKitProvider } from '@tour-kit/core';
+import { HintsProvider } from '@tour-kit/hints';
+import { ChecklistProvider } from '@tour-kit/checklists';
+import { AdoptionProvider } from '@tour-kit/adoption';
+import { segmentPlugin, posthogPlugin } from '@/lib/analytics';
+
+const checklistConfig = {
+  id: 'onboarding',
+  title: 'Get Started',
+  items: [
+    { id: 'profile', label: 'Complete profile', tourId: 'profile-tour' },
+    { id: 'invite', label: 'Invite team', requires: ['profile'] },
+    { id: 'project', label: 'Create project' },
+  ],
+};
+
+const features = [
+  {
+    id: 'dark-mode',
+    name: 'Dark Mode',
+    trigger: '#dark-mode-toggle',
+    adoptionCriteria: { minUses: 3 },
+  },
+];
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <AnalyticsProvider
+      plugins={[segmentPlugin, posthogPlugin]}
+      enabled={true}
+      onError={(error) => console.error('Analytics error:', error)}
+    >
+      <TourKitProvider>
+        <AdoptionProvider features={features}>
+          <ChecklistProvider checklists={[checklistConfig]}>
+            <HintsProvider>
+              {children}
+            </HintsProvider>
+          </ChecklistProvider>
+        </AdoptionProvider>
+      </TourKitProvider>
+    </AnalyticsProvider>
+  );
+}
+```
+
+```tsx title="components/complete-onboarding.tsx"
+'use client';
+
+import { Tour, TourStep, TourCard, TourOverlay } from '@tour-kit/react';
+import { Hint, HintHotspot, HintTooltip } from '@tour-kit/hints';
+import { Checklist, ChecklistItem } from '@tour-kit/checklists';
+import { useFeature } from '@tour-kit/adoption';
+
+export function CompleteOnboarding() {
+  const { trackUsage, isAdopted } = useFeature('dark-mode');
+
+  return (
+    <>
+      {/* Checklist */}
+      <div className="fixed top-4 right-4 w-80">
+        <Checklist id="onboarding">
+          <ChecklistItem id="profile" />
+          <ChecklistItem id="invite" />
+          <ChecklistItem id="project" />
+        </Checklist>
+      </div>
+
+      {/* Tour */}
+      <Tour id="profile-tour">
+        <TourStep
+          target="#name-field"
+          title="Your Name"
+          content="Enter your full name"
+        />
+        <TourStep
+          target="#bio-field"
+          title="Bio"
+          content="Tell us about yourself"
+        />
+        <TourOverlay />
+        <TourCard />
+      </Tour>
+
+      {/* Hint for unadopted feature */}
+      {!isAdopted && (
+        <Hint id="dark-mode-hint" dismissible>
+          <HintHotspot target="#dark-mode-toggle" pulse />
+          <HintTooltip
+            title="Try Dark Mode"
+            content="Switch to dark mode for better readability"
+          />
+        </Hint>
+      )}
+
+      {/* Feature with tracking */}
+      <button
+        id="dark-mode-toggle"
+        onClick={() => {
+          trackUsage(); // Tracks usage + emits analytics event
+          toggleDarkMode();
+        }}
+      >
+        Toggle Dark Mode
+      </button>
+    </>
+  );
+}
+```
+
+---
+
+## Disabling Analytics
+
+Disable analytics globally or for specific plugins:
+
+```tsx
+// Disable all analytics
+<AnalyticsProvider enabled={false} plugins={[...]}>
+  {children}
+</AnalyticsProvider>
+
+// Disable specific plugin
+const track = useTrack();
+track('custom_event', { ... }, { skipPlugins: ['segment'] });
+```
+
+---
+
+## Privacy Considerations
+
+<Callout type="warn">
+Always respect user privacy when tracking analytics:
+
+- Anonymize user IDs when possible
+- Don't track sensitive form data
+- Respect Do Not Track headers
+- Provide opt-out mechanisms
+- Follow GDPR/CCPA requirements
+</Callout>
+
+```tsx
+import { AnalyticsProvider } from '@tour-kit/analytics';
+
+export function PrivacyRespectingProvider({ children }) {
+  const userOptedOut = localStorage.getItem('analytics-opt-out') === 'true';
+
+  return (
+    <AnalyticsProvider
+      enabled={!userOptedOut}
+      plugins={plugins}
+      onBeforeTrack={(event, properties) => {
+        // Strip PII before sending
+        const { email, phone, ...safeProperties } = properties;
+        return { event, properties: safeProperties };
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  );
+}
+```
+
+---
+
+## Related
+
+- [Analytics API Reference](/docs/api/analytics) - Full API documentation
+- [Adoption Analytics Guide](/docs/guides/adoption-analytics) - Feature adoption metrics
+- [Checklists with Tours](/docs/guides/checklists-tours) - Combined implementation

@@ -1,0 +1,105 @@
+---
+title: Components
+description: Pre-styled checklist components with shadcn/ui patterns
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+# Components
+
+Pre-built, accessible checklist components styled with Tailwind CSS and CVA variants.
+
+## Available Components
+
+<Cards>
+  <Card title="Checklist" href="/docs/checklists/components/checklist">
+    Main checklist container with header and progress
+  </Card>
+  <Card title="ChecklistTask" href="/docs/checklists/components/checklist-task">
+    Individual task item with checkbox and state indicators
+  </Card>
+  <Card title="ChecklistProgress" href="/docs/checklists/components/checklist-progress">
+    Progress bar with percentage and count display
+  </Card>
+  <Card title="ChecklistLauncher" href="/docs/checklists/components/checklist-launcher">
+    Floating button to show/hide checklist panel
+  </Card>
+  <Card title="ChecklistPanel" href="/docs/checklists/components/checklist-panel">
+    Floating panel container for checklists
+  </Card>
+</Cards>
+
+## Quick Example
+
+```tsx
+import {
+  ChecklistProvider,
+  Checklist,
+  ChecklistTask,
+  ChecklistProgress,
+} from '@tour-kit/checklists';
+
+const checklist = {
+  id: 'onboarding',
+  title: 'Get Started',
+  tasks: [
+    { id: 'step1', title: 'Create account' },
+    { id: 'step2', title: 'Verify email' },
+    { id: 'step3', title: 'Complete profile' },
+  ],
+};
+
+function App() {
+  return (
+    <ChecklistProvider checklists={[checklist]}>
+      <Checklist
+        checklistId="onboarding"
+        showHeader
+        showProgress
+      />
+    </ChecklistProvider>
+  );
+}
+```
+
+## Styling
+
+All components support:
+- CVA variants for consistent styling
+- Tailwind CSS classes via `className` prop
+- `asChild` pattern for composition (Radix/Base UI compatible)
+
+### Variant System
+
+```tsx
+<Checklist variant="default" size="default" />
+<ChecklistTask variant="default" size="sm" />
+<ChecklistProgress variant="default" showPercentage />
+```
+
+## Composition
+
+Components are designed to be composed together:
+
+```tsx
+<ChecklistPanel checklistId="onboarding">
+  <Checklist checklistId="onboarding">
+    <ChecklistProgress />
+    <ChecklistTask taskId="step1" />
+    <ChecklistTask taskId="step2" />
+  </Checklist>
+</ChecklistPanel>
+```
+
+## Accessibility
+
+All components follow WCAG 2.1 AA guidelines:
+- Proper ARIA labels and roles
+- Keyboard navigation
+- Focus management
+- Screen reader announcements
+
+## Related
+
+- [Headless Components](/docs/checklists/headless) - Build custom UI
+- [Hooks](/docs/checklists/hooks/use-checklist) - Programmatic control

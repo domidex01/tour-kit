@@ -1,0 +1,544 @@
+---
+title: Vite Integration
+description: Setup guide for Tour Kit with Vite and React
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Vite Integration
+
+Complete guide for setting up Tour Kit with Vite and React. Covers single-page apps and React Router integration.
+
+---
+
+## Installation
+
+```bash
+pnpm add @tour-kit/react
+```
+
+For multi-page tours with React Router:
+
+```bash
+pnpm add @tour-kit/react react-router-dom
+```
+
+---
+
+## Basic Setup
+
+<Steps>
+<Step>
+### Create a Tour Component
+
+```tsx title="src/components/ProductTour.tsx"
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+  TourOverlay,
+  TourProgress,
+  TourNavigation,
+  TourClose,
+  useTour,
+} from '@tour-kit/react';
+
+export function ProductTour() {
+  return (
+    <Tour id="product-tour">
+      <TourStep
+        target="#welcome"
+        title="Welcome!"
+        content="Let's take a quick tour of our app."
+        placement="bottom"
+      />
+      <TourStep
+        target="#features"
+        title="Features"
+        content="Here's what you can do."
+        placement="right"
+      />
+      <TourStep
+        target="#get-started"
+        title="Get Started"
+        content="Click here to begin!"
+        placement="left"
+      />
+
+      <TourOverlay />
+
+      <TourCard className="w-80">
+        <TourCardHeader>
+          <TourClose />
+        </TourCardHeader>
+        <TourCardContent />
+        <TourCardFooter>
+          <TourProgress variant="dots" />
+          <TourNavigation />
+        </TourCardFooter>
+      </TourCard>
+
+      <StartButton />
+    </Tour>
+  );
+}
+
+function StartButton() {
+  const { start, isActive } = useTour();
+
+  if (isActive) return null;
+
+  return (
+    <button
+      onClick={() => start()}
+      className="fixed bottom-4 right-4 px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg"
+    >
+      Start Tour
+    </button>
+  );
+}
+```
+</Step>
+
+<Step>
+### Add to Your App
+
+```tsx title="src/App.tsx"
+import { ProductTour } from './components/ProductTour';
+import { Home } from './pages/Home';
+
+export default function App() {
+  return (
+    <>
+      <ProductTour />
+      <Home />
+    </>
+  );
+}
+```
+</Step>
+
+<Step>
+### Add Tailwind (Optional)
+
+Tour Kit uses Tailwind CSS classes. Make sure Tailwind is configured:
+
+```js title="tailwind.config.js"
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@tour-kit/**/*.{js,ts,jsx,tsx}', // Include Tour Kit
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+</Step>
+</Steps>
+
+---
+
+## With React Router
+
+For multi-page tours that span different routes:
+
+<Steps>
+<Step>
+### Setup React Router
+
+```tsx title="src/main.tsx"
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+
+createRoot(document.getElementById('root')!).render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+);
+```
+</Step>
+
+<Step>
+### Create Multi-Page Tour
+
+```tsx title="src/components/OnboardingTour.tsx"
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourOverlay,
+  MultiTourKitProvider,
+  useReactRouter,
+  useTour,
+} from '@tour-kit/react';
+
+export function OnboardingTour() {
+  const router = useReactRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+      autoNavigate={true}
+    >
+      <Tour id="onboarding">
+        {/* Home page step */}
+        <TourStep
+          target="#hero"
+          title="Welcome"
+          content="This is the homepage"
+          route="/"
+          routeMatch="exact"
+        />
+
+        {/* Dashboard page step */}
+        <TourStep
+          target="#dashboard"
+          title="Dashboard"
+          content="Your personal dashboard"
+          route="/dashboard"
+          routeMatch="startsWith"
+        />
+
+        {/* Settings page step */}
+        <TourStep
+          target="#settings"
+          title="Settings"
+          content="Customize your experience"
+          route="/settings"
+        />
+
+        <TourOverlay />
+        <TourCard />
+      </Tour>
+
+      <TourTrigger />
+    </MultiTourKitProvider>
+  );
+}
+
+function TourTrigger() {
+  const { start, isActive } = useTour();
+
+  if (isActive) return null;
+
+  return (
+    <button
+      onClick={() => start('onboarding')}
+      className="fixed bottom-4 right-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+    >
+      Start Tour
+    </button>
+  );
+}
+```
+</Step>
+
+<Step>
+### Add to App with Routes
+
+```tsx title="src/App.tsx"
+import { Routes, Route } from 'react-router-dom';
+import { OnboardingTour } from './components/OnboardingTour';
+import { Home } from './pages/Home';
+import { Dashboard } from './pages/Dashboard';
+import { Settings } from './pages/Settings';
+
+export default function App() {
+  return (
+    <>
+      <OnboardingTour />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard/*" element={<Dashboard />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+    </>
+  );
+}
+```
+</Step>
+</Steps>
+
+---
+
+## Custom Router Adapter
+
+For advanced routing needs:
+
+```tsx
+import { useNavigate, useLocation } from 'react-router-dom';
+import { createReactRouterAdapter } from '@tour-kit/react';
+
+function MyTour() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Create custom adapter with hooks
+  const createRouter = createReactRouterAdapter(
+    () => navigate,
+    () => location
+  );
+
+  const router = createRouter();
+
+  return (
+    <MultiTourKitProvider router={router}>
+      {/* ... */}
+    </MultiTourKitProvider>
+  );
+}
+```
+
+---
+
+## With Hints
+
+Add feature discovery hints:
+
+```tsx title="src/components/FeatureHints.tsx"
+import { HintsProvider, Hint } from '@tour-kit/hints';
+
+export function FeatureHints() {
+  return (
+    <HintsProvider>
+      <Hint
+        id="new-export"
+        target="#export-btn"
+        content="New! Export to multiple formats"
+        color="success"
+        persist
+      />
+
+      <Hint
+        id="keyboard-shortcuts"
+        target="#help-icon"
+        content="Press ? for keyboard shortcuts"
+        size="sm"
+      />
+    </HintsProvider>
+  );
+}
+```
+
+```tsx title="src/App.tsx"
+import { ProductTour } from './components/ProductTour';
+import { FeatureHints } from './components/FeatureHints';
+
+export default function App() {
+  return (
+    <>
+      <ProductTour />
+      <FeatureHints />
+      {/* ... */}
+    </>
+  );
+}
+```
+
+---
+
+## Auto-Start on First Visit
+
+```tsx
+import { usePersistence } from '@tour-kit/react';
+import { useEffect, useState } from 'react';
+
+export function ProductTour() {
+  const persistence = usePersistence({ keyPrefix: 'myapp' });
+  const [autoStart, setAutoStart] = useState(false);
+
+  useEffect(() => {
+    const completed = persistence.getCompletedTours().includes('welcome');
+    const dontShow = persistence.getDontShowAgain('welcome');
+    setAutoStart(!completed && !dontShow);
+  }, [persistence]);
+
+  return (
+    <Tour
+      id="welcome"
+      autoStart={autoStart}
+      onComplete={() => persistence.markCompleted('welcome')}
+    >
+      {/* ... */}
+    </Tour>
+  );
+}
+```
+
+---
+
+## Development Tips
+
+### Hot Module Replacement
+
+Tours work seamlessly with Vite's HMR. Changes to tour steps update instantly.
+
+### Lazy Loading
+
+For better performance, lazy load the tour component:
+
+```tsx
+import { lazy, Suspense } from 'react';
+
+const ProductTour = lazy(() => import('./components/ProductTour'));
+
+export default function App() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <ProductTour />
+      </Suspense>
+      {/* ... */}
+    </>
+  );
+}
+```
+
+### Environment-Specific Tours
+
+```tsx
+export function ProductTour() {
+  // Only show in development
+  if (import.meta.env.DEV) {
+    return <DeveloperTour />;
+  }
+
+  // Production tour
+  return <ProductionTour />;
+}
+```
+
+---
+
+## TypeScript Configuration
+
+Ensure your `tsconfig.json` includes:
+
+```json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "strict": true
+  }
+}
+```
+
+---
+
+## Complete Example
+
+```tsx title="src/main.tsx"
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import './index.css';
+
+createRoot(document.getElementById('root')!).render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+);
+```
+
+```tsx title="src/App.tsx"
+import { Routes, Route } from 'react-router-dom';
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourOverlay,
+  MultiTourKitProvider,
+  useReactRouter,
+  useTour,
+  usePersistence,
+} from '@tour-kit/react';
+import { HintsProvider, Hint } from '@tour-kit/hints';
+import { useEffect, useState } from 'react';
+
+export default function App() {
+  const router = useReactRouter();
+  const persistence = usePersistence();
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    const completed = persistence.getCompletedTours().includes('main');
+    setShowTour(!completed);
+  }, [persistence]);
+
+  return (
+    <MultiTourKitProvider router={router} routePersistence={{ enabled: true }}>
+      <HintsProvider>
+        <Tour
+          id="main"
+          autoStart={showTour}
+          onComplete={() => persistence.markCompleted('main')}
+        >
+          <TourStep target="#nav" title="Navigation" content="..." route="/" />
+          <TourStep target="#dash" title="Dashboard" content="..." route="/dashboard" />
+
+          <TourOverlay />
+          <TourCard />
+        </Tour>
+
+        <Hint id="new-feature" target="#feature" content="New!" persist />
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+
+        <TourButton />
+      </HintsProvider>
+    </MultiTourKitProvider>
+  );
+}
+
+function TourButton() {
+  const { start, isActive } = useTour();
+  if (isActive) return null;
+
+  return (
+    <button onClick={() => start('main')} className="fixed bottom-4 right-4 btn">
+      Start Tour
+    </button>
+  );
+}
+```
+
+---
+
+## Troubleshooting
+
+<Callout type="error" title="Tour Not Appearing">
+Ensure target elements exist in the DOM when the tour starts. Use `waitForTarget` for dynamically rendered elements.
+</Callout>
+
+<Callout type="error" title="Styles Missing">
+Add Tour Kit to your Tailwind content paths or import the CSS directly.
+</Callout>
+
+<Callout type="error" title="Router Not Working">
+Make sure `BrowserRouter` wraps your entire app and `useReactRouter` is called within the router context.
+</Callout>
+
+---
+
+## Related
+
+- [Next.js Integration](/docs/guides/nextjs) - For Next.js projects
+- [Router Integration](/docs/guides/router-integration) - Deep dive into multi-page tours
+- [Examples](/docs/examples) - Copy-paste code examples

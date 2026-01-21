@@ -1,0 +1,640 @@
+---
+title: AdoptionNudge
+description: Auto-showing nudge component for feature discovery
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`AdoptionNudge` is a component that automatically displays nudges for unadopted features based on the nudge configuration in `AdoptionProvider`. It handles scheduling, display, and user interactions out of the box.
+
+## Basic Usage
+
+```tsx
+import { AdoptionNudge } from '@tour-kit/adoption'
+
+export default function App() {
+  return (
+    <div className="app">
+      {/* Your app content */}
+      <AdoptionNudge />
+    </div>
+  )
+}
+```
+
+That's it! The component will automatically:
+- Wait for the configured delay
+- Show the highest-priority pending nudge
+- Track when nudges are shown
+- Handle dismissal and clicks
+
+## Props
+
+<TypeTable
+  type={{
+    render: {
+      type: '(props: NudgeRenderProps) => ReactNode',
+      description: 'Custom render function for complete UI control',
+    },
+    delay: {
+      type: 'number',
+      default: '5000',
+      description: 'Delay before showing nudge (milliseconds)',
+    },
+    position: {
+      type: '"bottom-right" | "bottom-left" | "top-right" | "top-left"',
+      default: '"bottom-right"',
+      description: 'Position of the nudge on screen',
+    },
+    size: {
+      type: '"sm" | "md" | "lg"',
+      default: '"md"',
+      description: 'Size variant',
+    },
+    asChild: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Use custom element via Slot pattern',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+## Examples
+
+### Default Nudge
+
+The default styling provides a clean, shadcn/ui-style nudge:
+
+```tsx
+<AdoptionNudge />
+```
+
+Renders a card with:
+- Feature name as heading
+- Feature description (if provided)
+- "Try it" button (tracks usage and dismisses)
+- "Dismiss" button (dismisses permanently)
+
+### Custom Position
+
+Control where the nudge appears:
+
+```tsx
+<AdoptionNudge position="top-right" />
+<AdoptionNudge position="bottom-left" />
+```
+
+### Custom Delay
+
+Show nudges immediately or with custom timing:
+
+```tsx
+{/* Show immediately */}
+<AdoptionNudge delay={0} />
+
+{/* Wait 10 seconds */}
+<AdoptionNudge delay={10000} />
+```
+
+### Custom Render
+
+Take full control of the UI:
+
+```tsx
+<AdoptionNudge
+  render={({ feature, onClick, onDismiss, onSnooze }) => (
+    <div className="custom-nudge">
+      <h3>{feature.name}</h3>
+      <p>{feature.description}</p>
+
+      <div className="actions">
+        <button onClick={onClick}>Try Now</button>
+        <button onClick={() => onSnooze(3600000)}>Remind me in 1h</button>
+        <button onClick={onDismiss}>Not interested</button>
+      </div>
+    </div>
+  )}
+/>
+```
+
+<TypeTable
+  type={{
+    feature: {
+      type: 'Feature',
+      description: 'The feature being nudged about',
+    },
+    onClick: {
+      type: '() => void',
+      description: 'Tracks usage and dismisses the nudge',
+    },
+    onDismiss: {
+      type: '() => void',
+      description: 'Dismisses the nudge permanently',
+    },
+    onSnooze: {
+      type: '(durationMs: number) => void',
+      description: 'Snoozes the nudge for specified duration',
+    },
+  }}
+/>
+
+### With Snooze Options
+
+Add snooze functionality to default UI:
+
+```tsx
+<AdoptionNudge
+  render={({ feature, onClick, onDismiss, onSnooze }) => (
+    <div className="nudge-card">
+      <h4>{feature.name}</h4>
+      <p>{feature.description}</p>
+
+      <div className="actions">
+        <button onClick={onClick}>Try it</button>
+
+        <details>
+          <summary>Remind me later</summary>
+          <button onClick={() => onSnooze(3600000)}>1 hour</button>
+          <button onClick={() => onSnooze(86400000)}>Tomorrow</button>
+          <button onClick={() => onSnooze(604800000)}>Next week</button>
+        </details>
+
+        <button onClick={onDismiss}>Dismiss</button>
+      </div>
+    </div>
+  )}
+/>
+```
+
+### Animated Nudge
+
+Add entrance/exit animations:
+
+```tsx
+import { useState, useEffect } from 'react'
+
+function AnimatedNudge() {
+  const [isVisible, setIsVisible] = useState(false)
+
+  return (
+    <AdoptionNudge
+      render={({ feature, onClick, onDismiss }) => {
+        useEffect(() => {
+          // Animate in
+          setIsVisible(true)
+        }, [])
+
+        const handleDismiss = () => {
+          setIsVisible(false)
+          setTimeout(onDismiss, 300) // Wait for animation
+        }
+
+        return (
+          <div className={`nudge-toast ${isVisible ? 'visible' : ''}`}>
+            <h4>{feature.name}</h4>
+            <button onClick={onClick}>Try</button>
+            <button onClick={handleDismiss}>✕</button>
+          </div>
+        )
+      }}
+    />
+  )
+}
+```
+
+```css
+.nudge-toast {
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.nudge-toast.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+```
+
+### With Tour Integration
+
+Launch a tour when user clicks the nudge:
+
+```tsx
+import { useTour } from '@tour-kit/react'
+
+function NudgeWithTour() {
+  const { startTour } = useTour()
+
+  return (
+    <AdoptionNudge
+      render={({ feature, onClick, onDismiss }) => {
+        const handleTryIt = () => {
+          onClick()
+          if (feature.resources?.tourId) {
+            startTour(feature.resources.tourId)
+          }
+        }
+
+        return (
+          <div className="nudge">
+            <h4>{feature.name}</h4>
+            <button onClick={handleTryIt}>
+              {feature.resources?.tourId ? 'Take Tour' : 'Try Now'}
+            </button>
+            <button onClick={onDismiss}>Dismiss</button>
+          </div>
+        )
+      }}
+    />
+  )
+}
+```
+
+### Rich Content Nudge
+
+Show images, videos, or rich formatting:
+
+```tsx
+<AdoptionNudge
+  render={({ feature, onClick, onDismiss }) => (
+    <div className="rich-nudge">
+      {feature.category === 'video' && (
+        <video
+          src={`/features/${feature.id}.mp4`}
+          autoPlay
+          loop
+          muted
+          className="nudge-video"
+        />
+      )}
+
+      <div className="content">
+        <h4>{feature.name}</h4>
+        <p>{feature.description}</p>
+
+        {feature.premium && (
+          <span className="badge-premium">Premium</span>
+        )}
+      </div>
+
+      <div className="actions">
+        <button onClick={onClick}>Try it free</button>
+        <button onClick={onDismiss}>Dismiss</button>
+      </div>
+    </div>
+  )}
+/>
+```
+
+### Category-Specific Styling
+
+Style nudges differently based on feature category:
+
+```tsx
+<AdoptionNudge
+  render={({ feature, onClick, onDismiss }) => (
+    <div className={`nudge nudge-${feature.category || 'default'}`}>
+      <div className="nudge-icon">
+        {getCategoryIcon(feature.category)}
+      </div>
+
+      <div className="nudge-content">
+        <h4>{feature.name}</h4>
+        <p>{feature.description}</p>
+      </div>
+
+      <div className="nudge-actions">
+        <button onClick={onClick}>Try</button>
+        <button onClick={onDismiss}>✕</button>
+      </div>
+    </div>
+  )}
+/>
+```
+
+### Progress Indicator
+
+Show how many uses until adoption:
+
+```tsx
+import { useFeature } from '@tour-kit/adoption'
+
+<AdoptionNudge
+  render={({ feature, onClick, onDismiss }) => {
+    const { usage } = useFeature(feature.id)
+    const criteria = feature.adoptionCriteria || { minUses: 3 }
+    const progress = (usage.useCount / criteria.minUses) * 100
+
+    return (
+      <div className="nudge">
+        <h4>{feature.name}</h4>
+        <p>{feature.description}</p>
+
+        <div className="progress">
+          <div className="progress-bar" style={{ width: `${progress}%` }} />
+          <span>{usage.useCount} / {criteria.minUses} uses</span>
+        </div>
+
+        <button onClick={onClick}>Try Now</button>
+        <button onClick={onDismiss}>Dismiss</button>
+      </div>
+    )
+  }}
+/>
+```
+
+## Styling
+
+### Variant Styling
+
+Use built-in size and position variants:
+
+```tsx
+<AdoptionNudge size="sm" position="top-right" />
+<AdoptionNudge size="lg" position="bottom-left" />
+```
+
+### Custom Classes
+
+Extend default styling:
+
+```tsx
+<AdoptionNudge className="shadow-xl border-2 border-primary" />
+```
+
+### CSS Variables
+
+Customize via CSS variables:
+
+```css
+.adoption-nudge {
+  --nudge-bg: hsl(0 0% 100%);
+  --nudge-border: hsl(0 0% 90%);
+  --nudge-text: hsl(0 0% 10%);
+  --nudge-radius: 0.5rem;
+}
+```
+
+### Using asChild
+
+Compose with your own elements:
+
+```tsx
+import { Card } from '@/components/ui/card'
+
+<AdoptionNudge asChild>
+  <Card className="nudge-card">
+    {/* Default nudge content rendered inside Card */}
+  </Card>
+</AdoptionNudge>
+```
+
+<Callout type="info">
+The `asChild` pattern follows Radix UI conventions, merging props into the child element.
+</Callout>
+
+## Behavior
+
+### Automatic Scheduling
+
+The component respects nudge configuration:
+
+```tsx
+<AdoptionProvider
+  features={features}
+  nudge={{
+    enabled: true,
+    initialDelay: 5000, // Component waits this + its own delay
+    cooldown: 86400000, // Won't show nudges more frequently
+    maxPerSession: 3, // Max nudges this session
+    maxFeatures: 1, // One feature nudge at a time
+  }}
+>
+  <App />
+  <AdoptionNudge delay={2000} />
+</AdoptionProvider>
+```
+
+Total delay = `nudge.initialDelay` + `AdoptionNudge.delay`
+
+### Priority Ordering
+
+Shows highest-priority feature first:
+
+```tsx
+const features = [
+  { id: 'basic', name: 'Basic', trigger: '#basic', priority: 1 },
+  { id: 'important', name: 'Important', trigger: '#important', priority: 10 },
+  { id: 'critical', name: 'Critical', trigger: '#critical', priority: 100 },
+]
+
+// <AdoptionNudge /> will show "Critical" first
+```
+
+### Dismissal
+
+When dismissed:
+1. Nudge disappears
+2. Feature marked as permanently dismissed
+3. Won't appear in future sessions
+4. Analytics event fired (if configured)
+
+### Click Behavior
+
+When "Try it" is clicked:
+1. Feature usage is tracked
+2. Nudge is dismissed
+3. `onClick` handler runs (if in custom render)
+4. Analytics events fired
+
+## Accessibility
+
+The default nudge includes:
+
+- Semantic HTML (`div` with proper heading hierarchy)
+- Focus management (buttons are keyboard accessible)
+- Clear dismiss action
+- No motion if `prefers-reduced-motion` is set
+
+### Screen Reader Support
+
+Add ARIA attributes in custom renders:
+
+```tsx
+<AdoptionNudge
+  render={({ feature, onClick, onDismiss }) => (
+    <div
+      role="region"
+      aria-label="Feature suggestion"
+      aria-live="polite"
+    >
+      <h4 id="nudge-heading">{feature.name}</h4>
+      <p id="nudge-desc">{feature.description}</p>
+
+      <div role="group" aria-labelledby="nudge-heading">
+        <button
+          onClick={onClick}
+          aria-describedby="nudge-desc"
+        >
+          Try Now
+        </button>
+        <button
+          onClick={onDismiss}
+          aria-label={`Dismiss ${feature.name} suggestion`}
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+  )}
+/>
+```
+
+<Callout type="info">
+Use `aria-live="polite"` to announce nudges to screen readers without interrupting.
+</Callout>
+
+## TypeScript
+
+Fully typed render props:
+
+```tsx
+import { AdoptionNudge, type NudgeRenderProps, type Feature } from '@tour-kit/adoption'
+
+<AdoptionNudge
+  render={(props: NudgeRenderProps) => {
+    const { feature, onClick, onDismiss, onSnooze } = props
+
+    // All typed correctly
+    feature.name // string
+    feature.description // string | undefined
+    onClick() // () => void
+    onSnooze(3600000) // (durationMs: number) => void
+
+    return <div>...</div>
+  }}
+/>
+```
+
+## Performance
+
+The component efficiently manages state:
+
+- Only re-renders when nudge state changes
+- Automatically cleans up timers
+- Memoized callbacks prevent unnecessary re-renders
+
+For optimal performance, define render functions outside the component:
+
+```tsx
+const renderNudge = ({ feature, onClick, onDismiss }: NudgeRenderProps) => (
+  <div>
+    <h4>{feature.name}</h4>
+    <button onClick={onClick}>Try</button>
+    <button onClick={onDismiss}>Dismiss</button>
+  </div>
+)
+
+function App() {
+  return <AdoptionNudge render={renderNudge} />
+}
+```
+
+## Common Patterns
+
+### Multiple Nudge Instances
+
+Show different nudges in different locations:
+
+```tsx
+function App() {
+  return (
+    <div>
+      <AdoptionNudge position="top-right" delay={5000} />
+      <AdoptionNudge position="bottom-left" delay={30000} />
+    </div>
+  )
+}
+```
+
+<Callout type="warn">
+Multiple instances will show the same nudge. Use `maxFeatures` config to control how many features are nudged at once.
+</Callout>
+
+### Conditional Display
+
+Only show nudges in certain contexts:
+
+```tsx
+function ConditionalNudge() {
+  const { user } = useAuth()
+
+  // Don't nudge trial users
+  if (user.plan === 'trial') return null
+
+  // Don't nudge during onboarding
+  if (!user.onboardingComplete) return null
+
+  return <AdoptionNudge />
+}
+```
+
+### Persistent Nudges
+
+Keep nudge visible until explicitly dismissed:
+
+```tsx
+<AdoptionNudge
+  render={({ feature, onClick, onDismiss }) => (
+    <div className="sticky-nudge">
+      <p>Don't forget to try {feature.name}!</p>
+      <button onClick={onClick}>Try</button>
+      <button onClick={onDismiss}>Dismiss</button>
+    </div>
+  )}
+/>
+```
+
+## Best Practices
+
+1. **Position strategically** - Don't block critical UI:
+
+```tsx
+// Good: Bottom corner, out of the way
+<AdoptionNudge position="bottom-right" />
+
+// Bad: Could block important content
+<div className="fixed top-0 left-0 w-full">
+  <AdoptionNudge />
+</div>
+```
+
+2. **Provide context** in feature descriptions:
+
+```tsx
+const features = [
+  {
+    id: 'shortcuts',
+    name: 'Keyboard Shortcuts',
+    description: 'Work faster with keyboard shortcuts', // Explains value
+    trigger: '#shortcuts',
+  },
+]
+```
+
+3. **Test delays** with real usage patterns
+4. **Make dismissal obvious** - always provide a clear close button
+5. **Respect user decisions** - dismissed means dismissed
+
+## Next Steps
+
+- [useNudge Hook](/docs/adoption/hooks/use-nudge) - Manual nudge control
+- [FeatureButton Component](/docs/adoption/components/feature-button) - Button with tracking
+- [Analytics Integration](/docs/adoption/analytics) - Track nudge interactions

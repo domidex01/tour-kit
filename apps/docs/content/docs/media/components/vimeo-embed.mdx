@@ -1,0 +1,428 @@
+---
+title: VimeoEmbed
+description: Embed Vimeo videos with professional privacy controls and customization
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`VimeoEmbed` provides a clean, professional way to embed Vimeo videos in your tours and announcements. Vimeo offers ad-free playback, privacy controls, and high-quality video hosting ideal for product demos and tutorials.
+
+## Why Use VimeoEmbed?
+
+- **Ad-free**: No pre-roll ads interrupt your onboarding flow
+- **Professional quality**: High-quality video playback and encoding
+- **Privacy controls**: Password protection and domain-level privacy
+- **Clean player**: Minimal, customizable player design
+- **Analytics**: Built-in engagement metrics (Vimeo Plus and above)
+
+## Basic Usage
+
+```tsx
+import { VimeoEmbed } from '@tour-kit/media'
+
+export function ProductDemo() {
+  return (
+    <VimeoEmbed
+      videoId="123456789"
+      title="Product walkthrough"
+    />
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    videoId: {
+      type: 'string',
+      required: true,
+      description: 'Vimeo video ID (from URL: vimeo.com/VIDEO_ID)',
+    },
+    title: {
+      type: 'string',
+      required: true,
+      description: 'Accessible title for the iframe. Describes the video content',
+    },
+    autoplay: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Auto-start playback when visible. Requires muted=true',
+    },
+    muted: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Start muted. Required for autoplay in most browsers',
+    },
+    loop: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Loop the video continuously',
+    },
+    startTime: {
+      type: 'number',
+      required: false,
+      description: 'Start playback at specific time in seconds',
+    },
+    aspectRatio: {
+      type: "'16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'",
+      required: false,
+      default: "'16/9'",
+      description: 'Video aspect ratio',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: "'md'",
+      description: 'Preset size for the video container',
+    },
+    rounded: {
+      type: "boolean | 'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: 'false',
+      description: 'Border radius styling',
+    },
+    color: {
+      type: 'string',
+      required: false,
+      description: 'Hex color for player controls (without #). Example: "ff0000" for red',
+    },
+    showTitle: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Show video title in player',
+    },
+    showByline: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Show video author/uploader',
+    },
+    showPortrait: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Show author profile picture',
+    },
+    allowFullscreen: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Allow fullscreen mode',
+    },
+    className: {
+      type: 'string',
+      required: false,
+      description: 'Additional CSS classes',
+    },
+    style: {
+      type: 'React.CSSProperties',
+      required: false,
+      description: 'Inline styles',
+    },
+  }}
+/>
+
+## Examples
+
+### Auto-playing Demo Video
+
+```tsx
+<VimeoEmbed
+  videoId="123456789"
+  title="Feature demonstration"
+  autoplay
+  muted
+  loop
+/>
+```
+
+### Clean Minimal Player
+
+Hide Vimeo branding and metadata for a focused experience:
+
+```tsx
+<VimeoEmbed
+  videoId="123456789"
+  title="Product tour"
+  showTitle={false}
+  showByline={false}
+  showPortrait={false}
+/>
+```
+
+### Custom Player Color
+
+Match your brand colors:
+
+```tsx
+<VimeoEmbed
+  videoId="123456789"
+  title="Branded demo"
+  color="6366f1" // Indigo-500
+/>
+```
+
+<Callout type="info">
+  The `color` prop expects a hex color **without** the `#` symbol. For example, use `"ff0000"` instead of `"#ff0000"`.
+</Callout>
+
+### Start at Specific Time
+
+Jump directly to the relevant section:
+
+```tsx
+<VimeoEmbed
+  videoId="123456789"
+  title="Advanced features walkthrough"
+  startTime={120} // Start at 2:00
+/>
+```
+
+### Vertical Video for Mobile
+
+Perfect for mobile app demos shot in portrait mode:
+
+```tsx
+<VimeoEmbed
+  videoId="123456789"
+  title="Mobile app onboarding"
+  aspectRatio="9/16"
+  size="sm"
+  rounded="lg"
+/>
+```
+
+### Square Video for Social
+
+Use 1:1 aspect ratio for social media style content:
+
+```tsx
+<VimeoEmbed
+  videoId="123456789"
+  title="Quick tip"
+  aspectRatio="1/1"
+  size="md"
+/>
+```
+
+### Full-Width Hero Video
+
+```tsx
+<VimeoEmbed
+  videoId="123456789"
+  title="Platform overview"
+  size="full"
+  aspectRatio="21/9"
+  autoplay
+  muted
+  loop
+  showTitle={false}
+  showByline={false}
+  showPortrait={false}
+/>
+```
+
+## Extracting Video IDs
+
+Vimeo URLs are simple - the ID is the number at the end:
+
+```tsx
+import { extractVimeoId, isVimeoUrl } from '@tour-kit/media'
+
+const url = 'https://vimeo.com/123456789'
+
+if (isVimeoUrl(url)) {
+  const videoId = extractVimeoId(url)
+  return <VimeoEmbed videoId={videoId} title="Video" />
+}
+```
+
+Supported URL formats:
+- `https://vimeo.com/123456789`
+- `https://player.vimeo.com/video/123456789`
+- `https://vimeo.com/channels/staffpicks/123456789`
+
+## Privacy Controls
+
+Vimeo offers several privacy options configured at the video level (not in the embed):
+
+### Domain-Level Privacy
+
+Restrict where your video can be embedded:
+1. Go to video settings on vimeo.com
+2. Privacy → "Where can this be embedded?"
+3. Add allowed domains
+
+This prevents unauthorized embedding while still allowing your tour embeds.
+
+### Password Protection
+
+Protect sensitive training videos:
+1. Set a password in video privacy settings
+2. Share password with authorized users only
+3. Embed still works for users who know the password
+
+### Hide from Vimeo.com
+
+Keep videos unlisted but embeddable:
+1. Privacy → "Hide from vimeo.com"
+2. Video won't appear in search or your profile
+3. Embed links still work
+
+<Callout type="warn">
+  Privacy settings are configured on Vimeo's website, not via embed parameters. The `VimeoEmbed` component respects whatever settings you've configured.
+</Callout>
+
+## Accessibility
+
+### Required Title Prop
+
+Provide descriptive titles for screen reader users:
+
+```tsx
+// Good - describes the content
+<VimeoEmbed
+  videoId="123456789"
+  title="Tutorial: Setting up two-factor authentication"
+/>
+
+// Bad - too generic
+<VimeoEmbed
+  videoId="123456789"
+  title="Video"
+/>
+```
+
+### Captions
+
+Add captions to your Vimeo videos for accessibility:
+1. Upload a caption file (VTT, SRT, SCC, etc.) on vimeo.com
+2. Captions automatically display in the embedded player
+3. Users can toggle captions via the CC button
+
+### Keyboard Navigation
+
+Vimeo player includes keyboard shortcuts:
+- **Space** - Play/Pause
+- **Left/Right arrows** - Seek backward/forward 5 seconds
+- **Up/Down arrows** - Volume up/down
+- **F** - Fullscreen
+- **M** - Mute/Unmute
+
+## Getting Thumbnails
+
+Fetch video thumbnails for loading states or fallbacks:
+
+```tsx
+import { getVimeoThumbnailUrl } from '@tour-kit/media'
+
+const thumbnailUrl = await getVimeoThumbnailUrl('123456789')
+
+// Use as poster image
+<img src={thumbnailUrl} alt="Video thumbnail" />
+```
+
+<Callout type="info">
+  `getVimeoThumbnailUrl` makes an API call to Vimeo's oEmbed endpoint. Consider caching the result or fetching at build time.
+</Callout>
+
+## Integration with Tours
+
+Embed professional demos in your onboarding flow:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { VimeoEmbed } from '@tour-kit/media'
+
+<Tour id="product-tour">
+  <TourStep id="intro">
+    <h2>Welcome to Our Platform</h2>
+    <VimeoEmbed
+      videoId="123456789"
+      title="Platform overview"
+      autoplay
+      muted
+      showTitle={false}
+      showByline={false}
+    />
+  </TourStep>
+
+  <TourStep id="advanced">
+    <h2>Power User Features</h2>
+    <VimeoEmbed
+      videoId="987654321"
+      title="Advanced features guide"
+      startTime={60}
+    />
+  </TourStep>
+</Tour>
+```
+
+## TypeScript
+
+Full type safety with autocompletion:
+
+```tsx
+import type { VimeoEmbedProps } from '@tour-kit/media'
+
+const config: VimeoEmbedProps = {
+  videoId: '123456789',
+  title: 'Product demo',
+  autoplay: true,
+  muted: true,
+  color: '6366f1',
+  showTitle: false
+}
+
+<VimeoEmbed {...config} />
+```
+
+## Building Custom Embed URLs
+
+For advanced use cases, construct Vimeo embed URLs manually:
+
+```tsx
+import { buildVimeoEmbedUrl } from '@tour-kit/media'
+
+const embedUrl = buildVimeoEmbedUrl('123456789', {
+  autoplay: true,
+  muted: true,
+  loop: true,
+  color: 'ff0000',
+  title: false,
+  byline: false
+})
+
+console.log(embedUrl)
+// https://player.vimeo.com/video/123456789?autoplay=1&muted=1&loop=1&color=ff0000&title=0&byline=0
+```
+
+## Vimeo vs YouTube
+
+When to choose Vimeo over YouTube:
+
+**Choose Vimeo when:**
+- You need ad-free playback
+- Professional appearance is important
+- Privacy controls are required
+- You want detailed analytics (with paid plan)
+- Hosting internal/training videos
+
+**Choose YouTube when:**
+- Content is public marketing material
+- SEO and discoverability matter
+- You want to leverage YouTube's audience
+- Free hosting is essential
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
+- [YouTubeEmbed](/docs/media/components/youtube-embed) - YouTube alternative
+- [Embed URL Utilities](/docs/media/utilities/embed-urls) - URL building functions
+- [URL Parsing](/docs/media/utilities/url-parsing) - Extract video IDs from URLs

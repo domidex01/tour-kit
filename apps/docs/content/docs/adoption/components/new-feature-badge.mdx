@@ -1,0 +1,440 @@
+---
+title: NewFeatureBadge
+description: Badge component that shows for unadopted features
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`NewFeatureBadge` displays a badge (default: "New") for features that haven't been adopted yet. It automatically hides once the feature is adopted.
+
+## Basic Usage
+
+```tsx
+import { NewFeatureBadge } from '@tour-kit/adoption'
+
+function FeatureButton() {
+  return (
+    <button id="dark-mode-toggle">
+      Toggle Dark Mode
+      <NewFeatureBadge featureId="dark-mode" />
+    </button>
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    featureId: {
+      type: 'string',
+      required: true,
+      description: 'Feature ID to check adoption status',
+    },
+    text: {
+      type: 'string',
+      default: '"New"',
+      description: 'Badge text content',
+    },
+    variant: {
+      type: '"default" | "secondary" | "outline" | "destructive"',
+      default: '"default"',
+      description: 'Badge style variant',
+    },
+    size: {
+      type: '"sm" | "md" | "lg"',
+      default: '"md"',
+      description: 'Badge size',
+    },
+  }}
+/>
+
+Extends all standard `<span>` props.
+
+## Examples
+
+### Default Badge
+
+```tsx
+<NewFeatureBadge featureId="export" />
+// Renders: <span>New</span>
+```
+
+### Custom Text
+
+```tsx
+<NewFeatureBadge featureId="ai-assist" text="AI" />
+<NewFeatureBadge featureId="premium" text="Premium" />
+<NewFeatureBadge featureId="beta" text="Beta" />
+```
+
+### Different Variants
+
+```tsx
+<NewFeatureBadge featureId="feature-1" variant="default" />
+<NewFeatureBadge featureId="feature-2" variant="secondary" />
+<NewFeatureBadge featureId="feature-3" variant="outline" />
+<NewFeatureBadge featureId="feature-4" variant="destructive" />
+```
+
+### Different Sizes
+
+```tsx
+<NewFeatureBadge featureId="small-feature" size="sm" text="New" />
+<NewFeatureBadge featureId="medium-feature" size="md" text="New" />
+<NewFeatureBadge featureId="large-feature" size="lg" text="New" />
+```
+
+### In Navigation
+
+```tsx
+function NavBar() {
+  return (
+    <nav>
+      <a href="/dashboard">Dashboard</a>
+
+      <a href="/analytics">
+        Analytics
+        <NewFeatureBadge featureId="analytics" />
+      </a>
+
+      <a href="/ai-tools">
+        AI Tools
+        <NewFeatureBadge featureId="ai-tools" text="Beta" variant="secondary" />
+      </a>
+    </nav>
+  )
+}
+```
+
+### In Dropdown Menu
+
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
+
+<DropdownMenu>
+  <DropdownMenuItem>
+    Export to PDF
+    <NewFeatureBadge featureId="pdf-export" size="sm" />
+  </DropdownMenuItem>
+
+  <DropdownMenuItem>
+    Advanced Filters
+    <NewFeatureBadge featureId="filters" size="sm" />
+  </DropdownMenuItem>
+</DropdownMenu>
+```
+
+### In Feature Cards
+
+```tsx
+function FeatureCard({ featureId, title, description }) {
+  return (
+    <div className="card">
+      <div className="card-header">
+        <h3>{title}</h3>
+        <NewFeatureBadge featureId={featureId} size="sm" />
+      </div>
+      <p>{description}</p>
+    </div>
+  )
+}
+```
+
+### With Icons
+
+```tsx
+import { Sparkles } from 'lucide-react'
+
+<button>
+  AI Assistant
+  <NewFeatureBadge featureId="ai-assist">
+    <Sparkles className="h-3 w-3" />
+    AI
+  </NewFeatureBadge>
+</button>
+```
+
+### Animated Badge
+
+```tsx
+<NewFeatureBadge
+  featureId="new-feature"
+  className="animate-pulse"
+  text="New!"
+/>
+```
+
+### Positioned Badge
+
+```tsx
+<div className="relative">
+  <button className="feature-btn">Advanced Search</button>
+
+  <NewFeatureBadge
+    featureId="advanced-search"
+    className="absolute -top-1 -right-1"
+    size="sm"
+  />
+</div>
+```
+
+## Styling
+
+### Custom Classes
+
+```tsx
+<NewFeatureBadge
+  featureId="feature"
+  className="ml-2 uppercase font-bold"
+/>
+```
+
+### CSS Variables
+
+Customize badge appearance:
+
+```css
+.new-feature-badge {
+  --badge-bg: hsl(142 76% 36%);
+  --badge-text: hsl(0 0% 100%);
+  --badge-radius: 0.25rem;
+  --badge-padding: 0.125rem 0.5rem;
+}
+```
+
+### Variant Styling
+
+The badge uses class-variance-authority (cva) for variants:
+
+```tsx
+// Default: Green background
+<NewFeatureBadge variant="default" />
+
+// Secondary: Gray background
+<NewFeatureBadge variant="secondary" />
+
+// Outline: Transparent with border
+<NewFeatureBadge variant="outline" />
+
+// Destructive: Red background
+<NewFeatureBadge variant="destructive" />
+```
+
+## Behavior
+
+The badge automatically:
+1. Renders when feature is not adopted
+2. Returns `null` when feature is adopted
+3. Re-renders when adoption status changes
+
+```tsx
+// Initially shows badge
+<NewFeatureBadge featureId="feature" />
+
+// After user adopts the feature
+// → Badge disappears automatically
+```
+
+## Accessibility
+
+The badge renders a semantic `<span>`:
+
+```tsx
+<NewFeatureBadge
+  featureId="feature"
+  aria-label="New feature available"
+/>
+```
+
+For screen readers, consider adding context:
+
+```tsx
+<button aria-label="Export data (new feature)">
+  Export
+  <NewFeatureBadge featureId="export" aria-hidden="true" />
+</button>
+```
+
+<Callout type="info">
+Use `aria-hidden="true"` on decorative badges to avoid announcing "New" to screen readers when the button label already indicates it's new.
+</Callout>
+
+## TypeScript
+
+Fully typed:
+
+```tsx
+import { NewFeatureBadge, type NewFeatureBadgeProps } from '@tour-kit/adoption'
+
+const badgeProps: NewFeatureBadgeProps = {
+  featureId: 'my-feature',
+  text: 'New',
+  variant: 'default',
+  size: 'md',
+  className: 'custom-class',
+}
+
+<NewFeatureBadge {...badgeProps} />
+```
+
+## Comparison with Conditional Components
+
+```tsx
+// Using NewFeatureBadge (simpler for badges)
+<NewFeatureBadge featureId="feature" text="New" />
+
+// Using IfNotAdopted (more flexible)
+<IfNotAdopted featureId="feature">
+  <span className="badge">New</span>
+</IfNotAdopted>
+```
+
+**Use NewFeatureBadge when:**
+- You want a simple badge with minimal code
+- You want consistent badge styling
+- You don't need custom badge content
+
+**Use IfNotAdopted when:**
+- You need fully custom content
+- You want to show complex UI
+- You need a fallback
+
+## Performance
+
+The badge efficiently re-renders only when adoption status changes:
+
+```tsx
+// ✓ Efficient: Only updates when "export" is adopted
+<NewFeatureBadge featureId="export" />
+
+// ✓ Also efficient: Multiple badges don't cause extra re-renders
+<div>
+  <NewFeatureBadge featureId="feature-1" />
+  <NewFeatureBadge featureId="feature-2" />
+  <NewFeatureBadge featureId="feature-3" />
+</div>
+```
+
+## Common Patterns
+
+### Category Badges
+
+```tsx
+const CATEGORY_BADGES = {
+  ai: { text: 'AI', variant: 'default' as const },
+  premium: { text: 'Pro', variant: 'secondary' as const },
+  beta: { text: 'Beta', variant: 'outline' as const },
+}
+
+function FeatureItem({ featureId, category }) {
+  const badge = CATEGORY_BADGES[category]
+
+  return (
+    <div>
+      Feature Name
+      {badge && (
+        <NewFeatureBadge
+          featureId={featureId}
+          text={badge.text}
+          variant={badge.variant}
+        />
+      )}
+    </div>
+  )
+}
+```
+
+### Pulsing Badge
+
+```tsx
+<NewFeatureBadge
+  featureId="important-feature"
+  className="animate-pulse ring-2 ring-primary"
+  text="Try me!"
+/>
+```
+
+### Count-Based Badge
+
+```tsx
+import { useFeature } from '@tour-kit/adoption'
+
+function SmartBadge({ featureId }: { featureId: string }) {
+  const { usage, feature } = useFeature(featureId)
+  const remaining = (feature?.adoptionCriteria?.minUses || 3) - usage.useCount
+
+  return (
+    <NewFeatureBadge
+      featureId={featureId}
+      text={`${remaining} left`}
+      size="sm"
+    />
+  )
+}
+```
+
+## Best Practices
+
+1. **Use consistent text** across your app:
+
+```tsx
+// Good: Consistent
+<NewFeatureBadge featureId="feature-1" text="New" />
+<NewFeatureBadge featureId="feature-2" text="New" />
+
+// Bad: Inconsistent
+<NewFeatureBadge featureId="feature-1" text="New" />
+<NewFeatureBadge featureId="feature-2" text="NEW!" />
+<NewFeatureBadge featureId="feature-3" text="Try this" />
+```
+
+2. **Don't overuse badges** - they lose impact:
+
+```tsx
+// Good: Strategic use
+<nav>
+  <a href="/home">Home</a>
+  <a href="/features">Features <NewFeatureBadge featureId="features" /></a>
+  <a href="/about">About</a>
+</nav>
+
+// Bad: Too many badges
+<nav>
+  <a href="/home">Home <NewFeatureBadge featureId="home" /></a>
+  <a href="/features">Features <NewFeatureBadge featureId="features" /></a>
+  <a href="/about">About <NewFeatureBadge featureId="about" /></a>
+</nav>
+```
+
+3. **Consider badge placement**:
+
+```tsx
+// Good: Badge after text
+<button>
+  Export Data
+  <NewFeatureBadge featureId="export" className="ml-2" />
+</button>
+
+// Also good: Badge as superscript
+<button className="relative">
+  Export Data
+  <NewFeatureBadge
+    featureId="export"
+    className="absolute -top-1 -right-1"
+    size="sm"
+  />
+</button>
+```
+
+## Next Steps
+
+- [IfNotAdopted Component](/docs/adoption/components/conditional) - More flexible conditional rendering
+- [FeatureButton](/docs/adoption/components/feature-button) - Button with built-in tracking
+- [useFeature Hook](/docs/adoption/hooks/use-feature) - Access adoption state programmatically

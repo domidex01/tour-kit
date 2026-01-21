@@ -1,25 +1,83 @@
 ---
 title: Guides
-description: In-depth guides for using TourKit
+description: In-depth guides for Tour Kit features and integrations
 ---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
 
 # Guides
 
-Learn how to use TourKit effectively in different scenarios.
+In-depth guides for setting up and customizing Tour Kit in your applications.
+
+---
 
 ## Framework Integration
 
-- [Next.js](/docs/guides/nextjs) - Server components, App Router
-- [Vite](/docs/guides/vite) - SPA setup
-- [Router Integration](/docs/guides/router-integration) - Multi-page tours with Next.js, React Router
+<Cards>
+  <Card title="Next.js" href="/docs/guides/nextjs">
+    Complete setup for Next.js App Router and Pages Router with multi-page tours
+  </Card>
+  <Card title="Vite" href="/docs/guides/vite">
+    Setup guide for Vite and React with React Router integration
+  </Card>
+</Cards>
 
-## Advanced Topics
+---
 
-- [Accessibility](/docs/guides/accessibility) - WCAG compliance
-- [Animations](/docs/guides/animations) - Custom transitions
-- [Persistence](/docs/guides/persistence) - Save tour progress
-- [Base UI Support](/docs/guides/base-ui) - Use Base UI instead of Radix UI
+## Features
 
-## Help
+<Cards>
+  <Card title="Accessibility" href="/docs/guides/accessibility">
+    WCAG 2.1 AA compliance, keyboard navigation, screen readers, and reduced motion
+  </Card>
+  <Card title="Persistence" href="/docs/guides/persistence">
+    Save tour progress, checklist state, and user preferences across sessions
+  </Card>
+  <Card title="Animations" href="/docs/guides/animations">
+    Customize transitions, respect reduced motion, and integrate with animation libraries
+  </Card>
+  <Card title="Router Integration" href="/docs/guides/router-integration">
+    Deep dive into multi-page tours with router adapters
+  </Card>
+  <Card title="Base UI" href="/docs/guides/base-ui">
+    Using Tour Kit with Base UI instead of Radix UI
+  </Card>
+  <Card title="Troubleshooting" href="/docs/guides/troubleshooting">
+    Common issues and solutions
+  </Card>
+</Cards>
 
-- [Troubleshooting](/docs/guides/troubleshooting) - Common issues and solutions
+---
+
+## Package Integration
+
+<Cards>
+  <Card title="Analytics Integration" href="/docs/guides/analytics-integration">
+    Set up analytics tracking across all Tour Kit packages
+  </Card>
+  <Card title="Adoption Analytics" href="/docs/guides/adoption-analytics">
+    Track feature adoption metrics and user behavior
+  </Card>
+  <Card title="Announcements + Scheduling" href="/docs/guides/announcements-scheduling">
+    Time-based announcements with scheduling rules
+  </Card>
+  <Card title="Checklists + Tours" href="/docs/guides/checklists-tours">
+    Combine onboarding checklists with guided tours
+  </Card>
+</Cards>
+
+---
+
+## Quick Links
+
+| Guide | Description |
+|-------|-------------|
+| [Next.js](/docs/guides/nextjs) | App Router, Pages Router, SSR |
+| [Vite](/docs/guides/vite) | SPA setup with React Router |
+| [Accessibility](/docs/guides/accessibility) | WCAG compliance, keyboard nav, screen readers |
+| [Persistence](/docs/guides/persistence) | Storage, cross-session state, custom adapters |
+| [Animations](/docs/guides/animations) | CSS variables, Tailwind, reduced motion, Framer Motion |
+| [Router Integration](/docs/guides/router-integration) | Multi-page tour implementation |
+| [Base UI](/docs/guides/base-ui) | Alternative UI library support |
+| [Analytics Integration](/docs/guides/analytics-integration) | Analytics setup and tracking |
+| [Troubleshooting](/docs/guides/troubleshooting) | Common issues and fixes |

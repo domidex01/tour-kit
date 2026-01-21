@@ -1,0 +1,478 @@
+---
+title: TypeScript Types
+description: Type definitions for @tour-kit/adoption
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Core Types
+
+### Feature
+
+```ts
+interface Feature {
+  id: string
+  name: string
+  trigger: FeatureTrigger
+  adoptionCriteria?: AdoptionCriteria
+  resources?: FeatureResources
+  priority?: number
+  category?: string
+  description?: string
+  premium?: boolean
+}
+```
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Unique feature identifier',
+    },
+    name: {
+      type: 'string',
+      required: true,
+      description: 'Human-readable feature name',
+    },
+    trigger: {
+      type: 'FeatureTrigger',
+      required: true,
+      description: 'How to detect usage',
+    },
+    adoptionCriteria: {
+      type: 'AdoptionCriteria',
+      description: 'When feature is considered adopted',
+    },
+    resources: {
+      type: 'FeatureResources',
+      description: 'Related tour/hint resources',
+    },
+    priority: {
+      type: 'number',
+      default: '0',
+      description: 'Nudge priority (higher shown first)',
+    },
+    category: {
+      type: 'string',
+      description: 'Feature category for grouping',
+    },
+    description: {
+      type: 'string',
+      description: 'Feature description for nudges',
+    },
+    premium: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Premium feature flag',
+    },
+  }}
+/>
+
+### FeatureTrigger
+
+```ts
+type FeatureTrigger =
+  | string // CSS selector
+  | { event: string } // Custom event
+  | { callback: () => boolean } // Programmatic check
+```
+
+**Examples:**
+
+```ts
+// CSS selector (click tracking)
+trigger: '#dark-mode-toggle'
+trigger: '[data-feature="export"]'
+
+// Custom event
+trigger: { event: 'export:complete' }
+trigger: { event: 'ai:generated' }
+
+// Callback (polled every 1s)
+trigger: { callback: () => document.fullscreenElement !== null }
+```
+
+### AdoptionCriteria
+
+```ts
+interface AdoptionCriteria {
+  minUses?: number // default: 3
+  recencyDays?: number // default: 30
+  custom?: (usage: FeatureUsage) => boolean
+}
+```
+
+<TypeTable
+  type={{
+    minUses: {
+      type: 'number',
+      default: '3',
+      description: 'Minimum uses required for adoption',
+    },
+    recencyDays: {
+      type: 'number',
+      default: '30',
+      description: 'Days without use before churning',
+    },
+    custom: {
+      type: '(usage: FeatureUsage) => boolean',
+      description: 'Custom adoption logic',
+    },
+  }}
+/>
+
+### FeatureResources
+
+```ts
+interface FeatureResources {
+  tourId?: string
+  hintIds?: string[]
+}
+```
+
+<TypeTable
+  type={{
+    tourId: {
+      type: 'string',
+      description: 'Tour ID from @tour-kit/react',
+    },
+    hintIds: {
+      type: 'string[]',
+      description: 'Hint IDs from @tour-kit/hints',
+    },
+  }}
+/>
+
+### FeatureUsage
+
+```ts
+interface FeatureUsage {
+  featureId: string
+  firstUsed: string | null // ISO date string
+  lastUsed: string | null // ISO date string
+  useCount: number
+  status: AdoptionStatus
+}
+```
+
+<TypeTable
+  type={{
+    featureId: {
+      type: 'string',
+      description: 'Feature identifier',
+    },
+    firstUsed: {
+      type: 'string | null',
+      description: 'ISO 8601 date of first use',
+    },
+    lastUsed: {
+      type: 'string | null',
+      description: 'ISO 8601 date of last use',
+    },
+    useCount: {
+      type: 'number',
+      description: 'Total number of uses',
+    },
+    status: {
+      type: 'AdoptionStatus',
+      description: 'Current adoption status',
+    },
+  }}
+/>
+
+### AdoptionStatus
+
+```ts
+type AdoptionStatus = 'not_started' | 'exploring' | 'adopted' | 'churned'
+```
+
+- **not_started**: Never used
+- **exploring**: Used, but below `minUses`
+- **adopted**: Meets adoption criteria
+- **churned**: Was adopted, now inactive (exceeds `recencyDays`)
+
+### FeatureWithUsage
+
+```ts
+interface FeatureWithUsage extends Feature {
+  usage: FeatureUsage
+}
+```
+
+Combines feature definition with current usage state.
+
+## Provider Types
+
+### AdoptionProviderProps
+
+```ts
+interface AdoptionProviderProps {
+  children: React.ReactNode
+  features: Feature[]
+  storage?: StorageConfig
+  nudge?: NudgeConfig
+  userId?: string
+  onAdoption?: (feature: Feature) => void
+  onChurn?: (feature: Feature) => void
+  onNudge?: (feature: Feature, action: 'shown' | 'clicked' | 'dismissed') => void
+}
+```
+
+### StorageConfig
+
+```ts
+type StorageConfig =
+  | { type: 'localStorage'; key?: string }
+  | { type: 'memory' }
+  | { type: 'custom'; adapter: StorageAdapter }
+```
+
+### StorageAdapter
+
+```ts
+interface StorageAdapter {
+  getItem(key: string): Promise<string | null> | string | null
+  setItem(key: string, value: string): Promise<void> | void
+  removeItem(key: string): Promise<void> | void
+}
+```
+
+### NudgeConfig
+
+```ts
+interface NudgeConfig {
+  enabled?: boolean // default: true
+  initialDelay?: number // default: 5000
+  cooldown?: number // default: 86400000 (24h)
+  maxPerSession?: number // default: 3
+  maxFeatures?: number // default: 1
+}
+```
+
+## Hook Return Types
+
+### UseFeatureReturn
+
+```ts
+interface UseFeatureReturn {
+  feature: Feature | null
+  usage: FeatureUsage
+  isAdopted: boolean
+  status: AdoptionStatus
+  useCount: number
+  trackUsage: () => void
+}
+```
+
+### AdoptionStats
+
+```ts
+interface AdoptionStats {
+  features: FeatureWithUsage[]
+  adoptionRate: number
+  adoptedCount: number
+  totalCount: number
+  byStatus: Record<AdoptionStatus, FeatureWithUsage[]>
+  byCategory: Record<string, { adopted: number; total: number; rate: number }>
+}
+```
+
+### UseNudgeReturn
+
+```ts
+interface UseNudgeReturn {
+  pendingNudges: Feature[]
+  hasNudges: boolean
+  showNudge: (featureId: string) => void
+  dismissNudge: (featureId: string) => void
+  snoozeNudge: (featureId: string, durationMs: number) => void
+  handleNudgeClick: (featureId: string) => void
+}
+```
+
+## Component Prop Types
+
+### AdoptionNudgeProps
+
+```ts
+interface AdoptionNudgeProps extends React.ComponentPropsWithoutRef<'div'> {
+  render?: (props: NudgeRenderProps) => React.ReactNode
+  delay?: number
+  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
+  size?: 'sm' | 'md' | 'lg'
+  asChild?: boolean
+}
+```
+
+### NudgeRenderProps
+
+```ts
+interface NudgeRenderProps {
+  feature: Feature
+  onDismiss: () => void
+  onSnooze: (durationMs: number) => void
+  onClick: () => void
+}
+```
+
+### FeatureButtonProps
+
+```ts
+interface FeatureButtonProps extends React.ComponentPropsWithoutRef<'button'> {
+  featureId: string
+  showNewIndicator?: boolean
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive'
+  size?: 'sm' | 'md' | 'lg'
+  asChild?: boolean
+}
+```
+
+### NewFeatureBadgeProps
+
+```ts
+interface NewFeatureBadgeProps extends React.ComponentPropsWithoutRef<'span'> {
+  featureId: string
+  text?: string
+  variant?: 'default' | 'secondary' | 'outline' | 'destructive'
+  size?: 'sm' | 'md' | 'lg'
+}
+```
+
+## Dashboard Component Types
+
+### AdoptionDashboardProps
+
+```ts
+interface AdoptionDashboardProps {
+  showFilters?: boolean
+  showStats?: boolean
+  showChart?: boolean
+  showTable?: boolean
+  className?: string
+}
+```
+
+### AdoptionStatCardProps
+
+```ts
+interface AdoptionStatCardProps {
+  title: string
+  value: string | number
+  description?: string
+  trend?: number
+  trendLabel?: string
+  icon?: React.ReactNode
+  variant?: 'default' | 'success' | 'warning' | 'danger'
+  size?: 'sm' | 'md' | 'lg'
+}
+```
+
+### AdoptionTableProps
+
+```ts
+interface AdoptionTableProps {
+  sortBy?: 'name' | 'status' | 'useCount' | 'lastUsed' | 'category'
+  sortOrder?: 'asc' | 'desc'
+  showCategory?: boolean
+  showPriority?: boolean
+  features?: FeatureWithUsage[]
+  onRowClick?: (feature: FeatureWithUsage) => void
+  className?: string
+}
+```
+
+### AdoptionCategoryChartProps
+
+```ts
+interface AdoptionCategoryChartProps {
+  showPercentages?: boolean
+  highlightCategory?: string
+  orientation?: 'horizontal' | 'vertical'
+  className?: string
+}
+```
+
+### AdoptionStatusBadgeProps
+
+```ts
+interface AdoptionStatusBadgeProps {
+  status: AdoptionStatus
+  size?: 'sm' | 'md' | 'lg'
+  showIcon?: boolean
+  className?: string
+}
+```
+
+### AdoptionFiltersProps
+
+```ts
+interface AdoptionFiltersProps {
+  filters: AdoptionFiltersState
+  onChange: (filters: AdoptionFiltersState) => void
+  categories?: string[]
+  className?: string
+}
+```
+
+### AdoptionFiltersState
+
+```ts
+interface AdoptionFiltersState {
+  status: AdoptionStatus | 'all'
+  category: string | 'all'
+  search: string
+}
+```
+
+## Usage Examples
+
+### Typed Feature Array
+
+```ts
+import type { Feature } from '@tour-kit/adoption'
+
+const features: Feature[] = [
+  {
+    id: 'dark-mode',
+    name: 'Dark Mode',
+    trigger: '#dark-mode-toggle',
+    category: 'customization',
+    adoptionCriteria: {
+      minUses: 3,
+      recencyDays: 30,
+    },
+  },
+]
+```
+
+### Typed Hook Usage
+
+```ts
+import { useFeature, type UseFeatureReturn } from '@tour-kit/adoption'
+
+function Component() {
+  const feature: UseFeatureReturn = useFeature('my-feature')
+
+  feature.trackUsage() // ✓ Type-safe
+  feature.isAdopted // ✓ Type-safe
+}
+```
+
+### Typed Component Props
+
+```ts
+import type { FeatureButtonProps } from '@tour-kit/adoption'
+
+const buttonProps: FeatureButtonProps = {
+  featureId: 'export',
+  variant: 'default',
+  onClick: () => console.log('clicked'),
+}
+```
+
+## Next Steps
+
+- [AdoptionProvider](/docs/adoption/providers/adoption-provider) - Provider setup
+- [Hooks](/docs/adoption/hooks/use-feature) - Hook usage
+- [Components](/docs/adoption/components/adoption-nudge) - Component props

@@ -1,0 +1,246 @@
+---
+title: Media
+description: Embedded video and media support for tours and announcements with auto-detection and accessibility features
+---
+
+## Overview
+
+The `@tour-kit/media` package provides rich media embedding capabilities for your product tours and announcements. It automatically detects video platforms, handles responsive playback, and ensures accessibility with caption support and reduced motion fallbacks.
+
+## Why Media in Tours?
+
+Embedding videos and animations in your onboarding tours can:
+
+- **Increase engagement**: Visual demonstrations are more engaging than text alone
+- **Reduce confusion**: Show exactly how features work with real recordings
+- **Save support time**: Users learn faster with video walkthroughs
+- **Improve retention**: Visual learners benefit from multimedia content
+
+## Installation
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @tour-kit/media
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install @tour-kit/media
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @tour-kit/media
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+  The `@tour-kit/media` package depends on `@tour-kit/core`. If you're using `@tour-kit/react`, core is already included.
+</Callout>
+
+## Quick Start
+
+The simplest way to add media is with automatic URL detection:
+
+```tsx
+import { TourMedia } from '@tour-kit/media'
+
+export function WelcomeTour() {
+  return (
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      alt="Product walkthrough"
+    />
+  )
+}
+```
+
+The component automatically detects the platform (YouTube, Vimeo, Loom, Wistia) and renders the appropriate embed.
+
+## Supported Platforms
+
+### Video Embeds
+
+- **YouTube** - Automatic GDPR-compliant embeds via youtube-nocookie.com
+- **Vimeo** - Professional video hosting with customization
+- **Loom** - Screen recordings and async video messages
+- **Wistia** - Enterprise video hosting with analytics
+
+### Native Media
+
+- **HTML5 Video** - MP4, WebM, OGG with caption support
+- **Animated GIF** - With play/pause controls
+- **Lottie Animations** - Lightweight vector animations
+- **Static Images** - Fallback for reduced motion
+
+## Accessibility Features
+
+All media components respect user preferences and accessibility standards:
+
+### Reduced Motion Support
+
+Automatically detects `prefers-reduced-motion` and shows static fallbacks:
+
+```tsx
+<TourMedia
+  src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  alt="Product walkthrough"
+  reducedMotionFallback="/static/thumbnail.jpg"
+/>
+```
+
+### Caption Support
+
+Add captions to native videos for hearing-impaired users:
+
+```tsx
+<TourMedia
+  src="/videos/demo.mp4"
+  alt="Feature demonstration"
+  captions={[
+    { src: '/captions/en.vtt', srcLang: 'en', label: 'English' },
+    { src: '/captions/es.vtt', srcLang: 'es', label: 'Español' }
+  ]}
+/>
+```
+
+### Keyboard Controls
+
+All interactive media (GIF player, Lottie controls) are keyboard accessible.
+
+## Basic Examples
+
+### YouTube Video
+
+```tsx
+<TourMedia
+  src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  alt="Getting started guide"
+  autoplay
+  muted
+/>
+```
+
+### Vimeo with Custom Aspect Ratio
+
+```tsx
+<TourMedia
+  src="https://vimeo.com/123456789"
+  alt="Feature showcase"
+  aspectRatio="1/1"
+/>
+```
+
+### Native Video with Captions
+
+```tsx
+<TourMedia
+  src="/videos/onboarding.mp4"
+  alt="Onboarding walkthrough"
+  poster="/thumbnails/onboarding.jpg"
+  captions={[
+    { src: '/captions/en.vtt', srcLang: 'en', label: 'English' }
+  ]}
+  controls
+/>
+```
+
+### Lottie Animation
+
+```tsx
+<TourMedia
+  type="lottie"
+  src="/animations/celebration.json"
+  alt="Success animation"
+  autoplay
+  loop
+/>
+```
+
+<Callout type="warn">
+  Lottie animations require the `lottie-web` peer dependency: `pnpm add lottie-web`
+</Callout>
+
+## Advanced Usage
+
+### Responsive Sources
+
+Serve different video files based on viewport size:
+
+```tsx
+<TourMedia
+  src="/videos/demo-desktop.mp4"
+  alt="Product demo"
+  sources={[
+    { src: '/videos/demo-mobile.mp4', maxWidth: 640 },
+    { src: '/videos/demo-tablet.mp4', maxWidth: 1024 },
+    { src: '/videos/demo-desktop.mp4', maxWidth: Infinity }
+  ]}
+/>
+```
+
+### Custom Event Handlers
+
+Track media engagement for analytics:
+
+```tsx
+import { useMediaEvents } from '@tour-kit/media'
+
+function AnalyticsDemo() {
+  const handlers = useMediaEvents({
+    mediaType: 'youtube',
+    mediaSrc: 'dQw4w9WgXcQ',
+    tourId: 'onboarding',
+    stepId: 'welcome',
+    onPlay: (event) => console.log('User played video'),
+    onComplete: (event) => console.log('User watched to end')
+  })
+
+  return (
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      alt="Welcome video"
+      {...handlers}
+    />
+  )
+}
+```
+
+### Headless Media
+
+Build completely custom UIs with full control:
+
+```tsx
+import { MediaHeadless } from '@tour-kit/media'
+
+<MediaHeadless src="https://vimeo.com/123456789">
+  {({ isPlaying, play, pause, currentTime, duration }) => (
+    <div>
+      <video />
+      <button onClick={isPlaying ? pause : play}>
+        {isPlaying ? 'Pause' : 'Play'}
+      </button>
+      <progress value={currentTime} max={duration} />
+    </div>
+  )}
+</MediaHeadless>
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="TourMedia Component" href="/docs/media/components/tour-media">
+    Main component with auto-detection
+  </Card>
+  <Card title="Embed Components" href="/docs/media/components/youtube-embed">
+    Platform-specific embed components
+  </Card>
+  <Card title="Headless API" href="/docs/media/headless/media-headless">
+    Build custom media interfaces
+  </Card>
+  <Card title="Media Hooks" href="/docs/media/hooks/use-media-events">
+    Track engagement and events
+  </Card>
+</Cards>

@@ -1,0 +1,558 @@
+---
+title: NativeVideo
+description: Self-hosted HTML5 video with captions, responsive sources, and accessibility features
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`NativeVideo` provides a powerful wrapper around the HTML5 `<video>` element with built-in support for captions, responsive sources, reduced motion, and accessibility features. Perfect for self-hosted videos where you need full control.
+
+## Why Use NativeVideo?
+
+- **Full control**: Host your own content, no third-party dependencies
+- **Privacy**: No external tracking or cookies
+- **Captions**: Built-in support for WebVTT subtitles
+- **Responsive**: Serve different videos based on screen size
+- **Accessibility**: Focus management, keyboard controls, reduced motion
+- **Formats**: MP4, WebM, OGG support with fallbacks
+
+## Basic Usage
+
+```tsx
+import { NativeVideo } from '@tour-kit/media'
+
+export function TutorialVideo() {
+  return (
+    <NativeVideo
+      src="/videos/tutorial.mp4"
+      alt="Feature tutorial walkthrough"
+      poster="/thumbnails/tutorial.jpg"
+      controls
+    />
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    src: {
+      type: 'string',
+      required: true,
+      description: 'Video file URL or path. Supports MP4, WebM, OGG formats',
+    },
+    alt: {
+      type: 'string',
+      required: true,
+      description: 'Accessible description of video content. Required for screen readers',
+    },
+    poster: {
+      type: 'string',
+      required: false,
+      description: 'Thumbnail image shown before playback starts',
+    },
+    autoplay: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Auto-start playback. Requires muted=true in most browsers',
+    },
+    muted: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Start muted. Required for autoplay to work',
+    },
+    controls: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Show native browser video controls',
+    },
+    loop: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Loop playback continuously',
+    },
+    playsInline: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Play inline on mobile instead of fullscreen',
+    },
+    preload: {
+      type: "'none' | 'metadata' | 'auto'",
+      required: false,
+      default: "'metadata'",
+      description: 'How much to preload: none (nothing), metadata (duration/dimensions), auto (buffer video)',
+    },
+    captions: {
+      type: 'CaptionTrack[]',
+      required: false,
+      description: 'Array of caption/subtitle tracks in WebVTT format',
+    },
+    sources: {
+      type: 'ResponsiveSource[]',
+      required: false,
+      description: 'Responsive video sources for different screen sizes',
+    },
+    aspectRatio: {
+      type: "'16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'",
+      required: false,
+      default: "'16/9'",
+      description: 'Video aspect ratio',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: "'md'",
+      description: 'Preset size for the video container',
+    },
+    rounded: {
+      type: "boolean | 'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: 'false',
+      description: 'Border radius styling',
+    },
+    reducedMotionFallback: {
+      type: 'string',
+      required: false,
+      description: 'Static image URL shown when prefers-reduced-motion is enabled',
+    },
+    className: {
+      type: 'string',
+      required: false,
+      description: 'Additional CSS classes',
+    },
+    style: {
+      type: 'React.CSSProperties',
+      required: false,
+      description: 'Inline styles',
+    },
+    onPlay: {
+      type: '() => void',
+      required: false,
+      description: 'Callback when video starts playing',
+    },
+    onPause: {
+      type: '() => void',
+      required: false,
+      description: 'Callback when video is paused',
+    },
+    onEnded: {
+      type: '() => void',
+      required: false,
+      description: 'Callback when video finishes playing',
+    },
+    onError: {
+      type: '(error: Event) => void',
+      required: false,
+      description: 'Callback when video fails to load',
+    },
+  }}
+/>
+
+## Examples
+
+### Basic Video with Controls
+
+```tsx
+<NativeVideo
+  src="/videos/demo.mp4"
+  alt="Product demonstration"
+  poster="/thumbnails/demo.jpg"
+  controls
+/>
+```
+
+### Auto-playing Background Video
+
+```tsx
+<NativeVideo
+  src="/videos/hero-background.mp4"
+  alt="Platform overview background video"
+  autoplay
+  muted
+  loop
+  controls={false}
+  playsInline
+/>
+```
+
+### Video with Captions
+
+Provide accessibility for hearing-impaired users:
+
+```tsx
+<NativeVideo
+  src="/videos/tutorial.mp4"
+  alt="Account setup tutorial"
+  poster="/thumbnails/tutorial.jpg"
+  captions={[
+    {
+      src: '/captions/en.vtt',
+      srcLang: 'en',
+      label: 'English',
+      default: true
+    },
+    {
+      src: '/captions/es.vtt',
+      srcLang: 'es',
+      label: 'Español'
+    },
+    {
+      src: '/captions/fr.vtt',
+      srcLang: 'fr',
+      label: 'Français'
+    }
+  ]}
+  controls
+/>
+```
+
+### Responsive Video Sources
+
+Serve optimized videos based on viewport size:
+
+```tsx
+<NativeVideo
+  src="/videos/demo-1080p.mp4" // Fallback
+  alt="Feature demonstration"
+  poster="/thumbnails/demo.jpg"
+  sources={[
+    { src: '/videos/demo-480p.mp4', maxWidth: 640 },
+    { src: '/videos/demo-720p.mp4', maxWidth: 1024 },
+    { src: '/videos/demo-1080p.mp4', maxWidth: Infinity }
+  ]}
+  controls
+/>
+```
+
+The component automatically selects the appropriate video based on screen width.
+
+### Multiple Format Fallbacks
+
+Serve different formats for browser compatibility:
+
+```tsx
+<NativeVideo
+  src="/videos/demo.mp4" // Fallback for all browsers
+  alt="Product demo"
+  sources={[
+    { src: '/videos/demo.webm', type: 'video/webm' }, // Modern browsers
+    { src: '/videos/demo.mp4', type: 'video/mp4' },   // Broad support
+    { src: '/videos/demo.ogv', type: 'video/ogg' }    // Firefox fallback
+  ]}
+  controls
+/>
+```
+
+### Reduced Motion Fallback
+
+Show static image for users who prefer reduced motion:
+
+```tsx
+<NativeVideo
+  src="/videos/animated-feature.mp4"
+  alt="Animated feature showcase"
+  poster="/images/feature-static.jpg"
+  reducedMotionFallback="/images/feature-static.jpg"
+  autoplay
+  loop
+  muted
+/>
+```
+
+When `prefers-reduced-motion: reduce` is detected, the static image displays instead.
+
+### Preload Strategies
+
+Control bandwidth usage with preload settings:
+
+```tsx
+// Don't preload - save bandwidth
+<NativeVideo
+  src="/videos/optional-demo.mp4"
+  alt="Optional feature demo"
+  preload="none"
+  controls
+/>
+
+// Preload metadata only - shows duration and poster
+<NativeVideo
+  src="/videos/tutorial.mp4"
+  alt="Tutorial video"
+  preload="metadata"
+  controls
+/>
+
+// Preload entire video - instant playback
+<NativeVideo
+  src="/videos/intro.mp4"
+  alt="Welcome video"
+  preload="auto"
+  autoplay
+  muted
+/>
+```
+
+### Event Handlers for Analytics
+
+Track video engagement:
+
+```tsx
+import { useState } from 'react'
+
+function AnalyticsExample() {
+  const [played, setPlayed] = useState(false)
+  const [completed, setCompleted] = useState(false)
+
+  return (
+    <NativeVideo
+      src="/videos/demo.mp4"
+      alt="Product demo"
+      onPlay={() => {
+        if (!played) {
+          setPlayed(true)
+          analytics.track('Video Started', { video: 'demo' })
+        }
+      }}
+      onEnded={() => {
+        setCompleted(true)
+        analytics.track('Video Completed', { video: 'demo' })
+      }}
+      controls
+    />
+  )
+}
+```
+
+## Caption Tracks
+
+The `CaptionTrack` interface for the `captions` prop:
+
+```ts
+interface CaptionTrack {
+  src: string          // URL to WebVTT file
+  srcLang: string      // BCP 47 language code (e.g., 'en', 'es', 'fr')
+  label: string        // Display name in captions menu
+  kind?: 'subtitles' | 'captions' | 'descriptions'
+  default?: boolean    // Set as default track
+}
+```
+
+### Creating WebVTT Files
+
+WebVTT (Web Video Text Tracks) format for captions:
+
+```text
+WEBVTT
+
+00:00:00.000 --> 00:00:03.000
+Welcome to the tutorial.
+
+00:00:03.500 --> 00:00:07.000
+Let's start by creating a new project.
+
+00:00:07.500 --> 00:00:11.000
+Click the "New Project" button in the top right.
+```
+
+Save as `.vtt` file and reference in `captions` prop.
+
+## Responsive Sources
+
+The `ResponsiveSource` interface:
+
+```ts
+interface ResponsiveSource {
+  src: string          // Video file URL
+  maxWidth?: number    // Maximum viewport width for this source
+  type?: string        // MIME type (e.g., 'video/mp4', 'video/webm')
+}
+```
+
+### Selection Logic
+
+Sources are selected based on current viewport width:
+
+```tsx
+sources={[
+  { src: 'mobile.mp4', maxWidth: 640 },    // Used when width ≤ 640px
+  { src: 'tablet.mp4', maxWidth: 1024 },   // Used when 641px ≤ width ≤ 1024px
+  { src: 'desktop.mp4', maxWidth: Infinity } // Used when width > 1024px
+]}
+```
+
+The component automatically updates when viewport size changes.
+
+## Video Formats
+
+Recommended formats for broad compatibility:
+
+### MP4 (H.264)
+- **Best for**: Universal compatibility
+- **Codec**: H.264 video, AAC audio
+- **Browsers**: All modern browsers
+- **File size**: Medium to large
+
+### WebM (VP9)
+- **Best for**: Modern browsers, smaller files
+- **Codec**: VP9 video, Opus audio
+- **Browsers**: Chrome, Firefox, Edge
+- **File size**: Smaller than MP4
+
+### OGG (Theora)
+- **Best for**: Firefox fallback
+- **Codec**: Theora video, Vorbis audio
+- **Browsers**: Firefox, older browsers
+- **File size**: Varies
+
+**Recommended approach**: Provide WebM and MP4, let browser choose best format.
+
+## Accessibility
+
+### Required Alt Text
+
+Always provide descriptive `alt` text:
+
+```tsx
+// Good - describes what's shown
+<NativeVideo
+  src="setup.mp4"
+  alt="Step-by-step walkthrough of initial account setup"
+/>
+
+// Bad - too vague
+<NativeVideo
+  src="setup.mp4"
+  alt="Video"
+/>
+```
+
+### Captions Are Essential
+
+Provide captions for all videos with speech:
+
+```tsx
+<NativeVideo
+  src="tutorial.mp4"
+  alt="Feature tutorial"
+  captions={[
+    { src: 'captions-en.vtt', srcLang: 'en', label: 'English', default: true }
+  ]}
+/>
+```
+
+**WCAG 2.1 AA requires captions** for prerecorded video content.
+
+### Keyboard Controls
+
+Native video controls are fully keyboard accessible:
+- **Space** - Play/Pause
+- **Tab** - Navigate controls
+- **Enter** - Activate button
+- **Arrow keys** - Volume and seek (in some browsers)
+
+### Focus Management
+
+The component manages focus for screen reader users:
+- Announces video state changes
+- Properly labels all interactive controls
+- Respects `prefers-reduced-motion`
+
+## Performance Optimization
+
+### Lazy Loading
+
+Load videos only when needed:
+
+```tsx
+<NativeVideo
+  src="large-video.mp4"
+  alt="Demo video"
+  preload="none" // Don't load until user clicks play
+  poster="thumbnail.jpg"
+/>
+```
+
+### Poster Images
+
+Always provide poster images to reduce initial load:
+
+```tsx
+<NativeVideo
+  src="demo.mp4"
+  alt="Demo"
+  poster="demo-poster.jpg" // Shows while loading
+  preload="metadata"
+/>
+```
+
+### Compression
+
+Optimize video files before hosting:
+- Use H.264 with appropriate bitrate (2-5 Mbps for 1080p)
+- Compress audio to 128-192 kbps AAC
+- Consider adaptive bitrate streaming for long videos
+
+## Integration with Tours
+
+Embed videos in onboarding steps:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { NativeVideo } from '@tour-kit/media'
+
+<Tour id="video-tour">
+  <TourStep id="welcome">
+    <h2>Welcome to Our Platform</h2>
+    <NativeVideo
+      src="/videos/intro.mp4"
+      alt="Platform introduction and overview"
+      poster="/thumbnails/intro.jpg"
+      captions={[
+        { src: '/captions/intro-en.vtt', srcLang: 'en', label: 'English', default: true }
+      ]}
+      autoplay
+      muted
+      controls
+    />
+  </TourStep>
+</Tour>
+```
+
+## TypeScript
+
+Full type safety with intelligent prop validation:
+
+```tsx
+import type { NativeVideoProps, CaptionTrack } from '@tour-kit/media'
+
+const captions: CaptionTrack[] = [
+  { src: '/captions/en.vtt', srcLang: 'en', label: 'English', default: true },
+  { src: '/captions/es.vtt', srcLang: 'es', label: 'Español' }
+]
+
+const config: NativeVideoProps = {
+  src: '/videos/demo.mp4',
+  alt: 'Product demonstration',
+  poster: '/thumbnails/demo.jpg',
+  captions,
+  controls: true,
+  preload: 'metadata'
+}
+
+<NativeVideo {...config} />
+```
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
+- [GifPlayer](/docs/media/components/gif-player) - Animated GIF player
+- [useResponsiveSource](/docs/media/hooks/use-responsive-source) - Responsive source selection hook
+- [useMediaEvents](/docs/media/hooks/use-media-events) - Track video engagement

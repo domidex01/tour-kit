@@ -1,0 +1,541 @@
+---
+title: '@tour-kit/core API'
+description: Complete API reference for @tour-kit/core
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/core API Reference
+
+Complete API reference for the core package. This package provides framework-agnostic logic for tours.
+
+---
+
+## Providers
+
+### TourKitProvider
+
+Global configuration provider for tour-kit.
+
+```tsx
+import { TourKitProvider } from '@tour-kit/core';
+
+<TourKitProvider config={config} dir="ltr">
+  {children}
+</TourKitProvider>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `config` | `TourKitConfig` | Global configuration for all tours |
+| `dir` | `'ltr' \| 'rtl' \| 'auto'` | Text direction (auto detects from document) |
+| `onTourStart` | `(tourId: string) => void` | Called when any tour starts |
+| `onTourComplete` | `(tourId: string) => void` | Called when any tour completes |
+| `onTourSkip` | `(tourId: string, stepIndex: number) => void` | Called when any tour is skipped |
+| `onStepView` | `(tourId: string, stepId: string, stepIndex: number) => void` | Called when a step is viewed |
+
+### TourProvider
+
+Provider for a single tour instance.
+
+```tsx
+import { TourProvider } from '@tour-kit/core';
+
+<TourProvider tours={tours} router={router}>
+  {children}
+</TourProvider>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `tours` | `Tour[]` | Array of tour definitions |
+| `router` | `RouterAdapter` | Router adapter for multi-page tours |
+| `onStart` | `(tourId: string) => void` | Called when tour starts |
+| `onComplete` | `(tourId: string) => void` | Called when tour completes |
+| `onSkip` | `(tourId: string, stepIndex: number) => void` | Called when tour is skipped |
+| `onStepChange` | `(step: TourStep, index: number) => void` | Called on step change |
+
+---
+
+## Hooks
+
+### useTour
+
+Main hook for tour control. Returns tour state and actions.
+
+```tsx
+import { useTour } from '@tour-kit/core';
+
+const {
+  isActive,
+  currentStep,
+  currentStepIndex,
+  totalSteps,
+  isFirstStep,
+  isLastStep,
+  progress,
+  isLoading,
+  isTransitioning,
+  start,
+  next,
+  prev,
+  goTo,
+  skip,
+  complete,
+  stop,
+  isStepActive,
+  getStep,
+} = useTour(tourId?);
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `isActive` | `boolean` | Whether a tour is currently active |
+| `currentStep` | `TourStep \| null` | Current step data |
+| `currentStepIndex` | `number` | 0-based index of current step |
+| `totalSteps` | `number` | Total number of steps |
+| `isFirstStep` | `boolean` | Whether on first step |
+| `isLastStep` | `boolean` | Whether on last step |
+| `progress` | `number` | Progress percentage (0-100) |
+| `isLoading` | `boolean` | Whether tour is loading |
+| `isTransitioning` | `boolean` | Whether transitioning between steps |
+| `start` | `(tourIdOrIndex?, stepIndex?) => void` | Start a tour |
+| `next` | `() => void` | Go to next step |
+| `prev` | `() => void` | Go to previous step |
+| `goTo` | `(stepIndex: number) => void` | Go to specific step |
+| `skip` | `() => void` | Skip/exit the tour |
+| `complete` | `() => void` | Mark tour as complete |
+| `stop` | `() => void` | Stop without completion |
+| `isStepActive` | `(stepId: string) => boolean` | Check if step is active |
+| `getStep` | `(stepId: string) => TourStep \| undefined` | Get step by ID |
+
+### useStep
+
+Hook for individual step control.
+
+```tsx
+import { useStep } from '@tour-kit/core';
+
+const { isActive, isVisible, hasCompleted, targetElement, targetRect } = useStep(stepId);
+```
+
+### useSpotlight
+
+Hook for spotlight overlay control.
+
+```tsx
+import { useSpotlight } from '@tour-kit/core';
+
+const { isVisible, targetRect, overlayStyle, cutoutStyle, show, hide, update } = useSpotlight();
+```
+
+### useElementPosition
+
+Hook for tracking element position.
+
+```tsx
+import { useElementPosition } from '@tour-kit/core';
+
+const { element, rect, scrollParent, update } = useElementPosition(target);
+```
+
+### useKeyboardNavigation
+
+Hook for keyboard navigation setup.
+
+```tsx
+import { useKeyboardNavigation } from '@tour-kit/core';
+
+useKeyboardNavigation(config?);
+```
+
+### useFocusTrap
+
+Hook for focus trap management.
+
+```tsx
+import { useFocusTrap } from '@tour-kit/core';
+
+const { containerRef, activate, deactivate } = useFocusTrap(enabled?);
+```
+
+### usePersistence
+
+Hook for tour state persistence.
+
+```tsx
+import { usePersistence } from '@tour-kit/core';
+
+const {
+  getCompletedTours,
+  getSkippedTours,
+  getDontShowAgain,
+  getLastStep,
+  markCompleted,
+  markSkipped,
+  setDontShowAgain,
+  saveStep,
+  reset,
+} = usePersistence(config?);
+```
+
+### useRoutePersistence
+
+Hook for multi-page tour persistence.
+
+```tsx
+import { useRoutePersistence } from '@tour-kit/core';
+
+const { save, load, clear, isStale } = useRoutePersistence(config);
+```
+
+### useMediaQuery
+
+Hook for responsive media query tracking.
+
+```tsx
+import { useMediaQuery } from '@tour-kit/core';
+
+const matches = useMediaQuery('(min-width: 768px)');
+```
+
+### usePrefersReducedMotion
+
+Hook for motion preference detection.
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/core';
+
+const prefersReducedMotion = usePrefersReducedMotion();
+```
+
+### useAdvanceOn
+
+Hook for event-based step advancement.
+
+```tsx
+import { useAdvanceOn } from '@tour-kit/core';
+
+useAdvanceOn({
+  event: 'click',
+  selector: '#target',
+  onAdvance: () => next(),
+});
+```
+
+---
+
+## Utilities
+
+### Tour Creation
+
+```tsx
+import { createTour, createNamedTour, createStep, createNamedStep } from '@tour-kit/core';
+
+// Auto-generated ID
+const tour = createTour(steps, options?);
+
+// Named tour
+const namedTour = createNamedTour('my-tour', steps, options?);
+
+// Auto-generated step ID
+const step = createStep(target, content, options?);
+
+// Named step
+const namedStep = createNamedStep('step-1', target, content, options?);
+```
+
+### Storage
+
+```tsx
+import {
+  createStorageAdapter,
+  createNoopStorage,
+  createCookieStorage,
+  createPrefixedStorage,
+  safeJSONParse,
+} from '@tour-kit/core';
+
+// Create adapter
+const adapter = createStorageAdapter('localStorage'); // or 'sessionStorage'
+
+// Cookie storage
+const cookies = createCookieStorage({ expires: 30 });
+
+// Prefixed storage
+const prefixed = createPrefixedStorage(adapter, 'myapp');
+
+// SSR-safe storage
+const noop = createNoopStorage();
+
+// Safe JSON parsing
+const data = safeJSONParse<MyType>(json, defaultValue);
+```
+
+### DOM Utilities
+
+```tsx
+import {
+  getElement,
+  isElementVisible,
+  isElementPartiallyVisible,
+  waitForElement,
+  getFocusableElements,
+  getScrollParent,
+} from '@tour-kit/core';
+
+// Resolve element from selector, ref, or HTMLElement
+const element = getElement('#my-element');
+
+// Check visibility
+const visible = isElementVisible(element);
+const partial = isElementPartiallyVisible(element);
+
+// Wait for element to appear
+const el = await waitForElement('#dynamic', { timeout: 5000 });
+
+// Get focusable elements for focus trap
+const focusable = getFocusableElements(container);
+
+// Find scroll parent
+const scrollParent = getScrollParent(element);
+```
+
+### Position Utilities
+
+```tsx
+import {
+  calculatePosition,
+  calculatePositionWithCollision,
+  getElementRect,
+  getViewportDimensions,
+  parsePlacement,
+  wouldOverflow,
+  getOppositeSide,
+  getFallbackPlacements,
+  mirrorPlacementForRTL,
+} from '@tour-kit/core';
+
+// Calculate tooltip position
+const pos = calculatePosition(targetRect, tooltipSize, 'bottom', offset?);
+
+// With collision detection
+const result = calculatePositionWithCollision(targetRect, tooltipSize, 'bottom', options?);
+
+// Parse placement string
+const { side, alignment } = parsePlacement('bottom-start');
+
+// RTL support
+const rtlPlacement = mirrorPlacementForRTL('left-start', true);
+```
+
+### Scroll Utilities
+
+```tsx
+import {
+  scrollIntoView,
+  scrollTo,
+  getScrollPosition,
+  lockScroll,
+} from '@tour-kit/core';
+
+// Scroll element into view
+await scrollIntoView(element, { behavior: 'smooth', block: 'center' });
+
+// Scroll to position
+scrollTo(container, position, 'smooth');
+
+// Get scroll position
+const { x, y } = getScrollPosition(container?);
+
+// Lock scroll
+const unlock = lockScroll();
+// ... later
+unlock();
+```
+
+### Accessibility Utilities
+
+```tsx
+import {
+  announce,
+  generateId,
+  prefersReducedMotion,
+  getStepAnnouncement,
+} from '@tour-kit/core';
+
+// Screen reader announcement
+announce('Step 1 of 5: Welcome', 'polite');
+
+// Generate unique ID
+const id = generateId('tour'); // e.g., 'tour-abc123'
+
+// Check motion preference (non-hook)
+const reduced = prefersReducedMotion();
+
+// Format step announcement
+const text = getStepAnnouncement('Welcome', 1, 5); // "Step 1 of 5: Welcome"
+```
+
+### Logger
+
+```tsx
+import { logger } from '@tour-kit/core';
+
+// Configure
+logger.configure({ level: 'warn', prefix: '[MyApp]' });
+
+// Use
+logger.debug('Debug message');
+logger.info('Info message');
+logger.warn('Warning message');
+logger.error('Error message');
+```
+
+---
+
+## Types
+
+### Configuration Types
+
+```tsx
+interface TourKitConfig {
+  keyboard?: KeyboardConfig;
+  spotlight?: SpotlightConfig;
+  persistence?: PersistenceConfig;
+  a11y?: A11yConfig;
+  scroll?: ScrollConfig;
+  dir?: 'ltr' | 'rtl' | 'auto';
+}
+
+interface KeyboardConfig {
+  enabled?: boolean;
+  nextKeys?: string[];
+  prevKeys?: string[];
+  exitKeys?: string[];
+  trapFocus?: boolean;
+}
+
+interface SpotlightConfig {
+  enabled?: boolean;
+  color?: string;
+  padding?: number;
+  borderRadius?: number;
+  animate?: boolean;
+  animationDuration?: number;
+  clickToExit?: boolean;
+}
+
+interface PersistenceConfig {
+  enabled?: boolean;
+  storage?: 'localStorage' | 'sessionStorage' | Storage;
+  keyPrefix?: string;
+  rememberStep?: boolean;
+  trackCompleted?: boolean;
+  dontShowAgain?: boolean;
+}
+
+interface A11yConfig {
+  announceSteps?: boolean;
+  ariaLive?: 'polite' | 'assertive';
+  focusTrap?: boolean;
+  restoreFocus?: boolean;
+  reducedMotion?: 'respect' | 'force' | 'ignore';
+}
+
+interface ScrollConfig {
+  enabled?: boolean;
+  behavior?: 'smooth' | 'auto';
+  block?: 'start' | 'center' | 'end' | 'nearest';
+  offset?: number;
+}
+```
+
+### Tour Types
+
+```tsx
+interface Tour {
+  id: string;
+  steps: TourStep[];
+  autoStart?: boolean;
+  startAt?: number;
+  keyboard?: KeyboardConfig;
+  spotlight?: SpotlightConfig;
+  persistence?: PersistenceConfig;
+  a11y?: A11yConfig;
+  scroll?: ScrollConfig;
+  onStart?: () => void;
+  onComplete?: () => void;
+  onSkip?: (stepIndex: number) => void;
+  onStepChange?: (step: TourStep, index: number) => void;
+}
+
+interface TourStep {
+  id: string;
+  target: string | React.RefObject<HTMLElement>;
+  title?: string;
+  content?: React.ReactNode;
+  placement?: Placement;
+  offset?: [number, number];
+  route?: string;
+  routeMatch?: 'exact' | 'startsWith' | 'contains';
+  when?: () => boolean;
+  advanceOn?: AdvanceOnConfig;
+  waitForTarget?: boolean;
+  waitTimeout?: number;
+  spotlightPadding?: number;
+  spotlightRadius?: number;
+  interactive?: boolean;
+  showNavigation?: boolean;
+  showProgress?: boolean;
+  showClose?: boolean;
+  className?: string;
+  onBeforeShow?: () => void | Promise<void>;
+  onAfterShow?: () => void;
+  onBeforeHide?: () => void | Promise<void>;
+  onAfterHide?: () => void;
+}
+
+type Placement =
+  | 'top' | 'top-start' | 'top-end' | 'top-center'
+  | 'bottom' | 'bottom-start' | 'bottom-end' | 'bottom-center'
+  | 'left' | 'left-start' | 'left-end' | 'left-center'
+  | 'right' | 'right-start' | 'right-end' | 'right-center';
+```
+
+### Router Types
+
+```tsx
+interface RouterAdapter {
+  getCurrentRoute(): string;
+  navigate(route: string): void;
+  matchRoute(pattern: string, mode?: 'exact' | 'startsWith' | 'contains'): boolean;
+  onRouteChange(callback: (route: string) => void): () => void;
+}
+
+interface MultiPagePersistenceConfig {
+  enabled?: boolean;
+  storage?: 'localStorage' | 'sessionStorage' | 'memory' | Storage;
+  key?: string;
+  syncTabs?: boolean;
+  expiryMs?: number;
+}
+```
+
+---
+
+## Default Configurations
+
+```tsx
+import {
+  defaultKeyboardConfig,
+  defaultSpotlightConfig,
+  defaultPersistenceConfig,
+  defaultA11yConfig,
+  defaultScrollConfig,
+} from '@tour-kit/core';
+```
+
+<Callout type="info">
+For detailed documentation on each export, see the individual pages in the [@tour-kit/core](/docs/core) section.
+</Callout>

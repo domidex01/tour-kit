@@ -1,0 +1,195 @@
+---
+title: ChecklistPanel
+description: Floating panel container for checklists
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# ChecklistPanel
+
+A floating panel that contains a checklist. Works with `ChecklistLauncher` for show/hide functionality.
+
+## Usage
+
+```tsx
+import { ChecklistPanel, ChecklistLauncher } from '@tour-kit/checklists';
+
+<>
+  <ChecklistPanel checklistId="onboarding">
+    {/* Checklist content */}
+  </ChecklistPanel>
+
+  <ChecklistLauncher checklistId="onboarding" />
+</>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    checklistId: {
+      type: 'string',
+      required: true,
+      description: 'ID of the checklist',
+    },
+    position: {
+      type: "'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'",
+      default: "'bottom-right'",
+      description: 'Position on screen',
+    },
+    variant: {
+      type: "'default' | 'bordered' | 'shadowed'",
+      default: "'default'",
+      description: 'Panel variant',
+    },
+    size: {
+      type: "'sm' | 'default' | 'lg'",
+      default: "'default'",
+      description: 'Panel size',
+    },
+    collapsible: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Allow collapsing',
+    },
+    defaultExpanded: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Initial expanded state',
+    },
+    showCloseButton: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show close button',
+    },
+    children: {
+      type: 'ReactNode',
+      required: true,
+      description: 'Panel content',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+## Examples
+
+### Basic Panel
+
+```tsx
+<ChecklistPanel checklistId="onboarding">
+  <Checklist checklistId="onboarding" />
+</ChecklistPanel>
+```
+
+### Different Positions
+
+```tsx
+<ChecklistPanel checklistId="onboarding" position="bottom-left">
+  <Checklist checklistId="onboarding" />
+</ChecklistPanel>
+```
+
+### With Launcher
+
+```tsx
+<>
+  <ChecklistPanel checklistId="onboarding">
+    <Checklist checklistId="onboarding" />
+  </ChecklistPanel>
+
+  <ChecklistLauncher checklistId="onboarding" />
+</>
+```
+
+### Non-Collapsible
+
+```tsx
+<ChecklistPanel
+  checklistId="onboarding"
+  collapsible={false}
+  showCloseButton={false}
+>
+  <Checklist checklistId="onboarding" />
+</ChecklistPanel>
+```
+
+### Custom Content
+
+```tsx
+<ChecklistPanel checklistId="onboarding">
+  <div className="p-4">
+    <h3>Welcome!</h3>
+    <Checklist checklistId="onboarding" showHeader={false} />
+    <button>Need help?</button>
+  </div>
+</ChecklistPanel>
+```
+
+### Variants
+
+```tsx
+<ChecklistPanel variant="bordered" checklistId="onboarding">
+  <Checklist checklistId="onboarding" />
+</ChecklistPanel>
+
+<ChecklistPanel variant="shadowed" size="lg" checklistId="onboarding">
+  <Checklist checklistId="onboarding" />
+</ChecklistPanel>
+```
+
+## Complete Example
+
+```tsx
+import {
+  ChecklistProvider,
+  ChecklistPanel,
+  ChecklistLauncher,
+  Checklist,
+} from '@tour-kit/checklists';
+
+const checklist = {
+  id: 'onboarding',
+  title: 'Get Started',
+  tasks: [
+    { id: 'step1', title: 'Create account' },
+    { id: 'step2', title: 'Add profile' },
+    { id: 'step3', title: 'Invite team' },
+  ],
+};
+
+function App() {
+  return (
+    <ChecklistProvider checklists={[checklist]}>
+      <YourApp />
+
+      <ChecklistPanel
+        checklistId="onboarding"
+        position="bottom-right"
+      >
+        <Checklist checklistId="onboarding" />
+      </ChecklistPanel>
+
+      <ChecklistLauncher
+        checklistId="onboarding"
+        position="bottom-right"
+      />
+    </ChecklistProvider>
+  );
+}
+```
+
+## Behavior
+
+- Panel expands/collapses based on `isExpanded` state
+- Automatically positions itself based on `position` prop
+- Integrates with launcher for coordinated show/hide
+- Respects checklist's `hideOnComplete` setting
+
+## Related
+
+- [ChecklistLauncher](/docs/checklists/components/checklist-launcher) - Toggle button
+- [Checklist](/docs/checklists/components/checklist) - Checklist component
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Panel control

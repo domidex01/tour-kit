@@ -1,0 +1,312 @@
+---
+title: Headless Components
+description: Build custom announcement UI with render props
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Headless Components
+
+Completely unstyled components that provide announcement logic and state through render props. Perfect for building custom UI that matches your design system.
+
+## Why Headless?
+
+Headless components give you:
+
+- **Full design control** - No CSS to override
+- **Framework flexibility** - Use with any CSS solution
+- **Logic reuse** - Announcement behavior without UI opinions
+- **Accessibility** - Built-in ARIA and keyboard support
+- **Type safety** - Full TypeScript support
+
+---
+
+## Available Components
+
+<Cards>
+  <Card title="HeadlessModal" href="/docs/announcements/headless/modal">
+    Build custom modal dialogs
+  </Card>
+  <Card title="HeadlessSlideout" href="/docs/announcements/headless/slideout">
+    Build custom side panels
+  </Card>
+  <Card title="HeadlessBanner" href="/docs/announcements/headless/banner">
+    Build custom banners
+  </Card>
+  <Card title="HeadlessToast" href="/docs/announcements/headless/toast">
+    Build custom toast notifications
+  </Card>
+  <Card title="HeadlessSpotlight" href="/docs/announcements/headless/spotlight">
+    Build custom element highlights
+  </Card>
+</Cards>
+
+---
+
+## Basic Pattern
+
+All headless components use a render props pattern:
+
+```tsx
+import { HeadlessModal } from '@tour-kit/announcements/headless';
+
+<HeadlessModal
+  id="announcement-id"
+  render={({ isVisible, config, state, hide, dismiss }) => {
+    if (!isVisible) return null;
+
+    return (
+      <div className="my-custom-modal">
+        <h2>{config.title}</h2>
+        <p>{config.description}</p>
+        <button onClick={hide}>Close</button>
+        <button onClick={dismiss}>Don't Show Again</button>
+      </div>
+    );
+  }}
+/>
+```
+
+---
+
+## Shared Render Props
+
+All headless components provide these props:
+
+```tsx
+interface HeadlessRenderProps {
+  // State
+  isVisible: boolean;
+  isActive: boolean;
+  isDismissed: boolean;
+  canShow: boolean;
+  viewCount: number;
+
+  // Config & State
+  config: AnnouncementConfig;
+  state: AnnouncementState;
+
+  // Methods
+  show: () => void;
+  hide: () => void;
+  dismiss: (reason?: DismissalReason) => void;
+  complete: () => void;
+}
+```
+
+---
+
+## Quick Example
+
+```tsx
+import { HeadlessModal } from '@tour-kit/announcements/headless';
+
+function CustomAnnouncement() {
+  return (
+    <HeadlessModal
+      id="welcome"
+      render={({ isVisible, config, hide, dismiss }) => {
+        if (!isVisible) return null;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Overlay */}
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={hide}
+            />
+
+            {/* Content */}
+            <div className="relative bg-white rounded-lg p-6 max-w-md">
+              <h2 className="text-2xl font-bold">{config.title}</h2>
+              <p className="mt-2 text-gray-600">{config.description}</p>
+
+              {config.media?.type === 'image' && (
+                <img
+                  src={config.media.src}
+                  alt={config.media.alt}
+                  className="mt-4 rounded"
+                />
+              )}
+
+              <div className="mt-6 flex gap-2">
+                {config.primaryAction && (
+                  <button
+                    onClick={() => {
+                      config.primaryAction?.onClick();
+                      dismiss('primary_action');
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded"
+                  >
+                    {config.primaryAction.label}
+                  </button>
+                )}
+
+                <button
+                  onClick={hide}
+                  className="px-4 py-2 border rounded"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }}
+    />
+  );
+}
+```
+
+---
+
+## With CSS-in-JS
+
+```tsx
+import styled from '@emotion/styled';
+import { HeadlessModal } from '@tour-kit/announcements/headless';
+
+const Overlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+`;
+
+const Modal = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  z-index: 51;
+`;
+
+function EmotionModal() {
+  return (
+    <HeadlessModal
+      id="announcement"
+      render={({ isVisible, config, hide }) => {
+        if (!isVisible) return null;
+
+        return (
+          <>
+            <Overlay onClick={hide} />
+            <Modal>
+              <h2>{config.title}</h2>
+              <p>{config.description}</p>
+              <button onClick={hide}>Close</button>
+            </Modal>
+          </>
+        );
+      }}
+    />
+  );
+}
+```
+
+---
+
+## With UI Libraries
+
+### shadcn/ui
+
+```tsx
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { HeadlessModal } from '@tour-kit/announcements/headless';
+
+<HeadlessModal
+  id="announcement"
+  render={({ isVisible, config, hide }) => (
+    <Dialog open={isVisible} onOpenChange={hide}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{config.title}</DialogTitle>
+        </DialogHeader>
+        <p>{config.description}</p>
+      </DialogContent>
+    </Dialog>
+  )}
+/>
+```
+
+### Radix UI
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { HeadlessModal } from '@tour-kit/announcements/headless';
+
+<HeadlessModal
+  id="announcement"
+  render={({ isVisible, config, hide }) => (
+    <Dialog.Root open={isVisible} onOpenChange={hide}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="overlay" />
+        <Dialog.Content className="content">
+          <Dialog.Title>{config.title}</Dialog.Title>
+          <Dialog.Description>{config.description}</Dialog.Description>
+          <Dialog.Close>Close</Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  )}
+/>
+```
+
+---
+
+## Accessibility
+
+Headless components provide accessibility primitives:
+
+```tsx
+<HeadlessModal
+  id="announcement"
+  render={({ isVisible, config, hide, ...a11yProps }) => (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={a11yProps.titleId}
+      aria-describedby={a11yProps.descriptionId}
+    >
+      <h2 id={a11yProps.titleId}>{config.title}</h2>
+      <p id={a11yProps.descriptionId}>{config.description}</p>
+    </div>
+  )}
+/>
+```
+
+<Callout type="info">
+  Each headless component provides appropriate ARIA attributes. See individual component docs for details.
+</Callout>
+
+---
+
+## TypeScript
+
+Full type safety with render props:
+
+```tsx
+import type { HeadlessModalProps, HeadlessRenderProps } from '@tour-kit/announcements/headless';
+
+const renderModal = ({ isVisible, config, hide }: HeadlessRenderProps) => {
+  // Fully typed render function
+};
+
+<HeadlessModal id="announcement" render={renderModal} />
+```
+
+---
+
+## Next Steps
+
+Explore each headless component for variant-specific render props:
+
+- [HeadlessModal](/docs/announcements/headless/modal)
+- [HeadlessSlideout](/docs/announcements/headless/slideout)
+- [HeadlessBanner](/docs/announcements/headless/banner)
+- [HeadlessToast](/docs/announcements/headless/toast)
+- [HeadlessSpotlight](/docs/announcements/headless/spotlight)

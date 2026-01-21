@@ -1,0 +1,326 @@
+---
+title: useRoutePersistence
+description: Persist tour state across page navigations for multi-page tours
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# useRoutePersistence
+
+Persist tour state across page navigations. Essential for multi-page tours where users navigate between routes while completing a tour.
+
+## Why Use This Hook?
+
+When a tour spans multiple pages, the state (current step, completed tours) needs to survive page navigations. This hook:
+
+- **Persists across navigations** - State survives full page reloads
+- **Supports multiple storage backends** - localStorage, sessionStorage, or memory
+- **Handles expiration** - Automatically clears stale state
+- **Syncs across tabs** - Optional cross-tab synchronization
+- **SSR-safe** - Works in server-side rendering environments
+
+---
+
+## Usage
+
+```tsx
+import { useRoutePersistence } from '@tour-kit/core';
+
+function MultiPageTour() {
+  const persistence = useRoutePersistence({
+    enabled: true,
+    storage: 'localStorage',
+    key: 'my-tour-state',
+    expiryMs: 24 * 60 * 60 * 1000, // 24 hours
+    syncTabs: true,
+  });
+
+  // Save state when tour progresses
+  const handleStepChange = (state) => {
+    persistence.save({
+      tourId: 'onboarding',
+      currentStepIndex: state.stepIndex,
+      completedTours: state.completedTours,
+    });
+  };
+
+  // Load state on mount
+  useEffect(() => {
+    const savedState = persistence.load();
+    if (savedState && !persistence.isStale()) {
+      // Resume tour from saved state
+      startTour(savedState.tourId, savedState.stepIndex);
+    }
+  }, []);
+
+  return <Tour onStepChange={handleStepChange}>{/* ... */}</Tour>;
+}
+```
+
+---
+
+## Configuration
+
+<TypeTable
+  type={{
+    enabled: {
+      type: 'boolean',
+      description: 'Enable/disable persistence',
+      default: 'true',
+    },
+    storage: {
+      type: "'localStorage' | 'sessionStorage' | 'memory'",
+      description: 'Storage backend to use',
+      default: "'localStorage'",
+    },
+    key: {
+      type: 'string',
+      description: 'Storage key for the persisted state',
+      default: "'tourkit-route-state'",
+    },
+    expiryMs: {
+      type: 'number',
+      description: 'Time in milliseconds before state expires',
+      default: '86400000 (24 hours)',
+    },
+    syncTabs: {
+      type: 'boolean',
+      description: 'Sync state across browser tabs (localStorage only)',
+      default: 'false',
+    },
+  }}
+/>
+
+---
+
+## Return Value
+
+<TypeTable
+  type={{
+    save: {
+      type: '(state: Partial<TourState>) => void',
+      description: 'Save current tour state to storage',
+    },
+    load: {
+      type: '() => PersistedRouteState | null',
+      description: 'Load persisted state from storage',
+    },
+    clear: {
+      type: '() => void',
+      description: 'Clear persisted state',
+    },
+    isStale: {
+      type: '() => boolean',
+      description: 'Check if persisted state has expired',
+    },
+  }}
+/>
+
+---
+
+## Persisted State Shape
+
+The `load()` method returns:
+
+```ts
+interface PersistedRouteState {
+  tourId: string | null;
+  stepIndex: number;
+  completedTours: string[];
+  skippedTours: string[];
+  timestamp: number;
+}
+```
+
+---
+
+## Storage Options
+
+<Tabs items={['localStorage', 'sessionStorage', 'memory']}>
+<Tab value="localStorage">
+```tsx
+const persistence = useRoutePersistence({
+  enabled: true,
+  storage: 'localStorage',
+  syncTabs: true, // Works with localStorage
+});
+
+// State persists across:
+// - Page refreshes
+// - Browser restarts
+// - Multiple tabs (with syncTabs)
+```
+</Tab>
+
+<Tab value="sessionStorage">
+```tsx
+const persistence = useRoutePersistence({
+  enabled: true,
+  storage: 'sessionStorage',
+});
+
+// State persists across:
+// - Page navigations within the session
+// - Page refreshes
+// State is cleared when:
+// - Browser tab closes
+```
+</Tab>
+
+<Tab value="memory">
+```tsx
+const persistence = useRoutePersistence({
+  enabled: true,
+  storage: 'memory',
+});
+
+// State persists across:
+// - SPA navigations only
+// State is cleared when:
+// - Page refreshes
+// - Browser restarts
+```
+</Tab>
+</Tabs>
+
+---
+
+## Multi-Page Tour Example
+
+```tsx
+import { useRoutePersistence } from '@tour-kit/core';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+function OnboardingTour() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const persistence = useRoutePersistence({
+    enabled: true,
+    storage: 'localStorage',
+    expiryMs: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  // Resume tour on mount
+  useEffect(() => {
+    const state = persistence.load();
+    if (state?.tourId === 'onboarding' && !persistence.isStale()) {
+      // Navigate to the correct page for the saved step
+      const stepRoutes = ['/', '/dashboard', '/settings'];
+      const targetRoute = stepRoutes[state.stepIndex];
+      if (location.pathname !== targetRoute) {
+        navigate(targetRoute);
+      }
+    }
+  }, []);
+
+  // Save state when step changes
+  const handleStepChange = (stepIndex: number) => {
+    persistence.save({
+      tourId: 'onboarding',
+      currentStepIndex: stepIndex,
+      completedTours: [],
+      skippedTours: [],
+    });
+  };
+
+  // Clear state on complete
+  const handleComplete = () => {
+    persistence.clear();
+  };
+
+  return (
+    <Tour
+      id="onboarding"
+      onStepChange={handleStepChange}
+      onComplete={handleComplete}
+    >
+      {/* Steps */}
+    </Tour>
+  );
+}
+```
+
+---
+
+## Cross-Tab Synchronization
+
+When `syncTabs` is enabled, state changes propagate to other tabs:
+
+```tsx
+const persistence = useRoutePersistence({
+  enabled: true,
+  storage: 'localStorage',
+  syncTabs: true,
+});
+
+// Tab 1: User completes step
+persistence.save({ tourId: 'demo', currentStepIndex: 2 });
+
+// Tab 2: Can detect the change
+const state = persistence.load();
+// state.stepIndex === 2
+```
+
+<Callout type="warn">
+Cross-tab sync only works with `localStorage`. Session storage is tab-specific by design.
+</Callout>
+
+---
+
+## Expiration Handling
+
+State automatically expires after the configured time:
+
+```tsx
+const persistence = useRoutePersistence({
+  enabled: true,
+  expiryMs: 60 * 60 * 1000, // 1 hour
+});
+
+// After 1 hour:
+const state = persistence.load(); // Returns null
+persistence.isStale(); // Returns true
+```
+
+---
+
+## SSR Considerations
+
+The hook handles SSR gracefully:
+
+```tsx
+// During SSR:
+// - Uses in-memory storage
+// - load() returns null
+// - save() is a no-op
+
+// After hydration:
+// - Switches to configured storage
+// - State persists normally
+```
+
+---
+
+## Error Handling
+
+Storage operations are wrapped in try-catch:
+
+```tsx
+// If storage is unavailable (e.g., private browsing):
+persistence.save({ tourId: 'demo' }); // Silent failure, logs warning
+persistence.load(); // Returns null
+
+// If JSON parsing fails:
+persistence.load(); // Returns null, logs warning
+```
+
+---
+
+## Related
+
+- [usePersistence](/docs/core/hooks/use-persistence) - General-purpose persistence hook
+- [Next.js Integration](/docs/guides/nextjs) - Multi-page tours with Next.js
+- [Router Integration](/docs/guides/router-integration) - Deep dive into multi-page tours

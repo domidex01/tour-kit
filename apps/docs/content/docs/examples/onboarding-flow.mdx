@@ -1,0 +1,454 @@
+---
+title: Onboarding Flow
+description: A complete user onboarding flow with persistence and conditional steps
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Onboarding Flow
+
+A production-ready onboarding tour that persists progress, shows only to new users, and handles conditional steps.
+
+## What You'll Build
+
+This example creates an onboarding flow that:
+- Only shows to users who haven't completed it
+- Remembers progress if the user leaves mid-tour
+- Offers a "Don't show again" option
+- Includes conditional steps based on user role
+- Tracks completion for analytics
+
+---
+
+## Complete Code
+
+```tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+  TourOverlay,
+  TourProgress,
+  TourNavigation,
+  TourClose,
+  useTour,
+  usePersistence,
+} from '@tour-kit/react';
+
+export default function OnboardingFlow() {
+  const persistence = usePersistence({
+    storage: 'localStorage',
+    keyPrefix: 'myapp-onboarding',
+  });
+
+  const [shouldShow, setShouldShow] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check if user has already completed or dismissed onboarding
+  useEffect(() => {
+    const completed = persistence.getCompletedTours().includes('onboarding');
+    const dontShow = persistence.getDontShowAgain('onboarding');
+
+    setShouldShow(!completed && !dontShow);
+    setIsLoading(false);
+  }, [persistence]);
+
+  if (isLoading) return <AppContent />;
+
+  return (
+    <Tour
+      id="onboarding"
+      autoStart={shouldShow}
+      onComplete={() => {
+        persistence.markCompleted('onboarding');
+        // Track analytics
+        analytics.track('onboarding_completed');
+      }}
+      onSkip={(stepIndex) => {
+        persistence.markSkipped('onboarding');
+        persistence.saveStep('onboarding', stepIndex);
+        analytics.track('onboarding_skipped', { step: stepIndex });
+      }}
+      onStepChange={(step, index) => {
+        // Save progress so user can resume
+        persistence.saveStep('onboarding', index);
+      }}
+    >
+      {/* Welcome step */}
+      <TourStep
+        target="#app-header"
+        title="Welcome to MyApp!"
+        content="We're excited to have you here. Let's take a quick tour to help you get started."
+        placement="bottom"
+      />
+
+      {/* Main features */}
+      <TourStep
+        target="#dashboard-widget"
+        title="Your Dashboard"
+        content="This is your personal dashboard. You'll see key metrics and recent activity here."
+        placement="right"
+      />
+
+      <TourStep
+        target="#create-button"
+        title="Create Your First Project"
+        content="Click here to create a new project. We have templates to help you get started quickly."
+        placement="bottom"
+      />
+
+      {/* Settings */}
+      <TourStep
+        target="#settings-link"
+        title="Customize Your Experience"
+        content="Visit settings to personalize your workspace, notification preferences, and more."
+        placement="left"
+      />
+
+      {/* Final step */}
+      <TourStep
+        target="#help-button"
+        title="Need Help?"
+        content="Click here anytime to access documentation, tutorials, and contact support. You're all set!"
+        placement="bottom"
+      />
+
+      <TourOverlay />
+
+      <TourCard className="w-96">
+        <TourCardHeader>
+          <TourClose />
+        </TourCardHeader>
+        <TourCardContent />
+        <TourCardFooter>
+          <TourProgress variant="bar" />
+          <OnboardingNavigation persistence={persistence} />
+        </TourCardFooter>
+      </TourCard>
+
+      <AppContent />
+    </Tour>
+  );
+}
+
+// Custom navigation with "Don't show again" option
+function OnboardingNavigation({
+  persistence,
+}: {
+  persistence: ReturnType<typeof usePersistence>;
+}) {
+  const { isFirstStep, isLastStep, next, prev, skip, complete } = useTour();
+  const [dontShow, setDontShow] = useState(false);
+
+  const handleSkip = () => {
+    if (dontShow) {
+      persistence.setDontShowAgain('onboarding', true);
+    }
+    skip();
+  };
+
+  const handleComplete = () => {
+    if (dontShow) {
+      persistence.setDontShowAgain('onboarding', true);
+    }
+    complete();
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          id="dont-show"
+          checked={dontShow}
+          onChange={(e) => setDontShow(e.target.checked)}
+          className="rounded"
+        />
+        <label htmlFor="dont-show" className="text-muted-foreground">
+          Don't show this again
+        </label>
+      </div>
+
+      <div className="flex justify-between">
+        <button
+          onClick={handleSkip}
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          Skip tour
+        </button>
+
+        <div className="flex gap-2">
+          {!isFirstStep && (
+            <button
+              onClick={prev}
+              className="px-3 py-1.5 text-sm border rounded-md hover:bg-accent"
+            >
+              Back
+            </button>
+          )}
+          <button
+            onClick={isLastStep ? handleComplete : next}
+            className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            {isLastStep ? 'Get Started' : 'Next'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AppContent() {
+  return (
+    <div className="min-h-screen">
+      <header id="app-header" className="border-b p-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold">MyApp</h1>
+        <nav className="flex gap-4">
+          <a id="settings-link" href="#" className="text-muted-foreground hover:text-foreground">
+            Settings
+          </a>
+          <button id="help-button" className="text-muted-foreground hover:text-foreground">
+            Help
+          </button>
+        </nav>
+      </header>
+
+      <div className="p-8 flex gap-8">
+        <main className="flex-1">
+          <div id="dashboard-widget" className="p-6 border rounded-lg mb-6">
+            <h2 className="font-semibold mb-2">Dashboard</h2>
+            <p className="text-muted-foreground">Your metrics and activity</p>
+          </div>
+
+          <button
+            id="create-button"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
+          >
+            + Create Project
+          </button>
+        </main>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Key Features Explained
+
+### Persistence Configuration
+
+```tsx
+const persistence = usePersistence({
+  storage: 'localStorage',    // or 'sessionStorage', 'cookie'
+  keyPrefix: 'myapp-onboarding', // namespaces all keys
+});
+```
+
+The persistence hook stores:
+- **Completed tours** - List of tour IDs the user finished
+- **Skipped tours** - List of tour IDs the user skipped
+- **Last step** - Where the user left off (for resuming)
+- **Don't show again** - Per-tour preference flag
+
+### Conditional Display
+
+```tsx
+useEffect(() => {
+  const completed = persistence.getCompletedTours().includes('onboarding');
+  const dontShow = persistence.getDontShowAgain('onboarding');
+  setShouldShow(!completed && !dontShow);
+}, [persistence]);
+
+<Tour autoStart={shouldShow}>
+```
+
+Only shows the tour if:
+1. User hasn't completed it before
+2. User hasn't checked "Don't show again"
+
+### Progress Saving
+
+```tsx
+<Tour
+  onStepChange={(step, index) => {
+    persistence.saveStep('onboarding', index);
+  }}
+>
+```
+
+Every time the user moves to a new step, their progress is saved. If they leave and return, you can resume from where they left off.
+
+### Resume From Last Step
+
+```tsx
+const lastStep = persistence.getLastStep('onboarding');
+
+<Tour
+  autoStart={shouldShow}
+  startAt={lastStep ?? 0}  // Resume from saved step
+>
+```
+
+---
+
+## Analytics Integration
+
+Track onboarding events for insights:
+
+```tsx
+<Tour
+  onStart={() => {
+    analytics.track('onboarding_started', {
+      variant: 'default',
+      timestamp: Date.now(),
+    });
+  }}
+  onComplete={() => {
+    analytics.track('onboarding_completed', {
+      duration: calculateDuration(),
+    });
+  }}
+  onSkip={(stepIndex) => {
+    analytics.track('onboarding_skipped', {
+      step: stepIndex,
+      stepTitle: steps[stepIndex].title,
+    });
+  }}
+  onStepChange={(step, index) => {
+    analytics.track('onboarding_step_viewed', {
+      stepIndex: index,
+      stepId: step.id,
+      stepTitle: step.title,
+    });
+  }}
+>
+```
+
+---
+
+## Conditional Steps
+
+Show different steps based on user role or features:
+
+```tsx
+function OnboardingWithRoles({ userRole }: { userRole: 'admin' | 'user' }) {
+  return (
+    <Tour id="role-onboarding">
+      {/* Common steps for all users */}
+      <TourStep target="#dashboard" title="Dashboard" content="..." />
+
+      {/* Admin-only step */}
+      {userRole === 'admin' && (
+        <TourStep
+          target="#admin-panel"
+          title="Admin Panel"
+          content="As an admin, you have access to user management and settings."
+        />
+      )}
+
+      {/* Common final step */}
+      <TourStep target="#help" title="Get Help" content="..." />
+
+      <TourOverlay />
+      <TourCard />
+    </Tour>
+  );
+}
+```
+
+---
+
+## Reset Onboarding
+
+Allow users to restart the onboarding:
+
+```tsx
+function OnboardingResetButton() {
+  const persistence = usePersistence({ keyPrefix: 'myapp-onboarding' });
+  const { start } = useTour();
+
+  const handleReset = () => {
+    persistence.reset('onboarding');
+    start();
+  };
+
+  return (
+    <button onClick={handleReset}>
+      Restart Onboarding
+    </button>
+  );
+}
+```
+
+---
+
+## Storage Options
+
+<Tabs items={['localStorage', 'sessionStorage', 'Cookies']}>
+<Tab value="localStorage">
+```tsx
+// Default - persists across browser sessions
+const persistence = usePersistence({
+  storage: 'localStorage',
+});
+```
+</Tab>
+
+<Tab value="sessionStorage">
+```tsx
+// Clears when tab is closed
+const persistence = usePersistence({
+  storage: 'sessionStorage',
+});
+```
+</Tab>
+
+<Tab value="Cookies">
+```tsx
+import { createCookieStorage } from '@tour-kit/react';
+
+// For SSR or when localStorage isn't available
+const persistence = usePersistence({
+  storage: createCookieStorage({ expires: 365 }),
+});
+```
+</Tab>
+</Tabs>
+
+---
+
+## Best Practices
+
+<Callout type="info">
+**Timing**: Don't show onboarding immediately. Wait for the app to load and stabilize.
+</Callout>
+
+<Callout type="info">
+**Escape hatch**: Always provide a way to skip and a "Don't show again" option.
+</Callout>
+
+<Callout type="info">
+**Mobile**: Test your onboarding on mobile. Consider shorter tours or different placements.
+</Callout>
+
+<Callout type="info">
+**Updates**: When you update onboarding significantly, consider using a new tour ID so existing users see the new content.
+</Callout>
+
+---
+
+## Related
+
+- [Basic Tour](/docs/examples/basic-tour) - Simple tour without persistence
+- [Headless Custom](/docs/examples/headless-custom) - Build completely custom UI
+- [usePersistence Hook](/docs/core/hooks/use-persistence) - Full API reference

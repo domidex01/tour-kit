@@ -1,0 +1,272 @@
+---
+title: useTourRoute
+description: Route-aware tour control for multi-page tours
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useTourRoute
+
+Hook for route-aware tour operations. Provides utilities for checking if the current step is on the current route and navigating to the correct route.
+
+## Why Use This Hook?
+
+Multi-page tours need to handle route mismatches:
+
+- **Detect route mismatches** - Know when step's route differs from current
+- **Navigate to step route** - Programmatically go to the correct page
+- **Check route state** - Determine if navigation is in progress
+- **Match routes flexibly** - Use exact, prefix, or contains matching
+
+---
+
+## Usage
+
+```tsx
+import { useTourRoute, useNextAppRouter, useTour } from '@tour-kit/react';
+
+function TourCard() {
+  const router = useNextAppRouter();
+  const { currentStep } = useTour();
+  const {
+    isStepOnCurrentRoute,
+    currentStepRoute,
+    goToStepRoute,
+    isNavigating,
+  } = useTourRoute({ router });
+
+  // If step requires different route, show navigation prompt
+  if (!isStepOnCurrentRoute) {
+    return (
+      <div className="p-4 bg-yellow-100 rounded">
+        <p>This step is on a different page.</p>
+        <button
+          onClick={goToStepRoute}
+          disabled={isNavigating}
+          className="mt-2 btn-primary"
+        >
+          {isNavigating ? 'Navigating...' : `Go to ${currentStepRoute}`}
+        </button>
+      </div>
+    );
+  }
+
+  // Normal tour card
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <h3>{currentStep?.title}</h3>
+      <p>{currentStep?.content}</p>
+    </div>
+  );
+}
+```
+
+---
+
+## Parameters
+
+<TypeTable
+  type={{
+    router: {
+      type: 'RouterAdapter',
+      description: 'Router adapter from useNextAppRouter, etc.',
+    },
+    tourId: {
+      type: 'string (optional)',
+      description: 'Specific tour ID (uses active tour if not specified)',
+    },
+  }}
+/>
+
+---
+
+## Return Value
+
+<TypeTable
+  type={{
+    isStepOnCurrentRoute: {
+      type: 'boolean',
+      description: 'Whether current step is on the current route',
+    },
+    currentStepRoute: {
+      type: 'string | undefined',
+      description: 'Route specified for the current step',
+    },
+    currentRoute: {
+      type: 'string',
+      description: 'Current route from router',
+    },
+    isNavigating: {
+      type: 'boolean',
+      description: 'Whether navigation is in progress',
+    },
+    goToStepRoute: {
+      type: '() => Promise<void>',
+      description: 'Navigate to the current step\'s route',
+    },
+    isOnRoute: {
+      type: "(route: string, mode?: 'exact' | 'startsWith' | 'contains') => boolean",
+      description: 'Check if current route matches a pattern',
+    },
+  }}
+/>
+
+---
+
+## Route Matching
+
+Steps without a `route` prop are considered valid on any route:
+
+```tsx
+// Always matches (no route specified)
+<TourStep target="#element" title="Always Here" />
+
+// Only matches exact path
+<TourStep target="#home" route="/" routeMatch="exact" />
+
+// Matches path prefix
+<TourStep target="#dashboard" route="/dashboard" routeMatch="startsWith" />
+```
+
+The hook uses the step's `routeMatch` mode:
+
+```tsx
+const { isStepOnCurrentRoute } = useTourRoute({ router });
+
+// If step has route="/dashboard" and routeMatch="startsWith"
+// isStepOnCurrentRoute = true for /dashboard, /dashboard/settings, etc.
+```
+
+---
+
+## Examples
+
+### Route Mismatch Overlay
+
+```tsx
+function RouteMismatchOverlay() {
+  const router = useNextAppRouter();
+  const { isStepOnCurrentRoute, currentStepRoute, goToStepRoute } = useTourRoute({ router });
+
+  if (isStepOnCurrentRoute) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg max-w-md">
+        <h3 className="text-lg font-bold">Wrong Page</h3>
+        <p className="mt-2 text-gray-600">
+          This tour step is on a different page.
+        </p>
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={goToStepRoute}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Go to {currentStepRoute}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Breadcrumb with Route Status
+
+```tsx
+function TourBreadcrumb() {
+  const router = useNextAppRouter();
+  const { currentRoute, isOnRoute } = useTourRoute({ router });
+
+  const routes = ['/', '/dashboard', '/settings'];
+
+  return (
+    <nav className="flex gap-2">
+      {routes.map(route => (
+        <span
+          key={route}
+          className={isOnRoute(route, 'startsWith') ? 'text-blue-500' : 'text-gray-400'}
+        >
+          {route}
+        </span>
+      ))}
+    </nav>
+  );
+}
+```
+
+### Auto-Navigate on Step Change
+
+```tsx
+function AutoNavigator() {
+  const router = useNextAppRouter();
+  const { isStepOnCurrentRoute, goToStepRoute } = useTourRoute({ router });
+  const { currentStepIndex } = useTour();
+
+  useEffect(() => {
+    if (!isStepOnCurrentRoute) {
+      goToStepRoute();
+    }
+  }, [currentStepIndex, isStepOnCurrentRoute, goToStepRoute]);
+
+  return null; // Invisible component
+}
+```
+
+<Callout type="info">
+If `autoNavigate={true}` is set on `MultiTourKitProvider`, navigation happens automatically. Use this hook for custom navigation UX.
+</Callout>
+
+---
+
+## With Specific Tour
+
+Access route info for a specific tour (not just the active one):
+
+```tsx
+function SpecificTourRoute() {
+  const router = useNextAppRouter();
+
+  // Check route for 'onboarding' tour specifically
+  const { currentStepRoute } = useTourRoute({
+    router,
+    tourId: 'onboarding',
+  });
+
+  return <p>Onboarding step route: {currentStepRoute}</p>;
+}
+```
+
+---
+
+## Navigation States
+
+```tsx
+function NavigationAwareCard() {
+  const router = useNextAppRouter();
+  const { isNavigating, goToStepRoute, isStepOnCurrentRoute } = useTourRoute({ router });
+
+  return (
+    <div>
+      {isNavigating && <LoadingSpinner />}
+
+      {!isStepOnCurrentRoute && !isNavigating && (
+        <button onClick={goToStepRoute}>
+          Navigate to Step
+        </button>
+      )}
+
+      {isStepOnCurrentRoute && <TourCardContent />}
+    </div>
+  );
+}
+```
+
+---
+
+## Related
+
+- [Router Adapters](/docs/react/adapters) - Router adapter options
+- [MultiTourKitProvider](/docs/react/providers/multi-tour-kit-provider) - autoNavigate setting
+- [useRoutePersistence](/docs/core/hooks/use-route-persistence) - Persist state across routes

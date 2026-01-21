@@ -1,0 +1,140 @@
+---
+title: AnnouncementSlideout
+description: Side panel component for detailed announcements
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# AnnouncementSlideout
+
+A slide-in panel from the left or right side. Best for detailed announcements that don't require immediate attention.
+
+## When to Use
+
+- Product changelogs
+- Detailed feature explanations
+- Multi-step announcements
+- Less critical updates
+
+---
+
+## Basic Usage
+
+```tsx
+import { AnnouncementsProvider, AnnouncementSlideout } from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'changelog',
+    variant: 'slideout',
+    title: "What's New in v2.0",
+    description: 'Check out the latest features and improvements.',
+    slideoutOptions: {
+      position: 'right',
+      size: 'md',
+    },
+  },
+];
+
+<AnnouncementSlideout id="changelog" />
+```
+
+---
+
+## Slideout Options
+
+<TypeTable
+  type={{
+    position: {
+      type: "'left' | 'right'",
+      default: "'right'",
+      description: 'Side to slide in from',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'full'",
+      default: "'md'",
+      description: 'Panel width - sm: 320px, md: 400px, lg: 500px, full: 100%',
+    },
+    closeOnOverlayClick: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Close when clicking outside',
+    },
+    closeOnEscape: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Close with Escape key',
+    },
+  }}
+/>
+
+---
+
+## Complete Example
+
+```tsx
+{
+  id: 'product-update',
+  variant: 'slideout',
+  title: 'Product Update - March 2024',
+
+  media: {
+    type: 'image',
+    src: '/update-banner.png',
+  },
+
+  description: `
+    We've shipped some amazing updates this month:
+    • New dashboard design
+    • Advanced filtering
+    • Mobile app improvements
+  `,
+
+  primaryAction: {
+    label: 'See All Updates',
+    onClick: () => router.push('/changelog'),
+  },
+
+  slideoutOptions: {
+    position: 'right',
+    size: 'lg',
+  },
+}
+```
+
+---
+
+## Position
+
+```tsx
+// Slide from right (default)
+slideoutOptions: { position: 'right' }
+
+// Slide from left
+slideoutOptions: { position: 'left' }
+```
+
+---
+
+## Size Variants
+
+```tsx
+// Small - 320px
+slideoutOptions: { size: 'sm' }
+
+// Medium - 400px
+slideoutOptions: { size: 'md' }
+
+// Large - 500px
+slideoutOptions: { size: 'lg' }
+
+// Full screen
+slideoutOptions: { size: 'full' }
+```
+
+---
+
+## Related
+
+- [Headless Slideout](/docs/announcements/headless/slideout)
+- [useAnnouncement](/docs/announcements/hooks/use-announcement)

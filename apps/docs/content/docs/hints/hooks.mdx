@@ -1,0 +1,369 @@
+---
+title: Hooks
+description: useHints and useHint hooks for programmatic hint control
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Hint Hooks
+
+## Why Use Hooks?
+
+While the `<Hint>` component handles most use cases declaratively, hooks give you programmatic control over hints. Use hooks when you need to:
+
+- **Trigger hints from events** - Show a hint after user actions
+- **Coordinate multiple hints** - Show hints in sequence
+- **Build custom UI** - Create your own hint components
+- **Track hint state** - React to hint visibility changes
+- **Control from anywhere** - Manage hints from non-adjacent components
+
+---
+
+## useHint
+
+Control a single hint by ID. This is the most common hook for programmatic hint control.
+
+### Basic Usage
+
+```tsx
+import { useHint } from '@tour-kit/hints';
+
+function FeatureButton() {
+  const { isOpen, isDismissed, show, hide, dismiss, reset } = useHint('feature-hint');
+
+  return (
+    <div>
+      <button onClick={show}>Show Hint</button>
+      <button onClick={hide}>Hide Hint</button>
+      <button onClick={dismiss}>Dismiss Forever</button>
+      <button onClick={reset}>Reset Dismissed State</button>
+
+      <p>
+        Status: {isDismissed ? 'Dismissed' : isOpen ? 'Open' : 'Closed'}
+      </p>
+    </div>
+  );
+}
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    id: { type: 'string', description: 'Unique identifier for the hint (required)' },
+  }}
+/>
+
+### Return Value
+
+<TypeTable
+  type={{
+    isOpen: { type: 'boolean', description: 'Whether the hint tooltip is currently visible' },
+    isDismissed: { type: 'boolean', description: 'Whether the hint has been permanently dismissed' },
+    show: { type: '() => void', description: 'Show the hint tooltip' },
+    hide: { type: '() => void', description: 'Hide the hint tooltip (can be shown again)' },
+    dismiss: { type: '() => void', description: 'Permanently dismiss the hint' },
+    reset: { type: '() => void', description: 'Reset dismissed state (hint can be shown again)' },
+  }}
+/>
+
+### Auto-Registration
+
+The hook automatically registers and unregisters the hint with the context:
+
+```tsx
+function MyComponent() {
+  // Hint is registered on mount
+  const hint = useHint('my-hint');
+
+  // Hint is unregistered on unmount
+  return <div>{hint.isOpen ? 'Visible' : 'Hidden'}</div>;
+}
+```
+
+### Stable Callbacks
+
+All returned functions (`show`, `hide`, `dismiss`, `reset`) are memoized and safe to use in dependency arrays:
+
+```tsx
+function FeatureAnnouncement() {
+  const { show } = useHint('announcement');
+
+  useEffect(() => {
+    // Show hint when component mounts
+    const timer = setTimeout(show, 2000);
+    return () => clearTimeout(timer);
+  }, [show]); // Safe to include in deps
+
+  return <div>Feature content...</div>;
+}
+```
+
+### Conditional Hints
+
+Show hints based on conditions:
+
+```tsx
+function ConditionalHint() {
+  const { show, isDismissed } = useHint('first-time-hint');
+  const [isFirstVisit, setIsFirstVisit] = useState(true);
+
+  useEffect(() => {
+    if (isFirstVisit && !isDismissed) {
+      show();
+    }
+  }, [isFirstVisit, isDismissed, show]);
+
+  return <div>Content with conditional hint</div>;
+}
+```
+
+---
+
+## useHints
+
+Access and control all hints in the application. Useful for global hint management, dashboards, or coordinating multiple hints.
+
+### Basic Usage
+
+```tsx
+import { useHints } from '@tour-kit/hints';
+
+function HintDashboard() {
+  const {
+    hints,
+    activeHint,
+    showHint,
+    hideHint,
+    dismissHint,
+    resetHint,
+    resetAllHints,
+    isHintVisible,
+    isHintDismissed,
+  } = useHints();
+
+  return (
+    <div>
+      <h2>Hints Dashboard</h2>
+      <p>Active hint: {activeHint ?? 'None'}</p>
+      <p>Total hints: {hints.length}</p>
+
+      <button onClick={resetAllHints}>Reset All Hints</button>
+
+      <ul>
+        {hints.map(hint => (
+          <li key={hint.id}>
+            {hint.id}: {hint.isDismissed ? 'Dismissed' : hint.isOpen ? 'Open' : 'Closed'}
+            <button onClick={() => showHint(hint.id)}>Show</button>
+            <button onClick={() => dismissHint(hint.id)}>Dismiss</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### Return Value
+
+<TypeTable
+  type={{
+    hints: { type: 'HintState[]', description: 'Array of all registered hints with their current state' },
+    activeHint: { type: 'string | null', description: 'ID of the currently open hint, or null' },
+    showHint: { type: '(id: string) => void', description: 'Show a specific hint by ID' },
+    hideHint: { type: '(id: string) => void', description: 'Hide a specific hint by ID' },
+    dismissHint: { type: '(id: string) => void', description: 'Permanently dismiss a hint by ID' },
+    resetHint: { type: '(id: string) => void', description: 'Reset dismissed state for a hint' },
+    resetAllHints: { type: '() => void', description: 'Reset all dismissed hints' },
+    isHintVisible: { type: '(id: string) => boolean', description: 'Check if a hint is currently visible' },
+    isHintDismissed: { type: '(id: string) => boolean', description: 'Check if a hint has been dismissed' },
+  }}
+/>
+
+### HintState Type
+
+Each hint in the `hints` array has this structure:
+
+```ts
+interface HintState {
+  id: string;        // Unique identifier
+  isOpen: boolean;   // Currently showing tooltip
+  isDismissed: boolean; // Permanently dismissed
+}
+```
+
+### Single Active Hint
+
+Only one hint can be open at a time. Opening a new hint automatically closes the previous one:
+
+```tsx
+function HintSequence() {
+  const { showHint, activeHint } = useHints();
+
+  return (
+    <div>
+      <button onClick={() => showHint('hint-1')}>Show Hint 1</button>
+      <button onClick={() => showHint('hint-2')}>Show Hint 2</button>
+      {/* Opening hint-2 will auto-close hint-1 */}
+
+      <p>Active: {activeHint}</p>
+    </div>
+  );
+}
+```
+
+### Helper Functions
+
+The `isHintVisible` and `isHintDismissed` functions provide quick state checks:
+
+```tsx
+function FeatureCheck() {
+  const { isHintVisible, isHintDismissed } = useHints();
+
+  if (isHintDismissed('onboarding-hint')) {
+    return <p>User has seen the onboarding</p>;
+  }
+
+  if (isHintVisible('onboarding-hint')) {
+    return <p>User is viewing onboarding</p>;
+  }
+
+  return <p>Onboarding hint is available</p>;
+}
+```
+
+---
+
+## Common Patterns
+
+### Show Hint on First Action
+
+```tsx
+function FirstTimeFeature() {
+  const { show, isDismissed, dismiss } = useHint('first-time');
+  const [hasUsedFeature, setHasUsedFeature] = useState(false);
+
+  const handleFeatureUse = () => {
+    if (!hasUsedFeature && !isDismissed) {
+      show();
+      setHasUsedFeature(true);
+    }
+    // Do feature action...
+  };
+
+  return (
+    <button onClick={handleFeatureUse}>
+      Use Feature
+    </button>
+  );
+}
+```
+
+### Hint Tour Sequence
+
+```tsx
+function HintTour() {
+  const { showHint, hideHint, activeHint } = useHints();
+  const sequence = ['intro-hint', 'feature-hint', 'finish-hint'];
+
+  const showNext = () => {
+    const currentIndex = sequence.indexOf(activeHint ?? '');
+    if (currentIndex < sequence.length - 1) {
+      showHint(sequence[currentIndex + 1]);
+    }
+  };
+
+  const startTour = () => showHint(sequence[0]);
+
+  return (
+    <div>
+      <button onClick={startTour}>Start Hint Tour</button>
+      <button onClick={showNext} disabled={!activeHint}>
+        Next Hint
+      </button>
+    </div>
+  );
+}
+```
+
+### Delayed Hint
+
+```tsx
+function DelayedHint() {
+  const { show, isDismissed } = useHint('delayed-hint');
+
+  useEffect(() => {
+    if (isDismissed) return;
+
+    const timer = setTimeout(() => {
+      show();
+    }, 5000); // Show after 5 seconds
+
+    return () => clearTimeout(timer);
+  }, [show, isDismissed]);
+
+  return <div>Content...</div>;
+}
+```
+
+### Analytics Integration
+
+```tsx
+function TrackedHint() {
+  const { isOpen, isDismissed } = useHint('tracked-hint');
+
+  useEffect(() => {
+    if (isOpen) {
+      analytics.track('hint_viewed', { hintId: 'tracked-hint' });
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isDismissed) {
+      analytics.track('hint_dismissed', { hintId: 'tracked-hint' });
+    }
+  }, [isDismissed]);
+
+  return null; // Just for tracking
+}
+```
+
+---
+
+## HintsProvider
+
+Both hooks require `HintsProvider` as an ancestor:
+
+```tsx
+import { HintsProvider, Hint, useHint } from '@tour-kit/hints';
+
+function App() {
+  return (
+    <HintsProvider>
+      <Hint id="my-hint" target="#element" content="..." />
+      <ChildComponent />
+    </HintsProvider>
+  );
+}
+
+function ChildComponent() {
+  // Works because HintsProvider is an ancestor
+  const hint = useHint('my-hint');
+  return <button onClick={hint.show}>Show</button>;
+}
+```
+
+<Callout type="error">
+  Using `useHint` or `useHints` outside of `HintsProvider` will throw an error:
+  `"useHintsContext must be used within a HintsProvider"`
+</Callout>
+
+---
+
+## Related
+
+- [Components](/docs/hints/components) - Hint, HintHotspot, HintTooltip
+- [Persistence](/docs/hints/persistence) - Configure hint dismissal storage
+- [Headless](/docs/hints/headless) - Build custom hint UI with hooks

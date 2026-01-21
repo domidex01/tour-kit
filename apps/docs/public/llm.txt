@@ -1,0 +1,425 @@
+# Tour-Kit Documentation for LLMs
+
+## Overview
+
+Tour-Kit is a headless, accessible product tour library for React. It provides:
+- Sequential guided tours with spotlight overlays
+- Persistent hints for feature discovery
+- Feature adoption tracking with nudges
+- Interactive onboarding checklists
+- Multi-variant product announcements
+- Video/media embeds for tours
+- Time-based scheduling for tours and announcements
+- Analytics integration with popular platforms
+- Full keyboard navigation and screen reader support
+- SSR-compatible with Next.js and Vite
+
+## Packages
+
+| Package | Description | Size |
+|---------|-------------|------|
+| @tour-kit/core | Framework-agnostic hooks and utilities | <8KB |
+| @tour-kit/react | Pre-styled React components | <12KB |
+| @tour-kit/hints | Feature discovery hints | <5KB |
+| @tour-kit/adoption | Feature adoption tracking with nudges | <10KB |
+| @tour-kit/analytics | Plugin-based analytics integration | <4KB |
+| @tour-kit/announcements | Multi-variant product announcements | <15KB |
+| @tour-kit/checklists | Interactive onboarding checklists | <12KB |
+| @tour-kit/media | Video/GIF/Lottie embeds | <8KB |
+| @tour-kit/scheduling | Time-based scheduling utilities | <3KB |
+
+## Installation
+
+```bash
+npm install @tour-kit/react
+# Optional packages
+npm install @tour-kit/hints
+npm install @tour-kit/adoption
+npm install @tour-kit/analytics
+npm install @tour-kit/announcements
+npm install @tour-kit/checklists
+npm install @tour-kit/media
+npm install @tour-kit/scheduling
+```
+
+## Quick Start
+
+```tsx
+import { Tour, TourStep, TourCard, TourOverlay, useTour } from '@tour-kit/react';
+
+function App() {
+  return (
+    <Tour id="welcome">
+      <TourStep target="#feature" title="Welcome" content="Hello!" />
+      <TourOverlay />
+      <TourCard />
+      <StartButton />
+    </Tour>
+  );
+}
+
+function StartButton() {
+  const { start, isActive } = useTour();
+  if (isActive) return null;
+  return <button onClick={() => start()}>Start Tour</button>;
+}
+```
+
+---
+
+## @tour-kit/core Exports
+
+### Providers
+- TourKitProvider - Global configuration
+- TourProvider - Tour state management
+
+### Hooks
+- useTour(tourId?) - Main tour control
+- useStep(stepId) - Step state
+- useSpotlight() - Overlay control
+- useElementPosition(target) - Element tracking
+- useKeyboardNavigation(config?) - Keyboard setup
+- useFocusTrap(enabled?) - Focus management
+- usePersistence(config?) - State storage
+- useRoutePersistence(config) - Multi-page state
+- useMediaQuery(query) - Media queries
+- usePrefersReducedMotion() - Motion preference
+- useAdvanceOn(options?) - Event-based advance
+- useDirection() - RTL/LTR direction
+
+### Utilities
+- createTour(steps, options?) - Tour factory
+- createStep(target, content, options?) - Step factory
+- createStorageAdapter(type) - Storage factory
+- createCookieStorage(options?) - Cookie storage
+- createPrefixedStorage(storage, prefix) - Namespaced storage
+- waitForElement(selector, timeout?) - DOM polling
+- isElementVisible(element) - Visibility check
+- scrollIntoView(element, config?) - Smooth scroll
+- announce(message, politeness?) - Screen reader
+- calculatePosition(target, tooltip, placement) - Positioning
+- dispatchAdvanceEvent(stepId) - Dispatch advance event
+
+### Types
+- TourKitConfig, Tour, TourStep, TourState
+- Placement, RouterAdapter, PersistenceConfig
+
+---
+
+## @tour-kit/react Exports
+
+### Styled Components
+- Tour - Wrapper component
+- TourStep - Step definition
+- TourCard, TourCardHeader, TourCardContent, TourCardFooter - Card compound
+- TourOverlay - Spotlight overlay
+- TourNavigation - Prev/Next buttons
+- TourProgress - Step indicator
+- TourClose - Close button
+- TourPortal - Portal render
+- TourArrow - Tooltip arrow
+
+### Headless (from /headless)
+- TourCardHeadless
+- TourOverlayHeadless
+- TourNavigationHeadless
+- TourProgressHeadless
+- TourCloseHeadless
+
+### Providers
+- MultiTourKitProvider - Multi-tour registry
+
+### Hooks
+- useTours() - Access all tours
+- useTourRoute(options) - Route-aware control
+
+### Router Adapters
+- useNextAppRouter() - Next.js App Router
+- useNextPagesRouter() - Next.js Pages Router
+- useReactRouter() - React Router v6+
+
+### Components
+- TourRoutePrompt - Route change prompt
+
+---
+
+## @tour-kit/hints Exports
+
+### Components
+- Hint - Main hint component
+- HintHotspot - Pulsing indicator
+- HintTooltip - Floating tooltip
+- HintsProvider - Context provider
+
+### Headless (from /headless)
+- HintHeadless
+- HintHotspotHeadless
+- HintTooltipHeadless
+
+### Hooks
+- useHint(id) - Single hint control
+- useHints() - All hints access
+
+### Types
+- HintConfig, HintState, HotspotPosition
+
+---
+
+## @tour-kit/adoption Exports
+
+### Providers
+- AdoptionProvider - Feature adoption tracking context
+
+### Hooks
+- useFeature(featureId) - Get feature adoption state
+- useAdoptionStats() - Aggregate adoption data
+- useNudge() - Control nudge queue
+- useAdoptionAnalytics() - Analytics integration
+
+### Components
+- AdoptionNudge - Auto-show nudges for unadopted features
+- FeatureButton - Button with adoption tracking
+- IfNotAdopted - Conditional render if not adopted
+- IfAdopted - Conditional render if adopted
+- NewFeatureBadge - Badge for new features
+
+### Dashboard Components
+- AdoptionDashboard - Full admin dashboard
+- AdoptionStatCard - Individual stat card
+- AdoptionStatsGrid - Grid layout
+- AdoptionTable - Feature adoption table
+- AdoptionCategoryChart - Chart by category
+- AdoptionStatusBadge - Status display
+- AdoptionFilters - Filter controls
+
+### Types
+- Feature, AdoptionCriteria, FeatureUsage, AdoptionStatus, NudgeConfig
+
+---
+
+## @tour-kit/analytics Exports
+
+### Core
+- TourAnalytics - Main tracker class
+- createAnalytics(config) - Create analytics instance
+
+### Providers
+- AnalyticsProvider - React context provider
+
+### Hooks
+- useAnalytics() - Access analytics (throws if unavailable)
+- useAnalyticsOptional() - Safe access (returns null)
+
+### Plugins
+- consolePlugin - Debug logging to console
+- posthogPlugin - PostHog integration
+- mixpanelPlugin - Mixpanel integration
+- amplitudePlugin - Amplitude integration
+- googleAnalyticsPlugin - Google Analytics 4 integration
+
+### Event Types
+- tour_started, tour_completed, tour_skipped, tour_abandoned
+- step_viewed, step_completed, step_skipped, step_interaction
+- hint_shown, hint_dismissed, hint_clicked
+- feature_used, feature_adopted, feature_churned
+- nudge_shown, nudge_clicked, nudge_dismissed
+
+### Types
+- TourEvent, TourEventName, TourEventData
+- AnalyticsPlugin, AnalyticsConfig
+
+---
+
+## @tour-kit/announcements Exports
+
+### Providers
+- AnnouncementsProvider - Announcements context
+
+### Hooks
+- useAnnouncement(id) - Single announcement control
+- useAnnouncements() - All announcements
+- useAnnouncementQueue() - Queue management
+
+### Components
+- AnnouncementModal - Centered dialog variant
+- AnnouncementSlideout - Side panel variant
+- AnnouncementBanner - Top/bottom strip variant
+- AnnouncementToast - Corner notification variant
+- AnnouncementSpotlight - Element highlight with overlay
+
+### Shared Components
+- AnnouncementOverlay - Shared overlay
+- AnnouncementClose - Close button
+- AnnouncementContent - Content wrapper
+- AnnouncementActions - Action buttons container
+
+### Headless (from /headless)
+- HeadlessModal, HeadlessSlideout, HeadlessBanner
+- HeadlessToast, HeadlessSpotlight
+
+### Core
+- PriorityQueue - Announcement ordering
+- Scheduler - Visibility management
+- FrequencyChecker - Frequency rule evaluation
+- AudienceTargeting - User targeting
+
+### Types
+- AnnouncementConfig, AnnouncementState
+- FrequencyRule, AudienceCondition, QueueConfig
+- DismissalReason, AnnouncementVariant
+
+---
+
+## @tour-kit/checklists Exports
+
+### Providers
+- ChecklistProvider - Checklists context
+
+### Hooks
+- useChecklist(id) - Single checklist control
+- useTask(checklistId, taskId) - Single task control
+- useChecklistPersistence(id) - Persistence control
+- useChecklistsProgress() - All checklists progress
+
+### Components
+- Checklist - Container component
+- ChecklistTask - Individual task item
+- ChecklistProgress - Progress bar/indicator
+- ChecklistLauncher - Float/button to launch checklist
+- ChecklistPanel - Full panel UI
+
+### Headless (from /headless)
+- ChecklistHeadless - Render prop for full checklist
+- TaskHeadless - Render prop for single task
+
+### Utilities
+- createChecklist(config) - Checklist factory
+- createTask(config) - Task factory
+- calculateProgress(state) - Get progress stats
+- getNextTask(state) - Get first incomplete unlocked task
+- getLockedTasks(state) - Get tasks blocked by dependencies
+- canCompleteTask(taskId, state) - Check if dependencies met
+- resolveTaskDependencies(tasks) - Get execution order
+- hasCircularDependency(tasks) - Detect dependency cycles
+
+### Types
+- ChecklistConfig, ChecklistState, ChecklistTaskConfig
+- TaskAction, TaskCompletionCondition, ChecklistProgress
+
+---
+
+## @tour-kit/media Exports
+
+### Main Component
+- TourMedia - Auto-detecting media component
+
+### Embed Components
+- YouTubeEmbed - YouTube iframe embed
+- VimeoEmbed - Vimeo iframe embed
+- LoomEmbed - Loom iframe embed
+- WistiaEmbed - Wistia iframe embed
+- NativeVideo - HTML5 video element
+- GifPlayer - GIF with play/pause controls
+- LottiePlayer - Lottie animation player
+
+### Headless (from /headless)
+- MediaHeadless - Render prop for custom media UI
+
+### Hooks
+- useMediaEvents(ref?, handlers?) - Media event handling
+- usePrefersReducedMotion() - Respects motion preferences
+- useResponsiveSource() - Select responsive source
+
+### Utilities
+- parseMediaUrl(url) - Parse and detect media type
+- detectMediaType(url) - Get media type
+- isSupportedMediaUrl(url) - Check if supported
+- extractYouTubeId(url) - Extract YouTube video ID
+- extractVimeoId(url) - Extract Vimeo video ID
+- extractLoomId(url) - Extract Loom video ID
+- extractWistiaId(url) - Extract Wistia video ID
+- buildYouTubeEmbedUrl(id, options?) - Build embed URL
+- buildVimeoEmbedUrl(id, options?) - Build embed URL
+- getYouTubeThumbnailUrl(id) - Get thumbnail URL
+- selectResponsiveSource(sources, width) - Select source
+
+### Supported Media Types
+- youtube, vimeo, loom, wistia (embeds)
+- video (.mp4, .webm, .ogg)
+- gif (.gif)
+- lottie (.json)
+
+### Types
+- MediaType, TourMediaConfig, CaptionTrack, ResponsiveSource
+
+---
+
+## @tour-kit/scheduling Exports
+
+### Hooks
+- useSchedule(schedule, options?) - Check if schedule is active
+- useScheduleStatus(schedule, options?) - Get detailed status with reason
+- useUserTimezone() - Detect browser timezone
+
+### Core
+- checkSchedule(schedule, options?) - Check if schedule is active
+- isScheduleActive(schedule, options?) - Alias for checkSchedule
+- getScheduleStatus(schedule, options?) - Get status with reason
+
+### Timezone Utilities
+- getUserTimezone() - Get browser timezone
+- getDateInTimezone(date, timezone) - Convert date to timezone
+- isValidTimezone(tz) - Validate timezone string
+- formatDateString(date, timezone?) - Format to YYYY-MM-DD
+- parseDateString(str) - Parse YYYY-MM-DD
+- parseTimeString(str) - Parse HH:MM
+
+### Date/Time Utilities
+- isWithinDateRange(date, startAt, endAt) - Check date range
+- isWithinTimeRange(date, timeRange, timezone?) - Check time range
+- isWithinAnyTimeRange(date, ranges) - Check multiple ranges
+- getDayOfWeek(date) - Get day number (0-6)
+- isAllowedDay(date, daysOfWeek) - Check if day allowed
+
+### Blackout Utilities
+- isInBlackoutPeriod(date, blackout) - Check if in blackout
+- isInAnyBlackout(date, blackouts) - Check multiple blackouts
+- getCurrentBlackout(date, blackouts) - Get current blackout
+- getBlackoutEndTime(date, blackouts) - Get end time
+
+### Business Hours
+- isWithinBusinessHours(date, businessHours, timezone?) - Check business hours
+- isHoliday(date, holidays) - Check if holiday
+- getDayBusinessHours(date, businessHours) - Get hours for day
+- BUSINESS_HOURS_PRESETS - Pre-configured standard hours
+
+### Recurring Patterns
+- matchesRecurringPattern(date, pattern, reference?) - Check if matches
+
+### Types
+- Schedule, RecurringPattern, BusinessHours, BlackoutPeriod
+- TimeRange, DateRange, ScheduleStatus, ScheduleInactiveReason
+
+---
+
+## Accessibility
+
+- WCAG 2.1 AA compliant
+- Focus trap during tours
+- Keyboard: Arrow keys, Escape, Enter
+- Screen reader announcements
+- Respects prefers-reduced-motion
+
+---
+
+## Bundle Sizes
+
+- @tour-kit/core: <8KB gzipped
+- @tour-kit/react: <12KB gzipped
+- @tour-kit/hints: <5KB gzipped
+- @tour-kit/adoption: <10KB gzipped
+- @tour-kit/analytics: <4KB gzipped
+- @tour-kit/announcements: <15KB gzipped
+- @tour-kit/checklists: <12KB gzipped
+- @tour-kit/media: <8KB gzipped
+- @tour-kit/scheduling: <3KB gzipped

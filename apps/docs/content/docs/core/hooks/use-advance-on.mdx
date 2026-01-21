@@ -1,0 +1,365 @@
+---
+title: useAdvanceOn
+description: Automatically advance tour when users interact with elements
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# useAdvanceOn
+
+Automatically advance the tour when users perform specific actions on elements. Essential for interactive tours that respond to user behavior.
+
+## Why Use This Hook?
+
+Some tour steps should advance when users complete an action, not just click "Next":
+
+- **Click events** - Advance when users click a button
+- **Input events** - Advance when users type in a field
+- **Custom events** - Advance on form submission, file upload, etc.
+- **Validation** - Only advance when a condition is met
+
+---
+
+## Usage
+
+The hook is typically used internally by Tour Kit, but you can use it directly for custom implementations:
+
+```tsx
+import { useAdvanceOn } from '@tour-kit/core';
+
+function MyTourStep() {
+  // Enables advanceOn behavior based on current step config
+  useAdvanceOn({ enabled: true });
+
+  return <TourCard>{/* ... */}</TourCard>;
+}
+```
+
+---
+
+## Step Configuration
+
+Define `advanceOn` behavior in your step configuration:
+
+```tsx
+<TourStep
+  target="#signup-button"
+  title="Click to Sign Up"
+  content="Click this button to continue"
+  advanceOn={{
+    event: 'click',
+    selector: '#signup-button',
+  }}
+/>
+```
+
+---
+
+## AdvanceOn Options
+
+<TypeTable
+  type={{
+    event: {
+      type: "'click' | 'input' | 'custom' | string",
+      description: 'DOM event to listen for',
+    },
+    selector: {
+      type: 'string (optional)',
+      description: 'CSS selector for target element. Defaults to document.',
+    },
+    handler: {
+      type: '() => boolean (optional)',
+      description: 'Validation function. Return true to advance, false to block.',
+    },
+  }}
+/>
+
+---
+
+## Event Types
+
+<Tabs items={['Click', 'Input', 'Custom']}>
+<Tab value="Click">
+Advance when users click an element:
+
+```tsx
+<TourStep
+  target="#submit-btn"
+  title="Submit the Form"
+  content="Click submit when ready"
+  advanceOn={{
+    event: 'click',
+    selector: '#submit-btn',
+  }}
+/>
+```
+
+Common use cases:
+- Button clicks
+- Link navigation
+- Toggle switches
+- Checkbox selections
+</Tab>
+
+<Tab value="Input">
+Advance when users type in a field:
+
+```tsx
+<TourStep
+  target="#search-input"
+  title="Try Searching"
+  content="Type something to search"
+  advanceOn={{
+    event: 'input',
+    selector: '#search-input',
+    handler: () => {
+      const input = document.querySelector('#search-input');
+      return input?.value.length >= 3;
+    },
+  }}
+/>
+```
+
+Common use cases:
+- Text input
+- Search queries
+- Form fields
+- Text areas
+</Tab>
+
+<Tab value="Custom">
+Advance on custom events for complex interactions:
+
+```tsx
+import { dispatchAdvanceEvent } from '@tour-kit/core';
+
+<TourStep
+  target="#file-upload"
+  title="Upload a File"
+  content="Drag and drop or click to upload"
+  advanceOn={{
+    event: 'custom',
+    selector: '#file-upload',
+  }}
+/>
+
+// In your upload handler:
+function handleFileUpload(file) {
+  uploadFile(file).then(() => {
+    dispatchAdvanceEvent('#file-upload');
+  });
+}
+```
+
+The custom event is `tourkit:advance` and bubbles up the DOM.
+</Tab>
+</Tabs>
+
+---
+
+## Validation Handler
+
+Use the `handler` function to validate before advancing:
+
+```tsx
+<TourStep
+  target="#email-input"
+  title="Enter Your Email"
+  content="We'll send you a confirmation"
+  advanceOn={{
+    event: 'input',
+    selector: '#email-input',
+    handler: () => {
+      const email = document.querySelector('#email-input')?.value;
+      const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      if (!isValid) {
+        showError('Please enter a valid email');
+      }
+      return isValid;
+    },
+  }}
+/>
+```
+
+<Callout type="info">
+The handler must return `true` to advance or `false` to block. Errors thrown in the handler are caught and logged.
+</Callout>
+
+---
+
+## dispatchAdvanceEvent
+
+Programmatically trigger advancement for custom event type:
+
+```tsx
+import { dispatchAdvanceEvent } from '@tour-kit/core';
+
+// Dispatch to specific element
+dispatchAdvanceEvent('#my-element');
+
+// Dispatch to document (when no selector on step)
+dispatchAdvanceEvent();
+```
+
+### Usage Example
+
+```tsx
+function FileUploader() {
+  const handleUploadComplete = () => {
+    // Notify the tour that upload is complete
+    dispatchAdvanceEvent('#file-upload-zone');
+  };
+
+  return (
+    <div
+      id="file-upload-zone"
+      onDrop={handleUploadComplete}
+    >
+      Drop files here
+    </div>
+  );
+}
+
+// Tour configuration
+<TourStep
+  target="#file-upload-zone"
+  title="Upload Complete!"
+  advanceOn={{ event: 'custom', selector: '#file-upload-zone' }}
+/>
+```
+
+---
+
+## Complete Example
+
+```tsx
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourOverlay,
+} from '@tour-kit/react';
+import { dispatchAdvanceEvent } from '@tour-kit/core';
+
+function InteractiveTour() {
+  return (
+    <Tour id="interactive-demo">
+      {/* Step 1: Click to advance */}
+      <TourStep
+        target="#start-button"
+        title="Get Started"
+        content="Click this button to begin"
+        advanceOn={{ event: 'click', selector: '#start-button' }}
+      />
+
+      {/* Step 2: Type to advance (with validation) */}
+      <TourStep
+        target="#name-input"
+        title="Enter Your Name"
+        content="Type at least 2 characters"
+        advanceOn={{
+          event: 'input',
+          selector: '#name-input',
+          handler: () => {
+            const value = document.querySelector('#name-input')?.value;
+            return value?.length >= 2;
+          },
+        }}
+      />
+
+      {/* Step 3: Custom event (API call completion) */}
+      <TourStep
+        target="#save-button"
+        title="Save Your Changes"
+        content="Click save and wait for confirmation"
+        advanceOn={{ event: 'custom', selector: '#save-button' }}
+      />
+
+      <TourOverlay />
+      <TourCard />
+    </Tour>
+  );
+}
+
+// In your save handler:
+async function handleSave() {
+  await saveData();
+  dispatchAdvanceEvent('#save-button');
+}
+```
+
+---
+
+## Hook Options
+
+<TypeTable
+  type={{
+    enabled: {
+      type: 'boolean',
+      description: 'Enable/disable the advanceOn behavior',
+      default: 'true',
+    },
+  }}
+/>
+
+---
+
+## Debouncing
+
+The hook includes built-in debouncing to prevent multiple rapid advances:
+
+```tsx
+// Internal behavior:
+// 1. Event fires
+// 2. Handler validates (if provided)
+// 3. Tour advances
+// 4. 100ms cooldown before next advance allowed
+```
+
+---
+
+## Error Handling
+
+Handler errors are caught and logged without crashing the tour:
+
+```tsx
+advanceOn={{
+  event: 'click',
+  handler: () => {
+    // If this throws, tour won't advance
+    // Error is logged to console
+    throw new Error('Validation failed');
+  },
+}}
+```
+
+---
+
+## Fallback Behavior
+
+If the target selector isn't found, the hook falls back to listening on `document`:
+
+```tsx
+// If #dynamic-element doesn't exist yet:
+advanceOn={{
+  event: 'click',
+  selector: '#dynamic-element', // Falls back to document
+}}
+
+// A warning is logged to console
+```
+
+<Callout type="warn">
+Use `waitForTarget` on the step for dynamically rendered elements to ensure the target exists before the step renders.
+</Callout>
+
+---
+
+## Related
+
+- [TourStep](/docs/react/components/tour-step) - Component that uses advanceOn
+- [useTour](/docs/core/hooks/use-tour) - Main tour control hook
+- [Examples](/docs/examples/onboarding-flow) - Interactive onboarding example

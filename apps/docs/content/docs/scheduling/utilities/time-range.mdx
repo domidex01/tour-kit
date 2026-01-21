@@ -1,0 +1,210 @@
+---
+title: Time Range Utilities
+description: Functions for checking time-of-day constraints
+---
+
+# Time Range Utilities
+
+Check if the current time falls within specified time-of-day ranges.
+
+## isWithinTimeRange
+
+Check if a date's time falls within a time range.
+
+```ts
+import { isWithinTimeRange } from '@tour-kit/scheduling'
+
+const now = new Date()
+const timeRange = { start: '09:00', end: '17:00' }
+
+const isWithin = isWithinTimeRange(now, timeRange, 'America/New_York')
+// true if between 9am-5pm in NY timezone
+```
+
+### API
+
+```ts
+function isWithinTimeRange(
+  date: Date,
+  timeRange: TimeRange,
+  timezone: string
+): boolean
+```
+
+### Parameters
+
+- **date** - The date to check
+- **timeRange** - Time range with `start` and `end` in HH:MM format (24-hour)
+- **timezone** - Timezone for time comparison
+
+### Returns
+
+`true` if the time is within the range, `false` otherwise.
+
+## isWithinAnyTimeRange
+
+Check if a date falls within any of multiple time ranges.
+
+```ts
+import { isWithinAnyTimeRange } from '@tour-kit/scheduling'
+
+const businessHours = [
+  { start: '09:00', end: '12:00' }, // Morning
+  { start: '13:00', end: '17:00' }, // Afternoon
+]
+
+const isWithin = isWithinAnyTimeRange(new Date(), businessHours, 'UTC')
+// true if in either range
+```
+
+Useful for split shifts or lunch breaks.
+
+## Examples
+
+### Business Hours
+
+```ts
+import { isWithinTimeRange } from '@tour-kit/scheduling'
+
+function isBusinessHours(date: Date = new Date()): boolean {
+  return isWithinTimeRange(
+    date,
+    { start: '09:00', end: '17:00' },
+    'America/New_York'
+  )
+}
+
+if (isBusinessHours()) {
+  enableLiveChat()
+}
+```
+
+### Split Shift Schedule
+
+```ts
+import { isWithinAnyTimeRange } from '@tour-kit/scheduling'
+
+const shiftHours = [
+  { start: '06:00', end: '14:00' }, // Morning shift
+  { start: '14:00', end: '22:00' }, // Evening shift
+]
+
+const isShiftActive = isWithinAnyTimeRange(new Date(), shiftHours, 'UTC')
+```
+
+### Overnight Range
+
+Time ranges can cross midnight:
+
+```ts
+// 10pm to 6am (overnight)
+const overnightRange = { start: '22:00', end: '06:00' }
+
+// 11pm - within range
+isWithinTimeRange(new Date('2024-01-01T23:00:00Z'), overnightRange, 'UTC')
+// true
+
+// 3am - within range
+isWithinTimeRange(new Date('2024-01-02T03:00:00Z'), overnightRange, 'UTC')
+// true
+
+// 10am - outside range
+isWithinTimeRange(new Date('2024-01-02T10:00:00Z'), overnightRange, 'UTC')
+// false
+```
+
+### Timezone Matters
+
+```ts
+const now = new Date('2024-01-01T15:00:00Z') // 3pm UTC
+const range = { start: '09:00', end: '17:00' }
+
+// In UTC (3pm) - within range
+isWithinTimeRange(now, range, 'UTC')
+// true
+
+// In Tokyo (midnight) - outside range
+isWithinTimeRange(now, range, 'Asia/Tokyo')
+// false
+
+// In New York (10am) - within range
+isWithinTimeRange(now, range, 'America/New_York')
+// true
+```
+
+### Lunch Break Excluded
+
+```ts
+import { isWithinAnyTimeRange } from '@tour-kit/scheduling'
+
+const workingHours = [
+  { start: '09:00', end: '12:00' }, // Morning
+  { start: '13:00', end: '17:00' }, // Afternoon (1-hour lunch)
+]
+
+// 11am - working
+isWithinAnyTimeRange(new Date('2024-01-01T11:00:00Z'), workingHours, 'UTC')
+// true
+
+// 12:30pm - lunch break
+isWithinAnyTimeRange(new Date('2024-01-01T12:30:00Z'), workingHours, 'UTC')
+// false
+```
+
+### Extended Hours on Fridays
+
+```ts
+import { getDayOfWeek } from '@tour-kit/scheduling'
+import { isWithinTimeRange } from '@tour-kit/scheduling'
+
+function isSupportAvailable(date: Date = new Date()): boolean {
+  const timezone = 'America/Los_Angeles'
+  const day = getDayOfWeek(date, timezone)
+
+  // Friday - extended hours
+  if (day === 5) {
+    return isWithinTimeRange(date, { start: '08:00', end: '20:00' }, timezone)
+  }
+
+  // Other days - regular hours
+  return isWithinTimeRange(date, { start: '09:00', end: '17:00' }, timezone)
+}
+```
+
+### Multiple Time Zones
+
+```ts
+function isOpenAnywhere(date: Date, officeTimezones: string[]): boolean {
+  const businessHours = { start: '09:00', end: '17:00' }
+
+  return officeTimezones.some((tz) => isWithinTimeRange(date, businessHours, tz))
+}
+
+const offices = ['America/New_York', 'Europe/London', 'Asia/Tokyo']
+
+if (isOpenAnywhere(new Date(), offices)) {
+  console.log('At least one office is open')
+}
+```
+
+## Time Format
+
+Times must be in HH:MM format (24-hour):
+
+```ts
+// Valid
+{ start: '09:00', end: '17:00' }
+{ start: '00:00', end: '23:59' }
+{ start: '14:30', end: '18:45' }
+
+// Invalid
+{ start: '9:00', end: '5:00' }    // Missing leading zero
+{ start: '9am', end: '5pm' }      // 12-hour format
+{ start: '09', end: '17' }        // Missing minutes
+```
+
+## Related
+
+- [Schedule.timeOfDay](/docs/scheduling/types#schedule) - Schedule time range
+- [TimeRange type](/docs/scheduling/types#timerange) - Time range type
+- [Business Hours](/docs/scheduling/utilities/business-hours) - More complex time patterns

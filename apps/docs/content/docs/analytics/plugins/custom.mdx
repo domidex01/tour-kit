@@ -1,0 +1,608 @@
+---
+title: Custom Analytics Plugins
+description: Build your own analytics integrations with the plugin API
+---
+
+## Overview
+
+Tour Kit's plugin system allows you to integrate with any analytics platform by implementing a simple interface. Create custom plugins for internal tracking systems, CRM integrations, or any data pipeline.
+
+## Plugin Interface
+
+All plugins must implement the `AnalyticsPlugin` interface:
+
+```ts
+interface AnalyticsPlugin {
+  /** Unique plugin identifier */
+  name: string
+
+  /** Initialize the plugin (called once on setup) */
+  init?: () => void | Promise<void>
+
+  /** Track an event */
+  track: (event: TourEvent) => void | Promise<void>
+
+  /** Identify a user */
+  identify?: (userId: string, properties?: Record<string, unknown>) => void
+
+  /** Flush any queued events */
+  flush?: () => void | Promise<void>
+
+  /** Clean up resources */
+  destroy?: () => void
+}
+```
+
+Only `name` and `track` are required. All other methods are optional.
+
+## Minimal Plugin
+
+A basic plugin that logs events:
+
+```ts
+import type { AnalyticsPlugin, TourEvent } from '@tour-kit/analytics'
+
+export const simplePlugin = (): AnalyticsPlugin => ({
+  name: 'simple-logger',
+
+  track(event: TourEvent) {
+    console.log('Tour event:', event.eventName, event)
+  }
+})
+```
+
+Usage:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    plugins: [simplePlugin()]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Event Structure
+
+Events passed to `track()` include:
+
+```ts
+interface TourEvent {
+  // Required
+  eventName: TourEventName     // 'tour_started' | 'step_viewed' | etc.
+  timestamp: number             // Unix timestamp in milliseconds
+  sessionId: string             // Unique session identifier
+  tourId: string                // Tour identifier
+
+  // Optional
+  stepId?: string               // Current step identifier
+  stepIndex?: number            // Current step index (0-based)
+  totalSteps?: number           // Total steps in tour
+  userId?: string               // User identifier
+  userProperties?: Record<string, unknown>
+  duration?: number             // Duration in milliseconds
+  interactionCount?: number     // Number of interactions
+  metadata?: Record<string, unknown>  // Custom metadata
+}
+```
+
+## Complete Plugin Example
+
+A plugin that sends events to a custom API:
+
+```ts title="lib/analytics/custom-api-plugin.ts"
+import type { AnalyticsPlugin, TourEvent } from '@tour-kit/analytics'
+
+interface CustomApiPluginOptions {
+  apiEndpoint: string
+  apiKey: string
+  batchSize?: number
+}
+
+export function customApiPlugin(options: CustomApiPluginOptions): AnalyticsPlugin {
+  const eventQueue: TourEvent[] = []
+  const batchSize = options.batchSize ?? 10
+
+  async function sendEvents(events: TourEvent[]) {
+    try {
+      await fetch(options.apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${options.apiKey}`
+        },
+        body: JSON.stringify({ events })
+      })
+    } catch (error) {
+      console.error('Failed to send events:', error)
+    }
+  }
+
+  async function flushQueue() {
+    if (eventQueue.length === 0) return
+    await sendEvents([...eventQueue])
+    eventQueue.length = 0
+  }
+
+  return {
+    name: 'custom-api',
+
+    async init() {
+      // Test API connection
+      console.log('Custom API plugin initialized')
+    },
+
+    async track(event: TourEvent) {
+      eventQueue.push(event)
+
+      if (eventQueue.length >= batchSize) {
+        await flushQueue()
+      }
+    },
+
+    identify(userId: string, properties?: Record<string, unknown>) {
+      // Send user identification to API
+      fetch(`${options.apiEndpoint}/identify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${options.apiKey}`
+        },
+        body: JSON.stringify({ userId, properties })
+      })
+    },
+
+    async flush() {
+      await flushQueue()
+    },
+
+    destroy() {
+      // Clean up
+      eventQueue.length = 0
+    }
+  }
+}
+```
+
+Usage:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    plugins: [
+      customApiPlugin({
+        apiEndpoint: 'https://api.example.com/analytics',
+        apiKey: process.env.ANALYTICS_API_KEY!,
+        batchSize: 20
+      })
+    ]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Plugin Patterns
+
+### Event Batching
+
+Batch events to reduce API calls:
+
+```ts
+export function batchedPlugin(): AnalyticsPlugin {
+  const queue: TourEvent[] = []
+  let timer: NodeJS.Timeout | null = null
+
+  const flush = () => {
+    if (queue.length === 0) return
+
+    console.log('Sending batch:', queue.length, 'events')
+    // Send to API
+    queue.length = 0
+  }
+
+  return {
+    name: 'batched-plugin',
+
+    track(event: TourEvent) {
+      queue.push(event)
+
+      // Auto-flush every 5 seconds
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(flush, 5000)
+
+      // Or flush when queue reaches limit
+      if (queue.length >= 10) {
+        flush()
+      }
+    },
+
+    flush,
+
+    destroy() {
+      if (timer) clearTimeout(timer)
+      flush()
+    }
+  }
+}
+```
+
+### Event Filtering
+
+Filter events before sending:
+
+```ts
+export function filteredPlugin(): AnalyticsPlugin {
+  return {
+    name: 'filtered-plugin',
+
+    track(event: TourEvent) {
+      // Only track tour completion events
+      if (event.eventName !== 'tour_completed') {
+        return
+      }
+
+      // Only track specific tours
+      if (!event.tourId.startsWith('onboarding-')) {
+        return
+      }
+
+      console.log('Tracking:', event)
+      // Send to analytics
+    }
+  }
+}
+```
+
+### Event Transformation
+
+Transform events before sending:
+
+```ts
+export function transformPlugin(): AnalyticsPlugin {
+  return {
+    name: 'transform-plugin',
+
+    track(event: TourEvent) {
+      // Transform to custom format
+      const transformed = {
+        type: event.eventName,
+        tour: event.tourId,
+        step: event.stepId,
+        time: new Date(event.timestamp).toISOString(),
+        // Flatten metadata
+        ...event.metadata
+      }
+
+      console.log('Transformed:', transformed)
+      // Send to API
+    }
+  }
+}
+```
+
+### Local Storage Plugin
+
+Persist events to localStorage:
+
+```ts
+export function localStoragePlugin(): AnalyticsPlugin {
+  const STORAGE_KEY = 'tour-analytics-events'
+
+  return {
+    name: 'local-storage',
+
+    track(event: TourEvent) {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      const events = stored ? JSON.parse(stored) : []
+
+      events.push(event)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(events))
+    },
+
+    flush() {
+      // Clear stored events
+      localStorage.removeItem(STORAGE_KEY)
+    }
+  }
+}
+```
+
+### Webhook Plugin
+
+Send events to a webhook:
+
+```ts
+interface WebhookPluginOptions {
+  url: string
+  headers?: Record<string, string>
+}
+
+export function webhookPlugin(options: WebhookPluginOptions): AnalyticsPlugin {
+  return {
+    name: 'webhook',
+
+    async track(event: TourEvent) {
+      await fetch(options.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        body: JSON.stringify(event)
+      })
+    }
+  }
+}
+```
+
+### Segment Plugin
+
+Integrate with Segment:
+
+```ts
+declare global {
+  interface Window {
+    analytics?: {
+      track: (event: string, properties: Record<string, unknown>) => void
+      identify: (userId: string, traits?: Record<string, unknown>) => void
+    }
+  }
+}
+
+export function segmentPlugin(): AnalyticsPlugin {
+  return {
+    name: 'segment',
+
+    track(event: TourEvent) {
+      if (!window.analytics) return
+
+      window.analytics.track(event.eventName, {
+        tour_id: event.tourId,
+        step_id: event.stepId,
+        step_index: event.stepIndex,
+        total_steps: event.totalSteps,
+        duration_ms: event.duration,
+        ...event.metadata
+      })
+    },
+
+    identify(userId: string, properties?: Record<string, unknown>) {
+      if (!window.analytics) return
+      window.analytics.identify(userId, properties)
+    }
+  }
+}
+```
+
+## Testing Plugins
+
+### Unit Testing
+
+Test plugins in isolation:
+
+```ts title="__tests__/custom-plugin.test.ts"
+import { describe, it, expect, vi } from 'vitest'
+import { customApiPlugin } from '../custom-api-plugin'
+import type { TourEvent } from '@tour-kit/analytics'
+
+describe('customApiPlugin', () => {
+  it('sends events to API', async () => {
+    const fetchSpy = vi.spyOn(global, 'fetch')
+    const plugin = customApiPlugin({
+      apiEndpoint: 'https://api.test.com',
+      apiKey: 'test-key'
+    })
+
+    const event: TourEvent = {
+      eventName: 'tour_started',
+      timestamp: Date.now(),
+      sessionId: 'session-123',
+      tourId: 'onboarding',
+      totalSteps: 5
+    }
+
+    await plugin.track(event)
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://api.test.com',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'Authorization': 'Bearer test-key'
+        })
+      })
+    )
+  })
+})
+```
+
+### Integration Testing
+
+Test plugins with the provider:
+
+```tsx title="__tests__/plugin-integration.test.tsx"
+import { render } from '@testing-library/react'
+import { AnalyticsProvider } from '@tour-kit/analytics'
+import { customApiPlugin } from '../custom-api-plugin'
+
+describe('Plugin integration', () => {
+  it('receives events from provider', async () => {
+    const trackSpy = vi.fn()
+
+    const testPlugin = {
+      name: 'test',
+      track: trackSpy
+    }
+
+    render(
+      <AnalyticsProvider config={{ plugins: [testPlugin] }}>
+        <TestComponent />
+      </AnalyticsProvider>
+    )
+
+    // Trigger event in component
+    // ...
+
+    expect(trackSpy).toHaveBeenCalled()
+  })
+})
+```
+
+## Best Practices
+
+### Error Handling
+
+Always handle errors gracefully:
+
+```ts
+export function resilientPlugin(): AnalyticsPlugin {
+  return {
+    name: 'resilient',
+
+    async track(event: TourEvent) {
+      try {
+        await sendToAPI(event)
+      } catch (error) {
+        console.error('Analytics error:', error)
+        // Don't throw - let other plugins continue
+      }
+    }
+  }
+}
+```
+
+### Type Safety
+
+Use TypeScript for full type safety:
+
+```ts
+import type { AnalyticsPlugin, TourEvent, TourEventName } from '@tour-kit/analytics'
+
+// Typed options
+interface MyPluginOptions {
+  apiKey: string
+  endpoint: string
+  debug?: boolean
+}
+
+// Typed plugin factory
+export function myPlugin(options: MyPluginOptions): AnalyticsPlugin {
+  return {
+    name: 'my-plugin',
+
+    track(event: TourEvent) {
+      // Full autocomplete for event properties
+      const eventName: TourEventName = event.eventName
+      // ...
+    }
+  }
+}
+```
+
+### Async Operations
+
+Support both sync and async tracking:
+
+```ts
+export function asyncPlugin(): AnalyticsPlugin {
+  return {
+    name: 'async-plugin',
+
+    async track(event: TourEvent) {
+      // Can use await
+      await fetch('/api/analytics', {
+        method: 'POST',
+        body: JSON.stringify(event)
+      })
+    }
+  }
+}
+```
+
+### Resource Cleanup
+
+Clean up resources in `destroy()`:
+
+```ts
+export function cleanPlugin(): AnalyticsPlugin {
+  let interval: NodeJS.Timeout | null = null
+
+  return {
+    name: 'clean-plugin',
+
+    init() {
+      interval = setInterval(() => {
+        console.log('Heartbeat')
+      }, 60000)
+    },
+
+    track(event: TourEvent) {
+      // ...
+    },
+
+    destroy() {
+      if (interval) {
+        clearInterval(interval)
+        interval = null
+      }
+    }
+  }
+}
+```
+
+## Publishing Plugins
+
+To share your plugin with others:
+
+1. **Create a package**:
+
+```json title="package.json"
+{
+  "name": "@yourcompany/tourkit-analytics-plugin",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "peerDependencies": {
+    "@tour-kit/analytics": "^1.0.0"
+  }
+}
+```
+
+2. **Export your plugin**:
+
+```ts title="src/index.ts"
+export { myPlugin } from './my-plugin'
+export type { MyPluginOptions } from './my-plugin'
+```
+
+3. **Document usage**:
+
+```md title="README.md"
+# My Tour Kit Plugin
+
+## Installation
+\`\`\`bash
+npm install @yourcompany/tourkit-analytics-plugin
+\`\`\`
+
+## Usage
+\`\`\`tsx
+import { myPlugin } from '@yourcompany/tourkit-analytics-plugin'
+
+<AnalyticsProvider
+  config={{
+    plugins: [myPlugin({ apiKey: 'xxx' })]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+\`\`\`
+```
+
+## Related
+
+- [Plugin Overview](/docs/analytics/plugins) - Plugin system architecture
+- [Types](/docs/analytics/types) - Full type reference
+- [AnalyticsProvider](/docs/analytics/providers) - Provider configuration

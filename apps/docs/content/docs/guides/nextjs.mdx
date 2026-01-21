@@ -1,0 +1,477 @@
+---
+title: Next.js Integration
+description: Complete setup guide for Tour Kit with Next.js App Router and Pages Router
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Next.js Integration
+
+Complete guide for setting up Tour Kit with Next.js. Covers both App Router (Next.js 13+) and Pages Router.
+
+---
+
+## Installation
+
+```bash
+pnpm add @tour-kit/react
+```
+
+---
+
+## App Router (Recommended)
+
+<Steps>
+<Step>
+### Mark Components as Client
+
+Tour Kit uses client-side features. Add `'use client'` to components that use tours:
+
+```tsx title="app/components/product-tour.tsx"
+'use client';
+
+import { Tour, TourStep, TourCard, TourOverlay, useTour } from '@tour-kit/react';
+
+export function ProductTour() {
+  return (
+    <Tour id="product-tour">
+      <TourStep target="#feature" title="Welcome" content="..." />
+      <TourOverlay />
+      <TourCard />
+    </Tour>
+  );
+}
+```
+</Step>
+
+<Step>
+### Add the Tour to Your Layout or Page
+
+```tsx title="app/layout.tsx"
+import { ProductTour } from './components/product-tour';
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <ProductTour />
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+Or in a specific page:
+
+```tsx title="app/dashboard/page.tsx"
+import { ProductTour } from '@/components/product-tour';
+
+export default function DashboardPage() {
+  return (
+    <>
+      <ProductTour />
+      <Dashboard />
+    </>
+  );
+}
+```
+</Step>
+
+<Step>
+### Multi-Page Tours with App Router
+
+For tours that span multiple pages, use the router adapter:
+
+```tsx title="app/components/onboarding-tour.tsx"
+'use client';
+
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourOverlay,
+  MultiTourKitProvider,
+  useNextAppRouter,
+} from '@tour-kit/react';
+
+export function OnboardingTour() {
+  const router = useNextAppRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+      autoNavigate={true}
+    >
+      <Tour id="onboarding">
+        {/* Step on homepage */}
+        <TourStep
+          target="#welcome"
+          title="Welcome!"
+          content="Let's get started"
+          route="/"
+          routeMatch="exact"
+        />
+
+        {/* Step on dashboard page */}
+        <TourStep
+          target="#dashboard-widget"
+          title="Your Dashboard"
+          content="View your metrics here"
+          route="/dashboard"
+          routeMatch="startsWith"
+        />
+
+        {/* Step on settings page */}
+        <TourStep
+          target="#settings-nav"
+          title="Settings"
+          content="Customize your experience"
+          route="/settings"
+        />
+
+        <TourOverlay />
+        <TourCard />
+      </Tour>
+    </MultiTourKitProvider>
+  );
+}
+```
+</Step>
+</Steps>
+
+---
+
+## Pages Router
+
+<Steps>
+<Step>
+### Basic Setup
+
+```tsx title="components/product-tour.tsx"
+import { Tour, TourStep, TourCard, TourOverlay } from '@tour-kit/react';
+
+export function ProductTour() {
+  return (
+    <Tour id="product-tour">
+      <TourStep target="#feature" title="Welcome" content="..." />
+      <TourOverlay />
+      <TourCard />
+    </Tour>
+  );
+}
+```
+</Step>
+
+<Step>
+### Add to _app.tsx
+
+```tsx title="pages/_app.tsx"
+import type { AppProps } from 'next/app';
+import { ProductTour } from '@/components/product-tour';
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <>
+      <ProductTour />
+      <Component {...pageProps} />
+    </>
+  );
+}
+```
+</Step>
+
+<Step>
+### Multi-Page Tours with Pages Router
+
+```tsx title="components/onboarding-tour.tsx"
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourOverlay,
+  MultiTourKitProvider,
+  useNextPagesRouter,
+} from '@tour-kit/react';
+
+export function OnboardingTour() {
+  const router = useNextPagesRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+      autoNavigate={true}
+    >
+      <Tour id="onboarding">
+        <TourStep
+          target="#welcome"
+          title="Welcome!"
+          route="/"
+          routeMatch="exact"
+          content="Let's get started"
+        />
+        <TourStep
+          target="#dashboard"
+          title="Dashboard"
+          route="/dashboard"
+          content="Your dashboard"
+        />
+        <TourOverlay />
+        <TourCard />
+      </Tour>
+    </MultiTourKitProvider>
+  );
+}
+```
+</Step>
+</Steps>
+
+---
+
+## SSR Considerations
+
+### Handling Hydration
+
+Tours render client-side only. If you see hydration mismatches, ensure components using tours are client components:
+
+```tsx
+'use client'; // Required for App Router
+```
+
+### Dynamic Imports (Optional)
+
+For better initial page load, you can dynamically import the tour:
+
+```tsx title="app/layout.tsx"
+import dynamic from 'next/dynamic';
+
+const ProductTour = dynamic(
+  () => import('./components/product-tour').then(mod => mod.ProductTour),
+  { ssr: false }
+);
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <ProductTour />
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+---
+
+## Custom Router Adapter (Advanced)
+
+If you need more control, create a custom adapter:
+
+<Tabs items={['App Router', 'Pages Router']}>
+<Tab value="App Router">
+```tsx
+'use client';
+
+import { usePathname, useRouter } from 'next/navigation';
+import { createNextAppRouterAdapter } from '@tour-kit/react';
+
+// Create adapter factory
+const createRouter = createNextAppRouterAdapter(usePathname, useRouter);
+
+// Use in component
+function MyTour() {
+  const router = createRouter();
+
+  return (
+    <MultiTourKitProvider router={router}>
+      {/* ... */}
+    </MultiTourKitProvider>
+  );
+}
+```
+</Tab>
+
+<Tab value="Pages Router">
+```tsx
+import { useRouter } from 'next/router';
+import { createNextPagesRouterAdapter } from '@tour-kit/react';
+
+const createRouter = createNextPagesRouterAdapter(useRouter);
+
+function MyTour() {
+  const router = createRouter();
+
+  return (
+    <MultiTourKitProvider router={router}>
+      {/* ... */}
+    </MultiTourKitProvider>
+  );
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+## Route Matching
+
+When defining steps with routes, you can control how routes are matched:
+
+```tsx
+// Exact match - only matches "/"
+<TourStep route="/" routeMatch="exact" />
+
+// Starts with - matches "/dashboard", "/dashboard/settings", etc.
+<TourStep route="/dashboard" routeMatch="startsWith" />
+
+// Contains - matches any route containing "/settings"
+<TourStep route="/settings" routeMatch="contains" />
+```
+
+---
+
+## Persistence Across Pages
+
+Route persistence saves tour state when navigating between pages:
+
+```tsx
+<MultiTourKitProvider
+  router={router}
+  routePersistence={{
+    enabled: true,
+    storage: 'localStorage',  // or 'sessionStorage'
+    key: 'tour-state',
+    expiryMs: 24 * 60 * 60 * 1000, // 24 hours
+    syncTabs: true,
+  }}
+>
+```
+
+---
+
+## Complete Example
+
+```tsx title="app/components/complete-tour.tsx"
+'use client';
+
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+  TourOverlay,
+  TourProgress,
+  TourNavigation,
+  TourClose,
+  MultiTourKitProvider,
+  useNextAppRouter,
+  useTour,
+  usePersistence,
+} from '@tour-kit/react';
+import { useEffect, useState } from 'react';
+
+export function CompleteTour() {
+  const router = useNextAppRouter();
+  const persistence = usePersistence({ keyPrefix: 'myapp' });
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const completed = persistence.getCompletedTours().includes('onboarding');
+    setShow(!completed);
+  }, [persistence]);
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+      onTourComplete={(id) => {
+        persistence.markCompleted(id);
+        console.log('Tour completed:', id);
+      }}
+    >
+      <Tour id="onboarding" autoStart={show}>
+        <TourStep
+          target="#hero"
+          title="Welcome to Our App"
+          content="Let's show you around!"
+          route="/"
+          routeMatch="exact"
+        />
+        <TourStep
+          target="#features"
+          title="Key Features"
+          content="Here's what you can do"
+          route="/features"
+        />
+        <TourStep
+          target="#pricing"
+          title="Pricing"
+          content="Choose your plan"
+          route="/pricing"
+        />
+
+        <TourOverlay />
+
+        <TourCard className="w-80">
+          <TourCardHeader>
+            <TourClose />
+          </TourCardHeader>
+          <TourCardContent />
+          <TourCardFooter>
+            <TourProgress variant="dots" />
+            <TourNavigation />
+          </TourCardFooter>
+        </TourCard>
+      </Tour>
+
+      <StartButton />
+    </MultiTourKitProvider>
+  );
+}
+
+function StartButton() {
+  const { start, isActive } = useTour();
+
+  if (isActive) return null;
+
+  return (
+    <button
+      onClick={() => start('onboarding')}
+      className="fixed bottom-4 right-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+    >
+      Start Tour
+    </button>
+  );
+}
+```
+
+---
+
+## Troubleshooting
+
+<Callout type="error" title="Hydration Mismatch">
+If you see hydration errors, ensure your tour component has `'use client'` at the top (App Router) or is dynamically imported with `ssr: false`.
+</Callout>
+
+<Callout type="error" title="Router Adapter Error">
+If `useNextAppRouter()` throws, make sure you're using it within a client component and that `next/navigation` is available.
+</Callout>
+
+<Callout type="error" title="Multi-Page Tour Not Working">
+Ensure `routePersistence` is enabled and your routes match correctly. Use `routeMatch="startsWith"` for catch-all patterns.
+</Callout>
+
+---
+
+## Related
+
+- [Router Integration Guide](/docs/guides/router-integration) - Deep dive into multi-page tours
+- [Persistence Guide](/docs/guides/persistence) - State persistence options
+- [Vite Integration](/docs/guides/vite) - For Vite/React SPA projects

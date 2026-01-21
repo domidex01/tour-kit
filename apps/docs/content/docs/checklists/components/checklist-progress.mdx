@@ -1,0 +1,148 @@
+---
+title: ChecklistProgress
+description: Progress bar component for checklists
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# ChecklistProgress
+
+Progress bar component that displays completion progress with optional percentage and count.
+
+## Usage
+
+```tsx
+import { ChecklistProgress, useChecklist } from '@tour-kit/checklists';
+
+function Progress() {
+  const { progress } = useChecklist('onboarding');
+
+  return (
+    <ChecklistProgress
+      value={progress.completed}
+      max={progress.total}
+      showPercentage
+    />
+  );
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    value: {
+      type: 'number',
+      required: true,
+      description: 'Current progress value',
+    },
+    max: {
+      type: 'number',
+      required: true,
+      description: 'Maximum value',
+    },
+    showPercentage: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Show percentage text',
+    },
+    showCount: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Show count text (e.g., "3/5")',
+    },
+    variant: {
+      type: "'default' | 'thin' | 'thick'",
+      default: "'default'",
+      description: 'Visual variant',
+    },
+    size: {
+      type: "'sm' | 'default' | 'lg'",
+      default: "'default'",
+      description: 'Size variant',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+    trackClassName: {
+      type: 'string',
+      description: 'Track (background) CSS classes',
+    },
+    barClassName: {
+      type: 'string',
+      description: 'Bar (fill) CSS classes',
+    },
+  }}
+/>
+
+## Examples
+
+### Basic Progress
+
+```tsx
+const { progress } = useChecklist('onboarding');
+
+<ChecklistProgress
+  value={progress.completed}
+  max={progress.total}
+/>
+```
+
+### With Percentage
+
+```tsx
+<ChecklistProgress
+  value={3}
+  max={5}
+  showPercentage
+/>
+// Shows "60%"
+```
+
+### With Count
+
+```tsx
+<ChecklistProgress
+  value={3}
+  max={5}
+  showCount
+/>
+// Shows "3/5"
+```
+
+### Both Percentage and Count
+
+```tsx
+<ChecklistProgress
+  value={3}
+  max={5}
+  showPercentage
+  showCount
+/>
+// Shows "3/5 (60%)"
+```
+
+### Custom Styling
+
+```tsx
+<ChecklistProgress
+  value={progress.completed}
+  max={progress.total}
+  variant="thick"
+  barClassName="bg-gradient-to-r from-blue-500 to-purple-500"
+/>
+```
+
+### Variants
+
+```tsx
+<ChecklistProgress value={3} max={5} variant="thin" />
+<ChecklistProgress value={3} max={5} variant="default" />
+<ChecklistProgress value={3} max={5} variant="thick" />
+```
+
+## Related
+
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Access progress data
+- [useChecklistsProgress](/docs/checklists/hooks/use-checklists-progress) - Multi-checklist progress

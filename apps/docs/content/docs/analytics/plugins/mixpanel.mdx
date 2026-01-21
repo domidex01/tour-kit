@@ -1,0 +1,382 @@
+---
+title: Mixpanel Plugin
+description: Integrate tour analytics with Mixpanel event tracking
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+The Mixpanel plugin sends tour and hint events to [Mixpanel](https://mixpanel.com), an event tracking and user analytics platform.
+
+## Installation
+
+Install the Mixpanel peer dependency:
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add mixpanel-browser
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install mixpanel-browser
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add mixpanel-browser
+    ```
+  </Tab>
+</Tabs>
+
+## Basic Usage
+
+```tsx title="app/providers.tsx"
+import { AnalyticsProvider, mixpanelPlugin } from '@tour-kit/analytics'
+
+export function Providers({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          mixpanelPlugin({
+            token: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN!
+          })
+        ]
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Options
+
+<TypeTable
+  type={{
+    token: {
+      type: 'string',
+      required: true,
+      description: 'Mixpanel project token'
+    },
+    debug: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Enable Mixpanel debug mode'
+    },
+    eventPrefix: {
+      type: 'string',
+      default: '"TourKit: "',
+      description: 'Prefix for all event names in Mixpanel'
+    }
+  }}
+/>
+
+## Event Names
+
+Events are prefixed with `TourKit: ` by default:
+
+| Tour Kit Event | Mixpanel Event Name |
+|----------------|-------------------|
+| `tour_started` | `TourKit: tour_started` |
+| `step_viewed` | `TourKit: step_viewed` |
+| `hint_clicked` | `TourKit: hint_clicked` |
+
+### Custom Prefix
+
+```tsx
+mixpanelPlugin({
+  token: 'xxx',
+  eventPrefix: 'App Tour - '
+})
+
+// Events: App Tour - tour_started, App Tour - step_viewed, etc.
+```
+
+### No Prefix
+
+```tsx
+mixpanelPlugin({
+  token: 'xxx',
+  eventPrefix: ''
+})
+
+// Events: tour_started, step_viewed, etc.
+```
+
+## Event Properties
+
+Events include these properties in Mixpanel:
+
+```ts
+{
+  tour_id: string          // Tour identifier
+  step_id?: string         // Step identifier
+  step_index?: number      // Current step index (0-based)
+  total_steps?: number     // Total steps in tour
+  duration_ms?: number     // Duration in milliseconds
+  ...metadata              // Custom metadata from event
+}
+```
+
+## User Identification
+
+Identify users and set user properties:
+
+```tsx title="app/analytics-wrapper.tsx"
+'use client'
+
+import { AnalyticsProvider, mixpanelPlugin } from '@tour-kit/analytics'
+import { useUser } from '@/lib/auth'
+
+export function AnalyticsWrapper({ children }) {
+  const user = useUser()
+
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          mixpanelPlugin({
+            token: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN!
+          })
+        ],
+        userId: user?.id,
+        userProperties: {
+          $email: user?.email,
+          $name: user?.name,
+          plan: user?.subscription.plan,
+          signup_date: user?.createdAt
+        }
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+<Callout type="info">
+  Mixpanel supports special properties prefixed with `$` like `$email`, `$name`, and `$created`. These are used in Mixpanel's People profiles.
+</Callout>
+
+## Debug Mode
+
+Enable Mixpanel's debug mode to see events in the console:
+
+```tsx
+mixpanelPlugin({
+  token: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN!,
+  debug: true
+})
+```
+
+Debug output shows:
+
+- Events being sent
+- Properties included
+- API responses
+- Error messages
+
+## EU Data Residency
+
+For EU data residency, initialize Mixpanel separately with a custom API host:
+
+```tsx
+import mixpanel from 'mixpanel-browser'
+
+// Initialize Mixpanel with EU endpoint
+mixpanel.init('YOUR_TOKEN', {
+  api_host: 'https://api-eu.mixpanel.com'
+})
+
+// Then use the Tour Kit plugin
+<AnalyticsProvider
+  config={{
+    plugins: [
+      mixpanelPlugin({
+        token: 'YOUR_TOKEN'
+      })
+    ]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Complete Example
+
+```tsx title="app/providers.tsx"
+'use client'
+
+import { AnalyticsProvider, mixpanelPlugin, consolePlugin } from '@tour-kit/analytics'
+import { useUser } from '@/lib/auth'
+
+const isDev = process.env.NODE_ENV === 'development'
+
+export function Providers({ children }) {
+  const user = useUser()
+
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          ...(isDev ? [consolePlugin()] : []),
+          mixpanelPlugin({
+            token: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN!,
+            debug: isDev
+          })
+        ],
+        userId: user?.id,
+        userProperties: user ? {
+          $email: user.email,
+          $name: user.name,
+          plan: user.plan,
+          company: user.company
+        } : undefined,
+        globalProperties: {
+          app_version: '1.0.0',
+          platform: 'web'
+        }
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Analytics in Mixpanel
+
+### Tour Completion Funnel
+
+Create a funnel to analyze tour completion:
+
+1. Go to Insights > Funnels
+2. Add steps:
+   - `TourKit: tour_started`
+   - `TourKit: step_viewed` (filter: step_index = 0)
+   - `TourKit: step_viewed` (filter: step_index = 1)
+   - `TourKit: tour_completed`
+3. Group by: `tour_id`
+
+### Step Duration Analysis
+
+Analyze how long users spend on each step:
+
+1. Go to Insights > Insights
+2. Event: `TourKit: step_completed`
+3. Aggregate: Average of `duration_ms`
+4. Group by: `step_id`
+
+### User Cohorts
+
+Create cohorts based on tour behavior:
+
+1. Go to Cohorts > Create Cohort
+2. Definition: `TourKit: tour_completed` where `tour_id` = "onboarding"
+3. Name: "Completed Onboarding"
+
+Use this cohort to:
+- Compare retention between users who completed tours vs. those who didn't
+- Target messaging to users who skipped tours
+- Analyze feature adoption after tour completion
+
+## User Profiles
+
+View tour activity on user profiles:
+
+1. Go to Users > User Profile
+2. Select a user
+3. View Events tab
+4. Filter by "TourKit:" to see all tour events
+
+## Retention Analysis
+
+Track retention based on tour completion:
+
+1. Go to Insights > Retention
+2. First event: `TourKit: tour_started`
+3. Return event: Any event
+4. Segment by: `tour_id`
+
+## Best Practices
+
+### Use Mixpanel Special Properties
+
+Leverage Mixpanel's special properties for better user profiles:
+
+```tsx
+userProperties: {
+  $email: user.email,          // Sets email in People profile
+  $name: user.name,            // Sets name in People profile
+  $created: user.createdAt,    // Sets signup date
+  plan: user.plan              // Custom property
+}
+```
+
+### Group Properties by Context
+
+Use Mixpanel's group analytics for B2B SaaS:
+
+```tsx
+import mixpanel from 'mixpanel-browser'
+
+// Set company context
+mixpanel.set_group('company_id', 'acme-corp')
+
+// Track with company context
+mixpanelPlugin({
+  token: 'YOUR_TOKEN'
+})
+```
+
+### Production Only
+
+Avoid polluting production data with development events:
+
+```tsx
+const plugins = process.env.NODE_ENV === 'production'
+  ? [mixpanelPlugin({ token: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN! })]
+  : [consolePlugin()]
+```
+
+## Troubleshooting
+
+### Events Not Appearing
+
+Check these common issues:
+
+1. **Token is correct**: Verify your Mixpanel project token
+2. **Ad blockers**: Mixpanel may be blocked by ad blockers
+3. **CORS**: Ensure your domain is whitelisted in Mixpanel settings
+4. **Debug mode**: Enable debug mode to see console logs
+
+```tsx
+mixpanelPlugin({
+  token: 'YOUR_TOKEN',
+  debug: true  // See events in console
+})
+```
+
+### User Not Identified
+
+Ensure you're passing `userId` to the provider:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    plugins: [mixpanelPlugin({ token: 'xxx' })],
+    userId: user?.id  // ✅ Required for user identification
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Related
+
+- [Mixpanel Documentation](https://developer.mixpanel.com/docs)
+- [Plugin Overview](/docs/analytics/plugins) - Plugin architecture
+- [AnalyticsProvider](/docs/analytics/providers) - Provider configuration

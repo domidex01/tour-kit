@@ -1,0 +1,773 @@
+---
+title: Type Reference
+description: Complete TypeScript type reference for @tour-kit/announcements
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Type Reference
+
+Complete TypeScript type definitions for the announcements package.
+
+---
+
+## Core Types
+
+### AnnouncementConfig
+
+Main configuration object for an announcement:
+
+```tsx
+interface AnnouncementConfig<TMetadata = any> {
+  // Required
+  id: string;
+  variant: AnnouncementVariant;
+
+  // Content
+  title?: string;
+  description?: string | ReactNode;
+  media?: AnnouncementMedia;
+
+  // Actions
+  primaryAction?: AnnouncementAction;
+  secondaryAction?: AnnouncementAction;
+
+  // Behavior
+  priority?: AnnouncementPriority;
+  frequency?: FrequencyRule;
+  audience?: AudienceCondition[];
+
+  // Variant Options
+  modalOptions?: ModalOptions;
+  slideoutOptions?: SlideoutOptions;
+  bannerOptions?: BannerOptions;
+  toastOptions?: ToastOptions;
+  spotlightOptions?: SpotlightOptions;
+
+  // Callbacks
+  onShow?: () => void;
+  onDismiss?: (reason: DismissalReason) => void;
+  onComplete?: () => void;
+
+  // Custom data
+  metadata?: TMetadata;
+}
+```
+
+### AnnouncementVariant
+
+```tsx
+type AnnouncementVariant = 'modal' | 'slideout' | 'banner' | 'toast' | 'spotlight';
+```
+
+### AnnouncementPriority
+
+```tsx
+type AnnouncementPriority = 'low' | 'normal' | 'high' | 'critical';
+```
+
+---
+
+## Content Types
+
+### AnnouncementMedia
+
+```tsx
+interface AnnouncementMedia {
+  type: 'image' | 'video' | 'custom';
+  src?: string;
+  alt?: string;
+  poster?: string;        // For videos
+  autoPlay?: boolean;     // For videos
+  component?: ReactNode;  // For custom
+}
+```
+
+**Examples:**
+
+```tsx
+// Image
+media: {
+  type: 'image',
+  src: '/feature.png',
+  alt: 'New feature screenshot',
+}
+
+// Video
+media: {
+  type: 'video',
+  src: '/demo.mp4',
+  poster: '/demo-poster.jpg',
+  autoPlay: true,
+}
+
+// Custom component
+media: {
+  type: 'custom',
+  component: <MyCustomMedia />,
+}
+```
+
+### AnnouncementAction
+
+```tsx
+interface AnnouncementAction {
+  label: string;
+  onClick: () => void;
+  href?: string;          // Optional link
+  variant?: 'primary' | 'secondary' | 'ghost';
+  disabled?: boolean;
+}
+```
+
+**Example:**
+
+```tsx
+primaryAction: {
+  label: 'Try It Now',
+  onClick: () => router.push('/feature'),
+  variant: 'primary',
+}
+```
+
+---
+
+## Frequency Types
+
+### FrequencyRule
+
+```tsx
+type FrequencyRule =
+  | 'once'                                    // Show once ever
+  | 'session'                                 // Once per session
+  | 'always'                                  // Every time
+  | { type: 'times'; count: number }          // N times total
+  | { type: 'interval'; days: number };       // Every N days
+```
+
+**Examples:**
+
+```tsx
+frequency: 'once'
+
+frequency: 'session'
+
+frequency: { type: 'times', count: 3 }
+
+frequency: { type: 'interval', days: 7 }
+```
+
+---
+
+## Audience Types
+
+### AudienceCondition
+
+```tsx
+type AudienceCondition<T = any> =
+  | FieldCondition<T>
+  | CustomCondition<T>;
+```
+
+### FieldCondition
+
+```tsx
+interface FieldCondition<T = any> {
+  field: keyof T;
+  operator: ComparisonOperator;
+  value: any;
+}
+
+type ComparisonOperator =
+  | 'equals'
+  | 'notEquals'
+  | 'in'
+  | 'notIn'
+  | 'greaterThan'
+  | 'lessThan'
+  | 'contains'
+  | 'notContains';
+```
+
+**Examples:**
+
+```tsx
+{ field: 'plan', operator: 'equals', value: 'pro' }
+
+{ field: 'role', operator: 'in', value: ['admin', 'owner'] }
+
+{ field: 'credits', operator: 'greaterThan', value: 100 }
+```
+
+### CustomCondition
+
+```tsx
+interface CustomCondition<T = any> {
+  type: 'custom';
+  check: (context: T) => boolean;
+}
+```
+
+**Example:**
+
+```tsx
+{
+  type: 'custom',
+  check: (user) => user.isActive && user.hasFeature('analytics'),
+}
+```
+
+---
+
+## State Types
+
+### AnnouncementState
+
+Internal state for each announcement:
+
+```tsx
+interface AnnouncementState {
+  id: string;
+  isVisible: boolean;
+  isActive: boolean;
+  isDismissed: boolean;
+  viewCount: number;
+  lastViewedAt: Date | null;
+  dismissedAt: Date | null;
+  dismissalReason: DismissalReason | null;
+}
+```
+
+### DismissalReason
+
+```tsx
+type DismissalReason =
+  | 'close_button'       // User clicked close button
+  | 'overlay_click'      // User clicked overlay
+  | 'escape_key'         // User pressed Escape
+  | 'primary_action'     // User clicked primary action
+  | 'secondary_action'   // User clicked secondary action
+  | 'auto_dismiss'       // Auto-dismissed (toasts)
+  | 'programmatic';      // Dismissed via code
+```
+
+---
+
+## Variant Options
+
+### ModalOptions
+
+```tsx
+interface ModalOptions {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  closeOnOverlay?: boolean;
+  closeOnEscape?: boolean;
+  showCloseButton?: boolean;
+  centered?: boolean;
+}
+```
+
+**Defaults:**
+
+```tsx
+{
+  size: 'md',
+  closeOnOverlay: true,
+  closeOnEscape: true,
+  showCloseButton: true,
+  centered: true,
+}
+```
+
+### SlideoutOptions
+
+```tsx
+interface SlideoutOptions {
+  position?: 'left' | 'right';
+  size?: 'sm' | 'md' | 'lg';
+  width?: number;
+  closeOnOverlay?: boolean;
+  closeOnEscape?: boolean;
+  showCloseButton?: boolean;
+}
+```
+
+**Defaults:**
+
+```tsx
+{
+  position: 'right',
+  size: 'md',
+  closeOnOverlay: true,
+  closeOnEscape: true,
+  showCloseButton: true,
+}
+```
+
+### BannerOptions
+
+```tsx
+interface BannerOptions {
+  position?: 'top' | 'bottom';
+  sticky?: boolean;
+  dismissible?: boolean;
+  intent?: 'info' | 'success' | 'warning' | 'error';
+}
+```
+
+**Defaults:**
+
+```tsx
+{
+  position: 'top',
+  sticky: false,
+  dismissible: true,
+  intent: 'info',
+}
+```
+
+### ToastOptions
+
+```tsx
+interface ToastOptions {
+  position?: ToastPosition;
+  autoDismiss?: boolean;
+  autoDismissDelay?: number;  // milliseconds
+  showCloseButton?: boolean;
+  intent?: 'info' | 'success' | 'warning' | 'error';
+}
+
+type ToastPosition =
+  | 'top-left'
+  | 'top-center'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right';
+```
+
+**Defaults:**
+
+```tsx
+{
+  position: 'bottom-right',
+  autoDismiss: true,
+  autoDismissDelay: 5000,
+  showCloseButton: true,
+  intent: 'info',
+}
+```
+
+### SpotlightOptions
+
+```tsx
+interface SpotlightOptions {
+  target: string;                          // CSS selector
+  targetElement?: HTMLElement;             // Or direct element ref
+  placement?: Placement;
+  offset?: number;
+  padding?: number;
+  borderRadius?: number;
+  closeOnClickOutside?: boolean;
+  closeOnEscape?: boolean;
+  showCloseButton?: boolean;
+}
+
+type Placement =
+  | 'top'
+  | 'top-start'
+  | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'left'
+  | 'left-start'
+  | 'left-end'
+  | 'right'
+  | 'right-start'
+  | 'right-end';
+```
+
+**Defaults:**
+
+```tsx
+{
+  placement: 'bottom',
+  offset: 8,
+  padding: 8,
+  borderRadius: 4,
+  closeOnClickOutside: true,
+  closeOnEscape: true,
+  showCloseButton: true,
+}
+```
+
+---
+
+## Provider Types
+
+### AnnouncementsProviderProps
+
+```tsx
+interface AnnouncementsProviderProps<TUserContext = any> {
+  // Required
+  announcements: AnnouncementConfig[];
+  children: ReactNode;
+
+  // Optional
+  userContext?: TUserContext;
+  queueConfig?: QueueConfig;
+  storage?: StorageType;
+  storageKey?: string;
+
+  // Callbacks
+  onShow?: (id: string) => void;
+  onDismiss?: (id: string, reason: DismissalReason) => void;
+  onComplete?: (id: string) => void;
+  onQueueChange?: (queue: AnnouncementConfig[]) => void;
+
+  // Debug
+  debug?: boolean;
+}
+```
+
+### QueueConfig
+
+```tsx
+interface QueueConfig {
+  maxConcurrent?: number;    // Max announcements shown at once
+  autoShow?: boolean;        // Auto-show next in queue
+  delayBetween?: number;     // Delay between announcements (ms)
+  respectVariants?: boolean; // Allow one per variant
+}
+```
+
+**Defaults:**
+
+```tsx
+{
+  maxConcurrent: 1,
+  autoShow: true,
+  delayBetween: 0,
+  respectVariants: false,
+}
+```
+
+### StorageType
+
+```tsx
+type StorageType = 'localStorage' | 'sessionStorage' | 'memory';
+```
+
+---
+
+## Hook Return Types
+
+### UseAnnouncementReturn
+
+```tsx
+interface UseAnnouncementReturn {
+  // State
+  state: AnnouncementState;
+  config: AnnouncementConfig;
+  isVisible: boolean;
+  isActive: boolean;
+  isDismissed: boolean;
+  canShow: boolean;
+  viewCount: number;
+
+  // Actions
+  show: () => void;
+  hide: () => void;
+  dismiss: (reason?: DismissalReason) => void;
+  complete: () => void;
+  reset: () => void;
+}
+```
+
+### UseAnnouncementsReturn
+
+```tsx
+interface UseAnnouncementsReturn {
+  // All announcements
+  announcements: {
+    all: AnnouncementState[];
+    visible: AnnouncementState[];
+    queued: AnnouncementState[];
+    dismissed: AnnouncementState[];
+  };
+
+  // Actions
+  showNext: () => void;
+  hideAll: () => void;
+  resetAll: () => void;
+}
+```
+
+### UseAnnouncementQueueReturn
+
+```tsx
+interface UseAnnouncementQueueReturn {
+  // Queue state
+  queue: AnnouncementConfig[];
+  queueSize: number;
+  activeCount: number;
+
+  // Actions
+  showNext: () => void;
+  clearQueue: () => void;
+}
+```
+
+---
+
+## Component Props
+
+### AnnouncementModal Props
+
+```tsx
+interface AnnouncementModalProps {
+  id?: string;                    // Announcement ID
+  config?: AnnouncementConfig;    // Or inline config
+  onDismiss?: (reason: DismissalReason) => void;
+}
+```
+
+### AnnouncementSlideout Props
+
+```tsx
+interface AnnouncementSlideoutProps {
+  id?: string;
+  config?: AnnouncementConfig;
+  onDismiss?: (reason: DismissalReason) => void;
+}
+```
+
+### AnnouncementBanner Props
+
+```tsx
+interface AnnouncementBannerProps {
+  id?: string;
+  config?: AnnouncementConfig;
+  onDismiss?: (reason: DismissalReason) => void;
+}
+```
+
+### AnnouncementToast Props
+
+```tsx
+interface AnnouncementToastProps {
+  id?: string;
+  config?: AnnouncementConfig;
+  onDismiss?: (reason: DismissalReason) => void;
+}
+```
+
+### AnnouncementSpotlight Props
+
+```tsx
+interface AnnouncementSpotlightProps {
+  id?: string;
+  config?: AnnouncementConfig;
+  onDismiss?: (reason: DismissalReason) => void;
+}
+```
+
+---
+
+## Headless Component Props
+
+### HeadlessModal Props
+
+```tsx
+interface HeadlessModalProps {
+  id?: string;
+  config?: AnnouncementConfig;
+  children: (props: HeadlessModalRenderProps) => ReactNode;
+}
+
+interface HeadlessModalRenderProps {
+  state: AnnouncementState;
+  config: AnnouncementConfig;
+  isOpen: boolean;
+  dismiss: (reason: DismissalReason) => void;
+  complete: () => void;
+}
+```
+
+### HeadlessSlideout Props
+
+```tsx
+interface HeadlessSlideoutProps {
+  id?: string;
+  config?: AnnouncementConfig;
+  children: (props: HeadlessSlideoutRenderProps) => ReactNode;
+}
+
+interface HeadlessSlideoutRenderProps {
+  state: AnnouncementState;
+  config: AnnouncementConfig;
+  isOpen: boolean;
+  dismiss: (reason: DismissalReason) => void;
+  complete: () => void;
+}
+```
+
+### HeadlessBanner Props
+
+```tsx
+interface HeadlessBannerProps {
+  id?: string;
+  config?: AnnouncementConfig;
+  children: (props: HeadlessBannerRenderProps) => ReactNode;
+}
+
+interface HeadlessBannerRenderProps {
+  state: AnnouncementState;
+  config: AnnouncementConfig;
+  isVisible: boolean;
+  dismiss: (reason: DismissalReason) => void;
+  complete: () => void;
+}
+```
+
+### HeadlessToast Props
+
+```tsx
+interface HeadlessToastProps {
+  id?: string;
+  config?: AnnouncementConfig;
+  children: (props: HeadlessToastRenderProps) => ReactNode;
+}
+
+interface HeadlessToastRenderProps {
+  state: AnnouncementState;
+  config: AnnouncementConfig;
+  isVisible: boolean;
+  dismiss: (reason: DismissalReason) => void;
+  complete: () => void;
+  progress: number;  // 0-100 for auto-dismiss
+}
+```
+
+### HeadlessSpotlight Props
+
+```tsx
+interface HeadlessSpotlightProps {
+  id?: string;
+  config?: AnnouncementConfig;
+  children: (props: HeadlessSpotlightRenderProps) => ReactNode;
+}
+
+interface HeadlessSpotlightRenderProps {
+  state: AnnouncementState;
+  config: AnnouncementConfig;
+  isVisible: boolean;
+  targetRect: DOMRect | null;
+  dismiss: (reason: DismissalReason) => void;
+  complete: () => void;
+}
+```
+
+---
+
+## Utility Types
+
+### Generic Metadata
+
+Extend announcement configs with custom metadata:
+
+```tsx
+interface CustomMetadata {
+  campaignId: string;
+  source: 'email' | 'in-app' | 'push';
+  experimentId?: string;
+}
+
+const config: AnnouncementConfig<CustomMetadata> = {
+  id: 'promo',
+  variant: 'modal',
+  title: 'Special Offer',
+  metadata: {
+    campaignId: 'summer-2024',
+    source: 'in-app',
+  },
+};
+```
+
+### Generic User Context
+
+Type-safe user context:
+
+```tsx
+interface UserContext {
+  plan: 'free' | 'pro' | 'enterprise';
+  role: 'user' | 'admin';
+  features: string[];
+}
+
+<AnnouncementsProvider<UserContext>
+  userContext={{
+    plan: 'pro',
+    role: 'user',
+    features: ['analytics'],
+  }}
+  announcements={announcements}
+/>
+```
+
+---
+
+## Import Paths
+
+```tsx
+// Types
+import type {
+  AnnouncementConfig,
+  AnnouncementVariant,
+  AnnouncementPriority,
+  FrequencyRule,
+  AudienceCondition,
+  DismissalReason,
+  QueueConfig,
+  UseAnnouncementReturn,
+  UseAnnouncementsReturn,
+  UseAnnouncementQueueReturn,
+} from '@tour-kit/announcements';
+
+// Components
+import {
+  AnnouncementsProvider,
+  AnnouncementModal,
+  AnnouncementSlideout,
+  AnnouncementBanner,
+  AnnouncementToast,
+  AnnouncementSpotlight,
+} from '@tour-kit/announcements';
+
+// Headless
+import {
+  HeadlessModal,
+  HeadlessSlideout,
+  HeadlessBanner,
+  HeadlessToast,
+  HeadlessSpotlight,
+} from '@tour-kit/announcements/headless';
+
+// Hooks
+import {
+  useAnnouncement,
+  useAnnouncements,
+  useAnnouncementQueue,
+} from '@tour-kit/announcements';
+```
+
+---
+
+## Related
+
+- [AnnouncementsProvider](/docs/announcements/providers/announcements-provider) - Provider configuration
+- [Components](/docs/announcements/components) - Styled components
+- [Hooks](/docs/announcements/hooks/use-announcement) - Hook APIs
+- [Headless](/docs/announcements/headless) - Headless components

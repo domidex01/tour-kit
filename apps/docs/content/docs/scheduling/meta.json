@@ -1,0 +1,10 @@
+{
+  "title": "Scheduling",
+  "pages": [
+    "index",
+    "hooks",
+    "utilities",
+    "types",
+    "presets"
+  ]
+}

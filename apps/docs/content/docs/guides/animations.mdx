@@ -1,0 +1,616 @@
+---
+title: Animations
+description: Customize tour transitions, respect reduced motion, and create smooth experiences
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
+
+# Animations
+
+Tour Kit provides smooth, performant animations out of the box while respecting users who prefer reduced motion. This guide covers customizing animations, understanding the built-in keyframes, and integrating with animation libraries.
+
+## Built-in Animations
+
+Tour Kit includes three core animations:
+
+| Animation | Purpose | Duration |
+|-----------|---------|----------|
+| `tour-spotlight-in` | Overlay fade-in | 200ms |
+| `tour-card-in` | Card entrance (scale + fade) | 200ms |
+| `tour-pulse` | Hint beacon pulse | 1.5s (infinite) |
+
+### Default Keyframes
+
+```css title="Built-in keyframes"
+@keyframes tour-spotlight-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tour-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes tour-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 8px hsl(var(--primary) / 0);
+  }
+}
+```
+
+---
+
+## CSS Custom Properties
+
+Animation timing is controlled via CSS variables:
+
+```css title="Animation variables"
+:root {
+  /* Duration presets */
+  --tour-duration-fast: 150ms;
+  --tour-duration-normal: 200ms;
+  --tour-duration-slow: 300ms;
+
+  /* Easing function */
+  --tour-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+```
+
+### Customizing Duration
+
+Override the variables in your CSS:
+
+```css title="styles/globals.css"
+:root {
+  /* Slower animations */
+  --tour-duration-normal: 300ms;
+  --tour-duration-slow: 500ms;
+
+  /* Custom easing */
+  --tour-timing: cubic-bezier(0.16, 1, 0.3, 1);
+}
+```
+
+### Disabling Animations
+
+Set durations to zero:
+
+```css title="Disable all animations"
+:root {
+  --tour-duration-fast: 0ms;
+  --tour-duration-normal: 0ms;
+  --tour-duration-slow: 0ms;
+}
+```
+
+---
+
+## Tailwind Integration
+
+### Using the Plugin
+
+The Tour Kit Tailwind plugin registers animations and utilities:
+
+```js title="tailwind.config.js"
+import { tourKitPlugin } from '@tour-kit/react/tailwind'
+
+export default {
+  plugins: [tourKitPlugin],
+}
+```
+
+### Available Utilities
+
+After adding the plugin, you can use:
+
+```tsx
+// Animation classes
+<div className="animate-tour-pulse" />
+<div className="animate-tour-spotlight-in" />
+<div className="animate-tour-card-in" />
+
+// Spotlight utilities
+<div className="tour-spotlight-cutout" />      // 50% opacity overlay
+<div className="tour-spotlight-cutout-light" /> // 30% opacity
+<div className="tour-spotlight-cutout-dark" />  // 70% opacity
+```
+
+### Custom Animations in Tailwind
+
+Extend the theme to add your own:
+
+```js title="tailwind.config.js"
+export default {
+  theme: {
+    extend: {
+      keyframes: {
+        'tour-slide-up': {
+          from: { opacity: '0', transform: 'translateY(10px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'tour-bounce-in': {
+          '0%': { transform: 'scale(0.3)', opacity: '0' },
+          '50%': { transform: 'scale(1.05)' },
+          '70%': { transform: 'scale(0.9)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
+      animation: {
+        'tour-slide-up': 'tour-slide-up 200ms ease-out',
+        'tour-bounce-in': 'tour-bounce-in 400ms ease-out',
+      },
+    },
+  },
+  plugins: [tourKitPlugin],
+}
+```
+
+---
+
+## Reduced Motion Support
+
+Tour Kit automatically respects the `prefers-reduced-motion` media query.
+
+### Automatic Behavior
+
+When users enable reduced motion:
+
+```css title="Built-in reduced motion handling"
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --tour-duration-fast: 0ms;
+    --tour-duration-normal: 0ms;
+    --tour-duration-slow: 0ms;
+  }
+
+  .animate-tour-pulse,
+  .animate-tour-spotlight-in,
+  .animate-tour-card-in {
+    animation: none;
+  }
+}
+```
+
+### What Changes
+
+| Feature | Normal | Reduced Motion |
+|---------|--------|----------------|
+| Overlay | Fade in | Instant appear |
+| Tour card | Scale + fade | Instant appear |
+| Hint pulse | Continuous pulse | Static |
+| Spotlight move | Animated | Instant |
+| Video autoplay | Enabled | Shows poster |
+| GIF autoplay | Enabled | Paused |
+
+### Using the Hook
+
+Detect reduced motion preference in your components:
+
+```tsx title="Using usePrefersReducedMotion"
+import { usePrefersReducedMotion } from '@tour-kit/core'
+
+function MyAnimatedComponent() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  return (
+    <div
+      style={{
+        transition: prefersReducedMotion
+          ? 'none'
+          : 'transform 200ms ease-out',
+      }}
+    >
+      Content
+    </div>
+  )
+}
+```
+
+### Testing Reduced Motion
+
+<Tabs items={['Chrome DevTools', 'CSS Override', 'Hook Mock']}>
+  <Tab value="Chrome DevTools">
+1. Open DevTools (F12)
+2. Press Cmd/Ctrl + Shift + P
+3. Type "reduced motion"
+4. Select "Emulate CSS prefers-reduced-motion: reduce"
+  </Tab>
+  <Tab value="CSS Override">
+```css
+/* Force reduced motion for testing */
+* {
+  animation-duration: 0ms !important;
+  transition-duration: 0ms !important;
+}
+```
+  </Tab>
+  <Tab value="Hook Mock">
+```tsx
+// In your test setup
+vi.mock('@tour-kit/core', async () => {
+  const actual = await vi.importActual('@tour-kit/core')
+  return {
+    ...actual,
+    usePrefersReducedMotion: () => true,
+  }
+})
+```
+  </Tab>
+</Tabs>
+
+---
+
+## Component-Specific Animations
+
+### Tour Card
+
+The card uses `tour-card-in` by default:
+
+```tsx title="Custom card animation"
+import { TourCard } from '@tour-kit/react'
+
+<TourCard
+  className="animate-tour-bounce-in" // Replace default animation
+  // ...props
+/>
+```
+
+### Overlay/Spotlight
+
+The overlay fades in with `tour-spotlight-in`:
+
+```tsx title="Custom overlay animation"
+import { TourOverlay } from '@tour-kit/react'
+
+<TourOverlay
+  className="animate-tour-slide-up"
+  // ...props
+/>
+```
+
+### Hints
+
+Hint beacons use `tour-pulse`:
+
+```tsx title="Custom hint animation"
+import { HintHotspot } from '@tour-kit/hints'
+
+<HintHotspot
+  className="animate-bounce" // Tailwind's bounce
+  // ...props
+/>
+```
+
+---
+
+## Framer Motion Integration
+
+For advanced animations, integrate with Framer Motion:
+
+### Basic Integration
+
+```tsx title="Framer Motion card wrapper"
+import { motion, AnimatePresence } from 'framer-motion'
+import { useTour } from '@tour-kit/core'
+
+function AnimatedTourCard({ children }) {
+  const { isActive } = useTour()
+
+  return (
+    <AnimatePresence>
+      {isActive && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: -20 }}
+          transition={{
+            type: 'spring',
+            stiffness: 300,
+            damping: 30,
+          }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+```
+
+### Step Transitions
+
+Animate between steps:
+
+```tsx title="Animated step transitions"
+import { motion, AnimatePresence } from 'framer-motion'
+import { useTour, useStep } from '@tour-kit/core'
+
+function AnimatedStepContent() {
+  const { currentStepIndex } = useTour()
+  const step = useStep()
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={currentStepIndex}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.2 }}
+      >
+        <h3>{step.title}</h3>
+        <p>{step.description}</p>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+```
+
+### Respecting Reduced Motion
+
+```tsx title="Framer Motion with reduced motion"
+import { motion, useReducedMotion } from 'framer-motion'
+
+function AccessibleAnimation({ children }) {
+  const shouldReduceMotion = useReducedMotion()
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: shouldReduceMotion ? 0 : 0.3,
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+```
+
+---
+
+## Performance Tips
+
+### Use Transform and Opacity
+
+These properties are GPU-accelerated:
+
+```css
+/* Good - GPU accelerated */
+.tour-card {
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 200ms, opacity 200ms;
+}
+
+/* Avoid - causes layout reflow */
+.tour-card {
+  width: 95%;
+  margin-top: 10px;
+  transition: width 200ms, margin 200ms;
+}
+```
+
+### Avoid Layout Thrash
+
+Don't read and write layout properties in rapid succession:
+
+```tsx
+// Bad - causes layout thrash
+function BadAnimation() {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (ref.current) {
+      const height = ref.current.offsetHeight // Read
+      ref.current.style.height = `${height + 10}px` // Write
+      const width = ref.current.offsetWidth // Read again!
+    }
+  }, [])
+}
+
+// Good - batch reads, then writes
+function GoodAnimation() {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (ref.current) {
+      // Batch all reads
+      const height = ref.current.offsetHeight
+      const width = ref.current.offsetWidth
+
+      // Then all writes
+      requestAnimationFrame(() => {
+        ref.current!.style.height = `${height + 10}px`
+        ref.current!.style.width = `${width + 10}px`
+      })
+    }
+  }, [])
+}
+```
+
+### Use will-change Sparingly
+
+```css
+/* Only add will-change right before animation */
+.tour-card-entering {
+  will-change: transform, opacity;
+}
+
+/* Remove after animation completes */
+.tour-card-entered {
+  will-change: auto;
+}
+```
+
+<Callout type="warn">
+  Don't apply `will-change` to many elements at once. It increases memory usage and can actually hurt performance.
+</Callout>
+
+---
+
+## Announcement Animations
+
+The `@tour-kit/announcements` package has its own animation system:
+
+### Modal Animations
+
+```css title="Custom modal animations"
+/* Override default modal animation */
+[data-tour-announcement-modal] {
+  animation: custom-modal-in 300ms ease-out;
+}
+
+@keyframes custom-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+```
+
+### Toast Animations
+
+```css title="Custom toast slide-in"
+[data-tour-announcement-toast] {
+  animation: toast-slide-in 200ms ease-out;
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+```
+
+### Banner Animations
+
+```css title="Custom banner reveal"
+[data-tour-announcement-banner] {
+  animation: banner-reveal 300ms ease-out;
+}
+
+@keyframes banner-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+---
+
+## Common Patterns
+
+### Staggered Entrance
+
+Animate multiple elements with delay:
+
+```tsx title="Staggered animation"
+function StaggeredTourContent({ items }) {
+  return (
+    <div>
+      {items.map((item, index) => (
+        <motion.div
+          key={item.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: index * 0.1,
+            duration: 0.2,
+          }}
+        >
+          {item.content}
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Exit Animations
+
+Animate elements when tour closes:
+
+```tsx title="Exit animation pattern"
+import { useEffect, useState } from 'react'
+import { useTour } from '@tour-kit/core'
+
+function TourWithExitAnimation({ children }) {
+  const { isActive } = useTour()
+  const [shouldRender, setShouldRender] = useState(false)
+  const [isExiting, setIsExiting] = useState(false)
+
+  useEffect(() => {
+    if (isActive) {
+      setShouldRender(true)
+      setIsExiting(false)
+    } else if (shouldRender) {
+      setIsExiting(true)
+      // Wait for exit animation
+      const timer = setTimeout(() => {
+        setShouldRender(false)
+        setIsExiting(false)
+      }, 200)
+      return () => clearTimeout(timer)
+    }
+  }, [isActive, shouldRender])
+
+  if (!shouldRender) return null
+
+  return (
+    <div className={isExiting ? 'animate-fade-out' : 'animate-fade-in'}>
+      {children}
+    </div>
+  )
+}
+```
+
+---
+
+## Summary
+
+| Need | Solution |
+|------|----------|
+| Change duration | Override `--tour-duration-*` CSS variables |
+| Custom keyframes | Add to Tailwind config or CSS |
+| Disable animations | Set durations to `0ms` |
+| Reduced motion | Automatic via media query |
+| Advanced animations | Integrate Framer Motion |
+| Performance | Use transform/opacity, avoid layout properties |
+
+---
+
+## Related Resources
+
+- [CSS Variables](/docs/react/styling/css-variables)
+- [Tailwind Integration](/docs/react/styling/tailwind)
+- [Accessibility Guide](/docs/guides/accessibility)
+- [usePrefersReducedMotion](/docs/core/hooks/use-media-query)

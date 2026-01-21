@@ -1,5 +1,5 @@
 {
   "title": "@tour-kit/react",
   "icon": "Component",
-  "pages": ["index", "components", "headless", "styling"]
+  "pages": ["index", "components", "headless", "adapters", "providers", "hooks", "styling"]
 }

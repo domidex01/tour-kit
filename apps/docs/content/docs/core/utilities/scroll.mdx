@@ -1,0 +1,340 @@
+---
+title: Scroll Utilities
+description: Smooth scrolling and scroll lock utilities
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Scroll Utilities
+
+Utilities for scrolling elements into view and managing scroll behavior during tours.
+
+## Why Use These Utilities?
+
+Tour steps often target elements that are:
+
+- **Below the fold** - Need to scroll into view
+- **In scrollable containers** - Nested scroll areas
+- **Behind modals** - Need scroll locking
+
+---
+
+## scrollIntoView
+
+Scroll an element into the viewport with configurable behavior.
+
+### Usage
+
+```tsx
+import { scrollIntoView } from '@tour-kit/core';
+
+// Default behavior (smooth, centered)
+const element = document.getElementById('target');
+await scrollIntoView(element);
+
+// Custom configuration
+await scrollIntoView(element, {
+  behavior: 'instant',
+  block: 'start',
+  offset: 40,
+});
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    element: {
+      type: 'HTMLElement',
+      description: 'Element to scroll into view',
+    },
+  }}
+/>
+
+### Configuration
+
+<TypeTable
+  type={{
+    enabled: {
+      type: 'boolean',
+      description: 'Enable/disable scrolling',
+      default: 'true',
+    },
+    behavior: {
+      type: "'smooth' | 'instant'",
+      description: 'Scroll animation behavior',
+      default: "'smooth'",
+    },
+    block: {
+      type: "'start' | 'center' | 'end' | 'nearest'",
+      description: 'Vertical alignment',
+      default: "'center'",
+    },
+    offset: {
+      type: 'number',
+      description: 'Additional offset in pixels',
+      default: '20',
+    },
+  }}
+/>
+
+### Return Value
+
+`Promise<void>` - Resolves when scrolling completes (or immediately if disabled/already visible).
+
+### Already Visible Elements
+
+```tsx
+import { scrollIntoView, isElementVisible } from '@tour-kit/core';
+
+// scrollIntoView skips scrolling if element is already visible
+const element = document.getElementById('visible-element');
+await scrollIntoView(element); // Resolves immediately if visible
+```
+
+---
+
+## scrollTo
+
+Scroll a container to a specific position.
+
+### Usage
+
+```tsx
+import { scrollTo } from '@tour-kit/core';
+
+// Scroll window
+scrollTo(window, { top: 0 }); // Scroll to top
+
+// Scroll container
+const container = document.getElementById('scroll-container');
+scrollTo(container, { top: 100, left: 0 }, 'smooth');
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    container: {
+      type: 'HTMLElement | Window',
+      description: 'Element or window to scroll',
+    },
+    position: {
+      type: '{ top?: number; left?: number }',
+      description: 'Target scroll position',
+    },
+    behavior: {
+      type: 'ScrollBehavior',
+      description: 'Scroll behavior',
+      default: "'smooth'",
+    },
+  }}
+/>
+
+---
+
+## getScrollPosition
+
+Get the current scroll position of a container.
+
+### Usage
+
+```tsx
+import { getScrollPosition } from '@tour-kit/core';
+
+// Window scroll position
+const windowPos = getScrollPosition();
+console.log(windowPos.x, windowPos.y);
+
+// Container scroll position
+const container = document.getElementById('scroll-container');
+const containerPos = getScrollPosition(container);
+```
+
+### Return Value
+
+```ts
+{ x: number; y: number }
+```
+
+---
+
+## lockScroll
+
+Lock page scrolling and return an unlock function. Essential for modal overlays.
+
+### Usage
+
+```tsx
+import { lockScroll } from '@tour-kit/core';
+
+function TourModal() {
+  useEffect(() => {
+    // Lock scroll when modal opens
+    const unlock = lockScroll();
+
+    // Unlock when modal closes
+    return () => unlock();
+  }, []);
+
+  return <div className="modal">Tour content</div>;
+}
+```
+
+### Return Value
+
+`() => void` - Function to restore scroll behavior.
+
+### How It Works
+
+1. **Saves current scroll position**
+2. **Fixes body position** - Prevents scroll while maintaining visual position
+3. **Restores on unlock** - Returns to original scroll position
+
+```tsx
+// Internal implementation:
+function lockScroll(): () => void {
+  const scrollY = window.scrollY;
+
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = '100%';
+  document.body.style.overflowY = 'scroll'; // Prevent layout shift
+
+  return () => {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.style.overflowY = '';
+    window.scrollTo(0, scrollY); // Restore position
+  };
+}
+```
+
+<Callout type="warn">
+Always call the unlock function when done. Failing to unlock will leave the page in a broken state.
+</Callout>
+
+---
+
+## Scroll Behavior Comparison
+
+<Tabs items={['smooth', 'instant']}>
+<Tab value="smooth">
+```tsx
+await scrollIntoView(element, { behavior: 'smooth' });
+```
+
+- Animated scrolling
+- Better UX for visible transitions
+- ~500ms duration
+- Respects `prefers-reduced-motion`
+</Tab>
+
+<Tab value="instant">
+```tsx
+await scrollIntoView(element, { behavior: 'instant' });
+```
+
+- Immediate jump
+- Use for programmatic navigation
+- Zero delay
+- Use for `prefers-reduced-motion`
+</Tab>
+</Tabs>
+
+---
+
+## Block Alignment Options
+
+```tsx
+// 'start' - Element at top of viewport
+await scrollIntoView(element, { block: 'start' });
+
+// 'center' - Element centered in viewport (default)
+await scrollIntoView(element, { block: 'center' });
+
+// 'end' - Element at bottom of viewport
+await scrollIntoView(element, { block: 'end' });
+
+// 'nearest' - Minimum scroll needed
+await scrollIntoView(element, { block: 'nearest' });
+```
+
+---
+
+## Nested Scroll Containers
+
+For elements in nested scrollable containers:
+
+```tsx
+import { scrollIntoView, getScrollParent } from '@tour-kit/core';
+
+async function scrollToNestedElement(selector: string) {
+  const element = document.querySelector(selector);
+  if (!element) return;
+
+  // Find the scroll parent
+  const scrollParent = getScrollParent(element);
+
+  // Scroll both the container and window if needed
+  if (scrollParent !== window) {
+    element.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
+  // Also ensure container is visible in window
+  await scrollIntoView(element);
+}
+```
+
+---
+
+## Reduced Motion Support
+
+```tsx
+import { scrollIntoView, prefersReducedMotion } from '@tour-kit/core';
+
+const element = document.getElementById('target');
+
+await scrollIntoView(element, {
+  behavior: prefersReducedMotion() ? 'instant' : 'smooth',
+});
+```
+
+---
+
+## Complete Tour Scroll Example
+
+```tsx
+import { scrollIntoView, lockScroll } from '@tour-kit/core';
+import { usePrefersReducedMotion } from '@tour-kit/core';
+
+function TourOverlay({ targetElement, children }) {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    // Lock background scroll
+    const unlock = lockScroll();
+
+    // Scroll target into view
+    scrollIntoView(targetElement, {
+      behavior: prefersReducedMotion ? 'instant' : 'smooth',
+      block: 'center',
+    });
+
+    return unlock;
+  }, [targetElement, prefersReducedMotion]);
+
+  return <div className="tour-overlay">{children}</div>;
+}
+```
+
+---
+
+## Related
+
+- [useSpotlight](/docs/core/hooks/use-spotlight) - Uses scroll utilities internally
+- [DOM Utilities](/docs/core/utilities/dom) - Element visibility detection
+- [useMediaQuery](/docs/core/hooks/use-media-query) - Reduced motion detection

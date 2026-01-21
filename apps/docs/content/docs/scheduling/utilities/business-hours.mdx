@@ -1,0 +1,344 @@
+---
+title: Business Hours Utilities
+description: Functions for checking business hours and holidays
+---
+
+# Business Hours Utilities
+
+Utilities for working with complex business hours configurations including split hours and holidays.
+
+## isWithinBusinessHours
+
+Check if a date falls within business hours.
+
+```ts
+import { isWithinBusinessHours } from '@tour-kit/scheduling'
+
+const hours = {
+  days: {
+    1: { open: true, hours: [{ start: '09:00', end: '17:00' }] }, // Monday
+    2: { open: true, hours: [{ start: '09:00', end: '17:00' }] }, // Tuesday
+    // ... etc
+  },
+}
+
+const isOpen = isWithinBusinessHours(new Date(), hours, 'America/New_York')
+```
+
+## isHoliday
+
+Check if a date is a holiday.
+
+```ts
+import { isHoliday } from '@tour-kit/scheduling'
+
+const holidays = ['2024-12-25', '2024-01-01']
+
+if (isHoliday(new Date(), holidays)) {
+  console.log('Office closed for holiday')
+}
+```
+
+## getDayBusinessHours
+
+Get the business hours configuration for a specific day.
+
+```ts
+import { getDayBusinessHours } from '@tour-kit/scheduling'
+
+const dayHours = getDayBusinessHours(1, hours) // Monday
+// { open: true, hours: [{ start: '09:00', end: '17:00' }] }
+```
+
+## BUSINESS_HOURS_PRESETS
+
+Pre-configured business hours patterns.
+
+```ts
+import { BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
+
+// Standard 9-5, Monday-Friday
+BUSINESS_HOURS_PRESETS.standard
+
+// Extended hours, Monday-Saturday
+BUSINESS_HOURS_PRESETS.extended
+
+// 24/7 availability
+BUSINESS_HOURS_PRESETS.always
+
+// Weekdays only, all day
+BUSINESS_HOURS_PRESETS.weekdaysOnly
+```
+
+## Examples
+
+### Basic Business Hours
+
+```ts
+import { isWithinBusinessHours, BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
+
+const isOpen = isWithinBusinessHours(
+  new Date(),
+  BUSINESS_HOURS_PRESETS.standard,
+  'America/New_York'
+)
+
+if (isOpen) {
+  enableLiveSupport()
+}
+```
+
+### Custom Hours Per Day
+
+```ts
+const customHours = {
+  default: { open: false },
+  days: {
+    1: { open: true, hours: [{ start: '09:00', end: '17:00' }] }, // Mon
+    2: { open: true, hours: [{ start: '09:00', end: '17:00' }] }, // Tue
+    3: { open: true, hours: [{ start: '09:00', end: '17:00' }] }, // Wed
+    4: { open: true, hours: [{ start: '09:00', end: '17:00' }] }, // Thu
+    5: { open: true, hours: [{ start: '09:00', end: '15:00' }] }, // Fri - half day
+  },
+}
+
+const isOpen = isWithinBusinessHours(new Date(), customHours, 'UTC')
+```
+
+### Split Hours (Lunch Break)
+
+```ts
+const hoursWithLunch = {
+  default: { open: false },
+  days: {
+    1: {
+      open: true,
+      hours: [
+        { start: '09:00', end: '12:00' }, // Morning
+        { start: '13:00', end: '17:00' }, // Afternoon
+      ],
+    },
+    // ... repeat for other days
+  },
+}
+
+const isOpen = isWithinBusinessHours(new Date(), hoursWithLunch, 'UTC')
+```
+
+### With Holidays
+
+```ts
+import { isWithinBusinessHours, isHoliday } from '@tour-kit/scheduling'
+
+const hours = BUSINESS_HOURS_PRESETS.standard
+const holidays = ['2024-12-25', '2024-01-01', '2024-07-04']
+
+function isSupportAvailable(date: Date = new Date()): boolean {
+  if (isHoliday(date, holidays)) {
+    return false
+  }
+
+  return isWithinBusinessHours(date, hours, 'America/New_York')
+}
+```
+
+### Different Timezones
+
+```ts
+const hours = {
+  timezone: 'America/New_York', // Office timezone
+  days: {
+    1: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+    // ...
+  },
+}
+
+// Automatically uses the configured timezone
+const isOpen = isWithinBusinessHours(new Date(), hours)
+```
+
+### Multiple Office Locations
+
+```ts
+function isAnyOfficeOpen(date: Date): boolean {
+  const offices = [
+    { tz: 'America/New_York', hours: BUSINESS_HOURS_PRESETS.standard },
+    { tz: 'Europe/London', hours: BUSINESS_HOURS_PRESETS.standard },
+    { tz: 'Asia/Tokyo', hours: BUSINESS_HOURS_PRESETS.standard },
+  ]
+
+  return offices.some(({ tz, hours }) => isWithinBusinessHours(date, hours, tz))
+}
+
+if (isAnyOfficeOpen(new Date())) {
+  showGlobalSupportBanner()
+}
+```
+
+### Check Specific Day Hours
+
+```ts
+import { getDayBusinessHours, getDayOfWeek } from '@tour-kit/scheduling'
+
+const hours = BUSINESS_HOURS_PRESETS.standard
+const date = new Date()
+const dayNum = getDayOfWeek(date, 'UTC')
+
+const todaysHours = getDayBusinessHours(dayNum, hours)
+
+if (todaysHours?.open) {
+  console.log('Open today:', todaysHours.hours)
+} else {
+  console.log('Closed today')
+}
+```
+
+### Display Hours UI
+
+```tsx
+import { getDayBusinessHours, DAY_NAMES } from '@tour-kit/scheduling'
+
+function BusinessHoursDisplay({ hours }: Props) {
+  return (
+    <table>
+      <tbody>
+        {DAY_NAMES.map((dayName, dayNum) => {
+          const dayHours = getDayBusinessHours(dayNum, hours)
+
+          return (
+            <tr key={dayName}>
+              <td>{dayName}</td>
+              <td>
+                {dayHours?.open
+                  ? dayHours.hours?.map((h) => `${h.start}-${h.end}`).join(', ')
+                  : 'Closed'}
+              </td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
+  )
+}
+```
+
+### Regional Holidays
+
+```ts
+const usHolidays = [
+  '2024-01-01', // New Year's Day
+  '2024-07-04', // Independence Day
+  '2024-12-25', // Christmas
+]
+
+const ukHolidays = [
+  '2024-01-01', // New Year's Day
+  '2024-12-25', // Christmas Day
+  '2024-12-26', // Boxing Day
+]
+
+function getHolidaysForRegion(region: string): string[] {
+  switch (region) {
+    case 'us':
+      return usHolidays
+    case 'uk':
+      return ukHolidays
+    default:
+      return []
+  }
+}
+```
+
+## BusinessHours Type
+
+```ts
+interface BusinessHours {
+  /** Default hours for days not explicitly configured */
+  default?: DayHours
+  /** Hours by day of week (0 = Sunday, 6 = Saturday) */
+  days?: {
+    [day: number]: DayHours
+  }
+  /** Override timezone */
+  timezone?: string
+  /** Holidays (YYYY-MM-DD format) */
+  holidays?: string[]
+}
+
+interface DayHours {
+  /** Whether open on this day */
+  open: boolean
+  /** Time ranges when open (allows split hours) */
+  hours?: TimeRange[]
+}
+```
+
+## Presets Reference
+
+### standard
+
+Monday-Friday, 9am-5pm:
+
+```ts
+{
+  default: { open: false },
+  days: {
+    1: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+    2: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+    3: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+    4: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+    5: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+  },
+}
+```
+
+### extended
+
+Monday-Saturday, 8am-8pm (10am-6pm Saturday):
+
+```ts
+{
+  default: { open: false },
+  days: {
+    1: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+    2: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+    3: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+    4: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+    5: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+    6: { open: true, hours: [{ start: '10:00', end: '18:00' }] },
+  },
+}
+```
+
+### always
+
+24/7:
+
+```ts
+{
+  default: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+}
+```
+
+### weekdaysOnly
+
+Monday-Friday, all day:
+
+```ts
+{
+  default: { open: false },
+  days: {
+    1: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+    2: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+    3: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+    4: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+    5: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+  },
+}
+```
+
+## Related
+
+- [BUSINESS_HOURS_PRESETS](/docs/scheduling/presets#business-hours-presets) - Pre-configured patterns
+- [BusinessHours type](/docs/scheduling/types#businesshours) - Type reference
+- [Time Range utilities](/docs/scheduling/utilities/time-range) - Time checking

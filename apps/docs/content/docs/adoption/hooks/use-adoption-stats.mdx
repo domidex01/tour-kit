@@ -1,0 +1,649 @@
+---
+title: useAdoptionStats
+description: Get aggregated adoption metrics across all features
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`useAdoptionStats` provides aggregated statistics across all features, including adoption rates, feature counts by status, and category breakdowns. Use this hook to build dashboards and analytics views.
+
+## Basic Usage
+
+```tsx
+import { useAdoptionStats } from '@tour-kit/adoption'
+
+function AdoptionOverview() {
+  const stats = useAdoptionStats()
+
+  return (
+    <div className="stats-grid">
+      <StatCard
+        title="Adoption Rate"
+        value={`${stats.adoptionRate.toFixed(1)}%`}
+      />
+      <StatCard
+        title="Adopted Features"
+        value={`${stats.adoptedCount}/${stats.totalCount}`}
+      />
+    </div>
+  )
+}
+```
+
+## Return Value
+
+<TypeTable
+  type={{
+    features: {
+      type: 'FeatureWithUsage[]',
+      description: 'All features with their current usage data',
+    },
+    adoptionRate: {
+      type: 'number',
+      description: 'Percentage of features adopted (0-100)',
+    },
+    adoptedCount: {
+      type: 'number',
+      description: 'Number of adopted features',
+    },
+    totalCount: {
+      type: 'number',
+      description: 'Total number of features',
+    },
+    byStatus: {
+      type: 'Record<AdoptionStatus, FeatureWithUsage[]>',
+      description: 'Features grouped by status (not_started, exploring, adopted, churned)',
+    },
+    byCategory: {
+      type: 'Record<string, { adopted: number, total: number, rate: number }>',
+      description: 'Features grouped by category with adoption stats',
+    },
+  }}
+/>
+
+## Examples
+
+### Dashboard Overview
+
+Build a comprehensive dashboard:
+
+```tsx
+function AdoptionDashboard() {
+  const stats = useAdoptionStats()
+
+  return (
+    <div className="dashboard">
+      <div className="header">
+        <h1>Feature Adoption</h1>
+        <p className="metric">
+          {stats.adoptedCount} of {stats.totalCount} features adopted
+          ({stats.adoptionRate.toFixed(1)}%)
+        </p>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard
+          title="Not Started"
+          count={stats.byStatus.not_started.length}
+          color="gray"
+        />
+        <StatCard
+          title="Exploring"
+          count={stats.byStatus.exploring.length}
+          color="blue"
+        />
+        <StatCard
+          title="Adopted"
+          count={stats.byStatus.adopted.length}
+          color="green"
+        />
+        <StatCard
+          title="Churned"
+          count={stats.byStatus.churned.length}
+          color="red"
+        />
+      </div>
+    </div>
+  )
+}
+```
+
+### Category Breakdown
+
+Show adoption by feature category:
+
+```tsx
+function CategoryBreakdown() {
+  const { byCategory } = useAdoptionStats()
+
+  return (
+    <div className="categories">
+      <h2>Adoption by Category</h2>
+      {Object.entries(byCategory).map(([category, stats]) => (
+        <div key={category} className="category-card">
+          <h3>{category}</h3>
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{ width: `${stats.rate}%` }}
+            />
+          </div>
+          <p>
+            {stats.adopted} / {stats.total} adopted ({stats.rate.toFixed(1)}%)
+          </p>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Feature List by Status
+
+Display features grouped by their adoption status:
+
+```tsx
+function FeatureStatusList() {
+  const { byStatus } = useAdoptionStats()
+
+  return (
+    <div className="feature-lists">
+      <FeatureGroup
+        title="Needs Attention"
+        features={byStatus.churned}
+        description="These features were adopted but users stopped using them"
+      />
+
+      <FeatureGroup
+        title="In Progress"
+        features={byStatus.exploring}
+        description="Users are trying these features"
+      />
+
+      <FeatureGroup
+        title="Not Discovered"
+        features={byStatus.not_started}
+        description="Users haven't tried these features yet"
+      />
+
+      <FeatureGroup
+        title="Successfully Adopted"
+        features={byStatus.adopted}
+        description="Users have adopted these features"
+      />
+    </div>
+  )
+}
+
+function FeatureGroup({ title, features, description }) {
+  return (
+    <section>
+      <h2>{title}</h2>
+      <p className="description">{description}</p>
+      <ul>
+        {features.map((f) => (
+          <li key={f.id}>
+            <strong>{f.name}</strong> - {f.usage.useCount} uses
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+```
+
+### Adoption Funnel
+
+Visualize the adoption funnel:
+
+```tsx
+function AdoptionFunnel() {
+  const { totalCount, byStatus } = useAdoptionStats()
+
+  const stages = [
+    {
+      name: 'Total Features',
+      count: totalCount,
+      percentage: 100,
+    },
+    {
+      name: 'Discovered',
+      count: totalCount - byStatus.not_started.length,
+      percentage: ((totalCount - byStatus.not_started.length) / totalCount) * 100,
+    },
+    {
+      name: 'Exploring',
+      count: byStatus.exploring.length,
+      percentage: (byStatus.exploring.length / totalCount) * 100,
+    },
+    {
+      name: 'Adopted',
+      count: byStatus.adopted.length,
+      percentage: (byStatus.adopted.length / totalCount) * 100,
+    },
+  ]
+
+  return (
+    <div className="funnel">
+      {stages.map((stage, index) => (
+        <div
+          key={stage.name}
+          className="funnel-stage"
+          style={{ width: `${stage.percentage}%` }}
+        >
+          <span className="stage-name">{stage.name}</span>
+          <span className="stage-count">{stage.count}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Top Features
+
+Show most/least adopted features:
+
+```tsx
+function TopFeatures() {
+  const { features } = useAdoptionStats()
+
+  const sortedByUsage = [...features].sort(
+    (a, b) => b.usage.useCount - a.usage.useCount
+  )
+
+  const mostUsed = sortedByUsage.slice(0, 5)
+  const leastUsed = sortedByUsage.slice(-5).reverse()
+
+  return (
+    <div className="top-features">
+      <section>
+        <h2>Most Used Features</h2>
+        <ul>
+          {mostUsed.map((f) => (
+            <li key={f.id}>
+              {f.name}: {f.usage.useCount} uses
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2>Least Used Features</h2>
+        <ul>
+          {leastUsed.map((f) => (
+            <li key={f.id}>
+              {f.name}: {f.usage.useCount} uses
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  )
+}
+```
+
+### Adoption Score
+
+Calculate a custom adoption health score:
+
+```tsx
+function AdoptionScore() {
+  const { byStatus, totalCount } = useAdoptionStats()
+
+  // Weighted scoring
+  const score =
+    (byStatus.adopted.length * 100 +
+      byStatus.exploring.length * 50 +
+      byStatus.churned.length * -50) /
+    totalCount
+
+  const getScoreColor = (score: number) => {
+    if (score >= 75) return 'green'
+    if (score >= 50) return 'yellow'
+    if (score >= 25) return 'orange'
+    return 'red'
+  }
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 75) return 'Excellent'
+    if (score >= 50) return 'Good'
+    if (score >= 25) return 'Fair'
+    return 'Needs Improvement'
+  }
+
+  return (
+    <div className="score-card">
+      <div className={`score score-${getScoreColor(score)}`}>
+        {score.toFixed(0)}
+      </div>
+      <p className="score-label">{getScoreLabel(score)}</p>
+    </div>
+  )
+}
+```
+
+### Time-Based Analysis
+
+Show features by recency:
+
+```tsx
+function RecentlyUsedFeatures() {
+  const { features } = useAdoptionStats()
+
+  const withLastUsed = features.filter((f) => f.usage.lastUsed)
+
+  const sorted = [...withLastUsed].sort((a, b) => {
+    const dateA = new Date(a.usage.lastUsed!).getTime()
+    const dateB = new Date(b.usage.lastUsed!).getTime()
+    return dateB - dateA
+  })
+
+  const recentlyUsed = sorted.slice(0, 10)
+
+  return (
+    <div>
+      <h2>Recently Used Features</h2>
+      <ul>
+        {recentlyUsed.map((f) => {
+          const lastUsed = new Date(f.usage.lastUsed!)
+          const daysAgo = Math.floor(
+            (Date.now() - lastUsed.getTime()) / (1000 * 60 * 60 * 24)
+          )
+
+          return (
+            <li key={f.id}>
+              <strong>{f.name}</strong>
+              <span>
+                {daysAgo === 0
+                  ? 'Today'
+                  : daysAgo === 1
+                  ? 'Yesterday'
+                  : `${daysAgo} days ago`}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+```
+
+## Filtering and Grouping
+
+### Filter by Premium Status
+
+```tsx
+function PremiumFeatureStats() {
+  const { features } = useAdoptionStats()
+
+  const premiumFeatures = features.filter((f) => f.premium)
+  const premiumAdopted = premiumFeatures.filter(
+    (f) => f.usage.status === 'adopted'
+  ).length
+
+  const premiumAdoptionRate =
+    premiumFeatures.length > 0
+      ? (premiumAdopted / premiumFeatures.length) * 100
+      : 0
+
+  return (
+    <div>
+      <h2>Premium Features</h2>
+      <p>
+        {premiumAdopted} of {premiumFeatures.length} adopted
+        ({premiumAdoptionRate.toFixed(1)}%)
+      </p>
+    </div>
+  )
+}
+```
+
+### Custom Grouping
+
+Group by priority tiers:
+
+```tsx
+function PriorityTiers() {
+  const { features } = useAdoptionStats()
+
+  const byPriority = {
+    high: features.filter((f) => (f.priority || 0) >= 10),
+    medium: features.filter((f) => {
+      const p = f.priority || 0
+      return p >= 5 && p < 10
+    }),
+    low: features.filter((f) => (f.priority || 0) < 5),
+  }
+
+  return (
+    <div>
+      {Object.entries(byPriority).map(([tier, tierFeatures]) => {
+        const adopted = tierFeatures.filter(
+          (f) => f.usage.status === 'adopted'
+        ).length
+
+        return (
+          <div key={tier}>
+            <h3>{tier} Priority</h3>
+            <p>
+              {adopted} / {tierFeatures.length} adopted
+            </p>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+```
+
+## Performance
+
+The hook uses `useMemo` to prevent recalculating stats on every render:
+
+```tsx
+// ✓ Efficient: Stats recalculated only when features or usage changes
+function Dashboard() {
+  const stats = useAdoptionStats()
+  return <div>{stats.adoptionRate}%</div>
+}
+
+// ✓ Also efficient: Destructure only what you need
+function SimpleStats() {
+  const { adoptionRate, adoptedCount } = useAdoptionStats()
+  return <div>{adoptionRate}%</div>
+}
+```
+
+For very large feature sets (100+ features), consider memoizing filtered results:
+
+```tsx
+function LargeFeatureSet() {
+  const stats = useAdoptionStats()
+
+  const topFeatures = useMemo(
+    () =>
+      [...stats.features]
+        .sort((a, b) => b.usage.useCount - a.usage.useCount)
+        .slice(0, 10),
+    [stats.features]
+  )
+
+  return <FeatureList features={topFeatures} />
+}
+```
+
+## TypeScript
+
+Fully typed return value:
+
+```tsx
+import { useAdoptionStats, type AdoptionStats } from '@tour-kit/adoption'
+
+function TypedDashboard() {
+  const stats: AdoptionStats = useAdoptionStats()
+
+  // ✓ Type-safe
+  stats.byStatus.adopted.forEach((feature) => {
+    console.log(feature.name, feature.usage.useCount)
+  })
+
+  // ✓ Type-safe
+  Object.entries(stats.byCategory).forEach(([category, data]) => {
+    console.log(category, data.rate)
+  })
+}
+```
+
+## Accessibility
+
+When building dashboards with these stats:
+
+```tsx
+function AccessibleDashboard() {
+  const stats = useAdoptionStats()
+
+  return (
+    <div role="region" aria-label="Feature adoption statistics">
+      <h2 id="adoption-heading">Adoption Overview</h2>
+
+      <dl aria-labelledby="adoption-heading">
+        <dt>Adoption Rate</dt>
+        <dd>{stats.adoptionRate.toFixed(1)}%</dd>
+
+        <dt>Adopted Features</dt>
+        <dd>
+          {stats.adoptedCount} of {stats.totalCount}
+        </dd>
+      </dl>
+
+      <div
+        role="img"
+        aria-label={`Adoption rate: ${stats.adoptionRate.toFixed(1)}%`}
+      >
+        <CircularProgress value={stats.adoptionRate} />
+      </div>
+    </div>
+  )
+}
+```
+
+## Common Patterns
+
+### Empty State
+
+Handle cases with no features:
+
+```tsx
+function Dashboard() {
+  const stats = useAdoptionStats()
+
+  if (stats.totalCount === 0) {
+    return (
+      <div className="empty-state">
+        <p>No features configured</p>
+        <a href="/docs">Learn how to add features</a>
+      </div>
+    )
+  }
+
+  return <AdoptionCharts stats={stats} />
+}
+```
+
+### Comparison View
+
+Compare current vs. previous periods:
+
+```tsx
+function AdoptionComparison() {
+  const currentStats = useAdoptionStats()
+  const previousStats = usePreviousAdoptionStats() // Your custom hook
+
+  const change = currentStats.adoptionRate - previousStats.adoptionRate
+
+  return (
+    <div>
+      <h2>Adoption Rate</h2>
+      <p className="current">{currentStats.adoptionRate.toFixed(1)}%</p>
+      <p className={change >= 0 ? 'positive' : 'negative'}>
+        {change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(1)}%
+      </p>
+    </div>
+  )
+}
+```
+
+### Export Data
+
+Allow exporting stats:
+
+```tsx
+function ExportButton() {
+  const stats = useAdoptionStats()
+
+  const exportCSV = () => {
+    const csv = [
+      ['Feature', 'Category', 'Status', 'Use Count', 'Last Used'],
+      ...stats.features.map((f) => [
+        f.name,
+        f.category || 'uncategorized',
+        f.usage.status,
+        f.usage.useCount,
+        f.usage.lastUsed || 'Never',
+      ]),
+    ]
+      .map((row) => row.join(','))
+      .join('\n')
+
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'adoption-stats.csv'
+    a.click()
+  }
+
+  return <button onClick={exportCSV}>Export to CSV</button>
+}
+```
+
+## Best Practices
+
+1. **Memoize expensive calculations**:
+
+```tsx
+const topAdopted = useMemo(
+  () => stats.features.filter((f) => f.usage.status === 'adopted'),
+  [stats.features]
+)
+```
+
+2. **Use semantic HTML for charts**:
+
+```tsx
+<figure>
+  <figcaption>Adoption by Category</figcaption>
+  <CategoryChart data={stats.byCategory} />
+</figure>
+```
+
+3. **Provide context for numbers**:
+
+```tsx
+// Good: Shows context
+<p>{stats.adoptedCount} of {stats.totalCount} features adopted</p>
+
+// Less helpful: Just a number
+<p>{stats.adoptedCount}</p>
+```
+
+## Next Steps
+
+- [Dashboard Components](/docs/adoption/dashboard) - Pre-built dashboard UI
+- [AdoptionDashboard](/docs/adoption/dashboard/adoption-dashboard) - Full dashboard component
+- [Analytics Integration](/docs/adoption/analytics) - Track adoption in your analytics platform

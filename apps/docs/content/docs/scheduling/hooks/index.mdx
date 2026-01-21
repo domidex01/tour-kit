@@ -1,0 +1,119 @@
+---
+title: Scheduling Hooks
+description: React hooks for reactive schedule evaluation
+---
+
+# Scheduling Hooks
+
+React hooks that automatically re-evaluate schedules and keep your UI in sync.
+
+## Available Hooks
+
+### useSchedule
+
+Simple active/inactive check with auto-refresh:
+
+```tsx
+import { useSchedule } from '@tour-kit/scheduling'
+
+const { isActive, reason } = useSchedule(schedule)
+```
+
+[View full documentation](/docs/scheduling/hooks/use-schedule)
+
+### useScheduleStatus
+
+Detailed status with next active/inactive times:
+
+```tsx
+import { useScheduleStatus } from '@tour-kit/scheduling'
+
+const { isActive, nextActiveAt, message } = useScheduleStatus(schedule)
+```
+
+[View full documentation](/docs/scheduling/hooks/use-schedule-status)
+
+### useUserTimezone
+
+Get the user's browser timezone:
+
+```tsx
+import { useUserTimezone } from '@tour-kit/scheduling'
+
+const timezone = useUserTimezone()
+// "America/New_York"
+```
+
+[View full documentation](/docs/scheduling/hooks/use-user-timezone)
+
+## When to Use Hooks vs Utilities
+
+**Use hooks when:**
+- Building React components
+- Need automatic updates when time changes
+- Want reactive UI based on schedule status
+
+**Use utilities when:**
+- Server-side rendering
+- One-time checks (e.g., in event handlers)
+- Non-React environments
+- Testing
+
+## Example: Conditional Rendering
+
+```tsx
+import { useSchedule } from '@tour-kit/scheduling'
+
+function FeatureAnnouncement() {
+  const schedule = {
+    startAt: '2024-02-01',
+    endAt: '2024-02-29',
+    daysOfWeek: [1, 2, 3, 4, 5], // Weekdays
+  }
+
+  const { isActive, reason, refresh } = useSchedule(schedule)
+
+  if (!isActive) {
+    console.log('Announcement hidden:', reason)
+    return null
+  }
+
+  return (
+    <div className="announcement">
+      <h2>New Feature Available!</h2>
+      <button onClick={refresh}>Check again</button>
+    </div>
+  )
+}
+```
+
+## Example: Status Display
+
+```tsx
+import { useScheduleStatus } from '@tour-kit/scheduling'
+
+function TourScheduleStatus() {
+  const { isActive, message, nextActiveAt, nextInactiveAt } = useScheduleStatus(schedule, {
+    debug: true,
+  })
+
+  return (
+    <div>
+      <p>Status: {isActive ? 'Active' : 'Inactive'}</p>
+      {message && <p>{message}</p>}
+      {nextActiveAt && <p>Next active: {nextActiveAt.toLocaleString()}</p>}
+      {nextInactiveAt && <p>Next inactive: {nextInactiveAt.toLocaleString()}</p>}
+    </div>
+  )
+}
+```
+
+## SSR Considerations
+
+All hooks are client-side only and use `'use client'` directive. They return safe defaults during SSR:
+
+- `useSchedule` - Returns `{ isActive: false, reason: 'disabled' }`
+- `useScheduleStatus` - Returns inactive status
+- `useUserTimezone` - Returns `'UTC'`
+
+After hydration, hooks evaluate with actual browser time and timezone.

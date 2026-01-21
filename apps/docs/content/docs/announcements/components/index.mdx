@@ -1,0 +1,141 @@
+---
+title: Components
+description: Pre-styled announcement components for all UI variants
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+# Announcement Components
+
+Pre-built, accessible announcement components styled with Tailwind CSS. Choose from 5 UI variants for different use cases.
+
+## Available Components
+
+<Cards>
+  <Card title="AnnouncementModal" href="/docs/announcements/components/modal">
+    Centered dialog with overlay - Best for critical updates
+  </Card>
+  <Card title="AnnouncementSlideout" href="/docs/announcements/components/slideout">
+    Side panel - Best for detailed announcements
+  </Card>
+  <Card title="AnnouncementBanner" href="/docs/announcements/components/banner">
+    Full-width bar - Best for persistent notices
+  </Card>
+  <Card title="AnnouncementToast" href="/docs/announcements/components/toast">
+    Temporary notification - Best for quick tips
+  </Card>
+  <Card title="AnnouncementSpotlight" href="/docs/announcements/components/spotlight">
+    Element highlight - Best for UI changes
+  </Card>
+</Cards>
+
+---
+
+## Shared Components
+
+All variants use these shared components:
+
+- **AnnouncementOverlay** - Backdrop overlay for modals and spotlights
+- **AnnouncementClose** - Close button with accessibility
+- **AnnouncementContent** - Content container with title and description
+- **AnnouncementActions** - Action buttons layout
+
+---
+
+## Basic Usage
+
+```tsx
+import {
+  AnnouncementsProvider,
+  AnnouncementModal,
+  AnnouncementBanner,
+} from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'welcome',
+    variant: 'modal',
+    title: 'Welcome!',
+    description: 'Thanks for joining.',
+  },
+  {
+    id: 'notice',
+    variant: 'banner',
+    title: 'Maintenance scheduled for tonight',
+  },
+];
+
+function App() {
+  return (
+    <AnnouncementsProvider announcements={announcements}>
+      {/* Render component for each announcement */}
+      <AnnouncementModal id="welcome" />
+      <AnnouncementBanner id="notice" />
+
+      <YourApp />
+    </AnnouncementsProvider>
+  );
+}
+```
+
+---
+
+## Common Props
+
+All components share these props:
+
+- `id` (required) - Announcement identifier matching config
+- `className` - Additional CSS classes
+- `asChild` - Use Slot pattern for custom elements
+
+---
+
+## Choosing a Variant
+
+| Variant | Use When | Blocking | Auto-Dismiss | Position |
+|---------|----------|----------|--------------|----------|
+| **Modal** | Critical updates, requires attention | Yes | No | Center |
+| **Slideout** | Detailed info, less urgent | Partial | No | Side |
+| **Banner** | Persistent notices, non-blocking | No | No | Top/Bottom |
+| **Toast** | Quick tips, success messages | No | Yes | Corner |
+| **Spotlight** | Highlight new UI elements | Partial | No | Target |
+
+---
+
+## Styling
+
+All components use Tailwind CSS with CSS variables for theming:
+
+```css
+:root {
+  --announcement-overlay-bg: rgba(0, 0, 0, 0.5);
+  --announcement-modal-bg: white;
+  --announcement-border-radius: 0.5rem;
+}
+```
+
+See individual component pages for variant-specific styling.
+
+---
+
+## Accessibility
+
+All components are built with accessibility in mind:
+
+- **ARIA roles** - Proper semantic roles (dialog, banner, status, etc.)
+- **Focus management** - Trap focus in modals, restore on close
+- **Keyboard support** - Escape to close, Tab navigation
+- **Screen readers** - Descriptive labels and live regions
+- **Reduced motion** - Respects `prefers-reduced-motion`
+
+---
+
+## Next Steps
+
+Explore each component variant for detailed props and examples:
+
+- [Modal](/docs/announcements/components/modal) - Centered dialog
+- [Slideout](/docs/announcements/components/slideout) - Side panel
+- [Banner](/docs/announcements/components/banner) - Top/bottom bar
+- [Toast](/docs/announcements/components/toast) - Corner notification
+- [Spotlight](/docs/announcements/components/spotlight) - Element highlight

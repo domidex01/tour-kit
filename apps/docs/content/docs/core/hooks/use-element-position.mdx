@@ -1,0 +1,212 @@
+---
+title: useElementPosition
+description: Track element position with automatic updates on scroll and resize
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useElementPosition
+
+Track a DOM element's position in real-time. Automatically updates when the element or window scrolls, resizes, or when the element's size changes.
+
+## Why Use This Hook?
+
+Tour overlays and tooltips need to stay aligned with their target elements. This hook:
+
+- **Tracks position changes** - Updates when elements move due to scroll or resize
+- **Uses ResizeObserver** - Detects when elements change size
+- **Finds scroll parents** - Handles nested scrollable containers
+- **Handles dynamic targets** - Accepts CSS selectors or element refs
+
+---
+
+## Usage
+
+```tsx
+import { useElementPosition } from '@tour-kit/core';
+
+function SpotlightOverlay() {
+  const { element, rect, update } = useElementPosition('#my-target');
+
+  if (!rect) return null;
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+        border: '2px solid blue',
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+```
+
+---
+
+## Parameters
+
+<TypeTable
+  type={{
+    target: {
+      type: 'string | HTMLElement | null',
+      description: 'CSS selector or element reference to track',
+    },
+  }}
+/>
+
+---
+
+## Return Value
+
+<TypeTable
+  type={{
+    element: {
+      type: 'HTMLElement | null',
+      description: 'The resolved DOM element',
+    },
+    rect: {
+      type: 'DOMRect | null',
+      description: 'Current bounding rectangle of the element',
+    },
+    scrollParent: {
+      type: 'HTMLElement | Window | null',
+      description: 'The nearest scrollable ancestor',
+    },
+    update: {
+      type: '() => void',
+      description: 'Manually trigger a position update',
+    },
+  }}
+/>
+
+---
+
+## With CSS Selector
+
+```tsx
+function TargetHighlight() {
+  const { rect } = useElementPosition('#signup-button');
+
+  if (!rect) {
+    return <p>Element not found</p>;
+  }
+
+  return (
+    <div
+      className="fixed bg-blue-500/20 rounded pointer-events-none"
+      style={{
+        top: rect.top - 4,
+        left: rect.left - 4,
+        width: rect.width + 8,
+        height: rect.height + 8,
+      }}
+    />
+  );
+}
+```
+
+---
+
+## With Element Ref
+
+```tsx
+import { useRef } from 'react';
+import { useElementPosition } from '@tour-kit/core';
+
+function TrackedElement() {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { rect } = useElementPosition(buttonRef.current);
+
+  return (
+    <>
+      <button ref={buttonRef}>Track me</button>
+      {rect && (
+        <span className="text-sm text-gray-500">
+          Position: {Math.round(rect.top)}, {Math.round(rect.left)}
+        </span>
+      )}
+    </>
+  );
+}
+```
+
+---
+
+## Manual Updates
+
+For cases where you know the element moved but the automatic detection missed it:
+
+```tsx
+function AnimatedElement() {
+  const { rect, update } = useElementPosition('#animated-box');
+
+  const handleAnimationEnd = () => {
+    // Force position recalculation after animation
+    update();
+  };
+
+  return (
+    <div id="animated-box" onAnimationEnd={handleAnimationEnd}>
+      Animated content
+    </div>
+  );
+}
+```
+
+---
+
+## Nested Scroll Containers
+
+The hook automatically detects nested scrollable parents:
+
+```tsx
+function NestedScrollExample() {
+  const { rect, scrollParent } = useElementPosition('#nested-target');
+
+  // scrollParent will be the nearest scrollable container,
+  // not necessarily the window
+
+  return (
+    <div className="h-64 overflow-auto">
+      <div className="h-[200vh]">
+        <button id="nested-target">Target in scrollable container</button>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## How It Works
+
+1. **Element Resolution** - Converts CSS selector to element, or uses the provided element directly
+2. **Scroll Parent Detection** - Finds the nearest ancestor with `overflow: auto/scroll`
+3. **Event Listeners** - Attaches scroll and resize listeners to window (with capture)
+4. **ResizeObserver** - Observes both the target and its scroll parent for size changes
+5. **Cleanup** - Removes all listeners and observers when unmounting or target changes
+
+<Callout type="info">
+The hook uses `getBoundingClientRect()` for position calculations, which returns coordinates relative to the viewport.
+</Callout>
+
+---
+
+## Performance Notes
+
+- Position updates are synchronous for immediate visual feedback
+- ResizeObserver is more efficient than polling
+- Scroll events use capture phase to catch all scroll events in the hierarchy
+
+---
+
+## Related
+
+- [useSpotlight](/docs/core/hooks/use-spotlight) - Uses element position for overlay calculations
+- [TourOverlay](/docs/react/components/tour-overlay) - Component that uses this hook internally

@@ -1,0 +1,116 @@
+---
+title: TaskHeadless
+description: Headless task component with render props
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# TaskHeadless
+
+Headless component for individual tasks with render props.
+
+## Usage
+
+```tsx
+import { TaskHeadless } from '@tour-kit/checklists/headless';
+
+<TaskHeadless checklistId="onboarding" taskId="step1">
+  {({ task, isCompleted, toggle }) => (
+    <button onClick={toggle} disabled={task.locked}>
+      {isCompleted ? '✓' : '○'} {task.config.title}
+    </button>
+  )}
+</TaskHeadless>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    checklistId: {
+      type: 'string',
+      required: true,
+      description: 'Checklist ID',
+    },
+    taskId: {
+      type: 'string',
+      required: true,
+      description: 'Task ID',
+    },
+    render: {
+      type: '(props: TaskRenderProps) => ReactNode',
+      description: 'Render function',
+    },
+    children: {
+      type: '(props: TaskRenderProps) => ReactNode',
+      description: 'Children function',
+    },
+  }}
+/>
+
+## Render Props
+
+<TypeTable
+  type={{
+    task: {
+      type: 'ChecklistTaskState',
+      description: 'Task state',
+    },
+    isCompleted: {
+      type: 'boolean',
+      description: 'Task completed',
+    },
+    isLocked: {
+      type: 'boolean',
+      description: 'Task locked',
+    },
+    isVisible: {
+      type: 'boolean',
+      description: 'Task visible',
+    },
+    complete: {
+      type: '() => void',
+      description: 'Complete task',
+    },
+    uncomplete: {
+      type: '() => void',
+      description: 'Uncomplete task',
+    },
+    execute: {
+      type: '() => void',
+      description: 'Execute action',
+    },
+    toggle: {
+      type: '() => void',
+      description: 'Toggle completion',
+    },
+  }}
+/>
+
+## Examples
+
+### Custom Card
+
+```tsx
+<TaskHeadless checklistId="onboarding" taskId="step1">
+  {({ task, isCompleted, isLocked, execute }) => (
+    <div className="task-card">
+      <div className="icon">
+        {task.config.icon ?? (isCompleted ? '✓' : '○')}
+      </div>
+      <div className="content">
+        <h4>{task.config.title}</h4>
+        <p>{task.config.description}</p>
+      </div>
+      <button onClick={execute} disabled={isLocked}>
+        {isCompleted ? 'Done' : 'Start'}
+      </button>
+    </div>
+  )}
+</TaskHeadless>
+```
+
+## Related
+
+- [ChecklistHeadless](/docs/checklists/headless/checklist-headless) - Headless checklist
+- [useTask](/docs/checklists/hooks/use-task) - Task hook

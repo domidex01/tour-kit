@@ -1,0 +1,668 @@
+---
+title: Checklists with Tours
+description: Using checklists with tours for guided onboarding flows
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Checklists with Tours
+
+Combine checklists and tours to create interactive onboarding experiences that guide users through tasks step-by-step.
+
+---
+
+## Why Combine Checklists and Tours
+
+Checklists provide:
+- Clear list of tasks to complete
+- Progress tracking and motivation
+- Task dependencies and ordering
+- Persistent completion state
+
+Tours provide:
+- Step-by-step guidance through complex workflows
+- Visual highlighting of UI elements
+- Contextual tips and explanations
+
+Together, they create a powerful onboarding system where users can see what needs to be done (checklist) and get help completing each task (tour).
+
+---
+
+## Installation
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @tour-kit/react @tour-kit/checklists
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install @tour-kit/react @tour-kit/checklists
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @tour-kit/react @tour-kit/checklists
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Architecture Overview
+
+The integration works through two mechanisms:
+
+1. **Task Actions**: Checklist items can trigger tours when clicked
+2. **Auto-completion**: Tours can auto-complete checklist tasks when finished
+
+```
+┌─────────────────┐
+│  Checklist Item │ ──(click)──> Tour starts
+└─────────────────┘
+         ↑
+         │
+    (completes)
+         │
+┌─────────────────┐
+│   Tour Complete │
+└─────────────────┘
+```
+
+---
+
+## Basic Setup
+
+<Steps>
+<Step>
+### Configure Providers
+
+Wrap your app with both `ChecklistProvider` and `TourKitProvider`:
+
+```tsx title="app/providers.tsx"
+'use client';
+
+import { TourKitProvider } from '@tour-kit/core';
+import { ChecklistProvider } from '@tour-kit/checklists';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <TourKitProvider>
+      <ChecklistProvider checklists={checklistConfigs}>
+        {children}
+      </ChecklistProvider>
+    </TourKitProvider>
+  );
+}
+```
+
+<Callout type="info">
+`TourKitProvider` should wrap `ChecklistProvider` since tours are used by checklist items.
+</Callout>
+</Step>
+
+<Step>
+### Define Checklist with Tour Actions
+
+Create a checklist where items trigger tours:
+
+```tsx title="config/onboarding-checklist.ts"
+import type { ChecklistConfig } from '@tour-kit/checklists';
+
+export const onboardingChecklist: ChecklistConfig = {
+  id: 'onboarding',
+  title: 'Get Started with Your Account',
+  description: 'Complete these tasks to set up your workspace',
+  items: [
+    {
+      id: 'profile',
+      label: 'Complete your profile',
+      description: 'Add your name, photo, and bio',
+      action: {
+        type: 'tour',
+        tourId: 'profile-tour', // Tour to trigger
+        label: 'Start Tour',
+      },
+      completedWhen: {
+        tourCompleted: 'profile-tour', // Auto-complete when tour finishes
+      },
+    },
+    {
+      id: 'invite',
+      label: 'Invite your team',
+      description: 'Add teammates to collaborate',
+      requires: ['profile'], // Locked until profile is complete
+      action: {
+        type: 'tour',
+        tourId: 'invite-tour',
+        label: 'Learn How',
+      },
+      completedWhen: {
+        tourCompleted: 'invite-tour',
+      },
+    },
+    {
+      id: 'project',
+      label: 'Create your first project',
+      description: 'Set up a workspace for your team',
+      requires: ['invite'],
+      action: {
+        type: 'tour',
+        tourId: 'project-tour',
+        label: 'Get Started',
+      },
+      completedWhen: {
+        tourCompleted: 'project-tour',
+      },
+    },
+  ],
+};
+```
+</Step>
+
+<Step>
+### Create Tours for Each Task
+
+Define tours that correspond to checklist items:
+
+```tsx title="components/onboarding-tours.tsx"
+'use client';
+
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourOverlay,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+  TourProgress,
+  TourNavigation,
+} from '@tour-kit/react';
+
+export function OnboardingTours() {
+  return (
+    <>
+      {/* Profile Tour */}
+      <Tour id="profile-tour">
+        <TourStep
+          target="#name-field"
+          title="Your Name"
+          content="Enter your full name so teammates can recognize you"
+          placement="right"
+        />
+        <TourStep
+          target="#photo-upload"
+          title="Profile Photo"
+          content="Upload a photo to personalize your profile"
+          placement="right"
+        />
+        <TourStep
+          target="#bio-field"
+          title="About You"
+          content="Add a short bio to help your team get to know you"
+          placement="right"
+        />
+
+        <TourOverlay />
+        <TourCard>
+          <TourCardHeader />
+          <TourCardContent />
+          <TourCardFooter>
+            <TourProgress variant="dots" />
+            <TourNavigation />
+          </TourCardFooter>
+        </TourCard>
+      </Tour>
+
+      {/* Invite Tour */}
+      <Tour id="invite-tour">
+        <TourStep
+          target="#invite-button"
+          title="Invite Teammates"
+          content="Click here to invite people to your workspace"
+          placement="bottom"
+        />
+        <TourStep
+          target="#email-input"
+          title="Enter Emails"
+          content="Add email addresses of teammates you want to invite"
+          placement="right"
+        />
+        <TourStep
+          target="#role-selector"
+          title="Assign Roles"
+          content="Choose their permission level: Admin, Member, or Guest"
+          placement="right"
+        />
+
+        <TourOverlay />
+        <TourCard>
+          <TourCardHeader />
+          <TourCardContent />
+          <TourCardFooter>
+            <TourProgress variant="dots" />
+            <TourNavigation />
+          </TourCardFooter>
+        </TourCard>
+      </Tour>
+
+      {/* Project Tour */}
+      <Tour id="project-tour">
+        <TourStep
+          target="#new-project"
+          title="Create Project"
+          content="Projects organize your work into separate workspaces"
+          placement="bottom"
+        />
+        <TourStep
+          target="#project-name"
+          title="Name Your Project"
+          content="Choose a descriptive name for easy identification"
+          placement="right"
+        />
+        <TourStep
+          target="#project-members"
+          title="Add Members"
+          content="Select teammates to add to this project"
+          placement="right"
+        />
+
+        <TourOverlay />
+        <TourCard>
+          <TourCardHeader />
+          <TourCardContent />
+          <TourCardFooter>
+            <TourProgress variant="dots" />
+            <TourNavigation />
+          </TourCardFooter>
+        </TourCard>
+      </Tour>
+    </>
+  );
+}
+```
+</Step>
+
+<Step>
+### Render the Checklist
+
+Display the checklist in your UI:
+
+```tsx title="components/onboarding-panel.tsx"
+'use client';
+
+import {
+  Checklist,
+  ChecklistItem,
+  ChecklistProgress,
+  ChecklistHeader,
+  ChecklistDismiss,
+} from '@tour-kit/checklists';
+
+export function OnboardingPanel() {
+  return (
+    <div className="fixed top-4 right-4 w-96 bg-white rounded-lg shadow-lg p-6">
+      <Checklist id="onboarding">
+        <ChecklistHeader>
+          <ChecklistDismiss />
+        </ChecklistHeader>
+
+        <ChecklistProgress className="mb-6" />
+
+        <div className="space-y-3">
+          <ChecklistItem id="profile" />
+          <ChecklistItem id="invite" />
+          <ChecklistItem id="project" />
+        </div>
+      </Checklist>
+    </div>
+  );
+}
+```
+</Step>
+</Steps>
+
+---
+
+## Auto-Completing Tasks
+
+Tasks can auto-complete based on tour completion or custom conditions:
+
+### Tour Completion
+
+```tsx
+{
+  id: 'setup-payment',
+  label: 'Add payment method',
+  action: {
+    type: 'tour',
+    tourId: 'payment-tour',
+  },
+  completedWhen: {
+    tourCompleted: 'payment-tour', // Auto-complete when tour finishes
+  },
+}
+```
+
+### Custom Condition
+
+```tsx
+{
+  id: 'first-sale',
+  label: 'Make your first sale',
+  completedWhen: {
+    custom: () => {
+      // Check your app state
+      return user.sales.length > 0;
+    },
+  },
+}
+```
+
+### Event-Based Completion
+
+```tsx
+{
+  id: 'connect-integration',
+  label: 'Connect an integration',
+  completedWhen: {
+    event: 'integration:connected', // Listen for custom event
+  },
+}
+```
+
+---
+
+## Progress Tracking
+
+Track checklist and tour progress together:
+
+```tsx title="components/progress-tracker.tsx"
+'use client';
+
+import { useChecklist } from '@tour-kit/checklists';
+import { useTour } from '@tour-kit/core';
+
+export function ProgressTracker() {
+  const { progress, completedItems, totalItems } = useChecklist('onboarding');
+  const { isActive, currentStepIndex, totalSteps } = useTour('profile-tour');
+
+  return (
+    <div className="space-y-4">
+      {/* Overall Checklist Progress */}
+      <div>
+        <div className="flex justify-between text-sm mb-2">
+          <span>Overall Progress</span>
+          <span>{progress}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-blue-600 h-2 rounded-full transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          {completedItems} of {totalItems} tasks completed
+        </p>
+      </div>
+
+      {/* Active Tour Progress */}
+      {isActive && (
+        <div>
+          <div className="flex justify-between text-sm mb-2">
+            <span>Current Tour</span>
+            <span>
+              Step {currentStepIndex + 1} of {totalSteps}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-green-600 h-2 rounded-full transition-all"
+              style={{ width: `${((currentStepIndex + 1) / totalSteps) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## Complete Onboarding Flow Example
+
+Here's a production-ready example combining all concepts:
+
+```tsx title="app/onboarding/page.tsx"
+'use client';
+
+import { useState } from 'react';
+import { ChecklistProvider, Checklist, ChecklistItem } from '@tour-kit/checklists';
+import { TourKitProvider } from '@tour-kit/core';
+import { Tour, TourStep, TourCard, TourOverlay } from '@tour-kit/react';
+import { usePersistence } from '@tour-kit/core';
+
+const checklistConfig = {
+  id: 'onboarding',
+  title: 'Welcome to Acme Corp',
+  description: 'Get started in 3 simple steps',
+  items: [
+    {
+      id: 'profile',
+      label: 'Set up your profile',
+      description: 'Add your details',
+      action: { type: 'tour', tourId: 'profile-tour', label: 'Start' },
+      completedWhen: { tourCompleted: 'profile-tour' },
+    },
+    {
+      id: 'team',
+      label: 'Invite your team',
+      description: 'Collaborate with teammates',
+      requires: ['profile'],
+      action: { type: 'tour', tourId: 'team-tour', label: 'Start' },
+      completedWhen: { tourCompleted: 'team-tour' },
+    },
+    {
+      id: 'workspace',
+      label: 'Create a workspace',
+      description: 'Organize your projects',
+      requires: ['team'],
+      action: { type: 'tour', tourId: 'workspace-tour', label: 'Start' },
+      completedWhen: { tourCompleted: 'workspace-tour' },
+    },
+  ],
+};
+
+export default function OnboardingPage() {
+  const persistence = usePersistence({ keyPrefix: 'acme' });
+  const [dismissed, setDismissed] = useState(false);
+
+  const handleComplete = () => {
+    persistence.markCompleted('onboarding');
+    // Redirect to dashboard or show success message
+    window.location.href = '/dashboard';
+  };
+
+  if (dismissed) return null;
+
+  return (
+    <TourKitProvider>
+      <ChecklistProvider
+        checklists={[checklistConfig]}
+        onChecklistComplete={handleComplete}
+      >
+        <div className="min-h-screen bg-gray-50 p-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">
+                Welcome to Acme Corp
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Let's get you set up in just a few minutes
+              </p>
+            </div>
+
+            {/* Checklist */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <Checklist id="onboarding" onDismiss={() => setDismissed(true)}>
+                <ChecklistItem id="profile" />
+                <ChecklistItem id="team" />
+                <ChecklistItem id="workspace" />
+              </Checklist>
+            </div>
+
+            {/* Tours */}
+            <OnboardingTours />
+          </div>
+        </div>
+      </ChecklistProvider>
+    </TourKitProvider>
+  );
+}
+
+function OnboardingTours() {
+  return (
+    <>
+      <Tour id="profile-tour">
+        <TourStep target="#name" title="Your Name" content="Enter your name" />
+        <TourStep target="#email" title="Email" content="Verify your email" />
+        <TourStep target="#avatar" title="Photo" content="Upload a photo" />
+        <TourOverlay />
+        <TourCard />
+      </Tour>
+
+      <Tour id="team-tour">
+        <TourStep target="#invite" title="Invite" content="Add teammates" />
+        <TourStep target="#roles" title="Roles" content="Set permissions" />
+        <TourOverlay />
+        <TourCard />
+      </Tour>
+
+      <Tour id="workspace-tour">
+        <TourStep target="#new-workspace" title="Create" content="New workspace" />
+        <TourStep target="#workspace-name" title="Name" content="Choose a name" />
+        <TourOverlay />
+        <TourCard />
+      </Tour>
+    </>
+  );
+}
+```
+
+---
+
+## Best Practices
+
+### 1. Keep Tasks Focused
+
+Each checklist item should represent one clear task:
+
+```tsx
+// Good - Clear, single task
+{ id: 'profile', label: 'Complete your profile' }
+
+// Bad - Too broad
+{ id: 'setup', label: 'Set up your account' }
+```
+
+### 2. Use Dependencies Wisely
+
+Create logical progression through tasks:
+
+```tsx
+items: [
+  { id: 'signup', label: 'Create account' },
+  { id: 'verify', label: 'Verify email', requires: ['signup'] },
+  { id: 'profile', label: 'Complete profile', requires: ['verify'] },
+]
+```
+
+### 3. Provide Escape Hatches
+
+Let users skip tours while still marking tasks complete:
+
+```tsx
+{
+  id: 'setup-integration',
+  label: 'Connect your tools',
+  action: {
+    type: 'tour',
+    tourId: 'integration-tour',
+    label: 'Show Me How',
+  },
+  // Also allow manual completion
+  completedWhen: {
+    custom: () => user.integrations.length > 0,
+  },
+}
+```
+
+### 4. Celebrate Progress
+
+Show encouragement as users complete tasks:
+
+```tsx
+import { useChecklist } from '@tour-kit/checklists';
+import confetti from 'canvas-confetti';
+
+function OnboardingChecklist() {
+  const { progress } = useChecklist('onboarding');
+
+  useEffect(() => {
+    if (progress === 100) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+      });
+    }
+  }, [progress]);
+
+  return <Checklist id="onboarding">{/* ... */}</Checklist>;
+}
+```
+
+### 5. Persist State
+
+Save checklist progress so users can resume:
+
+```tsx
+<ChecklistProvider
+  checklists={[config]}
+  storage={{
+    type: 'localStorage',
+    key: 'onboarding-progress',
+  }}
+>
+```
+
+---
+
+## Troubleshooting
+
+<Callout type="error" title="Tour not starting from checklist">
+Ensure the `tourId` in the checklist action exactly matches the tour's `id` prop.
+</Callout>
+
+<Callout type="error" title="Task not auto-completing">
+Verify that the tour ID in `completedWhen.tourCompleted` matches the tour that's being completed.
+</Callout>
+
+<Callout type="error" title="Dependencies not working">
+Check that required task IDs exist in the checklist and are spelled correctly.
+</Callout>
+
+---
+
+## Related
+
+- [Checklist API Reference](/docs/api/checklists) - Full checklist documentation
+- [Tour API Reference](/docs/api/react) - Tour component reference
+- [Full Onboarding Flow](/docs/guides/full-onboarding-flow) - Complete system integration
+- [Analytics Integration](/docs/guides/analytics-integration) - Track checklist completion

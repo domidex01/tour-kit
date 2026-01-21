@@ -1,0 +1,713 @@
+---
+title: Adoption Analytics
+description: Tracking feature adoption metrics with analytics integration
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Adoption Analytics
+
+Track feature adoption metrics by combining `@tour-kit/adoption` with `@tour-kit/analytics` to build data-driven insights.
+
+---
+
+## Why Track Adoption with Analytics
+
+Understanding feature adoption helps you:
+
+- Identify which features drive user engagement
+- Measure the success of nudges and education
+- Detect features at risk of churn
+- Build adoption funnels and cohort analysis
+- Make data-driven product decisions
+- Optimize onboarding and feature discovery
+
+---
+
+## Installation
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @tour-kit/adoption @tour-kit/analytics
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install @tour-kit/adoption @tour-kit/analytics
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @tour-kit/adoption @tour-kit/analytics
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Architecture Overview
+
+The adoption-analytics integration works through automatic event emission:
+
+```
+User Action → AdoptionProvider → Analytics Events → Analytics Plugins → Data Warehouse
+```
+
+Events are automatically tracked when:
+- A feature is used for the first time
+- Usage count increases
+- Adoption status changes (exploring → adopted)
+- A feature churns (adopted → churned)
+- Nudges are shown or dismissed
+
+---
+
+## Basic Setup
+
+<Steps>
+<Step>
+### Configure Both Providers
+
+Wrap your app with both providers, analytics first:
+
+```tsx title="app/providers.tsx"
+'use client';
+
+import { AnalyticsProvider } from '@tour-kit/analytics';
+import { AdoptionProvider } from '@tour-kit/adoption';
+import { segmentPlugin, posthogPlugin } from '@/lib/analytics';
+
+const features = [
+  {
+    id: 'dark-mode',
+    name: 'Dark Mode',
+    category: 'appearance',
+    trigger: '#dark-mode-toggle',
+    adoptionCriteria: { minUses: 3, recencyDays: 30 },
+  },
+  {
+    id: 'keyboard-shortcuts',
+    name: 'Keyboard Shortcuts',
+    category: 'productivity',
+    trigger: { event: 'keyboard:shortcut' },
+    adoptionCriteria: { minUses: 5, recencyDays: 14 },
+  },
+  {
+    id: 'export',
+    name: 'Export Data',
+    category: 'data',
+    trigger: '#export-button',
+    adoptionCriteria: { minUses: 2, recencyDays: 60 },
+  },
+];
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <AnalyticsProvider plugins={[segmentPlugin, posthogPlugin]}>
+      <AdoptionProvider
+        features={features}
+        onAdoption={(feature) => {
+          console.log('Feature adopted:', feature);
+        }}
+        onChurn={(feature) => {
+          console.log('Feature churned:', feature);
+        }}
+      >
+        {children}
+      </AdoptionProvider>
+    </AnalyticsProvider>
+  );
+}
+```
+
+<Callout type="info">
+`AnalyticsProvider` must wrap `AdoptionProvider` so adoption events can be tracked.
+</Callout>
+</Step>
+
+<Step>
+### Auto-Tracking is Enabled
+
+Once both providers are configured, adoption events are automatically tracked:
+
+```tsx title="components/dark-mode-toggle.tsx"
+'use client';
+
+import { useFeature } from '@tour-kit/adoption';
+
+export function DarkModeToggle() {
+  const { trackUsage, isAdopted, status } = useFeature('dark-mode');
+
+  const handleToggle = () => {
+    trackUsage(); // Automatically emits analytics event
+    // Toggle dark mode implementation
+  };
+
+  return (
+    <button
+      id="dark-mode-toggle"
+      onClick={handleToggle}
+      className="flex items-center gap-2"
+    >
+      <span>Dark Mode</span>
+      {!isAdopted && <span className="text-xs bg-blue-100 px-2 py-1 rounded">New</span>}
+    </button>
+  );
+}
+```
+
+No additional code needed - analytics events are sent automatically!
+</Step>
+</Steps>
+
+---
+
+## Tracked Adoption Events
+
+### Feature Usage Events
+
+| Event | When Fired | Properties |
+|-------|------------|------------|
+| `feature_used` | Feature is used | `featureId`, `featureName`, `category`, `usageCount`, `status`, `sessionId` |
+| `feature_first_use` | First time using a feature | `featureId`, `featureName`, `category`, `timestamp` |
+
+```typescript
+// Example event payload
+{
+  event: 'feature_used',
+  properties: {
+    featureId: 'dark-mode',
+    featureName: 'Dark Mode',
+    category: 'appearance',
+    usageCount: 3,
+    status: 'exploring',
+    sessionId: 'abc-123',
+    timestamp: '2024-03-15T10:30:00Z',
+  }
+}
+```
+
+### Adoption Status Events
+
+| Event | When Fired | Properties |
+|-------|------------|------------|
+| `feature_adopted` | Meets adoption criteria | `featureId`, `featureName`, `category`, `totalUses`, `adoptionDate`, `daysToAdoption` |
+| `feature_churned` | Becomes inactive after adoption | `featureId`, `featureName`, `category`, `lastUsedDate`, `daysSinceUse`, `totalUses` |
+
+```typescript
+// Adoption event payload
+{
+  event: 'feature_adopted',
+  properties: {
+    featureId: 'keyboard-shortcuts',
+    featureName: 'Keyboard Shortcuts',
+    category: 'productivity',
+    totalUses: 5,
+    adoptionDate: '2024-03-15T10:30:00Z',
+    daysToAdoption: 3, // Time from first use to adoption
+  }
+}
+```
+
+### Nudge Events
+
+| Event | When Fired | Properties |
+|-------|------------|------------|
+| `nudge_shown` | Nudge is displayed | `featureId`, `nudgeType`, `priority`, `sessionId` |
+| `nudge_dismissed` | User dismisses nudge | `featureId`, `nudgeType`, `dismissMethod` |
+| `nudge_interacted` | User clicks nudge | `featureId`, `nudgeType`, `action` |
+
+---
+
+## Using Event Builders
+
+Use helper functions to build consistent events:
+
+```tsx title="lib/adoption-events.ts"
+import { buildFeatureAdoptedEvent, buildFeatureUsedEvent, buildNudgeEvent } from '@tour-kit/adoption';
+
+// Build a feature usage event
+const usageEvent = buildFeatureUsedEvent({
+  featureId: 'export',
+  featureName: 'Export Data',
+  category: 'data',
+  usageCount: 2,
+  status: 'exploring',
+});
+
+// Build an adoption event
+const adoptionEvent = buildFeatureAdoptedEvent({
+  featureId: 'export',
+  featureName: 'Export Data',
+  category: 'data',
+  totalUses: 3,
+  daysToAdoption: 5,
+});
+
+// Build a nudge event
+const nudgeEvent = buildNudgeEvent({
+  featureId: 'keyboard-shortcuts',
+  nudgeType: 'tooltip',
+  action: 'shown',
+  priority: 'high',
+});
+```
+
+---
+
+## Building Adoption Funnels
+
+Track users through the adoption journey:
+
+```tsx title="components/adoption-funnel.tsx"
+'use client';
+
+import { useAdoptionStats } from '@tour-kit/adoption';
+import { useEffect, useState } from 'react';
+
+export function AdoptionFunnel() {
+  const stats = useAdoptionStats();
+  const [funnelData, setFunnelData] = useState({
+    notStarted: 0,
+    exploring: 0,
+    adopted: 0,
+    churned: 0,
+  });
+
+  useEffect(() => {
+    // Calculate funnel from stats
+    const data = {
+      notStarted: stats.features.filter(f => f.status === 'not_started').length,
+      exploring: stats.features.filter(f => f.status === 'exploring').length,
+      adopted: stats.features.filter(f => f.status === 'adopted').length,
+      churned: stats.features.filter(f => f.status === 'churned').length,
+    };
+    setFunnelData(data);
+
+    // Send to analytics
+    analytics.track('adoption_funnel_view', {
+      ...data,
+      totalFeatures: stats.totalFeatures,
+    });
+  }, [stats]);
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold">Feature Adoption Funnel</h2>
+
+      <div className="space-y-2">
+        <FunnelStage
+          label="Not Started"
+          count={funnelData.notStarted}
+          total={stats.totalFeatures}
+          color="gray"
+        />
+        <FunnelStage
+          label="Exploring"
+          count={funnelData.exploring}
+          total={stats.totalFeatures}
+          color="blue"
+        />
+        <FunnelStage
+          label="Adopted"
+          count={funnelData.adopted}
+          total={stats.totalFeatures}
+          color="green"
+        />
+        <FunnelStage
+          label="Churned"
+          count={funnelData.churned}
+          total={stats.totalFeatures}
+          color="red"
+        />
+      </div>
+    </div>
+  );
+}
+
+function FunnelStage({ label, count, total, color }) {
+  const percentage = (count / total) * 100;
+
+  return (
+    <div>
+      <div className="flex justify-between text-sm mb-1">
+        <span>{label}</span>
+        <span>{count} ({percentage.toFixed(0)}%)</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-8">
+        <div
+          className={`bg-${color}-500 h-8 rounded-full transition-all flex items-center px-3 text-white text-sm font-medium`}
+          style={{ width: `${percentage}%` }}
+        >
+          {count > 0 && count}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Cohort Analysis
+
+Track adoption by user cohorts:
+
+```tsx title="lib/cohort-analysis.ts"
+import { useAnalytics } from '@tour-kit/analytics';
+import { useAdoptionStats } from '@tour-kit/adoption';
+
+export function useCohortAnalysis(cohort: string) {
+  const { track } = useAnalytics();
+  const stats = useAdoptionStats();
+
+  useEffect(() => {
+    // Track cohort-specific adoption
+    track('cohort_adoption_metrics', {
+      cohort,
+      totalFeatures: stats.totalFeatures,
+      adoptedFeatures: stats.features.filter(f => f.status === 'adopted').length,
+      adoptionRate: (stats.features.filter(f => f.status === 'adopted').length / stats.totalFeatures) * 100,
+      avgTimeToAdoption: calculateAvgTimeToAdoption(stats.features),
+      topFeatures: getTopFeatures(stats.features, 5),
+    });
+  }, [cohort, stats, track]);
+
+  return stats;
+}
+
+function calculateAvgTimeToAdoption(features) {
+  const adoptedFeatures = features.filter(f => f.status === 'adopted' && f.adoptionDate);
+  if (adoptedFeatures.length === 0) return 0;
+
+  const totalDays = adoptedFeatures.reduce((sum, f) => {
+    const firstUse = new Date(f.firstUsedDate);
+    const adopted = new Date(f.adoptionDate);
+    const days = (adopted.getTime() - firstUse.getTime()) / (1000 * 60 * 60 * 24);
+    return sum + days;
+  }, 0);
+
+  return totalDays / adoptedFeatures.length;
+}
+
+function getTopFeatures(features, limit: number) {
+  return features
+    .filter(f => f.status === 'adopted')
+    .sort((a, b) => b.usageCount - a.usageCount)
+    .slice(0, limit)
+    .map(f => ({ id: f.id, name: f.name, usageCount: f.usageCount }));
+}
+```
+
+---
+
+## Feature Adoption Dashboard
+
+Build a comprehensive dashboard:
+
+```tsx title="components/adoption-dashboard.tsx"
+'use client';
+
+import { useAdoptionStats, useFeature } from '@tour-kit/adoption';
+import { useAnalytics } from '@tour-kit/analytics';
+
+export function AdoptionDashboard() {
+  const stats = useAdoptionStats();
+  const { track } = useAnalytics();
+
+  useEffect(() => {
+    // Track dashboard view
+    track('adoption_dashboard_viewed', {
+      totalFeatures: stats.totalFeatures,
+      adoptedCount: stats.features.filter(f => f.status === 'adopted').length,
+      exploringCount: stats.features.filter(f => f.status === 'exploring').length,
+    });
+  }, [stats, track]);
+
+  const adoptionRate = (stats.features.filter(f => f.status === 'adopted').length / stats.totalFeatures) * 100;
+  const churnRate = (stats.features.filter(f => f.status === 'churned').length / stats.totalFeatures) * 100;
+
+  return (
+    <div className="space-y-6">
+      {/* Overview Cards */}
+      <div className="grid grid-cols-4 gap-4">
+        <StatCard
+          title="Adoption Rate"
+          value={`${adoptionRate.toFixed(1)}%`}
+          trend="+5.2%"
+          trendDirection="up"
+        />
+        <StatCard
+          title="Features Adopted"
+          value={stats.features.filter(f => f.status === 'adopted').length}
+          subtitle={`of ${stats.totalFeatures}`}
+        />
+        <StatCard
+          title="Exploring"
+          value={stats.features.filter(f => f.status === 'exploring').length}
+          trend="Active users"
+        />
+        <StatCard
+          title="Churn Rate"
+          value={`${churnRate.toFixed(1)}%`}
+          trend="-1.2%"
+          trendDirection="down"
+        />
+      </div>
+
+      {/* Feature List */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b">
+          <h2 className="text-xl font-semibold">Feature Details</h2>
+        </div>
+        <div className="p-6">
+          <table className="w-full">
+            <thead>
+              <tr className="text-left text-sm text-gray-500">
+                <th className="pb-3">Feature</th>
+                <th className="pb-3">Category</th>
+                <th className="pb-3">Status</th>
+                <th className="pb-3">Usage Count</th>
+                <th className="pb-3">Last Used</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.features.map((feature) => (
+                <FeatureRow key={feature.id} feature={feature} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Category Breakdown */}
+      <CategoryBreakdown features={stats.features} />
+    </div>
+  );
+}
+
+function FeatureRow({ feature }) {
+  const statusColors = {
+    not_started: 'gray',
+    exploring: 'blue',
+    adopted: 'green',
+    churned: 'red',
+  };
+
+  return (
+    <tr className="border-t">
+      <td className="py-3 font-medium">{feature.name}</td>
+      <td className="py-3 text-gray-600">{feature.category}</td>
+      <td className="py-3">
+        <span className={`px-2 py-1 rounded text-xs bg-${statusColors[feature.status]}-100 text-${statusColors[feature.status]}-800`}>
+          {feature.status}
+        </span>
+      </td>
+      <td className="py-3 text-gray-600">{feature.usageCount}</td>
+      <td className="py-3 text-gray-600">
+        {feature.lastUsedDate ? new Date(feature.lastUsedDate).toLocaleDateString() : 'Never'}
+      </td>
+    </tr>
+  );
+}
+
+function CategoryBreakdown({ features }) {
+  const categories = features.reduce((acc, feature) => {
+    const category = feature.category || 'Uncategorized';
+    if (!acc[category]) {
+      acc[category] = { total: 0, adopted: 0 };
+    }
+    acc[category].total++;
+    if (feature.status === 'adopted') {
+      acc[category].adopted++;
+    }
+    return acc;
+  }, {});
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <h3 className="text-lg font-semibold mb-4">Adoption by Category</h3>
+      <div className="space-y-3">
+        {Object.entries(categories).map(([category, data]) => (
+          <div key={category}>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="font-medium">{category}</span>
+              <span>{data.adopted} / {data.total} adopted</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-green-500 h-2 rounded-full"
+                style={{ width: `${(data.adopted / data.total) * 100}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Complete Example: Production Dashboard
+
+```tsx title="app/admin/adoption/page.tsx"
+'use client';
+
+import { AnalyticsProvider, useAnalytics } from '@tour-kit/analytics';
+import { AdoptionProvider, useAdoptionStats } from '@tour-kit/adoption';
+import { segmentPlugin } from '@/lib/analytics';
+
+const features = [
+  {
+    id: 'dark-mode',
+    name: 'Dark Mode',
+    category: 'appearance',
+    trigger: '#dark-mode-toggle',
+    adoptionCriteria: { minUses: 3, recencyDays: 30 },
+  },
+  {
+    id: 'shortcuts',
+    name: 'Keyboard Shortcuts',
+    category: 'productivity',
+    trigger: { event: 'keyboard:shortcut' },
+    adoptionCriteria: { minUses: 5, recencyDays: 14 },
+  },
+  {
+    id: 'export',
+    name: 'Export Data',
+    category: 'data',
+    trigger: '#export-button',
+    adoptionCriteria: { minUses: 2, recencyDays: 60 },
+  },
+  {
+    id: 'integrations',
+    name: 'Third-party Integrations',
+    category: 'integrations',
+    trigger: '#integrations-tab',
+    adoptionCriteria: { minUses: 1, recencyDays: 90 },
+  },
+];
+
+export default function AdoptionAnalyticsPage() {
+  return (
+    <AnalyticsProvider plugins={[segmentPlugin]} enabled={true}>
+      <AdoptionProvider
+        features={features}
+        storage={{ type: 'localStorage', key: 'feature-adoption' }}
+        nudge={{
+          enabled: true,
+          cooldown: 86400000, // 24 hours
+          maxPerSession: 3,
+        }}
+        onAdoption={(feature) => {
+          console.log('Adopted:', feature);
+        }}
+        onChurn={(feature) => {
+          console.warn('Churned:', feature);
+        }}
+      >
+        <AdoptionDashboard />
+      </AdoptionProvider>
+    </AnalyticsProvider>
+  );
+}
+```
+
+---
+
+## Exporting Analytics Data
+
+Build API endpoints to export adoption data:
+
+```tsx title="app/api/analytics/adoption/route.ts"
+import { NextResponse } from 'next/server';
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const startDate = searchParams.get('startDate');
+  const endDate = searchParams.get('endDate');
+
+  // Query your analytics backend
+  const data = await fetchAdoptionData({ startDate, endDate });
+
+  return NextResponse.json({
+    metrics: {
+      totalFeatures: data.features.length,
+      adoptionRate: calculateAdoptionRate(data.features),
+      avgTimeToAdoption: calculateAvgTime(data.features),
+      topFeatures: getTopFeatures(data.features, 10),
+    },
+    features: data.features,
+    timeline: data.timeline,
+  });
+}
+```
+
+---
+
+## Best Practices
+
+### 1. Set Realistic Adoption Criteria
+
+```tsx
+// Good - Achievable thresholds
+{ minUses: 3, recencyDays: 30 }
+
+// Bad - Too aggressive
+{ minUses: 20, recencyDays: 7 }
+```
+
+### 2. Track Category-Level Metrics
+
+```tsx
+const features = [
+  { id: 'dark-mode', category: 'appearance', ... },
+  { id: 'shortcuts', category: 'productivity', ... },
+  { id: 'export', category: 'data', ... },
+];
+
+// Analyze by category
+const productivityAdoption = features
+  .filter(f => f.category === 'productivity')
+  .filter(f => f.status === 'adopted').length;
+```
+
+### 3. Monitor Churn Signals
+
+```tsx
+onChurn={(feature) => {
+  track('feature_at_risk', {
+    featureId: feature.id,
+    daysSinceUse: feature.daysSinceLastUse,
+    priority: 'high',
+  });
+
+  // Trigger re-engagement campaign
+  showReEngagementNudge(feature);
+}
+```
+
+### 4. A/B Test Nudges
+
+```tsx
+const nudgeVariant = Math.random() > 0.5 ? 'tooltip' : 'badge';
+
+track('nudge_shown', {
+  featureId: feature.id,
+  variant: nudgeVariant,
+  experimentId: 'nudge-ab-test-2024-q1',
+});
+```
+
+---
+
+## Related
+
+- [Adoption API Reference](/docs/api/adoption) - Full adoption documentation
+- [Analytics API Reference](/docs/api/analytics) - Analytics integration details
+- [Analytics Integration Guide](/docs/guides/analytics-integration) - General analytics setup

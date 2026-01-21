@@ -1,0 +1,320 @@
+---
+title: Next.js App Router Adapter
+description: Router adapter for Next.js 13+ App Router
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Next.js App Router Adapter
+
+Router adapter for Next.js 13+ App Router using `next/navigation`.
+
+## When to Use
+
+Use this adapter when:
+- You're using Next.js 13 or later
+- Your app uses the App Router (`app/` directory)
+- You need multi-page tours that navigate between routes
+
+---
+
+## Installation
+
+The adapter is included in `@tour-kit/react`. Make sure Next.js is installed:
+
+```bash
+pnpm add @tour-kit/react next
+```
+
+---
+
+## Usage
+
+<Tabs items={['Direct Hook', 'Factory Function']}>
+<Tab value="Direct Hook">
+```tsx
+'use client';
+
+import { MultiTourKitProvider, useNextAppRouter } from '@tour-kit/react';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  const router = useNextAppRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+    >
+      {children}
+    </MultiTourKitProvider>
+  );
+}
+```
+</Tab>
+
+<Tab value="Factory Function">
+```tsx
+'use client';
+
+import { MultiTourKitProvider, createNextAppRouterAdapter } from '@tour-kit/react';
+import { usePathname, useRouter } from 'next/navigation';
+
+const useRouter = createNextAppRouterAdapter(usePathname, useRouter);
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+    >
+      {children}
+    </MultiTourKitProvider>
+  );
+}
+```
+</Tab>
+</Tabs>
+
+<Callout type="warn">
+Both the adapter hook and any component using it must have `'use client'` at the top since they use browser APIs and React hooks.
+</Callout>
+
+---
+
+## useNextAppRouter
+
+Direct hook that automatically imports from `next/navigation`.
+
+```tsx
+import { useNextAppRouter } from '@tour-kit/react';
+
+const router = useNextAppRouter();
+```
+
+### Return Value
+
+Returns a `RouterAdapter` with these methods:
+
+<TypeTable
+  type={{
+    getCurrentRoute: {
+      type: '() => string',
+      description: 'Returns current pathname from usePathname()',
+    },
+    navigate: {
+      type: '(route: string) => void',
+      description: 'Navigates using router.push()',
+    },
+    matchRoute: {
+      type: "(pattern: string, mode?: 'exact' | 'startsWith' | 'contains') => boolean",
+      description: 'Matches current pathname against pattern',
+    },
+    onRouteChange: {
+      type: '(callback: (route: string) => void) => () => void',
+      description: 'Subscribe to pathname changes',
+    },
+  }}
+/>
+
+---
+
+## createNextAppRouterAdapter
+
+Factory function for custom setups.
+
+```tsx
+import { createNextAppRouterAdapter } from '@tour-kit/react';
+import { usePathname, useRouter } from 'next/navigation';
+
+const useMyRouter = createNextAppRouterAdapter(usePathname, useRouter);
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    usePathname: {
+      type: '() => string | null',
+      description: 'Next.js usePathname hook',
+    },
+    useRouter: {
+      type: '() => { push: (href: string) => void }',
+      description: 'Next.js useRouter hook',
+    },
+  }}
+/>
+
+---
+
+## Complete Example
+
+```tsx title="app/providers/tour-provider.tsx"
+'use client';
+
+import {
+  MultiTourKitProvider,
+  useNextAppRouter,
+  Tour,
+  TourStep,
+  TourOverlay,
+  TourCard,
+  useTour,
+} from '@tour-kit/react';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  const router = useNextAppRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{
+        enabled: true,
+        storage: 'localStorage',
+        expiryMs: 24 * 60 * 60 * 1000, // 24 hours
+      }}
+      autoNavigate={true}
+      onTourComplete={(tourId) => {
+        console.log(`Tour ${tourId} completed!`);
+      }}
+    >
+      <Tour id="onboarding">
+        <TourStep
+          target="#hero-section"
+          title="Welcome!"
+          content="Let's show you around our app."
+          route="/"
+          routeMatch="exact"
+        />
+        <TourStep
+          target="#dashboard-widget"
+          title="Your Dashboard"
+          content="View your metrics and activity here."
+          route="/dashboard"
+          routeMatch="startsWith"
+        />
+        <TourStep
+          target="#settings-link"
+          title="Settings"
+          content="Customize your experience in settings."
+          route="/settings"
+        />
+      </Tour>
+
+      <TourOverlay />
+      <TourCard />
+
+      {children}
+
+      <TourButton />
+    </MultiTourKitProvider>
+  );
+}
+
+function TourButton() {
+  const { start, isActive } = useTour();
+
+  if (isActive) return null;
+
+  return (
+    <button
+      onClick={() => start('onboarding')}
+      className="fixed bottom-4 right-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+    >
+      Start Tour
+    </button>
+  );
+}
+```
+
+```tsx title="app/layout.tsx"
+import { TourProvider } from './providers/tour-provider';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <TourProvider>
+          {children}
+        </TourProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+---
+
+## SSR Handling
+
+The adapter handles SSR gracefully:
+
+- `usePathname()` may return `null` during SSR edge cases - adapter defaults to `'/'`
+- Route change callbacks only fire client-side
+- Initial route is detected after hydration
+
+---
+
+## Route Change Detection
+
+The adapter uses `usePathname()` reactivity to detect route changes:
+
+```tsx
+// Internal behavior:
+useEffect(() => {
+  if (previousPath !== pathname) {
+    for (const callback of callbacks) {
+      callback(pathname);
+    }
+  }
+}, [pathname]);
+```
+
+<Callout type="info">
+The `onRouteChange` callback fires immediately with the current route when subscribed, then on each subsequent navigation.
+</Callout>
+
+---
+
+## Troubleshooting
+
+### "Cannot find module 'next/navigation'"
+
+The adapter requires Next.js 13+. Check your Next.js version:
+
+```bash
+npm list next
+```
+
+### Hydration Mismatch
+
+Ensure tour components have `'use client'`:
+
+```tsx
+'use client'; // Required!
+
+import { Tour } from '@tour-kit/react';
+```
+
+### Routes Not Matching
+
+Check your `routeMatch` mode:
+
+```tsx
+// For exact paths
+<TourStep route="/" routeMatch="exact" />
+
+// For paths with dynamic segments
+<TourStep route="/dashboard" routeMatch="startsWith" />
+```
+
+---
+
+## Related
+
+- [Next.js Integration Guide](/docs/guides/nextjs) - Complete setup walkthrough
+- [Router Adapters Overview](/docs/react/adapters) - All available adapters
+- [MultiTourKitProvider](/docs/react/providers/multi-tour-kit-provider) - Provider configuration

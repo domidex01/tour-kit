@@ -1,0 +1,292 @@
+---
+title: Feature Adoption Tracking
+description: Track feature usage, measure adoption, and nudge users toward valuable features
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs'
+
+## What is @tour-kit/adoption?
+
+The adoption package helps you understand which features users actually use, identify adoption patterns, and intelligently nudge users toward valuable features they haven't discovered.
+
+## Why Track Adoption?
+
+Building features is expensive. Understanding which features drive value and which go unused helps you:
+
+- **Prioritize development** based on actual usage patterns
+- **Guide users** to features they'll find valuable
+- **Reduce churn** by identifying features users abandon
+- **Measure product-market fit** through adoption metrics
+
+## Core Concepts
+
+### Feature
+
+A product capability you want to track. Each feature has:
+
+- **ID**: Unique identifier
+- **Trigger**: How usage is detected (click, event, or callback)
+- **Criteria**: When it's considered "adopted" (default: 3 uses in 30 days)
+
+```tsx
+const feature = {
+  id: 'dark-mode',
+  name: 'Dark Mode',
+  trigger: '#dark-mode-toggle', // CSS selector
+  adoptionCriteria: { minUses: 3, recencyDays: 30 },
+}
+```
+
+### Adoption Status
+
+Features progress through four states:
+
+- **not_started**: Never used
+- **exploring**: Used, but below adoption threshold
+- **adopted**: Meets adoption criteria
+- **churned**: Was adopted but hasn't been used recently
+
+### Nudge
+
+A contextual prompt shown to encourage feature discovery. The package handles:
+
+- **Scheduling**: When to show nudges based on cooldowns and session limits
+- **Prioritization**: Which features to nudge first
+- **Dismissal**: Permanent dismissal or temporary snoozing
+
+## Installation
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @tour-kit/adoption @tour-kit/core
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install @tour-kit/adoption @tour-kit/core
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @tour-kit/adoption @tour-kit/core
+    ```
+  </Tab>
+</Tabs>
+
+## Quick Start
+
+```tsx title="app/layout.tsx"
+import { AdoptionProvider } from '@tour-kit/adoption'
+
+const features = [
+  {
+    id: 'dark-mode',
+    name: 'Dark Mode',
+    trigger: '#dark-mode-toggle',
+    category: 'customization',
+  },
+  {
+    id: 'keyboard-shortcuts',
+    name: 'Keyboard Shortcuts',
+    trigger: { event: 'shortcuts:opened' },
+    category: 'productivity',
+  },
+]
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <AdoptionProvider features={features}>
+          {children}
+        </AdoptionProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+```tsx title="components/feature-badge.tsx"
+import { IfNotAdopted, NewFeatureBadge } from '@tour-kit/adoption'
+
+export function DarkModeToggle() {
+  return (
+    <button id="dark-mode-toggle" className="relative">
+      Toggle Dark Mode
+      <IfNotAdopted featureId="dark-mode">
+        <NewFeatureBadge>New!</NewFeatureBadge>
+      </IfNotAdopted>
+    </button>
+  )
+}
+```
+
+```tsx title="components/export-button.tsx"
+import { useFeature } from '@tour-kit/adoption'
+
+export function ExportButton() {
+  const { trackUsage, isAdopted } = useFeature('export')
+
+  const handleExport = async () => {
+    // Your export logic
+    await exportData()
+    // Track the usage
+    trackUsage()
+  }
+
+  return (
+    <button onClick={handleExport}>
+      Export Data {!isAdopted && <span className="badge">New</span>}
+    </button>
+  )
+}
+```
+
+## Usage Tracking Methods
+
+### Automatic Click Tracking
+
+The simplest approach: provide a CSS selector as the trigger.
+
+```tsx
+const feature = {
+  id: 'search',
+  name: 'Search',
+  trigger: '[data-feature="search"]', // Tracks clicks on this element
+}
+```
+
+<Callout type="info">
+Click tracking uses event delegation for performance. Elements can be added/removed dynamically.
+</Callout>
+
+### Custom Event Tracking
+
+For complex interactions, dispatch custom events:
+
+```tsx
+const feature = {
+  id: 'export',
+  name: 'Export',
+  trigger: { event: 'export:complete' },
+}
+
+// In your code
+async function handleExport() {
+  await exportData()
+  window.dispatchEvent(new CustomEvent('export:complete'))
+}
+```
+
+### Programmatic Tracking
+
+For maximum control, use the `useFeature` hook:
+
+```tsx
+function AIAssistant() {
+  const { trackUsage } = useFeature('ai-assist')
+
+  const handleGenerate = async () => {
+    const result = await generateWithAI()
+    if (result.success) {
+      trackUsage() // Track only on success
+    }
+  }
+
+  return <button onClick={handleGenerate}>Generate with AI</button>
+}
+```
+
+## Adoption Criteria
+
+Define what "adopted" means for each feature:
+
+```tsx
+const feature = {
+  id: 'advanced-search',
+  name: 'Advanced Search',
+  trigger: '#advanced-search',
+  adoptionCriteria: {
+    minUses: 5, // Must use 5+ times
+    recencyDays: 30, // Within last 30 days
+  },
+}
+```
+
+### Custom Adoption Logic
+
+For complex cases, provide a custom function:
+
+```tsx
+const feature = {
+  id: 'premium-feature',
+  name: 'Premium Feature',
+  trigger: '#premium-btn',
+  adoptionCriteria: {
+    custom: (usage) => {
+      // Adopted if used 10+ times OR used in last 7 days
+      return usage.useCount >= 10 ||
+        (usage.lastUsed &&
+         Date.now() - new Date(usage.lastUsed).getTime() < 7 * 24 * 60 * 60 * 1000)
+    },
+  },
+}
+```
+
+## Configuration
+
+Full provider configuration:
+
+```tsx
+<AdoptionProvider
+  features={features}
+  storage={{
+    type: 'localStorage',
+    key: 'my-app-adoption',
+  }}
+  nudge={{
+    enabled: true,
+    initialDelay: 5000, // Wait 5s before first nudge
+    cooldown: 86400000, // 24 hours between nudges
+    maxPerSession: 3, // Max 3 nudges per session
+    maxFeatures: 1, // Show 1 feature at a time
+  }}
+  userId="user-123" // For multi-user tracking
+  onAdoption={(feature) => {
+    console.log(`Feature adopted: ${feature.name}`)
+  }}
+  onChurn={(feature) => {
+    console.log(`Feature churned: ${feature.name}`)
+  }}
+/>
+```
+
+<Callout type="warn">
+The `userId` prop changes the storage key to be user-specific. Omit for single-user applications.
+</Callout>
+
+## Next Steps
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+  <a href="/docs/adoption/providers/adoption-provider" className="card">
+    <h3>Provider Setup</h3>
+    <p>Configure the AdoptionProvider with features and storage</p>
+  </a>
+
+  <a href="/docs/adoption/hooks/use-feature" className="card">
+    <h3>useFeature Hook</h3>
+    <p>Track and query individual feature adoption</p>
+  </a>
+
+  <a href="/docs/adoption/components/adoption-nudge" className="card">
+    <h3>Nudge Components</h3>
+    <p>Show contextual prompts for feature discovery</p>
+  </a>
+
+  <a href="/docs/adoption/dashboard" className="card">
+    <h3>Admin Dashboard</h3>
+    <p>Visualize adoption metrics with built-in components</p>
+  </a>
+</div>

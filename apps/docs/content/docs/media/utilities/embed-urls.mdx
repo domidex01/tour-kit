@@ -1,0 +1,653 @@
+---
+title: Embed URLs
+description: Build privacy-compliant embed URLs for video platforms
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+The embed URL utilities construct privacy-compliant iframe URLs for YouTube, Vimeo, Loom, and Wistia. Use them when you need precise control over embed parameters or are building custom components.
+
+## Functions
+
+- `buildYouTubeEmbedUrl()` - Build YouTube iframe URL
+- `buildVimeoEmbedUrl()` - Build Vimeo iframe URL
+- `buildLoomEmbedUrl()` - Build Loom iframe URL
+- `buildWistiaEmbedUrl()` - Build Wistia iframe URL
+- `getYouTubeThumbnailUrl()` - Get YouTube thumbnail image
+- `getVimeoThumbnailUrl()` - Get Vimeo thumbnail image (async)
+
+## buildYouTubeEmbedUrl
+
+Build a privacy-enhanced YouTube embed URL:
+
+```tsx
+import { buildYouTubeEmbedUrl } from '@tour-kit/media'
+
+const embedUrl = buildYouTubeEmbedUrl('dQw4w9WgXcQ', {
+  autoplay: true,
+  muted: true,
+  controls: true,
+  loop: false
+})
+
+console.log(embedUrl)
+// 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&controls=1'
+```
+
+### Parameters
+
+```ts
+buildYouTubeEmbedUrl(
+  videoId: string,
+  options?: {
+    autoplay?: boolean
+    muted?: boolean
+    controls?: boolean
+    loop?: boolean
+    startTime?: number
+    endTime?: number
+    playlistId?: string
+    showInfo?: boolean
+    modestBranding?: boolean
+    rel?: boolean
+  }
+): string
+```
+
+### Options
+
+<TypeTable
+  type={{
+    autoplay: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Auto-start playback when loaded',
+    },
+    muted: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Start muted (required for autoplay in most browsers)',
+    },
+    controls: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show player controls',
+    },
+    loop: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Loop the video',
+    },
+    startTime: {
+      type: 'number',
+      description: 'Start playback at specific time in seconds',
+    },
+    endTime: {
+      type: 'number',
+      description: 'Stop playback at specific time in seconds',
+    },
+    playlistId: {
+      type: 'string',
+      description: 'Playlist ID to embed instead of single video',
+    },
+    showInfo: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show video title and uploader info',
+    },
+    modestBranding: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Hide YouTube logo in control bar',
+    },
+    rel: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Show related videos from same channel',
+    },
+  }}
+/>
+
+### Examples
+
+**Basic embed:**
+```tsx
+buildYouTubeEmbedUrl('dQw4w9WgXcQ')
+// 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ'
+```
+
+**Auto-playing muted:**
+```tsx
+buildYouTubeEmbedUrl('dQw4w9WgXcQ', {
+  autoplay: true,
+  muted: true
+})
+// 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1'
+```
+
+**Start at specific time:**
+```tsx
+buildYouTubeEmbedUrl('dQw4w9WgXcQ', {
+  startTime: 90,
+  endTime: 180
+})
+// '...?start=90&end=180'
+```
+
+**Clean minimal player:**
+```tsx
+buildYouTubeEmbedUrl('dQw4w9WgXcQ', {
+  modestBranding: true,
+  showInfo: false,
+  rel: false
+})
+// '...?modestbranding=1&showinfo=0&rel=0'
+```
+
+**Playlist embed:**
+```tsx
+buildYouTubeEmbedUrl('dQw4w9WgXcQ', {
+  playlistId: 'PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf'
+})
+// '...?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf'
+```
+
+## buildVimeoEmbedUrl
+
+Build a Vimeo embed URL:
+
+```tsx
+import { buildVimeoEmbedUrl } from '@tour-kit/media'
+
+const embedUrl = buildVimeoEmbedUrl('123456789', {
+  autoplay: true,
+  muted: true,
+  loop: true
+})
+
+console.log(embedUrl)
+// 'https://player.vimeo.com/video/123456789?autoplay=1&muted=1&loop=1'
+```
+
+### Parameters
+
+```ts
+buildVimeoEmbedUrl(
+  videoId: string,
+  options?: {
+    autoplay?: boolean
+    muted?: boolean
+    loop?: boolean
+    startTime?: number
+    color?: string
+    showTitle?: boolean
+    showByline?: boolean
+    showPortrait?: boolean
+  }
+): string
+```
+
+### Options
+
+<TypeTable
+  type={{
+    autoplay: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Auto-start playback when loaded',
+    },
+    muted: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Start muted',
+    },
+    loop: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Loop the video',
+    },
+    startTime: {
+      type: 'number',
+      description: 'Start playback at specific time in seconds',
+    },
+    color: {
+      type: 'string',
+      description: 'Hex color for controls (without #). Example: "ff0000"',
+    },
+    showTitle: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show video title',
+    },
+    showByline: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show author byline',
+    },
+    showPortrait: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show author portrait',
+    },
+  }}
+/>
+
+### Examples
+
+**Basic embed:**
+```tsx
+buildVimeoEmbedUrl('123456789')
+// 'https://player.vimeo.com/video/123456789'
+```
+
+**With custom color:**
+```tsx
+buildVimeoEmbedUrl('123456789', {
+  color: '6366f1' // Indigo
+})
+// '...?color=6366f1'
+```
+
+**Clean player:**
+```tsx
+buildVimeoEmbedUrl('123456789', {
+  showTitle: false,
+  showByline: false,
+  showPortrait: false
+})
+// '...?title=0&byline=0&portrait=0'
+```
+
+## buildLoomEmbedUrl
+
+Build a Loom embed URL:
+
+```tsx
+import { buildLoomEmbedUrl } from '@tour-kit/media'
+
+const embedUrl = buildLoomEmbedUrl('abc123def456', {
+  autoplay: true,
+  hideControls: true
+})
+
+console.log(embedUrl)
+// 'https://www.loom.com/embed/abc123def456?autoplay=1&hide_owner=1&hide_share=1&hide_title=1&hideEmbedTopBar=1'
+```
+
+### Parameters
+
+```ts
+buildLoomEmbedUrl(
+  videoId: string,
+  options?: {
+    autoplay?: boolean
+    muted?: boolean
+    loop?: boolean
+    hideControls?: boolean
+    startTime?: number
+  }
+): string
+```
+
+### Options
+
+<TypeTable
+  type={{
+    autoplay: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Auto-start playback',
+    },
+    muted: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Start muted (optional for Loom)',
+    },
+    loop: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Loop the video',
+    },
+    hideControls: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Hide player controls and branding',
+    },
+    startTime: {
+      type: 'number',
+      description: 'Start playback at specific time in seconds',
+    },
+  }}
+/>
+
+### Examples
+
+**Basic embed:**
+```tsx
+buildLoomEmbedUrl('abc123def456')
+// 'https://www.loom.com/embed/abc123def456'
+```
+
+**Auto-playing:**
+```tsx
+buildLoomEmbedUrl('abc123def456', {
+  autoplay: true
+})
+// '...?autoplay=1'
+```
+
+**Clean embed without controls:**
+```tsx
+buildLoomEmbedUrl('abc123def456', {
+  hideControls: true
+})
+// '...?hide_owner=1&hide_share=1&hide_title=1&hideEmbedTopBar=1'
+```
+
+## buildWistiaEmbedUrl
+
+Build a Wistia embed URL:
+
+```tsx
+import { buildWistiaEmbedUrl } from '@tour-kit/media'
+
+const embedUrl = buildWistiaEmbedUrl('abc123xyz', {
+  autoplay: true,
+  muted: true,
+  playerColor: 'ff0000'
+})
+
+console.log(embedUrl)
+// 'https://fast.wistia.net/embed/iframe/abc123xyz?autoPlay=1&muted=1&playerColor=ff0000'
+```
+
+### Parameters
+
+```ts
+buildWistiaEmbedUrl(
+  videoId: string,
+  options?: {
+    autoplay?: boolean
+    muted?: boolean
+    loop?: boolean
+    controlsVisibleOnLoad?: boolean
+    startTime?: number
+    playerColor?: string
+  }
+): string
+```
+
+### Options
+
+<TypeTable
+  type={{
+    autoplay: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Auto-start playback',
+    },
+    muted: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Start muted',
+    },
+    loop: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Loop the video',
+    },
+    controlsVisibleOnLoad: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show controls immediately vs on hover',
+    },
+    startTime: {
+      type: 'number',
+      description: 'Start playback at specific time in seconds',
+    },
+    playerColor: {
+      type: 'string',
+      description: 'Hex color for player controls (without #)',
+    },
+  }}
+/>
+
+### Examples
+
+**Basic embed:**
+```tsx
+buildWistiaEmbedUrl('abc123xyz')
+// 'https://fast.wistia.net/embed/iframe/abc123xyz'
+```
+
+**With branding color:**
+```tsx
+buildWistiaEmbedUrl('abc123xyz', {
+  playerColor: '6366f1'
+})
+// '...?playerColor=6366f1'
+```
+
+**Hide controls on load:**
+```tsx
+buildWistiaEmbedUrl('abc123xyz', {
+  controlsVisibleOnLoad: false
+})
+// '...?controlsVisibleOnLoad=0'
+```
+
+## Thumbnail URLs
+
+### getYouTubeThumbnailUrl
+
+Get thumbnail image URL for YouTube video:
+
+```tsx
+import { getYouTubeThumbnailUrl } from '@tour-kit/media'
+
+// High quality thumbnail
+const hqUrl = getYouTubeThumbnailUrl('dQw4w9WgXcQ')
+console.log(hqUrl)
+// 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg'
+
+// Maximum quality thumbnail
+const maxUrl = getYouTubeThumbnailUrl('dQw4w9WgXcQ', 'maxresdefault')
+console.log(maxUrl)
+// 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'
+```
+
+**Quality options:**
+- `default` - 120x90
+- `mqdefault` - 320x180
+- `hqdefault` - 480x360 (default)
+- `sddefault` - 640x480
+- `maxresdefault` - 1280x720 (if available)
+
+**Usage in components:**
+```tsx
+function VideoWithThumbnail({ videoId }) {
+  const thumbnail = getYouTubeThumbnailUrl(videoId, 'hqdefault')
+
+  return (
+    <img
+      src={thumbnail}
+      alt="Video thumbnail"
+      className="w-full rounded-lg"
+    />
+  )
+}
+```
+
+### getVimeoThumbnailUrl
+
+Get thumbnail image URL for Vimeo video (async):
+
+```tsx
+import { getVimeoThumbnailUrl } from '@tour-kit/media'
+
+const thumbnail = await getVimeoThumbnailUrl('123456789')
+console.log(thumbnail)
+// 'https://i.vimeocdn.com/video/123456789_640.jpg'
+```
+
+<Callout type="info">
+  `getVimeoThumbnailUrl` makes an API call to Vimeo's oEmbed endpoint. Consider caching the result or fetching at build time.
+</Callout>
+
+**Usage with async components:**
+```tsx
+function VimeoThumbnail({ videoId }) {
+  const [thumbnail, setThumbnail] = useState<string | null>(null)
+
+  useEffect(() => {
+    getVimeoThumbnailUrl(videoId).then(setThumbnail)
+  }, [videoId])
+
+  if (!thumbnail) return <div>Loading...</div>
+
+  return <img src={thumbnail} alt="Video thumbnail" />
+}
+```
+
+## Use Cases
+
+### Custom Video Player
+
+Build a custom player with generated embed URLs:
+
+```tsx
+import { buildYouTubeEmbedUrl, extractYouTubeId } from '@tour-kit/media'
+
+function CustomYouTubePlayer({ url, autoplay = false }) {
+  const videoId = extractYouTubeId(url)
+  const embedUrl = buildYouTubeEmbedUrl(videoId, {
+    autoplay,
+    muted: autoplay,
+    modestBranding: true,
+    rel: false
+  })
+
+  return (
+    <div className="video-container">
+      <iframe
+        src={embedUrl}
+        className="w-full aspect-video"
+        allow="autoplay; encrypted-media"
+        allowFullScreen
+      />
+    </div>
+  )
+}
+```
+
+### Thumbnail Gallery
+
+Create a video gallery with thumbnails:
+
+```tsx
+import { getYouTubeThumbnailUrl, buildYouTubeEmbedUrl } from '@tour-kit/media'
+
+function VideoGallery({ videos }) {
+  const [selectedVideo, setSelectedVideo] = useState(videos[0])
+
+  return (
+    <div>
+      <iframe
+        src={buildYouTubeEmbedUrl(selectedVideo.id, { autoplay: true })}
+        className="w-full aspect-video"
+      />
+
+      <div className="grid grid-cols-4 gap-4 mt-4">
+        {videos.map(video => (
+          <button
+            key={video.id}
+            onClick={() => setSelectedVideo(video)}
+            className="cursor-pointer"
+          >
+            <img
+              src={getYouTubeThumbnailUrl(video.id)}
+              alt={video.title}
+              className="w-full rounded"
+            />
+            <p className="text-sm">{video.title}</p>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+### Privacy-First Embedding
+
+Use privacy-enhanced URLs:
+
+```tsx
+import { buildYouTubeEmbedUrl } from '@tour-kit/media'
+
+// YouTube automatically uses youtube-nocookie.com
+const embedUrl = buildYouTubeEmbedUrl('dQw4w9WgXcQ')
+// 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ'
+
+// No tracking cookies until user interacts with video
+```
+
+### Server-Side URL Generation
+
+Generate URLs at build time:
+
+```tsx
+// In getStaticProps or server component
+import { buildYouTubeEmbedUrl } from '@tour-kit/media'
+
+export async function getStaticProps() {
+  const videos = [
+    { id: 'abc123', title: 'Tutorial 1' },
+    { id: 'def456', title: 'Tutorial 2' }
+  ]
+
+  const videosWithEmbeds = videos.map(video => ({
+    ...video,
+    embedUrl: buildYouTubeEmbedUrl(video.id, {
+      modestBranding: true,
+      rel: false
+    })
+  }))
+
+  return {
+    props: { videos: videosWithEmbeds }
+  }
+}
+```
+
+## TypeScript
+
+All utilities are fully typed:
+
+```tsx
+import type { EmbedUrlOptions } from '@tour-kit/media'
+import {
+  buildYouTubeEmbedUrl,
+  buildVimeoEmbedUrl,
+  getYouTubeThumbnailUrl
+} from '@tour-kit/media'
+
+const youtubeOptions: EmbedUrlOptions = {
+  autoplay: true,
+  muted: true,
+  startTime: 90
+}
+
+const youtubeUrl: string = buildYouTubeEmbedUrl('abc123', youtubeOptions)
+const vimeoUrl: string = buildVimeoEmbedUrl('123456789', { loop: true })
+const thumbnail: string = getYouTubeThumbnailUrl('abc123', 'hqdefault')
+```
+
+## See Also
+
+- [URL Parsing](/docs/media/utilities/url-parsing) - Extract video IDs from URLs
+- [YouTubeEmbed](/docs/media/components/youtube-embed) - YouTube component
+- [VimeoEmbed](/docs/media/components/vimeo-embed) - Vimeo component
+- [LoomEmbed](/docs/media/components/loom-embed) - Loom component
+- [WistiaEmbed](/docs/media/components/wistia-embed) - Wistia component

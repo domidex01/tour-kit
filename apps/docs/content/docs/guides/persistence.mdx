@@ -1,0 +1,675 @@
+---
+title: Persistence
+description: Save tour progress, checklist state, and user preferences across sessions
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
+
+# Persistence
+
+Tour Kit provides comprehensive persistence across all packages, allowing you to save user progress, dismissed announcements, checklist completion, and feature adoption data. This guide covers storage options, configuration, and best practices.
+
+## Why Persistence Matters
+
+Without persistence:
+- Users restart onboarding tours every visit
+- Dismissed announcements reappear
+- Checklist progress is lost on refresh
+- Feature adoption tracking resets
+
+With Tour Kit's persistence:
+- Tours resume from where users left off
+- "Don't show again" is remembered
+- Checklists track completed tasks across sessions
+- Adoption data builds over time
+
+---
+
+## Storage Options
+
+Tour Kit supports multiple storage backends:
+
+| Storage | Scope | SSR Safe | Best For |
+|---------|-------|----------|----------|
+| `localStorage` | Cross-session | No | Default browser storage |
+| `sessionStorage` | Session only | No | Temporary progress |
+| `memory` | Page only | Yes | SSR, testing |
+| Custom adapter | Your choice | Depends | API backend, IndexedDB |
+
+### SSR Considerations
+
+When using Server-Side Rendering (Next.js, Remix), storage APIs aren't available during initial render:
+
+```tsx title="SSR-safe pattern"
+// Tour Kit automatically handles this, but for custom code:
+const storage = typeof window !== 'undefined'
+  ? localStorage
+  : createMemoryStorage()
+```
+
+<Callout type="info">
+  All Tour Kit persistence hooks automatically fall back to memory storage during SSR, then hydrate client-side.
+</Callout>
+
+---
+
+## Tour Persistence
+
+The `usePersistence` hook saves tour progress for single-page applications.
+
+### Configuration
+
+```tsx title="Setting up tour persistence"
+import { TourProvider } from '@tour-kit/react'
+
+<TourProvider
+  tour={myTour}
+  persistence={{
+    enabled: true,
+    storage: 'localStorage',
+    keyPrefix: 'my-app',
+    rememberStep: true,
+    trackCompleted: true,
+    dontShowAgain: false,
+  }}
+>
+  {children}
+</TourProvider>
+```
+
+### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | `boolean` | `true` | Enable/disable persistence |
+| `storage` | `'localStorage' \| 'sessionStorage' \| Storage` | `'localStorage'` | Storage backend |
+| `keyPrefix` | `string` | `'tourkit'` | Key namespace prefix |
+| `rememberStep` | `boolean` | `true` | Save last viewed step |
+| `trackCompleted` | `boolean` | `true` | Track completed tours |
+| `dontShowAgain` | `boolean` | `false` | Enable "don't show again" |
+
+### Storage Keys
+
+| Key Pattern | Type | Purpose |
+|-------------|------|---------|
+| `{prefix}:completed` | `string[]` | Completed tour IDs |
+| `{prefix}:skipped` | `string[]` | Skipped tour IDs |
+| `{prefix}:step:{tourId}` | `number` | Last step index |
+| `{prefix}:dontShow:{tourId}` | `boolean` | Don't show flag |
+
+### API Reference
+
+```tsx title="Using persistence programmatically"
+import { usePersistence } from '@tour-kit/core'
+
+function TourManager() {
+  const persistence = usePersistence({ keyPrefix: 'my-app' })
+
+  // Check if user completed a tour
+  const completed = persistence.getCompletedTours()
+  const hasCompletedOnboarding = completed.includes('onboarding')
+
+  // Mark tour as completed
+  const handleComplete = () => {
+    persistence.markCompleted('onboarding')
+  }
+
+  // Resume from last step
+  const lastStep = persistence.getLastStep('onboarding')
+
+  // Enable "don't show again"
+  const handleDontShow = () => {
+    persistence.setDontShowAgain('onboarding', true)
+  }
+
+  // Reset all tour data
+  const handleReset = () => {
+    persistence.reset() // All tours
+    // or
+    persistence.reset('onboarding') // Single tour
+  }
+
+  return (/* ... */)
+}
+```
+
+---
+
+## Multi-Page Tour Persistence
+
+For tours that span multiple pages/routes, use `useRoutePersistence`:
+
+### Configuration
+
+```tsx title="Multi-page persistence setup"
+import { TourProvider } from '@tour-kit/react'
+import { useRoutePersistence } from '@tour-kit/core'
+
+function App() {
+  const routePersistence = useRoutePersistence({
+    enabled: true,
+    storage: 'localStorage',
+    key: 'my-app-route-state',
+    syncTabs: true,
+    expiryMs: 24 * 60 * 60 * 1000, // 24 hours
+  })
+
+  return (
+    <TourProvider
+      tour={multiPageTour}
+      routePersistence={routePersistence}
+    >
+      {children}
+    </TourProvider>
+  )
+}
+```
+
+### Persisted State Structure
+
+```typescript
+interface PersistedRouteState {
+  tourId: string | null
+  stepIndex: number
+  completedTours: string[]
+  skippedTours: string[]
+  timestamp: number
+}
+```
+
+### Cross-Tab Synchronization
+
+When `syncTabs: true`, tour state syncs across browser tabs:
+
+```tsx title="Tab sync behavior"
+// Tab 1: User advances to step 3
+routePersistence.save({ stepIndex: 3 })
+
+// Tab 2: Automatically receives update via StorageEvent
+// Tour UI updates to reflect step 3
+```
+
+### Expiry Handling
+
+Route state expires after `expiryMs` (default 24 hours):
+
+```tsx
+const state = routePersistence.load()
+
+if (state && routePersistence.isStale()) {
+  // State expired, start fresh
+  routePersistence.clear()
+}
+```
+
+---
+
+## Checklist Persistence
+
+The `@tour-kit/checklists` package persists task completion and dismissal state.
+
+### Configuration
+
+```tsx title="Checklist persistence setup"
+import { ChecklistProvider } from '@tour-kit/checklists'
+
+<ChecklistProvider
+  checklists={myChecklists}
+  persistence={{
+    enabled: true,
+    storage: 'localStorage',
+    key: 'my-app-checklists',
+  }}
+>
+  {children}
+</ChecklistProvider>
+```
+
+### Persisted State Structure
+
+```typescript
+interface PersistedChecklistState {
+  completed: Record<string, string[]>  // { checklistId: [taskId1, taskId2] }
+  dismissed: string[]                   // Dismissed checklist IDs
+  timestamp: number
+}
+```
+
+### Using the Hook Directly
+
+```tsx title="Programmatic checklist persistence"
+import { useChecklistPersistence } from '@tour-kit/checklists'
+
+function ChecklistManager() {
+  const persistence = useChecklistPersistence({
+    enabled: true,
+    storage: 'localStorage',
+    key: 'my-app-checklists',
+  })
+
+  // Save current state
+  persistence.save({
+    completed: {
+      'onboarding': ['create-account', 'verify-email'],
+      'setup': ['add-profile-photo'],
+    },
+    dismissed: [],
+    timestamp: Date.now(),
+  })
+
+  // Load persisted state
+  const state = persistence.load()
+
+  // Clear all data
+  persistence.clear()
+}
+```
+
+### API Backend Persistence
+
+For server-side storage, use custom handlers:
+
+```tsx title="API-backed checklist persistence"
+<ChecklistProvider
+  checklists={myChecklists}
+  persistence={{
+    enabled: true,
+    onSave: async (state) => {
+      await fetch('/api/user/checklists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state),
+      })
+    },
+    onLoad: async () => {
+      const res = await fetch('/api/user/checklists')
+      if (!res.ok) return null
+      return res.json()
+    },
+  }}
+>
+```
+
+---
+
+## Announcement Persistence
+
+Announcements track view counts, dismissals, and frequency-based display rules.
+
+### Storage Keys
+
+Each announcement stores state with the key pattern:
+```
+{storageKey}{announcementId}
+```
+
+Default: `tour-kit:announcements:{id}`
+
+### Persisted Data Per Announcement
+
+```typescript
+interface AnnouncementPersistedState {
+  viewCount: number
+  lastViewedAt: string | null    // ISO date
+  isDismissed: boolean
+  dismissedAt: string | null     // ISO date
+  dismissalReason: DismissalReason
+  completedAt: string | null     // ISO date (primary action taken)
+}
+```
+
+### Frequency Rules
+
+Frequency determines how persistence affects display:
+
+<Tabs items={['once', 'session', 'times', 'interval', 'always']}>
+  <Tab value="once">
+```tsx
+// Show only once, ever
+{ frequency: 'once' }
+
+// Persisted: viewCount >= 1 prevents re-display
+```
+  </Tab>
+  <Tab value="session">
+```tsx
+// Show once per browser session
+{ frequency: 'session' }
+
+// Not persisted - uses session state only
+```
+  </Tab>
+  <Tab value="times">
+```tsx
+// Show up to 3 times total
+{ frequency: { type: 'times', count: 3 } }
+
+// Persisted: viewCount tracks displays
+```
+  </Tab>
+  <Tab value="interval">
+```tsx
+// Show again after 7 days
+{ frequency: { type: 'interval', days: 7 } }
+
+// Persisted: lastViewedAt determines eligibility
+```
+  </Tab>
+  <Tab value="always">
+```tsx
+// Show every time (respects dismissal)
+{ frequency: 'always' }
+
+// Persisted: isDismissed still honored
+```
+  </Tab>
+</Tabs>
+
+### Configuration
+
+```tsx title="Announcement persistence setup"
+import { AnnouncementsProvider } from '@tour-kit/announcements'
+
+<AnnouncementsProvider
+  announcements={myAnnouncements}
+  storage={localStorage}           // Or sessionStorage, null
+  storageKey="my-app:announcements:"
+  syncTabs={true}
+>
+  {children}
+</AnnouncementsProvider>
+```
+
+---
+
+## Adoption Persistence
+
+The `@tour-kit/adoption` package tracks feature usage over time.
+
+### Persisted State Structure
+
+```typescript
+interface PersistedAdoptionState {
+  version: number
+  userId?: string
+  features: Record<string, FeatureUsage>
+  nudges: NudgeState
+  updatedAt: string
+}
+
+interface FeatureUsage {
+  featureId: string
+  firstUsed: string | null    // ISO date
+  lastUsed: string | null     // ISO date
+  useCount: number
+  status: 'not_started' | 'exploring' | 'adopted' | 'churned'
+}
+
+interface NudgeState {
+  lastShown: string | null
+  dismissed: string[]         // Permanently dismissed features
+  snoozed: Record<string, string>  // featureId -> expiry date
+  sessionCount: number
+}
+```
+
+### Configuration
+
+```tsx title="Adoption persistence setup"
+import { AdoptionProvider } from '@tour-kit/adoption'
+
+<AdoptionProvider
+  features={myFeatures}
+  storage={{
+    type: 'localStorage',
+    key: 'my-app-adoption',
+  }}
+>
+  {children}
+</AdoptionProvider>
+```
+
+### Storage Types
+
+```tsx
+// Browser localStorage (default)
+storage={{ type: 'localStorage', key: 'my-key' }}
+
+// Session storage
+storage={{ type: 'sessionStorage', key: 'my-key' }}
+
+// In-memory (SSR-safe)
+storage={{ type: 'memory' }}
+```
+
+### Adoption Status Calculation
+
+The adoption status is calculated from persisted usage data:
+
+```typescript
+function calculateStatus(usage: FeatureUsage, criteria: AdoptionCriteria) {
+  if (usage.useCount === 0) return 'not_started'
+  if (usage.useCount < criteria.minUses) return 'exploring'
+
+  const daysSinceUse = daysSince(usage.lastUsed)
+  if (daysSinceUse > criteria.recencyDays) return 'churned'
+
+  return 'adopted'
+}
+```
+
+---
+
+## Custom Storage Adapters
+
+Create custom adapters for IndexedDB, API backends, or other storage:
+
+### Adapter Interface
+
+```typescript
+interface Storage {
+  getItem(key: string): string | null | Promise<string | null>
+  setItem(key: string, value: string): void | Promise<void>
+  removeItem(key: string): void | Promise<void>
+}
+```
+
+### IndexedDB Example
+
+```tsx title="IndexedDB storage adapter"
+import { openDB } from 'idb'
+
+const idbStorage: Storage = {
+  async getItem(key: string) {
+    const db = await openDB('tour-kit', 1, {
+      upgrade(db) {
+        db.createObjectStore('state')
+      },
+    })
+    const value = await db.get('state', key)
+    return value ? JSON.stringify(value) : null
+  },
+
+  async setItem(key: string, value: string) {
+    const db = await openDB('tour-kit', 1)
+    await db.put('state', JSON.parse(value), key)
+  },
+
+  async removeItem(key: string) {
+    const db = await openDB('tour-kit', 1)
+    await db.delete('state', key)
+  },
+}
+
+// Use with any Tour Kit provider
+<TourProvider
+  tour={myTour}
+  persistence={{ storage: idbStorage }}
+>
+```
+
+### API Backend Example
+
+```tsx title="REST API storage adapter"
+const apiStorage: Storage = {
+  async getItem(key: string) {
+    const res = await fetch(`/api/tour-state/${encodeURIComponent(key)}`)
+    if (!res.ok) return null
+    const data = await res.json()
+    return JSON.stringify(data)
+  },
+
+  async setItem(key: string, value: string) {
+    await fetch(`/api/tour-state/${encodeURIComponent(key)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: value,
+    })
+  },
+
+  async removeItem(key: string) {
+    await fetch(`/api/tour-state/${encodeURIComponent(key)}`, {
+      method: 'DELETE',
+    })
+  },
+}
+```
+
+---
+
+## Storage Key Namespacing
+
+When running multiple apps or features, namespace your keys:
+
+| Package | Default Prefix | Recommended Custom |
+|---------|----------------|-------------------|
+| Core (tours) | `tourkit` | `{app}:tours` |
+| Core (routes) | `tourkit-route-state` | `{app}:route-state` |
+| Checklists | `tourkit-checklists` | `{app}:checklists` |
+| Announcements | `tour-kit:announcements:` | `{app}:announcements:` |
+| Adoption | `tourkit-adoption` | `{app}:adoption` |
+
+```tsx title="Custom namespacing example"
+// All Tour Kit data under 'acme-app' prefix
+<TourProvider persistence={{ keyPrefix: 'acme-app:tours' }}>
+<ChecklistProvider persistence={{ key: 'acme-app:checklists' }}>
+<AnnouncementsProvider storageKey="acme-app:announcements:">
+<AdoptionProvider storage={{ key: 'acme-app:adoption' }}>
+```
+
+---
+
+## Clearing Persisted Data
+
+### Per Package
+
+```tsx
+// Tours
+const persistence = usePersistence()
+persistence.reset() // All tours
+persistence.reset('tour-id') // Single tour
+
+// Checklists
+const checklistPersistence = useChecklistPersistence()
+checklistPersistence.clear()
+
+// Route state
+const routePersistence = useRoutePersistence()
+routePersistence.clear()
+```
+
+### Global Reset
+
+For a complete reset during development or user logout:
+
+```tsx title="Clear all Tour Kit data"
+function clearAllTourKitData(prefix = 'tourkit') {
+  const keys = Object.keys(localStorage)
+  keys.forEach(key => {
+    if (key.startsWith(prefix) || key.startsWith('tour-kit:')) {
+      localStorage.removeItem(key)
+    }
+  })
+}
+
+// On user logout
+function handleLogout() {
+  clearAllTourKitData('my-app')
+  // ... other logout logic
+}
+```
+
+---
+
+## Error Handling
+
+Tour Kit handles storage errors gracefully:
+
+```typescript
+// Internal pattern - errors don't crash the app
+try {
+  localStorage.setItem(key, JSON.stringify(value))
+} catch (error) {
+  if (error.name === 'QuotaExceededError') {
+    logger.warn('Storage quota exceeded, state not persisted')
+  }
+  // Silent failure - tour continues without persistence
+}
+```
+
+<Callout type="warn">
+  If `localStorage` quota is exceeded, Tour Kit logs a warning but continues functioning without persistence. Consider clearing old data or using a custom adapter with larger capacity.
+</Callout>
+
+---
+
+## Migration and Versioning
+
+When your data schema changes, handle migrations:
+
+```tsx title="Migration pattern for adoption data"
+const CURRENT_VERSION = 2
+
+function migrateState(state: PersistedState): PersistedState {
+  if (state.version === 1) {
+    // v1 -> v2: Add new field
+    return {
+      ...state,
+      version: 2,
+      newField: 'default',
+    }
+  }
+  return state
+}
+
+// In your storage adapter
+async function loadWithMigration(key: string) {
+  const raw = await storage.getItem(key)
+  if (!raw) return null
+
+  const state = JSON.parse(raw)
+  return migrateState(state)
+}
+```
+
+---
+
+## Best Practices
+
+1. **Use consistent prefixes** - Namespace all keys to avoid collisions
+2. **Handle SSR** - Tour Kit does this automatically, but custom code needs checks
+3. **Respect user privacy** - Provide a way to clear stored data
+4. **Test persistence** - Include persistence in your test suites
+5. **Plan for migration** - Version your persisted data structures
+6. **Monitor storage usage** - Large amounts of data can hit quotas
+
+---
+
+## Related Resources
+
+- [usePersistence Hook](/docs/core/hooks/use-persistence)
+- [useRoutePersistence Hook](/docs/core/hooks/use-route-persistence)
+- [useChecklistPersistence Hook](/docs/checklists/hooks/use-checklist-persistence)
+- [Storage Utilities](/docs/core/utilities/storage)
+- [Announcement Frequency Rules](/docs/announcements/configuration/frequency)

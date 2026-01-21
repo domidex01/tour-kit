@@ -1,0 +1,660 @@
+---
+title: Type Reference
+description: Complete TypeScript type definitions for @tour-kit/media
+---
+
+## Overview
+
+This page documents all TypeScript types exported by `@tour-kit/media`. Use these for type-safe media component development.
+
+## Core Types
+
+### MediaType
+
+Supported media platforms and formats:
+
+```ts
+type MediaType =
+  | 'youtube'
+  | 'vimeo'
+  | 'loom'
+  | 'wistia'
+  | 'video'
+  | 'gif'
+  | 'lottie'
+  | 'image'
+```
+
+**Usage:**
+```tsx
+import type { MediaType } from '@tour-kit/media'
+
+const type: MediaType = 'youtube'
+```
+
+### AspectRatio
+
+Standard video aspect ratios:
+
+```ts
+type AspectRatio =
+  | '16/9'   // Standard widescreen
+  | '4/3'    // Classic TV
+  | '1/1'    // Square
+  | '9/16'   // Vertical/mobile
+  | '21/9'   // Ultra-wide
+  | 'auto'   // Preserve original
+```
+
+**Usage:**
+```tsx
+<TourMedia
+  src="video.mp4"
+  alt="Demo"
+  aspectRatio="16/9"
+/>
+```
+
+## Configuration Types
+
+### TourMediaConfig
+
+Main configuration object for media components:
+
+```ts
+interface TourMediaConfig {
+  // Required
+  src: string
+  alt: string
+
+  // Media type
+  type?: MediaType
+
+  // Display
+  poster?: string
+  aspectRatio?: AspectRatio
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
+  loading?: 'eager' | 'lazy'
+
+  // Playback
+  autoplay?: boolean
+  muted?: boolean
+  controls?: boolean
+  loop?: boolean
+  playsInline?: boolean
+  preload?: 'none' | 'metadata' | 'auto'
+  startTime?: number
+
+  // Accessibility
+  captions?: CaptionTrack[]
+  reducedMotionFallback?: string
+
+  // Advanced
+  sources?: ResponsiveSource[]
+  lottieOptions?: LottieOptions
+
+  // Styling
+  className?: string
+  style?: React.CSSProperties
+}
+```
+
+**Usage:**
+```tsx
+import type { TourMediaConfig } from '@tour-kit/media'
+
+const config: TourMediaConfig = {
+  src: '/videos/demo.mp4',
+  alt: 'Product demo',
+  autoplay: true,
+  muted: true,
+  aspectRatio: '16/9'
+}
+
+<TourMedia {...config} />
+```
+
+### CaptionTrack
+
+Caption/subtitle track configuration:
+
+```ts
+interface CaptionTrack {
+  src: string                                    // URL to WebVTT file
+  srcLang: string                                // BCP 47 language code
+  label: string                                  // Display name
+  kind?: 'subtitles' | 'captions' | 'descriptions'
+  default?: boolean                              // Set as default track
+}
+```
+
+**Usage:**
+```tsx
+import type { CaptionTrack } from '@tour-kit/media'
+
+const captions: CaptionTrack[] = [
+  {
+    src: '/captions/en.vtt',
+    srcLang: 'en',
+    label: 'English',
+    kind: 'captions',
+    default: true
+  },
+  {
+    src: '/captions/es.vtt',
+    srcLang: 'es',
+    label: 'Español',
+    kind: 'subtitles'
+  }
+]
+
+<NativeVideo
+  src="video.mp4"
+  alt="Demo"
+  captions={captions}
+/>
+```
+
+### ResponsiveSource
+
+Responsive media source for different viewport sizes:
+
+```ts
+interface ResponsiveSource {
+  src: string           // Video file URL
+  maxWidth?: number     // Maximum viewport width for this source
+  type?: string         // MIME type (e.g., 'video/mp4', 'video/webm')
+}
+```
+
+**Usage:**
+```tsx
+import type { ResponsiveSource } from '@tour-kit/media'
+
+const sources: ResponsiveSource[] = [
+  { src: '/videos/demo-480p.mp4', maxWidth: 640 },
+  { src: '/videos/demo-720p.mp4', maxWidth: 1024 },
+  { src: '/videos/demo-1080p.mp4', maxWidth: Infinity }
+]
+
+<NativeVideo
+  src="/videos/demo-1080p.mp4"
+  alt="Demo"
+  sources={sources}
+/>
+```
+
+### LottieOptions
+
+Lottie animation configuration:
+
+```ts
+interface LottieOptions {
+  renderer?: 'svg' | 'canvas' | 'html'
+  loop?: boolean
+  autoplay?: boolean
+  speed?: number
+  direction?: 1 | -1
+  rendererSettings?: {
+    preserveAspectRatio?: string
+    progressiveLoad?: boolean
+    hideOnTransparent?: boolean
+    className?: string
+  }
+}
+```
+
+**Usage:**
+```tsx
+import type { LottieOptions } from '@tour-kit/media'
+
+const lottieConfig: LottieOptions = {
+  renderer: 'svg',
+  loop: true,
+  autoplay: true,
+  speed: 1,
+  rendererSettings: {
+    preserveAspectRatio: 'xMidYMid slice',
+    progressiveLoad: true
+  }
+}
+
+<LottiePlayer
+  src="/animations/success.json"
+  alt="Success"
+  lottieOptions={lottieConfig}
+/>
+```
+
+## Component Props
+
+### TourMediaProps
+
+Props for the TourMedia component:
+
+```ts
+interface TourMediaProps extends TourMediaConfig {
+  // Event handlers
+  onLoaded?: () => void
+  onPlay?: () => void
+  onPause?: () => void
+  onEnded?: () => void
+  onError?: (error: Error) => void
+  onTimeUpdate?: (currentTime: number, duration: number) => void
+}
+```
+
+### YouTubeEmbedProps
+
+Props for YouTubeEmbed component:
+
+```ts
+interface YouTubeEmbedProps {
+  videoId: string
+  title: string
+  autoplay?: boolean
+  muted?: boolean
+  controls?: boolean
+  loop?: boolean
+  startTime?: number
+  endTime?: number
+  playlistId?: string
+  aspectRatio?: AspectRatio
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
+  showInfo?: boolean
+  modestBranding?: boolean
+  allowFullscreen?: boolean
+  className?: string
+  style?: React.CSSProperties
+}
+```
+
+### VimeoEmbedProps
+
+Props for VimeoEmbed component:
+
+```ts
+interface VimeoEmbedProps {
+  videoId: string
+  title: string
+  autoplay?: boolean
+  muted?: boolean
+  loop?: boolean
+  startTime?: number
+  aspectRatio?: AspectRatio
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
+  color?: string
+  showTitle?: boolean
+  showByline?: boolean
+  showPortrait?: boolean
+  allowFullscreen?: boolean
+  className?: string
+  style?: React.CSSProperties
+}
+```
+
+### LoomEmbedProps
+
+Props for LoomEmbed component:
+
+```ts
+interface LoomEmbedProps {
+  videoId: string
+  title: string
+  autoplay?: boolean
+  muted?: boolean
+  loop?: boolean
+  hideControls?: boolean
+  startTime?: number
+  aspectRatio?: AspectRatio
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
+  allowFullscreen?: boolean
+  className?: string
+  style?: React.CSSProperties
+}
+```
+
+### WistiaEmbedProps
+
+Props for WistiaEmbed component:
+
+```ts
+interface WistiaEmbedProps {
+  videoId: string
+  title: string
+  autoplay?: boolean
+  muted?: boolean
+  loop?: boolean
+  controlsVisibleOnLoad?: boolean
+  startTime?: number
+  aspectRatio?: AspectRatio
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
+  playerColor?: string
+  allowFullscreen?: boolean
+  className?: string
+  style?: React.CSSProperties
+}
+```
+
+### NativeVideoProps
+
+Props for NativeVideo component:
+
+```ts
+interface NativeVideoProps {
+  src: string
+  alt: string
+  poster?: string
+  autoplay?: boolean
+  muted?: boolean
+  controls?: boolean
+  loop?: boolean
+  playsInline?: boolean
+  preload?: 'none' | 'metadata' | 'auto'
+  captions?: CaptionTrack[]
+  sources?: ResponsiveSource[]
+  aspectRatio?: AspectRatio
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
+  reducedMotionFallback?: string
+  className?: string
+  style?: React.CSSProperties
+  onPlay?: () => void
+  onPause?: () => void
+  onEnded?: () => void
+  onError?: (error: Event) => void
+}
+```
+
+### GifPlayerProps
+
+Props for GifPlayer component:
+
+```ts
+interface GifPlayerProps {
+  src: string
+  alt: string
+  poster?: string
+  autoplay?: boolean
+  loop?: boolean
+  aspectRatio?: AspectRatio
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
+  reducedMotionFallback?: string
+  showControls?: boolean
+  controlPosition?: 'center' | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
+  className?: string
+  style?: React.CSSProperties
+  onPlay?: () => void
+  onPause?: () => void
+}
+```
+
+### LottiePlayerProps
+
+Props for LottiePlayer component:
+
+```ts
+interface LottiePlayerProps {
+  src: string
+  alt: string
+  autoplay?: boolean
+  loop?: boolean
+  speed?: number
+  direction?: 1 | -1
+  renderer?: 'svg' | 'canvas' | 'html'
+  aspectRatio?: AspectRatio
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
+  reducedMotionFallback?: string
+  lottieOptions?: LottieOptions
+  className?: string
+  style?: React.CSSProperties
+  onComplete?: () => void
+  onLoopComplete?: () => void
+}
+```
+
+## Headless Types
+
+### MediaHeadlessProps
+
+Props for MediaHeadless component:
+
+```ts
+interface MediaHeadlessProps {
+  src: string
+  type?: MediaType
+  children: (props: MediaHeadlessRenderProps) => React.ReactNode
+  onLoaded?: () => void
+  onPlay?: () => void
+  onPause?: () => void
+  onComplete?: () => void
+  onError?: (error: Error) => void
+}
+```
+
+### MediaHeadlessRenderProps
+
+Render props provided by MediaHeadless:
+
+```ts
+interface MediaHeadlessRenderProps {
+  // State
+  mediaType: MediaType
+  src: string
+  embedUrl: string | null
+  videoId: string | null
+  isPlaying: boolean
+  isLoaded: boolean
+  hasError: boolean
+  errorMessage: string | null
+  currentTime: number
+  duration: number
+  prefersReducedMotion: boolean
+
+  // Methods
+  play: () => void
+  pause: () => void
+  seek: (time: number) => void
+  markLoaded: () => void
+  markError: (error: string) => void
+  updateDuration: (duration: number) => void
+  updateCurrentTime: (time: number) => void
+
+  // Refs
+  containerRef: React.RefObject<HTMLDivElement>
+}
+```
+
+## Event Types
+
+### MediaEventName
+
+Names of media events:
+
+```ts
+type MediaEventName =
+  | 'media_loaded'
+  | 'media_play'
+  | 'media_pause'
+  | 'media_complete'
+  | 'media_error'
+```
+
+### MediaEvent
+
+Media event object:
+
+```ts
+interface MediaEvent {
+  eventName: MediaEventName
+  mediaType: MediaType
+  mediaSrc: string
+  tourId?: string
+  stepId?: string
+  timestamp: number
+  currentTime?: number
+  duration?: number
+  error?: Error
+}
+```
+
+### MediaEventHandlers
+
+Event handler functions:
+
+```ts
+interface MediaEventHandlers {
+  onLoaded?: (event: MediaEvent) => void
+  onPlay?: (event: MediaEvent) => void
+  onPause?: (event: MediaEvent) => void
+  onComplete?: (event: MediaEvent) => void
+  onError?: (event: MediaEvent) => void
+  onTimeUpdate?: (event: MediaEvent) => void
+  onEvent?: (event: MediaEvent) => void
+}
+```
+
+## Utility Types
+
+### ParsedMediaUrl
+
+Result from parseMediaUrl utility:
+
+```ts
+interface ParsedMediaUrl {
+  type: MediaType
+  videoId?: string
+  embedUrl?: string
+  originalUrl: string
+}
+```
+
+**Usage:**
+```tsx
+import type { ParsedMediaUrl } from '@tour-kit/media'
+import { parseMediaUrl } from '@tour-kit/media'
+
+const parsed: ParsedMediaUrl = parseMediaUrl('https://youtube.com/watch?v=abc')
+```
+
+### EmbedUrlOptions
+
+Options for building embed URLs:
+
+```ts
+interface EmbedUrlOptions {
+  autoplay?: boolean
+  muted?: boolean
+  controls?: boolean
+  loop?: boolean
+  startTime?: number
+  endTime?: number
+  [key: string]: any  // Platform-specific options
+}
+```
+
+## Hook Types
+
+### UseMediaEventsOptions
+
+Options for useMediaEvents hook:
+
+```ts
+interface UseMediaEventsOptions {
+  mediaType: MediaType
+  mediaSrc: string
+  tourId?: string
+  stepId?: string
+  onLoaded?: (event: MediaEvent) => void
+  onPlay?: (event: MediaEvent) => void
+  onPause?: (event: MediaEvent) => void
+  onComplete?: (event: MediaEvent) => void
+  onError?: (event: MediaEvent) => void
+  onTimeUpdate?: (event: MediaEvent) => void
+  onEvent?: (event: MediaEvent) => void
+}
+```
+
+**Usage:**
+```tsx
+import type { UseMediaEventsOptions } from '@tour-kit/media'
+import { useMediaEvents } from '@tour-kit/media'
+
+const options: UseMediaEventsOptions = {
+  mediaType: 'youtube',
+  mediaSrc: 'abc123',
+  tourId: 'onboarding',
+  onPlay: (event) => console.log('Video played', event)
+}
+
+const handlers = useMediaEvents(options)
+```
+
+## Type Guards
+
+Use these to check media types:
+
+```ts
+function isEmbedType(type: MediaType): boolean
+function isNativeVideoType(type: MediaType): boolean
+function supportsAutoplay(type: MediaType): boolean
+```
+
+**Usage:**
+```tsx
+import { isEmbedType, isNativeVideoType } from '@tour-kit/media'
+
+const type: MediaType = 'youtube'
+
+if (isEmbedType(type)) {
+  // type is 'youtube' | 'vimeo' | 'loom' | 'wistia'
+}
+
+if (isNativeVideoType(type)) {
+  // type is 'video' | 'gif'
+}
+```
+
+## Generic Component Types
+
+For building custom media components:
+
+```ts
+import type {
+  TourMediaComponentProps,
+  MediaComponentProps,
+  EmbedComponentProps
+} from '@tour-kit/media'
+
+// Base media component props
+type MediaComponentProps = {
+  src: string
+  alt: string
+  className?: string
+  style?: React.CSSProperties
+}
+
+// Embed-specific props
+type EmbedComponentProps = MediaComponentProps & {
+  videoId: string
+  title: string
+  aspectRatio?: AspectRatio
+}
+
+// Full TourMedia props
+type TourMediaComponentProps = TourMediaConfig & MediaEventHandlers
+```
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Main media component
+- [MediaHeadless](/docs/media/headless/media-headless) - Headless API
+- [useMediaEvents](/docs/media/hooks/use-media-events) - Event tracking hook
+- [URL Parsing](/docs/media/utilities/url-parsing) - Utility types

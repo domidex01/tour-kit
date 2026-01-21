@@ -1,0 +1,376 @@
+---
+title: PostHog Plugin
+description: Integrate tour analytics with PostHog product analytics
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+The PostHog plugin sends tour and hint events to [PostHog](https://posthog.com), a product analytics platform with session replay, feature flags, and experimentation.
+
+## Installation
+
+Install the PostHog peer dependency:
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add posthog-js
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install posthog-js
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add posthog-js
+    ```
+  </Tab>
+</Tabs>
+
+## Basic Usage
+
+```tsx title="app/providers.tsx"
+import { AnalyticsProvider, posthogPlugin } from '@tour-kit/analytics'
+
+export function Providers({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          posthogPlugin({
+            apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!
+          })
+        ]
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Options
+
+<TypeTable
+  type={{
+    apiKey: {
+      type: 'string',
+      required: true,
+      description: 'PostHog API key (starts with phc_)'
+    },
+    apiHost: {
+      type: 'string',
+      default: '"https://app.posthog.com"',
+      description: 'PostHog API host URL'
+    },
+    autocapture: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Enable PostHog autocapture (not recommended with Tour Kit)'
+    },
+    eventPrefix: {
+      type: 'string',
+      default: '"tourkit_"',
+      description: 'Prefix for all event names in PostHog'
+    }
+  }}
+/>
+
+## Self-Hosted PostHog
+
+Use a custom API host for self-hosted instances:
+
+```tsx
+posthogPlugin({
+  apiKey: 'phc_xxx',
+  apiHost: 'https://posthog.yourcompany.com'
+})
+```
+
+## EU Cloud
+
+Use PostHog's EU cloud:
+
+```tsx
+posthogPlugin({
+  apiKey: 'phc_xxx',
+  apiHost: 'https://eu.posthog.com'
+})
+```
+
+## Event Names
+
+Events are prefixed with `tourkit_` by default:
+
+| Tour Kit Event | PostHog Event Name |
+|----------------|-------------------|
+| `tour_started` | `tourkit_tour_started` |
+| `step_viewed` | `tourkit_step_viewed` |
+| `hint_clicked` | `tourkit_hint_clicked` |
+
+### Custom Prefix
+
+```tsx
+posthogPlugin({
+  apiKey: 'phc_xxx',
+  eventPrefix: 'app_tour_'
+})
+
+// Events: app_tour_tour_started, app_tour_step_viewed, etc.
+```
+
+### No Prefix
+
+```tsx
+posthogPlugin({
+  apiKey: 'phc_xxx',
+  eventPrefix: ''
+})
+
+// Events: tour_started, step_viewed, etc.
+```
+
+## Event Properties
+
+Events include these properties in PostHog:
+
+```ts
+{
+  tour_id: string          // Tour identifier
+  step_id?: string         // Step identifier
+  step_index?: number      // Current step index (0-based)
+  total_steps?: number     // Total steps in tour
+  duration_ms?: number     // Duration in milliseconds
+  session_id: string       // Tour Kit session ID
+  ...metadata              // Custom metadata from event
+}
+```
+
+## User Identification
+
+Identify users in PostHog:
+
+```tsx title="app/analytics-wrapper.tsx"
+'use client'
+
+import { AnalyticsProvider, posthogPlugin } from '@tour-kit/analytics'
+import { useUser } from '@/lib/auth'
+
+export function AnalyticsWrapper({ children }) {
+  const user = useUser()
+
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          posthogPlugin({
+            apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!
+          })
+        ],
+        userId: user?.id,
+        userProperties: {
+          email: user?.email,
+          name: user?.name,
+          plan: user?.subscription.plan
+        }
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Session Replay
+
+PostHog's session replay automatically captures tour interactions when enabled:
+
+```tsx
+// In your PostHog initialization (separate from Tour Kit)
+posthog.init('phc_xxx', {
+  api_host: 'https://app.posthog.com',
+  session_recording: {
+    recordCrossOriginIframes: true
+  }
+})
+
+// Tour Kit plugin (minimal config)
+posthogPlugin({
+  apiKey: 'phc_xxx'
+})
+```
+
+<Callout type="info">
+  Session replay is configured through PostHog's main SDK, not the Tour Kit plugin. The plugin only sends events.
+</Callout>
+
+## Feature Flags
+
+Use PostHog feature flags to control tour visibility:
+
+```tsx
+'use client'
+
+import { usePostHog } from 'posthog-js/react'
+import { Tour } from '@tour-kit/react'
+
+export function ConditionalTour() {
+  const posthog = usePostHog()
+  const showTour = posthog.isFeatureEnabled('new-user-tour')
+
+  if (!showTour) return null
+
+  return (
+    <Tour id="onboarding">
+      {/* tour steps */}
+    </Tour>
+  )
+}
+```
+
+## Complete Example
+
+```tsx title="app/providers.tsx"
+'use client'
+
+import { AnalyticsProvider, posthogPlugin } from '@tour-kit/analytics'
+import { PostHogProvider } from 'posthog-js/react'
+import posthog from 'posthog-js'
+import { useEffect } from 'react'
+
+// Initialize PostHog SDK
+if (typeof window !== 'undefined') {
+  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+    api_host: 'https://app.posthog.com',
+    autocapture: false,
+    capture_pageview: false,
+    session_recording: {
+      recordCrossOriginIframes: true
+    }
+  })
+}
+
+export function Providers({ children, user }) {
+  useEffect(() => {
+    if (user) {
+      posthog.identify(user.id, {
+        email: user.email,
+        name: user.name
+      })
+    }
+  }, [user])
+
+  return (
+    <PostHogProvider client={posthog}>
+      <AnalyticsProvider
+        config={{
+          plugins: [
+            posthogPlugin({
+              apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!
+            })
+          ],
+          userId: user?.id
+        }}
+      >
+        {children}
+      </AnalyticsProvider>
+    </PostHogProvider>
+  )
+}
+```
+
+## Debugging
+
+Enable debug mode to see events in the console:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    plugins: [
+      posthogPlugin({
+        apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!
+      })
+    ],
+    debug: true
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Analytics in PostHog
+
+### Tour Funnel Analysis
+
+Create a funnel to see tour completion rates:
+
+1. Go to Insights > Funnels
+2. Add steps:
+   - `tourkit_tour_started`
+   - `tourkit_step_viewed` (filter: step_index = 0)
+   - `tourkit_step_viewed` (filter: step_index = 1)
+   - `tourkit_tour_completed`
+
+### Step Engagement
+
+Track which steps users interact with most:
+
+1. Go to Insights > Trends
+2. Add event: `tourkit_step_interaction`
+3. Break down by: `step_id`
+
+### Hint Performance
+
+Analyze hint click-through rates:
+
+1. Go to Insights > Trends
+2. Add events:
+   - `tourkit_hint_shown`
+   - `tourkit_hint_clicked`
+3. View as: Conversion rate
+
+## Best Practices
+
+### Avoid Duplicate Initialization
+
+Don't initialize PostHog twice - use the Tour Kit plugin instead of loading PostHog separately if you only need tour analytics:
+
+```tsx
+// ✅ Good - Tour Kit plugin handles PostHog
+<AnalyticsProvider
+  config={{
+    plugins: [posthogPlugin({ apiKey: 'phc_xxx' })]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+
+// ❌ Bad - Don't do both unless you need PostHog features
+posthog.init('phc_xxx')
+<AnalyticsProvider
+  config={{
+    plugins: [posthogPlugin({ apiKey: 'phc_xxx' })]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+### Production Only
+
+Load PostHog only in production to avoid polluting analytics:
+
+```tsx
+const plugins = process.env.NODE_ENV === 'production'
+  ? [posthogPlugin({ apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY! })]
+  : [consolePlugin()]
+```
+
+## Related
+
+- [PostHog Documentation](https://posthog.com/docs)
+- [Plugin Overview](/docs/analytics/plugins) - Plugin architecture
+- [AnalyticsProvider](/docs/analytics/providers) - Provider configuration

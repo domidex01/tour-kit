@@ -1,0 +1,86 @@
+---
+title: Headless API
+description: Build completely custom media interfaces with full programmatic control
+---
+
+## Overview
+
+The headless API provides render props for building custom media components with complete control over UI and behavior. Use it when the built-in components don't match your design needs.
+
+## Why Headless?
+
+- **Full control**: Build any UI you can imagine
+- **Design system integration**: Match your existing components
+- **Custom interactions**: Add unique controls and behaviors
+- **Accessibility**: Manage focus, ARIA, and keyboard as needed
+- **Logic reuse**: Share media logic across different UIs
+
+## Available Components
+
+<Cards>
+  <Card title="MediaHeadless" href="/docs/media/headless/media-headless">
+    Core headless component with render props
+  </Card>
+</Cards>
+
+## Quick Example
+
+```tsx
+import { MediaHeadless } from '@tour-kit/media'
+
+<MediaHeadless src="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+  {({ mediaType, isPlaying, play, pause, currentTime, duration }) => (
+    <div className="custom-player">
+      <div className="video-container">
+        {/* Your custom UI */}
+      </div>
+
+      <div className="controls">
+        <button onClick={isPlaying ? pause : play}>
+          {isPlaying ? 'Pause' : 'Play'}
+        </button>
+
+        <div className="progress">
+          <span>{formatTime(currentTime)}</span>
+          <span> / </span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+    </div>
+  )}
+</MediaHeadless>
+```
+
+## When to Use Headless
+
+**Use headless when:**
+- You need a completely custom UI
+- Integrating with an existing design system
+- Building unique interactive experiences
+- Default components don't fit your needs
+
+**Use pre-built components when:**
+- Standard video player UI works
+- Rapid prototyping
+- Consistent appearance across the app
+- Accessibility is automatically handled
+
+## Philosophy
+
+The headless pattern separates logic from presentation:
+
+```tsx
+// Logic (provided by MediaHeadless)
+- Media detection and loading
+- Playback state management
+- Event handling
+- Accessibility helpers
+
+// Presentation (you control)
+- Custom UI components
+- Styling and theming
+- Layout and positioning
+- Interactions and animations
+```
+
+This gives you maximum flexibility while benefiting from tested, reliable media handling logic.

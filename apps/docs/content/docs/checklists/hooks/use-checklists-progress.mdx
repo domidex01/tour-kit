@@ -1,0 +1,504 @@
+---
+title: useChecklistsProgress
+description: Get aggregated progress across all checklists
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useChecklistsProgress
+
+Hook for accessing aggregated progress information across all checklists in the provider.
+
+## Usage
+
+```tsx
+import { useChecklistsProgress } from '@tour-kit/checklists';
+
+function GlobalProgress() {
+  const { total, completedChecklists, totalChecklists } = useChecklistsProgress();
+
+  return (
+    <div>
+      <h3>Overall Progress</h3>
+      <progress value={total.completed} max={total.total} />
+      <p>
+        {total.completed} of {total.total} tasks completed ({total.percentage.toFixed(0)}%)
+      </p>
+      <p>
+        {completedChecklists} of {totalChecklists} checklists completed
+      </p>
+    </div>
+  );
+}
+```
+
+## Return Value
+
+<TypeTable
+  type={{
+    byChecklist: {
+      type: 'Record<string, ChecklistProgress>',
+      description: 'Progress for each checklist by ID',
+    },
+    total: {
+      type: 'ChecklistProgress',
+      description: 'Aggregated progress across all checklists',
+    },
+    completedChecklists: {
+      type: 'number',
+      description: 'Number of completed checklists',
+    },
+    totalChecklists: {
+      type: 'number',
+      description: 'Total number of checklists',
+    },
+  }}
+/>
+
+### ChecklistProgress
+
+```ts
+interface ChecklistProgress {
+  completed: number;   // Number of completed tasks
+  total: number;       // Total number of tasks
+  percentage: number;  // Progress percentage (0-100)
+  remaining: number;   // Remaining tasks (total - completed)
+}
+```
+
+## Basic Examples
+
+### Simple Progress Bar
+
+```tsx
+function ProgressBar() {
+  const { total } = useChecklistsProgress();
+
+  return (
+    <div className="progress-container">
+      <div
+        className="progress-bar"
+        style={{ width: `${total.percentage}%` }}
+      />
+      <span>{total.completed} / {total.total}</span>
+    </div>
+  );
+}
+```
+
+### Progress Summary
+
+```tsx
+function ProgressSummary() {
+  const {
+    total,
+    completedChecklists,
+    totalChecklists,
+  } = useChecklistsProgress();
+
+  const allComplete = completedChecklists === totalChecklists;
+
+  return (
+    <div>
+      <h3>Your Progress</h3>
+
+      {allComplete ? (
+        <p>🎉 All checklists completed!</p>
+      ) : (
+        <>
+          <p>{total.remaining} tasks remaining</p>
+          <p>
+            {completedChecklists} of {totalChecklists} checklists done
+          </p>
+        </>
+      )}
+
+      <progress value={total.completed} max={total.total} />
+    </div>
+  );
+}
+```
+
+### Individual Checklist Progress
+
+```tsx
+function ChecklistBreakdown() {
+  const { byChecklist } = useChecklistsProgress();
+
+  return (
+    <div>
+      <h3>Checklist Progress</h3>
+
+      {Object.entries(byChecklist).map(([id, progress]) => (
+        <div key={id}>
+          <h4>{id}</h4>
+          <progress value={progress.completed} max={progress.total} />
+          <span>{progress.percentage.toFixed(0)}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Advanced Examples
+
+### Progress Dashboard
+
+```tsx
+import { useChecklistContext } from '@tour-kit/checklists';
+
+function ProgressDashboard() {
+  const { byChecklist, total, completedChecklists } = useChecklistsProgress();
+  const { checklists } = useChecklistContext();
+
+  return (
+    <div className="dashboard">
+      {/* Overall stats */}
+      <div className="stats">
+        <div className="stat">
+          <span className="stat-value">{total.percentage.toFixed(0)}%</span>
+          <span className="stat-label">Overall Progress</span>
+        </div>
+
+        <div className="stat">
+          <span className="stat-value">{completedChecklists}</span>
+          <span className="stat-label">Checklists Done</span>
+        </div>
+
+        <div className="stat">
+          <span className="stat-value">{total.remaining}</span>
+          <span className="stat-label">Tasks Left</span>
+        </div>
+      </div>
+
+      {/* Individual checklists */}
+      <div className="checklists">
+        {Array.from(checklists.entries()).map(([id, checklist]) => {
+          const progress = byChecklist[id];
+
+          return (
+            <div key={id} className="checklist-card">
+              <h4>{checklist.config.title}</h4>
+
+              <div className="progress">
+                <progress value={progress.completed} max={progress.total} />
+                <span>{progress.completed} / {progress.total}</span>
+              </div>
+
+              {checklist.isComplete && <span>✓ Complete</span>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+```
+
+### Progress Chart
+
+```tsx
+import { PieChart, Pie, Cell } from 'recharts';
+
+function ProgressChart() {
+  const { byChecklist } = useChecklistsProgress();
+
+  const data = Object.entries(byChecklist).map(([id, progress]) => ({
+    name: id,
+    value: progress.completed,
+    total: progress.total,
+  }));
+
+  return (
+    <PieChart width={400} height={400}>
+      <Pie
+        data={data}
+        dataKey="value"
+        nameKey="name"
+        cx="50%"
+        cy="50%"
+        outerRadius={80}
+      >
+        {data.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={getColor(index)} />
+        ))}
+      </Pie>
+    </PieChart>
+  );
+}
+```
+
+### Milestone Tracker
+
+```tsx
+function MilestoneTracker() {
+  const { total } = useChecklistsProgress();
+
+  const milestones = [
+    { at: 25, label: 'Getting started', icon: '🌱' },
+    { at: 50, label: 'Halfway there', icon: '🚀' },
+    { at: 75, label: 'Almost done', icon: '⭐' },
+    { at: 100, label: 'Complete!', icon: '🎉' },
+  ];
+
+  const nextMilestone = milestones.find(
+    (m) => total.percentage < m.at
+  );
+
+  const achieved = milestones.filter(
+    (m) => total.percentage >= m.at
+  );
+
+  return (
+    <div>
+      <h3>Milestones</h3>
+
+      {/* Achieved milestones */}
+      {achieved.map((milestone) => (
+        <div key={milestone.at} className="milestone achieved">
+          <span>{milestone.icon}</span>
+          <span>{milestone.label}</span>
+        </div>
+      ))}
+
+      {/* Next milestone */}
+      {nextMilestone && (
+        <div className="milestone next">
+          <span>{nextMilestone.icon}</span>
+          <span>{nextMilestone.label}</span>
+          <span>({nextMilestone.at - total.percentage.toFixed(0)}% away)</span>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Progress Notifications
+
+```tsx
+function ProgressNotifications() {
+  const { total } = useChecklistsProgress();
+  const [lastPercentage, setLastPercentage] = useState(0);
+
+  useEffect(() => {
+    // Notify on 25% increments
+    const currentQuarter = Math.floor(total.percentage / 25);
+    const lastQuarter = Math.floor(lastPercentage / 25);
+
+    if (currentQuarter > lastQuarter) {
+      const milestone = currentQuarter * 25;
+      toast(`🎉 ${milestone}% complete!`);
+    }
+
+    setLastPercentage(total.percentage);
+  }, [total.percentage, lastPercentage]);
+
+  return null; // Notification-only component
+}
+```
+
+### Gamification
+
+```tsx
+function ProgressGamification() {
+  const { total, completedChecklists } = useChecklistsProgress();
+
+  const level = Math.floor(total.completed / 5) + 1;
+  const points = total.completed * 10;
+  const nextLevelAt = level * 5;
+
+  const badges = [];
+  if (total.completed >= 5) badges.push({ name: 'Starter', icon: '🌟' });
+  if (total.completed >= 10) badges.push({ name: 'Explorer', icon: '🚀' });
+  if (total.completed >= 25) badges.push({ name: 'Expert', icon: '👑' });
+  if (completedChecklists >= 3) badges.push({ name: 'Completionist', icon: '💯' });
+
+  return (
+    <div className="gamification">
+      <div className="level">
+        <h4>Level {level}</h4>
+        <p>{points} points</p>
+        <p>Next level: {nextLevelAt - total.completed} tasks</p>
+      </div>
+
+      <div className="badges">
+        <h4>Badges</h4>
+        {badges.map((badge) => (
+          <div key={badge.name} className="badge">
+            <span>{badge.icon}</span>
+            <span>{badge.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+## Filtering Checklists
+
+### By Completion Status
+
+```tsx
+function CompletedChecklists() {
+  const { byChecklist } = useChecklistsProgress();
+
+  const completed = Object.entries(byChecklist)
+    .filter(([_, progress]) => progress.percentage === 100)
+    .map(([id]) => id);
+
+  return (
+    <div>
+      <h3>Completed Checklists</h3>
+      <ul>
+        {completed.map((id) => (
+          <li key={id}>{id} ✓</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### By Progress Range
+
+```tsx
+function ChecklistsByProgress() {
+  const { byChecklist } = useChecklistsProgress();
+
+  const categorized = {
+    notStarted: [] as string[],
+    inProgress: [] as string[],
+    complete: [] as string[],
+  };
+
+  Object.entries(byChecklist).forEach(([id, progress]) => {
+    if (progress.percentage === 0) {
+      categorized.notStarted.push(id);
+    } else if (progress.percentage === 100) {
+      categorized.complete.push(id);
+    } else {
+      categorized.inProgress.push(id);
+    }
+  });
+
+  return (
+    <div>
+      <section>
+        <h4>In Progress ({categorized.inProgress.length})</h4>
+        {/* Render in progress checklists */}
+      </section>
+
+      <section>
+        <h4>Not Started ({categorized.notStarted.length})</h4>
+        {/* Render not started checklists */}
+      </section>
+
+      <section>
+        <h4>Complete ({categorized.complete.length})</h4>
+        {/* Render completed checklists */}
+      </section>
+    </div>
+  );
+}
+```
+
+## Performance Considerations
+
+The hook uses `useMemo` internally for efficient computation:
+
+```tsx
+// Automatically memoized, safe to use in render
+function Component() {
+  const progress = useChecklistsProgress();
+
+  return (
+    <div>
+      {/* This won't cause unnecessary re-renders */}
+      {progress.total.percentage}
+    </div>
+  );
+}
+```
+
+## Real-time Updates
+
+Progress updates automatically when checklist state changes:
+
+```tsx
+function LiveProgress() {
+  const { total } = useChecklistsProgress();
+  const { completeTask } = useChecklist('onboarding');
+
+  const handleComplete = (taskId: string) => {
+    completeTask(taskId);
+    // total.completed updates automatically
+  };
+
+  return (
+    <div>
+      <p>Current: {total.completed} tasks</p>
+      <button onClick={() => handleComplete('task1')}>
+        Complete Task
+      </button>
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Combine with Individual Progress
+
+```tsx
+function CombinedProgress() {
+  const globalProgress = useChecklistsProgress();
+  const onboarding = useChecklist('onboarding');
+
+  return (
+    <div>
+      {/* Show global progress in header */}
+      <header>
+        <span>Overall: {globalProgress.total.percentage.toFixed(0)}%</span>
+      </header>
+
+      {/* Show specific checklist in content */}
+      <main>
+        <h2>Onboarding</h2>
+        <progress
+          value={onboarding.progress.completed}
+          max={onboarding.progress.total}
+        />
+      </main>
+    </div>
+  );
+}
+```
+
+### Conditional Rendering
+
+```tsx
+function ConditionalContent() {
+  const { total } = useChecklistsProgress();
+
+  // Show different content based on progress
+  if (total.percentage === 0) {
+    return <WelcomeScreen />;
+  }
+
+  if (total.percentage === 100) {
+    return <CelebrationScreen />;
+  }
+
+  return <ChecklistsScreen />;
+}
+```
+
+## Related
+
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Access individual checklist progress
+- [ChecklistProgress](/docs/checklists/components/checklist-progress) - Progress component
+- [ChecklistProvider](/docs/checklists/providers/checklist-provider) - Provider configuration

@@ -1,0 +1,375 @@
+---
+title: useScheduleStatus
+description: React hook for detailed schedule status with next active/inactive times
+---
+
+# useScheduleStatus
+
+A React hook that provides detailed schedule status including next active/inactive times and human-readable messages.
+
+## Usage
+
+```tsx
+import { useScheduleStatus } from '@tour-kit/scheduling'
+
+function TourStatusDisplay() {
+  const { isActive, message, nextActiveAt } = useScheduleStatus(schedule)
+
+  return (
+    <div>
+      <p>{message}</p>
+      {!isActive && nextActiveAt && (
+        <p>Starts {nextActiveAt.toLocaleString()}</p>
+      )}
+    </div>
+  )
+}
+```
+
+## API
+
+### Parameters
+
+```ts
+useScheduleStatus(
+  schedule: Schedule | undefined | null,
+  options?: UseScheduleStatusOptions
+): UseScheduleStatusReturn
+```
+
+#### schedule
+
+The schedule configuration. Can be `undefined` or `null` (treated as disabled).
+
+#### options
+
+```ts
+interface UseScheduleStatusOptions {
+  /** Refresh interval in milliseconds (default: 60000 = 1 minute) */
+  refreshInterval?: number
+  /** Disable auto-refresh */
+  disableAutoRefresh?: boolean
+  /** Override timezone */
+  timezone?: string
+  /** Include debug information in status */
+  debug?: boolean
+}
+```
+
+### Returns
+
+```ts
+interface UseScheduleStatusReturn extends ScheduleStatus {
+  /** Whether the schedule is currently active */
+  isActive: boolean
+  /** Reason for being inactive */
+  reason?: ScheduleInactiveReason
+  /** Human-readable explanation */
+  message?: string
+  /** When the schedule will next become active */
+  nextActiveAt?: Date
+  /** When the schedule will next become inactive */
+  nextInactiveAt?: Date
+  /** Current blackout period if in one */
+  currentBlackout?: {
+    id: string
+    reason?: string
+    endsAt: Date
+  }
+  /** Debug information */
+  debug?: {
+    evaluatedAt: Date
+    timezone: string
+    localTime: string
+    dayOfWeek: number
+  }
+  /** Manually refresh the schedule status */
+  refresh: () => void
+  /** Last evaluation timestamp */
+  lastCheckedAt: Date
+  /** Current timezone being used */
+  timezone: string
+}
+```
+
+## Examples
+
+### Display Status Message
+
+```tsx
+import { useScheduleStatus } from '@tour-kit/scheduling'
+
+function ScheduleInfo() {
+  const { isActive, message } = useScheduleStatus({
+    daysOfWeek: [1, 2, 3, 4, 5],
+    timeOfDay: { start: '09:00', end: '17:00' },
+  })
+
+  return (
+    <div className={isActive ? 'active' : 'inactive'}>
+      {message}
+      {/* "Currently active" or "Outside time range (9:00 AM - 5:00 PM)" */}
+    </div>
+  )
+}
+```
+
+### Show Next Active Time
+
+```tsx
+function NextActiveDisplay() {
+  const { isActive, nextActiveAt } = useScheduleStatus(schedule)
+
+  if (isActive) {
+    return <div>Tour is available now!</div>
+  }
+
+  if (!nextActiveAt) {
+    return <div>Tour is not currently scheduled</div>
+  }
+
+  return (
+    <div>
+      Tour will be available on {nextActiveAt.toLocaleDateString()} at{' '}
+      {nextActiveAt.toLocaleTimeString()}
+    </div>
+  )
+}
+```
+
+### Countdown Timer
+
+```tsx
+function TourCountdown() {
+  const { isActive, nextActiveAt, nextInactiveAt } = useScheduleStatus(schedule, {
+    refreshInterval: 1000, // Update every second
+  })
+
+  const targetTime = isActive ? nextInactiveAt : nextActiveAt
+  if (!targetTime) return null
+
+  const now = new Date()
+  const msRemaining = targetTime.getTime() - now.getTime()
+  const minutesRemaining = Math.floor(msRemaining / 60000)
+
+  return (
+    <div>
+      {isActive ? (
+        <p>Tour ends in {minutesRemaining} minutes</p>
+      ) : (
+        <p>Tour starts in {minutesRemaining} minutes</p>
+      )}
+    </div>
+  )
+}
+```
+
+### Debug Information
+
+```tsx
+function ScheduleDebugPanel() {
+  const status = useScheduleStatus(schedule, {
+    debug: true,
+  })
+
+  if (!status.debug) return null
+
+  return (
+    <pre>
+      {JSON.stringify(
+        {
+          isActive: status.isActive,
+          reason: status.reason,
+          message: status.message,
+          evaluatedAt: status.debug.evaluatedAt,
+          timezone: status.debug.timezone,
+          localTime: status.debug.localTime,
+          dayOfWeek: status.debug.dayOfWeek,
+        },
+        null,
+        2
+      )}
+    </pre>
+  )
+}
+```
+
+### Blackout Period Display
+
+```tsx
+function BlackoutStatus() {
+  const { isActive, currentBlackout } = useScheduleStatus({
+    startAt: '2024-01-01',
+    blackouts: [
+      {
+        id: 'maintenance',
+        start: '2024-02-15T00:00:00Z',
+        end: '2024-02-15T06:00:00Z',
+        reason: 'Scheduled maintenance',
+      },
+    ],
+  })
+
+  if (isActive) {
+    return <div>All systems operational</div>
+  }
+
+  if (currentBlackout) {
+    return (
+      <div>
+        <p>{currentBlackout.reason || 'Temporarily unavailable'}</p>
+        <p>Resumes at {currentBlackout.endsAt.toLocaleString()}</p>
+      </div>
+    )
+  }
+
+  return <div>Currently unavailable</div>
+}
+```
+
+### Admin Dashboard
+
+```tsx
+function TourScheduleDashboard({ tourId, schedule }: Props) {
+  const status = useScheduleStatus(schedule, {
+    debug: true,
+  })
+
+  return (
+    <div className="dashboard">
+      <h3>Tour: {tourId}</h3>
+
+      <div className="status">
+        <span className={status.isActive ? 'badge-active' : 'badge-inactive'}>
+          {status.isActive ? 'Active' : 'Inactive'}
+        </span>
+        {status.message && <p>{status.message}</p>}
+      </div>
+
+      {status.nextActiveAt && (
+        <div>
+          <strong>Next Active:</strong> {status.nextActiveAt.toLocaleString()}
+        </div>
+      )}
+
+      {status.nextInactiveAt && (
+        <div>
+          <strong>Next Inactive:</strong> {status.nextInactiveAt.toLocaleString()}
+        </div>
+      )}
+
+      {status.currentBlackout && (
+        <div className="blackout-alert">
+          <strong>Blackout Period:</strong> {status.currentBlackout.reason}
+          <br />
+          <strong>Ends:</strong> {status.currentBlackout.endsAt.toLocaleString()}
+        </div>
+      )}
+
+      {status.debug && (
+        <details>
+          <summary>Debug Info</summary>
+          <dl>
+            <dt>Timezone:</dt>
+            <dd>{status.debug.timezone}</dd>
+            <dt>Local Time:</dt>
+            <dd>{status.debug.localTime}</dd>
+            <dt>Day of Week:</dt>
+            <dd>{status.debug.dayOfWeek}</dd>
+            <dt>Evaluated At:</dt>
+            <dd>{status.debug.evaluatedAt.toISOString()}</dd>
+          </dl>
+        </details>
+      )}
+    </div>
+  )
+}
+```
+
+### Status-Based Styling
+
+```tsx
+function ScheduledFeature() {
+  const { isActive, reason, nextActiveAt } = useScheduleStatus(schedule)
+
+  const className = isActive
+    ? 'feature feature--active'
+    : `feature feature--inactive feature--${reason}`
+
+  return (
+    <div className={className}>
+      <h2>Premium Feature</h2>
+      {!isActive && nextActiveAt && (
+        <p className="coming-soon">
+          Available {nextActiveAt.toLocaleDateString()}
+        </p>
+      )}
+    </div>
+  )
+}
+```
+
+## Auto-Refresh Behavior
+
+Same as `useSchedule`:
+
+```tsx
+// Default: refreshes every minute
+const status = useScheduleStatus(schedule)
+
+// Custom interval: refreshes every 30 seconds
+const status = useScheduleStatus(schedule, {
+  refreshInterval: 30000,
+})
+
+// No auto-refresh
+const status = useScheduleStatus(schedule, {
+  disableAutoRefresh: true,
+})
+```
+
+## Messages
+
+The `message` field provides human-readable explanations:
+
+| Reason | Example Message |
+|--------|-----------------|
+| `disabled` | "Schedule is disabled" |
+| `not_started` | "Not started yet (starts Jan 15, 2024)" |
+| `ended` | "Schedule has ended" |
+| `wrong_day` | "Not available on weekends" |
+| `wrong_time` | "Outside time range (9:00 AM - 5:00 PM)" |
+| `blackout` | "In blackout period: Holiday freeze" |
+| `outside_business_hours` | "Outside business hours" |
+| `recurring_mismatch` | "Not a scheduled occurrence" |
+
+Messages are localized to the schedule's timezone when displaying times.
+
+## Performance Notes
+
+`useScheduleStatus` is more expensive than `useSchedule` because it calculates next active/inactive times. If you only need a simple active check, use `useSchedule` instead.
+
+For better performance:
+- Increase `refreshInterval` if minute-level precision isn't needed
+- Set `debug: false` in production (it's false by default)
+- Use `disableAutoRefresh` for static displays
+
+## When to Use
+
+**Use `useScheduleStatus` when:**
+- Building admin/management UIs
+- Displaying countdown timers
+- Showing "available in X hours" messages
+- Debugging schedule issues
+- Need to explain why content is hidden
+
+**Use `useSchedule` when:**
+- Simple show/hide logic
+- Performance is critical
+- You don't need detailed status
+
+## Related
+
+- [useSchedule](/docs/scheduling/hooks/use-schedule) - Simpler active/inactive check
+- [getScheduleStatus](/docs/scheduling/utilities/schedule-evaluation) - One-time status utility
+- [ScheduleStatus type](/docs/scheduling/types#schedulestatus) - Status type reference

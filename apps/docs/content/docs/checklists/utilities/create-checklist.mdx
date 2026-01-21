@@ -1,0 +1,59 @@
+---
+title: createChecklist & createTask
+description: Factory functions for type-safe checklist creation
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# createChecklist & createTask
+
+Type-safe factory functions for creating checklists and tasks with validation.
+
+## createChecklist
+
+```tsx
+import { createChecklist } from '@tour-kit/checklists';
+
+const checklist = createChecklist({
+  id: 'onboarding',
+  title: 'Get Started',
+  tasks: [
+    { id: 'step1', title: 'First step' },
+    { id: 'step2', title: 'Second step' },
+  ],
+});
+```
+
+<Callout type="info">
+  These factories validate your configuration at creation time and provide better TypeScript inference.
+</Callout>
+
+## createTask
+
+```tsx
+import { createTask } from '@tour-kit/checklists';
+
+const task = createTask({
+  id: 'verify-email',
+  title: 'Verify your email',
+  description: 'Check your inbox',
+  dependsOn: ['create-account'],
+  action: {
+    type: 'navigate',
+    url: '/verify',
+  },
+});
+```
+
+## Benefits
+
+- **Type safety**: Full TypeScript support
+- **Validation**: Catches errors early
+- **IntelliSense**: Better autocomplete
+- **Reusability**: Share task configs
+
+## Related
+
+- [ChecklistProvider](/docs/checklists/providers/checklist-provider) - Provider configuration
+- [Types](/docs/checklists/types) - Type definitions

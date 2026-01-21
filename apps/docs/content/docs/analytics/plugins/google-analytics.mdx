@@ -1,0 +1,452 @@
+---
+title: Google Analytics Plugin
+description: Integrate tour analytics with Google Analytics 4
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+The Google Analytics plugin sends tour and hint events to [Google Analytics 4](https://support.google.com/analytics/answer/10089681) using the gtag.js library.
+
+## Installation
+
+No additional dependencies required - the plugin uses the global `gtag` function that must already be loaded on your page.
+
+<Callout type="warn">
+  This plugin requires gtag.js to be loaded on the page before the Tour Kit analytics provider initializes. Add the Google Analytics script tag to your HTML.
+</Callout>
+
+## Setup gtag.js
+
+Add the Google Analytics script to your HTML:
+
+```html title="app/layout.tsx"
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <head>
+        {/* Google Analytics */}
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
+            `
+          }}
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+## Basic Usage
+
+```tsx title="app/providers.tsx"
+import { AnalyticsProvider, googleAnalyticsPlugin } from '@tour-kit/analytics'
+
+export function Providers({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          googleAnalyticsPlugin({
+            measurementId: process.env.NEXT_PUBLIC_GA_ID!
+          })
+        ]
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Options
+
+<TypeTable
+  type={{
+    measurementId: {
+      type: 'string',
+      required: true,
+      description: 'Google Analytics 4 Measurement ID (starts with G-)'
+    },
+    eventPrefix: {
+      type: 'string',
+      default: '"tourkit_"',
+      description: 'Prefix for all event names in GA4'
+    }
+  }}
+/>
+
+## Event Names
+
+Events are prefixed with `tourkit_` by default:
+
+| Tour Kit Event | GA4 Event Name |
+|----------------|----------------|
+| `tour_started` | `tourkit_tour_started` |
+| `step_viewed` | `tourkit_step_viewed` |
+| `hint_clicked` | `tourkit_hint_clicked` |
+
+### Custom Prefix
+
+```tsx
+googleAnalyticsPlugin({
+  measurementId: 'G-XXXXXXXXXX',
+  eventPrefix: 'app_tour_'
+})
+
+// Events: app_tour_tour_started, app_tour_step_viewed, etc.
+```
+
+### No Prefix
+
+```tsx
+googleAnalyticsPlugin({
+  measurementId: 'G-XXXXXXXXXX',
+  eventPrefix: ''
+})
+
+// Events: tour_started, step_viewed, etc.
+```
+
+## Event Parameters
+
+Events include these parameters in GA4:
+
+```ts
+{
+  tour_id: string          // Tour identifier
+  step_id?: string         // Step identifier
+  step_index?: number      // Current step index (0-based)
+  total_steps?: number     // Total steps in tour
+  duration_ms?: number     // Duration in milliseconds
+  ...metadata              // Custom metadata from event
+}
+```
+
+## User Identification
+
+Set user ID in Google Analytics:
+
+```tsx title="app/analytics-wrapper.tsx"
+'use client'
+
+import { AnalyticsProvider, googleAnalyticsPlugin } from '@tour-kit/analytics'
+import { useUser } from '@/lib/auth'
+
+export function AnalyticsWrapper({ children }) {
+  const user = useUser()
+
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          googleAnalyticsPlugin({
+            measurementId: process.env.NEXT_PUBLIC_GA_ID!
+          })
+        ],
+        userId: user?.id
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+<Callout type="info">
+  User identification in GA4 sets the `user_id` parameter. Make sure you comply with Google's [User ID policy](https://support.google.com/analytics/answer/9213390) and avoid sending PII.
+</Callout>
+
+## Complete Example with Next.js
+
+```tsx title="app/layout.tsx"
+import { AnalyticsProvider, googleAnalyticsPlugin } from '@tour-kit/analytics'
+import Script from 'next/script'
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID!
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <head>
+        {/* Google Analytics */}
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}');
+            `
+          }}
+        />
+      </head>
+      <body>
+        <AnalyticsProvider
+          config={{
+            plugins: [
+              googleAnalyticsPlugin({ measurementId: GA_ID })
+            ]
+          }}
+        >
+          {children}
+        </AnalyticsProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+## Analytics in Google Analytics
+
+### Tour Completion Funnel
+
+Create a funnel exploration to analyze tour completion:
+
+1. Go to Explore > Funnel exploration
+2. Add steps:
+   - `tourkit_tour_started`
+   - `tourkit_step_viewed` (parameter: step_index = 0)
+   - `tourkit_step_viewed` (parameter: step_index = 1)
+   - `tourkit_tour_completed`
+3. Breakdown by: `tour_id` parameter
+
+### Step Engagement
+
+View which steps get the most interaction:
+
+1. Go to Reports > Engagement > Events
+2. Filter by event name contains "tourkit_step_"
+3. Add dimension: `step_id` parameter
+4. Add metric: Event count
+
+### Custom Report
+
+Create a custom report for tour analytics:
+
+1. Go to Explore > Blank
+2. Dimensions: `Event name`, `tour_id`, `step_id`
+3. Metrics: `Event count`, `Total users`
+4. Filters: Event name contains "tourkit_"
+
+### Conversion Events
+
+Mark tour completion as a conversion:
+
+1. Go to Configure > Events
+2. Find `tourkit_tour_completed`
+3. Toggle "Mark as conversion"
+
+Now tour completions will appear in conversion reports.
+
+## GA4 Limitations
+
+### Event Parameter Limits
+
+GA4 has strict limits on custom parameters:
+
+- Maximum 25 custom parameters per event
+- Parameter names: Up to 40 characters
+- Parameter values: Up to 100 characters
+
+Tour Kit events stay well within these limits.
+
+### Reserved Names
+
+Avoid these reserved parameter names:
+
+- `user_id`
+- `user_properties`
+- `timestamp_micros`
+- Any name starting with `google_` or `ga_`
+
+Tour Kit uses safe parameter names like `tour_id`, `step_id`, etc.
+
+## Privacy & Compliance
+
+### Cookie Consent
+
+Respect user consent before loading Google Analytics:
+
+```tsx title="app/analytics-wrapper.tsx"
+'use client'
+
+import { AnalyticsProvider, googleAnalyticsPlugin } from '@tour-kit/analytics'
+import { useCookieConsent } from '@/lib/consent'
+import Script from 'next/script'
+
+export function AnalyticsWrapper({ children }) {
+  const consent = useCookieConsent()
+
+  return (
+    <>
+      {consent.analytics && (
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+        />
+      )}
+
+      <AnalyticsProvider
+        config={{
+          enabled: consent.analytics,
+          plugins: [
+            googleAnalyticsPlugin({
+              measurementId: process.env.NEXT_PUBLIC_GA_ID!
+            })
+          ]
+        }}
+      >
+        {children}
+      </AnalyticsProvider>
+    </>
+  )
+}
+```
+
+### User ID and PII
+
+Never send personally identifiable information (PII) to Google Analytics:
+
+```tsx
+// ❌ Bad - Don't send email or name
+userId: user.email
+
+// ✅ Good - Use opaque identifier
+userId: user.id
+```
+
+## Debugging
+
+### Check gtag is Loaded
+
+The plugin will warn in the console if gtag is not available:
+
+```
+Analytics: gtag not found. Make sure Google Analytics is loaded on the page.
+```
+
+### Enable Debug Mode
+
+Use GA4 DebugView to see events in real-time:
+
+```tsx
+// Add to your gtag config
+gtag('config', 'G-XXXXXXXXXX', {
+  debug_mode: true
+})
+```
+
+Then view events in GA4:
+1. Go to Configure > DebugView
+2. Events appear in real-time
+
+### Console Debugging
+
+Use the console plugin alongside GA4:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    plugins: [
+      consolePlugin(),
+      googleAnalyticsPlugin({ measurementId: 'G-XXXXXXXXXX' })
+    ],
+    debug: true
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Best Practices
+
+### Production Only
+
+Load GA4 only in production:
+
+```tsx
+const plugins = process.env.NODE_ENV === 'production'
+  ? [googleAnalyticsPlugin({ measurementId: process.env.NEXT_PUBLIC_GA_ID! })]
+  : [consolePlugin()]
+```
+
+### Use Google Tag Manager
+
+For more control, load Google Analytics through [Google Tag Manager](https://tagmanager.google.com):
+
+```html
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-XXXXXX');</script>
+```
+
+Then use the Tour Kit plugin as normal.
+
+### Descriptive Event Names
+
+Keep event names descriptive but concise:
+
+```tsx
+// ✅ Good
+googleAnalyticsPlugin({
+  measurementId: 'G-XXXXXXXXXX',
+  eventPrefix: 'onboarding_'
+})
+
+// ❌ Bad - Too verbose
+googleAnalyticsPlugin({
+  measurementId: 'G-XXXXXXXXXX',
+  eventPrefix: 'tour_kit_user_onboarding_flow_'
+})
+```
+
+## Troubleshooting
+
+### Events Not Appearing
+
+Common issues:
+
+1. **gtag not loaded**: Check browser console for warnings
+2. **Ad blockers**: Users with ad blockers won't send events
+3. **Sampling**: GA4 may sample data in high-traffic properties
+4. **Processing delay**: Events can take 24-48 hours to appear in reports
+
+### gtag is undefined
+
+Ensure gtag loads before Tour Kit:
+
+```tsx
+// ✅ Good - gtag loads first
+<Script src="gtag.js" strategy="beforeInteractive" />
+<AnalyticsProvider>...</AnalyticsProvider>
+
+// ❌ Bad - Race condition
+<Script src="gtag.js" strategy="lazyOnload" />
+<AnalyticsProvider>...</AnalyticsProvider>
+```
+
+## Related
+
+- [Google Analytics 4 Documentation](https://support.google.com/analytics/answer/10089681)
+- [Plugin Overview](/docs/analytics/plugins) - Plugin architecture
+- [AnalyticsProvider](/docs/analytics/providers) - Provider configuration

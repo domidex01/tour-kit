@@ -1,0 +1,449 @@
+---
+title: LoomEmbed
+description: Embed Loom screen recordings and async video messages in your tours
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`LoomEmbed` makes it easy to embed Loom videos - perfect for screen recordings, async video messages, and quick walkthroughs. Loom's lightweight player is optimized for internal communications and product demos.
+
+## Why Use LoomEmbed?
+
+- **Quick recordings**: Ideal for screen shares and quick explanations
+- **Async communication**: Replace meetings with video messages
+- **Simple player**: Clean, distraction-free playback experience
+- **Fast creation**: Record, share, embed in minutes
+- **Internal focused**: Great for onboarding and training
+
+## Basic Usage
+
+```tsx
+import { LoomEmbed } from '@tour-kit/media'
+
+export function FeatureDemo() {
+  return (
+    <LoomEmbed
+      videoId="abc123def456"
+      title="Feature walkthrough"
+    />
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    videoId: {
+      type: 'string',
+      required: true,
+      description: 'Loom video ID (from share URL: loom.com/share/VIDEO_ID)',
+    },
+    title: {
+      type: 'string',
+      required: true,
+      description: 'Accessible title for the iframe. Describes the video content',
+    },
+    autoplay: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Auto-start playback when visible. Works without muting',
+    },
+    muted: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Start muted. Optional for Loom autoplay',
+    },
+    loop: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Loop the video continuously',
+    },
+    hideControls: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Hide player controls for cleaner appearance',
+    },
+    startTime: {
+      type: 'number',
+      required: false,
+      description: 'Start playback at specific time in seconds',
+    },
+    aspectRatio: {
+      type: "'16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'",
+      required: false,
+      default: "'16/9'",
+      description: 'Video aspect ratio',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: "'md'",
+      description: 'Preset size for the video container',
+    },
+    rounded: {
+      type: "boolean | 'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: 'false',
+      description: 'Border radius styling',
+    },
+    allowFullscreen: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Allow fullscreen mode',
+    },
+    className: {
+      type: 'string',
+      required: false,
+      description: 'Additional CSS classes',
+    },
+    style: {
+      type: 'React.CSSProperties',
+      required: false,
+      description: 'Inline styles',
+    },
+  }}
+/>
+
+## Examples
+
+### Auto-playing Screen Recording
+
+Loom videos can autoplay without being muted (unlike YouTube):
+
+```tsx
+<LoomEmbed
+  videoId="abc123def456"
+  title="Dashboard walkthrough"
+  autoplay
+/>
+```
+
+<Callout type="info">
+  Loom allows unmuted autoplay in many browsers, making it great for hands-free onboarding experiences.
+</Callout>
+
+### Clean Player for Presentations
+
+Hide controls for a seamless, distraction-free experience:
+
+```tsx
+<LoomEmbed
+  videoId="abc123def456"
+  title="Product overview"
+  hideControls
+  autoplay
+  loop
+/>
+```
+
+### Start at Specific Moment
+
+Skip the intro and jump to the important part:
+
+```tsx
+<LoomEmbed
+  videoId="abc123def456"
+  title="Feature deep dive"
+  startTime={30} // Skip 30-second intro
+/>
+```
+
+### Vertical Mobile Recording
+
+Loom supports portrait recordings for mobile demos:
+
+```tsx
+<LoomEmbed
+  videoId="abc123def456"
+  title="Mobile app navigation"
+  aspectRatio="9/16"
+  size="sm"
+  rounded="lg"
+/>
+```
+
+### Small Tutorial Bubble
+
+Compact video for inline help:
+
+```tsx
+<LoomEmbed
+  videoId="abc123def456"
+  title="Quick tip: Keyboard shortcuts"
+  size="sm"
+  rounded="md"
+  className="float-right ml-4"
+/>
+```
+
+### Looping Background Demo
+
+Perfect for hero sections or feature showcases:
+
+```tsx
+<LoomEmbed
+  videoId="abc123def456"
+  title="Platform capabilities"
+  autoplay
+  loop
+  muted
+  hideControls
+  size="full"
+/>
+```
+
+## Extracting Video IDs
+
+Loom share URLs contain the video ID:
+
+```tsx
+import { extractLoomId, isLoomUrl } from '@tour-kit/media'
+
+const url = 'https://www.loom.com/share/abc123def456'
+
+if (isLoomUrl(url)) {
+  const videoId = extractLoomId(url)
+  return <LoomEmbed videoId={videoId} title="Video" />
+}
+```
+
+Supported URL formats:
+- `https://www.loom.com/share/abc123def456`
+- `https://loom.com/share/abc123def456`
+- `https://www.loom.com/embed/abc123def456`
+
+## Use Cases for Loom
+
+Loom excels at specific scenarios:
+
+### Onboarding New Users
+
+Show users exactly how to complete key actions:
+
+```tsx
+<Tour id="onboarding">
+  <TourStep id="setup">
+    <h2>Setting Up Your Workspace</h2>
+    <LoomEmbed
+      videoId="setup-walkthrough"
+      title="Workspace setup tutorial"
+      autoplay
+    />
+    <p>Watch this 2-minute guide to get started</p>
+  </TourStep>
+</Tour>
+```
+
+### Bug Reports and Support
+
+Embed Loom recordings from users showing issues:
+
+```tsx
+<div className="support-ticket">
+  <h3>User-reported issue</h3>
+  <LoomEmbed
+    videoId="user-bug-report"
+    title="Bug reproduction video"
+  />
+</div>
+```
+
+### Feature Announcements
+
+Showcase new features with quick demos:
+
+```tsx
+<Announcement id="new-feature">
+  <h2>Introducing: Advanced Search</h2>
+  <LoomEmbed
+    videoId="advanced-search-demo"
+    title="Advanced search feature demo"
+    autoplay
+    muted
+  />
+</Announcement>
+```
+
+### Internal Training
+
+Create a library of training videos for your team:
+
+```tsx
+const trainingModules = [
+  { id: 'module-1', title: 'Getting Started', videoId: 'abc123' },
+  { id: 'module-2', title: 'Advanced Features', videoId: 'def456' },
+  { id: 'module-3', title: 'Best Practices', videoId: 'ghi789' }
+]
+
+{trainingModules.map(module => (
+  <LoomEmbed
+    key={module.id}
+    videoId={module.videoId}
+    title={module.title}
+    size="md"
+  />
+))}
+```
+
+## Accessibility
+
+### Required Title Prop
+
+Describe the video content for screen reader users:
+
+```tsx
+// Good - specific and descriptive
+<LoomEmbed
+  videoId="abc123"
+  title="Step-by-step guide: Creating your first project"
+/>
+
+// Bad - too vague
+<LoomEmbed
+  videoId="abc123"
+  title="Loom video"
+/>
+```
+
+### Keyboard Navigation
+
+Loom's player supports standard keyboard controls:
+- **Space** - Play/Pause
+- **K** - Play/Pause (alternate)
+- **Left/Right arrows** - Seek backward/forward
+- **F** - Fullscreen
+- **M** - Mute/Unmute
+
+### Captions
+
+Add captions to Loom videos:
+1. Open video on loom.com
+2. Click "Edit" → "Captions"
+3. Auto-generate or upload caption file
+4. Captions appear automatically in embeds
+
+## Privacy and Sharing
+
+Loom offers several privacy controls:
+
+### Workspace-Only Videos
+
+Restrict viewing to your workspace members:
+1. Set video privacy to "Only workspace members"
+2. Embed still works within your app for logged-in users
+3. Public sharing links won't work
+
+### Password Protection
+
+Add password protection for sensitive content:
+1. Video settings → Add password
+2. Users must enter password to view
+3. Works with embedded videos
+
+### Restrict Domain Embedding
+
+Control where your videos can be embedded:
+1. Workspace settings → Embedding
+2. Add allowed domains
+3. Blocks unauthorized embedding
+
+<Callout type="warn">
+  Privacy settings are configured on loom.com, not via embed parameters. Check your Loom workspace settings for domain restrictions.
+</Callout>
+
+## Integration with Tours
+
+Perfect for visual onboarding steps:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { LoomEmbed } from '@tour-kit/media'
+
+<Tour id="feature-tour">
+  <TourStep id="overview">
+    <h2>Feature Overview</h2>
+    <LoomEmbed
+      videoId="overview-video"
+      title="Quick overview of the dashboard"
+      autoplay
+    />
+  </TourStep>
+
+  <TourStep id="details">
+    <h2>How It Works</h2>
+    <LoomEmbed
+      videoId="detailed-walkthrough"
+      title="Detailed feature walkthrough"
+      startTime={15}
+    />
+  </TourStep>
+</Tour>
+```
+
+## TypeScript
+
+Full type safety and autocompletion:
+
+```tsx
+import type { LoomEmbedProps } from '@tour-kit/media'
+
+const config: LoomEmbedProps = {
+  videoId: 'abc123def456',
+  title: 'Feature demo',
+  autoplay: true,
+  hideControls: false,
+  startTime: 30
+}
+
+<LoomEmbed {...config} />
+```
+
+## Building Custom Embed URLs
+
+Construct Loom embed URLs programmatically:
+
+```tsx
+import { buildLoomEmbedUrl } from '@tour-kit/media'
+
+const embedUrl = buildLoomEmbedUrl('abc123def456', {
+  autoplay: true,
+  hideControls: true,
+  startTime: 30
+})
+
+console.log(embedUrl)
+// https://www.loom.com/embed/abc123def456?autoplay=1&hide_owner=1&hide_share=1&hide_title=1&hideEmbedTopBar=1&t=30
+```
+
+## Loom vs Other Platforms
+
+When to use Loom:
+
+**Choose Loom when:**
+- Recording quick screen shares
+- Creating internal training videos
+- Async team communication
+- Showing bugs or issues
+- Simple, fast video creation
+
+**Choose YouTube/Vimeo when:**
+- Public marketing content
+- Professional production quality
+- Long-form content
+- SEO is important
+- Need advanced analytics
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
+- [YouTubeEmbed](/docs/media/components/youtube-embed) - YouTube embeds
+- [VimeoEmbed](/docs/media/components/vimeo-embed) - Vimeo embeds
+- [Embed URL Utilities](/docs/media/utilities/embed-urls) - URL building functions
+- [URL Parsing](/docs/media/utilities/url-parsing) - Extract video IDs from URLs

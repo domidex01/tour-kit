@@ -1,0 +1,486 @@
+---
+title: ChecklistProvider
+description: Configure and provide checklist state to your application
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# ChecklistProvider
+
+The root provider that manages checklist state and makes it available throughout your application.
+
+## Usage
+
+```tsx
+import { ChecklistProvider } from '@tour-kit/checklists';
+
+const checklists = [
+  {
+    id: 'onboarding',
+    title: 'Get Started',
+    tasks: [
+      { id: 'step1', title: 'First step' },
+      { id: 'step2', title: 'Second step' },
+    ],
+  },
+];
+
+function App() {
+  return (
+    <ChecklistProvider checklists={checklists}>
+      <YourApp />
+    </ChecklistProvider>
+  );
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    checklists: {
+      type: 'ChecklistConfig[]',
+      required: true,
+      description: 'Array of checklist configurations',
+    },
+    persistence: {
+      type: 'ChecklistPersistenceConfig',
+      default: '{ enabled: false }',
+      description: 'Persistence configuration for state storage',
+    },
+    context: {
+      type: '{ user?: object; data?: object }',
+      description: 'Context available to task conditions',
+    },
+    onTaskComplete: {
+      type: '(checklistId: string, taskId: string) => void',
+      description: 'Called when a task is completed',
+    },
+    onTaskUncomplete: {
+      type: '(checklistId: string, taskId: string) => void',
+      description: 'Called when a task is uncompleted',
+    },
+    onChecklistComplete: {
+      type: '(checklistId: string) => void',
+      description: 'Called when all tasks in a checklist are completed',
+    },
+    onChecklistDismiss: {
+      type: '(checklistId: string) => void',
+      description: 'Called when a checklist is dismissed',
+    },
+    onTaskAction: {
+      type: '(checklistId: string, taskId: string, action: TaskAction) => void',
+      description: 'Called before a task action is executed',
+    },
+  }}
+/>
+
+## Persistence
+
+Enable persistence to save checklist state across sessions:
+
+```tsx
+<ChecklistProvider
+  checklists={checklists}
+  persistence={{
+    enabled: true,
+    storage: 'localStorage', // 'localStorage' | 'sessionStorage'
+    key: 'tour-kit:checklists', // Storage key
+  }}
+>
+  <YourApp />
+</ChecklistProvider>
+```
+
+### Storage Format
+
+The provider persists:
+- Completed tasks per checklist
+- Dismissed checklists
+- Timestamp of last update
+
+```ts
+{
+  completed: {
+    'onboarding': ['step1', 'step2'],
+    'setup': ['verify-email']
+  },
+  dismissed: ['old-checklist'],
+  timestamp: 1234567890
+}
+```
+
+<Callout type="info">
+  Persistence is automatically loaded on mount and saved on every state change.
+</Callout>
+
+## Context
+
+Pass custom context to make it available in task conditions:
+
+```tsx
+const user = {
+  id: '123',
+  name: 'John Doe',
+  role: 'admin',
+  plan: 'premium',
+};
+
+const data = {
+  projectCount: 5,
+  teamSize: 10,
+};
+
+<ChecklistProvider
+  checklists={checklists}
+  context={{ user, data }}
+>
+  <YourApp />
+</ChecklistProvider>
+```
+
+Tasks can then use this context:
+
+```tsx
+const tasks = [
+  {
+    id: 'admin-task',
+    title: 'Admin only',
+    when: (context) => context.user.role === 'admin',
+  },
+  {
+    id: 'premium-task',
+    title: 'Unlock premium',
+    when: (context) => context.user.plan === 'free',
+  },
+  {
+    id: 'milestone',
+    title: 'Create 10 projects',
+    completedWhen: {
+      custom: (context) => context.data.projectCount >= 10,
+    },
+  },
+];
+```
+
+## Event Handlers
+
+Track user interactions with event callbacks:
+
+```tsx
+<ChecklistProvider
+  checklists={checklists}
+  onTaskComplete={(checklistId, taskId) => {
+    console.log(`Task ${taskId} completed in ${checklistId}`);
+    analytics.track('checklist_task_completed', {
+      checklist: checklistId,
+      task: taskId,
+    });
+  }}
+  onTaskUncomplete={(checklistId, taskId) => {
+    console.log(`Task ${taskId} uncompleted`);
+  }}
+  onChecklistComplete={(checklistId) => {
+    console.log(`Checklist ${checklistId} completed!`);
+    analytics.track('checklist_completed', { checklist: checklistId });
+  }}
+  onChecklistDismiss={(checklistId) => {
+    console.log(`Checklist ${checklistId} dismissed`);
+  }}
+  onTaskAction={(checklistId, taskId, action) => {
+    console.log(`Task action:`, action);
+
+    // Custom handling for specific actions
+    if (action.type === 'tour') {
+      // Launch tour via your tour system
+      tourSystem.start(action.tourId);
+    }
+    if (action.type === 'modal') {
+      // Open modal via your modal system
+      modalSystem.open(action.modalId);
+    }
+  }}
+>
+  <YourApp />
+</ChecklistProvider>
+```
+
+## Task Actions
+
+The provider automatically handles these action types:
+
+### Navigate
+
+```tsx
+{
+  type: 'navigate',
+  url: '/dashboard',
+  external: false // Opens in same window
+}
+
+{
+  type: 'navigate',
+  url: 'https://example.com',
+  external: true // Opens in new tab
+}
+```
+
+### Callback
+
+```tsx
+{
+  type: 'callback',
+  handler: async () => {
+    await api.doSomething();
+    console.log('Custom logic executed');
+  }
+}
+```
+
+### Tour (requires integration)
+
+```tsx
+{
+  type: 'tour',
+  tourId: 'intro-tour'
+}
+```
+
+<Callout type="warn">
+  Tour actions require integration with a tour system. Use `onTaskAction` to handle tour launching.
+</Callout>
+
+### Modal (requires integration)
+
+```tsx
+{
+  type: 'modal',
+  modalId: 'invite-modal'
+}
+```
+
+### Custom
+
+```tsx
+{
+  type: 'custom',
+  data: { anything: 'you want' }
+}
+```
+
+Handle custom actions via `onTaskAction`:
+
+```tsx
+onTaskAction={(checklistId, taskId, action) => {
+  if (action.type === 'custom') {
+    // Handle your custom action
+    console.log(action.data);
+  }
+}}
+```
+
+## Automatic Task Completion
+
+By default, tasks auto-complete when their action is executed. Disable this:
+
+```tsx
+const tasks = [
+  {
+    id: 'manual-task',
+    title: 'Do something',
+    action: { type: 'navigate', url: '/page' },
+    manualComplete: false, // Don't auto-complete
+  },
+];
+```
+
+Then complete manually:
+
+```tsx
+const { completeTask } = useChecklist('my-checklist');
+
+// Later...
+completeTask('manual-task');
+```
+
+## Checklist Lifecycle
+
+```tsx
+const checklist = {
+  id: 'onboarding',
+  title: 'Get Started',
+  tasks: [...],
+
+  onComplete: () => {
+    console.log('All tasks completed!');
+    // Show celebration modal
+    // Award achievement
+    // Navigate to next step
+  },
+
+  onDismiss: () => {
+    console.log('Checklist dismissed');
+    // Track dismissal
+    // Maybe show alternative guidance
+  },
+
+  dismissible: true, // Allow dismissing
+  hideOnComplete: true, // Auto-hide when done
+};
+```
+
+## Multiple Checklists
+
+Provide multiple checklists for different user journeys:
+
+```tsx
+const checklists = [
+  {
+    id: 'onboarding',
+    title: 'Getting Started',
+    tasks: [
+      { id: 'create-account', title: 'Create account' },
+      { id: 'verify-email', title: 'Verify email' },
+    ],
+  },
+  {
+    id: 'advanced-setup',
+    title: 'Advanced Setup',
+    tasks: [
+      { id: 'api-keys', title: 'Generate API keys' },
+      { id: 'webhooks', title: 'Configure webhooks' },
+    ],
+  },
+  {
+    id: 'feature-discovery',
+    title: 'Explore Features',
+    tasks: [
+      { id: 'try-feature-a', title: 'Try Feature A' },
+      { id: 'try-feature-b', title: 'Try Feature B' },
+    ],
+  },
+];
+
+<ChecklistProvider checklists={checklists}>
+  <YourApp />
+</ChecklistProvider>
+```
+
+## Best Practices
+
+### Start Simple
+
+Begin with a simple checklist and add complexity as needed:
+
+```tsx
+// Good: Start simple
+const checklist = {
+  id: 'onboarding',
+  title: 'Get Started',
+  tasks: [
+    { id: 'step1', title: 'First step' },
+    { id: 'step2', title: 'Second step' },
+  ],
+};
+
+// Add features incrementally
+const enhancedChecklist = {
+  ...checklist,
+  tasks: checklist.tasks.map((task, i) => ({
+    ...task,
+    dependsOn: i > 0 ? [checklist.tasks[i - 1].id] : undefined,
+    action: { type: 'navigate', url: `/step-${i + 1}` },
+  })),
+};
+```
+
+### Validate Circular Dependencies
+
+Always validate dependencies during development:
+
+```tsx
+import { hasCircularDependency } from '@tour-kit/checklists';
+
+const checklist = {
+  id: 'test',
+  tasks: [
+    { id: 'a', dependsOn: ['b'] },
+    { id: 'b', dependsOn: ['a'] }, // Circular!
+  ],
+};
+
+if (hasCircularDependency(checklist.tasks)) {
+  console.error('Circular dependency detected!');
+}
+```
+
+### Context Best Practices
+
+Keep context flat and predictable:
+
+```tsx
+// Good: Flat, predictable structure
+const context = {
+  user: {
+    id: '123',
+    role: 'admin',
+    plan: 'premium',
+  },
+  data: {
+    projectCount: 5,
+    hasTeam: true,
+  },
+};
+
+// Avoid: Deep nesting, computed values
+const context = {
+  user: {
+    profile: {
+      settings: {
+        preferences: { /* ... */ }
+      }
+    }
+  },
+  // Computed values can cause re-renders
+  computed: {
+    get isEligible() {
+      return checkComplexLogic();
+    }
+  }
+};
+```
+
+### Event Tracking
+
+Use event handlers for analytics:
+
+```tsx
+<ChecklistProvider
+  checklists={checklists}
+  onTaskComplete={(checklistId, taskId) => {
+    analytics.track('task_completed', {
+      checklist_id: checklistId,
+      task_id: taskId,
+      timestamp: Date.now(),
+    });
+  }}
+  onChecklistComplete={(checklistId) => {
+    analytics.track('checklist_completed', {
+      checklist_id: checklistId,
+      timestamp: Date.now(),
+    });
+
+    // Award achievement
+    achievements.unlock(`${checklistId}_complete`);
+  }}
+>
+  <YourApp />
+</ChecklistProvider>
+```
+
+## Related
+
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Access checklist state
+- [useChecklistPersistence](/docs/checklists/hooks/use-checklist-persistence) - Manage persistence
+- [Checklist Types](/docs/checklists/types) - Type definitions

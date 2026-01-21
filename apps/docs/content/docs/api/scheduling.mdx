@@ -1,0 +1,431 @@
+---
+title: '@tour-kit/scheduling API'
+description: Complete API reference for @tour-kit/scheduling
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/scheduling API Reference
+
+Complete API reference for the scheduling package. This package provides time-based scheduling utilities.
+
+---
+
+## Hooks
+
+### useSchedule
+
+Hook to check if schedule is active.
+
+```tsx
+import { useSchedule } from '@tour-kit/scheduling';
+
+const isActive = useSchedule(schedule, {
+  refreshInterval: 60000, // Check every minute
+});
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `schedule` | `Schedule` | Schedule configuration |
+| `options.refreshInterval` | `number` | Refresh interval (ms) |
+
+### useScheduleStatus
+
+Hook for detailed schedule status.
+
+```tsx
+import { useScheduleStatus } from '@tour-kit/scheduling';
+
+const {
+  isActive,
+  status,
+  reason,
+  nextCheck,
+} = useScheduleStatus(schedule);
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `isActive` | `boolean` | Whether schedule is active |
+| `status` | `ScheduleStatus` | Status object |
+| `reason` | `ScheduleInactiveReason \| null` | Why inactive |
+| `nextCheck` | `number` | Ms until next status change |
+
+### useUserTimezone
+
+Hook to detect user's timezone.
+
+```tsx
+import { useUserTimezone } from '@tour-kit/scheduling';
+
+const {
+  timezone,
+  isSupported,
+  isDST,
+} = useUserTimezone();
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `timezone` | `string \| null` | IANA timezone (e.g., 'America/New_York') |
+| `isSupported` | `boolean` | Whether timezone detection is supported |
+| `isDST` | `boolean` | Whether currently in DST |
+
+---
+
+## Core Functions
+
+### checkSchedule
+
+Check if schedule is currently active.
+
+```tsx
+import { checkSchedule } from '@tour-kit/scheduling';
+
+const isActive = checkSchedule(schedule, {
+  now: new Date(),
+  timezone: 'America/New_York',
+});
+```
+
+### isScheduleActive
+
+Alias for checkSchedule.
+
+```tsx
+import { isScheduleActive } from '@tour-kit/scheduling';
+
+const isActive = isScheduleActive(schedule);
+```
+
+### getScheduleStatus
+
+Get detailed status with reason.
+
+```tsx
+import { getScheduleStatus } from '@tour-kit/scheduling';
+
+const { isActive, reason } = getScheduleStatus(schedule);
+// reason: 'before_start_date' | 'after_end_date' | 'wrong_day_of_week' | etc.
+```
+
+---
+
+## Timezone Utilities
+
+```tsx
+import {
+  getUserTimezone,
+  getDateInTimezone,
+  isValidTimezone,
+  formatDateString,
+  parseDateString,
+  parseTimeString,
+} from '@tour-kit/scheduling';
+
+// Get browser timezone
+const tz = getUserTimezone();
+// 'America/New_York'
+
+// Convert date to timezone
+const date = getDateInTimezone(new Date(), 'Europe/London');
+
+// Validate timezone string
+const valid = isValidTimezone('America/New_York');
+// true
+
+// Format date to YYYY-MM-DD
+const dateStr = formatDateString(new Date(), 'UTC');
+// '2024-01-15'
+
+// Parse date string
+const date = parseDateString('2024-01-15');
+
+// Parse time string
+const { hours, minutes } = parseTimeString('09:30');
+```
+
+---
+
+## Date/Time Utilities
+
+### Date Range
+
+```tsx
+import { isWithinDateRange } from '@tour-kit/scheduling';
+
+const inRange = isWithinDateRange(
+  new Date(),
+  '2024-01-01', // startAt
+  '2024-12-31'  // endAt
+);
+```
+
+### Time Range
+
+```tsx
+import { isWithinTimeRange, isWithinAnyTimeRange } from '@tour-kit/scheduling';
+
+const inTimeRange = isWithinTimeRange(
+  new Date(),
+  { start: '09:00', end: '17:00' },
+  'America/New_York'
+);
+
+const inAnyRange = isWithinAnyTimeRange(new Date(), [
+  { start: '09:00', end: '12:00' },
+  { start: '13:00', end: '17:00' },
+]);
+```
+
+### Day of Week
+
+```tsx
+import {
+  getDayOfWeek,
+  isAllowedDay,
+  dayNameToNumber,
+  dayNumberToName,
+  DAY_GROUPS,
+} from '@tour-kit/scheduling';
+
+const day = getDayOfWeek(new Date());
+// 0-6 (Sunday=0)
+
+const allowed = isAllowedDay(new Date(), [1, 2, 3, 4, 5]);
+// true if Monday-Friday
+
+const num = dayNameToNumber('monday');
+// 1
+
+const name = dayNumberToName(1);
+// 'monday'
+
+// Day groups
+DAY_GROUPS.weekdays; // [1, 2, 3, 4, 5]
+DAY_GROUPS.weekend;  // [0, 6]
+```
+
+---
+
+## Blackout Utilities
+
+```tsx
+import {
+  isInBlackoutPeriod,
+  isInAnyBlackout,
+  getCurrentBlackout,
+  getBlackoutEndTime,
+} from '@tour-kit/scheduling';
+
+const blackout = {
+  id: 'holiday',
+  start: '2024-12-24',
+  end: '2024-12-26',
+  reason: 'Holiday',
+};
+
+const inBlackout = isInBlackoutPeriod(new Date(), blackout);
+
+const inAny = isInAnyBlackout(new Date(), blackouts);
+
+const current = getCurrentBlackout(new Date(), blackouts);
+// Returns current blackout or null
+
+const endTime = getBlackoutEndTime(new Date(), blackouts);
+// Returns end time of current blackout
+```
+
+---
+
+## Business Hours
+
+```tsx
+import {
+  isWithinBusinessHours,
+  isHoliday,
+  getDayBusinessHours,
+  BUSINESS_HOURS_PRESETS,
+} from '@tour-kit/scheduling';
+
+const businessHours = {
+  timezone: 'America/New_York',
+  hours: {
+    monday: { start: '09:00', end: '17:00' },
+    tuesday: { start: '09:00', end: '17:00' },
+    wednesday: { start: '09:00', end: '17:00' },
+    thursday: { start: '09:00', end: '17:00' },
+    friday: { start: '09:00', end: '17:00' },
+    saturday: { closed: true },
+    sunday: { closed: true },
+  },
+  holidays: ['2024-12-25', '2024-01-01'],
+};
+
+const isOpen = isWithinBusinessHours(new Date(), businessHours, 'America/New_York');
+
+const isHolidayToday = isHoliday(new Date(), businessHours.holidays);
+
+const todayHours = getDayBusinessHours(new Date(), businessHours);
+// { start: '09:00', end: '17:00' } or { closed: true }
+
+// Presets
+BUSINESS_HOURS_PRESETS.standard; // 9-5 M-F
+BUSINESS_HOURS_PRESETS.extended; // 8-8 M-Sa
+```
+
+---
+
+## Recurring Patterns
+
+```tsx
+import { matchesRecurringPattern } from '@tour-kit/scheduling';
+
+// Daily
+const daily = matchesRecurringPattern(new Date(), {
+  type: 'daily',
+  interval: 1,
+});
+
+// Weekly (every Monday)
+const weekly = matchesRecurringPattern(new Date(), {
+  type: 'weekly',
+  interval: 1,
+  daysOfWeek: [1],
+});
+
+// Monthly (15th of each month)
+const monthly = matchesRecurringPattern(new Date(), {
+  type: 'monthly',
+  interval: 1,
+  dayOfMonth: 15,
+});
+
+// Yearly (January 1st)
+const yearly = matchesRecurringPattern(new Date(), {
+  type: 'yearly',
+  interval: 1,
+  month: 1,
+  dayOfMonth: 1,
+});
+
+// With limits
+const limited = matchesRecurringPattern(new Date(), {
+  type: 'weekly',
+  interval: 2,
+  daysOfWeek: [1, 3, 5],
+  maxOccurrences: 10,
+  endDate: '2024-12-31',
+}, referenceDate);
+```
+
+---
+
+## Schedule Evaluation Order
+
+The schedule is evaluated in this order:
+
+1. Check if `enabled` is true
+2. Check date range (`startAt`/`endAt`)
+3. Check blackout periods
+4. Check day of week (`daysOfWeek`)
+5. Check time of day (`timeOfDay`)
+6. Check business hours
+7. Check recurring pattern
+
+---
+
+## Types
+
+### Schedule
+
+```tsx
+interface Schedule {
+  enabled?: boolean;
+  startAt?: DateString | Date;
+  endAt?: DateString | Date;
+  daysOfWeek?: DayOfWeek[];
+  timeOfDay?: TimeRange;
+  useUserTimezone?: boolean;
+  timezone?: string;
+  blackouts?: BlackoutPeriod[];
+  recurring?: RecurringPattern;
+  metadata?: Record<string, unknown>;
+}
+```
+
+### TimeRange
+
+```tsx
+interface TimeRange {
+  start: TimeString; // "HH:MM"
+  end: TimeString;   // "HH:MM"
+}
+```
+
+### BlackoutPeriod
+
+```tsx
+interface BlackoutPeriod {
+  id: string;
+  start: DateString | Date;
+  end: DateString | Date;
+  reason?: string;
+}
+```
+
+### RecurringPattern
+
+```tsx
+interface RecurringPattern {
+  type: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  interval?: number;
+  daysOfWeek?: DayOfWeek[];
+  dayOfMonth?: number;
+  month?: number;
+  maxOccurrences?: number;
+  endDate?: DateString;
+}
+```
+
+### BusinessHours
+
+```tsx
+interface DayHours {
+  start: TimeString;
+  end: TimeString;
+  closed?: boolean;
+}
+
+type BusinessHoursMap = Record<DayName, DayHours>;
+
+interface BusinessHours {
+  timezone: string;
+  hours: BusinessHoursMap;
+  holidays?: Date[];
+}
+```
+
+### ScheduleInactiveReason
+
+```tsx
+type ScheduleInactiveReason =
+  | 'not_enabled'
+  | 'before_start_date'
+  | 'after_end_date'
+  | 'wrong_day_of_week'
+  | 'outside_time_range'
+  | 'in_blackout'
+  | 'outside_business_hours'
+  | 'recurring_pattern_mismatch';
+```
+
+### ScheduleStatus
+
+```tsx
+interface ScheduleStatus {
+  isActive: boolean;
+  reason?: ScheduleInactiveReason;
+}
+```

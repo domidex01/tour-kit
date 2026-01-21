@@ -1,0 +1,295 @@
+---
+title: Storage Utilities
+description: Storage adapters for persisting tour state
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Storage Utilities
+
+Factory functions for creating storage adapters. Used by persistence hooks to save and restore tour state.
+
+## Why Use These Utilities?
+
+Tour state needs to persist across sessions and page navigations:
+
+- **Multiple backends** - localStorage, sessionStorage, cookies
+- **Custom storage** - Redis, IndexedDB, or your own backend
+- **Namespace isolation** - Prevent key collisions with prefixed storage
+- **SSR safety** - Graceful degradation when storage is unavailable
+
+---
+
+## createStorageAdapter
+
+Create a storage adapter from configuration.
+
+### Usage
+
+```tsx
+import { createStorageAdapter } from '@tour-kit/core';
+
+// From string config
+const localStorage = createStorageAdapter('localStorage');
+const sessionStorage = createStorageAdapter('sessionStorage');
+const cookieStorage = createStorageAdapter('cookie');
+
+// From custom object
+const customStorage = createStorageAdapter({
+  getItem: (key) => redis.get(key),
+  setItem: (key, value) => redis.set(key, value),
+  removeItem: (key) => redis.del(key),
+});
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    storageType: {
+      type: "'localStorage' | 'sessionStorage' | 'cookie' | Storage",
+      description: 'Storage type or custom storage object',
+    },
+  }}
+/>
+
+### Return Value
+
+Returns a `Storage` interface:
+
+```ts
+interface Storage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}
+```
+
+---
+
+## createCookieStorage
+
+Create a cookie-based storage adapter with configurable expiration.
+
+### Usage
+
+```tsx
+import { createCookieStorage } from '@tour-kit/core';
+
+// Default: 365 days, root path
+const cookies = createCookieStorage();
+
+// Custom options
+const sessionCookies = createCookieStorage({
+  expires: 1, // 1 day
+  path: '/app',
+});
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    expires: {
+      type: 'number',
+      description: 'Days until cookie expires',
+      default: '365',
+    },
+    path: {
+      type: 'string',
+      description: 'Cookie path',
+      default: '"/"',
+    },
+  }}
+/>
+
+### When to Use Cookies
+
+<Tabs items={['Use Cookies', 'Use localStorage']}>
+<Tab value="Use Cookies">
+- Server-side access needed (SSR tour resumption)
+- Cross-subdomain sharing required
+- Smaller data (under 4KB)
+</Tab>
+
+<Tab value="Use localStorage">
+- Client-only access sufficient
+- Larger data storage needed
+- Faster access (no network overhead)
+</Tab>
+</Tabs>
+
+---
+
+## createPrefixedStorage
+
+Wrap a storage adapter with key prefixes to avoid collisions.
+
+### Usage
+
+```tsx
+import { createPrefixedStorage, createStorageAdapter } from '@tour-kit/core';
+
+const localStorage = createStorageAdapter('localStorage');
+const appStorage = createPrefixedStorage(localStorage, 'myapp');
+
+// Keys are automatically prefixed
+appStorage.setItem('tour-state', '...'); // Stored as "myapp:tour-state"
+appStorage.getItem('tour-state'); // Looks up "myapp:tour-state"
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    storage: {
+      type: 'Storage',
+      description: 'Base storage adapter to wrap',
+    },
+    prefix: {
+      type: 'string',
+      description: 'Prefix to prepend to all keys',
+    },
+  }}
+/>
+
+### Multi-App Example
+
+```tsx
+// Prevent collisions when multiple apps use the same storage
+const mainAppTours = createPrefixedStorage(localStorage, 'main-app');
+const adminTours = createPrefixedStorage(localStorage, 'admin');
+
+mainAppTours.setItem('completed', '["welcome"]');
+adminTours.setItem('completed', '["admin-tour"]');
+
+// Stored as:
+// "main-app:completed" → '["welcome"]'
+// "admin:completed" → '["admin-tour"]'
+```
+
+---
+
+## createNoopStorage
+
+Create a no-operation storage for SSR or testing.
+
+### Usage
+
+```tsx
+import { createNoopStorage } from '@tour-kit/core';
+
+const noopStorage = createNoopStorage();
+
+noopStorage.setItem('key', 'value'); // Does nothing
+noopStorage.getItem('key'); // Returns null
+noopStorage.removeItem('key'); // Does nothing
+```
+
+<Callout type="info">
+This is used internally when storage is unavailable (e.g., during SSR). You typically don't need to use it directly.
+</Callout>
+
+---
+
+## safeJSONParse
+
+Safely parse JSON with a fallback value.
+
+### Usage
+
+```tsx
+import { safeJSONParse } from '@tour-kit/core';
+
+// Safe parsing with fallback
+const tours = safeJSONParse(localStorage.getItem('tours'), []);
+// Returns parsed array or [] if null/invalid
+
+const config = safeJSONParse(localStorage.getItem('config'), { theme: 'light' });
+// Returns parsed object or default config
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    value: {
+      type: 'string | null',
+      description: 'JSON string to parse',
+    },
+    fallback: {
+      type: 'T',
+      description: 'Value to return if parsing fails',
+    },
+  }}
+/>
+
+---
+
+## Custom Storage Backend
+
+Implement the `Storage` interface for custom backends:
+
+```tsx
+import { createStorageAdapter } from '@tour-kit/core';
+
+// Redis example (Node.js)
+const redisStorage = {
+  getItem: async (key: string) => {
+    return await redis.get(`tourkit:${key}`);
+  },
+  setItem: async (key: string, value: string) => {
+    await redis.set(`tourkit:${key}`, value);
+  },
+  removeItem: async (key: string) => {
+    await redis.del(`tourkit:${key}`);
+  },
+};
+
+// IndexedDB example
+const idbStorage = {
+  getItem: (key: string) => {
+    return new Promise((resolve) => {
+      const tx = db.transaction('tours', 'readonly');
+      const store = tx.objectStore('tours');
+      const request = store.get(key);
+      request.onsuccess = () => resolve(request.result?.value ?? null);
+    });
+  },
+  setItem: (key: string, value: string) => {
+    const tx = db.transaction('tours', 'readwrite');
+    const store = tx.objectStore('tours');
+    store.put({ key, value });
+  },
+  removeItem: (key: string) => {
+    const tx = db.transaction('tours', 'readwrite');
+    const store = tx.objectStore('tours');
+    store.delete(key);
+  },
+};
+```
+
+<Callout type="warn">
+Custom storage backends with async operations require special handling. The built-in persistence hooks expect synchronous storage.
+</Callout>
+
+---
+
+## Storage Types Reference
+
+| Type | Capacity | Persistence | Server Access |
+|------|----------|-------------|---------------|
+| `localStorage` | ~5-10MB | Permanent | No |
+| `sessionStorage` | ~5-10MB | Session only | No |
+| `cookie` | ~4KB | Configurable | Yes |
+| Custom | Varies | Varies | Varies |
+
+---
+
+## Related
+
+- [usePersistence](/docs/core/hooks/use-persistence) - Uses storage adapters
+- [useRoutePersistence](/docs/core/hooks/use-route-persistence) - Multi-page persistence
+- [Persistence Guide](/docs/guides/persistence) - Advanced patterns

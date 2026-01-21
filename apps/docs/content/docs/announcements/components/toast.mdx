@@ -1,0 +1,155 @@
+---
+title: AnnouncementToast
+description: Temporary notification component for quick messages
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# AnnouncementToast
+
+A temporary notification that appears in a corner. Best for quick, non-critical messages.
+
+## When to Use
+
+- Quick tips
+- Success confirmations
+- Non-critical updates
+- Ephemeral messages
+- Status notifications
+
+---
+
+## Basic Usage
+
+```tsx
+import { AnnouncementsProvider, AnnouncementToast } from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'quick-tip',
+    variant: 'toast',
+    title: 'Pro Tip: Use keyboard shortcuts!',
+    toastOptions: {
+      position: 'bottom-right',
+      autoDismiss: true,
+      autoDismissDelay: 5000,
+    },
+  },
+];
+
+<AnnouncementToast id="quick-tip" />
+```
+
+---
+
+## Toast Options
+
+<TypeTable
+  type={{
+    position: {
+      type: "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'",
+      default: "'bottom-right'",
+      description: 'Position on screen',
+    },
+    autoDismiss: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Auto-dismiss after delay',
+    },
+    autoDismissDelay: {
+      type: 'number',
+      default: '5000',
+      description: 'Milliseconds before auto-dismiss',
+    },
+    showProgress: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show progress bar for auto-dismiss',
+    },
+    intent: {
+      type: "'default' | 'info' | 'success' | 'warning' | 'error'",
+      default: "'default'",
+      description: 'Visual style/color',
+    },
+  }}
+/>
+
+---
+
+## Positions
+
+```tsx
+// Top positions
+toastOptions: { position: 'top-left' }
+toastOptions: { position: 'top-center' }
+toastOptions: { position: 'top-right' }
+
+// Bottom positions
+toastOptions: { position: 'bottom-left' }
+toastOptions: { position: 'bottom-center' }
+toastOptions: { position: 'bottom-right' } // Default
+```
+
+---
+
+## Auto-Dismiss
+
+```tsx
+// Auto-dismiss after 3 seconds
+toastOptions: {
+  autoDismiss: true,
+  autoDismissDelay: 3000,
+  showProgress: true, // Progress bar countdown
+}
+
+// Manual dismiss only
+toastOptions: {
+  autoDismiss: false,
+}
+```
+
+---
+
+## Complete Example
+
+```tsx
+{
+  id: 'success-message',
+  variant: 'toast',
+  title: 'Changes saved successfully!',
+
+  toastOptions: {
+    position: 'bottom-right',
+    autoDismiss: true,
+    autoDismissDelay: 4000,
+    showProgress: true,
+    intent: 'success',
+  },
+
+  frequency: 'always', // Show every time
+  onDismiss: (reason) => {
+    if (reason === 'auto_dismiss') {
+      console.log('Toast auto-dismissed');
+    }
+  },
+}
+```
+
+---
+
+## Intent Styles
+
+```tsx
+toastOptions: { intent: 'default' } // Neutral
+toastOptions: { intent: 'info' } // Blue
+toastOptions: { intent: 'success' } // Green
+toastOptions: { intent: 'warning' } // Yellow
+toastOptions: { intent: 'error' } // Red
+```
+
+---
+
+## Related
+
+- [Headless Toast](/docs/announcements/headless/toast)
+- [useAnnouncement](/docs/announcements/hooks/use-announcement)

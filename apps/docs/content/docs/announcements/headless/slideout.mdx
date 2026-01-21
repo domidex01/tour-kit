@@ -1,0 +1,47 @@
+---
+title: HeadlessSlideout
+description: Headless slideout component with render props
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# HeadlessSlideout
+
+Unstyled slideout panel that provides state and behavior through render props.
+
+## Additional Render Props
+
+<TypeTable
+  type={{
+    slideoutOptions: { type: 'SlideoutOptions', description: 'Position and size options' },
+    position: { type: "'left' | 'right'", description: 'Slide direction' },
+    size: { type: "'sm' | 'md' | 'lg' | 'full'", description: 'Panel width' },
+  }}
+/>
+
+## Example
+
+```tsx
+import { HeadlessSlideout } from '@tour-kit/announcements/headless';
+
+<HeadlessSlideout
+  id="changelog"
+  render={({ isVisible, config, hide, position, size }) => {
+    if (!isVisible) return null;
+
+    return (
+      <div className="slideout-container">
+        <div className="overlay" onClick={hide} />
+        <div
+          className={`slideout ${position} ${size}`}
+          role="complementary"
+        >
+          <h2>{config.title}</h2>
+          <p>{config.description}</p>
+          <button onClick={hide}>Close</button>
+        </div>
+      </div>
+    );
+  }}
+/>
+```

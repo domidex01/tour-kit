@@ -1,0 +1,113 @@
+---
+title: ChecklistTask
+description: Individual task item component
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# ChecklistTask
+
+Component for rendering individual checklist tasks with checkboxes, icons, and state indicators.
+
+## Usage
+
+```tsx
+import { ChecklistTask, useTask } from '@tour-kit/checklists';
+
+function TaskList() {
+  const { task } = useTask('onboarding', 'step1');
+
+  return <ChecklistTask task={task} />;
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    task: {
+      type: 'ChecklistTaskState',
+      required: true,
+      description: 'Task state object from useTask hook',
+    },
+    variant: {
+      type: "'default' | 'compact' | 'detailed'",
+      default: "'default'",
+      description: 'Visual variant',
+    },
+    size: {
+      type: "'sm' | 'default' | 'lg'",
+      default: "'default'",
+      description: 'Size variant',
+    },
+    onClick: {
+      type: '() => void',
+      description: 'Called when task is clicked',
+    },
+    onToggle: {
+      type: '() => void',
+      description: 'Called when checkbox is toggled',
+    },
+    renderIcon: {
+      type: '(task) => ReactNode',
+      description: 'Custom icon renderer',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+## Examples
+
+### Basic Task
+
+```tsx
+const { task } = useTask('onboarding', 'step1');
+
+<ChecklistTask task={task} />
+```
+
+### With Click Handler
+
+```tsx
+const { task, execute } = useTask('onboarding', 'step1');
+
+<ChecklistTask
+  task={task}
+  onClick={execute}
+/>
+```
+
+### Custom Icon
+
+```tsx
+<ChecklistTask
+  task={task}
+  renderIcon={(task) => (
+    task.completed ? <CheckCircle /> : <Circle />
+  )}
+/>
+```
+
+### Different Variants
+
+```tsx
+<ChecklistTask task={task} variant="compact" size="sm" />
+<ChecklistTask task={task} variant="detailed" />
+```
+
+## Task States
+
+The component automatically shows different states:
+
+- **Completed**: Check icon, strikethrough text
+- **Locked**: Lock icon, disabled appearance
+- **Active**: Highlight border
+- **Hidden**: Not rendered
+
+## Related
+
+- [useTask](/docs/checklists/hooks/use-task) - Task state hook
+- [Checklist](/docs/checklists/components/checklist) - Container component

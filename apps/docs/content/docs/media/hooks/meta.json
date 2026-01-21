@@ -1,0 +1,8 @@
+{
+  "title": "Hooks",
+  "pages": [
+    "use-media-events",
+    "use-responsive-source",
+    "use-prefers-reduced-motion"
+  ]
+}

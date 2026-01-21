@@ -1,0 +1,311 @@
+---
+title: FeatureButton
+description: Button with automatic usage tracking
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`FeatureButton` is a button wrapper that automatically tracks feature usage when clicked. It optionally shows a "new" indicator for unadopted features.
+
+## Basic Usage
+
+```tsx
+import { FeatureButton } from '@tour-kit/adoption'
+
+function Toolbar() {
+  return (
+    <FeatureButton featureId="export" onClick={() => exportData()}>
+      Export
+    </FeatureButton>
+  )
+}
+```
+
+Every click automatically tracks usage - no manual `trackUsage()` calls needed.
+
+## Props
+
+<TypeTable
+  type={{
+    featureId: {
+      type: 'string',
+      required: true,
+      description: 'Feature ID to track',
+    },
+    showNewIndicator: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show red dot indicator if feature not adopted',
+    },
+    variant: {
+      type: '"default" | "secondary" | "outline" | "ghost" | "destructive"',
+      default: '"default"',
+      description: 'Button style variant',
+    },
+    size: {
+      type: '"sm" | "md" | "lg"',
+      default: '"md"',
+      description: 'Button size',
+    },
+    asChild: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Use custom element via Slot pattern',
+    },
+  }}
+/>
+
+Extends all standard `<button>` props.
+
+## Examples
+
+### Basic Button
+
+```tsx
+<FeatureButton featureId="search" onClick={handleSearch}>
+  Search
+</FeatureButton>
+```
+
+### Without New Indicator
+
+```tsx
+<FeatureButton
+  featureId="save"
+  showNewIndicator={false}
+  onClick={handleSave}
+>
+  Save
+</FeatureButton>
+```
+
+### Different Variants
+
+```tsx
+<FeatureButton featureId="delete" variant="destructive">
+  Delete
+</FeatureButton>
+
+<FeatureButton featureId="settings" variant="outline">
+  Settings
+</FeatureButton>
+
+<FeatureButton featureId="help" variant="ghost" size="sm">
+  Help
+</FeatureButton>
+```
+
+### With Custom Element (asChild)
+
+```tsx
+import { Button } from '@/components/ui/button'
+
+<FeatureButton featureId="export" asChild>
+  <Button className="custom-class">
+    Export Data
+  </Button>
+</FeatureButton>
+```
+
+### Icon Button
+
+```tsx
+import { Download } from 'lucide-react'
+
+<FeatureButton featureId="download" size="sm" variant="ghost">
+  <Download className="h-4 w-4" />
+</FeatureButton>
+```
+
+### Loading State
+
+```tsx
+function ExportButton() {
+  const [loading, setLoading] = useState(false)
+
+  const handleExport = async () => {
+    setLoading(true)
+    try {
+      await exportData()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <FeatureButton
+      featureId="export"
+      onClick={handleExport}
+      disabled={loading}
+    >
+      {loading ? 'Exporting...' : 'Export'}
+    </FeatureButton>
+  )
+}
+```
+
+### With Tooltip
+
+```tsx
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+
+<Tooltip>
+  <TooltipTrigger asChild>
+    <FeatureButton featureId="shortcuts" variant="ghost" size="sm">
+      Ctrl+K
+    </FeatureButton>
+  </TooltipTrigger>
+  <TooltipContent>Keyboard Shortcuts</TooltipContent>
+</Tooltip>
+```
+
+## New Indicator
+
+The indicator appears as a small red dot when the feature is not adopted:
+
+```tsx
+// Shows red dot if not adopted
+<FeatureButton featureId="new-feature">
+  Try New Feature
+</FeatureButton>
+
+// Hide indicator
+<FeatureButton featureId="new-feature" showNewIndicator={false}>
+  Try New Feature
+</FeatureButton>
+```
+
+The indicator automatically disappears once the feature is adopted.
+
+## Click Handling
+
+The button tracks usage before calling your `onClick`:
+
+```tsx
+<FeatureButton
+  featureId="analytics"
+  onClick={(e) => {
+    // Usage already tracked at this point
+    console.log('Button clicked')
+  }}
+>
+  View Analytics
+</FeatureButton>
+```
+
+Tracking happens even if `onClick` is not provided:
+
+```tsx
+<FeatureButton featureId="feature" type="submit">
+  Submit Form
+</FeatureButton>
+```
+
+## Accessibility
+
+The component:
+- Renders a semantic `<button>` by default
+- Includes `aria-label` on the new indicator: "New feature"
+- Supports all standard button ARIA attributes
+- Works with keyboard navigation
+
+```tsx
+<FeatureButton
+  featureId="feature"
+  aria-label="Export data to CSV"
+  aria-describedby="export-help"
+>
+  Export
+</FeatureButton>
+```
+
+## TypeScript
+
+Fully typed with standard button props:
+
+```tsx
+import { FeatureButton, type FeatureButtonProps } from '@tour-kit/adoption'
+
+const props: FeatureButtonProps = {
+  featureId: 'my-feature',
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log('clicked')
+  },
+  disabled: false,
+  type: 'button',
+}
+
+<FeatureButton {...props}>Click</FeatureButton>
+```
+
+## Styling
+
+### CSS Variables
+
+```css
+.feature-button {
+  --button-bg: hsl(0 0% 10%);
+  --button-text: hsl(0 0% 100%);
+  --indicator-color: hsl(0 84% 60%);
+}
+```
+
+### Custom Classes
+
+```tsx
+<FeatureButton
+  featureId="feature"
+  className="w-full justify-start"
+>
+  Full Width Button
+</FeatureButton>
+```
+
+## Best Practices
+
+1. **Use for feature-specific actions**, not generic buttons:
+
+```tsx
+// Good
+<FeatureButton featureId="ai-assist" onClick={generateWithAI}>
+  Generate with AI
+</FeatureButton>
+
+// Bad (too generic)
+<FeatureButton featureId="button" onClick={handleClick}>
+  Click Me
+</FeatureButton>
+```
+
+2. **Provide meaningful feature IDs**:
+
+```tsx
+// Good
+featureId="pdf-export"
+
+// Bad
+featureId="btn-1"
+```
+
+3. **Don't track non-feature actions**:
+
+```tsx
+// Good: Feature-specific
+<FeatureButton featureId="dark-mode" onClick={toggleDarkMode}>
+  Dark Mode
+</FeatureButton>
+
+// Bad: Should use regular button
+<FeatureButton featureId="close" onClick={closeModal}>
+  Close
+</FeatureButton>
+```
+
+## Next Steps
+
+- [useFeature Hook](/docs/adoption/hooks/use-feature) - Manual tracking control
+- [NewFeatureBadge](/docs/adoption/components/new-feature-badge) - Badge component
+- [IfNotAdopted](/docs/adoption/components/conditional) - Conditional rendering

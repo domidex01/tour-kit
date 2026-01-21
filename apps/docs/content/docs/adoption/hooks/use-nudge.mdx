@@ -1,0 +1,617 @@
+---
+title: useNudge
+description: Manage nudge state and handle user interactions
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`useNudge` provides access to the nudge system, allowing you to show, dismiss, and snooze nudges for features. The hook integrates with the automatic nudge scheduler configured in `AdoptionProvider`.
+
+## Basic Usage
+
+```tsx
+import { useNudge } from '@tour-kit/adoption'
+
+function NudgeManager() {
+  const { pendingNudges, dismissNudge } = useNudge()
+
+  if (pendingNudges.length === 0) return null
+
+  const feature = pendingNudges[0]
+
+  return (
+    <div className="nudge">
+      <p>Try {feature.name}!</p>
+      <button onClick={() => dismissNudge(feature.id)}>Dismiss</button>
+    </div>
+  )
+}
+```
+
+## Return Value
+
+<TypeTable
+  type={{
+    pendingNudges: {
+      type: 'Feature[]',
+      description: 'Features that should be nudged about (sorted by priority)',
+    },
+    hasNudges: {
+      type: 'boolean',
+      description: 'True if there are any pending nudges',
+    },
+    showNudge: {
+      type: '(featureId: string) => void',
+      description: 'Mark a nudge as shown (tracks in analytics)',
+    },
+    dismissNudge: {
+      type: '(featureId: string) => void',
+      description: 'Permanently dismiss a nudge',
+    },
+    snoozeNudge: {
+      type: '(featureId: string, durationMs: number) => void',
+      description: 'Temporarily dismiss a nudge for specified duration',
+    },
+    handleNudgeClick: {
+      type: '(featureId: string) => void',
+      description: 'Handle nudge click (tracks usage and dismisses)',
+    },
+  }}
+/>
+
+## Examples
+
+### Simple Nudge Display
+
+Show the highest-priority pending nudge:
+
+```tsx
+function SimpleNudge() {
+  const { pendingNudges, handleNudgeClick, dismissNudge } = useNudge()
+
+  if (pendingNudges.length === 0) return null
+
+  const feature = pendingNudges[0]
+
+  return (
+    <div className="nudge-toast">
+      <h4>{feature.name}</h4>
+      <p>{feature.description || 'Try this new feature!'}</p>
+      <div className="nudge-actions">
+        <button onClick={() => handleNudgeClick(feature.id)}>
+          Try it now
+        </button>
+        <button onClick={() => dismissNudge(feature.id)}>
+          Dismiss
+        </button>
+      </div>
+    </div>
+  )
+}
+```
+
+### Nudge with Snooze
+
+Allow users to postpone nudges:
+
+```tsx
+function SnoozeableNudge() {
+  const { pendingNudges, handleNudgeClick, dismissNudge, snoozeNudge } = useNudge()
+
+  if (!pendingNudges[0]) return null
+
+  const feature = pendingNudges[0]
+
+  const handleSnooze = (hours: number) => {
+    snoozeNudge(feature.id, hours * 60 * 60 * 1000)
+  }
+
+  return (
+    <div className="nudge">
+      <p>Discover {feature.name}</p>
+      <div className="actions">
+        <button onClick={() => handleNudgeClick(feature.id)}>
+          Try Now
+        </button>
+        <button onClick={() => handleSnooze(1)}>Remind me in 1 hour</button>
+        <button onClick={() => handleSnooze(24)}>Remind me tomorrow</button>
+        <button onClick={() => dismissNudge(feature.id)}>
+          Don't show again
+        </button>
+      </div>
+    </div>
+  )
+}
+```
+
+### Multi-Nudge Display
+
+Show multiple nudges at once:
+
+```tsx
+function MultiNudgeList() {
+  const { pendingNudges, handleNudgeClick, dismissNudge } = useNudge()
+
+  if (pendingNudges.length === 0) {
+    return <p>You've discovered all features!</p>
+  }
+
+  return (
+    <div className="nudge-list">
+      <h3>Features to Try ({pendingNudges.length})</h3>
+      {pendingNudges.map((feature) => (
+        <div key={feature.id} className="nudge-item">
+          <div className="nudge-content">
+            <h4>{feature.name}</h4>
+            {feature.description && <p>{feature.description}</p>}
+            {feature.category && (
+              <span className="category-badge">{feature.category}</span>
+            )}
+          </div>
+          <div className="nudge-actions">
+            <button onClick={() => handleNudgeClick(feature.id)}>Try</button>
+            <button onClick={() => dismissNudge(feature.id)}>✕</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Animated Nudge
+
+Show nudges with entrance/exit animations:
+
+```tsx
+function AnimatedNudge() {
+  const { pendingNudges, showNudge, dismissNudge } = useNudge()
+  const [visible, setVisible] = useState(false)
+  const [currentFeature, setCurrentFeature] = useState<Feature | null>(null)
+
+  useEffect(() => {
+    if (pendingNudges.length > 0 && !currentFeature) {
+      const feature = pendingNudges[0]
+      setCurrentFeature(feature)
+      showNudge(feature.id) // Track nudge shown
+
+      // Animate in after slight delay
+      setTimeout(() => setVisible(true), 100)
+    }
+  }, [pendingNudges, currentFeature, showNudge])
+
+  const handleDismiss = () => {
+    if (!currentFeature) return
+
+    setVisible(false)
+    setTimeout(() => {
+      dismissNudge(currentFeature.id)
+      setCurrentFeature(null)
+    }, 300) // Wait for exit animation
+  }
+
+  if (!currentFeature) return null
+
+  return (
+    <div className={`nudge-toast ${visible ? 'visible' : ''}`}>
+      <p>{currentFeature.name}</p>
+      <button onClick={handleDismiss}>Dismiss</button>
+    </div>
+  )
+}
+```
+
+### Contextual Nudge Placement
+
+Show nudges near related UI elements:
+
+```tsx
+function FeatureButton({ featureId }: { featureId: string }) {
+  const { pendingNudges, handleNudgeClick, dismissNudge } = useNudge()
+
+  const shouldNudge = pendingNudges.some((f) => f.id === featureId)
+
+  return (
+    <div className="relative">
+      <button id={`feature-${featureId}`}>Feature Button</button>
+
+      {shouldNudge && (
+        <div className="nudge-tooltip">
+          <p>Try this feature!</p>
+          <button onClick={() => handleNudgeClick(featureId)}>OK</button>
+          <button onClick={() => dismissNudge(featureId)}>Dismiss</button>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+### Nudge with Tour Integration
+
+Launch a tour when user clicks the nudge:
+
+```tsx
+function NudgeWithTour() {
+  const { pendingNudges, handleNudgeClick, dismissNudge } = useNudge()
+  const { startTour } = useTour() // From @tour-kit/react
+
+  if (pendingNudges.length === 0) return null
+
+  const feature = pendingNudges[0]
+
+  const handleTryIt = () => {
+    handleNudgeClick(feature.id)
+
+    // Launch tour if available
+    if (feature.resources?.tourId) {
+      startTour(feature.resources.tourId)
+    }
+  }
+
+  return (
+    <div className="nudge">
+      <p>Learn about {feature.name}</p>
+      <button onClick={handleTryIt}>
+        {feature.resources?.tourId ? 'Take Tour' : 'Try Now'}
+      </button>
+      <button onClick={() => dismissNudge(feature.id)}>Dismiss</button>
+    </div>
+  )
+}
+```
+
+### Nudge Scheduling UI
+
+Show when nudges will appear:
+
+```tsx
+function NudgeSchedule() {
+  const { pendingNudges } = useNudge()
+  const nudgeConfig = useNudgeConfig() // Your custom hook to get config
+
+  return (
+    <div className="nudge-settings">
+      <h3>Upcoming Nudges</h3>
+
+      {pendingNudges.length === 0 ? (
+        <p>No pending nudges</p>
+      ) : (
+        <ul>
+          {pendingNudges.slice(0, 5).map((feature, index) => (
+            <li key={feature.id}>
+              <strong>{feature.name}</strong>
+              <span className="priority">Priority: {feature.priority || 0}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="nudge-config">
+        <p>Nudge cooldown: {nudgeConfig.cooldown / 3600000}h</p>
+        <p>Max per session: {nudgeConfig.maxPerSession}</p>
+      </div>
+    </div>
+  )
+}
+```
+
+## Nudge Priority
+
+Pending nudges are automatically sorted by priority (highest first):
+
+```tsx
+function PriorityNudges() {
+  const { pendingNudges } = useNudge()
+
+  return (
+    <div>
+      {pendingNudges.map((feature, index) => (
+        <div key={feature.id} className="nudge-item">
+          <span className="rank">#{index + 1}</span>
+          <span className="name">{feature.name}</span>
+          <span className="priority">Priority: {feature.priority || 0}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+Features with higher `priority` values appear first in `pendingNudges`.
+
+## Tracking Nudge Interactions
+
+### Manual Tracking
+
+Use `showNudge` to track when a nudge is displayed:
+
+```tsx
+function TrackedNudge() {
+  const { pendingNudges, showNudge } = useNudge()
+
+  useEffect(() => {
+    if (pendingNudges.length > 0) {
+      const feature = pendingNudges[0]
+      showNudge(feature.id) // Tracks "nudge shown" event
+    }
+  }, [pendingNudges, showNudge])
+
+  // ... render nudge
+}
+```
+
+### Click Tracking
+
+`handleNudgeClick` automatically:
+1. Tracks feature usage
+2. Dismisses the nudge
+3. Fires analytics events (if configured)
+
+```tsx
+<button onClick={() => handleNudgeClick(feature.id)}>
+  Try Feature
+</button>
+```
+
+This is equivalent to:
+
+```tsx
+const { trackUsage } = useFeature(feature.id)
+const { dismissNudge } = useNudge()
+
+<button
+  onClick={() => {
+    trackUsage()
+    dismissNudge(feature.id)
+  }}
+>
+  Try Feature
+</button>
+```
+
+## Snooze Duration
+
+Common snooze durations:
+
+```tsx
+const SNOOZE_DURATIONS = {
+  '1 hour': 60 * 60 * 1000,
+  '4 hours': 4 * 60 * 60 * 1000,
+  '1 day': 24 * 60 * 60 * 1000,
+  '1 week': 7 * 24 * 60 * 60 * 1000,
+}
+
+function CustomSnooze() {
+  const { snoozeNudge, pendingNudges } = useNudge()
+
+  if (!pendingNudges[0]) return null
+
+  return (
+    <div>
+      <p>Remind me:</p>
+      {Object.entries(SNOOZE_DURATIONS).map(([label, duration]) => (
+        <button
+          key={label}
+          onClick={() => snoozeNudge(pendingNudges[0].id, duration)}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
+```
+
+<Callout type="info">
+Snoozed nudges won't appear in `pendingNudges` until the snooze duration expires.
+</Callout>
+
+## Conditional Nudging
+
+Only show nudges under certain conditions:
+
+```tsx
+function ConditionalNudge() {
+  const { pendingNudges } = useNudge()
+  const user = useUser()
+
+  // Don't nudge trial users
+  if (user.plan === 'trial') return null
+
+  // Don't nudge during onboarding
+  if (user.onboardingComplete === false) return null
+
+  // Don't nudge if user is busy
+  if (user.isEditing) return null
+
+  return <NudgeDisplay features={pendingNudges} />
+}
+```
+
+## Performance
+
+The hook efficiently manages nudge state:
+
+```tsx
+// ✓ Efficient: Only re-renders when pendingNudges changes
+function OptimizedNudge() {
+  const { pendingNudges } = useNudge()
+
+  return <NudgeList nudges={pendingNudges} />
+}
+
+// ✓ Also efficient: Actions are stable callbacks
+function StableActions() {
+  const { dismissNudge, snoozeNudge } = useNudge()
+
+  // These callbacks won't cause re-renders
+  return (
+    <NudgeActions
+      onDismiss={dismissNudge}
+      onSnooze={snoozeNudge}
+    />
+  )
+}
+```
+
+## TypeScript
+
+Fully typed:
+
+```tsx
+import { useNudge, type UseNudgeReturn, type Feature } from '@tour-kit/adoption'
+
+function TypedNudge() {
+  const nudge: UseNudgeReturn = useNudge()
+
+  nudge.pendingNudges.forEach((feature: Feature) => {
+    console.log(feature.name)
+  })
+
+  nudge.dismissNudge('feature-id') // ✓ Type-safe
+  nudge.snoozeNudge('feature-id', 3600000) // ✓ Type-safe
+}
+```
+
+## Accessibility
+
+Best practices for accessible nudges:
+
+```tsx
+function AccessibleNudge() {
+  const { pendingNudges, dismissNudge } = useNudge()
+
+  if (!pendingNudges[0]) return null
+
+  const feature = pendingNudges[0]
+
+  return (
+    <div
+      role="region"
+      aria-label="Feature suggestion"
+      aria-live="polite"
+    >
+      <h4 id="nudge-title">Try {feature.name}</h4>
+      <p id="nudge-desc">{feature.description}</p>
+
+      <div role="group" aria-labelledby="nudge-title">
+        <button
+          onClick={() => handleNudgeClick(feature.id)}
+          aria-describedby="nudge-desc"
+        >
+          Try Now
+        </button>
+
+        <button
+          onClick={() => dismissNudge(feature.id)}
+          aria-label={`Dismiss ${feature.name} suggestion`}
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+  )
+}
+```
+
+<Callout type="info">
+Use `aria-live="polite"` for nudges to avoid interrupting screen reader users.
+</Callout>
+
+## Common Patterns
+
+### Nudge Counter
+
+Show how many nudges are pending:
+
+```tsx
+function NudgeCounter() {
+  const { hasNudges, pendingNudges } = useNudge()
+
+  if (!hasNudges) return null
+
+  return (
+    <button className="nudge-indicator">
+      New Features
+      <span className="badge">{pendingNudges.length}</span>
+    </button>
+  )
+}
+```
+
+### Dismiss All
+
+Allow dismissing all nudges at once:
+
+```tsx
+function DismissAllButton() {
+  const { pendingNudges, dismissNudge } = useNudge()
+
+  const handleDismissAll = () => {
+    pendingNudges.forEach((feature) => {
+      dismissNudge(feature.id)
+    })
+  }
+
+  if (pendingNudges.length === 0) return null
+
+  return (
+    <button onClick={handleDismissAll}>
+      Dismiss all ({pendingNudges.length})
+    </button>
+  )
+}
+```
+
+### Nudge History
+
+Track which nudges were dismissed:
+
+```tsx
+function NudgeHistory() {
+  const [dismissed, setDismissed] = useState<string[]>([])
+  const { dismissNudge } = useNudge()
+
+  const handleDismiss = (featureId: string) => {
+    dismissNudge(featureId)
+    setDismissed((prev) => [...prev, featureId])
+  }
+
+  return (
+    <div>
+      <p>Dismissed: {dismissed.length} features</p>
+      {/* Your nudge UI */}
+    </div>
+  )
+}
+```
+
+## Best Practices
+
+1. **Limit nudge frequency** to avoid overwhelming users:
+
+```tsx
+nudge: {
+  cooldown: 86400000, // 24 hours minimum
+  maxPerSession: 2,
+  maxFeatures: 1,
+}
+```
+
+2. **Respect user dismissals** - don't re-show dismissed nudges
+
+3. **Provide context** - explain why the feature is useful
+
+4. **Make dismissal easy** - always provide a clear way to close nudges
+
+5. **Test nudge timing** - ensure nudges appear at appropriate moments
+
+## Next Steps
+
+- [AdoptionNudge Component](/docs/adoption/components/adoption-nudge) - Pre-built nudge UI
+- [Analytics Integration](/docs/adoption/analytics) - Track nudge events
+- [AdoptionProvider](/docs/adoption/providers/adoption-provider) - Configure nudge behavior

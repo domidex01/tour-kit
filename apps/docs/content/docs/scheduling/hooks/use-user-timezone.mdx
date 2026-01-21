@@ -1,0 +1,210 @@
+---
+title: useUserTimezone
+description: React hook to get the user's browser timezone
+---
+
+# useUserTimezone
+
+A simple React hook that returns the user's IANA timezone string detected from their browser.
+
+## Usage
+
+```tsx
+import { useUserTimezone } from '@tour-kit/scheduling'
+
+function TimezoneDisplay() {
+  const timezone = useUserTimezone()
+
+  return <p>Your timezone: {timezone}</p>
+  // "America/New_York"
+}
+```
+
+## API
+
+### Parameters
+
+```ts
+useUserTimezone(override?: string): string
+```
+
+#### override
+
+Optional timezone to use instead of browser detection. Useful for testing or user-selected timezones.
+
+### Returns
+
+IANA timezone string (e.g., `"America/New_York"`, `"Europe/London"`, `"Asia/Tokyo"`).
+
+Returns `"UTC"` during SSR or if detection fails.
+
+## Examples
+
+### Basic Usage
+
+```tsx
+function CurrentTime() {
+  const timezone = useUserTimezone()
+  const now = new Date()
+
+  return (
+    <p>
+      Current time in {timezone}: {now.toLocaleTimeString('en-US', { timeZone: timezone })}
+    </p>
+  )
+}
+```
+
+### With Override
+
+```tsx
+function TimezonePicker() {
+  const [selectedTz, setSelectedTz] = useState<string>()
+  const timezone = useUserTimezone(selectedTz)
+
+  return (
+    <div>
+      <select onChange={(e) => setSelectedTz(e.target.value || undefined)}>
+        <option value="">Auto-detect</option>
+        <option value="America/New_York">New York</option>
+        <option value="Europe/London">London</option>
+        <option value="Asia/Tokyo">Tokyo</option>
+      </select>
+      <p>Using timezone: {timezone}</p>
+    </div>
+  )
+}
+```
+
+### Use with Schedule
+
+```tsx
+function ScheduledContent() {
+  const userTz = useUserTimezone()
+
+  const schedule = {
+    timeOfDay: { start: '09:00', end: '17:00' },
+    timezone: userTz, // Use detected timezone
+  }
+
+  const { isActive } = useSchedule(schedule)
+
+  return isActive ? <div>Available now in your timezone!</div> : null
+}
+```
+
+### SSR-Safe Display
+
+```tsx
+function TourBanner() {
+  const timezone = useUserTimezone()
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  return (
+    <div>
+      {isClient ? (
+        <p>Tour available during your business hours ({timezone})</p>
+      ) : (
+        <p>Tour available during your business hours</p>
+      )}
+    </div>
+  )
+}
+```
+
+### Debug Panel
+
+```tsx
+function TimezoneDebug() {
+  const timezone = useUserTimezone()
+  const now = new Date()
+
+  return (
+    <pre>
+      {JSON.stringify(
+        {
+          timezone,
+          offset: now.getTimezoneOffset(),
+          localTime: now.toLocaleString('en-US', { timeZone: timezone }),
+          utcTime: now.toUTCString(),
+        },
+        null,
+        2
+      )}
+    </pre>
+  )
+}
+```
+
+## How It Works
+
+The hook uses `Intl.DateTimeFormat().resolvedOptions().timeZone` to detect the browser's timezone. This is supported in all modern browsers and provides the IANA timezone identifier.
+
+During SSR (server-side rendering), the hook returns `"UTC"` as a safe default since the browser timezone isn't available yet. After hydration, it updates to the actual browser timezone.
+
+## SSR Behavior
+
+```tsx
+// Server render
+const timezone = useUserTimezone()
+// "UTC"
+
+// After hydration (client-side)
+const timezone = useUserTimezone()
+// "America/New_York" (user's actual timezone)
+```
+
+If you need consistent timezone handling across SSR and client, consider:
+
+1. Using a fixed timezone in your schedule
+2. Storing user timezone preference in cookies/localStorage
+3. Accepting the UTC default for initial render
+
+## Edge Cases
+
+### Invalid Override
+
+```tsx
+const timezone = useUserTimezone('Invalid/Timezone')
+// Falls back to browser timezone or "UTC"
+```
+
+The hook validates the override using `isValidTimezone()`. If invalid, it falls back to browser detection.
+
+### Browser Support
+
+Works in all modern browsers:
+- Chrome 24+
+- Firefox 29+
+- Safari 10+
+- Edge 14+
+
+For older browsers, falls back to `"UTC"`.
+
+## Performance Notes
+
+- The hook is very lightweight (just reads browser API)
+- No state updates or re-renders after initial mount
+- Safe to call in multiple components (doesn't trigger re-detection)
+
+## When to Use
+
+**Use `useUserTimezone` when:**
+- You need the user's timezone for schedule evaluation
+- Building timezone-aware UI components
+- Displaying times in user's local timezone
+
+**Don't use when:**
+- Schedule already has `useUserTimezone: true` (automatic)
+- You want a fixed timezone for all users
+- Building server-side logic (use utilities instead)
+
+## Related
+
+- [getUserTimezone](/docs/scheduling/utilities/timezone#get-user-timezone) - Non-hook version
+- [isValidTimezone](/docs/scheduling/utilities/timezone#is-valid-timezone) - Validate timezone strings
+- [Schedule.timezone](/docs/scheduling/types#schedule) - Schedule timezone option

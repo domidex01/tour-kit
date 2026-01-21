@@ -1,0 +1,267 @@
+---
+title: Types
+description: TypeScript type definitions for checklists
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# Types
+
+TypeScript type definitions exported by @tour-kit/checklists.
+
+## Core Types
+
+### ChecklistConfig
+
+Checklist configuration:
+
+```ts
+interface ChecklistConfig {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string | ReactNode;
+  tasks: ChecklistTaskConfig[];
+  onComplete?: () => void;
+  onDismiss?: () => void;
+  dismissible?: boolean;
+  hideOnComplete?: boolean;
+  meta?: Record<string, unknown>;
+}
+```
+
+### ChecklistTaskConfig
+
+Task configuration:
+
+```ts
+interface ChecklistTaskConfig {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string | ReactNode;
+  action?: TaskAction;
+  dependsOn?: string[];
+  when?: (context: ChecklistContext) => boolean;
+  completedWhen?: TaskCompletionCondition;
+  manualComplete?: boolean;
+  meta?: Record<string, unknown>;
+}
+```
+
+## State Types
+
+### ChecklistState
+
+Runtime checklist state:
+
+```ts
+interface ChecklistState {
+  config: ChecklistConfig;
+  tasks: ChecklistTaskState[];
+  progress: number;
+  completedCount: number;
+  totalCount: number;
+  isComplete: boolean;
+  isDismissed: boolean;
+  isExpanded: boolean;
+}
+```
+
+### ChecklistTaskState
+
+Runtime task state:
+
+```ts
+interface ChecklistTaskState {
+  config: ChecklistTaskConfig;
+  completed: boolean;
+  locked: boolean;
+  visible: boolean;
+  active: boolean;
+  completedAt?: number;
+}
+```
+
+## Action Types
+
+### TaskAction
+
+Actions that can be triggered:
+
+```ts
+type TaskAction =
+  | { type: 'navigate'; url: string; external?: boolean }
+  | { type: 'callback'; handler: () => void | Promise<void> }
+  | { type: 'tour'; tourId: string }
+  | { type: 'modal'; modalId: string }
+  | { type: 'custom'; data: unknown };
+```
+
+### TaskCompletionCondition
+
+Auto-completion conditions:
+
+```ts
+type TaskCompletionCondition =
+  | { tourCompleted: string }
+  | { tourStarted: string }
+  | { custom: (context: ChecklistContext) => boolean };
+```
+
+## Context Types
+
+### ChecklistContext
+
+Context available to conditions:
+
+```ts
+interface ChecklistContext {
+  user: Record<string, unknown>;
+  data: Record<string, unknown>;
+  completedTasks: string[];
+  completedTours: string[];
+}
+```
+
+## Progress Types
+
+### ChecklistProgress
+
+Progress information:
+
+```ts
+interface ChecklistProgress {
+  completed: number;
+  total: number;
+  percentage: number;
+  remaining: number;
+}
+```
+
+## Config Types
+
+### ChecklistProviderConfig
+
+Provider configuration:
+
+```ts
+interface ChecklistProviderConfig {
+  checklists: ChecklistConfig[];
+  persistence?: ChecklistPersistenceConfig;
+  context?: {
+    user?: Record<string, unknown>;
+    data?: Record<string, unknown>;
+  };
+  onTaskComplete?: (checklistId: string, taskId: string) => void;
+  onTaskUncomplete?: (checklistId: string, taskId: string) => void;
+  onChecklistComplete?: (checklistId: string) => void;
+  onChecklistDismiss?: (checklistId: string) => void;
+  onTaskAction?: (checklistId: string, taskId: string, action: TaskAction) => void;
+}
+```
+
+### ChecklistPersistenceConfig
+
+Persistence configuration:
+
+```ts
+interface ChecklistPersistenceConfig {
+  enabled: boolean;
+  storage?: 'localStorage' | 'sessionStorage' | 'memory';
+  key?: string;
+  onSave?: (state: PersistedChecklistState) => void;
+  onLoad?: () => PersistedChecklistState | null | Promise<PersistedChecklistState | null>;
+}
+```
+
+### PersistedChecklistState
+
+Persisted state format:
+
+```ts
+interface PersistedChecklistState {
+  completed: Record<string, string[]>;
+  dismissed: string[];
+  timestamp: number;
+}
+```
+
+## Hook Return Types
+
+### UseChecklistReturn
+
+Returned by useChecklist:
+
+```ts
+interface UseChecklistReturn {
+  checklist: ChecklistState | undefined;
+  tasks: ChecklistTaskState[];
+  visibleTasks: ChecklistTaskState[];
+  progress: ChecklistProgress;
+  exists: boolean;
+  isComplete: boolean;
+  isDismissed: boolean;
+  isExpanded: boolean;
+  completeTask: (taskId: string) => void;
+  uncompleteTask: (taskId: string) => void;
+  executeAction: (taskId: string) => void;
+  dismiss: () => void;
+  restore: () => void;
+  toggleExpanded: () => void;
+  setExpanded: (expanded: boolean) => void;
+  reset: () => void;
+}
+```
+
+### UseTaskReturn
+
+Returned by useTask:
+
+```ts
+interface UseTaskReturn {
+  task: ChecklistTaskState | undefined;
+  exists: boolean;
+  isCompleted: boolean;
+  isLocked: boolean;
+  isVisible: boolean;
+  complete: () => void;
+  uncomplete: () => void;
+  execute: () => void;
+  toggle: () => void;
+}
+```
+
+## Import Paths
+
+```ts
+import type {
+  // Configs
+  ChecklistConfig,
+  ChecklistTaskConfig,
+  ChecklistProviderConfig,
+  ChecklistPersistenceConfig,
+
+  // States
+  ChecklistState,
+  ChecklistTaskState,
+  PersistedChecklistState,
+
+  // Actions & Conditions
+  TaskAction,
+  TaskCompletionCondition,
+
+  // Context & Progress
+  ChecklistContext,
+  ChecklistProgress,
+
+  // Hook Returns
+  UseChecklistReturn,
+  UseTaskReturn,
+} from '@tour-kit/checklists';
+```
+
+## Related
+
+- [ChecklistProvider](/docs/checklists/providers/checklist-provider) - Provider usage
+- [Hooks](/docs/checklists/hooks/use-checklist) - Hook usage

@@ -1,0 +1,322 @@
+---
+title: HintTooltipHeadless
+description: Headless floating tooltip with positioning logic
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# HintTooltipHeadless
+
+A headless floating tooltip component powered by Floating UI. Handles positioning, collision detection, and portal rendering.
+
+## Why Use This Component?
+
+- **Smart positioning** - Automatic flip and shift to avoid viewport edges
+- **Portal rendering** - Renders outside DOM hierarchy for proper stacking
+- **Floating UI powered** - Industry-standard positioning logic
+- **Dismiss handling** - Built-in click-outside and escape key support
+
+---
+
+## Basic Usage
+
+```tsx
+import { HintTooltipHeadless } from '@tour-kit/hints/headless';
+
+function CustomTooltip() {
+  const targetElement = document.getElementById('target');
+
+  return (
+    <HintTooltipHeadless
+      target={targetElement}
+      placement="bottom"
+      onClose={() => setIsOpen(false)}
+    >
+      <div className="p-4 bg-white rounded shadow-lg">
+        <p>Tooltip content here</p>
+        <button onClick={() => setIsOpen(false)}>Close</button>
+      </div>
+    </HintTooltipHeadless>
+  );
+}
+```
+
+---
+
+## Props
+
+<TypeTable
+  type={{
+    target: {
+      type: 'HTMLElement',
+      description: 'Element to anchor the tooltip to',
+    },
+    placement: {
+      type: 'Placement',
+      description: 'Preferred placement relative to target',
+      default: "'bottom'",
+    },
+    onClose: {
+      type: '() => void',
+      description: 'Called when tooltip should close (click outside, escape)',
+    },
+    children: {
+      type: 'React.ReactNode',
+      description: 'Tooltip content',
+    },
+    render: {
+      type: '(props: HintTooltipRenderProps) => ReactNode',
+      description: 'Render prop for custom container',
+    },
+    className: {
+      type: 'string',
+      description: 'Class name for default container',
+    },
+    style: {
+      type: 'CSSProperties',
+      description: 'Additional styles (merged with floating styles)',
+    },
+  }}
+/>
+
+Also accepts all `<div>` props.
+
+---
+
+## Render Props
+
+<TypeTable
+  type={{
+    floatingStyles: {
+      type: 'CSSProperties',
+      description: 'Calculated position styles to apply',
+    },
+    getFloatingProps: {
+      type: '() => Record<string, unknown>',
+      description: 'Props to spread on the floating element',
+    },
+    refs: {
+      type: '{ setFloating: (node: HTMLElement | null) => void }',
+      description: 'Ref setter for the floating element',
+    },
+  }}
+/>
+
+---
+
+## With Render Prop
+
+```tsx
+<HintTooltipHeadless
+  target={targetElement}
+  placement="right"
+  onClose={closeTooltip}
+  render={({ floatingStyles, refs, getFloatingProps }) => (
+    <div
+      ref={refs.setFloating}
+      style={floatingStyles}
+      className="bg-gray-900 text-white p-4 rounded-lg shadow-xl"
+      {...getFloatingProps()}
+    >
+      <h4 className="font-bold">New Feature!</h4>
+      <p className="text-gray-300 mt-1">
+        Check out our new export functionality.
+      </p>
+      <button
+        onClick={closeTooltip}
+        className="mt-2 text-blue-400 hover:underline"
+      >
+        Got it
+      </button>
+    </div>
+  )}
+/>
+```
+
+---
+
+## Placement Options
+
+```tsx
+type Placement =
+  | 'top' | 'top-start' | 'top-end'
+  | 'bottom' | 'bottom-start' | 'bottom-end'
+  | 'left' | 'left-start' | 'left-end'
+  | 'right' | 'right-start' | 'right-end';
+```
+
+The tooltip automatically flips to the opposite side if there isn't enough space:
+
+```tsx
+// Prefers bottom, but will flip to top if needed
+<HintTooltipHeadless placement="bottom" />
+```
+
+---
+
+## Positioning Behavior
+
+The component uses Floating UI middleware:
+
+| Middleware | Behavior |
+|------------|----------|
+| `offset(8)` | 8px gap between target and tooltip |
+| `flip()` | Flips to opposite side if overflowing |
+| `shift({ padding: 8 })` | Shifts along axis to stay in viewport |
+| `autoUpdate` | Updates position on scroll/resize |
+
+---
+
+## Portal Rendering
+
+The tooltip renders in a portal at the document root:
+
+```tsx
+// Internally uses FloatingPortal from @floating-ui/react
+<FloatingPortal>
+  <div style={floatingStyles} {...getFloatingProps()}>
+    {children}
+  </div>
+</FloatingPortal>
+```
+
+<Callout type="info">
+Portal rendering ensures the tooltip appears above all other content regardless of parent z-index.
+</Callout>
+
+---
+
+## Dismiss Behavior
+
+Built-in dismiss handling via Floating UI:
+
+- **Click outside** - Calls `onClose` when clicking outside tooltip
+- **Escape key** - Calls `onClose` when pressing Escape
+- **Focus management** - Tooltip has proper ARIA role
+
+```tsx
+// These are handled automatically
+<HintTooltipHeadless
+  onClose={() => {
+    // Called on:
+    // - Click outside
+    // - Escape key press
+  }}
+/>
+```
+
+---
+
+## Custom Arrow
+
+```tsx
+<HintTooltipHeadless
+  target={element}
+  placement="bottom"
+  onClose={close}
+  render={({ floatingStyles, refs, getFloatingProps }) => (
+    <div
+      ref={refs.setFloating}
+      style={floatingStyles}
+      {...getFloatingProps()}
+      className="relative"
+    >
+      {/* Arrow */}
+      <div
+        className="absolute -top-2 left-1/2 -translate-x-1/2
+                   border-8 border-transparent border-b-white"
+      />
+
+      {/* Content */}
+      <div className="bg-white p-4 rounded shadow-lg">
+        <p>Tooltip with arrow!</p>
+      </div>
+    </div>
+  )}
+/>
+```
+
+---
+
+## Ref Forwarding
+
+```tsx
+const tooltipRef = useRef<HTMLDivElement>(null);
+
+<HintTooltipHeadless
+  ref={tooltipRef}
+  target={element}
+  onClose={close}
+>
+  <p>Content</p>
+</HintTooltipHeadless>
+```
+
+---
+
+## Complete Example
+
+```tsx
+import { HintTooltipHeadless } from '@tour-kit/hints/headless';
+import { XIcon } from 'lucide-react';
+
+function FeatureTooltip({ target, onClose }) {
+  return (
+    <HintTooltipHeadless
+      target={target}
+      placement="right-start"
+      onClose={onClose}
+      render={({ floatingStyles, refs, getFloatingProps }) => (
+        <div
+          ref={refs.setFloating}
+          style={floatingStyles}
+          className="w-72 bg-gradient-to-r from-blue-500 to-purple-500 p-4 rounded-xl shadow-2xl text-white"
+          {...getFloatingProps()}
+        >
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">✨</span>
+              <h4 className="font-bold">New Feature</h4>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-white/20 rounded"
+            >
+              <XIcon className="w-4 h-4" />
+            </button>
+          </div>
+
+          <p className="mt-2 text-white/90">
+            Try our new export feature to download your data
+            in multiple formats.
+          </p>
+
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={onClose}
+              className="flex-1 py-2 bg-white text-blue-600 rounded-lg font-medium"
+            >
+              Try it now
+            </button>
+            <button
+              onClick={onClose}
+              className="px-3 py-2 bg-white/20 rounded-lg"
+            >
+              Later
+            </button>
+          </div>
+        </div>
+      )}
+    />
+  );
+}
+```
+
+---
+
+## Related
+
+- [HintHeadless](/docs/hints/headless/hint-headless) - Parent container
+- [HintHotspotHeadless](/docs/hints/headless/hint-hotspot-headless) - Trigger button
+- [TourCardHeadless](/docs/react/headless/headless-card) - Tour card equivalent

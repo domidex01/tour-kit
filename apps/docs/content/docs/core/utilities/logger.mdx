@@ -1,0 +1,284 @@
+---
+title: Logger Utility
+description: Configurable logging for debugging and production
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Logger Utility
+
+A configurable logger for Tour Kit that adapts to your environment. Provides consistent logging with level-based filtering.
+
+## Why Use This Logger?
+
+- **Environment-aware** - Errors only in production, warnings in development
+- **Configurable levels** - Control verbosity at runtime
+- **Consistent prefix** - Easy to filter Tour Kit logs
+- **Zero overhead** - Silent mode disables all logging
+
+---
+
+## Usage
+
+```tsx
+import { logger } from '@tour-kit/core';
+
+// Basic logging
+logger.debug('Debug info:', { state });
+logger.info('Tour started:', tourId);
+logger.warn('Element not found:', selector);
+logger.error('Failed to save state:', error);
+```
+
+---
+
+## Log Levels
+
+<TypeTable
+  type={{
+    debug: {
+      type: 'Level 0',
+      description: 'Verbose debugging information',
+    },
+    info: {
+      type: 'Level 1',
+      description: 'General information',
+    },
+    warn: {
+      type: 'Level 2',
+      description: 'Warnings that don\'t break functionality',
+    },
+    error: {
+      type: 'Level 3',
+      description: 'Errors and exceptions',
+    },
+    silent: {
+      type: 'Level 4',
+      description: 'Disable all logging',
+    },
+  }}
+/>
+
+---
+
+## Configuration
+
+### configure
+
+Set the logger configuration.
+
+```tsx
+import { logger } from '@tour-kit/core';
+
+// Enable debug logging
+logger.configure({ level: 'debug' });
+
+// Custom prefix
+logger.configure({ prefix: '[my-app]' });
+
+// Disable logging in tests
+logger.configure({ level: 'silent' });
+```
+
+### Configuration Options
+
+<TypeTable
+  type={{
+    level: {
+      type: 'LogLevel',
+      description: 'Minimum level to log',
+      default: "'warn' (dev) / 'error' (prod)",
+    },
+    prefix: {
+      type: 'string',
+      description: 'Prefix for all log messages',
+      default: "'[tour-kit]'",
+    },
+  }}
+/>
+
+### getConfig
+
+Get the current configuration.
+
+```tsx
+const config = logger.getConfig();
+// { level: 'warn', prefix: '[tour-kit]' }
+```
+
+---
+
+## Environment Defaults
+
+<Tabs items={['Development', 'Production']}>
+<Tab value="Development">
+```tsx
+// Default in development
+logger.configure({ level: 'warn' });
+
+// Logged:
+logger.warn('Warning message');  // ✓ Logged
+logger.error('Error message');   // ✓ Logged
+
+// Not logged:
+logger.debug('Debug message');   // ✗ Skipped
+logger.info('Info message');     // ✗ Skipped
+```
+</Tab>
+
+<Tab value="Production">
+```tsx
+// Default in production (NODE_ENV=production)
+logger.configure({ level: 'error' });
+
+// Logged:
+logger.error('Error message');   // ✓ Logged
+
+// Not logged:
+logger.debug('Debug message');   // ✗ Skipped
+logger.info('Info message');     // ✗ Skipped
+logger.warn('Warning message');  // ✗ Skipped
+```
+</Tab>
+</Tabs>
+
+---
+
+## Debug Mode
+
+Enable verbose logging for troubleshooting:
+
+```tsx
+import { logger } from '@tour-kit/core';
+
+// Enable debug mode
+logger.configure({ level: 'debug' });
+
+// Now all levels are logged
+logger.debug('Step rendered:', { stepId, rect });
+logger.info('Tour started');
+logger.warn('Fallback placement used');
+logger.error('Storage unavailable');
+```
+
+---
+
+## Silent Mode
+
+Disable all logging (useful for tests):
+
+```tsx
+import { logger } from '@tour-kit/core';
+
+// In test setup
+beforeAll(() => {
+  logger.configure({ level: 'silent' });
+});
+```
+
+---
+
+## Custom Prefix
+
+```tsx
+import { logger } from '@tour-kit/core';
+
+// Multiple instances with different prefixes
+logger.configure({ prefix: '[tour-kit:onboarding]' });
+logger.info('Starting onboarding tour');
+// Output: [tour-kit:onboarding] Starting onboarding tour
+```
+
+---
+
+## Internal Usage
+
+Tour Kit uses the logger internally for:
+
+| Scenario | Level | Example |
+|----------|-------|---------|
+| Target element not found | `warn` | Element "#missing" not found |
+| Storage operation failed | `warn` | Failed to save route state |
+| Position calculation | `debug` | Calculated position: `{ x, y }` |
+| advanceOn handler error | `warn` | advanceOn handler error for step "step-1" |
+| State changes | `debug` | Tour state updated: `{ ... }` |
+
+---
+
+## API Reference
+
+### Logger Methods
+
+```tsx
+interface Logger {
+  // Configuration
+  configure(config: Partial<LoggerConfig>): void;
+  getConfig(): Readonly<LoggerConfig>;
+
+  // Logging
+  debug(...args: unknown[]): void;
+  info(...args: unknown[]): void;
+  warn(...args: unknown[]): void;
+  error(...args: unknown[]): void;
+}
+```
+
+### LoggerConfig
+
+```tsx
+interface LoggerConfig {
+  level: 'debug' | 'info' | 'warn' | 'error' | 'silent';
+  prefix?: string;
+}
+```
+
+---
+
+## Best Practices
+
+### Development
+
+```tsx
+// Enable debug mode during development
+if (process.env.NODE_ENV === 'development') {
+  logger.configure({ level: 'debug' });
+}
+```
+
+### Testing
+
+```tsx
+// Silence logs in tests
+describe('Tour', () => {
+  beforeAll(() => {
+    logger.configure({ level: 'silent' });
+  });
+
+  afterAll(() => {
+    logger.configure({ level: 'warn' });
+  });
+});
+```
+
+### Production
+
+```tsx
+// Keep default (errors only) or silence completely
+if (process.env.NODE_ENV === 'production') {
+  logger.configure({ level: 'error' }); // or 'silent'
+}
+```
+
+<Callout type="info">
+The logger automatically detects `NODE_ENV=production` and defaults to error-level logging.
+</Callout>
+
+---
+
+## Related
+
+- [Troubleshooting](/docs/guides/troubleshooting) - Common issues and debugging
+- [useAdvanceOn](/docs/core/hooks/use-advance-on) - Uses logger for handler errors
+- [useRoutePersistence](/docs/core/hooks/use-route-persistence) - Uses logger for storage errors

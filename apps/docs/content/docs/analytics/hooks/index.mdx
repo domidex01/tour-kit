@@ -1,0 +1,353 @@
+---
+title: Analytics Hooks
+description: React hooks for accessing the analytics tracker in components
+---
+
+## Overview
+
+Tour Kit provides two hooks for accessing the analytics tracker in your components:
+
+- `useAnalytics()` - Throws error if not in provider (strict)
+- `useAnalyticsOptional()` - Returns `null` if not in provider (lenient)
+
+## useAnalytics
+
+Access the analytics tracker with strict provider enforcement.
+
+### Usage
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics'
+
+function MyComponent() {
+  const analytics = useAnalytics()
+
+  const handleClick = () => {
+    analytics.track('feature_used', {
+      tourId: 'feature-demo',
+      metadata: { feature: 'export-data' }
+    })
+  }
+
+  return <button onClick={handleClick}>Export</button>
+}
+```
+
+### Error Handling
+
+This hook throws an error if used outside an `AnalyticsProvider`:
+
+```tsx
+// This will throw an error
+function BadComponent() {
+  const analytics = useAnalytics() // Error: useAnalytics must be used within AnalyticsProvider
+  return <div>...</div>
+}
+```
+
+<Callout type="warn">
+  Always ensure components using `useAnalytics` are rendered within an `AnalyticsProvider`.
+</Callout>
+
+### When to Use
+
+Use `useAnalytics()` when:
+- Analytics are required for the component to function
+- You want to catch configuration errors early
+- The component is always rendered within a provider
+
+## useAnalyticsOptional
+
+Access the analytics tracker with optional provider support.
+
+### Usage
+
+```tsx
+import { useAnalyticsOptional } from '@tour-kit/analytics'
+
+function OptionalTrackingComponent() {
+  const analytics = useAnalyticsOptional()
+
+  const handleClick = () => {
+    // Only track if analytics is available
+    analytics?.track('button_clicked', {
+      tourId: 'optional-feature',
+      metadata: { source: 'sidebar' }
+    })
+  }
+
+  return <button onClick={handleClick}>Click Me</button>
+}
+```
+
+### Null Safety
+
+This hook returns `null` when not in a provider:
+
+```tsx
+function SafeComponent() {
+  const analytics = useAnalyticsOptional()
+
+  if (!analytics) {
+    // Analytics not configured - component still works
+    return <div>No tracking</div>
+  }
+
+  return <div>Tracking enabled</div>
+}
+```
+
+### When to Use
+
+Use `useAnalyticsOptional()` when:
+- Analytics are nice-to-have but not required
+- The component should work without a provider
+- You're building reusable components for multiple apps
+
+## Tracking Custom Events
+
+### Feature Usage
+
+Track when users interact with specific features:
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics'
+
+function AdvancedSearch() {
+  const analytics = useAnalytics()
+
+  const handleSearch = (query: string, filters: string[]) => {
+    analytics.track('feature_used', {
+      tourId: 'advanced-search',
+      metadata: {
+        query_length: query.length,
+        filter_count: filters.length,
+        filters: filters.join(',')
+      }
+    })
+  }
+
+  return <SearchForm onSubmit={handleSearch} />
+}
+```
+
+### Step Interactions
+
+Track user interactions within tour steps:
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics'
+import { useTour } from '@tour-kit/core'
+
+function InteractiveTourStep() {
+  const analytics = useAnalytics()
+  const { tourId, currentStep } = useTour()
+
+  const handleVideoPlay = () => {
+    analytics.stepInteraction(
+      tourId,
+      currentStep.id,
+      'video_played',
+      { video_duration: 120 }
+    )
+  }
+
+  return (
+    <div>
+      <video onPlay={handleVideoPlay}>...</video>
+    </div>
+  )
+}
+```
+
+### User Identification
+
+Identify users after authentication:
+
+```tsx
+'use client'
+
+import { useAnalytics } from '@tour-kit/analytics'
+import { useEffect } from 'react'
+
+function UserIdentifier({ user }) {
+  const analytics = useAnalytics()
+
+  useEffect(() => {
+    if (user) {
+      analytics.identify(user.id, {
+        email: user.email,
+        plan: user.plan,
+        signup_date: user.createdAt
+      })
+    }
+  }, [user, analytics])
+
+  return null
+}
+```
+
+## TourAnalytics Methods
+
+The analytics object returned by both hooks provides these methods:
+
+### Identification
+
+```tsx
+// Identify a user
+analytics.identify(userId: string, properties?: Record<string, unknown>)
+```
+
+### Raw Event Tracking
+
+```tsx
+// Track any event type
+analytics.track(
+  eventName: TourEventName,
+  data: TourEventData
+)
+```
+
+### Tour Lifecycle
+
+```tsx
+// Track tour start
+analytics.tourStarted(tourId: string, totalSteps: number, metadata?: Record<string, unknown>)
+
+// Track tour completion
+analytics.tourCompleted(tourId: string, metadata?: Record<string, unknown>)
+
+// Track tour skip
+analytics.tourSkipped(
+  tourId: string,
+  stepIndex: number,
+  stepId?: string,
+  metadata?: Record<string, unknown>
+)
+
+// Track tour abandonment
+analytics.tourAbandoned(
+  tourId: string,
+  stepIndex: number,
+  stepId?: string,
+  metadata?: Record<string, unknown>
+)
+```
+
+### Step Lifecycle
+
+```tsx
+// Track step view
+analytics.stepViewed(
+  tourId: string,
+  stepId: string,
+  stepIndex: number,
+  totalSteps: number,
+  metadata?: Record<string, unknown>
+)
+
+// Track step completion
+analytics.stepCompleted(
+  tourId: string,
+  stepId: string,
+  stepIndex: number,
+  metadata?: Record<string, unknown>
+)
+
+// Track step skip
+analytics.stepSkipped(
+  tourId: string,
+  stepId: string,
+  stepIndex: number,
+  metadata?: Record<string, unknown>
+)
+
+// Track step interaction
+analytics.stepInteraction(
+  tourId: string,
+  stepId: string,
+  interactionType: string,
+  metadata?: Record<string, unknown>
+)
+```
+
+### Hint Tracking
+
+```tsx
+// Track hint shown
+analytics.hintShown(hintId: string, metadata?: Record<string, unknown>)
+
+// Track hint dismissed
+analytics.hintDismissed(hintId: string, metadata?: Record<string, unknown>)
+
+// Track hint clicked
+analytics.hintClicked(hintId: string, metadata?: Record<string, unknown>)
+```
+
+### Utility Methods
+
+```tsx
+// Flush queued events immediately
+await analytics.flush()
+
+// Clean up and destroy tracker
+analytics.destroy()
+```
+
+## Type Safety
+
+Both hooks return a fully typed `TourAnalytics` instance:
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics'
+import type { TourAnalytics } from '@tour-kit/analytics'
+
+function TypedComponent() {
+  const analytics: TourAnalytics = useAnalytics()
+
+  // Full TypeScript autocomplete and type checking
+  analytics.track('tour_started', {
+    tourId: 'onboarding',
+    totalSteps: 5
+  })
+
+  return <div>...</div>
+}
+```
+
+## Combining with Tour Hooks
+
+Use analytics hooks alongside tour hooks for rich tracking:
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics'
+import { useTour } from '@tour-kit/core'
+
+function TourWithAnalytics() {
+  const analytics = useAnalytics()
+  const { tourId, currentStep, next, skip } = useTour()
+
+  const handleNext = () => {
+    analytics.stepCompleted(tourId, currentStep.id, currentStep.index)
+    next()
+  }
+
+  const handleSkip = () => {
+    analytics.tourSkipped(tourId, currentStep.index, currentStep.id)
+    skip()
+  }
+
+  return (
+    <div>
+      <button onClick={handleNext}>Next</button>
+      <button onClick={handleSkip}>Skip Tour</button>
+    </div>
+  )
+}
+```
+
+## Related
+
+- [AnalyticsProvider](/docs/analytics/providers) - Configure analytics
+- [Types](/docs/analytics/types) - Event types and interfaces
+- [Plugins](/docs/analytics/plugins) - Available analytics plugins

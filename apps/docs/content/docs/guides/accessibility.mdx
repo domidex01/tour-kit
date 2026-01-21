@@ -1,0 +1,539 @@
+---
+title: Accessibility
+description: Building accessible tours that work for everyone - WCAG 2.1 AA compliance guide
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
+
+# Accessibility
+
+Tour Kit is built with accessibility as a core principle, not an afterthought. Every component follows WCAG 2.1 AA guidelines to ensure your tours work for all users, including those using screen readers, keyboard navigation, or who have motion sensitivity.
+
+<Callout type="info">
+  Tour Kit targets a **Lighthouse Accessibility Score of 100** and full WCAG 2.1 AA compliance.
+</Callout>
+
+## Why Accessibility Matters for Tours
+
+Product tours and onboarding flows often interrupt the normal page experience. Without proper accessibility:
+
+- **Screen reader users** won't understand what's happening when a tour starts
+- **Keyboard users** can get trapped or lose their place in the page
+- **Users with motion sensitivity** may experience discomfort from animations
+- **Users with cognitive disabilities** may struggle with complex multi-step flows
+
+Tour Kit handles all of these concerns automatically.
+
+---
+
+## Focus Management
+
+When a tour step activates, focus needs careful management to ensure keyboard users can interact with the tour and return to their previous location when done.
+
+### How Focus Trap Works
+
+Tour Kit's `useFocusTrap` hook automatically:
+
+1. **Saves the previously focused element** before the tour starts
+2. **Traps Tab/Shift+Tab** within the tour card
+3. **Wraps focus** from last to first element (and vice versa)
+4. **Restores focus** to the original element when the tour ends
+
+```tsx title="How useFocusTrap is used internally"
+import { useFocusTrap } from '@tour-kit/core'
+
+function TourCard({ isActive }) {
+  const { containerRef, activate, deactivate } = useFocusTrap(isActive)
+
+  useEffect(() => {
+    if (isActive) {
+      activate()
+    } else {
+      deactivate()
+    }
+  }, [isActive, activate, deactivate])
+
+  return (
+    <div ref={containerRef} role="dialog" aria-modal="true">
+      {/* Tour content */}
+    </div>
+  )
+}
+```
+
+### Focusable Elements
+
+The focus trap identifies focusable elements using this selector:
+
+```typescript
+const FOCUSABLE_SELECTOR = [
+  'a[href]:not([tabindex="-1"])',
+  'button:not([disabled]):not([tabindex="-1"])',
+  'textarea:not([disabled]):not([tabindex="-1"])',
+  'input:not([disabled]):not([tabindex="-1"])',
+  'select:not([disabled]):not([tabindex="-1"])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ')
+```
+
+<Callout type="warn">
+  Avoid using `tabindex="-1"` on interactive elements inside tour cards, as they will be excluded from the focus trap.
+</Callout>
+
+### Using Focus Trap in Custom Components
+
+If you're building headless components, you can use `useFocusTrap` directly:
+
+```tsx title="Custom headless tour card"
+import { useFocusTrap } from '@tour-kit/core'
+
+function MyCustomCard({ isActive, children }) {
+  const { containerRef, activate, deactivate } = useFocusTrap(isActive)
+
+  useEffect(() => {
+    if (isActive) {
+      // Small delay ensures DOM is ready
+      requestAnimationFrame(() => activate())
+    }
+    return () => deactivate()
+  }, [isActive, activate, deactivate])
+
+  return (
+    <div
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tour-title"
+    >
+      <h2 id="tour-title">Welcome</h2>
+      {children}
+      <button>Next</button>
+      <button>Close</button>
+    </div>
+  )
+}
+```
+
+---
+
+## Keyboard Navigation
+
+Tour Kit provides intuitive keyboard controls out of the box.
+
+### Default Key Bindings
+
+| Key | Action |
+|-----|--------|
+| `ArrowRight` | Go to next step |
+| `Enter` | Go to next step |
+| `ArrowLeft` | Go to previous step |
+| `Escape` | Exit the tour |
+| `Tab` | Move focus within tour card |
+| `Shift+Tab` | Move focus backwards within tour card |
+
+### Smart Input Detection
+
+Keyboard navigation is automatically disabled when users are typing in form fields:
+
+```typescript
+// Internal logic - keyboard events are ignored when focus is in:
+// - <input> elements
+// - <textarea> elements
+// This prevents arrow keys from interfering with text editing
+```
+
+### Customizing Keyboard Controls
+
+You can customize key bindings when setting up your tour:
+
+```tsx title="Custom keyboard configuration"
+import { TourProvider } from '@tour-kit/react'
+
+function App() {
+  return (
+    <TourProvider
+      tour={myTour}
+      keyboardConfig={{
+        enabled: true,
+        nextKeys: ['ArrowRight', 'Enter', 'Space'],
+        prevKeys: ['ArrowLeft', 'Backspace'],
+        exitKeys: ['Escape', 'q'],
+      }}
+    >
+      {children}
+    </TourProvider>
+  )
+}
+```
+
+### Disabling Keyboard Navigation
+
+For tours with form inputs or interactive content, you may want to disable certain keys:
+
+```tsx title="Disable arrow key navigation"
+<TourProvider
+  tour={formTour}
+  keyboardConfig={{
+    enabled: true,
+    nextKeys: ['Enter'], // Only Enter advances
+    prevKeys: [],        // Disable going back
+    exitKeys: ['Escape'],
+  }}
+>
+```
+
+---
+
+## Screen Reader Support
+
+Tour Kit ensures screen reader users understand what's happening at every step.
+
+### ARIA Attributes
+
+All tour cards include proper ARIA attributes:
+
+```tsx
+<div
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="tour-step-title-welcome"
+>
+  <h3 id="tour-step-title-welcome">Welcome to the App</h3>
+  <p>Let's get you started...</p>
+</div>
+```
+
+| Attribute | Purpose |
+|-----------|---------|
+| `role="dialog"` | Announces the tour card as a dialog |
+| `aria-modal="true"` | Indicates content behind is inert |
+| `aria-labelledby` | Links to the step title for announcement |
+
+### Live Announcements
+
+When tour steps change, Tour Kit announces the new step to screen readers:
+
+```typescript title="How announcements work internally"
+import { announce, getStepAnnouncement } from '@tour-kit/core'
+
+// When step changes:
+const message = getStepAnnouncement(step.title, currentIndex + 1, totalSteps)
+// Returns: "Step 2 of 5: Feature Overview"
+
+announce(message, 'polite')
+```
+
+The announcement uses a visually hidden element with `aria-live="polite"`:
+
+```tsx
+// Created dynamically, visually hidden but announced
+<div
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+  style={{
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+  }}
+>
+  Step 2 of 5: Feature Overview
+</div>
+```
+
+### Progress Indicators
+
+Progress components include proper ARIA for screen readers:
+
+<Tabs items={['Text', 'Progress Bar', 'Dots']}>
+  <Tab value="Text">
+```tsx
+<span aria-label="Step 2 of 5">
+  2 of 5
+</span>
+```
+  </Tab>
+  <Tab value="Progress Bar">
+```tsx
+<div
+  role="progressbar"
+  aria-valuenow={2}
+  aria-valuemin={1}
+  aria-valuemax={5}
+  aria-label="Step 2 of 5"
+>
+  <div style={{ width: '40%' }} />
+</div>
+```
+  </Tab>
+  <Tab value="Dots">
+```tsx
+<div role="group" aria-label="Step 2 of 5">
+  <div aria-current={undefined} />
+  <div aria-current="step" />  {/* Current step */}
+  <div aria-current={undefined} />
+</div>
+```
+  </Tab>
+</Tabs>
+
+### Icon Buttons
+
+All icon-only buttons include descriptive labels:
+
+```tsx
+<button type="button" aria-label="Close tour">
+  <svg aria-hidden="true">
+    {/* X icon */}
+  </svg>
+</button>
+```
+
+<Callout type="info">
+  Always use `aria-hidden="true"` on decorative SVG icons to prevent screen readers from announcing them.
+</Callout>
+
+---
+
+## Reduced Motion Support
+
+Users who experience motion sickness or have vestibular disorders can enable "reduced motion" in their operating system. Tour Kit respects this preference.
+
+### Automatic Detection
+
+Tour Kit automatically detects the `prefers-reduced-motion` media query:
+
+```tsx title="How reduced motion is detected"
+import { usePrefersReducedMotion } from '@tour-kit/core'
+
+function MyComponent() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  return (
+    <div style={{
+      transition: prefersReducedMotion ? 'none' : 'all 0.3s ease'
+    }}>
+      Content
+    </div>
+  )
+}
+```
+
+### What Changes with Reduced Motion
+
+When reduced motion is enabled:
+
+| Feature | Normal | Reduced Motion |
+|---------|--------|----------------|
+| Overlay transitions | Fade animation | Instant show/hide |
+| Card entrance | Slide + fade | Instant appear |
+| Spotlight movement | Animated | Instant move |
+| GIF players | Auto-play | Paused by default |
+| Lottie animations | Playing | Static frame |
+| Video content | Auto-play | Shows poster image |
+
+### Media Fallbacks
+
+For animated media, provide a static fallback image:
+
+```tsx title="Reduced motion fallback for video"
+import { TourMedia } from '@tour-kit/media'
+
+<TourMedia
+  src="/videos/feature-demo.mp4"
+  alt="Feature demonstration"
+  poster="/images/feature-poster.jpg"
+  reducedMotionFallback="/images/feature-static.jpg"
+/>
+```
+
+When `prefers-reduced-motion: reduce` is active, the static image displays instead of the video.
+
+### GIF Player Behavior
+
+The GIF player pauses automatically and provides a play button:
+
+```tsx
+// GIF respects reduced motion preference
+<GifPlayer
+  src="/animations/loading.gif"
+  alt="Loading indicator"
+  poster="/images/loading-frame.png"
+  autoplay={true} // Ignored if reduced motion is preferred
+/>
+```
+
+Users can manually play the GIF using the play button, which includes proper ARIA:
+
+```tsx
+<button
+  aria-label={isPlaying ? "Pause Loading indicator" : "Play Loading indicator"}
+  aria-pressed={isPlaying}
+>
+  {/* Play/Pause icon */}
+</button>
+```
+
+### Testing Reduced Motion
+
+To test reduced motion in your browser:
+
+<Tabs items={['Chrome', 'Firefox', 'Safari']}>
+  <Tab value="Chrome">
+    1. Open DevTools (F12)
+    2. Press Cmd/Ctrl + Shift + P
+    3. Type "reduced motion"
+    4. Select "Emulate CSS prefers-reduced-motion: reduce"
+  </Tab>
+  <Tab value="Firefox">
+    1. Go to `about:config`
+    2. Search for `ui.prefersReducedMotion`
+    3. Set value to `1`
+  </Tab>
+  <Tab value="Safari">
+    1. System Preferences > Accessibility
+    2. Display > Reduce motion
+    3. Or use Web Inspector's media query simulation
+  </Tab>
+</Tabs>
+
+---
+
+## Touch Targets
+
+Interactive elements in Tour Kit meet minimum touch target requirements:
+
+```css
+/* Minimum 44x44px touch target for buttons */
+.tour-button {
+  min-width: 44px;
+  min-height: 44px;
+}
+```
+
+### Focus Indicators
+
+All interactive elements have visible focus indicators:
+
+```css
+/* Focus ring styling */
+.tour-button:focus-visible {
+  outline: 2px solid var(--tour-focus-ring);
+  outline-offset: 2px;
+}
+```
+
+<Callout type="warn">
+  Never remove focus indicators with `outline: none` without providing an alternative visible focus state.
+</Callout>
+
+---
+
+## Color Contrast
+
+Tour Kit uses CSS variables that ensure sufficient color contrast:
+
+```css title="Default contrast-safe variables"
+:root {
+  --tour-card-background: hsl(0 0% 100%);
+  --tour-card-foreground: hsl(222 47% 11%);
+  --tour-overlay-background: hsl(0 0% 0% / 0.5);
+}
+```
+
+### Overlay Considerations
+
+The overlay uses a maximum opacity of 50% to ensure content behind remains somewhat visible:
+
+```css
+.tour-overlay {
+  background: hsl(0 0% 0% / 0.5); /* Max 50% opacity */
+}
+```
+
+This helps users maintain orientation within the page during the tour.
+
+---
+
+## Testing Your Tours
+
+### Automated Testing
+
+Use vitest-axe for automated accessibility testing:
+
+```tsx title="Example accessibility test"
+import { render } from '@testing-library/react'
+import { axe, toHaveNoViolations } from 'jest-axe'
+import { TourCard } from '@tour-kit/react'
+
+expect.extend(toHaveNoViolations)
+
+test('TourCard has no accessibility violations', async () => {
+  const { container } = render(
+    <TourCard
+      title="Welcome"
+      description="Let's get started"
+      isActive={true}
+    />
+  )
+
+  const results = await axe(container)
+  expect(results).toHaveNoViolations()
+})
+```
+
+### Manual Testing Checklist
+
+Before shipping your tour, verify:
+
+- [ ] **Keyboard only**: Complete the entire tour using only keyboard
+- [ ] **Screen reader**: Test with VoiceOver (Mac), NVDA, or JAWS
+- [ ] **Reduced motion**: Enable reduced motion and verify no jarring animations
+- [ ] **Focus visible**: Tab through and ensure focus ring is always visible
+- [ ] **High contrast**: Test with Windows High Contrast Mode
+- [ ] **Zoom**: Test at 200% zoom level
+
+### Screen Reader Testing
+
+| Screen Reader | Platform | Free? |
+|---------------|----------|-------|
+| VoiceOver | macOS, iOS | Yes |
+| NVDA | Windows | Yes |
+| JAWS | Windows | No |
+| TalkBack | Android | Yes |
+
+**Quick VoiceOver test (Mac):**
+1. Press Cmd + F5 to enable VoiceOver
+2. Use Tab to navigate to your tour trigger
+3. Activate the tour
+4. Listen for step announcements
+5. Navigate using arrow keys
+6. Verify focus returns when tour closes
+
+---
+
+## Accessibility Rules Summary
+
+| Requirement | Implementation |
+|-------------|----------------|
+| Focus trap in dialogs | `useFocusTrap` hook |
+| Keyboard navigation | `useKeyboardNavigation` hook |
+| Screen reader announcements | `aria-live` regions |
+| Dialog semantics | `role="dialog"` + `aria-modal` |
+| Reduced motion | `usePrefersReducedMotion` hook |
+| Focus indicators | CSS `:focus-visible` |
+| Touch targets | Minimum 44x44px |
+| Color contrast | WCAG AA ratios |
+
+---
+
+## Related Resources
+
+- [useFocusTrap Hook](/docs/core/hooks/use-focus-trap)
+- [useKeyboard Hook](/docs/core/hooks/use-keyboard)
+- [usePrefersReducedMotion](/docs/core/hooks/use-media-query)
+- [Accessibility Utilities](/docs/core/utilities/a11y)
+- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)

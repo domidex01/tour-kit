@@ -1,0 +1,478 @@
+---
+title: Types Reference
+description: TypeScript types for scheduling
+---
+
+# Types Reference
+
+Complete TypeScript type definitions for the scheduling package.
+
+## Schedule
+
+Main schedule configuration.
+
+```ts
+interface Schedule {
+  /** Schedule is enabled (default: true) */
+  enabled?: boolean
+
+  /** Start date (inclusive) - content won't show before this */
+  startAt?: DateString | Date
+
+  /** End date (inclusive) - content won't show after this */
+  endAt?: DateString | Date
+
+  /** Days of the week when content can show (0=Sunday, 6=Saturday) */
+  daysOfWeek?: DayOfWeek[]
+
+  /** Time range during the day when content can show */
+  timeOfDay?: TimeRange
+
+  /** Use user's detected timezone (default: true) */
+  useUserTimezone?: boolean
+
+  /** Override timezone (IANA timezone name) */
+  timezone?: string
+
+  /** Blackout periods when content should not show */
+  blackouts?: BlackoutPeriod[]
+
+  /** Recurring pattern for the schedule */
+  recurring?: RecurringPattern
+
+  /** Custom metadata */
+  metadata?: Record<string, unknown>
+}
+```
+
+### Example
+
+```ts
+const schedule: Schedule = {
+  enabled: true,
+  startAt: '2024-01-15',
+  endAt: '2024-12-31',
+  daysOfWeek: [1, 2, 3, 4, 5],
+  timeOfDay: { start: '09:00', end: '17:00' },
+  useUserTimezone: true,
+}
+```
+
+## TimeRange
+
+Time-of-day constraint.
+
+```ts
+interface TimeRange {
+  /** Start time in HH:MM format (24-hour) */
+  start: TimeString
+  /** End time in HH:MM format (24-hour) */
+  end: TimeString
+}
+
+type TimeString = `${string}:${string}`
+```
+
+### Example
+
+```ts
+const businessHours: TimeRange = {
+  start: '09:00',
+  end: '17:00',
+}
+
+const overnightShift: TimeRange = {
+  start: '22:00',
+  end: '06:00', // Crosses midnight
+}
+```
+
+## DateRange
+
+Date range constraint.
+
+```ts
+interface DateRange {
+  /** Start date (inclusive) in YYYY-MM-DD format */
+  start?: DateString
+  /** End date (inclusive) in YYYY-MM-DD format */
+  end?: DateString
+}
+
+type DateString = `${string}-${string}-${string}`
+```
+
+### Example
+
+```ts
+const q1: DateRange = {
+  start: '2024-01-01',
+  end: '2024-03-31',
+}
+```
+
+## DayOfWeek
+
+Day of the week as a number.
+
+```ts
+type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6
+
+// 0 = Sunday
+// 1 = Monday
+// 2 = Tuesday
+// 3 = Wednesday
+// 4 = Thursday
+// 5 = Friday
+// 6 = Saturday
+```
+
+### Example
+
+```ts
+const weekdays: DayOfWeek[] = [1, 2, 3, 4, 5]
+const weekends: DayOfWeek[] = [0, 6]
+```
+
+## DayName
+
+Day name as a string.
+
+```ts
+type DayName =
+  | 'sunday'
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+
+const DAY_NAMES: readonly DayName[] = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+]
+```
+
+## BlackoutPeriod
+
+Period when content should not be shown.
+
+```ts
+interface BlackoutPeriod {
+  /** Unique identifier */
+  id: string
+  /** Start date/time of the blackout */
+  start: DateString | Date
+  /** End date/time of the blackout */
+  end: DateString | Date
+  /** Optional reason for the blackout */
+  reason?: string
+}
+```
+
+### Example
+
+```ts
+const blackout: BlackoutPeriod = {
+  id: 'holiday-freeze',
+  start: '2024-12-20',
+  end: '2024-12-31',
+  reason: 'Year-end code freeze',
+}
+```
+
+## RecurringPattern
+
+Recurring schedule pattern.
+
+```ts
+interface RecurringPattern {
+  /** Type of recurrence */
+  type: 'daily' | 'weekly' | 'monthly' | 'yearly'
+
+  /** Interval between occurrences (e.g., every 2 weeks) */
+  interval?: number
+
+  /** For weekly: which days of the week */
+  daysOfWeek?: DayOfWeek[]
+
+  /** For monthly: which day of the month (1-31) */
+  dayOfMonth?: number
+
+  /** For yearly: which month (1-12) */
+  month?: number
+
+  /** Maximum number of occurrences */
+  maxOccurrences?: number
+
+  /** End date for the recurrence */
+  endDate?: DateString
+}
+```
+
+### Examples
+
+```ts
+// Every Monday
+const weekly: RecurringPattern = {
+  type: 'weekly',
+  daysOfWeek: [1],
+}
+
+// First of every month
+const monthly: RecurringPattern = {
+  type: 'monthly',
+  dayOfMonth: 1,
+}
+
+// Every Christmas
+const yearly: RecurringPattern = {
+  type: 'yearly',
+  month: 12,
+  dayOfMonth: 25,
+}
+```
+
+## ScheduleResult
+
+Simple active/inactive result.
+
+```ts
+interface ScheduleResult {
+  /** Whether the schedule is currently active */
+  isActive: boolean
+  /** Quick reason code if inactive */
+  reason?: ScheduleInactiveReason
+}
+```
+
+### Example
+
+```ts
+const result: ScheduleResult = {
+  isActive: false,
+  reason: 'wrong_time',
+}
+```
+
+## ScheduleStatus
+
+Detailed status with next times.
+
+```ts
+interface ScheduleStatus {
+  /** Whether the schedule is currently active */
+  isActive: boolean
+
+  /** Reason for being inactive */
+  reason?: ScheduleInactiveReason
+
+  /** Human-readable explanation */
+  message?: string
+
+  /** When the schedule will next become active */
+  nextActiveAt?: Date
+
+  /** When the schedule will next become inactive */
+  nextInactiveAt?: Date
+
+  /** Current blackout period if in one */
+  currentBlackout?: {
+    id: string
+    reason?: string
+    endsAt: Date
+  }
+
+  /** Debug information */
+  debug?: {
+    evaluatedAt: Date
+    timezone: string
+    localTime: string
+    dayOfWeek: number
+  }
+}
+```
+
+### Example
+
+```ts
+const status: ScheduleStatus = {
+  isActive: false,
+  reason: 'wrong_time',
+  message: 'Outside time range (9:00 AM - 5:00 PM)',
+  nextActiveAt: new Date('2024-02-15T09:00:00Z'),
+}
+```
+
+## ScheduleInactiveReason
+
+Reason codes for why a schedule is inactive.
+
+```ts
+type ScheduleInactiveReason =
+  | 'disabled' // Schedule explicitly disabled
+  | 'not_started' // Before start date
+  | 'ended' // After end date
+  | 'wrong_day' // Not on allowed day of week
+  | 'wrong_time' // Outside allowed time range
+  | 'blackout' // In a blackout period
+  | 'outside_business_hours' // Outside business hours
+  | 'recurring_mismatch' // Doesn't match recurring pattern
+```
+
+## ScheduleEvaluationOptions
+
+Options for schedule evaluation.
+
+```ts
+interface ScheduleEvaluationOptions {
+  /** Override the current date/time for testing */
+  now?: Date
+  /** User's detected timezone */
+  userTimezone?: string
+}
+```
+
+### Example
+
+```ts
+const options: ScheduleEvaluationOptions = {
+  now: new Date('2024-02-15T10:00:00Z'),
+  userTimezone: 'America/New_York',
+}
+
+const result = isScheduleActive(schedule, options)
+```
+
+## BusinessHours
+
+Complex business hours configuration.
+
+```ts
+interface BusinessHours {
+  /** Default hours for days not explicitly configured */
+  default?: DayHours
+  /** Hours by day of week */
+  days?: BusinessHoursMap
+  /** Override timezone */
+  timezone?: string
+  /** Holidays or closure dates (YYYY-MM-DD format) */
+  holidays?: string[]
+}
+
+type BusinessHoursMap = {
+  [K in DayOfWeek]?: DayHours
+}
+
+interface DayHours {
+  /** Whether the business is open on this day */
+  open: boolean
+  /** Time ranges when open (allows split hours) */
+  hours?: TimeRange[]
+}
+```
+
+### Example
+
+```ts
+const hours: BusinessHours = {
+  default: { open: false },
+  days: {
+    1: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+    2: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+    3: {
+      open: true,
+      hours: [
+        { start: '09:00', end: '12:00' },
+        { start: '13:00', end: '17:00' }, // Lunch break
+      ],
+    },
+  },
+  holidays: ['2024-12-25', '2024-01-01'],
+}
+```
+
+## Hook Types
+
+### UseScheduleOptions
+
+```ts
+interface UseScheduleOptions {
+  /** Refresh interval in milliseconds (default: 60000) */
+  refreshInterval?: number
+  /** Disable auto-refresh */
+  disableAutoRefresh?: boolean
+  /** Override timezone */
+  timezone?: string
+}
+```
+
+### UseScheduleReturn
+
+```ts
+interface UseScheduleReturn extends ScheduleResult {
+  isActive: boolean
+  reason?: ScheduleInactiveReason
+  /** Manually refresh the schedule status */
+  refresh: () => void
+  /** Last evaluation timestamp */
+  lastCheckedAt: Date
+  /** Current timezone being used */
+  timezone: string
+}
+```
+
+### UseScheduleStatusOptions
+
+```ts
+interface UseScheduleStatusOptions {
+  /** Refresh interval in milliseconds (default: 60000) */
+  refreshInterval?: number
+  /** Disable auto-refresh */
+  disableAutoRefresh?: boolean
+  /** Override timezone */
+  timezone?: string
+  /** Include debug information in status */
+  debug?: boolean
+}
+```
+
+### UseScheduleStatusReturn
+
+```ts
+interface UseScheduleStatusReturn extends ScheduleStatus {
+  /** Manually refresh the schedule status */
+  refresh: () => void
+  /** Last evaluation timestamp */
+  lastCheckedAt: Date
+  /** Current timezone being used */
+  timezone: string
+}
+```
+
+## Type Guards
+
+While not exported, you can create your own type guards:
+
+```ts
+function isScheduleActive(result: ScheduleResult): result is { isActive: true } {
+  return result.isActive
+}
+
+function hasBlackout(
+  status: ScheduleStatus
+): status is ScheduleStatus & { currentBlackout: NonNullable<ScheduleStatus['currentBlackout']> } {
+  return status.currentBlackout !== undefined
+}
+```
+
+## Related
+
+- [Schedule Evaluation](/docs/scheduling/utilities/schedule-evaluation) - Using these types
+- [Hooks](/docs/scheduling/hooks/) - React hooks with these types

@@ -1,0 +1,417 @@
+---
+title: '@tour-kit/media API'
+description: Complete API reference for @tour-kit/media
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/media API Reference
+
+Complete API reference for the media package. This package provides video, GIF, and Lottie animation embeds.
+
+---
+
+## Main Component
+
+### TourMedia
+
+Auto-detecting media component.
+
+```tsx
+import { TourMedia } from '@tour-kit/media';
+
+<TourMedia
+  src="https://youtube.com/watch?v=abc123"
+  alt="Tutorial video"
+  aspectRatio="16/9"
+  autoplay={false}
+  muted={true}
+  controls={true}
+  poster="/images/poster.jpg"
+/>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `src` | `string` | Media source URL |
+| `alt` | `string` | Alt text (required) |
+| `type` | `MediaType` | Media type (auto-detected if omitted) |
+| `aspectRatio` | `string` | Aspect ratio |
+| `autoplay` | `boolean` | Auto-play media |
+| `muted` | `boolean` | Mute audio |
+| `controls` | `boolean` | Show controls |
+| `loop` | `boolean` | Loop media |
+| `playsInline` | `boolean` | Play inline on mobile |
+| `poster` | `string` | Poster image for video |
+| `startTime` | `number` | Start time in seconds |
+| `captions` | `CaptionTrack[]` | Caption tracks |
+| `sources` | `ResponsiveSource[]` | Responsive sources |
+| `reducedMotionFallback` | `string` | Static image for reduced motion |
+| `loading` | `'eager' \| 'lazy'` | Loading strategy |
+| `preload` | `string` | Video preload strategy |
+
+---
+
+## Embed Components
+
+### YouTubeEmbed
+
+YouTube iframe embed.
+
+```tsx
+import { YouTubeEmbed } from '@tour-kit/media';
+
+<YouTubeEmbed
+  videoId="abc123"
+  autoplay
+  muted
+  startTime={30}
+/>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `videoId` | `string` | YouTube video ID |
+| `autoplay` | `boolean` | Auto-play |
+| `muted` | `boolean` | Mute audio |
+| `startTime` | `number` | Start time (seconds) |
+| `controls` | `boolean` | Show controls |
+
+### VimeoEmbed
+
+Vimeo iframe embed.
+
+```tsx
+import { VimeoEmbed } from '@tour-kit/media';
+
+<VimeoEmbed
+  videoId="123456"
+  autoplay
+  muted
+/>
+```
+
+### LoomEmbed
+
+Loom iframe embed.
+
+```tsx
+import { LoomEmbed } from '@tour-kit/media';
+
+<LoomEmbed
+  videoId="abc123"
+  hideOwner
+  hideTitle
+/>
+```
+
+### WistiaEmbed
+
+Wistia iframe embed.
+
+```tsx
+import { WistiaEmbed } from '@tour-kit/media';
+
+<WistiaEmbed
+  videoId="abc123"
+  autoplay
+/>
+```
+
+### NativeVideo
+
+HTML5 video element.
+
+```tsx
+import { NativeVideo } from '@tour-kit/media';
+
+<NativeVideo
+  src="/videos/intro.mp4"
+  poster="/images/poster.jpg"
+  controls
+  captions={[
+    { src: '/captions/en.vtt', srclang: 'en', label: 'English', default: true }
+  ]}
+/>
+```
+
+### GifPlayer
+
+GIF with play/pause controls.
+
+```tsx
+import { GifPlayer } from '@tour-kit/media';
+
+<GifPlayer
+  src="/images/demo.gif"
+  alt="Demo animation"
+  playOnHover
+  showControls
+/>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `src` | `string` | GIF source URL |
+| `alt` | `string` | Alt text |
+| `playOnHover` | `boolean` | Play on hover |
+| `showControls` | `boolean` | Show play/pause |
+
+### LottiePlayer
+
+Lottie animation player.
+
+```tsx
+import { LottiePlayer } from '@tour-kit/media';
+
+<LottiePlayer
+  src="/animations/success.json"
+  loop
+  autoplay
+  speed={1.5}
+/>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `src` | `string` | Lottie JSON URL |
+| `loop` | `boolean` | Loop animation |
+| `autoplay` | `boolean` | Auto-play |
+| `speed` | `number` | Playback speed |
+
+<Callout>
+Lottie requires optional peer dependency: `@lottiefiles/react-lottie-player`
+</Callout>
+
+---
+
+## Headless Components
+
+```tsx
+import { MediaHeadless } from '@tour-kit/media/headless';
+
+<MediaHeadless src={src} alt={alt}>
+  {({
+    mediaType,
+    src,
+    embedUrl,
+    videoId,
+    isPlaying,
+    isLoaded,
+    hasError,
+    currentTime,
+    duration,
+    play,
+    pause,
+    seek,
+    prefersReducedMotion,
+    containerRef,
+  }) => (
+    <CustomMediaPlayer />
+  )}
+</MediaHeadless>
+```
+
+---
+
+## Hooks
+
+### useMediaEvents
+
+Hook for media event handling.
+
+```tsx
+import { useMediaEvents } from '@tour-kit/media';
+
+const {
+  ref,
+  isPlaying,
+  currentTime,
+  duration,
+} = useMediaEvents({
+  onPlay: () => {},
+  onPause: () => {},
+  onEnded: () => {},
+  onError: (error) => {},
+  onTimeUpdate: (time) => {},
+  onLoadedMetadata: (duration) => {},
+});
+```
+
+### usePrefersReducedMotion
+
+Hook for motion preference.
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/media';
+
+const prefersReducedMotion = usePrefersReducedMotion();
+```
+
+### useResponsiveSource
+
+Hook for responsive source selection.
+
+```tsx
+import { useResponsiveSource } from '@tour-kit/media';
+
+const source = useResponsiveSource([
+  { src: '/video-mobile.mp4', media: '(max-width: 768px)' },
+  { src: '/video-desktop.mp4' },
+]);
+```
+
+---
+
+## Utilities
+
+### URL Detection
+
+```tsx
+import {
+  parseMediaUrl,
+  detectMediaType,
+  isSupportedMediaUrl,
+  isYouTubeUrl,
+  isVimeoUrl,
+  isLoomUrl,
+  isWistiaUrl,
+} from '@tour-kit/media';
+
+const { type, id } = parseMediaUrl('https://youtube.com/watch?v=abc');
+// { type: 'youtube', id: 'abc' }
+
+const type = detectMediaType('/video.mp4');
+// 'video'
+
+const isSupported = isSupportedMediaUrl(url);
+```
+
+### ID Extraction
+
+```tsx
+import {
+  extractYouTubeId,
+  extractVimeoId,
+  extractLoomId,
+  extractWistiaId,
+} from '@tour-kit/media';
+
+const id = extractYouTubeId('https://youtu.be/abc123');
+// 'abc123'
+```
+
+### Embed URL Builders
+
+```tsx
+import {
+  buildYouTubeEmbedUrl,
+  buildVimeoEmbedUrl,
+  buildLoomEmbedUrl,
+  buildWistiaEmbedUrl,
+} from '@tour-kit/media';
+
+const embedUrl = buildYouTubeEmbedUrl('abc123', {
+  autoplay: true,
+  muted: true,
+  startTime: 30,
+});
+```
+
+### Thumbnail URLs
+
+```tsx
+import {
+  getYouTubeThumbnailUrl,
+  getVimeoThumbnailUrl,
+} from '@tour-kit/media';
+
+const thumbnail = getYouTubeThumbnailUrl('abc123');
+// https://img.youtube.com/vi/abc123/maxresdefault.jpg
+```
+
+### Responsive Source
+
+```tsx
+import { selectResponsiveSource } from '@tour-kit/media';
+
+const source = selectResponsiveSource(sources, window.innerWidth);
+```
+
+---
+
+## Supported Media Types
+
+| Type | Extensions/Patterns |
+|------|---------------------|
+| `youtube` | youtube.com, youtu.be |
+| `vimeo` | vimeo.com, player.vimeo.com |
+| `loom` | loom.com |
+| `wistia` | wistia.com, fast.wistia.net |
+| `video` | .mp4, .webm, .ogg |
+| `gif` | .gif |
+| `lottie` | .json (Lottie animations) |
+| `image` | .jpg, .png, .webp, etc. |
+
+---
+
+## Types
+
+### MediaType
+
+```tsx
+type MediaType =
+  | 'youtube'
+  | 'vimeo'
+  | 'loom'
+  | 'wistia'
+  | 'video'
+  | 'gif'
+  | 'lottie'
+  | 'image';
+```
+
+### TourMediaConfig
+
+```tsx
+interface TourMediaConfig {
+  src: string;
+  type?: MediaType;
+  alt: string;
+  poster?: string;
+  aspectRatio?: '16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto';
+  autoplay?: boolean;
+  muted?: boolean;
+  controls?: boolean;
+  loop?: boolean;
+  playsInline?: boolean;
+  startTime?: number;
+  captions?: CaptionTrack[];
+  sources?: ResponsiveSource[];
+  lottieOptions?: LottieOptions;
+  reducedMotionFallback?: string;
+  loading?: 'eager' | 'lazy';
+  preload?: 'none' | 'metadata' | 'auto';
+}
+```
+
+### CaptionTrack
+
+```tsx
+interface CaptionTrack {
+  src: string;
+  srclang: string;
+  label: string;
+  default?: boolean;
+}
+```
+
+### ResponsiveSource
+
+```tsx
+interface ResponsiveSource {
+  src: string;
+  media?: string;
+  type?: string;
+}
+```

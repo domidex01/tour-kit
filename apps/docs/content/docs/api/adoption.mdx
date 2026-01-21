@@ -1,0 +1,304 @@
+---
+title: '@tour-kit/adoption API'
+description: Complete API reference for @tour-kit/adoption
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/adoption API Reference
+
+Complete API reference for the adoption package. This package provides feature adoption tracking with automatic nudging.
+
+---
+
+## Providers
+
+### AdoptionProvider
+
+Provider for feature adoption tracking.
+
+```tsx
+import { AdoptionProvider } from '@tour-kit/adoption';
+
+<AdoptionProvider
+  features={features}
+  storage={{ type: 'localStorage', key: 'adoption' }}
+  nudge={{ enabled: true, cooldownMs: 86400000, maxPerSession: 3 }}
+  userId="user-123"
+  onAdoption={(feature) => console.log('Adopted:', feature.name)}
+  onChurn={(feature) => console.log('Churned:', feature.name)}
+>
+  {children}
+</AdoptionProvider>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `features` | `Feature[]` | Array of feature definitions |
+| `storage` | `StorageConfig` | Storage configuration |
+| `nudge` | `NudgeConfig` | Nudge configuration |
+| `userId` | `string` | User identifier for multi-user support |
+| `onAdoption` | `(feature: Feature) => void` | Called when feature is adopted |
+| `onChurn` | `(feature: Feature) => void` | Called when feature adoption is lost |
+| `onNudge` | `(feature: Feature, action: string) => void` | Called on nudge interaction |
+
+---
+
+## Hooks
+
+### useFeature
+
+Hook for tracking single feature adoption.
+
+```tsx
+import { useFeature } from '@tour-kit/adoption';
+
+const {
+  feature,
+  usage,
+  isAdopted,
+  status,
+  useCount,
+  trackUsage,
+} = useFeature('feature-id');
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `feature` | `Feature \| undefined` | Feature configuration |
+| `usage` | `FeatureUsage \| undefined` | Usage tracking data |
+| `isAdopted` | `boolean` | Whether feature is adopted |
+| `status` | `AdoptionStatus` | Current adoption status |
+| `useCount` | `number` | Number of times feature was used |
+| `trackUsage` | `() => void` | Manually track a usage |
+
+### useAdoptionStats
+
+Hook for aggregate adoption statistics.
+
+```tsx
+import { useAdoptionStats } from '@tour-kit/adoption';
+
+const {
+  totalFeatures,
+  adoptedCount,
+  adoptionRate,
+  byCategory,
+  byStatus,
+} = useAdoptionStats();
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `totalFeatures` | `number` | Total number of features |
+| `adoptedCount` | `number` | Number of adopted features |
+| `adoptionRate` | `number` | Adoption rate (0-100) |
+| `byCategory` | `Record<string, CategoryStats>` | Stats grouped by category |
+| `byStatus` | `Record<AdoptionStatus, number>` | Counts by status |
+
+### useNudge
+
+Hook for controlling nudge queue.
+
+```tsx
+import { useNudge } from '@tour-kit/adoption';
+
+const {
+  currentNudge,
+  queue,
+  show,
+  dismiss,
+  skip,
+} = useNudge();
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `currentNudge` | `Feature \| null` | Currently shown nudge |
+| `queue` | `Feature[]` | Queued nudges |
+| `show` | `(featureId: string) => void` | Show nudge for feature |
+| `dismiss` | `() => void` | Dismiss current nudge |
+| `skip` | `() => void` | Skip current nudge |
+
+### useAdoptionAnalytics
+
+Hook for analytics integration.
+
+```tsx
+import { useAdoptionAnalytics } from '@tour-kit/adoption';
+
+const analytics = useAdoptionAnalytics();
+```
+
+---
+
+## Components
+
+### AdoptionNudge
+
+Auto-shows nudges for unadopted features.
+
+```tsx
+import { AdoptionNudge } from '@tour-kit/adoption';
+
+<AdoptionNudge
+  position="bottom-right"
+  delay={2000}
+  size="default"
+  render={({ feature, dismiss }) => <CustomNudge />}
+/>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `position` | `string` | Position of nudge |
+| `delay` | `number` | Delay before showing (ms) |
+| `size` | `'sm' \| 'default' \| 'lg'` | Size variant |
+| `render` | `(props) => ReactNode` | Custom render function |
+| `asChild` | `boolean` | Merge props to child element |
+
+### FeatureButton
+
+Button with automatic usage tracking.
+
+```tsx
+import { FeatureButton } from '@tour-kit/adoption';
+
+<FeatureButton
+  featureId="feature-export"
+  onClick={handleExport}
+  variant="default"
+>
+  Export
+</FeatureButton>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `featureId` | `string` | Feature to track |
+| `onClick` | `() => void` | Click handler |
+| `variant` | `string` | Button variant |
+
+### IfNotAdopted / IfAdopted
+
+Conditional rendering based on adoption status.
+
+```tsx
+import { IfNotAdopted, IfAdopted } from '@tour-kit/adoption';
+
+<IfNotAdopted featureId="feature-search">
+  <NewFeatureBadge>New!</NewFeatureBadge>
+</IfNotAdopted>
+
+<IfAdopted featureId="feature-search">
+  <span>Power user!</span>
+</IfAdopted>
+```
+
+### NewFeatureBadge
+
+Badge component for new features.
+
+```tsx
+import { NewFeatureBadge } from '@tour-kit/adoption';
+
+<NewFeatureBadge variant="default" size="sm">
+  New
+</NewFeatureBadge>
+```
+
+---
+
+## Dashboard Components
+
+### AdoptionDashboard
+
+Full admin dashboard for adoption metrics.
+
+```tsx
+import { AdoptionDashboard } from '@tour-kit/adoption';
+
+<AdoptionDashboard features={features} />
+```
+
+### AdoptionStatsGrid
+
+Grid of stat cards.
+
+```tsx
+import { AdoptionStatsGrid } from '@tour-kit/adoption';
+
+<AdoptionStatsGrid />
+```
+
+### AdoptionTable
+
+Sortable, filterable table of features.
+
+```tsx
+import { AdoptionTable } from '@tour-kit/adoption';
+
+<AdoptionTable
+  sortable
+  filterable
+  onRowClick={(feature) => {}}
+/>
+```
+
+### AdoptionCategoryChart
+
+Chart showing adoption by category.
+
+```tsx
+import { AdoptionCategoryChart } from '@tour-kit/adoption';
+
+<AdoptionCategoryChart type="bar" />
+```
+
+---
+
+## Types
+
+### Feature
+
+```tsx
+interface Feature {
+  id: string;
+  name: string;
+  trigger: string | { event: string } | (() => void);
+  adoptionCriteria?: AdoptionCriteria;
+  resources?: FeatureResources;
+  priority?: number;
+  category?: string;
+  description?: string;
+  premium?: boolean;
+}
+```
+
+### AdoptionCriteria
+
+```tsx
+interface AdoptionCriteria {
+  minUses?: number;
+  recencyDays?: number;
+  custom?: (usage: FeatureUsage) => boolean;
+}
+```
+
+### AdoptionStatus
+
+```tsx
+type AdoptionStatus = 'not_started' | 'exploring' | 'adopted' | 'churned';
+```
+
+### FeatureUsage
+
+```tsx
+interface FeatureUsage {
+  featureId: string;
+  useCount: number;
+  firstUsedAt: Date | null;
+  lastUsedAt: Date | null;
+  adoptedAt: Date | null;
+}
+```

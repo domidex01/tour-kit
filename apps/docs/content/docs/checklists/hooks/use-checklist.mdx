@@ -1,0 +1,542 @@
+---
+title: useChecklist
+description: Main hook for controlling checklist state and actions
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useChecklist
+
+The primary hook for accessing and controlling checklist state.
+
+## Usage
+
+```tsx
+import { useChecklist } from '@tour-kit/checklists';
+
+function OnboardingChecklist() {
+  const {
+    checklist,
+    visibleTasks,
+    progress,
+    isComplete,
+    completeTask,
+    executeAction,
+  } = useChecklist('onboarding');
+
+  if (!checklist) return null;
+
+  return (
+    <div>
+      <h2>{checklist.config.title}</h2>
+      <progress value={progress.completed} max={progress.total} />
+
+      {visibleTasks.map((task) => (
+        <button
+          key={task.config.id}
+          onClick={() => executeAction(task.config.id)}
+          disabled={task.locked}
+        >
+          {task.completed ? '✓' : '○'} {task.config.title}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+## Parameters
+
+<TypeTable
+  type={{
+    checklistId: {
+      type: 'string',
+      required: true,
+      description: 'Unique identifier of the checklist',
+    },
+  }}
+/>
+
+## Return Value
+
+<TypeTable
+  type={{
+    checklist: {
+      type: 'ChecklistState | undefined',
+      description: 'Full checklist state (undefined if not found)',
+    },
+    tasks: {
+      type: 'ChecklistTaskState[]',
+      description: 'All tasks (including hidden)',
+    },
+    visibleTasks: {
+      type: 'ChecklistTaskState[]',
+      description: 'Filtered tasks passing when conditions',
+    },
+    progress: {
+      type: 'ChecklistProgress',
+      description: 'Progress information (completed, total, percentage, remaining)',
+    },
+    exists: {
+      type: 'boolean',
+      description: 'Whether checklist exists',
+    },
+    isComplete: {
+      type: 'boolean',
+      description: 'Whether all visible tasks are completed',
+    },
+    isDismissed: {
+      type: 'boolean',
+      description: 'Whether checklist is dismissed',
+    },
+    isExpanded: {
+      type: 'boolean',
+      description: 'Whether checklist is expanded (for collapsible UI)',
+    },
+    completeTask: {
+      type: '(taskId: string) => void',
+      description: 'Mark a task as completed',
+    },
+    uncompleteTask: {
+      type: '(taskId: string) => void',
+      description: 'Mark a task as incomplete',
+    },
+    executeAction: {
+      type: '(taskId: string) => void',
+      description: 'Execute task action and auto-complete (if enabled)',
+    },
+    dismiss: {
+      type: '() => void',
+      description: 'Dismiss the checklist',
+    },
+    restore: {
+      type: '() => void',
+      description: 'Restore dismissed checklist',
+    },
+    toggleExpanded: {
+      type: '() => void',
+      description: 'Toggle expanded state',
+    },
+    setExpanded: {
+      type: '(expanded: boolean) => void',
+      description: 'Set expanded state',
+    },
+    reset: {
+      type: '() => void',
+      description: 'Reset checklist (clear all progress)',
+    },
+  }}
+/>
+
+## Basic Examples
+
+### Display Checklist Progress
+
+```tsx
+function ChecklistHeader() {
+  const { checklist, progress, isComplete } = useChecklist('onboarding');
+
+  if (!checklist) return null;
+
+  return (
+    <div>
+      <h3>{checklist.config.title}</h3>
+      <p>{checklist.config.description}</p>
+
+      <div className="progress-bar">
+        <div style={{ width: `${progress.percentage}%` }} />
+      </div>
+
+      <p>
+        {progress.completed} of {progress.total} completed
+        {isComplete && ' 🎉'}
+      </p>
+    </div>
+  );
+}
+```
+
+### Task List
+
+```tsx
+function TaskList() {
+  const { visibleTasks, completeTask } = useChecklist('onboarding');
+
+  return (
+    <ul>
+      {visibleTasks.map((task) => (
+        <li key={task.config.id}>
+          <input
+            type="checkbox"
+            checked={task.completed}
+            disabled={task.locked}
+            onChange={() => completeTask(task.config.id)}
+          />
+          <span>{task.config.title}</span>
+          {task.locked && <span>🔒</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### With Actions
+
+```tsx
+function ActionableChecklist() {
+  const { visibleTasks, executeAction } = useChecklist('onboarding');
+
+  return (
+    <div>
+      {visibleTasks.map((task) => (
+        <div key={task.config.id}>
+          <h4>{task.config.title}</h4>
+          <p>{task.config.description}</p>
+
+          <button
+            onClick={() => executeAction(task.config.id)}
+            disabled={task.locked || task.completed}
+          >
+            {task.completed ? 'Completed ✓' : 'Start'}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Advanced Examples
+
+### Dismissible Checklist
+
+```tsx
+function DismissibleChecklist() {
+  const {
+    checklist,
+    isDismissed,
+    dismiss,
+    restore,
+    isComplete,
+  } = useChecklist('onboarding');
+
+  if (!checklist || isDismissed) {
+    return (
+      <button onClick={restore}>
+        Show onboarding checklist
+      </button>
+    );
+  }
+
+  return (
+    <div>
+      <h3>{checklist.config.title}</h3>
+
+      {/* Checklist content */}
+
+      {checklist.config.dismissible && !isComplete && (
+        <button onClick={dismiss}>
+          Dismiss
+        </button>
+      )}
+    </div>
+  );
+}
+```
+
+### Collapsible Checklist
+
+```tsx
+function CollapsibleChecklist() {
+  const {
+    checklist,
+    visibleTasks,
+    progress,
+    isExpanded,
+    toggleExpanded,
+    completeTask,
+  } = useChecklist('onboarding');
+
+  if (!checklist) return null;
+
+  return (
+    <div>
+      <button onClick={toggleExpanded}>
+        {checklist.config.title}
+        <span>{progress.completed}/{progress.total}</span>
+        <span>{isExpanded ? '▼' : '▶'}</span>
+      </button>
+
+      {isExpanded && (
+        <div>
+          {visibleTasks.map((task) => (
+            <div key={task.config.id}>
+              <input
+                type="checkbox"
+                checked={task.completed}
+                onChange={() => completeTask(task.config.id)}
+                disabled={task.locked}
+              />
+              {task.config.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Reset Functionality
+
+```tsx
+function ChecklistWithReset() {
+  const { checklist, progress, isComplete, reset } = useChecklist('onboarding');
+
+  if (!checklist) return null;
+
+  return (
+    <div>
+      <h3>{checklist.config.title}</h3>
+      <p>{progress.completed} of {progress.total} completed</p>
+
+      {/* Checklist content */}
+
+      {isComplete && (
+        <div>
+          <p>All done! 🎉</p>
+          <button onClick={reset}>Start over</button>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Custom Progress Display
+
+```tsx
+function CustomProgress() {
+  const { progress, visibleTasks } = useChecklist('onboarding');
+
+  const completedTasks = visibleTasks.filter((t) => t.completed);
+  const nextTask = visibleTasks.find((t) => !t.completed && !t.locked);
+
+  return (
+    <div>
+      <h4>Your Progress</h4>
+
+      {/* Percentage */}
+      <div className="circular-progress">
+        {Math.round(progress.percentage)}%
+      </div>
+
+      {/* Counts */}
+      <p>
+        {progress.completed} completed,{' '}
+        {progress.remaining} remaining
+      </p>
+
+      {/* Next task */}
+      {nextTask && (
+        <div>
+          <p>Up next: {nextTask.config.title}</p>
+        </div>
+      )}
+
+      {/* Completed list */}
+      {completedTasks.length > 0 && (
+        <details>
+          <summary>Completed tasks ({completedTasks.length})</summary>
+          <ul>
+            {completedTasks.map((task) => (
+              <li key={task.config.id}>
+                ✓ {task.config.title}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
+}
+```
+
+## Handling Missing Checklists
+
+Always check if the checklist exists:
+
+```tsx
+function SafeChecklist() {
+  const { exists, checklist } = useChecklist('my-checklist');
+
+  if (!exists) {
+    return (
+      <div>
+        <p>Checklist not found</p>
+        <p>Make sure "my-checklist" is in your provider config</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Safe to use checklist */}
+      <h3>{checklist.config.title}</h3>
+    </div>
+  );
+}
+```
+
+## Task State Properties
+
+Each task in `tasks` and `visibleTasks` has:
+
+```tsx
+interface ChecklistTaskState {
+  config: ChecklistTaskConfig;  // Original config
+  completed: boolean;           // Completion status
+  locked: boolean;              // Whether dependencies are met
+  visible: boolean;             // Whether when condition passed
+  active: boolean;              // Currently in progress (future)
+  completedAt?: number;         // Timestamp of completion
+}
+```
+
+### Example: Show Lock Reason
+
+```tsx
+function TaskWithLockReason() {
+  const { tasks } = useChecklist('onboarding');
+
+  return (
+    <>
+      {tasks.map((task) => {
+        const deps = task.config.dependsOn ?? [];
+        const unmetDeps = deps.filter((depId) => {
+          const dep = tasks.find((t) => t.config.id === depId);
+          return dep && !dep.completed;
+        });
+
+        return (
+          <div key={task.config.id}>
+            <h4>{task.config.title}</h4>
+
+            {task.locked && unmetDeps.length > 0 && (
+              <p className="text-muted">
+                🔒 Complete these first:{' '}
+                {unmetDeps.map((id) => {
+                  const dep = tasks.find((t) => t.config.id === id);
+                  return dep?.config.title;
+                }).join(', ')}
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+```
+
+## Progress Calculation
+
+The `progress` object provides:
+
+```tsx
+interface ChecklistProgress {
+  completed: number;   // Number of completed tasks
+  total: number;       // Total visible tasks
+  percentage: number;  // 0-100
+  remaining: number;   // total - completed
+}
+```
+
+<Callout type="info">
+  Progress is calculated from **visible** tasks only. Hidden tasks (failing `when` conditions) don't count.
+</Callout>
+
+### Example: Progress Stages
+
+```tsx
+function ProgressStages() {
+  const { progress } = useChecklist('onboarding');
+
+  let stage = 'not-started';
+  if (progress.percentage === 100) stage = 'complete';
+  else if (progress.percentage >= 50) stage = 'halfway';
+  else if (progress.percentage > 0) stage = 'started';
+
+  const messages = {
+    'not-started': 'Ready to begin?',
+    'started': 'Great start! Keep going!',
+    'halfway': "You're halfway there!",
+    'complete': 'All done! 🎉',
+  };
+
+  return (
+    <div>
+      <p>{messages[stage]}</p>
+      <progress value={progress.completed} max={progress.total} />
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Memoize Expensive Computations
+
+```tsx
+function ChecklistStats() {
+  const { tasks } = useChecklist('onboarding');
+
+  const stats = useMemo(() => ({
+    total: tasks.length,
+    completed: tasks.filter((t) => t.completed).length,
+    locked: tasks.filter((t) => t.locked).length,
+    visible: tasks.filter((t) => t.visible).length,
+  }), [tasks]);
+
+  return <div>{/* Use stats */}</div>;
+}
+```
+
+### Avoid Stale Closures
+
+```tsx
+// Bad: Capturing stale completeTask in setTimeout
+function BadExample() {
+  const { completeTask } = useChecklist('onboarding');
+
+  const handleClick = (taskId: string) => {
+    setTimeout(() => {
+      completeTask(taskId); // May be stale
+    }, 5000);
+  };
+}
+
+// Good: Use stable ref or latest value
+function GoodExample() {
+  const { completeTask } = useChecklist('onboarding');
+  const completeTaskRef = useRef(completeTask);
+
+  useEffect(() => {
+    completeTaskRef.current = completeTask;
+  }, [completeTask]);
+
+  const handleClick = (taskId: string) => {
+    setTimeout(() => {
+      completeTaskRef.current(taskId);
+    }, 5000);
+  };
+}
+```
+
+## Related
+
+- [useTask](/docs/checklists/hooks/use-task) - Control individual tasks
+- [useChecklistPersistence](/docs/checklists/hooks/use-checklist-persistence) - Manage persistence
+- [ChecklistProvider](/docs/checklists/providers/checklist-provider) - Provider configuration

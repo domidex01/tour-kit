@@ -1,0 +1,231 @@
+---
+title: Scheduling Utilities
+description: Pure functions for schedule evaluation and time handling
+---
+
+# Scheduling Utilities
+
+Framework-agnostic functions for evaluating schedules and working with dates, times, and timezones.
+
+## Categories
+
+### Schedule Evaluation
+
+Core functions for checking if a schedule is active:
+
+- [`checkSchedule`](/docs/scheduling/utilities/schedule-evaluation#check-schedule) - Simple boolean check
+- [`isScheduleActive`](/docs/scheduling/utilities/schedule-evaluation#is-schedule-active) - Returns result with reason
+- [`getScheduleStatus`](/docs/scheduling/utilities/schedule-evaluation#get-schedule-status) - Detailed status with next times
+
+[View full documentation](/docs/scheduling/utilities/schedule-evaluation)
+
+### Timezone
+
+Convert and validate timezones:
+
+- [`getUserTimezone`](/docs/scheduling/utilities/timezone#get-user-timezone) - Detect browser timezone
+- [`isValidTimezone`](/docs/scheduling/utilities/timezone#is-valid-timezone) - Validate IANA timezone
+- [`formatDateString`](/docs/scheduling/utilities/timezone#format-date-string) - Format date in timezone
+- [`getDateInTimezone`](/docs/scheduling/utilities/timezone#get-date-in-timezone) - Get date components
+- [`parseDateString`](/docs/scheduling/utilities/timezone#parse-date-string) / [`parseTimeString`](/docs/scheduling/utilities/timezone#parse-time-string) - Parse strings
+
+[View full documentation](/docs/scheduling/utilities/timezone)
+
+### Date Range
+
+Check if a date falls within a range:
+
+- [`isWithinDateRange`](/docs/scheduling/utilities/date-range) - Check date range
+
+[View full documentation](/docs/scheduling/utilities/date-range)
+
+### Time Range
+
+Check time-of-day constraints:
+
+- [`isWithinTimeRange`](/docs/scheduling/utilities/time-range#is-within-time-range) - Check single time range
+- [`isWithinAnyTimeRange`](/docs/scheduling/utilities/time-range#is-within-any-time-range) - Check multiple ranges
+
+[View full documentation](/docs/scheduling/utilities/time-range)
+
+### Day of Week
+
+Work with days of the week:
+
+- [`getDayOfWeek`](/docs/scheduling/utilities/day-of-week#get-day-of-week) - Get day number (0-6)
+- [`isAllowedDay`](/docs/scheduling/utilities/day-of-week#is-allowed-day) - Check allowed days
+- [`dayNameToNumber`](/docs/scheduling/utilities/day-of-week#day-name-to-number) - Convert name to number
+- [`dayNumberToName`](/docs/scheduling/utilities/day-of-week#day-number-to-name) - Convert number to name
+
+[View full documentation](/docs/scheduling/utilities/day-of-week)
+
+### Blackout Periods
+
+Check if in a blackout:
+
+- [`isInBlackoutPeriod`](/docs/scheduling/utilities/blackouts#is-in-blackout-period) - Check single blackout
+- [`isInAnyBlackout`](/docs/scheduling/utilities/blackouts#is-in-any-blackout) - Check multiple blackouts
+- [`getCurrentBlackout`](/docs/scheduling/utilities/blackouts#get-current-blackout) - Get active blackout
+- [`getBlackoutEndTime`](/docs/scheduling/utilities/blackouts#get-blackout-end-time) - Get blackout end
+
+[View full documentation](/docs/scheduling/utilities/blackouts)
+
+### Business Hours
+
+Evaluate business hours:
+
+- [`isWithinBusinessHours`](/docs/scheduling/utilities/business-hours#is-within-business-hours) - Check business hours
+- [`isHoliday`](/docs/scheduling/utilities/business-hours#is-holiday) - Check if date is holiday
+- [`getDayBusinessHours`](/docs/scheduling/utilities/business-hours#get-day-business-hours) - Get hours for day
+
+[View full documentation](/docs/scheduling/utilities/business-hours)
+
+### Recurring Patterns
+
+Match recurring schedules:
+
+- [`matchesRecurringPattern`](/docs/scheduling/utilities/recurring) - Check if date matches pattern
+
+[View full documentation](/docs/scheduling/utilities/recurring)
+
+## When to Use Utilities vs Hooks
+
+**Use utilities when:**
+- Building server-side logic
+- One-time checks (e.g., in event handlers)
+- Non-React environments
+- Testing
+- You need precise control over evaluation timing
+
+**Use hooks when:**
+- Building React components
+- Need automatic updates when time changes
+- Want reactive UI based on schedule status
+
+## Example: Server-Side Evaluation
+
+```ts
+import { isScheduleActive } from '@tour-kit/scheduling'
+
+export async function GET(request: Request) {
+  const schedule = {
+    daysOfWeek: [1, 2, 3, 4, 5],
+    timeOfDay: { start: '09:00', end: '17:00' },
+  }
+
+  const { isActive, reason } = isScheduleActive(schedule, {
+    now: new Date(),
+    userTimezone: request.headers.get('x-timezone') || 'UTC',
+  })
+
+  if (!isActive) {
+    return new Response('Feature not available', { status: 403 })
+  }
+
+  return new Response('Feature available')
+}
+```
+
+## Example: Testing
+
+```ts
+import { checkSchedule } from '@tour-kit/scheduling'
+import { describe, it, expect } from 'vitest'
+
+describe('Tour Schedule', () => {
+  it('should be active during business hours', () => {
+    const schedule = {
+      daysOfWeek: [1, 2, 3, 4, 5],
+      timeOfDay: { start: '09:00', end: '17:00' },
+    }
+
+    // Tuesday at 10am
+    const isActive = checkSchedule(schedule, {
+      now: new Date('2024-01-09T10:00:00Z'),
+      userTimezone: 'UTC',
+    })
+
+    expect(isActive).toBe(true)
+  })
+
+  it('should be inactive on weekends', () => {
+    const schedule = {
+      daysOfWeek: [1, 2, 3, 4, 5],
+    }
+
+    // Saturday
+    const isActive = checkSchedule(schedule, {
+      now: new Date('2024-01-13T10:00:00Z'),
+      userTimezone: 'UTC',
+    })
+
+    expect(isActive).toBe(false)
+  })
+})
+```
+
+## Example: Event Handler
+
+```tsx
+import { isScheduleActive } from '@tour-kit/scheduling'
+
+function FeatureButton() {
+  const handleClick = () => {
+    const schedule = {
+      timeOfDay: { start: '09:00', end: '17:00' },
+    }
+
+    const { isActive, reason } = isScheduleActive(schedule)
+
+    if (!isActive) {
+      alert(`Feature not available: ${reason}`)
+      return
+    }
+
+    // Proceed with feature
+  }
+
+  return <button onClick={handleClick}>Use Feature</button>
+}
+```
+
+## Common Patterns
+
+### Combine Multiple Checks
+
+```ts
+import { isWithinDateRange, isWithinTimeRange, isAllowedDay } from '@tour-kit/scheduling'
+
+function isAvailable(date: Date): boolean {
+  const timezone = 'America/New_York'
+
+  return (
+    isWithinDateRange(date, '2024-01-01', '2024-12-31', timezone) &&
+    isAllowedDay(date, [1, 2, 3, 4, 5], timezone) &&
+    isWithinTimeRange(date, { start: '09:00', end: '17:00' }, timezone)
+  )
+}
+```
+
+### Build Custom Evaluation
+
+```ts
+import { getDayOfWeek, isWithinTimeRange } from '@tour-kit/scheduling'
+
+function isWorkingHours(date: Date, timezone: string): boolean {
+  const day = getDayOfWeek(date, timezone)
+
+  // Weekend - closed
+  if (day === 0 || day === 6) {
+    return false
+  }
+
+  // Friday - short day
+  if (day === 5) {
+    return isWithinTimeRange(date, { start: '09:00', end: '15:00' }, timezone)
+  }
+
+  // Regular weekday
+  return isWithinTimeRange(date, { start: '09:00', end: '17:00' }, timezone)
+}
+```

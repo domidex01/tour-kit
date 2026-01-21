@@ -1,0 +1,435 @@
+---
+title: Frequency Rules
+description: Control how often announcements are shown to users
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Frequency Rules
+
+Control how often users see announcements with flexible frequency rules. Rules are enforced automatically and state is persisted across sessions.
+
+## Why Frequency Rules?
+
+Prevent announcement fatigue by controlling when and how often announcements appear:
+
+- **Respect users** - Don't show the same announcement repeatedly
+- **Optimize engagement** - Show announcements at the right frequency
+- **Track views** - Know how many times users have seen each announcement
+- **Persistent state** - Frequency rules persist across sessions
+
+---
+
+## Frequency Types
+
+```tsx
+type FrequencyRule =
+  | 'once'                                    // Only ever show once
+  | 'session'                                 // Once per session
+  | 'always'                                  // Every time
+  | { type: 'times'; count: number }          // N times total
+  | { type: 'interval'; days: number }        // Every N days
+```
+
+---
+
+## Once
+
+Show the announcement only one time ever:
+
+```tsx
+{
+  id: 'welcome',
+  variant: 'modal',
+  title: 'Welcome to Our App',
+  frequency: 'once', // Shows once, then never again
+}
+```
+
+**Use for:**
+- Welcome messages
+- One-time feature introductions
+- Privacy policy updates
+- Terms acceptance
+
+<Callout type="info">
+  State is persisted to localStorage by default, so "once" means once across all sessions.
+</Callout>
+
+---
+
+## Session
+
+Show once per browser session:
+
+```tsx
+{
+  id: 'tip-of-day',
+  variant: 'toast',
+  title: 'Daily Tip',
+  frequency: 'session', // Shows once per session
+}
+```
+
+**Use for:**
+- Session-specific tips
+- Temporary notices
+- Per-visit reminders
+
+A new session starts when:
+- User closes all browser tabs
+- Session storage is cleared
+- Browser is restarted
+
+---
+
+## Always
+
+Show every time the announcement is eligible:
+
+```tsx
+{
+  id: 'critical-alert',
+  variant: 'banner',
+  title: 'System Maintenance in Progress',
+  frequency: 'always', // Shows every time
+}
+```
+
+**Use for:**
+- Critical system alerts
+- Real-time status updates
+- Urgent notifications
+- Temporary announcements
+
+<Callout type="warn">
+  Use `always` sparingly. It can lead to announcement fatigue if overused.
+</Callout>
+
+---
+
+## Times
+
+Show N times total, then stop:
+
+```tsx
+{
+  id: 'feature-promo',
+  variant: 'slideout',
+  title: 'Try Our New Feature',
+  frequency: { type: 'times', count: 3 }, // Show 3 times total
+}
+```
+
+**Use for:**
+- Feature promotions (show a few times)
+- Gradual onboarding (spread over multiple visits)
+- Survey invitations
+- Feedback requests
+
+### Example
+
+```tsx
+const announcements = [
+  {
+    id: 'survey',
+    variant: 'modal',
+    title: 'We Value Your Feedback',
+    description: 'Take our 2-minute survey to help us improve.',
+
+    frequency: {
+      type: 'times',
+      count: 2, // Show twice, then stop
+    },
+
+    primaryAction: {
+      label: 'Take Survey',
+      onClick: () => window.open('/survey'),
+    },
+
+    onShow: () => {
+      // Track which view this is
+      const announcement = useAnnouncement('survey');
+      analytics.track('survey_shown', {
+        viewNumber: announcement.viewCount,
+      });
+    },
+  },
+];
+```
+
+---
+
+## Interval
+
+Show every N days:
+
+```tsx
+{
+  id: 'weekly-update',
+  variant: 'banner',
+  title: 'Weekly Product Update',
+  frequency: { type: 'interval', days: 7 }, // Show every 7 days
+}
+```
+
+**Use for:**
+- Periodic updates
+- Weekly tips
+- Monthly reminders
+- Recurring promotions
+
+### Examples
+
+```tsx
+// Show every day
+frequency: { type: 'interval', days: 1 }
+
+// Show every week
+frequency: { type: 'interval', days: 7 }
+
+// Show every 2 weeks
+frequency: { type: 'interval', days: 14 }
+
+// Show every month (approx)
+frequency: { type: 'interval', days: 30 }
+```
+
+### How It Works
+
+The interval starts from the last time the announcement was shown:
+
+```tsx
+// First view: Today at 10:00 AM
+// Next eligible: 7 days later at 10:00 AM
+// If dismissed before 7 days, won't show until interval passes
+```
+
+---
+
+## Combining with Dismissal
+
+Frequency rules work with dismissal patterns:
+
+```tsx
+{
+  id: 'promo',
+  variant: 'toast',
+  title: 'Limited Time Offer',
+
+  frequency: { type: 'interval', days: 3 }, // Show every 3 days
+
+  // If user dismisses, they won't see it again
+  // If user just hides it, it will show again in 3 days
+}
+```
+
+### Dismiss vs Hide
+
+- **Dismiss** - Permanently removes the announcement (ignores frequency)
+- **Hide** - Temporarily hides, respects frequency rules
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+
+function AnnouncementControls() {
+  const announcement = useAnnouncement('promo');
+
+  return (
+    <div>
+      {/* Hide - will show again based on frequency */}
+      <button onClick={announcement.hide}>
+        Remind Me Later
+      </button>
+
+      {/* Dismiss - won't show again */}
+      <button onClick={() => announcement.dismiss()}>
+        Don't Show Again
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## Checking Eligibility
+
+Use `canShow` to check if an announcement can be shown:
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+
+function SmartTrigger() {
+  const announcement = useAnnouncement('feature-tip');
+
+  useEffect(() => {
+    // Only show if frequency rules allow
+    if (announcement.canShow) {
+      announcement.show();
+    }
+  }, []);
+}
+```
+
+---
+
+## View Tracking
+
+Track how many times an announcement has been viewed:
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+
+function ViewCounter() {
+  const announcement = useAnnouncement('tip');
+
+  return (
+    <div>
+      <p>Viewed {announcement.viewCount} times</p>
+      <p>Can show: {announcement.canShow ? 'Yes' : 'No'}</p>
+
+      {announcement.state.lastViewedAt && (
+        <p>
+          Last viewed:{' '}
+          {announcement.state.lastViewedAt.toLocaleDateString()}
+        </p>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## Advanced Patterns
+
+### Reset After Completion
+
+```tsx
+{
+  id: 'onboarding',
+  variant: 'modal',
+  title: 'Complete Onboarding',
+  frequency: 'once',
+
+  primaryAction: {
+    label: 'Complete',
+    onClick: () => {
+      completeOnboarding();
+      announcement.complete();
+      // User completed - won't see again
+    },
+  },
+
+  secondaryAction: {
+    label: 'Skip',
+    onClick: () => {
+      announcement.hide();
+      // User skipped - can see again next session
+    },
+  },
+}
+```
+
+### Conditional Frequency
+
+```tsx
+const getFrequency = (userPlan: string): FrequencyRule => {
+  // Free users see promo every 3 days
+  if (userPlan === 'free') {
+    return { type: 'interval', days: 3 };
+  }
+
+  // Pro users see once
+  return 'once';
+};
+
+const announcements = [
+  {
+    id: 'upgrade-promo',
+    variant: 'banner',
+    title: 'Upgrade to Pro',
+    frequency: getFrequency(user.plan),
+  },
+];
+```
+
+### Progressive Disclosure
+
+Show different announcements based on view count:
+
+```tsx
+function ProgressiveAnnouncements() {
+  const welcome = useAnnouncement('welcome');
+  const advanced = useAnnouncement('advanced-tips');
+
+  useEffect(() => {
+    // Show welcome first 3 times
+    if (welcome.viewCount < 3 && welcome.canShow) {
+      welcome.show();
+    }
+    // Then show advanced tips
+    else if (welcome.viewCount >= 3 && advanced.canShow) {
+      advanced.show();
+    }
+  }, [welcome.viewCount]);
+}
+```
+
+---
+
+## Storage
+
+Frequency state is persisted using the storage option:
+
+```tsx
+<AnnouncementsProvider
+  storage="localStorage" // Default - persists across sessions
+  // storage="sessionStorage" // Session only
+  // storage="memory" // Not persisted
+/>
+```
+
+### Stored Data
+
+```json
+{
+  "announcement-id": {
+    "viewCount": 2,
+    "lastViewedAt": "2024-01-20T10:30:00Z",
+    "isDismissed": false
+  }
+}
+```
+
+---
+
+## TypeScript
+
+```tsx
+import type { FrequencyRule } from '@tour-kit/announcements';
+
+const onceRule: FrequencyRule = 'once';
+const sessionRule: FrequencyRule = 'session';
+const alwaysRule: FrequencyRule = 'always';
+
+const timesRule: FrequencyRule = {
+  type: 'times',
+  count: 5,
+};
+
+const intervalRule: FrequencyRule = {
+  type: 'interval',
+  days: 7,
+};
+```
+
+---
+
+## Related
+
+- [AnnouncementsProvider](/docs/announcements/providers/announcements-provider) - Configure storage
+- [useAnnouncement](/docs/announcements/hooks/use-announcement) - Access view count and eligibility
+- [Audience Targeting](/docs/announcements/configuration/audience) - Target specific users

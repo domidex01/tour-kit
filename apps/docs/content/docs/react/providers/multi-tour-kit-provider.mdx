@@ -1,0 +1,344 @@
+---
+title: MultiTourKitProvider
+description: Provider for managing multiple tours with shared configuration
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# MultiTourKitProvider
+
+The top-level provider for Tour Kit that manages multiple tours, routing, persistence, and lifecycle callbacks.
+
+## Why Use This Provider?
+
+- **Multi-tour registry** - Register and manage multiple tours declaratively
+- **Shared configuration** - Apply global settings to all tours
+- **Router integration** - Connect to your app's routing system
+- **Lifecycle callbacks** - Track tour starts, completions, and step views
+- **State persistence** - Preserve tour progress across navigations
+
+---
+
+## Basic Usage
+
+```tsx
+import {
+  MultiTourKitProvider,
+  Tour,
+  TourStep,
+  TourOverlay,
+  TourCard,
+} from '@tour-kit/react';
+
+function App() {
+  return (
+    <MultiTourKitProvider>
+      <Tour id="welcome">
+        <TourStep target="#hero" title="Welcome!" content="..." />
+      </Tour>
+
+      <TourOverlay />
+      <TourCard />
+
+      <YourApp />
+    </MultiTourKitProvider>
+  );
+}
+```
+
+---
+
+## Props
+
+<TypeTable
+  type={{
+    children: {
+      type: 'React.ReactNode',
+      description: 'Tour components and your application',
+    },
+    config: {
+      type: 'TourKitConfig',
+      description: 'Global configuration for all tours',
+      default: '{}',
+    },
+    router: {
+      type: 'RouterAdapter',
+      description: 'Router adapter for multi-page tours',
+      default: 'undefined',
+    },
+    routePersistence: {
+      type: 'MultiPagePersistenceConfig',
+      description: 'Configuration for persisting state across pages',
+      default: 'undefined',
+    },
+    autoNavigate: {
+      type: 'boolean',
+      description: 'Auto-navigate when step requires different route',
+      default: 'true',
+    },
+    onNavigationRequired: {
+      type: '(route: string, stepId: string) => void',
+      description: 'Called when navigation needed but autoNavigate is false',
+      default: 'undefined',
+    },
+    onTourStart: {
+      type: '(tourId: string) => void',
+      description: 'Called when any tour starts',
+      default: 'undefined',
+    },
+    onTourComplete: {
+      type: '(tourId: string) => void',
+      description: 'Called when any tour completes',
+      default: 'undefined',
+    },
+    onTourSkip: {
+      type: '(tourId: string, stepIndex: number) => void',
+      description: 'Called when any tour is skipped',
+      default: 'undefined',
+    },
+    onStepView: {
+      type: '(tourId: string, stepId: string, stepIndex: number) => void',
+      description: 'Called when step changes in any tour',
+      default: 'undefined',
+    },
+  }}
+/>
+
+---
+
+## With Router Integration
+
+```tsx
+import {
+  MultiTourKitProvider,
+  useNextAppRouter,
+  Tour,
+  TourStep,
+} from '@tour-kit/react';
+
+function App() {
+  const router = useNextAppRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{
+        enabled: true,
+        storage: 'localStorage',
+        expiryMs: 24 * 60 * 60 * 1000, // 24 hours
+        syncTabs: true,
+      }}
+      autoNavigate={true}
+    >
+      <Tour id="onboarding">
+        <TourStep target="#home" title="Home" route="/" />
+        <TourStep target="#dashboard" title="Dashboard" route="/dashboard" />
+      </Tour>
+
+      <TourOverlay />
+      <TourCard />
+    </MultiTourKitProvider>
+  );
+}
+```
+
+---
+
+## Lifecycle Callbacks
+
+Track tour analytics with lifecycle callbacks:
+
+```tsx
+<MultiTourKitProvider
+  onTourStart={(tourId) => {
+    analytics.track('tour_started', { tourId });
+  }}
+  onTourComplete={(tourId) => {
+    analytics.track('tour_completed', { tourId });
+  }}
+  onTourSkip={(tourId, stepIndex) => {
+    analytics.track('tour_skipped', { tourId, stoppedAt: stepIndex });
+  }}
+  onStepView={(tourId, stepId, stepIndex) => {
+    analytics.track('step_viewed', { tourId, stepId, stepIndex });
+  }}
+>
+```
+
+---
+
+## Multiple Tours
+
+Register multiple tours within the same provider:
+
+```tsx
+<MultiTourKitProvider>
+  <Tour id="welcome">
+    <TourStep target="#hero" title="Welcome!" />
+    <TourStep target="#features" title="Features" />
+  </Tour>
+
+  <Tour id="feature-deep-dive">
+    <TourStep target="#feature-1" title="Feature 1" />
+    <TourStep target="#feature-2" title="Feature 2" />
+    <TourStep target="#feature-3" title="Feature 3" />
+  </Tour>
+
+  <TourOverlay />
+  <TourCard />
+</MultiTourKitProvider>
+```
+
+Start specific tours:
+
+```tsx
+function TourButtons() {
+  const { start } = useTour();
+
+  return (
+    <>
+      <button onClick={() => start('welcome')}>Start Welcome Tour</button>
+      <button onClick={() => start('feature-deep-dive')}>Deep Dive</button>
+    </>
+  );
+}
+```
+
+---
+
+## Global Configuration
+
+Apply settings to all tours:
+
+```tsx
+<MultiTourKitProvider
+  config={{
+    defaultPlacement: 'bottom',
+    spotlight: {
+      enabled: true,
+      padding: 8,
+      borderRadius: 8,
+    },
+    keyboard: {
+      enabled: true,
+      escapeCloses: true,
+      arrowNavigation: true,
+    },
+    a11y: {
+      announceSteps: true,
+      politeness: 'polite',
+    },
+    scroll: {
+      enabled: true,
+      behavior: 'smooth',
+      block: 'center',
+    },
+  }}
+>
+```
+
+### TourKitConfig Options
+
+<TypeTable
+  type={{
+    defaultPlacement: {
+      type: 'Placement',
+      description: 'Default tooltip placement',
+      default: "'bottom'",
+    },
+    spotlight: {
+      type: 'SpotlightConfig',
+      description: 'Spotlight/overlay configuration',
+    },
+    keyboard: {
+      type: 'KeyboardConfig',
+      description: 'Keyboard navigation settings',
+    },
+    a11y: {
+      type: 'A11yConfig',
+      description: 'Accessibility settings',
+    },
+    scroll: {
+      type: 'ScrollConfig',
+      description: 'Scroll behavior settings',
+    },
+  }}
+/>
+
+---
+
+## Route Persistence Configuration
+
+<TypeTable
+  type={{
+    enabled: {
+      type: 'boolean',
+      description: 'Enable state persistence',
+      default: 'false',
+    },
+    storage: {
+      type: "'localStorage' | 'sessionStorage' | 'memory'",
+      description: 'Storage backend',
+      default: "'localStorage'",
+    },
+    key: {
+      type: 'string',
+      description: 'Storage key',
+      default: "'tourkit-route-state'",
+    },
+    expiryMs: {
+      type: 'number',
+      description: 'Expiration time in ms',
+      default: '86400000 (24h)',
+    },
+    syncTabs: {
+      type: 'boolean',
+      description: 'Sync across browser tabs',
+      default: 'false',
+    },
+  }}
+/>
+
+---
+
+## Manual Navigation Control
+
+Disable auto-navigation and handle it yourself:
+
+```tsx
+<MultiTourKitProvider
+  router={router}
+  autoNavigate={false}
+  onNavigationRequired={(route, stepId) => {
+    // Show confirmation dialog
+    if (confirm(`Navigate to ${route}?`)) {
+      router.navigate(route);
+    }
+  }}
+>
+```
+
+---
+
+## Architecture
+
+The provider composes three internal providers:
+
+```tsx
+<TourRegistryContext.Provider>    {/* Tour registration */}
+  <CoreTourKitProvider>            {/* Global config, callbacks */}
+    <TourProvider>                  {/* Tour state, routing */}
+      {children}
+    </TourProvider>
+  </CoreTourKitProvider>
+</TourRegistryContext.Provider>
+```
+
+---
+
+## Related
+
+- [Tour](/docs/react/components/tour) - Individual tour component
+- [useTours](/docs/react/hooks/use-tours) - Access all registered tours
+- [Router Adapters](/docs/react/adapters) - Router integration options

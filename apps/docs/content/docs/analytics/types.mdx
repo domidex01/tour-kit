@@ -1,0 +1,505 @@
+---
+title: Analytics Types
+description: TypeScript type definitions for the analytics package
+---
+
+## Overview
+
+The `@tour-kit/analytics` package is fully typed with TypeScript. This reference documents all exported types for events, plugins, and configuration.
+
+## Event Types
+
+### TourEventName
+
+All possible event names that can be tracked:
+
+```ts
+type TourEventName =
+  // Tour lifecycle
+  | 'tour_started'
+  | 'tour_completed'
+  | 'tour_skipped'
+  | 'tour_abandoned'
+  // Step lifecycle
+  | 'step_viewed'
+  | 'step_completed'
+  | 'step_skipped'
+  | 'step_interaction'
+  // Hint events
+  | 'hint_shown'
+  | 'hint_dismissed'
+  | 'hint_clicked'
+  // Feature adoption
+  | 'feature_used'
+  | 'feature_adopted'
+  | 'feature_churned'
+  | 'nudge_shown'
+  | 'nudge_clicked'
+  | 'nudge_dismissed'
+```
+
+### TourEvent
+
+Complete event payload sent to plugins:
+
+```ts
+interface TourEvent {
+  /** Event type */
+  eventName: TourEventName
+
+  /** Unix timestamp in milliseconds */
+  timestamp: number
+
+  /** Unique session identifier */
+  sessionId: string
+
+  /** Tour identifier */
+  tourId: string
+
+  /** Current step identifier */
+  stepId?: string
+
+  /** Current step index (0-based) */
+  stepIndex?: number
+
+  /** Total number of steps in tour */
+  totalSteps?: number
+
+  /** User identifier (if known) */
+  userId?: string
+
+  /** Additional user properties */
+  userProperties?: Record<string, unknown>
+
+  /** Duration in milliseconds */
+  duration?: number
+
+  /** Number of interactions during step */
+  interactionCount?: number
+
+  /** Custom metadata */
+  metadata?: Record<string, unknown>
+}
+```
+
+### TourEventData
+
+Event data without auto-generated fields (used when tracking events manually):
+
+```ts
+type TourEventData = Omit<TourEvent, 'timestamp' | 'sessionId' | 'eventName'>
+```
+
+Usage:
+
+```tsx
+import { useAnalytics, type TourEventData } from '@tour-kit/analytics'
+
+function MyComponent() {
+  const analytics = useAnalytics()
+
+  const data: TourEventData = {
+    tourId: 'onboarding',
+    stepId: 'welcome',
+    stepIndex: 0,
+    totalSteps: 5,
+    metadata: {
+      source: 'dashboard'
+    }
+  }
+
+  analytics.track('step_viewed', data)
+}
+```
+
+## Plugin Types
+
+### AnalyticsPlugin
+
+Plugin interface that all analytics plugins must implement:
+
+```ts
+interface AnalyticsPlugin {
+  /** Unique plugin identifier */
+  name: string
+
+  /** Initialize the plugin (called once on setup) */
+  init?: () => void | Promise<void>
+
+  /** Track an event */
+  track: (event: TourEvent) => void | Promise<void>
+
+  /** Identify a user */
+  identify?: (userId: string, properties?: Record<string, unknown>) => void
+
+  /** Flush any queued events */
+  flush?: () => void | Promise<void>
+
+  /** Clean up resources */
+  destroy?: () => void
+}
+```
+
+Only `name` and `track` are required.
+
+Example:
+
+```ts
+import type { AnalyticsPlugin, TourEvent } from '@tour-kit/analytics'
+
+const myPlugin: AnalyticsPlugin = {
+  name: 'my-plugin',
+
+  async init() {
+    console.log('Plugin initialized')
+  },
+
+  track(event: TourEvent) {
+    console.log('Tracking:', event.eventName)
+  },
+
+  identify(userId: string, properties?: Record<string, unknown>) {
+    console.log('User:', userId, properties)
+  },
+
+  async flush() {
+    console.log('Flushing events')
+  },
+
+  destroy() {
+    console.log('Cleaning up')
+  }
+}
+```
+
+## Configuration Types
+
+### AnalyticsConfig
+
+Configuration object passed to `AnalyticsProvider`:
+
+```ts
+interface AnalyticsConfig {
+  /** Enable/disable analytics (default: true) */
+  enabled?: boolean
+
+  /** Array of analytics plugins */
+  plugins: AnalyticsPlugin[]
+
+  /** Enable debug logging to console */
+  debug?: boolean
+
+  /** Queue events when offline */
+  offlineQueue?: boolean
+
+  /** Batch events before sending */
+  batchSize?: number
+
+  /** Batch interval in milliseconds */
+  batchInterval?: number
+
+  /** User identification */
+  userId?: string
+
+  /** User properties */
+  userProperties?: Record<string, unknown>
+
+  /** Global properties added to all events */
+  globalProperties?: Record<string, unknown>
+}
+```
+
+Example:
+
+```tsx
+import { AnalyticsProvider, type AnalyticsConfig } from '@tour-kit/analytics'
+
+const config: AnalyticsConfig = {
+  enabled: true,
+  plugins: [
+    posthogPlugin({ apiKey: 'phc_xxx' })
+  ],
+  debug: process.env.NODE_ENV === 'development',
+  userId: user?.id,
+  userProperties: {
+    email: user?.email,
+    plan: user?.plan
+  },
+  globalProperties: {
+    app_version: '1.0.0',
+    environment: 'production'
+  }
+}
+
+<AnalyticsProvider config={config}>
+  {children}
+</AnalyticsProvider>
+```
+
+## Class Types
+
+### TourAnalytics
+
+Main analytics tracker class returned by `createAnalytics()` and hooks:
+
+```ts
+class TourAnalytics {
+  // User identification
+  identify(userId: string, properties?: Record<string, unknown>): void
+
+  // Raw event tracking
+  track(eventName: TourEventName, data: TourEventData): void
+
+  // Tour lifecycle methods
+  tourStarted(tourId: string, totalSteps: number, metadata?: Record<string, unknown>): void
+  tourCompleted(tourId: string, metadata?: Record<string, unknown>): void
+  tourSkipped(tourId: string, stepIndex: number, stepId?: string, metadata?: Record<string, unknown>): void
+  tourAbandoned(tourId: string, stepIndex: number, stepId?: string, metadata?: Record<string, unknown>): void
+
+  // Step lifecycle methods
+  stepViewed(tourId: string, stepId: string, stepIndex: number, totalSteps: number, metadata?: Record<string, unknown>): void
+  stepCompleted(tourId: string, stepId: string, stepIndex: number, metadata?: Record<string, unknown>): void
+  stepSkipped(tourId: string, stepId: string, stepIndex: number, metadata?: Record<string, unknown>): void
+  stepInteraction(tourId: string, stepId: string, interactionType: string, metadata?: Record<string, unknown>): void
+
+  // Hint tracking methods
+  hintShown(hintId: string, metadata?: Record<string, unknown>): void
+  hintDismissed(hintId: string, metadata?: Record<string, unknown>): void
+  hintClicked(hintId: string, metadata?: Record<string, unknown>): void
+
+  // Utility methods
+  flush(): Promise<void>
+  destroy(): void
+}
+```
+
+## Hook Return Types
+
+### useAnalytics
+
+Returns `TourAnalytics` or throws error:
+
+```ts
+function useAnalytics(): TourAnalytics
+```
+
+Usage:
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics'
+
+function MyComponent() {
+  const analytics = useAnalytics()
+  // analytics is always defined (throws if not in provider)
+}
+```
+
+### useAnalyticsOptional
+
+Returns `TourAnalytics | null`:
+
+```ts
+function useAnalyticsOptional(): TourAnalytics | null
+```
+
+Usage:
+
+```tsx
+import { useAnalyticsOptional } from '@tour-kit/analytics'
+
+function MyComponent() {
+  const analytics = useAnalyticsOptional()
+  // analytics may be null
+  analytics?.track('event', { tourId: 'test' })
+}
+```
+
+## Plugin-Specific Types
+
+### Console Plugin
+
+```ts
+interface ConsolePluginOptions {
+  /** Prefix for log messages */
+  prefix?: string
+  /** Use collapsed console groups */
+  collapsed?: boolean
+  /** Custom colors for different event types */
+  colors?: {
+    tour?: string
+    step?: string
+    hint?: string
+  }
+}
+
+function consolePlugin(options?: ConsolePluginOptions): AnalyticsPlugin
+```
+
+### PostHog Plugin
+
+```ts
+interface PostHogPluginOptions {
+  /** PostHog API key */
+  apiKey: string
+  /** PostHog API host (default: https://app.posthog.com) */
+  apiHost?: string
+  /** Enable autocapture (default: false) */
+  autocapture?: boolean
+  /** Event name prefix (default: tourkit_) */
+  eventPrefix?: string
+}
+
+function posthogPlugin(options: PostHogPluginOptions): AnalyticsPlugin
+```
+
+### Mixpanel Plugin
+
+```ts
+interface MixpanelPluginOptions {
+  /** Mixpanel token */
+  token: string
+  /** Enable debug mode */
+  debug?: boolean
+  /** Event name prefix (default: TourKit: ) */
+  eventPrefix?: string
+}
+
+function mixpanelPlugin(options: MixpanelPluginOptions): AnalyticsPlugin
+```
+
+### Amplitude Plugin
+
+```ts
+interface AmplitudePluginOptions {
+  /** Amplitude API key */
+  apiKey: string
+  /** Event name prefix (default: tourkit_) */
+  eventPrefix?: string
+  /** Server URL for EU data residency */
+  serverUrl?: string
+}
+
+function amplitudePlugin(options: AmplitudePluginOptions): AnalyticsPlugin
+```
+
+### Google Analytics Plugin
+
+```ts
+interface GoogleAnalyticsPluginOptions {
+  /** GA4 Measurement ID (G-XXXXXXXXXX) */
+  measurementId: string
+  /** Event name prefix (default: tourkit_) */
+  eventPrefix?: string
+}
+
+function googleAnalyticsPlugin(options: GoogleAnalyticsPluginOptions): AnalyticsPlugin
+```
+
+## Type Imports
+
+Import types from the package:
+
+```ts
+// Event types
+import type {
+  TourEvent,
+  TourEventName,
+  TourEventData
+} from '@tour-kit/analytics'
+
+// Plugin types
+import type {
+  AnalyticsPlugin,
+  AnalyticsConfig
+} from '@tour-kit/analytics'
+
+// Class type
+import type { TourAnalytics } from '@tour-kit/analytics'
+```
+
+## Generic Types
+
+### Metadata Type
+
+Metadata can be any JSON-serializable object:
+
+```ts
+// Valid metadata
+const metadata: Record<string, unknown> = {
+  string: 'value',
+  number: 123,
+  boolean: true,
+  array: [1, 2, 3],
+  nested: {
+    key: 'value'
+  }
+}
+
+// Invalid metadata (not JSON-serializable)
+const bad = {
+  fn: () => {},           // ❌ Function
+  date: new Date(),       // ❌ Date object
+  regex: /test/,          // ❌ RegExp
+  symbol: Symbol('test')  // ❌ Symbol
+}
+```
+
+### Properties Type
+
+User and global properties use the same type:
+
+```ts
+type Properties = Record<string, unknown>
+```
+
+Example:
+
+```ts
+const userProperties: Record<string, unknown> = {
+  email: 'user@example.com',
+  plan: 'pro',
+  features: ['feature-a', 'feature-b']
+}
+
+const globalProperties: Record<string, unknown> = {
+  app_version: '1.0.0',
+  platform: 'web',
+  environment: 'production'
+}
+```
+
+## Type Guards
+
+Check event types at runtime:
+
+```ts
+import type { TourEvent, TourEventName } from '@tour-kit/analytics'
+
+function isTourEvent(eventName: TourEventName): boolean {
+  return eventName.startsWith('tour_')
+}
+
+function isStepEvent(eventName: TourEventName): boolean {
+  return eventName.startsWith('step_')
+}
+
+function isHintEvent(eventName: TourEventName): boolean {
+  return eventName.startsWith('hint_')
+}
+
+// Usage in plugin
+const plugin: AnalyticsPlugin = {
+  name: 'filtered',
+  track(event: TourEvent) {
+    if (isTourEvent(event.eventName)) {
+      console.log('Tour event:', event)
+    }
+  }
+}
+```
+
+## Related
+
+- [AnalyticsProvider](/docs/analytics/providers) - Provider configuration
+- [Hooks](/docs/analytics/hooks) - Access analytics in components
+- [Custom Plugins](/docs/analytics/plugins/custom) - Build custom integrations

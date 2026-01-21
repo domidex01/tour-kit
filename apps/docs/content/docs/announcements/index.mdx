@@ -1,0 +1,506 @@
+---
+title: '@tour-kit/announcements'
+description: Product announcements with 5 UI variants, priority queuing, and audience targeting
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/announcements
+
+A flexible library for displaying product announcements and updates to your users. Choose from 5 UI variants, manage announcement queues with priority ordering, and target specific user segments.
+
+## Why Announcements?
+
+Product announcements help you communicate new features, important updates, and critical messages to users at the right time. Unlike tours (which are sequential tutorials), announcements are:
+
+- **Flexible** - Choose from 5 UI variants for different use cases
+- **Prioritized** - Critical messages appear before low-priority ones
+- **Targeted** - Show announcements only to relevant users
+- **Frequency-aware** - Control how often users see each announcement
+- **Persistent** - Track views and dismissals across sessions
+
+**Use announcements for:**
+- New feature releases
+- Product updates and improvements
+- Important notices and alerts
+- Time-sensitive promotions
+- Onboarding messages
+
+**Use tours instead when:**
+- You need a sequential, step-by-step walkthrough
+- Users need to complete specific actions in order
+- You want guided product education
+
+---
+
+## Installation
+
+```bash
+pnpm add @tour-kit/announcements
+```
+
+```bash
+npm install @tour-kit/announcements
+```
+
+```bash
+yarn add @tour-kit/announcements
+```
+
+---
+
+## Quick Start
+
+```tsx
+import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements';
+
+function App() {
+  return (
+    <AnnouncementsProvider
+      announcements={[
+        {
+          id: 'new-feature',
+          variant: 'modal',
+          priority: 'high',
+          title: 'New Export Feature!',
+          description: 'You can now export your data to CSV and PDF.',
+          primaryAction: {
+            label: 'Try It Now',
+            onClick: () => console.log('Action clicked'),
+          },
+        },
+      ]}
+    >
+      <AnnouncementModal id="new-feature" />
+      <YourApp />
+    </AnnouncementsProvider>
+  );
+}
+```
+
+---
+
+## UI Variants
+
+Choose the right variant for your use case:
+
+### Modal
+
+Centered dialog with overlay - best for important announcements requiring immediate attention.
+
+```tsx
+<AnnouncementModal
+  id="feature-launch"
+  size="md"
+  closeOnOverlayClick={false}
+/>
+```
+
+**Best for:** Major features, breaking changes, critical updates
+
+### Slideout
+
+Side panel that slides in from left or right - less intrusive than modals.
+
+```tsx
+<AnnouncementSlideout
+  id="product-update"
+  position="right"
+  size="md"
+/>
+```
+
+**Best for:** Product updates, changelog entries, detailed announcements
+
+### Banner
+
+Full-width bar at top or bottom - persistent and non-blocking.
+
+```tsx
+<AnnouncementBanner
+  id="maintenance-notice"
+  position="top"
+  sticky={true}
+  intent="warning"
+/>
+```
+
+**Best for:** System notices, maintenance alerts, persistent messages
+
+### Toast
+
+Temporary notification that auto-dismisses - minimal and unobtrusive.
+
+```tsx
+<AnnouncementToast
+  id="quick-tip"
+  position="bottom-right"
+  autoDismiss={true}
+  autoDismissDelay={5000}
+/>
+```
+
+**Best for:** Quick tips, non-critical updates, success messages
+
+### Spotlight
+
+Highlights a specific element with an overlay - draws attention to UI changes.
+
+```tsx
+<AnnouncementSpotlight
+  id="new-button"
+  targetSelector="#export-button"
+  placement="bottom"
+/>
+```
+
+**Best for:** New UI elements, feature highlights, contextual help
+
+---
+
+## Priority-Based Queue
+
+Announcements are automatically queued based on priority:
+
+```tsx
+const announcements = [
+  {
+    id: 'critical-alert',
+    variant: 'modal',
+    priority: 'critical', // Shows first
+    title: 'Security Update Required',
+  },
+  {
+    id: 'new-feature',
+    variant: 'slideout',
+    priority: 'high', // Shows second
+    title: 'New Export Feature',
+  },
+  {
+    id: 'tip',
+    variant: 'toast',
+    priority: 'low', // Shows last
+    title: 'Pro Tip',
+  },
+];
+```
+
+**Priority order:** `critical` > `high` > `normal` > `low`
+
+Configure queue behavior:
+
+```tsx
+<AnnouncementsProvider
+  announcements={announcements}
+  queueConfig={{
+    maxConcurrent: 1, // Only show one at a time
+    autoShow: true, // Automatically show next in queue
+    delayBetween: 500, // Wait 500ms between announcements
+  }}
+/>
+```
+
+---
+
+## Frequency Rules
+
+Control how often users see announcements:
+
+```tsx
+{
+  id: 'promo',
+  variant: 'banner',
+  frequency: 'once', // Only ever show once
+}
+
+{
+  id: 'tip',
+  variant: 'toast',
+  frequency: 'session', // Once per session
+}
+
+{
+  id: 'survey',
+  variant: 'modal',
+  frequency: { type: 'times', count: 3 }, // Show 3 times total
+}
+
+{
+  id: 'reminder',
+  variant: 'banner',
+  frequency: { type: 'interval', days: 7 }, // Every 7 days
+}
+```
+
+---
+
+## Audience Targeting
+
+Show announcements only to specific users:
+
+```tsx
+<AnnouncementsProvider
+  userContext={{
+    plan: 'pro',
+    role: 'admin',
+    signupDate: '2024-01-15',
+  }}
+  announcements={[
+    {
+      id: 'pro-feature',
+      variant: 'modal',
+      title: 'New Pro Feature',
+      audience: [
+        { field: 'plan', operator: 'equals', value: 'pro' },
+      ],
+    },
+    {
+      id: 'admin-notice',
+      variant: 'banner',
+      title: 'Admin Update',
+      audience: [
+        { field: 'role', operator: 'equals', value: 'admin' },
+      ],
+    },
+  ]}
+/>
+```
+
+---
+
+## Programmatic Control
+
+Use hooks to control announcements programmatically:
+
+```tsx
+import { useAnnouncement, useAnnouncements } from '@tour-kit/announcements';
+
+function AnnouncementControls() {
+  const announcement = useAnnouncement('new-feature');
+  const { announcements, showNext } = useAnnouncements();
+
+  return (
+    <div>
+      <button onClick={announcement.show}>
+        Show Announcement
+      </button>
+      <button onClick={announcement.dismiss}>
+        Dismiss Forever
+      </button>
+      <p>Viewed {announcement.viewCount} times</p>
+      <p>Active announcements: {announcements.visible.length}</p>
+    </div>
+  );
+}
+```
+
+---
+
+## Persistence
+
+Announcement state (views, dismissals) is automatically persisted:
+
+```tsx
+<AnnouncementsProvider
+  announcements={announcements}
+  storage="localStorage" // Default
+  storageKey="app:announcements" // Custom key
+/>
+```
+
+Reset all announcement state:
+
+```tsx
+const { resetAll } = useAnnouncements();
+
+<button onClick={resetAll}>
+  Reset All Announcements
+</button>
+```
+
+---
+
+## Architecture
+
+The announcements package uses a provider/context pattern:
+
+```
+AnnouncementsProvider
+├── Context (state management)
+│   ├── announcements Map<id, AnnouncementState>
+│   ├── queue (priority-sorted)
+│   └── activeId (currently shown)
+├── UI Components
+│   ├── AnnouncementModal
+│   ├── AnnouncementSlideout
+│   ├── AnnouncementBanner
+│   ├── AnnouncementToast
+│   └── AnnouncementSpotlight
+└── Hooks
+    ├── useAnnouncement(id)
+    ├── useAnnouncements()
+    └── useAnnouncementQueue()
+```
+
+### State Management
+
+- **Provider-based** - Announcement state managed via React context
+- **Priority queuing** - Automatic ordering by priority level
+- **Persistence** - State saved to localStorage/sessionStorage
+- **Lifecycle callbacks** - onShow, onDismiss, onComplete events
+
+---
+
+## Bundle Size
+
+| Package | Gzipped |
+|---------|---------|
+| @tour-kit/announcements | < 10KB |
+
+---
+
+## Package Contents
+
+<Cards>
+  <Card title="Providers" href="/docs/announcements/providers/announcements-provider">
+    AnnouncementsProvider - Configure announcements, queue, and persistence
+  </Card>
+  <Card title="Hooks" href="/docs/announcements/hooks/use-announcement">
+    useAnnouncement, useAnnouncements, useAnnouncementQueue - Programmatic control
+  </Card>
+  <Card title="Components" href="/docs/announcements/components">
+    Modal, Slideout, Banner, Toast, Spotlight - Pre-styled UI variants
+  </Card>
+  <Card title="Headless" href="/docs/announcements/headless">
+    Build custom announcement UI with render props
+  </Card>
+  <Card title="Configuration" href="/docs/announcements/configuration/frequency">
+    Frequency rules, audience targeting, queue management
+  </Card>
+  <Card title="Types" href="/docs/announcements/types">
+    Complete TypeScript type reference
+  </Card>
+</Cards>
+
+---
+
+## Complete Example
+
+```tsx
+import {
+  AnnouncementsProvider,
+  AnnouncementModal,
+  AnnouncementBanner,
+  AnnouncementToast,
+  useAnnouncement,
+} from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'security-update',
+    variant: 'modal',
+    priority: 'critical',
+    title: 'Security Update Required',
+    description: 'Please update your password to continue.',
+    frequency: 'always',
+    primaryAction: {
+      label: 'Update Now',
+      onClick: () => router.push('/settings/security'),
+    },
+  },
+  {
+    id: 'new-export',
+    variant: 'slideout',
+    priority: 'high',
+    title: 'New Export Feature',
+    description: 'Export your data to CSV, PDF, or Excel.',
+    frequency: 'once',
+    media: {
+      type: 'image',
+      src: '/export-preview.png',
+      alt: 'Export feature preview',
+    },
+    audience: [
+      { field: 'plan', operator: 'in', value: ['pro', 'enterprise'] },
+    ],
+  },
+  {
+    id: 'maintenance',
+    variant: 'banner',
+    priority: 'normal',
+    title: 'Scheduled maintenance tonight at 2 AM EST',
+    frequency: 'session',
+    bannerOptions: {
+      intent: 'warning',
+      sticky: true,
+    },
+  },
+];
+
+function App() {
+  return (
+    <AnnouncementsProvider
+      announcements={announcements}
+      userContext={{
+        plan: 'pro',
+        role: 'user',
+      }}
+      queueConfig={{
+        maxConcurrent: 1,
+        autoShow: true,
+        delayBetween: 1000,
+      }}
+      storage="localStorage"
+      onShow={(id) => analytics.track('announcement_shown', { id })}
+      onDismiss={(id, reason) => analytics.track('announcement_dismissed', { id, reason })}
+    >
+      {/* Render UI components for each variant */}
+      <AnnouncementModal id="security-update" />
+      <AnnouncementModal id="new-export" />
+      <AnnouncementBanner id="maintenance" />
+
+      <MainApp />
+    </AnnouncementsProvider>
+  );
+}
+
+function MainApp() {
+  const security = useAnnouncement('security-update');
+
+  return (
+    <div>
+      <h1>My App</h1>
+      {security.canShow && (
+        <button onClick={security.show}>
+          Important Security Update
+        </button>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## Accessibility
+
+All announcement components are built with accessibility in mind:
+
+- **Modal**: Traps focus, closes on Escape, ARIA dialog role
+- **Slideout**: ARIA complementary role, keyboard navigation
+- **Banner**: ARIA banner/alert role based on intent
+- **Toast**: ARIA status/alert role, auto-dismiss announcements
+- **Spotlight**: Focus management, keyboard dismissal
+
+<Callout type="info">
+  All animations respect `prefers-reduced-motion`. Users with motion sensitivity will see instant transitions instead of animations.
+</Callout>
+
+---
+
+## Related
+
+- [@tour-kit/hints](/docs/hints) - For persistent, non-blocking feature hints
+- [@tour-kit/react](/docs/react) - For sequential product tours
+- [@tour-kit/scheduling](/docs/scheduling) - Schedule announcements for future dates

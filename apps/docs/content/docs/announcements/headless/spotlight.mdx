@@ -1,0 +1,61 @@
+---
+title: HeadlessSpotlight
+description: Headless spotlight component with render props
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# HeadlessSpotlight
+
+Unstyled element spotlight that provides state and behavior through render props.
+
+## Additional Render Props
+
+<TypeTable
+  type={{
+    spotlightOptions: { type: 'SpotlightOptions', description: 'Target and overlay options' },
+    targetElement: { type: 'HTMLElement | null', description: 'The element being highlighted' },
+    targetRect: { type: 'DOMRect | null', description: 'Bounding rect of target' },
+    placement: { type: 'Placement', description: 'Announcement card position' },
+    overlayStyle: { type: 'CSSProperties', description: 'Calculated overlay styles' },
+    spotlightStyle: { type: 'CSSProperties', description: 'Calculated spotlight cutout styles' },
+  }}
+/>
+
+## Example
+
+```tsx
+import { HeadlessSpotlight } from '@tour-kit/announcements/headless';
+
+<HeadlessSpotlight
+  id="new-button"
+  render={({
+    isVisible,
+    config,
+    hide,
+    targetElement,
+    targetRect,
+    overlayStyle,
+    spotlightStyle,
+  }) => {
+    if (!isVisible || !targetElement || !targetRect) return null;
+
+    return (
+      <>
+        {/* Overlay with cutout */}
+        <div className="overlay" style={overlayStyle} onClick={hide} />
+
+        {/* Spotlight highlight */}
+        <div className="spotlight" style={spotlightStyle} />
+
+        {/* Announcement card */}
+        <div className="announcement-card">
+          <h3>{config.title}</h3>
+          <p>{config.description}</p>
+          <button onClick={hide}>Got it</button>
+        </div>
+      </>
+    );
+  }}
+/>
+```

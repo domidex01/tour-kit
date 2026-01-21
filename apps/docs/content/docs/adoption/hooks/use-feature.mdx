@@ -1,0 +1,481 @@
+---
+title: useFeature
+description: Track and query individual feature adoption state
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`useFeature` provides access to a single feature's adoption state and a method to manually track usage. Use this hook when you need programmatic control over when usage is tracked.
+
+## Basic Usage
+
+```tsx
+import { useFeature } from '@tour-kit/adoption'
+
+function ExportButton() {
+  const { trackUsage, isAdopted, useCount } = useFeature('export')
+
+  const handleExport = async () => {
+    await exportUserData()
+    trackUsage() // Track after successful export
+  }
+
+  return (
+    <button onClick={handleExport}>
+      Export Data {!isAdopted && <span className="badge">{useCount}/3</span>}
+    </button>
+  )
+}
+```
+
+## Return Value
+
+<TypeTable
+  type={{
+    feature: {
+      type: 'Feature | null',
+      description: 'Feature definition, or null if feature ID not found',
+    },
+    usage: {
+      type: 'FeatureUsage',
+      description: 'Current usage statistics (useCount, firstUsed, lastUsed, status)',
+    },
+    isAdopted: {
+      type: 'boolean',
+      description: 'True if feature meets adoption criteria',
+    },
+    status: {
+      type: 'AdoptionStatus',
+      description: 'Current status: "not_started" | "exploring" | "adopted" | "churned"',
+    },
+    useCount: {
+      type: 'number',
+      description: 'Number of times feature has been used',
+    },
+    trackUsage: {
+      type: '() => void',
+      description: 'Manually track a feature usage',
+    },
+  }}
+/>
+
+## Examples
+
+### Conditional UI Based on Adoption
+
+Show different UI based on adoption status:
+
+```tsx
+function AIAssistantButton() {
+  const { isAdopted, status, useCount } = useFeature('ai-assistant')
+
+  if (status === 'not_started') {
+    return (
+      <button className="highlight">
+        Try AI Assistant
+        <span className="badge-new">New!</span>
+      </button>
+    )
+  }
+
+  if (status === 'exploring') {
+    return (
+      <button>
+        AI Assistant
+        <span className="badge-progress">{useCount}/5 uses</span>
+      </button>
+    )
+  }
+
+  return <button>AI Assistant</button>
+}
+```
+
+### Track on Success Only
+
+Don't track failed attempts:
+
+```tsx
+function SaveButton() {
+  const { trackUsage } = useFeature('auto-save')
+
+  const handleSave = async () => {
+    try {
+      await saveDocument()
+      trackUsage() // Only track successful saves
+    } catch (error) {
+      showError('Save failed')
+      // Don't track failures
+    }
+  }
+
+  return <button onClick={handleSave}>Save</button>
+}
+```
+
+### Progress Indicators
+
+Show adoption progress:
+
+```tsx
+function FeatureCard({ featureId }: { featureId: string }) {
+  const { feature, usage, isAdopted } = useFeature(featureId)
+
+  if (!feature) return null
+
+  const criteria = feature.adoptionCriteria || { minUses: 3 }
+  const progress = Math.min((usage.useCount / criteria.minUses) * 100, 100)
+
+  return (
+    <div className="feature-card">
+      <h3>{feature.name}</h3>
+      {isAdopted ? (
+        <span className="badge-success">Adopted</span>
+      ) : (
+        <div className="progress-bar">
+          <div className="progress-fill" style={{ width: `${progress}%` }} />
+          <span>{usage.useCount} / {criteria.minUses} uses</span>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+### Complex Tracking Logic
+
+Track based on specific conditions:
+
+```tsx
+function AdvancedSearchForm() {
+  const { trackUsage } = useFeature('advanced-search')
+  const [filters, setFilters] = useState({})
+
+  const handleSearch = () => {
+    const isAdvancedSearch =
+      Object.keys(filters).length > 1 || // Multiple filters
+      filters.dateRange || // Date filtering
+      filters.regex // Regex search
+
+    if (isAdvancedSearch) {
+      trackUsage() // Only track when using advanced features
+    }
+
+    performSearch(filters)
+  }
+
+  return <SearchForm onSubmit={handleSearch} />
+}
+```
+
+### Gamification
+
+Show achievement-style feedback:
+
+```tsx
+function KeyboardShortcuts() {
+  const { useCount, trackUsage } = useFeature('keyboard-shortcuts')
+  const [showCelebration, setShowCelebration] = useState(false)
+
+  const handleShortcut = (e: KeyboardEvent) => {
+    if (e.metaKey && e.key === 'k') {
+      const previousCount = useCount
+      trackUsage()
+
+      // Show celebration on milestones
+      if ([1, 5, 10, 25, 50].includes(previousCount + 1)) {
+        setShowCelebration(true)
+      }
+    }
+  }
+
+  return (
+    <>
+      <div onKeyDown={handleShortcut}>
+        {/* Your app */}
+      </div>
+      {showCelebration && (
+        <CelebrationModal count={useCount} />
+      )}
+    </>
+  )
+}
+```
+
+## Adoption Status Flow
+
+Features transition through these states:
+
+```
+not_started
+    ↓ (first use)
+exploring
+    ↓ (reaches minUses)
+adopted
+    ↓ (exceeds recencyDays without use)
+churned
+```
+
+### Checking Status
+
+```tsx
+function FeatureStatus({ featureId }: { featureId: string }) {
+  const { status, usage, feature } = useFeature(featureId)
+
+  const getMessage = () => {
+    switch (status) {
+      case 'not_started':
+        return 'Try this feature to get started!'
+
+      case 'exploring':
+        const remaining = (feature?.adoptionCriteria?.minUses || 3) - usage.useCount
+        return `${remaining} more uses to unlock`
+
+      case 'adopted':
+        return 'You've mastered this feature!'
+
+      case 'churned':
+        const lastUsed = new Date(usage.lastUsed!)
+        return `Last used ${formatDistanceToNow(lastUsed)} ago`
+    }
+  }
+
+  return <p>{getMessage()}</p>
+}
+```
+
+## Usage Timestamps
+
+Access when a feature was first/last used:
+
+```tsx
+function FeatureTimeline({ featureId }: { featureId: string }) {
+  const { usage } = useFeature(featureId)
+
+  if (!usage.firstUsed) {
+    return <p>Not yet used</p>
+  }
+
+  const daysSinceFirst = Math.floor(
+    (Date.now() - new Date(usage.firstUsed).getTime()) / (1000 * 60 * 60 * 24)
+  )
+
+  const daysSinceLast = usage.lastUsed
+    ? Math.floor((Date.now() - new Date(usage.lastUsed).getTime()) / (1000 * 60 * 60 * 24))
+    : null
+
+  return (
+    <div>
+      <p>First used {daysSinceFirst} days ago</p>
+      {daysSinceLast !== null && <p>Last used {daysSinceLast} days ago</p>}
+      <p>Total uses: {usage.useCount}</p>
+    </div>
+  )
+}
+```
+
+## Feature Not Found
+
+Handle missing features gracefully:
+
+```tsx
+function DynamicFeature({ featureId }: { featureId: string }) {
+  const { feature, trackUsage } = useFeature(featureId)
+
+  if (!feature) {
+    console.warn(`Feature not found: ${featureId}`)
+    return null
+  }
+
+  return (
+    <button onClick={trackUsage}>
+      {feature.name}
+    </button>
+  )
+}
+```
+
+The hook returns `feature: null` if the ID doesn't match any feature in the provider.
+
+## Performance Considerations
+
+The hook uses `useMemo` internally to prevent unnecessary recalculations:
+
+```tsx
+// ✓ Efficient: Memoized, only updates when usage changes
+function MyComponent() {
+  const { isAdopted } = useFeature('my-feature')
+  return <div>{isAdopted ? 'Adopted' : 'Not adopted'}</div>
+}
+
+// ✓ Also efficient: trackUsage is a stable callback
+function MyButton() {
+  const { trackUsage } = useFeature('my-feature')
+  return <button onClick={trackUsage}>Click</button>
+}
+```
+
+## TypeScript
+
+Fully typed return values:
+
+```tsx
+import { useFeature, type UseFeatureReturn, type AdoptionStatus } from '@tour-kit/adoption'
+
+function TypedComponent() {
+  const result: UseFeatureReturn = useFeature('search')
+
+  const status: AdoptionStatus = result.status // ✓ Type-safe
+  const isAdopted: boolean = result.isAdopted // ✓ Type-safe
+}
+```
+
+## Accessibility
+
+The hook:
+
+- Does not affect DOM or ARIA attributes
+- Provides data for you to render accessible UI
+- Works with screen readers (usage counts can be announced)
+
+Best practices:
+
+```tsx
+function AccessibleFeature() {
+  const { isAdopted, useCount } = useFeature('feature')
+
+  return (
+    <button
+      onClick={handleClick}
+      aria-label={
+        isAdopted
+          ? 'Feature (adopted)'
+          : `Feature (${useCount} uses)`
+      }
+    >
+      Feature
+    </button>
+  )
+}
+```
+
+## Common Patterns
+
+### Loading States
+
+Handle async operations:
+
+```tsx
+function AsyncFeature() {
+  const { trackUsage } = useFeature('async-feature')
+  const [loading, setLoading] = useState(false)
+
+  const handleClick = async () => {
+    setLoading(true)
+    try {
+      await performAsyncOperation()
+      trackUsage()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <button onClick={handleClick} disabled={loading}>
+      {loading ? 'Loading...' : 'Perform Action'}
+    </button>
+  )
+}
+```
+
+### Debounced Tracking
+
+Avoid tracking rapid repeated uses:
+
+```tsx
+import { useDebouncedCallback } from 'use-debounce'
+
+function SearchInput() {
+  const { trackUsage } = useFeature('search')
+
+  const debouncedTrack = useDebouncedCallback(
+    () => trackUsage(),
+    2000 // Track once per 2 seconds max
+  )
+
+  const handleSearch = (query: string) => {
+    performSearch(query)
+    debouncedTrack()
+  }
+
+  return <input onChange={(e) => handleSearch(e.target.value)} />
+}
+```
+
+### Feature Gates
+
+Combine with feature flags:
+
+```tsx
+function FeatureGate({ featureId, children }) {
+  const { feature } = useFeature(featureId)
+  const isEnabled = useFeatureFlag(featureId)
+
+  if (!isEnabled || !feature) {
+    return null
+  }
+
+  return children
+}
+```
+
+## Best Practices
+
+1. **Track meaningful interactions**, not page views:
+
+```tsx
+// Good: Tracks actual usage
+const { trackUsage } = useFeature('export')
+<button onClick={() => { exportData(); trackUsage() }}>Export</button>
+
+// Bad: Tracks just rendering
+useEffect(() => {
+  trackUsage() // This tracks every render
+}, [])
+```
+
+2. **Use stable feature IDs**:
+
+```tsx
+// Good: Constant ID
+const FEATURE_ID = 'dark-mode'
+const { trackUsage } = useFeature(FEATURE_ID)
+
+// Bad: Dynamic ID might cause issues
+const { trackUsage } = useFeature(`feature-${Math.random()}`)
+```
+
+3. **Don't over-track**:
+
+```tsx
+// Good: Track once per meaningful action
+onClick={() => {
+  saveDocument()
+  trackUsage()
+}}
+
+// Bad: Tracking every keystroke
+onChange={(e) => {
+  setInput(e.target.value)
+  trackUsage() // Too frequent!
+}}
+```
+
+## Next Steps
+
+- [useAdoptionStats Hook](/docs/adoption/hooks/use-adoption-stats) - Aggregate adoption metrics
+- [IfNotAdopted Component](/docs/adoption/components/conditional) - Conditional rendering based on adoption
+- [Analytics Integration](/docs/adoption/analytics) - Track adoption events automatically

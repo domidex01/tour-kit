@@ -1,0 +1,447 @@
+---
+title: '@tour-kit/hints API'
+description: Complete API reference for @tour-kit/hints
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/hints API Reference
+
+Complete API reference for the hints package. This package provides persistent hints and hotspots for feature discovery.
+
+---
+
+## Styled Components
+
+### Hint
+
+Main hint component combining hotspot and tooltip.
+
+```tsx
+import { Hint } from '@tour-kit/hints';
+
+<Hint
+  id="feature-hint"
+  target="#element"
+  content="Helpful tip here"
+  position="top-right"
+  tooltipPlacement="bottom"
+  pulse={true}
+  autoShow={false}
+  persist={false}
+  size="default"
+  color="default"
+  zIndex="default"
+  className="tooltip-class"
+  hotspotClassName="hotspot-class"
+  onClick={() => {}}
+  onShow={() => {}}
+  onDismiss={() => {}}
+/>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `string` | - | Unique identifier (required) |
+| `target` | `string \| RefObject<HTMLElement>` | - | CSS selector or ref (required) |
+| `content` | `ReactNode` | - | Tooltip content (required) |
+| `children` | `ReactNode` | - | Custom content (overrides content) |
+| `position` | `HotspotPosition` | `'top-right'` | Hotspot position |
+| `tooltipPlacement` | `Placement` | `'bottom'` | Tooltip placement |
+| `pulse` | `boolean` | `true` | Enable pulse animation |
+| `autoShow` | `boolean` | `false` | Auto-show on mount |
+| `persist` | `boolean` | `false` | Permanent dismiss on close |
+| `size` | `'default' \| 'sm' \| 'lg'` | `'default'` | Hotspot size |
+| `color` | `'default' \| 'secondary' \| 'destructive' \| 'success' \| 'warning'` | `'default'` | Hotspot color |
+| `zIndex` | `'default' \| 'high'` | `'default'` | z-index level |
+| `className` | `string` | - | Tooltip CSS class |
+| `hotspotClassName` | `string` | - | Hotspot CSS class |
+| `onClick` | `() => void` | - | Hotspot click handler |
+| `onShow` | `() => void` | - | Show callback |
+| `onDismiss` | `() => void` | - | Dismiss callback |
+
+### HintHotspot
+
+Standalone pulsing indicator.
+
+```tsx
+import { HintHotspot } from '@tour-kit/hints';
+
+<HintHotspot
+  targetRect={domRect}
+  position="top-right"
+  isOpen={false}
+  asChild={false}
+  size="default"
+  color="default"
+  pulse={true}
+  zIndex="default"
+  className="custom-hotspot"
+  onClick={() => {}}
+/>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `targetRect` | `DOMRect` | - | Target bounding rect (required) |
+| `position` | `HotspotPosition` | - | Position relative to target (required) |
+| `isOpen` | `boolean` | `false` | Whether tooltip is open |
+| `asChild` | `boolean` | `false` | Merge props to child |
+| `size` | `'default' \| 'sm' \| 'lg'` | `'default'` | Size variant |
+| `color` | `string` | `'default'` | Color variant |
+| `pulse` | `boolean` | `true` | Enable pulse |
+| `zIndex` | `'default' \| 'high'` | `'default'` | z-index |
+
+### HintTooltip
+
+Floating tooltip component.
+
+```tsx
+import { HintTooltip } from '@tour-kit/hints';
+
+<HintTooltip
+  target={htmlElement}
+  placement="bottom"
+  onClose={() => {}}
+  size="default"
+  zIndex="default"
+  asChild={false}
+  closeButton={<CustomClose />}
+>
+  Tooltip content
+</HintTooltip>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `target` | `HTMLElement` | - | Anchor element (required) |
+| `placement` | `Placement` | `'bottom'` | Position relative to target |
+| `onClose` | `() => void` | - | Close callback (required) |
+| `children` | `ReactNode` | - | Content (required) |
+| `closeButton` | `ReactNode` | - | Custom close button |
+| `asChild` | `boolean` | `false` | Merge props to child |
+| `size` | `'default' \| 'sm' \| 'lg'` | `'default'` | Size variant |
+| `zIndex` | `'default' \| 'high'` | `'default'` | z-index |
+
+---
+
+## Headless Components
+
+Import from `@tour-kit/hints/headless`:
+
+### HintHeadless
+
+```tsx
+import { HintHeadless } from '@tour-kit/hints/headless';
+
+<HintHeadless
+  id="custom-hint"
+  target="#element"
+  content="Content"
+  position="top-right"
+  tooltipPlacement="bottom"
+  pulse={true}
+  autoShow={false}
+  persist={false}
+  render={({
+    isOpen,
+    isDismissed,
+    show,
+    hide,
+    dismiss,
+    targetElement,
+    targetRect,
+    hotspotRef,
+    position,
+    tooltipPlacement,
+    pulse,
+    content,
+  }) => (
+    // Custom UI
+  )}
+/>
+```
+
+### HintHotspotHeadless
+
+```tsx
+import { HintHotspotHeadless } from '@tour-kit/hints/headless';
+
+<HintHotspotHeadless
+  targetRect={rect}
+  position="top-right"
+  isOpen={false}
+  render={({
+    position,  // { top, left }
+    isOpen,
+    targetRect,
+  }) => (
+    // Custom hotspot UI
+  )}
+/>
+```
+
+### HintTooltipHeadless
+
+```tsx
+import { HintTooltipHeadless } from '@tour-kit/hints/headless';
+
+<HintTooltipHeadless
+  target={element}
+  placement="bottom"
+  onClose={handleClose}
+  size="default"
+  zIndex="default"
+  render={({
+    floatingStyles,
+    refs,
+    context,
+  }) => (
+    <div ref={refs.setFloating} style={floatingStyles}>
+      Custom tooltip
+    </div>
+  )}
+/>
+```
+
+---
+
+## Provider
+
+### HintsProvider
+
+Context provider for hint state management.
+
+```tsx
+import { HintsProvider } from '@tour-kit/hints';
+
+<HintsProvider>
+  {/* Hint components */}
+</HintsProvider>
+```
+
+---
+
+## Hooks
+
+### useHint
+
+Control a single hint by ID.
+
+```tsx
+import { useHint } from '@tour-kit/hints';
+
+const {
+  isOpen,     // boolean - tooltip visible
+  isDismissed, // boolean - permanently dismissed
+  show,       // () => void - show tooltip
+  hide,       // () => void - hide tooltip (temporary)
+  dismiss,    // () => void - dismiss permanently
+  reset,      // () => void - clear dismissed state
+} = useHint('hint-id');
+```
+
+### useHints
+
+Access and control all hints.
+
+```tsx
+import { useHints } from '@tour-kit/hints';
+
+const {
+  hints,          // HintState[] - all hints
+  activeHint,     // string | null - currently open hint
+  showHint,       // (id: string) => void
+  hideHint,       // (id: string) => void
+  dismissHint,    // (id: string) => void
+  resetHint,      // (id: string) => void
+  resetAllHints,  // () => void
+  isHintVisible,  // (id: string) => boolean
+  isHintDismissed, // (id: string) => boolean
+} = useHints();
+```
+
+### useHintsContext
+
+Low-level context access.
+
+```tsx
+import { useHintsContext } from '@tour-kit/hints';
+
+const context = useHintsContext(); // HintsContextValue
+```
+
+---
+
+## UI Variants
+
+CVA variant exports for customization:
+
+```tsx
+import {
+  hintHotspotVariants,
+  hintTooltipVariants,
+  hintCloseVariants,
+} from '@tour-kit/hints';
+
+// Types
+import type {
+  HintHotspotVariants,
+  HintTooltipVariants,
+  HintCloseVariants,
+} from '@tour-kit/hints';
+```
+
+### Hotspot Variants
+
+```ts
+{
+  size: 'default' | 'sm' | 'lg',
+  color: 'default' | 'secondary' | 'destructive' | 'success' | 'warning',
+  pulse: boolean,
+  zIndex: 'default' | 'high',
+}
+```
+
+### Tooltip Variants
+
+```ts
+{
+  size: 'default' | 'sm' | 'lg',
+  zIndex: 'default' | 'high',
+}
+```
+
+### Close Button Variants
+
+```ts
+{
+  position: 'default' | 'inside',
+  size: 'default' | 'sm',
+}
+```
+
+---
+
+## Types
+
+### HintConfig
+
+```tsx
+interface HintConfig {
+  id: string;
+  target: string | React.RefObject<HTMLElement | null>;
+  content: React.ReactNode;
+  position?: HotspotPosition;
+  tooltipPlacement?: Placement;
+  pulse?: boolean;
+  autoShow?: boolean;
+  persist?: boolean;
+  onClick?: () => void;
+  onShow?: () => void;
+  onDismiss?: () => void;
+}
+```
+
+### HintState
+
+```tsx
+interface HintState {
+  id: string;
+  isOpen: boolean;
+  isDismissed: boolean;
+}
+```
+
+### HotspotPosition
+
+```tsx
+type HotspotPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'center';
+```
+
+### HintsContextValue
+
+```tsx
+interface HintsContextValue {
+  hints: Map<string, HintState>;
+  activeHint: string | null;
+  registerHint: (id: string) => void;
+  unregisterHint: (id: string) => void;
+  showHint: (id: string) => void;
+  hideHint: (id: string) => void;
+  dismissHint: (id: string) => void;
+  resetHint: (id: string) => void;
+  resetAllHints: () => void;
+}
+```
+
+### Placement
+
+Re-exported from `@tour-kit/core`:
+
+```tsx
+type Placement =
+  | 'top' | 'top-start' | 'top-end' | 'top-center'
+  | 'bottom' | 'bottom-start' | 'bottom-end' | 'bottom-center'
+  | 'left' | 'left-start' | 'left-end' | 'left-center'
+  | 'right' | 'right-start' | 'right-end' | 'right-center';
+```
+
+---
+
+## Utilities
+
+### cn
+
+Class name utility.
+
+```tsx
+import { cn } from '@tour-kit/hints';
+
+cn('base', condition && 'conditional', className);
+```
+
+### Slot Components
+
+```tsx
+import { Slot, Slottable, UnifiedSlot } from '@tour-kit/hints';
+```
+
+### UI Library Context
+
+```tsx
+import { UILibraryProvider, useUILibrary } from '@tour-kit/hints';
+
+<UILibraryProvider library="radix">
+  {children}
+</UILibraryProvider>
+
+const library = useUILibrary(); // 'radix' | 'base-ui'
+```
+
+---
+
+## Import Paths
+
+```tsx
+// Styled components
+import { Hint, HintHotspot, HintTooltip, HintsProvider, useHint, useHints } from '@tour-kit/hints';
+
+// Headless components
+import { HintHeadless, HintHotspotHeadless, HintTooltipHeadless } from '@tour-kit/hints/headless';
+
+// Variants
+import { hintHotspotVariants, hintTooltipVariants } from '@tour-kit/hints';
+
+// Types
+import type { HintConfig, HintState, HotspotPosition, Placement } from '@tour-kit/hints';
+```
+
+<Callout type="info">
+For detailed documentation on each component, see the individual pages in the [@tour-kit/hints](/docs/hints) section.
+</Callout>

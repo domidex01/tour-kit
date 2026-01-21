@@ -1,0 +1,521 @@
+---
+title: useChecklistPersistence
+description: Manage checklist state persistence across sessions
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useChecklistPersistence
+
+Hook for managing checklist state persistence. Typically used internally by `ChecklistProvider`, but can be used directly for custom persistence strategies.
+
+## Usage
+
+```tsx
+import { useChecklistPersistence } from '@tour-kit/checklists';
+
+function CustomProvider() {
+  const { save, load, clear } = useChecklistPersistence({
+    enabled: true,
+    storage: 'localStorage',
+    key: 'my-checklists',
+  });
+
+  // Load on mount
+  useEffect(() => {
+    const state = load();
+    if (state) {
+      // Apply loaded state
+      applyState(state);
+    }
+  }, [load]);
+
+  // Save on change
+  useEffect(() => {
+    save(currentState);
+  }, [currentState, save]);
+
+  return <div>{/* Your UI */}</div>;
+}
+```
+
+<Callout type="info">
+  The `ChecklistProvider` handles persistence automatically. You only need this hook for custom implementations.
+</Callout>
+
+## Parameters
+
+<TypeTable
+  type={{
+    config: {
+      type: 'ChecklistPersistenceConfig',
+      required: true,
+      description: 'Persistence configuration object',
+    },
+  }}
+/>
+
+### Config Object
+
+<TypeTable
+  type={{
+    enabled: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Whether persistence is enabled',
+    },
+    storage: {
+      type: "'localStorage' | 'sessionStorage' | 'memory'",
+      default: "'localStorage'",
+      description: 'Storage type to use',
+    },
+    key: {
+      type: 'string',
+      default: "'tourkit-checklists'",
+      description: 'Storage key',
+    },
+    onSave: {
+      type: '(state: PersistedChecklistState) => void',
+      description: 'Custom save handler (overrides default storage)',
+    },
+    onLoad: {
+      type: '() => PersistedChecklistState | null | Promise<PersistedChecklistState | null>',
+      description: 'Custom load handler (overrides default storage)',
+    },
+  }}
+/>
+
+## Return Value
+
+<TypeTable
+  type={{
+    save: {
+      type: '(state: PersistedChecklistState) => void',
+      description: 'Save state to storage',
+    },
+    load: {
+      type: '() => PersistedChecklistState | null',
+      description: 'Load state from storage',
+    },
+    clear: {
+      type: '() => void',
+      description: 'Clear persisted state',
+    },
+  }}
+/>
+
+## Persisted State Format
+
+```ts
+interface PersistedChecklistState {
+  // Completed tasks per checklist
+  completed: Record<string, string[]>;
+
+  // Dismissed checklist IDs
+  dismissed: string[];
+
+  // Timestamp of last update
+  timestamp: number;
+}
+```
+
+Example:
+
+```json
+{
+  "completed": {
+    "onboarding": ["step1", "step2"],
+    "setup": ["verify-email", "add-payment"]
+  },
+  "dismissed": ["old-checklist"],
+  "timestamp": 1234567890
+}
+```
+
+## Storage Types
+
+### localStorage
+
+Persists across browser sessions:
+
+```tsx
+const persistence = useChecklistPersistence({
+  enabled: true,
+  storage: 'localStorage',
+  key: 'my-checklists',
+});
+```
+
+### sessionStorage
+
+Persists only during browser session:
+
+```tsx
+const persistence = useChecklistPersistence({
+  enabled: true,
+  storage: 'sessionStorage',
+  key: 'my-checklists',
+});
+```
+
+### Memory
+
+In-memory storage (useful for testing or SSR):
+
+```tsx
+const persistence = useChecklistPersistence({
+  enabled: true,
+  storage: 'memory',
+});
+```
+
+<Callout type="warn">
+  Memory storage is cleared when the component unmounts or page reloads.
+</Callout>
+
+## Custom Storage
+
+### Database Storage
+
+```tsx
+function DatabasePersistence() {
+  const persistence = useChecklistPersistence({
+    enabled: true,
+    onSave: async (state) => {
+      await api.saveChecklistState(userId, state);
+    },
+    onLoad: async () => {
+      const data = await api.loadChecklistState(userId);
+      return data;
+    },
+  });
+
+  return <div>{/* Your UI */}</div>;
+}
+```
+
+<Callout type="info">
+  When using async `onLoad`, it returns `null` initially. Handle loading state in your component.
+</Callout>
+
+### IndexedDB Storage
+
+```tsx
+import { openDB } from 'idb';
+
+const db = await openDB('checklists', 1, {
+  upgrade(db) {
+    db.createObjectStore('state');
+  },
+});
+
+function IndexedDBPersistence() {
+  const persistence = useChecklistPersistence({
+    enabled: true,
+    onSave: async (state) => {
+      await db.put('state', state, 'current');
+    },
+    onLoad: async () => {
+      return (await db.get('state', 'current')) ?? null;
+    },
+  });
+
+  return <div>{/* Your UI */}</div>;
+}
+```
+
+### URL State
+
+```tsx
+function URLPersistence() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const persistence = useChecklistPersistence({
+    enabled: true,
+    onSave: (state) => {
+      const encoded = btoa(JSON.stringify(state));
+      setSearchParams({ checklist: encoded });
+    },
+    onLoad: () => {
+      const encoded = searchParams.get('checklist');
+      if (!encoded) return null;
+      try {
+        return JSON.parse(atob(encoded));
+      } catch {
+        return null;
+      }
+    },
+  });
+
+  return <div>{/* Your UI */}</div>;
+}
+```
+
+## Error Handling
+
+The hook handles errors gracefully:
+
+```tsx
+const persistence = useChecklistPersistence({
+  enabled: true,
+  storage: 'localStorage',
+});
+
+// Save errors are logged but don't throw
+persistence.save(state); // Logs warning if quota exceeded
+
+// Load errors return null
+const state = persistence.load(); // Returns null if parse error
+```
+
+## Migration Strategies
+
+### Version Migration
+
+```tsx
+interface PersistedStateV1 {
+  completed: Record<string, string[]>;
+}
+
+interface PersistedStateV2 extends PersistedStateV1 {
+  dismissed: string[];
+  timestamp: number;
+}
+
+function MigrationPersistence() {
+  const persistence = useChecklistPersistence({
+    enabled: true,
+    onLoad: () => {
+      const raw = localStorage.getItem('my-checklists');
+      if (!raw) return null;
+
+      const data = JSON.parse(raw);
+
+      // Migrate v1 to v2
+      if (!data.timestamp) {
+        return {
+          completed: data.completed ?? {},
+          dismissed: [],
+          timestamp: Date.now(),
+        };
+      }
+
+      return data as PersistedStateV2;
+    },
+  });
+
+  return <div>{/* Your UI */}</div>;
+}
+```
+
+### Data Cleanup
+
+```tsx
+function CleanupPersistence() {
+  const persistence = useChecklistPersistence({
+    enabled: true,
+    onSave: (state) => {
+      // Remove old data (older than 30 days)
+      const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+
+      if (state.timestamp < thirtyDaysAgo) {
+        persistence.clear();
+        return;
+      }
+
+      // Save normally
+      localStorage.setItem('my-checklists', JSON.stringify(state));
+    },
+  });
+
+  return <div>{/* Your UI */}</div>;
+}
+```
+
+## SSR Considerations
+
+The hook is SSR-safe:
+
+```tsx
+// On server: uses memory storage
+// On client: uses specified storage
+
+function SSRSafeApp() {
+  const persistence = useChecklistPersistence({
+    enabled: true,
+    storage: 'localStorage', // Falls back to memory on server
+  });
+
+  // Safe to use
+  return <div>{/* Your UI */}</div>;
+}
+```
+
+## Manual Control
+
+### Clear All State
+
+```tsx
+function ClearButton() {
+  const { clear } = useChecklistPersistence({
+    enabled: true,
+  });
+
+  return (
+    <button onClick={clear}>
+      Clear all progress
+    </button>
+  );
+}
+```
+
+### Export State
+
+```tsx
+function ExportButton() {
+  const { load } = useChecklistPersistence({
+    enabled: true,
+  });
+
+  const handleExport = () => {
+    const state = load();
+    if (!state) return;
+
+    const json = JSON.stringify(state, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'checklist-progress.json';
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <button onClick={handleExport}>
+      Export progress
+    </button>
+  );
+}
+```
+
+### Import State
+
+```tsx
+function ImportButton() {
+  const { save } = useChecklistPersistence({
+    enabled: true,
+  });
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const state = JSON.parse(e.target?.result as string);
+        save(state);
+        window.location.reload();
+      } catch (error) {
+        console.error('Invalid file:', error);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  return (
+    <input
+      type="file"
+      accept=".json"
+      onChange={handleImport}
+    />
+  );
+}
+```
+
+## Best Practices
+
+### Debounce Saves
+
+```tsx
+import { useDebouncedCallback } from 'use-debounce';
+
+function DebouncedPersistence() {
+  const { save } = useChecklistPersistence({
+    enabled: true,
+  });
+
+  const debouncedSave = useDebouncedCallback(
+    (state) => save(state),
+    1000 // Save at most once per second
+  );
+
+  useEffect(() => {
+    debouncedSave(currentState);
+  }, [currentState, debouncedSave]);
+}
+```
+
+### Validate Loaded State
+
+```tsx
+function ValidatedPersistence() {
+  const persistence = useChecklistPersistence({
+    enabled: true,
+    onLoad: () => {
+      const state = localStorage.getItem('my-checklists');
+      if (!state) return null;
+
+      try {
+        const parsed = JSON.parse(state);
+
+        // Validate structure
+        if (
+          typeof parsed !== 'object' ||
+          !parsed.completed ||
+          !parsed.dismissed ||
+          !parsed.timestamp
+        ) {
+          console.warn('Invalid state structure');
+          return null;
+        }
+
+        return parsed;
+      } catch {
+        return null;
+      }
+    },
+  });
+}
+```
+
+### Handle Storage Quota
+
+```tsx
+function QuotaSafePersistence() {
+  const persistence = useChecklistPersistence({
+    enabled: true,
+    onSave: (state) => {
+      try {
+        localStorage.setItem('my-checklists', JSON.stringify(state));
+      } catch (error) {
+        if (error.name === 'QuotaExceededError') {
+          // Clear old data or notify user
+          console.warn('Storage quota exceeded, clearing old data');
+          localStorage.clear();
+          localStorage.setItem('my-checklists', JSON.stringify(state));
+        }
+      }
+    },
+  });
+}
+```
+
+## Related
+
+- [ChecklistProvider](/docs/checklists/providers/checklist-provider) - Provider handles persistence automatically
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Access checklist state

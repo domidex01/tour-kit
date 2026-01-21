@@ -1,11 +1,36 @@
 ---
 title: '@tour-kit/hints'
-description: Persistent hints and hotspots system
+description: Persistent hints and hotspots for feature discovery
 ---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
 
 # @tour-kit/hints
 
-Show persistent UI hints that guide users to features.
+A lightweight library for adding contextual hints to your React application. Hints are persistent UI elements that guide users to features without interrupting their flow.
+
+## Why Hints?
+
+Unlike tours (which are sequential and require user attention), hints are:
+
+- **Non-blocking** - Users can interact with your app while hints are visible
+- **Persistent** - Hints stay visible until explicitly dismissed
+- **Independent** - Each hint has its own lifecycle, no sequence required
+- **Subtle** - Pulsing hotspots attract attention without being intrusive
+
+**Use hints for:**
+- New feature announcements
+- Contextual help on complex UI elements
+- Onboarding nudges that don't require immediate action
+- Feature discovery for power users
+
+**Use tours instead when:**
+- You need a sequential, guided walkthrough
+- Steps depend on each other
+- You want focused, modal-like attention
+
+---
 
 ## Installation
 
@@ -13,9 +38,225 @@ Show persistent UI hints that guide users to features.
 pnpm add @tour-kit/hints
 ```
 
+```bash
+npm install @tour-kit/hints
+```
+
+```bash
+yarn add @tour-kit/hints
+```
+
+---
+
+## Quick Start
+
+```tsx
+import { HintsProvider, Hint } from '@tour-kit/hints';
+
+function App() {
+  return (
+    <HintsProvider>
+      {/* Add hints to any element */}
+      <Hint
+        id="new-feature"
+        target="#export-button"
+        content="New! Export your data to CSV or PDF"
+      />
+
+      <button id="export-button">Export</button>
+    </HintsProvider>
+  );
+}
+```
+
+---
+
+## Architecture
+
+The hints package uses a simple provider/consumer pattern:
+
+```
+HintsProvider
+├── Context (state management)
+│   ├── hints Map<id, HintState>
+│   └── activeHint (only one open at a time)
+├── Hint Components
+│   ├── HintHotspot (pulsing indicator)
+│   └── HintTooltip (floating content)
+└── Hooks
+    ├── useHints() (access all hints)
+    └── useHint(id) (access single hint)
+```
+
+### State Management
+
+- **In-memory state** - Hint state is managed via React context with `useReducer`
+- **Single active hint** - Only one hint tooltip can be open at a time
+- **Automatic registration** - Hints register themselves on mount
+- **Lifecycle events** - Callbacks for show, hide, dismiss actions
+
+### Key Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Hotspot** | The pulsing indicator positioned near the target element |
+| **Tooltip** | The floating content that appears when hotspot is clicked |
+| **Hide** | Temporarily close the tooltip (can reopen) |
+| **Dismiss** | Permanently hide the hint (won't show again) |
+| **Reset** | Clear dismissed state (hint can show again) |
+
+---
+
 ## Features
 
-- Pulsing beacon animations
-- Dismissible with persistence
-- Tooltip on click/hover
-- Position anywhere on target
+### Styling Variants
+
+Built-in CVA variants for easy customization:
+
+```tsx
+<Hint
+  id="hint"
+  target="#element"
+  content="..."
+  size="lg"      // 'sm' | 'default' | 'lg'
+  color="success" // 'default' | 'secondary' | 'destructive' | 'success' | 'warning'
+/>
+```
+
+### Positioning
+
+Hotspots can be positioned at any corner or center:
+
+```tsx
+<Hint position="top-left" />
+<Hint position="top-right" />     {/* default */}
+<Hint position="bottom-left" />
+<Hint position="bottom-right" />
+<Hint position="center" />
+```
+
+Tooltips use floating-ui for smart positioning with collision detection.
+
+### Programmatic Control
+
+Full control via hooks:
+
+```tsx
+const { show, hide, dismiss, reset, isOpen, isDismissed } = useHint('my-hint');
+const { hints, showHint, resetAllHints } = useHints();
+```
+
+### Headless Mode
+
+Build completely custom UIs with headless components:
+
+```tsx
+import { HintHeadless } from '@tour-kit/hints/headless';
+
+<HintHeadless
+  id="custom"
+  target="#element"
+  render={({ isOpen, show, hide, targetRect }) => (
+    // Your custom UI
+  )}
+/>
+```
+
+---
+
+## Bundle Size
+
+| Package | Gzipped |
+|---------|---------|
+| @tour-kit/hints | < 5KB |
+
+---
+
+## Package Contents
+
+<Cards>
+  <Card title="Components" href="/docs/hints/components">
+    Hint, HintHotspot, HintTooltip - Pre-styled components with variants
+  </Card>
+  <Card title="Hooks" href="/docs/hints/hooks">
+    useHints, useHint - Programmatic control and state access
+  </Card>
+  <Card title="Persistence" href="/docs/hints/persistence">
+    Dismiss patterns and cross-session storage strategies
+  </Card>
+  <Card title="Headless" href="/docs/hints/headless">
+    Build custom hint UI with render props
+  </Card>
+</Cards>
+
+---
+
+## Complete Example
+
+```tsx
+import { HintsProvider, Hint, useHint, useHints } from '@tour-kit/hints';
+
+function App() {
+  return (
+    <HintsProvider>
+      {/* Feature announcement (persistent) */}
+      <Hint
+        id="new-dashboard"
+        target="#dashboard-link"
+        content="Check out the redesigned dashboard!"
+        color="success"
+        persist={true}
+      />
+
+      {/* Contextual help (can reopen) */}
+      <Hint
+        id="filter-help"
+        target="#filter-button"
+        content="Use filters to narrow results"
+        size="sm"
+      />
+
+      <Dashboard />
+      <HintControls />
+    </HintsProvider>
+  );
+}
+
+function HintControls() {
+  const { resetAllHints } = useHints();
+  const dashboard = useHint('new-dashboard');
+
+  return (
+    <div>
+      {dashboard.isDismissed && (
+        <button onClick={dashboard.reset}>
+          Show dashboard hint again
+        </button>
+      )}
+      <button onClick={resetAllHints}>Reset all hints</button>
+    </div>
+  );
+}
+```
+
+---
+
+## Accessibility
+
+All hint components are built with accessibility in mind:
+
+- **ARIA attributes** - Proper roles, labels, and expanded states
+- **Keyboard support** - Escape to dismiss, Tab navigation
+- **Focus management** - Focus rings on keyboard interaction
+- **Reduced motion** - Pulse animation respects `prefers-reduced-motion`
+
+<Callout>
+  The pulsing animation is automatically disabled for users who prefer reduced motion.
+</Callout>
+
+---
+
+## Related
+
+- [Tours](/docs/react) - For sequential, guided walkthroughs
+- [@tour-kit/core](/docs/core) - Shared utilities used by hints

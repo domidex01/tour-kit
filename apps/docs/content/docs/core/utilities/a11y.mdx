@@ -1,0 +1,322 @@
+---
+title: Accessibility Utilities
+description: Screen reader announcements and accessibility helpers
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Accessibility Utilities
+
+Utilities for building accessible tours. Includes screen reader announcements, unique ID generation, and motion preferences.
+
+## Why Use These Utilities?
+
+Accessible tours require:
+
+- **Screen reader support** - Announce step changes to assistive technology
+- **Unique IDs** - ARIA relationships (`aria-describedby`, `aria-labelledby`)
+- **Motion respect** - Honor user preferences for reduced motion
+
+---
+
+## announce
+
+Announce a message to screen readers using an ARIA live region.
+
+### Usage
+
+```tsx
+import { announce } from '@tour-kit/core';
+
+// Polite announcement (default)
+announce('Step 2 of 5: Dashboard Overview');
+
+// Assertive announcement (interrupts current speech)
+announce('Tour completed!', 'assertive');
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    message: {
+      type: 'string',
+      description: 'Text to announce to screen readers',
+    },
+    politeness: {
+      type: "'polite' | 'assertive'",
+      description: 'Announcement priority',
+      default: "'polite'",
+    },
+  }}
+/>
+
+### Politeness Levels
+
+| Level | Behavior | Use Case |
+|-------|----------|----------|
+| `polite` | Waits for current speech to finish | Step changes, progress updates |
+| `assertive` | Interrupts current speech | Errors, completion, urgent messages |
+
+### How It Works
+
+1. Creates a visually hidden `<div>` with `role="status"` and `aria-live`
+2. Appends to `document.body`
+3. Sets content after 100ms delay (allows screen reader registration)
+4. Removes element after 1000ms
+
+```tsx
+// Internal implementation
+function announce(message: string, politeness = 'polite'): void {
+  const announcer = document.createElement('div');
+  announcer.setAttribute('role', 'status');
+  announcer.setAttribute('aria-live', politeness);
+  announcer.setAttribute('aria-atomic', 'true');
+  // ... visually hidden styles
+  document.body.appendChild(announcer);
+
+  setTimeout(() => { announcer.textContent = message; }, 100);
+  setTimeout(() => { document.body.removeChild(announcer); }, 1000);
+}
+```
+
+<Callout type="info">
+The 100ms delay is necessary because screen readers need time to register the live region before content is added.
+</Callout>
+
+---
+
+## getStepAnnouncement
+
+Generate a standardized step announcement string.
+
+### Usage
+
+```tsx
+import { getStepAnnouncement } from '@tour-kit/core';
+
+// With step title
+const msg1 = getStepAnnouncement('Dashboard Overview', 2, 5);
+// "Step 2 of 5: Dashboard Overview"
+
+// Without step title
+const msg2 = getStepAnnouncement(undefined, 2, 5);
+// "Step 2 of 5"
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    stepTitle: {
+      type: 'string | undefined',
+      description: 'Title of the current step',
+    },
+    currentStep: {
+      type: 'number',
+      description: 'Current step number (1-indexed)',
+    },
+    totalSteps: {
+      type: 'number',
+      description: 'Total number of steps',
+    },
+  }}
+/>
+
+### Return Value
+
+`string` - Formatted announcement message.
+
+---
+
+## generateId
+
+Generate a unique ID for ARIA relationships.
+
+### Usage
+
+```tsx
+import { generateId } from '@tour-kit/core';
+
+// Default prefix
+const id1 = generateId();
+// "tourkit-x7f8k2m9q"
+
+// Custom prefix
+const id2 = generateId('tooltip');
+// "tooltip-a3b5c7d9e"
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    prefix: {
+      type: 'string',
+      description: 'Prefix for the generated ID',
+      default: "'tourkit'",
+    },
+  }}
+/>
+
+### Use Case: ARIA Relationships
+
+```tsx
+function TourStep({ title, content }) {
+  const titleId = useMemo(() => generateId('title'), []);
+  const contentId = useMemo(() => generateId('content'), []);
+
+  return (
+    <div
+      role="dialog"
+      aria-labelledby={titleId}
+      aria-describedby={contentId}
+    >
+      <h2 id={titleId}>{title}</h2>
+      <p id={contentId}>{content}</p>
+    </div>
+  );
+}
+```
+
+---
+
+## prefersReducedMotion
+
+Check if the user prefers reduced motion.
+
+### Usage
+
+```tsx
+import { prefersReducedMotion } from '@tour-kit/core';
+
+if (prefersReducedMotion()) {
+  // Skip animations
+  element.style.transition = 'none';
+} else {
+  // Use animations
+  element.style.transition = 'opacity 300ms ease';
+}
+```
+
+### Return Value
+
+`boolean` - `true` if user has enabled reduced motion preference.
+
+<Callout type="warn" title="WCAG Requirement">
+WCAG 2.1 Success Criterion 2.3.3 requires respecting `prefers-reduced-motion`. Always check this before animating.
+</Callout>
+
+---
+
+## Complete Accessible Tour Example
+
+```tsx
+import {
+  announce,
+  getStepAnnouncement,
+  generateId,
+  prefersReducedMotion,
+} from '@tour-kit/core';
+
+function AccessibleTourCard({ step, currentIndex, totalSteps }) {
+  const titleId = useMemo(() => generateId('step-title'), []);
+  const contentId = useMemo(() => generateId('step-content'), []);
+
+  // Announce step changes
+  useEffect(() => {
+    const announcement = getStepAnnouncement(
+      step.title,
+      currentIndex + 1,
+      totalSteps
+    );
+    announce(announcement);
+  }, [currentIndex, step.title, totalSteps]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      aria-describedby={contentId}
+      className={prefersReducedMotion() ? '' : 'animate-fade-in'}
+    >
+      <h2 id={titleId}>{step.title}</h2>
+      <p id={contentId}>{step.content}</p>
+      <p className="sr-only">
+        Step {currentIndex + 1} of {totalSteps}
+      </p>
+      <nav aria-label="Tour navigation">
+        <button onClick={prev} disabled={currentIndex === 0}>
+          Previous
+        </button>
+        <button onClick={next}>
+          {currentIndex === totalSteps - 1 ? 'Finish' : 'Next'}
+        </button>
+      </nav>
+    </div>
+  );
+}
+```
+
+---
+
+## Screen Reader Testing
+
+### VoiceOver (macOS)
+
+1. Enable: `Cmd + F5`
+2. Navigate: `Ctrl + Option + Arrow keys`
+3. Listen for step announcements
+
+### NVDA (Windows)
+
+1. Enable: `Ctrl + Alt + N`
+2. Navigate: `Tab` and arrow keys
+3. Check announcement timing
+
+### Expected Behavior
+
+| Action | Announcement |
+|--------|--------------|
+| Step change | "Step X of Y: Title" |
+| Tour complete | "Tour completed!" (assertive) |
+| Focus trap | Focus stays within tour card |
+
+---
+
+## ARIA Attributes Reference
+
+```tsx
+// Tour container
+<div
+  role="dialog"           // Announces as dialog
+  aria-modal="true"       // Indicates modal behavior
+  aria-labelledby={id}    // Links to title
+  aria-describedby={id}   // Links to content
+>
+
+// Navigation
+<nav aria-label="Tour navigation">
+  <button aria-label="Go to previous step">Previous</button>
+  <button aria-label="Go to next step">Next</button>
+</nav>
+
+// Progress
+<div role="status" aria-live="polite">
+  Step 2 of 5
+</div>
+
+// Close button
+<button aria-label="Close tour">×</button>
+```
+
+---
+
+## Related
+
+- [useFocusTrap](/docs/core/hooks/use-focus-trap) - Focus management
+- [useKeyboardNavigation](/docs/core/hooks/use-keyboard) - Keyboard support
+- [useMediaQuery](/docs/core/hooks/use-media-query) - `usePrefersReducedMotion` hook
+- [Accessibility Guide](/docs/guides/accessibility) - Full WCAG compliance

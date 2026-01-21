@@ -1,0 +1,329 @@
+---
+title: DOM Utilities
+description: DOM manipulation and element tracking utilities
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# DOM Utilities
+
+Utilities for working with DOM elements. Used internally by Tour Kit for element resolution, visibility detection, and focus management.
+
+## Why Use These Utilities?
+
+Tour steps target DOM elements that may be:
+
+- **Identified by selectors** - CSS selectors like `#button` or `.class`
+- **Stored in refs** - React refs from `useRef()`
+- **Dynamically rendered** - Appear after async operations
+- **Partially visible** - Scrolled out of view
+
+---
+
+## getElement
+
+Resolve various target types to an HTMLElement.
+
+### Usage
+
+```tsx
+import { getElement } from '@tour-kit/core';
+
+// From CSS selector
+const bySelector = getElement('#my-button');
+
+// From React ref
+const buttonRef = useRef<HTMLButtonElement>(null);
+const byRef = getElement(buttonRef);
+
+// From element directly
+const element = document.getElementById('my-button');
+const byElement = getElement(element);
+
+// Null handling
+const notFound = getElement('#nonexistent'); // Returns null
+const fromNull = getElement(null); // Returns null
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    target: {
+      type: 'string | HTMLElement | RefObject<HTMLElement> | null',
+      description: 'Target to resolve to an element',
+    },
+  }}
+/>
+
+### Return Value
+
+`HTMLElement | null`
+
+---
+
+## waitForElement
+
+Wait for a dynamically rendered element to appear in the DOM.
+
+### Usage
+
+```tsx
+import { waitForElement } from '@tour-kit/core';
+
+// Wait for element with default timeout (5s)
+try {
+  const element = await waitForElement('#dynamic-content');
+  console.log('Element found:', element);
+} catch (error) {
+  console.log('Element not found within timeout');
+}
+
+// Custom timeout
+const element = await waitForElement('#lazy-loaded', 10000); // 10 seconds
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    selector: {
+      type: 'string',
+      description: 'CSS selector for the element',
+    },
+    timeout: {
+      type: 'number',
+      description: 'Maximum wait time in milliseconds',
+      default: '5000',
+    },
+  }}
+/>
+
+### Return Value
+
+`Promise<HTMLElement>` - Resolves with the element or rejects on timeout.
+
+### Use Case: Lazy-Loaded Components
+
+```tsx
+function LazyComponentTour() {
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    // Wait for lazy component to mount
+    waitForElement('#lazy-feature')
+      .then(() => setShowTour(true))
+      .catch(() => console.log('Feature not available'));
+  }, []);
+
+  if (!showTour) return null;
+
+  return (
+    <Tour>
+      <TourStep target="#lazy-feature" title="New Feature" />
+    </Tour>
+  );
+}
+```
+
+---
+
+## isElementVisible
+
+Check if an element is fully visible within the viewport.
+
+### Usage
+
+```tsx
+import { isElementVisible } from '@tour-kit/core';
+
+const button = document.getElementById('signup-btn');
+
+if (isElementVisible(button)) {
+  // Element is fully visible
+  showTooltip();
+} else {
+  // Element is partially or fully hidden
+  scrollIntoView(button);
+}
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    element: {
+      type: 'HTMLElement',
+      description: 'Element to check',
+    },
+  }}
+/>
+
+### Return Value
+
+`boolean` - `true` if all edges are within the viewport.
+
+---
+
+## isElementPartiallyVisible
+
+Check if an element is at least partially visible.
+
+### Usage
+
+```tsx
+import { isElementPartiallyVisible } from '@tour-kit/core';
+
+const card = document.getElementById('info-card');
+
+if (isElementPartiallyVisible(card)) {
+  // At least some part is visible
+  highlightElement(card);
+} else {
+  // Element is completely off-screen
+  return null;
+}
+```
+
+<Callout type="info">
+Use `isElementPartiallyVisible` for overlays that should still appear when the target is scrolled partially out of view.
+</Callout>
+
+---
+
+## getFocusableElements
+
+Get all focusable elements within a container for focus trapping.
+
+### Usage
+
+```tsx
+import { getFocusableElements } from '@tour-kit/core';
+
+function FocusTrap({ children }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const focusable = getFocusableElements(container);
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    // Focus first element
+    first?.focus();
+
+    // Handle Tab key for trapping
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
+      }
+    };
+
+    container.addEventListener('keydown', handleKeyDown);
+    return () => container.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  return <div ref={containerRef}>{children}</div>;
+}
+```
+
+### Focusable Elements
+
+The function finds elements matching:
+
+- `a[href]` - Links with href
+- `button:not([disabled])` - Enabled buttons
+- `input:not([disabled])` - Enabled inputs
+- `textarea:not([disabled])` - Enabled textareas
+- `select:not([disabled])` - Enabled selects
+- `[tabindex]` (not -1) - Custom focusable elements
+
+Elements with `tabindex="-1"` or `display: none` are excluded.
+
+---
+
+## getScrollParent
+
+Find the nearest scrollable ancestor of an element.
+
+### Usage
+
+```tsx
+import { getScrollParent } from '@tour-kit/core';
+
+const target = document.getElementById('nested-element');
+const scrollParent = getScrollParent(target);
+
+if (scrollParent === window) {
+  // Element scrolls with the page
+  window.scrollTo({ top: target.offsetTop });
+} else {
+  // Element is in a scrollable container
+  scrollParent.scrollTo({ top: target.offsetTop });
+}
+```
+
+### Return Value
+
+`HTMLElement | Window` - The nearest ancestor with `overflow: auto` or `overflow: scroll`, or `window` if none found.
+
+### Detection Logic
+
+The function checks each ancestor's computed style for:
+
+```css
+overflow: auto | scroll;
+overflow-x: auto | scroll;
+overflow-y: auto | scroll;
+```
+
+---
+
+## Example: Complete Element Tracking
+
+```tsx
+import {
+  getElement,
+  isElementVisible,
+  waitForElement,
+  getScrollParent,
+} from '@tour-kit/core';
+import { scrollIntoView } from '@tour-kit/core';
+
+async function showTourStep(target: string) {
+  // Wait for element if needed
+  const element = await waitForElement(target, 3000);
+
+  // Check if visible
+  if (!isElementVisible(element)) {
+    // Find scroll container and scroll element into view
+    await scrollIntoView(element);
+  }
+
+  // Get position for tooltip
+  const rect = element.getBoundingClientRect();
+
+  return {
+    element,
+    rect,
+    scrollParent: getScrollParent(element),
+  };
+}
+```
+
+---
+
+## Related
+
+- [useElementPosition](/docs/core/hooks/use-element-position) - React hook for element tracking
+- [Scroll Utilities](/docs/core/utilities/scroll) - Scroll manipulation
+- [useFocusTrap](/docs/core/hooks/use-focus-trap) - Focus trapping hook

@@ -1,0 +1,266 @@
+---
+title: Analytics Plugins
+description: Overview of the plugin system and available integrations
+---
+
+## Overview
+
+Tour Kit's analytics system is built on a plugin architecture that allows you to send events to any analytics platform. Each plugin implements a simple interface and runs independently.
+
+## How Plugins Work
+
+Plugins receive tour events and forward them to analytics platforms:
+
+```tsx
+import { AnalyticsProvider, posthogPlugin } from '@tour-kit/analytics'
+
+<AnalyticsProvider
+  config={{
+    plugins: [
+      posthogPlugin({ apiKey: 'phc_xxx' })
+    ]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+When an event occurs (e.g., user views a step), the analytics system:
+
+1. Enriches the event with session data and timestamps
+2. Passes the event to each plugin's `track()` method
+3. Each plugin transforms and sends the event to its platform
+
+## Plugin Interface
+
+All plugins implement the `AnalyticsPlugin` interface:
+
+```ts
+interface AnalyticsPlugin {
+  /** Unique plugin identifier */
+  name: string
+
+  /** Initialize the plugin (called once on setup) */
+  init?: () => void | Promise<void>
+
+  /** Track an event */
+  track: (event: TourEvent) => void | Promise<void>
+
+  /** Identify a user */
+  identify?: (userId: string, properties?: Record<string, unknown>) => void
+
+  /** Flush any queued events */
+  flush?: () => void | Promise<void>
+
+  /** Clean up resources */
+  destroy?: () => void
+}
+```
+
+Only `name` and `track` are required. All other methods are optional.
+
+## Built-in Plugins
+
+Tour Kit provides official plugins for popular platforms:
+
+### Development
+
+- [Console Plugin](/docs/analytics/plugins/console) - Debug logging with colored output
+
+### Production Analytics
+
+- [PostHog Plugin](/docs/analytics/plugins/posthog) - Product analytics and session replay
+- [Mixpanel Plugin](/docs/analytics/plugins/mixpanel) - Event tracking and user analytics
+- [Amplitude Plugin](/docs/analytics/plugins/amplitude) - Product intelligence platform
+- [Google Analytics Plugin](/docs/analytics/plugins/google-analytics) - GA4 event tracking
+
+## Plugin Order
+
+Plugins execute in the order they're registered:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    plugins: [
+      consolePlugin(),    // Runs first
+      posthogPlugin({}),  // Runs second
+      mixpanelPlugin({})  // Runs third
+    ]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+This matters when:
+- Debugging - put console plugin first to see events before they're sent
+- Error handling - earlier plugins won't be affected by later plugin errors
+
+## Error Handling
+
+If a plugin throws an error, it doesn't affect other plugins:
+
+```tsx
+// Even if PostHog fails, Mixpanel still receives events
+<AnalyticsProvider
+  config={{
+    plugins: [
+      posthogPlugin({ apiKey: 'invalid' }), // Fails silently
+      mixpanelPlugin({ token: 'valid' })     // Still works
+    ],
+    debug: true // Shows errors in console
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+Enable `debug: true` to see plugin errors in the console.
+
+## Conditional Plugins
+
+Load plugins conditionally based on environment:
+
+```tsx
+import {
+  AnalyticsProvider,
+  consolePlugin,
+  posthogPlugin,
+  mixpanelPlugin
+} from '@tour-kit/analytics'
+
+const isDev = process.env.NODE_ENV === 'development'
+const isProd = process.env.NODE_ENV === 'production'
+
+<AnalyticsProvider
+  config={{
+    plugins: [
+      // Always show console in dev
+      ...(isDev ? [consolePlugin()] : []),
+      // Only load PostHog in production
+      ...(isProd ? [posthogPlugin({ apiKey: process.env.POSTHOG_KEY! })] : []),
+      // Load Mixpanel everywhere except local
+      ...(!isDev ? [mixpanelPlugin({ token: process.env.MIXPANEL_TOKEN! })] : [])
+    ]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Plugin Lifecycle
+
+### Initialization
+
+Plugins are initialized when `AnalyticsProvider` mounts:
+
+```tsx
+const plugin: AnalyticsPlugin = {
+  name: 'my-plugin',
+
+  async init() {
+    // Load SDK, connect to API, etc.
+    console.log('Plugin initialized')
+  },
+
+  track(event) {
+    console.log('Tracking:', event)
+  }
+}
+```
+
+### Event Tracking
+
+The `track` method is called for every event:
+
+```tsx
+const plugin: AnalyticsPlugin = {
+  name: 'my-plugin',
+
+  track(event: TourEvent) {
+    // event.eventName: 'tour_started' | 'step_viewed' | etc.
+    // event.tourId: 'onboarding'
+    // event.timestamp: 1699564800000
+    // event.sessionId: '1699564800000-abc123'
+    // ...other properties
+  }
+}
+```
+
+### User Identification
+
+The `identify` method is called when users are identified:
+
+```tsx
+const plugin: AnalyticsPlugin = {
+  name: 'my-plugin',
+
+  identify(userId: string, properties?: Record<string, unknown>) {
+    console.log('User:', userId, properties)
+  },
+
+  track(event) {
+    // Events include userId after identification
+    console.log(event.userId)
+  }
+}
+```
+
+### Cleanup
+
+The `destroy` method is called when the provider unmounts:
+
+```tsx
+const plugin: AnalyticsPlugin = {
+  name: 'my-plugin',
+
+  destroy() {
+    // Clear caches, close connections, etc.
+    console.log('Plugin destroyed')
+  },
+
+  track(event) {
+    console.log(event)
+  }
+}
+```
+
+## Event Batching
+
+Some plugins support batching events before sending:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    plugins: [myPlugin()],
+    batchSize: 10,        // Send every 10 events
+    batchInterval: 5000   // Or every 5 seconds
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+<Callout type="info">
+  Batching configuration is supported at the provider level but must be implemented by individual plugins. Built-in plugins handle batching automatically based on their platform's best practices.
+</Callout>
+
+## Creating Custom Plugins
+
+See [Custom Plugins](/docs/analytics/plugins/custom) for a complete guide on creating your own analytics integrations.
+
+## Plugin Comparison
+
+| Plugin | Peer Dependency | Event Prefix | Auto-Flush | Batching |
+|--------|-----------------|--------------|------------|----------|
+| Console | None | `🎯 TourKit` | N/A | No |
+| PostHog | `posthog-js` | `tourkit_` | Yes | Yes |
+| Mixpanel | `mixpanel-browser` | `TourKit: ` | Yes | Yes |
+| Amplitude | `@amplitude/analytics-browser` | `tourkit_` | Manual | Yes |
+| Google Analytics | gtag.js | `tourkit_` | Yes | Yes |
+
+## Related
+
+- [Console Plugin](/docs/analytics/plugins/console) - Debug logging
+- [Custom Plugins](/docs/analytics/plugins/custom) - Build your own
+- [Types](/docs/analytics/types) - Plugin interface reference

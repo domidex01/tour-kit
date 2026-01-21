@@ -5,13 +5,22 @@
     "index",
     "---Getting Started---",
     "getting-started",
-    "---Packages---",
+    "---Core Packages---",
     "core",
     "react",
     "hints",
+    "---Extended Packages---",
+    "adoption",
+    "analytics",
+    "announcements",
+    "checklists",
+    "media",
+    "scheduling",
     "---Resources---",
     "guides",
     "examples",
-    "api"
+    "api",
+    "---AI---",
+    "ai-assistants"
   ]
 }

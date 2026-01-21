@@ -1,17 +1,59 @@
 ---
 title: Examples
-description: Code examples and demos
+description: Real-world examples and copy-paste code for Tour Kit
 ---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
 
 # Examples
 
-Real-world examples of TourKit in action.
+Copy-paste examples to get started quickly with Tour Kit. Each example is a complete, working implementation.
 
-## Tours
+---
 
-- [Basic Tour](/docs/examples/basic-tour) - Simple multi-step tour
-- [Onboarding Flow](/docs/examples/onboarding-flow) - User onboarding
+## Tour Examples
 
-## Advanced
+<Cards>
+  <Card title="Basic Tour" href="/docs/examples/basic-tour">
+    A simple multi-step product tour with spotlight overlay and navigation controls
+  </Card>
+  <Card title="Onboarding Flow" href="/docs/examples/onboarding-flow">
+    Complete user onboarding with persistence, conditional steps, and analytics
+  </Card>
+  <Card title="Headless Custom" href="/docs/examples/headless-custom">
+    Build completely custom UI using headless components and render props
+  </Card>
+</Cards>
 
-- [Headless Custom](/docs/examples/headless-custom) - Build your own UI
+---
+
+## Quick Comparison
+
+| Example | Complexity | Use Case |
+|---------|-----------|----------|
+| [Basic Tour](/docs/examples/basic-tour) | Simple | Learning the basics, simple product tours |
+| [Onboarding Flow](/docs/examples/onboarding-flow) | Intermediate | User onboarding, remembering progress |
+| [Headless Custom](/docs/examples/headless-custom) | Advanced | Custom design systems, unique requirements |
+
+---
+
+## What's Included
+
+### Basic Tour
+- Complete tour with overlay and card
+- Keyboard navigation
+- Progress indicators
+- Step-by-step breakdown
+
+### Onboarding Flow
+- localStorage persistence
+- "Don't show again" option
+- Conditional steps by role
+- Analytics integration
+- Resume from last step
+
+### Headless Custom
+- Custom overlay effects
+- Design system integration (shadcn, Chakra)
+- Framer Motion animations
+- Full styling control

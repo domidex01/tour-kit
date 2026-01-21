@@ -1,0 +1,256 @@
+---
+title: '@tour-kit/scheduling'
+description: Time-based scheduling utilities for controlling when tours and content should be shown
+---
+
+# @tour-kit/scheduling
+
+Time-based scheduling for tours, announcements, and onboarding content.
+
+## Why Scheduling Matters
+
+Not all users should see tours at the same time. Scheduling helps you:
+
+- **Launch at the right time** - Show tours when features go live, not before
+- **Respect user hours** - Only display content during business hours or specific time zones
+- **Avoid peak times** - Block tours during critical periods like end-of-quarter
+- **Target by region** - Use timezone-aware scheduling for global audiences
+- **Create recurring patterns** - Show weekly tips or monthly feature highlights
+
+## Installation
+
+```bash
+pnpm add @tour-kit/scheduling
+```
+
+## Quick Start
+
+```tsx
+import { useSchedule } from '@tour-kit/scheduling'
+
+function OnboardingTour() {
+  const schedule = {
+    startAt: '2024-01-15',
+    endAt: '2024-03-31',
+    daysOfWeek: [1, 2, 3, 4, 5], // Weekdays only
+    timeOfDay: { start: '09:00', end: '17:00' },
+    useUserTimezone: true,
+  }
+
+  const { isActive, reason } = useSchedule(schedule)
+
+  if (!isActive) {
+    return null
+  }
+
+  return <Tour tourId="onboarding">...</Tour>
+}
+```
+
+## Core Concepts
+
+### Schedule
+
+A `Schedule` defines when content should be shown:
+
+```ts
+interface Schedule {
+  enabled?: boolean
+  startAt?: DateString | Date
+  endAt?: DateString | Date
+  daysOfWeek?: DayOfWeek[]
+  timeOfDay?: TimeRange
+  useUserTimezone?: boolean
+  timezone?: string
+  blackouts?: BlackoutPeriod[]
+  recurring?: RecurringPattern
+  metadata?: Record<string, unknown>
+}
+```
+
+### Evaluation Order
+
+Schedules are evaluated in this order:
+
+1. **Enabled check** - Is `enabled` true?
+2. **Date range** - Is now between `startAt` and `endAt`?
+3. **Blackout periods** - Are we in a blackout?
+4. **Day of week** - Is today in `daysOfWeek`?
+5. **Time of day** - Is now in `timeOfDay` range?
+6. **Business hours** - Are we in business hours (if configured)?
+7. **Recurring pattern** - Does now match the pattern?
+
+The first failed check determines the inactive reason.
+
+### Timezone Handling
+
+All scheduling is timezone-aware:
+
+```tsx
+// Use the user's browser timezone
+const schedule = {
+  useUserTimezone: true,
+  timeOfDay: { start: '09:00', end: '17:00' },
+}
+
+// Or specify a fixed timezone
+const schedule = {
+  timezone: 'America/New_York',
+  timeOfDay: { start: '09:00', end: '17:00' },
+}
+```
+
+Dates are evaluated in the schedule's timezone, not UTC. This ensures users in different timezones see content at the correct local time.
+
+### Blackout Periods
+
+Block specific date ranges regardless of other rules:
+
+```tsx
+const schedule = {
+  startAt: '2024-01-01',
+  endAt: '2024-12-31',
+  blackouts: [
+    {
+      id: 'holiday-freeze',
+      start: '2024-12-20',
+      end: '2024-12-31',
+      reason: 'Holiday freeze',
+    },
+    {
+      id: 'major-release',
+      start: '2024-06-15T00:00:00Z',
+      end: '2024-06-15T23:59:59Z',
+      reason: 'Major product release',
+    },
+  ],
+}
+```
+
+Blackouts override all other schedule rules.
+
+### Recurring Patterns
+
+Show content on a repeating schedule:
+
+```tsx
+// Every Monday and Wednesday
+const schedule = {
+  recurring: {
+    type: 'weekly',
+    daysOfWeek: [1, 3],
+  },
+}
+
+// First day of each month
+const schedule = {
+  recurring: {
+    type: 'monthly',
+    dayOfMonth: 1,
+  },
+}
+
+// Every 2 weeks, up to 5 occurrences
+const schedule = {
+  recurring: {
+    type: 'weekly',
+    interval: 2,
+    maxOccurrences: 5,
+  },
+}
+```
+
+## Package Structure
+
+### Hooks
+
+React hooks for reactive scheduling:
+
+- [`useSchedule`](/docs/scheduling/hooks/use-schedule) - Simple active/inactive check
+- [`useScheduleStatus`](/docs/scheduling/hooks/use-schedule-status) - Detailed status with next active/inactive times
+- [`useUserTimezone`](/docs/scheduling/hooks/use-user-timezone) - Get user's browser timezone
+
+### Utilities
+
+Pure functions for schedule evaluation:
+
+- **Evaluation** - [`checkSchedule`](/docs/scheduling/utilities/schedule-evaluation), [`isScheduleActive`](/docs/scheduling/utilities/schedule-evaluation), [`getScheduleStatus`](/docs/scheduling/utilities/schedule-evaluation)
+- **Timezone** - [`getUserTimezone`](/docs/scheduling/utilities/timezone), [`isValidTimezone`](/docs/scheduling/utilities/timezone), [`formatDateString`](/docs/scheduling/utilities/timezone)
+- **Date Range** - [`isWithinDateRange`](/docs/scheduling/utilities/date-range)
+- **Time Range** - [`isWithinTimeRange`](/docs/scheduling/utilities/time-range), [`isWithinAnyTimeRange`](/docs/scheduling/utilities/time-range)
+- **Day of Week** - [`getDayOfWeek`](/docs/scheduling/utilities/day-of-week), [`isAllowedDay`](/docs/scheduling/utilities/day-of-week)
+- **Blackouts** - [`isInBlackoutPeriod`](/docs/scheduling/utilities/blackouts), [`getCurrentBlackout`](/docs/scheduling/utilities/blackouts)
+- **Business Hours** - [`isWithinBusinessHours`](/docs/scheduling/utilities/business-hours), [`isHoliday`](/docs/scheduling/utilities/business-hours)
+- **Recurring** - [`matchesRecurringPattern`](/docs/scheduling/utilities/recurring)
+
+### Types
+
+Full TypeScript definitions:
+
+- [`Schedule`](/docs/scheduling/types#schedule)
+- [`TimeRange`](/docs/scheduling/types#timerange), [`DateRange`](/docs/scheduling/types#daterange)
+- [`BlackoutPeriod`](/docs/scheduling/types#blackoutperiod)
+- [`RecurringPattern`](/docs/scheduling/types#recurringpattern)
+- [`ScheduleStatus`](/docs/scheduling/types#schedulestatus)
+- [`BusinessHours`](/docs/scheduling/types#businesshours)
+
+### Presets
+
+Built-in configurations:
+
+- [`BUSINESS_HOURS_PRESETS`](/docs/scheduling/presets#business-hours-presets)
+- [`DAY_NAMES`](/docs/scheduling/presets#day-names)
+- [`DAY_GROUPS`](/docs/scheduling/presets#day-groups)
+
+## Common Patterns
+
+### Weekdays Only
+
+```tsx
+import { DAY_GROUPS } from '@tour-kit/scheduling'
+
+const schedule = {
+  daysOfWeek: DAY_GROUPS.weekdays, // [1, 2, 3, 4, 5]
+}
+```
+
+### Business Hours
+
+```tsx
+import { BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
+
+const schedule = {
+  timeOfDay: BUSINESS_HOURS_PRESETS.standard.days[1].hours[0],
+  // { start: '09:00', end: '17:00' }
+}
+```
+
+### Limited-Time Campaign
+
+```tsx
+const schedule = {
+  startAt: '2024-02-01',
+  endAt: '2024-02-14',
+  timeOfDay: { start: '08:00', end: '20:00' },
+  useUserTimezone: true,
+}
+```
+
+### Recurring Weekly Tips
+
+```tsx
+const schedule = {
+  recurring: {
+    type: 'weekly',
+    daysOfWeek: [2], // Every Tuesday
+    interval: 1,
+    endDate: '2024-12-31',
+  },
+}
+```
+
+## Next Steps
+
+- [useSchedule Hook](/docs/scheduling/hooks/use-schedule) - Start using reactive scheduling
+- [Schedule Evaluation](/docs/scheduling/utilities/schedule-evaluation) - Understand how schedules are evaluated
+- [Types Reference](/docs/scheduling/types) - Explore all available types

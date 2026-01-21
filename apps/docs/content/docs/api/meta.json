@@ -1,5 +1,16 @@
 {
   "title": "API Reference",
   "icon": "FileCode",
-  "pages": ["index", "core", "react", "hints"]
+  "pages": [
+    "index",
+    "core",
+    "react",
+    "hints",
+    "adoption",
+    "analytics",
+    "announcements",
+    "checklists",
+    "media",
+    "scheduling"
+  ]
 }

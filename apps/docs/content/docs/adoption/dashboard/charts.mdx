@@ -1,0 +1,144 @@
+---
+title: Charts
+description: AdoptionCategoryChart and AdoptionStatusBadge components
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## AdoptionCategoryChart
+
+Bar chart showing adoption rate by feature category.
+
+### Basic Usage
+
+```tsx
+import { AdoptionCategoryChart } from '@tour-kit/adoption'
+
+<AdoptionCategoryChart />
+```
+
+### Props
+
+<TypeTable
+  type={{
+    showPercentages: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show percentage labels',
+    },
+    highlightCategory: {
+      type: 'string',
+      description: 'Category to highlight',
+    },
+    orientation: {
+      type: '"horizontal" | "vertical"',
+      default: '"vertical"',
+      description: 'Chart orientation',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+### Examples
+
+#### Horizontal Chart
+
+```tsx
+<AdoptionCategoryChart orientation="horizontal" />
+```
+
+#### Highlight Category
+
+```tsx
+<AdoptionCategoryChart highlightCategory="productivity" />
+```
+
+#### Without Percentages
+
+```tsx
+<AdoptionCategoryChart showPercentages={false} />
+```
+
+## AdoptionStatusBadge
+
+Status indicator badge for adoption states.
+
+### Basic Usage
+
+```tsx
+import { AdoptionStatusBadge } from '@tour-kit/adoption'
+
+<AdoptionStatusBadge status="adopted" />
+<AdoptionStatusBadge status="exploring" />
+<AdoptionStatusBadge status="churned" />
+<AdoptionStatusBadge status="not_started" />
+```
+
+### Props
+
+<TypeTable
+  type={{
+    status: {
+      type: '"not_started" | "exploring" | "adopted" | "churned"',
+      required: true,
+      description: 'Adoption status',
+    },
+    size: {
+      type: '"sm" | "md" | "lg"',
+      default: '"md"',
+      description: 'Badge size',
+    },
+    showIcon: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show status icon',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+### Examples
+
+#### All Statuses
+
+```tsx
+<div className="flex gap-2">
+  <AdoptionStatusBadge status="not_started" />
+  <AdoptionStatusBadge status="exploring" />
+  <AdoptionStatusBadge status="adopted" />
+  <AdoptionStatusBadge status="churned" />
+</div>
+```
+
+#### Different Sizes
+
+```tsx
+<AdoptionStatusBadge status="adopted" size="sm" />
+<AdoptionStatusBadge status="adopted" size="md" />
+<AdoptionStatusBadge status="adopted" size="lg" />
+```
+
+#### Without Icon
+
+```tsx
+<AdoptionStatusBadge status="adopted" showIcon={false} />
+```
+
+### Status Colors
+
+- **not_started**: Gray
+- **exploring**: Blue
+- **adopted**: Green
+- **churned**: Red
+
+## Next Steps
+
+- [AdoptionTable](/docs/adoption/dashboard/table) - Feature table
+- [useAdoptionStats](/docs/adoption/hooks/use-adoption-stats) - Access chart data

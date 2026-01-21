@@ -1,0 +1,490 @@
+---
+title: URL Parsing
+description: Detect media types and extract video IDs from URLs
+---
+
+## Overview
+
+The URL parsing utilities automatically detect media platforms and extract video IDs from URLs. Use them to build auto-detecting media components or validate user-provided URLs.
+
+## Functions
+
+- `parseMediaUrl()` - Parse URL and extract all metadata
+- `detectMediaType()` - Detect platform from URL
+- `isSupportedMediaUrl()` - Check if URL is supported
+- `extractYouTubeId()` - Extract YouTube video ID
+- `extractVimeoId()` - Extract Vimeo video ID
+- `extractLoomId()` - Extract Loom video ID
+- `extractWistiaId()` - Extract Wistia video ID
+- `isYouTubeUrl()` - Check if URL is YouTube
+- `isVimeoUrl()` - Check if URL is Vimeo
+- `isLoomUrl()` - Check if URL is Loom
+- `isWistiaUrl()` - Check if URL is Wistia
+
+## parseMediaUrl
+
+Parse a media URL and extract all relevant metadata:
+
+```tsx
+import { parseMediaUrl } from '@tour-kit/media'
+
+const result = parseMediaUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+
+console.log(result)
+// {
+//   type: 'youtube',
+//   videoId: 'dQw4w9WgXcQ',
+//   embedUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
+//   originalUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+// }
+```
+
+### Return Type
+
+```ts
+interface ParsedMediaUrl {
+  type: MediaType
+  videoId?: string
+  embedUrl?: string
+  originalUrl: string
+}
+
+type MediaType = 'youtube' | 'vimeo' | 'loom' | 'wistia' | 'video' | 'gif' | 'lottie' | 'image'
+```
+
+### Examples
+
+**YouTube:**
+```tsx
+parseMediaUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+// { type: 'youtube', videoId: 'dQw4w9WgXcQ', embedUrl: '...', originalUrl: '...' }
+
+parseMediaUrl('https://youtu.be/dQw4w9WgXcQ')
+// { type: 'youtube', videoId: 'dQw4w9WgXcQ', embedUrl: '...', originalUrl: '...' }
+```
+
+**Vimeo:**
+```tsx
+parseMediaUrl('https://vimeo.com/123456789')
+// { type: 'vimeo', videoId: '123456789', embedUrl: '...', originalUrl: '...' }
+```
+
+**Loom:**
+```tsx
+parseMediaUrl('https://www.loom.com/share/abc123def456')
+// { type: 'loom', videoId: 'abc123def456', embedUrl: '...', originalUrl: '...' }
+```
+
+**Wistia:**
+```tsx
+parseMediaUrl('https://company.wistia.com/medias/abc123xyz')
+// { type: 'wistia', videoId: 'abc123xyz', embedUrl: '...', originalUrl: '...' }
+```
+
+**Native Video:**
+```tsx
+parseMediaUrl('/videos/demo.mp4')
+// { type: 'video', originalUrl: '/videos/demo.mp4' }
+```
+
+**GIF:**
+```tsx
+parseMediaUrl('/animations/demo.gif')
+// { type: 'gif', originalUrl: '/animations/demo.gif' }
+```
+
+## detectMediaType
+
+Detect the media type from a URL:
+
+```tsx
+import { detectMediaType } from '@tour-kit/media'
+
+detectMediaType('https://www.youtube.com/watch?v=abc123')
+// 'youtube'
+
+detectMediaType('https://vimeo.com/123456789')
+// 'vimeo'
+
+detectMediaType('/videos/demo.mp4')
+// 'video'
+
+detectMediaType('/animations/loading.gif')
+// 'gif'
+
+detectMediaType('/animations/success.json')
+// 'lottie'
+
+detectMediaType('/images/screenshot.png')
+// 'image'
+```
+
+### Detection Logic
+
+1. **URL patterns** - Checks domain and path patterns
+2. **File extensions** - Falls back to extension for direct files
+3. **Explicit types** - You can override with explicit type prop
+
+## isSupportedMediaUrl
+
+Check if a URL is supported:
+
+```tsx
+import { isSupportedMediaUrl } from '@tour-kit/media'
+
+isSupportedMediaUrl('https://www.youtube.com/watch?v=abc123')
+// true
+
+isSupportedMediaUrl('https://vimeo.com/123456789')
+// true
+
+isSupportedMediaUrl('https://unsupported-platform.com/video')
+// false
+
+isSupportedMediaUrl('/videos/demo.mp4')
+// true
+```
+
+Use this to validate user-provided URLs before embedding.
+
+## Platform Detection
+
+### YouTube
+
+```tsx
+import { isYouTubeUrl, extractYouTubeId } from '@tour-kit/media'
+
+isYouTubeUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+// true
+
+isYouTubeUrl('https://youtu.be/dQw4w9WgXcQ')
+// true
+
+isYouTubeUrl('https://vimeo.com/123456789')
+// false
+
+extractYouTubeId('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+// 'dQw4w9WgXcQ'
+
+extractYouTubeId('https://youtu.be/dQw4w9WgXcQ')
+// 'dQw4w9WgXcQ'
+```
+
+**Supported YouTube URL formats:**
+- `https://www.youtube.com/watch?v=VIDEO_ID`
+- `https://youtu.be/VIDEO_ID`
+- `https://www.youtube.com/embed/VIDEO_ID`
+- `https://www.youtube.com/v/VIDEO_ID`
+- `https://m.youtube.com/watch?v=VIDEO_ID`
+
+### Vimeo
+
+```tsx
+import { isVimeoUrl, extractVimeoId } from '@tour-kit/media'
+
+isVimeoUrl('https://vimeo.com/123456789')
+// true
+
+isVimeoUrl('https://player.vimeo.com/video/123456789')
+// true
+
+extractVimeoId('https://vimeo.com/123456789')
+// '123456789'
+
+extractVimeoId('https://vimeo.com/channels/staffpicks/123456789')
+// '123456789'
+```
+
+**Supported Vimeo URL formats:**
+- `https://vimeo.com/VIDEO_ID`
+- `https://player.vimeo.com/video/VIDEO_ID`
+- `https://vimeo.com/channels/*/VIDEO_ID`
+- `https://vimeo.com/groups/*/videos/VIDEO_ID`
+
+### Loom
+
+```tsx
+import { isLoomUrl, extractLoomId } from '@tour-kit/media'
+
+isLoomUrl('https://www.loom.com/share/abc123def456')
+// true
+
+isLoomUrl('https://loom.com/share/abc123def456')
+// true
+
+extractLoomId('https://www.loom.com/share/abc123def456')
+// 'abc123def456'
+
+extractLoomId('https://www.loom.com/embed/abc123def456')
+// 'abc123def456'
+```
+
+**Supported Loom URL formats:**
+- `https://www.loom.com/share/VIDEO_ID`
+- `https://loom.com/share/VIDEO_ID`
+- `https://www.loom.com/embed/VIDEO_ID`
+
+### Wistia
+
+```tsx
+import { isWistiaUrl, extractWistiaId } from '@tour-kit/media'
+
+isWistiaUrl('https://company.wistia.com/medias/abc123xyz')
+// true
+
+isWistiaUrl('https://fast.wistia.net/embed/iframe/abc123xyz')
+// true
+
+extractWistiaId('https://company.wistia.com/medias/abc123xyz')
+// 'abc123xyz'
+
+extractWistiaId('https://fast.wistia.net/embed/iframe/abc123xyz')
+// 'abc123xyz'
+```
+
+**Supported Wistia URL formats:**
+- `https://*.wistia.com/medias/VIDEO_ID`
+- `https://fast.wistia.net/embed/iframe/VIDEO_ID`
+- `https://home.wistia.com/medias/VIDEO_ID`
+
+## Type Checking
+
+Check if detected type belongs to a category:
+
+```tsx
+import { isEmbedType, isNativeVideoType, supportsAutoplay } from '@tour-kit/media'
+
+isEmbedType('youtube')
+// true (embed platforms: youtube, vimeo, loom, wistia)
+
+isEmbedType('video')
+// false
+
+isNativeVideoType('video')
+// true (native types: video, gif)
+
+isNativeVideoType('youtube')
+// false
+
+supportsAutoplay('youtube')
+// true (platforms with autoplay support)
+
+supportsAutoplay('image')
+// false
+```
+
+## File Extension Detection
+
+The library detects media types from file extensions:
+
+```tsx
+detectMediaType('/videos/demo.mp4')    // 'video'
+detectMediaType('/videos/demo.webm')   // 'video'
+detectMediaType('/videos/demo.ogv')    // 'video'
+
+detectMediaType('/animations/demo.gif') // 'gif'
+
+detectMediaType('/animations/lottie.json') // 'lottie'
+
+detectMediaType('/images/screenshot.png')  // 'image'
+detectMediaType('/images/screenshot.jpg')  // 'image'
+detectMediaType('/images/screenshot.webp') // 'image'
+```
+
+## Use Cases
+
+### Auto-Detecting Media Component
+
+Build components that automatically determine type:
+
+```tsx
+import { parseMediaUrl } from '@tour-kit/media'
+import { YouTubeEmbed, VimeoEmbed, NativeVideo } from '@tour-kit/media'
+
+function AutoMedia({ src, alt }) {
+  const { type, videoId, embedUrl } = parseMediaUrl(src)
+
+  switch (type) {
+    case 'youtube':
+      return <YouTubeEmbed videoId={videoId} title={alt} />
+    case 'vimeo':
+      return <VimeoEmbed videoId={videoId} title={alt} />
+    case 'video':
+      return <NativeVideo src={src} alt={alt} />
+    default:
+      return <img src={src} alt={alt} />
+  }
+}
+```
+
+### URL Validation
+
+Validate user input before embedding:
+
+```tsx
+import { isSupportedMediaUrl, detectMediaType } from '@tour-kit/media'
+
+function MediaUrlInput() {
+  const [url, setUrl] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = () => {
+    if (!isSupportedMediaUrl(url)) {
+      setError('Unsupported media URL')
+      return
+    }
+
+    const type = detectMediaType(url)
+    console.log('Valid URL of type:', type)
+    setError(null)
+  }
+
+  return (
+    <div>
+      <input
+        type="url"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder="Enter video URL"
+      />
+      <button onClick={handleSubmit}>Add Media</button>
+      {error && <p className="error">{error}</p>}
+    </div>
+  )
+}
+```
+
+### Dynamic Embed Selection
+
+Show different embeds based on URL:
+
+```tsx
+import { parseMediaUrl } from '@tour-kit/media'
+
+function DynamicEmbed({ url }) {
+  const { type, videoId, embedUrl, originalUrl } = parseMediaUrl(url)
+
+  if (type === 'youtube' || type === 'vimeo') {
+    return (
+      <iframe
+        src={embedUrl}
+        title="Video"
+        className="w-full aspect-video"
+      />
+    )
+  }
+
+  if (type === 'video') {
+    return <video src={originalUrl} controls />
+  }
+
+  if (type === 'gif') {
+    return <img src={originalUrl} alt="Animation" />
+  }
+
+  return <p>Unsupported media type</p>
+}
+```
+
+### Content Moderation
+
+Check URLs before allowing user embeds:
+
+```tsx
+import { isYouTubeUrl, isVimeoUrl, extractYouTubeId } from '@tour-kit/media'
+
+function ModeratedMediaInput({ onSubmit }) {
+  const [url, setUrl] = useState('')
+
+  const handleSubmit = async () => {
+    // Only allow YouTube and Vimeo
+    if (!isYouTubeUrl(url) && !isVimeoUrl(url)) {
+      alert('Only YouTube and Vimeo URLs are allowed')
+      return
+    }
+
+    // Additional validation (e.g., check video exists)
+    if (isYouTubeUrl(url)) {
+      const videoId = extractYouTubeId(url)
+      const exists = await checkYouTubeVideoExists(videoId)
+      if (!exists) {
+        alert('Video not found')
+        return
+      }
+    }
+
+    onSubmit(url)
+  }
+
+  return (
+    <div>
+      <input
+        type="url"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder="YouTube or Vimeo URL"
+      />
+      <button onClick={handleSubmit}>Submit</button>
+    </div>
+  )
+}
+```
+
+## TypeScript
+
+All utilities are fully typed:
+
+```tsx
+import type { MediaType, ParsedMediaUrl } from '@tour-kit/media'
+import {
+  parseMediaUrl,
+  detectMediaType,
+  isSupportedMediaUrl
+} from '@tour-kit/media'
+
+const result: ParsedMediaUrl = parseMediaUrl('https://youtube.com/watch?v=abc')
+const type: MediaType = detectMediaType('https://youtube.com/watch?v=abc')
+const isSupported: boolean = isSupportedMediaUrl('https://youtube.com/watch?v=abc')
+
+// Type guards
+function handleMedia(url: string) {
+  const type = detectMediaType(url)
+
+  if (type === 'youtube' || type === 'vimeo') {
+    // TypeScript knows these are embed types
+    const parsed = parseMediaUrl(url)
+    console.log(parsed.videoId) // string | undefined
+    console.log(parsed.embedUrl) // string | undefined
+  }
+}
+```
+
+## Error Handling
+
+Functions return sensible defaults for invalid input:
+
+```tsx
+// Invalid YouTube URL
+extractYouTubeId('not-a-url')
+// null
+
+// Unsupported platform
+detectMediaType('https://unsupported.com/video')
+// 'video' (fallback based on extension)
+
+// Non-media file
+detectMediaType('/documents/file.pdf')
+// 'image' (fallback)
+
+// Empty string
+parseMediaUrl('')
+// { type: 'image', originalUrl: '' }
+```
+
+Always validate with `isSupportedMediaUrl()` first for reliable results.
+
+## See Also
+
+- [Embed URL Utilities](/docs/media/utilities/embed-urls) - Build embed URLs
+- [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
+- [MediaHeadless](/docs/media/headless/media-headless) - Headless API with URL parsing

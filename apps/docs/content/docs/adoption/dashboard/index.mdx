@@ -1,0 +1,378 @@
+---
+title: Dashboard Components
+description: Pre-built admin dashboard components for visualizing adoption metrics
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+## Overview
+
+The @tour-kit/adoption package includes pre-built dashboard components for admin interfaces. These components integrate with `useAdoptionStats` to visualize feature adoption data.
+
+## Available Components
+
+| Component | Description |
+|-----------|-------------|
+| `AdoptionDashboard` | Full-featured dashboard with all components |
+| `AdoptionStatsGrid` | Grid of stat cards showing key metrics |
+| `AdoptionStatCard` | Individual metric card |
+| `AdoptionTable` | Sortable table of features and their status |
+| `AdoptionCategoryChart` | Bar chart showing adoption by category |
+| `AdoptionStatusBadge` | Status indicator badge |
+| `AdoptionFilters` | Filter controls for the dashboard |
+
+## Quick Start
+
+### Full Dashboard
+
+```tsx
+import { AdoptionDashboard } from '@tour-kit/adoption'
+
+export default function AdminPage() {
+  return (
+    <div className="container mx-auto p-6">
+      <h1>Feature Adoption Dashboard</h1>
+      <AdoptionDashboard />
+    </div>
+  )
+}
+```
+
+### Custom Dashboard
+
+Compose individual components:
+
+```tsx
+import {
+  AdoptionStatsGrid,
+  AdoptionCategoryChart,
+  AdoptionTable,
+} from '@tour-kit/adoption'
+
+export default function CustomDashboard() {
+  return (
+    <div className="space-y-6">
+      <AdoptionStatsGrid />
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <AdoptionCategoryChart />
+        <AdoptionTable />
+      </div>
+    </div>
+  )
+}
+```
+
+## Component Overview
+
+### AdoptionStatsGrid
+
+Shows overview metrics in a grid:
+
+```tsx
+<AdoptionStatsGrid />
+```
+
+Displays:
+- Total features
+- Adopted features
+- Adoption rate
+- Features by status (not started, exploring, adopted, churned)
+
+### AdoptionStatCard
+
+Individual stat card:
+
+```tsx
+<AdoptionStatCard
+  title="Adoption Rate"
+  value="78%"
+  trend={+5}
+  trendLabel="vs last month"
+/>
+```
+
+### AdoptionTable
+
+Sortable table of all features:
+
+```tsx
+<AdoptionTable
+  sortBy="name"
+  sortOrder="asc"
+  showCategory
+  showPriority
+/>
+```
+
+Columns:
+- Feature name
+- Category (optional)
+- Status with badge
+- Use count
+- Last used date
+- Priority (optional)
+
+### AdoptionCategoryChart
+
+Bar chart showing adoption by category:
+
+```tsx
+<AdoptionCategoryChart
+  showPercentages
+  highlightCategory="productivity"
+/>
+```
+
+### AdoptionStatusBadge
+
+Status indicator badge:
+
+```tsx
+<AdoptionStatusBadge status="adopted" />
+<AdoptionStatusBadge status="exploring" />
+<AdoptionStatusBadge status="churned" />
+<AdoptionStatusBadge status="not_started" />
+```
+
+### AdoptionFilters
+
+Filter controls:
+
+```tsx
+const [filters, setFilters] = useState({
+  status: 'all',
+  category: 'all',
+  search: '',
+})
+
+<AdoptionFilters
+  filters={filters}
+  onChange={setFilters}
+  categories={['productivity', 'customization', 'ai']}
+/>
+```
+
+## Styling
+
+All components follow shadcn/ui conventions:
+
+```tsx
+// Custom classes
+<AdoptionDashboard className="max-w-7xl mx-auto" />
+
+// Size variants
+<AdoptionStatCard size="sm" />
+<AdoptionStatCard size="lg" />
+
+// Color variants
+<AdoptionStatusBadge status="adopted" variant="success" />
+```
+
+## Data Integration
+
+Components automatically use `useAdoptionStats()`:
+
+```tsx
+// No props needed - uses context
+<AdoptionDashboard />
+
+// Or provide custom data
+import { useAdoptionStats } from '@tour-kit/adoption'
+
+function CustomView() {
+  const stats = useAdoptionStats()
+
+  // Filter or transform data
+  const premiumStats = {
+    ...stats,
+    features: stats.features.filter(f => f.premium),
+  }
+
+  return <AdoptionTable features={premiumStats.features} />
+}
+```
+
+## Examples
+
+### Admin Dashboard Page
+
+```tsx
+import { AdoptionDashboard, AdoptionFilters } from '@tour-kit/adoption'
+
+export default function AdminDashboard() {
+  const [filters, setFilters] = useState({
+    status: 'all',
+    category: 'all',
+    search: '',
+  })
+
+  return (
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Feature Adoption</h1>
+        <AdoptionFilters filters={filters} onChange={setFilters} />
+      </div>
+
+      <AdoptionDashboard filters={filters} />
+    </div>
+  )
+}
+```
+
+### Metrics Overview
+
+```tsx
+import { AdoptionStatsGrid, AdoptionCategoryChart } from '@tour-kit/adoption'
+
+export function MetricsPage() {
+  return (
+    <div className="space-y-8">
+      <section>
+        <h2 className="text-2xl mb-4">Overview</h2>
+        <AdoptionStatsGrid />
+      </section>
+
+      <section>
+        <h2 className="text-2xl mb-4">By Category</h2>
+        <AdoptionCategoryChart />
+      </section>
+    </div>
+  )
+}
+```
+
+### Export Dashboard Data
+
+```tsx
+import { useAdoptionStats } from '@tour-kit/adoption'
+import { AdoptionDashboard } from '@tour-kit/adoption'
+
+export function ExportableDashboard() {
+  const stats = useAdoptionStats()
+
+  const exportCSV = () => {
+    const csv = [
+      ['Feature', 'Category', 'Status', 'Uses', 'Last Used'],
+      ...stats.features.map(f => [
+        f.name,
+        f.category || '-',
+        f.usage.status,
+        f.usage.useCount,
+        f.usage.lastUsed || 'Never',
+      ]),
+    ].map(row => row.join(',')).join('\n')
+
+    // Download CSV
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'adoption-metrics.csv'
+    a.click()
+  }
+
+  return (
+    <div>
+      <div className="flex justify-end mb-4">
+        <button onClick={exportCSV}>Export CSV</button>
+      </div>
+      <AdoptionDashboard />
+    </div>
+  )
+}
+```
+
+## Accessibility
+
+All dashboard components include:
+- Semantic HTML (`table`, `figure`, `dl`, etc.)
+- ARIA labels for screen readers
+- Keyboard navigation support
+- Focus indicators
+
+```tsx
+<AdoptionTable
+  aria-label="Feature adoption table"
+  caption="Current adoption status for all features"
+/>
+```
+
+## TypeScript
+
+Fully typed props:
+
+```tsx
+import type {
+  AdoptionDashboardProps,
+  AdoptionStatCardProps,
+  AdoptionTableProps,
+  AdoptionFiltersState,
+} from '@tour-kit/adoption'
+
+const dashboardProps: AdoptionDashboardProps = {
+  className: 'my-dashboard',
+  showFilters: true,
+}
+
+const filterState: AdoptionFiltersState = {
+  status: 'all',
+  category: 'all',
+  search: '',
+}
+```
+
+## Best Practices
+
+1. **Use the full dashboard** for admin pages:
+
+```tsx
+<AdoptionDashboard />
+```
+
+2. **Compose individual components** for custom layouts:
+
+```tsx
+<div className="grid lg:grid-cols-2 gap-6">
+  <AdoptionStatsGrid />
+  <AdoptionCategoryChart />
+</div>
+```
+
+3. **Add filtering** for large feature sets:
+
+```tsx
+<AdoptionFilters onChange={setFilters} />
+<AdoptionTable filters={filters} />
+```
+
+4. **Export data** for reporting:
+
+```tsx
+const stats = useAdoptionStats()
+// Export stats.features as CSV/JSON
+```
+
+## Next Steps
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+  <a href="/docs/adoption/dashboard/adoption-dashboard" className="card">
+    <h3>AdoptionDashboard</h3>
+    <p>Full dashboard component</p>
+  </a>
+
+  <a href="/docs/adoption/dashboard/stats" className="card">
+    <h3>Stat Cards</h3>
+    <p>Individual metric displays</p>
+  </a>
+
+  <a href="/docs/adoption/dashboard/table" className="card">
+    <h3>AdoptionTable</h3>
+    <p>Sortable feature table</p>
+  </a>
+
+  <a href="/docs/adoption/dashboard/charts" className="card">
+    <h3>Charts</h3>
+    <p>Category visualizations</p>
+  </a>
+</div>

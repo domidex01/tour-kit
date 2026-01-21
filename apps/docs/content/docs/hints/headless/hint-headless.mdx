@@ -1,0 +1,343 @@
+---
+title: HintHeadless
+description: Headless hint component with render props for custom UIs
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# HintHeadless
+
+The main headless hint component that manages state, positioning, and provides render props for complete UI customization.
+
+## Why Use HintHeadless?
+
+- **Complete control** - Build any hint UI you want
+- **All logic included** - State, positioning, dismissal handled
+- **Render props** - Access all internal state for custom rendering
+- **Same accessibility** - ARIA attributes built in
+
+---
+
+## Basic Usage
+
+```tsx
+import { HintHeadless } from '@tour-kit/hints/headless';
+
+function CustomHint() {
+  return (
+    <HintHeadless
+      id="welcome-hint"
+      target="#welcome-button"
+      content="Click here to get started!"
+      render={({
+        isOpen,
+        targetRect,
+        targetElement,
+        show,
+        hide,
+        dismiss,
+        hotspotRef,
+        position,
+        tooltipPlacement,
+        content,
+      }) => (
+        <>
+          {/* Custom hotspot */}
+          <button
+            ref={hotspotRef}
+            onClick={isOpen ? hide : show}
+            style={{
+              position: 'fixed',
+              top: targetRect.top - 4,
+              left: targetRect.right - 4,
+            }}
+            className="w-4 h-4 bg-blue-500 rounded-full"
+          />
+
+          {/* Custom tooltip */}
+          {isOpen && (
+            <div
+              style={{
+                position: 'fixed',
+                top: targetRect.bottom + 8,
+                left: targetRect.left,
+              }}
+              className="p-3 bg-white shadow-lg rounded"
+            >
+              <p>{content}</p>
+              <button onClick={dismiss}>Dismiss</button>
+            </div>
+          )}
+        </>
+      )}
+    />
+  );
+}
+```
+
+---
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      description: 'Unique identifier for the hint',
+    },
+    target: {
+      type: 'string | RefObject<HTMLElement>',
+      description: 'CSS selector or ref for the target element',
+    },
+    content: {
+      type: 'React.ReactNode',
+      description: 'Hint content to display',
+    },
+    position: {
+      type: 'HotspotPosition',
+      description: 'Hotspot position relative to target',
+      default: "'top-right'",
+    },
+    tooltipPlacement: {
+      type: 'Placement',
+      description: 'Tooltip placement relative to hotspot',
+      default: "'bottom'",
+    },
+    pulse: {
+      type: 'boolean',
+      description: 'Enable pulsing animation (for custom implementation)',
+      default: 'true',
+    },
+    autoShow: {
+      type: 'boolean',
+      description: 'Automatically show hint on mount',
+      default: 'false',
+    },
+    persist: {
+      type: 'boolean',
+      description: 'Remember dismissal in storage',
+      default: 'false',
+    },
+    onClick: {
+      type: '() => void',
+      description: 'Called when hotspot is clicked',
+    },
+    onShow: {
+      type: '() => void',
+      description: 'Called when hint is shown',
+    },
+    onDismiss: {
+      type: '() => void',
+      description: 'Called when hint is dismissed',
+    },
+    render: {
+      type: '(props: HintHeadlessRenderProps) => ReactNode',
+      description: 'Render prop for custom UI',
+    },
+    children: {
+      type: 'React.ReactNode',
+      description: 'Children rendered when hint is open (if no render prop)',
+    },
+    className: {
+      type: 'string',
+      description: 'Class name for default button (if no render prop)',
+    },
+  }}
+/>
+
+---
+
+## Render Props
+
+The `render` function receives these props:
+
+<TypeTable
+  type={{
+    isOpen: {
+      type: 'boolean',
+      description: 'Whether the tooltip is currently visible',
+    },
+    isDismissed: {
+      type: 'boolean',
+      description: 'Whether the hint has been dismissed',
+    },
+    show: {
+      type: '() => void',
+      description: 'Show the tooltip',
+    },
+    hide: {
+      type: '() => void',
+      description: 'Hide the tooltip temporarily',
+    },
+    dismiss: {
+      type: '() => void',
+      description: 'Dismiss the hint (respects persist option)',
+    },
+    targetElement: {
+      type: 'HTMLElement | null',
+      description: 'The resolved target DOM element',
+    },
+    targetRect: {
+      type: 'DOMRect | null',
+      description: 'Bounding rectangle of the target',
+    },
+    hotspotRef: {
+      type: 'RefObject<HTMLButtonElement>',
+      description: 'Ref to attach to hotspot button',
+    },
+    position: {
+      type: 'HotspotPosition',
+      description: 'Hotspot position setting',
+    },
+    tooltipPlacement: {
+      type: 'Placement',
+      description: 'Tooltip placement setting',
+    },
+    pulse: {
+      type: 'boolean',
+      description: 'Pulse animation setting',
+    },
+    content: {
+      type: 'React.ReactNode',
+      description: 'The hint content',
+    },
+  }}
+/>
+
+---
+
+## Position Options
+
+```tsx
+// HotspotPosition values
+type HotspotPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'center';
+```
+
+```tsx
+<HintHeadless
+  id="hint"
+  target="#element"
+  position="bottom-right"  // Hotspot at bottom-right corner
+  render={({ targetRect, position }) => {
+    // position = 'bottom-right'
+    // targetRect = { top, left, right, bottom, width, height }
+  }}
+/>
+```
+
+---
+
+## Complete Custom Hint
+
+```tsx
+import { HintHeadless } from '@tour-kit/hints/headless';
+
+function FeatureHint() {
+  return (
+    <HintHeadless
+      id="new-export"
+      target="#export-button"
+      content="Export to multiple formats now available!"
+      position="top-right"
+      tooltipPlacement="right"
+      persist={true}
+      onDismiss={() => analytics.track('hint_dismissed')}
+      render={({
+        isOpen,
+        targetRect,
+        targetElement,
+        show,
+        hide,
+        dismiss,
+        content,
+      }) => (
+        <>
+          {/* Custom pulsing hotspot */}
+          <button
+            onClick={isOpen ? hide : show}
+            className="fixed z-50"
+            style={{
+              top: targetRect.top - 4,
+              left: targetRect.right - 4,
+            }}
+          >
+            <span className="flex h-4 w-4">
+              <span className="animate-ping absolute h-4 w-4 rounded-full bg-blue-400 opacity-75" />
+              <span className="relative rounded-full h-4 w-4 bg-blue-500" />
+            </span>
+          </button>
+
+          {/* Custom tooltip */}
+          {isOpen && (
+            <div
+              className="fixed z-50 p-4 bg-white rounded-lg shadow-xl"
+              style={{
+                top: targetRect.top,
+                left: targetRect.right + 12,
+              }}
+            >
+              <div className="flex items-start gap-2">
+                <span className="text-xl">🆕</span>
+                <div>
+                  <p className="font-medium">{content}</p>
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      onClick={dismiss}
+                      className="text-sm text-blue-600"
+                    >
+                      Got it
+                    </button>
+                    <button
+                      onClick={hide}
+                      className="text-sm text-gray-500"
+                    >
+                      Later
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    />
+  );
+}
+```
+
+---
+
+## Without Render Prop
+
+For simple cases, use children instead:
+
+```tsx
+<HintHeadless
+  id="simple-hint"
+  target="#button"
+  className="w-4 h-4 bg-blue-500 rounded-full"
+>
+  {/* This renders when isOpen is true */}
+  <div className="tooltip">
+    <p>Hint content here</p>
+  </div>
+</HintHeadless>
+```
+
+<Callout type="info">
+When not using `render`, the component renders a basic button that toggles the tooltip. Use this for prototyping before implementing full custom rendering.
+</Callout>
+
+---
+
+## Related
+
+- [HintHotspotHeadless](/docs/hints/headless/hint-hotspot-headless) - Positioned hotspot
+- [HintTooltipHeadless](/docs/hints/headless/hint-tooltip-headless) - Floating tooltip
+- [useHint](/docs/hints/hooks) - Direct hook access

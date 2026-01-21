@@ -1,0 +1,46 @@
+---
+title: HeadlessBanner
+description: Headless banner component with render props
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# HeadlessBanner
+
+Unstyled banner bar that provides state and behavior through render props.
+
+## Additional Render Props
+
+<TypeTable
+  type={{
+    bannerOptions: { type: 'BannerOptions', description: 'Position and style options' },
+    position: { type: "'top' | 'bottom'", description: 'Banner position' },
+    intent: { type: "'default' | 'info' | 'success' | 'warning' | 'error'", description: 'Visual intent' },
+    sticky: { type: 'boolean', description: 'Sticky positioning' },
+  }}
+/>
+
+## Example
+
+```tsx
+import { HeadlessBanner } from '@tour-kit/announcements/headless';
+
+<HeadlessBanner
+  id="notice"
+  render={({ isVisible, config, dismiss, position, intent, sticky }) => {
+    if (!isVisible) return null;
+
+    return (
+      <div
+        className={`banner ${position} ${intent} ${sticky ? 'sticky' : ''}`}
+        role="banner"
+      >
+        <p>{config.title}</p>
+        {config.bannerOptions?.dismissable && (
+          <button onClick={() => dismiss()}>×</button>
+        )}
+      </div>
+    );
+  }}
+/>
+```

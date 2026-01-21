@@ -1,0 +1,50 @@
+---
+title: Progress Utilities
+description: Functions for calculating and analyzing progress
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# Progress Utilities
+
+Functions for working with checklist progress.
+
+## calculateProgress
+
+Calculate progress for a checklist:
+
+```tsx
+import { calculateProgress } from '@tour-kit/checklists';
+
+const progress = calculateProgress(checklistState);
+// { completed: 3, total: 5, percentage: 60, remaining: 2 }
+```
+
+## getNextTask
+
+Get the next incomplete, unlocked task:
+
+```tsx
+import { getNextTask } from '@tour-kit/checklists';
+
+const nextTask = getNextTask(checklistState);
+if (nextTask) {
+  console.log('Next:', nextTask.config.title);
+}
+```
+
+## getLockedTasks
+
+Get all tasks locked by dependencies:
+
+```tsx
+import { getLockedTasks } from '@tour-kit/checklists';
+
+const locked = getLockedTasks(checklistState);
+console.log(`${locked.length} tasks locked`);
+```
+
+## Related
+
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Access progress
+- [useChecklistsProgress](/docs/checklists/hooks/use-checklists-progress) - Multi-checklist progress

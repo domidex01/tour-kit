@@ -1,0 +1,326 @@
+---
+title: Next.js Pages Router Adapter
+description: Router adapter for Next.js Pages Router
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Next.js Pages Router Adapter
+
+Router adapter for Next.js Pages Router using `next/router`.
+
+## When to Use
+
+Use this adapter when:
+- You're using Next.js with the Pages Router (`pages/` directory)
+- Your app doesn't use the App Router
+- You need multi-page tours that navigate between routes
+
+---
+
+## Installation
+
+The adapter is included in `@tour-kit/react`. Make sure Next.js is installed:
+
+```bash
+pnpm add @tour-kit/react next
+```
+
+---
+
+## Usage
+
+<Tabs items={['Direct Hook', 'Factory Function']}>
+<Tab value="Direct Hook">
+```tsx
+import { MultiTourKitProvider, useNextPagesRouter } from '@tour-kit/react';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  const router = useNextPagesRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+    >
+      {children}
+    </MultiTourKitProvider>
+  );
+}
+```
+</Tab>
+
+<Tab value="Factory Function">
+```tsx
+import { MultiTourKitProvider, createNextPagesRouterAdapter } from '@tour-kit/react';
+import { useRouter } from 'next/router';
+
+const useRouter = createNextPagesRouterAdapter(useRouter);
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+    >
+      {children}
+    </MultiTourKitProvider>
+  );
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+## useNextPagesRouter
+
+Direct hook that automatically imports from `next/router`.
+
+```tsx
+import { useNextPagesRouter } from '@tour-kit/react';
+
+const router = useNextPagesRouter();
+```
+
+### Return Value
+
+Returns a `RouterAdapter` with these methods:
+
+<TypeTable
+  type={{
+    getCurrentRoute: {
+      type: '() => string',
+      description: 'Returns router.pathname',
+    },
+    navigate: {
+      type: '(route: string) => Promise<boolean>',
+      description: 'Navigates using router.push()',
+    },
+    matchRoute: {
+      type: "(pattern: string, mode?: 'exact' | 'startsWith' | 'contains') => boolean",
+      description: 'Matches pathname against pattern',
+    },
+    onRouteChange: {
+      type: '(callback: (route: string) => void) => () => void',
+      description: 'Subscribe to route changes via router.events',
+    },
+  }}
+/>
+
+---
+
+## createNextPagesRouterAdapter
+
+Factory function for custom setups.
+
+```tsx
+import { createNextPagesRouterAdapter } from '@tour-kit/react';
+import { useRouter } from 'next/router';
+
+const useMyRouter = createNextPagesRouterAdapter(useRouter);
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    useRouter: {
+      type: '() => NextRouter',
+      description: 'Next.js Pages Router useRouter hook',
+    },
+  }}
+/>
+
+Where `NextRouter` includes:
+
+```ts
+interface NextRouter {
+  pathname: string;
+  push: (url: string) => Promise<boolean>;
+  events: {
+    on: (event: string, handler: (url: string) => void) => void;
+    off: (event: string, handler: (url: string) => void) => void;
+  };
+}
+```
+
+---
+
+## Complete Example
+
+```tsx title="components/TourProvider.tsx"
+import {
+  MultiTourKitProvider,
+  useNextPagesRouter,
+  Tour,
+  TourStep,
+  TourOverlay,
+  TourCard,
+  useTour,
+} from '@tour-kit/react';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  const router = useNextPagesRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{
+        enabled: true,
+        storage: 'localStorage',
+      }}
+      autoNavigate={true}
+    >
+      <Tour id="onboarding">
+        <TourStep
+          target="#hero"
+          title="Welcome!"
+          content="Let's show you around."
+          route="/"
+          routeMatch="exact"
+        />
+        <TourStep
+          target="#dashboard"
+          title="Dashboard"
+          content="Your personal dashboard."
+          route="/dashboard"
+        />
+        <TourStep
+          target="#profile"
+          title="Profile"
+          content="Manage your profile here."
+          route="/profile"
+        />
+      </Tour>
+
+      <TourOverlay />
+      <TourCard />
+
+      {children}
+
+      <TourButton />
+    </MultiTourKitProvider>
+  );
+}
+
+function TourButton() {
+  const { start, isActive } = useTour();
+
+  if (isActive) return null;
+
+  return (
+    <button onClick={() => start('onboarding')}>
+      Start Tour
+    </button>
+  );
+}
+```
+
+```tsx title="pages/_app.tsx"
+import type { AppProps } from 'next/app';
+import { TourProvider } from '@/components/TourProvider';
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <TourProvider>
+      <Component {...pageProps} />
+    </TourProvider>
+  );
+}
+```
+
+---
+
+## Route Change Detection
+
+The Pages Router adapter uses `router.events` for route change detection:
+
+```tsx
+// Internal behavior:
+useEffect(() => {
+  const handleRouteChange = (url: string) => {
+    const pathname = url.split('?')[0]; // Strip query string
+    for (const callback of callbacks) {
+      callback(pathname);
+    }
+  };
+
+  router.events.on('routeChangeComplete', handleRouteChange);
+  return () => router.events.off('routeChangeComplete', handleRouteChange);
+}, [router.events]);
+```
+
+<Callout type="info">
+The `onRouteChange` callback fires immediately with the current route when subscribed, then fires on `routeChangeComplete` events.
+</Callout>
+
+---
+
+## Differences from App Router
+
+| Feature | Pages Router | App Router |
+|---------|-------------|------------|
+| Route source | `router.pathname` | `usePathname()` |
+| Navigation | `router.push()` (async) | `router.push()` (void) |
+| Change detection | `router.events` | Pathname reactivity |
+| Query string | Stripped automatically | Not in pathname |
+| Client directive | Not needed | `'use client'` required |
+
+---
+
+## Dynamic Routes
+
+For routes with dynamic segments like `/users/[id]`:
+
+```tsx
+// The pathname includes the pattern, not the actual value
+router.pathname // "/users/[id]"
+
+// Use startsWith for dynamic routes
+<TourStep
+  route="/users"
+  routeMatch="startsWith"
+/>
+```
+
+---
+
+## Troubleshooting
+
+### "Cannot find module 'next/router'"
+
+Ensure you're using the Pages Router. The App Router uses `next/navigation` instead.
+
+### Route Changes Not Detected
+
+Check that your navigation uses Next.js routing:
+
+```tsx
+// This works - triggers routeChangeComplete
+router.push('/dashboard');
+
+// This doesn't trigger events - use Link instead
+window.location.href = '/dashboard';
+```
+
+### Query Parameters in Routes
+
+The adapter automatically strips query parameters:
+
+```tsx
+// URL: /dashboard?tab=overview
+router.getCurrentRoute() // Returns: "/dashboard"
+```
+
+---
+
+## Related
+
+- [Next.js Integration Guide](/docs/guides/nextjs) - Complete setup walkthrough
+- [Next.js App Router Adapter](/docs/react/adapters/next-app-router) - For App Router
+- [Router Adapters Overview](/docs/react/adapters) - All available adapters

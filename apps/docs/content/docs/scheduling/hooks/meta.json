@@ -1,0 +1,9 @@
+{
+  "title": "Hooks",
+  "pages": [
+    "index",
+    "use-schedule",
+    "use-schedule-status",
+    "use-user-timezone"
+  ]
+}

@@ -1,0 +1,57 @@
+---
+title: HeadlessModal
+description: Headless modal component with render props
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# HeadlessModal
+
+Unstyled modal component that provides state and behavior through render props.
+
+## Render Props
+
+<TypeTable
+  type={{
+    isVisible: { type: 'boolean', description: 'Whether modal is visible' },
+    isActive: { type: 'boolean', description: 'Whether modal is active' },
+    config: { type: 'AnnouncementConfig', description: 'Announcement configuration' },
+    state: { type: 'AnnouncementState', description: 'Announcement state' },
+    hide: { type: '() => void', description: 'Hide modal' },
+    dismiss: { type: '(reason?) => void', description: 'Dismiss forever' },
+    modalOptions: { type: 'ModalOptions', description: 'Modal-specific options' },
+    titleId: { type: 'string', description: 'ID for aria-labelledby' },
+    descriptionId: { type: 'string', description: 'ID for aria-describedby' },
+  }}
+/>
+
+## Example
+
+```tsx
+import { HeadlessModal } from '@tour-kit/announcements/headless';
+
+<HeadlessModal
+  id="welcome"
+  render={({ isVisible, config, hide, dismiss, titleId, descriptionId }) => {
+    if (!isVisible) return null;
+
+    return (
+      <div className="modal-container">
+        <div className="overlay" onClick={hide} />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          aria-describedby={descriptionId}
+          className="modal-content"
+        >
+          <h2 id={titleId}>{config.title}</h2>
+          <p id={descriptionId}>{config.description}</p>
+          <button onClick={hide}>Close</button>
+          <button onClick={() => dismiss()}>Don't Show Again</button>
+        </div>
+      </div>
+    );
+  }}
+/>
+```

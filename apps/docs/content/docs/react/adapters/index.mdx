@@ -1,0 +1,229 @@
+---
+title: Router Adapters
+description: Framework-specific router adapters for multi-page tours
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Router Adapters
+
+Router adapters connect Tour Kit to your application's routing system, enabling multi-page tours that navigate users across different routes.
+
+## Why Use Router Adapters?
+
+Multi-page tours need to:
+
+- **Navigate between pages** - Automatically go to the correct route for each step
+- **Detect route changes** - Know when users navigate away from a step's route
+- **Match routes flexibly** - Support exact, prefix, and contains matching
+- **Persist state** - Remember progress across page loads
+
+---
+
+## Available Adapters
+
+<Cards>
+  <Card title="Next.js App Router" href="/docs/react/adapters/next-app-router">
+    For Next.js 13+ App Router with `next/navigation`
+  </Card>
+  <Card title="Next.js Pages Router" href="/docs/react/adapters/next-pages-router">
+    For Next.js Pages Router with `next/router`
+  </Card>
+  <Card title="React Router" href="/docs/react/adapters/react-router">
+    For React Router v6/v7 in SPAs
+  </Card>
+</Cards>
+
+---
+
+## Two Usage Patterns
+
+Each adapter provides two ways to create it:
+
+### 1. Direct Hook (Recommended)
+
+Simple to use - automatically imports the router library:
+
+```tsx
+import { useNextAppRouter } from '@tour-kit/react';
+
+function App() {
+  const router = useNextAppRouter();
+
+  return (
+    <MultiTourKitProvider router={router}>
+      {/* ... */}
+    </MultiTourKitProvider>
+  );
+}
+```
+
+### 2. Factory Function
+
+For custom setups or when you need more control:
+
+```tsx
+import { createNextAppRouterAdapter } from '@tour-kit/react';
+import { usePathname, useRouter } from 'next/navigation';
+
+const useMyRouter = createNextAppRouterAdapter(usePathname, useRouter);
+
+function App() {
+  const router = useMyRouter();
+
+  return (
+    <MultiTourKitProvider router={router}>
+      {/* ... */}
+    </MultiTourKitProvider>
+  );
+}
+```
+
+---
+
+## RouterAdapter Interface
+
+All adapters implement this interface:
+
+<TypeTable
+  type={{
+    getCurrentRoute: {
+      type: '() => string',
+      description: 'Get the current route path',
+    },
+    navigate: {
+      type: '(route: string) => void | Promise<boolean>',
+      description: 'Navigate to a route',
+    },
+    matchRoute: {
+      type: "(pattern: string, mode?: 'exact' | 'startsWith' | 'contains') => boolean",
+      description: 'Check if current route matches a pattern',
+    },
+    onRouteChange: {
+      type: '(callback: (route: string) => void) => () => void',
+      description: 'Subscribe to route changes, returns unsubscribe function',
+    },
+  }}
+/>
+
+---
+
+## Route Matching Modes
+
+```tsx
+<TourStep
+  route="/dashboard"
+  routeMatch="exact"      // Only "/dashboard"
+/>
+
+<TourStep
+  route="/dashboard"
+  routeMatch="startsWith" // "/dashboard", "/dashboard/settings", etc.
+/>
+
+<TourStep
+  route="/settings"
+  routeMatch="contains"   // "/app/settings", "/user/settings", etc.
+/>
+```
+
+---
+
+## Custom Adapter
+
+Create your own adapter for other routing libraries:
+
+```tsx
+import type { RouterAdapter } from '@tour-kit/core';
+
+function useMyCustomRouter(): RouterAdapter {
+  const location = useYourRouterLocation();
+  const navigate = useYourRouterNavigate();
+  const callbacksRef = useRef<Set<(route: string) => void>>(new Set());
+
+  useEffect(() => {
+    // Notify on route change
+    for (const cb of callbacksRef.current) {
+      cb(location.pathname);
+    }
+  }, [location.pathname]);
+
+  return {
+    getCurrentRoute: () => location.pathname,
+
+    navigate: (route: string) => {
+      navigate(route);
+    },
+
+    matchRoute: (pattern, mode = 'exact') => {
+      const current = location.pathname;
+      switch (mode) {
+        case 'exact': return current === pattern;
+        case 'startsWith': return current.startsWith(pattern);
+        case 'contains': return current.includes(pattern);
+      }
+    },
+
+    onRouteChange: (callback) => {
+      callbacksRef.current.add(callback);
+      callback(location.pathname); // Initial call
+      return () => callbacksRef.current.delete(callback);
+    },
+  };
+}
+```
+
+---
+
+## Usage with MultiTourKitProvider
+
+```tsx
+import {
+  MultiTourKitProvider,
+  useNextAppRouter,
+  Tour,
+  TourStep,
+  TourOverlay,
+  TourCard,
+} from '@tour-kit/react';
+
+function App() {
+  const router = useNextAppRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+      autoNavigate={true}
+    >
+      <Tour id="onboarding">
+        <TourStep
+          target="#home"
+          title="Home"
+          route="/"
+          routeMatch="exact"
+        />
+        <TourStep
+          target="#dashboard"
+          title="Dashboard"
+          route="/dashboard"
+          routeMatch="startsWith"
+        />
+      </Tour>
+      <TourOverlay />
+      <TourCard />
+      <Routes />
+    </MultiTourKitProvider>
+  );
+}
+```
+
+---
+
+## Related
+
+- [Next.js Integration](/docs/guides/nextjs) - Complete Next.js setup guide
+- [Vite Integration](/docs/guides/vite) - Vite with React Router setup
+- [Router Integration Guide](/docs/guides/router-integration) - Deep dive into multi-page tours

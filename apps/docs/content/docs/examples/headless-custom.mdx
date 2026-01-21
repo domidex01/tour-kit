@@ -1,0 +1,497 @@
+---
+title: Headless Custom UI
+description: Build a completely custom tour UI using headless components
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Headless Custom UI
+
+Build a tour with completely custom UI using headless components. Full control over every element while keeping all the positioning, state, and accessibility logic.
+
+## What You'll Build
+
+This example creates a custom-styled tour that:
+- Uses your own design system components
+- Has a unique overlay effect with gradient
+- Features custom animations
+- Maintains all accessibility features
+
+---
+
+## Complete Code
+
+```tsx
+'use client';
+
+import {
+  Tour,
+  TourStep,
+  useTour,
+} from '@tour-kit/react';
+import {
+  TourCardHeadless,
+  TourOverlayHeadless,
+  TourProgressHeadless,
+} from '@tour-kit/react/headless';
+
+export default function CustomTourExample() {
+  return (
+    <Tour id="custom-tour">
+      <TourStep
+        target="#feature-1"
+        title="Custom Design"
+        content="This tour uses completely custom UI components."
+        placement="bottom"
+      />
+      <TourStep
+        target="#feature-2"
+        title="Your Styles"
+        content="Style every element exactly how you want."
+        placement="right"
+      />
+      <TourStep
+        target="#feature-3"
+        title="Full Control"
+        content="All positioning and accessibility handled for you."
+        placement="left"
+      />
+
+      {/* Custom overlay with render prop */}
+      <CustomOverlay />
+
+      {/* Custom card with render prop */}
+      <CustomCard />
+
+      <AppContent />
+    </Tour>
+  );
+}
+
+// Completely custom overlay with gradient effect
+function CustomOverlay() {
+  return (
+    <TourOverlayHeadless
+      render={({ isActive, overlayStyle, cutoutStyle, targetRect }) => (
+        <div
+          style={{
+            ...overlayStyle,
+            background: 'radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%)',
+          }}
+          className="fixed inset-0 z-40 transition-opacity duration-300"
+        >
+          {targetRect && (
+            <div
+              style={{
+                ...cutoutStyle,
+                boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3)',
+              }}
+              className="rounded-lg"
+            />
+          )}
+        </div>
+      )}
+    />
+  );
+}
+
+// Completely custom card with render prop
+function CustomCard() {
+  return (
+    <TourCardHeadless
+      render={({
+        currentStep,
+        currentStepIndex,
+        totalSteps,
+        isFirstStep,
+        isLastStep,
+        next,
+        prev,
+        skip,
+        floatingStyles,
+        refs,
+      }) => (
+        <div
+          ref={refs.setFloating}
+          style={floatingStyles}
+          className="z-50 w-80 animate-in fade-in slide-in-from-bottom-2 duration-200"
+        >
+          {/* Custom card design */}
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl shadow-2xl border border-slate-700 overflow-hidden">
+            {/* Header with step indicator */}
+            <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+              <span className="text-sm font-medium text-blue-400">
+                Step {currentStepIndex + 1} of {totalSteps}
+              </span>
+              <button
+                onClick={skip}
+                className="text-slate-400 hover:text-white transition-colors text-sm"
+              >
+                Skip
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-5 space-y-3">
+              <h2 className="text-xl font-bold">{currentStep?.title}</h2>
+              <p className="text-slate-300 leading-relaxed">
+                {currentStep?.content}
+              </p>
+            </div>
+
+            {/* Custom progress bar */}
+            <div className="px-5">
+              <TourProgressHeadless
+                current={currentStepIndex + 1}
+                total={totalSteps}
+                render={({ current, total }) => (
+                  <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 transition-all duration-300"
+                      style={{ width: `${(current / total) * 100}%` }}
+                    />
+                  </div>
+                )}
+              />
+            </div>
+
+            {/* Navigation */}
+            <div className="p-5 flex justify-between items-center">
+              {!isFirstStep ? (
+                <button
+                  onClick={prev}
+                  className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
+                >
+                  ← Back
+                </button>
+              ) : (
+                <div />
+              )}
+
+              <button
+                onClick={next}
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
+              >
+                {isLastStep ? 'Finish' : 'Continue →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    />
+  );
+}
+
+function AppContent() {
+  const { start, isActive } = useTour();
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white p-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div id="feature-1" className="p-8 bg-slate-900 rounded-xl border border-slate-800">
+          <h2 className="text-2xl font-bold mb-2">Feature One</h2>
+          <p className="text-slate-400">Description of feature one</p>
+        </div>
+
+        <div id="feature-2" className="p-8 bg-slate-900 rounded-xl border border-slate-800">
+          <h2 className="text-2xl font-bold mb-2">Feature Two</h2>
+          <p className="text-slate-400">Description of feature two</p>
+        </div>
+
+        <div id="feature-3" className="p-8 bg-slate-900 rounded-xl border border-slate-800">
+          <h2 className="text-2xl font-bold mb-2">Feature Three</h2>
+          <p className="text-slate-400">Description of feature three</p>
+        </div>
+
+        {!isActive && (
+          <button
+            onClick={() => start()}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition-colors"
+          >
+            Start Custom Tour
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Headless Components Overview
+
+### TourCardHeadless
+
+Provides all card positioning and state without any styling:
+
+```tsx
+<TourCardHeadless
+  render={({
+    currentStep,       // Current step data (title, content, etc.)
+    currentStepIndex,  // 0-based index
+    totalSteps,        // Total number of steps
+    isFirstStep,       // Boolean
+    isLastStep,        // Boolean
+    next,              // Go to next step
+    prev,              // Go to previous step
+    skip,              // Skip/exit the tour
+    floatingStyles,    // Position styles from floating-ui
+    refs,              // { setFloating } ref for positioning
+    arrowRef,          // Ref for arrow element
+    context,           // floating-ui context for advanced use
+  }) => (
+    <div ref={refs.setFloating} style={floatingStyles}>
+      {/* Your custom UI */}
+    </div>
+  )}
+/>
+```
+
+### TourOverlayHeadless
+
+Provides spotlight positioning without any styling:
+
+```tsx
+<TourOverlayHeadless
+  render={({
+    isActive,     // Whether tour is active
+    overlayStyle, // Base styles for full-screen overlay
+    cutoutStyle,  // Styles for the spotlight cutout
+    targetRect,   // DOMRect of target element
+    interactive,  // Whether cutout allows clicks through
+  }) => (
+    <div style={overlayStyle}>
+      {targetRect && <div style={cutoutStyle} />}
+    </div>
+  )}
+/>
+```
+
+### TourProgressHeadless
+
+Provides progress data for custom progress indicators:
+
+```tsx
+<TourProgressHeadless
+  current={currentStepIndex + 1}
+  total={totalSteps}
+  render={({ current, total }) => (
+    <div className="progress-bar">
+      <div style={{ width: `${(current / total) * 100}%` }} />
+    </div>
+  )}
+/>
+```
+
+---
+
+## Design System Integration
+
+### With shadcn/ui
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+
+function ShadcnCard() {
+  return (
+    <TourCardHeadless
+      render={({ currentStep, next, prev, skip, floatingStyles, refs, currentStepIndex, totalSteps }) => (
+        <Card ref={refs.setFloating} style={floatingStyles} className="w-80">
+          <CardHeader>
+            <h3 className="font-semibold">{currentStep?.title}</h3>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">{currentStep?.content}</p>
+            <Progress value={(currentStepIndex / totalSteps) * 100} className="mt-4" />
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="ghost" onClick={skip}>Skip</Button>
+            <div className="space-x-2">
+              <Button variant="outline" onClick={prev}>Back</Button>
+              <Button onClick={next}>Next</Button>
+            </div>
+          </CardFooter>
+        </Card>
+      )}
+    />
+  );
+}
+```
+
+### With Chakra UI
+
+```tsx
+import { Box, Button, Heading, Text, Progress, HStack } from '@chakra-ui/react';
+
+function ChakraCard() {
+  return (
+    <TourCardHeadless
+      render={({ currentStep, next, prev, skip, floatingStyles, refs, currentStepIndex, totalSteps }) => (
+        <Box
+          ref={refs.setFloating}
+          style={floatingStyles}
+          bg="white"
+          p={6}
+          borderRadius="xl"
+          shadow="xl"
+          maxW="sm"
+        >
+          <Heading size="md" mb={2}>{currentStep?.title}</Heading>
+          <Text color="gray.600" mb={4}>{currentStep?.content}</Text>
+          <Progress value={(currentStepIndex / totalSteps) * 100} mb={4} colorScheme="blue" />
+          <HStack justify="space-between">
+            <Button variant="ghost" onClick={skip}>Skip</Button>
+            <HStack>
+              <Button variant="outline" onClick={prev}>Back</Button>
+              <Button colorScheme="blue" onClick={next}>Next</Button>
+            </HStack>
+          </HStack>
+        </Box>
+      )}
+    />
+  );
+}
+```
+
+---
+
+## Custom Animations
+
+Add entrance/exit animations:
+
+```tsx
+import { motion, AnimatePresence } from 'framer-motion';
+
+function AnimatedCard() {
+  return (
+    <TourCardHeadless
+      render={({ currentStep, floatingStyles, refs, ...props }) => (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep?.id}
+            ref={refs.setFloating}
+            style={floatingStyles}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-lg shadow-xl p-6 w-80"
+          >
+            <h2 className="text-xl font-bold">{currentStep?.title}</h2>
+            <p>{currentStep?.content}</p>
+            {/* Navigation... */}
+          </motion.div>
+        </AnimatePresence>
+      )}
+    />
+  );
+}
+```
+
+---
+
+## Custom Overlay Effects
+
+### Blur Effect
+
+```tsx
+function BlurOverlay() {
+  return (
+    <TourOverlayHeadless
+      render={({ overlayStyle }) => (
+        <div
+          style={overlayStyle}
+          className="fixed inset-0 backdrop-blur-sm bg-black/30"
+        />
+      )}
+    />
+  );
+}
+```
+
+### Colored Overlay
+
+```tsx
+function ColoredOverlay() {
+  return (
+    <TourOverlayHeadless
+      render={({ overlayStyle, cutoutStyle, targetRect }) => (
+        <div
+          style={{
+            ...overlayStyle,
+            background: 'linear-gradient(135deg, rgba(59,130,246,0.3) 0%, rgba(147,51,234,0.3) 100%)',
+          }}
+          className="fixed inset-0"
+        >
+          {targetRect && (
+            <div
+              style={cutoutStyle}
+              className="rounded-lg ring-4 ring-blue-500/50"
+            />
+          )}
+        </div>
+      )}
+    />
+  );
+}
+```
+
+### No Overlay (Highlight Only)
+
+```tsx
+function HighlightOnly() {
+  return (
+    <TourOverlayHeadless
+      render={({ cutoutStyle, targetRect }) => (
+        <>
+          {targetRect && (
+            <div
+              style={{
+                position: 'fixed',
+                ...cutoutStyle,
+              }}
+              className="pointer-events-none ring-4 ring-blue-500 ring-offset-4 rounded-lg animate-pulse"
+            />
+          )}
+        </>
+      )}
+    />
+  );
+}
+```
+
+---
+
+## Accessibility
+
+Headless components maintain accessibility features:
+
+- **Focus trap**: Card traps focus during tour
+- **ARIA attributes**: Added automatically
+- **Keyboard navigation**: Works out of the box
+- **Screen reader**: Announcements for step changes
+
+<Callout type="info">
+When using custom elements, ensure you include appropriate ARIA attributes like `role="dialog"` and `aria-modal="true"` on your card container.
+</Callout>
+
+---
+
+## Best Practices
+
+1. **Keep positioning intact** - Always apply `floatingStyles` and use `refs.setFloating`
+2. **Handle all states** - Check for `isFirstStep`, `isLastStep`, etc.
+3. **Accessibility first** - Include ARIA attributes and keyboard support
+4. **Test responsively** - Ensure custom designs work on mobile
+
+---
+
+## Related
+
+- [Basic Tour](/docs/examples/basic-tour) - Using styled components
+- [Onboarding Flow](/docs/examples/onboarding-flow) - With persistence
+- [Headless Components](/docs/react/headless) - Full API reference

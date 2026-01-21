@@ -1,0 +1,12 @@
+{
+  "title": "Checklists",
+  "pages": [
+    "index",
+    "providers",
+    "hooks",
+    "components",
+    "headless",
+    "utilities",
+    "types"
+  ]
+}

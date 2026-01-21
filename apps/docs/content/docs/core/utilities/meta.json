@@ -1,4 +1,14 @@
 {
   "title": "Utilities",
-  "pages": ["create-tour", "create-step", "helpers"]
+  "pages": [
+    "create-tour",
+    "create-step",
+    "helpers",
+    "storage",
+    "dom",
+    "scroll",
+    "position",
+    "a11y",
+    "logger"
+  ]
 }

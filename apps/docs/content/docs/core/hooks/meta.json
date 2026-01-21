@@ -6,6 +6,10 @@
     "use-spotlight",
     "use-keyboard",
     "use-focus-trap",
-    "use-persistence"
+    "use-persistence",
+    "use-element-position",
+    "use-route-persistence",
+    "use-media-query",
+    "use-advance-on"
   ]
 }

@@ -1,0 +1,13 @@
+{
+  "title": "Components",
+  "pages": [
+    "tour-media",
+    "youtube-embed",
+    "vimeo-embed",
+    "loom-embed",
+    "wistia-embed",
+    "native-video",
+    "gif-player",
+    "lottie-player"
+  ]
+}

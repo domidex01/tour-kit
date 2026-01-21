@@ -1,0 +1,75 @@
+---
+title: Headless Components
+description: Unstyled components with render props for custom UIs
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+# Headless Components
+
+Headless components provide all the logic and state management without any styling, giving you complete control over the UI.
+
+## Why Headless?
+
+Use headless components when you need:
+- Complete control over markup and styling
+- Integration with existing design systems
+- Custom interactions not supported by styled components
+- Maximum flexibility
+
+## Available Components
+
+<Cards>
+  <Card title="ChecklistHeadless" href="/docs/checklists/headless/checklist-headless">
+    Headless checklist with render props
+  </Card>
+  <Card title="TaskHeadless" href="/docs/checklists/headless/task-headless">
+    Headless task with render props
+  </Card>
+</Cards>
+
+## Quick Example
+
+```tsx
+import { ChecklistHeadless } from '@tour-kit/checklists/headless';
+
+<ChecklistHeadless checklistId="onboarding">
+  {({ checklist, visibleTasks, completeTask }) => (
+    <div className="my-custom-checklist">
+      <h2>{checklist.config.title}</h2>
+      {visibleTasks.map((task) => (
+        <button
+          key={task.config.id}
+          onClick={() => completeTask(task.config.id)}
+        >
+          {task.completed ? '✓' : '○'} {task.config.title}
+        </button>
+      ))}
+    </div>
+  )}
+</ChecklistHeadless>
+```
+
+## Pattern Options
+
+### Render Prop
+
+```tsx
+<ChecklistHeadless
+  checklistId="onboarding"
+  render={(props) => <YourUI {...props} />}
+/>
+```
+
+### Children Function
+
+```tsx
+<ChecklistHeadless checklistId="onboarding">
+  {(props) => <YourUI {...props} />}
+</ChecklistHeadless>
+```
+
+## Related
+
+- [Components](/docs/checklists/components) - Pre-styled components
+- [Hooks](/docs/checklists/hooks/use-checklist) - Direct hook usage

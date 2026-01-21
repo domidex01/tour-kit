@@ -1,0 +1,330 @@
+---
+title: AnalyticsProvider
+description: React provider for configuring tour analytics tracking
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+The `AnalyticsProvider` component wraps your application to enable analytics tracking across all tour and hint components. It manages plugin initialization, event batching, and automatic cleanup.
+
+## Basic Usage
+
+```tsx title="app/layout.tsx"
+import { AnalyticsProvider, consolePlugin } from '@tour-kit/analytics'
+
+export default function RootLayout({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [consolePlugin()]
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    config: {
+      type: 'AnalyticsConfig',
+      required: true,
+      description: 'Analytics configuration object with plugins and settings'
+    },
+    children: {
+      type: 'React.ReactNode',
+      required: true,
+      description: 'Your application components'
+    }
+  }}
+/>
+
+## AnalyticsConfig
+
+<TypeTable
+  type={{
+    enabled: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Enable or disable analytics tracking globally'
+    },
+    plugins: {
+      type: 'AnalyticsPlugin[]',
+      required: true,
+      description: 'Array of analytics plugins to use'
+    },
+    debug: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Enable debug logging to console'
+    },
+    offlineQueue: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Queue events when offline and send when reconnected'
+    },
+    batchSize: {
+      type: 'number',
+      default: 'undefined',
+      description: 'Number of events to batch before sending'
+    },
+    batchInterval: {
+      type: 'number',
+      default: 'undefined',
+      description: 'Milliseconds to wait before sending batched events'
+    },
+    userId: {
+      type: 'string',
+      default: 'undefined',
+      description: 'User identifier to associate with all events'
+    },
+    userProperties: {
+      type: 'Record<string, unknown>',
+      default: 'undefined',
+      description: 'User properties to include with identification'
+    },
+    globalProperties: {
+      type: 'Record<string, unknown>',
+      default: 'undefined',
+      description: 'Properties to include with every tracked event'
+    }
+  }}
+/>
+
+## Single Plugin
+
+Use one analytics provider for simple setups:
+
+```tsx title="app/providers.tsx"
+import { AnalyticsProvider, posthogPlugin } from '@tour-kit/analytics'
+
+export function Providers({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          posthogPlugin({
+            apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!,
+            apiHost: 'https://app.posthog.com'
+          })
+        ]
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Multiple Plugins
+
+Send events to multiple analytics platforms simultaneously:
+
+```tsx title="app/providers.tsx"
+import {
+  AnalyticsProvider,
+  consolePlugin,
+  posthogPlugin,
+  mixpanelPlugin
+} from '@tour-kit/analytics'
+
+const isDev = process.env.NODE_ENV === 'development'
+
+export function Providers({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          // Development debugging
+          ...(isDev ? [consolePlugin({ collapsed: false })] : []),
+          // Production analytics
+          posthogPlugin({
+            apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!
+          }),
+          mixpanelPlugin({
+            token: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN!
+          })
+        ],
+        debug: isDev
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## User Identification
+
+Associate events with a specific user:
+
+```tsx title="app/analytics-wrapper.tsx"
+'use client'
+
+import { AnalyticsProvider, posthogPlugin } from '@tour-kit/analytics'
+import { useUser } from '@/lib/auth'
+
+export function AnalyticsWrapper({ children }) {
+  const user = useUser()
+
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          posthogPlugin({
+            apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!
+          })
+        ],
+        userId: user?.id,
+        userProperties: {
+          email: user?.email,
+          plan: user?.subscription.plan,
+          created_at: user?.createdAt
+        }
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Global Properties
+
+Add properties to every tracked event:
+
+```tsx title="app/providers.tsx"
+import { AnalyticsProvider, posthogPlugin } from '@tour-kit/analytics'
+
+export function Providers({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          posthogPlugin({
+            apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!
+          })
+        ],
+        globalProperties: {
+          app_version: '2.1.0',
+          environment: process.env.NODE_ENV,
+          platform: 'web',
+          build_id: process.env.NEXT_PUBLIC_BUILD_ID
+        }
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Conditional Analytics
+
+Enable or disable based on user consent:
+
+```tsx title="app/providers.tsx"
+'use client'
+
+import { AnalyticsProvider, posthogPlugin } from '@tour-kit/analytics'
+import { useCookieConsent } from '@/lib/consent'
+
+export function Providers({ children }) {
+  const consent = useCookieConsent()
+
+  return (
+    <AnalyticsProvider
+      config={{
+        enabled: consent.analytics,
+        plugins: [
+          posthogPlugin({
+            apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!
+          })
+        ]
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+<Callout type="info">
+  When `enabled` is set to `false`, no events will be tracked and plugins will not be initialized, regardless of plugin configuration.
+</Callout>
+
+## Automatic Flush
+
+The provider automatically flushes queued events when the user navigates away from the page:
+
+```tsx
+// Automatically handled - no setup required
+<AnalyticsProvider config={{ plugins: [/* ... */] }}>
+  {children}
+</AnalyticsProvider>
+```
+
+This ensures no analytics data is lost when users close tabs or navigate away during tours.
+
+## Environment-Based Configuration
+
+Separate development and production configurations:
+
+```tsx title="lib/analytics.ts"
+import {
+  consolePlugin,
+  posthogPlugin,
+  type AnalyticsConfig
+} from '@tour-kit/analytics'
+
+const isDev = process.env.NODE_ENV === 'development'
+
+export const analyticsConfig: AnalyticsConfig = {
+  plugins: isDev
+    ? [consolePlugin({ collapsed: false })]
+    : [
+        posthogPlugin({
+          apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!,
+          apiHost: 'https://app.posthog.com'
+        })
+      ],
+  debug: isDev,
+  globalProperties: {
+    environment: process.env.NODE_ENV,
+    version: process.env.NEXT_PUBLIC_APP_VERSION
+  }
+}
+```
+
+```tsx title="app/layout.tsx"
+import { AnalyticsProvider } from '@tour-kit/analytics'
+import { analyticsConfig } from '@/lib/analytics'
+
+export default function RootLayout({ children }) {
+  return (
+    <AnalyticsProvider config={analyticsConfig}>
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Cleanup
+
+The provider automatically cleans up resources on unmount:
+
+- Calls `destroy()` on all plugins
+- Clears event queues
+- Removes event listeners
+
+No manual cleanup is required.
+
+## Related
+
+- [Hooks](/docs/analytics/hooks) - Access analytics from components
+- [Plugins](/docs/analytics/plugins) - Available analytics plugins
+- [Types](/docs/analytics/types) - Full configuration reference

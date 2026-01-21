@@ -1,0 +1,404 @@
+---
+title: Basic Tour
+description: A simple multi-step product tour with copy-paste code
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Basic Tour
+
+A complete, copy-paste example of a product tour with a spotlight overlay, navigation controls, and step progress.
+
+## What You'll Build
+
+This example creates a 3-step tour that:
+- Highlights each target element with a spotlight overlay
+- Shows a card with title, description, and navigation
+- Supports keyboard navigation (Arrow keys, Escape)
+- Displays progress indicators
+
+---
+
+## Complete Code
+
+<Tabs items={['Full Example', 'Minimal']}>
+<Tab value="Full Example">
+```tsx
+'use client';
+
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+  TourOverlay,
+  TourProgress,
+  TourNavigation,
+  TourClose,
+  useTour,
+} from '@tour-kit/react';
+
+export default function BasicTourExample() {
+  return (
+    <Tour id="basic-tour">
+      {/* Define your steps */}
+      <TourStep
+        target="#welcome-header"
+        title="Welcome!"
+        content="This is your dashboard. Let's take a quick tour of the key features."
+        placement="bottom"
+      />
+
+      <TourStep
+        target="#sidebar-nav"
+        title="Navigation"
+        content="Use the sidebar to navigate between different sections of the app."
+        placement="right"
+      />
+
+      <TourStep
+        target="#create-button"
+        title="Create New"
+        content="Click here to create a new project. You can choose from templates or start from scratch."
+        placement="bottom-start"
+      />
+
+      {/* Spotlight overlay */}
+      <TourOverlay />
+
+      {/* Tour card UI */}
+      <TourCard className="w-80">
+        <TourCardHeader>
+          <TourClose />
+        </TourCardHeader>
+        <TourCardContent />
+        <TourCardFooter>
+          <TourProgress variant="dots" />
+          <TourNavigation />
+        </TourCardFooter>
+      </TourCard>
+
+      {/* Your app content */}
+      <AppContent />
+
+      {/* Button to start the tour */}
+      <StartTourButton />
+    </Tour>
+  );
+}
+
+function AppContent() {
+  return (
+    <div className="p-8">
+      <header id="welcome-header" className="mb-8">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground">Welcome to your workspace</p>
+      </header>
+
+      <div className="flex gap-8">
+        <nav id="sidebar-nav" className="w-48 p-4 border rounded-lg">
+          <ul className="space-y-2">
+            <li><a href="#" className="hover:underline">Home</a></li>
+            <li><a href="#" className="hover:underline">Projects</a></li>
+            <li><a href="#" className="hover:underline">Settings</a></li>
+          </ul>
+        </nav>
+
+        <main className="flex-1">
+          <button
+            id="create-button"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
+          >
+            Create New Project
+          </button>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function StartTourButton() {
+  const { start, isActive } = useTour();
+
+  if (isActive) return null;
+
+  return (
+    <button
+      onClick={() => start()}
+      className="fixed bottom-4 right-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg shadow-lg"
+    >
+      Start Tour
+    </button>
+  );
+}
+```
+</Tab>
+
+<Tab value="Minimal">
+```tsx
+'use client';
+
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourOverlay,
+  useTour,
+} from '@tour-kit/react';
+
+export default function MinimalTour() {
+  return (
+    <Tour id="minimal-tour">
+      <TourStep target="#feature-1" title="Feature One" content="Description here" />
+      <TourStep target="#feature-2" title="Feature Two" content="Description here" />
+
+      <TourOverlay />
+      <TourCard />
+
+      <App />
+    </Tour>
+  );
+}
+
+function App() {
+  const { start, isActive } = useTour();
+
+  return (
+    <div className="p-8 space-y-4">
+      <div id="feature-1" className="p-4 border">Feature 1</div>
+      <div id="feature-2" className="p-4 border">Feature 2</div>
+
+      {!isActive && (
+        <button onClick={() => start()} className="px-4 py-2 bg-blue-500 text-white rounded">
+          Start Tour
+        </button>
+      )}
+    </div>
+  );
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+## Step-by-Step Breakdown
+
+<Steps>
+<Step>
+### Wrap Your App with Tour
+
+The `<Tour>` component wraps your content and manages tour state:
+
+```tsx
+import { Tour } from '@tour-kit/react';
+
+<Tour id="my-tour">
+  {/* Steps, overlay, card, and your app content */}
+</Tour>
+```
+
+The `id` prop is required and used to identify the tour (useful for persistence and analytics).
+</Step>
+
+<Step>
+### Define Tour Steps
+
+Use `<TourStep>` to define each step of the tour:
+
+```tsx
+<TourStep
+  target="#element-id"       // CSS selector or ref
+  title="Step Title"          // Header text
+  content="Description..."    // Body text
+  placement="bottom"          // Tooltip position
+/>
+```
+
+**Placement options**: `top`, `bottom`, `left`, `right`, plus alignments like `top-start`, `bottom-end`, etc.
+</Step>
+
+<Step>
+### Add the Spotlight Overlay
+
+The overlay dims the page and creates a cutout around the target:
+
+```tsx
+<TourOverlay />
+```
+
+By default, clicking the overlay skips the tour. You can customize this behavior with props.
+</Step>
+
+<Step>
+### Add the Tour Card
+
+The card displays step content. Use compound components for full control:
+
+```tsx
+<TourCard className="w-80">
+  <TourCardHeader>
+    <TourClose />
+  </TourCardHeader>
+  <TourCardContent />
+  <TourCardFooter>
+    <TourProgress variant="dots" />
+    <TourNavigation />
+  </TourCardFooter>
+</TourCard>
+```
+
+Or use the minimal version which renders a default layout:
+
+```tsx
+<TourCard />
+```
+</Step>
+
+<Step>
+### Start the Tour
+
+Use the `useTour` hook to control the tour:
+
+```tsx
+const { start, isActive, next, prev, skip } = useTour();
+
+<button onClick={() => start()}>Start Tour</button>
+```
+</Step>
+</Steps>
+
+---
+
+## Customization
+
+### Custom Placement
+
+```tsx
+<TourStep
+  target="#element"
+  title="Title"
+  content="Content"
+  placement="right-start"  // right side, aligned to top
+  offset={[0, 16]}         // [skidding, distance]
+/>
+```
+
+### Custom Navigation Labels
+
+```tsx
+<TourNavigation
+  prevLabel="Back"
+  nextLabel="Continue"
+  finishLabel="Done!"
+  skipLabel="Skip tour"
+/>
+```
+
+### Progress Variants
+
+```tsx
+{/* Dots (default) */}
+<TourProgress variant="dots" />
+
+{/* Progress bar */}
+<TourProgress variant="bar" />
+
+{/* Text: "Step 1 of 3" */}
+<TourProgress variant="text" />
+```
+
+### Styling
+
+```tsx
+<TourCard className="w-96 bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+  <TourCardHeader className="border-b border-white/20" />
+  <TourCardContent className="text-white/90" />
+  <TourCardFooter className="border-t border-white/20" />
+</TourCard>
+```
+
+---
+
+## Auto-Start Tour
+
+Start the tour automatically on mount:
+
+```tsx
+<Tour id="auto-tour" autoStart>
+  {/* steps and content */}
+</Tour>
+```
+
+Or start at a specific step:
+
+```tsx
+<Tour id="resume-tour" autoStart startAt={2}>
+  {/* starts at step 3 (0-indexed) */}
+</Tour>
+```
+
+---
+
+## Keyboard Navigation
+
+By default, the tour supports keyboard navigation:
+
+| Key | Action |
+|-----|--------|
+| `→` or `Enter` | Next step |
+| `←` | Previous step |
+| `Escape` | Exit tour |
+
+To disable or customize:
+
+```tsx
+<Tour
+  id="custom-keyboard"
+  config={{
+    keyboard: {
+      enabled: true,
+      nextKeys: ['ArrowRight', 'Enter'],
+      prevKeys: ['ArrowLeft'],
+      exitKeys: ['Escape'],
+    }
+  }}
+>
+```
+
+---
+
+## Lifecycle Callbacks
+
+```tsx
+<Tour
+  id="tracked-tour"
+  onStart={() => console.log('Tour started')}
+  onComplete={() => console.log('Tour completed')}
+  onSkip={(stepIndex) => console.log(`Skipped at step ${stepIndex}`)}
+  onStepChange={(step, index) => console.log(`Now at step ${index}`)}
+>
+```
+
+---
+
+## Full API Reference
+
+<Callout type="info">
+For complete API documentation, see:
+- [Tour Component](/docs/react/components/tour)
+- [TourCard](/docs/react/components/tour-card)
+- [TourOverlay](/docs/react/components/tour-overlay)
+- [useTour Hook](/docs/core/hooks/use-tour)
+</Callout>
+
+---
+
+## Related Examples
+
+- [Onboarding Flow](/docs/examples/onboarding-flow) - Multi-step user onboarding with persistence
+- [Headless Custom](/docs/examples/headless-custom) - Build completely custom tour UI

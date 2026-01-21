@@ -1,0 +1,496 @@
+---
+title: Audience Targeting
+description: Show announcements to specific user segments
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Audience Targeting
+
+Target specific user segments with announcements. Only show messages to users who match your conditions.
+
+## Why Audience Targeting?
+
+Send the right message to the right users:
+
+- **Personalized** - Show relevant announcements to specific user groups
+- **Efficient** - Don't waste impressions on irrelevant users
+- **Contextual** - Message users based on their plan, role, or behavior
+- **Privacy-safe** - All targeting happens client-side
+
+---
+
+## User Context
+
+Provide user information to the provider:
+
+```tsx
+<AnnouncementsProvider
+  userContext={{
+    plan: 'pro',
+    role: 'admin',
+    signupDate: '2024-01-15',
+    features: ['export', 'analytics'],
+    customerId: '12345',
+  }}
+  announcements={announcements}
+>
+  <YourApp />
+</AnnouncementsProvider>
+```
+
+The `userContext` object can contain any data you need for targeting.
+
+---
+
+## Audience Conditions
+
+Define conditions using the `audience` property:
+
+```tsx
+{
+  id: 'pro-feature',
+  variant: 'modal',
+  title: 'New Pro Feature',
+  audience: [
+    { field: 'plan', operator: 'equals', value: 'pro' },
+  ],
+}
+```
+
+### Operators
+
+<TypeTable
+  type={{
+    equals: { type: 'string', description: 'Field equals value' },
+    notEquals: { type: 'string', description: 'Field does not equal value' },
+    in: { type: 'array', description: 'Field is in array of values' },
+    notIn: { type: 'array', description: 'Field is not in array of values' },
+    greaterThan: { type: 'number', description: 'Field is greater than value' },
+    lessThan: { type: 'number', description: 'Field is less than value' },
+    contains: { type: 'string | array', description: 'Field contains value' },
+    notContains: { type: 'string | array', description: 'Field does not contain value' },
+  }}
+/>
+
+---
+
+## Examples
+
+### Plan-Based Targeting
+
+```tsx
+// Show to free users only
+{
+  id: 'upgrade-promo',
+  variant: 'banner',
+  title: 'Upgrade to Pro',
+  audience: [
+    { field: 'plan', operator: 'equals', value: 'free' },
+  ],
+}
+
+// Show to pro or enterprise users
+{
+  id: 'advanced-feature',
+  variant: 'modal',
+  title: 'New Advanced Analytics',
+  audience: [
+    { field: 'plan', operator: 'in', value: ['pro', 'enterprise'] },
+  ],
+}
+```
+
+### Role-Based Targeting
+
+```tsx
+// Show to admins only
+{
+  id: 'admin-dashboard',
+  variant: 'slideout',
+  title: 'New Admin Dashboard',
+  audience: [
+    { field: 'role', operator: 'equals', value: 'admin' },
+  ],
+}
+
+// Show to non-admin users
+{
+  id: 'request-access',
+  variant: 'toast',
+  title: 'Need Admin Access?',
+  audience: [
+    { field: 'role', operator: 'notEquals', value: 'admin' },
+  ],
+}
+```
+
+### Feature-Based Targeting
+
+```tsx
+// Show if user has export feature
+{
+  id: 'export-update',
+  variant: 'banner',
+  title: 'Export Feature Improved',
+  audience: [
+    { field: 'features', operator: 'contains', value: 'export' },
+  ],
+}
+
+// Show if user lacks analytics
+{
+  id: 'analytics-promo',
+  variant: 'modal',
+  title: 'Try Analytics',
+  audience: [
+    { field: 'features', operator: 'notContains', value: 'analytics' },
+  ],
+}
+```
+
+### Date-Based Targeting
+
+```tsx
+// Show to users who signed up after a date
+{
+  id: 'new-user-welcome',
+  variant: 'modal',
+  title: 'Welcome!',
+  audience: [
+    {
+      field: 'signupDate',
+      operator: 'greaterThan',
+      value: '2024-01-01',
+    },
+  ],
+}
+```
+
+---
+
+## Multiple Conditions
+
+Combine multiple conditions (AND logic):
+
+```tsx
+{
+  id: 'trial-ending',
+  variant: 'banner',
+  title: 'Your Trial Ends Soon',
+  audience: [
+    { field: 'plan', operator: 'equals', value: 'trial' },
+    { field: 'daysRemaining', operator: 'lessThan', value: 7 },
+  ],
+}
+```
+
+All conditions must match for the announcement to show.
+
+---
+
+## Custom Conditions
+
+Use custom functions for complex targeting:
+
+```tsx
+<AnnouncementsProvider
+  userContext={{ user }}
+  announcements={[
+    {
+      id: 'custom-target',
+      variant: 'modal',
+      title: 'Special Offer',
+      audience: [
+        {
+          type: 'custom',
+          check: (context) => {
+            // Custom logic
+            const { user } = context;
+            const isActiveUser = user.lastLogin > Date.now() - 86400000;
+            const hasNoRecent Purchase = !user.lastPurchase;
+            return isActiveUser && hasNoRecentPurchase;
+          },
+        },
+      ],
+    },
+  ]}
+/>
+```
+
+### Custom Condition Type
+
+```tsx
+type CustomCondition<T = any> = {
+  type: 'custom';
+  check: (context: T) => boolean;
+};
+```
+
+---
+
+## OR Conditions
+
+Create OR logic with multiple announcement configs:
+
+```tsx
+const announcements = [
+  // Show to free users
+  {
+    id: 'upgrade-promo-free',
+    variant: 'banner',
+    title: 'Upgrade to Pro',
+    audience: [
+      { field: 'plan', operator: 'equals', value: 'free' },
+    ],
+  },
+  // OR show to trial users
+  {
+    id: 'upgrade-promo-trial',
+    variant: 'banner',
+    title: 'Upgrade to Pro',
+    audience: [
+      { field: 'plan', operator: 'equals', value: 'trial' },
+    ],
+  },
+];
+```
+
+Or use the `in` operator:
+
+```tsx
+{
+  id: 'upgrade-promo',
+  variant: 'banner',
+  title: 'Upgrade to Pro',
+  audience: [
+    { field: 'plan', operator: 'in', value: ['free', 'trial'] },
+  ],
+}
+```
+
+---
+
+## Dynamic User Context
+
+Update user context when user data changes:
+
+```tsx
+function App() {
+  const { user } = useAuth();
+
+  return (
+    <AnnouncementsProvider
+      userContext={{
+        plan: user.plan,
+        role: user.role,
+        features: user.features,
+      }}
+      announcements={announcements}
+    >
+      <YourApp />
+    </AnnouncementsProvider>
+  );
+}
+```
+
+<Callout type="info">
+  When userContext changes, the provider re-evaluates which announcements are eligible to show.
+</Callout>
+
+---
+
+## Programmatic Checks
+
+Check if an announcement matches a user:
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+
+function ConditionalTrigger() {
+  const announcement = useAnnouncement('pro-feature');
+
+  // canShow checks both frequency rules AND audience targeting
+  if (announcement.canShow) {
+    return (
+      <button onClick={announcement.show}>
+        Learn About Pro Features
+      </button>
+    );
+  }
+
+  return null;
+}
+```
+
+---
+
+## Use Cases
+
+### Trial Expiration
+
+```tsx
+{
+  id: 'trial-ending',
+  variant: 'modal',
+  title: 'Your Trial Expires in 3 Days',
+  audience: [
+    { field: 'plan', operator: 'equals', value: 'trial' },
+    { field: 'trialDaysLeft', operator: 'lessThan', value: 4 },
+  ],
+  frequency: { type: 'interval', days: 1 },
+  primaryAction: {
+    label: 'Upgrade Now',
+    onClick: () => router.push('/upgrade'),
+  },
+}
+```
+
+### Feature Upsell
+
+```tsx
+{
+  id: 'analytics-upsell',
+  variant: 'slideout',
+  title: 'Unlock Analytics',
+  description: 'Get insights into your data with our analytics package.',
+  audience: [
+    { field: 'features', operator: 'notContains', value: 'analytics' },
+    { field: 'plan', operator: 'in', value: ['pro', 'enterprise'] },
+  ],
+  frequency: { type: 'times', count: 2 },
+}
+```
+
+### Onboarding for New Users
+
+```tsx
+{
+  id: 'welcome-tour',
+  variant: 'modal',
+  title: 'Welcome to Our Platform',
+  audience: [
+    {
+      type: 'custom',
+      check: (context) => {
+        const signupDate = new Date(context.signupDate);
+        const daysSinceSignup = (Date.now() - signupDate.getTime()) / 86400000;
+        return daysSinceSignup < 7;
+      },
+    },
+  ],
+  frequency: 'once',
+}
+```
+
+### Behavior-Based
+
+```tsx
+{
+  id: 'power-user-feature',
+  variant: 'spotlight',
+  title: 'Try Advanced Mode',
+  audience: [
+    {
+      type: 'custom',
+      check: (context) => {
+        // Show to users with high activity
+        return context.actionsPerDay > 50;
+      },
+    },
+  ],
+  spotlightOptions: {
+    target: '#advanced-toggle',
+  },
+}
+```
+
+---
+
+## Privacy Considerations
+
+<Callout type="warn">
+  All audience targeting happens **client-side**. The userContext you provide is only used in the browser. No user data is sent to external services.
+</Callout>
+
+### Best Practices
+
+- Only include necessary user data in userContext
+- Don't store sensitive information in announcement configs
+- Use custom conditions for complex privacy requirements
+- Consider using hashed or anonymized identifiers
+
+---
+
+## Testing Audiences
+
+### Test Mode
+
+```tsx
+<AnnouncementsProvider
+  userContext={{ plan: 'free' }}
+  announcements={announcements}
+  debug={true} // Logs which announcements match
+>
+```
+
+### Manual Testing
+
+```tsx
+// Test as free user
+<AnnouncementsProvider userContext={{ plan: 'free' }}>
+
+// Test as pro user
+<AnnouncementsProvider userContext={{ plan: 'pro' }}>
+
+// Test as admin
+<AnnouncementsProvider userContext={{ role: 'admin' }}>
+```
+
+---
+
+## TypeScript
+
+Type your user context for safety:
+
+```tsx
+interface UserContext {
+  plan: 'free' | 'pro' | 'enterprise';
+  role: 'user' | 'admin';
+  features: string[];
+  signupDate: string;
+  customerId: string;
+}
+
+const announcements: AnnouncementConfig<UserContext>[] = [
+  {
+    id: 'pro-feature',
+    variant: 'modal',
+    title: 'New Feature',
+    audience: [
+      // TypeScript knows 'plan' exists and its possible values
+      { field: 'plan', operator: 'equals', value: 'pro' },
+    ],
+  },
+];
+
+<AnnouncementsProvider<UserContext>
+  userContext={{
+    plan: 'free',
+    role: 'user',
+    features: [],
+    signupDate: '2024-01-15',
+    customerId: '12345',
+  }}
+  announcements={announcements}
+/>
+```
+
+---
+
+## Related
+
+- [Frequency Rules](/docs/announcements/configuration/frequency) - Control how often announcements show
+- [Queue Management](/docs/announcements/configuration/queue) - Priority and scheduling
+- [useAnnouncement](/docs/announcements/hooks/use-announcement) - Check canShow programmatically

@@ -1,0 +1,112 @@
+---
+title: ChecklistLauncher
+description: Floating button to toggle checklist panel visibility
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# ChecklistLauncher
+
+A floating action button that toggles the visibility of a checklist panel. Shows progress indicator.
+
+## Usage
+
+```tsx
+import { ChecklistLauncher } from '@tour-kit/checklists';
+
+<ChecklistLauncher checklistId="onboarding" />
+```
+
+## Props
+
+<TypeTable
+  type={{
+    checklistId: {
+      type: 'string',
+      required: true,
+      description: 'ID of the checklist to control',
+    },
+    position: {
+      type: "'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'",
+      default: "'bottom-right'",
+      description: 'Position on screen',
+    },
+    variant: {
+      type: "'default' | 'outline' | 'ghost'",
+      default: "'default'",
+      description: 'Button variant',
+    },
+    size: {
+      type: "'sm' | 'default' | 'lg'",
+      default: "'default'",
+      description: 'Button size',
+    },
+    showBadge: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show progress badge',
+    },
+    icon: {
+      type: 'ReactNode',
+      description: 'Custom icon',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+## Examples
+
+### Basic Launcher
+
+```tsx
+<ChecklistLauncher checklistId="onboarding" />
+```
+
+### Different Positions
+
+```tsx
+<ChecklistLauncher checklistId="onboarding" position="bottom-left" />
+<ChecklistLauncher checklistId="onboarding" position="top-right" />
+```
+
+### Custom Icon
+
+```tsx
+import { CheckSquare } from 'lucide-react';
+
+<ChecklistLauncher
+  checklistId="onboarding"
+  icon={<CheckSquare />}
+/>
+```
+
+### Without Badge
+
+```tsx
+<ChecklistLauncher
+  checklistId="onboarding"
+  showBadge={false}
+/>
+```
+
+### Styled Variants
+
+```tsx
+<ChecklistLauncher checklistId="onboarding" variant="outline" />
+<ChecklistLauncher checklistId="onboarding" variant="ghost" />
+```
+
+## Progress Badge
+
+The launcher automatically shows:
+- Number of completed tasks (e.g., "3/5")
+- Completion checkmark when done
+- Pulsing animation for incomplete checklists
+
+## Related
+
+- [ChecklistPanel](/docs/checklists/components/checklist-panel) - Panel component
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Checklist control

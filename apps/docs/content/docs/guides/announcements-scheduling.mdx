@@ -1,0 +1,679 @@
+---
+title: Time-Based Announcements
+description: Using scheduling with announcements for timed content delivery
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Time-Based Announcements
+
+Schedule announcements to appear at specific times, dates, or recurring intervals using `@tour-kit/scheduling`.
+
+---
+
+## Why Schedule Announcements
+
+Time-based scheduling allows you to:
+
+- Show welcome messages during business hours only
+- Launch feature announcements on specific dates
+- Display promotional content during campaigns
+- Avoid interrupting users during off-hours
+- Create recurring reminders (e.g., weekly tips)
+- Respect user timezones and working hours
+
+---
+
+## Installation
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @tour-kit/announcements @tour-kit/scheduling
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install @tour-kit/announcements @tour-kit/scheduling
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @tour-kit/announcements @tour-kit/scheduling
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Basic Setup
+
+<Steps>
+<Step>
+### Configure Providers
+
+Wrap your app with both providers:
+
+```tsx title="app/providers.tsx"
+'use client';
+
+import { AnnouncementsProvider } from '@tour-kit/announcements';
+import { TourKitProvider } from '@tour-kit/core';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <TourKitProvider>
+      <AnnouncementsProvider announcements={announcementConfigs}>
+        {children}
+      </AnnouncementsProvider>
+    </TourKitProvider>
+  );
+}
+```
+</Step>
+
+<Step>
+### Create Scheduled Announcement
+
+Define an announcement with a schedule:
+
+```tsx title="config/announcements.ts"
+import type { AnnouncementConfig } from '@tour-kit/announcements';
+
+export const announcements: AnnouncementConfig[] = [
+  {
+    id: 'feature-launch',
+    title: 'New Feature Available!',
+    content: 'Check out our new dashboard analytics',
+    variant: 'modal',
+    priority: 'high',
+
+    // Schedule configuration
+    schedule: {
+      startAt: '2024-03-01T09:00:00Z', // Launch date
+      endAt: '2024-03-31T23:59:59Z',   // Campaign end
+      timezone: 'America/New_York',
+    },
+
+    frequency: {
+      type: 'once', // Show only once during the schedule
+    },
+  },
+];
+```
+</Step>
+</Steps>
+
+---
+
+## Schedule Types
+
+### Date Range
+
+Show announcements between specific dates:
+
+```tsx
+{
+  id: 'holiday-promo',
+  title: 'Holiday Sale!',
+  content: '50% off all plans this week',
+  variant: 'banner',
+
+  schedule: {
+    startAt: '2024-12-20T00:00:00Z',
+    endAt: '2024-12-27T23:59:59Z',
+    timezone: 'UTC',
+  },
+}
+```
+
+### Business Hours Only
+
+Display announcements during working hours:
+
+```tsx
+{
+  id: 'support-available',
+  title: 'Support Team Available',
+  content: 'Chat with us now for instant help',
+  variant: 'toast',
+
+  schedule: {
+    timezone: 'America/Los_Angeles',
+    businessHours: {
+      monday: { start: '09:00', end: '17:00' },
+      tuesday: { start: '09:00', end: '17:00' },
+      wednesday: { start: '09:00', end: '17:00' },
+      thursday: { start: '09:00', end: '17:00' },
+      friday: { start: '09:00', end: '17:00' },
+      // Weekends excluded by omission
+    },
+  },
+}
+```
+
+### Specific Days of Week
+
+Show announcements on certain weekdays:
+
+```tsx
+{
+  id: 'monday-motivation',
+  title: 'Start Your Week Strong',
+  content: 'Weekly productivity tips',
+  variant: 'slideout',
+
+  schedule: {
+    daysOfWeek: [1], // Monday only (0 = Sunday, 6 = Saturday)
+    timeOfDay: {
+      start: '08:00',
+      end: '10:00',
+    },
+    timezone: 'America/Chicago',
+  },
+}
+```
+
+### Time of Day
+
+Display during specific hours:
+
+```tsx
+{
+  id: 'lunch-reminder',
+  title: 'Time for a Break',
+  content: 'Take a break and grab some lunch!',
+  variant: 'toast',
+
+  schedule: {
+    timeOfDay: {
+      start: '12:00',
+      end: '13:00',
+    },
+    timezone: 'America/New_York',
+  },
+}
+```
+
+---
+
+## Recurring Announcements
+
+### Daily Recurring
+
+Show every day at a specific time:
+
+```tsx
+{
+  id: 'daily-tip',
+  title: 'Daily Productivity Tip',
+  content: 'Save time by using keyboard shortcuts',
+  variant: 'toast',
+
+  schedule: {
+    recurring: {
+      type: 'daily',
+      time: '09:00',
+    },
+    timezone: 'America/Los_Angeles',
+  },
+
+  frequency: {
+    type: 'interval',
+    days: 1, // Once per day
+  },
+}
+```
+
+### Weekly Recurring
+
+Show once per week on specific days:
+
+```tsx
+{
+  id: 'weekly-report',
+  title: 'Your Weekly Summary',
+  content: 'Check your progress from this week',
+  variant: 'modal',
+
+  schedule: {
+    recurring: {
+      type: 'weekly',
+      dayOfWeek: 5, // Friday
+      time: '16:00',
+    },
+    timezone: 'UTC',
+  },
+
+  frequency: {
+    type: 'interval',
+    days: 7,
+  },
+}
+```
+
+### Monthly Recurring
+
+Show on a specific day each month:
+
+```tsx
+{
+  id: 'monthly-billing',
+  title: 'Billing Reminder',
+  content: 'Your subscription renews in 3 days',
+  variant: 'banner',
+
+  schedule: {
+    recurring: {
+      type: 'monthly',
+      dayOfMonth: 28, // 28th of each month
+      time: '10:00',
+    },
+    timezone: 'America/New_York',
+  },
+}
+```
+
+---
+
+## Blackout Periods
+
+Prevent announcements during specific times:
+
+```tsx
+{
+  id: 'feature-update',
+  title: 'New Features Released',
+  content: 'Explore what\'s new in version 2.0',
+  variant: 'modal',
+
+  schedule: {
+    startAt: '2024-03-01T00:00:00Z',
+    endAt: '2024-03-31T23:59:59Z',
+    timezone: 'UTC',
+
+    // Don't show during these periods
+    blackoutPeriods: [
+      {
+        startAt: '2024-03-10T00:00:00Z',
+        endAt: '2024-03-11T23:59:59Z',
+        reason: 'Company holiday',
+      },
+      {
+        startAt: '2024-03-20T00:00:00Z',
+        endAt: '2024-03-20T23:59:59Z',
+        reason: 'Maintenance window',
+      },
+    ],
+  },
+}
+```
+
+---
+
+## User Timezone Detection
+
+Automatically detect and respect user timezone:
+
+```tsx
+{
+  id: 'timezone-aware',
+  title: 'Good Morning!',
+  content: 'Here are your daily tasks',
+  variant: 'slideout',
+
+  schedule: {
+    useUserTimezone: true, // Auto-detect browser timezone
+    timeOfDay: {
+      start: '08:00',
+      end: '09:00',
+    },
+  },
+}
+```
+
+<Callout type="info">
+When `useUserTimezone: true`, the schedule uses the browser's timezone instead of the specified `timezone` field.
+</Callout>
+
+---
+
+## Complete Example: Campaign Announcement
+
+Here's a full example of a product launch campaign:
+
+```tsx title="config/launch-campaign.ts"
+import type { AnnouncementConfig } from '@tour-kit/announcements';
+
+export const launchCampaign: AnnouncementConfig = {
+  id: 'product-launch-2024',
+  title: 'Introducing AI-Powered Analytics',
+  content: `
+    <div class="space-y-4">
+      <p>We're excited to announce our new AI analytics engine!</p>
+      <ul class="list-disc pl-4">
+        <li>Real-time insights</li>
+        <li>Predictive forecasting</li>
+        <li>Custom dashboards</li>
+      </ul>
+      <a href="/features/ai-analytics" class="text-blue-600 underline">
+        Learn More →
+      </a>
+    </div>
+  `,
+  variant: 'modal',
+  priority: 'high',
+
+  // Campaign runs for 2 weeks
+  schedule: {
+    startAt: '2024-03-01T09:00:00-05:00',
+    endAt: '2024-03-14T17:00:00-05:00',
+    timezone: 'America/New_York',
+
+    // Only during business hours
+    businessHours: {
+      monday: { start: '09:00', end: '17:00' },
+      tuesday: { start: '09:00', end: '17:00' },
+      wednesday: { start: '09:00', end: '17:00' },
+      thursday: { start: '09:00', end: '17:00' },
+      friday: { start: '09:00', end: '17:00' },
+    },
+
+    // Skip company holidays
+    blackoutPeriods: [
+      {
+        startAt: '2024-03-08T00:00:00-05:00',
+        endAt: '2024-03-08T23:59:59-05:00',
+        reason: 'International Women\'s Day',
+      },
+    ],
+  },
+
+  // Show max 3 times per user
+  frequency: {
+    type: 'times',
+    count: 3,
+  },
+
+  // Target specific users
+  audience: {
+    include: {
+      plan: ['pro', 'enterprise'],
+      segment: ['power-users'],
+    },
+  },
+
+  // Track interactions
+  onShow: () => {
+    analytics.track('announcement_shown', {
+      campaignId: 'product-launch-2024',
+      variant: 'modal',
+    });
+  },
+
+  onDismiss: (reason) => {
+    analytics.track('announcement_dismissed', {
+      campaignId: 'product-launch-2024',
+      dismissReason: reason,
+    });
+  },
+
+  onAction: () => {
+    analytics.track('announcement_clicked', {
+      campaignId: 'product-launch-2024',
+      action: 'learn_more',
+    });
+  },
+};
+```
+
+---
+
+## Testing Schedules
+
+Use the schedule status hook to verify scheduling logic:
+
+```tsx title="components/schedule-debugger.tsx"
+'use client';
+
+import { useScheduleStatus } from '@tour-kit/scheduling';
+
+export function ScheduleDebugger({ schedule }) {
+  const { isActive, reason, nextActiveAt } = useScheduleStatus(schedule);
+
+  if (process.env.NODE_ENV !== 'development') return null;
+
+  return (
+    <div className="fixed bottom-4 left-4 bg-black text-white p-4 rounded text-xs">
+      <h3 className="font-bold mb-2">Schedule Debug</h3>
+      <div>Active: {isActive ? '✅' : '❌'}</div>
+      <div>Reason: {reason}</div>
+      {nextActiveAt && (
+        <div>Next Active: {new Date(nextActiveAt).toLocaleString()}</div>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## Multiple Announcements with Scheduling
+
+Manage multiple scheduled announcements:
+
+```tsx title="app/announcements-wrapper.tsx"
+'use client';
+
+import { AnnouncementsProvider } from '@tour-kit/announcements';
+import {
+  AnnouncementModal,
+  AnnouncementBanner,
+  AnnouncementToast,
+} from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'welcome',
+    title: 'Welcome!',
+    content: 'Thanks for joining',
+    variant: 'modal',
+    schedule: {
+      // Show immediately after signup
+      startAt: new Date().toISOString(),
+      endAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    },
+    frequency: { type: 'once' },
+  },
+  {
+    id: 'daily-tip',
+    title: 'Daily Tip',
+    content: 'Did you know...',
+    variant: 'toast',
+    schedule: {
+      recurring: {
+        type: 'daily',
+        time: '10:00',
+      },
+      useUserTimezone: true,
+    },
+    frequency: {
+      type: 'interval',
+      days: 1,
+    },
+  },
+  {
+    id: 'maintenance',
+    title: 'Scheduled Maintenance',
+    content: 'We'll be offline Sunday 2-4am',
+    variant: 'banner',
+    schedule: {
+      // Show 3 days before maintenance
+      startAt: '2024-03-10T00:00:00Z',
+      endAt: '2024-03-13T04:00:00Z',
+    },
+    priority: 'critical',
+  },
+];
+
+export function AnnouncementsWrapper({ children }) {
+  return (
+    <AnnouncementsProvider
+      announcements={announcements}
+      maxConcurrent={2}
+      storage={{ type: 'localStorage', key: 'announcements' }}
+    >
+      {children}
+
+      {/* Render announcement variants */}
+      <AnnouncementModal />
+      <AnnouncementBanner position="top" />
+      <AnnouncementToast position="bottom-right" />
+    </AnnouncementsProvider>
+  );
+}
+```
+
+---
+
+## Advanced: Dynamic Schedules
+
+Update schedules based on user behavior:
+
+```tsx title="hooks/use-adaptive-schedule.ts"
+import { useState, useEffect } from 'react';
+import { useAnnouncement } from '@tour-kit/announcements';
+
+export function useAdaptiveSchedule(announcementId: string) {
+  const { announcement, updateSchedule } = useAnnouncement(announcementId);
+  const [userActivity, setUserActivity] = useState(0);
+
+  useEffect(() => {
+    // Track user activity
+    const handleActivity = () => setUserActivity((prev) => prev + 1);
+
+    window.addEventListener('click', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+
+    return () => {
+      window.removeEventListener('click', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Adjust schedule based on activity
+    if (userActivity > 100) {
+      // User is active, show more frequently
+      updateSchedule({
+        frequency: {
+          type: 'interval',
+          days: 1,
+        },
+      });
+    } else {
+      // User is less active, reduce frequency
+      updateSchedule({
+        frequency: {
+          type: 'interval',
+          days: 7,
+        },
+      });
+    }
+  }, [userActivity, updateSchedule]);
+
+  return announcement;
+}
+```
+
+---
+
+## Best Practices
+
+### 1. Respect User Time
+
+Don't interrupt users during critical workflows:
+
+```tsx
+schedule: {
+  // Avoid typical focus hours
+  businessHours: {
+    monday: { start: '09:00', end: '11:00' }, // Only show mid-morning
+    // ...
+  },
+}
+```
+
+### 2. Use Appropriate Variants
+
+Match variant to urgency and schedule:
+
+```tsx
+// Critical time-sensitive: Modal
+{ variant: 'modal', priority: 'critical', schedule: { endAt: '...' } }
+
+// Regular updates: Toast or Banner
+{ variant: 'toast', schedule: { recurring: { type: 'daily' } } }
+
+// Detailed content: Slideout
+{ variant: 'slideout', schedule: { businessHours: {...} } }
+```
+
+### 3. Test Timezone Logic
+
+Verify schedules work across timezones:
+
+```tsx
+const testSchedule = {
+  startAt: '2024-03-01T09:00:00-05:00', // EST
+  endAt: '2024-03-01T17:00:00-05:00',
+  timezone: 'America/New_York',
+};
+
+// Test from different timezones
+console.log(isScheduleActive(testSchedule, 'America/Los_Angeles'));
+console.log(isScheduleActive(testSchedule, 'Europe/London'));
+```
+
+### 4. Limit Frequency
+
+Avoid announcement fatigue:
+
+```tsx
+frequency: {
+  type: 'times',
+  count: 3, // Max 3 shows total
+}
+
+// Or use intervals
+frequency: {
+  type: 'interval',
+  days: 7, // Once per week max
+}
+```
+
+---
+
+## Troubleshooting
+
+<Callout type="error" title="Announcement not showing during schedule">
+Check that your timezone is correct and that the current time falls within your schedule's time range. Use `useScheduleStatus()` to debug.
+</Callout>
+
+<Callout type="error" title="Blackout period not working">
+Ensure blackout period dates are in ISO format and that the timezone matches your schedule's timezone.
+</Callout>
+
+<Callout type="error" title="Recurring not repeating">
+Verify your `frequency` setting allows repeats. `type: 'once'` will only show once even with recurring schedules.
+</Callout>
+
+---
+
+## Related
+
+- [Announcements API Reference](/docs/api/announcements) - Full announcement documentation
+- [Scheduling API Reference](/docs/api/scheduling) - Schedule configuration details
+- [Full Onboarding Flow](/docs/guides/full-onboarding-flow) - Complete system integration

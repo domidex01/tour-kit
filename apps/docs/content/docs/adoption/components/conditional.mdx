@@ -1,0 +1,454 @@
+---
+title: Conditional Components
+description: IfNotAdopted and IfAdopted - render based on adoption status
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`IfNotAdopted` and `IfAdopted` are conditional rendering components that show/hide content based on whether a feature has been adopted.
+
+## Basic Usage
+
+### IfNotAdopted
+
+Show content only if feature is not yet adopted:
+
+```tsx
+import { IfNotAdopted } from '@tour-kit/adoption'
+
+function FeatureToggle() {
+  return (
+    <button id="dark-mode-toggle">
+      Dark Mode
+      <IfNotAdopted featureId="dark-mode">
+        <span className="badge">New!</span>
+      </IfNotAdopted>
+    </button>
+  )
+}
+```
+
+### IfAdopted
+
+Show content only if feature is adopted:
+
+```tsx
+import { IfAdopted } from '@tour-kit/adoption'
+
+function FeatureToggle() {
+  return (
+    <button id="shortcuts-toggle">
+      <IfAdopted featureId="shortcuts">
+        <CheckIcon className="adopted-icon" />
+      </IfAdopted>
+      Keyboard Shortcuts
+    </button>
+  )
+}
+```
+
+## Props
+
+Both components share the same props:
+
+<TypeTable
+  type={{
+    featureId: {
+      type: 'string',
+      required: true,
+      description: 'Feature ID to check',
+    },
+    children: {
+      type: 'ReactNode',
+      required: true,
+      description: 'Content to render when condition is met',
+    },
+    fallback: {
+      type: 'ReactNode',
+      default: 'null',
+      description: 'Content to render when condition is NOT met',
+    },
+  }}
+/>
+
+## Examples
+
+### Show/Hide Badges
+
+```tsx
+<div className="feature-list">
+  <button id="feature-1">
+    Feature 1
+    <IfNotAdopted featureId="feature-1">
+      <span className="badge-new">New</span>
+    </IfNotAdopted>
+  </button>
+
+  <button id="feature-2">
+    Feature 2
+    <IfAdopted featureId="feature-2">
+      <CheckIcon />
+    </IfAdopted>
+  </button>
+</div>
+```
+
+### With Fallback Content
+
+```tsx
+<IfNotAdopted
+  featureId="export"
+  fallback={<span className="badge-success">Mastered!</span>}
+>
+  <span className="badge-info">Try this!</span>
+</IfNotAdopted>
+```
+
+### Conditional Help Text
+
+```tsx
+<div className="feature-section">
+  <h3>Advanced Search</h3>
+
+  <IfNotAdopted featureId="advanced-search">
+    <p className="help-text">
+      Use filters and operators to find exactly what you need.
+      Try it now to unlock powerful search capabilities!
+    </p>
+  </IfNotAdopted>
+
+  <IfAdopted featureId="advanced-search">
+    <p className="help-text">
+      You're a search pro! Check out keyboard shortcuts for even faster searches.
+    </p>
+  </IfAdopted>
+</div>
+```
+
+### Conditional UI Elements
+
+```tsx
+function Toolbar() {
+  return (
+    <div className="toolbar">
+      <IfNotAdopted featureId="quick-actions">
+        <button onClick={showTutorial}>
+          Learn Quick Actions
+        </button>
+      </IfNotAdopted>
+
+      <IfAdopted featureId="quick-actions">
+        <QuickActionsPalette />
+      </IfAdopted>
+    </div>
+  )
+}
+```
+
+### Promotional Messaging
+
+```tsx
+<IfNotAdopted featureId="premium-export">
+  <div className="promo-card">
+    <h4>Export to PDF</h4>
+    <p>Save your work as a beautifully formatted PDF</p>
+    <button>Try Premium Export</button>
+  </div>
+</IfNotAdopted>
+```
+
+### Progress Indicators
+
+```tsx
+import { useFeature } from '@tour-kit/adoption'
+
+function FeatureCard({ featureId }: { featureId: string }) {
+  const { feature, usage } = useFeature(featureId)
+
+  if (!feature) return null
+
+  return (
+    <div className="card">
+      <h3>{feature.name}</h3>
+
+      <IfNotAdopted featureId={featureId}>
+        <div className="progress">
+          <span>
+            {usage.useCount} / {feature.adoptionCriteria?.minUses || 3} uses
+          </span>
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{
+                width: `${(usage.useCount / (feature.adoptionCriteria?.minUses || 3)) * 100}%`,
+              }}
+            />
+          </div>
+        </div>
+      </IfNotAdopted>
+
+      <IfAdopted featureId={featureId}>
+        <div className="success-message">
+          Feature adopted! Used {usage.useCount} times
+        </div>
+      </IfAdopted>
+    </div>
+  )
+}
+```
+
+### Contextual Nudges
+
+```tsx
+<div className="feature-container">
+  <button id="feature-btn">Use Feature</button>
+
+  <IfNotAdopted featureId="feature">
+    <div className="tooltip">
+      Click here to try this powerful feature!
+    </div>
+  </IfNotAdopted>
+</div>
+```
+
+### Multi-Feature Conditions
+
+```tsx
+function Dashboard() {
+  return (
+    <div>
+      {/* Show onboarding if NO features adopted */}
+      <IfNotAdopted featureId="search">
+        <IfNotAdopted featureId="export">
+          <IfNotAdopted featureId="shortcuts">
+            <OnboardingBanner />
+          </IfNotAdopted>
+        </IfNotAdopted>
+      </IfNotAdopted>
+
+      {/* Show congrats if key features adopted */}
+      <IfAdopted featureId="search">
+        <IfAdopted featureId="export">
+          <CongratulationsBanner />
+        </IfAdopted>
+      </IfAdopted>
+    </div>
+  )
+}
+```
+
+<Callout type="info">
+For complex multi-feature conditions, consider using `useAdoptionStats()` hook instead.
+</Callout>
+
+### Animation on State Change
+
+```tsx
+function AnimatedBadge({ featureId }: { featureId: string }) {
+  return (
+    <div className="relative">
+      <IfNotAdopted featureId={featureId}>
+        <span className="badge animate-pulse">New</span>
+      </IfNotAdopted>
+
+      <IfAdopted featureId={featureId}>
+        <span className="badge animate-bounce">✓</span>
+      </IfAdopted>
+    </div>
+  )
+}
+```
+
+## Comparison with useFeature
+
+These components are syntactic sugar for the `useFeature` hook:
+
+```tsx
+// Using IfNotAdopted
+<IfNotAdopted featureId="feature">
+  <Badge>New</Badge>
+</IfNotAdopted>
+
+// Equivalent with useFeature
+function FeatureBadge() {
+  const { isAdopted } = useFeature('feature')
+  if (isAdopted) return null
+  return <Badge>New</Badge>
+}
+```
+
+**Use conditional components when:**
+- You only need to show/hide content
+- The logic is simple (adopted vs. not adopted)
+- You want cleaner JSX
+
+**Use `useFeature` when:**
+- You need additional data (useCount, status, etc.)
+- You need the `trackUsage` function
+- You have complex conditional logic
+
+## Performance
+
+Both components are lightweight wrappers around `useFeature`:
+
+```tsx
+// ✓ Efficient: Only re-renders when adoption status changes
+<IfNotAdopted featureId="feature">
+  <ExpensiveComponent />
+</IfNotAdopted>
+
+// ✓ Also efficient: Multiple instances share the same context
+<div>
+  <IfNotAdopted featureId="feature">...</IfNotAdopted>
+  <IfAdopted featureId="feature">...</IfAdopted>
+</div>
+```
+
+## TypeScript
+
+Both components are fully typed:
+
+```tsx
+import { IfNotAdopted, IfAdopted } from '@tour-kit/adoption'
+
+<IfNotAdopted featureId="my-feature">
+  <div>This is typed correctly</div>
+</IfNotAdopted>
+
+<IfAdopted
+  featureId="my-feature"
+  fallback={<div>Fallback is typed</div>}
+>
+  <div>Children is typed</div>
+</IfAdopted>
+```
+
+## Accessibility
+
+These components render fragments and don't affect accessibility:
+
+```tsx
+// The button remains accessible
+<button aria-label="Export data">
+  Export
+  <IfNotAdopted featureId="export">
+    <span aria-label="New feature">New!</span>
+  </IfNotAdopted>
+</button>
+```
+
+Ensure content changes are announced to screen readers:
+
+```tsx
+<div aria-live="polite">
+  <IfNotAdopted featureId="feature">
+    <p>Try this feature!</p>
+  </IfNotAdopted>
+  <IfAdopted featureId="feature">
+    <p>You've adopted this feature!</p>
+  </IfAdopted>
+</div>
+```
+
+## Common Patterns
+
+### Feature Discovery Flow
+
+```tsx
+function FeatureFlow({ featureId }: { featureId: string }) {
+  return (
+    <div>
+      <IfNotAdopted featureId={featureId}>
+        <div className="discovery">
+          <h4>Discover this feature</h4>
+          <button>Learn More</button>
+        </div>
+      </IfNotAdopted>
+
+      <IfAdopted featureId={featureId}>
+        <div className="mastered">
+          <h4>You've mastered this!</h4>
+          <button>Share your achievement</button>
+        </div>
+      </IfAdopted>
+    </div>
+  )
+}
+```
+
+### Gamification
+
+```tsx
+<IfAdopted featureId="power-user-feature">
+  <div className="achievement">
+    <TrophyIcon />
+    <span>Power User Unlocked!</span>
+  </div>
+</IfAdopted>
+```
+
+### Contextual Help
+
+```tsx
+<IfNotAdopted featureId="feature">
+  <HelpTooltip>
+    This feature helps you do X. Click to try it!
+  </HelpTooltip>
+</IfNotAdopted>
+```
+
+## Best Practices
+
+1. **Use semantic HTML** inside conditional components:
+
+```tsx
+// Good
+<IfNotAdopted featureId="feature">
+  <span className="badge">New</span>
+</IfNotAdopted>
+
+// Bad (creates unnecessary wrapper)
+<IfNotAdopted featureId="feature">
+  <div>
+    <div>
+      <span>New</span>
+    </div>
+  </div>
+</IfNotAdopted>
+```
+
+2. **Provide fallback for important UI**:
+
+```tsx
+<IfNotAdopted featureId="feature" fallback={<Placeholder />}>
+  <FeatureContent />
+</IfNotAdopted>
+```
+
+3. **Avoid deep nesting**:
+
+```tsx
+// Good: Use useAdoptionStats for complex conditions
+const { byStatus } = useAdoptionStats()
+if (byStatus.adopted.length === 0) {
+  return <OnboardingBanner />
+}
+
+// Bad: Too deeply nested
+<IfNotAdopted featureId="a">
+  <IfNotAdopted featureId="b">
+    <IfNotAdopted featureId="c">
+      <OnboardingBanner />
+    </IfNotAdopted>
+  </IfNotAdopted>
+</IfNotAdopted>
+```
+
+## Next Steps
+
+- [useFeature Hook](/docs/adoption/hooks/use-feature) - More adoption state control
+- [NewFeatureBadge](/docs/adoption/components/new-feature-badge) - Pre-built badge component
+- [FeatureButton](/docs/adoption/components/feature-button) - Button with tracking

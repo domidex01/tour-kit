@@ -1,14 +1,245 @@
 ---
 title: API Reference
-description: Complete API documentation
+description: Complete API documentation for all Tour Kit packages
 ---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
 
 # API Reference
 
-Complete API documentation for all TourKit packages.
+Complete API documentation for all Tour Kit packages. Each page contains exports, types, and usage examples.
 
-## Packages
+<Callout title="For AI Assistants" type="info">
+  Download [llms.txt](/llms.txt) for a quick reference guide optimized for LLMs and AI coding assistants.
+</Callout>
 
-- [@tour-kit/core](/docs/api/core) - Core hooks and utilities
-- [@tour-kit/react](/docs/api/react) - React components
-- [@tour-kit/hints](/docs/api/hints) - Hints system
+---
+
+## Core Packages
+
+<Cards>
+  <Card title="@tour-kit/core" href="/docs/api/core">
+    Framework-agnostic hooks, utilities, and types
+  </Card>
+  <Card title="@tour-kit/react" href="/docs/api/react">
+    React components, headless components, and router adapters
+  </Card>
+  <Card title="@tour-kit/hints" href="/docs/api/hints">
+    Hint components, hooks, and headless variants
+  </Card>
+</Cards>
+
+---
+
+## Extended Packages
+
+<Cards>
+  <Card title="@tour-kit/adoption" href="/docs/api/adoption">
+    Feature adoption tracking with nudges
+  </Card>
+  <Card title="@tour-kit/analytics" href="/docs/api/analytics">
+    Plugin-based analytics integration
+  </Card>
+  <Card title="@tour-kit/announcements" href="/docs/api/announcements">
+    Multi-variant product announcements
+  </Card>
+  <Card title="@tour-kit/checklists" href="/docs/api/checklists">
+    Interactive onboarding checklists
+  </Card>
+  <Card title="@tour-kit/media" href="/docs/api/media">
+    Video/GIF/Lottie embeds for tours
+  </Card>
+  <Card title="@tour-kit/scheduling" href="/docs/api/scheduling">
+    Time-based scheduling utilities
+  </Card>
+</Cards>
+
+---
+
+## Quick Reference
+
+### Most Used Exports
+
+| Export | Package | Description |
+|--------|---------|-------------|
+| `useTour` | core/react | Main tour control hook |
+| `Tour` | react | Declarative tour wrapper |
+| `TourStep` | react | Step definition component |
+| `TourCard` | react | Tooltip card component |
+| `TourOverlay` | react | Spotlight overlay |
+| `Hint` | hints | Hint with hotspot and tooltip |
+| `useHint` | hints | Single hint control |
+| `usePersistence` | core/react | State persistence |
+| `useFeature` | adoption | Feature adoption tracking |
+| `useAnalytics` | analytics | Analytics tracking |
+| `useAnnouncement` | announcements | Announcement control |
+| `useChecklist` | checklists | Checklist progress |
+| `TourMedia` | media | Embedded media component |
+| `useSchedule` | scheduling | Time-based scheduling |
+
+### Package Sizes
+
+| Package | Gzipped |
+|---------|---------|
+| @tour-kit/core | < 8KB |
+| @tour-kit/react | < 12KB |
+| @tour-kit/hints | < 5KB |
+| @tour-kit/adoption | < 10KB |
+| @tour-kit/analytics | < 4KB |
+| @tour-kit/announcements | < 15KB |
+| @tour-kit/checklists | < 12KB |
+| @tour-kit/media | < 8KB |
+| @tour-kit/scheduling | < 3KB |
+
+---
+
+## Import Patterns
+
+### React App (Recommended)
+
+```tsx
+// Import everything from @tour-kit/react
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourOverlay,
+  useTour,
+  usePersistence,
+} from '@tour-kit/react';
+
+// Headless components
+import { TourCardHeadless } from '@tour-kit/react/headless';
+```
+
+### With Hints
+
+```tsx
+import { Tour, TourStep, TourCard } from '@tour-kit/react';
+import { HintsProvider, Hint, useHint } from '@tour-kit/hints';
+```
+
+### With Analytics
+
+```tsx
+import { AnalyticsProvider, createAnalytics, consolePlugin } from '@tour-kit/analytics';
+
+const analytics = createAnalytics({
+  plugins: [consolePlugin()],
+});
+```
+
+### With Adoption Tracking
+
+```tsx
+import { AdoptionProvider, useFeature, AdoptionNudge } from '@tour-kit/adoption';
+```
+
+### With Announcements
+
+```tsx
+import { AnnouncementsProvider, useAnnouncement, AnnouncementModal } from '@tour-kit/announcements';
+```
+
+### With Checklists
+
+```tsx
+import { ChecklistProvider, useChecklist, ChecklistPanel } from '@tour-kit/checklists';
+```
+
+### With Media
+
+```tsx
+import { TourMedia, YouTubeEmbed } from '@tour-kit/media';
+```
+
+### With Scheduling
+
+```tsx
+import { useSchedule, checkSchedule } from '@tour-kit/scheduling';
+```
+
+### Core Only (Framework-agnostic)
+
+```tsx
+import {
+  useTour,
+  usePersistence,
+  createTour,
+  createStep,
+} from '@tour-kit/core';
+```
+
+---
+
+## Type Exports
+
+All packages export TypeScript types:
+
+```tsx
+import type {
+  // Config
+  TourKitConfig,
+  KeyboardConfig,
+  SpotlightConfig,
+  PersistenceConfig,
+
+  // Tour
+  Tour,
+  TourStep,
+  TourState,
+  Placement,
+
+  // Router
+  RouterAdapter,
+  MultiPagePersistenceConfig,
+
+  // Hook returns
+  UseTourReturn,
+  UsePersistenceReturn,
+} from '@tour-kit/react';
+
+import type {
+  HintConfig,
+  HintState,
+  HotspotPosition,
+} from '@tour-kit/hints';
+
+import type {
+  Feature,
+  AdoptionCriteria,
+  FeatureUsage,
+  AdoptionStatus,
+} from '@tour-kit/adoption';
+
+import type {
+  TourEvent,
+  TourEventName,
+  AnalyticsPlugin,
+} from '@tour-kit/analytics';
+
+import type {
+  AnnouncementConfig,
+  FrequencyRule,
+  AudienceCondition,
+} from '@tour-kit/announcements';
+
+import type {
+  ChecklistConfig,
+  ChecklistTaskConfig,
+  TaskAction,
+} from '@tour-kit/checklists';
+
+import type {
+  MediaType,
+  TourMediaConfig,
+  CaptionTrack,
+} from '@tour-kit/media';
+
+import type {
+  Schedule,
+  RecurringPattern,
+  BusinessHours,
+} from '@tour-kit/scheduling';
+```

@@ -1,0 +1,11 @@
+{
+  "title": "Media",
+  "pages": [
+    "index",
+    "components",
+    "headless",
+    "hooks",
+    "utilities",
+    "types"
+  ]
+}

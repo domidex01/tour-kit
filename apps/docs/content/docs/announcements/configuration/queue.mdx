@@ -1,0 +1,549 @@
+---
+title: Queue Management
+description: Priority-based announcement queue with automatic scheduling
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Queue Management
+
+Manage multiple announcements with a priority-based queue system. Announcements are automatically ordered and shown based on priority, frequency rules, and audience targeting.
+
+## Why a Queue?
+
+When you have multiple announcements, a queue system helps:
+
+- **Prioritize** - Critical messages shown before routine updates
+- **Prevent overwhelm** - Control how many announcements show at once
+- **Auto-schedule** - Next announcement shows automatically
+- **Respect limits** - Enforce maximum concurrent announcements
+
+---
+
+## How the Queue Works
+
+```
+Announcements → Filter (audience + frequency) → Sort (priority) → Queue → Display
+```
+
+1. **Filter** - Remove announcements that don't match audience or frequency rules
+2. **Sort** - Order by priority: `critical` > `high` > `normal` > `low`
+3. **Queue** - Maintain ordered list of eligible announcements
+4. **Display** - Show based on queue configuration
+
+---
+
+## Priority Levels
+
+```tsx
+type AnnouncementPriority = 'low' | 'normal' | 'high' | 'critical';
+```
+
+### Critical
+Urgent messages that interrupt everything:
+
+```tsx
+{
+  id: 'security-breach',
+  variant: 'modal',
+  priority: 'critical',
+  title: 'Security Alert',
+  description: 'Your account may be compromised. Update your password immediately.',
+}
+```
+
+**Use for:**
+- Security alerts
+- Service outages
+- Account issues
+- Breaking changes
+
+### High
+Important but not critical:
+
+```tsx
+{
+  id: 'major-feature',
+  variant: 'slideout',
+  priority: 'high',
+  title: 'Major Feature Release',
+  description: 'Check out our biggest update of the year.',
+}
+```
+
+**Use for:**
+- Major feature releases
+- Important updates
+- Time-sensitive promotions
+- Account notifications
+
+### Normal (Default)
+Standard announcements:
+
+```tsx
+{
+  id: 'product-update',
+  variant: 'banner',
+  priority: 'normal', // Default if not specified
+  title: 'Product Update',
+}
+```
+
+**Use for:**
+- Regular updates
+- Feature improvements
+- General announcements
+- Product news
+
+### Low
+Non-urgent information:
+
+```tsx
+{
+  id: 'tip',
+  variant: 'toast',
+  priority: 'low',
+  title: 'Pro Tip',
+}
+```
+
+**Use for:**
+- Tips and tricks
+- Optional features
+- Suggestions
+- Non-critical information
+
+---
+
+## Queue Configuration
+
+Configure queue behavior in the provider:
+
+```tsx
+<AnnouncementsProvider
+  announcements={announcements}
+  queueConfig={{
+    maxConcurrent: 1,        // Max announcements shown at once
+    autoShow: true,          // Auto-show next in queue
+    delayBetween: 1000,      // Wait 1s between announcements
+    respectVariants: true,   // Allow one per variant
+  }}
+/>
+```
+
+### Props
+
+<TypeTable
+  type={{
+    maxConcurrent: {
+      type: 'number',
+      default: '1',
+      description: 'Maximum number of announcements to show at once',
+    },
+    autoShow: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Automatically show next announcement when current is dismissed',
+    },
+    delayBetween: {
+      type: 'number',
+      default: '0',
+      description: 'Delay in milliseconds between showing announcements',
+    },
+    respectVariants: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Allow one announcement per variant type',
+    },
+  }}
+/>
+
+---
+
+## Examples
+
+### Single Announcement at a Time
+
+```tsx
+<AnnouncementsProvider
+  queueConfig={{
+    maxConcurrent: 1,  // Only one announcement visible
+    autoShow: true,    // Show next when current is dismissed
+  }}
+  announcements={[
+    { id: 'alert', priority: 'critical' },  // Shows first
+    { id: 'update', priority: 'high' },     // Shows second
+    { id: 'tip', priority: 'low' },         // Shows third
+  ]}
+/>
+```
+
+### Multiple Variants Simultaneously
+
+```tsx
+<AnnouncementsProvider
+  queueConfig={{
+    maxConcurrent: 3,       // Up to 3 announcements
+    respectVariants: true,  // One per variant
+  }}
+  announcements={[
+    { id: 'banner-alert', variant: 'banner', priority: 'high' },
+    { id: 'toast-tip', variant: 'toast', priority: 'low' },
+    { id: 'modal-feature', variant: 'modal', priority: 'normal' },
+  ]}
+/>
+```
+
+This allows a banner, toast, and modal to show simultaneously.
+
+### Delayed Queue
+
+```tsx
+<AnnouncementsProvider
+  queueConfig={{
+    maxConcurrent: 1,
+    autoShow: true,
+    delayBetween: 2000,  // 2 second delay between announcements
+  }}
+  announcements={announcements}
+/>
+```
+
+### Manual Queue Control
+
+```tsx
+<AnnouncementsProvider
+  queueConfig={{
+    maxConcurrent: 1,
+    autoShow: false,  // Don't auto-show next
+  }}
+  announcements={announcements}
+/>
+```
+
+---
+
+## Programmatic Queue Control
+
+Use the `useAnnouncementQueue` hook to control the queue:
+
+```tsx
+import { useAnnouncementQueue } from '@tour-kit/announcements';
+
+function QueueControls() {
+  const { queue, showNext, clearQueue, queueSize } = useAnnouncementQueue();
+
+  return (
+    <div>
+      <p>Queue size: {queueSize}</p>
+      <button onClick={showNext}>Show Next</button>
+      <button onClick={clearQueue}>Clear Queue</button>
+
+      <h3>Queue Contents:</h3>
+      <ul>
+        {queue.map((announcement) => (
+          <li key={announcement.id}>
+            {announcement.title} ({announcement.priority})
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### Hook API
+
+<TypeTable
+  type={{
+    queue: {
+      type: 'AnnouncementConfig[]',
+      description: 'Current queue ordered by priority',
+    },
+    queueSize: {
+      type: 'number',
+      description: 'Number of announcements in queue',
+    },
+    showNext: {
+      type: '() => void',
+      description: 'Show next announcement in queue',
+    },
+    clearQueue: {
+      type: '() => void',
+      description: 'Clear all queued announcements',
+    },
+    activeCount: {
+      type: 'number',
+      description: 'Number of currently visible announcements',
+    },
+  }}
+/>
+
+---
+
+## Priority Interruption
+
+Critical announcements interrupt lower-priority ones:
+
+```tsx
+const announcements = [
+  {
+    id: 'tip',
+    variant: 'toast',
+    priority: 'low',
+    title: 'Pro Tip',
+    // User is viewing this...
+  },
+  {
+    id: 'security-alert',
+    variant: 'modal',
+    priority: 'critical',
+    title: 'Security Alert',
+    // This appears and pushes tip back to queue
+  },
+];
+```
+
+When a critical announcement is added while a low-priority one is showing:
+1. Low-priority announcement is hidden
+2. Critical announcement is shown
+3. Low-priority announcement returns to queue
+
+---
+
+## Queue Strategies
+
+### Sequential (Default)
+
+Show announcements one at a time in priority order:
+
+```tsx
+queueConfig={{
+  maxConcurrent: 1,
+  autoShow: true,
+}}
+```
+
+### Concurrent by Variant
+
+Show multiple announcements if they use different variants:
+
+```tsx
+queueConfig={{
+  maxConcurrent: 5,
+  respectVariants: true,
+}}
+```
+
+This allows:
+- One modal
+- One slideout
+- One banner
+- One toast
+- One spotlight
+
+All showing simultaneously.
+
+### Manual Control
+
+Developer controls when announcements show:
+
+```tsx
+queueConfig={{
+  autoShow: false,
+}}
+
+// In your component
+function App() {
+  const { showNext } = useAnnouncementQueue();
+
+  useEffect(() => {
+    // Show announcement after user action
+    const timer = setTimeout(() => {
+      showNext();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+}
+```
+
+---
+
+## Advanced Patterns
+
+### Priority Boost for Time-Sensitive
+
+```tsx
+const getAnnouncements = () => {
+  const now = Date.now();
+  const deadline = new Date('2024-12-31').getTime();
+  const daysLeft = (deadline - now) / 86400000;
+
+  return [
+    {
+      id: 'sale',
+      variant: 'banner',
+      title: 'Year-End Sale',
+      // Boost priority as deadline approaches
+      priority: daysLeft < 3 ? 'high' : 'normal',
+    },
+  ];
+};
+```
+
+### Dynamic Queue Size
+
+```tsx
+const [maxConcurrent, setMaxConcurrent] = useState(1);
+
+// Show more announcements on larger screens
+useEffect(() => {
+  const updateMax = () => {
+    if (window.innerWidth > 1200) {
+      setMaxConcurrent(3);
+    } else {
+      setMaxConcurrent(1);
+    }
+  };
+
+  updateMax();
+  window.addEventListener('resize', updateMax);
+  return () => window.removeEventListener('resize', updateMax);
+}, []);
+
+<AnnouncementsProvider
+  queueConfig={{ maxConcurrent }}
+  announcements={announcements}
+/>
+```
+
+### Pause/Resume Queue
+
+```tsx
+function QueueManager() {
+  const [isPaused, setIsPaused] = useState(false);
+  const { showNext, clearQueue } = useAnnouncementQueue();
+
+  useEffect(() => {
+    if (isPaused) {
+      // Clear visible announcements
+      clearQueue();
+    } else {
+      // Resume showing
+      showNext();
+    }
+  }, [isPaused]);
+
+  return (
+    <button onClick={() => setIsPaused(!isPaused)}>
+      {isPaused ? 'Resume' : 'Pause'} Announcements
+    </button>
+  );
+}
+```
+
+---
+
+## Queue Events
+
+Track queue events with callbacks:
+
+```tsx
+<AnnouncementsProvider
+  announcements={announcements}
+  onQueueChange={(queue) => {
+    console.log('Queue updated:', queue.length, 'announcements');
+  }}
+  onShow={(id) => {
+    console.log('Showing announcement:', id);
+    analytics.track('announcement_shown', { id });
+  }}
+  onDismiss={(id, reason) => {
+    console.log('Dismissed:', id, 'Reason:', reason);
+    analytics.track('announcement_dismissed', { id, reason });
+  }}
+/>
+```
+
+---
+
+## Best Practices
+
+### Don't Overwhelm Users
+
+<Callout type="warn">
+  Set `maxConcurrent: 1` for most applications. Multiple simultaneous announcements create a poor user experience.
+</Callout>
+
+```tsx
+// Good
+queueConfig={{ maxConcurrent: 1 }}
+
+// Use sparingly
+queueConfig={{ maxConcurrent: 3, respectVariants: true }}
+```
+
+### Use Priority Appropriately
+
+- **Critical**: Truly urgent (security, outages)
+- **High**: Important but not urgent
+- **Normal**: Standard updates
+- **Low**: Optional tips
+
+### Add Delays
+
+Give users time to read:
+
+```tsx
+queueConfig={{
+  delayBetween: 1000,  // 1 second breathing room
+}}
+```
+
+### Clear Queue on Navigation
+
+```tsx
+function App() {
+  const { clearQueue } = useAnnouncementQueue();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Clear announcements when user navigates
+    const handleRouteChange = () => {
+      clearQueue();
+    };
+
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [router]);
+}
+```
+
+---
+
+## TypeScript
+
+```tsx
+import type { QueueConfig, AnnouncementPriority } from '@tour-kit/announcements';
+
+const queueConfig: QueueConfig = {
+  maxConcurrent: 1,
+  autoShow: true,
+  delayBetween: 1000,
+  respectVariants: false,
+};
+
+const priority: AnnouncementPriority = 'high';
+```
+
+---
+
+## Related
+
+- [Frequency Rules](/docs/announcements/configuration/frequency) - Control how often announcements show
+- [Audience Targeting](/docs/announcements/configuration/audience) - Target specific users
+- [useAnnouncementQueue](/docs/announcements/hooks/use-announcement-queue) - Programmatic queue control

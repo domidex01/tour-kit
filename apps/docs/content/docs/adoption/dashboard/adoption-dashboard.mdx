@@ -1,0 +1,92 @@
+---
+title: AdoptionDashboard
+description: Complete admin dashboard with all adoption metrics
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`AdoptionDashboard` is a complete, drop-in dashboard component that displays all adoption metrics. It combines stats grid, charts, tables, and filters into a single component.
+
+## Basic Usage
+
+```tsx
+import { AdoptionDashboard } from '@tour-kit/adoption'
+
+export default function AdminPage() {
+  return (
+    <div className="container">
+      <h1>Feature Adoption</h1>
+      <AdoptionDashboard />
+    </div>
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    showFilters: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show filter controls',
+    },
+    showStats: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show stats grid',
+    },
+    showChart: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show category chart',
+    },
+    showTable: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show feature table',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+## Examples
+
+### Minimal Dashboard
+
+```tsx
+<AdoptionDashboard
+  showFilters={false}
+  showChart={false}
+/>
+```
+
+### Stats Only
+
+```tsx
+<AdoptionDashboard
+  showChart={false}
+  showTable={false}
+  showFilters={false}
+/>
+```
+
+### With Custom Wrapper
+
+```tsx
+<div className="max-w-7xl mx-auto p-6 space-y-6">
+  <AdoptionDashboard className="shadow-lg rounded-lg" />
+</div>
+```
+
+## Next Steps
+
+- [AdoptionStatsGrid](/docs/adoption/dashboard/stats) - Metrics grid
+- [AdoptionTable](/docs/adoption/dashboard/table) - Feature table
+- [AdoptionCategoryChart](/docs/adoption/dashboard/charts) - Charts

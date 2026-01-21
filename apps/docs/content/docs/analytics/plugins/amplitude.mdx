@@ -1,0 +1,419 @@
+---
+title: Amplitude Plugin
+description: Integrate tour analytics with Amplitude product intelligence
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+The Amplitude plugin sends tour and hint events to [Amplitude](https://amplitude.com), a product intelligence and behavioral analytics platform.
+
+## Installation
+
+Install the Amplitude peer dependency:
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @amplitude/analytics-browser
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install @amplitude/analytics-browser
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @amplitude/analytics-browser
+    ```
+  </Tab>
+</Tabs>
+
+## Basic Usage
+
+```tsx title="app/providers.tsx"
+import { AnalyticsProvider, amplitudePlugin } from '@tour-kit/analytics'
+
+export function Providers({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          amplitudePlugin({
+            apiKey: process.env.NEXT_PUBLIC_AMPLITUDE_KEY!
+          })
+        ]
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Options
+
+<TypeTable
+  type={{
+    apiKey: {
+      type: 'string',
+      required: true,
+      description: 'Amplitude API key'
+    },
+    eventPrefix: {
+      type: 'string',
+      default: '"tourkit_"',
+      description: 'Prefix for all event names in Amplitude'
+    },
+    serverUrl: {
+      type: 'string',
+      default: 'undefined',
+      description: 'Custom server URL for EU data residency or self-hosting'
+    }
+  }}
+/>
+
+## Event Names
+
+Events are prefixed with `tourkit_` by default:
+
+| Tour Kit Event | Amplitude Event Name |
+|----------------|---------------------|
+| `tour_started` | `tourkit_tour_started` |
+| `step_viewed` | `tourkit_step_viewed` |
+| `hint_clicked` | `tourkit_hint_clicked` |
+
+### Custom Prefix
+
+```tsx
+amplitudePlugin({
+  apiKey: 'xxx',
+  eventPrefix: 'app_tour_'
+})
+
+// Events: app_tour_tour_started, app_tour_step_viewed, etc.
+```
+
+### No Prefix
+
+```tsx
+amplitudePlugin({
+  apiKey: 'xxx',
+  eventPrefix: ''
+})
+
+// Events: tour_started, step_viewed, etc.
+```
+
+## Event Properties
+
+Events include these properties in Amplitude:
+
+```ts
+{
+  tour_id: string          // Tour identifier
+  step_id?: string         // Step identifier
+  step_index?: number      // Current step index (0-based)
+  total_steps?: number     // Total steps in tour
+  duration_ms?: number     // Duration in milliseconds
+  ...metadata              // Custom metadata from event
+}
+```
+
+## EU Data Residency
+
+For EU data residency, set the server URL to Amplitude's EU endpoint:
+
+```tsx
+amplitudePlugin({
+  apiKey: process.env.NEXT_PUBLIC_AMPLITUDE_KEY!,
+  serverUrl: 'https://api.eu.amplitude.com/2/httpapi'
+})
+```
+
+## User Identification
+
+Identify users and set user properties:
+
+```tsx title="app/analytics-wrapper.tsx"
+'use client'
+
+import { AnalyticsProvider, amplitudePlugin } from '@tour-kit/analytics'
+import { useUser } from '@/lib/auth'
+
+export function AnalyticsWrapper({ children }) {
+  const user = useUser()
+
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          amplitudePlugin({
+            apiKey: process.env.NEXT_PUBLIC_AMPLITUDE_KEY!
+          })
+        ],
+        userId: user?.id,
+        userProperties: {
+          email: user?.email,
+          name: user?.name,
+          plan: user?.subscription.plan,
+          company: user?.company
+        }
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Complete Example
+
+```tsx title="app/providers.tsx"
+'use client'
+
+import { AnalyticsProvider, amplitudePlugin, consolePlugin } from '@tour-kit/analytics'
+import { useUser } from '@/lib/auth'
+
+const isDev = process.env.NODE_ENV === 'development'
+const isEU = process.env.NEXT_PUBLIC_REGION === 'eu'
+
+export function Providers({ children }) {
+  const user = useUser()
+
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          ...(isDev ? [consolePlugin()] : []),
+          amplitudePlugin({
+            apiKey: process.env.NEXT_PUBLIC_AMPLITUDE_KEY!,
+            serverUrl: isEU
+              ? 'https://api.eu.amplitude.com/2/httpapi'
+              : undefined
+          })
+        ],
+        userId: user?.id,
+        userProperties: user ? {
+          email: user.email,
+          name: user.name,
+          plan: user.plan,
+          signup_date: user.createdAt
+        } : undefined,
+        globalProperties: {
+          app_version: process.env.NEXT_PUBLIC_APP_VERSION,
+          platform: 'web',
+          region: process.env.NEXT_PUBLIC_REGION
+        }
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Manual Flush
+
+The Amplitude plugin supports manual flushing of queued events:
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics'
+
+function FlushButton() {
+  const analytics = useAnalytics()
+
+  const handleFlush = async () => {
+    await analytics.flush()
+    console.log('Events flushed to Amplitude')
+  }
+
+  return <button onClick={handleFlush}>Flush Events</button>
+}
+```
+
+This is useful when:
+- User is about to navigate away
+- Completing a critical action
+- Handling errors or crashes
+
+## Analytics in Amplitude
+
+### Tour Funnel Analysis
+
+Create a funnel to analyze tour completion:
+
+1. Go to Analytics > Funnels
+2. Add steps:
+   - `tourkit_tour_started`
+   - `tourkit_step_viewed` (filter: step_index = 0)
+   - `tourkit_step_viewed` (filter: step_index = 1)
+   - `tourkit_tour_completed`
+3. Break down by: `tour_id`
+
+### Retention by Tour Completion
+
+Compare retention of users who completed tours:
+
+1. Go to Analytics > Retention
+2. Entry Event: `tourkit_tour_started`
+3. Return Event: Any active event
+4. Cohort by: `tourkit_tour_completed` (Yes/No)
+
+### Step Duration Analysis
+
+Analyze time spent on each step:
+
+1. Go to Analytics > Event Segmentation
+2. Select: `tourkit_step_completed`
+3. Measure: Average `duration_ms`
+4. Group by: `step_id`
+5. Chart type: Bar chart
+
+### User Journeys
+
+Visualize user paths through tours:
+
+1. Go to Analytics > Journeys
+2. Start event: `tourkit_tour_started`
+3. End event: `tourkit_tour_completed` or `tourkit_tour_skipped`
+4. Filter by: `tour_id`
+
+## User Properties
+
+Amplitude automatically includes user properties in events:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    plugins: [amplitudePlugin({ apiKey: 'xxx' })],
+    userProperties: {
+      plan: 'pro',
+      company: 'Acme Inc',
+      role: 'admin'
+    }
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+These properties can be used to:
+- Segment funnels and retention
+- Create user cohorts
+- Analyze feature adoption by user type
+
+## Behavioral Cohorts
+
+Create cohorts based on tour behavior:
+
+1. Go to Audiences > Create Cohort
+2. Definition: User performed `tourkit_tour_completed` where `tour_id` = "onboarding"
+3. Use cohort to:
+   - Compare feature adoption
+   - Analyze product usage patterns
+   - Target messaging
+
+## Best Practices
+
+### Use Descriptive Metadata
+
+Add context to events with metadata:
+
+```tsx
+analytics.track('step_interaction', {
+  tourId: 'feature-tour',
+  stepId: 'video-step',
+  metadata: {
+    interaction_type: 'video_played',
+    video_duration: 120,
+    completion_percentage: 75
+  }
+})
+```
+
+### Track Meaningful Milestones
+
+Beyond basic tour events, track adoption milestones:
+
+```tsx
+analytics.track('feature_adopted', {
+  tourId: 'advanced-search',
+  metadata: {
+    feature_name: 'saved-filters',
+    usage_count: 5,
+    days_since_tour: 3
+  }
+})
+```
+
+### Avoid Over-Tracking
+
+Don't track every micro-interaction:
+
+```tsx
+// ✅ Good - Track meaningful events
+analytics.stepCompleted(tourId, stepId, stepIndex)
+
+// ❌ Bad - Don't track every hover or mouse move
+analytics.track('mouse_moved', { x, y })
+```
+
+### Production Only
+
+Keep development events out of production analytics:
+
+```tsx
+const plugins = process.env.NODE_ENV === 'production'
+  ? [amplitudePlugin({ apiKey: process.env.NEXT_PUBLIC_AMPLITUDE_KEY! })]
+  : [consolePlugin()]
+```
+
+## Troubleshooting
+
+### Events Not Appearing
+
+Check these common issues:
+
+1. **API key is correct**: Verify your Amplitude API key
+2. **Ad blockers**: Some ad blockers may block Amplitude
+3. **Network errors**: Check browser console for failed requests
+4. **Event batching**: Amplitude batches events - they may take a few seconds to appear
+
+### Events Delayed
+
+Amplitude batches events by default for performance. To see events immediately:
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics'
+
+// Flush events manually
+const analytics = useAnalytics()
+await analytics.flush()
+```
+
+### User Properties Not Set
+
+Ensure user properties are passed to the provider:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    plugins: [amplitudePlugin({ apiKey: 'xxx' })],
+    userId: user?.id,
+    userProperties: {  // ✅ Must pass user properties here
+      email: user?.email,
+      plan: user?.plan
+    }
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Related
+
+- [Amplitude Documentation](https://www.docs.developers.amplitude.com/)
+- [Plugin Overview](/docs/analytics/plugins) - Plugin architecture
+- [AnalyticsProvider](/docs/analytics/providers) - Provider configuration

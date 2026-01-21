@@ -1,0 +1,513 @@
+---
+title: '@tour-kit/react API'
+description: Complete API reference for @tour-kit/react
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/react API Reference
+
+Complete API reference for the React package. This package provides styled and headless React components for tours.
+
+<Callout type="info">
+This package re-exports all of `@tour-kit/core`. Import everything from `@tour-kit/react` to avoid duplicate dependencies.
+</Callout>
+
+---
+
+## Styled Components
+
+### Tour
+
+Wrapper component for declarative tour definition.
+
+```tsx
+import { Tour } from '@tour-kit/react';
+
+<Tour
+  id="my-tour"
+  autoStart={false}
+  startAt={0}
+  config={tourConfig}
+  onStart={() => {}}
+  onComplete={() => {}}
+  onSkip={(stepIndex) => {}}
+  onStepChange={(step, index) => {}}
+>
+  {children}
+</Tour>
+```
+
+### TourStep
+
+Declarative step definition (must be child of Tour).
+
+```tsx
+import { TourStep } from '@tour-kit/react';
+
+<TourStep
+  target="#element"
+  title="Step Title"
+  content="Step description"
+  placement="bottom"
+  offset={[0, 12]}
+  spotlightPadding={8}
+  spotlightRadius={4}
+  interactive={false}
+  showNavigation={true}
+  showProgress={true}
+  showClose={true}
+/>
+```
+
+### TourCard (Compound)
+
+Main tooltip card with compound components.
+
+```tsx
+import {
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+} from '@tour-kit/react';
+
+<TourCard size="default" className="w-80">
+  <TourCardHeader showClose>
+    <TourClose />
+  </TourCardHeader>
+  <TourCardContent spacing="default" />
+  <TourCardFooter>
+    <TourProgress variant="dots" />
+    <TourNavigation />
+  </TourCardFooter>
+</TourCard>
+```
+
+| Component | Props |
+|-----------|-------|
+| `TourCard` | `size?: 'default' \| 'sm' \| 'lg' \| 'auto'`, `className?`, `asChild?` |
+| `TourCardHeader` | `spacing?: 'default' \| 'compact'`, `showClose?`, `title?`, `titleId?` |
+| `TourCardContent` | `spacing?: 'default' \| 'compact' \| 'none'`, `content?` |
+| `TourCardFooter` | `justify?: 'between' \| 'end' \| 'start'`, `spacing?: 'default' \| 'compact' \| 'none'` |
+
+### TourOverlay
+
+Spotlight overlay with cutout.
+
+```tsx
+import { TourOverlay } from '@tour-kit/react';
+
+<TourOverlay
+  zIndex="default"
+  className="custom-overlay"
+  onClick={() => skip()}
+/>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `zIndex` | `'default' \| 'high'` | `'default'` | z-index level |
+| `className` | `string` | - | Custom CSS class |
+| `onClick` | `() => void` | - | Click handler |
+
+### TourNavigation
+
+Navigation buttons component.
+
+```tsx
+import { TourNavigation } from '@tour-kit/react';
+
+<TourNavigation
+  prevLabel="Back"
+  nextLabel="Next"
+  finishLabel="Done"
+  skipLabel="Skip"
+  prevVariant="outline"
+  nextVariant="default"
+/>
+```
+
+### TourProgress
+
+Progress indicator component.
+
+```tsx
+import { TourProgress } from '@tour-kit/react';
+
+<TourProgress variant="dots" />
+<TourProgress variant="bar" />
+<TourProgress variant="text" />
+```
+
+### TourClose
+
+Close/skip button.
+
+```tsx
+import { TourClose } from '@tour-kit/react';
+
+<TourClose asChild>
+  <button>Custom Close</button>
+</TourClose>
+```
+
+### TourPortal
+
+Portal component for rendering to document.body.
+
+```tsx
+import { TourPortal } from '@tour-kit/react';
+
+<TourPortal className="portal-container">
+  {children}
+</TourPortal>
+```
+
+### TourArrow
+
+Arrow component for tooltips (floating-ui).
+
+```tsx
+import { TourArrow } from '@tour-kit/react';
+
+<TourArrow ref={arrowRef} context={floatingContext} />
+```
+
+---
+
+## Headless Components
+
+Import from `@tour-kit/react/headless`:
+
+### TourCardHeadless
+
+```tsx
+import { TourCardHeadless } from '@tour-kit/react/headless';
+
+<TourCardHeadless
+  render={({
+    isActive,
+    currentStep,
+    currentStepIndex,
+    totalSteps,
+    isFirstStep,
+    isLastStep,
+    next,
+    prev,
+    skip,
+    floatingStyles,
+    refs,
+    arrowRef,
+    context,
+  }) => (
+    <div ref={refs.setFloating} style={floatingStyles}>
+      {/* Custom UI */}
+    </div>
+  )}
+/>
+```
+
+### TourOverlayHeadless
+
+```tsx
+import { TourOverlayHeadless } from '@tour-kit/react/headless';
+
+<TourOverlayHeadless
+  render={({
+    isActive,
+    overlayStyle,
+    cutoutStyle,
+    targetRect,
+    interactive,
+  }) => (
+    <div style={overlayStyle}>
+      {targetRect && <div style={cutoutStyle} />}
+    </div>
+  )}
+/>
+```
+
+### TourNavigationHeadless
+
+```tsx
+import { TourNavigationHeadless } from '@tour-kit/react/headless';
+
+<TourNavigationHeadless
+  isFirstStep={isFirstStep}
+  isLastStep={isLastStep}
+  onPrev={prev}
+  onNext={next}
+  onSkip={skip}
+  render={({ isFirstStep, isLastStep, onPrev, onNext, onSkip }) => (
+    // Custom navigation UI
+  )}
+/>
+```
+
+### TourProgressHeadless
+
+```tsx
+import { TourProgressHeadless } from '@tour-kit/react/headless';
+
+<TourProgressHeadless
+  current={currentStepIndex + 1}
+  total={totalSteps}
+  render={({ current, total }) => (
+    <div>{current} / {total}</div>
+  )}
+/>
+```
+
+### TourCloseHeadless
+
+```tsx
+import { TourCloseHeadless } from '@tour-kit/react/headless';
+
+<TourCloseHeadless
+  render={(props) => (
+    <button {...props}>Close</button>
+  )}
+/>
+```
+
+---
+
+## Provider Components
+
+### MultiTourKitProvider
+
+Provider for managing multiple tours.
+
+```tsx
+import { MultiTourKitProvider } from '@tour-kit/react';
+
+<MultiTourKitProvider
+  config={tourKitConfig}
+  router={router}
+  routePersistence={{ enabled: true }}
+  autoNavigate={false}
+  onNavigationRequired={(route) => {}}
+  onTourStart={(tourId) => {}}
+  onTourComplete={(tourId) => {}}
+  onTourSkip={(tourId, stepIndex) => {}}
+  onStepView={(tourId, stepId, stepIndex) => {}}
+>
+  {children}
+</MultiTourKitProvider>
+```
+
+---
+
+## Hooks
+
+### useTours
+
+Access all registered tours.
+
+```tsx
+import { useTours } from '@tour-kit/react';
+
+const {
+  tours,           // TourInfo[]
+  activeTourId,    // string | null
+  isAnyTourActive, // boolean
+  completedTours,  // string[]
+  skippedTours,    // string[]
+  isTourCompleted, // (id: string) => boolean
+  isTourSkipped,   // (id: string) => boolean
+  getTour,         // (id: string) => TourInfo | undefined
+} = useTours();
+```
+
+### useTourRoute
+
+Route-aware tour control.
+
+```tsx
+import { useTourRoute } from '@tour-kit/react';
+
+const {
+  isStepOnCurrentRoute, // boolean
+  currentStepRoute,     // string | undefined
+  currentRoute,         // string
+  isNavigating,         // boolean
+  goToStepRoute,        // () => Promise<void>
+  isOnRoute,            // (route: string) => boolean
+} = useTourRoute({ router, tourId? });
+```
+
+---
+
+## Router Adapters
+
+### Next.js App Router
+
+```tsx
+import { useNextAppRouter, createNextAppRouterAdapter } from '@tour-kit/react';
+
+// Hook (uses dynamic require)
+const router = useNextAppRouter();
+
+// Factory (for custom setup)
+import { usePathname, useRouter } from 'next/navigation';
+const createRouter = createNextAppRouterAdapter(usePathname, useRouter);
+const router = createRouter();
+```
+
+### Next.js Pages Router
+
+```tsx
+import { useNextPagesRouter, createNextPagesRouterAdapter } from '@tour-kit/react';
+
+// Hook
+const router = useNextPagesRouter();
+
+// Factory
+import { useRouter } from 'next/router';
+const createRouter = createNextPagesRouterAdapter(useRouter);
+```
+
+### React Router
+
+```tsx
+import { useReactRouter, createReactRouterAdapter } from '@tour-kit/react';
+
+// Hook
+const router = useReactRouter();
+
+// Factory
+import { useNavigate, useLocation } from 'react-router-dom';
+const createRouter = createReactRouterAdapter(useNavigate, useLocation);
+```
+
+---
+
+## UI Variants
+
+CVA variant exports for customization:
+
+```tsx
+import {
+  // Button
+  tourButtonVariants,
+
+  // Card
+  tourCardVariants,
+  tourCardHeaderVariants,
+  tourCardContentVariants,
+  tourCardFooterVariants,
+
+  // Progress
+  tourProgressVariants,
+  tourProgressDotVariants,
+
+  // Overlay
+  tourOverlayVariants,
+} from '@tour-kit/react';
+```
+
+---
+
+## Utilities
+
+### cn
+
+Class name utility (clsx + tailwind-merge).
+
+```tsx
+import { cn } from '@tour-kit/react';
+
+cn('base-class', condition && 'conditional', className);
+```
+
+### Slot Components
+
+```tsx
+import { Slot, Slottable, UnifiedSlot } from '@tour-kit/react';
+
+// Radix-style slot
+<Slot {...props}>{children}</Slot>
+
+// Unified for both Radix and Base UI
+<UnifiedSlot {...props}>{children}</UnifiedSlot>
+```
+
+### UI Library Context
+
+```tsx
+import { UILibraryProvider, useUILibrary } from '@tour-kit/react';
+
+<UILibraryProvider library="radix">
+  {children}
+</UILibraryProvider>
+
+const library = useUILibrary(); // 'radix' | 'base-ui'
+```
+
+---
+
+## Re-exports from @tour-kit/core
+
+All exports from `@tour-kit/core` are available:
+
+```tsx
+// Providers
+export { TourContext, TourProvider, TourKitContext, TourKitProvider } from '@tour-kit/react';
+
+// Hooks
+export {
+  useTour,
+  useStep,
+  useSpotlight,
+  useElementPosition,
+  useKeyboardNavigation,
+  useFocusTrap,
+  usePersistence,
+  useRoutePersistence,
+  useMediaQuery,
+  usePrefersReducedMotion,
+} from '@tour-kit/react';
+
+// Utilities
+export {
+  createTour,
+  createStep,
+  waitForElement,
+  isElementVisible,
+  getScrollParent,
+  scrollIntoView,
+  generateId,
+  announce,
+  prefersReducedMotion,
+  getStepAnnouncement,
+  createStorageAdapter,
+  createPrefixedStorage,
+  safeJSONParse,
+  calculatePosition,
+} from '@tour-kit/react';
+
+// Configs
+export {
+  defaultSpotlightConfig,
+  defaultKeyboardConfig,
+  defaultPersistenceConfig,
+  defaultA11yConfig,
+  defaultScrollConfig,
+} from '@tour-kit/react';
+
+// Types
+export type {
+  Placement,
+  TourStep,
+  Tour,
+  TourState,
+  TourKitConfig,
+  RouterAdapter,
+  // ... and more
+} from '@tour-kit/react';
+```
+
+<Callout type="info">
+For detailed documentation on each component, see the individual pages in the [@tour-kit/react](/docs/react) section.
+</Callout>

@@ -1,0 +1,241 @@
+---
+title: useSchedule
+description: React hook for simple schedule active/inactive checks with auto-refresh
+---
+
+# useSchedule
+
+A React hook that reactively monitors schedule status and automatically refreshes.
+
+## Usage
+
+```tsx
+import { useSchedule } from '@tour-kit/scheduling'
+
+function ScheduledTour() {
+  const schedule = {
+    startAt: '2024-01-15',
+    endAt: '2024-03-31',
+    daysOfWeek: [1, 2, 3, 4, 5], // Weekdays
+    timeOfDay: { start: '09:00', end: '17:00' },
+  }
+
+  const { isActive, reason } = useSchedule(schedule)
+
+  if (!isActive) {
+    return null
+  }
+
+  return <Tour tourId="onboarding">...</Tour>
+}
+```
+
+## API
+
+### Parameters
+
+```ts
+useSchedule(
+  schedule: Schedule | undefined | null,
+  options?: UseScheduleOptions
+): UseScheduleReturn
+```
+
+#### schedule
+
+The schedule configuration. Can be `undefined` or `null` (treated as disabled).
+
+#### options
+
+```ts
+interface UseScheduleOptions {
+  /** Refresh interval in milliseconds (default: 60000 = 1 minute) */
+  refreshInterval?: number
+  /** Disable auto-refresh */
+  disableAutoRefresh?: boolean
+  /** Override timezone */
+  timezone?: string
+}
+```
+
+### Returns
+
+```ts
+interface UseScheduleReturn extends ScheduleResult {
+  /** Whether the schedule is currently active */
+  isActive: boolean
+  /** Reason for being inactive */
+  reason?: ScheduleInactiveReason
+  /** Manually refresh the schedule status */
+  refresh: () => void
+  /** Last evaluation timestamp */
+  lastCheckedAt: Date
+  /** Current timezone being used */
+  timezone: string
+}
+```
+
+## Examples
+
+### Basic Usage
+
+```tsx
+import { useSchedule } from '@tour-kit/scheduling'
+
+function AnnouncementBanner() {
+  const { isActive } = useSchedule({
+    startAt: '2024-02-01',
+    endAt: '2024-02-14',
+  })
+
+  return isActive ? <div>Valentine's Sale!</div> : null
+}
+```
+
+### Custom Refresh Interval
+
+Check every 10 seconds instead of every minute:
+
+```tsx
+const { isActive } = useSchedule(schedule, {
+  refreshInterval: 10000, // 10 seconds
+})
+```
+
+### Manual Refresh Only
+
+Disable auto-refresh and control when to check:
+
+```tsx
+const { isActive, refresh } = useSchedule(schedule, {
+  disableAutoRefresh: true,
+})
+
+// Manually trigger refresh
+useEffect(() => {
+  refresh()
+}, [someCondition])
+```
+
+### Debug Inactive Reason
+
+```tsx
+const { isActive, reason } = useSchedule(schedule)
+
+useEffect(() => {
+  if (!isActive) {
+    console.log('Schedule inactive:', reason)
+    // 'disabled' | 'not_started' | 'ended' | 'wrong_day' | 'wrong_time' | 'blackout' | etc.
+  }
+}, [isActive, reason])
+```
+
+### Timezone Override
+
+```tsx
+// Use a specific timezone instead of user's browser timezone
+const { isActive } = useSchedule(schedule, {
+  timezone: 'America/Los_Angeles',
+})
+```
+
+### With Loading State
+
+```tsx
+function ScheduledContent() {
+  const [isReady, setIsReady] = useState(false)
+  const { isActive, timezone, lastCheckedAt } = useSchedule(schedule)
+
+  useEffect(() => {
+    // Wait for first evaluation
+    setIsReady(true)
+  }, [])
+
+  if (!isReady) {
+    return <div>Checking schedule...</div>
+  }
+
+  return (
+    <div>
+      <p>Active: {isActive ? 'Yes' : 'No'}</p>
+      <p>Timezone: {timezone}</p>
+      <p>Last checked: {lastCheckedAt.toLocaleTimeString()}</p>
+    </div>
+  )
+}
+```
+
+### Conditional Rendering with Fallback
+
+```tsx
+function ScheduledTour() {
+  const { isActive, reason } = useSchedule({
+    startAt: '2024-03-01',
+    daysOfWeek: [1, 2, 3, 4, 5],
+    timeOfDay: { start: '09:00', end: '17:00' },
+  })
+
+  if (!isActive) {
+    if (reason === 'not_started') {
+      return <div>Tour starts March 1st</div>
+    }
+    if (reason === 'wrong_day') {
+      return <div>Tour only available on weekdays</div>
+    }
+    return null
+  }
+
+  return <Tour tourId="feature-walkthrough">...</Tour>
+}
+```
+
+## Auto-Refresh Behavior
+
+By default, the hook automatically re-evaluates the schedule every 60 seconds (1 minute):
+
+```tsx
+// Default: refreshes every minute
+const { isActive } = useSchedule(schedule)
+
+// Custom interval: refreshes every 5 minutes
+const { isActive } = useSchedule(schedule, {
+  refreshInterval: 300000,
+})
+
+// No auto-refresh: only evaluates on mount or when schedule/timezone changes
+const { isActive } = useSchedule(schedule, {
+  disableAutoRefresh: true,
+})
+```
+
+The hook also re-evaluates when:
+- The `schedule` object changes
+- The `timezone` option changes
+- You call the `refresh()` function manually
+
+## Performance Notes
+
+- Auto-refresh uses `setInterval` and cleans up on unmount
+- Each refresh creates a new `Date` object for accurate time
+- Consider disabling auto-refresh if you have many instances running simultaneously
+- The hook memoizes the refresh function to avoid unnecessary re-renders
+
+## When to Use
+
+**Use `useSchedule` when:**
+- You need a simple active/inactive check
+- Auto-refresh is sufficient (every minute)
+- You don't need next active/inactive times
+- Performance is critical (simpler than `useScheduleStatus`)
+
+**Use `useScheduleStatus` when:**
+- You need detailed status information
+- You want to display next active/inactive times
+- You need human-readable messages
+- You're building admin/debug UIs
+
+## Related
+
+- [useScheduleStatus](/docs/scheduling/hooks/use-schedule-status) - Detailed status with next times
+- [checkSchedule](/docs/scheduling/utilities/schedule-evaluation) - One-time evaluation utility
+- [Schedule type](/docs/scheduling/types#schedule) - Schedule configuration reference

@@ -1,0 +1,368 @@
+---
+title: YouTubeEmbed
+description: Embed YouTube videos with GDPR-compliant privacy-enhanced mode
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`YouTubeEmbed` renders YouTube videos using privacy-enhanced mode (`youtube-nocookie.com`) for GDPR compliance. It provides fine-grained control over YouTube-specific features like playlist support and custom player controls.
+
+## Why Use YouTubeEmbed?
+
+- **Privacy first**: Automatically uses `youtube-nocookie.com` domain
+- **GDPR compliant**: No tracking cookies until user interacts
+- **YouTube features**: Access to playlist, annotations, and branding controls
+- **Custom styling**: Control player chrome, colors, and appearance
+
+## Basic Usage
+
+```tsx
+import { YouTubeEmbed } from '@tour-kit/media'
+
+export function IntroVideo() {
+  return (
+    <YouTubeEmbed
+      videoId="dQw4w9WgXcQ"
+      title="Product introduction"
+    />
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    videoId: {
+      type: 'string',
+      required: true,
+      description: 'YouTube video ID (from URL: youtube.com/watch?v=VIDEO_ID)',
+    },
+    title: {
+      type: 'string',
+      required: true,
+      description: 'Accessible title for the iframe. Describes the video content',
+    },
+    autoplay: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Auto-start playback. Requires muted=true in most browsers',
+    },
+    muted: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Start muted. Required for autoplay to work',
+    },
+    controls: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Show YouTube player controls',
+    },
+    loop: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Loop the video. Works best with single videos',
+    },
+    startTime: {
+      type: 'number',
+      required: false,
+      description: 'Start playback at specific time in seconds',
+    },
+    endTime: {
+      type: 'number',
+      required: false,
+      description: 'Stop playback at specific time in seconds',
+    },
+    playlistId: {
+      type: 'string',
+      required: false,
+      description: 'YouTube playlist ID to embed instead of single video',
+    },
+    aspectRatio: {
+      type: "'16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'",
+      required: false,
+      default: "'16/9'",
+      description: 'Video aspect ratio',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: "'md'",
+      description: 'Preset size for the video container',
+    },
+    rounded: {
+      type: "boolean | 'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: 'false',
+      description: 'Border radius styling',
+    },
+    showInfo: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Show video title and uploader before playback',
+    },
+    modestBranding: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Hide YouTube logo in control bar',
+    },
+    allowFullscreen: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Allow fullscreen mode',
+    },
+    className: {
+      type: 'string',
+      required: false,
+      description: 'Additional CSS classes',
+    },
+    style: {
+      type: 'React.CSSProperties',
+      required: false,
+      description: 'Inline styles',
+    },
+  }}
+/>
+
+## Examples
+
+### Auto-playing Welcome Video
+
+```tsx
+<YouTubeEmbed
+  videoId="dQw4w9WgXcQ"
+  title="Welcome to our platform"
+  autoplay
+  muted
+  loop
+/>
+```
+
+<Callout type="warn">
+  Autoplay only works when `muted={true}` due to browser policies. Unmuted autoplay is blocked to prevent annoying user experiences.
+</Callout>
+
+### Start at Specific Time
+
+Jump to the relevant part of a longer video:
+
+```tsx
+<YouTubeEmbed
+  videoId="dQw4w9WgXcQ"
+  title="Feature deep dive"
+  startTime={90} // Start at 1:30
+  endTime={180}  // End at 3:00
+/>
+```
+
+### Clean Player UI
+
+Remove YouTube branding for a cleaner look:
+
+```tsx
+<YouTubeEmbed
+  videoId="dQw4w9WgXcQ"
+  title="Product demo"
+  modestBranding
+  showInfo={false}
+/>
+```
+
+### Vertical Mobile Video
+
+Perfect for mobile app demos:
+
+```tsx
+<YouTubeEmbed
+  videoId="dQw4w9WgXcQ"
+  title="Mobile app walkthrough"
+  aspectRatio="9/16"
+  size="sm"
+  rounded="lg"
+/>
+```
+
+### Playlist Embed
+
+Embed an entire playlist instead of a single video:
+
+```tsx
+<YouTubeEmbed
+  playlistId="PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf"
+  title="Complete tutorial series"
+  aspectRatio="16/9"
+/>
+```
+
+<Callout type="info">
+  When using `playlistId`, you don't need to provide `videoId`. The playlist will start with the first video.
+</Callout>
+
+### Controlled Size and Styling
+
+```tsx
+<YouTubeEmbed
+  videoId="dQw4w9WgXcQ"
+  title="Feature showcase"
+  size="lg"
+  rounded="md"
+  className="shadow-xl"
+/>
+```
+
+## Extracting Video IDs
+
+YouTube URLs come in various formats. Use the utility functions to extract the video ID:
+
+```tsx
+import { extractYouTubeId, isYouTubeUrl } from '@tour-kit/media'
+
+const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+
+if (isYouTubeUrl(url)) {
+  const videoId = extractYouTubeId(url)
+  return <YouTubeEmbed videoId={videoId} title="Video" />
+}
+```
+
+Supported URL formats:
+- `https://www.youtube.com/watch?v=dQw4w9WgXcQ`
+- `https://youtu.be/dQw4w9WgXcQ`
+- `https://www.youtube.com/embed/dQw4w9WgXcQ`
+- `https://www.youtube.com/v/dQw4w9WgXcQ`
+
+## Privacy and GDPR
+
+`YouTubeEmbed` automatically uses the privacy-enhanced mode (`youtube-nocookie.com`):
+
+```html
+<!-- Standard YouTube embed -->
+<iframe src="https://www.youtube.com/embed/VIDEO_ID" />
+
+<!-- Privacy-enhanced (what YouTubeEmbed uses) -->
+<iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" />
+```
+
+**Benefits:**
+- No tracking cookies set until user plays the video
+- Compliant with GDPR and privacy regulations
+- User must actively interact to trigger tracking
+- Identical functionality to standard embeds
+
+<Callout type="info">
+  All YouTube embeds via TourKit use privacy-enhanced mode by default. You don't need to configure anything special.
+</Callout>
+
+## Accessibility
+
+### Required Title Prop
+
+The `title` prop is required to provide accessible context for screen readers:
+
+```tsx
+// Good - descriptive title
+<YouTubeEmbed
+  videoId="dQw4w9WgXcQ"
+  title="Step-by-step guide to creating your first project"
+/>
+
+// Bad - generic title
+<YouTubeEmbed
+  videoId="dQw4w9WgXcQ"
+  title="Video"
+/>
+```
+
+### Keyboard Navigation
+
+YouTube's player has built-in keyboard shortcuts:
+- **Space** or **K** - Play/Pause
+- **Left/Right arrows** - Seek backward/forward
+- **Up/Down arrows** - Volume up/down
+- **F** - Fullscreen
+- **M** - Mute/Unmute
+
+### Captions
+
+YouTube videos with captions automatically display them. Users can enable via the CC button in the player controls.
+
+## Integration with Tours
+
+Use inside tour steps for video-based onboarding:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { YouTubeEmbed } from '@tour-kit/media'
+
+<Tour id="video-onboarding">
+  <TourStep id="intro">
+    <h2>Welcome!</h2>
+    <YouTubeEmbed
+      videoId="dQw4w9WgXcQ"
+      title="Platform introduction"
+      autoplay
+      muted
+    />
+  </TourStep>
+
+  <TourStep id="advanced">
+    <h2>Advanced Features</h2>
+    <YouTubeEmbed
+      videoId="dQw4w9WgXcQ"
+      title="Power user tips"
+      startTime={120}
+    />
+  </TourStep>
+</Tour>
+```
+
+## TypeScript
+
+Fully typed component with intellisense support:
+
+```tsx
+import type { YouTubeEmbedProps } from '@tour-kit/media'
+
+const config: YouTubeEmbedProps = {
+  videoId: 'dQw4w9WgXcQ',
+  title: 'Product demo',
+  autoplay: true,
+  muted: true,
+  startTime: 30
+}
+
+<YouTubeEmbed {...config} />
+```
+
+## Building Custom Embed URLs
+
+For advanced use cases, build YouTube embed URLs manually:
+
+```tsx
+import { buildYouTubeEmbedUrl } from '@tour-kit/media'
+
+const embedUrl = buildYouTubeEmbedUrl('dQw4w9WgXcQ', {
+  autoplay: true,
+  muted: true,
+  startTime: 90,
+  modestBranding: true
+})
+
+console.log(embedUrl)
+// https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&start=90&modestbranding=1
+```
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
+- [VimeoEmbed](/docs/media/components/vimeo-embed) - Vimeo alternative
+- [Embed URL Utilities](/docs/media/utilities/embed-urls) - URL building functions
+- [URL Parsing](/docs/media/utilities/url-parsing) - Extract video IDs from URLs

@@ -1,5 +1,19 @@
 {
   "title": "Guides",
   "icon": "BookOpen",
-  "pages": ["index", "nextjs", "vite", "accessibility", "animations", "persistence", "base-ui"]
+  "pages": [
+    "index",
+    "nextjs",
+    "vite",
+    "accessibility",
+    "animations",
+    "persistence",
+    "router-integration",
+    "base-ui",
+    "troubleshooting",
+    "analytics-integration",
+    "adoption-analytics",
+    "announcements-scheduling",
+    "checklists-tours"
+  ]
 }

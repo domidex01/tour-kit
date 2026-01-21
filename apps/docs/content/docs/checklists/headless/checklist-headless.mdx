@@ -1,0 +1,210 @@
+---
+title: ChecklistHeadless
+description: Headless checklist component with render props
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# ChecklistHeadless
+
+Headless component that provides checklist state and actions via render props, without any styling.
+
+## Usage
+
+```tsx
+import { ChecklistHeadless } from '@tour-kit/checklists/headless';
+
+<ChecklistHeadless checklistId="onboarding">
+  {({ checklist, visibleTasks, completeTask }) => (
+    <div>
+      <h2>{checklist.config.title}</h2>
+      {visibleTasks.map((task) => (
+        <button
+          key={task.config.id}
+          onClick={() => completeTask(task.config.id)}
+          disabled={task.locked}
+        >
+          {task.completed ? '✓' : '○'} {task.config.title}
+        </button>
+      ))}
+    </div>
+  )}
+</ChecklistHeadless>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    checklistId: {
+      type: 'string',
+      required: true,
+      description: 'ID of the checklist',
+    },
+    render: {
+      type: '(props: ChecklistRenderProps) => ReactNode',
+      description: 'Render function',
+    },
+    children: {
+      type: '(props: ChecklistRenderProps) => ReactNode',
+      description: 'Children function (alternative to render)',
+    },
+  }}
+/>
+
+## Render Props
+
+<TypeTable
+  type={{
+    checklist: {
+      type: 'ChecklistState',
+      description: 'Full checklist state',
+    },
+    visibleTasks: {
+      type: 'ChecklistTaskState[]',
+      description: 'Tasks passing when conditions',
+    },
+    progress: {
+      type: 'ChecklistProgress',
+      description: 'Progress info',
+    },
+    isComplete: {
+      type: 'boolean',
+      description: 'All tasks completed',
+    },
+    isDismissed: {
+      type: 'boolean',
+      description: 'Checklist dismissed',
+    },
+    isExpanded: {
+      type: 'boolean',
+      description: 'Checklist expanded',
+    },
+    completeTask: {
+      type: '(taskId: string) => void',
+      description: 'Complete task',
+    },
+    uncompleteTask: {
+      type: '(taskId: string) => void',
+      description: 'Uncomplete task',
+    },
+    executeAction: {
+      type: '(taskId: string) => void',
+      description: 'Execute task action',
+    },
+    dismiss: {
+      type: '() => void',
+      description: 'Dismiss checklist',
+    },
+    restore: {
+      type: '() => void',
+      description: 'Restore checklist',
+    },
+    toggleExpanded: {
+      type: '() => void',
+      description: 'Toggle expanded state',
+    },
+    setExpanded: {
+      type: '(expanded: boolean) => void',
+      description: 'Set expanded state',
+    },
+    reset: {
+      type: '() => void',
+      description: 'Reset checklist',
+    },
+  }}
+/>
+
+## Examples
+
+### Material UI
+
+```tsx
+import { Card, CardContent, Checkbox, List, ListItem } from '@mui/material';
+
+<ChecklistHeadless checklistId="onboarding">
+  {({ checklist, visibleTasks, completeTask }) => (
+    <Card>
+      <CardContent>
+        <h2>{checklist.config.title}</h2>
+        <List>
+          {visibleTasks.map((task) => (
+            <ListItem key={task.config.id}>
+              <Checkbox
+                checked={task.completed}
+                disabled={task.locked}
+                onChange={() => completeTask(task.config.id)}
+              />
+              {task.config.title}
+            </ListItem>
+          ))}
+        </List>
+      </CardContent>
+    </Card>
+  )}
+</ChecklistHeadless>
+```
+
+### Chakra UI
+
+```tsx
+import { Box, Checkbox, Stack } from '@chakra-ui/react';
+
+<ChecklistHeadless checklistId="onboarding">
+  {({ checklist, visibleTasks, completeTask }) => (
+    <Box p={4} borderWidth="1px" borderRadius="lg">
+      <Heading size="md">{checklist.config.title}</Heading>
+      <Stack spacing={3} mt={4}>
+        {visibleTasks.map((task) => (
+          <Checkbox
+            key={task.config.id}
+            isChecked={task.completed}
+            isDisabled={task.locked}
+            onChange={() => completeTask(task.config.id)}
+          >
+            {task.config.title}
+          </Checkbox>
+        ))}
+      </Stack>
+    </Box>
+  )}
+</ChecklistHeadless>
+```
+
+### Custom Animations
+
+```tsx
+import { AnimatePresence, motion } from 'framer-motion';
+
+<ChecklistHeadless checklistId="onboarding">
+  {({ visibleTasks, completeTask, progress }) => (
+    <div>
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: `${progress.percentage}%` }}
+        className="progress-bar"
+      />
+
+      <AnimatePresence>
+        {visibleTasks.map((task) => (
+          <motion.div
+            key={task.config.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+          >
+            <button onClick={() => completeTask(task.config.id)}>
+              {task.config.title}
+            </button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  )}
+</ChecklistHeadless>
+```
+
+## Related
+
+- [TaskHeadless](/docs/checklists/headless/task-headless) - Headless task
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Direct hook access

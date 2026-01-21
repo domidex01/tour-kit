@@ -1,0 +1,432 @@
+---
+title: Persistence
+description: Understanding hint dismissal patterns and persisting state across sessions
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+# Hint Persistence
+
+## Why Persistence Matters
+
+Hints are designed to guide users to features they haven't discovered yet. Once a user has seen and dismissed a hint, showing it repeatedly becomes annoying rather than helpful. Persistence ensures:
+
+- **Dismissed hints stay dismissed** - Users don't see the same hint multiple times
+- **State survives page reloads** - Hints remember their state across sessions
+- **Cross-page consistency** - Hints dismissed on one page stay dismissed everywhere
+
+---
+
+## Hide vs Dismiss
+
+The hints package has two distinct concepts for closing hints:
+
+### Hide (Temporary)
+
+- Closes the tooltip but **doesn't mark it as dismissed**
+- The hotspot remains visible
+- User can reopen the hint by clicking the hotspot
+- Default behavior when `persist={false}`
+
+```tsx
+const { hide, isOpen } = useHint('my-hint');
+
+// Clicking the close button hides the tooltip
+// The hotspot stays visible for reopening
+hide();
+```
+
+### Dismiss (Permanent)
+
+- Closes the tooltip **and marks it as dismissed**
+- The entire hint component unmounts
+- Hint won't show again until explicitly reset
+- Enabled when `persist={true}`
+
+```tsx
+const { dismiss, isDismissed } = useHint('my-hint');
+
+// The hint is permanently dismissed
+// Component renders null until reset
+dismiss();
+```
+
+---
+
+## Using the persist Prop
+
+The `persist` prop on the `<Hint>` component controls what happens when the tooltip close button is clicked:
+
+<Tabs items={['persist={false}', 'persist={true}']}>
+  <Tab value="persist={false}">
+```tsx
+// Default behavior - hint can be reopened
+<Hint
+  id="help-hint"
+  target="#help-icon"
+  content="Click for help"
+  persist={false} // default
+/>
+
+// When user clicks close:
+// 1. Tooltip closes
+// 2. Hotspot stays visible
+// 3. User can click hotspot to reopen
+```
+  </Tab>
+  <Tab value="persist={true}">
+```tsx
+// Permanent dismissal
+<Hint
+  id="new-feature"
+  target="#feature-button"
+  content="Try our new feature!"
+  persist={true}
+/>
+
+// When user clicks close:
+// 1. Tooltip closes
+// 2. Hint is marked as dismissed
+// 3. Entire component unmounts
+// 4. Won't show until reset
+```
+  </Tab>
+</Tabs>
+
+---
+
+## In-Memory State
+
+By default, hint state is stored in React context (in-memory). This means:
+
+- **State persists** within the same session
+- **State resets** on page refresh
+- **State resets** when `HintsProvider` unmounts
+
+```tsx
+function App() {
+  return (
+    <HintsProvider>
+      {/* State lives in this provider */}
+      <Hint id="hint-1" target="#a" content="..." persist />
+      <Hint id="hint-2" target="#b" content="..." persist />
+    </HintsProvider>
+  );
+}
+
+// Refreshing the page resets all hints to their initial state
+```
+
+---
+
+## Adding Browser Storage
+
+To persist hint state across page reloads, you need to implement a storage layer. Here's a pattern using localStorage:
+
+<Steps>
+<Step>
+### Create a Storage Hook
+
+```tsx
+import { useEffect, useState } from 'react';
+
+const STORAGE_KEY = 'dismissed-hints';
+
+function useDismissedHints() {
+  const [dismissed, setDismissed] = useState<Set<string>>(() => {
+    if (typeof window === 'undefined') return new Set();
+
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  });
+
+  const persistDismiss = (hintId: string) => {
+    setDismissed(prev => {
+      const next = new Set(prev);
+      next.add(hintId);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  };
+
+  const resetDismiss = (hintId: string) => {
+    setDismissed(prev => {
+      const next = new Set(prev);
+      next.delete(hintId);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  };
+
+  const resetAll = () => {
+    setDismissed(new Set());
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
+  return { dismissed, persistDismiss, resetDismiss, resetAll };
+}
+```
+</Step>
+
+<Step>
+### Create a Persistent Hint Component
+
+```tsx
+import { Hint, useHint } from '@tour-kit/hints';
+import type { ComponentProps } from 'react';
+
+interface PersistentHintProps extends ComponentProps<typeof Hint> {
+  /** Uses browser storage for persistence */
+  browserPersist?: boolean;
+}
+
+function PersistentHint({
+  id,
+  browserPersist = true,
+  onDismiss,
+  ...props
+}: PersistentHintProps) {
+  const { dismissed, persistDismiss } = useDismissedHints();
+
+  // Don't render if already dismissed in storage
+  if (browserPersist && dismissed.has(id)) {
+    return null;
+  }
+
+  const handleDismiss = () => {
+    if (browserPersist) {
+      persistDismiss(id);
+    }
+    onDismiss?.();
+  };
+
+  return (
+    <Hint
+      id={id}
+      persist={true}
+      onDismiss={handleDismiss}
+      {...props}
+    />
+  );
+}
+```
+</Step>
+
+<Step>
+### Use the Persistent Hint
+
+```tsx
+function App() {
+  return (
+    <HintsProvider>
+      {/* This hint persists across page reloads */}
+      <PersistentHint
+        id="new-feature"
+        target="#feature-btn"
+        content="Try our new feature!"
+      />
+
+      {/* This hint resets on refresh */}
+      <Hint
+        id="temporary-hint"
+        target="#temp-btn"
+        content="Just a temporary tip"
+      />
+    </HintsProvider>
+  );
+}
+```
+</Step>
+</Steps>
+
+---
+
+## Storage Adapters with @tour-kit/core
+
+For more robust storage, you can use the storage utilities from `@tour-kit/core`:
+
+```tsx
+import {
+  createStorageAdapter,
+  createPrefixedStorage,
+  createCookieStorage
+} from '@tour-kit/core';
+
+// localStorage (default)
+const localAdapter = createStorageAdapter('localStorage');
+
+// sessionStorage (clears on tab close)
+const sessionAdapter = createStorageAdapter('sessionStorage');
+
+// Cookies (for SSR-friendly persistence)
+const cookieAdapter = createCookieStorage({ expires: 30 }); // 30 days
+
+// With prefix to avoid collisions
+const prefixedAdapter = createPrefixedStorage(localAdapter, 'myapp-hints');
+```
+
+### Using Core Storage with Hints
+
+```tsx
+import { createStorageAdapter } from '@tour-kit/core';
+import { useEffect, useState } from 'react';
+
+const storage = createStorageAdapter('localStorage');
+const HINTS_KEY = 'dismissed-hints';
+
+function usePersistentHints() {
+  const [dismissed, setDismissed] = useState<string[]>([]);
+
+  useEffect(() => {
+    const stored = storage.getItem(HINTS_KEY);
+    if (stored) {
+      setDismissed(JSON.parse(stored));
+    }
+  }, []);
+
+  const saveDismissed = (ids: string[]) => {
+    storage.setItem(HINTS_KEY, JSON.stringify(ids));
+    setDismissed(ids);
+  };
+
+  return { dismissed, saveDismissed };
+}
+```
+
+---
+
+## Resetting Hints
+
+Sometimes you need to reset dismissed hints (e.g., for testing or after feature updates):
+
+### Reset a Single Hint
+
+```tsx
+function ResetButton({ hintId }: { hintId: string }) {
+  const { reset, isDismissed } = useHint(hintId);
+
+  if (!isDismissed) return null;
+
+  return (
+    <button onClick={reset}>
+      Show "{hintId}" hint again
+    </button>
+  );
+}
+```
+
+### Reset All Hints
+
+```tsx
+function ResetAllButton() {
+  const { resetAllHints } = useHints();
+
+  return (
+    <button onClick={resetAllHints}>
+      Reset All Hints
+    </button>
+  );
+}
+```
+
+### Admin/Debug Panel
+
+```tsx
+function HintDebugPanel() {
+  const { hints, resetHint, resetAllHints } = useHints();
+
+  return (
+    <div className="fixed bottom-4 right-4 p-4 bg-gray-100 rounded-lg">
+      <h3 className="font-bold mb-2">Hint Debug</h3>
+
+      <ul className="space-y-1 mb-4">
+        {hints.map(hint => (
+          <li key={hint.id} className="flex items-center gap-2">
+            <span className={hint.isDismissed ? 'line-through' : ''}>
+              {hint.id}
+            </span>
+            {hint.isDismissed && (
+              <button
+                onClick={() => resetHint(hint.id)}
+                className="text-blue-500 text-sm"
+              >
+                Reset
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <button
+        onClick={resetAllHints}
+        className="w-full bg-red-500 text-white px-3 py-1 rounded"
+      >
+        Reset All
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## Best Practices
+
+### When to Use persist={true}
+
+<Callout type="info">
+Use permanent dismissal for hints that:
+- Announce new features (show once, then never again)
+- Explain UI elements (user only needs to learn once)
+- Could become annoying if shown repeatedly
+</Callout>
+
+```tsx
+// Good: Feature announcements
+<Hint id="v2-announcement" persist content="Check out our new dashboard!" />
+
+// Good: One-time tutorials
+<Hint id="how-to-export" persist content="Click here to export data" />
+```
+
+### When to Use persist={false}
+
+<Callout type="info">
+Use temporary hiding for hints that:
+- Provide contextual help users might need again
+- Explain complex features
+- Serve as ongoing reference
+</Callout>
+
+```tsx
+// Good: Contextual help
+<Hint id="formula-help" persist={false} content="Click for formula syntax" />
+
+// Good: Reference information
+<Hint id="keyboard-shortcuts" persist={false} content="Press ? for shortcuts" />
+```
+
+### Versioning Hints
+
+When you update a hint's content significantly, consider changing its ID:
+
+```tsx
+// v1 - Original hint
+<Hint id="feature-intro-v1" content="Basic explanation" persist />
+
+// v2 - Updated with new content
+<Hint id="feature-intro-v2" content="New, better explanation" persist />
+
+// Users who dismissed v1 will see v2
+```
+
+---
+
+## Related
+
+- [Components](/docs/hints/components) - Hint, HintHotspot, HintTooltip
+- [Hooks](/docs/hints/hooks) - useHints and useHint
+- [Storage Utilities](/docs/core/utilities/storage) - Core storage adapters

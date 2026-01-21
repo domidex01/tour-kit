@@ -1,0 +1,322 @@
+---
+title: '@tour-kit/announcements API'
+description: Complete API reference for @tour-kit/announcements
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/announcements API Reference
+
+Complete API reference for the announcements package. This package provides multi-variant product announcements.
+
+---
+
+## Providers
+
+### AnnouncementsProvider
+
+Provider for announcements.
+
+```tsx
+import { AnnouncementsProvider } from '@tour-kit/announcements';
+
+<AnnouncementsProvider
+  announcements={announcements}
+  userId="user-123"
+  userProperties={{ plan: 'pro' }}
+  onShow={(id) => console.log('Shown:', id)}
+  onDismiss={(id, reason) => console.log('Dismissed:', id, reason)}
+>
+  {children}
+</AnnouncementsProvider>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `announcements` | `AnnouncementConfig[]` | Array of announcement configs |
+| `userId` | `string` | User identifier |
+| `userProperties` | `Record<string, unknown>` | User properties for targeting |
+| `onShow` | `(id: string) => void` | Called when announcement shown |
+| `onDismiss` | `(id: string, reason: DismissalReason) => void` | Called on dismiss |
+
+---
+
+## Hooks
+
+### useAnnouncement
+
+Hook for single announcement control.
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+
+const {
+  announcement,
+  isVisible,
+  show,
+  dismiss,
+  complete,
+} = useAnnouncement('announcement-id');
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `announcement` | `AnnouncementConfig \| undefined` | Announcement config |
+| `isVisible` | `boolean` | Whether currently visible |
+| `show` | `() => void` | Show the announcement |
+| `dismiss` | `(reason?: DismissalReason) => void` | Dismiss the announcement |
+| `complete` | `() => void` | Mark as completed |
+
+### useAnnouncements
+
+Hook for all announcements.
+
+```tsx
+import { useAnnouncements } from '@tour-kit/announcements';
+
+const {
+  announcements,
+  visible,
+  showAnnouncement,
+  dismissAnnouncement,
+} = useAnnouncements();
+```
+
+### useAnnouncementQueue
+
+Hook for queue management.
+
+```tsx
+import { useAnnouncementQueue } from '@tour-kit/announcements';
+
+const {
+  queue,
+  current,
+  next,
+  clear,
+} = useAnnouncementQueue();
+```
+
+---
+
+## Components
+
+### AnnouncementModal
+
+Centered dialog variant.
+
+```tsx
+import { AnnouncementModal } from '@tour-kit/announcements';
+
+<AnnouncementModal id="welcome-modal" />
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `id` | `string` | Announcement ID |
+| `size` | `'sm' \| 'md' \| 'lg'` | Modal size |
+| `closeOnOverlay` | `boolean` | Close when clicking overlay |
+
+### AnnouncementSlideout
+
+Side panel variant.
+
+```tsx
+import { AnnouncementSlideout } from '@tour-kit/announcements';
+
+<AnnouncementSlideout id="feature-slideout" />
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `id` | `string` | Announcement ID |
+| `position` | `'left' \| 'right'` | Slide from direction |
+| `width` | `string` | Panel width |
+
+### AnnouncementBanner
+
+Top/bottom strip variant.
+
+```tsx
+import { AnnouncementBanner } from '@tour-kit/announcements';
+
+<AnnouncementBanner id="maintenance-banner" />
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `id` | `string` | Announcement ID |
+| `position` | `'top' \| 'bottom'` | Banner position |
+| `dismissible` | `boolean` | Show close button |
+
+### AnnouncementToast
+
+Corner notification variant.
+
+```tsx
+import { AnnouncementToast } from '@tour-kit/announcements';
+
+<AnnouncementToast id="update-toast" />
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `id` | `string` | Announcement ID |
+| `position` | `string` | Toast position |
+| `duration` | `number` | Auto-dismiss duration (ms) |
+
+### AnnouncementSpotlight
+
+Element highlight with overlay.
+
+```tsx
+import { AnnouncementSpotlight } from '@tour-kit/announcements';
+
+<AnnouncementSpotlight id="feature-spotlight" />
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `id` | `string` | Announcement ID |
+| `target` | `string` | CSS selector for target |
+| `placement` | `Placement` | Tooltip placement |
+
+### Shared Components
+
+```tsx
+import {
+  AnnouncementOverlay,
+  AnnouncementClose,
+  AnnouncementContent,
+  AnnouncementActions,
+} from '@tour-kit/announcements';
+```
+
+---
+
+## Headless Components
+
+```tsx
+import {
+  HeadlessModal,
+  HeadlessSlideout,
+  HeadlessBanner,
+  HeadlessToast,
+  HeadlessSpotlight,
+} from '@tour-kit/announcements/headless';
+
+<HeadlessModal id="my-modal">
+  {({ isVisible, dismiss, announcement }) => (
+    <CustomModal />
+  )}
+</HeadlessModal>
+```
+
+---
+
+## Configuration
+
+### Frequency Rules
+
+```tsx
+// Show only once ever
+frequency: 'once'
+
+// Show once per session
+frequency: 'session'
+
+// Show every time conditions met
+frequency: 'always'
+
+// Show N times total
+frequency: { type: 'times', count: 3 }
+
+// Show every N days
+frequency: { type: 'interval', days: 7 }
+```
+
+### Audience Targeting
+
+```tsx
+audience: [
+  { property: 'plan', operator: 'equals', value: 'pro' },
+  { property: 'signupDate', operator: 'before', value: '2024-01-01' },
+  { property: 'features', operator: 'contains', value: 'beta' },
+]
+```
+
+| Operator | Description |
+|----------|-------------|
+| `equals` | Exact match |
+| `not_equals` | Not equal |
+| `contains` | Array contains value |
+| `not_contains` | Array doesn't contain |
+| `in` | Value in array |
+| `not_in` | Value not in array |
+| `exists` | Property exists |
+| `not_exists` | Property doesn't exist |
+
+### Priority
+
+```tsx
+priority: 'low' | 'normal' | 'high' | 'critical'
+```
+
+---
+
+## Types
+
+### AnnouncementConfig
+
+```tsx
+interface AnnouncementConfig {
+  id: string;
+  variant: 'modal' | 'slideout' | 'banner' | 'toast' | 'spotlight';
+  priority?: 'low' | 'normal' | 'high' | 'critical';
+  title?: string;
+  description?: string | ReactNode;
+  media?: AnnouncementMedia;
+  primaryAction?: AnnouncementAction;
+  secondaryAction?: AnnouncementAction;
+  frequency?: FrequencyRule;
+  schedule?: Schedule;
+  audience?: AudienceCondition[];
+  modalOptions?: ModalOptions;
+  slideoutOptions?: SlideoutOptions;
+  bannerOptions?: BannerOptions;
+  toastOptions?: ToastOptions;
+  spotlightOptions?: SpotlightOptions;
+  onShow?: () => void;
+  onDismiss?: (reason: DismissalReason) => void;
+  onComplete?: () => void;
+}
+```
+
+### DismissalReason
+
+```tsx
+type DismissalReason =
+  | 'close_button'
+  | 'overlay_click'
+  | 'escape_key'
+  | 'primary_action'
+  | 'secondary_action'
+  | 'auto_dismiss'
+  | 'programmatic';
+```
+
+### AnnouncementState
+
+```tsx
+interface AnnouncementState {
+  id: string;
+  isActive: boolean;
+  isVisible: boolean;
+  isDismissed: boolean;
+  viewCount: number;
+  lastViewedAt: Date | null;
+  dismissedAt: Date | null;
+  dismissalReason: DismissalReason | null;
+  completedAt: Date | null;
+}
+```

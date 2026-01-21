@@ -1,0 +1,209 @@
+---
+title: Analytics
+description: Plugin-based analytics integration for tracking tour and hint events
+---
+
+## Why Analytics Matter
+
+Understanding how users interact with your tours and hints is crucial for optimizing the onboarding experience. Analytics help you answer questions like:
+
+- Which tours are users completing vs. abandoning?
+- Where do users get stuck in multi-step flows?
+- Are hints actually being seen and clicked?
+- How long do users spend on each step?
+
+The `@tour-kit/analytics` package provides a plugin-based system that integrates with popular analytics platforms while maintaining full type safety and privacy controls.
+
+## Installation
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @tour-kit/analytics
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install @tour-kit/analytics
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @tour-kit/analytics
+    ```
+  </Tab>
+</Tabs>
+
+## Quick Start
+
+Wrap your application with `AnalyticsProvider` and configure one or more plugins:
+
+```tsx title="app/layout.tsx"
+import { AnalyticsProvider, consolePlugin } from '@tour-kit/analytics'
+
+export default function RootLayout({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [
+          consolePlugin({ collapsed: false })
+        ],
+        debug: true
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+Now tour events will automatically be logged to the console during development.
+
+## Available Plugins
+
+Tour Kit provides official plugins for popular analytics platforms:
+
+| Plugin | Description | Peer Dependency |
+|--------|-------------|-----------------|
+| `consolePlugin` | Debug logging with colored output | None |
+| `posthogPlugin` | PostHog product analytics | `posthog-js` |
+| `mixpanelPlugin` | Mixpanel event tracking | `mixpanel-browser` |
+| `amplitudePlugin` | Amplitude analytics | `@amplitude/analytics-browser` |
+| `googleAnalyticsPlugin` | Google Analytics 4 | gtag.js (script tag) |
+
+## Multiple Plugins
+
+You can use multiple analytics providers simultaneously:
+
+```tsx title="app/providers.tsx"
+import { AnalyticsProvider, consolePlugin, posthogPlugin } from '@tour-kit/analytics'
+
+const analytics = (
+  <AnalyticsProvider
+    config={{
+      plugins: [
+        // Debug in development
+        consolePlugin({ collapsed: true }),
+        // Production analytics
+        posthogPlugin({
+          apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+          apiHost: 'https://app.posthog.com'
+        })
+      ],
+      userId: user.id,
+      globalProperties: {
+        app_version: '1.2.0',
+        environment: process.env.NODE_ENV
+      }
+    }}
+  >
+    {children}
+  </AnalyticsProvider>
+)
+```
+
+## Tracked Events
+
+The analytics system automatically tracks these event types:
+
+### Tour Lifecycle
+- `tour_started` - User begins a tour
+- `tour_completed` - User finishes all steps
+- `tour_skipped` - User exits tour early
+- `tour_abandoned` - User closes page during tour
+
+### Step Lifecycle
+- `step_viewed` - User views a step
+- `step_completed` - User advances from a step
+- `step_skipped` - User skips a step
+- `step_interaction` - User interacts with step content
+
+### Hint Events
+- `hint_shown` - Hint becomes visible
+- `hint_dismissed` - User dismisses hint
+- `hint_clicked` - User clicks hint hotspot
+
+### Feature Adoption
+- `feature_used` - User uses a feature for the first time
+- `feature_adopted` - User reaches adoption threshold
+- `feature_churned` - User stops using a feature
+- `nudge_shown` - Nudge displayed to user
+- `nudge_clicked` - User clicks nudge
+- `nudge_dismissed` - User dismisses nudge
+
+## Manual Tracking
+
+For custom tracking needs, use the `useAnalytics` hook:
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics'
+
+function FeatureButton() {
+  const analytics = useAnalytics()
+
+  const handleClick = () => {
+    analytics.track('feature_used', {
+      tourId: 'custom-feature',
+      metadata: {
+        feature_name: 'advanced-search',
+        source: 'toolbar'
+      }
+    })
+  }
+
+  return <button onClick={handleClick}>Advanced Search</button>
+}
+```
+
+## Privacy & Performance
+
+### Automatic Flush
+
+The `AnalyticsProvider` automatically flushes queued events when the user navigates away from the page, ensuring no data loss.
+
+### Opt-Out Support
+
+Disable analytics entirely by setting `enabled: false`:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    enabled: userConsent.analytics,
+    plugins: [/* ... */]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+### Debug Mode
+
+Enable debug logging to see events in the console without sending to production:
+
+```tsx
+<AnalyticsProvider
+  config={{
+    debug: process.env.NODE_ENV === 'development',
+    plugins: [/* ... */]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="AnalyticsProvider" href="/docs/analytics/providers">
+    Configure the analytics provider with plugins and settings
+  </Card>
+  <Card title="Hooks" href="/docs/analytics/hooks">
+    Access analytics from components with useAnalytics
+  </Card>
+  <Card title="Plugins" href="/docs/analytics/plugins">
+    Browse available plugins and create custom integrations
+  </Card>
+  <Card title="Types" href="/docs/analytics/types">
+    Full TypeScript API reference
+  </Card>
+</Cards>

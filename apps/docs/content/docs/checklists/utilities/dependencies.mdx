@@ -1,0 +1,91 @@
+---
+title: Dependency Utilities
+description: Functions for managing task dependencies
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Dependency Utilities
+
+Functions for resolving and validating task dependencies.
+
+## canCompleteTask
+
+Check if a task's dependencies are satisfied:
+
+```tsx
+import { canCompleteTask } from '@tour-kit/checklists';
+
+const completed = new Set(['step1', 'step2']);
+const task = { id: 'step3', dependsOn: ['step1', 'step2'] };
+
+const canComplete = canCompleteTask(task, completed, allTasks);
+// true
+```
+
+## resolveTaskDependencies
+
+Get ordered list of task dependencies:
+
+```tsx
+import { resolveTaskDependencies } from '@tour-kit/checklists';
+
+const deps = resolveTaskDependencies('step3', allTasks);
+// ['step1', 'step2']
+```
+
+## hasCircularDependency
+
+Detect circular dependencies:
+
+```tsx
+import { hasCircularDependency } from '@tour-kit/checklists';
+
+const tasks = [
+  { id: 'a', dependsOn: ['b'] },
+  { id: 'b', dependsOn: ['a'] }, // Circular!
+];
+
+if (hasCircularDependency(tasks)) {
+  throw new Error('Circular dependency detected');
+}
+```
+
+<Callout type="warn">
+  Always validate dependencies in development to catch circular references early.
+</Callout>
+
+## Example: Dependency Graph
+
+```tsx
+function DependencyGraph({ tasks }) {
+  const deps = {};
+
+  tasks.forEach((task) => {
+    deps[task.id] = resolveTaskDependencies(task.id, tasks);
+  });
+
+  return (
+    <div>
+      {Object.entries(deps).map(([taskId, dependencies]) => (
+        <div key={taskId}>
+          <strong>{taskId}</strong>
+          {dependencies.length > 0 && (
+            <ul>
+              {dependencies.map((depId) => (
+                <li key={depId}>{depId}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Related
+
+- [ChecklistProvider](/docs/checklists/providers/checklist-provider) - Handles dependencies automatically
+- [useTask](/docs/checklists/hooks/use-task) - Check if task is locked

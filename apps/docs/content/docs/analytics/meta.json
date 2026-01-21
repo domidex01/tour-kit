@@ -1,0 +1,10 @@
+{
+  "title": "Analytics",
+  "pages": [
+    "index",
+    "providers",
+    "hooks",
+    "plugins",
+    "types"
+  ]
+}

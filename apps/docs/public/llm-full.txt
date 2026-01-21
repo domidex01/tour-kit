@@ -1,0 +1,1568 @@
+# Tour-Kit Comprehensive Documentation for LLMs
+
+## Project Overview
+
+Tour-Kit is a headless, accessible product tour and feature discovery library for React applications. It is designed for building user onboarding flows, product tours, and contextual hints.
+
+### Architecture
+
+```
+@tour-kit/react ─────────┐
+@tour-kit/hints ─────────┤
+@tour-kit/adoption ──────┼──► @tour-kit/core
+@tour-kit/announcements ─┤
+@tour-kit/checklists ────┤
+@tour-kit/analytics ─────┘
+@tour-kit/media ─────────── (standalone)
+@tour-kit/scheduling ────── (standalone)
+```
+
+- **@tour-kit/core**: Framework-agnostic hooks, utilities, and types
+- **@tour-kit/react**: Pre-styled React components and headless variants
+- **@tour-kit/hints**: Persistent hints for feature discovery
+- **@tour-kit/adoption**: Feature adoption tracking with nudges
+- **@tour-kit/analytics**: Plugin-based analytics integration
+- **@tour-kit/announcements**: Multi-variant product announcements
+- **@tour-kit/checklists**: Interactive onboarding checklists
+- **@tour-kit/media**: Video/GIF/Lottie embeds for tours
+- **@tour-kit/scheduling**: Time-based scheduling utilities
+
+### Key Features
+
+- Headless-first architecture with styled components
+- Full TypeScript support with strict mode
+- WCAG 2.1 AA accessibility compliance
+- Keyboard navigation and focus management
+- Screen reader announcements
+- SSR-compatible (Next.js, Vite)
+- Multi-page tour support with router adapters
+- Persistence across sessions (localStorage, sessionStorage, cookies)
+- Respects prefers-reduced-motion
+
+---
+
+## Installation
+
+```bash
+# Core React package (includes @tour-kit/core)
+npm install @tour-kit/react
+
+# For hints/hotspots
+npm install @tour-kit/hints
+
+# Both together
+npm install @tour-kit/react @tour-kit/hints
+```
+
+---
+
+## Basic Tour Example
+
+```tsx
+'use client';
+
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+  TourOverlay,
+  TourProgress,
+  TourNavigation,
+  TourClose,
+  useTour,
+} from '@tour-kit/react';
+
+export default function ProductTour() {
+  return (
+    <Tour id="welcome-tour">
+      {/* Step 1 */}
+      <TourStep
+        target="#welcome-header"
+        title="Welcome!"
+        content="Let's take a quick tour of the key features."
+        placement="bottom"
+      />
+
+      {/* Step 2 */}
+      <TourStep
+        target="#sidebar-nav"
+        title="Navigation"
+        content="Use the sidebar to navigate between sections."
+        placement="right"
+      />
+
+      {/* Step 3 */}
+      <TourStep
+        target="#create-button"
+        title="Create New"
+        content="Click here to create a new project."
+        placement="bottom-start"
+      />
+
+      {/* Spotlight overlay */}
+      <TourOverlay />
+
+      {/* Tour card */}
+      <TourCard className="w-80">
+        <TourCardHeader>
+          <TourClose />
+        </TourCardHeader>
+        <TourCardContent />
+        <TourCardFooter>
+          <TourProgress variant="dots" />
+          <TourNavigation />
+        </TourCardFooter>
+      </TourCard>
+
+      {/* Your app content */}
+      <AppContent />
+      <StartTourButton />
+    </Tour>
+  );
+}
+
+function StartTourButton() {
+  const { start, isActive } = useTour();
+
+  if (isActive) return null;
+
+  return (
+    <button
+      onClick={() => start()}
+      className="fixed bottom-4 right-4 px-4 py-2 bg-primary text-white rounded-lg"
+    >
+      Start Tour
+    </button>
+  );
+}
+```
+
+---
+
+## Multi-Page Tour with Next.js
+
+```tsx
+'use client';
+
+import {
+  Tour,
+  TourStep,
+  TourCard,
+  TourOverlay,
+  MultiTourKitProvider,
+  useNextAppRouter,
+  useTour,
+  usePersistence,
+} from '@tour-kit/react';
+import { useEffect, useState } from 'react';
+
+export function OnboardingTour() {
+  const router = useNextAppRouter();
+  const persistence = usePersistence({ keyPrefix: 'myapp' });
+  const [shouldShow, setShouldShow] = useState(false);
+
+  useEffect(() => {
+    const completed = persistence.getCompletedTours().includes('onboarding');
+    setShouldShow(!completed);
+  }, [persistence]);
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+      autoNavigate={true}
+      onTourComplete={(tourId) => {
+        persistence.markCompleted(tourId);
+      }}
+    >
+      <Tour id="onboarding" autoStart={shouldShow}>
+        {/* Home page */}
+        <TourStep
+          target="#hero"
+          title="Welcome"
+          content="Let's get started!"
+          route="/"
+          routeMatch="exact"
+        />
+
+        {/* Dashboard page */}
+        <TourStep
+          target="#dashboard"
+          title="Dashboard"
+          content="Your personal dashboard"
+          route="/dashboard"
+          routeMatch="startsWith"
+        />
+
+        {/* Settings page */}
+        <TourStep
+          target="#settings"
+          title="Settings"
+          content="Customize your experience"
+          route="/settings"
+        />
+
+        <TourOverlay />
+        <TourCard />
+      </Tour>
+    </MultiTourKitProvider>
+  );
+}
+```
+
+---
+
+## Headless Custom UI
+
+```tsx
+import { Tour, TourStep, useTour } from '@tour-kit/react';
+import { TourCardHeadless, TourOverlayHeadless } from '@tour-kit/react/headless';
+
+function CustomTour() {
+  return (
+    <Tour id="custom-tour">
+      <TourStep target="#feature" title="Custom" content="Fully custom UI" />
+
+      {/* Custom overlay */}
+      <TourOverlayHeadless
+        render={({ overlayStyle, cutoutStyle, targetRect }) => (
+          <div style={{ ...overlayStyle, background: 'rgba(0,0,0,0.7)' }}>
+            {targetRect && <div style={cutoutStyle} />}
+          </div>
+        )}
+      />
+
+      {/* Custom card */}
+      <TourCardHeadless
+        render={({
+          currentStep,
+          currentStepIndex,
+          totalSteps,
+          next,
+          prev,
+          skip,
+          floatingStyles,
+          refs,
+          isFirstStep,
+          isLastStep,
+        }) => (
+          <div ref={refs.setFloating} style={floatingStyles} className="custom-card">
+            <h2>{currentStep?.title}</h2>
+            <p>{currentStep?.content}</p>
+            <div className="flex gap-2">
+              {!isFirstStep && <button onClick={prev}>Back</button>}
+              <button onClick={isLastStep ? skip : next}>
+                {isLastStep ? 'Finish' : 'Next'}
+              </button>
+            </div>
+            <span>{currentStepIndex + 1} / {totalSteps}</span>
+          </div>
+        )}
+      />
+    </Tour>
+  );
+}
+```
+
+---
+
+## Feature Discovery with Hints
+
+```tsx
+import { HintsProvider, Hint, useHint, useHints } from '@tour-kit/hints';
+
+function App() {
+  return (
+    <HintsProvider>
+      {/* Feature announcement - permanently dismissible */}
+      <Hint
+        id="new-export"
+        target="#export-button"
+        content="New! Export to CSV and PDF"
+        color="success"
+        persist={true}
+      />
+
+      {/* Contextual help - can reopen */}
+      <Hint
+        id="filter-help"
+        target="#filter-btn"
+        content="Filter your results here"
+        size="sm"
+        persist={false}
+      />
+
+      <Dashboard />
+      <HintControls />
+    </HintsProvider>
+  );
+}
+
+function HintControls() {
+  const { resetAllHints } = useHints();
+  const exportHint = useHint('new-export');
+
+  return (
+    <div>
+      {exportHint.isDismissed && (
+        <button onClick={exportHint.reset}>Show export hint again</button>
+      )}
+      <button onClick={resetAllHints}>Reset all hints</button>
+    </div>
+  );
+}
+```
+
+---
+
+## Persistence Patterns
+
+```tsx
+import { usePersistence } from '@tour-kit/react';
+
+function TourWithPersistence() {
+  const persistence = usePersistence({
+    storage: 'localStorage', // or 'sessionStorage', createCookieStorage()
+    keyPrefix: 'myapp-tours',
+  });
+
+  // Check completed tours
+  const completed = persistence.getCompletedTours();
+  const wasSkipped = persistence.getSkippedTours().includes('onboarding');
+  const dontShow = persistence.getDontShowAgain('onboarding');
+  const lastStep = persistence.getLastStep('onboarding');
+
+  // Mark tour state
+  persistence.markCompleted('onboarding');
+  persistence.markSkipped('onboarding');
+  persistence.setDontShowAgain('onboarding', true);
+  persistence.saveStep('onboarding', 2);
+
+  // Reset
+  persistence.reset('onboarding'); // Single tour
+  persistence.reset(); // All tours
+}
+```
+
+---
+
+## @tour-kit/core Full API
+
+### Providers
+
+```tsx
+// Global configuration provider
+<TourKitProvider
+  config={{
+    keyboard: { enabled: true, nextKeys: ['ArrowRight'], prevKeys: ['ArrowLeft'], exitKeys: ['Escape'] },
+    spotlight: { enabled: true, padding: 8, borderRadius: 4, animate: true },
+    persistence: { enabled: true, storage: 'localStorage', keyPrefix: 'tourkit' },
+    a11y: { announceSteps: true, focusTrap: true, reducedMotion: 'respect' },
+    scroll: { enabled: true, behavior: 'smooth', block: 'center' },
+  }}
+  dir="ltr" // 'ltr' | 'rtl' | 'auto'
+  onTourStart={(tourId) => {}}
+  onTourComplete={(tourId) => {}}
+  onTourSkip={(tourId, stepIndex) => {}}
+  onStepView={(tourId, stepId, stepIndex) => {}}
+>
+  {children}
+</TourKitProvider>
+
+// Tour state provider
+<TourProvider
+  tours={[tour1, tour2]}
+  router={routerAdapter}
+  onStart={(tourId) => {}}
+  onComplete={(tourId) => {}}
+  onSkip={(tourId, stepIndex) => {}}
+  onStepChange={(step, index) => {}}
+>
+  {children}
+</TourProvider>
+```
+
+### Hooks
+
+```tsx
+// Main tour control
+const {
+  isActive,          // boolean
+  currentStep,       // TourStep | null
+  currentStepIndex,  // number
+  totalSteps,        // number
+  isFirstStep,       // boolean
+  isLastStep,        // boolean
+  progress,          // number (0-100)
+  isLoading,         // boolean
+  isTransitioning,   // boolean
+  start,             // (tourIdOrIndex?, stepIndex?) => void
+  next,              // () => void
+  prev,              // () => void
+  goTo,              // (stepIndex: number) => void
+  skip,              // () => void
+  complete,          // () => void
+  stop,              // () => void
+  isStepActive,      // (stepId: string) => boolean
+  getStep,           // (stepId: string) => TourStep | undefined
+} = useTour(tourId?);
+
+// Spotlight control
+const {
+  isVisible,
+  targetRect,
+  overlayStyle,
+  cutoutStyle,
+  show,
+  hide,
+  update,
+} = useSpotlight();
+
+// Focus trap
+const { containerRef, activate, deactivate } = useFocusTrap(enabled?);
+
+// Persistence
+const {
+  getCompletedTours,
+  getSkippedTours,
+  getDontShowAgain,
+  getLastStep,
+  markCompleted,
+  markSkipped,
+  setDontShowAgain,
+  saveStep,
+  reset,
+} = usePersistence(config?);
+
+// Route persistence
+const { save, load, clear, isStale } = useRoutePersistence(config);
+
+// Event-based advancement
+useAdvanceOn({
+  event: 'click',
+  selector: '#target',
+  onAdvance: () => next(),
+});
+```
+
+### Utilities
+
+```tsx
+// Tour creation
+const tour = createTour(steps, options?);
+const namedTour = createNamedTour('my-tour', steps, options?);
+const step = createStep(target, content, options?);
+const namedStep = createNamedStep('step-1', target, content, options?);
+
+// Storage
+const adapter = createStorageAdapter('localStorage');
+const cookies = createCookieStorage({ expires: 30 });
+const prefixed = createPrefixedStorage(adapter, 'myapp');
+const noop = createNoopStorage(); // SSR-safe
+
+// DOM utilities
+const element = getElement('#selector');
+const visible = isElementVisible(element);
+const el = await waitForElement('#dynamic', { timeout: 5000 });
+const focusable = getFocusableElements(container);
+const scrollParent = getScrollParent(element);
+
+// Scroll
+await scrollIntoView(element, { behavior: 'smooth', block: 'center' });
+const unlock = lockScroll();
+
+// A11y
+announce('Step 1 of 5', 'polite');
+const text = getStepAnnouncement('Welcome', 1, 5);
+
+// Position
+const pos = calculatePosition(targetRect, tooltipSize, 'bottom', offset);
+const rtlPlacement = mirrorPlacementForRTL('left-start', true);
+```
+
+### Types
+
+```tsx
+interface TourStep {
+  id: string;
+  target: string | React.RefObject<HTMLElement>;
+  title?: string;
+  content?: React.ReactNode;
+  placement?: Placement;
+  offset?: [number, number];
+  route?: string;
+  routeMatch?: 'exact' | 'startsWith' | 'contains';
+  when?: () => boolean;
+  advanceOn?: { event: string; selector?: string };
+  waitForTarget?: boolean;
+  waitTimeout?: number;
+  spotlightPadding?: number;
+  spotlightRadius?: number;
+  interactive?: boolean;
+  showNavigation?: boolean;
+  showProgress?: boolean;
+  showClose?: boolean;
+  className?: string;
+  onBeforeShow?: () => void | Promise<void>;
+  onAfterShow?: () => void;
+  onBeforeHide?: () => void | Promise<void>;
+  onAfterHide?: () => void;
+}
+
+type Placement =
+  | 'top' | 'top-start' | 'top-end'
+  | 'bottom' | 'bottom-start' | 'bottom-end'
+  | 'left' | 'left-start' | 'left-end'
+  | 'right' | 'right-start' | 'right-end';
+
+interface RouterAdapter {
+  getCurrentRoute(): string;
+  navigate(route: string): void;
+  matchRoute(pattern: string, mode?: 'exact' | 'startsWith' | 'contains'): boolean;
+  onRouteChange(callback: (route: string) => void): () => void;
+}
+```
+
+---
+
+## @tour-kit/react Full API
+
+### Styled Components
+
+```tsx
+// Tour wrapper
+<Tour
+  id="tour-id"
+  autoStart={false}
+  startAt={0}
+  config={tourKitConfig}
+  onStart={() => {}}
+  onComplete={() => {}}
+  onSkip={(stepIndex) => {}}
+  onStepChange={(step, index) => {}}
+>
+  {children}
+</Tour>
+
+// Step definition
+<TourStep
+  target="#element"
+  title="Title"
+  content="Content"
+  placement="bottom"
+  offset={[0, 12]}
+  spotlightPadding={8}
+  spotlightRadius={4}
+  interactive={false}
+  showNavigation={true}
+  showProgress={true}
+  showClose={true}
+/>
+
+// Card compound components
+<TourCard size="default" className="w-80">
+  <TourCardHeader showClose>
+    <TourClose />
+  </TourCardHeader>
+  <TourCardContent spacing="default" />
+  <TourCardFooter>
+    <TourProgress variant="dots" /> {/* dots | bar | text */}
+    <TourNavigation
+      prevLabel="Back"
+      nextLabel="Next"
+      finishLabel="Done"
+      skipLabel="Skip"
+    />
+  </TourCardFooter>
+</TourCard>
+
+// Overlay
+<TourOverlay zIndex="default" onClick={() => skip()} />
+```
+
+### Headless Components (from /headless)
+
+```tsx
+import { TourCardHeadless, TourOverlayHeadless } from '@tour-kit/react/headless';
+
+// TourCardHeadless render props
+<TourCardHeadless
+  render={({
+    isActive,
+    currentStep,
+    currentStepIndex,
+    totalSteps,
+    isFirstStep,
+    isLastStep,
+    next,
+    prev,
+    skip,
+    floatingStyles,
+    refs,          // { setFloating }
+    arrowRef,
+    context,
+  }) => <CustomCard />}
+/>
+
+// TourOverlayHeadless render props
+<TourOverlayHeadless
+  render={({
+    isActive,
+    overlayStyle,
+    cutoutStyle,
+    targetRect,
+    interactive,
+  }) => <CustomOverlay />}
+/>
+```
+
+### Router Adapters
+
+```tsx
+// Next.js App Router
+import { useNextAppRouter } from '@tour-kit/react';
+const router = useNextAppRouter();
+
+// Next.js Pages Router
+import { useNextPagesRouter } from '@tour-kit/react';
+const router = useNextPagesRouter();
+
+// React Router
+import { useReactRouter } from '@tour-kit/react';
+const router = useReactRouter();
+
+// Custom adapter factory
+import { createNextAppRouterAdapter } from '@tour-kit/react';
+import { usePathname, useRouter } from 'next/navigation';
+const createRouter = createNextAppRouterAdapter(usePathname, useRouter);
+```
+
+---
+
+## @tour-kit/hints Full API
+
+### Components
+
+```tsx
+// Main hint
+<Hint
+  id="hint-id"
+  target="#element"
+  content="Hint content"
+  position="top-right" // top-left | top-right | bottom-left | bottom-right | center
+  tooltipPlacement="bottom"
+  pulse={true}
+  autoShow={false}
+  persist={false} // true = permanent dismiss, false = can reopen
+  size="default" // sm | default | lg
+  color="default" // default | secondary | destructive | success | warning
+  zIndex="default" // default | high
+  onClick={() => {}}
+  onShow={() => {}}
+  onDismiss={() => {}}
+/>
+
+// Provider
+<HintsProvider>
+  {children}
+</HintsProvider>
+```
+
+### Hooks
+
+```tsx
+// Single hint control
+const {
+  isOpen,
+  isDismissed,
+  show,
+  hide,
+  dismiss,
+  reset,
+} = useHint('hint-id');
+
+// All hints control
+const {
+  hints,           // HintState[]
+  activeHint,      // string | null
+  showHint,        // (id: string) => void
+  hideHint,        // (id: string) => void
+  dismissHint,     // (id: string) => void
+  resetHint,       // (id: string) => void
+  resetAllHints,   // () => void
+  isHintVisible,   // (id: string) => boolean
+  isHintDismissed, // (id: string) => boolean
+} = useHints();
+```
+
+---
+
+## @tour-kit/adoption Full API
+
+Feature adoption tracking with automatic nudging to encourage users to try new features.
+
+### Installation
+
+```bash
+npm install @tour-kit/adoption
+```
+
+### Provider Setup
+
+```tsx
+import { AdoptionProvider } from '@tour-kit/adoption';
+
+const features = [
+  {
+    id: 'feature-export',
+    name: 'Export Data',
+    trigger: '#export-button', // CSS selector
+    adoptionCriteria: {
+      minUses: 3,
+      recencyDays: 30,
+    },
+    category: 'data',
+    description: 'Export your data to CSV or JSON',
+  },
+  {
+    id: 'feature-search',
+    name: 'Advanced Search',
+    trigger: { event: 'search:executed' }, // Custom event
+    adoptionCriteria: {
+      minUses: 5,
+    },
+  },
+];
+
+function App() {
+  return (
+    <AdoptionProvider
+      features={features}
+      storage={{ type: 'localStorage', key: 'adoption' }}
+      nudge={{
+        enabled: true,
+        cooldownMs: 24 * 60 * 60 * 1000, // 24 hours
+        maxPerSession: 3,
+      }}
+      onAdoption={(feature) => console.log('Adopted:', feature.name)}
+      onChurn={(feature) => console.log('Churned:', feature.name)}
+    >
+      {children}
+    </AdoptionProvider>
+  );
+}
+```
+
+### Hooks
+
+```tsx
+// Track single feature
+const {
+  feature,     // Feature config
+  usage,       // FeatureUsage data
+  isAdopted,   // boolean
+  status,      // 'not_started' | 'exploring' | 'adopted' | 'churned'
+  useCount,    // number
+  trackUsage,  // () => void - manual tracking
+} = useFeature('feature-export');
+
+// Aggregate stats
+const {
+  totalFeatures,
+  adoptedCount,
+  adoptionRate,
+  byCategory,    // Record<string, CategoryStats>
+  byStatus,      // Record<AdoptionStatus, number>
+} = useAdoptionStats();
+
+// Nudge control
+const {
+  currentNudge,    // Feature | null
+  queue,           // Feature[]
+  show,            // (featureId: string) => void
+  dismiss,         // () => void
+  skip,            // () => void
+} = useNudge();
+```
+
+### Components
+
+```tsx
+// Auto-show nudges
+<AdoptionNudge
+  position="bottom-right"
+  delay={2000}
+  render={({ feature, dismiss }) => (
+    <CustomNudge feature={feature} onDismiss={dismiss} />
+  )}
+/>
+
+// Button with tracking
+<FeatureButton
+  featureId="feature-export"
+  onClick={handleExport}
+  variant="default"
+>
+  Export
+</FeatureButton>
+
+// Conditional rendering
+<IfNotAdopted featureId="feature-search">
+  <NewFeatureBadge>Try Advanced Search!</NewFeatureBadge>
+</IfNotAdopted>
+
+<IfAdopted featureId="feature-search">
+  <span>You're a power user!</span>
+</IfAdopted>
+```
+
+### Dashboard Components
+
+```tsx
+// Full dashboard
+<AdoptionDashboard features={features} />
+
+// Individual components
+<AdoptionStatsGrid />
+<AdoptionTable
+  sortable
+  filterable
+  onRowClick={(feature) => {}}
+/>
+<AdoptionCategoryChart type="bar" />
+```
+
+---
+
+## @tour-kit/analytics Full API
+
+Plugin-based analytics for tracking tour, step, hint, and adoption events.
+
+### Installation
+
+```bash
+npm install @tour-kit/analytics
+```
+
+### Setup
+
+```tsx
+import {
+  AnalyticsProvider,
+  createAnalytics,
+  consolePlugin,
+  posthogPlugin,
+} from '@tour-kit/analytics';
+
+const analytics = createAnalytics({
+  plugins: [
+    consolePlugin({ enabled: process.env.NODE_ENV === 'development' }),
+    posthogPlugin(), // Uses window.posthog
+  ],
+  defaultProperties: {
+    appVersion: '1.0.0',
+  },
+});
+
+function App() {
+  return (
+    <AnalyticsProvider analytics={analytics}>
+      {children}
+    </AnalyticsProvider>
+  );
+}
+```
+
+### Hooks
+
+```tsx
+// Throws if analytics not available
+const analytics = useAnalytics();
+
+// Safe - returns null if not available
+const analytics = useAnalyticsOptional();
+
+// Usage
+analytics?.track('custom_event', { key: 'value' });
+analytics?.identify('user-123', { plan: 'pro' });
+```
+
+### TourAnalytics Methods
+
+```tsx
+const analytics = useAnalytics();
+
+// Tour events
+analytics.tourStarted('tour-id', 5);
+analytics.tourCompleted('tour-id');
+analytics.tourSkipped('tour-id', 2, 'step-3');
+analytics.tourAbandoned('tour-id', 2, 'step-3');
+
+// Step events
+analytics.stepViewed('tour-id', 'step-1', 0, 5);
+analytics.stepCompleted('tour-id', 'step-1', 0);
+analytics.stepSkipped('tour-id', 'step-1', 0);
+analytics.stepInteraction('tour-id', 'step-1', 'click');
+
+// Hint events
+analytics.hintShown('hint-id');
+analytics.hintDismissed('hint-id');
+analytics.hintClicked('hint-id');
+
+// Generic tracking
+analytics.track('custom_event', { data: 'value' });
+analytics.identify('user-id', { email: 'user@example.com' });
+await analytics.flush();
+```
+
+### Available Plugins
+
+```tsx
+import {
+  consolePlugin,
+  posthogPlugin,
+  mixpanelPlugin,
+  amplitudePlugin,
+  googleAnalyticsPlugin,
+} from '@tour-kit/analytics';
+
+// Console (dev only)
+consolePlugin({ enabled: true, prefix: '[Tour]' })
+
+// PostHog
+posthogPlugin() // Uses window.posthog
+
+// Mixpanel
+mixpanelPlugin() // Uses window.mixpanel
+
+// Amplitude
+amplitudePlugin() // Uses window.amplitude
+
+// Google Analytics 4
+googleAnalyticsPlugin() // Uses gtag()
+```
+
+### Custom Plugin
+
+```tsx
+const customPlugin: AnalyticsPlugin = {
+  name: 'custom',
+  async init() {
+    // Initialize
+  },
+  track(event) {
+    myAnalytics.send(event.eventName, event);
+  },
+  identify(userId, properties) {
+    myAnalytics.identify(userId, properties);
+  },
+  async flush() {
+    await myAnalytics.flush();
+  },
+  destroy() {
+    // Cleanup
+  },
+};
+```
+
+---
+
+## @tour-kit/announcements Full API
+
+Multi-variant product announcements with priority queuing and frequency rules.
+
+### Installation
+
+```bash
+npm install @tour-kit/announcements
+```
+
+### Provider Setup
+
+```tsx
+import { AnnouncementsProvider } from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'new-feature',
+    variant: 'modal',
+    title: 'New Feature Available',
+    description: 'Check out our new export functionality!',
+    primaryAction: {
+      label: 'Try it now',
+      onClick: () => router.push('/export'),
+    },
+    frequency: 'once', // Show only once
+    priority: 'high',
+  },
+  {
+    id: 'maintenance',
+    variant: 'banner',
+    title: 'Scheduled Maintenance',
+    description: 'System will be down for maintenance on Sunday.',
+    frequency: { type: 'interval', days: 1 },
+    priority: 'critical',
+    bannerOptions: { position: 'top', dismissible: true },
+  },
+];
+
+function App() {
+  return (
+    <AnnouncementsProvider
+      announcements={announcements}
+      userId="user-123"
+      userProperties={{ plan: 'pro' }}
+    >
+      {children}
+    </AnnouncementsProvider>
+  );
+}
+```
+
+### Variants
+
+```tsx
+// Modal - centered dialog
+{ variant: 'modal', modalOptions: { size: 'md', closeOnOverlay: true } }
+
+// Slideout - side panel
+{ variant: 'slideout', slideoutOptions: { position: 'right', width: '400px' } }
+
+// Banner - top/bottom strip
+{ variant: 'banner', bannerOptions: { position: 'top', dismissible: true } }
+
+// Toast - corner notification
+{ variant: 'toast', toastOptions: { position: 'bottom-right', duration: 5000 } }
+
+// Spotlight - element highlight
+{ variant: 'spotlight', spotlightOptions: { target: '#new-button', placement: 'bottom' } }
+```
+
+### Frequency Rules
+
+```tsx
+// Show only once ever
+frequency: 'once'
+
+// Show once per session
+frequency: 'session'
+
+// Show every time
+frequency: 'always'
+
+// Show N times total
+frequency: { type: 'times', count: 3 }
+
+// Show every N days
+frequency: { type: 'interval', days: 7 }
+```
+
+### Audience Targeting
+
+```tsx
+audience: [
+  { property: 'plan', operator: 'equals', value: 'pro' },
+  { property: 'signupDate', operator: 'before', value: '2024-01-01' },
+]
+```
+
+### Hooks
+
+```tsx
+// Single announcement
+const {
+  announcement,
+  isVisible,
+  show,
+  dismiss,
+  complete,
+} = useAnnouncement('new-feature');
+
+// All announcements
+const {
+  announcements,
+  visible,
+  showAnnouncement,
+  dismissAnnouncement,
+} = useAnnouncements();
+
+// Queue management
+const {
+  queue,
+  current,
+  next,
+  clear,
+} = useAnnouncementQueue();
+```
+
+---
+
+## @tour-kit/checklists Full API
+
+Interactive checklists with task dependencies and progress tracking.
+
+### Installation
+
+```bash
+npm install @tour-kit/checklists
+```
+
+### Provider Setup
+
+```tsx
+import { ChecklistProvider, createChecklist } from '@tour-kit/checklists';
+
+const onboarding = createChecklist({
+  id: 'onboarding',
+  title: 'Get Started',
+  description: 'Complete these steps to set up your account',
+  tasks: [
+    {
+      id: 'profile',
+      title: 'Complete your profile',
+      action: { type: 'navigate', url: '/settings/profile' },
+    },
+    {
+      id: 'connect',
+      title: 'Connect your first integration',
+      dependsOn: ['profile'],
+      action: { type: 'tour', tourId: 'integration-tour' },
+    },
+    {
+      id: 'invite',
+      title: 'Invite team members',
+      dependsOn: ['profile'],
+      action: { type: 'callback', handler: () => openInviteModal() },
+    },
+    {
+      id: 'create',
+      title: 'Create your first project',
+      dependsOn: ['connect'],
+      completedWhen: { event: 'project:created' },
+    },
+  ],
+});
+
+function App() {
+  return (
+    <ChecklistProvider checklists={[onboarding]}>
+      {children}
+    </ChecklistProvider>
+  );
+}
+```
+
+### Task Actions
+
+```tsx
+// Navigate to URL
+action: { type: 'navigate', url: '/path', external: false }
+
+// Run callback
+action: { type: 'callback', handler: async () => {} }
+
+// Start tour
+action: { type: 'tour', tourId: 'my-tour' }
+
+// Open modal
+action: { type: 'modal', modalId: 'my-modal' }
+
+// Custom data
+action: { type: 'custom', data: { ... } }
+```
+
+### Auto-completion
+
+```tsx
+// Complete when event fires
+completedWhen: { event: 'project:created' }
+
+// Complete when DOM element exists
+completedWhen: { selector: '#project-list .project' }
+
+// Custom condition
+completedWhen: { custom: (ctx) => ctx.user.projectCount > 0 }
+```
+
+### Hooks
+
+```tsx
+// Single checklist
+const {
+  checklist,
+  tasks,
+  visibleTasks,
+  progress,        // { completed, total, percentage }
+  completeTask,    // (taskId: string) => void
+  executeAction,   // (taskId: string) => void
+  dismiss,
+  reset,
+} = useChecklist('onboarding');
+
+// Single task
+const {
+  task,
+  isCompleted,
+  isLocked,
+  dependencies,
+  complete,
+  execute,
+} = useTask('onboarding', 'profile');
+
+// All checklists progress
+const progress = useChecklistsProgress();
+// [{ id, title, completed, total, percentage }]
+```
+
+### Components
+
+```tsx
+// Full checklist panel
+<ChecklistPanel
+  checklistId="onboarding"
+  position="bottom-right"
+  collapsible
+/>
+
+// Launcher button
+<ChecklistLauncher checklistId="onboarding">
+  <button>Open Checklist</button>
+</ChecklistLauncher>
+
+// Custom layout
+<Checklist id="onboarding">
+  <ChecklistProgress />
+  {tasks.map(task => (
+    <ChecklistTask key={task.id} taskId={task.id} />
+  ))}
+</Checklist>
+```
+
+### Utilities
+
+```tsx
+import {
+  calculateProgress,
+  getNextTask,
+  getLockedTasks,
+  canCompleteTask,
+  resolveTaskDependencies,
+  hasCircularDependency,
+} from '@tour-kit/checklists';
+
+const progress = calculateProgress(checklistState);
+const next = getNextTask(checklistState);
+const locked = getLockedTasks(checklistState);
+const canComplete = canCompleteTask('task-id', checklistState);
+const order = resolveTaskDependencies(tasks);
+const hasCircular = hasCircularDependency(tasks);
+```
+
+---
+
+## @tour-kit/media Full API
+
+Embedded media support for video, GIF, and Lottie animations in tours.
+
+### Installation
+
+```bash
+npm install @tour-kit/media
+# For Lottie animations
+npm install @lottiefiles/react-lottie-player
+```
+
+### Main Component
+
+```tsx
+import { TourMedia } from '@tour-kit/media';
+
+// Auto-detects media type from URL
+<TourMedia
+  src="https://youtube.com/watch?v=abc123"
+  alt="Tutorial video"
+  aspectRatio="16/9"
+  autoplay={false}
+  muted={true}
+  controls={true}
+/>
+
+// Native video
+<TourMedia
+  src="/videos/intro.mp4"
+  alt="Introduction"
+  poster="/images/poster.jpg"
+  captions={[
+    { src: '/captions/en.vtt', srclang: 'en', label: 'English', default: true }
+  ]}
+/>
+
+// GIF with controls
+<TourMedia
+  src="/images/demo.gif"
+  alt="Demo animation"
+  reducedMotionFallback="/images/demo-static.png"
+/>
+
+// Lottie animation
+<TourMedia
+  src="/animations/success.json"
+  alt="Success animation"
+  lottieOptions={{ loop: true, autoplay: true }}
+/>
+```
+
+### Embed Components
+
+```tsx
+import {
+  YouTubeEmbed,
+  VimeoEmbed,
+  LoomEmbed,
+  WistiaEmbed,
+  NativeVideo,
+  GifPlayer,
+  LottiePlayer,
+} from '@tour-kit/media';
+
+<YouTubeEmbed videoId="abc123" autoplay muted />
+<VimeoEmbed videoId="123456" />
+<LoomEmbed videoId="abc123" />
+<WistiaEmbed videoId="abc123" />
+<NativeVideo src="/video.mp4" controls />
+<GifPlayer src="/demo.gif" playOnHover />
+<LottiePlayer src="/animation.json" loop autoplay />
+```
+
+### Hooks
+
+```tsx
+// Media event handling
+const { ref, isPlaying, currentTime, duration } = useMediaEvents({
+  onPlay: () => {},
+  onPause: () => {},
+  onEnded: () => {},
+  onError: (error) => {},
+});
+
+// Motion preference
+const prefersReducedMotion = usePrefersReducedMotion();
+
+// Responsive source selection
+const source = useResponsiveSource([
+  { src: '/video-mobile.mp4', media: '(max-width: 768px)' },
+  { src: '/video-desktop.mp4' },
+]);
+```
+
+### Utilities
+
+```tsx
+import {
+  parseMediaUrl,
+  detectMediaType,
+  extractYouTubeId,
+  extractVimeoId,
+  buildYouTubeEmbedUrl,
+  getYouTubeThumbnailUrl,
+} from '@tour-kit/media';
+
+const { type, id } = parseMediaUrl('https://youtube.com/watch?v=abc');
+// { type: 'youtube', id: 'abc' }
+
+const type = detectMediaType('/video.mp4'); // 'video'
+const youtubeId = extractYouTubeId('https://youtu.be/abc'); // 'abc'
+const embedUrl = buildYouTubeEmbedUrl('abc', { autoplay: true });
+const thumbnail = getYouTubeThumbnailUrl('abc'); // maxresdefault.jpg
+```
+
+---
+
+## @tour-kit/scheduling Full API
+
+Time-based scheduling for tours and announcements.
+
+### Installation
+
+```bash
+npm install @tour-kit/scheduling
+```
+
+### Schedule Configuration
+
+```tsx
+import { checkSchedule } from '@tour-kit/scheduling';
+
+const schedule = {
+  enabled: true,
+  startAt: '2024-01-01',
+  endAt: '2024-12-31',
+  daysOfWeek: [1, 2, 3, 4, 5], // Monday-Friday
+  timeOfDay: { start: '09:00', end: '17:00' },
+  useUserTimezone: true,
+  blackouts: [
+    { id: 'holiday', start: '2024-12-24', end: '2024-12-26', reason: 'Holiday' }
+  ],
+};
+
+const isActive = checkSchedule(schedule);
+```
+
+### Hooks
+
+```tsx
+import {
+  useSchedule,
+  useScheduleStatus,
+  useUserTimezone,
+} from '@tour-kit/scheduling';
+
+// Simple check
+const isActive = useSchedule(schedule);
+
+// Detailed status
+const {
+  isActive,
+  status,
+  reason,      // 'before_start_date' | 'after_end_date' | 'wrong_day' | ...
+  nextCheck,   // ms until next status change
+} = useScheduleStatus(schedule);
+
+// User timezone
+const {
+  timezone,     // 'America/New_York'
+  isSupported,
+  isDST,
+} = useUserTimezone();
+```
+
+### Utility Functions
+
+```tsx
+import {
+  // Timezone
+  getUserTimezone,
+  getDateInTimezone,
+  isValidTimezone,
+  formatDateString,
+
+  // Date/Time checks
+  isWithinDateRange,
+  isWithinTimeRange,
+  isWithinBusinessHours,
+  getDayOfWeek,
+  isAllowedDay,
+
+  // Blackouts
+  isInBlackoutPeriod,
+  isInAnyBlackout,
+  getCurrentBlackout,
+
+  // Recurring
+  matchesRecurringPattern,
+} from '@tour-kit/scheduling';
+
+// Examples
+const tz = getUserTimezone(); // 'America/New_York'
+const inRange = isWithinDateRange(new Date(), '2024-01-01', '2024-12-31');
+const inHours = isWithinBusinessHours(new Date(), businessHours);
+const inBlackout = isInBlackoutPeriod(new Date(), blackout);
+const matches = matchesRecurringPattern(new Date(), { type: 'weekly', interval: 1 });
+```
+
+### Business Hours
+
+```tsx
+const businessHours = {
+  timezone: 'America/New_York',
+  hours: {
+    monday: { start: '09:00', end: '17:00' },
+    tuesday: { start: '09:00', end: '17:00' },
+    wednesday: { start: '09:00', end: '17:00' },
+    thursday: { start: '09:00', end: '17:00' },
+    friday: { start: '09:00', end: '17:00' },
+    saturday: { closed: true },
+    sunday: { closed: true },
+  },
+  holidays: ['2024-12-25', '2024-01-01'],
+};
+
+const isOpen = isWithinBusinessHours(new Date(), businessHours);
+```
+
+### Recurring Patterns
+
+```tsx
+// Daily
+{ type: 'daily', interval: 1 }
+
+// Weekly (every Monday)
+{ type: 'weekly', interval: 1, daysOfWeek: [1] }
+
+// Monthly (15th of each month)
+{ type: 'monthly', interval: 1, dayOfMonth: 15 }
+
+// Yearly (January 1st)
+{ type: 'yearly', interval: 1, month: 1, dayOfMonth: 1 }
+
+// With limits
+{
+  type: 'weekly',
+  interval: 2,
+  daysOfWeek: [1, 3, 5],
+  maxOccurrences: 10,
+  endDate: '2024-12-31',
+}
+```
+
+---
+
+## Troubleshooting
+
+### Tour not appearing
+- Ensure target elements exist in DOM
+- Check that TourOverlay and TourCard are inside Tour
+- Use waitForTarget for dynamic elements
+
+### Hydration errors (Next.js)
+- Add 'use client' to tour components
+- Or use dynamic import with ssr: false
+
+### Multi-page tour not working
+- Enable routePersistence in MultiTourKitProvider
+- Use correct routeMatch mode
+- Ensure router adapter is provided
+
+### Styles missing
+- Add @tour-kit packages to Tailwind content config
+- Or import CSS directly
+
+---
+
+## Accessibility Features
+
+- **Focus trap**: Focus is trapped in tour card
+- **Keyboard**: Arrow keys navigate, Escape exits
+- **Screen reader**: Steps announced via aria-live
+- **Motion**: Animations respect prefers-reduced-motion
+- **ARIA**: Proper roles and labels on all elements
+- **High contrast**: Works with high contrast modes
+
+---
+
+## Bundle Sizes
+
+| Package | Gzipped | Tree-shakeable |
+|---------|---------|----------------|
+| @tour-kit/core | <8KB | Yes |
+| @tour-kit/react | <12KB | Yes |
+| @tour-kit/hints | <5KB | Yes |
+| @tour-kit/adoption | <10KB | Yes |
+| @tour-kit/analytics | <4KB | Yes |
+| @tour-kit/announcements | <15KB | Yes |
+| @tour-kit/checklists | <12KB | Yes |
+| @tour-kit/media | <8KB | Yes |
+| @tour-kit/scheduling | <3KB | Yes |

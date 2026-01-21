@@ -1,0 +1,570 @@
+---
+title: useMediaEvents
+description: Track media engagement and integrate with analytics platforms
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`useMediaEvents` provides event handlers for tracking media engagement. Use it to measure how users interact with videos in your onboarding tours, send data to analytics platforms, or trigger actions based on playback events.
+
+## Why Track Media Events?
+
+- **Measure engagement**: See which videos users watch and how much
+- **Optimize content**: Identify where users drop off
+- **Analytics integration**: Send events to your analytics platform
+- **Conditional flows**: Proceed to next step after video completion
+- **A/B testing**: Compare video performance
+
+## Basic Usage
+
+```tsx
+import { useMediaEvents } from '@tour-kit/media'
+import { TourMedia } from '@tour-kit/media'
+
+function TrackedVideo() {
+  const handlers = useMediaEvents({
+    mediaType: 'youtube',
+    mediaSrc: 'dQw4w9WgXcQ',
+    tourId: 'onboarding',
+    stepId: 'welcome'
+  })
+
+  return (
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      alt="Welcome video"
+      {...handlers}
+    />
+  )
+}
+```
+
+## Options
+
+<TypeTable
+  type={{
+    mediaType: {
+      type: 'MediaType',
+      required: true,
+      description: 'Type of media being tracked (youtube, vimeo, video, etc.)',
+    },
+    mediaSrc: {
+      type: 'string',
+      required: true,
+      description: 'Media identifier (video ID or file path) for tracking',
+    },
+    tourId: {
+      type: 'string',
+      required: false,
+      description: 'Tour ID if media is part of a tour',
+    },
+    stepId: {
+      type: 'string',
+      required: false,
+      description: 'Step ID if media is part of a tour step',
+    },
+    onLoaded: {
+      type: '(event: MediaEvent) => void',
+      required: false,
+      description: 'Called when media finishes loading',
+    },
+    onPlay: {
+      type: '(event: MediaEvent) => void',
+      required: false,
+      description: 'Called when playback starts',
+    },
+    onPause: {
+      type: '(event: MediaEvent) => void',
+      required: false,
+      description: 'Called when playback pauses',
+    },
+    onComplete: {
+      type: '(event: MediaEvent) => void',
+      required: false,
+      description: 'Called when playback reaches the end',
+    },
+    onError: {
+      type: '(event: MediaEvent) => void',
+      required: false,
+      description: 'Called when media fails to load or play',
+    },
+    onTimeUpdate: {
+      type: '(event: MediaEvent) => void',
+      required: false,
+      description: 'Called periodically during playback with current time',
+    },
+    onEvent: {
+      type: '(event: MediaEvent) => void',
+      required: false,
+      description: 'Generic event handler called for all events',
+    },
+  }}
+/>
+
+## Return Value
+
+Returns an object with event handler functions to spread onto media components:
+
+```ts
+{
+  onLoaded: () => void
+  onPlay: () => void
+  onPause: () => void
+  onComplete: () => void
+  onError: (error: Error) => void
+  onTimeUpdate: (currentTime: number, duration: number) => void
+}
+```
+
+## Examples
+
+### Basic Analytics Integration
+
+Send events to your analytics platform:
+
+```tsx
+import { useMediaEvents } from '@tour-kit/media'
+import analytics from './analytics'
+
+function AnalyticsVideo() {
+  const handlers = useMediaEvents({
+    mediaType: 'youtube',
+    mediaSrc: 'dQw4w9WgXcQ',
+    onPlay: (event) => {
+      analytics.track('Video Played', {
+        videoId: event.mediaSrc,
+        mediaType: event.mediaType
+      })
+    },
+    onComplete: (event) => {
+      analytics.track('Video Completed', {
+        videoId: event.mediaSrc,
+        mediaType: event.mediaType
+      })
+    }
+  })
+
+  return (
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      alt="Product demo"
+      {...handlers}
+    />
+  )
+}
+```
+
+### Track Watch Progress
+
+Monitor how much users watch:
+
+```tsx
+function WatchProgressTracking() {
+  const [progress, setProgress] = useState<number[]>([])
+
+  const handlers = useMediaEvents({
+    mediaType: 'video',
+    mediaSrc: '/videos/tutorial.mp4',
+    onTimeUpdate: (event) => {
+      const { currentTime, duration } = event
+      const percentComplete = (currentTime / duration) * 100
+
+      // Track 25%, 50%, 75% milestones
+      if (percentComplete >= 25 && !progress.includes(25)) {
+        setProgress([...progress, 25])
+        analytics.track('Video 25% Complete')
+      }
+      if (percentComplete >= 50 && !progress.includes(50)) {
+        setProgress([...progress, 50])
+        analytics.track('Video 50% Complete')
+      }
+      if (percentComplete >= 75 && !progress.includes(75)) {
+        setProgress([...progress, 75])
+        analytics.track('Video 75% Complete')
+      }
+    }
+  })
+
+  return (
+    <TourMedia
+      src="/videos/tutorial.mp4"
+      alt="Tutorial video"
+      {...handlers}
+    />
+  )
+}
+```
+
+### Conditional Tour Progression
+
+Only allow proceeding after watching video:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { useMediaEvents } from '@tour-kit/media'
+
+function GatedTourStep() {
+  const [videoCompleted, setVideoCompleted] = useState(false)
+  const { nextStep } = useTour()
+
+  const handlers = useMediaEvents({
+    mediaType: 'youtube',
+    mediaSrc: 'dQw4w9WgXcQ',
+    tourId: 'onboarding',
+    stepId: 'training-video',
+    onComplete: () => {
+      setVideoCompleted(true)
+      // Auto-advance to next step
+      setTimeout(() => nextStep(), 1000)
+    }
+  })
+
+  return (
+    <TourStep id="training-video">
+      <h2>Required Training Video</h2>
+      <TourMedia
+        src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        alt="Required training content"
+        {...handlers}
+      />
+      {videoCompleted ? (
+        <p className="success">✓ Training complete! Proceeding...</p>
+      ) : (
+        <p className="info">Please watch the video to continue</p>
+      )}
+    </TourStep>
+  )
+}
+```
+
+### Error Tracking
+
+Monitor video loading failures:
+
+```tsx
+function ErrorTracking() {
+  const handlers = useMediaEvents({
+    mediaType: 'video',
+    mediaSrc: '/videos/demo.mp4',
+    onError: (event) => {
+      console.error('Video failed to load:', event)
+      analytics.track('Video Error', {
+        videoSrc: event.mediaSrc,
+        error: event.error?.message
+      })
+
+      // Send to error tracking service
+      Sentry.captureException(event.error, {
+        tags: {
+          mediaType: event.mediaType,
+          mediaSrc: event.mediaSrc
+        }
+      })
+    }
+  })
+
+  return (
+    <TourMedia
+      src="/videos/demo.mp4"
+      alt="Demo video"
+      {...handlers}
+    />
+  )
+}
+```
+
+### Engagement Heatmap
+
+Track when users replay sections:
+
+```tsx
+function EngagementHeatmap() {
+  const seekEvents = useRef<number[]>([])
+
+  const handlers = useMediaEvents({
+    mediaType: 'youtube',
+    mediaSrc: 'dQw4w9WgXcQ',
+    onTimeUpdate: (event) => {
+      seekEvents.current.push(event.currentTime)
+    },
+    onComplete: (event) => {
+      // Analyze seek patterns
+      const heatmap = calculateHeatmap(seekEvents.current)
+      analytics.track('Video Heatmap', {
+        videoId: event.mediaSrc,
+        heatmap
+      })
+    }
+  })
+
+  return (
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      alt="Product demo"
+      {...handlers}
+    />
+  )
+}
+```
+
+### Multiple Event Handler
+
+Use generic event handler for all events:
+
+```tsx
+function UnifiedEventTracking() {
+  const handlers = useMediaEvents({
+    mediaType: 'vimeo',
+    mediaSrc: '123456789',
+    tourId: 'product-tour',
+    stepId: 'intro',
+    onEvent: (event) => {
+      // Log all events to analytics
+      analytics.track('Media Event', {
+        eventName: event.eventName,
+        mediaType: event.mediaType,
+        mediaSrc: event.mediaSrc,
+        tourId: event.tourId,
+        stepId: event.stepId,
+        timestamp: event.timestamp,
+        currentTime: event.currentTime,
+        duration: event.duration
+      })
+
+      // Also log to console in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Media event:', event)
+      }
+    }
+  })
+
+  return (
+    <TourMedia
+      src="https://vimeo.com/123456789"
+      alt="Intro video"
+      {...handlers}
+    />
+  )
+}
+```
+
+### Session Replay Integration
+
+Capture video events for session replay tools:
+
+```tsx
+import { useMediaEvents } from '@tour-kit/media'
+import { LogRocket } from 'logrocket'
+
+function SessionReplayTracking() {
+  const handlers = useMediaEvents({
+    mediaType: 'video',
+    mediaSrc: '/videos/onboarding.mp4',
+    onPlay: (event) => {
+      LogRocket.track('Video Played', {
+        mediaSrc: event.mediaSrc
+      })
+    },
+    onPause: (event) => {
+      LogRocket.track('Video Paused', {
+        mediaSrc: event.mediaSrc,
+        currentTime: event.currentTime
+      })
+    },
+    onComplete: (event) => {
+      LogRocket.track('Video Completed', {
+        mediaSrc: event.mediaSrc,
+        duration: event.duration
+      })
+    }
+  })
+
+  return (
+    <TourMedia
+      src="/videos/onboarding.mp4"
+      alt="Onboarding guide"
+      {...handlers}
+    />
+  )
+}
+```
+
+## MediaEvent Type
+
+All event handlers receive a `MediaEvent` object:
+
+```ts
+interface MediaEvent {
+  eventName: 'media_loaded' | 'media_play' | 'media_pause' | 'media_complete' | 'media_error'
+  mediaType: MediaType
+  mediaSrc: string
+  tourId?: string
+  stepId?: string
+  timestamp: number
+  currentTime?: number
+  duration?: number
+  error?: Error
+}
+```
+
+## Event Types
+
+### media_loaded
+
+Fired when media finishes loading and is ready to play:
+
+```tsx
+onLoaded: (event) => {
+  console.log('Video loaded:', event.mediaSrc)
+  console.log('Duration:', event.duration)
+}
+```
+
+### media_play
+
+Fired when playback starts:
+
+```tsx
+onPlay: (event) => {
+  console.log('Video started playing')
+  console.log('Current time:', event.currentTime)
+}
+```
+
+### media_pause
+
+Fired when playback pauses:
+
+```tsx
+onPause: (event) => {
+  console.log('Video paused at:', event.currentTime)
+}
+```
+
+### media_complete
+
+Fired when playback reaches the end:
+
+```tsx
+onComplete: (event) => {
+  console.log('Video finished')
+  console.log('Total duration:', event.duration)
+}
+```
+
+### media_error
+
+Fired when media fails to load or play:
+
+```tsx
+onError: (event) => {
+  console.error('Video error:', event.error?.message)
+}
+```
+
+### media_time_update
+
+Fired periodically during playback (typically every second):
+
+```tsx
+onTimeUpdate: (event) => {
+  const progress = (event.currentTime / event.duration) * 100
+  console.log(`Progress: ${progress}%`)
+}
+```
+
+## Analytics Platform Examples
+
+### Segment
+
+```tsx
+const handlers = useMediaEvents({
+  mediaType: 'youtube',
+  mediaSrc: 'dQw4w9WgXcQ',
+  onPlay: (event) => {
+    window.analytics.track('Video Played', {
+      video_id: event.mediaSrc,
+      platform: event.mediaType
+    })
+  }
+})
+```
+
+### Mixpanel
+
+```tsx
+const handlers = useMediaEvents({
+  mediaType: 'vimeo',
+  mediaSrc: '123456789',
+  onComplete: (event) => {
+    mixpanel.track('Video Completed', {
+      'Video ID': event.mediaSrc,
+      'Media Type': event.mediaType,
+      'Duration': event.duration
+    })
+  }
+})
+```
+
+### Google Analytics 4
+
+```tsx
+const handlers = useMediaEvents({
+  mediaType: 'video',
+  mediaSrc: '/videos/demo.mp4',
+  onPlay: (event) => {
+    gtag('event', 'video_start', {
+      video_title: 'Product Demo',
+      video_url: event.mediaSrc
+    })
+  },
+  onComplete: (event) => {
+    gtag('event', 'video_complete', {
+      video_title: 'Product Demo',
+      video_url: event.mediaSrc
+    })
+  }
+})
+```
+
+### Amplitude
+
+```tsx
+const handlers = useMediaEvents({
+  mediaType: 'loom',
+  mediaSrc: 'abc123',
+  onEvent: (event) => {
+    amplitude.track(event.eventName, {
+      media_type: event.mediaType,
+      media_src: event.mediaSrc,
+      tour_id: event.tourId,
+      step_id: event.stepId
+    })
+  }
+})
+```
+
+## TypeScript
+
+Full type safety for event handlers:
+
+```tsx
+import type { MediaEvent, MediaEventHandlers } from '@tour-kit/media'
+
+const handlers: MediaEventHandlers = useMediaEvents({
+  mediaType: 'youtube',
+  mediaSrc: 'dQw4w9WgXcQ',
+  onPlay: (event: MediaEvent) => {
+    // event is fully typed
+    console.log(event.eventName) // 'media_play'
+    console.log(event.currentTime) // number | undefined
+  }
+})
+```
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Media component with event support
+- [MediaHeadless](/docs/media/headless/media-headless) - Headless media with events
+- [usePrefersReducedMotion](/docs/media/hooks/use-prefers-reduced-motion) - Motion preference detection

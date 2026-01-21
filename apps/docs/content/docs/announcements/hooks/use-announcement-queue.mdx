@@ -1,0 +1,552 @@
+---
+title: useAnnouncementQueue
+description: Hook for managing the announcement queue
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useAnnouncementQueue
+
+Hook for accessing and controlling the announcement queue. The queue automatically orders announcements by priority and manages which announcements to show based on `queueConfig`.
+
+## Why Use This Hook?
+
+Use `useAnnouncementQueue` when you need to:
+
+- Manually trigger the next announcement in queue
+- Check what announcements are queued
+- Get an announcement's position in the queue
+- Clear the queue
+- Build custom queue management UIs
+
+---
+
+## Basic Usage
+
+```tsx
+import { useAnnouncementQueue } from '@tour-kit/announcements';
+
+function QueueControls() {
+  const { queue, showNext } = useAnnouncementQueue();
+
+  return (
+    <div>
+      <p>{queue.length} announcements in queue</p>
+      <button onClick={showNext}>Show Next</button>
+    </div>
+  );
+}
+```
+
+---
+
+## Return Value
+
+```tsx
+const {
+  // State
+  queue,
+  size,
+  isEmpty,
+  config,
+
+  // Methods
+  showNext,
+  clear,
+  isQueued,
+  getPosition,
+} = useAnnouncementQueue();
+```
+
+### Properties
+
+<TypeTable
+  type={{
+    queue: {
+      type: 'string[]',
+      description: 'Array of announcement IDs in queue order (priority-sorted)',
+    },
+    size: {
+      type: 'number',
+      description: 'Number of announcements in the queue',
+    },
+    isEmpty: {
+      type: 'boolean',
+      description: 'Whether the queue is empty',
+    },
+    config: {
+      type: 'QueueConfig',
+      description: 'Current queue configuration from provider',
+    },
+  }}
+/>
+
+### Methods
+
+<TypeTable
+  type={{
+    showNext: {
+      type: '() => void',
+      description: 'Show the next announcement in the queue',
+    },
+    clear: {
+      type: '() => void',
+      description: 'Clear all announcements from the queue',
+    },
+    isQueued: {
+      type: '(id: string) => boolean',
+      description: 'Check if an announcement is in the queue',
+    },
+    getPosition: {
+      type: '(id: string) => number',
+      description: 'Get position of announcement in queue (0-based, -1 if not queued)',
+    },
+  }}
+/>
+
+---
+
+## Queue Order
+
+Announcements are automatically ordered by priority:
+
+**Priority order:** `critical` > `high` > `normal` > `low`
+
+```tsx
+// Provider configuration
+const announcements = [
+  { id: 'low-priority', priority: 'low' },
+  { id: 'critical-alert', priority: 'critical' },
+  { id: 'high-priority', priority: 'high' },
+  { id: 'normal-msg', priority: 'normal' },
+];
+
+// Queue will be ordered as:
+// ['critical-alert', 'high-priority', 'normal-msg', 'low-priority']
+```
+
+---
+
+## Examples
+
+### Show Next Announcement
+
+```tsx
+import { useAnnouncementQueue } from '@tour-kit/announcements';
+
+function NextAnnouncementButton() {
+  const { queue, showNext, isEmpty } = useAnnouncementQueue();
+
+  if (isEmpty) {
+    return <p>No announcements to show</p>;
+  }
+
+  return (
+    <button onClick={showNext}>
+      Show Next Announcement ({queue.length} remaining)
+    </button>
+  );
+}
+```
+
+### Display Queue Status
+
+```tsx
+import { useAnnouncementQueue, useAnnouncements } from '@tour-kit/announcements';
+
+function QueueStatus() {
+  const { queue, size, isEmpty } = useAnnouncementQueue();
+  const { announcements } = useAnnouncements();
+
+  if (isEmpty) {
+    return <p>Queue is empty</p>;
+  }
+
+  return (
+    <div>
+      <h3>Queue ({size})</h3>
+      <ol>
+        {queue.map((id, index) => {
+          const announcement = announcements.byId[id];
+          return (
+            <li key={id}>
+              <strong>{announcement.config.title}</strong>
+              <span>Priority: {announcement.config.priority}</span>
+              <span>Position: {index + 1}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+```
+
+### Check if Queued
+
+```tsx
+function AnnouncementBadge({ id }: { id: string }) {
+  const { isQueued, getPosition } = useAnnouncementQueue();
+
+  if (!isQueued(id)) {
+    return null;
+  }
+
+  const position = getPosition(id);
+
+  return (
+    <span className="badge">
+      In queue (#{position + 1})
+    </span>
+  );
+}
+```
+
+### Clear Queue
+
+```tsx
+function QueueManager() {
+  const { queue, clear, showNext } = useAnnouncementQueue();
+
+  const handleClear = () => {
+    if (confirm('Clear all queued announcements?')) {
+      clear();
+    }
+  };
+
+  return (
+    <div>
+      <h2>Queue Management</h2>
+      <p>{queue.length} announcements queued</p>
+
+      <div className="actions">
+        <button onClick={showNext} disabled={queue.length === 0}>
+          Show Next
+        </button>
+        <button onClick={handleClear} disabled={queue.length === 0}>
+          Clear Queue
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Queue Configuration
+
+```tsx
+function QueueConfigDisplay() {
+  const { config, size } = useAnnouncementQueue();
+
+  return (
+    <div>
+      <h3>Queue Configuration</h3>
+      <dl>
+        <dt>Max Concurrent:</dt>
+        <dd>{config.maxConcurrent}</dd>
+
+        <dt>Auto Show:</dt>
+        <dd>{config.autoShow ? 'Yes' : 'No'}</dd>
+
+        <dt>Delay Between:</dt>
+        <dd>{config.delayBetween}ms</dd>
+
+        <dt>Respect Priority:</dt>
+        <dd>{config.respectPriority ? 'Yes' : 'No'}</dd>
+
+        <dt>Current Queue Size:</dt>
+        <dd>{size}</dd>
+      </dl>
+    </div>
+  );
+}
+```
+
+---
+
+## Queue Behavior
+
+### Auto-Show
+
+When `autoShow` is enabled (default), the queue automatically shows the next announcement when the current one is dismissed:
+
+```tsx
+<AnnouncementsProvider
+  queueConfig={{
+    autoShow: true, // Next announcement shows automatically
+  }}
+/>
+```
+
+### Manual Control
+
+Disable `autoShow` to manually control when announcements are shown:
+
+```tsx
+<AnnouncementsProvider
+  queueConfig={{
+    autoShow: false, // Require manual showNext() calls
+  }}
+/>
+
+function ManualQueue() {
+  const { showNext, queue } = useAnnouncementQueue();
+
+  return (
+    <button onClick={showNext}>
+      Show Next ({queue.length} queued)
+    </button>
+  );
+}
+```
+
+### Max Concurrent
+
+Control how many announcements can be visible at once:
+
+```tsx
+<AnnouncementsProvider
+  queueConfig={{
+    maxConcurrent: 2, // Allow 2 announcements at once
+  }}
+/>
+```
+
+<Callout type="info">
+  By default, `maxConcurrent` is set to 1, meaning only one announcement can be visible at a time.
+</Callout>
+
+### Delay Between
+
+Add a delay between showing announcements:
+
+```tsx
+<AnnouncementsProvider
+  queueConfig={{
+    delayBetween: 2000, // Wait 2 seconds between announcements
+  }}
+/>
+```
+
+---
+
+## Advanced Patterns
+
+### Priority-Based Queue Display
+
+```tsx
+import { useAnnouncementQueue, useAnnouncement } from '@tour-kit/announcements';
+
+function PriorityQueue() {
+  const { queue } = useAnnouncementQueue();
+
+  const grouped = queue.reduce((acc, id) => {
+    const announcement = useAnnouncement(id);
+    const priority = announcement.config.priority || 'normal';
+
+    if (!acc[priority]) acc[priority] = [];
+    acc[priority].push(announcement);
+
+    return acc;
+  }, {} as Record<string, Announcement[]>);
+
+  return (
+    <div>
+      {grouped.critical?.length > 0 && (
+        <section className="critical">
+          <h3>Critical ({grouped.critical.length})</h3>
+          {/* Render critical announcements */}
+        </section>
+      )}
+
+      {grouped.high?.length > 0 && (
+        <section className="high">
+          <h3>High Priority ({grouped.high.length})</h3>
+          {/* Render high priority announcements */}
+        </section>
+      )}
+    </div>
+  );
+}
+```
+
+### Queue Progress Indicator
+
+```tsx
+function QueueProgress() {
+  const { queue, size } = useAnnouncementQueue();
+  const { count } = useAnnouncements();
+
+  const total = count.total;
+  const remaining = size;
+  const shown = total - remaining;
+  const progress = (shown / total) * 100;
+
+  return (
+    <div className="progress-bar">
+      <div
+        className="progress-fill"
+        style={{ width: `${progress}%` }}
+      />
+      <p>{shown} of {total} shown</p>
+    </div>
+  );
+}
+```
+
+### Conditional Queue Display
+
+```tsx
+function ConditionalQueue() {
+  const { queue, isEmpty, showNext } = useAnnouncementQueue();
+  const { announcements } = useAnnouncements();
+
+  if (isEmpty) {
+    return <p>All announcements have been shown</p>;
+  }
+
+  const nextId = queue[0];
+  const next = announcements.byId[nextId];
+
+  return (
+    <div className="next-preview">
+      <h3>Next Announcement</h3>
+      <p>{next.config.title}</p>
+      <button onClick={showNext}>
+        Show Now
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## TypeScript
+
+The hook is fully typed:
+
+```tsx
+import { useAnnouncementQueue } from '@tour-kit/announcements';
+import type { QueueConfig } from '@tour-kit/announcements';
+
+function TypedComponent() {
+  const {
+    queue,
+    size,
+    isEmpty,
+    config,
+    showNext,
+    clear,
+    isQueued,
+    getPosition,
+  } = useAnnouncementQueue();
+
+  // All properties are typed
+  const queueIds: string[] = queue;
+  const queueSize: number = size;
+  const empty: boolean = isEmpty;
+  const queueConfig: QueueConfig = config;
+
+  // Methods are typed
+  showNext(); // () => void
+  clear(); // () => void
+  const queued: boolean = isQueued('announcement-id');
+  const position: number = getPosition('announcement-id');
+}
+```
+
+---
+
+## Common Use Cases
+
+### Dashboard Queue Widget
+
+```tsx
+function QueueWidget() {
+  const { queue, size, showNext, isEmpty } = useAnnouncementQueue();
+  const { announcements } = useAnnouncements();
+
+  if (isEmpty) {
+    return (
+      <div className="widget">
+        <p>No pending announcements</p>
+      </div>
+    );
+  }
+
+  const next = announcements.byId[queue[0]];
+
+  return (
+    <div className="widget">
+      <h4>Pending Announcements ({size})</h4>
+      <div className="next">
+        <p className="title">{next.config.title}</p>
+        <p className="priority">Priority: {next.config.priority}</p>
+      </div>
+      <button onClick={showNext} className="primary">
+        Show Now
+      </button>
+    </div>
+  );
+}
+```
+
+### Admin Queue Manager
+
+```tsx
+function AdminQueueManager() {
+  const { queue, clear, showNext, getPosition } = useAnnouncementQueue();
+  const { announcements } = useAnnouncements();
+
+  return (
+    <div className="admin-panel">
+      <header>
+        <h2>Announcement Queue</h2>
+        <div className="actions">
+          <button onClick={showNext}>Show Next</button>
+          <button onClick={clear} className="danger">
+            Clear Queue
+          </button>
+        </div>
+      </header>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Position</th>
+            <th>Title</th>
+            <th>Variant</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          {queue.map((id) => {
+            const a = announcements.byId[id];
+            const position = getPosition(id);
+
+            return (
+              <tr key={id}>
+                <td>{position + 1}</td>
+                <td>{a.config.title}</td>
+                <td>{a.config.variant}</td>
+                <td>{a.config.priority}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+```
+
+---
+
+## Related
+
+- [useAnnouncement](/docs/announcements/hooks/use-announcement) - Control a single announcement
+- [useAnnouncements](/docs/announcements/hooks/use-announcements) - Access all announcements
+- [Queue Configuration](/docs/announcements/configuration/queue) - Queue config details
+- [AnnouncementsProvider](/docs/announcements/providers/announcements-provider) - Provider setup

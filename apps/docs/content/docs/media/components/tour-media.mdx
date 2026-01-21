@@ -1,0 +1,457 @@
+---
+title: TourMedia
+description: Main media component with automatic platform detection and accessibility features
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`TourMedia` is the primary component for embedding media in your tours. It automatically detects the platform from the URL and renders the appropriate embed with accessibility features built-in.
+
+## Why Use TourMedia?
+
+- **Auto-detection**: Pass any video URL and it figures out the platform
+- **Unified API**: Same props work across YouTube, Vimeo, Loom, Wistia, and native video
+- **Accessibility first**: Respects `prefers-reduced-motion`, supports captions
+- **Responsive**: Adapts to different screen sizes automatically
+- **Type-safe**: Full TypeScript support with intelligent prop validation
+
+## Basic Usage
+
+### Automatic Platform Detection
+
+Simply pass a URL and `TourMedia` detects the platform:
+
+```tsx
+import { TourMedia } from '@tour-kit/media'
+
+export function YouTubeExample() {
+  return (
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      alt="Product walkthrough"
+    />
+  )
+}
+
+export function VimeoExample() {
+  return (
+    <TourMedia
+      src="https://vimeo.com/123456789"
+      alt="Feature showcase"
+    />
+  )
+}
+
+export function LoomExample() {
+  return (
+    <TourMedia
+      src="https://www.loom.com/share/abc123"
+      alt="Screen recording"
+    />
+  )
+}
+```
+
+### Native Video
+
+For self-hosted videos, provide the direct file path:
+
+```tsx
+<TourMedia
+  src="/videos/demo.mp4"
+  alt="Feature demonstration"
+  poster="/thumbnails/demo.jpg"
+  controls
+/>
+```
+
+### Manual Type Override
+
+You can explicitly set the media type if auto-detection fails:
+
+```tsx
+<TourMedia
+  src="custom-video-url"
+  type="vimeo"
+  alt="Custom video"
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    src: {
+      type: 'string',
+      required: true,
+      description: 'Media source URL or file path. Supports YouTube, Vimeo, Loom, Wistia URLs, or direct video files',
+    },
+    type: {
+      type: "'youtube' | 'vimeo' | 'loom' | 'wistia' | 'video' | 'gif' | 'lottie' | 'image'",
+      required: false,
+      description: 'Explicitly set media type. Auto-detected from URL if not provided',
+    },
+    alt: {
+      type: 'string',
+      required: true,
+      description: 'Accessible description of the media content. Required for screen readers',
+    },
+    poster: {
+      type: 'string',
+      required: false,
+      description: 'Thumbnail image URL shown before playback (native video and GIF only)',
+    },
+    aspectRatio: {
+      type: "'16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'",
+      required: false,
+      default: "'16/9'",
+      description: 'Video aspect ratio. Use 9/16 for vertical mobile videos',
+    },
+    autoplay: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Auto-start playback when visible. Most browsers require muted=true',
+    },
+    muted: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Start muted. Required for autoplay in most browsers',
+    },
+    controls: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Show playback controls (native video only)',
+    },
+    loop: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Loop playback continuously',
+    },
+    playsInline: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Play inline on mobile instead of fullscreen (native video only)',
+    },
+    startTime: {
+      type: 'number',
+      required: false,
+      description: 'Start playback at specific time in seconds',
+    },
+    captions: {
+      type: 'CaptionTrack[]',
+      required: false,
+      description: 'Caption/subtitle tracks for native video',
+    },
+    sources: {
+      type: 'ResponsiveSource[]',
+      required: false,
+      description: 'Responsive video sources for different screen sizes',
+    },
+    lottieOptions: {
+      type: 'LottieOptions',
+      required: false,
+      description: 'Lottie animation configuration (when type="lottie")',
+    },
+    reducedMotionFallback: {
+      type: 'string',
+      required: false,
+      description: 'Static image URL to show when prefers-reduced-motion is enabled',
+    },
+    loading: {
+      type: "'eager' | 'lazy'",
+      required: false,
+      default: "'lazy'",
+      description: 'When to load the media. Use eager for above-the-fold content',
+    },
+    preload: {
+      type: "'none' | 'metadata' | 'auto'",
+      required: false,
+      default: "'metadata'",
+      description: 'How much to preload (native video only)',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: "'md'",
+      description: 'Preset size for the media container',
+    },
+    rounded: {
+      type: "boolean | 'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: 'false',
+      description: 'Border radius styling',
+    },
+    className: {
+      type: 'string',
+      required: false,
+      description: 'Additional CSS classes',
+    },
+    style: {
+      type: 'React.CSSProperties',
+      required: false,
+      description: 'Inline styles',
+    },
+  }}
+/>
+
+## Examples
+
+### YouTube with Autoplay
+
+Most browsers require videos to be muted for autoplay to work:
+
+```tsx
+<TourMedia
+  src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  alt="Welcome to our platform"
+  autoplay
+  muted
+  loop
+/>
+```
+
+### Vimeo with Custom Aspect Ratio
+
+Use square or vertical aspect ratios for mobile-first designs:
+
+```tsx
+<TourMedia
+  src="https://vimeo.com/123456789"
+  alt="Mobile app demo"
+  aspectRatio="9/16"
+  size="sm"
+/>
+```
+
+### Native Video with Captions
+
+Provide accessibility for hearing-impaired users:
+
+```tsx
+<TourMedia
+  src="/videos/tutorial.mp4"
+  alt="Feature tutorial"
+  poster="/thumbnails/tutorial.jpg"
+  captions={[
+    {
+      src: '/captions/en.vtt',
+      srcLang: 'en',
+      label: 'English',
+      default: true
+    },
+    {
+      src: '/captions/es.vtt',
+      srcLang: 'es',
+      label: 'Español'
+    }
+  ]}
+  controls
+  preload="metadata"
+/>
+```
+
+### Start at Specific Time
+
+Jump to a specific moment (supported by YouTube, Vimeo, native video):
+
+```tsx
+<TourMedia
+  src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  alt="Feature deep dive"
+  startTime={90} // Start at 1:30
+/>
+```
+
+### Responsive Video Sources
+
+Serve optimized videos based on screen size:
+
+```tsx
+<TourMedia
+  src="/videos/demo-desktop.mp4"
+  alt="Product demo"
+  sources={[
+    { src: '/videos/demo-mobile.mp4', maxWidth: 640 },
+    { src: '/videos/demo-tablet.mp4', maxWidth: 1024 },
+    { src: '/videos/demo-desktop.mp4', maxWidth: Infinity }
+  ]}
+  poster="/thumbnails/demo.jpg"
+/>
+```
+
+### Reduced Motion Fallback
+
+Respect user motion preferences with a static fallback:
+
+```tsx
+<TourMedia
+  src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  alt="Animated feature showcase"
+  reducedMotionFallback="/images/feature-screenshot.jpg"
+/>
+```
+
+When `prefers-reduced-motion: reduce` is set, the static image displays instead of the video.
+
+### Lottie Animation
+
+Display vector animations (requires `lottie-web` peer dependency):
+
+```tsx
+<TourMedia
+  type="lottie"
+  src="/animations/success.json"
+  alt="Success celebration animation"
+  autoplay
+  loop
+  lottieOptions={{
+    renderer: 'svg',
+    loop: true,
+    autoplay: true
+  }}
+/>
+```
+
+### GIF with Play/Pause Controls
+
+Show animated GIFs with user-controlled playback:
+
+```tsx
+<TourMedia
+  type="gif"
+  src="/animations/feature-demo.gif"
+  alt="Feature demonstration"
+  poster="/images/feature-poster.jpg"
+  aspectRatio="16/9"
+/>
+```
+
+## Accessibility
+
+### Required Alt Text
+
+Always provide meaningful `alt` text describing the media content:
+
+```tsx
+// Good
+<TourMedia
+  src="video.mp4"
+  alt="Walkthrough of creating your first project"
+/>
+
+// Bad
+<TourMedia
+  src="video.mp4"
+  alt="Video"
+/>
+```
+
+### Captions for Native Video
+
+Include captions for all spoken content:
+
+```tsx
+<TourMedia
+  src="/videos/tutorial.mp4"
+  alt="Account setup tutorial"
+  captions={[
+    { src: '/captions/en.vtt', srcLang: 'en', label: 'English', default: true }
+  ]}
+/>
+```
+
+<Callout type="info">
+  WebVTT (.vtt) is the standard format for captions. Most video editing tools can export to VTT.
+</Callout>
+
+### Motion Sensitivity
+
+Always provide a static fallback for users who prefer reduced motion:
+
+```tsx
+<TourMedia
+  src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  alt="Animated dashboard walkthrough"
+  reducedMotionFallback="/images/dashboard-screenshot.jpg"
+/>
+```
+
+## Platform-Specific Features
+
+### YouTube
+
+- Automatically uses `youtube-nocookie.com` for GDPR compliance
+- Supports: autoplay, muted, loop, controls, startTime
+- See [YouTubeEmbed](/docs/media/components/youtube-embed) for YouTube-specific props
+
+### Vimeo
+
+- Professional video hosting with privacy controls
+- Supports: autoplay, muted, loop, startTime
+- See [VimeoEmbed](/docs/media/components/vimeo-embed) for Vimeo-specific props
+
+### Loom
+
+- Optimized for screen recordings and async video
+- Supports: autoplay, muted, loop, hideControls, startTime
+- See [LoomEmbed](/docs/media/components/loom-embed) for Loom-specific props
+
+### Wistia
+
+- Enterprise video hosting with analytics
+- Supports: autoplay, muted, loop, controlsVisibleOnLoad, startTime
+- See [WistiaEmbed](/docs/media/components/wistia-embed) for Wistia-specific props
+
+## Integration with Tours
+
+Use inside tour steps for rich onboarding experiences:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { TourMedia } from '@tour-kit/media'
+
+<Tour id="onboarding">
+  <TourStep id="welcome">
+    <h2>Welcome to Our Platform</h2>
+    <TourMedia
+      src="https://www.youtube.com/watch?v=intro-video"
+      alt="Platform introduction"
+      autoplay
+      muted
+    />
+    <p>Watch this 2-minute intro to get started</p>
+  </TourStep>
+</Tour>
+```
+
+## TypeScript
+
+Full type safety with intelligent prop validation:
+
+```tsx
+import type { TourMediaConfig, MediaType } from '@tour-kit/media'
+
+const config: TourMediaConfig = {
+  src: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  alt: 'Product demo',
+  autoplay: true,
+  muted: true,
+  aspectRatio: '16/9'
+}
+
+<TourMedia {...config} />
+```
+
+## See Also
+
+- [YouTubeEmbed](/docs/media/components/youtube-embed) - YouTube-specific component
+- [VimeoEmbed](/docs/media/components/vimeo-embed) - Vimeo-specific component
+- [NativeVideo](/docs/media/components/native-video) - Self-hosted video component
+- [MediaHeadless](/docs/media/headless/media-headless) - Build custom media UIs
+- [useMediaEvents](/docs/media/hooks/use-media-events) - Track media engagement

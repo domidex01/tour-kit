@@ -1,0 +1,159 @@
+---
+title: Stat Cards
+description: AdoptionStatCard and AdoptionStatsGrid components
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+Display adoption metrics as stat cards. Use `AdoptionStatsGrid` for a full overview or `AdoptionStatCard` for individual metrics.
+
+## AdoptionStatsGrid
+
+Displays all key metrics in a responsive grid.
+
+### Basic Usage
+
+```tsx
+import { AdoptionStatsGrid } from '@tour-kit/adoption'
+
+<AdoptionStatsGrid />
+```
+
+Shows:
+- Total features
+- Adopted features
+- Adoption rate percentage
+- Features by status (not started, exploring, adopted, churned)
+
+### Props
+
+<TypeTable
+  type={{
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+### Example
+
+```tsx
+<AdoptionStatsGrid className="grid-cols-2 lg:grid-cols-4 gap-4" />
+```
+
+## AdoptionStatCard
+
+Individual metric card.
+
+### Basic Usage
+
+```tsx
+import { AdoptionStatCard } from '@tour-kit/adoption'
+
+<AdoptionStatCard
+  title="Adoption Rate"
+  value="78%"
+  description="Features adopted"
+/>
+```
+
+### Props
+
+<TypeTable
+  type={{
+    title: {
+      type: 'string',
+      required: true,
+      description: 'Card title',
+    },
+    value: {
+      type: 'string | number',
+      required: true,
+      description: 'Main metric value',
+    },
+    description: {
+      type: 'string',
+      description: 'Descriptive text',
+    },
+    trend: {
+      type: 'number',
+      description: 'Trend indicator (+/- number)',
+    },
+    trendLabel: {
+      type: 'string',
+      description: 'Label for trend (e.g., "vs last month")',
+    },
+    icon: {
+      type: 'ReactNode',
+      description: 'Icon component',
+    },
+    variant: {
+      type: '"default" | "success" | "warning" | "danger"',
+      default: '"default"',
+      description: 'Color variant',
+    },
+    size: {
+      type: '"sm" | "md" | "lg"',
+      default: '"md"',
+      description: 'Card size',
+    },
+  }}
+/>
+
+### Examples
+
+#### With Trend
+
+```tsx
+<AdoptionStatCard
+  title="Adoption Rate"
+  value="82%"
+  trend={+5}
+  trendLabel="vs last month"
+/>
+```
+
+#### With Icon
+
+```tsx
+import { TrendingUp } from 'lucide-react'
+
+<AdoptionStatCard
+  title="Adopted Features"
+  value="24"
+  icon={<TrendingUp />}
+  variant="success"
+/>
+```
+
+#### Custom Metrics
+
+```tsx
+import { useAdoptionStats } from '@tour-kit/adoption'
+
+function CustomStats() {
+  const stats = useAdoptionStats()
+
+  const churnRate = (
+    (stats.byStatus.churned.length / stats.totalCount) * 100
+  ).toFixed(1)
+
+  return (
+    <AdoptionStatCard
+      title="Churn Rate"
+      value={`${churnRate}%`}
+      description="Features with declining usage"
+      variant="warning"
+    />
+  )
+}
+```
+
+## Next Steps
+
+- [AdoptionDashboard](/docs/adoption/dashboard/adoption-dashboard) - Full dashboard
+- [useAdoptionStats](/docs/adoption/hooks/use-adoption-stats) - Access raw data

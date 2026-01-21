@@ -1,0 +1,305 @@
+---
+title: useMediaQuery
+description: Reactive media query hooks for responsive and accessible tours
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useMediaQuery
+
+Reactive hooks for CSS media queries. Includes `useMediaQuery` for custom queries and `usePrefersReducedMotion` for accessibility.
+
+## Why Use These Hooks?
+
+Tours need to adapt to user preferences and device capabilities:
+
+- **Responsive layouts** - Change tour card position on mobile vs desktop
+- **Reduced motion** - Disable animations for users who prefer less motion
+- **Dark mode** - Detect system color scheme preferences
+- **Print styles** - Hide tours when printing
+
+---
+
+## useMediaQuery
+
+Subscribe to any CSS media query and get reactive updates.
+
+### Usage
+
+```tsx
+import { useMediaQuery } from '@tour-kit/core';
+
+function ResponsiveTour() {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isTablet = useMediaQuery('(min-width: 769px) and (max-width: 1024px)');
+  const isDesktop = useMediaQuery('(min-width: 1025px)');
+
+  return (
+    <TourCard
+      placement={isMobile ? 'bottom' : 'right'}
+      className={isMobile ? 'w-full' : 'w-80'}
+    >
+      {isMobile && <p>Swipe to navigate</p>}
+      {isDesktop && <p>Use arrow keys to navigate</p>}
+    </TourCard>
+  );
+}
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    query: {
+      type: 'string',
+      description: 'CSS media query string',
+    },
+  }}
+/>
+
+### Return Value
+
+<TypeTable
+  type={{
+    matches: {
+      type: 'boolean',
+      description: 'Whether the media query currently matches',
+    },
+  }}
+/>
+
+---
+
+## usePrefersReducedMotion
+
+A convenience hook for the `prefers-reduced-motion` media query.
+
+### Usage
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/core';
+
+function AnimatedOverlay() {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  return (
+    <TourOverlay
+      className={prefersReducedMotion ? '' : 'animate-fade-in'}
+      style={{
+        transition: prefersReducedMotion ? 'none' : 'opacity 300ms ease',
+      }}
+    />
+  );
+}
+```
+
+### Return Value
+
+<TypeTable
+  type={{
+    prefersReducedMotion: {
+      type: 'boolean',
+      description: 'True if user prefers reduced motion',
+    },
+  }}
+/>
+
+<Callout type="info">
+This hook is equivalent to `useMediaQuery('(prefers-reduced-motion: reduce)')`.
+</Callout>
+
+---
+
+## Common Media Queries
+
+### Responsive Breakpoints
+
+```tsx
+function ResponsiveExample() {
+  const isMobile = useMediaQuery('(max-width: 640px)');
+  const isTablet = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
+  const isDesktop = useMediaQuery('(min-width: 1025px)');
+
+  let placement: 'bottom' | 'right' | 'left' = 'bottom';
+  if (isTablet) placement = 'right';
+  if (isDesktop) placement = 'left';
+
+  return <TourCard placement={placement} />;
+}
+```
+
+### Color Scheme
+
+```tsx
+function ThemeAwareTour() {
+  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
+
+  return (
+    <TourCard
+      className={prefersDark ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}
+    />
+  );
+}
+```
+
+### Pointer Type
+
+```tsx
+function TouchOptimizedTour() {
+  const isTouch = useMediaQuery('(pointer: coarse)');
+  const hasFinePointer = useMediaQuery('(pointer: fine)');
+
+  return (
+    <TourNavigation>
+      {isTouch ? (
+        <button className="p-4 text-lg">Next</button>
+      ) : (
+        <button className="px-3 py-1">Next</button>
+      )}
+    </TourNavigation>
+  );
+}
+```
+
+### Print Media
+
+```tsx
+function PrintAwareTour() {
+  const isPrinting = useMediaQuery('print');
+
+  // Hide tour completely when printing
+  if (isPrinting) return null;
+
+  return <Tour>{/* ... */}</Tour>;
+}
+```
+
+---
+
+## Accessibility: Reduced Motion
+
+Always respect the `prefers-reduced-motion` preference:
+
+```tsx
+import { usePrefersReducedMotion } from '@tour-kit/core';
+
+function AccessibleTourCard() {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  return (
+    <TourCard
+      // Disable animations
+      animate={!prefersReducedMotion}
+      // Or use CSS
+      className={prefersReducedMotion ? 'motion-reduce:transition-none' : ''}
+      // Inline styles
+      style={{
+        animationDuration: prefersReducedMotion ? '0s' : '0.3s',
+        transitionDuration: prefersReducedMotion ? '0s' : '0.2s',
+      }}
+    />
+  );
+}
+```
+
+<Callout type="warn" title="WCAG Requirement">
+WCAG 2.1 Success Criterion 2.3.3 requires respecting the user's motion preferences. Always use `usePrefersReducedMotion` when implementing animations.
+</Callout>
+
+---
+
+## SSR Handling
+
+Both hooks handle SSR by defaulting to `false`:
+
+```tsx
+// During SSR:
+useMediaQuery('(max-width: 768px)'); // Returns false
+usePrefersReducedMotion(); // Returns false
+
+// After hydration:
+// Hooks re-evaluate and return actual values
+```
+
+<Callout type="info">
+The initial SSR value is always `false`. If you need to handle the "unknown" state differently, check for hydration:
+
+```tsx
+const [hydrated, setHydrated] = useState(false);
+const isMobile = useMediaQuery('(max-width: 768px)');
+
+useEffect(() => setHydrated(true), []);
+
+if (!hydrated) return <LoadingState />;
+return isMobile ? <MobileLayout /> : <DesktopLayout />;
+```
+</Callout>
+
+---
+
+## Combining Queries
+
+```tsx
+function ComplexResponsiveLogic() {
+  const isSmallScreen = useMediaQuery('(max-width: 640px)');
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const isTouch = useMediaQuery('(pointer: coarse)');
+
+  // Determine optimal tour experience
+  const config = {
+    placement: isSmallScreen ? 'bottom' : 'right',
+    animated: !prefersReducedMotion,
+    showSwipeHint: isSmallScreen && isTouch,
+    showKeyboardHint: !isTouch,
+  };
+
+  return (
+    <Tour>
+      <TourCard placement={config.placement} animate={config.animated}>
+        <TourCardContent />
+        {config.showSwipeHint && <p>Swipe left/right to navigate</p>}
+        {config.showKeyboardHint && <p>Use arrow keys to navigate</p>}
+      </TourCard>
+    </Tour>
+  );
+}
+```
+
+---
+
+## How It Works
+
+1. **Initial Value** - Returns `false` during SSR, or the current match status client-side
+2. **Event Listener** - Subscribes to `MediaQueryList.change` events
+3. **Cleanup** - Removes listener on unmount or query change
+4. **Re-evaluation** - Updates state when media query changes (e.g., window resize)
+
+```tsx
+// Simplified implementation
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia(query).matches;
+  });
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+
+    setMatches(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, [query]);
+
+  return matches;
+}
+```
+
+---
+
+## Related
+
+- [Accessibility Guide](/docs/guides/accessibility) - Full WCAG compliance details
+- [Animations Guide](/docs/guides/animations) - Custom transitions with reduced motion
+- [TourOverlay](/docs/react/components/tour-overlay) - Uses reduced motion internally

@@ -1,0 +1,450 @@
+---
+title: WistiaEmbed
+description: Embed Wistia videos with enterprise features and advanced analytics
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`WistiaEmbed` integrates Wistia's enterprise video hosting platform into your tours. Wistia provides advanced analytics, lead generation, and customization options ideal for B2B products and marketing.
+
+## Why Use WistiaEmbed?
+
+- **Enterprise analytics**: Detailed engagement heatmaps and viewer insights
+- **Lead generation**: Collect emails with in-video forms (Turnstile)
+- **A/B testing**: Test different videos and CTAs
+- **SEO optimized**: Video sitemaps and schema markup
+- **Customization**: Full control over player appearance and behavior
+
+## Basic Usage
+
+```tsx
+import { WistiaEmbed } from '@tour-kit/media'
+
+export function ProductDemo() {
+  return (
+    <WistiaEmbed
+      videoId="abc123xyz"
+      title="Enterprise product demo"
+    />
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    videoId: {
+      type: 'string',
+      required: true,
+      description: 'Wistia video ID (found in video URL or embed code)',
+    },
+    title: {
+      type: 'string',
+      required: true,
+      description: 'Accessible title for the iframe. Describes the video content',
+    },
+    autoplay: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Auto-start playback when visible. Requires muted=true',
+    },
+    muted: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Start muted. Required for autoplay in most browsers',
+    },
+    loop: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Loop the video continuously',
+    },
+    controlsVisibleOnLoad: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Show controls immediately vs on hover',
+    },
+    startTime: {
+      type: 'number',
+      required: false,
+      description: 'Start playback at specific time in seconds',
+    },
+    aspectRatio: {
+      type: "'16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'",
+      required: false,
+      default: "'16/9'",
+      description: 'Video aspect ratio',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: "'md'",
+      description: 'Preset size for the video container',
+    },
+    rounded: {
+      type: "boolean | 'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: 'false',
+      description: 'Border radius styling',
+    },
+    playerColor: {
+      type: 'string',
+      required: false,
+      description: 'Hex color for player controls (without #). Example: "ff0000" for red',
+    },
+    allowFullscreen: {
+      type: 'boolean',
+      required: false,
+      default: 'true',
+      description: 'Allow fullscreen mode',
+    },
+    className: {
+      type: 'string',
+      required: false,
+      description: 'Additional CSS classes',
+    },
+    style: {
+      type: 'React.CSSProperties',
+      required: false,
+      description: 'Inline styles',
+    },
+  }}
+/>
+
+## Examples
+
+### Auto-playing Demo Video
+
+```tsx
+<WistiaEmbed
+  videoId="abc123xyz"
+  title="Product walkthrough"
+  autoplay
+  muted
+/>
+```
+
+### Clean Minimal Player
+
+Hide controls until user hovers:
+
+```tsx
+<WistiaEmbed
+  videoId="abc123xyz"
+  title="Feature showcase"
+  controlsVisibleOnLoad={false}
+/>
+```
+
+### Branded Player Color
+
+Match your brand identity:
+
+```tsx
+<WistiaEmbed
+  videoId="abc123xyz"
+  title="Branded demo"
+  playerColor="6366f1" // Indigo-500
+/>
+```
+
+<Callout type="info">
+  The `playerColor` prop expects a hex color **without** the `#` symbol. For example, use `"ff0000"` instead of `"#ff0000"`.
+</Callout>
+
+### Start at Specific Time
+
+Jump to the most relevant section:
+
+```tsx
+<WistiaEmbed
+  videoId="abc123xyz"
+  title="Advanced features"
+  startTime={120} // Start at 2:00
+/>
+```
+
+### Looping Background Video
+
+Perfect for hero sections:
+
+```tsx
+<WistiaEmbed
+  videoId="abc123xyz"
+  title="Platform overview"
+  autoplay
+  muted
+  loop
+  controlsVisibleOnLoad={false}
+  size="full"
+/>
+```
+
+### Vertical Video for Mobile
+
+Mobile app demonstrations in portrait:
+
+```tsx
+<WistiaEmbed
+  videoId="abc123xyz"
+  title="Mobile app tour"
+  aspectRatio="9/16"
+  size="sm"
+  rounded="lg"
+/>
+```
+
+## Extracting Video IDs
+
+Wistia video IDs are alphanumeric strings found in URLs:
+
+```tsx
+import { extractWistiaId, isWistiaUrl } from '@tour-kit/media'
+
+const url = 'https://company.wistia.com/medias/abc123xyz'
+
+if (isWistiaUrl(url)) {
+  const videoId = extractWistiaId(url)
+  return <WistiaEmbed videoId={videoId} title="Video" />
+}
+```
+
+Supported URL formats:
+- `https://yourcompany.wistia.com/medias/abc123xyz`
+- `https://fast.wistia.net/embed/iframe/abc123xyz`
+- `https://home.wistia.com/medias/abc123xyz`
+
+## Enterprise Features
+
+Wistia offers advanced features for enterprise customers:
+
+### Video Analytics
+
+Track detailed engagement metrics:
+- Watch time and completion rates
+- Engagement graphs showing drop-off points
+- Individual viewer tracking
+- Aggregated performance data
+
+Access analytics on your Wistia dashboard.
+
+### Lead Generation (Turnstile)
+
+Collect emails with in-video forms:
+1. Enable Turnstile in Wistia video settings
+2. Configure timing (e.g., at 50% or end of video)
+3. Leads sync to your CRM automatically
+4. Works in embedded videos
+
+```tsx
+// Embed video with Turnstile configured on Wistia
+<WistiaEmbed
+  videoId="abc123xyz"
+  title="Product demo with email gate"
+/>
+```
+
+### A/B Testing
+
+Test different videos or CTAs:
+1. Create video variants in Wistia
+2. Set up A/B test parameters
+3. Wistia automatically serves variants
+4. Track performance in analytics
+
+### Chapters and Annotations
+
+Add interactive chapters and clickable annotations:
+1. Configure in Wistia video editor
+2. Chapters appear automatically in embed
+3. Users can jump between sections
+4. Annotations can link to external pages
+
+<Callout type="info">
+  Advanced features like Turnstile, A/B testing, and annotations are configured on wistia.com and work automatically in embeds.
+</Callout>
+
+## Accessibility
+
+### Required Title Prop
+
+Provide descriptive titles for screen readers:
+
+```tsx
+// Good - describes the content
+<WistiaEmbed
+  videoId="abc123xyz"
+  title="Tutorial: Setting up SSO for enterprise accounts"
+/>
+
+// Bad - too generic
+<WistiaEmbed
+  videoId="abc123xyz"
+  title="Wistia video"
+/>
+```
+
+### Captions
+
+Add captions for accessibility compliance:
+1. Upload caption file on wistia.com (SRT, VTT, etc.)
+2. Captions display automatically in player
+3. Users can toggle with CC button
+4. Multiple language support
+
+### Keyboard Navigation
+
+Wistia player supports keyboard shortcuts:
+- **Space** or **K** - Play/Pause
+- **Left/Right arrows** - Seek backward/forward
+- **Up/Down arrows** - Volume up/down
+- **F** - Fullscreen
+- **M** - Mute/Unmute
+
+## Privacy and Compliance
+
+### GDPR Compliance
+
+Wistia provides GDPR-compliant features:
+- Consent management integration
+- Data processing agreements
+- EU data residency options (Enterprise plan)
+- Viewer data export/deletion tools
+
+### Privacy Settings
+
+Control video privacy on wistia.com:
+- **Public**: Anyone with link can watch
+- **Private**: Requires account login
+- **Domain restrictions**: Limit embedding to specific domains
+- **Password protection**: Add password requirement
+
+<Callout type="warn">
+  Privacy and compliance settings are configured on wistia.com. The `WistiaEmbed` component respects your configured settings.
+</Callout>
+
+## Integration with Tours
+
+Use Wistia's analytics to track onboarding engagement:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { WistiaEmbed } from '@tour-kit/media'
+
+<Tour id="enterprise-onboarding">
+  <TourStep id="welcome">
+    <h2>Welcome to Our Platform</h2>
+    <WistiaEmbed
+      videoId="welcome-video"
+      title="Platform introduction for new users"
+      autoplay
+      muted
+    />
+    <p>Learn the basics in 3 minutes</p>
+  </TourStep>
+
+  <TourStep id="advanced">
+    <h2>Enterprise Features</h2>
+    <WistiaEmbed
+      videoId="enterprise-features"
+      title="SSO, SCIM, and advanced security features"
+      startTime={30}
+    />
+  </TourStep>
+</Tour>
+```
+
+Track which users watched which videos in your Wistia analytics dashboard.
+
+## TypeScript
+
+Full type safety with autocompletion:
+
+```tsx
+import type { WistiaEmbedProps } from '@tour-kit/media'
+
+const config: WistiaEmbedProps = {
+  videoId: 'abc123xyz',
+  title: 'Enterprise demo',
+  autoplay: true,
+  muted: true,
+  playerColor: '6366f1',
+  controlsVisibleOnLoad: false
+}
+
+<WistiaEmbed {...config} />
+```
+
+## Building Custom Embed URLs
+
+Construct Wistia embed URLs programmatically:
+
+```tsx
+import { buildWistiaEmbedUrl } from '@tour-kit/media'
+
+const embedUrl = buildWistiaEmbedUrl('abc123xyz', {
+  autoplay: true,
+  muted: true,
+  controlsVisibleOnLoad: false,
+  playerColor: 'ff0000'
+})
+
+console.log(embedUrl)
+// https://fast.wistia.net/embed/iframe/abc123xyz?autoPlay=1&muted=1&controlsVisibleOnLoad=0&playerColor=ff0000
+```
+
+## Wistia Pricing Considerations
+
+Wistia is a paid platform with different tiers:
+
+**Free Plan:**
+- 3 videos
+- Basic analytics
+- No Turnstile or advanced features
+
+**Pro Plan:**
+- Unlimited videos
+- Advanced analytics
+- Turnstile lead generation
+- A/B testing
+- Remove Wistia branding
+
+**Advanced/Enterprise:**
+- Custom data retention
+- SSO integration
+- EU data residency
+- Dedicated support
+
+<Callout type="info">
+  Most enterprise features mentioned in this guide require a Pro or Advanced plan. Check [wistia.com/pricing](https://wistia.com/pricing) for current offerings.
+</Callout>
+
+## Wistia vs Other Platforms
+
+When to choose Wistia:
+
+**Choose Wistia when:**
+- You need detailed video analytics
+- Lead generation is important
+- B2B product or enterprise customers
+- Want A/B testing capabilities
+- Budget allows for paid platform
+
+**Choose YouTube/Vimeo when:**
+- Public content and SEO matter
+- Free hosting is required
+- Consumer-focused product
+- Simple embedding needs
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
+- [YouTubeEmbed](/docs/media/components/youtube-embed) - YouTube embeds
+- [VimeoEmbed](/docs/media/components/vimeo-embed) - Vimeo embeds
+- [Embed URL Utilities](/docs/media/utilities/embed-urls) - URL building functions
+- [URL Parsing](/docs/media/utilities/url-parsing) - Extract video IDs from URLs

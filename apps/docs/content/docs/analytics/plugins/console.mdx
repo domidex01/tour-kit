@@ -1,0 +1,287 @@
+---
+title: Console Plugin
+description: Debug analytics events with colored console output
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+The console plugin outputs analytics events to the browser console with colored formatting. It's designed for development and debugging - not for production use.
+
+## Installation
+
+No additional dependencies required. The plugin is included with `@tour-kit/analytics`.
+
+```tsx
+import { consolePlugin } from '@tour-kit/analytics'
+```
+
+## Basic Usage
+
+```tsx title="app/providers.tsx"
+import { AnalyticsProvider, consolePlugin } from '@tour-kit/analytics'
+
+export function Providers({ children }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [consolePlugin()]
+      }}
+    >
+      {children}
+    </AnalyticsProvider>
+  )
+}
+```
+
+## Options
+
+<TypeTable
+  type={{
+    prefix: {
+      type: 'string',
+      default: '"🎯 TourKit"',
+      description: 'Prefix for all log messages'
+    },
+    collapsed: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Use collapsed console groups (console.groupCollapsed)'
+    },
+    colors: {
+      type: 'object',
+      default: 'undefined',
+      description: 'Custom colors for different event types'
+    },
+    'colors.tour': {
+      type: 'string',
+      default: '"#6366f1"',
+      description: 'Color for tour lifecycle events (tour_started, tour_completed, etc.)'
+    },
+    'colors.step': {
+      type: 'string',
+      default: '"#10b981"',
+      description: 'Color for step events (step_viewed, step_completed, etc.)'
+    },
+    'colors.hint': {
+      type: 'string',
+      default: '"#f59e0b"',
+      description: 'Color for hint events (hint_shown, hint_dismissed, etc.)'
+    }
+  }}
+/>
+
+## Custom Prefix
+
+Change the log prefix:
+
+```tsx
+consolePlugin({
+  prefix: '📊 Analytics'
+})
+
+// Output:
+// 📊 Analytics tour_started
+```
+
+## Collapsed Groups
+
+Use collapsed console groups to reduce noise:
+
+```tsx
+consolePlugin({
+  collapsed: true
+})
+```
+
+Events will be logged in collapsed groups that can be expanded in the console.
+
+## Custom Colors
+
+Customize colors for different event types:
+
+```tsx
+consolePlugin({
+  colors: {
+    tour: '#3b82f6',  // Blue
+    step: '#22c55e',  // Green
+    hint: '#f97316'   // Orange
+  }
+})
+```
+
+## Console Output Format
+
+Each event is logged as a group with the following structure:
+
+```
+🎯 TourKit tour_started
+  Tour: onboarding
+  Step: welcome (0/5)
+  Duration: 1234ms
+  Metadata: { source: 'dashboard' }
+  Timestamp: 2024-01-20T10:30:00.000Z
+```
+
+### Event with Metadata
+
+```tsx
+analytics.track('step_completed', {
+  tourId: 'onboarding',
+  stepId: 'welcome',
+  stepIndex: 0,
+  metadata: {
+    source: 'dashboard',
+    user_type: 'free'
+  }
+})
+```
+
+Console output:
+
+```
+🎯 TourKit step_completed
+  Tour: onboarding
+  Step: welcome (0/5)
+  Duration: 2340ms
+  Metadata: { source: 'dashboard', user_type: 'free' }
+  Timestamp: 2024-01-20T10:30:02.340Z
+```
+
+## Development Only
+
+Conditionally load the console plugin in development:
+
+```tsx title="lib/analytics.ts"
+import {
+  consolePlugin,
+  posthogPlugin,
+  type AnalyticsConfig
+} from '@tour-kit/analytics'
+
+const isDev = process.env.NODE_ENV === 'development'
+
+export const analyticsConfig: AnalyticsConfig = {
+  plugins: [
+    ...(isDev ? [consolePlugin({ collapsed: false })] : []),
+    posthogPlugin({
+      apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!
+    })
+  ]
+}
+```
+
+## Debugging with Console Plugin
+
+Use the console plugin alongside production plugins to debug:
+
+```tsx
+import {
+  AnalyticsProvider,
+  consolePlugin,
+  posthogPlugin
+} from '@tour-kit/analytics'
+
+<AnalyticsProvider
+  config={{
+    plugins: [
+      // See events in console before they're sent
+      consolePlugin({ collapsed: false }),
+      // Production tracking
+      posthogPlugin({ apiKey: 'phc_xxx' })
+    ],
+    debug: true
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## User Identification
+
+The console plugin also logs user identification:
+
+```tsx
+analytics.identify('user-123', {
+  email: 'user@example.com',
+  plan: 'pro'
+})
+```
+
+Console output:
+
+```
+🎯 TourKit User Identified: user-123
+{ email: 'user@example.com', plan: 'pro' }
+```
+
+## Example Output
+
+### Tour Started
+
+```
+🎯 TourKit tour_started
+  Tour: product-tour
+  Duration: 0ms
+  Metadata: { totalSteps: 5 }
+  Timestamp: 2024-01-20T10:30:00.000Z
+```
+
+### Step Viewed
+
+```
+🎯 TourKit step_viewed
+  Tour: product-tour
+  Step: create-project (1/5)
+  Metadata: { source: 'dashboard' }
+  Timestamp: 2024-01-20T10:30:01.000Z
+```
+
+### Hint Clicked
+
+```
+🎯 TourKit hint_clicked
+  Tour: keyboard-shortcuts-hint
+  Metadata: { position: 'bottom-right' }
+  Timestamp: 2024-01-20T10:30:05.000Z
+```
+
+## Best Practices
+
+<Callout type="warn">
+  Do not use the console plugin in production. It adds unnecessary console noise and may expose sensitive event data in browser dev tools.
+</Callout>
+
+### Recommended Setup
+
+```tsx
+// ✅ Good - Only in development
+const plugins = process.env.NODE_ENV === 'development'
+  ? [consolePlugin(), productionPlugin()]
+  : [productionPlugin()]
+
+// ❌ Bad - Always loaded
+const plugins = [consolePlugin(), productionPlugin()]
+```
+
+### Debug Alongside Production
+
+```tsx
+// ✅ Good - Debug flag controls console plugin
+<AnalyticsProvider
+  config={{
+    plugins: [
+      ...(debug ? [consolePlugin()] : []),
+      posthogPlugin({ apiKey: 'phc_xxx' })
+    ]
+  }}
+>
+  {children}
+</AnalyticsProvider>
+```
+
+## Related
+
+- [Plugin Overview](/docs/analytics/plugins) - Plugin system architecture
+- [AnalyticsProvider](/docs/analytics/providers) - Configure analytics
+- [Custom Plugins](/docs/analytics/plugins/custom) - Build your own plugin

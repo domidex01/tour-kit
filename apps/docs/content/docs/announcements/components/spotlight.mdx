@@ -1,0 +1,279 @@
+---
+title: AnnouncementSpotlight
+description: Element highlight component for contextual announcements
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# AnnouncementSpotlight
+
+Highlights a specific element with an overlay and floating announcement. Best for drawing attention to new UI elements.
+
+## When to Use
+
+- New buttons or features
+- UI changes and relocations
+- Interactive element introductions
+- Contextual feature announcements
+
+---
+
+## Basic Usage
+
+```tsx
+import { AnnouncementsProvider, AnnouncementSpotlight } from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'new-export',
+    variant: 'spotlight',
+    title: 'New Export Button',
+    description: 'Export your data with one click!',
+    spotlightOptions: {
+      targetSelector: '#export-button',
+      placement: 'bottom',
+    },
+  },
+];
+
+function App() {
+  return (
+    <AnnouncementsProvider announcements={announcements}>
+      <AnnouncementSpotlight id="new-export" />
+
+      <button id="export-button">Export</button>
+    </AnnouncementsProvider>
+  );
+}
+```
+
+---
+
+## Spotlight Options
+
+<TypeTable
+  type={{
+    targetSelector: {
+      type: 'string',
+      required: true,
+      description: 'CSS selector for element to highlight',
+    },
+    placement: {
+      type: 'Placement',
+      default: "'bottom'",
+      description: 'Announcement card position relative to target',
+    },
+    offset: {
+      type: 'number',
+      default: '8',
+      description: 'Pixels between spotlight and announcement card',
+    },
+    showOverlay: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show dimmed overlay around target',
+    },
+    overlayOpacity: {
+      type: 'number',
+      default: '0.5',
+      description: 'Overlay opacity (0-1)',
+    },
+    padding: {
+      type: 'number',
+      default: '8',
+      description: 'Padding around spotlighted element',
+    },
+  }}
+/>
+
+---
+
+## Target Selector
+
+```tsx
+// By ID
+spotlightOptions: {
+  targetSelector: '#new-feature-button',
+}
+
+// By class
+spotlightOptions: {
+  targetSelector: '.export-btn',
+}
+
+// By attribute
+spotlightOptions: {
+  targetSelector: '[data-feature="export"]',
+}
+
+// Complex selector
+spotlightOptions: {
+  targetSelector: 'nav button[aria-label="Settings"]',
+}
+```
+
+<Callout type="warn">
+  The target element must exist in the DOM when the announcement is shown. Use `onShow` callback to verify.
+</Callout>
+
+---
+
+## Placement
+
+```tsx
+// Basic placements
+spotlightOptions: { placement: 'top' }
+spotlightOptions: { placement: 'bottom' }
+spotlightOptions: { placement: 'left' }
+spotlightOptions: { placement: 'right' }
+
+// With alignment
+spotlightOptions: { placement: 'top-start' }
+spotlightOptions: { placement: 'top-end' }
+spotlightOptions: { placement: 'bottom-start' }
+spotlightOptions: { placement: 'bottom-end' }
+```
+
+---
+
+## Complete Example
+
+```tsx
+{
+  id: 'new-dashboard',
+  variant: 'spotlight',
+  title: 'Redesigned Dashboard',
+  description: 'Check out the new dashboard with improved analytics and insights.',
+
+  media: {
+    type: 'image',
+    src: '/dashboard-preview.png',
+  },
+
+  primaryAction: {
+    label: 'Explore Now',
+    onClick: () => router.push('/dashboard'),
+  },
+
+  spotlightOptions: {
+    targetSelector: '#dashboard-nav-link',
+    placement: 'bottom-start',
+    offset: 12,
+    showOverlay: true,
+    overlayOpacity: 0.7,
+    padding: 8,
+  },
+
+  frequency: 'once',
+  audience: [
+    { field: 'hasSeenDashboard', operator: 'equals', value: false },
+  ],
+}
+```
+
+---
+
+## Overlay Customization
+
+```tsx
+// Light overlay
+spotlightOptions: {
+  overlayOpacity: 0.3,
+}
+
+// Dark overlay
+spotlightOptions: {
+  overlayOpacity: 0.8,
+}
+
+// No overlay (just card)
+spotlightOptions: {
+  showOverlay: false,
+}
+```
+
+---
+
+## Padding
+
+Control spacing around the highlighted element:
+
+```tsx
+// Tight (4px)
+spotlightOptions: { padding: 4 }
+
+// Default (8px)
+spotlightOptions: { padding: 8 }
+
+// Spacious (16px)
+spotlightOptions: { padding: 16 }
+```
+
+---
+
+## Handling Missing Targets
+
+```tsx
+{
+  id: 'spotlight',
+  variant: 'spotlight',
+  title: 'New Feature',
+
+  spotlightOptions: {
+    targetSelector: '#maybe-missing',
+  },
+
+  onShow: () => {
+    const target = document.querySelector('#maybe-missing');
+    if (!target) {
+      console.warn('Target element not found');
+      announcement.hide();
+    }
+  },
+}
+```
+
+---
+
+## Programmatic Control
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+
+function FeatureButton() {
+  const spotlight = useAnnouncement('new-feature');
+
+  const handleClick = () => {
+    // Show spotlight when feature is first used
+    if (!spotlight.isDismissed && spotlight.canShow) {
+      spotlight.show();
+    }
+  };
+
+  return (
+    <>
+      <button id="feature-btn" onClick={handleClick}>
+        Use Feature
+      </button>
+      <AnnouncementSpotlight id="new-feature" />
+    </>
+  );
+}
+```
+
+---
+
+## Accessibility
+
+- **Overlay** - `role="presentation"`, blocks interaction with background
+- **Focus trap** - Focus stays within announcement card
+- **Keyboard** - Escape closes spotlight
+- **Screen reader** - Announces content when shown
+
+---
+
+## Related
+
+- [Headless Spotlight](/docs/announcements/headless/spotlight)
+- [useAnnouncement](/docs/announcements/hooks/use-announcement)

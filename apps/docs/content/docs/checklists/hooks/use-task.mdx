@@ -1,0 +1,568 @@
+---
+title: useTask
+description: Hook for controlling individual tasks
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useTask
+
+Hook for accessing and controlling individual task state.
+
+## Usage
+
+```tsx
+import { useTask } from '@tour-kit/checklists';
+
+function TaskItem({ checklistId, taskId }) {
+  const {
+    task,
+    isCompleted,
+    isLocked,
+    complete,
+    execute,
+  } = useTask(checklistId, taskId);
+
+  if (!task) return null;
+
+  return (
+    <button
+      onClick={execute}
+      disabled={isLocked}
+    >
+      {isCompleted ? '✓' : '○'} {task.config.title}
+    </button>
+  );
+}
+```
+
+## Parameters
+
+<TypeTable
+  type={{
+    checklistId: {
+      type: 'string',
+      required: true,
+      description: 'Checklist identifier',
+    },
+    taskId: {
+      type: 'string',
+      required: true,
+      description: 'Task identifier',
+    },
+  }}
+/>
+
+## Return Value
+
+<TypeTable
+  type={{
+    task: {
+      type: 'ChecklistTaskState | undefined',
+      description: 'Full task state (undefined if not found)',
+    },
+    exists: {
+      type: 'boolean',
+      description: 'Whether task exists',
+    },
+    isCompleted: {
+      type: 'boolean',
+      description: 'Whether task is completed',
+    },
+    isLocked: {
+      type: 'boolean',
+      description: 'Whether task is locked (dependencies not met)',
+    },
+    isVisible: {
+      type: 'boolean',
+      description: 'Whether task is visible (when condition met)',
+    },
+    complete: {
+      type: '() => void',
+      description: 'Mark task as completed',
+    },
+    uncomplete: {
+      type: '() => void',
+      description: 'Mark task as incomplete',
+    },
+    execute: {
+      type: '() => void',
+      description: 'Execute task action',
+    },
+    toggle: {
+      type: '() => void',
+      description: 'Toggle completion state',
+    },
+  }}
+/>
+
+## Basic Examples
+
+### Simple Checkbox
+
+```tsx
+function TaskCheckbox({ checklistId, taskId }) {
+  const { task, isCompleted, isLocked, toggle } = useTask(checklistId, taskId);
+
+  if (!task) return null;
+
+  return (
+    <label>
+      <input
+        type="checkbox"
+        checked={isCompleted}
+        disabled={isLocked}
+        onChange={toggle}
+      />
+      {task.config.title}
+    </label>
+  );
+}
+```
+
+### Task Card
+
+```tsx
+function TaskCard({ checklistId, taskId }) {
+  const { task, isCompleted, isLocked, execute } = useTask(checklistId, taskId);
+
+  if (!task) return null;
+
+  return (
+    <div className={`task-card ${isCompleted ? 'completed' : ''}`}>
+      {task.config.icon && <span>{task.config.icon}</span>}
+
+      <div>
+        <h4>{task.config.title}</h4>
+        {task.config.description && (
+          <p>{task.config.description}</p>
+        )}
+      </div>
+
+      <button
+        onClick={execute}
+        disabled={isLocked || isCompleted}
+      >
+        {isCompleted ? 'Done ✓' : isLocked ? 'Locked 🔒' : 'Start'}
+      </button>
+    </div>
+  );
+}
+```
+
+### Progress Indicator
+
+```tsx
+function TaskProgress({ checklistId, taskId }) {
+  const { task, isCompleted, isLocked } = useTask(checklistId, taskId);
+
+  if (!task) return null;
+
+  let status = 'pending';
+  if (isCompleted) status = 'completed';
+  else if (isLocked) status = 'locked';
+
+  const icons = {
+    pending: '○',
+    locked: '🔒',
+    completed: '✓',
+  };
+
+  const colors = {
+    pending: 'gray',
+    locked: 'gray',
+    completed: 'green',
+  };
+
+  return (
+    <div style={{ color: colors[status] }}>
+      <span>{icons[status]}</span>
+      <span>{task.config.title}</span>
+    </div>
+  );
+}
+```
+
+## Advanced Examples
+
+### With Dependencies Display
+
+```tsx
+function TaskWithDependencies({ checklistId, taskId }) {
+  const { task, isLocked } = useTask(checklistId, taskId);
+
+  if (!task) return null;
+
+  const dependencies = task.config.dependsOn ?? [];
+
+  return (
+    <div>
+      <h4>{task.config.title}</h4>
+
+      {isLocked && dependencies.length > 0 && (
+        <div className="dependencies">
+          <p>Complete these first:</p>
+          <ul>
+            {dependencies.map((depId) => (
+              <li key={depId}>
+                <DependencyTask checklistId={checklistId} taskId={depId} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DependencyTask({ checklistId, taskId }) {
+  const { task, isCompleted } = useTask(checklistId, taskId);
+
+  if (!task) return <span>{taskId}</span>;
+
+  return (
+    <span>
+      {isCompleted ? '✓' : '○'} {task.config.title}
+    </span>
+  );
+}
+```
+
+### Manual vs Auto Complete
+
+```tsx
+function TaskWithManualControl({ checklistId, taskId }) {
+  const { task, isCompleted, isLocked, execute, complete } = useTask(
+    checklistId,
+    taskId
+  );
+
+  if (!task) return null;
+
+  const hasAction = !!task.config.action;
+  const manualComplete = task.config.manualComplete !== false;
+
+  return (
+    <div>
+      <h4>{task.config.title}</h4>
+
+      {hasAction && (
+        <button
+          onClick={execute}
+          disabled={isLocked}
+        >
+          {task.config.action.type === 'navigate' && 'Go →'}
+          {task.config.action.type === 'tour' && 'Start Tour'}
+          {task.config.action.type === 'callback' && 'Execute'}
+        </button>
+      )}
+
+      {!manualComplete && !isCompleted && (
+        <button
+          onClick={complete}
+          disabled={isLocked}
+        >
+          Mark as complete
+        </button>
+      )}
+
+      {isCompleted && <span>✓ Completed</span>}
+    </div>
+  );
+}
+```
+
+### Completion Timestamp
+
+```tsx
+function TaskWithTimestamp({ checklistId, taskId }) {
+  const { task, isCompleted } = useTask(checklistId, taskId);
+
+  if (!task) return null;
+
+  return (
+    <div>
+      <h4>{task.config.title}</h4>
+
+      {isCompleted && task.completedAt && (
+        <p className="text-sm text-muted">
+          Completed {new Date(task.completedAt).toLocaleDateString()}
+        </p>
+      )}
+    </div>
+  );
+}
+```
+
+### Conditional Rendering
+
+```tsx
+function ConditionalTask({ checklistId, taskId }) {
+  const { task, isVisible, isCompleted } = useTask(checklistId, taskId);
+
+  // Don't render if task doesn't exist or isn't visible
+  if (!task || !isVisible) return null;
+
+  // Don't render if completed (optional)
+  if (isCompleted) return null;
+
+  return (
+    <div>
+      <h4>{task.config.title}</h4>
+      {/* Task content */}
+    </div>
+  );
+}
+```
+
+## Task Actions
+
+The `execute` function handles different action types:
+
+### Navigate Action
+
+```tsx
+function NavigateTask({ checklistId, taskId }) {
+  const { task, execute } = useTask(checklistId, taskId);
+
+  if (!task || task.config.action?.type !== 'navigate') return null;
+
+  const action = task.config.action;
+
+  return (
+    <button onClick={execute}>
+      Go to {action.url}
+      {action.external && ' ↗'}
+    </button>
+  );
+}
+```
+
+### Callback Action
+
+```tsx
+function CallbackTask({ checklistId, taskId }) {
+  const { task, execute } = useTask(checklistId, taskId);
+  const [loading, setLoading] = useState(false);
+
+  if (!task || task.config.action?.type !== 'callback') return null;
+
+  const handleExecute = async () => {
+    setLoading(true);
+    try {
+      await execute();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button onClick={handleExecute} disabled={loading}>
+      {loading ? 'Processing...' : 'Execute'}
+    </button>
+  );
+}
+```
+
+### Custom Action Handling
+
+```tsx
+function CustomActionTask({ checklistId, taskId }) {
+  const { task, complete } = useTask(checklistId, taskId);
+
+  if (!task) return null;
+
+  const handleCustomAction = async () => {
+    // Your custom logic
+    await myCustomHandler(task.config.action?.data);
+
+    // Manually complete if needed
+    if (task.config.manualComplete !== false) {
+      complete();
+    }
+  };
+
+  return (
+    <button onClick={handleCustomAction}>
+      Custom Action
+    </button>
+  );
+}
+```
+
+## Optimistic Updates
+
+```tsx
+function OptimisticTask({ checklistId, taskId }) {
+  const { task, isCompleted, toggle } = useTask(checklistId, taskId);
+  const [optimistic, setOptimistic] = useState(false);
+
+  if (!task) return null;
+
+  const handleToggle = async () => {
+    // Show optimistic state immediately
+    setOptimistic(true);
+
+    try {
+      // Perform async operation
+      await api.updateTask(taskId);
+
+      // Update actual state
+      toggle();
+    } catch (error) {
+      console.error('Failed to update task:', error);
+    } finally {
+      setOptimistic(false);
+    }
+  };
+
+  const checked = optimistic ? !isCompleted : isCompleted;
+
+  return (
+    <label>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={handleToggle}
+        disabled={optimistic}
+      />
+      {task.config.title}
+    </label>
+  );
+}
+```
+
+## Multiple Task Instances
+
+When rendering the same task multiple times:
+
+```tsx
+function TaskList({ checklistId, taskIds }) {
+  return (
+    <ul>
+      {taskIds.map((taskId) => (
+        <TaskListItem
+          key={taskId}
+          checklistId={checklistId}
+          taskId={taskId}
+        />
+      ))}
+    </ul>
+  );
+}
+
+function TaskListItem({ checklistId, taskId }) {
+  const { task, isCompleted, toggle } = useTask(checklistId, taskId);
+
+  if (!task) return null;
+
+  return (
+    <li>
+      <label>
+        <input
+          type="checkbox"
+          checked={isCompleted}
+          onChange={toggle}
+        />
+        {task.config.title}
+      </label>
+    </li>
+  );
+}
+```
+
+<Callout type="info">
+  Each `useTask` call with the same IDs returns the same state. React hooks handle this efficiently.
+</Callout>
+
+## Error Handling
+
+```tsx
+function SafeTask({ checklistId, taskId }) {
+  const { exists, task } = useTask(checklistId, taskId);
+
+  if (!exists) {
+    console.warn(`Task ${taskId} not found in ${checklistId}`);
+    return null;
+  }
+
+  return (
+    <div>
+      <h4>{task.config.title}</h4>
+      {/* Task content */}
+    </div>
+  );
+}
+```
+
+## Performance Tips
+
+### Avoid Unnecessary Re-renders
+
+```tsx
+// Bad: Entire list re-renders when any task changes
+function BadTaskList({ checklistId, taskIds }) {
+  const tasks = taskIds.map((id) => useTask(checklistId, id));
+
+  return (
+    <ul>
+      {tasks.map((taskHook, i) => (
+        <li key={taskIds[i]}>
+          {/* All items re-render */}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// Good: Each task is isolated
+function GoodTaskList({ checklistId, taskIds }) {
+  return (
+    <ul>
+      {taskIds.map((taskId) => (
+        <TaskItem
+          key={taskId}
+          checklistId={checklistId}
+          taskId={taskId}
+        />
+      ))}
+    </ul>
+  );
+}
+
+const TaskItem = memo(function TaskItem({ checklistId, taskId }) {
+  const { task, isCompleted, toggle } = useTask(checklistId, taskId);
+  // Only this item re-renders when its state changes
+  return <li>{/* ... */}</li>;
+});
+```
+
+### Memoize Expensive Computations
+
+```tsx
+function TaskWithStats({ checklistId, taskId }) {
+  const { task } = useTask(checklistId, taskId);
+
+  const stats = useMemo(() => {
+    if (!task) return null;
+
+    return {
+      hasDependencies: (task.config.dependsOn?.length ?? 0) > 0,
+      hasAction: !!task.config.action,
+      hasIcon: !!task.config.icon,
+      hasDescription: !!task.config.description,
+    };
+  }, [task]);
+
+  if (!task) return null;
+
+  return <div>{/* Use stats */}</div>;
+}
+```
+
+## Related
+
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Access full checklist state
+- [ChecklistTask](/docs/checklists/components/checklist-task) - Pre-built task component
+- [TaskHeadless](/docs/checklists/headless/task-headless) - Headless task component

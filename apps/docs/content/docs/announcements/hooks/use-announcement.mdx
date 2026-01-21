@@ -1,0 +1,526 @@
+---
+title: useAnnouncement
+description: Hook for controlling a single announcement
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useAnnouncement
+
+Hook for accessing and controlling a single announcement. Provides state, configuration, and methods for showing, hiding, and dismissing the announcement.
+
+## Why Use This Hook?
+
+Use `useAnnouncement` when you need to:
+
+- Programmatically show or hide an announcement
+- Check if an announcement has been dismissed
+- Track how many times an announcement has been viewed
+- Determine if an announcement can be shown based on frequency rules
+- Manually trigger announcement actions
+
+---
+
+## Basic Usage
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+
+function WelcomeButton() {
+  const announcement = useAnnouncement('welcome-tour');
+
+  return (
+    <button onClick={announcement.show}>
+      Start Welcome Tour
+    </button>
+  );
+}
+```
+
+---
+
+## Parameters
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'The unique identifier of the announcement',
+    },
+  }}
+/>
+
+---
+
+## Return Value
+
+```tsx
+const {
+  // State
+  state,
+  config,
+  isVisible,
+  isActive,
+  isDismissed,
+  canShow,
+  viewCount,
+
+  // Methods
+  show,
+  hide,
+  dismiss,
+  complete,
+  reset,
+} = useAnnouncement('announcement-id');
+```
+
+### Properties
+
+<TypeTable
+  type={{
+    state: {
+      type: 'AnnouncementState',
+      description: 'Full announcement state object',
+    },
+    config: {
+      type: 'AnnouncementConfig',
+      description: 'Full announcement configuration',
+    },
+    isVisible: {
+      type: 'boolean',
+      description: 'Whether the announcement UI is currently visible',
+    },
+    isActive: {
+      type: 'boolean',
+      description: 'Whether the announcement is the currently active one',
+    },
+    isDismissed: {
+      type: 'boolean',
+      description: 'Whether the announcement has been permanently dismissed',
+    },
+    canShow: {
+      type: 'boolean',
+      description: 'Whether the announcement can be shown (based on frequency rules)',
+    },
+    viewCount: {
+      type: 'number',
+      description: 'Number of times the announcement has been viewed',
+    },
+  }}
+/>
+
+### Methods
+
+<TypeTable
+  type={{
+    show: {
+      type: '() => void',
+      description: 'Show the announcement (increments view count)',
+    },
+    hide: {
+      type: '() => void',
+      description: 'Hide the announcement (can be shown again)',
+    },
+    dismiss: {
+      type: '(reason?: DismissalReason) => void',
+      description: 'Permanently dismiss the announcement',
+    },
+    complete: {
+      type: '() => void',
+      description: 'Mark the announcement as completed',
+    },
+    reset: {
+      type: '() => void',
+      description: 'Reset all state (views, dismissal, completion)',
+    },
+  }}
+/>
+
+---
+
+## Examples
+
+### Show/Hide Announcements
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+
+function AnnouncementControls() {
+  const announcement = useAnnouncement('new-feature');
+
+  return (
+    <div>
+      <button
+        onClick={announcement.show}
+        disabled={announcement.isVisible}
+      >
+        Show Announcement
+      </button>
+
+      <button
+        onClick={announcement.hide}
+        disabled={!announcement.isVisible}
+      >
+        Hide Announcement
+      </button>
+
+      <p>Status: {announcement.isVisible ? 'Visible' : 'Hidden'}</p>
+    </div>
+  );
+}
+```
+
+### Check Dismissal State
+
+```tsx
+function FeatureHighlight() {
+  const announcement = useAnnouncement('export-feature');
+
+  if (announcement.isDismissed) {
+    return null; // Don't show UI if user dismissed it
+  }
+
+  return (
+    <div className="feature-badge">
+      <span>New!</span>
+      <button onClick={announcement.show}>
+        Learn More
+      </button>
+    </div>
+  );
+}
+```
+
+### Track View Count
+
+```tsx
+function ViewTracker() {
+  const announcement = useAnnouncement('onboarding');
+
+  useEffect(() => {
+    if (announcement.viewCount >= 3 && announcement.canShow) {
+      // Show a different announcement after 3 views
+      console.log('User has seen this 3 times');
+    }
+  }, [announcement.viewCount]);
+
+  return (
+    <div>
+      <p>You've seen this {announcement.viewCount} times</p>
+      <button onClick={announcement.show}>Show Again</button>
+    </div>
+  );
+}
+```
+
+### Respect Frequency Rules
+
+```tsx
+function SmartAnnouncementButton() {
+  const announcement = useAnnouncement('weekly-tip');
+
+  if (!announcement.canShow) {
+    return <p>Check back next week for a new tip!</p>;
+  }
+
+  return (
+    <button onClick={announcement.show}>
+      Show Weekly Tip
+    </button>
+  );
+}
+```
+
+### Complete Announcement
+
+```tsx
+function OnboardingFlow() {
+  const announcement = useAnnouncement('onboarding');
+
+  const handleFinishOnboarding = () => {
+    // Mark as completed (for analytics)
+    announcement.complete();
+
+    // Navigate to dashboard
+    router.push('/dashboard');
+  };
+
+  return (
+    <div>
+      <h1>Welcome!</h1>
+      <button onClick={handleFinishOnboarding}>
+        Get Started
+      </button>
+    </div>
+  );
+}
+```
+
+### Reset Announcement
+
+```tsx
+function SettingsPanel() {
+  const { resetAll } = useAnnouncements();
+  const welcome = useAnnouncement('welcome');
+
+  return (
+    <div>
+      <h2>Announcement Settings</h2>
+
+      <button onClick={welcome.reset}>
+        Reset Welcome Announcement
+      </button>
+
+      <button onClick={resetAll}>
+        Reset All Announcements
+      </button>
+
+      <div>
+        <p>Welcome announcement status:</p>
+        <ul>
+          <li>Views: {welcome.viewCount}</li>
+          <li>Dismissed: {welcome.isDismissed ? 'Yes' : 'No'}</li>
+          <li>Can show: {welcome.canShow ? 'Yes' : 'No'}</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Dismissal Reasons
+
+When calling `dismiss()`, you can optionally specify a reason:
+
+```tsx
+const announcement = useAnnouncement('feature');
+
+// Dismiss with default reason ('programmatic')
+announcement.dismiss();
+
+// Dismiss with specific reason
+announcement.dismiss('close_button');
+announcement.dismiss('overlay_click');
+announcement.dismiss('escape_key');
+announcement.dismiss('primary_action');
+announcement.dismiss('secondary_action');
+announcement.dismiss('auto_dismiss');
+```
+
+This is tracked in analytics via the `onDismiss` callback:
+
+```tsx
+<AnnouncementsProvider
+  onDismiss={(id, reason) => {
+    analytics.track('announcement_dismissed', { id, reason });
+  }}
+/>
+```
+
+---
+
+## State Object
+
+The `state` property contains the full announcement state:
+
+```tsx
+const announcement = useAnnouncement('feature');
+
+console.log(announcement.state);
+// {
+//   id: 'feature',
+//   isActive: false,
+//   isVisible: false,
+//   isDismissed: false,
+//   viewCount: 3,
+//   lastViewedAt: Date('2024-01-20T10:30:00Z'),
+//   dismissedAt: null,
+//   dismissalReason: null,
+//   completedAt: null,
+// }
+```
+
+---
+
+## Config Object
+
+The `config` property contains the announcement configuration:
+
+```tsx
+const announcement = useAnnouncement('feature');
+
+console.log(announcement.config);
+// {
+//   id: 'feature',
+//   variant: 'modal',
+//   priority: 'high',
+//   title: 'New Feature',
+//   description: '...',
+//   frequency: 'once',
+//   modalOptions: { size: 'md' },
+//   // ... rest of config
+// }
+```
+
+---
+
+## Conditional Rendering
+
+Show different UI based on announcement state:
+
+```tsx
+function ConditionalAnnouncement() {
+  const announcement = useAnnouncement('promo');
+
+  if (!announcement.config) {
+    return <p>Announcement not found</p>;
+  }
+
+  if (announcement.isDismissed) {
+    return (
+      <div>
+        <p>You dismissed this announcement</p>
+        <button onClick={announcement.reset}>
+          Show Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!announcement.canShow) {
+    return <p>This announcement will be available soon</p>;
+  }
+
+  return (
+    <button onClick={announcement.show}>
+      {announcement.config.title}
+    </button>
+  );
+}
+```
+
+---
+
+## TypeScript
+
+The hook is fully typed:
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+import type {
+  AnnouncementState,
+  AnnouncementConfig,
+  DismissalReason,
+} from '@tour-kit/announcements';
+
+function TypedComponent() {
+  const announcement = useAnnouncement('feature');
+
+  // All properties are typed
+  const isVisible: boolean = announcement.isVisible;
+  const viewCount: number = announcement.viewCount;
+  const state: AnnouncementState = announcement.state;
+  const config: AnnouncementConfig = announcement.config;
+
+  // Methods are typed
+  announcement.show(); // () => void
+  announcement.dismiss('close_button'); // (reason?: DismissalReason) => void
+}
+```
+
+---
+
+## Common Patterns
+
+### Auto-show on Mount
+
+```tsx
+function AutoShowAnnouncement() {
+  const announcement = useAnnouncement('welcome');
+
+  useEffect(() => {
+    if (announcement.canShow) {
+      announcement.show();
+    }
+  }, []);
+
+  return <AnnouncementModal id="welcome" />;
+}
+```
+
+### Show After User Action
+
+```tsx
+function FeatureButton() {
+  const announcement = useAnnouncement('feature-tip');
+
+  const handleClick = () => {
+    // Perform action
+    performFeature();
+
+    // Show tip after action
+    if (announcement.canShow) {
+      announcement.show();
+    }
+  };
+
+  return <button onClick={handleClick}>Use Feature</button>;
+}
+```
+
+### Delay Before Showing
+
+```tsx
+function DelayedAnnouncement() {
+  const announcement = useAnnouncement('tip');
+
+  useEffect(() => {
+    // Show after 5 seconds
+    const timer = setTimeout(() => {
+      if (announcement.canShow) {
+        announcement.show();
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return <AnnouncementToast id="tip" />;
+}
+```
+
+---
+
+## Error Handling
+
+If the announcement ID doesn't exist in the provider's configuration:
+
+```tsx
+function SafeAnnouncement() {
+  const announcement = useAnnouncement('non-existent');
+
+  // Check if config exists
+  if (!announcement.config) {
+    console.warn('Announcement not found');
+    return null;
+  }
+
+  return <button onClick={announcement.show}>Show</button>;
+}
+```
+
+<Callout type="warn">
+  The hook will not throw an error if the ID doesn't exist. Always check `config` before using the announcement.
+</Callout>
+
+---
+
+## Related
+
+- [useAnnouncements](/docs/announcements/hooks/use-announcements) - Access all announcements
+- [useAnnouncementQueue](/docs/announcements/hooks/use-announcement-queue) - Control the queue
+- [AnnouncementsProvider](/docs/announcements/providers/announcements-provider) - Provider configuration

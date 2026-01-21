@@ -1,0 +1,11 @@
+{
+  "title": "Components",
+  "pages": [
+    "index",
+    "checklist",
+    "checklist-task",
+    "checklist-progress",
+    "checklist-launcher",
+    "checklist-panel"
+  ]
+}

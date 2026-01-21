@@ -1,0 +1,393 @@
+---
+title: React Router Adapter
+description: Router adapter for React Router v6 and v7
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# React Router Adapter
+
+Router adapter for React Router v6 (react-router-dom) and v7 (react-router).
+
+## When to Use
+
+Use this adapter when:
+- You're building a React SPA with Vite, Create React App, or similar
+- Your app uses React Router for client-side routing
+- You need multi-page tours that navigate between routes
+
+---
+
+## Installation
+
+The adapter is included in `@tour-kit/react`. Install React Router:
+
+<Tabs items={['React Router v7', 'React Router v6']}>
+<Tab value="React Router v7">
+```bash
+pnpm add @tour-kit/react react-router
+```
+</Tab>
+
+<Tab value="React Router v6">
+```bash
+pnpm add @tour-kit/react react-router-dom
+```
+</Tab>
+</Tabs>
+
+---
+
+## Usage
+
+<Tabs items={['Direct Hook', 'Factory Function']}>
+<Tab value="Direct Hook">
+```tsx
+import { BrowserRouter } from 'react-router-dom'; // or 'react-router'
+import { MultiTourKitProvider, useReactRouter } from '@tour-kit/react';
+
+function TourProviderWithRouter({ children }) {
+  const router = useReactRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{ enabled: true }}
+    >
+      {children}
+    </MultiTourKitProvider>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <TourProviderWithRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </TourProviderWithRouter>
+    </BrowserRouter>
+  );
+}
+```
+</Tab>
+
+<Tab value="Factory Function">
+```tsx
+import { useLocation, useNavigate } from 'react-router-dom';
+import { MultiTourKitProvider, createReactRouterAdapter } from '@tour-kit/react';
+
+const useRouter = createReactRouterAdapter(useLocation, useNavigate);
+
+function TourProviderWithRouter({ children }) {
+  const router = useRouter();
+
+  return (
+    <MultiTourKitProvider router={router}>
+      {children}
+    </MultiTourKitProvider>
+  );
+}
+```
+</Tab>
+</Tabs>
+
+<Callout type="warn">
+The adapter must be used inside `BrowserRouter` (or any Router) since it depends on React Router's context.
+</Callout>
+
+---
+
+## useReactRouter
+
+Direct hook that automatically imports from `react-router` (v7) or `react-router-dom` (v6).
+
+```tsx
+import { useReactRouter } from '@tour-kit/react';
+
+const router = useReactRouter();
+```
+
+### Return Value
+
+Returns a `RouterAdapter` with these methods:
+
+<TypeTable
+  type={{
+    getCurrentRoute: {
+      type: '() => string',
+      description: 'Returns location.pathname',
+    },
+    navigate: {
+      type: '(route: string) => void',
+      description: 'Navigates using navigate()',
+    },
+    matchRoute: {
+      type: "(pattern: string, mode?: 'exact' | 'startsWith' | 'contains') => boolean",
+      description: 'Matches pathname against pattern',
+    },
+    onRouteChange: {
+      type: '(callback: (route: string) => void) => () => void',
+      description: 'Subscribe to pathname changes',
+    },
+  }}
+/>
+
+---
+
+## createReactRouterAdapter
+
+Factory function for custom setups.
+
+```tsx
+import { createReactRouterAdapter } from '@tour-kit/react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+const useRouter = createReactRouterAdapter(useLocation, useNavigate);
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    useLocation: {
+      type: '() => { pathname: string }',
+      description: 'React Router useLocation hook',
+    },
+    useNavigate: {
+      type: '() => (to: string) => void',
+      description: 'React Router useNavigate hook',
+    },
+  }}
+/>
+
+---
+
+## Complete Example
+
+```tsx title="src/App.tsx"
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {
+  MultiTourKitProvider,
+  useReactRouter,
+  Tour,
+  TourStep,
+  TourOverlay,
+  TourCard,
+  useTour,
+} from '@tour-kit/react';
+import { Home, Dashboard, Settings } from './pages';
+
+function TourProviderWithRouter({ children }) {
+  const router = useReactRouter();
+
+  return (
+    <MultiTourKitProvider
+      router={router}
+      routePersistence={{
+        enabled: true,
+        storage: 'sessionStorage', // Clears on tab close
+      }}
+      autoNavigate={true}
+    >
+      <Tour id="onboarding">
+        <TourStep
+          target="#hero"
+          title="Welcome!"
+          content="Let's show you around our app."
+          route="/"
+          routeMatch="exact"
+        />
+        <TourStep
+          target="#dashboard-chart"
+          title="Your Dashboard"
+          content="View your analytics here."
+          route="/dashboard"
+        />
+        <TourStep
+          target="#settings-theme"
+          title="Settings"
+          content="Customize your experience."
+          route="/settings"
+        />
+      </Tour>
+
+      <TourOverlay />
+      <TourCard />
+
+      {children}
+
+      <TourButton />
+    </MultiTourKitProvider>
+  );
+}
+
+function TourButton() {
+  const { start, isActive } = useTour();
+
+  if (isActive) return null;
+
+  return (
+    <button
+      onClick={() => start('onboarding')}
+      className="fixed bottom-4 right-4 btn-primary"
+    >
+      Start Tour
+    </button>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <TourProviderWithRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </TourProviderWithRouter>
+    </BrowserRouter>
+  );
+}
+```
+
+---
+
+## React Router v6 vs v7
+
+The adapter works with both versions:
+
+| Feature | v6 (react-router-dom) | v7 (react-router) |
+|---------|----------------------|-------------------|
+| Package | `react-router-dom` | `react-router` |
+| Import | Auto-detected | Auto-detected |
+| API | Same | Same |
+| Detection | Falls back if v7 not found | Tried first |
+
+```tsx
+// Adapter tries in order:
+try {
+  require('react-router');     // v7
+} catch {
+  require('react-router-dom'); // v6 fallback
+}
+```
+
+---
+
+## Route Change Detection
+
+The adapter uses `location.pathname` reactivity:
+
+```tsx
+// Internal behavior:
+useEffect(() => {
+  if (previousPath !== location.pathname) {
+    for (const callback of callbacks) {
+      callback(location.pathname);
+    }
+  }
+}, [location.pathname]);
+```
+
+<Callout type="info">
+The `onRouteChange` callback fires immediately with the current route when subscribed, then on each subsequent navigation.
+</Callout>
+
+---
+
+## Nested Routes
+
+For nested routes, use `startsWith` matching:
+
+```tsx
+// Routes setup
+<Route path="/dashboard/*" element={<Dashboard />}>
+  <Route path="analytics" element={<Analytics />} />
+  <Route path="settings" element={<Settings />} />
+</Route>
+
+// Tour step that works for all dashboard routes
+<TourStep
+  target="#dashboard-nav"
+  title="Dashboard"
+  route="/dashboard"
+  routeMatch="startsWith"  // Matches /dashboard, /dashboard/analytics, etc.
+/>
+```
+
+---
+
+## Hash Router Support
+
+For `HashRouter`, the adapter still works since `useLocation()` returns the same shape:
+
+```tsx
+import { HashRouter } from 'react-router-dom';
+
+function App() {
+  return (
+    <HashRouter>
+      <TourProviderWithRouter>
+        <Routes />
+      </TourProviderWithRouter>
+    </HashRouter>
+  );
+}
+```
+
+---
+
+## Troubleshooting
+
+### "Neither react-router nor react-router-dom found"
+
+Install one of them:
+
+```bash
+pnpm add react-router-dom  # v6
+# or
+pnpm add react-router      # v7
+```
+
+### "useLocation must be used within a Router"
+
+Ensure the adapter is used inside a Router:
+
+```tsx
+// Wrong - adapter outside router
+<TourProviderWithRouter>
+  <BrowserRouter>
+    <Routes />
+  </BrowserRouter>
+</TourProviderWithRouter>
+
+// Correct - adapter inside router
+<BrowserRouter>
+  <TourProviderWithRouter>
+    <Routes />
+  </TourProviderWithRouter>
+</BrowserRouter>
+```
+
+### Routes Not Matching
+
+Check the current pathname:
+
+```tsx
+const { getCurrentRoute } = useReactRouter();
+console.log(getCurrentRoute()); // Check actual pathname
+```
+
+---
+
+## Related
+
+- [Vite Integration Guide](/docs/guides/vite) - Complete Vite + React Router setup
+- [Router Adapters Overview](/docs/react/adapters) - All available adapters
+- [MultiTourKitProvider](/docs/react/providers/multi-tour-kit-provider) - Provider configuration

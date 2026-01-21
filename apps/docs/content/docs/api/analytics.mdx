@@ -1,0 +1,296 @@
+---
+title: '@tour-kit/analytics API'
+description: Complete API reference for @tour-kit/analytics
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/analytics API Reference
+
+Complete API reference for the analytics package. This package provides plugin-based analytics integration.
+
+---
+
+## Core
+
+### createAnalytics
+
+Factory function to create an analytics instance.
+
+```tsx
+import { createAnalytics } from '@tour-kit/analytics';
+
+const analytics = createAnalytics({
+  plugins: [consolePlugin(), posthogPlugin()],
+  defaultProperties: { appVersion: '1.0.0' },
+});
+```
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `plugins` | `AnalyticsPlugin[]` | Array of analytics plugins |
+| `defaultProperties` | `Record<string, unknown>` | Properties added to all events |
+
+### TourAnalytics
+
+Main analytics tracker class.
+
+```tsx
+const analytics = new TourAnalytics(config);
+
+// Tour events
+analytics.tourStarted(tourId, totalSteps, metadata?);
+analytics.tourCompleted(tourId, metadata?);
+analytics.tourSkipped(tourId, stepIndex, stepId?, metadata?);
+analytics.tourAbandoned(tourId, stepIndex, stepId?, metadata?);
+
+// Step events
+analytics.stepViewed(tourId, stepId, stepIndex, totalSteps, metadata?);
+analytics.stepCompleted(tourId, stepId, stepIndex, metadata?);
+analytics.stepSkipped(tourId, stepId, stepIndex, metadata?);
+analytics.stepInteraction(tourId, stepId, interactionType, metadata?);
+
+// Hint events
+analytics.hintShown(hintId, metadata?);
+analytics.hintDismissed(hintId, metadata?);
+analytics.hintClicked(hintId, metadata?);
+
+// Generic
+analytics.track(eventName, data?);
+analytics.identify(userId, properties?);
+await analytics.flush();
+analytics.destroy();
+```
+
+---
+
+## Providers
+
+### AnalyticsProvider
+
+React context provider for analytics.
+
+```tsx
+import { AnalyticsProvider } from '@tour-kit/analytics';
+
+<AnalyticsProvider analytics={analytics}>
+  {children}
+</AnalyticsProvider>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `analytics` | `TourAnalytics` | Analytics instance |
+
+---
+
+## Hooks
+
+### useAnalytics
+
+Hook to access analytics. Throws if not available.
+
+```tsx
+import { useAnalytics } from '@tour-kit/analytics';
+
+const analytics = useAnalytics();
+analytics.track('custom_event', { key: 'value' });
+```
+
+### useAnalyticsOptional
+
+Safe hook that returns null if analytics not available.
+
+```tsx
+import { useAnalyticsOptional } from '@tour-kit/analytics';
+
+const analytics = useAnalyticsOptional();
+analytics?.track('custom_event', { key: 'value' });
+```
+
+---
+
+## Plugins
+
+### consolePlugin
+
+Debug logging to console.
+
+```tsx
+import { consolePlugin } from '@tour-kit/analytics';
+
+consolePlugin({
+  enabled: true,
+  prefix: '[Tour]',
+});
+```
+
+### posthogPlugin
+
+PostHog integration.
+
+```tsx
+import { posthogPlugin } from '@tour-kit/analytics';
+
+posthogPlugin(); // Uses window.posthog
+```
+
+### mixpanelPlugin
+
+Mixpanel integration.
+
+```tsx
+import { mixpanelPlugin } from '@tour-kit/analytics';
+
+mixpanelPlugin(); // Uses window.mixpanel
+```
+
+### amplitudePlugin
+
+Amplitude integration.
+
+```tsx
+import { amplitudePlugin } from '@tour-kit/analytics';
+
+amplitudePlugin(); // Uses window.amplitude
+```
+
+### googleAnalyticsPlugin
+
+Google Analytics 4 integration.
+
+```tsx
+import { googleAnalyticsPlugin } from '@tour-kit/analytics';
+
+googleAnalyticsPlugin(); // Uses gtag()
+```
+
+---
+
+## Custom Plugin
+
+Create your own analytics plugin:
+
+```tsx
+import type { AnalyticsPlugin, TourEvent } from '@tour-kit/analytics';
+
+const customPlugin: AnalyticsPlugin = {
+  name: 'my-plugin',
+
+  async init() {
+    // Initialize SDK
+  },
+
+  track(event: TourEvent) {
+    mySDK.track(event.eventName, {
+      tourId: event.tourId,
+      stepId: event.stepId,
+      timestamp: event.timestamp,
+      ...event.metadata,
+    });
+  },
+
+  identify(userId: string, properties?: Record<string, unknown>) {
+    mySDK.identify(userId, properties);
+  },
+
+  page(name: string, properties?: Record<string, unknown>) {
+    mySDK.page(name, properties);
+  },
+
+  async flush() {
+    await mySDK.flush();
+  },
+
+  destroy() {
+    mySDK.shutdown();
+  },
+};
+```
+
+---
+
+## Event Types
+
+### Tour Events
+
+| Event | Description |
+|-------|-------------|
+| `tour_started` | User begins tour |
+| `tour_completed` | Tour finished all steps |
+| `tour_skipped` | Tour was skipped |
+| `tour_abandoned` | Page navigated away during tour |
+
+### Step Events
+
+| Event | Description |
+|-------|-------------|
+| `step_viewed` | Step displayed |
+| `step_completed` | Step finished |
+| `step_skipped` | Step was skipped |
+| `step_interaction` | User interacted during step |
+
+### Hint Events
+
+| Event | Description |
+|-------|-------------|
+| `hint_shown` | Hint displayed |
+| `hint_dismissed` | Hint dismissed |
+| `hint_clicked` | Hint clicked |
+
+### Feature Events
+
+| Event | Description |
+|-------|-------------|
+| `feature_used` | Feature usage tracked |
+| `feature_adopted` | Feature reached adopted status |
+| `feature_churned` | Feature adoption lost |
+| `nudge_shown` | Nudge shown |
+| `nudge_clicked` | Nudge clicked |
+| `nudge_dismissed` | Nudge dismissed |
+
+---
+
+## Types
+
+### TourEvent
+
+```tsx
+interface TourEvent {
+  eventName: TourEventName;
+  timestamp: number;
+  sessionId: string;
+  tourId: string;
+  stepId?: string;
+  stepIndex?: number;
+  totalSteps?: number;
+  userId?: string;
+  userProperties?: Record<string, unknown>;
+  duration?: number;
+  interactionCount?: number;
+  metadata?: Record<string, unknown>;
+}
+```
+
+### AnalyticsPlugin
+
+```tsx
+interface AnalyticsPlugin {
+  name: string;
+  init?(): Promise<void>;
+  track(event: TourEvent): void;
+  identify?(userId: string, properties?: Record<string, unknown>): void;
+  page?(name: string, properties?: Record<string, unknown>): void;
+  flush?(): Promise<void>;
+  destroy?(): void;
+}
+```
+
+### AnalyticsConfig
+
+```tsx
+interface AnalyticsConfig {
+  plugins: AnalyticsPlugin[];
+  defaultProperties?: Record<string, unknown>;
+}
+```

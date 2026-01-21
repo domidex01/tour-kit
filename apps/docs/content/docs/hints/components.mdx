@@ -1,0 +1,411 @@
+---
+title: Components
+description: Hint, HintHotspot, and HintTooltip components for contextual feature discovery
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Hint Components
+
+## Why Use Hints?
+
+Hints are persistent UI elements that draw attention to features without interrupting the user flow. Unlike tours (which are sequential and modal), hints:
+
+- **Stay visible** until explicitly dismissed
+- **Don't block** user interaction with the page
+- **Guide discovery** of features users might miss
+- **Persist across sessions** when configured
+
+Use hints for:
+- New feature announcements
+- Contextual help on complex UI elements
+- Onboarding nudges that don't require immediate action
+- Feature discovery for power users
+
+---
+
+## Hint
+
+The main component that combines a pulsing hotspot with a tooltip. This is the recommended way to add hints to your app.
+
+### Basic Usage
+
+```tsx
+import { HintsProvider, Hint } from '@tour-kit/hints';
+
+function App() {
+  return (
+    <HintsProvider>
+      <Hint
+        id="new-feature"
+        target="#export-button"
+        content="New! Export your data to CSV or PDF"
+      />
+
+      <button id="export-button">Export</button>
+    </HintsProvider>
+  );
+}
+```
+
+### Props
+
+<TypeTable
+  type={{
+    id: { type: 'string', description: 'Unique identifier for the hint (required)' },
+    target: { type: 'string | RefObject<HTMLElement>', description: 'CSS selector or ref to the target element (required)' },
+    content: { type: 'ReactNode', description: 'Tooltip content to display (required)' },
+    children: { type: 'ReactNode', description: 'Custom tooltip content (overrides content prop)' },
+    position: { type: "'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'", default: "'top-right'", description: 'Hotspot position relative to target' },
+    tooltipPlacement: { type: 'Placement', default: "'bottom'", description: 'Tooltip placement relative to hotspot' },
+    pulse: { type: 'boolean', default: 'true', description: 'Whether the hotspot pulses to attract attention' },
+    autoShow: { type: 'boolean', default: 'false', description: 'Automatically show tooltip on mount' },
+    persist: { type: 'boolean', default: 'false', description: 'Permanently dismiss on close (vs hide temporarily)' },
+    size: { type: "'default' | 'sm' | 'lg'", default: "'default'", description: 'Hotspot size variant' },
+    color: { type: "'default' | 'secondary' | 'destructive' | 'success' | 'warning'", default: "'default'", description: 'Hotspot color variant' },
+    zIndex: { type: "'default' | 'high'", default: "'default'", description: 'z-index level (default: z-50, high: z-9999)' },
+    className: { type: 'string', description: 'Additional CSS classes for the tooltip' },
+    hotspotClassName: { type: 'string', description: 'Additional CSS classes for the hotspot' },
+    onClick: { type: '() => void', description: 'Called when hotspot is clicked' },
+    onShow: { type: '() => void', description: 'Called when tooltip is shown' },
+    onDismiss: { type: '() => void', description: 'Called when hint is dismissed' },
+  }}
+/>
+
+### Styling Variants
+
+<Tabs items={['Size', 'Color', 'Position']}>
+  <Tab value="Size">
+```tsx
+// Small - subtle indicators
+<Hint id="subtle" target="#element" content="..." size="sm" />
+
+// Default - standard size
+<Hint id="normal" target="#element" content="..." size="default" />
+
+// Large - prominent indicators
+<Hint id="prominent" target="#element" content="..." size="lg" />
+```
+  </Tab>
+  <Tab value="Color">
+```tsx
+// Primary (default)
+<Hint id="primary" target="#element" content="..." color="default" />
+
+// Secondary
+<Hint id="secondary" target="#element" content="..." color="secondary" />
+
+// Success - for positive features
+<Hint id="success" target="#element" content="New!" color="success" />
+
+// Warning - for important features
+<Hint id="warning" target="#element" content="Required" color="warning" />
+
+// Destructive - for dangerous actions
+<Hint id="danger" target="#element" content="Caution" color="destructive" />
+```
+  </Tab>
+  <Tab value="Position">
+```tsx
+// Hotspot positions relative to target element
+<Hint id="tl" target="#element" position="top-left" content="..." />
+<Hint id="tr" target="#element" position="top-right" content="..." />
+<Hint id="bl" target="#element" position="bottom-left" content="..." />
+<Hint id="br" target="#element" position="bottom-right" content="..." />
+<Hint id="c" target="#element" position="center" content="..." />
+```
+  </Tab>
+</Tabs>
+
+### Using Refs
+
+```tsx
+import { useRef } from 'react';
+import { HintsProvider, Hint } from '@tour-kit/hints';
+
+function App() {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  return (
+    <HintsProvider>
+      <Hint
+        id="ref-hint"
+        target={buttonRef}
+        content="This hint targets a ref"
+      />
+
+      <button ref={buttonRef}>Target Button</button>
+    </HintsProvider>
+  );
+}
+```
+
+### Rich Content
+
+```tsx
+<Hint
+  id="rich-hint"
+  target="#feature"
+  content={
+    <div className="space-y-2">
+      <p className="font-semibold">New Feature!</p>
+      <p className="text-muted-foreground">
+        You can now export your data in multiple formats.
+      </p>
+      <button className="text-primary underline">Learn more</button>
+    </div>
+  }
+/>
+
+// Or use children for custom content
+<Hint id="custom-hint" target="#feature" content="">
+  <div className="space-y-2">
+    <h4>Custom Content</h4>
+    <p>Using children prop for full control</p>
+  </div>
+</Hint>
+```
+
+---
+
+## HintHotspot
+
+The pulsing indicator that appears near the target element. Use this directly for advanced customization.
+
+### Basic Usage
+
+```tsx
+import { HintHotspot } from '@tour-kit/hints';
+
+function CustomHint({ targetRect }: { targetRect: DOMRect }) {
+  return (
+    <HintHotspot
+      targetRect={targetRect}
+      position="top-right"
+      onClick={() => console.log('Clicked!')}
+    />
+  );
+}
+```
+
+### Props
+
+<TypeTable
+  type={{
+    targetRect: { type: 'DOMRect', description: 'Bounding rect of the target element (required)' },
+    position: { type: 'HotspotPosition', description: 'Position relative to target (required)' },
+    isOpen: { type: 'boolean', default: 'false', description: 'Whether the tooltip is currently open' },
+    asChild: { type: 'boolean', default: 'false', description: 'Merge props onto child element (Slot pattern)' },
+    size: { type: "'default' | 'sm' | 'lg'", default: "'default'", description: 'Size variant' },
+    color: { type: "'default' | 'secondary' | 'destructive' | 'success' | 'warning'", default: "'default'", description: 'Color variant' },
+    pulse: { type: 'boolean', default: 'true', description: 'Enable pulse animation' },
+    zIndex: { type: "'default' | 'high'", default: "'default'", description: 'z-index level' },
+    className: { type: 'string', description: 'Additional CSS classes' },
+  }}
+/>
+
+### Pulse Behavior
+
+The hotspot automatically stops pulsing when the tooltip is open:
+
+```tsx
+const [isOpen, setIsOpen] = useState(false);
+
+<HintHotspot
+  targetRect={rect}
+  position="top-right"
+  isOpen={isOpen} // Pulse stops when true
+  onClick={() => setIsOpen(!isOpen)}
+/>
+```
+
+### asChild Pattern
+
+Use `asChild` to render a custom element:
+
+```tsx
+<HintHotspot
+  targetRect={rect}
+  position="top-right"
+  asChild
+>
+  <MyCustomButton className="my-hotspot" />
+</HintHotspot>
+```
+
+---
+
+## HintTooltip
+
+The floating tooltip that appears when a hint is activated.
+
+### Basic Usage
+
+```tsx
+import { HintTooltip } from '@tour-kit/hints';
+
+function CustomTooltip({ target, onClose }: { target: HTMLElement; onClose: () => void }) {
+  return (
+    <HintTooltip
+      target={target}
+      placement="bottom"
+      onClose={onClose}
+    >
+      <p>This is the tooltip content</p>
+    </HintTooltip>
+  );
+}
+```
+
+### Props
+
+<TypeTable
+  type={{
+    target: { type: 'HTMLElement', description: 'Element to anchor the tooltip to (required)' },
+    placement: { type: 'Placement', default: "'bottom'", description: 'Position relative to target' },
+    onClose: { type: '() => void', description: 'Called when tooltip should close (required)' },
+    children: { type: 'ReactNode', description: 'Tooltip content (required)' },
+    closeButton: { type: 'ReactNode', description: 'Custom close button (replaces default)' },
+    asChild: { type: 'boolean', default: 'false', description: 'Merge props onto child element' },
+    size: { type: "'default' | 'sm' | 'lg'", default: "'default'", description: 'Size variant' },
+    zIndex: { type: "'default' | 'high'", default: "'default'", description: 'z-index level' },
+    className: { type: 'string', description: 'Additional CSS classes' },
+  }}
+/>
+
+### Placement Options
+
+The tooltip uses floating-ui for positioning with automatic collision detection:
+
+```tsx
+// Basic placements
+<HintTooltip placement="top" {...props} />
+<HintTooltip placement="bottom" {...props} />
+<HintTooltip placement="left" {...props} />
+<HintTooltip placement="right" {...props} />
+
+// With alignment
+<HintTooltip placement="top-start" {...props} />
+<HintTooltip placement="top-end" {...props} />
+<HintTooltip placement="bottom-start" {...props} />
+<HintTooltip placement="bottom-end" {...props} />
+```
+
+### Custom Close Button
+
+```tsx
+<HintTooltip
+  target={target}
+  onClose={handleClose}
+  closeButton={
+    <button
+      onClick={handleClose}
+      className="absolute right-2 top-2 text-red-500"
+    >
+      Dismiss
+    </button>
+  }
+>
+  Content here
+</HintTooltip>
+```
+
+### Size Variants
+
+```tsx
+// Small (max-width: 200px, text-xs)
+<HintTooltip size="sm" {...props}>Brief tip</HintTooltip>
+
+// Default (max-width: 280px, text-sm)
+<HintTooltip size="default" {...props}>Standard content</HintTooltip>
+
+// Large (max-width: 360px, text-base)
+<HintTooltip size="lg" {...props}>
+  Detailed explanation with more content
+</HintTooltip>
+```
+
+---
+
+## Complete Example
+
+Here's a full example combining all components:
+
+```tsx
+import { HintsProvider, Hint, useHint } from '@tour-kit/hints';
+
+function FeatureDiscovery() {
+  return (
+    <HintsProvider>
+      {/* New feature announcement */}
+      <Hint
+        id="export-feature"
+        target="#export-btn"
+        content="New! Export your data to multiple formats"
+        color="success"
+        persist={true}
+      />
+
+      {/* Important action hint */}
+      <Hint
+        id="save-warning"
+        target="#save-btn"
+        content="Don't forget to save your changes"
+        color="warning"
+        position="bottom-right"
+      />
+
+      {/* Subtle help hint */}
+      <Hint
+        id="help-hint"
+        target="#help-icon"
+        content="Click for documentation"
+        size="sm"
+        pulse={false}
+      />
+
+      <Dashboard />
+    </HintsProvider>
+  );
+}
+
+// Control hints programmatically
+function HintControls() {
+  const exportHint = useHint('export-feature');
+
+  return (
+    <div>
+      <button onClick={exportHint.show}>Show Hint</button>
+      <button onClick={exportHint.dismiss}>Dismiss Forever</button>
+      <button onClick={exportHint.reset}>Reset Hint</button>
+      <p>Status: {exportHint.isDismissed ? 'Dismissed' : exportHint.isOpen ? 'Open' : 'Hidden'}</p>
+    </div>
+  );
+}
+```
+
+---
+
+## Accessibility
+
+All hint components are built with accessibility in mind:
+
+- **Hotspot**: Has `role="button"`, `aria-label`, and `aria-expanded`
+- **Tooltip**: Has `role="tooltip"` via floating-ui
+- **Close button**: Has descriptive `aria-label="Dismiss hint"`
+- **Keyboard**: Escape key dismisses open tooltips
+- **Focus**: Focus ring visible on keyboard navigation
+
+<Callout type="info">
+  The pulsing animation respects `prefers-reduced-motion`. Users with motion sensitivity will see a static indicator instead.
+</Callout>
+
+---
+
+## Related
+
+- [Hooks](/docs/hints/hooks) - useHints and useHint for programmatic control
+- [Persistence](/docs/hints/persistence) - Configure hint dismissal persistence
+- [Headless](/docs/hints/headless) - Build custom hint UI

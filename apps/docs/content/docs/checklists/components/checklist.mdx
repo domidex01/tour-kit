@@ -1,0 +1,125 @@
+---
+title: Checklist
+description: Main checklist container component
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# Checklist
+
+The main container component that displays a complete checklist with tasks, header, and progress.
+
+## Usage
+
+```tsx
+import { Checklist } from '@tour-kit/checklists';
+
+<Checklist
+  checklistId="onboarding"
+  showHeader
+  showProgress
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    checklistId: {
+      type: 'string',
+      required: true,
+      description: 'ID of the checklist to display',
+    },
+    showHeader: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show checklist title and description',
+    },
+    showProgress: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show progress bar',
+    },
+    showDismiss: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Show dismiss button',
+    },
+    variant: {
+      type: "'default' | 'compact' | 'card'",
+      default: "'default'",
+      description: 'Visual variant',
+    },
+    size: {
+      type: "'sm' | 'default' | 'lg'",
+      default: "'default'",
+      description: 'Size variant',
+    },
+    asChild: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Render as child element (Radix UI pattern)',
+    },
+    renderTask: {
+      type: '(task, actions) => ReactNode',
+      description: 'Custom task renderer',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+## Examples
+
+### Basic Checklist
+
+```tsx
+<Checklist checklistId="onboarding" />
+```
+
+### With Custom Styling
+
+```tsx
+<Checklist
+  checklistId="onboarding"
+  variant="card"
+  size="lg"
+  className="shadow-lg"
+/>
+```
+
+### Custom Task Rendering
+
+```tsx
+<Checklist
+  checklistId="onboarding"
+  renderTask={(task, { execute, toggle }) => (
+    <div className="custom-task">
+      <input type="checkbox" checked={task.completed} onChange={toggle} />
+      <span>{task.config.title}</span>
+      {task.config.action && (
+        <button onClick={execute}>Start</button>
+      )}
+    </div>
+  )}
+/>
+```
+
+### Compact Mode
+
+```tsx
+<Checklist
+  checklistId="onboarding"
+  variant="compact"
+  showHeader={false}
+  showProgress={false}
+/>
+```
+
+## Related
+
+- [ChecklistTask](/docs/checklists/components/checklist-task) - Individual task component
+- [ChecklistProgress](/docs/checklists/components/checklist-progress) - Progress bar
+- [useChecklist](/docs/checklists/hooks/use-checklist) - Checklist hook

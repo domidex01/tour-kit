@@ -1,0 +1,190 @@
+---
+title: Headless Hints
+description: Build custom hint UIs with headless components
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Headless Hints
+
+Build completely custom hint UIs while leveraging Tour Kit's logic for positioning, state management, and accessibility.
+
+## Why Use Headless Components?
+
+- **Full design control** - No pre-built styles to override
+- **Custom rendering** - Use render props for complete flexibility
+- **Same logic** - Position calculation, floating UI, dismissal state
+- **Accessibility** - ARIA attributes and keyboard support included
+
+---
+
+## Available Components
+
+<Cards>
+  <Card title="HintHeadless" href="/docs/hints/headless/hint-headless">
+    Main container with state management and render props
+  </Card>
+  <Card title="HintHotspotHeadless" href="/docs/hints/headless/hint-hotspot-headless">
+    Positioned trigger button with render props
+  </Card>
+  <Card title="HintTooltipHeadless" href="/docs/hints/headless/hint-tooltip-headless">
+    Floating tooltip with positioning logic
+  </Card>
+</Cards>
+
+---
+
+## Quick Example
+
+```tsx
+import {
+  HintHeadless,
+  HintHotspotHeadless,
+  HintTooltipHeadless,
+} from '@tour-kit/hints/headless';
+
+function CustomHint() {
+  return (
+    <HintHeadless
+      id="feature-hint"
+      target="#new-feature"
+      content="Check out this new feature!"
+      render={({
+        isOpen,
+        targetRect,
+        hotspotRef,
+        position,
+        tooltipPlacement,
+        content,
+        dismiss,
+        targetElement,
+      }) => (
+        <>
+          <HintHotspotHeadless
+            ref={hotspotRef}
+            targetRect={targetRect}
+            position={position}
+            isOpen={isOpen}
+            render={({ position: pos }) => (
+              <button
+                className="custom-pulse-dot"
+                style={{
+                  position: 'fixed',
+                  top: pos.top,
+                  left: pos.left,
+                }}
+              >
+                <span className="dot" />
+              </button>
+            )}
+          />
+
+          {isOpen && targetElement && (
+            <HintTooltipHeadless
+              target={targetElement}
+              placement={tooltipPlacement}
+              onClose={dismiss}
+              render={({ floatingStyles, refs, getFloatingProps }) => (
+                <div
+                  ref={refs.setFloating}
+                  style={floatingStyles}
+                  className="custom-tooltip"
+                  {...getFloatingProps()}
+                >
+                  <p>{content}</p>
+                  <button onClick={dismiss}>Got it</button>
+                </div>
+              )}
+            />
+          )}
+        </>
+      )}
+    />
+  );
+}
+```
+
+---
+
+## Render Props Pattern
+
+All headless components support render props for full customization:
+
+```tsx
+// Render prop pattern
+<HintHeadless
+  render={(props) => <CustomUI {...props} />}
+/>
+
+// Props include:
+// - isOpen, isDismissed
+// - show, hide, dismiss
+// - targetElement, targetRect
+// - position, tooltipPlacement
+// - content
+```
+
+---
+
+## Composing Components
+
+You can use the headless components individually or compose them:
+
+### Full Composition
+
+```tsx
+<HintHeadless
+  id="my-hint"
+  target="#element"
+  render={(props) => (
+    <>
+      <HintHotspotHeadless {...} />
+      {props.isOpen && <HintTooltipHeadless {...} />}
+    </>
+  )}
+/>
+```
+
+### Hotspot Only
+
+```tsx
+<HintHotspotHeadless
+  targetRect={rect}
+  position="top-right"
+  isOpen={isOpen}
+  onClick={toggle}
+/>
+```
+
+### Tooltip Only
+
+```tsx
+<HintTooltipHeadless
+  target={element}
+  placement="bottom"
+  onClose={close}
+>
+  <MyTooltipContent />
+</HintTooltipHeadless>
+```
+
+---
+
+## Comparison: Styled vs Headless
+
+| Feature | Styled (`Hint`) | Headless (`HintHeadless`) |
+|---------|----------------|---------------------------|
+| Styling | Tailwind classes | None (you provide) |
+| Variants | Pre-built (primary, success, etc.) | Custom |
+| Flexibility | Component props | Render props |
+| Bundle size | Includes styles | Minimal |
+| Use case | Quick implementation | Custom design systems |
+
+---
+
+## Related
+
+- [Hint Components](/docs/hints/components) - Styled hint components
+- [Hint Hooks](/docs/hints/hooks) - useHint, useHints
+- [React Headless](/docs/react/headless) - Tour headless components

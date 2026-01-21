@@ -1,0 +1,135 @@
+---
+title: AdoptionTable
+description: Sortable table of features and adoption status
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+`AdoptionTable` displays all features in a sortable table with status badges, use counts, and timestamps.
+
+## Basic Usage
+
+```tsx
+import { AdoptionTable } from '@tour-kit/adoption'
+
+<AdoptionTable />
+```
+
+## Props
+
+<TypeTable
+  type={{
+    sortBy: {
+      type: '"name" | "status" | "useCount" | "lastUsed" | "category"',
+      default: '"name"',
+      description: 'Column to sort by',
+    },
+    sortOrder: {
+      type: '"asc" | "desc"',
+      default: '"asc"',
+      description: 'Sort direction',
+    },
+    showCategory: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show category column',
+    },
+    showPriority: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Show priority column',
+    },
+    features: {
+      type: 'FeatureWithUsage[]',
+      description: 'Custom feature array (uses context by default)',
+    },
+    onRowClick: {
+      type: '(feature: FeatureWithUsage) => void',
+      description: 'Row click handler',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes',
+    },
+  }}
+/>
+
+## Examples
+
+### Sorted Table
+
+```tsx
+<AdoptionTable sortBy="useCount" sortOrder="desc" />
+```
+
+### With Row Click
+
+```tsx
+<AdoptionTable
+  onRowClick={(feature) => {
+    console.log('Clicked:', feature.name)
+    // Navigate to feature details, etc.
+  }}
+/>
+```
+
+### Show All Columns
+
+```tsx
+<AdoptionTable
+  showCategory
+  showPriority
+/>
+```
+
+### Filtered Features
+
+```tsx
+import { useAdoptionStats } from '@tour-kit/adoption'
+
+function ChurnedFeaturesTable() {
+  const { byStatus } = useAdoptionStats()
+
+  return (
+    <div>
+      <h2>Churned Features</h2>
+      <AdoptionTable features={byStatus.churned} />
+    </div>
+  )
+}
+```
+
+## Table Columns
+
+Default columns:
+- **Name**: Feature name
+- **Status**: Adoption status badge
+- **Uses**: Total use count
+- **Last Used**: Relative time (e.g., "2 days ago")
+
+Optional columns:
+- **Category**: Feature category (if `showCategory={true}`)
+- **Priority**: Numeric priority (if `showPriority={true}`)
+
+## Accessibility
+
+The table includes:
+- Semantic `<table>` element
+- `<caption>` for screen readers
+- Sortable column headers with `aria-sort`
+- Row selection with keyboard
+
+```tsx
+<AdoptionTable
+  aria-label="Feature adoption table"
+  caption="Current adoption status for all features"
+/>
+```
+
+## Next Steps
+
+- [AdoptionStatusBadge](/docs/adoption/dashboard/charts) - Status badges
+- [useAdoptionStats](/docs/adoption/hooks/use-adoption-stats) - Filter data

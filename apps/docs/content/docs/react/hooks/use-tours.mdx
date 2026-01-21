@@ -1,0 +1,234 @@
+---
+title: useTours
+description: Access all registered tours and their state
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useTours
+
+Access all registered tours and their state. Useful for building tour selectors, progress dashboards, or checking completion status.
+
+## Why Use This Hook?
+
+- **List all tours** - Get all registered tours with step counts
+- **Check completion** - Know which tours are completed or skipped
+- **Track active tour** - See which tour (if any) is currently running
+- **Build selectors** - Create tour picker UIs
+
+---
+
+## Usage
+
+```tsx
+import { useTours, useTour } from '@tour-kit/react';
+
+function TourSelector() {
+  const { tours, isTourCompleted, activeTourId } = useTours();
+  const { start } = useTour();
+
+  return (
+    <div className="space-y-2">
+      <h3>Available Tours</h3>
+      {tours.map(tour => (
+        <button
+          key={tour.id}
+          onClick={() => start(tour.id)}
+          disabled={activeTourId !== null}
+          className={isTourCompleted(tour.id) ? 'opacity-50' : ''}
+        >
+          {tour.id} ({tour.stepCount} steps)
+          {isTourCompleted(tour.id) && ' ✓'}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+## Return Value
+
+<TypeTable
+  type={{
+    tours: {
+      type: 'TourInfo[]',
+      description: 'Array of all registered tours',
+    },
+    activeTourId: {
+      type: 'string | null',
+      description: 'ID of currently active tour, or null',
+    },
+    isAnyTourActive: {
+      type: 'boolean',
+      description: 'Whether any tour is currently running',
+    },
+    completedTours: {
+      type: 'string[]',
+      description: 'Array of completed tour IDs',
+    },
+    skippedTours: {
+      type: 'string[]',
+      description: 'Array of skipped tour IDs',
+    },
+    isTourCompleted: {
+      type: '(tourId: string) => boolean',
+      description: 'Check if a specific tour is completed',
+    },
+    isTourSkipped: {
+      type: '(tourId: string) => boolean',
+      description: 'Check if a specific tour was skipped',
+    },
+    getTour: {
+      type: '(tourId: string) => TourInfo | undefined',
+      description: 'Get info for a specific tour by ID',
+    },
+  }}
+/>
+
+### TourInfo Type
+
+```ts
+interface TourInfo {
+  id: string;
+  stepCount: number;
+}
+```
+
+---
+
+## Examples
+
+### Progress Dashboard
+
+```tsx
+function TourProgress() {
+  const { tours, completedTours, skippedTours } = useTours();
+
+  const completed = completedTours.length;
+  const skipped = skippedTours.length;
+  const total = tours.length;
+  const remaining = total - completed - skipped;
+
+  return (
+    <div className="p-4 bg-gray-100 rounded-lg">
+      <h4>Onboarding Progress</h4>
+      <div className="flex gap-4 mt-2">
+        <span className="text-green-600">{completed} completed</span>
+        <span className="text-yellow-600">{skipped} skipped</span>
+        <span className="text-gray-600">{remaining} remaining</span>
+      </div>
+      <progress
+        value={completed}
+        max={total}
+        className="w-full mt-2"
+      />
+    </div>
+  );
+}
+```
+
+### Tour Picker with Status
+
+```tsx
+function TourPicker() {
+  const { tours, isTourCompleted, isTourSkipped, isAnyTourActive } = useTours();
+  const { start } = useTour();
+
+  return (
+    <div className="space-y-2">
+      {tours.map(tour => {
+        const completed = isTourCompleted(tour.id);
+        const skipped = isTourSkipped(tour.id);
+
+        return (
+          <button
+            key={tour.id}
+            onClick={() => start(tour.id)}
+            disabled={isAnyTourActive}
+            className="flex items-center gap-2 p-2 w-full"
+          >
+            <span className="flex-1">{tour.id}</span>
+            <span className="text-sm text-gray-500">
+              {tour.stepCount} steps
+            </span>
+            {completed && <span className="text-green-500">✓</span>}
+            {skipped && <span className="text-yellow-500">⊘</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+```
+
+### Conditional Tour Button
+
+```tsx
+function SmartTourButton() {
+  const { tours, completedTours, isAnyTourActive } = useTours();
+  const { start } = useTour();
+
+  // Find first uncompleted tour
+  const nextTour = tours.find(t => !completedTours.includes(t.id));
+
+  if (!nextTour || isAnyTourActive) return null;
+
+  return (
+    <button
+      onClick={() => start(nextTour.id)}
+      className="fixed bottom-4 right-4 btn-primary"
+    >
+      Continue: {nextTour.id}
+    </button>
+  );
+}
+```
+
+### All Tours Completed Check
+
+```tsx
+function OnboardingComplete() {
+  const { tours, completedTours } = useTours();
+
+  const allCompleted = tours.every(
+    tour => completedTours.includes(tour.id)
+  );
+
+  if (!allCompleted) return null;
+
+  return (
+    <div className="p-4 bg-green-100 text-green-800 rounded">
+      🎉 You've completed all tours! You're all set.
+    </div>
+  );
+}
+```
+
+---
+
+## Requirements
+
+<Callout type="warn">
+This hook must be used within a `MultiTourKitProvider`. It will throw an error if used outside the provider context.
+</Callout>
+
+```tsx
+// ✓ Correct
+<MultiTourKitProvider>
+  <ComponentUsingUseTours />
+</MultiTourKitProvider>
+
+// ✗ Will throw
+<ComponentUsingUseTours />
+```
+
+---
+
+## Related
+
+- [useTour](/docs/core/hooks/use-tour) - Control individual tour actions
+- [MultiTourKitProvider](/docs/react/providers/multi-tour-kit-provider) - Parent provider
+- [Tour](/docs/react/components/tour) - Tour component

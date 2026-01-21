@@ -1,0 +1,274 @@
+---
+title: Presets
+description: Pre-configured constants and patterns for common scheduling scenarios
+---
+
+# Presets
+
+Built-in constants for common scheduling patterns.
+
+## BUSINESS_HOURS_PRESETS
+
+Pre-configured business hours patterns.
+
+### standard
+
+Monday-Friday, 9am-5pm.
+
+```ts
+import { BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
+
+const hours = BUSINESS_HOURS_PRESETS.standard
+// {
+//   default: { open: false },
+//   days: {
+//     1: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+//     2: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+//     3: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+//     4: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+//     5: { open: true, hours: [{ start: '09:00', end: '17:00' }] },
+//   }
+// }
+```
+
+### extended
+
+Monday-Saturday, 8am-8pm (Saturday 10am-6pm).
+
+```ts
+const hours = BUSINESS_HOURS_PRESETS.extended
+// {
+//   default: { open: false },
+//   days: {
+//     1: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+//     2: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+//     3: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+//     4: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+//     5: { open: true, hours: [{ start: '08:00', end: '20:00' }] },
+//     6: { open: true, hours: [{ start: '10:00', end: '18:00' }] },
+//   }
+// }
+```
+
+### always
+
+24/7 availability.
+
+```ts
+const hours = BUSINESS_HOURS_PRESETS.always
+// {
+//   default: { open: true, hours: [{ start: '00:00', end: '23:59' }] }
+// }
+```
+
+### weekdaysOnly
+
+Monday-Friday, all day.
+
+```ts
+const hours = BUSINESS_HOURS_PRESETS.weekdaysOnly
+// {
+//   default: { open: false },
+//   days: {
+//     1: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+//     2: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+//     3: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+//     4: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+//     5: { open: true, hours: [{ start: '00:00', end: '23:59' }] },
+//   }
+// }
+```
+
+## DAY_NAMES
+
+Array of day names for configuration.
+
+```ts
+import { DAY_NAMES } from '@tour-kit/scheduling'
+
+DAY_NAMES
+// ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+type DayName = (typeof DAY_NAMES)[number]
+// 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday'
+```
+
+### Usage
+
+```tsx
+import { DAY_NAMES, dayNameToNumber } from '@tour-kit/scheduling'
+
+function DayPicker() {
+  return (
+    <select>
+      {DAY_NAMES.map((day) => (
+        <option key={day} value={dayNameToNumber(day)}>
+          {day}
+        </option>
+      ))}
+    </select>
+  )
+}
+```
+
+## DAY_GROUPS
+
+Pre-defined groups of days.
+
+```ts
+import { DAY_GROUPS } from '@tour-kit/scheduling'
+
+DAY_GROUPS.weekdays // [1, 2, 3, 4, 5]
+DAY_GROUPS.weekends // [0, 6]
+DAY_GROUPS.all // [0, 1, 2, 3, 4, 5, 6]
+```
+
+### Usage
+
+```ts
+import { DAY_GROUPS } from '@tour-kit/scheduling'
+
+const schedule = {
+  daysOfWeek: DAY_GROUPS.weekdays,
+  timeOfDay: { start: '09:00', end: '17:00' },
+}
+```
+
+## Examples
+
+### Combine Presets
+
+```ts
+import { BUSINESS_HOURS_PRESETS, DAY_GROUPS } from '@tour-kit/scheduling'
+
+const schedule = {
+  daysOfWeek: DAY_GROUPS.weekdays,
+  timeOfDay: BUSINESS_HOURS_PRESETS.standard.days[1].hours[0],
+  // { start: '09:00', end: '17:00' }
+}
+```
+
+### Extract Single Day Hours
+
+```ts
+import { BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
+
+// Get Monday hours from standard preset
+const mondayHours = BUSINESS_HOURS_PRESETS.standard.days[1]
+// { open: true, hours: [{ start: '09:00', end: '17:00' }] }
+
+const timeRange = mondayHours.hours[0]
+// { start: '09:00', end: '17:00' }
+```
+
+### Custom Preset with Timezone
+
+```ts
+import { BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
+
+const customHours = {
+  ...BUSINESS_HOURS_PRESETS.standard,
+  timezone: 'America/New_York',
+  holidays: ['2024-12-25', '2024-01-01'],
+}
+```
+
+### Display All Presets
+
+```tsx
+import { BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
+
+function PresetSelector() {
+  const presets = Object.keys(BUSINESS_HOURS_PRESETS) as Array<
+    keyof typeof BUSINESS_HOURS_PRESETS
+  >
+
+  return (
+    <select>
+      {presets.map((preset) => (
+        <option key={preset} value={preset}>
+          {preset}
+        </option>
+      ))}
+    </select>
+  )
+}
+```
+
+### Type-Safe Preset Access
+
+```ts
+import { BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
+import type { BusinessHoursPreset } from '@tour-kit/scheduling'
+
+function getPreset(name: BusinessHoursPreset) {
+  return BUSINESS_HOURS_PRESETS[name]
+}
+
+const hours = getPreset('standard')
+// Type-safe: only accepts 'standard' | 'extended' | 'always' | 'weekdaysOnly'
+```
+
+### Build Custom Day Groups
+
+```ts
+import { DAY_GROUPS } from '@tour-kit/scheduling'
+import type { DayOfWeek } from '@tour-kit/scheduling'
+
+const CUSTOM_GROUPS = {
+  ...DAY_GROUPS,
+  businessDays: [1, 2, 3, 4] as DayOfWeek[], // Mon-Thu
+  flexFriday: [5] as DayOfWeek[],
+} as const
+```
+
+### Iterate Day Names
+
+```ts
+import { DAY_NAMES, dayNameToNumber } from '@tour-kit/scheduling'
+
+const dayMap = DAY_NAMES.reduce(
+  (acc, name) => {
+    acc[name] = dayNameToNumber(name)
+    return acc
+  },
+  {} as Record<string, number>
+)
+
+// {
+//   sunday: 0,
+//   monday: 1,
+//   tuesday: 2,
+//   ...
+// }
+```
+
+## Type Reference
+
+```ts
+// Business hours preset names
+type BusinessHoursPreset = 'standard' | 'extended' | 'always' | 'weekdaysOnly'
+
+// Day name
+type DayName =
+  | 'sunday'
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+
+// Day groups
+type DayGroups = {
+  weekdays: DayOfWeek[]
+  weekends: DayOfWeek[]
+  all: DayOfWeek[]
+}
+```
+
+## Related
+
+- [Business Hours Utilities](/docs/scheduling/utilities/business-hours) - Using business hours
+- [Day of Week Utilities](/docs/scheduling/utilities/day-of-week) - Day utilities
+- [Types Reference](/docs/scheduling/types) - Full type definitions

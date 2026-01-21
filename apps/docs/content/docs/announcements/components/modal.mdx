@@ -1,0 +1,358 @@
+---
+title: AnnouncementModal
+description: Centered dialog component for important announcements
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# AnnouncementModal
+
+A centered modal dialog with overlay backdrop. Best for critical announcements that require user attention.
+
+## When to Use
+
+- Critical security updates
+- Breaking changes
+- Important feature releases
+- User action required
+- Major product announcements
+
+---
+
+## Basic Usage
+
+```tsx
+import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'security-update',
+    variant: 'modal',
+    title: 'Security Update Required',
+    description: 'Please update your password to continue using the app.',
+    primaryAction: {
+      label: 'Update Now',
+      onClick: () => router.push('/settings/security'),
+    },
+  },
+];
+
+function App() {
+  return (
+    <AnnouncementsProvider announcements={announcements}>
+      <AnnouncementModal id="security-update" />
+      <YourApp />
+    </AnnouncementsProvider>
+  );
+}
+```
+
+---
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Announcement identifier matching config',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes for the modal',
+    },
+    asChild: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Use Slot pattern for custom element',
+    },
+  }}
+/>
+
+---
+
+## Modal Options
+
+Configure modal behavior in the announcement config:
+
+```tsx
+{
+  id: 'announcement',
+  variant: 'modal',
+  modalOptions: {
+    size: 'md', // 'sm' | 'md' | 'lg' | 'xl'
+    closeOnOverlayClick: true,
+    closeOnEscape: true,
+    showCloseButton: true,
+  },
+}
+```
+
+### ModalOptions
+
+<TypeTable
+  type={{
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'xl'",
+      default: "'md'",
+      description: 'Modal width - sm: 400px, md: 500px, lg: 600px, xl: 800px',
+    },
+    closeOnOverlayClick: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Allow closing by clicking outside modal',
+    },
+    closeOnEscape: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Allow closing with Escape key',
+    },
+    showCloseButton: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Show X button in top-right corner',
+    },
+  }}
+/>
+
+---
+
+## Complete Example
+
+```tsx
+const announcements = [
+  {
+    id: 'feature-launch',
+    variant: 'modal',
+    priority: 'high',
+    title: 'New Export Feature',
+    description: 'Export your data to CSV, PDF, or Excel format.',
+
+    media: {
+      type: 'image',
+      src: '/export-preview.png',
+      alt: 'Export feature preview',
+    },
+
+    primaryAction: {
+      label: 'Try It Now',
+      onClick: () => router.push('/export'),
+    },
+
+    secondaryAction: {
+      label: 'Learn More',
+      onClick: () => window.open('/docs/export'),
+    },
+
+    modalOptions: {
+      size: 'lg',
+      closeOnOverlayClick: false, // Prevent accidental closing
+      showCloseButton: true,
+    },
+
+    frequency: 'once',
+    onShow: () => analytics.track('modal_shown'),
+    onDismiss: (reason) => analytics.track('modal_dismissed', { reason }),
+  },
+];
+
+<AnnouncementModal id="feature-launch" />
+```
+
+---
+
+## With Media
+
+Display images or videos in the modal:
+
+```tsx
+{
+  id: 'video-announcement',
+  variant: 'modal',
+  title: 'Product Demo',
+  description: 'Watch how the new feature works.',
+
+  media: {
+    type: 'video',
+    src: '/demo.mp4',
+    poster: '/demo-poster.jpg',
+  },
+
+  modalOptions: {
+    size: 'xl', // Larger for video
+  },
+}
+```
+
+---
+
+## Preventing Dismissal
+
+For critical modals that require user action:
+
+```tsx
+{
+  id: 'terms-update',
+  variant: 'modal',
+  title: 'Terms of Service Update',
+  description: 'Please accept the updated terms to continue.',
+
+  primaryAction: {
+    label: 'Accept',
+    onClick: () => acceptTerms(),
+  },
+
+  modalOptions: {
+    closeOnOverlayClick: false,
+    closeOnEscape: false,
+    showCloseButton: false, // No way to dismiss without action
+  },
+}
+```
+
+<Callout type="warn">
+  Use non-dismissable modals sparingly. Always provide a clear action path for users.
+</Callout>
+
+---
+
+## Size Variants
+
+```tsx
+// Small - 400px wide
+{
+  id: 'small',
+  variant: 'modal',
+  title: 'Quick Tip',
+  modalOptions: { size: 'sm' },
+}
+
+// Medium (default) - 500px wide
+{
+  id: 'medium',
+  variant: 'modal',
+  title: 'Feature Update',
+  modalOptions: { size: 'md' },
+}
+
+// Large - 600px wide
+{
+  id: 'large',
+  variant: 'modal',
+  title: 'Detailed Announcement',
+  modalOptions: { size: 'lg' },
+}
+
+// Extra Large - 800px wide
+{
+  id: 'xlarge',
+  variant: 'modal',
+  title: 'Full Product Demo',
+  modalOptions: { size: 'xl' },
+}
+```
+
+---
+
+## Styling
+
+### Custom Classes
+
+```tsx
+<AnnouncementModal
+  id="custom"
+  className="custom-modal shadow-2xl border-2 border-primary"
+/>
+```
+
+### CSS Variables
+
+```css
+:root {
+  --announcement-modal-bg: white;
+  --announcement-modal-text: #1a1a1a;
+  --announcement-overlay-bg: rgba(0, 0, 0, 0.5);
+  --announcement-border-radius: 0.5rem;
+  --announcement-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.dark {
+  --announcement-modal-bg: #1a1a1a;
+  --announcement-modal-text: white;
+  --announcement-overlay-bg: rgba(0, 0, 0, 0.7);
+}
+```
+
+---
+
+## Accessibility
+
+The modal component includes:
+
+- **ARIA dialog role** - Proper semantic role
+- **Focus trap** - Focus stays within modal
+- **Focus restoration** - Returns focus when closed
+- **Keyboard support** - Escape to close (if enabled)
+- **Screen reader** - Announced as dialog
+- **Close button** - Labeled "Close announcement"
+
+```tsx
+// Rendered HTML structure
+<div role="dialog" aria-labelledby="modal-title" aria-modal="true">
+  <h2 id="modal-title">Announcement Title</h2>
+  <p>Description...</p>
+  <button aria-label="Close announcement">×</button>
+</div>
+```
+
+---
+
+## Programmatic Control
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements';
+
+function ModalController() {
+  const modal = useAnnouncement('my-modal');
+
+  return (
+    <div>
+      <button onClick={modal.show}>Open Modal</button>
+      <button onClick={modal.hide}>Close Modal</button>
+      <button onClick={() => modal.dismiss('programmatic')}>
+        Dismiss Forever
+      </button>
+
+      <AnnouncementModal id="my-modal" />
+    </div>
+  );
+}
+```
+
+---
+
+## TypeScript
+
+```tsx
+import type { AnnouncementConfig, ModalOptions } from '@tour-kit/announcements';
+
+const modalConfig: AnnouncementConfig = {
+  id: 'typed-modal',
+  variant: 'modal',
+  title: 'Typed Announcement',
+  modalOptions: {
+    size: 'lg',
+    closeOnOverlayClick: false,
+  } satisfies ModalOptions,
+};
+```
+
+---
+
+## Related
+
+- [Headless Modal](/docs/announcements/headless/modal) - Build custom modal UI
+- [AnnouncementOverlay](/docs/announcements/components) - Shared overlay component
+- [useAnnouncement](/docs/announcements/hooks/use-announcement) - Programmatic control

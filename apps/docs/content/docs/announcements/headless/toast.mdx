@@ -1,0 +1,51 @@
+---
+title: HeadlessToast
+description: Headless toast component with render props
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# HeadlessToast
+
+Unstyled toast notification that provides state and behavior through render props.
+
+## Additional Render Props
+
+<TypeTable
+  type={{
+    toastOptions: { type: 'ToastOptions', description: 'Position and auto-dismiss options' },
+    position: { type: 'ToastPosition', description: 'Screen position (6 options)' },
+    intent: { type: 'Intent', description: 'Visual intent' },
+    progress: { type: 'number', description: 'Auto-dismiss progress (0-100)' },
+    remainingTime: { type: 'number', description: 'Milliseconds until auto-dismiss' },
+  }}
+/>
+
+## Example
+
+```tsx
+import { HeadlessToast } from '@tour-kit/announcements/headless';
+
+<HeadlessToast
+  id="tip"
+  render={({ isVisible, config, position, intent, progress, remainingTime }) => {
+    if (!isVisible) return null;
+
+    return (
+      <div
+        className={`toast ${position} ${intent}`}
+        role="status"
+        aria-live="polite"
+      >
+        <p>{config.title}</p>
+        {config.toastOptions?.showProgress && (
+          <div className="progress-bar">
+            <div className="progress" style={{ width: `${progress}%` }} />
+          </div>
+        )}
+        <span className="time">{Math.ceil(remainingTime / 1000)}s</span>
+      </div>
+    );
+  }}
+/>
+```

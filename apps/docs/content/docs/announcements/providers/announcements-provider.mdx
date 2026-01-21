@@ -1,0 +1,545 @@
+---
+title: AnnouncementsProvider
+description: Root provider for announcement state and configuration
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# AnnouncementsProvider
+
+The root provider that manages announcement state, queue, persistence, and configuration. All announcement components and hooks must be used within this provider.
+
+## Why Use AnnouncementsProvider?
+
+The provider centralizes announcement management:
+
+- **State management** - Tracks views, dismissals, and active announcements
+- **Queue management** - Automatically orders by priority and shows next in queue
+- **Persistence** - Saves state to localStorage/sessionStorage
+- **Audience targeting** - Filters announcements based on user context
+- **Lifecycle callbacks** - Global event handlers for all announcements
+
+---
+
+## Basic Usage
+
+```tsx
+import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements';
+
+function App() {
+  return (
+    <AnnouncementsProvider
+      announcements={[
+        {
+          id: 'welcome',
+          variant: 'modal',
+          title: 'Welcome!',
+          description: 'Thanks for joining us.',
+        },
+      ]}
+    >
+      <AnnouncementModal id="welcome" />
+      <YourApp />
+    </AnnouncementsProvider>
+  );
+}
+```
+
+---
+
+## Props
+
+<TypeTable
+  type={{
+    children: {
+      type: 'ReactNode',
+      required: true,
+      description: 'Your application content',
+    },
+    announcements: {
+      type: 'AnnouncementConfig[]',
+      default: '[]',
+      description: 'Array of announcement configurations',
+    },
+    queueConfig: {
+      type: 'QueueConfig',
+      description: 'Queue behavior configuration',
+    },
+    storage: {
+      type: "'localStorage' | 'sessionStorage' | 'memory'",
+      default: "'localStorage'",
+      description: 'Persistence storage type',
+    },
+    storageKey: {
+      type: 'string',
+      default: "'tour-kit:announcements'",
+      description: 'Key for storing state in storage',
+    },
+    userContext: {
+      type: 'Record<string, unknown>',
+      description: 'User data for audience targeting',
+    },
+    onShow: {
+      type: '(id: string) => void',
+      description: 'Called when any announcement is shown',
+    },
+    onDismiss: {
+      type: '(id: string, reason: DismissalReason) => void',
+      description: 'Called when any announcement is dismissed',
+    },
+    onComplete: {
+      type: '(id: string) => void',
+      description: 'Called when any announcement is completed',
+    },
+  }}
+/>
+
+---
+
+## Announcement Configuration
+
+Each announcement in the `announcements` array requires:
+
+```tsx
+const announcements: AnnouncementConfig[] = [
+  {
+    id: 'unique-id', // Required: unique identifier
+    variant: 'modal', // Required: 'modal' | 'slideout' | 'banner' | 'toast' | 'spotlight'
+    priority: 'high', // Optional: 'low' | 'normal' | 'high' | 'critical'
+    title: 'Announcement Title',
+    description: 'Announcement description',
+
+    // Actions
+    primaryAction: {
+      label: 'Get Started',
+      onClick: () => console.log('Primary action'),
+    },
+    secondaryAction: {
+      label: 'Learn More',
+      onClick: () => console.log('Secondary action'),
+    },
+
+    // Display rules
+    frequency: 'once', // 'once' | 'session' | 'always' | object
+    audience: [], // Targeting rules
+    schedule: {}, // From @tour-kit/scheduling
+
+    // Variant-specific options
+    modalOptions: { size: 'md' },
+    slideoutOptions: { position: 'right' },
+    bannerOptions: { sticky: true },
+    toastOptions: { autoDismiss: true },
+    spotlightOptions: { targetSelector: '#element' },
+
+    // Callbacks
+    onShow: () => console.log('Shown'),
+    onDismiss: (reason) => console.log('Dismissed', reason),
+    onComplete: () => console.log('Completed'),
+
+    // Metadata
+    metadata: { campaign: 'spring-2024' },
+  },
+];
+```
+
+---
+
+## Queue Configuration
+
+Control how announcements are queued and displayed:
+
+```tsx
+<AnnouncementsProvider
+  queueConfig={{
+    maxConcurrent: 1, // Only show 1 announcement at a time
+    autoShow: true, // Automatically show next in queue
+    delayBetween: 1000, // Wait 1s between announcements
+    respectPriority: true, // Order by priority (default: true)
+  }}
+/>
+```
+
+### QueueConfig Options
+
+<TypeTable
+  type={{
+    maxConcurrent: {
+      type: 'number',
+      default: '1',
+      description: 'Maximum announcements to show simultaneously',
+    },
+    autoShow: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Automatically show next announcement when one is dismissed',
+    },
+    delayBetween: {
+      type: 'number',
+      default: '0',
+      description: 'Milliseconds to wait between announcements',
+    },
+    respectPriority: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Order announcements by priority level',
+    },
+  }}
+/>
+
+---
+
+## User Context for Targeting
+
+Provide user data to enable audience targeting:
+
+```tsx
+<AnnouncementsProvider
+  userContext={{
+    userId: '123',
+    plan: 'pro',
+    role: 'admin',
+    signupDate: '2024-01-15',
+    features: ['export', 'api'],
+    preferences: {
+      theme: 'dark',
+    },
+  }}
+  announcements={[
+    {
+      id: 'pro-feature',
+      variant: 'modal',
+      title: 'New Pro Feature',
+      audience: [
+        { field: 'plan', operator: 'equals', value: 'pro' },
+      ],
+    },
+    {
+      id: 'admin-notice',
+      variant: 'banner',
+      title: 'Admin Update',
+      audience: [
+        { field: 'role', operator: 'equals', value: 'admin' },
+      ],
+    },
+  ]}
+/>
+```
+
+See [Audience Targeting](/docs/announcements/configuration/audience) for detailed targeting rules.
+
+---
+
+## Storage Options
+
+### localStorage (Default)
+
+Persist across browser sessions:
+
+```tsx
+<AnnouncementsProvider
+  storage="localStorage"
+  storageKey="my-app:announcements"
+/>
+```
+
+### sessionStorage
+
+Persist only for current session:
+
+```tsx
+<AnnouncementsProvider
+  storage="sessionStorage"
+  storageKey="my-app:announcements"
+/>
+```
+
+### Memory
+
+No persistence (resets on page reload):
+
+```tsx
+<AnnouncementsProvider storage="memory" />
+```
+
+<Callout type="warn">
+  Using `storage="memory"` means announcement state will reset on page reload. Users will see dismissed announcements again.
+</Callout>
+
+---
+
+## Global Callbacks
+
+Track announcement events across your app:
+
+```tsx
+<AnnouncementsProvider
+  announcements={announcements}
+  onShow={(id) => {
+    console.log(`Announcement shown: ${id}`);
+    analytics.track('announcement_shown', { announcementId: id });
+  }}
+  onDismiss={(id, reason) => {
+    console.log(`Announcement dismissed: ${id}, reason: ${reason}`);
+    analytics.track('announcement_dismissed', {
+      announcementId: id,
+      dismissalReason: reason,
+    });
+  }}
+  onComplete={(id) => {
+    console.log(`Announcement completed: ${id}`);
+    analytics.track('announcement_completed', { announcementId: id });
+  }}
+/>
+```
+
+### Dismissal Reasons
+
+The `onDismiss` callback receives one of these reasons:
+
+- `'close_button'` - User clicked close button
+- `'overlay_click'` - User clicked overlay (modals/slideouts)
+- `'escape_key'` - User pressed Escape key
+- `'primary_action'` - User clicked primary action button
+- `'secondary_action'` - User clicked secondary action button
+- `'auto_dismiss'` - Toast auto-dismissed after delay
+- `'programmatic'` - Dismissed via hook/API call
+
+---
+
+## Complete Example
+
+```tsx
+import {
+  AnnouncementsProvider,
+  AnnouncementModal,
+  AnnouncementBanner,
+  AnnouncementToast,
+} from '@tour-kit/announcements';
+
+const announcements = [
+  {
+    id: 'critical-update',
+    variant: 'modal',
+    priority: 'critical',
+    title: 'Security Update Required',
+    description: 'Please update your password immediately.',
+    frequency: 'always',
+    primaryAction: {
+      label: 'Update Now',
+      onClick: () => router.push('/settings/security'),
+    },
+    modalOptions: {
+      size: 'md',
+      closeOnOverlayClick: false,
+      closeOnEscape: false,
+    },
+  },
+  {
+    id: 'new-export',
+    variant: 'modal',
+    priority: 'high',
+    title: 'New Export Feature',
+    description: 'Export your data to CSV, PDF, or Excel.',
+    frequency: 'once',
+    audience: [
+      { field: 'plan', operator: 'in', value: ['pro', 'enterprise'] },
+    ],
+    media: {
+      type: 'image',
+      src: '/images/export-feature.png',
+      alt: 'Export feature preview',
+    },
+    primaryAction: {
+      label: 'Try It Now',
+      onClick: () => router.push('/export'),
+    },
+    secondaryAction: {
+      label: 'Learn More',
+      onClick: () => window.open('/docs/export', '_blank'),
+    },
+  },
+  {
+    id: 'maintenance',
+    variant: 'banner',
+    priority: 'normal',
+    title: 'Scheduled maintenance tonight at 2 AM EST',
+    frequency: 'session',
+    bannerOptions: {
+      position: 'top',
+      sticky: true,
+      intent: 'warning',
+    },
+  },
+  {
+    id: 'tip-of-day',
+    variant: 'toast',
+    priority: 'low',
+    title: 'Pro Tip: Use keyboard shortcuts!',
+    frequency: { type: 'interval', days: 7 },
+    toastOptions: {
+      position: 'bottom-right',
+      autoDismiss: true,
+      autoDismissDelay: 5000,
+    },
+  },
+];
+
+function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Fetch user data
+    fetchUser().then(setUser);
+  }, []);
+
+  if (!user) return <Loading />;
+
+  return (
+    <AnnouncementsProvider
+      announcements={announcements}
+      userContext={{
+        userId: user.id,
+        plan: user.plan,
+        role: user.role,
+        signupDate: user.createdAt,
+      }}
+      queueConfig={{
+        maxConcurrent: 1,
+        autoShow: true,
+        delayBetween: 500,
+      }}
+      storage="localStorage"
+      storageKey="myapp:announcements"
+      onShow={(id) => {
+        console.log('Shown:', id);
+        analytics.track('announcement_shown', { id });
+      }}
+      onDismiss={(id, reason) => {
+        console.log('Dismissed:', id, reason);
+        analytics.track('announcement_dismissed', { id, reason });
+      }}
+      onComplete={(id) => {
+        console.log('Completed:', id);
+        analytics.track('announcement_completed', { id });
+      }}
+    >
+      {/* Render announcement UI components */}
+      <AnnouncementModal id="critical-update" />
+      <AnnouncementModal id="new-export" />
+      <AnnouncementBanner id="maintenance" />
+      <AnnouncementToast id="tip-of-day" />
+
+      {/* Your app content */}
+      <MainApp />
+    </AnnouncementsProvider>
+  );
+}
+```
+
+---
+
+## Dynamic Announcements
+
+Add or update announcements after initial render:
+
+```tsx
+function DynamicAnnouncementsExample() {
+  const [announcements, setAnnouncements] = useState([]);
+
+  useEffect(() => {
+    // Fetch announcements from API
+    fetch('/api/announcements')
+      .then(res => res.json())
+      .then(data => setAnnouncements(data));
+  }, []);
+
+  return (
+    <AnnouncementsProvider announcements={announcements}>
+      <App />
+    </AnnouncementsProvider>
+  );
+}
+```
+
+<Callout type="info">
+  When the `announcements` prop changes, the provider will re-evaluate which announcements should be shown based on frequency rules and user context.
+</Callout>
+
+---
+
+## Nested Providers
+
+You can nest providers for different sections of your app:
+
+```tsx
+function App() {
+  return (
+    <AnnouncementsProvider
+      announcements={globalAnnouncements}
+      storageKey="app:global"
+    >
+      <Dashboard />
+
+      <AdminPanel>
+        <AnnouncementsProvider
+          announcements={adminAnnouncements}
+          storageKey="app:admin"
+        >
+          <AdminContent />
+        </AnnouncementsProvider>
+      </AdminPanel>
+    </AnnouncementsProvider>
+  );
+}
+```
+
+<Callout type="warn">
+  Each provider maintains its own state. Nested providers won't share announcement state with parent providers.
+</Callout>
+
+---
+
+## TypeScript
+
+The provider is fully typed:
+
+```tsx
+import type {
+  AnnouncementConfig,
+  QueueConfig,
+  DismissalReason,
+} from '@tour-kit/announcements';
+
+const announcements: AnnouncementConfig[] = [
+  {
+    id: 'welcome',
+    variant: 'modal',
+    title: 'Welcome!',
+  },
+];
+
+const queueConfig: QueueConfig = {
+  maxConcurrent: 1,
+  autoShow: true,
+};
+
+<AnnouncementsProvider
+  announcements={announcements}
+  queueConfig={queueConfig}
+  onDismiss={(id: string, reason: DismissalReason) => {
+    console.log(id, reason);
+  }}
+>
+  <App />
+</AnnouncementsProvider>
+```
+
+---
+
+## Related
+
+- [useAnnouncements](/docs/announcements/hooks/use-announcements) - Access provider state
+- [Queue Configuration](/docs/announcements/configuration/queue) - Detailed queue config
+- [Audience Targeting](/docs/announcements/configuration/audience) - Targeting rules
+- [Frequency Rules](/docs/announcements/configuration/frequency) - Display frequency

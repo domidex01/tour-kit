@@ -1,0 +1,338 @@
+---
+title: Recurring Pattern Utilities
+description: Functions for matching recurring schedules
+---
+
+# Recurring Pattern Utilities
+
+Check if a date matches a recurring pattern for repeating schedules.
+
+## matchesRecurringPattern
+
+Check if a date matches a recurring pattern.
+
+```ts
+import { matchesRecurringPattern } from '@tour-kit/scheduling'
+
+const pattern = {
+  type: 'weekly',
+  daysOfWeek: [1, 3], // Monday and Wednesday
+  interval: 1,
+}
+
+const matches = matchesRecurringPattern(
+  new Date(),
+  pattern,
+  'UTC',
+  '2024-01-01' // Start date
+)
+```
+
+### API
+
+```ts
+function matchesRecurringPattern(
+  date: Date,
+  pattern: RecurringPattern,
+  timezone: string,
+  startDate?: DateString | Date
+): boolean
+```
+
+### Parameters
+
+- **date** - The date to check
+- **pattern** - The recurring pattern configuration
+- **timezone** - Timezone for date calculations
+- **startDate** - Optional start date for interval calculations
+
+## Pattern Types
+
+### Daily
+
+Occurs every day or every N days.
+
+```ts
+// Every day
+const pattern = {
+  type: 'daily',
+  interval: 1,
+}
+
+// Every 3 days
+const pattern = {
+  type: 'daily',
+  interval: 3,
+}
+```
+
+### Weekly
+
+Occurs on specific days of the week.
+
+```ts
+// Every Monday and Wednesday
+const pattern = {
+  type: 'weekly',
+  daysOfWeek: [1, 3],
+}
+
+// Every other week on Friday
+const pattern = {
+  type: 'weekly',
+  daysOfWeek: [5],
+  interval: 2,
+}
+```
+
+### Monthly
+
+Occurs on a specific day of the month.
+
+```ts
+// First day of every month
+const pattern = {
+  type: 'monthly',
+  dayOfMonth: 1,
+}
+
+// 15th of every other month
+const pattern = {
+  type: 'monthly',
+  dayOfMonth: 15,
+  interval: 2,
+}
+```
+
+### Yearly
+
+Occurs on a specific date each year.
+
+```ts
+// Every January 1st
+const pattern = {
+  type: 'yearly',
+  month: 1,
+  dayOfMonth: 1,
+}
+
+// Every July 4th, every other year
+const pattern = {
+  type: 'yearly',
+  month: 7,
+  dayOfMonth: 4,
+  interval: 2,
+}
+```
+
+## Examples
+
+### Weekly Tips
+
+```ts
+import { useSchedule } from '@tour-kit/scheduling'
+
+const schedule = {
+  recurring: {
+    type: 'weekly',
+    daysOfWeek: [2], // Every Tuesday
+  },
+}
+
+const { isActive } = useSchedule(schedule)
+```
+
+### Monthly Newsletter
+
+```ts
+const schedule = {
+  recurring: {
+    type: 'monthly',
+    dayOfMonth: 1, // First of each month
+  },
+  timeOfDay: { start: '09:00', end: '10:00' },
+}
+```
+
+### Quarterly Reviews
+
+```ts
+const schedule = {
+  recurring: {
+    type: 'monthly',
+    dayOfMonth: 1,
+    interval: 3, // Every 3 months
+  },
+}
+```
+
+### Annual Event
+
+```ts
+const schedule = {
+  recurring: {
+    type: 'yearly',
+    month: 12,
+    dayOfMonth: 25, // Every Christmas
+  },
+}
+```
+
+### Limited Occurrences
+
+```ts
+const schedule = {
+  recurring: {
+    type: 'weekly',
+    daysOfWeek: [1], // Mondays
+    maxOccurrences: 5, // Only 5 times
+  },
+}
+```
+
+Note: `maxOccurrences` is not currently implemented in the evaluation but is part of the type for future use.
+
+### End Date
+
+```ts
+const schedule = {
+  recurring: {
+    type: 'weekly',
+    daysOfWeek: [1, 3, 5],
+    endDate: '2024-12-31', // Stop recurring after this date
+  },
+}
+```
+
+### With Start Date
+
+The `startDate` parameter affects interval calculations:
+
+```ts
+// Starts Jan 1, 2024, every 2 weeks
+const startDate = '2024-01-01'
+const pattern = {
+  type: 'weekly',
+  interval: 2,
+}
+
+// Matches: Jan 1, Jan 15, Jan 29, Feb 12, etc.
+matchesRecurringPattern(new Date('2024-01-15'), pattern, 'UTC', startDate)
+// true
+
+matchesRecurringPattern(new Date('2024-01-08'), pattern, 'UTC', startDate)
+// false (not a 2-week interval from start)
+```
+
+### Complex Schedule
+
+```ts
+// Every other Monday, during Q1 2024
+const schedule = {
+  startAt: '2024-01-01',
+  endAt: '2024-03-31',
+  recurring: {
+    type: 'weekly',
+    daysOfWeek: [1], // Monday
+    interval: 2, // Every other week
+  },
+  timeOfDay: { start: '10:00', end: '11:00' },
+}
+```
+
+### Timezone Awareness
+
+Recurring patterns respect timezones:
+
+```ts
+const pattern = {
+  type: 'weekly',
+  daysOfWeek: [1], // Monday
+}
+
+const date = new Date('2024-01-01T23:00:00Z') // Monday 11pm UTC
+
+// In UTC - Monday
+matchesRecurringPattern(date, pattern, 'UTC')
+// true
+
+// In Los Angeles (still Sunday) - not Monday
+matchesRecurringPattern(date, pattern, 'America/Los_Angeles')
+// false
+```
+
+### Check Multiple Patterns
+
+```ts
+function matchesAnyPattern(
+  date: Date,
+  patterns: RecurringPattern[],
+  timezone: string
+): boolean {
+  return patterns.some((pattern) => matchesRecurringPattern(date, pattern, timezone))
+}
+
+const patterns = [
+  { type: 'weekly', daysOfWeek: [1] }, // Mondays
+  { type: 'monthly', dayOfMonth: 1 }, // First of month
+]
+
+if (matchesAnyPattern(new Date(), patterns, 'UTC')) {
+  showSpecialContent()
+}
+```
+
+## Pattern Validation
+
+The function returns `false` for invalid patterns:
+
+```ts
+// Invalid: type not recognized
+matchesRecurringPattern(
+  new Date(),
+  { type: 'custom' } as any,
+  'UTC'
+)
+// false
+
+// Invalid: monthly without dayOfMonth
+matchesRecurringPattern(
+  new Date(),
+  { type: 'monthly' },
+  'UTC'
+)
+// false (needs dayOfMonth to match specific date)
+```
+
+## RecurringPattern Type
+
+```ts
+interface RecurringPattern {
+  /** Type of recurrence */
+  type: 'daily' | 'weekly' | 'monthly' | 'yearly'
+
+  /** Interval between occurrences (default: 1) */
+  interval?: number
+
+  /** For weekly: which days of the week (0 = Sunday) */
+  daysOfWeek?: DayOfWeek[]
+
+  /** For monthly/yearly: which day of the month (1-31) */
+  dayOfMonth?: number
+
+  /** For yearly: which month (1-12) */
+  month?: number
+
+  /** Maximum number of occurrences */
+  maxOccurrences?: number
+
+  /** End date for the recurrence (YYYY-MM-DD) */
+  endDate?: DateString
+}
+```
+
+## Related
+
+- [Schedule.recurring](/docs/scheduling/types#schedule) - Schedule recurring option
+- [RecurringPattern type](/docs/scheduling/types#recurringpattern) - Type reference
+- [Day of Week utilities](/docs/scheduling/utilities/day-of-week) - Day matching

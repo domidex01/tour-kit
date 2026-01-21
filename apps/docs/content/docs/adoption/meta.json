@@ -1,0 +1,5 @@
+{
+  "title": "@tour-kit/adoption",
+  "icon": "TrendingUp",
+  "pages": ["index", "providers", "hooks", "components", "dashboard", "analytics", "types"]
+}

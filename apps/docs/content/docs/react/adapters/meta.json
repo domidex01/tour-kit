@@ -1,0 +1,9 @@
+{
+  "title": "Router Adapters",
+  "pages": [
+    "index",
+    "next-app-router",
+    "next-pages-router",
+    "react-router"
+  ]
+}

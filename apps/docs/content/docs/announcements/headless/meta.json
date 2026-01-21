@@ -1,0 +1,4 @@
+{
+  "title": "Headless",
+  "pages": ["index", "modal", "slideout", "banner", "toast", "spotlight"]
+}

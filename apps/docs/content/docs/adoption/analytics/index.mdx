@@ -1,0 +1,483 @@
+---
+title: Analytics Integration
+description: Automatic analytics tracking for adoption events
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+## Overview
+
+The @tour-kit/adoption package integrates with @tour-kit/analytics to automatically track adoption events. When an analytics provider is configured, events are sent for feature usage, adoption milestones, and nudge interactions.
+
+## Setup
+
+### Install Analytics Package
+
+```bash
+pnpm add @tour-kit/analytics
+```
+
+### Configure Provider
+
+```tsx
+import { AnalyticsProvider } from '@tour-kit/analytics'
+import { AdoptionProvider } from '@tour-kit/adoption'
+
+function App() {
+  return (
+    <AnalyticsProvider
+      plugins={[
+        // Your analytics plugins (Segment, Mixpanel, etc.)
+      ]}
+    >
+      <AdoptionProvider features={features}>
+        {children}
+      </AdoptionProvider>
+    </AnalyticsProvider>
+  )
+}
+```
+
+That's it! Adoption events are now tracked automatically.
+
+## Automatic Events
+
+### Feature Adopted
+
+Fired when a feature meets adoption criteria:
+
+```ts
+{
+  event: 'Feature Adopted',
+  properties: {
+    featureId: 'dark-mode',
+    featureName: 'Dark Mode',
+    category: 'customization',
+    useCount: 3,
+    daysSinceFirst: 5,
+  }
+}
+```
+
+### Feature Churned
+
+Fired when an adopted feature becomes inactive:
+
+```ts
+{
+  event: 'Feature Churned',
+  properties: {
+    featureId: 'export',
+    featureName: 'Export Data',
+    category: 'productivity',
+    useCount: 10,
+    daysSinceLastUse: 35,
+  }
+}
+```
+
+### Feature Used
+
+Fired every time a feature is used:
+
+```ts
+{
+  event: 'Feature Used',
+  properties: {
+    featureId: 'search',
+    featureName: 'Advanced Search',
+    category: 'productivity',
+    useCount: 7,
+    status: 'exploring',
+  }
+}
+```
+
+### Nudge Shown
+
+Fired when a nudge is displayed:
+
+```ts
+{
+  event: 'Nudge Shown',
+  properties: {
+    featureId: 'shortcuts',
+    featureName: 'Keyboard Shortcuts',
+    category: 'productivity',
+    priority: 10,
+  }
+}
+```
+
+### Nudge Clicked
+
+Fired when user clicks a nudge:
+
+```ts
+{
+  event: 'Nudge Clicked',
+  properties: {
+    featureId: 'ai-assist',
+    featureName: 'AI Assistant',
+    category: 'ai',
+  }
+}
+```
+
+### Nudge Dismissed
+
+Fired when user dismisses a nudge:
+
+```ts
+{
+  event: 'Nudge Dismissed',
+  properties: {
+    featureId: 'premium',
+    featureName: 'Premium Export',
+    category: 'export',
+  }
+}
+```
+
+## Manual Event Tracking
+
+### useAdoptionAnalytics Hook
+
+For custom analytics:
+
+```tsx
+import { useAdoptionAnalytics } from '@tour-kit/adoption'
+
+function CustomComponent() {
+  const analytics = useAdoptionAnalytics()
+
+  const handleAction = () => {
+    // Track custom event
+    analytics.track('Custom Adoption Event', {
+      featureId: 'custom',
+      customProperty: 'value',
+    })
+  }
+
+  return <button onClick={handleAction}>Action</button>
+}
+```
+
+The hook returns the analytics context from @tour-kit/analytics:
+
+<TypeTable
+  type={{
+    track: {
+      type: '(event: string, properties?: object) => void',
+      description: 'Track custom event',
+    },
+    identify: {
+      type: '(userId: string, traits?: object) => void',
+      description: 'Identify user',
+    },
+    page: {
+      type: '(name?: string, properties?: object) => void',
+      description: 'Track page view',
+    },
+  }}
+/>
+
+### Event Builder Functions
+
+Build event objects manually:
+
+```tsx
+import {
+  buildFeatureAdoptedEvent,
+  buildFeatureChurnedEvent,
+  buildFeatureUsedEvent,
+  buildNudgeShownEvent,
+  buildNudgeClickedEvent,
+  buildNudgeDismissedEvent,
+} from '@tour-kit/adoption'
+
+// Build event
+const event = buildFeatureAdoptedEvent(feature, usage)
+// { event: 'Feature Adopted', properties: { ... } }
+
+// Send to your analytics
+analytics.track(event.event, event.properties)
+```
+
+## Custom Analytics Implementation
+
+### Without @tour-kit/analytics
+
+Use provider callbacks for custom analytics:
+
+```tsx
+<AdoptionProvider
+  features={features}
+  onAdoption={(feature) => {
+    // Send to your analytics service
+    window.gtag('event', 'feature_adopted', {
+      feature_id: feature.id,
+      feature_name: feature.name,
+      category: feature.category,
+    })
+  }}
+  onChurn={(feature) => {
+    window.gtag('event', 'feature_churned', {
+      feature_id: feature.id,
+      feature_name: feature.name,
+    })
+  }}
+  onNudge={(feature, action) => {
+    window.gtag('event', `nudge_${action}`, {
+      feature_id: feature.id,
+      feature_name: feature.name,
+    })
+  }}
+/>
+```
+
+### Tracking Usage Events
+
+Listen to usage events manually:
+
+```tsx
+import { emitFeatureEvent } from '@tour-kit/adoption'
+
+// Emit feature usage event
+emitFeatureEvent('feature-id')
+
+// Listen for events
+window.addEventListener('feature-used', (event) => {
+  const { featureId } = event.detail
+  analytics.track('Feature Used', { featureId })
+})
+```
+
+## Analytics Integrations
+
+### Segment
+
+```tsx
+import { AnalyticsProvider, segmentPlugin } from '@tour-kit/analytics'
+
+<AnalyticsProvider
+  plugins={[
+    segmentPlugin({
+      writeKey: 'YOUR_SEGMENT_KEY',
+    }),
+  ]}
+>
+  <AdoptionProvider features={features}>
+    {children}
+  </AdoptionProvider>
+</AnalyticsProvider>
+```
+
+### Google Analytics
+
+```tsx
+import { AnalyticsProvider, googleAnalyticsPlugin } from '@tour-kit/analytics'
+
+<AnalyticsProvider
+  plugins={[
+    googleAnalyticsPlugin({
+      measurementId: 'G-XXXXXXXXXX',
+    }),
+  ]}
+>
+  <AdoptionProvider features={features}>
+    {children}
+  </AdoptionProvider>
+</AnalyticsProvider>
+```
+
+### Mixpanel
+
+```tsx
+import { AnalyticsProvider, mixpanelPlugin } from '@tour-kit/analytics'
+
+<AnalyticsProvider
+  plugins={[
+    mixpanelPlugin({
+      token: 'YOUR_MIXPANEL_TOKEN',
+    }),
+  ]}
+>
+  <AdoptionProvider features={features}>
+    {children}
+  </AdoptionProvider>
+</AnalyticsProvider>
+```
+
+### PostHog
+
+```tsx
+import { AnalyticsProvider, posthogPlugin } from '@tour-kit/analytics'
+
+<AnalyticsProvider
+  plugins={[
+    posthogPlugin({
+      apiKey: 'YOUR_POSTHOG_KEY',
+      host: 'https://app.posthog.com',
+    }),
+  ]}
+>
+  <AdoptionProvider features={features}>
+    {children}
+  </AdoptionProvider>
+</AnalyticsProvider>
+```
+
+## Event Properties Reference
+
+### Common Properties
+
+All events include:
+
+```ts
+{
+  featureId: string
+  featureName: string
+  category?: string
+  timestamp: string // ISO 8601
+}
+```
+
+### Feature Adopted
+
+Additional properties:
+
+```ts
+{
+  useCount: number
+  daysSinceFirst: number
+  adoptionCriteria: {
+    minUses: number
+    recencyDays: number
+  }
+}
+```
+
+### Feature Churned
+
+Additional properties:
+
+```ts
+{
+  useCount: number
+  daysSinceLastUse: number
+  previousStatus: 'adopted'
+}
+```
+
+### Feature Used
+
+Additional properties:
+
+```ts
+{
+  useCount: number
+  status: AdoptionStatus
+  isFirstUse: boolean
+}
+```
+
+### Nudge Events
+
+Additional properties:
+
+```ts
+{
+  priority: number
+  description?: string
+  premium?: boolean
+}
+```
+
+## Privacy Considerations
+
+<Callout type="warn">
+Adoption tracking collects usage data. Ensure compliance with privacy regulations (GDPR, CCPA, etc.):
+
+- Disclose tracking in your privacy policy
+- Obtain user consent where required
+- Provide opt-out mechanisms
+- Anonymize sensitive data
+</Callout>
+
+### Disable Tracking
+
+```tsx
+<AdoptionProvider
+  features={features}
+  // Don't track if user opted out
+  onAdoption={userConsent ? handleAdoption : undefined}
+  onChurn={userConsent ? handleChurn : undefined}
+/>
+```
+
+### Anonymize Data
+
+```tsx
+onAdoption={(feature) => {
+  analytics.track('Feature Adopted', {
+    featureId: hashFeatureId(feature.id), // Hash IDs
+    // Omit featureName to avoid PII
+  })
+}
+```
+
+## Debugging
+
+Enable debug mode to log events:
+
+```tsx
+import { AnalyticsProvider } from '@tour-kit/analytics'
+
+<AnalyticsProvider
+  plugins={[...]}
+  debug={process.env.NODE_ENV === 'development'}
+>
+  <AdoptionProvider features={features}>
+    {children}
+  </AdoptionProvider>
+</AnalyticsProvider>
+```
+
+## Best Practices
+
+1. **Track meaningful events** - Don't over-track:
+
+```tsx
+// Good: Track adoption milestones
+onAdoption={(feature) => analytics.track('Feature Adopted', { ... })}
+
+// Bad: Track every render
+useEffect(() => {
+  analytics.track('Component Rendered') // Too noisy
+}, [])
+```
+
+2. **Include context** in event properties:
+
+```tsx
+onAdoption={(feature) => {
+  analytics.track('Feature Adopted', {
+    featureId: feature.id,
+    category: feature.category,
+    userPlan: user.plan, // Useful context
+    daysActive: user.daysActive,
+  })
+}
+```
+
+3. **Use standard event names** for cross-platform analysis
+
+4. **Test analytics** in development before production
+
+## Next Steps
+
+- [Analytics Package Docs](/docs/analytics) - Full analytics documentation
+- [AdoptionProvider](/docs/adoption/providers/adoption-provider) - Provider callbacks
+- [useAdoptionStats](/docs/adoption/hooks/use-adoption-stats) - Access metrics for custom tracking

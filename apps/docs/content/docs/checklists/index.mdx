@@ -1,0 +1,406 @@
+---
+title: '@tour-kit/checklists'
+description: Interactive checklists with task dependencies and progress tracking
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/checklists
+
+Interactive checklists with task dependencies, progress tracking, and action triggers. Perfect for onboarding flows, feature adoption, and guided user journeys.
+
+## Why Checklists?
+
+Checklists provide a structured way to guide users through multi-step processes:
+
+- **Progressive disclosure** - Break complex workflows into manageable tasks
+- **Visual progress** - Users see how far they've come and what remains
+- **Smart dependencies** - Tasks unlock only when prerequisites are met
+- **Action triggers** - Tasks can navigate, launch tours, or execute custom logic
+- **Persistent state** - Track completion across sessions
+
+**Use checklists for:**
+- Onboarding new users through setup steps
+- Feature adoption campaigns
+- Account setup and configuration
+- Multi-step workflows with dependencies
+- Progress tracking toward goals
+
+**Use tours instead when:**
+- You need sequential, guided walkthroughs
+- Steps require focused, modal-like attention
+- The flow is linear without branching
+
+---
+
+## Installation
+
+```bash
+pnpm add @tour-kit/checklists
+```
+
+```bash
+npm install @tour-kit/checklists
+```
+
+```bash
+yarn add @tour-kit/checklists
+```
+
+---
+
+## Quick Start
+
+```tsx
+import { ChecklistProvider, Checklist, ChecklistTask } from '@tour-kit/checklists';
+
+const onboardingChecklist = {
+  id: 'onboarding',
+  title: 'Get Started',
+  description: 'Complete these steps to get the most out of our app',
+  tasks: [
+    {
+      id: 'create-account',
+      title: 'Create your account',
+      description: 'Sign up and verify your email',
+    },
+    {
+      id: 'add-profile',
+      title: 'Add profile details',
+      description: 'Tell us about yourself',
+      dependsOn: ['create-account'], // Locked until account created
+    },
+    {
+      id: 'first-project',
+      title: 'Create your first project',
+      description: 'Start building something amazing',
+      dependsOn: ['add-profile'],
+      action: { type: 'navigate', url: '/projects/new' },
+    },
+  ],
+};
+
+function App() {
+  return (
+    <ChecklistProvider checklists={[onboardingChecklist]}>
+      <Checklist checklistId="onboarding">
+        <ChecklistTask taskId="create-account" />
+        <ChecklistTask taskId="add-profile" />
+        <ChecklistTask taskId="first-project" />
+      </Checklist>
+
+      <YourAppContent />
+    </ChecklistProvider>
+  );
+}
+```
+
+---
+
+## Architecture
+
+The checklists package uses a provider/consumer pattern with powerful dependency resolution:
+
+```
+ChecklistProvider
+├── Context (state management)
+│   ├── checklists Map<id, ChecklistState>
+│   ├── Dependency resolver
+│   └── Action executor
+├── Components
+│   ├── Checklist (styled container)
+│   ├── ChecklistTask (individual task)
+│   ├── ChecklistProgress (progress bar)
+│   ├── ChecklistLauncher (toggle button)
+│   └── ChecklistPanel (floating panel)
+└── Hooks
+    ├── useChecklist(id) (checklist state)
+    ├── useTask(id, taskId) (task state)
+    ├── useChecklistPersistence() (storage)
+    └── useChecklistsProgress() (multi-checklist)
+```
+
+### State Management
+
+- **In-memory state** - Managed via React context with `useReducer`
+- **Dependency resolution** - Automatic task locking based on `dependsOn`
+- **Circular detection** - Throws error if circular dependencies detected
+- **Persistence** - Optional localStorage/sessionStorage integration
+
+### Key Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Task** | An individual item that can be completed |
+| **Dependency** | Tasks can depend on other tasks via `dependsOn` |
+| **Locked** | Task is disabled because dependencies aren't met |
+| **Visible** | Task passes its `when` condition |
+| **Action** | What happens when task is clicked (navigate, tour, callback) |
+| **Progress** | Calculated as completed / total visible tasks |
+
+---
+
+## Features
+
+### Task Dependencies
+
+Build complex workflows with automatic dependency management:
+
+```tsx
+const tasks = [
+  { id: 'step1', title: 'First step' },
+  { id: 'step2', title: 'Second step', dependsOn: ['step1'] },
+  { id: 'step3', title: 'Final step', dependsOn: ['step1', 'step2'] },
+];
+```
+
+<Callout type="warn">
+  Circular dependencies will throw an error: "Circular dependency detected in checklist"
+</Callout>
+
+### Action Triggers
+
+Tasks can trigger different actions when clicked:
+
+```tsx
+const tasks = [
+  {
+    id: 'navigate-task',
+    title: 'View dashboard',
+    action: { type: 'navigate', url: '/dashboard' },
+  },
+  {
+    id: 'tour-task',
+    title: 'Learn the basics',
+    action: { type: 'tour', tourId: 'intro-tour' },
+  },
+  {
+    id: 'callback-task',
+    title: 'Custom action',
+    action: {
+      type: 'callback',
+      handler: async () => {
+        await api.doSomething();
+      }
+    },
+  },
+];
+```
+
+### Conditional Visibility
+
+Show/hide tasks based on context:
+
+```tsx
+const tasks = [
+  {
+    id: 'premium-task',
+    title: 'Unlock premium features',
+    when: (context) => context.user.plan === 'free',
+  },
+  {
+    id: 'admin-task',
+    title: 'Configure team settings',
+    when: (context) => context.user.role === 'admin',
+  },
+];
+```
+
+### Auto-Completion
+
+Tasks can auto-complete based on conditions:
+
+```tsx
+const tasks = [
+  {
+    id: 'take-tour',
+    title: 'Complete the intro tour',
+    completedWhen: { tourCompleted: 'intro-tour' },
+  },
+  {
+    id: 'custom-condition',
+    title: 'Reach 10 projects',
+    completedWhen: {
+      custom: (context) => context.data.projectCount >= 10,
+    },
+  },
+];
+```
+
+### Programmatic Control
+
+Full control via hooks:
+
+```tsx
+const { completeTask, uncompleteTask, executeAction, progress } = useChecklist('onboarding');
+const { isCompleted, isLocked, toggle } = useTask('onboarding', 'step1');
+```
+
+### Headless Mode
+
+Build completely custom UIs with headless components:
+
+```tsx
+import { ChecklistHeadless } from '@tour-kit/checklists/headless';
+
+<ChecklistHeadless checklistId="onboarding">
+  {({ checklist, visibleTasks, progress, completeTask }) => (
+    // Your custom UI
+    <div>
+      <h2>{checklist.config.title}</h2>
+      <progress value={progress.completed} max={progress.total} />
+      {visibleTasks.map((task) => (
+        <button
+          key={task.config.id}
+          onClick={() => completeTask(task.config.id)}
+          disabled={task.locked}
+        >
+          {task.completed ? '✓' : '○'} {task.config.title}
+        </button>
+      ))}
+    </div>
+  )}
+</ChecklistHeadless>
+```
+
+---
+
+## Bundle Size
+
+| Package | Gzipped |
+|---------|---------|
+| @tour-kit/checklists | < 8KB |
+
+---
+
+## Package Contents
+
+<Cards>
+  <Card title="Providers" href="/docs/checklists/providers/checklist-provider">
+    ChecklistProvider - Configure and provide checklist state
+  </Card>
+  <Card title="Hooks" href="/docs/checklists/hooks/use-checklist">
+    useChecklist, useTask - Programmatic control and state access
+  </Card>
+  <Card title="Components" href="/docs/checklists/components">
+    Checklist, ChecklistTask, ChecklistProgress - Pre-styled components
+  </Card>
+  <Card title="Headless" href="/docs/checklists/headless">
+    Build custom checklist UI with render props
+  </Card>
+  <Card title="Utilities" href="/docs/checklists/utilities">
+    Factories, dependency resolution, progress calculation
+  </Card>
+  <Card title="Types" href="/docs/checklists/types">
+    TypeScript type definitions and interfaces
+  </Card>
+</Cards>
+
+---
+
+## Complete Example
+
+```tsx
+import {
+  ChecklistProvider,
+  ChecklistPanel,
+  ChecklistLauncher,
+  Checklist,
+  ChecklistTask,
+  ChecklistProgress,
+  useChecklist,
+} from '@tour-kit/checklists';
+
+const setupChecklist = {
+  id: 'setup',
+  title: 'Account Setup',
+  description: 'Get your account ready in 3 steps',
+  dismissible: true,
+  hideOnComplete: true,
+  tasks: [
+    {
+      id: 'verify-email',
+      title: 'Verify your email',
+      description: 'Check your inbox for verification link',
+      icon: '📧',
+    },
+    {
+      id: 'add-payment',
+      title: 'Add payment method',
+      description: 'Add a credit card to enable premium features',
+      icon: '💳',
+      dependsOn: ['verify-email'],
+      action: { type: 'navigate', url: '/settings/billing' },
+    },
+    {
+      id: 'invite-team',
+      title: 'Invite team members',
+      description: 'Collaborate with your team',
+      icon: '👥',
+      dependsOn: ['verify-email'],
+      action: { type: 'modal', modalId: 'invite-modal' },
+    },
+  ],
+  onComplete: () => {
+    console.log('Setup complete!');
+    analytics.track('setup_completed');
+  },
+};
+
+function App() {
+  return (
+    <ChecklistProvider checklists={[setupChecklist]}>
+      {/* Floating panel with launcher */}
+      <ChecklistPanel checklistId="setup">
+        <ChecklistProgress />
+        <Checklist>
+          <ChecklistTask taskId="verify-email" />
+          <ChecklistTask taskId="add-payment" />
+          <ChecklistTask taskId="invite-team" />
+        </Checklist>
+      </ChecklistPanel>
+
+      <ChecklistLauncher checklistId="setup" />
+
+      <YourAppContent />
+    </ChecklistProvider>
+  );
+}
+
+function ChecklistControls() {
+  const { progress, isComplete, reset } = useChecklist('setup');
+
+  return (
+    <div>
+      <p>{progress.completed} of {progress.total} completed</p>
+      {isComplete && (
+        <button onClick={reset}>Start over</button>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## Accessibility
+
+All checklist components are built with accessibility in mind:
+
+- **ARIA attributes** - Proper roles, labels, and states
+- **Keyboard support** - Full keyboard navigation
+- **Focus management** - Logical focus order
+- **Screen readers** - Descriptive labels and progress announcements
+
+<Callout type="info">
+  Task completion is announced to screen readers via live regions.
+</Callout>
+
+---
+
+## Related
+
+- [Tours](/docs/react) - For sequential, guided walkthroughs
+- [@tour-kit/core](/docs/core) - Shared utilities used by checklists
+- [@tour-kit/hints](/docs/hints) - For contextual, non-sequential hints

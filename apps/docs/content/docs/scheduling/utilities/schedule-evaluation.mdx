@@ -1,0 +1,347 @@
+---
+title: Schedule Evaluation
+description: Core functions for evaluating schedule active status
+---
+
+# Schedule Evaluation
+
+The main entry points for determining if a schedule is currently active.
+
+## checkSchedule
+
+Simple boolean check if a schedule is active.
+
+### Usage
+
+```ts
+import { checkSchedule } from '@tour-kit/scheduling'
+
+const schedule = {
+  daysOfWeek: [1, 2, 3, 4, 5],
+  timeOfDay: { start: '09:00', end: '17:00' },
+}
+
+const isActive = checkSchedule(schedule)
+// true or false
+```
+
+### API
+
+```ts
+function checkSchedule(
+  schedule: Schedule,
+  options?: ScheduleEvaluationOptions
+): boolean
+```
+
+#### Parameters
+
+- **schedule** - The schedule configuration to evaluate
+- **options** - Optional evaluation options:
+  ```ts
+  interface ScheduleEvaluationOptions {
+    /** Override the current date/time for testing */
+    now?: Date
+    /** User's detected timezone */
+    userTimezone?: string
+  }
+  ```
+
+#### Returns
+
+`true` if the schedule is active, `false` otherwise.
+
+### Examples
+
+```ts
+// Basic check
+if (checkSchedule(schedule)) {
+  showTour()
+}
+
+// Override time for testing
+const isActive = checkSchedule(schedule, {
+  now: new Date('2024-02-15T10:00:00Z'),
+  userTimezone: 'America/New_York',
+})
+
+// Check multiple schedules
+const schedules = [schedule1, schedule2, schedule3]
+const anyActive = schedules.some((s) => checkSchedule(s))
+```
+
+## isScheduleActive
+
+Returns a result object with the active status and reason for being inactive.
+
+### Usage
+
+```ts
+import { isScheduleActive } from '@tour-kit/scheduling'
+
+const { isActive, reason } = isScheduleActive(schedule)
+
+if (!isActive) {
+  console.log('Inactive reason:', reason)
+  // 'disabled' | 'not_started' | 'ended' | 'wrong_day' | etc.
+}
+```
+
+### API
+
+```ts
+function isScheduleActive(
+  schedule: Schedule,
+  options?: ScheduleEvaluationOptions
+): ScheduleResult
+```
+
+#### Returns
+
+```ts
+interface ScheduleResult {
+  /** Whether the schedule is currently active */
+  isActive: boolean
+  /** Quick reason code if inactive */
+  reason?: ScheduleInactiveReason
+}
+
+type ScheduleInactiveReason =
+  | 'disabled'
+  | 'not_started'
+  | 'ended'
+  | 'wrong_day'
+  | 'wrong_time'
+  | 'blackout'
+  | 'outside_business_hours'
+  | 'recurring_mismatch'
+```
+
+### Examples
+
+```ts
+// Get reason for debugging
+const { isActive, reason } = isScheduleActive(schedule)
+
+if (!isActive) {
+  switch (reason) {
+    case 'not_started':
+      console.log('Tour has not started yet')
+      break
+    case 'wrong_day':
+      console.log('Tour only available on weekdays')
+      break
+    case 'blackout':
+      console.log('Tour blocked during blackout period')
+      break
+  }
+}
+
+// Log analytics
+const result = isScheduleActive(schedule)
+analytics.track('schedule_evaluated', {
+  isActive: result.isActive,
+  reason: result.reason,
+})
+```
+
+## getScheduleStatus
+
+Returns detailed status information including next active/inactive times and human-readable messages.
+
+### Usage
+
+```ts
+import { getScheduleStatus } from '@tour-kit/scheduling'
+
+const status = getScheduleStatus(schedule)
+
+console.log(status.message)
+// "Currently active" or "Outside time range (9:00 AM - 5:00 PM)"
+
+if (status.nextActiveAt) {
+  console.log('Next active:', status.nextActiveAt)
+}
+```
+
+### API
+
+```ts
+function getScheduleStatus(
+  schedule: Schedule,
+  options?: ScheduleEvaluationOptions & { debug?: boolean }
+): ScheduleStatus
+```
+
+#### Returns
+
+```ts
+interface ScheduleStatus {
+  /** Whether the schedule is currently active */
+  isActive: boolean
+  /** Reason for being inactive */
+  reason?: ScheduleInactiveReason
+  /** Human-readable explanation */
+  message?: string
+  /** When the schedule will next become active */
+  nextActiveAt?: Date
+  /** When the schedule will next become inactive */
+  nextInactiveAt?: Date
+  /** Current blackout period if in one */
+  currentBlackout?: {
+    id: string
+    reason?: string
+    endsAt: Date
+  }
+  /** Debug information */
+  debug?: {
+    evaluatedAt: Date
+    timezone: string
+    localTime: string
+    dayOfWeek: number
+  }
+}
+```
+
+### Examples
+
+```ts
+// Get full status
+const status = getScheduleStatus(schedule)
+
+if (status.isActive) {
+  console.log('Active until:', status.nextInactiveAt)
+} else {
+  console.log(status.message)
+  console.log('Available again:', status.nextActiveAt)
+}
+
+// Debug mode
+const status = getScheduleStatus(schedule, { debug: true })
+console.log('Evaluated at:', status.debug?.evaluatedAt)
+console.log('Timezone:', status.debug?.timezone)
+console.log('Local time:', status.debug?.localTime)
+```
+
+## Evaluation Order
+
+Schedules are evaluated in this specific order. The first check that fails determines the inactive reason:
+
+1. **Enabled check** - Is `enabled` explicitly set to `false`?
+   - Reason: `'disabled'`
+
+2. **Date range** - Is current date between `startAt` and `endAt`?
+   - Reasons: `'not_started'` or `'ended'`
+
+3. **Blackout periods** - Is current time in any blackout period?
+   - Reason: `'blackout'`
+
+4. **Day of week** - Is today in the `daysOfWeek` array?
+   - Reason: `'wrong_day'`
+
+5. **Time of day** - Is current time within `timeOfDay` range?
+   - Reason: `'wrong_time'`
+
+6. **Business hours** - Is current time within business hours (if configured)?
+   - Reason: `'outside_business_hours'`
+
+7. **Recurring pattern** - Does current date match the `recurring` pattern?
+   - Reason: `'recurring_mismatch'`
+
+If all checks pass, the schedule is active.
+
+### Why This Order?
+
+The evaluation order is designed to fail fast and provide the most relevant reason:
+
+- **Disabled first** - No point checking anything else
+- **Date range early** - Broad time constraints before specific ones
+- **Blackouts override** - Important exceptions should block quickly
+- **Day before time** - Day is less granular than time
+- **Recurring last** - Most complex calculation
+
+## Testing Schedules
+
+Override the current time to test different scenarios:
+
+```ts
+import { isScheduleActive } from '@tour-kit/scheduling'
+import { describe, it, expect } from 'vitest'
+
+describe('Onboarding Tour Schedule', () => {
+  const schedule = {
+    startAt: '2024-01-15',
+    endAt: '2024-03-31',
+    daysOfWeek: [1, 2, 3, 4, 5],
+    timeOfDay: { start: '09:00', end: '17:00' },
+  }
+
+  it('should be active on weekday during business hours', () => {
+    const result = isScheduleActive(schedule, {
+      now: new Date('2024-02-14T14:00:00Z'), // Wednesday 2pm
+      userTimezone: 'UTC',
+    })
+
+    expect(result.isActive).toBe(true)
+  })
+
+  it('should be inactive before start date', () => {
+    const result = isScheduleActive(schedule, {
+      now: new Date('2024-01-10T14:00:00Z'),
+      userTimezone: 'UTC',
+    })
+
+    expect(result.isActive).toBe(false)
+    expect(result.reason).toBe('not_started')
+  })
+
+  it('should be inactive on weekends', () => {
+    const result = isScheduleActive(schedule, {
+      now: new Date('2024-02-10T14:00:00Z'), // Saturday
+      userTimezone: 'UTC',
+    })
+
+    expect(result.isActive).toBe(false)
+    expect(result.reason).toBe('wrong_day')
+  })
+
+  it('should be inactive outside time range', () => {
+    const result = isScheduleActive(schedule, {
+      now: new Date('2024-02-14T20:00:00Z'), // Wednesday 8pm
+      userTimezone: 'UTC',
+    })
+
+    expect(result.isActive).toBe(false)
+    expect(result.reason).toBe('wrong_time')
+  })
+})
+```
+
+## Performance Considerations
+
+- `checkSchedule` is the fastest (just returns boolean)
+- `isScheduleActive` adds minimal overhead for reason tracking
+- `getScheduleStatus` is the most expensive (calculates next times)
+
+Choose based on your needs:
+
+```ts
+// Fast check in hot path
+if (checkSchedule(schedule)) {
+  // Do something
+}
+
+// Get reason for logging
+const { isActive, reason } = isScheduleActive(schedule)
+logEvent('schedule_check', { isActive, reason })
+
+// Full status for UI display
+const status = getScheduleStatus(schedule)
+return <div>{status.message}</div>
+```
+
+## Related
+
+- [useSchedule](/docs/scheduling/hooks/use-schedule) - React hook wrapper
+- [Schedule type](/docs/scheduling/types#schedule) - Schedule configuration
+- [ScheduleStatus type](/docs/scheduling/types#schedulestatus) - Status return type

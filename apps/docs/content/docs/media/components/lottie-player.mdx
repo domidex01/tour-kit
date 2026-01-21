@@ -1,0 +1,571 @@
+---
+title: LottiePlayer
+description: Lightweight vector animation player with Lottie support
+---
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`LottiePlayer` renders high-quality vector animations using the Lottie format. Lottie animations are scalable, small in file size, and can be exported directly from After Effects, making them perfect for loading states, success animations, and feature highlights.
+
+## Why Use LottiePlayer?
+
+- **Scalable**: Vector-based, looks crisp at any size
+- **Lightweight**: Much smaller than video or GIF (typically < 50KB)
+- **Interactive**: Can be controlled programmatically
+- **Designer-friendly**: Exported directly from After Effects
+- **Performant**: GPU-accelerated rendering
+
+## Installation
+
+LottiePlayer requires the `lottie-web` peer dependency:
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add lottie-web
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install lottie-web
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add lottie-web
+    ```
+  </Tab>
+</Tabs>
+
+## Basic Usage
+
+```tsx
+import { LottiePlayer } from '@tour-kit/media'
+
+export function SuccessAnimation() {
+  return (
+    <LottiePlayer
+      src="/animations/success.json"
+      alt="Success celebration animation"
+      autoplay
+      loop
+    />
+  )
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    src: {
+      type: 'string',
+      required: true,
+      description: 'Path to Lottie JSON file or animation data URL',
+    },
+    alt: {
+      type: 'string',
+      required: true,
+      description: 'Accessible description of animation. Required for screen readers',
+    },
+    autoplay: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Auto-start animation on load',
+    },
+    loop: {
+      type: 'boolean',
+      required: false,
+      default: 'false',
+      description: 'Loop animation continuously',
+    },
+    speed: {
+      type: 'number',
+      required: false,
+      default: '1',
+      description: 'Playback speed multiplier. 1 = normal, 0.5 = half speed, 2 = double speed',
+    },
+    direction: {
+      type: '1 | -1',
+      required: false,
+      default: '1',
+      description: 'Playback direction. 1 = forward, -1 = reverse',
+    },
+    renderer: {
+      type: "'svg' | 'canvas' | 'html'",
+      required: false,
+      default: "'svg'",
+      description: 'Rendering method. SVG recommended for most use cases',
+    },
+    aspectRatio: {
+      type: "'16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'",
+      required: false,
+      default: "'1/1'",
+      description: 'Container aspect ratio. Most Lottie animations are square',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: "'md'",
+      description: 'Preset size for the animation container',
+    },
+    rounded: {
+      type: "boolean | 'sm' | 'md' | 'lg' | 'full'",
+      required: false,
+      default: 'false',
+      description: 'Border radius styling',
+    },
+    reducedMotionFallback: {
+      type: 'string',
+      required: false,
+      description: 'Static image URL shown when prefers-reduced-motion is enabled',
+    },
+    lottieOptions: {
+      type: 'LottieOptions',
+      required: false,
+      description: 'Advanced lottie-web configuration options',
+    },
+    className: {
+      type: 'string',
+      required: false,
+      description: 'Additional CSS classes',
+    },
+    style: {
+      type: 'React.CSSProperties',
+      required: false,
+      description: 'Inline styles',
+    },
+    onComplete: {
+      type: '() => void',
+      required: false,
+      description: 'Callback when animation completes (non-looping)',
+    },
+    onLoopComplete: {
+      type: '() => void',
+      required: false,
+      description: 'Callback after each loop iteration',
+    },
+  }}
+/>
+
+## Examples
+
+### Success Celebration
+
+```tsx
+<LottiePlayer
+  src="/animations/success-checkmark.json"
+  alt="Success animation with checkmark"
+  autoplay
+  size="sm"
+/>
+```
+
+### Loading Spinner
+
+```tsx
+<LottiePlayer
+  src="/animations/loading-spinner.json"
+  alt="Loading animation"
+  autoplay
+  loop
+  size="sm"
+/>
+```
+
+### Error State
+
+```tsx
+<LottiePlayer
+  src="/animations/error-state.json"
+  alt="Error notification animation"
+  autoplay
+  speed={0.8}
+  size="md"
+/>
+```
+
+### Reversed Animation
+
+Play animation in reverse for unique effects:
+
+```tsx
+<LottiePlayer
+  src="/animations/reveal.json"
+  alt="Reverse reveal animation"
+  autoplay
+  direction={-1}
+/>
+```
+
+### Slow Motion
+
+Slow down for dramatic effect:
+
+```tsx
+<LottiePlayer
+  src="/animations/celebration.json"
+  alt="Celebration animation"
+  autoplay
+  speed={0.5}
+  loop
+/>
+```
+
+### Custom Aspect Ratio
+
+Wide animations for banners:
+
+```tsx
+<LottiePlayer
+  src="/animations/banner.json"
+  alt="Banner animation"
+  aspectRatio="21/9"
+  size="full"
+  autoplay
+  loop
+/>
+```
+
+### Canvas Renderer
+
+Use canvas for better performance with complex animations:
+
+```tsx
+<LottiePlayer
+  src="/animations/complex.json"
+  alt="Complex particle animation"
+  renderer="canvas"
+  autoplay
+  loop
+/>
+```
+
+### Reduced Motion Fallback
+
+Show static image for motion-sensitive users:
+
+```tsx
+<LottiePlayer
+  src="/animations/animated-feature.json"
+  alt="Feature showcase animation"
+  reducedMotionFallback="/images/feature-static.svg"
+  autoplay
+  loop
+/>
+```
+
+### Event Callbacks
+
+Track animation completion:
+
+```tsx
+<LottiePlayer
+  src="/animations/onboarding.json"
+  alt="Onboarding animation"
+  autoplay
+  onComplete={() => {
+    console.log('Animation finished')
+    // Proceed to next step
+  }}
+/>
+```
+
+## Advanced Configuration
+
+### LottieOptions
+
+Fine-tune animation behavior with advanced options:
+
+```tsx
+<LottiePlayer
+  src="/animations/complex.json"
+  alt="Advanced animation"
+  lottieOptions={{
+    renderer: 'svg',
+    loop: true,
+    autoplay: true,
+    rendererSettings: {
+      preserveAspectRatio: 'xMidYMid slice',
+      progressiveLoad: true,
+      hideOnTransparent: true
+    }
+  }}
+/>
+```
+
+### Programmatic Control
+
+For advanced use cases, use the headless API:
+
+```tsx
+import { MediaHeadless } from '@tour-kit/media'
+
+<MediaHeadless src="/animations/interactive.json" type="lottie">
+  {({ play, pause, seek, isPlaying }) => (
+    <div>
+      <div id="lottie-container" />
+      <button onClick={play}>Play</button>
+      <button onClick={pause}>Pause</button>
+      <button onClick={() => seek(0)}>Restart</button>
+    </div>
+  )}
+</MediaHeadless>
+```
+
+## Finding Lottie Animations
+
+### Free Sources
+
+- [LottieFiles](https://lottiefiles.com/) - Largest library of free animations
+- [IconScout](https://iconscout.com/lottie-animations) - Free and premium
+- [Motion Elements](https://www.motionelements.com/free/lottie) - Curated collection
+
+### Creating Custom Animations
+
+**Tools:**
+1. **After Effects** + [Bodymovin plugin](https://aescripts.com/bodymovin/) - Industry standard
+2. **LottieFiles Creator** - Browser-based editor
+3. **Haiku Animator** - Animation tool with Lottie export
+
+**After Effects workflow:**
+1. Create animation in After Effects
+2. Install Bodymovin extension
+3. Export as JSON
+4. Upload JSON file to your project
+
+## File Size Optimization
+
+Lottie files are JSON and can be optimized:
+
+### Compression
+
+```bash
+# Minify JSON
+cat animation.json | jq -c > animation-min.json
+
+# Gzip for serving
+gzip animation-min.json
+```
+
+### LottieFiles Optimizer
+
+Use [LottieFiles optimizer](https://lottiefiles.com/tools/lottie-editor) to:
+- Remove unused layers
+- Simplify paths
+- Reduce keyframes
+- Optimize colors
+
+**Typical sizes:**
+- Simple icon animation: 5-20 KB
+- Loading spinner: 10-30 KB
+- Complex scene: 50-200 KB
+
+## Accessibility
+
+### Required Alt Text
+
+Describe what the animation represents:
+
+```tsx
+// Good - describes the purpose
+<LottiePlayer
+  src="success.json"
+  alt="Success checkmark animation confirming action completed"
+/>
+
+// Bad - too generic
+<LottiePlayer
+  src="success.json"
+  alt="Animation"
+/>
+```
+
+### Reduced Motion
+
+Always provide fallbacks for motion-sensitive users:
+
+```tsx
+<LottiePlayer
+  src="animated-feature.json"
+  alt="Feature showcase"
+  reducedMotionFallback="feature-static.svg"
+/>
+```
+
+### Decorative Animations
+
+For purely decorative animations, use `aria-hidden`:
+
+```tsx
+<div aria-hidden="true">
+  <LottiePlayer
+    src="background-decoration.json"
+    alt=""
+    autoplay
+    loop
+  />
+</div>
+```
+
+## Use Cases
+
+### Success States
+
+Celebrate user achievements:
+
+```tsx
+function SuccessMessage() {
+  return (
+    <div className="success-toast">
+      <LottiePlayer
+        src="/animations/success.json"
+        alt="Success celebration"
+        autoplay
+        size="sm"
+      />
+      <p>Your project was created successfully!</p>
+    </div>
+  )
+}
+```
+
+### Loading States
+
+Engaging loading indicators:
+
+```tsx
+function LoadingState() {
+  return (
+    <div className="loading">
+      <LottiePlayer
+        src="/animations/loading.json"
+        alt="Loading animation"
+        autoplay
+        loop
+        size="md"
+      />
+      <p>Processing your request...</p>
+    </div>
+  )
+}
+```
+
+### Feature Highlights
+
+Animate feature icons:
+
+```tsx
+<div className="feature-card">
+  <LottiePlayer
+    src="/animations/analytics-icon.json"
+    alt="Analytics feature icon animation"
+    autoplay
+    size="sm"
+  />
+  <h3>Analytics Dashboard</h3>
+  <p>Track your metrics in real-time</p>
+</div>
+```
+
+### Onboarding Tours
+
+Add delight to tour steps:
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { LottiePlayer } from '@tour-kit/media'
+
+<Tour id="onboarding">
+  <TourStep id="welcome">
+    <LottiePlayer
+      src="/animations/welcome.json"
+      alt="Welcome animation"
+      autoplay
+    />
+    <h2>Welcome to Our Platform!</h2>
+  </TourStep>
+</Tour>
+```
+
+### Empty States
+
+Make empty states more engaging:
+
+```tsx
+<div className="empty-state">
+  <LottiePlayer
+    src="/animations/empty-inbox.json"
+    alt="Empty inbox illustration"
+    autoplay
+    size="lg"
+  />
+  <h3>No messages yet</h3>
+  <p>Your inbox is empty</p>
+</div>
+```
+
+## Performance
+
+### Renderer Comparison
+
+| Renderer | Best For | Performance | File Size Impact |
+|----------|----------|-------------|------------------|
+| SVG | Most cases, scalability | Good | None |
+| Canvas | Complex animations, many elements | Better | None |
+| HTML | Text-heavy animations | Variable | Larger DOM |
+
+**Recommendation**: Use SVG unless you have performance issues with complex animations.
+
+### Progressive Loading
+
+Enable progressive loading for large animations:
+
+```tsx
+<LottiePlayer
+  src="/animations/large.json"
+  alt="Complex animation"
+  lottieOptions={{
+    rendererSettings: {
+      progressiveLoad: true
+    }
+  }}
+/>
+```
+
+## TypeScript
+
+Full type safety with Lottie options:
+
+```tsx
+import type { LottiePlayerProps, LottieOptions } from '@tour-kit/media'
+
+const lottieConfig: LottieOptions = {
+  renderer: 'svg',
+  loop: true,
+  autoplay: true,
+  rendererSettings: {
+    preserveAspectRatio: 'xMidYMid slice'
+  }
+}
+
+const config: LottiePlayerProps = {
+  src: '/animations/demo.json',
+  alt: 'Demo animation',
+  autoplay: true,
+  loop: true,
+  speed: 1,
+  lottieOptions: lottieConfig
+}
+
+<LottiePlayer {...config} />
+```
+
+## See Also
+
+- [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
+- [GifPlayer](/docs/media/components/gif-player) - Alternative for simple animations
+- [MediaHeadless](/docs/media/headless/media-headless) - Programmatic control
+- [useMediaEvents](/docs/media/hooks/use-media-events) - Track animation events

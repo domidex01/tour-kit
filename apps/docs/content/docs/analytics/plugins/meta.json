@@ -1,0 +1,12 @@
+{
+  "title": "Plugins",
+  "pages": [
+    "index",
+    "console",
+    "posthog",
+    "mixpanel",
+    "amplitude",
+    "google-analytics",
+    "custom"
+  ]
+}

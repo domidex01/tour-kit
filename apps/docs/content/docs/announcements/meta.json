@@ -1,0 +1,5 @@
+{
+  "title": "@tour-kit/announcements",
+  "icon": "Megaphone",
+  "pages": ["index", "providers", "hooks", "components", "headless", "configuration", "types"]
+}

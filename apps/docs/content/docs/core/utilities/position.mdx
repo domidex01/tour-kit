@@ -1,0 +1,413 @@
+---
+title: Position Utilities
+description: Calculate tooltip positions with collision detection and RTL support
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Position Utilities
+
+Calculate tooltip and card positions relative to target elements. Includes viewport collision detection and RTL layout support.
+
+## Why Use These Utilities?
+
+Tour cards need to be positioned correctly relative to their targets:
+
+- **Multiple placements** - Top, bottom, left, right with alignments
+- **Collision detection** - Flip when hitting viewport edges
+- **RTL support** - Mirror placements for right-to-left layouts
+- **Responsive** - Adjust based on available space
+
+---
+
+## calculatePosition
+
+Calculate the position for a tooltip relative to a target element.
+
+### Usage
+
+```tsx
+import { calculatePosition, getElementRect } from '@tour-kit/core';
+
+const target = document.getElementById('button');
+const targetRect = getElementRect(target);
+
+const tooltipSize = { width: 300, height: 150 };
+
+const position = calculatePosition(
+  targetRect,
+  tooltipSize,
+  'bottom', // placement
+  [0, 8]   // offset [x, y]
+);
+
+// position = { x: 150, y: 248 }
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    targetRect: {
+      type: 'Rect',
+      description: 'Target element bounding rectangle',
+    },
+    tooltipSize: {
+      type: '{ width: number; height: number }',
+      description: 'Dimensions of the tooltip',
+    },
+    placement: {
+      type: 'Placement',
+      description: 'Desired placement relative to target',
+    },
+    offset: {
+      type: '[number, number]',
+      description: 'X and Y offset from calculated position',
+      default: '[0, 0]',
+    },
+  }}
+/>
+
+### Return Value
+
+```ts
+{ x: number; y: number }
+```
+
+---
+
+## calculatePositionWithCollision
+
+Calculate position with automatic fallback when hitting viewport edges.
+
+### Usage
+
+```tsx
+import { calculatePositionWithCollision, getElementRect } from '@tour-kit/core';
+
+const targetRect = getElementRect(document.getElementById('button'));
+const tooltipSize = { width: 300, height: 150 };
+
+const result = calculatePositionWithCollision(
+  targetRect,
+  tooltipSize,
+  'top',
+  {
+    offset: [0, 8],
+    padding: 16,
+  }
+);
+
+// result = { x: 150, y: 50, placement: 'bottom', hasOverflow: false }
+// Note: 'top' was requested but 'bottom' was used due to collision
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    targetRect: {
+      type: 'Rect',
+      description: 'Target element bounding rectangle',
+    },
+    tooltipSize: {
+      type: '{ width: number; height: number }',
+      description: 'Dimensions of the tooltip',
+    },
+    placement: {
+      type: 'Placement',
+      description: 'Preferred placement',
+    },
+  }}
+/>
+
+### Options
+
+<TypeTable
+  type={{
+    offset: {
+      type: '[number, number]',
+      description: 'X and Y offset',
+      default: '[0, 0]',
+    },
+    fallbackPlacements: {
+      type: 'Placement[]',
+      description: 'Custom fallback order',
+      default: 'Auto-generated based on placement',
+    },
+    padding: {
+      type: 'number',
+      description: 'Minimum distance from viewport edges',
+      default: '0',
+    },
+  }}
+/>
+
+### Return Value
+
+```ts
+interface PositionResult {
+  x: number;
+  y: number;
+  placement: Placement;   // Actual placement used
+  hasOverflow: boolean;   // True if no placement fit
+}
+```
+
+---
+
+## Placement Options
+
+<Tabs items={['Sides', 'With Alignment']}>
+<Tab value="Sides">
+```tsx
+// Simple side placements
+'top'    // Centered above target
+'bottom' // Centered below target
+'left'   // Centered to the left
+'right'  // Centered to the right
+```
+</Tab>
+
+<Tab value="With Alignment">
+```tsx
+// With alignment
+'top-start'    // Above, aligned to start (left in LTR)
+'top-end'      // Above, aligned to end (right in LTR)
+'bottom-start' // Below, aligned to start
+'bottom-end'   // Below, aligned to end
+'left-start'   // Left, aligned to top
+'left-end'     // Left, aligned to bottom
+'right-start'  // Right, aligned to top
+'right-end'    // Right, aligned to bottom
+```
+</Tab>
+</Tabs>
+
+---
+
+## RTL Support
+
+### getDocumentDirection
+
+Detect the document's text direction.
+
+```tsx
+import { getDocumentDirection } from '@tour-kit/core';
+
+const dir = getDocumentDirection(); // 'ltr' or 'rtl'
+```
+
+### mirrorPlacementForRTL
+
+Mirror a placement for RTL layouts.
+
+```tsx
+import { mirrorPlacementForRTL } from '@tour-kit/core';
+
+// In RTL mode:
+mirrorPlacementForRTL('left', true);       // 'right'
+mirrorPlacementForRTL('right-start', true); // 'left-end'
+mirrorPlacementForRTL('top-start', true);   // 'top-end'
+mirrorPlacementForRTL('bottom', true);      // 'bottom' (unchanged)
+```
+
+### RTL-Aware Positioning
+
+```tsx
+import {
+  calculatePositionWithCollision,
+  getDocumentDirection,
+  mirrorPlacementForRTL,
+} from '@tour-kit/core';
+
+function getTooltipPosition(target, size, placement) {
+  const isRTL = getDocumentDirection() === 'rtl';
+  const effectivePlacement = mirrorPlacementForRTL(placement, isRTL);
+
+  return calculatePositionWithCollision(
+    getElementRect(target),
+    size,
+    effectivePlacement
+  );
+}
+```
+
+---
+
+## Helper Functions
+
+### getElementRect
+
+Get element position including scroll offset.
+
+```tsx
+import { getElementRect } from '@tour-kit/core';
+
+const rect = getElementRect(element);
+// { x: 100, y: 200, width: 150, height: 40 }
+```
+
+<Callout type="info">
+Unlike `getBoundingClientRect()`, this includes scroll offset so positions work correctly after scrolling.
+</Callout>
+
+### getViewportDimensions
+
+Get current viewport size.
+
+```tsx
+import { getViewportDimensions } from '@tour-kit/core';
+
+const viewport = getViewportDimensions();
+// { width: 1920, height: 1080 }
+```
+
+### parsePlacement
+
+Parse placement string into side and alignment.
+
+```tsx
+import { parsePlacement } from '@tour-kit/core';
+
+parsePlacement('top-start');
+// { side: 'top', alignment: 'start' }
+
+parsePlacement('bottom');
+// { side: 'bottom', alignment: 'center' }
+```
+
+### getOppositeSide
+
+Get the opposite side for fallback positioning.
+
+```tsx
+import { getOppositeSide } from '@tour-kit/core';
+
+getOppositeSide('top');    // 'bottom'
+getOppositeSide('left');   // 'right'
+```
+
+### getFallbackPlacements
+
+Get fallback placements for collision handling.
+
+```tsx
+import { getFallbackPlacements } from '@tour-kit/core';
+
+getFallbackPlacements('top');
+// ['bottom', 'left', 'right']
+
+getFallbackPlacements('top-start');
+// ['bottom-start', 'left-start', 'right-start', 'top-end']
+```
+
+### wouldOverflow
+
+Check if a position would cause viewport overflow.
+
+```tsx
+import { wouldOverflow, getViewportDimensions } from '@tour-kit/core';
+
+const overflow = wouldOverflow(
+  { x: -10, y: 50 },
+  { width: 200, height: 100 },
+  getViewportDimensions()
+);
+// { top: false, right: false, bottom: false, left: true }
+```
+
+---
+
+## Complete Positioning Example
+
+```tsx
+import {
+  calculatePositionWithCollision,
+  getElementRect,
+  getDocumentDirection,
+  mirrorPlacementForRTL,
+} from '@tour-kit/core';
+
+function TourTooltip({ target, placement = 'bottom' }) {
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [actualPlacement, setActualPlacement] = useState(placement);
+
+  useEffect(() => {
+    if (!tooltipRef.current) return;
+
+    const targetRect = getElementRect(target);
+    const tooltipSize = {
+      width: tooltipRef.current.offsetWidth,
+      height: tooltipRef.current.offsetHeight,
+    };
+
+    // Handle RTL
+    const isRTL = getDocumentDirection() === 'rtl';
+    const effectivePlacement = mirrorPlacementForRTL(placement, isRTL);
+
+    // Calculate with collision detection
+    const result = calculatePositionWithCollision(
+      targetRect,
+      tooltipSize,
+      effectivePlacement,
+      { offset: [0, 8], padding: 16 }
+    );
+
+    setPosition({ x: result.x, y: result.y });
+    setActualPlacement(result.placement);
+  }, [target, placement]);
+
+  return (
+    <div
+      ref={tooltipRef}
+      style={{
+        position: 'absolute',
+        left: position.x,
+        top: position.y,
+      }}
+      data-placement={actualPlacement}
+    >
+      Tooltip content
+    </div>
+  );
+}
+```
+
+---
+
+## Types
+
+```ts
+type Side = 'top' | 'bottom' | 'left' | 'right';
+
+type Alignment = 'start' | 'center' | 'end';
+
+type Placement =
+  | Side
+  | `${Side}-start`
+  | `${Side}-end`;
+
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface Position {
+  x: number;
+  y: number;
+}
+```
+
+---
+
+## Related
+
+- [TourCard](/docs/react/components/tour-card) - Uses position utilities
+- [useElementPosition](/docs/core/hooks/use-element-position) - React hook for element tracking
+- [DOM Utilities](/docs/core/utilities/dom) - Element resolution

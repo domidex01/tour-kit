@@ -1,0 +1,387 @@
+---
+title: '@tour-kit/checklists API'
+description: Complete API reference for @tour-kit/checklists
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# @tour-kit/checklists API Reference
+
+Complete API reference for the checklists package. This package provides interactive checklists with task dependencies.
+
+---
+
+## Providers
+
+### ChecklistProvider
+
+Provider for checklists.
+
+```tsx
+import { ChecklistProvider } from '@tour-kit/checklists';
+
+<ChecklistProvider
+  checklists={[onboarding, setup]}
+  onTaskComplete={(checklistId, taskId) => {}}
+  onChecklistComplete={(checklistId) => {}}
+>
+  {children}
+</ChecklistProvider>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `checklists` | `ChecklistConfig[]` | Array of checklist configs |
+| `onTaskComplete` | `(checklistId, taskId) => void` | Called when task completes |
+| `onChecklistComplete` | `(checklistId) => void` | Called when checklist completes |
+
+---
+
+## Hooks
+
+### useChecklist
+
+Hook for single checklist control.
+
+```tsx
+import { useChecklist } from '@tour-kit/checklists';
+
+const {
+  checklist,
+  tasks,
+  visibleTasks,
+  progress,
+  completeTask,
+  executeAction,
+  dismiss,
+  reset,
+} = useChecklist('onboarding');
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `checklist` | `ChecklistState` | Checklist state |
+| `tasks` | `ChecklistTaskState[]` | All tasks |
+| `visibleTasks` | `ChecklistTaskState[]` | Visible tasks (passing `when` condition) |
+| `progress` | `{ completed, total, percentage }` | Progress stats |
+| `completeTask` | `(taskId: string) => void` | Mark task complete |
+| `executeAction` | `(taskId: string) => void` | Execute task action |
+| `dismiss` | `() => void` | Dismiss checklist |
+| `reset` | `() => void` | Reset checklist |
+
+### useTask
+
+Hook for single task control.
+
+```tsx
+import { useTask } from '@tour-kit/checklists';
+
+const {
+  task,
+  isCompleted,
+  isLocked,
+  dependencies,
+  complete,
+  execute,
+} = useTask('onboarding', 'profile');
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `task` | `ChecklistTaskState` | Task state |
+| `isCompleted` | `boolean` | Whether task is complete |
+| `isLocked` | `boolean` | Whether blocked by dependencies |
+| `dependencies` | `string[]` | IDs of blocking tasks |
+| `complete` | `() => void` | Mark task complete |
+| `execute` | `() => void` | Execute task action |
+
+### useChecklistPersistence
+
+Hook for persistence control.
+
+```tsx
+import { useChecklistPersistence } from '@tour-kit/checklists';
+
+const { save, load, clear } = useChecklistPersistence('onboarding');
+```
+
+### useChecklistsProgress
+
+Hook for all checklists progress.
+
+```tsx
+import { useChecklistsProgress } from '@tour-kit/checklists';
+
+const progress = useChecklistsProgress();
+// [{ id, title, completed, total, percentage }]
+```
+
+---
+
+## Components
+
+### Checklist
+
+Container component for checklist.
+
+```tsx
+import { Checklist } from '@tour-kit/checklists';
+
+<Checklist id="onboarding" className="custom-class">
+  <ChecklistProgress />
+  {tasks.map(task => (
+    <ChecklistTask key={task.id} taskId={task.id} />
+  ))}
+</Checklist>
+```
+
+### ChecklistTask
+
+Individual task item.
+
+```tsx
+import { ChecklistTask } from '@tour-kit/checklists';
+
+<ChecklistTask
+  taskId="profile"
+  checklistId="onboarding"
+  showIcon
+  showDescription
+/>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `taskId` | `string` | Task ID |
+| `checklistId` | `string` | Parent checklist ID |
+| `showIcon` | `boolean` | Show task icon |
+| `showDescription` | `boolean` | Show task description |
+
+### ChecklistProgress
+
+Progress bar/indicator.
+
+```tsx
+import { ChecklistProgress } from '@tour-kit/checklists';
+
+<ChecklistProgress
+  checklistId="onboarding"
+  showPercentage
+  showCount
+/>
+```
+
+### ChecklistLauncher
+
+Button to launch checklist.
+
+```tsx
+import { ChecklistLauncher } from '@tour-kit/checklists';
+
+<ChecklistLauncher checklistId="onboarding">
+  <button>Open Checklist</button>
+</ChecklistLauncher>
+```
+
+### ChecklistPanel
+
+Full panel UI with all features.
+
+```tsx
+import { ChecklistPanel } from '@tour-kit/checklists';
+
+<ChecklistPanel
+  checklistId="onboarding"
+  position="bottom-right"
+  collapsible
+  defaultExpanded={true}
+/>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `checklistId` | `string` | Checklist ID |
+| `position` | `string` | Panel position |
+| `collapsible` | `boolean` | Allow collapse |
+| `defaultExpanded` | `boolean` | Start expanded |
+
+---
+
+## Headless Components
+
+```tsx
+import { ChecklistHeadless, TaskHeadless } from '@tour-kit/checklists/headless';
+
+<ChecklistHeadless id="onboarding">
+  {({ checklist, tasks, progress, completeTask }) => (
+    <CustomChecklist />
+  )}
+</ChecklistHeadless>
+
+<TaskHeadless checklistId="onboarding" taskId="profile">
+  {({ task, isCompleted, isLocked, complete, execute }) => (
+    <CustomTask />
+  )}
+</TaskHeadless>
+```
+
+---
+
+## Utilities
+
+### createChecklist
+
+Factory function for checklist creation.
+
+```tsx
+import { createChecklist } from '@tour-kit/checklists';
+
+const checklist = createChecklist({
+  id: 'onboarding',
+  title: 'Get Started',
+  tasks: [/* ... */],
+});
+```
+
+### createTask
+
+Factory function for task creation.
+
+```tsx
+import { createTask } from '@tour-kit/checklists';
+
+const task = createTask({
+  id: 'profile',
+  title: 'Complete profile',
+  action: { type: 'navigate', url: '/settings' },
+});
+```
+
+### calculateProgress
+
+Calculate progress from state.
+
+```tsx
+import { calculateProgress } from '@tour-kit/checklists';
+
+const { completed, total, percentage, remaining } = calculateProgress(state);
+```
+
+### getNextTask
+
+Get first incomplete unlocked task.
+
+```tsx
+import { getNextTask } from '@tour-kit/checklists';
+
+const next = getNextTask(state);
+```
+
+### getLockedTasks
+
+Get tasks blocked by dependencies.
+
+```tsx
+import { getLockedTasks } from '@tour-kit/checklists';
+
+const locked = getLockedTasks(state);
+```
+
+### canCompleteTask
+
+Check if task dependencies are met.
+
+```tsx
+import { canCompleteTask } from '@tour-kit/checklists';
+
+const canComplete = canCompleteTask('task-id', state);
+```
+
+### resolveTaskDependencies
+
+Get topological sort of tasks.
+
+```tsx
+import { resolveTaskDependencies } from '@tour-kit/checklists';
+
+const order = resolveTaskDependencies(tasks);
+```
+
+### hasCircularDependency
+
+Detect circular dependencies.
+
+```tsx
+import { hasCircularDependency } from '@tour-kit/checklists';
+
+const hasCircular = hasCircularDependency(tasks);
+```
+
+---
+
+## Types
+
+### ChecklistConfig
+
+```tsx
+interface ChecklistConfig {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string | ReactNode;
+  tasks: ChecklistTaskConfig[];
+  onComplete?: () => void;
+  onDismiss?: () => void;
+  dismissible?: boolean;
+  hideOnComplete?: boolean;
+  meta?: Record<string, unknown>;
+}
+```
+
+### ChecklistTaskConfig
+
+```tsx
+interface ChecklistTaskConfig {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string | ReactNode;
+  action?: TaskAction;
+  dependsOn?: string[];
+  when?: (context: ChecklistContext) => boolean;
+  completedWhen?: TaskCompletionCondition;
+  manualComplete?: boolean;
+  meta?: Record<string, unknown>;
+}
+```
+
+### TaskAction
+
+```tsx
+type TaskAction =
+  | { type: 'navigate'; url: string; external?: boolean }
+  | { type: 'callback'; handler: () => void | Promise<void> }
+  | { type: 'tour'; tourId: string }
+  | { type: 'modal'; modalId: string }
+  | { type: 'custom'; data: unknown };
+```
+
+### TaskCompletionCondition
+
+```tsx
+type TaskCompletionCondition =
+  | { event: string }
+  | { selector: string }
+  | { custom: (ctx: ChecklistContext) => boolean };
+```
+
+### ChecklistProgress
+
+```tsx
+interface ChecklistProgress {
+  completed: number;
+  total: number;
+  percentage: number;
+  remaining: number;
+}
+```

@@ -1,0 +1,185 @@
+---
+title: Date Range Utilities
+description: Functions for checking date range constraints
+---
+
+# Date Range Utilities
+
+Check if a date falls within a specified range.
+
+## isWithinDateRange
+
+Check if a date is between start and end dates.
+
+```ts
+import { isWithinDateRange } from '@tour-kit/scheduling'
+
+const now = new Date('2024-02-15T10:00:00Z')
+
+const result = isWithinDateRange(
+  now,
+  '2024-01-01', // start
+  '2024-12-31', // end
+  'UTC'
+)
+
+// {
+//   isWithin: true,
+//   reason: undefined
+// }
+```
+
+### API
+
+```ts
+function isWithinDateRange(
+  date: Date,
+  start: DateString | Date | undefined,
+  end: DateString | Date | undefined,
+  timezone: string
+): {
+  isWithin: boolean
+  reason?: 'not_started' | 'ended'
+}
+```
+
+### Parameters
+
+- **date** - The date to check
+- **start** - Start date (inclusive), or `undefined` for no start constraint
+- **end** - End date (inclusive), or `undefined` for no end constraint
+- **timezone** - Timezone for date comparison
+
+### Returns
+
+Object with:
+- **isWithin** - `true` if within range
+- **reason** - `'not_started'` if before start, `'ended'` if after end
+
+## Examples
+
+### Basic Usage
+
+```ts
+import { isWithinDateRange } from '@tour-kit/scheduling'
+
+// Check if we're in Q1 2024
+const { isWithin } = isWithinDateRange(
+  new Date(),
+  '2024-01-01',
+  '2024-03-31',
+  'America/New_York'
+)
+
+if (isWithin) {
+  console.log('We are in Q1')
+}
+```
+
+### No End Date
+
+```ts
+// Starts Jan 1, 2024, never ends
+const { isWithin } = isWithinDateRange(
+  new Date(),
+  '2024-01-01',
+  undefined, // no end
+  'UTC'
+)
+```
+
+### No Start Date
+
+```ts
+// Ends Dec 31, 2024, no start constraint
+const { isWithin } = isWithinDateRange(
+  new Date(),
+  undefined, // no start
+  '2024-12-31',
+  'UTC'
+)
+```
+
+### Handle Reason
+
+```ts
+const result = isWithinDateRange(
+  new Date('2024-01-01T00:00:00Z'),
+  '2024-02-01',
+  '2024-02-29',
+  'UTC'
+)
+
+if (!result.isWithin) {
+  if (result.reason === 'not_started') {
+    console.log('Campaign has not started yet')
+  } else if (result.reason === 'ended') {
+    console.log('Campaign has ended')
+  }
+}
+```
+
+### Timezone-Aware Comparison
+
+Dates are compared in the specified timezone, not UTC:
+
+```ts
+import { isWithinDateRange } from '@tour-kit/scheduling'
+
+const date = new Date('2024-01-31T23:00:00Z')
+// 11pm UTC on Jan 31
+
+// In UTC, still Jan 31
+isWithinDateRange(date, undefined, '2024-01-31', 'UTC')
+// { isWithin: true }
+
+// In Tokyo (UTC+9), it's already Feb 1
+isWithinDateRange(date, undefined, '2024-01-31', 'Asia/Tokyo')
+// { isWithin: false, reason: 'ended' }
+```
+
+### Multi-Period Check
+
+```ts
+function isInAnyPeriod(date: Date, periods: Array<{ start: string; end: string }>) {
+  return periods.some((period) => {
+    const { isWithin } = isWithinDateRange(date, period.start, period.end, 'UTC')
+    return isWithin
+  })
+}
+
+const summerPeriods = [
+  { start: '2024-06-01', end: '2024-08-31' },
+  { start: '2024-12-01', end: '2025-02-28' }, // Southern hemisphere
+]
+
+if (isInAnyPeriod(new Date(), summerPeriods)) {
+  console.log('Summer sale active')
+}
+```
+
+## Date Format
+
+Both `DateString` (`YYYY-MM-DD`) and `Date` objects are accepted:
+
+```ts
+// Using date strings
+isWithinDateRange(new Date(), '2024-01-01', '2024-12-31', 'UTC')
+
+// Using Date objects
+isWithinDateRange(
+  new Date(),
+  new Date('2024-01-01'),
+  new Date('2024-12-31'),
+  'UTC'
+)
+
+// Mixed
+isWithinDateRange(new Date(), '2024-01-01', new Date('2024-12-31'), 'UTC')
+```
+
+## Related
+
+- [Schedule.startAt](/docs/scheduling/types#schedule) - Schedule start date
+- [Schedule.endAt](/docs/scheduling/types#schedule) - Schedule end date
+- [DateRange type](/docs/scheduling/types#daterange) - Date range type
