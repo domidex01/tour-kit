@@ -1,12 +1,5 @@
 {
-  "title": "Checklists",
-  "pages": [
-    "index",
-    "providers",
-    "hooks",
-    "components",
-    "headless",
-    "utilities",
-    "types"
-  ]
+  "title": "@tour-kit/checklists",
+  "icon": "ListChecks",
+  "pages": ["index", "providers", "hooks", "components", "headless", "utilities", "types"]
 }

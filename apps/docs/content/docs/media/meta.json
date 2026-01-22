@@ -1,11 +1,5 @@
 {
-  "title": "Media",
-  "pages": [
-    "index",
-    "components",
-    "headless",
-    "hooks",
-    "utilities",
-    "types"
-  ]
+  "title": "@tour-kit/media",
+  "icon": "Play",
+  "pages": ["index", "components", "headless", "hooks", "utilities", "types"]
 }

@@ -31,6 +31,6 @@ export function baseOptions(): BaseLayoutProps {
         icon: <Layers className="w-4 h-4" />,
       },
     ],
-    githubUrl: 'https://github.com/your-username/tour-kit',
+    githubUrl: 'https://github.com/domidex/tour-kit',
   }
 }

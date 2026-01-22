@@ -1,10 +1,5 @@
 {
-  "title": "Analytics",
-  "pages": [
-    "index",
-    "providers",
-    "hooks",
-    "plugins",
-    "types"
-  ]
+  "title": "@tour-kit/analytics",
+  "icon": "BarChart3",
+  "pages": ["index", "providers", "hooks", "plugins", "types"]
 }
