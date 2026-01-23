@@ -13,7 +13,7 @@ export default defineConfig([
     clean: true,
     external: ['react', 'react-dom', '@lottiefiles/react-lottie-player'],
     treeshake: true,
-    splitting: false,
+    splitting: true,
     minify: true,
     sourcemap: true,
     target: 'es2020',

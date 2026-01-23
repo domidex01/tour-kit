@@ -25,7 +25,11 @@
     "version-packages": "changeset version",
     "release": "turbo run build && changeset publish",
     "example:vite": "pnpm --filter vite-tour-kit-demo dev",
-    "example:next": "pnpm --filter next-tour-kit-demo dev"
+    "example:next": "pnpm --filter next-tour-kit-demo dev",
+    "size": "pnpm --filter @tour-kit/bundle-check check",
+    "size:why": "pnpm --filter @tour-kit/bundle-check check:why",
+    "bench": "turbo run bench",
+    "bench:core": "pnpm --filter @tour-kit/core vitest bench"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.0",
@@ -33,6 +37,7 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
+    "@types/node": "^25.0.10",
     "@vitest/coverage-v8": "^4.0.16",
     "happy-dom": "^20.0.11",
     "jsdom": "^27.3.0",
@@ -45,7 +50,12 @@
       "react-router": ">=7.12.0",
       "preact": ">=10.28.2"
     },
-    "ignoredBuiltDependencies": ["esbuild", "sharp"],
-    "onlyBuiltDependencies": ["@biomejs/biome"]
+    "ignoredBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ],
+    "onlyBuiltDependencies": [
+      "@biomejs/biome"
+    ]
   }
 }

@@ -12,3 +12,4 @@ export {
   dispatchAdvanceEvent,
   type UseAdvanceOnOptions,
 } from './use-advance-on'
+export { useBranch } from './use-branch'

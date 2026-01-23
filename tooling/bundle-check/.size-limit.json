@@ -1,0 +1,37 @@
+[
+  {
+    "name": "@tour-kit/core",
+    "path": "../../packages/core/dist/index.js",
+    "limit": "9 KB",
+    "gzip": true,
+    "ignore": ["react", "react-dom"]
+  },
+  {
+    "name": "@tour-kit/react",
+    "path": "../../packages/react/dist/index.js",
+    "limit": "35 KB",
+    "gzip": true,
+    "ignore": ["react", "react-dom"]
+  },
+  {
+    "name": "@tour-kit/react/headless",
+    "path": "../../packages/react/dist/headless.js",
+    "limit": "25 KB",
+    "gzip": true,
+    "ignore": ["react", "react-dom"]
+  },
+  {
+    "name": "@tour-kit/hints",
+    "path": "../../packages/hints/dist/index.js",
+    "limit": "30 KB",
+    "gzip": true,
+    "ignore": ["react", "react-dom"]
+  },
+  {
+    "name": "@tour-kit/hints/headless",
+    "path": "../../packages/hints/dist/headless.js",
+    "limit": "28 KB",
+    "gzip": true,
+    "ignore": ["react", "react-dom"]
+  }
+]

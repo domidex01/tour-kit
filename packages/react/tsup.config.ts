@@ -6,6 +6,7 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     headless: 'src/headless.ts',
+    lazy: 'src/lazy.tsx',
     'tailwind/index': 'src/tailwind/index.ts',
   },
   format: ['cjs', 'esm'],
@@ -25,7 +26,7 @@ export default defineConfig({
     'react-router-dom',
   ],
   treeshake: true,
-  splitting: false,
+  splitting: true,
   minify: true,
   sourcemap: true,
   target: 'es2020',

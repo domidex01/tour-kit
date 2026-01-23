@@ -1,4 +1,5 @@
 import type React from 'react'
+import type { Branch } from './branch'
 import type { Placement } from './config'
 import type { TourCallbackContext } from './state'
 
@@ -40,6 +41,31 @@ export interface TourStep {
     context: TourCallbackContext
   ) => boolean | undefined | Promise<boolean | undefined>
   onHide?: (context: TourCallbackContext) => void
+  /**
+   * Override the next navigation behavior
+   * Determines where to go when the user clicks "Next" or the tour advances
+   */
+  onNext?: Branch
+  /**
+   * Override the previous navigation behavior
+   * Determines where to go when the user clicks "Back"
+   * Set to null to disable going back from this step
+   */
+  onPrev?: Branch
+  /**
+   * Named actions that can be triggered from step content
+   * Use with useBranch().triggerAction() from your step components
+   *
+   * @example
+   * ```tsx
+   * onAction: {
+   *   'select-developer': 'developer-path-step',
+   *   'select-designer': 'designer-path-step',
+   *   'skip-onboarding': 'complete'
+   * }
+   * ```
+   */
+  onAction?: Record<string, Branch>
 }
 
 export type StepOptions = Omit<TourStep, 'id'>

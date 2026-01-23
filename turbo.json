@@ -18,6 +18,14 @@
     },
     "clean": {
       "cache": false
+    },
+    "size": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
+    "bench": {
+      "dependsOn": ["build"],
+      "outputs": ["benchmark-results.json"]
     }
   }
 }

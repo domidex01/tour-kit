@@ -50,6 +50,16 @@
         "default": "./dist/headless.cjs"
       }
     },
+    "./lazy": {
+      "import": {
+        "types": "./dist/lazy.d.ts",
+        "default": "./dist/lazy.js"
+      },
+      "require": {
+        "types": "./dist/lazy.d.cts",
+        "default": "./dist/lazy.cjs"
+      }
+    },
     "./tailwind": {
       "import": {
         "types": "./dist/tailwind/index.d.ts",

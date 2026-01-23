@@ -20,7 +20,7 @@ export default defineConfig({
     'tailwindcss/plugin',
   ],
   treeshake: true,
-  splitting: false,
+  splitting: true,
   minify: true,
   sourcemap: true,
   target: 'es2020',

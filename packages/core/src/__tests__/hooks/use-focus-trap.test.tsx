@@ -1,8 +1,10 @@
-import { render, screen } from '@testing-library/react'
+import { render, renderHook, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useState } from 'react'
 import type * as React from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFocusTrap } from '../../hooks/use-focus-trap'
+import { createEventListenerTracker, createFunctionIdentityChecker } from '../utils/cleanup-test-utils'
 
 function TestComponent({ enabled = true }: { enabled?: boolean }) {
   const { containerRef, activate, deactivate } = useFocusTrap(enabled)
@@ -218,5 +220,91 @@ describe('useFocusTrap', () => {
     expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function))
 
     addEventListenerSpy.mockRestore()
+  })
+})
+
+describe('useFocusTrap - memory leak prevention', () => {
+  let tracker: ReturnType<typeof createEventListenerTracker>
+
+  beforeEach(() => {
+    tracker = createEventListenerTracker(document)
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+  })
+
+  afterEach(() => {
+    tracker.cleanup()
+  })
+
+  it('does not leak listeners after multiple activate/deactivate cycles', async () => {
+    const user = userEvent.setup()
+    render(<TestComponent />)
+
+    // Perform multiple activate/deactivate cycles
+    for (let i = 0; i < 5; i++) {
+      await user.click(screen.getByTestId('activate'))
+      await user.click(screen.getByTestId('deactivate'))
+    }
+
+    tracker.assertNoLeaks()
+  })
+
+  it('does not leak listeners after rapid activate calls', async () => {
+    const user = userEvent.setup()
+    render(<TestComponent />)
+
+    // Rapid activate calls without deactivate
+    await user.click(screen.getByTestId('activate'))
+    await user.click(screen.getByTestId('activate'))
+    await user.click(screen.getByTestId('activate'))
+
+    // Should only have one listener
+    expect(tracker.getListenerCount('keydown')).toBe(1)
+
+    await user.click(screen.getByTestId('deactivate'))
+    tracker.assertNoLeaks()
+  })
+
+  it('maintains function identity stability across rerenders', () => {
+    const checker = createFunctionIdentityChecker()
+    const { result, rerender } = renderHook(() => useFocusTrap())
+
+    checker.record('activate', result.current.activate)
+    checker.record('deactivate', result.current.deactivate)
+
+    // Rerender multiple times
+    for (let i = 0; i < 3; i++) {
+      rerender()
+      checker.assertStable('activate', result.current.activate)
+      checker.assertStable('deactivate', result.current.deactivate)
+    }
+  })
+
+  it('cleans up properly when enabled prop changes', async () => {
+    const user = userEvent.setup()
+
+    function ToggleComponent() {
+      const [enabled, setEnabled] = useState(true)
+      const { containerRef, activate, deactivate } = useFocusTrap(enabled)
+
+      return (
+        <div ref={containerRef as React.RefObject<HTMLDivElement>} data-testid="container">
+          <button type="button" data-testid="first">First</button>
+          <button type="button" onClick={activate} data-testid="activate">Activate</button>
+          <button type="button" onClick={deactivate} data-testid="deactivate">Deactivate</button>
+          <button type="button" onClick={() => setEnabled((e: boolean) => !e)} data-testid="toggle">Toggle</button>
+        </div>
+      )
+    }
+
+    const { unmount } = render(<ToggleComponent />)
+
+    await user.click(screen.getByTestId('activate'))
+    await user.click(screen.getByTestId('toggle')) // Disable
+    await user.click(screen.getByTestId('deactivate'))
+
+    unmount()
+    tracker.assertNoLeaks()
   })
 })

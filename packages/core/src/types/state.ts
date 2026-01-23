@@ -14,6 +14,12 @@ export interface TourState {
   isTransitioning: boolean
   completedTours: string[]
   skippedTours: string[]
+  /** List of step IDs visited in the current tour session */
+  visitedSteps: string[]
+  /** Map of step ID to number of times it has been visited */
+  stepVisitCount: Map<string, number>
+  /** ID of the previous step (for branch context) */
+  previousStepId: string | null
 }
 
 /**
@@ -38,6 +44,22 @@ export interface TourActions {
   setDontShowAgain: (tourId: string, value: boolean) => void
   reset: (tourId?: string) => void
   setData: (key: string, value: unknown) => void
+  /**
+   * Navigate directly to a step by its ID
+   */
+  goToStep: (stepId: string) => Promise<void>
+  /**
+   * Start a different tour (for cross-tour branching)
+   * @param tourId - The tour to start
+   * @param stepId - Optional step ID or index to start at
+   */
+  startTour: (tourId: string, stepId?: string | number) => Promise<void>
+  /**
+   * Trigger a branch action defined in the current step's onAction
+   * @param actionId - The action ID to trigger
+   * @param payload - Optional data to pass to the branch resolver
+   */
+  triggerBranchAction: (actionId: string, payload?: unknown) => Promise<void>
 }
 
 /**
@@ -61,4 +83,7 @@ export const initialTourState: TourState = {
   isTransitioning: false,
   completedTours: [],
   skippedTours: [],
+  visitedSteps: [],
+  stepVisitCount: new Map(),
+  previousStepId: null,
 }

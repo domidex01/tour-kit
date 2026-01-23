@@ -1,10 +1,11 @@
 import { act, renderHook } from '@testing-library/react'
 import type * as React from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { TourProvider } from '../../context/tour-provider'
 import { useKeyboardNavigation } from '../../hooks/use-keyboard'
 import { useTour } from '../../hooks/use-tour'
 import type { Tour } from '../../types'
+import { createEventListenerTracker } from '../utils/cleanup-test-utils'
 
 const testTours: Tour[] = [
   {
@@ -386,5 +387,107 @@ describe('useKeyboardNavigation', () => {
     })
 
     expect(preventDefaultSpy).toHaveBeenCalled()
+  })
+})
+
+describe('useKeyboardNavigation - memory leak prevention', () => {
+  let tracker: ReturnType<typeof createEventListenerTracker>
+
+  beforeEach(() => {
+    tracker = createEventListenerTracker(document)
+    document.body.innerHTML = ''
+  })
+
+  afterEach(() => {
+    tracker.cleanup()
+  })
+
+  it('does not leak listeners after multiple start/stop cycles', async () => {
+    const wrapper = createWrapper()
+
+    const { result, unmount } = renderHook(
+      () => {
+        const tour = useTour()
+        useKeyboardNavigation()
+        return tour
+      },
+      { wrapper }
+    )
+
+    // Perform multiple start/stop cycles
+    for (let i = 0; i < 5; i++) {
+      await act(async () => {
+        await result.current.start()
+      })
+      act(() => {
+        result.current.stop()
+      })
+    }
+
+    unmount()
+    tracker.assertNoLeaks()
+  })
+
+  it('does not accumulate listeners when tour state changes rapidly', async () => {
+    const wrapper = createWrapper()
+
+    const { result, unmount } = renderHook(
+      () => {
+        const tour = useTour()
+        useKeyboardNavigation()
+        return tour
+      },
+      { wrapper }
+    )
+
+    await act(async () => {
+      await result.current.start()
+    })
+
+    // Navigate through steps rapidly
+    for (let i = 0; i < 10; i++) {
+      await act(async () => {
+        await result.current.next()
+      })
+      await act(async () => {
+        await result.current.prev()
+      })
+    }
+
+    // Should only have one keydown listener
+    expect(tracker.getListenerCount('keydown')).toBe(1)
+
+    unmount()
+    tracker.assertNoLeaks()
+  })
+
+  it('cleans up when config changes from enabled to disabled', async () => {
+    let config = { enabled: true }
+    const wrapper = createWrapper()
+
+    const { result, rerender, unmount } = renderHook(
+      () => {
+        const tour = useTour()
+        useKeyboardNavigation(config)
+        return tour
+      },
+      { wrapper }
+    )
+
+    await act(async () => {
+      await result.current.start()
+    })
+
+    expect(tracker.getListenerCount('keydown')).toBe(1)
+
+    // Disable keyboard navigation
+    config = { enabled: false }
+    rerender()
+
+    // Listener should be removed
+    expect(tracker.getListenerCount('keydown')).toBe(0)
+
+    unmount()
+    tracker.assertNoLeaks()
   })
 })

@@ -1,0 +1,14 @@
+{
+  "name": "@tour-kit/bundle-check",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bundle size verification for tour-kit packages",
+  "scripts": {
+    "check": "size-limit",
+    "check:why": "size-limit --why"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^11.0.0",
+    "size-limit": "^11.0.0"
+  }
+}

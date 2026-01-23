@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { TourKitConfig } from '../types'
+import type { BranchTarget, TourKitConfig } from '../types'
 
 export interface TourKitContextValue {
   config: TourKitConfig
@@ -17,6 +17,21 @@ export interface TourKitContextValue {
   onTourComplete?: (tourId: string) => void
   onTourSkip?: (tourId: string, stepIndex: number) => void
   onStepView?: (tourId: string, stepId: string, stepIndex: number) => void
+  /**
+   * Called when a branch action is triggered from a step
+   * @param tourId - The current tour ID
+   * @param stepId - The step where the action was triggered
+   * @param actionId - The action ID that was triggered
+   * @param target - The resolved branch target
+   */
+  onBranchAction?: (tourId: string, stepId: string, actionId: string, target: BranchTarget) => void
+  /**
+   * Called when branching to a different tour
+   * @param fromTourId - The tour being navigated from
+   * @param toTourId - The tour being navigated to
+   * @param fromStepId - The step where the branch occurred
+   */
+  onTourBranch?: (fromTourId: string, toTourId: string, fromStepId: string) => void
 }
 
 export const TourKitContext = createContext<TourKitContextValue | null>(null)
