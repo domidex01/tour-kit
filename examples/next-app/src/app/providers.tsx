@@ -203,6 +203,81 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
         />
       </Tour>
 
+      {/* Branching demo tour */}
+      <Tour id="branching-demo">
+        <TourStep
+          id="welcome"
+          route="/branching"
+          target="#branching-title"
+          title="Dynamic Branching"
+          content="This tour demonstrates personalized flows based on your choices. Tours can adapt to user decisions!"
+          placement="bottom"
+          waitForTarget
+        />
+        <TourStep
+          id="role-select"
+          route="/branching"
+          target="#role-select"
+          title="Select Your Role"
+          content="Click one of the role buttons below to choose your path. Each role shows different content."
+          placement="bottom"
+          waitForTarget
+          onNext={null}
+          onAction={{
+            developer: 'dev-intro',
+            designer: 'design-intro',
+            manager: 'manager-intro',
+          }}
+        />
+        {/* Developer path */}
+        <TourStep
+          id="dev-intro"
+          route="/branching"
+          target="#developer-section"
+          title="Developer Track"
+          content="Welcome to the developer path! Here you'll find API docs, code examples, and integration guides."
+          placement="right"
+          waitForTarget
+          onNext="summary"
+          onPrev="role-select"
+        />
+        {/* Designer path */}
+        <TourStep
+          id="design-intro"
+          route="/branching"
+          target="#designer-section"
+          title="Designer Track"
+          content="Welcome to the designer path! Explore visual tools, themes, and component styling options."
+          placement="right"
+          waitForTarget
+          onNext="summary"
+          onPrev="role-select"
+        />
+        {/* Manager path */}
+        <TourStep
+          id="manager-intro"
+          route="/branching"
+          target="#manager-section"
+          title="Manager Track"
+          content="Welcome to the manager path! Learn about analytics, team features, and performance metrics."
+          placement="right"
+          waitForTarget
+          onNext="summary"
+          onPrev="role-select"
+        />
+        {/* Summary */}
+        <TourStep
+          id="summary"
+          route="/branching"
+          target="#branching-title"
+          title="Tour Complete!"
+          content="You completed the branching tour. Try again with a different role to see other content!"
+          placement="bottom"
+          waitForTarget
+          onNext="complete"
+        />
+      </Tour>
+
       {/* Multi-page onboarding tour */}
       <Tour id="onboarding-tour">
         {/* Home page steps */}

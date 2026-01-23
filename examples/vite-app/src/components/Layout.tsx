@@ -43,6 +43,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
               Adoption
             </Link>
             <Link
+              to="/branching"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Branching
+            </Link>
+            <Link
               to="/base-ui"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >

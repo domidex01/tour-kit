@@ -26,6 +26,7 @@ import { Layout } from './components/Layout'
 import {
   AdoptionPage,
   BaseUIPage,
+  BranchingPage,
   ContactPage,
   FeaturesPage,
   HomePage,

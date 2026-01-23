@@ -132,6 +132,7 @@ export {
   useRoutePersistence,
   useMediaQuery,
   usePrefersReducedMotion,
+  useBranch,
 } from '@tour-kit/core'
 
 // Utilities
@@ -200,4 +201,13 @@ export type {
   UseFocusTrapReturn,
   UsePersistenceReturn,
   UseRoutePersistenceReturn,
+  // Branch types
+  BranchTarget,
+  BranchToTour,
+  BranchSkip,
+  BranchWait,
+  BranchContext,
+  BranchResolver,
+  Branch,
+  UseBranchReturn,
 } from '@tour-kit/core'
