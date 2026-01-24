@@ -138,5 +138,15 @@ export {
   resolveBranch,
   resolveTargetToIndex,
   isLoopDetected,
+  // Throttle utilities
+  throttleRAF,
+  throttleTime,
+  throttleLeading,
 } from './utils'
-export type { PositionResult, LogLevel, LoggerConfig } from './utils'
+export type {
+  PositionResult,
+  LogLevel,
+  LoggerConfig,
+  ThrottledFunction,
+  ThrottledFunctionWithFlush,
+} from './utils'

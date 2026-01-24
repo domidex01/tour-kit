@@ -291,6 +291,92 @@ interface AnalyticsPlugin {
 ```tsx
 interface AnalyticsConfig {
   plugins: AnalyticsPlugin[];
-  defaultProperties?: Record<string, unknown>;
+  enabled?: boolean;
+  debug?: boolean;
+  batchSize?: number;
+  batchInterval?: number;
+  userId?: string;
+  userProperties?: Record<string, unknown>;
+  globalProperties?: Record<string, unknown>;
 }
 ```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `plugins` | `AnalyticsPlugin[]` | Required | Array of analytics plugins |
+| `enabled` | `boolean` | `true` | Enable/disable analytics |
+| `debug` | `boolean` | `false` | Log events to console |
+| `batchSize` | `number` | `1` | Number of events to buffer before sending |
+| `batchInterval` | `number` | `5000` | Maximum time (ms) before auto-flush |
+| `userId` | `string` | - | User identification on init |
+| `userProperties` | `Record<string, unknown>` | - | User properties on init |
+| `globalProperties` | `Record<string, unknown>` | - | Properties added to all events |
+
+---
+
+## Event Batching
+
+Configure event batching to reduce network requests and improve performance.
+
+### Basic Configuration
+
+```tsx
+import { createAnalytics } from '@tour-kit/analytics';
+
+const analytics = createAnalytics({
+  plugins: [myPlugin],
+  batchSize: 10,        // Buffer up to 10 events
+  batchInterval: 5000,  // Flush after 5 seconds max
+});
+```
+
+### How Batching Works
+
+1. Events are queued in memory
+2. Queue flushes when **either** condition is met:
+   - `batchSize` events are queued
+   - `batchInterval` milliseconds have passed
+3. Critical events always flush immediately
+
+### Critical Events
+
+These events bypass batching and flush immediately to ensure delivery:
+
+- `tour_completed` - Tour success metrics
+- `tour_abandoned` - User drop-off tracking
+- `tour_skipped` - Skip behavior analysis
+
+```tsx
+// tour_completed always sends immediately, regardless of batch settings
+analytics.tourCompleted('onboarding');
+```
+
+### Manual Flush
+
+Force all buffered events to send:
+
+```tsx
+// Before page unload
+window.addEventListener('beforeunload', () => {
+  analytics.flush();
+});
+
+// Or in component cleanup
+useEffect(() => {
+  return () => {
+    analytics.flush();
+  };
+}, []);
+```
+
+### When to Use Batching
+
+| Scenario | Recommended Settings |
+|----------|---------------------|
+| High-traffic apps | `batchSize: 10, batchInterval: 5000` |
+| Real-time dashboards | `batchSize: 1` (no batching) |
+| Mobile/low bandwidth | `batchSize: 20, batchInterval: 10000` |
+
+<Callout type="info">
+Batching only affects event delivery timing, not event accuracy. All events are eventually sent.
+</Callout>

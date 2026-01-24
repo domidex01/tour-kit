@@ -44,7 +44,11 @@ export const TourOverlay = React.forwardRef<HTMLDivElement, TourOverlayProps>(
         <div
           ref={ref}
           className={cn(tourOverlayVariants({ zIndex }), className)}
-          style={overlayStyle}
+          style={{
+            ...overlayStyle,
+            // When interactive, allow clicks to pass through the overlay to page elements
+            pointerEvents: currentStep?.interactive ? 'none' : overlayStyle.pointerEvents,
+          }}
           onClick={onClick}
           aria-hidden="true"
           {...props}
@@ -54,7 +58,7 @@ export const TourOverlay = React.forwardRef<HTMLDivElement, TourOverlayProps>(
               className="absolute bg-transparent"
               style={{
                 ...cutoutStyle,
-                pointerEvents: currentStep?.interactive ? 'auto' : 'none',
+                pointerEvents: 'none',
               }}
             />
           )}

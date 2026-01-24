@@ -9,6 +9,7 @@
     "scroll",
     "position",
     "a11y",
-    "logger"
+    "logger",
+    "throttle"
   ]
 }

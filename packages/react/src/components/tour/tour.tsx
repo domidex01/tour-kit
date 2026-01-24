@@ -64,8 +64,16 @@ export function Tour({
     const contentElements: React.ReactNode[] = []
 
     React.Children.forEach(children, (child) => {
-      if (React.isValidElement(child) && child.type === TourStep) {
-        stepElements.push(child.props as TourStepType)
+      if (React.isValidElement(child)) {
+        // Check both reference equality and displayName for bundler compatibility
+        const type = child.type as React.ComponentType & { displayName?: string }
+        const isTourStep = type === TourStep || type.displayName === 'TourStep'
+
+        if (isTourStep) {
+          stepElements.push(child.props as TourStepType)
+        } else {
+          contentElements.push(child)
+        }
       } else {
         contentElements.push(child)
       }

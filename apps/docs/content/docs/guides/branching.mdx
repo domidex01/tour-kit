@@ -1,0 +1,451 @@
+---
+title: Branching Tours
+description: Create personalized tour experiences with dynamic branching based on user choices
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+# Branching Tours
+
+Branching allows tours to adapt based on user choices, creating personalized onboarding experiences. Instead of a linear sequence, users can select paths that show content relevant to their needs.
+
+## When to Use Branching
+
+Branching is ideal when:
+
+- **Role-based onboarding**: Developers, designers, and managers see different features
+- **Feature discovery**: Users choose which features to explore
+- **Skill-based paths**: Beginners vs advanced users get appropriate content
+- **Conditional flows**: Show different steps based on user state or data
+
+For simple sequential tours, standard navigation is sufficient.
+
+---
+
+## Core Concepts
+
+### Step Actions
+
+Steps can define named actions using the `onAction` prop:
+
+```tsx
+<TourStep
+  id="role-select"
+  target="#role-buttons"
+  onAction={{
+    developer: 'dev-intro',
+    designer: 'design-intro',
+    manager: 'manager-intro',
+  }}
+/>
+```
+
+### The useBranch Hook
+
+The `useBranch` hook triggers these actions from your components:
+
+```tsx
+import { useBranch } from '@tour-kit/core';
+
+function RoleButtons() {
+  const { triggerAction } = useBranch();
+
+  return (
+    <>
+      <button onClick={() => triggerAction('developer')}>Developer</button>
+      <button onClick={() => triggerAction('designer')}>Designer</button>
+    </>
+  );
+}
+```
+
+### Interactive Steps
+
+Set `interactive={true}` to allow clicks through the overlay:
+
+```tsx
+<TourStep
+  id="role-select"
+  target="#role-buttons"
+  interactive  // Clicks pass through to page elements
+  onNext={null}  // Hide Next button
+  onAction={{ ... }}
+/>
+```
+
+<Callout type="warn">
+  Without `interactive={true}`, the overlay blocks all clicks—users won't be able to interact with page elements even within the spotlight area.
+</Callout>
+
+---
+
+## Branch Targets
+
+Actions can navigate to various targets:
+
+<Tabs items={['Step ID', 'Special Keywords', 'Cross-Tour', 'Dynamic']}>
+  <Tab value="Step ID">
+```tsx
+onAction={{
+  developer: 'dev-intro',   // Navigate to step with id="dev-intro"
+  designer: 'design-intro',
+}}
+```
+  </Tab>
+  <Tab value="Special Keywords">
+```tsx
+onAction={{
+  continue: 'next',     // Next sequential step
+  goBack: 'prev',       // Previous step
+  done: 'complete',     // Complete the tour
+  cancel: 'skip',       // Skip/abort the tour
+  retry: 'restart',     // Restart from beginning
+}}
+```
+  </Tab>
+  <Tab value="Cross-Tour">
+```tsx
+onAction={{
+  // Start a different tour
+  advanced: { tour: 'advanced-tour' },
+
+  // Start at specific step in another tour
+  reports: { tour: 'reports-tour', step: 'intro' },
+}}
+```
+  </Tab>
+  <Tab value="Dynamic">
+```tsx
+onAction={{
+  submit: (ctx) => {
+    // Access action payload
+    const score = ctx.actionPayload as number;
+
+    // Access tour data
+    const isAdmin = ctx.data.isAdmin;
+
+    // Return target dynamically
+    if (score > 80) return 'advanced-track';
+    if (isAdmin) return 'admin-track';
+    return 'basic-track';
+  },
+}}
+```
+  </Tab>
+</Tabs>
+
+---
+
+## Complete Example
+
+Here's a full role-selection tour implementation:
+
+### Tour Configuration
+
+```tsx
+<Tour id="onboarding">
+  {/* Welcome step */}
+  <TourStep
+    id="welcome"
+    target="#header"
+    title="Welcome!"
+    content="Let's personalize your experience"
+  />
+
+  {/* Branching point */}
+  <TourStep
+    id="role-select"
+    target="#role-buttons"
+    title="Select Your Role"
+    content="Choose your role to see relevant content"
+    interactive
+    onNext={null}
+    onAction={{
+      developer: 'dev-intro',
+      designer: 'design-intro',
+      manager: 'manager-intro',
+    }}
+  />
+
+  {/* Developer path */}
+  <TourStep
+    id="dev-intro"
+    target="#api-docs"
+    title="API Documentation"
+    content="Here's where you'll find code examples and integration guides."
+    onNext="summary"
+    onPrev="role-select"
+  />
+
+  {/* Designer path */}
+  <TourStep
+    id="design-intro"
+    target="#design-tools"
+    title="Design Studio"
+    content="Create beautiful experiences with our visual editor."
+    onNext="summary"
+    onPrev="role-select"
+  />
+
+  {/* Manager path */}
+  <TourStep
+    id="manager-intro"
+    target="#analytics"
+    title="Analytics Dashboard"
+    content="Track your team's progress and engagement."
+    onNext="summary"
+    onPrev="role-select"
+  />
+
+  {/* All paths converge */}
+  <TourStep
+    id="summary"
+    target="#header"
+    title="You're All Set!"
+    content="Explore more features at your own pace."
+    onNext="complete"
+  />
+</Tour>
+```
+
+### Page Component
+
+```tsx
+'use client';
+
+import { useBranch, useTour } from '@tour-kit/react';
+
+export default function OnboardingPage() {
+  const { start, isActive } = useTour('onboarding');
+
+  return (
+    <div>
+      <button onClick={() => start()}>
+        {isActive ? 'Tour Running...' : 'Start Tour'}
+      </button>
+
+      <div id="role-buttons">
+        <RoleButtons />
+      </div>
+
+      <div id="api-docs">API Documentation Section</div>
+      <div id="design-tools">Design Tools Section</div>
+      <div id="analytics">Analytics Dashboard</div>
+    </div>
+  );
+}
+
+function RoleButtons() {
+  const { triggerAction, hasAction } = useBranch();
+  const { isActive, currentStep } = useTour('onboarding');
+
+  // Only show during role selection step
+  const showButtons = isActive && currentStep?.id === 'role-select';
+
+  const roles = [
+    { id: 'developer', label: 'Developer', bg: 'bg-blue-100', text: 'text-blue-800' },
+    { id: 'designer', label: 'Designer', bg: 'bg-purple-100', text: 'text-purple-800' },
+    { id: 'manager', label: 'Manager', bg: 'bg-green-100', text: 'text-green-800' },
+  ];
+
+  return (
+    <div className="flex gap-4">
+      {roles.map(({ id, label, bg, text }) => (
+        <button
+          key={id}
+          onClick={() => showButtons && triggerAction(id)}
+          disabled={!showButtons || !hasAction(id)}
+          className={`px-6 py-3 rounded-lg font-medium ${bg} ${text}
+            ${showButtons ? 'hover:opacity-80' : 'opacity-50 cursor-not-allowed'}`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+## Navigation Overrides
+
+### Disabling Next/Prev
+
+Set to `null` to disable buttons:
+
+```tsx
+<TourStep
+  id="role-select"
+  onNext={null}  // Hide Next - require action choice
+  onPrev={null}  // Hide Prev - no going back
+/>
+```
+
+### Custom Back Navigation
+
+Use `onPrev` to return to branching points:
+
+```tsx
+<TourStep
+  id="dev-intro"
+  onPrev="role-select"  // Back returns to selection, not previous step index
+/>
+```
+
+### Skip to End
+
+Use `onNext` to skip ahead:
+
+```tsx
+<TourStep
+  id="feature-highlight"
+  onNext="summary"  // Skip remaining steps
+/>
+```
+
+---
+
+## Advanced Patterns
+
+### Storing User Choices
+
+Use the context's `setData` in resolver functions:
+
+```tsx
+<TourStep
+  id="role-select"
+  onAction={{
+    developer: (ctx) => {
+      ctx.setData('selectedRole', 'developer');
+      return 'dev-intro';
+    },
+  }}
+/>
+```
+
+Access stored data later:
+
+```tsx
+<TourStep
+  id="personalized-step"
+  content={(ctx) => `Welcome, ${ctx.data.selectedRole}!`}
+/>
+```
+
+### Multi-Level Branching
+
+Create deeper branching trees:
+
+```tsx
+<Tour id="deep-branch">
+  <TourStep id="start" onNext="level1-choice" />
+
+  <TourStep
+    id="level1-choice"
+    interactive
+    onNext={null}
+    onAction={{
+      pathA: 'level2-a-choice',
+      pathB: 'level2-b-choice',
+    }}
+  />
+
+  <TourStep
+    id="level2-a-choice"
+    interactive
+    onNext={null}
+    onAction={{
+      detailed: 'detail-a',
+      quick: 'summary',
+    }}
+  />
+
+  {/* More steps... */}
+</Tour>
+```
+
+### Conditional Paths with when
+
+Combine branching with conditional visibility:
+
+```tsx
+<TourStep
+  id="admin-features"
+  when={(ctx) => ctx.data.isAdmin === true}
+  // Only shown to admins
+/>
+```
+
+### Async Actions
+
+Resolver functions can be async:
+
+```tsx
+<TourStep
+  id="submit"
+  onAction={{
+    save: async (ctx) => {
+      const result = await saveProgress(ctx.data);
+      return result.success ? 'success-step' : 'error-step';
+    },
+  }}
+/>
+```
+
+---
+
+## Cross-Tour Navigation
+
+Navigate between tours for complex flows:
+
+```tsx
+// In onboarding tour
+<TourStep
+  id="feature-choice"
+  onAction={{
+    analytics: { tour: 'analytics-tour' },
+    reports: { tour: 'reports-tour', step: 'intro' },
+  }}
+/>
+```
+
+<Callout type="info">
+  Cross-tour navigation works with `TourKitProvider` or `MultiTourKitProvider`. The target tour must be registered in the same provider hierarchy.
+</Callout>
+
+---
+
+## Loop Prevention
+
+Tour Kit includes automatic loop detection to prevent infinite navigation:
+
+- Maximum branch resolution depth: 50
+- Maximum step visits: 10 per step
+
+If loops are detected, navigation falls back to `'next'` with a console warning.
+
+---
+
+## Debugging Tips
+
+1. **Check `interactive` prop**: Without it, overlay blocks clicks
+2. **Verify action names**: `hasAction()` returns false for undefined actions
+3. **Use console plugin**: Analytics plugin shows navigation events
+4. **Check step IDs**: Typos in target IDs cause navigation failures
+
+```tsx
+// Debug available actions
+const { availableActions } = useBranch();
+console.log('Available actions:', availableActions);
+```
+
+---
+
+## Related
+
+- [useBranch Hook](/docs/core/hooks/use-branch)
+- [Step Types - Branching Navigation](/docs/core/types/step-types#branching-navigation)
+- [Conditional Steps (when)](/docs/core/types/step-types)
+- [useTour Hook](/docs/core/hooks/use-tour)

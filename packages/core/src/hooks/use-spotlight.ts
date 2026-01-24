@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { SpotlightConfig } from '../types'
 import { defaultSpotlightConfig } from '../types/config'
+import { throttleRAF } from '../utils/throttle'
 
 export interface UseSpotlightReturn {
   isVisible: boolean
@@ -24,17 +25,21 @@ export function useSpotlight(): UseSpotlightReturn {
     }
   }, [])
 
+  // Throttle updates to RAF for smooth 60fps during scroll/resize
+  const throttledUpdateRect = useMemo(() => throttleRAF(updateRect), [updateRect])
+
   useEffect(() => {
     if (!isVisible) return
 
-    window.addEventListener('scroll', updateRect, true)
-    window.addEventListener('resize', updateRect)
+    window.addEventListener('scroll', throttledUpdateRect, { passive: true, capture: true })
+    window.addEventListener('resize', throttledUpdateRect, { passive: true })
 
     return () => {
-      window.removeEventListener('scroll', updateRect, true)
-      window.removeEventListener('resize', updateRect)
+      throttledUpdateRect.cancel()
+      window.removeEventListener('scroll', throttledUpdateRect, true)
+      window.removeEventListener('resize', throttledUpdateRect)
     }
-  }, [isVisible, updateRect])
+  }, [isVisible, throttledUpdateRect])
 
   const show = useCallback((target: HTMLElement, spotlightConfig?: SpotlightConfig) => {
     targetRef.current = target

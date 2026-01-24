@@ -286,8 +286,25 @@ function tourReducer(state: TourReducerState, action: TourAction): TourReducerSt
       return { ...state, skippedTours: [...state.skippedTours, action.tourId] }
     case 'RESET':
       return handleReset(state, action.tourId)
-    case 'UPDATE_TOURS':
-      return { ...state, tours: new Map(action.tours.map((t) => [t.id, t])) }
+    case 'UPDATE_TOURS': {
+      const newTours = new Map(action.tours.map((t) => [t.id, t]))
+
+      // If there's an active tour, refresh currentStep from the updated tour
+      // This ensures step properties like onAction are synchronized
+      if (state.isActive && state.tourId) {
+        const updatedTour = newTours.get(state.tourId)
+        if (updatedTour && updatedTour.steps[state.currentStepIndex]) {
+          return {
+            ...state,
+            tours: newTours,
+            currentStep: updatedTour.steps[state.currentStepIndex],
+            totalSteps: updatedTour.steps.length,
+          }
+        }
+      }
+
+      return { ...state, tours: newTours }
+    }
     case 'TRACK_STEP_VISIT': {
       const newVisitedSteps = state.visitedSteps.includes(action.stepId)
         ? state.visitedSteps

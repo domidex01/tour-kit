@@ -269,6 +269,142 @@ function CustomTour() {
 
 ---
 
+## Branching Tours
+
+Dynamic branching allows tours to adapt based on user choices, creating personalized onboarding.
+
+```tsx
+import { Tour, TourStep, TourCard, TourOverlay, useTour, useBranch } from '@tour-kit/react';
+
+function BranchingTour() {
+  return (
+    <Tour id="onboarding">
+      <TourStep
+        id="welcome"
+        target="#header"
+        title="Welcome!"
+        content="Let's personalize your experience"
+      />
+
+      {/* Branching point - user selects their role */}
+      <TourStep
+        id="role-select"
+        target="#role-buttons"
+        title="Select Your Role"
+        content="Choose your role to see relevant content"
+        interactive  // Allow clicks through overlay
+        onNext={null}  // Hide Next button
+        onAction={{
+          developer: 'dev-intro',
+          designer: 'design-intro',
+          manager: 'manager-intro',
+        }}
+      />
+
+      {/* Developer path */}
+      <TourStep
+        id="dev-intro"
+        target="#api-docs"
+        title="Developer Tools"
+        onNext="summary"
+        onPrev="role-select"
+      />
+
+      {/* Designer path */}
+      <TourStep
+        id="design-intro"
+        target="#design-panel"
+        title="Design Studio"
+        onNext="summary"
+        onPrev="role-select"
+      />
+
+      {/* Manager path */}
+      <TourStep
+        id="manager-intro"
+        target="#dashboard"
+        title="Analytics"
+        onNext="summary"
+        onPrev="role-select"
+      />
+
+      {/* Convergence point */}
+      <TourStep
+        id="summary"
+        target="#header"
+        title="You're All Set!"
+        onNext="complete"
+      />
+
+      <TourOverlay />
+      <TourCard />
+      <RoleButtons />
+    </Tour>
+  );
+}
+
+function RoleButtons() {
+  const { triggerAction, hasAction, availableActions } = useBranch();
+  const { isActive, currentStep } = useTour();
+
+  // Only show during role selection step
+  if (!isActive || currentStep?.id !== 'role-select') return null;
+
+  return (
+    <div id="role-buttons">
+      <button
+        onClick={() => triggerAction('developer')}
+        disabled={!hasAction('developer')}
+      >
+        Developer
+      </button>
+      <button
+        onClick={() => triggerAction('designer')}
+        disabled={!hasAction('designer')}
+      >
+        Designer
+      </button>
+      <button
+        onClick={() => triggerAction('manager')}
+        disabled={!hasAction('manager')}
+      >
+        Manager
+      </button>
+    </div>
+  );
+}
+```
+
+### Branch Targets
+
+```tsx
+// Step ID navigation
+onAction={{ next: 'specific-step-id' }}
+
+// Special keywords
+onNext="complete"  // Complete tour
+onNext="skip"      // Skip/abort tour
+onNext="restart"   // Restart tour
+
+// Cross-tour navigation
+onAction={{ advanced: { tour: 'advanced-tour', step: 'intro' } }}
+
+// Dynamic resolver
+onAction={{
+  submit: async (ctx) => {
+    const score = ctx.actionPayload as number;
+    ctx.setData('userScore', score);
+    return score > 80 ? 'advanced-track' : 'basic-track';
+  }
+}}
+
+// Disable button
+onNext={null}  // Hides/disables Next button
+onPrev={null}  // Hides/disables Prev button
+```
+
+---
+
 ## Feature Discovery with Hints
 
 ```tsx
@@ -446,6 +582,14 @@ useAdvanceOn({
   selector: '#target',
   onAdvance: () => next(),
 });
+
+// Branch control for interactive steps
+const {
+  triggerAction,     // (actionId: string, payload?: unknown) => Promise<void>
+  availableActions,  // string[] - action IDs for current step
+  hasAction,         // (actionId: string) => boolean
+  previewAction,     // (actionId: string, payload?) => Promise<BranchTarget>
+} = useBranch();
 ```
 
 ### Utilities
@@ -501,15 +645,52 @@ interface TourStep {
   waitTimeout?: number;
   spotlightPadding?: number;
   spotlightRadius?: number;
-  interactive?: boolean;
+  interactive?: boolean;  // Allow clicks through overlay
   showNavigation?: boolean;
   showProgress?: boolean;
   showClose?: boolean;
   className?: string;
+  // Branching navigation
+  onAction?: Record<string, Branch>;  // Named actions triggered via useBranch
+  onNext?: Branch | null;    // Override next button (null = disable)
+  onPrev?: Branch | null;    // Override prev button (null = disable)
   onBeforeShow?: () => void | Promise<void>;
   onAfterShow?: () => void;
   onBeforeHide?: () => void | Promise<void>;
   onAfterHide?: () => void;
+}
+
+// Branch types for dynamic navigation
+type BranchTarget =
+  | string           // Step ID
+  | number           // Step index
+  | 'next'           // Next sequential step
+  | 'prev'           // Previous step
+  | 'complete'       // Complete the tour
+  | 'skip'           // Skip/abort the tour
+  | 'restart'        // Restart from beginning
+  | BranchToTour     // Switch tours
+  | BranchSkip       // Skip N steps
+  | BranchWait       // Delayed navigation
+  | null;            // Stay on current step
+
+interface BranchToTour { tour: string; step?: string | number; }
+interface BranchSkip { skip: number; }
+interface BranchWait { wait: number; then?: BranchTarget; }
+
+type BranchResolver = (ctx: BranchContext) => BranchTarget | Promise<BranchTarget>;
+type Branch = BranchTarget | BranchResolver;
+
+interface BranchContext {
+  tourId: string;
+  isActive: boolean;
+  currentStepIndex: number;
+  currentStep: TourStep | null;
+  totalSteps: number;
+  data: Record<string, unknown>;
+  action?: string;          // Action ID (for onAction)
+  actionPayload?: unknown;  // Payload passed with action
+  setData: (key: string, value: unknown) => void;
 }
 
 type Placement =

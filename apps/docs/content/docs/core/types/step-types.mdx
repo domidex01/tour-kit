@@ -80,3 +80,247 @@ const step: TourStep<MyStepData> = {
   },
 };
 ```
+
+---
+
+## Interactive Steps
+
+### interactive
+
+When set to `true`, allows clicks to pass through the tour overlay to interact with page elements within the spotlight area. Essential for steps that require user interaction with buttons, forms, or other clickable elements.
+
+**Type**: `boolean`
+**Default**: `false`
+
+```tsx
+<TourStep
+  id="role-select"
+  target="#role-buttons"
+  title="Choose Your Role"
+  content="Click a button below to select your path"
+  interactive  // Allows clicking buttons within the spotlight
+  onNext={null}  // Disable Next button - user must click a role
+  onAction={{
+    developer: 'dev-track',
+    designer: 'design-track',
+  }}
+/>
+```
+
+Without `interactive={true}`, the overlay blocks all clicks to page elements, even within the spotlight area.
+
+---
+
+## Branching Navigation
+
+Tour Kit supports dynamic branching, allowing tours to adapt based on user choices. These props control how navigation flows between steps.
+
+### onAction
+
+Defines named actions that can be triggered from step content using the [`useBranch`](/docs/core/hooks/use-branch) hook. Each action maps to a branch target.
+
+**Type**: `Record<string, Branch>`
+
+```tsx
+<TourStep
+  id="feature-select"
+  target="#features"
+  interactive
+  onNext={null}
+  onAction={{
+    analytics: 'analytics-intro',      // Navigate to step by ID
+    reports: { tour: 'reports-tour' }, // Switch to different tour
+    skip: 'complete',                  // Complete the tour
+  }}
+/>
+```
+
+Branch targets can be:
+- **Step ID** (`string`): Navigate to a specific step
+- **Step index** (`number`): Navigate by index
+- **Special keywords**: `'next'`, `'prev'`, `'complete'`, `'skip'`, `'restart'`
+- **Cross-tour**: `{ tour: 'other-tour', step?: 'step-id' }`
+- **Skip steps**: `{ skip: 2 }` - Jump forward 2 steps
+- **Delayed**: `{ wait: 1000, then: 'next-step' }` - Wait before navigating
+- **Stay**: `null` - Remain on current step
+- **Resolver function**: Dynamic logic based on context
+
+### onNext
+
+Override the default "Next" button behavior. Set to `null` to hide/disable the Next button.
+
+**Type**: `Branch | null`
+**Default**: Advances to next step in sequence
+
+```tsx
+// Navigate to specific step instead of sequential next
+<TourStep
+  id="dev-intro"
+  onNext="summary"  // Skip to summary step
+/>
+
+// Disable Next button (require action)
+<TourStep
+  id="role-select"
+  onNext={null}
+  onAction={{ ... }}
+/>
+
+// Conditional navigation
+<TourStep
+  id="feature-step"
+  onNext={(ctx) => ctx.data.isAdvanced ? 'advanced-section' : 'basic-section'}
+/>
+```
+
+### onPrev
+
+Override the default "Previous" button behavior. Set to `null` to hide/disable the Previous button.
+
+**Type**: `Branch | null`
+**Default**: Goes to previous step in sequence
+
+```tsx
+// Navigate back to a branching point
+<TourStep
+  id="dev-intro"
+  onPrev="role-select"  // Return to role selection
+/>
+
+// Disable Prev button
+<TourStep
+  id="first-step"
+  onPrev={null}
+/>
+```
+
+---
+
+## Branch Types
+
+```typescript
+// Static targets
+type BranchTarget =
+  | string           // Step ID
+  | number           // Step index
+  | 'next'           // Next sequential step
+  | 'prev'           // Previous step
+  | 'complete'       // Complete the tour
+  | 'skip'           // Skip/abort the tour
+  | 'restart'        // Restart from beginning
+  | BranchToTour     // Switch tours
+  | BranchSkip       // Skip N steps
+  | BranchWait       // Delayed navigation
+  | null             // Stay on current step
+
+// Cross-tour navigation
+interface BranchToTour {
+  tour: string
+  step?: string | number
+}
+
+// Skip multiple steps
+interface BranchSkip {
+  skip: number
+}
+
+// Delayed navigation
+interface BranchWait {
+  wait: number        // Milliseconds
+  then?: BranchTarget // Target after delay
+}
+
+// Dynamic resolver
+type BranchResolver = (context: BranchContext) => BranchTarget | Promise<BranchTarget>
+
+// Branch can be static or dynamic
+type Branch = BranchTarget | BranchResolver
+```
+
+### BranchContext
+
+Context passed to resolver functions:
+
+```typescript
+interface BranchContext {
+  tourId: string
+  isActive: boolean
+  currentStepIndex: number
+  currentStep: TourStep | null
+  totalSteps: number
+  data: Record<string, unknown>
+  action?: string          // Action ID (for onAction)
+  actionPayload?: unknown  // Payload passed with action
+  setData: (key: string, value: unknown) => void
+}
+```
+
+---
+
+## Complete Branching Example
+
+```tsx
+<Tour id="onboarding">
+  <TourStep
+    id="welcome"
+    target="#header"
+    title="Welcome!"
+    content="Let's personalize your experience"
+  />
+
+  <TourStep
+    id="role-select"
+    target="#role-buttons"
+    title="Select Your Role"
+    content="Choose your role to see relevant content"
+    interactive
+    onNext={null}
+    onAction={{
+      developer: 'dev-path',
+      designer: 'design-path',
+      manager: 'manager-path',
+    }}
+  />
+
+  {/* Developer path */}
+  <TourStep
+    id="dev-path"
+    target="#api-docs"
+    title="API Documentation"
+    content="Here's where you'll find code examples"
+    onNext="summary"
+    onPrev="role-select"
+  />
+
+  {/* Designer path */}
+  <TourStep
+    id="design-path"
+    target="#design-tools"
+    title="Design Tools"
+    content="Explore our visual editor"
+    onNext="summary"
+    onPrev="role-select"
+  />
+
+  {/* Manager path */}
+  <TourStep
+    id="manager-path"
+    target="#analytics"
+    title="Analytics Dashboard"
+    content="Track your team's progress"
+    onNext="summary"
+    onPrev="role-select"
+  />
+
+  {/* All paths converge here */}
+  <TourStep
+    id="summary"
+    target="#header"
+    title="You're All Set!"
+    content="Explore more features at your own pace"
+    onNext="complete"
+  />
+</Tour>
+```
+
+See the [Branching Guide](/docs/guides/branching) for more patterns and examples.

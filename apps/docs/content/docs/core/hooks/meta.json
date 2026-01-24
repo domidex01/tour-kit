@@ -3,6 +3,7 @@
   "pages": [
     "use-tour",
     "use-step",
+    "use-branch",
     "use-spotlight",
     "use-keyboard",
     "use-focus-trap",

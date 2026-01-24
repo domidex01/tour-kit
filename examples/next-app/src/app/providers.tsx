@@ -222,6 +222,7 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
           content="Click one of the role buttons below to choose your path. Each role shows different content."
           placement="bottom"
           waitForTarget
+          interactive
           onNext={null}
           onAction={{
             developer: 'dev-intro',

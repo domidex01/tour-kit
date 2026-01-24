@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getScrollParent } from '../utils/dom'
+import { throttleRAF } from '../utils/throttle'
 
 export interface ElementPositionResult {
   element: HTMLElement | null
@@ -40,6 +41,9 @@ export function useElementPosition(target: string | HTMLElement | null): Element
     }
   }, [element])
 
+  // Throttle updates to RAF for smooth 60fps during scroll/resize
+  const throttledUpdate = useMemo(() => throttleRAF(update), [update])
+
   useEffect(() => {
     if (!element) {
       setRect(null)
@@ -49,12 +53,12 @@ export function useElementPosition(target: string | HTMLElement | null): Element
     update()
 
     // Observe element resize
-    observerRef.current = new ResizeObserver(update)
+    observerRef.current = new ResizeObserver(throttledUpdate)
     observerRef.current.observe(element)
 
-    // Listen for window scroll/resize (with capture to catch all scroll events)
-    window.addEventListener('scroll', update, true)
-    window.addEventListener('resize', update)
+    // Listen for window scroll/resize with passive listeners for better performance
+    window.addEventListener('scroll', throttledUpdate, { passive: true, capture: true })
+    window.addEventListener('resize', throttledUpdate, { passive: true })
 
     // Also observe scrollable parent's resize if it's not window
     if (scrollParent && scrollParent !== window && scrollParent instanceof HTMLElement) {
@@ -62,11 +66,12 @@ export function useElementPosition(target: string | HTMLElement | null): Element
     }
 
     return () => {
+      throttledUpdate.cancel()
       observerRef.current?.disconnect()
-      window.removeEventListener('scroll', update, true)
-      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', throttledUpdate, true)
+      window.removeEventListener('resize', throttledUpdate)
     }
-  }, [element, scrollParent, update])
+  }, [element, scrollParent, update, throttledUpdate])
 
   return { element, rect, scrollParent, update }
 }

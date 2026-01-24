@@ -173,7 +173,7 @@ export default function BranchingPage() {
 }
 
 function RoleButtons() {
-  const { triggerAction, availableActions, hasAction } = useBranch()
+  const { triggerAction, hasAction } = useBranch()
   const { isActive, currentStep } = useTour('branching-demo')
 
   // Only show buttons when the tour is active and on the role-select step

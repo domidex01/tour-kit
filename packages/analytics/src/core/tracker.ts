@@ -1,6 +1,7 @@
 import { logger } from '@tour-kit/core'
 import type { TourEvent, TourEventData, TourEventName } from '../types/events'
 import type { AnalyticsConfig, AnalyticsPlugin } from '../types/plugin'
+import { createEventQueue, type EventQueue } from './event-queue'
 
 /**
  * Main analytics tracker class
@@ -12,11 +13,21 @@ export class TourAnalytics {
   private stepStartTime = 0
   private tourStartTime = 0
   private initialized = false
+  private eventQueue: EventQueue | null = null
 
   constructor(config: AnalyticsConfig) {
     this.config = config
     this.plugins = config.plugins
     this.sessionId = this.generateSessionId()
+
+    // Initialize event queue if batching is configured
+    if (config.batchSize && config.batchSize > 1) {
+      this.eventQueue = createEventQueue({
+        batchSize: config.batchSize,
+        batchInterval: config.batchInterval ?? 5000,
+        onFlush: (events) => this.dispatchEvents(events),
+      })
+    }
 
     if (config.enabled !== false) {
       this.init()
@@ -74,12 +85,28 @@ export class TourAnalytics {
       logger.debug('Analytics:', eventName, event)
     }
 
-    for (const plugin of this.plugins) {
-      try {
-        plugin.track(event)
-      } catch (error) {
-        if (this.config.debug) {
-          logger.error(`Analytics: Failed to track in ${plugin.name}:`, error)
+    // Use event queue if configured
+    if (this.eventQueue) {
+      this.eventQueue.push(event)
+      return
+    }
+
+    // Otherwise dispatch directly
+    this.dispatchEvents([event])
+  }
+
+  /**
+   * Dispatch events to all plugins
+   */
+  private dispatchEvents(events: TourEvent[]) {
+    for (const event of events) {
+      for (const plugin of this.plugins) {
+        try {
+          plugin.track(event)
+        } catch (error) {
+          if (this.config.debug) {
+            logger.error(`Analytics: Failed to track in ${plugin.name}:`, error)
+          }
         }
       }
     }
@@ -250,6 +277,10 @@ export class TourAnalytics {
    * Flush all queued events
    */
   async flush() {
+    // Flush internal event queue first
+    this.eventQueue?.flush()
+
+    // Then flush plugin queues
     for (const plugin of this.plugins) {
       try {
         await plugin.flush?.()
@@ -265,6 +296,10 @@ export class TourAnalytics {
    * Destroy tracker and clean up
    */
   destroy() {
+    // Clean up event queue
+    this.eventQueue?.destroy()
+    this.eventQueue = null
+
     for (const plugin of this.plugins) {
       try {
         plugin.destroy?.()

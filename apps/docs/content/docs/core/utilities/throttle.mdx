@@ -1,0 +1,351 @@
+---
+title: Throttle Utilities
+description: Performance utilities for rate-limiting function calls
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+# Throttle Utilities
+
+Performance utilities for rate-limiting function calls. Used internally by tour-kit for smooth scroll/resize handling and analytics batching.
+
+## Why Throttle?
+
+High-frequency events like scroll and resize can fire 60+ times per second. Without throttling:
+
+- **DOM measurements** (`getBoundingClientRect`) become expensive
+- **State updates** cause excessive re-renders
+- **Analytics events** flood your backend
+
+---
+
+## throttleRAF
+
+RAF-based throttling for smooth 60fps updates during scroll/resize. Coalesces rapid calls to a single execution per animation frame.
+
+### Usage
+
+```tsx
+import { throttleRAF } from '@tour-kit/core';
+
+const throttledUpdate = throttleRAF(() => {
+  // Expensive DOM measurement
+  element.getBoundingClientRect();
+});
+
+// Attach to scroll/resize with passive listeners
+window.addEventListener('scroll', throttledUpdate, { passive: true });
+
+// Cleanup
+throttledUpdate.cancel();
+window.removeEventListener('scroll', throttledUpdate);
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    callback: {
+      type: '(...args: unknown[]) => void',
+      description: 'Function to throttle',
+    },
+  }}
+/>
+
+### Return Value
+
+```ts
+ThrottledFunction<T> & {
+  cancel: () => void;
+}
+```
+
+The returned function includes a `cancel()` method to abort any pending animation frame.
+
+### When to Use
+
+- Scroll event handlers
+- Resize event handlers
+- Any high-frequency DOM operations
+
+<Callout type="info">
+`throttleRAF` automatically uses `requestAnimationFrame` for optimal browser rendering sync.
+</Callout>
+
+---
+
+## throttleTime
+
+Time-based throttling with trailing edge execution. Queues the most recent call and executes after the interval.
+
+### Usage
+
+```tsx
+import { throttleTime } from '@tour-kit/core';
+
+const throttled = throttleTime(sendAnalytics, 1000);
+
+// Call multiple times - executes once per second
+throttled(event1); // Executes immediately
+throttled(event2); // Queued
+throttled(event3); // Replaces event2
+
+// After 1 second: event3 is sent
+
+// Force immediate execution of pending call
+throttled.flush();
+
+// Cleanup
+throttled.cancel();
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    callback: {
+      type: '(...args: unknown[]) => void',
+      description: 'Function to throttle',
+    },
+    ms: {
+      type: 'number',
+      description: 'Throttle interval in milliseconds',
+    },
+  }}
+/>
+
+### Return Value
+
+```ts
+ThrottledFunction<T> & {
+  cancel: () => void;
+  flush: () => void;
+}
+```
+
+Includes both `cancel()` to abort pending execution and `flush()` to execute immediately.
+
+### When to Use
+
+- Analytics event batching
+- API calls that shouldn't be too frequent
+- Expensive computations on user input
+
+---
+
+## throttleLeading
+
+Leading-edge throttle - fires immediately, then ignores calls for the interval. Useful for immediate user feedback while preventing rapid-fire events.
+
+### Usage
+
+```tsx
+import { throttleLeading } from '@tour-kit/core';
+
+const throttled = throttleLeading(onClick, 500);
+
+// First call fires immediately
+throttled(); // Executes
+throttled(); // Ignored (within 500ms)
+throttled(); // Ignored
+
+// After 500ms
+throttled(); // Executes again
+```
+
+### Parameters
+
+<TypeTable
+  type={{
+    callback: {
+      type: '(...args: unknown[]) => void',
+      description: 'Function to throttle',
+    },
+    ms: {
+      type: 'number',
+      description: 'Throttle interval in milliseconds',
+    },
+  }}
+/>
+
+### Return Value
+
+```ts
+ThrottledFunction<T> & {
+  cancel: () => void;
+}
+```
+
+Includes `cancel()` to reset the throttle state.
+
+### When to Use
+
+- Button click handlers
+- Feature usage tracking
+- Any action where immediate feedback matters
+
+---
+
+## Comparison Table
+
+| Utility | First Call | During Interval | After Interval |
+|---------|------------|-----------------|----------------|
+| `throttleRAF` | Queued to RAF | Coalesced | Executes latest |
+| `throttleTime` | Immediate | Queued (latest) | Executes queued |
+| `throttleLeading` | Immediate | Ignored | Immediate again |
+
+---
+
+## TypeScript Types
+
+```ts
+type AnyFunction = (...args: unknown[]) => void;
+
+interface ThrottledFunction<T extends AnyFunction> {
+  (...args: Parameters<T>): void;
+  cancel: () => void;
+}
+
+interface ThrottledFunctionWithFlush<T extends AnyFunction>
+  extends ThrottledFunction<T> {
+  flush: () => void;
+}
+```
+
+---
+
+## Real-World Examples
+
+### Spotlight Position Updates
+
+```tsx
+import { throttleRAF } from '@tour-kit/core';
+import { useCallback, useEffect, useMemo } from 'react';
+
+function useSpotlightPosition(targetRef: RefObject<HTMLElement>) {
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  const updateRect = useCallback(() => {
+    if (targetRef.current) {
+      setRect(targetRef.current.getBoundingClientRect());
+    }
+  }, []);
+
+  const throttledUpdate = useMemo(() => throttleRAF(updateRect), [updateRect]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', throttledUpdate, { passive: true });
+    window.addEventListener('resize', throttledUpdate, { passive: true });
+
+    return () => {
+      throttledUpdate.cancel();
+      window.removeEventListener('scroll', throttledUpdate);
+      window.removeEventListener('resize', throttledUpdate);
+    };
+  }, [throttledUpdate]);
+
+  return rect;
+}
+```
+
+### Feature Usage Tracking
+
+```tsx
+import { throttleLeading } from '@tour-kit/core';
+
+function setupFeatureTracking(featureId: string, onUsage: () => void) {
+  // Prevent rapid-fire events (1 second cooldown)
+  const throttledUsage = throttleLeading(onUsage, 1000);
+
+  const handler = (event: MouseEvent) => {
+    if ((event.target as Element).matches(`[data-feature="${featureId}"]`)) {
+      throttledUsage();
+    }
+  };
+
+  document.addEventListener('click', handler);
+  return () => {
+    throttledUsage.cancel();
+    document.removeEventListener('click', handler);
+  };
+}
+```
+
+### Analytics Debouncing
+
+```tsx
+import { throttleTime } from '@tour-kit/core';
+
+const analytics = {
+  queue: [] as Event[],
+
+  track: throttleTime((event: Event) => {
+    // Batch send to analytics service
+    fetch('/api/analytics', {
+      method: 'POST',
+      body: JSON.stringify(event),
+    });
+  }, 5000),
+
+  // Ensure events are sent on page unload
+  flush() {
+    this.track.flush();
+  },
+};
+
+window.addEventListener('beforeunload', () => analytics.flush());
+```
+
+---
+
+## Performance Considerations
+
+### Passive Event Listeners
+
+Always use `{ passive: true }` with throttled scroll/resize handlers:
+
+```tsx
+// Good - prevents scroll jank
+window.addEventListener('scroll', throttled, { passive: true });
+
+// Avoid - can cause scroll jank
+window.addEventListener('scroll', throttled);
+```
+
+### Cleanup
+
+Always cancel throttled functions in cleanup to prevent memory leaks:
+
+```tsx
+useEffect(() => {
+  const throttled = throttleRAF(update);
+  window.addEventListener('scroll', throttled);
+
+  return () => {
+    throttled.cancel(); // Important!
+    window.removeEventListener('scroll', throttled);
+  };
+}, []);
+```
+
+### Memoization
+
+Wrap throttled functions in `useMemo` to prevent recreating on every render:
+
+```tsx
+// Good - stable reference
+const throttled = useMemo(() => throttleRAF(update), [update]);
+
+// Avoid - creates new throttled function on every render
+const throttled = throttleRAF(update);
+```
+
+---
+
+## Related
+
+- [useElementPosition](/docs/core/hooks/use-element-position) - Uses throttleRAF for position updates
+- [useSpotlight](/docs/core/hooks/use-spotlight) - Uses throttleRAF for rect updates
+- [Analytics](/docs/api/analytics) - Uses event batching with throttleTime

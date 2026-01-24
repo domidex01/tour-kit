@@ -1,0 +1,304 @@
+---
+title: useBranch
+description: Hook for triggering branch actions from step content
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# useBranch
+
+Hook for triggering branch actions defined in a step's `onAction` prop. Use this to build interactive steps where users make choices that determine the tour path.
+
+## Usage
+
+```tsx
+import { useBranch } from '@tour-kit/core';
+
+function RoleSelectStep() {
+  const { triggerAction, hasAction, availableActions } = useBranch();
+
+  return (
+    <div>
+      <h2>What's your role?</h2>
+      <button
+        onClick={() => triggerAction('developer')}
+        disabled={!hasAction('developer')}
+      >
+        I'm a Developer
+      </button>
+      <button
+        onClick={() => triggerAction('designer')}
+        disabled={!hasAction('designer')}
+      >
+        I'm a Designer
+      </button>
+    </div>
+  );
+}
+```
+
+<Callout type="info">
+  The `useBranch` hook must be used within a `TourProvider` or `TourKitProvider` context.
+</Callout>
+
+## Return Value
+
+<TypeTable
+  type={{
+    triggerAction: {
+      type: '(actionId: string, payload?: unknown) => Promise<void>',
+      description: 'Trigger a named action defined in onAction'
+    },
+    availableActions: {
+      type: 'string[]',
+      description: 'List of action IDs available for current step'
+    },
+    hasAction: {
+      type: '(actionId: string) => boolean',
+      description: 'Check if an action is available'
+    },
+    previewAction: {
+      type: '(actionId: string, payload?: unknown) => Promise<BranchTarget>',
+      description: 'Preview where an action would navigate without navigating'
+    },
+  }}
+/>
+
+---
+
+## Step Configuration
+
+For `useBranch` to work, the current step must define `onAction`:
+
+```tsx
+<TourStep
+  id="role-select"
+  target="#role-buttons"
+  title="Choose Your Role"
+  interactive  // Required for clickable elements
+  onNext={null}  // Hide Next button
+  onAction={{
+    developer: 'dev-intro',
+    designer: 'design-intro',
+    manager: 'manager-intro',
+  }}
+/>
+```
+
+---
+
+## triggerAction
+
+Triggers a named action, navigating to the associated branch target.
+
+```tsx
+const { triggerAction } = useBranch();
+
+// Basic usage
+await triggerAction('developer');
+
+// With payload (passed to resolver functions)
+await triggerAction('submit', { formData: values });
+```
+
+### With Resolver Functions
+
+When `onAction` uses a resolver function, the payload is available in the context:
+
+```tsx
+// Step configuration
+<TourStep
+  id="dynamic-step"
+  onAction={{
+    submit: (ctx) => {
+      const data = ctx.actionPayload as { score: number };
+      return data.score > 80 ? 'advanced-track' : 'basic-track';
+    },
+  }}
+/>
+
+// Component usage
+<button onClick={() => triggerAction('submit', { score: 95 })}>
+  Submit Score
+</button>
+```
+
+---
+
+## hasAction
+
+Check if an action is available for the current step. Useful for conditional rendering or button states.
+
+```tsx
+const { hasAction } = useBranch();
+
+if (hasAction('admin')) {
+  return <button onClick={() => triggerAction('admin')}>Admin Panel</button>;
+}
+```
+
+---
+
+## availableActions
+
+Array of all action IDs defined in the current step's `onAction`.
+
+```tsx
+const { availableActions, triggerAction } = useBranch();
+
+return (
+  <div>
+    {availableActions.map((action) => (
+      <button key={action} onClick={() => triggerAction(action)}>
+        {action}
+      </button>
+    ))}
+  </div>
+);
+```
+
+---
+
+## previewAction
+
+Preview where an action would navigate without actually triggering navigation. Useful for showing users what will happen before they commit.
+
+```tsx
+const { previewAction, triggerAction } = useBranch();
+const [preview, setPreview] = useState<string | null>(null);
+
+async function handleHover(actionId: string) {
+  const target = await previewAction(actionId);
+  setPreview(typeof target === 'string' ? target : 'special navigation');
+}
+
+return (
+  <button
+    onMouseEnter={() => handleHover('developer')}
+    onMouseLeave={() => setPreview(null)}
+    onClick={() => triggerAction('developer')}
+  >
+    Developer Path
+    {preview && <span>→ {preview}</span>}
+  </button>
+);
+```
+
+---
+
+## Complete Example
+
+Here's a full example showing role-based branching:
+
+```tsx
+import { useBranch, useTour } from '@tour-kit/core';
+
+function RoleButtons() {
+  const { triggerAction, hasAction, availableActions } = useBranch();
+  const { isActive, currentStep } = useTour('onboarding');
+
+  // Only show when on the role-select step
+  if (!isActive || currentStep?.id !== 'role-select') {
+    return null;
+  }
+
+  const roles = [
+    { id: 'developer', label: 'Developer', color: 'blue' },
+    { id: 'designer', label: 'Designer', color: 'purple' },
+    { id: 'manager', label: 'Manager', color: 'green' },
+  ];
+
+  return (
+    <div className="flex gap-4">
+      {roles.map(({ id, label, color }) => (
+        <button
+          key={id}
+          onClick={() => triggerAction(id)}
+          disabled={!hasAction(id)}
+          className={`px-4 py-2 bg-${color}-100 text-${color}-800 rounded`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+And the corresponding tour configuration:
+
+```tsx
+<Tour id="onboarding">
+  <TourStep
+    id="welcome"
+    target="#header"
+    title="Welcome!"
+  />
+
+  <TourStep
+    id="role-select"
+    target="#role-buttons"
+    title="Choose Your Role"
+    content="Select a role to see personalized content"
+    interactive
+    onNext={null}
+    onAction={{
+      developer: 'dev-intro',
+      designer: 'design-intro',
+      manager: 'manager-intro',
+    }}
+  />
+
+  <TourStep
+    id="dev-intro"
+    target="#api-docs"
+    title="Developer Tools"
+    onNext="summary"
+    onPrev="role-select"
+  />
+
+  <TourStep
+    id="design-intro"
+    target="#design-panel"
+    title="Design Studio"
+    onNext="summary"
+    onPrev="role-select"
+  />
+
+  <TourStep
+    id="manager-intro"
+    target="#dashboard"
+    title="Analytics Dashboard"
+    onNext="summary"
+    onPrev="role-select"
+  />
+
+  <TourStep
+    id="summary"
+    target="#header"
+    title="All Set!"
+    onNext="complete"
+  />
+</Tour>
+```
+
+---
+
+## Important Notes
+
+<Callout type="warn">
+  Always set `interactive={true}` on steps where users need to click page elements. Without it, the overlay blocks all clicks.
+</Callout>
+
+<Callout type="info">
+  Set `onNext={null}` to hide the Next button when you want users to make a choice via `onAction` instead of proceeding linearly.
+</Callout>
+
+---
+
+## Related
+
+- [Step Types - Branching Navigation](/docs/core/types/step-types#branching-navigation)
+- [Branching Guide](/docs/guides/branching)
+- [useTour Hook](/docs/core/hooks/use-tour)

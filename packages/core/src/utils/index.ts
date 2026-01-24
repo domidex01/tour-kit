@@ -61,3 +61,11 @@ export {
   resolveTargetToIndex,
   isLoopDetected,
 } from './branch'
+
+export {
+  throttleRAF,
+  throttleTime,
+  throttleLeading,
+  type ThrottledFunction,
+  type ThrottledFunctionWithFlush,
+} from './throttle'

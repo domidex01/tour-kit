@@ -1,3 +1,4 @@
+import { throttleLeading } from '@tour-kit/core'
 import type { Feature } from '../types'
 
 type UsageCallback = (featureId: string) => void
@@ -25,17 +26,24 @@ export function setupFeatureTracking(feature: Feature, onUsage: UsageCallback): 
 
 /**
  * Track clicks on elements matching selector
+ * Uses leading-edge throttle (1s) to prevent rapid-fire events
  */
 function setupClickTracking(selector: string, callback: () => void): () => void {
+  // Throttle to prevent rapid-fire feature_used events
+  const throttledCallback = throttleLeading(callback, 1000)
+
   const handler = (event: MouseEvent) => {
     const target = event.target as Element
     if (target.matches(selector) || target.closest(selector)) {
-      callback()
+      throttledCallback()
     }
   }
 
   document.addEventListener('click', handler, { capture: true })
-  return () => document.removeEventListener('click', handler, { capture: true })
+  return () => {
+    throttledCallback.cancel()
+    document.removeEventListener('click', handler, { capture: true })
+  }
 }
 
 /**

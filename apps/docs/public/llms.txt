@@ -8,7 +8,7 @@
 
 | Package | Purpose | Key Exports |
 |---------|---------|-------------|
-| @tour-kit/core | Framework-agnostic logic | useTour, useStep, TourProvider, createTour |
+| @tour-kit/core | Framework-agnostic logic | useTour, useStep, useBranch, TourProvider, createTour |
 | @tour-kit/react | React components | Tour, TourCard, TourStep, TourOverlay |
 | @tour-kit/hints | Hint beacons | Hint, HintHotspot, HintTooltip, useHint |
 | @tour-kit/adoption | Feature tracking | AdoptionProvider, useFeature, useNudge, AdoptionNudge |
@@ -62,6 +62,33 @@ const tour = createTour({
 <TourProvider tour={tour}>
   <Tour />
 </TourProvider>
+```
+
+### Branching Tours
+```tsx
+import { useBranch } from '@tour-kit/core'
+
+// Step with branching actions
+<TourStep
+  id="role-select"
+  target="#role-buttons"
+  interactive  // Allow clicks through overlay
+  onNext={null}  // Disable Next button
+  onAction={{
+    developer: 'dev-intro',
+    designer: 'design-intro',
+  }}
+/>
+
+// Component to trigger actions
+function RoleButtons() {
+  const { triggerAction, hasAction } = useBranch()
+  return (
+    <button onClick={() => triggerAction('developer')} disabled={!hasAction('developer')}>
+      Developer
+    </button>
+  )
+}
 ```
 
 ### Tracking Analytics
@@ -174,7 +201,7 @@ apps/docs/content/docs/
 ├── index.mdx                  # Landing
 ├── getting-started/           # Installation, quick start (4 pages)
 ├── core/                      # @tour-kit/core (15 pages)
-│   ├── hooks/                 # useTour, useStep, useFocusTrap, etc.
+│   ├── hooks/                 # useTour, useStep, useBranch, useFocusTrap, etc.
 │   ├── providers/             # TourProvider, TourKitProvider
 │   ├── utilities/             # createTour, createStep, helpers
 │   └── types/                 # TourConfig, StepConfig, etc.
@@ -217,10 +244,11 @@ apps/docs/content/docs/
 │   ├── hooks/                 # useSchedule, useScheduleStatus
 │   ├── utilities/             # checkSchedule, timezone, blackouts
 │   └── presets/               # BUSINESS_HOURS_PRESETS
-├── guides/                    # Tutorials and guides (14 pages)
+├── guides/                    # Tutorials and guides (15 pages)
 │   ├── nextjs.mdx             # Next.js integration
 │   ├── vite.mdx               # Vite setup
 │   ├── accessibility.mdx      # A11y best practices
+│   ├── branching.mdx          # Dynamic branching tours
 │   ├── analytics-integration.mdx
 │   ├── adoption-analytics.mdx
 │   └── checklists-tours.mdx
@@ -366,8 +394,13 @@ type ScheduleInactiveReason = 'before_start_date' | 'after_end_date' | 'wrong_da
 
 ```typescript
 // Tour
-interface TourStep { id: string; target: string; title?: string; description?: string }
+interface TourStep { id: string; target: string; title?: string; description?: string; interactive?: boolean; onAction?: Record<string, Branch>; onNext?: Branch | null; onPrev?: Branch | null }
 interface TourConfig { id: string; steps: TourStep[] }
+
+// Branching
+type BranchTarget = string | number | 'next' | 'prev' | 'complete' | 'skip' | 'restart' | BranchToTour | null
+type Branch = BranchTarget | ((ctx: BranchContext) => BranchTarget | Promise<BranchTarget>)
+interface BranchToTour { tour: string; step?: string | number }
 
 // Announcements
 type AnnouncementVariant = 'modal' | 'toast' | 'banner' | 'slideout' | 'spotlight'
