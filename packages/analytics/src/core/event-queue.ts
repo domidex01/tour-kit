@@ -117,10 +117,6 @@ export function createEventQueue(config: EventQueueConfig): EventQueue {
     }
   }
 
-  const flush = () => {
-    flushQueue()
-  }
-
   const destroy = () => {
     if (timeoutId !== null) {
       clearTimeout(timeoutId)
@@ -133,7 +129,7 @@ export function createEventQueue(config: EventQueueConfig): EventQueue {
 
   return {
     push,
-    flush,
+    flush: flushQueue,
     destroy,
     size,
   }

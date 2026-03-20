@@ -76,6 +76,8 @@ describe('useElementPosition', () => {
   })
 
   it('updates rect on scroll', () => {
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0 })
+
     const { result } = renderHook(() => useElementPosition('#test-element'))
 
     vi.mocked(element.getBoundingClientRect).mockReturnValue({
@@ -95,9 +97,12 @@ describe('useElementPosition', () => {
     })
 
     expect(result.current.rect?.top).toBe(0)
+    rafSpy.mockRestore()
   })
 
   it('updates rect on window resize', () => {
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0 })
+
     const { result } = renderHook(() => useElementPosition('#test-element'))
 
     vi.mocked(element.getBoundingClientRect).mockReturnValue({
@@ -117,6 +122,7 @@ describe('useElementPosition', () => {
     })
 
     expect(result.current.rect?.top).toBe(75)
+    rafSpy.mockRestore()
   })
 
   it('cleans up observers on unmount', () => {

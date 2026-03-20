@@ -37,7 +37,19 @@ coverage/
 *.tgz
 #tour kit plan
 tour-kit/*
-#claude
+# Claude Code
+.claude/memory.db
+.claude/settings.local.json
+.claude/commands/
+.claude/skills/*-workspace/
+doc-prompts/*
+
+# Wizardry runtime artifacts
+phase-*-status.json
+wizardry-state.json
+*.skill
+__pycache__/
+*.pyc
+.pytest_cache/
 .claude/*
 CLAUDE.md
-doc-prompts/*

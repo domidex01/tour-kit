@@ -152,7 +152,6 @@ export function throttleLeading<T extends AnyFunction>(
   ms: number
 ): ThrottledFunction<T> {
   let lastCallTime = 0
-  let timeoutId: ReturnType<typeof setTimeout> | null = null
 
   const throttled = ((...args: Parameters<T>) => {
     const now = Date.now()
@@ -164,10 +163,6 @@ export function throttleLeading<T extends AnyFunction>(
   }) as ThrottledFunction<T>
 
   throttled.cancel = () => {
-    if (timeoutId !== null) {
-      clearTimeout(timeoutId)
-      timeoutId = null
-    }
     lastCallTime = 0
   }
 

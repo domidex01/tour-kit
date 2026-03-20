@@ -22,7 +22,7 @@ export function isBranchToTour(target: BranchTarget): target is BranchToTour {
     target !== null &&
     typeof target === 'object' &&
     'tour' in target &&
-    typeof (target as BranchToTour).tour === 'string'
+    typeof target.tour === 'string'
   )
 }
 
@@ -34,7 +34,7 @@ export function isBranchSkip(target: BranchTarget): target is BranchSkip {
     target !== null &&
     typeof target === 'object' &&
     'skip' in target &&
-    typeof (target as BranchSkip).skip === 'number'
+    typeof target.skip === 'number'
   )
 }
 
@@ -46,7 +46,7 @@ export function isBranchWait(target: BranchTarget): target is BranchWait {
     target !== null &&
     typeof target === 'object' &&
     'wait' in target &&
-    typeof (target as BranchWait).wait === 'number'
+    typeof target.wait === 'number'
   )
 }
 

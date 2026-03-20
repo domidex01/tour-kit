@@ -125,7 +125,7 @@ describe('useSpotlight', () => {
       result.current.show(targetElement)
     })
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function), true)
+    expect(addEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function), { passive: true, capture: true })
 
     addEventListenerSpy.mockRestore()
   })
@@ -139,7 +139,7 @@ describe('useSpotlight', () => {
       result.current.show(targetElement)
     })
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function))
+    expect(addEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true })
 
     addEventListenerSpy.mockRestore()
   })
@@ -164,6 +164,8 @@ describe('useSpotlight', () => {
   })
 
   it('updates rect on scroll', () => {
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0 })
+
     const { result } = renderHook(() => useSpotlight())
 
     act(() => {
@@ -177,9 +179,12 @@ describe('useSpotlight', () => {
     })
 
     expect(targetElement.getBoundingClientRect).toHaveBeenCalled()
+    rafSpy.mockRestore()
   })
 
   it('updates rect on resize', () => {
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0 })
+
     const { result } = renderHook(() => useSpotlight())
 
     act(() => {
@@ -193,6 +198,7 @@ describe('useSpotlight', () => {
     })
 
     expect(targetElement.getBoundingClientRect).toHaveBeenCalled()
+    rafSpy.mockRestore()
   })
 
   it('update() manually refreshes rect', () => {

@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { useTourContext } from '../context/tour-context'
-import type { BranchTarget, UseBranchReturn } from '../types/branch'
+import type { BranchContext, BranchTarget, UseBranchReturn } from '../types/branch'
 import { resolveBranch } from '../utils/branch'
 
 /**
@@ -66,13 +66,12 @@ export function useBranch(): UseBranchReturn {
   const previewAction = useCallback(
     async (actionId: string, payload?: unknown): Promise<BranchTarget> => {
       if (!currentStep?.onAction?.[actionId]) {
-        return 'next' // Default if action not found
+        return 'next'
       }
 
       const branch = currentStep.onAction[actionId]
 
-      // Build a minimal context for preview (without setData functionality)
-      const previewContext = {
+      const previewContext: BranchContext = {
         tourId: context.tourId,
         isActive: context.isActive,
         currentStepIndex: context.currentStepIndex,
@@ -89,18 +88,31 @@ export function useBranch(): UseBranchReturn {
         data: context.data,
         action: actionId,
         actionPayload: payload,
-        setData: () => {
-          // No-op for preview
-        },
+        setData: () => {},
       }
 
       try {
         return await resolveBranch(branch, previewContext)
       } catch {
-        return 'next' // Fallback on error
+        return 'next'
       }
     },
-    [currentStep, context]
+    [
+      currentStep,
+      context.tourId,
+      context.isActive,
+      context.currentStepIndex,
+      context.totalSteps,
+      context.isLoading,
+      context.isTransitioning,
+      context.completedTours,
+      context.skippedTours,
+      context.visitedSteps,
+      context.stepVisitCount,
+      context.previousStepId,
+      context.tour,
+      context.data,
+    ]
   )
 
   return {

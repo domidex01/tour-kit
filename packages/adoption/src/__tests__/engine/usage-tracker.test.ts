@@ -117,16 +117,20 @@ describe('setupFeatureTracking', () => {
     })
 
     it('tracks multiple clicks', () => {
+      vi.useFakeTimers()
       const onUsage = vi.fn()
       const feature = createMockFeature({ trigger: '#test-button' })
       document.body.innerHTML = '<button id="test-button">Click me</button>'
 
       cleanup = setupFeatureTracking(feature, onUsage)
       document.getElementById('test-button')?.click()
+      vi.advanceTimersByTime(1000)
       document.getElementById('test-button')?.click()
+      vi.advanceTimersByTime(1000)
       document.getElementById('test-button')?.click()
 
       expect(onUsage).toHaveBeenCalledTimes(3)
+      vi.useRealTimers()
     })
   })
 
