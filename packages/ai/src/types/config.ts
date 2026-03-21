@@ -1,5 +1,5 @@
-import type { UIMessage } from 'ai'
-import type { Document } from './document'
+import type { LanguageModel, UIMessage } from 'ai'
+import type { Document, RetrievedDocument } from './document'
 import type { VectorStoreAdapter, EmbeddingAdapter, RateLimitStore } from './adapter'
 import type { AiChatEvent } from './events'
 
@@ -91,8 +91,8 @@ export interface AiChatState {
 // ── Server Config ──
 
 export interface ChatRouteHandlerOptions {
-  /** AI SDK model identifier (e.g., 'openai/gpt-4o-mini') */
-  model: string
+  /** AI SDK model — string ID (e.g., 'openai/gpt-4o-mini') or model instance. RAG strategy requires a model instance. */
+  model: LanguageModel
   /** Context strategy — how documents are provided to the LLM */
   context: ContextConfig
   /** Layered system prompt configuration */
@@ -142,4 +142,26 @@ export interface ServerRateLimitConfig {
   windowMs?: number
   identifier: (req: Request) => string | Promise<string>
   store?: RateLimitStore
+}
+
+// ── RAG Pipeline Types ──
+
+export interface RetrieverOptions {
+  documents: Document[]
+  embedding: EmbeddingAdapter
+  vectorStore?: VectorStoreAdapter
+  chunkSize?: number
+  chunkOverlap?: number
+}
+
+export interface Retriever {
+  index(): Promise<void>
+  search(query: string, topK?: number, minScore?: number): Promise<RetrievedDocument[]>
+}
+
+export interface RAGMiddlewareOptions {
+  retriever: Retriever
+  topK?: number
+  rerank?: { model: string; topN?: number }
+  formatContext?(docs: RetrievedDocument[]): string
 }

@@ -1,21 +1,50 @@
-import { convertToModelMessages, streamText, type UIMessage } from 'ai'
-import type { ChatRouteHandlerOptions, ContextStuffingConfig } from '../types'
+import { convertToModelMessages, streamText, wrapLanguageModel, type LanguageModel, type UIMessage } from 'ai'
+import type { ChatRouteHandlerOptions, ContextStuffingConfig, RAGConfig } from '../types'
 import { createSystemPrompt } from './system-prompt'
+import { createRetriever } from './retriever'
+import { createRAGMiddleware } from './rag-middleware'
 
 export function createChatRouteHandler(options: ChatRouteHandlerOptions): { POST: (req: Request) => Promise<Response> } {
   const { model, context } = options
 
-  if (context.strategy === 'rag') {
-    throw new Error(
-      'RAG strategy is not yet implemented. Use "context-stuffing" strategy.'
-    )
-  }
-
-  const cagContext = context as ContextStuffingConfig
+  // Build system prompt (shared by both strategies)
   const systemPrompt = createSystemPrompt({
     ...options.instructions,
-    documents: cagContext.documents,
+    documents: context.strategy === 'context-stuffing'
+      ? (context as ContextStuffingConfig).documents
+      : [], // RAG injects docs via middleware, not system prompt
   })
+
+  // Set up RAG pipeline if needed (memoized across requests)
+  let resolvedModel: LanguageModel = model
+  if (context.strategy === 'rag') {
+    const ragConfig = context as RAGConfig
+    if (typeof model === 'string') {
+      throw new Error(
+        'RAG strategy requires a LanguageModel instance, not a string model ID. ' +
+        'Use a model provider (e.g., openai("gpt-4o-mini")) instead.'
+      )
+    }
+
+    const retriever = createRetriever({
+      documents: ragConfig.documents,
+      embedding: ragConfig.embedding,
+      vectorStore: ragConfig.vectorStore,
+      chunkSize: ragConfig.chunkSize,
+      chunkOverlap: ragConfig.chunkOverlap,
+    })
+
+    const ragMiddleware = createRAGMiddleware({
+      retriever,
+      topK: ragConfig.topK,
+      rerank: ragConfig.rerank,
+    })
+
+    resolvedModel = wrapLanguageModel({
+      model,
+      middleware: ragMiddleware,
+    })
+  }
 
   async function POST(req: Request): Promise<Response> {
     try {
@@ -54,7 +83,7 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): { POST
       const modelMessages = convertToModelMessages(messages)
 
       const result = streamText({
-        model,
+        model: resolvedModel,
         system: systemPrompt,
         messages: modelMessages,
       })

@@ -13,6 +13,9 @@ export type {
   RAGConfig,
   InstructionsConfig,
   ServerRateLimitConfig,
+  RetrieverOptions,
+  Retriever,
+  RAGMiddlewareOptions,
 } from './config'
 
 export type {

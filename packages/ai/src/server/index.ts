@@ -1,3 +1,8 @@
 export { createChatRouteHandler } from './route-handler'
 export { createSystemPrompt } from './system-prompt'
 export type { SystemPromptConfig } from './system-prompt'
+export { createInMemoryVectorStore } from './vector-store'
+export { createAiSdkEmbedding } from './embedding'
+export type { AiSdkEmbeddingOptions } from './embedding'
+export { createRetriever, chunkDocument, chunkDocuments } from './retriever'
+export { createRAGMiddleware } from './rag-middleware'
