@@ -1,4 +1,38 @@
-// @tour-kit/ai — client entry point
-// Phase 0: placeholder exports for build validation
+// ============================================
+// CONTEXT & PROVIDERS
+// ============================================
+export { AiChatProvider } from './context/ai-chat-provider'
+export { AiChatContext, type AiChatContextValue } from './context/ai-chat-context'
 
-export const AI_PACKAGE_VERSION = '0.0.0' as const
+// ============================================
+// HOOKS
+// ============================================
+export { useAiChat, type UseAiChatReturn } from './hooks/use-ai-chat'
+
+// ============================================
+// TYPES
+// ============================================
+export type {
+  AiChatConfig,
+  SuggestionsConfig,
+  PersistenceConfig,
+  PersistenceAdapter,
+  ClientRateLimitConfig,
+  AiChatStrings,
+  ChatStatus,
+  AiChatState,
+  ChatRouteHandlerOptions,
+  ContextConfig,
+  ContextStuffingConfig,
+  RAGConfig,
+  InstructionsConfig,
+  ServerRateLimitConfig,
+  Document,
+  DocumentMetadata,
+  RetrievedDocument,
+  VectorStoreAdapter,
+  EmbeddingAdapter,
+  RateLimitStore,
+  AiChatEvent,
+  AiChatEventType,
+} from './types'
