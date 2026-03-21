@@ -9,7 +9,10 @@
       "**/.turbo/**",
       "**/coverage/**",
       "**/.source/**",
-      "**/next-env.d.ts"
+      "**/next-env.d.ts",
+      "**/.claude/skills/**/evals/**",
+      "**/__spikes__/**",
+      "**/__tests__/spikes/**"
     ]
   }
 }

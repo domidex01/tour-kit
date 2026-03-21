@@ -1,9 +1,9 @@
 'use client'
 
-import { useContext } from 'react'
 import type { UIMessage } from 'ai'
-import type { ChatStatus } from '../types'
+import { useContext } from 'react'
 import { AiChatContext } from '../context/ai-chat-context'
+import type { ChatStatus } from '../types'
 
 export interface UseAiChatReturn {
   messages: UIMessage[]
@@ -25,7 +25,7 @@ export function useAiChat(): UseAiChatReturn {
   if (!context) {
     throw new Error(
       'useAiChat must be used within an <AiChatProvider>. ' +
-      'Wrap your component tree with <AiChatProvider config={...}>.'
+        'Wrap your component tree with <AiChatProvider config={...}>.'
     )
   }
 

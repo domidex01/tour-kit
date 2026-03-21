@@ -17,9 +17,7 @@ export const DEFAULT_STRINGS: AiChatStrings = {
  * Merge partial string overrides with defaults.
  * Returns a complete AiChatStrings object.
  */
-export function resolveStrings(
-  partial?: Partial<AiChatStrings>
-): AiChatStrings {
+export function resolveStrings(partial?: Partial<AiChatStrings>): AiChatStrings {
   if (!partial) return { ...DEFAULT_STRINGS }
   return { ...DEFAULT_STRINGS, ...partial }
 }

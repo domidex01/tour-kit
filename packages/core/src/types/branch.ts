@@ -79,9 +79,7 @@ export interface BranchContext extends TourCallbackContext {
  * - API calls to determine next step
  * - Complex branching logic
  */
-export type BranchResolver = (
-  context: BranchContext
-) => BranchTarget | Promise<BranchTarget>
+export type BranchResolver = (context: BranchContext) => BranchTarget | Promise<BranchTarget>
 
 /**
  * A branch definition: either a static target or a resolver function

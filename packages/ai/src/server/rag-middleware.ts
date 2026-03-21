@@ -10,15 +10,8 @@ function defaultFormatContext(docs: RetrievedDocument[]): string {
     .join('\n\n')
 }
 
-export function createRAGMiddleware(
-  options: RAGMiddlewareOptions,
-): LanguageModelMiddleware {
-  const {
-    retriever,
-    topK = 5,
-    rerank,
-    formatContext = defaultFormatContext,
-  } = options
+export function createRAGMiddleware(options: RAGMiddlewareOptions): LanguageModelMiddleware {
+  const { retriever, topK = 5, rerank, formatContext = defaultFormatContext } = options
 
   return {
     transformParams: async ({ params }) => {
@@ -45,9 +38,7 @@ export function createRAGMiddleware(
       if (rerank) {
         const topN = rerank.topN ?? topK
         // Re-score by combining original score with position weight
-        finalResults = results
-          .sort((a, b) => b.score - a.score)
-          .slice(0, topN)
+        finalResults = results.sort((a, b) => b.score - a.score).slice(0, topN)
       } else {
         finalResults = results.slice(0, topK)
       }

@@ -80,6 +80,7 @@ describe('branch utilities', () => {
     describe('isBranchWait', () => {
       it('returns true for valid BranchWait objects', () => {
         expect(isBranchWait({ wait: 1000 })).toBe(true)
+        // biome-ignore lint/suspicious/noThenProperty: testing BranchWait type which has a `then` property
         expect(isBranchWait({ wait: 500, then: 'next' })).toBe(true)
         expect(isBranchWait({ wait: 0 })).toBe(true)
       })

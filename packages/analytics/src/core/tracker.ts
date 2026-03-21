@@ -1,7 +1,7 @@
 import { logger } from '@tour-kit/core'
 import type { TourEvent, TourEventData, TourEventName } from '../types/events'
 import type { AnalyticsConfig, AnalyticsPlugin } from '../types/plugin'
-import { createEventQueue, type EventQueue } from './event-queue'
+import { type EventQueue, createEventQueue } from './event-queue'
 
 /**
  * Main analytics tracker class

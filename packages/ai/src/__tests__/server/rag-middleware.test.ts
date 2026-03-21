@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('ai', () => ({}))
 
 import { createRAGMiddleware } from '../../server/rag-middleware'
-import { createMockRetriever } from '../helpers/mock-retriever'
 import type { RetrievedDocument } from '../../types'
+import { createMockRetriever } from '../helpers/mock-retriever'
 
 function createMockParams(userText: string) {
   return {
@@ -28,8 +28,18 @@ function createMockParams(userText: string) {
 
 describe('createRAGMiddleware', () => {
   const mockResults: RetrievedDocument[] = [
-    { id: 'doc-1', content: 'Tour Kit supports branching.', score: 0.95, metadata: { title: 'Branching' } },
-    { id: 'doc-2', content: 'Use useTour hook for state.', score: 0.88, metadata: { source: 'hooks-guide' } },
+    {
+      id: 'doc-1',
+      content: 'Tour Kit supports branching.',
+      score: 0.95,
+      metadata: { title: 'Branching' },
+    },
+    {
+      id: 'doc-2',
+      content: 'Use useTour hook for state.',
+      score: 0.88,
+      metadata: { source: 'hooks-guide' },
+    },
   ]
 
   it('returns a middleware with transformParams', () => {
@@ -46,7 +56,7 @@ describe('createRAGMiddleware', () => {
       const middleware = createRAGMiddleware({ retriever })
 
       const mockP = createMockParams('How does branching work?')
-      await middleware.transformParams!(mockP)
+      await middleware.transformParams?.(mockP)
 
       // Retriever should have been called — verifies text was extracted
       // We can't spy directly but we know it returns results
@@ -63,7 +73,7 @@ describe('createRAGMiddleware', () => {
       }
 
       const middleware = createRAGMiddleware({ retriever })
-      await middleware.transformParams!(createMockParams('How does branching work?'))
+      await middleware.transformParams?.(createMockParams('How does branching work?'))
 
       expect(searchedQuery).toBe('How does branching work?')
     })
@@ -72,15 +82,15 @@ describe('createRAGMiddleware', () => {
       const retriever = createMockRetriever(mockResults)
       const middleware = createRAGMiddleware({ retriever })
 
-      const result = await middleware.transformParams!(createMockParams('test query'))
+      const result = await middleware.transformParams?.(createMockParams('test query'))
 
       // First message should be the injected system context
-      expect(result.prompt[0].role).toBe('system')
-      expect((result.prompt[0] as { role: 'system'; content: string }).content).toContain(
-        'Relevant context from documentation',
+      expect(result!.prompt[0].role).toBe('system')
+      expect((result!.prompt[0] as { role: 'system'; content: string }).content).toContain(
+        'Relevant context from documentation'
       )
-      expect((result.prompt[0] as { role: 'system'; content: string }).content).toContain(
-        'Tour Kit supports branching',
+      expect((result!.prompt[0] as { role: 'system'; content: string }).content).toContain(
+        'Tour Kit supports branching'
       )
     })
 
@@ -91,16 +101,14 @@ describe('createRAGMiddleware', () => {
       const params = {
         type: 'generate' as const,
         params: {
-          prompt: [
-            { role: 'system' as const, content: 'System message only.' },
-          ],
+          prompt: [{ role: 'system' as const, content: 'System message only.' }],
         },
         model: {} as never,
       }
 
-      const result = await middleware.transformParams!(params)
-      expect(result.prompt).toHaveLength(1)
-      expect(result.prompt[0].role).toBe('system')
+      const result = await middleware.transformParams?.(params)
+      expect(result!.prompt).toHaveLength(1)
+      expect(result!.prompt[0].role).toBe('system')
     })
 
     it('returns params unchanged when retriever returns empty results', async () => {
@@ -108,10 +116,10 @@ describe('createRAGMiddleware', () => {
       const middleware = createRAGMiddleware({ retriever })
 
       const mockP = createMockParams('query with no matches')
-      const result = await middleware.transformParams!(mockP)
+      const result = await middleware.transformParams?.(mockP)
 
       // Should have the original 2 messages, no injected system message
-      expect(result.prompt).toHaveLength(2)
+      expect(result!.prompt).toHaveLength(2)
     })
 
     it('uses custom formatContext function when provided', async () => {
@@ -124,8 +132,8 @@ describe('createRAGMiddleware', () => {
         formatContext: customFormat,
       })
 
-      const result = await middleware.transformParams!(createMockParams('test'))
-      const systemContent = (result.prompt[0] as { role: 'system'; content: string }).content
+      const result = await middleware.transformParams?.(createMockParams('test'))
+      const systemContent = (result!.prompt[0] as { role: 'system'; content: string }).content
 
       expect(systemContent).toContain('- Tour Kit supports branching.')
       expect(systemContent).toContain('- Use useTour hook for state.')
@@ -135,8 +143,8 @@ describe('createRAGMiddleware', () => {
       const retriever = createMockRetriever(mockResults)
       const middleware = createRAGMiddleware({ retriever })
 
-      const result = await middleware.transformParams!(createMockParams('test'))
-      const systemContent = (result.prompt[0] as { role: 'system'; content: string }).content
+      const result = await middleware.transformParams?.(createMockParams('test'))
+      const systemContent = (result!.prompt[0] as { role: 'system'; content: string }).content
 
       expect(systemContent).toContain('[1] (Branching)')
       expect(systemContent).toContain('[2] (hooks-guide)')
@@ -158,7 +166,7 @@ describe('createRAGMiddleware', () => {
         rerank: { model: 'rerank-model', topN: 2 },
       })
 
-      await middleware.transformParams!(createMockParams('test'))
+      await middleware.transformParams?.(createMockParams('test'))
 
       expect(searchTopK).toBe(6) // topK * 2 = 3 * 2
     })

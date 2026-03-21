@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock the ai module to avoid loading the massive ai package
 vi.mock('ai', () => ({
@@ -16,9 +16,9 @@ vi.mock('ai', () => ({
 }))
 
 import { chunkDocument, chunkDocuments, createRetriever } from '../../server/retriever'
+import type { Document } from '../../types'
 import { createMockEmbedding } from '../helpers/mock-embedding'
 import { createMockVectorStore } from '../helpers/mock-vector-store'
-import type { Document } from '../../types'
 
 describe('chunkDocument', () => {
   it('returns single chunk for short document below chunkSize', () => {
@@ -51,7 +51,8 @@ describe('chunkDocument', () => {
   })
 
   it('splits at paragraph boundaries (\\n\\n)', () => {
-    const content = 'Paragraph one about cats.\n\nParagraph two about dogs.\n\nParagraph three about birds.'
+    const content =
+      'Paragraph one about cats.\n\nParagraph two about dogs.\n\nParagraph three about birds.'
     const doc: Document = { id: 'doc-1', content }
 
     // chunkSize large enough for first two paragraphs but not all three
@@ -152,9 +153,7 @@ describe('createRetriever', () => {
   describe('index', () => {
     it('chunks documents and calls embedMany on chunk contents', async () => {
       const embedManySpy = vi.spyOn(mockEmbedding, 'embedMany')
-      const docs: Document[] = [
-        { id: 'doc-1', content: 'Short content.' },
-      ]
+      const docs: Document[] = [{ id: 'doc-1', content: 'Short content.' }]
 
       const retriever = createRetriever({
         documents: docs,
@@ -171,9 +170,7 @@ describe('createRetriever', () => {
     })
 
     it('upserts chunks and embeddings into vector store', async () => {
-      const docs: Document[] = [
-        { id: 'doc-1', content: 'Some content for testing.' },
-      ]
+      const docs: Document[] = [{ id: 'doc-1', content: 'Some content for testing.' }]
 
       const retriever = createRetriever({
         documents: docs,
@@ -189,9 +186,7 @@ describe('createRetriever', () => {
     })
 
     it('uses default in-memory vector store when none provided', async () => {
-      const docs: Document[] = [
-        { id: 'doc-1', content: 'Content.' },
-      ]
+      const docs: Document[] = [{ id: 'doc-1', content: 'Content.' }]
 
       const retriever = createRetriever({
         documents: docs,
@@ -203,9 +198,7 @@ describe('createRetriever', () => {
     })
 
     it('uses custom vector store when provided', async () => {
-      const docs: Document[] = [
-        { id: 'doc-1', content: 'Content.' },
-      ]
+      const docs: Document[] = [{ id: 'doc-1', content: 'Content.' }]
 
       const retriever = createRetriever({
         documents: docs,
@@ -237,9 +230,7 @@ describe('createRetriever', () => {
     })
 
     it('returns RetrievedDocument[] from vector store results', async () => {
-      mockVectorStore.setSearchResults([
-        { id: 'doc-1', content: 'result', score: 0.95 },
-      ])
+      mockVectorStore.setSearchResults([{ id: 'doc-1', content: 'result', score: 0.95 }])
 
       const docs: Document[] = [{ id: 'doc-1', content: 'Content.' }]
       const retriever = createRetriever({

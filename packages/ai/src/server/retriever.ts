@@ -8,7 +8,7 @@ import { createInMemoryVectorStore } from './vector-store'
 export function chunkDocument(
   document: Document,
   chunkSize: number,
-  chunkOverlap: number,
+  chunkOverlap: number
 ): Document[] {
   const { content } = document
   if (content.length <= chunkSize) {
@@ -56,7 +56,7 @@ export function chunkDocument(
       let sentenceBuffer = ''
 
       for (let i = 0; i < sentences.length; i++) {
-        const sentence = i < sentences.length - 1 ? sentences[i] + '. ' : sentences[i]
+        const sentence = i < sentences.length - 1 ? `${sentences[i]}. ` : sentences[i]
 
         if (sentenceBuffer.length + sentence.length > chunkSize) {
           if (sentenceBuffer.length > 0) {
@@ -111,7 +111,7 @@ export function chunkDocument(
 export function chunkDocuments(
   documents: Document[],
   chunkSize: number,
-  chunkOverlap: number,
+  chunkOverlap: number
 ): Document[] {
   return documents.flatMap((doc) => chunkDocument(doc, chunkSize, chunkOverlap))
 }

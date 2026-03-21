@@ -41,8 +41,8 @@ export default function BranchingPage() {
         <section className="p-8 rounded-lg bg-secondary">
           <h2 className="text-2xl font-bold mb-4">Personalized Tour Paths</h2>
           <p className="text-muted-foreground mb-4">
-            This demo showcases TourKit's branching feature, which allows tours to adapt
-            based on user choices. Select your role to see different tour paths!
+            This demo showcases TourKit's branching feature, which allows tours to adapt based on
+            user choices. Select your role to see different tour paths!
           </p>
         </section>
 
@@ -50,8 +50,8 @@ export default function BranchingPage() {
         <section id="role-select" className="p-8 rounded-lg border bg-popover shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Choose Your Role</h2>
           <p className="text-muted-foreground mb-6">
-            Click one of the buttons below to select your role. The tour will show you
-            content relevant to your selection.
+            Click one of the buttons below to select your role. The tour will show you content
+            relevant to your selection.
           </p>
           <RoleButtons />
         </section>
@@ -77,8 +77,8 @@ export default function BranchingPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Developer Track</h3>
             <p className="text-muted-foreground">
-              Deep dive into our API documentation, code examples, and integration guides.
-              Perfect for technical users who want to build custom solutions.
+              Deep dive into our API documentation, code examples, and integration guides. Perfect
+              for technical users who want to build custom solutions.
             </p>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>• API reference documentation</li>
@@ -107,8 +107,8 @@ export default function BranchingPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Designer Track</h3>
             <p className="text-muted-foreground">
-              Explore our visual tools, theming options, and component library.
-              Create beautiful onboarding experiences without code.
+              Explore our visual tools, theming options, and component library. Create beautiful
+              onboarding experiences without code.
             </p>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>• Theme customization</li>
@@ -137,8 +137,8 @@ export default function BranchingPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Manager Track</h3>
             <p className="text-muted-foreground">
-              Learn about team collaboration, analytics dashboards, and reporting features.
-              Get insights into your team's onboarding performance.
+              Learn about team collaboration, analytics dashboards, and reporting features. Get
+              insights into your team's onboarding performance.
             </p>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>• Team management</li>

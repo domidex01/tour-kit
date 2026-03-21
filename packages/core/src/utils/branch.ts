@@ -68,7 +68,9 @@ export function isSpecialTarget(
 /**
  * Check if a branch is a resolver function
  */
-export function isBranchResolver(branch: Branch): branch is (context: BranchContext) => BranchTarget | Promise<BranchTarget> {
+export function isBranchResolver(
+  branch: Branch
+): branch is (context: BranchContext) => BranchTarget | Promise<BranchTarget> {
   return typeof branch === 'function'
 }
 
@@ -91,8 +93,7 @@ export async function resolveBranch(
   // Check for infinite loop
   if (depth > MAX_BRANCH_DEPTH) {
     logger.warn(
-      `Branch resolution exceeded maximum depth (${MAX_BRANCH_DEPTH}). ` +
-        'Possible circular reference detected. Falling back to "next".'
+      `Branch resolution exceeded maximum depth (${MAX_BRANCH_DEPTH}). Possible circular reference detected. Falling back to "next".`
     )
     return 'next'
   }

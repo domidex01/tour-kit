@@ -1,8 +1,8 @@
 import { describe, expectTypeOf, it } from 'vitest'
 import type {
   AiChatConfig,
-  ChatStatus,
   ChatRouteHandlerOptions,
+  ChatStatus,
   ContextStuffingConfig,
 } from '../../types/config'
 

@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'vitest'
-import type { VectorStoreAdapter, EmbeddingAdapter, RateLimitStore } from '../../types/adapter'
+import type { EmbeddingAdapter, RateLimitStore, VectorStoreAdapter } from '../../types/adapter'
 
 describe('Adapter Types — US-5', () => {
   it('VectorStoreAdapter has required methods', () => {

@@ -8,6 +8,16 @@ export { AiChatContext, type AiChatContextValue } from './context/ai-chat-contex
 // HOOKS
 // ============================================
 export { useAiChat, type UseAiChatReturn } from './hooks/use-ai-chat'
+export {
+  useSuggestions,
+  useOptionalSuggestions,
+  type UseSuggestionsReturn,
+} from './hooks/use-suggestions'
+
+// ============================================
+// COMPONENTS
+// ============================================
+export { AiChatSuggestions, type AiChatSuggestionsProps } from './components/ai-chat-suggestions'
 
 // ============================================
 // TYPES

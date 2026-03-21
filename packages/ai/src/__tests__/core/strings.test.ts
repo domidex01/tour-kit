@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { DEFAULT_STRINGS, resolveStrings } from '../../core/strings'
 import type { AiChatStrings } from '../../types'
 

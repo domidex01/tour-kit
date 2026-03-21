@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import { describeWithApiKey } from '../helpers/skip-conditions'
 
 describeWithApiKey('Streaming Spike — US-2', () => {
@@ -24,10 +24,10 @@ describeWithApiKey('Streaming Spike — US-2', () => {
     expect(response.body).toBeInstanceOf(ReadableStream)
 
     // Read at least one chunk to confirm streaming works
-    const reader = response.body!.getReader()
-    const { value, done } = await reader.read()
+    const reader = response.body?.getReader()
+    const { value, done } = await reader!.read()
     expect(done).toBe(false)
     expect(value).toBeDefined()
-    reader.releaseLock()
+    reader!.releaseLock()
   }, 30_000)
 })

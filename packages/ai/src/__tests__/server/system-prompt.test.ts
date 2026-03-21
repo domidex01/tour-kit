@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { createSystemPrompt } from '../../server/system-prompt'
 
 describe('createSystemPrompt', () => {
@@ -172,9 +172,7 @@ describe('createSystemPrompt', () => {
   describe('Layer 2 — Document Inlining', () => {
     it('inlines documents with XML-style tags', () => {
       const prompt = createSystemPrompt({
-        documents: [
-          { id: 'doc-1', content: 'Export guide content here.' },
-        ],
+        documents: [{ id: 'doc-1', content: 'Export guide content here.' }],
       })
       expect(prompt).toContain('<document id="doc-1">')
       expect(prompt).toContain('Export guide content here.')
@@ -184,11 +182,13 @@ describe('createSystemPrompt', () => {
 
     it('includes source and title attributes in document tags', () => {
       const prompt = createSystemPrompt({
-        documents: [{
-          id: 'doc-2',
-          content: 'Pricing info.',
-          metadata: { source: 'docs', title: 'Pricing' },
-        }],
+        documents: [
+          {
+            id: 'doc-2',
+            content: 'Pricing info.',
+            metadata: { source: 'docs', title: 'Pricing' },
+          },
+        ],
       })
       expect(prompt).toContain('source="docs"')
       expect(prompt).toContain('title="Pricing"')

@@ -1,8 +1,8 @@
 import { renderHook } from '@testing-library/react'
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAiChat } from '../../hooks/use-ai-chat'
-import { createTestWrapper } from '../helpers/test-wrapper'
 import { createMockUseChatReturn } from '../helpers/mock-use-chat'
+import { createTestWrapper } from '../helpers/test-wrapper'
 
 const mockUseChatReturn = createMockUseChatReturn()
 

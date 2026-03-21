@@ -1,9 +1,4 @@
 {
   "title": "Headless",
-  "pages": [
-    "index",
-    "hint-headless",
-    "hint-hotspot-headless",
-    "hint-tooltip-headless"
-  ]
+  "pages": ["index", "hint-headless", "hint-hotspot-headless", "hint-tooltip-headless"]
 }

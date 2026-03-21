@@ -1,18 +1,26 @@
-import { convertToModelMessages, streamText, wrapLanguageModel, type LanguageModel, type UIMessage } from 'ai'
+import {
+  type LanguageModel,
+  type UIMessage,
+  convertToModelMessages,
+  streamText,
+  wrapLanguageModel,
+} from 'ai'
+import { generateSuggestions } from '../core/suggestion-engine'
 import type { ChatRouteHandlerOptions, ContextStuffingConfig, RAGConfig } from '../types'
-import { createSystemPrompt } from './system-prompt'
-import { createRetriever } from './retriever'
 import { createRAGMiddleware } from './rag-middleware'
+import { createRetriever } from './retriever'
+import { createSystemPrompt } from './system-prompt'
 
-export function createChatRouteHandler(options: ChatRouteHandlerOptions): { POST: (req: Request) => Promise<Response> } {
+export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
+  POST: (req: Request) => Promise<Response>
+} {
   const { model, context } = options
 
   // Build system prompt (shared by both strategies)
   const systemPrompt = createSystemPrompt({
     ...options.instructions,
-    documents: context.strategy === 'context-stuffing'
-      ? (context as ContextStuffingConfig).documents
-      : [], // RAG injects docs via middleware, not system prompt
+    documents:
+      context.strategy === 'context-stuffing' ? (context as ContextStuffingConfig).documents : [], // RAG injects docs via middleware, not system prompt
   })
 
   // Set up RAG pipeline if needed (memoized across requests)
@@ -22,7 +30,7 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): { POST
     if (typeof model === 'string') {
       throw new Error(
         'RAG strategy requires a LanguageModel instance, not a string model ID. ' +
-        'Use a model provider (e.g., openai("gpt-4o-mini")) instead.'
+          'Use a model provider (e.g., openai("gpt-4o-mini")) instead.'
       )
     }
 
@@ -46,15 +54,42 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): { POST
     })
   }
 
+  async function handleSuggestions(req: Request): Promise<Response> {
+    const body = await req.json()
+    const messages: UIMessage[] = body.messages ?? []
+    const simplifiedMessages = messages.map((m: UIMessage) => ({
+      role: m.role,
+      content: (m.parts ?? [])
+        .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+        .map((p) => p.text)
+        .join(' '),
+    }))
+    const suggestions = await generateSuggestions({
+      messages: simplifiedMessages,
+      model,
+      productName: options.instructions?.productName,
+    })
+    return new Response(JSON.stringify({ suggestions }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   async function POST(req: Request): Promise<Response> {
     try {
+      const url = new URL(req.url)
+
+      if (url.searchParams.get('suggestions') === 'true') {
+        return handleSuggestions(req)
+      }
+
       const { messages }: { messages: UIMessage[] } = await req.json()
 
       if (!messages || !Array.isArray(messages)) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid request: messages array required' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        )
+        return new Response(JSON.stringify({ error: 'Invalid request: messages array required' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        })
       }
 
       const lastMessage = messages[messages.length - 1]
@@ -73,10 +108,10 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): { POST
       if (options.beforeSend && lastMessage) {
         const result = await options.beforeSend(lastMessage)
         if (result === null) {
-          return new Response(
-            JSON.stringify({ error: 'Message blocked by beforeSend hook' }),
-            { status: 403, headers: { 'Content-Type': 'application/json' } }
-          )
+          return new Response(JSON.stringify({ error: 'Message blocked by beforeSend hook' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' },
+          })
         }
       }
 
@@ -102,10 +137,10 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): { POST
         }
       }
 
-      return new Response(
-        JSON.stringify({ error: 'Internal server error' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      )
+      return new Response(JSON.stringify({ error: 'Internal server error' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
   }
 

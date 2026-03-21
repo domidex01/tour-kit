@@ -1,9 +1,4 @@
 {
   "title": "Hooks",
-  "pages": [
-    "use-checklist",
-    "use-task",
-    "use-checklist-persistence",
-    "use-checklists-progress"
-  ]
+  "pages": ["use-checklist", "use-task", "use-checklist-persistence", "use-checklists-progress"]
 }

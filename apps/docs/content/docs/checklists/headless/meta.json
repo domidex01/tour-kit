@@ -1,8 +1,4 @@
 {
   "title": "Headless",
-  "pages": [
-    "index",
-    "checklist-headless",
-    "task-headless"
-  ]
+  "pages": ["index", "checklist-headless", "task-headless"]
 }

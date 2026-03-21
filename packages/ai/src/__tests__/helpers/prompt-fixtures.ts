@@ -1,5 +1,5 @@
-import type { Document } from '../../types'
 import type { SystemPromptConfig } from '../../server/system-prompt'
+import type { Document } from '../../types'
 
 /** Minimal config — produces only Layer 1 defaults */
 export const EMPTY_CONFIG: SystemPromptConfig = {}

@@ -1,5 +1,5 @@
-import { vi } from 'vitest'
 import type { UIMessage } from 'ai'
+import { vi } from 'vitest'
 
 export interface MockUseChatReturn {
   messages: UIMessage[]

@@ -1,10 +1,10 @@
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import { TourProvider } from '../../context/tour-provider'
 import { useTourContext } from '../../context/tour-context'
+import { TourProvider } from '../../context/tour-provider'
 import { useBranch } from '../../hooks/use-branch'
-import type { Tour, TourStep, BranchContext, BranchTarget } from '../../types'
+import type { BranchContext, BranchTarget, Tour, TourStep } from '../../types'
 
 // Helper to create a wrapper with TourProvider
 function createWrapper(tours: Tour[]) {

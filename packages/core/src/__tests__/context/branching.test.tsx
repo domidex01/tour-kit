@@ -1,9 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { TourProvider } from '../../context/tour-provider'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useTourContext } from '../../context/tour-context'
-import type { Tour, TourStep, BranchTarget, BranchContext } from '../../types'
+import { TourProvider } from '../../context/tour-provider'
+import type { BranchContext, BranchTarget, Tour, TourStep } from '../../types'
 
 // Helper to create a wrapper with TourProvider
 function createWrapper(tours: Tour[]) {
@@ -63,11 +63,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('step-1', { onNext: 2 }),
-            createStep('step-2'),
-            createStep('step-3'),
-          ],
+          steps: [createStep('step-1', { onNext: 2 }), createStep('step-2'), createStep('step-3')],
         },
       ]
 
@@ -90,10 +86,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('step-1', { onNext: 'complete' }),
-            createStep('step-2'),
-          ],
+          steps: [createStep('step-1', { onNext: 'complete' }), createStep('step-2')],
         },
       ]
 
@@ -117,10 +110,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('step-1', { onNext: 'skip' }),
-            createStep('step-2'),
-          ],
+          steps: [createStep('step-1', { onNext: 'skip' }), createStep('step-2')],
         },
       ]
 
@@ -178,10 +168,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('step-1', { onNext: null }),
-            createStep('step-2'),
-          ],
+          steps: [createStep('step-1', { onNext: null }), createStep('step-2')],
         },
       ]
 
@@ -242,10 +229,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('step-1', { onNext: resolver }),
-            createStep('step-2'),
-          ],
+          steps: [createStep('step-1', { onNext: resolver }), createStep('step-2')],
         },
       ]
 
@@ -266,10 +250,10 @@ describe('TourProvider branching logic', () => {
       })
 
       expect(capturedContext).toBeDefined()
-      expect(capturedContext!.tourId).toBe('test-tour')
-      expect(capturedContext!.isActive).toBe(true)
-      expect(capturedContext!.data.testKey).toBe('testValue')
-      expect(typeof capturedContext!.setData).toBe('function')
+      expect(capturedContext?.tourId).toBe('test-tour')
+      expect(capturedContext?.isActive).toBe(true)
+      expect(capturedContext?.data.testKey).toBe('testValue')
+      expect(typeof capturedContext?.setData).toBe('function')
     })
 
     it('resolver can modify data', async () => {
@@ -281,10 +265,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('step-1', { onNext: resolver }),
-            createStep('step-2'),
-          ],
+          steps: [createStep('step-1', { onNext: resolver }), createStep('step-2')],
         },
       ]
 
@@ -338,10 +319,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('step-1'),
-            createStep('step-2', { onPrev: null }),
-          ],
+          steps: [createStep('step-1'), createStep('step-2', { onPrev: null })],
         },
       ]
 
@@ -468,11 +446,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('step-1'),
-            createStep('step-2'),
-            createStep('step-3'),
-          ],
+          steps: [createStep('step-1'), createStep('step-2'), createStep('step-3')],
         },
       ]
 
@@ -530,10 +504,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('step-1'),
-            createStep('step-2', { onNext: 'restart' }),
-          ],
+          steps: [createStep('step-1'), createStep('step-2', { onNext: 'restart' })],
         },
       ]
 
@@ -565,11 +536,7 @@ describe('TourProvider branching logic', () => {
       const tours: Tour[] = [
         {
           id: 'test-tour',
-          steps: [
-            createStep('intro'),
-            createStep('features'),
-            createStep('outro'),
-          ],
+          steps: [createStep('intro'), createStep('features'), createStep('outro')],
         },
       ]
 

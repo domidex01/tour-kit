@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import { describeWithApiKey } from '../helpers/skip-conditions'
 
 describeWithApiKey('Middleware Spike — US-3', () => {
@@ -13,9 +13,7 @@ describeWithApiKey('Middleware Spike — US-3', () => {
       transformParams: async ({ params }: { params: any }) => {
         transformParamsCalled = true
 
-        const lastUserMessage = params.prompt.findLast(
-          (msg: any) => msg.role === 'user'
-        )
+        const lastUserMessage = params.prompt.findLast((msg: any) => msg.role === 'user')
 
         if (!lastUserMessage || lastUserMessage.role !== 'user') {
           return params
@@ -49,7 +47,10 @@ describeWithApiKey('Middleware Spike — US-3', () => {
     })
 
     const messages = await convertToModelMessages([
-      { role: 'user' as const, parts: [{ type: 'text' as const, text: 'Tell me about this product.' }] },
+      {
+        role: 'user' as const,
+        parts: [{ type: 'text' as const, text: 'Tell me about this product.' }],
+      },
     ])
 
     const result = streamText({
@@ -60,11 +61,11 @@ describeWithApiKey('Middleware Spike — US-3', () => {
 
     // Consume the stream to completion
     const response = result.toUIMessageStreamResponse()
-    const reader = response.body!.getReader()
+    const reader = response.body?.getReader()
     const chunks: string[] = []
 
     while (true) {
-      const { value, done } = await reader.read()
+      const { value, done } = await reader!.read()
       if (done) break
       if (value) {
         chunks.push(new TextDecoder().decode(value))

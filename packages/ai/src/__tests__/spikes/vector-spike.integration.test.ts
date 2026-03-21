@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import { describeWithApiKey } from '../helpers/skip-conditions'
 
 describeWithApiKey('Vector Search Spike — US-4', () => {
@@ -24,7 +24,10 @@ describeWithApiKey('Vector Search Spike — US-4', () => {
 
     const startSearch = performance.now()
     const results = docs
-      .map((doc, i) => ({ document: doc, similarity: cosineSimilarity(queryEmbedding, embeddings[i]) }))
+      .map((doc, i) => ({
+        document: doc,
+        similarity: cosineSimilarity(queryEmbedding, embeddings[i]),
+      }))
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, 3)
     const searchTime = performance.now() - startSearch

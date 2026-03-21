@@ -1,6 +1,6 @@
-import { createContext } from 'react'
 import type { UIMessage } from 'ai'
-import type { ChatStatus, AiChatConfig } from '../types'
+import { createContext } from 'react'
+import type { AiChatConfig, ChatStatus } from '../types'
 
 export interface AiChatContextValue {
   messages: UIMessage[]

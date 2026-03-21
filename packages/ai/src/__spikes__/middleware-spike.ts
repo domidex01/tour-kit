@@ -1,17 +1,12 @@
-import type { LanguageModelMiddleware } from 'ai'
-
 /**
  * Test middleware that injects a static context string into the last user message.
  * This validates that wrapLanguageModel + transformParams works in our build system.
  */
-export const testRagMiddleware: LanguageModelMiddleware = {
-  specificationVersion: 'v3',
+export const testRagMiddleware = {
   transformParams: async ({ params }: { params: any }) => {
     console.log('[middleware-spike] transformParams called')
 
-    const lastUserMessage = params.prompt.findLast(
-      (msg: any) => msg.role === 'user'
-    )
+    const lastUserMessage = params.prompt.findLast((msg: any) => msg.role === 'user')
 
     if (!lastUserMessage || lastUserMessage.role !== 'user') {
       console.log('[middleware-spike] No user message found, skipping injection')

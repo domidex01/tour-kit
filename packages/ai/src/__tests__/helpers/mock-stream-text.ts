@@ -10,9 +10,12 @@ export function createMockStreamResult(
   overrides: Partial<MockStreamResult> = {}
 ): MockStreamResult {
   return {
-    toUIMessageStreamResponse: vi.fn(() => new Response('mock stream', {
-      headers: { 'Content-Type': 'text/event-stream' },
-    })),
+    toUIMessageStreamResponse: vi.fn(
+      () =>
+        new Response('mock stream', {
+          headers: { 'Content-Type': 'text/event-stream' },
+        })
+    ),
     text: Promise.resolve('Mock AI response'),
     usage: Promise.resolve({ promptTokens: 10, completionTokens: 20 }),
     ...overrides,

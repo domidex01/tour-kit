@@ -4,9 +4,7 @@
     "context7@claude-plugins-official": true
   },
   "enableAllProjectMcpServers": false,
-  "enabledMcpjsonServers": [
-    "context7"
-  ],
+  "enabledMcpjsonServers": ["context7"],
   "permissions": {
     "allow": [
       "WebSearch",
@@ -40,11 +38,7 @@
       "Bash(tsc:*)",
       "Bash(cat:*)"
     ],
-    "deny": [
-      "Read(.env*)",
-      "Read(secrets/**)",
-      "Read(.git/config)"
-    ]
+    "deny": ["Read(.env*)", "Read(secrets/**)", "Read(.git/config)"]
   },
   "hooks": {
     "UserPromptSubmit": [

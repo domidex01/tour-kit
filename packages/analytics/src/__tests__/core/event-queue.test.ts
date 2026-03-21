@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createEventQueue, type EventQueueConfig } from '../../core/event-queue'
+import { type EventQueueConfig, createEventQueue } from '../../core/event-queue'
 import type { TourEvent } from '../../types/events'
 
 /**
@@ -109,9 +109,7 @@ describe('createEventQueue', () => {
   describe('Interval Flushing', () => {
     it('flushes after batch interval expires', () => {
       const onFlush = vi.fn()
-      const queue = createEventQueue(
-        createConfig({ batchSize: 10, batchInterval: 5000, onFlush })
-      )
+      const queue = createEventQueue(createConfig({ batchSize: 10, batchInterval: 5000, onFlush }))
 
       queue.push(createMockEvent())
 
@@ -134,9 +132,7 @@ describe('createEventQueue', () => {
 
     it('resets interval timer after batch size flush', () => {
       const onFlush = vi.fn()
-      const queue = createEventQueue(
-        createConfig({ batchSize: 2, batchInterval: 5000, onFlush })
-      )
+      const queue = createEventQueue(createConfig({ batchSize: 2, batchInterval: 5000, onFlush }))
 
       queue.push(createMockEvent())
       queue.push(createMockEvent())
@@ -251,9 +247,7 @@ describe('createEventQueue', () => {
 
     it('cancels pending interval timer', () => {
       const onFlush = vi.fn()
-      const queue = createEventQueue(
-        createConfig({ batchSize: 10, batchInterval: 5000, onFlush })
-      )
+      const queue = createEventQueue(createConfig({ batchSize: 10, batchInterval: 5000, onFlush }))
 
       queue.push(createMockEvent())
       queue.flush()
@@ -280,9 +274,7 @@ describe('createEventQueue', () => {
 
     it('cancels pending interval timer', () => {
       const onFlush = vi.fn()
-      const queue = createEventQueue(
-        createConfig({ batchSize: 10, batchInterval: 5000, onFlush })
-      )
+      const queue = createEventQueue(createConfig({ batchSize: 10, batchInterval: 5000, onFlush }))
 
       queue.push(createMockEvent())
       queue.destroy()

@@ -4,7 +4,10 @@ import { useState } from 'react'
 import type * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFocusTrap } from '../../hooks/use-focus-trap'
-import { createEventListenerTracker, createFunctionIdentityChecker } from '../utils/cleanup-test-utils'
+import {
+  createEventListenerTracker,
+  createFunctionIdentityChecker,
+} from '../utils/cleanup-test-utils'
 
 function TestComponent({ enabled = true }: { enabled?: boolean }) {
   const { containerRef, activate, deactivate } = useFocusTrap(enabled)
@@ -290,10 +293,18 @@ describe('useFocusTrap - memory leak prevention', () => {
 
       return (
         <div ref={containerRef as React.RefObject<HTMLDivElement>} data-testid="container">
-          <button type="button" data-testid="first">First</button>
-          <button type="button" onClick={activate} data-testid="activate">Activate</button>
-          <button type="button" onClick={deactivate} data-testid="deactivate">Deactivate</button>
-          <button type="button" onClick={() => setEnabled((e: boolean) => !e)} data-testid="toggle">Toggle</button>
+          <button type="button" data-testid="first">
+            First
+          </button>
+          <button type="button" onClick={activate} data-testid="activate">
+            Activate
+          </button>
+          <button type="button" onClick={deactivate} data-testid="deactivate">
+            Deactivate
+          </button>
+          <button type="button" onClick={() => setEnabled((e: boolean) => !e)} data-testid="toggle">
+            Toggle
+          </button>
         </div>
       )
     }

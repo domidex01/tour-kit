@@ -1,5 +1,5 @@
-import { cosineSimilarity, embed, embedMany } from 'ai'
 import { openai } from '@ai-sdk/openai'
+import { cosineSimilarity, embed, embedMany } from 'ai'
 
 /** 50 test documents covering diverse product topics */
 const TEST_DOCUMENTS = [

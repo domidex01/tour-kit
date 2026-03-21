@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback, useMemo, type ReactNode } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
+import { type ReactNode, useCallback, useMemo, useState } from 'react'
 import type { AiChatConfig, ChatStatus } from '../types'
 import { AiChatContext, type AiChatContextValue } from './ai-chat-context'
 
@@ -119,12 +119,21 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
       toggle,
       config,
     }),
-    [chatHelpers.messages, status, error, sendMessage, stop, reload, setMessages, isOpen, open, close, toggle, config]
+    [
+      chatHelpers.messages,
+      status,
+      error,
+      sendMessage,
+      stop,
+      reload,
+      setMessages,
+      isOpen,
+      open,
+      close,
+      toggle,
+      config,
+    ]
   )
 
-  return (
-    <AiChatContext.Provider value={value}>
-      {children}
-    </AiChatContext.Provider>
-  )
+  return <AiChatContext.Provider value={value}>{children}</AiChatContext.Provider>
 }

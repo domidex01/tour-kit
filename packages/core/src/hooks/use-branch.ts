@@ -102,6 +102,7 @@ export function useBranch(): UseBranchReturn {
       context.tourId,
       context.isActive,
       context.currentStepIndex,
+      context.currentStep,
       context.totalSteps,
       context.isLoading,
       context.isTransitioning,

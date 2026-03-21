@@ -1,7 +1,4 @@
 {
   "title": "Utilities",
-  "pages": [
-    "url-parsing",
-    "embed-urls"
-  ]
+  "pages": ["url-parsing", "embed-urls"]
 }

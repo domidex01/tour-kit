@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createAiSdkEmbedding } from '../../server/embedding'
 
 vi.mock('ai', () => ({
@@ -43,8 +43,13 @@ describe('createAiSdkEmbedding', () => {
   })
 
   it('calls ai.embedMany() and returns the embedding vectors', async () => {
-    const mockEmbeddings = [[0.1, 0.2], [0.3, 0.4]]
-    mockEmbedMany.mockResolvedValue({ embeddings: mockEmbeddings } as Awaited<ReturnType<typeof embedMany>>)
+    const mockEmbeddings = [
+      [0.1, 0.2],
+      [0.3, 0.4],
+    ]
+    mockEmbedMany.mockResolvedValue({ embeddings: mockEmbeddings } as Awaited<
+      ReturnType<typeof embedMany>
+    >)
 
     const adapter = createAiSdkEmbedding({
       model: { modelId: 'test-model' } as Parameters<typeof embed>[0]['model'],

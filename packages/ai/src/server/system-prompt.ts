@@ -47,9 +47,7 @@ export function createSystemPrompt(config: SystemPromptConfig = {}): string {
 
   // Product context
   if (config.productName || config.productDescription) {
-    const desc = config.productDescription
-      ? ` ${config.productDescription}`
-      : ''
+    const desc = config.productDescription ? ` ${config.productDescription}` : ''
     if (config.productName) {
       layer2Parts.push(
         `## Product Context\nYou are assisting users of ${config.productName}.${desc}`
@@ -67,9 +65,7 @@ export function createSystemPrompt(config: SystemPromptConfig = {}): string {
   // Boundaries
   if (config.boundaries && config.boundaries.length > 0) {
     const items = config.boundaries.map((b) => `- ${b}`).join('\n')
-    layer2Parts.push(
-      `## Boundaries\nYou must stay within these topic boundaries:\n${items}`
-    )
+    layer2Parts.push(`## Boundaries\nYou must stay within these topic boundaries:\n${items}`)
   }
 
   // Document inlining

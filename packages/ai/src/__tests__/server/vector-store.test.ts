@@ -47,7 +47,7 @@ describe('createInMemoryVectorStore', () => {
       ]
 
       await expect(store.upsert(documents, embeddings)).rejects.toThrow(
-        /Documents length.*must match embeddings length/,
+        /Documents length.*must match embeddings length/
       )
     })
 
@@ -159,7 +159,7 @@ describe('createInMemoryVectorStore', () => {
         [
           [1, 0, 0],
           [0, 1, 0],
-        ],
+        ]
       )
 
       await store.delete(['doc-a'])
@@ -189,7 +189,7 @@ describe('createInMemoryVectorStore', () => {
         [
           [1, 0, 0],
           [0, 1, 0],
-        ],
+        ]
       )
 
       await store.clear()

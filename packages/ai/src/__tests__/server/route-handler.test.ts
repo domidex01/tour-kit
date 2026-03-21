@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMockStreamResult } from '../helpers/mock-stream-text'
 import { createTestDocuments } from '../helpers/test-documents'
 

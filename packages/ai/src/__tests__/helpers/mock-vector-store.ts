@@ -25,7 +25,7 @@ export function createMockVectorStore(): VectorStoreAdapter & {
     async search(
       embedding: number[],
       topK: number,
-      minScore?: number,
+      minScore?: number
     ): Promise<RetrievedDocument[]> {
       searchCalls.push({ embedding, topK, minScore })
       return storedResults.slice(0, topK)

@@ -1,6 +1,6 @@
 import type { LanguageModel, UIMessage } from 'ai'
+import type { EmbeddingAdapter, RateLimitStore, VectorStoreAdapter } from './adapter'
 import type { Document, RetrievedDocument } from './document'
-import type { VectorStoreAdapter, EmbeddingAdapter, RateLimitStore } from './adapter'
 import type { AiChatEvent } from './events'
 
 // ── Client Config ──
@@ -33,9 +33,7 @@ export interface SuggestionsConfig {
   cacheTtl?: number
 }
 
-export type PersistenceConfig =
-  | 'local'
-  | { adapter: PersistenceAdapter }
+export type PersistenceConfig = 'local' | { adapter: PersistenceAdapter }
 
 export interface PersistenceAdapter {
   save(chatId: string, messages: UIMessage[]): Promise<void>

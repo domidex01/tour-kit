@@ -76,7 +76,10 @@ describe('useElementPosition', () => {
   })
 
   it('updates rect on scroll', () => {
-    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0 })
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(0)
+      return 0
+    })
 
     const { result } = renderHook(() => useElementPosition('#test-element'))
 
@@ -101,7 +104,10 @@ describe('useElementPosition', () => {
   })
 
   it('updates rect on window resize', () => {
-    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0 })
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(0)
+      return 0
+    })
 
     const { result } = renderHook(() => useElementPosition('#test-element'))
 

@@ -30,7 +30,7 @@ export function createInMemoryVectorStore(): VectorStoreAdapter {
     async search(
       queryEmbedding: number[],
       topK: number,
-      minScore = 0,
+      minScore = 0
     ): Promise<RetrievedDocument[]> {
       const results: RetrievedDocument[] = []
 

@@ -52,9 +52,7 @@ describe('useRoutePersistence', () => {
     })
 
     it('does nothing when disabled', () => {
-      const { result } = renderHook(() =>
-        useRoutePersistence({ ...defaultConfig, enabled: false })
-      )
+      const { result } = renderHook(() => useRoutePersistence({ ...defaultConfig, enabled: false }))
 
       act(() => {
         result.current.save({ tourId: 'test-tour' })
@@ -118,9 +116,7 @@ describe('useRoutePersistence', () => {
         timestamp: Date.now(),
       })
 
-      const { result } = renderHook(() =>
-        useRoutePersistence({ ...defaultConfig, enabled: false })
-      )
+      const { result } = renderHook(() => useRoutePersistence({ ...defaultConfig, enabled: false }))
 
       const loaded = result.current.load()
 

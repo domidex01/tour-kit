@@ -1,4 +1,4 @@
-import { vi, type Mock } from 'vitest'
+import { type Mock, vi } from 'vitest'
 
 /**
  * Creates a tracker for event listeners on a target element.
@@ -12,24 +12,36 @@ export function createEventListenerTracker(target: EventTarget = document) {
   const addSpy = vi.spyOn(target, 'addEventListener')
   const removeSpy = vi.spyOn(target, 'removeEventListener')
 
-  addSpy.mockImplementation((event: string, handler: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions) => {
-    if (handler) {
-      const fn = typeof handler === 'function' ? handler : handler.handleEvent.bind(handler)
-      if (!listeners.has(event)) {
-        listeners.set(event, new Set())
+  addSpy.mockImplementation(
+    (
+      event: string,
+      handler: EventListenerOrEventListenerObject | null,
+      options?: boolean | AddEventListenerOptions
+    ) => {
+      if (handler) {
+        const fn = typeof handler === 'function' ? handler : handler.handleEvent.bind(handler)
+        if (!listeners.has(event)) {
+          listeners.set(event, new Set())
+        }
+        listeners.get(event)?.add(fn)
       }
-      listeners.get(event)!.add(fn)
+      originalAdd(event, handler, options)
     }
-    originalAdd(event, handler, options)
-  })
+  )
 
-  removeSpy.mockImplementation((event: string, handler: EventListenerOrEventListenerObject | null, options?: boolean | EventListenerOptions) => {
-    if (handler) {
-      const fn = typeof handler === 'function' ? handler : handler.handleEvent.bind(handler)
-      listeners.get(event)?.delete(fn)
+  removeSpy.mockImplementation(
+    (
+      event: string,
+      handler: EventListenerOrEventListenerObject | null,
+      options?: boolean | EventListenerOptions
+    ) => {
+      if (handler) {
+        const fn = typeof handler === 'function' ? handler : handler.handleEvent.bind(handler)
+        listeners.get(event)?.delete(fn)
+      }
+      originalRemove(event, handler, options)
     }
-    originalRemove(event, handler, options)
-  })
+  )
 
   return {
     /**
@@ -115,7 +127,9 @@ export function createResizeObserverMock(): ObserverMockResult {
 
     assertNoLeaks(): void {
       if (instances.size > 0) {
-        throw new Error(`ResizeObserver leak detected: ${instances.size} instance(s) not disconnected`)
+        throw new Error(
+          `ResizeObserver leak detected: ${instances.size} instance(s) not disconnected`
+        )
       }
     },
 
@@ -139,18 +153,22 @@ interface IntersectionObserverInstance extends ObserverInstance {
 export function createIntersectionObserverMock(): ObserverMockResult {
   const instances = new Set<IntersectionObserverInstance>()
 
-  const MockCtor = vi.fn().mockImplementation((_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) => {
-    const instance: IntersectionObserverInstance = {
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(() => {
-        instances.delete(instance)
-      }),
-      takeRecords: vi.fn().mockReturnValue([]),
-    }
-    instances.add(instance)
-    return instance
-  })
+  const MockCtor = vi
+    .fn()
+    .mockImplementation(
+      (_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) => {
+        const instance: IntersectionObserverInstance = {
+          observe: vi.fn(),
+          unobserve: vi.fn(),
+          disconnect: vi.fn(() => {
+            instances.delete(instance)
+          }),
+          takeRecords: vi.fn().mockReturnValue([]),
+        }
+        instances.add(instance)
+        return instance
+      }
+    )
 
   vi.stubGlobal('IntersectionObserver', MockCtor)
 
@@ -161,7 +179,9 @@ export function createIntersectionObserverMock(): ObserverMockResult {
 
     assertNoLeaks(): void {
       if (instances.size > 0) {
-        throw new Error(`IntersectionObserver leak detected: ${instances.size} instance(s) not disconnected`)
+        throw new Error(
+          `IntersectionObserver leak detected: ${instances.size} instance(s) not disconnected`
+        )
       }
     },
 
@@ -208,7 +228,9 @@ export function createMutationObserverMock(): ObserverMockResult {
 
     assertNoLeaks(): void {
       if (instances.size > 0) {
-        throw new Error(`MutationObserver leak detected: ${instances.size} instance(s) not disconnected`)
+        throw new Error(
+          `MutationObserver leak detected: ${instances.size} instance(s) not disconnected`
+        )
       }
     },
 
@@ -312,21 +334,33 @@ export function createStorageTracker(storage: Storage = localStorage) {
   const addSpy = vi.spyOn(window, 'addEventListener')
   const removeSpy = vi.spyOn(window, 'removeEventListener')
 
-  addSpy.mockImplementation((event: string, handler: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
-    if (event === 'storage') {
-      const fn = typeof handler === 'function' ? handler : handler.handleEvent.bind(handler)
-      listeners.add(fn)
+  addSpy.mockImplementation(
+    (
+      event: string,
+      handler: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions
+    ) => {
+      if (event === 'storage') {
+        const fn = typeof handler === 'function' ? handler : handler.handleEvent.bind(handler)
+        listeners.add(fn)
+      }
+      originalAdd(event, handler, options)
     }
-    originalAdd(event, handler, options)
-  })
+  )
 
-  removeSpy.mockImplementation((event: string, handler: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions) => {
-    if (event === 'storage') {
-      const fn = typeof handler === 'function' ? handler : handler.handleEvent.bind(handler)
-      listeners.delete(fn)
+  removeSpy.mockImplementation(
+    (
+      event: string,
+      handler: EventListenerOrEventListenerObject,
+      options?: boolean | EventListenerOptions
+    ) => {
+      if (event === 'storage') {
+        const fn = typeof handler === 'function' ? handler : handler.handleEvent.bind(handler)
+        listeners.delete(fn)
+      }
+      originalRemove(event, handler, options)
     }
-    originalRemove(event, handler, options)
-  })
+  )
 
   return {
     getStorageListenerCount(): number {

@@ -293,7 +293,7 @@ function tourReducer(state: TourReducerState, action: TourAction): TourReducerSt
       // This ensures step properties like onAction are synchronized
       if (state.isActive && state.tourId) {
         const updatedTour = newTours.get(state.tourId)
-        if (updatedTour && updatedTour.steps[state.currentStepIndex]) {
+        if (updatedTour?.steps[state.currentStepIndex]) {
           return {
             ...state,
             tours: newTours,
@@ -487,7 +487,7 @@ export function TourProvider({
             currentTour.onSkip?.({ ...state, tour: currentTour, data })
             return
 
-          case 'restart':
+          case 'restart': {
             dispatch({ type: 'CLEAR_VISIT_TRACKING' })
             dispatch({ type: 'GO_TO_STEP', stepIndex: 0 })
             const firstStep = currentTour.steps[0]
@@ -500,6 +500,7 @@ export function TourProvider({
               tourKitContext?.onStepView?.(currentTour.id, firstStep.id, 0)
             }
             return
+          }
 
           case 'next':
           case 'prev':
@@ -642,15 +643,7 @@ export function TourProvider({
         })
       }
     },
-    [
-      currentTour,
-      state,
-      data,
-      stepIdMap,
-      tourKitContext,
-      clear,
-      navigateToStep,
-    ]
+    [currentTour, state, data, stepIdMap, tourKitContext, clear, navigateToStep]
   )
 
   // Actions
@@ -758,7 +751,16 @@ export function TourProvider({
         data,
       })
     }
-  }, [state, currentTour, data, tourKitContext, navigateToStep, completeTour, buildBranchContext, handleBranchTarget])
+  }, [
+    state,
+    currentTour,
+    data,
+    tourKitContext,
+    navigateToStep,
+    completeTour,
+    buildBranchContext,
+    handleBranchTarget,
+  ])
 
   const prev = React.useCallback(async () => {
     if (!state.isActive || !currentTour) return
@@ -817,7 +819,15 @@ export function TourProvider({
         })
       }
     }
-  }, [state, currentTour, data, tourKitContext, navigateToStep, buildBranchContext, handleBranchTarget])
+  }, [
+    state,
+    currentTour,
+    data,
+    tourKitContext,
+    navigateToStep,
+    buildBranchContext,
+    handleBranchTarget,
+  ])
 
   const goTo = React.useCallback(
     async (stepIndex: number) => {
@@ -968,7 +978,14 @@ export function TourProvider({
 
       await handleBranchTarget(target, branchContext, actionId)
     },
-    [state.isActive, currentTour, state.currentStep, buildBranchContext, tourKitContext, handleBranchTarget]
+    [
+      state.isActive,
+      currentTour,
+      state.currentStep,
+      buildBranchContext,
+      tourKitContext,
+      handleBranchTarget,
+    ]
   )
 
   const contextValue = React.useMemo<TourContextValue>(

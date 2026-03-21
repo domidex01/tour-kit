@@ -15,11 +15,11 @@ vi.mock('ai', () => ({
   },
 }))
 
-import { createRetriever } from '../../server/retriever'
 import { createRAGMiddleware } from '../../server/rag-middleware'
-import { createMockEmbedding } from '../helpers/mock-embedding'
-import { createTestDocuments } from '../helpers/factories'
+import { createRetriever } from '../../server/retriever'
 import type { Document, VectorStoreAdapter } from '../../types'
+import { createTestDocuments } from '../helpers/factories'
+import { createMockEmbedding } from '../helpers/mock-embedding'
 
 describe('RAG Pipeline Integration', () => {
   it('indexes documents and retrieves relevant results for a query', async () => {
@@ -52,8 +52,16 @@ describe('RAG Pipeline Integration', () => {
   it('RAG middleware injects retrieved context into LLM prompt', async () => {
     const embedding = createMockEmbedding()
     const docs: Document[] = [
-      { id: 'doc-1', content: 'Tour Kit uses React context for state management.', metadata: { title: 'State' } },
-      { id: 'doc-2', content: 'Animations are handled via CSS transitions.', metadata: { title: 'Animations' } },
+      {
+        id: 'doc-1',
+        content: 'Tour Kit uses React context for state management.',
+        metadata: { title: 'State' },
+      },
+      {
+        id: 'doc-2',
+        content: 'Animations are handled via CSS transitions.',
+        metadata: { title: 'Animations' },
+      },
     ]
 
     const retriever = createRetriever({
@@ -80,12 +88,12 @@ describe('RAG Pipeline Integration', () => {
       model: {} as never,
     }
 
-    const result = await middleware.transformParams!(params)
+    const result = await middleware.transformParams?.(params)
 
     // Should have 3 messages: injected context + original system + user
-    expect(result.prompt.length).toBe(3)
-    expect(result.prompt[0].role).toBe('system')
-    expect((result.prompt[0] as { content: string }).content).toContain('Relevant context')
+    expect(result!.prompt.length).toBe(3)
+    expect(result!.prompt[0].role).toBe('system')
+    expect((result!.prompt[0] as { content: string }).content).toContain('Relevant context')
   })
 
   it('end-to-end: index → query → retrieve → verify ranked results', async () => {
@@ -117,17 +125,17 @@ describe('RAG Pipeline Integration', () => {
         for (let i = 0; i < documents.length; i++) {
           ;(this as unknown as { _data: Map<string, { doc: Document; emb: number[] }> })._data.set(
             documents[i].id,
-            { doc: documents[i], emb: embeddings[i] },
+            { doc: documents[i], emb: embeddings[i] }
           )
         }
       },
       async search(_embedding, topK) {
         const entries = Array.from(
-          (this as unknown as { _data: Map<string, { doc: Document; emb: number[] }> })._data.values(),
+          (
+            this as unknown as { _data: Map<string, { doc: Document; emb: number[] }> }
+          )._data.values()
         )
-        return entries
-          .slice(0, topK)
-          .map((e) => ({ ...e.doc, score: 0.9 }))
+        return entries.slice(0, topK).map((e) => ({ ...e.doc, score: 0.9 }))
       },
       async delete(ids) {
         for (const id of ids) {
@@ -139,9 +147,7 @@ describe('RAG Pipeline Integration', () => {
       },
     } as VectorStoreAdapter
 
-    const docs: Document[] = [
-      { id: 'doc-1', content: 'Test content.' },
-    ]
+    const docs: Document[] = [{ id: 'doc-1', content: 'Test content.' }]
 
     const retriever = createRetriever({
       documents: docs,
@@ -182,10 +188,10 @@ describe('RAG Pipeline Integration', () => {
       model: {} as never,
     }
 
-    const result = await middleware.transformParams!(params)
+    const result = await middleware.transformParams?.(params)
 
     // Should have injected context
-    expect(result.prompt[0].role).toBe('system')
+    expect(result!.prompt[0].role).toBe('system')
   })
 
   it('lazy indexes on first search — no upfront blocking', async () => {
@@ -245,4 +251,3 @@ describe('RAG Pipeline Integration', () => {
     })
   })
 })
-

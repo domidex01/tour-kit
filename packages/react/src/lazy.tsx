@@ -1,6 +1,6 @@
 'use client'
 
-import { lazy, Suspense, type ReactNode } from 'react'
+import { type ReactNode, Suspense, lazy } from 'react'
 
 // Lazy-loaded components for code splitting
 export const LazyTourCard = lazy(() =>
@@ -32,26 +32,19 @@ export const LazyTourClose = lazy(() =>
 )
 
 // Preload functions for warming the cache
-export const preloadTourCard = () =>
-  import('./components/card/tour-card')
+export const preloadTourCard = () => import('./components/card/tour-card')
 
-export const preloadTourOverlay = () =>
-  import('./components/overlay/tour-overlay')
+export const preloadTourOverlay = () => import('./components/overlay/tour-overlay')
 
-export const preloadTourStep = () =>
-  import('./components/tour/tour-step')
+export const preloadTourStep = () => import('./components/tour/tour-step')
 
-export const preloadTour = () =>
-  import('./components/tour/tour')
+export const preloadTour = () => import('./components/tour/tour')
 
-export const preloadTourNavigation = () =>
-  import('./components/navigation/tour-navigation')
+export const preloadTourNavigation = () => import('./components/navigation/tour-navigation')
 
-export const preloadTourProgress = () =>
-  import('./components/navigation/tour-progress')
+export const preloadTourProgress = () => import('./components/navigation/tour-progress')
 
-export const preloadTourClose = () =>
-  import('./components/navigation/tour-close')
+export const preloadTourClose = () => import('./components/navigation/tour-close')
 
 // Preload all main components at once
 export const preloadAllTourComponents = () =>

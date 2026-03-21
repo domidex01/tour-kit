@@ -1,7 +1,4 @@
 {
   "title": "Headless",
-  "pages": [
-    "index",
-    "media-headless"
-  ]
+  "pages": ["index", "media-headless"]
 }
