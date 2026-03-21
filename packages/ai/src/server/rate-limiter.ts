@@ -1,26 +1,20 @@
 import type { RateLimitStore } from '../types/adapter'
-import type { ServerRateLimitConfig } from '../types/config'
+import type { ServerRateLimitConfig, ServerRateLimitResult } from '../types/config'
 
 const DEFAULT_MAX_MESSAGES = 20
 const DEFAULT_WINDOW_MS = 60_000
 
-export interface ServerRateLimitResult {
-  allowed: boolean
-  count: number
-  limit: number
-  remaining: number
-  resetAt: number
-}
-
 /** Default in-memory store (single-process only) */
 export function createInMemoryRateLimitStore(): RateLimitStore {
   const store = new Map<string, number[]>()
+  const windowMsPerIdentifier = new Map<string, number>()
   let callCount = 0
 
   function prune(identifier: string, windowMs: number): number[] {
     const cutoff = Date.now() - windowMs
     const timestamps = (store.get(identifier) ?? []).filter((t) => t > cutoff)
     store.set(identifier, timestamps)
+    windowMsPerIdentifier.set(identifier, windowMs)
     return timestamps
   }
 
@@ -32,6 +26,7 @@ export function createInMemoryRateLimitStore(): RateLimitStore {
       const recent = timestamps.filter((t) => t > cutoff)
       if (recent.length === 0) {
         store.delete(key)
+        windowMsPerIdentifier.delete(key)
       } else {
         store.set(key, recent)
       }
@@ -52,13 +47,16 @@ export function createInMemoryRateLimitStore(): RateLimitStore {
     },
 
     async check(identifier: string) {
-      const timestamps = store.get(identifier) ?? []
+      const windowMs = windowMsPerIdentifier.get(identifier) ?? DEFAULT_WINDOW_MS
+      const cutoff = Date.now() - windowMs
+      const timestamps = (store.get(identifier) ?? []).filter((t) => t > cutoff)
+      store.set(identifier, timestamps)
       if (timestamps.length === 0) {
         return { count: 0, resetAt: 0 }
       }
       return {
         count: timestamps.length,
-        resetAt: timestamps[0] + DEFAULT_WINDOW_MS,
+        resetAt: timestamps[0] + windowMs,
       }
     },
   }

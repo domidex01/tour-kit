@@ -1,13 +1,6 @@
-import type { ClientRateLimitConfig } from '../types/config'
+import type { ClientRateLimitConfig, RateLimitStatus } from '../types/config'
 
-export interface RateLimitStatus {
-  /** Whether the user can send a message right now */
-  canSend: boolean
-  /** Number of messages remaining in the current window */
-  remaining: number
-  /** Milliseconds until the oldest message in the window expires (0 if canSend is true and no messages) */
-  resetInMs: number
-}
+export type { RateLimitStatus }
 
 const DEFAULT_MAX_MESSAGES = 10
 const DEFAULT_WINDOW_MS = 60_000
