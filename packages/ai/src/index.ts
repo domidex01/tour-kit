@@ -20,6 +20,14 @@ export {
 export { AiChatSuggestions, type AiChatSuggestionsProps } from './components/ai-chat-suggestions'
 
 // ============================================
+// CORE UTILITIES
+// ============================================
+export { SlidingWindowRateLimiter, createRateLimiter } from './core/rate-limiter'
+export type { RateLimitStatus } from './core/rate-limiter'
+export { createAnalyticsBridge } from './core/analytics-bridge'
+export { emitEvent } from './core/events'
+
+// ============================================
 // TYPES
 // ============================================
 export type {

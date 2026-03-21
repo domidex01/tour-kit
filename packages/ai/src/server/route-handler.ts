@@ -5,9 +5,11 @@ import {
   streamText,
   wrapLanguageModel,
 } from 'ai'
+import { emitEvent } from '../core/events'
 import { generateSuggestions } from '../core/suggestion-engine'
 import type { ChatRouteHandlerOptions, ContextStuffingConfig, RAGConfig } from '../types'
 import { createRAGMiddleware } from './rag-middleware'
+import { createServerRateLimiter } from './rate-limiter'
 import { createRetriever } from './retriever'
 import { createSystemPrompt } from './system-prompt'
 
@@ -20,7 +22,7 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
   const systemPrompt = createSystemPrompt({
     ...options.instructions,
     documents:
-      context.strategy === 'context-stuffing' ? (context as ContextStuffingConfig).documents : [], // RAG injects docs via middleware, not system prompt
+      context.strategy === 'context-stuffing' ? (context as ContextStuffingConfig).documents : [],
   })
 
   // Set up RAG pipeline if needed (memoized across requests)
@@ -53,6 +55,11 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
       middleware: ragMiddleware,
     })
   }
+
+  // Create server rate limiter if configured
+  const serverRateLimiter = options.rateLimit
+    ? createServerRateLimiter(options.rateLimit)
+    : null
 
   async function handleSuggestions(req: Request): Promise<Response> {
     const body = await req.json()
@@ -92,50 +99,97 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
         })
       }
 
-      const lastMessage = messages[messages.length - 1]
-      if (options.onEvent && lastMessage) {
-        try {
-          await options.onEvent({
-            type: 'message_sent',
-            data: { messageId: lastMessage.id, role: lastMessage.role },
-            timestamp: new Date(),
+      // ── Step 1: Server-side rate limiting ──
+      if (serverRateLimiter) {
+        const rateLimitResult = await serverRateLimiter.check(req)
+        if (!rateLimitResult.allowed) {
+          const retryAfterSeconds = Math.ceil(
+            (rateLimitResult.resetAt - Date.now()) / 1000
+          )
+          emitEvent(options.onEvent, 'error', {
+            error: 'Rate limit exceeded',
+            source: 'server',
+            reason: 'rate_limited',
           })
-        } catch {
-          // onEvent errors must never break the request
+          return new Response(
+            JSON.stringify({
+              error: 'Too many requests',
+              retryAfter: retryAfterSeconds,
+            }),
+            {
+              status: 429,
+              headers: {
+                'Content-Type': 'application/json',
+                'Retry-After': String(retryAfterSeconds),
+                'X-RateLimit-Limit': String(rateLimitResult.limit),
+                'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+                'X-RateLimit-Reset': String(rateLimitResult.resetAt),
+              },
+            }
+          )
         }
       }
+
+      // ── Step 2: beforeSend hook ──
+      const lastMessage = messages[messages.length - 1]
+      let processedMessages = messages
 
       if (options.beforeSend && lastMessage) {
-        const result = await options.beforeSend(lastMessage)
-        if (result === null) {
-          return new Response(JSON.stringify({ error: 'Message blocked by beforeSend hook' }), {
-            status: 403,
-            headers: { 'Content-Type': 'application/json' },
-          })
+        try {
+          const hookResult = await options.beforeSend(lastMessage)
+          if (hookResult === null) {
+            emitEvent(options.onEvent, 'message_sent', {
+              messageLength: 0,
+              blocked: true,
+            })
+            return new Response(JSON.stringify({ blocked: true }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            })
+          }
+          // Replace last message with hook result
+          processedMessages = [...messages.slice(0, -1), hookResult]
+        } catch (error) {
+          console.warn('[@tour-kit/ai] beforeSend hook error:', error)
+          // Continue with original messages
         }
       }
 
-      const modelMessages = convertToModelMessages(messages)
+      // Emit message_sent event
+      emitEvent(options.onEvent, 'message_sent', {
+        messageId: lastMessage?.id,
+        role: lastMessage?.role,
+      })
+
+      // ── Step 3: Convert and stream ──
+      const modelMessages = convertToModelMessages(processedMessages)
 
       const result = streamText({
         model: resolvedModel,
         system: systemPrompt,
         messages: modelMessages,
+        onFinish: async ({ text }) => {
+          // ── Step 4: beforeResponse hook ──
+          if (options.beforeResponse) {
+            try {
+              await options.beforeResponse(text)
+            } catch (error) {
+              console.warn('[@tour-kit/ai] beforeResponse hook error:', error)
+            }
+          }
+
+          emitEvent(options.onEvent, 'response_received', {
+            responseLength: text.length,
+          })
+        },
       })
 
       return result.toUIMessageStreamResponse()
     } catch (err) {
-      if (options.onEvent) {
-        try {
-          await options.onEvent({
-            type: 'error',
-            data: { message: err instanceof Error ? err.message : 'Unknown error' },
-            timestamp: new Date(),
-          })
-        } catch {
-          // swallow
-        }
-      }
+      emitEvent(options.onEvent, 'error', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        source: 'server',
+      })
 
       return new Response(JSON.stringify({ error: 'Internal server error' }), {
         status: 500,
