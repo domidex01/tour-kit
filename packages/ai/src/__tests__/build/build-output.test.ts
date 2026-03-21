@@ -20,6 +20,11 @@ const EXPECTED_FILES = [
   'headless.cjs',
   'headless.d.ts',
   'headless.d.cts',
+  // Tailwind entry
+  'tailwind/index.js',
+  'tailwind/index.cjs',
+  'tailwind/index.d.ts',
+  'tailwind/index.d.cts',
 ]
 
 describe('Build Output — US-1', () => {

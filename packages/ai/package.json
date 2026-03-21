@@ -49,9 +49,6 @@
         "default": "./dist/tailwind/index.cjs"
       }
     },
-    "./styles.css": "./dist/styles/variables.css",
-    "./styles/variables.css": "./dist/styles/variables.css",
-    "./styles/components.css": "./dist/styles/components.css",
     "./package.json": "./package.json"
   },
   "files": ["dist", "README.md", "CHANGELOG.md", "styles"],
