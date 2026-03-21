@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-describe('Entry Point Exports — US-1', () => {
+describe('Barrel Exports — US-5', () => {
   it('client entry exports AiChatProvider', async () => {
     const clientModule = await import('../../index')
     expect(clientModule.AiChatProvider).toBeDefined()
@@ -16,8 +16,9 @@ describe('Entry Point Exports — US-1', () => {
     expect(serverModule.createChatRouteHandler).toBeDefined()
   })
 
-  it('headless entry exports HEADLESS_ENTRY', async () => {
-    const headlessModule = await import('../../headless')
-    expect(headlessModule.HEADLESS_ENTRY).toBe(true)
+  it('server entry does NOT export React components', async () => {
+    const serverModule = await import('../../server/index')
+    expect(serverModule).not.toHaveProperty('AiChatProvider')
+    expect(serverModule).not.toHaveProperty('useAiChat')
   })
 })
