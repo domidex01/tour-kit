@@ -8,6 +8,8 @@ import type { AiChatEvent } from './events'
 export interface AiChatConfig {
   /** API endpoint for chat completions (e.g., '/api/chat') */
   endpoint: string
+  /** Unique identifier for this chat session (default: 'default') */
+  chatId?: string
   /** Enable optional tour-kit context injection (requires @tour-kit/core) */
   tourContext?: boolean
   /** Suggestions config — static strings and/or dynamic AI-generated */
