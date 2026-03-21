@@ -151,6 +151,11 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
           processedMessages = [...messages.slice(0, -1), hookResult]
         } catch (error) {
           console.warn('[@tour-kit/ai] beforeSend hook error:', error)
+          emitEvent(options.onEvent, 'error', {
+            error: 'beforeSend hook failed',
+            source: 'server',
+            hookError: true,
+          })
           // Continue with original messages
         }
       }
@@ -170,16 +175,19 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
         messages: modelMessages,
         onFinish: async ({ text }) => {
           // ── Step 4: beforeResponse hook ──
+          let finalText = text
           if (options.beforeResponse) {
             try {
-              await options.beforeResponse(text)
+              finalText = await options.beforeResponse(text)
             } catch (error) {
               console.warn('[@tour-kit/ai] beforeResponse hook error:', error)
+              // Use original text on error
             }
           }
 
           emitEvent(options.onEvent, 'response_received', {
-            responseLength: text.length,
+            responseLength: finalText.length,
+            modified: finalText !== text,
           })
         },
       })

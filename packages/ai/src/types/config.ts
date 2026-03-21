@@ -144,6 +144,35 @@ export interface ServerRateLimitConfig {
   store?: RateLimitStore
 }
 
+export interface ServerRateLimitResult {
+  /** Whether the request is allowed */
+  allowed: boolean
+  /** Current count in the window */
+  count: number
+  /** Maximum allowed in the window */
+  limit: number
+  /** Remaining requests in the window */
+  remaining: number
+  /** Timestamp (ms) when the window resets */
+  resetAt: number
+}
+
+export interface RateLimitStatus {
+  /** Whether the user can send a message right now */
+  canSend: boolean
+  /** Number of messages remaining in the current window */
+  remaining: number
+  /** Milliseconds until the oldest message in the window expires (0 if no messages) */
+  resetInMs: number
+}
+
+export interface AnalyticsBridgeConfig {
+  /** Track function from @tour-kit/analytics — track(eventName, properties) */
+  track: (eventName: string, properties?: Record<string, unknown>) => void
+  /** Optional prefix for event names (default: 'ai_chat') */
+  prefix?: string
+}
+
 // ── RAG Pipeline Types ──
 
 export interface RetrieverOptions {

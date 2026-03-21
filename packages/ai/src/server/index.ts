@@ -1,6 +1,6 @@
 export { createChatRouteHandler } from './route-handler'
 export { createServerRateLimiter, createInMemoryRateLimitStore } from './rate-limiter'
-export type { ServerRateLimitResult } from './rate-limiter'
+export type { ServerRateLimitResult } from '../types/config'
 export { createSystemPrompt } from './system-prompt'
 export type { SystemPromptConfig } from './system-prompt'
 export { createInMemoryVectorStore } from './vector-store'
