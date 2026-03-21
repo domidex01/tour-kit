@@ -1,8 +1,10 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
+import type { UIMessage } from 'ai'
 import { DefaultChatTransport } from 'ai'
-import { type ReactNode, useCallback, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { usePersistence } from '../hooks/use-persistence'
 import type { AiChatConfig, ChatStatus } from '../types'
 import { AiChatContext, type AiChatContextValue } from './ai-chat-context'
 
@@ -13,9 +15,30 @@ interface AiChatProviderProps {
 
 export function AiChatProvider({ config, children }: AiChatProviderProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const chatId = config.chatId ?? 'default'
+
+  const { loadMessages, saveMessages, clearMessages, isEnabled } = usePersistence({
+    chatId,
+    persistence: config.persistence,
+  })
+
+  const [initialMessages, setInitialMessages] = useState<UIMessage[] | undefined>(undefined)
+  const [isPersistenceLoading, setIsPersistenceLoading] = useState(isEnabled)
+  const hasHydratedRef = useRef(false)
+
+  // Load persisted messages on mount
+  useEffect(() => {
+    if (!isEnabled) return
+    loadMessages().then((messages) => {
+      if (messages) setInitialMessages(messages)
+      setIsPersistenceLoading(false)
+      hasHydratedRef.current = true
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const chatHelpers = useChat({
     transport: new DefaultChatTransport({ api: config.endpoint }),
+    initialMessages,
     onFinish: ({ message }) => {
       try {
         config.onEvent?.({
@@ -39,6 +62,16 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
       }
     },
   })
+
+  // Auto-save on message change (skip initial hydration)
+  useEffect(() => {
+    if (!isEnabled || isPersistenceLoading) return
+    if (!hasHydratedRef.current) {
+      hasHydratedRef.current = true
+      return
+    }
+    saveMessages(chatHelpers.messages)
+  }, [chatHelpers.messages]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const status: ChatStatus = chatHelpers.status as ChatStatus
   const error: Error | null = chatHelpers.error ?? null
@@ -70,8 +103,11 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
   const setMessages = useCallback(
     (messages: Parameters<typeof chatHelpers.setMessages>[0]) => {
       chatHelpers.setMessages(messages)
+      if (Array.isArray(messages) && messages.length === 0) {
+        clearMessages()
+      }
     },
-    [chatHelpers]
+    [chatHelpers, clearMessages]
   )
 
   const open = useCallback(() => {
