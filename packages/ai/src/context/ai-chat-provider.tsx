@@ -1,7 +1,6 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
-import type { UIMessage } from 'ai'
 import { DefaultChatTransport } from 'ai'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePersistence } from '../hooks/use-persistence'
@@ -22,23 +21,11 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
     persistence: config.persistence,
   })
 
-  const [initialMessages, setInitialMessages] = useState<UIMessage[] | undefined>(undefined)
   const [isPersistenceLoading, setIsPersistenceLoading] = useState(isEnabled)
   const hasHydratedRef = useRef(false)
 
-  // Load persisted messages on mount
-  useEffect(() => {
-    if (!isEnabled) return
-    loadMessages().then((messages) => {
-      if (messages) setInitialMessages(messages)
-      setIsPersistenceLoading(false)
-      hasHydratedRef.current = true
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
   const chatHelpers = useChat({
     transport: new DefaultChatTransport({ api: config.endpoint }),
-    initialMessages,
     onFinish: ({ message }) => {
       try {
         config.onEvent?.({
@@ -62,6 +49,16 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
       }
     },
   })
+
+  // Load persisted messages on mount via setMessages
+  useEffect(() => {
+    if (!isEnabled) return
+    loadMessages().then((messages) => {
+      if (messages) chatHelpers.setMessages(messages)
+      setIsPersistenceLoading(false)
+      hasHydratedRef.current = true
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-save on message change (skip initial hydration)
   useEffect(() => {
