@@ -1,8 +1,11 @@
+import type { TourAssistantContext } from '../hooks/use-tour-assistant'
 import type { Document, InstructionsConfig } from '../types'
 
 export interface SystemPromptConfig extends InstructionsConfig {
   /** Documents to inline in prompt (used by CAG strategy) */
   documents?: Document[]
+  /** Optional tour context for the "Current User Context" section */
+  tourContext?: TourAssistantContext
 }
 
 const LAYER_1_DEFAULTS = `You are a helpful product assistant. Answer questions based ONLY on the provided context documents. Follow these rules strictly:
@@ -88,6 +91,26 @@ export function createSystemPrompt(config: SystemPromptConfig = {}): string {
   // Layer 3 — Custom Instructions
   if (config.custom) {
     layers.push(`## Additional Instructions\n${config.custom}`)
+  }
+
+  // Layer 4 — Tour Context (optional)
+  if (config.tourContext?.activeTour) {
+    const { activeTour, activeStep, completedTours } = config.tourContext
+    const tourParts: string[] = [
+      `## Current User Context`,
+      `The user is currently on step ${activeTour.currentStep + 1} of ${activeTour.totalSteps} in the "${activeTour.name}" tour.`,
+    ]
+    if (activeStep) {
+      tourParts.push(
+        `Step title: "${activeStep.title}"\nStep content: "${activeStep.content}"`
+      )
+    }
+    tourParts.push(
+      completedTours.length > 0
+        ? `Previously completed tours: ${completedTours.join(', ')}`
+        : 'No tours completed yet.'
+    )
+    layers.push(tourParts.join('\n'))
   }
 
   return layers.join('\n\n').trimEnd()

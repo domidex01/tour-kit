@@ -18,12 +18,12 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
 } {
   const { model, context } = options
 
-  // Build system prompt (shared by both strategies)
-  const systemPrompt = createSystemPrompt({
+  // Build base system prompt config (shared by both strategies)
+  const basePromptConfig = {
     ...options.instructions,
     documents:
       context.strategy === 'context-stuffing' ? (context as ContextStuffingConfig).documents : [],
-  })
+  }
 
   // Set up RAG pipeline if needed (memoized across requests)
   let resolvedModel: LanguageModel = model
@@ -90,7 +90,9 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
         return handleSuggestions(req)
       }
 
-      const { messages }: { messages: UIMessage[] } = await req.json()
+      const body = await req.json()
+      const messages: UIMessage[] = body.messages
+      const tourContext = body.tourContext
 
       if (!messages || !Array.isArray(messages)) {
         return new Response(JSON.stringify({ error: 'Invalid request: messages array required' }), {
@@ -168,6 +170,12 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
 
       // ── Step 3: Convert and stream ──
       const modelMessages = convertToModelMessages(processedMessages)
+
+      // Build system prompt per-request (includes optional tour context)
+      const systemPrompt = createSystemPrompt({
+        ...basePromptConfig,
+        tourContext,
+      })
 
       const result = streamText({
         model: resolvedModel,

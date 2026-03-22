@@ -1,5 +1,5 @@
 import type { UIMessage } from 'ai'
-import { createContext } from 'react'
+import { createContext, useContext } from 'react'
 import type { AiChatConfig, ChatStatus } from '../types'
 
 export interface AiChatContextValue {
@@ -18,7 +18,20 @@ export interface AiChatContextValue {
   toggle(): void
 
   config: AiChatConfig
+
+  /** Tour context value from @tour-kit/core (null when not available) */
+  tourContextValue: unknown
 }
 
 export const AiChatContext = createContext<AiChatContextValue | null>(null)
 AiChatContext.displayName = 'AiChatContext'
+
+export function useAiChatContext(): AiChatContextValue {
+  const context = useContext(AiChatContext)
+  if (!context) {
+    throw new Error(
+      'useAiChatContext must be used within an <AiChatProvider>.'
+    )
+  }
+  return context
+}

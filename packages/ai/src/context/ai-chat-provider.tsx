@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { usePersistence } from '../hooks/use-persistence'
 import type { AiChatConfig, ChatStatus } from '../types'
 import { AiChatContext, type AiChatContextValue } from './ai-chat-context'
@@ -10,11 +10,46 @@ import { AiChatContext, type AiChatContextValue } from './ai-chat-context'
 interface AiChatProviderProps {
   config: AiChatConfig
   children: ReactNode
+  /** Explicit tour context value — alternative to automatic detection via @tour-kit/core */
+  tourContextValue?: unknown
 }
 
-export function AiChatProvider({ config, children }: AiChatProviderProps) {
+/**
+ * Safely reads tour context from @tour-kit/core's TourContext.
+ * Returns null if @tour-kit/core is not installed or no TourProvider exists.
+ */
+// Lazily resolved TourContext from @tour-kit/core (cached at module level)
+let resolvedTourContext: React.Context<unknown> | undefined
+
+function getTourContext(): React.Context<unknown> | null {
+  if (resolvedTourContext !== undefined) return resolvedTourContext
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const core = require('@tour-kit/core')
+    resolvedTourContext = (core.TourContext as React.Context<unknown>) ?? null
+    return resolvedTourContext ?? null
+  } catch {
+    // @tour-kit/core not installed — expected for optional peer dep
+    return null
+  }
+}
+
+// A dummy context used as fallback so useContext is always called (Rules of Hooks)
+const DummyContext = React.createContext<unknown>(null)
+
+function useTourContextSafe(enabled: boolean): unknown {
+  const TourContext = enabled ? getTourContext() : null
+  // useContext must be called unconditionally
+  const value = useContext(TourContext ?? DummyContext)
+  if (!enabled || !TourContext) return null
+  return value
+}
+
+export function AiChatProvider({ config, children, tourContextValue: explicitTourContext }: AiChatProviderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const chatId = config.chatId ?? 'default'
+  const detectedTourContext = useTourContextSafe(config.tourContext === true && explicitTourContext === undefined)
+  const tourContextValue = explicitTourContext ?? detectedTourContext
 
   const { loadMessages, saveMessages, clearMessages, isEnabled } = usePersistence({
     chatId,
@@ -151,6 +186,7 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
       close,
       toggle,
       config,
+      tourContextValue,
     }),
     [
       chatHelpers.messages,
@@ -165,6 +201,7 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
       close,
       toggle,
       config,
+      tourContextValue,
     ]
   )
 
