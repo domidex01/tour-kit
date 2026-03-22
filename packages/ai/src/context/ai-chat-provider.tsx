@@ -10,9 +10,15 @@ import { AiChatContext, type AiChatContextValue } from './ai-chat-context'
 interface AiChatProviderProps {
   config: AiChatConfig
   children: ReactNode
+  /**
+   * Tour context value from @tour-kit/core's useTourContext().
+   * Pass this explicitly when config.tourContext is true.
+   * The AI package never imports @tour-kit/core directly — the consumer bridges the two.
+   */
+  tourContextValue?: unknown
 }
 
-export function AiChatProvider({ config, children }: AiChatProviderProps) {
+export function AiChatProvider({ config, children, tourContextValue }: AiChatProviderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const chatId = config.chatId ?? 'default'
 
@@ -72,6 +78,9 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
 
   const status: ChatStatus = chatHelpers.status as ChatStatus
   const error: Error | null = chatHelpers.error ?? null
+
+  // Resolve tour context: only use the explicit prop when tourContext config is enabled
+  const resolvedTourContext = config.tourContext === true ? (tourContextValue ?? null) : null
 
   const sendMessage = useCallback(
     (input: { text: string }) => {
@@ -151,6 +160,7 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
       close,
       toggle,
       config,
+      tourContextValue: resolvedTourContext,
     }),
     [
       chatHelpers.messages,
@@ -165,6 +175,7 @@ export function AiChatProvider({ config, children }: AiChatProviderProps) {
       close,
       toggle,
       config,
+      resolvedTourContext,
     ]
   )
 

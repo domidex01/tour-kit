@@ -2,12 +2,18 @@
 // CONTEXT & PROVIDERS
 // ============================================
 export { AiChatProvider } from './context/ai-chat-provider'
-export { AiChatContext, type AiChatContextValue } from './context/ai-chat-context'
+export { AiChatContext, useAiChatContext, type AiChatContextValue } from './context/ai-chat-context'
 
 // ============================================
 // HOOKS
 // ============================================
 export { useAiChat, type UseAiChatReturn } from './hooks/use-ai-chat'
+export {
+  useTourAssistant,
+  assembleTourContext,
+  type UseTourAssistantReturn,
+  type TourAssistantContext,
+} from './hooks/use-tour-assistant'
 export {
   useSuggestions,
   useOptionalSuggestions,
