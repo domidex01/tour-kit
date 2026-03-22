@@ -45,7 +45,7 @@ interface TourContextLike {
   currentStep?: {
     id: string
     title?: string
-    content?: string | unknown
+    content?: unknown
   } | null
   tour?: { id: string; name: string; steps: unknown[] } | null
   completedTours?: string[]
@@ -65,10 +65,12 @@ export function assembleTourContext(
     }
   }
 
+  const tourId = tourState.tourId ?? 'unknown'
+
   return {
     activeTour: {
-      id: tourState.tourId!,
-      name: tourState.tour?.name || tourState.tourId!,
+      id: tourId,
+      name: tourState.tour?.name || tourId,
       currentStep: tourState.currentStepIndex ?? 0,
       totalSteps: tourState.totalSteps ?? 0,
     },
@@ -93,6 +95,7 @@ export function useTourAssistant(): UseTourAssistantReturn {
   const chat = useAiChat()
   const ctx = useAiChatContext()
   const tourState = ctx.tourContextValue ?? null
+  const { sendMessage } = chat
 
   const tourContext = useMemo(
     () => assembleTourContext(tourState as TourContextLike | null),
@@ -118,10 +121,10 @@ export function useTourAssistant(): UseTourAssistantReturn {
       return
     }
     const { activeTour, activeStep } = tourContext
-    chat.sendMessage({
+    sendMessage({
       text: `Can you help me with the current step? I'm on step ${activeTour.currentStep + 1} of ${activeTour.totalSteps} in the "${activeTour.name}" tour: "${activeStep.title}"`,
     })
-  }, [tourContext, chat])
+  }, [tourContext, sendMessage])
 
   const askForHelp = useCallback(
     (topic?: string) => {
@@ -131,9 +134,9 @@ export function useTourAssistant(): UseTourAssistantReturn {
       const question = topic
         ? `${base} Can you help me with: ${topic}`
         : `${base} I need help with this step.`
-      chat.sendMessage({ text: question.trim() })
+      sendMessage({ text: question.trim() })
     },
-    [tourContext, chat]
+    [tourContext, sendMessage]
   )
 
   const isLoading = chat.status === 'submitted' || chat.status === 'streaming'

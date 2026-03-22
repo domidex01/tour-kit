@@ -12,6 +12,49 @@ import { createRAGMiddleware } from './rag-middleware'
 import { createServerRateLimiter } from './rate-limiter'
 import { createRetriever } from './retriever'
 import { createSystemPrompt } from './system-prompt'
+import type { TourAssistantContext } from '../hooks/use-tour-assistant'
+
+/** Validate and sanitize tourContext from untrusted request body */
+function parseTourContext(raw: unknown): TourAssistantContext | undefined {
+  if (!raw || typeof raw !== 'object') return undefined
+
+  const obj = raw as Record<string, unknown>
+  const activeTour = obj.activeTour
+  const activeStep = obj.activeStep
+  const completedTours = obj.completedTours
+
+  // Validate activeTour shape
+  if (activeTour != null) {
+    if (typeof activeTour !== 'object') return undefined
+    const t = activeTour as Record<string, unknown>
+    if (typeof t.id !== 'string' || typeof t.name !== 'string') return undefined
+    if (typeof t.currentStep !== 'number' || typeof t.totalSteps !== 'number') return undefined
+  }
+
+  // Validate activeStep shape
+  if (activeStep != null) {
+    if (typeof activeStep !== 'object') return undefined
+    const s = activeStep as Record<string, unknown>
+    if (typeof s.id !== 'string') return undefined
+    // Truncate title/content to prevent prompt bloat from malicious input
+    if (typeof s.title !== 'string' || typeof s.content !== 'string') return undefined
+    if (s.title.length > 500 || s.content.length > 2000) return undefined
+  }
+
+  // Validate completedTours
+  if (completedTours != null) {
+    if (!Array.isArray(completedTours)) return undefined
+    if (!completedTours.every((t): t is string => typeof t === 'string')) return undefined
+    if (completedTours.length > 100) return undefined
+  }
+
+  return {
+    activeTour: activeTour as TourAssistantContext['activeTour'],
+    activeStep: activeStep as TourAssistantContext['activeStep'],
+    completedTours: (completedTours as string[]) ?? [],
+    checklistProgress: null,
+  }
+}
 
 export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
   POST: (req: Request) => Promise<Response>
@@ -92,7 +135,7 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
 
       const body = await req.json()
       const messages: UIMessage[] = body.messages
-      const tourContext = body.tourContext
+      const tourContext = parseTourContext(body.tourContext)
 
       if (!messages || !Array.isArray(messages)) {
         return new Response(JSON.stringify({ error: 'Invalid request: messages array required' }), {

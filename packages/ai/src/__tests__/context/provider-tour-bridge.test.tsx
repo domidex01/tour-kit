@@ -90,4 +90,13 @@ describe('AiChatProvider — tour context bridge', () => {
 
     expect(result.current.tourContextValue).toBeNull()
   })
+
+  it('ignores tourContextValue prop when config.tourContext is false', () => {
+    const tourState = createActiveTourState()
+    const wrapper = createWrapper({ tourContext: false }, tourState)
+
+    const { result } = renderHook(() => useProviderTourContext(), { wrapper })
+
+    expect(result.current.tourContextValue).toBeNull()
+  })
 })
