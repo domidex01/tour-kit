@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { createSystemPrompt } from '../../server/system-prompt'
+import { describe, expect, it } from 'vitest'
 import type { TourAssistantContext } from '../../hooks/use-tour-assistant'
+import { createSystemPrompt } from '../../server/system-prompt'
 
 /** Fixture: active tour context */
 const activeTourContext: TourAssistantContext = {
@@ -13,8 +13,7 @@ const activeTourContext: TourAssistantContext = {
   activeStep: {
     id: 'step-connect',
     title: 'Connect your data source',
-    content:
-      'Click the Add Connection button to connect your first data source.',
+    content: 'Click the Add Connection button to connect your first data source.',
   },
   completedTours: ['getting-started'],
   checklistProgress: null,
@@ -60,9 +59,7 @@ describe('createSystemPrompt — tour context injection', () => {
     it('includes active step content', () => {
       const prompt = createSystemPrompt({ tourContext: activeTourContext })
 
-      expect(prompt).toContain(
-        'Click the Add Connection button to connect your first data source.'
-      )
+      expect(prompt).toContain('Click the Add Connection button to connect your first data source.')
     })
 
     it('includes completed tours list', () => {

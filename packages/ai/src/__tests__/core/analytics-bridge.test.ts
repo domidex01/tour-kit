@@ -67,10 +67,7 @@ describe('createAnalyticsBridge', () => {
 
     onEvent(event)
 
-    expect(track).toHaveBeenCalledWith(
-      'my_app.chat_opened',
-      expect.any(Object)
-    )
+    expect(track).toHaveBeenCalledWith('my_app.chat_opened', expect.any(Object))
   })
 
   it('uses default prefix "ai_chat" when none provided', () => {
@@ -85,9 +82,6 @@ describe('createAnalyticsBridge', () => {
 
     onEvent(event)
 
-    expect(track).toHaveBeenCalledWith(
-      'ai_chat.error',
-      expect.objectContaining({ error: 'test' })
-    )
+    expect(track).toHaveBeenCalledWith('ai_chat.error', expect.objectContaining({ error: 'test' }))
   })
 })

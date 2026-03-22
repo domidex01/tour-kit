@@ -20,9 +20,7 @@ import type { AiChatEvent } from '../types/events'
  * }
  * ```
  */
-export function createAnalyticsBridge(
-  config: AnalyticsBridgeConfig
-): (event: AiChatEvent) => void {
+export function createAnalyticsBridge(config: AnalyticsBridgeConfig): (event: AiChatEvent) => void {
   const prefix = config.prefix ?? 'ai_chat'
   return (event: AiChatEvent) => {
     config.track(`${prefix}.${event.type}`, {

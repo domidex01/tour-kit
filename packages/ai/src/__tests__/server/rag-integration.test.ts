@@ -91,9 +91,9 @@ describe('RAG Pipeline Integration', () => {
     const result = await middleware.transformParams?.(params)
 
     // Should have 3 messages: injected context + original system + user
-    expect(result!.prompt.length).toBe(3)
-    expect(result!.prompt[0].role).toBe('system')
-    expect((result!.prompt[0] as { content: string }).content).toContain('Relevant context')
+    expect(result?.prompt.length).toBe(3)
+    expect(result?.prompt[0].role).toBe('system')
+    expect((result?.prompt[0] as { content: string }).content).toContain('Relevant context')
   })
 
   it('end-to-end: index → query → retrieve → verify ranked results', async () => {
@@ -191,7 +191,7 @@ describe('RAG Pipeline Integration', () => {
     const result = await middleware.transformParams?.(params)
 
     // Should have injected context
-    expect(result!.prompt[0].role).toBe('system')
+    expect(result?.prompt[0].role).toBe('system')
   })
 
   it('lazy indexes on first search — no upfront blocking', async () => {

@@ -29,85 +29,110 @@ function App() {
 
 export function CodePreview() {
   return (
-    <section className="px-4 py-24">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-3xl font-bold sm:text-4xl">Simple to Use</h2>
-          <p className="text-lg text-fd-muted-foreground">
-            Get started with just a few lines of code.
-          </p>
-        </div>
-
-        <div className="relative overflow-hidden rounded-xl border border-fd-border bg-[#1e1e1e]">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-fd-border/10 bg-[#2d2d2d] px-4 py-2">
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-[#ff5f56]" />
-              <div className="h-3 w-3 rounded-full bg-[#ffbd2e]" />
-              <div className="h-3 w-3 rounded-full bg-[#27c93f]" />
+    <section className="border-y border-fd-border bg-fd-muted/30 px-6 py-20 sm:px-8 md:py-28 lg:px-12">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
+          {/* Left — explanation */}
+          <div className="lg:sticky lg:top-24">
+            <h2 className="mb-6 text-3xl font-extrabold tracking-tight text-fd-foreground sm:text-4xl">
+              A few lines of code, <span className="text-[var(--tk-primary)]">a complete tour</span>
+            </h2>
+            <div className="space-y-4 text-[15px] leading-relaxed text-fd-muted-foreground">
+              <p>
+                Wrap your app with{' '}
+                <code className="rounded-md bg-fd-muted px-1.5 py-0.5 font-mono text-[13px] font-semibold text-fd-foreground">
+                  {'<Tour>'}
+                </code>
+                , declare your steps, and call{' '}
+                <code className="rounded-md bg-fd-muted px-1.5 py-0.5 font-mono text-[13px] font-semibold text-fd-foreground">
+                  start()
+                </code>
+                .
+              </p>
+              <p>
+                TourKit handles positioning, focus management, and keyboard navigation. Every
+                component is composable — swap out the tooltip, overlay, or navigation without
+                fighting the library.
+              </p>
             </div>
-            <span className="text-xs text-gray-400">App.tsx</span>
-            <CopyButton text={codeExample} className="text-gray-400 hover:text-white" />
           </div>
 
-          {/* Code */}
-          <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
-            <code className="text-gray-300">
-              <span className="text-[#c586c0]">import</span>
-              {' { Tour, TourStep, useTour } '}
-              <span className="text-[#c586c0]">from</span>
-              <span className="text-[#ce9178]"> '@tour-kit/react'</span>;{'\n\n'}
-              <span className="text-[#c586c0]">function</span>
-              <span className="text-[#dcdcaa]"> App</span>() {'{'}
-              {'\n  '}
-              <span className="text-[#c586c0]">const</span>
-              {' { start } = '}
-              <span className="text-[#dcdcaa]">useTour</span>(
-              <span className="text-[#ce9178]">'onboarding'</span>);
-              {'\n  \n  '}
-              <span className="text-[#c586c0]">return</span> ({'\n    '}
-              <span className="text-gray-500">{'<'}</span>
-              <span className="text-[#4ec9b0]">Tour</span>
-              <span className="text-[#9cdcfe]"> id</span>=
-              <span className="text-[#ce9178]">"onboarding"</span>
-              <span className="text-gray-500">{'>'}</span>
-              {'\n      '}
-              <span className="text-gray-500">{'<'}</span>
-              <span className="text-[#4ec9b0]">TourStep</span>
-              {'\n        '}
-              <span className="text-[#9cdcfe]">target</span>=
-              <span className="text-[#ce9178]">"#welcome"</span>
-              {'\n        '}
-              <span className="text-[#9cdcfe]">title</span>=
-              <span className="text-[#ce9178]">"Welcome!"</span>
-              {'\n        '}
-              <span className="text-[#9cdcfe]">content</span>=
-              <span className="text-[#ce9178]">"Let's take a quick tour."</span>
-              {'\n        '}
-              <span className="text-[#9cdcfe]">placement</span>=
-              <span className="text-[#ce9178]">"bottom"</span>
-              {'\n      '}
-              <span className="text-gray-500">{'/>'}</span>
-              {'\n      '}
-              <span className="text-gray-500">{'<'}</span>
-              <span className="text-[#569cd6]">button</span>
-              <span className="text-[#9cdcfe]"> onClick</span>
-              {'={() => '}
-              <span className="text-[#dcdcaa]">start</span>
-              {'()}'}
-              <span className="text-gray-500">{'>'}</span>
-              Start Tour
-              <span className="text-gray-500">{'</'}</span>
-              <span className="text-[#569cd6]">button</span>
-              <span className="text-gray-500">{'>'}</span>
-              {'\n    '}
-              <span className="text-gray-500">{'</'}</span>
-              <span className="text-[#4ec9b0]">Tour</span>
-              <span className="text-gray-500">{'>'}</span>
-              {'\n  );'}
-              {'\n}'}
-            </code>
-          </pre>
+          {/* Right — code */}
+          <div className="overflow-hidden rounded-xl border border-fd-border shadow-sm">
+            <div className="flex items-center justify-between border-b border-fd-border bg-fd-card px-4 py-2.5">
+              <span className="text-xs font-semibold text-fd-muted-foreground">App.tsx</span>
+              <CopyButton
+                text={codeExample}
+                className="text-fd-muted-foreground hover:text-fd-foreground"
+              />
+            </div>
+
+            <pre className="overflow-x-auto bg-[#1a1b1e] p-5 text-[13px] leading-[1.7]">
+              <code className="text-[#d4d4d8]">
+                <span className="text-[#c4a7e7]">import</span>
+                {' { Tour, TourStep, useTour } '}
+                <span className="text-[#c4a7e7]">from</span>
+                <span className="text-[#a8cc8c]"> &apos;@tour-kit/react&apos;</span>;{'\n\n'}
+                <span className="text-[#c4a7e7]">function</span>
+                <span className="text-[#e2cca9]"> App</span>() {'{'}
+                {'\n  '}
+                <span className="text-[#c4a7e7]">const</span>
+                {' { start } = '}
+                <span className="text-[#e2cca9]">useTour</span>(
+                <span className="text-[#a8cc8c]">&apos;onboarding&apos;</span>);
+                {'\n\n  '}
+                <span className="text-[#c4a7e7]">return</span> ({'\n    '}
+                <span className="text-[#5a5a6e]">{'<'}</span>
+                <span className="text-[#89b4fa]">Tour</span>
+                <span className="text-[#cba6f7]"> id</span>=
+                <span className="text-[#a8cc8c]">&quot;onboarding&quot;</span>
+                <span className="text-[#cba6f7]"> onComplete</span>
+                {'={()'}
+                {' => '}
+                <span className="text-[#e2cca9]">console</span>.
+                <span className="text-[#e2cca9]">log</span>(
+                <span className="text-[#a8cc8c]">&apos;Done!&apos;</span>){'}'}
+                <span className="text-[#5a5a6e]">{'>'}</span>
+                {'\n      '}
+                <span className="text-[#5a5a6e]">{'<'}</span>
+                <span className="text-[#89b4fa]">TourStep</span>
+                {'\n        '}
+                <span className="text-[#cba6f7]">target</span>=
+                <span className="text-[#a8cc8c]">&quot;#welcome&quot;</span>
+                {'\n        '}
+                <span className="text-[#cba6f7]">title</span>=
+                <span className="text-[#a8cc8c]">&quot;Welcome!&quot;</span>
+                {'\n        '}
+                <span className="text-[#cba6f7]">content</span>=
+                <span className="text-[#a8cc8c]">&quot;Let&apos;s take a quick tour.&quot;</span>
+                {'\n        '}
+                <span className="text-[#cba6f7]">placement</span>=
+                <span className="text-[#a8cc8c]">&quot;bottom&quot;</span>
+                {'\n      '}
+                <span className="text-[#5a5a6e]">{'/>'}</span>
+                {'\n\n      '}
+                <span className="text-[#5a5a6e]">{'<'}</span>
+                <span className="text-[#7fb4ca]">button</span>
+                <span className="text-[#cba6f7]"> onClick</span>
+                {'={()'}
+                {' => '}
+                <span className="text-[#e2cca9]">start</span>
+                {'()'}
+                {'}'}
+                <span className="text-[#5a5a6e]">{'>'}</span>
+                Start Tour
+                <span className="text-[#5a5a6e]">{'</'}</span>
+                <span className="text-[#7fb4ca]">button</span>
+                <span className="text-[#5a5a6e]">{'>'}</span>
+                {'\n    '}
+                <span className="text-[#5a5a6e]">{'</'}</span>
+                <span className="text-[#89b4fa]">Tour</span>
+                <span className="text-[#5a5a6e]">{'>'}</span>
+                {'\n  );'}
+                {'\n}'}
+              </code>
+            </pre>
+          </div>
         </div>
       </div>
     </section>

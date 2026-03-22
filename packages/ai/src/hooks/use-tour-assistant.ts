@@ -1,8 +1,8 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
-import { useAiChat, type UseAiChatReturn } from './use-ai-chat'
 import { useAiChatContext } from '../context/ai-chat-context'
+import { type UseAiChatReturn, useAiChat } from './use-ai-chat'
 
 // ── Types ──
 
@@ -79,9 +79,7 @@ export function assembleTourContext(
           id: tourState.currentStep.id,
           title: tourState.currentStep.title ?? '',
           content:
-            typeof tourState.currentStep.content === 'string'
-              ? tourState.currentStep.content
-              : '',
+            typeof tourState.currentStep.content === 'string' ? tourState.currentStep.content : '',
         }
       : null,
     completedTours: tourState.completedTours ?? [],
@@ -114,9 +112,7 @@ export function useTourAssistant(): UseTourAssistantReturn {
   const askAboutStep = useCallback(() => {
     if (!tourContext.activeTour || !tourContext.activeStep) {
       if (process.env.NODE_ENV !== 'production') {
-        console.warn(
-          '[tour-kit/ai] askAboutStep() called with no active step. Message not sent.'
-        )
+        console.warn('[tour-kit/ai] askAboutStep() called with no active step. Message not sent.')
       }
       return
     }

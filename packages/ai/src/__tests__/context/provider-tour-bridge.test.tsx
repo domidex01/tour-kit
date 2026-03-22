@@ -1,10 +1,8 @@
 // @vitest-environment jsdom
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import {
-  createActiveTourState,
-} from '../helpers/mock-tour-context'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createActiveTourState } from '../helpers/mock-tour-context'
 import { createMockUseChatReturn } from '../helpers/mock-use-chat'
 
 // Mock @ai-sdk/react useChat
@@ -27,8 +25,8 @@ vi.mock('../../hooks/use-persistence', () => ({
   }),
 }))
 
-import { AiChatProvider } from '../../context/ai-chat-provider'
 import { useAiChatContext } from '../../context/ai-chat-context'
+import { AiChatProvider } from '../../context/ai-chat-provider'
 
 // Helper to read tour context from the provider's internal context
 function useProviderTourContext() {

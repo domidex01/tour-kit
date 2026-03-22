@@ -97,13 +97,11 @@ export function createSystemPrompt(config: SystemPromptConfig = {}): string {
   if (config.tourContext?.activeTour) {
     const { activeTour, activeStep, completedTours } = config.tourContext
     const tourParts: string[] = [
-      `## Current User Context`,
+      '## Current User Context',
       `The user is currently on step ${activeTour.currentStep + 1} of ${activeTour.totalSteps} in the "${activeTour.name}" tour.`,
     ]
     if (activeStep) {
-      tourParts.push(
-        `Step title: "${activeStep.title}"\nStep content: "${activeStep.content}"`
-      )
+      tourParts.push(`Step title: "${activeStep.title}"\nStep content: "${activeStep.content}"`)
     }
     tourParts.push(
       completedTours.length > 0

@@ -1,8 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-  createServerRateLimiter,
-  createInMemoryRateLimitStore,
-} from '../../server/rate-limiter'
+import { createInMemoryRateLimitStore, createServerRateLimiter } from '../../server/rate-limiter'
 import type { RateLimitStore } from '../../types/adapter'
 
 function createMockRequest(

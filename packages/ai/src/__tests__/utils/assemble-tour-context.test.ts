@@ -1,9 +1,6 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { assembleTourContext } from '../../hooks/use-tour-assistant'
-import {
-  createActiveTourState,
-  createInactiveTourState,
-} from '../helpers/mock-tour-context'
+import { createActiveTourState, createInactiveTourState } from '../helpers/mock-tour-context'
 
 describe('assembleTourContext', () => {
   // -------------------------------------------------------
@@ -26,7 +23,7 @@ describe('assembleTourContext', () => {
       const state = createActiveTourState({ tour: { id: 'onboarding', name: '', steps: [] } })
       const result = assembleTourContext(state)
 
-      expect(result.activeTour!.name).toBe('onboarding')
+      expect(result.activeTour?.name).toBe('onboarding')
     })
 
     it('maps currentStep fields to activeStep', () => {
@@ -36,8 +33,7 @@ describe('assembleTourContext', () => {
       expect(result.activeStep).toEqual({
         id: 'step-connect',
         title: 'Connect your data source',
-        content:
-          'Click the Add Connection button to connect your first data source.',
+        content: 'Click the Add Connection button to connect your first data source.',
       })
     })
 
@@ -51,7 +47,7 @@ describe('assembleTourContext', () => {
       })
       const result = assembleTourContext(state)
 
-      expect(result.activeStep!.title).toBe('')
+      expect(result.activeStep?.title).toBe('')
     })
 
     it('returns empty string for content when step content is non-string', () => {
@@ -63,9 +59,11 @@ describe('assembleTourContext', () => {
           target: '#btn',
         },
       })
-      const result = assembleTourContext(state as unknown as Parameters<typeof assembleTourContext>[0])
+      const result = assembleTourContext(
+        state as unknown as Parameters<typeof assembleTourContext>[0]
+      )
 
-      expect(result.activeStep!.content).toBe('')
+      expect(result.activeStep?.content).toBe('')
     })
 
     it('sets activeStep to null when currentStep is null', () => {
@@ -98,10 +96,7 @@ describe('assembleTourContext', () => {
       const state = createInactiveTourState()
       const result = assembleTourContext(state)
 
-      expect(result.completedTours).toEqual([
-        'getting-started',
-        'workspace-setup',
-      ])
+      expect(result.completedTours).toEqual(['getting-started', 'workspace-setup'])
     })
   })
 
@@ -137,7 +132,7 @@ describe('assembleTourContext', () => {
       const result = assembleTourContext(state)
 
       // Should fallback tourId as name
-      expect(result.activeTour!.name).toBe('onboarding')
+      expect(result.activeTour?.name).toBe('onboarding')
     })
 
     it('handles empty completedTours array', () => {

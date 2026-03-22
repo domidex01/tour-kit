@@ -1,17 +1,12 @@
 // @vitest-environment jsdom
-import { renderHook, act } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import {
-  createActiveTourState,
-  createInactiveTourState,
-} from '../helpers/mock-tour-context'
+import { act, renderHook } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { createActiveTourState, createInactiveTourState } from '../helpers/mock-tour-context'
 import { createMockUseAiChatReturn } from '../helpers/mock-use-ai-chat'
 
 // Mock useAiChat — isolate tour integration logic
 const mockSendMessage = vi.fn()
-const mockUseAiChat = vi.fn(() =>
-  createMockUseAiChatReturn({ sendMessage: mockSendMessage })
-)
+const mockUseAiChat = vi.fn(() => createMockUseAiChatReturn({ sendMessage: mockSendMessage }))
 vi.mock('../../hooks/use-ai-chat', () => ({
   useAiChat: () => mockUseAiChat(),
 }))
@@ -64,8 +59,7 @@ describe('useTourAssistant', () => {
       expect(result.current.tourContext.activeStep).toEqual({
         id: 'step-connect',
         title: 'Connect your data source',
-        content:
-          'Click the Add Connection button to connect your first data source.',
+        content: 'Click the Add Connection button to connect your first data source.',
       })
     })
 
@@ -75,9 +69,7 @@ describe('useTourAssistant', () => {
 
       const { result } = renderHook(() => useTourAssistant())
 
-      expect(result.current.tourContext.completedTours).toEqual([
-        'getting-started',
-      ])
+      expect(result.current.tourContext.completedTours).toEqual(['getting-started'])
     })
 
     it('sets checklistProgress to null (no checklists integration)', () => {
@@ -177,9 +169,7 @@ describe('useTourAssistant', () => {
         result.current.askAboutStep()
       })
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('askAboutStep')
-      )
+      expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('askAboutStep'))
     })
 
     it('is a no-op when tourContextValue is null', () => {
@@ -259,12 +249,8 @@ describe('useTourAssistant', () => {
       const { result } = renderHook(() => useTourAssistant())
 
       expect(result.current.suggestions).toHaveLength(3)
-      expect(result.current.suggestions[0]).toContain(
-        'Connect your data source'
-      )
-      expect(result.current.suggestions).toContain(
-        'Can you explain this step?'
-      )
+      expect(result.current.suggestions[0]).toContain('Connect your data source')
+      expect(result.current.suggestions).toContain('Can you explain this step?')
       expect(result.current.suggestions).toContain('What should I do next?')
     })
 

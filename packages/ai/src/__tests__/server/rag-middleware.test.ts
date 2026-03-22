@@ -85,11 +85,11 @@ describe('createRAGMiddleware', () => {
       const result = await middleware.transformParams?.(createMockParams('test query'))
 
       // First message should be the injected system context
-      expect(result!.prompt[0].role).toBe('system')
-      expect((result!.prompt[0] as { role: 'system'; content: string }).content).toContain(
+      expect(result?.prompt[0].role).toBe('system')
+      expect((result?.prompt[0] as { role: 'system'; content: string }).content).toContain(
         'Relevant context from documentation'
       )
-      expect((result!.prompt[0] as { role: 'system'; content: string }).content).toContain(
+      expect((result?.prompt[0] as { role: 'system'; content: string }).content).toContain(
         'Tour Kit supports branching'
       )
     })
@@ -107,8 +107,8 @@ describe('createRAGMiddleware', () => {
       }
 
       const result = await middleware.transformParams?.(params)
-      expect(result!.prompt).toHaveLength(1)
-      expect(result!.prompt[0].role).toBe('system')
+      expect(result?.prompt).toHaveLength(1)
+      expect(result?.prompt[0].role).toBe('system')
     })
 
     it('returns params unchanged when retriever returns empty results', async () => {
@@ -119,7 +119,7 @@ describe('createRAGMiddleware', () => {
       const result = await middleware.transformParams?.(mockP)
 
       // Should have the original 2 messages, no injected system message
-      expect(result!.prompt).toHaveLength(2)
+      expect(result?.prompt).toHaveLength(2)
     })
 
     it('uses custom formatContext function when provided', async () => {
@@ -133,7 +133,7 @@ describe('createRAGMiddleware', () => {
       })
 
       const result = await middleware.transformParams?.(createMockParams('test'))
-      const systemContent = (result!.prompt[0] as { role: 'system'; content: string }).content
+      const systemContent = (result?.prompt[0] as { role: 'system'; content: string }).content
 
       expect(systemContent).toContain('- Tour Kit supports branching.')
       expect(systemContent).toContain('- Use useTour hook for state.')
@@ -144,7 +144,7 @@ describe('createRAGMiddleware', () => {
       const middleware = createRAGMiddleware({ retriever })
 
       const result = await middleware.transformParams?.(createMockParams('test'))
-      const systemContent = (result!.prompt[0] as { role: 'system'; content: string }).content
+      const systemContent = (result?.prompt[0] as { role: 'system'; content: string }).content
 
       expect(systemContent).toContain('[1] (Branching)')
       expect(systemContent).toContain('[2] (hooks-guide)')

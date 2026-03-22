@@ -1,167 +1,196 @@
 'use client'
 
-import { Play, RotateCcw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Play, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 
-function DemoContent() {
-  const [step, setStep] = useState<number | null>(null)
+const steps = [
+  {
+    target: 'demo-title',
+    title: 'Welcome to TourKit',
+    content: 'This is an interactive demo. Each step highlights a different element.',
+  },
+  {
+    target: 'demo-feature-1',
+    title: 'Highlight anything',
+    content: 'Tours can spotlight any element on the page with a smooth transition.',
+  },
+  {
+    target: 'demo-feature-2',
+    title: 'Step by step',
+    content: 'Guide users through your application flow at their own pace.',
+  },
+  {
+    target: 'demo-feature-3',
+    title: 'Fully customizable',
+    content: 'Every visual detail — tooltip, overlay, navigation — is yours to style.',
+  },
+  {
+    target: 'demo-start',
+    title: "That's it",
+    content: 'Three packages, a few lines of code, and your product tour is live.',
+  },
+]
 
-  const steps = [
-    {
-      target: 'demo-title',
-      title: 'Welcome to TourKit!',
-      content: "This is an interactive demo. Click 'Next' to continue.",
-    },
-    {
-      target: 'demo-feature-1',
-      title: 'Feature Highlights',
-      content: 'Tours can highlight any element on the page.',
-    },
-    {
-      target: 'demo-feature-2',
-      title: 'Step by Step',
-      content: 'Guide users through your application flow.',
-    },
-    {
-      target: 'demo-feature-3',
-      title: 'Fully Customizable',
-      content: 'Style everything to match your brand.',
-    },
-    {
-      target: 'demo-start',
-      title: "That's it!",
-      content: 'Try TourKit in your own project today.',
-    },
-  ]
+const featureColors = [
+  { icon: 'text-rose-500', bg: 'bg-rose-500/10', ring: 'ring-rose-500/30 bg-rose-500/5' },
+  {
+    icon: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    ring: 'ring-emerald-500/30 bg-emerald-500/5',
+  },
+  { icon: 'text-amber-500', bg: 'bg-amber-500/10', ring: 'ring-amber-500/30 bg-amber-500/5' },
+]
+
+function isHighlighted(target: string, currentTarget: string | undefined) {
+  return target === currentTarget
+}
+
+export function DemoTour() {
+  const [step, setStep] = useState<number | null>(null)
 
   const isActive = step !== null
   const currentStep = step !== null ? steps[step] : null
 
   const start = () => setStep(0)
   const next = () => {
-    if (step !== null && step < steps.length - 1) {
-      setStep(step + 1)
-    } else {
-      setStep(null)
-    }
+    if (step !== null && step < steps.length - 1) setStep(step + 1)
+    else setStep(null)
   }
   const prev = () => {
-    if (step !== null && step > 0) {
-      setStep(step - 1)
-    }
+    if (step !== null && step > 0) setStep(step - 1)
   }
   const reset = () => setStep(null)
 
   return (
-    <div className="relative rounded-xl border border-fd-border bg-fd-card p-8">
-      {/* Demo Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <h3
-          id="demo-title"
-          className={`text-xl font-semibold ${currentStep?.target === 'demo-title' ? 'ring-2 ring-[var(--tk-primary)] ring-offset-2 rounded-lg p-2 -m-2' : ''}`}
-        >
-          Interactive Demo
-        </h3>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={reset}
-            className="inline-flex items-center gap-2 rounded-lg border border-fd-border px-3 py-1.5 text-sm transition-colors hover:bg-fd-muted"
-            disabled={!isActive}
-          >
-            <RotateCcw className="h-4 w-4" />
-            Reset
-          </button>
-          <button
-            type="button"
-            id="demo-start"
-            onClick={start}
-            className={`inline-flex items-center gap-2 rounded-lg bg-[var(--tk-primary)] px-4 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90 ${currentStep?.target === 'demo-start' ? 'ring-2 ring-[var(--tk-primary)] ring-offset-2' : ''}`}
-            disabled={isActive}
-          >
-            <Play className="h-4 w-4" />
-            Start Tour
-          </button>
-        </div>
-      </div>
-
-      {/* Demo Content */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div
-          id="demo-feature-1"
-          className={`rounded-lg border border-fd-border bg-fd-background p-4 ${currentStep?.target === 'demo-feature-1' ? 'ring-2 ring-[var(--tk-primary)] ring-offset-2' : ''}`}
-        >
-          <div className="mb-2 h-8 w-8 rounded-lg bg-[var(--tk-primary-container)]" />
-          <h4 className="font-medium">Feature One</h4>
-          <p className="text-sm text-fd-muted-foreground">First feature description</p>
-        </div>
-        <div
-          id="demo-feature-2"
-          className={`rounded-lg border border-fd-border bg-fd-background p-4 ${currentStep?.target === 'demo-feature-2' ? 'ring-2 ring-[var(--tk-primary)] ring-offset-2' : ''}`}
-        >
-          <div className="mb-2 h-8 w-8 rounded-lg bg-[var(--tk-primary-container)]" />
-          <h4 className="font-medium">Feature Two</h4>
-          <p className="text-sm text-fd-muted-foreground">Second feature description</p>
-        </div>
-        <div
-          id="demo-feature-3"
-          className={`rounded-lg border border-fd-border bg-fd-background p-4 ${currentStep?.target === 'demo-feature-3' ? 'ring-2 ring-[var(--tk-primary)] ring-offset-2' : ''}`}
-        >
-          <div className="mb-2 h-8 w-8 rounded-lg bg-[var(--tk-primary-container)]" />
-          <h4 className="font-medium">Feature Three</h4>
-          <p className="text-sm text-fd-muted-foreground">Third feature description</p>
-        </div>
-      </div>
-
-      {/* Tour Tooltip */}
-      {currentStep && (
-        <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-80 rounded-xl border border-fd-border bg-fd-background p-4 shadow-xl">
-          <h4 className="mb-2 font-semibold">{currentStep.title}</h4>
-          <p className="mb-4 text-sm text-fd-muted-foreground">{currentStep.content}</p>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-fd-muted-foreground">
-              Step {(step ?? 0) + 1} of {steps.length}
-            </span>
-            <div className="flex gap-2">
-              {(step ?? 0) > 0 && (
-                <button
-                  type="button"
-                  onClick={prev}
-                  className="rounded-lg border border-fd-border px-3 py-1.5 text-sm transition-colors hover:bg-fd-muted"
-                >
-                  Previous
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={next}
-                className="rounded-lg bg-[var(--tk-primary)] px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-              >
-                {step === steps.length - 1 ? 'Finish' : 'Next'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Overlay */}
-      {isActive && <div className="absolute inset-0 bg-black/20 rounded-xl pointer-events-none" />}
-    </div>
-  )
-}
-
-export function DemoTour() {
-  return (
-    <section className="px-4 py-24">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-3xl font-bold sm:text-4xl">Try It Yourself</h2>
-          <p className="text-lg text-fd-muted-foreground">
-            Click "Start Tour" to see TourKit in action.
+    <section className="px-6 py-20 sm:px-8 md:py-28 lg:px-12">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-14 text-center">
+          <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-fd-foreground sm:text-4xl">
+            See it in action
+          </h2>
+          <p className="mx-auto max-w-lg text-lg text-fd-muted-foreground">
+            Click &ldquo;Start tour&rdquo; to walk through a working demo right here.
           </p>
         </div>
 
-        <DemoContent />
+        <div className="relative overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-sm">
+          {/* Demo header */}
+          <div className="flex items-center justify-between border-b border-fd-border px-6 py-4">
+            <h3
+              id="demo-title"
+              className={`text-[15px] font-bold transition-all ${
+                isHighlighted('demo-title', currentStep?.target)
+                  ? 'rounded-lg bg-[var(--tk-primary)]/10 px-3 py-1 -mx-3 -my-1 ring-2 ring-[var(--tk-primary)]/40'
+                  : ''
+              }`}
+            >
+              Interactive Demo
+            </h3>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={reset}
+                disabled={!isActive}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-fd-border px-3 py-1.5 text-sm font-medium text-fd-muted-foreground transition-colors hover:bg-fd-muted disabled:opacity-40"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Reset
+              </button>
+              <button
+                type="button"
+                id="demo-start"
+                onClick={start}
+                disabled={isActive}
+                className={`inline-flex items-center gap-1.5 rounded-lg bg-[var(--tk-primary)] px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:brightness-110 disabled:opacity-40 ${
+                  isHighlighted('demo-start', currentStep?.target)
+                    ? 'ring-2 ring-[var(--tk-primary)]/40 ring-offset-2 ring-offset-fd-card'
+                    : ''
+                }`}
+              >
+                <Play className="h-3.5 w-3.5" />
+                Start tour
+              </button>
+            </div>
+          </div>
+
+          {/* Demo content */}
+          <div className="grid gap-px bg-fd-border sm:grid-cols-3">
+            {(['demo-feature-1', 'demo-feature-2', 'demo-feature-3'] as const).map((id, i) => (
+              <div
+                key={id}
+                id={id}
+                className={`relative bg-fd-background p-6 transition-all ${
+                  isHighlighted(id, currentStep?.target)
+                    ? `ring-2 ring-inset ${featureColors[i].ring}`
+                    : ''
+                }`}
+              >
+                <div
+                  className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg ${featureColors[i].bg}`}
+                >
+                  <span className={`text-sm font-bold ${featureColors[i].icon}`}>{i + 1}</span>
+                </div>
+                <h4 className="mb-1 text-sm font-bold text-fd-foreground">
+                  {['Highlight targets', 'Navigation flow', 'Custom styling'][i]}
+                </h4>
+                <p className="text-[13px] leading-relaxed text-fd-muted-foreground">
+                  {
+                    [
+                      'Any DOM element can become a tour target with smooth spotlight transitions.',
+                      'Step-by-step navigation with keyboard support and progress tracking.',
+                      'Full control over tooltip appearance, overlay, and animation timing.',
+                    ][i]
+                  }
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Tour tooltip */}
+          {currentStep && (
+            <div className="absolute bottom-6 left-1/2 z-10 w-80 -translate-x-1/2 rounded-xl border border-fd-border bg-fd-background p-5 shadow-xl">
+              <h4 className="mb-1.5 text-sm font-bold text-fd-foreground">{currentStep.title}</h4>
+              <p className="mb-4 text-[13px] leading-relaxed text-fd-muted-foreground">
+                {currentStep.content}
+              </p>
+              <div className="flex items-center justify-between">
+                <div className="flex gap-1">
+                  {steps.map((_, i) => (
+                    <div
+                      key={`dot-${steps[i].target}`}
+                      className={`h-1.5 rounded-full transition-all ${
+                        i === step ? 'w-5 bg-[var(--tk-primary)]' : 'w-1.5 bg-fd-muted'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <div className="flex gap-1.5">
+                  {(step ?? 0) > 0 && (
+                    <button
+                      type="button"
+                      onClick={prev}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-fd-border text-fd-muted-foreground transition-colors hover:bg-fd-muted"
+                      aria-label="Previous step"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={next}
+                    className="flex h-7 items-center gap-1 rounded-lg bg-[var(--tk-primary)] px-3 text-xs font-semibold text-white transition-all hover:brightness-110"
+                  >
+                    {step === steps.length - 1 ? 'Finish' : 'Next'}
+                    {step !== steps.length - 1 && <ChevronRight className="h-3 w-3" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Overlay */}
+          {isActive && <div className="pointer-events-none absolute inset-0 bg-fd-foreground/5" />}
+        </div>
       </div>
     </section>
   )

@@ -29,9 +29,7 @@ AiChatContext.displayName = 'AiChatContext'
 export function useAiChatContext(): AiChatContextValue {
   const context = useContext(AiChatContext)
   if (!context) {
-    throw new Error(
-      'useAiChatContext must be used within an <AiChatProvider>.'
-    )
+    throw new Error('useAiChatContext must be used within an <AiChatProvider>.')
   }
   return context
 }

@@ -9,6 +9,22 @@
   },
   "license": "MIT",
   "packageManager": "pnpm@10.26.1",
+  "workspaces": {
+    "packages": ["packages/*", "apps/*", "tooling/*", "examples/*"],
+    "catalog": {
+      "vitest": "^4.1.0",
+      "jsdom": "^27.3.0",
+      "typescript": "^5.9.3",
+      "tsup": "^8.5.1",
+      "@types/react": "^19.2.0",
+      "@types/react-dom": "^19.2.0",
+      "@vitest/coverage-v8": "^4.1.0",
+      "@testing-library/react": "^16.3.1",
+      "@testing-library/jest-dom": "^6.9.1",
+      "@testing-library/dom": "^10.4.1",
+      "@testing-library/user-event": "^14.6.1"
+    }
+  },
   "engines": {
     "node": ">=18"
   },
@@ -24,12 +40,12 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "turbo run build && changeset publish",
-    "example:vite": "pnpm --filter vite-tour-kit-demo dev",
-    "example:next": "pnpm --filter next-tour-kit-demo dev",
-    "size": "pnpm --filter @tour-kit/bundle-check check",
-    "size:why": "pnpm --filter @tour-kit/bundle-check check:why",
+    "example:vite": "turbo run dev --filter=vite-tour-kit-demo",
+    "example:next": "turbo run dev --filter=next-tour-kit-demo",
+    "size": "turbo run check --filter=@tour-kit/bundle-check",
+    "size:why": "turbo run check:why --filter=@tour-kit/bundle-check",
     "bench": "turbo run bench",
-    "bench:core": "pnpm --filter @tour-kit/core vitest bench"
+    "bench:core": "turbo run bench --filter=@tour-kit/core"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.0",
@@ -46,11 +62,11 @@
     "vitest": "^4.1.0"
   },
   "pnpm": {
-    "overrides": {
-      "react-router": ">=7.12.0",
-      "preact": ">=10.28.2"
-    },
     "ignoredBuiltDependencies": ["esbuild", "sharp"],
-    "onlyBuiltDependencies": ["@biomejs/biome"]
+    "onlyBuiltDependencies": ["@biomejs/biome", "esbuild", "sharp"]
+  },
+  "overrides": {
+    "react-router": ">=7.12.0",
+    "preact": ">=10.28.2"
   }
 }

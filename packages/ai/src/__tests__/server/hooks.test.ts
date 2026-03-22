@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
 import type { UIMessage } from 'ai'
+import { describe, expect, it, vi } from 'vitest'
 import { createChatRouteHandler } from '../../server/route-handler'
 
 // Mock the ai module to prevent actual LLM calls
@@ -7,18 +7,19 @@ vi.mock('ai', async (importOriginal) => {
   const actual = await importOriginal<typeof import('ai')>()
   return {
     ...actual,
-    streamText: vi.fn().mockImplementation((opts: { onFinish?: (result: { text: string }) => void }) => {
-      // Simulate onFinish being called after streaming
-      if (opts.onFinish) {
-        // Call onFinish asynchronously to simulate streaming completion
-        Promise.resolve().then(() => opts.onFinish?.({ text: 'Hello from AI' }))
-      }
-      return {
-        toUIMessageStreamResponse: () =>
-          new Response('stream', { status: 200 }),
-        text: Promise.resolve('Hello from AI'),
-      }
-    }),
+    streamText: vi
+      .fn()
+      .mockImplementation((opts: { onFinish?: (result: { text: string }) => void }) => {
+        // Simulate onFinish being called after streaming
+        if (opts.onFinish) {
+          // Call onFinish asynchronously to simulate streaming completion
+          Promise.resolve().then(() => opts.onFinish?.({ text: 'Hello from AI' }))
+        }
+        return {
+          toUIMessageStreamResponse: () => new Response('stream', { status: 200 }),
+          text: Promise.resolve('Hello from AI'),
+        }
+      }),
     convertToModelMessages: vi.fn().mockReturnValue([]),
     wrapLanguageModel: vi.fn((opts: { model: unknown }) => opts.model),
   }

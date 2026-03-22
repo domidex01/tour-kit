@@ -57,6 +57,7 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
   })
 
   // Load persisted messages on mount via setMessages
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only effect
   useEffect(() => {
     if (!isEnabled) return
     loadMessages().then((messages) => {
@@ -64,9 +65,10 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
       setIsPersistenceLoading(false)
       hasHydratedRef.current = true
     })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   // Auto-save on message change (skip initial hydration)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only re-run when messages change
   useEffect(() => {
     if (!isEnabled || isPersistenceLoading) return
     if (!hasHydratedRef.current) {
@@ -74,7 +76,7 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
       return
     }
     saveMessages(chatHelpers.messages)
-  }, [chatHelpers.messages]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [chatHelpers.messages])
 
   const status: ChatStatus = chatHelpers.status as ChatStatus
   const error: Error | null = chatHelpers.error ?? null

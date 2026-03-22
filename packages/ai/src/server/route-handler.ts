@@ -7,12 +7,12 @@ import {
 } from 'ai'
 import { emitEvent } from '../core/events'
 import { generateSuggestions } from '../core/suggestion-engine'
+import type { TourAssistantContext } from '../hooks/use-tour-assistant'
 import type { ChatRouteHandlerOptions, ContextStuffingConfig, RAGConfig } from '../types'
 import { createRAGMiddleware } from './rag-middleware'
 import { createServerRateLimiter } from './rate-limiter'
 import { createRetriever } from './retriever'
 import { createSystemPrompt } from './system-prompt'
-import type { TourAssistantContext } from '../hooks/use-tour-assistant'
 
 /** Validate and sanitize tourContext from untrusted request body */
 function parseTourContext(raw: unknown): TourAssistantContext | undefined {
@@ -100,9 +100,7 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
   }
 
   // Create server rate limiter if configured
-  const serverRateLimiter = options.rateLimit
-    ? createServerRateLimiter(options.rateLimit)
-    : null
+  const serverRateLimiter = options.rateLimit ? createServerRateLimiter(options.rateLimit) : null
 
   async function handleSuggestions(req: Request): Promise<Response> {
     const body = await req.json()
@@ -148,9 +146,7 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
       if (serverRateLimiter) {
         const rateLimitResult = await serverRateLimiter.check(req)
         if (!rateLimitResult.allowed) {
-          const retryAfterSeconds = Math.ceil(
-            (rateLimitResult.resetAt - Date.now()) / 1000
-          )
+          const retryAfterSeconds = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000)
           emitEvent(options.onEvent, 'error', {
             error: 'Rate limit exceeded',
             source: 'server',

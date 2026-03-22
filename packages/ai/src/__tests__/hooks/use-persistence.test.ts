@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
 import { act, renderHook } from '@testing-library/react'
+import type { UIMessage } from 'ai'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePersistence } from '../../hooks/use-persistence'
 import type { PersistenceAdapter } from '../../types/config'
-import type { UIMessage } from 'ai'
 
 // ── Helpers ──
 
@@ -74,25 +74,19 @@ afterEach(() => {
 describe('usePersistence', () => {
   describe('disabled (no persistence config)', () => {
     it('returns isEnabled: false when no persistence config', () => {
-      const { result } = renderHook(() =>
-        usePersistence({ chatId: 'test' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId: 'test' }))
       expect(result.current.isEnabled).toBe(false)
     })
 
     it('loadMessages returns null when disabled', async () => {
-      const { result } = renderHook(() =>
-        usePersistence({ chatId: 'test' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId: 'test' }))
       const messages = await result.current.loadMessages()
       expect(messages).toBeNull()
       expect(mockStorage.getItem).not.toHaveBeenCalled()
     })
 
     it('saveMessages is a no-op when disabled', () => {
-      const { result } = renderHook(() =>
-        usePersistence({ chatId: 'test' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId: 'test' }))
       act(() => {
         result.current.saveMessages(createTestMessages(2))
       })
@@ -101,9 +95,7 @@ describe('usePersistence', () => {
     })
 
     it('clearMessages is a no-op when disabled', async () => {
-      const { result } = renderHook(() =>
-        usePersistence({ chatId: 'test' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId: 'test' }))
       await act(async () => {
         await result.current.clearMessages()
       })
@@ -116,16 +108,12 @@ describe('usePersistence', () => {
     const storageKey = `tourkit-ai-chat:${chatId}`
 
     it('returns isEnabled: true when persistence is "local"', () => {
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
       expect(result.current.isEnabled).toBe(true)
     })
 
     it('saves messages to localStorage with correct key', () => {
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
       const messages = createTestMessages(2)
 
       act(() => {
@@ -141,19 +129,14 @@ describe('usePersistence', () => {
       })
 
       expect(mockStorage.setItem).toHaveBeenCalledTimes(1)
-      expect(mockStorage.setItem).toHaveBeenCalledWith(
-        storageKey,
-        JSON.stringify(messages)
-      )
+      expect(mockStorage.setItem).toHaveBeenCalledWith(storageKey, JSON.stringify(messages))
     })
 
     it('loads messages from localStorage', async () => {
       const messages = createTestMessages(3)
       mockStorage._store.set(storageKey, JSON.stringify(messages))
 
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
 
       let loaded: UIMessage[] | null = null
       await act(async () => {
@@ -166,9 +149,7 @@ describe('usePersistence', () => {
     })
 
     it('returns null when no stored messages exist', async () => {
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
 
       let loaded: UIMessage[] | null = null
       await act(async () => {
@@ -182,9 +163,7 @@ describe('usePersistence', () => {
       mockStorage._store.set(storageKey, '{not valid json}}}')
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
 
       let loaded: UIMessage[] | null = null
       await act(async () => {
@@ -198,9 +177,7 @@ describe('usePersistence', () => {
     it('returns null when stored data is not an array', async () => {
       mockStorage._store.set(storageKey, JSON.stringify({ foo: 'bar' }))
 
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
 
       let loaded: UIMessage[] | null = null
       await act(async () => {
@@ -213,9 +190,7 @@ describe('usePersistence', () => {
     it('clears messages from localStorage', async () => {
       mockStorage._store.set(storageKey, JSON.stringify(createTestMessages(2)))
 
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
 
       await act(async () => {
         await result.current.clearMessages()
@@ -225,9 +200,7 @@ describe('usePersistence', () => {
     })
 
     it('debounces save calls — only last write within 500ms persists', () => {
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
       const messages1 = createTestMessages(1)
       const messages2 = createTestMessages(2)
       const messages3 = createTestMessages(3)
@@ -252,16 +225,11 @@ describe('usePersistence', () => {
       })
 
       expect(mockStorage.setItem).toHaveBeenCalledTimes(1)
-      expect(mockStorage.setItem).toHaveBeenCalledWith(
-        storageKey,
-        JSON.stringify(messages3)
-      )
+      expect(mockStorage.setItem).toHaveBeenCalledWith(storageKey, JSON.stringify(messages3))
     })
 
     it('flushes pending save on unmount', () => {
-      const { result, unmount } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result, unmount } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
       const messages = createTestMessages(2)
 
       act(() => {
@@ -272,10 +240,7 @@ describe('usePersistence', () => {
       unmount()
 
       expect(mockStorage.setItem).toHaveBeenCalledTimes(1)
-      expect(mockStorage.setItem).toHaveBeenCalledWith(
-        storageKey,
-        JSON.stringify(messages)
-      )
+      expect(mockStorage.setItem).toHaveBeenCalledWith(storageKey, JSON.stringify(messages))
     })
 
     it('handles localStorage quota exceeded gracefully', () => {
@@ -284,9 +249,7 @@ describe('usePersistence', () => {
         throw new DOMException('QuotaExceededError')
       })
 
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
 
       act(() => {
         result.current.saveMessages(createTestMessages(2))
@@ -308,9 +271,7 @@ describe('usePersistence', () => {
         configurable: true,
       })
 
-      const { result } = renderHook(() =>
-        usePersistence({ chatId, persistence: 'local' })
-      )
+      const { result } = renderHook(() => usePersistence({ chatId, persistence: 'local' }))
 
       let loaded: UIMessage[] | null = null
       await act(async () => {
@@ -507,14 +468,8 @@ describe('usePersistence', () => {
       const messagesA = createTestMessages(1)
       const messagesB = createTestMessages(2)
 
-      mockStorage._store.set(
-        'tourkit-ai-chat:chat-a',
-        JSON.stringify(messagesA)
-      )
-      mockStorage._store.set(
-        'tourkit-ai-chat:chat-b',
-        JSON.stringify(messagesB)
-      )
+      mockStorage._store.set('tourkit-ai-chat:chat-a', JSON.stringify(messagesA))
+      mockStorage._store.set('tourkit-ai-chat:chat-b', JSON.stringify(messagesB))
 
       const { result: hookA } = renderHook(() =>
         usePersistence({ chatId: 'chat-a', persistence: 'local' })
