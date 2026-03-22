@@ -1,0 +1,94 @@
+---
+title: Tour Integration
+description: Connect AI chat to active tours for context-aware assistance
+---
+
+# Tour Integration
+
+The `useTourAssistant` hook connects the AI chat to your active tours, giving the assistant real-time awareness of tour state, progress, and step content.
+
+## Basic Usage
+
+```tsx
+import { useTourAssistant } from '@tour-kit/ai'
+
+function TourChat() {
+  const { tourContext, sendMessage, messages } = useTourAssistant()
+
+  return (
+    <div>
+      <p>Current step: {tourContext?.currentStep?.title}</p>
+      <p>Progress: {tourContext?.progress}%</p>
+
+      {messages.map((msg) => (
+        <div key={msg.id}>{msg.content}</div>
+      ))}
+
+      <button onClick={() => sendMessage('What should I do next?')}>
+        Ask for help
+      </button>
+    </div>
+  )
+}
+```
+
+## How It Works
+
+1. `useTourAssistant` reads the current tour state from `@tour-kit/react` providers
+2. Tour context (steps, progress, current step) is assembled automatically
+3. Context is included with each message sent to the AI
+4. The assistant can reference specific steps, suggest next actions, and explain UI elements
+
+## Context Assembly
+
+The `assembleTourContext` function gathers tour information:
+
+```ts
+import { assembleTourContext } from '@tour-kit/ai'
+
+const context = assembleTourContext({
+  tourId: 'onboarding',
+  steps: tourSteps,
+  currentStepIndex: 2,
+  completedSteps: ['step-1', 'step-2'],
+})
+```
+
+## Combining with CAG
+
+For the best experience with small tours, combine `useTourAssistant` with CAG:
+
+```tsx
+<AiChatProvider
+  config={{
+    apiEndpoint: '/api/chat',
+    contextStrategy: 'cag',
+    context: {
+      stuffing: {
+        tourSteps: true,
+        currentStep: true,
+        completedSteps: true,
+      },
+    },
+  }}
+>
+  <TourChat />
+</AiChatProvider>
+```
+
+## Combining with RAG
+
+For large documentation sites, use RAG alongside tour context:
+
+```tsx
+<AiChatProvider
+  config={{
+    apiEndpoint: '/api/chat',
+    contextStrategy: 'rag',
+  }}
+>
+  <TourChat />
+</AiChatProvider>
+```
+
+The tour context is always sent as structured metadata, while RAG handles the documentation search.

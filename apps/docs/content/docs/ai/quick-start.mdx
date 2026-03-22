@@ -1,0 +1,99 @@
+---
+title: Quick Start
+description: Get up and running with @tour-kit/ai in under 5 minutes
+---
+
+# Quick Start
+
+## Installation
+
+```bash
+pnpm add @tour-kit/ai
+```
+
+You also need the AI SDK as a peer dependency:
+
+```bash
+pnpm add ai @ai-sdk/openai
+```
+
+## Client Setup
+
+Wrap your application with `AiChatProvider`:
+
+```tsx
+import { AiChatProvider } from '@tour-kit/ai'
+
+export function App() {
+  return (
+    <AiChatProvider
+      config={{
+        apiEndpoint: '/api/chat',
+        contextStrategy: 'cag',
+      }}
+    >
+      <YourApp />
+    </AiChatProvider>
+  )
+}
+```
+
+## Add a Chat Widget
+
+Use the `useAiChat` hook to build your chat UI:
+
+```tsx
+import { useAiChat } from '@tour-kit/ai'
+
+function ChatWidget() {
+  const { messages, sendMessage, status } = useAiChat()
+
+  return (
+    <div>
+      <div>
+        {messages.map((msg) => (
+          <div key={msg.id}>
+            <strong>{msg.role}:</strong> {msg.content}
+          </div>
+        ))}
+      </div>
+      <input
+        placeholder="Ask a question..."
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            sendMessage(e.currentTarget.value)
+            e.currentTarget.value = ''
+          }
+        }}
+      />
+    </div>
+  )
+}
+```
+
+## Server Setup
+
+Create an API route handler. For Next.js:
+
+```ts
+// app/api/chat/route.ts
+import { createChatRouteHandler } from '@tour-kit/ai/server'
+
+const handler = createChatRouteHandler({
+  model: 'gpt-4o-mini',
+})
+
+export { handler as POST }
+```
+
+Set your API key in `.env.local`:
+
+```
+OPENAI_API_KEY=sk-...
+```
+
+## Next Steps
+
+- [CAG Guide](/docs/ai/cag-guide) — Learn about context-augmented generation
+- [RAG Guide](/docs/ai/rag-guide) — Set up retrieval-augmented generation
+- [Tour Integration](/docs/ai/tour-integration) — Connect chat to your tours

@@ -1,0 +1,78 @@
+---
+title: CAG Guide
+description: Context-Augmented Generation — inject tour context directly into AI prompts
+---
+
+# Context-Augmented Generation (CAG)
+
+CAG is the simplest way to make your AI assistant tour-aware. It works by stuffing relevant tour context directly into the system prompt sent to the LLM.
+
+## When to Use CAG
+
+- Your tour has fewer than ~20 steps
+- You want a quick setup with no infrastructure
+- Your context fits within the model's context window
+
+## Setup
+
+### Client Configuration
+
+Set `contextStrategy: 'cag'` in your provider config:
+
+```tsx
+import { AiChatProvider } from '@tour-kit/ai'
+
+function App() {
+  return (
+    <AiChatProvider
+      config={{
+        apiEndpoint: '/api/chat',
+        contextStrategy: 'cag',
+        context: {
+          stuffing: {
+            tourSteps: true,
+            currentStep: true,
+            completedSteps: true,
+          },
+        },
+      }}
+    >
+      <YourApp />
+    </AiChatProvider>
+  )
+}
+```
+
+### Server Configuration
+
+Use `createSystemPrompt` to build a context-rich system prompt:
+
+```ts
+import { createChatRouteHandler, createSystemPrompt } from '@tour-kit/ai/server'
+
+const handler = createChatRouteHandler({
+  model: 'gpt-4o-mini',
+  systemPrompt: createSystemPrompt({
+    role: 'onboarding assistant',
+    instructions: [
+      'Help users complete their onboarding tour',
+      'Reference specific tour steps when answering questions',
+    ],
+  }),
+})
+
+export { handler as POST }
+```
+
+## How It Works
+
+1. The client collects tour context (steps, progress, current step)
+2. Context is serialized and sent with each chat request
+3. The server injects this context into the system prompt
+4. The LLM receives the full tour context and can answer questions about it
+
+## Limitations
+
+- Context size grows linearly with tour complexity
+- Not suitable for large documentation sets (use RAG instead)
+- Each request sends the full context, increasing token usage

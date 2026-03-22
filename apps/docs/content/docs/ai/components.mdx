@@ -1,0 +1,78 @@
+---
+title: Components
+description: Pre-built UI components for AI chat features
+---
+
+# Components
+
+`@tour-kit/ai` provides headless components that you can style with your own design system.
+
+## AiChatProvider
+
+The root provider that manages chat state and configuration.
+
+```tsx
+import { AiChatProvider } from '@tour-kit/ai'
+
+<AiChatProvider
+  config={{
+    apiEndpoint: '/api/chat',
+    contextStrategy: 'cag',
+    rateLimit: {
+      maxRequests: 10,
+      windowMs: 60_000,
+    },
+    suggestions: {
+      enabled: true,
+      count: 3,
+    },
+  }}
+>
+  {children}
+</AiChatProvider>
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `config` | `AiChatConfig` | Chat configuration object |
+| `children` | `ReactNode` | Child components |
+
+## AiChatSuggestions
+
+Renders AI-generated follow-up suggestions as clickable chips.
+
+```tsx
+import { AiChatSuggestions } from '@tour-kit/ai'
+
+<AiChatSuggestions
+  onSelect={(suggestion) => sendMessage(suggestion)}
+  className="flex gap-2"
+  chipClassName="px-3 py-1 rounded-full bg-gray-100"
+/>
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `onSelect` | `(suggestion: string) => void` | Called when a suggestion is clicked |
+| `className` | `string` | Container class name |
+| `chipClassName` | `string` | Individual chip class name |
+
+## Headless Pattern
+
+All components follow the headless pattern. Use the hooks directly for full control:
+
+```tsx
+import { useAiChat, useSuggestions } from '@tour-kit/ai'
+
+function CustomChat() {
+  const { messages, sendMessage, status } = useAiChat()
+  const { suggestions, isLoading } = useSuggestions()
+
+  // Build your own UI
+  return <div>{/* ... */}</div>
+}
+```

@@ -1,0 +1,96 @@
+---
+title: RAG Guide
+description: Retrieval-Augmented Generation — vector search over documentation for scalable AI chat
+---
+
+# Retrieval-Augmented Generation (RAG)
+
+RAG enables your AI assistant to search over large documentation sets using vector embeddings. Instead of stuffing all context into the prompt, it retrieves only the most relevant documents for each query.
+
+## When to Use RAG
+
+- You have a large documentation set (> 20 pages)
+- You want precise, relevant answers from specific documents
+- You need to scale beyond what fits in a single context window
+
+## Setup
+
+### 1. Create a Vector Store
+
+```ts
+import {
+  createInMemoryVectorStore,
+  createAiSdkEmbedding,
+  chunkDocuments,
+} from '@tour-kit/ai/server'
+
+const vectorStore = createInMemoryVectorStore()
+const embedding = createAiSdkEmbedding({ model: 'text-embedding-3-small' })
+
+// Index your documents
+const documents = [
+  { id: 'doc-1', content: 'How to create a tour...', metadata: { title: 'Creating Tours' } },
+  { id: 'doc-2', content: 'Tour step configuration...', metadata: { title: 'Step Config' } },
+]
+
+const chunks = chunkDocuments(documents, { chunkSize: 512, overlap: 50 })
+await vectorStore.upsert(chunks, embedding)
+```
+
+### 2. Create a Retriever
+
+```ts
+import { createRetriever } from '@tour-kit/ai/server'
+
+const retriever = createRetriever({
+  vectorStore,
+  embedding,
+  topK: 5,
+})
+```
+
+### 3. Add RAG Middleware
+
+```ts
+import { createChatRouteHandler, createRAGMiddleware } from '@tour-kit/ai/server'
+
+const handler = createChatRouteHandler({
+  model: 'gpt-4o-mini',
+  middleware: [createRAGMiddleware({ retriever })],
+})
+
+export { handler as POST }
+```
+
+### 4. Client Configuration
+
+```tsx
+<AiChatProvider
+  config={{
+    apiEndpoint: '/api/chat',
+    contextStrategy: 'rag',
+  }}
+>
+  <YourApp />
+</AiChatProvider>
+```
+
+## Custom Vector Store
+
+Implement the `VectorStoreAdapter` interface to use your own vector database:
+
+```ts
+import type { VectorStoreAdapter } from '@tour-kit/ai'
+
+const customStore: VectorStoreAdapter = {
+  upsert: async (documents, embedding) => { /* ... */ },
+  query: async (query, embedding, topK) => { /* ... */ },
+  delete: async (ids) => { /* ... */ },
+}
+```
+
+## Performance Tips
+
+- Use appropriate chunk sizes (256-1024 tokens)
+- Set `topK` between 3-10 for best relevance/cost balance
+- Pre-compute embeddings at build time for static content

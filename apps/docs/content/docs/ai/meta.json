@@ -1,0 +1,13 @@
+{
+  "title": "@tour-kit/ai",
+  "icon": "Bot",
+  "pages": [
+    "index",
+    "quick-start",
+    "cag-guide",
+    "rag-guide",
+    "tour-integration",
+    "components",
+    "api-reference"
+  ]
+}

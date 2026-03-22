@@ -1,0 +1,14 @@
+[
+  {
+    "name": "client",
+    "path": "dist/index.js",
+    "limit": "15 KB",
+    "gzip": true
+  },
+  {
+    "name": "server",
+    "path": "dist/server/index.js",
+    "limit": "8 KB",
+    "gzip": true
+  }
+]

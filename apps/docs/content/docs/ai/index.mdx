@@ -1,0 +1,43 @@
+---
+title: "@tour-kit/ai"
+description: AI-powered chat assistant for product tours with context-aware conversation
+---
+
+# @tour-kit/ai
+
+Add a conversational AI layer to your product tours. `@tour-kit/ai` provides hooks, providers, and server utilities that let users ask questions and get context-aware answers about your onboarding flows.
+
+## Features
+
+- **Context-Augmented Generation (CAG)** — Inject tour context directly into prompts for simple setups
+- **Retrieval-Augmented Generation (RAG)** — Vector search over documentation for large knowledge bases
+- **Tour Integration** — Automatically understands active tour steps, progress, and state
+- **Client/Server Split** — Browser-safe client code, Node.js server utilities in separate entry points
+- **Rate Limiting** — Built-in client and server-side rate limiting
+- **Suggestions** — AI-generated follow-up question chips
+
+## Architecture
+
+The package is split into two entry points:
+
+```
+@tour-kit/ai          # Client: React hooks, providers, components
+@tour-kit/ai/server   # Server: Route handlers, RAG pipeline, embeddings
+```
+
+This ensures server-only code (API keys, vector stores) never leaks into the browser bundle.
+
+## When to Use
+
+| Scenario | Recommendation |
+|----------|----------------|
+| Small tour (< 20 steps) | Use CAG — simpler, no vector store needed |
+| Large documentation site | Use RAG — scales to thousands of documents |
+| Interactive onboarding | Combine with `useTourAssistant` for tour-aware chat |
+
+## Next Steps
+
+- [Quick Start](/docs/ai/quick-start) — Get up and running in 5 minutes
+- [CAG Guide](/docs/ai/cag-guide) — Context-augmented generation setup
+- [RAG Guide](/docs/ai/rag-guide) — Retrieval-augmented generation setup
+- [Tour Integration](/docs/ai/tour-integration) — Connect AI chat to active tours

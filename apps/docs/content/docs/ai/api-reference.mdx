@@ -1,0 +1,120 @@
+---
+title: API Reference
+description: Complete API reference for @tour-kit/ai client and server exports
+---
+
+# API Reference
+
+## Client Exports (`@tour-kit/ai`)
+
+### Hooks
+
+#### `useAiChat()`
+
+Core chat hook. Must be used within `AiChatProvider`.
+
+Returns `UseAiChatReturn`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `messages` | `Message[]` | Chat message history |
+| `sendMessage` | `(content: string) => void` | Send a user message |
+| `status` | `ChatStatus` | Current chat status |
+| `clearMessages` | `() => void` | Clear message history |
+
+#### `useTourAssistant()`
+
+Tour-aware chat hook. Extends `useAiChat` with tour context.
+
+Returns `UseTourAssistantReturn`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `tourContext` | `TourAssistantContext` | Current tour state |
+| `messages` | `Message[]` | Chat message history |
+| `sendMessage` | `(content: string) => void` | Send a message with tour context |
+
+#### `useSuggestions()`
+
+AI-generated follow-up suggestions.
+
+Returns `UseSuggestionsReturn`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `suggestions` | `string[]` | Current suggestions |
+| `isLoading` | `boolean` | Loading state |
+
+### Utilities
+
+#### `SlidingWindowRateLimiter`
+
+Client-side rate limiter using a sliding window algorithm.
+
+#### `createRateLimiter(config)`
+
+Factory function for creating a rate limiter instance.
+
+#### `createAnalyticsBridge(config)`
+
+Bridges AI chat events to `@tour-kit/analytics`.
+
+## Server Exports (`@tour-kit/ai/server`)
+
+### Route Handling
+
+#### `createChatRouteHandler(options)`
+
+Creates an API route handler for chat requests.
+
+```ts
+const handler = createChatRouteHandler({
+  model: 'gpt-4o-mini',
+  systemPrompt: 'You are a helpful assistant.',
+  middleware: [],
+})
+```
+
+### RAG Pipeline
+
+#### `createInMemoryVectorStore()`
+
+Creates an in-memory vector store for development and testing.
+
+#### `createAiSdkEmbedding(options)`
+
+Creates an embedding adapter using the AI SDK.
+
+#### `createRetriever(options)`
+
+Creates a document retriever from a vector store.
+
+#### `chunkDocument(doc, options)` / `chunkDocuments(docs, options)`
+
+Splits documents into chunks for embedding.
+
+#### `createRAGMiddleware(options)`
+
+Creates middleware that adds retrieved context to chat requests.
+
+### Utilities
+
+#### `createSystemPrompt(config)`
+
+Builds a structured system prompt from configuration.
+
+#### `createServerRateLimiter(config)`
+
+Server-side rate limiter.
+
+#### `createInMemoryRateLimitStore()`
+
+In-memory store for server rate limiting.
+
+#### `generateSuggestions(options)` / `parseSuggestions(text)`
+
+Generate and parse AI follow-up suggestions.
+
+## Types
+
+See the full type definitions in the [source code](https://github.com/DomiDex/tour-kit/tree/main/packages/ai/src/types).
