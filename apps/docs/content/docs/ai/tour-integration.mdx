@@ -13,18 +13,24 @@ The `useTourAssistant` hook connects the AI chat to your active tours, giving th
 import { useTourAssistant } from '@tour-kit/ai'
 
 function TourChat() {
-  const { tourContext, sendMessage, messages } = useTourAssistant()
+  const { tourContext, sendMessage, messages, askAboutStep, askForHelp } = useTourAssistant()
 
   return (
     <div>
-      <p>Current step: {tourContext?.currentStep?.title}</p>
-      <p>Progress: {tourContext?.progress}%</p>
+      {tourContext.activeTour && (
+        <p>
+          Step {tourContext.activeTour.currentStep + 1} of {tourContext.activeTour.totalSteps}
+          {' — '}{tourContext.activeStep?.title}
+        </p>
+      )}
 
       {messages.map((msg) => (
         <div key={msg.id}>{msg.content}</div>
       ))}
 
-      <button onClick={() => sendMessage('What should I do next?')}>
+      <button onClick={askAboutStep}>Ask about this step</button>
+      <button onClick={() => askForHelp('navigation')}>Help with navigation</button>
+      <button onClick={() => sendMessage({ text: 'What should I do next?' })}>
         Ask for help
       </button>
     </div>
@@ -47,10 +53,13 @@ The `assembleTourContext` function gathers tour information:
 import { assembleTourContext } from '@tour-kit/ai'
 
 const context = assembleTourContext({
+  isActive: true,
   tourId: 'onboarding',
-  steps: tourSteps,
+  tour: { id: 'onboarding', name: 'Onboarding Tour', steps: [] },
   currentStepIndex: 2,
-  completedSteps: ['step-1', 'step-2'],
+  totalSteps: 5,
+  currentStep: { id: 'step-3', title: 'Add your team', content: 'Invite team members.' },
+  completedTours: [],
 })
 ```
 
@@ -61,15 +70,8 @@ For the best experience with small tours, combine `useTourAssistant` with CAG:
 ```tsx
 <AiChatProvider
   config={{
-    apiEndpoint: '/api/chat',
-    contextStrategy: 'cag',
-    context: {
-      stuffing: {
-        tourSteps: true,
-        currentStep: true,
-        completedSteps: true,
-      },
-    },
+    endpoint: '/api/chat',
+    tourContext: true,
   }}
 >
   <TourChat />
@@ -83,8 +85,8 @@ For large documentation sites, use RAG alongside tour context:
 ```tsx
 <AiChatProvider
   config={{
-    apiEndpoint: '/api/chat',
-    contextStrategy: 'rag',
+    endpoint: '/api/chat',
+    tourContext: true,
   }}
 >
   <TourChat />

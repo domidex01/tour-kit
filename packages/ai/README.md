@@ -21,8 +21,8 @@ function App() {
   return (
     <AiChatProvider
       config={{
-        apiEndpoint: '/api/chat',
-        contextStrategy: 'cag',
+        endpoint: '/api/chat',
+        tourContext: true,
       }}
     >
       <ChatWidget />
@@ -42,7 +42,7 @@ function ChatWidget() {
       <input
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            sendMessage(e.currentTarget.value)
+            sendMessage({ text: e.currentTarget.value })
           }
         }}
       />
@@ -58,12 +58,17 @@ Create an API route handler:
 ```ts
 // app/api/chat/route.ts
 import { createChatRouteHandler } from '@tour-kit/ai/server'
+import { openai } from '@ai-sdk/openai'
 
-const handler = createChatRouteHandler({
-  model: 'gpt-4o-mini',
+const { POST } = createChatRouteHandler({
+  model: openai('gpt-4o-mini'),
+  context: {
+    strategy: 'context-stuffing',
+    documents: [],
+  },
 })
 
-export { handler as POST }
+export { POST }
 ```
 
 ## Features

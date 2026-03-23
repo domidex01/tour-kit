@@ -49,17 +49,24 @@ const retriever = createRetriever({
 })
 ```
 
-### 3. Add RAG Middleware
+### 3. Create a Route Handler with RAG
 
 ```ts
-import { createChatRouteHandler, createRAGMiddleware } from '@tour-kit/ai/server'
+import { createChatRouteHandler } from '@tour-kit/ai/server'
+import { openai } from '@ai-sdk/openai'
 
-const handler = createChatRouteHandler({
-  model: 'gpt-4o-mini',
-  middleware: [createRAGMiddleware({ retriever })],
+const { POST } = createChatRouteHandler({
+  model: openai('gpt-4o-mini'),
+  context: {
+    strategy: 'rag',
+    documents,
+    embedding,
+    vectorStore,
+    topK: 5,
+  },
 })
 
-export { handler as POST }
+export { POST }
 ```
 
 ### 4. Client Configuration
@@ -67,8 +74,7 @@ export { handler as POST }
 ```tsx
 <AiChatProvider
   config={{
-    apiEndpoint: '/api/chat',
-    contextStrategy: 'rag',
+    endpoint: '/api/chat',
   }}
 >
   <YourApp />

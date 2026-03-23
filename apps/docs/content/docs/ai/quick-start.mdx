@@ -28,8 +28,8 @@ export function App() {
   return (
     <AiChatProvider
       config={{
-        apiEndpoint: '/api/chat',
-        contextStrategy: 'cag',
+        endpoint: '/api/chat',
+        tourContext: true,
       }}
     >
       <YourApp />
@@ -61,7 +61,7 @@ function ChatWidget() {
         placeholder="Ask a question..."
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            sendMessage(e.currentTarget.value)
+            sendMessage({ text: e.currentTarget.value })
             e.currentTarget.value = ''
           }
         }}
@@ -78,12 +78,17 @@ Create an API route handler. For Next.js:
 ```ts
 // app/api/chat/route.ts
 import { createChatRouteHandler } from '@tour-kit/ai/server'
+import { openai } from '@ai-sdk/openai'
 
-const handler = createChatRouteHandler({
-  model: 'gpt-4o-mini',
+const { POST } = createChatRouteHandler({
+  model: openai('gpt-4o-mini'),
+  context: {
+    strategy: 'context-stuffing',
+    documents: [],
+  },
 })
 
-export { handler as POST }
+export { POST }
 ```
 
 Set your API key in `.env.local`:

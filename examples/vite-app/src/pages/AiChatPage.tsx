@@ -1,11 +1,5 @@
 import { AiChatProvider, AiChatSuggestions } from '@tour-kit/ai'
 
-const FAQ_DOCS = [
-  { id: 'pricing', content: 'Our Pro plan is $29/mo and includes unlimited projects.' },
-  { id: 'export', content: 'To export data, go to Settings > Export > Choose Format.' },
-  { id: 'teams', content: 'Teams can have up to 10 members on the Pro plan.' },
-]
-
 export function AiChatPage() {
   return (
     <AiChatProvider

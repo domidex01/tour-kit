@@ -17,7 +17,7 @@ CAG is the simplest way to make your AI assistant tour-aware. It works by stuffi
 
 ### Client Configuration
 
-Set `contextStrategy: 'cag'` in your provider config:
+Enable `tourContext` in your provider config so tour state is sent with each request:
 
 ```tsx
 import { AiChatProvider } from '@tour-kit/ai'
@@ -26,15 +26,8 @@ function App() {
   return (
     <AiChatProvider
       config={{
-        apiEndpoint: '/api/chat',
-        contextStrategy: 'cag',
-        context: {
-          stuffing: {
-            tourSteps: true,
-            currentStep: true,
-            completedSteps: true,
-          },
-        },
+        endpoint: '/api/chat',
+        tourContext: true,
       }}
     >
       <YourApp />
@@ -48,20 +41,25 @@ function App() {
 Use `createSystemPrompt` to build a context-rich system prompt:
 
 ```ts
-import { createChatRouteHandler, createSystemPrompt } from '@tour-kit/ai/server'
+import { createChatRouteHandler } from '@tour-kit/ai/server'
+import { openai } from '@ai-sdk/openai'
 
-const handler = createChatRouteHandler({
-  model: 'gpt-4o-mini',
-  systemPrompt: createSystemPrompt({
-    role: 'onboarding assistant',
-    instructions: [
-      'Help users complete their onboarding tour',
-      'Reference specific tour steps when answering questions',
+const { POST } = createChatRouteHandler({
+  model: openai('gpt-4o-mini'),
+  context: {
+    strategy: 'context-stuffing',
+    documents: [
+      { id: 'guide', content: 'Step 1: Click the button...' },
     ],
-  }),
+  },
+  instructions: {
+    productName: 'My App',
+    tone: 'friendly',
+    boundaries: ['Only answer questions about onboarding'],
+  },
 })
 
-export { handler as POST }
+export { POST }
 ```
 
 ## How It Works

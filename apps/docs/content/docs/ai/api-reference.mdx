@@ -17,22 +17,32 @@ Returns `UseAiChatReturn`:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `messages` | `Message[]` | Chat message history |
-| `sendMessage` | `(content: string) => void` | Send a user message |
-| `status` | `ChatStatus` | Current chat status |
-| `clearMessages` | `() => void` | Clear message history |
+| `messages` | `UIMessage[]` | Chat message history |
+| `sendMessage` | `(input: { text: string }) => void` | Send a user message |
+| `status` | `ChatStatus` | Current chat status (`'ready'`, `'submitted'`, `'streaming'`, `'error'`) |
+| `error` | `Error \| null` | Current error, if any |
+| `stop` | `() => void` | Stop the current generation |
+| `reload` | `() => void` | Regenerate the last response |
+| `setMessages` | `(messages: UIMessage[]) => void` | Replace message history (pass `[]` to clear) |
+| `isOpen` | `boolean` | Whether the chat panel is open |
+| `open` | `() => void` | Open the chat panel |
+| `close` | `() => void` | Close the chat panel |
+| `toggle` | `() => void` | Toggle the chat panel |
 
 #### `useTourAssistant()`
 
 Tour-aware chat hook. Extends `useAiChat` with tour context.
 
-Returns `UseTourAssistantReturn`:
+Returns `UseTourAssistantReturn` (extends `UseAiChatReturn`):
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `tourContext` | `TourAssistantContext` | Current tour state |
-| `messages` | `Message[]` | Chat message history |
-| `sendMessage` | `(content: string) => void` | Send a message with tour context |
+| `isLoading` | `boolean` | Whether the assistant is loading |
+| `suggestions` | `string[]` | Contextual suggestions based on current step |
+| `askAboutStep` | `() => void` | Ask the AI about the current tour step |
+| `askForHelp` | `(topic?: string) => void` | Ask for help, optionally on a topic |
+| _...all `UseAiChatReturn` properties_ | | |
 
 #### `useSuggestions()`
 
@@ -68,10 +78,18 @@ Bridges AI chat events to `@tour-kit/analytics`.
 Creates an API route handler for chat requests.
 
 ```ts
-const handler = createChatRouteHandler({
-  model: 'gpt-4o-mini',
-  systemPrompt: 'You are a helpful assistant.',
-  middleware: [],
+import { openai } from '@ai-sdk/openai'
+
+const { POST } = createChatRouteHandler({
+  model: openai('gpt-4o-mini'),
+  context: {
+    strategy: 'context-stuffing',
+    documents: [{ id: 'doc-1', content: '...' }],
+  },
+  instructions: {
+    productName: 'My App',
+    tone: 'friendly',
+  },
 })
 ```
 

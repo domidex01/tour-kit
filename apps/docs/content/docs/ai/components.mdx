@@ -16,15 +16,15 @@ import { AiChatProvider } from '@tour-kit/ai'
 
 <AiChatProvider
   config={{
-    apiEndpoint: '/api/chat',
-    contextStrategy: 'cag',
+    endpoint: '/api/chat',
+    tourContext: true,
     rateLimit: {
-      maxRequests: 10,
+      maxMessages: 10,
       windowMs: 60_000,
     },
     suggestions: {
-      enabled: true,
-      count: 3,
+      static: ['How do I get started?'],
+      dynamic: true,
     },
   }}
 >
@@ -47,9 +47,23 @@ Renders AI-generated follow-up suggestions as clickable chips.
 import { AiChatSuggestions } from '@tour-kit/ai'
 
 <AiChatSuggestions
-  onSelect={(suggestion) => sendMessage(suggestion)}
+  suggestions={['How do I start?', 'What features exist?']}
+  onSelect={(suggestion) => sendMessage({ text: suggestion })}
   className="flex gap-2"
-  chipClassName="px-3 py-1 rounded-full bg-gray-100"
+/>
+```
+
+You can customize rendering with `renderSuggestion`:
+
+```tsx
+<AiChatSuggestions
+  suggestions={['How do I start?']}
+  onSelect={(suggestion) => sendMessage({ text: suggestion })}
+  renderSuggestion={(suggestion, onSelect) => (
+    <span key={suggestion} onClick={onSelect} className="px-3 py-1 rounded-full bg-gray-100 cursor-pointer">
+      {suggestion}
+    </span>
+  )}
 />
 ```
 
@@ -57,22 +71,29 @@ import { AiChatSuggestions } from '@tour-kit/ai'
 
 | Prop | Type | Description |
 |------|------|-------------|
+| `suggestions` | `string[]` | Explicit suggestions list (overrides hook data) |
 | `onSelect` | `(suggestion: string) => void` | Called when a suggestion is clicked |
+| `renderSuggestion` | `(suggestion: string, onSelect: () => void) => ReactNode` | Custom chip renderer |
 | `className` | `string` | Container class name |
-| `chipClassName` | `string` | Individual chip class name |
 
 ## Headless Pattern
 
 All components follow the headless pattern. Use the hooks directly for full control:
 
 ```tsx
-import { useAiChat, useSuggestions } from '@tour-kit/ai'
+import { useAiChat } from '@tour-kit/ai'
 
 function CustomChat() {
   const { messages, sendMessage, status } = useAiChat()
-  const { suggestions, isLoading } = useSuggestions()
 
   // Build your own UI
-  return <div>{/* ... */}</div>
+  return (
+    <div>
+      {messages.map((msg) => (
+        <div key={msg.id}>{msg.content}</div>
+      ))}
+      <button onClick={() => sendMessage({ text: 'Hello' })}>Send</button>
+    </div>
+  )
 }
 ```
