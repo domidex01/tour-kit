@@ -1,58 +1,95 @@
 ---
 title: AI Assistants
-description: Documentation resources optimized for AI coding assistants and LLMs
+description: >-
+  Documentation resources optimized for AI coding assistants — llms.txt, context
+  files, and MCP server for Tour Kit integration
 icon: Bot
 ---
 
 # AI Assistants
 
-TourKit provides documentation optimized for AI coding assistants, LLMs, and automated tools.
+Tour Kit provides machine-readable documentation files following the [llms.txt standard](https://llmstxt.org) for AI coding assistants and LLMs.
 
-## Available Resources
+## Available Files
 
-### llms.txt
+### llms.txt — Documentation Index
 
-A quick reference guide optimized for LLMs and AI coding assistants. Contains:
+A structured index of all Tour Kit documentation pages, following the [llmstxt.org](https://llmstxt.org) standard format. Contains section headings with links and descriptions for every page.
 
-- Package overview and architecture
-- Key exports for all packages
-- Common usage patterns
-- Type definitions
+**URL:** [`/llms.txt`](/llms.txt)
 
-**Download:** [llms.txt](/llms.txt)
+### llms-full.txt — Complete Documentation
 
-### llm-full.txt
+The full content of all Tour Kit documentation in a single file. Use this when you need the AI to have comprehensive knowledge of the entire library.
 
-Complete documentation dump for comprehensive context. Use this when you need the AI to have full knowledge of the library.
-
-**Download:** [llm-full.txt](/llm-full.txt)
+**URL:** [`/llms-full.txt`](/llms-full.txt)
 
 ## Usage with AI Tools
 
-### Claude Code
+### ChatGPT
 
-When working with Tour Kit in Claude Code, reference the llms.txt file:
+Paste the llms-full.txt URL into your conversation:
 
 ```
-Read the llms.txt file to understand the Tour Kit API
+Read https://tour-kit-docs.vercel.app/llms-full.txt and use it as context for Tour Kit questions
 ```
 
-### Cursor / Copilot
+Or create a Custom GPT with the file as a knowledge source.
 
-Add llms.txt to your project context for better suggestions when working with Tour Kit components.
+### Claude
 
-### Custom AI Integrations
+In Claude Code, reference the documentation:
 
-Fetch the documentation programmatically:
+```
+Fetch https://tour-kit-docs.vercel.app/llms.txt to understand the Tour Kit API
+```
+
+In Claude.ai, paste the content of llms-full.txt into your conversation for full context.
+
+### Cursor / Windsurf
+
+Add the llms.txt URL to your project's AI context:
+
+1. Download `/llms.txt` to your project root
+2. Reference it in your editor's AI context settings
+3. The AI will use Tour Kit's documentation for code suggestions
+
+### Gemini
+
+Google Gemini with grounding can discover Tour Kit documentation via search. The llms.txt file and sitemap help Gemini index our docs accurately.
+
+### Programmatic Access
 
 ```bash
-# Quick reference
-curl https://your-docs-site.com/llms.txt
+# Documentation index (llmstxt.org format)
+curl https://tour-kit-docs.vercel.app/llms.txt
 
-# Full documentation
-curl https://your-docs-site.com/llm-full.txt
+# Complete documentation
+curl https://tour-kit-docs.vercel.app/llms-full.txt
 ```
 
-## API Reference
+<!-- per-package-context-files -->
+## Per-Package Context Files
 
-For complete API documentation with examples, see the [API Reference](/docs/api).
+For targeted assistance with a specific package, paste the corresponding context file
+into your LLM conversation. Each file contains the complete API surface, type definitions,
+and usage examples — optimized to fit within a single paste.
+
+| Package | Context File | Size |
+|---------|-------------|------|
+| @tour-kit/core | [core.txt](/context/core.txt) | ~243 lines |
+| @tour-kit/react | [react.txt](/context/react.txt) | ~551 lines |
+| @tour-kit/hints | [hints.txt](/context/hints.txt) | ~231 lines |
+| @tour-kit/adoption | [adoption.txt](/context/adoption.txt) | ~438 lines |
+| @tour-kit/analytics | [analytics.txt](/context/analytics.txt) | ~288 lines |
+| @tour-kit/announcements | [announcements.txt](/context/announcements.txt) | ~104 lines |
+| @tour-kit/checklists | [checklists.txt](/context/checklists.txt) | ~264 lines |
+| @tour-kit/media | [media.txt](/context/media.txt) | ~201 lines |
+| @tour-kit/scheduling | [scheduling.txt](/context/scheduling.txt) | ~158 lines |
+
+### How to Use
+
+1. Download the context file for the package you need help with
+2. Paste the file contents at the start of your conversation with ChatGPT, Claude, or Gemini
+3. Ask your question — the LLM will have accurate API knowledge to generate correct code
+
