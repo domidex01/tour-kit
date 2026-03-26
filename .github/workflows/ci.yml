@@ -40,8 +40,8 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
-      - name: Build
-        run: pnpm build
+      - name: Build packages
+        run: pnpm build --filter='./packages/*'
 
       - name: Test
         run: pnpm test
@@ -69,8 +69,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Build packages
+        run: pnpm build --filter='./packages/*'
 
       - name: Check bundle size limits
         run: pnpm size
