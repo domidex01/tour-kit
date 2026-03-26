@@ -1,64 +1,37 @@
-'use client'
-
-import { AiChatProvider, AiChatSuggestions, useTourAssistant } from '@tour-kit/ai'
-
-const tourConfig = {
-  tours: [
-    {
-      id: 'demo',
-      name: 'Demo Tour',
-      steps: [
-        { id: 'step-1', title: 'Welcome', content: 'Welcome to the demo.' },
-        { id: 'step-2', title: 'Features', content: 'Explore our features.' },
-      ],
-    },
-  ],
-}
-
-function ChatContent() {
-  const { tourContext, askAboutStep, askForHelp, suggestions, messages } = useTourAssistant()
-
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h1>AI Chat with Tour Integration</h1>
-      {tourContext.activeTour && (
-        <div>
-          <p>
-            Current tour: {tourContext.activeTour.name} (step{' '}
-            {tourContext.activeTour.currentStep + 1}/{tourContext.activeTour.totalSteps})
-          </p>
-          <button type="button" onClick={askAboutStep}>
-            Ask about this step
-          </button>
-          <button type="button" onClick={() => askForHelp('navigation')}>
-            Help with navigation
-          </button>
-        </div>
-      )}
-      <div>
-        <h2>Messages ({messages.length})</h2>
-        <AiChatSuggestions
-          suggestions={suggestions.length > 0 ? suggestions : ['How do I get started?']}
-        />
-      </div>
-    </div>
-  )
-}
-
 export default function AiChatPage() {
   return (
-    <AiChatProvider
-      config={{
-        endpoint: '/api/chat',
-        tourContext: true,
-        suggestions: {
-          static: ['How do I get started?', 'What features are available?'],
-          dynamic: true,
-        },
-        persistence: 'local',
-      }}
-    >
-      <ChatContent />
-    </AiChatProvider>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto p-8 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">AI Chat Demo</h1>
+          <p className="text-muted-foreground mt-2">
+            The AI assistant is available on every page — click the chat button
+            in the bottom-left corner.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="rounded-lg border bg-popover p-6 shadow-sm space-y-3">
+            <h2 className="text-lg font-semibold">Features</h2>
+            <ul className="text-sm text-muted-foreground space-y-2">
+              <li>Floating chat widget with polished UI</li>
+              <li>Context-aware responses via CAG</li>
+              <li>Smart follow-up suggestions</li>
+              <li>Tour integration for step-aware help</li>
+            </ul>
+          </div>
+
+          <div className="rounded-lg border bg-popover p-6 shadow-sm space-y-3">
+            <h2 className="text-lg font-semibold">How It Works</h2>
+            <ul className="text-sm text-muted-foreground space-y-2">
+              <li>Documents are stuffed into the system prompt</li>
+              <li>The AI model answers based on your product docs</li>
+              <li>Tour context is injected when a tour is active</li>
+              <li>Suggestions refresh after each response</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

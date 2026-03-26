@@ -1,465 +1,252 @@
-# Tour Kit - LLM Documentation Reference
-
-> Tour Kit is a headless onboarding and product tour library for React.
-> Documentation: apps/docs/content/docs/
-> This file provides a quick reference for LLMs working with the codebase.
-
-## Package Overview
-
-| Package | Purpose | Key Exports |
-|---------|---------|-------------|
-| @tour-kit/core | Framework-agnostic logic | useTour, useStep, useBranch, TourProvider, createTour |
-| @tour-kit/react | React components | Tour, TourCard, TourStep, TourOverlay |
-| @tour-kit/hints | Hint beacons | Hint, HintHotspot, HintTooltip, useHint |
-| @tour-kit/adoption | Feature tracking | AdoptionProvider, useFeature, useNudge, AdoptionNudge |
-| @tour-kit/analytics | Analytics plugins | AnalyticsProvider, useAnalytics, createAnalytics |
-| @tour-kit/announcements | Announcements | AnnouncementsProvider, useAnnouncement, Modal/Toast/Banner/Slideout/Spotlight |
-| @tour-kit/checklists | Onboarding checklists | ChecklistProvider, useChecklist, Checklist, ChecklistPanel |
-| @tour-kit/media | Media embedding | TourMedia, YouTubeEmbed, VimeoEmbed, LoomEmbed, WistiaEmbed, GifPlayer, LottiePlayer |
-| @tour-kit/scheduling | Time scheduling | useSchedule, checkSchedule, isScheduleActive, BUSINESS_HOURS_PRESETS |
-
-## Key Patterns
-
-### Headless-First Architecture
-- Logic in @tour-kit/core
-- Components are thin wrappers
-- Headless variants available for all UI packages
-
-### Unified Slot Pattern
-All UI packages support asChild via UnifiedSlot:
-- Radix UI style: `<Button asChild><Link /></Button>`
-- Base UI style: `<Button>{(props) => <Link {...props} />}</Button>`
-
-### Provider Hierarchy
-```jsx
-<AnalyticsProvider>
-  <TourKitProvider>
-    <AdoptionProvider>
-      <AnnouncementsProvider>
-        <ChecklistProvider>
-          <App />
-        </ChecklistProvider>
-      </AnnouncementsProvider>
-    </AdoptionProvider>
-  </TourKitProvider>
-</AnalyticsProvider>
-```
-
-## Common Tasks
-
-### Creating a Tour
-```tsx
-import { TourProvider, Tour } from '@tour-kit/react'
-
-const tour = createTour({
-  id: 'onboarding',
-  steps: [
-    { id: 'welcome', target: '#welcome', title: 'Welcome!' },
-    { id: 'features', target: '#features', title: 'Features' },
-  ],
-})
-
-<TourProvider tour={tour}>
-  <Tour />
-</TourProvider>
-```
-
-### Branching Tours
-```tsx
-import { useBranch } from '@tour-kit/core'
-
-// Step with branching actions
-<TourStep
-  id="role-select"
-  target="#role-buttons"
-  interactive  // Allow clicks through overlay
-  onNext={null}  // Disable Next button
-  onAction={{
-    developer: 'dev-intro',
-    designer: 'design-intro',
-  }}
-/>
-
-// Component to trigger actions
-function RoleButtons() {
-  const { triggerAction, hasAction } = useBranch()
-  return (
-    <button onClick={() => triggerAction('developer')} disabled={!hasAction('developer')}>
-      Developer
-    </button>
-  )
-}
-```
-
-### Tracking Analytics
-```tsx
-import { AnalyticsProvider, createAnalytics, posthogPlugin } from '@tour-kit/analytics'
-
-const analytics = createAnalytics({
-  plugins: [posthogPlugin()],
-})
-
-<AnalyticsProvider analytics={analytics}>
-  <App />
-</AnalyticsProvider>
-```
-
-### Creating Announcements
-```tsx
-import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements'
-
-<AnnouncementsProvider announcements={[
-  { id: 'welcome', variant: 'modal', title: 'Welcome!', frequency: 'once' }
-]}>
-  <AnnouncementModal id="welcome" />
-</AnnouncementsProvider>
-```
-
-### Creating Checklists
-```tsx
-import { ChecklistProvider, ChecklistPanel, createChecklist } from '@tour-kit/checklists'
-
-<ChecklistProvider checklists={[createChecklist({
-  id: 'setup',
-  title: 'Get Started',
-  tasks: [
-    { id: 'profile', title: 'Complete profile', action: { type: 'navigate', url: '/settings' } },
-    { id: 'invite', title: 'Invite team', dependsOn: ['profile'] },
-  ]
-})]}>
-  <ChecklistPanel checklistId="setup" />
-</ChecklistProvider>
-```
-
-### Tracking Feature Adoption
-```tsx
-import { AdoptionProvider, useFeature, AdoptionNudge } from '@tour-kit/adoption'
-
-<AdoptionProvider features={[
-  { id: 'export', name: 'Export', trigger: 'click', adoptionCriteria: { minUses: 3 } }
-]}>
-  <FeatureButton featureId="export">Export</FeatureButton>
-  <AdoptionNudge />
-</AdoptionProvider>
-```
-
-### Embedding Media
-```tsx
-import { TourMedia } from '@tour-kit/media'
-
-// Auto-detects media type from URL
-<TourMedia src="https://youtube.com/watch?v=abc123" alt="Tutorial" />
-<TourMedia src="/demo.gif" alt="Demo animation" />
-<TourMedia src="/animation.json" alt="Success animation" /> // Lottie
-```
-
-### Schedule-Based Content
-```tsx
-import { useSchedule } from '@tour-kit/scheduling'
-
-const isActive = useSchedule({
-  daysOfWeek: [1, 2, 3, 4, 5], // Monday-Friday
-  timeOfDay: { start: '09:00', end: '17:00' },
-  timezone: 'America/New_York',
-})
-
-{isActive && <AnnouncementBanner id="promo" />}
-```
-
-## Accessibility
-
-- WCAG 2.1 AA compliant
-- Focus trap in tour cards (useFocusTrap)
-- Keyboard navigation (Arrow keys, Escape, Tab)
-- Screen reader announcements (aria-live)
-- Reduced motion support (prefers-reduced-motion)
-
-## File Locations
-
-- Documentation: apps/docs/content/docs/
-- Core hooks: packages/core/src/hooks/
-- React components: packages/react/src/components/
-- Types: packages/*/src/types/
-- Tests: packages/*/src/__tests__/
-- Coding rules: tour-kit/rules/
-
-## Commands
-
-```bash
-pnpm install          # Install dependencies
-pnpm build            # Build all packages
-pnpm dev              # Watch mode
-pnpm typecheck        # Type checking
-pnpm test             # Run tests
-pnpm --filter @tour-kit/core build  # Build single package
-```
-
-## Documentation Site Structure
-
-```
-apps/docs/content/docs/
-├── index.mdx                  # Landing
-├── getting-started/           # Installation, quick start (4 pages)
-├── core/                      # @tour-kit/core (15 pages)
-│   ├── hooks/                 # useTour, useStep, useBranch, useFocusTrap, etc.
-│   ├── providers/             # TourProvider, TourKitProvider
-│   ├── utilities/             # createTour, createStep, helpers
-│   └── types/                 # TourConfig, StepConfig, etc.
-├── react/                     # @tour-kit/react (14 pages)
-│   ├── components/            # Tour, TourCard, TourStep, etc.
-│   ├── headless/              # TourCardHeadless, TourOverlayHeadless
-│   ├── adapters/              # Next.js, React Router
-│   └── styling/               # CSS variables, Tailwind
-├── hints/                     # @tour-kit/hints (4+ pages)
-│   ├── components/            # Hint, HintHotspot, HintTooltip
-│   └── headless/              # HintHeadless variants
-├── adoption/                  # @tour-kit/adoption (16 pages)
-│   ├── providers/             # AdoptionProvider
-│   ├── hooks/                 # useFeature, useNudge, useAdoptionStats
-│   ├── components/            # AdoptionNudge, FeatureButton, IfAdopted
-│   ├── dashboard/             # AdoptionDashboard, AdoptionTable, Charts
-│   └── analytics/             # Analytics integration
-├── analytics/                 # @tour-kit/analytics (15 pages)
-│   ├── providers/             # AnalyticsProvider
-│   ├── hooks/                 # useAnalytics, useAnalyticsOptional
-│   └── plugins/               # console, posthog, mixpanel, amplitude, ga4
-├── announcements/             # @tour-kit/announcements (21 pages)
-│   ├── providers/             # AnnouncementsProvider
-│   ├── hooks/                 # useAnnouncement, useAnnouncementQueue
-│   ├── components/            # Modal, Slideout, Banner, Toast, Spotlight
-│   ├── headless/              # HeadlessModal, HeadlessBanner, etc.
-│   └── configuration/         # Frequency, Audience, Queue
-├── checklists/                # @tour-kit/checklists (26 pages)
-│   ├── providers/             # ChecklistProvider
-│   ├── hooks/                 # useChecklist, useTask, useChecklistPersistence
-│   ├── components/            # Checklist, ChecklistTask, ChecklistPanel
-│   ├── headless/              # ChecklistHeadless, TaskHeadless
-│   └── utilities/             # createChecklist, dependencies, progress
-├── media/                     # @tour-kit/media (21 pages)
-│   ├── components/            # TourMedia, YouTubeEmbed, GifPlayer, etc.
-│   ├── headless/              # MediaHeadless
-│   ├── hooks/                 # useMediaEvents, usePrefersReducedMotion
-│   └── utilities/             # URL parsing, embed builders
-├── scheduling/                # @tour-kit/scheduling (18 pages)
-│   ├── hooks/                 # useSchedule, useScheduleStatus
-│   ├── utilities/             # checkSchedule, timezone, blackouts
-│   └── presets/               # BUSINESS_HOURS_PRESETS
-├── guides/                    # Tutorials and guides (15 pages)
-│   ├── nextjs.mdx             # Next.js integration
-│   ├── vite.mdx               # Vite setup
-│   ├── accessibility.mdx      # A11y best practices
-│   ├── branching.mdx          # Dynamic branching tours
-│   ├── analytics-integration.mdx
-│   ├── adoption-analytics.mdx
-│   └── checklists-tours.mdx
-├── examples/                  # Code examples (3 pages)
-│   ├── basic-tour.mdx
-│   ├── onboarding-flow.mdx
-│   └── headless-custom.mdx
-└── api/                       # API reference (10 pages)
-    ├── core.mdx
-    ├── react.mdx
-    ├── hints.mdx
-    ├── adoption.mdx
-    ├── analytics.mdx
-    ├── announcements.mdx
-    ├── checklists.mdx
-    ├── media.mdx
-    └── scheduling.mdx
-```
-
-**Total: ~150+ documentation pages**
-
-## Extended Package APIs
-
-### @tour-kit/adoption
-```typescript
-// Hooks
-useFeature(featureId) → { feature, usage, isAdopted, status, trackUsage }
-useAdoptionStats() → { totalFeatures, adoptedCount, adoptionRate, byCategory }
-useNudge() → { currentNudge, queue, show, dismiss, skip }
-
-// Components
-AdoptionNudge, FeatureButton, IfAdopted, IfNotAdopted, NewFeatureBadge
-AdoptionDashboard, AdoptionTable, AdoptionCategoryChart, AdoptionStatsGrid
-
-// Types
-type AdoptionStatus = 'not_started' | 'exploring' | 'adopted' | 'churned'
-interface Feature { id, name, trigger, adoptionCriteria, category?, priority? }
-```
-
-### @tour-kit/analytics
-```typescript
-// Core
-createAnalytics(config) → TourAnalytics
-TourAnalytics.track(eventName, data), .tourStarted(), .stepViewed(), .hintShown()
-
-// Hooks
-useAnalytics() → TourAnalytics (throws if not in provider)
-useAnalyticsOptional() → TourAnalytics | null
-
-// Plugins
-consolePlugin(), posthogPlugin(), mixpanelPlugin(), amplitudePlugin(), googleAnalyticsPlugin()
-
-// Event Types
-type TourEventName = 'tour_started' | 'tour_completed' | 'step_viewed' | 'hint_shown' | ...
-```
-
-### @tour-kit/announcements
-```typescript
-// Hooks
-useAnnouncement(id) → { announcement, isVisible, show, dismiss, complete }
-useAnnouncements() → { announcements, visible, showAnnouncement }
-useAnnouncementQueue() → { queue, current, next, clear }
-
-// Components (5 variants)
-AnnouncementModal, AnnouncementSlideout, AnnouncementBanner, AnnouncementToast, AnnouncementSpotlight
-// Headless versions: HeadlessModal, HeadlessSlideout, HeadlessBanner, HeadlessToast, HeadlessSpotlight
-
-// Types
-type AnnouncementVariant = 'modal' | 'slideout' | 'banner' | 'toast' | 'spotlight'
-type FrequencyRule = 'once' | 'session' | 'always' | { type: 'times', count: N } | { type: 'interval', days: N }
-type AnnouncementPriority = 'low' | 'normal' | 'high' | 'critical'
-```
-
-### @tour-kit/checklists
-```typescript
-// Hooks
-useChecklist(id) → { checklist, tasks, progress, completeTask, reset }
-useTask(checklistId, taskId) → { task, isCompleted, isLocked, complete }
-useChecklistPersistence(id) → { save, load, clear }
-
-// Components
-Checklist, ChecklistTask, ChecklistProgress, ChecklistLauncher, ChecklistPanel
-// Headless: ChecklistHeadless, TaskHeadless
-
-// Utilities
-createChecklist(config), createTask(config)
-calculateProgress(state), canCompleteTask(taskId, state), hasCircularDependency(tasks)
-
-// Types
-type TaskAction = { type: 'navigate', url } | { type: 'callback', handler } | { type: 'tour', tourId }
-interface ChecklistProgress { completed, total, percentage, remaining }
-```
-
-### @tour-kit/media
-```typescript
-// Components
-TourMedia - Auto-detecting media component
-YouTubeEmbed, VimeoEmbed, LoomEmbed, WistiaEmbed, NativeVideo, GifPlayer, LottiePlayer
-MediaHeadless - Render prop version
-
-// Hooks
-useMediaEvents(options) → { isPlaying, currentTime, duration, play, pause, seek }
-usePrefersReducedMotion() → boolean
-useResponsiveSource(sources) → ResponsiveSource
-
-// Utilities
-parseMediaUrl(url) → { type, id, embedUrl }
-detectMediaType(url) → MediaType
-extractYouTubeId(url), extractVimeoId(url), extractLoomId(url), extractWistiaId(url)
-buildYouTubeEmbedUrl(id, options), buildVimeoEmbedUrl(id, options)
-
-// Types
-type MediaType = 'youtube' | 'vimeo' | 'loom' | 'wistia' | 'video' | 'gif' | 'lottie' | 'image'
-```
-
-### @tour-kit/scheduling
-```typescript
-// Hooks
-useSchedule(schedule, options?) → isActive: boolean
-useScheduleStatus(schedule) → { isActive, reason, nextCheck }
-useUserTimezone() → { timezone, isSupported, isDST }
-
-// Core Functions
-checkSchedule(schedule, options?) → boolean
-isScheduleActive(schedule) → boolean
-getScheduleStatus(schedule) → { isActive, reason }
-
-// Utilities
-isWithinDateRange(), isWithinTimeRange(), isWithinBusinessHours()
-isInBlackoutPeriod(), matchesRecurringPattern()
-getDayOfWeek(), isAllowedDay(), DAY_GROUPS.weekdays, DAY_GROUPS.weekend
-
-// Constants
-BUSINESS_HOURS_PRESETS.standard  // 9-5 Mon-Fri
-BUSINESS_HOURS_PRESETS.extended  // 8-8 Mon-Sat
-
-// Types
-interface Schedule { startAt?, endAt?, daysOfWeek?, timeOfDay?, timezone?, blackouts?, recurring? }
-type ScheduleInactiveReason = 'before_start_date' | 'after_end_date' | 'wrong_day_of_week' | 'in_blackout' | ...
-```
-
-## Key TypeScript Types
-
-```typescript
-// Tour
-interface TourStep { id: string; target: string; title?: string; description?: string; interactive?: boolean; onAction?: Record<string, Branch>; onNext?: Branch | null; onPrev?: Branch | null }
-interface TourConfig { id: string; steps: TourStep[] }
-
-// Branching
-type BranchTarget = string | number | 'next' | 'prev' | 'complete' | 'skip' | 'restart' | BranchToTour | null
-type Branch = BranchTarget | ((ctx: BranchContext) => BranchTarget | Promise<BranchTarget>)
-interface BranchToTour { tour: string; step?: string | number }
-
-// Announcements
-type AnnouncementVariant = 'modal' | 'toast' | 'banner' | 'slideout' | 'spotlight'
-type FrequencyRule = 'once' | 'session' | 'always' | { type: 'times'; count: number }
-
-// Checklists
-interface ChecklistTaskConfig { id: string; title: string; dependsOn?: string[]; action?: TaskAction }
-
-// Scheduling
-interface Schedule { startAt?: string; endAt?: string; daysOfWeek?: number[]; timeOfDay?: TimeRange }
-
-// Adoption
-type AdoptionStatus = 'not_started' | 'exploring' | 'adopted' | 'churned'
-
-// Analytics
-type TourEventName = 'tour_started' | 'tour_completed' | 'step_viewed' | 'hint_shown' | ...
-
-// Media
-type MediaType = 'youtube' | 'vimeo' | 'loom' | 'wistia' | 'video' | 'gif' | 'lottie' | 'image'
-```
-
-## Cross-Package Integration Patterns
-
-### Analytics + Adoption
-```tsx
-// Adoption events auto-track if analytics provider exists
-<AnalyticsProvider analytics={analytics}>
-  <AdoptionProvider features={features}>
-    {/* feature_used, feature_adopted, nudge_shown events auto-tracked */}
-  </AdoptionProvider>
-</AnalyticsProvider>
-```
-
-### Announcements + Scheduling
-```tsx
-// Show announcement only during business hours
-const announcement = {
-  id: 'promo',
-  variant: 'banner',
-  schedule: {
-    daysOfWeek: [1, 2, 3, 4, 5],
-    timeOfDay: { start: '09:00', end: '17:00' },
-  }
-}
-```
-
-### Checklists + Tours
-```tsx
-// Launch tour from checklist task
-const task = {
-  id: 'learn-feature',
-  title: 'Learn the feature',
-  action: { type: 'tour', tourId: 'feature-tour' }
-}
-```
-
-## Related Files
-
-- CLAUDE.md - Main project documentation for Claude
-- packages/*/CLAUDE.md - Package-specific documentation
-- apps/docs/CLAUDE.md - Documentation site conventions
-- tour-kit/rules/ - Coding rules and standards
+# Tour Kit v0.3.0 — Generated 2026-03-24T02:58:52Z
+
+# Tour Kit
+
+> Tour Kit is a headless onboarding and product tour library for React. It provides sequential guided tours, persistent hints, onboarding checklists, product announcements, media embeds, feature adoption tracking, analytics integration, and time-based scheduling. All components are accessible (WCAG 2.1 AA), keyboard-navigable, and work with Next.js and Vite.
+
+## Getting Started
+
+- [Getting Started](https://tour-kit-docs.vercel.app/docs/getting-started): Learn how to install and set up Tour Kit in your React application.
+- [Installation](https://tour-kit-docs.vercel.app/docs/getting-started/installation): Install TourKit in your React project
+- [Quick Start](https://tour-kit-docs.vercel.app/docs/getting-started/quick-start): Get up and running with TourKit in 5 minutes
+- [TypeScript](https://tour-kit-docs.vercel.app/docs/getting-started/typescript): TypeScript configuration and type usage
+
+## Core
+
+- [@tour-kit/core](https://tour-kit-docs.vercel.app/docs/core): Headless hooks and utilities for building product tours
+- [useAdvanceOn](https://tour-kit-docs.vercel.app/docs/core/hooks/use-advance-on): Automatically advance tour when users interact with elements
+- [useBranch](https://tour-kit-docs.vercel.app/docs/core/hooks/use-branch): Hook for triggering branch actions from step content
+- [useElementPosition](https://tour-kit-docs.vercel.app/docs/core/hooks/use-element-position): Track element position with automatic updates on scroll and resize
+- [useFocusTrap](https://tour-kit-docs.vercel.app/docs/core/hooks/use-focus-trap): Hook for trapping focus within tour elements
+- [useKeyboard](https://tour-kit-docs.vercel.app/docs/core/hooks/use-keyboard): Hook for keyboard navigation
+- [useMediaQuery](https://tour-kit-docs.vercel.app/docs/core/hooks/use-media-query): Reactive media query hooks for responsive and accessible tours
+- [usePersistence](https://tour-kit-docs.vercel.app/docs/core/hooks/use-persistence): Hook for persisting tour state
+- [useRoutePersistence](https://tour-kit-docs.vercel.app/docs/core/hooks/use-route-persistence): Persist tour state across page navigations for multi-page tours
+- [useSpotlight](https://tour-kit-docs.vercel.app/docs/core/hooks/use-spotlight): Hook for spotlight overlay control
+- [useStep](https://tour-kit-docs.vercel.app/docs/core/hooks/use-step): Hook for accessing current step data
+- [useTour](https://tour-kit-docs.vercel.app/docs/core/hooks/use-tour): Main hook for controlling tours
+- [TourKitProvider](https://tour-kit-docs.vercel.app/docs/core/providers/tour-kit-provider): Global provider for managing multiple tours
+- [TourProvider](https://tour-kit-docs.vercel.app/docs/core/providers/tour-provider): Context provider for individual tours
+- [Config Types](https://tour-kit-docs.vercel.app/docs/core/types/config-types): TypeScript types for configuration options
+- [Step Types](https://tour-kit-docs.vercel.app/docs/core/types/step-types): TypeScript types for tour steps
+- [Tour Types](https://tour-kit-docs.vercel.app/docs/core/types/tour-types): TypeScript types for tour configuration
+- [Accessibility Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/a11y): Screen reader announcements and accessibility helpers
+- [createStep](https://tour-kit-docs.vercel.app/docs/core/utilities/create-step): Factory function for creating typed step configurations
+- [createTour](https://tour-kit-docs.vercel.app/docs/core/utilities/create-tour): Factory function for creating typed tour configurations
+- [DOM Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/dom): DOM manipulation and element tracking utilities
+- [Helper Functions](https://tour-kit-docs.vercel.app/docs/core/utilities/helpers): Utility functions for common tour operations
+- [Logger Utility](https://tour-kit-docs.vercel.app/docs/core/utilities/logger): Configurable logging for debugging and production
+- [Position Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/position): Calculate tooltip positions with collision detection and RTL support
+- [Scroll Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/scroll): Smooth scrolling and scroll lock utilities
+- [Storage Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/storage): Storage adapters for persisting tour state
+- [Throttle Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/throttle): Performance utilities for rate-limiting function calls
+
+## React
+
+- [@tour-kit/react](https://tour-kit-docs.vercel.app/docs/react): Pre-styled React components for product tours
+- [Router Adapters](https://tour-kit-docs.vercel.app/docs/react/adapters): Framework-specific router adapters for multi-page tours
+- [Next.js App Router Adapter](https://tour-kit-docs.vercel.app/docs/react/adapters/next-app-router): Router adapter for Next.js 13+ App Router
+- [Next.js Pages Router Adapter](https://tour-kit-docs.vercel.app/docs/react/adapters/next-pages-router): Router adapter for Next.js Pages Router
+- [React Router Adapter](https://tour-kit-docs.vercel.app/docs/react/adapters/react-router): Router adapter for React Router v6 and v7
+- [Tour](https://tour-kit-docs.vercel.app/docs/react/components/tour): Main tour wrapper component
+- [TourCard](https://tour-kit-docs.vercel.app/docs/react/components/tour-card): Tooltip card component for tour steps
+- [TourClose](https://tour-kit-docs.vercel.app/docs/react/components/tour-close): Close button for dismissing the tour
+- [TourNavigation](https://tour-kit-docs.vercel.app/docs/react/components/tour-navigation): Navigation buttons for tour steps
+- [TourOverlay](https://tour-kit-docs.vercel.app/docs/react/components/tour-overlay): Spotlight overlay component
+- [TourProgress](https://tour-kit-docs.vercel.app/docs/react/components/tour-progress): Progress indicator for tour steps
+- [TourStep](https://tour-kit-docs.vercel.app/docs/react/components/tour-step): Define individual tour steps
+- [Headless Components](https://tour-kit-docs.vercel.app/docs/react/headless): Unstyled components for complete customization
+- [Headless Examples](https://tour-kit-docs.vercel.app/docs/react/headless/examples): Advanced examples for building custom tour UIs with headless components
+- [HeadlessTourCard](https://tour-kit-docs.vercel.app/docs/react/headless/headless-card): Unstyled tour card component
+- [HeadlessTourOverlay](https://tour-kit-docs.vercel.app/docs/react/headless/headless-overlay): Unstyled spotlight overlay component
+- [useTourRoute](https://tour-kit-docs.vercel.app/docs/react/hooks/use-tour-route): Route-aware tour control for multi-page tours
+- [useTours](https://tour-kit-docs.vercel.app/docs/react/hooks/use-tours): Access all registered tours and their state
+- [MultiTourKitProvider](https://tour-kit-docs.vercel.app/docs/react/providers/multi-tour-kit-provider): Provider for managing multiple tours with shared configuration
+- [CSS Variables](https://tour-kit-docs.vercel.app/docs/react/styling/css-variables): Customize TourKit with CSS variables
+- [Custom Components](https://tour-kit-docs.vercel.app/docs/react/styling/custom-components): Build your own tour components
+- [Tailwind CSS](https://tour-kit-docs.vercel.app/docs/react/styling/tailwind): Using TourKit with Tailwind CSS
+
+## Hints
+
+- [@tour-kit/hints](https://tour-kit-docs.vercel.app/docs/hints): Persistent hints and hotspots for feature discovery
+- [Components](https://tour-kit-docs.vercel.app/docs/hints/components): Hint, HintHotspot, and HintTooltip components for contextual feature discovery
+- [Headless Hints](https://tour-kit-docs.vercel.app/docs/hints/headless): Build custom hint UIs with headless components
+- [HintHeadless](https://tour-kit-docs.vercel.app/docs/hints/headless/hint-headless): Headless hint component with render props for custom UIs
+- [HintHotspotHeadless](https://tour-kit-docs.vercel.app/docs/hints/headless/hint-hotspot-headless): Headless hotspot component for custom trigger buttons
+- [HintTooltipHeadless](https://tour-kit-docs.vercel.app/docs/hints/headless/hint-tooltip-headless): Headless floating tooltip with positioning logic
+- [Hooks](https://tour-kit-docs.vercel.app/docs/hints/hooks): useHints and useHint hooks for programmatic hint control
+- [Persistence](https://tour-kit-docs.vercel.app/docs/hints/persistence): Understanding hint dismissal patterns and persisting state across sessions
+
+## Adoption
+
+- [Feature Adoption Tracking](https://tour-kit-docs.vercel.app/docs/adoption): Track feature usage, measure adoption, and nudge users toward valuable features
+- [Analytics Integration](https://tour-kit-docs.vercel.app/docs/adoption/analytics): Automatic analytics tracking for adoption events
+- [AdoptionNudge](https://tour-kit-docs.vercel.app/docs/adoption/components/adoption-nudge): Auto-showing nudge component for feature discovery
+- [Conditional Components](https://tour-kit-docs.vercel.app/docs/adoption/components/conditional): IfNotAdopted and IfAdopted - render based on adoption status
+- [FeatureButton](https://tour-kit-docs.vercel.app/docs/adoption/components/feature-button): Button with automatic usage tracking
+- [NewFeatureBadge](https://tour-kit-docs.vercel.app/docs/adoption/components/new-feature-badge): Badge component that shows for unadopted features
+- [Dashboard Components](https://tour-kit-docs.vercel.app/docs/adoption/dashboard): Pre-built admin dashboard components for visualizing adoption metrics
+- [AdoptionDashboard](https://tour-kit-docs.vercel.app/docs/adoption/dashboard/adoption-dashboard): Complete admin dashboard with all adoption metrics
+- [Charts](https://tour-kit-docs.vercel.app/docs/adoption/dashboard/charts): AdoptionCategoryChart and AdoptionStatusBadge components
+- [Stat Cards](https://tour-kit-docs.vercel.app/docs/adoption/dashboard/stats): AdoptionStatCard and AdoptionStatsGrid components
+- [AdoptionTable](https://tour-kit-docs.vercel.app/docs/adoption/dashboard/table): Sortable table of features and adoption status
+- [useAdoptionStats](https://tour-kit-docs.vercel.app/docs/adoption/hooks/use-adoption-stats): Get aggregated adoption metrics across all features
+- [useFeature](https://tour-kit-docs.vercel.app/docs/adoption/hooks/use-feature): Track and query individual feature adoption state
+- [useNudge](https://tour-kit-docs.vercel.app/docs/adoption/hooks/use-nudge): Manage nudge state and handle user interactions
+- [AdoptionProvider](https://tour-kit-docs.vercel.app/docs/adoption/providers/adoption-provider): Configure feature tracking, storage, and nudge behavior
+- [TypeScript Types](https://tour-kit-docs.vercel.app/docs/adoption/types): Type definitions for @tour-kit/adoption
+
+## Analytics
+
+- [Analytics](https://tour-kit-docs.vercel.app/docs/analytics): Plugin-based analytics integration for tracking tour and hint events
+- [Analytics Hooks](https://tour-kit-docs.vercel.app/docs/analytics/hooks): React hooks for accessing the analytics tracker in components
+- [Analytics Plugins](https://tour-kit-docs.vercel.app/docs/analytics/plugins): Overview of the plugin system and available integrations
+- [Amplitude Plugin](https://tour-kit-docs.vercel.app/docs/analytics/plugins/amplitude): Integrate tour analytics with Amplitude product intelligence
+- [Console Plugin](https://tour-kit-docs.vercel.app/docs/analytics/plugins/console): Debug analytics events with colored console output
+- [Custom Analytics Plugins](https://tour-kit-docs.vercel.app/docs/analytics/plugins/custom): Build your own analytics integrations with the plugin API
+- [Google Analytics Plugin](https://tour-kit-docs.vercel.app/docs/analytics/plugins/google-analytics): Integrate tour analytics with Google Analytics 4
+- [Mixpanel Plugin](https://tour-kit-docs.vercel.app/docs/analytics/plugins/mixpanel): Integrate tour analytics with Mixpanel event tracking
+- [PostHog Plugin](https://tour-kit-docs.vercel.app/docs/analytics/plugins/posthog): Integrate tour analytics with PostHog product analytics
+- [AnalyticsProvider](https://tour-kit-docs.vercel.app/docs/analytics/providers): React provider for configuring tour analytics tracking
+- [Analytics Types](https://tour-kit-docs.vercel.app/docs/analytics/types): TypeScript type definitions for the analytics package
+
+## Announcements
+
+- [@tour-kit/announcements](https://tour-kit-docs.vercel.app/docs/announcements): Product announcements with 5 UI variants, priority queuing, and audience targeting
+- [Components](https://tour-kit-docs.vercel.app/docs/announcements/components): Pre-styled announcement components for all UI variants
+- [AnnouncementBanner](https://tour-kit-docs.vercel.app/docs/announcements/components/banner): Full-width bar component for persistent notices
+- [AnnouncementModal](https://tour-kit-docs.vercel.app/docs/announcements/components/modal): Centered dialog component for important announcements
+- [AnnouncementSlideout](https://tour-kit-docs.vercel.app/docs/announcements/components/slideout): Side panel component for detailed announcements
+- [AnnouncementSpotlight](https://tour-kit-docs.vercel.app/docs/announcements/components/spotlight): Element highlight component for contextual announcements
+- [AnnouncementToast](https://tour-kit-docs.vercel.app/docs/announcements/components/toast): Temporary notification component for quick messages
+- [Audience Targeting](https://tour-kit-docs.vercel.app/docs/announcements/configuration/audience): Show announcements to specific user segments
+- [Frequency Rules](https://tour-kit-docs.vercel.app/docs/announcements/configuration/frequency): Control how often announcements are shown to users
+- [Queue Management](https://tour-kit-docs.vercel.app/docs/announcements/configuration/queue): Priority-based announcement queue with automatic scheduling
+- [Headless Components](https://tour-kit-docs.vercel.app/docs/announcements/headless): Build custom announcement UI with render props
+- [HeadlessBanner](https://tour-kit-docs.vercel.app/docs/announcements/headless/banner): Headless banner component with render props
+- [HeadlessModal](https://tour-kit-docs.vercel.app/docs/announcements/headless/modal): Headless modal component with render props
+- [HeadlessSlideout](https://tour-kit-docs.vercel.app/docs/announcements/headless/slideout): Headless slideout component with render props
+- [HeadlessSpotlight](https://tour-kit-docs.vercel.app/docs/announcements/headless/spotlight): Headless spotlight component with render props
+- [HeadlessToast](https://tour-kit-docs.vercel.app/docs/announcements/headless/toast): Headless toast component with render props
+- [useAnnouncement](https://tour-kit-docs.vercel.app/docs/announcements/hooks/use-announcement): Hook for controlling a single announcement
+- [useAnnouncementQueue](https://tour-kit-docs.vercel.app/docs/announcements/hooks/use-announcement-queue): Hook for managing the announcement queue
+- [useAnnouncements](https://tour-kit-docs.vercel.app/docs/announcements/hooks/use-announcements): Hook for accessing and managing all announcements
+- [AnnouncementsProvider](https://tour-kit-docs.vercel.app/docs/announcements/providers/announcements-provider): Root provider for announcement state and configuration
+- [Type Reference](https://tour-kit-docs.vercel.app/docs/announcements/types): Complete TypeScript type reference for @tour-kit/announcements
+
+## Checklists
+
+- [@tour-kit/checklists](https://tour-kit-docs.vercel.app/docs/checklists): Interactive checklists with task dependencies and progress tracking
+- [Components](https://tour-kit-docs.vercel.app/docs/checklists/components): Pre-styled checklist components with shadcn/ui patterns
+- [Checklist](https://tour-kit-docs.vercel.app/docs/checklists/components/checklist): Main checklist container component
+- [ChecklistLauncher](https://tour-kit-docs.vercel.app/docs/checklists/components/checklist-launcher): Floating button to toggle checklist panel visibility
+- [ChecklistPanel](https://tour-kit-docs.vercel.app/docs/checklists/components/checklist-panel): Floating panel container for checklists
+- [ChecklistProgress](https://tour-kit-docs.vercel.app/docs/checklists/components/checklist-progress): Progress bar component for checklists
+- [ChecklistTask](https://tour-kit-docs.vercel.app/docs/checklists/components/checklist-task): Individual task item component
+- [Headless Components](https://tour-kit-docs.vercel.app/docs/checklists/headless): Unstyled components with render props for custom UIs
+- [ChecklistHeadless](https://tour-kit-docs.vercel.app/docs/checklists/headless/checklist-headless): Headless checklist component with render props
+- [TaskHeadless](https://tour-kit-docs.vercel.app/docs/checklists/headless/task-headless): Headless task component with render props
+- [useChecklist](https://tour-kit-docs.vercel.app/docs/checklists/hooks/use-checklist): Main hook for controlling checklist state and actions
+- [useChecklistPersistence](https://tour-kit-docs.vercel.app/docs/checklists/hooks/use-checklist-persistence): Manage checklist state persistence across sessions
+- [useChecklistsProgress](https://tour-kit-docs.vercel.app/docs/checklists/hooks/use-checklists-progress): Get aggregated progress across all checklists
+- [useTask](https://tour-kit-docs.vercel.app/docs/checklists/hooks/use-task): Hook for controlling individual tasks
+- [ChecklistProvider](https://tour-kit-docs.vercel.app/docs/checklists/providers/checklist-provider): Configure and provide checklist state to your application
+- [Types](https://tour-kit-docs.vercel.app/docs/checklists/types): TypeScript type definitions for checklists
+- [Utilities](https://tour-kit-docs.vercel.app/docs/checklists/utilities): Helper functions for checklists and tasks
+- [createChecklist & createTask](https://tour-kit-docs.vercel.app/docs/checklists/utilities/create-checklist): Factory functions for type-safe checklist creation
+- [Dependency Utilities](https://tour-kit-docs.vercel.app/docs/checklists/utilities/dependencies): Functions for managing task dependencies
+- [Progress Utilities](https://tour-kit-docs.vercel.app/docs/checklists/utilities/progress): Functions for calculating and analyzing progress
+
+## Media
+
+- [Media](https://tour-kit-docs.vercel.app/docs/media): Embedded video and media support for tours and announcements with auto-detection and accessibility features
+- [GifPlayer](https://tour-kit-docs.vercel.app/docs/media/components/gif-player): Animated GIF player with play/pause controls and accessibility features
+- [LoomEmbed](https://tour-kit-docs.vercel.app/docs/media/components/loom-embed): Embed Loom screen recordings and async video messages in your tours
+- [LottiePlayer](https://tour-kit-docs.vercel.app/docs/media/components/lottie-player): Lightweight vector animation player with Lottie support
+- [NativeVideo](https://tour-kit-docs.vercel.app/docs/media/components/native-video): Self-hosted HTML5 video with captions, responsive sources, and accessibility features
+- [TourMedia](https://tour-kit-docs.vercel.app/docs/media/components/tour-media): Main media component with automatic platform detection and accessibility features
+- [VimeoEmbed](https://tour-kit-docs.vercel.app/docs/media/components/vimeo-embed): Embed Vimeo videos with professional privacy controls and customization
+- [WistiaEmbed](https://tour-kit-docs.vercel.app/docs/media/components/wistia-embed): Embed Wistia videos with enterprise features and advanced analytics
+- [YouTubeEmbed](https://tour-kit-docs.vercel.app/docs/media/components/youtube-embed): Embed YouTube videos with GDPR-compliant privacy-enhanced mode
+- [Headless API](https://tour-kit-docs.vercel.app/docs/media/headless): Build completely custom media interfaces with full programmatic control
+- [MediaHeadless](https://tour-kit-docs.vercel.app/docs/media/headless/media-headless): Headless media component with render props for complete UI control
+- [useMediaEvents](https://tour-kit-docs.vercel.app/docs/media/hooks/use-media-events): Track media engagement and integrate with analytics platforms
+- [usePrefersReducedMotion](https://tour-kit-docs.vercel.app/docs/media/hooks/use-prefers-reduced-motion): Detect user motion preferences for accessible animations
+- [useResponsiveSource](https://tour-kit-docs.vercel.app/docs/media/hooks/use-responsive-source): Select media sources based on viewport size for optimized delivery
+- [Type Reference](https://tour-kit-docs.vercel.app/docs/media/types): Complete TypeScript type definitions for @tour-kit/media
+- [Embed URLs](https://tour-kit-docs.vercel.app/docs/media/utilities/embed-urls): Build privacy-compliant embed URLs for video platforms
+- [URL Parsing](https://tour-kit-docs.vercel.app/docs/media/utilities/url-parsing): Detect media types and extract video IDs from URLs
+
+## Scheduling
+
+- [@tour-kit/scheduling](https://tour-kit-docs.vercel.app/docs/scheduling): Time-based scheduling utilities for controlling when tours and content should be shown
+- [Scheduling Hooks](https://tour-kit-docs.vercel.app/docs/scheduling/hooks): React hooks for reactive schedule evaluation
+- [useSchedule](https://tour-kit-docs.vercel.app/docs/scheduling/hooks/use-schedule): React hook for simple schedule active/inactive checks with auto-refresh
+- [useScheduleStatus](https://tour-kit-docs.vercel.app/docs/scheduling/hooks/use-schedule-status): React hook for detailed schedule status with next active/inactive times
+- [useUserTimezone](https://tour-kit-docs.vercel.app/docs/scheduling/hooks/use-user-timezone): React hook to get the user's browser timezone
+- [Presets](https://tour-kit-docs.vercel.app/docs/scheduling/presets): Pre-configured constants and patterns for common scheduling scenarios
+- [Types Reference](https://tour-kit-docs.vercel.app/docs/scheduling/types): TypeScript types for scheduling
+- [Scheduling Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities): Pure functions for schedule evaluation and time handling
+- [Blackout Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities/blackouts): Functions for checking blackout periods
+- [Business Hours Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities/business-hours): Functions for checking business hours and holidays
+- [Date Range Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities/date-range): Functions for checking date range constraints
+- [Day of Week Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities/day-of-week): Functions for working with days of the week
+- [Recurring Pattern Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities/recurring): Functions for matching recurring schedules
+- [Schedule Evaluation](https://tour-kit-docs.vercel.app/docs/scheduling/utilities/schedule-evaluation): Core functions for evaluating schedule active status
+- [Time Range Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities/time-range): Functions for checking time-of-day constraints
+- [Timezone Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities/timezone): Functions for timezone detection, validation, and conversion
+
+## AI
+
+- [@tour-kit/ai](https://tour-kit-docs.vercel.app/docs/ai): AI-powered chat assistant for product tours with context-aware conversation
+- [API Reference](https://tour-kit-docs.vercel.app/docs/ai/api-reference): Complete API reference for @tour-kit/ai client and server exports
+- [CAG Guide](https://tour-kit-docs.vercel.app/docs/ai/cag-guide): Context-Augmented Generation — inject tour context directly into AI prompts
+- [Components](https://tour-kit-docs.vercel.app/docs/ai/components): Pre-built UI components for AI chat features
+- [Quick Start](https://tour-kit-docs.vercel.app/docs/ai/quick-start): Get up and running with @tour-kit/ai in under 5 minutes
+- [RAG Guide](https://tour-kit-docs.vercel.app/docs/ai/rag-guide): Retrieval-Augmented Generation — vector search over documentation for scalable AI chat
+- [Tour Integration](https://tour-kit-docs.vercel.app/docs/ai/tour-integration): Connect AI chat to active tours for context-aware assistance
+
+## Guides
+
+- [Guides](https://tour-kit-docs.vercel.app/docs/guides): In-depth guides for Tour Kit features and integrations
+- [Accessibility](https://tour-kit-docs.vercel.app/docs/guides/accessibility): Building accessible tours that work for everyone - WCAG 2.1 AA compliance guide
+- [Adoption Analytics](https://tour-kit-docs.vercel.app/docs/guides/adoption-analytics): Tracking feature adoption metrics with analytics integration
+- [Analytics Integration](https://tour-kit-docs.vercel.app/docs/guides/analytics-integration): Integrating @tour-kit/analytics with tours, hints, checklists, and adoption tracking
+- [Animations](https://tour-kit-docs.vercel.app/docs/guides/animations): Customize tour transitions, respect reduced motion, and create smooth experiences
+- [Time-Based Announcements](https://tour-kit-docs.vercel.app/docs/guides/announcements-scheduling): Using scheduling with announcements for timed content delivery
+- [Base UI Support](https://tour-kit-docs.vercel.app/docs/guides/base-ui): Use TourKit with Base UI instead of Radix UI
+- [Branching Tours](https://tour-kit-docs.vercel.app/docs/guides/branching): Create personalized tour experiences with dynamic branching based on user choices
+- [Checklists with Tours](https://tour-kit-docs.vercel.app/docs/guides/checklists-tours): Using checklists with tours for guided onboarding flows
+- [Next.js Integration](https://tour-kit-docs.vercel.app/docs/guides/nextjs): Complete setup guide for Tour Kit with Next.js App Router and Pages Router
+- [Persistence](https://tour-kit-docs.vercel.app/docs/guides/persistence): Save tour progress, checklist state, and user preferences across sessions
+- [Router Integration](https://tour-kit-docs.vercel.app/docs/guides/router-integration): Set up multi-page tours with Next.js, React Router, and custom routers
+- [Troubleshooting](https://tour-kit-docs.vercel.app/docs/guides/troubleshooting): Common issues and solutions when using Tour Kit
+- [Vite Integration](https://tour-kit-docs.vercel.app/docs/guides/vite): Setup guide for Tour Kit with Vite and React
+
+## Examples
+
+- [Examples](https://tour-kit-docs.vercel.app/docs/examples): Real-world examples and copy-paste code for Tour Kit
+- [Basic Tour](https://tour-kit-docs.vercel.app/docs/examples/basic-tour): A simple multi-step product tour with copy-paste code
+- [Headless Custom UI](https://tour-kit-docs.vercel.app/docs/examples/headless-custom): Build a completely custom tour UI using headless components
+- [Onboarding Flow](https://tour-kit-docs.vercel.app/docs/examples/onboarding-flow): A complete user onboarding flow with persistence and conditional steps
+
+## API Reference
+
+- [API Reference](https://tour-kit-docs.vercel.app/docs/api): Complete API documentation for all Tour Kit packages
+- [@tour-kit/adoption API](https://tour-kit-docs.vercel.app/docs/api/adoption): Complete API reference for @tour-kit/adoption
+- [@tour-kit/analytics API](https://tour-kit-docs.vercel.app/docs/api/analytics): Complete API reference for @tour-kit/analytics
+- [@tour-kit/announcements API](https://tour-kit-docs.vercel.app/docs/api/announcements): Complete API reference for @tour-kit/announcements
+- [@tour-kit/checklists API](https://tour-kit-docs.vercel.app/docs/api/checklists): Complete API reference for @tour-kit/checklists
+- [@tour-kit/core API](https://tour-kit-docs.vercel.app/docs/api/core): Complete API reference for @tour-kit/core
+- [@tour-kit/hints API](https://tour-kit-docs.vercel.app/docs/api/hints): Complete API reference for @tour-kit/hints
+- [@tour-kit/media API](https://tour-kit-docs.vercel.app/docs/api/media): Complete API reference for @tour-kit/media
+- [@tour-kit/react API](https://tour-kit-docs.vercel.app/docs/api/react): Complete API reference for @tour-kit/react
+- [@tour-kit/scheduling API](https://tour-kit-docs.vercel.app/docs/api/scheduling): Complete API reference for @tour-kit/scheduling
+
+## AI Assistants
+
+- [AI Assistants](https://tour-kit-docs.vercel.app/docs/ai-assistants): Documentation resources optimized for AI coding assistants and LLMs
+
+## Index
+
+- [TourKit](https://tour-kit-docs.vercel.app/docs/index): The most developer-friendly, accessible product tour library for React

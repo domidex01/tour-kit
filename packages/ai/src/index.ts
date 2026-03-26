@@ -23,7 +23,28 @@ export {
 // ============================================
 // COMPONENTS
 // ============================================
+export { AiChatPanel, type AiChatPanelProps } from './components/ai-chat-panel'
+export { AiChatToggle, type AiChatToggleProps } from './components/ai-chat-toggle'
+export { AiChatHeader, type AiChatHeaderProps } from './components/ai-chat-header'
+export {
+  AiChatMessageList,
+  type AiChatMessageListProps,
+} from './components/ai-chat-message-list'
+export { AiChatMessage, type AiChatMessageProps } from './components/ai-chat-message'
+export { AiChatInput, type AiChatInputProps } from './components/ai-chat-input'
 export { AiChatSuggestions, type AiChatSuggestionsProps } from './components/ai-chat-suggestions'
+export { AiChatPortal, type AiChatPortalProps } from './components/primitives/ai-chat-portal'
+
+// ============================================
+// VARIANTS
+// ============================================
+export {
+  aiChatPanelVariants,
+  aiChatHeaderVariants,
+  aiChatMessageVariants,
+  aiChatSuggestionChipVariants,
+  aiChatToggleVariants,
+} from './components/ui'
 
 // ============================================
 // CORE UTILITIES

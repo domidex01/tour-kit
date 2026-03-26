@@ -1,0 +1,180 @@
+Tour Kit — @tour-kit/media Context File
+Version: 0.1.0 | Generated: 2026-03-24
+Paste this into your LLM to get accurate answers about @tour-kit/media.
+=========================================================================
+
+OVERVIEW
+--------
+Embedded video and media support for TourKit tours and announcements
+
+INSTALLATION
+------------
+    npm install @tour-kit/media
+    # or
+    pnpm add @tour-kit/media
+
+Peer dependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+    @lottiefiles/react-lottie-player: ^3.5.0
+    @mui/base: ^5.0.0-beta.0
+
+EXPORTS
+-------
+
+Types:
+    TourMediaComponentProps
+    YouTubeEmbedProps
+    VimeoEmbedProps
+    LoomEmbedProps
+    WistiaEmbedProps
+    NativeVideoProps
+    GifPlayerProps
+    LottiePlayerProps
+    MediaContainerVariants
+    MediaOverlayVariants
+    PlayButtonVariants
+    IframeVariants
+    UseMediaEventsOptions
+    UseMediaEventsReturn
+    UnifiedSlotProps
+    UILibraryProviderProps
+    EmbedUrlOptions
+    MediaType
+    CaptionTrack
+    ResponsiveSource
+    ParsedMediaUrl
+    LottieOptions
+    TourMediaConfig
+    TourMediaProps
+    MediaHeadlessRenderProps
+    MediaHeadlessProps
+    MediaEventName
+    MediaEvent
+    MediaEventHandlers
+
+Hooks:
+    useMediaEvents
+    usePrefersReducedMotion
+    useResponsiveSource
+    useUILibrary
+
+Components:
+    TourMedia
+    YouTubeEmbed
+    VimeoEmbed
+    LoomEmbed
+    WistiaEmbed
+    NativeVideo
+    GifPlayer
+    LottiePlayer
+    MediaHeadless
+    Slot
+    Slottable
+    UnifiedSlot
+    RenderProp
+    UILibraryProvider
+    UILibrary
+
+Utilities:
+    mediaContainerVariants
+    mediaOverlayVariants
+    playButtonVariants
+    iframeVariants
+    cn
+    parseMediaUrl
+    detectMediaType
+    isSupportedMediaUrl
+    isEmbedType
+    isNativeVideoType
+    supportsAutoplay
+    extractYouTubeId
+    extractVimeoId
+    extractLoomId
+    extractWistiaId
+    isYouTubeUrl
+    isVimeoUrl
+    isLoomUrl
+    isWistiaUrl
+    buildYouTubeEmbedUrl
+    buildVimeoEmbedUrl
+    buildLoomEmbedUrl
+    buildWistiaEmbedUrl
+    getYouTubeThumbnailUrl
+    getVimeoThumbnailUrl
+    selectResponsiveSource
+    getSourceType
+
+TYPES
+-----
+
+    export interface TourMediaComponentProps
+      extends TourMediaProps,
+        Omit<MediaContainerVariants, 'aspectRatio'> {}
+
+    export interface UILibraryProviderProps {
+      library?: UILibrary
+      children: React.ReactNode
+    }
+
+    export type UILibrary = 'radix-ui' | 'base-ui'
+
+HOOKS
+-----
+    useMediaEvents(...)
+    usePrefersReducedMotion(...)
+    useResponsiveSource(...)
+    useUILibrary(): UILibrary
+
+COMPONENTS
+----------
+    <TourMedia />
+    <YouTubeEmbed />
+    <VimeoEmbed />
+    <LoomEmbed />
+    <WistiaEmbed />
+    <NativeVideo />
+    <GifPlayer />
+    <LottiePlayer />
+    <MediaHeadless />
+    <Slot />
+    <Slottable />
+    <UnifiedSlot />
+    <RenderProp />
+    <UILibraryProvider />
+    <UILibrary />
+
+EXAMPLES
+--------
+
+Example 1: Quick Start
+
+    import { TourMedia } from '@tour-kit/media'
+    
+    export function WelcomeTour() {
+      return (
+        <TourMedia
+          src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          alt="Product walkthrough"
+        />
+      )
+    }
+
+Example 2: Reduced Motion Support
+
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      alt="Product walkthrough"
+      reducedMotionFallback="/static/thumbnail.jpg"
+    />
+
+Example 3: Caption Support
+
+    <TourMedia
+      src="/videos/demo.mp4"
+      alt="Feature demonstration"
+      captions={[
+        { src: '/captions/en.vtt', srcLang: 'en', label: 'English' },
+        { src: '/captions/es.vtt', srcLang: 'es', label: 'Español' }
+      ]}
+    />

@@ -1,4 +1,13 @@
-// @tour-kit/ai/headless — headless entry point
-// Phase 0: placeholder exports for build validation
+export {
+  AiChatPanelHeadless,
+  type AiChatPanelHeadlessProps,
+  type AiChatPanelRenderProps,
+} from './components/headless/ai-chat-panel-headless'
 
-export const HEADLESS_ENTRY = true as const
+export { useAiChat, type UseAiChatReturn } from './hooks/use-ai-chat'
+export { useSuggestions, type UseSuggestionsReturn } from './hooks/use-suggestions'
+export {
+  useTourAssistant,
+  type UseTourAssistantReturn,
+  type TourAssistantContext,
+} from './hooks/use-tour-assistant'

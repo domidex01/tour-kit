@@ -1,0 +1,214 @@
+Tour Kit — @tour-kit/hints Context File
+Version: 0.4.1 | Generated: 2026-03-24
+Paste this into your LLM to get accurate answers about @tour-kit/hints.
+=========================================================================
+
+OVERVIEW
+--------
+Persistent hints and hotspots for TourKit - works with or without Tailwind CSS
+
+INSTALLATION
+------------
+    npm install @tour-kit/hints
+    # or
+    pnpm add @tour-kit/hints
+
+Peer dependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+    tailwindcss: ^3.4.0 || ^4.0.0
+    @mui/base: ^5.0.0-beta.0
+
+EXPORTS
+-------
+
+Types:
+    HintProps
+    HintHotspotProps
+    HintTooltipProps
+    HintHotspotVariants
+    HintTooltipVariants
+    HintCloseVariants
+    UnifiedSlotProps
+    UILibraryProviderProps
+    HintConfig
+    HintState
+    HotspotPosition
+    HintsContextValue
+    Placement
+
+Hooks:
+    useHintsContext
+    useHints
+    useHint
+    useUILibrary
+
+Components:
+    Hint
+    HintHotspot
+    HintTooltip
+    HintsProvider
+    HintsContext
+    Slot
+    Slottable
+    UnifiedSlot
+    UILibraryProvider
+    UILibrary
+
+Utilities:
+    hintHotspotVariants
+    hintTooltipVariants
+    hintCloseVariants
+    cn
+
+TYPES
+-----
+
+    export interface HintProps extends HintConfig, Omit<Partial<HintHotspotVariants>, 'pulse'> {
+      /** Custom content (overrides config.content) */
+      children?: React.ReactNode
+      /** Additional class name for the tooltip */
+      className?: string
+      /** Additional class name for the hotspot */
+      hotspotClassName?: string
+    }
+
+    export interface HintHotspotProps
+      extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'>,
+        HintHotspotVariants {
+      /** Target element's bounding rect */
+      targetRect: DOMRect
+      /** Position relative to the target element */
+      position: HotspotPosition
+      /** Whether the hint tooltip is open */
+      isOpen?: boolean
+      /** Use custom element via Slot */
+      asChild?: boolean
+    }
+
+    export interface HintTooltipProps
+      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+        HintTooltipVariants {
+      /** Target element to anchor the tooltip to */
+      target: HTMLElement
+      /** Placement relative to target */
+      placement?: Placement
+      /** Called when the tooltip should close */
+      onClose: () => void
+      /** Content to display */
+      children: React.ReactNode
+      /** Use custom close button */
+      closeButton?: React.ReactNode
+      /** Use custom element via Slot */
+      asChild?: boolean
+    }
+
+    export interface UILibraryProviderProps {
+      library?: UILibrary
+      children: React.ReactNode
+    }
+
+    export type UILibrary = 'radix-ui' | 'base-ui'
+
+    export interface HintConfig {
+      id: string
+      target: string | React.RefObject<HTMLElement | null>
+      content: React.ReactNode
+      position?: HotspotPosition
+      tooltipPlacement?: import('@tour-kit/core').Placement
+      pulse?: boolean
+      autoShow?: boolean
+      persist?: boolean
+      onClick?: () => void
+      onShow?: () => void
+      onDismiss?: () => void
+    }
+
+    export interface HintState {
+      id: string
+      isOpen: boolean
+      isDismissed: boolean
+    }
+
+    export interface HintsContextValue {
+      hints: Map<string, HintState>
+      activeHint: string | null
+      registerHint: (id: string) => void
+      unregisterHint: (id: string) => void
+      showHint: (id: string) => void
+      hideHint: (id: string) => void
+      dismissHint: (id: string) => void
+      resetHint: (id: string) => void
+      resetAllHints: () => void
+    }
+
+    export type HotspotPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
+
+HOOKS
+-----
+    useHintsContext(): HintsContextValue
+    useHints()
+    useHint(id: string)
+    useUILibrary(): UILibrary
+
+COMPONENTS
+----------
+    <Hint />
+    <HintHotspot />
+    <HintTooltip />
+    <HintsProvider />
+    <HintsContext />
+    <Slot />
+    <Slottable />
+    <UnifiedSlot />
+    <UILibraryProvider />
+    <UILibrary />
+
+EXAMPLES
+--------
+
+Example 1: Basic Usage
+
+    import { HintsProvider, Hint } from '@tour-kit/hints';
+    
+    function App() {
+      return (
+        <HintsProvider>
+          <Hint
+            id="new-feature"
+            target="#export-button"
+            content="New! Export your data to CSV or PDF"
+          />
+    
+          <button id="export-button">Export</button>
+        </HintsProvider>
+      );
+    }
+
+Example 2: Styling Variants
+
+    // Small - subtle indicators
+    <Hint id="subtle" target="#element" content="..." size="sm" />
+    
+    // Default - standard size
+    <Hint id="normal" target="#element" content="..." size="default" />
+    
+    // Large - prominent indicators
+    <Hint id="prominent" target="#element" content="..." size="lg" />
+
+Example 3: Styling Variants
+
+    // Primary (default)
+    <Hint id="primary" target="#element" content="..." color="default" />
+    
+    // Secondary
+    <Hint id="secondary" target="#element" content="..." color="secondary" />
+    
+    // Success - for positive features
+    <Hint id="success" target="#element" content="New!" color="success" />
+    
+    // Warning - for important features
+    <Hint id="warning" target="#element" content="Required" color="warning" />
+    
+    // Destructive - for dangerous actions
+    <Hint id="danger" target="#element" content="Caution" color="destructive" />

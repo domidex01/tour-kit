@@ -1,0 +1,231 @@
+Tour Kit — @tour-kit/checklists Context File
+Version: 0.1.0 | Generated: 2026-03-24
+Paste this into your LLM to get accurate answers about @tour-kit/checklists.
+=========================================================================
+
+OVERVIEW
+--------
+Interactive checklists for user onboarding and workflow guidance
+
+INSTALLATION
+------------
+    npm install @tour-kit/checklists
+    # or
+    pnpm add @tour-kit/checklists
+
+Peer dependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+    @mui/base: ^5.0.0-beta.0
+
+EXPORTS
+-------
+
+Types:
+    ChecklistContextValue
+    ChecklistProps
+    ChecklistTaskProps
+    ChecklistProgressProps
+    ChecklistLauncherProps
+    ChecklistPanelProps
+    ChecklistHeadlessProps
+    ChecklistRenderProps
+    TaskHeadlessProps
+    TaskRenderProps
+    UseChecklistReturn
+    UseTaskReturn
+    UseChecklistPersistenceReturn
+    UnifiedSlotProps
+    UILibraryProviderProps
+    // Checklist types
+  ChecklistConfig
+    ChecklistState
+    ChecklistTaskConfig
+    ChecklistTaskState
+    ChecklistProgress as ChecklistProgressType
+    ChecklistContext as ChecklistContextData
+    TaskAction
+    TaskCompletionCondition
+    // Config types
+  ChecklistProviderConfig
+    ChecklistPersistenceConfig
+    PersistedChecklistState
+
+Hooks:
+    useChecklistContext
+    useChecklist
+    useTask
+    useChecklistPersistence
+    useChecklistsProgress
+    useUILibrary
+
+Components:
+    ChecklistContext
+    ChecklistProvider
+    Checklist
+    ChecklistTask
+    ChecklistProgress
+    ChecklistLauncher
+    ChecklistPanel
+    ChecklistHeadless
+    TaskHeadless
+    Slot
+    Slottable
+    UnifiedSlot
+    UILibraryProvider
+    UILibrary
+
+Utilities:
+    createChecklist
+    createTask
+    calculateProgress
+    getNextTask
+    getLockedTasks
+    canCompleteTask
+    resolveTaskDependencies
+    hasCircularDependency
+
+TYPES
+-----
+
+    export interface ChecklistContextValue {
+      /** All checklist states */
+      checklists: Map<string, ChecklistState>
+      /** Context data for conditions */
+      context: ChecklistContextType
+      /** Get a specific checklist */
+      getChecklist: (id: string) => ChecklistState | undefined
+      /** Complete a task */
+      completeTask: (checklistId: string, taskId: string) => void
+      /** Uncomplete a task */
+      uncompleteTask: (checklistId: string, taskId: string) => void
+      /** Execute task action */
+      executeAction: (checklistId: string, taskId: string) => void
+      /** Dismiss a checklist */
+      dismissChecklist: (checklistId: string) => void
+      /** Restore a dismissed checklist */
+      restoreChecklist: (checklistId: string) => void
+      /** Toggle checklist expanded state */
+      toggleExpanded: (checklistId: string) => void
+      /** Set expanded state */
+      setExpanded: (checklistId: string, expanded: boolean) => void
+      /** Reset a checklist */
+      resetChecklist: (checklistId: string) => void
+      /** Reset all checklists */
+      resetAll: () => void
+      /** Get progress for a checklist */
+      getProgress: (checklistId: string) => ChecklistProgress
+    }
+
+    export interface UILibraryProviderProps {
+      library?: UILibrary
+      children: React.ReactNode
+    }
+
+    export type UILibrary = 'radix-ui' | 'base-ui'
+
+HOOKS
+-----
+    useChecklistContext(): ChecklistContextValue
+    useChecklist(...)
+    useTask(...)
+    useChecklistPersistence(...)
+    useChecklistsProgress(...)
+    useUILibrary(): UILibrary
+
+COMPONENTS
+----------
+    <ChecklistContext />
+    <ChecklistProvider />
+    <Checklist />
+    <ChecklistTask />
+    <ChecklistProgress />
+    <ChecklistLauncher />
+    <ChecklistPanel />
+    <ChecklistHeadless />
+    <TaskHeadless />
+    <Slot />
+    <Slottable />
+    <UnifiedSlot />
+    <UILibraryProvider />
+    <UILibrary />
+
+EXAMPLES
+--------
+
+Example 1: Quick Start
+
+    import { ChecklistProvider, Checklist, ChecklistTask } from '@tour-kit/checklists';
+    
+    const onboardingChecklist = {
+      id: 'onboarding',
+      title: 'Get Started',
+      description: 'Complete these steps to get the most out of our app',
+      tasks: [
+        {
+          id: 'create-account',
+          title: 'Create your account',
+          description: 'Sign up and verify your email',
+        },
+        {
+          id: 'add-profile',
+          title: 'Add profile details',
+          description: 'Tell us about yourself',
+          dependsOn: ['create-account'], // Locked until account created
+        },
+        {
+          id: 'first-project',
+          title: 'Create your first project',
+          description: 'Start building something amazing',
+          dependsOn: ['add-profile'],
+          action: { type: 'navigate', url: '/projects/new' },
+        },
+      ],
+    };
+    
+    function App() {
+      return (
+        <ChecklistProvider checklists={[onboardingChecklist]}>
+          <Checklist checklistId="onboarding">
+            <ChecklistTask taskId="create-account" />
+            <ChecklistTask taskId="add-profile" />
+            <ChecklistTask taskId="first-project" />
+          </Checklist>
+    
+          <YourAppContent />
+        </ChecklistProvider>
+      );
+    }
+
+Example 2: Task Dependencies
+
+    const tasks = [
+      { id: 'step1', title: 'First step' },
+      { id: 'step2', title: 'Second step', dependsOn: ['step1'] },
+      { id: 'step3', title: 'Final step', dependsOn: ['step1', 'step2'] },
+    ];
+
+Example 3: Action Triggers
+
+    const tasks = [
+      {
+        id: 'navigate-task',
+        title: 'View dashboard',
+        action: { type: 'navigate', url: '/dashboard' },
+      },
+      {
+        id: 'tour-task',
+        title: 'Learn the basics',
+        action: { type: 'tour', tourId: 'intro-tour' },
+      },
+      {
+        id: 'callback-task',
+        title: 'Custom action',
+        action: {
+          type: 'callback',
+          handler: async () => {
+            await api.doSomething();
+          }
+        },
+      },
+    ];

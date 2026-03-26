@@ -1,0 +1,378 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tour Kit Documentation API",
+    "version": "1.0.0",
+    "description": "REST API for querying Tour Kit documentation. Tour Kit is a headless onboarding and product tour library for React. Use this API to search docs, retrieve full page content, and get code examples by package."
+  },
+  "servers": [
+    {
+      "url": "https://tour-kit.dev",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/api/docs/search": {
+      "get": {
+        "operationId": "searchDocs",
+        "summary": "Search Tour Kit documentation",
+        "description": "Full-text search across all documentation pages. Scores results by title, description, headings, and body content. Supports filtering by documentation section (e.g., core, react, hints).",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Search query string",
+            "schema": {
+              "type": "string",
+              "example": "useTour"
+            }
+          },
+          {
+            "name": "section",
+            "in": "query",
+            "required": false,
+            "description": "Filter results to a specific documentation section (e.g., core, react, hints, adoption, analytics, announcements, checklists, media, scheduling)",
+            "schema": {
+              "type": "string",
+              "example": "core"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of results to return (1-50, default 10)",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SearchResult"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "Number of results returned"
+                    },
+                    "query": {
+                      "type": "string",
+                      "description": "The search query"
+                    },
+                    "section": {
+                      "type": "string",
+                      "description": "Section filter applied (if any)"
+                    }
+                  },
+                  "required": ["results", "total", "query"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid query parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/docs/page/{slug}": {
+      "get": {
+        "operationId": "getDocPage",
+        "summary": "Get a documentation page by slug",
+        "description": "Retrieve the full content of a documentation page including title, description, markdown body, and table of contents. The slug is the URL path after /docs/ with segments separated by /. For example, 'core/hooks/use-tour' for the useTour hook page.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "Page slug path (e.g., core/hooks/use-tour, react/components/tour-card, getting-started/installation)",
+            "schema": {
+              "type": "string",
+              "example": "core/hooks/use-tour"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full page content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocPage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Page not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/docs/examples/{pkg}": {
+      "get": {
+        "operationId": "getCodeExamples",
+        "summary": "Get code examples for a package",
+        "description": "Extract all fenced code blocks from a package's documentation section. Returns examples with language tags and source page references. Valid packages: core, react, hints, adoption, analytics, announcements, checklists, media, scheduling.",
+        "parameters": [
+          {
+            "name": "pkg",
+            "in": "path",
+            "required": true,
+            "description": "Package name (one of: core, react, hints, adoption, analytics, announcements, checklists, media, scheduling)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "core",
+                "react",
+                "hints",
+                "adoption",
+                "analytics",
+                "announcements",
+                "checklists",
+                "media",
+                "scheduling"
+              ],
+              "example": "react"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Code examples for the package",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "package": {
+                      "type": "string",
+                      "description": "Package name"
+                    },
+                    "examples": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CodeExample"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of examples returned"
+                    }
+                  },
+                  "required": ["package", "examples", "count"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown package name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SearchResult": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Page title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Page description"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Page slug path"
+          },
+          "url": {
+            "type": "string",
+            "description": "Full URL path to the page"
+          },
+          "score": {
+            "type": "number",
+            "description": "Relevance score"
+          },
+          "section": {
+            "type": "string",
+            "description": "Documentation section (e.g., core, react)"
+          },
+          "highlights": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Matched text snippets"
+          }
+        },
+        "required": ["title", "description", "slug", "url", "score", "section", "highlights"]
+      },
+      "DocPage": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Page title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Page description"
+          },
+          "body": {
+            "type": "string",
+            "description": "Full page content as cleaned markdown"
+          },
+          "toc": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TocEntry"
+            },
+            "description": "Table of contents"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Page slug path"
+          },
+          "url": {
+            "type": "string",
+            "description": "Full URL path to the page"
+          }
+        },
+        "required": ["title", "description", "body", "toc", "slug", "url"]
+      },
+      "TocEntry": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Heading text"
+          },
+          "depth": {
+            "type": "integer",
+            "description": "Heading depth (2 for h2, 3 for h3)"
+          },
+          "url": {
+            "type": "string",
+            "description": "Anchor URL"
+          }
+        },
+        "required": ["title", "depth", "url"]
+      },
+      "CodeExample": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "Programming language (e.g., tsx, typescript, bash)"
+          },
+          "code": {
+            "type": "string",
+            "description": "Code content"
+          },
+          "sourceSlug": {
+            "type": "string",
+            "description": "Slug of the page this example came from"
+          },
+          "sourceTitle": {
+            "type": "string",
+            "description": "Title of the page this example came from"
+          }
+        },
+        "required": ["language", "code", "sourceSlug", "sourceTitle"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        },
+        "required": ["error"]
+      },
+      "RateLimitError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "retryAfter": {
+            "type": "integer",
+            "description": "Seconds to wait before retrying"
+          }
+        },
+        "required": ["error", "retryAfter"]
+      }
+    }
+  }
+}

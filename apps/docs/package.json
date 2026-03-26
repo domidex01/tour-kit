@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "prebuild": "pnpm generate:llm",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "generate:llm": "tsx scripts/generate-llm-files.ts",
+    "generate:context": "tsx scripts/generate-context-files.ts",
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
@@ -31,6 +34,9 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^4.0.0",
+    "glob": "^11.0.0",
+    "gray-matter": "^4.0.3",
+    "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }
 }

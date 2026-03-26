@@ -65,6 +65,11 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.5.0"
+  },
   "peerDependencies": {
     "@ai-sdk/react": "^2.0.0",
     "@tour-kit/core": ">=0.1.0",

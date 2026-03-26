@@ -2,6 +2,8 @@
 
 import type { ReactNode } from 'react'
 import { useOptionalSuggestions } from '../hooks/use-suggestions'
+import { cn } from '../lib/utils'
+import { aiChatSuggestionChipVariants } from './ui/chat-variants'
 
 export interface AiChatSuggestionsProps {
   /** Explicit suggestions list (overrides hook data when provided) */
@@ -15,7 +17,6 @@ export interface AiChatSuggestionsProps {
 }
 
 export function AiChatSuggestions(props: AiChatSuggestionsProps) {
-  // Auto-connect to useSuggestions when inside AiChatProvider and no explicit props
   const hookData = useOptionalSuggestions()
 
   const suggestions = props.suggestions ?? hookData?.suggestions ?? []
@@ -26,7 +27,10 @@ export function AiChatSuggestions(props: AiChatSuggestionsProps) {
   }
 
   return (
-    <fieldset className={props.className} aria-label="Suggested questions">
+    <fieldset
+      className={cn('flex flex-wrap gap-2 border-0 px-4 py-2', props.className)}
+      aria-label="Suggested questions"
+    >
       {suggestions.map((suggestion) => {
         const handleSelect = () => onSelect?.(suggestion)
 
@@ -35,7 +39,12 @@ export function AiChatSuggestions(props: AiChatSuggestionsProps) {
         }
 
         return (
-          <button key={suggestion} type="button" onClick={handleSelect}>
+          <button
+            key={suggestion}
+            type="button"
+            onClick={handleSelect}
+            className={cn(aiChatSuggestionChipVariants())}
+          >
             {suggestion}
           </button>
         )

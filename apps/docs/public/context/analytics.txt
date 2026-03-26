@@ -1,0 +1,280 @@
+Tour Kit — @tour-kit/analytics Context File
+Version: 0.1.0 | Generated: 2026-03-24
+Paste this into your LLM to get accurate answers about @tour-kit/analytics.
+=========================================================================
+
+OVERVIEW
+--------
+Analytics plugins for TourKit - track tour engagement
+
+INSTALLATION
+------------
+    npm install @tour-kit/analytics
+    # or
+    pnpm add @tour-kit/analytics
+
+Peer dependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+
+EXPORTS
+-------
+
+Types:
+    TourEvent
+    TourEventName
+    TourEventData
+    AnalyticsPlugin
+    AnalyticsConfig
+
+Hooks:
+    useAnalytics — Hook to access analytics tracker
+    useAnalyticsOptional — Hook to optionally access analytics (returns null if not in provider)
+
+Components:
+    TourAnalytics
+    AnalyticsProvider
+
+Utilities:
+    createAnalytics
+    consolePlugin
+    posthogPlugin
+    mixpanelPlugin
+    amplitudePlugin
+    googleAnalyticsPlugin
+
+TYPES
+-----
+
+    /**
+     * Tour analytics event names
+     */
+    export type TourEventName =
+      | 'tour_started'
+      | 'tour_completed'
+      | 'tour_skipped'
+      | 'tour_abandoned'
+      | 'step_viewed'
+      | 'step_completed'
+      | 'step_skipped'
+      | 'step_interaction'
+      | 'hint_shown'
+      | 'hint_dismissed'
+      | 'hint_clicked'
+      // Feature adoption events
+      | 'feature_used'
+      | 'feature_adopted'
+      | 'feature_churned'
+      | 'nudge_shown'
+      | 'nudge_clicked'
+      | 'nudge_dismissed'
+    
+    /**
+     * Tour analytics event payload
+     */
+    export interface TourEvent {
+      /** Event type */
+      eventName: TourEventName
+    
+      /** Unix timestamp */
+      timestamp: number
+    
+      /** Unique session identifier */
+      sessionId: string
+    
+      /** Tour identifier */
+      tourId: string
+    
+      /** Current step identifier */
+      stepId?: string
+    
+      /** Current step index (0-based) */
+      stepIndex?: number
+    
+      /** Total number of steps in tour */
+      totalSteps?: number
+    
+      /** User identifier (if known) */
+      userId?: string
+    
+      /** Additional user properties */
+      userProperties?: Record<string, unknown>
+    
+      /** Duration in milliseconds */
+      duration?: number
+    
+      /** Number of interactions during step */
+      interactionCount?: number
+    
+      /** Custom metadata */
+      metadata?: Record<string, unknown>
+    }
+
+    /**
+     * Tour analytics event names
+     */
+    export type TourEventName =
+      | 'tour_started'
+      | 'tour_completed'
+      | 'tour_skipped'
+      | 'tour_abandoned'
+      | 'step_viewed'
+      | 'step_completed'
+      | 'step_skipped'
+      | 'step_interaction'
+      | 'hint_shown'
+      | 'hint_dismissed'
+      | 'hint_clicked'
+      // Feature adoption events
+      | 'feature_used'
+      | 'feature_adopted'
+      | 'feature_churned'
+      | 'nudge_shown'
+      | 'nudge_clicked'
+      | 'nudge_dismissed'
+
+    /**
+     * Tour analytics event payload
+     */
+    export interface TourEvent {
+      /** Event type */
+      eventName: TourEventName
+    
+      /** Unix timestamp */
+      timestamp: number
+    
+      /** Unique session identifier */
+      sessionId: string
+    
+      /** Tour identifier */
+      tourId: string
+    
+      /** Current step identifier */
+      stepId?: string
+    
+      /** Current step index (0-based) */
+      stepIndex?: number
+    
+      /** Total number of steps in tour */
+      totalSteps?: number
+    
+      /** User identifier (if known) */
+      userId?: string
+    
+      /** Additional user properties */
+      userProperties?: Record<string, unknown>
+    
+      /** Duration in milliseconds */
+      duration?: number
+    
+      /** Number of interactions during step */
+      interactionCount?: number
+    
+      /** Custom metadata */
+      metadata?: Record<string, unknown>
+    }
+    
+    /**
+     * Event data without auto-generated fields
+     */
+    export type TourEventData = Omit<TourEvent, 'timestamp' | 'sessionId' | 'eventName'>
+
+    ... and 1 more types. See source for full definitions.
+
+HOOKS
+-----
+    useAnalytics(): TourAnalytics
+    useAnalyticsOptional(): TourAnalytics | null
+
+COMPONENTS
+----------
+    <TourAnalytics />
+    <AnalyticsProvider />
+
+EXAMPLES
+--------
+
+Example 1: TourEventName
+
+    type TourEventName =
+      // Tour lifecycle
+      | 'tour_started'
+      | 'tour_completed'
+      | 'tour_skipped'
+      | 'tour_abandoned'
+      // Step lifecycle
+      | 'step_viewed'
+      | 'step_completed'
+      | 'step_skipped'
+      | 'step_interaction'
+      // Hint events
+      | 'hint_shown'
+      | 'hint_dismissed'
+      | 'hint_clicked'
+      // Feature adoption
+      | 'feature_used'
+      | 'feature_adopted'
+      | 'feature_churned'
+      | 'nudge_shown'
+      | 'nudge_clicked'
+      | 'nudge_dismissed'
+
+Example 2: TourEvent
+
+    interface TourEvent {
+      /** Event type */
+      eventName: TourEventName
+    
+      /** Unix timestamp in milliseconds */
+      timestamp: number
+    
+      /** Unique session identifier */
+      sessionId: string
+    
+      /** Tour identifier */
+      tourId: string
+    
+      /** Current step identifier */
+      stepId?: string
+    
+      /** Current step index (0-based) */
+      stepIndex?: number
+    
+      /** Total number of steps in tour */
+      totalSteps?: number
+    
+      /** User identifier (if known) */
+      userId?: string
+    
+      /** Additional user properties */
+      userProperties?: Record<string, unknown>
+    
+      /** Duration in milliseconds */
+      duration?: number
+    
+      /** Number of interactions during step */
+      interactionCount?: number
+    
+      /** Custom metadata */
+      metadata?: Record<string, unknown>
+    }
+
+Example 3: TourEventData
+
+    import { useAnalytics, type TourEventData } from '@tour-kit/analytics'
+    
+    function MyComponent() {
+      const analytics = useAnalytics()
+    
+      const data: TourEventData = {
+        tourId: 'onboarding',
+        stepId: 'welcome',
+        stepIndex: 0,
+        totalSteps: 5,
+        metadata: {
+          source: 'dashboard'
+        }
+      }
+    
+      analytics.track('step_viewed', data)
+    }

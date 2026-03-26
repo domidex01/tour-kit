@@ -10,6 +10,7 @@ export default {
     '../../packages/hints/dist/**/*.js',
     '../../packages/checklists/dist/**/*.js',
     '../../packages/adoption/dist/**/*.js',
+    '../../packages/ai/dist/**/*.js',
   ],
   theme: {
     extend: {

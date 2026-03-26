@@ -54,6 +54,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               Base UI
             </Link>
+            <Link
+              to="/ai-chat"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              AI Chat
+            </Link>
           </div>
         </div>
       </nav>

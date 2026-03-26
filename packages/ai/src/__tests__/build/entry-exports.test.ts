@@ -16,8 +16,11 @@ describe('Entry Point Exports — US-1', () => {
     expect(serverModule.createChatRouteHandler).toBeDefined()
   })
 
-  it('headless entry exports HEADLESS_ENTRY', async () => {
+  it('headless entry exports AiChatPanelHeadless', async () => {
     const headlessModule = await import('../../headless')
-    expect(headlessModule.HEADLESS_ENTRY).toBe(true)
+    expect(headlessModule.AiChatPanelHeadless).toBeDefined()
+    expect(headlessModule.useAiChat).toBeDefined()
+    expect(headlessModule.useSuggestions).toBeDefined()
+    expect(headlessModule.useTourAssistant).toBeDefined()
   })
 })

@@ -1,5 +1,6 @@
 'use client'
 
+import { AiChatPanel, AiChatProvider, AiChatToggle } from '@tour-kit/ai'
 import {
   type AnalyticsPlugin,
   AnalyticsProvider,
@@ -367,14 +368,27 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
       </ChecklistWrapper>
       <TourOverlay />
       <TourCard />
+      <AiChatPanel position="bottom-left" title="Tour Kit Assistant" emptyState="Ask me anything about Tour Kit!" />
+      <AiChatToggle position="bottom-left" />
     </MultiTourKitProvider>
   )
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <AnalyticsProvider config={analyticsConfig}>
-      <ProvidersInner>{children}</ProvidersInner>
-    </AnalyticsProvider>
+    <AiChatProvider
+      config={{
+        endpoint: '/api/chat',
+        tourContext: true,
+        suggestions: {
+          static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
+        },
+        persistence: 'local',
+      }}
+    >
+      <AnalyticsProvider config={analyticsConfig}>
+        <ProvidersInner>{children}</ProvidersInner>
+      </AnalyticsProvider>
+    </AiChatProvider>
   )
 }

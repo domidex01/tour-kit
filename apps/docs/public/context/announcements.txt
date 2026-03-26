@@ -1,0 +1,99 @@
+Tour Kit — @tour-kit/announcements Context File
+Version: 0.1.0 | Generated: 2026-03-24
+Paste this into your LLM to get accurate answers about @tour-kit/announcements.
+=========================================================================
+
+OVERVIEW
+--------
+Product announcements for TourKit - Modal, Slideout, Banner, Toast, and Spotlight variants
+
+INSTALLATION
+------------
+    npm install @tour-kit/announcements
+    # or
+    pnpm add @tour-kit/announcements
+
+Peer dependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+    tailwindcss: ^3.4.0 || ^4.0.0
+    @mui/base: ^5.0.0-beta.0
+    @tour-kit/scheduling: workspace:*
+
+EXPORTS
+-------
+
+Hooks:
+    useUILibrary
+
+Components:
+    UILibraryProvider
+    UILibrary
+
+Utilities:
+    cn
+
+TYPES
+-----
+
+    export interface UILibraryProviderProps {
+      library?: UILibrary
+      children: React.ReactNode
+    }
+
+    export type UILibrary = 'radix-ui' | 'base-ui'
+
+HOOKS
+-----
+    useUILibrary(): UILibrary
+
+COMPONENTS
+----------
+    <UILibraryProvider />
+    <UILibrary />
+
+EXAMPLES
+--------
+
+Example 1: Quick Start
+
+    import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements';
+    
+    function App() {
+      return (
+        <AnnouncementsProvider
+          announcements={[
+            {
+              id: 'new-feature',
+              variant: 'modal',
+              priority: 'high',
+              title: 'New Export Feature!',
+              description: 'You can now export your data to CSV and PDF.',
+              primaryAction: {
+                label: 'Try It Now',
+                onClick: () => console.log('Action clicked'),
+              },
+            },
+          ]}
+        >
+          <AnnouncementModal id="new-feature" />
+          <YourApp />
+        </AnnouncementsProvider>
+      );
+    }
+
+Example 2: Modal
+
+    <AnnouncementModal
+      id="feature-launch"
+      size="md"
+      closeOnOverlayClick={false}
+    />
+
+Example 3: Slideout
+
+    <AnnouncementSlideout
+      id="product-update"
+      position="right"
+      size="md"
+    />

@@ -1,0 +1,312 @@
+Tour Kit — @tour-kit/adoption Context File
+Version: 0.0.1 | Generated: 2026-03-24
+Paste this into your LLM to get accurate answers about @tour-kit/adoption.
+=========================================================================
+
+OVERVIEW
+--------
+Feature adoption tracking and nudging for TourKit
+
+INSTALLATION
+------------
+    npm install @tour-kit/adoption
+    # or
+    pnpm add @tour-kit/adoption
+
+Peer dependencies:
+    @tour-kit/analytics: workspace:*
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+    tailwindcss: ^3.4.0 || ^4.0.0
+    @mui/base: ^5.0.0-beta.0
+
+EXPORTS
+-------
+
+Types:
+    UseFeatureReturn
+    UseNudgeReturn
+    AdoptionNudgeProps
+    NudgeRenderProps
+    FeatureButtonProps
+    NewFeatureBadgeProps
+    AdoptionNudgeVariants
+    FeatureButtonVariants
+    NewFeatureBadgeVariants
+    UnifiedSlotProps
+    UILibraryProviderProps
+    Feature
+    FeatureTrigger
+    AdoptionCriteria
+    FeatureResources
+    FeatureUsage
+    AdoptionStatus
+    FeatureWithUsage
+    StorageConfig
+    NudgeConfig
+    AdoptionProviderProps
+    AdoptionDashboardProps
+    AdoptionStatCardProps
+    AdoptionStatsGridProps
+    AdoptionTableProps
+    AdoptionCategoryChartProps
+    AdoptionStatusBadgeProps
+    AdoptionFiltersProps
+    AdoptionFiltersState
+
+Hooks:
+    useAdoptionContext
+    useFeature — Feature definition
+    useAdoptionStats — All features with their usage data
+    useNudge — Features that should be nudged
+    useUILibrary
+    useAdoptionAnalytics
+
+Components:
+    AdoptionProvider
+    AdoptionStats
+    AdoptionNudge
+    FeatureButton
+    IfNotAdopted
+    IfAdopted
+    NewFeatureBadge
+    Slot
+    Slottable
+    UnifiedSlot
+    UILibraryProvider
+    UILibrary
+    AdoptionDashboard
+    AdoptionStatCard
+    AdoptionStatsGrid
+    AdoptionTable
+    AdoptionCategoryChart
+    AdoptionStatusBadge
+    AdoptionFilters
+
+Utilities:
+    adoptionNudgeVariants
+    featureButtonVariants
+    newFeatureBadgeVariants
+    cn
+    emitFeatureEvent
+    buildFeatureAdoptedEvent
+    buildFeatureChurnedEvent
+    buildFeatureUsedEvent
+    buildNudgeClickedEvent
+    buildNudgeDismissedEvent
+    buildNudgeShownEvent
+
+TYPES
+-----
+
+    export interface AdoptionContextValue {
+      // State
+      features: Feature[]
+      usageMap: Record<string, FeatureUsage>
+      nudgeState: NudgeState
+    
+      // Actions
+      trackUsage: (featureId: string) => void
+      getFeature: (featureId: string) => FeatureWithUsage | null
+      showNudge: (featureId: string) => void
+      dismissNudge: (featureId: string) => void
+      snoozeNudge: (featureId: string, durationMs: number) => void
+    
+      // Computed
+      pendingNudges: Feature[]
+    }
+
+    export interface UseFeatureReturn {
+      /** Feature definition */
+      feature: Feature | null
+      /** Current usage data */
+      usage: FeatureUsage
+      /** Whether feature is adopted */
+      isAdopted: boolean
+      /** Current adoption status */
+      status: AdoptionStatus
+      /** Number of times feature has been used */
+      useCount: number
+      /** Manually track a feature usage */
+      trackUsage: () => void
+    }
+
+    export interface AdoptionStats {
+      /** All features with their usage data */
+      features: FeatureWithUsage[]
+      /** Overall adoption rate (0-100) */
+      adoptionRate: number
+      /** Number of adopted features */
+      adoptedCount: number
+      /** Total number of features */
+      totalCount: number
+      /** Features grouped by status */
+      byStatus: Record<AdoptionStatus, FeatureWithUsage[]>
+      /** Features grouped by category */
+      byCategory: Record<string, { adopted: number; total: number; rate: number }>
+    }
+
+    export interface UseNudgeReturn {
+      /** Features that should be nudged */
+      pendingNudges: Feature[]
+      /** Whether there are any pending nudges */
+      hasNudges: boolean
+      /** Show nudge for a feature (marks as shown) */
+      showNudge: (featureId: string) => void
+      /** Dismiss nudge permanently */
+      dismissNudge: (featureId: string) => void
+      /** Snooze nudge for a duration */
+      snoozeNudge: (featureId: string, durationMs: number) => void
+      /** Handle nudge click (tracks usage and dismisses) */
+      handleNudgeClick: (featureId: string) => void
+    }
+
+    export interface NudgeRenderProps {
+      feature: Feature
+      onDismiss: () => void
+      onSnooze: (durationMs: number) => void
+      onClick: () => void
+    }
+
+    export interface AdoptionNudgeProps
+      extends React.ComponentPropsWithoutRef<'div'>,
+        AdoptionNudgeVariants {
+      /** Custom render function for nudge UI */
+      render?: (props: NudgeRenderProps) => React.ReactNode
+      /** Delay before showing nudge (ms) */
+      delay?: number
+      /** Use custom element via Slot */
+      asChild?: boolean
+    }
+
+    export interface FeatureButtonProps
+      extends React.ComponentPropsWithoutRef<'button'>,
+        FeatureButtonVariants {
+      /** Feature ID to track */
+      featureId: string
+      /** Show "new" indicator if not adopted */
+      showNewIndicator?: boolean
+      /** Use custom element via Slot */
+      asChild?: boolean
+    }
+
+    export interface NewFeatureBadgeProps
+      extends React.ComponentPropsWithoutRef<'span'>,
+        NewFeatureBadgeVariants {
+      /** Feature ID to check */
+      featureId: string
+      /** Badge text */
+      text?: string
+    }
+
+    export interface UILibraryProviderProps {
+      library?: UILibrary
+      children: React.ReactNode
+    }
+
+    export type UILibrary = 'radix-ui' | 'base-ui'
+
+    /**
+     * Nudge configuration
+     */
+    export interface NudgeConfig {
+      /**
+       * Enable automatic nudging
+       * @default true
+       */
+      enabled?: boolean
+    
+      /**
+       * Delay before first nudge (ms)
+       * @default 5000
+       */
+      initialDelay?: number
+    
+      /**
+       * Minimum time between nudges (ms)
+       * @default 86400000 (24 hours)
+       */
+      cooldown?: number
+    
+      /**
+       * Maximum nudges per session
+       * @default 3
+       */
+      maxPerSession?: number
+    
+      /**
+       * Maximum features to show nudges for at once
+       * @default 1
+       */
+      maxFeatures?: number
+    }
+
+HOOKS
+-----
+    useAdoptionContext(): AdoptionContextValue
+    useFeature(featureId: string): UseFeatureReturn
+    useAdoptionStats(): AdoptionStats
+    useNudge(): UseNudgeReturn
+    useUILibrary(): UILibrary
+    useAdoptionAnalytics(...)
+
+COMPONENTS
+----------
+    <AdoptionProvider />
+    <AdoptionStats />
+    <AdoptionNudge />
+    <FeatureButton />
+    <IfNotAdopted />
+    <IfAdopted />
+    <NewFeatureBadge />
+    <Slot />
+    <Slottable />
+    <UnifiedSlot />
+    <UILibraryProvider />
+    <UILibrary />
+    <AdoptionDashboard />
+    <AdoptionStatCard />
+    <AdoptionStatsGrid />
+    <AdoptionTable />
+    <AdoptionCategoryChart />
+    <AdoptionStatusBadge />
+    <AdoptionFilters />
+
+EXAMPLES
+--------
+
+Example 1: Feature
+
+    const feature = {
+      id: 'dark-mode',
+      name: 'Dark Mode',
+      trigger: '#dark-mode-toggle', // CSS selector
+      adoptionCriteria: { minUses: 3, recencyDays: 30 },
+    }
+
+Example 2: Feature
+
+    interface Feature {
+      id: string
+      name: string
+      trigger: FeatureTrigger
+      adoptionCriteria?: AdoptionCriteria
+      resources?: FeatureResources
+      priority?: number
+      category?: string
+      description?: string
+      premium?: boolean
+    }
+
+Example 3: FeatureTrigger
+
+    // CSS selector (click tracking)
+    trigger: '#dark-mode-toggle'
+    trigger: '[data-feature="export"]'
+    
+    // Custom event
+    trigger: { event: 'export:complete' }
+    trigger: { event: 'ai:generated' }
+    
+    // Callback (polled every 1s)
+    trigger: { callback: () => document.fullscreenElement !== null }

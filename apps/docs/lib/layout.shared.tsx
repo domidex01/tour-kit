@@ -1,5 +1,5 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared'
-import { BookOpen, Code2, Layers, Sparkles } from 'lucide-react'
+import { BookOpen, Code2, CreditCard, Layers, Sparkles } from 'lucide-react'
 
 /**
  * Shared layout options used by both home and docs layouts
@@ -29,6 +29,11 @@ export function baseOptions(): BaseLayoutProps {
         text: 'Examples',
         url: '/docs/examples',
         icon: <Layers className="w-4 h-4" />,
+      },
+      {
+        text: 'Pricing',
+        url: '/pricing',
+        icon: <CreditCard className="w-4 h-4" />,
       },
     ],
     githubUrl: 'https://github.com/domidex/tour-kit',

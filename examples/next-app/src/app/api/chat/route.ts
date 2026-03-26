@@ -1,22 +1,5 @@
-import type { LanguageModel } from 'ai'
+import { openai } from '@ai-sdk/openai'
 import { createChatRouteHandler } from '@tour-kit/ai/server'
-
-// TODO: Install @ai-sdk/openai and replace with:
-//   import { openai } from '@ai-sdk/openai'
-//   const model = openai('gpt-4o-mini')
-//
-// Install a provider to use this route:
-//   pnpm add @ai-sdk/openai
-const model: LanguageModel = new Proxy({} as LanguageModel, {
-  get(_, prop) {
-    if (prop === 'modelId') return 'placeholder'
-    if (prop === 'provider') return 'placeholder'
-    throw new Error(
-      'No AI model configured. Install @ai-sdk/openai and update this file. ' +
-        'See: https://sdk.vercel.ai/docs/getting-started'
-    )
-  },
-})
 
 const productDocs = [
   {
@@ -33,7 +16,7 @@ const productDocs = [
 ]
 
 const { POST } = createChatRouteHandler({
-  model,
+  model: openai('gpt-4o-mini'),
   context: {
     strategy: 'context-stuffing',
     documents: productDocs,

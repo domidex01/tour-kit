@@ -88,7 +88,7 @@ describe('Component coverage gaps', () => {
         <AiChatSuggestions suggestions={['Test']} onSelect={vi.fn()} className="my-class" />
       )
 
-      expect(container.firstElementChild?.className).toBe('my-class')
+      expect(container.firstElementChild?.className).toContain('my-class')
     })
   })
 })

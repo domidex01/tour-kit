@@ -1,0 +1,152 @@
+Tour Kit — @tour-kit/scheduling Context File
+Version: 0.1.0 | Generated: 2026-03-24
+Paste this into your LLM to get accurate answers about @tour-kit/scheduling.
+=========================================================================
+
+OVERVIEW
+--------
+Time-based scheduling utilities for TourKit tours and announcements
+
+INSTALLATION
+------------
+    npm install @tour-kit/scheduling
+    # or
+    pnpm add @tour-kit/scheduling
+
+Peer dependencies:
+    react: ^18.0.0 || ^19.0.0
+
+EXPORTS
+-------
+
+Types:
+    BlackoutPeriod
+    BusinessHours
+    BusinessHoursMap
+    BusinessHoursPreset
+    DateRange
+    DateString
+    DayHours
+    DayName
+    DayOfWeek
+    RecurringPattern
+    Schedule
+    ScheduleEvaluationOptions
+    ScheduleInactiveReason
+    ScheduleResult
+    ScheduleStatus
+    TimeRange
+    TimeString
+    UseScheduleOptions
+    UseScheduleReturn
+    UseScheduleStatusOptions
+    UseScheduleStatusReturn
+
+Hooks:
+    useUserTimezone
+    useSchedule
+    useScheduleStatus
+
+Components:
+    BUSINESS_HOURS_PRESETS
+    DAY_NAMES
+
+Utilities:
+    // Main evaluation functions
+  checkSchedule
+    isScheduleActive
+    getScheduleStatus
+    // Timezone utilities
+  formatDateString
+    getDateInTimezone
+    getUserTimezone
+    isValidTimezone
+    parseDateString
+    parseTimeString
+    // Date range utilities
+  isWithinDateRange
+    // Time of day utilities
+  isWithinTimeRange
+    isWithinAnyTimeRange
+    // Day of week utilities
+  DAY_GROUPS
+    getDayOfWeek
+    isAllowedDay
+    dayNameToNumber
+    dayNumberToName
+    // Blackout utilities
+  isInBlackoutPeriod
+    isInAnyBlackout
+    getCurrentBlackout
+    getBlackoutEndTime
+    // Business hours utilities
+  isWithinBusinessHours
+    isHoliday
+    getDayBusinessHours
+    // Recurring pattern utilities
+  matchesRecurringPattern
+
+HOOKS
+-----
+    useUserTimezone(...)
+    useSchedule(...)
+    useScheduleStatus(...)
+
+COMPONENTS
+----------
+    <BUSINESS_HOURS_PRESETS />
+    <DAY_NAMES />
+
+EXAMPLES
+--------
+
+Example 1: Quick Start
+
+    import { useSchedule } from '@tour-kit/scheduling'
+    
+    function OnboardingTour() {
+      const schedule = {
+        startAt: '2024-01-15',
+        endAt: '2024-03-31',
+        daysOfWeek: [1, 2, 3, 4, 5], // Weekdays only
+        timeOfDay: { start: '09:00', end: '17:00' },
+        useUserTimezone: true,
+      }
+    
+      const { isActive, reason } = useSchedule(schedule)
+    
+      if (!isActive) {
+        return null
+      }
+    
+      return <Tour tourId="onboarding">...</Tour>
+    }
+
+Example 2: Schedule
+
+    interface Schedule {
+      enabled?: boolean
+      startAt?: DateString | Date
+      endAt?: DateString | Date
+      daysOfWeek?: DayOfWeek[]
+      timeOfDay?: TimeRange
+      useUserTimezone?: boolean
+      timezone?: string
+      blackouts?: BlackoutPeriod[]
+      recurring?: RecurringPattern
+      metadata?: Record<string, unknown>
+    }
+
+Example 3: Timezone Handling
+
+    // Use the user's browser timezone
+    const schedule = {
+      useUserTimezone: true,
+      timeOfDay: { start: '09:00', end: '17:00' },
+    }
+    
+    // Or specify a fixed timezone
+    const schedule = {
+      timezone: 'America/New_York',
+      timeOfDay: { start: '09:00', end: '17:00' },
+    }

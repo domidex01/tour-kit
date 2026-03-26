@@ -1,3 +1,4 @@
+import { AiChatPanel, AiChatProvider, AiChatToggle } from '@tour-kit/ai'
 import {
   type AnalyticsPlugin,
   AnalyticsProvider,
@@ -32,6 +33,7 @@ import {
   HomePage,
   MediaPage,
   PricingPage,
+  AiChatPage,
 } from './pages'
 
 // Load Google Analytics script dynamically
@@ -417,6 +419,7 @@ function AppContent() {
               <Route path="/branching" element={<BranchingPage />} />
               <Route path="/base-ui" element={<BaseUIPage />} />
               <Route path="/media" element={<MediaPage />} />
+              <Route path="/ai-chat" element={<AiChatPage />} />
             </Routes>
           </Layout>
         </HintsProvider>
@@ -424,6 +427,8 @@ function AppContent() {
 
       <TourOverlay />
       <TourCard />
+      <AiChatPanel position="bottom-left" title="Help Assistant" emptyState="How can I help you?" />
+      <AiChatToggle position="bottom-left" />
     </MultiTourKitProvider>
   )
 }
@@ -433,9 +438,18 @@ function App() {
   useGoogleAnalytics()
 
   return (
-    <AnalyticsProvider config={analyticsConfig}>
-      <AppContent />
-    </AnalyticsProvider>
+    <AiChatProvider
+      config={{
+        endpoint: '/api/chat',
+        suggestions: {
+          static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
+        },
+      }}
+    >
+      <AnalyticsProvider config={analyticsConfig}>
+        <AppContent />
+      </AnalyticsProvider>
+    </AiChatProvider>
   )
 }
 

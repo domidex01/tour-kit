@@ -1,0 +1,399 @@
+Tour Kit — @tour-kit/react Context File
+Version: 0.4.1 | Generated: 2026-03-24
+Paste this into your LLM to get accurate answers about @tour-kit/react.
+=========================================================================
+
+OVERVIEW
+--------
+React components for TourKit - works with or without Tailwind CSS
+
+INSTALLATION
+------------
+    npm install @tour-kit/react
+    # or
+    pnpm add @tour-kit/react
+
+Peer dependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+    tailwindcss: ^3.4.0 || ^4.0.0
+    @mui/base: ^5.0.0-beta.0
+
+EXPORTS
+-------
+
+Types:
+    TourProps
+    TourCardProps
+    TourCardHeaderProps
+    TourCardContentProps
+    TourCardFooterProps
+    TourNavigationProps
+    TourProgressProps
+    TourCloseProps
+    TourOverlayProps
+    TourPortalProps
+    MultiTourKitProviderProps
+    TourButtonVariants
+    TourCardVariants
+    TourCardHeaderVariants
+    TourCardContentVariants
+    TourCardFooterVariants
+    TourProgressVariants
+    TourProgressDotVariants
+    TourOverlayVariants
+    UnifiedSlotProps
+    UILibraryProviderProps
+    TourInfo
+    UseToursReturn
+    // Config types
+  Side
+    Alignment
+    Placement
+    Position
+    Rect
+    SpotlightConfig
+    KeyboardConfig
+    PersistenceConfig
+    TourKitConfig
+    A11yConfig
+    ScrollConfig
+    Storage
+    // Step types
+  TourStep as TourStepConfig
+    StepOptions
+    // Tour types
+  Tour as TourConfig
+    TourOptions
+    // State types
+  TourState
+    TourCallbackContext
+    // Hint types
+  HintConfig
+    HintState
+    HintsState
+    HotspotPosition
+    // Router types
+  RouterAdapter
+    MultiPagePersistenceConfig
+    // Hook return types
+  UseTourReturn
+    UseStepReturn
+    UseSpotlightReturn
+    UseFocusTrapReturn
+    UsePersistenceReturn
+    UseRoutePersistenceReturn
+    // Branch types
+  BranchTarget
+    BranchToTour
+    BranchSkip
+    BranchWait
+    BranchContext
+    BranchResolver
+    Branch
+    UseBranchReturn
+
+Hooks:
+    useUILibrary — Hook to get the current UI library setting
+    useTours — All registered tours
+    useTourRoute — Router adapter
+    useNextAppRouter
+    useNextPagesRouter
+    useReactRouter
+    useTour
+    useStep
+    useSpotlight
+    useElementPosition
+    useKeyboardNavigation
+    useFocusTrap
+    usePersistence
+    useRoutePersistence
+    useMediaQuery
+    usePrefersReducedMotion
+    useBranch
+
+Components:
+    Tour
+    TourStep
+    TourCard
+    TourCardHeader
+    TourCardContent
+    TourCardFooter
+    TourNavigation
+    TourProgress
+    TourClose
+    TourRoutePrompt
+    TourOverlay
+    TourPortal
+    TourArrow
+    MultiTourKitProvider
+    Slot
+    Slottable
+    UnifiedSlot
+    RenderProp
+    UILibraryProvider
+    UILibrary
+    TourContext
+    TourProvider
+    TourKitContext
+    TourKitProvider
+
+Utilities:
+    // Button variants
+  tourButtonVariants
+    // Card variants
+  tourCardVariants
+    tourCardHeaderVariants
+    tourCardContentVariants
+    tourCardFooterVariants
+    // Progress variants
+  tourProgressVariants
+    tourProgressDotVariants
+    // Overlay variants
+  tourOverlayVariants
+    cn
+    createNextAppRouterAdapter
+    createNextPagesRouterAdapter
+    createReactRouterAdapter
+    createTour
+    createStep
+    waitForElement
+    isElementVisible
+    getScrollParent
+    scrollIntoView
+    generateId
+    announce
+    prefersReducedMotion
+    getStepAnnouncement
+    createStorageAdapter
+    createPrefixedStorage
+    safeJSONParse
+    calculatePosition
+    defaultSpotlightConfig
+    defaultKeyboardConfig
+    defaultPersistenceConfig
+    defaultA11yConfig
+    defaultScrollConfig
+
+TYPES
+-----
+
+    export interface TourProps {
+      id: string
+      autoStart?: boolean
+      startAt?: number
+      config?: Omit<TourType, 'id' | 'steps'>
+      onStart?: () => void
+      onComplete?: () => void
+      onSkip?: () => void
+      onStepChange?: (step: TourStepType, index: number) => void
+      children: React.ReactNode
+    }
+
+    export interface TourCardProps
+      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+        TourCardVariants {}
+
+    export interface TourCardHeaderProps
+      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'title'>,
+        TourCardHeaderVariants {
+      /** Title content */
+      title?: React.ReactNode
+      /** ID for accessibility (aria-labelledby) */
+      titleId: string
+      /** Whether to show the close button */
+      showClose?: boolean
+    }
+
+    export interface TourCardContentProps
+      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+        TourCardContentVariants {
+      /** Content to display */
+      content?: React.ReactNode
+    }
+
+    export interface TourCardFooterProps
+      extends React.ComponentPropsWithoutRef<'div'>,
+        TourCardFooterVariants {
+      currentStep: number
+      totalSteps: number
+      showNavigation?: boolean
+      showProgress?: boolean
+      isFirstStep: boolean
+      isLastStep: boolean
+      onPrev: () => void
+      onNext: () => void
+      onSkip: () => void
+    }
+
+    export interface TourNavigationProps extends React.ComponentPropsWithoutRef<'div'> {
+      isFirstStep: boolean
+      isLastStep: boolean
+      onPrev: () => void
+      onNext: () => void
+      onSkip?: () => void
+      prevLabel?: string
+      nextLabel?: string
+      finishLabel?: string
+      skipLabel?: string
+      /** Custom button variant for previous button */
+      prevVariant?: TourButtonVariants['variant']
+      /** Custom button variant for next button */
+      nextVariant?: TourButtonVariants['variant']
+    }
+
+    export interface TourProgressProps
+      extends React.ComponentPropsWithoutRef<'div'>,
+        TourProgressVariants {
+      /** Current step (1-indexed) */
+      current: number
+      /** Total number of steps */
+      total: number
+    }
+
+    export interface TourCloseProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'> {
+      asChild?: boolean
+      children?: React.ReactNode | RenderProp
+    }
+
+    export interface TourOverlayProps
+      extends React.ComponentPropsWithoutRef<'div'>,
+        TourOverlayVariants {
+      /** Called when the overlay is clicked */
+      onClick?: () => void
+    }
+
+    export interface TourPortalProps {
+      children: React.ReactNode
+      /** Container element for the portal. Defaults to document.body */
+      container?: HTMLElement | null
+    }
+
+    export interface UILibraryProviderProps {
+      library?: UILibrary
+      children: React.ReactNode
+    }
+
+    export type UILibrary = 'radix-ui' | 'base-ui'
+
+    export interface TourInfo {
+      id: string
+      stepCount: number
+    }
+
+    export interface UseToursReturn {
+      /** All registered tours */
+      tours: TourInfo[]
+      /** Currently active tour ID */
+      activeTourId: string | null
+      /** Check if any tour is active */
+      isAnyTourActive: boolean
+      /** Completed tour IDs */
+      completedTours: string[]
+      /** Skipped tour IDs */
+      skippedTours: string[]
+      /** Check if a tour was completed */
+      isTourCompleted: (tourId: string) => boolean
+      /** Check if a tour was skipped */
+      isTourSkipped: (tourId: string) => boolean
+      /** Get tour info by ID */
+      getTour: (tourId: string) => TourInfo | undefined
+    }
+
+HOOKS
+-----
+    useUILibrary(): UILibrary
+    useTours(): UseToursReturn
+    useTourRoute({ router, tourId }: UseTourRouteOptions): UseTourRouteReturn
+    useNextAppRouter(...)
+    useNextPagesRouter(...)
+    useReactRouter(...)
+    useTour(...)
+    useStep(...)
+    useSpotlight(...)
+    useElementPosition(...)
+    useKeyboardNavigation(...)
+    useFocusTrap(...)
+    usePersistence(...)
+    useRoutePersistence(...)
+    useMediaQuery(...)
+    usePrefersReducedMotion(...)
+    useBranch(...)
+
+COMPONENTS
+----------
+    <Tour />
+    <TourStep />
+    <TourCard />
+    <TourCardHeader />
+    <TourCardContent />
+    <TourCardFooter />
+    <TourNavigation />
+    <TourProgress />
+    <TourClose />
+    <TourRoutePrompt />
+    <TourOverlay />
+    <TourPortal />
+    <TourArrow />
+    <MultiTourKitProvider />
+    <Slot />
+    <Slottable />
+    <UnifiedSlot />
+    <RenderProp />
+    <UILibraryProvider />
+    <UILibrary />
+    <TourContext />
+    <TourProvider />
+    <TourKitContext />
+    <TourKitProvider />
+
+EXAMPLES
+--------
+
+Example 1: 1. Direct Hook (Recommended)
+
+    import { useNextAppRouter } from '@tour-kit/react';
+    
+    function App() {
+      const router = useNextAppRouter();
+    
+      return (
+        <MultiTourKitProvider router={router}>
+          {/* ... */}
+        </MultiTourKitProvider>
+      );
+    }
+
+Example 2: 2. Factory Function
+
+    import { createNextAppRouterAdapter } from '@tour-kit/react';
+    import { usePathname, useRouter } from 'next/navigation';
+    
+    const useMyRouter = createNextAppRouterAdapter(usePathname, useRouter);
+    
+    function App() {
+      const router = useMyRouter();
+    
+      return (
+        <MultiTourKitProvider router={router}>
+          {/* ... */}
+        </MultiTourKitProvider>
+      );
+    }
+
+Example 3: Route Matching Modes
+
+    <TourStep
+      route="/dashboard"
+      routeMatch="exact"      // Only "/dashboard"
+    />
+    
+    <TourStep
+      route="/dashboard"
+      routeMatch="startsWith" // "/dashboard", "/dashboard/settings", etc.
+    />
+    
+    <TourStep
+      route="/settings"
+      routeMatch="contains"   // "/app/settings", "/user/settings", etc.
+    />
