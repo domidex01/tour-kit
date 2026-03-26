@@ -1,12 +1,12 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { registerPagesResource } from './resources/pages.js'
-import { registerNavResource } from './resources/nav.js'
-import { registerSearchTool } from './tools/search.js'
-import { registerGetPageTool } from './tools/get-page.js'
-import { registerListSectionsTool } from './tools/list-sections.js'
-import { registerCodeExamplesTool } from './tools/code-examples.js'
 import { registerExplainApiPrompt } from './prompts/explain-api.js'
 import { registerGuideMePrompt } from './prompts/guide-me.js'
+import { registerNavResource } from './resources/nav.js'
+import { registerPagesResource } from './resources/pages.js'
+import { registerCodeExamplesTool } from './tools/code-examples.js'
+import { registerGetPageTool } from './tools/get-page.js'
+import { registerListSectionsTool } from './tools/list-sections.js'
+import { registerSearchTool } from './tools/search.js'
 
 export function createServer(): McpServer {
   const server = new McpServer({

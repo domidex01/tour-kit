@@ -27,6 +27,7 @@ export class SearchIndex {
     this.pages = pages
   }
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: search scoring requires multiple conditional branches
   search({ query, section, limit = 10 }: SearchOptions): SearchResult[] {
     const normalizedQuery = query.toLowerCase().trim()
     const queryTerms = normalizedQuery.split(/\s+/)
@@ -83,8 +84,6 @@ export class SearchIndex {
       }
     }
 
-    return results
-      .sort((a, b) => b.score - a.score)
-      .slice(0, Math.min(limit, 50))
+    return results.sort((a, b) => b.score - a.score).slice(0, Math.min(limit, 50))
   }
 }

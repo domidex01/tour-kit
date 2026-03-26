@@ -1,10 +1,10 @@
+import { readFileSync } from 'node:fs'
 /**
  * Audit script for MDX meta descriptions.
  * Run: npx tsx scripts/audit-descriptions.ts
  */
 import { globSync } from 'glob'
 import matter from 'gray-matter'
-import { readFileSync } from 'fs'
 
 const files = globSync('content/docs/**/*.mdx')
 const descriptions = new Map<string, string[]>()

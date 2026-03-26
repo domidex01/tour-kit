@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs'
-import { resolve, join } from 'node:path'
-import { describe, it, expect } from 'vitest'
+import { join, resolve } from 'node:path'
+import { describe, expect, it } from 'vitest'
 
 const PKG_ROOT = process.cwd()
 const SRC_DIR = resolve(PKG_ROOT, 'src')
@@ -105,9 +105,7 @@ describe('SSR safety', () => {
           if (line.trimStart().startsWith('import type')) continue
           for (const clientDir of clientDirs) {
             if (line.includes(`from '${clientDir}`) || line.includes(`from "${clientDir}`)) {
-              throw new Error(
-                `Runtime import from client directory in server file: ${line.trim()}`
-              )
+              throw new Error(`Runtime import from client directory in server file: ${line.trim()}`)
             }
           }
         }

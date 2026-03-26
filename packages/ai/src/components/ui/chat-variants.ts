@@ -18,9 +18,7 @@ export const aiChatPanelVariants = cva(
 
 export type AiChatPanelVariants = VariantProps<typeof aiChatPanelVariants>
 
-export const aiChatHeaderVariants = cva(
-  'flex items-start justify-between gap-2'
-)
+export const aiChatHeaderVariants = cva('flex items-start justify-between gap-2')
 
 export type AiChatHeaderVariants = VariantProps<typeof aiChatHeaderVariants>
 

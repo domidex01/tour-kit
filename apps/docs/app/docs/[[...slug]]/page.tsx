@@ -1,9 +1,5 @@
 import { source } from '@/lib/source'
-import {
-  TechArticleJsonLd,
-  SoftwareSourceCodeJsonLd,
-  FAQJsonLd,
-} from '@/lib/structured-data'
+import { FAQJsonLd, SoftwareSourceCodeJsonLd, TechArticleJsonLd } from '@/lib/structured-data'
 import defaultMdxComponents from 'fumadocs-ui/mdx'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page'
 import type { Metadata } from 'next'
@@ -182,7 +178,7 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
     },
   ],
   // 9. Hints / Overview
-  'hints': [
+  hints: [
     {
       question: 'What are hints in Tour Kit?',
       answer:

@@ -26,6 +26,7 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import {
   AdoptionPage,
+  AiChatPage,
   BaseUIPage,
   BranchingPage,
   ContactPage,
@@ -33,7 +34,6 @@ import {
   HomePage,
   MediaPage,
   PricingPage,
-  AiChatPage,
 } from './pages'
 
 // Load Google Analytics script dynamically

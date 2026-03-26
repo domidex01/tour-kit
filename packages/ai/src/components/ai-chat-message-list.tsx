@@ -48,18 +48,11 @@ export function AiChatMessageList({
 
   if (!hasMessages && !isStreaming) {
     if (!emptyState) return null
-    return (
-      <div className={cn('text-sm text-muted-foreground', className)}>
-        {emptyState}
-      </div>
-    )
+    return <div className={cn('text-sm text-muted-foreground', className)}>{emptyState}</div>
   }
 
   return (
-    <div
-      className={cn('max-h-60 overflow-y-auto space-y-2', className)}
-      role="log"
-    >
+    <div className={cn('max-h-60 overflow-y-auto space-y-2', className)} role="log">
       {messages.map((message, index) => {
         if (renderMessage) return renderMessage(message, index)
         const text = getTextContent(message)

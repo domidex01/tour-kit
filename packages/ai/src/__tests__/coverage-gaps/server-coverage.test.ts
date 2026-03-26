@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock AI SDK
 vi.mock('ai', () => ({
@@ -49,8 +49,7 @@ describe('Server — coverage gaps', () => {
         rateLimit: {
           maxMessages: 1,
           windowMs: 60000,
-          identifier: (req: Request) =>
-            req.headers.get('x-forwarded-for') ?? '127.0.0.1',
+          identifier: (req: Request) => req.headers.get('x-forwarded-for') ?? '127.0.0.1',
         },
       })
 

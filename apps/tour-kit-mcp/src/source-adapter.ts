@@ -23,7 +23,7 @@ export interface DocSection {
 // Resolve content directory relative to this package's location in the monorepo
 const CONTENT_DIR = path.resolve(
   import.meta.dirname ?? path.dirname(new URL(import.meta.url).pathname),
-  '../../docs/content/docs',
+  '../../docs/content/docs'
 )
 
 let cachedPages: DocPage[] | null = null
@@ -50,9 +50,10 @@ function findMdxFiles(dir: string): string[] {
 function extractHeadings(content: string): string[] {
   const headingRegex = /^#{2,3}\s+(.+)$/gm
   const headings: string[] = []
-  let match: RegExpExecArray | null
-  while ((match = headingRegex.exec(content)) !== null) {
+  let match: RegExpExecArray | null = headingRegex.exec(content)
+  while (match !== null) {
     headings.push(match[1].trim())
+    match = headingRegex.exec(content)
   }
   return headings
 }

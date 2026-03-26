@@ -1,10 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, corsPreflightResponse, withCors } from '@/lib/api-middleware'
 import { searchDocs } from '@/lib/docs-api'
-import {
-  withCors,
-  corsPreflightResponse,
-  checkRateLimit,
-} from '@/lib/api-middleware'
+import { type NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const rateLimited = checkRateLimit(request)
@@ -16,17 +12,14 @@ export async function GET(request: NextRequest) {
   const q = searchParams.get('q')
   if (!q || q.trim().length === 0) {
     return withCors(
-      NextResponse.json(
-        { error: 'Missing required query parameter: q' },
-        { status: 400 }
-      ),
+      NextResponse.json({ error: 'Missing required query parameter: q' }, { status: 400 }),
       origin
     )
   }
 
   const section = searchParams.get('section') ?? undefined
   const limitParam = searchParams.get('limit')
-  const limit = limitParam ? Math.min(Math.max(1, parseInt(limitParam, 10) || 10), 50) : 10
+  const limit = limitParam ? Math.min(Math.max(1, Number.parseInt(limitParam, 10) || 10), 50) : 10
 
   const results = searchDocs(q, { section, limit })
 
@@ -36,10 +29,7 @@ export async function GET(request: NextRequest) {
     query: q,
     ...(section && { section }),
   })
-  response.headers.set(
-    'Cache-Control',
-    's-maxage=60, stale-while-revalidate=300'
-  )
+  response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300')
   return withCors(response, origin)
 }
 

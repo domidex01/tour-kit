@@ -5,7 +5,7 @@
  * Each description is hand-written, keyword-rich, 80–160 chars,
  * active voice, unique across all pages.
  */
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import matter from 'gray-matter'
 
 const updates: Record<string, string> = {
@@ -450,8 +450,8 @@ for (const [filePath, newDesc] of Object.entries(updates)) {
     const output = matter.stringify(content, data)
     writeFileSync(fullPath, output)
     updated++
-  } catch (err: any) {
-    console.error(`Failed: ${filePath} — ${err.message}`)
+  } catch (err: unknown) {
+    console.error(`Failed: ${filePath} — ${err instanceof Error ? err.message : String(err)}`)
   }
 }
 

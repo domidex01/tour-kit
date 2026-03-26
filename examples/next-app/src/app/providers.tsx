@@ -368,7 +368,11 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
       </ChecklistWrapper>
       <TourOverlay />
       <TourCard />
-      <AiChatPanel position="bottom-left" title="Tour Kit Assistant" emptyState="Ask me anything about Tour Kit!" />
+      <AiChatPanel
+        position="bottom-left"
+        title="Tour Kit Assistant"
+        emptyState="Ask me anything about Tour Kit!"
+      />
       <AiChatToggle position="bottom-left" />
     </MultiTourKitProvider>
   )

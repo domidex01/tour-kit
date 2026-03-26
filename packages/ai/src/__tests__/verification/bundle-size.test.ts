@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { gzipSync } from 'node:zlib'
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 const PKG_ROOT = process.cwd()
 const DIST_DIR = resolve(PKG_ROOT, 'dist')

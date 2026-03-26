@@ -10,9 +10,9 @@
  *   or: pnpm --filter docs generate:llm
  */
 
+import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
-import { execSync } from 'node:child_process'
 import { globSync } from 'glob'
 import matter from 'gray-matter'
 
@@ -86,12 +86,12 @@ function makeVersionStamp(version: string): string {
 
 function stripMdxSyntax(content: string): string {
   return content
-    .replace(/^import\s+.*$/gm, '')                                  // import statements
+    .replace(/^import\s+.*$/gm, '') // import statements
     .replace(/^export\s+(?:default\s+)?(?:const|let|var|function)\s+.*$/gm, '') // export statements
-    .replace(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g, '')                       // self-closing JSX <Foo />
+    .replace(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g, '') // self-closing JSX <Foo />
     .replace(/<[A-Z][a-zA-Z]*[^>]*>[\s\S]*?<\/[A-Z][a-zA-Z]*>/g, '') // JSX blocks <Foo>...</Foo>
-    .replace(/<[A-Z][a-zA-Z]*\s*\/>/g, '')                            // <Foo/>
-    .replace(/\n{3,}/g, '\n\n')                                       // collapse excess newlines
+    .replace(/<[A-Z][a-zA-Z]*\s*\/>/g, '') // <Foo/>
+    .replace(/\n{3,}/g, '\n\n') // collapse excess newlines
     .trim()
 }
 
@@ -136,6 +136,7 @@ function collectPages(): PageMeta[] {
 
 // ─── llms.txt Generation ─────────────────────────────────────────
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: section grouping and ordering logic
 function generateLlmsTxt(pages: PageMeta[], versionStamp: string): string {
   const lines: string[] = []
 
@@ -230,14 +231,19 @@ function generateContextFiles(): void {
   const contextScript = path.resolve(DOCS_ROOT, 'scripts/generate-context-files.ts')
 
   if (!fs.existsSync(contextScript)) {
-    console.warn('Warning: scripts/generate-context-files.ts not found, skipping context file generation')
+    console.warn(
+      'Warning: scripts/generate-context-files.ts not found, skipping context file generation'
+    )
     return
   }
 
   console.log('Generating per-package context files...')
 
   // Try bun first (faster, avoids esbuild platform issues in WSL), fall back to npx tsx
-  const commands = ['bun run scripts/generate-context-files.ts', 'npx tsx scripts/generate-context-files.ts']
+  const commands = [
+    'bun run scripts/generate-context-files.ts',
+    'npx tsx scripts/generate-context-files.ts',
+  ]
   for (const cmd of commands) {
     try {
       execSync(cmd, { cwd: DOCS_ROOT, stdio: 'inherit' })

@@ -38,7 +38,7 @@ export function stripMdx(mdxContent: string): string {
 
   // Step 8: Restore code blocks
   result = result.replace(/__CODE_BLOCK_(\d+)__/g, (_, index) => {
-    return codeBlocks[parseInt(index, 10)]
+    return codeBlocks[Number.parseInt(index, 10)]
   })
 
   // Step 9: Clean up excessive blank lines

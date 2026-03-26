@@ -11,8 +11,15 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const PACKAGES = [
-  'core', 'react', 'hints', 'adoption', 'analytics',
-  'announcements', 'checklists', 'media', 'scheduling',
+  'core',
+  'react',
+  'hints',
+  'adoption',
+  'analytics',
+  'announcements',
+  'checklists',
+  'media',
+  'scheduling',
 ] as const
 
 const SCRIPT_DIR = __dirname
@@ -68,10 +75,10 @@ function addCalloutToPackagePage(pkg: string): boolean {
   const firstDoubleNewline = restContent.indexOf('\n\n')
 
   if (firstDoubleNewline === -1) {
-    content = content.slice(0, afterFrontmatter) + '\n\n' + getCalloutBlock(pkg) + '\n' + restContent
+    content = `${content.slice(0, afterFrontmatter)}\n\n${getCalloutBlock(pkg)}\n${restContent}`
   } else {
     const insertPos = afterFrontmatter + firstDoubleNewline + 2
-    content = content.slice(0, insertPos) + getCalloutBlock(pkg) + '\n' + content.slice(insertPos)
+    content = `${content.slice(0, insertPos) + getCalloutBlock(pkg)}\n${content.slice(insertPos)}`
   }
 
   fs.writeFileSync(mdxPath, content, 'utf-8')
@@ -82,7 +89,7 @@ function addCalloutToPackagePage(pkg: string): boolean {
 function updateAIAssistantsPage(): boolean {
   const aiPath = path.join(CONTENT_DIR, 'ai-assistants', 'index.mdx')
   if (!fs.existsSync(aiPath)) {
-    console.log(`  SKIP: ai-assistants/index.mdx not found`)
+    console.log('  SKIP: ai-assistants/index.mdx not found')
     return false
   }
 
@@ -90,7 +97,7 @@ function updateAIAssistantsPage(): boolean {
   const SECTION_MARKER = '<!-- per-package-context-files -->'
 
   if (content.includes(SECTION_MARKER)) {
-    console.log(`  SKIP: ai-assistants/index.mdx already has context files section`)
+    console.log('  SKIP: ai-assistants/index.mdx already has context files section')
     return false
   }
 
@@ -118,9 +125,9 @@ ${rows}
 3. Ask your question — the LLM will have accurate API knowledge to generate correct code
 `
 
-  content = content.trimEnd() + '\n' + section + '\n'
+  content = `${content.trimEnd()}\n${section}\n`
   fs.writeFileSync(aiPath, content, 'utf-8')
-  console.log(`  OK: ai-assistants/index.mdx`)
+  console.log('  OK: ai-assistants/index.mdx')
   return true
 }
 

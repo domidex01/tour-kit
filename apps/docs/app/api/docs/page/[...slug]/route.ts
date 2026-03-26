@@ -1,10 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, corsPreflightResponse, withCors } from '@/lib/api-middleware'
 import { getDocPage } from '@/lib/docs-api'
-import {
-  withCors,
-  corsPreflightResponse,
-  checkRateLimit,
-} from '@/lib/api-middleware'
+import { type NextRequest, NextResponse } from 'next/server'
 
 interface RouteParams {
   params: Promise<{ slug: string[] }>
@@ -19,17 +15,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   const page = getDocPage(slug)
   if (!page) {
-    return withCors(
-      NextResponse.json({ error: 'Page not found' }, { status: 404 }),
-      origin
-    )
+    return withCors(NextResponse.json({ error: 'Page not found' }, { status: 404 }), origin)
   }
 
   const response = NextResponse.json(page)
-  response.headers.set(
-    'Cache-Control',
-    's-maxage=60, stale-while-revalidate=300'
-  )
+  response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300')
   return withCors(response, origin)
 }
 

@@ -50,8 +50,8 @@ export function Pricing() {
             Simple, one-time pricing
           </h2>
           <p className="mx-auto max-w-xl text-lg text-fd-muted-foreground">
-            Core packages are free forever. Pay once for extended packages — no
-            subscriptions, no per-seat fees.
+            Core packages are free forever. Pay once for extended packages — no subscriptions, no
+            per-seat fees.
           </p>
         </div>
 
@@ -60,18 +60,14 @@ export function Pricing() {
           {/* Free tier */}
           <div className="flex flex-col rounded-xl border border-fd-border bg-fd-card p-8 shadow-sm">
             <div className="mb-6">
-              <h3 className="mb-1 text-lg font-bold text-fd-foreground">
-                Free
-              </h3>
+              <h3 className="mb-1 text-lg font-bold text-fd-foreground">Free</h3>
               <p className="text-sm text-fd-muted-foreground">
                 Everything you need for product tours
               </p>
             </div>
 
             <div className="mb-8">
-              <span className="text-4xl font-extrabold text-fd-foreground">
-                $0
-              </span>
+              <span className="text-4xl font-extrabold text-fd-foreground">$0</span>
               <span className="ml-1 text-fd-muted-foreground">forever</span>
             </div>
 
@@ -111,12 +107,8 @@ export function Pricing() {
             </div>
 
             <div className="mb-8">
-              <span className="text-4xl font-extrabold text-fd-foreground">
-                $99
-              </span>
-              <span className="ml-1 text-fd-muted-foreground">
-                one-time / 5 sites
-              </span>
+              <span className="text-4xl font-extrabold text-fd-foreground">$99</span>
+              <span className="ml-1 text-fd-muted-foreground">one-time / 5 sites</span>
             </div>
 
             <ul className="mb-8 flex-1 space-y-3">
@@ -152,12 +144,8 @@ export function Pricing() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-fd-border bg-fd-muted/50">
-                  <th className="px-6 py-3 text-left font-semibold text-fd-foreground">
-                    Feature
-                  </th>
-                  <th className="px-6 py-3 text-center font-semibold text-fd-foreground">
-                    Free
-                  </th>
+                  <th className="px-6 py-3 text-left font-semibold text-fd-foreground">Feature</th>
+                  <th className="px-6 py-3 text-center font-semibold text-fd-foreground">Free</th>
                   <th className="px-6 py-3 text-center font-semibold text-[var(--tk-primary)]">
                     Pro
                   </th>
@@ -165,13 +153,8 @@ export function Pricing() {
               </thead>
               <tbody>
                 {COMPARISON_ROWS.map((row) => (
-                  <tr
-                    key={row.feature}
-                    className="border-b border-fd-border last:border-b-0"
-                  >
-                    <td className="px-6 py-3 text-fd-foreground">
-                      {row.feature}
-                    </td>
+                  <tr key={row.feature} className="border-b border-fd-border last:border-b-0">
+                    <td className="px-6 py-3 text-fd-foreground">{row.feature}</td>
                     <td className="px-6 py-3 text-center">
                       <ComparisonCell value={row.free} />
                     </td>
@@ -193,12 +176,8 @@ export function Pricing() {
           <div className="mx-auto max-w-3xl space-y-6">
             {FAQ_ITEMS.map((item) => (
               <div key={item.q}>
-                <h4 className="mb-2 font-semibold text-fd-foreground">
-                  {item.q}
-                </h4>
-                <p className="text-sm leading-relaxed text-fd-muted-foreground">
-                  {item.a}
-                </p>
+                <h4 className="mb-2 font-semibold text-fd-foreground">{item.q}</h4>
+                <p className="text-sm leading-relaxed text-fd-muted-foreground">{item.a}</p>
               </div>
             ))}
           </div>
@@ -222,9 +201,7 @@ function ComparisonCell({
     return (
       <Check
         className={`mx-auto h-4 w-4 ${
-          isPro
-            ? 'text-[var(--tk-primary)]'
-            : 'text-emerald-600 dark:text-emerald-400'
+          isPro ? 'text-[var(--tk-primary)]' : 'text-emerald-600 dark:text-emerald-400'
         }`}
       />
     )
@@ -239,14 +216,14 @@ const FAQ_ITEMS = [
   },
   {
     q: 'What does "5 sites" mean?',
-    a: 'Your Pro license key can be activated on up to 5 production domains. localhost and development environments don\'t count. You can deactivate and reassign domains anytime from your Polar dashboard.',
+    a: "Your Pro license key can be activated on up to 5 production domains. localhost and development environments don't count. You can deactivate and reassign domains anytime from your Polar dashboard.",
   },
   {
     q: 'Do I need to pay again for updates?',
     a: 'No. The Pro license is a one-time purchase that includes all future updates to the extended packages. No subscriptions, no renewal fees.',
   },
   {
-    q: 'What happens if I don\'t have a license?',
+    q: "What happens if I don't have a license?",
     a: 'Extended packages degrade gracefully — they render their children without the enhanced features and log a developer warning in the console. Nothing crashes or shows a blank screen.',
   },
   {

@@ -47,12 +47,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <head>
-        <link
-          rel="alternate"
-          type="text/plain"
-          href="/llms.txt"
-          title="LLM Documentation Index"
-        />
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Documentation Index" />
       </head>
       <body
         style={{

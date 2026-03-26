@@ -74,10 +74,7 @@ function stripMdx(mdxContent: string): string {
   result = result.replace(/^export\s+default\s+/gm, '')
   result = result.replace(/<[A-Z][a-zA-Z]*\s*[^>]*\/>/g, '')
   for (let i = 0; i < 3; i++) {
-    result = result.replace(
-      /<[A-Z][a-zA-Z]*[^>]*>[\s\S]*?<\/[A-Z][a-zA-Z]*>/g,
-      ''
-    )
+    result = result.replace(/<[A-Z][a-zA-Z]*[^>]*>[\s\S]*?<\/[A-Z][a-zA-Z]*>/g, '')
   }
   result = result.replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
   result = result.replace(/\{[^}]*\}/g, '')
@@ -87,7 +84,7 @@ function stripMdx(mdxContent: string): string {
 
   // Restore code blocks
   result = result.replace(/__CODE_BLOCK_(\d+)__/g, (_, index) => {
-    return codeBlocks[parseInt(index, 10)]
+    return codeBlocks[Number.parseInt(index, 10)]
   })
 
   // Clean up blank lines
@@ -100,10 +97,10 @@ function stripMdx(mdxContent: string): string {
 
 function resolveContentPath(slugs: string[]): string | null {
   // Try direct file: content/docs/core/hooks/use-tour.mdx
-  const directMdx = path.join(CONTENT_DIR, ...slugs) + '.mdx'
+  const directMdx = `${path.join(CONTENT_DIR, ...slugs)}.mdx`
   if (fs.existsSync(directMdx)) return directMdx
 
-  const directMd = path.join(CONTENT_DIR, ...slugs) + '.md'
+  const directMd = `${path.join(CONTENT_DIR, ...slugs)}.md`
   if (fs.existsSync(directMd)) return directMd
 
   // Try index file: content/docs/core/hooks/use-tour/index.mdx
@@ -126,9 +123,10 @@ function readRawContent(slugs: string[]): string | null {
 function extractHeadings(content: string): string[] {
   const headingRegex = /^#{2,3}\s+(.+)$/gm
   const headings: string[] = []
-  let match: RegExpExecArray | null
-  while ((match = headingRegex.exec(content)) !== null) {
+  let match: RegExpExecArray | null = headingRegex.exec(content)
+  while (match !== null) {
     headings.push(match[1].trim())
+    match = headingRegex.exec(content)
   }
   return headings
 }
@@ -148,6 +146,7 @@ export function searchDocs(
 
   const scored = pages
     .filter((page) => !section || page.slugs[0] === section)
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: search scoring requires multiple conditional branches
     .map((page) => {
       const titleLower = (page.data.title ?? '').toLowerCase()
       const descLower = (page.data.description ?? '').toLowerCase()
@@ -191,10 +190,8 @@ export function searchDocs(
 
       // Build highlights from matched fields
       const highlights: string[] = []
-      if (matchedFields.includes('title'))
-        highlights.push(page.data.title ?? '')
-      if (matchedFields.includes('description'))
-        highlights.push(page.data.description ?? '')
+      if (matchedFields.includes('title')) highlights.push(page.data.title ?? '')
+      if (matchedFields.includes('description')) highlights.push(page.data.description ?? '')
 
       return { page, score, highlights }
     })
@@ -219,13 +216,12 @@ export function getDocPage(slug: string[]): DocPage | null {
 
   const body = readRawContent(slug) ?? ''
 
-  const toc: TocEntry[] = (page.data.toc as TocEntry[] | undefined)?.map(
-    (entry) => ({
+  const toc: TocEntry[] =
+    (page.data.toc as TocEntry[] | undefined)?.map((entry) => ({
       title: entry.title,
       depth: entry.depth,
       url: entry.url,
-    })
-  ) ?? []
+    })) ?? []
 
   return {
     title: page.data.title ?? '',
@@ -248,6 +244,7 @@ export function getCodeExamples(pkg: string): CodeExample[] {
 
     let match: RegExpExecArray | null
     codeBlockRegex.lastIndex = 0
+    // biome-ignore lint/suspicious/noAssignInExpressions: idiomatic regex exec loop
     while ((match = codeBlockRegex.exec(rawContent)) !== null) {
       examples.push({
         language: match[1] ?? 'text',

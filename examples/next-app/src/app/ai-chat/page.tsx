@@ -5,8 +5,8 @@ export default function AiChatPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">AI Chat Demo</h1>
           <p className="text-muted-foreground mt-2">
-            The AI assistant is available on every page — click the chat button
-            in the bottom-left corner.
+            The AI assistant is available on every page — click the chat button in the bottom-left
+            corner.
           </p>
         </div>
 

@@ -1,10 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, corsPreflightResponse, withCors } from '@/lib/api-middleware'
 import { getCodeExamples } from '@/lib/docs-api'
-import {
-  withCors,
-  corsPreflightResponse,
-  checkRateLimit,
-} from '@/lib/api-middleware'
+import { type NextRequest, NextResponse } from 'next/server'
 
 const VALID_PACKAGES = [
   'core',
@@ -48,10 +44,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     examples,
     count: examples.length,
   })
-  response.headers.set(
-    'Cache-Control',
-    's-maxage=60, stale-while-revalidate=300'
-  )
+  response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300')
   return withCors(response, origin)
 }
 

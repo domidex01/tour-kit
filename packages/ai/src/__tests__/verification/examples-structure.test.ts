@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 const PKG_ROOT = process.cwd()
 const MONOREPO_ROOT = resolve(PKG_ROOT, '../..')

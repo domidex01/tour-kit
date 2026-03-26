@@ -105,6 +105,7 @@ function resolveExportPath(indexDir: string, relativePath: string): string | nul
 
 // ─── Extraction: exports from index.ts ───────────────────────────
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: export parsing requires many conditional branches
 function extractExportsFromIndex(indexPath: string): {
   entries: ExportEntry[]
   reExportPaths: string[]
@@ -118,8 +119,8 @@ function extractExportsFromIndex(indexPath: string): {
 
   // Re-exports: export { Foo, Bar } from './module'
   const reExportRegex = /export\s+(?:type\s+)?\{([^}]+)\}\s+from\s+['"]([^'"]+)['"]/g
-  let match: RegExpExecArray | null
-  while ((match = reExportRegex.exec(source)) !== null) {
+  let match: RegExpExecArray | null = reExportRegex.exec(source)
+  while (match !== null) {
     const names = match[1].split(',').map((n) => {
       const trimmed = n.trim()
       // Handle "type Foo" prefix inside braces
@@ -132,13 +133,14 @@ function extractExportsFromIndex(indexPath: string): {
       if (!name) continue
       entries.push({
         name,
-        kind: isTypeOnly || /^[A-Z].*(?:Props|Config|State|Options|Value|Return|Variants)$/.test(name)
-          ? 'type'
-          : name.startsWith('use')
-            ? 'function'
-            : /^[A-Z]/.test(name)
-              ? 'component'
-              : 'const',
+        kind:
+          isTypeOnly || /^[A-Z].*(?:Props|Config|State|Options|Value|Return|Variants)$/.test(name)
+            ? 'type'
+            : name.startsWith('use')
+              ? 'function'
+              : /^[A-Z]/.test(name)
+                ? 'component'
+                : 'const',
         signature: '',
         jsdoc: '',
       })
@@ -148,16 +150,19 @@ function extractExportsFromIndex(indexPath: string): {
       const resolved = resolveExportPath(indexDir, modulePath)
       if (resolved) reExportPaths.push(resolved)
     }
+    match = reExportRegex.exec(source)
   }
 
   // Direct exports: export function foo / export const foo / export interface Foo
   const directRegex = /export\s+(type|interface|function|const)\s+(\w+)/g
-  while ((match = directRegex.exec(source)) !== null) {
+  match = directRegex.exec(source)
+  while (match !== null) {
     const kind = match[1] as ExportEntry['kind']
     const name = match[2]
     if (!entries.some((e) => e.name === name)) {
       entries.push({ name, kind, signature: '', jsdoc: '' })
     }
+    match = directRegex.exec(source)
   }
 
   return { entries, reExportPaths }
@@ -165,6 +170,7 @@ function extractExportsFromIndex(indexPath: string): {
 
 // ─── Extraction: type/interface definitions ──────────────────────
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: type extraction requires nested brace counting
 function extractTypeDefinitions(filePaths: string[]): string[] {
   const definitions: string[] = []
   const seen = new Set<string>()
@@ -176,8 +182,8 @@ function extractTypeDefinitions(filePaths: string[]): string[] {
     // Match exported interfaces with optional JSDoc
     const interfaceRegex =
       /(\/\*\*[\s\S]*?\*\/\s*)?export\s+interface\s+(\w+)(?:<[^>]*>)?(?:\s+extends\s+[^{]*)?\s*\{/g
-    let match: RegExpExecArray | null
-    while ((match = interfaceRegex.exec(source)) !== null) {
+    let match: RegExpExecArray | null = interfaceRegex.exec(source)
+    while (match !== null) {
       const name = match[2]
       if (seen.has(name)) continue
       seen.add(name)
@@ -202,12 +208,13 @@ function extractTypeDefinitions(filePaths: string[]): string[] {
       if (endIdx > startIdx) {
         definitions.push(source.slice(startIdx, endIdx).trim())
       }
+      match = interfaceRegex.exec(source)
     }
 
     // Match exported type aliases with optional JSDoc
-    const typeRegex =
-      /(\/\*\*[\s\S]*?\*\/\s*)?export\s+type\s+(\w+)(?:<[^>]*>)?\s*=\s*/g
-    while ((match = typeRegex.exec(source)) !== null) {
+    const typeRegex = /(\/\*\*[\s\S]*?\*\/\s*)?export\s+type\s+(\w+)(?:<[^>]*>)?\s*=\s*/g
+    match = typeRegex.exec(source)
+    while (match !== null) {
       const name = match[2]
       if (seen.has(name)) continue
       seen.add(name)
@@ -224,6 +231,7 @@ function extractTypeDefinitions(filePaths: string[]): string[] {
       }
 
       definitions.push(source.slice(startIdx, endIdx).trim())
+      match = typeRegex.exec(source)
     }
   }
 
@@ -232,6 +240,7 @@ function extractTypeDefinitions(filePaths: string[]): string[] {
 
 // ─── Extraction: function/hook signatures ────────────────────────
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: signature extraction requires multiple regex passes
 function extractFunctionSignatures(
   filePaths: string[],
   exportNames: string[]
@@ -246,8 +255,8 @@ function extractFunctionSignatures(
     // Match exported functions with optional JSDoc
     const fnRegex =
       /(\/\*\*[\s\S]*?\*\/\s*)?export\s+(?:default\s+)?function\s+(\w+)\s*(<[^>]*>)?\s*\(([^)]*)\)(?:\s*:\s*([^\n{]+))?/g
-    let match: RegExpExecArray | null
-    while ((match = fnRegex.exec(source)) !== null) {
+    let match: RegExpExecArray | null = fnRegex.exec(source)
+    while (match !== null) {
       const jsdoc = (match[1] || '').trim()
       const name = match[2]
       const generics = match[3] || ''
@@ -258,12 +267,14 @@ function extractFunctionSignatures(
         const sig = `${name}${generics}(${params})${returnType ? `: ${returnType}` : ''}`
         result.set(name, { signature: sig, jsdoc })
       }
+      match = fnRegex.exec(source)
     }
 
     // Also match arrow function exports: export const useFoo = (...) => ...
     const arrowRegex =
       /(\/\*\*[\s\S]*?\*\/\s*)?export\s+const\s+(\w+)\s*=\s*(?:<[^>]*>\s*)?\(([^)]*)\)(?:\s*:\s*([^\n=>{]+))?\s*=>/g
-    while ((match = arrowRegex.exec(source)) !== null) {
+    match = arrowRegex.exec(source)
+    while (match !== null) {
       const jsdoc = (match[1] || '').trim()
       const name = match[2]
       const params = match[3].trim()
@@ -275,6 +286,7 @@ function extractFunctionSignatures(
           result.set(name, { signature: sig, jsdoc })
         }
       }
+      match = arrowRegex.exec(source)
     }
   }
 
@@ -283,6 +295,7 @@ function extractFunctionSignatures(
 
 // ─── Extraction: examples from MDX ──────────────────────────────
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: example extraction with filtering logic
 function extractExamplesFromMdx(pkgName: string): CodeExample[] {
   const docsDir = path.join(CONTENT_DIR, pkgName)
   const mdxFiles = safeReadDir(docsDir, true).filter((f) => f.endsWith('.mdx'))
@@ -295,8 +308,8 @@ function extractExamplesFromMdx(pkgName: string): CodeExample[] {
     const content = safeReadFile(filePath)
     if (!content) continue
 
-    let match: RegExpExecArray | null
-    while ((match = codeBlockRegex.exec(content)) !== null) {
+    let match: RegExpExecArray | null = codeBlockRegex.exec(content)
+    while (match !== null) {
       const lang = match[1] ?? ''
       const code = match[2].trim()
 
@@ -314,6 +327,7 @@ function extractExamplesFromMdx(pkgName: string): CodeExample[] {
       }
 
       if (examples.length >= MAX_EXAMPLES) break
+      match = codeBlockRegex.exec(content)
     }
     if (examples.length >= MAX_EXAMPLES) break
   }
@@ -387,7 +401,7 @@ function readPackageInfo(pkgName: PackageName): PackageInfo {
 function fencedToIndented(code: string): string {
   return code
     .split('\n')
-    .map((line) => '    ' + line)
+    .map((line) => `    ${line}`)
     .join('\n')
 }
 
@@ -401,6 +415,7 @@ function formatJsdoc(jsdoc: string): string {
     .trim()
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: template assembly with many sections
 function assembleContextFile(info: PackageInfo): string {
   const lines: string[] = []
   const date = new Date().toISOString().split('T')[0]
@@ -509,7 +524,7 @@ function assembleContextFile(info: PackageInfo): string {
     lines.push('HOOKS')
     lines.push('-----')
     for (const e of hookExports) {
-      lines.push(`    ${e.signature || e.name + '(...)'}`)
+      lines.push(`    ${e.signature || `${e.name}(...)`}`)
     }
     lines.push('')
   }
