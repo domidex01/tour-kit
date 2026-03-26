@@ -16,13 +16,13 @@ describe('Example apps — AI chat integration', () => {
       expect(existsSync(resolve(viteAppDir, 'src/pages/AiChatPage.tsx'))).toBe(true)
     })
 
-    it('AiChatPage.tsx imports from @tour-kit/ai', () => {
-      const content = readFileSync(resolve(viteAppDir, 'src/pages/AiChatPage.tsx'), 'utf-8')
+    it('App.tsx imports from @tour-kit/ai', () => {
+      const content = readFileSync(resolve(viteAppDir, 'src/App.tsx'), 'utf-8')
       expect(content).toContain('@tour-kit/ai')
     })
 
-    it('AiChatPage.tsx uses AiChatProvider', () => {
-      const content = readFileSync(resolve(viteAppDir, 'src/pages/AiChatPage.tsx'), 'utf-8')
+    it('App.tsx uses AiChatProvider', () => {
+      const content = readFileSync(resolve(viteAppDir, 'src/App.tsx'), 'utf-8')
       expect(content).toContain('AiChatProvider')
     })
 
@@ -42,14 +42,14 @@ describe('Example apps — AI chat integration', () => {
       expect(existsSync(resolve(nextAppDir, 'src/app/ai-chat/page.tsx'))).toBe(true)
     })
 
-    it('ai-chat page.tsx is a client component', () => {
-      const content = readFileSync(resolve(nextAppDir, 'src/app/ai-chat/page.tsx'), 'utf-8')
+    it('providers.tsx is a client component', () => {
+      const content = readFileSync(resolve(nextAppDir, 'src/app/providers.tsx'), 'utf-8')
       expect(content).toContain("'use client'")
     })
 
-    it('ai-chat page.tsx uses useTourAssistant', () => {
-      const content = readFileSync(resolve(nextAppDir, 'src/app/ai-chat/page.tsx'), 'utf-8')
-      expect(content).toContain('useTourAssistant')
+    it('providers.tsx uses AiChatProvider', () => {
+      const content = readFileSync(resolve(nextAppDir, 'src/app/providers.tsx'), 'utf-8')
+      expect(content).toContain('AiChatProvider')
     })
 
     it('API route handler exists', () => {
