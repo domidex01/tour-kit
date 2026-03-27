@@ -6,6 +6,7 @@ node_modules/
 dist/
 *.tsbuildinfo
 .next/
+tsup.config.bundled_*
 
 # IDE
 .idea/
