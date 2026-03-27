@@ -36,7 +36,7 @@
     "format": "biome format --write .",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "clean": "turbo run clean && node -e \"require('fs').rmSync('node_modules',{recursive:true,force:true})\"",
+    "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "turbo run build --filter='./packages/*' && changeset publish",

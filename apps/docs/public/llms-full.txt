@@ -1,8 +1,8 @@
-# Tour Kit v0.3.0 — Generated 2026-03-24T02:58:52Z
+# Tour Kit v0.3.0 — Generated 2026-03-27T04:04:34Z
 
 # Feature Adoption Tracking
 
-> Track feature usage, measure adoption, and nudge users toward valuable features
+> Track feature usage, measure adoption rates, and nudge users toward underused features with @tour-kit/adoption for React
 
 <!-- llm-context-callout -->
 
@@ -242,7 +242,7 @@ Full provider configuration:
 
 # Analytics Integration
 
-> Automatic analytics tracking for adoption events
+> Adoption analytics integration: automatically send feature usage and nudge interaction events to your analytics provider
 
 ## Overview
 
@@ -553,7 +553,7 @@ onAdoption={(feature) => {
 
 # AdoptionNudge
 
-> Auto-showing nudge component for feature discovery
+> AdoptionNudge component: auto-showing prompt that appears when a user has not adopted a tracked feature after a threshold
 
 ## Overview
 
@@ -720,7 +720,7 @@ const features = [
 
 # Conditional Components
 
-> IfNotAdopted and IfAdopted - render based on adoption status
+> IfNotAdopted and IfAdopted components: conditionally render content based on whether a user has adopted a specific feature
 
 ## Overview
 
@@ -1027,7 +1027,7 @@ if (byStatus.adopted.length === 0) {
 
 # FeatureButton
 
-> Button with automatic usage tracking
+> FeatureButton component: button wrapper that automatically records usage events for the tracked feature on each click
 
 ## Overview
 
@@ -1221,7 +1221,7 @@ featureId="btn-1"
 
 # NewFeatureBadge
 
-> Badge component that shows for unadopted features
+> NewFeatureBadge component: badge overlay that highlights unadopted features and auto-hides after the user engages with them
 
 ## Overview
 
@@ -1565,7 +1565,7 @@ function SmartBadge({ featureId }: { featureId: string }) {
 
 # Dashboard Components
 
-> Pre-built admin dashboard components for visualizing adoption metrics
+> Pre-built admin dashboard components for visualizing feature adoption metrics, trends, and per-feature engagement rates
 
 ## Overview
 
@@ -1903,7 +1903,7 @@ const stats = useAdoptionStats()
 
 # AdoptionDashboard
 
-> Complete admin dashboard with all adoption metrics
+> AdoptionDashboard component: complete admin view combining stats grid, category chart, and feature table in one layout
 
 ## Overview
 
@@ -1956,7 +1956,7 @@ const stats = useAdoptionStats()
 
 # Charts
 
-> AdoptionCategoryChart and AdoptionStatusBadge components
+> AdoptionCategoryChart and AdoptionStatusBadge: visualize adoption distribution by category and individual feature status
 
 ## AdoptionCategoryChart
 
@@ -2043,7 +2043,7 @@ Status indicator badge for adoption states.
 
 # Stat Cards
 
-> AdoptionStatCard and AdoptionStatsGrid components
+> AdoptionStatCard and AdoptionStatsGrid: display aggregate adoption metrics with trend indicators and percentage changes
 
 ## Overview
 
@@ -2128,7 +2128,7 @@ function CustomStats() {
 
 # AdoptionTable
 
-> Sortable table of features and adoption status
+> AdoptionTable component: sortable, filterable table of tracked features showing adoption status, usage count, and trends
 
 ## Overview
 
@@ -2253,7 +2253,7 @@ The table includes:
 
 # useAdoptionStats
 
-> Get aggregated adoption metrics across all features
+> useAdoptionStats hook: retrieve aggregated adoption metrics across all tracked features for dashboards and reporting
 
 ## Overview
 
@@ -2861,7 +2861,7 @@ const topAdopted = useMemo(
 
 # useFeature
 
-> Track and query individual feature adoption state
+> useFeature hook: track individual feature usage, query adoption state, and record interactions for adoption metrics
 
 ## Overview
 
@@ -3338,7 +3338,7 @@ onChange={(e) => {
 
 # useNudge
 
-> Manage nudge state and handle user interactions
+> useNudge hook: manage nudge visibility, dismissal, snooze, and user interaction state for feature discovery prompts
 
 ## Overview
 
@@ -3568,7 +3568,7 @@ nudge: {
 
 # AdoptionProvider
 
-> Configure feature tracking, storage, and nudge behavior
+> AdoptionProvider: configure feature definitions, usage thresholds, nudge rules, and storage for the adoption tracking system
 
 ## Overview
 
@@ -3799,7 +3799,7 @@ adoptionCriteria: { minUses: 3, recencyDays: 30 }
 
 # TypeScript Types
 
-> Type definitions for @tour-kit/adoption
+> TypeScript types for FeatureConfig, AdoptionState, NudgeRule, UsageThreshold, and the @tour-kit/adoption API surface
 
 ## Core Types
 
@@ -4190,7 +4190,7 @@ const buttonProps: FeatureButtonProps = {
 
 # @tour-kit/ai
 
-> AI-powered chat assistant for product tours with context-aware conversation
+> AI-powered chat assistant for product tours — context-aware conversation with RAG and CAG documentation retrieval modes
 
 # @tour-kit/ai
 
@@ -4235,7 +4235,7 @@ This ensures server-only code (API keys, vector stores) never leaks into the bro
 
 # AI Assistants
 
-> Documentation resources optimized for AI coding assistants and LLMs
+> Documentation resources optimized for AI coding assistants — llms.txt, context files, and MCP server for Tour Kit integration
 
 # AI Assistants
 
@@ -4328,7 +4328,7 @@ and usage examples — optimized to fit within a single paste.
 
 # API Reference
 
-> Complete API reference for @tour-kit/ai client and server exports
+> Complete API reference for @tour-kit/ai: client hooks, server utilities, chat components, and configuration types
 
 # API Reference
 
@@ -4467,7 +4467,7 @@ See the full type definitions in the [source code](https://github.com/DomiDex/to
 
 # CAG Guide
 
-> Context-Augmented Generation — inject tour context directly into AI prompts
+> Context-Augmented Generation guide: inject tour documentation directly into AI prompts for fast, deterministic responses
 
 # Context-Augmented Generation (CAG)
 
@@ -4535,7 +4535,7 @@ export { POST }
 
 # Components
 
-> Pre-built UI components for AI chat features
+> Pre-built AI chat components: AiChatPanel, AiChatToggle, AiChatMessageList, and AiChatInput with shadcn/ui styling
 
 # Components
 
@@ -4617,7 +4617,7 @@ function CustomChat() {
 
 # Quick Start
 
-> Get up and running with @tour-kit/ai in under 5 minutes
+> Set up @tour-kit/ai in under 5 minutes: install the package, configure your AI provider, and add the chat widget to React
 
 # Quick Start
 
@@ -4711,7 +4711,7 @@ OPENAI_API_KEY=sk-...
 
 # RAG Guide
 
-> Retrieval-Augmented Generation — vector search over documentation for scalable AI chat
+> Retrieval-Augmented Generation guide: use vector search over documentation for scalable AI chat with large content sets
 
 # Retrieval-Augmented Generation (RAG)
 
@@ -4805,7 +4805,7 @@ const customStore: VectorStoreAdapter = {
 
 # Tour Integration
 
-> Connect AI chat to active tours for context-aware assistance
+> Connect AI chat to active tour state: context-aware assistance that knows the current step, tour progress, and user actions
 
 # Tour Integration
 
@@ -4887,7 +4887,7 @@ The tour context is always sent as structured metadata, while RAG handles the do
 
 # Analytics
 
-> Plugin-based analytics integration for tracking tour and hint events
+> Plugin-based analytics for tracking tour starts, step views, completions, and hint interactions across any provider
 
 <!-- llm-context-callout -->
 
@@ -5030,7 +5030,7 @@ Enable debug logging to see events in the console without sending to production:
 
 # Analytics Hooks
 
-> React hooks for accessing the analytics tracker in components
+> useAnalytics hook: access the analytics tracker to send custom events and track tour interactions in React components
 
 ## Overview
 
@@ -5369,7 +5369,7 @@ function TourWithAnalytics() {
 
 # Analytics Plugins
 
-> Overview of the plugin system and available integrations
+> Analytics plugin system: choose from built-in integrations or create custom plugins with the AnalyticsPlugin interface
 
 ## Overview
 
@@ -5581,7 +5581,7 @@ See [Custom Plugins](/docs/analytics/plugins/custom) for a complete guide on cre
 
 # Amplitude Plugin
 
-> Integrate tour analytics with Amplitude product intelligence
+> Amplitude analytics plugin: send tour and hint events to Amplitude with automatic property mapping and session tracking
 
 ## Overview
 
@@ -5880,7 +5880,7 @@ Ensure user properties are passed to the provider:
 
 # Console Plugin
 
-> Debug analytics events with colored console output
+> Console analytics plugin: log all tour events with colored output for debugging analytics integration in development
 
 ## Overview
 
@@ -6098,7 +6098,7 @@ const plugins = [consolePlugin(), productionPlugin()]
 
 # Custom Analytics Plugins
 
-> Build your own analytics integrations with the plugin API
+> Build custom analytics plugins by implementing the AnalyticsPlugin interface with track, identify, and flush methods
 
 ## Overview
 
@@ -6667,7 +6667,7 @@ npm install @yourcompany/tourkit-analytics-plugin
 
 # Google Analytics Plugin
 
-> Integrate tour analytics with Google Analytics 4
+> Google Analytics 4 plugin: send tour events as GA4 custom events with automatic parameter mapping and measurement ID
 
 ## Overview
 
@@ -7013,7 +7013,7 @@ Ensure gtag loads before Tour Kit:
 
 # Mixpanel Plugin
 
-> Integrate tour analytics with Mixpanel event tracking
+> Mixpanel analytics plugin: track tour funnel events, step completions, and user engagement with Mixpanel properties
 
 ## Overview
 
@@ -7279,7 +7279,7 @@ Ensure you're passing `userId` to the provider:
 
 # PostHog Plugin
 
-> Integrate tour analytics with PostHog product analytics
+> PostHog analytics plugin: capture tour events as PostHog actions with automatic feature flag and person property sync
 
 ## Overview
 
@@ -7533,7 +7533,7 @@ const plugins = process.env.NODE_ENV === 'production'
 
 # AnalyticsProvider
 
-> React provider for configuring tour analytics tracking
+> AnalyticsProvider component: configure one or more analytics plugins and provide the tracker to your React component tree
 
 ## Overview
 
@@ -7687,7 +7687,7 @@ No manual cleanup is required.
 
 # Analytics Types
 
-> TypeScript type definitions for the analytics package
+> TypeScript types for AnalyticsPlugin, AnalyticsEvent, TrackerConfig, and the analytics package public API surface
 
 ## Overview
 
@@ -8045,7 +8045,7 @@ const plugin: AnalyticsPlugin = {
 
 # @tour-kit/announcements
 
-> Product announcements with 5 UI variants, priority queuing, and audience targeting
+> Product announcements with modal, toast, banner, slideout, and spotlight variants — priority queuing and audience targeting
 
 <!-- llm-context-callout -->
 
@@ -8437,7 +8437,7 @@ All announcement components are built with accessibility in mind:
 
 # Components
 
-> Pre-styled announcement components for all UI variants
+> Pre-styled announcement components: Modal, Toast, Banner, Slideout, and Spotlight with built-in close and action buttons
 
 # Announcement Components
 
@@ -8560,7 +8560,7 @@ Explore each component variant for detailed props and examples:
 
 # AnnouncementBanner
 
-> Full-width bar component for persistent notices
+> AnnouncementBanner component: full-width persistent bar for system notices with dismiss button and action link support
 
 # AnnouncementBanner
 
@@ -8692,7 +8692,7 @@ bannerOptions: {
 
 # AnnouncementModal
 
-> Centered dialog component for important announcements
+> AnnouncementModal component: centered dialog overlay for important product updates with title, body, and action buttons
 
 # AnnouncementModal
 
@@ -8991,7 +8991,7 @@ const modalConfig: AnnouncementConfig = {
 
 # AnnouncementSlideout
 
-> Side panel component for detailed announcements
+> AnnouncementSlideout component: side panel drawer for detailed product updates with rich content and multiple sections
 
 # AnnouncementSlideout
 
@@ -9104,7 +9104,7 @@ slideoutOptions: { size: 'full' }
 
 # AnnouncementSpotlight
 
-> Element highlight component for contextual announcements
+> AnnouncementSpotlight component: element highlight overlay for contextual feature announcements tied to specific UI areas
 
 # AnnouncementSpotlight
 
@@ -9337,7 +9337,7 @@ function FeatureButton() {
 
 # AnnouncementToast
 
-> Temporary notification component for quick messages
+> AnnouncementToast component: auto-dismissing corner notification for quick updates with configurable duration and position
 
 # AnnouncementToast
 
@@ -9460,7 +9460,7 @@ toastOptions: { intent: 'error' } // Red
 
 # Audience Targeting
 
-> Show announcements to specific user segments
+> Target announcements to user segments with role-based, attribute, and custom predicate audience filtering rules
 
 # Audience Targeting
 
@@ -9827,7 +9827,7 @@ const announcements: AnnouncementConfig<UserContext>[] = [
 
 # Frequency Rules
 
-> Control how often announcements are shown to users
+> Control announcement display frequency with once, daily, weekly, and session-based rules to avoid notification fatigue
 
 # Frequency Rules
 
@@ -10245,7 +10245,7 @@ const intervalRule: FrequencyRule = {
 
 # Queue Management
 
-> Priority-based announcement queue with automatic scheduling
+> Priority queue system: rank announcements by urgency, schedule display windows, and prevent overlapping notifications
 
 # Queue Management
 
@@ -10503,7 +10503,7 @@ const priority: AnnouncementPriority = 'high';
 
 # Headless Components
 
-> Build custom announcement UI with render props
+> Headless announcement components: unstyled Modal, Toast, Banner, Slideout, and Spotlight with render props for custom UIs
 
 # Headless Components
 
@@ -10595,7 +10595,7 @@ Explore each headless component for variant-specific render props:
 
 # HeadlessBanner
 
-> Headless banner component with render props
+> HeadlessAnnouncementBanner: unstyled banner primitive with dismiss and action state exposed via render props for theming
 
 # HeadlessBanner
 
@@ -10631,7 +10631,7 @@ Unstyled banner bar that provides state and behavior through render props.
 
 # HeadlessModal
 
-> Headless modal component with render props
+> HeadlessAnnouncementModal: unstyled dialog primitive with focus trap, backdrop click, and Escape key dismiss handling
 
 # HeadlessModal
 
@@ -10687,7 +10687,7 @@ Unstyled modal component that provides state and behavior through render props.
 
 # HeadlessSlideout
 
-> Headless slideout component with render props
+> HeadlessAnnouncementSlideout: unstyled drawer primitive with slide animation state and content sections via render props
 
 # HeadlessSlideout
 
@@ -10725,7 +10725,7 @@ Unstyled slideout panel that provides state and behavior through render props.
 
 # HeadlessSpotlight
 
-> Headless spotlight component with render props
+> HeadlessAnnouncementSpotlight: unstyled highlight primitive with target element positioning and overlay via render props
 
 # HeadlessSpotlight
 
@@ -10774,7 +10774,7 @@ Unstyled element spotlight that provides state and behavior through render props
 
 # HeadlessToast
 
-> Headless toast component with render props
+> HeadlessAnnouncementToast: unstyled notification primitive with auto-dismiss timer and position data via render props
 
 # HeadlessToast
 
@@ -10814,7 +10814,7 @@ Unstyled toast notification that provides state and behavior through render prop
 
 # useAnnouncement
 
-> Hook for controlling a single announcement
+> useAnnouncement hook: control visibility, dismissal, and action tracking for a single announcement instance in React
 
 # useAnnouncement
 
@@ -10891,7 +10891,7 @@ const {
 
 # useAnnouncementQueue
 
-> Hook for managing the announcement queue
+> useAnnouncementQueue hook: manage priority-based display ordering and automatic scheduling of queued announcements
 
 # useAnnouncementQueue
 
@@ -11180,7 +11180,7 @@ function AdminQueueManager() {
 
 # useAnnouncements
 
-> Hook for accessing and managing all announcements
+> useAnnouncements hook: query all announcements, filter by status or variant, and manage the announcement collection state
 
 # useAnnouncements
 
@@ -11260,7 +11260,7 @@ const {
 
 # AnnouncementsProvider
 
-> Root provider for announcement state and configuration
+> AnnouncementsProvider: configure announcement storage, queue behavior, frequency rules, and audience targeting at app level
 
 # AnnouncementsProvider
 
@@ -11385,7 +11385,7 @@ const queueConfig: QueueConfig = {
 
 # Type Reference
 
-> Complete TypeScript type reference for @tour-kit/announcements
+> TypeScript types for Announcement, AnnouncementVariant, QueueConfig, AudienceRule, and the full announcements API surface
 
 # Type Reference
 
@@ -12157,7 +12157,7 @@ interface UserContext {
 
 # API Reference
 
-> Complete API documentation for all Tour Kit packages
+> Complete API reference for all Tour Kit packages — hooks, components, providers, utilities, and TypeScript type exports
 
 # API Reference
 
@@ -12379,7 +12379,7 @@ All packages export TypeScript types:
 
 # @tour-kit/adoption API
 
-> Complete API reference for @tour-kit/adoption
+> API reference for @tour-kit/adoption: AdoptionProvider, useFeature, useNudge, useAdoptionStats, and dashboard exports
 
 # @tour-kit/adoption API Reference
 
@@ -12593,7 +12593,7 @@ interface FeatureUsage {
 
 # @tour-kit/analytics API
 
-> Complete API reference for @tour-kit/analytics
+> API reference for @tour-kit/analytics: AnalyticsProvider, useAnalytics, plugin interface, and built-in integrations
 
 # @tour-kit/analytics API Reference
 
@@ -12969,7 +12969,7 @@ useEffect(() => {
 
 # @tour-kit/announcements API
 
-> Complete API reference for @tour-kit/announcements
+> API reference for @tour-kit/announcements: Modal, Toast, Banner, Slideout, Spotlight, queue hooks, and provider config
 
 # @tour-kit/announcements API Reference
 
@@ -13279,7 +13279,7 @@ interface AnnouncementState {
 
 # @tour-kit/checklists API
 
-> Complete API reference for @tour-kit/checklists
+> API reference for @tour-kit/checklists: Checklist, ChecklistTask, useChecklist, useTask, and progress utilities
 
 # @tour-kit/checklists API Reference
 
@@ -13631,7 +13631,7 @@ interface ChecklistProgress {
 
 # @tour-kit/core API
 
-> Complete API reference for @tour-kit/core
+> API reference for @tour-kit/core: useTour, useStep, useFocusTrap, createTour, createStep, and all utility exports
 
 # @tour-kit/core API Reference
 
@@ -13883,7 +13883,7 @@ const data = safeJSONParse
 
 # @tour-kit/hints API
 
-> Complete API reference for @tour-kit/hints
+> API reference for @tour-kit/hints: Hint, HintHotspot, HintTooltip, useHints, useHint, and headless hint primitives
 
 # @tour-kit/hints API Reference
 
@@ -14055,7 +14055,7 @@ const library = useUILibrary(); // 'radix' | 'base-ui'
 
 # @tour-kit/media API
 
-> Complete API reference for @tour-kit/media
+> API reference for @tour-kit/media: YouTubeEmbed, VimeoEmbed, LoomEmbed, GifPlayer, LottiePlayer, and TourMedia
 
 # @tour-kit/media API Reference
 
@@ -14410,7 +14410,7 @@ interface ResponsiveSource {
 
 # @tour-kit/react API
 
-> Complete API reference for @tour-kit/react
+> API reference for @tour-kit/react: Tour, TourCard, TourStep, headless components, router adapters, and style hooks
 
 # @tour-kit/react API Reference
 
@@ -14698,7 +14698,7 @@ export type {
 
 # @tour-kit/scheduling API
 
-> Complete API reference for @tour-kit/scheduling
+> API reference for @tour-kit/scheduling: useSchedule, evaluateSchedule, timezone utilities, and preset configurations
 
 # @tour-kit/scheduling API Reference
 
@@ -15129,7 +15129,7 @@ interface ScheduleStatus {
 
 # @tour-kit/checklists
 
-> Interactive checklists with task dependencies and progress tracking
+> Onboarding checklists with task dependencies, progress tracking, persistence, and optional tour integration for React apps
 
 <!-- llm-context-callout -->
 
@@ -15481,7 +15481,7 @@ All checklist components are built with accessibility in mind:
 
 # Components
 
-> Pre-styled checklist components with shadcn/ui patterns
+> Pre-styled checklist components with shadcn/ui patterns: Checklist, ChecklistTask, ChecklistProgress, and ChecklistLauncher
 
 # Components
 
@@ -15561,7 +15561,7 @@ All components follow WCAG 2.1 AA guidelines:
 
 # Checklist
 
-> Main checklist container component
+> Checklist component: main container rendering tasks with progress header, completion state, and configurable layout options
 
 # Checklist
 
@@ -15670,7 +15670,7 @@ The main container component that displays a complete checklist with tasks, head
 
 # ChecklistLauncher
 
-> Floating button to toggle checklist panel visibility
+> ChecklistLauncher component: floating action button to toggle checklist panel visibility with badge showing remaining tasks
 
 # ChecklistLauncher
 
@@ -15734,7 +15734,7 @@ The launcher automatically shows:
 
 # ChecklistPanel
 
-> Floating panel container for checklists
+> ChecklistPanel component: floating side panel container with slide-in animation for persistent checklist access
 
 # ChecklistPanel
 
@@ -15842,7 +15842,7 @@ function App() {
 
 # ChecklistProgress
 
-> Progress bar component for checklists
+> ChecklistProgress component: visual progress bar with percentage, completed count, and animated fill for task completion
 
 # ChecklistProgress
 
@@ -15914,7 +15914,7 @@ const { progress } = useChecklist('onboarding');
 
 # ChecklistTask
 
-> Individual task item component
+> ChecklistTask component: individual task item with checkbox, label, description, completion state, and action button
 
 # ChecklistTask
 
@@ -16020,7 +16020,7 @@ The component automatically shows different states:
 
 # Headless Components
 
-> Unstyled components with render props for custom UIs
+> Headless checklist components: unstyled primitives with render props for building custom checklist and task UIs
 
 # Headless Components
 
@@ -16062,7 +16062,7 @@ Use headless components when you need:
 
 # ChecklistHeadless
 
-> Headless checklist component with render props
+> HeadlessChecklist component: unstyled checklist container exposing tasks, progress, and actions via render props
 
 # ChecklistHeadless
 
@@ -16114,7 +16114,7 @@ Headless component that provides checklist state and actions via render props, w
 
 # TaskHeadless
 
-> Headless task component with render props
+> HeadlessTask component: unstyled task primitive exposing completion state, actions, and dependency info via render props
 
 # TaskHeadless
 
@@ -16139,7 +16139,7 @@ Headless component for individual tasks with render props.
 
 # useChecklist
 
-> Main hook for controlling checklist state and actions
+> useChecklist hook: manage task completion, track overall progress, and control checklist state with toggle and reset actions
 
 # useChecklist
 
@@ -16271,7 +16271,7 @@ function GoodExample() {
 
 # useChecklistPersistence
 
-> Manage checklist state persistence across sessions
+> useChecklistPersistence hook: save and restore checklist completion state across sessions with pluggable storage adapters
 
 # useChecklistPersistence
 
@@ -16654,7 +16654,7 @@ function QuotaSafePersistence() {
 
 # useChecklistsProgress
 
-> Get aggregated progress across all checklists
+> useChecklistsProgress hook: get aggregated completion stats across all active checklists for dashboard or summary views
 
 # useChecklistsProgress
 
@@ -16966,7 +16966,7 @@ function ConditionalContent() {
 
 # useTask
 
-> Hook for controlling individual tasks
+> useTask hook: control individual task state, trigger completion, handle dependencies, and access task metadata in React
 
 # useTask
 
@@ -17093,7 +17093,7 @@ function TaskWithStats({ checklistId, taskId }) {
 
 # ChecklistProvider
 
-> Configure and provide checklist state to your application
+> ChecklistProvider: configure task definitions, dependencies, storage, and analytics integration for your checklist instance
 
 # ChecklistProvider
 
@@ -17449,7 +17449,7 @@ Use event handlers for analytics:
 
 # Types
 
-> TypeScript type definitions for checklists
+> TypeScript types for ChecklistConfig, TaskConfig, TaskDependency, ChecklistState, and the full checklists type system
 
 # Types
 
@@ -17716,7 +17716,7 @@ interface UseTaskReturn {
 
 # Utilities
 
-> Helper functions for checklists and tasks
+> Checklist utility functions: create type-safe configs, resolve dependencies, and calculate progress with pure functions
 
 # Utilities
 
@@ -17730,7 +17730,7 @@ Helper functions for creating checklists, calculating progress, and managing dep
 
 # createChecklist & createTask
 
-> Factory functions for type-safe checklist creation
+> createChecklist factory: build validated checklist configurations with type-safe task definitions and dependency declarations
 
 # createChecklist & createTask
 
@@ -17782,7 +17782,7 @@ const task = createTask({
 
 # Dependency Utilities
 
-> Functions for managing task dependencies
+> Dependency resolution utilities: topological sort, circular reference detection, and prerequisite task validation functions
 
 # Dependency Utilities
 
@@ -17865,7 +17865,7 @@ function DependencyGraph({ tasks }) {
 
 # Progress Utilities
 
-> Functions for calculating and analyzing progress
+> Progress calculation utilities: compute completion percentages, remaining task counts, and estimated time to finish values
 
 # Progress Utilities
 
@@ -17912,7 +17912,7 @@ console.log(`${locked.length} tasks locked`);
 
 # @tour-kit/core
 
-> Headless hooks and utilities for building product tours
+> Framework-agnostic hooks and utilities for building product tours — state management, positioning, and accessibility
 
 <!-- llm-context-callout -->
 
@@ -17941,7 +17941,7 @@ This package provides:
 
 # useAdvanceOn
 
-> Automatically advance tour when users interact with elements
+> useAdvanceOn hook: automatically advance tour steps when users click buttons, submit forms, or interact with elements
 
 # useAdvanceOn
 
@@ -18122,7 +18122,7 @@ advanceOn={{
 
 # useBranch
 
-> Hook for triggering branch actions from step content
+> useBranch hook: trigger conditional branching paths from step content based on user choices or application state
 
 # useBranch
 
@@ -18183,7 +18183,7 @@ function RoleSelectStep() {
 
 # useElementPosition
 
-> Track element position with automatic updates on scroll and resize
+> useElementPosition hook: track DOM element position with automatic updates on scroll, resize, and layout changes
 
 # useElementPosition
 
@@ -18252,7 +18252,7 @@ function SpotlightOverlay() {
 
 # useFocusTrap
 
-> Hook for trapping focus within tour elements
+> useFocusTrap hook: trap keyboard focus within tour step elements for WCAG 2.1 AA accessible navigation
 
 # useFocusTrap
 
@@ -18296,7 +18296,7 @@ useEffect(() => {
 
 # useKeyboard
 
-> Hook for keyboard navigation
+> useKeyboard hook: add arrow key navigation, Escape to close, and custom keyboard shortcuts to product tours
 
 # useKeyboard
 
@@ -18360,7 +18360,7 @@ useKeyboard({ enabled: !isInputFocused });
 
 # useMediaQuery
 
-> Reactive media query hooks for responsive and accessible tours
+> useMediaQuery hook: respond to viewport changes and prefers-reduced-motion for responsive, accessible product tours
 
 # useMediaQuery
 
@@ -18578,7 +18578,7 @@ function useMediaQuery(query: string): boolean {
 
 # usePersistence
 
-> Hook for persisting tour state
+> usePersistence hook: save and restore tour completion state across browser sessions with localStorage or custom adapters
 
 # usePersistence
 
@@ -18671,7 +18671,7 @@ useEffect(() => {
 
 # useRoutePersistence
 
-> Persist tour state across page navigations for multi-page tours
+> useRoutePersistence hook: maintain tour progress when users navigate between pages in multi-page applications
 
 # useRoutePersistence
 
@@ -18866,7 +18866,7 @@ persistence.load(); // Returns null, logs warning
 
 # useSpotlight
 
-> Hook for spotlight overlay control
+> useSpotlight hook: control spotlight overlay visibility, padding, border radius, and animation for tour steps
 
 # useSpotlight
 
@@ -18943,7 +18943,7 @@ function CustomSpotlight() {
 
 # useStep
 
-> Hook for accessing current step data
+> useStep hook: access current step data, index, progress percentage, and isFirst/isLast flags in tour components
 
 # useStep
 
@@ -18994,7 +18994,7 @@ useEffect(() => {
 
 # useTour
 
-> Main hook for controlling tours
+> useTour hook: control tour state with start, next, prev, skip, and complete actions plus step tracking in React
 
 # useTour
 
@@ -19073,7 +19073,7 @@ function handleNext() {
 
 # TourKitProvider
 
-> Global provider for managing multiple tours
+> TourKitProvider: wrap your app to enable global tour management, shared configuration, and multi-tour coordination
 
 # TourKitProvider
 
@@ -19110,7 +19110,7 @@ When using `TourKitProvider`, you can define multiple tours:
 
 # TourProvider
 
-> Context provider for individual tours
+> TourProvider: context provider that manages state, steps, and lifecycle for an individual product tour instance
 
 # TourProvider
 
@@ -19142,7 +19142,7 @@ function App() {
 
 # Config Types
 
-> TypeScript types for configuration options
+> TypeScript interfaces for TourConfig, SpotlightConfig, KeyboardConfig, and other Tour Kit configuration options
 
 # Config Types
 
@@ -19254,7 +19254,7 @@ const defaultScroll: ScrollConfig = {
 
 # Step Types
 
-> TypeScript types for tour steps
+> TypeScript interfaces for StepConfig, StepTarget, StepPlacement, and step-level configuration in Tour Kit tours
 
 # Step Types
 
@@ -19270,7 +19270,7 @@ See the [Branching Guide](/docs/guides/branching) for more patterns and examples
 
 # Tour Types
 
-> TypeScript types for tour configuration
+> TypeScript interfaces for TourState, TourActions, TourCallbacks, and the complete tour lifecycle type system
 
 # Tour Types
 
@@ -19341,7 +19341,7 @@ type Placement = Side | `${Side}-${Alignment}`;
 
 # Accessibility Utilities
 
-> Screen reader announcements and accessibility helpers
+> Accessibility utilities: screen reader announcements, live regions, and ARIA attribute helpers for product tours
 
 # Accessibility Utilities
 
@@ -19609,7 +19609,7 @@ function AccessibleTourCard({ step, currentIndex, totalSteps }) {
 
 # createStep
 
-> Factory function for creating typed step configurations
+> createStep factory function: build type-safe step configurations with validation and IntelliSense autocomplete
 
 # createStep
 
@@ -19704,7 +19704,7 @@ const tour = createTour({
 
 # createTour
 
-> Factory function for creating typed tour configurations
+> createTour factory function: define type-safe tour configurations with validated steps, callbacks, and options
 
 # createTour
 
@@ -19794,7 +19794,7 @@ Returns a `TourConfig` object that can be passed directly to `TourProvider`:
 
 # DOM Utilities
 
-> DOM manipulation and element tracking utilities
+> DOM utilities: element measurement, visibility detection, and target resolution for positioning tour tooltips
 
 # DOM Utilities
 
@@ -20015,7 +20015,7 @@ async function showTourStep(target: string) {
 
 # Helper Functions
 
-> Utility functions for common tour operations
+> Helper utilities: step index calculations, progress percentages, and common tour operation functions in Tour Kit
 
 # Helper Functions
 
@@ -20118,7 +20118,7 @@ const visible = isElementVisible(element);
 
 # Logger Utility
 
-> Configurable logging for debugging and production
+> Configurable logger utility: debug tour state transitions, step changes, and lifecycle events in development mode
 
 # Logger Utility
 
@@ -20266,7 +20266,7 @@ interface Logger {
 
 # Position Utilities
 
-> Calculate tooltip positions with collision detection and RTL support
+> Position engine: calculate tooltip placement with collision detection, viewport clamping, and RTL layout support
 
 # Position Utilities
 
@@ -20580,7 +20580,7 @@ interface Position {
 
 # Scroll Utilities
 
-> Smooth scrolling and scroll lock utilities
+> Scroll utilities: smooth scroll to target elements, scroll lock during tour steps, and overflow container handling
 
 # Scroll Utilities
 
@@ -20831,7 +20831,7 @@ function TourOverlay({ targetElement, children }) {
 
 # Storage Utilities
 
-> Storage adapters for persisting tour state
+> Storage adapters: persist tour state with localStorage, sessionStorage, or custom backends for completion tracking
 
 # Storage Utilities
 
@@ -21048,7 +21048,7 @@ const idbStorage = {
 
 # Throttle Utilities
 
-> Performance utilities for rate-limiting function calls
+> Throttle and debounce utilities: rate-limit scroll, resize, and position update handlers for smooth tour performance
 
 # Throttle Utilities
 
@@ -21370,7 +21370,7 @@ const throttled = throttleRAF(update);
 
 # Examples
 
-> Real-world examples and copy-paste code for Tour Kit
+> Copy-paste examples for common Tour Kit patterns: basic tours, onboarding flows, and fully custom headless interfaces
 
 # Examples
 
@@ -21422,7 +21422,7 @@ Copy-paste examples to get started quickly with Tour Kit. Each example is a comp
 
 # Basic Tour
 
-> A simple multi-step product tour with copy-paste code
+> Build a 3-step product tour with spotlight overlay, keyboard navigation, and progress indicators — full working code
 
 # Basic Tour
 
@@ -21622,7 +21622,7 @@ To disable or customize:
 
 # Headless Custom UI
 
-> Build a completely custom tour UI using headless components
+> Build a completely custom tour UI with headless components, render props, and your own design system or CSS framework
 
 # Headless Custom UI
 
@@ -21746,7 +21746,7 @@ function BlurOverlay() {
 
 # Onboarding Flow
 
-> A complete user onboarding flow with persistence and conditional steps
+> Complete user onboarding flow with persistent progress, conditional steps, checklists, and tour completion callbacks
 
 # Onboarding Flow
 
@@ -21992,7 +21992,7 @@ function OnboardingResetButton() {
 
 # Getting Started
 
-> Learn how to install and set up Tour Kit in your React application.
+> Set up Tour Kit in your React application with step-by-step installation, configuration, and TypeScript guides
 
 # Getting Started
 
@@ -22016,7 +22016,7 @@ Tour Kit provides a flexible foundation for building:
 
 # Installation
 
-> Install TourKit in your React project
+> Install @tour-kit/core and @tour-kit/react with npm, pnpm, yarn, or bun and configure peer dependencies for React 18+
 
 # Installation
 
@@ -22053,7 +22053,7 @@ TourKit requires React 18 or 19:
 
 # Quick Start
 
-> Get up and running with TourKit in 5 minutes
+> Create your first multi-step product tour in under 5 minutes with Tour, TourStep, and useTour hook examples
 
 # Quick Start
 
@@ -22078,7 +22078,7 @@ TourKit requires React 18 or 19:
 
 # TypeScript
 
-> TypeScript configuration and type usage
+> Configure TypeScript strict mode, use inferred step types, and leverage generic tour configurations in Tour Kit
 
 # TypeScript
 
@@ -22160,7 +22160,7 @@ TourKit is fully compatible with React Strict Mode and follows all TypeScript st
 
 # Guides
 
-> In-depth guides for Tour Kit features and integrations
+> In-depth guides for accessibility, persistence, animations, router integration, and framework-specific Tour Kit setup
 
 # Guides
 
@@ -22216,7 +22216,7 @@ In-depth guides for setting up and customizing Tour Kit in your applications.
 
 # Accessibility
 
-> Building accessible tours that work for everyone - WCAG 2.1 AA compliance guide
+> Configure keyboard navigation, focus trapping, screen reader support, and reduced motion for WCAG 2.1 AA compliant tours
 
 # Accessibility
 
@@ -22605,7 +22605,7 @@ Before shipping your tour, verify:
 
 # Adoption Analytics
 
-> Tracking feature adoption metrics with analytics integration
+> Combine @tour-kit/adoption and @tour-kit/analytics to measure feature discovery rates and optimize onboarding funnels
 
 # Adoption Analytics
 
@@ -23005,7 +23005,7 @@ track('nudge_shown', {
 
 # Analytics Integration
 
-> Integrating @tour-kit/analytics with tours, hints, checklists, and adoption tracking
+> Connect @tour-kit/analytics to tours, hints, checklists, and adoption events with Mixpanel, PostHog, or custom plugins
 
 # Analytics Integration
 
@@ -23361,7 +23361,7 @@ track('custom_event', { ... }, { skipPlugins: ['segment'] });
 
 # Animations
 
-> Customize tour transitions, respect reduced motion, and create smooth experiences
+> Add CSS transitions and animations to tour steps, respect prefers-reduced-motion, and create smooth step transitions
 
 # Animations
 
@@ -23869,7 +23869,7 @@ function TourWithExitAnimation({ children }) {
 
 # Time-Based Announcements
 
-> Using scheduling with announcements for timed content delivery
+> Schedule announcements with @tour-kit/scheduling for time-based delivery, business hours, and recurring content windows
 
 # Time-Based Announcements
 
@@ -24446,7 +24446,7 @@ frequency: {
 
 # Base UI Support
 
-> Use TourKit with Base UI instead of Radix UI
+> Switch from Radix UI to Base UI for tour components using the UnifiedSlot abstraction and UILibraryContext provider
 
 # Base UI Support
 
@@ -24598,7 +24598,7 @@ You can nest providers to use different libraries in different parts of your app
 
 # Branching Tours
 
-> Create personalized tour experiences with dynamic branching based on user choices
+> Create personalized tour paths with conditional branching, user choice flows, and dynamic step insertion based on state
 
 # Branching Tours
 
@@ -24824,7 +24824,7 @@ console.log('Available actions:', availableActions);
 
 # Checklists with Tours
 
-> Using checklists with tours for guided onboarding flows
+> Link checklists to tours for guided onboarding — auto-complete tasks on tour finish and track user progress together
 
 # Checklists with Tours
 
@@ -25190,7 +25190,7 @@ Save checklist progress so users can resume:
 
 # Next.js Integration
 
-> Complete setup guide for Tour Kit with Next.js App Router and Pages Router
+> Set up Tour Kit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support
 
 # Next.js Integration
 
@@ -25352,7 +25352,7 @@ function StartButton() {
 
 # Persistence
 
-> Save tour progress, checklist state, and user preferences across sessions
+> Save tour progress, checklist completion, and hint dismissals across browser sessions with pluggable storage adapters
 
 # Persistence
 
@@ -25778,7 +25778,7 @@ async function loadWithMigration(key: string) {
 
 # Router Integration
 
-> Set up multi-page tours with Next.js, React Router, and custom routers
+> Build multi-page tours with Next.js, React Router, or custom routers using route-aware step targeting and persistence
 
 # Router Integration
 
@@ -26102,7 +26102,7 @@ const navigate = (route) => {
 
 # Troubleshooting
 
-> Common issues and solutions when using Tour Kit
+> Diagnose and fix common Tour Kit issues: missing targets, positioning glitches, hydration errors, and focus trap problems
 
 # Troubleshooting
 
@@ -26332,7 +26332,7 @@ const router = useNextAppRouter()
 
 # Vite Integration
 
-> Setup guide for Tour Kit with Vite and React
+> Configure Tour Kit in Vite + React projects with hot module replacement, path aliases, and production build optimization
 
 # Vite Integration
 
@@ -26626,7 +26626,7 @@ function TourButton() {
 
 # @tour-kit/hints
 
-> Persistent hints and hotspots for feature discovery
+> Add contextual hint beacons and hotspots that highlight features and guide users without interrupting their workflow
 
 <!-- llm-context-callout -->
 
@@ -26827,7 +26827,7 @@ All hint components are built with accessibility in mind:
 
 # Components
 
-> Hint, HintHotspot, and HintTooltip components for contextual feature discovery
+> Hint, HintHotspot, and HintTooltip components: add pulsing beacons and floating tooltips for feature discovery
 
 # Hint Components
 
@@ -26985,7 +26985,7 @@ All hint components are built with accessibility in mind:
 
 # Headless Hints
 
-> Build custom hint UIs with headless components
+> Headless hint components: build custom beacon animations, tooltip designs, and hotspot UIs with render props
 
 # Headless Hints
 
@@ -27046,7 +27046,7 @@ function CustomHint() {
 
 # HintHeadless
 
-> Headless hint component with render props for custom UIs
+> HeadlessHint: unstyled hint wrapper exposing visibility state and dismiss actions via render props for custom UIs
 
 # HintHeadless
 
@@ -27082,7 +27082,7 @@ function CustomHint() {
 
 # HintHotspotHeadless
 
-> Headless hotspot component for custom trigger buttons
+> HeadlessHintHotspot: unstyled hotspot trigger with positioning data exposed via render props for custom beacons
 
 # HintHotspotHeadless
 
@@ -27312,7 +27312,7 @@ const hotspotRef = useRef<HTMLButtonElement>(null);
 
 # HintTooltipHeadless
 
-> Headless floating tooltip with positioning logic
+> HeadlessHintTooltip: unstyled floating tooltip with calculated position and collision avoidance via render props
 
 # HintTooltipHeadless
 
@@ -27431,7 +27431,7 @@ function FeatureTooltip({ target, onClose }) {
 
 # Hooks
 
-> useHints and useHint hooks for programmatic hint control
+> useHints and useHint hooks: programmatically show, dismiss, and query hint visibility state across your application
 
 # Hint Hooks
 
@@ -27460,7 +27460,7 @@ function ChildComponent() {
 
 # Persistence
 
-> Understanding hint dismissal patterns and persisting state across sessions
+> Configure hint dismissal persistence with localStorage, sessionStorage, or custom backends to remember user choices
 
 # Hint Persistence
 
@@ -27721,7 +27721,7 @@ When you update a hint's content significantly, consider changing its ID:
 
 # TourKit
 
-> The most developer-friendly, accessible product tour library for React
+> Tour Kit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage
 
 # TourKit
 
@@ -27784,7 +27784,7 @@ function App() {
 
 # Media
 
-> Embedded video and media support for tours and announcements with auto-detection and accessibility features
+> Embed YouTube, Vimeo, Loom, Wistia, GIF, and Lottie media in tours with automatic platform detection and accessibility
 
 <!-- llm-context-callout -->
 
@@ -27938,7 +27938,7 @@ Build completely custom UIs with full control:
 
 # GifPlayer
 
-> Animated GIF player with play/pause controls and accessibility features
+> GifPlayer component: animated GIF with play/pause toggle, reduced motion support, and accessible alt text for tour steps
 
 ## Overview
 
@@ -28091,7 +28091,7 @@ const config: GifPlayerProps = {
 
 # LoomEmbed
 
-> Embed Loom screen recordings and async video messages in your tours
+> LoomEmbed component: embed Loom screen recordings in tour steps with automatic URL parsing and responsive iframe sizing
 
 ## Overview
 
@@ -28361,7 +28361,7 @@ When to use Loom:
 
 # LottiePlayer
 
-> Lightweight vector animation player with Lottie support
+> LottiePlayer component: render lightweight vector animations from Lottie JSON files with loop, autoplay, and speed control
 
 ## Overview
 
@@ -28598,7 +28598,7 @@ const config: LottiePlayerProps = {
 
 # NativeVideo
 
-> Self-hosted HTML5 video with captions, responsive sources, and accessibility features
+> NativeVideo component: self-hosted HTML5 video with captions, poster images, responsive sources, and picture-in-picture
 
 ## Overview
 
@@ -28661,7 +28661,7 @@ const config: NativeVideoProps = {
 
 # TourMedia
 
-> Main media component with automatic platform detection and accessibility features
+> TourMedia component: unified media embed with automatic platform detection from URL — YouTube, Vimeo, Loom, or native video
 
 ## Overview
 
@@ -28877,7 +28877,7 @@ const config: TourMediaConfig = {
 
 # VimeoEmbed
 
-> Embed Vimeo videos with professional privacy controls and customization
+> VimeoEmbed component: embed Vimeo videos with privacy controls, custom colors, autoplay options, and responsive sizing
 
 ## Overview
 
@@ -29118,7 +29118,7 @@ When to choose Vimeo over YouTube:
 
 # WistiaEmbed
 
-> Embed Wistia videos with enterprise features and advanced analytics
+> WistiaEmbed component: embed Wistia videos with enterprise popover, chapter markers, and advanced analytics integration
 
 ## Overview
 
@@ -29399,7 +29399,7 @@ When to choose Wistia:
 
 # YouTubeEmbed
 
-> Embed YouTube videos with GDPR-compliant privacy-enhanced mode
+> YouTubeEmbed component: embed YouTube videos with GDPR privacy-enhanced mode, captions, and responsive aspect ratios
 
 ## Overview
 
@@ -29588,7 +29588,7 @@ console.log(embedUrl)
 
 # Headless API
 
-> Build completely custom media interfaces with full programmatic control
+> Headless media components: unstyled video and animation primitives with full playback state exposed via render props
 
 ## Overview
 
@@ -29650,7 +29650,7 @@ This gives you maximum flexibility while benefiting from tested, reliable media 
 
 # MediaHeadless
 
-> Headless media component with render props for complete UI control
+> HeadlessMedia: unstyled media primitive exposing playback state, duration, progress, and control actions via render props
 
 ## Overview
 
@@ -29810,7 +29810,7 @@ function CustomPlayer({ src }: { src: string }) {
 
 # useMediaEvents
 
-> Track media engagement and integrate with analytics platforms
+> useMediaEvents hook: track play, pause, complete, and seek events from embedded media for analytics integration in tours
 
 ## Overview
 
@@ -30164,7 +30164,7 @@ const handlers: MediaEventHandlers = useMediaEvents({
 
 # usePrefersReducedMotion
 
-> Detect user motion preferences for accessible animations
+> usePrefersReducedMotion hook: detect the prefers-reduced-motion media query to pause GIFs and animations automatically
 
 ## Overview
 
@@ -30605,7 +30605,7 @@ if (prefersReducedMotion) {
 
 # useResponsiveSource
 
-> Select media sources based on viewport size for optimized delivery
+> useResponsiveSource hook: select optimal media source based on viewport width for mobile, tablet, and desktop breakpoints
 
 ## Overview
 
@@ -30936,7 +30936,7 @@ const selectedSrc: string = useResponsiveSource(sources, '/videos/demo-1080p.mp4
 
 # Type Reference
 
-> Complete TypeScript type definitions for @tour-kit/media
+> TypeScript types for MediaSource, EmbedConfig, MediaProvider, PlaybackState, and the full @tour-kit/media API surface
 
 ## Overview
 
@@ -31568,7 +31568,7 @@ type TourMediaComponentProps = TourMediaConfig & MediaEventHandlers
 
 # Embed URLs
 
-> Build privacy-compliant embed URLs for video platforms
+> Embed URL builders: construct privacy-compliant iframe src URLs for YouTube, Vimeo, Loom, and Wistia with custom parameters
 
 ## Overview
 
@@ -32050,7 +32050,7 @@ const thumbnail: string = getYouTubeThumbnailUrl('abc123', 'hqdefault')
 
 # URL Parsing
 
-> Detect media types and extract video IDs from URLs
+> URL parsing utilities: detect video platform, extract video IDs, and validate media URLs from YouTube, Vimeo, and Loom
 
 ## Overview
 
@@ -32528,7 +32528,7 @@ Always validate with `isSupportedMediaUrl()` first for reliable results.
 
 # @tour-kit/react
 
-> Pre-styled React components for product tours
+> Pre-styled React components for product tours with compound component patterns, asChild slot, and shadcn/ui compatibility
 
 <!-- llm-context-callout -->
 
@@ -32557,7 +32557,7 @@ pnpm add @tour-kit/react
 
 # Router Adapters
 
-> Framework-specific router adapters for multi-page tours
+> Router adapters enable multi-page product tours that persist across route changes in React framework applications
 
 # Router Adapters
 
@@ -32644,7 +32644,7 @@ All adapters implement this interface:
 
 # Next.js App Router Adapter
 
-> Router adapter for Next.js 13+ App Router
+> Next.js App Router adapter: configure route-aware tours with usePathname integration for server component layouts
 
 # Next.js App Router Adapter
 
@@ -32806,7 +32806,7 @@ Check your `routeMatch` mode:
 
 # Next.js Pages Router Adapter
 
-> Router adapter for Next.js Pages Router
+> Next.js Pages Router adapter: set up multi-page tours with useRouter integration for _app.tsx tour providers
 
 # Next.js Pages Router Adapter
 
@@ -32978,7 +32978,7 @@ router.getCurrentRoute() // Returns: "/dashboard"
 
 # React Router Adapter
 
-> Router adapter for React Router v6 and v7
+> React Router v6/v7 adapter: enable cross-route tours with useLocation and useNavigate integration in SPAs
 
 # React Router Adapter
 
@@ -33191,7 +33191,7 @@ console.log(getCurrentRoute()); // Check actual pathname
 
 # Tour
 
-> Main tour wrapper component
+> Tour component: main wrapper that provides tour context, keyboard controls, spotlight overlay, and step management
 
 # Tour
 
@@ -33232,7 +33232,7 @@ function StartButton() {
 
 # TourCard
 
-> Tooltip card component for tour steps
+> TourCard compound component: render step content with header, body, footer sub-components and asChild slot support
 
 # TourCard
 
@@ -33329,7 +33329,7 @@ For simpler use cases:
 
 # TourClose
 
-> Close button for dismissing the tour
+> TourClose component: accessible close button with customizable icon, aria-label, and asChild polymorphic rendering
 
 # TourClose
 
@@ -33452,7 +33452,7 @@ The component includes proper ARIA attributes:
 
 # TourNavigation
 
-> Navigation buttons for tour steps
+> TourNavigation component: previous/next buttons with automatic disable states and customizable button labels
 
 # TourNavigation
 
@@ -33522,7 +33522,7 @@ function CustomNavigation() {
 
 # TourOverlay
 
-> Spotlight overlay component
+> TourOverlay component: spotlight overlay that highlights the target element with configurable padding and animation
 
 # TourOverlay
 
@@ -33585,7 +33585,7 @@ function CustomOverlay() {
 
 # TourProgress
 
-> Progress indicator for tour steps
+> TourProgress component: step counter and progress bar showing current position and total steps in the tour
 
 # TourProgress
 
@@ -33633,7 +33633,7 @@ function CustomProgress() {
 
 # TourStep
 
-> Define individual tour steps
+> TourStep component: define individual steps with target selectors, placement, content, and advance-on triggers
 
 # TourStep
 
@@ -33694,7 +33694,7 @@ const videoUrl = currentStep?.data?.videoUrl;
 
 # Headless Components
 
-> Unstyled components for complete customization
+> Headless tour components: unstyled primitives with render props for building completely custom tour interfaces
 
 # Headless Components
 
@@ -33779,7 +33779,7 @@ Mix headless and styled components:
 
 # Headless Examples
 
-> Advanced examples for building custom tour UIs with headless components
+> Headless component examples: build custom tooltip cards, overlays, and navigation using Tour Kit render props
 
 # Headless Component Examples
 
@@ -34002,7 +34002,7 @@ function FullyCustomTour({ tourId }: { tourId: string }) {
 
 # HeadlessTourCard
 
-> Unstyled tour card component
+> HeadlessTourCard: unstyled card primitive exposing step data, actions, and positioning via render props for custom UIs
 
 # HeadlessTourCard
 
@@ -34043,7 +34043,7 @@ Use `targetRect` to position the card:
 
 # HeadlessTourOverlay
 
-> Unstyled spotlight overlay component
+> HeadlessTourOverlay: unstyled overlay primitive with spotlight cutout positioning exposed via render props
 
 # HeadlessTourOverlay
 
@@ -34101,7 +34101,7 @@ For complex effects:
 
 # useTourRoute
 
-> Route-aware tour control for multi-page tours
+> useTourRoute hook: synchronize tour progress with router state for multi-page tours in Next.js and React Router
 
 # useTourRoute
 
@@ -34223,7 +34223,7 @@ function NavigationAwareCard() {
 
 # useTours
 
-> Access all registered tours and their state
+> useTours hook: access all registered tour instances, check active states, and manage multiple tours from one place
 
 # useTours
 
@@ -34288,7 +34288,7 @@ function TourSelector() {
 
 # MultiTourKitProvider
 
-> Provider for managing multiple tours with shared configuration
+> MultiTourKitProvider: manage multiple independent tours with shared configuration, analytics, and storage settings
 
 # MultiTourKitProvider
 
@@ -34393,7 +34393,7 @@ Apply settings to all tours:
 
 # CSS Variables
 
-> Customize TourKit with CSS variables
+> Customize Tour Kit appearance with CSS custom properties for colors, spacing, border radius, and shadow values
 
 # CSS Variables
 
@@ -34538,7 +34538,7 @@ Reset to defaults:
 
 # Custom Components
 
-> Build your own tour components
+> Build fully custom tour card, overlay, and navigation components using Tour Kit hooks and headless primitives
 
 # Custom Components
 
@@ -34705,7 +34705,7 @@ function App() {
 
 # Tailwind CSS
 
-> Using TourKit with Tailwind CSS
+> Style Tour Kit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints
 
 # Tailwind CSS
 
@@ -34844,7 +34844,7 @@ Create reusable styled variants:
 
 # @tour-kit/scheduling
 
-> Time-based scheduling utilities for controlling when tours and content should be shown
+> Time-based scheduling for controlling when tours, announcements, and content appear — business hours, dates, and timezones
 
 <!-- llm-context-callout -->
 
@@ -35101,7 +35101,7 @@ const schedule = {
 
 # Scheduling Hooks
 
-> React hooks for reactive schedule evaluation
+> React hooks for reactive schedule evaluation: check active state, get next window, and detect user timezone automatically
 
 # Scheduling Hooks
 
@@ -35217,7 +35217,7 @@ After hydration, hooks evaluate with actual browser time and timezone.
 
 # useSchedule
 
-> React hook for simple schedule active/inactive checks with auto-refresh
+> useSchedule hook: evaluate whether a schedule is currently active with automatic refresh and timezone-aware calculations
 
 # useSchedule
 
@@ -35458,7 +35458,7 @@ The hook also re-evaluates when:
 
 # useScheduleStatus
 
-> React hook for detailed schedule status with next active/inactive times
+> useScheduleStatus hook: get detailed schedule information including next active window, time remaining, and status reason
 
 # useScheduleStatus
 
@@ -35833,7 +35833,7 @@ For better performance:
 
 # useUserTimezone
 
-> React hook to get the user's browser timezone
+> useUserTimezone hook: detect the user browser timezone via Intl API for timezone-aware schedule evaluation in React apps
 
 # useUserTimezone
 
@@ -36044,7 +36044,7 @@ For older browsers, falls back to `"UTC"`.
 
 # Presets
 
-> Pre-configured constants and patterns for common scheduling scenarios
+> Schedule presets: pre-configured constants for business hours, weekdays, weekends, and common scheduling patterns in Tour Kit
 
 # Presets
 
@@ -36306,7 +36306,7 @@ type DayGroups = {
 
 # Types Reference
 
-> TypeScript types for scheduling
+> TypeScript types for ScheduleConfig, TimeRange, DateRange, BlackoutPeriod, RecurrenceRule, and the scheduling API surface
 
 # Types Reference
 
@@ -36786,7 +36786,7 @@ function hasBlackout(
 
 # Scheduling Utilities
 
-> Pure functions for schedule evaluation and time handling
+> Pure scheduling functions: evaluate schedules, check business hours, handle blackouts, and convert timezones without React
 
 # Scheduling Utilities
 
@@ -37013,7 +37013,7 @@ function isWorkingHours(date: Date, timezone: string): boolean {
 
 # Blackout Utilities
 
-> Functions for checking blackout periods
+> Blackout period utilities: define maintenance windows, holidays, and exclusion dates when content should not be displayed
 
 # Blackout Utilities
 
@@ -37277,7 +37277,7 @@ Blackouts accept both date strings and Date objects:
 
 # Business Hours Utilities
 
-> Functions for checking business hours and holidays
+> Business hours utilities: restrict content to work hours with timezone support, holiday calendars, and custom day schedules
 
 # Business Hours Utilities
 
@@ -37615,7 +37615,7 @@ Monday-Friday, all day:
 
 # Date Range Utilities
 
-> Functions for checking date range constraints
+> Date range utilities: check if a date falls within start/end bounds with inclusive/exclusive boundary option support
 
 # Date Range Utilities
 
@@ -37799,7 +37799,7 @@ isWithinDateRange(new Date(), '2024-01-01', new Date('2024-12-31'), 'UTC')
 
 # Day of Week Utilities
 
-> Functions for working with days of the week
+> Day-of-week utilities: filter schedules by weekday with locale-aware day names and configurable week start day support
 
 # Day of Week Utilities
 
@@ -38014,7 +38014,7 @@ This matches JavaScript's `Date.getDay()` convention.
 
 # Recurring Pattern Utilities
 
-> Functions for matching recurring schedules
+> Recurring schedule utilities: match daily, weekly, monthly, and custom recurrence patterns for periodic content display
 
 # Recurring Pattern Utilities
 
@@ -38352,7 +38352,7 @@ interface RecurringPattern {
 
 # Schedule Evaluation
 
-> Core functions for evaluating schedule active status
+> evaluateSchedule function: check if the current time matches a schedule config with date ranges, time windows, and blackouts
 
 # Schedule Evaluation
 
@@ -38696,7 +38696,7 @@ return <div>{status.message}</div>
 
 # Time Range Utilities
 
-> Functions for checking time-of-day constraints
+> Time range utilities: check if the current time falls within daily time windows for business hours and display schedules
 
 # Time Range Utilities
 
@@ -38901,7 +38901,7 @@ Times must be in HH:MM format (24-hour):
 
 # Timezone Utilities
 
-> Functions for timezone detection, validation, and conversion
+> Timezone utilities: detect browser timezone, validate IANA identifiers, convert between zones, and normalize UTC offsets
 
 # Timezone Utilities
 

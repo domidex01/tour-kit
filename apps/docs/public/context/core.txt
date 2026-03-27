@@ -1,5 +1,5 @@
 Tour Kit — @tour-kit/core Context File
-Version: 0.3.0 | Generated: 2026-03-24
+Version: 0.3.0 | Generated: 2026-03-27
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -189,35 +189,51 @@ EXAMPLES
 
 Example 1: Usage
 
-    import { useAdvanceOn } from '@tour-kit/core';
+    import { useMediaQuery } from '@tour-kit/core';
     
-    function MyTourStep() {
-      // Enables advanceOn behavior based on current step config
-      useAdvanceOn({ enabled: true });
+    function ResponsiveTour() {
+      const isMobile = useMediaQuery('(max-width: 768px)');
+      const isTablet = useMediaQuery('(min-width: 769px) and (max-width: 1024px)');
+      const isDesktop = useMediaQuery('(min-width: 1025px)');
     
-      return <TourCard>{/* ... */}</TourCard>;
+      return (
+        <TourCard
+          placement={isMobile ? 'bottom' : 'right'}
+          className={isMobile ? 'w-full' : 'w-80'}
+        >
+          {isMobile && <p>Swipe to navigate</p>}
+          {isDesktop && <p>Use arrow keys to navigate</p>}
+        </TourCard>
+      );
     }
 
-Example 2: Step Configuration
+Example 2: Usage
 
-    <TourStep
-      target="#signup-button"
-      title="Click to Sign Up"
-      content="Click this button to continue"
-      advanceOn={{
-        event: 'click',
-        selector: '#signup-button',
-      }}
-    />
+    import { usePrefersReducedMotion } from '@tour-kit/core';
+    
+    function AnimatedOverlay() {
+      const prefersReducedMotion = usePrefersReducedMotion();
+    
+      return (
+        <TourOverlay
+          className={prefersReducedMotion ? '' : 'animate-fade-in'}
+          style={{
+            transition: prefersReducedMotion ? 'none' : 'opacity 300ms ease',
+          }}
+        />
+      );
+    }
 
-Example 3: Event Types
+Example 3: Responsive Breakpoints
 
-    <TourStep
-      target="#submit-btn"
-      title="Submit the Form"
-      content="Click submit when ready"
-      advanceOn={{
-        event: 'click',
-        selector: '#submit-btn',
-      }}
-    />
+    function ResponsiveExample() {
+      const isMobile = useMediaQuery('(max-width: 640px)');
+      const isTablet = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
+      const isDesktop = useMediaQuery('(min-width: 1025px)');
+    
+      let placement: 'bottom' | 'right' | 'left' = 'bottom';
+      if (isTablet) placement = 'right';
+      if (isDesktop) placement = 'left';
+    
+      return <TourCard placement={placement} />;
+    }
