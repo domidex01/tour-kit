@@ -97,7 +97,7 @@ function makeBenefitGrantPayload(
 
 ```typescript
 beforeEach(() => {
-  vi.stubEnv("POLAR_WEBHOOK_SECRET", "whsec_dGVzdF9zZWNyZXRfZm9yX3Rlc3Rpbmc=");
+  vi.stubEnv("POLAR_WEBHOOK_SECRET", "whsec_test_placeholder_not_real");
   vi.restoreAllMocks();
   consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
   // Reset the idempotency Map between tests (import and clear, or re-import module)
