@@ -1,9 +1,10 @@
-# Phase 0 — Test Plan: Validation Gate
+# Phase 0 Test Plan — Polar API Validation Gate
 
-**Package:** `@tour-kit/ai`
-**Phase Type:** Research / validation — the spikes ARE the tests. No fakes needed.
-**Framework:** Vitest + `@testing-library/react`
-**Date:** 2026-03-21
+| Field | Value |
+|-------|-------|
+| **Scope** | Validate Polar.sh license key API (validate, activate, deactivate) works end-to-end with acceptable latency |
+| **Key Pattern** | Research/validation — real API calls, no mocks. Tests target metric functions and API response shape. |
+| **Dependencies** | `@polar-sh/sdk` (dev), `dotenv` (dev), Polar sandbox account with test product + license key |
 
 ---
 
@@ -11,360 +12,263 @@
 
 | ID | Story | Acceptance Criteria | Test Tier |
 |----|-------|---------------------|-----------|
-| US-1 | As a developer, I want `pnpm --filter @tour-kit/ai build` to exit 0, so that the AI SDK integrates with our build system | Build produces 3 entry points (index, server/index, headless) with ESM + CJS + DTS | Unit |
-| US-2 | As a developer, I want streaming to deliver tokens incrementally, so that the chat UX is responsive | `streamText` + `toUIMessageStreamResponse` streams tokens; `Content-Type: text/event-stream` | Integration (requires OPENAI_API_KEY) |
-| US-3 | As a developer, I want middleware `transformParams` to intercept prompts, so that RAG context injection works | `wrapLanguageModel` middleware is invoked; injected text appears in LLM response | Integration (requires OPENAI_API_KEY) |
-| US-4 | As a developer, I want in-memory vector search to return relevant results in <200ms, so that the retrieval strategy is viable | Top-3 results are semantically relevant; cosine similarity scores in [-1, 1]; search < 200ms | Integration (requires OPENAI_API_KEY) |
+| US-01 | As a developer, I need to confirm Polar's validate endpoint returns `status: "granted"` for a valid key so I know the API can gate Pro features | Validate returns HTTP 200, `status === "granted"`, response includes `id`, `limit_activations`, `usage` | Integration |
+| US-02 | As a developer, I need to confirm invalid keys are rejected so the system cannot be bypassed with arbitrary strings | Invalid key returns non-200 or `status !== "granted"` | Integration |
+| US-03 | As a developer, I need activation/deactivation to precisely track slot usage so per-domain licensing works | Each activate increments `usage` by 1, each deactivate decrements by 1, exceeding limit errors | Integration |
+| US-04 | As a developer, I need validation latency under 500ms (p95) so client-side checks do not degrade UX | 10 sequential validate calls have p95 < 500ms | Performance |
+| US-05 | As a developer, I need a machine-readable go/no-go document so downstream phases can check the gate | `phase-0-status.json` contains `decision`, `tests` object with status for each operation | Smoke |
 
 ---
 
-## Component Mock Strategy
-
-**Key Pattern:** Phase 0 is a validation gate. No fakes — the real dependency IS what's being tested. Only the build output verification tests are pure unit tests with no external dependencies.
+## 1. Component Mock Strategy
 
 | Component | Strategy | Rationale |
 |-----------|----------|-----------|
-| tsup build output | Direct filesystem assertions | We need to verify the REAL build output files exist and export correctly |
-| `streamText` / `toUIMessageStreamResponse` | Real API call | The spike tests the actual AI SDK streaming behavior; mocking would defeat the purpose |
-| `wrapLanguageModel` / `LanguageModelV3Middleware` | Real API call | Testing real middleware composition is the point of the spike |
-| `embedMany` / `embed` / `cosineSimilarity` | Real API call for embeddings; pure function for cosine similarity | Embedding requires the real API; cosine similarity is a pure math function that can be unit-tested |
+| Polar Validate API | **Real API** — no mock | This is the thing being tested. Mocking it would defeat the purpose. |
+| Polar Activate API | **Real API** — no mock | Must confirm actual slot accounting behavior against sandbox. |
+| Polar Deactivate API | **Real API via SDK** — no mock | Must confirm SDK auth pattern works and usage decrements. |
+| Network / `fetch()` | **Real network** | Latency measurement requires real network calls. |
+| Environment variables | **Real `.env`** loaded via `dotenv` or shell `source` | Script requires real credentials for sandbox. |
 
 ---
 
-## Test Tier Table
+## 2. Test Tier Table
 
-| Test File | Tier | US | External Deps | Skip Condition |
-|-----------|------|----|---------------|----------------|
-| `build-output.test.ts` | Unit | US-1 | Filesystem (post-build) | None — always runs |
-| `entry-exports.test.ts` | Unit | US-1 | Compiled dist modules | None — always runs |
-| `cosine-similarity.test.ts` | Unit | US-4 | None (pure math) | None — always runs |
-| `streaming-spike.integration.test.ts` | Integration | US-2 | OPENAI_API_KEY | `!process.env.OPENAI_API_KEY` |
-| `middleware-spike.integration.test.ts` | Integration | US-3 | OPENAI_API_KEY | `!process.env.OPENAI_API_KEY` |
-| `vector-spike.integration.test.ts` | Integration | US-4 | OPENAI_API_KEY | `!process.env.OPENAI_API_KEY` |
+| Tier | Count | What it covers |
+|------|-------|----------------|
+| **Integration (API shape)** | 5 | Validate valid key, validate invalid key, activate response shape, deactivate success, slot accounting |
+| **Performance (latency)** | 2 | p50/p95 measurement, p95 < 500ms assertion |
+| **Smoke (deliverable)** | 2 | `phase-0-status.json` schema validation, script runs without crash |
+| **Total** | **9** | |
 
 ---
 
-## Fake/Mock Implementations
+## 3. No Fake Implementations (Research Phase)
 
-Phase 0 uses **no fakes** for spike tests. Only build verification tests use filesystem checks.
+This is a research/validation phase where the Polar API itself is the subject under test. Mocking or faking any API would invalidate the results — the entire point is to confirm real API behavior, response shapes, and latency characteristics against the Polar sandbox.
 
-### Helper: `assertFileExists`
+---
+
+## 4. Test File List
+
+| File | Tier | Tests | Description |
+|------|------|-------|-------------|
+| `scripts/polar-validation-test.ts` | Integration + Performance | 9 | Standalone script exercising all API operations and measuring latency. Runs via `npx tsx`. |
+| `scripts/__tests__/polar-validation.test.ts` | Smoke | 2 | Optional Vitest suite that validates the script's helper functions (latency math, assert logic) and `phase-0-status.json` schema after the main script has been run. |
+
+> **Note:** The primary deliverable (`polar-validation-test.ts`) is a standalone script, not a Vitest test file. This is intentional — Phase 0 is manual validation, not CI-automated testing. The optional Vitest file provides a safety net for the metric calculation logic.
+
+---
+
+## 5. Test Setup (Vitest Patterns)
+
+Since the standalone script uses raw `assert()` calls, the Vitest file covers post-run validation and helper logic.
 
 ```typescript
-// packages/ai/src/__tests__/helpers/fs-assertions.ts
-import { existsSync } from 'node:fs'
+// scripts/__tests__/polar-validation.test.ts
+import { describe, it, expect, beforeAll } from 'vitest'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-const DIST_DIR = resolve(__dirname, '../../../dist')
+const STATUS_PATH = resolve(__dirname, '../../plan/phase-0-status.json')
 
-export function distPath(...segments: string[]): string {
-  return resolve(DIST_DIR, ...segments)
-}
+describe('Phase 0 — Post-run validation', () => {
+  let statusDoc: Record<string, unknown>
 
-export function assertDistFileExists(relativePath: string): void {
-  const fullPath = distPath(relativePath)
-  if (!existsSync(fullPath)) {
-    throw new Error(`Expected dist file not found: ${relativePath} (resolved: ${fullPath})`)
-  }
-}
-```
+  beforeAll(() => {
+    // This suite runs AFTER the standalone script has executed
+    // and phase-0-status.json has been written.
+    if (!existsSync(STATUS_PATH)) {
+      throw new Error(
+        'phase-0-status.json does not exist. Run polar-validation-test.ts first.'
+      )
+    }
+    statusDoc = JSON.parse(readFileSync(STATUS_PATH, 'utf-8'))
+  })
 
-### Helper: `skipWithoutApiKey`
+  it('phase-0-status.json has required top-level fields', () => {
+    expect(statusDoc).toHaveProperty('phase', 0)
+    expect(statusDoc).toHaveProperty('name')
+    expect(statusDoc).toHaveProperty('date')
+    expect(statusDoc).toHaveProperty('decision')
+    expect(['proceed', 'adjust', 'abort']).toContain(statusDoc.decision)
+  })
 
-```typescript
-// packages/ai/src/__tests__/helpers/skip-conditions.ts
-export const HAS_OPENAI_KEY = !!process.env.OPENAI_API_KEY
+  it('phase-0-status.json has test results for all operations', () => {
+    const tests = statusDoc.tests as Record<string, unknown>
+    expect(tests).toHaveProperty('validate')
+    expect(tests).toHaveProperty('activate')
+    expect(tests).toHaveProperty('deactivate')
+    expect(tests).toHaveProperty('latency')
 
-export function describeWithApiKey(name: string, fn: () => void) {
-  if (HAS_OPENAI_KEY) {
-    describe(name, fn)
-  } else {
-    describe.skip(`${name} (OPENAI_API_KEY not set)`, fn)
-  }
-}
+    const latency = tests.latency as Record<string, unknown>
+    expect(typeof latency.p50_ms).toBe('number')
+    expect(typeof latency.p95_ms).toBe('number')
+  })
+})
+
+describe('Latency calculation helpers', () => {
+  it('computes p50 and p95 correctly from sorted array', () => {
+    // Simulates the latency math from the standalone script
+    const latencies = [50, 80, 100, 120, 150, 180, 200, 250, 300, 450]
+    // Already sorted, 10 samples
+    const p50 = latencies[4] // index 4
+    const p95 = latencies[9] // index 9
+
+    expect(p50).toBe(150)
+    expect(p95).toBe(450)
+    expect(p95).toBeLessThan(500) // Budget check
+  })
+
+  it('flags p95 over budget', () => {
+    const latencies = [50, 80, 100, 120, 150, 180, 200, 250, 300, 600]
+    const p95 = latencies[9]
+
+    expect(p95).toBeGreaterThanOrEqual(500)
+  })
+})
 ```
 
 ---
 
-## Test File List
-
-```
-packages/ai/src/__tests__/
-├── helpers/
-│   ├── fs-assertions.ts          ← Dist file existence helpers
-│   └── skip-conditions.ts        ← API key skip guard
-├── build/
-│   ├── build-output.test.ts      ← US-1: Verify dist/ file structure
-│   └── entry-exports.test.ts     ← US-1: Verify each entry point exports
-├── spikes/
-│   ├── cosine-similarity.test.ts                ← US-4: Pure unit test for cosine math
-│   ├── streaming-spike.integration.test.ts      ← US-2: Token streaming (requires key)
-│   ├── middleware-spike.integration.test.ts      ← US-3: Middleware composition (requires key)
-│   └── vector-spike.integration.test.ts         ← US-4: In-memory vector search (requires key)
-```
-
----
-
-## Helpers Structure
-
-No `conftest.py` equivalent. Shared utilities live in `packages/ai/src/__tests__/helpers/`.
-
-| File | Purpose |
-|------|---------|
-| `helpers/fs-assertions.ts` | `distPath()`, `assertDistFileExists()` — filesystem helpers for build verification |
-| `helpers/skip-conditions.ts` | `HAS_OPENAI_KEY`, `describeWithApiKey()` — conditional test execution |
-
----
-
-## Key Testing Decisions
+## 6. Key Testing Decisions
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| No mocks for spike tests | Real API calls | Phase 0 validates that real AI SDK 6.x APIs work in the tour-kit build system. Mocking would test nothing. |
-| Build tests run post-build | Filesystem assertions on `dist/` | Tests assert that `pnpm --filter @tour-kit/ai build` produced the expected file structure. Must run after build. |
-| Integration tests are skippable | `describeWithApiKey` guard | CI may not have OPENAI_API_KEY. Build verification tests always run; integration tests require the key. |
-| Cosine similarity is unit-tested separately | Pure function, no API needed | `cosineSimilarity` from `ai` is a pure math function — test it deterministically without API calls. |
-| No React component tests | No UI in Phase 0 | Phase 0 has no React components — only build output and spike functions. |
-| Test timeout for integration tests | 30s per test | LLM API calls can be slow; default 5s timeout would cause flaky failures. |
+| Standalone script as primary test artifact | `npx tsx scripts/polar-validation-test.ts` | Phase 0 is a one-time manual gate, not a recurring CI test. A single script with console output is the fastest path to a go/no-go answer. |
+| Real API calls, no mocks | All tests hit Polar sandbox | The purpose of Phase 0 is to validate that the real API works. Mocking would make the tests meaningless. |
+| Sequential latency measurement | 10 calls in a `for` loop, not `Promise.all` | Sequential calls simulate real user validation flow (one key check per page load). Parallel calls would measure Polar's throughput, not user-experienced latency. |
+| `performance.now()` for timing | Built into Node.js, no dependencies | Sub-millisecond resolution, no external packages needed. |
+| `process.exit(1)` on first failure | Fail-fast in standalone script | For a go/no-go gate, the first failure is enough to trigger investigation. No need to collect all failures. |
+| Optional Vitest suite for post-run checks | Validates `phase-0-status.json` schema + latency math | Catches human error in writing the status document and ensures percentile math is correct. |
+| Test cleanup: deactivate all slots after test | Script deactivates everything it activates | Prevents test pollution — leaves the license key in a clean state for re-runs. |
 
 ---
 
-## Example Test Cases
-
-### Build Output Verification (Unit)
+## 7. Example Test Case (Vitest / TypeScript)
 
 ```typescript
-// packages/ai/src/__tests__/build/build-output.test.ts
-import { existsSync } from 'node:fs'
-import { resolve } from 'node:path'
-import { describe, expect, it } from 'vitest'
+// Example: Validate that a valid license key returns expected shape
+// This shows the pattern used in the standalone script, adapted to Vitest syntax
 
-const DIST = resolve(__dirname, '../../../dist')
+import { describe, it, expect } from 'vitest'
 
-const EXPECTED_FILES = [
-  // Client entry
-  'index.js',
-  'index.cjs',
-  'index.d.ts',
-  'index.d.cts',
-  // Server entry
-  'server/index.js',
-  'server/index.cjs',
-  'server/index.d.ts',
-  'server/index.d.cts',
-  // Headless entry
-  'headless.js',
-  'headless.cjs',
-  'headless.d.ts',
-  'headless.d.cts',
-]
+const VALIDATE_URL = 'https://api.polar.sh/v1/customer-portal/license-keys/validate'
 
-describe('Build Output — US-1', () => {
-  it.each(EXPECTED_FILES)('dist/%s exists', (file) => {
-    const fullPath = resolve(DIST, file)
-    expect(existsSync(fullPath)).toBe(true)
-  })
+describe('Polar Validate Endpoint', () => {
+  // Skip if env vars not set (CI without sandbox credentials)
+  const POLAR_ORGANIZATION_ID = process.env.POLAR_ORGANIZATION_ID
+  const POLAR_TEST_LICENSE_KEY = process.env.POLAR_TEST_LICENSE_KEY
 
-  it('dist/ contains no unexpected top-level directories', () => {
-    // Ensure only expected output, not leaked spike code
-    const { readdirSync } = require('node:fs')
-    const entries = readdirSync(DIST)
-    expect(entries).not.toContain('__spikes__')
-  })
-})
-```
+  it.skipIf(!POLAR_ORGANIZATION_ID || !POLAR_TEST_LICENSE_KEY)(
+    'returns status "granted" for a valid key with expected response shape',
+    async () => {
+      const res = await fetch(VALIDATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: POLAR_TEST_LICENSE_KEY,
+          organization_id: POLAR_ORGANIZATION_ID,
+        }),
+      })
 
-### Entry Point Exports (Unit)
+      expect(res.status).toBe(200)
 
-```typescript
-// packages/ai/src/__tests__/build/entry-exports.test.ts
-import { describe, expect, it } from 'vitest'
+      const data = await res.json()
 
-describe('Entry Point Exports — US-1', () => {
-  it('client entry exports AI_PACKAGE_VERSION', async () => {
-    const clientModule = await import('../../index')
-    expect(clientModule.AI_PACKAGE_VERSION).toBe('0.0.0')
-  })
+      // Shape assertions — these define what Phase 1 Zod schemas must match
+      expect(data).toMatchObject({
+        status: 'granted',
+      })
+      expect(typeof data.id).toBe('string')
+      expect(typeof data.limit_activations).toBe('number')
+      expect(typeof data.usage).toBe('number')
+      expect(data.organization_id).toBe(POLAR_ORGANIZATION_ID)
+    },
+  )
 
-  it('server entry exports SERVER_ENTRY', async () => {
-    const serverModule = await import('../../server/index')
-    expect(serverModule.SERVER_ENTRY).toBe(true)
-  })
+  it.skipIf(!POLAR_ORGANIZATION_ID)(
+    'rejects an invalid key (does not return "granted")',
+    async () => {
+      const res = await fetch(VALIDATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: 'TOURKIT-INVALID-FAKE-KEY-99999',
+          organization_id: POLAR_ORGANIZATION_ID,
+        }),
+      })
 
-  it('headless entry exports HEADLESS_ENTRY', async () => {
-    const headlessModule = await import('../../headless')
-    expect(headlessModule.HEADLESS_ENTRY).toBe(true)
-  })
-})
-```
-
-### Cosine Similarity (Unit)
-
-```typescript
-// packages/ai/src/__tests__/spikes/cosine-similarity.test.ts
-import { cosineSimilarity } from 'ai'
-import { describe, expect, it } from 'vitest'
-
-describe('cosineSimilarity — US-4 (pure math)', () => {
-  it('returns 1 for identical vectors', () => {
-    const v = [1, 0, 0, 1]
-    expect(cosineSimilarity(v, v)).toBeCloseTo(1, 5)
-  })
-
-  it('returns -1 for opposite vectors', () => {
-    const a = [1, 0]
-    const b = [-1, 0]
-    expect(cosineSimilarity(a, b)).toBeCloseTo(-1, 5)
-  })
-
-  it('returns 0 for orthogonal vectors', () => {
-    const a = [1, 0]
-    const b = [0, 1]
-    expect(cosineSimilarity(a, b)).toBeCloseTo(0, 5)
-  })
-
-  it('returns a value between -1 and 1 for arbitrary vectors', () => {
-    const a = [0.5, 0.3, 0.9, 0.1]
-    const b = [0.2, 0.8, 0.4, 0.6]
-    const result = cosineSimilarity(a, b)
-    expect(result).toBeGreaterThanOrEqual(-1)
-    expect(result).toBeLessThanOrEqual(1)
-  })
-})
-```
-
-### Streaming Spike (Integration)
-
-```typescript
-// packages/ai/src/__tests__/spikes/streaming-spike.integration.test.ts
-import { describe, expect, it } from 'vitest'
-import { describeWithApiKey } from '../helpers/skip-conditions'
-
-describeWithApiKey('Streaming Spike — US-2', () => {
-  it('streamText produces a ReadableStream response', async () => {
-    const { streamText, convertToModelMessages } = await import('ai')
-    const { openai } = await import('@ai-sdk/openai')
-
-    const result = streamText({
-      model: openai('gpt-4o-mini'),
-      messages: convertToModelMessages([
-        { id: '1', role: 'user', parts: [{ type: 'text', text: 'Say hello in 5 words.' }], createdAt: new Date() },
-      ]),
-      maxTokens: 50,
-    })
-
-    const response = result.toUIMessageStreamResponse()
-    expect(response).toBeInstanceOf(Response)
-    expect(response.headers.get('content-type')).toContain('text/event-stream')
-
-    // Verify the body is a ReadableStream
-    expect(response.body).toBeInstanceOf(ReadableStream)
-
-    // Read at least one chunk to confirm streaming works
-    const reader = response.body!.getReader()
-    const { value, done } = await reader.read()
-    expect(done).toBe(false)
-    expect(value).toBeDefined()
-    reader.releaseLock()
-  }, 30_000)
-})
-```
-
-### Vector Search Spike (Integration)
-
-```typescript
-// packages/ai/src/__tests__/spikes/vector-spike.integration.test.ts
-import { describe, expect, it } from 'vitest'
-import { describeWithApiKey } from '../helpers/skip-conditions'
-
-describeWithApiKey('Vector Search Spike — US-4', () => {
-  it('returns top-3 semantically relevant results in < 200ms', async () => {
-    const { embed, embedMany, cosineSimilarity } = await import('ai')
-    const { openai } = await import('@ai-sdk/openai')
-
-    const docs = [
-      'Tour Kit is a headless onboarding library for React applications.',
-      'Installation requires pnpm add @tour-kit/core @tour-kit/react.',
-      'The analytics package supports plugin-based event tracking.',
-      'WCAG 2.1 AA accessibility compliance is a core requirement.',
-      'Keyboard navigation supports Escape to close and Tab for focus.',
-    ]
-
-    const embeddingModel = openai.embedding('text-embedding-3-small')
-
-    const { embeddings } = await embedMany({ model: embeddingModel, values: docs })
-    expect(embeddings).toHaveLength(docs.length)
-
-    const query = 'How do I install the library?'
-    const { embedding: queryEmbedding } = await embed({ model: embeddingModel, value: query })
-
-    const startSearch = performance.now()
-    const results = docs
-      .map((doc, i) => ({ document: doc, similarity: cosineSimilarity(queryEmbedding, embeddings[i]) }))
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 3)
-    const searchTime = performance.now() - startSearch
-
-    // Search (excluding embedding API calls) should be < 200ms
-    expect(searchTime).toBeLessThan(200)
-
-    // All similarity scores in valid range
-    for (const r of results) {
-      expect(r.similarity).toBeGreaterThanOrEqual(-1)
-      expect(r.similarity).toBeLessThanOrEqual(1)
-    }
-
-    // Top result should be the installation doc
-    expect(results[0].document).toContain('install')
-  }, 30_000)
+      // Either non-200 status OR 200 with non-granted status
+      if (res.status === 200) {
+        const data = await res.json()
+        expect(data.status).not.toBe('granted')
+      } else {
+        // 404, 422, etc. — all acceptable for invalid key
+        expect(res.status).toBeGreaterThanOrEqual(400)
+      }
+    },
+  )
 })
 ```
 
 ---
 
-## Execution Prompt
+## 8. Execution Prompt
 
-> Paste this into a Claude Code session to implement Phase 0 tests.
-
-You are writing **Phase 0 tests** for `@tour-kit/ai`. Phase 0 is a validation gate — the spikes ARE the tests. No fakes needed.
-
-### What to implement
-
-1. Create `packages/ai/src/__tests__/helpers/fs-assertions.ts` — filesystem helpers for dist verification
-2. Create `packages/ai/src/__tests__/helpers/skip-conditions.ts` — API key guard for integration tests
-3. Create `packages/ai/src/__tests__/build/build-output.test.ts` — verify all 12 expected dist files exist
-4. Create `packages/ai/src/__tests__/build/entry-exports.test.ts` — verify each entry point exports the expected symbols
-5. Create `packages/ai/src/__tests__/spikes/cosine-similarity.test.ts` — pure math unit tests
-6. Create `packages/ai/src/__tests__/spikes/streaming-spike.integration.test.ts` — verify `streamText` produces a `ReadableStream` (requires OPENAI_API_KEY)
-7. Create `packages/ai/src/__tests__/spikes/middleware-spike.integration.test.ts` — verify `wrapLanguageModel` + `transformParams` intercepts the prompt (requires OPENAI_API_KEY)
-8. Create `packages/ai/src/__tests__/spikes/vector-spike.integration.test.ts` — verify in-memory vector search returns relevant results in < 200ms (requires OPENAI_API_KEY)
-
-### Conventions
-
-- Use `describe/it/expect` from `vitest` (explicit imports, not global)
-- Use `beforeEach/afterEach` for setup/teardown
-- Integration tests use 30s timeout: `it('...', async () => { ... }, 30_000)`
-- Integration tests are wrapped with `describeWithApiKey()` to skip when OPENAI_API_KEY is missing
-- File extension: `.test.ts` for non-React, `.test.tsx` for React
-- No conftest — shared helpers go in `__tests__/helpers/`
+> Paste this into a Claude Code session to implement the Phase 0 tests.
 
 ---
 
-## Run Commands
+You are writing tests for **Phase 0 (Polar API Validation Gate)** of the Tour Kit licensing system.
+
+**Context:**
+- Project root: `/home/domidex/projects/tour-kit/`
+- Phase plan: `plan/phase-0.md`
+- Test plan: `plan/phase-0-tests.md`
+- Runtime: Node.js 18+, TypeScript, `npx tsx` for standalone scripts, Vitest for test suites
+- Package manager: pnpm
+
+**What already exists or will exist:**
+- `scripts/polar-validation-test.ts` — standalone validation script (primary deliverable from Phase 0)
+- `plan/phase-0-status.json` — go/no-go decision document (written after running the script)
+
+**Your task:**
+1. Ensure `scripts/polar-validation-test.ts` contains all assertion checks from Phase 0 tasks (0.2, 0.3, 0.4):
+   - Validate valid key: HTTP 200, `status === "granted"`, shape fields (`id`, `limit_activations`, `usage`)
+   - Validate invalid key: non-granted response
+   - Activation cycle: usage increments by 1 per activate, decrements by 1 per deactivate
+   - Slot limit: 6th activation on a 5-limit key fails
+   - Latency: 10 sequential calls, p50 and p95 computed, p95 < 500ms
+   - Cleanup: all activated slots are deactivated at the end
+
+2. Create `scripts/__tests__/polar-validation.test.ts` (Vitest) with:
+   - Post-run validation of `phase-0-status.json` schema
+   - Latency percentile math unit tests
+   - Use `describe`/`it`/`expect` patterns, `beforeAll` for setup
+   - Use `it.skipIf()` for tests that require env vars
+
+3. Do NOT mock any API calls. This is a research phase — real Polar sandbox calls are the point.
+
+4. Ensure all tests handle the case where env vars are not set (skip gracefully, do not crash).
+
+---
+
+## 9. Run Commands
 
 ```bash
-# Build first (build tests require dist/)
-pnpm --filter @tour-kit/ai build
+# ── Primary: Run the standalone validation script ──
+cd /home/domidex/projects/tour-kit
+npx tsx scripts/polar-validation-test.ts
 
-# Run unit tests only (no API key needed)
-pnpm --filter @tour-kit/ai test -- --run
+# ── Secondary: Run the Vitest post-run checks ──
+# (only after the standalone script has been run and phase-0-status.json exists)
+pnpm vitest run scripts/__tests__/polar-validation.test.ts
 
-# Run all tests including integration (requires OPENAI_API_KEY)
-OPENAI_API_KEY=sk-... pnpm --filter @tour-kit/ai test -- --run
+# ── Run with env vars inline (if not using .env) ──
+POLAR_ORGANIZATION_ID=xxx POLAR_TEST_LICENSE_KEY=xxx POLAR_ACCESS_TOKEN=xxx \
+  npx tsx scripts/polar-validation-test.ts
 
-# Run with coverage
-pnpm --filter @tour-kit/ai test -- --run --coverage
-
-# Run a specific test file
-pnpm --filter @tour-kit/ai test -- --run src/__tests__/build/build-output.test.ts
+# ── Run Vitest in watch mode during development ──
+pnpm vitest scripts/__tests__/polar-validation.test.ts
 ```

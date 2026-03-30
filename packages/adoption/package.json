@@ -31,8 +31,9 @@
     "./styles/theme.css": "./src/styles/theme.css"
   },
   "files": ["dist"],
+  "license": "SEE LICENSE IN LICENSE.md",
   "publishConfig": {
-    "access": "public",
+    "access": "restricted",
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {

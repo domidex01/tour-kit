@@ -90,17 +90,6 @@
         ]
       }
     ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/run-tests.sh",
-            "timeout": 120
-          }
-        ]
-      }
-    ],
     "PreCompact": [
       {
         "hooks": [
@@ -119,11 +108,6 @@
             "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/skills/memory-manager/scripts/save_memories.py\"",
             "timeout": 65
-          },
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/skills/memory-manager/scripts/session_end.py\"",
-            "timeout": 10
           }
         ]
       }

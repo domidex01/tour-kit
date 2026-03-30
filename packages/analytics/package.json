@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Analytics plugins for TourKit - track tour engagement",
   "author": "Tour Kit Team",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -39,7 +39,7 @@
   },
   "files": ["dist", "README.md", "CHANGELOG.md"],
   "publishConfig": {
-    "access": "public",
+    "access": "restricted",
     "registry": "https://registry.npmjs.org/"
   },
   "sideEffects": false,

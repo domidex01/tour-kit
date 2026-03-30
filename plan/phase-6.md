@@ -1,402 +1,620 @@
-# Phase 6 — Persistence
+# Phase 6 — Source Code Separation
 
-**Duration:** Days 22–23 (~6h)
-**Depends on:** Phase 1 (provider, types, `AiChatProvider`, `AiChatConfig`, `UIMessage`)
-**Blocks:** Phase 9 (docs, examples, final quality)
-**Risk Level:** LOW — well-scoped feature with a clear interface boundary; localStorage is synchronous and deterministic; the async adapter path adds minimal complexity
-**Stack:** react, typescript
+**Duration:** Days 20-21 (~6-7h)
+**Depends on:** Phase 5 (all code complete, tested, documented)
+**Blocks:** Nothing (final phase)
+**Risk Level:** MEDIUM — irreversible repo restructuring, npm access changes
+**Stack:** typescript
 
 ---
 
 ## 1. Objective + What Success Looks Like
 
-**Objective:** Chat messages persist across page reloads. Users can close their browser, return later, and see the same conversation. The system supports two modes: a zero-config `'local'` mode (localStorage) and a pluggable `PersistenceAdapter` for server-side or custom storage backends.
+Split the Tour Kit monorepo into two independent repositories: a public `DomiDex/tour-kit` containing only the 3 MIT-licensed free packages (`core`, `react`, `hints`) and a private `DomiDex/tour-kit-pro` containing all 8 proprietary packages (`license`, `adoption`, `ai`, `analytics`, `announcements`, `checklists`, `media`, `scheduling`). Fix npm access so all pro packages are restricted (currently all 8 are publicly installable). Set up independent CI/CD and Changesets release pipelines for the private repo.
 
-**What success looks like:**
+**Success looks like:**
 
-- `persistence: 'local'` — user sends messages, refreshes page, messages are restored automatically
-- `persistence: { adapter: myServerAdapter }` — adapter's `save` is called on every message change; `load` is called on mount; `clear` is called when the user resets the chat
-- No persistence configured — no localStorage writes, no adapter calls, zero overhead
-- Clearing chat via `useAiChat().setMessages([])` triggers `clear()` on the adapter and removes stored data
-- The chat ID is stable per provider instance (configurable via `chatId` prop on `AiChatProvider`)
+- Running `npm access get status @tour-kit/announcements` returns `restricted` for all 8 pro packages
+- `DomiDex/tour-kit-pro` is a private GitHub repo with its own pnpm + Turborepo monorepo scaffold
+- All 8 pro packages build and pass tests in the private repo, depending on `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` via npm (not `workspace:*`)
+- `git ls-files packages/{adoption,ai,analytics,announcements,checklists,license,media,scheduling}` in the public repo returns empty
+- Public repo `pnpm install && pnpm build && pnpm typecheck` passes with only free packages
+- Docs site builds without broken imports from removed pro packages
+- `pnpm changeset && pnpm version-packages && npm publish --dry-run --access restricted` succeeds in the private repo
+- GitHub Actions in the private repo can build and publish restricted npm packages
 
 ---
 
 ## 2. Key Design Decisions
 
-### 2.1 Persistence lives in the provider, not the hook consumer
+**D1: Fix npm access before touching any source code.**
+All 8 pro packages are currently `public` on npm. Anyone can `npm install @tour-kit/announcements` right now. This is the highest-priority fix and must happen before any repo restructuring. A single `npm access restricted` command per package switches them immediately. This is a one-time operation that takes effect globally in seconds.
 
-`usePersistence` is an internal hook consumed by `AiChatProvider`. External consumers never call it directly — they interact with persistence through `useAiChat().messages` (auto-loaded) and `useAiChat().setMessages([])` (triggers clear). This keeps the API surface minimal.
+**D2: Replace `workspace:*` with published npm version ranges.**
+Pro packages currently use `"@tour-kit/core": "workspace:*"` which resolves within the monorepo. In the private repo, these must become `"@tour-kit/core": "^0.3.0"` (using the latest published versions). Cross-pro dependencies (e.g., `@tour-kit/announcements` depends on `@tour-kit/scheduling`) stay as `workspace:*` within the private monorepo since both packages live there. Only dependencies on free packages change.
 
-### 2.2 Chat ID strategy
+**D3: Private repo is a minimal pnpm + Turborepo monorepo.**
+Copy the root config files (`turbo.json`, `tsconfig.json`, `pnpm-workspace.yaml`, `.npmrc`) from the public repo and adapt them. The private repo does NOT include `apps/docs/`, `examples/`, or `tooling/` -- only `packages/*`. The `pnpm-workspace.yaml` has a single entry: `packages/*`.
 
-Each `AiChatProvider` instance gets a `chatId` (default: `'default'`). The localStorage key is `tourkit-ai-chat:{chatId}`. Custom adapters receive this `chatId` in all calls. This supports multiple independent chat widgets on the same page.
+**D4: CI/CD uses Changesets with `access: restricted`.**
+The private repo gets its own `.github/workflows/ci.yml` (build + test on PR) and `.github/workflows/release.yml` (Changesets publish). The Changesets config sets `"access": "restricted"` which passes `--access restricted` to `npm publish`. The release workflow uses an npm Automation token (bypasses 2FA for CI) stored as the `NPM_TOKEN` GitHub secret.
 
-### 2.3 Debounced saves
+**D5: Release order is free-first, pro-second.**
+Pro packages depend on free packages via npm semver ranges (e.g., `^0.3.0`). When free packages bump, pro packages continue working within the range. For breaking changes (major bump), the sequence is: publish free packages first, then update pro package deps and publish. This is a human coordination step, not an automated one.
 
-Messages change on every streaming token. Saving on every change would thrash localStorage. The hook debounces saves with a 500ms trailing delay. The final save always fires (including on unmount via `useEffect` cleanup).
-
-### 2.4 Serialization format
-
-localStorage stores `JSON.stringify(messages)` where `messages` is `UIMessage[]` from AI SDK 6. On load, the hook parses and validates the array — if parsing fails, it returns `null` (no restore, no crash).
-
-### 2.5 Adapter errors are non-fatal
-
-If `adapter.save()` or `adapter.load()` throws, the error is caught and logged via `console.warn`. Chat continues working without persistence. This prevents a broken adapter from crashing the entire chat experience.
+**D6: Docs site references pro packages via npm, not source imports.**
+After removing pro package directories from the public repo, the docs site must not break. Pro package API documentation pages use MDX content (not live imports from source). Any code examples that import pro packages work because they reference the npm package name, not a workspace path. If any build-time imports exist, replace them with conditional stubs or remove them.
 
 ---
 
 ## 3. Tasks
 
-### Task 6.1 — `usePersistence` hook with localStorage adapter (2h)
+### Step 1: Fix npm Access (URGENT) -- 0.5h
 
-**File:** `packages/ai/src/hooks/use-persistence.ts`
+| # | Task | Hours | Dependencies | Output |
+|---|------|-------|-------------|--------|
+| 6.0a | Run `npm access restricted` for all 8 pro packages | 0.25h | npm Pro plan active, npm login | 8 packages switched to restricted |
+| 6.0b | Verify restricted status for all 8 packages | 0.25h | 6.0a | All return `restricted` |
 
-Create the internal persistence hook that manages save/load/clear lifecycle.
+### Step 2: Create Private Repo and Move Source -- 2.5h
 
-**Data Model Rules:**
-- All types must be defined in `packages/ai/src/types/` and imported — never inline type definitions in hook files
-- `UIMessage` comes from `@ai-sdk/react` — import it as a type-only import
-- The hook is internal (not exported from package `index.ts`)
+| # | Task | Hours | Dependencies | Output |
+|---|------|-------|-------------|--------|
+| 6.1 | Create private GitHub repo | 0.25h | -- | `DomiDex/tour-kit-pro` exists |
+| 6.2 | Initialize as pnpm monorepo with Turborepo, copy and adapt root configs | 0.5h | 6.1 | Monorepo scaffolded |
+| 6.3 | Copy all 8 pro package directories | 0.5h | 6.2 | 8 packages in `packages/` |
+| 6.4 | Update all `package.json` deps -- `workspace:*` to published npm versions for free packages | 0.5h | 6.3 | 8 `package.json` files updated |
+| 6.5 | `pnpm install && pnpm build` in private repo | 0.5h | 6.4 | Build passes |
+| 6.6 | `pnpm test` in private repo | 0.25h | 6.5 | Tests pass |
 
-**Type definitions (from `packages/ai/src/types/config.ts`):**
+### Step 3: Clean Public Repo -- 1.2h
 
-```typescript
-type PersistenceConfig =
-  | 'local'
-  | { adapter: PersistenceAdapter }
+| # | Task | Hours | Dependencies | Output |
+|---|------|-------|-------------|--------|
+| 6.7 | Delete pro package directories from public repo | 0.25h | 6.5 (private repo verified) | Directories removed |
+| 6.8 | Verify `pnpm-workspace.yaml` auto-adjusts (wildcard `packages/*` still works) | 0.1h | 6.7 | Only core, react, hints remain |
+| 6.9 | `pnpm install && pnpm build && pnpm typecheck` in public repo | 0.25h | 6.7 | Free packages build |
+| 6.10 | Update docs site -- remove or stub pro package imports | 0.5h | 6.7 | Docs site builds |
+| 6.11 | Commit: `"chore: remove pro packages -- moved to private repo"` | 0.1h | 6.9, 6.10 | Public repo cleaned |
 
-interface PersistenceAdapter {
-  save(chatId: string, messages: UIMessage[]): Promise<void>
-  load(chatId: string): Promise<UIMessage[] | null>
-  clear(chatId: string): Promise<void>
-}
-```
+### Step 4: CI/CD and Release Config -- 1.85h
 
-**Hook signature:**
+| # | Task | Hours | Dependencies | Output |
+|---|------|-------|-------------|--------|
+| 6.12 | Configure Changesets in private repo | 0.25h | 6.3 | `.changeset/config.json` |
+| 6.13 | Set up GitHub Actions: `ci.yml` + `release.yml` | 1h | 6.5 | Workflows committed |
+| 6.14 | Add `NPM_TOKEN` secret to private repo | 0.1h | 6.13 | Secret configured |
+| 6.15 | Dry-run full release | 0.5h | 6.12, 6.13 | Verification log |
 
-```typescript
-interface UsePersistenceOptions {
-  chatId: string
-  persistence?: PersistenceConfig
-  onError?: (error: Error) => void
-}
+### Step 5: Verify and Document -- 0.8h
 
-interface UsePersistenceReturn {
-  /** Load messages from storage. Returns null if none found or persistence disabled. */
-  loadMessages(): Promise<UIMessage[] | null>
-  /** Save messages to storage. Debounced internally for 'local' mode. */
-  saveMessages(messages: UIMessage[]): void
-  /** Clear all stored messages for this chatId. */
-  clearMessages(): Promise<void>
-  /** Whether persistence is enabled. */
-  isEnabled: boolean
-}
-
-function usePersistence(options: UsePersistenceOptions): UsePersistenceReturn
-```
-
-**Implementation guidance:**
-
-1. If `persistence` is `undefined`, return no-op implementations with `isEnabled: false`
-2. If `persistence` is `'local'`:
-   - `loadMessages`: read from `localStorage.getItem('tourkit-ai-chat:{chatId}')`, parse JSON, validate it's an array, return it or `null`
-   - `saveMessages`: debounce 500ms, then `localStorage.setItem('tourkit-ai-chat:{chatId}', JSON.stringify(messages))`
-   - `clearMessages`: `localStorage.removeItem('tourkit-ai-chat:{chatId}')`
-3. If `persistence` is `{ adapter }`:
-   - `loadMessages`: call `adapter.load(chatId)`, catch errors
-   - `saveMessages`: call `adapter.save(chatId, messages)`, catch errors
-   - `clearMessages`: call `adapter.clear(chatId)`, catch errors
-4. Wrap all localStorage and adapter calls in try/catch — on error, call `onError` if provided, otherwise `console.warn`
-5. Use `useCallback` for all returned functions, `useRef` for the debounce timer
-6. SSR safety: guard localStorage access with `typeof window !== 'undefined'`
-7. Flush pending debounced save on unmount via `useEffect` cleanup
-
-**localStorage helper (inline in hook file):**
-
-```typescript
-const STORAGE_PREFIX = 'tourkit-ai-chat'
-
-function getStorageKey(chatId: string): string {
-  return `${STORAGE_PREFIX}:${chatId}`
-}
-
-function safeJsonParse<T>(value: string | null): T | null {
-  if (!value) return null
-  try {
-    const parsed = JSON.parse(value)
-    return Array.isArray(parsed) ? parsed : null
-  } catch {
-    return null
-  }
-}
-```
-
----
-
-### Task 6.2 — Wire persistence into `AiChatProvider` (1–2h)
-
-**File:** `packages/ai/src/context/ai-chat-provider.tsx`
-
-Integrate `usePersistence` into the existing provider. The provider already manages `useChat` from `@ai-sdk/react`.
-
-**Changes required:**
-
-1. Add `chatId?: string` to `AiChatConfig` (default: `'default'`):
-
-```typescript
-// In packages/ai/src/types/config.ts
-interface AiChatConfig {
-  // ... existing fields ...
-  /** Unique chat ID for persistence (default: 'default') */
-  chatId?: string
-  /** Chat persistence */
-  persistence?: PersistenceConfig
-}
-```
-
-2. In `AiChatProvider`, call `usePersistence({ chatId, persistence })` and wire it:
-   - Pass `loadMessages` result as `initialMessages` to `useChat` (requires `useState` + `useEffect` for async load)
-   - Call `saveMessages` whenever `messages` changes (via `useEffect` with `messages` dependency)
-   - Override `setMessages` to also call `clearMessages` when messages is set to empty array
-
-3. Loading state management:
-   - Add `isPersistenceLoading: boolean` state — `true` until `loadMessages` resolves
-   - While loading, do not render children (or render with empty messages) to avoid flash of empty state
-   - Expose `isPersistenceLoading` in context if needed
-
-**Provider integration pattern:**
-
-```typescript
-function AiChatProvider({ config, children }: AiChatProviderProps) {
-  const chatId = config.chatId ?? 'default'
-  const { loadMessages, saveMessages, clearMessages, isEnabled } = usePersistence({
-    chatId,
-    persistence: config.persistence,
-  })
-
-  const [initialMessages, setInitialMessages] = useState<UIMessage[] | undefined>(undefined)
-  const [isLoading, setIsLoading] = useState(isEnabled)
-
-  // Load on mount
-  useEffect(() => {
-    if (!isEnabled) return
-    loadMessages().then((messages) => {
-      if (messages) setInitialMessages(messages)
-      setIsLoading(false)
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // AI SDK useChat with initial messages
-  const chat = useChat({
-    api: config.endpoint,
-    initialMessages,
-    // ... other options
-  })
-
-  // Auto-save on message change
-  useEffect(() => {
-    if (!isEnabled || isLoading) return
-    saveMessages(chat.messages)
-  }, [chat.messages]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Wrap setMessages to handle clear
-  const setMessages = useCallback((messages: UIMessage[]) => {
-    chat.setMessages(messages)
-    if (messages.length === 0) {
-      clearMessages()
-    }
-  }, [chat.setMessages, clearMessages])
-
-  // ... rest of provider
-}
-```
-
----
-
-### Task 6.3 — Auto-save on message change, auto-load on mount (1h)
-
-This task is integrated into Task 6.2 above. The specific behaviors to verify:
-
-1. **Auto-load on mount:** When `AiChatProvider` mounts with `persistence: 'local'`, it reads localStorage and passes loaded messages to `useChat` as `initialMessages`
-2. **Auto-save on change:** When `chat.messages` changes (new user message, streaming AI response completes), `saveMessages` is called. For `'local'` mode this is debounced 500ms.
-3. **Clear on reset:** When `setMessages([])` is called (user clicks "Clear chat"), `clearMessages()` runs — removing the localStorage key or calling `adapter.clear(chatId)`
-4. **No double-save on mount:** The `useEffect` that auto-saves should skip the initial render when messages are loaded from persistence (use a ref flag `hasHydrated`)
-
----
-
-### Task 6.4 — Unit tests (1–2h)
-
-**File:** `packages/ai/src/__tests__/hooks/use-persistence.test.ts`
-
-**Test structure:**
-
-```typescript
-describe('usePersistence', () => {
-  describe('disabled (no persistence config)', () => {
-    it('returns isEnabled: false')
-    it('loadMessages returns null')
-    it('saveMessages is a no-op')
-    it('clearMessages is a no-op')
-  })
-
-  describe('local mode', () => {
-    it('saves messages to localStorage with correct key')
-    it('loads messages from localStorage')
-    it('returns null when no stored messages exist')
-    it('returns null when stored data is invalid JSON')
-    it('returns null when stored data is not an array')
-    it('clears messages from localStorage')
-    it('debounces save calls (only last write within 500ms persists)')
-    it('flushes pending save on unmount')
-    it('handles localStorage quota exceeded gracefully')
-    it('handles SSR environment (no window) gracefully')
-  })
-
-  describe('adapter mode', () => {
-    it('calls adapter.load(chatId) on loadMessages')
-    it('calls adapter.save(chatId, messages) on saveMessages')
-    it('calls adapter.clear(chatId) on clearMessages')
-    it('catches and warns on adapter.load error')
-    it('catches and warns on adapter.save error')
-    it('catches and warns on adapter.clear error')
-    it('calls onError callback when adapter throws')
-  })
-
-  describe('chatId isolation', () => {
-    it('different chatIds use different storage keys')
-    it('clearing one chatId does not affect another')
-  })
-})
-```
-
-**Test utilities:**
-
-- Use `@testing-library/react` with `renderHook`
-- Mock `localStorage` using a simple in-memory object with `getItem`/`setItem`/`removeItem`
-- For adapter tests, create a mock adapter with `vi.fn()` for each method
-- Use `vi.useFakeTimers()` for debounce tests
-- For SSR tests, temporarily delete `window.localStorage` and restore after
+| # | Task | Hours | Dependencies | Output |
+|---|------|-------|-------------|--------|
+| 6.16 | Verify public repo has zero pro source | 0.1h | 6.11 | Confirmed |
+| 6.17 | Verify npm restricted access | 0.1h | 6.0b | Confirmed |
+| 6.18 | Update public repo README | 0.25h | 6.11 | README updated |
+| 6.19 | Update CLAUDE.md in both repos | 0.25h | 6.11 | Both updated |
+| 6.20 | Push private repo to GitHub | 0.1h | 6.15 | Private repo live |
 
 ---
 
 ## 4. Deliverables
 
-| File | Description |
-|------|-------------|
-| `packages/ai/src/hooks/use-persistence.ts` | Internal persistence hook with localStorage and adapter support |
-| `packages/ai/src/types/config.ts` | Updated with `chatId` field on `AiChatConfig`, `PersistenceConfig` type, `PersistenceAdapter` interface |
-| `packages/ai/src/context/ai-chat-provider.tsx` | Updated to consume `usePersistence`, auto-load on mount, auto-save on change |
-| `packages/ai/src/__tests__/hooks/use-persistence.test.ts` | Unit tests covering local, adapter, disabled, and edge cases |
+### Public Repo (`DomiDex/tour-kit`) -- After Cleanup
+
+```
+tour-kit/
+├── packages/
+│   ├── core/                    # @tour-kit/core (MIT, public)
+│   ├── react/                   # @tour-kit/react (MIT, public)
+│   └── hints/                   # @tour-kit/hints (MIT, public)
+├── apps/
+│   └── docs/                    # Documentation site
+├── examples/                    # Example projects (free packages only)
+├── .changeset/
+│   └── config.json              # access: public, linked: [core, react, hints]
+├── .github/
+│   └── workflows/
+│       ├── ci.yml               # Existing CI
+│       └── release.yml          # Existing release (public packages)
+├── turbo.json
+├── pnpm-workspace.yaml
+├── CLAUDE.md                    # Updated -- no pro package references
+├── README.md                    # Updated -- pro packages referenced as npm-only
+└── package.json
+```
+
+### Private Repo (`DomiDex/tour-kit-pro`) -- New
+
+```
+tour-kit-pro/
+├── packages/
+│   ├── license/                 # @tour-kit/license (proprietary, restricted)
+│   ├── adoption/                # @tour-kit/adoption (proprietary, restricted)
+│   ├── ai/                      # @tour-kit/ai (proprietary, restricted)
+│   ├── analytics/               # @tour-kit/analytics (proprietary, restricted)
+│   ├── announcements/           # @tour-kit/announcements (proprietary, restricted)
+│   ├── checklists/              # @tour-kit/checklists (proprietary, restricted)
+│   ├── media/                   # @tour-kit/media (proprietary, restricted)
+│   └── scheduling/              # @tour-kit/scheduling (proprietary, restricted)
+├── .changeset/
+│   └── config.json              # access: restricted, linked: [all 8 pro packages]
+├── .github/
+│   └── workflows/
+│       ├── ci.yml               # Build + test on PR
+│       └── release.yml          # Changesets publish with --access restricted
+├── turbo.json
+├── tsconfig.json
+├── pnpm-workspace.yaml          # packages: ["packages/*"]
+├── .npmrc
+├── CLAUDE.md                    # Pro-specific guidance
+├── README.md                    # Internal docs
+└── package.json                 # Scripts: build, test, release
+```
 
 ---
 
 ## 5. Exit Criteria
 
-- [ ] `persistence: 'local'` saves messages to `localStorage` key `tourkit-ai-chat:{chatId}` on every message change (debounced 500ms)
-- [ ] Page reload restores previous chat messages — provider reads from localStorage on mount and passes to `useChat` as `initialMessages`
-- [ ] `persistence: { adapter }` calls adapter's `save`/`load`/`clear` methods with the correct `chatId`
-- [ ] Clearing chat (`setMessages([])`) calls `adapter.clear()` and removes the localStorage entry
-- [ ] Adapter errors are caught and logged — chat continues working
-- [ ] Invalid stored data (corrupt JSON, wrong shape) returns `null` without crashing
-- [ ] No persistence config = zero localStorage reads/writes
-- [ ] All unit tests pass with > 80% coverage on `use-persistence.ts`
-- [ ] `pnpm --filter @tour-kit/ai typecheck` passes with no errors
+| # | Criterion | Verification Command |
+|---|-----------|---------------------|
+| EC1 | `DomiDex/tour-kit-pro` is a private GitHub repo | `gh repo view DomiDex/tour-kit-pro --json visibility -q .visibility` returns `PRIVATE` |
+| EC2 | Private repo contains all 8 pro packages | `ls tour-kit-pro/packages/` lists: adoption, ai, analytics, announcements, checklists, license, media, scheduling |
+| EC3 | All 8 pro packages build in private repo | `cd tour-kit-pro && pnpm build` exits 0 |
+| EC4 | All 8 pro packages pass tests in private repo | `cd tour-kit-pro && pnpm test` exits 0 |
+| EC5 | Public repo contains zero pro source at HEAD | `cd tour-kit && git ls-files packages/{adoption,ai,analytics,announcements,checklists,license,media,scheduling}` returns empty |
+| EC6 | Public repo free packages build | `cd tour-kit && pnpm install && pnpm build && pnpm typecheck` exits 0 |
+| EC7 | Pro packages depend on free packages via npm, not workspace | `grep "workspace" tour-kit-pro/packages/*/package.json` shows no `@tour-kit/core`, `@tour-kit/react`, or `@tour-kit/hints` workspace refs |
+| EC8 | All 8 pro packages restricted on npm | `npm access get status @tour-kit/<pkg>` returns `restricted` for all 8 |
+| EC9 | Changesets config has `access: restricted` | `cat tour-kit-pro/.changeset/config.json` contains `"access": "restricted"` |
+| EC10 | GitHub Actions exist in private repo | `ls tour-kit-pro/.github/workflows/` lists `ci.yml` and `release.yml` |
+| EC11 | Dry-run release succeeds | `npm publish --dry-run --access restricted` exits 0 for all 8 packages |
+| EC12 | Cross-pro deps resolve within private monorepo | `cd tour-kit-pro && pnpm ls --filter @tour-kit/announcements` shows `@tour-kit/scheduling` resolved |
+| EC13 | Docs site builds after cleanup | `cd tour-kit && pnpm build --filter=docs` exits 0 |
 
 ---
 
 ## 6. Execution Prompt
 
-You are implementing Phase 6 (Persistence) of the `@tour-kit/ai` package in a pnpm monorepo at `packages/ai/`. This phase adds chat history persistence via localStorage or a custom adapter.
+This section is self-contained. Execute steps in order. Do not skip verification steps.
 
-**Monorepo context:**
-- Build: `pnpm --filter @tour-kit/ai build` (tsup, ESM + CJS)
-- Typecheck: `pnpm --filter @tour-kit/ai typecheck`
-- Test: `pnpm --filter @tour-kit/ai test`
-- The package uses `@ai-sdk/react` (AI SDK 6.x) — `UIMessage` type comes from there
-- Existing pattern reference: `packages/core/src/hooks/use-persistence.ts` (tour persistence, different domain but similar localStorage patterns)
+### Prerequisites
 
-**Data Model Rules:**
-- All types live in `packages/ai/src/types/` — never define interfaces in hook files
-- Import `UIMessage` from `@ai-sdk/react` as type-only: `import type { UIMessage } from '@ai-sdk/react'`
-- Use `interface` for object shapes, `type` for unions and mapped types
-- All public interfaces must have JSDoc comments on every field
+- [ ] npm CLI logged in (`npm whoami` returns your username)
+- [ ] npm Pro or Org plan active (required for restricted scoped packages)
+- [ ] `gh` CLI authenticated (`gh auth status` returns authenticated)
+- [ ] Phase 5 complete -- all 8 pro packages are built, tested, and documented in the public repo
+- [ ] Published versions confirmed: core@0.3.0, react@0.4.1, hints@0.4.1
 
-**Type definitions to use (already defined in `packages/ai/src/types/config.ts`):**
+### Step 1: Fix npm Access (do this FIRST)
 
-```typescript
-type PersistenceConfig =
-  | 'local'
-  | { adapter: PersistenceAdapter }
+```bash
+# Switch all 8 pro packages to restricted
+npm access restricted @tour-kit/adoption
+npm access restricted @tour-kit/ai
+npm access restricted @tour-kit/analytics
+npm access restricted @tour-kit/announcements
+npm access restricted @tour-kit/checklists
+npm access restricted @tour-kit/license
+npm access restricted @tour-kit/media
+npm access restricted @tour-kit/scheduling
 
-interface PersistenceAdapter {
-  /** Save messages for a chat session */
-  save(chatId: string, messages: UIMessage[]): Promise<void>
-  /** Load messages for a chat session, returns null if none found */
-  load(chatId: string): Promise<UIMessage[] | null>
-  /** Clear all messages for a chat session */
-  clear(chatId: string): Promise<void>
-}
+# Verify -- all must return "restricted"
+for pkg in adoption ai analytics announcements checklists license media scheduling; do
+  status=$(npm access get status @tour-kit/$pkg 2>&1)
+  echo "@tour-kit/$pkg: $status"
+done
 ```
 
-**Add to `AiChatConfig` in `packages/ai/src/types/config.ts`:**
+**STOP if any package does not return `restricted`.** Debug before proceeding.
 
-```typescript
-interface AiChatConfig {
-  // ... existing fields ...
-  /** Unique identifier for this chat session (default: 'default') */
-  chatId?: string
-  /** Chat persistence configuration */
-  persistence?: PersistenceConfig
-}
+### Step 2: Create Private Repo
+
+```bash
+# Create and clone
+gh repo create DomiDex/tour-kit-pro --private --clone
+cd tour-kit-pro
 ```
 
-**File 1 — `packages/ai/src/hooks/use-persistence.ts`:**
+Create `package.json`:
 
-- Internal hook, NOT exported from package `index.ts`
-- Signature: `usePersistence(options: UsePersistenceOptions): UsePersistenceReturn`
-- `UsePersistenceOptions`: `{ chatId: string; persistence?: PersistenceConfig; onError?: (error: Error) => void }`
-- `UsePersistenceReturn`: `{ loadMessages(): Promise<UIMessage[] | null>; saveMessages(messages: UIMessage[]): void; clearMessages(): Promise<void>; isEnabled: boolean }`
-- localStorage key format: `tourkit-ai-chat:{chatId}`
-- `saveMessages` for `'local'` mode: debounce 500ms (use `useRef` for timer, `useCallback` for stable reference)
-- Flush pending save on unmount (`useEffect` cleanup)
-- SSR guard: `typeof window !== 'undefined'` before any `localStorage` access
-- All errors caught with try/catch — call `onError` if provided, else `console.warn`
-- JSON parse validation: check `Array.isArray()` after parse, return `null` if not an array
+```bash
+cat > package.json << 'PKGJSON'
+{
+  "name": "tour-kit-pro",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build --filter='./packages/*' && changeset publish --access restricted"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "@changesets/cli": "^2.29.4",
+    "@changesets/changelog-github": "^0.5.1"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  }
+}
+PKGJSON
+```
 
-**File 2 — Update `packages/ai/src/context/ai-chat-provider.tsx`:**
+Create `pnpm-workspace.yaml`:
 
-- Import and call `usePersistence` in provider
-- Add `isPersistenceLoading` state — true while initial `loadMessages()` is pending
-- Pass loaded messages as `initialMessages` to `useChat()`
-- Auto-save: `useEffect` watching `chat.messages` calls `saveMessages(chat.messages)` — skip during initial hydration (use `hasHydrated` ref)
-- Wrap `setMessages`: when called with `[]`, also call `clearMessages()`
-- Do NOT change the public `useAiChat()` return type — persistence is transparent
+```bash
+cat > pnpm-workspace.yaml << 'WORKSPACE'
+packages:
+  - "packages/*"
 
-**File 3 — `packages/ai/src/__tests__/hooks/use-persistence.test.ts`:**
+catalog:
+  vitest: ^4.1.0
+  jsdom: ^27.3.0
+  typescript: ^5.9.3
+  tsup: ^8.5.1
+  "@types/react": ^19.2.0
+  "@types/react-dom": ^19.2.0
+  "@vitest/coverage-v8": ^4.1.0
+  "@testing-library/react": ^16.3.1
+  "@testing-library/jest-dom": ^6.9.1
+  "@testing-library/dom": ^10.4.1
+  "@testing-library/user-event": ^14.6.1
+WORKSPACE
+```
 
-- Use `@testing-library/react` `renderHook` + `vitest`
-- Mock localStorage: `Object.defineProperty(window, 'localStorage', { value: mockStorage })`
-- Test groups: disabled mode (4 tests), local mode (10 tests), adapter mode (7 tests), chatId isolation (2 tests)
-- Use `vi.useFakeTimers()` for debounce tests, `vi.advanceTimersByTime(500)` to flush
-- Mock adapter: `{ save: vi.fn().mockResolvedValue(undefined), load: vi.fn().mockResolvedValue(null), clear: vi.fn().mockResolvedValue(undefined) }`
-- For error tests: make adapter methods reject with `new Error('adapter error')`, verify `console.warn` was called
+Create `turbo.json`:
 
-**Quality gates:**
-- `pnpm --filter @tour-kit/ai typecheck` must pass
-- All tests must pass
-- No `any` types — use `unknown` for generic error catches
-- No direct `window` access without SSR guard
+```bash
+cat > turbo.json << 'TURBO'
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}
+TURBO
+```
+
+Copy `tsconfig.json` and `.npmrc` from public repo:
+
+```bash
+cp ../tour-kit/tsconfig.json .
+cp ../tour-kit/.npmrc . 2>/dev/null || true
+```
+
+### Step 3: Copy Pro Packages
+
+```bash
+mkdir -p packages
+for pkg in license adoption ai analytics announcements checklists media scheduling; do
+  cp -r ../tour-kit/packages/$pkg packages/
+done
+```
+
+### Step 4: Update Dependencies
+
+Replace free-package `workspace:*` refs with published npm versions. Leave cross-pro `workspace:*` refs intact.
+
+```bash
+# Replace workspace:* refs to free packages with published npm versions
+for pkg in license adoption ai analytics announcements checklists media scheduling; do
+  file="packages/$pkg/package.json"
+  if [ -f "$file" ]; then
+    sed -i 's/"@tour-kit\/core": "workspace:\*"/"@tour-kit\/core": "^0.3.0"/g' "$file"
+    sed -i 's/"@tour-kit\/react": "workspace:\*"/"@tour-kit\/react": "^0.4.1"/g' "$file"
+    sed -i 's/"@tour-kit\/hints": "workspace:\*"/"@tour-kit\/hints": "^0.4.1"/g' "$file"
+    echo "Updated $file"
+  fi
+done
+
+# Verify no free-package workspace refs remain
+echo "--- Checking for remaining free-package workspace refs ---"
+grep -r '"@tour-kit/core": "workspace' packages/*/package.json || echo "None found (good)"
+grep -r '"@tour-kit/react": "workspace' packages/*/package.json || echo "None found (good)"
+grep -r '"@tour-kit/hints": "workspace' packages/*/package.json || echo "None found (good)"
+
+# Verify cross-pro workspace refs are intact (these should exist)
+echo "--- Cross-pro workspace refs (should exist) ---"
+grep -r '"@tour-kit/.*": "workspace' packages/*/package.json || echo "No cross-pro deps"
+```
+
+### Step 5: Build and Test Private Repo
+
+```bash
+pnpm install
+pnpm build
+pnpm test
+pnpm typecheck
+```
+
+**STOP if build or tests fail.** Fix issues before proceeding to clean the public repo.
+
+### Step 6: Configure Changesets
+
+```bash
+mkdir -p .changeset
+
+cat > .changeset/config.json << 'CSCONFIG'
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
+  "changelog": ["@changesets/changelog-github", { "repo": "DomiDex/tour-kit-pro" }],
+  "commit": false,
+  "fixed": [],
+  "linked": [[
+    "@tour-kit/license",
+    "@tour-kit/adoption",
+    "@tour-kit/analytics",
+    "@tour-kit/announcements",
+    "@tour-kit/checklists",
+    "@tour-kit/media",
+    "@tour-kit/scheduling",
+    "@tour-kit/ai"
+  ]],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}
+CSCONFIG
+```
+
+### Step 7: Set Up GitHub Actions
+
+```bash
+mkdir -p .github/workflows
+
+cat > .github/workflows/ci.yml << 'CIYML'
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build --filter='./packages/*'
+
+      - run: pnpm typecheck
+
+      - run: pnpm test
+CIYML
+
+cat > .github/workflows/release.yml << 'RELYML'
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build --filter='./packages/*'
+
+      - name: Create Release Pull Request or Publish
+        uses: changesets/action@v1
+        with:
+          version: pnpm version-packages
+          publish: pnpm release
+          title: 'chore: version pro packages'
+          commit: 'chore: version pro packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+RELYML
+```
+
+### Step 8: Dry-Run Release
+
+```bash
+# Create a test changeset
+pnpm changeset  # Select all packages, patch bump, message: "test: dry-run release"
+pnpm version-packages
+pnpm build --filter='./packages/*'
+
+# Dry-run publish for each package
+for pkg in license adoption ai analytics announcements checklists media scheduling; do
+  echo "=== @tour-kit/$pkg ==="
+  (cd packages/$pkg && npm publish --dry-run --access restricted 2>&1)
+  echo ""
+done
+
+# Reset the test changeset (don't commit version bumps)
+git checkout -- .
+```
+
+### Step 9: Clean Public Repo
+
+```bash
+cd ../tour-kit
+
+# Delete pro package directories
+rm -rf packages/adoption packages/ai packages/analytics packages/announcements \
+       packages/checklists packages/license packages/media packages/scheduling
+
+# Verify workspace -- only free packages remain
+pnpm ls --filter='./packages/*' --depth 0
+# Should list only: @tour-kit/core, @tour-kit/react, @tour-kit/hints
+
+# Build free packages
+pnpm install
+pnpm build
+pnpm typecheck
+
+# Check docs site for broken pro imports (only .ts/.tsx files, not MDX code blocks)
+grep -rn "@tour-kit/license\|@tour-kit/adoption\|@tour-kit/analytics\|@tour-kit/announcements\|@tour-kit/checklists\|@tour-kit/media\|@tour-kit/scheduling\|@tour-kit/ai" apps/docs/ \
+  --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" || echo "No broken imports"
+
+# Build docs site
+pnpm build --filter=docs
+
+# Commit
+git add -A
+git commit -m "chore: remove pro packages -- moved to private repo"
+git push origin main
+```
+
+### Step 10: Update Documentation
+
+**Public repo README:**
+- Remove pro packages from the packages table
+- Add a "Pro Packages" section: available via npm with a license key, link to `tourkit.dev/pricing`
+- Note: pro packages require `NPM_TOKEN` for installation
+
+**Public repo CLAUDE.md:**
+- Remove all 8 pro packages from Architecture > Packages section
+- Remove pro packages from the Package Dependency Graph
+- Remove pro package CLAUDE.md references from the table
+- Add note: "Pro packages are maintained in a separate private repository"
+
+**Private repo CLAUDE.md:**
+- Document the 8 pro packages and their domains
+- Reference published free packages as npm dependencies (not workspace)
+- Include release workflow instructions
+- Document the `access: restricted` Changesets config
+
+### Step 11: Push Private Repo and Final Verification
+
+```bash
+cd ../tour-kit-pro
+
+# Add NPM_TOKEN secret (manual step via GitHub UI)
+echo "ACTION REQUIRED: Add NPM_TOKEN secret at:"
+echo "  https://github.com/DomiDex/tour-kit-pro/settings/secrets/actions"
+
+# Commit everything
+git add -A
+git commit -m "feat: initialize tour-kit-pro monorepo with 8 pro packages
+
+Includes:
+- 8 pro packages: license, adoption, ai, analytics, announcements, checklists, media, scheduling
+- Changesets config with access: restricted
+- GitHub Actions: CI + Release workflows
+- Dependencies on published @tour-kit/core@^0.3.0, @tour-kit/react@^0.4.1, @tour-kit/hints@^0.4.1"
+
+git push -u origin main
+```
+
+### Step 12: Final Verification Checklist
+
+```bash
+# 1. Private repo exists and is private
+gh repo view DomiDex/tour-kit-pro --json visibility -q .visibility
+# Expected: PRIVATE
+
+# 2. Public repo has zero pro source
+cd ../tour-kit
+git ls-files packages/adoption packages/ai packages/analytics packages/announcements \
+             packages/checklists packages/license packages/media packages/scheduling
+# Expected: empty output
+
+# 3. npm access is restricted for all 8
+for pkg in adoption ai analytics announcements checklists license media scheduling; do
+  echo "@tour-kit/$pkg: $(npm access get status @tour-kit/$pkg)"
+done
+# Expected: all "restricted"
+
+# 4. Public repo builds
+pnpm install && pnpm build && pnpm typecheck
+# Expected: exit 0
+
+# 5. Private repo builds
+cd ../tour-kit-pro
+pnpm install && pnpm build && pnpm test
+# Expected: exit 0
+
+# 6. No free-package workspace refs in private repo
+grep -r '"@tour-kit/core": "workspace' packages/*/package.json
+grep -r '"@tour-kit/react": "workspace' packages/*/package.json
+grep -r '"@tour-kit/hints": "workspace' packages/*/package.json
+# Expected: no output for all three
+
+# 7. Changesets config
+cat .changeset/config.json | grep '"access"'
+# Expected: "access": "restricted"
+
+echo "Phase 6 complete."
+```
 
 ---
 
 ## Readiness Check
 
-Before starting implementation, confirm:
+| # | Prerequisite | How to Verify | Status |
+|---|-------------|---------------|--------|
+| R1 | Phase 5 complete (all pro packages built, tested, documented) | Phase 5 exit criteria met | [ ] |
+| R2 | npm CLI authenticated | `npm whoami` returns username | [ ] |
+| R3 | npm Pro or Org plan active | `npm profile get` shows paid plan | [ ] |
+| R4 | `gh` CLI authenticated | `gh auth status` returns authenticated | [ ] |
+| R5 | Free packages published at expected versions | `npm view @tour-kit/core version` returns `0.3.0` | [ ] |
+| R6 | All 8 pro packages exist on npm (even if public) | `npm view @tour-kit/license version` returns `0.0.1` | [ ] |
+| R7 | No uncommitted changes in public repo | `git status` is clean | [ ] |
+| R8 | Git configured with correct user | `git config user.name` and `git config user.email` are set | [ ] |
+| R9 | Sufficient disk space for second repo | `df -h .` shows available space | [ ] |
+| R10 | npm Automation token ready (for `NPM_TOKEN` secret) | Token generated at npmjs.com > Access Tokens | [ ] |
 
-- [ ] Phase 1 is complete — `AiChatProvider`, `AiChatConfig`, `useAiChat` exist and work
-- [ ] `packages/ai/src/types/config.ts` exists with `AiChatConfig` interface
-- [ ] `packages/ai/src/context/ai-chat-provider.tsx` exists and wraps `useChat` from `@ai-sdk/react`
-- [ ] `@ai-sdk/react` is listed as a dependency in `packages/ai/package.json`
-- [ ] `vitest` and `@testing-library/react` are available for testing
-- [ ] `pnpm --filter @tour-kit/ai build` succeeds before starting
+**All items must be checked before starting Phase 6.**

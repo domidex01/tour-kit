@@ -1,99 +1,191 @@
-import { ArrowRight, Component, Cpu, Lightbulb } from 'lucide-react'
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
-const packages = [
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.15 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return { ref, visible }
+}
+
+const corePackages = [
   {
     name: '@tour-kit/core',
-    icon: Cpu,
-    description: 'Headless hooks & utilities',
+    description: 'The headless engine. Hooks, positioning, focus management, and state — all framework-agnostic.',
     size: '< 8 KB',
+    install: 'pnpm add @tour-kit/core',
     href: '/docs/core',
-    features: ['useTour hook', 'useSpotlight hook', 'Keyboard navigation', 'Full TypeScript'],
-    color: 'text-violet-500',
-    bgColor: 'bg-violet-500/10',
-    borderHover: 'hover:border-violet-500/40',
+    features: ['useTour hook', 'Position engine', 'Focus trap', 'Keyboard nav', 'Storage adapters'],
   },
   {
     name: '@tour-kit/react',
-    icon: Component,
-    description: 'Pre-styled React components',
+    description: 'Pre-styled, composable React components. Drop in and go.',
     size: '< 12 KB',
+    install: 'pnpm add @tour-kit/react',
     href: '/docs/react',
-    features: ['Tour component', 'TourStep component', 'Tailwind styling', 'Headless variants'],
-    color: 'text-[var(--tk-primary)]',
-    bgColor: 'bg-[var(--tk-primary)]/10',
-    borderHover: 'hover:border-[var(--tk-primary)]/40',
+    features: ['Tour component', 'TourStep', 'Router adapters', 'Headless variants'],
   },
   {
     name: '@tour-kit/hints',
-    icon: Lightbulb,
-    description: 'Persistent hint system',
+    description: 'Persistent contextual hints and pulsing beacons.',
     size: '< 5 KB',
+    install: 'pnpm add @tour-kit/hints',
     href: '/docs/hints',
-    features: ['Hint component', 'Pulsing beacons', 'Dismissible', 'Persistence'],
-    color: 'text-amber-500',
-    bgColor: 'bg-amber-500/10',
-    borderHover: 'hover:border-amber-500/40',
+    features: ['Pulsing beacons', 'Contextual tips', 'Dismissal tracking'],
+  },
+]
+
+const extensions = [
+  {
+    name: '@tour-kit/announcements',
+    description: 'Modals, toasts, banners, slideouts',
+    install: 'pnpm add @tour-kit/announcements',
+    href: '/docs/announcements',
+  },
+  {
+    name: '@tour-kit/checklists',
+    description: 'Onboarding tasks with dependencies',
+    install: 'pnpm add @tour-kit/checklists',
+    href: '/docs/checklists',
+  },
+  {
+    name: '@tour-kit/analytics',
+    description: 'PostHog, Mixpanel, Amplitude, GA4',
+    install: 'pnpm add @tour-kit/analytics',
+    href: '/docs/analytics',
+  },
+  {
+    name: '@tour-kit/adoption',
+    description: 'Usage tracking & nudge scheduler',
+    install: 'pnpm add @tour-kit/adoption',
+    href: '/docs/adoption',
+  },
+  {
+    name: '@tour-kit/media',
+    description: 'YouTube, Vimeo, Loom, Lottie, GIF',
+    install: 'pnpm add @tour-kit/media',
+    href: '/docs/media',
+  },
+  {
+    name: '@tour-kit/scheduling',
+    description: 'Time-based scheduling & timezones',
+    install: 'pnpm add @tour-kit/scheduling',
+    href: '/docs/scheduling',
   },
 ]
 
 export function Packages() {
+  const { ref, visible } = useReveal()
+
   return (
-    <section className="px-6 py-20 sm:px-8 md:py-28 lg:px-12">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-14 text-center">
-          <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-fd-foreground sm:text-4xl">
-            Pick what you need
+    <section ref={ref} className="bg-[#EDF6FB] dark:bg-fd-muted/30 px-6 py-28 sm:px-8 md:py-36 lg:px-12">
+      <div className="mx-auto max-w-[1120px]">
+        {/* Header — right-aligned for contrast with previous left-aligned sections */}
+        <div className="mb-16 ml-auto max-w-lg text-right">
+          <span className="mb-4 inline-block font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--landing-accent)]">
+            Modular by design
+          </span>
+          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
+            One install.
+            <br />
+            Nine packages.
           </h2>
-          <p className="mx-auto max-w-xl text-lg text-fd-muted-foreground">
-            Start with core for full control, or grab react for ready-made components.
+          <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
+            Start with the free core. Add analytics, checklists, or scheduling when you need them — each package is independently tree-shakeable.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {packages.map((pkg) => (
-            <Link
+        {/* Core packages — featured layout: first one large, rest smaller */}
+        <div className="mb-8 grid gap-4 md:grid-cols-[1.2fr_1fr_1fr]">
+          {corePackages.map((pkg, i) => (
+            <div
               key={pkg.name}
-              href={pkg.href}
-              className={`group flex flex-col rounded-xl border border-fd-border bg-fd-card p-7 shadow-sm transition-all hover:shadow-md ${pkg.borderHover}`}
+              className={`rounded-lg border border-fd-border bg-fd-card p-6 transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                visible ? 'animate-fade-in-up' : 'opacity-0'
+              } ${i === 0 ? 'md:row-span-1' : ''}`}
+              style={{ animationDelay: `${i * 100}ms` }}
             >
-              <div className="mb-5 flex items-center justify-between">
-                <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-lg ${pkg.bgColor}`}
-                >
-                  <pkg.icon className={`h-5 w-5 ${pkg.color}`} />
-                </div>
-                <span className="rounded-full bg-fd-muted px-3 py-1 text-xs font-bold text-fd-muted-foreground">
-                  {pkg.size}
-                </span>
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="font-mono text-[14px] font-bold text-fd-foreground">{pkg.name}</h3>
+                <span className="font-mono text-[11px] text-fd-muted-foreground">{pkg.size}</span>
               </div>
-
-              <h3 className="mb-1 font-mono text-[15px] font-bold text-fd-foreground">
-                {pkg.name}
-              </h3>
-              <p className="mb-5 text-sm text-fd-muted-foreground">{pkg.description}</p>
-
-              <ul className="mb-6 flex-1 space-y-2.5">
-                {pkg.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-center gap-2.5 text-sm text-fd-muted-foreground"
+              <p className="mb-4 text-[14px] leading-[1.6] text-fd-muted-foreground">
+                {pkg.description}
+              </p>
+              <div className="mb-5 flex flex-wrap gap-1.5">
+                {pkg.features.map((f) => (
+                  <span
+                    key={f}
+                    className="rounded bg-fd-muted px-2 py-0.5 font-mono text-[11px] text-fd-muted-foreground"
                   >
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${pkg.color.replace('text-', 'bg-')}`}
-                    />
-                    {feature}
-                  </li>
+                    {f}
+                  </span>
                 ))}
-              </ul>
+              </div>
+              <div className="flex items-center justify-between border-t border-fd-border pt-4">
+                <code className="font-mono text-[11px] text-fd-muted-foreground">
+                  <span className="select-none opacity-30">$ </span>
+                  {pkg.install}
+                </code>
+                <Link
+                  href={pkg.href}
+                  className="font-mono text-[12px] font-semibold text-[var(--landing-accent)] transition-colors hover:opacity-80"
+                >
+                  Docs &rarr;
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
 
-              <span
-                className={`inline-flex items-center gap-1.5 text-sm font-semibold ${pkg.color} transition-colors`}
+        {/* Divider */}
+        <div className="mb-8 flex items-center gap-4">
+          <div className="h-px flex-1 border-t border-dashed border-fd-border" />
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-fd-muted-foreground">
+            Extensions
+          </span>
+          <div className="h-px flex-1 border-t border-dashed border-fd-border" />
+        </div>
+
+        {/* Extensions — compact grid */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {extensions.map((pkg, i) => (
+            <div
+              key={pkg.name}
+              className={`group flex items-center justify-between rounded-lg border border-dashed border-fd-border bg-fd-card px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-solid hover:shadow-sm ${
+                visible ? 'animate-fade-in-up' : 'opacity-0'
+              }`}
+              style={{ animationDelay: `${300 + i * 80}ms` }}
+            >
+              <div className="min-w-0">
+                <h3 className="font-mono text-[12px] font-bold text-fd-foreground">{pkg.name}</h3>
+                <p className="text-[12px] text-fd-muted-foreground">{pkg.description}</p>
+              </div>
+              <Link
+                href={pkg.href}
+                className="ml-4 shrink-0 font-mono text-[11px] font-semibold text-[var(--landing-accent)] opacity-0 transition-opacity group-hover:opacity-100"
               >
-                Documentation
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </Link>
+                &rarr;
+              </Link>
+            </div>
           ))}
         </div>
       </div>

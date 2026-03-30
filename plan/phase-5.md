@@ -1,553 +1,456 @@
-# Phase 5 — Suggestions
+# Licence Phase 5 — Documentation, Examples & Hardening
 
-**Duration:** Days 20–21 (~7h)
-**Depends on:** Phase 1 (provider, `useAiChat`), Phase 2 (system prompt), Phase 3 (`AiChatSuggestions` component)
-**Blocks:** Phase 9 (Docs + Ship)
-**Risk Level:** LOW — straightforward hook + server utility with well-defined inputs/outputs; no infrastructure dependencies; caching is simple TTL-based
-**Stack:** react, typescript
+**Duration:** Days 17–19 (~7–8 hours)
+**Depends on:** Phase 0 (Polar validation), Phase 1 (Core SDK), Phase 2 (React layer), Phase 3 (Pro package integration), Phase 4 (Webhook + pricing)
+**Blocks:** Phase 6 (Source Code Separation)
+**Risk Level:** LOW — documentation, verification, and configuration; no new runtime logic
+**Stack:** typescript
 
 ---
 
 ## 1. Objective + What Success Looks Like
 
-Add a suggestions system to `@tour-kit/ai` that provides two types of contextual suggestions: static strings defined in config (shown immediately) and dynamic AI-generated follow-up suggestions produced after each assistant response (cached with a configurable TTL).
+Write all user-facing documentation for the Polar-based licensing system, update both example apps with license integration, run full quality verification (build, tests, bundle size), create a changeset for breaking changes, and configure CI for restricted npm package access.
 
 **Success looks like:**
 
-- `useSuggestions().suggestions` returns the static suggestions array immediately on mount
-- After an AI response completes, the hook triggers the suggestion engine to generate 3 follow-up suggestions, which appear in `suggestions` alongside any remaining static ones
-- Dynamic suggestions are cached: re-rendering the component within `cacheTtl` ms returns the cached suggestions without a new LLM call
-- `useSuggestions().select("How do I export?")` sends that string as a chat message via `useAiChat().sendMessage()`
-- `useSuggestions().refresh()` clears the cache and regenerates dynamic suggestions
-- The `AiChatSuggestions` component (from Phase 3) is wired to use `useSuggestions()` for its data
-- All unit tests pass with > 80% coverage on Phase 5 files
+- A developer reads `apps/docs/content/docs/licensing/index.mdx` and can set up Tour Kit Pro end-to-end: install restricted packages with `NPM_TOKEN`, add `TOUR_KIT_LICENSE_KEY` to their env, wrap their app with `<LicenseProvider>`, and understand watermark behavior
+- Both example apps (`examples/next-app/`, `examples/vite-app/`) demonstrate `<LicenseProvider>` wrapping pro features with `.env.example` files showing the required env vars
+- `packages/license/CLAUDE.md` gives AI assistants accurate domain guidance for the license package
+- `packages/license/README.md` documents the full Polar-based API (no leftover JWT references)
+- `pnpm build` compiles all packages with zero type errors
+- `pnpm test` passes with >80% coverage on `@tour-kit/license`
+- `@tour-kit/license` is < 3KB gzipped; free packages (`core`, `react`, `hints`) show no size regression
+- A changeset documents the breaking changes (removed `publicKey` prop, new `organizationId` prop, new key format)
+- CI workflow can install restricted `@tour-kit/*` packages via `NPM_TOKEN`
+- `npm publish --dry-run` succeeds for at least one restricted package
 
 ---
 
 ## 2. Key Design Decisions
 
-**D1: Suggestions hook consumes `AiChatContext`, does not create its own provider.**
-`useSuggestions()` reads chat state (messages, status) from `AiChatContext` (Phase 1) and config from `AiChatConfig.suggestions`. It does NOT introduce a new provider or context — it is a standalone hook that composes with the existing provider.
+**D1: MDX follows Fumadocs conventions established in existing docs.**
+The licensing page uses the same frontmatter format (`title`, `description`), Fumadocs imports (`Callout`, `Tab`, `Tabs`), and kebab-case file naming as all other package docs. It lives at `apps/docs/content/docs/licensing/index.mdx` and gets added to `apps/docs/content/docs/meta.json` under a new `---Licensing---` separator section (after Extended Packages, before Resources).
 
-**D2: Dynamic suggestion generation is a server-side API call, not a client-side LLM call.**
-The suggestion engine runs on the server via a dedicated endpoint (or a separate call to the same chat endpoint with a special flag). The `useSuggestions` hook makes a `fetch()` call to generate suggestions — it does NOT import or call LLM APIs on the client. This keeps the client bundle clean and avoids exposing API keys.
+**D2: Docs page structure mirrors a setup guide, not an API reference.**
+The licensing page is task-oriented: install, configure, verify, deploy. Sections: Installation (npm auth + package install), Configuration (`<LicenseProvider>` setup), Gating (`<LicenseGate>` usage), Watermark Behavior, CI/CD Setup (`NPM_TOKEN` + `.npmrc`), Environment Variables, FAQ. API details (hooks, components, types) are secondary to the "how do I get this working" flow.
 
-**D3: Suggestion generation uses `generateText` (non-streaming), not `streamText`.**
-Suggestions are short (3 strings). Streaming is unnecessary overhead. The server-side engine calls `generateText()` with a structured prompt asking for exactly 3 follow-up questions, parses the response, and returns `string[]`.
+**D3: `.env.example` files use framework-appropriate prefixes.**
+Next.js example uses `NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY` (because `<LicenseProvider>` runs client-side, the key must be exposed to the browser via the `NEXT_PUBLIC_` prefix). Vite example uses `VITE_TOUR_KIT_LICENSE_KEY`. The docs page explains both conventions and why the prefix matters.
 
-**D4: Cache is per-conversation-state, keyed by last message ID.**
-The cache key is the ID of the last assistant message. If the conversation progresses (new messages), the cache is automatically invalidated. The TTL is a secondary expiration — whichever fires first (new message or TTL) triggers regeneration.
+**D4: Changeset uses `@changesets/cli` format with `major` bump for license package.**
+The changeset documents three breaking changes: (1) removed `publicKey` prop from `<LicenseProvider>`, (2) new required `organizationId` prop, (3) license key format changed from JWT to Polar `TOURKIT-*` format. All 7 pro packages get a `patch` bump (internal dependency update). Free packages are unaffected. The changeset config at `.changeset/config.json` currently has `"access": "public"` and linked free packages — the changeset for pro packages uses the existing config, and Phase 6 will handle the private repo changeset config with `"access": "restricted"`.
 
-**D5: Static suggestions are always shown first, dynamic suggestions append.**
-The `suggestions` array returned by the hook is `[...staticSuggestions, ...dynamicSuggestions]`. Static suggestions that have already been sent as messages are filtered out. Dynamic suggestions that duplicate static ones are also filtered out.
+**D5: `.npmrc` template never contains raw tokens.**
+The `.npmrc` file uses environment variable interpolation (`${NPM_TOKEN}`) and is safe to commit. The actual token lives in CI secrets (`NPM_TOKEN` in GitHub Actions) and developer local environments (which are gitignored). The docs page explains this distinction clearly.
 
-**D6: Generation is debounced — only trigger after status transitions to `'ready'` from `'streaming'`.**
-The hook watches `status` from `useAiChat()`. It only triggers dynamic suggestion generation when status transitions from `'streaming'` to `'ready'`, meaning the assistant has finished responding. This avoids generating suggestions mid-stream or on initial load.
+**D6: CLAUDE.md follows the established pattern from other package CLAUDE.md files.**
+It covers: package purpose, key files, domain concepts (Polar validation, caching, domain activation), testing patterns, and common pitfalls. It references the architecture from the big plan and Phase 1/2 deliverables. Aim for 60-80 lines.
 
 ---
 
 ## 3. Tasks
 
-### 5.1: `useSuggestions` hook — static + dynamic, with cache TTL (2–3h)
+### 5.1: Write `packages/license/CLAUDE.md` (0.5h)
 
-**File:** `packages/ai/src/hooks/use-suggestions.ts`
+**File:** `packages/license/CLAUDE.md`
 
-- Read `AiChatConfig.suggestions` from `AiChatContext`
-- Read `messages`, `status`, `sendMessage` from `useAiChat()`
-- Return `UseSuggestionsReturn`: `{ suggestions, refresh, select }`
-- Static suggestions: filter out any that match already-sent user messages
-- Dynamic suggestions: fetch from server endpoint after assistant response completes
-- Cache: store `{ suggestions: string[], messageId: string, timestamp: number }` in a `useRef`
-- On `status` transition `'streaming' → 'ready'`: check cache validity (messageId + TTL), fetch if stale
-- `refresh()`: clear cache, re-fetch dynamic suggestions
-- `select(suggestion)`: call `sendMessage({ text: suggestion })`, emit `'suggestion_clicked'` event
+Domain-specific guidance for AI assistants working on the license package. Structure:
 
-**State management:**
-- `dynamicSuggestions: string[]` via `useState`
-- `isLoading: boolean` via `useState` (true while fetching dynamic suggestions)
-- Cache ref: `useRef<{ suggestions: string[]; messageId: string; timestamp: number } | null>(null)`
-- Previous status ref: `useRef<ChatStatus>('ready')` for detecting transitions
+- **Package Purpose** — Polar.sh license key validation, activation (up to 5 domains), 24h cache, React gating components
+- **Key Files** — `src/lib/polar-client.ts` (API calls), `src/lib/cache.ts` (localStorage TTL), `src/lib/domain.ts` (dev detection), `src/lib/schemas.ts` (Zod validation), `src/context/license-context.ts` (React provider), `src/components/` (Gate, Watermark, Warning)
+- **Domain Concepts** — License states (`loading` | `valid` | `invalid` | `expired` | `revoked`), activation slots (5 per key), dev bypass (localhost/127.0.0.1/*.local skips activation), cache integrity (Zod parse on read, clear on corruption), render-time domain verification
+- **API Surface** — `validateLicenseKey()`, `activateLicense()`, `deactivateLicense()` (headless); `<LicenseProvider>`, `<LicenseGate>`, `<LicenseWatermark>`, `<LicenseWarning>`, `useLicense()`, `useIsPro()` (React)
+- **Testing Patterns** — Mock `fetch` for Polar API, mock `localStorage` for cache, mock `window.location` for domain detection, use `@testing-library/react` for component tests
+- **Common Pitfalls** — Never import `@tour-kit/license` from free packages (`core`, `react`, `hints`); watermark code lives in pro packages not in license package; dev bypass only applies to `localhost`/`127.0.0.1`/`*.local`; `headless.ts` entry point must not import React
 
-### 5.2: Suggestion engine — server-side LLM call to generate follow-ups (2–3h)
+### 5.2: Update `packages/license/README.md` (1h)
 
-**File:** `packages/ai/src/core/suggestion-engine.ts`
+**File:** `packages/license/README.md`
 
-- `generateSuggestions(options): Promise<string[]>`
-- Takes: `{ messages: UIMessage[], model: string, productName?: string, count?: number }`
-- Builds a prompt: "Based on the conversation, suggest {count} follow-up questions the user might ask. Return only the questions, one per line, no numbering."
-- Calls `generateText()` from `'ai'` (non-streaming)
-- Parses response: split by newlines, trim, filter empty, take first `count` (default 3)
-- Returns `string[]`
+Replace any JWT-era content with the Polar-based API. Sections:
 
-**Server integration:**
-- Add a `suggestions` handler to `createChatRouteHandler` that accepts POST with `{ messages, type: 'suggestions' }` body
-- OR: expose `generateSuggestions` as a standalone export from `@tour-kit/ai/server` that consumers wire into their own route
-- Recommended approach: add a query parameter `?suggestions=true` to the existing chat endpoint, which triggers suggestion generation instead of chat streaming
+- **Overview** — What the package does, why it exists
+- **Installation** — `pnpm add @tour-kit/license` (requires npm auth for restricted package), `.npmrc` setup
+- **Quick Start** — Minimal `<LicenseProvider>` + `<LicenseGate>` example (copy-pasteable)
+- **Configuration** — `organizationId` prop (required), `licenseKey` prop (from env var), `onValidated` callback
+- **Components** — `<LicenseGate>`, `<LicenseWatermark>`, `<LicenseWarning>` with prop tables
+- **Hooks** — `useLicense()` return shape (`LicenseState`), `useIsPro()` boolean shortcut
+- **Headless API** — `validateLicenseKey()`, `activateLicense()`, `deactivateLicense()` for non-React usage via `@tour-kit/license/headless` import
+- **Environment Variables** — `TOUR_KIT_LICENSE_KEY` convention, framework-specific prefixes (`NEXT_PUBLIC_`, `VITE_`)
+- **CI/CD** — `.npmrc` setup for restricted package installs, `NPM_TOKEN` in GitHub Actions
+- **License** — Link to `LICENSE.md` (proprietary)
 
-**Implementation in route handler:**
-```typescript
-// In createChatRouteHandler, check for suggestions request:
-if (url.searchParams.get('suggestions') === 'true') {
-  const { messages } = await req.json()
-  const suggestions = await generateSuggestions({
-    messages,
-    model: options.model,
-    productName: options.instructions?.productName,
-  })
-  return Response.json({ suggestions })
-}
-```
+Ensure zero references to `publicKey`, JWT, or `jose` remain.
 
-### 5.3: Wire suggestions into `AiChatSuggestions` component (1h)
-
-**File:** `packages/ai/src/components/ai-chat-suggestions.tsx` (update existing from Phase 3)
-
-- If `AiChatSuggestions` currently accepts `suggestions` and `onSelect` as props, keep that API
-- Add a "connected" mode: when used inside `AiChatProvider` without explicit props, it auto-connects to `useSuggestions()`
-- Props override hook data when provided (controlled vs uncontrolled pattern)
-- Show loading state while dynamic suggestions are being generated (optional skeleton/shimmer)
-
-### 5.4: Unit tests for suggestions hook and engine (1–2h)
+### 5.3: Write docs page `apps/docs/content/docs/licensing/index.mdx` (1.5h)
 
 **Files:**
-- `packages/ai/src/__tests__/hooks/use-suggestions.test.tsx`
-- `packages/ai/src/__tests__/core/suggestion-engine.test.ts`
+- `apps/docs/content/docs/licensing/index.mdx`
+- `apps/docs/content/docs/licensing/meta.json` (navigation ordering if sub-pages are added later)
+- Update `apps/docs/content/docs/meta.json` — insert `"---Licensing---"` and `"licensing"` into the `pages` array after the Extended Packages section
 
-**Hook tests (`use-suggestions.test.tsx`):**
-- Returns static suggestions immediately
-- Filters out static suggestions that match sent messages
-- Triggers dynamic suggestion fetch after status `'streaming' → 'ready'`
-- Caches dynamic suggestions — no re-fetch within TTL
-- Cache invalidated when new message arrives (different messageId)
-- `refresh()` clears cache and re-fetches
-- `select(suggestion)` calls `sendMessage` with the suggestion text
-- Returns empty array when `suggestions` config is undefined
-- `isLoading` is true during fetch, false after
+MDX page frontmatter:
 
-**Engine tests (`suggestion-engine.test.ts`):**
-- Calls `generateText` with correct prompt structure
-- Parses multi-line response into `string[]`
-- Handles response with numbering (strips "1. ", "2. " prefixes)
-- Returns at most `count` suggestions
-- Handles empty/error response gracefully (returns `[]`)
-- Includes product name in prompt when provided
+```
+---
+title: Licensing
+description: Set up Tour Kit Pro licensing with Polar.sh — installation, configuration, and CI/CD
+---
+```
+
+Sections:
+1. **Overview** — Free vs Pro split, what requires a license (7 extended packages + license package itself), what is always free (`core`, `react`, `hints`)
+2. **Getting a License Key** — Link to tourkit.dev/pricing, Polar checkout flow, key arrives via email with `TOURKIT-` prefix
+3. **Installation** — Setting up `.npmrc` for restricted packages (`//registry.npmjs.org/:_authToken=${NPM_TOKEN}`), `pnpm add @tour-kit/license`, framework-specific env var setup
+4. **Configuration** — `<LicenseProvider organizationId="..." licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY}>` wrapping app, use Fumadocs `<Tabs>` for Next.js vs Vite code samples
+5. **Using LicenseGate** — Wrapping pro components, fallback behavior, code example showing `<LicenseGate require="pro">`
+6. **Watermark Behavior** — What happens without a valid license: components still render but show "UNLICENSED" overlay, dev console warning, never a crash or blank screen
+7. **Development Mode** — Automatic bypass on localhost/127.0.0.1/*.local, no activation slot consumed, `{ valid: true, tier: 'pro' }` returned
+8. **CI/CD Setup** — `NPM_TOKEN` in GitHub Actions secrets, `.npmrc` template, Vercel env var configuration, Netlify env var configuration
+9. **Hooks Reference** — `useLicense()` and `useIsPro()` quick reference with return type tables
+10. **FAQ** — Common questions:
+    - "Do free packages need a license?" (no)
+    - "What happens if my key expires?" (watermark appears, components still work)
+    - "How many domains can I activate?" (5)
+    - "Does localhost count as an activation?" (no)
+    - "Can I use one key for staging + production?" (yes, separate activations)
+
+Use Fumadocs `<Callout type="info">` for important notes (e.g., "Free packages never require a license key").
+
+### 5.4: Update Next.js example app with LicenseProvider (1h)
+
+**Files:**
+- `examples/next-app/src/app/providers.tsx` — Add `LicenseProvider` wrapping pro features
+- `examples/next-app/.env.example` — Add `NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY=`
+- `examples/next-app/package.json` — Add `@tour-kit/license` to dependencies
+
+Implementation notes:
+- Import `LicenseProvider` from `@tour-kit/license`
+- Wrap the outermost level in the `Providers` component (around `<AiChatProvider>`) so all pro packages are covered
+- Pass `organizationId` as a string constant with a `// TODO: replace with your Polar organization ID` comment
+- Pass `licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY ?? ''}`
+- Ensure existing tours, checklists, analytics, and AI chat still function without a license key (watermark appears but no crash)
+
+### 5.5: Update Vite example app with LicenseProvider (1h)
+
+**Files:**
+- `examples/vite-app/src/App.tsx` — Add `LicenseProvider` wrapping pro features
+- `examples/vite-app/.env.example` — Add `VITE_TOUR_KIT_LICENSE_KEY=`
+- `examples/vite-app/package.json` — Add `@tour-kit/license` to dependencies
+
+Implementation notes:
+- Same pattern as Next.js but with Vite env var access: `import.meta.env.VITE_TOUR_KIT_LICENSE_KEY`
+- Add `@tour-kit/license` to `examples/vite-app/package.json` dependencies
+- Wrap `<LicenseProvider>` around the outermost provider in `App.tsx`
+
+### 5.6: Run full monorepo build (0.5h)
+
+**Command:** `pnpm build`
+
+Verify:
+- All packages compile (including `@tour-kit/license` with dual entry points `index.ts` + `headless.ts`)
+- Zero TypeScript errors across all packages
+- Both example apps build successfully
+- Docs site builds successfully (`pnpm --filter docs build`)
+- Fix any errors discovered before proceeding
+
+### 5.7: Run full test suite (0.5h)
+
+**Command:** `pnpm test --filter='./packages/*'`
+
+Verify:
+- All package tests pass
+- `@tour-kit/license` test coverage > 80% (`pnpm --filter=@tour-kit/license test:coverage`)
+- No regressions in free packages (`core`, `react`, `hints`)
+
+### 5.8: Final bundle size check (0.5h)
+
+**Command:** `pnpm build --filter=@tour-kit/license` then inspect `dist/` output
+
+Verify:
+- `@tour-kit/license` < 3KB gzipped (ESM entry)
+- Free packages unchanged from pre-licensing baseline:
+  - `@tour-kit/core` < 8KB gzipped
+  - `@tour-kit/react` < 12KB gzipped
+  - `@tour-kit/hints` < 5KB gzipped
+- Free packages have zero imports from `@tour-kit/license`: `grep -r "@tour-kit/license" packages/core packages/react packages/hints` returns nothing
+
+### 5.9: Create changeset for breaking changes (0.5h)
+
+**File:** `.changeset/<generated-name>.md`
+
+Use `pnpm changeset` interactively or create the file manually. Required format:
+
+```md
+---
+'@tour-kit/license': major
+'@tour-kit/adoption': patch
+'@tour-kit/ai': patch
+'@tour-kit/analytics': patch
+'@tour-kit/announcements': patch
+'@tour-kit/checklists': patch
+'@tour-kit/media': patch
+'@tour-kit/scheduling': patch
+---
+
+Replace JWT-based licensing with Polar.sh license key validation
+
+BREAKING CHANGES:
+- Removed `publicKey` prop from `<LicenseProvider>` (JWT verification removed)
+- Added required `organizationId` prop to `<LicenseProvider>`
+- License key format changed from JWT to Polar format (`TOURKIT-*` prefix)
+- Removed `jose` dependency
+
+New features:
+- Polar.sh license key validation and activation (up to 5 domains)
+- 24-hour localStorage cache with Zod integrity checks
+- Automatic dev-mode bypass (localhost, 127.0.0.1, *.local)
+- `<LicenseWatermark>` component for soft enforcement
+- `<LicenseGate>` with interleaved validation
+- Render-time domain verification
+```
+
+### 5.10: Update GitHub Actions workflow + `.npmrc` template (0.5h)
+
+**Files:**
+- `.github/workflows/ci.yml` — Add `NPM_TOKEN` for installing restricted packages
+- `.npmrc` (repo root) — Add auth token interpolation for registry
+
+CI workflow changes in `.github/workflows/ci.yml`:
+- Add `NPM_TOKEN` environment variable to the job level (so it is available for `pnpm install --frozen-lockfile`):
+  ```yaml
+  jobs:
+    build:
+      name: Build & Test
+      runs-on: ubuntu-latest
+      timeout-minutes: 20
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  ```
+- Add a comment above the env block explaining: `# Required for installing restricted @tour-kit/* pro packages`
+
+Root `.npmrc` update — add or ensure this line is present:
+```
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+```
+This file is safe to commit because the token value comes from the environment variable at runtime, not from the file itself.
+
+Also verify `.github/workflows/release.yml` has `NPM_TOKEN` available for both install and publish steps.
+
+### 5.11: Verify npm access and dry-run publish (0.5h)
+
+**Manual verification steps (not automated):**
+1. Confirm npm Pro or Org plan is active: `npm whoami` + `npm profile get`
+2. Verify restricted access on pro packages: `npm access get status @tour-kit/license` returns `restricted`
+3. Dry-run publish from `packages/license/`: `npm publish --dry-run --access restricted`
+4. Confirm the tarball contains expected files (`dist/`, `README.md`, `CHANGELOG.md`, `LICENSE.md`)
+5. Verify no source files (`src/`) leak into the published package (check `files` field in `package.json`)
 
 ---
 
 ## 4. Deliverables
 
-| File | Description |
-|------|-------------|
-| `packages/ai/src/hooks/use-suggestions.ts` | Suggestions hook with static + dynamic support and caching |
-| `packages/ai/src/core/suggestion-engine.ts` | Server-side suggestion generation via `generateText` |
-| `packages/ai/src/server/route-handler.ts` | Updated with `?suggestions=true` query parameter support |
-| `packages/ai/src/components/ai-chat-suggestions.tsx` | Updated to auto-connect with `useSuggestions()` |
-| `packages/ai/src/__tests__/hooks/use-suggestions.test.tsx` | Hook unit tests |
-| `packages/ai/src/__tests__/core/suggestion-engine.test.ts` | Engine unit tests |
+```
+packages/license/
+├── CLAUDE.md                                    # 5.1 — AI assistant guidance
+└── README.md                                    # 5.2 — Updated Polar-based API docs
+
+apps/docs/content/docs/
+├── licensing/
+│   └── index.mdx                                # 5.3 — Setup guide + FAQ
+└── meta.json                                    # 5.3 — Updated nav (add licensing)
+
+examples/next-app/
+├── src/app/providers.tsx                         # 5.4 — LicenseProvider added
+├── .env.example                                 # 5.4 — NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY
+└── package.json                                 # 5.4 — @tour-kit/license dep
+
+examples/vite-app/
+├── src/App.tsx                                  # 5.5 — LicenseProvider added
+├── .env.example                                 # 5.5 — VITE_TOUR_KIT_LICENSE_KEY
+└── package.json                                 # 5.5 — @tour-kit/license dep
+
+.changeset/<generated>.md                        # 5.9 — Breaking change changeset
+
+.github/workflows/ci.yml                         # 5.10 — NPM_TOKEN for restricted installs
+.npmrc                                           # 5.10 — Auth token interpolation
+```
 
 ---
 
 ## 5. Exit Criteria
 
-- [ ] `useSuggestions().suggestions` returns static suggestions immediately when `suggestions.static` is configured
-- [ ] After AI response completes (status `'streaming' → 'ready'`), dynamic suggestions are generated and appended to the suggestions array
-- [ ] Dynamic suggestions are cached: no re-fetch within `cacheTtl` ms for the same conversation state
-- [ ] Cache is invalidated when a new assistant message arrives (different last message ID)
-- [ ] `useSuggestions().select("suggestion text")` sends it as a chat message via `sendMessage()`
-- [ ] `useSuggestions().refresh()` clears cache and regenerates dynamic suggestions immediately
-- [ ] Static suggestions already sent as messages are filtered out
-- [ ] `AiChatSuggestions` component auto-connects to `useSuggestions()` when used inside `AiChatProvider`
-- [ ] Server-side `generateSuggestions()` calls `generateText()` (not streaming) and returns `string[]`
-- [ ] All unit tests pass: `pnpm --filter @tour-kit/ai test`
-- [ ] Coverage > 80% for Phase 5 files
+| # | Criterion | Verified By |
+|---|-----------|-------------|
+| EC-1 | `packages/license/CLAUDE.md` exists with Polar integration guidance, key files, domain concepts, testing patterns | File exists and covers all sections from 5.1 |
+| EC-2 | `packages/license/README.md` documents Polar-based API with zero JWT/jose references | `grep -r "jose\|JWT\|publicKey" packages/license/README.md` returns nothing |
+| EC-3 | `apps/docs/content/docs/licensing/index.mdx` covers installation, `TOUR_KIT_LICENSE_KEY` env var, `<LicenseProvider>` config, `<LicenseGate>` + watermark behavior, CI/CD `NPM_TOKEN` setup, FAQ | File exists with all 10 sections from 5.3 |
+| EC-4 | Licensing page appears in docs site navigation | `meta.json` includes `licensing`, `pnpm --filter docs build` succeeds |
+| EC-5 | Next.js example has `LicenseProvider` in providers, `.env.example` with `NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY` | Files updated, `pnpm --filter next-app build` succeeds |
+| EC-6 | Vite example has `LicenseProvider` in App, `.env.example` with `VITE_TOUR_KIT_LICENSE_KEY` | Files updated, `pnpm --filter vite-app build` succeeds |
+| EC-7 | `pnpm build` passes with zero type errors across all packages | Build log shows success for every package |
+| EC-8 | `@tour-kit/license` test coverage > 80% | `pnpm --filter=@tour-kit/license test:coverage` output shows >80% |
+| EC-9 | `@tour-kit/license` < 3KB gzipped | Build output size check on `dist/index.js` |
+| EC-10 | Free packages (`core`, `react`, `hints`) bundle sizes unchanged | Build output compared to pre-licensing baseline |
+| EC-11 | Free packages have zero imports from `@tour-kit/license` | `grep -r "@tour-kit/license" packages/core packages/react packages/hints` returns nothing |
+| EC-12 | Changeset exists documenting `major` bump for license, `patch` for 7 pro packages | `.changeset/*.md` file with correct frontmatter |
+| EC-13 | CI workflow includes `NPM_TOKEN` for restricted package installs | `.github/workflows/ci.yml` references `secrets.NPM_TOKEN` |
+| EC-14 | `.npmrc` contains `//registry.npmjs.org/:_authToken=${NPM_TOKEN}` | File exists with correct line |
+| EC-15 | `npm publish --dry-run` succeeds for `@tour-kit/license` | Manual verification log |
 
 ---
 
 ## 6. Execution Prompt
 
-You are implementing Phase 5 (Suggestions) of `@tour-kit/ai` in the tour-kit monorepo at `packages/ai/`. This phase adds static and dynamic suggestion support to the chat widget — static suggestions from config and AI-generated follow-up suggestions after each assistant response.
+You are implementing **Licence Phase 5 — Documentation, Examples & Hardening** for the Tour Kit licensing system. This phase writes user-facing docs, updates example apps, and runs final quality checks. There is no new runtime logic — this is documentation, configuration, and verification only.
 
-### Data Model Rules
+### Prior Phase Context
 
-All types are defined in `packages/ai/src/types/`. Use these exact interfaces — do not redefine them:
+**Phase 0** validated Polar.sh sandbox: `POST /v1/customer-portal/license-keys/validate` returns `status: 'granted'` for valid keys. Activation consumes exactly 1 slot (5 max per key). Deactivation frees a slot. p95 validation latency < 500ms. Decision: proceed.
 
-```typescript
-// From types/config.ts
-interface SuggestionsConfig {
-  /** Static suggestion strings shown immediately */
-  static?: string[]
-  /** Enable dynamic AI-generated suggestions after each response */
-  dynamic?: boolean
-  /** Cache TTL for dynamic suggestions in ms (default: 60000) */
-  cacheTtl?: number
-}
+**Phase 1** built the core SDK in `packages/license/src/lib/`:
+- `polar-client.ts` — `validateKey()`, `activateKey()`, `deactivateKey()` using raw `fetch()` against Polar customer portal API (`/v1/customer-portal/license-keys/validate` and `/activate`). No SDK dependency, no auth required.
+- `cache.ts` — `readCache()`, `writeCache()`, `clearCache()` with 24h TTL. Domain-scoped localStorage keys (`tourkit-license-{domain}`). Zod integrity validation on every read — corrupted/tampered entries are cleared and force re-validation.
+- `domain.ts` — `getCurrentDomain()` reads `window.location.hostname`. `isDevEnvironment()` detects localhost, 127.0.0.1, `*.local`. `validateDomainAtRender()` compares runtime hostname against stored activation label and logs mismatches (soft enforcement).
+- `schemas.ts` — Zod schemas for Polar API responses (`PolarValidateResponseSchema`, `PolarActivateResponseSchema`) and cache shape (`LicenseCacheSchema`).
+- `types/index.ts` — `LicenseState` (`'loading' | 'valid' | 'invalid' | 'expired' | 'revoked'`), `LicenseCache`, `LicenseError`, `PolarValidateResponse`, `PolarActivateResponse`.
+- `headless.ts` — Re-exports all types + lib functions without any React dependency.
+- `jose` dependency removed from `package.json`. All JWT code deleted.
 
-// From types/config.ts — relevant parts of AiChatConfig
-interface AiChatConfig {
-  endpoint: string
-  suggestions?: SuggestionsConfig
-  onEvent?(event: AiChatEvent): void
-  // ... other fields
-}
+**Phase 2** built the React layer in `packages/license/src/`:
+- `context/license-context.ts` — `LicenseProvider` component. Props: `organizationId` (string, required), `licenseKey` (string), `children`. Validates on mount, caches result, provides `LicenseState` via React context. Dev-mode bypass: on localhost/127.0.0.1/*.local, skips activation and returns `{ valid: true, tier: 'pro' }`.
+- `components/license-gate.tsx` — `<LicenseGate require="pro">` with interleaved validation. License state provides a render key consumed inside the component tree — removing the license check breaks rendering (not a simple boolean wrapper).
+- `components/license-watermark.tsx` — `<LicenseWatermark>` renders semi-transparent "UNLICENSED" overlay with inline styles, high z-index, `pointer-events: none`. Resists basic CSS overrides (follows AG Grid/MUI X pattern).
+- `components/license-warning.tsx` — `<LicenseWarning>` logs dev-mode console warning when license is invalid.
+- `hooks/use-license.ts` — `useLicense()` context consumer. Throws if used outside `<LicenseProvider>`.
+- `hooks/use-is-pro.ts` — `useIsPro()` returns `true` when license tier is `'pro'`, `false` otherwise.
+- `tsup.config.ts` — Dual entry points: `index.ts` (React + headless) and `headless.ts` (types + functions, no React).
+- Bundle verified < 3KB gzipped.
 
-// Hook return type — define in hooks/use-suggestions.ts
-interface UseSuggestionsReturn {
-  /** Combined static + dynamic suggestions, filtered for relevance */
-  suggestions: string[]
-  /** True while dynamic suggestions are being fetched */
-  isLoading: boolean
-  /** Clear cache and regenerate dynamic suggestions */
-  refresh(): void
-  /** Send a suggestion as a chat message */
-  select(suggestion: string): void
-}
+**Phase 3** integrated license checks into all 7 pro packages:
+- Each pro package (`adoption`, `ai`, `analytics`, `announcements`, `checklists`, `media`, `scheduling`) has `@tour-kit/license` as `optionalPeerDependency` in its `package.json`.
+- Shared `useLicenseCheck()` pattern: try-catch dynamic import, returns `{ valid: true }` if license package is not installed (zero impact on free-tier users who never install `@tour-kit/license`).
+- Without a license: components render normally but show inline `<LicenseWatermark>` overlay + console warning. No crash, no blank screen, full functionality preserved.
+- With a valid license: normal rendering, no watermark, no warning.
+- Free packages (`core`, `react`, `hints`) confirmed to have zero imports from `@tour-kit/license`.
 
-// From types/events.ts
-interface AiChatEvent {
-  type: AiChatEventType
-  data: Record<string, unknown>
-  timestamp: Date
-}
+**Phase 4** built:
+- Webhook handler at `apps/docs/app/api/webhooks/polar/route.ts` using `@polar-sh/nextjs` `Webhooks()` wrapper (or `@polar-sh/sdk/webhooks` `validateEvent()`). Handles `benefit_grant.created`, `benefit_grant.updated`, `benefit_grant.revoked`. Returns HTTP 202. Idempotency via in-memory `webhook-id` dedup Map (10-min TTL). Timestamp tolerance: rejects webhooks > 5 min old with 403.
+- `POLAR_WEBHOOK_SECRET` added to `.env.example`.
+- Pricing page at `apps/docs/app/pricing/page.tsx` with Free vs Pro comparison and Polar checkout link.
 
-type AiChatEventType =
-  | 'chat_opened'
-  | 'chat_closed'
-  | 'message_sent'
-  | 'response_received'
-  | 'suggestion_clicked'
-  | 'message_rated'
-  | 'error'
+### Per-File Guidance
 
-// AI SDK types used
-type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error'
-// UIMessage from '@ai-sdk/react' — used as-is, not re-exported
-```
+**`packages/license/CLAUDE.md`:**
+Follow the format established by `packages/core/CLAUDE.md`. Include these sections: Package Purpose, Key Files (with one-line descriptions), Domain Concepts, API Surface (headless + React), Testing Patterns, Common Pitfalls. Target 60-80 lines. Do not duplicate the README — focus on implementation-level guidance for AI assistants modifying the code.
 
-### Confirmed AI SDK 6.x APIs
+**`packages/license/README.md`:**
+Standard npm README format. Start with `# @tour-kit/license` and a one-line description. Code examples must be copy-pasteable TypeScript/TSX. Include both React usage (`<LicenseProvider>` + `<LicenseGate>`) and headless usage (`import { validateLicenseKey } from '@tour-kit/license/headless'`). Link to full docs at `https://tourkit.dev/docs/licensing`. Prop tables use markdown table format. No JWT/jose references anywhere.
 
-```typescript
-// generateText — non-streaming text generation (for suggestion engine)
-import { generateText } from 'ai'
+**`apps/docs/content/docs/licensing/index.mdx`:**
+Fumadocs MDX conventions:
+- Frontmatter: `title: 'Licensing'`, `description: 'Set up Tour Kit Pro licensing...'`
+- Use `import { Callout } from 'fumadocs-ui/components/callout'` for important notes
+- Use `import { Tab, Tabs } from 'fumadocs-ui/components/tabs'` for framework-specific code samples (Next.js tab vs Vite tab)
+- Code blocks use ` ```tsx ` fencing
+- Internal links use relative paths (Fumadocs handles routing)
+- Add `"---Licensing---"` separator and `"licensing"` to `apps/docs/content/docs/meta.json` `pages` array — insert after `"scheduling"` and before `"---Resources---"`
 
-const { text } = await generateText({
-  model: 'openai/gpt-4o-mini',  // Use a cheap/fast model for suggestions
-  prompt: 'Based on this conversation, suggest 3 follow-up questions...',
-  // OR use messages format:
-  messages: [
-    { role: 'system', content: 'You generate follow-up question suggestions...' },
-    { role: 'user', content: 'Generate 3 suggestions based on:\n...' },
-  ],
-})
-// text: string — the full generated response
-
-// useChat from '@ai-sdk/react' — already wrapped by useAiChat in Phase 1
-// The hook exposes: messages, status, sendMessage, etc.
-```
-
-### Per-File Implementation Guidance
-
-**`hooks/use-suggestions.ts`**
-
-```typescript
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useAiChat } from './use-ai-chat'
-import { useAiChatContext } from '../context/ai-chat-context'
-import type { UseSuggestionsReturn } from './types'
-
-interface SuggestionCache {
-  suggestions: string[]
-  messageId: string
-  timestamp: number
-}
-
-export function useSuggestions(): UseSuggestionsReturn {
-  const { config } = useAiChatContext()
-  const { messages, status, sendMessage } = useAiChat()
-  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const cacheRef = useRef<SuggestionCache | null>(null)
-  const prevStatusRef = useRef<string>(status)
-
-  const suggestionsConfig = config.suggestions
-  const cacheTtl = suggestionsConfig?.cacheTtl ?? 60_000
-
-  // Get last assistant message ID for cache key
-  const lastAssistantMessage = messages.findLast(m => m.role === 'assistant')
-  const lastMessageId = lastAssistantMessage?.id ?? ''
-
-  // Get sent user messages for filtering static suggestions
-  const sentMessages = new Set(
-    messages.filter(m => m.role === 'user').map(m => {
-      // Extract text from message parts
-      const textParts = m.parts?.filter(p => p.type === 'text') ?? []
-      return textParts.map(p => p.text).join(' ')
-    })
-  )
-
-  // Filter static suggestions: remove ones already sent
-  const staticSuggestions = (suggestionsConfig?.static ?? [])
-    .filter(s => !sentMessages.has(s))
-
-  // Fetch dynamic suggestions
-  const fetchDynamic = useCallback(async () => {
-    if (!suggestionsConfig?.dynamic || messages.length === 0) return
-
-    // Check cache
-    const cached = cacheRef.current
-    if (
-      cached &&
-      cached.messageId === lastMessageId &&
-      Date.now() - cached.timestamp < cacheTtl
-    ) {
-      setDynamicSuggestions(cached.suggestions)
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const response = await fetch(
-        `${config.endpoint}?suggestions=true`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages }),
-        }
-      )
-      const data = await response.json()
-      const suggestions: string[] = data.suggestions ?? []
-
-      // Filter out duplicates of static suggestions
-      const filtered = suggestions.filter(
-        s => !staticSuggestions.includes(s)
-      )
-
-      cacheRef.current = {
-        suggestions: filtered,
-        messageId: lastMessageId,
-        timestamp: Date.now(),
-      }
-      setDynamicSuggestions(filtered)
-    } catch {
-      setDynamicSuggestions([])
-    } finally {
-      setIsLoading(false)
-    }
-  }, [config.endpoint, messages, lastMessageId, cacheTtl, suggestionsConfig?.dynamic, staticSuggestions])
-
-  // Trigger on status transition: streaming → ready
-  useEffect(() => {
-    const prevStatus = prevStatusRef.current
-    prevStatusRef.current = status
-
-    if (prevStatus === 'streaming' && status === 'ready') {
-      fetchDynamic()
-    }
-  }, [status, fetchDynamic])
-
-  const refresh = useCallback(() => {
-    cacheRef.current = null
-    fetchDynamic()
-  }, [fetchDynamic])
-
-  const select = useCallback((suggestion: string) => {
-    sendMessage({ text: suggestion })
-    config.onEvent?.({
-      type: 'suggestion_clicked',
-      data: { suggestion },
-      timestamp: new Date(),
-    })
-  }, [sendMessage, config])
-
-  return {
-    suggestions: [...staticSuggestions, ...dynamicSuggestions],
-    isLoading,
-    refresh,
-    select,
+**`examples/next-app/src/app/providers.tsx`:**
+- Import `LicenseProvider` from `@tour-kit/license`
+- Wrap it around the existing `<AiChatProvider>` in the `Providers` component so all pro packages below it are covered:
+  ```tsx
+  export function Providers({ children }: { children: React.ReactNode }) {
+    return (
+      <LicenseProvider
+        organizationId="your-polar-org-id" // TODO: replace with your Polar organization ID
+        licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY ?? ''}
+      >
+        <AiChatProvider config={...}>
+          <AnalyticsProvider config={analyticsConfig}>
+            <ProvidersInner>{children}</ProvidersInner>
+          </AnalyticsProvider>
+        </AiChatProvider>
+      </LicenseProvider>
+    )
   }
-}
+  ```
+- Add `"@tour-kit/license": "workspace:*"` to `examples/next-app/package.json` dependencies
+
+**`examples/next-app/.env.example`:**
+```
+# Tour Kit Pro license key (get yours at https://tourkit.dev/pricing)
+NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY=
 ```
 
-**`core/suggestion-engine.ts`**
+**`examples/vite-app/src/App.tsx`:**
+- Same `<LicenseProvider>` wrapping pattern
+- Use `import.meta.env.VITE_TOUR_KIT_LICENSE_KEY` for the license key value
+- Add `"@tour-kit/license": "workspace:*"` to `examples/vite-app/package.json` dependencies
 
-```typescript
-import { generateText } from 'ai'
-// NOTE: This file is server-only. It uses generateText which requires server-side execution.
-
-interface GenerateSuggestionsOptions {
-  /** Recent messages for context */
-  messages: Array<{ role: string; content: string }>
-  /** AI SDK model identifier */
-  model: string
-  /** Product name for context in the prompt */
-  productName?: string
-  /** Number of suggestions to generate (default: 3) */
-  count?: number
-}
-
-export async function generateSuggestions(
-  options: GenerateSuggestionsOptions
-): Promise<string[]> {
-  const { messages, model, productName, count = 3 } = options
-
-  // Build conversation summary from recent messages (last 6 messages max)
-  const recentMessages = messages.slice(-6)
-  const conversationContext = recentMessages
-    .map(m => `${m.role}: ${m.content}`)
-    .join('\n')
-
-  const productContext = productName
-    ? ` about ${productName}`
-    : ''
-
-  const prompt = [
-    `Based on this conversation${productContext}, suggest exactly ${count} natural follow-up questions the user might want to ask next.`,
-    '',
-    'Conversation:',
-    conversationContext,
-    '',
-    'Rules:',
-    '- Return ONLY the questions, one per line',
-    '- Do NOT number them or add bullet points',
-    '- Keep questions concise (under 60 characters)',
-    '- Questions should be diverse and relevant',
-    '- Do NOT repeat topics already covered in the conversation',
-  ].join('\n')
-
-  try {
-    const { text } = await generateText({
-      model,
-      prompt,
-    })
-
-    return parseSuggestions(text, count)
-  } catch {
-    return []
-  }
-}
-
-/** Parse LLM response into clean suggestion strings */
-export function parseSuggestions(text: string, count: number): string[] {
-  return text
-    .split('\n')
-    .map(line => line.trim())
-    .map(line => line.replace(/^\d+[\.\)]\s*/, ''))  // strip "1. " or "1) " prefixes
-    .map(line => line.replace(/^[-*]\s*/, ''))        // strip "- " or "* " prefixes
-    .map(line => line.replace(/^["']|["']$/g, ''))    // strip surrounding quotes
-    .filter(line => line.length > 0)
-    .slice(0, count)
-}
+**`examples/vite-app/.env.example`:**
+```
+# Tour Kit Pro license key (get yours at https://tourkit.dev/pricing)
+VITE_TOUR_KIT_LICENSE_KEY=
 ```
 
-**Updating `server/route-handler.ts`**
+**Changeset (`.changeset/<name>.md`):**
+Create the file manually with the exact frontmatter format Changesets expects. Package names must be quoted strings. The `major` bump is for `@tour-kit/license` only. All 7 other pro packages get `patch` (they added license check integration in Phase 3). Free packages (`core`, `react`, `hints`) are NOT included — they have no changes.
 
-Add suggestion handling to the existing route handler. Insert this check early in the POST handler, before the main chat logic:
-
-```typescript
-// At the top of the POST handler:
-const url = new URL(req.url)
-
-if (url.searchParams.get('suggestions') === 'true') {
-  const body = await req.json()
-  const suggestions = await generateSuggestions({
-    messages: body.messages.map((m: UIMessage) => ({
-      role: m.role,
-      content: m.parts
-        ?.filter((p: { type: string }) => p.type === 'text')
-        .map((p: { text: string }) => p.text)
-        .join(' ') ?? '',
-    })),
-    model: options.model,
-    productName: options.instructions?.productName,
-  })
-  return Response.json({ suggestions })
-}
-
-// ... rest of existing chat handler
+**`.github/workflows/ci.yml`:**
+Current workflow at `.github/workflows/ci.yml` runs `pnpm install --frozen-lockfile`. After Phase 3, the lockfile includes `@tour-kit/license` as a peer dep of pro packages. In CI, `pnpm install` needs npm auth to resolve restricted packages. Add at the job level:
+```yaml
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Required for installing restricted @tour-kit/* pro packages
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
-**Updating `components/ai-chat-suggestions.tsx`**
-
-Add auto-connection mode. The component should work in two modes:
-1. **Controlled:** `suggestions` and `onSelect` props provided explicitly
-2. **Connected:** Used inside `AiChatProvider` without props — auto-connects to `useSuggestions()`
-
-```typescript
-// Simplified pattern:
-export function AiChatSuggestions(props: AiChatSuggestionsProps) {
-  // Try to use hook data if inside provider and no explicit props
-  const hookData = useOptionalSuggestions() // returns null if outside provider
-
-  const suggestions = props.suggestions ?? hookData?.suggestions ?? []
-  const onSelect = props.onSelect ?? hookData?.select
-
-  // ... render suggestion chips
-}
-
-// useOptionalSuggestions: try/catch around useSuggestions()
-// or check if context is available before calling
+**`.npmrc` (repo root):**
+The current `.npmrc` may not exist or may only have pnpm config. Add or ensure this line exists:
 ```
-
-### Testing Patterns
-
-Use vitest and `@testing-library/react`. Mock the fetch API for dynamic suggestion tests:
-
-```typescript
-// Mock fetch for dynamic suggestions
-const mockFetch = vi.fn().mockResolvedValue({
-  json: () => Promise.resolve({
-    suggestions: ['How do I export?', 'What plans are available?', 'How do I invite team members?']
-  }),
-})
-global.fetch = mockFetch
-
-// Wrap hook in test provider
-function renderUseSuggestions(config: Partial<AiChatConfig> = {}) {
-  return renderHook(() => useSuggestions(), {
-    wrapper: ({ children }) => (
-      <AiChatProvider config={{ endpoint: '/api/chat', ...config }}>
-        {children}
-      </AiChatProvider>
-    ),
-  })
-}
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
 ```
+When `NPM_TOKEN` is unset (local dev without pro packages), this resolves to an empty string and npm/pnpm silently ignores it for public packages. When set in CI or by a pro user, it authenticates for restricted package installs.
 
-For `suggestion-engine.test.ts`, mock the `generateText` function from `'ai'`:
+### Execution Order
 
-```typescript
-vi.mock('ai', () => ({
-  generateText: vi.fn(),
-}))
+1. **Parallel batch 1:** Write CLAUDE.md (5.1), README.md (5.2), docs MDX + meta.json (5.3), changeset (5.9), CI config + .npmrc (5.10)
+2. **Parallel batch 2:** Update Next.js example (5.4), update Vite example (5.5)
+3. **Sequential:** Full build (5.6) then test suite (5.7) then bundle size check (5.8)
+4. **Manual:** npm verification (5.11) — requires npm account access
 
-import { generateText } from 'ai'
-const mockGenerateText = vi.mocked(generateText)
-
-// Test: parses multi-line response
-mockGenerateText.mockResolvedValue({ text: 'Question 1\nQuestion 2\nQuestion 3' })
-const result = await generateSuggestions({ messages: [...], model: 'test' })
-expect(result).toEqual(['Question 1', 'Question 2', 'Question 3'])
-```
+Tasks in batch 1 have no interdependencies. Tasks in batch 2 depend on knowing the `<LicenseProvider>` API (established in Phase 2, documented in batch 1). Tasks 5.6-5.8 must run sequentially because tests depend on a successful build, and bundle size check depends on build output.
 
 ### Constraints
 
-- `hooks/use-suggestions.ts` is client-side React code — NO server imports, NO `generateText`
-- `core/suggestion-engine.ts` is server-side — uses `generateText` from `'ai'`, must be in the server entry point
-- The hook communicates with the engine via `fetch()` to the chat endpoint with `?suggestions=true`
-- Do NOT create a separate suggestions endpoint/route — piggyback on the existing chat endpoint
-- Use `useCallback` and `useRef` for stable references to avoid infinite re-render loops
-- All functions are named exports (no default exports)
-- Run `pnpm --filter @tour-kit/ai build` and `pnpm --filter @tour-kit/ai test` after implementation
+- Do NOT write any new runtime code — this phase is documentation, configuration, and verification only
+- Do NOT modify any files in `packages/license/src/` — Phase 1-2 deliverables are complete
+- Do NOT modify any pro package provider files — Phase 3 integration is complete
+- All Fumadocs imports must use the exact module paths (`fumadocs-ui/components/callout`, `fumadocs-ui/components/tabs`)
+- The `.npmrc` auth line must use `${NPM_TOKEN}` (curly braces required for pnpm interpolation)
+- The changeset must NOT include free packages (`core`, `react`, `hints`) — they are unchanged
+- Example app `package.json` deps use `"workspace:*"` while in the monorepo (Phase 6 will change these to published versions when moving to the private repo)
 
 ---
 
 ## Readiness Check
 
-Before starting Phase 5, confirm:
+Before starting Phase 5, verify these prerequisites:
 
-- [ ] Phase 1 is complete: `AiChatProvider` and `useAiChat()` work with `sendMessage()`, `messages`, and `status`
-- [ ] Phase 1 is complete: `AiChatConfig` includes the `suggestions?: SuggestionsConfig` field
-- [ ] Phase 2 is complete: `createChatRouteHandler` exists and handles POST requests
-- [ ] Phase 3 is complete: `AiChatSuggestions` component exists with `suggestions` and `onSelect` props
-- [ ] `pnpm --filter @tour-kit/ai build` succeeds
-- [ ] `pnpm --filter @tour-kit/ai test` passes all existing tests
-- [ ] The `SuggestionsConfig` and `UseSuggestionsReturn` interfaces exist in `types/` (or will be created in task 5.1)
+| # | Check | How to Verify | Status |
+|---|-------|---------------|--------|
+| R-1 | Phase 0 status is `proceed` | `cat plan/phase-0-status.json` shows `"decision": "proceed"` | [ ] |
+| R-2 | Phase 1 core SDK exists | `ls packages/license/src/lib/polar-client.ts packages/license/src/lib/cache.ts packages/license/src/lib/domain.ts packages/license/src/lib/schemas.ts` — all present | [ ] |
+| R-3 | Phase 2 React layer exists | `ls packages/license/src/context/license-context.ts packages/license/src/components/license-gate.tsx packages/license/src/components/license-watermark.tsx` — all present | [ ] |
+| R-4 | Phase 3 integration complete | `grep -r "useLicenseCheck" packages/adoption packages/analytics packages/announcements packages/checklists packages/media packages/scheduling packages/ai` — returns matches in all 7 | [ ] |
+| R-5 | Phase 4 webhook handler exists | `ls apps/docs/app/api/webhooks/polar/route.ts` — present | [ ] |
+| R-6 | `jose` dependency removed | `grep "jose" packages/license/package.json` — returns nothing | [ ] |
+| R-7 | Free packages have no license imports | `grep -r "@tour-kit/license" packages/core packages/react packages/hints` — returns nothing | [ ] |
+| R-8 | npm account has Pro or Org plan | `npm whoami` succeeds, account has paid plan for restricted publishing | [ ] |
+| R-9 | Monorepo builds | `pnpm build` succeeds before starting docs work | [ ] |

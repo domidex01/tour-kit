@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Product announcements for TourKit - Modal, Slideout, Banner, Toast, and Spotlight variants",
   "author": "Tour Kit Team",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/DomiDex/tour-kit#readme",
   "repository": {
     "type": "git",
@@ -56,7 +56,7 @@
   "files": ["dist", "src/styles", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
-    "access": "public",
+    "access": "restricted",
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {

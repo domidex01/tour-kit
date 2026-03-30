@@ -1,470 +1,550 @@
-# Phase 4 Test Plan — RAG Pipeline
+# Phase 4 Test Plan — Webhook Handler + Docs Pricing Page
 
-**Package:** `@tour-kit/ai`
-**Phase:** 4 — RAG Pipeline
-**Phase Type:** Service (mock embedding API, test pipeline logic)
-**Framework:** Vitest + TypeScript
-**Date:** 2026-03-21
-
----
-
-## User Stories
-
-| ID | Story | Acceptance Criteria | Test Tier |
-|----|-------|---------------------|-----------|
-| US-1 | As a developer, I want `createRetriever().search()` to return ranked documents, so that the RAG pipeline delivers relevant context | `search()` returns `RetrievedDocument[]` sorted by score descending; results match the query semantically via mock embeddings | Unit + Integration |
-| US-2 | As a developer, I want the in-memory vector store to handle 500 docs in <200ms, so that search is fast enough | Index 500 documents and run `search()` — total time < 200ms | Performance |
-| US-3 | As a developer, I want chunking to preserve document metadata, so that I can trace results back to sources | Each chunk inherits parent `metadata`, has `chunkIndex`, and ID follows `${docId}-chunk-${index}` pattern | Unit |
-| US-4 | As a developer, I want RAG middleware to inject context via `transformParams`, so that the LLM sees retrieved documents | `transformParams` output contains a system message with formatted retrieved context prepended to the prompt | Unit |
-| US-5 | As a developer, I want lazy indexing on first search, so that startup is not blocked by embedding calls | `search()` auto-calls `index()` on first invocation; subsequent calls skip indexing; concurrent calls share the same indexing promise | Unit |
+| Field | Value |
+|-------|-------|
+| **Phase** | 4 |
+| **Type** | Service (Next.js API route webhook handler) |
+| **Test Runner** | Vitest |
+| **Test File** | `apps/docs/app/api/webhooks/polar/__tests__/webhook.test.ts` |
 
 ---
 
-## Component Mock Strategy
+## 1. Mock Strategy
 
-| Dependency | Mock Type | Rationale |
-|------------|-----------|-----------|
-| `cosineSimilarity` from `ai` | **Real implementation** or deterministic stub | Cosine similarity is a pure math function; use real when testing vector store, stub when isolating retriever |
-| `embed` / `embedMany` from `ai` | **vi.mock('ai')** | Avoid real API calls; return deterministic hash-based vectors |
-| `wrapLanguageModel` from `ai` | **vi.mock('ai')** | Return identity wrapper; verify it is called with correct middleware |
-| `EmbeddingAdapter` | **Fake (MockEmbeddingAdapter)** | Deterministic 3-dimension hash-based embeddings for pipeline tests |
-| `VectorStoreAdapter` | **Fake (MockVectorStore)** | Spy-enabled mock implementing the full interface for retriever tests |
-| `Retriever` | **Fake (MockRetriever)** | Pre-configured search results for middleware tests |
-| `generateText` from `ai` | **vi.mock('ai')** | For rerank tests; return mock re-scored results |
-
----
-
-## Test Tier Table
-
-| Tier | Test Count | Scope |
-|------|-----------|-------|
-| Unit | ~35 | Vector store CRUD, chunking algorithm, embedding adapter, retriever logic, RAG middleware transformParams |
-| Integration | ~8 | Full RAG pipeline end-to-end (index + search + middleware), route handler with RAG strategy |
-| Performance | ~2 | 500-document indexing + search timing |
-| **Total** | **~45** | |
-
----
-
-## Fake / Mock Implementations
-
-### `MockEmbeddingAdapter`
+Mock the `@polar-sh/nextjs` module using `vi.mock()`. The `Webhooks()` export is a factory that returns a Next.js route handler (`POST`). The mock captures the config (`webhookSecret`, `onPayload`) and exposes a controllable handler that can simulate valid signatures, invalid signatures, and stale timestamps.
 
 ```typescript
-// packages/ai/src/__tests__/helpers/mock-embedding.ts
+// Mock shape
+vi.mock("@polar-sh/nextjs", () => ({
+  Webhooks: vi.fn((config: { webhookSecret: string; onPayload: (payload: any) => Promise<void> }) => {
+    // Store config for test access
+    mockConfig = config;
+    // Return a route handler that delegates to onPayload or rejects
+    return mockRouteHandler;
+  }),
+}));
+```
 
-import type { EmbeddingAdapter } from '../../types'
+Key mock behaviors:
+- **Valid request**: Calls `config.onPayload(payload)` and returns `Response(null, { status: 202 })`.
+- **Invalid signature**: Returns `Response("Invalid signature", { status: 403 })` without calling `onPayload`.
+- **Stale timestamp**: Returns `Response("Stale timestamp", { status: 403 })` without calling `onPayload`.
+- **Malformed body**: Returns `Response("Bad request", { status: 400 })` without calling `onPayload`.
 
-/**
- * Deterministic hash-based embedding for testing.
- * Returns 3-dimensional vectors derived from text content.
- * Same input always produces the same output.
- */
-function simpleHash(text: string): number {
-  let hash = 0
-  for (let i = 0; i < text.length; i++) {
-    const char = text.charCodeAt(i)
-    hash = ((hash << 5) - hash + char) | 0
-  }
-  return hash
+The mock simulates SDK behavior so unit tests focus on the handler logic (idempotency, event routing, structured logging) rather than re-testing the SDK.
+
+---
+
+## 2. Test Helper Utilities
+
+### `createWebhookRequest(overrides?)`
+
+Factory for `NextRequest` objects with standard webhook headers:
+
+```typescript
+function createWebhookRequest(overrides?: {
+  webhookId?: string;
+  webhookTimestamp?: string;
+  webhookSignature?: string;
+  body?: Record<string, unknown>;
+  headers?: Record<string, string>;
+}): NextRequest {
+  const body = overrides?.body ?? makeBenefitGrantPayload("benefit_grant.created");
+  const now = Math.floor(Date.now() / 1000);
+
+  return new NextRequest("http://localhost:3000/api/webhooks/polar", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "webhook-id": overrides?.webhookId ?? `wh_${crypto.randomUUID()}`,
+      "webhook-timestamp": overrides?.webhookTimestamp ?? String(now),
+      "webhook-signature": overrides?.webhookSignature ?? "v1,validbase64sig==",
+      ...overrides?.headers,
+    },
+    body: JSON.stringify(body),
+  });
 }
+```
 
-export function createMockEmbedding(): EmbeddingAdapter {
+### `makeBenefitGrantPayload(type)`
+
+Generates typed webhook payloads for each event type:
+
+```typescript
+function makeBenefitGrantPayload(
+  type: "benefit_grant.created" | "benefit_grant.updated" | "benefit_grant.revoked"
+) {
   return {
-    name: 'mock-embedding',
-    dimensions: 3,
-
-    async embed(text: string): Promise<number[]> {
-      const h = simpleHash(text)
-      return [Math.sin(h), Math.cos(h), Math.sin(h * 2)]
+    type,
+    data: {
+      id: "bg_test123",
+      benefit_id: "ben_tourkit_pro",
+      customer_id: "cust_abc456",
+      benefit: {
+        id: "ben_tourkit_pro",
+        type: "license_keys",
+        description: "Tour Kit Pro License",
+      },
+      granted_at: new Date().toISOString(),
     },
-
-    async embedMany(texts: string[]): Promise<number[][]> {
-      return Promise.all(texts.map((t) => this.embed(t)))
-    },
-  }
-}
-```
-
-### `MockVectorStore`
-
-```typescript
-// packages/ai/src/__tests__/helpers/mock-vector-store.ts
-
-import type { Document, RetrievedDocument, VectorStoreAdapter } from '../../types'
-
-export function createMockVectorStore(): VectorStoreAdapter & {
-  upsertCalls: Array<{ documents: Document[]; embeddings: number[][] }>
-  searchCalls: Array<{ embedding: number[]; topK: number; minScore?: number }>
-} {
-  let storedResults: RetrievedDocument[] = []
-  const upsertCalls: Array<{ documents: Document[]; embeddings: number[][] }> = []
-  const searchCalls: Array<{ embedding: number[]; topK: number; minScore?: number }> = []
-
-  return {
-    name: 'mock-vector-store',
-    upsertCalls,
-    searchCalls,
-
-    async upsert(documents: Document[], embeddings: number[][]): Promise<void> {
-      upsertCalls.push({ documents, embeddings })
-    },
-
-    async search(
-      embedding: number[],
-      topK: number,
-      minScore?: number,
-    ): Promise<RetrievedDocument[]> {
-      searchCalls.push({ embedding, topK, minScore })
-      return storedResults.slice(0, topK)
-    },
-
-    async delete(_ids: string[]): Promise<void> {},
-    async clear(): Promise<void> {
-      storedResults = []
-    },
-  }
-}
-```
-
-### `MockRetriever`
-
-```typescript
-// packages/ai/src/__tests__/helpers/mock-retriever.ts
-
-import type { Retriever, RetrievedDocument } from '../../types'
-
-export function createMockRetriever(
-  results: RetrievedDocument[] = [],
-): Retriever & { indexCalled: boolean } {
-  return {
-    indexCalled: false,
-
-    async index(): Promise<void> {
-      this.indexCalled = true
-    },
-
-    async search(
-      _query: string,
-      topK = 5,
-      _minScore?: number,
-    ): Promise<RetrievedDocument[]> {
-      return results.slice(0, topK)
-    },
-  }
-}
-```
-
-### Test Document Factory
-
-```typescript
-// packages/ai/src/__tests__/helpers/factories.ts
-
-import type { Document } from '../../types'
-
-export function createTestDocument(overrides: Partial<Document> = {}): Document {
-  return {
-    id: 'doc-1',
-    content: 'This is test document content about product features.',
-    metadata: { source: 'test', title: 'Test Document' },
-    ...overrides,
-  }
-}
-
-export function createTestDocuments(count: number, prefix = 'doc'): Document[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${prefix}-${i}`,
-    content: `Document ${i} content about topic ${i % 5}. This has enough text to be meaningful for chunking tests.`,
-    metadata: { source: `source-${i}`, title: `Document ${i}`, tags: [`tag-${i % 3}`] },
-  }))
+  };
 }
 ```
 
 ---
 
-## Test File List
+## 3. Environment Setup
 
-| # | File | Tests | Tier | US Coverage |
-|---|------|-------|------|-------------|
-| 1 | `packages/ai/src/__tests__/server/vector-store.test.ts` | ~10 | Unit | US-1, US-2 |
-| 2 | `packages/ai/src/__tests__/server/embedding.test.ts` | ~5 | Unit | US-1 |
-| 3 | `packages/ai/src/__tests__/server/retriever.test.ts` | ~12 | Unit | US-1, US-3, US-5 |
-| 4 | `packages/ai/src/__tests__/server/rag-middleware.test.ts` | ~8 | Unit | US-4 |
-| 5 | `packages/ai/src/__tests__/server/rag-integration.test.ts` | ~8 | Integration + Performance | US-1, US-2, US-3, US-4, US-5 |
-| 6 | `packages/ai/src/__tests__/helpers/mock-embedding.ts` | — | Helper | — |
-| 7 | `packages/ai/src/__tests__/helpers/mock-vector-store.ts` | — | Helper | — |
-| 8 | `packages/ai/src/__tests__/helpers/mock-retriever.ts` | — | Helper | — |
-| 9 | `packages/ai/src/__tests__/helpers/factories.ts` | — | Helper | — |
+```typescript
+beforeEach(() => {
+  vi.stubEnv("POLAR_WEBHOOK_SECRET", "whsec_dGVzdF9zZWNyZXRfZm9yX3Rlc3Rpbmc=");
+  vi.restoreAllMocks();
+  consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+  // Reset the idempotency Map between tests (import and clear, or re-import module)
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+```
+
+Module re-import strategy: Use `vi.resetModules()` + dynamic `import()` in tests that need a fresh idempotency Map. For tests that verify deduplication, import once and call the handler twice.
 
 ---
 
-## Helpers Structure
+## 4. Test Sections
 
+### Section A: Signature Verification (SDK behavior, mocked)
+
+| # | Test | Expected |
+|---|------|----------|
+| A1 | Valid signature with `benefit_grant.created` payload | `onPayload` is called, response status 202 |
+| A2 | Invalid signature header | `onPayload` is NOT called, response status 403 |
+| A3 | Missing `webhook-signature` header | Response status 403 |
+| A4 | Missing `POLAR_WEBHOOK_SECRET` env var | `Webhooks()` receives `undefined` secret, handler rejects (test that env is required) |
+
+```typescript
+describe("Signature verification", () => {
+  it("calls onPayload and returns 202 for valid signature", async () => {
+    const req = createWebhookRequest();
+    simulateValidSignature();
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+    expect(mockConfig.onPayload).toHaveBeenCalled();
+  });
+
+  it("returns 403 for invalid signature without calling onPayload", async () => {
+    const req = createWebhookRequest({ webhookSignature: "v1,invalidsig==" });
+    simulateInvalidSignature();
+    const res = await POST(req);
+    expect(res.status).toBe(403);
+    expect(mockConfig.onPayload).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 when webhook-signature header is missing", async () => {
+    const req = createWebhookRequest({ webhookSignature: "" });
+    simulateInvalidSignature();
+    const res = await POST(req);
+    expect(res.status).toBe(403);
+  });
+});
 ```
-packages/ai/src/__tests__/
-├── helpers/
-│   ├── mock-embedding.ts        # MockEmbeddingAdapter (hash-based, 3D)
-│   ├── mock-vector-store.ts     # MockVectorStore with call tracking
-│   ├── mock-retriever.ts        # MockRetriever with preset results
-│   └── factories.ts             # createTestDocument, createTestDocuments
-└── server/
-    ├── vector-store.test.ts
-    ├── embedding.test.ts
-    ├── retriever.test.ts
-    ├── rag-middleware.test.ts
-    └── rag-integration.test.ts
+
+### Section B: Stale Timestamp Rejection (SDK behavior, mocked)
+
+| # | Test | Expected |
+|---|------|----------|
+| B1 | Timestamp > 5 minutes old | Response status 403, `onPayload` not called |
+| B2 | Timestamp within 5-minute window | Response status 202, `onPayload` called |
+
+```typescript
+describe("Stale timestamp rejection", () => {
+  it("returns 403 for webhook-timestamp older than 5 minutes", async () => {
+    const staleTimestamp = String(Math.floor(Date.now() / 1000) - 6 * 60); // 6 min ago
+    const req = createWebhookRequest({ webhookTimestamp: staleTimestamp });
+    simulateStaleTimestamp();
+    const res = await POST(req);
+    expect(res.status).toBe(403);
+  });
+
+  it("accepts webhook-timestamp within 5-minute window", async () => {
+    const freshTimestamp = String(Math.floor(Date.now() / 1000) - 2 * 60); // 2 min ago
+    const req = createWebhookRequest({ webhookTimestamp: freshTimestamp });
+    simulateValidSignature();
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+  });
+});
+```
+
+### Section C: Idempotency (Duplicate webhook-id)
+
+| # | Test | Expected |
+|---|------|----------|
+| C1 | First request with a webhook-id processes normally | `onPayload` logic executes, returns 202 |
+| C2 | Second request with same webhook-id returns 202 without re-processing | Returns 202, handler logic (logging) not executed again |
+| C3 | Same webhook-id after TTL expiry (10 min) processes again | After advancing timers past 10 min, re-processes normally |
+
+```typescript
+describe("Idempotency", () => {
+  it("processes the first request with a given webhook-id", async () => {
+    const webhookId = "wh_dedup_test_001";
+    const req = createWebhookRequest({ webhookId });
+    simulateValidSignature();
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "[polar-webhook]",
+      expect.objectContaining({ type: "benefit_grant.created" })
+    );
+  });
+
+  it("returns 202 without re-processing for duplicate webhook-id", async () => {
+    const webhookId = "wh_dedup_test_002";
+    simulateValidSignature();
+
+    // First call
+    const req1 = createWebhookRequest({ webhookId });
+    await POST(req1);
+    consoleSpy.mockClear();
+
+    // Second call — same webhook-id
+    const req2 = createWebhookRequest({ webhookId });
+    const res = await POST(req2);
+    expect(res.status).toBe(202);
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      "[polar-webhook]",
+      expect.objectContaining({ type: "benefit_grant.created" })
+    );
+  });
+
+  it("re-processes after TTL expiry", async () => {
+    vi.useFakeTimers();
+    const webhookId = "wh_dedup_test_003";
+    simulateValidSignature();
+
+    const req1 = createWebhookRequest({ webhookId });
+    await POST(req1);
+    consoleSpy.mockClear();
+
+    // Advance past 10-minute TTL
+    vi.advanceTimersByTime(11 * 60 * 1000);
+
+    const req2 = createWebhookRequest({ webhookId });
+    const res = await POST(req2);
+    expect(res.status).toBe(202);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "[polar-webhook]",
+      expect.objectContaining({ type: "benefit_grant.created" })
+    );
+
+    vi.useRealTimers();
+  });
+});
+```
+
+### Section D: Event Type Handling
+
+| # | Test | Expected |
+|---|------|----------|
+| D1 | `benefit_grant.created` event | Returns 202, logs `{ type: "benefit_grant.created", benefit_id, customer_id, timestamp }` |
+| D2 | `benefit_grant.updated` event | Returns 202, logs `{ type: "benefit_grant.updated", benefit_id, customer_id, timestamp }` |
+| D3 | `benefit_grant.revoked` event | Returns 202, logs `{ type: "benefit_grant.revoked", benefit_id, customer_id, timestamp }` |
+| D4 | Unknown event type (e.g., `order.created`) | Returns 202, does not crash, logs unknown type warning |
+
+```typescript
+describe("Event type handling", () => {
+  it.each([
+    "benefit_grant.created",
+    "benefit_grant.updated",
+    "benefit_grant.revoked",
+  ] as const)("handles %s event and logs structured data", async (eventType) => {
+    const payload = makeBenefitGrantPayload(eventType);
+    const req = createWebhookRequest({ body: payload });
+    simulateValidSignature();
+
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "[polar-webhook]",
+      expect.objectContaining({
+        type: eventType,
+        benefit_id: "ben_tourkit_pro",
+        customer_id: "cust_abc456",
+      })
+    );
+  });
+
+  it("handles unknown event type gracefully without crashing", async () => {
+    const payload = { type: "order.created", data: { id: "ord_123" } };
+    const req = createWebhookRequest({ body: payload });
+    simulateValidSignature();
+
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+    // Should not throw
+  });
+});
+```
+
+### Section E: Structured Logging
+
+| # | Test | Expected |
+|---|------|----------|
+| E1 | `benefit_grant.created` log shape | `console.log("[polar-webhook]", { type, benefit_id, customer_id, timestamp })` |
+| E2 | Duplicate request does not log again | `console.log` not called with `[polar-webhook]` on second call |
+| E3 | Unknown event type logs a warning | `console.log` called with unknown type indicator |
+
+```typescript
+describe("Structured logging", () => {
+  it("logs [polar-webhook] prefix with structured payload fields", async () => {
+    const req = createWebhookRequest({
+      body: makeBenefitGrantPayload("benefit_grant.created"),
+    });
+    simulateValidSignature();
+    await POST(req);
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "[polar-webhook]",
+      expect.objectContaining({
+        type: "benefit_grant.created",
+        benefit_id: expect.any(String),
+        customer_id: expect.any(String),
+        timestamp: expect.any(String),
+      })
+    );
+  });
+
+  it("does not log payload on duplicate webhook-id", async () => {
+    const webhookId = "wh_log_dedup";
+    simulateValidSignature();
+
+    await POST(createWebhookRequest({ webhookId }));
+    consoleSpy.mockClear();
+
+    await POST(createWebhookRequest({ webhookId }));
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      "[polar-webhook]",
+      expect.anything()
+    );
+  });
+});
+```
+
+### Section F: Malformed Payload Handling
+
+| # | Test | Expected |
+|---|------|----------|
+| F1 | Empty body | Does not crash, returns error response (400 or 403 from SDK) |
+| F2 | Missing `type` field in payload | Handled gracefully, no unhandled exception |
+| F3 | Missing `data` field in payload | Handled gracefully, no unhandled exception |
+
+```typescript
+describe("Malformed payload handling", () => {
+  it("handles empty body without crashing", async () => {
+    const req = createWebhookRequest({ body: {} });
+    simulateMalformedBody();
+    const res = await POST(req);
+    expect([400, 403]).toContain(res.status);
+  });
+
+  it("handles payload with missing type field gracefully", async () => {
+    const req = createWebhookRequest({ body: { data: { id: "test" } } });
+    simulateValidSignature();
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+    // Should not throw
+  });
+
+  it("handles payload with missing data field gracefully", async () => {
+    const req = createWebhookRequest({ body: { type: "benefit_grant.created" } });
+    simulateValidSignature();
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+    // Should not throw
+  });
+});
+```
+
+### Section G: HTTP Method and Response
+
+| # | Test | Expected |
+|---|------|----------|
+| G1 | POST request returns 202 on success | Status 202 (not 200) |
+| G2 | Only `POST` is exported from the route | The module exports `POST`, no `GET`/`PUT`/`DELETE` |
+
+```typescript
+describe("HTTP method and response", () => {
+  it("returns 202 (not 200) on successful webhook", async () => {
+    const req = createWebhookRequest();
+    simulateValidSignature();
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+    expect(res.status).not.toBe(200);
+  });
+
+  it("exports only POST handler from route module", async () => {
+    const routeModule = await import("../route");
+    expect(routeModule.POST).toBeDefined();
+    expect((routeModule as any).GET).toBeUndefined();
+    expect((routeModule as any).PUT).toBeUndefined();
+    expect((routeModule as any).DELETE).toBeUndefined();
+  });
+});
+```
+
+### Section H: Response Time
+
+| # | Test | Expected |
+|---|------|----------|
+| H1 | Handler responds within 2 seconds | Elapsed time < 2000ms |
+
+```typescript
+describe("Response time", () => {
+  it("responds within 2 seconds", async () => {
+    const req = createWebhookRequest();
+    simulateValidSignature();
+    const start = performance.now();
+    await POST(req);
+    const elapsed = performance.now() - start;
+    expect(elapsed).toBeLessThan(2000);
+  });
+});
+```
+
+### Section I: Idempotency Map Internals
+
+| # | Test | Expected |
+|---|------|----------|
+| I1 | `cleanExpired()` removes entries older than 10 minutes | After advancing timers, expired entries are purged |
+| I2 | `isDuplicate()` returns `false` for new ID, `true` for seen ID | First call false, second call true |
+| I3 | Map does not grow unbounded under high volume | After many requests + time advance, Map size stays bounded |
+
+These tests target the exported (or module-internal) idempotency functions. If `isDuplicate` and `cleanExpired` are not exported, test them indirectly through the route handler behavior (covered in Section C).
+
+```typescript
+describe("Idempotency map internals (if exported)", () => {
+  it("isDuplicate returns false for new ID, true for repeated ID", () => {
+    expect(isDuplicate("wh_new")).toBe(false);
+    expect(isDuplicate("wh_new")).toBe(true);
+  });
+
+  it("cleanExpired removes entries older than DEDUP_TTL_MS", () => {
+    vi.useFakeTimers();
+    isDuplicate("wh_expire_test");
+    vi.advanceTimersByTime(11 * 60 * 1000);
+    cleanExpired();
+    expect(isDuplicate("wh_expire_test")).toBe(false); // Re-processed as new
+    vi.useRealTimers();
+  });
+});
 ```
 
 ---
 
-## Key Testing Decisions
+## 5. Test Count Summary
 
-1. **Real `cosineSimilarity` in vector store tests.** The in-memory vector store uses `cosineSimilarity` from `ai` — we test with real cosine similarity and deterministic vectors to validate correct sorting and filtering behavior. Only mock it when isolating retriever logic.
-
-2. **Hash-based mock embeddings.** The `MockEmbeddingAdapter` uses a deterministic `simpleHash` function to produce 3-dimensional vectors. This ensures the same text always maps to the same vector, allowing us to write assertions about which documents score highest for a given query. The 3-dimension size is minimal but sufficient for cosine similarity to distinguish different texts.
-
-3. **No real API calls.** All tests mock `embed`, `embedMany`, and `generateText` from `ai`. The `createAiSdkEmbedding` adapter tests mock the `ai` module entirely. Pipeline tests use `MockEmbeddingAdapter` directly.
-
-4. **Performance tests use real in-memory store.** The 500-document performance test uses the actual `createInMemoryVectorStore()` with `MockEmbeddingAdapter` to validate the <200ms target. This is a real timing assertion, not a mock.
-
-5. **Middleware tested in isolation.** RAG middleware `transformParams` tests use `MockRetriever` with predetermined results. The middleware receives a fake `params` object matching the `LanguageModelV3Middleware` input shape and we assert on the output prompt structure.
-
-6. **Chunking tested as pure functions.** `chunkDocument` and `chunkDocuments` are exported pure functions — tested with deterministic inputs and exact output assertions. No mocks needed.
-
-7. **Lazy indexing tested with concurrent access.** Use multiple simultaneous `search()` calls to verify the indexing lock prevents duplicate `embedMany` calls.
+| Section | Tests |
+|---------|-------|
+| A: Signature Verification | 3 |
+| B: Stale Timestamp Rejection | 2 |
+| C: Idempotency | 3 |
+| D: Event Type Handling | 4 |
+| E: Structured Logging | 2 |
+| F: Malformed Payload Handling | 3 |
+| G: HTTP Method and Response | 2 |
+| H: Response Time | 1 |
+| I: Idempotency Map Internals | 2 |
+| **Total** | **22** |
 
 ---
 
-## Example Test Case
+## 6. Files to Create
+
+| File | Purpose |
+|------|---------|
+| `apps/docs/app/api/webhooks/polar/__tests__/webhook.test.ts` | All 22 tests in a single file |
+
+---
+
+## 7. Mock Implementations
+
+### `@polar-sh/nextjs` Module Mock
 
 ```typescript
-// packages/ai/src/__tests__/server/vector-store.test.ts
+import { vi, type Mock } from "vitest";
 
-import { describe, expect, it } from 'vitest'
-import { createInMemoryVectorStore } from '../../server/vector-store'
-import type { Document } from '../../types'
+let capturedOnPayload: ((payload: any) => Promise<void>) | null = null;
+let mockBehavior: "valid" | "invalid-sig" | "stale" | "malformed" = "valid";
 
-describe('createInMemoryVectorStore', () => {
-  describe('search', () => {
-    it('returns results sorted by cosine similarity descending', async () => {
-      const store = createInMemoryVectorStore()
+vi.mock("@polar-sh/nextjs", () => ({
+  Webhooks: vi.fn(
+    (config: { webhookSecret: string; onPayload: (payload: any) => Promise<void> }) => {
+      capturedOnPayload = config.onPayload;
 
-      const documents: Document[] = [
-        { id: 'doc-a', content: 'about cats' },
-        { id: 'doc-b', content: 'about dogs' },
-        { id: 'doc-c', content: 'about birds' },
-      ]
+      // Return a route handler function
+      return async (req: Request): Promise<Response> => {
+        if (mockBehavior === "invalid-sig") {
+          return new Response("Invalid signature", { status: 403 });
+        }
+        if (mockBehavior === "stale") {
+          return new Response("Stale timestamp", { status: 403 });
+        }
+        if (mockBehavior === "malformed") {
+          return new Response("Bad request", { status: 400 });
+        }
 
-      // Deterministic embeddings where doc-a is closest to query
-      const embeddings = [
-        [1, 0, 0],   // doc-a
-        [0, 1, 0],   // doc-b
-        [0, 0, 1],   // doc-c
-      ]
+        const body = await req.clone().json();
+        await config.onPayload(body);
+        return new Response(null, { status: 202 });
+      };
+    }
+  ),
+}));
 
-      await store.upsert(documents, embeddings)
+// Helpers used in tests
+function simulateValidSignature() { mockBehavior = "valid"; }
+function simulateInvalidSignature() { mockBehavior = "invalid-sig"; }
+function simulateStaleTimestamp() { mockBehavior = "stale"; }
+function simulateMalformedBody() { mockBehavior = "malformed"; }
+```
 
-      // Query vector closest to doc-a
-      const results = await store.search([0.9, 0.1, 0], 3)
+### `NextRequest` Construction
 
-      expect(results).toHaveLength(3)
-      expect(results[0].id).toBe('doc-a')
-      expect(results[0].score).toBeGreaterThan(results[1].score)
-      expect(results[1].score).toBeGreaterThan(results[2].score)
-    })
+```typescript
+import { NextRequest } from "next/server";
 
-    it('filters results below minScore', async () => {
-      const store = createInMemoryVectorStore()
-
-      const documents: Document[] = [
-        { id: 'doc-a', content: 'relevant' },
-        { id: 'doc-b', content: 'irrelevant' },
-      ]
-
-      const embeddings = [
-        [1, 0, 0],   // doc-a — will be close to query
-        [0, 0, 1],   // doc-b — will be far from query
-      ]
-
-      await store.upsert(documents, embeddings)
-
-      const results = await store.search([1, 0, 0], 10, 0.9)
-
-      expect(results).toHaveLength(1)
-      expect(results[0].id).toBe('doc-a')
-      expect(results[0].score).toBeGreaterThanOrEqual(0.9)
-    })
-  })
-})
+// NextRequest accepts a URL string and RequestInit
+// Headers include Standard Webhooks headers: webhook-id, webhook-timestamp, webhook-signature
 ```
 
 ---
 
-## Detailed Test Outlines
+## 8. Running Tests
 
-### 1. `vector-store.test.ts`
-
-```typescript
-describe('createInMemoryVectorStore', () => {
-  describe('upsert', () => {
-    it('stores documents and embeddings by document ID')
-    it('throws when documents.length !== embeddings.length')
-    it('overwrites existing entries on duplicate upsert')
-  })
-
-  describe('search', () => {
-    it('returns results sorted by cosine similarity descending')
-    it('respects topK limit')
-    it('filters results below minScore')
-    it('returns empty array when store is empty')
-    it('defaults minScore to 0 when not provided')
-  })
-
-  describe('delete', () => {
-    it('removes documents by ID')
-    it('ignores IDs that do not exist')
-  })
-
-  describe('clear', () => {
-    it('empties all stored data')
-  })
-})
-```
-
-### 2. `embedding.test.ts`
-
-```typescript
-vi.mock('ai', () => ({
-  embed: vi.fn(),
-  embedMany: vi.fn(),
-}))
-
-describe('createAiSdkEmbedding', () => {
-  it('returns an EmbeddingAdapter with correct name and dimensions')
-  it('calls ai.embed() and returns the embedding vector')
-  it('calls ai.embedMany() and returns the embedding vectors')
-  it('uses default dimensions of 1536 when not specified')
-  it('propagates errors from the embedding API with descriptive messages')
-})
-```
-
-### 3. `retriever.test.ts`
-
-```typescript
-describe('chunkDocument', () => {
-  it('returns single chunk for short document below chunkSize')
-  it('splits long document into multiple chunks with correct overlap')
-  it('splits at paragraph boundaries (\\n\\n)')
-  it('falls back to sentence splitting for oversized paragraphs')
-  it('hard-splits at chunkSize when no sentence boundary found')
-  it('generates chunk IDs as ${docId}-chunk-${index}')
-  it('preserves parent document metadata on all chunks')
-  it('adds chunkIndex to each chunk metadata')
-})
-
-describe('chunkDocuments', () => {
-  it('chunks all documents and returns flat array')
-})
-
-describe('createRetriever', () => {
-  describe('index', () => {
-    it('chunks documents and calls embedMany on chunk contents')
-    it('upserts chunks and embeddings into vector store')
-    it('uses default in-memory vector store when none provided')
-    it('uses custom vector store when provided')
-  })
-
-  describe('search', () => {
-    it('embeds query and searches vector store')
-    it('returns RetrievedDocument[] from vector store results')
-    it('auto-indexes on first search if not yet indexed')
-    it('does not re-index on subsequent searches')
-    it('concurrent search calls share the same indexing promise')
-    it('uses default topK=5 and minScore=0.7 when not specified')
-  })
-})
-```
-
-### 4. `rag-middleware.test.ts`
-
-```typescript
-describe('createRAGMiddleware', () => {
-  it('returns a LanguageModelV3Middleware with transformParams')
-
-  describe('transformParams', () => {
-    it('extracts text from the last user message')
-    it('searches retriever with extracted text')
-    it('injects formatted context as a system message prepended to prompt')
-    it('returns params unchanged when no user message found')
-    it('returns params unchanged when retriever returns empty results')
-    it('uses custom formatContext function when provided')
-    it('uses default formatContext with numbered list and source metadata')
-    it('retrieves topK * 2 results when rerank is configured')
-  })
-})
-```
-
-### 5. `rag-integration.test.ts`
-
-```typescript
-describe('RAG Pipeline Integration', () => {
-  it('indexes documents and retrieves relevant results for a query')
-  it('RAG middleware injects retrieved context into LLM prompt')
-  it('end-to-end: index → query → retrieve → verify ranked results')
-  it('works with custom VectorStoreAdapter')
-  it('handles rerank option with mock rerank model')
-  it('lazy indexes on first search — no upfront blocking')
-
-  describe('Performance', () => {
-    it('indexes and searches 500 documents in < 200ms')
-    it('subsequent searches after indexing complete in < 50ms')
-  })
-})
-```
-
----
-
-## Execution Prompt
-
-You are writing tests for Phase 4 (RAG Pipeline) of `@tour-kit/ai`. Use Vitest with TypeScript. All test files use `.test.ts` extension.
-
-**Setup:**
-1. Create the helper files first: `mock-embedding.ts`, `mock-vector-store.ts`, `mock-retriever.ts`, `factories.ts`
-2. Write unit tests for each module in isolation
-3. Write integration tests last, composing the real implementations with mock embedding
-
-**Conventions:**
-- Import `{ describe, expect, it, vi, beforeEach, afterEach }` from `'vitest'`
-- Use `vi.mock('ai')` to mock AI SDK functions; use `vi.mocked()` for typed access
-- Use factory functions for test data (see helpers)
-- Each `describe` block matches a function or method
-- Test names start with a verb: "returns", "throws", "calls", "filters"
-- Use `beforeEach` to reset mocks: `vi.clearAllMocks()`
-- Performance tests use `performance.now()` for timing assertions
-- No `any` types — use proper TypeScript types or `unknown`
-
-**Run command:**
 ```bash
-pnpm --filter @tour-kit/ai test -- --run src/__tests__/server/
+# Run webhook tests only
+pnpm --filter docs test -- webhook
+
+# Run all docs tests
+pnpm --filter docs test
+
+# Run with coverage
+pnpm --filter docs test -- --coverage
 ```
 
 ---
 
-## Run Commands
+## 9. Exit Criteria Traceability
 
-```bash
-# Run all Phase 4 tests
-pnpm --filter @tour-kit/ai test -- --run src/__tests__/server/
-
-# Run individual test files
-pnpm --filter @tour-kit/ai test -- --run src/__tests__/server/vector-store.test.ts
-pnpm --filter @tour-kit/ai test -- --run src/__tests__/server/embedding.test.ts
-pnpm --filter @tour-kit/ai test -- --run src/__tests__/server/retriever.test.ts
-pnpm --filter @tour-kit/ai test -- --run src/__tests__/server/rag-middleware.test.ts
-pnpm --filter @tour-kit/ai test -- --run src/__tests__/server/rag-integration.test.ts
-
-# Run with coverage for Phase 4 files
-pnpm --filter @tour-kit/ai test -- --run --coverage src/__tests__/server/
-
-# Run only performance tests
-pnpm --filter @tour-kit/ai test -- --run -t "Performance" src/__tests__/server/rag-integration.test.ts
-```
+| Exit Criterion (from phase-4.md) | Test(s) |
+|----------------------------------|---------|
+| 1. Webhook verifies signatures via `Webhooks()` | A1, A2, A3 |
+| 2. Invalid signatures return 403 | A2, A3 |
+| 3. Duplicate `webhook-id` returns 202 without re-processing | C1, C2 |
+| 4. Stale webhooks (>5 min) return 403 | B1 |
+| 5. Handler responds within 2 seconds | H1 |
+| 6. Handler returns HTTP 202 on success | G1, D1-D3 |
+| 7. `benefit_grant.created`/`.updated`/`.revoked` handled | D1, D2, D3 |
+| 8. Pricing page renders with checkout link | Manual verification (not unit tested) |
+| 9. Webhook tests pass | All 22 tests green |

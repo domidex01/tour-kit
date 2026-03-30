@@ -1,8 +1,11 @@
-import { CodePreview } from '@/components/landing/code-preview'
+import { ComparisonTable } from '@/components/landing/comparison-table'
 import { DemoTour } from '@/components/landing/demo-tour'
 import { Features } from '@/components/landing/features'
+import { Footer } from '@/components/landing/footer'
 import { Hero } from '@/components/landing/hero'
 import { Packages } from '@/components/landing/packages'
+import { QuickStart } from '@/components/landing/quick-start'
+import { SocialProof } from '@/components/landing/social-proof'
 import { baseOptions } from '@/lib/layout.shared'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowRight } from 'lucide-react'
@@ -13,33 +16,70 @@ export default function HomePage() {
     <HomeLayout {...baseOptions()}>
       <main className="flex flex-1 flex-col">
         <Hero />
+        <DemoTour />
+        <QuickStart />
         <Features />
         <Packages />
-        <CodePreview />
-        <DemoTour />
+        <ComparisonTable />
+        <SocialProof />
 
-        {/* Final CTA */}
-        <section className="relative overflow-hidden border-t border-fd-border bg-fd-muted/30 px-6 py-20 sm:px-8 md:py-28 lg:px-12">
+        {/* CTA Footer */}
+        <section className="relative overflow-hidden px-6 py-24 sm:px-8 md:py-32 lg:px-12">
+          {/* Background images - same as hero */}
           <div className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute -right-20 bottom-0 h-64 w-64 rounded-full bg-[var(--tk-primary)] opacity-[0.06] blur-[80px]" />
-            <div className="absolute -left-20 top-0 h-48 w-48 rounded-full bg-amber-500 opacity-[0.05] blur-[80px]" />
+            <img
+              src="/tourkit-lighthouse.png"
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover dark:hidden"
+            />
+            <img
+              src="/hero-dark.avif"
+              alt=""
+              className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
+            />
           </div>
-          <div className="mx-auto max-w-6xl text-center">
-            <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-fd-foreground sm:text-4xl">
-              Ready to build?
-            </h2>
-            <p className="mx-auto mb-8 max-w-md text-lg text-fd-muted-foreground">
-              Get your first product tour running in under five minutes.
-            </p>
-            <Link
-              href="/docs/getting-started"
-              className="inline-flex items-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-8 py-4 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 hover:brightness-110"
-            >
-              Get started
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+
+          {/* Dot grid overlay */}
+          <div
+            className="pointer-events-none absolute inset-0 -z-10 opacity-[0.35]"
+            style={{
+              backgroundImage: 'radial-gradient(circle, var(--color-fd-border) 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+          />
+
+          <div className="relative mx-auto max-w-[1120px]">
+            <div className="mx-auto max-w-xl rounded-2xl border border-fd-border/50 bg-fd-background/40 p-10 text-center shadow-2xl backdrop-blur-xl dark:bg-fd-background/40 sm:p-12">
+              <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-[#02182b] dark:text-white sm:text-4xl">
+                Own your onboarding.{' '}
+                <span className="text-[#0197f6]">
+                  Ship it today.
+                </span>
+              </h2>
+
+              <p className="mb-10 text-[16px] text-fd-muted-foreground">
+                No vendor lock-in. No monthly invoice. Just code you control and users who convert.
+              </p>
+
+              {/* Install command */}
+              <div className="mx-auto mb-8 inline-flex items-center gap-3 rounded-lg border border-fd-border/50 bg-fd-muted/30 px-6 py-3 font-mono text-[14px] backdrop-blur-sm">
+                <span className="select-none text-fd-muted-foreground/50">$</span>
+                <span className="text-fd-foreground/70">pnpm add @tour-kit/react</span>
+              </div>
+
+              <div className="flex justify-center">
+                <Link
+                  href="/docs/getting-started"
+                  className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-7 py-3.5 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30"
+                >
+                  Get started
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
+        <Footer />
       </main>
     </HomeLayout>
   )

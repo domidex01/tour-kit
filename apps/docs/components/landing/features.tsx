@@ -1,86 +1,138 @@
-import { Code2, Eye, Keyboard, Package, Shield, Zap } from 'lucide-react'
+import { highlightCode } from '@/components/landing/syntax-highlight'
 
-const highlights = [
+const features = [
   {
-    icon: Zap,
     title: 'Headless first',
     description:
-      'All tour logic lives in hooks. Bring your own UI, or reach for the pre-styled components when speed matters.',
-    iconColor: 'text-amber-500',
-    bgColor: 'bg-amber-500/10',
+      'All logic lives in hooks — your design system, your components. Need to ship fast? Use the pre-styled components and customize later.',
+    code: `const tour = useTour('onboarding', {
+  steps: [
+    { target: '#sidebar', title: 'Nav' },
+    { target: '#search', title: 'Search' },
+  ],
+});
+
+// Full control over rendering
+return <div style={tour.tooltipProps.style}>
+  {tour.currentStep.title}
+</div>;`,
+    label: 'useTour',
   },
   {
-    icon: Shield,
     title: 'Accessible by default',
     description:
-      'WCAG 2.1 AA compliant out of the box — focus management, keyboard navigation, and ARIA attributes handled for you.',
-    iconColor: 'text-emerald-500',
-    bgColor: 'bg-emerald-500/10',
+      'WCAG 2.1 AA from day one — not bolted on after an audit. Focus traps, keyboard nav, and screen reader announcements are handled so you never retrofit accessibility.',
+    code: `<Tour id="onboarding">
+  {/* Focus trap auto-managed */}
+  {/* Arrow keys navigate steps */}
+  {/* Escape dismisses tour */}
+  {/* Screen readers announce steps */}
+  <TourStep
+    target="#welcome"
+    aria-label="Welcome step"
+    role="dialog"
+  />
+</Tour>`,
+    label: '<Tour />',
   },
   {
-    icon: Package,
     title: 'Tree-shakeable & tiny',
     description:
-      'Core under 8 KB gzipped. Only ship the code you use — every export is independently tree-shakeable.',
-    iconColor: 'text-violet-500',
-    bgColor: 'bg-violet-500/10',
+      'Core is under 8KB gzipped — 6x smaller than react-joyride. Import one hook or the full library. You only ship what you use.',
+    code: `// Only imports what you use
+import { useTour } from '@tour-kit/core';
+// → 3.2 KB
+
+import { Tour, TourStep } from '@tour-kit/react';
+// → 7.4 KB
+
+// vs. react-joyride → 47.2 KB
+// vs. shepherd.js  → 35.1 KB`,
+    label: 'import',
   },
   {
-    icon: Keyboard,
-    title: 'Keyboard navigation',
-    description:
-      'Arrow keys, Escape, Tab — full keyboard support with customizable bindings. No mouse required.',
-    iconColor: 'text-sky-500',
-    bgColor: 'bg-sky-500/10',
-  },
-  {
-    icon: Eye,
-    title: 'Spotlight & overlays',
-    description:
-      'Smoothly highlight any element with configurable overlays, padding, and border-radius.',
-    iconColor: 'text-rose-500',
-    bgColor: 'bg-rose-500/10',
-  },
-  {
-    icon: Code2,
     title: 'TypeScript native',
     description:
-      'Written in TypeScript with strict mode. Full type inference for steps, events, and configuration.',
-    iconColor: 'text-[var(--tk-primary)]',
-    bgColor: 'bg-[var(--tk-primary)]/10',
+      'Strict mode from the first commit. Full type inference for configs, hooks, and props — no @types packages, no any casts, no surprises.',
+    code: `// Full type inference
+const tour = useTour<MyStepData>('setup', {
+  steps: [
+    {
+      target: '#nav',
+      title: 'Navigation',
+      data: { category: 'core' }, // ← typed
+    },
+  ],
+  onComplete: (ctx) => {
+    ctx.steps // ← TourStep<MyStepData>[]
+  },
+});`,
+    label: 'type-safe',
   },
 ]
 
 export function Features() {
   return (
-    <section className="border-y border-fd-border bg-fd-muted/30 px-6 py-20 sm:px-8 md:py-28 lg:px-12">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-14 text-center">
-          <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-fd-foreground sm:text-4xl">
-            Everything you need, nothing you don&apos;t
+    <section className="px-6 py-28 sm:px-8 md:py-36 lg:px-12">
+      <div className="mx-auto max-w-[1120px]">
+        <div className="mb-20 max-w-lg">
+          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
+            Built for developers
+            <br />
+            who ship.
           </h2>
-          <p className="mx-auto max-w-2xl text-lg text-fd-muted-foreground">
-            Built with developer experience and accessibility as first-class priorities.
+          <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
+            Headless architecture, strict TypeScript, and WCAG accessibility — not afterthoughts, but foundations.
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {highlights.map((item) => (
-            <div
-              key={item.title}
-              className="group rounded-xl border border-fd-border bg-fd-background p-6 shadow-sm transition-all hover:border-fd-ring/30 hover:shadow-md"
-            >
+        <div className="space-y-24 md:space-y-32">
+          {features.map((feature, i) => {
+            const isReversed = i % 2 === 1
+            return (
               <div
-                className={`mb-4 flex h-11 w-11 items-center justify-center rounded-lg ${item.bgColor}`}
+                key={feature.title}
+                className={`grid items-center gap-10 md:grid-cols-2 md:gap-16 ${
+                  isReversed ? 'md:[direction:rtl] md:[&>*]:[direction:ltr]' : ''
+                }`}
               >
-                <item.icon className={`h-5 w-5 ${item.iconColor}`} />
+                {/* Text side */}
+                <div>
+                  <span className="mb-4 inline-block font-mono text-[13px] font-semibold text-[var(--landing-accent)]">
+                    {feature.label}
+                  </span>
+                  <h3 className="mb-4 text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
+                    {feature.title}
+                  </h3>
+                  <p className="max-w-md text-[16px] leading-[1.7] text-fd-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+
+                {/* Code side */}
+                <div className="overflow-hidden rounded-xl border border-white/[0.08] shadow-2xl shadow-black/25 ring-1 ring-white/[0.04]">
+                  <div className="flex items-center gap-3 border-b border-white/[0.06] bg-[#16171a] px-4 py-2.5">
+                    <div className="flex gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+                    </div>
+                    <span className="font-mono text-[11px] text-white/30">example.tsx</span>
+                  </div>
+                  <div className="flex overflow-x-auto bg-[#0d0e11] py-4">
+                    <div className="select-none border-r border-white/[0.06] pl-4 pr-4 text-right font-mono text-[13px] leading-[1.8] text-white/15" aria-hidden="true">
+                      {feature.code.split('\n').map((_: string, j: number) => (
+                        <div key={j}>{j + 1}</div>
+                      ))}
+                    </div>
+                    <pre className="flex-1 px-4 font-mono text-[13px] leading-[1.8]">
+                      <code>{highlightCode(feature.code)}</code>
+                    </pre>
+                  </div>
+                </div>
               </div>
-              <h3 className="mb-2 text-[16px] font-bold text-fd-foreground">{item.title}</h3>
-              <p className="text-[15px] leading-relaxed text-fd-muted-foreground">
-                {item.description}
-              </p>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

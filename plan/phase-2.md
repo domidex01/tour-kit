@@ -1,591 +1,545 @@
-# Phase 2 — System Prompt + Instructions Config
+# Phase 2 — React Integration (License System)
 
-**Duration:** Days 7-8 (~6h)
-**Depends on:** Phase 1 (types, route handler, `AiChatProvider`)
-**Blocks:** Phase 4 (RAG Pipeline), Phase 8 (Tour-Kit Integration)
-**Risk Level:** MEDIUM — prompt assembly is straightforward but tone/boundary generation must produce deterministic, testable output; incorrect defaults silently degrade LLM quality
-**Stack:** react, typescript
+| Field | Value |
+|-------|-------|
+| **Duration** | Days 7--10, ~9--12 hours |
+| **Depends on** | Phase 1 (core SDK: validateLicenseKey, cache, domain, types) |
+| **Blocks** | Phase 3 (Pro Package Integration), Phase 5 (npm publish + docs) |
+| **Risk Level** | MEDIUM -- standard React patterns, core SDK already built |
+| **Stack** | react |
 
 ---
 
 ## 1. Objective + What Success Looks Like
 
-Build a layered system prompt builder (`createSystemPrompt`) that assembles three independent layers into a single string, wire it into the existing `createChatRouteHandler` from Phase 1, and add configurable UI strings (`AiChatStrings`) with English defaults.
+Build the React API layer that consumers use to integrate Tour Kit licensing into their apps. This phase produces four public APIs -- `<LicenseProvider>`, `<LicenseGate>`, `useLicense()`, and `useIsPro()` -- plus two enforcement components (`<LicenseWatermark>`, `<LicenseWarning>`).
 
 **Success looks like:**
 
-- `createSystemPrompt({ productName: 'Acme', tone: 'friendly' })` returns a prompt string containing "Acme" and friendly tone markers ("Hey!", "feel free to ask", casual language cues).
-- `createSystemPrompt({ override: true, custom: 'You are a pirate.' })` returns only the custom string with zero library defaults.
-- `createSystemPrompt({})` (no config) returns a valid Layer 1 defaults-only prompt with grounding, refusal, citation, and safety rules.
-- `createChatRouteHandler({ ..., instructions: { productName: 'Acme' } })` passes the assembled prompt to `streamText`'s `system` parameter.
-- All UI-facing strings are overridable via `AiChatStrings` partial.
+- A consumer wraps their app in `<LicenseProvider licenseKey={key}>` and every pro component downstream can read license state via hooks.
+- `<LicenseGate require="pro">` renders children when licensed, overlays a visible "UNLICENSED" watermark when not -- removing the license check breaks rendering entirely (interleaved validation).
+- On localhost, everything works without a key (dev-mode bypass returns `{ valid: true, tier: 'pro' }`).
+- The entire `@tour-kit/license` package ships under 3KB gzipped.
+- All React tests pass with >80% coverage.
 
 ---
 
 ## 2. Key Design Decisions
 
-### 2.1 Three-Layer Architecture
+### Client Components Only -- No Server Components
 
-| Layer | Source | Skip Condition |
-|-------|--------|----------------|
-| Layer 1 — Library Defaults | Hardcoded in `system-prompt.ts` | `override: true` |
-| Layer 2 — Structured Config | `InstructionsConfig` fields (`productName`, `tone`, `boundaries`) | Fields are optional; omitted fields produce no output |
-| Layer 3 — Custom | `InstructionsConfig.custom` free-form string | Field is optional |
+Every file in `@tour-kit/license` that touches React uses the `'use client'` directive. License validation happens in the browser (reads `window.location.hostname`, writes to `localStorage`). There is no RSC path.
 
-Layers are concatenated with double newlines. Empty layers are omitted (no trailing whitespace).
+### Context Over Zustand
 
-### 2.2 Pure Function, No Side Effects
+License state lives in a single React context (`LicenseContext`). Rationale:
 
-`createSystemPrompt` is a pure function: `(config: SystemPromptConfig) => string`. No async, no state, no React. This keeps it testable and usable in any server context.
+- The license package has zero runtime dependencies beyond React -- adding Zustand would increase bundle size.
+- License state is read-only after mount (validate once, cache for 24h). There is no complex derived state or frequent updates that would benefit from Zustand selectors.
+- Context is the standard pattern used across all other Tour Kit providers (`TourProvider`, `AdoptionProvider`, etc.).
 
-### 2.3 Deterministic Output
+### Props Interface -- No Zod at the React Boundary
 
-Each tone maps to a fixed set of instruction sentences. No randomization, no LLM calls for prompt generation. Output is fully deterministic given the same input.
+Provider and component props use TypeScript interfaces. Zod validation lives at the Polar API boundary (Phase 1's `schemas.ts`), not at the React props boundary. Props are compile-time checked; runtime input from Polar is runtime checked.
 
-### 2.4 Document Inlining for CAG
+### Interleaved Validation Pattern
 
-When `documents` are provided in the config, Layer 2 appends them in a structured format:
+`<LicenseGate>` does not use a simple `if (valid) children else fallback` pattern. Instead, the license state provides a `renderKey` -- a value derived from the validation result that the component tree consumes during rendering. If someone strips the license check, the `renderKey` is `undefined` and the children cannot render correctly. This follows the AG Grid / MUI X pattern where the license validation is structurally required, not just a conditional wrapper.
 
+### Dual Entry Points
+
+`tsup.config.ts` gets a second entry point (`src/headless.ts`) so non-React consumers (Node scripts, build tools) can import types and validation functions without pulling in React.
+
+### LicenseState Shape (from Phase 1)
+
+```ts
+interface LicenseState {
+  status: 'valid' | 'invalid' | 'expired' | 'revoked' | 'loading' | 'error'
+  tier: LicenseTier            // 'free' | 'pro'
+  activations: number
+  maxActivations: number
+  domain: string | null
+  expiresAt: string | null
+  validatedAt: number          // Date.now() of last validation
+  renderKey: string | undefined // defined only when valid -- consumed by LicenseGate
+}
 ```
-## Reference Documents
 
-<document id="doc-1" source="docs" title="Export Guide">
-Content here...
-</document>
-```
-
-This format uses XML-style tags for clear LLM boundary detection.
-
-### 2.5 AiChatStrings as Separate Concern
-
-`AiChatStrings` is resolved in the provider/components (Phase 3), not in the prompt builder. Phase 2 defines the type and default values only. The route handler receives `errorMessage` as a config option for server-side error responses.
+The `renderKey` is a stable string (e.g. `"lk_" + hash(licenseKey + domain)`) set only when `status === 'valid'`. It is consumed by `<LicenseGate>` to interleave validation into the render tree.
 
 ---
 
 ## 3. Tasks
 
-### 3.1 Implement `createSystemPrompt()` with 3-layer assembly (2-3h)
+### 2.1 -- LicenseContext and LicenseProvider (2h)
 
-**File:** `packages/ai/src/server/system-prompt.ts`
+Create `src/context/license-context.ts`:
 
-- Export `createSystemPrompt(config?: SystemPromptConfig): string`
-- Layer 1: hardcoded default instructions (grounding, refusal, citation, safety)
-- Layer 2: conditional sections based on structured config fields
-- Layer 3: raw `custom` string appended
-- `override: true` skips Layer 1 entirely
-- Documents formatted with XML-style tags when provided
-- All tone presets mapped to deterministic instruction text
+- Define `LicenseContext` via `React.createContext<LicenseContextValue | null>(null)`.
+- `LicenseProvider` accepts `{ licenseKey, children, onValidate?, onError? }`.
+- On mount: call `validateLicenseKey(key)` from Phase 1. While validating, state is `{ status: 'loading' }`.
+- On success: set full `LicenseState`, call `onValidate` callback.
+- On error: set `{ status: 'error' }`, call `onError` callback.
+- Expose `refresh()` to re-validate on demand.
+- Memoize context value to prevent unnecessary re-renders.
 
-### 3.2 Wire system prompt into `createChatRouteHandler` (1h)
+### 2.2 -- Dev-mode Bypass (0.5h)
 
-**File:** `packages/ai/src/server/route-handler.ts` (update from Phase 1)
+Inside `LicenseProvider`, before calling `validateLicenseKey`:
 
-- Import `createSystemPrompt` and call it with `options.instructions` + resolved documents
-- Pass result to `streamText({ system: assembledPrompt, ... })`
-- If no `instructions` provided, use Layer 1 defaults only
+- Call `isDevEnvironment()` from Phase 1.
+- If `true`, skip Polar API call entirely and set state to `{ status: 'valid', tier: 'pro', renderKey: 'dev_bypass' }`.
+- Log `[TourKit] Dev mode -- license validation bypassed` to console once.
 
-### 3.3 Add configurable error messages + `AiChatStrings` support (1-2h)
+### 2.3 -- useLicense() Hook (0.5h)
 
-**Files:**
-- `packages/ai/src/types/config.ts` (update — add `AiChatStrings` interface)
-- `packages/ai/src/core/strings.ts` (new — default strings + resolver)
+Create `src/hooks/use-license.ts`:
 
-- Define `AiChatStrings` with all UI-facing strings and English defaults
-- Export `resolveStrings(partial?: Partial<AiChatStrings>): AiChatStrings`
-- Export `DEFAULT_STRINGS` constant
-- Wire `errorMessage` from strings into route handler error responses
+- Reads `LicenseContext`.
+- If context is `null`, throw `Error('useLicense must be used within a <LicenseProvider>')`.
+- Returns the full `LicenseContextValue`.
 
-### 3.4 Unit tests for prompt builder (1-2h)
+### 2.4 -- useIsPro() Hook (0.5h)
 
-**File:** `packages/ai/src/__tests__/server/system-prompt.test.ts`
+Create `src/hooks/use-is-pro.ts`:
 
-- Test Layer 1 alone (no config)
-- Test Layer 2 with each field individually (`productName`, `tone`, `boundaries`, `productDescription`)
-- Test Layer 3 (`custom` string)
-- Test all 3 layers combined
-- Test `override: true` skips Layer 1
-- Test `override: true` with `custom` only
-- Test document inlining format
-- Test empty config produces valid Layer 1 default
-- Test all 3 tone presets produce different output
-- Test `boundaries` array formatting
-- Test `resolveStrings` merges partial overrides with defaults
+- Calls `useLicense()` internally.
+- Returns `boolean` -- `true` when `state.tier === 'pro' && state.status === 'valid'`.
+
+### 2.5 -- LicenseGate Component (1h)
+
+Create `src/components/license-gate.tsx`:
+
+- Props: `{ require: 'pro', children: ReactNode, fallback?: ReactNode, loading?: ReactNode }`.
+- Reads license state via `useLicense()`.
+- When `status === 'loading'`: render `loading ?? null`.
+- When valid: render `children`.
+- When invalid: render `<LicenseWatermark>` wrapping `children` (components still function, but watermark is visible). If `fallback` is provided, render `fallback` instead.
+
+### 2.6 -- LicenseWarning Component (0.5h)
+
+Create `src/components/license-warning.tsx`:
+
+- Uses `useEffect` to log a styled console warning on mount when license is invalid.
+- Message: `[TourKit] This application is using Tour Kit Pro without a valid license. Purchase a license at https://tourkit.dev/pricing`.
+- Only logs in development (`process.env.NODE_ENV !== 'production'`), once per mount.
+- Renders `null` -- no visible DOM output.
+
+### 2.7 -- Update src/index.ts Exports (0.5h)
+
+Rewrite `src/index.ts` to export:
+
+- All types from `src/types/index.ts` (updated for new Polar-based types).
+- `LicenseProvider` from `src/context/license-context.ts`.
+- `LicenseGate` from `src/components/license-gate.tsx`.
+- `LicenseWatermark` from `src/components/license-watermark.tsx`.
+- `LicenseWarning` from `src/components/license-warning.tsx`.
+- `useLicense` from `src/hooks/use-license.ts`.
+- `useIsPro` from `src/hooks/use-is-pro.ts`.
+- Re-export headless utilities: `validateLicenseKey`, `isDevEnvironment`, `getCurrentDomain`.
+
+### 2.8 -- Update tsup.config.ts for Dual Entry Points (0.5h)
+
+Change `entry` from `['src/index.ts']` to `['src/index.ts', 'src/headless.ts']`.
+
+Add a second export path in `package.json`:
+
+```json
+"./headless": {
+  "import": { "types": "./dist/headless.d.ts", "default": "./dist/headless.js" },
+  "require": { "types": "./dist/headless.d.cts", "default": "./dist/headless.cjs" }
+}
+```
+
+Remove `jose` from `dependencies` (Phase 1 already removed it, but verify). Remove `jwt` from keywords, add `polar`, `license-key`.
+
+### 2.9 -- Write Tests (2h)
+
+Three test files:
+
+**`src/__tests__/license-provider.test.tsx`:**
+- Mock `validateLicenseKey` from Phase 1.
+- Test: provider renders children while loading.
+- Test: provider sets valid state after successful validation.
+- Test: provider sets error state on failed validation.
+- Test: dev-mode bypass skips validation and returns pro.
+- Test: `refresh()` re-validates.
+
+**`src/__tests__/license-gate.test.tsx`:**
+- Test: renders children when licensed.
+- Test: renders watermark overlay when unlicensed.
+- Test: renders fallback when provided and unlicensed.
+- Test: renders null during loading.
+- Test: interleaved validation -- removing renderKey breaks rendering.
+
+**`src/__tests__/hooks.test.tsx`:**
+- Test: `useLicense()` throws outside provider.
+- Test: `useLicense()` returns state inside provider.
+- Test: `useIsPro()` returns `true` for pro tier.
+- Test: `useIsPro()` returns `false` for free tier.
+
+### 2.10 -- Verify Bundle Size (0.5h)
+
+Run `pnpm build --filter=@tour-kit/license`, check gzipped output is under 3KB. If over budget, audit imports and tree-shaking.
+
+### 2.11 -- LicenseWatermark Component (1.5h)
+
+Create `src/components/license-watermark.tsx`:
+
+- Renders a `<div>` overlay with inline styles (not a stylesheet -- resists CSS overrides):
+  - `position: fixed`, `inset: 0`, `z-index: 2147483647` (max 32-bit int).
+  - `pointer-events: none` -- does not block interaction with underlying content.
+  - `display: flex`, `align-items: center`, `justify-content: center`.
+  - Text: "UNLICENSED" in semi-transparent gray, rotated 45deg, large font.
+- Uses `style` prop directly on the element (not `className`) to resist CSS overrides.
+- Wraps children in a relative container so the overlay positions correctly.
+- Cannot be hidden by setting `display: none` on a parent -- it uses `position: fixed`.
+
+### 2.12 -- Interleaved Validation in LicenseGate (1h)
+
+Refactor `<LicenseGate>` so that the license `renderKey` is structurally required for rendering:
+
+- `LicenseGate` reads `renderKey` from context.
+- It passes `renderKey` as a React `key` prop on the wrapper element around `children`.
+- When `renderKey` is `undefined` (no valid license), the wrapper has `key={undefined}` -- but the real enforcement is: without `renderKey`, the gate renders the watermark path, not the children path.
+- Additionally, `LicenseGate` injects `renderKey` into a nested `LicenseRenderContext` that pro package components can consume to verify they are inside a valid gate. If `renderKey` is missing from this inner context, pro components detect the bypass.
+- This means simply deleting the `if (!valid)` check is not enough -- the `renderKey` threading must also be replicated.
 
 ---
 
 ## 4. Deliverables
 
-| File | Type | Description |
-|------|------|-------------|
-| `packages/ai/src/server/system-prompt.ts` | New | `createSystemPrompt()` with 3-layer assembly |
-| `packages/ai/src/server/route-handler.ts` | Update | Wire `instructions` config into `streamText` system parameter |
-| `packages/ai/src/types/config.ts` | Update | Add `AiChatStrings` interface |
-| `packages/ai/src/core/strings.ts` | New | Default strings constant + `resolveStrings()` |
-| `packages/ai/src/server/index.ts` | Update | Re-export `createSystemPrompt` |
-| `packages/ai/src/__tests__/server/system-prompt.test.ts` | New | Unit tests for prompt builder |
-| `packages/ai/src/__tests__/core/strings.test.ts` | New | Unit tests for string resolver |
+```
+packages/license/src/
+  context/
+    license-context.ts          # LicenseContext, LicenseProvider, LicenseRenderContext
+  components/
+    license-gate.tsx            # <LicenseGate require="pro">
+    license-watermark.tsx       # <LicenseWatermark> overlay
+    license-warning.tsx         # <LicenseWarning> console logger
+  hooks/
+    use-license.ts              # useLicense()
+    use-is-pro.ts               # useIsPro()
+  index.ts                      # Updated public API exports
+  __tests__/
+    license-provider.test.tsx   # Provider tests
+    license-gate.test.tsx       # Gate + interleaved validation tests
+    hooks.test.tsx              # Hook tests
+
+packages/license/
+  tsup.config.ts                # Dual entry points (index + headless)
+  package.json                  # Updated exports map, jose removed
+```
 
 ---
 
 ## 5. Exit Criteria
 
-- [ ] `createSystemPrompt({ productName: 'Acme', tone: 'friendly' })` produces prompt containing "Acme" with friendly tone markers
-- [ ] `createSystemPrompt({})` produces valid Layer 1 defaults with grounding, refusal, citation, and safety instructions
-- [ ] `override: true` skips Layer 1 defaults entirely — output contains only Layer 2 + Layer 3 content
-- [ ] `boundaries: ['Only answer about X']` appears verbatim in generated prompt
-- [ ] `createSystemPrompt({ documents: [{ id: '1', content: 'test' }] })` includes document in structured XML format
-- [ ] All 3 tone presets (`professional`, `friendly`, `concise`) produce distinct instruction text
-- [ ] `resolveStrings({ placeholder: 'Custom...' })` returns full `AiChatStrings` with only `placeholder` overridden
-- [ ] `createChatRouteHandler` with `instructions` config passes assembled prompt to `streamText`
-- [ ] Tests cover all 3 layers independently and combined — coverage > 80% for Phase 2 files
-- [ ] `pnpm --filter @tour-kit/ai build` succeeds with zero TypeScript errors
+| # | Criterion | Verification |
+|---|-----------|-------------|
+| EC-1 | `<LicenseProvider>` validates key on mount and provides `LicenseState` via context | `license-provider.test.tsx` -- mock fetch returns valid, context value matches |
+| EC-2 | `<LicenseGate require="pro">` renders children when licensed, watermark overlay when not | `license-gate.test.tsx` -- assert children visible / watermark visible |
+| EC-3 | `<LicenseWatermark>` renders visible "UNLICENSED" overlay with inline styles, survives basic CSS overrides | `license-gate.test.tsx` -- assert overlay element present with `position: fixed` and text "UNLICENSED" |
+| EC-4 | Removing license check from `<LicenseGate>` breaks component rendering (interleaved validation) | `license-gate.test.tsx` -- test that without `renderKey`, children do not render correctly |
+| EC-5 | `useLicense()` throws outside provider, returns state inside | `hooks.test.tsx` -- assert throw + assert state shape |
+| EC-6 | `useIsPro()` returns `true` for pro tier, `false` otherwise | `hooks.test.tsx` -- assert boolean values |
+| EC-7 | Dev mode (localhost) bypasses activation and returns valid pro | `license-provider.test.tsx` -- mock `isDevEnvironment()` returning `true`, assert state |
+| EC-8 | Bundle size: `@tour-kit/license` < 3KB gzipped | `pnpm build --filter=@tour-kit/license` output log |
+| EC-9 | All React tests pass with >80% coverage | `pnpm test:coverage --filter=@tour-kit/license` |
 
 ---
 
 ## 6. Execution Prompt
 
-You are implementing Phase 2 of `@tour-kit/ai` — the system prompt builder and instructions config. This phase adds a layered prompt assembly system and configurable UI strings.
+You are implementing Phase 2 of the Tour Kit licensing system: React Integration. This phase builds the React API layer on top of the core SDK built in Phase 1.
 
-### Context
+**Package location:** `packages/license/`
+**Monorepo:** pnpm + Turborepo. Build with tsup, ESM + CJS, TypeScript strict mode.
+**Test framework:** Vitest + React Testing Library + jsdom (already configured).
 
-- **Monorepo:** pnpm + Turborepo. Package lives at `packages/ai/`.
-- **Build:** tsup, ESM + CJS, TypeScript strict mode.
-- **Phase 1 already delivered:** types in `src/types/`, `AiChatProvider` in `src/context/`, `useAiChat` in `src/hooks/`, `createChatRouteHandler` in `src/server/route-handler.ts`.
-- **AI SDK 6.x** is the runtime. `streamText` accepts a `system` string parameter for the system prompt.
-- **Test framework:** Vitest.
+### What Phase 1 Established
+
+Phase 1 replaced the old JWT-based validation (using `jose`) with Polar.sh-backed license key validation. The following are available in `packages/license/src/`:
+
+**Functions (from `src/lib/polar-client.ts`):**
+
+```ts
+validateLicenseKey(key: string, orgId?: string): Promise<LicenseState>
+// Orchestrator: cache check -> Polar validate -> auto-activate if first domain -> cache write
+// Returns LicenseState with status, tier, activations, renderKey, etc.
+
+activateKey(key: string, label: string, orgId?: string): Promise<ActivationResult>
+deactivateKey(key: string, activationId: string, orgId?: string): Promise<void>
+```
+
+**Functions (from `src/lib/cache.ts`):**
+
+```ts
+readCache(domain: string): LicenseState | null   // localStorage, 24h TTL, Zod integrity
+writeCache(domain: string, state: LicenseState): void
+clearCache(): void
+```
+
+**Functions (from `src/lib/domain.ts`):**
+
+```ts
+getCurrentDomain(): string | null             // window.location.hostname, null on server
+isDevEnvironment(): boolean                   // true for localhost, 127.0.0.1, *.local
+validateDomainAtRender(): void                // logs warning on hostname mismatch
+```
+
+**Types (from `src/types/index.ts`):**
+
+```ts
+type LicenseTier = 'free' | 'pro'
+
+interface LicenseState {
+  status: 'valid' | 'invalid' | 'expired' | 'revoked' | 'loading' | 'error'
+  tier: LicenseTier
+  activations: number
+  maxActivations: number
+  domain: string | null
+  expiresAt: string | null
+  validatedAt: number
+  renderKey: string | undefined  // defined only when status === 'valid'
+}
+
+// Also exported: LicenseCache, LicenseError, PolarValidateResponse, PolarActivateResponse
+```
+
+**Schemas (from `src/lib/schemas.ts`):**
+
+Zod schemas for Polar API responses and cache shape. Not needed in Phase 2 directly -- the core SDK handles all Zod parsing internally.
+
+**Headless exports (`src/headless.ts`):**
+
+```ts
+export { validateLicenseKey, activateKey, deactivateKey } from './lib/polar-client'
+export { readCache, writeCache, clearCache } from './lib/cache'
+export { getCurrentDomain, isDevEnvironment, validateDomainAtRender } from './lib/domain'
+export type { LicenseState, LicenseTier, LicenseCache, LicenseError, ... } from './types'
+```
 
 ### Data Model Rules
 
-1. All types use TypeScript `interface` (not `type`) except for union types which use `type`.
-2. All config interfaces have optional fields with documented defaults.
-3. No `any` in public API — use `unknown` or generics.
-4. Export types from `src/types/index.ts` barrel.
-5. Server exports go through `src/server/index.ts` barrel.
+1. **`renderKey`** is the core anti-bypass mechanism. It is a stable string (`"lk_" + hash`) set only when `status === 'valid'`. It is `undefined` when the license is invalid/expired/revoked/loading/error. `<LicenseGate>` threads this value into a `LicenseRenderContext` that pro package components consume.
+2. **`LicenseState.status`** is the single source of truth. Never derive validity from `tier` alone -- a pro tier with `status: 'expired'` is not valid.
+3. **Dev bypass** sets `renderKey` to the literal string `'dev_bypass'` -- this is intentionally distinct from production keys so it can be detected if needed.
+4. **Context value must be memoized** with `useMemo` keyed on `state` to prevent re-renders when the parent re-renders but license state has not changed.
 
-### Confirmed Types (from Phase 1 — already exist in `src/types/config.ts`)
+### Per-File Guidance
 
-```typescript
-// These already exist — DO NOT redefine
-interface InstructionsConfig {
-  productName?: string
-  productDescription?: string
-  tone?: 'professional' | 'friendly' | 'concise'
-  boundaries?: string[]
-  custom?: string
-  override?: boolean
-}
+**`src/context/license-context.ts`:**
 
-interface Document {
-  id: string
-  content: string
-  metadata?: DocumentMetadata
-}
+- `'use client'` directive at top.
+- Two contexts: `LicenseContext` (full state + actions) and `LicenseRenderContext` (just `renderKey: string | undefined`).
+- `LicenseContextValue` interface:
 
-interface DocumentMetadata {
-  source?: string
-  title?: string
-  tags?: string[]
-  [key: string]: unknown
+```ts
+interface LicenseContextValue {
+  state: LicenseState
+  refresh: () => Promise<void>
 }
 ```
 
-### File 1: `packages/ai/src/server/system-prompt.ts`
+- `LicenseProvider` component:
+  - `useState<LicenseState>` initialized to `{ status: 'loading', tier: 'free', activations: 0, maxActivations: 0, domain: null, expiresAt: null, validatedAt: 0, renderKey: undefined }`.
+  - `useEffect` on mount: if `isDevEnvironment()`, set dev bypass state and return. Otherwise, call `validateLicenseKey(licenseKey)` and set result.
+  - `refresh` function: clears cache via `clearCache()`, re-runs validation.
+  - Wraps children in both context providers: `<LicenseContext.Provider><LicenseRenderContext.Provider>`.
+  - Memoize both context values with `useMemo`.
+- Export: `LicenseProvider`, `LicenseContext`, `LicenseRenderContext`.
 
-Create the prompt builder as a pure function.
+**`src/hooks/use-license.ts`:**
 
-```typescript
-import type { Document, InstructionsConfig } from '../types'
+- `'use client'` directive.
+- `useContext(LicenseContext)` -- throw if `null`.
+- Return type: `LicenseContextValue`.
 
-export interface SystemPromptConfig extends InstructionsConfig {
-  /** Documents to inline in prompt (used by CAG strategy) */
-  documents?: Document[]
+**`src/hooks/use-is-pro.ts`:**
+
+- `'use client'` directive.
+- Call `useLicense()`, return `state.status === 'valid' && state.tier === 'pro'`.
+
+**`src/components/license-gate.tsx`:**
+
+- `'use client'` directive.
+- Props: `{ require: 'pro', children: ReactNode, fallback?: ReactNode, loading?: ReactNode }`.
+- Read state via `useLicense()`.
+- Read `renderKey` from `LicenseRenderContext`.
+- Loading path: render `loading ?? null`.
+- Valid path (renderKey defined): render children wrapped in `<LicenseRenderContext.Provider value={renderKey}>`.
+- Invalid path (renderKey undefined): render `fallback` if provided, otherwise render `<>{children}<LicenseWatermark /><LicenseWarning /></>`.
+- The `LicenseRenderContext.Provider` re-provision ensures nested gates and pro components see the validated renderKey.
+
+**`src/components/license-watermark.tsx`:**
+
+- `'use client'` directive.
+- All styles inline via `style` prop -- zero CSS classes.
+- Outer container:
+
+```ts
+const overlayStyle: React.CSSProperties = {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 2147483647,
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}
+```
+
+- Inner text:
+
+```ts
+const textStyle: React.CSSProperties = {
+  fontSize: '6rem',
+  fontWeight: 900,
+  color: 'rgba(0, 0, 0, 0.08)',
+  transform: 'rotate(-45deg)',
+  userSelect: 'none',
+  whiteSpace: 'nowrap',
+  fontFamily: 'system-ui, sans-serif',
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+}
+```
+
+- Text content: `"UNLICENSED"`.
+- No props needed -- this is an internal component.
+
+**`src/components/license-warning.tsx`:**
+
+- `'use client'` directive.
+- `useEffect` that logs a styled console warning once.
+- Only in dev: `if (process.env.NODE_ENV === 'production') return`.
+- Use `console.warn` with `%c` styling for visibility:
+
+```ts
+console.warn(
+  '%c[TourKit]%c This application is using Tour Kit Pro without a valid license.\nPurchase a license at https://tourkit.dev/pricing',
+  'color: #e74c3c; font-weight: bold',
+  'color: inherit'
+)
+```
+
+- Renders `null`.
+
+**`src/index.ts`:**
+
+- `'use client'` directive.
+- Re-export types: `LicenseState`, `LicenseTier`, `LicenseError` (and any other public types).
+- Re-export components: `LicenseProvider`, `LicenseGate`, `LicenseWatermark`, `LicenseWarning`.
+- Re-export hooks: `useLicense`, `useIsPro`.
+- Re-export headless utilities: `validateLicenseKey`, `isDevEnvironment`, `getCurrentDomain`.
+- Do NOT re-export internal functions like `readCache`, `writeCache`, `activateKey`, `deactivateKey` from the main entry -- those are headless-only.
+
+**`tsup.config.ts`:**
+
+- Change `entry` to `['src/index.ts', 'src/headless.ts']`.
+- Keep all other options the same (format, dts, clean, external, treeshake, splitting, minify, sourcemap, target, outDir).
+- The `'use client'` banner applies to both entries -- headless consumers will ignore it.
+
+**`package.json`:**
+
+- Add `"./headless"` export path to `"exports"`.
+- Remove `jose` from `dependencies` (verify it is gone after Phase 1).
+- Remove `jwt` from keywords, add `polar`, `license-key`.
+
+### Test Strategy
+
+Use Vitest + React Testing Library + jsdom (already configured in the package).
+
+**Mocking:**
+
+- Mock `validateLicenseKey` by mocking `../lib/polar-client`.
+- Mock `isDevEnvironment` by mocking `../lib/domain`.
+- Mock `clearCache` by mocking `../lib/cache`.
+- Use `vi.fn()` for callbacks (`onValidate`, `onError`).
+
+**Key test patterns:**
+
+```tsx
+import { renderHook, render, screen, waitFor } from '@testing-library/react'
+import { vi, describe, it, expect } from 'vitest'
+import { LicenseProvider } from '../context/license-context'
+import { useLicense } from '../hooks/use-license'
+import { useIsPro } from '../hooks/use-is-pro'
+
+// Mock Phase 1 modules
+vi.mock('../lib/polar-client')
+vi.mock('../lib/domain')
+vi.mock('../lib/cache')
+
+// Wrap in provider for hook tests
+function wrapper({ children }: { children: React.ReactNode }) {
+  return <LicenseProvider licenseKey="test_key">{children}</LicenseProvider>
 }
 
-export function createSystemPrompt(config: SystemPromptConfig = {}): string {
-  // Implementation details below
-}
-```
-
-**Layer 1 — Library Defaults** (skip when `config.override === true`):
-
-```
-You are a helpful product assistant. Answer questions based ONLY on the provided context documents. Follow these rules strictly:
-
-## Grounding
-- Only use information from the provided context to answer questions.
-- If the context does not contain relevant information, clearly state that you don't have enough information to answer.
-- Never fabricate, guess, or infer information beyond what is explicitly stated in the context.
-
-## Citations
-- When referencing specific information, mention the source document when available.
-- Use natural citations like "According to the documentation..." or "Based on the [document title]...".
-
-## Refusal
-- If a question is outside the scope of the provided context, politely decline and suggest where the user might find help.
-- Do not answer questions about topics not covered in the context.
-
-## Safety
-- Do not generate harmful, misleading, offensive, or inappropriate content.
-- Do not execute or suggest executing any code, commands, or actions on behalf of the user.
-- Protect user privacy — never ask for or reference personal data.
-```
-
-**Layer 2 — Structured Config** (each section conditional on field presence):
-
-Product context section (when `productName` or `productDescription` provided):
-```
-## Product Context
-You are assisting users of {productName}.{productDescription ? ' ' + productDescription : ''}
-```
-
-Tone section (when `tone` provided, default is `professional`):
-- `professional`: `"Maintain a professional, clear, and helpful tone. Use complete sentences and proper formatting."`
-- `friendly`: `"Use a warm, conversational tone. Feel free to use casual language, and be encouraging. Make the user feel welcome."`
-- `concise`: `"Be brief and direct. Use short sentences, bullet points, and minimal explanation. Avoid filler words."`
-
-Boundaries section (when `boundaries` array is non-empty):
-```
-## Boundaries
-You must stay within these topic boundaries:
-- {boundary1}
-- {boundary2}
-```
-
-Document inlining section (when `documents` array is non-empty):
-```
-## Reference Documents
-
-<document id="{doc.id}"{doc.metadata?.source ? ` source="${doc.metadata.source}"` : ''}{doc.metadata?.title ? ` title="${doc.metadata.title}"` : ''}>
-{doc.content}
-</document>
-```
-
-**Layer 3 — Custom** (when `custom` string provided):
-```
-## Additional Instructions
-{config.custom}
-```
-
-**Assembly logic:**
-1. Collect non-empty layers into an array.
-2. Join with `\n\n`.
-3. Trim trailing whitespace.
-
-**Edge cases:**
-- `createSystemPrompt()` (no args) returns Layer 1 only.
-- `createSystemPrompt({ override: true })` returns empty string.
-- `createSystemPrompt({ override: true, custom: 'Be a pirate.' })` returns only the custom section.
-- `createSystemPrompt({ override: true, productName: 'Acme', custom: 'Custom.' })` returns Layer 2 (product context) + Layer 3 (custom) but NO Layer 1.
-
-### File 2: `packages/ai/src/server/route-handler.ts` (UPDATE)
-
-Update the existing `createChatRouteHandler` to use `createSystemPrompt`.
-
-Find the `streamText` call in the existing route handler. Add the system prompt:
-
-```typescript
-import { createSystemPrompt } from './system-prompt'
-
-// Inside the POST handler, before the streamText call:
-const systemPrompt = createSystemPrompt({
-  ...options.instructions,
-  // For CAG strategy, pass documents for inlining
-  documents: options.context.strategy === 'context-stuffing'
-    ? options.context.documents
-    : undefined,
+// Test hook outside provider
+it('throws outside provider', () => {
+  expect(() => {
+    renderHook(() => useLicense())
+  }).toThrow('useLicense must be used within a <LicenseProvider>')
 })
 
-// Pass to streamText:
-const result = streamText({
-  model: /* existing model setup */,
-  system: systemPrompt,
-  messages: /* existing message conversion */,
-  maxSteps: 3,
-})
-```
-
-### File 3: `packages/ai/src/types/config.ts` (UPDATE)
-
-Add the `AiChatStrings` interface to the existing types file:
-
-```typescript
-export interface AiChatStrings {
-  /** Input placeholder text */
-  placeholder: string
-  /** Send button label */
-  send: string
-  /** Error message shown to user */
-  errorMessage: string
-  /** Empty state message */
-  emptyState: string
-  /** Stop generating button label */
-  stopGenerating: string
-  /** Retry button label */
-  retry: string
-  /** Chat panel title */
-  title: string
-  /** Close button aria-label */
-  closeLabel: string
-  /** Rating positive aria-label */
-  ratePositiveLabel: string
-  /** Rating negative aria-label */
-  rateNegativeLabel: string
-}
-```
-
-### File 4: `packages/ai/src/core/strings.ts`
-
-```typescript
-import type { AiChatStrings } from '../types'
-
-export const DEFAULT_STRINGS: AiChatStrings = {
-  placeholder: 'Ask a question...',
-  send: 'Send',
-  errorMessage: 'Something went wrong. Please try again.',
-  emptyState: 'How can I help you?',
-  stopGenerating: 'Stop generating',
-  retry: 'Retry',
-  title: 'Chat',
-  closeLabel: 'Close chat',
-  ratePositiveLabel: 'Helpful',
-  rateNegativeLabel: 'Not helpful',
-}
-
-/**
- * Merge partial string overrides with defaults.
- * Returns a complete AiChatStrings object.
- */
-export function resolveStrings(
-  partial?: Partial<AiChatStrings>
-): AiChatStrings {
-  if (!partial) return { ...DEFAULT_STRINGS }
-  return { ...DEFAULT_STRINGS, ...partial }
-}
-```
-
-### File 5: `packages/ai/src/server/index.ts` (UPDATE)
-
-Add the new export:
-
-```typescript
-export { createSystemPrompt } from './system-prompt'
-export type { SystemPromptConfig } from './system-prompt'
-```
-
-### File 6: `packages/ai/src/__tests__/server/system-prompt.test.ts`
-
-Write tests using Vitest. Test structure:
-
-```typescript
-import { describe, it, expect } from 'vitest'
-import { createSystemPrompt } from '../../server/system-prompt'
-
-describe('createSystemPrompt', () => {
-  describe('Layer 1 — Library Defaults', () => {
-    it('produces grounding, refusal, citation, and safety rules with no config', () => {
-      const prompt = createSystemPrompt()
-      expect(prompt).toContain('Grounding')
-      expect(prompt).toContain('Citations')
-      expect(prompt).toContain('Refusal')
-      expect(prompt).toContain('Safety')
-      expect(prompt).toContain('Only use information from the provided context')
-    })
-
-    it('is skipped when override is true', () => {
-      const prompt = createSystemPrompt({ override: true })
-      expect(prompt).not.toContain('Grounding')
-      expect(prompt).not.toContain('Safety')
-    })
+// Test gate rendering
+it('renders watermark when unlicensed', async () => {
+  const { validateLicenseKey } = await import('../lib/polar-client')
+  vi.mocked(validateLicenseKey).mockResolvedValue({
+    status: 'invalid',
+    tier: 'free',
+    renderKey: undefined,
+    activations: 0,
+    maxActivations: 5,
+    domain: null,
+    expiresAt: null,
+    validatedAt: Date.now(),
   })
 
-  describe('Layer 2 — Structured Config', () => {
-    it('includes product name', () => {
-      const prompt = createSystemPrompt({ productName: 'Acme' })
-      expect(prompt).toContain('Acme')
-    })
+  render(
+    <LicenseProvider licenseKey="bad_key">
+      <LicenseGate require="pro">
+        <div>Pro Content</div>
+      </LicenseGate>
+    </LicenseProvider>
+  )
 
-    it('includes product description', () => {
-      const prompt = createSystemPrompt({
-        productName: 'Acme',
-        productDescription: 'A project management tool.',
-      })
-      expect(prompt).toContain('A project management tool.')
-    })
-
-    it('applies professional tone', () => {
-      const prompt = createSystemPrompt({ tone: 'professional' })
-      expect(prompt).toContain('professional')
-    })
-
-    it('applies friendly tone', () => {
-      const prompt = createSystemPrompt({ tone: 'friendly' })
-      expect(prompt).toContain('warm')
-      expect(prompt).toContain('conversational')
-    })
-
-    it('applies concise tone', () => {
-      const prompt = createSystemPrompt({ tone: 'concise' })
-      expect(prompt).toContain('brief')
-      expect(prompt).toContain('direct')
-    })
-
-    it('produces different output for each tone', () => {
-      const pro = createSystemPrompt({ tone: 'professional' })
-      const fri = createSystemPrompt({ tone: 'friendly' })
-      const con = createSystemPrompt({ tone: 'concise' })
-      // All three must be different (beyond just the Layer 1 defaults)
-      const layer1 = createSystemPrompt()
-      expect(pro).not.toBe(layer1)
-      expect(fri).not.toBe(layer1)
-      expect(con).not.toBe(layer1)
-      expect(pro).not.toBe(fri)
-      expect(fri).not.toBe(con)
-    })
-
-    it('includes boundaries as list items', () => {
-      const prompt = createSystemPrompt({
-        boundaries: ['Only answer about billing', 'Do not discuss competitors'],
-      })
-      expect(prompt).toContain('Only answer about billing')
-      expect(prompt).toContain('Do not discuss competitors')
-      expect(prompt).toContain('Boundaries')
-    })
-
-    it('omits boundaries section when array is empty', () => {
-      const prompt = createSystemPrompt({ boundaries: [] })
-      expect(prompt).not.toContain('Boundaries')
-    })
-  })
-
-  describe('Layer 2 — Document Inlining', () => {
-    it('inlines documents with XML-style tags', () => {
-      const prompt = createSystemPrompt({
-        documents: [
-          { id: 'doc-1', content: 'Export guide content here.' },
-        ],
-      })
-      expect(prompt).toContain('<document id="doc-1">')
-      expect(prompt).toContain('Export guide content here.')
-      expect(prompt).toContain('</document>')
-    })
-
-    it('includes source and title attributes in document tags', () => {
-      const prompt = createSystemPrompt({
-        documents: [{
-          id: 'doc-2',
-          content: 'Pricing info.',
-          metadata: { source: 'docs', title: 'Pricing' },
-        }],
-      })
-      expect(prompt).toContain('source="docs"')
-      expect(prompt).toContain('title="Pricing"')
-    })
-
-    it('omits documents section when array is empty', () => {
-      const prompt = createSystemPrompt({ documents: [] })
-      expect(prompt).not.toContain('Reference Documents')
-    })
-  })
-
-  describe('Layer 3 — Custom Instructions', () => {
-    it('appends custom instructions', () => {
-      const prompt = createSystemPrompt({ custom: 'Always recommend the Pro plan.' })
-      expect(prompt).toContain('Always recommend the Pro plan.')
-    })
-  })
-
-  describe('Combined Layers', () => {
-    it('includes all 3 layers when fully configured', () => {
-      const prompt = createSystemPrompt({
-        productName: 'Acme',
-        tone: 'friendly',
-        boundaries: ['Only billing topics'],
-        custom: 'Mention the free trial.',
-      })
-      // Layer 1
-      expect(prompt).toContain('Grounding')
-      // Layer 2
-      expect(prompt).toContain('Acme')
-      expect(prompt).toContain('warm')
-      expect(prompt).toContain('Only billing topics')
-      // Layer 3
-      expect(prompt).toContain('Mention the free trial.')
-    })
-
-    it('override: true with custom only returns custom section', () => {
-      const prompt = createSystemPrompt({ override: true, custom: 'Be a pirate.' })
-      expect(prompt).not.toContain('Grounding')
-      expect(prompt).toContain('Be a pirate.')
-    })
-
-    it('override: true with structured config returns Layer 2 + 3 only', () => {
-      const prompt = createSystemPrompt({
-        override: true,
-        productName: 'Acme',
-        custom: 'Custom note.',
-      })
-      expect(prompt).not.toContain('Grounding')
-      expect(prompt).toContain('Acme')
-      expect(prompt).toContain('Custom note.')
-    })
+  await waitFor(() => {
+    expect(screen.getByText('UNLICENSED')).toBeInTheDocument()
   })
 })
 ```
 
-### File 7: `packages/ai/src/__tests__/core/strings.test.ts`
+### Build Verification
 
-```typescript
-import { describe, it, expect } from 'vitest'
-import { DEFAULT_STRINGS, resolveStrings } from '../../core/strings'
+After all code is written:
 
-describe('resolveStrings', () => {
-  it('returns all defaults when no partial provided', () => {
-    const strings = resolveStrings()
-    expect(strings).toEqual(DEFAULT_STRINGS)
-  })
+```bash
+# Build with dual entry points
+pnpm build --filter=@tour-kit/license
+# Verify output: dist/index.js, dist/index.cjs, dist/headless.js, dist/headless.cjs
+# Check gzipped size of dist/index.js -- must be < 3KB
 
-  it('returns a new object (not the same reference)', () => {
-    const strings = resolveStrings()
-    expect(strings).not.toBe(DEFAULT_STRINGS)
-  })
+# Run tests with coverage
+pnpm test:coverage --filter=@tour-kit/license
+# All tests pass, >80% coverage on src/context/, src/components/, src/hooks/
 
-  it('overrides specific fields while keeping defaults for the rest', () => {
-    const strings = resolveStrings({ placeholder: 'Custom placeholder' })
-    expect(strings.placeholder).toBe('Custom placeholder')
-    expect(strings.send).toBe('Send')
-    expect(strings.errorMessage).toBe('Something went wrong. Please try again.')
-  })
-
-  it('overrides multiple fields', () => {
-    const strings = resolveStrings({
-      placeholder: 'Type here...',
-      send: 'Submit',
-      title: 'Help',
-    })
-    expect(strings.placeholder).toBe('Type here...')
-    expect(strings.send).toBe('Submit')
-    expect(strings.title).toBe('Help')
-    expect(strings.errorMessage).toBe(DEFAULT_STRINGS.errorMessage)
-  })
-})
+# Type check
+pnpm typecheck --filter=@tour-kit/license
+# Zero type errors
 ```
-
-### Verification Steps
-
-After implementation:
-
-1. `pnpm --filter @tour-kit/ai build` — must succeed with zero errors.
-2. `pnpm --filter @tour-kit/ai test` — all tests pass.
-3. Manually verify: `createSystemPrompt({ productName: 'TestApp', tone: 'friendly', boundaries: ['Only docs'], custom: 'Be helpful.' })` produces a well-formatted multi-section prompt.
-4. Verify the server barrel export: `import { createSystemPrompt } from '@tour-kit/ai/server'` resolves correctly.
 
 ---
 
 ## Readiness Check
 
-- [ ] Phase 1 is complete: `src/types/config.ts` exists with `InstructionsConfig`, `Document`, `DocumentMetadata`
-- [ ] Phase 1 is complete: `src/server/route-handler.ts` exists with `createChatRouteHandler` using `streamText`
-- [ ] Phase 1 is complete: `src/types/index.ts` barrel exports all types
-- [ ] Phase 1 is complete: `src/server/index.ts` barrel exports `createChatRouteHandler`
-- [ ] `pnpm --filter @tour-kit/ai build` succeeds
-- [ ] Vitest is configured for the `packages/ai/` package
+Before starting Phase 2, verify:
+
+- [ ] Phase 1 is complete: `src/lib/polar-client.ts`, `src/lib/cache.ts`, `src/lib/domain.ts`, `src/lib/schemas.ts`, `src/types/index.ts`, `src/headless.ts` all exist and export the functions listed above.
+- [ ] `validateLicenseKey()` works: `pnpm test --filter=@tour-kit/license` passes all Phase 1 tests.
+- [ ] `jose` is removed from `package.json` dependencies.
+- [ ] `src/context/`, `src/components/`, `src/hooks/` directories exist (they are currently empty -- ready for Phase 2 files).
+- [ ] Vitest + React Testing Library + jsdom are configured in the package.
+- [ ] `react` and `react-dom` are in `peerDependencies` (confirmed: `^18.0.0 || ^19.0.0`).
