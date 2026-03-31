@@ -457,6 +457,7 @@ export function TourProvider({
       target: BranchTarget,
       branchContext: BranchContext,
       actionId?: string
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: branch navigation with multiple target types
     ): Promise<void> => {
       if (!currentTour || !state.currentStep) return
 
@@ -762,6 +763,7 @@ export function TourProvider({
     handleBranchTarget,
   ])
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: step navigation with branch/loop handling
   const prev = React.useCallback(async () => {
     if (!state.isActive || !currentTour) return
 

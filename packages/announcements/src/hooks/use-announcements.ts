@@ -58,6 +58,7 @@ export function useAnnouncements(): UseAnnouncementsReturn {
       (filter: AnnouncementsFilter): AnnouncementState[] => {
         const results: AnnouncementState[] = []
 
+        // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: filter logic with multiple criteria
         context.announcements.forEach((state, id) => {
           const config = context.getConfig(id)
           if (!config) return

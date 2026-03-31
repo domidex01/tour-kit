@@ -59,6 +59,7 @@ const tourSteps = [
   { target: 'action', title: 'Quick actions', content: 'Create new items from here.' },
 ]
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: demo component with conditional rendering
 function TourDemo() {
   const [step, setStep] = useState<number | null>(null)
   const active = step !== null
@@ -69,7 +70,9 @@ function TourDemo() {
         {/* Sidebar */}
         <div
           className={`w-44 shrink-0 border-r border-fd-border bg-fd-muted/30 p-4 transition-all ${
-            active && step === 0 ? 'ring-2 ring-inset ring-[var(--tk-primary)]/40 bg-[var(--tk-primary)]/5' : ''
+            active && step === 0
+              ? 'ring-2 ring-inset ring-[var(--tk-primary)]/40 bg-[var(--tk-primary)]/5'
+              : ''
           }`}
         >
           <div className="mb-4 h-3 w-20 rounded bg-fd-foreground/10" />
@@ -108,7 +111,9 @@ function TourDemo() {
           {/* Stat cards */}
           <div
             className={`mb-4 grid grid-cols-3 gap-3 transition-all ${
-              active && step === 1 ? 'rounded-lg ring-2 ring-[var(--tk-primary)]/40 ring-offset-2 ring-offset-fd-card' : ''
+              active && step === 1
+                ? 'rounded-lg ring-2 ring-[var(--tk-primary)]/40 ring-offset-2 ring-offset-fd-card'
+                : ''
             }`}
           >
             {[
@@ -116,7 +121,10 @@ function TourDemo() {
               { label: 'Complete', value: '47' },
               { label: 'Revenue', value: '$8.2k' },
             ].map((stat) => (
-              <div key={stat.label} className="rounded-lg border border-fd-border bg-fd-background p-3">
+              <div
+                key={stat.label}
+                className="rounded-lg border border-fd-border bg-fd-background p-3"
+              >
                 <div className="text-[11px] text-fd-muted-foreground">{stat.label}</div>
                 <div className="text-[16px] font-bold text-fd-foreground">{stat.value}</div>
               </div>
@@ -149,13 +157,17 @@ function TourDemo() {
                 ...(step === 2 ? { top: -6, right: 24 } : {}),
               }}
             />
-            <p className="mb-1 text-[13px] font-bold text-fd-foreground">{tourSteps[step!].title}</p>
-            <p className="mb-3 text-[12px] text-fd-muted-foreground">{tourSteps[step!].content}</p>
+            <p className="mb-1 text-[13px] font-bold text-fd-foreground">
+              {tourSteps[step ?? 0].title}
+            </p>
+            <p className="mb-3 text-[12px] text-fd-muted-foreground">
+              {tourSteps[step ?? 0].content}
+            </p>
             <div className="flex items-center justify-between">
               <div className="flex gap-1">
-                {tourSteps.map((_, i) => (
+                {tourSteps.map((s, i) => (
                   <div
-                    key={i}
+                    key={s.target}
                     className={`h-1.5 rounded-full transition-all ${
                       i === step ? 'w-4 bg-[var(--tk-primary)]' : 'w-1.5 bg-fd-muted'
                     }`}
@@ -163,7 +175,7 @@ function TourDemo() {
                 ))}
               </div>
               <div className="flex gap-1.5">
-                {step! > 0 && (
+                {(step ?? 0) > 0 && (
                   <button
                     type="button"
                     onClick={() => setStep((s) => (s ?? 1) - 1)}
@@ -225,11 +237,29 @@ function HintsDemo() {
 
         {/* Settings rows with hints */}
         {[
-          { id: 'theme', label: 'Theme', value: 'System', hint: 'New! Auto-detect your OS preference for light and dark mode.' },
-          { id: 'notif', label: 'Notifications', value: 'Email', hint: 'Tip: Enable push notifications for real-time alerts.' },
-          { id: 'api', label: 'API Key', value: '•••••••dk4f', hint: 'Your API key rotates every 90 days for security.' },
+          {
+            id: 'theme',
+            label: 'Theme',
+            value: 'System',
+            hint: 'New! Auto-detect your OS preference for light and dark mode.',
+          },
+          {
+            id: 'notif',
+            label: 'Notifications',
+            value: 'Email',
+            hint: 'Tip: Enable push notifications for real-time alerts.',
+          },
+          {
+            id: 'api',
+            label: 'API Key',
+            value: '•••••••dk4f',
+            hint: 'Your API key rotates every 90 days for security.',
+          },
         ].map((row) => (
-          <div key={row.id} className="relative mb-3 flex items-center justify-between rounded-lg border border-fd-border bg-fd-background p-4">
+          <div
+            key={row.id}
+            className="relative mb-3 flex items-center justify-between rounded-lg border border-fd-border bg-fd-background p-4"
+          >
             <div>
               <div className="text-[13px] font-semibold text-fd-foreground">{row.label}</div>
               <div className="text-[12px] text-fd-muted-foreground">{row.value}</div>
@@ -251,7 +281,9 @@ function HintsDemo() {
             {activeHint === row.id && (
               <div className="absolute -top-2 right-10 z-10 w-56 -translate-y-full rounded-lg border border-fd-border bg-fd-background p-3 shadow-xl">
                 <div className="absolute -bottom-1.5 right-4 h-3 w-3 rotate-45 border-b border-r border-fd-border bg-fd-background" />
-                <p className="mb-2 text-[12px] leading-relaxed text-fd-muted-foreground">{row.hint}</p>
+                <p className="mb-2 text-[12px] leading-relaxed text-fd-muted-foreground">
+                  {row.hint}
+                </p>
                 <button
                   type="button"
                   onClick={() => dismiss(row.id)}
@@ -374,7 +406,8 @@ function AnnouncementsDemo() {
                 </div>
                 <h4 className="mb-1.5 text-[15px] font-bold text-fd-foreground">What&apos;s new</h4>
                 <p className="mb-4 text-[12px] leading-relaxed text-fd-muted-foreground">
-                  We shipped 3 new features this week: real-time collaboration, API v2, and custom themes.
+                  We shipped 3 new features this week: real-time collaboration, API v2, and custom
+                  themes.
                 </p>
                 <div className="flex gap-2">
                   <button
@@ -444,11 +477,14 @@ function ChecklistsDemo() {
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <p className="mt-1.5 text-[11px] text-fd-muted-foreground">{completed} of {total} complete</p>
+            <p className="mt-1.5 text-[11px] text-fd-muted-foreground">
+              {completed} of {total} complete
+            </p>
           </div>
 
           {/* Task list */}
           <div className="space-y-2">
+            {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: task card conditional rendering */}
             {tasks.map((task) => (
               <button
                 key={task.id}
@@ -482,14 +518,17 @@ function ChecklistsDemo() {
                   {task.label}
                 </span>
                 {task.locked && (
-                  <span className="ml-auto text-[10px] text-fd-muted-foreground/40">Requires previous</span>
+                  <span className="ml-auto text-[10px] text-fd-muted-foreground/40">
+                    Requires previous
+                  </span>
                 )}
               </button>
             ))}
           </div>
 
           <p className="mt-4 text-center text-[11px] text-fd-muted-foreground/60">
-            Click tasks to toggle &middot; &quot;Connect integration&quot; unlocks after &quot;Create first project&quot;
+            Click tasks to toggle &middot; &quot;Connect integration&quot; unlocks after
+            &quot;Create first project&quot;
           </p>
         </div>
       </div>
@@ -600,11 +639,14 @@ function AnalyticsDemo() {
           <div>
             <div className="mb-3 flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[12px] font-semibold text-fd-foreground">Live event stream</span>
+              <span className="text-[12px] font-semibold text-fd-foreground">
+                Live event stream
+              </span>
             </div>
             <div className="overflow-hidden rounded-lg border border-fd-border bg-[#0d1117]">
               <div className="space-y-0.5 px-3 py-2 font-mono text-[11px]">
                 {events.map((event, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: event log entries don't have unique ids and are append-only
                   <div key={i} className="flex items-start gap-2 py-1">
                     <span className="shrink-0 text-white/20">{event.time}</span>
                     <span className={event.color}>{event.name}</span>
@@ -622,7 +664,9 @@ function AnalyticsDemo() {
 
           {/* Right: Plugin badges + mini funnel */}
           <div>
-            <div className="mb-3 text-[12px] font-semibold text-fd-foreground">Connected plugins</div>
+            <div className="mb-3 text-[12px] font-semibold text-fd-foreground">
+              Connected plugins
+            </div>
             <div className="mb-4 flex flex-wrap gap-1.5">
               {['PostHog', 'Mixpanel', 'Amplitude', 'GA4'].map((p) => (
                 <span
@@ -649,7 +693,10 @@ function AnalyticsDemo() {
                     <span className="font-semibold text-fd-foreground">{row.pct}%</span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-fd-muted">
-                    <div className={`h-full rounded-full ${row.color} transition-all duration-700`} style={{ width: `${row.pct}%` }} />
+                    <div
+                      className={`h-full rounded-full ${row.color} transition-all duration-700`}
+                      style={{ width: `${row.pct}%` }}
+                    />
                   </div>
                 </div>
               ))}
@@ -669,8 +716,18 @@ function AdoptionDemo() {
   const [nudgeVisible, setNudgeVisible] = useState(true)
 
   const features = [
-    { name: 'Search', score: 92, status: 'Adopted', statusColor: 'text-emerald-500 bg-emerald-500/10' },
-    { name: 'Filters', score: 64, status: 'Improving', statusColor: 'text-amber-500 bg-amber-500/10' },
+    {
+      name: 'Search',
+      score: 92,
+      status: 'Adopted',
+      statusColor: 'text-emerald-500 bg-emerald-500/10',
+    },
+    {
+      name: 'Filters',
+      score: 64,
+      status: 'Improving',
+      statusColor: 'text-amber-500 bg-amber-500/10',
+    },
     { name: 'Export', score: 23, status: 'Low', statusColor: 'text-rose-500 bg-rose-500/10' },
     { name: 'Templates', score: 8, status: 'New', statusColor: 'text-violet-500 bg-violet-500/10' },
   ]
@@ -680,7 +737,9 @@ function AdoptionDemo() {
       <div className="relative min-h-[340px] p-5">
         <div className="mb-4 flex items-center justify-between">
           <h4 className="text-[13px] font-bold text-fd-foreground">Feature adoption</h4>
-          <span className="rounded-full bg-fd-muted px-2.5 py-0.5 text-[11px] font-medium text-fd-muted-foreground">Last 30 days</span>
+          <span className="rounded-full bg-fd-muted px-2.5 py-0.5 text-[11px] font-medium text-fd-muted-foreground">
+            Last 30 days
+          </span>
         </div>
 
         {/* Adoption table */}
@@ -688,9 +747,15 @@ function AdoptionDemo() {
           <table className="w-full text-[12px]">
             <thead>
               <tr className="border-b border-fd-border bg-fd-muted/50">
-                <th className="px-3 py-2 text-left font-semibold text-fd-muted-foreground">Feature</th>
-                <th className="px-3 py-2 text-left font-semibold text-fd-muted-foreground">Score</th>
-                <th className="px-3 py-2 text-left font-semibold text-fd-muted-foreground">Status</th>
+                <th className="px-3 py-2 text-left font-semibold text-fd-muted-foreground">
+                  Feature
+                </th>
+                <th className="px-3 py-2 text-left font-semibold text-fd-muted-foreground">
+                  Score
+                </th>
+                <th className="px-3 py-2 text-left font-semibold text-fd-muted-foreground">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -709,7 +774,9 @@ function AdoptionDemo() {
                     </div>
                   </td>
                   <td className="px-3 py-2.5">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${f.statusColor}`}>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${f.statusColor}`}
+                    >
                       {f.status}
                     </span>
                   </td>
@@ -770,15 +837,19 @@ function SchedulingDemo() {
             <div className="mb-3 rounded-lg border border-fd-border bg-fd-background p-3.5">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-[12px] font-semibold text-fd-foreground">Business hours</span>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                  isBusinessHours
-                    ? 'bg-emerald-500/10 text-emerald-500'
-                    : 'bg-fd-muted text-fd-muted-foreground'
-                }`}>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    isBusinessHours
+                      ? 'bg-emerald-500/10 text-emerald-500'
+                      : 'bg-fd-muted text-fd-muted-foreground'
+                  }`}
+                >
                   {isBusinessHours ? 'Active now' : 'Inactive'}
                 </span>
               </div>
-              <p className="mb-2.5 text-[11px] text-fd-muted-foreground">Mon–Fri, 9:00 AM – 5:00 PM</p>
+              <p className="mb-2.5 text-[11px] text-fd-muted-foreground">
+                Mon–Fri, 9:00 AM – 5:00 PM
+              </p>
               <div className="flex gap-1">
                 {days.map((d, i) => (
                   <div
@@ -800,19 +871,31 @@ function SchedulingDemo() {
             {/* Blackout */}
             <div className="mb-3 rounded-lg border border-fd-border bg-fd-background p-3.5">
               <div className="mb-1 flex items-center justify-between">
-                <span className="text-[12px] font-semibold text-fd-foreground">Blackout period</span>
-                <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold text-rose-500">Upcoming</span>
+                <span className="text-[12px] font-semibold text-fd-foreground">
+                  Blackout period
+                </span>
+                <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold text-rose-500">
+                  Upcoming
+                </span>
               </div>
-              <p className="text-[11px] text-fd-muted-foreground">Dec 23 – Jan 2 (Holiday freeze)</p>
+              <p className="text-[11px] text-fd-muted-foreground">
+                Dec 23 – Jan 2 (Holiday freeze)
+              </p>
             </div>
 
             {/* Recurring */}
             <div className="rounded-lg border border-fd-border bg-fd-background p-3.5">
               <div className="mb-1 flex items-center justify-between">
-                <span className="text-[12px] font-semibold text-fd-foreground">Recurring weekly</span>
-                <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-500">Every Monday</span>
+                <span className="text-[12px] font-semibold text-fd-foreground">
+                  Recurring weekly
+                </span>
+                <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-500">
+                  Every Monday
+                </span>
               </div>
-              <p className="text-[11px] text-fd-muted-foreground">Show &quot;Weekly tips&quot; tour each week</p>
+              <p className="text-[11px] text-fd-muted-foreground">
+                Show &quot;Weekly tips&quot; tour each week
+              </p>
             </div>
 
             {/* Timezone */}
@@ -910,7 +993,9 @@ function SchedulingDemo() {
                 <span className="text-[#5a5a6e]">{'// => { active: '}</span>
                 <span className="text-[#5a5a6e]">{isBusinessHours ? 'true' : 'false'}</span>
                 <span className="text-[#5a5a6e]">{', reason: "'}</span>
-                <span className="text-[#5a5a6e]">{isBusinessHours ? 'business_hours' : 'outside_hours'}</span>
+                <span className="text-[#5a5a6e]">
+                  {isBusinessHours ? 'business_hours' : 'outside_hours'}
+                </span>
                 <span className="text-[#5a5a6e]">{'" }'}</span>
               </code>
             </pre>
@@ -1009,7 +1094,8 @@ export function DemoTour() {
             Try before you install
           </h2>
           <p className="mx-auto max-w-lg text-[16px] text-fd-muted-foreground">
-            Interactive demos for every package. No signup, no sandbox — just click through and see what ships.
+            Interactive demos for every package. No signup, no sandbox — just click through and see
+            what ships.
           </p>
         </div>
 
@@ -1050,7 +1136,10 @@ export function DemoTour() {
           <MessageSquare className="mx-auto mb-2 h-4 w-4 text-fd-muted-foreground/40" />
           <p className="text-[12px] text-fd-muted-foreground/60">
             These are visual mockups &middot; See the{' '}
-            <a href="/docs/getting-started" className="font-medium text-[var(--tk-primary)] underline underline-offset-2 hover:no-underline">
+            <a
+              href="/docs/getting-started"
+              className="font-medium text-[var(--tk-primary)] underline underline-offset-2 hover:no-underline"
+            >
               docs
             </a>{' '}
             for real integration examples

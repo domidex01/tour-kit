@@ -43,6 +43,7 @@ export function AiChatHeader({
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
+              aria-hidden="true"
             >
               <path d="M1 1l12 12M13 1L1 13" />
             </svg>

@@ -1,8 +1,5 @@
-'use client'
-
 // Types
 export type {
-  LicenseTier,
   LicenseState,
   LicenseError,
   LicenseActivation,
@@ -10,10 +7,6 @@ export type {
   LicenseConfig,
   PolarValidateResponse,
   PolarActivateResponse,
-  LicenseContextValue,
-  LicenseProviderProps,
-  LicenseGateProps,
-  LicenseWarningProps,
 } from './types'
 
 // Polar client

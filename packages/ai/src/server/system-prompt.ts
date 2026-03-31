@@ -37,6 +37,7 @@ const TONE_MAP = {
     'Be brief and direct. Use short sentences, bullet points, and minimal explanation. Avoid filler words.',
 } as const
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: prompt builder with conditional layers
 export function createSystemPrompt(config: SystemPromptConfig = {}): string {
   const layers: string[] = []
 

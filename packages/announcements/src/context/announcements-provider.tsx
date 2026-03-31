@@ -41,6 +41,7 @@ function createInitialState(id: string): AnnouncementState {
   }
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: reducer handling multiple action types
 function announcementsReducer(
   state: AnnouncementsState,
   action: AnnouncementsAction

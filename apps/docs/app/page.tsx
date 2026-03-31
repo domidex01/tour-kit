@@ -43,7 +43,8 @@ export default function HomePage() {
           <div
             className="pointer-events-none absolute inset-0 -z-10 opacity-[0.35]"
             style={{
-              backgroundImage: 'radial-gradient(circle, var(--color-fd-border) 1px, transparent 1px)',
+              backgroundImage:
+                'radial-gradient(circle, var(--color-fd-border) 1px, transparent 1px)',
               backgroundSize: '24px 24px',
             }}
           />
@@ -51,10 +52,7 @@ export default function HomePage() {
           <div className="relative mx-auto max-w-[1120px]">
             <div className="mx-auto max-w-xl rounded-2xl border border-fd-border/50 bg-fd-background/40 p-10 text-center shadow-2xl backdrop-blur-xl dark:bg-fd-background/40 sm:p-12">
               <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-[#02182b] dark:text-white sm:text-4xl">
-                Own your onboarding.{' '}
-                <span className="text-[#0197f6]">
-                  Ship it today.
-                </span>
+                Own your onboarding. <span className="text-[#0197f6]">Ship it today.</span>
               </h2>
 
               <p className="mb-10 text-[16px] text-fd-muted-foreground">

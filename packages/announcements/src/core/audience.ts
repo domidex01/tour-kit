@@ -29,6 +29,7 @@ export function matchesAudience(
 /**
  * Check if a single condition matches
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: condition matching with multiple operators
 function matchesCondition(
   condition: AudienceCondition,
   userContext: Record<string, unknown>

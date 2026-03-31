@@ -44,6 +44,7 @@ describe('SSR safety', () => {
     for (const file of serverFiles) {
       const relativePath = file.replace(SRC_DIR, 'src/')
 
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: test scanning logic
       it(`${relativePath} has no unguarded browser globals`, () => {
         const content = readFileSync(file, 'utf-8')
         const lines = content.split('\n')
@@ -93,6 +94,7 @@ describe('SSR safety', () => {
       }
     })
 
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: test scanning logic
     it('server files do not have runtime imports from client directories', () => {
       const serverFiles = getSourceFiles(SERVER_DIR)
       const clientDirs = ['../hooks', '../components', '../context']

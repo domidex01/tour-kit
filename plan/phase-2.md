@@ -35,7 +35,7 @@ Every file in `@tour-kit/license` that touches React uses the `'use client'` dir
 License state lives in a single React context (`LicenseContext`). Rationale:
 
 - The license package has zero runtime dependencies beyond React -- adding Zustand would increase bundle size.
-- License state is read-only after mount (validate once, cache for 24h). There is no complex derived state or frequent updates that would benefit from Zustand selectors.
+- License state is read-only after mount (validate once, cache for 72h per Phase 0 latency findings). There is no complex derived state or frequent updates that would benefit from Zustand selectors.
 - Context is the standard pattern used across all other Tour Kit providers (`TourProvider`, `AdoptionProvider`, etc.).
 
 ### Props Interface -- No Zod at the React Boundary

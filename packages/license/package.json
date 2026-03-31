@@ -13,7 +13,7 @@
   "bugs": {
     "url": "https://github.com/DomiDex/tour-kit/issues"
   },
-  "keywords": ["react", "license", "jwt", "tour-kit", "premium"],
+  "keywords": ["react", "license", "tour-kit", "premium", "polar"],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -47,7 +47,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "jose": "^5.9.0"
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

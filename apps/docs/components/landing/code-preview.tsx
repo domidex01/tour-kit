@@ -34,7 +34,7 @@ function App() {
 }`,
     highlighted: [
       { text: 'import', type: 'keyword' as const },
-      { text: " { Tour, TourStep, useTour } ", type: 'plain' as const },
+      { text: ' { Tour, TourStep, useTour } ', type: 'plain' as const },
       { text: 'from', type: 'keyword' as const },
       { text: " '@tour-kit/react'", type: 'string' as const },
       { text: ';\n\n', type: 'plain' as const },
@@ -332,8 +332,12 @@ const tokenColors: Record<string, string> = {
 
 function LineNumbers({ count }: { count: number }) {
   return (
-    <div className="select-none border-r border-white/[0.06] pl-4 pr-4 text-right font-mono text-[13px] leading-[1.8] text-white/15" aria-hidden="true">
+    <div
+      className="select-none border-r border-white/[0.06] pl-4 pr-4 text-right font-mono text-[13px] leading-[1.8] text-white/15"
+      aria-hidden="true"
+    >
       {Array.from({ length: count }, (_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: line numbers are static and never reorder
         <div key={i}>{i + 1}</div>
       ))}
     </div>
@@ -350,12 +354,18 @@ export function CodePreview() {
       <div className="mx-auto max-w-[1120px]">
         <div className="mb-12 max-w-lg">
           <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            A few lines of code.{' '}
-            <span className="text-[#0197f6]">A complete tour.</span>
+            A few lines of code. <span className="text-[#0197f6]">A complete tour.</span>
           </h2>
           <p className="text-[16px] leading-relaxed text-fd-muted-foreground">
-            Wrap your app with <code className="rounded bg-fd-muted px-1.5 py-0.5 font-mono text-[13px] font-semibold text-fd-foreground">{'<Tour>'}</code>,
-            declare your steps, call <code className="rounded bg-fd-muted px-1.5 py-0.5 font-mono text-[13px] font-semibold text-fd-foreground">start()</code>.
+            Wrap your app with{' '}
+            <code className="rounded bg-fd-muted px-1.5 py-0.5 font-mono text-[13px] font-semibold text-fd-foreground">
+              {'<Tour>'}
+            </code>
+            , declare your steps, call{' '}
+            <code className="rounded bg-fd-muted px-1.5 py-0.5 font-mono text-[13px] font-semibold text-fd-foreground">
+              start()
+            </code>
+            .
           </p>
         </div>
 
@@ -370,10 +380,7 @@ export function CodePreview() {
             </div>
             <span className="font-mono text-[11px] text-white/30">{activeExample.filename}</span>
             <div className="flex-1" />
-            <CopyButton
-              text={activeExample.code}
-              className="text-white/20 hover:text-white/60"
-            />
+            <CopyButton text={activeExample.code} className="text-white/20 hover:text-white/60" />
           </div>
 
           {/* Tab bar */}
@@ -384,9 +391,7 @@ export function CodePreview() {
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative px-4 py-2 font-mono text-[12px] font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? 'text-white/80'
-                    : 'text-white/25 hover:text-white/45'
+                  activeTab === tab.id ? 'text-white/80' : 'text-white/25 hover:text-white/45'
                 }`}
               >
                 {tab.label}
@@ -403,6 +408,7 @@ export function CodePreview() {
             <pre className="flex-1 pr-6 font-mono text-[13px] leading-[1.8]">
               <code>
                 {activeExample.highlighted.map((token, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: tokens are static per tab and never reorder
                   <span key={i} className={tokenColors[token.type]}>
                     {token.text}
                   </span>
