@@ -1,3 +1,6 @@
+// Components
+export { ScheduleGate } from './components/schedule-gate'
+
 // Types
 export type {
   BlackoutPeriod,

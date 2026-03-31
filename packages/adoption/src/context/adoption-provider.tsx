@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { ProWatermark } from '../lib/pro-watermark'
 import {
   createInitialUsage,
   didStatusChange,
@@ -175,5 +176,12 @@ export function AdoptionProvider({
     pendingNudges,
   }
 
-  return <AdoptionContext.Provider value={contextValue}>{children}</AdoptionContext.Provider>
+  return (
+    <AdoptionContext.Provider value={contextValue}>
+      <div style={{ position: 'relative' }}>
+        {children}
+        <ProWatermark />
+      </div>
+    </AdoptionContext.Provider>
+  )
 }

@@ -1,16 +1,31 @@
+import { withLicenseCheck } from '../../lib/with-license-check'
+
 // ============================================
 // PLATFORM EMBEDS
 // ============================================
 
-export { YouTubeEmbed, type YouTubeEmbedProps } from './youtube-embed'
-export { VimeoEmbed, type VimeoEmbedProps } from './vimeo-embed'
-export { LoomEmbed, type LoomEmbedProps } from './loom-embed'
-export { WistiaEmbed, type WistiaEmbedProps } from './wistia-embed'
+import { YouTubeEmbed as _YouTubeEmbed, type YouTubeEmbedProps } from './youtube-embed'
+import { VimeoEmbed as _VimeoEmbed, type VimeoEmbedProps } from './vimeo-embed'
+import { LoomEmbed as _LoomEmbed, type LoomEmbedProps } from './loom-embed'
+import { WistiaEmbed as _WistiaEmbed, type WistiaEmbedProps } from './wistia-embed'
+
+export type { YouTubeEmbedProps, VimeoEmbedProps, LoomEmbedProps, WistiaEmbedProps }
+
+export const YouTubeEmbed = withLicenseCheck(_YouTubeEmbed, 'YouTubeEmbed')
+export const VimeoEmbed = withLicenseCheck(_VimeoEmbed, 'VimeoEmbed')
+export const LoomEmbed = withLicenseCheck(_LoomEmbed, 'LoomEmbed')
+export const WistiaEmbed = withLicenseCheck(_WistiaEmbed, 'WistiaEmbed')
 
 // ============================================
 // NATIVE MEDIA
 // ============================================
 
-export { NativeVideo, type NativeVideoProps } from './native-video'
-export { GifPlayer, type GifPlayerProps } from './gif-player'
-export { LottiePlayer, type LottiePlayerProps } from './lottie-player'
+import { NativeVideo as _NativeVideo, type NativeVideoProps } from './native-video'
+import { GifPlayer as _GifPlayer, type GifPlayerProps } from './gif-player'
+import { LottiePlayer as _LottiePlayer, type LottiePlayerProps } from './lottie-player'
+
+export type { NativeVideoProps, GifPlayerProps, LottiePlayerProps }
+
+export const NativeVideo = withLicenseCheck(_NativeVideo, 'NativeVideo')
+export const GifPlayer = withLicenseCheck(_GifPlayer, 'GifPlayer')
+export const LottiePlayer = withLicenseCheck(_LottiePlayer, 'LottiePlayer')

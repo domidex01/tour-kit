@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { ProWatermark } from '../lib/pro-watermark'
 import type { AnalyticsConfig } from '../types/plugin'
 import { type TourAnalytics, createAnalytics } from './tracker'
 
@@ -43,7 +44,12 @@ export function AnalyticsProvider({ config, children }: AnalyticsProviderProps) 
   }, [])
 
   return (
-    <AnalyticsContext.Provider value={analyticsRef.current}>{children}</AnalyticsContext.Provider>
+    <AnalyticsContext.Provider value={analyticsRef.current}>
+      <div style={{ position: 'relative' }}>
+        {children}
+        <ProWatermark />
+      </div>
+    </AnalyticsContext.Provider>
   )
 }
 
