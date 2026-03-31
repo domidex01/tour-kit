@@ -1,7 +1,5 @@
 import type { ZodError } from 'zod'
 import type {
-  LicenseActivation,
-  LicenseConfig,
   LicenseState,
   PolarActivateResponse,
   PolarValidateResponse,
@@ -175,32 +173,13 @@ export async function deactivateKey(
 // Helpers
 // ---------------------------------------------------------------------------
 
-function toActivation(raw: {
-  id: string
-  licenseKeyId: string
-  label: string
-  createdAt: string
-  modifiedAt: string | null
-}): LicenseActivation {
-  return {
-    id: raw.id,
-    licenseKeyId: raw.licenseKeyId,
-    label: raw.label,
-    createdAt: raw.createdAt,
-    modifiedAt: raw.modifiedAt,
+function generateRenderKey(key: string, domain: string | null): string {
+  const input = key + (domain ?? '')
+  let hash = 0
+  for (let i = 0; i < input.length; i++) {
+    hash = ((hash << 5) - hash + input.charCodeAt(i)) | 0
   }
-}
-
-// ---------------------------------------------------------------------------
-// Synthetic dev activation (used when running on localhost)
-// ---------------------------------------------------------------------------
-
-const DEV_ACTIVATION: LicenseActivation = {
-  id: 'dev',
-  licenseKeyId: 'dev',
-  label: 'localhost',
-  createdAt: '1970-01-01T00:00:00Z',
-  modifiedAt: null,
+  return `lk_${Math.abs(hash).toString(36)}`
 }
 
 // ---------------------------------------------------------------------------
@@ -208,13 +187,26 @@ const DEV_ACTIVATION: LicenseActivation = {
 // ---------------------------------------------------------------------------
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: orchestrator with multiple validation paths
-export async function validateLicenseKey(config: LicenseConfig): Promise<LicenseState> {
-  const { key, organizationId } = config
+export async function validateLicenseKey(
+  key: string,
+  organizationId?: string
+): Promise<LicenseState> {
   const domain = getCurrentDomain()
+  const orgId = organizationId ?? ''
+  const now = Date.now()
 
   // 1. Dev bypass
   if (isDevEnvironment()) {
-    return { status: 'valid', activation: DEV_ACTIVATION, expiresAt: null }
+    return {
+      status: 'valid',
+      tier: 'pro',
+      activations: 0,
+      maxActivations: 0,
+      domain,
+      expiresAt: null,
+      validatedAt: now,
+      renderKey: 'dev_bypass',
+    }
   }
 
   // 2. Cache check
@@ -225,11 +217,20 @@ export async function validateLicenseKey(config: LicenseConfig): Promise<License
 
   try {
     // 3. Validate against Polar API
-    const response = await validateKey(key, organizationId)
+    const response = await validateKey(key, orgId)
 
     // 4. Map Polar status to LicenseState
     if (response.status === 'revoked' || response.status === 'disabled') {
-      const state: LicenseState = { status: 'revoked' }
+      const state: LicenseState = {
+        status: 'revoked',
+        tier: 'free',
+        activations: response.usage,
+        maxActivations: response.limitActivations ?? 0,
+        domain,
+        expiresAt: null,
+        validatedAt: now,
+        renderKey: undefined,
+      }
       if (domain) writeCache(domain, state)
       return state
     }
@@ -237,44 +238,100 @@ export async function validateLicenseKey(config: LicenseConfig): Promise<License
     if (response.expiresAt && new Date(response.expiresAt) < new Date()) {
       const state: LicenseState = {
         status: 'expired',
+        tier: 'pro',
+        activations: response.usage,
+        maxActivations: response.limitActivations ?? 0,
+        domain,
         expiresAt: response.expiresAt,
+        validatedAt: now,
+        renderKey: undefined,
       }
       if (domain) writeCache(domain, state)
       return state
     }
 
     // 5. Auto-activate if no activation for this domain
-    let activation: LicenseActivation | null = response.activation
-      ? toActivation(response.activation)
-      : null
+    let activationLabel = response.activation?.label ?? null
+    let usage = response.usage
 
-    if (!activation && domain) {
-      const activateResponse = await activateKey(key, organizationId, domain)
-      activation = toActivation(activateResponse)
+    if (!response.activation && domain) {
+      const activateResponse = await activateKey(key, orgId, domain)
+      activationLabel = activateResponse.label
+      usage = activateResponse.licenseKey.usage
     }
 
     // 6. Guard: if still no activation (SSR with no prior activation), return error
-    if (!activation) {
-      return { status: 'error', error: 'network_error' }
+    if (!activationLabel) {
+      return {
+        status: 'error',
+        tier: 'free',
+        activations: 0,
+        maxActivations: 0,
+        domain: null,
+        expiresAt: null,
+        validatedAt: now,
+        renderKey: undefined,
+      }
     }
 
     const state: LicenseState = {
       status: 'valid',
-      activation,
+      tier: 'pro',
+      activations: usage,
+      maxActivations: response.limitActivations ?? 0,
+      domain: activationLabel,
       expiresAt: response.expiresAt,
+      validatedAt: now,
+      renderKey: generateRenderKey(key, activationLabel),
     }
     if (domain) writeCache(domain, state)
     return state
   } catch (error) {
     if (error instanceof PolarApiError && error.statusCode === 404) {
-      return { status: 'invalid', error: 'invalid_key' }
+      return {
+        status: 'invalid',
+        tier: 'free',
+        activations: 0,
+        maxActivations: 0,
+        domain: null,
+        expiresAt: null,
+        validatedAt: now,
+        renderKey: undefined,
+      }
     }
     if (error instanceof PolarApiError && error.statusCode === 403) {
-      return { status: 'invalid', error: 'activation_limit_reached' }
+      return {
+        status: 'invalid',
+        tier: 'free',
+        activations: 0,
+        maxActivations: 0,
+        domain: null,
+        expiresAt: null,
+        validatedAt: now,
+        renderKey: undefined,
+      }
     }
     if (error instanceof PolarParseError) {
-      return { status: 'error', error: 'parse_error' }
+      return {
+        status: 'error',
+        tier: 'free',
+        activations: 0,
+        maxActivations: 0,
+        domain: null,
+        expiresAt: null,
+        validatedAt: now,
+        renderKey: undefined,
+      }
     }
-    return { status: 'error', error: 'network_error' }
+    return {
+      status: 'error',
+      tier: 'free',
+      activations: 0,
+      maxActivations: 0,
+      domain: null,
+      expiresAt: null,
+      validatedAt: now,
+      renderKey: undefined,
+    }
   }
 }

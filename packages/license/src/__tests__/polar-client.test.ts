@@ -71,14 +71,13 @@ const VALID_ACTIVATE_RESPONSE = {
 const VALID_CACHE_ENTRY = {
   state: {
     status: 'valid' as const,
-    activation: {
-      id: 'act_test_789',
-      licenseKeyId: 'lk_test_123',
-      label: 'example.com',
-      createdAt: '2026-03-01T00:00:00Z',
-      modifiedAt: '2026-03-01T00:00:00Z',
-    },
+    tier: 'pro' as const,
+    activations: 1,
+    maxActivations: 5,
+    domain: 'example.com',
     expiresAt: null,
+    validatedAt: Date.now(),
+    renderKey: 'lk_abc123',
   },
   cachedAt: Date.now(),
   domain: 'example.com',
@@ -211,12 +210,9 @@ describe('deactivateKey', () => {
 // ---------------------------------------------------------------------------
 
 describe('validateLicenseKey', () => {
-  const config = { key: 'TK-XXXX', organizationId: 'org_test_456' }
-
   it('returns cached state without API call (cache hit)', async () => {
-    // Pre-populate cache
     localStorage.setItem('tourkit:license:example.com', JSON.stringify(VALID_CACHE_ENTRY))
-    const result = await validateLicenseKey(config)
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
     expect(mockFetch).not.toHaveBeenCalled()
     expect(result.status).toBe('valid')
   })
@@ -226,69 +222,70 @@ describe('validateLicenseKey', () => {
       .mockResolvedValueOnce(mockFetchResponse(VALID_VALIDATE_RESPONSE_NO_ACTIVATION))
       .mockResolvedValueOnce(mockFetchResponse(VALID_ACTIVATE_RESPONSE))
 
-    const result = await validateLicenseKey(config)
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
     expect(mockFetch).toHaveBeenCalledTimes(2)
     expect(result.status).toBe('valid')
-    if (result.status === 'valid') {
-      expect(result.activation.id).toBe('act_test_new')
-    }
+    expect(result.domain).toBe('example.com')
   })
 
   it('returns valid with existing activation (no auto-activate)', async () => {
     mockFetch.mockResolvedValue(mockFetchResponse(VALID_VALIDATE_RESPONSE))
-    const result = await validateLicenseKey(config)
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
     expect(mockFetch).toHaveBeenCalledOnce()
     expect(result.status).toBe('valid')
+    expect(result.tier).toBe('pro')
+    expect(result.renderKey).toBeDefined()
   })
 
-  it('returns { status: "revoked" } for revoked key', async () => {
+  it('returns revoked state for revoked key', async () => {
     mockFetch.mockResolvedValue(mockFetchResponse(REVOKED_VALIDATE_RESPONSE))
-    const result = await validateLicenseKey(config)
-    expect(result).toEqual({ status: 'revoked' })
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
+    expect(result.status).toBe('revoked')
+    expect(result.renderKey).toBeUndefined()
   })
 
-  it('returns { status: "expired" } for expired key', async () => {
+  it('returns expired state for expired key', async () => {
     mockFetch.mockResolvedValue(mockFetchResponse(EXPIRED_VALIDATE_RESPONSE))
-    const result = await validateLicenseKey(config)
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
     expect(result.status).toBe('expired')
-    if (result.status === 'expired') {
-      expect(result.expiresAt).toBe('2025-01-01T00:00:00Z')
-    }
+    expect(result.expiresAt).toBe('2025-01-01T00:00:00Z')
+    expect(result.renderKey).toBeUndefined()
   })
 
-  it('returns { status: "invalid", error: "invalid_key" } for 404', async () => {
+  it('returns invalid state for 404', async () => {
     mockFetch.mockResolvedValue(mockFetchResponse({ detail: 'Not found' }, 404))
-    const result = await validateLicenseKey(config)
-    expect(result).toEqual({ status: 'invalid', error: 'invalid_key' })
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
+    expect(result.status).toBe('invalid')
+    expect(result.renderKey).toBeUndefined()
   })
 
-  it('returns { status: "invalid", error: "activation_limit_reached" } for 403', async () => {
+  it('returns invalid state for 403 (activation limit)', async () => {
     mockFetch
       .mockResolvedValueOnce(mockFetchResponse(VALID_VALIDATE_RESPONSE_NO_ACTIVATION))
       .mockResolvedValueOnce(mockFetchResponse({ detail: 'Limit reached' }, 403))
-    const result = await validateLicenseKey(config)
-    expect(result).toEqual({
-      status: 'invalid',
-      error: 'activation_limit_reached',
-    })
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
+    expect(result.status).toBe('invalid')
   })
 
-  it('returns { status: "error", error: "network_error" } for fetch failure', async () => {
+  it('returns error state for fetch failure', async () => {
     mockFetch.mockRejectedValue(new TypeError('Failed to fetch'))
-    const result = await validateLicenseKey(config)
-    expect(result).toEqual({ status: 'error', error: 'network_error' })
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
+    expect(result.status).toBe('error')
+    expect(result.renderKey).toBeUndefined()
   })
 
-  it('returns synthetic valid state in dev environment', async () => {
+  it('returns dev bypass state in dev environment', async () => {
     vi.stubGlobal('location', { hostname: 'localhost' })
-    const result = await validateLicenseKey(config)
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
     expect(mockFetch).not.toHaveBeenCalled()
     expect(result.status).toBe('valid')
+    expect(result.tier).toBe('pro')
+    expect(result.renderKey).toBe('dev_bypass')
   })
 
   it('writes result to cache after successful validation', async () => {
     mockFetch.mockResolvedValue(mockFetchResponse(VALID_VALIDATE_RESPONSE))
-    await validateLicenseKey(config)
+    await validateLicenseKey('TK-XXXX', 'org_test_456')
     expect(localStorage.setItem).toHaveBeenCalledWith(
       'tourkit:license:example.com',
       expect.any(String)

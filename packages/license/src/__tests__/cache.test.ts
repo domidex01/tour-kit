@@ -5,14 +5,24 @@ import { createMockLocalStorage } from './helpers'
 
 const VALID_STATE: LicenseState = {
   status: 'valid',
-  activation: {
-    id: 'act_test_789',
-    licenseKeyId: 'lk_test_123',
-    label: 'example.com',
-    createdAt: '2026-03-01T00:00:00Z',
-    modifiedAt: '2026-03-01T00:00:00Z',
-  },
+  tier: 'pro',
+  activations: 1,
+  maxActivations: 5,
+  domain: 'example.com',
   expiresAt: null,
+  validatedAt: Date.now(),
+  renderKey: 'lk_abc123',
+}
+
+const REVOKED_STATE: LicenseState = {
+  status: 'revoked',
+  tier: 'free',
+  activations: 0,
+  maxActivations: 0,
+  domain: null,
+  expiresAt: null,
+  validatedAt: Date.now(),
+  renderKey: undefined,
 }
 
 let mockStorage: ReturnType<typeof createMockLocalStorage>
@@ -36,12 +46,10 @@ describe('writeCache + readCache round-trip', () => {
   })
 
   it('different domains are isolated', () => {
-    const stateA: LicenseState = { ...VALID_STATE }
-    const stateB: LicenseState = { status: 'revoked' }
-    writeCache('a.com', stateA)
-    writeCache('b.com', stateB)
-    expect(readCache('a.com')).toEqual(stateA)
-    expect(readCache('b.com')).toEqual(stateB)
+    writeCache('a.com', VALID_STATE)
+    writeCache('b.com', REVOKED_STATE)
+    expect(readCache('a.com')).toEqual(VALID_STATE)
+    expect(readCache('b.com')).toEqual(REVOKED_STATE)
   })
 })
 
@@ -53,8 +61,6 @@ describe('readCache TTL', () => {
   })
 
   it('returns null for expired entry (TTL exceeded)', () => {
-    // Write cache entry with cachedAt 25 hours ago (exceeds 72h? No, 25h < 72h)
-    // Use 73 hours ago to exceed 72h TTL
     const expiredEntry = {
       state: VALID_STATE,
       cachedAt: Date.now() - 73 * 60 * 60 * 1000,

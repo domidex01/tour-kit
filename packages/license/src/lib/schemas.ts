@@ -49,28 +49,19 @@ export const PolarActivateResponseSchema = z.object({
 })
 
 /**
- * Cache schema — camelCase matching our internal types.
+ * Cache schema — flat LicenseState shape.
  */
 export const LicenseCacheSchema = z.object({
-  state: z.discriminatedUnion('status', [
-    z.object({
-      status: z.literal('valid'),
-      activation: z.object({
-        id: z.string(),
-        licenseKeyId: z.string(),
-        label: z.string(),
-        createdAt: z.string(),
-        modifiedAt: z.string().nullable(),
-      }),
-      expiresAt: z.string().nullable(),
-    }),
-    z.object({ status: z.literal('invalid'), error: z.string() }),
-    z.object({ status: z.literal('expired'), expiresAt: z.string() }),
-    z.object({ status: z.literal('revoked') }),
-    z.object({ status: z.literal('loading') }),
-    z.object({ status: z.literal('error'), error: z.string() }),
-    z.object({ status: z.literal('idle') }),
-  ]),
+  state: z.object({
+    status: z.enum(['valid', 'invalid', 'expired', 'revoked', 'loading', 'error']),
+    tier: z.enum(['free', 'pro']),
+    activations: z.number(),
+    maxActivations: z.number(),
+    domain: z.string().nullable(),
+    expiresAt: z.string().nullable(),
+    validatedAt: z.number(),
+    renderKey: z.string().optional(),
+  }),
   cachedAt: z.number(),
   domain: z.string(),
 })
