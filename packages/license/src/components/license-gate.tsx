@@ -1,10 +1,10 @@
 'use client'
 
-import type { LicenseGateProps } from '../types'
-import { useLicense } from '../hooks/use-license'
 import { LicenseRenderContext } from '../context/license-context'
-import { LicenseWatermark } from './license-watermark'
+import { useLicense } from '../hooks/use-license'
+import type { LicenseGateProps } from '../types'
 import { LicenseWarning } from './license-warning'
+import { LicenseWatermark } from './license-watermark'
 
 export function LicenseGate({ require: _require, children, fallback, loading }: LicenseGateProps) {
   const { state } = useLicense()

@@ -1,8 +1,8 @@
 'use client'
 
 import { useContext } from 'react'
-import type { LicenseContextValue } from '../types'
 import { LicenseContext } from '../context/license-context'
+import type { LicenseContextValue } from '../types'
 
 export function useLicense(): LicenseContextValue {
   const context = useContext(LicenseContext)

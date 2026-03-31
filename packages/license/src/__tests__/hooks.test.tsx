@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LicenseProvider } from '../context/license-context'
-import { useLicense } from '../hooks/use-license'
 import { useIsPro } from '../hooks/use-is-pro'
+import { useLicense } from '../hooks/use-license'
 import type { LicenseState } from '../types'
 
 vi.mock('../lib/polar-client', () => ({
@@ -19,8 +19,8 @@ vi.mock('../lib/cache', () => ({
   clearCache: vi.fn(),
 }))
 
-import { validateLicenseKey } from '../lib/polar-client'
 import { isDevEnvironment } from '../lib/domain'
+import { validateLicenseKey } from '../lib/polar-client'
 
 const mockValidate = vi.mocked(validateLicenseKey)
 const mockIsDev = vi.mocked(isDevEnvironment)
@@ -71,11 +71,7 @@ const EXPIRED: LicenseState = {
 
 function createWrapper(licenseKey = 'TOURKIT_key') {
   return function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <LicenseProvider licenseKey={licenseKey}>
-        {children}
-      </LicenseProvider>
-    )
+    return <LicenseProvider licenseKey={licenseKey}>{children}</LicenseProvider>
   }
 }
 

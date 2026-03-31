@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, act } from '@testing-library/react'
-import { renderHook } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LicenseProvider } from '../context/license-context'
 import { useLicense } from '../hooks/use-license'
 import type { LicenseState } from '../types'
@@ -18,9 +17,9 @@ vi.mock('../lib/cache', () => ({
   clearCache: vi.fn(),
 }))
 
-import { validateLicenseKey } from '../lib/polar-client'
-import { isDevEnvironment } from '../lib/domain'
 import { clearCache } from '../lib/cache'
+import { isDevEnvironment } from '../lib/domain'
+import { validateLicenseKey } from '../lib/polar-client'
 
 const mockValidate = vi.mocked(validateLicenseKey)
 const mockIsDev = vi.mocked(isDevEnvironment)
@@ -84,7 +83,10 @@ describe('LicenseProvider', () => {
   it('starts with status=loading, then resolves to validated state', async () => {
     let resolveValidation!: (value: LicenseState) => void
     mockValidate.mockImplementation(
-      () => new Promise((resolve) => { resolveValidation = resolve })
+      () =>
+        new Promise((resolve) => {
+          resolveValidation = resolve
+        })
     )
 
     render(
@@ -193,7 +195,9 @@ describe('LicenseProvider', () => {
       return (
         <div>
           <span data-testid="status">{state.status}</span>
-          <button data-testid="refresh" onClick={() => refresh()}>Refresh</button>
+          <button type="button" data-testid="refresh" onClick={() => refresh()}>
+            Refresh
+          </button>
         </div>
       )
     }

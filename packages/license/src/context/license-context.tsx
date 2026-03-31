@@ -1,10 +1,10 @@
 'use client'
 
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
-import type { LicenseContextValue, LicenseProviderProps, LicenseState } from '../types'
 import { clearCache } from '../lib/cache'
 import { getCurrentDomain, isDevEnvironment } from '../lib/domain'
 import { validateLicenseKey } from '../lib/polar-client'
+import type { LicenseContextValue, LicenseProviderProps, LicenseState } from '../types'
 
 const LOADING_STATE: LicenseState = {
   status: 'loading',
@@ -86,10 +86,7 @@ export function LicenseProvider({
     await validate()
   }, [validate])
 
-  const contextValue = useMemo<LicenseContextValue>(
-    () => ({ state, refresh }),
-    [state, refresh]
-  )
+  const contextValue = useMemo<LicenseContextValue>(() => ({ state, refresh }), [state, refresh])
 
   return (
     <LicenseContext.Provider value={contextValue}>

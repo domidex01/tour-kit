@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { useContext } from 'react'
-import { LicenseProvider, LicenseRenderContext } from '../context/license-context'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LicenseGate } from '../components/license-gate'
+import { LicenseProvider, LicenseRenderContext } from '../context/license-context'
 import type { LicenseState } from '../types'
 
 vi.mock('../lib/polar-client', () => ({
@@ -18,8 +18,8 @@ vi.mock('../lib/cache', () => ({
   clearCache: vi.fn(),
 }))
 
-import { validateLicenseKey } from '../lib/polar-client'
 import { isDevEnvironment } from '../lib/domain'
+import { validateLicenseKey } from '../lib/polar-client'
 
 const mockValidate = vi.mocked(validateLicenseKey)
 const mockIsDev = vi.mocked(isDevEnvironment)
@@ -123,10 +123,7 @@ describe('LicenseGate', () => {
 
     render(
       <LicenseProvider licenseKey="TOURKIT_key">
-        <LicenseGate
-          require="pro"
-          loading={<div data-testid="loading">Loading...</div>}
-        >
+        <LicenseGate require="pro" loading={<div data-testid="loading">Loading...</div>}>
           <div data-testid="pro-content">Pro Feature</div>
         </LicenseGate>
       </LicenseProvider>

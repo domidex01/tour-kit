@@ -1,9 +1,5 @@
 import type { ZodError } from 'zod'
-import type {
-  LicenseState,
-  PolarActivateResponse,
-  PolarValidateResponse,
-} from '../types'
+import type { LicenseState, PolarActivateResponse, PolarValidateResponse } from '../types'
 import { readCache, writeCache } from './cache'
 import { getCurrentDomain, isDevEnvironment } from './domain'
 import { PolarActivateResponseSchema, PolarValidateResponseSchema } from './schemas'

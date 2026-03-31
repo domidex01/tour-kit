@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
 import { LicenseWatermark } from '../components/license-watermark'
 
 describe('LicenseWatermark', () => {
@@ -15,7 +15,7 @@ describe('LicenseWatermark', () => {
     const overlay = screen.getByText('UNLICENSED').closest('div')
     expect(overlay).not.toBeNull()
 
-    const style = overlay!.style
+    const style = overlay?.style
     expect(style.position).toBe('fixed')
     expect(style.zIndex).toBe('2147483647')
     expect(style.pointerEvents).toBe('none')
@@ -25,7 +25,7 @@ describe('LicenseWatermark', () => {
     render(<LicenseWatermark />)
 
     const overlay = screen.getByText('UNLICENSED').closest('div')
-    expect(overlay!.className).toBe('')
+    expect(overlay?.className).toBe('')
   })
 
   it('text element has userSelect: none', () => {
