@@ -30,8 +30,7 @@ export function ProWatermark() {
       warnedRef.current = true
       if (process.env.NODE_ENV === 'development') {
         console.warn(
-          `[${PACKAGE_NAME}] Unlicensed usage detected. ` +
-          'Purchase a license at tourkit.dev/pricing'
+          `[${PACKAGE_NAME}] Unlicensed usage detected. Purchase a license at tourkit.dev/pricing`
         )
       }
     }
@@ -39,5 +38,9 @@ export function ProWatermark() {
 
   if (isLicensed || isLoading) return null
 
-  return <div style={watermarkStyles} aria-hidden="true">UNLICENSED</div>
+  return (
+    <div style={watermarkStyles} aria-hidden="true">
+      UNLICENSED
+    </div>
+  )
 }

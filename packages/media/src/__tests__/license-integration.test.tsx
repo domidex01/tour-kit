@@ -89,9 +89,7 @@ describe('YouTubeEmbed — license integration (HOC)', () => {
       render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
 
       expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('@tour-kit/media')
-      )
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/media'))
     })
   })
 

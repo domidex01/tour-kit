@@ -3,8 +3,8 @@
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ProWatermark } from '../lib/pro-watermark'
 import { usePersistence } from '../hooks/use-persistence'
+import { ProWatermark } from '../lib/pro-watermark'
 import type { AiChatConfig, ChatStatus } from '../types'
 import { AiChatContext, type AiChatContextValue } from './ai-chat-context'
 

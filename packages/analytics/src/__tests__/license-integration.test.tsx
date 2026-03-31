@@ -113,9 +113,7 @@ describe('AnalyticsProvider — license integration', () => {
       )
 
       expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('@tour-kit/analytics')
-      )
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/analytics'))
     })
 
     it('analytics functionality still works when unlicensed', async () => {

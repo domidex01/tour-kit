@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { ProWatermark } from '../lib/pro-watermark'
 import {
   createInitialUsage,
   didStatusChange,
@@ -10,6 +9,7 @@ import {
   snoozeNudge as snoozeNudgeState,
   trackFeatureUsage,
 } from '../engine'
+import { ProWatermark } from '../lib/pro-watermark'
 import { createStorageAdapter } from '../storage'
 import type {
   AdoptionProviderProps,

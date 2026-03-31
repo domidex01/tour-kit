@@ -38,4 +38,3 @@ export function useLicenseCheck(): LicenseCheckResult {
     return { isLicensed: false, isLoading: false }
   }
 }
-

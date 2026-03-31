@@ -154,9 +154,7 @@ describe('AiChatProvider — license integration', () => {
       )
 
       expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('@tour-kit/ai')
-      )
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/ai'))
     })
   })
 

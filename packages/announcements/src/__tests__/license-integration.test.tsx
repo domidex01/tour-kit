@@ -113,9 +113,7 @@ describe('AnnouncementsProvider — license integration', () => {
       )
 
       expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('@tour-kit/announcements')
-      )
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/announcements'))
     })
   })
 

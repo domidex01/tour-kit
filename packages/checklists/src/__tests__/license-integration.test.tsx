@@ -113,9 +113,7 @@ describe('ChecklistProvider — license integration', () => {
       )
 
       expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('@tour-kit/checklists')
-      )
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/checklists'))
     })
   })
 

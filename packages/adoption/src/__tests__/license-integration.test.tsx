@@ -113,9 +113,7 @@ describe('AdoptionProvider — license integration', () => {
       )
 
       expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('@tour-kit/adoption')
-      )
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/adoption'))
     })
   })
 

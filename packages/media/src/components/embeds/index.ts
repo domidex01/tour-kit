@@ -4,10 +4,10 @@ import { withLicenseCheck } from '../../lib/with-license-check'
 // PLATFORM EMBEDS
 // ============================================
 
-import { YouTubeEmbed as _YouTubeEmbed, type YouTubeEmbedProps } from './youtube-embed'
-import { VimeoEmbed as _VimeoEmbed, type VimeoEmbedProps } from './vimeo-embed'
-import { LoomEmbed as _LoomEmbed, type LoomEmbedProps } from './loom-embed'
-import { WistiaEmbed as _WistiaEmbed, type WistiaEmbedProps } from './wistia-embed'
+import { type LoomEmbedProps, LoomEmbed as _LoomEmbed } from './loom-embed'
+import { type VimeoEmbedProps, VimeoEmbed as _VimeoEmbed } from './vimeo-embed'
+import { type WistiaEmbedProps, WistiaEmbed as _WistiaEmbed } from './wistia-embed'
+import { type YouTubeEmbedProps, YouTubeEmbed as _YouTubeEmbed } from './youtube-embed'
 
 export type { YouTubeEmbedProps, VimeoEmbedProps, LoomEmbedProps, WistiaEmbedProps }
 
@@ -20,9 +20,9 @@ export const WistiaEmbed = withLicenseCheck(_WistiaEmbed, 'WistiaEmbed')
 // NATIVE MEDIA
 // ============================================
 
-import { NativeVideo as _NativeVideo, type NativeVideoProps } from './native-video'
-import { GifPlayer as _GifPlayer, type GifPlayerProps } from './gif-player'
-import { LottiePlayer as _LottiePlayer, type LottiePlayerProps } from './lottie-player'
+import { type GifPlayerProps, GifPlayer as _GifPlayer } from './gif-player'
+import { type LottiePlayerProps, LottiePlayer as _LottiePlayer } from './lottie-player'
+import { type NativeVideoProps, NativeVideo as _NativeVideo } from './native-video'
 
 export type { NativeVideoProps, GifPlayerProps, LottiePlayerProps }
 

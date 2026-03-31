@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { ProWatermark } from '../lib/pro-watermark'
 
 interface ScheduleGateProps {
