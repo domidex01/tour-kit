@@ -547,10 +547,7 @@ export function AnnouncementsProvider({
 
   return (
     <AnnouncementsContext.Provider value={contextValue}>
-      <div style={{ position: 'relative' }}>
-        {children}
-        <ProWatermark />
-      </div>
+      <ProWatermark>{children}</ProWatermark>
     </AnnouncementsContext.Provider>
   )
 }

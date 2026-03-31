@@ -459,10 +459,7 @@ export function ChecklistProvider({
 
   return (
     <ChecklistContext.Provider value={contextValue}>
-      <div style={{ position: 'relative' }}>
-        {children}
-        <ProWatermark />
-      </div>
+      <ProWatermark>{children}</ProWatermark>
     </ChecklistContext.Provider>
   )
 }

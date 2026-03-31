@@ -184,10 +184,7 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
 
   return (
     <AiChatContext.Provider value={value}>
-      <div style={{ position: 'relative' }}>
-        {children}
-        <ProWatermark />
-      </div>
+      <ProWatermark>{children}</ProWatermark>
     </AiChatContext.Provider>
   )
 }

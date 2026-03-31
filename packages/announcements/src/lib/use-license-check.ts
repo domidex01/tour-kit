@@ -1,10 +1,12 @@
+type LicenseStatus = 'valid' | 'invalid' | 'expired' | 'revoked' | 'loading' | 'error'
+
 interface LicenseCheckResult {
   isLicensed: boolean
   isLoading: boolean
 }
 
 type LicenseModule = {
-  useLicense: () => { state: { status: string }; refresh: () => Promise<void> }
+  useLicense: () => { state: { status: LicenseStatus }; refresh: () => Promise<void> }
 }
 
 let licenseModule: LicenseModule | null | undefined
@@ -30,7 +32,8 @@ export function useLicenseCheck(): LicenseCheckResult {
   try {
     const { state } = mod.useLicense()
     return {
-      isLicensed: state.status === 'valid' || state.status === 'loading',
+      isLicensed:
+        state.status === 'valid' || state.status === 'loading' || state.status === 'error',
       isLoading: state.status === 'loading',
     }
   } catch {

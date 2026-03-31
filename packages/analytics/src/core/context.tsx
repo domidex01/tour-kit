@@ -45,10 +45,7 @@ export function AnalyticsProvider({ config, children }: AnalyticsProviderProps) 
 
   return (
     <AnalyticsContext.Provider value={analyticsRef.current}>
-      <div style={{ position: 'relative' }}>
-        {children}
-        <ProWatermark />
-      </div>
+      <ProWatermark>{children}</ProWatermark>
     </AnalyticsContext.Provider>
   )
 }

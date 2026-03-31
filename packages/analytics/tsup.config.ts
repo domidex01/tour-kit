@@ -11,7 +11,7 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['react', 'react-dom', '@tour-kit/core', 'posthog-js', 'mixpanel-browser'],
+  external: ['react', 'react-dom', '@tour-kit/core', 'posthog-js', 'mixpanel-browser', '@tour-kit/license'],
   treeshake: true,
   splitting: false,
   minify: true,

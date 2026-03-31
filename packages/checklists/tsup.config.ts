@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: ['react', 'react-dom', '@tour-kit/core', '@floating-ui/react'],
+  external: ['react', 'react-dom', '@tour-kit/core', '@floating-ui/react', '@tour-kit/license'],
   treeshake: true,
   minify: true,
   target: 'es2020',

@@ -6,10 +6,5 @@ interface ScheduleGateProps {
 }
 
 export function ScheduleGate({ children }: ScheduleGateProps) {
-  return (
-    <div style={{ position: 'relative' }}>
-      {children}
-      <ProWatermark />
-    </div>
-  )
+  return <ProWatermark>{children}</ProWatermark>
 }

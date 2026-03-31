@@ -21,7 +21,11 @@ const watermarkStyles: React.CSSProperties = {
   textTransform: 'uppercase',
 }
 
-export function ProWatermark() {
+interface ProWatermarkProps {
+  children: React.ReactNode
+}
+
+export function ProWatermark({ children }: ProWatermarkProps) {
   const { isLicensed, isLoading } = useLicenseCheck()
   const warnedRef = React.useRef(false)
 
@@ -36,11 +40,14 @@ export function ProWatermark() {
     }
   }, [isLicensed, isLoading])
 
-  if (isLicensed || isLoading) return null
+  if (isLicensed || isLoading) return <>{children}</>
 
   return (
-    <div style={watermarkStyles} aria-hidden="true">
-      UNLICENSED
+    <div style={{ position: 'relative' }}>
+      {children}
+      <div style={watermarkStyles} aria-hidden="true">
+        UNLICENSED
+      </div>
     </div>
   )
 }

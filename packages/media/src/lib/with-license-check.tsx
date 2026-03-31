@@ -1,16 +1,16 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { ProWatermark } from './pro-watermark'
 
-export function withLicenseCheck<P extends object>(
+// biome-ignore lint/suspicious/noExplicitAny: HOC generic needs flexible constraint
+export function withLicenseCheck<P extends Record<string, any>>(
   Component: React.ComponentType<P>,
   displayName: string
-): React.ComponentType<P> {
-  const Wrapped = React.forwardRef<unknown, P>((props, ref) => (
-    <div style={{ position: 'relative' }}>
-      <Component {...(props as P & { ref: React.Ref<unknown> })} ref={ref} />
-      <ProWatermark />
-    </div>
-  ))
+): React.FC<P> {
+  const Wrapped: React.FC<P> = (props) => (
+    <ProWatermark>
+      <Component {...props} />
+    </ProWatermark>
+  )
   Wrapped.displayName = `Licensed(${displayName})`
-  return Wrapped as unknown as React.ComponentType<P>
+  return Wrapped
 }
