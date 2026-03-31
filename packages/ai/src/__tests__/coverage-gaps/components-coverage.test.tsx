@@ -63,9 +63,9 @@ describe('Component coverage gaps', () => {
           suggestions={['Custom']}
           onSelect={vi.fn()}
           renderSuggestion={(suggestion, onSelect) => (
-            <span key={suggestion} onClick={onSelect} data-testid="custom">
+            <button key={suggestion} type="button" onClick={onSelect} data-testid="custom">
               {suggestion}
-            </span>
+            </button>
           )}
         />
       )

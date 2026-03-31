@@ -1,157 +1,147 @@
 /**
  * License tier levels
  */
-export type LicenseTier = 'free' | 'pro' | 'enterprise'
+export type LicenseTier = 'free' | 'pro'
 
 /**
- * Available premium packages
+ * Activation details for a licensed domain
  */
-export type LicensePackage = 'analytics' | 'ai' | 'branching'
-
-/**
- * Available premium features
- */
-export type LicenseFeature =
-  // Analytics features
-  | 'analytics-posthog'
-  | 'analytics-mixpanel'
-  | 'analytics-amplitude'
-  | 'analytics-ga4'
-  // AI features
-  | 'ai-personalization'
-  | 'ai-rag'
-  | 'ai-chat'
-  // Branching features
-  | 'branching-advanced'
-
-/**
- * JWT payload structure for license validation
- */
-export interface LicensePayload {
-  /** Customer ID */
-  sub: string
-  /** Issuer (tourkit.dev) */
-  iss: string
-  /** Issued at timestamp */
-  iat: number
-  /** Expiry timestamp */
-  exp: number
-  /** Customer email */
-  email: string
-  /** License tier */
-  tier: LicenseTier
-  /** Enabled packages */
-  packages: LicensePackage[]
-  /** Enabled features */
-  features: LicenseFeature[]
-  /** Enterprise limits (optional) */
-  limits?: LicenseLimits
-}
-
-/**
- * Enterprise license limits
- */
-export interface LicenseLimits {
-  /** Allowed domains for license */
-  maxDomains?: string[]
-  /** Maximum monthly active users */
-  maxMau?: number
-  /** Maximum tours */
-  maxTours?: number
-}
-
-/**
- * License validation result
- */
-export interface LicenseValidation {
-  /** Is the license valid */
-  valid: boolean
-  /** Decoded payload if valid */
-  payload: LicensePayload | null
-  /** Error message if invalid */
-  error: LicenseError | null
-  /** Time until expiry in milliseconds */
-  expiresIn: number | null
+export type LicenseActivation = {
+  id: string
+  licenseKeyId: string
+  label: string
+  createdAt: string
+  modifiedAt: string | null
 }
 
 /**
  * License error types
  */
 export type LicenseError =
-  | 'invalid_format'
-  | 'invalid_signature'
-  | 'expired'
-  | 'not_yet_valid'
-  | 'domain_mismatch'
-  | 'missing_key'
+  | 'invalid_key'
+  | 'network_error'
   | 'parse_error'
+  | 'activation_limit_reached'
+  | 'domain_mismatch'
 
 /**
- * License context value
+ * Flat license state — single source of truth for validity.
+ * Never derive validity from `tier` alone — a pro tier with
+ * `status: 'expired'` is not valid.
+ *
+ * `renderKey` is set only when `status === 'valid'`. It is the
+ * core anti-bypass mechanism consumed by `<LicenseGate>`.
  */
-export interface LicenseContextValue {
-  /** Current license validation state */
-  license: LicenseValidation
-  /** Check if a specific feature is enabled */
-  hasFeature: (feature: LicenseFeature) => boolean
-  /** Check if a specific package is enabled */
-  hasPackage: (pkg: LicensePackage) => boolean
-  /** Current tier */
+export type LicenseState = {
+  status: 'valid' | 'invalid' | 'expired' | 'revoked' | 'loading' | 'error'
   tier: LicenseTier
-  /** Is any premium license active */
-  isPremium: boolean
-  /** Is license loading/validating */
-  isLoading: boolean
-  /** Refresh license validation */
+  activations: number
+  maxActivations: number
+  domain: string | null
+  expiresAt: string | null
+  validatedAt: number
+  renderKey: string | undefined
+}
+
+/**
+ * Shape stored in localStorage
+ */
+export type LicenseCache = {
+  state: LicenseState
+  cachedAt: number
+  domain: string
+}
+
+/**
+ * Config passed to validateLicenseKey()
+ */
+export type LicenseConfig = {
+  key: string
+  organizationId: string
+}
+
+/**
+ * Raw Polar validate response (after camelCase transform)
+ */
+export type PolarValidateResponse = {
+  id: string
+  organizationId: string
+  status: 'granted' | 'revoked' | 'disabled'
+  key: string
+  limitActivations: number | null
+  usage: number
+  validations: number
+  lastValidatedAt: string
+  expiresAt: string | null
+  activation: {
+    id: string
+    licenseKeyId: string
+    label: string
+    meta: Record<string, unknown>
+    createdAt: string
+    modifiedAt: string | null
+  } | null
+}
+
+/**
+ * Raw Polar activate response (after camelCase transform)
+ */
+export type PolarActivateResponse = {
+  id: string
+  licenseKeyId: string
+  label: string
+  meta: Record<string, unknown>
+  createdAt: string
+  modifiedAt: string | null
+  licenseKey: {
+    id: string
+    organizationId: string
+    status: 'granted' | 'revoked' | 'disabled'
+    limitActivations: number | null
+    usage: number
+    limitUsage: number | null
+    validations: number
+    lastValidatedAt: string
+    expiresAt: string | null
+  }
+}
+
+/**
+ * License context value (used by React integration)
+ */
+export type LicenseContextValue = {
+  state: LicenseState
   refresh: () => Promise<void>
 }
 
 /**
  * License provider props
  */
-export interface LicenseProviderProps {
-  /** License key (tk_...) */
-  licenseKey?: string
-  /** Public key for validation (PEM format) */
-  publicKey: string
-  /** Optional domain validation */
-  validateDomain?: boolean
-  /** Children */
+export type LicenseProviderProps = {
+  licenseKey: string
+  organizationId?: string
   children: React.ReactNode
-  /** Callback when license is validated */
-  onValidate?: (result: LicenseValidation) => void
-  /** Callback when license expires */
-  onExpire?: () => void
+  onValidate?: (state: LicenseState) => void
+  onError?: (error: Error) => void
 }
 
 /**
  * License gate props for conditional rendering
  */
-export interface LicenseGateProps {
-  /** Required feature(s) - any match enables content */
-  feature?: LicenseFeature | LicenseFeature[]
-  /** Required package(s) - any match enables content */
-  package?: LicensePackage | LicensePackage[]
-  /** Required tier (minimum) */
-  tier?: LicenseTier
-  /** Content to show when licensed */
+export type LicenseGateProps = {
+  require: 'pro'
   children: React.ReactNode
-  /** Content to show when not licensed */
   fallback?: React.ReactNode
+  loading?: React.ReactNode
 }
 
 /**
  * License warning banner props
  */
-export interface LicenseWarningProps {
-  /** Custom message */
+export type LicenseWarningProps = {
   message?: string
-  /** Link to pricing page */
   pricingUrl?: string
-  /** Whether the warning can be dismissed */
   dismissible?: boolean
-  /** Callback when dismissed */
   onDismiss?: () => void
-  /** Custom className */
   className?: string
 }

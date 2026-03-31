@@ -82,7 +82,8 @@ export function Features() {
             who ship.
           </h2>
           <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-            Headless architecture, strict TypeScript, and WCAG accessibility — not afterthoughts, but foundations.
+            Headless architecture, strict TypeScript, and WCAG accessibility — not afterthoughts,
+            but foundations.
           </p>
         </div>
 
@@ -120,8 +121,12 @@ export function Features() {
                     <span className="font-mono text-[11px] text-white/30">example.tsx</span>
                   </div>
                   <div className="flex overflow-x-auto bg-[#0d0e11] py-4">
-                    <div className="select-none border-r border-white/[0.06] pl-4 pr-4 text-right font-mono text-[13px] leading-[1.8] text-white/15" aria-hidden="true">
+                    <div
+                      className="select-none border-r border-white/[0.06] pl-4 pr-4 text-right font-mono text-[13px] leading-[1.8] text-white/15"
+                      aria-hidden="true"
+                    >
                       {feature.code.split('\n').map((_: string, j: number) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: line numbers are static and never reorder
                         <div key={j}>{j + 1}</div>
                       ))}
                     </div>

@@ -16,9 +16,24 @@ const colors = {
 type Token = { text: string; color: string }
 
 const keywords = new Set([
-  'import', 'export', 'from', 'const', 'let', 'var', 'function',
-  'return', 'if', 'else', 'default', 'new', 'null', 'undefined',
-  'true', 'false', 'typeof', 'void',
+  'import',
+  'export',
+  'from',
+  'const',
+  'let',
+  'var',
+  'function',
+  'return',
+  'if',
+  'else',
+  'default',
+  'new',
+  'null',
+  'undefined',
+  'true',
+  'false',
+  'typeof',
+  'void',
 ])
 
 export function highlightCode(code: string): ReactNode[] {
@@ -42,6 +57,7 @@ export function highlightCode(code: string): ReactNode[] {
   return result
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: tokenizer requires sequential pattern matching
 function tokenizeLine(line: string): Token[] {
   const tokens: Token[] = []
   let i = 0
@@ -88,7 +104,7 @@ function tokenizeLine(line: string): Token[] {
         const name = line.slice(nameStart, j)
 
         // Push < or </
-        tokens.push({ text: '<' + closingSlash, color: colors.bracket })
+        tokens.push({ text: `<${closingSlash}`, color: colors.bracket })
         // Component (uppercase) vs HTML tag (lowercase)
         const isComponent = name[0] === name[0].toUpperCase() && /[a-z]/.test(name)
         tokens.push({ text: name, color: isComponent ? colors.component : colors.tag })
@@ -128,7 +144,13 @@ function tokenizeLine(line: string): Token[] {
       } else if (j < line.length && line[j] === '=' && line[j + 1] !== '=') {
         // JSX attribute: word=
         tokens.push({ text: word, color: colors.attr })
-      } else if (i > 0 && /\s/.test(line[i - 1]) && /[a-z]/.test(word[0]) && j < line.length && (line[j] === '=' || line[j] === ':')) {
+      } else if (
+        i > 0 &&
+        /\s/.test(line[i - 1]) &&
+        /[a-z]/.test(word[0]) &&
+        j < line.length &&
+        (line[j] === '=' || line[j] === ':')
+      ) {
         tokens.push({ text: word, color: colors.attr })
       } else {
         tokens.push({ text: word, color: colors.plain })

@@ -21,6 +21,7 @@ import { getUserTimezone } from './timezone'
  * @param options - Evaluation options (override now, timezone)
  * @returns ScheduleResult with isActive and reason
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: schedule evaluation with multiple rule checks
 export function isScheduleActive(
   schedule: Schedule,
   options: ScheduleEvaluationOptions = {}

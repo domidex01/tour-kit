@@ -96,8 +96,8 @@ function ZIndexCard({ show }: { show: boolean }) {
         {/* Pain label */}
         <div className="border-t border-white/[0.06] bg-rose-500/[0.06] px-5 py-3">
           <p className="flex items-center gap-2 text-[12px] font-medium text-rose-400/90">
-            <AlertTriangle className="h-3.5 w-3.5" />
-            3 days of z-index whack-a-mole. Tooltip still renders behind the modal.
+            <AlertTriangle className="h-3.5 w-3.5" />3 days of z-index whack-a-mole. Tooltip still
+            renders behind the modal.
           </p>
         </div>
       </div>
@@ -150,8 +150,8 @@ function BundleSizeCard({ show }: { show: boolean }) {
           </div>
 
           <div className="mt-3 border-t border-white/[0.06] pt-3 text-[11px] text-white/25">
-            <span className="text-rose-400/70">+47KB</span> to show 3 tooltips. Your users
-            are downloading a novel.
+            <span className="text-rose-400/70">+47KB</span> to show 3 tooltips. Your users are
+            downloading a novel.
           </div>
         </div>
 
@@ -193,7 +193,8 @@ function PricingCard({ show }: { show: boolean }) {
               <span className="text-[12px] font-semibold text-white/60">product-manager</span>
             </div>
             <p className="text-white/50">
-              Can we customize the tooltip to match our design system? The brand team is pushing back
+              Can we customize the tooltip to match our design system? The brand team is pushing
+              back
             </p>
           </div>
 
@@ -216,9 +217,7 @@ function PricingCard({ show }: { show: boolean }) {
               </div>
               <span className="text-[12px] font-semibold text-white/60">eng-manager</span>
             </div>
-            <p className="text-white/50">
-              Wait, how much are we paying for this?
-            </p>
+            <p className="text-white/50">Wait, how much are we paying for this?</p>
           </div>
 
           <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2">
@@ -268,8 +267,8 @@ function RouterCard({ show }: { show: boolean }) {
 
           <div className="space-y-2.5 text-[12.5px]">
             <p className="text-white/40">
-              We migrated from Pages Router to App Router and every single tour step is broken.
-              The library relies on{' '}
+              We migrated from Pages Router to App Router and every single tour step is broken. The
+              library relies on{' '}
               <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[11px] text-violet-400/80">
                 window.location
               </code>{' '}

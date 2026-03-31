@@ -1,7 +1,7 @@
 'use client'
 
-import { CopyButton } from '@/components/ui/copy-button'
 import { highlightCode } from '@/components/landing/syntax-highlight'
+import { CopyButton } from '@/components/ui/copy-button'
 import { useState } from 'react'
 
 const steps = [
@@ -101,9 +101,7 @@ export function QuickStart() {
                   type="button"
                   onClick={() => setActive(i)}
                   className={`group relative flex shrink-0 items-start gap-4 rounded-xl px-4 py-4 text-left transition-colors lg:rounded-r-xl lg:rounded-l-none ${
-                    isActive
-                      ? 'bg-fd-card shadow-sm'
-                      : 'hover:bg-fd-muted/40'
+                    isActive ? 'bg-fd-card shadow-sm' : 'hover:bg-fd-muted/40'
                   }`}
                 >
                   {/* Vertical active indicator (desktop only) */}
@@ -116,9 +114,7 @@ export function QuickStart() {
                   {/* Step number */}
                   <span
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-[13px] font-bold transition-colors ${
-                      isActive
-                        ? 'bg-[#0197f6] text-white'
-                        : 'bg-fd-muted text-fd-muted-foreground'
+                      isActive ? 'bg-[#0197f6] text-white' : 'bg-fd-muted text-fd-muted-foreground'
                     }`}
                   >
                     {s.number}
@@ -151,19 +147,18 @@ export function QuickStart() {
                   <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
                   <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
                 </div>
-                <span className="font-mono text-[12px] text-white/30">
-                  {step.filename}
-                </span>
+                <span className="font-mono text-[12px] text-white/30">{step.filename}</span>
               </div>
-              <CopyButton
-                text={step.code}
-                className="text-white/20 hover:text-white/60"
-              />
+              <CopyButton text={step.code} className="text-white/20 hover:text-white/60" />
             </div>
             {/* Code content with line numbers */}
             <div className="flex min-h-[280px] overflow-x-auto bg-[#0d0e11] py-4">
-              <div className="select-none border-r border-white/[0.06] pl-4 pr-4 text-right font-mono text-[13px] leading-[1.8] text-white/15" aria-hidden="true">
+              <div
+                className="select-none border-r border-white/[0.06] pl-4 pr-4 text-right font-mono text-[13px] leading-[1.8] text-white/15"
+                aria-hidden="true"
+              >
                 {step.code.split('\n').map((_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: line numbers are static and never reorder
                   <div key={i}>{i + 1}</div>
                 ))}
               </div>
@@ -175,8 +170,8 @@ export function QuickStart() {
         </div>
 
         <p className="mt-8 text-[14px] text-fd-muted-foreground">
-          That&apos;s it. TourKit handles positioning, focus trapping, keyboard navigation,
-          and screen reader announcements automatically.
+          That&apos;s it. TourKit handles positioning, focus trapping, keyboard navigation, and
+          screen reader announcements automatically.
         </p>
       </div>
     </section>

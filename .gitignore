@@ -54,3 +54,7 @@ __pycache__/
 .pytest_cache/
 .claude/*
 CLAUDE.md
+
+marketing-strategy/*
+tour-kit/*
+plan/*

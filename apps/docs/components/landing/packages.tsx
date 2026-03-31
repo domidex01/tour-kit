@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null)
@@ -29,7 +29,8 @@ function useReveal() {
 const corePackages = [
   {
     name: '@tour-kit/core',
-    description: 'The headless engine. Hooks, positioning, focus management, and state — all framework-agnostic.',
+    description:
+      'The headless engine. Hooks, positioning, focus management, and state — all framework-agnostic.',
     size: '< 8 KB',
     install: 'pnpm add @tour-kit/core',
     href: '/docs/core',
@@ -96,7 +97,10 @@ export function Packages() {
   const { ref, visible } = useReveal()
 
   return (
-    <section ref={ref} className="bg-[#EDF6FB] dark:bg-fd-muted/30 px-6 py-28 sm:px-8 md:py-36 lg:px-12">
+    <section
+      ref={ref}
+      className="bg-[#EDF6FB] dark:bg-fd-muted/30 px-6 py-28 sm:px-8 md:py-36 lg:px-12"
+    >
       <div className="mx-auto max-w-[1120px]">
         {/* Header — right-aligned for contrast with previous left-aligned sections */}
         <div className="mb-16 ml-auto max-w-lg text-right">
@@ -109,7 +113,8 @@ export function Packages() {
             Nine packages.
           </h2>
           <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-            Start with the free core. Add analytics, checklists, or scheduling when you need them — each package is independently tree-shakeable.
+            Start with the free core. Add analytics, checklists, or scheduling when you need them —
+            each package is independently tree-shakeable.
           </p>
         </div>
 

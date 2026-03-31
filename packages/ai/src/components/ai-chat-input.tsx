@@ -47,7 +47,7 @@ export function AiChatInput({
           className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Stop generating"
         >
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
             <rect x="2" y="2" width="10" height="10" rx="1" />
           </svg>
         </button>
@@ -67,6 +67,7 @@ export function AiChatInput({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
+            aria-hidden="true"
           >
             <path d="M13 1L1 8l4 2 2 4 6-13z" />
           </svg>

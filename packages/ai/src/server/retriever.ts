@@ -5,6 +5,7 @@ import { createInMemoryVectorStore } from './vector-store'
  * Splits a single document into chunks with overlap.
  * Uses paragraph-aware splitting with sentence fallback.
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: chunking algorithm requires nested boundary logic
 export function chunkDocument(
   document: Document,
   chunkSize: number,

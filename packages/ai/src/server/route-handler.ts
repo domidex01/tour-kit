@@ -15,6 +15,7 @@ import { createRetriever } from './retriever'
 import { createSystemPrompt } from './system-prompt'
 
 /** Validate and sanitize tourContext from untrusted request body */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: input validation with multiple field checks
 function parseTourContext(raw: unknown): TourAssistantContext | undefined {
   if (!raw || typeof raw !== 'object') return undefined
 
@@ -123,6 +124,7 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
     })
   }
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: route handler with multiple context strategies
   async function POST(req: Request): Promise<Response> {
     try {
       const url = new URL(req.url)

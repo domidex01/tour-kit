@@ -13,7 +13,7 @@
   "bugs": {
     "url": "https://github.com/DomiDex/tour-kit/issues"
   },
-  "keywords": ["react", "license", "jwt", "tour-kit", "premium"],
+  "keywords": ["react", "license", "tour-kit", "premium", "polar"],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -27,6 +27,16 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./headless": {
+      "import": {
+        "types": "./dist/headless.d.ts",
+        "default": "./dist/headless.js"
+      },
+      "require": {
+        "types": "./dist/headless.d.cts",
+        "default": "./dist/headless.cjs"
       }
     },
     "./package.json": "./package.json"
@@ -47,7 +57,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "jose": "^5.9.0"
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
@@ -58,6 +68,7 @@
     "@testing-library/react": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^4.7.0",
     "@vitest/coverage-v8": "catalog:",
     "jsdom": "catalog:",
     "react": "^19.2.0",

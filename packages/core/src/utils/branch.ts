@@ -122,6 +122,7 @@ export async function resolveBranch(
  * @param totalSteps - Total number of steps in the tour
  * @returns Step index, or null for special targets that don't map to an index
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: branch resolution with multiple target types
 export function resolveTargetToIndex(
   target: BranchTarget,
   currentIndex: number,

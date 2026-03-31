@@ -26,6 +26,7 @@ describe('Server — coverage gaps', () => {
       const { createChatRouteHandler } = await import('../../server/route-handler')
 
       const { POST } = createChatRouteHandler({
+        // biome-ignore lint/suspicious/noExplicitAny: test mock stub
         model: {} as any,
         context: { strategy: 'context-stuffing', documents: [] },
       })
@@ -44,6 +45,7 @@ describe('Server — coverage gaps', () => {
       const { createChatRouteHandler } = await import('../../server/route-handler')
 
       const { POST } = createChatRouteHandler({
+        // biome-ignore lint/suspicious/noExplicitAny: test mock stub
         model: {} as any,
         context: { strategy: 'context-stuffing', documents: [] },
         rateLimit: {
@@ -79,6 +81,7 @@ describe('Server — coverage gaps', () => {
       const { createChatRouteHandler } = await import('../../server/route-handler')
 
       const { POST } = createChatRouteHandler({
+        // biome-ignore lint/suspicious/noExplicitAny: test mock stub
         model: {} as any,
         context: { strategy: 'context-stuffing', documents: [] },
         beforeSend,
@@ -109,6 +112,7 @@ describe('Server — coverage gaps', () => {
       const { createChatRouteHandler } = await import('../../server/route-handler')
 
       const { POST } = createChatRouteHandler({
+        // biome-ignore lint/suspicious/noExplicitAny: test mock stub
         model: {} as any,
         context: { strategy: 'context-stuffing', documents: [] },
       })

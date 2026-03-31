@@ -39,6 +39,7 @@ export function AiChatMessageList({
   const { messages, status } = useAiChat()
   const bottomRef = useRef<HTMLDivElement>(null)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on message count or status change, not on ref
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length, status])

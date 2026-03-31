@@ -188,7 +188,7 @@ afterEach(() => {
 | # | Test | Assert |
 |---|------|--------|
 | 5 | returns activation with correct label | `mockFetch` returns 200 + `VALID_ACTIVATE_RESPONSE`. Result has `label === 'example.com'`, `licenseKeyId` set. |
-| 6 | throws PolarApiError for 422 (activation limit) | `mockFetch` returns 422. `expect(call).rejects.toThrow(PolarApiError)`. Error has `statusCode === 422`. |
+| 6 | throws PolarApiError for 403 (activation limit) | `mockFetch` returns 403. `expect(call).rejects.toThrow(PolarApiError)`. Error has `statusCode === 403`. |
 | 7 | sends correct request body including label | Assert `mockFetch` body contains `key`, `organization_id`, and `label`. |
 
 #### `describe('deactivateKey')`
@@ -208,7 +208,7 @@ afterEach(() => {
 | 13 | returns `{ status: 'revoked' }` for revoked key | `mockFetch` returns `REVOKED_VALIDATE_RESPONSE`. Result is `{ status: 'revoked' }`. |
 | 14 | returns `{ status: 'expired' }` for expired key | `mockFetch` returns `EXPIRED_VALIDATE_RESPONSE`. Result has `status === 'expired'`, `expiresAt` set. |
 | 15 | returns `{ status: 'invalid', error: 'invalid_key' }` for 404 | `mockFetch` returns 404. Result matches expected shape. |
-| 16 | returns `{ status: 'invalid', error: 'activation_limit_reached' }` for 422 | First `mockFetch` (validate) returns `VALID_VALIDATE_RESPONSE_NO_ACTIVATION`, second (activate) returns 422. Result matches expected shape. |
+| 16 | returns `{ status: 'invalid', error: 'activation_limit_reached' }` for 403 | First `mockFetch` (validate) returns `VALID_VALIDATE_RESPONSE_NO_ACTIVATION`, second (activate) returns 403. Result matches expected shape. |
 | 17 | returns `{ status: 'error', error: 'network_error' }` for fetch failure | `mockFetch` rejects with `TypeError('Failed to fetch')`. Result matches expected shape. |
 | 18 | returns synthetic valid state in dev environment | Stub `location.hostname` to `localhost`. Call `validateLicenseKey()`. Assert `mockFetch` NOT called. Result has `status === 'valid'`. |
 | 19 | writes result to cache after successful validation | `mockFetch` returns `VALID_VALIDATE_RESPONSE`. After call, assert `localStorage.setItem` was called with key `tourkit:license:example.com`. |
@@ -339,7 +339,7 @@ afterEach(() => {
 | Network | fetch throws TypeError (offline) | polar-client #17 |
 | Network | fetch returns non-JSON body | polar-client #3 |
 | Cache | Cache entry written 23h59m ago (just within TTL) | cache #3 |
-| Cache | Cache entry written 24h01m ago (just past TTL) | cache #4 |
+| Cache | Cache entry written 72h01m ago (just past TTL) | cache #4 |
 | Cache | localStorage quota exceeded on write | Not tested (writeCache wraps in try/catch, fails silently) |
 | Domain | Empty hostname string | Implicitly covered by SSR tests |
 | API | Validate returns `disabled` status | Could be added; similar to `revoked` path |
@@ -388,14 +388,14 @@ pnpm test:watch --filter=@tour-kit/license
 | 2 | `validateKey()` throws `PolarApiError` for 404 | polar-client #2 |
 | 3 | `validateKey()` throws `PolarParseError` for malformed body | polar-client #3 |
 | 4 | `activateKey()` returns activation with correct domain label | polar-client #5 |
-| 5 | `activateKey()` throws `PolarApiError` for 422 | polar-client #6 |
+| 5 | `activateKey()` throws `PolarApiError` for 403 | polar-client #6 |
 | 6 | `deactivateKey()` succeeds on 204 | polar-client #8 |
 | 7 | Orchestrator returns cached state on cache hit | polar-client #10 |
 | 8 | Orchestrator validates + auto-activates on cache miss | polar-client #11 |
 | 9 | Orchestrator returns `revoked` for revoked key | polar-client #13 |
 | 10 | Orchestrator returns `expired` for expired key | polar-client #14 |
 | 11 | Orchestrator returns `invalid_key` for 404 | polar-client #15 |
-| 12 | Orchestrator returns `activation_limit_reached` for 422 | polar-client #16 |
+| 12 | Orchestrator returns `activation_limit_reached` for 403 | polar-client #16 |
 | 13 | Orchestrator returns `network_error` for fetch failure | polar-client #17 |
 | 14 | Orchestrator bypasses API in dev environment | polar-client #18 |
 | 15 | Cache round-trip preserves state | cache #1 |

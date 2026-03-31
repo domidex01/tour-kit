@@ -60,6 +60,7 @@ export function AiChatPanel({
       <div
         style={positionStyle}
         className={cn(aiChatPanelVariants({ size }), 'p-4', className)}
+        // biome-ignore lint/a11y/useSemanticElements: dialog role is intentional for a non-modal floating panel
         role="dialog"
         aria-modal="false"
         aria-label="AI Chat"

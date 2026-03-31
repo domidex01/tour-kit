@@ -63,6 +63,7 @@ export function getScheduleStatus(
 /**
  * Get a human-readable message for the status
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: status message mapping with many reason variants
 function getStatusMessage(
   reason: ScheduleStatus['reason'],
   schedule: Schedule,

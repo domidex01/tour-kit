@@ -10,6 +10,28 @@
 
 ---
 
+## 0. Phase 0 Findings (MUST READ)
+
+Phase 0 validated the Polar API on 2026-03-30. **Critical discoveries that affect this phase:**
+
+| Finding | Impact on Phase 1 |
+|---------|-------------------|
+| **Request bodies use `snake_case`** (`organization_id`, `activation_id`) | Zod schemas and `fetch()` calls must use snake_case in request bodies |
+| **`usage` does NOT track activations** | The `usage` field stays 0 regardless of activations. Do NOT use it to count active domains. |
+| **`limit_activations` is lifetime, not concurrent** | Deactivating a domain does NOT free a slot. Once 5 activations are created (even if later deactivated), no more can be added. This means activation is a one-way operation per domain. |
+| **Activation limit exceeded returns HTTP 403** (not 422) | Error mapping: `PolarApiError` with `statusCode === 403` → `activation_limit_reached` |
+| **Deactivation returns 204 No Content** | `deactivateKey()` must not attempt to parse response body |
+| **Deactivation is unauthenticated** | Customer portal deactivate endpoint works without auth (same as validate/activate) |
+| **Rate limiting at ~20 req/min** | No impact on production (single validate per page load), but test helpers should include retry logic |
+| **p95 latency ~350-500ms from Asia** | Cache TTL should be **72h** (not 24h) to minimize API calls from high-latency regions |
+| **Validate with `activation_id`** returns `activation` object | Use this to confirm a specific domain activation is still valid |
+| **`modified_at` can be `null`** on activation objects | Type must be `string \| null`, not `string` |
+| **Invalid key returns 404** (not a 200 with different status) | Error mapping: HTTP 404 → `invalid_key` |
+
+**Activation model change:** Because `limit_activations` is lifetime (not concurrent), the auto-activation strategy must be: activate once per domain, store the `activation_id` in cache, and re-validate with that `activation_id` on subsequent visits. Never deactivate programmatically — deactivation wastes a slot permanently.
+
+---
+
 ## 1. Objective + What Success Looks Like
 
 **Objective:** Build the framework-agnostic license validation, activation, caching, and domain detection layer inside `packages/license/src/lib/`. Replace the existing JWT/jose-based validation with Polar.sh API calls. This phase produces zero React code — only pure TypeScript functions and types that Phase 2 will wrap in React context.
@@ -17,8 +39,8 @@
 **What Success Looks Like:**
 
 - A developer can call `validateLicenseKey(key, orgId)` and get back a typed `LicenseState` discriminated union (`valid`, `invalid`, `expired`, `revoked`, `loading`, `error`, `idle`).
-- Results are cached in `localStorage` with a 24-hour TTL, scoped by domain. Corrupted cache entries are detected via Zod parse and silently cleared.
-- First-time validation on a new domain auto-activates via Polar's activate endpoint (consuming one activation slot out of the customer's limit).
+- Results are cached in `localStorage` with a 72-hour TTL, scoped by domain. Corrupted cache entries are detected via Zod parse and silently cleared.
+- First-time validation on a new domain auto-activates via Polar's activate endpoint (consuming one activation slot out of the customer's **lifetime** limit — deactivation does NOT free slots, so activation is a one-way operation per domain).
 - `isDevEnvironment()` correctly identifies `localhost`, `127.0.0.1`, and `*.local` as dev environments.
 - `validateDomainAtRender()` compares the current `window.location.hostname` against the stored activation label and logs a console warning on mismatch (soft enforcement, no hard block).
 - The `jose` dependency is gone. No JWT code remains anywhere in the package.
@@ -68,6 +90,10 @@ tourkit:license:<domain>  ->  { state: LicenseState, cachedAt: number }
 
 The `<domain>` segment comes from `getCurrentDomain()`. SSR environments (no `window`) skip caching entirely.
 
+### Activation ID Persistence
+
+The cache must store the `activation_id` from the first successful activation. On subsequent visits, pass this `activation_id` to the validate endpoint: `POST /validate { key, organization_id, activation_id }`. This confirms the specific domain activation is still valid without creating a new activation (which would waste a lifetime slot). The flow is: activate once → store `activation_id` in cache → re-validate with `activation_id` on every subsequent visit.
+
 ### Raw `fetch()`, No SDK
 
 Use the browser's native `fetch()` to call Polar's customer-portal endpoints. No `@polar-sh/sdk` dependency. Both endpoints require no auth headers (client-side safe). This keeps the bundle minimal and avoids SDK version coupling.
@@ -110,7 +136,7 @@ export type LicenseActivation = {
   licenseKeyId: string
   label: string          // domain name
   createdAt: string
-  modifiedAt: string
+  modifiedAt: string | null  // null on first creation (confirmed Phase 0)
 }
 
 /** Shape stored in localStorage */
@@ -199,7 +225,7 @@ export const PolarValidateResponseSchema = z.object({
     label: z.string(),
     meta: z.record(z.unknown()),
     created_at: z.string(),
-    modified_at: z.string(),
+    modified_at: z.string().nullable(),  // null on first creation
   }).nullable(),
 })
 
@@ -209,7 +235,7 @@ export const PolarActivateResponseSchema = z.object({
   label: z.string(),
   meta: z.record(z.unknown()),
   created_at: z.string(),
-  modified_at: z.string(),
+  modified_at: z.string().nullable(),
   license_key: z.object({
     id: z.string(),
     organization_id: z.string(),
@@ -311,7 +337,7 @@ Include `transformValidateResponse()` and `transformActivateResponse()` helpers 
 
 ```typescript
 const CACHE_PREFIX = 'tourkit:license:'
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000  // 24 hours
+const CACHE_TTL_MS = 72 * 60 * 60 * 1000  // 72 hours (adjusted per Phase 0 latency findings)
 
 export function readCache(domain: string): LicenseState | null {
   if (typeof window === 'undefined') return null
@@ -392,10 +418,13 @@ export async function validateLicenseKey(config: LicenseConfig): Promise<License
   }
 
   try {
-    // 3. Validate against Polar API
-    const response = await validateKey(key, organizationId)
+    // 3. Check for stored activation_id from a previous activation
+    const storedActivationId = domain ? readActivationId(domain) : undefined
 
-    // 4. Map Polar status to LicenseState
+    // 4. Validate against Polar API (with activation_id if available)
+    const response = await validateKey(key, organizationId, storedActivationId)
+
+    // 5. Map Polar status to LicenseState
     if (response.status === 'revoked') {
       const state: LicenseState = { status: 'revoked' }
       if (domain) writeCache(domain, state)
@@ -408,7 +437,8 @@ export async function validateLicenseKey(config: LicenseConfig): Promise<License
       return state
     }
 
-    // 5. Auto-activate if no activation exists for this domain
+    // 6. Auto-activate if no activation exists for this domain
+    //    WARNING: activation is a one-way operation (lifetime limit, not concurrent)
     let activation = response.activation
       ? {
           id: response.activation.id,
@@ -441,7 +471,7 @@ export async function validateLicenseKey(config: LicenseConfig): Promise<License
     if (error instanceof PolarApiError && error.statusCode === 404) {
       return { status: 'invalid', error: 'invalid_key' }
     }
-    if (error instanceof PolarApiError && error.statusCode === 422) {
+    if (error instanceof PolarApiError && error.statusCode === 403) {
       return { status: 'invalid', error: 'activation_limit_reached' }
     }
     return { status: 'error', error: 'network_error' }
@@ -478,7 +508,7 @@ export async function validateLicenseKey(config: LicenseConfig): Promise<License
 - `validateKey()` throws `PolarApiError` for 404 (invalid key)
 - `validateKey()` throws `PolarParseError` for malformed response body
 - `activateKey()` returns activation with correct label
-- `activateKey()` throws `PolarApiError` for 422 (activation limit reached)
+- `activateKey()` throws `PolarApiError` for 403 (activation limit reached)
 - `deactivateKey()` completes successfully (204 response)
 - `validateLicenseKey()` orchestrator: cache hit returns cached state without API call
 - `validateLicenseKey()` orchestrator: cache miss calls validate then auto-activate
@@ -717,7 +747,7 @@ Response 200:
   }
 }
 
-Response 422: activation limit reached
+Response 403: activation limit reached (NOT 422 — confirmed in Phase 0)
 ```
 
 **Deactivate:**
@@ -752,13 +782,13 @@ Create `PolarValidateResponseSchema` and `PolarActivateResponseSchema` using sna
 Implement `validateKey()`, `activateKey()`, `deactivateKey()` using raw `fetch()`. Each: POST to Polar endpoint, check `res.ok`, Zod-parse JSON body, transform snake_case to camelCase. Define error classes `PolarApiError` (stores statusCode + message) and `PolarParseError` (stores ZodError). Include `transformValidateResponse()` and `transformActivateResponse()` helpers.
 
 **Step 4 — Cache** (`src/lib/cache.ts`):
-Implement `readCache(domain)`, `writeCache(domain, state)`, `clearCache(domain)`. Cache key: `tourkit:license:<domain>`. TTL: 24 hours. `readCache` wraps `JSON.parse` in try/catch, then runs `LicenseCacheSchema.safeParse()`. Any failure clears the entry and returns `null`. All functions SSR-safe (`typeof window` check).
+Implement `readCache(domain)`, `writeCache(domain, state)`, `clearCache(domain)`. Cache key: `tourkit:license:<domain>`. TTL: 72 hours. `readCache` wraps `JSON.parse` in try/catch, then runs `LicenseCacheSchema.safeParse()`. Any failure clears the entry and returns `null`. All functions SSR-safe (`typeof window` check).
 
 **Step 5 — Domain** (`src/lib/domain.ts`):
 Implement `getCurrentDomain()` (returns `window.location.hostname` or `null` in SSR), `isDevEnvironment()` (matches `localhost`, `127.0.0.1`, `*.local`), `validateDomainAtRender(activationLabel)` (compares hostname vs label, logs `console.warn` on mismatch, returns boolean, skips check in SSR and dev).
 
 **Step 6 — Orchestrator** (extend `src/lib/polar-client.ts`):
-Implement `validateLicenseKey(config: LicenseConfig): Promise<LicenseState>`. Flow: dev environment check (return synthetic valid) -> cache read (return if hit) -> `validateKey()` call -> check status (revoked/expired) -> auto-activate if no activation for this domain -> cache write -> return state. Error mapping: HTTP 404 = `invalid_key`, HTTP 422 = `activation_limit_reached`, other = `network_error`.
+Implement `validateLicenseKey(config: LicenseConfig): Promise<LicenseState>`. Flow: dev environment check (return synthetic valid) -> cache read (return if hit) -> `validateKey()` call -> check status (revoked/expired) -> auto-activate if no activation for this domain -> cache write -> return state. Error mapping: HTTP 404 = `invalid_key`, HTTP 403 = `activation_limit_reached`, other = `network_error`.
 
 **Step 7 — Remove jose**:
 Delete `src/utils/validate.ts`. Delete `src/utils/` if empty. Remove `jose` from `package.json` dependencies. Add `zod` to dependencies. Remove `jose`/`jwt` from keywords. Update `src/index.ts` to remove old validate exports. Run `pnpm install`.

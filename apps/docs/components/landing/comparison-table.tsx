@@ -5,7 +5,12 @@ type Support = 'yes' | 'no' | 'partial' | string
 const rows: { label: string; tourKit: Support; saas: Support; oss: Support }[] = [
   { label: 'Cost', tourKit: 'Free core', saas: '$200–900/mo', oss: 'Free' },
   { label: 'Bundle impact', tourKit: '< 8KB', saas: 'External script', oss: '30–50KB' },
-  { label: 'Customization', tourKit: 'Your components', saas: 'Their UI + CSS overrides', oss: 'CSS overrides' },
+  {
+    label: 'Customization',
+    tourKit: 'Your components',
+    saas: 'Their UI + CSS overrides',
+    oss: 'CSS overrides',
+  },
   { label: 'Headless mode', tourKit: 'yes', saas: 'no', oss: 'no' },
   { label: 'TypeScript', tourKit: 'Strict native', saas: 'partial', oss: 'partial' },
   { label: 'Accessibility', tourKit: 'WCAG 2.1 AA', saas: 'partial', oss: 'no' },
@@ -17,7 +22,9 @@ const rows: { label: string; tourKit: Support; saas: Support; oss: Support }[] =
 function CellValue({ value, isTourKit = false }: { value: Support; isTourKit?: boolean }) {
   if (value === 'yes') {
     return (
-      <span className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-emerald-600 dark:text-emerald-400'}`}>
+      <span
+        className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-emerald-600 dark:text-emerald-400'}`}
+      >
         &#10003;
       </span>
     )
@@ -29,7 +36,9 @@ function CellValue({ value, isTourKit = false }: { value: Support; isTourKit?: b
     return <span className="font-mono text-[13px] text-amber-600/70 dark:text-amber-400/70">~</span>
   }
   return (
-    <span className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-fd-muted-foreground'}`}>
+    <span
+      className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-fd-muted-foreground'}`}
+    >
       {value}
     </span>
   )
@@ -44,9 +53,9 @@ export function ComparisonTable() {
             Stop <span className="text-[#0197f6]">renting</span> your onboarding
           </h2>
           <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-            SaaS platforms charge hundreds a month for UI you can&apos;t customize.
-            Open-source alternatives ship bloated bundles without TypeScript or accessibility.
-            Tour Kit is the third option.
+            SaaS platforms charge hundreds a month for UI you can&apos;t customize. Open-source
+            alternatives ship bloated bundles without TypeScript or accessibility. Tour Kit is the
+            third option.
           </p>
         </div>
 
@@ -58,8 +67,12 @@ export function ComparisonTable() {
                 <th className="bg-[#0197f6]/5 px-5 py-3 text-center">
                   <span className="font-mono text-[13px] font-bold text-[#0197f6]">Tour Kit</span>
                 </th>
-                <th className="px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">SaaS platforms</th>
-                <th className="px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">OSS libraries</th>
+                <th className="px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
+                  SaaS platforms
+                </th>
+                <th className="px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
+                  OSS libraries
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -68,7 +81,9 @@ export function ComparisonTable() {
                   key={row.label}
                   className="border-b border-fd-border/50 transition-colors hover:bg-fd-muted/20"
                 >
-                  <td className="py-4 pr-6 text-[14px] font-medium text-fd-foreground">{row.label}</td>
+                  <td className="py-4 pr-6 text-[14px] font-medium text-fd-foreground">
+                    {row.label}
+                  </td>
                   <td className="bg-[#0197f6]/5 px-5 py-4 text-center">
                     <CellValue value={row.tourKit} isTourKit />
                   </td>

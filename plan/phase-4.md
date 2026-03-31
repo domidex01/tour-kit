@@ -10,6 +10,16 @@
 
 ---
 
+## 0. Phase 0 Findings (Relevant to Phase 4)
+
+- **Organization ID:** `b1392378-b00d-436e-a2bf-a0f99b588992` (specShip org)
+- **Product ID:** `931c5ed2-686a-4925-8044-f88a0720bf6c` (Tour Kit Pro Test)
+- **Deactivation is unauthenticated** via customer portal — no server-side proxy needed for client deactivation
+- **`limit_activations` is lifetime, not concurrent** — webhook handler should NOT auto-deactivate on cancellation (wastes slots)
+- **Webhook payloads use snake_case** field names
+
+---
+
 ## 1. Objective
 
 Build the server-side Polar webhook handler at `apps/docs/app/api/webhooks/polar/route.ts` and finalize the pricing page checkout link on tourkit.dev.

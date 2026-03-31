@@ -23,6 +23,7 @@ function ChatIcon() {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
     >
       <path d="M3 3h14a2 2 0 012 2v8a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2z" />
     </svg>
@@ -39,6 +40,7 @@ function CloseIcon() {
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
+      aria-hidden="true"
     >
       <path d="M2 2l14 14M16 2L2 16" />
     </svg>

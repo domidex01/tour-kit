@@ -8,8 +8,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 const installCmd = 'pnpm add @tour-kit/react'
 
 const steps = [
-  { title: 'Welcome to your dashboard', content: "This is where you'll manage your projects.", step: 1 },
-  { title: 'Create a new project', content: 'Click here to start building something new.', step: 2 },
+  {
+    title: 'Welcome to your dashboard',
+    content: "This is where you'll manage your projects.",
+    step: 1,
+  },
+  {
+    title: 'Create a new project',
+    content: 'Click here to start building something new.',
+    step: 2,
+  },
   { title: 'Track your progress', content: 'Monitor metrics and activity in real time.', step: 3 },
 ]
 
@@ -36,9 +44,12 @@ function HeroDemo() {
   const containerRef = useRef<HTMLDivElement>(null)
   const targetRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  const setTargetRef = useCallback((index: number) => (el: HTMLDivElement | null) => {
-    targetRefs.current[index] = el
-  }, [])
+  const setTargetRef = useCallback(
+    (index: number) => (el: HTMLDivElement | null) => {
+      targetRefs.current[index] = el
+    },
+    []
+  )
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -76,7 +87,10 @@ function HeroDemo() {
         {/* Mini app content */}
         <div ref={containerRef} className="relative p-6" style={{ minHeight: 380 }}>
           {/* Top bar — step 0 target */}
-          <div ref={setTargetRef(0)} className={`mb-4 flex items-center justify-between rounded-lg p-2 transition-all duration-500 ${step === 0 ? 'border-2 border-[#0197f6]/30 bg-[#0197f6]/5' : 'border-2 border-transparent'}`}>
+          <div
+            ref={setTargetRef(0)}
+            className={`mb-4 flex items-center justify-between rounded-lg p-2 transition-all duration-500 ${step === 0 ? 'border-2 border-[#0197f6]/30 bg-[#0197f6]/5' : 'border-2 border-transparent'}`}
+          >
             <div className="h-3 w-24 rounded bg-fd-foreground/10" />
             <div className="flex gap-2">
               <div className="h-7 w-7 rounded-lg bg-fd-muted/80" />
@@ -85,7 +99,10 @@ function HeroDemo() {
           </div>
 
           {/* Card element — step 1 target */}
-          <div ref={setTargetRef(1)} className={`mb-3 rounded-lg p-3 transition-all duration-500 ${step === 1 ? 'border-2 border-[#0197f6]/30 bg-[#0197f6]/5' : 'border-2 border-transparent'}`}>
+          <div
+            ref={setTargetRef(1)}
+            className={`mb-3 rounded-lg p-3 transition-all duration-500 ${step === 1 ? 'border-2 border-[#0197f6]/30 bg-[#0197f6]/5' : 'border-2 border-transparent'}`}
+          >
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-[#0197f6]/15" />
               <div className="flex-1 space-y-1.5">
@@ -96,7 +113,10 @@ function HeroDemo() {
           </div>
 
           {/* Content rows — step 2 target */}
-          <div ref={setTargetRef(2)} className={`mb-3 space-y-2 rounded-lg p-2 transition-all duration-500 ${step === 2 ? 'border-2 border-[#0197f6]/30 bg-[#0197f6]/5' : 'border-2 border-transparent'}`}>
+          <div
+            ref={setTargetRef(2)}
+            className={`mb-3 space-y-2 rounded-lg p-2 transition-all duration-500 ${step === 2 ? 'border-2 border-[#0197f6]/30 bg-[#0197f6]/5' : 'border-2 border-transparent'}`}
+          >
             <div className="h-2.5 w-full rounded bg-fd-foreground/5" />
             <div className="h-2.5 w-4/5 rounded bg-fd-foreground/5" />
             <div className="h-2.5 w-3/5 rounded bg-fd-foreground/5" />
@@ -116,29 +136,26 @@ function HeroDemo() {
             <div className="relative rounded-xl border border-fd-border/50 bg-fd-background/95 p-4 shadow-lg backdrop-blur-md">
               {/* Arrow pointing up */}
               <div className="absolute -top-1.5 left-8 h-3 w-3 rotate-45 border-l border-t border-fd-border/50 bg-fd-background/95" />
-              <p className="mb-1 text-[13px] font-bold text-fd-foreground">
-                {current.title}
-              </p>
-              <p className="mb-3 text-[12px] text-fd-muted-foreground">
-                {current.content}
-              </p>
+              <p className="mb-1 text-[13px] font-bold text-fd-foreground">{current.title}</p>
+              <p className="mb-3 text-[12px] text-fd-muted-foreground">{current.content}</p>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] text-fd-muted-foreground">
                   {current.step} / {steps.length}
                 </span>
                 <div className="flex gap-1.5">
-                  {steps.map((_, i) => (
+                  {steps.map((s, i) => (
                     <div
-                      key={i}
+                      key={s.step}
                       className={`rounded-full transition-all duration-300 ${
-                        i === step
-                          ? 'h-1.5 w-4 bg-[#0197f6]'
-                          : 'h-1.5 w-1.5 bg-fd-muted'
+                        i === step ? 'h-1.5 w-4 bg-[#0197f6]' : 'h-1.5 w-1.5 bg-fd-muted'
                       }`}
                     />
                   ))}
                 </div>
-                <button type="button" className="rounded-lg bg-[#0197f6] px-3 py-1 text-[11px] font-semibold text-white">
+                <button
+                  type="button"
+                  className="rounded-lg bg-[#0197f6] px-3 py-1 text-[11px] font-semibold text-white"
+                >
                   {step === steps.length - 1 ? 'Done' : 'Next'}
                 </button>
               </div>
@@ -183,11 +200,40 @@ export function Hero() {
           <div className="animate-fade-in-up">
             <div className="mb-5 flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-semibold text-[#02182b] backdrop-blur-sm dark:text-white">
-                <svg className="h-3.5 w-3.5 text-[#0197f6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                <svg
+                  className="h-3.5 w-3.5 text-[#0197f6]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  role="img"
+                  aria-label="Checkmark"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
                 WCAG 2.1 AA accessible
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-semibold text-[#02182b] backdrop-blur-sm dark:text-white">
-                <svg className="h-3.5 w-3.5 text-fd-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/></svg>
+                <svg
+                  className="h-3.5 w-3.5 text-fd-muted-foreground"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  role="img"
+                  aria-label="Components"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M7 7h.01" />
+                  <path d="M17 7h.01" />
+                  <path d="M7 17h.01" />
+                  <path d="M17 17h.01" />
+                </svg>
                 Built for shadcn/ui
               </span>
             </div>
@@ -195,25 +241,18 @@ export function Hero() {
             <h1 className="mb-6 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-[#02182b] dark:text-white">
               The onboarding library
               <br />
-              <span className="text-[#0197f6]">
-                you wish you'd built.
-              </span>
+              <span className="text-[#0197f6]">you wish you'd built.</span>
             </h1>
 
             <p className="mb-8 max-w-[540px] text-[17px] leading-[1.7] text-[#02182b]/80 dark:text-white/80">
-              The open-source onboarding toolkit for React. Headless hooks, composable
-              components, and WCAG 2.1 AA accessibility — all in under 8KB.
-              Works with shadcn/ui out of the box.
+              The open-source onboarding toolkit for React. Headless hooks, composable components,
+              and WCAG 2.1 AA accessibility — all in under 8KB. Works with shadcn/ui out of the box.
             </p>
 
             <p className="mb-8 font-mono text-[13px] font-bold text-[#02182b]/60 dark:text-white/60">
-              pnpm add @tour-kit/react{' '}
-              <span className="mx-1 opacity-40">&middot;</span>{' '}
-              {'<'} 8KB gzipped{' '}
-              <span className="mx-1 opacity-40">&middot;</span>{' '}
-              TypeScript strict{' '}
-              <span className="mx-1 opacity-40">&middot;</span>{' '}
-              own your code
+              pnpm add @tour-kit/react <span className="mx-1 opacity-40">&middot;</span> {'<'} 8KB
+              gzipped <span className="mx-1 opacity-40">&middot;</span> TypeScript strict{' '}
+              <span className="mx-1 opacity-40">&middot;</span> own your code
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
