@@ -4,6 +4,7 @@ import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePersistence } from '../hooks/use-persistence'
+import { ProWatermark } from '../lib/pro-watermark'
 import type { AiChatConfig, ChatStatus } from '../types'
 import { AiChatContext, type AiChatContextValue } from './ai-chat-context'
 
@@ -181,5 +182,9 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
     ]
   )
 
-  return <AiChatContext.Provider value={value}>{children}</AiChatContext.Provider>
+  return (
+    <AiChatContext.Provider value={value}>
+      <ProWatermark>{children}</ProWatermark>
+    </AiChatContext.Provider>
+  )
 }

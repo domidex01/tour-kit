@@ -20,6 +20,7 @@ export default defineConfig({
     '@radix-ui/react-dialog',
     'tailwindcss',
     'tailwindcss/plugin',
+    '@tour-kit/license',
   ],
   treeshake: true,
   splitting: true,

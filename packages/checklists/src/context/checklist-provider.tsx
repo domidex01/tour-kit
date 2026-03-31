@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { useChecklistPersistence } from '../hooks/use-checklist-persistence'
+import { ProWatermark } from '../lib/pro-watermark'
 import type {
   ChecklistConfig,
   ChecklistContext as ChecklistContextType,
@@ -456,5 +457,9 @@ export function ChecklistProvider({
     ]
   )
 
-  return <ChecklistContext.Provider value={contextValue}>{children}</ChecklistContext.Provider>
+  return (
+    <ChecklistContext.Provider value={contextValue}>
+      <ProWatermark>{children}</ProWatermark>
+    </ChecklistContext.Provider>
+  )
 }

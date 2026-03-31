@@ -9,6 +9,7 @@ import {
   snoozeNudge as snoozeNudgeState,
   trackFeatureUsage,
 } from '../engine'
+import { ProWatermark } from '../lib/pro-watermark'
 import { createStorageAdapter } from '../storage'
 import type {
   AdoptionProviderProps,
@@ -175,5 +176,9 @@ export function AdoptionProvider({
     pendingNudges,
   }
 
-  return <AdoptionContext.Provider value={contextValue}>{children}</AdoptionContext.Provider>
+  return (
+    <AdoptionContext.Provider value={contextValue}>
+      <ProWatermark>{children}</ProWatermark>
+    </AdoptionContext.Provider>
+  )
 }
