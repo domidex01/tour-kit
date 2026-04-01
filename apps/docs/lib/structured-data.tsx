@@ -44,19 +44,212 @@ export function TechArticleJsonLd({
     ...(section && { articleSection: section }),
     author: {
       '@type': 'Organization',
-      name: 'TourKit',
+      name: 'User Tour Kit',
       url: SITE_URL,
     },
     publisher: {
       '@type': 'Organization',
-      name: 'TourKit',
+      name: 'User Tour Kit',
       url: SITE_URL,
     },
     isPartOf: {
       '@type': 'WebSite',
-      name: 'TourKit Documentation',
+      name: 'User Tour Kit Documentation',
       url: `${SITE_URL}/docs`,
     },
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+interface ArticleJsonLdProps {
+  headline: string
+  description: string
+  url: string
+  datePublished: string
+  dateModified: string
+  authorName?: string
+  authorUrl?: string
+  authorGithub?: string
+  authorLinkedin?: string
+  image?: string
+  wordCount?: number
+  articleSection?: string
+  keywords?: string[]
+}
+
+interface BreadcrumbItem {
+  name: string
+  url: string
+}
+
+interface GraphJsonLdProps {
+  items: Record<string, unknown>[]
+}
+
+// ── Comparison / Article Schemas ──
+
+const ORGANIZATION = {
+  '@type': 'Organization',
+  '@id': `${SITE_URL}/#organization`,
+  name: 'User Tour Kit',
+  url: SITE_URL,
+  logo: {
+    '@type': 'ImageObject',
+    url: `${SITE_URL}/logo.png`,
+    width: 600,
+    height: 60,
+  },
+  foundingDate: '2025',
+  description:
+    'Open-source headless React library for product tours, onboarding, and in-app messaging.',
+}
+
+export function ArticleJsonLd({
+  headline,
+  description,
+  url,
+  datePublished,
+  dateModified,
+  authorName = 'User Tour Kit Team',
+  authorUrl,
+  authorGithub,
+  authorLinkedin,
+  image,
+  wordCount,
+  articleSection,
+  keywords,
+}: ArticleJsonLdProps): ReactNode {
+  const sameAs = [authorGithub, authorLinkedin].filter(Boolean)
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline,
+    description,
+    url: url.startsWith('http') ? url : `${SITE_URL}${url}`,
+    datePublished,
+    dateModified,
+    author: {
+      '@type': 'Person',
+      name: authorName,
+      ...(authorUrl && { url: authorUrl }),
+      ...(sameAs.length > 0 && { sameAs }),
+    },
+    publisher: {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: 'User Tour Kit',
+      url: SITE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/logo.png`,
+        width: 600,
+        height: 60,
+      },
+    },
+    ...(image && { image }),
+    ...(wordCount && { wordCount }),
+    ...(articleSection && { articleSection }),
+    ...(keywords && { keywords }),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url.startsWith('http') ? url : `${SITE_URL}${url}`,
+    },
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+export function BreadcrumbJsonLd({ items }: { items: BreadcrumbItem[] }): ReactNode {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url.startsWith('http') ? item.url : `${SITE_URL}${item.url}`,
+    })),
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+export function OrganizationJsonLd(): ReactNode {
+  const data = {
+    '@context': 'https://schema.org',
+    ...ORGANIZATION,
+    sameAs: [
+      'https://github.com/DomiDex/tour-kit',
+      'https://www.npmjs.com/package/@tour-kit/core',
+    ],
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+export function ProductJsonLd(): ReactNode {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'User Tour Kit',
+    description:
+      'Open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling.',
+    brand: { '@type': 'Organization', '@id': `${SITE_URL}/#organization` },
+    category: 'Developer Tools > Frontend Libraries',
+    url: SITE_URL,
+    image: `${SITE_URL}/images/tour-kit-og.png`,
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'User Tour Kit Free (MIT)',
+        price: '0',
+        priceCurrency: 'USD',
+        description: 'Core library, React bindings, and hints package. MIT licensed.',
+        availability: 'https://schema.org/InStock',
+        url: `${SITE_URL}/pricing/`,
+      },
+      {
+        '@type': 'Offer',
+        name: 'User Tour Kit Pro',
+        price: '99',
+        priceCurrency: 'USD',
+        description:
+          'One-time purchase. Adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.',
+        availability: 'https://schema.org/InStock',
+        url: `${SITE_URL}/pricing/`,
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: '99',
+          priceCurrency: 'USD',
+          billingDuration: { '@type': 'Duration', name: 'Lifetime' },
+        },
+      },
+    ],
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+export function GraphJsonLd({ items }: GraphJsonLdProps): ReactNode {
+  const data = {
+    '@context': 'https://schema.org',
+    '@graph': items,
   }
 
   return (

@@ -1,0 +1,247 @@
+---
+title: "Tour Kit vs Appcues: 2026 Comparison for React Teams"
+description: "Compare Tour Kit vs Appcues for product onboarding. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
+competitor: "Appcues"
+competitorSlug: "appcues"
+lastUpdated: "2026-03-31"
+---
+
+## The bottom line
+
+Tour Kit is a headless React library offering tours, hints, checklists, announcements, and five more packages in a &lt;8KB core bundle for a $99 one-time fee. Appcues is a no-code onboarding platform starting at $750/month. Tour Kit suits React teams wanting code ownership and tiny bundles. Appcues is better when non-technical PMs need to build tours without developers.
+
+## What is Tour Kit?
+
+Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+
+## What is Appcues?
+
+Appcues is a SaaS onboarding platform that lets product teams create in-app tours, modals, and checklists through a Chrome extension WYSIWYG builder, with MAU-based pricing starting at $750/month.
+
+## Feature-by-feature comparison
+
+### Tours and step types
+
+Appcues builds tours through a Chrome extension overlay. You point-and-click to select elements, then configure tooltips and modals in their visual editor. The output renders through Appcues' own DOM structure and iframe-wrapped tooltips using Snabbdom (confirmed by their open-source `appcues/snabbdom-iframe-domapi` repo). Tour content lives in Appcues' cloud, not your codebase.
+
+Tour Kit defines steps in JSX with typed config objects. Each step accepts a CSS selector or React ref, 12 placement options, async `onBeforeShow` guards, and `advanceOn` event triggers. Branching with loop detection and route-aware navigation come built in. Steps live in your component files, versioned in Git.
+
+The `useTour()` hook gives you `start`, `next`, `prev`, `skip`, `goTo`, and `reset` — all fully typed.
+
+### Hints and hotspots
+
+Both tools support persistent hotspots. Appcues calls them "Pins" and renders them as pulsating beacons attached to elements. They're configured through the visual builder.
+
+Tour Kit's `@tour-kit/hints` package (&lt;5KB gzipped, MIT licensed) provides `HintsProvider`, `HintHotspot`, `HintTooltip` components. Each hint has independent dismissal state persisted through storage adapters. The `useHint()` hook returns `isVisible`, `isDismissed`, `show`, `hide`, `dismiss` for programmatic control.
+
+Hints aren't sequential like tour steps. They suit feature discovery better than guided walkthroughs, which is why they ship as a separate package rather than bolted onto the tour engine.
+
+### Checklists and onboarding flows
+
+Appcues offers checklists, but only on their Growth plan at $750+/month. They're built in the visual editor with task items that can link to Appcues flows. The catch: checklists aren't available on the cheaper tier at all. As of March 2026, Appcues has consolidated to two plans (Grow and Enterprise), and checklists require Grow.
+
+Tour Kit's `@tour-kit/checklists` package ($99 one-time, Pro) supports task dependencies with circular dependency detection. Three completion types: manual, event-based, custom check function. Progress calculation accounts for locked tasks, and every component (`Checklist`, `ChecklistTask`, `ChecklistProgress`, `ChecklistPanel`) has a headless variant for full UI control.
+
+### Announcements and banners
+
+Appcues handles announcements through its modal and banner flow types. Banners, modals, slideouts are all configurable in the builder, and Appcues added a "Flows in Workflows" feature in January 2026 that coordinates in-app messages with emails, push notifications, and delays on a single canvas.
+
+Tour Kit's `@tour-kit/announcements` ($99 Pro) ships five display variants: modal (sm/md/lg/xl/full), toast (6 positions with auto-dismiss), banner (top/bottom sticky with intent levels), slideout (left/right drawer), and spotlight targeting a DOM element with overlay. Frequency rules support `once`, `session`, `always`, count-limited, and interval-based display. A priority queue handles concurrent announcements with FIFO, replace, or stack strategies depending on how aggressive you want the messaging cadence to be.
+
+Tour Kit doesn't do email or push. That's a real gap if multi-channel orchestration matters to your team.
+
+### Analytics and tracking
+
+Appcues includes basic flow analytics (completion rates, drop-off by step) on all plans, with more advanced event tracking on Growth. One Capterra reviewer switched from Appcues to Pendo specifically because "as we grew as a company, we needed deeper analytics and insight into our users." Appcues doesn't offer cohort analysis, path analysis, or session recordings.
+
+Tour Kit's `@tour-kit/analytics` ($99 Pro) takes a plugin approach. Five built-in plugins cover PostHog, Mixpanel, Amplitude, Google Analytics, and a console logger. Custom plugins? Three lines: a name, a `track` function, and optionally `identify`. Event types cover the full lifecycle: `tour_started`, `tour_completed`, `step_viewed`, `hint_dismissed`, `checklist_completed`.
+
+You own the data pipeline. But you're also responsible for building dashboards yourself.
+
+### Scheduling and targeting
+
+Appcues has built-in user segmentation with property-based and event-based targeting. You can show different flows to different user segments, limit frequency, and control when flows appear. Segmentation is one of Appcues' genuine strengths, though the Essentials plan caps you at 5 segments.
+
+Tour Kit's `@tour-kit/scheduling` ($99 Pro) handles time-based display: start/end dates, time-of-day windows, day-of-week rules, recurring patterns, and blackout periods with IANA timezone support. The `ScheduleGate` component conditionally renders children based on schedule state.
+
+But Tour Kit doesn't include a user segmentation engine. If you need to show different onboarding to different user cohorts based on behavioral data, you'll build that logic yourself or pull it from your existing product analytics.
+
+### Accessibility and WCAG compliance
+
+Appcues doesn't document WCAG compliance. Their tooltip rendering inside `about:blank` iframes creates accessibility challenges: screen readers may struggle with iframe boundaries, and focus management across the iframe/parent divide is unreliable. No public Lighthouse accessibility score exists for Appcues' output.
+
+Tour Kit ships WCAG 2.1 AA compliance by default, not as an opt-in flag. `useFocusTrap()` manages focus within tour cards. `aria-live` regions announce step changes to screen readers (polite or assertive, configurable). Keyboard navigation covers arrow keys for next/prev, Escape for exit, Tab trapping. `usePrefersReducedMotion()` respects the user's motion preferences.
+
+Lighthouse accessibility score: 100.
+
+### Bundle size and performance
+
+Appcues doesn't publish its bundle size. Their loading is multi-phase: bootstrap script from CDN (Fastly), full SDK fetch, API calls to check active flows, then flow content. Default installation is synchronous and render-blocking. An async option exists but needs a callback queue wrapper. Because the payload is account-specific, Bundlephobia can't measure it.
+
+Tour Kit's core is &lt;8KB gzipped. React adds &lt;12KB. Hints, &lt;5KB. All three packages are tree-shakeable and code-split alongside the rest of your application bundle, which means you pay zero performance tax for features your users don't trigger. No CDN dependency, no render blocking. `LazyTour` from `@tour-kit/react/lazy` handles deferred loading when you want to push that cost even further down the line.
+
+### Framework support and TypeScript
+
+Appcues isn't a React library. It's a global `window.Appcues` singleton that injects DOM elements via script tag or an NPM bootstrap that calls `Appcues.setup()`. It works with any framework (or none), but it doesn't participate in React's component lifecycle. No hooks API, no JSX composition, no SSR support. TypeScript declarations are basic at best.
+
+Tour Kit is React 18 and 19 native. Hooks like `useTour()` and `useStep()` return typed state. Router adapters exist for Next.js (App Router and Pages Router) plus React Router v6+. SSR and SSG work with `createNoopStorage()` for server-side rendering. TypeScript strict mode throughout, with full type inference on step configs and branching logic.
+
+The flip side: Tour Kit is React-only. If your app is built with Vue, Svelte, or vanilla JS, Tour Kit isn't an option. Appcues works everywhere.
+
+### Licensing and pricing
+
+This is where the comparison gets stark. Appcues' Grow plan starts at $750/month for 1,000 MAUs (as of March 2026). At 2,000 MAUs, that's $800/month. At 4,000, it's $900/month. Enterprise requires a custom quote.
+
+Vendr purchase intelligence shows negotiated contracts between $42,000 and $84,000/year at scale. Appcues counts all logged-in users as MAUs, whether they see onboarding content or not.
+
+A G2 reviewer put it bluntly: "They've gotten insanely expensive. I love the features... But nobody should have to pay $500+/month for this stuff."
+
+Tour Kit's free tier (MIT) includes core, React bindings, and hints. The $99 one-time Pro license adds analytics, announcements, checklists, adoption tracking, media embedding, and scheduling. Three-year total cost of ownership at 10,000 MAUs: Appcues runs $90,000 to $120,000+. Tour Kit is $99.
+
+## Side-by-side comparison table
+
+| Feature | Tour Kit | Appcues |
+|---|---|---|
+| Product tours | ✅ Built-in (core, MIT) | ✅ WYSIWYG builder |
+| Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ✅ Pins |
+| Onboarding checklists | ✅ Pro ($99 one-time) | ⚠️ Grow plan only ($750+/mo) |
+| Announcements | ✅ Pro ($99 one-time) | ✅ Built-in |
+| Analytics | ✅ Pro (plugin-based) | ✅ Basic (advanced on Grow) |
+| Scheduling | ✅ Pro (timezone-aware) | ✅ Frequency controls |
+| NPS/surveys | 🚫 Not available | ⚠️ Grow plan only |
+| A/B testing | 🚫 Not available | ⚠️ Grow plan only |
+| User segmentation | 🚫 Not available | ✅ Property + event-based |
+| No-code builder | 🚫 Code-only | ✅ Chrome extension |
+| WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 Not documented |
+| Headless/BYO UI | ✅ Full headless (UnifiedSlot) | 🚫 Opinionated DOM injection |
+| Core bundle (gzipped) | &lt;8KB | Opaque (multi-phase CDN) |
+| React 18 + 19 | ✅ Native hooks | 🚫 Global singleton |
+| TypeScript | ✅ Strict mode, full inference | ⚙️ Basic declarations |
+| SSR/Next.js | ✅ App Router compatible | 🚫 Client-only |
+| Self-hosted | ✅ Your infrastructure | 🚫 Appcues cloud only |
+| Git version control | ✅ Flows in code | 🚫 Cloud-stored flows |
+| Mobile SDK | 🚫 Web only | ✅ Premium add-on ($8K-$12K/yr) |
+| Multi-channel (email/push) | 🚫 Not available | ✅ Workflows (Grow+) |
+| Integrations | ⚙️ Plugin API, build your own | ✅ 20+ pre-built |
+| License | MIT (free tier) | Proprietary SaaS |
+| Pricing | Free + $99 one-time Pro | $750/mo+ (MAU-based) |
+
+Data verified March 2026. Sources: official documentation, npm, GitHub, Appcues pricing page, Vendr.
+
+## When to choose Appcues instead
+
+Choose Appcues if your product team needs to create and publish onboarding without writing code. Appcues' Chrome extension builder lets PMs drag and drop elements in minutes, while Tour Kit requires React developers for every change. Appcues also makes more sense when you need native iOS/Android mobile onboarding or multi-channel orchestration across email, push, and in-app messages (their new Workflows feature shipped in January 2026).
+
+For teams that need SOC 2, EU hosting, and SSO/SAML out of the box, Appcues provides that compliance infrastructure. If your company is at Series A-B with budget and values speed-to-first-flow over design fidelity, Appcues' visual builder is hard to beat.
+
+## When Tour Kit is the better fit
+
+Tour Kit fits when your team writes React and cares about four things: design system parity, bundle performance, accessibility, long-term cost.
+
+If you're running shadcn/ui, Radix, or Tailwind, Tour Kit's components render as your components. A tooltip is your `<Tooltip>`, positioned by Tour Kit's core logic. A modal is your `<Dialog>`, managed by Tour Kit's state machine. No CSS hacking against selectors like `appcues[data-pattern-type=modal]`.
+
+Testing is another angle where Tour Kit pulls ahead significantly compared to any cloud-hosted onboarding tool. Write a Playwright or Cypress test that verifies your tour works after a UI refactor. With Appcues, flows live in their cloud. There's no programmatic way to verify they still work after you push a change.
+
+And the math: if you're a startup with 5,000 MAUs spending $3,500/year on Appcues Essentials (now likely more on Grow), the $99 one-time Pro license pays for itself before your first monthly invoice arrives.
+
+## Migration path from Appcues to Tour Kit
+
+Migration from Appcues isn't a lift-and-shift because the architectures are fundamentally different: one stores flows in a cloud dashboard, the other defines them in your component tree. Here's what the process looks like.
+
+**Step 1: Export your flow definitions.** Appcues stores flows in their cloud. Use their API or manually document each flow's steps and targets. Map each flow to a Tour Kit step config.
+
+**Step 2: Install Tour Kit.** Three packages for the free tier:
+
+```bash
+npm install @tour-kit/core @tour-kit/react @tour-kit/hints
+```
+
+**Step 3: Convert flows to Tour Kit steps.** An Appcues tooltip targeting `#sidebar-nav` becomes:
+
+```tsx
+// Appcues: configured in Chrome extension builder, stored in cloud
+// Tour Kit: defined in code, versioned in Git
+
+const steps = [
+  {
+    id: 'nav-intro',
+    target: '#sidebar-nav',
+    title: 'Navigation',
+    content: <p>Find your way around the dashboard.</p>,
+    placement: 'right-start',
+  },
+];
+```
+
+**Step 4: Replace the Appcues script tag.** Remove the `<script>` tag or `Appcues.setup()` call. Replace with `TourKitProvider`:
+
+```tsx
+import { TourKitProvider, Tour, TourCard, TourOverlay } from '@tour-kit/react';
+
+<TourKitProvider config={{ persistence: true, keyboard: true }}>
+  <Tour id="onboarding" steps={steps} autoStart>
+    <TourOverlay />
+    <TourCard>
+      <TourCardContent />
+      <TourCardFooter>
+        <TourProgress variant="dots" />
+        <TourNavigation />
+      </TourCardFooter>
+    </TourCard>
+  </Tour>
+</TourKitProvider>
+```
+
+**Step 5: Migrate analytics.** If you were using Appcues' analytics, set up `@tour-kit/analytics` with plugins for your existing tools (PostHog, Mixpanel, Amplitude, or GA4). Three lines per plugin.
+
+The timeline depends on how many flows you have. A team with 3-5 Appcues flows typically migrates in 2-3 days. Larger installations with 20+ flows and complex segmentation take longer, especially rebuilding user targeting logic that Appcues handled through their segmentation engine.
+
+## What developers say
+
+On G2, Appcues holds a 4.6/5 rating across 342 reviews (as of March 2026). But the negative reviews cluster around consistent themes.
+
+A Capterra reviewer warned prospective buyers: "Do not buy this if you aren't part of the development team, they will say it can all be done without developers when being sold to you, but it can often require development."
+
+Another described the onboarding experience as "like buying the car and engine separately."
+
+On pricing, the frustration is consistent across review platforms. One user wrote: "They've gotten insanely expensive. I love the features... But nobody should have to pay $500+/month for this stuff." Appcues' starting price has since increased to $750/month on the Grow plan.
+
+Flows.sh captured the design limitation well: "With Appcues you are forced to use their templates, limiting the experience you can build and making it obvious that the components aren't part of your product."
+
+Multiple G2 reviewers echoed: "We often find ourselves wishing for greater control over the appearance of modals and tooltips to better match our branding and user interface."
+
+Appcues is investing in AI — they shipped an MCP Server in January 2026 that pipes Appcues data into Claude and ChatGPT for bulk flow management. That's a bet on AI-assisted ops rather than developer experience.
+
+A Hacker News commenter summarized the market shift: "Your challenge will always lie there - you are not just competing with Appcues of the world but also devs. When Appcues came to market, cool onboarding like this was not commoditized, now it is."
+
+We built Tour Kit, so take these comparisons with appropriate skepticism. But the developer quotes above come from independent review platforms, not our marketing.
+
+## Frequently asked questions
+
+**Is Tour Kit free?**
+The core package, React bindings, and hints are MIT licensed and free forever. The Pro upgrade ($99, one-time payment) adds analytics, announcements, checklists, adoption tracking, media embedding, and scheduling. No MAU limits. No recurring fees.
+
+**What is the difference between Tour Kit and Appcues?**
+Tour Kit is a code-first React component library. Appcues is a no-code SaaS platform with a visual builder. Tour Kit renders inside your React tree using your design tokens; Appcues injects external DOM elements and iframes over your application. Tour Kit costs $99 once, Appcues starts at $750/month.
+
+**Can I migrate from Appcues to Tour Kit?**
+Yes. Export your Appcues flow definitions, then recreate them as Tour Kit step configs in JSX. The architectural shift means you're rewriting flows in code rather than moving them between tools. Most teams with under 10 flows migrate in a week or less.
+
+**Does Tour Kit work with Next.js and React 19?**
+Tour Kit supports React 18 and 19 with native hooks. The `useNextAppRouter()` adapter provides route-aware tours for Next.js App Router. SSR and SSG work with the included `createNoopStorage()` adapter. Full TypeScript strict mode support.
+
+**What is the bundle size of Tour Kit vs Appcues?**
+Tour Kit's core is &lt;8KB gzipped, the React package is &lt;12KB, and hints is &lt;5KB. Appcues doesn't publish its bundle size. Their multi-phase CDN loading (bootstrap, SDK, API calls, flow content) makes the total payload opaque and unmeasurable with standard tools like Bundlephobia.
+
+**Does Appcues support checklists and analytics?**
+Checklists, advanced analytics, NPS surveys, A/B testing, custom CSS, and most integrations require Appcues' Grow plan at $750+/month. The previous Essentials tier had these features gated as well.
+
+**Is Appcues open source?**
+No. Appcues is a proprietary SaaS product. Your onboarding flows are stored in Appcues' cloud infrastructure. Tour Kit's free tier packages are MIT licensed, and the source code is publicly available.
+
+**Which is better for enterprise: Tour Kit or Appcues?**
+Appcues has stronger enterprise features today: SOC 2, SSO/SAML, EU hosting (launched early 2026), plus a managed infrastructure SLA. Tour Kit doesn't offer enterprise support tiers or compliance certifications. If your procurement process requires these, Appcues is the safer bet.
+
+## Final verdict
+
+For React teams that own their frontend, Tour Kit gives you onboarding components that match your design system, pass WCAG 2.1 AA with Lighthouse 100, and cost $99 total. Appcues makes sense when PMs need to ship without developers, when mobile onboarding matters, or when enterprise compliance is non-negotiable. Your mileage may vary depending on team size and technical capacity.

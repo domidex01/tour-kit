@@ -1,0 +1,242 @@
+---
+title: "Tour Kit vs Onborda: which product tour library should you choose in 2026?"
+description: "Compare Tour Kit vs Onborda for Next.js product tours. See features, bundle size, accessibility, pricing, and shadcn/ui support side-by-side. Find which fits your React stack in 2026."
+competitor: "Onborda"
+competitorSlug: "onborda"
+lastUpdated: "2026-03-31"
+---
+
+## The bottom line
+
+Tour Kit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Onborda is a Next.js-only product tour library powered by Framer Motion with roughly 1,400 GitHub stars and no release since December 2024. Tour Kit fits React teams that want accessibility and framework flexibility beyond Next.js. Onborda is the better pick when you're already running Framer Motion in a Next.js app and only need basic step-by-step tours.
+
+## What is Tour Kit?
+
+Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and a $99 one-time Pro upgrade.
+
+## What is Onborda?
+
+Onborda is an MIT-licensed Next.js product tour library that uses Framer Motion for step animations and Tailwind CSS for default styling, built primarily by a single developer who works at Prisma.
+
+## Feature-by-feature comparison
+
+### Tours and step types
+
+Both libraries get the basics right. Define a step array, point each step at a DOM element, add some content, wire up navigation. Onborda targets elements by `id` attribute and uses a `customCard` prop that receives typed `CardComponentProps` with current step data and navigation callbacks. Clean API. Easy to pick up.
+
+Tour Kit targets elements by CSS selector or React ref and accepts JSX directly in step content. The `TourCard` compound component (`TourCard.Header`, `TourCard.Content`, `TourCard.Footer`) follows Radix UI composition patterns. Steps support `advanceOn` for event-based auto-progression and `waitForTarget` for dynamically rendered elements. Conditional branching via `onNext` with async resolvers lets you route users down different paths based on their role or behavior. Onborda has neither conditional branching nor event-based advancement.
+
+Where Onborda falls short: cross-route tour transitions rely on a hardcoded 500ms delay between navigation and step rendering. The README acknowledged this as temporary over 15 months ago. Configurable delay never shipped. Applications with slower page loads break silently. Tour Kit's event-driven architecture decouples step progression from framework routing entirely.
+
+### Hints and hotspots
+
+Onborda doesn't include hints. If you need persistent feature-discovery beacons outside a sequential tour, you're building them yourself.
+
+Tour Kit ships `@tour-kit/hints` (under 5KB gzipped, MIT licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads. Non-sequential by design, not a hack on top of the tour system.
+
+### Checklists and onboarding flows
+
+Not available in Onborda. No task tracking, no progress persistence.
+
+Tour Kit's `@tour-kit/checklists` package (Pro, $99 one-time) handles task dependencies with circular dependency detection. Three completion types: manual, event-based, custom check functions. The `ChecklistPanel` component gives you a working onboarding checklist without stitching together multiple npm packages.
+
+### Announcements and banners
+
+Onborda is a tour library, not an onboarding platform. No announcements of any kind.
+
+Tour Kit's `@tour-kit/announcements` package supports five display variants: modal, toast, banner, slideout, and spotlight. Frequency rules control repetition (`once`, `session`, `always`, or interval-based). When multiple announcements compete for screen real estate, a priority queue sorts them out.
+
+### Analytics and tracking
+
+Onborda doesn't include analytics. No event emission, no callbacks for step completion. If you want to know where users drop off, you'll instrument it yourself from scratch.
+
+Tour Kit's `@tour-kit/analytics` package (Pro) ships five pre-built plugins: PostHog, Mixpanel, Amplitude, Google Analytics, and console. Custom plugins take three lines. Event types cover tours, hints, checklists, announcements. One analytics layer across your entire onboarding stack instead of instrumenting each piece separately.
+
+### Scheduling and targeting
+
+No scheduling in Onborda. Tours show when you trigger them, full stop.
+
+Tour Kit's `@tour-kit/scheduling` package handles time-based display with IANA timezone support. Recurring patterns (daily, weekly, monthly) and blackout periods are built in, along with business hours presets like `US_STANDARD` and `UK_STANDARD`. The `ScheduleGate` component conditionally renders children only when a schedule is active. Useful for time-limited feature launches.
+
+### Accessibility and WCAG compliance
+
+This is the widest gap between the two libraries. Onborda has no documented accessibility support. No ARIA attributes on tour elements, no keyboard navigation, no focus trapping. The LogRocket review noted the library "may have a smaller community and less documentation," but the accessibility gap goes deeper than docs. Enterprise teams with WCAG requirements can't adopt it.
+
+Tour Kit targets WCAG 2.1 AA by default with a Lighthouse Accessibility score of 100. `useFocusTrap` handles focus management within tour cards. Screen reader announcements use `aria-live` regions, and keyboard navigation covers arrow keys, Escape, and Tab.
+
+`prefers-reduced-motion` offers three modes. RTL/LTR direction detection is automatic. None of this is opt-in — it ships as default behavior.
+
+### Bundle size and performance
+
+Onborda's own code weighs roughly 5-15KB, but it mandates Framer Motion as a peer dependency (about 32KB gzipped). If your app already uses Framer Motion, the marginal cost is small. If it doesn't, you're loading 32KB for tour animations that many products don't need.
+
+One detail: Onborda still imports from the legacy `framer-motion` package name rather than the rebranded `motion` package. That suggests the dependency hasn't been updated to current conventions.
+
+Tour Kit's core bundles at under 8KB gzipped. React package: under 12KB. Hints: under 5KB. Animations use CSS by default, with bring-your-own-library as an option.
+
+No forced dependencies beyond React 18+.
+
+### Framework support and TypeScript
+
+Onborda imports `next/navigation` directly, making it structurally impossible to run outside Next.js. GitHub issue #37 asked "Can onborda be used outside Next.js? Regular react/vite app?" and sat unanswered for five months before closing without resolution. According to State of JS 2024 surveys, Next.js captures roughly 45-53% of React developers. Building exclusively for Next.js means excluding nearly half the React market.
+
+The framework lock-in becomes ironic when you consider that shadcn/ui itself is fully framework-agnostic, with official guides for Next.js, Vite, Remix, and Astro. A Next.js-only tour library conflicts with shadcn/ui's own portability philosophy.
+
+Tour Kit's core is framework-agnostic. `@tour-kit/react` provides router adapters for Next.js App Router, Next.js Pages Router, and React Router v6+. Same code runs on Vite, Remix, Astro. Both libraries use TypeScript, though Tour Kit enforces strict mode while Onborda's strictness isn't documented.
+
+### Licensing and pricing
+
+Both libraries use MIT licensing for their core code. Onborda is fully MIT with no paid tier. Tour Kit's free tier (core, react, hints) is MIT, while the Pro packages cost $99 as a one-time purchase.
+
+Onborda's fully-free model is genuinely attractive for budget-constrained projects. But free doesn't mean maintained. With no funding model and no releases since December 2024, Onborda's long-term sustainability depends entirely on volunteer effort from a single developer.
+
+Tour Kit's Pro tier funds ongoing development. Your mileage may vary on which tradeoff matters more.
+
+## Side-by-side comparison table
+
+| Feature | Tour Kit | Onborda |
+|---|---|---|
+| Product tours | ✅ Built-in (core) | ✅ Built-in |
+| Hints/hotspots | ✅ Built-in (&lt;5KB) | 🚫 Not available |
+| Onboarding checklists | ✅ Pro ($99 one-time) | 🚫 Not available |
+| Announcements | ✅ Pro | 🚫 Not available |
+| Analytics | ✅ Pro (5 plugins) | 🚫 Not available |
+| Scheduling | ✅ Pro | 🚫 Not available |
+| WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 No a11y support |
+| Focus trapping | ✅ Built-in | 🚫 Not available |
+| Keyboard navigation | ✅ Arrow keys, Escape, Tab | 🚫 Not available |
+| Screen reader support | ✅ aria-live regions | 🚫 Not available |
+| Headless / BYO UI | ✅ Full headless mode | 🚫 Opinionated UI |
+| Conditional branching | ✅ Async resolvers | 🚫 Not available |
+| Cross-route tours | ✅ Event-driven, framework-agnostic | ⚙️ MutationObserver + 500ms delay |
+| Multiple tours | ✅ MultiTourKitProvider | ✅ Since v1.2.3 |
+| Progress persistence | ✅ localStorage, sessionStorage, cookie | 🚫 Not available |
+| Core bundle (gzipped) | &lt;8KB | ~5-15KB + 32KB Framer Motion |
+| Framework support | Next.js, Vite, Remix, Astro, CRA | Next.js only |
+| shadcn/ui integration | ✅ Native UnifiedSlot | ⚙️ Compatible (manual) |
+| TypeScript | Strict mode, full inference | TypeScript, no strict evidence |
+| License | MIT (free) + $99 Pro | MIT |
+| Last release | Active | Dec 22, 2024 |
+| GitHub stars | — | ~1,400 |
+
+Data verified March 2026. Sources: official documentation, npm, GitHub.
+
+## When to choose Onborda instead
+
+Choose Onborda if you're building a Next.js app that already uses Framer Motion and you only need basic sequential tours without accessibility requirements. Onborda's API is genuinely simpler in that scenario. A single `OnbordaProvider` wrapper, a step array, a `customCard` component — you're running in under 30 minutes. The Framer Motion animations look polished out of the box.
+
+Onborda also makes sense when budget is the only constraint that matters and you can accept the maintenance risk. It's fully free and MIT licensed with no paid tier to worry about. If your team treats product tours as a "set and forget" feature that won't need updates, Onborda's maintenance stall might not matter.
+
+## When Tour Kit is the better fit
+
+Tour Kit is the stronger choice when your project needs WCAG compliance (government, enterprise, or any team that takes accessibility seriously), framework portability beyond Next.js, or features beyond basic tours. If you want hints, checklists, analytics, announcements, and scheduling from a single ecosystem with native shadcn/ui integration, Onborda doesn't cover any of those.
+
+The headless architecture means trading Onborda's "works in 30 minutes" simplicity for a composable system that grows with your onboarding needs. For anything beyond a simple three-step demo tour, that tradeoff favors Tour Kit.
+
+## Migration path from Onborda to Tour Kit
+
+Moving from Onborda to Tour Kit involves three changes: the provider, the step format, and the card component.
+
+**1. Replace the provider**
+
+```tsx
+// Onborda
+import { OnbordaProvider, Onborda } from 'onborda';
+
+<OnbordaProvider>
+  <Onborda steps={steps} customCard={CustomCard}>
+    <App />
+  </Onborda>
+</OnbordaProvider>
+
+// Tour Kit
+import { TourKitProvider, Tour, TourOverlay, TourCard,
+         TourCardContent, TourCardFooter, TourNavigation,
+         TourProgress, useNextAppRouter } from '@tour-kit/react';
+
+const router = useNextAppRouter();
+
+<TourKitProvider config={{ persistence: true, keyboard: true }} router={router}>
+  <Tour id="onboarding" steps={tourKitSteps} autoStart>
+    <TourOverlay />
+    <TourCard>
+      <TourCardContent />
+      <TourCardFooter>
+        <TourProgress variant="dots" />
+        <TourNavigation />
+      </TourCardFooter>
+    </TourCard>
+  </Tour>
+  <App />
+</TourKitProvider>
+```
+
+**2. Convert the step array**
+
+```tsx
+// Onborda step
+{ icon: <>👋</>, title: 'Welcome', content: <>Your dashboard.</>,
+  selector: '#dashboard', side: 'bottom', showControls: true, pointerPadding: 10 }
+
+// Tour Kit step
+{ id: 'welcome', target: '#dashboard', title: 'Welcome',
+  content: <p>Your dashboard.</p>, placement: 'bottom', offset: [0, 10] }
+```
+
+Key differences: `selector` becomes `target`, `side` becomes `placement`, `pointerPadding` maps to `offset`, and each step gets a unique `id` for persistence and branching.
+
+**3. Replace the custom card**
+
+Onborda's `customCard` prop receives `CardComponentProps` with step data and navigation callbacks. Tour Kit's `TourCard` compound component or `TourCardHeadless` render prop gives you the same data through a composition pattern instead of a single prop. If you've already built a custom card for Onborda, the render prop approach maps most directly:
+
+```tsx
+import { TourCardHeadless } from '@tour-kit/react/headless';
+
+<TourCardHeadless>
+  {({ isActive, currentStep, next, prev, skip }) => (
+    <YourExistingCard step={currentStep} onNext={next} onPrev={prev} onSkip={skip} />
+  )}
+</TourCardHeadless>
+```
+
+Most migrations should take under an hour for a typical 5-10 step tour. The hardest part isn't the code conversion. It's deciding which new features (hints, checklists, analytics) to add once they're available.
+
+## What developers say
+
+Onborda's GitHub issues tell a consistent story. Issue #28, filed October 2024, reports the library is "broken" with React 19 and Next.js 15. As of March 2026, it's still open, 17 months later. Any developer starting a new Next.js project today gets React 19 and Next.js 15 by default.
+
+Three separate issues (#44, #41, #38) document the spotlight pointer rendering at wrong positions when steps require scrolling. Issue #34 reported the official demo repository was broken.
+
+The LogRocket review of product tour libraries described Onborda as "another good option" but noted its "smaller community and less documentation." The Chameleon blog's roundup of JavaScript onboarding libraries mentioned Onborda's "smooth transitions between steps," but didn't address accessibility.
+
+NextStepjs, a fork that explicitly credits Onborda for "inspiration and some code snippets," has accumulated 963 GitHub stars as of March 2026. Its v2.0 release added framework-agnostic routing and keyboard navigation, the exact features Onborda users had been requesting. That a fork exists at all says something about the gaps in Onborda's feature set.
+
+## Frequently asked questions
+
+**Is Tour Kit free?**
+The core packages (tours, hints, react components) are MIT licensed and free. Pro packages (analytics, checklists, announcements, media, scheduling) cost $99 one-time. No subscriptions, no per-seat fees.
+
+**What is the difference between Tour Kit and Onborda?**
+Tour Kit is a headless React library spanning nine packages: tours, hints, checklists, announcements, analytics, scheduling. Onborda is a Next.js-only tour library powered by Framer Motion that covers tours only. Tour Kit ships WCAG 2.1 AA accessibility by default. Onborda has none.
+
+**Can I migrate from Onborda to Tour Kit?**
+Yes. Replace the provider wrapper, convert the step array, adapt your custom card. A typical 5-10 step tour migrates in under an hour. Tour Kit's `useNextAppRouter` hook handles cross-route tours without Onborda's hardcoded 500ms delay.
+
+**Does Tour Kit work with Next.js and React 19?**
+Tour Kit supports React 18 and React 19 across Next.js, Vite, Remix, Astro. Onborda has an open compatibility issue (#28) with React 19 and Next.js 15 that's been unresolved since October 2024.
+
+**What is the bundle size of Tour Kit vs Onborda?**
+Tour Kit's core is under 8KB gzipped. The react package is under 12KB. Onborda's own code is roughly 5-15KB, but it requires Framer Motion (approximately 32KB gzipped) as a mandatory dependency.
+
+**Does Onborda support checklists, analytics, or hints?**
+No. Onborda provides product tours only. Tour Kit offers dedicated packages for hints, checklists, analytics, announcements, media embedding, and scheduling.
+
+**Is Onborda still maintained?**
+Onborda's last release was December 22, 2024. Fifteen GitHub issues remain open, including a React 19 compatibility report from October 2024. The project has 50 total commits from roughly 3-5 contributors.
+
+**Which is better for enterprise use?**
+Tour Kit's WCAG 2.1 AA compliance, keyboard navigation, and focus trapping make it viable for enterprise projects with accessibility mandates. Onborda's lack of accessibility features rules it out for regulated environments.
+
+## Final verdict
+
+Onborda proved that developers want a modern, Tailwind-native tour library for Next.js. It validated real demand. But 15 months without a release, zero accessibility, and broken React 19 support leave it in a difficult position. Tour Kit covers the same ground with a headless architecture, WCAG 2.1 AA compliance, and eight additional packages beyond basic tours. For anything past a quick prototype, Tour Kit is the more practical choice.

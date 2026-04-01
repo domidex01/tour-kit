@@ -1,6 +1,6 @@
 # Homepage Styleguide
 
-Design reference for the Tour Kit landing page (`apps/docs/app/page.tsx`).
+Design reference for the User Tour Kit landing page (`apps/docs/app/page.tsx`).
 
 ---
 

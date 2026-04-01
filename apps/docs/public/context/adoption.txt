@@ -1,5 +1,5 @@
 Tour Kit — @tour-kit/adoption Context File
-Version: 0.0.1 | Generated: 2026-03-24
+Version: 0.0.1 | Generated: 2026-03-31
 Paste this into your LLM to get accurate answers about @tour-kit/adoption.
 =========================================================================
 
@@ -15,6 +15,7 @@ INSTALLATION
 
 Peer dependencies:
     @tour-kit/analytics: workspace:*
+    @tour-kit/license: >=0.1.0
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
     tailwindcss: ^3.4.0 || ^4.0.0

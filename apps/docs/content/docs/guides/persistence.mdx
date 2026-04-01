@@ -10,7 +10,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
 # Persistence
 
-Tour Kit provides comprehensive persistence across all packages, allowing you to save user progress, dismissed announcements, checklist completion, and feature adoption data. This guide covers storage options, configuration, and best practices.
+User Tour Kit provides comprehensive persistence across all packages, allowing you to save user progress, dismissed announcements, checklist completion, and feature adoption data. This guide covers storage options, configuration, and best practices.
 
 ## Why Persistence Matters
 
@@ -20,7 +20,7 @@ Without persistence:
 - Checklist progress is lost on refresh
 - Feature adoption tracking resets
 
-With Tour Kit's persistence:
+With User Tour Kit's persistence:
 - Tours resume from where users left off
 - "Don't show again" is remembered
 - Checklists track completed tasks across sessions
@@ -30,7 +30,7 @@ With Tour Kit's persistence:
 
 ## Storage Options
 
-Tour Kit supports multiple storage backends:
+User Tour Kit supports multiple storage backends:
 
 | Storage | Scope | SSR Safe | Best For |
 |---------|-------|----------|----------|
@@ -51,7 +51,7 @@ const storage = typeof window !== 'undefined'
 ```
 
 <Callout type="info">
-  All Tour Kit persistence hooks automatically fall back to memory storage during SSR, then hydrate client-side.
+  All User Tour Kit persistence hooks automatically fall back to memory storage during SSR, then hydrate client-side.
 </Callout>
 
 ---
@@ -606,7 +606,7 @@ function handleLogout() {
 
 ## Error Handling
 
-Tour Kit handles storage errors gracefully:
+User Tour Kit handles storage errors gracefully:
 
 ```typescript
 // Internal pattern - errors don't crash the app
@@ -621,7 +621,7 @@ try {
 ```
 
 <Callout type="warn">
-  If `localStorage` quota is exceeded, Tour Kit logs a warning but continues functioning without persistence. Consider clearing old data or using a custom adapter with larger capacity.
+  If `localStorage` quota is exceeded, User Tour Kit logs a warning but continues functioning without persistence. Consider clearing old data or using a custom adapter with larger capacity.
 </Callout>
 
 ---
@@ -660,7 +660,7 @@ async function loadWithMigration(key: string) {
 ## Best Practices
 
 1. **Use consistent prefixes** - Namespace all keys to avoid collisions
-2. **Handle SSR** - Tour Kit does this automatically, but custom code needs checks
+2. **Handle SSR** - User Tour Kit does this automatically, but custom code needs checks
 3. **Respect user privacy** - Provide a way to clear stored data
 4. **Test persistence** - Include persistence in your test suites
 5. **Plan for migration** - Version your persisted data structures

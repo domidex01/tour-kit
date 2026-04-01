@@ -1,0 +1,247 @@
+---
+title: "Tour Kit vs Driver.js: which product tour library should you choose in 2026?"
+description: "Compare Tour Kit vs Driver.js for product tours. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
+competitor: "Driver.js"
+competitorSlug: "driver-js"
+lastUpdated: "2026-03-31"
+---
+
+## The bottom line
+
+Tour Kit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Driver.js is a framework-agnostic highlight-and-tour library at ~5KB gzipped with zero dependencies. Tour Kit suits React teams that want component-level control and built-in accessibility. Driver.js is better when you need a quick, lightweight tour on a non-React project.
+
+## What is Tour Kit?
+
+Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+
+## What is Driver.js?
+
+Driver.js is an MIT-licensed JavaScript library for element highlighting and step-by-step product tours. It's framework-agnostic with zero runtime dependencies, maintained primarily by Kamran Ahmed.
+
+## Feature-by-feature comparison
+
+### Tours and step types
+
+Driver.js handles sequential tours well. You define steps with CSS selectors, configure popover content, then call `drive()`. The API surface is small: `drive()`, `moveNext()`, `movePrevious()`, `highlight()`, `destroy()`. A basic tour takes about 10 lines. That simplicity is real.
+
+Tour Kit steps accept CSS selectors or React refs with 12 placement options via Floating UI and JSX content. The `waitForTarget` option handles dynamically rendered elements automatically, avoiding the `MutationObserver` workarounds that Driver.js users build themselves (GitHub issue [#471](https://github.com/kamranahmedse/driver.js/issues/471)). Steps also support `route` properties for multi-page tours and `advanceOn` for event-driven progression.
+
+Driver.js has no built-in element observer. If your target element hasn't rendered when the tour step fires, the step fails silently. In React apps with code-split routes or lazy-loaded components, this creates bugs that are annoying to track down.
+
+### Hints and hotspots
+
+Driver.js doesn't have hints. You can call `highlight()` on a single element, but there's no persistent hotspot system, no pulsing beacons, no per-hint dismissal state.
+
+Tour Kit's `@tour-kit/hints` package (under 5KB gzipped) provides `HintsProvider`, `HintHotspot`, `HintTooltip` components. Each hint tracks its own dismissed state through the storage adapter, persisting across page loads.
+
+The `useHint` hook gives you per-hint control: `isVisible`, `isDismissed`, `show`, `hide`, `dismiss`. Non-sequential by design. They sit on the page until the user interacts with them.
+
+### Checklists and onboarding flows
+
+Driver.js doesn't offer checklists. GitHub issue [#511](https://github.com/kamranahmedse/driver.js/issues/511) shows users requesting even basic "don't show again" functionality, which hints at demand for stateful onboarding that the library doesn't address.
+
+Tour Kit's `@tour-kit/checklists` package (Pro, $99 one-time) provides task dependencies with circular dependency detection. Three completion types: manual, event-based, custom check functions. Progress persists across sessions.
+
+Components include `Checklist`, `ChecklistTask`, `ChecklistProgress`, `ChecklistPanel`, all with headless variants.
+
+### Announcements and banners
+
+Not part of Driver.js's scope. You can approximate a centered announcement with a non-element popover step, but there's no queue system, no frequency controls, no audience targeting.
+
+Tour Kit's `@tour-kit/announcements` package ships five display variants: modal (4 sizes), toast (6 positions with auto-dismiss), banner (top/bottom sticky with intent styling), slideout (left/right drawer), and spotlight. Frequency rules range from "show once ever" to interval-based repetition. A priority queue manages display order when multiple announcements compete.
+
+### Analytics and tracking
+
+Driver.js has lifecycle hooks (`onHighlightStarted`, `onHighlighted`, `onDeselected`, `onNextClick`, `onPrevClick`, `onCloseClick`) that you can wire to your analytics platform manually. There's no built-in event schema or plugin system.
+
+Tour Kit's `@tour-kit/analytics` package ships five plugins out of the box: PostHog, Mixpanel, Amplitude, Google Analytics 4, plus a console logger. The plugin API has three fields (`name`, `track`, optional `identify`). Event types are standardized across all Tour Kit packages. Writing a custom plugin takes three lines of code.
+
+### Scheduling and targeting
+
+Driver.js has no scheduling or targeting capabilities. Tours start when you call `drive()` and that's it.
+
+Tour Kit's `@tour-kit/scheduling` package handles time-based scheduling with IANA timezone support, recurring patterns, business hours presets, blackout windows. The `ScheduleGate` component conditionally renders children only when a schedule is active. Announcements can pull in scheduling as an optional peer dependency.
+
+### Accessibility and WCAG compliance
+
+This is where the gap gets uncomfortable. Driver.js has open WCAG AA failures documented in GitHub issue [#434](https://github.com/kamranahmedse/driver.js/issues/434), filed through cypress-axe automated testing. The failures: duplicate banner landmarks, missing `aria-label` on `#driver-popover-content`, incorrect `aria-expanded` on `#driver-dummy-element`, no `role="dialog"` semantics. That issue remains open as of March 2026.
+
+No `aria-live` regions for announcing step changes to screen readers. Basic keyboard navigation works with arrow keys and Escape, but there's no focus trapping within popovers. Keyboard users can tab out of the tour step and into the page behind the overlay. For applications with compliance requirements, that's a real problem.
+
+Tour Kit ships WCAG 2.1 AA compliance by default. The `useFocusTrap` hook keeps keyboard focus within the tour card. Screen reader announcements use `aria-live` regions (configurable as polite or assertive). The `usePrefersReducedMotion` hook respects OS-level motion preferences. Lighthouse Accessibility score: 100.
+
+### Bundle size and performance
+
+Driver.js wins here. Around 5KB gzipped with zero dependencies. That's genuinely small, and the number is accurate (the `package.json` contains only devDependencies).
+
+Tour Kit's core ships under 8KB gzipped. The React package adds under 12KB, hints under 5KB. These are peer dependencies, so you only ship what you import. Tree-shaking works because all packages output ESM via tsup. But comparing tour functionality only, Driver.js is smaller.
+
+The trade-off is scope. Driver.js's 5KB gives you tours and highlighting. Tour Kit's 8KB core includes the hook system, position engine, storage adapters, accessibility primitives, branching logic, persistence. That extra 3KB is the foundation for everything else in the ecosystem.
+
+### Framework support and TypeScript
+
+Driver.js is framework-agnostic. It works with vanilla JavaScript, Vue, Angular, Svelte. The v1.x codebase was fully rewritten in TypeScript (June 2023), types ship bundled via `dts-bundle-generator`. IDE autocomplete works without separate `@types` packages.
+
+But "framework-agnostic" has costs for React teams. Driver.js operates through direct DOM manipulation, querying elements via CSS selectors and injecting SVG overlays. This conflicts with React's virtual DOM reconciliation.
+
+There are no official React hooks, no components, no React-specific docs. Three community wrappers exist on npm (`driverjs-react`, `use-driver`, `driver.jsx`), but the most-starred one has 5 GitHub stars. Most React developers write `useEffect` wrappers themselves.
+
+React Strict Mode (default in Create React App and Next.js development) causes specific problems. Issue [#504](https://github.com/kamranahmedse/driver.js/issues/504) documents a bug where `destroy()` on one driver instance incorrectly destroyed another active instance when using `useMemo`. SSR requires `"use client"` directives and dynamic imports. Route changes need manual cleanup.
+
+Tour Kit is React-first. Hooks like `useTour`, `useStep`, `useKeyboardNavigation` integrate with React's lifecycle naturally. Router adapters for Next.js (both App Router and Pages Router) plus React Router v6+ handle navigation-aware tours. The `MultiTourKitProvider` manages multiple concurrent tour registries. SSR works through the noop storage adapter.
+
+Tour Kit requires React 18 or later. If you're on React 16 or 17, or using Vue or Svelte, Tour Kit isn't an option. That's a real limitation.
+
+### Licensing and pricing
+
+Both libraries use the MIT license for their core functionality. Driver.js is entirely MIT — no paid tier, no restrictions.
+
+Tour Kit's three core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. The extended packages (adoption, analytics, announcements, checklists, media, scheduling) require a one-time $99 Pro license. No subscriptions, no per-seat pricing.
+
+For teams that only need tours and highlighting, Driver.js costs nothing. For teams that need checklists, analytics, or announcements, the choice is between Driver.js plus building those yourself, or Tour Kit Pro at $99.
+
+## Side-by-side comparison table
+
+| Feature | Tour Kit | Driver.js |
+|---|---|---|
+| Product tours | ✅ Built-in (core) | ✅ Built-in |
+| Hints / hotspots | ✅ Built-in (&lt;5KB) | 🚫 Not available |
+| Onboarding checklists | ⚠️ Pro ($99 one-time) | 🚫 Not available |
+| Announcements | ⚠️ Pro ($99 one-time) | 🚫 Not available |
+| Analytics plugins | ⚠️ Pro ($99 one-time) | ⚙️ Manual via lifecycle hooks |
+| Scheduling / targeting | ⚠️ Pro ($99 one-time) | 🚫 Not available |
+| WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ⚙️ Partial, open failures (#434) |
+| Focus trapping | ✅ Built-in (`useFocusTrap`) | 🚫 Not available |
+| Screen reader support | ✅ `aria-live` regions | 🚫 No `aria-live` |
+| Headless / BYO UI | ✅ Full headless mode | 🚫 CSS-based, opinionated |
+| React hooks | ✅ `useTour`, `useStep`, etc. | 🚫 No official React support |
+| Router integration | ✅ Next.js, React Router | 🚫 Manual implementation |
+| Multi-page tours | ✅ Built-in persistence | ⚙️ Manual localStorage |
+| Conditional branching | ✅ Declarative + async | ⚙️ Via `setSteps()` in hooks |
+| Core bundle (gzipped) | &lt;8KB | ~5KB |
+| Dependencies | React 18+ (peer) | Zero |
+| License | MIT (free tier) | MIT |
+| Pricing | Free + $99 one-time Pro | Free |
+| Framework support | React only | Any framework |
+
+Data verified March 2026. Sources: official documentation, npm, GitHub.
+
+## When to choose Driver.js instead
+
+Choose Driver.js if your project doesn't use React. Driver.js works with Vue, Angular, Svelte, vanilla JavaScript, server-rendered pages. No wrapper code needed. For a quick tour on a Django or Rails app with sprinkled JavaScript, Driver.js is the practical choice.
+
+Driver.js also makes sense when you genuinely only need step-by-step tours and element highlighting, without checklists, hints, or an analytics pipeline. At ~5KB gzipped with zero dependencies, it's the lightest option in the category. If your team ships a marketing site or documentation portal and wants a quick walkthrough, Driver.js gets the job done with minimal overhead.
+
+If bundle size is your primary constraint and you're counting every kilobyte, Driver.js's zero-dependency architecture is hard to match.
+
+## When Tour Kit is the better fit
+
+Tour Kit fits better when your onboarding needs go beyond sequential tours. If you're building a SaaS product with persistent hints, onboarding checklists, feature announcements, analytics tracking, assembling those from scratch on top of Driver.js means building code that Tour Kit already ships.
+
+React teams get the most value from Tour Kit. Hooks like `useTour` and `useStep` work with React's lifecycle instead of fighting it. Router adapters handle navigation-aware tours without manual cleanup. The headless architecture means your tour cards use the same design system as the rest of your app, with no CSS overrides or `onPopoverRender` DOM manipulation.
+
+WCAG compliance is the other deciding factor. Tour Kit's built-in focus trapping, `aria-live` regions, `prefers-reduced-motion` support avoid the kind of audit findings documented in Driver.js issue #434.
+
+## Migration path from Driver.js to Tour Kit
+
+The migration is mostly structural. Driver.js tours are imperative JavaScript; Tour Kit tours are React components.
+
+**Step 1: Install Tour Kit**
+
+```bash
+npm install @tour-kit/core @tour-kit/react
+```
+
+**Step 2: Convert step definitions**
+
+Driver.js:
+```js
+const driver = window.driver.js.driver;
+const driverObj = driver({
+  showProgress: true,
+  steps: [
+    { element: '#sidebar', popover: { title: 'Navigation', description: 'Find your way around.' } },
+    { element: '#search', popover: { title: 'Search', description: 'Search anything.', side: 'bottom' } },
+  ]
+});
+driverObj.drive();
+```
+
+Tour Kit:
+```tsx
+import { TourKitProvider, Tour, TourCard, TourCardContent,
+         TourCardFooter, TourOverlay, TourNavigation,
+         TourProgress } from '@tour-kit/react';
+
+<TourKitProvider config={{ persistence: true, keyboard: true }}>
+  <Tour
+    id="welcome"
+    steps={[
+      { id: 'nav', target: '#sidebar', content: 'Find your way around.' },
+      { id: 'search', target: '#search', content: 'Search anything.', placement: 'bottom' },
+    ]}
+    autoStart
+  >
+    <TourOverlay />
+    <TourCard>
+      <TourCardContent />
+      <TourCardFooter>
+        <TourProgress variant="dots" />
+        <TourNavigation />
+      </TourCardFooter>
+    </TourCard>
+  </Tour>
+</TourKitProvider>
+```
+
+**Step 3: Replace lifecycle hooks**
+
+Driver.js's `onNextClick` and `onPrevClick` map to Tour Kit's step-level `onBeforeShow` and `onNext` callbacks. The `onPopoverRender` DOM manipulation hook has no Tour Kit equivalent because you control the rendering directly through JSX.
+
+**Step 4: Remove Driver.js CSS**
+
+Delete `import 'driver.js/dist/driver.css'`. Tour Kit's styled components use CVA (class-variance-authority), so your Tailwind classes and design tokens apply directly. If you use the headless variant, there's no default CSS at all.
+
+**Step 5: Add features incrementally**
+
+With the base migration done, you can add hints, checklists, or analytics as separate packages without changing your tour implementation.
+
+## What developers say
+
+On the Driver.js side, sentiment is positive but thin. A dev.to author wrote: "The API is so good, that you can add multi-step product tours in a few lines of code." A Medium reviewer noted: "Don't let the simplicity fool you, Driver.js is packed with customization options." The Hacker News thread from July 2023 (348 points, 107 comments) spent more time debating whether product tours are good UX than evaluating the library itself.
+
+The complaints cluster around React integration friction and maintenance pace. Usertour.io's comparison criticized Driver.js for requiring developers to "operate HTML elements and overwrite CSS Class styles, which are difficult to develop and maintain." OnboardJS positions against it directly: "Driver.js is impressively lightweight and has great highlighting, but its popover-only approach limits what you can build."
+
+As of March 2026, Driver.js has 25,475 GitHub stars and roughly 457K weekly npm downloads. But 91 open issues and 21 open pull requests (some waiting 8+ months for review) reflect the single-maintainer bottleneck. PR [#582](https://github.com/kamranahmedse/driver.js/pull/582), a simple copyright year fix from July 2025, remains unmerged. Kamran Ahmed's primary project, roadmap.sh (351K GitHub stars), understandably takes priority.
+
+We built Tour Kit, so take our perspective with appropriate skepticism. The numbers and GitHub issues above are verifiable.
+
+## Frequently asked questions
+
+**Is Tour Kit free?**
+The three core packages (@tour-kit/core, @tour-kit/react, @tour-kit/hints) are MIT-licensed and free. Extended packages for analytics, checklists, announcements, media, and scheduling require a one-time $99 Pro license. No subscriptions, no MAU caps.
+
+**What is the difference between Tour Kit and Driver.js?**
+Tour Kit is a React-specific headless library covering tours, hints, checklists, announcements, analytics, and scheduling. Driver.js is a framework-agnostic tour-and-highlight library. The core architectural difference: Tour Kit uses React hooks and components, Driver.js uses imperative DOM manipulation.
+
+**Can I migrate from Driver.js to Tour Kit?**
+Yes. Convert your step definitions from Driver.js's config object to Tour Kit's JSX step array, replace lifecycle hooks with step-level callbacks, and remove the Driver.js CSS import. The migration guide above covers the key changes.
+
+**Does Tour Kit work with Next.js and React 19?**
+Tour Kit supports React 18 and React 19. Built-in router adapters handle both Next.js App Router and Pages Router. SSR works through the noop storage adapter without hydration mismatches.
+
+**What is the bundle size of Tour Kit vs Driver.js?**
+Driver.js ships at roughly 5KB gzipped with zero dependencies. Tour Kit's core is under 8KB gzipped, the React package under 12KB, hints under 5KB. Tour Kit packages are peer dependencies, so you only bundle what you import.
+
+**Does Driver.js support checklists, analytics, or hints?**
+No. Driver.js provides step-by-step tours and element highlighting. For checklists, analytics plugins, persistent hints, announcements, or scheduling, you'd need to build those features yourself or use additional libraries.
+
+**Is Driver.js actively maintained?**
+Driver.js is maintained by Kamran Ahmed as a side project alongside roadmap.sh. The most recent release (v1.4.0) shipped November 2025. As of March 2026, 91 issues and 21 PRs are open, with some community contributions waiting 8+ months for review.
+
+**Which is better for enterprise use?**
+Depends on your requirements. Driver.js has broader framework support and a lighter footprint. Tour Kit has built-in WCAG 2.1 AA compliance, which matters for enterprise accessibility audits. Neither offers an enterprise support SLA. Both rely on community support. Your mileage may vary.
+
+## Final verdict
+
+Driver.js is a well-made, lightweight tour library that does one thing cleanly. Tour Kit is a broader onboarding toolkit built specifically for React. If you're adding a quick walkthrough to a non-React project, Driver.js is the right call. If you're building product onboarding in React and need accessibility compliance, persistent state, or anything beyond sequential tours, Tour Kit handles the complexity that Driver.js leaves to you.

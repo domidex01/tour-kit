@@ -1,0 +1,229 @@
+---
+title: "Tour Kit vs UserGuiding: which product tour tool should you choose in 2026?"
+description: "Compare Tour Kit vs UserGuiding for product tours. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
+competitor: "UserGuiding"
+competitorSlug: "userguiding"
+lastUpdated: "2026-03-31"
+---
+
+## The bottom line
+
+Tour Kit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $99 one-time fee. UserGuiding is a no-code product adoption platform starting at $174/month with a visual Chrome Extension builder. Tour Kit suits React teams wanting code ownership and tiny bundles with WCAG 2.1 AA baked in. UserGuiding is better when product managers need to ship onboarding flows without developer involvement.
+
+## What is Tour Kit?
+
+Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+
+## What is UserGuiding?
+
+UserGuiding is a no-code SaaS product adoption platform that provides in-app tours, checklists, surveys, NPS, a resource center, and an AI assistant through a Chrome Extension visual builder. Plans start at $174/month billed annually.
+
+## Feature-by-feature comparison
+
+### Tours and step types
+
+UserGuiding builds tours through a Chrome Extension that overlays on your live product. Product managers point and click to select elements, write copy, and publish without a deploy. The visual builder is the platform's strongest feature, earning 218 "ease of use" mentions across 756+ G2 reviews.
+
+But those tours anchor to DOM elements via CSS selectors. When your engineering team refactors a component or changes an ID, guides break silently. UserGuiding's own help center has multiple articles for debugging "Why can't I see my Guide live?" Selector fragility is a recurring problem.
+
+Tour Kit takes a different approach. Tours are React components with typed step configs. You reference targets by CSS selector or React ref, and `waitForTarget` handles async rendering. Steps support conditional branching with `onNext` resolvers and async `onBeforeShow` guards. Cross-tour navigation works too. The `useAdvanceOn` hook auto-advances on click, input, or custom events. Every change goes through version control alongside your application code.
+
+### Hints and hotspots
+
+UserGuiding offers hotspots as pulsing beacons positioned through the visual builder. The Starter plan caps you at 20 active hotspots. Need 21? Upgrade to Growth at $349/month. Positioning hotspots precisely over specific elements can be frustrating, according to multiple Capterra reviewers.
+
+Tour Kit's `@tour-kit/hints` package (&lt;5KB gzipped) treats hints as non-sequential, independently dismissible components. Each hint persists across page loads via storage adapters. The `HintHotspot` component renders pulsing beacons; `HintTooltip` appears on hover or click. No artificial caps on how many you can run.
+
+### Checklists and onboarding flows
+
+UserGuiding includes checklists on all paid plans, though the Starter tier limits you to two. The checklist builder follows the same visual, no-code pattern as tours. For teams running basic onboarding (complete profile, invite teammate, create first project), this works fine.
+
+Tour Kit's `@tour-kit/checklists` ($99 Pro) supports task dependencies with circular dependency detection. Three completion types are available: manual, event-based, and custom check function. Progress tracking accounts for locked tasks. You get `ChecklistPanel`, `ChecklistLauncher`, and headless render props for full customization.
+
+More work to set up than dragging items in a visual builder? Absolutely. But the result is an onboarding flow that behaves exactly like the rest of your application.
+
+### Announcements and banners
+
+UserGuiding supports modals, banners, and slideouts for in-app announcements. These are built through the same visual editor and follow the same selector-based targeting. The feature works well for straightforward product updates.
+
+Tour Kit's `@tour-kit/announcements` ($99 Pro) ships five display variants: modal, toast, banner, slideout, and spotlight. Modals come in five sizes. Toasts support 6 positions with auto-dismiss. Banners stick to top or bottom with intent variants (info, success, warning, error). Frequency rules control how often announcements appear: once ever, once per session, N times total, or on a recurring interval. A priority queue manages concurrent announcements.
+
+### Analytics and tracking
+
+UserGuiding includes a built-in analytics dashboard showing completion rates for guides and checklists. The depth is limited. One G2 reviewer (a Customer Success Manager) noted: *"Deeper insights into user behavior and advanced analytics dashboards are lacking."* No funnel analysis. No cohort tracking. And on the Starter plan, no way to pipe events to your existing analytics stack.
+
+Tour Kit's `@tour-kit/analytics` ($99 Pro) takes a plugin approach. Five built-in plugins cover PostHog, Mixpanel, Amplitude, Google Analytics, and a console logger. Writing a custom plugin is three lines of code: implement `name` and `track`, then pass it to `AnalyticsProvider`.
+
+Event types span the full lifecycle (`tour_started`, `step_viewed`, `hint_dismissed`, `checklist_completed`). Your data lives in your own analytics platform, not locked inside a vendor dashboard.
+
+### Scheduling and targeting
+
+UserGuiding handles audience targeting through a built-in rules engine with user segmentation by attributes, roles, and custom properties. Time-based scheduling is limited compared to dedicated scheduling tools.
+
+Tour Kit's `@tour-kit/scheduling` ($99 Pro) handles time-based display with IANA timezone support, four business hours presets (US Standard, US Tech, UK Standard, Australia Standard), recurring patterns, and blackout windows. The `ScheduleGate` component conditionally renders children only when a schedule is active. `useSchedule` returns the current status and reason (`outside_hours`, `blackout`, `wrong_day`), so you can show users why content isn't visible yet.
+
+### Accessibility and WCAG compliance
+
+UserGuiding doesn't publish WCAG compliance claims. The platform generates a third-party JavaScript overlay on your product, and you don't control the rendered HTML. Custom CSS to fix accessibility issues requires the Growth plan ($349/month). There's no documented focus trap, no `aria-live` announcements for screen readers, and the keyboard navigation API is absent.
+
+Tour Kit ships WCAG 2.1 AA by default with a Lighthouse Accessibility score of 100. Focus trapping within tour cards uses `useFocusTrap`. Screen reader announcements use `aria-live` (polite or assertive). Keyboard navigation supports arrow keys for next/prev, Escape to exit, and Tab for focus cycling.
+
+The `usePrefersReducedMotion` hook respects the user's motion preferences. RTL/LTR direction detection is automatic. None of this is opt-in. It's how the library works out of the box.
+
+### Bundle size and performance
+
+UserGuiding loads an external JavaScript snippet on every page. The exact bundle size isn't publicly disclosed, which isn't unusual for SaaS tools but makes performance auditing difficult.
+
+What we do know: in February 2026, Bromcom (a UK schools platform) published a root cause analysis after UserGuiding's client-side JavaScript caused CPU spikes and degraded browser performance over five consecutive days. Their post-mortem stated that UserGuiding "confirmed to us that software updates made to their client side javascript source code have resulted in CPU spikes and degraded browser responses for their customers." Bromcom built a "kill switch" to disable UserGuiding without requiring a code deploy.
+
+Tour Kit's core bundle is under 8KB gzipped. The React package is under 12KB. Hints are under 5KB. Everything tree-shakes, so you ship only the code your application actually uses. There's no external runtime, no network requests to a vendor CDN. And no third-party script can push a bad update to your production environment at 2 AM on a Tuesday.
+
+### Framework support and TypeScript
+
+UserGuiding works with any web application by injecting a script tag. React, Vue, Angular, jQuery, whatever. That framework-agnostic approach is a genuine strength for teams with mixed stacks.
+
+But the integration is shallow. UserGuiding monitors the DOM and overlays content. It doesn't participate in your React component tree or your type system.
+
+No npm package exists. A help center FAQ titled "Does UserGuiding offer an npm package?" confirms developers have asked and been told no.
+
+Tour Kit is React 18+ only. That's a real limitation if your app runs Vue or Angular. Within the React ecosystem, though, the integration is deep. Hooks for tour state. Context providers for multi-tour management. Router adapters for Next.js (both App Router and Pages Router) plus React Router v6+.
+
+Full TypeScript strict mode with exported types for every config object. The `UnifiedSlot` pattern supports Radix UI and Base UI component composition side by side.
+
+### Licensing and pricing
+
+UserGuiding's pricing restructured between late 2024 and early 2025. As of March 2026, Starter costs $174/month (annual billing) or $249/month (monthly) for 2,000 MAU. Growth costs $349/month (annual) for the same MAU. At 5,000 MAU, Starter rises to $209/month and Growth to $419/month.
+
+Want custom CSS or A/B testing? Growth plan required. Same for branding removal. One G2 reviewer noted: *"The tool is becoming expensive without corresponding product advancement, and limits even on the number of surveys or guides made other tools far more attractive."*
+
+Tour Kit's core, React, and hints packages are MIT-licensed and free. The Pro tier costs $99 one-time and covers adoption, analytics, announcements, checklists, media, and scheduling. Zero MAU limits. Zero recurring charges.
+
+Over three years at 5,000 MAU on UserGuiding's Growth plan, a team would spend roughly $15,084. Tour Kit costs $99 regardless of whether you have 100 users or 100,000.
+
+## Side-by-side comparison table
+
+| Category | Tour Kit | UserGuiding |
+|---|---|---|
+| Product tours | ✅ Built-in (core, MIT) | ✅ No-code visual builder |
+| Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ✅ Visual builder (20 cap on Starter) |
+| Onboarding checklists | ✅ Pro ($99 one-time) | ✅ Built-in (2 cap on Starter) |
+| Announcements | ✅ Pro (5 variants) | ✅ Modals, banners, slideouts |
+| Analytics | ✅ Pro (5 plugins + custom) | ⚠️ Basic dashboard, limited depth |
+| Scheduling | ✅ Pro (timezone, blackouts) | ⚙️ Basic time targeting |
+| NPS/surveys | 🚫 Not included | ✅ Built-in |
+| Resource center | 🚫 Not included | ✅ Built-in |
+| AI assistant | 🚫 Not included | ✅ GPT-4 powered |
+| WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 No published compliance |
+| Headless/BYO UI | ✅ Full headless + styled | 🚫 Template-based only |
+| Custom CSS | ✅ Full control (any method) | ⚠️ Growth plan only ($349/mo) |
+| Core bundle (gzipped) | &lt;8KB | Undisclosed (external script) |
+| No-code visual editor | 🚫 Code-only (by design) | ✅ Chrome Extension |
+| TypeScript support | ✅ Strict mode, exported types | 🚫 No npm package |
+| Framework support | React 18+ only | ✅ Any web application |
+| Mobile SDK | 🚫 Web only | 🚫 Web only |
+| Self-hosted | ✅ Runs in your bundle | 🚫 Cloud only |
+| Open source | ✅ MIT (core packages) | 🚫 Proprietary |
+| Pricing | Free + $99 one-time Pro | $174-$349+/mo (annual billing) |
+
+Data verified March 2026. Sources: official documentation, G2, UserGuiding pricing page, Bromcom community forums.
+
+## When to choose UserGuiding instead
+
+Choose UserGuiding if your team doesn't have frontend developers and needs onboarding flows live this week, not next sprint. The Chrome Extension builder lets product managers create a guide in 15 minutes without touching code. That speed advantage is real and well-earned.
+
+UserGuiding also makes more sense when you need NPS surveys, a resource center, and an AI-powered help assistant bundled into one subscription. Building those from scratch alongside Tour Kit would take meaningful engineering time. For product-led growth teams where the PM owns onboarding and the engineering team has higher priorities, UserGuiding's all-in-one platform is the more practical choice.
+
+If your application isn't built with React, Tour Kit isn't an option at all. UserGuiding works with any web stack.
+
+## When Tour Kit is the better fit
+
+Tour Kit wins when your team has frontend developers, your product is a React application, and you care about design fidelity or performance budgets. Long-term cost matters too.
+
+The headless architecture means your onboarding UI matches your design system exactly. You won't fight template constraints or pay a custom CSS surcharge. There's no vendor branding to remove. Onboarding flows live in your codebase, go through code review, and deploy with your application.
+
+The cost math is straightforward. If you're a 5,000 MAU company planning to use onboarding for the next three years, UserGuiding Growth costs roughly $15,084. Tour Kit costs $99. That's a 99.3% cost reduction. Your mileage may vary (you'll spend engineering hours on implementation), but for most React teams the total cost of ownership still favors the library approach.
+
+## Migration path from UserGuiding to Tour Kit
+
+Migrating from UserGuiding to Tour Kit is a rebuild, not a port. The two tools have different architectures and there's no export format to convert. Here's the practical path:
+
+**1. Audit your existing flows.** List every active guide, checklist, hotspot, and announcement in UserGuiding. Note which DOM elements they target, what copy they display, and what completion/analytics events they track. UserGuiding's dashboard shows this data.
+
+**2. Install Tour Kit packages.**
+
+```bash
+npm install @tour-kit/core @tour-kit/react @tour-kit/hints
+```
+
+**3. Convert guides to Tour Kit steps.** Each UserGuiding guide becomes a `Tour` component with typed step configs:
+
+```tsx
+import { TourKitProvider, Tour, TourCard, TourCardContent,
+         TourCardFooter, TourOverlay, TourNavigation } from '@tour-kit/react';
+
+const steps = [
+  { id: 'welcome', target: '#sidebar', content: 'Your nav lives here.' },
+  { id: 'search', target: '#search-bar', content: 'Search anything.', placement: 'bottom' },
+  { id: 'profile', target: '#user-menu', content: 'Manage your account.', route: '/settings' },
+];
+
+<TourKitProvider config={{ persistence: true, keyboard: true }}>
+  <Tour id="onboarding" steps={steps} autoStart>
+    <TourOverlay />
+    <TourCard>
+      <TourCardContent />
+      <TourCardFooter><TourNavigation /></TourCardFooter>
+    </TourCard>
+  </Tour>
+</TourKitProvider>
+```
+
+**4. Convert hotspots to hints.** Each UserGuiding hotspot becomes a hint in the `HintsProvider` array with an `id`, `target`, and `content`.
+
+**5. Run both tools in parallel for a week.** Show Tour Kit to internal users or a small percentage of traffic. Compare completion rates. Then remove the UserGuiding script tag.
+
+**6. Remove the UserGuiding snippet.** Delete the `<script>` tag from your HTML. Your page immediately gets lighter. No more external JavaScript loading on every page view.
+
+## What developers say
+
+UserGuiding gets strong marks from product managers. Its 4.7/5 G2 rating across 756+ reviews reflects genuine satisfaction with the visual builder's speed and the support team's responsiveness. The tool does what it promises for its target audience.
+
+But developers tell a different story. One G2 reviewer wrote: *"UserGuiding's UI is confusing and you need CSS knowledge to customize beyond templates. Not as 'no-code' as advertised."* Another noted: *"Even though it's positioned as a no-code solution, the tool requires extensive CSS and HTML coding to customize your content."*
+
+The customization complaint shows up 47 times across G2 reviews. It's the platform's most-cited limitation. And the workaround (custom CSS) requires the Growth plan at $349/month.
+
+Developer community presence is effectively zero. Stack Overflow has no questions referencing UserGuiding. Hacker News has no threads. Reddit's r/reactjs and r/webdev don't mention it either.
+
+The platform's GitHub organization contains three public repositories: a WordPress plugin and two forks. As of March 2026, there's no official npm package. That absence tells you who the tool is built for.
+
+The Bromcom incident from February 2026 raised a separate concern. A SaaS vendor's JavaScript update caused five days of CPU spikes on a production application serving UK schools. The question that raises isn't about features. It's about how much control you're willing to hand over. Bromcom's response (building a kill switch to disable UserGuiding without a deploy) speaks to the vendor-dependency risk that code-first alternatives avoid entirely.
+
+## Frequently asked questions
+
+**Is Tour Kit free?**
+Tour Kit's core, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time (not monthly, not annual) and adds adoption tracking, analytics, announcements, checklists, media, and scheduling. No MAU limits on any tier.
+
+**What is the difference between Tour Kit and UserGuiding?**
+Tour Kit is a headless React library that developers integrate directly into application code. UserGuiding is a no-code SaaS platform with a visual Chrome Extension builder. Tour Kit gives full design and performance control; UserGuiding gives speed-to-publish without developer involvement.
+
+**Can I migrate from UserGuiding to Tour Kit?**
+Yes, but it's a rebuild rather than a migration. You'll recreate each guide as typed React components. The upside: your onboarding flows become part of your codebase, go through code review, and are version-controlled. Most teams complete the migration within one to two sprints.
+
+**Does Tour Kit work with Next.js and React 19?**
+Tour Kit supports React 18 and 19. Built-in router adapters handle Next.js App Router, Next.js Pages Router, and React Router v6+. The `useNextAppRouter` hook connects Tour Kit's navigation to Next.js routing.
+
+**What is the bundle size of Tour Kit vs UserGuiding?**
+Tour Kit's core is under 8KB gzipped, the React package under 12KB, and hints under 5KB. UserGuiding's external script size isn't publicly disclosed. Tour Kit tree-shakes so you ship only the code you use; UserGuiding loads its full runtime on every page.
+
+**Does UserGuiding have an npm package?**
+No. UserGuiding installs via a script tag in your HTML. A help center FAQ confirms developers have asked for an npm package and it doesn't exist. A third-party wrapper from commercetools exists, but UserGuiding itself doesn't publish one.
+
+**Is UserGuiding open source?**
+No. UserGuiding is proprietary SaaS. Tour Kit's core packages (core, React, hints) are MIT-licensed and open source. The Pro packages are proprietary with a one-time $99 license.
+
+**Which is better for enterprise?**
+Depends on your enterprise. UserGuiding offers SOC2/HIPAA/GDPR compliance, SAML SSO, and dedicated CSMs on the Enterprise plan (custom pricing). Tour Kit runs in your own infrastructure, so compliance is your responsibility, but you control the data. For enterprises with strong engineering teams, Tour Kit's self-hosted model can simplify compliance by keeping user data out of a third-party platform entirely.
+
+## Final verdict
+
+For React teams with frontend developers, Tour Kit gives you better performance (&lt;8KB vs. an undisclosed external script), real accessibility (WCAG 2.1 AA, Lighthouse 100), full design control, and a 99%+ cost reduction over three years. For product managers without developer support who need onboarding live today, UserGuiding's visual builder is genuinely faster to ship. The choice comes down to whether onboarding is an engineering concern or a marketing one. We built Tour Kit, so factor that bias in.

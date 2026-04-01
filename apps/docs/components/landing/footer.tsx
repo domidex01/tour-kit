@@ -5,8 +5,9 @@ const footerLinks = {
   product: [
     { label: 'Documentation', href: '/docs' },
     { label: 'Getting started', href: '/docs/getting-started' },
-    { label: 'API reference', href: '/docs/api' },
-    { label: 'Examples', href: '/docs/examples' },
+    { label: 'Compare', href: '/compare' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Pricing', href: '/pricing' },
   ],
   packages: [
     { label: '@tour-kit/core', href: '/docs/core' },

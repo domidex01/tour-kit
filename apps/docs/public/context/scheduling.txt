@@ -1,5 +1,5 @@
 Tour Kit — @tour-kit/scheduling Context File
-Version: 0.1.0 | Generated: 2026-03-24
+Version: 0.1.0 | Generated: 2026-03-31
 Paste this into your LLM to get accurate answers about @tour-kit/scheduling.
 =========================================================================
 
@@ -14,6 +14,7 @@ INSTALLATION
     pnpm add @tour-kit/scheduling
 
 Peer dependencies:
+    @tour-kit/license: >=0.1.0
     react: ^18.0.0 || ^19.0.0
 
 EXPORTS
@@ -48,6 +49,7 @@ Hooks:
     useScheduleStatus
 
 Components:
+    ScheduleGate
     BUSINESS_HOURS_PRESETS
     DAY_NAMES
 
@@ -94,6 +96,7 @@ HOOKS
 
 COMPONENTS
 ----------
+    <ScheduleGate />
     <BUSINESS_HOURS_PRESETS />
     <DAY_NAMES />
 

@@ -107,7 +107,7 @@ posthogPlugin({
 
 Events are prefixed with `tourkit_` by default:
 
-| Tour Kit Event | PostHog Event Name |
+| User Tour Kit Event | PostHog Event Name |
 |----------------|-------------------|
 | `tour_started` | `tourkit_tour_started` |
 | `step_viewed` | `tourkit_step_viewed` |
@@ -206,7 +206,7 @@ posthogPlugin({
 ```
 
 <Callout type="info">
-  Session replay is configured through PostHog's main SDK, not the Tour Kit plugin. The plugin only sends events.
+  Session replay is configured through PostHog's main SDK, not the User Tour Kit plugin. The plugin only sends events.
 </Callout>
 
 ## Feature Flags
@@ -338,7 +338,7 @@ Analyze hint click-through rates:
 
 ### Avoid Duplicate Initialization
 
-Don't initialize PostHog twice - use the Tour Kit plugin instead of loading PostHog separately if you only need tour analytics:
+Don't initialize PostHog twice - use the User Tour Kit plugin instead of loading PostHog separately if you only need tour analytics:
 
 ```tsx
 // ✅ Good - Tour Kit plugin handles PostHog
