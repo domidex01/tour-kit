@@ -1,4 +1,4 @@
-# Tour Kit v0.3.0 — Generated 2026-03-31T13:29:09Z
+# User Tour Kit v0.3.0 — Generated 2026-04-01T16:32:26Z
 
 # Feature Adoption Tracking
 
@@ -4235,23 +4235,23 @@ This ensures server-only code (API keys, vector stores) never leaks into the bro
 
 # AI Assistants
 
-> Documentation resources optimized for AI coding assistants — llms.txt, context files, and MCP server for Tour Kit integration
+> Documentation resources optimized for AI coding assistants — llms.txt, context files, and MCP server for User Tour Kit integration
 
 # AI Assistants
 
-Tour Kit provides machine-readable documentation files following the [llms.txt standard](https://llmstxt.org) for AI coding assistants and LLMs.
+User Tour Kit provides machine-readable documentation files following the [llms.txt standard](https://llmstxt.org) for AI coding assistants and LLMs.
 
 ## Available Files
 
 ### llms.txt — Documentation Index
 
-A structured index of all Tour Kit documentation pages, following the [llmstxt.org](https://llmstxt.org) standard format. Contains section headings with links and descriptions for every page.
+A structured index of all User Tour Kit documentation pages, following the [llmstxt.org](https://llmstxt.org) standard format. Contains section headings with links and descriptions for every page.
 
 **URL:** [`/llms.txt`](/llms.txt)
 
 ### llms-full.txt — Complete Documentation
 
-The full content of all Tour Kit documentation in a single file. Use this when you need the AI to have comprehensive knowledge of the entire library.
+The full content of all User Tour Kit documentation in a single file. Use this when you need the AI to have comprehensive knowledge of the entire library.
 
 **URL:** [`/llms-full.txt`](/llms-full.txt)
 
@@ -4283,11 +4283,11 @@ Add the llms.txt URL to your project's AI context:
 
 1. Download `/llms.txt` to your project root
 2. Reference it in your editor's AI context settings
-3. The AI will use Tour Kit's documentation for code suggestions
+3. The AI will use User Tour Kit's documentation for code suggestions
 
 ### Gemini
 
-Google Gemini with grounding can discover Tour Kit documentation via search. The llms.txt file and sitemap help Gemini index our docs accurately.
+Google Gemini with grounding can discover User Tour Kit documentation via search. The llms.txt file and sitemap help Gemini index our docs accurately.
 
 ### Programmatic Access
 
@@ -4924,7 +4924,7 @@ Now tour events will automatically be logged to the console during development.
 
 ## Available Plugins
 
-Tour Kit provides official plugins for popular analytics platforms:
+User Tour Kit provides official plugins for popular analytics platforms:
 
 | Plugin | Description | Peer Dependency |
 |--------|-------------|-----------------|
@@ -5034,7 +5034,7 @@ Enable debug logging to see events in the console without sending to production:
 
 ## Overview
 
-Tour Kit provides two hooks for accessing the analytics tracker in your components:
+User Tour Kit provides two hooks for accessing the analytics tracker in your components:
 
 - `useAnalytics()` - Throws error if not in provider (strict)
 - `useAnalyticsOptional()` - Returns `null` if not in provider (lenient)
@@ -5373,7 +5373,7 @@ function TourWithAnalytics() {
 
 ## Overview
 
-Tour Kit's analytics system is built on a plugin architecture that allows you to send events to any analytics platform. Each plugin implements a simple interface and runs independently.
+User Tour Kit's analytics system is built on a plugin architecture that allows you to send events to any analytics platform. Each plugin implements a simple interface and runs independently.
 
 ## How Plugins Work
 
@@ -5419,7 +5419,7 @@ Only `name` and `track` are required. All other methods are optional.
 
 ## Built-in Plugins
 
-Tour Kit provides official plugins for popular platforms:
+User Tour Kit provides official plugins for popular platforms:
 
 ### Development
 
@@ -5611,7 +5611,7 @@ Install the Amplitude peer dependency:
 
 Events are prefixed with `tourkit_` by default:
 
-| Tour Kit Event | Amplitude Event Name |
+| User Tour Kit Event | Amplitude Event Name |
 |----------------|---------------------|
 | `tour_started` | `tourkit_tour_started` |
 | `step_viewed` | `tourkit_step_viewed` |
@@ -6102,7 +6102,7 @@ const plugins = [consolePlugin(), productionPlugin()]
 
 ## Overview
 
-Tour Kit's plugin system allows you to integrate with any analytics platform by implementing a simple interface. Create custom plugins for internal tracking systems, CRM integrations, or any data pipeline.
+User Tour Kit's plugin system allows you to integrate with any analytics platform by implementing a simple interface. Create custom plugins for internal tracking systems, CRM integrations, or any data pipeline.
 
 ## Plugin Interface
 
@@ -6724,7 +6724,7 @@ Add the Google Analytics script to your HTML:
 
 Events are prefixed with `tourkit_` by default:
 
-| Tour Kit Event | GA4 Event Name |
+| User Tour Kit Event | GA4 Event Name |
 |----------------|----------------|
 | `tour_started` | `tourkit_tour_started` |
 | `step_viewed` | `tourkit_step_viewed` |
@@ -6855,7 +6855,7 @@ GA4 has strict limits on custom parameters:
 - Parameter names: Up to 40 characters
 - Parameter values: Up to 100 characters
 
-Tour Kit events stay well within these limits.
+User Tour Kit events stay well within these limits.
 
 ### Reserved Names
 
@@ -6866,7 +6866,7 @@ Avoid these reserved parameter names:
 - `timestamp_micros`
 - Any name starting with `google_` or `ga_`
 
-Tour Kit uses safe parameter names like `tour_id`, `step_id`, etc.
+User Tour Kit uses safe parameter names like `tour_id`, `step_id`, etc.
 
 ## Privacy & Compliance
 
@@ -6961,7 +6961,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-XXXXXX');</script>
 ```
 
-Then use the Tour Kit plugin as normal.
+Then use the User Tour Kit plugin as normal.
 
 ### Descriptive Event Names
 
@@ -6994,7 +6994,7 @@ Common issues:
 
 ### gtag is undefined
 
-Ensure gtag loads before Tour Kit:
+Ensure gtag loads before User Tour Kit:
 
 ```tsx
 // ✅ Good - gtag loads first
@@ -7043,7 +7043,7 @@ Install the Mixpanel peer dependency:
 
 Events are prefixed with `TourKit: ` by default:
 
-| Tour Kit Event | Mixpanel Event Name |
+| User Tour Kit Event | Mixpanel Event Name |
 |----------------|-------------------|
 | `tour_started` | `TourKit: tour_started` |
 | `step_viewed` | `TourKit: step_viewed` |
@@ -7331,7 +7331,7 @@ posthogPlugin({
 
 Events are prefixed with `tourkit_` by default:
 
-| Tour Kit Event | PostHog Event Name |
+| User Tour Kit Event | PostHog Event Name |
 |----------------|-------------------|
 | `tour_started` | `tourkit_tour_started` |
 | `step_viewed` | `tourkit_step_viewed` |
@@ -7503,7 +7503,7 @@ Analyze hint click-through rates:
 
 ### Avoid Duplicate Initialization
 
-Don't initialize PostHog twice - use the Tour Kit plugin instead of loading PostHog separately if you only need tour analytics:
+Don't initialize PostHog twice - use the User Tour Kit plugin instead of loading PostHog separately if you only need tour analytics:
 
 ```tsx
 // ✅ Good - Tour Kit plugin handles PostHog
@@ -12157,18 +12157,15 @@ interface UserContext {
 
 # API Reference
 
-> Complete API reference for all Tour Kit packages — hooks, components, providers, utilities, and TypeScript type exports
+> Complete API reference for all User Tour Kit packages — hooks, components, providers, utilities, and TypeScript type exports
 
 # API Reference
 
-Complete API documentation for all Tour Kit packages. Each page contains exports, types, and usage examples.
-
-
+Complete API documentation for all User Tour Kit packages. Each page contains exports, types, and usage examples.
 
 ---
 
 ## Core Packages
-
 
   
   
@@ -12177,7 +12174,6 @@ Complete API documentation for all Tour Kit packages. Each page contains exports
 ---
 
 ## Extended Packages
-
 
   
   
@@ -12248,13 +12244,11 @@ Complete API documentation for all Tour Kit packages. Each page contains exports
 
 ```tsx
 
-
 ```
 
 ### With Analytics
 
 ```tsx
-
 
 const analytics = createAnalytics({
   plugins: [consolePlugin()],
@@ -12331,12 +12325,10 @@ All packages export TypeScript types:
   UsePersistenceReturn,
 } from '@tour-kit/react';
 
-
   HintConfig,
   HintState,
   HotspotPosition,
 } from '@tour-kit/hints';
-
 
   Feature,
   AdoptionCriteria,
@@ -12344,30 +12336,25 @@ All packages export TypeScript types:
   AdoptionStatus,
 } from '@tour-kit/adoption';
 
-
   TourEvent,
   TourEventName,
   AnalyticsPlugin,
 } from '@tour-kit/analytics';
-
 
   AnnouncementConfig,
   FrequencyRule,
   AudienceCondition,
 } from '@tour-kit/announcements';
 
-
   ChecklistConfig,
   ChecklistTaskConfig,
   TaskAction,
 } from '@tour-kit/checklists';
 
-
   MediaType,
   TourMediaConfig,
   CaptionTrack,
 } from '@tour-kit/media';
-
 
   Schedule,
   RecurringPattern,
@@ -17959,7 +17946,7 @@ Some tour steps should advance when users complete an action, not just click "Ne
 
 ## Usage
 
-The hook is typically used internally by Tour Kit, but you can use it directly for custom implementations:
+The hook is typically used internally by User Tour Kit, but you can use it directly for custom implementations:
 
 ```tsx
 
@@ -19141,7 +19128,7 @@ function App() {
 
 # Config Types
 
-> TypeScript interfaces for TourConfig, SpotlightConfig, KeyboardConfig, and other Tour Kit configuration options
+> TypeScript interfaces for TourConfig, SpotlightConfig, KeyboardConfig, and other User Tour Kit configuration options
 
 # Config Types
 
@@ -19253,7 +19240,7 @@ const defaultScroll: ScrollConfig = {
 
 # Step Types
 
-> TypeScript interfaces for StepConfig, StepTarget, StepPlacement, and step-level configuration in Tour Kit tours
+> TypeScript interfaces for StepConfig, StepTarget, StepPlacement, and step-level configuration in User Tour Kit tours
 
 # Step Types
 
@@ -19797,7 +19784,7 @@ Returns a `TourConfig` object that can be passed directly to `TourProvider`:
 
 # DOM Utilities
 
-Utilities for working with DOM elements. Used internally by Tour Kit for element resolution, visibility detection, and focus management.
+Utilities for working with DOM elements. Used internally by User Tour Kit for element resolution, visibility detection, and focus management.
 
 ## Why Use These Utilities?
 
@@ -20014,7 +20001,7 @@ async function showTourStep(target: string) {
 
 # Helper Functions
 
-> Helper utilities: step index calculations, progress percentages, and common tour operation functions in Tour Kit
+> Helper utilities: step index calculations, progress percentages, and common tour operation functions in User Tour Kit
 
 # Helper Functions
 
@@ -20023,7 +20010,6 @@ async function showTourStep(target: string) {
 Resolves a target selector to an HTMLElement.
 
 ```tsx
-
 
 const element = getElement('#my-button');
 // Returns: HTMLElement | null
@@ -20038,7 +20024,6 @@ Waits for an element to appear in the DOM.
 
 ```tsx
 
-
 // Wait up to 5 seconds for element to appear
 const element = await waitForElement('#lazy-loaded', {
   timeout: 5000,
@@ -20051,7 +20036,6 @@ const element = await waitForElement('#lazy-loaded', {
 Scrolls an element into view with options.
 
 ```tsx
-
 
 await scrollToElement(element, {
   behavior: 'smooth',
@@ -20066,7 +20050,6 @@ Calculates optimal tooltip placement based on viewport.
 
 ```tsx
 
-
 const placement = calculatePlacement(targetRect, tooltipRect, {
   preferred: 'bottom',
   fallback: ['top', 'right', 'left'],
@@ -20080,7 +20063,6 @@ const placement = calculatePlacement(targetRect, tooltipRect, {
 Deep merges tour configurations.
 
 ```tsx
-
 
 const baseConfig = {
   keyboard: true,
@@ -20108,7 +20090,6 @@ Checks if an element is visible in the viewport.
 
 ```tsx
 
-
 const visible = isElementVisible(element);
 // Returns: boolean
 ```
@@ -20121,13 +20102,13 @@ const visible = isElementVisible(element);
 
 # Logger Utility
 
-A configurable logger for Tour Kit that adapts to your environment. Provides consistent logging with level-based filtering.
+A configurable logger for User Tour Kit that adapts to your environment. Provides consistent logging with level-based filtering.
 
 ## Why Use This Logger?
 
 - **Environment-aware** - Errors only in production, warnings in development
 - **Configurable levels** - Control verbosity at runtime
-- **Consistent prefix** - Easy to filter Tour Kit logs
+- **Consistent prefix** - Easy to filter User Tour Kit logs
 - **Zero overhead** - Silent mode disables all logging
 
 ---
@@ -20232,7 +20213,7 @@ logger.info('Starting onboarding tour');
 
 ## Internal Usage
 
-Tour Kit uses the logger internally for:
+User Tour Kit uses the logger internally for:
 
 | Scenario | Level | Example |
 |----------|-------|---------|
@@ -21369,16 +21350,15 @@ const throttled = throttleRAF(update);
 
 # Examples
 
-> Copy-paste examples for common Tour Kit patterns: basic tours, onboarding flows, and fully custom headless interfaces
+> Copy-paste examples for common User Tour Kit patterns: basic tours, onboarding flows, and fully custom headless interfaces
 
 # Examples
 
-Copy-paste examples to get started quickly with Tour Kit. Each example is a complete, working implementation.
+Copy-paste examples to get started quickly with User Tour Kit. Each example is a complete, working implementation.
 
 ---
 
 ## Tour Examples
-
 
   
   
@@ -21991,15 +21971,15 @@ function OnboardingResetButton() {
 
 # Getting Started
 
-> Set up Tour Kit in your React application with step-by-step installation, configuration, and TypeScript guides
+> Set up User Tour Kit in your React application with step-by-step installation, configuration, and TypeScript guides
 
 # Getting Started
 
-Tour Kit is a headless onboarding and product tour library for React. It's designed to work well with shadcn/ui and similar component libraries.
+User Tour Kit is a headless onboarding and product tour library for React. It's designed to work well with shadcn/ui and similar component libraries.
 
 ## Overview
 
-Tour Kit provides a flexible foundation for building:
+User Tour Kit provides a flexible foundation for building:
 
 - **Product Tours** - Guide users through your application with step-by-step tours
 - **Hints & Hotspots** - Highlight features with persistent hints
@@ -22007,7 +21987,7 @@ Tour Kit provides a flexible foundation for building:
 
 ## Next Steps
 
-- [Installation](/docs/getting-started/installation) - Install Tour Kit packages
+- [Installation](/docs/getting-started/installation) - Install User Tour Kit packages
 - [Quick Start](/docs/getting-started/quick-start) - Build your first tour
 - [TypeScript](/docs/getting-started/typescript) - TypeScript configuration
 
@@ -22077,7 +22057,7 @@ TourKit requires React 18 or 19:
 
 # TypeScript
 
-> Configure TypeScript strict mode, use inferred step types, and leverage generic tour configurations in Tour Kit
+> Configure TypeScript strict mode, use inferred step types, and leverage generic tour configurations in User Tour Kit
 
 # TypeScript
 
@@ -22099,7 +22079,6 @@ TourKit is written in TypeScript and provides full type definitions.
 
 ```tsx
 
-
 const tour = createTour({
   id: 'onboarding',
   steps: [
@@ -22117,7 +22096,6 @@ const tour = createTour({
 ## Hook Return Types
 
 ```tsx
-
 
 function MyComponent() {
   const tour: UseTourReturn = useTour('my-tour');
@@ -22159,16 +22137,15 @@ TourKit is fully compatible with React Strict Mode and follows all TypeScript st
 
 # Guides
 
-> In-depth guides for accessibility, persistence, animations, router integration, and framework-specific Tour Kit setup
+> In-depth guides for accessibility, persistence, animations, router integration, and framework-specific User Tour Kit setup
 
 # Guides
 
-In-depth guides for setting up and customizing Tour Kit in your applications.
+In-depth guides for setting up and customizing User Tour Kit in your applications.
 
 ---
 
 ## Framework Integration
-
 
   
 </Cards>
@@ -22176,7 +22153,6 @@ In-depth guides for setting up and customizing Tour Kit in your applications.
 ---
 
 ## Features
-
 
   
   
@@ -22188,7 +22164,6 @@ In-depth guides for setting up and customizing Tour Kit in your applications.
 ---
 
 ## Package Integration
-
 
   
   
@@ -22219,9 +22194,7 @@ In-depth guides for setting up and customizing Tour Kit in your applications.
 
 # Accessibility
 
-Tour Kit is built with accessibility as a core principle, not an afterthought. Every component follows WCAG 2.1 AA guidelines to ensure your tours work for all users, including those using screen readers, keyboard navigation, or who have motion sensitivity.
-
-
+User Tour Kit is built with accessibility as a core principle, not an afterthought. Every component follows WCAG 2.1 AA guidelines to ensure your tours work for all users, including those using screen readers, keyboard navigation, or who have motion sensitivity.
 
 ## Why Accessibility Matters for Tours
 
@@ -22232,7 +22205,7 @@ Product tours and onboarding flows often interrupt the normal page experience. W
 - **Users with motion sensitivity** may experience discomfort from animations
 - **Users with cognitive disabilities** may struggle with complex multi-step flows
 
-Tour Kit handles all of these concerns automatically.
+User Tour Kit handles all of these concerns automatically.
 
 ---
 
@@ -22242,7 +22215,7 @@ When a tour step activates, focus needs careful management to ensure keyboard us
 
 ### How Focus Trap Works
 
-Tour Kit's `useFocusTrap` hook automatically:
+User Tour Kit's `useFocusTrap` hook automatically:
 
 1. **Saves the previously focused element** before the tour starts
 2. **Traps Tab/Shift+Tab** within the tour card
@@ -22250,7 +22223,6 @@ Tour Kit's `useFocusTrap` hook automatically:
 4. **Restores focus** to the original element when the tour ends
 
 ```tsx title="How useFocusTrap is used internally"
-
 
 function TourCard({ isActive }) {
   const { containerRef, activate, deactivate } = useFocusTrap(isActive)
@@ -22286,14 +22258,11 @@ const FOCUSABLE_SELECTOR = [
 ].join(', ')
 ```
 
-
-
 ### Using Focus Trap in Custom Components
 
 If you're building headless components, you can use `useFocusTrap` directly:
 
 ```tsx title="Custom headless tour card"
-
 
 function MyCustomCard({ isActive, children }) {
   const { containerRef, activate, deactivate } = useFocusTrap(isActive)
@@ -22326,7 +22295,7 @@ function MyCustomCard({ isActive, children }) {
 
 ## Keyboard Navigation
 
-Tour Kit provides intuitive keyboard controls out of the box.
+User Tour Kit provides intuitive keyboard controls out of the box.
 
 ### Default Key Bindings
 
@@ -22355,7 +22324,6 @@ Keyboard navigation is automatically disabled when users are typing in form fiel
 You can customize key bindings when setting up your tour:
 
 ```tsx title="Custom keyboard configuration"
-
 
 function App() {
   return (
@@ -22386,20 +22354,17 @@ All icon-only buttons include descriptive labels:
 </button>
 ```
 
-
-
 ---
 
 ## Reduced Motion Support
 
-Users who experience motion sickness or have vestibular disorders can enable "reduced motion" in their operating system. Tour Kit respects this preference.
+Users who experience motion sickness or have vestibular disorders can enable "reduced motion" in their operating system. User Tour Kit respects this preference.
 
 ### Automatic Detection
 
-Tour Kit automatically detects the `prefers-reduced-motion` media query:
+User Tour Kit automatically detects the `prefers-reduced-motion` media query:
 
 ```tsx title="How reduced motion is detected"
-
 
 function MyComponent() {
   const prefersReducedMotion = usePrefersReducedMotion()
@@ -22433,8 +22398,6 @@ For animated media, provide a static fallback image:
 
 ```tsx title="Reduced motion fallback for video"
 
-
-
 ```
 
 When `prefers-reduced-motion: reduce` is active, the static image displays instead of the video.
@@ -22463,7 +22426,6 @@ Users can manually play the GIF using the play button, which includes proper ARI
 
 To test reduced motion in your browser:
 
-
   
   
 </Tabs>
@@ -22472,7 +22434,7 @@ To test reduced motion in your browser:
 
 ## Touch Targets
 
-Interactive elements in Tour Kit meet minimum touch target requirements:
+Interactive elements in User Tour Kit meet minimum touch target requirements:
 
 ```css
 /* Minimum 44x44px touch target for buttons */
@@ -22494,13 +22456,11 @@ All interactive elements have visible focus indicators:
 }
 ```
 
-
-
 ---
 
 ## Color Contrast
 
-Tour Kit uses CSS variables that ensure sufficient color contrast:
+User Tour Kit uses CSS variables that ensure sufficient color contrast:
 
 ```css title="Default contrast-safe variables"
 :root {
@@ -22531,9 +22491,6 @@ This helps users maintain orientation within the page during the tour.
 Use vitest-axe for automated accessibility testing:
 
 ```tsx title="Example accessibility test"
-
-
-
 
 expect.extend(toHaveNoViolations)
 
@@ -23008,7 +22965,7 @@ track('nudge_shown', {
 
 # Analytics Integration
 
-Track user interactions across all Tour Kit features with the analytics plugin system.
+Track user interactions across all User Tour Kit features with the analytics plugin system.
 
 ---
 
@@ -23022,7 +22979,7 @@ Understanding how users engage with your onboarding flows helps you:
 - Track checklist completion rates
 - Make data-driven improvements to your onboarding
 
-Tour Kit's analytics system is plugin-based, allowing you to send events to multiple services simultaneously.
+User Tour Kit's analytics system is plugin-based, allowing you to send events to multiple services simultaneously.
 
 ---
 
@@ -23364,11 +23321,11 @@ track('custom_event', { ... }, { skipPlugins: ['segment'] });
 
 # Animations
 
-Tour Kit provides smooth, performant animations out of the box while respecting users who prefer reduced motion. This guide covers customizing animations, understanding the built-in keyframes, and integrating with animation libraries.
+User Tour Kit provides smooth, performant animations out of the box while respecting users who prefer reduced motion. This guide covers customizing animations, understanding the built-in keyframes, and integrating with animation libraries.
 
 ## Built-in Animations
 
-Tour Kit includes three core animations:
+User Tour Kit includes three core animations:
 
 | Animation | Purpose | Duration |
 |-----------|---------|----------|
@@ -23458,10 +23415,9 @@ Set durations to zero:
 
 ### Using the Plugin
 
-The Tour Kit Tailwind plugin registers animations and utilities:
+The User Tour Kit Tailwind plugin registers animations and utilities:
 
 ```js title="tailwind.config.js"
-
 
 export default {
   plugins: [tourKitPlugin],
@@ -23518,7 +23474,7 @@ export default {
 
 ## Reduced Motion Support
 
-Tour Kit automatically respects the `prefers-reduced-motion` media query.
+User Tour Kit automatically respects the `prefers-reduced-motion` media query.
 
 ### Automatic Behavior
 
@@ -23557,7 +23513,6 @@ Detect reduced motion preference in your components:
 
 ```tsx title="Using usePrefersReducedMotion"
 
-
 function MyAnimatedComponent() {
   const prefersReducedMotion = usePrefersReducedMotion()
 
@@ -23577,7 +23532,6 @@ function MyAnimatedComponent() {
 
 ### Testing Reduced Motion
 
-
   
   
 </Tabs>
@@ -23592,8 +23546,6 @@ The card uses `tour-card-in` by default:
 
 ```tsx title="Custom card animation"
 
-
-
 ```
 
 ### Overlay/Spotlight
@@ -23602,8 +23554,6 @@ The overlay fades in with `tour-spotlight-in`:
 
 ```tsx title="Custom overlay animation"
 
-
-
 ```
 
 ### Hints
@@ -23611,8 +23561,6 @@ The overlay fades in with `tour-spotlight-in`:
 Hint beacons use `tour-pulse`:
 
 ```tsx title="Custom hint animation"
-
-
 
 ```
 
@@ -23625,8 +23573,6 @@ For advanced animations, integrate with Framer Motion:
 ### Basic Integration
 
 ```tsx title="Framer Motion card wrapper"
-
-
 
 function AnimatedTourCard({ children }) {
   const { isActive } = useTour()
@@ -23643,8 +23589,6 @@ Animate between steps:
 
 ```tsx title="Animated step transitions"
 
-
-
 function AnimatedStepContent() {
   const { currentStepIndex } = useTour()
   const step = useStep()
@@ -23658,7 +23602,6 @@ function AnimatedStepContent() {
 ### Respecting Reduced Motion
 
 ```tsx title="Framer Motion with reduced motion"
-
 
 function AccessibleAnimation({ children }) {
   const shouldReduceMotion = useReducedMotion()
@@ -23809,8 +23752,6 @@ function StaggeredTourContent({ items }) {
 Animate elements when tour closes:
 
 ```tsx title="Exit animation pattern"
-
-
 
 function TourWithExitAnimation({ children }) {
   const { isActive } = useTour()
@@ -24632,7 +24573,6 @@ The `useBranch` hook triggers these actions from your components:
 
 ```tsx
 
-
 function RoleButtons() {
   const { triggerAction } = useBranch();
 
@@ -24653,14 +24593,11 @@ Set `interactive={true}` to allow clicks through the overlay:
 
 ```
 
-
-
 ---
 
 ## Branch Targets
 
 Actions can navigate to various targets:
-
 
   
   
@@ -24683,9 +24620,6 @@ Here's a full role-selection tour implementation:
 
 ```tsx
 'use client';
-
-
-
 
   const { start, isActive } = useTour('onboarding');
 
@@ -24783,12 +24717,11 @@ Combine branching with conditional visibility:
 
 ```tsx
 
-
 ---
 
 ## Loop Prevention
 
-Tour Kit includes automatic loop detection to prevent infinite navigation:
+User Tour Kit includes automatic loop detection to prevent infinite navigation:
 
 - Maximum branch resolution depth: 50
 - Maximum step visits: 10 per step
@@ -25189,11 +25122,11 @@ Save checklist progress so users can resume:
 
 # Next.js Integration
 
-> Set up Tour Kit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support
+> Set up User Tour Kit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support
 
 # Next.js Integration
 
-Complete guide for setting up Tour Kit with Next.js. Covers both App Router (Next.js 13+) and Pages Router.
+Complete guide for setting up User Tour Kit with Next.js. Covers both App Router (Next.js 13+) and Pages Router.
 
 ---
 
@@ -25355,7 +25288,7 @@ function StartButton() {
 
 # Persistence
 
-Tour Kit provides comprehensive persistence across all packages, allowing you to save user progress, dismissed announcements, checklist completion, and feature adoption data. This guide covers storage options, configuration, and best practices.
+User Tour Kit provides comprehensive persistence across all packages, allowing you to save user progress, dismissed announcements, checklist completion, and feature adoption data. This guide covers storage options, configuration, and best practices.
 
 ## Why Persistence Matters
 
@@ -25365,7 +25298,7 @@ Without persistence:
 - Checklist progress is lost on refresh
 - Feature adoption tracking resets
 
-With Tour Kit's persistence:
+With User Tour Kit's persistence:
 - Tours resume from where users left off
 - "Don't show again" is remembered
 - Checklists track completed tasks across sessions
@@ -25375,7 +25308,7 @@ With Tour Kit's persistence:
 
 ## Storage Options
 
-Tour Kit supports multiple storage backends:
+User Tour Kit supports multiple storage backends:
 
 | Storage | Scope | SSR Safe | Best For |
 |---------|-------|----------|----------|
@@ -25395,8 +25328,6 @@ const storage = typeof window !== 'undefined'
   : createMemoryStorage()
 ```
 
-
-
 ---
 
 ## Tour Persistence
@@ -25406,8 +25337,6 @@ The `usePersistence` hook saves tour progress for single-page applications.
 ### Configuration
 
 ```tsx title="Setting up tour persistence"
-
-
 
 ```
 
@@ -25434,7 +25363,6 @@ The `usePersistence` hook saves tour progress for single-page applications.
 ### API Reference
 
 ```tsx title="Using persistence programmatically"
-
 
 function TourManager() {
   const persistence = usePersistence({ keyPrefix: 'my-app' })
@@ -25476,8 +25404,6 @@ For tours that span multiple pages/routes, use `useRoutePersistence`:
 ### Configuration
 
 ```tsx title="Multi-page persistence setup"
-
-
 
 function App() {
   const routePersistence = useRoutePersistence({
@@ -25541,8 +25467,6 @@ The `@tour-kit/checklists` package persists task completion and dismissal state.
 
 ```tsx title="Checklist persistence setup"
 
-
-
 ```
 
 ### Persisted State Structure
@@ -25558,7 +25482,6 @@ interface PersistedChecklistState {
 ### Using the Hook Directly
 
 ```tsx title="Programmatic checklist persistence"
-
 
 function ChecklistManager() {
   const persistence = useChecklistPersistence({
@@ -25601,8 +25524,6 @@ For server-side storage, use custom handlers:
 
 ```tsx title="Announcement persistence setup"
 
-
-
 ```
 
 ---
@@ -25641,8 +25562,6 @@ interface NudgeState {
 ### Configuration
 
 ```tsx title="Adoption persistence setup"
-
-
 
 ```
 
@@ -25695,7 +25614,6 @@ interface Storage {
 
 ```tsx title="IndexedDB storage adapter"
 
-
 const idbStorage: Storage = {
   async getItem(key: string) {
     const db = await openDB('tour-kit', 1, {
@@ -25719,7 +25637,6 @@ const idbStorage: Storage = {
 }
 
 // Use with any Tour Kit provider
-
 
 ---
 
@@ -25757,7 +25674,7 @@ async function loadWithMigration(key: string) {
 ## Best Practices
 
 1. **Use consistent prefixes** - Namespace all keys to avoid collisions
-2. **Handle SSR** - Tour Kit does this automatically, but custom code needs checks
+2. **Handle SSR** - User Tour Kit does this automatically, but custom code needs checks
 3. **Respect user privacy** - Provide a way to clear stored data
 4. **Test persistence** - Include persistence in your test suites
 5. **Plan for migration** - Version your persisted data structures
@@ -25781,7 +25698,7 @@ async function loadWithMigration(key: string) {
 
 # Router Integration
 
-Tour Kit supports multi-page tours that navigate users across different routes. This guide covers integration with popular routers.
+User Tour Kit supports multi-page tours that navigate users across different routes. This guide covers integration with popular routers.
 
 ## Why Router Integration?
 
@@ -25996,7 +25913,7 @@ createStep({
 
 ### Automatic Navigation
 
-When a step requires a different route, Tour Kit automatically navigates:
+When a step requires a different route, User Tour Kit automatically navigates:
 
 ```tsx
 const tour = createTour({
@@ -26101,11 +26018,11 @@ const navigate = (route) => {
 
 # Troubleshooting
 
-> Diagnose and fix common Tour Kit issues: missing targets, positioning glitches, hydration errors, and focus trap problems
+> Diagnose and fix common User Tour Kit issues: missing targets, positioning glitches, hydration errors, and focus trap problems
 
 # Troubleshooting
 
-Solutions to common issues when using Tour Kit.
+Solutions to common issues when using User Tour Kit.
 
 ## Tour Not Starting
 
@@ -26331,11 +26248,11 @@ const router = useNextAppRouter()
 
 # Vite Integration
 
-> Configure Tour Kit in Vite + React projects with hot module replacement, path aliases, and production build optimization
+> Configure User Tour Kit in Vite + React projects with hot module replacement, path aliases, and production build optimization
 
 # Vite Integration
 
-Complete guide for setting up Tour Kit with Vite and React. Covers single-page apps and React Router integration.
+Complete guide for setting up User Tour Kit with Vite and React. Covers single-page apps and React Router integration.
 
 ---
 
@@ -26984,7 +26901,7 @@ All hint components are built with accessibility in mind:
 
 # Headless Hints
 
-Build completely custom hint UIs while leveraging Tour Kit's logic for positioning, state management, and accessibility.
+Build completely custom hint UIs while leveraging User Tour Kit's logic for positioning, state management, and accessibility.
 
 ## Why Use Headless Components?
 
@@ -27716,7 +27633,7 @@ When you update a hint's content significantly, consider changing its ID:
 
 # TourKit
 
-> Tour Kit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage
+> User Tour Kit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage
 
 # TourKit
 
@@ -27724,7 +27641,6 @@ A headless, accessible, and beautifully styled product tour library for React.
 Works seamlessly with shadcn/ui and Tailwind CSS.
 
 ## Why TourKit?
-
 
   }
     href="/docs/guides/accessibility"
@@ -27759,7 +27675,6 @@ pnpm add @tour-kit/react
 
 ```tsx
 
-
 function App() {
   const { start } = useTour('onboarding');
 
@@ -27770,7 +27685,6 @@ function App() {
 ```
 
 ## Next Steps
-
 
   
 </Cards>
@@ -32555,7 +32469,7 @@ pnpm add @tour-kit/react
 
 # Router Adapters
 
-Router adapters connect Tour Kit to your application's routing system, enabling multi-page tours that navigate users across different routes.
+Router adapters connect User Tour Kit to your application's routing system, enabling multi-page tours that navigate users across different routes.
 
 ## Why Use Router Adapters?
 
@@ -33773,7 +33687,7 @@ Mix headless and styled components:
 
 # Headless Examples
 
-> Headless component examples: build custom tooltip cards, overlays, and navigation using Tour Kit render props
+> Headless component examples: build custom tooltip cards, overlays, and navigation using User Tour Kit render props
 
 # Headless Component Examples
 
@@ -34286,7 +34200,7 @@ function TourSelector() {
 
 # MultiTourKitProvider
 
-The top-level provider for Tour Kit that manages multiple tours, routing, persistence, and lifecycle callbacks.
+The top-level provider for User Tour Kit that manages multiple tours, routing, persistence, and lifecycle callbacks.
 
 ## Why Use This Provider?
 
@@ -34387,7 +34301,7 @@ Apply settings to all tours:
 
 # CSS Variables
 
-> Customize Tour Kit appearance with CSS custom properties for colors, spacing, border radius, and shadow values
+> Customize User Tour Kit appearance with CSS custom properties for colors, spacing, border radius, and shadow values
 
 # CSS Variables
 
@@ -34509,7 +34423,6 @@ function setTourTheme(theme: 'light' | 'dark' | 'brand') {
 ## Integration with CSS-in-JS
 
 ```tsx
-
 
 const StyledTourCard = styled(TourCard)`
   --tour-kit-card-bg: ${props => props.theme.cardBg};
@@ -34699,7 +34612,7 @@ function App() {
 
 # Tailwind CSS
 
-> Style Tour Kit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints
+> Style User Tour Kit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints
 
 # Tailwind CSS
 
@@ -34793,12 +34706,9 @@ Common customization patterns:
 ```tsx
 // Rounded corners
 
-
 // Shadow
 
-
 // Width
-
 
 // Animation
 
@@ -34824,9 +34734,6 @@ module.exports = {
 Create reusable styled variants:
 
 ```tsx
-
-
-
 
   return (
     
@@ -36038,7 +35945,7 @@ For older browsers, falls back to `"UTC"`.
 
 # Presets
 
-> Schedule presets: pre-configured constants for business hours, weekdays, weekends, and common scheduling patterns in Tour Kit
+> Schedule presets: pre-configured constants for business hours, weekdays, weekends, and common scheduling patterns in User Tour Kit
 
 # Presets
 

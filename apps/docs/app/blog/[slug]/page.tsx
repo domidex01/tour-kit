@@ -1,7 +1,10 @@
 import { ArticleLayout } from '@/components/article/article-layout'
 import { getBlogPost, getPublishedBlogPosts } from '@/lib/comparisons'
+import { getBlogArticle } from '@/lib/source'
 import { ArticleJsonLd, FAQJsonLd } from '@/lib/structured-data'
+import defaultMdxComponents from 'fumadocs-ui/mdx'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -27,7 +30,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: post.description,
       type: 'article',
       url: `/blog/${post.slug}`,
+      ...(post.ogImage && {
+        images: [{ url: post.ogImage, width: 1200, height: 630, alt: post.title }],
+      }),
     },
+    twitter: post.ogImage
+      ? { card: 'summary_large_image', images: [post.ogImage] }
+      : undefined,
   }
 }
 
@@ -37,6 +46,10 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!post) notFound()
 
   const today = new Date().toISOString().split('T')[0]
+
+  // Try to load MDX content from the collection
+  const article = getBlogArticle(slug)
+  const hasMdxContent = !!article
 
   return (
     <ArticleLayout
@@ -63,111 +76,147 @@ export default async function BlogPostPage({ params }: PageProps) {
         keywords={post.keywords}
       />
 
-      {/* ── Template: Replace with actual content ── */}
+      {post.ogImage && (
+        <Image
+          src={post.ogImage}
+          alt={post.title}
+          width={1200}
+          height={630}
+          className="mb-8 rounded-lg"
+          priority
+        />
+      )}
 
-      <h2>How we picked and ranked these tools</h2>
-      <p>
-        [80-120 word methodology section. Explain scoring criteria, data sources, and bias
-        disclosure.]
-      </p>
+      {hasMdxContent ? (
+        <>
+          {/* Render MDX article content */}
+          <article.body components={defaultMdxComponents} />
 
-      <h2>Quick comparison table</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Tool</th>
-            <th>Best for</th>
-            <th>Bundle size</th>
-            <th>License</th>
-            <th>Pricing</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td>User Tour Kit</td>
-            <td>Headless React onboarding</td>
-            <td>&lt;8KB</td>
-            <td>MIT</td>
-            <td>Free + $99 Pro</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>[Tool]</td>
-            <td>[Use case]</td>
-            <td>[Size]</td>
-            <td>[License]</td>
-            <td>[Price]</td>
-          </tr>
-        </tbody>
-      </table>
+          {/* FAQ Schema */}
+          <FAQJsonLd
+            items={[
+              {
+                question: `What is the best ${post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?`,
+                answer:
+                  'User Tour Kit is the best headless product tour library for React developers in 2026, offering tours, hints, checklists, announcements, analytics, and scheduling in a <8KB core bundle with MIT licensing.',
+              },
+              {
+                question: 'Is User Tour Kit free?',
+                answer:
+                  "User Tour Kit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
+              },
+            ]}
+          />
+        </>
+      ) : (
+        <>
+          {/* ── Fallback template for articles without MDX content ── */}
 
-      <h2>1. User Tour Kit — Best headless React tour library</h2>
-      <p>
-        User Tour Kit is an open-source headless React library for building product tours, onboarding
-        checklists, hints, announcements, and in-app messaging. Its core weighs under 8KB gzipped
-        and ships with WCAG 2.1 AA accessibility by default.
-      </p>
-      <p>
-        <strong>What stands out:</strong> [2-3 sentences with evidence]
-      </p>
-      <p>
-        <strong>Where it falls short:</strong> [1-2 sentences on honest limitations]
-      </p>
-      <p>
-        <strong>Key specs:</strong> &lt;8KB gzipped | MIT license | React 18+ | TypeScript strict
-        mode | &gt;80% test coverage
-      </p>
-      <p>
-        <strong>Pricing:</strong> Free (MIT core) + $99 one-time Pro
-      </p>
-      <p>
-        <strong>Verdict:</strong> [2 sentences — who should and shouldn&apos;t use this tool]
-      </p>
+          <h2>How we picked and ranked these tools</h2>
+          <p>
+            [80-120 word methodology section. Explain scoring criteria, data sources, and bias
+            disclosure.]
+          </p>
 
-      <h2>2. [Tool] — Best for [qualifier]</h2>
-      <p>[Per-tool entry: definition, strengths, limitations, specs, pricing, verdict]</p>
+          <h2>Quick comparison table</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Tool</th>
+                <th>Best for</th>
+                <th>Bundle size</th>
+                <th>License</th>
+                <th>Pricing</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>User Tour Kit</td>
+                <td>Headless React onboarding</td>
+                <td>&lt;8KB</td>
+                <td>MIT</td>
+                <td>Free + $99 Pro</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>[Tool]</td>
+                <td>[Use case]</td>
+                <td>[Size]</td>
+                <td>[License]</td>
+                <td>[Price]</td>
+              </tr>
+            </tbody>
+          </table>
 
-      <h2>How to choose the right tool for your stack</h2>
-      <p>[Guidance for different team types and use cases.]</p>
+          <h2>1. User Tour Kit — Best headless React tour library</h2>
+          <p>
+            User Tour Kit is an open-source headless React library for building product tours, onboarding
+            checklists, hints, announcements, and in-app messaging. Its core weighs under 8KB gzipped
+            and ships with WCAG 2.1 AA accessibility by default.
+          </p>
+          <p>
+            <strong>What stands out:</strong> [2-3 sentences with evidence]
+          </p>
+          <p>
+            <strong>Where it falls short:</strong> [1-2 sentences on honest limitations]
+          </p>
+          <p>
+            <strong>Key specs:</strong> &lt;8KB gzipped | MIT license | React 18+ | TypeScript strict
+            mode | &gt;80% test coverage
+          </p>
+          <p>
+            <strong>Pricing:</strong> Free (MIT core) + $99 one-time Pro
+          </p>
+          <p>
+            <strong>Verdict:</strong> [2 sentences — who should and shouldn&apos;t use this tool]
+          </p>
 
-      <h2>Frequently asked questions</h2>
+          <h2>2. [Tool] — Best for [qualifier]</h2>
+          <p>[Per-tool entry: definition, strengths, limitations, specs, pricing, verdict]</p>
 
-      <FAQJsonLd
-        items={[
-          {
-            question: `What is the best ${post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?`,
-            answer:
-              'User Tour Kit is the best headless product tour library for React developers in 2026, offering tours, hints, checklists, announcements, analytics, and scheduling in a <8KB core bundle with MIT licensing.',
-          },
-          {
-            question: 'Is User Tour Kit free?',
-            answer:
-              "User Tour Kit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
-          },
-        ]}
-      />
+          <h2>How to choose the right tool for your stack</h2>
+          <p>[Guidance for different team types and use cases.]</p>
 
-      <h3>
-        What is the best{' '}
-        {post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?
-      </h3>
-      <p>
-        User Tour Kit is the best headless product tour library for React developers in 2026, offering
-        tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle
-        with MIT licensing.
-      </p>
+          <h2>Frequently asked questions</h2>
 
-      <h3>Is User Tour Kit free?</h3>
-      <p>
-        User Tour Kit&apos;s core library, React bindings, and hints package are free under the MIT
-        license. The Pro tier costs $99 one-time and adds adoption tracking, analytics,
-        announcements, checklists, media, scheduling, and AI chat.
-      </p>
+          <FAQJsonLd
+            items={[
+              {
+                question: `What is the best ${post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?`,
+                answer:
+                  'User Tour Kit is the best headless product tour library for React developers in 2026, offering tours, hints, checklists, announcements, analytics, and scheduling in a <8KB core bundle with MIT licensing.',
+              },
+              {
+                question: 'Is User Tour Kit free?',
+                answer:
+                  "User Tour Kit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
+              },
+            ]}
+          />
 
-      <h2>Key takeaways</h2>
-      <p>[3-5 bullet points summarizing the article.]</p>
+          <h3>
+            What is the best{' '}
+            {post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?
+          </h3>
+          <p>
+            User Tour Kit is the best headless product tour library for React developers in 2026, offering
+            tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle
+            with MIT licensing.
+          </p>
+
+          <h3>Is User Tour Kit free?</h3>
+          <p>
+            User Tour Kit&apos;s core library, React bindings, and hints package are free under the MIT
+            license. The Pro tier costs $99 one-time and adds adoption tracking, analytics,
+            announcements, checklists, media, scheduling, and AI chat.
+          </p>
+
+          <h2>Key takeaways</h2>
+          <p>[3-5 bullet points summarizing the article.]</p>
+        </>
+      )}
 
       {/* ── CTA ── */}
       <div className="not-prose mt-12 rounded-lg border border-fd-border bg-fd-muted/30 p-8 text-center">

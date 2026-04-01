@@ -1,5 +1,5 @@
-Tour Kit — @tour-kit/react Context File
-Version: 0.4.1 | Generated: 2026-03-31
+User Tour Kit — @tour-kit/react Context File
+Version: 0.4.1 | Generated: 2026-04-01
 Paste this into your LLM to get accurate answers about @tour-kit/react.
 =========================================================================
 
@@ -350,50 +350,179 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: 1. Direct Hook (Recommended)
+Example 1: Custom Card with Tailwind
 
-    import { useNextAppRouter } from '@tour-kit/react';
+    import { HeadlessTourCard } from '@tour-kit/react/headless'
+    import { X, ChevronLeft, ChevronRight } from 'lucide-react'
     
-    function App() {
-      const router = useNextAppRouter();
-    
+    function CustomTailwindCard() {
       return (
-        <MultiTourKitProvider router={router}>
-          {/* ... */}
-        </MultiTourKitProvider>
-      );
+        <HeadlessTourCard>
+          {({
+            currentStep,
+            currentStepIndex,
+            totalSteps,
+            next,
+            prev,
+            skip,
+            complete,
+            isFirstStep,
+            isLastStep,
+            floatingStyles,
+            refs,
+          }) => (
+            <div
+              ref={refs.setFloating}
+              style={floatingStyles}
+              className="bg-white rounded-xl shadow-2xl border border-gray-200 w-80 overflow-hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-indigo-500 to-purple-500">
+                <span className="text-white/80 text-sm font-medium">
+                  Step {currentStepIndex + 1} of {totalSteps}
+                </span>
+                <button
+                  onClick={skip}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+    
+              {/* Content */}
+              <div className="p-5">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {currentStep?.content?.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {currentStep?.content?.description}
+                </p>
+              </div>
+    
+              {/* Footer */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 border-t">
+                <button
+                  onClick={prev}
+                  disabled={isFirstStep}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600
+                             hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft size={16} />
+                  Back
+                </button>
+    
+                <button
+                  onClick={isLastStep ? complete : next}
+                  className="flex items-center gap-1 px-4 py-1.5 text-sm text-white
+                             bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors"
+                >
+                  {isLastStep ? 'Finish' : 'Next'}
+                  {!isLastStep && <ChevronRight size={16} />}
+                </button>
+              </div>
+            </div>
+          )}
+        </HeadlessTourCard>
+      )
     }
 
-Example 2: 2. Factory Function
+Example 2: Custom Overlay with Animations
 
-    import { createNextAppRouterAdapter } from '@tour-kit/react';
-    import { usePathname, useRouter } from 'next/navigation';
+    import { useSpotlight } from '@tour-kit/core'
+    import { motion, AnimatePresence } from 'framer-motion'
     
-    const useMyRouter = createNextAppRouterAdapter(usePathname, useRouter);
-    
-    function App() {
-      const router = useMyRouter();
+    function AnimatedOverlay() {
+      const { isVisible, targetRect, overlayStyle } = useSpotlight()
     
       return (
-        <MultiTourKitProvider router={router}>
-          {/* ... */}
-        </MultiTourKitProvider>
-      );
+        <AnimatePresence>
+          {isVisible && targetRect && (
+            <>
+              {/* Overlay background */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 z-40"
+              />
+    
+              {/* Spotlight cutout */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                style={{
+                  position: 'fixed',
+                  left: targetRect.left - 8,
+                  top: targetRect.top - 8,
+                  width: targetRect.width + 16,
+                  height: targetRect.height + 16,
+                  borderRadius: 8,
+                  boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+                }}
+                className="z-40 pointer-events-none"
+              />
+    
+              {/* Pulsing ring */}
+              <motion.div
+                animate={{
+                  scale: [1, 1.05, 1],
+                  opacity: [0.5, 0.8, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                style={{
+                  position: 'fixed',
+                  left: targetRect.left - 12,
+                  top: targetRect.top - 12,
+                  width: targetRect.width + 24,
+                  height: targetRect.height + 24,
+                  borderRadius: 12,
+                  border: '2px solid rgb(99, 102, 241)',
+                }}
+                className="z-40 pointer-events-none"
+              />
+            </>
+          )}
+        </AnimatePresence>
+      )
     }
 
-Example 3: Route Matching Modes
+Example 3: Minimal Progress Bar
 
-    <TourStep
-      route="/dashboard"
-      routeMatch="exact"      // Only "/dashboard"
-    />
+    import { useTour } from '@tour-kit/core'
     
-    <TourStep
-      route="/dashboard"
-      routeMatch="startsWith" // "/dashboard", "/dashboard/settings", etc.
-    />
+    function MinimalProgress() {
+      const { isActive, currentStepIndex, totalSteps, progress } = useTour()
     
-    <TourStep
-      route="/settings"
-      routeMatch="contains"   // "/app/settings", "/user/settings", etc.
-    />
+      if (!isActive) return null
+    
+      return (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
+          <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm
+                          rounded-full px-4 py-2 shadow-lg">
+            {/* Step dots */}
+            <div className="flex gap-1.5">
+              {Array.from({ length: totalSteps }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    i <= currentStepIndex
+                      ? 'bg-indigo-500 scale-110'
+                      : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+    
+            {/* Percentage */}
+            <span className="text-xs font-medium text-gray-600 ml-2">
+              {Math.round(progress)}%
+            </span>
+          </div>
+        </div>
+      )
+    }

@@ -40,6 +40,8 @@ export interface BlogMeta {
   published?: boolean
   publishedAt?: string
   lastUpdated?: string
+  /** Path to static OG/featured image relative to public/ */
+  ogImage?: string
 }
 
 // ── Comparisons ──
@@ -517,6 +519,24 @@ export const BLOG_POSTS: BlogMeta[] = [
       'The best product tour and onboarding tools in 2026 for developers and product teams. Open-source libraries and commercial platforms compared.',
     keywords: ['best product tour tools', 'onboarding tools', 'product tour software'],
     category: 'Listicle',
+  },
+  {
+    slug: 'best-product-tour-tools-react',
+    title: '10 Best Product Tour Tools for React Developers (2026)',
+    metaTitle: '10 Best Product Tour Tools for React Developers (2026)',
+    description:
+      'Discover the best product tour tools for React in 2026. We installed and tested 10 options, comparing bundle size, TypeScript support, React 19 compatibility, and pricing.',
+    keywords: [
+      'best product tour tool react',
+      'react onboarding tool',
+      'react product tour software',
+      'developer onboarding tool',
+    ],
+    category: 'Listicle',
+    published: true,
+    publishedAt: '2026-04-01',
+    lastUpdated: '2026-04-01',
+    ogImage: '/og-images/best-product-tour-tools-react.avif',
   },
 ]
 

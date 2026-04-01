@@ -1,5 +1,5 @@
-Tour Kit — @tour-kit/core Context File
-Version: 0.3.0 | Generated: 2026-03-31
+User Tour Kit — @tour-kit/core Context File
+Version: 0.3.0 | Generated: 2026-04-01
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -187,37 +187,52 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: Usage
-
-    import { useAdvanceOn } from '@tour-kit/core';
-    
-    function MyTourStep() {
-      // Enables advanceOn behavior based on current step config
-      useAdvanceOn({ enabled: true });
-    
-      return <TourCard>{/* ... */}</TourCard>;
-    }
-
-Example 2: Step Configuration
+Example 1: interactive
 
     <TourStep
-      target="#signup-button"
-      title="Click to Sign Up"
-      content="Click this button to continue"
-      advanceOn={{
-        event: 'click',
-        selector: '#signup-button',
+      id="role-select"
+      target="#role-buttons"
+      title="Choose Your Role"
+      content="Click a button below to select your path"
+      interactive  // Allows clicking buttons within the spotlight
+      onNext={null}  // Disable Next button - user must click a role
+      onAction={{
+        developer: 'dev-track',
+        designer: 'design-track',
       }}
     />
 
-Example 3: Event Types
+Example 2: onAction
 
     <TourStep
-      target="#submit-btn"
-      title="Submit the Form"
-      content="Click submit when ready"
-      advanceOn={{
-        event: 'click',
-        selector: '#submit-btn',
+      id="feature-select"
+      target="#features"
+      interactive
+      onNext={null}
+      onAction={{
+        analytics: 'analytics-intro',      // Navigate to step by ID
+        reports: { tour: 'reports-tour' }, // Switch to different tour
+        skip: 'complete',                  // Complete the tour
       }}
+    />
+
+Example 3: onNext
+
+    // Navigate to specific step instead of sequential next
+    <TourStep
+      id="dev-intro"
+      onNext="summary"  // Skip to summary step
+    />
+    
+    // Disable Next button (require action)
+    <TourStep
+      id="role-select"
+      onNext={null}
+      onAction={{ ... }}
+    />
+    
+    // Conditional navigation
+    <TourStep
+      id="feature-step"
+      onNext={(ctx) => ctx.data.isAdvanced ? 'advanced-section' : 'basic-section'}
     />

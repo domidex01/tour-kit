@@ -47,6 +47,7 @@ export default function BlogHub() {
               description={post.description}
               href={`/blog/${post.slug}`}
               badge={post.category}
+              image={post.ogImage}
             />
           ))}
         </div>

@@ -25,7 +25,8 @@
     "lucide-react": "^0.468.0",
     "next": "canary",
     "react": "canary",
-    "react-dom": "canary"
+    "react-dom": "canary",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
@@ -36,7 +37,9 @@
     "autoprefixer": "^10.4.20",
     "glob": "^11.0.0",
     "gray-matter": "^4.0.3",
+    "playwright": "^1.59.0",
     "postcss": "^8.4.49",
+    "puppeteer": "^24.40.0",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
