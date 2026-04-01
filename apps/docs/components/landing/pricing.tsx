@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, Check, Sparkles, X } from 'lucide-react'
+import { ArrowRight, Check, Code2, Sparkles, X, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -48,39 +48,53 @@ const COMPARISON_ROWS = [
 export function Pricing() {
   return (
     <section className="px-6 py-20 sm:px-8 md:py-28 lg:px-12">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-[1120px]">
         {/* Header */}
-        <div className="mb-14 text-center">
-          <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-fd-foreground sm:text-4xl">
+        <div className="mb-16 text-center">
+          <p className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tk-primary)]">
+            Pricing
+          </p>
+          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
             Simple, one-time pricing
           </h2>
-          <p className="mx-auto max-w-xl text-lg text-fd-muted-foreground">
+          <p className="mx-auto max-w-xl text-[16px] leading-[1.6] text-fd-muted-foreground">
             Core packages are free forever. Pay once for extended packages — no subscriptions, no
             per-seat fees.
           </p>
         </div>
 
         {/* Pricing cards */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 md:gap-8">
           {/* Free tier */}
-          <div className="flex flex-col rounded-xl border border-fd-border bg-fd-card p-8 shadow-sm">
-            <div className="mb-6">
-              <h3 className="mb-1 text-lg font-bold text-fd-foreground">Free</h3>
-              <p className="text-sm text-fd-muted-foreground">
-                Everything you need for product tours
-              </p>
+          <div className="group flex flex-col rounded-xl border border-fd-border bg-fd-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-fd-border bg-fd-muted">
+                <Code2 className="h-5 w-5 text-fd-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-fd-foreground">Free</h3>
+                <p className="text-[13px] text-fd-muted-foreground">
+                  Open source core
+                </p>
+              </div>
             </div>
 
             <div className="mb-8">
-              <span className="text-4xl font-extrabold text-fd-foreground">$0</span>
-              <span className="ml-1 text-fd-muted-foreground">forever</span>
+              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">$0</span>
+              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">forever</span>
+            </div>
+
+            <div className="mb-6 rounded-lg border border-dashed border-fd-border bg-fd-muted/30 px-4 py-2.5">
+              <p className="text-[13px] font-medium text-fd-muted-foreground">
+                3 MIT packages — unlimited sites, no restrictions
+              </p>
             </div>
 
             <ul className="mb-8 flex-1 space-y-3">
               {FREE_FEATURES.map((feature) => (
                 <li
                   key={feature}
-                  className="flex items-start gap-2.5 text-sm text-fd-muted-foreground"
+                  className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
                 >
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                   {feature}
@@ -90,7 +104,7 @@ export function Pricing() {
 
             <Link
               href="/docs/getting-started"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md"
             >
               Get started
               <ArrowRight className="h-4 w-4" />
@@ -98,29 +112,40 @@ export function Pricing() {
           </div>
 
           {/* Pro tier */}
-          <div className="relative flex flex-col rounded-xl border-2 border-[var(--tk-primary)] bg-fd-card p-8 shadow-md">
-            <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-primary)] px-3 py-1 text-xs font-semibold text-white">
+          <div className="group relative flex flex-col rounded-xl border-2 border-[var(--tk-primary)] bg-fd-card p-8 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+            <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-primary)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-[var(--tk-primary)]/20">
               <Sparkles className="h-3 w-3" />
               One-time purchase
             </div>
 
-            <div className="mb-6">
-              <h3 className="mb-1 text-lg font-bold text-fd-foreground">Pro</h3>
-              <p className="text-sm text-fd-muted-foreground">
-                Extended packages for full onboarding flows
-              </p>
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--tk-primary)]/10 ring-1 ring-[var(--tk-primary)]/20">
+                <Zap className="h-5 w-5 text-[var(--tk-primary)]" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-fd-foreground">Pro</h3>
+                <p className="text-[13px] text-fd-muted-foreground">
+                  Full onboarding suite
+                </p>
+              </div>
             </div>
 
             <div className="mb-8">
-              <span className="text-4xl font-extrabold text-fd-foreground">$99</span>
-              <span className="ml-1 text-fd-muted-foreground">one-time / 5 sites</span>
+              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">$99</span>
+              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">one-time / 5 sites</span>
+            </div>
+
+            <div className="mb-6 rounded-lg border border-[var(--tk-primary)]/20 bg-[var(--tk-primary)]/5 px-4 py-2.5">
+              <p className="text-[13px] font-medium text-fd-foreground">
+                8 extended packages — analytics, checklists, AI & more
+              </p>
             </div>
 
             <ul className="mb-8 flex-1 space-y-3">
               {PRO_FEATURES.map((feature) => (
                 <li
                   key={feature}
-                  className="flex items-start gap-2.5 text-sm text-fd-muted-foreground"
+                  className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
                 >
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tk-primary)]" />
                   {feature}
@@ -132,7 +157,7 @@ export function Pricing() {
               href={POLAR_CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 hover:brightness-110"
+              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--tk-primary)]/30"
             >
               Buy Pro License
               <ArrowRight className="h-4 w-4" />
@@ -141,25 +166,33 @@ export function Pricing() {
         </div>
 
         {/* Comparison table */}
-        <div className="mt-16">
-          <h3 className="mb-6 text-center text-xl font-bold text-fd-foreground">
-            Feature comparison
-          </h3>
-          <div className="overflow-hidden rounded-xl border border-fd-border">
+        <div className="mt-20">
+          <div className="mb-8 text-center">
+            <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tk-primary)]">
+              Compare
+            </p>
+            <h3 className="text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
+              Feature comparison
+            </h3>
+          </div>
+          <div className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-fd-border">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-fd-border bg-fd-muted/50">
-                  <th className="px-6 py-3 text-left font-semibold text-fd-foreground">Feature</th>
-                  <th className="px-6 py-3 text-center font-semibold text-fd-foreground">Free</th>
-                  <th className="px-6 py-3 text-center font-semibold text-[var(--tk-primary)]">
+                  <th className="px-6 py-3.5 text-left text-[13px] font-semibold text-fd-foreground">Feature</th>
+                  <th className="px-6 py-3.5 text-center text-[13px] font-semibold text-fd-foreground">Free</th>
+                  <th className="px-6 py-3.5 text-center text-[13px] font-semibold text-[var(--tk-primary)]">
                     Pro
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {COMPARISON_ROWS.map((row) => (
-                  <tr key={row.feature} className="border-b border-fd-border last:border-b-0">
-                    <td className="px-6 py-3 text-fd-foreground">{row.feature}</td>
+                  <tr
+                    key={row.feature}
+                    className="border-b border-fd-border transition-colors last:border-b-0 hover:bg-fd-muted/30"
+                  >
+                    <td className="px-6 py-3 text-[14px] text-fd-foreground">{row.feature}</td>
                     <td className="px-6 py-3 text-center">
                       <ComparisonCell value={row.free} />
                     </td>
@@ -188,7 +221,7 @@ function ComparisonCell({
   isPro?: boolean
 }) {
   if (typeof value === 'string') {
-    return <span className="text-fd-muted-foreground">{value}</span>
+    return <span className="text-[13px] font-medium text-fd-muted-foreground">{value}</span>
   }
   if (value) {
     return (
@@ -199,17 +232,22 @@ function ComparisonCell({
       />
     )
   }
-  return <X className="mx-auto h-4 w-4 text-fd-muted-foreground/40" />
+  return <X className="mx-auto h-4 w-4 text-fd-muted-foreground/30" />
 }
 
 function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <div className="mt-16">
-      <h3 className="mb-8 text-center text-xl font-bold text-fd-foreground">
-        Frequently asked questions
-      </h3>
+    <div className="mt-20">
+      <div className="mb-8 text-center">
+        <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tk-primary)]">
+          FAQ
+        </p>
+        <h3 className="text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
+          Frequently asked questions
+        </h3>
+      </div>
       <div className="mx-auto max-w-3xl divide-y divide-fd-border overflow-hidden rounded-xl border border-fd-border">
         {FAQ_ITEMS.map((item, i) => (
           <div key={item.q}>
@@ -236,7 +274,7 @@ function FAQ() {
               className={`grid transition-all duration-200 ${openIndex === i ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
             >
               <div className="overflow-hidden">
-                <p className="px-6 pb-5 text-sm leading-relaxed text-fd-muted-foreground">
+                <p className="px-6 pb-5 text-[14px] leading-relaxed text-fd-muted-foreground">
                   {item.a}
                 </p>
               </div>
