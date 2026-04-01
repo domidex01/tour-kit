@@ -62,6 +62,22 @@ UserGuiding handles audience targeting through a built-in rules engine with user
 
 Tour Kit's `@tour-kit/scheduling` ($99 Pro) handles time-based display with IANA timezone support, four business hours presets (US Standard, US Tech, UK Standard, Australia Standard), recurring patterns, and blackout windows. The `ScheduleGate` component conditionally renders children only when a schedule is active. `useSchedule` returns the current status and reason (`outside_hours`, `blackout`, `wrong_day`), so you can show users why content isn't visible yet.
 
+### Adoption tracking
+
+UserGuiding offers basic feature adoption insights through their analytics, showing how users interact with onboarding elements. Their "Product Adoption" dashboard tracks activation rates and feature discovery. Available on the Professional plan ($249/month). The tracking is limited to UserGuiding-created elements — it doesn't measure organic feature usage in your application code.
+
+Tour Kit's `@tour-kit/adoption` ($99 Pro) measures feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+
+UserGuiding tracks adoption of its own onboarding elements. Tour Kit tracks adoption of your actual product features. That distinction matters if you want to know whether users are using a feature organically, not just whether they clicked through the guide about it.
+
+### Media embedding
+
+UserGuiding supports YouTube and Vimeo embeds in guides and modals. Their visual builder handles video insertion. No support for Loom, Wistia, native video files, GIF players, or Lottie animations. No programmatic API for media management.
+
+Tour Kit's `@tour-kit/media` ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
+For basic YouTube or Vimeo embeds in a visual builder, UserGuiding works fine. Tour Kit covers seven platforms with code-level control and built-in accessibility handling.
+
 ### Accessibility and WCAG compliance
 
 UserGuiding doesn't publish WCAG compliance claims. The platform generates a third-party JavaScript overlay on your product, and you don't control the rendered HTML. Custom CSS to fix accessibility issues requires the Growth plan ($349/month). There's no documented focus trap, no `aria-live` announcements for screen readers, and the keyboard navigation API is absent.
@@ -110,6 +126,8 @@ Over three years at 5,000 MAU on UserGuiding's Growth plan, a team would spend r
 | Announcements | ✅ Pro (5 variants) | ✅ Modals, banners, slideouts |
 | Analytics | ✅ Pro (5 plugins + custom) | ⚠️ Basic dashboard, limited depth |
 | Scheduling | ✅ Pro (timezone, blackouts) | ⚙️ Basic time targeting |
+| Adoption tracking | ✅ Pro (usage + nudges) | ⚠️ Basic (UserGuiding elements only) |
+| Media embedding | ✅ Pro (7 platforms) | ⚠️ YouTube/Vimeo only (visual builder) |
 | NPS/surveys | 🚫 Not included | ✅ Built-in |
 | Resource center | 🚫 Not included | ✅ Built-in |
 | AI assistant | 🚫 Not included | ✅ GPT-4 powered |

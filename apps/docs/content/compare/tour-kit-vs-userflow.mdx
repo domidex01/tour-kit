@@ -58,6 +58,22 @@ Userflow offers attribute-based user segmentation and cohort targeting. You can 
 
 Tour Kit's `@tour-kit/scheduling` (Pro) focuses on time-based display control: start/end dates, time-of-day windows, day-of-week filters, recurring patterns, and blackout periods. Timezone support uses IANA identifiers. Business hour presets cover US Standard (9-5 ET), US Tech (10-6 PT), UK Standard, and four others. The `ScheduleGate` component conditionally renders children based on schedule state. Userflow's approach is user-centric (who sees this); Tour Kit's is time-centric (when does this show). Different problems, different tools.
 
+### Adoption tracking
+
+Userflow doesn't offer dedicated feature adoption tracking. Their analytics cover flow completion and user progress through checklists, but there's no feature-tagging or adoption criteria system. You'd track adoption separately through your product analytics stack (Amplitude, Mixpanel, etc.).
+
+Tour Kit's `@tour-kit/adoption` ($99 Pro) fills that gap. It tracks feature usage against configurable adoption criteria. The adoption calculator evaluates actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and supports time-based, usage-based, or event-based triggers. `IfNotAdopted` conditionally renders badges or prompts for users who haven't adopted a feature, and `AdoptionDashboard` provides admins with a visual overview of adoption metrics.
+
+If you need adoption tracking with Userflow, you're building it yourself or stitching together a separate analytics tool. Tour Kit bundles it in the Pro package.
+
+### Media embedding
+
+Userflow supports video embeds in flow steps — YouTube and Vimeo URLs can be pasted into their builder. No Loom, Wistia, GIF, or Lottie support. Media is configured through Userflow's visual editor, not in code.
+
+Tour Kit's `@tour-kit/media` ($99 Pro) handles video and media embedding directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant provides full control over the player UI.
+
+Userflow covers the basics for video in tours. Tour Kit supports seven platforms with programmatic control and accessibility built in.
+
 ### Accessibility and WCAG compliance
 
 Userflow doesn't document WCAG compliance to any specific level. Their Chrome extension (v4.10.0, updated February 2026) injects overlay elements that sit outside your app's accessibility tree.
@@ -101,6 +117,8 @@ Three-year TCO at 10,000 MAUs: Userflow Pro runs $24,480. Tour Kit runs $99. The
 | Analytics | ✅ Pro (5 plugins) | ⚠️ Basic (no funnels) |
 | AI flow generation | 🚫 Not available | ✅ Smartflows |
 | Scheduling | ✅ Pro (timezone, recurring) | 🚫 Not available |
+| Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Not available |
+| Media embedding | ✅ Pro (7 platforms) | ⚠️ YouTube/Vimeo only (visual builder) |
 | Localization | ⚙️ Bring your own i18n | ⚠️ Paid tier only (Pro) |
 | A/B testing | 🚫 Not available | ✅ Attribute-based |
 | User segmentation | 🚫 Server-side (BYO) | ✅ Advanced |

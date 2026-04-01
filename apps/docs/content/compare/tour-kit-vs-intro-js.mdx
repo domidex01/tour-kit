@@ -56,6 +56,20 @@ Intro.js has no scheduling. No business hours, no timezone support, no date rang
 
 User Tour Kit's `@tour-kit/scheduling` package (Pro) handles IANA timezone support, recurring patterns (daily/weekly/monthly/yearly), blackout windows, and business hours presets. The `useSchedule()` hook returns `isActive`, `nextActivation`, and a reason for inactivity. `ScheduleGate` conditionally renders children only when the schedule is active.
 
+### Adoption tracking
+
+Intro.js is a tour-only library. It doesn't track feature adoption, usage patterns, or provide nudging. If you need adoption tracking alongside Intro.js, you'd build it from scratch or integrate a separate product analytics tool.
+
+User Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+
+Tour Kit's adoption tracking is code-first -- there's no visual dashboard you can hand to a PM without developer involvement. But the data is there for any team willing to wire it into their existing admin tooling.
+
+### Media embedding
+
+Intro.js doesn't include media components. You can insert HTML (including iframe embeds) into step content strings, but there's no media auto-detection, no accessibility fallbacks for reduced motion, and no built-in support for platforms like Loom or Wistia. You'd hand-roll each embed.
+
+User Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
 ### Accessibility and WCAG compliance
 
 This is where the comparison gets uncomfortable. GitHub issue [#426](https://github.com/usablica/intro.js/issues/426) requested ARIA roles, `aria-live` regions, focus traps, and screen reader support for Intro.js. It was closed with a **"wontfix" label**.
@@ -102,6 +116,7 @@ If you're building anything commercial, the licensing difference alone drives ma
 | Announcements | ✅ Pro (5 variants) | 🚫 Not available |
 | Analytics | ✅ Pro (5 built-in plugins) | ⚙️ Manual callback forwarding |
 | Scheduling | ✅ Pro (timezone, recurring) | 🚫 Not available |
+| Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Not available |
 | Media embedding | ✅ Pro (7 platforms) | 🚫 Not available |
 | Conditional branching | ✅ Async resolvers, cross-tour | 🚫 Not available |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 Key issue closed as "wontfix" |

@@ -66,6 +66,22 @@ Tour Kit's `@tour-kit/scheduling` ($99 Pro) handles time-based display: start/en
 
 But Tour Kit doesn't include a user segmentation engine. If you need to show different onboarding to different user cohorts based on behavioral data, you'll build that logic yourself or pull it from your existing product analytics.
 
+### Adoption tracking
+
+Appcues doesn't offer dedicated feature adoption tracking. Their analytics surface flow completion rates and drop-off points, but there's no way to define adoption criteria per feature, track usage patterns over time, or automatically nudge users toward underused capabilities. Teams that need adoption insights typically bolt on a separate product analytics tool like Pendo or Heap.
+
+Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count versus required threshold, time since first use versus adoption window, and recency of use versus churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature, while `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+
+The trade-off: Tour Kit's adoption tracking is code-driven and lives in your React app. Appcues users who want adoption analytics without developer involvement will still need a third-party tool.
+
+### Media embedding
+
+Appcues supports embedding videos in flows through their visual builder — paste a YouTube or Vimeo URL into a tooltip or modal and it renders inline. But there's no unified media component, no platform auto-detection, no support for GIF players or Lottie animations, and no accessibility fallbacks for users who prefer reduced motion.
+
+Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and animation directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
+If your media needs are limited to YouTube clips in tooltips, Appcues handles that through the builder. Tour Kit covers more platforms and adds accessibility handling, but requires a developer to configure.
+
 ### Accessibility and WCAG compliance
 
 Appcues doesn't document WCAG compliance. Their tooltip rendering inside `about:blank` iframes creates accessibility challenges: screen readers may struggle with iframe boundaries, and focus management across the iframe/parent divide is unreliable. No public Lighthouse accessibility score exists for Appcues' output.
@@ -108,6 +124,8 @@ Tour Kit's free tier (MIT) includes core, React bindings, and hints. The $99 one
 | Announcements | ✅ Pro ($99 one-time) | ✅ Built-in |
 | Analytics | ✅ Pro (plugin-based) | ✅ Basic (advanced on Grow) |
 | Scheduling | ✅ Pro (timezone-aware) | ✅ Frequency controls |
+| Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Requires third-party analytics |
+| Media embedding | ✅ Pro (7 platforms) | ⚠️ YouTube/Vimeo only, no a11y fallbacks |
 | NPS/surveys | 🚫 Not available | ⚠️ Grow plan only |
 | A/B testing | 🚫 Not available | ⚠️ Grow plan only |
 | User segmentation | 🚫 Not available | ✅ Property + event-based |

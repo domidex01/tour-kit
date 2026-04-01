@@ -67,6 +67,22 @@ Chameleon's targeting engine evaluates user properties, company attributes, cust
 
 Tour Kit's `@tour-kit/scheduling` package handles the time dimension: date ranges, time-of-day windows, day-of-week filters, recurring patterns, plus blackout periods with timezone-aware evaluation using IANA identifiers. Business hours presets (`US_STANDARD`, `UK_STANDARD`, `US_TECH`, `AUSTRALIA_STANDARD`) cover common scenarios. The `ScheduleGate` component conditionally renders children based on schedule state. But Tour Kit doesn't have a CRM sync layer. Targeting by user attributes is your application code's job.
 
+### Adoption tracking
+
+Chameleon tracks feature adoption through its "Launchers" — persistent UI elements that guide users toward features they haven't discovered yet. Their analytics dashboard shows adoption funnels and completion rates. But this tracking requires the Growth plan ($1,180+/month), and it measures engagement with Chameleon's own UI elements rather than organic feature usage inside your application code.
+
+Tour Kit's `@tour-kit/adoption` package ($99 Pro) measures actual feature usage against configurable criteria. The adoption calculator evaluates usage count versus required threshold, time since first use versus the adoption window, and recency of use versus a churn threshold. A nudge scheduler fires on time-based, usage-based, or event-based triggers while respecting cooldown periods. `IfNotAdopted` conditionally renders badges or prompts for users who haven't hit adoption criteria. `AdoptionDashboard` provides admins with a visual overview of adoption metrics across features.
+
+Chameleon's approach is more visual and PM-friendly. Tour Kit's is more granular and code-driven. If your adoption strategy is tied to CRM segments and Chameleon's targeting engine, their Launchers integrate naturally. If you want to track whether users actually use a feature in your React code, Tour Kit measures that directly.
+
+### Media embedding
+
+Chameleon supports video embeds in tour steps and microsurveys — YouTube and Vimeo URLs render inline through their visual builder. There's no native support for Loom, Wistia, GIF players, or Lottie animations. Media configuration happens in Chameleon's dashboard rather than your codebase.
+
+Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and animation directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image, and a headless `MediaHeadless` render prop variant gives full control over the player UI.
+
+For teams that just need YouTube in a tooltip, Chameleon's builder is faster. Tour Kit covers seven platforms with accessibility fallbacks, but you're writing code rather than pasting a URL in a dashboard.
+
 ### Accessibility and WCAG compliance
 
 Chameleon doesn't document WCAG compliance levels. Their tours inject `.chmln-*` prefixed DOM elements that live outside your application's accessibility tree. Screen reader behavior and focus management depend on Chameleon's runtime, not your application's a11y patterns.
@@ -106,6 +122,8 @@ Tour Kit's core packages (tours, hints, the headless architecture) are MIT-licen
 | Microsurveys | 🚫 Not available | ⚠️ 5 on Startup, unlimited on Growth |
 | Analytics | ✅ Pro (5 plugins) | ⚠️ Basic; needs Mixpanel/Amplitude |
 | Scheduling | ✅ Pro (timezone-aware) | 🚫 Not available |
+| Adoption tracking | ✅ Pro (usage + nudges) | ⚠️ Growth only ($1,180+/mo) |
+| Media embedding | ✅ Pro (7 platforms) | ⚠️ YouTube/Vimeo only |
 | Interactive demos | 🚫 Not available | ✅ Growth+ |
 | CRM targeting | ⚙️ Developer-built via API | ✅ HubSpot, Salesforce sync |
 | User segmentation GUI | 🚫 Code-based | ✅ Visual builder |

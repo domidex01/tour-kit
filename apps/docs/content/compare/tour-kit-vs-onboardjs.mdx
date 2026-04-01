@@ -60,6 +60,20 @@ Tour Kit's `@tour-kit/scheduling` package (Pro) handles time-based display with 
 
 OnboardJS has no scheduling or targeting system. If you need to show an onboarding flow only during business hours or after a specific date, you'd build that logic yourself.
 
+### Adoption tracking
+
+OnboardJS is a lightweight tour library focused on step-by-step guides. It doesn't include adoption tracking, usage analytics, or nudging capabilities. Feature adoption measurement would require building a separate tracking layer.
+
+User Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+
+The honest caveat: Tour Kit's adoption system is entirely code-first. There's no visual configuration layer or standalone dashboard a non-technical team member can use without developer involvement.
+
+### Media embedding
+
+OnboardJS doesn't provide media components. You can include HTML in step content, but there's no video embedding system, no URL parsing, no platform detection, and no reduced-motion fallbacks.
+
+User Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
 ### Accessibility and WCAG compliance
 
 This is probably the starkest gap between the two libraries. Tour Kit ships WCAG 2.1 AA compliance by default, not as an add-on. Focus trapping via `useFocusTrap`. Screen reader announcements through `aria-live` regions. Keyboard navigation: arrow keys for next/prev, Escape to exit, Tab for focus cycling.
@@ -105,7 +119,7 @@ The practical comparison: Tour Kit's $99 one-time fee for 7 extra packages versu
 | Announcements | ✅ Pro (5 variants) | 🚫 Not available |
 | Analytics | ✅ Pro (5 plugins) | 🔌 PostHog plugin only |
 | Scheduling | ✅ Pro (timezone, recurring) | 🚫 Not available |
-| Adoption tracking | ✅ Pro | 🚫 Not available |
+| Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Not available |
 | Media embedding | ✅ Pro (7 platforms) | 🚫 Not available |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 No documentation |
 | Focus management | ✅ useFocusTrap, aria-live | 🚫 Not documented |

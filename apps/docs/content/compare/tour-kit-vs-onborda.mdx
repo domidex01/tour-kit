@@ -58,6 +58,22 @@ No scheduling in Onborda. Tours show when you trigger them, full stop.
 
 Tour Kit's `@tour-kit/scheduling` package handles time-based display with IANA timezone support. Recurring patterns (daily, weekly, monthly) and blackout periods are built in, along with business hours presets like `US_STANDARD` and `UK_STANDARD`. The `ScheduleGate` component conditionally renders children only when a schedule is active. Useful for time-limited feature launches.
 
+### Adoption tracking
+
+Onborda is a Next.js-focused tour library. It handles step-based onboarding flows but doesn't include adoption tracking, usage analytics, or nudging. Feature adoption measurement is entirely outside its scope.
+
+Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+
+Tour Kit's adoption tracking is code-first — configuration lives in TypeScript, not a visual editor. Teams wanting non-developers to define adoption thresholds will need to build a settings UI on top of the API.
+
+### Media embedding
+
+Onborda step content supports React components, so video embeds are technically possible by rendering your own iframe. But there's no media component, no URL parsing, no platform detection, and no motion-preference handling built in.
+
+Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
+For onboarding flows that rely on video demos or animated walkthroughs, Tour Kit eliminates the per-platform iframe boilerplate. If you only need a single static video, a plain iframe inside your step content works fine without an extra package.
+
 ### Accessibility and WCAG compliance
 
 This is the widest gap between the two libraries. Onborda has no documented accessibility support. No ARIA attributes on tour elements, no keyboard navigation, no focus trapping. The LogRocket review noted the library "may have a smaller community and less documentation," but the accessibility gap goes deeper than docs. Enterprise teams with WCAG requirements can't adopt it.
@@ -102,6 +118,8 @@ Tour Kit's Pro tier funds ongoing development. Your mileage may vary on which tr
 | Announcements | ✅ Pro | 🚫 Not available |
 | Analytics | ✅ Pro (5 plugins) | 🚫 Not available |
 | Scheduling | ✅ Pro | 🚫 Not available |
+| Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Not available |
+| Media embedding | ✅ Pro (7 platforms) | 🚫 Not available |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 No a11y support |
 | Focus trapping | ✅ Built-in | 🚫 Not available |
 | Keyboard navigation | ✅ Arrow keys, Escape, Tab | 🚫 Not available |

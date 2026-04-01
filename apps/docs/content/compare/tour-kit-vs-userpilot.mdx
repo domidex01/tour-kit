@@ -70,6 +70,22 @@ Tour Kit's `@tour-kit/scheduling` (Pro) focuses on time-based rules: date ranges
 
 Userpilot gives PMs a point-and-click segmentation builder. Tour Kit gives developers programmatic scheduling primitives. Different tools for different teams.
 
+### Adoption tracking
+
+Userpilot includes feature adoption tracking as part of their analytics suite. Their "Feature Tags" let you tag UI elements and measure click-through rates, adoption percentages, and time-to-adopt. The Growth plan ($249/month for 2,000 MAUs) includes this. It's genuinely useful for non-technical teams — PMs can tag features without code changes. But the data lives in Userpilot's dashboard, and MAU-based pricing means adoption tracking costs scale with your user base.
+
+Tour Kit's `@tour-kit/adoption` ($99 Pro) takes a code-first approach to tracking feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+
+The trade-off: Userpilot's no-code tagging is faster to set up. Tour Kit's approach gives you more granular control over adoption logic and keeps your data in your own analytics pipeline.
+
+### Media embedding
+
+Userpilot supports embedding YouTube and Vimeo videos in flows, modals, and slideouts through their visual builder. No native support for Loom, Wistia, GIF, or Lottie. Video insertion is done through the WYSIWYG editor — no programmatic control or URL auto-detection.
+
+Tour Kit's `@tour-kit/media` ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
+If you only need YouTube and Vimeo in a visual builder, Userpilot covers that. If you need broader platform support or programmatic media control in your React components, Tour Kit handles more formats with less friction.
+
 ### Accessibility and WCAG compliance
 
 Tour Kit ships with WCAG 2.1 AA compliance by default. Not opt-in, not a configuration flag. Focus trapping via `useFocusTrap()`, screen reader announcements via `aria-live`, keyboard navigation (Arrow keys, Escape, Tab) — all built into the core. It also respects `prefers-reduced-motion`. Lighthouse Accessibility score: 100.
@@ -118,6 +134,8 @@ Over three years, the math works out to: Tour Kit Pro costs $99 total. Userpilot
 | Announcements | ✅ Pro ($99 one-time) | ✅ Built-in (all plans) |
 | Analytics | ✅ Pro (plugin-based) | ⚠️ Trends only on Starter; full on Growth+ |
 | Scheduling | ✅ Pro (timezone, recurring) | ⚙️ Segment-based targeting only |
+| Adoption tracking | ✅ Pro (usage + nudges) | ✅ Feature Tags (Growth+, MAU-priced) |
+| Media embedding | ✅ Pro (7 platforms) | ⚠️ YouTube/Vimeo only (visual builder) |
 | Surveys (NPS/CSAT) | 🚫 Not available | ✅ NPS all plans; CSAT/CES Growth+ |
 | Resource Center | 🚫 Not available | ⚠️ Growth+ only |
 | Session replay | 🚫 Not available | ⚠️ Growth+ add-on |

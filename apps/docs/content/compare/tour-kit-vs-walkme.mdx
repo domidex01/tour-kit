@@ -58,6 +58,22 @@ WalkMe supports segment-based targeting using user attributes, roles, and custom
 
 Tour Kit's `@tour-kit/scheduling` (Pro) provides schedule evaluation in code: `startDate`, `endDate`, `timeOfDay` ranges, `daysOfWeek`, recurring patterns (daily/weekly/monthly/yearly), blackout periods, IANA timezone support. Business hours presets ship for US, UK, and Australian time zones. The `ScheduleGate` component conditionally renders children when a schedule is active. Everything evaluates client-side with no backend dependency.
 
+### Adoption tracking
+
+WalkMe's Digital Adoption Platform is built around adoption tracking — it's their core value proposition. "Digital Adoption Analytics" includes process mining, user journey mapping, and adoption scoring across an organization's entire software stack. For enterprises training tens of thousands of employees on SAP or Salesforce, that depth justifies the investment. The catch: WalkMe's pricing (typically $50,000-$150,000/year) reflects this scope, and their adoption data sits inside a proprietary analytics silo you don't control.
+
+Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count versus required threshold, time since first use versus the adoption window, and recency of use versus a churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. `IfNotAdopted` conditionally renders badges or prompts for users who haven't adopted a feature, and `AdoptionDashboard` provides admins a visual overview of adoption metrics.
+
+WalkMe's adoption analytics are broader and deeper for enterprise-wide deployments. Tour Kit's are lighter-weight but give you code-level control and ownership of the data pipeline. If you're measuring adoption across 60 third-party apps, WalkMe wins. If you're tracking feature adoption inside your own React product, Tour Kit is more than sufficient at 0.1% of the cost.
+
+### Media embedding
+
+WalkMe supports video in Walk-Thrus and ShoutOuts through their visual editor. YouTube and Vimeo embeds work, and the Smart Walk-Thru editor handles media placement. But there's no programmatic API for embedding media from code, no auto-detection from URLs, and no accessibility fallbacks for users who prefer reduced motion.
+
+Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and animation directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
+WalkMe's media support covers the basics through the visual editor. Tour Kit covers more platforms, adds GDPR-compliant embeds, and handles motion accessibility automatically — but requires developers to implement.
+
 ### Accessibility and WCAG compliance
 
 WalkMe's documentation doesn't specify WCAG compliance level. The overlay injection approach creates accessibility challenges by default. Foreign DOM elements disrupt the document's natural tab order. WalkMe's custom balloon containers don't inherit the host application's ARIA patterns. And the spotlight mode that dims the entire page can trap keyboard users in ways that aren't always predictable.
@@ -98,6 +114,8 @@ Tour Kit's MIT-licensed free tier includes the core library, React bindings, and
 | Announcements | ✅ Pro (5 variants) | ⚙️ ShoutOuts only |
 | Analytics | 🔌 Pro (5 plugins, BYO) | ✅ Enterprise-grade built-in |
 | Scheduling | ✅ Pro (timezone, recurring) | ✅ Segment-based targeting |
+| Adoption tracking | ✅ Pro (usage + nudges) | ✅ Enterprise DAP (core feature) |
+| Media embedding | ✅ Pro (7 platforms) | ⚠️ YouTube/Vimeo via editor |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ⚙️ Not specified at WCAG level |
 | Headless / BYO UI | ✅ Full headless + styled | 🚫 Visual editor only |
 | Core bundle (gzipped) | &lt;8KB | ~1-2 MB CDN payload |

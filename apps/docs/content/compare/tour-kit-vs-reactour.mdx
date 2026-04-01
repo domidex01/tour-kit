@@ -67,6 +67,22 @@ Reactour shows tours when you tell it to. No time-based scheduling, no timezone 
 
 Tour Kit's `@tour-kit/scheduling` Pro package supports start/end dates, time-of-day windows, day-of-week filters, and recurring patterns. Blackout periods with reasons and IANA timezone handling are built in. Presets cover US standard (9-5 ET), US tech (10-6 PT), UK standard, and Australia standard business hours. The `<ScheduleGate>` component conditionally renders children only when the schedule is active.
 
+### Adoption tracking
+
+Reactour is a single-purpose tour component. It renders a guided tour overlay and that's it — no adoption tracking, no usage analytics, no nudge system. If you want to know whether users actually adopt the features your tour highlights, you'd build that tracking layer yourself or plug in a separate product analytics tool.
+
+Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+
+Tour Kit's adoption tracking is code-first — there's no visual dashboard you can hand to a PM without developer involvement. But it's a layer that doesn't exist at all in Reactour's scope.
+
+### Media embedding
+
+Reactour step content accepts React nodes, so you could render a YouTube iframe inside a step. But there's no media component, no URL auto-detection, no platform-specific optimizations (privacy-mode YouTube, Loom embeds), and no accessibility handling for video. Each embed is a custom React element you build and maintain.
+
+Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
+For teams embedding video walkthroughs in their tours, Tour Kit removes the per-platform boilerplate. The trade-off is the same $99 Pro cost — if you only need one YouTube embed, a raw iframe is simpler.
+
 ### Accessibility and WCAG compliance
 
 This is where the gap is widest. Reactour provides a focus scope via `@react-aria/focus`, configurable keyboard navigation (left/right arrows, Escape), and a handful of ARIA attributes: `ariaLabelledBy`, `closeButtonAriaLabel`, and `showNavigationScreenReaders`. It's better than nothing.
@@ -117,6 +133,8 @@ If all you need is basic tours, Reactour costs nothing. But once you need analyt
 | Announcements | ✅ Pro (5 display variants) | 🚫 Not available |
 | Analytics | ✅ Pro (PostHog, Mixpanel, Amplitude, GA4) | 🚫 Not available |
 | Scheduling | ✅ Pro (timezone, recurring, blackouts) | 🚫 Not available |
+| Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Not available |
+| Media embedding | ✅ Pro (7 platforms) | 🚫 Not available |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ⚙️ Basic keyboard + some ARIA |
 | Focus trapping | ✅ useFocusTrap hook | ✅ @react-aria/focus |
 | Screen reader announcements | ✅ aria-live regions | 🚫 Not available |

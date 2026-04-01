@@ -62,6 +62,20 @@ Driver.js has no scheduling or targeting capabilities. Tours start when you call
 
 Tour Kit's `@tour-kit/scheduling` package handles time-based scheduling with IANA timezone support, recurring patterns, business hours presets, blackout windows. The `ScheduleGate` component conditionally renders children only when a schedule is active. Announcements can pull in scheduling as an optional peer dependency.
 
+### Adoption tracking
+
+Driver.js focuses exclusively on element highlighting and step-based tours. No adoption tracking, no usage analytics, no nudge system. Feature adoption requires a completely separate solution.
+
+User Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+
+The trade-off: Tour Kit's adoption system is developer-facing. There's no drag-and-drop dashboard a product manager can use independently. You write code to define adoption criteria and render nudges.
+
+### Media embedding
+
+Driver.js doesn't handle media. Step content accepts HTML strings, so you can manually embed an iframe, but there's no media component, no URL parsing, no platform detection, and no motion preference handling. Each video embed is DIY.
+
+User Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
 ### Accessibility and WCAG compliance
 
 This is where the gap gets uncomfortable. Driver.js has open WCAG AA failures documented in GitHub issue [#434](https://github.com/kamranahmedse/driver.js/issues/434), filed through cypress-axe automated testing. The failures: duplicate banner landmarks, missing `aria-label` on `#driver-popover-content`, incorrect `aria-expanded` on `#driver-dummy-element`, no `role="dialog"` semantics. That issue remains open as of March 2026.
@@ -110,6 +124,8 @@ For teams that only need tours and highlighting, Driver.js costs nothing. For te
 | Announcements | ⚠️ Pro ($99 one-time) | 🚫 Not available |
 | Analytics plugins | ⚠️ Pro ($99 one-time) | ⚙️ Manual via lifecycle hooks |
 | Scheduling / targeting | ⚠️ Pro ($99 one-time) | 🚫 Not available |
+| Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Not available |
+| Media embedding | ✅ Pro (7 platforms) | 🚫 Not available |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ⚙️ Partial, open failures (#434) |
 | Focus trapping | ✅ Built-in (`useFocusTrap`) | 🚫 Not available |
 | Screen reader support | ✅ `aria-live` regions | 🚫 No `aria-live` |

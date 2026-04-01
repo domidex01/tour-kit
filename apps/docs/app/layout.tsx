@@ -26,6 +26,10 @@ export const metadata: Metadata = {
     'shadcn',
   ],
   authors: [{ name: 'TourKit Team' }],
+  robots: {
+    index: false,
+    follow: false,
+  },
   openGraph: {
     title: 'TourKit - Product Tours for React',
     description: 'The most developer-friendly, accessible product tour library for React.',

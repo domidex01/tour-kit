@@ -58,6 +58,20 @@ Shepherd.js has no scheduling. You'd need custom code to show tours during busin
 
 User Tour Kit's `@tour-kit/scheduling` package handles time-based scheduling with IANA timezone support. Recurring patterns (daily, weekly, monthly), blackout periods, business hours presets (`US_STANDARD`, `UK_STANDARD`) are all built in. The `ScheduleGate` component conditionally renders children only when a schedule is active. Useful for time-limited onboarding campaigns.
 
+### Adoption tracking
+
+Shepherd.js is a tour library -- it guides users through steps but doesn't track whether they actually adopt the features being shown. No usage tracking, no adoption criteria, no nudge scheduler. You'd pair Shepherd with a separate analytics tool to measure feature adoption.
+
+User Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+
+Worth noting: Tour Kit's adoption tracking is code-driven. There's no no-code dashboard you can hand to a product manager without engineering support. The data and logic are there, but surfacing it requires building on top of the provided components and hooks.
+
+### Media embedding
+
+Shepherd.js step content accepts arbitrary HTML, so you can drop in an iframe manually. But there's no dedicated media component, no URL auto-detection, no platform-specific embed optimization, and no accessibility handling for video content. Every embed is custom HTML you maintain yourself.
+
+User Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
 ### Accessibility and WCAG compliance
 
 Shepherd.js provides `role="dialog"` on step containers, `aria-describedby` linking to step text, focus trapping within active steps, and keyboard navigation via arrow keys and Escape. Solid basics. But Shepherd doesn't formally claim a WCAG compliance level.
@@ -104,6 +118,7 @@ User Tour Kit's free tier (core, React bindings, hints) is MIT licensed. No lega
 | Announcements | Pro | Not available |
 | Analytics | Pro (5 plugins) | Events only, custom code required |
 | Scheduling | Pro | Not available |
+| Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Not available |
 | Media embedding | Pro (7 platforms) | Via HTML strings |
 | WCAG 2.1 AA | Default, Lighthouse 100 | Basic a11y, no WCAG level claimed |
 | Headless / BYO UI | Default architecture | Svelte-rendered UI only |

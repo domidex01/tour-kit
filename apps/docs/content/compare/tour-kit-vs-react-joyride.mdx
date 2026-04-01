@@ -70,6 +70,22 @@ User Tour Kit's `@tour-kit/scheduling` package (Pro) handles time-based scheduli
 
 The `ScheduleGate` component conditionally renders children only when the schedule is active. For SaaS products with global user bases, this removes a surprising amount of custom logic.
 
+### Adoption tracking
+
+React Joyride handles tour rendering and beacon placement — it doesn't track feature adoption. There's no mechanism to define adoption criteria, measure usage over time, or trigger nudges for underused features. Teams typically pair Joyride with Amplitude, Mixpanel, or a custom events layer to close that gap, which means maintaining two systems.
+
+User Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` provides admins with a visual overview of adoption metrics across features.
+
+The caveat: Tour Kit's adoption tracking is developer-facing. Configuration happens in code, not a drag-and-drop UI. Teams that want a non-technical stakeholder to define adoption criteria will still need developer involvement.
+
+### Media embedding
+
+React Joyride accepts React elements as step content, so you can embed videos manually. But there's no dedicated media component, no auto-detection from URLs, no reduced-motion fallbacks, and no built-in support for platforms beyond basic iframe embeds. You'd write the embed logic per platform yourself.
+
+User Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+
+If your tours include video walkthroughs or animated demos, Tour Kit handles the embedding plumbing across seven platforms. For a single YouTube embed in one step, a manual iframe is arguably simpler.
+
 ### Accessibility and WCAG compliance
 
 Joyride v3 improved accessibility over v2. Focus trapping within tooltips, keyboard navigation (arrow keys, Escape), ARIA labels. Real improvements worth acknowledging.

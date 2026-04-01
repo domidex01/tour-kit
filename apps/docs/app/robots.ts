@@ -7,8 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: ['GPTBot', 'ClaudeBot', 'Google-Extended', 'Bingbot', '*'],
-        allow: '/',
-        disallow: ['/_next/', '/api/'],
+        disallow: '/',
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
