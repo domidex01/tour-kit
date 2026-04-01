@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // --- Mock state ---
-let capturedOnPayload: ((payload: any) => Promise<void>) | null = null;
 let mockBehavior: "valid" | "invalid-sig" | "stale" | "malformed" = "valid";
 
 vi.mock("@polar-sh/nextjs", () => ({
@@ -10,8 +9,6 @@ vi.mock("@polar-sh/nextjs", () => ({
       webhookSecret: string;
       onPayload: (payload: any) => Promise<void>;
     }) => {
-      capturedOnPayload = config.onPayload;
-
       return async (req: Request): Promise<Response> => {
         if (mockBehavior === "invalid-sig") {
           return new Response("Invalid signature", { status: 403 });
@@ -197,6 +194,27 @@ describe("Idempotency", () => {
     const res = await POST(req2);
     expect(res.status).toBe(202);
     expect(consoleSpy).not.toHaveBeenCalledWith(
+      "[polar-webhook]",
+      expect.objectContaining({ type: "benefit_grant.created" })
+    );
+  });
+
+  it("still processes valid request after invalid-sig request with same webhook-id", async () => {
+    const POST = await getPostHandler();
+    const webhookId = "wh_poison_test";
+
+    // Attacker sends request with valid webhook-id but invalid signature
+    simulateInvalidSignature();
+    const poisonReq = createWebhookRequest({ webhookId });
+    const poisonRes = await POST(poisonReq);
+    expect(poisonRes.status).toBe(403);
+
+    // Real Polar retry with same webhook-id and valid signature
+    simulateValidSignature();
+    const realReq = createWebhookRequest({ webhookId });
+    const realRes = await POST(realReq);
+    expect(realRes.status).toBe(202);
+    expect(consoleSpy).toHaveBeenCalledWith(
       "[polar-webhook]",
       expect.objectContaining({ type: "benefit_grant.created" })
     );
