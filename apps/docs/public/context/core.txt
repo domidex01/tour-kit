@@ -189,51 +189,35 @@ EXAMPLES
 
 Example 1: Usage
 
-    import { useMediaQuery } from '@tour-kit/core';
+    import { useAdvanceOn } from '@tour-kit/core';
     
-    function ResponsiveTour() {
-      const isMobile = useMediaQuery('(max-width: 768px)');
-      const isTablet = useMediaQuery('(min-width: 769px) and (max-width: 1024px)');
-      const isDesktop = useMediaQuery('(min-width: 1025px)');
+    function MyTourStep() {
+      // Enables advanceOn behavior based on current step config
+      useAdvanceOn({ enabled: true });
     
-      return (
-        <TourCard
-          placement={isMobile ? 'bottom' : 'right'}
-          className={isMobile ? 'w-full' : 'w-80'}
-        >
-          {isMobile && <p>Swipe to navigate</p>}
-          {isDesktop && <p>Use arrow keys to navigate</p>}
-        </TourCard>
-      );
+      return <TourCard>{/* ... */}</TourCard>;
     }
 
-Example 2: Usage
+Example 2: Step Configuration
 
-    import { usePrefersReducedMotion } from '@tour-kit/core';
-    
-    function AnimatedOverlay() {
-      const prefersReducedMotion = usePrefersReducedMotion();
-    
-      return (
-        <TourOverlay
-          className={prefersReducedMotion ? '' : 'animate-fade-in'}
-          style={{
-            transition: prefersReducedMotion ? 'none' : 'opacity 300ms ease',
-          }}
-        />
-      );
-    }
+    <TourStep
+      target="#signup-button"
+      title="Click to Sign Up"
+      content="Click this button to continue"
+      advanceOn={{
+        event: 'click',
+        selector: '#signup-button',
+      }}
+    />
 
-Example 3: Responsive Breakpoints
+Example 3: Event Types
 
-    function ResponsiveExample() {
-      const isMobile = useMediaQuery('(max-width: 640px)');
-      const isTablet = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
-      const isDesktop = useMediaQuery('(min-width: 1025px)');
-    
-      let placement: 'bottom' | 'right' | 'left' = 'bottom';
-      if (isTablet) placement = 'right';
-      if (isDesktop) placement = 'left';
-    
-      return <TourCard placement={placement} />;
-    }
+    <TourStep
+      target="#submit-btn"
+      title="Submit the Form"
+      content="Click submit when ready"
+      advanceOn={{
+        event: 'click',
+        selector: '#submit-btn',
+      }}
+    />

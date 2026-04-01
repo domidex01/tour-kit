@@ -1,5 +1,6 @@
 import { source } from '@/lib/source'
 import { FAQJsonLd, SoftwareSourceCodeJsonLd, TechArticleJsonLd } from '@/lib/structured-data'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 import defaultMdxComponents from 'fumadocs-ui/mdx'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page'
 import type { Metadata } from 'next'
@@ -11,22 +12,22 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
   // 1. Getting Started / Installation
   'getting-started/installation': [
     {
-      question: 'How do I install Tour Kit?',
+      question: 'How do I install User Tour Kit?',
       answer:
         'Run pnpm add @tour-kit/core @tour-kit/react to install both packages. You can also use npm, yarn, or bun as your package manager.',
     },
     {
-      question: 'Does Tour Kit work with Next.js?',
+      question: 'Does User Tour Kit work with Next.js?',
       answer:
-        'Yes, Tour Kit works with Next.js App Router and Pages Router. Wrap your layout with TourProvider and use the Next.js App Router adapter for multi-page tours.',
+        'Yes, User Tour Kit works with Next.js App Router and Pages Router. Wrap your layout with TourProvider and use the Next.js App Router adapter for multi-page tours.',
     },
     {
-      question: "What are Tour Kit's peer dependencies?",
+      question: "What are User Tour Kit's peer dependencies?",
       answer:
-        'Tour Kit requires React 18+ and React DOM 18+ as peer dependencies. TypeScript 4.7+ is recommended but not required.',
+        'User Tour Kit requires React 18+ and React DOM 18+ as peer dependencies. TypeScript 4.7+ is recommended but not required.',
     },
     {
-      question: 'Which Tour Kit packages should I install?',
+      question: 'Which User Tour Kit packages should I install?',
       answer:
         '@tour-kit/react is the main package for most projects. It includes @tour-kit/core automatically. Add @tour-kit/hints for feature discovery beacons.',
     },
@@ -39,14 +40,14 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'Wrap your app with TourProvider, add Tour with TourStep children that target elements via CSS selectors, and call useTour().start() to launch the tour.',
     },
     {
-      question: 'What is the minimum code for a Tour Kit tour?',
+      question: 'What is the minimum code for a User Tour Kit tour?',
       answer:
         'Import Tour and TourStep from @tour-kit/react, define steps with target selectors and content, then trigger the tour with the useTour hook.',
     },
     {
       question: 'How do I target specific elements in a tour step?',
       answer:
-        'Use the target prop on TourStep with a CSS selector string like "#my-button" or ".feature-card". Tour Kit will highlight and position the tooltip near that element.',
+        'Use the target prop on TourStep with a CSS selector string like "#my-button" or ".feature-card". User Tour Kit will highlight and position the tooltip near that element.',
     },
   ],
   // 3. Core / Hooks / useTour
@@ -134,7 +135,7 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
   // 7. React / Headless / Overview
   'react/headless': [
     {
-      question: 'What is headless mode in Tour Kit?',
+      question: 'What is headless mode in User Tour Kit?',
       answer:
         'Headless components provide tour logic without any styling. They expose state and actions via render props so you can build a completely custom UI.',
     },
@@ -146,7 +147,7 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
     {
       question: 'What headless components are available?',
       answer:
-        'Tour Kit provides HeadlessTourCard, HeadlessTourOverlay, HeadlessTourNavigation, and HeadlessTourProgress as unstyled primitives with render props.',
+        'User Tour Kit provides HeadlessTourCard, HeadlessTourOverlay, HeadlessTourNavigation, and HeadlessTourProgress as unstyled primitives with render props.',
     },
     {
       question: 'Can I mix styled and headless components?',
@@ -157,30 +158,30 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
   // 8. Guides / Accessibility
   'guides/accessibility': [
     {
-      question: 'Is Tour Kit accessible?',
+      question: 'Is User Tour Kit accessible?',
       answer:
-        'Yes, Tour Kit targets WCAG 2.1 AA compliance with built-in focus trapping, ARIA attributes, keyboard navigation, screen reader announcements, and reduced motion support.',
+        'Yes, User Tour Kit targets WCAG 2.1 AA compliance with built-in focus trapping, ARIA attributes, keyboard navigation, screen reader announcements, and reduced motion support.',
     },
     {
-      question: 'How does Tour Kit handle focus management?',
+      question: 'How does User Tour Kit handle focus management?',
       answer:
-        'Tour Kit uses the useFocusTrap hook to trap keyboard focus within the active tour step. Focus returns to the trigger element when the tour ends.',
+        'User Tour Kit uses the useFocusTrap hook to trap keyboard focus within the active tour step. Focus returns to the trigger element when the tour ends.',
     },
     {
-      question: 'Does Tour Kit support screen readers?',
+      question: 'Does User Tour Kit support screen readers?',
       answer:
         'Yes, tour steps use ARIA live regions for announcements, role="dialog" for the card, and aria-describedby to connect step content with the target element.',
     },
     {
       question: 'How do I respect prefers-reduced-motion?',
       answer:
-        'Tour Kit automatically detects the prefers-reduced-motion media query and disables animations. The useMediaQuery hook lets you customize behavior further.',
+        'User Tour Kit automatically detects the prefers-reduced-motion media query and disables animations. The useMediaQuery hook lets you customize behavior further.',
     },
   ],
   // 9. Hints / Overview
   hints: [
     {
-      question: 'What are hints in Tour Kit?',
+      question: 'What are hints in User Tour Kit?',
       answer:
         'Hints are non-blocking UI elements like pulsing beacons and floating tooltips that highlight features. Unlike tours, hints are independent and do not follow a sequence.',
     },
@@ -257,7 +258,7 @@ export default async function Page({ params }: PageProps) {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDXContent components={defaultMdxComponents} />
+        <MDXContent components={{ ...defaultMdxComponents, Tab, Tabs }} />
       </DocsBody>
     </DocsPage>
   )

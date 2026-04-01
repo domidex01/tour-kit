@@ -1,0 +1,243 @@
+---
+title: "Tour Kit vs Chameleon: which product tour tool should you choose in 2026?"
+description: "Compare Tour Kit vs Chameleon for product tours. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
+competitor: "Chameleon"
+competitorSlug: "chameleon"
+lastUpdated: "2026-03-31"
+---
+
+## The bottom line
+
+Tour Kit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $99 one-time Pro fee. Chameleon is a SaaS product adoption platform starting at $279/month with a visual builder and CRM-based targeting. Tour Kit fits React teams that want code ownership and design system parity. Chameleon is the better pick when product managers need to build and iterate on tours without developer involvement.
+
+## What is Tour Kit?
+
+Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade. It ships with strict TypeScript, WCAG 2.1 AA compliance (Lighthouse Accessibility score: 100), and native support for shadcn/ui, Radix UI, and Base UI through its UnifiedSlot pattern.
+
+## What is Chameleon?
+
+Chameleon is a closed-source SaaS product adoption platform that provides a visual builder for in-app tours, tooltips, checklists, banners, microsurveys, and interactive demos, with pricing starting at $279/month for 2,000 monthly tracked users. As of March 2026, Chameleon holds a 4.4/5 rating on G2 with an Ease of Setup score of 8.2.
+
+## Feature-by-feature comparison
+
+### Tours and step types
+
+Chameleon's Chrome extension builder lets product managers point-and-click on live product pages to create multi-step tours. Steps support modals, tooltips, driven actions. Triggers fire on clicks, hovers, page views, or a "Smart Delay" timer. The visual approach works well for straightforward walkthroughs.
+
+But G2 reviewers flagged a recurring problem: element selection breaks when the underlying app updates. One reviewer wrote, "I frequently get alerts for the 'missing element' even when everything seems alright." The fix? Developers add stable `data-chmln` attributes, which undermines the no-code promise.
+
+Tour Kit defines steps in code with CSS selectors or React refs. Twelve placement options. Conditional branching, including cross-tour jumps. Async `onBeforeShow` validators and `waitForTarget` for dynamically rendered elements. Route-based navigation works out of the box with `useNextAppRouter` or `useReactRouter`.
+
+The trade-off is clear: Chameleon is faster for simple tours built by non-developers. Tour Kit gives engineers version-controlled, type-safe tour definitions that don't break when the DOM changes, because selectors live alongside the components they reference.
+
+### Hints and hotspots
+
+Both tools support persistent tooltips attached to UI elements. Chameleon calls them "Tooltips" and manages them through the dashboard. Tour Kit's `@tour-kit/hints` package (&lt;5KB gzipped, MIT-licensed) provides `HintHotspot` beacons and `HintTooltip` components with per-hint dismiss state persisted via storage adapters. The key difference is that Tour Kit hints are non-sequential and independently dismissible, while Chameleon tooltips follow its platform-wide targeting and frequency rules.
+
+Developers get programmatic control through `useHint('feature-id')` for individual hint state and `useHints()` for batch operations like `dismissAll` and `resetAll`. Chameleon's hints require the dashboard for any changes.
+
+### Checklists and onboarding flows
+
+Chameleon offers "Launchers" for checklist-style onboarding, but the Startup plan caps you at a single Launcher. Need two checklists? That's a jump to Growth at $999/month. A G2 reviewer captured this frustration: "Plan based restrictions. I don't want to upgrade if I just want to use one more checklist on my plan."
+
+Tour Kit's `@tour-kit/checklists` package (Pro, $99 one-time) supports unlimited checklists with task dependencies and circular dependency detection. Three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks, and state persists across sessions. No per-checklist limits. No tier gating.
+
+### Announcements and banners
+
+Chameleon provides banners and modals through its platform, with targeting rules and frequency controls available on Growth and above. Tour Kit's `@tour-kit/announcements` package ships five display variants: modal, toast, banner, slideout, and spotlight. Each variant has its own size and position options. Frequency rules range from "once ever" to interval-based (`{ type: 'interval', days: 7 }`). A priority queue handles ordering when multiple announcements compete for attention. Audience targeting filters by user IDs, roles, or custom predicates.
+
+Chameleon's announcement targeting is more sophisticated out of the box because it integrates CRM data from HubSpot and Salesforce. Tour Kit's targeting is code-based, which means it can be as complex as your data layer allows, but you're building that integration yourself.
+
+### Analytics and tracking
+
+Chameleon tracks experience-level metrics: how many users started a tour, completed it, or dropped off at a specific step. But multiple sources confirm the analytics lack depth. Userpilot's review notes that teams "must pair it with Mixpanel, Amplitude, or PostHog for meaningful product analytics." You're paying $12,000+/year for Chameleon and still need a separate analytics platform.
+
+Tour Kit's `@tour-kit/analytics` package (Pro) takes the opposite approach. It doesn't try to be an analytics platform. Instead, it ships plugins for PostHog, Mixpanel, Amplitude, Google Analytics, plus a console logger for development. Events like `tour_started`, `step_viewed`, and `checklist_completed` flow directly into whatever analytics tool your team already uses. Custom plugins take three lines:
+
+```tsx
+const myPlugin: AnalyticsPlugin = {
+  name: 'my-backend',
+  track: (event) => fetch('/api/analytics', { method: 'POST', body: JSON.stringify(event) }),
+};
+```
+
+### Scheduling and targeting
+
+Chameleon's targeting engine evaluates user properties, company attributes, custom events, URL patterns, element presence, plus CRM data using AND/OR conditions. HubSpot Lists sync bidirectionally (polling every ~6 hours). Salesforce attributes flow in for account-based targeting. For PM-led teams that need rules like "show this tour to Enterprise users in the Expansion HubSpot lifecycle stage who haven't seen it in 14 days," Chameleon's GUI is genuinely faster than writing code.
+
+Tour Kit's `@tour-kit/scheduling` package handles the time dimension: date ranges, time-of-day windows, day-of-week filters, recurring patterns, plus blackout periods with timezone-aware evaluation using IANA identifiers. Business hours presets (`US_STANDARD`, `UK_STANDARD`, `US_TECH`, `AUSTRALIA_STANDARD`) cover common scenarios. The `ScheduleGate` component conditionally renders children based on schedule state. But Tour Kit doesn't have a CRM sync layer. Targeting by user attributes is your application code's job.
+
+### Accessibility and WCAG compliance
+
+Chameleon doesn't document WCAG compliance levels. Their tours inject `.chmln-*` prefixed DOM elements that live outside your application's accessibility tree. Screen reader behavior and focus management depend on Chameleon's runtime, not your application's a11y patterns.
+
+Tour Kit ships WCAG 2.1 AA compliance by default, not as an opt-in. Focus trapping (`useFocusTrap`) keeps keyboard users inside the tour card. `aria-live` announces step changes to screen readers. Arrow keys navigate between steps, Escape exits, Tab moves focus within the card. The library respects `prefers-reduced-motion` and detects RTL/LTR automatically. Lighthouse Accessibility score: 100. For teams with accessibility requirements in their contracts, this matters.
+
+### Bundle size and performance
+
+Chameleon installs via a script tag or npm package (`@chamaeleonidae/chmln`, last published over 4 years ago at v1.0.1). The loader weighs approximately 18.5KB, and the CDN runtime it fetches is undisclosed. You're loading Chameleon's JavaScript on every page for every user, whether they see a tour or not.
+
+Tour Kit's core is &lt;8KB gzipped. The React package adds &lt;12KB. Hints add &lt;5KB. All three MIT packages together total under 25KB gzipped, with tree-shaking eliminating unused code. The `LazyTour` component (imported from `@tour-kit/react/lazy`) code-splits the tour UI so it only loads when a tour activates. On a mobile connection, the parse time difference between 18.5KB+ (Chameleon's loader alone) and &lt;8KB (Tour Kit's core) is measurable.
+
+### Framework support and TypeScript
+
+Chameleon is framework-agnostic in the sense that it injects its own DOM layer on top of any web application. But it doesn't integrate with your framework. The npm package's TypeScript types come from DefinitelyTyped (community-maintained), not from the Chameleon team. The package hasn't been updated in over four years.
+
+Tour Kit is built in TypeScript strict mode from the ground up. Every hook and component is fully typed with inference. Router adapters exist for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), plus React Router v6+ (`useReactRouter`). The UnifiedSlot pattern supports both Radix UI and Base UI. But Tour Kit requires React 18+ and doesn't support Vue, Angular, or vanilla JS.
+
+### Licensing and pricing
+
+The cost difference is the elephant in the room. Chameleon's Startup plan runs $3,348/year for 2,000 MTUs with severe feature caps: 1 Launcher, 5 microsurveys, 5 tracked events. Growth starts at $12,000/year with annual-only billing.
+
+According to Vendr's analysis of 27 Chameleon customers, the median annual contract is $26,500. Deals range up to $118,000/year. Multi-year contracts often include 5-10% annual escalation clauses.
+
+Chameleon measures Monthly Tracked Users, meaning every unique user who *could* log in, not just those who interact with tours. One Capterra reviewer reported being charged for 5,000 users during beta testing when only 2 people were actively using the product.
+
+Tour Kit's core packages (tours, hints, the headless architecture) are MIT-licensed and free. The Pro upgrade covering checklists, announcements, analytics, scheduling, plus media and adoption tracking costs $99 one-time. No MTU limits. No annual renewals. No escalation clauses. At 10,000 MAU over three years, Chameleon Growth costs roughly $52,500+. Tour Kit costs $99.
+
+## Side-by-side comparison table
+
+| Category | Tour Kit | Chameleon |
+|---|---|---|
+| Product tours | ✅ Built-in (MIT) | ✅ Visual builder |
+| Hints/hotspots | ✅ Built-in, &lt;5KB (MIT) | ✅ Tooltips |
+| Onboarding checklists | ✅ Pro ($99 one-time) | ⚠️ 1 on Startup, unlimited on Growth |
+| Announcements | ✅ Pro (5 variants) | ✅ Banners/modals |
+| Microsurveys | 🚫 Not available | ⚠️ 5 on Startup, unlimited on Growth |
+| Analytics | ✅ Pro (5 plugins) | ⚠️ Basic; needs Mixpanel/Amplitude |
+| Scheduling | ✅ Pro (timezone-aware) | 🚫 Not available |
+| Interactive demos | 🚫 Not available | ✅ Growth+ |
+| CRM targeting | ⚙️ Developer-built via API | ✅ HubSpot, Salesforce sync |
+| User segmentation GUI | 🚫 Code-based | ✅ Visual builder |
+| Visual tour builder | 🚫 Code-first | ✅ Chrome extension |
+| A/B testing | ⚙️ Via analytics plugins | ⚠️ Growth only ($12K+/yr) |
+| WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ❓ Not documented |
+| Headless / BYO UI | ✅ Full headless | 🚫 Own theme system |
+| shadcn/ui native | ✅ UnifiedSlot pattern | 🚫 CSS-only theming |
+| TypeScript | ✅ Strict mode, full inference | ⚙️ DefinitelyTyped (community) |
+| Core bundle (gzipped) | &lt;8KB | ~18.5KB loader + CDN runtime |
+| Version control | ✅ Git-native | 🚫 Dashboard only |
+| License | MIT (free tier) | Proprietary SaaS |
+| Starting price | Free + $99 one-time Pro | $279/mo ($3,348/yr) |
+| SOC 2 | N/A (client-side library) | ✅ Growth+ |
+| Mobile SDK | 🚫 Web only | 🚫 Web only |
+
+Data verified March 2026. Sources: official documentation, npm, GitHub, G2, Vendr, Capterra.
+
+## When to choose Chameleon instead
+
+Choose Chameleon if product managers need to create and ship tours without waiting for developer sprints. Chameleon's Chrome extension builder lets PMs iterate on targeting rules, launch A/B tests, adjust copy in minutes. That workflow matters in organizations where PM-to-engineer ratios are stretched thin.
+
+Chameleon also makes more sense when CRM-driven targeting is core to your onboarding strategy. If tour visibility depends on Salesforce opportunity stages or HubSpot lifecycle properties, Chameleon's managed bidirectional sync saves real engineering time.
+
+And if your procurement team requires SOC 2 reports or SAML SSO, Chameleon's Growth and Enterprise tiers provide that compliance documentation. Tour Kit inherits the host app's security posture but doesn't independently produce compliance artifacts.
+
+## When Tour Kit is the better fit
+
+Tour Kit wins when your team has React developers and wants tours that feel native to your application. If you're running shadcn/ui or Radix, Tour Kit components render inside your design system rather than injecting a parallel CSS layer with `.chmln-*` prefixed elements. Tour definitions live in your codebase: version-controlled, code-reviewed, testable.
+
+The cost math is hard to argue with. A team paying $26,500/year (Vendr's median Chameleon contract) could buy Tour Kit Pro for $99 and spend the remaining $26,401 on literally anything else. That's not a rounding error.
+
+Tour Kit is also the better choice when accessibility is a contractual requirement. WCAG 2.1 AA compliance with Lighthouse 100 ships out of the box. And for performance-sensitive apps, a &lt;8KB core versus an 18.5KB+ loader (before the CDN runtime loads) translates directly to faster page interactions on mobile devices.
+
+## Migration path from Chameleon to Tour Kit
+
+Migrating from Chameleon to Tour Kit is a conceptual shift from dashboard-managed experiences to code-defined ones. There's no automated export tool because Chameleon stores tour configurations in its platform, not in your codebase.
+
+**Step 1: Audit your Chameleon experiences.** List every tour, tooltip, launcher, and banner in your Chameleon dashboard. Note the targeting rules, step content, and element selectors for each.
+
+**Step 2: Install Tour Kit.**
+
+```bash
+pnpm add @tour-kit/core @tour-kit/react @tour-kit/hints
+# For Pro features (checklists, announcements, analytics):
+pnpm add @tour-kit/checklists @tour-kit/announcements @tour-kit/analytics
+```
+
+**Step 3: Convert tour definitions.** Each Chameleon tour becomes a Tour Kit steps array:
+
+```tsx
+// Chameleon: configured in dashboard, targeting "data-chmln-id" selectors
+// Tour Kit: defined in code alongside the components they reference
+
+const onboardingSteps = [
+  {
+    id: 'welcome',
+    target: '#sidebar-nav',       // use your existing selectors
+    title: 'Navigation',
+    content: <p>Find your way around the dashboard.</p>,
+    placement: 'right-start',
+    waitForTarget: true,
+  },
+  {
+    id: 'search',
+    target: '#global-search',
+    content: <p>Search anything with Cmd+K.</p>,
+    placement: 'bottom',
+    advanceOn: { event: 'click', selector: '#global-search' },
+  },
+];
+```
+
+**Step 4: Replace Chameleon's script tag.** Remove the Chameleon snippet and `@chamaeleonidae/chmln` package. Wrap your app with `TourKitProvider`:
+
+```tsx
+<TourKitProvider config={{ persistence: true, keyboard: true }} router={router}>
+  <Tour id="onboarding" steps={onboardingSteps} autoStart>
+    <TourOverlay />
+    <TourCard>
+      <TourCardHeader showClose><TourClose /></TourCardHeader>
+      <TourCardContent />
+      <TourCardFooter>
+        <TourProgress variant="dots" />
+        <TourNavigation />
+      </TourCardFooter>
+    </TourCard>
+  </Tour>
+  <App />
+</TourKitProvider>
+```
+
+**Step 5: Rebuild targeting in application code.** Chameleon's segment rules become conditional rendering. This is the part that takes the most thought, but it's also where you gain the most control.
+
+Expect the migration to take 1-2 days for a typical setup with 3-5 tours and a dozen hints. Complex Chameleon configurations with CRM-driven targeting will take longer because you're building those integrations yourself.
+
+## What developers say
+
+A mid-market user who spent over two years with Chameleon told G2: "The promise of Chameleon far exceeds what it does in reality... I dislike almost everything about Chameleon." That's harsh, and not every user feels that way. But the sentiment around pricing is consistent across platforms.
+
+Capterra reviewers flagged MTU counting as deceptive: one team was "charged for 5,000 users during beta testing when only 2 people were actively using the product." G2 reviews include 24-33 mentions of "learning curve" and 18 mentions of "software bugs."
+
+On the positive side, Chameleon's support team gets a 9.0/10 quality score on G2, which is above the category average. Users who can afford the Growth plan and have PM-led workflows consistently praise the targeting engine and Chrome extension builder.
+
+Tour Kit is newer with a smaller community. You won't find years of Stack Overflow answers or battle-tested blog tutorials. The documentation is thorough, but if you hit an edge case, you're reading source code rather than finding someone else's solution on Reddit. Your mileage may vary depending on how self-sufficient your team is with React libraries.
+
+## Frequently asked questions
+
+**Is Tour Kit free?**
+Tour Kit's core packages (tours, hints, headless architecture) are MIT-licensed and free. The Pro upgrade adds checklists, announcements, analytics, scheduling, plus media and adoption tracking for a $99 one-time payment. No monthly fees. No MTU limits.
+
+**What is the difference between Tour Kit and Chameleon?**
+Tour Kit is a code-first React library where developers define tours in TypeScript. Chameleon is a SaaS platform where product managers build tours through a visual Chrome extension and manage targeting via a web dashboard. The key difference is who owns the tour: engineers or PMs.
+
+**Can I migrate from Chameleon to Tour Kit?**
+Yes. Tour Kit doesn't have an automated import tool, but the migration involves converting each Chameleon experience into a Tour Kit steps array and rebuilding targeting in application code. A typical setup with 3-5 tours takes 1-2 days.
+
+**Does Tour Kit work with Next.js and React 19?**
+Tour Kit supports React 18 and React 19 as peer dependencies. It ships dedicated router adapters for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), and React Router v6+.
+
+**What is the bundle size of Tour Kit vs Chameleon?**
+Tour Kit's core is &lt;8KB gzipped. The React package adds &lt;12KB, hints add &lt;5KB. Chameleon's loader script alone weighs approximately 18.5KB, plus an undisclosed CDN runtime. Tour Kit's full MIT stack totals under 25KB gzipped with tree-shaking support.
+
+**Does Chameleon support checklists and analytics?**
+Chameleon offers Launchers (checklists) but caps the Startup plan at 1 Launcher. Analytics track basic experience metrics; deeper product analytics require Mixpanel, Amplitude, or PostHog. Both features need the Growth plan ($12,000+/year) for meaningful use.
+
+**Is Chameleon open source?**
+No. Chameleon is a proprietary SaaS platform with closed-source code. Tour definitions live in Chameleon's dashboard and cannot be exported to version control. Tour Kit's core packages are MIT-licensed and fully open source on GitHub.
+
+**Which is better for enterprise: Tour Kit or Chameleon?**
+Depends on what "enterprise" means for your team. If you need SOC 2 reports, SAML SSO, and governance controls from the tour platform itself, Chameleon's Growth and Enterprise tiers provide that. If your enterprise requirements center on accessibility compliance (WCAG 2.1 AA), design system consistency, and engineering best practices, Tour Kit is the stronger fit. Neither offers a mobile SDK.
+
+## Final verdict
+
+Chameleon is a capable platform for PM-led teams with budget for $12,000-$26,500+ per year. But engineering teams running React with shadcn/ui or Tailwind are paying for a visual builder they don't need while missing the TypeScript inference, WCAG compliance, git workflows, and design system integration they do need. Tour Kit gives those teams code ownership at a fraction of the cost. We built Tour Kit, so take that with appropriate skepticism. But the bundle sizes, the license, and the pricing are verifiable facts, not marketing claims.

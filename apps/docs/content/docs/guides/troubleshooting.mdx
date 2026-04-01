@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
 description: >-
-  Diagnose and fix common Tour Kit issues: missing targets, positioning
+  Diagnose and fix common User Tour Kit issues: missing targets, positioning
   glitches, hydration errors, and focus trap problems
 ---
 
@@ -9,7 +9,7 @@ import { Callout } from 'fumadocs-ui/components/callout'
 
 # Troubleshooting
 
-Solutions to common issues when using Tour Kit.
+Solutions to common issues when using User Tour Kit.
 
 ## Tour Not Starting
 
@@ -325,7 +325,7 @@ import '@tour-kit/react/styles.css'
 
 **2. Tailwind config**
 
-Add Tour Kit to content paths:
+Add User Tour Kit to content paths:
 
 ```js title="tailwind.config.js"
 module.exports = {
@@ -364,9 +364,9 @@ createStep({
 })
 ```
 
-### Can I use Tour Kit with React Native?
+### Can I use User Tour Kit with React Native?
 
-No, Tour Kit is designed for web only. It uses DOM APIs extensively.
+No, User Tour Kit is designed for web only. It uses DOM APIs extensively.
 
 ### How do I track tour analytics?
 
@@ -378,9 +378,9 @@ import { AnalyticsProvider } from '@tour-kit/analytics'
 <AnalyticsProvider plugins={[myPlugin]}>
 ```
 
-### Is Tour Kit accessible?
+### Is User Tour Kit accessible?
 
-Yes! Tour Kit is WCAG 2.1 AA compliant with:
+Yes! User Tour Kit is WCAG 2.1 AA compliant with:
 - Full keyboard navigation
 - Focus trapping
 - Screen reader announcements
@@ -399,7 +399,7 @@ createStep({
 
 ### Can tours span iframe content?
 
-No, Tour Kit cannot target elements inside iframes due to browser security restrictions.
+No, User Tour Kit cannot target elements inside iframes due to browser security restrictions.
 
 <Callout type="info">
   Still having issues? [Open an issue on GitHub](https://github.com/your-org/tour-kit/issues).

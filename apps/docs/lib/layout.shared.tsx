@@ -1,5 +1,5 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared'
-import { BookOpen, Code2, CreditCard, Layers } from 'lucide-react'
+import { BookOpen, Code2, CreditCard, GitCompareArrows, Layers, PenLine } from 'lucide-react'
 
 export function TourKitLogo({ className }: { className?: string }) {
   return (
@@ -67,6 +67,16 @@ export function baseOptions(): BaseLayoutProps {
         text: 'Examples',
         url: '/docs/examples',
         icon: <Layers className="w-4 h-4" />,
+      },
+      {
+        text: 'Compare',
+        url: '/compare',
+        icon: <GitCompareArrows className="w-4 h-4" />,
+      },
+      {
+        text: 'Blog',
+        url: '/blog',
+        icon: <PenLine className="w-4 h-4" />,
       },
       {
         text: 'Pricing',

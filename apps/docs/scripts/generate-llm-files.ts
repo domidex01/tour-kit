@@ -27,7 +27,7 @@ const PUBLIC_DIR = path.resolve(DOCS_ROOT, 'public')
 const BASE_URL = 'https://tour-kit-docs.vercel.app/docs'
 
 const PROJECT_DESCRIPTION =
-  'Tour Kit is a headless onboarding and product tour library for React. ' +
+  'User Tour Kit is a headless onboarding and product tour library for React. ' +
   'It provides sequential guided tours, persistent hints, onboarding checklists, ' +
   'product announcements, media embeds, feature adoption tracking, analytics integration, ' +
   'and time-based scheduling. All components are accessible (WCAG 2.1 AA), ' +
@@ -81,7 +81,7 @@ function readVersion(): string {
 
 function makeVersionStamp(version: string): string {
   const now = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
-  return `# Tour Kit v${version} — Generated ${now}`
+  return `# User Tour Kit v${version} — Generated ${now}`
 }
 
 function stripMdxSyntax(content: string): string {
@@ -143,7 +143,7 @@ function generateLlmsTxt(pages: PageMeta[], versionStamp: string): string {
   // Header
   lines.push(versionStamp)
   lines.push('')
-  lines.push('# Tour Kit')
+  lines.push('# User Tour Kit')
   lines.push('')
   lines.push(`> ${PROJECT_DESCRIPTION}`)
   lines.push('')
@@ -240,15 +240,21 @@ function generateContextFiles(): void {
   console.log('Generating per-package context files...')
 
   // Try bun first (faster, avoids esbuild platform issues in WSL), fall back to npx tsx
+  // Timeout after 60s to prevent build from hanging indefinitely
   const commands = [
     'bun run scripts/generate-context-files.ts',
     'npx tsx scripts/generate-context-files.ts',
   ]
   for (const cmd of commands) {
     try {
-      execSync(cmd, { cwd: DOCS_ROOT, stdio: 'inherit' })
+      execSync(cmd, { cwd: DOCS_ROOT, stdio: 'inherit', timeout: 60_000 })
       return
-    } catch {
+    } catch (error) {
+      const err = error as { killed?: boolean }
+      if (err.killed) {
+        console.warn('Warning: Context file generation timed out after 60s, skipping')
+        return
+      }
       // try next command
     }
   }
@@ -261,7 +267,7 @@ function generateContextFiles(): void {
 function main(): void {
   const startTime = Date.now()
 
-  console.log('Generating LLM files for Tour Kit...')
+  console.log('Generating LLM files for User Tour Kit...')
   console.log(`  Content dir: ${CONTENT_DIR}`)
   console.log(`  Output dir:  ${PUBLIC_DIR}`)
   console.log('')

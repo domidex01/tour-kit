@@ -1,0 +1,237 @@
+---
+title: "Tour Kit vs Userpilot: which onboarding tool should you choose in 2026?"
+description: "Compare Tour Kit vs Userpilot for product onboarding. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
+competitor: "Userpilot"
+competitorSlug: "userpilot"
+lastUpdated: "2026-03-31"
+---
+
+## The bottom line
+
+Tour Kit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $99 one-time Pro fee. Userpilot is a no-code product adoption platform starting at $299/month. Tour Kit suits React teams wanting code ownership and tiny bundles. Userpilot is better when non-technical PMs need to build onboarding flows without developers.
+
+## What is Tour Kit?
+
+Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+
+## What is Userpilot?
+
+Userpilot is a no-code product adoption platform that provides in-app engagement, product analytics, session replay, and user feedback surveys, starting at $299/month with MAU-based pricing tiers.
+
+## Feature-by-feature comparison
+
+### Tours and step types
+
+Userpilot ships with a Chrome extension builder that lets product managers point-and-click their way through tour creation. No code required. That's the core value proposition, and for PM-led teams it works. The builder supports tooltips, modals, slideouts, driven actions, and checklists across all plans.
+
+Tour Kit takes the opposite approach. You define steps in JSX with typed config objects: `target`, `placement`, `advanceOn`, `route`, `waitForTarget`. The `useTour()` hook returns `start`, `next`, `prev`, `skip`, `goTo`, and `reset` controls.
+
+You also get conditional branching with async resolvers, cross-tour navigation, and route-aware steps that auto-navigate before displaying. None of that is possible through a visual builder. But it does mean you need React developers for every change.
+
+The trade-off is control versus speed-to-publish. Userpilot wins on time-to-first-tour. Tour Kit wins when your onboarding logic has conditions, branches, or needs to live alongside your component tree.
+
+### Hints and hotspots
+
+Both tools support hotspots. Userpilot renders them as part of its proprietary DOM overlay. Tour Kit's `@tour-kit/hints` package (&lt;5KB gzipped) provides `HintHotspot` and `HintTooltip` components with independent dismiss state per hint. The key difference is persistence: Tour Kit hints dismiss independently and persist across page loads via storage adapters. Userpilot's hotspots are tied to its flow system and don't offer per-hint programmatic control through a hook like `useHint('feature-name')`.
+
+For developer teams that want to scatter contextual hints across an app and manage each one through code, Tour Kit gives more granular control. For PM teams that want to drop a pulsing dot on a button through a Chrome extension, Userpilot is faster.
+
+### Checklists and onboarding flows
+
+Userpilot includes checklists on all plans. You build them visually, assign tasks, and track completion through their dashboard. Straightforward and well-reviewed.
+
+Tour Kit's `@tour-kit/checklists` (Pro, $99 one-time) takes a different tack. Tasks support dependency graphs with circular dependency detection and three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks.
+
+Components include `ChecklistPanel`, `ChecklistLauncher`, and headless render props. State persists across sessions and integrates with the analytics package.
+
+Userpilot's checklists are easier to set up. Tour Kit's are more programmable. If your onboarding flow has conditional task dependencies ("complete your profile before inviting teammates"), Tour Kit handles that natively. Userpilot requires workarounds.
+
+### Announcements and banners
+
+Userpilot supports modals, slideouts, banners, and tooltips across all plans. The visual builder makes it quick to create and target announcements by segment.
+
+Tour Kit's `@tour-kit/announcements` (Pro) provides five display variants: modal, toast, banner, slideout, and spotlight. On top of that, it ships frequency rules (`once`, `session`, interval-based) and a priority queue. Audience targeting uses custom filter functions. Optional scheduling integration lets you set start/end dates with timezone support.
+
+The architectural difference: Userpilot announcements render in a proprietary overlay. Tour Kit announcements render inside your React tree using your own design system components.
+
+### Analytics and tracking
+
+This is where the products diverge most. Userpilot bundles product analytics on Growth plans ($799/month): funnels, paths, retention cohorts, trends, and session replay. The "analyze then act" loop, where you spot a drop-off and immediately deploy a targeted tooltip, is a genuine productivity win. But analytics on the Starter plan ($299/month) is limited to trend reports only. No funnels, no paths, no retention.
+
+Tour Kit's `@tour-kit/analytics` (Pro) takes a plugin approach. Five built-in plugins ship for PostHog, Mixpanel, Amplitude, Google Analytics 4, and console logging. Custom plugins require three lines of code. Event types cover tour lifecycle (`tour_started`, `tour_completed`, `step_viewed`), hints, checklists, and announcements.
+
+The philosophical split matters here. Userpilot wants to be your analytics tool. Tour Kit assumes you already have one and plugs into it. Already paying for Mixpanel or PostHog? Duplicating that data inside Userpilot isn't useful. But if you want everything in one platform and don't have standalone analytics, Userpilot's bundled approach saves integration work.
+
+### Scheduling and targeting
+
+Userpilot's segmentation engine is strong. You can target by user attributes, company data, event triggers, and custom properties. On Starter, you're capped at 10 segments and 10 feature tags. Growth removes those limits.
+
+Tour Kit's `@tour-kit/scheduling` (Pro) focuses on time-based rules: date ranges, time-of-day windows, business hours presets (US_STANDARD, UK_STANDARD, etc.), recurring patterns, and blackout periods with IANA timezone support. Wrap any component in `ScheduleGate` to conditionally render based on schedule state. Audience targeting is code-based: you write the filter logic.
+
+Userpilot gives PMs a point-and-click segmentation builder. Tour Kit gives developers programmatic scheduling primitives. Different tools for different teams.
+
+### Accessibility and WCAG compliance
+
+Tour Kit ships with WCAG 2.1 AA compliance by default. Not opt-in, not a configuration flag. Focus trapping via `useFocusTrap()`, screen reader announcements via `aria-live`, keyboard navigation (Arrow keys, Escape, Tab) — all built into the core. It also respects `prefers-reduced-motion`. Lighthouse Accessibility score: 100.
+
+Userpilot states it "aligns with" WCAG standards, but doesn't publish certification or Lighthouse scores. As of March 2026, their documentation doesn't detail focus management within tour steps or screen reader behavior. For applications serving government, education, or healthcare users where WCAG compliance is a legal requirement, this gap matters.
+
+Tour Kit's accessibility is its strongest technical differentiator against every commercial platform, not just Userpilot.
+
+### Bundle size and performance
+
+Tour Kit's core ships at &lt;8KB gzipped. The React package adds &lt;12KB. Hints adds &lt;5KB. All packages tree-shake.
+
+Userpilot's npm package (`userpilot@1.4.2`) is 8.38KB, but it's a shim. The actual SDK loads from Userpilot's CDN (`js.userpilot.io`) at runtime, and the full size is undisclosed. Installation docs recommend placing the script at the beginning of `<head>` with no mention of `async` or `defer`.
+
+At runtime, the SDK opens persistent WebSocket connections to `analytex.userpilot.io`, loads Google Fonts externally, and fetches resources from multiple subdomains. One Capterra reviewer reported: "The interface hangs and takes time to load, this also few times eats up the RAM too."
+
+Self-hosting Userpilot's SDK requires Growth plan ($799/month) and a multi-step CDN proxy setup that takes up to 5 business days. On Starter, the third-party script loads from Userpilot's domain, which means ad-blockers and privacy extensions can block it entirely. Your onboarding flows just disappear for those users, with no fallback.
+
+Tour Kit installs from npm, bundles with your app, and ships no external network requests.
+
+### Framework support and TypeScript
+
+Tour Kit targets React 18+ and React 19 with full TypeScript strict mode support. Every hook, component, and config object is typed. Router adapters ship for Next.js (both App Router and Pages Router) and React Router v6+. The headless core is framework-agnostic, though UI components require React.
+
+Userpilot works with any web framework since it's a script tag injection. Broader framework support, technically. But the npm package ships no TypeScript definitions — no `.d.ts` files, no `@types/userpilot` package. For teams running `strict: true` in their tsconfig (standard practice in 2026), that means no autocomplete, no type inference, and `// @ts-ignore` littered through your initialization code.
+
+Userpilot's SPA integration also requires manual `userpilot.reload()` calls on every route change. Their docs state this explicitly: "Since Single Page Applications do not reload after URL changes, you must call userpilot.reload() after each URL change." No React hooks. No automatic route detection. In a Next.js or React Router codebase, you're writing imperative glue code inside your declarative component tree.
+
+### Licensing and pricing
+
+Tour Kit's core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. Pro packages cost $99 one-time — that covers adoption, analytics, announcements, checklists, media, and scheduling. No MAU limits. No seat limits. Self-hosted by default.
+
+Userpilot's pricing has three tiers. Starter at $299/month ($3,588/year) caps you at 2,000 MAUs and 3 seats. No custom CSS. No A/B testing. No webhooks or API access. No Resource Center. Analytics limited to trend reports. Growth at $799/month ($9,588/year) removes those restrictions. Enterprise pricing is custom, with Vendr reporting an average customer payment of $18,000/year and a range of $7,638 to $60,680.
+
+Userpilot's pricing has also climbed over time. G2 listings showed Starter at $249 as recently as January 2025. TrustRadius showed Growth at $499/month. The trajectory: Starter went from roughly $199 to $249 to $299, and Growth from $499 to $799.
+
+Over three years, the math works out to: Tour Kit Pro costs $99 total. Userpilot Starter costs $10,764. Userpilot Growth costs $28,764. That's not a rounding error.
+
+## Side-by-side comparison table
+
+| Category | Tour Kit | Userpilot |
+|---|---|---|
+| Product tours | ✅ Built-in (core, MIT) | ✅ Built-in (all plans) |
+| Hints/hotspots | ✅ Built-in (&lt;5KB) | ✅ Built-in (all plans) |
+| Onboarding checklists | ✅ Pro ($99 one-time) | ✅ Built-in (all plans) |
+| Announcements | ✅ Pro ($99 one-time) | ✅ Built-in (all plans) |
+| Analytics | ✅ Pro (plugin-based) | ⚠️ Trends only on Starter; full on Growth+ |
+| Scheduling | ✅ Pro (timezone, recurring) | ⚙️ Segment-based targeting only |
+| Surveys (NPS/CSAT) | 🚫 Not available | ✅ NPS all plans; CSAT/CES Growth+ |
+| Resource Center | 🚫 Not available | ⚠️ Growth+ only |
+| Session replay | 🚫 Not available | ⚠️ Growth+ add-on |
+| Visual builder | 🚫 Code-first only | ✅ Chrome extension |
+| Headless / BYO UI | ✅ Full headless mode | 🚫 Proprietary overlay |
+| WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ⚙️ "Aligns with" (not certified) |
+| TypeScript | ✅ Strict mode, full inference | 🚫 No type definitions |
+| Core bundle (gzipped) | &lt;8KB | 8KB shim + CDN-loaded SDK (unknown) |
+| Self-hosted | ✅ Default (npm install) | ⚠️ Growth+ only, multi-step setup |
+| Framework | React 18+ | Any (script tag) |
+| Mobile SDK | 🚫 Web only | ⚠️ Growth+ (iOS/Android) |
+| License | MIT (free tier) | Proprietary SaaS |
+| Pricing | Free + $99 one-time Pro | $299-$799+/month |
+
+Data verified March 2026. Sources: official documentation, npm, GitHub, G2.
+
+## When to choose Userpilot instead
+
+Choose Userpilot if your team deploying onboarding is product managers and customer success, not engineers. Userpilot's Chrome extension builder and visual editor let non-technical teams create tours in minutes. That's a real advantage when developer time is expensive or unavailable.
+
+Userpilot also makes sense when you need surveys (NPS, CSAT, CES) and a Resource Center built into the same tool. Tour Kit doesn't include survey functionality. Userpilot's self-service help hub with knowledge base search across Zendesk, Freshdesk, and Intercom is genuinely differentiated, and 349 G2 reviewers cite ease of use.
+
+If your organization runs native mobile apps and needs onboarding on iOS and Android, Userpilot offers mobile SDKs on Growth plans. Tour Kit is web-only.
+
+## When Tour Kit is the better fit
+
+Tour Kit wins for React teams that want onboarding to live in the same codebase as the product. If you're already using shadcn/ui or Tailwind, Tour Kit's components slot directly into your design system through the `UnifiedSlot` pattern and CVA-based styling. No proprietary overlay fighting your CSS.
+
+The cost difference is hard to ignore for startups and growing teams. Tour Kit Pro at $99 one-time versus Userpilot Growth at $9,588/year means your onboarding budget pays for itself on day one. No MAU caps mean you don't get penalized as your user base grows.
+
+For TypeScript-heavy codebases, Tour Kit's strict mode support with full type inference is table stakes that Userpilot doesn't meet. And if you have Content Security Policy requirements, Tour Kit's self-hosted architecture avoids the 15+ subdomain whitelist that Userpilot needs.
+
+## Migration path from Userpilot to Tour Kit
+
+Migrating from Userpilot to Tour Kit is a code-first process. There's no automated import tool. Here's what the transition looks like.
+
+**Step 1: Audit your Userpilot flows.** Export or screenshot every active tour, checklist, and announcement. Document the targeting rules, segments, and trigger conditions for each. Userpilot doesn't provide a structured export, so this is manual.
+
+**Step 2: Install Tour Kit.**
+
+```bash
+npm install @tour-kit/core @tour-kit/react
+# Pro packages if needed:
+npm install @tour-kit/checklists @tour-kit/announcements @tour-kit/analytics
+```
+
+**Step 3: Convert flows to code.** Each Userpilot tooltip becomes a Tour Kit step:
+
+```tsx
+// Userpilot: visual builder + CSS selector targeting
+// Tour Kit equivalent:
+const steps = [
+  {
+    id: 'welcome',
+    target: '#sidebar-nav',
+    content: 'Find your way around the dashboard.',
+    placement: 'right-start',
+    advanceOn: { event: 'click', selector: '#sidebar-nav a' },
+  },
+];
+```
+
+**Step 4: Replace `userpilot.reload()` calls.** If you were calling `userpilot.reload()` on route changes, Tour Kit's router adapters handle this automatically:
+
+```tsx
+import { useNextAppRouter } from '@tour-kit/react';
+const router = useNextAppRouter();
+// Pass to TourKitProvider — route changes detected automatically
+```
+
+**Step 5: Remove the Userpilot script tag** and npm package. Delete the CSP whitelist entries for `userpilot.io` subdomains.
+
+Simple setups (3-5 tours) typically migrate in a few days. Complex deployments with checklists and segmentation take a couple of weeks. After migration, the ongoing maintenance burden drops because your onboarding code lives next to the UI it references and deploys with your regular CI/CD pipeline.
+
+## What developers say
+
+G2 reviewers have given Userpilot a 4.6/5 rating across 836+ verified reviews. That's a strong score, and the praise for ease of use is consistent. But the developer-specific complaints paint a different picture.
+
+A G2 reviewer wrote about customization: "If you need ultra custom solutions this might not be the tool for you." That tracks with the 79 G2 mentions of "limited customization" and 60 mentions of technical limitations requiring external support.
+
+Cost complaints are equally common. One reviewer noted: "We're on a cheaper plan (which costs almost $1000 monthly anyways), where many valuable features are locked." Feature gating between Starter and Growth is a recurring theme.
+
+Maintenance is another sore point. One analysis estimated 15-25 hours per month for fast-shipping SaaS teams keeping Userpilot flows working after UI changes. Dynamic class names from CSS Modules and Tailwind JIT break CSS selector targeting between deploys.
+
+Then there's performance. A Capterra reviewer reported: "The interface hangs and takes time to load, this also few times eats up the RAM too." WebSocket connections and multi-subdomain resource fetching all contribute.
+
+As of March 2026, the userpilot npm package sits at version 1.4.2. The Chrome extension is at version 1.1.4.4. Userpilot maintains 30 repositories on GitHub, though the core product isn't open source.
+
+## Frequently asked questions
+
+**Is Tour Kit free?**
+Tour Kit's core packages (tours, hints, React components) are MIT-licensed and free. Pro packages covering analytics, checklists, announcements, scheduling, media, and adoption tracking cost $99 one-time. No monthly fees and no MAU limits.
+
+**What is the difference between Tour Kit and Userpilot?**
+Tour Kit is a headless React library where you write onboarding in code. Userpilot is a no-code SaaS platform with a visual builder. Tour Kit gives developers full control over rendering and design system integration. Userpilot gives non-technical teams independence from engineering.
+
+**Can I migrate from Userpilot to Tour Kit?**
+Yes. The migration is manual since there's no automated import. You audit existing Userpilot flows, convert them to Tour Kit step configurations in JSX, and replace the script tag with npm packages. Simple setups migrate in days.
+
+**Does Tour Kit work with Next.js and React 19?**
+Tour Kit supports React 18 and React 19 as peer dependencies. It ships router adapters for Next.js App Router, Next.js Pages Router, and React Router v6+. Userpilot works with any framework but requires manual `userpilot.reload()` calls on SPA route changes.
+
+**What is the bundle size of Tour Kit vs Userpilot?**
+Tour Kit's core is &lt;8KB gzipped, React package &lt;12KB, hints &lt;5KB. Userpilot's npm shim is 8KB, but the actual SDK loads from their CDN at runtime with an undisclosed total size. Tour Kit tree-shakes; Userpilot's CDN-loaded SDK doesn't.
+
+**Does Userpilot support TypeScript?**
+As of March 2026, the Userpilot npm package ships no `.d.ts` type definitions and no `@types/userpilot` package exists. Tour Kit uses TypeScript strict mode with full type inference across all packages.
+
+**Is Userpilot open source?**
+No. Userpilot is a proprietary SaaS platform. Tour Kit's core packages are MIT-licensed open source. Pro packages require a $99 one-time license.
+
+**Which is better for enterprise use?**
+Depends on the team. Userpilot offers SAML SSO (Enterprise tier), mobile SDKs, and a Resource Center that reduces support tickets. Tour Kit offers self-hosted deployment, WCAG 2.1 AA compliance with Lighthouse 100, and no vendor lock-in. Userpilot suits PM-led enterprise teams. Tour Kit suits engineering-led teams with design system requirements.
+
+## Final verdict
+
+Userpilot and Tour Kit solve the same problem for different teams. Userpilot is a strong choice for PM-led organizations that want surveys, visual building, and bundled analytics, and can budget $800+/month. Tour Kit is the better fit for React engineering teams that want headless architecture, TypeScript support, WCAG compliance, and a $99 total price tag. Your mileage may vary depending on who owns onboarding at your company.

@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Tour Kit Documentation API",
+    "title": "User Tour Kit Documentation API",
     "version": "1.0.0",
-    "description": "REST API for querying Tour Kit documentation. Tour Kit is a headless onboarding and product tour library for React. Use this API to search docs, retrieve full page content, and get code examples by package."
+    "description": "REST API for querying User Tour Kit documentation. User Tour Kit is a headless onboarding and product tour library for React. Use this API to search docs, retrieve full page content, and get code examples by package."
   },
   "servers": [
     {
@@ -15,7 +15,7 @@
     "/api/docs/search": {
       "get": {
         "operationId": "searchDocs",
-        "summary": "Search Tour Kit documentation",
+        "summary": "Search User Tour Kit documentation",
         "description": "Full-text search across all documentation pages. Scores results by title, description, headings, and body content. Supports filtering by documentation section (e.g., core, react, hints).",
         "parameters": [
           {

@@ -11,21 +11,21 @@ import matter from 'gray-matter'
 const updates: Record<string, string> = {
   // ── Getting Started ──
   'content/docs/index.mdx':
-    'Tour Kit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage',
+    'User Tour Kit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage',
   'content/docs/getting-started/index.mdx':
-    'Set up Tour Kit in your React application with step-by-step installation, configuration, and TypeScript guides',
+    'Set up User Tour Kit in your React application with step-by-step installation, configuration, and TypeScript guides',
   'content/docs/getting-started/installation.mdx':
     'Install @tour-kit/core and @tour-kit/react with npm, pnpm, yarn, or bun and configure peer dependencies for React 18+',
   'content/docs/getting-started/quick-start.mdx':
     'Create your first multi-step product tour in under 5 minutes with Tour, TourStep, and useTour hook examples',
   'content/docs/getting-started/typescript.mdx':
-    'Configure TypeScript strict mode, use inferred step types, and leverage generic tour configurations in Tour Kit',
+    'Configure TypeScript strict mode, use inferred step types, and leverage generic tour configurations in User Tour Kit',
 
   // ── Core Package ──
   'content/docs/core/index.mdx':
     'Framework-agnostic hooks and utilities for building product tours — state management, positioning, and accessibility',
   'content/docs/core/hooks/use-tour.mdx':
-    'useTour hook: control tour state with start, next, prev, skip, and complete actions plus step tracking in React',
+    'useTour hook: control tour state with start, next, prev, skip, and complete actions plus step tracking in User Tour Kit',
   'content/docs/core/hooks/use-step.mdx':
     'useStep hook: access current step data, index, progress percentage, and isFirst/isLast flags in tour components',
   'content/docs/core/hooks/use-focus-trap.mdx':
@@ -51,9 +51,9 @@ const updates: Record<string, string> = {
   'content/docs/core/providers/tour-provider.mdx':
     'TourProvider: context provider that manages state, steps, and lifecycle for an individual product tour instance',
   'content/docs/core/types/config-types.mdx':
-    'TypeScript interfaces for TourConfig, SpotlightConfig, KeyboardConfig, and other Tour Kit configuration options',
+    'TypeScript interfaces for TourConfig, SpotlightConfig, KeyboardConfig, and other User Tour Kit configuration options',
   'content/docs/core/types/step-types.mdx':
-    'TypeScript interfaces for StepConfig, StepTarget, StepPlacement, and step-level configuration in Tour Kit tours',
+    'TypeScript interfaces for StepConfig, StepTarget, StepPlacement, and step-level configuration in User Tour Kit tours',
   'content/docs/core/types/tour-types.mdx':
     'TypeScript interfaces for TourState, TourActions, TourCallbacks, and the complete tour lifecycle type system',
   'content/docs/core/utilities/a11y.mdx':
@@ -65,7 +65,7 @@ const updates: Record<string, string> = {
   'content/docs/core/utilities/dom.mdx':
     'DOM utilities: element measurement, visibility detection, and target resolution for positioning tour tooltips',
   'content/docs/core/utilities/helpers.mdx':
-    'Helper utilities: step index calculations, progress percentages, and common tour operation functions in Tour Kit',
+    'Helper utilities: step index calculations, progress percentages, and common tour operation functions in User Tour Kit',
   'content/docs/core/utilities/logger.mdx':
     'Configurable logger utility: debug tour state transitions, step changes, and lifecycle events in development mode',
   'content/docs/core/utilities/position.mdx':
@@ -101,7 +101,7 @@ const updates: Record<string, string> = {
   'content/docs/react/headless/headless-overlay.mdx':
     'HeadlessTourOverlay: unstyled overlay primitive with spotlight cutout positioning exposed via render props',
   'content/docs/react/headless/examples.mdx':
-    'Headless component examples: build custom tooltip cards, overlays, and navigation using Tour Kit render props',
+    'Headless component examples: build custom tooltip cards, overlays, and navigation using User Tour Kit render props',
   'content/docs/react/hooks/use-tour-route.mdx':
     'useTourRoute hook: synchronize tour progress with router state for multi-page tours in Next.js and React Router',
   'content/docs/react/hooks/use-tours.mdx':
@@ -109,11 +109,11 @@ const updates: Record<string, string> = {
   'content/docs/react/providers/multi-tour-kit-provider.mdx':
     'MultiTourKitProvider: manage multiple independent tours with shared configuration, analytics, and storage settings',
   'content/docs/react/styling/css-variables.mdx':
-    'Customize Tour Kit appearance with CSS custom properties for colors, spacing, border radius, and shadow values',
+    'Customize User Tour Kit appearance with CSS custom properties for colors, spacing, border radius, and shadow values',
   'content/docs/react/styling/custom-components.mdx':
-    'Build fully custom tour card, overlay, and navigation components using Tour Kit hooks and headless primitives',
+    'Build fully custom tour card, overlay, and navigation components using User Tour Kit hooks and headless primitives',
   'content/docs/react/styling/tailwind.mdx':
-    'Style Tour Kit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints',
+    'Style User Tour Kit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints',
   'content/docs/react/adapters/index.mdx':
     'Router adapters enable multi-page product tours that persist across route changes in React framework applications',
   'content/docs/react/adapters/next-app-router.mdx':
@@ -143,7 +143,7 @@ const updates: Record<string, string> = {
 
   // ── Guides ──
   'content/docs/guides/index.mdx':
-    'In-depth guides for accessibility, persistence, animations, router integration, and framework-specific Tour Kit setup',
+    'In-depth guides for accessibility, persistence, animations, router integration, and framework-specific User Tour Kit setup',
   'content/docs/guides/accessibility.mdx':
     'Configure keyboard navigation, focus trapping, screen reader support, and reduced motion for WCAG 2.1 AA compliant tours',
   'content/docs/guides/persistence.mdx':
@@ -151,15 +151,15 @@ const updates: Record<string, string> = {
   'content/docs/guides/animations.mdx':
     'Add CSS transitions and animations to tour steps, respect prefers-reduced-motion, and create smooth step transitions',
   'content/docs/guides/nextjs.mdx':
-    'Set up Tour Kit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support',
+    'Set up User Tour Kit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support',
   'content/docs/guides/vite.mdx':
-    'Configure Tour Kit in Vite + React projects with hot module replacement, path aliases, and production build optimization',
+    'Configure User Tour Kit in Vite + React projects with hot module replacement, path aliases, and production build optimization',
   'content/docs/guides/router-integration.mdx':
     'Build multi-page tours with Next.js, React Router, or custom routers using route-aware step targeting and persistence',
   'content/docs/guides/base-ui.mdx':
     'Switch from Radix UI to Base UI for tour components using the UnifiedSlot abstraction and UILibraryContext provider',
   'content/docs/guides/troubleshooting.mdx':
-    'Diagnose and fix common Tour Kit issues: missing targets, positioning glitches, hydration errors, and focus trap problems',
+    'Diagnose and fix common User Tour Kit issues: missing targets, positioning glitches, hydration errors, and focus trap problems',
   'content/docs/guides/branching.mdx':
     'Create personalized tour paths with conditional branching, user choice flows, and dynamic step insertion based on state',
   'content/docs/guides/adoption-analytics.mdx':
@@ -173,7 +173,7 @@ const updates: Record<string, string> = {
 
   // ── Examples ──
   'content/docs/examples/index.mdx':
-    'Copy-paste examples for common Tour Kit patterns: basic tours, onboarding flows, and fully custom headless interfaces',
+    'Copy-paste examples for common User Tour Kit patterns: basic tours, onboarding flows, and fully custom headless interfaces',
   'content/docs/examples/basic-tour.mdx':
     'Build a 3-step product tour with spotlight overlay, keyboard navigation, and progress indicators — full working code',
   'content/docs/examples/onboarding-flow.mdx':
@@ -183,7 +183,7 @@ const updates: Record<string, string> = {
 
   // ── API Reference ──
   'content/docs/api/index.mdx':
-    'Complete API reference for all Tour Kit packages — hooks, components, providers, utilities, and TypeScript type exports',
+    'Complete API reference for all User Tour Kit packages — hooks, components, providers, utilities, and TypeScript type exports',
   'content/docs/api/core.mdx':
     'API reference for @tour-kit/core: useTour, useStep, useFocusTrap, createTour, createStep, and all utility exports',
   'content/docs/api/react.mdx':
@@ -375,7 +375,7 @@ const updates: Record<string, string> = {
   'content/docs/scheduling/types.mdx':
     'TypeScript types for ScheduleConfig, TimeRange, DateRange, BlackoutPeriod, RecurrenceRule, and the scheduling API surface',
   'content/docs/scheduling/presets.mdx':
-    'Schedule presets: pre-configured constants for business hours, weekdays, weekends, and common scheduling patterns in Tour Kit',
+    'Schedule presets: pre-configured constants for business hours, weekdays, weekends, and common scheduling patterns in User Tour Kit',
 
   // ── Adoption Package ──
   'content/docs/adoption/index.mdx':
@@ -429,7 +429,7 @@ const updates: Record<string, string> = {
 
   // ── AI Assistants ──
   'content/docs/ai-assistants/index.mdx':
-    'Documentation resources optimized for AI coding assistants — llms.txt, context files, and MCP server for Tour Kit integration',
+    'Documentation resources optimized for AI coding assistants — llms.txt, context files, and MCP server for User Tour Kit integration',
 }
 
 let updated = 0

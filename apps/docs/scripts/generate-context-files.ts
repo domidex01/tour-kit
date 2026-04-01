@@ -1,7 +1,7 @@
 /**
  * generate-context-files.ts
  *
- * Generates plain-text context files for each Tour Kit package.
+ * Generates plain-text context files for each User Tour Kit package.
  * These files are designed to be copy-pasted into LLM conversations
  * (ChatGPT, Claude, Gemini) so the LLM has accurate API knowledge.
  *
@@ -185,7 +185,10 @@ function extractTypeDefinitions(filePaths: string[]): string[] {
     let match: RegExpExecArray | null = interfaceRegex.exec(source)
     while (match !== null) {
       const name = match[2]
-      if (seen.has(name)) continue
+      if (seen.has(name)) {
+        match = interfaceRegex.exec(source)
+        continue
+      }
       seen.add(name)
 
       // Find the closing brace by counting braces
@@ -216,7 +219,10 @@ function extractTypeDefinitions(filePaths: string[]): string[] {
     match = typeRegex.exec(source)
     while (match !== null) {
       const name = match[2]
-      if (seen.has(name)) continue
+      if (seen.has(name)) {
+        match = typeRegex.exec(source)
+        continue
+      }
       seen.add(name)
 
       // Find the end of the type (semicolon or newline after last line)
@@ -421,7 +427,7 @@ function assembleContextFile(info: PackageInfo): string {
   const date = new Date().toISOString().split('T')[0]
 
   // ── Header ──
-  lines.push(`Tour Kit — ${info.fullName} Context File`)
+  lines.push(`User Tour Kit — ${info.fullName} Context File`)
   lines.push(`Version: ${info.version} | Generated: ${date}`)
   lines.push(`Paste this into your LLM to get accurate answers about ${info.fullName}.`)
   lines.push('='.repeat(73))
@@ -430,7 +436,7 @@ function assembleContextFile(info: PackageInfo): string {
   // ── Overview ──
   lines.push('OVERVIEW')
   lines.push('--------')
-  lines.push(info.description || `${info.fullName} package for Tour Kit.`)
+  lines.push(info.description || `${info.fullName} package for User Tour Kit.`)
   lines.push('')
 
   // ── Installation ──
@@ -561,7 +567,7 @@ function assembleContextFile(info: PackageInfo): string {
 async function main() {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true })
 
-  console.log('Generating Tour Kit context files...')
+  console.log('Generating User Tour Kit context files...')
   console.log(`  Monorepo root: ${MONOREPO_ROOT}`)
   console.log(`  Output dir:    ${OUTPUT_DIR}`)
   console.log('')
