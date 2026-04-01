@@ -46,7 +46,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "peerDependencies": {
-    "@tour-kit/license": ">=0.1.0",
+    "@tour-kit/license": ">=0.0.1",
     "react": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {

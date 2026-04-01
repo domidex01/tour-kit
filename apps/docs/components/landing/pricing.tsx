@@ -4,6 +4,8 @@ import { ArrowRight, Check, Sparkles, X } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
+import { POLAR_CHECKOUT_URL } from '@/lib/polar-config'
+
 const FREE_FEATURES = [
   'Product tours & steps',
   'Spotlight overlays',
@@ -127,7 +129,7 @@ export function Pricing() {
             </ul>
 
             <a
-              href="https://polar.sh/tour-kit/products"
+              href={POLAR_CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 hover:brightness-110"
