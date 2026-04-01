@@ -4,6 +4,7 @@ const withMDX = createMDX()
 
 /** @type {import('next').NextConfig} */
 const config = {
+  output: 'standalone',
   reactStrictMode: true,
   transpilePackages: ['@tour-kit/core', '@tour-kit/react', '@tour-kit/hints'],
   async headers() {
