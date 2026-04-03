@@ -1,5 +1,5 @@
 User Tour Kit — @tour-kit/announcements Context File
-Version: 0.1.0 | Generated: 2026-04-01
+Version: 0.1.0 | Generated: 2026-04-02
 Paste this into your LLM to get accurate answers about @tour-kit/announcements.
 =========================================================================
 

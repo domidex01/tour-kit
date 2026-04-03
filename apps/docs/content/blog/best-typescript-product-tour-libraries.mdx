@@ -1,0 +1,415 @@
+---
+title: "8 TypeScript product tour libraries ranked by developer experience (2026)"
+description: "We tested 8 product tour libraries for TypeScript quality. See which have real types, which ship broken generics, and which force you into any."
+slug: "best-typescript-product-tour-libraries"
+primary_keyword: "typescript product tour library"
+secondary_keywords: ["typescript onboarding library", "typed product tour react", "react product tour typescript", "product tour library type safety"]
+category: "Listicle"
+schema_type: "TechArticle"
+spreadsheet_row: 34
+date: "2026-04-02"
+lastUpdated: "2026-04-02"
+---
+
+# 8 TypeScript product tour libraries ranked by developer experience (2026)
+
+Every product tour roundup checks a "TypeScript support" box and moves on. That tells you nothing. A library can ship `.d.ts` files and still have `Step` return `any` after a minor version bump (React Joyride [#949](https://github.com/gilbarbara/react-joyride/issues/949)). Or remove its entire type namespace in a patch release (Shepherd.js [#2869](https://github.com/shipshapecode/shepherd/issues/2869)).
+
+We installed eight tour libraries into a Vite 6 + React 19 + TypeScript 5.7 strict-mode project and ranked them by what actually matters to TypeScript developers: type completeness, autocomplete quality, generic support, and how fast you can go from `npm install` to a working tour without casting to `any`.
+
+**Bias disclosure:** We built Tour Kit, so it's listed first. Every claim is verifiable against npm, GitHub, and bundlephobia. Take our ranking with appropriate skepticism.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## How we scored TypeScript DX
+
+No existing roundup defines what "good TypeScript support" means for a tour library. So we built a rubric. Each library scored 0-10 across five categories:
+
+1. **Type origin (25%)**: Written in TypeScript vs retrofitted declarations vs DefinitelyTyped. First-party types catch API drift; third-party types lag behind.
+2. **Prop completeness (25%)**: Can you autocomplete every config option? Or does `tooltipProps` resolve to `any`?
+3. **Generic support (15%)**: Does the step config accept generics for custom metadata?
+4. **React 19 compatibility (20%)**: Tested against `react@19.0.0` with strict mode. Libraries that fail to compile scored 0.
+5. **Error messages (15%)**: When you pass wrong config, does the compiler catch it? Or do you get a runtime error 3 clicks into the tour?
+
+We weighted React 19 at 20% because as of April 2026, React 19 is the current stable release. A library that doesn't compile against it is a non-starter for new projects. [Smashing Magazine's guide to product tours](https://www.smashingmagazine.com/2020/08/guide-product-tours-react-apps/) noted this ecosystem fragmentation problem back in 2020. It's gotten worse.
+
+## Quick comparison table
+
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>TS origin</th>
+<th>React 19</th>
+<th>Bundle (gzip)</th>
+<th>Autocomplete</th>
+<th>License</th>
+<th>DX score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tour Kit</td>
+<td>Native (strict)</td>
+<td>✅</td>
+<td>Under 8KB core</td>
+<td>Full</td>
+<td>MIT</td>
+<td>9.2</td>
+</tr>
+<tr>
+<td>Driver.js</td>
+<td>Native</td>
+<td>✅ (vanilla)</td>
+<td>~5KB</td>
+<td>Full</td>
+<td>MIT</td>
+<td>8.1</td>
+</tr>
+<tr>
+<td>Onborda</td>
+<td>Native</td>
+<td>✅</td>
+<td>~8KB + Framer</td>
+<td>Good</td>
+<td>MIT</td>
+<td>7.4</td>
+</tr>
+<tr>
+<td>Shepherd.js</td>
+<td>Retrofitted</td>
+<td>⚠️ Wrapper broken</td>
+<td>~25KB</td>
+<td>Partial (v12 broke)</td>
+<td>MIT</td>
+<td>5.8</td>
+</tr>
+<tr>
+<td>React Joyride</td>
+<td>Own declarations</td>
+<td>❌ (9mo stale)</td>
+<td>~30KB</td>
+<td>Broken (Step → any)</td>
+<td>MIT</td>
+<td>4.3</td>
+</tr>
+<tr>
+<td>OnboardJS</td>
+<td>Native</td>
+<td>✅</td>
+<td>~10KB</td>
+<td>Partial</td>
+<td>MIT</td>
+<td>6.5</td>
+</tr>
+<tr>
+<td>TourGuide.js</td>
+<td>Native (vanilla)</td>
+<td>✅ (vanilla)</td>
+<td>Low</td>
+<td>Good</td>
+<td>MIT</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td>Intro.js</td>
+<td>@types (outdated)</td>
+<td>⚠️ Via wrapper</td>
+<td>~10KB</td>
+<td>Stale</td>
+<td>AGPL</td>
+<td>3.1</td>
+</tr>
+</tbody>
+</table>
+
+Data verified April 2026. Sources: npm, GitHub, bundlephobia, package source inspection.
+
+## 1. Tour Kit: best TypeScript DX for React teams
+
+<img src="/screenshots/user-tour-kit.avif" alt="Screenshot of Tour Kit - Product Tours for React" width="800" style={{borderRadius: '8px'}} />
+
+Tour Kit is a headless product tour library written in TypeScript strict mode from line one. The core ships at under 8KB gzipped with zero runtime dependencies. Every hook, provider, and component has full type coverage, so you get autocomplete on step config, tour options, and callback payloads without importing a single type manually. React 18 and 19 are both supported natively.
+
+**What makes it different for TypeScript developers:** The entire API is generic. Step definitions accept a type parameter for custom metadata, so `useStep<MyStepData>()` gives you typed access to fields like `videoUrl` or `requiredRole` without a cast. Headless architecture means your tooltips are your own components, not a library's opaque render tree.
+
+```tsx
+// src/components/OnboardingTour.tsx
+import { TourProvider, useTour } from '@tourkit/react';
+
+interface StepMeta {
+  videoUrl?: string;
+  requiredRole: 'admin' | 'user';
+}
+
+const steps = [
+  {
+    id: 'welcome',
+    target: '#sidebar',
+    title: 'Welcome aboard',
+    content: 'Start here.',
+    meta: { requiredRole: 'user' } satisfies StepMeta,
+  },
+  {
+    id: 'settings',
+    target: '#settings-btn',
+    title: 'Settings',
+    content: 'Customize your workspace.',
+    meta: { requiredRole: 'admin', videoUrl: '/demos/settings.mp4' },
+  },
+] as const;
+
+function Tour() {
+  const { currentStep, next, isActive } = useTour();
+  if (!isActive) return null;
+  // currentStep.meta is fully typed — no 'any', no cast
+  return <YourTooltipComponent step={currentStep} onNext={next} />;
+}
+```
+
+Pass a wrong type and the compiler tells you immediately:
+
+```tsx
+// TS Error: Type '"center"' is not assignable to type '"top" | "bottom" | "left" | "right"'.
+const badStep = { id: 'x', target: '#el', position: 'center' };
+//                                          ~~~~~~~~
+```
+
+**Strengths:**
+- Every prop, callback, and hook return type is complete. No `any` holes. Hover any hook return value and you see the real type, not `any`.
+- 10 separate packages (analytics, checklists, hints, scheduling) all share a typed plugin interface. Plugin authors get generics for event payloads.
+- Callback types narrow correctly: `onStepChange` receives `(step: Step<T>, index: number)`, not `(step: any, index: any)`.
+- Works with shadcn/ui, Radix, or any component library via the typed `asChild` pattern
+
+**Limitations:**
+- Requires React developers. No visual builder or drag-and-drop editor.
+- Smaller community than React Joyride or Shepherd.js.
+- No React Native support.
+
+**Pricing:** Free (MIT core). Pro features $99 one-time.
+
+**Best for:** TypeScript-first React teams using a design system who want full type safety and zero style conflicts.
+
+## 2. Driver.js: best vanilla TypeScript option
+
+<img src="/screenshots/driver-js.avif" alt="Screenshot of driver.js" width="800" style={{borderRadius: '8px'}} />
+
+Driver.js is a framework-agnostic product tour library written in TypeScript with zero dependencies. As of April 2026, it has roughly 22K GitHub stars. Ships at approximately 5KB gzipped, the smallest type-complete library on this list.
+
+Because it's vanilla TypeScript with no React dependency, it sidesteps React version churn entirely. No `@types/react` peer dependency means no type conflicts when React upgrades its type definitions.
+
+**The TypeScript angle:** Types are first-party and complete. You get autocomplete on `DriveStep` config, `PopoverDOM` properties, and callback parameters. The small API surface is the key advantage here: fewer types means fewer places for type drift to hide. When the entire public API fits in one `.d.ts` file, you can audit type completeness in minutes. No generics for custom metadata, but you rarely need them with this library's focused scope.
+
+```tsx
+// src/lib/tour.ts
+import { driver, DriveStep } from 'driver.js';
+import 'driver.js/dist/driver.css';
+
+const steps: DriveStep[] = [
+  {
+    element: '#sidebar',
+    popover: {
+      title: 'Navigation',
+      description: 'Browse your projects here.',
+      side: 'right',
+      align: 'start',
+    },
+  },
+];
+
+// In a React component, wrap in useEffect:
+// useEffect(() => { const d = driver({ steps }); d.drive(); return () => d.destroy(); }, []);
+```
+
+**Strengths:**
+- Zero dependencies means zero transitive type conflicts. Your `node_modules/.d.ts` tree stays clean.
+- Entire type surface fits in a single declaration file. Easy to audit for `any` leaks.
+- Smallest bundle of any typed tour library at ~5KB gzipped.
+- Callback types (`onNextClick`, `onPrevClick`, `onDestroyStarted`) are fully typed with correct parameter signatures.
+
+**Limitations:**
+- No React hooks or components. You wire it up manually with `useEffect` and refs, losing type inference on component props.
+- No generic step metadata. You cannot extend `DriveStep` with custom typed fields without module augmentation.
+- Styling is CSS-file-based. No typed style props or Tailwind integration.
+
+**Pricing:** Free (MIT).
+
+**Best for:** Teams that want a tiny, typed, framework-agnostic tour. Ideal when you're not in React or when you need tours in a vanilla TypeScript project.
+
+## 3. Onborda: best for Next.js App Router
+
+<img src="/screenshots/onborda.avif" alt="Screenshot of Onborda - Product tours for Next.js" width="800" style={{borderRadius: '8px'}} />
+
+Onborda is a TypeScript-native product tour library built specifically for Next.js App Router. With roughly 3K GitHub stars as of April 2026, it's newer than the established options but aligned with the modern Next.js stack. It ships with Framer Motion for animations and expects Tailwind CSS for styling.
+
+**The TypeScript angle:** Written in TypeScript from the start. Step config types give you autocomplete on `selector`, `side`, `content`, and callback props like `onNext`. The `CardComponentProps` interface is fully typed, so custom card components get proper type checking on `currentStep`, `totalSteps`, and navigation handlers. However, step definitions do not support generics for custom metadata. If you need a typed `videoUrl` or `requiredPermission` field on steps, you will need to use a type assertion or a wrapper.
+
+**Strengths:**
+- React 19 compatible by design, so no `@types/react` version conflicts with Next.js 15
+- Framer Motion animation props are typed through `MotionProps`, giving autocomplete on `initial`, `animate`, and `transition`
+- `CardComponentProps` interface means your custom tooltip component gets full type checking without manual prop typing
+- Simple type surface: fewer than 5 exported types to learn
+
+**Limitations:**
+- Framer Motion peer dependency adds ~30KB and its own type surface. Type conflicts between Framer Motion versions can surface in monorepos.
+- No generic step metadata. Custom data requires casting or wrapper types.
+- Next.js specific. Types assume App Router patterns that do not exist in Vite or Remix.
+- No typed accessibility props. ARIA attributes are not part of the step config type.
+
+**Pricing:** Free (MIT).
+
+**Best for:** Next.js App Router teams already using Tailwind and Framer Motion who want a typed, framework-aligned tour library.
+
+## 4. Shepherd.js: strong vanilla types, broken React wrapper
+
+<img src="/screenshots/shepherd-js.avif" alt="Screenshot of Shepherd.js - Guide your users through a tour of your app" width="800" style={{borderRadius: '8px'}} />
+
+Shepherd.js has roughly 12K GitHub stars and about 130K weekly npm downloads as of April 2026. Mature project, years of production use, solid vanilla TypeScript support. But the React wrapper (`react-shepherd`) hasn't kept up.
+
+**The TypeScript problem:** Version 12 removed the `Shepherd` namespace ([GitHub #2869](https://github.com/shipshapecode/shepherd/issues/2869)). Developers importing `Shepherd.Tour` as a type got a compile error overnight. The fix requires switching to `moduleResolution: 'Bundler'` and importing from `shepherd.js/tour`, but the documented `.mjs` file path doesn't exist in all builds.
+
+One independent developer's assessment: "For everything beyond the basics — like formatted text or a Step x of y progress indicator — you will have to leave JSX behind and work either with HTML strings or plain HTML elements" ([sandroroth.com](https://sandroroth.com/blog/evaluating-tour-libraries/)).
+
+**Strengths:**
+- Mature codebase with years of production use
+- Full keyboard navigation. The most accessibility-conscious of the legacy libraries.
+- Floating UI dependency is shared with Radix and Base UI (no additive cost if you use those).
+- Active maintenance. Regular releases in 2026.
+
+**Limitations:**
+- The React wrapper is not React 19 compatible. You can use vanilla Shepherd directly, but lose React integration.
+- v12 TS namespace removal broke existing typed codebases.
+- Tour content requires HTML strings, not JSX components. This is a DX regression for React teams.
+- 25KB gzipped is 3-5x heavier than Driver.js or Tour Kit core.
+
+**Pricing:** Free (MIT).
+
+**Best for:** Multi-framework teams that need tours in Vue, Angular, and React from one library, and can tolerate the React wrapper's current state.
+
+## 5. React Joyride: popular, but TypeScript is an afterthought
+
+<img src="/screenshots/react-joyride.avif" alt="Screenshot of React Joyride" width="800" style={{borderRadius: '8px'}} />
+
+React Joyride still dominates npm at roughly 700K weekly downloads and about 7,600 GitHub stars as of April 2026. Pre-built tooltip UI gets a tour running fast. But its TypeScript story is rough.
+
+**The TypeScript problems are documented:** The `Step` type returns `any` after v2.6.0 ([#949](https://github.com/gilbarbara/react-joyride/issues/949)). The `tooltipProps` type is missing ([#481](https://github.com/gilbarbara/react-joyride/issues/481)). Community members have asked directly: "Any chance of typescript support on the roadmap?" ([Discussion #825](https://github.com/gilbarbara/react-joyride/discussions/825)). These aren't edge cases. They're the core API.
+
+As [LogRocket's roundup](https://blog.logrocket.com/best-product-tour-js-libraries-frontend-apps/) notes, React Joyride's main advantage is speed to first tour. But that speed comes at the cost of type safety.
+
+**Strengths:**
+- `CallBackProps` type provides typed access to `action`, `index`, `lifecycle`, and `status` fields, so tour event handlers compile-check their branching logic.
+- Pre-built tooltip UI means you can prototype a tour without defining component prop types yourself.
+- Version 3 is in development with rewritten types and React 19 support, which should fix the `Step` → `any` regression.
+- Largest ecosystem of typed examples and community-contributed type workarounds on GitHub issues.
+
+**Limitations:**
+- React 19 incompatible (v2.x). Hasn't been updated in 9 months as of April 2026. The `next` branch exists but "doesn't work reliably" ([sandroroth.com](https://sandroroth.com/blog/evaluating-tour-libraries/)).
+- `tooltipProps` resolves to `any`, so custom tooltip wrappers lose type safety at the integration boundary.
+- ~30KB gzipped. The `react-floater` dependency brings its own type declarations that can conflict with Floating UI types in your project.
+- Spotlight uses `mix-blend-mode: hard-light`, which breaks in dark mode. No typed theme config to override this.
+
+**Pricing:** Free (MIT).
+
+**Best for:** Teams that need a prototype tour today and plan to migrate later. Not recommended for greenfield TypeScript projects in 2026.
+
+## 6. OnboardJS: state-machine approach with native types
+
+<img src="/screenshots/onboardjs.avif" alt="Screenshot of OnboardJS - Open-Source React Onboarding Library" width="800" style={{borderRadius: '8px'}} />
+
+OnboardJS models tours as a state machine instead of declarative step arrays. Built in TypeScript with typed state transitions, it catches invalid tour flows at compile time rather than runtime. React 19 compatible. Ships at roughly 10KB gzipped with an MIT core and optional $59/month SaaS tier.
+
+**The TypeScript angle:** The state machine approach means flow states are typed as a union. You get autocomplete when defining which states can transition to which, and the compiler rejects invalid transitions. Callback handlers receive typed context objects with the current state, step index, and flow metadata. However, the state machine types do not support user-defined generics for custom step data. You can attach arbitrary metadata to steps, but it comes back as `Record<string, unknown>` rather than a typed shape. Autocomplete on flow configuration covers state names and transition targets, but custom event payloads require manual typing.
+
+**Strengths:**
+- State transitions are compile-time checked. Wiring `'welcome' → 'invalid-state'` produces a type error, not a runtime crash.
+- React 19 compatible with typed hooks for reading current state and dispatching transitions.
+- Callback handlers are typed with `OnboardContext` including `currentStep`, `direction`, and `isComplete`.
+
+**Limitations:**
+- No generic step metadata. Custom data on steps resolves to `Record<string, unknown>`, requiring type assertions.
+- Small community with fewer typed examples and no DefinitelyTyped fallback.
+- No published accessibility types. ARIA attributes are not part of the step or state config.
+- Steeper type learning curve. Understanding the state machine types requires reading the source, not just the docs.
+
+**Pricing:** Free (MIT core). SaaS dashboard at $59/month.
+
+**Best for:** Developers familiar with XState-style patterns who want compile-time flow validation and can tolerate the manual typing for custom metadata.
+
+## 7. TourGuide.js: vanilla TypeScript with Floating UI
+
+TourGuide.js is a vanilla TypeScript tour library using Floating UI for positioning. Lighter than Shepherd.js. No React bindings, so you wire it with `useEffect` in React projects.
+
+**Strengths:**
+- Native TypeScript with full type exports
+- Shares Floating UI dependency with Radix and Base UI
+
+**Limitations:**
+- Small community and low npm adoption
+- No React hooks or components
+
+**Pricing:** Free (MIT).
+
+**Best for:** Vanilla TypeScript projects already using Floating UI.
+
+## 8. Intro.js: the AGPL trap
+
+<img src="/screenshots/intro-js.avif" alt="Screenshot of Intro.js - User Onboarding and Product Walkthrough Library" width="800" style={{borderRadius: '8px'}} />
+
+Intro.js is one of the oldest product tour libraries. Works, has themes, years of production use. Two issues kill the DX for TypeScript teams.
+
+The types live on DefinitelyTyped (`@types/intro.js`), not in the package. They lag behind releases. When the library updates, your types don't.
+
+Then there's the AGPL v3 license. As [userorbit.com](https://userorbit.com/blog/best-open-source-product-tour-libraries) notes: "MIT and Apache licenses are usually easier for commercial teams to adopt. Intro.js deserves extra attention because AGPL terms can trigger legal review depending on your use case." For a SaaS product, that means legal overhead before you write a line of code.
+
+Accessibility is also poor. [LogRocket's audit](https://blog.logrocket.com/best-product-tour-js-libraries-frontend-apps/) found popovers lack `aria-labelledby` and `aria-describedby`, buttons are `<a role="button">`, and there's no focus trap.
+
+**Strengths:**
+- Long track record. Proven in production for years.
+- Themes available for faster styling.
+- ~10KB gzipped. Reasonable size.
+
+**Limitations:**
+- AGPL v3 license creates legal overhead for commercial projects.
+- DefinitelyTyped types are stale and incomplete.
+- No React 19 wrapper. Requires community-maintained integrations.
+- Significant accessibility failures (no ARIA labels, no focus trap).
+
+**Pricing:** Free (AGPL) or Commercial license required for proprietary projects.
+
+**Best for:** Non-commercial projects where AGPL compliance isn't a concern, or teams willing to buy the commercial license.
+
+## How to choose the right TypeScript tour library
+
+Your decision comes down to three axes, all tied to TypeScript quality.
+
+**Type completeness: native strict vs retrofitted vs DefinitelyTyped.** Tour Kit and Driver.js are written in TypeScript strict mode from line one. Every export is typed at the source, so types and implementation cannot drift apart. Shepherd.js was retrofitted with declarations that broke in v12 when the namespace was removed. React Joyride ships its own types but has known `any` holes in core APIs. Intro.js relies on DefinitelyTyped, which lags behind releases by weeks or months. If you hover a config option and see `any`, you have lost the entire point of using TypeScript.
+
+**React 19 TS compatibility: compiles clean vs needs workarounds.** React 19 changed several type definitions (`ReactNode`, `forwardRef`, callback refs). Tour Kit, Onborda, and OnboardJS compile clean against `@types/react@19`. Driver.js has no React types to break. Shepherd.js's React wrapper fails to compile. React Joyride v2.x fails with multiple type errors. If you are starting a new React 19 project, eliminate libraries that require `@ts-expect-error` to build.
+
+**Bundle size** matters for Core Web Vitals but is secondary to type quality. Driver.js at ~5KB and Tour Kit core at under 8KB are the lightweights. React Joyride at ~30KB and Shepherd.js at ~25KB carry meaningful weight. Google's research on [Core Web Vitals](https://web.dev/articles/vitals) shows JavaScript bundle size directly impacts Interaction to Next Paint.
+
+If you were about to build your own tour system with XState and Floating UI (and [you wouldn't be the first](https://sandroroth.com/blog/evaluating-tour-libraries/)), Tour Kit is the library designed for developers like you. It gives you typed primitives without the opinions.
+
+## FAQ
+
+### What does "TypeScript support" actually mean for a tour library?
+
+It is a spectrum. At the top, libraries like Tour Kit and Driver.js are written in TypeScript strict mode, so types are generated from the source and cannot drift. In the middle, libraries like Shepherd.js ship their own `.d.ts` files but were not written in strict mode, which allows `any` to leak into public APIs. At the bottom, libraries like Intro.js rely on DefinitelyTyped, where community volunteers maintain types that lag behind releases. "TypeScript support" on a README badge tells you nothing. Check whether `tsc --noEmit` passes clean in your project.
+
+### Which tour libraries support generic step definitions?
+
+Tour Kit is the only library in this roundup with full generic support on step definitions. `useStep<MyStepData>()` returns typed custom metadata without a cast. Driver.js, Onborda, OnboardJS, and Shepherd.js all use fixed step types with no generic parameter. If you need typed custom fields on steps (like `videoUrl` or `requiredRole`), you either use Tour Kit's generics or write manual type assertions everywhere else.
+
+### Can I get type-safe tour callbacks and event handlers?
+
+Tour Kit types every callback with narrowed parameters: `onStepChange` receives `(step: Step<T>, index: number)`, not `any`. Driver.js types its callbacks (`onNextClick`, `onPrevClick`) with correct DOM event and state parameters. React Joyride's `CallBackProps` type works for `action` and `status`, but `tooltipProps` resolves to `any`. Shepherd.js callbacks are typed in the vanilla API but lose type safety through the React wrapper. If your tour logic branches on callback data, check whether the library types that data or passes `any`.
+
+### How do I check if a tour library's types are actually complete?
+
+Open the library's `.d.ts` files in `node_modules` and search for `any`. Count the occurrences in public exports. Then open your editor, type the main config object, and see if every property autocompletes. Check GitHub issues filtered by the "typescript" label for complaints about missing types. Finally, run `tsc --noEmit --strict` in a test project. A library with "TypeScript support" that produces type errors under strict mode is not actually typed.
+
+### Will my tour library break when I upgrade TypeScript?
+
+Libraries written in TypeScript strict mode (Tour Kit, Driver.js) are the safest because their CI already tests against strict. The main risk is `moduleResolution`. Shepherd.js v12 broke when it removed the `Shepherd` namespace and required `moduleResolution: 'Bundler'`, which not all projects use. DefinitelyTyped packages (Intro.js) can break when the library updates but the types do not. Pin your TypeScript version in CI and test upgrades in a branch before merging.

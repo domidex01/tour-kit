@@ -30,6 +30,12 @@ const TOOL_URLS: Record<string, string> = {
   'userguiding': 'https://userguiding.com',
   'whatfix': 'https://www.whatfix.com',
   'frigade': 'https://frigade.com',
+  'radix primitives': 'https://www.radix-ui.com/primitives',
+  'radix': 'https://www.radix-ui.com/primitives',
+  'react aria': 'https://react-spectrum.adobe.com/react-aria/',
+  'base ui': 'https://base-ui.com',
+  'ark ui': 'https://ark-ui.com',
+  'headless ui': 'https://headlessui.com',
 }
 
 function parseArgs(args: string[]): Record<string, string> {

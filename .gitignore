@@ -58,3 +58,5 @@ CLAUDE.md
 marketing-strategy/*
 tour-kit/*
 plan/*
+.claude\settings.json
+syndication/*

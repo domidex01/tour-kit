@@ -1,0 +1,309 @@
+---
+title: "How to add a product tour to a React 19 app in 5 minutes"
+published: false
+description: "Add a working product tour to your React 19 app with Tour Kit. Covers useTransition async steps, ref-as-prop targeting, and full TypeScript examples."
+tags: react, typescript, tutorial, webdev
+canonical_url: https://usertourkit.com/blog/add-product-tour-react-19
+cover_image: https://usertourkit.com/og-images/add-product-tour-react-19-v2.avif
+---
+
+*Originally published at [usertourkit.com](https://usertourkit.com/blog/add-product-tour-react-19)*
+
+Your React 19 app is live, users sign up, and then they stare at the dashboard wondering what to do next. Most React tour libraries were built for React 16. They rely on `forwardRef` wrappers, fight with Server Components, and ship opinionated CSS that clashes with whatever design system you're running. Tour Kit is a headless React product tour library (under 8KB gzipped for the core) that gives you step sequencing, element highlighting, scroll management, and keyboard navigation while you keep full control of rendering. By the end of this tutorial, you'll have a working 4-step product tour that uses React 19's native ref-as-prop and `useTransition` for async step navigation.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What you'll build
+
+Tour Kit ships tour logic without prescribing UI, so the product tour you build here will match whatever component library you're already using (shadcn/ui, Radix, Tailwind, plain CSS, anything). Four steps. The tour walks new users through a dashboard's sidebar navigation, search bar, main content area, and settings panel. Each step highlights the target element with a spotlight overlay, shows a tooltip card you fully control, and advances via keyboard arrows or button clicks.
+
+We tested this in a Vite 6 + React 19.1 + TypeScript 5.7 project. Under 5 minutes from `npm install` to a running tour.
+
+## Prerequisites
+
+You need a working React 19 project with at least a few UI elements worth touring, like a dashboard with navigation and interactive controls. The code examples use TypeScript, but plain JavaScript works too if you drop the type annotations.
+
+- React 19 (18.2+ also works, but this tutorial uses React 19 patterns)
+- TypeScript 5.0+
+- A React project with interactive UI elements (dashboard, settings page, etc.)
+- npm, yarn, or pnpm
+
+## Step 1: install Tour Kit
+
+Tour Kit splits into two packages: `@tour-kit/core` for framework-agnostic logic (step sequencing, positioning, storage) and `@tour-kit/react` for React components and hooks. The React package re-exports everything from core, so you'll only import from `@tourkit/react` in your code. Install both.
+
+### npm
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+### pnpm
+
+```bash
+pnpm add @tourkit/core @tourkit/react
+```
+
+### yarn
+
+```bash
+yarn add @tourkit/core @tourkit/react
+```
+
+Both packages are TypeScript-first with full type exports. No `@types/` packages needed.
+
+## Step 2: define your tour steps and wrap your app
+
+React 19 dropped the `forwardRef` requirement, making refs regular props that you pass directly to elements. Tour Kit's target system accepts both CSS selectors (strings like `#sidebar-nav`) and React refs, so registering tour targets in a React 19 codebase requires zero wrapper components or ref-forwarding boilerplate.
+
+Create a tour component that defines your steps and wraps the content you want to tour:
+
+```tsx
+// src/components/product-tour.tsx
+'use client'
+
+import { Tour, TourStep, useTour } from '@tourkit/react'
+
+export function ProductTour({ children }: { children: React.ReactNode }) {
+  return (
+    <Tour id="onboarding" autoStart>
+      <TourStep
+        id="sidebar"
+        target="#sidebar-nav"
+        title="Navigation"
+        content="Your main sections live here. Click any item to jump between views."
+        placement="right"
+      />
+      <TourStep
+        id="search"
+        target="#search-bar"
+        title="Search"
+        content="Find anything in your workspace. Supports keyboard shortcut Cmd+K."
+        placement="bottom"
+      />
+      <TourStep
+        id="content"
+        target="#main-content"
+        title="Your dashboard"
+        content="This is where your data lives. We'll add widgets in the next step."
+        placement="top"
+      />
+      <TourStep
+        id="settings"
+        target="#settings-btn"
+        title="Settings"
+        content="Customize your workspace, manage team members, and configure integrations."
+        placement="left"
+      />
+      {children}
+    </Tour>
+  )
+}
+```
+
+The `Tour` component creates a `TourProvider` automatically when used standalone. Each `TourStep` declares its config; it renders nothing in the DOM. Internally, Tour Kit handles spotlight overlays, tooltip positioning via Floating UI, scroll management, and focus trapping.
+
+Make sure those target IDs exist on your page elements. The `target` prop accepts any CSS selector (`#sidebar-nav`, `.search-input`, `[data-tour="step-1"]`).
+
+## Step 3: add tour controls with useTour
+
+The `useTour()` hook exposes the full tour state (current step, progress, active/inactive) and all navigation actions (next, prev, skip, complete) as a single return object. You can use it anywhere inside a `TourProvider` to build custom trigger buttons, progress indicators, or conditional UI based on tour state.
+
+```tsx
+// src/components/tour-trigger.tsx
+'use client'
+
+import { useTour } from '@tourkit/react'
+
+export function TourTrigger() {
+  const { isActive, start, currentStepIndex, totalSteps } = useTour()
+
+  if (isActive) {
+    return (
+      <div className="fixed bottom-4 right-4 rounded bg-gray-900 px-3 py-2 text-sm text-white">
+        Step {currentStepIndex + 1} of {totalSteps}
+      </div>
+    )
+  }
+
+  return (
+    <button
+      onClick={() => start()}
+      className="fixed bottom-4 right-4 rounded bg-blue-600 px-4 py-2 text-white"
+    >
+      Start tour
+    </button>
+  )
+}
+```
+
+`useTour()` returns `next()`, `prev()`, `goTo(index)`, `skip()`, `complete()`, and `stop()`. It also exposes `isFirstStep`, `isLastStep`, `progress` (0 to 1), and `isTransitioning` for loading states. Put `TourTrigger` inside your `ProductTour` wrapper so it has access to the tour context.
+
+## Step 4: use React 19's useTransition for async step navigation
+
+Multi-page onboarding flows often need to navigate to a different route before showing the next tour step, and React 18 forced you to chain `setState` calls with timeouts or `useEffect` watchers to sequence that correctly. React 19's `useTransition` accepts async functions natively, so you can `await` a route navigation and then advance the tour in a single callback while the UI stays responsive.
+
+```tsx
+// src/components/async-tour-step.tsx
+'use client'
+
+import { useTransition } from 'react'
+import { useTour } from '@tourkit/react'
+import { useRouter } from 'next/navigation' // or your router
+
+export function AsyncTourStep() {
+  const { next, currentStep } = useTour()
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  const handleNext = () => {
+    startTransition(async () => {
+      // Navigate to the route the next step needs
+      await router.push('/settings')
+      // Advance the tour after navigation completes
+      next()
+    })
+  }
+
+  return (
+    <button onClick={handleNext} disabled={isPending}>
+      {isPending ? 'Loading...' : 'Next step'}
+    </button>
+  )
+}
+```
+
+This pattern keeps the current step visible and interactive while the route transition happens in the background. No spinners, no layout shift. The `isPending` flag from `useTransition` gives you a loading state for free.
+
+Sentry's engineering team documented this exact pain point when building their own product tours: "The text for each step was separated from the focused element being put on display, which meant it was challenging to conditionally alter it" ([Sentry Engineering Blog](https://sentry.engineering/blog/building-a-product-tour-in-react/)). Tour Kit's declarative step model avoids this by co-locating step content with step config.
+
+## Step 5: wire it all together
+
+With your tour steps defined, the `useTour` hook wired up, and async navigation handled via `useTransition`, the final step is adding the `ProductTour` wrapper to your app's root layout so every page has access to the tour context. Here's the complete integration:
+
+```tsx
+// src/app/layout.tsx (Next.js App Router) or src/App.tsx (Vite)
+import { ProductTour } from '@/components/product-tour'
+import { TourTrigger } from '@/components/tour-trigger'
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <ProductTour>
+      <TourTrigger />
+      <main>
+        <nav id="sidebar-nav">{/* your sidebar */}</nav>
+        <div id="search-bar">{/* your search */}</div>
+        <section id="main-content">{/* your content */}</section>
+        <button id="settings-btn">{/* settings */}</button>
+      </main>
+    </ProductTour>
+  )
+}
+```
+
+Run your dev server. The tour starts automatically (because `autoStart` is set), highlights each element in sequence, and handles keyboard navigation (arrow keys, Escape to close) out of the box. Tour Kit includes WCAG 2.1 AA accessibility by default: focus trapping, `aria-live` announcements for step changes, and `prefers-reduced-motion` support.
+
+## How Tour Kit handles React 19 features
+
+Tour Kit was designed for React 19's component model from the start, which means it uses ref-as-prop instead of `forwardRef`, supports async `useTransition` for step navigation, and keeps client-side boundaries minimal so Server Components work naturally around the tour provider. Here's a concrete breakdown of each React 19 feature and how it maps to the tour you just built:
+
+| React 19 feature | What it changes for tours | Tour Kit support |
+|---|---|---|
+| Ref as prop (no forwardRef) | Target elements pass refs directly, no wrapper components | Supported — use ref targets or CSS selectors |
+| Async useTransition | Step navigation can await route changes without blocking UI | Works with useTour().next() inside startTransition |
+| Ref cleanup functions | Highlight overlays and event listeners clean up declaratively | Used internally for spotlight teardown |
+| Server Components | Tour content can be pre-rendered, shipping less JS to the client | 'use client' boundary on TourProvider only |
+| Context as provider | Cleaner provider syntax without .Provider suffix | TourProvider uses this pattern |
+
+As of April 2026, most React tour libraries haven't updated for React 19's new primitives. React Joyride advertises React 19 compatibility but still uses `forwardRef` internally. Reactour and Shepherd.js don't confirm React 19 support in their docs ([OnboardJS comparison, 2025](https://onboardjs.com/blog/5-best-react-onboarding-libraries-in-2025-compared)).
+
+## Common issues and troubleshooting
+
+We hit these issues while testing Tour Kit in various React 19 setups. Each one has a straightforward fix.
+
+### "Tour tooltip doesn't appear"
+
+This happens when the target element renders after the tour initializes. Tour Kit waits for elements by default (`waitForTarget`), but if your element loads behind a Suspense boundary or lazy import, increase the wait timeout:
+
+```tsx
+<TourStep
+  id="lazy-element"
+  target="#lazy-widget"
+  content="This widget loads asynchronously."
+  waitForTarget
+  waitTimeout={5000} // Wait up to 5 seconds
+/>
+```
+
+### "Spotlight highlights the wrong area"
+
+Check that your target selector is unique on the page. If you have multiple elements matching `#sidebar-nav`, Tour Kit highlights the first match. Use more specific selectors or switch to React refs for guaranteed targeting:
+
+```tsx
+const sidebarRef = useRef<HTMLElement>(null)
+
+// In your step config
+<TourStep id="sidebar" target={sidebarRef} content="..." />
+
+// On your element (React 19, no forwardRef needed)
+<nav ref={sidebarRef}>...</nav>
+```
+
+### "Tour doesn't persist across page reloads"
+
+Enable persistence in your tour config. Tour Kit stores progress in localStorage by default:
+
+```tsx
+<Tour id="onboarding" config={{ persistence: true }}>
+  {/* steps */}
+</Tour>
+```
+
+Users who close the tour mid-way will resume from where they left off. Call `useTour().complete()` explicitly when they finish to mark it done.
+
+### "Keyboard navigation conflicts with my app's shortcuts"
+
+Tour Kit's keyboard handling (arrow keys for prev/next, Escape to close) can be configured or disabled per tour. Here's how to keep Escape but turn off arrow key navigation:
+
+```tsx
+<Tour id="onboarding" config={{ keyboard: { enabled: true, escape: true, arrows: false } }}>
+  {/* steps */}
+</Tour>
+```
+
+## Next steps
+
+You've got a working product tour in a React 19 app with step sequencing, spotlight overlays, keyboard navigation, and async route transitions via `useTransition`. The base setup handles most onboarding flows, but Tour Kit's 10-package architecture lets you add features incrementally without bloating your bundle. Here's where to go from here:
+
+- **Add conditional steps** with the `when` prop to show different tours based on user role or feature flags
+- **Track completion** by wiring `onComplete` to your analytics (Tour Kit's `@tourkit/analytics` package has plugins for Mixpanel, Amplitude, and PostHog)
+- **Build multi-page tours** using `route` on each step and a router adapter like `useNextAppRouter()` for Next.js App Router
+- **Style the tooltip** by passing your own components. Tour Kit's `TourCard`, `TourCardHeader`, `TourCardContent`, and `TourCardFooter` are all replaceable via composition
+
+**Honest limitation:** Tour Kit has no visual builder. It requires React developers to implement tours in code, which means non-technical teammates can't create or edit tours on their own. If that's a dealbreaker, a SaaS tool like Appcues or Userpilot gives you drag-and-drop editing. Tour Kit also has a smaller community than React Joyride (5.1K GitHub stars) or Shepherd.js (~10K stars). The tradeoff: you get a sub-8KB bundle, full design system control, and native React 19 support.
+
+Check the [Tour Kit docs](https://usertourkit.com/docs) for the full API reference, or clone the [GitHub repo](https://github.com/user-tour-kit/tour-kit) to run the examples locally.
+
+## FAQ
+
+### Does Tour Kit support React 19 Server Components?
+
+Tour Kit's `TourProvider` requires client-side rendering because it manages DOM state (positions, focus, overlays). Add `'use client'` to your tour file. Page content inside the tour wrapper stays server-rendered normally.
+
+### What is a product tour in React?
+
+A product tour in React is a guided walkthrough that highlights UI elements in sequence, showing tooltips that explain each feature. Tours typically run on first login or after a new feature ships. React tour libraries hook into the component lifecycle to detect target element mounting, manage focus for accessibility, and clean up on unmount.
+
+### How is Tour Kit different from React Joyride?
+
+React Joyride ships opinionated tooltip UI at roughly 30KB gzipped. Tour Kit is headless at under 8KB for the core. You get the tour logic (step sequencing, positioning, keyboard nav) and render tooltips with your own components. If you use shadcn/ui or Tailwind, that means zero style conflicts.
+
+### Does adding a product tour affect performance?
+
+Tour Kit's core ships under 8KB gzipped with zero runtime dependencies. React Joyride weighs roughly 30KB and Shepherd.js roughly 25KB ([bundlephobia](https://bundlephobia.com), April 2026). Tour Kit uses a single SVG spotlight instead of multiple DOM nodes, so layout shift isn't a concern.
+
+### Can I use Tour Kit with Next.js App Router?
+
+Yes. Tour Kit ships a `useNextAppRouter()` hook that plugs into `usePathname` and `useRouter`. Multi-page tours navigate between routes automatically. Add `'use client'` to your tour file; everything else stays server-rendered.

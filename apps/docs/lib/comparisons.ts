@@ -538,6 +538,78 @@ export const BLOG_POSTS: BlogMeta[] = [
     lastUpdated: '2026-04-01',
     ogImage: '/og-images/best-product-tour-tools-react.avif',
   },
+  {
+    slug: 'best-free-product-tour-libraries-open-source',
+    title: 'Best Free Product Tour Libraries in 2026 (Open Source Only)',
+    metaTitle: 'Best Free Product Tour Libraries in 2026 (Open Source Only)',
+    description:
+      'We installed 9 open-source tour libraries into the same React 19 project. Here\'s what actually works, what\'s abandoned, and which licenses have traps.',
+    keywords: [
+      'free product tour library open source',
+      'open source tour library',
+      'free onboarding library javascript',
+      'react tour library free',
+    ],
+    category: 'Listicle',
+    published: true,
+    publishedAt: '2026-04-02',
+    lastUpdated: '2026-04-02',
+    ogImage: '/og-images/best-free-product-tour-libraries-open-source.avif',
+  },
+  {
+    slug: 'add-product-tour-react-19',
+    title: 'How to Add a Product Tour to a React 19 App in 5 Minutes',
+    metaTitle: 'Add a Product Tour to React 19 in 5 Minutes (2026)',
+    description:
+      'Add a working product tour to your React 19 app with Tour Kit. Covers useTransition async steps, ref-as-prop targeting, and full TypeScript examples.',
+    keywords: [
+      'add product tour react 19',
+      'react 19 onboarding tutorial',
+      'product tour react 19 guide',
+      'headless product tour react',
+    ],
+    category: 'Tutorial',
+    published: true,
+    publishedAt: '2026-04-02',
+    lastUpdated: '2026-04-02',
+    ogImage: '/og-images/add-product-tour-react-19-v2.avif',
+  },
+  {
+    slug: 'best-headless-ui-libraries-onboarding',
+    title: '7 Best Headless UI Libraries for Onboarding in 2026',
+    metaTitle: '7 Best Headless UI Libraries for Onboarding (2026)',
+    description:
+      'We tested 7 headless libraries for building product tours and onboarding flows in React. Comparing bundle size, accessibility, and composition patterns.',
+    keywords: [
+      'headless onboarding library',
+      'headless ui product tour',
+      'composable onboarding library',
+      'headless tour library react',
+    ],
+    category: 'Listicle',
+    published: true,
+    publishedAt: '2026-04-02',
+    lastUpdated: '2026-04-02',
+    ogImage: '/og-images/best-headless-ui-libraries-onboarding.avif',
+  },
+  {
+    slug: 'best-typescript-product-tour-libraries',
+    title: '8 TypeScript Product Tour Libraries Ranked by Developer Experience (2026)',
+    metaTitle: '8 TypeScript Product Tour Libraries Ranked by DX (2026)',
+    description:
+      'We tested 8 product tour libraries for TypeScript quality. See which have real types, which ship broken generics, and which force you into any.',
+    keywords: [
+      'typescript product tour library',
+      'typescript onboarding library',
+      'typed product tour react',
+      'react product tour typescript',
+    ],
+    category: 'Listicle',
+    published: true,
+    publishedAt: '2026-04-02',
+    lastUpdated: '2026-04-02',
+    ogImage: '/og-images/best-typescript-product-tour-libraries.avif',
+  },
 ]
 
 // ── Helpers ──
