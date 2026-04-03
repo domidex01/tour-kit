@@ -250,13 +250,7 @@ export const COMPARISONS: ComparisonMeta[] = [
     metaTitle: 'userTourKit vs Frigade: 2026 Comparison for Developers',
     description:
       'Compare userTourKit vs Frigade for React onboarding. See features, self-hosting, pricing, and vendor independence side-by-side in 2026.',
-    keywords: [
-      'usertourkit',
-      'frigade',
-      'frigade alternative',
-      'react onboarding',
-      'self-hosted',
-    ],
+    keywords: ['usertourkit', 'frigade', 'frigade alternative', 'react onboarding', 'self-hosted'],
   },
   // Tier 4: Smaller tools (months 4-6)
   {
@@ -281,7 +275,13 @@ export const COMPARISONS: ComparisonMeta[] = [
     metaTitle: 'userTourKit vs OnboardJS: 2026 Comparison for Developers',
     description:
       'Compare userTourKit vs OnboardJS for headless product tours. See features, visual components, and TypeScript support side-by-side in 2026.',
-    keywords: ['usertourkit', 'onboardjs', 'onboardjs alternative', 'headless tour', 'product tour'],
+    keywords: [
+      'usertourkit',
+      'onboardjs',
+      'onboardjs alternative',
+      'headless tour',
+      'product tour',
+    ],
   },
   {
     slug: 'tour-kit-vs-usertour',
@@ -327,13 +327,7 @@ export const COMPARISONS: ComparisonMeta[] = [
     metaTitle: 'userTourKit vs Whatfix: 2026 Comparison for Developers',
     description:
       'Compare userTourKit vs Whatfix for digital adoption. See features, pricing, and developer experience side-by-side in 2026.',
-    keywords: [
-      'usertourkit',
-      'whatfix',
-      'whatfix alternative',
-      'digital adoption',
-      'enterprise',
-    ],
+    keywords: ['usertourkit', 'whatfix', 'whatfix alternative', 'digital adoption', 'enterprise'],
   },
 ]
 
@@ -543,7 +537,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Best Free Product Tour Libraries in 2026 (Open Source Only)',
     metaTitle: 'Best Free Product Tour Libraries in 2026 (Open Source Only)',
     description:
-      'We installed 9 open-source tour libraries into the same React 19 project. Here\'s what actually works, what\'s abandoned, and which licenses have traps.',
+      "We installed 9 open-source tour libraries into the same React 19 project. Here's what actually works, what's abandoned, and which licenses have traps.",
     keywords: [
       'free product tour library open source',
       'open source tour library',
@@ -645,8 +639,7 @@ export function getPublishedBlogPosts(): BlogMeta[] {
 export function getRelatedComparisons(slug: string, limit = 3): ComparisonMeta[] {
   const current = getComparison(slug)
   if (!current) return getPublishedComparisons().slice(0, limit)
-  return COMPARISONS.filter((c) => c.slug !== slug && c.category === current.category && c.published).slice(
-    0,
-    limit,
-  )
+  return COMPARISONS.filter(
+    (c) => c.slug !== slug && c.category === current.category && c.published
+  ).slice(0, limit)
 }

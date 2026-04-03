@@ -1,6 +1,6 @@
 import { ArticleCard } from '@/components/article/article-card'
 import { Footer } from '@/components/landing/footer'
-import { COMPARISONS, getComparisonsByCategory } from '@/lib/comparisons'
+import { getComparisonsByCategory } from '@/lib/comparisons'
 import { baseOptions } from '@/lib/layout.shared'
 import { BreadcrumbJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
@@ -38,14 +38,17 @@ export default function CompareHub() {
             userTourKit vs the rest
           </h1>
           <p className="text-[16px] leading-relaxed text-fd-muted-foreground">
-            Honest, data-driven comparisons between userTourKit and every major product tour library and
-            onboarding platform. We cover features, bundle size, accessibility, licensing, and
+            Honest, data-driven comparisons between userTourKit and every major product tour library
+            and onboarding platform. We cover features, bundle size, accessibility, licensing, and
             pricing so you can make the right choice for your stack.
           </p>
         </header>
 
         {/* Open-source libraries */}
-        <Section title="Open-source libraries" description="MIT, AGPL, and permissive-licensed tour libraries.">
+        <Section
+          title="Open-source libraries"
+          description="MIT, AGPL, and permissive-licensed tour libraries."
+        >
           {openSource.map((c) => (
             <ArticleCard
               key={c.slug}
@@ -58,7 +61,10 @@ export default function CompareHub() {
         </Section>
 
         {/* Commercial tools */}
-        <Section title="Commercial onboarding tools" description="SaaS platforms with no-code builders and hosted analytics.">
+        <Section
+          title="Commercial onboarding tools"
+          description="SaaS platforms with no-code builders and hosted analytics."
+        >
           {commercial.map((c) => (
             <ArticleCard
               key={c.slug}
@@ -72,7 +78,10 @@ export default function CompareHub() {
 
         {/* Open-source platforms */}
         {platforms.length > 0 && (
-          <Section title="Open-source platforms" description="Self-hosted onboarding platforms with open-source cores.">
+          <Section
+            title="Open-source platforms"
+            description="Self-hosted onboarding platforms with open-source cores."
+          >
             {platforms.map((c) => (
               <ArticleCard
                 key={c.slug}

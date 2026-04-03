@@ -188,10 +188,7 @@ export function OrganizationJsonLd(): ReactNode {
   const data = {
     '@context': 'https://schema.org',
     ...ORGANIZATION,
-    sameAs: [
-      'https://github.com/DomiDex/tour-kit',
-      'https://www.npmjs.com/package/@tour-kit/core',
-    ],
+    sameAs: ['https://github.com/DomiDex/tour-kit', 'https://www.npmjs.com/package/@tour-kit/core'],
   }
 
   return (

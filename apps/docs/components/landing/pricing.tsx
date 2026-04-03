@@ -73,14 +73,14 @@ export function Pricing() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-fd-foreground">Free</h3>
-                <p className="text-[13px] text-fd-muted-foreground">
-                  Open source core
-                </p>
+                <p className="text-[13px] text-fd-muted-foreground">Open source core</p>
               </div>
             </div>
 
             <div className="mb-8">
-              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">$0</span>
+              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
+                $0
+              </span>
               <span className="ml-1.5 text-[15px] text-fd-muted-foreground">forever</span>
             </div>
 
@@ -124,15 +124,17 @@ export function Pricing() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-fd-foreground">Pro</h3>
-                <p className="text-[13px] text-fd-muted-foreground">
-                  Full onboarding suite
-                </p>
+                <p className="text-[13px] text-fd-muted-foreground">Full onboarding suite</p>
               </div>
             </div>
 
             <div className="mb-8">
-              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">$99</span>
-              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">one-time / 5 sites</span>
+              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
+                $99
+              </span>
+              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">
+                one-time / 5 sites
+              </span>
             </div>
 
             <div className="mb-6 rounded-lg border border-[var(--tk-primary)]/20 bg-[var(--tk-primary)]/5 px-4 py-2.5">
@@ -179,8 +181,12 @@ export function Pricing() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-fd-border bg-fd-muted/50">
-                  <th className="px-6 py-3.5 text-left text-[13px] font-semibold text-fd-foreground">Feature</th>
-                  <th className="px-6 py-3.5 text-center text-[13px] font-semibold text-fd-foreground">Free</th>
+                  <th className="px-6 py-3.5 text-left text-[13px] font-semibold text-fd-foreground">
+                    Feature
+                  </th>
+                  <th className="px-6 py-3.5 text-center text-[13px] font-semibold text-fd-foreground">
+                    Free
+                  </th>
                   <th className="px-6 py-3.5 text-center text-[13px] font-semibold text-[var(--tk-primary)]">
                     Pro
                   </th>

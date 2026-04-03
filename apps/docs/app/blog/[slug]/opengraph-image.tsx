@@ -16,7 +16,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     title: post?.title ?? 'userTourKit Blog',
     subtitle: post?.description,
     category: post?.category?.toUpperCase(),
-    background: (post as any)?.ogBackground,
+    background: undefined,
   })
 
   return new Response(new Uint8Array(buffer), {

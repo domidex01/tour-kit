@@ -110,8 +110,8 @@ export default async function ComparisonPage({ params }: PageProps) {
 
           <h2>The bottom line</h2>
           <p>
-            <strong>userTourKit is a headless React library</strong> offering tours, hints, checklists,
-            announcements, analytics, and scheduling in a &lt;8KB core bundle.{' '}
+            <strong>userTourKit is a headless React library</strong> offering tours, hints,
+            checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle.{' '}
             <strong>{comparison.competitor}</strong> is [category description] focused on [primary
             capability]. userTourKit suits React teams wanting code ownership and tiny bundles;{' '}
             {comparison.competitor} is better when you need [honest competitor advantage].
@@ -119,19 +119,19 @@ export default async function ComparisonPage({ params }: PageProps) {
 
           <h2>What is userTourKit?</h2>
           <p>
-            userTourKit is an open-source headless React library for building product tours, onboarding
-            checklists, hints, announcements, and in-app messaging. Its framework-agnostic core weighs
-            under 8KB gzipped, ships with WCAG 2.1 AA accessibility and Lighthouse 100 scores by
-            default, and integrates natively with shadcn/ui, Radix UI, and Base UI through its
-            UnifiedSlot pattern. The MIT-licensed free tier includes tours, React bindings, and hints.
-            The $99 one-time Pro tier adds adoption tracking, analytics, announcements, checklists,
-            media, scheduling, and AI chat.
+            userTourKit is an open-source headless React library for building product tours,
+            onboarding checklists, hints, announcements, and in-app messaging. Its
+            framework-agnostic core weighs under 8KB gzipped, ships with WCAG 2.1 AA accessibility
+            and Lighthouse 100 scores by default, and integrates natively with shadcn/ui, Radix UI,
+            and Base UI through its UnifiedSlot pattern. The MIT-licensed free tier includes tours,
+            React bindings, and hints. The $99 one-time Pro tier adds adoption tracking, analytics,
+            announcements, checklists, media, scheduling, and AI chat.
           </p>
 
           <h2>What is {comparison.competitor}?</h2>
           <p>
-            [Write a factual 20-25 word definition of {comparison.competitor}. Include category, primary
-            function, key characteristic, and pricing model.]
+            [Write a factual 20-25 word definition of {comparison.competitor}. Include category,
+            primary function, key characteristic, and pricing model.]
           </p>
 
           <h2>Feature-by-feature comparison</h2>
@@ -216,7 +216,9 @@ export default async function ComparisonPage({ params }: PageProps) {
           <p>[Write 80-120 words honestly explaining when the competitor is the better choice.]</p>
 
           <h2>When userTourKit is the better fit</h2>
-          <p>[Write 80-120 words explaining userTourKit&apos;s advantages for specific use cases.]</p>
+          <p>
+            [Write 80-120 words explaining userTourKit&apos;s advantages for specific use cases.]
+          </p>
 
           <h2>Migration path from {comparison.competitor} to userTourKit</h2>
           <p>[Describe the migration approach in 100-150 words.]</p>
@@ -245,14 +247,15 @@ export default async function ComparisonPage({ params }: PageProps) {
 
           <h3>Is userTourKit free to use?</h3>
           <p>
-            userTourKit&apos;s core library, React bindings, and hints package are free under the MIT
-            license. The Pro tier costs $99 one-time and adds adoption tracking, analytics,
+            userTourKit&apos;s core library, React bindings, and hints package are free under the
+            MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics,
             announcements, checklists, media, scheduling, and AI chat.
           </p>
 
           <h2>Final verdict</h2>
           <p>
-            [Write a 50-70 word conclusion with a definitive recommendation based on specific use cases.]
+            [Write a 50-70 word conclusion with a definitive recommendation based on specific use
+            cases.]
           </p>
         </>
       )}

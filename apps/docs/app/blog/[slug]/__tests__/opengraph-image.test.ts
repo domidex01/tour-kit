@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 // Mock sharp
 vi.mock('sharp', () => {
@@ -45,7 +45,7 @@ vi.mock('@/lib/comparisons', () => ({
       return {
         slug: 'best-product-tour-tools-react',
         title: '10 Best Product Tour Tools for React Developers (2026)',
-        description: "We tested 10 product tour tools for React.",
+        description: 'We tested 10 product tour tools for React.',
         category: 'Listicle',
       }
     }

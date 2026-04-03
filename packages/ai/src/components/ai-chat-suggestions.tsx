@@ -34,9 +34,9 @@ export function AiChatSuggestions(props: AiChatSuggestionsProps) {
       )
   )
 
-  const staticSuggestions = (
-    props.suggestions ?? config?.suggestions?.static ?? []
-  ).filter((s) => !sentTexts.has(s))
+  const staticSuggestions = (props.suggestions ?? config?.suggestions?.static ?? []).filter(
+    (s) => !sentTexts.has(s)
+  )
 
   // Hide when busy or empty
   if (status !== 'ready' || staticSuggestions.length === 0) {
@@ -44,9 +44,8 @@ export function AiChatSuggestions(props: AiChatSuggestionsProps) {
   }
 
   return (
-    <div
-      className={cn('flex flex-wrap gap-2 px-4 py-2', props.className)}
-      role="group"
+    <fieldset
+      className={cn('flex flex-wrap gap-2 border-0 px-4 py-2', props.className)}
       aria-label="Suggested questions"
     >
       {staticSuggestions.map((suggestion) => {
@@ -74,6 +73,6 @@ export function AiChatSuggestions(props: AiChatSuggestionsProps) {
           </button>
         )
       })}
-    </div>
+    </fieldset>
   )
 }

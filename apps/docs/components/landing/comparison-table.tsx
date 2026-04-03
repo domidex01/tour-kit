@@ -65,7 +65,9 @@ export function ComparisonTable() {
               <tr className="border-b border-fd-border">
                 <th className="py-3 pr-6 text-left font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-fd-muted-foreground" />
                 <th className="bg-[#0197f6]/5 px-5 py-3 text-center">
-                  <span className="font-mono text-[13px] font-bold text-[#0197f6]">userTourKit</span>
+                  <span className="font-mono text-[13px] font-bold text-[#0197f6]">
+                    userTourKit
+                  </span>
                 </th>
                 <th className="px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
                   SaaS platforms

@@ -30,9 +30,7 @@ export function ArticleLayout({
 }: ArticleLayoutProps) {
   return (
     <HomeLayout {...baseOptions()}>
-      <BreadcrumbJsonLd
-        items={breadcrumbs.map((b) => ({ name: b.label, url: b.href }))}
-      />
+      <BreadcrumbJsonLd items={breadcrumbs.map((b) => ({ name: b.label, url: b.href }))} />
       <main className="mx-auto w-full max-w-[860px] px-6 py-12 sm:px-8 lg:px-12">
         {/* Breadcrumbs */}
         <nav aria-label="Breadcrumb" className="mb-8">
@@ -59,9 +57,7 @@ export function ArticleLayout({
           </h1>
           <p className="text-[16px] leading-relaxed text-fd-muted-foreground">{description}</p>
           {lastUpdated && (
-            <p className="mt-3 text-[13px] text-fd-muted-foreground">
-              Last updated: {lastUpdated}
-            </p>
+            <p className="mt-3 text-[13px] text-fd-muted-foreground">Last updated: {lastUpdated}</p>
           )}
         </header>
 

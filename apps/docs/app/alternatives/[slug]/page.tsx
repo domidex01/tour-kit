@@ -1,5 +1,9 @@
 import { ArticleLayout } from '@/components/article/article-layout'
-import { getAlternative, getPublishedAlternatives, getPublishedComparisons } from '@/lib/comparisons'
+import {
+  getAlternative,
+  getPublishedAlternatives,
+  getPublishedComparisons,
+} from '@/lib/comparisons'
 import { ArticleJsonLd, FAQJsonLd } from '@/lib/structured-data'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -88,8 +92,8 @@ export default async function AlternativesPage({ params }: PageProps) {
           documentation quality
         </li>
         <li>
-          <strong>Feature completeness</strong> — Tours, hints, checklists, announcements, analytics,
-          scheduling
+          <strong>Feature completeness</strong> — Tours, hints, checklists, announcements,
+          analytics, scheduling
         </li>
         <li>
           <strong>Performance</strong> — Bundle size (gzipped), Lighthouse impact, tree-shaking
@@ -117,8 +121,8 @@ export default async function AlternativesPage({ params }: PageProps) {
         <strong>License:</strong> MIT
       </p>
       <p>
-        We built userTourKit, so take this recommendation with appropriate skepticism. userTourKit is an
-        open-source headless React library for product tours, onboarding checklists, hints,
+        We built userTourKit, so take this recommendation with appropriate skepticism. userTourKit
+        is an open-source headless React library for product tours, onboarding checklists, hints,
         announcements, and in-app messaging with a &lt;8KB gzipped core.
       </p>
 
@@ -197,8 +201,8 @@ export default async function AlternativesPage({ params }: PageProps) {
 
       <h3>Can I migrate from {alt.competitor} to userTourKit?</h3>
       <p>
-        Yes. userTourKit&apos;s headless API is designed for incremental adoption. You can run userTourKit
-        alongside {alt.competitor} during migration without conflicts.
+        Yes. userTourKit&apos;s headless API is designed for incremental adoption. You can run
+        userTourKit alongside {alt.competitor} during migration without conflicts.
       </p>
 
       <h2>The bottom line</h2>

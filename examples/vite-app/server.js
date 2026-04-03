@@ -1,6 +1,6 @@
+import { createServer } from 'node:http'
 import { createOpenAI } from '@ai-sdk/openai'
 import { createChatRouteHandler } from '@tour-kit/ai/server'
-import { createServer } from 'node:http'
 
 const openrouter = createOpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
@@ -52,7 +52,7 @@ const server = createServer(async (req, res) => {
     const body = Buffer.concat(chunks)
 
     // Build a Web Request from the Node request
-    const url = new URL(req.url, `http://localhost:3001`)
+    const url = new URL(req.url, 'http://localhost:3001')
     const webReq = new Request(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1,6 +1,6 @@
+import fs from 'node:fs'
 import path from 'node:path'
 import sharp from 'sharp'
-import fs from 'node:fs'
 
 const OG_WIDTH = 1200
 const OG_HEIGHT = 630
@@ -64,7 +64,11 @@ function wrapText(text: string, maxCharsPerLine: number): string[] {
 }
 
 function escapeXml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }
 
 function buildTextSvg(options: OGImageOptions): Buffer {
@@ -93,7 +97,7 @@ function buildTextSvg(options: OGImageOptions): Buffer {
   const titleSvg = titleLines
     .map(
       (line, i) =>
-        `<text x="72" y="${titleStartY + i * titleLineHeight}" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="${titleFontSize}" font-weight="800" fill="#ffffff" letter-spacing="-0.02em">${escapeXml(line)}</text>`,
+        `<text x="72" y="${titleStartY + i * titleLineHeight}" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="${titleFontSize}" font-weight="800" fill="#ffffff" letter-spacing="-0.02em">${escapeXml(line)}</text>`
     )
     .join('\n')
 

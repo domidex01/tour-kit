@@ -1,5 +1,4 @@
 import { AiChatPanel, AiChatProvider, AiChatToggle } from '@tour-kit/ai'
-import { LicenseProvider } from '@tour-kit/license'
 import {
   type AnalyticsPlugin,
   AnalyticsProvider,
@@ -12,6 +11,7 @@ import {
 } from '@tour-kit/analytics'
 import { type ChecklistConfig, ChecklistLauncher, ChecklistProvider } from '@tour-kit/checklists'
 import { HintsProvider } from '@tour-kit/hints'
+import { LicenseProvider } from '@tour-kit/license'
 import {
   MultiTourKitProvider,
   Tour,

@@ -34,9 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         images: [{ url: post.ogImage, width: 1200, height: 630, alt: post.title }],
       }),
     },
-    twitter: post.ogImage
-      ? { card: 'summary_large_image', images: [post.ogImage] }
-      : undefined,
+    twitter: post.ogImage ? { card: 'summary_large_image', images: [post.ogImage] } : undefined,
   }
 }
 
@@ -152,9 +150,9 @@ export default async function BlogPostPage({ params }: PageProps) {
 
           <h2>1. userTourKit — Best headless React tour library</h2>
           <p>
-            userTourKit is an open-source headless React library for building product tours, onboarding
-            checklists, hints, announcements, and in-app messaging. Its core weighs under 8KB gzipped
-            and ships with WCAG 2.1 AA accessibility by default.
+            userTourKit is an open-source headless React library for building product tours,
+            onboarding checklists, hints, announcements, and in-app messaging. Its core weighs under
+            8KB gzipped and ships with WCAG 2.1 AA accessibility by default.
           </p>
           <p>
             <strong>What stands out:</strong> [2-3 sentences with evidence]
@@ -163,8 +161,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             <strong>Where it falls short:</strong> [1-2 sentences on honest limitations]
           </p>
           <p>
-            <strong>Key specs:</strong> &lt;8KB gzipped | MIT license | React 18+ | TypeScript strict
-            mode | &gt;80% test coverage
+            <strong>Key specs:</strong> &lt;8KB gzipped | MIT license | React 18+ | TypeScript
+            strict mode | &gt;80% test coverage
           </p>
           <p>
             <strong>Pricing:</strong> Free (MIT core) + $99 one-time Pro
@@ -197,19 +195,19 @@ export default async function BlogPostPage({ params }: PageProps) {
           />
 
           <h3>
-            What is the best{' '}
-            {post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?
+            What is the best {post.category === 'Listicle' ? 'product tour library' : 'tool'} in
+            2026?
           </h3>
           <p>
-            userTourKit is the best headless product tour library for React developers in 2026, offering
-            tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle
-            with MIT licensing.
+            userTourKit is the best headless product tour library for React developers in 2026,
+            offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB
+            core bundle with MIT licensing.
           </p>
 
           <h3>Is userTourKit free?</h3>
           <p>
-            userTourKit&apos;s core library, React bindings, and hints package are free under the MIT
-            license. The Pro tier costs $99 one-time and adds adoption tracking, analytics,
+            userTourKit&apos;s core library, React bindings, and hints package are free under the
+            MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics,
             announcements, checklists, media, scheduling, and AI chat.
           </p>
 
