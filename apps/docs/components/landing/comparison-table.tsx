@@ -54,7 +54,7 @@ export function ComparisonTable() {
           </h2>
           <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
             SaaS platforms charge hundreds a month for UI you can&apos;t customize. Open-source
-            alternatives ship bloated bundles without TypeScript or accessibility. User Tour Kit is
+            alternatives ship bloated bundles without TypeScript or accessibility. userTourKit is
             the third option.
           </p>
         </div>
@@ -65,7 +65,7 @@ export function ComparisonTable() {
               <tr className="border-b border-fd-border">
                 <th className="py-3 pr-6 text-left font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-fd-muted-foreground" />
                 <th className="bg-[#0197f6]/5 px-5 py-3 text-center">
-                  <span className="font-mono text-[13px] font-bold text-[#0197f6]">User Tour Kit</span>
+                  <span className="font-mono text-[13px] font-bold text-[#0197f6]">userTourKit</span>
                 </th>
                 <th className="px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
                   SaaS platforms

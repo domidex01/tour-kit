@@ -12,7 +12,7 @@ import path from 'node:path'
 
 // ── Tool name → URL registry ──
 const TOOL_URLS: Record<string, string> = {
-  'user tour kit': 'https://usertourkit.com',
+  'usertourkit': 'https://usertourkit.com',
   'react joyride': 'https://react-joyride.com',
   'shepherd.js': 'https://shepherdjs.dev',
   'shepherd': 'https://shepherdjs.dev',

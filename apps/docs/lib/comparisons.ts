@@ -54,12 +54,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'react-joyride',
     category: 'open-source',
     published: true,
-    title: 'User Tour Kit vs React Joyride: Which React Tour Library Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs React Joyride: 2026 Comparison for Developers',
+    title: 'userTourKit vs React Joyride: Which React Tour Library Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs React Joyride: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs React Joyride for React product tours. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026.',
+      'Compare userTourKit vs React Joyride for React product tours. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'react joyride',
       'react joyride alternative',
       'product tour library',
@@ -72,12 +72,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'shepherd-js',
     category: 'open-source',
     published: true,
-    title: 'User Tour Kit vs Shepherd.js: Which Product Tour Library Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Shepherd.js: 2026 Comparison for Developers',
+    title: 'userTourKit vs Shepherd.js: Which Product Tour Library Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Shepherd.js: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Shepherd.js for product tours. See features, bundle size, licensing, and accessibility side-by-side. Find which fits your stack in 2026.',
+      'Compare userTourKit vs Shepherd.js for product tours. See features, bundle size, licensing, and accessibility side-by-side. Find which fits your stack in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'shepherd.js',
       'shepherd.js alternative',
       'product tour library',
@@ -90,12 +90,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'intro-js',
     category: 'open-source',
     published: true,
-    title: 'User Tour Kit vs Intro.js: Which Tour Library Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Intro.js: 2026 Comparison for Developers',
+    title: 'userTourKit vs Intro.js: Which Tour Library Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Intro.js: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Intro.js for product tours and onboarding. See features, bundle size, licensing, and accessibility side-by-side in 2026.',
+      'Compare userTourKit vs Intro.js for product tours and onboarding. See features, bundle size, licensing, and accessibility side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'intro.js',
       'intro.js alternative',
       'product tour library',
@@ -108,12 +108,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'driver-js',
     category: 'open-source',
     published: true,
-    title: 'User Tour Kit vs Driver.js: Which Tour Library Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Driver.js: 2026 Comparison for Developers',
+    title: 'userTourKit vs Driver.js: Which Tour Library Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Driver.js: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Driver.js for product tours. See features, bundle size, React integration, and accessibility side-by-side in 2026.',
+      'Compare userTourKit vs Driver.js for product tours. See features, bundle size, React integration, and accessibility side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'driver.js',
       'driver.js alternative',
       'product tour library',
@@ -126,12 +126,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'reactour',
     category: 'open-source',
     published: true,
-    title: 'User Tour Kit vs Reactour: Which React Tour Library Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Reactour: 2026 Comparison for Developers',
+    title: 'userTourKit vs Reactour: Which React Tour Library Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Reactour: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Reactour for React product tours. See features, bundle size, pricing, accessibility, and TypeScript side-by-side in 2026.',
+      'Compare userTourKit vs Reactour for React product tours. See features, bundle size, pricing, accessibility, and TypeScript side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'reactour',
       'reactour alternative',
       'react tour library',
@@ -145,12 +145,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'appcues',
     category: 'commercial',
     published: true,
-    title: 'User Tour Kit vs Appcues: Which Onboarding Tool Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Appcues: 2026 Comparison for React Teams',
+    title: 'userTourKit vs Appcues: Which Onboarding Tool Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Appcues: 2026 Comparison for React Teams',
     description:
-      'Compare User Tour Kit vs Appcues for product onboarding. $99 one-time vs $300+/month. See features, pricing, and developer experience side-by-side in 2026.',
+      'Compare userTourKit vs Appcues for product onboarding. $99 one-time vs $300+/month. See features, pricing, and developer experience side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'appcues',
       'appcues alternative',
       'product onboarding',
@@ -163,12 +163,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'userguiding',
     category: 'commercial',
     published: true,
-    title: 'User Tour Kit vs UserGuiding: Which Onboarding Tool Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs UserGuiding: 2026 Comparison for Developers',
+    title: 'userTourKit vs UserGuiding: Which Onboarding Tool Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs UserGuiding: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs UserGuiding for product onboarding. See features, pricing, customization, and developer control side-by-side in 2026.',
+      'Compare userTourKit vs UserGuiding for product onboarding. See features, pricing, customization, and developer control side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'userguiding',
       'userguiding alternative',
       'product tour',
@@ -181,12 +181,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'userpilot',
     category: 'commercial',
     published: true,
-    title: 'User Tour Kit vs Userpilot: Which Onboarding Tool Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Userpilot: 2026 Comparison for Developers',
+    title: 'userTourKit vs Userpilot: Which Onboarding Tool Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Userpilot: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Userpilot for product onboarding. See features, pricing, analytics, and developer experience side-by-side in 2026.',
+      'Compare userTourKit vs Userpilot for product onboarding. See features, pricing, analytics, and developer experience side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'userpilot',
       'userpilot alternative',
       'product analytics',
@@ -199,11 +199,11 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitor: 'Pendo',
     competitorSlug: 'pendo',
     category: 'commercial',
-    title: 'User Tour Kit vs Pendo: Which Product Tour Tool Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Pendo: 2026 Comparison for Developers',
+    title: 'userTourKit vs Pendo: Which Product Tour Tool Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Pendo: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Pendo for product tours and analytics. See features, pricing, and developer experience side-by-side in 2026.',
-    keywords: ['user tour kit', 'pendo', 'pendo alternative', 'product analytics', 'enterprise'],
+      'Compare userTourKit vs Pendo for product tours and analytics. See features, pricing, and developer experience side-by-side in 2026.',
+    keywords: ['usertourkit', 'pendo', 'pendo alternative', 'product analytics', 'enterprise'],
   },
   {
     slug: 'tour-kit-vs-walkme',
@@ -211,12 +211,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'walkme',
     category: 'commercial',
     published: true,
-    title: 'User Tour Kit vs WalkMe: Which Digital Adoption Platform Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs WalkMe: 2026 Comparison for Developers',
+    title: 'userTourKit vs WalkMe: Which Digital Adoption Platform Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs WalkMe: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs WalkMe for digital adoption. See features, pricing, performance, and implementation complexity side-by-side in 2026.',
+      'Compare userTourKit vs WalkMe for digital adoption. See features, pricing, performance, and implementation complexity side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'walkme',
       'walkme alternative',
       'digital adoption platform',
@@ -229,12 +229,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'userflow',
     category: 'commercial',
     published: true,
-    title: 'User Tour Kit vs Userflow: Which Onboarding Tool Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Userflow: 2026 Comparison for Developers',
+    title: 'userTourKit vs Userflow: Which Onboarding Tool Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Userflow: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Userflow for product onboarding. See features, pricing, flow builder, and developer experience side-by-side in 2026.',
+      'Compare userTourKit vs Userflow for product onboarding. See features, pricing, flow builder, and developer experience side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'userflow',
       'userflow alternative',
       'product onboarding',
@@ -246,12 +246,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitor: 'Frigade',
     competitorSlug: 'frigade',
     category: 'platform',
-    title: 'User Tour Kit vs Frigade: Which React Onboarding Library Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Frigade: 2026 Comparison for Developers',
+    title: 'userTourKit vs Frigade: Which React Onboarding Library Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Frigade: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Frigade for React onboarding. See features, self-hosting, pricing, and vendor independence side-by-side in 2026.',
+      'Compare userTourKit vs Frigade for React onboarding. See features, self-hosting, pricing, and vendor independence side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'frigade',
       'frigade alternative',
       'react onboarding',
@@ -265,11 +265,11 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'onborda',
     category: 'open-source',
     published: true,
-    title: 'User Tour Kit vs Onborda: Which Next.js Tour Library Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Onborda: 2026 Comparison for Developers',
+    title: 'userTourKit vs Onborda: Which Next.js Tour Library Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Onborda: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Onborda for Next.js product tours. See features, framework support, and compatibility side-by-side in 2026.',
-    keywords: ['user tour kit', 'onborda', 'onborda alternative', 'nextjs tour', 'product tour'],
+      'Compare userTourKit vs Onborda for Next.js product tours. See features, framework support, and compatibility side-by-side in 2026.',
+    keywords: ['usertourkit', 'onborda', 'onborda alternative', 'nextjs tour', 'product tour'],
   },
   {
     slug: 'tour-kit-vs-onboardjs',
@@ -277,23 +277,23 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'onboardjs',
     category: 'open-source',
     published: true,
-    title: 'User Tour Kit vs OnboardJS: Which Headless Tour Library Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs OnboardJS: 2026 Comparison for Developers',
+    title: 'userTourKit vs OnboardJS: Which Headless Tour Library Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs OnboardJS: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs OnboardJS for headless product tours. See features, visual components, and TypeScript support side-by-side in 2026.',
-    keywords: ['user tour kit', 'onboardjs', 'onboardjs alternative', 'headless tour', 'product tour'],
+      'Compare userTourKit vs OnboardJS for headless product tours. See features, visual components, and TypeScript support side-by-side in 2026.',
+    keywords: ['usertourkit', 'onboardjs', 'onboardjs alternative', 'headless tour', 'product tour'],
   },
   {
     slug: 'tour-kit-vs-usertour',
     competitor: 'Usertour.io',
     competitorSlug: 'usertour',
     category: 'platform',
-    title: 'User Tour Kit vs Usertour.io: Which Onboarding Tool Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Usertour.io: 2026 Comparison for Developers',
+    title: 'userTourKit vs Usertour.io: Which Onboarding Tool Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Usertour.io: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Usertour.io for product onboarding. See features, self-hosting, pricing, and developer experience side-by-side in 2026.',
+      'Compare userTourKit vs Usertour.io for product onboarding. See features, self-hosting, pricing, and developer experience side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'usertour',
       'usertour alternative',
       'product onboarding',
@@ -306,12 +306,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'chameleon',
     category: 'commercial',
     published: true,
-    title: 'User Tour Kit vs Chameleon: Which Onboarding Tool Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Chameleon: 2026 Comparison for Developers',
+    title: 'userTourKit vs Chameleon: Which Onboarding Tool Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Chameleon: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Chameleon for product onboarding. See features, pricing, and developer experience side-by-side in 2026.',
+      'Compare userTourKit vs Chameleon for product onboarding. See features, pricing, and developer experience side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'chameleon',
       'chameleon alternative',
       'product onboarding',
@@ -323,12 +323,12 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitor: 'Whatfix',
     competitorSlug: 'whatfix',
     category: 'commercial',
-    title: 'User Tour Kit vs Whatfix: Which Digital Adoption Platform Should You Choose in 2026?',
-    metaTitle: 'User Tour Kit vs Whatfix: 2026 Comparison for Developers',
+    title: 'userTourKit vs Whatfix: Which Digital Adoption Platform Should You Choose in 2026?',
+    metaTitle: 'userTourKit vs Whatfix: 2026 Comparison for Developers',
     description:
-      'Compare User Tour Kit vs Whatfix for digital adoption. See features, pricing, and developer experience side-by-side in 2026.',
+      'Compare userTourKit vs Whatfix for digital adoption. See features, pricing, and developer experience side-by-side in 2026.',
     keywords: [
-      'user tour kit',
+      'usertourkit',
       'whatfix',
       'whatfix alternative',
       'digital adoption',
@@ -347,7 +347,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best Appcues Alternatives for React and JavaScript Developers in 2026',
     metaTitle: 'Best Appcues Alternatives for Developers (2026)',
     description:
-      'The best Appcues alternatives for developers in 2026. Compare User Tour Kit, Userpilot, UserGuiding, Userflow, and more. Ranked by DX, features, and pricing.',
+      'The best Appcues alternatives for developers in 2026. Compare userTourKit, Userpilot, UserGuiding, Userflow, and more. Ranked by DX, features, and pricing.',
     keywords: ['appcues alternative', 'appcues alternatives', 'product onboarding', 'react'],
   },
   {
@@ -357,7 +357,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best Pendo Alternatives for React and JavaScript Developers in 2026',
     metaTitle: 'Best Pendo Alternatives for Developers (2026)',
     description:
-      'The best Pendo alternatives for developers in 2026. Compare User Tour Kit, Appcues, Userpilot, and more. Ranked by DX, features, and pricing.',
+      'The best Pendo alternatives for developers in 2026. Compare userTourKit, Appcues, Userpilot, and more. Ranked by DX, features, and pricing.',
     keywords: ['pendo alternative', 'pendo alternatives', 'product analytics', 'onboarding'],
   },
   {
@@ -367,7 +367,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best WalkMe Alternatives for React and JavaScript Developers in 2026',
     metaTitle: 'Best WalkMe Alternatives for Developers (2026)',
     description:
-      'The best WalkMe alternatives for developers in 2026. Compare User Tour Kit, Pendo, Whatfix, and more. Ranked by DX, features, and pricing.',
+      'The best WalkMe alternatives for developers in 2026. Compare userTourKit, Pendo, Whatfix, and more. Ranked by DX, features, and pricing.',
     keywords: [
       'walkme alternative',
       'walkme alternatives',
@@ -382,7 +382,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best Userpilot Alternatives for React and JavaScript Developers in 2026',
     metaTitle: 'Best Userpilot Alternatives for Developers (2026)',
     description:
-      'The best Userpilot alternatives for developers in 2026. Compare User Tour Kit, Appcues, UserGuiding, and more. Ranked by DX, features, and pricing.',
+      'The best Userpilot alternatives for developers in 2026. Compare userTourKit, Appcues, UserGuiding, and more. Ranked by DX, features, and pricing.',
     keywords: [
       'userpilot alternative',
       'userpilot alternatives',
@@ -397,7 +397,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best UserGuiding Alternatives for React and JavaScript Developers in 2026',
     metaTitle: 'Best UserGuiding Alternatives for Developers (2026)',
     description:
-      'The best UserGuiding alternatives for developers in 2026. Compare User Tour Kit, Appcues, Userpilot, and more. Ranked by DX, features, and pricing.',
+      'The best UserGuiding alternatives for developers in 2026. Compare userTourKit, Appcues, Userpilot, and more. Ranked by DX, features, and pricing.',
     keywords: [
       'userguiding alternative',
       'userguiding alternatives',
@@ -412,7 +412,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best Userflow Alternatives for React and JavaScript Developers in 2026',
     metaTitle: 'Best Userflow Alternatives for Developers (2026)',
     description:
-      'The best Userflow alternatives for developers in 2026. Compare User Tour Kit, Appcues, UserGuiding, and more. Ranked by DX, features, and pricing.',
+      'The best Userflow alternatives for developers in 2026. Compare userTourKit, Appcues, UserGuiding, and more. Ranked by DX, features, and pricing.',
     keywords: [
       'userflow alternative',
       'userflow alternatives',
@@ -427,7 +427,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best React Joyride Alternatives for Developers in 2026',
     metaTitle: 'Best React Joyride Alternatives for Developers (2026)',
     description:
-      'The best React Joyride alternatives in 2026. Compare User Tour Kit, Shepherd.js, Driver.js, and more. Ranked by bundle size, features, and DX.',
+      'The best React Joyride alternatives in 2026. Compare userTourKit, Shepherd.js, Driver.js, and more. Ranked by bundle size, features, and DX.',
     keywords: [
       'react joyride alternative',
       'react joyride alternatives',
@@ -442,7 +442,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best Shepherd.js Alternatives for Developers in 2026',
     metaTitle: 'Best Shepherd.js Alternatives for Developers (2026)',
     description:
-      'The best Shepherd.js alternatives in 2026. Compare User Tour Kit, React Joyride, Driver.js, and more. Ranked by license, features, and DX.',
+      'The best Shepherd.js alternatives in 2026. Compare userTourKit, React Joyride, Driver.js, and more. Ranked by license, features, and DX.',
     keywords: [
       'shepherd.js alternative',
       'shepherd.js alternatives',
@@ -457,7 +457,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best Intro.js Alternatives for Developers in 2026',
     metaTitle: 'Best Intro.js Alternatives for Developers (2026)',
     description:
-      'The best Intro.js alternatives in 2026. Compare User Tour Kit, Shepherd.js, Driver.js, and more. Ranked by license, features, and DX.',
+      'The best Intro.js alternatives in 2026. Compare userTourKit, Shepherd.js, Driver.js, and more. Ranked by license, features, and DX.',
     keywords: [
       'intro.js alternative',
       'intro.js alternatives',
@@ -472,7 +472,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     title: 'Best Frigade Alternatives for Developers in 2026',
     metaTitle: 'Best Frigade Alternatives for Developers (2026)',
     description:
-      'The best Frigade alternatives in 2026. Compare User Tour Kit, Appcues, and more. Ranked by self-hosting, pricing, and DX.',
+      'The best Frigade alternatives in 2026. Compare userTourKit, Appcues, and more. Ranked by self-hosting, pricing, and DX.',
     keywords: [
       'frigade alternative',
       'frigade alternatives',
@@ -503,7 +503,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'The 9 Best Open-Source Onboarding Tools in 2026, Ranked',
     metaTitle: '9 Best Open-Source Onboarding Tools in 2026 (Ranked by Developers)',
     description:
-      'The best open-source onboarding and product tour tools in 2026. Compare User Tour Kit, Shepherd.js, React Joyride, Driver.js, and more.',
+      'The best open-source onboarding and product tour tools in 2026. Compare userTourKit, Shepherd.js, React Joyride, Driver.js, and more.',
     keywords: [
       'product tour open source',
       'best free product tour library',
@@ -561,7 +561,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'How to Add a Product Tour to a React 19 App in 5 Minutes',
     metaTitle: 'Add a Product Tour to React 19 in 5 Minutes (2026)',
     description:
-      'Add a working product tour to your React 19 app with Tour Kit. Covers useTransition async steps, ref-as-prop targeting, and full TypeScript examples.',
+      'Add a working product tour to your React 19 app with userTourKit. Covers useTransition async steps, ref-as-prop targeting, and full TypeScript examples.',
     keywords: [
       'add product tour react 19',
       'react 19 onboarding tutorial',

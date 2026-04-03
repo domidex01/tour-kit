@@ -12,7 +12,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // TourKit custom colors using CSS variables
+        // userTourKit custom colors using CSS variables
         tk: {
           primary: 'var(--tk-primary)',
           'primary-container': 'var(--tk-primary-container)',

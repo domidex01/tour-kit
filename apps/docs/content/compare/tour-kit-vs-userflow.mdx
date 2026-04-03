@@ -1,6 +1,6 @@
 ---
-title: "Tour Kit vs Userflow: which onboarding tool should you choose in 2026?"
-description: "Compare Tour Kit vs Userflow for product onboarding. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
+title: "userTourKit vs Userflow: which onboarding tool should you choose in 2026?"
+description: "Compare userTourKit vs Userflow for product onboarding. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
 competitor: "Userflow"
 competitorSlug: "userflow"
 lastUpdated: "2026-03-31"
@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-Tour Kit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $99 one-time Pro fee. Userflow is a no-code onboarding platform starting at $240/month with a visual flow builder and AI-powered tour generation. Tour Kit suits React teams wanting code ownership and design-system-native UI; Userflow is better when product managers need to ship onboarding without developers.
+userTourKit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $99 one-time Pro fee. Userflow is a no-code onboarding platform starting at $240/month with a visual flow builder and AI-powered tour generation. userTourKit suits React teams wanting code ownership and design-system-native UI; Userflow is better when product managers need to ship onboarding without developers.
 
-## What is Tour Kit?
+## What is userTourKit?
 
-Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
 
 ## What is Userflow?
 
@@ -24,25 +24,25 @@ Userflow is a commercial no-code onboarding platform that lets product teams bui
 
 Userflow's Kanban-style flow builder is genuinely impressive. You drag steps onto a canvas, connect them with branches, and preview the result without writing code. Their AI Smartflows feature can generate up to 30-step tours from recorded clicks. G2 rates Userflow's ease of use at 9.3/10, and that score feels earned.
 
-Tour Kit takes the opposite approach. Steps are TypeScript objects with full type inference across targets, placements, routes, and branching conditions. Twelve placement options. Async `onBeforeShow` validators. Cross-tour branching via `{ tour: 'other-tour', step: 'step-id' }`. Route-aware navigation ships with adapters for Next.js App Router, Pages Router, and React Router v6+.
+userTourKit takes the opposite approach. Steps are TypeScript objects with full type inference across targets, placements, routes, and branching conditions. Twelve placement options. Async `onBeforeShow` validators. Cross-tour branching via `{ tour: 'other-tour', step: 'step-id' }`. Route-aware navigation ships with adapters for Next.js App Router, Pages Router, and React Router v6+.
 
 The trade-off is real: every change requires a developer. But for teams already working in React, the config lives in version control, gets reviewed in PRs, and deploys with the rest of the app.
 
 ### Hints and hotspots
 
-Both tools support persistent hotspot indicators on UI elements. Userflow calls them "launchers" and "beacons," configurable through the visual builder. Tour Kit's `@tour-kit/hints` package (&lt;5KB gzipped) provides `HintHotspot` and `HintTooltip` components with independent dismiss state per hint and persistence across page loads via storage adapters. Hints are non-sequential, so each one manages its own lifecycle rather than following a linear flow. The key difference: Tour Kit hints render as actual React components in your tree, while Userflow injects its own DOM overlay.
+Both tools support persistent hotspot indicators on UI elements. Userflow calls them "launchers" and "beacons," configurable through the visual builder. userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) provides `HintHotspot` and `HintTooltip` components with independent dismiss state per hint and persistence across page loads via storage adapters. Hints are non-sequential, so each one manages its own lifecycle rather than following a linear flow. The key difference: userTourKit hints render as actual React components in your tree, while Userflow injects its own DOM overlay.
 
 ### Checklists and onboarding flows
 
 Userflow ships checklists on all plans. You configure tasks and dependencies in the visual builder. It works well for straightforward onboarding sequences.
 
-Tour Kit's `@tour-kit/checklists` (Pro, $99 one-time) adds task dependencies with circular dependency detection and three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks. The `ChecklistPanel` and `ChecklistLauncher` components render inside your React tree, so they inherit your design tokens.
+userTourKit's `@tour-kit/checklists` (Pro, $99 one-time) adds task dependencies with circular dependency detection and three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks. The `ChecklistPanel` and `ChecklistLauncher` components render inside your React tree, so they inherit your design tokens.
 
-Here's the practical difference: Userflow checklists look like Userflow. Tour Kit checklists look like your app.
+Here's the practical difference: Userflow checklists look like Userflow. userTourKit checklists look like your app.
 
 ### Announcements and banners
 
-Userflow includes basic announcement capabilities. Tour Kit's `@tour-kit/announcements` (Pro) goes deeper with five display variants: modal, toast (6 positions), banner (top/bottom sticky), slideout (left/right drawer), and spotlight (targets a DOM element with overlay). Frequency rules cover once, per-session, count-based, and interval-based display.
+Userflow includes basic announcement capabilities. userTourKit's `@tour-kit/announcements` (Pro) goes deeper with five display variants: modal, toast (6 positions), banner (top/bottom sticky), slideout (left/right drawer), and spotlight (targets a DOM element with overlay). Frequency rules cover once, per-session, count-based, and interval-based display.
 
 A priority queue handles conflicts when multiple announcements compete for attention.
 
@@ -50,35 +50,35 @@ A priority queue handles conflicts when multiple announcements compete for atten
 
 This is where Userflow shows its weakest hand. Multiple G2 reviews flag "Poor Reporting" as a consistent complaint. Userflow tracks completion rates but doesn't offer funnel analysis, behavioral analytics, or session replay. Teams end up bolting on Mixpanel or Amplitude separately, adding both cost and integration work.
 
-Tour Kit's `@tour-kit/analytics` (Pro) takes a plugin-based approach. Five built-in plugins ship out of the box: PostHog, Mixpanel, Amplitude, GA4, and a console logger. Custom plugins are three lines of code. The system fires on 12 event types covering tours, hints, checklists, and announcements. You own the data pipeline.
+userTourKit's `@tour-kit/analytics` (Pro) takes a plugin-based approach. Five built-in plugins ship out of the box: PostHog, Mixpanel, Amplitude, GA4, and a console logger. Custom plugins are three lines of code. The system fires on 12 event types covering tours, hints, checklists, and announcements. You own the data pipeline.
 
 ### Scheduling and targeting
 
 Userflow offers attribute-based user segmentation and cohort targeting. You can target flows based on user properties and custom events. For teams that need segmentation without backend work, this is convenient.
 
-Tour Kit's `@tour-kit/scheduling` (Pro) focuses on time-based display control: start/end dates, time-of-day windows, day-of-week filters, recurring patterns, and blackout periods. Timezone support uses IANA identifiers. Business hour presets cover US Standard (9-5 ET), US Tech (10-6 PT), UK Standard, and four others. The `ScheduleGate` component conditionally renders children based on schedule state. Userflow's approach is user-centric (who sees this); Tour Kit's is time-centric (when does this show). Different problems, different tools.
+userTourKit's `@tour-kit/scheduling` (Pro) focuses on time-based display control: start/end dates, time-of-day windows, day-of-week filters, recurring patterns, and blackout periods. Timezone support uses IANA identifiers. Business hour presets cover US Standard (9-5 ET), US Tech (10-6 PT), UK Standard, and four others. The `ScheduleGate` component conditionally renders children based on schedule state. Userflow's approach is user-centric (who sees this); userTourKit's is time-centric (when does this show). Different problems, different tools.
 
 ### Adoption tracking
 
 Userflow doesn't offer dedicated feature adoption tracking. Their analytics cover flow completion and user progress through checklists, but there's no feature-tagging or adoption criteria system. You'd track adoption separately through your product analytics stack (Amplitude, Mixpanel, etc.).
 
-Tour Kit's `@tour-kit/adoption` ($99 Pro) fills that gap. It tracks feature usage against configurable adoption criteria. The adoption calculator evaluates actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and supports time-based, usage-based, or event-based triggers. `IfNotAdopted` conditionally renders badges or prompts for users who haven't adopted a feature, and `AdoptionDashboard` provides admins with a visual overview of adoption metrics.
+userTourKit's `@tour-kit/adoption` ($99 Pro) fills that gap. It tracks feature usage against configurable adoption criteria. The adoption calculator evaluates actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and supports time-based, usage-based, or event-based triggers. `IfNotAdopted` conditionally renders badges or prompts for users who haven't adopted a feature, and `AdoptionDashboard` provides admins with a visual overview of adoption metrics.
 
-If you need adoption tracking with Userflow, you're building it yourself or stitching together a separate analytics tool. Tour Kit bundles it in the Pro package.
+If you need adoption tracking with Userflow, you're building it yourself or stitching together a separate analytics tool. userTourKit bundles it in the Pro package.
 
 ### Media embedding
 
 Userflow supports video embeds in flow steps — YouTube and Vimeo URLs can be pasted into their builder. No Loom, Wistia, GIF, or Lottie support. Media is configured through Userflow's visual editor, not in code.
 
-Tour Kit's `@tour-kit/media` ($99 Pro) handles video and media embedding directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant provides full control over the player UI.
+userTourKit's `@tour-kit/media` ($99 Pro) handles video and media embedding directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant provides full control over the player UI.
 
-Userflow covers the basics for video in tours. Tour Kit supports seven platforms with programmatic control and accessibility built in.
+Userflow covers the basics for video in tours. userTourKit supports seven platforms with programmatic control and accessibility built in.
 
 ### Accessibility and WCAG compliance
 
 Userflow doesn't document WCAG compliance to any specific level. Their Chrome extension (v4.10.0, updated February 2026) injects overlay elements that sit outside your app's accessibility tree.
 
-Tour Kit ships WCAG 2.1 AA compliant by default, with focus trapping (`useFocusTrap`), screen reader announcements via `aria-live`, and full keyboard navigation. It also respects `prefers-reduced-motion`. All built in, not opt-in. Lighthouse Accessibility score: 100.
+userTourKit ships WCAG 2.1 AA compliant by default, with focus trapping (`useFocusTrap`), screen reader announcements via `aria-live`, and full keyboard navigation. It also respects `prefers-reduced-motion`. All built in, not opt-in. Lighthouse Accessibility score: 100.
 
 For teams in regulated industries, or anyone who cares about inclusive design, this gap matters.
 
@@ -86,13 +86,13 @@ For teams in regulated industries, or anyone who cares about inclusive design, t
 
 Userflow loads a ~15KB JavaScript stub, which then asynchronously fetches the full SDK and all onboarding content from Userflow's CDN. The total runtime payload is undisclosed. This creates a hard dependency on Userflow's servers for core user experience, something security-conscious organizations flag regularly.
 
-Tour Kit's `@tour-kit/core` ships at &lt;8KB gzipped. `@tour-kit/react` adds &lt;12KB. `@tour-kit/hints` adds &lt;5KB. Everything tree-shakes, everything bundles with your app, and nothing phones home. On a slow 3G connection, the difference between loading content from your own bundle versus waiting for a third-party CDN fetch is the difference between onboarding that works and onboarding that doesn't.
+userTourKit's `@tour-kit/core` ships at &lt;8KB gzipped. `@tour-kit/react` adds &lt;12KB. `@tour-kit/hints` adds &lt;5KB. Everything tree-shakes, everything bundles with your app, and nothing phones home. On a slow 3G connection, the difference between loading content from your own bundle versus waiting for a third-party CDN fetch is the difference between onboarding that works and onboarding that doesn't.
 
 ### Framework support and TypeScript
 
 Userflow works with any web framework through its JavaScript SDK. You add a script tag or install the `userflow` npm package (~141 weekly downloads as of March 2026, per Snyk). TypeScript types exist for the SDK, but the tour configuration itself lives in Userflow's visual builder, not in your codebase.
 
-Tour Kit requires React 18 or 19. That's a real limitation if you're on Vue, Angular, or Svelte. But within the React ecosystem, the TypeScript experience is thorough: full type inference on step configs, placement options, and branching targets. Router adapters for Next.js and React Router v6+ provide typed navigation. The core package is framework-agnostic in theory, but UI components are React-only in practice.
+userTourKit requires React 18 or 19. That's a real limitation if you're on Vue, Angular, or Svelte. But within the React ecosystem, the TypeScript experience is thorough: full type inference on step configs, placement options, and branching targets. Router adapters for Next.js and React Router v6+ provide typed navigation. The core package is framework-agnostic in theory, but UI components are React-only in practice.
 
 ### Licensing and pricing
 
@@ -100,13 +100,13 @@ Userflow charges $240/month (Startup, 3,000 MAUs) or $680/month (Pro, 10,000 MAU
 
 At 50,000 MAUs, annual costs reach $12,480-$15,840 depending on plan. Multiple G2 reviewers flagged pricing as their primary complaint: *"Maybe the price for the pro plan ;-)"* was a recurring theme.
 
-Tour Kit's core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. Pro packages cost $99 one-time. No MAU limits. No per-seat charges. No recurring fees.
+userTourKit's core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. Pro packages cost $99 one-time. No MAU limits. No per-seat charges. No recurring fees.
 
-Three-year TCO at 10,000 MAUs: Userflow Pro runs $24,480. Tour Kit runs $99. The math isn't close.
+Three-year TCO at 10,000 MAUs: Userflow Pro runs $24,480. userTourKit runs $99. The math isn't close.
 
 ## Side-by-side comparison table
 
-| Feature | Tour Kit | Userflow |
+| Feature | userTourKit | Userflow |
 |---|---|---|
 | Product tours | ✅ Built-in (core, MIT) | ✅ Visual builder |
 | Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ✅ Launchers/beacons |
@@ -141,25 +141,25 @@ Choose Userflow if your onboarding team is product managers and growth marketers
 
 Userflow also makes more sense when you need native CRM integrations (HubSpot, Salesforce), built-in A/B testing, or AI-powered localization. For teams running weekly onboarding experiments where iteration speed beats design fidelity, Userflow's 9.3/10 ease-of-use score (G2) and 9.8/10 support quality rating aren't marketing fluff. They reflect a product that genuinely delivers for its target buyer.
 
-## When Tour Kit is the better fit
+## When userTourKit is the better fit
 
-Tour Kit fits better when your onboarding needs to look and feel like the rest of your app. If you're building with shadcn/ui and Tailwind (or Radix, or Base UI), Tour Kit's components render inside your React tree and inherit your design tokens. There's no fighting a third-party overlay to match your visual language.
+userTourKit fits better when your onboarding needs to look and feel like the rest of your app. If you're building with shadcn/ui and Tailwind (or Radix, or Base UI), userTourKit's components render inside your React tree and inherit your design tokens. There's no fighting a third-party overlay to match your visual language.
 
 It's also the right call when performance budgets are strict (&lt;8KB core versus an undisclosed CDN payload), when WCAG 2.1 AA compliance matters (Lighthouse 100), or when content must render without depending on a third-party CDN. And the $99 one-time price speaks for itself at any MAU scale.
 
-Tour Kit won't work if you don't have React developers. It won't work if you need a visual builder. And it doesn't support mobile. Those are real constraints.
+userTourKit won't work if you don't have React developers. It won't work if you need a visual builder. And it doesn't support mobile. Those are real constraints.
 
-## Migration path from Userflow to Tour Kit
+## Migration path from Userflow to userTourKit
 
-Migration from Userflow to Tour Kit isn't a lift-and-shift. Userflow stores flows in its cloud; Tour Kit stores steps in your codebase. Here's a practical approach:
+Migration from Userflow to userTourKit isn't a lift-and-shift. Userflow stores flows in its cloud; userTourKit stores steps in your codebase. Here's a practical approach:
 
 1. **Export your flow structure.** Document each Userflow flow's steps, targets (CSS selectors), and branching logic. Userflow doesn't offer a structured export, so you'll need to recreate this manually from the builder.
 
-2. **Map to Tour Kit steps.** Each Userflow step becomes a Tour Kit step config with `target`, `content`, `placement`, and optional `advanceOn` or `onNext` branching.
+2. **Map to userTourKit steps.** Each Userflow step becomes a userTourKit step config with `target`, `content`, `placement`, and optional `advanceOn` or `onNext` branching.
 
 3. **Replace the SDK.** Remove the Userflow script tag or npm package. Install `@tour-kit/react`. Wrap your app in `TourKitProvider` with your router adapter.
 
-4. **Rebuild incrementally.** Start with your highest-traffic flow. Convert one flow at a time rather than doing a big-bang migration. Run both systems in parallel during the transition by conditionally loading Tour Kit for converted flows and keeping Userflow active for the rest.
+4. **Rebuild incrementally.** Start with your highest-traffic flow. Convert one flow at a time rather than doing a big-bang migration. Run both systems in parallel during the transition by conditionally loading userTourKit for converted flows and keeping Userflow active for the rest.
 
 ```tsx
 import { TourKitProvider, Tour, TourCard, TourCardContent,
@@ -187,7 +187,7 @@ const steps = [
 </TourKitProvider>
 ```
 
-The biggest adjustment is mindset. Userflow treats onboarding as a separate layer managed outside the codebase. Tour Kit treats onboarding as application code. That means code review and TypeScript checking apply to your onboarding through standard deployment pipelines, which is either a burden or a benefit depending on your team.
+The biggest adjustment is mindset. Userflow treats onboarding as a separate layer managed outside the codebase. userTourKit treats onboarding as application code. That means code review and TypeScript checking apply to your onboarding through standard deployment pipelines, which is either a burden or a benefit depending on your team.
 
 ## What developers say
 
@@ -199,36 +199,36 @@ Chameleon's competitive analysis of Userflow churn drivers identifies *"limited 
 
 Pricing draws the sharpest criticism. The $240-to-$680 Startup-to-Pro jump locks Custom CSS, event tracking, and advanced integrations behind a near-3x increase. Userpilot's analysis concludes Userflow *"eventually becomes a bottleneck"* for scaling companies.
 
-Tour Kit is newer and has a smaller community footprint. Fewer Stack Overflow answers, fewer blog tutorials, fewer production case studies. That's worth factoring into your decision. Your mileage may vary on community support compared to a product backed by Beamer's $60M acquisition budget.
+userTourKit is newer and has a smaller community footprint. Fewer Stack Overflow answers, fewer blog tutorials, fewer production case studies. That's worth factoring into your decision. Your mileage may vary on community support compared to a product backed by Beamer's $60M acquisition budget.
 
 ## Frequently asked questions
 
-**Is Tour Kit free?**
+**Is userTourKit free?**
 The core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free with no usage limits. Pro packages (analytics, announcements, checklists, media, scheduling) cost $99 one-time. No MAU fees. No per-seat charges.
 
-**What is the difference between Tour Kit and Userflow?**
-Tour Kit is a headless React library where onboarding UI renders inside your component tree and config lives in your codebase. Userflow is a SaaS platform with a visual builder where content loads from Userflow's CDN at runtime. The architectural difference: Tour Kit is code you own, Userflow is a service you rent.
+**What is the difference between userTourKit and Userflow?**
+userTourKit is a headless React library where onboarding UI renders inside your component tree and config lives in your codebase. Userflow is a SaaS platform with a visual builder where content loads from Userflow's CDN at runtime. The architectural difference: userTourKit is code you own, Userflow is a service you rent.
 
-**Can I migrate from Userflow to Tour Kit?**
-Yes, but it requires manual conversion since Userflow doesn't export flows in a structured format. Map each Userflow step to a Tour Kit step config, then migrate flows incrementally. Most teams convert one flow at a time while running both systems in parallel.
+**Can I migrate from Userflow to userTourKit?**
+Yes, but it requires manual conversion since Userflow doesn't export flows in a structured format. Map each Userflow step to a userTourKit step config, then migrate flows incrementally. Most teams convert one flow at a time while running both systems in parallel.
 
-**Does Tour Kit work with Next.js and React 19?**
-Tour Kit supports React 18 and React 19 as peer dependencies. Router adapters exist for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`).
+**Does userTourKit work with Next.js and React 19?**
+userTourKit supports React 18 and React 19 as peer dependencies. Router adapters exist for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`).
 
-**What is the bundle size of Tour Kit vs Userflow?**
-Tour Kit's core is &lt;8KB gzipped, React components add &lt;12KB, hints add &lt;5KB. Userflow loads a ~15KB stub that fetches the full SDK from its CDN asynchronously. Userflow doesn't disclose the total runtime payload size.
+**What is the bundle size of userTourKit vs Userflow?**
+userTourKit's core is &lt;8KB gzipped, React components add &lt;12KB, hints add &lt;5KB. Userflow loads a ~15KB stub that fetches the full SDK from its CDN asynchronously. Userflow doesn't disclose the total runtime payload size.
 
 **Does Userflow support WCAG accessibility?**
-Userflow doesn't document WCAG compliance to any specific level. Tour Kit ships WCAG 2.1 AA compliant by default with focus trapping, screen reader announcements, keyboard navigation, and Lighthouse Accessibility score of 100.
+Userflow doesn't document WCAG compliance to any specific level. userTourKit ships WCAG 2.1 AA compliant by default with focus trapping, screen reader announcements, keyboard navigation, and Lighthouse Accessibility score of 100.
 
 **Is Userflow open source?**
-No. Userflow is proprietary commercial software acquired by Beamer in February 2024 for approximately $60M. Tour Kit's free tier is MIT-licensed. Pro packages use a proprietary license.
+No. Userflow is proprietary commercial software acquired by Beamer in February 2024 for approximately $60M. userTourKit's free tier is MIT-licensed. Pro packages use a proprietary license.
 
 **Which is better for enterprise use?**
-Userflow offers enterprise plans with custom pricing and SSO. Tour Kit doesn't offer enterprise support SLAs. For enterprises that need vendor support contracts, Userflow is the safer bet. For enterprises that want to own the code and avoid vendor dependency, Tour Kit gives you full control.
+Userflow offers enterprise plans with custom pricing and SSO. userTourKit doesn't offer enterprise support SLAs. For enterprises that need vendor support contracts, Userflow is the safer bet. For enterprises that want to own the code and avoid vendor dependency, userTourKit gives you full control.
 
 ## Final verdict
 
-Userflow is an excellent product for product-manager-led teams that prioritize speed of creation over design fidelity. Its 4.9/5 G2 rating is deserved. But at $240-$680+/month with MAU overages, basic analytics, and a proprietary DOM overlay, it's a recurring cost that compounds with growth. Tour Kit costs $99 once, ships at &lt;8KB, renders inside your React tree, and hits WCAG 2.1 AA out of the box. For developer-led teams building React apps, the value proposition is straightforward.
+Userflow is an excellent product for product-manager-led teams that prioritize speed of creation over design fidelity. Its 4.9/5 G2 rating is deserved. But at $240-$680+/month with MAU overages, basic analytics, and a proprietary DOM overlay, it's a recurring cost that compounds with growth. userTourKit costs $99 once, ships at &lt;8KB, renders inside your React tree, and hits WCAG 2.1 AA out of the box. For developer-led teams building React apps, the value proposition is straightforward.
 
-We built Tour Kit, so take this comparison with appropriate skepticism. Try both. Decide based on who's building your onboarding and what they need to control.
+We built userTourKit, so take this comparison with appropriate skepticism. Try both. Decide based on who's building your onboarding and what they need to control.

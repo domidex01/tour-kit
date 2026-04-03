@@ -15,7 +15,7 @@ The Google Analytics plugin sends tour and hint events to [Google Analytics 4](h
 No additional dependencies required - the plugin uses the global `gtag` function that must already be loaded on your page.
 
 <Callout type="warn">
-  This plugin requires gtag.js to be loaded on the page before the User Tour Kit analytics provider initializes. Add the Google Analytics script tag to your HTML.
+  This plugin requires gtag.js to be loaded on the page before the userTourKit analytics provider initializes. Add the Google Analytics script tag to your HTML.
 </Callout>
 
 ## Setup gtag.js
@@ -92,7 +92,7 @@ export function Providers({ children }) {
 
 Events are prefixed with `tourkit_` by default:
 
-| User Tour Kit Event | GA4 Event Name |
+| userTourKit Event | GA4 Event Name |
 |----------------|----------------|
 | `tour_started` | `tourkit_tour_started` |
 | `step_viewed` | `tourkit_step_viewed` |
@@ -267,7 +267,7 @@ GA4 has strict limits on custom parameters:
 - Parameter names: Up to 40 characters
 - Parameter values: Up to 100 characters
 
-User Tour Kit events stay well within these limits.
+userTourKit events stay well within these limits.
 
 ### Reserved Names
 
@@ -278,7 +278,7 @@ Avoid these reserved parameter names:
 - `timestamp_micros`
 - Any name starting with `google_` or `ga_`
 
-User Tour Kit uses safe parameter names like `tour_id`, `step_id`, etc.
+userTourKit uses safe parameter names like `tour_id`, `step_id`, etc.
 
 ## Privacy & Compliance
 
@@ -402,7 +402,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-XXXXXX');</script>
 ```
 
-Then use the User Tour Kit plugin as normal.
+Then use the userTourKit plugin as normal.
 
 ### Descriptive Event Names
 
@@ -435,7 +435,7 @@ Common issues:
 
 ### gtag is undefined
 
-Ensure gtag loads before User Tour Kit:
+Ensure gtag loads before userTourKit:
 
 ```tsx
 // ✅ Good - gtag loads first

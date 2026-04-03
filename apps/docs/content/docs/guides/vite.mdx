@@ -1,7 +1,7 @@
 ---
 title: Vite Integration
 description: >-
-  Configure User Tour Kit in Vite + React projects with hot module replacement, path
+  Configure userTourKit in Vite + React projects with hot module replacement, path
   aliases, and production build optimization
 ---
 
@@ -11,7 +11,7 @@ import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 
 # Vite Integration
 
-Complete guide for setting up User Tour Kit with Vite and React. Covers single-page apps and React Router integration.
+Complete guide for setting up userTourKit with Vite and React. Covers single-page apps and React Router integration.
 
 ---
 
@@ -128,7 +128,7 @@ export default function App() {
 <Step>
 ### Add Tailwind (Optional)
 
-User Tour Kit uses Tailwind CSS classes. Make sure Tailwind is configured:
+userTourKit uses Tailwind CSS classes. Make sure Tailwind is configured:
 
 ```js title="tailwind.config.js"
 /** @type {import('tailwindcss').Config} */
@@ -136,7 +136,7 @@ export default {
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
-    './node_modules/@tour-kit/**/*.{js,ts,jsx,tsx}', // Include Tour Kit
+    './node_modules/@tour-kit/**/*.{js,ts,jsx,tsx}', // Include userTourKit
   ],
   theme: {
     extend: {},
@@ -530,7 +530,7 @@ Ensure target elements exist in the DOM when the tour starts. Use `waitForTarget
 </Callout>
 
 <Callout type="error" title="Styles Missing">
-Add User Tour Kit to your Tailwind content paths or import the CSS directly.
+Add userTourKit to your Tailwind content paths or import the CSS directly.
 </Callout>
 
 <Callout type="error" title="Router Not Working">

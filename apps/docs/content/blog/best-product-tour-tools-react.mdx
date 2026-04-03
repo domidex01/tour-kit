@@ -10,7 +10,7 @@ lastUpdated: "2026-04-01"
 
 We installed each library into a fresh Vite 6 + React 19 + TypeScript 5.7 project, built a 5-step product tour, and measured bundle size (via `bundlephobia`), initialization time, and TypeScript coverage. We also checked React 19 compatibility, WCAG 2.1 AA compliance, last npm publish date, and license terms.
 
-**Bias disclosure:** We built User Tour Kit, so it's listed first. We've tried to be fair with every entry, but you should know that. Every claim is verifiable against npm, GitHub, and bundlephobia.
+**Bias disclosure:** We built userTourKit, so it's listed first. We've tried to be fair with every entry, but you should know that. Every claim is verifiable against npm, GitHub, and bundlephobia.
 
 Scoring criteria: bundle size (20%), TypeScript support (15%), React 19 compatibility (15%), accessibility (15%), maintenance activity (15%), feature scope (10%), pricing (10%).
 
@@ -18,7 +18,7 @@ Scoring criteria: bundle size (20%), TypeScript support (15%), React 19 compatib
 
 | Tool | Type | Bundle (gzip) | React 19 | TypeScript | License | Pricing | Best for |
 |---|---|---|---|---|---|---|---|
-| User Tour Kit | Headless library | Under 8KB core | Yes | Strict | MIT | Free + $99 Pro | Design system teams |
+| userTourKit | Headless library | Under 8KB core | Yes | Strict | MIT | Free + $99 Pro | Design system teams |
 | React Joyride | Opinionated library | ~30KB | v3 only | Built-in (v3) | MIT | Free | Quick drop-in tours |
 | Shepherd.js | Framework-agnostic | ~25KB | Via wrapper | Built-in | MIT | Free | Multi-framework teams |
 | Driver.js | Vanilla JS | ~5KB | N/A (no wrapper) | Built-in | MIT | Free | Lightweight highlights |
@@ -31,11 +31,11 @@ Scoring criteria: bundle size (20%), TypeScript support (15%), React 19 compatib
 
 Data verified April 2026. Sources: npm, GitHub, bundlephobia, official pricing pages.
 
-## 1. User Tour Kit: best for teams with a design system
+## 1. userTourKit: best for teams with a design system
 
 <img src="/screenshots/user-tour-kit.avif" alt="Screenshot of TourKit - Product Tours for React" width="800" style={{borderRadius: '8px'}} />
 
-If your engineering team owns a component library or design system, you do not want a tour tool that ships its own UI and fights your tokens. User Tour Kit is headless: it handles tour logic, positioning, and state, then gets out of the way so your components render every tooltip, popover, and checklist. The core weighs under 8KB gzipped and supports React 18 and 19. Ten separate packages (tours, hints, checklists, announcements, analytics, scheduling) let you adopt only what your roadmap requires.
+If your engineering team owns a component library or design system, you do not want a tour tool that ships its own UI and fights your tokens. userTourKit is headless: it handles tour logic, positioning, and state, then gets out of the way so your components render every tooltip, popover, and checklist. The core weighs under 8KB gzipped and supports React 18 and 19. Ten separate packages (tours, hints, checklists, announcements, analytics, scheduling) let you adopt only what your roadmap requires.
 
 **Strengths:**
 - Renders with your existing shadcn/ui, Radix, or Tailwind components, so tours match your app from day one
@@ -266,7 +266,7 @@ If developers own onboarding and your team writes React, you are choosing betwee
 
 **Then consider your technical capacity.**
 
-If you have a design system and want tours to match it exactly, pick a headless library. User Tour Kit gives you composition with zero style opinions. OnboardJS offers a similar headless approach with state machine semantics.
+If you have a design system and want tours to match it exactly, pick a headless library. userTourKit gives you composition with zero style opinions. OnboardJS offers a similar headless approach with state machine semantics.
 
 If you want a working tour without designing tooltips, React Joyride v3 gets you there in minutes. Accept the default UI or plan time for component overrides.
 
@@ -274,9 +274,9 @@ If your org runs multiple frontend frameworks, Shepherd.js is the only library o
 
 **Finally, factor in budget and long-term cost.**
 
-Free MIT libraries (User Tour Kit, React Joyride, Driver.js, Reactour, Onborda) cost developer time but nothing else. OnboardJS is free at the core but $59/month for the SaaS dashboard. Intro.js is AGPL, which means commercial teams need to buy a license. SaaS platforms run $249/month and up, indefinitely.
+Free MIT libraries (userTourKit, React Joyride, Driver.js, Reactour, Onborda) cost developer time but nothing else. OnboardJS is free at the core but $59/month for the SaaS dashboard. Intro.js is AGPL, which means commercial teams need to buy a license. SaaS platforms run $249/month and up, indefinitely.
 
-A solo developer building a side project should reach for Reactour or Driver.js. A startup with three engineers and a design system should evaluate User Tour Kit. A 50-person product org with PMs who need to move fast should price out Appcues or Userpilot.
+A solo developer building a side project should reach for Reactour or Driver.js. A startup with three engineers and a design system should evaluate userTourKit. A 50-person product org with PMs who need to move fast should price out Appcues or Userpilot.
 
 ## Frequently asked questions
 
@@ -286,7 +286,7 @@ It depends on who creates and updates tours in your organization. If product man
 
 ### What is the total cost of ownership for each type of product tour tool?
 
-SaaS platforms start at ~$249/month ($3K/year) and scale with usage and seats. Open-source libraries cost developer time for initial implementation (typically 1-3 days for a basic tour) plus ongoing maintenance. One-time purchases like User Tour Kit Pro ($99) sit in between: no recurring fee, but you maintain the code yourself. Factor in migration cost if you ever switch: SaaS tours live on the vendor's servers and cannot be exported, while code-based tours are portable.
+SaaS platforms start at ~$249/month ($3K/year) and scale with usage and seats. Open-source libraries cost developer time for initial implementation (typically 1-3 days for a basic tour) plus ongoing maintenance. One-time purchases like userTourKit Pro ($99) sit in between: no recurring fee, but you maintain the code yourself. Factor in migration cost if you ever switch: SaaS tours live on the vendor's servers and cannot be exported, while code-based tours are portable.
 
 ### Can I switch product tour tools later without rebuilding everything?
 
@@ -294,7 +294,7 @@ Switching between open-source libraries is moderately painful but possible since
 
 ### Which product tour tools work with React 19 and Next.js App Router?
 
-User Tour Kit, OnboardJS, and Onborda support React 19 natively. React Joyride added React 19 support in its v3 rewrite (March 2026). Shepherd.js works via the `react-shepherd` wrapper but verify compatibility with your version. Driver.js and Intro.js are vanilla JavaScript and work in any React version through `useEffect`, though they lack React-specific bindings. For Next.js App Router specifically, Onborda is purpose-built for it, while User Tour Kit and React Joyride work with standard client component patterns.
+userTourKit, OnboardJS, and Onborda support React 19 natively. React Joyride added React 19 support in its v3 rewrite (March 2026). Shepherd.js works via the `react-shepherd` wrapper but verify compatibility with your version. Driver.js and Intro.js are vanilla JavaScript and work in any React version through `useEffect`, though they lack React-specific bindings. For Next.js App Router specifically, Onborda is purpose-built for it, while userTourKit and React Joyride work with standard client component patterns.
 
 ### Do I need a product tour or would in-app tooltips be enough?
 

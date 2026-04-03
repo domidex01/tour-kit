@@ -2,7 +2,7 @@ export default function ThemePreview() {
   return (
     <div className="min-h-screen bg-tk-surface p-8 space-y-12">
       <header>
-        <h1 className="text-4xl font-bold text-tk-on-surface">TourKit Theme Preview</h1>
+        <h1 className="text-4xl font-bold text-tk-on-surface">userTourKit Theme Preview</h1>
         <p className="text-tk-on-surface-variant mt-2">Blue + Gold color scheme</p>
       </header>
 

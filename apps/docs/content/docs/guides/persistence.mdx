@@ -10,7 +10,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
 # Persistence
 
-User Tour Kit provides comprehensive persistence across all packages, allowing you to save user progress, dismissed announcements, checklist completion, and feature adoption data. This guide covers storage options, configuration, and best practices.
+userTourKit provides comprehensive persistence across all packages, allowing you to save user progress, dismissed announcements, checklist completion, and feature adoption data. This guide covers storage options, configuration, and best practices.
 
 ## Why Persistence Matters
 
@@ -20,7 +20,7 @@ Without persistence:
 - Checklist progress is lost on refresh
 - Feature adoption tracking resets
 
-With User Tour Kit's persistence:
+With userTourKit's persistence:
 - Tours resume from where users left off
 - "Don't show again" is remembered
 - Checklists track completed tasks across sessions
@@ -30,7 +30,7 @@ With User Tour Kit's persistence:
 
 ## Storage Options
 
-User Tour Kit supports multiple storage backends:
+userTourKit supports multiple storage backends:
 
 | Storage | Scope | SSR Safe | Best For |
 |---------|-------|----------|----------|
@@ -44,14 +44,14 @@ User Tour Kit supports multiple storage backends:
 When using Server-Side Rendering (Next.js, Remix), storage APIs aren't available during initial render:
 
 ```tsx title="SSR-safe pattern"
-// Tour Kit automatically handles this, but for custom code:
+// userTourKit automatically handles this, but for custom code:
 const storage = typeof window !== 'undefined'
   ? localStorage
   : createMemoryStorage()
 ```
 
 <Callout type="info">
-  All User Tour Kit persistence hooks automatically fall back to memory storage during SSR, then hydrate client-side.
+  All userTourKit persistence hooks automatically fall back to memory storage during SSR, then hydrate client-side.
 </Callout>
 
 ---
@@ -504,7 +504,7 @@ const idbStorage: Storage = {
   },
 }
 
-// Use with any Tour Kit provider
+// Use with any userTourKit provider
 <TourProvider
   tour={myTour}
   persistence={{ storage: idbStorage }}
@@ -553,7 +553,7 @@ When running multiple apps or features, namespace your keys:
 | Adoption | `tourkit-adoption` | `{app}:adoption` |
 
 ```tsx title="Custom namespacing example"
-// All Tour Kit data under 'acme-app' prefix
+// All userTourKit data under 'acme-app' prefix
 <TourProvider persistence={{ keyPrefix: 'acme-app:tours' }}>
 <ChecklistProvider persistence={{ key: 'acme-app:checklists' }}>
 <AnnouncementsProvider storageKey="acme-app:announcements:">
@@ -585,7 +585,7 @@ routePersistence.clear()
 
 For a complete reset during development or user logout:
 
-```tsx title="Clear all Tour Kit data"
+```tsx title="Clear all userTourKit data"
 function clearAllTourKitData(prefix = 'tourkit') {
   const keys = Object.keys(localStorage)
   keys.forEach(key => {
@@ -606,7 +606,7 @@ function handleLogout() {
 
 ## Error Handling
 
-User Tour Kit handles storage errors gracefully:
+userTourKit handles storage errors gracefully:
 
 ```typescript
 // Internal pattern - errors don't crash the app
@@ -621,7 +621,7 @@ try {
 ```
 
 <Callout type="warn">
-  If `localStorage` quota is exceeded, User Tour Kit logs a warning but continues functioning without persistence. Consider clearing old data or using a custom adapter with larger capacity.
+  If `localStorage` quota is exceeded, userTourKit logs a warning but continues functioning without persistence. Consider clearing old data or using a custom adapter with larger capacity.
 </Callout>
 
 ---
@@ -660,7 +660,7 @@ async function loadWithMigration(key: string) {
 ## Best Practices
 
 1. **Use consistent prefixes** - Namespace all keys to avoid collisions
-2. **Handle SSR** - User Tour Kit does this automatically, but custom code needs checks
+2. **Handle SSR** - userTourKit does this automatically, but custom code needs checks
 3. **Respect user privacy** - Provide a way to clear stored data
 4. **Test persistence** - Include persistence in your test suites
 5. **Plan for migration** - Version your persisted data structures

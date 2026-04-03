@@ -1,7 +1,7 @@
 import { getBlogPost } from '@/lib/comparisons'
 import { generateOGImage } from '@/lib/og-image'
 
-export const alt = 'Tour Kit Blog'
+export const alt = 'userTourKit Blog'
 export const size = {
   width: 1200,
   height: 630,
@@ -13,7 +13,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const post = getBlogPost(slug)
 
   const buffer = await generateOGImage({
-    title: post?.title ?? 'Tour Kit Blog',
+    title: post?.title ?? 'userTourKit Blog',
     subtitle: post?.description,
     category: post?.category?.toUpperCase(),
     background: (post as any)?.ogBackground,

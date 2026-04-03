@@ -12,7 +12,7 @@ export interface UseAiChatReturn {
   sendMessage(input: { text: string }): void
   stop(): void
   reload(): void
-  setMessages(messages: UIMessage[]): void
+  setMessages(messages: UIMessage[] | ((messages: UIMessage[]) => UIMessage[])): void
   isOpen: boolean
   open(): void
   close(): void

@@ -1,5 +1,10 @@
-import { openai } from '@ai-sdk/openai'
+import { createOpenAI } from '@ai-sdk/openai'
 import { createChatRouteHandler } from '@tour-kit/ai/server'
+
+const openrouter = createOpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY,
+})
 
 const productDocs = [
   {
@@ -16,7 +21,7 @@ const productDocs = [
 ]
 
 const { POST } = createChatRouteHandler({
-  model: openai('gpt-4o-mini'),
+  model: openrouter.chat('google/gemini-2.0-flash-001'),
   context: {
     strategy: 'context-stuffing',
     documents: productDocs,

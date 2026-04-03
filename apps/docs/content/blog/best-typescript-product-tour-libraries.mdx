@@ -17,7 +17,7 @@ Every product tour roundup checks a "TypeScript support" box and moves on. That 
 
 We installed eight tour libraries into a Vite 6 + React 19 + TypeScript 5.7 strict-mode project and ranked them by what actually matters to TypeScript developers: type completeness, autocomplete quality, generic support, and how fast you can go from `npm install` to a working tour without casting to `any`.
 
-**Bias disclosure:** We built Tour Kit, so it's listed first. Every claim is verifiable against npm, GitHub, and bundlephobia. Take our ranking with appropriate skepticism.
+**Bias disclosure:** We built userTourKit, so it's listed first. Every claim is verifiable against npm, GitHub, and bundlephobia. Take our ranking with appropriate skepticism.
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -51,7 +51,7 @@ We weighted React 19 at 20% because as of April 2026, React 19 is the current st
 </thead>
 <tbody>
 <tr>
-<td>Tour Kit</td>
+<td>userTourKit</td>
 <td>Native (strict)</td>
 <td>✅</td>
 <td>Under 8KB core</td>
@@ -127,11 +127,11 @@ We weighted React 19 at 20% because as of April 2026, React 19 is the current st
 
 Data verified April 2026. Sources: npm, GitHub, bundlephobia, package source inspection.
 
-## 1. Tour Kit: best TypeScript DX for React teams
+## 1. userTourKit: best TypeScript DX for React teams
 
-<img src="/screenshots/user-tour-kit.avif" alt="Screenshot of Tour Kit - Product Tours for React" width="800" style={{borderRadius: '8px'}} />
+<img src="/screenshots/user-tour-kit.avif" alt="Screenshot of userTourKit - Product Tours for React" width="800" style={{borderRadius: '8px'}} />
 
-Tour Kit is a headless product tour library written in TypeScript strict mode from line one. The core ships at under 8KB gzipped with zero runtime dependencies. Every hook, provider, and component has full type coverage, so you get autocomplete on step config, tour options, and callback payloads without importing a single type manually. React 18 and 19 are both supported natively.
+userTourKit is a headless product tour library written in TypeScript strict mode from line one. The core ships at under 8KB gzipped with zero runtime dependencies. Every hook, provider, and component has full type coverage, so you get autocomplete on step config, tour options, and callback payloads without importing a single type manually. React 18 and 19 are both supported natively.
 
 **What makes it different for TypeScript developers:** The entire API is generic. Step definitions accept a type parameter for custom metadata, so `useStep<MyStepData>()` gives you typed access to fields like `videoUrl` or `requiredRole` without a cast. Headless architecture means your tooltips are your own components, not a library's opaque render tree.
 
@@ -282,7 +282,7 @@ One independent developer's assessment: "For everything beyond the basics — li
 - The React wrapper is not React 19 compatible. You can use vanilla Shepherd directly, but lose React integration.
 - v12 TS namespace removal broke existing typed codebases.
 - Tour content requires HTML strings, not JSX components. This is a DX regression for React teams.
-- 25KB gzipped is 3-5x heavier than Driver.js or Tour Kit core.
+- 25KB gzipped is 3-5x heavier than Driver.js or userTourKit core.
 
 **Pricing:** Free (MIT).
 
@@ -384,27 +384,27 @@ Accessibility is also poor. [LogRocket's audit](https://blog.logrocket.com/best-
 
 Your decision comes down to three axes, all tied to TypeScript quality.
 
-**Type completeness: native strict vs retrofitted vs DefinitelyTyped.** Tour Kit and Driver.js are written in TypeScript strict mode from line one. Every export is typed at the source, so types and implementation cannot drift apart. Shepherd.js was retrofitted with declarations that broke in v12 when the namespace was removed. React Joyride ships its own types but has known `any` holes in core APIs. Intro.js relies on DefinitelyTyped, which lags behind releases by weeks or months. If you hover a config option and see `any`, you have lost the entire point of using TypeScript.
+**Type completeness: native strict vs retrofitted vs DefinitelyTyped.** userTourKit and Driver.js are written in TypeScript strict mode from line one. Every export is typed at the source, so types and implementation cannot drift apart. Shepherd.js was retrofitted with declarations that broke in v12 when the namespace was removed. React Joyride ships its own types but has known `any` holes in core APIs. Intro.js relies on DefinitelyTyped, which lags behind releases by weeks or months. If you hover a config option and see `any`, you have lost the entire point of using TypeScript.
 
-**React 19 TS compatibility: compiles clean vs needs workarounds.** React 19 changed several type definitions (`ReactNode`, `forwardRef`, callback refs). Tour Kit, Onborda, and OnboardJS compile clean against `@types/react@19`. Driver.js has no React types to break. Shepherd.js's React wrapper fails to compile. React Joyride v2.x fails with multiple type errors. If you are starting a new React 19 project, eliminate libraries that require `@ts-expect-error` to build.
+**React 19 TS compatibility: compiles clean vs needs workarounds.** React 19 changed several type definitions (`ReactNode`, `forwardRef`, callback refs). userTourKit, Onborda, and OnboardJS compile clean against `@types/react@19`. Driver.js has no React types to break. Shepherd.js's React wrapper fails to compile. React Joyride v2.x fails with multiple type errors. If you are starting a new React 19 project, eliminate libraries that require `@ts-expect-error` to build.
 
-**Bundle size** matters for Core Web Vitals but is secondary to type quality. Driver.js at ~5KB and Tour Kit core at under 8KB are the lightweights. React Joyride at ~30KB and Shepherd.js at ~25KB carry meaningful weight. Google's research on [Core Web Vitals](https://web.dev/articles/vitals) shows JavaScript bundle size directly impacts Interaction to Next Paint.
+**Bundle size** matters for Core Web Vitals but is secondary to type quality. Driver.js at ~5KB and userTourKit core at under 8KB are the lightweights. React Joyride at ~30KB and Shepherd.js at ~25KB carry meaningful weight. Google's research on [Core Web Vitals](https://web.dev/articles/vitals) shows JavaScript bundle size directly impacts Interaction to Next Paint.
 
-If you were about to build your own tour system with XState and Floating UI (and [you wouldn't be the first](https://sandroroth.com/blog/evaluating-tour-libraries/)), Tour Kit is the library designed for developers like you. It gives you typed primitives without the opinions.
+If you were about to build your own tour system with XState and Floating UI (and [you wouldn't be the first](https://sandroroth.com/blog/evaluating-tour-libraries/)), userTourKit is the library designed for developers like you. It gives you typed primitives without the opinions.
 
 ## FAQ
 
 ### What does "TypeScript support" actually mean for a tour library?
 
-It is a spectrum. At the top, libraries like Tour Kit and Driver.js are written in TypeScript strict mode, so types are generated from the source and cannot drift. In the middle, libraries like Shepherd.js ship their own `.d.ts` files but were not written in strict mode, which allows `any` to leak into public APIs. At the bottom, libraries like Intro.js rely on DefinitelyTyped, where community volunteers maintain types that lag behind releases. "TypeScript support" on a README badge tells you nothing. Check whether `tsc --noEmit` passes clean in your project.
+It is a spectrum. At the top, libraries like userTourKit and Driver.js are written in TypeScript strict mode, so types are generated from the source and cannot drift. In the middle, libraries like Shepherd.js ship their own `.d.ts` files but were not written in strict mode, which allows `any` to leak into public APIs. At the bottom, libraries like Intro.js rely on DefinitelyTyped, where community volunteers maintain types that lag behind releases. "TypeScript support" on a README badge tells you nothing. Check whether `tsc --noEmit` passes clean in your project.
 
 ### Which tour libraries support generic step definitions?
 
-Tour Kit is the only library in this roundup with full generic support on step definitions. `useStep<MyStepData>()` returns typed custom metadata without a cast. Driver.js, Onborda, OnboardJS, and Shepherd.js all use fixed step types with no generic parameter. If you need typed custom fields on steps (like `videoUrl` or `requiredRole`), you either use Tour Kit's generics or write manual type assertions everywhere else.
+userTourKit is the only library in this roundup with full generic support on step definitions. `useStep<MyStepData>()` returns typed custom metadata without a cast. Driver.js, Onborda, OnboardJS, and Shepherd.js all use fixed step types with no generic parameter. If you need typed custom fields on steps (like `videoUrl` or `requiredRole`), you either use userTourKit's generics or write manual type assertions everywhere else.
 
 ### Can I get type-safe tour callbacks and event handlers?
 
-Tour Kit types every callback with narrowed parameters: `onStepChange` receives `(step: Step<T>, index: number)`, not `any`. Driver.js types its callbacks (`onNextClick`, `onPrevClick`) with correct DOM event and state parameters. React Joyride's `CallBackProps` type works for `action` and `status`, but `tooltipProps` resolves to `any`. Shepherd.js callbacks are typed in the vanilla API but lose type safety through the React wrapper. If your tour logic branches on callback data, check whether the library types that data or passes `any`.
+userTourKit types every callback with narrowed parameters: `onStepChange` receives `(step: Step<T>, index: number)`, not `any`. Driver.js types its callbacks (`onNextClick`, `onPrevClick`) with correct DOM event and state parameters. React Joyride's `CallBackProps` type works for `action` and `status`, but `tooltipProps` resolves to `any`. Shepherd.js callbacks are typed in the vanilla API but lose type safety through the React wrapper. If your tour logic branches on callback data, check whether the library types that data or passes `any`.
 
 ### How do I check if a tour library's types are actually complete?
 
@@ -412,4 +412,4 @@ Open the library's `.d.ts` files in `node_modules` and search for `any`. Count t
 
 ### Will my tour library break when I upgrade TypeScript?
 
-Libraries written in TypeScript strict mode (Tour Kit, Driver.js) are the safest because their CI already tests against strict. The main risk is `moduleResolution`. Shepherd.js v12 broke when it removed the `Shepherd` namespace and required `moduleResolution: 'Bundler'`, which not all projects use. DefinitelyTyped packages (Intro.js) can break when the library updates but the types do not. Pin your TypeScript version in CI and test upgrades in a branch before merging.
+Libraries written in TypeScript strict mode (userTourKit, Driver.js) are the safest because their CI already tests against strict. The main risk is `moduleResolution`. Shepherd.js v12 broke when it removed the `Shepherd` namespace and required `moduleResolution: 'Bundler'`, which not all projects use. DefinitelyTyped packages (Intro.js) can break when the library updates but the types do not. Pin your TypeScript version in CI and test upgrades in a branch before merging.

@@ -4,6 +4,11 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      '/api/chat': 'http://localhost:3001',
+    },
+  },
   resolve: {
     alias: {
       '@tour-kit/checklists': path.resolve(__dirname, '../../packages/checklists/dist/index.js'),

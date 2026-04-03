@@ -27,7 +27,7 @@ We installed each library into a Vite 6 + React 19 + TypeScript 5.7 project and 
 
 Two libraries are purpose-built onboarding tools. The other five are headless UI primitive libraries whose popovers and dialogs become tour building blocks. We included both categories because a headless onboarding setup typically means pairing a tour engine with a UI primitive library.
 
-**Bias disclosure:** We built Tour Kit, so it's listed first. Take our #1 ranking with appropriate skepticism. Every claim is verifiable against npm, GitHub, and bundlephobia.
+**Bias disclosure:** We built userTourKit, so it's listed first. Take our #1 ranking with appropriate skepticism. Every claim is verifiable against npm, GitHub, and bundlephobia.
 
 ## Quick comparison table
 
@@ -45,7 +45,7 @@ Two libraries are purpose-built onboarding tools. The other five are headless UI
 </thead>
 <tbody>
 <tr>
-<td>Tour Kit</td>
+<td>userTourKit</td>
 <td>Headless tour library</td>
 <td>✅</td>
 <td>✅</td>
@@ -111,9 +111,9 @@ Two libraries are purpose-built onboarding tools. The other five are headless UI
 </table>
 
 
-## 1. Tour Kit — best headless onboarding library for React
+## 1. userTourKit — best headless onboarding library for React
 
-Tour Kit is a composable headless onboarding library for React that ships tour logic as hooks and renders nothing by default. Core bundle sits under 8KB gzipped. Ten installable packages cover tours, hints, checklists, announcements, analytics, scheduling, adoption tracking, and media without forcing you to install what you don't need. Built for React 18 and 19, it uses the `asChild` composition pattern from Radix to merge tour behavior into your existing components.
+userTourKit is a composable headless onboarding library for React that ships tour logic as hooks and renders nothing by default. Core bundle sits under 8KB gzipped. Ten installable packages cover tours, hints, checklists, announcements, analytics, scheduling, adoption tracking, and media without forcing you to install what you don't need. Built for React 18 and 19, it uses the `asChild` composition pattern from Radix to merge tour behavior into your existing components.
 
 ### Strengths
 
@@ -215,7 +215,7 @@ Free and MIT licensed.
 
 ### Best for
 
-Teams already on Radix or shadcn/ui who want to compose tour step UI from the same primitives they use everywhere else. Pair with Tour Kit's hooks for a fully headless onboarding stack.
+Teams already on Radix or shadcn/ui who want to compose tour step UI from the same primitives they use everywhere else. Pair with userTourKit's hooks for a fully headless onboarding stack.
 
 ## 4. React Aria (Adobe) — best headless accessibility layer for tour UI
 
@@ -322,11 +322,11 @@ Tailwind-first teams who want the absolute minimum headless dependency for tour 
 
 The decision comes down to what you mean by "onboarding."
 
-**If you need guided product tours with element highlighting and step navigation**, choose a dedicated headless tour library. As of April 2026, Tour Kit is the one library we found that combines headless rendering with DOM-aware tour features (targeting, highlighting, scroll management) while supporting React 19. The alternative is building it yourself with Floating UI and a state manager, which is what developer Sandro Roth ended up doing after evaluating every existing library ([Sandro Roth, 2025](https://sandroroth.com/blog/evaluating-tour-libraries/)).
+**If you need guided product tours with element highlighting and step navigation**, choose a dedicated headless tour library. As of April 2026, userTourKit is the one library we found that combines headless rendering with DOM-aware tour features (targeting, highlighting, scroll management) while supporting React 19. The alternative is building it yourself with Floating UI and a state manager, which is what developer Sandro Roth ended up doing after evaluating every existing library ([Sandro Roth, 2025](https://sandroroth.com/blog/evaluating-tour-libraries/)).
 
 **If your onboarding is wizard-style or checklist-style**, OnboardJS gives you headless flow orchestration with built-in analytics. It won't position a tooltip next to your sidebar, but it'll manage "complete these 5 setup steps" flows cleanly.
 
-**If you already have a headless UI library**, use it for tour step rendering too. Radix for shadcn/ui teams. React Aria for accessibility-critical applications. Base UI for MUI-adjacent teams. Ark UI for multi-framework setups. Then pair it with Tour Kit's hooks for the tour logic.
+**If you already have a headless UI library**, use it for tour step rendering too. Radix for shadcn/ui teams. React Aria for accessibility-critical applications. Base UI for MUI-adjacent teams. Ark UI for multi-framework setups. Then pair it with userTourKit's hooks for the tour logic.
 
 The pattern emerging in 2026 mirrors what happened with form libraries: the styling layer separates from the logic layer. Onboarding is catching up.
 
@@ -341,23 +341,23 @@ npm install @radix-ui/react-dialog          # Modal onboarding steps
 
 ### What is a headless onboarding library?
 
-A headless onboarding library provides tour logic, step management, and element targeting without rendering any UI. You bring your own React components for tooltips and progress indicators. Tour Kit ships hooks like `useTour()` and `useStep()` that return state and callbacks while you control the rendering. This works naturally with shadcn/ui because there are no opinionated styles to override.
+A headless onboarding library provides tour logic, step management, and element targeting without rendering any UI. You bring your own React components for tooltips and progress indicators. userTourKit ships hooks like `useTour()` and `useStep()` that return state and callbacks while you control the rendering. This works naturally with shadcn/ui because there are no opinionated styles to override.
 
 ### Can I use Radix or React Aria for product tours?
 
-Radix and React Aria provide headless popovers, dialogs, and tooltips useful for rendering tour step content. But neither includes tour-specific logic: step sequencing, element highlighting, or progress tracking. Pair them with a tour engine like Tour Kit's hooks for both headless rendering and tour orchestration. As of April 2026, no headless UI primitive library ships tour-specific components.
+Radix and React Aria provide headless popovers, dialogs, and tooltips useful for rendering tour step content. But neither includes tour-specific logic: step sequencing, element highlighting, or progress tracking. Pair them with a tour engine like userTourKit's hooks for both headless rendering and tour orchestration. As of April 2026, no headless UI primitive library ships tour-specific components.
 
 ### Why don't React Joyride and Shepherd.js work with React 19?
 
 React Joyride's v3 rewrite (shipped March 2026) added React 19 support, but v2.x — still the most-installed version — relies on class components that are incompatible with React 19. The react-shepherd wrapper has similar issues, though Shepherd.js works when used directly via vanilla JavaScript. As of April 2026, React Joyride pulls roughly 700K weekly npm downloads, with most installs still on v2.x.
 
-### Is Tour Kit free?
+### Is userTourKit free?
 
-Tour Kit's three core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT licensed and free. Seven extended packages (adoption tracking, analytics, announcements, checklists, media, scheduling, and the license package) require a one-time $99 Pro license. No subscriptions, no per-seat pricing, no usage limits.
+userTourKit's three core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT licensed and free. Seven extended packages (adoption tracking, analytics, announcements, checklists, media, scheduling, and the license package) require a one-time $99 Pro license. No subscriptions, no per-seat pricing, no usage limits.
 
-### What's the difference between OnboardJS and Tour Kit?
+### What's the difference between OnboardJS and userTourKit?
 
-OnboardJS manages step state and branching logic but renders nothing and has no DOM awareness. It can't highlight a page element or position a tooltip. Tour Kit provides flow logic plus DOM-aware features (element targeting, scroll management, spotlights) while staying headless on rendering. Choose OnboardJS for wizard flows, Tour Kit for guided UI walkthroughs.
+OnboardJS manages step state and branching logic but renders nothing and has no DOM awareness. It can't highlight a page element or position a tooltip. userTourKit provides flow logic plus DOM-aware features (element targeting, scroll management, spotlights) while staying headless on rendering. Choose OnboardJS for wizard flows, userTourKit for guided UI walkthroughs.
 
 ---
 
@@ -372,24 +372,24 @@ OnboardJS manages step state and branching logic but renders nothing and has no 
   "author": {
     "@type": "Person",
     "name": "DomiDex",
-    "url": "https://tourkit.dev"
+    "url": "https://usertourkit.com"
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Tour Kit",
-    "url": "https://tourkit.dev",
+    "name": "userTourKit",
+    "url": "https://usertourkit.com",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://tourkit.dev/logo.png"
+      "url": "https://usertourkit.com/logo.png"
     }
   },
   "datePublished": "2026-04-02",
   "dateModified": "2026-04-02",
-  "image": "https://tourkit.dev/og-images/best-headless-ui-libraries-onboarding.png",
-  "url": "https://tourkit.dev/blog/best-headless-ui-libraries-onboarding",
+  "image": "https://usertourkit.com/og-images/best-headless-ui-libraries-onboarding.png",
+  "url": "https://usertourkit.com/blog/best-headless-ui-libraries-onboarding",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://tourkit.dev/blog/best-headless-ui-libraries-onboarding"
+    "@id": "https://usertourkit.com/blog/best-headless-ui-libraries-onboarding"
   },
   "keywords": ["headless onboarding library", "headless ui product tour", "composable onboarding library", "headless tour library react"],
   "proficiencyLevel": "Intermediate",
@@ -411,7 +411,7 @@ OnboardJS manages step state and branching logic but renders nothing and has no 
       "name": "What is a headless onboarding library?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A headless onboarding library provides tour logic, step management, element targeting, and keyboard navigation without rendering any UI. You bring your own React components for tooltips, overlays, and progress indicators. Tour Kit, for example, ships hooks like useTour() and useStep() that return state and callbacks while you control every pixel of the rendering."
+        "text": "A headless onboarding library provides tour logic, step management, element targeting, and keyboard navigation without rendering any UI. You bring your own React components for tooltips, overlays, and progress indicators. userTourKit, for example, ships hooks like useTour() and useStep() that return state and callbacks while you control every pixel of the rendering."
       }
     },
     {
@@ -419,7 +419,7 @@ OnboardJS manages step state and branching logic but renders nothing and has no 
       "name": "Can I use Radix or React Aria for product tours?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Radix Primitives and React Aria provide headless UI components (popovers, dialogs, tooltips) useful for rendering tour step content. But they don't include tour-specific logic: step sequencing, element highlighting, scroll-to-target behavior, or progress tracking. You'd pair them with a tour engine like Tour Kit's hooks to get both headless rendering and tour orchestration."
+        "text": "Radix Primitives and React Aria provide headless UI components (popovers, dialogs, tooltips) useful for rendering tour step content. But they don't include tour-specific logic: step sequencing, element highlighting, scroll-to-target behavior, or progress tracking. You'd pair them with a tour engine like userTourKit's hooks to get both headless rendering and tour orchestration."
       }
     },
     {
@@ -432,18 +432,18 @@ OnboardJS manages step state and branching logic but renders nothing and has no 
     },
     {
       "@type": "Question",
-      "name": "Is Tour Kit free?",
+      "name": "Is userTourKit free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit's three core packages (@tourkit/core, @tourkit/react, @tourkit/hints) are MIT licensed and free. Seven extended packages require a one-time $99 Pro license. No subscriptions, no per-seat pricing, no usage limits."
+        "text": "userTourKit's three core packages (@tourkit/core, @tourkit/react, @tourkit/hints) are MIT licensed and free. Seven extended packages require a one-time $99 Pro license. No subscriptions, no per-seat pricing, no usage limits."
       }
     },
     {
       "@type": "Question",
-      "name": "What's the difference between OnboardJS and Tour Kit?",
+      "name": "What's the difference between OnboardJS and userTourKit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "OnboardJS is a headless flow orchestrator: it manages step state, branching logic, persistence, and analytics but renders nothing and has no DOM awareness. Tour Kit is a headless tour library: it provides both the flow logic and DOM-aware features while remaining headless on the rendering side. Choose OnboardJS for wizard-style flows, Tour Kit for guided UI walkthroughs."
+        "text": "OnboardJS is a headless flow orchestrator: it manages step state, branching logic, persistence, and analytics but renders nothing and has no DOM awareness. userTourKit is a headless tour library: it provides both the flow logic and DOM-aware features while remaining headless on the rendering side. Choose OnboardJS for wizard-style flows, userTourKit for guided UI walkthroughs."
       }
     }
   ]
@@ -458,7 +458,7 @@ OnboardJS manages step state and branching logic but renders nothing and has no 
 - Future hub: link from a "Headless product tours: the complete guide" pillar page when written
 
 **Distribution checklist:**
-- Dev.to: Cross-post with canonical URL to tourkit.dev. Tag: react, typescript, webdev, tutorial
+- Dev.to: Cross-post with canonical URL to usertourkit.com. Tag: react, typescript, webdev, tutorial
 - Hashnode: Cross-post with canonical URL. Newsletter distribution enabled.
 - Reddit: Post to r/reactjs with title "We tested 7 headless UI libraries for onboarding — here's what we found." Genuine discussion, not promotional.
-- Hacker News: Only if paired with a Show HN for Tour Kit. Listicles alone don't perform on HN.
+- Hacker News: Only if paired with a Show HN for userTourKit. Listicles alone don't perform on HN.

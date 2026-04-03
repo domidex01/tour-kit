@@ -34,8 +34,8 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="mb-4 inline-flex items-center gap-2">
-              <TourKitLogo className="h-6 w-6 text-[#0197f6]" />
-              <span className="text-[15px] font-semibold text-fd-foreground">TourKit</span>
+              <TourKitLogo className="h-8 w-8 text-[#0197f6]" />
+              <span className="text-[15px] font-semibold text-fd-foreground">userTourKit</span>
             </Link>
             <p className="mt-3 max-w-[240px] text-[13px] leading-[1.6] text-fd-muted-foreground">
               The open-source onboarding toolkit for React. Headless, accessible, and tiny.
@@ -103,7 +103,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-fd-border pt-8">
           <p className="text-[12px] text-fd-muted-foreground">
-            &copy; {new Date().getFullYear()} TourKit. MIT Licensed.
+            &copy; {new Date().getFullYear()} userTourKit. MIT Licensed.
           </p>
           <div className="flex items-center gap-4">
             <Link

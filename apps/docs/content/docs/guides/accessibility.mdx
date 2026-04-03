@@ -10,10 +10,10 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
 # Accessibility
 
-User Tour Kit is built with accessibility as a core principle, not an afterthought. Every component follows WCAG 2.1 AA guidelines to ensure your tours work for all users, including those using screen readers, keyboard navigation, or who have motion sensitivity.
+userTourKit is built with accessibility as a core principle, not an afterthought. Every component follows WCAG 2.1 AA guidelines to ensure your tours work for all users, including those using screen readers, keyboard navigation, or who have motion sensitivity.
 
 <Callout type="info">
-  User Tour Kit targets a **Lighthouse Accessibility Score of 100** and full WCAG 2.1 AA compliance.
+  userTourKit targets a **Lighthouse Accessibility Score of 100** and full WCAG 2.1 AA compliance.
 </Callout>
 
 ## Why Accessibility Matters for Tours
@@ -25,7 +25,7 @@ Product tours and onboarding flows often interrupt the normal page experience. W
 - **Users with motion sensitivity** may experience discomfort from animations
 - **Users with cognitive disabilities** may struggle with complex multi-step flows
 
-User Tour Kit handles all of these concerns automatically.
+userTourKit handles all of these concerns automatically.
 
 ---
 
@@ -35,7 +35,7 @@ When a tour step activates, focus needs careful management to ensure keyboard us
 
 ### How Focus Trap Works
 
-User Tour Kit's `useFocusTrap` hook automatically:
+userTourKit's `useFocusTrap` hook automatically:
 
 1. **Saves the previously focused element** before the tour starts
 2. **Traps Tab/Shift+Tab** within the tour card
@@ -121,7 +121,7 @@ function MyCustomCard({ isActive, children }) {
 
 ## Keyboard Navigation
 
-User Tour Kit provides intuitive keyboard controls out of the box.
+userTourKit provides intuitive keyboard controls out of the box.
 
 ### Default Key Bindings
 
@@ -189,7 +189,7 @@ For tours with form inputs or interactive content, you may want to disable certa
 
 ## Screen Reader Support
 
-User Tour Kit ensures screen reader users understand what's happening at every step.
+userTourKit ensures screen reader users understand what's happening at every step.
 
 ### ARIA Attributes
 
@@ -214,7 +214,7 @@ All tour cards include proper ARIA attributes:
 
 ### Live Announcements
 
-When tour steps change, User Tour Kit announces the new step to screen readers:
+When tour steps change, userTourKit announces the new step to screen readers:
 
 ```typescript title="How announcements work internally"
 import { announce, getStepAnnouncement } from '@tour-kit/core'
@@ -302,11 +302,11 @@ All icon-only buttons include descriptive labels:
 
 ## Reduced Motion Support
 
-Users who experience motion sickness or have vestibular disorders can enable "reduced motion" in their operating system. User Tour Kit respects this preference.
+Users who experience motion sickness or have vestibular disorders can enable "reduced motion" in their operating system. userTourKit respects this preference.
 
 ### Automatic Detection
 
-User Tour Kit automatically detects the `prefers-reduced-motion` media query:
+userTourKit automatically detects the `prefers-reduced-motion` media query:
 
 ```tsx title="How reduced motion is detected"
 import { usePrefersReducedMotion } from '@tour-kit/core'
@@ -406,7 +406,7 @@ To test reduced motion in your browser:
 
 ## Touch Targets
 
-Interactive elements in User Tour Kit meet minimum touch target requirements:
+Interactive elements in userTourKit meet minimum touch target requirements:
 
 ```css
 /* Minimum 44x44px touch target for buttons */
@@ -436,7 +436,7 @@ All interactive elements have visible focus indicators:
 
 ## Color Contrast
 
-User Tour Kit uses CSS variables that ensure sufficient color contrast:
+userTourKit uses CSS variables that ensure sufficient color contrast:
 
 ```css title="Default contrast-safe variables"
 :root {

@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process'
 import { source } from '@/lib/source'
 import type { MetadataRoute } from 'next'
 
-const SITE_URL = 'https://tourkit.dev'
+const SITE_URL = 'https://usertourkit.com'
 
 function getGitLastModified(filePath: string): Date {
   try {

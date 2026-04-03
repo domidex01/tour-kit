@@ -1,15 +1,15 @@
-# User Tour Kit v0.3.0 — Generated 2026-04-02T16:42:42Z
+# userTourKit v0.3.0 — Generated 2026-04-02T16:42:42Z
 
-# User Tour Kit
+# userTourKit
 
-> User Tour Kit is a headless onboarding and product tour library for React. It provides sequential guided tours, persistent hints, onboarding checklists, product announcements, media embeds, feature adoption tracking, analytics integration, and time-based scheduling. All components are accessible (WCAG 2.1 AA), keyboard-navigable, and work with Next.js and Vite.
+> userTourKit is a headless onboarding and product tour library for React. It provides sequential guided tours, persistent hints, onboarding checklists, product announcements, media embeds, feature adoption tracking, analytics integration, and time-based scheduling. All components are accessible (WCAG 2.1 AA), keyboard-navigable, and work with Next.js and Vite.
 
 ## Getting Started
 
-- [Getting Started](https://tour-kit-docs.vercel.app/docs/getting-started): Set up User Tour Kit in your React application with step-by-step installation, configuration, and TypeScript guides
+- [Getting Started](https://tour-kit-docs.vercel.app/docs/getting-started): Set up userTourKit in your React application with step-by-step installation, configuration, and TypeScript guides
 - [Installation](https://tour-kit-docs.vercel.app/docs/getting-started/installation): Install @tour-kit/core and @tour-kit/react with npm, pnpm, yarn, or bun and configure peer dependencies for React 18+
 - [Quick Start](https://tour-kit-docs.vercel.app/docs/getting-started/quick-start): Create your first multi-step product tour in under 5 minutes with Tour, TourStep, and useTour hook examples
-- [TypeScript](https://tour-kit-docs.vercel.app/docs/getting-started/typescript): Configure TypeScript strict mode, use inferred step types, and leverage generic tour configurations in User Tour Kit
+- [TypeScript](https://tour-kit-docs.vercel.app/docs/getting-started/typescript): Configure TypeScript strict mode, use inferred step types, and leverage generic tour configurations in userTourKit
 
 ## Core
 
@@ -27,14 +27,14 @@
 - [useTour](https://tour-kit-docs.vercel.app/docs/core/hooks/use-tour): useTour hook: control tour state with start, next, prev, skip, and complete actions plus step tracking in React
 - [TourKitProvider](https://tour-kit-docs.vercel.app/docs/core/providers/tour-kit-provider): TourKitProvider: wrap your app to enable global tour management, shared configuration, and multi-tour coordination
 - [TourProvider](https://tour-kit-docs.vercel.app/docs/core/providers/tour-provider): TourProvider: context provider that manages state, steps, and lifecycle for an individual product tour instance
-- [Config Types](https://tour-kit-docs.vercel.app/docs/core/types/config-types): TypeScript interfaces for TourConfig, SpotlightConfig, KeyboardConfig, and other User Tour Kit configuration options
-- [Step Types](https://tour-kit-docs.vercel.app/docs/core/types/step-types): TypeScript interfaces for StepConfig, StepTarget, StepPlacement, and step-level configuration in User Tour Kit tours
+- [Config Types](https://tour-kit-docs.vercel.app/docs/core/types/config-types): TypeScript interfaces for TourConfig, SpotlightConfig, KeyboardConfig, and other userTourKit configuration options
+- [Step Types](https://tour-kit-docs.vercel.app/docs/core/types/step-types): TypeScript interfaces for StepConfig, StepTarget, StepPlacement, and step-level configuration in userTourKit tours
 - [Tour Types](https://tour-kit-docs.vercel.app/docs/core/types/tour-types): TypeScript interfaces for TourState, TourActions, TourCallbacks, and the complete tour lifecycle type system
 - [Accessibility Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/a11y): Accessibility utilities: screen reader announcements, live regions, and ARIA attribute helpers for product tours
 - [createStep](https://tour-kit-docs.vercel.app/docs/core/utilities/create-step): createStep factory function: build type-safe step configurations with validation and IntelliSense autocomplete
 - [createTour](https://tour-kit-docs.vercel.app/docs/core/utilities/create-tour): createTour factory function: define type-safe tour configurations with validated steps, callbacks, and options
 - [DOM Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/dom): DOM utilities: element measurement, visibility detection, and target resolution for positioning tour tooltips
-- [Helper Functions](https://tour-kit-docs.vercel.app/docs/core/utilities/helpers): Helper utilities: step index calculations, progress percentages, and common tour operation functions in User Tour Kit
+- [Helper Functions](https://tour-kit-docs.vercel.app/docs/core/utilities/helpers): Helper utilities: step index calculations, progress percentages, and common tour operation functions in userTourKit
 - [Logger Utility](https://tour-kit-docs.vercel.app/docs/core/utilities/logger): Configurable logger utility: debug tour state transitions, step changes, and lifecycle events in development mode
 - [Position Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/position): Position engine: calculate tooltip placement with collision detection, viewport clamping, and RTL layout support
 - [Scroll Utilities](https://tour-kit-docs.vercel.app/docs/core/utilities/scroll): Scroll utilities: smooth scroll to target elements, scroll lock during tour steps, and overflow container handling
@@ -56,15 +56,15 @@
 - [TourProgress](https://tour-kit-docs.vercel.app/docs/react/components/tour-progress): TourProgress component: step counter and progress bar showing current position and total steps in the tour
 - [TourStep](https://tour-kit-docs.vercel.app/docs/react/components/tour-step): TourStep component: define individual steps with target selectors, placement, content, and advance-on triggers
 - [Headless Components](https://tour-kit-docs.vercel.app/docs/react/headless): Headless tour components: unstyled primitives with render props for building completely custom tour interfaces
-- [Headless Examples](https://tour-kit-docs.vercel.app/docs/react/headless/examples): Headless component examples: build custom tooltip cards, overlays, and navigation using User Tour Kit render props
+- [Headless Examples](https://tour-kit-docs.vercel.app/docs/react/headless/examples): Headless component examples: build custom tooltip cards, overlays, and navigation using userTourKit render props
 - [HeadlessTourCard](https://tour-kit-docs.vercel.app/docs/react/headless/headless-card): HeadlessTourCard: unstyled card primitive exposing step data, actions, and positioning via render props for custom UIs
 - [HeadlessTourOverlay](https://tour-kit-docs.vercel.app/docs/react/headless/headless-overlay): HeadlessTourOverlay: unstyled overlay primitive with spotlight cutout positioning exposed via render props
 - [useTourRoute](https://tour-kit-docs.vercel.app/docs/react/hooks/use-tour-route): useTourRoute hook: synchronize tour progress with router state for multi-page tours in Next.js and React Router
 - [useTours](https://tour-kit-docs.vercel.app/docs/react/hooks/use-tours): useTours hook: access all registered tour instances, check active states, and manage multiple tours from one place
 - [MultiTourKitProvider](https://tour-kit-docs.vercel.app/docs/react/providers/multi-tour-kit-provider): MultiTourKitProvider: manage multiple independent tours with shared configuration, analytics, and storage settings
-- [CSS Variables](https://tour-kit-docs.vercel.app/docs/react/styling/css-variables): Customize User Tour Kit appearance with CSS custom properties for colors, spacing, border radius, and shadow values
-- [Custom Components](https://tour-kit-docs.vercel.app/docs/react/styling/custom-components): Build fully custom tour card, overlay, and navigation components using Tour Kit hooks and headless primitives
-- [Tailwind CSS](https://tour-kit-docs.vercel.app/docs/react/styling/tailwind): Style User Tour Kit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints
+- [CSS Variables](https://tour-kit-docs.vercel.app/docs/react/styling/css-variables): Customize userTourKit appearance with CSS custom properties for colors, spacing, border radius, and shadow values
+- [Custom Components](https://tour-kit-docs.vercel.app/docs/react/styling/custom-components): Build fully custom tour card, overlay, and navigation components using userTourKit hooks and headless primitives
+- [Tailwind CSS](https://tour-kit-docs.vercel.app/docs/react/styling/tailwind): Style userTourKit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints
 
 ## Hints
 
@@ -184,7 +184,7 @@
 - [useSchedule](https://tour-kit-docs.vercel.app/docs/scheduling/hooks/use-schedule): useSchedule hook: evaluate whether a schedule is currently active with automatic refresh and timezone-aware calculations
 - [useScheduleStatus](https://tour-kit-docs.vercel.app/docs/scheduling/hooks/use-schedule-status): useScheduleStatus hook: get detailed schedule information including next active window, time remaining, and status reason
 - [useUserTimezone](https://tour-kit-docs.vercel.app/docs/scheduling/hooks/use-user-timezone): useUserTimezone hook: detect the user browser timezone via Intl API for timezone-aware schedule evaluation in React apps
-- [Presets](https://tour-kit-docs.vercel.app/docs/scheduling/presets): Schedule presets: pre-configured constants for business hours, weekdays, weekends, and common scheduling patterns in User Tour Kit
+- [Presets](https://tour-kit-docs.vercel.app/docs/scheduling/presets): Schedule presets: pre-configured constants for business hours, weekdays, weekends, and common scheduling patterns in userTourKit
 - [Types Reference](https://tour-kit-docs.vercel.app/docs/scheduling/types): TypeScript types for ScheduleConfig, TimeRange, DateRange, BlackoutPeriod, RecurrenceRule, and the scheduling API surface
 - [Scheduling Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities): Pure scheduling functions: evaluate schedules, check business hours, handle blackouts, and convert timezones without React
 - [Blackout Utilities](https://tour-kit-docs.vercel.app/docs/scheduling/utilities/blackouts): Blackout period utilities: define maintenance windows, holidays, and exclusion dates when content should not be displayed
@@ -208,7 +208,7 @@
 
 ## Guides
 
-- [Guides](https://tour-kit-docs.vercel.app/docs/guides): In-depth guides for accessibility, persistence, animations, router integration, and framework-specific User Tour Kit setup
+- [Guides](https://tour-kit-docs.vercel.app/docs/guides): In-depth guides for accessibility, persistence, animations, router integration, and framework-specific userTourKit setup
 - [Accessibility](https://tour-kit-docs.vercel.app/docs/guides/accessibility): Configure keyboard navigation, focus trapping, screen reader support, and reduced motion for WCAG 2.1 AA compliant tours
 - [Adoption Analytics](https://tour-kit-docs.vercel.app/docs/guides/adoption-analytics): Combine @tour-kit/adoption and @tour-kit/analytics to measure feature discovery rates and optimize onboarding funnels
 - [Analytics Integration](https://tour-kit-docs.vercel.app/docs/guides/analytics-integration): Connect @tour-kit/analytics to tours, hints, checklists, and adoption events with Mixpanel, PostHog, or custom plugins
@@ -217,22 +217,22 @@
 - [Base UI Support](https://tour-kit-docs.vercel.app/docs/guides/base-ui): Switch from Radix UI to Base UI for tour components using the UnifiedSlot abstraction and UILibraryContext provider
 - [Branching Tours](https://tour-kit-docs.vercel.app/docs/guides/branching): Create personalized tour paths with conditional branching, user choice flows, and dynamic step insertion based on state
 - [Checklists with Tours](https://tour-kit-docs.vercel.app/docs/guides/checklists-tours): Link checklists to tours for guided onboarding — auto-complete tasks on tour finish and track user progress together
-- [Next.js Integration](https://tour-kit-docs.vercel.app/docs/guides/nextjs): Set up User Tour Kit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support
+- [Next.js Integration](https://tour-kit-docs.vercel.app/docs/guides/nextjs): Set up userTourKit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support
 - [Persistence](https://tour-kit-docs.vercel.app/docs/guides/persistence): Save tour progress, checklist completion, and hint dismissals across browser sessions with pluggable storage adapters
 - [Router Integration](https://tour-kit-docs.vercel.app/docs/guides/router-integration): Build multi-page tours with Next.js, React Router, or custom routers using route-aware step targeting and persistence
-- [Troubleshooting](https://tour-kit-docs.vercel.app/docs/guides/troubleshooting): Diagnose and fix common User Tour Kit issues: missing targets, positioning glitches, hydration errors, and focus trap problems
-- [Vite Integration](https://tour-kit-docs.vercel.app/docs/guides/vite): Configure User Tour Kit in Vite + React projects with hot module replacement, path aliases, and production build optimization
+- [Troubleshooting](https://tour-kit-docs.vercel.app/docs/guides/troubleshooting): Diagnose and fix common userTourKit issues: missing targets, positioning glitches, hydration errors, and focus trap problems
+- [Vite Integration](https://tour-kit-docs.vercel.app/docs/guides/vite): Configure userTourKit in Vite + React projects with hot module replacement, path aliases, and production build optimization
 
 ## Examples
 
-- [Examples](https://tour-kit-docs.vercel.app/docs/examples): Copy-paste examples for common User Tour Kit patterns: basic tours, onboarding flows, and fully custom headless interfaces
+- [Examples](https://tour-kit-docs.vercel.app/docs/examples): Copy-paste examples for common userTourKit patterns: basic tours, onboarding flows, and fully custom headless interfaces
 - [Basic Tour](https://tour-kit-docs.vercel.app/docs/examples/basic-tour): Build a 3-step product tour with spotlight overlay, keyboard navigation, and progress indicators — full working code
 - [Headless Custom UI](https://tour-kit-docs.vercel.app/docs/examples/headless-custom): Build a completely custom tour UI with headless components, render props, and your own design system or CSS framework
 - [Onboarding Flow](https://tour-kit-docs.vercel.app/docs/examples/onboarding-flow): Complete user onboarding flow with persistent progress, conditional steps, checklists, and tour completion callbacks
 
 ## API Reference
 
-- [API Reference](https://tour-kit-docs.vercel.app/docs/api): Complete API reference for all User Tour Kit packages — hooks, components, providers, utilities, and TypeScript type exports
+- [API Reference](https://tour-kit-docs.vercel.app/docs/api): Complete API reference for all userTourKit packages — hooks, components, providers, utilities, and TypeScript type exports
 - [@tour-kit/adoption API](https://tour-kit-docs.vercel.app/docs/api/adoption): API reference for @tour-kit/adoption: AdoptionProvider, useFeature, useNudge, useAdoptionStats, and dashboard exports
 - [@tour-kit/analytics API](https://tour-kit-docs.vercel.app/docs/api/analytics): API reference for @tour-kit/analytics: AnalyticsProvider, useAnalytics, plugin interface, and built-in integrations
 - [@tour-kit/announcements API](https://tour-kit-docs.vercel.app/docs/api/announcements): API reference for @tour-kit/announcements: Modal, Toast, Banner, Slideout, Spotlight, queue hooks, and provider config
@@ -245,8 +245,8 @@
 
 ## AI Assistants
 
-- [AI Assistants](https://tour-kit-docs.vercel.app/docs/ai-assistants): Documentation resources optimized for AI coding assistants — llms.txt, context files, and MCP server for User Tour Kit integration
+- [AI Assistants](https://tour-kit-docs.vercel.app/docs/ai-assistants): Documentation resources optimized for AI coding assistants — llms.txt, context files, and MCP server for userTourKit integration
 
 ## Index
 
-- [TourKit](https://tour-kit-docs.vercel.app/docs/index): User Tour Kit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage
+- [TourKit](https://tour-kit-docs.vercel.app/docs/index): userTourKit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage

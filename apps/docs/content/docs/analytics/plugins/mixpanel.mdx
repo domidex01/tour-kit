@@ -70,7 +70,7 @@ export function Providers({ children }) {
     },
     eventPrefix: {
       type: 'string',
-      default: '"TourKit: "',
+      default: '"userTourKit: "',
       description: 'Prefix for all event names in Mixpanel'
     }
   }}
@@ -80,7 +80,7 @@ export function Providers({ children }) {
 
 Events are prefixed with `TourKit: ` by default:
 
-| User Tour Kit Event | Mixpanel Event Name |
+| userTourKit Event | Mixpanel Event Name |
 |----------------|-------------------|
 | `tour_started` | `TourKit: tour_started` |
 | `step_viewed` | `TourKit: step_viewed` |
@@ -193,7 +193,7 @@ mixpanel.init('YOUR_TOKEN', {
   api_host: 'https://api-eu.mixpanel.com'
 })
 
-// Then use the Tour Kit plugin
+// Then use the userTourKit plugin
 <AnalyticsProvider
   config={{
     plugins: [
@@ -292,7 +292,7 @@ View tour activity on user profiles:
 1. Go to Users > User Profile
 2. Select a user
 3. View Events tab
-4. Filter by "TourKit:" to see all tour events
+4. Filter by "userTourKit:" to see all tour events
 
 ## Retention Analysis
 

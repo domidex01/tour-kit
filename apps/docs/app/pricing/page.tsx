@@ -4,9 +4,9 @@ import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Pricing — User Tour Kit',
+  title: 'Pricing — userTourKit',
   description:
-    'Simple one-time pricing for User Tour Kit Pro. Free core packages, $99 for all extended packages.',
+    'Simple one-time pricing for userTourKit Pro. Free core packages, $99 for all extended packages.',
 }
 
 export default function PricingPage() {

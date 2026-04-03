@@ -570,7 +570,7 @@ function MediaDemo() {
               <div className="aspect-video">
                 <iframe
                   src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
-                  title="User Tour Kit media embed demo"
+                  title="userTourKit media embed demo"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="h-full w-full"

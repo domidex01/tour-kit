@@ -1,6 +1,7 @@
 'use client'
 
 import { AiChatPanel, AiChatProvider, AiChatToggle } from '@tour-kit/ai'
+import { LicenseProvider } from '@tour-kit/license'
 import {
   type AnalyticsPlugin,
   AnalyticsProvider,
@@ -380,19 +381,24 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <AiChatProvider
-      config={{
-        endpoint: '/api/chat',
-        tourContext: true,
-        suggestions: {
-          static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
-        },
-        persistence: 'local',
-      }}
+    <LicenseProvider
+      organizationId="your-polar-org-id" // TODO: replace with your Polar organization ID
+      licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY ?? ''}
     >
-      <AnalyticsProvider config={analyticsConfig}>
-        <ProvidersInner>{children}</ProvidersInner>
-      </AnalyticsProvider>
-    </AiChatProvider>
+      <AiChatProvider
+        config={{
+          endpoint: '/api/chat',
+          tourContext: true,
+          suggestions: {
+            static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
+          },
+          persistence: 'local',
+        }}
+      >
+        <AnalyticsProvider config={analyticsConfig}>
+          <ProvidersInner>{children}</ProvidersInner>
+        </AnalyticsProvider>
+      </AiChatProvider>
+    </LicenseProvider>
   )
 }

@@ -12,22 +12,22 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
   // 1. Getting Started / Installation
   'getting-started/installation': [
     {
-      question: 'How do I install User Tour Kit?',
+      question: 'How do I install userTourKit?',
       answer:
         'Run pnpm add @tour-kit/core @tour-kit/react to install both packages. You can also use npm, yarn, or bun as your package manager.',
     },
     {
-      question: 'Does User Tour Kit work with Next.js?',
+      question: 'Does userTourKit work with Next.js?',
       answer:
-        'Yes, User Tour Kit works with Next.js App Router and Pages Router. Wrap your layout with TourProvider and use the Next.js App Router adapter for multi-page tours.',
+        'Yes, userTourKit works with Next.js App Router and Pages Router. Wrap your layout with TourProvider and use the Next.js App Router adapter for multi-page tours.',
     },
     {
-      question: "What are User Tour Kit's peer dependencies?",
+      question: "What are userTourKit's peer dependencies?",
       answer:
-        'User Tour Kit requires React 18+ and React DOM 18+ as peer dependencies. TypeScript 4.7+ is recommended but not required.',
+        'userTourKit requires React 18+ and React DOM 18+ as peer dependencies. TypeScript 4.7+ is recommended but not required.',
     },
     {
-      question: 'Which User Tour Kit packages should I install?',
+      question: 'Which userTourKit packages should I install?',
       answer:
         '@tour-kit/react is the main package for most projects. It includes @tour-kit/core automatically. Add @tour-kit/hints for feature discovery beacons.',
     },
@@ -40,14 +40,14 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'Wrap your app with TourProvider, add Tour with TourStep children that target elements via CSS selectors, and call useTour().start() to launch the tour.',
     },
     {
-      question: 'What is the minimum code for a User Tour Kit tour?',
+      question: 'What is the minimum code for a userTourKit tour?',
       answer:
         'Import Tour and TourStep from @tour-kit/react, define steps with target selectors and content, then trigger the tour with the useTour hook.',
     },
     {
       question: 'How do I target specific elements in a tour step?',
       answer:
-        'Use the target prop on TourStep with a CSS selector string like "#my-button" or ".feature-card". User Tour Kit will highlight and position the tooltip near that element.',
+        'Use the target prop on TourStep with a CSS selector string like "#my-button" or ".feature-card". userTourKit will highlight and position the tooltip near that element.',
     },
   ],
   // 3. Core / Hooks / useTour
@@ -135,7 +135,7 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
   // 7. React / Headless / Overview
   'react/headless': [
     {
-      question: 'What is headless mode in User Tour Kit?',
+      question: 'What is headless mode in userTourKit?',
       answer:
         'Headless components provide tour logic without any styling. They expose state and actions via render props so you can build a completely custom UI.',
     },
@@ -147,7 +147,7 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
     {
       question: 'What headless components are available?',
       answer:
-        'User Tour Kit provides HeadlessTourCard, HeadlessTourOverlay, HeadlessTourNavigation, and HeadlessTourProgress as unstyled primitives with render props.',
+        'userTourKit provides HeadlessTourCard, HeadlessTourOverlay, HeadlessTourNavigation, and HeadlessTourProgress as unstyled primitives with render props.',
     },
     {
       question: 'Can I mix styled and headless components?',
@@ -158,30 +158,30 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
   // 8. Guides / Accessibility
   'guides/accessibility': [
     {
-      question: 'Is User Tour Kit accessible?',
+      question: 'Is userTourKit accessible?',
       answer:
-        'Yes, User Tour Kit targets WCAG 2.1 AA compliance with built-in focus trapping, ARIA attributes, keyboard navigation, screen reader announcements, and reduced motion support.',
+        'Yes, userTourKit targets WCAG 2.1 AA compliance with built-in focus trapping, ARIA attributes, keyboard navigation, screen reader announcements, and reduced motion support.',
     },
     {
-      question: 'How does User Tour Kit handle focus management?',
+      question: 'How does userTourKit handle focus management?',
       answer:
-        'User Tour Kit uses the useFocusTrap hook to trap keyboard focus within the active tour step. Focus returns to the trigger element when the tour ends.',
+        'userTourKit uses the useFocusTrap hook to trap keyboard focus within the active tour step. Focus returns to the trigger element when the tour ends.',
     },
     {
-      question: 'Does User Tour Kit support screen readers?',
+      question: 'Does userTourKit support screen readers?',
       answer:
         'Yes, tour steps use ARIA live regions for announcements, role="dialog" for the card, and aria-describedby to connect step content with the target element.',
     },
     {
       question: 'How do I respect prefers-reduced-motion?',
       answer:
-        'User Tour Kit automatically detects the prefers-reduced-motion media query and disables animations. The useMediaQuery hook lets you customize behavior further.',
+        'userTourKit automatically detects the prefers-reduced-motion media query and disables animations. The useMediaQuery hook lets you customize behavior further.',
     },
   ],
   // 9. Hints / Overview
   hints: [
     {
-      question: 'What are hints in User Tour Kit?',
+      question: 'What are hints in userTourKit?',
       answer:
         'Hints are non-blocking UI elements like pulsing beacons and floating tooltips that highlight features. Unlike tours, hints are independent and do not follow a sequence.',
     },

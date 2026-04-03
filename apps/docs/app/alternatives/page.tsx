@@ -7,11 +7,11 @@ import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Alternatives — User Tour Kit',
+  title: 'Alternatives — userTourKit',
   description:
     'Find the best alternatives to Appcues, Pendo, WalkMe, Userpilot, UserGuiding, React Joyride, Shepherd.js, and more. Ranked by developers for developers.',
   openGraph: {
-    title: 'Alternatives — User Tour Kit',
+    title: 'Alternatives — userTourKit',
     description:
       'Find the best alternatives to popular onboarding tools and product tour libraries. Developer-focused rankings.',
     type: 'website',

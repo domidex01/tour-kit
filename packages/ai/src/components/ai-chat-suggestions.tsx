@@ -1,54 +1,79 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useOptionalSuggestions } from '../hooks/use-suggestions'
+import { useContext } from 'react'
+import { AiChatContext } from '../context/ai-chat-context'
 import { cn } from '../lib/utils'
 import { aiChatSuggestionChipVariants } from './ui/chat-variants'
 
 export interface AiChatSuggestionsProps {
-  /** Explicit suggestions list (overrides hook data when provided) */
   suggestions?: string[]
-  /** Callback when a suggestion is selected (overrides hook select when provided) */
   onSelect?: (suggestion: string) => void
-  /** Custom render function for each suggestion chip */
   renderSuggestion?: (suggestion: string, onSelect: () => void) => ReactNode
-  /** CSS class name for the container */
   className?: string
 }
 
 export function AiChatSuggestions(props: AiChatSuggestionsProps) {
-  const hookData = useOptionalSuggestions()
+  // Read context directly — same pattern as AiChatInput which works
+  const context = useContext(AiChatContext)
 
-  const suggestions = props.suggestions ?? hookData?.suggestions ?? []
-  const onSelect = props.onSelect ?? hookData?.select
+  const status = context?.status ?? 'ready'
+  const messages = context?.messages ?? []
+  const config = context?.config
+  const contextSendMessage = context?.sendMessage
 
-  if (suggestions.length === 0) {
+  // Build suggestions list
+  const sentTexts = new Set(
+    messages
+      .filter((m) => m.role === 'user')
+      .map((m) =>
+        (m.parts ?? [])
+          .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+          .map((p) => p.text)
+          .join(' ')
+      )
+  )
+
+  const staticSuggestions = (
+    props.suggestions ?? config?.suggestions?.static ?? []
+  ).filter((s) => !sentTexts.has(s))
+
+  // Hide when busy or empty
+  if (status !== 'ready' || staticSuggestions.length === 0) {
     return null
   }
 
   return (
-    <fieldset
-      className={cn('flex flex-wrap gap-2 border-0 px-4 py-2', props.className)}
+    <div
+      className={cn('flex flex-wrap gap-2 px-4 py-2', props.className)}
+      role="group"
       aria-label="Suggested questions"
     >
-      {suggestions.map((suggestion) => {
-        const handleSelect = () => onSelect?.(suggestion)
+      {staticSuggestions.map((suggestion) => {
+        const handleClick = () => {
+          if (props.onSelect) {
+            props.onSelect(suggestion)
+            return
+          }
+          // Call sendMessage directly — no ref, no hook, no wrapper
+          contextSendMessage?.({ text: suggestion })
+        }
 
         if (props.renderSuggestion) {
-          return props.renderSuggestion(suggestion, handleSelect)
+          return props.renderSuggestion(suggestion, handleClick)
         }
 
         return (
           <button
             key={suggestion}
             type="button"
-            onClick={handleSelect}
+            onClick={handleClick}
             className={cn(aiChatSuggestionChipVariants())}
           >
             {suggestion}
           </button>
         )
       })}
-    </fieldset>
+    </div>
   )
 }

@@ -110,6 +110,16 @@
             "timeout": 30
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/safe-ship-gate.sh",
+            "timeout": 45
+          }
+        ]
       }
     ],
     "PreCompact": [

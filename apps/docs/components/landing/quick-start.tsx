@@ -170,7 +170,7 @@ export function QuickStart() {
         </div>
 
         <p className="mt-8 text-[14px] text-fd-muted-foreground">
-          That&apos;s it. TourKit handles positioning, focus trapping, keyboard navigation, and
+          That&apos;s it. userTourKit handles positioning, focus trapping, keyboard navigation, and
           screen reader announcements automatically.
         </p>
       </div>

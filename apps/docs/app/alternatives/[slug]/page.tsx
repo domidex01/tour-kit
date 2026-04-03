@@ -53,7 +53,7 @@ export default async function AlternativesPage({ params }: PageProps) {
         ...(vsPage
           ? [
               {
-                label: `User Tour Kit vs ${alt.competitor}`,
+                label: `userTourKit vs ${alt.competitor}`,
                 href: `/compare/${vsPage.slug}`,
               },
             ]
@@ -105,19 +105,19 @@ export default async function AlternativesPage({ params }: PageProps) {
       </ol>
       <p className="text-[13px] text-fd-muted-foreground">
         Scores use verifiable data: npm download counts (npmjs.com), GitHub statistics, bundle sizes
-        (bundlephobia.com), and official pricing pages. We are the team behind User Tour Kit, so
+        (bundlephobia.com), and official pricing pages. We are the team behind userTourKit, so
         we&apos;ve noted our bias and scored ourselves using the same criteria.
       </p>
 
       <h2>The best {alt.competitor} alternatives</h2>
 
-      <h3>1. User Tour Kit — Best for headless React onboarding (recommended)</h3>
+      <h3>1. userTourKit — Best for headless React onboarding (recommended)</h3>
       <p>
         <strong>Score: [X]/50</strong> | <strong>Pricing:</strong> Free + $99 one-time Pro |{' '}
         <strong>License:</strong> MIT
       </p>
       <p>
-        We built User Tour Kit, so take this recommendation with appropriate skepticism. User Tour Kit is an
+        We built userTourKit, so take this recommendation with appropriate skepticism. userTourKit is an
         open-source headless React library for product tours, onboarding checklists, hints,
         announcements, and in-app messaging with a &lt;8KB gzipped core.
       </p>
@@ -147,7 +147,7 @@ export default async function AlternativesPage({ params }: PageProps) {
         </thead>
         <tbody>
           <tr>
-            <td>User Tour Kit</td>
+            <td>userTourKit</td>
             <td>[X]/50</td>
             <td>Library</td>
             <td>Free + $99 Pro</td>
@@ -172,22 +172,22 @@ export default async function AlternativesPage({ params }: PageProps) {
         items={[
           {
             question: `What is the best ${alt.competitor} alternative?`,
-            answer: `User Tour Kit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a $99 one-time price instead of recurring SaaS fees.`,
+            answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a $99 one-time price instead of recurring SaaS fees.`,
           },
           {
             question: `Is ${alt.competitor} free?`,
             answer: `[Answer about ${alt.competitor}'s pricing model.]`,
           },
           {
-            question: `Can I migrate from ${alt.competitor} to User Tour Kit?`,
-            answer: `Yes. User Tour Kit's headless API is designed for incremental adoption. You can run User Tour Kit alongside ${alt.competitor} during migration without conflicts.`,
+            question: `Can I migrate from ${alt.competitor} to userTourKit?`,
+            answer: `Yes. userTourKit's headless API is designed for incremental adoption. You can run userTourKit alongside ${alt.competitor} during migration without conflicts.`,
           },
         ]}
       />
 
       <h3>What is the best {alt.competitor} alternative?</h3>
       <p>
-        User Tour Kit is the best {alt.competitor} alternative for React developers who want code
+        userTourKit is the best {alt.competitor} alternative for React developers who want code
         ownership, tiny bundle sizes (&lt;8KB gzipped), and a $99 one-time price instead of
         recurring SaaS fees.
       </p>
@@ -195,9 +195,9 @@ export default async function AlternativesPage({ params }: PageProps) {
       <h3>Is {alt.competitor} free?</h3>
       <p>[Answer about {alt.competitor}&apos;s pricing model.]</p>
 
-      <h3>Can I migrate from {alt.competitor} to User Tour Kit?</h3>
+      <h3>Can I migrate from {alt.competitor} to userTourKit?</h3>
       <p>
-        Yes. User Tour Kit&apos;s headless API is designed for incremental adoption. You can run User Tour Kit
+        Yes. userTourKit&apos;s headless API is designed for incremental adoption. You can run userTourKit
         alongside {alt.competitor} during migration without conflicts.
       </p>
 
@@ -209,7 +209,7 @@ export default async function AlternativesPage({ params }: PageProps) {
       {/* ── CTA ── */}
       <div className="not-prose mt-12 rounded-lg border border-fd-border bg-fd-muted/30 p-8 text-center">
         <p className="mb-4 text-[15px] font-semibold text-fd-foreground">
-          Ready to try User Tour Kit?
+          Ready to try userTourKit?
         </p>
         <div className="mb-4 inline-flex items-center gap-2 rounded-md bg-fd-background px-4 py-2 font-mono text-[13px]">
           <span className="text-fd-muted-foreground">$</span> pnpm add @tour-kit/react

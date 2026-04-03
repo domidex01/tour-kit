@@ -31,8 +31,15 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
   const [isPersistenceLoading, setIsPersistenceLoading] = useState(isEnabled)
   const hasHydratedRef = useRef(false)
 
+  // Memoize transport to prevent re-creating on every render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const transport = useMemo(
+    () => new DefaultChatTransport({ api: config.endpoint }),
+    [config.endpoint]
+  )
+
   const chatHelpers = useChat({
-    transport: new DefaultChatTransport({ api: config.endpoint }),
+    transport,
     onFinish: ({ message }) => {
       try {
         config.onEvent?.({
@@ -57,12 +64,18 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
     },
   })
 
+  // Keep a ref to chatHelpers so callbacks always use the latest version.
+  // useChat returns a new object each render — without this ref, useCallback
+  // closures capture stale sendMessage/stop/setMessages references.
+  const helpersRef = useRef(chatHelpers)
+  helpersRef.current = chatHelpers
+
   // Load persisted messages on mount via setMessages
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only effect
   useEffect(() => {
     if (!isEnabled) return
     loadMessages().then((messages) => {
-      if (messages) chatHelpers.setMessages(messages)
+      if (messages) helpersRef.current.setMessages(messages)
       setIsPersistenceLoading(false)
       hasHydratedRef.current = true
     })
@@ -85,6 +98,7 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
   // Resolve tour context: only use the explicit prop when tourContext config is enabled
   const resolvedTourContext = config.tourContext === true ? (tourContextValue ?? null) : null
 
+  // Stable callbacks that always read the latest chatHelpers via ref
   const sendMessage = useCallback(
     (input: { text: string }) => {
       try {
@@ -96,27 +110,27 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
       } catch {
         // onEvent errors must never break chat
       }
-      chatHelpers.sendMessage({ text: input.text })
+      helpersRef.current.sendMessage({ text: input.text })
     },
-    [chatHelpers, config]
+    [config]
   )
 
   const stop = useCallback(() => {
-    chatHelpers.stop()
-  }, [chatHelpers])
+    helpersRef.current.stop()
+  }, [])
 
   const reload = useCallback(() => {
-    chatHelpers.regenerate()
-  }, [chatHelpers])
+    helpersRef.current.regenerate()
+  }, [])
 
   const setMessages = useCallback(
     (messages: Parameters<typeof chatHelpers.setMessages>[0]) => {
-      chatHelpers.setMessages(messages)
+      helpersRef.current.setMessages(messages)
       if (Array.isArray(messages) && messages.length === 0) {
         clearMessages()
       }
     },
-    [chatHelpers, clearMessages]
+    [clearMessages]
   )
 
   const open = useCallback(() => {

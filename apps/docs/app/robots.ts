@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const SITE_URL = 'https://tourkit.dev'
+const SITE_URL = 'https://usertourkit.com'
 
 export default function robots(): MetadataRoute.Robots {
   return {

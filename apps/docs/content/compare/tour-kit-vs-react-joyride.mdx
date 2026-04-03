@@ -1,6 +1,6 @@
 ---
-title: "User Tour Kit vs React Joyride: which React tour library should you choose in 2026?"
-description: "Compare User Tour Kit vs React Joyride for React product tours. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
+title: "userTourKit vs React Joyride: which React tour library should you choose in 2026?"
+description: "Compare userTourKit vs React Joyride for React product tours. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
 competitor: "React Joyride"
 competitorSlug: "react-joyride"
 lastUpdated: "2026-03-31"
@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-User Tour Kit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;8KB core bundle. The Pro tier is $99 once. React Joyride is the most-downloaded React tour library at ~672K weekly npm installs (as of March 2026), shipping a monolithic inline-styles-only tour component at roughly 30KB gzipped. User Tour Kit fits teams wanting design system integration and onboarding scope beyond sequential tours. Joyride is better when you need the simplest possible setup at zero cost.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;8KB core bundle. The Pro tier is $99 once. React Joyride is the most-downloaded React tour library at ~672K weekly npm installs (as of March 2026), shipping a monolithic inline-styles-only tour component at roughly 30KB gzipped. userTourKit fits teams wanting design system integration and onboarding scope beyond sequential tours. Joyride is better when you need the simplest possible setup at zero cost.
 
-## What is User Tour Kit?
+## What is userTourKit?
 
-User Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
 
 ## What is React Joyride?
 
@@ -24,7 +24,7 @@ React Joyride is an open-source MIT-licensed React component for step-based prod
 
 React Joyride v3 ships a solid step-based tour engine. You define steps as objects with targets and content, attach them to the `Joyride` component, and the library handles positioning via `@floating-ui/react-dom`. The new `useJoyride()` hook gives you programmatic control: start, stop, next, prev, go-to-step. Steps support async `before`/`after` hooks, locale-based label overrides, and `targetWaitTimeout` for dynamically rendered elements.
 
-User Tour Kit's tour engine (`@tour-kit/core`) does the same things but separates logic from UI. Steps take CSS selectors or React refs as targets, 12 placement options, and async `onBeforeShow` hooks. The bigger difference is conditional branching. User Tour Kit's `onNext` resolvers handle async logic, cross-tour jumps, skip counts, even delay-then-advance patterns. Joyride doesn't support branching at all.
+userTourKit's tour engine (`@tour-kit/core`) does the same things but separates logic from UI. Steps take CSS selectors or React refs as targets, 12 placement options, and async `onBeforeShow` hooks. The bigger difference is conditional branching. userTourKit's `onNext` resolvers handle async logic, cross-tour jumps, skip counts, even delay-then-advance patterns. Joyride doesn't support branching at all.
 
 Does that matter? Depends. Fixed-sequence tours work fine without it. But if you need paths that fork based on user roles or feature flags, you'll be writing that orchestration yourself in Joyride's callbacks.
 
@@ -32,7 +32,7 @@ Does that matter? Depends. Fixed-sequence tours work fine without it. But if you
 
 Joyride has beacons, but they're sequential tour entry points. Click a beacon, and the tour starts from that step. You can't show persistent, independent hints that live outside the tour flow.
 
-User Tour Kit's `@tour-kit/hints` package (&lt;5KB gzipped) provides non-sequential hotspots. Each hint has its own lifecycle: show, hide, dismiss. Dismissed hints stay dismissed across page loads via the storage adapter.
+userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) provides non-sequential hotspots. Each hint has its own lifecycle: show, hide, dismiss. Dismissed hints stay dismissed across page loads via the storage adapter.
 
 `HintHotspot` renders a pulsing beacon; `HintTooltip` appears on hover or click. Need a persistent "new" indicator on a button? That's what this package is for. Joyride has no equivalent.
 
@@ -40,7 +40,7 @@ User Tour Kit's `@tour-kit/hints` package (&lt;5KB gzipped) provides non-sequent
 
 React Joyride doesn't include checklists. Teams that need "complete your profile, invite a teammate, create a project" flows typically build them from scratch or bolt on a separate library. The onboarding checklist has no shared state with the tour. No shared analytics pipeline. No shared completion tracking.
 
-User Tour Kit's `@tour-kit/checklists` package (Pro, $99) provides task dependencies with circular dependency detection. Three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked (dependency-blocked) tasks.
+userTourKit's `@tour-kit/checklists` package (Pro, $99) provides task dependencies with circular dependency detection. Three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked (dependency-blocked) tasks.
 
 Components include `Checklist`, `ChecklistTask`, `ChecklistProgress`, `ChecklistLauncher`. Everything shares core state with the tour system.
 
@@ -48,7 +48,7 @@ Components include `Checklist`, `ChecklistTask`, `ChecklistProgress`, `Checklist
 
 Joyride is a tour component. It doesn't do announcements. No modals, banners, toasts, or slideouts. Teams reach for Radix Dialog or react-hot-toast. None of those know about your tour state.
 
-User Tour Kit's `@tour-kit/announcements` package (Pro) ships five display variants: modal, toast, banner, slideout, and spotlight. Each variant has its own configuration (4 modal sizes, 6 toast positions, top/bottom banners with intent levels, left/right drawers).
+userTourKit's `@tour-kit/announcements` package (Pro) ships five display variants: modal, toast, banner, slideout, and spotlight. Each variant has its own configuration (4 modal sizes, 6 toast positions, top/bottom banners with intent levels, left/right drawers).
 
 Frequency rules control display: once ever, once per session, N times total, or every 7 days. A priority queue manages concurrent announcements.
 
@@ -58,7 +58,7 @@ All of it feeds into the same analytics pipeline as your tours.
 
 With Joyride, you get callback events. The `callback` prop fires on every lifecycle event: step changes, completions, skips. From there, you write the plumbing to forward events to Amplitude or Mixpanel or PostHog or wherever. Every team writes this from scratch. No standard event schema exists.
 
-User Tour Kit's `@tour-kit/analytics` package (Pro) provides a plugin interface with five built-in plugins: PostHog, Mixpanel, Amplitude, GA4, and a console logger for development. A custom plugin is three lines of code.
+userTourKit's `@tour-kit/analytics` package (Pro) provides a plugin interface with five built-in plugins: PostHog, Mixpanel, Amplitude, GA4, and a console logger for development. A custom plugin is three lines of code.
 
 Events follow a consistent schema: `tour_started`, `step_viewed`, `hint_dismissed`, `checklist_completed`. Wire it up once. Every onboarding component reports through the same pipeline.
 
@@ -66,7 +66,7 @@ Events follow a consistent schema: `tour_started`, `step_viewed`, `hint_dismisse
 
 Joyride has no scheduling concept. If you want a tour to appear only during business hours, only on weekdays, or only between two dates, that's your problem to solve.
 
-User Tour Kit's `@tour-kit/scheduling` package (Pro) handles time-based scheduling with IANA timezone support, recurring patterns (daily/weekly/monthly/yearly), blackout windows, and business hours presets. The `useSchedule()` hook returns `isActive`, `nextActivation`, and a reason for why the schedule is currently off.
+userTourKit's `@tour-kit/scheduling` package (Pro) handles time-based scheduling with IANA timezone support, recurring patterns (daily/weekly/monthly/yearly), blackout windows, and business hours presets. The `useSchedule()` hook returns `isActive`, `nextActivation`, and a reason for why the schedule is currently off.
 
 The `ScheduleGate` component conditionally renders children only when the schedule is active. For SaaS products with global user bases, this removes a surprising amount of custom logic.
 
@@ -74,57 +74,57 @@ The `ScheduleGate` component conditionally renders children only when the schedu
 
 React Joyride handles tour rendering and beacon placement — it doesn't track feature adoption. There's no mechanism to define adoption criteria, measure usage over time, or trigger nudges for underused features. Teams typically pair Joyride with Amplitude, Mixpanel, or a custom events layer to close that gap, which means maintaining two systems.
 
-User Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` provides admins with a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` provides admins with a visual overview of adoption metrics across features.
 
-The caveat: Tour Kit's adoption tracking is developer-facing. Configuration happens in code, not a drag-and-drop UI. Teams that want a non-technical stakeholder to define adoption criteria will still need developer involvement.
+The caveat: userTourKit's adoption tracking is developer-facing. Configuration happens in code, not a drag-and-drop UI. Teams that want a non-technical stakeholder to define adoption criteria will still need developer involvement.
 
 ### Media embedding
 
 React Joyride accepts React elements as step content, so you can embed videos manually. But there's no dedicated media component, no auto-detection from URLs, no reduced-motion fallbacks, and no built-in support for platforms beyond basic iframe embeds. You'd write the embed logic per platform yourself.
 
-User Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
-If your tours include video walkthroughs or animated demos, Tour Kit handles the embedding plumbing across seven platforms. For a single YouTube embed in one step, a manual iframe is arguably simpler.
+If your tours include video walkthroughs or animated demos, userTourKit handles the embedding plumbing across seven platforms. For a single YouTube embed in one step, a manual iframe is arguably simpler.
 
 ### Accessibility and WCAG compliance
 
 Joyride v3 improved accessibility over v2. Focus trapping within tooltips, keyboard navigation (arrow keys, Escape), ARIA labels. Real improvements worth acknowledging.
 
-User Tour Kit treats accessibility as a default, not a feature. WCAG 2.1 AA compliance is built into every component. `useFocusTrap()` manages focus within tour cards, and screen reader announcements use `aria-live` regions.
+userTourKit treats accessibility as a default, not a feature. WCAG 2.1 AA compliance is built into every component. `useFocusTrap()` manages focus within tour cards, and screen reader announcements use `aria-live` regions.
 
 `usePrefersReducedMotion()` respects the user's motion preferences. RTL/LTR detection is automatic. Lighthouse Accessibility score: 100.
 
 No independent audit comparing both libraries exists yet. (We plan to publish one.) Take our claims and verify them yourself.
 
-The architectural difference matters, though. User Tour Kit's accessibility is configured via `A11yConfig` at the provider level. Joyride bakes it into individual components with less configurability.
+The architectural difference matters, though. userTourKit's accessibility is configured via `A11yConfig` at the provider level. Joyride bakes it into individual components with less configurability.
 
 ### Bundle size and performance
 
 React Joyride v3 ships at roughly 30KB gzipped with 10 runtime dependencies. That's about 30% smaller than v2, which is genuine progress. The `size-limit` budget in the repo confirms this target.
 
-User Tour Kit's core is under 8KB gzipped. The React UI package is under 12KB. Hints: under 5KB. That's roughly 3.75x smaller for core logic alone.
+userTourKit's core is under 8KB gzipped. The React UI package is under 12KB. Hints: under 5KB. That's roughly 3.75x smaller for core logic alone.
 
-The difference comes from architecture. User Tour Kit's headless core ships logic without opinionated UI components, and tree-shaking works because each package is a separate entry point. On mobile, where every kilobyte adds parse time, this gap matters. On a standard desktop SaaS dashboard? You probably won't notice.
+The difference comes from architecture. userTourKit's headless core ships logic without opinionated UI components, and tree-shaking works because each package is a separate entry point. On mobile, where every kilobyte adds parse time, this gap matters. On a standard desktop SaaS dashboard? You probably won't notice.
 
 ### Framework support and TypeScript
 
 React Joyride v3 supports React 16.8 through React 19. That wider range is an advantage for teams stuck on older React versions. TypeScript support in v3 is native (v2 used hand-written `.d.ts` files), which is a big improvement.
 
-User Tour Kit targets React 18 and 19 only. No React 16 or 17 support. TypeScript runs in strict mode with full type inference and generics.
+userTourKit targets React 18 and 19 only. No React 16 or 17 support. TypeScript runs in strict mode with full type inference and generics.
 
-Router adapters ship for Next.js App Router (`useNextAppRouter`), Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`). Multi-page tours work through the router adapter, not through manual callback orchestration. If your app is on React 17 or earlier, User Tour Kit isn't an option. That's a real limitation.
+Router adapters ship for Next.js App Router (`useNextAppRouter`), Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`). Multi-page tours work through the router adapter, not through manual callback orchestration. If your app is on React 17 or earlier, userTourKit isn't an option. That's a real limitation.
 
 ### Licensing and pricing
 
 Both libraries use MIT licensing for their core functionality. Joyride is 100% MIT with no paid tier, which is straightforward.
 
-User Tour Kit's three core packages (core, react, hints) are MIT. The seven Pro packages cost $99 as a one-time purchase. No monthly fees, no MAU limits, no per-seat pricing.
+userTourKit's three core packages (core, react, hints) are MIT. The seven Pro packages cost $99 as a one-time purchase. No monthly fees, no MAU limits, no per-seat pricing.
 
-If your project only needs tours and hints, User Tour Kit costs the same as Joyride: nothing. The $99 matters when you need the extended onboarding features that Joyride doesn't offer at any price.
+If your project only needs tours and hints, userTourKit costs the same as Joyride: nothing. The $99 matters when you need the extended onboarding features that Joyride doesn't offer at any price.
 
 ## Side-by-side comparison table
 
-| Feature | User Tour Kit | React Joyride v3 |
+| Feature | userTourKit | React Joyride v3 |
 |---|---|---|
 | Product tours | ✅ Built-in (core, MIT) | ✅ Built-in (MIT) |
 | Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ⚙️ Beacons only (sequential) |
@@ -149,23 +149,23 @@ Data verified March 2026. Sources: official documentation, npm, GitHub.
 
 ## When to choose React Joyride instead
 
-Choose Joyride if you need a basic sequential tour with default styling and don't use Tailwind or a component design system. Joyride v3's `useJoyride()` hook is clean. The SVG spotlight works reliably. You can go from install to working demo in minutes. It also makes more sense if you're on React 16 or 17, since User Tour Kit requires React 18+.
+Choose Joyride if you need a basic sequential tour with default styling and don't use Tailwind or a component design system. Joyride v3's `useJoyride()` hook is clean. The SVG spotlight works reliably. You can go from install to working demo in minutes. It also makes more sense if you're on React 16 or 17, since userTourKit requires React 18+.
 
 For teams already invested in Joyride v2, upgrading to v3 is lower risk than switching libraries entirely. The mental model carries over. And with 672K weekly downloads and 7,600+ GitHub stars (as of March 2026), Joyride has the largest pool of Stack Overflow answers and blog tutorials. When a junior developer hits a wall, they're more likely to find an existing solution.
 
 If your project only needs tours and cost is a hard constraint, Joyride at zero cost is an honest advantage.
 
-## When User Tour Kit is the better fit
+## When userTourKit is the better fit
 
-User Tour Kit fits better when your onboarding needs extend beyond sequential tours. If you're assembling Joyride for tours, a modal library for announcements, a custom checklist, and manual analytics forwarding, you're building the integration layer that User Tour Kit already provides. Shared state across 9 packages eliminates that tax.
+userTourKit fits better when your onboarding needs extend beyond sequential tours. If you're assembling Joyride for tours, a modal library for announcements, a custom checklist, and manual analytics forwarding, you're building the integration layer that userTourKit already provides. Shared state across 9 packages eliminates that tax.
 
-User Tour Kit is also the better choice for teams using shadcn/ui, Radix UI, or Tailwind CSS. Joyride's inline-styles-only architecture (GitHub issue [#526](https://github.com/gilbarbara/react-joyride/issues/526), [#545](https://github.com/gilbarbara/react-joyride/issues/545)) means you replace entire tooltip components just to apply your design system. User Tour Kit components use CVA (class-variance-authority) and inherit your design tokens directly. No parallel styling system required.
+userTourKit is also the better choice for teams using shadcn/ui, Radix UI, or Tailwind CSS. Joyride's inline-styles-only architecture (GitHub issue [#526](https://github.com/gilbarbara/react-joyride/issues/526), [#545](https://github.com/gilbarbara/react-joyride/issues/545)) means you replace entire tooltip components just to apply your design system. userTourKit components use CVA (class-variance-authority) and inherit your design tokens directly. No parallel styling system required.
 
-And if accessibility compliance is a requirement, not a nice-to-have, User Tour Kit's WCAG 2.1 AA defaults and Lighthouse 100 score provide a stronger starting point than Joyride's improving-but-unconfigurable accessibility layer.
+And if accessibility compliance is a requirement, not a nice-to-have, userTourKit's WCAG 2.1 AA defaults and Lighthouse 100 score provide a stronger starting point than Joyride's improving-but-unconfigurable accessibility layer.
 
-## Migration path from React Joyride to User Tour Kit
+## Migration path from React Joyride to userTourKit
 
-The migration is straightforward for basic tours. Joyride steps map directly to User Tour Kit steps:
+The migration is straightforward for basic tours. Joyride steps map directly to userTourKit steps:
 
 ```tsx
 // React Joyride v3 step
@@ -174,18 +174,18 @@ const joyrideSteps = [
   { target: '.search', content: 'Search anything.', placement: 'bottom' },
 ];
 
-// Tour Kit equivalent
+// userTourKit equivalent
 const tourKitSteps = [
   { id: 'nav', target: '.sidebar', content: 'Your nav lives here.', placement: 'right' },
   { id: 'search', target: '.search', content: 'Search anything.', placement: 'bottom' },
 ];
 ```
 
-The main additions are explicit `id` fields per step (User Tour Kit requires them for branching and persistence) and wrapping your app with `TourKitProvider` instead of dropping a `Joyride` component inline.
+The main additions are explicit `id` fields per step (userTourKit requires them for branching and persistence) and wrapping your app with `TourKitProvider` instead of dropping a `Joyride` component inline.
 
-Custom tooltip components need more work. If you've replaced Joyride's tooltip to match your design system (and given the inline styles issue, many teams have), you'll rebuild those using User Tour Kit's `TourCard` compound component or the `TourCardHeadless` render prop. The upside: you won't need `!important` overrides or DOM class-name manipulation in callbacks anymore.
+Custom tooltip components need more work. If you've replaced Joyride's tooltip to match your design system (and given the inline styles issue, many teams have), you'll rebuild those using userTourKit's `TourCard` compound component or the `TourCardHeadless` render prop. The upside: you won't need `!important` overrides or DOM class-name manipulation in callbacks anymore.
 
-Multi-page tours get simpler. Replace Joyride's `setTimeout()` polling pattern with User Tour Kit's router adapter. Set `route` and `routeMatch` on each step, and the library handles navigation and element-wait logic.
+Multi-page tours get simpler. Replace Joyride's `setTimeout()` polling pattern with userTourKit's router adapter. Set `route` and `routeMatch` on each step, and the library handles navigation and element-wait logic.
 
 For teams with controlled Joyride tours using extensive callback logic, plan a sprint. The callback-to-hook refactoring isn't mechanical; you're moving from event-driven imperative code to declarative configuration. Budget time to test, especially around tour completion state and analytics forwarding.
 
@@ -199,42 +199,42 @@ On horizontal scrolling, the maintainer acknowledged in Discussion [#849](https:
 
 Whatfix's 2026 review described Joyride as *"a hobby project that the maintainer tinkers with occasionally."* That characterization is arguably unfair given the v3 rewrite, but it reflects a perception problem that the 16-month release gap created. Socket.dev lists the project as having "1 open source maintainer."
 
-We built User Tour Kit, so take everything above with appropriate skepticism. We've tried to cite verifiable sources. Check the GitHub issues yourself.
+We built userTourKit, so take everything above with appropriate skepticism. We've tried to cite verifiable sources. Check the GitHub issues yourself.
 
 ## Frequently asked questions
 
-### Is User Tour Kit free?
+### Is userTourKit free?
 
-User Tour Kit's three core packages (core, react, hints) are MIT-licensed and completely free. The seven Pro packages cost $99 as a one-time purchase covering analytics, checklists, announcements, adoption tracking, media, and scheduling. No subscriptions. No MAU limits.
+userTourKit's three core packages (core, react, hints) are MIT-licensed and completely free. The seven Pro packages cost $99 as a one-time purchase covering analytics, checklists, announcements, adoption tracking, media, and scheduling. No subscriptions. No MAU limits.
 
-### What is the difference between User Tour Kit and React Joyride?
+### What is the difference between userTourKit and React Joyride?
 
-React Joyride is a monolithic tour component that renders its own inline-styled UI. User Tour Kit is a headless onboarding platform with separate packages for tours, hints, checklists, announcements, and more. The core architectural difference: headless vs opinionated.
+React Joyride is a monolithic tour component that renders its own inline-styled UI. userTourKit is a headless onboarding platform with separate packages for tours, hints, checklists, announcements, and more. The core architectural difference: headless vs opinionated.
 
-### Can I migrate from React Joyride to User Tour Kit?
+### Can I migrate from React Joyride to userTourKit?
 
 Yes. Step definitions map almost directly. The main work: adding step IDs, switching from callbacks to hooks, replacing custom tooltip overrides with compound components, swapping multi-page polling for router adapters. Basic tours migrate in hours; complex controlled tours may take a sprint.
 
-### Does User Tour Kit work with Next.js and React 19?
+### Does userTourKit work with Next.js and React 19?
 
 Yes. React 18 and 19, with built-in router adapters for Next.js App Router and Pages Router. No React 16 or 17 support.
 
-### What is the bundle size of User Tour Kit vs React Joyride?
+### What is the bundle size of userTourKit vs React Joyride?
 
-User Tour Kit's core is &lt;8KB gzipped. The React UI package is &lt;12KB gzipped. React Joyride v3 ships at roughly 30KB gzipped. User Tour Kit achieves the smaller size through its headless architecture, shipping logic without opinionated UI components.
+userTourKit's core is &lt;8KB gzipped. The React UI package is &lt;12KB gzipped. React Joyride v3 ships at roughly 30KB gzipped. userTourKit achieves the smaller size through its headless architecture, shipping logic without opinionated UI components.
 
 ### Does React Joyride support checklists or analytics?
 
-No. Joyride is exclusively a tour component. Checklists, announcements, analytics — you'd bolt on separate libraries yourself. User Tour Kit's Pro tier bundles these with shared state across all packages.
+No. Joyride is exclusively a tour component. Checklists, announcements, analytics — you'd bolt on separate libraries yourself. userTourKit's Pro tier bundles these with shared state across all packages.
 
 ### Is React Joyride open source?
 
-Fully MIT-licensed, no paid tier. User Tour Kit's core is also MIT. The extended packages are proprietary at $99 one-time.
+Fully MIT-licensed, no paid tier. userTourKit's core is also MIT. The extended packages are proprietary at $99 one-time.
 
-### Which is better for enterprise: User Tour Kit or React Joyride?
+### Which is better for enterprise: userTourKit or React Joyride?
 
-User Tour Kit's WCAG 2.1 AA compliance and team maintenance model fit enterprise requirements better. But User Tour Kit has no enterprise support SLA and a smaller community. Joyride has broader ecosystem familiarity at zero cost. Neither offers dedicated enterprise support contracts as of March 2026.
+userTourKit's WCAG 2.1 AA compliance and team maintenance model fit enterprise requirements better. But userTourKit has no enterprise support SLA and a smaller community. Joyride has broader ecosystem familiarity at zero cost. Neither offers dedicated enterprise support contracts as of March 2026.
 
 ## Final verdict
 
-React Joyride v3 is a competent, well-maintained tour component. If sequential product tours with default styling are all you need, it does the job at zero cost with the largest React tour community behind it. User Tour Kit solves a different problem: headless onboarding infrastructure that spans tours, hints, checklists, announcements, and analytics in a design-system-native architecture under 8KB. Your choice depends on scope, not quality.
+React Joyride v3 is a competent, well-maintained tour component. If sequential product tours with default styling are all you need, it does the job at zero cost with the largest React tour community behind it. userTourKit solves a different problem: headless onboarding infrastructure that spans tours, hints, checklists, announcements, and analytics in a design-system-native architecture under 8KB. Your choice depends on scope, not quality.

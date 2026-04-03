@@ -1,7 +1,7 @@
 /**
  * generate-context-files.ts
  *
- * Generates plain-text context files for each User Tour Kit package.
+ * Generates plain-text context files for each userTourKit package.
  * These files are designed to be copy-pasted into LLM conversations
  * (ChatGPT, Claude, Gemini) so the LLM has accurate API knowledge.
  *
@@ -427,7 +427,7 @@ function assembleContextFile(info: PackageInfo): string {
   const date = new Date().toISOString().split('T')[0]
 
   // ── Header ──
-  lines.push(`User Tour Kit — ${info.fullName} Context File`)
+  lines.push(`userTourKit — ${info.fullName} Context File`)
   lines.push(`Version: ${info.version} | Generated: ${date}`)
   lines.push(`Paste this into your LLM to get accurate answers about ${info.fullName}.`)
   lines.push('='.repeat(73))
@@ -436,7 +436,7 @@ function assembleContextFile(info: PackageInfo): string {
   // ── Overview ──
   lines.push('OVERVIEW')
   lines.push('--------')
-  lines.push(info.description || `${info.fullName} package for User Tour Kit.`)
+  lines.push(info.description || `${info.fullName} package for userTourKit.`)
   lines.push('')
 
   // ── Installation ──
@@ -567,7 +567,7 @@ function assembleContextFile(info: PackageInfo): string {
 async function main() {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true })
 
-  console.log('Generating User Tour Kit context files...')
+  console.log('Generating userTourKit context files...')
   console.log(`  Monorepo root: ${MONOREPO_ROOT}`)
   console.log(`  Output dir:    ${OUTPUT_DIR}`)
   console.log('')

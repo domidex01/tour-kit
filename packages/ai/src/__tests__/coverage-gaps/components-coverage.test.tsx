@@ -2,19 +2,14 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Mock the hooks that AiChatSuggestions uses internally
-vi.mock('../../hooks/use-suggestions', () => ({
-  useOptionalSuggestions: vi.fn(() => null),
-}))
-
-// Mock useAiChat so useSuggestions doesn't throw
-vi.mock('../../hooks/use-ai-chat', () => ({
-  useAiChat: vi.fn(() => ({
-    messages: [],
-    sendMessage: vi.fn(),
-    status: 'ready',
-    error: null,
-  })),
+// Mock the context module so AiChatSuggestions can render outside a provider
+vi.mock('../../context/ai-chat-context', () => ({
+  AiChatContext: {
+    ...(() => {
+      const { createContext } = require('react')
+      return createContext(null)
+    })(),
+  },
 }))
 
 describe('Component coverage gaps', () => {

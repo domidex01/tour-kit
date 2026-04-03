@@ -1,6 +1,6 @@
 ---
-title: "Tour Kit vs OnboardJS: which React onboarding library should you choose in 2026?"
-description: "Compare Tour Kit vs OnboardJS for React onboarding. See features, bundle size, accessibility, and pricing side-by-side. Find which fits your stack in 2026."
+title: "userTourKit vs OnboardJS: which React onboarding library should you choose in 2026?"
+description: "Compare userTourKit vs OnboardJS for React onboarding. See features, bundle size, accessibility, and pricing side-by-side. Find which fits your stack in 2026."
 competitor: "OnboardJS"
 competitorSlug: "onboardjs"
 lastUpdated: "2026-03-31"
@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-Tour Kit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;8KB core bundle for a $99 one-time Pro upgrade. OnboardJS is a headless step-flow engine for multi-step onboarding wizards, MIT-licensed and free. Tour Kit suits React teams building full-lifecycle onboarding with DOM-anchored tours. OnboardJS fits better when you only need wizard-style flows and don't care about tooltips or accessibility compliance.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;8KB core bundle for a $99 one-time Pro upgrade. OnboardJS is a headless step-flow engine for multi-step onboarding wizards, MIT-licensed and free. userTourKit suits React teams building full-lifecycle onboarding with DOM-anchored tours. OnboardJS fits better when you only need wizard-style flows and don't care about tooltips or accessibility compliance.
 
-## What is Tour Kit?
+## What is userTourKit?
 
-Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
 
 ## What is OnboardJS?
 
@@ -22,41 +22,41 @@ OnboardJS is an open-source headless React onboarding framework that manages mul
 
 ### Tours and step types
 
-This is where the two libraries diverge most sharply. Tour Kit's core purpose is DOM-anchored product tours: you point a step at a CSS selector or React ref, and the library positions a tooltip next to that element with spotlight overlays and floating-ui placement (12 positions). Steps support `advanceOn` triggers that auto-advance when users click specific elements. Route-based navigation waits for page transitions. Conditional branching uses async resolvers.
+This is where the two libraries diverge most sharply. userTourKit's core purpose is DOM-anchored product tours: you point a step at a CSS selector or React ref, and the library positions a tooltip next to that element with spotlight overlays and floating-ui placement (12 positions). Steps support `advanceOn` triggers that auto-advance when users click specific elements. Route-based navigation waits for page transitions. Conditional branching uses async resolvers.
 
 OnboardJS doesn't do any of that. It's a step-flow controller for full-screen wizard panels, not a tooltip positioning engine. Steps are typed data objects (`INFORMATION`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `CHECKLIST`, `CONFIRMATION`, `CUSTOM_COMPONENT`) rendered through a `StepComponentRegistry`.
 
 No `target` property. No spotlight. No floating positioning. If you need to highlight a button in your UI and show a contextual tooltip, OnboardJS can't help. It manages "step 1 → step 2 → step 3" flows for welcome screens and setup wizards.
 
-Both support conditional next-step routing. Tour Kit uses `onNext` callbacks that return step IDs or cross-tour branch targets. OnboardJS uses a `nextStep` function on each step definition. The conditional logic is roughly equivalent, but the output is different: Tour Kit navigates between DOM-attached tooltips; OnboardJS navigates between full-page panels.
+Both support conditional next-step routing. userTourKit uses `onNext` callbacks that return step IDs or cross-tour branch targets. OnboardJS uses a `nextStep` function on each step definition. The conditional logic is roughly equivalent, but the output is different: userTourKit navigates between DOM-attached tooltips; OnboardJS navigates between full-page panels.
 
 ### Hints and hotspots
 
-Tour Kit ships a dedicated `@tour-kit/hints` package (&lt;5KB gzipped) with `HintsProvider`, `HintHotspot`, and `HintTooltip` components. Hints are non-sequential, each dismisses independently, and dismissal state persists across page loads. The hotspot renders a pulsing beacon on the target element. The tooltip appears on hover or click.
+userTourKit ships a dedicated `@tour-kit/hints` package (&lt;5KB gzipped) with `HintsProvider`, `HintHotspot`, and `HintTooltip` components. Hints are non-sequential, each dismisses independently, and dismissal state persists across page loads. The hotspot renders a pulsing beacon on the target element. The tooltip appears on hover or click.
 
 OnboardJS has no hint or hotspot capability. It doesn't attach to DOM elements at all, so the concept of a persistent beacon on a UI element isn't possible within its architecture.
 
 ### Checklists and onboarding flows
 
-Tour Kit's `@tour-kit/checklists` package (Pro, $99 one-time) provides task dependencies with circular dependency detection, three completion types (manual, event-based, custom check function), progress calculation, and persistence. Components include `ChecklistPanel`, `ChecklistLauncher`, and headless render-prop variants.
+userTourKit's `@tour-kit/checklists` package (Pro, $99 one-time) provides task dependencies with circular dependency detection, three completion types (manual, event-based, custom check function), progress calculation, and persistence. Components include `ChecklistPanel`, `ChecklistLauncher`, and headless render-prop variants.
 
 OnboardJS has a built-in `CHECKLIST` step type that renders a list of items within a wizard step. But it's a UI component within a flow, not a standalone task-tracking system. You can't use it as a persistent sidebar checklist that tracks completion across sessions independently of the wizard flow. Different tools for different jobs.
 
 ### Announcements and banners
 
-Tour Kit's `@tour-kit/announcements` package (Pro) offers five display variants: modal, toast, banner, slideout, spotlight. Each has frequency rules (`once`, `session`, `always`, interval-based) with priority queuing. You can target by user ID, role, or custom filter function. Announcements can integrate with `@tour-kit/scheduling` for time-based display windows.
+userTourKit's `@tour-kit/announcements` package (Pro) offers five display variants: modal, toast, banner, slideout, spotlight. Each has frequency rules (`once`, `session`, `always`, interval-based) with priority queuing. You can target by user ID, role, or custom filter function. Announcements can integrate with `@tour-kit/scheduling` for time-based display windows.
 
 OnboardJS has no announcement system. Its architecture is built around sequential flows, not standalone notification delivery.
 
 ### Analytics and tracking
 
-Tour Kit's `@tour-kit/analytics` package (Pro) uses a plugin interface with five built-in plugins: PostHog, Mixpanel, Amplitude, Google Analytics, and a console logger. Custom plugins take three lines of code. Event types cover the full lifecycle: `tour_started`, `tour_completed`, `step_viewed`, `hint_shown`, `checklist_completed`, and more.
+userTourKit's `@tour-kit/analytics` package (Pro) uses a plugin interface with five built-in plugins: PostHog, Mixpanel, Amplitude, Google Analytics, and a console logger. Custom plugins take three lines of code. Event types cover the full lifecycle: `tour_started`, `tour_completed`, `step_viewed`, `hint_shown`, `checklist_completed`, and more.
 
-OnboardJS ships a PostHog plugin (`@onboardjs/posthog`) that tracks flow starts, step completions, and abandonment. There's also a cloud analytics offering with an "AI-driven insights" pitch, but as of March 2026 it has no published pricing or feature matrix. The PostHog plugin works well for what it covers. But it's one integration versus Tour Kit's five, with no Mixpanel or Amplitude support.
+OnboardJS ships a PostHog plugin (`@onboardjs/posthog`) that tracks flow starts, step completions, and abandonment. There's also a cloud analytics offering with an "AI-driven insights" pitch, but as of March 2026 it has no published pricing or feature matrix. The PostHog plugin works well for what it covers. But it's one integration versus userTourKit's five, with no Mixpanel or Amplitude support.
 
 ### Scheduling and targeting
 
-Tour Kit's `@tour-kit/scheduling` package (Pro) handles time-based display with ISO 8601 dates, time-of-day windows, day-of-week filters, recurring patterns, blackout periods, and IANA timezone support. Four business hours presets ship out of the box (US Standard, US Tech, UK Standard, Australia Standard). The `ScheduleGate` component conditionally renders children based on schedule evaluation.
+userTourKit's `@tour-kit/scheduling` package (Pro) handles time-based display with ISO 8601 dates, time-of-day windows, day-of-week filters, recurring patterns, blackout periods, and IANA timezone support. Four business hours presets ship out of the box (US Standard, US Tech, UK Standard, Australia Standard). The `ScheduleGate` component conditionally renders children based on schedule evaluation.
 
 OnboardJS has no scheduling or targeting system. If you need to show an onboarding flow only during business hours or after a specific date, you'd build that logic yourself.
 
@@ -64,19 +64,19 @@ OnboardJS has no scheduling or targeting system. If you need to show an onboardi
 
 OnboardJS is a lightweight tour library focused on step-by-step guides. It doesn't include adoption tracking, usage analytics, or nudging capabilities. Feature adoption measurement would require building a separate tracking layer.
 
-User Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
 
-The honest caveat: Tour Kit's adoption system is entirely code-first. There's no visual configuration layer or standalone dashboard a non-technical team member can use without developer involvement.
+The honest caveat: userTourKit's adoption system is entirely code-first. There's no visual configuration layer or standalone dashboard a non-technical team member can use without developer involvement.
 
 ### Media embedding
 
 OnboardJS doesn't provide media components. You can include HTML in step content, but there's no video embedding system, no URL parsing, no platform detection, and no reduced-motion fallbacks.
 
-User Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 ### Accessibility and WCAG compliance
 
-This is probably the starkest gap between the two libraries. Tour Kit ships WCAG 2.1 AA compliance by default, not as an add-on. Focus trapping via `useFocusTrap`. Screen reader announcements through `aria-live` regions. Keyboard navigation: arrow keys for next/prev, Escape to exit, Tab for focus cycling.
+This is probably the starkest gap between the two libraries. userTourKit ships WCAG 2.1 AA compliance by default, not as an add-on. Focus trapping via `useFocusTrap`. Screen reader announcements through `aria-live` regions. Keyboard navigation: arrow keys for next/prev, Escape to exit, Tab for focus cycling.
 
 On top of that, `prefers-reduced-motion` support and RTL/LTR automatic detection. Lighthouse Accessibility score: 100.
 
@@ -86,31 +86,31 @@ For teams building products under compliance requirements (government contracts,
 
 ### Bundle size and performance
 
-Tour Kit publishes verified gzipped bundle sizes: core at &lt;8KB, react at &lt;12KB, hints at &lt;5KB. These are measured and enforced as quality gates.
+userTourKit publishes verified gzipped bundle sizes: core at &lt;8KB, react at &lt;12KB, hints at &lt;5KB. These are measured and enforced as quality gates.
 
-OnboardJS doesn't publish minified+gzipped bundle sizes. The npm unpacked tarball for `@onboardjs/core` weighs 442KB, but that includes source maps, type declarations, development artifacts. The actual browser payload is smaller, though without published benchmarks it's impossible to compare directly. Tour Kit's transparency here is a practical advantage for teams with performance budgets.
+OnboardJS doesn't publish minified+gzipped bundle sizes. The npm unpacked tarball for `@onboardjs/core` weighs 442KB, but that includes source maps, type declarations, development artifacts. The actual browser payload is smaller, though without published benchmarks it's impossible to compare directly. userTourKit's transparency here is a practical advantage for teams with performance budgets.
 
 ### Framework support and TypeScript
 
-Both libraries target React 18+ and use TypeScript with strict configurations. Tour Kit explicitly supports React 19 and provides router adapters for Next.js App Router, Next.js Pages Router, and React Router v6+. OnboardJS uses `"use client"` directives for Next.js App Router compatibility but doesn't document React 19 support.
+Both libraries target React 18+ and use TypeScript with strict configurations. userTourKit explicitly supports React 19 and provides router adapters for Next.js App Router, Next.js Pages Router, and React Router v6+. OnboardJS uses `"use client"` directives for Next.js App Router compatibility but doesn't document React 19 support.
 
-OnboardJS claims "framework-agnostic" in its marketing, but only React bindings exist (`@onboardjs/react`). No Vue adapter. No Svelte. No Angular. Tour Kit makes the same trade-off honestly: core logic is framework-agnostic, UI components require React.
+OnboardJS claims "framework-agnostic" in its marketing, but only React bindings exist (`@onboardjs/react`). No Vue adapter. No Svelte. No Angular. userTourKit makes the same trade-off honestly: core logic is framework-agnostic, UI components require React.
 
-TypeScript quality is comparable. OnboardJS reports 98.5% TypeScript coverage with generics for step types. Tour Kit uses strict mode throughout with full type inference on hooks and components. Both are solid choices for type-safe development.
+TypeScript quality is comparable. OnboardJS reports 98.5% TypeScript coverage with generics for step types. userTourKit uses strict mode throughout with full type inference on hooks and components. Both are solid choices for type-safe development.
 
 ### Licensing and pricing
 
 Both libraries use MIT licensing for their open-source packages.
 
-Tour Kit's free tier includes three packages: `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints`. The Pro tier adds seven packages (adoption, analytics, announcements, checklists, media, scheduling) for a one-time $99 payment. No monthly fees. No per-seat pricing. No MAU limits.
+userTourKit's free tier includes three packages: `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints`. The Pro tier adds seven packages (adoption, analytics, announcements, checklists, media, scheduling) for a one-time $99 payment. No monthly fees. No per-seat pricing. No MAU limits.
 
 OnboardJS's core (`@onboardjs/core`) and React bindings (`@onboardjs/react`) are MIT and free. The Supabase and PostHog plugins are also free. There's a cloud analytics product mentioned on the site with a "Start Analytics Free" button, but no pricing page exists as of March 2026. The Hobby ($0), Starter ($59/mo), Growth ($119/mo), Business ($249/mo) tiers sometimes attributed to OnboardJS in comparison articles actually belong to Usertour, a different product entirely.
 
-The practical comparison: Tour Kit's $99 one-time fee for 7 extra packages versus OnboardJS's free everything (but with far fewer features). If you only need wizard flows, OnboardJS costs nothing. If you need tours with hints, announcements with checklists, plus analytics and scheduling on top, Tour Kit's $99 covers the lot.
+The practical comparison: userTourKit's $99 one-time fee for 7 extra packages versus OnboardJS's free everything (but with far fewer features). If you only need wizard flows, OnboardJS costs nothing. If you need tours with hints, announcements with checklists, plus analytics and scheduling on top, userTourKit's $99 covers the lot.
 
 ## Side-by-side comparison table
 
-| Category | Tour Kit | OnboardJS |
+| Category | userTourKit | OnboardJS |
 |---|---|---|
 | Product tours (DOM-anchored) | ✅ Built-in (core) | 🚫 Not available |
 | Hints and hotspots | ✅ Built-in (&lt;5KB) | 🚫 Not available |
@@ -141,29 +141,29 @@ Data verified March 2026. Sources: official documentation, npm, GitHub.
 
 Choose OnboardJS if you're building a multi-step welcome wizard or setup flow and don't need DOM-anchored tooltips at all. OnboardJS's step-type system (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `CONFIRMATION`) gives you a clean abstraction for questionnaire-style flows, and the Supabase persistence plugin is useful if you're already running Supabase for your backend.
 
-OnboardJS also fits if you want a completely free solution with zero commercial components. Tour Kit's free tier covers tours, hints, and core hooks, but checklists and analytics require the $99 Pro upgrade. OnboardJS's entire feature set ships under MIT at no cost.
+OnboardJS also fits if you want a completely free solution with zero commercial components. userTourKit's free tier covers tours, hints, and core hooks, but checklists and analytics require the $99 Pro upgrade. OnboardJS's entire feature set ships under MIT at no cost.
 
 If your team doesn't need accessibility compliance and you're building a simple onboarding wizard for an internal tool, OnboardJS gets the job done with less overhead.
 
-## When Tour Kit is the better fit
+## When userTourKit is the better fit
 
-Tour Kit makes more sense when your onboarding needs go beyond wizard screens. Building product tours that highlight specific UI elements? OnboardJS can't do that. It doesn't attach to DOM elements at all, so Tour Kit is where you'd look.
+userTourKit makes more sense when your onboarding needs go beyond wizard screens. Building product tours that highlight specific UI elements? OnboardJS can't do that. It doesn't attach to DOM elements at all, so userTourKit is where you'd look.
 
-For teams with accessibility requirements, Tour Kit is the only choice between these two. WCAG 2.1 AA compliance with Lighthouse 100 scores, focus trapping, and screen reader announcements ship by default. OnboardJS has no accessibility story.
+For teams with accessibility requirements, userTourKit is the only choice between these two. WCAG 2.1 AA compliance with Lighthouse 100 scores, focus trapping, and screen reader announcements ship by default. OnboardJS has no accessibility story.
 
-Tour Kit also wins on breadth. Ten packages cover tours, hints, announcements, checklists, analytics, adoption tracking, media embedding, scheduling. You won't need to stitch together separate libraries as requirements grow.
+userTourKit also wins on breadth. Ten packages cover tours, hints, announcements, checklists, analytics, adoption tracking, media embedding, scheduling. You won't need to stitch together separate libraries as requirements grow.
 
-A startup that starts with a welcome tour and later needs feature announcements plus onboarding checklists can stay within Tour Kit's ecosystem without adding new dependencies.
+A startup that starts with a welcome tour and later needs feature announcements plus onboarding checklists can stay within userTourKit's ecosystem without adding new dependencies.
 
-Design system integration runs deeper with Tour Kit. The UnifiedSlot pattern supports both Radix UI (`asChild` prop) and Base UI (render prop) approaches natively. Components use CVA for variant-based styling, making Tour Kit a natural fit for shadcn/ui projects. OnboardJS offers copy-paste shadcn/ui component templates, which work but require manual maintenance.
+Design system integration runs deeper with userTourKit. The UnifiedSlot pattern supports both Radix UI (`asChild` prop) and Base UI (render prop) approaches natively. Components use CVA for variant-based styling, making userTourKit a natural fit for shadcn/ui projects. OnboardJS offers copy-paste shadcn/ui component templates, which work but require manual maintenance.
 
-## Migration path from OnboardJS to Tour Kit
+## Migration path from OnboardJS to userTourKit
 
 If you're currently using OnboardJS for wizard-style flows and want to add product tours, hints, or announcements, you don't necessarily need to rip out OnboardJS. The two libraries solve different problems and can coexist.
 
 But if you want to consolidate, here's the mapping:
 
-**Step definitions:** OnboardJS steps with `type: 'INFORMATION'` map to Tour Kit's `TourStep` with content. OnboardJS's `nextStep` conditional function maps to Tour Kit's `onNext` callback. The logic is similar, but Tour Kit adds `target` for DOM anchoring.
+**Step definitions:** OnboardJS steps with `type: 'INFORMATION'` map to userTourKit's `TourStep` with content. OnboardJS's `nextStep` conditional function maps to userTourKit's `onNext` callback. The logic is similar, but userTourKit adds `target` for DOM anchoring.
 
 ```tsx
 // OnboardJS
@@ -172,7 +172,7 @@ const steps = [
   { id: 'setup', type: 'SINGLE_CHOICE', payload: { options: ['Dev', 'PM'] } },
 ];
 
-// Tour Kit equivalent (as a tour with DOM targets)
+// userTourKit equivalent (as a tour with DOM targets)
 const steps = [
   { id: 'welcome', target: '#hero', content: 'Welcome to the app.', placement: 'bottom' },
   { id: 'setup', target: '#role-select', content: 'Pick your role.', advanceOn: { event: 'click', selector: '#role-select' } },
@@ -181,11 +181,11 @@ const steps = [
 
 **Provider swap:** Replace `OnboardingProvider` with `TourKitProvider`. The context API shapes differ, but the provider-at-root pattern is identical.
 
-**Analytics:** If you're using `@onboardjs/posthog`, Tour Kit's PostHog plugin (`@tour-kit/analytics/posthog`) covers the same events with a broader event taxonomy. Replace `createPostHogPlugin()` with `postHogPlugin` from `@tour-kit/analytics/posthog`.
+**Analytics:** If you're using `@onboardjs/posthog`, userTourKit's PostHog plugin (`@tour-kit/analytics/posthog`) covers the same events with a broader event taxonomy. Replace `createPostHogPlugin()` with `postHogPlugin` from `@tour-kit/analytics/posthog`.
 
-**Persistence:** OnboardJS's localStorage handler maps directly to Tour Kit's default localStorage adapter. If you're using the Supabase plugin for cross-device persistence, you'd need a custom storage adapter in Tour Kit (implement `getItem`, `setItem`, `removeItem`).
+**Persistence:** OnboardJS's localStorage handler maps directly to userTourKit's default localStorage adapter. If you're using the Supabase plugin for cross-device persistence, you'd need a custom storage adapter in userTourKit (implement `getItem`, `setItem`, `removeItem`).
 
-The migration is straightforward for simple flows. Complex conditional branching may need careful translation of OnboardJS's `condition` functions to Tour Kit's `onBeforeShow` async validators.
+The migration is straightforward for simple flows. Complex conditional branching may need careful translation of OnboardJS's `condition` functions to userTourKit's `onBeforeShow` async validators.
 
 ## What developers say
 
@@ -197,36 +197,36 @@ Third-party review sites have started noticing OnboardJS. [Userpilot](https://us
 
 A Dev.to tutorial from the maintainer titled "Build Your First Onboarding Flow with OnboardJS in Under 10 Minutes" shows the setup is genuinely simple for wizard-style flows. The API surface is small and the TypeScript types are well-designed. Where developers might hit friction is when they need DOM-anchored features that aren't part of OnboardJS's scope.
 
-We built Tour Kit, so take the comparison above with appropriate skepticism. We've tried to present OnboardJS's strengths honestly and limit our claims to things we can verify through public documentation and repositories.
+We built userTourKit, so take the comparison above with appropriate skepticism. We've tried to present OnboardJS's strengths honestly and limit our claims to things we can verify through public documentation and repositories.
 
 ## Frequently asked questions
 
-**Is Tour Kit free?**
-Tour Kit's free tier includes three MIT-licensed packages: `@tour-kit/core` (&lt;8KB gzipped), `@tour-kit/react` (&lt;12KB), and `@tour-kit/hints` (&lt;5KB). Seven more packages (analytics, announcements, checklists, adoption, media, scheduling) are available for a one-time $99 Pro payment. No subscriptions. No MAU caps.
+**Is userTourKit free?**
+userTourKit's free tier includes three MIT-licensed packages: `@tour-kit/core` (&lt;8KB gzipped), `@tour-kit/react` (&lt;12KB), and `@tour-kit/hints` (&lt;5KB). Seven more packages (analytics, announcements, checklists, adoption, media, scheduling) are available for a one-time $99 Pro payment. No subscriptions. No MAU caps.
 
-**What is the difference between Tour Kit and OnboardJS?**
-Tour Kit positions tooltips and spotlights on DOM elements for product tours. OnboardJS manages multi-step wizard screens without attaching to the DOM. Tour Kit has 10 packages covering the full onboarding lifecycle. OnboardJS focuses on step flows with PostHog and Supabase plugins. Different scope, similar philosophy.
+**What is the difference between userTourKit and OnboardJS?**
+userTourKit positions tooltips and spotlights on DOM elements for product tours. OnboardJS manages multi-step wizard screens without attaching to the DOM. userTourKit has 10 packages covering the full onboarding lifecycle. OnboardJS focuses on step flows with PostHog and Supabase plugins. Different scope, similar philosophy.
 
-**Can I migrate from OnboardJS to Tour Kit?**
-Yes. OnboardJS step definitions map to Tour Kit's step config with added DOM targeting. The provider pattern is similar. PostHog analytics translate directly. The migration is mostly additive since Tour Kit covers features OnboardJS doesn't have, so you're gaining capability rather than replacing equivalent functionality.
+**Can I migrate from OnboardJS to userTourKit?**
+Yes. OnboardJS step definitions map to userTourKit's step config with added DOM targeting. The provider pattern is similar. PostHog analytics translate directly. The migration is mostly additive since userTourKit covers features OnboardJS doesn't have, so you're gaining capability rather than replacing equivalent functionality.
 
-**Does Tour Kit work with Next.js and React 19?**
-Tour Kit provides router adapters for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`). It supports React 18 and React 19 explicitly. OnboardJS supports Next.js App Router via `"use client"` directives but hasn't confirmed React 19 compatibility.
+**Does userTourKit work with Next.js and React 19?**
+userTourKit provides router adapters for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`). It supports React 18 and React 19 explicitly. OnboardJS supports Next.js App Router via `"use client"` directives but hasn't confirmed React 19 compatibility.
 
-**What is the bundle size of Tour Kit vs OnboardJS?**
-Tour Kit publishes verified gzipped sizes: core &lt;8KB, react &lt;12KB, hints &lt;5KB. OnboardJS doesn't publish gzipped bundle sizes. The `@onboardjs/core` npm tarball is 442KB unpacked, but the browser bundle is smaller. Without published benchmarks, a direct size comparison isn't possible.
+**What is the bundle size of userTourKit vs OnboardJS?**
+userTourKit publishes verified gzipped sizes: core &lt;8KB, react &lt;12KB, hints &lt;5KB. OnboardJS doesn't publish gzipped bundle sizes. The `@onboardjs/core` npm tarball is 442KB unpacked, but the browser bundle is smaller. Without published benchmarks, a direct size comparison isn't possible.
 
 **Does OnboardJS support product tours with tooltips?**
-No. OnboardJS manages wizard-style step flows rendered as full-screen or panel components. It doesn't position elements relative to DOM targets, show spotlight overlays, or render contextual tooltips. For those features, you need a library like Tour Kit, React Joyride, or Shepherd.js.
+No. OnboardJS manages wizard-style step flows rendered as full-screen or panel components. It doesn't position elements relative to DOM targets, show spotlight overlays, or render contextual tooltips. For those features, you need a library like userTourKit, React Joyride, or Shepherd.js.
 
 **Is OnboardJS production-ready?**
 OnboardJS is at v1.0.0-rc.3 as of March 2026, meaning it hasn't shipped a stable 1.0 release. The project has about 45 GitHub stars, ~1,800 weekly npm downloads, and is maintained primarily by one developer. It's functional for wizard flows but doesn't have the production validation or community support of more established libraries.
 
-**Which is better for enterprise: Tour Kit or OnboardJS?**
-Tour Kit is the stronger choice for enterprise due to WCAG 2.1 AA compliance (Lighthouse 100), broader feature coverage, and a defined pricing model. OnboardJS has no accessibility documentation and no published pricing for its cloud offering, which makes procurement evaluation difficult. That said, neither library offers an enterprise support SLA.
+**Which is better for enterprise: userTourKit or OnboardJS?**
+userTourKit is the stronger choice for enterprise due to WCAG 2.1 AA compliance (Lighthouse 100), broader feature coverage, and a defined pricing model. OnboardJS has no accessibility documentation and no published pricing for its cloud offering, which makes procurement evaluation difficult. That said, neither library offers an enterprise support SLA.
 
 ## Final verdict
 
-Tour Kit and OnboardJS solve different problems despite sharing "headless React onboarding" vocabulary. OnboardJS is a clean, typed wizard-flow engine for setup screens. Tour Kit is a full onboarding platform with DOM-anchored tours, hints, checklists, and more.
+userTourKit and OnboardJS solve different problems despite sharing "headless React onboarding" vocabulary. OnboardJS is a clean, typed wizard-flow engine for setup screens. userTourKit is a full onboarding platform with DOM-anchored tours, hints, checklists, and more.
 
-Need tooltips on UI elements or accessibility compliance? Tour Kit. Building a simple welcome wizard for free? OnboardJS gets the job done.
+Need tooltips on UI elements or accessibility compliance? userTourKit. Building a simple welcome wizard for free? OnboardJS gets the job done.

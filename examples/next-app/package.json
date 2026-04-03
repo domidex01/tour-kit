@@ -15,6 +15,7 @@
     "@tour-kit/hints": "workspace:*",
     "@tour-kit/media": "workspace:*",
     "@tour-kit/ai": "workspace:*",
+    "@tour-kit/license": "workspace:*",
     "@tour-kit/react": "workspace:*",
     "@ai-sdk/openai": "^2.0.0",
     "@ai-sdk/react": "^2.0.0",

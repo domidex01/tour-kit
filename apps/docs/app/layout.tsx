@@ -7,8 +7,8 @@ import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | TourKit',
-    default: 'TourKit - Product Tours for React',
+    template: '%s | userTourKit',
+    default: 'userTourKit - Product Tours for React',
   },
   description:
     'The most developer-friendly, accessible product tour library for React. Headless hooks and pre-styled components.',
@@ -25,20 +25,20 @@ export const metadata: Metadata = {
     'tailwind',
     'shadcn',
   ],
-  authors: [{ name: 'TourKit Team' }],
+  authors: [{ name: 'userTourKit Team' }],
   robots: {
     index: false,
     follow: false,
   },
   openGraph: {
-    title: 'TourKit - Product Tours for React',
+    title: 'userTourKit - Product Tours for React',
     description: 'The most developer-friendly, accessible product tour library for React.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TourKit - Product Tours for React',
+    title: 'userTourKit - Product Tours for React',
     description: 'The most developer-friendly, accessible product tour library for React.',
   },
 }

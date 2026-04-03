@@ -7,11 +7,11 @@ import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Blog — User Tour Kit',
+  title: 'Blog — userTourKit',
   description:
-    'Guides, comparisons, and insights on product tours, onboarding, and developer experience from the User Tour Kit team.',
+    'Guides, comparisons, and insights on product tours, onboarding, and developer experience from the userTourKit team.',
   openGraph: {
-    title: 'Blog — User Tour Kit',
+    title: 'Blog — userTourKit',
     description:
       'Guides, comparisons, and insights on product tours, onboarding, and developer experience.',
     type: 'website',
@@ -35,7 +35,7 @@ export default function BlogHub() {
           </h1>
           <p className="text-[16px] leading-relaxed text-fd-muted-foreground">
             Guides, rankings, and insights on product tours, onboarding best practices, and
-            developer experience from the User Tour Kit team.
+            developer experience from the userTourKit team.
           </p>
         </header>
 

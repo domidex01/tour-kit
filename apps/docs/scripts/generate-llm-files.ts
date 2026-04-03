@@ -27,7 +27,7 @@ const PUBLIC_DIR = path.resolve(DOCS_ROOT, 'public')
 const BASE_URL = 'https://tour-kit-docs.vercel.app/docs'
 
 const PROJECT_DESCRIPTION =
-  'User Tour Kit is a headless onboarding and product tour library for React. ' +
+  'userTourKit is a headless onboarding and product tour library for React. ' +
   'It provides sequential guided tours, persistent hints, onboarding checklists, ' +
   'product announcements, media embeds, feature adoption tracking, analytics integration, ' +
   'and time-based scheduling. All components are accessible (WCAG 2.1 AA), ' +
@@ -81,7 +81,7 @@ function readVersion(): string {
 
 function makeVersionStamp(version: string): string {
   const now = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
-  return `# User Tour Kit v${version} — Generated ${now}`
+  return `# userTourKit v${version} — Generated ${now}`
 }
 
 function stripMdxSyntax(content: string): string {
@@ -143,7 +143,7 @@ function generateLlmsTxt(pages: PageMeta[], versionStamp: string): string {
   // Header
   lines.push(versionStamp)
   lines.push('')
-  lines.push('# User Tour Kit')
+  lines.push('# userTourKit')
   lines.push('')
   lines.push(`> ${PROJECT_DESCRIPTION}`)
   lines.push('')
@@ -267,7 +267,7 @@ function generateContextFiles(): void {
 function main(): void {
   const startTime = Date.now()
 
-  console.log('Generating LLM files for User Tour Kit...')
+  console.log('Generating LLM files for userTourKit...')
   console.log(`  Content dir: ${CONTENT_DIR}`)
   console.log(`  Output dir:  ${PUBLIC_DIR}`)
   console.log('')

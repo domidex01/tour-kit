@@ -58,7 +58,7 @@ describe('blog opengraph-image', () => {
     const mod = await import('../opengraph-image')
     expect(mod.size).toEqual({ width: 1200, height: 630 })
     expect(mod.contentType).toBe('image/png')
-    expect(mod.alt).toBe('Tour Kit Blog')
+    expect(mod.alt).toBe('userTourKit Blog')
   })
 
   it('returns a Response with PNG content type for known posts', async () => {

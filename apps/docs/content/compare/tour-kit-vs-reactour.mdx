@@ -1,6 +1,6 @@
 ---
-title: "Tour Kit vs Reactour: which React tour library should you choose in 2026?"
-description: "Compare Tour Kit vs Reactour for React product tours. See features, bundle size, pricing, accessibility, and TypeScript side-by-side. Find which fits your stack in 2026."
+title: "userTourKit vs Reactour: which React tour library should you choose in 2026?"
+description: "Compare userTourKit vs Reactour for React product tours. See features, bundle size, pricing, accessibility, and TypeScript side-by-side. Find which fits your stack in 2026."
 competitor: "Reactour"
 competitorSlug: "reactour"
 lastUpdated: "2026-03-31"
@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-Tour Kit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Reactour is a lightweight presentational tour library with 3.9K GitHub stars and 114,000 weekly npm downloads. Tour Kit fits React teams that want full UI control, WCAG 2.1 AA compliance, and room to grow beyond basic tours. Reactour is better when you need a quick, good-looking walkthrough on React 18 without much customization.
+userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Reactour is a lightweight presentational tour library with 3.9K GitHub stars and 114,000 weekly npm downloads. userTourKit fits React teams that want full UI control, WCAG 2.1 AA compliance, and room to grow beyond basic tours. Reactour is better when you need a quick, good-looking walkthrough on React 18 without much customization.
 
-## What is Tour Kit?
+## What is userTourKit?
 
-Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
 
 ## What is Reactour?
 
@@ -24,7 +24,7 @@ Reactour is an MIT-licensed React component library for building step-based guid
 
 Both libraries handle the basics: define an array of steps, point each step at a DOM element, show a tooltip. Reactour's step config is clean. You pass a `selector`, some `content`, and optional `position`. It works.
 
-Tour Kit's step config goes deeper. Each step supports `advanceOn` for auto-advancing on click or input events, `route` for navigating to a URL before the step shows, and `waitForTarget` with a configurable timeout for dynamic content. There's also `onBeforeShow` async guards and conditional branching via `onNext`.
+userTourKit's step config goes deeper. Each step supports `advanceOn` for auto-advancing on click or input events, `route` for navigating to a URL before the step shows, and `waitForTarget` with a configurable timeout for dynamic content. There's also `onBeforeShow` async guards and conditional branching via `onNext`.
 
 Branch targets include specific step IDs, skip-N, delay, or cross-tour jumps. Reactour doesn't have branching, route-aware navigation, or event-based advancement.
 
@@ -34,23 +34,23 @@ For linear walkthroughs, both get the job done. For anything involving condition
 
 Reactour doesn't have hints. It does tours. That's the scope.
 
-Tour Kit ships a separate `@tour-kit/hints` package (under 5KB gzipped) for persistent, non-sequential hotspots. Each hint has its own dismiss state and persists across page loads. The component renders a pulsing beacon on the target element, with a tooltip on hover or click.
+userTourKit ships a separate `@tour-kit/hints` package (under 5KB gzipped) for persistent, non-sequential hotspots. Each hint has its own dismiss state and persists across page loads. The component renders a pulsing beacon on the target element, with a tooltip on hover or click.
 
-Need "new feature" indicators or contextual tips outside a tour flow? Tour Kit handles it. With Reactour, you'd build this yourself.
+Need "new feature" indicators or contextual tips outside a tour flow? userTourKit handles it. With Reactour, you'd build this yourself.
 
 ### Checklists and onboarding flows
 
-Reactour doesn't offer checklists. Tour Kit's `@tour-kit/checklists` Pro package ($99 one-time) provides task dependencies with circular dependency detection and three completion types: manual, event-based, or custom check function. Progress calculation tracks locked tasks (blocked by unmet dependencies). Components include `Checklist`, `ChecklistTask`, `ChecklistProgress`, plus a `ChecklistPanel` launcher. Not something you'd want to build from scratch.
+Reactour doesn't offer checklists. userTourKit's `@tour-kit/checklists` Pro package ($99 one-time) provides task dependencies with circular dependency detection and three completion types: manual, event-based, or custom check function. Progress calculation tracks locked tasks (blocked by unmet dependencies). Components include `Checklist`, `ChecklistTask`, `ChecklistProgress`, plus a `ChecklistPanel` launcher. Not something you'd want to build from scratch.
 
 ### Announcements and banners
 
-Not part of Reactour's scope. Tour Kit's `@tour-kit/announcements` Pro package has five display variants: modal, toast, banner, slideout, spotlight. Frequency rules control how often each announcement appears (once ever, once per session, every N days). A priority queue ranks announcements from critical to low, and audience targeting filters by user ID, role, or custom logic. This is what separates a tour library from an onboarding toolkit.
+Not part of Reactour's scope. userTourKit's `@tour-kit/announcements` Pro package has five display variants: modal, toast, banner, slideout, spotlight. Frequency rules control how often each announcement appears (once ever, once per session, every N days). A priority queue ranks announcements from critical to low, and audience targeting filters by user ID, role, or custom logic. This is what separates a tour library from an onboarding toolkit.
 
 ### Analytics and tracking
 
 Reactour fires no analytics events. You'd need to wire up callbacks manually for every step transition and tour completion.
 
-Tour Kit's `@tour-kit/analytics` Pro package ships five built-in plugins: PostHog, Mixpanel, Amplitude, Google Analytics 4, and a console logger. The plugin interface is three lines:
+userTourKit's `@tour-kit/analytics` Pro package ships five built-in plugins: PostHog, Mixpanel, Amplitude, Google Analytics 4, and a console logger. The plugin interface is three lines:
 
 ```tsx
 const myPlugin: AnalyticsPlugin = {
@@ -65,23 +65,23 @@ Event types cover the full lifecycle: `tour_started`, `tour_completed`, `tour_sk
 
 Reactour shows tours when you tell it to. No time-based scheduling, no timezone awareness, no blackout windows.
 
-Tour Kit's `@tour-kit/scheduling` Pro package supports start/end dates, time-of-day windows, day-of-week filters, and recurring patterns. Blackout periods with reasons and IANA timezone handling are built in. Presets cover US standard (9-5 ET), US tech (10-6 PT), UK standard, and Australia standard business hours. The `<ScheduleGate>` component conditionally renders children only when the schedule is active.
+userTourKit's `@tour-kit/scheduling` Pro package supports start/end dates, time-of-day windows, day-of-week filters, and recurring patterns. Blackout periods with reasons and IANA timezone handling are built in. Presets cover US standard (9-5 ET), US tech (10-6 PT), UK standard, and Australia standard business hours. The `<ScheduleGate>` component conditionally renders children only when the schedule is active.
 
 ### Adoption tracking
 
 Reactour is a single-purpose tour component. It renders a guided tour overlay and that's it — no adoption tracking, no usage analytics, no nudge system. If you want to know whether users actually adopt the features your tour highlights, you'd build that tracking layer yourself or plug in a separate product analytics tool.
 
-Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
 
-Tour Kit's adoption tracking is code-first — there's no visual dashboard you can hand to a PM without developer involvement. But it's a layer that doesn't exist at all in Reactour's scope.
+userTourKit's adoption tracking is code-first — there's no visual dashboard you can hand to a PM without developer involvement. But it's a layer that doesn't exist at all in Reactour's scope.
 
 ### Media embedding
 
 Reactour step content accepts React nodes, so you could render a YouTube iframe inside a step. But there's no media component, no URL auto-detection, no platform-specific optimizations (privacy-mode YouTube, Loom embeds), and no accessibility handling for video. Each embed is a custom React element you build and maintain.
 
-Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
-For teams embedding video walkthroughs in their tours, Tour Kit removes the per-platform boilerplate. The trade-off is the same $99 Pro cost — if you only need one YouTube embed, a raw iframe is simpler.
+For teams embedding video walkthroughs in their tours, userTourKit removes the per-platform boilerplate. The trade-off is the same $99 Pro cost — if you only need one YouTube embed, a raw iframe is simpler.
 
 ### Accessibility and WCAG compliance
 
@@ -89,7 +89,7 @@ This is where the gap is widest. Reactour provides a focus scope via `@react-ari
 
 But Reactour doesn't claim WCAG compliance. There's no documented accessibility audit. No `aria-live` announcements for step transitions. No documented Lighthouse accessibility score. The Chameleon comparison blog notes Reactour has "basic keyboard navigation" and leaves it at that.
 
-Tour Kit ships WCAG 2.1 AA by default, not as an opt-in. That means focus trapping via `useFocusTrap`, screen reader announcements through `aria-live` regions, keyboard support for arrow keys and Escape, automatic RTL/LTR detection, and respect for `prefers-reduced-motion`. Lighthouse Accessibility score: 100.
+userTourKit ships WCAG 2.1 AA by default, not as an opt-in. That means focus trapping via `useFocusTrap`, screen reader announcements through `aria-live` regions, keyboard support for arrow keys and Escape, automatic RTL/LTR detection, and respect for `prefers-reduced-motion`. Lighthouse Accessibility score: 100.
 
 For any team where accessibility is a compliance requirement rather than a nice-to-have, this gap decides the choice.
 
@@ -97,7 +97,7 @@ For any team where accessibility is a compliance requirement rather than a nice-
 
 Reactour's `@reactour/tour` package has an unpacked size of 98.5KB. That's the installed footprint before gzipping. The actual transfer size varies, but it's a full presentational component with its own rendering layer, mask system, and popover implementation.
 
-Tour Kit's core ships under 8KB gzipped. The React binding adds under 12KB. Hints: under 5KB. Because Tour Kit is headless, you aren't shipping UI code you'll override anyway. The core contains only logic (hooks, state management, position calculation, storage adapters) and your existing design system components handle the rendering.
+userTourKit's core ships under 8KB gzipped. The React binding adds under 12KB. Hints: under 5KB. Because userTourKit is headless, you aren't shipping UI code you'll override anyway. The core contains only logic (hooks, state management, position calculation, storage adapters) and your existing design system components handle the rendering.
 
 For context, 8KB gzipped for the core is smaller than most icon libraries. On a 3G mobile connection, that's roughly 100ms of additional load time versus several hundred for a larger bundle.
 
@@ -105,25 +105,25 @@ For context, 8KB gzipped for the core is smaller than most icon libraries. On a 
 
 Both libraries are written in TypeScript. Reactour was rewritten in TypeScript for v2, and ships built-in type definitions. That's good.
 
-Tour Kit uses TypeScript strict mode with full type inference across all 10 packages. Step configs, hook return types, branching targets, storage adapters, schedule definitions: all typed end-to-end. The headless architecture means your custom components get typed props from render functions, not loosely typed style override objects.
+userTourKit uses TypeScript strict mode with full type inference across all 10 packages. Step configs, hook return types, branching targets, storage adapters, schedule definitions: all typed end-to-end. The headless architecture means your custom components get typed props from render functions, not loosely typed style override objects.
 
-On framework support: Reactour is React-only. Tour Kit's core (`@tour-kit/core`) is framework-agnostic, though the UI components require React 18 or 19.
+On framework support: Reactour is React-only. userTourKit's core (`@tour-kit/core`) is framework-agnostic, though the UI components require React 18 or 19.
 
-Tour Kit ships router adapters for Next.js App Router (`useNextAppRouter`), Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`). Reactour's SPA routing requires manual state management through the `useTour` hook.
+userTourKit ships router adapters for Next.js App Router (`useNextAppRouter`), Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`). Reactour's SPA routing requires manual state management through the `useTour` hook.
 
-And then there's React 19. As of March 2026, Reactour's GitHub issue #659 documents a critical compatibility problem: the library bundles its own copy of React, causing duplicate instance errors (`TypeError: Cannot read properties of null (reading 'useState')`) when used with React 19. The issue was opened in December 2024. Workarounds like `--legacy-peer-deps` exist but break easily. Tour Kit supports both React 18 and React 19 as peer dependencies.
+And then there's React 19. As of March 2026, Reactour's GitHub issue #659 documents a critical compatibility problem: the library bundles its own copy of React, causing duplicate instance errors (`TypeError: Cannot read properties of null (reading 'useState')`) when used with React 19. The issue was opened in December 2024. Workarounds like `--legacy-peer-deps` exist but break easily. userTourKit supports both React 18 and React 19 as peer dependencies.
 
 ### Licensing and pricing
 
 Both use MIT licenses for their core functionality. Reactour is 100% free, 100% MIT. No paid tier exists.
 
-Tour Kit's free tier (MIT) includes `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints`. Seven Pro packages cover the rest: adoption, analytics, announcements, checklists, media, scheduling, plus licensing. All for $99 one-time. No monthly fees, no MAU limits.
+userTourKit's free tier (MIT) includes `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints`. Seven Pro packages cover the rest: adoption, analytics, announcements, checklists, media, scheduling, plus licensing. All for $99 one-time. No monthly fees, no MAU limits.
 
-If all you need is basic tours, Reactour costs nothing. But once you need analytics, checklists, or scheduling, Tour Kit's $99 one-time fee beats building those features yourself. It also undercuts SaaS onboarding platforms at $300+/month by a wide margin.
+If all you need is basic tours, Reactour costs nothing. But once you need analytics, checklists, or scheduling, userTourKit's $99 one-time fee beats building those features yourself. It also undercuts SaaS onboarding platforms at $300+/month by a wide margin.
 
 ## Side-by-side comparison table
 
-| Feature | Tour Kit | Reactour |
+| Feature | userTourKit | Reactour |
 |---|---|---|
 | Product tours | ✅ Built-in (core, MIT) | ✅ Built-in (MIT) |
 | Conditional branching | ✅ Async resolvers, cross-tour jumps | 🚫 Not available |
@@ -158,19 +158,19 @@ Reactour also makes sense for internal tools or prototypes where default styling
 
 If your team accepts solo-maintainer risk and isn't planning to upgrade to React 19 soon, Reactour delivers basic tours with less overhead than setting up a larger library.
 
-## When Tour Kit is the better fit
+## When userTourKit is the better fit
 
-Tour Kit makes more sense when your requirements extend beyond basic tours. Hints, checklists, announcements, analytics, scheduling: Tour Kit covers all of those. Building them on top of Reactour means building them from scratch.
+userTourKit makes more sense when your requirements extend beyond basic tours. Hints, checklists, announcements, analytics, scheduling: userTourKit covers all of those. Building them on top of Reactour means building them from scratch.
 
-Teams that care about design system consistency will prefer Tour Kit's headless architecture. Instead of overriding Reactour's built-in popover styles to match your shadcn/ui components, you render your own components and Tour Kit provides the logic. The `UnifiedSlot` pattern supports both Radix UI (`asChild`) and Base UI (render prop) patterns natively.
+Teams that care about design system consistency will prefer userTourKit's headless architecture. Instead of overriding Reactour's built-in popover styles to match your shadcn/ui components, you render your own components and userTourKit provides the logic. The `UnifiedSlot` pattern supports both Radix UI (`asChild`) and Base UI (render prop) patterns natively.
 
-If you're on React 19, or planning to upgrade, Tour Kit supports it without workarounds. If WCAG 2.1 AA compliance matters for your product (it probably should), Tour Kit ships it by default.
+If you're on React 19, or planning to upgrade, userTourKit supports it without workarounds. If WCAG 2.1 AA compliance matters for your product (it probably should), userTourKit ships it by default.
 
-Multi-page SPA tours with conditional branching? Route-aware steps with persistence across navigations? Tour Kit's architecture was designed for this from day one. Reactour leaves it to you.
+Multi-page SPA tours with conditional branching? Route-aware steps with persistence across navigations? userTourKit's architecture was designed for this from day one. Reactour leaves it to you.
 
-## Migration path from Reactour to Tour Kit
+## Migration path from Reactour to userTourKit
 
-The core concepts map directly. Reactour's `TourProvider` becomes Tour Kit's `TourKitProvider`. The `useTour` hook becomes Tour Kit's `useTour` with a similar API surface.
+The core concepts map directly. Reactour's `TourProvider` becomes userTourKit's `TourKitProvider`. The `useTour` hook becomes userTourKit's `useTour` with a similar API surface.
 
 **Step definitions:**
 
@@ -180,13 +180,13 @@ const steps = [
   { selector: '.my-element', content: 'Hello world', position: 'right' },
 ];
 
-// Tour Kit
+// userTourKit
 const steps = [
   { id: 'step-1', target: '.my-element', content: 'Hello world', placement: 'right-start' },
 ];
 ```
 
-Key differences: Tour Kit steps require an `id` field. The `selector` prop becomes `target`. The `position` prop becomes `placement` with 12 options (top/bottom/left/right combined with start/center/end).
+Key differences: userTourKit steps require an `id` field. The `selector` prop becomes `target`. The `position` prop becomes `placement` with 12 options (top/bottom/left/right combined with start/center/end).
 
 **Provider setup:**
 
@@ -195,7 +195,7 @@ Key differences: Tour Kit steps require an `id` field. The `selector` prop becom
 import { TourProvider } from '@reactour/tour';
 <TourProvider steps={steps}><App /></TourProvider>
 
-// Tour Kit
+// userTourKit
 import { TourKitProvider, Tour, TourCard, TourOverlay } from '@tour-kit/react';
 <TourKitProvider config={{ persistence: true, keyboard: true }}>
   <Tour id="main" steps={steps}>
@@ -211,7 +211,7 @@ import { TourKitProvider, Tour, TourCard, TourOverlay } from '@tour-kit/react';
 </TourKitProvider>
 ```
 
-Tour Kit uses compound components instead of a single provider with style overrides. More verbose for the initial setup, but each piece is independently customizable or replaceable.
+userTourKit uses compound components instead of a single provider with style overrides. More verbose for the initial setup, but each piece is independently customizable or replaceable.
 
 **Style overrides vs headless:**
 
@@ -222,10 +222,10 @@ Reactour uses react-select-style functions to override component styles:
 <TourProvider styles={{ popover: (base) => ({ ...base, borderRadius: 8 }) }}>
 ```
 
-Tour Kit's headless approach skips overrides entirely. Use `TourCardHeadless` to get full state via render props, then render whatever you want:
+userTourKit's headless approach skips overrides entirely. Use `TourCardHeadless` to get full state via render props, then render whatever you want:
 
 ```tsx
-// Tour Kit headless
+// userTourKit headless
 import { TourCardHeadless } from '@tour-kit/react/headless';
 
 <TourCardHeadless>
@@ -249,34 +249,34 @@ Chameleon's review highlights Reactour's "limited styling customization compared
 
 On GitHub, issue #659 has developers reporting the React 19 incompatibility with specific reproduction steps. The `useState` error from duplicate React instances has been confirmed by multiple users. Separately, issue #192 documents a long-standing scrolling bug where Reactour doesn't properly scroll elements into view.
 
-We built Tour Kit, so take the comparison above with appropriate skepticism. We've tried to cite verifiable sources for every claim. Check the GitHub repos, npm pages, and documentation yourself.
+We built userTourKit, so take the comparison above with appropriate skepticism. We've tried to cite verifiable sources for every claim. Check the GitHub repos, npm pages, and documentation yourself.
 
 ## Frequently asked questions
 
-**Is Tour Kit free?**
+**Is userTourKit free?**
 The core library, React components, and hints package are MIT-licensed and free. Seven Pro packages (analytics, checklists, announcements, adoption, media, scheduling, licensing) cost $99 as a one-time purchase. No subscriptions, no MAU limits.
 
-**What is the difference between Tour Kit and Reactour?**
-Tour Kit uses a headless architecture that separates logic from UI, letting you render with your own components. Reactour is presentational, rendering its own UI with style override functions. Tour Kit also covers hints, checklists, announcements, analytics, and scheduling. Reactour focuses on tours only.
+**What is the difference between userTourKit and Reactour?**
+userTourKit uses a headless architecture that separates logic from UI, letting you render with your own components. Reactour is presentational, rendering its own UI with style override functions. userTourKit also covers hints, checklists, announcements, analytics, and scheduling. Reactour focuses on tours only.
 
-**Can I migrate from Reactour to Tour Kit?**
+**Can I migrate from Reactour to userTourKit?**
 Yes. The core concepts (step definitions, provider pattern, tour hook) map directly. The main change is moving from style overrides to compound components or headless render props. Most migrations take an afternoon for a typical setup.
 
-**Does Tour Kit work with React 19?**
-Tour Kit supports React 18 and React 19 as peer dependencies. Reactour has a documented React 19 compatibility issue (GitHub #659) involving duplicate React instances.
+**Does userTourKit work with React 19?**
+userTourKit supports React 18 and React 19 as peer dependencies. Reactour has a documented React 19 compatibility issue (GitHub #659) involving duplicate React instances.
 
-**What is the bundle size of Tour Kit vs Reactour?**
-Tour Kit's core is under 8KB gzipped, the React package under 12KB gzipped, and hints under 5KB gzipped. Reactour's `@reactour/tour` package has an unpacked size of 98.5KB, though the gzipped transfer size is smaller.
+**What is the bundle size of userTourKit vs Reactour?**
+userTourKit's core is under 8KB gzipped, the React package under 12KB gzipped, and hints under 5KB gzipped. Reactour's `@reactour/tour` package has an unpacked size of 98.5KB, though the gzipped transfer size is smaller.
 
 **Does Reactour support checklists or analytics?**
-No. Reactour is a tour-only library. Checklists, analytics, announcements, and scheduling aren't part of its scope. Tour Kit offers all of these through Pro packages.
+No. Reactour is a tour-only library. Checklists, analytics, announcements, and scheduling aren't part of its scope. userTourKit offers all of these through Pro packages.
 
 **Is Reactour still maintained?**
 Reactour isn't abandoned. npm publishes continued through late 2025 (v3.8.0). But it's maintained by a single developer, has 74 open issues, and the last GitHub release with notes was v3.0.0 in August 2022. Community engagement (issue responses, PR reviews, discussion answers) is sporadic.
 
 **Which is better for enterprise use?**
-Tour Kit's WCAG 2.1 AA compliance, React 19 support, and extended feature set (analytics, scheduling, checklists) make it more suitable for enterprise applications. Reactour's solo maintainer and limited accessibility documentation are concerns for teams with compliance requirements. Neither library offers an enterprise support SLA.
+userTourKit's WCAG 2.1 AA compliance, React 19 support, and extended feature set (analytics, scheduling, checklists) make it more suitable for enterprise applications. Reactour's solo maintainer and limited accessibility documentation are concerns for teams with compliance requirements. Neither library offers an enterprise support SLA.
 
 ## Final verdict
 
-Reactour is a well-built library from 2017 that does one thing competently: simple React tours. If that's all you need and you're on React 18, it works. For teams building on React 19, needing WCAG compliance, or growing beyond basic walkthroughs into hints, checklists, analytics, and scheduling, Tour Kit's headless architecture and extended package ecosystem cover ground that Reactour was never designed to reach. The $99 Pro tier costs less than a day of engineering time building any one of those features from scratch.
+Reactour is a well-built library from 2017 that does one thing competently: simple React tours. If that's all you need and you're on React 18, it works. For teams building on React 19, needing WCAG compliance, or growing beyond basic walkthroughs into hints, checklists, analytics, and scheduling, userTourKit's headless architecture and extended package ecosystem cover ground that Reactour was never designed to reach. The $99 Pro tier costs less than a day of engineering time building any one of those features from scratch.

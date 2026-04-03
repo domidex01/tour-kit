@@ -1,0 +1,252 @@
+---
+title: Licensing
+description: Set up userTourKit Pro licensing with Polar.sh — installation, configuration, and CI/CD
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
+
+## Overview
+
+userTourKit uses a **Free + Pro** licensing model:
+
+- **Free packages** (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and never require a license key.
+- **Pro packages** (`@tour-kit/adoption`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/ai`) require a valid license key for production use.
+
+<Callout type="info">
+Free packages never require a license key. You can use `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` without any licensing setup.
+</Callout>
+
+Without a valid license, pro packages still render and function normally but display an "UNLICENSED" watermark overlay and a console warning. There is never a crash or blank screen.
+
+## Getting a License Key
+
+1. Visit [usertourkit.com/pricing](https://usertourkit.com/pricing) and choose the Pro plan.
+2. Complete the checkout via Polar.sh.
+3. Your license key arrives via email with a `TOURKIT-` prefix (e.g., `TOURKIT-abc123-def456`).
+
+## Installation
+
+### 1. Set up npm authentication
+
+Pro packages are published with restricted access on npm. Add the following to your `.npmrc` at the repo root:
+
+```text
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+```
+
+This file is safe to commit — the token value comes from your environment, not the file.
+
+### 2. Install the license package
+
+```bash
+pnpm add @tour-kit/license
+```
+
+### 3. Set the environment variable
+
+<Tabs items={['Next.js', 'Vite', 'Create React App']}>
+<Tab value="Next.js">
+Add to `.env.local`:
+
+```text
+NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY=TOURKIT-your-key-here
+```
+
+The `NEXT_PUBLIC_` prefix is required because `<LicenseProvider>` runs client-side.
+</Tab>
+<Tab value="Vite">
+Add to `.env`:
+
+```text
+VITE_TOUR_KIT_LICENSE_KEY=TOURKIT-your-key-here
+```
+
+The `VITE_` prefix is required for Vite to expose the variable to client-side code.
+</Tab>
+<Tab value="Create React App">
+Add to `.env`:
+
+```text
+REACT_APP_TOUR_KIT_LICENSE_KEY=TOURKIT-your-key-here
+```
+</Tab>
+</Tabs>
+
+## Configuration
+
+Wrap your app (or the section using pro features) with `<LicenseProvider>`:
+
+<Tabs items={['Next.js', 'Vite']}>
+<Tab value="Next.js">
+```tsx
+import { LicenseProvider } from '@tour-kit/license'
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <LicenseProvider
+      organizationId="your-polar-org-id"
+      licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY ?? ''}
+    >
+      {children}
+    </LicenseProvider>
+  )
+}
+```
+</Tab>
+<Tab value="Vite">
+```tsx
+import { LicenseProvider } from '@tour-kit/license'
+
+function App() {
+  return (
+    <LicenseProvider
+      organizationId="your-polar-org-id"
+      licenseKey={import.meta.env.VITE_TOUR_KIT_LICENSE_KEY ?? ''}
+    >
+      <YourApp />
+    </LicenseProvider>
+  )
+}
+```
+</Tab>
+</Tabs>
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `organizationId` | `string` | Yes | Your Polar organization ID |
+| `licenseKey` | `string` | Yes | License key with `TOURKIT-` prefix |
+| `onValidate` | `(state: LicenseState) => void` | No | Called after validation completes |
+| `onError` | `(error: Error) => void` | No | Called on validation error |
+
+## Using LicenseGate
+
+Wrap pro components with `<LicenseGate>` for conditional rendering:
+
+```tsx
+import { LicenseGate } from '@tour-kit/license'
+
+function Dashboard() {
+  return (
+    <div>
+      <BasicFeature />
+      <LicenseGate require="pro" fallback={<UpgradePrompt />}>
+        <AdvancedAnalytics />
+      </LicenseGate>
+    </div>
+  )
+}
+```
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `require` | `'pro'` | Yes | Required license tier |
+| `fallback` | `ReactNode` | No | Shown when license is invalid |
+| `loading` | `ReactNode` | No | Shown during validation |
+
+`<LicenseGate>` uses interleaved render-key validation — removing the license check breaks rendering, not just gating.
+
+## Watermark Behavior
+
+Without a valid license, pro components still render and function but display an "UNLICENSED" overlay:
+
+- Semi-transparent overlay with inline styles and high z-index
+- `pointer-events: none` so the UI remains interactive beneath it
+- Console warning logged in development
+- **No crash, no blank screen, full functionality preserved**
+
+This follows the same soft-enforcement pattern used by AG Grid and MUI X.
+
+## Development Mode
+
+On `localhost`, `127.0.0.1`, and `*.local` domains, license validation is automatically bypassed:
+
+- No network request to Polar API
+- No activation slot consumed
+- Provider returns `{ status: 'valid', tier: 'pro' }`
+- All pro features work without a license key
+
+<Callout type="info">
+Development mode bypass is automatic. You do not need a license key for local development.
+</Callout>
+
+## CI/CD Setup
+
+### GitHub Actions
+
+Add `NPM_TOKEN` to your repository secrets, then reference it in your workflow:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Required for installing restricted @tour-kit/* pro packages
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+```
+
+### Vercel
+
+Add `NPM_TOKEN` as an environment variable in your Vercel project settings. Vercel automatically reads `.npmrc` during the build.
+
+### Netlify
+
+Add `NPM_TOKEN` as an environment variable in your Netlify site settings under **Build & deploy > Environment**.
+
+## Hooks Reference
+
+### `useLicense()`
+
+Returns the full license context. Must be used within `<LicenseProvider>`.
+
+```tsx
+const { state, refresh } = useLicense()
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `state.status` | `'valid' \| 'invalid' \| 'expired' \| 'revoked' \| 'loading' \| 'error'` | Current license status |
+| `state.tier` | `'free' \| 'pro'` | License tier |
+| `state.activations` | `number` | Number of activated domains |
+| `state.maxActivations` | `number` | Maximum allowed activations |
+| `state.domain` | `string \| null` | Current activated domain |
+| `state.expiresAt` | `string \| null` | Expiration date (ISO string) |
+| `refresh` | `() => Promise<void>` | Re-validate the license (clears cache) |
+
+### `useIsPro()`
+
+Returns `true` when license tier is `'pro'` and status is `'valid'`.
+
+```tsx
+const isPro = useIsPro()
+```
+
+## FAQ
+
+### Do free packages need a license?
+
+No. `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` are MIT-licensed and work without any license key.
+
+### What happens if my key expires?
+
+The watermark appears on pro components and a console warning is logged. Components continue to render and function normally — there is never a crash or blank screen.
+
+### How many domains can I activate?
+
+Each license key supports up to 5 domain activations. You can deactivate a domain to free up a slot.
+
+### Does localhost count as an activation?
+
+No. Development environments (`localhost`, `127.0.0.1`, `*.local`) are automatically bypassed and do not consume an activation slot.
+
+### Can I use one key for staging + production?
+
+Yes. Each environment uses a separate domain activation. For example, `staging.example.com` and `example.com` would use 2 of your 5 activation slots.
+
+### What is the `TOURKIT-` prefix?
+
+All userTourKit license keys issued via Polar.sh have a `TOURKIT-` prefix. This prefix is required for validation to work.

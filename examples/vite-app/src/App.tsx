@@ -1,4 +1,5 @@
 import { AiChatPanel, AiChatProvider, AiChatToggle } from '@tour-kit/ai'
+import { LicenseProvider } from '@tour-kit/license'
 import {
   type AnalyticsPlugin,
   AnalyticsProvider,
@@ -438,18 +439,23 @@ function App() {
   useGoogleAnalytics()
 
   return (
-    <AiChatProvider
-      config={{
-        endpoint: '/api/chat',
-        suggestions: {
-          static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
-        },
-      }}
+    <LicenseProvider
+      organizationId="your-polar-org-id" // TODO: replace with your Polar organization ID
+      licenseKey={import.meta.env.VITE_TOUR_KIT_LICENSE_KEY ?? ''}
     >
-      <AnalyticsProvider config={analyticsConfig}>
-        <AppContent />
-      </AnalyticsProvider>
-    </AiChatProvider>
+      <AiChatProvider
+        config={{
+          endpoint: '/api/chat',
+          suggestions: {
+            static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
+          },
+        }}
+      >
+        <AnalyticsProvider config={analyticsConfig}>
+          <AppContent />
+        </AnalyticsProvider>
+      </AiChatProvider>
+    </LicenseProvider>
   )
 }
 

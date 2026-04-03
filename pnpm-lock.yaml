@@ -229,6 +229,9 @@ importers:
       '@tour-kit/hints':
         specifier: workspace:*
         version: link:../../packages/hints
+      '@tour-kit/license':
+        specifier: workspace:*
+        version: link:../../packages/license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../../packages/media
@@ -312,6 +315,9 @@ importers:
 
   examples/vite-app:
     dependencies:
+      '@ai-sdk/openai':
+        specifier: ^2.0.0
+        version: 2.0.101(zod@4.3.6)
       '@ai-sdk/react':
         specifier: ^2.0.0
         version: 2.0.162(react@19.2.4)(zod@4.3.6)
@@ -333,6 +339,9 @@ importers:
       '@tour-kit/hints':
         specifier: workspace:*
         version: link:../../packages/hints
+      '@tour-kit/license':
+        specifier: workspace:*
+        version: link:../../packages/license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../../packages/media

@@ -71,7 +71,7 @@ export function Providers({ children }) {
     autocapture: {
       type: 'boolean',
       default: 'false',
-      description: 'Enable PostHog autocapture (not recommended with Tour Kit)'
+      description: 'Enable PostHog autocapture (not recommended with userTourKit)'
     },
     eventPrefix: {
       type: 'string',
@@ -107,7 +107,7 @@ posthogPlugin({
 
 Events are prefixed with `tourkit_` by default:
 
-| User Tour Kit Event | PostHog Event Name |
+| userTourKit Event | PostHog Event Name |
 |----------------|-------------------|
 | `tour_started` | `tourkit_tour_started` |
 | `step_viewed` | `tourkit_step_viewed` |
@@ -146,7 +146,7 @@ Events include these properties in PostHog:
   step_index?: number      // Current step index (0-based)
   total_steps?: number     // Total steps in tour
   duration_ms?: number     // Duration in milliseconds
-  session_id: string       // Tour Kit session ID
+  session_id: string       // userTourKit session ID
   ...metadata              // Custom metadata from event
 }
 ```
@@ -191,7 +191,7 @@ export function AnalyticsWrapper({ children }) {
 PostHog's session replay automatically captures tour interactions when enabled:
 
 ```tsx
-// In your PostHog initialization (separate from Tour Kit)
+// In your PostHog initialization (separate from userTourKit)
 posthog.init('phc_xxx', {
   api_host: 'https://app.posthog.com',
   session_recording: {
@@ -199,14 +199,14 @@ posthog.init('phc_xxx', {
   }
 })
 
-// Tour Kit plugin (minimal config)
+// userTourKit plugin (minimal config)
 posthogPlugin({
   apiKey: 'phc_xxx'
 })
 ```
 
 <Callout type="info">
-  Session replay is configured through PostHog's main SDK, not the User Tour Kit plugin. The plugin only sends events.
+  Session replay is configured through PostHog's main SDK, not the userTourKit plugin. The plugin only sends events.
 </Callout>
 
 ## Feature Flags
@@ -338,10 +338,10 @@ Analyze hint click-through rates:
 
 ### Avoid Duplicate Initialization
 
-Don't initialize PostHog twice - use the User Tour Kit plugin instead of loading PostHog separately if you only need tour analytics:
+Don't initialize PostHog twice - use the userTourKit plugin instead of loading PostHog separately if you only need tour analytics:
 
 ```tsx
-// ✅ Good - Tour Kit plugin handles PostHog
+// ✅ Good - userTourKit plugin handles PostHog
 <AnalyticsProvider
   config={{
     plugins: [posthogPlugin({ apiKey: 'phc_xxx' })]

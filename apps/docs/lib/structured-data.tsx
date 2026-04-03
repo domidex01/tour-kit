@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-const SITE_URL = 'https://tourkit.dev'
+const SITE_URL = 'https://usertourkit.com'
 
 // ── Types ──
 
@@ -44,17 +44,17 @@ export function TechArticleJsonLd({
     ...(section && { articleSection: section }),
     author: {
       '@type': 'Organization',
-      name: 'User Tour Kit',
+      name: 'userTourKit',
       url: SITE_URL,
     },
     publisher: {
       '@type': 'Organization',
-      name: 'User Tour Kit',
+      name: 'userTourKit',
       url: SITE_URL,
     },
     isPartOf: {
       '@type': 'WebSite',
-      name: 'User Tour Kit Documentation',
+      name: 'userTourKit Documentation',
       url: `${SITE_URL}/docs`,
     },
   }
@@ -95,7 +95,7 @@ interface GraphJsonLdProps {
 const ORGANIZATION = {
   '@type': 'Organization',
   '@id': `${SITE_URL}/#organization`,
-  name: 'User Tour Kit',
+  name: 'userTourKit',
   url: SITE_URL,
   logo: {
     '@type': 'ImageObject',
@@ -114,7 +114,7 @@ export function ArticleJsonLd({
   url,
   datePublished,
   dateModified,
-  authorName = 'User Tour Kit Team',
+  authorName = 'userTourKit Team',
   authorUrl,
   authorGithub,
   authorLinkedin,
@@ -141,7 +141,7 @@ export function ArticleJsonLd({
     publisher: {
       '@type': 'Organization',
       '@id': `${SITE_URL}/#organization`,
-      name: 'User Tour Kit',
+      name: 'userTourKit',
       url: SITE_URL,
       logo: {
         '@type': 'ImageObject',
@@ -204,7 +204,7 @@ export function ProductJsonLd(): ReactNode {
   const data = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: 'User Tour Kit',
+    name: 'userTourKit',
     description:
       'Open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling.',
     brand: { '@type': 'Organization', '@id': `${SITE_URL}/#organization` },
@@ -214,7 +214,7 @@ export function ProductJsonLd(): ReactNode {
     offers: [
       {
         '@type': 'Offer',
-        name: 'User Tour Kit Free (MIT)',
+        name: 'userTourKit Free (MIT)',
         price: '0',
         priceCurrency: 'USD',
         description: 'Core library, React bindings, and hints package. MIT licensed.',
@@ -223,7 +223,7 @@ export function ProductJsonLd(): ReactNode {
       },
       {
         '@type': 'Offer',
-        name: 'User Tour Kit Pro',
+        name: 'userTourKit Pro',
         price: '99',
         priceCurrency: 'USD',
         description:

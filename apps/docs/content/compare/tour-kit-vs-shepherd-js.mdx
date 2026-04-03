@@ -1,6 +1,6 @@
 ---
-title: "User Tour Kit vs Shepherd.js: which product tour library should you choose in 2026?"
-description: "Compare User Tour Kit vs Shepherd.js for product tours. See features, bundle size, licensing, and accessibility side-by-side. Find which fits your stack in 2026."
+title: "userTourKit vs Shepherd.js: which product tour library should you choose in 2026?"
+description: "Compare userTourKit vs Shepherd.js for product tours. See features, bundle size, licensing, and accessibility side-by-side. Find which fits your stack in 2026."
 competitor: "Shepherd.js"
 competitorSlug: "shepherd-js"
 lastUpdated: "2026-03-31"
@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-User Tour Kit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Shepherd.js is a multi-framework tour library built on Svelte internals, now dual-licensed under AGPL-3.0 and a $50-$300 commercial license. User Tour Kit fits React teams that want JSX-native tours and MIT licensing. Shepherd.js is the better pick when you need Vue, Angular, or vanilla JS support.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Shepherd.js is a multi-framework tour library built on Svelte internals, now dual-licensed under AGPL-3.0 and a $50-$300 commercial license. userTourKit fits React teams that want JSX-native tours and MIT licensing. Shepherd.js is the better pick when you need Vue, Angular, or vanilla JS support.
 
-## What is User Tour Kit?
+## What is userTourKit?
 
-User Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and a $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and a $99 one-time Pro upgrade.
 
 ## What is Shepherd.js?
 
@@ -24,59 +24,59 @@ Shepherd.js is a multi-framework JavaScript tour library that creates step-by-st
 
 Both libraries handle the basics: attach a tooltip to a DOM element, show content, navigate forward and back. Shepherd.js defines steps as plain JavaScript config objects with string or HTML content. You pass `text: 'Welcome to the dashboard.'` or raw HTML. There's no way to drop a React component into a step without workarounds like rendering to a detached DOM node.
 
-User Tour Kit takes the opposite approach. Steps accept JSX directly. Custom progress indicators, interactive forms, branded components: they all render inside tour cards the same way you'd build any other React UI. The `TourCard` compound component (`TourCard.Header`, `TourCard.Content`, `TourCard.Footer`) follows the same composition patterns as Radix UI or shadcn/ui. Both libraries support `advanceOn` for event-based auto-progression.
+userTourKit takes the opposite approach. Steps accept JSX directly. Custom progress indicators, interactive forms, branded components: they all render inside tour cards the same way you'd build any other React UI. The `TourCard` compound component (`TourCard.Header`, `TourCard.Content`, `TourCard.Footer`) follows the same composition patterns as Radix UI or shadcn/ui. Both libraries support `advanceOn` for event-based auto-progression.
 
-Where they diverge: User Tour Kit supports conditional branching with async resolvers (`onNext: (ctx) => ctx.data.userRole === 'admin' ? 'admin-step' : 'regular-step'`) and cross-tour navigation. Shepherd doesn't have branching beyond `showOn` for conditional step display.
+Where they diverge: userTourKit supports conditional branching with async resolvers (`onNext: (ctx) => ctx.data.userRole === 'admin' ? 'admin-step' : 'regular-step'`) and cross-tour navigation. Shepherd doesn't have branching beyond `showOn` for conditional step display.
 
 ### Hints and hotspots
 
 Shepherd.js doesn't include hints. If you need pulsing beacons for feature discovery, you'll build them yourself or pull in another library.
 
-User Tour Kit ships a dedicated `@tour-kit/hints` package (under 5KB gzipped, MIT licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads via the storage adapter. Not a workaround bolted on top of the tour system.
+userTourKit ships a dedicated `@tour-kit/hints` package (under 5KB gzipped, MIT licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads via the storage adapter. Not a workaround bolted on top of the tour system.
 
 ### Checklists and onboarding flows
 
 Shepherd.js is a tour library, not an onboarding platform. No checklists, no task tracking, no progress persistence.
 
-User Tour Kit's `@tour-kit/checklists` package (Pro, $99 one-time) handles task dependencies with circular dependency detection and three completion types: manual, event-based, and custom check functions. Progress calculation accounts for locked tasks. The `ChecklistProvider` and `ChecklistPanel` components give you a working onboarding checklist without stitching together multiple npm packages.
+userTourKit's `@tour-kit/checklists` package (Pro, $99 one-time) handles task dependencies with circular dependency detection and three completion types: manual, event-based, and custom check functions. Progress calculation accounts for locked tasks. The `ChecklistProvider` and `ChecklistPanel` components give you a working onboarding checklist without stitching together multiple npm packages.
 
 ### Announcements and banners
 
 Not available in Shepherd.js. The Shepherd Pro SaaS product (separate from the library) had some announcement-adjacent features, but the `@shepherdpro/pro-js` npm package was deprecated in the v14 release cycle.
 
-User Tour Kit's `@tour-kit/announcements` package supports five display variants: modal, toast, banner, slideout, and spotlight. Frequency rules control how often an announcement appears (`once`, `session`, `always`, or interval-based). A priority queue handles conflicts when multiple announcements compete for attention.
+userTourKit's `@tour-kit/announcements` package supports five display variants: modal, toast, banner, slideout, and spotlight. Frequency rules control how often an announcement appears (`once`, `session`, `always`, or interval-based). A priority queue handles conflicts when multiple announcements compete for attention.
 
 ### Analytics and tracking
 
 Shepherd.js emits events (`tour.on('complete', ...)`, `tour.on('cancel', ...)`, `step.on('show', ...)`) that you can wire to your own analytics pipeline. No built-in dashboard, no plugin system, no pre-built integrations. You write the glue code yourself.
 
-User Tour Kit's `@tour-kit/analytics` package (Pro) ships five pre-built plugins for PostHog, Mixpanel, Amplitude, Google Analytics, and console logging. Writing a custom plugin takes three lines. Event types cover tours, hints, checklists, and announcements -- one analytics layer across your entire onboarding stack instead of instrumenting each piece separately.
+userTourKit's `@tour-kit/analytics` package (Pro) ships five pre-built plugins for PostHog, Mixpanel, Amplitude, Google Analytics, and console logging. Writing a custom plugin takes three lines. Event types cover tours, hints, checklists, and announcements -- one analytics layer across your entire onboarding stack instead of instrumenting each piece separately.
 
 ### Scheduling and targeting
 
 Shepherd.js has no scheduling. You'd need custom code to show tours during business hours, on specific days, or within date ranges.
 
-User Tour Kit's `@tour-kit/scheduling` package handles time-based scheduling with IANA timezone support. Recurring patterns (daily, weekly, monthly), blackout periods, business hours presets (`US_STANDARD`, `UK_STANDARD`) are all built in. The `ScheduleGate` component conditionally renders children only when a schedule is active. Useful for time-limited onboarding campaigns.
+userTourKit's `@tour-kit/scheduling` package handles time-based scheduling with IANA timezone support. Recurring patterns (daily, weekly, monthly), blackout periods, business hours presets (`US_STANDARD`, `UK_STANDARD`) are all built in. The `ScheduleGate` component conditionally renders children only when a schedule is active. Useful for time-limited onboarding campaigns.
 
 ### Adoption tracking
 
 Shepherd.js is a tour library -- it guides users through steps but doesn't track whether they actually adopt the features being shown. No usage tracking, no adoption criteria, no nudge scheduler. You'd pair Shepherd with a separate analytics tool to measure feature adoption.
 
-User Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
 
-Worth noting: Tour Kit's adoption tracking is code-driven. There's no no-code dashboard you can hand to a product manager without engineering support. The data and logic are there, but surfacing it requires building on top of the provided components and hooks.
+Worth noting: userTourKit's adoption tracking is code-driven. There's no no-code dashboard you can hand to a product manager without engineering support. The data and logic are there, but surfacing it requires building on top of the provided components and hooks.
 
 ### Media embedding
 
 Shepherd.js step content accepts arbitrary HTML, so you can drop in an iframe manually. But there's no dedicated media component, no URL auto-detection, no platform-specific embed optimization, and no accessibility handling for video content. Every embed is custom HTML you maintain yourself.
 
-User Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 ### Accessibility and WCAG compliance
 
 Shepherd.js provides `role="dialog"` on step containers, `aria-describedby` linking to step text, focus trapping within active steps, and keyboard navigation via arrow keys and Escape. Solid basics. But Shepherd doesn't formally claim a WCAG compliance level.
 
-User Tour Kit targets WCAG 2.1 AA by default. Lighthouse Accessibility score: 100. Beyond the basics, it includes `useFocusTrap` for configurable focus management and screen reader announcements via `aria-live`. The `prefers-reduced-motion` hook offers three modes, and RTL/LTR direction detection is automatic.
+userTourKit targets WCAG 2.1 AA by default. Lighthouse Accessibility score: 100. Beyond the basics, it includes `useFocusTrap` for configurable focus management and screen reader announcements via `aria-live`. The `prefers-reduced-motion` hook offers three modes, and RTL/LTR direction detection is automatic.
 
 Accessibility isn't opt-in here. It ships as the default behavior.
 
@@ -84,7 +84,7 @@ Accessibility isn't opt-in here. It ships as the default behavior.
 
 Shepherd.js ships as a 656KB unpacked npm package, roughly 25-40KB gzipped for JS and CSS combined. That includes compiled Svelte runtime output. If you're already running React, you're loading two UI runtimes: React + ReactDOM plus Shepherd's compiled Svelte layer. As of March 2026, v15.2.2 is the latest release.
 
-User Tour Kit's core bundles at under 8KB gzipped. React package: under 12KB. Hints: under 5KB. Because User Tour Kit is native React, it shares your existing runtime.
+userTourKit's core bundles at under 8KB gzipped. React package: under 12KB. Hints: under 5KB. Because userTourKit is native React, it shares your existing runtime.
 
 No duplicate UI framework. On mobile connections where every kilobyte adds parse time, that gap matters.
 
@@ -94,9 +94,9 @@ Shepherd.js supports React, Vue, Angular, Ember, and vanilla JavaScript. That's 
 
 That multi-framework story comes with tradeoffs though. TypeScript support has documented type mismatches. The React wrapper (`react-shepherd`, ~19K weekly downloads) is described by the maintainers themselves as "syntactical sugar" around the imperative API. Their docs now recommend using `shepherd.js` directly.
 
-User Tour Kit is React-only. That's both a limitation and a design choice. TypeScript runs in strict mode with full inference, steps are JSX, and state is React state. Router adapters cover Next.js (App and Pages) plus React Router v6+.
+userTourKit is React-only. That's both a limitation and a design choice. TypeScript runs in strict mode with full inference, steps are JSX, and state is React state. Router adapters cover Next.js (App and Pages) plus React Router v6+.
 
-If you're not on React, User Tour Kit isn't an option.
+If you're not on React, userTourKit isn't an option.
 
 ### Licensing and pricing
 
@@ -106,11 +106,11 @@ Google explicitly bans AGPL-licensed code internally. Drupal CMS downgraded from
 
 Shepherd's commercial licenses are reasonable: $50 lifetime for up to 5 projects, $300 lifetime for unlimited. No recurring fees. But the friction isn't the price. It's the procurement approval and legal review that AGPL triggers at companies with blanket copyleft policies.
 
-User Tour Kit's free tier (core, React bindings, hints) is MIT licensed. No legal review needed. The Pro tier costs $99 one-time for all seven additional packages. Not recurring.
+userTourKit's free tier (core, React bindings, hints) is MIT licensed. No legal review needed. The Pro tier costs $99 one-time for all seven additional packages. Not recurring.
 
 ## Side-by-side comparison table
 
-| Feature | User Tour Kit | Shepherd.js |
+| Feature | userTourKit | Shepherd.js |
 |---|---|---|
 | Product tours | Built-in (core) | Built-in |
 | Hints/hotspots | Built-in, under 5KB | Not available |
@@ -141,17 +141,17 @@ Choose Shepherd.js if your team runs Vue, Angular, or Ember alongside React. She
 
 For commercial projects with simple tour needs, the $50 lifetime license is genuinely affordable and covers up to five projects with no recurring costs. If your team needs guided tours and nothing else, no hints, no checklists, no announcements, Shepherd delivers that reliably after nine years of production use across thousands of projects.
 
-## When User Tour Kit is the better fit
+## When userTourKit is the better fit
 
-User Tour Kit makes more sense when your stack is React and you want your tour code to feel like the rest of your app. Steps are JSX. State is React state. Styling plugs into your existing design system through the UnifiedSlot pattern (Radix style via `asChild`, Base UI style via render props). No fighting a separate UI framework's output.
+userTourKit makes more sense when your stack is React and you want your tour code to feel like the rest of your app. Steps are JSX. State is React state. Styling plugs into your existing design system through the UnifiedSlot pattern (Radix style via `asChild`, Base UI style via render props). No fighting a separate UI framework's output.
 
 It's also the pick when you need more than tours. Hints, checklists, announcements, analytics, and scheduling all ship as packages under one system. Building that yourself on top of Shepherd means pulling in multiple libraries and wiring them together.
 
-And if AGPL is a non-starter at your company, User Tour Kit's MIT free tier removes the conversation entirely.
+And if AGPL is a non-starter at your company, userTourKit's MIT free tier removes the conversation entirely.
 
-## Migration path from Shepherd.js to User Tour Kit
+## Migration path from Shepherd.js to userTourKit
 
-The conceptual mapping is straightforward. Shepherd's `Tour` class becomes User Tour Kit's `<Tour>` component. Each `addStep()` call becomes a step object in the `steps` array. The `attachTo.element` selector maps to `target`. Placement values are similar (Floating UI on both sides).
+The conceptual mapping is straightforward. Shepherd's `Tour` class becomes userTourKit's `<Tour>` component. Each `addStep()` call becomes a step object in the `steps` array. The `attachTo.element` selector maps to `target`. Placement values are similar (Floating UI on both sides).
 
 Here's a Shepherd.js tour:
 
@@ -166,7 +166,7 @@ tour.addStep({
 tour.start();
 ```
 
-The User Tour Kit equivalent:
+The userTourKit equivalent:
 
 ```tsx
 <Tour
@@ -186,9 +186,9 @@ The User Tour Kit equivalent:
 </Tour>
 ```
 
-The biggest shift isn't syntax. It's mental model. Shepherd operates imperatively: create an instance, call methods, listen to events. User Tour Kit is declarative: render components, pass props, compose UI. If your team already thinks in React, the migration removes friction rather than adding it.
+The biggest shift isn't syntax. It's mental model. Shepherd operates imperatively: create an instance, call methods, listen to events. userTourKit is declarative: render components, pass props, compose UI. If your team already thinks in React, the migration removes friction rather than adding it.
 
-For Next.js projects specifically, you can drop the `dynamic(() => import('react-shepherd'), { ssr: false })` workaround. User Tour Kit's hooks handle SSR natively.
+For Next.js projects specifically, you can drop the `dynamic(() => import('react-shepherd'), { ssr: false })` workaround. userTourKit's hooks handle SSR natively.
 
 ## What developers say
 
@@ -204,42 +204,42 @@ As of March 2026, GitHub issue #3102 on `react-shepherd` (17+ thumbs-up reaction
 
 ## Frequently asked questions
 
-### Is User Tour Kit free?
+### Is userTourKit free?
 
 The core library, React bindings, and hints are all free under the MIT license. The Pro tier costs $99 one-time (not recurring) and adds seven packages: adoption tracking, analytics, announcements, checklists, media embedding, scheduling, and more. No MAU limits on either tier.
 
-### What is the difference between User Tour Kit and Shepherd.js?
+### What is the difference between userTourKit and Shepherd.js?
 
-User Tour Kit is a headless React library with nine onboarding capabilities under an MIT license. Shepherd.js provides product tours across five frameworks but uses AGPL licensing for the free tier and doesn't include hints, checklists, or built-in analytics. User Tour Kit renders JSX; Shepherd renders HTML strings.
+userTourKit is a headless React library with nine onboarding capabilities under an MIT license. Shepherd.js provides product tours across five frameworks but uses AGPL licensing for the free tier and doesn't include hints, checklists, or built-in analytics. userTourKit renders JSX; Shepherd renders HTML strings.
 
-### Can I migrate from Shepherd.js to User Tour Kit?
+### Can I migrate from Shepherd.js to userTourKit?
 
 Yes. Both use Floating UI for positioning, so placement values map directly. The main change is moving from imperative config objects to declarative JSX components. You can run both libraries side by side during an incremental migration.
 
-### Does User Tour Kit work with Next.js and React 19?
+### Does userTourKit work with Next.js and React 19?
 
-Yes. User Tour Kit supports React 18 and React 19, including Next.js App Router with built-in router adapters. No dynamic imports or SSR workarounds required. Shepherd's React wrapper is currently broken on React 19 (issue #3102).
+Yes. userTourKit supports React 18 and React 19, including Next.js App Router with built-in router adapters. No dynamic imports or SSR workarounds required. Shepherd's React wrapper is currently broken on React 19 (issue #3102).
 
-### What is the bundle size of User Tour Kit vs Shepherd.js?
+### What is the bundle size of userTourKit vs Shepherd.js?
 
-User Tour Kit's core is under 8KB gzipped; the React package is under 12KB. Shepherd.js bundles at 25-40KB gzipped, including compiled Svelte runtime. A React project using Shepherd ships two UI runtimes.
+userTourKit's core is under 8KB gzipped; the React package is under 12KB. Shepherd.js bundles at 25-40KB gzipped, including compiled Svelte runtime. A React project using Shepherd ships two UI runtimes.
 
 ### Is Shepherd.js open source?
 
-Yes, but under AGPL-3.0 since October 2024. Any commercial use requires a $50-$300 lifetime license. The AGPL's network use clause means SaaS companies must either open-source their application or purchase a license. User Tour Kit's free tier uses MIT, which has no such requirement.
+Yes, but under AGPL-3.0 since October 2024. Any commercial use requires a $50-$300 lifetime license. The AGPL's network use clause means SaaS companies must either open-source their application or purchase a license. userTourKit's free tier uses MIT, which has no such requirement.
 
 ### Does Shepherd.js support checklists or analytics?
 
 No. Shepherd is a tour library only. It emits events you can wire to analytics, but provides no built-in plugins, dashboard, or checklist system. The Shepherd Pro SaaS platform (separate product) had some of these features, but the npm package was deprecated.
 
-### Which is better for a design system: User Tour Kit or Shepherd.js?
+### Which is better for a design system: userTourKit or Shepherd.js?
 
-User Tour Kit. Its headless architecture and UnifiedSlot pattern let you swap in your own components from shadcn/ui, Radix UI, or Base UI. Shepherd renders Svelte-compiled UI with CSS class overrides. There's no slot-based API for replacing individual primitives.
+userTourKit. Its headless architecture and UnifiedSlot pattern let you swap in your own components from shadcn/ui, Radix UI, or Base UI. Shepherd renders Svelte-compiled UI with CSS class overrides. There's no slot-based API for replacing individual primitives.
 
 ## Final verdict
 
-For React teams, User Tour Kit is the stronger choice: MIT licensing, JSX-native steps, a sub-8KB core, WCAG 2.1 AA by default, and a complete onboarding ecosystem beyond just tours. Shepherd.js earns its 13,300 GitHub stars through nine years of multi-framework reliability, and it's genuinely better if you need Vue or Angular support.
+For React teams, userTourKit is the stronger choice: MIT licensing, JSX-native steps, a sub-8KB core, WCAG 2.1 AA by default, and a complete onboarding ecosystem beyond just tours. Shepherd.js earns its 13,300 GitHub stars through nine years of multi-framework reliability, and it's genuinely better if you need Vue or Angular support.
 
 But the AGPL license and broken React 19 wrapper make it a harder sell for modern React projects. Pick based on your stack, not on star counts.
 
-*We built User Tour Kit, so take this comparison with appropriate skepticism. We've tried to be fair, but you should verify claims against the official [Shepherd.js documentation](https://docs.shepherdjs.dev/) and [User Tour Kit documentation](/docs).*
+*We built userTourKit, so take this comparison with appropriate skepticism. We've tried to be fair, but you should verify claims against the official [Shepherd.js documentation](https://docs.shepherdjs.dev/) and [userTourKit documentation](/docs).*

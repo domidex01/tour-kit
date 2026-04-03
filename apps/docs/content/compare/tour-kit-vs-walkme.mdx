@@ -1,6 +1,6 @@
 ---
-title: "Tour Kit vs WalkMe: which onboarding tool should you choose in 2026?"
-description: "Compare Tour Kit vs WalkMe for product onboarding. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
+title: "userTourKit vs WalkMe: which onboarding tool should you choose in 2026?"
+description: "Compare userTourKit vs WalkMe for product onboarding. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026."
 competitor: "WalkMe"
 competitorSlug: "walkme"
 lastUpdated: "2026-03-31"
@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-Tour Kit is a headless React library that ships tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped, for a $99 one-time Pro fee. WalkMe is SAP's enterprise digital adoption platform with a median annual contract of $43,000 and total first-year costs reaching $125,000-$500,000. Tour Kit fits React teams building customer-facing product onboarding. WalkMe fits enterprises training thousands of employees across third-party applications like Salesforce and SAP S/4HANA.
+userTourKit is a headless React library that ships tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped, for a $99 one-time Pro fee. WalkMe is SAP's enterprise digital adoption platform with a median annual contract of $43,000 and total first-year costs reaching $125,000-$500,000. userTourKit fits React teams building customer-facing product onboarding. WalkMe fits enterprises training thousands of employees across third-party applications like Salesforce and SAP S/4HANA.
 
-## What is Tour Kit?
+## What is userTourKit?
 
-Tour Kit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
 
 ## What is WalkMe?
 
@@ -24,31 +24,31 @@ WalkMe is an enterprise digital adoption platform, acquired by SAP for $1.5 bill
 
 WalkMe calls them Smart Walk-Thrus. Non-technical users build them with a desktop editor and browser extension, targeting elements through CSS selectors, text content, and HTML attributes. The visual builder is WalkMe's core selling point, and to be fair, it works well for form-heavy enterprise apps where HR teams need to guide employees through procurement workflows.
 
-Tour Kit takes a code-first approach. Steps are defined as a TypeScript array with `target`, `content`, `placement`, and `advanceOn` fields. You get 12 placement options, async `onBeforeShow` hooks, conditional branching with loop detection, and cross-tour navigation. The trade-off is clear: WalkMe doesn't require developers; Tour Kit doesn't require a $43,000 contract.
+userTourKit takes a code-first approach. Steps are defined as a TypeScript array with `target`, `content`, `placement`, and `advanceOn` fields. You get 12 placement options, async `onBeforeShow` hooks, conditional branching with loop detection, and cross-tour navigation. The trade-off is clear: WalkMe doesn't require developers; userTourKit doesn't require a $43,000 contract.
 
 ### Hints and hotspots
 
 WalkMe provides ShoutOuts (modal popups) and Launchers (persistent on-screen buttons). But SAP's own training materials warn against overuse: "Numerous ShoutOuts popping up for end users or constantly replaying could lead to a frustrating user experience!" The overlay architecture makes subtle, contextual hints difficult because every element WalkMe adds is a foreign DOM node with its own styling.
 
-Tour Kit's `@tour-kit/hints` package (&lt;5KB gzipped) renders non-sequential hotspots as native React components. Each hint dismisses independently, persists across page loads, and inherits your design system's tokens. A pulsing beacon on a button looks like part of your app, not an overlay injected by a third-party script.
+userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) renders non-sequential hotspots as native React components. Each hint dismisses independently, persists across page loads, and inherits your design system's tokens. A pulsing beacon on a button looks like part of your app, not an overlay injected by a third-party script.
 
 ### Checklists and onboarding flows
 
 WalkMe includes onboarding checklists in its platform, built through the same visual editor. They work across any application WalkMe overlays on, which is a genuine advantage for multi-app enterprise deployments.
 
-Tour Kit's `@tour-kit/checklists` (Pro, $99 one-time) provides task dependencies with circular dependency detection, three completion types (manual, event-based, custom check function), and progress calculation that accounts for locked tasks. The `ChecklistProvider` renders as React components, so your checklist panel matches your design system without CSS overrides. The flip side: Tour Kit checklists only work inside your React application.
+userTourKit's `@tour-kit/checklists` (Pro, $99 one-time) provides task dependencies with circular dependency detection, three completion types (manual, event-based, custom check function), and progress calculation that accounts for locked tasks. The `ChecklistProvider` renders as React components, so your checklist panel matches your design system without CSS overrides. The flip side: userTourKit checklists only work inside your React application.
 
 ### Announcements and banners
 
 WalkMe has ShoutOuts for announcements, which are essentially modal overlays positioned on-screen. They're configurable but constrained to WalkMe's styling system. Customization requires `!important` CSS overrides on selectors like `.walkme-custom-balloon-outer-div`.
 
-Tour Kit's `@tour-kit/announcements` (Pro) ships five display variants: modal, toast, banner, slideout, and spotlight. Each supports frequency rules (`once`, `session`, `always`, interval-based), a priority queue (critical > high > normal > low), and audience targeting by user ID, role, or custom filter. Announcements integrate with `@tour-kit/scheduling` for time-based display with timezone support.
+userTourKit's `@tour-kit/announcements` (Pro) ships five display variants: modal, toast, banner, slideout, and spotlight. Each supports frequency rules (`once`, `session`, `always`, interval-based), a priority queue (critical > high > normal > low), and audience targeting by user ID, role, or custom filter. Announcements integrate with `@tour-kit/scheduling` for time-based display with timezone support.
 
 ### Analytics and tracking
 
 This is where WalkMe earns its enterprise price tag. WalkMe's built-in analytics track user interactions across every guided flow and measure software adoption rates. Dashboards surface underused features across an organization's entire tech stack. The analytics retain data for one year and support enterprise reporting workflows. For a company training 50,000 employees on SAP SuccessFactors, that visibility is worth the cost.
 
-Tour Kit's `@tour-kit/analytics` (Pro) takes a plugin approach. Five built-in plugins cover PostHog, Mixpanel, Amplitude, Google Analytics, and console logging. A custom plugin is three lines of code.
+userTourKit's `@tour-kit/analytics` (Pro) takes a plugin approach. Five built-in plugins cover PostHog, Mixpanel, Amplitude, Google Analytics, and console logging. A custom plugin is three lines of code.
 
 You own the data pipeline and send events wherever your existing analytics stack lives. Event types cover tour lifecycle (`tour_started`, `tour_completed`, `tour_skipped`), step interactions, hint dismissals, and checklist progress. It won't replace an enterprise adoption dashboard, and it isn't trying to.
 
@@ -56,29 +56,29 @@ You own the data pipeline and send events wherever your existing analytics stack
 
 WalkMe supports segment-based targeting using user attributes, roles, and custom variables. Content can be scheduled with start/end dates through the platform's admin interface.
 
-Tour Kit's `@tour-kit/scheduling` (Pro) provides schedule evaluation in code: `startDate`, `endDate`, `timeOfDay` ranges, `daysOfWeek`, recurring patterns (daily/weekly/monthly/yearly), blackout periods, IANA timezone support. Business hours presets ship for US, UK, and Australian time zones. The `ScheduleGate` component conditionally renders children when a schedule is active. Everything evaluates client-side with no backend dependency.
+userTourKit's `@tour-kit/scheduling` (Pro) provides schedule evaluation in code: `startDate`, `endDate`, `timeOfDay` ranges, `daysOfWeek`, recurring patterns (daily/weekly/monthly/yearly), blackout periods, IANA timezone support. Business hours presets ship for US, UK, and Australian time zones. The `ScheduleGate` component conditionally renders children when a schedule is active. Everything evaluates client-side with no backend dependency.
 
 ### Adoption tracking
 
 WalkMe's Digital Adoption Platform is built around adoption tracking — it's their core value proposition. "Digital Adoption Analytics" includes process mining, user journey mapping, and adoption scoring across an organization's entire software stack. For enterprises training tens of thousands of employees on SAP or Salesforce, that depth justifies the investment. The catch: WalkMe's pricing (typically $50,000-$150,000/year) reflects this scope, and their adoption data sits inside a proprietary analytics silo you don't control.
 
-Tour Kit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count versus required threshold, time since first use versus the adoption window, and recency of use versus a churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. `IfNotAdopted` conditionally renders badges or prompts for users who haven't adopted a feature, and `AdoptionDashboard` provides admins a visual overview of adoption metrics.
+userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count versus required threshold, time since first use versus the adoption window, and recency of use versus a churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. `IfNotAdopted` conditionally renders badges or prompts for users who haven't adopted a feature, and `AdoptionDashboard` provides admins a visual overview of adoption metrics.
 
-WalkMe's adoption analytics are broader and deeper for enterprise-wide deployments. Tour Kit's are lighter-weight but give you code-level control and ownership of the data pipeline. If you're measuring adoption across 60 third-party apps, WalkMe wins. If you're tracking feature adoption inside your own React product, Tour Kit is more than sufficient at 0.1% of the cost.
+WalkMe's adoption analytics are broader and deeper for enterprise-wide deployments. userTourKit's are lighter-weight but give you code-level control and ownership of the data pipeline. If you're measuring adoption across 60 third-party apps, WalkMe wins. If you're tracking feature adoption inside your own React product, userTourKit is more than sufficient at 0.1% of the cost.
 
 ### Media embedding
 
 WalkMe supports video in Walk-Thrus and ShoutOuts through their visual editor. YouTube and Vimeo embeds work, and the Smart Walk-Thru editor handles media placement. But there's no programmatic API for embedding media from code, no auto-detection from URLs, and no accessibility fallbacks for users who prefer reduced motion.
 
-Tour Kit's `@tour-kit/media` package ($99 Pro) embeds video and animation directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and animation directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
-WalkMe's media support covers the basics through the visual editor. Tour Kit covers more platforms, adds GDPR-compliant embeds, and handles motion accessibility automatically — but requires developers to implement.
+WalkMe's media support covers the basics through the visual editor. userTourKit covers more platforms, adds GDPR-compliant embeds, and handles motion accessibility automatically — but requires developers to implement.
 
 ### Accessibility and WCAG compliance
 
 WalkMe's documentation doesn't specify WCAG compliance level. The overlay injection approach creates accessibility challenges by default. Foreign DOM elements disrupt the document's natural tab order. WalkMe's custom balloon containers don't inherit the host application's ARIA patterns. And the spotlight mode that dims the entire page can trap keyboard users in ways that aren't always predictable.
 
-Tour Kit ships WCAG 2.1 AA compliance by default, not as an add-on. Built-in `useFocusTrap` manages focus within tour cards. Screen readers hear step changes through `aria-live` regions. Keyboard navigation (arrow keys, Escape, Tab) works without configuration, and `prefers-reduced-motion` is respected automatically. Lighthouse Accessibility score: 100.
+userTourKit ships WCAG 2.1 AA compliance by default, not as an add-on. Built-in `useFocusTrap` manages focus within tour cards. Screen readers hear step changes through `aria-live` regions. Keyboard navigation (arrow keys, Escape, Tab) works without configuration, and `prefers-reduced-motion` is respected automatically. Lighthouse Accessibility score: 100.
 
 ### Bundle size and performance
 
@@ -86,13 +86,13 @@ The key difference in architecture shows up in the numbers. WalkMe loads a JavaS
 
 WalkMe still bundles its own internal `wmjQuery` library.
 
-Tour Kit's core is under 8KB gzipped. The React package adds under 12KB. Hints add under 5KB. The total for all three free-tier packages is under 25KB gzipped, roughly 1.5% of WalkMe's CDN payload. Tour Kit tree-shakes unused code, ships no jQuery, and runs zero continuous DOM scanning. On mobile connections, that difference translates to seconds of parse time.
+userTourKit's core is under 8KB gzipped. The React package adds under 12KB. Hints add under 5KB. The total for all three free-tier packages is under 25KB gzipped, roughly 1.5% of WalkMe's CDN payload. userTourKit tree-shakes unused code, ships no jQuery, and runs zero continuous DOM scanning. On mobile connections, that difference translates to seconds of parse time.
 
 ### Framework support and TypeScript
 
 WalkMe works with any web application because it operates at the DOM level. It doesn't integrate with your framework; it overlays on top of it. That's both its strength (universal compatibility) and its weakness. It fights React's virtual DOM, breaks on CSS-in-JS dynamic class names, and needs special SPA configuration. A verified G2 reviewer wrote in 2025: "Handling dynamic elements has been challenging, especially when selectors fail to recognize elements inside menus, frames or dynamically loaded components."
 
-Tour Kit is React 18+ and React 19 compatible, with TypeScript strict mode throughout. Router adapters cover Next.js App Router, Next.js Pages Router, and React Router v6+. The UnifiedSlot pattern supports both Radix UI and Base UI component composition. WalkMe has a TypeScript SDK, but the typing is limited compared to Tour Kit's full type inference across hooks, components, and step configurations.
+userTourKit is React 18+ and React 19 compatible, with TypeScript strict mode throughout. Router adapters cover Next.js App Router, Next.js Pages Router, and React Router v6+. The UnifiedSlot pattern supports both Radix UI and Base UI component composition. WalkMe has a TypeScript SDK, but the typing is limited compared to userTourKit's full type inference across hooks, components, and step configurations.
 
 ### Licensing and pricing
 
@@ -102,11 +102,11 @@ One TrustRadius reviewer reported being charged "tens of thousands of dollars" a
 
 As of Q1 2026, SAP has split WalkMe into separate "Digital Adoption" and "Digital Learning" SKUs. An Info-Tech analyst called this a potential "money grab." The SAP Enterprise Edition requires a minimum of 500 users.
 
-Tour Kit's MIT-licensed free tier includes the core library, React bindings, and hints. The Pro tier costs $99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media embedding, and scheduling. Zero contracts. Zero MAU limits. Buy it once and you're done.
+userTourKit's MIT-licensed free tier includes the core library, React bindings, and hints. The Pro tier costs $99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media embedding, and scheduling. Zero contracts. Zero MAU limits. Buy it once and you're done.
 
 ## Side-by-side comparison table
 
-| Category | Tour Kit | WalkMe |
+| Category | userTourKit | WalkMe |
 |---|---|---|
 | Product tours | ✅ Built-in (core, MIT) | ✅ Smart Walk-Thrus |
 | Hints / hotspots | ✅ Built-in (&lt;5KB) | ⚙️ ShoutOuts / Launchers (overlay-based) |
@@ -139,25 +139,25 @@ Choose WalkMe if you're training thousands of employees across applications you 
 
 WalkMe also makes more sense when compliance documentation matters. FedRAMP Ready and SOC 2 Type 2 certifications, combined with enterprise audit trails, serve regulated industries where proof of employee training is a legal requirement. And if your content creators are HR teams or training departments who can't write React code, WalkMe's visual editor is the only realistic option.
 
-The honest boundary: when the problem shifts from "onboard customers to our product" to "train employees across Salesforce, SAP, and Workday simultaneously," Tour Kit is the wrong tool.
+The honest boundary: when the problem shifts from "onboard customers to our product" to "train employees across Salesforce, SAP, and Workday simultaneously," userTourKit is the wrong tool.
 
-## When Tour Kit is the better fit
+## When userTourKit is the better fit
 
-Tour Kit wins when a developer team builds customer-facing onboarding for their own React application. The reasons are architectural, not philosophical.
+userTourKit wins when a developer team builds customer-facing onboarding for their own React application. The reasons are architectural, not philosophical.
 
 Your onboarding components render as native React elements that inherit your design tokens and respond to state changes. They update alongside your codebase. Gone are the z-index wars at 2,147,483,630, the `!important` overrides on `.walkme-custom-balloon-outer-div`, and the foreign DOM nodes fighting your virtual DOM.
 
 Bundle impact is measurable: under 25KB total for three packages versus 1-2 MB of CDN-loaded payload. On mobile, that gap costs real seconds.
 
-And pricing removes a category of conversation entirely. A startup evaluating WalkMe needs budget approval, a procurement process, a multi-year contract commitment. Tour Kit needs `npm install @tour-kit/react` and, if the team wants Pro features, a one-time $99 purchase. The product decision and the budget decision happen in the same afternoon.
+And pricing removes a category of conversation entirely. A startup evaluating WalkMe needs budget approval, a procurement process, a multi-year contract commitment. userTourKit needs `npm install @tour-kit/react` and, if the team wants Pro features, a one-time $99 purchase. The product decision and the budget decision happen in the same afternoon.
 
-## Migration path from WalkMe to Tour Kit
+## Migration path from WalkMe to userTourKit
 
-Migration from WalkMe to Tour Kit isn't a lift-and-shift. These tools have fundamentally different architectures, so the process is more of a rebuild using your existing WalkMe flows as a spec.
+Migration from WalkMe to userTourKit isn't a lift-and-shift. These tools have fundamentally different architectures, so the process is more of a rebuild using your existing WalkMe flows as a spec.
 
-**Step 1: Audit your WalkMe content.** Export your Smart Walk-Thru configurations. Map each WalkMe flow to its purpose: customer onboarding, feature discovery, or employee training. Flows targeting third-party apps (Salesforce, SAP) stay in WalkMe. Customer-facing product tours move to Tour Kit.
+**Step 1: Audit your WalkMe content.** Export your Smart Walk-Thru configurations. Map each WalkMe flow to its purpose: customer onboarding, feature discovery, or employee training. Flows targeting third-party apps (Salesforce, SAP) stay in WalkMe. Customer-facing product tours move to userTourKit.
 
-**Step 2: Install Tour Kit.**
+**Step 2: Install userTourKit.**
 
 ```bash
 npm install @tour-kit/core @tour-kit/react
@@ -165,7 +165,7 @@ npm install @tour-kit/core @tour-kit/react
 npm install @tour-kit/checklists @tour-kit/announcements @tour-kit/analytics
 ```
 
-**Step 3: Convert WalkMe selectors to React targets.** WalkMe targets elements by CSS selector and text content. Tour Kit targets by CSS selector or React ref. For dynamic elements that broke WalkMe's selectors, use refs directly:
+**Step 3: Convert WalkMe selectors to React targets.** WalkMe targets elements by CSS selector and text content. userTourKit targets by CSS selector or React ref. For dynamic elements that broke WalkMe's selectors, use refs directly:
 
 ```tsx
 const searchRef = useRef<HTMLInputElement>(null);
@@ -180,9 +180,9 @@ const steps = [
 ];
 ```
 
-**Step 4: Run both systems in parallel.** Tour Kit renders inside your React component tree. WalkMe overlays from outside. They won't conflict. Migrate one flow at a time, validate with your analytics, then disable the corresponding WalkMe flow.
+**Step 4: Run both systems in parallel.** userTourKit renders inside your React component tree. WalkMe overlays from outside. They won't conflict. Migrate one flow at a time, validate with your analytics, then disable the corresponding WalkMe flow.
 
-**Step 5: Remove the WalkMe snippet.** Once all customer-facing flows are running on Tour Kit, remove the WalkMe JavaScript snippet from your application. Keep WalkMe active only on third-party enterprise apps where it's still needed.
+**Step 5: Remove the WalkMe snippet.** Once all customer-facing flows are running on userTourKit, remove the WalkMe JavaScript snippet from your application. Keep WalkMe active only on third-party enterprise apps where it's still needed.
 
 ## What developers say
 
@@ -196,34 +196,34 @@ As of March 2026, G2 reviews also flag 18 mentions of loading delays and 34 ment
 
 Analyst Jon Reed at Diginomica wrote after the SAP acquisition: "If I'm a Workday or Oracle WalkMe customer, I'm probably not jumping for joy today." That SAP-first orientation is reshaping WalkMe's roadmap. SAP Enable Now ceased new customer sales in Q2 2025, with WalkMe's "Digital Learning" positioned as its replacement.
 
-(We built Tour Kit, so take developer feedback about our library with appropriate skepticism. Tour Kit is newer, has a smaller community, fewer Stack Overflow answers, and no enterprise track record yet. Your mileage may vary.)
+(We built userTourKit, so take developer feedback about our library with appropriate skepticism. userTourKit is newer, has a smaller community, fewer Stack Overflow answers, and no enterprise track record yet. Your mileage may vary.)
 
 ## Frequently asked questions
 
-**Is Tour Kit free?**
-Tour Kit's core library, React bindings, and hints package are free under the MIT license with no restrictions. The Pro tier costs $99 one-time (not a subscription) and adds adoption tracking, analytics with five built-in plugins, announcements, checklists, media embedding, and scheduling with timezone support.
+**Is userTourKit free?**
+userTourKit's core library, React bindings, and hints package are free under the MIT license with no restrictions. The Pro tier costs $99 one-time (not a subscription) and adds adoption tracking, analytics with five built-in plugins, announcements, checklists, media embedding, and scheduling with timezone support.
 
-**What is the difference between Tour Kit and WalkMe?**
-Tour Kit is a headless React library that renders onboarding as native components inside your codebase. WalkMe is an enterprise platform that injects overlay guidance on top of any web application without source code access. Tour Kit requires developers; WalkMe's visual editor doesn't. Tour Kit costs $0-$99; WalkMe's median annual contract is $43,000.
+**What is the difference between userTourKit and WalkMe?**
+userTourKit is a headless React library that renders onboarding as native components inside your codebase. WalkMe is an enterprise platform that injects overlay guidance on top of any web application without source code access. userTourKit requires developers; WalkMe's visual editor doesn't. userTourKit costs $0-$99; WalkMe's median annual contract is $43,000.
 
-**Can I migrate from WalkMe to Tour Kit?**
-Yes, for customer-facing product tours built on your own React application. Export WalkMe flow configurations as a spec, convert CSS selectors to React refs or selectors, and rebuild flows using Tour Kit's step API. Run both systems in parallel during migration since they don't conflict architecturally.
+**Can I migrate from WalkMe to userTourKit?**
+Yes, for customer-facing product tours built on your own React application. Export WalkMe flow configurations as a spec, convert CSS selectors to React refs or selectors, and rebuild flows using userTourKit's step API. Run both systems in parallel during migration since they don't conflict architecturally.
 
-**Does Tour Kit work with Next.js and React 19?**
-Tour Kit supports React 18 and React 19, with built-in router adapters for Next.js App Router, Next.js Pages Router, and React Router v6+. The headless architecture avoids hydration issues with server components.
+**Does userTourKit work with Next.js and React 19?**
+userTourKit supports React 18 and React 19, with built-in router adapters for Next.js App Router, Next.js Pages Router, and React Router v6+. The headless architecture avoids hydration issues with server components.
 
-**What is the bundle size of Tour Kit vs WalkMe?**
-Tour Kit's core is under 8KB gzipped, React package under 12KB, hints under 5KB. WalkMe loads a JavaScript snippet that fetches approximately 1-2 MB of content payload from its CDN. Tour Kit's entire free tier totals under 25KB gzipped.
+**What is the bundle size of userTourKit vs WalkMe?**
+userTourKit's core is under 8KB gzipped, React package under 12KB, hints under 5KB. WalkMe loads a JavaScript snippet that fetches approximately 1-2 MB of content payload from its CDN. userTourKit's entire free tier totals under 25KB gzipped.
 
 **Does WalkMe work with React single-page applications?**
 WalkMe can work with SPAs, but it requires special configuration. Their documentation states SPA support must be enabled by contacting WalkMe support. It works by watching for DOM mutations rather than integrating with React's component lifecycle, which causes issues with dynamic elements and CSS-in-JS.
 
 **Is WalkMe open source?**
-No. WalkMe is proprietary software with quote-based pricing and multi-year contracts. Tour Kit's free tier (core, React, hints) is MIT-licensed open source. The Pro packages use a proprietary license with a one-time $99 fee.
+No. WalkMe is proprietary software with quote-based pricing and multi-year contracts. userTourKit's free tier (core, React, hints) is MIT-licensed open source. The Pro packages use a proprietary license with a one-time $99 fee.
 
-**Which is better for enterprise: Tour Kit or WalkMe?**
-For enterprise employee training across third-party applications (SAP, Salesforce, Workday), WalkMe is the stronger choice — it has FedRAMP Ready certification, SOC 2 Type 2, and a visual editor for non-technical content creators. For enterprise SaaS teams building customer-facing onboarding in React, Tour Kit gives developers full code ownership at a fraction of the cost.
+**Which is better for enterprise: userTourKit or WalkMe?**
+For enterprise employee training across third-party applications (SAP, Salesforce, Workday), WalkMe is the stronger choice — it has FedRAMP Ready certification, SOC 2 Type 2, and a visual editor for non-technical content creators. For enterprise SaaS teams building customer-facing onboarding in React, userTourKit gives developers full code ownership at a fraction of the cost.
 
 ## Final verdict
 
-WalkMe and Tour Kit solve different problems that share a surface-level resemblance. If you're training employees on software you bought, WalkMe's enterprise capabilities justify its enterprise pricing. If you're onboarding customers to software you built in React, Tour Kit gives you native components under 25KB, WCAG 2.1 AA accessibility, and design system integration for $99 once — or free if you only need tours and hints.
+WalkMe and userTourKit solve different problems that share a surface-level resemblance. If you're training employees on software you bought, WalkMe's enterprise capabilities justify its enterprise pricing. If you're onboarding customers to software you built in React, userTourKit gives you native components under 25KB, WCAG 2.1 AA accessibility, and design system integration for $99 once — or free if you only need tours and hints.
