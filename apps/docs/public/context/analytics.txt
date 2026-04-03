@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/analytics Context File
-Version: 0.1.0 | Generated: 2026-04-02
+Version: 0.1.0 | Generated: 2026-04-03
 Paste this into your LLM to get accurate answers about @tour-kit/analytics.
 =========================================================================
 
 OVERVIEW
 --------
-Analytics plugins for TourKit - track tour engagement
+Analytics plugins for userTourKit - track tour engagement
 
 INSTALLATION
 ------------

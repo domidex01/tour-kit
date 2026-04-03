@@ -18,7 +18,7 @@
 ---
 
 > Use the same body content as devto.md, with these changes:
-> 1. Remove the markdown comparison table and replace with: "I put together a quick rundown — User Tour Kit (under 8KB, MIT, headless), React Joyride (~30KB, MIT, drop-in), Shepherd.js (~25KB, AGPL, multi-framework), Driver.js (~5KB, MIT, highlights only), and five more ranging from free open-source to $249/month SaaS platforms."
+> 1. Remove the markdown comparison table and replace with: "I put together a quick rundown — userTourKit (under 8KB, MIT, headless), React Joyride (~30KB, MIT, drop-in), Shepherd.js (~25KB, AGPL, multi-framework), Driver.js (~5KB, MIT, highlights only), and five more ranging from free open-source to $249/month SaaS platforms."
 > 2. Keep the install command block — it's short enough for Medium
 > 3. Remove FAQ section (too long for Medium's format — link back to the original instead)
 > 4. End with: "The full comparison table and FAQ are in the [original article](https://usertourkit.com/blog/best-product-tour-tools-react)."

@@ -8,4 +8,4 @@ Two things that surprised me: almost none of them claim WCAG 2.1 AA compliance, 
 
 https://usertourkit.com/blog/best-free-product-tour-libraries-open-source
 
-Full disclosure: I built one of the tools on the list (User Tour Kit). Would love feedback if you think the rankings are off or I missed a library.
+Full disclosure: I built one of the tools on the list (userTourKit). Would love feedback if you think the rankings are off or I missed a library.

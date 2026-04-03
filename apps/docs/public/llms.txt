@@ -1,4 +1,4 @@
-# userTourKit v0.3.0 — Generated 2026-04-02T16:42:42Z
+# userTourKit v0.3.0 — Generated 2026-04-03T08:08:19Z
 
 # userTourKit
 
@@ -63,7 +63,7 @@
 - [useTours](https://tour-kit-docs.vercel.app/docs/react/hooks/use-tours): useTours hook: access all registered tour instances, check active states, and manage multiple tours from one place
 - [MultiTourKitProvider](https://tour-kit-docs.vercel.app/docs/react/providers/multi-tour-kit-provider): MultiTourKitProvider: manage multiple independent tours with shared configuration, analytics, and storage settings
 - [CSS Variables](https://tour-kit-docs.vercel.app/docs/react/styling/css-variables): Customize userTourKit appearance with CSS custom properties for colors, spacing, border radius, and shadow values
-- [Custom Components](https://tour-kit-docs.vercel.app/docs/react/styling/custom-components): Build fully custom tour card, overlay, and navigation components using userTourKit hooks and headless primitives
+- [Custom Components](https://tour-kit-docs.vercel.app/docs/react/styling/custom-components): Build fully custom tour card, overlay, and navigation components using Tour Kit hooks and headless primitives
 - [Tailwind CSS](https://tour-kit-docs.vercel.app/docs/react/styling/tailwind): Style userTourKit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints
 
 ## Hints
@@ -250,3 +250,7 @@
 ## Index
 
 - [TourKit](https://tour-kit-docs.vercel.app/docs/index): userTourKit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage
+
+## Licensing
+
+- [Licensing](https://tour-kit-docs.vercel.app/docs/licensing): Set up userTourKit Pro licensing with Polar.sh — installation, configuration, and CI/CD

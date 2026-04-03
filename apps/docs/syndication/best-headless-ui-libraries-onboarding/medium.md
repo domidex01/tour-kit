@@ -12,7 +12,7 @@ The headless pattern fixes this. You get the logic and bring your own components
 
 ## Two categories of headless onboarding tools
 
-**Purpose-built onboarding libraries** handle tour logic directly. Tour Kit provides hooks like `useTour()` and `useStep()` that manage step sequencing, element targeting, and keyboard navigation while rendering nothing. OnboardJS takes a different approach as a flow orchestrator with a state machine architecture, but it has no DOM awareness (can't highlight page elements or position tooltips).
+**Purpose-built onboarding libraries** handle tour logic directly. userTourKit provides hooks like `useTour()` and `useStep()` that manage step sequencing, element targeting, and keyboard navigation while rendering nothing. OnboardJS takes a different approach as a flow orchestrator with a state machine architecture, but it has no DOM awareness (can't highlight page elements or position tooltips).
 
 **Headless UI primitive libraries** give you the building blocks. Radix Primitives (28+ components, used by Vercel and Supabase), React Aria (43+ components from Adobe), Base UI (35+ components, launched v1 in February 2026), Ark UI (34+ components across React/Vue/Solid), and Headless UI (about 10 components from Tailwind Labs) all provide popovers, dialogs, and tooltips that become tour step UI when paired with tour logic.
 

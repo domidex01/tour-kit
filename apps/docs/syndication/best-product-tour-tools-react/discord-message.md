@@ -6,4 +6,4 @@ Hey folks — I put together a comparison of 10 product tour libraries for React
 
 https://usertourkit.com/blog/best-product-tour-tools-react
 
-Full disclosure: I built one of the tools on the list (User Tour Kit). Would love feedback if you think the rankings are off or I missed something.
+Full disclosure: I built one of the tools on the list (userTourKit). Would love feedback if you think the rankings are off or I missed something.

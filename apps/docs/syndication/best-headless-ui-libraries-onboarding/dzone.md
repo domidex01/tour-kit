@@ -8,7 +8,7 @@ After testing 7 libraries in a React 19 project, the headless onboarding space b
 
 ## Purpose-built headless onboarding libraries
 
-**Tour Kit** provides hooks-based tour logic that renders nothing by default. Core bundle under 8KB gzipped with 10 composable packages covering tours, hints, checklists, announcements, analytics, and scheduling. Uses the `asChild` composition pattern from Radix UI. MIT licensed core, $99 one-time for extended packages.
+**userTourKit** provides hooks-based tour logic that renders nothing by default. Core bundle under 8KB gzipped with 10 composable packages covering tours, hints, checklists, announcements, analytics, and scheduling. Uses the `asChild` composition pattern from Radix UI. MIT licensed core, $99 one-time for extended packages.
 
 **OnboardJS** uses a state machine architecture for flow orchestration with React bindings and analytics plugins for PostHog, Mixpanel, and Supabase. Handles step state, branching logic, and persistence but has no DOM awareness — it cannot highlight page elements or position tooltips.
 
@@ -38,4 +38,4 @@ Headless component adoption grew 70% in 2025 for general UI. The same pattern is
 
 Full comparison table and code examples: [usertourkit.com/blog/best-headless-ui-libraries-onboarding](https://usertourkit.com/blog/best-headless-ui-libraries-onboarding)
 
-*Disclosure: Tour Kit is the author's project.*
+*Disclosure: userTourKit is the author's project.*

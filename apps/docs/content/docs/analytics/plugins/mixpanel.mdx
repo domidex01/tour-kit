@@ -70,7 +70,7 @@ export function Providers({ children }) {
     },
     eventPrefix: {
       type: 'string',
-      default: '"userTourKit: "',
+      default: '"useruserTourKit: "',
       description: 'Prefix for all event names in Mixpanel'
     }
   }}
@@ -78,13 +78,13 @@ export function Providers({ children }) {
 
 ## Event Names
 
-Events are prefixed with `TourKit: ` by default:
+Events are prefixed with `userTourKit: ` by default:
 
 | userTourKit Event | Mixpanel Event Name |
 |----------------|-------------------|
-| `tour_started` | `TourKit: tour_started` |
-| `step_viewed` | `TourKit: step_viewed` |
-| `hint_clicked` | `TourKit: hint_clicked` |
+| `tour_started` | `userTourKit: tour_started` |
+| `step_viewed` | `userTourKit: step_viewed` |
+| `hint_clicked` | `userTourKit: hint_clicked` |
 
 ### Custom Prefix
 
@@ -257,10 +257,10 @@ Create a funnel to analyze tour completion:
 
 1. Go to Insights > Funnels
 2. Add steps:
-   - `TourKit: tour_started`
-   - `TourKit: step_viewed` (filter: step_index = 0)
-   - `TourKit: step_viewed` (filter: step_index = 1)
-   - `TourKit: tour_completed`
+   - `userTourKit: tour_started`
+   - `userTourKit: step_viewed` (filter: step_index = 0)
+   - `userTourKit: step_viewed` (filter: step_index = 1)
+   - `userTourKit: tour_completed`
 3. Group by: `tour_id`
 
 ### Step Duration Analysis
@@ -268,7 +268,7 @@ Create a funnel to analyze tour completion:
 Analyze how long users spend on each step:
 
 1. Go to Insights > Insights
-2. Event: `TourKit: step_completed`
+2. Event: `userTourKit: step_completed`
 3. Aggregate: Average of `duration_ms`
 4. Group by: `step_id`
 
@@ -277,7 +277,7 @@ Analyze how long users spend on each step:
 Create cohorts based on tour behavior:
 
 1. Go to Cohorts > Create Cohort
-2. Definition: `TourKit: tour_completed` where `tour_id` = "onboarding"
+2. Definition: `userTourKit: tour_completed` where `tour_id` = "onboarding"
 3. Name: "Completed Onboarding"
 
 Use this cohort to:
@@ -299,7 +299,7 @@ View tour activity on user profiles:
 Track retention based on tour completion:
 
 1. Go to Insights > Retention
-2. First event: `TourKit: tour_started`
+2. First event: `userTourKit: tour_started`
 3. Return event: Any event
 4. Segment by: `tour_id`
 

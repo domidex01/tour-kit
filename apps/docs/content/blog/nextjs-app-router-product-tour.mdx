@@ -1,0 +1,303 @@
+---
+title: "How to add a product tour to a Next.js App Router project"
+slug: "nextjs-app-router-product-tour"
+description: "Step-by-step guide to integrating userTourKit into a Next.js 15 App Router project. Covers Server Components, client boundaries, multi-page routing, and TypeScript setup."
+primary_keyword: "nextjs product tour"
+secondary_keywords: ["next.js app router tour", "product tour next.js", "react onboarding next.js"]
+category: "Tutorials"
+schema_type: "TechArticle"
+date: "2026-04-03"
+updated: "2026-04-03"
+ogImage: /og-images/nextjs-app-router-product-tour.png
+published: true
+lastUpdated: "2026-04-03"
+---
+
+# How to add a product tour to a Next.js App Router project
+
+Next.js App Router splits your application into Server Components and Client Components, which breaks most product tour libraries that expect a fully client-rendered tree. userTourKit is a headless React tour library (core under 8KB gzipped) that works inside `'use client'` boundaries without touching your Server Component layout. This tutorial walks you through installing userTourKit in a Next.js 15 project, defining tour steps, wiring up the App Router adapter for multi-page tours, and rendering tooltip UI with full control over markup and styling.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What does userTourKit do in a Next.js project?
+
+userTourKit provides step sequencing, element highlighting with spotlight overlays, scroll management, and keyboard navigation as headless hooks and components. You bring your own UI -- shadcn/ui cards, Radix popovers, plain divs with Tailwind, whatever your project already uses. The library never injects global CSS or portals that conflict with Next.js streaming. The `@tourkit/react` package re-exports everything from `@tourkit/core`, so a single import handles both.
+
+We tested this integration in a Next.js 15.2 + React 19 + TypeScript 5.7 project bootstrapped with `create-next-app`. The whole setup takes about 10 minutes if you already have a Next.js app with some UI to tour.
+
+## Prerequisites
+
+You need a Next.js 13.4+ project using the App Router (the `app/` directory). The examples use Next.js 15, but anything from 13.4 onward works. TypeScript is recommended but not required.
+
+- Next.js 13.4+ with App Router enabled
+- React 18.2+ (React 19 recommended)
+- TypeScript 5.0+
+- A few UI elements worth touring (dashboard, sidebar, settings)
+
+## Step 1: install the packages
+
+userTourKit ships two packages. `@tourkit/core` contains framework-agnostic logic -- step state machine, position calculations, localStorage persistence. `@tourkit/react` adds React hooks and components. Install both.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Or with pnpm:
+
+```bash
+pnpm add @tourkit/core @tourkit/react
+```
+
+Both packages are ESM-first with CommonJS fallbacks. Next.js handles the resolution automatically through its webpack or turbopack bundler.
+
+## Step 2: create a client-side tour provider
+
+The App Router defaults every component to a Server Component. Tour logic requires browser APIs (DOM measurement, scroll, event listeners), so the provider must live inside a `'use client'` boundary. Create a dedicated file for it.
+
+```tsx
+// src/components/tour-provider.tsx
+'use client'
+
+import { TourProvider } from '@tourkit/react'
+
+export function AppTourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProvider
+      tourId="onboarding"
+      persist="localStorage"
+      steps={[
+        {
+          id: 'sidebar',
+          target: '[data-tour="sidebar"]',
+          title: 'Navigation',
+          content: 'Use the sidebar to switch between sections.',
+        },
+        {
+          id: 'search',
+          target: '[data-tour="search"]',
+          title: 'Search',
+          content: 'Find anything in your workspace.',
+        },
+        {
+          id: 'settings',
+          target: '[data-tour="settings"]',
+          title: 'Settings',
+          content: 'Configure your preferences here.',
+        },
+      ]}
+    >
+      {children}
+    </TourProvider>
+  )
+}
+```
+
+The `persist="localStorage"` option remembers which users have completed the tour, so it only fires once per browser.
+
+## Step 3: wrap your layout
+
+Import the provider into your root layout. Because the provider is a Client Component, Next.js will render your page content as Server Components and hydrate only the tour boundary on the client.
+
+```tsx
+// src/app/layout.tsx
+import { AppTourProvider } from '@/components/tour-provider'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <AppTourProvider>
+          {children}
+        </AppTourProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+Server Components nested inside `AppTourProvider` stay server-rendered. The `'use client'` boundary does not force everything below it to become client code -- a common misconception. Next.js serializes the server-rendered children and passes them through.
+
+## Step 4: add data attributes to your UI
+
+userTourKit targets elements using CSS selectors. The simplest approach is `data-tour` attributes on the elements you want to highlight.
+
+```tsx
+// src/components/sidebar.tsx (this can be a Server Component)
+export function Sidebar() {
+  return (
+    <nav data-tour="sidebar" className="w-64 border-r p-4">
+      <ul>
+        <li>Dashboard</li>
+        <li>Projects</li>
+        <li>Settings</li>
+      </ul>
+    </nav>
+  )
+}
+```
+
+These attributes work on Server Components because they're standard HTML. No client-side hooks needed on the target elements themselves.
+
+## Step 5: render the tour UI
+
+userTourKit is headless, so you decide what the tooltip looks like. The `useTour` hook gives you the current step, navigation functions, and visibility state.
+
+```tsx
+// src/components/tour-tooltip.tsx
+'use client'
+
+import { useTour } from '@tourkit/react'
+
+export function TourTooltip() {
+  const { currentStep, isActive, next, prev, stop, progress } = useTour()
+
+  if (!isActive || !currentStep) return null
+
+  return (
+    <div className="fixed z-50 rounded-lg border bg-white p-4 shadow-lg"
+         role="dialog" aria-label={currentStep.title}>
+      <h3 className="font-semibold">{currentStep.title}</h3>
+      <p className="mt-1 text-sm text-gray-600">{currentStep.content}</p>
+      <div className="mt-3 flex items-center justify-between">
+        <span className="text-xs text-gray-400">
+          {progress.current} of {progress.total}
+        </span>
+        <div className="flex gap-2">
+          <button onClick={prev} className="rounded px-3 py-1 text-sm border">
+            Back
+          </button>
+          <button onClick={next} className="rounded px-3 py-1 text-sm bg-blue-600 text-white">
+            {progress.isLast ? 'Done' : 'Next'}
+          </button>
+        </div>
+      </div>
+      <button onClick={stop} className="absolute top-2 right-2 text-gray-400"
+              aria-label="Close tour">
+        x
+      </button>
+    </div>
+  )
+}
+```
+
+Import `TourTooltip` inside the layout or any client boundary. The positioning of the tooltip relative to the highlighted element is handled by the `Spotlight` component or manually via the `useStepPosition` hook from `@tourkit/react`.
+
+## How to handle multi-page tours with the App Router
+
+Single-page tours work out of the box. For tours that span multiple routes (like onboarding that moves from `/dashboard` to `/settings`), userTourKit provides a router adapter.
+
+```tsx
+// src/components/tour-provider.tsx
+'use client'
+
+import { TourProvider, useNextAppRouter } from '@tourkit/react'
+
+export function AppTourProvider({ children }: { children: React.ReactNode }) {
+  const router = useNextAppRouter()
+
+  return (
+    <TourProvider
+      tourId="onboarding"
+      persist="localStorage"
+      router={router}
+      steps={[
+        {
+          id: 'dashboard-overview',
+          target: '[data-tour="main-content"]',
+          title: 'Your dashboard',
+          content: 'This is where your projects live.',
+          route: '/dashboard',
+        },
+        {
+          id: 'settings-page',
+          target: '[data-tour="settings-form"]',
+          title: 'Settings',
+          content: 'Configure notifications and preferences.',
+          route: '/settings',
+        },
+      ]}
+    >
+      {children}
+    </TourProvider>
+  )
+}
+```
+
+The `useNextAppRouter()` hook wraps `useRouter()` and `usePathname()` from `next/navigation`. When a step has a `route` property, the tour navigates there before highlighting the target. As of April 2026, this adapter handles both soft navigations (client-side) and hard navigations (full page load) correctly.
+
+## What are the current limitations?
+
+userTourKit is React 18+ only. If your project runs React 17 or earlier, you need to upgrade first. The library does not ship a visual tour builder -- you define steps in code or JSON. For teams that need a drag-and-drop editor, tools like Appcues or Userflow are better fits, though they cost $249+/month at scale (source: published pricing pages, April 2026). The core bundle is under 8KB gzipped and the React package adds roughly 4KB, measured via bundlephobia.
+
+**Disclosure:** userTourKit is our project. We built it because existing open-source tour libraries either ship opinionated CSS that fights design systems or lack Server Component compatibility.
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>userTourKit</th>
+      <th>React Joyride</th>
+      <th>Onborda</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>App Router compatible</td>
+      <td>Yes</td>
+      <td>Partial (needs workarounds)</td>
+      <td>Yes (Next.js only)</td>
+    </tr>
+    <tr>
+      <td>Headless (no default CSS)</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Multi-page tours</td>
+      <td>Yes (any router)</td>
+      <td>No</td>
+      <td>Yes (Next.js only)</td>
+    </tr>
+    <tr>
+      <td>Bundle size (gzipped)</td>
+      <td>~8KB core + ~4KB react</td>
+      <td>~15KB</td>
+      <td>~8KB + Framer Motion</td>
+    </tr>
+    <tr>
+      <td>TypeScript</td>
+      <td>Full strict mode</td>
+      <td>@types/react-joyride</td>
+      <td>Built-in</td>
+    </tr>
+  </tbody>
+</table>
+
+Check out the [userTourKit documentation](/docs) for the full API reference, or explore the [interactive examples](/docs/examples) to see tours running in a live Next.js sandbox.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Get started with userTourKit on [GitHub](https://github.com/user-tour-kit/tour-kit) or install it now with the command above.
+
+## Frequently asked questions
+
+### Does userTourKit work with Next.js Server Components?
+
+userTourKit's provider and tooltip components require a `'use client'` boundary, but they do not force child components to become Client Components. Your page content, data fetching, and layouts stay server-rendered. The tour only hydrates the thin client boundary where the provider lives.
+
+### Can I use userTourKit with the Pages Router instead of App Router?
+
+Yes. The `useNextAppRouter()` adapter is specifically for the App Router's `next/navigation` API. For the Pages Router, use the `useNextPagesRouter()` adapter which wraps `next/router` instead. Both support multi-page tour navigation.
+
+### How do I start the tour programmatically after a user action?
+
+Call the `start()` function from the `useTour` hook. For example, trigger it after a user completes signup: `const { start } = useTour(); start()`. The tour respects the `persist` setting, so it won't re-trigger for users who already completed it unless you call `reset()` first.
+
+### What happens if a target element hasn't rendered yet?
+
+userTourKit waits for the target element to appear in the DOM before showing the step. This handles Next.js streaming and Suspense boundaries where content loads progressively. You can configure the timeout with the `waitForTarget` option (defaults to 5 seconds).

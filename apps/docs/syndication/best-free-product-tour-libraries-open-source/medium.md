@@ -22,19 +22,19 @@ Most "best product tour" roundups mix SaaS platforms charging $249/month with op
 
 We installed each library into a Vite 6 + React 19 + TypeScript 5.7 project and built a 5-step tour targeting a sidebar, a button, and a modal. We measured bundle size via bundlephobia, checked TypeScript coverage, tested keyboard navigation, and verified the license in package.json.
 
-**Bias disclosure:** We built User Tour Kit, so it's listed first. We've tried to be fair with every entry. Every claim below is verifiable against npm, GitHub, and bundlephobia.
+**Bias disclosure:** We built userTourKit, so it's listed first. We've tried to be fair with every entry. Every claim below is verifiable against npm, GitHub, and bundlephobia.
 
 ## The quick rundown
 
-Here's how the 9 libraries stack up: User Tour Kit (under 8KB, MIT, headless, WCAG 2.1 AA), React Joyride (~30KB, MIT, drop-in UI), Shepherd.js (~25KB, MIT, multi-framework), Driver.js (~5KB, MIT, highlight-focused), Reactour (~12KB, MIT, simple sequential), OnboardJS (~10KB, MIT core, state machine), Onborda (~8KB, MIT, Next.js-specific), Intro.js (~10KB, **AGPL -- commercial trap**), and GuideChimp (~15KB, MIT, multi-page tours).
+Here's how the 9 libraries stack up: userTourKit (under 8KB, MIT, headless, WCAG 2.1 AA), React Joyride (~30KB, MIT, drop-in UI), Shepherd.js (~25KB, MIT, multi-framework), Driver.js (~5KB, MIT, highlight-focused), Reactour (~12KB, MIT, simple sequential), OnboardJS (~10KB, MIT core, state machine), Onborda (~8KB, MIT, Next.js-specific), Intro.js (~10KB, **AGPL -- commercial trap**), and GuideChimp (~15KB, MIT, multi-page tours).
 
 ## How we evaluated
 
 We scored against six criteria: bundle size (20%), TypeScript support (20%), React 19 compatibility (15%), accessibility (20%), maintenance activity (15%), and license clarity (10%). We weighted accessibility at 20% because no other roundup in this space evaluates it at all.
 
-## 1. User Tour Kit: best for teams with a design system
+## 1. userTourKit: best for teams with a design system
 
-User Tour Kit is a headless React product tour library that ships as 10 composable packages at under 8KB gzipped for the core. It renders with your existing components (shadcn/ui, Radix, Tailwind, anything) instead of shipping its own UI. React 18 and 19 are supported natively, with TypeScript strict mode throughout.
+userTourKit is a headless React product tour library that ships as 10 composable packages at under 8KB gzipped for the core. It renders with your existing components (shadcn/ui, Radix, Tailwind, anything) instead of shipping its own UI. React 18 and 19 are supported natively, with TypeScript strict mode throughout.
 
 Headless architecture means zero style conflicts. The asChild pattern works with both Radix UI and Base UI, so your tour tooltips look identical to the rest of your app.
 
@@ -122,10 +122,10 @@ Pricing: Free (MIT).
 
 Almost no open-source tour library claims WCAG 2.1 AA compliance. Shepherd.js mentions keyboard navigation. Reactour has accessible overlays. None publish Lighthouse scores or document ARIA role usage. Not one mentions prefers-reduced-motion.
 
-User Tour Kit scores Lighthouse 100 for accessibility with focus management, ARIA roles, keyboard navigation, and prefers-reduced-motion support.
+userTourKit scores Lighthouse 100 for accessibility with focus management, ARIA roles, keyboard navigation, and prefers-reduced-motion support.
 
 ## How to choose
 
-Choose a headless library (User Tour Kit, OnboardJS) if you want UI that matches your design system. Choose an opinionated library (React Joyride, Shepherd.js) for quick setup. Choose Driver.js for lightweight highlights. Choose Onborda for Next.js App Router. Avoid AGPL libraries (Intro.js) in commercial projects.
+Choose a headless library (userTourKit, OnboardJS) if you want UI that matches your design system. Choose an opinionated library (React Joyride, Shepherd.js) for quick setup. Choose Driver.js for lightweight highlights. Choose Onborda for Next.js App Router. Avoid AGPL libraries (Intro.js) in commercial projects.
 
 The full comparison table and FAQ are in the [original article](https://usertourkit.com/blog/best-free-product-tour-libraries-open-source).

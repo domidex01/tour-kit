@@ -13,7 +13,7 @@ Most "best product tour" roundups mix SaaS platforms charging $249/month with op
 
 We installed each library into a Vite 6 + React 19 + TypeScript 5.7 project and built a 5-step tour targeting a sidebar, a button, and a modal. We measured bundle size via bundlephobia, checked TypeScript coverage, tested keyboard navigation, and verified the license in `package.json`.
 
-**Bias disclosure:** We built User Tour Kit, so it's listed first. We've tried to be fair with every entry. Every claim below is verifiable against npm, GitHub, and bundlephobia.
+**Bias disclosure:** We built userTourKit, so it's listed first. We've tried to be fair with every entry. Every claim below is verifiable against npm, GitHub, and bundlephobia.
 
 ```bash
 npm install @tour-kit/core @tour-kit/react
@@ -36,7 +36,7 @@ We weighted accessibility at 20% because [accessible interactive components are 
 
 | Library | Bundle (gzip) | React 19 | TypeScript | License | Accessibility | Best for |
 |---|---|---|---|---|---|---|
-| User Tour Kit | Under 8KB core | Yes | Strict | MIT | WCAG 2.1 AA | Design system teams |
+| userTourKit | Under 8KB core | Yes | Strict | MIT | WCAG 2.1 AA | Design system teams |
 | React Joyride | ~30KB | v3 only | Built-in (v3) | MIT | Partial | Quick drop-in tours |
 | Shepherd.js | ~25KB | Via wrapper | Built-in | MIT | Keyboard nav | Multi-framework teams |
 | Driver.js | ~5KB | Via hooks | Built-in | MIT | Minimal | Lightweight highlights |
@@ -48,11 +48,11 @@ We weighted accessibility at 20% because [accessible interactive components are 
 
 Data verified April 2026. Sources: npm, GitHub, bundlephobia, official docs.
 
-## 1. User Tour Kit: best for teams with a design system
+## 1. userTourKit: best for teams with a design system
 
-![Screenshot of TourKit - Product Tours for React](https://usertourkit.com/screenshots/user-tour-kit.avif)
+![Screenshot of userTourKit - Product Tours for React](https://usertourkit.com/screenshots/user-tour-kit.avif)
 
-User Tour Kit is a headless React product tour library that ships as 10 composable packages at under 8KB gzipped for the core. It renders with your existing components (shadcn/ui, Radix, Tailwind, anything) instead of shipping its own UI. React 18 and 19 are supported natively, with TypeScript strict mode throughout. The library includes tours, hints, checklists, announcements, analytics, and scheduling in separate packages you install individually.
+userTourKit is a headless React product tour library that ships as 10 composable packages at under 8KB gzipped for the core. It renders with your existing components (shadcn/ui, Radix, Tailwind, anything) instead of shipping its own UI. React 18 and 19 are supported natively, with TypeScript strict mode throughout. The library includes tours, hints, checklists, announcements, analytics, and scheduling in separate packages you install individually.
 
 **What makes it different:** Headless architecture means zero style conflicts. The `asChild` pattern (UnifiedSlot) works with both Radix UI and Base UI, so your tour tooltips look identical to the rest of your app. No CSS overrides, no `!important` hacks, no fighting the library's opinions.
 
@@ -88,7 +88,7 @@ As one comparison article put it: "For React-heavy products, React Joyride and R
 **Limitations:**
 - Opinionated styling clashes with Tailwind and CSS Modules
 - No headless mode: you get their UI or nothing
-- Bundle size (~30KB gzipped) is 4x User Tour Kit's core
+- Bundle size (~30KB gzipped) is 4x userTourKit's core
 - No built-in analytics, checklists, or scheduling
 
 **Pricing:** Free (MIT).
@@ -169,7 +169,7 @@ Reactour is a React-native tour library that keeps things simple. You define ste
 
 ![Screenshot of OnboardJS](https://usertourkit.com/screenshots/onboardjs.avif)
 
-OnboardJS is the newest competitor positioning itself as a headless onboarding framework. It uses a state machine approach to tour logic and ships with built-in analytics plugins for PostHog and Supabase. Closest in philosophy to User Tour Kit: both are headless, both target React, both separate logic from UI.
+OnboardJS is the newest competitor positioning itself as a headless onboarding framework. It uses a state machine approach to tour logic and ships with built-in analytics plugins for PostHog and Supabase. Closest in philosophy to userTourKit: both are headless, both target React, both separate logic from UI.
 
 **Strengths:**
 - Headless architecture: render tours with your own components
@@ -258,13 +258,13 @@ Shepherd.js mentions keyboard navigation. Reactour has accessible overlays. Intr
 
 Why does this matter? [Accessible interactive components are a growing priority in the React ecosystem](https://www.infoq.com/news/2025/12/accessibility-ariakit-react/) (InfoQ, 2025). Screen reader users and keyboard-only navigators deserve onboarding that works too.
 
-User Tour Kit scores Lighthouse 100 for accessibility. Every step manages focus, uses ARIA roles (`role="dialog"`, `aria-describedby`), supports Tab/Escape/Arrow keys, and respects `prefers-reduced-motion`. We test with axe-core on every build.
+userTourKit scores Lighthouse 100 for accessibility. Every step manages focus, uses ARIA roles (`role="dialog"`, `aria-describedby`), supports Tab/Escape/Arrow keys, and respects `prefers-reduced-motion`. We test with axe-core on every build.
 
 The bar is low right now. Ship ARIA roles and keyboard nav and you're ahead of most libraries in this space.
 
 ## How to choose the right library for your project
 
-**Choose a headless library (User Tour Kit, OnboardJS)** if your team has React developers and you want tour UI that matches your design system exactly. You write more JSX, but you avoid style conflicts entirely.
+**Choose a headless library (userTourKit, OnboardJS)** if your team has React developers and you want tour UI that matches your design system exactly. You write more JSX, but you avoid style conflicts entirely.
 
 **Choose an opinionated library (React Joyride, Shepherd.js)** if you need a working tour in under an hour and the default tooltip UI is acceptable. Joyride for React-only, Shepherd for multi-framework.
 
@@ -278,7 +278,7 @@ The bar is low right now. Ship ARIA roles and keyboard nav and you're ahead of m
 
 ### What is the best free product tour library for React in 2026?
 
-User Tour Kit and React Joyride are the two strongest free options for React. User Tour Kit is headless (under 8KB, WCAG 2.1 AA, works with any design system), while React Joyride ships pre-built UI for faster setup. Both are MIT licensed and support React 19 natively. Your choice depends on whether you want full control or quick deployment.
+userTourKit and React Joyride are the two strongest free options for React. userTourKit is headless (under 8KB, WCAG 2.1 AA, works with any design system), while React Joyride ships pre-built UI for faster setup. Both are MIT licensed and support React 19 natively. Your choice depends on whether you want full control or quick deployment.
 
 ### Is Intro.js really free?
 
@@ -286,12 +286,12 @@ Intro.js uses an AGPL-3.0 license, which means commercial projects must either o
 
 ### Which product tour library has the smallest bundle size?
 
-Driver.js is the smallest at approximately 5KB gzipped. User Tour Kit's core is under 8KB gzipped. React Joyride is the heaviest at roughly 30KB gzipped. For mobile-first apps where every kilobyte affects Core Web Vitals, bundle size should weight heavily in your decision.
+Driver.js is the smallest at approximately 5KB gzipped. userTourKit's core is under 8KB gzipped. React Joyride is the heaviest at roughly 30KB gzipped. For mobile-first apps where every kilobyte affects Core Web Vitals, bundle size should weight heavily in your decision.
 
 ### Do any open-source tour libraries support WCAG 2.1 AA?
 
-As of April 2026, User Tour Kit is the only open-source product tour library that claims WCAG 2.1 AA compliance with documented ARIA roles, focus management, keyboard navigation, and `prefers-reduced-motion` support. Other libraries offer partial accessibility (keyboard nav in Shepherd.js, accessible overlays in Reactour) but none publish formal compliance documentation.
+As of April 2026, userTourKit is the only open-source product tour library that claims WCAG 2.1 AA compliance with documented ARIA roles, focus management, keyboard navigation, and `prefers-reduced-motion` support. Other libraries offer partial accessibility (keyboard nav in Shepherd.js, accessible overlays in Reactour) but none publish formal compliance documentation.
 
 ### Can I use these libraries with Next.js App Router?
 
-React Joyride, User Tour Kit, OnboardJS, and Reactour all work with Next.js App Router. Onborda is built specifically for it. Shepherd.js and Driver.js work via dynamic imports with `'use client'` directives. Intro.js requires a client-side wrapper. The main gotcha is server components: tour logic must run on the client.
+React Joyride, userTourKit, OnboardJS, and Reactour all work with Next.js App Router. Onborda is built specifically for it. Shepherd.js and Driver.js work via dynamic imports with `'use client'` directives. Intro.js requires a client-side wrapper. The main gotcha is server components: tour logic must run on the client.

@@ -6,4 +6,4 @@ Wrote a comparison of 7 headless UI libraries for building onboarding flows in R
 
 https://usertourkit.com/blog/best-headless-ui-libraries-onboarding
 
-Disclosure: Tour Kit is mine, listed at #1. Tried to be fair — interested in feedback on whether the comparison reads that way.
+Disclosure: userTourKit is mine, listed at #1. Tried to be fair — interested in feedback on whether the comparison reads that way.

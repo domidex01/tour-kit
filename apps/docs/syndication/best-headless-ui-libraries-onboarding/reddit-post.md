@@ -9,7 +9,7 @@ I've been working on a headless product tour library and wanted to understand th
 Here's the quick breakdown after testing each in a Vite 6 + React 19 + TS 5.7 project:
 
 **Purpose-built headless onboarding:**
-- **Tour Kit** (ours, bias disclosed) — hooks-based, DOM-aware tours, `asChild` pattern, <8KB core. Does element highlighting, scroll management, keyboard nav while rendering nothing.
+- **userTourKit** (ours, bias disclosed) — hooks-based, DOM-aware tours, `asChild` pattern, <8KB core. Does element highlighting, scroll management, keyboard nav while rendering nothing.
 - **OnboardJS** — state machine flow orchestrator with analytics plugins (PostHog, Mixpanel). No DOM awareness though — can't highlight elements or position tooltips.
 
 **Headless UI primitives you'd compose into tour steps:**

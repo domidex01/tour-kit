@@ -57,7 +57,7 @@ function makeBenefitGrantPayload(
       benefit: {
         id: 'ben_tourkit_pro',
         type: 'license_keys',
-        description: 'Tour Kit Pro License',
+        description: 'userTourKit Pro License',
       },
       granted_at: new Date().toISOString(),
     },

@@ -17,7 +17,7 @@ Every number is verifiable against npm and bundlephobia. There's a comparison ta
 
 Link: https://usertourkit.com/blog/best-product-tour-tools-react
 
-Disclosure: I built one of the tools listed (User Tour Kit). Tried to keep it honest.
+Disclosure: I built one of the tools listed (userTourKit). Tried to keep it honest.
 
 Thanks,
 Domi

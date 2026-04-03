@@ -6,7 +6,7 @@
 
 I've been building product tours for React apps and kept running into the same issue: most tour libraries were written for React 16 and still rely on `forwardRef` wrappers internally. With React 19 making refs regular props, that whole pattern is unnecessary.
 
-So I wrote up a step-by-step tutorial for adding a product tour to a React 19 app using Tour Kit (a headless tour library I built). The tutorial covers:
+So I wrote up a step-by-step tutorial for adding a product tour to a React 19 app using userTourKit (a headless tour library I built). The tutorial covers:
 
 - Setting up a 4-step product tour with CSS selector targets (no forwardRef needed)
 - Using `useTour()` hook for custom tour controls and progress indicators
@@ -19,4 +19,4 @@ One thing I found interesting while building this: most React tour libraries hav
 
 Tutorial: https://usertourkit.com/blog/add-product-tour-react-19
 
-Disclosure: I built Tour Kit, so take the recommendation with that context. The tutorial itself should be useful regardless of which library you choose — the React 19 patterns (ref-as-prop, async useTransition) apply to any tour implementation. Happy to answer questions.
+Disclosure: I built userTourKit, so take the recommendation with that context. The tutorial itself should be useful regardless of which library you choose — the React 19 patterns (ref-as-prop, async useTransition) apply to any tour implementation. Happy to answer questions.

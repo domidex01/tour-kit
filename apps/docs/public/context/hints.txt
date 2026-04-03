@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/hints Context File
-Version: 0.4.1 | Generated: 2026-04-02
+Version: 0.4.1 | Generated: 2026-04-03
 Paste this into your LLM to get accurate answers about @tour-kit/hints.
 =========================================================================
 
 OVERVIEW
 --------
-Persistent hints and hotspots for TourKit - works with or without Tailwind CSS
+Persistent hints and hotspots for userTourKit - works with or without Tailwind CSS
 
 INSTALLATION
 ------------

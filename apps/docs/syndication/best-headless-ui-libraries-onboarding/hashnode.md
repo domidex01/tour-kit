@@ -15,11 +15,11 @@ Most product tour libraries ship with tooltips you can't restyle, overlays that 
 
 We installed each library into a Vite 6 + React 19 + TypeScript 5.7 project and scored them on composition patterns, accessibility, bundle size, and React 19 compatibility.
 
-**Bias disclosure:** We built Tour Kit, so it's listed first. Take our #1 ranking with appropriate skepticism. Every claim is verifiable against npm, GitHub, and bundlephobia.
+**Bias disclosure:** We built userTourKit, so it's listed first. Take our #1 ranking with appropriate skepticism. Every claim is verifiable against npm, GitHub, and bundlephobia.
 
 | Library | Type | DOM tours | React 19 | Components | License | Best for |
 |---------|------|-----------|----------|------------|---------|----------|
-| Tour Kit | Headless tour library | Yes | Yes | 10 packages | MIT (core) | Full onboarding with your design system |
+| userTourKit | Headless tour library | Yes | Yes | 10 packages | MIT (core) | Full onboarding with your design system |
 | OnboardJS | Flow orchestrator | No | Yes | State machine | Open source | Non-DOM onboarding flows |
 | Radix Primitives | UI primitives | No | Yes | 28+ | MIT | Tour tooltip/popover rendering |
 | React Aria | Hooks library | No | Yes | 43+ | Apache 2.0 | Accessibility-first tour UI |
@@ -31,7 +31,7 @@ Full breakdown of each library with code examples and decision framework: [Read 
 
 ## The short version
 
-**Tour Kit** is the only library that combines headless rendering with DOM-aware tour features (element targeting, scroll management, highlighting) while supporting React 19. Core bundle under 8KB gzipped, 10 composable packages, `asChild` pattern from Radix.
+**userTourKit** is the only library that combines headless rendering with DOM-aware tour features (element targeting, scroll management, highlighting) while supporting React 19. Core bundle under 8KB gzipped, 10 composable packages, `asChild` pattern from Radix.
 
 **OnboardJS** handles flow orchestration (state machine, analytics plugins) but has no DOM awareness. Good for wizard-style flows, not guided UI walkthroughs.
 
@@ -39,9 +39,9 @@ Full breakdown of each library with code examples and decision framework: [Read 
 
 ## How to choose
 
-- Need guided tours with element highlighting? Tour Kit.
+- Need guided tours with element highlighting? userTourKit.
 - Need wizard/checklist flows? OnboardJS.
-- Already using Radix/shadcn? Pair Radix Primitives with Tour Kit's hooks.
+- Already using Radix/shadcn? Pair Radix Primitives with userTourKit's hooks.
 - Accessibility is a hard requirement? React Aria.
 - MUI team going headless? Base UI.
 - Multi-framework? Ark UI.

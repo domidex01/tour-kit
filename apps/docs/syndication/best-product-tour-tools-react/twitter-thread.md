@@ -16,13 +16,13 @@ That means you have to open-source your entire app or buy a commercial license. 
 
 **4/** React 19 is a mess for tour libraries. React Joyride just rewrote their whole library (v3) to drop class components. Shepherd.js works through a react-shepherd wrapper. Driver.js and Intro.js don't even have React bindings.
 
-Only User Tour Kit, OnboardJS, and Onborda support it natively.
+Only userTourKit, OnboardJS, and Onborda support it natively.
 
 **5/** The headless vs. opinionated split matters more than bundle size.
 
 Libraries like React Joyride ship their own tooltip UI with inline styles. If you're running Tailwind or shadcn/ui, you'll fight those styles constantly.
 
-Headless options (User Tour Kit, OnboardJS) render with your components.
+Headless options (userTourKit, OnboardJS) render with your components.
 
 **6/** SaaS vs. open-source comes down to who builds the tours.
 
@@ -35,4 +35,4 @@ No in-between exists yet.
 
 https://usertourkit.com/blog/best-product-tour-tools-react
 
-(Disclosure: I built User Tour Kit. Tried to be fair with every entry.)
+(Disclosure: I built userTourKit. Tried to be fair with every entry.)

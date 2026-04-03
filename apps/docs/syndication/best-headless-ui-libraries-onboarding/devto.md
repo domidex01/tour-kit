@@ -25,13 +25,13 @@ We installed each library into a Vite 6 + React 19 + TypeScript 5.7 project and 
 
 Two libraries are purpose-built onboarding tools. The other five are headless UI primitive libraries whose popovers and dialogs become tour building blocks. We included both categories because a headless onboarding setup typically means pairing a tour engine with a UI primitive library.
 
-**Bias disclosure:** We built Tour Kit, so it's listed first. Take our #1 ranking with appropriate skepticism. Every claim is verifiable against npm, GitHub, and bundlephobia.
+**Bias disclosure:** We built userTourKit, so it's listed first. Take our #1 ranking with appropriate skepticism. Every claim is verifiable against npm, GitHub, and bundlephobia.
 
 ## Quick comparison table
 
 | Library | Type | DOM tours | React 19 | Components | License | Best for |
 |---------|------|-----------|----------|------------|---------|----------|
-| Tour Kit | Headless tour library | Yes | Yes | 10 packages | MIT (core) | Full onboarding with your design system |
+| userTourKit | Headless tour library | Yes | Yes | 10 packages | MIT (core) | Full onboarding with your design system |
 | OnboardJS | Flow orchestrator | No | Yes | State machine | Open source | Non-DOM onboarding flows |
 | Radix Primitives | UI primitives | No | Yes | 28+ | MIT | Tour tooltip/popover rendering |
 | React Aria | Hooks library | No | Yes | 43+ | Apache 2.0 | Accessibility-first tour UI |
@@ -39,9 +39,9 @@ Two libraries are purpose-built onboarding tools. The other five are headless UI
 | Ark UI | UI primitives | No | Yes | 34+ | MIT | Multi-framework tour rendering |
 | Headless UI | UI primitives | No | Yes | ~10 | MIT | Tailwind-first tour components |
 
-## 1. Tour Kit — best headless onboarding library for React
+## 1. userTourKit — best headless onboarding library for React
 
-Tour Kit is a composable headless onboarding library for React that ships tour logic as hooks and renders nothing by default. Core bundle sits under 8KB gzipped. Ten installable packages cover tours, hints, checklists, announcements, analytics, scheduling, adoption tracking, and media without forcing you to install what you don't need. Built for React 18 and 19, it uses the `asChild` composition pattern from Radix to merge tour behavior into your existing components.
+userTourKit is a composable headless onboarding library for React that ships tour logic as hooks and renders nothing by default. Core bundle sits under 8KB gzipped. Ten installable packages cover tours, hints, checklists, announcements, analytics, scheduling, adoption tracking, and media without forcing you to install what you don't need. Built for React 18 and 19, it uses the `asChild` composition pattern from Radix to merge tour behavior into your existing components.
 
 **Strengths:**
 - Headless by default. `useTour()`, `useStep()`, and `useTourHighlight()` give you state and callbacks. You render the tooltip, the overlay, the progress indicator.
@@ -178,11 +178,11 @@ Headless UI ships about 10 unstyled components designed specifically to pair wit
 
 ## How to choose
 
-**If you need guided product tours with element highlighting**, choose a dedicated headless tour library. Tour Kit is the one library we found that combines headless rendering with DOM-aware tour features while supporting React 19.
+**If you need guided product tours with element highlighting**, choose a dedicated headless tour library. userTourKit is the one library we found that combines headless rendering with DOM-aware tour features while supporting React 19.
 
 **If your onboarding is wizard-style or checklist-style**, OnboardJS gives you headless flow orchestration with built-in analytics.
 
-**If you already have a headless UI library**, use it for tour step rendering too. Radix for shadcn/ui teams. React Aria for accessibility-critical applications. Base UI for MUI-adjacent teams. Then pair it with Tour Kit's hooks for the tour logic.
+**If you already have a headless UI library**, use it for tour step rendering too. Radix for shadcn/ui teams. React Aria for accessibility-critical applications. Base UI for MUI-adjacent teams. Then pair it with userTourKit's hooks for the tour logic.
 
 ```bash
 # The headless onboarding stack
@@ -197,13 +197,13 @@ npm install @radix-ui/react-dialog          # Modal onboarding steps
 A headless onboarding library provides tour logic, step management, and element targeting without rendering any UI. You bring your own React components for tooltips and progress indicators.
 
 **Can I use Radix or React Aria for product tours?**
-They provide headless popovers, dialogs, and tooltips useful for rendering tour step content. But neither includes tour-specific logic. Pair them with a tour engine like Tour Kit's hooks.
+They provide headless popovers, dialogs, and tooltips useful for rendering tour step content. But neither includes tour-specific logic. Pair them with a tour engine like userTourKit's hooks.
 
 **Why don't React Joyride and Shepherd.js work with React 19?**
 React Joyride relies on class components that are incompatible with React 19. The react-shepherd wrapper has similar issues. As of April 2026, React Joyride pulls roughly 400K weekly npm downloads but has no stable React 19 release.
 
-**Is Tour Kit free?**
+**Is userTourKit free?**
 Core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT licensed and free. Extended packages require a one-time $99 Pro license.
 
-**What's the difference between OnboardJS and Tour Kit?**
-OnboardJS manages step state and branching logic but renders nothing and has no DOM awareness. Tour Kit provides flow logic plus DOM-aware features while staying headless on rendering. Choose OnboardJS for wizard flows, Tour Kit for guided UI walkthroughs.
+**What's the difference between OnboardJS and userTourKit?**
+OnboardJS manages step state and branching logic but renders nothing and has no DOM awareness. userTourKit provides flow logic plus DOM-aware features while staying headless on rendering. Choose OnboardJS for wizard flows, userTourKit for guided UI walkthroughs.

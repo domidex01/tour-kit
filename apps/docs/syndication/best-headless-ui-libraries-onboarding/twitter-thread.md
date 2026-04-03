@@ -6,7 +6,7 @@
 
 **3/** Only 2 libraries do headless onboarding directly:
 
-- Tour Kit (ours): hooks + DOM awareness + asChild pattern, <8KB core
+- userTourKit (ours): hooks + DOM awareness + asChild pattern, <8KB core
 - OnboardJS: state machine flow orchestrator, but no DOM targeting
 
 The other 5 (Radix, React Aria, Base UI, Ark UI, Headless UI) are rendering primitives you'd pair with tour logic.

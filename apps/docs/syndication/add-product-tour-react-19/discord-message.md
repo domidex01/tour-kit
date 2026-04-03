@@ -6,6 +6,6 @@ Hey all — I wrote a tutorial on adding a product tour to a React 19 app. Cover
 
 https://usertourkit.com/blog/add-product-tour-react-19
 
-Uses Tour Kit, a headless tour library I built (under 8KB gzipped core). The React 19 patterns in the tutorial apply to any tour implementation though. Let me know if anything's unclear or if you've run into different issues with tours in React 19.
+Uses userTourKit, a headless tour library I built (under 8KB gzipped core). The React 19 patterns in the tutorial apply to any tour implementation though. Let me know if anything's unclear or if you've run into different issues with tours in React 19.
 
 *Originally published at usertourkit.com*

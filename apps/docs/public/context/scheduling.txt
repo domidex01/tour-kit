@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/scheduling Context File
-Version: 0.1.0 | Generated: 2026-04-02
+Version: 0.1.0 | Generated: 2026-04-03
 Paste this into your LLM to get accurate answers about @tour-kit/scheduling.
 =========================================================================
 
 OVERVIEW
 --------
-Time-based scheduling utilities for TourKit tours and announcements
+Time-based scheduling utilities for userTourKit tours and announcements
 
 INSTALLATION
 ------------

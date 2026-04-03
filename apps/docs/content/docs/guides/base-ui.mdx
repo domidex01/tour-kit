@@ -10,7 +10,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 # Base UI Support
 
-TourKit supports both Radix UI (default) and Base UI for headless component primitives. This allows you to choose your preferred headless UI library while using the same TourKit components.
+userTourKit supports both Radix UI (default) and Base UI for headless component primitives. This allows you to choose your preferred headless UI library while using the same userTourKit components.
 
 ## Installation
 
@@ -65,7 +65,7 @@ function App() {
 
 ## Available Packages
 
-Base UI support is available in all TourKit packages:
+Base UI support is available in all userTourKit packages:
 
 | Package | Components with Base UI support |
 |---------|--------------------------------|
@@ -78,7 +78,7 @@ Base UI support is available in all TourKit packages:
 
 ### The `asChild` Pattern
 
-TourKit components use the `asChild` pattern to allow custom element composition:
+userTourKit components use the `asChild` pattern to allow custom element composition:
 
 ```tsx
 // Radix UI style - passes an element as child
@@ -96,7 +96,7 @@ The `UILibraryProvider` automatically switches between these patterns based on t
 
 ### UnifiedSlot Component
 
-Under the hood, TourKit uses a `UnifiedSlot` component that handles both patterns:
+Under the hood, userTourKit uses a `UnifiedSlot` component that handles both patterns:
 
 - **Radix UI mode**: Clones the child element and merges props (like `@radix-ui/react-slot`)
 - **Base UI mode**: Calls the render prop function with props

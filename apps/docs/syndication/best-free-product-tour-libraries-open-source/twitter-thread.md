@@ -24,11 +24,11 @@ The bar is shockingly low.
 
 React Joyride ships inline-styled tooltips. If you use Tailwind or shadcn/ui, you'll fight those styles constantly.
 
-Headless options (User Tour Kit, OnboardJS) render with your components instead.
+Headless options (userTourKit, OnboardJS) render with your components instead.
 
 **6/** Quick decision guide:
 
-- Design system team? Headless (User Tour Kit, OnboardJS)
+- Design system team? Headless (userTourKit, OnboardJS)
 - Need it working in 10 min? React Joyride
 - Multi-framework? Shepherd.js
 - Just need highlights? Driver.js (5KB)
@@ -39,4 +39,4 @@ Headless options (User Tour Kit, OnboardJS) render with your components instead.
 
 https://usertourkit.com/blog/best-free-product-tour-libraries-open-source
 
-(Disclosure: I built User Tour Kit. Tried to be fair with every entry -- all data points are verifiable on npm, GitHub, and bundlephobia.)
+(Disclosure: I built userTourKit. Tried to be fair with every entry -- all data points are verifiable on npm, GitHub, and bundlephobia.)

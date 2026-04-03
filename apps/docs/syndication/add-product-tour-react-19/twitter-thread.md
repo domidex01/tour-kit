@@ -6,7 +6,7 @@ I wrote a tutorial on adding a product tour to a React 19 app in 5 minutes using
 
 **2/** React 19 dropped the forwardRef requirement. Refs are just props now.
 
-That means tour target elements don't need wrapper components. Pass a ref directly to your element and Tour Kit picks it up. Zero boilerplate.
+That means tour target elements don't need wrapper components. Pass a ref directly to your element and userTourKit picks it up. Zero boilerplate.
 
 **3/** The bigger win: async useTransition for multi-page tours.
 
@@ -27,16 +27,16 @@ No spinners. No layout shift. isPending gives you a loading state for free.
 - Dashboard content area
 - Settings panel
 
-Uses Tour Kit (headless, under 8KB gzipped core). Works with shadcn/ui, Radix, Tailwind, anything.
+Uses userTourKit (headless, under 8KB gzipped core). Works with shadcn/ui, Radix, Tailwind, anything.
 
 **5/** React 19 feature support comparison:
 
-- Ref as prop: Tour Kit supports it. React Joyride still uses forwardRef internally.
+- Ref as prop: userTourKit supports it. React Joyride still uses forwardRef internally.
 - Async useTransition: Works with useTour().next() inside startTransition.
 - Server Components: Only TourProvider needs 'use client'.
 - Context as provider: No more .Provider suffix.
 
-**6/** The honest limitation: Tour Kit has no visual builder.
+**6/** The honest limitation: userTourKit has no visual builder.
 
 Non-technical teammates can't create tours without developers. If that's a dealbreaker, Appcues or Userpilot give you drag-and-drop (at $249/month).
 
@@ -48,4 +48,4 @@ https://usertourkit.com/blog/add-product-tour-react-19
 
 5 minutes from npm install to a working tour. Vite 6 + React 19.1 + TypeScript 5.7.
 
-(Disclosure: I built Tour Kit.)
+(Disclosure: I built userTourKit.)

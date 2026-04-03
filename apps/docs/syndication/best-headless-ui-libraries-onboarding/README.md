@@ -5,7 +5,7 @@
 **Generated:** 2026-04-02
 
 ## Day 0 — Publish
-- [ ] Publish on Tour Kit blog
+- [ ] Publish on userTourKit blog
 - [ ] Submit URL for indexing in Google Search Console
 - [ ] Post Twitter/X thread (twitter-thread.md)
 - [ ] Post on LinkedIn (linkedin-post.md)

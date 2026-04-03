@@ -1,4 +1,4 @@
-# userTourKit v0.3.0 — Generated 2026-04-02T16:42:42Z
+# userTourKit v0.3.0 — Generated 2026-04-03T08:08:19Z
 
 # Feature Adoption Tracking
 
@@ -4262,7 +4262,7 @@ The full content of all userTourKit documentation in a single file. Use this whe
 Paste the llms-full.txt URL into your conversation:
 
 ```
-Read https://tour-kit-docs.vercel.app/llms-full.txt and use it as context for Tour Kit questions
+Read https://tour-kit-docs.vercel.app/llms-full.txt and use it as context for userTourKit questions
 ```
 
 Or create a Custom GPT with the file as a knowledge source.
@@ -4272,7 +4272,7 @@ Or create a Custom GPT with the file as a knowledge source.
 In Claude Code, reference the documentation:
 
 ```
-Fetch https://tour-kit-docs.vercel.app/llms.txt to understand the Tour Kit API
+Fetch https://tour-kit-docs.vercel.app/llms.txt to understand the userTourKit API
 ```
 
 In Claude.ai, paste the content of llms-full.txt into your conversation for full context.
@@ -7192,7 +7192,7 @@ View tour activity on user profiles:
 1. Go to Users > User Profile
 2. Select a user
 3. View Events tab
-4. Filter by "TourKit:" to see all tour events
+4. Filter by "userTourKit:" to see all tour events
 
 ## Retention Analysis
 
@@ -27691,6 +27691,167 @@ function App() {
 
 ---
 
+# Licensing
+
+> Set up userTourKit Pro licensing with Polar.sh — installation, configuration, and CI/CD
+
+## Overview
+
+userTourKit uses a **Free + Pro** licensing model:
+
+- **Free packages** (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and never require a license key.
+- **Pro packages** (`@tour-kit/adoption`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/ai`) require a valid license key for production use.
+
+Without a valid license, pro packages still render and function normally but display an "UNLICENSED" watermark overlay and a console warning. There is never a crash or blank screen.
+
+## Getting a License Key
+
+1. Visit [usertourkit.com/pricing](https://usertourkit.com/pricing) and choose the Pro plan.
+2. Complete the checkout via Polar.sh.
+3. Your license key arrives via email with a `TOURKIT-` prefix (e.g., `TOURKIT-abc123-def456`).
+
+## Installation
+
+### 1. Set up npm authentication
+
+Pro packages are published with restricted access on npm. Add the following to your `.npmrc` at the repo root:
+
+```text
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+```
+
+This file is safe to commit — the token value comes from your environment, not the file.
+
+### 2. Install the license package
+
+```bash
+pnpm add @tour-kit/license
+```
+
+### 3. Set the environment variable
+
+</Tabs>
+
+## Configuration
+
+Wrap your app (or the section using pro features) with `
+  )
+}
+```
+</Tab>
+
+  )
+}
+```
+</Tab>
+</Tabs>
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `organizationId` | `string` | Yes | Your Polar organization ID |
+| `licenseKey` | `string` | Yes | License key with `TOURKIT-` prefix |
+| `onValidate` | `(state: LicenseState) => void` | No | Called after validation completes |
+| `onError` | `(error: Error) => void` | No | Called on validation error |
+
+## Using LicenseGate
+
+Wrap pro components with `
+    </div>
+  )
+}
+```
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `require` | `'pro'` | Yes | Required license tier |
+| `fallback` | `ReactNode` | No | Shown when license is invalid |
+| `loading` | `ReactNode` | No | Shown during validation |
+
+`
+
+## CI/CD Setup
+
+### GitHub Actions
+
+Add `NPM_TOKEN` to your repository secrets, then reference it in your workflow:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Required for installing restricted @tour-kit/* pro packages
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+```
+
+### Vercel
+
+Add `NPM_TOKEN` as an environment variable in your Vercel project settings. Vercel automatically reads `.npmrc` during the build.
+
+### Netlify
+
+Add `NPM_TOKEN` as an environment variable in your Netlify site settings under **Build & deploy > Environment**.
+
+## Hooks Reference
+
+### `useLicense()`
+
+Returns the full license context. Must be used within `<LicenseProvider>`.
+
+```tsx
+const { state, refresh } = useLicense()
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `state.status` | `'valid' \| 'invalid' \| 'expired' \| 'revoked' \| 'loading' \| 'error'` | Current license status |
+| `state.tier` | `'free' \| 'pro'` | License tier |
+| `state.activations` | `number` | Number of activated domains |
+| `state.maxActivations` | `number` | Maximum allowed activations |
+| `state.domain` | `string \| null` | Current activated domain |
+| `state.expiresAt` | `string \| null` | Expiration date (ISO string) |
+| `refresh` | `() => Promise<void>` | Re-validate the license (clears cache) |
+
+### `useIsPro()`
+
+Returns `true` when license tier is `'pro'` and status is `'valid'`.
+
+```tsx
+const isPro = useIsPro()
+```
+
+## FAQ
+
+### Do free packages need a license?
+
+No. `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` are MIT-licensed and work without any license key.
+
+### What happens if my key expires?
+
+The watermark appears on pro components and a console warning is logged. Components continue to render and function normally — there is never a crash or blank screen.
+
+### How many domains can I activate?
+
+Each license key supports up to 5 domain activations. You can deactivate a domain to free up a slot.
+
+### Does localhost count as an activation?
+
+No. Development environments (`localhost`, `127.0.0.1`, `*.local`) are automatically bypassed and do not consume an activation slot.
+
+### Can I use one key for staging + production?
+
+Yes. Each environment uses a separate domain activation. For example, `staging.example.com` and `example.com` would use 2 of your 5 activation slots.
+
+### What is the `TOURKIT-` prefix?
+
+All userTourKit license keys issued via Polar.sh have a `TOURKIT-` prefix. This prefix is required for validation to work.
+
+---
+
 # Media
 
 > Embed YouTube, Vimeo, Loom, Wistia, GIF, and Lottie media in tours with automatic platform detection and accessibility
@@ -34445,7 +34606,7 @@ Reset to defaults:
 
 # Custom Components
 
-> Build fully custom tour card, overlay, and navigation components using userTourKit hooks and headless primitives
+> Build fully custom tour card, overlay, and navigation components using Tour Kit hooks and headless primitives
 
 # Custom Components
 

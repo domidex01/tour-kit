@@ -11,7 +11,7 @@
 
 Hi,
 
-I wrote a step-by-step tutorial on adding a product tour to a React 19 app using Tour Kit (headless, under 8KB gzipped). The interesting part is how React 19's new primitives change the implementation:
+I wrote a step-by-step tutorial on adding a product tour to a React 19 app using userTourKit (headless, under 8KB gzipped). The interesting part is how React 19's new primitives change the implementation:
 
 - ref-as-prop eliminates the forwardRef wrappers that older tour libraries still require
 - async useTransition lets you await route navigation before advancing tour steps (no useEffect chains)
@@ -21,7 +21,7 @@ I wrote a step-by-step tutorial on adding a product tour to a React 19 app using
 
 Link: https://usertourkit.com/blog/add-product-tour-react-19
 
-Disclosure: I built Tour Kit. The React 19 patterns in the tutorial apply to any tour implementation.
+Disclosure: I built userTourKit. The React 19 patterns in the tutorial apply to any tour implementation.
 
 Thanks,
 Domi
@@ -37,7 +37,7 @@ Wrote a tutorial on adding a product tour to a React 19 app that covers two patt
 1. Using ref-as-prop for tour target elements (no forwardRef needed — most tour libraries haven't adopted this yet)
 2. Async useTransition for multi-page tour navigation (await router.push, then advance the step in one callback)
 
-The tutorial uses Tour Kit (a headless library I built), but the React 19 patterns apply generally. Covers Vite 6 + React 19.1 + TypeScript 5.7 setup.
+The tutorial uses userTourKit (a headless library I built), but the React 19 patterns apply generally. Covers Vite 6 + React 19.1 + TypeScript 5.7 setup.
 
 Link: https://usertourkit.com/blog/add-product-tour-react-19
 

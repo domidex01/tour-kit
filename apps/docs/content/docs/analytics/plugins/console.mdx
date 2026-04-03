@@ -42,7 +42,7 @@ export function Providers({ children }) {
   type={{
     prefix: {
       type: 'string',
-      default: '"🎯 TourKit"',
+      default: '"🎯 userTourKit"',
       description: 'Prefix for all log messages'
     },
     collapsed: {
@@ -117,7 +117,7 @@ consolePlugin({
 Each event is logged as a group with the following structure:
 
 ```
-🎯 TourKit tour_started
+🎯 userTourKit tour_started
   Tour: onboarding
   Step: welcome (0/5)
   Duration: 1234ms
@@ -142,7 +142,7 @@ analytics.track('step_completed', {
 Console output:
 
 ```
-🎯 TourKit step_completed
+🎯 userTourKit step_completed
   Tour: onboarding
   Step: welcome (0/5)
   Duration: 2340ms
@@ -213,7 +213,7 @@ analytics.identify('user-123', {
 Console output:
 
 ```
-🎯 TourKit User Identified: user-123
+🎯 userTourKit User Identified: user-123
 { email: 'user@example.com', plan: 'pro' }
 ```
 
@@ -222,7 +222,7 @@ Console output:
 ### Tour Started
 
 ```
-🎯 TourKit tour_started
+🎯 userTourKit tour_started
   Tour: product-tour
   Duration: 0ms
   Metadata: { totalSteps: 5 }
@@ -232,7 +232,7 @@ Console output:
 ### Step Viewed
 
 ```
-🎯 TourKit step_viewed
+🎯 userTourKit step_viewed
   Tour: product-tour
   Step: create-project (1/5)
   Metadata: { source: 'dashboard' }
@@ -242,7 +242,7 @@ Console output:
 ### Hint Clicked
 
 ```
-🎯 TourKit hint_clicked
+🎯 userTourKit hint_clicked
   Tour: keyboard-shortcuts-hint
   Metadata: { position: 'bottom-right' }
   Timestamp: 2024-01-20T10:30:05.000Z

@@ -9,7 +9,7 @@ Most "best product tour" roundups mix SaaS platforms charging $249/month with op
 
 We installed each library into a Vite 6 + React 19 + TypeScript 5.7 project and built a 5-step tour targeting a sidebar, a button, and a modal. We measured bundle size via bundlephobia, checked TypeScript coverage, tested keyboard navigation, and verified the license in `package.json`.
 
-**Bias disclosure:** We built User Tour Kit, so it's listed first. We've tried to be fair with every entry. Every claim below is verifiable against npm, GitHub, and bundlephobia.
+**Bias disclosure:** We built userTourKit, so it's listed first. We've tried to be fair with every entry. Every claim below is verifiable against npm, GitHub, and bundlephobia.
 
 ## How we evaluated these libraries
 
@@ -28,7 +28,7 @@ We weighted accessibility at 20% because accessible interactive components are a
 
 | Library | Bundle (gzip) | React 19 | TypeScript | License | Accessibility | Best for |
 |---|---|---|---|---|---|---|
-| User Tour Kit | Under 8KB core | Yes | Strict | MIT | WCAG 2.1 AA | Design system teams |
+| userTourKit | Under 8KB core | Yes | Strict | MIT | WCAG 2.1 AA | Design system teams |
 | React Joyride | ~30KB | v3 only | Built-in (v3) | MIT | Partial | Quick drop-in tours |
 | Shepherd.js | ~25KB | Via wrapper | Built-in | MIT | Keyboard nav | Multi-framework teams |
 | Driver.js | ~5KB | Via hooks | Built-in | MIT | Minimal | Lightweight highlights |
@@ -40,9 +40,9 @@ We weighted accessibility at 20% because accessible interactive components are a
 
 Data verified April 2026. Sources: npm, GitHub, bundlephobia, official docs.
 
-## 1. User Tour Kit: best for teams with a design system
+## 1. userTourKit: best for teams with a design system
 
-User Tour Kit is a headless React product tour library that ships as 10 composable packages at under 8KB gzipped for the core. It renders with your existing components instead of shipping its own UI. React 18 and 19 are supported natively, with TypeScript strict mode throughout. The library includes tours, hints, checklists, announcements, analytics, and scheduling in separate packages installed individually.
+userTourKit is a headless React product tour library that ships as 10 composable packages at under 8KB gzipped for the core. It renders with your existing components instead of shipping its own UI. React 18 and 19 are supported natively, with TypeScript strict mode throughout. The library includes tours, hints, checklists, announcements, analytics, and scheduling in separate packages installed individually.
 
 **Strengths:**
 - 10 packages installed individually: you ship only what you use
@@ -204,11 +204,11 @@ Almost no open-source tour library claims WCAG 2.1 AA compliance. Shepherd.js me
 
 For organizations with accessibility requirements -- and that includes any enterprise serving public-sector clients or operating in the EU -- this gap is a compliance risk.
 
-User Tour Kit scores Lighthouse 100 for accessibility with focus management, ARIA roles, keyboard navigation, and `prefers-reduced-motion` support, tested with axe-core on every build.
+userTourKit scores Lighthouse 100 for accessibility with focus management, ARIA roles, keyboard navigation, and `prefers-reduced-motion` support, tested with axe-core on every build.
 
 ## How to choose the right library
 
-**Choose a headless library (User Tour Kit, OnboardJS)** if your team has frontend developers and you want tour UI that matches your design system exactly.
+**Choose a headless library (userTourKit, OnboardJS)** if your team has frontend developers and you want tour UI that matches your design system exactly.
 
 **Choose an opinionated library (React Joyride, Shepherd.js)** if you need a working tour quickly and the default tooltip UI is acceptable.
 
@@ -226,7 +226,7 @@ For enterprise teams evaluating these libraries, additional factors beyond the c
 
 ### What is the best free product tour library for React in 2026?
 
-User Tour Kit and React Joyride are the two strongest free options. User Tour Kit is headless (under 8KB, WCAG 2.1 AA, works with any design system), while React Joyride ships pre-built UI for faster setup. Both are MIT licensed and support React 19.
+userTourKit and React Joyride are the two strongest free options. userTourKit is headless (under 8KB, WCAG 2.1 AA, works with any design system), while React Joyride ships pre-built UI for faster setup. Both are MIT licensed and support React 19.
 
 ### Is Intro.js really free?
 
@@ -234,12 +234,12 @@ Intro.js uses AGPL-3.0, which means commercial projects must either open-source 
 
 ### Which product tour library has the smallest bundle size?
 
-Driver.js at approximately 5KB gzipped. User Tour Kit's core is under 8KB. React Joyride is the heaviest at roughly 30KB.
+Driver.js at approximately 5KB gzipped. userTourKit's core is under 8KB. React Joyride is the heaviest at roughly 30KB.
 
 ### Do any open-source tour libraries support WCAG 2.1 AA?
 
-As of April 2026, User Tour Kit is the only open-source product tour library that claims WCAG 2.1 AA compliance with documented ARIA roles, focus management, keyboard navigation, and `prefers-reduced-motion` support.
+As of April 2026, userTourKit is the only open-source product tour library that claims WCAG 2.1 AA compliance with documented ARIA roles, focus management, keyboard navigation, and `prefers-reduced-motion` support.
 
 ### Can I use these libraries with Next.js App Router?
 
-React Joyride, User Tour Kit, OnboardJS, and Reactour all work with Next.js App Router. Onborda is built specifically for it. Shepherd.js and Driver.js work via dynamic imports with `'use client'` directives. Tour logic must run on the client.
+React Joyride, userTourKit, OnboardJS, and Reactour all work with Next.js App Router. Onborda is built specifically for it. Shepherd.js and Driver.js work via dynamic imports with `'use client'` directives. Tour logic must run on the client.
