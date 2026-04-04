@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/announcements Context File
-Version: 0.1.0 | Generated: 2026-04-03
+Version: 0.1.0 | Generated: 2026-04-04
 Paste this into your LLM to get accurate answers about @tour-kit/announcements.
 =========================================================================
 
 OVERVIEW
 --------
-Product announcements for userTourKit - Modal, Slideout, Banner, Toast, and Spotlight variants
+Product announcements for TourKit - Modal, Slideout, Banner, Toast, and Spotlight variants
 
 INSTALLATION
 ------------
@@ -14,7 +14,6 @@ INSTALLATION
     pnpm add @tour-kit/announcements
 
 Peer dependencies:
-    @tour-kit/license: >=0.0.1
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
     tailwindcss: ^3.4.0 || ^4.0.0

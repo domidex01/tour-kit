@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { AnnouncementScheduler } from '../core/scheduler'
-import { ProWatermark } from '../lib/pro-watermark'
+import { ProGate } from '@tour-kit/license'
 import type { AnnouncementConfig, AnnouncementState, DismissalReason } from '../types/announcement'
 import type { AnnouncementsContextValue, AnnouncementsProviderProps } from '../types/context'
 import type { QueueConfig } from '../types/queue'
@@ -546,8 +546,10 @@ export function AnnouncementsProvider({
   )
 
   return (
-    <AnnouncementsContext.Provider value={contextValue}>
-      <ProWatermark>{children}</ProWatermark>
-    </AnnouncementsContext.Provider>
+    <ProGate package="@tour-kit/announcements">
+      <AnnouncementsContext.Provider value={contextValue}>
+        {children}
+      </AnnouncementsContext.Provider>
+    </ProGate>
   )
 }

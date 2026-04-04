@@ -404,8 +404,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@tour-kit/license':
-        specifier: '>=0.0.1'
-        version: 0.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: workspace:*
+        version: link:../license
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -465,8 +465,8 @@ importers:
         specifier: '>=0.1.0'
         version: 0.3.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tour-kit/license':
-        specifier: '>=0.0.1'
-        version: 0.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: workspace:*
+        version: link:../license
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -526,8 +526,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@tour-kit/license':
-        specifier: '>=0.0.1'
-        version: 0.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: workspace:*
+        version: link:../license
     devDependencies:
       '@amplitude/analytics-browser':
         specifier: ^2.36.7
@@ -593,8 +593,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@tour-kit/license':
-        specifier: '>=0.0.1'
-        version: 0.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: workspace:*
+        version: link:../license
       '@tour-kit/scheduling':
         specifier: workspace:*
         version: link:../scheduling
@@ -669,8 +669,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@tour-kit/license':
-        specifier: '>=0.0.1'
-        version: 0.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: workspace:*
+        version: link:../license
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -885,8 +885,8 @@ importers:
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
       '@tour-kit/license':
-        specifier: '>=0.0.1'
-        version: 0.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: workspace:*
+        version: link:../license
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1013,8 +1013,8 @@ importers:
   packages/scheduling:
     dependencies:
       '@tour-kit/license':
-        specifier: '>=0.0.1'
-        version: 0.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: workspace:*
+        version: link:../license
     devDependencies:
       '@testing-library/react':
         specifier: 'catalog:'
@@ -2933,12 +2933,6 @@ packages:
       react: ^18.0.0 || >=19.2.0
       react-dom: ^18.0.0 || >=19.2.0
 
-  '@tour-kit/license@0.0.1':
-    resolution: {integrity: sha512-WpzJsjbM99nnHqj2dm4GsxzTDfAbb61IF1Xc67LTw3M7LPKOwdaGQlhWAaJB1mJnsyM6fov8SExPLkQO5F7kAw==}
-    peerDependencies:
-      react: ^18.0.0 || >=19.2.0
-      react-dom: ^18.0.0 || >=19.2.0
-
   '@turbo/darwin-64@2.8.20':
     resolution: {integrity: sha512-FQ9EX1xMU5nbwjxXxM3yU88AQQ6Sqc6S44exPRroMcx9XZHqqppl5ymJF0Ig/z3nvQNwDmz1Gsnvxubo+nXWjQ==}
     cpu: [x64]
@@ -4230,9 +4224,6 @@ packages:
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
-
-  jose@5.10.0:
-    resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
 
   jose@6.2.2:
     resolution: {integrity: sha512-d7kPDd34KO/YnzaDOlikGpOurfF0ByC2sEV4cANCtdqLlTfBlw2p14O/5d/zv40gJPbIQxfES3nSx1/oYNyuZQ==}
@@ -7802,12 +7793,6 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@tour-kit/license@0.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      jose: 5.10.0
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-
   '@turbo/darwin-64@2.8.20':
     optional: true
 
@@ -9194,8 +9179,6 @@ snapshots:
   jiti@1.21.7: {}
 
   jiti@2.6.1: {}
-
-  jose@5.10.0: {}
 
   jose@6.2.2: {}
 

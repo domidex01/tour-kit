@@ -1,10 +1,10 @@
 import type * as React from 'react'
-import { ProWatermark } from '../lib/pro-watermark'
+import { ProGate } from '@tour-kit/license'
 
 interface ScheduleGateProps {
   children: React.ReactNode
 }
 
 export function ScheduleGate({ children }: ScheduleGateProps) {
-  return <ProWatermark>{children}</ProWatermark>
+  return <ProGate package="@tour-kit/scheduling">{children}</ProGate>
 }

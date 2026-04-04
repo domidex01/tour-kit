@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ProWatermark } from '../lib/pro-watermark'
+import { ProGate } from '@tour-kit/license'
 import type { AnalyticsConfig } from '../types/plugin'
 import { type TourAnalytics, createAnalytics } from './tracker'
 
@@ -44,9 +44,11 @@ export function AnalyticsProvider({ config, children }: AnalyticsProviderProps) 
   }, [])
 
   return (
-    <AnalyticsContext.Provider value={analyticsRef.current}>
-      <ProWatermark>{children}</ProWatermark>
-    </AnalyticsContext.Provider>
+    <ProGate package="@tour-kit/analytics">
+      <AnalyticsContext.Provider value={analyticsRef.current}>
+        {children}
+      </AnalyticsContext.Provider>
+    </ProGate>
   )
 }
 

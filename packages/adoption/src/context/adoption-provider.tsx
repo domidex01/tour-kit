@@ -9,7 +9,7 @@ import {
   snoozeNudge as snoozeNudgeState,
   trackFeatureUsage,
 } from '../engine'
-import { ProWatermark } from '../lib/pro-watermark'
+import { ProGate } from '@tour-kit/license'
 import { createStorageAdapter } from '../storage'
 import type {
   AdoptionProviderProps,
@@ -177,8 +177,10 @@ export function AdoptionProvider({
   }
 
   return (
-    <AdoptionContext.Provider value={contextValue}>
-      <ProWatermark>{children}</ProWatermark>
-    </AdoptionContext.Provider>
+    <ProGate package="@tour-kit/adoption">
+      <AdoptionContext.Provider value={contextValue}>
+        {children}
+      </AdoptionContext.Provider>
+    </ProGate>
   )
 }

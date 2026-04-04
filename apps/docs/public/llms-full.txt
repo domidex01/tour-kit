@@ -1,4 +1,4 @@
-# userTourKit v0.3.0 — Generated 2026-04-03T08:08:19Z
+# userTourKit v0.3.0 — Generated 2026-04-04T03:47:52Z
 
 # Feature Adoption Tracking
 
@@ -5565,9 +5565,9 @@ See [Custom Plugins](/docs/analytics/plugins/custom) for a complete guide on cre
 
 | Plugin | Peer Dependency | Event Prefix | Auto-Flush | Batching |
 |--------|-----------------|--------------|------------|----------|
-| Console | None | `🎯 TourKit` | N/A | No |
+| Console | None | `🎯 userTourKit` | N/A | No |
 | PostHog | `posthog-js` | `tourkit_` | Yes | Yes |
-| Mixpanel | `mixpanel-browser` | `TourKit: ` | Yes | Yes |
+| Mixpanel | `mixpanel-browser` | `userTourKit: ` | Yes | Yes |
 | Amplitude | `@amplitude/analytics-browser` | `tourkit_` | Manual | Yes |
 | Google Analytics | gtag.js | `tourkit_` | Yes | Yes |
 
@@ -5950,7 +5950,7 @@ consolePlugin({
 Each event is logged as a group with the following structure:
 
 ```
-🎯 TourKit tour_started
+🎯 userTourKit tour_started
   Tour: onboarding
   Step: welcome (0/5)
   Duration: 1234ms
@@ -5975,7 +5975,7 @@ analytics.track('step_completed', {
 Console output:
 
 ```
-🎯 TourKit step_completed
+🎯 userTourKit step_completed
   Tour: onboarding
   Step: welcome (0/5)
   Duration: 2340ms
@@ -6032,7 +6032,7 @@ analytics.identify('user-123', {
 Console output:
 
 ```
-🎯 TourKit User Identified: user-123
+🎯 userTourKit User Identified: user-123
 { email: 'user@example.com', plan: 'pro' }
 ```
 
@@ -6041,7 +6041,7 @@ Console output:
 ### Tour Started
 
 ```
-🎯 TourKit tour_started
+🎯 userTourKit tour_started
   Tour: product-tour
   Duration: 0ms
   Metadata: { totalSteps: 5 }
@@ -6051,7 +6051,7 @@ Console output:
 ### Step Viewed
 
 ```
-🎯 TourKit step_viewed
+🎯 userTourKit step_viewed
   Tour: product-tour
   Step: create-project (1/5)
   Metadata: { source: 'dashboard' }
@@ -6061,7 +6061,7 @@ Console output:
 ### Hint Clicked
 
 ```
-🎯 TourKit hint_clicked
+🎯 userTourKit hint_clicked
   Tour: keyboard-shortcuts-hint
   Metadata: { position: 'bottom-right' }
   Timestamp: 2024-01-20T10:30:05.000Z
@@ -7041,13 +7041,13 @@ Install the Mixpanel peer dependency:
 
 ## Event Names
 
-Events are prefixed with `TourKit: ` by default:
+Events are prefixed with `userTourKit: ` by default:
 
 | userTourKit Event | Mixpanel Event Name |
 |----------------|-------------------|
-| `tour_started` | `TourKit: tour_started` |
-| `step_viewed` | `TourKit: step_viewed` |
-| `hint_clicked` | `TourKit: hint_clicked` |
+| `tour_started` | `userTourKit: tour_started` |
+| `step_viewed` | `userTourKit: step_viewed` |
+| `hint_clicked` | `userTourKit: hint_clicked` |
 
 ### Custom Prefix
 
@@ -7157,10 +7157,10 @@ Create a funnel to analyze tour completion:
 
 1. Go to Insights > Funnels
 2. Add steps:
-   - `TourKit: tour_started`
-   - `TourKit: step_viewed` (filter: step_index = 0)
-   - `TourKit: step_viewed` (filter: step_index = 1)
-   - `TourKit: tour_completed`
+   - `userTourKit: tour_started`
+   - `userTourKit: step_viewed` (filter: step_index = 0)
+   - `userTourKit: step_viewed` (filter: step_index = 1)
+   - `userTourKit: tour_completed`
 3. Group by: `tour_id`
 
 ### Step Duration Analysis
@@ -7168,7 +7168,7 @@ Create a funnel to analyze tour completion:
 Analyze how long users spend on each step:
 
 1. Go to Insights > Insights
-2. Event: `TourKit: step_completed`
+2. Event: `userTourKit: step_completed`
 3. Aggregate: Average of `duration_ms`
 4. Group by: `step_id`
 
@@ -7177,7 +7177,7 @@ Analyze how long users spend on each step:
 Create cohorts based on tour behavior:
 
 1. Go to Cohorts > Create Cohort
-2. Definition: `TourKit: tour_completed` where `tour_id` = "onboarding"
+2. Definition: `userTourKit: tour_completed` where `tour_id` = "onboarding"
 3. Name: "Completed Onboarding"
 
 Use this cohort to:
@@ -7199,7 +7199,7 @@ View tour activity on user profiles:
 Track retention based on tour completion:
 
 1. Go to Insights > Retention
-2. First event: `TourKit: tour_started`
+2. First event: `userTourKit: tour_started`
 3. Return event: Any event
 4. Segment by: `tour_id`
 
@@ -7898,7 +7898,7 @@ interface MixpanelPluginOptions {
   token: string
   /** Enable debug mode */
   debug?: boolean
-  /** Event name prefix (default: TourKit: ) */
+  /** Event name prefix (default: userTourKit: ) */
   eventPrefix?: string
 }
 
@@ -17906,7 +17906,7 @@ console.log(`${locked.length} tasks locked`);
 
 # @tour-kit/core
 
-The core package contains all the headless logic for TourKit.
+The core package contains all the headless logic for userTourKit.
 
 ## Installation
 
@@ -22017,7 +22017,7 @@ userTourKit provides a flexible foundation for building:
 
 ## Peer Dependencies
 
-TourKit requires React 18 or 19:
+userTourKit requires React 18 or 19:
 
 ```json
 {
@@ -22061,7 +22061,7 @@ TourKit requires React 18 or 19:
 
 # TypeScript
 
-TourKit is written in TypeScript and provides full type definitions.
+userTourKit is written in TypeScript and provides full type definitions.
 
 ## Type Imports
 
@@ -22122,7 +22122,7 @@ if (currentStep?.data?.videoUrl) {
 
 ## Strict Mode Compatibility
 
-TourKit is fully compatible with React Strict Mode and follows all TypeScript strict mode guidelines:
+userTourKit is fully compatible with React Strict Mode and follows all TypeScript strict mode guidelines:
 
 ```json title="tsconfig.json"
 {
@@ -24390,7 +24390,7 @@ frequency: {
 
 # Base UI Support
 
-TourKit supports both Radix UI (default) and Base UI for headless component primitives. This allows you to choose your preferred headless UI library while using the same TourKit components.
+userTourKit supports both Radix UI (default) and Base UI for headless component primitives. This allows you to choose your preferred headless UI library while using the same userTourKit components.
 
 ## Installation
 
@@ -24418,7 +24418,7 @@ function App() {
 
 ## Available Packages
 
-Base UI support is available in all TourKit packages:
+Base UI support is available in all userTourKit packages:
 
 | Package | Components with Base UI support |
 |---------|--------------------------------|
@@ -24431,7 +24431,7 @@ Base UI support is available in all TourKit packages:
 
 ### The `asChild` Pattern
 
-TourKit components use the `asChild` pattern to allow custom element composition:
+userTourKit components use the `asChild` pattern to allow custom element composition:
 
 ```tsx
 // Radix UI style - passes an element as child
@@ -24444,7 +24444,7 @@ The `UILibraryProvider` automatically switches between these patterns based on t
 
 ### UnifiedSlot Component
 
-Under the hood, TourKit uses a `UnifiedSlot` component that handles both patterns:
+Under the hood, userTourKit uses a `UnifiedSlot` component that handles both patterns:
 
 - **Radix UI mode**: Clones the child element and merges props (like `@radix-ui/react-slot`)
 - **Base UI mode**: Calls the render prop function with props
@@ -27631,16 +27631,16 @@ When you update a hint's content significantly, consider changing its ID:
 
 ---
 
-# TourKit
+# userTourKit
 
 > userTourKit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage
 
-# TourKit
+# userTourKit
 
 A headless, accessible, and beautifully styled product tour library for React.
 Works seamlessly with shadcn/ui and Tailwind CSS.
 
-## Why TourKit?
+## Why userTourKit?
 
   }
     href="/docs/guides/accessibility"
@@ -34466,7 +34466,7 @@ Apply settings to all tours:
 
 # CSS Variables
 
-TourKit exposes CSS variables for easy theming without modifying component code.
+userTourKit exposes CSS variables for easy theming without modifying component code.
 
 ## Available Variables
 
@@ -34777,7 +34777,7 @@ function App() {
 
 # Tailwind CSS
 
-TourKit components are styled with Tailwind CSS by default.
+userTourKit components are styled with Tailwind CSS by default.
 
 ## Default Styles
 
@@ -34814,7 +34814,7 @@ Override with className prop:
 
 ## shadcn/ui Integration
 
-TourKit uses the same CSS variable naming conventions as shadcn/ui:
+userTourKit uses the same CSS variable naming conventions as shadcn/ui:
 
 ```css
 /* These variables are automatically used */
@@ -34877,7 +34877,7 @@ Common customization patterns:
 
 ## Tailwind Config
 
-Add TourKit to your content paths:
+Add userTourKit to your content paths:
 
 ```js
 // tailwind.config.js

@@ -1,4 +1,4 @@
-# userTourKit v0.3.0 — Generated 2026-04-03T08:08:19Z
+# userTourKit v0.3.0 — Generated 2026-04-04T03:47:52Z
 
 # userTourKit
 
@@ -249,7 +249,7 @@
 
 ## Index
 
-- [TourKit](https://tour-kit-docs.vercel.app/docs/index): userTourKit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage
+- [userTourKit](https://tour-kit-docs.vercel.app/docs/index): userTourKit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage
 
 ## Licensing
 

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useChecklistPersistence } from '../hooks/use-checklist-persistence'
-import { ProWatermark } from '../lib/pro-watermark'
+import { ProGate } from '@tour-kit/license'
 import type {
   ChecklistConfig,
   ChecklistContext as ChecklistContextType,
@@ -458,8 +458,10 @@ export function ChecklistProvider({
   )
 
   return (
-    <ChecklistContext.Provider value={contextValue}>
-      <ProWatermark>{children}</ProWatermark>
-    </ChecklistContext.Provider>
+    <ProGate package="@tour-kit/checklists">
+      <ChecklistContext.Provider value={contextValue}>
+        {children}
+      </ChecklistContext.Provider>
+    </ProGate>
   )
 }

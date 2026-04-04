@@ -1,4 +1,5 @@
-import { withLicenseCheck } from '../../lib/with-license-check'
+import { ProGate } from '@tour-kit/license'
+import * as React from 'react'
 
 // ============================================
 // PLATFORM EMBEDS
@@ -11,10 +12,24 @@ import { type YouTubeEmbedProps, YouTubeEmbed as _YouTubeEmbed } from './youtube
 
 export type { YouTubeEmbedProps, VimeoEmbedProps, LoomEmbedProps, WistiaEmbedProps }
 
-export const YouTubeEmbed = withLicenseCheck(_YouTubeEmbed, 'YouTubeEmbed')
-export const VimeoEmbed = withLicenseCheck(_VimeoEmbed, 'VimeoEmbed')
-export const LoomEmbed = withLicenseCheck(_LoomEmbed, 'LoomEmbed')
-export const WistiaEmbed = withLicenseCheck(_WistiaEmbed, 'WistiaEmbed')
+// biome-ignore lint/suspicious/noExplicitAny: HOC generic needs flexible constraint
+function withProGate<P extends Record<string, any>>(
+  Component: React.ComponentType<P>,
+  displayName: string
+): React.FC<P> {
+  const Wrapped: React.FC<P> = (props) =>
+    React.createElement(
+      ProGate,
+      { package: '@tour-kit/media', children: React.createElement(Component, props) }
+    )
+  Wrapped.displayName = `Licensed(${displayName})`
+  return Wrapped
+}
+
+export const YouTubeEmbed = withProGate(_YouTubeEmbed, 'YouTubeEmbed')
+export const VimeoEmbed = withProGate(_VimeoEmbed, 'VimeoEmbed')
+export const LoomEmbed = withProGate(_LoomEmbed, 'LoomEmbed')
+export const WistiaEmbed = withProGate(_WistiaEmbed, 'WistiaEmbed')
 
 // ============================================
 // NATIVE MEDIA
@@ -26,6 +41,6 @@ import { type NativeVideoProps, NativeVideo as _NativeVideo } from './native-vid
 
 export type { NativeVideoProps, GifPlayerProps, LottiePlayerProps }
 
-export const NativeVideo = withLicenseCheck(_NativeVideo, 'NativeVideo')
-export const GifPlayer = withLicenseCheck(_GifPlayer, 'GifPlayer')
-export const LottiePlayer = withLicenseCheck(_LottiePlayer, 'LottiePlayer')
+export const NativeVideo = withProGate(_NativeVideo, 'NativeVideo')
+export const GifPlayer = withProGate(_GifPlayer, 'GifPlayer')
+export const LottiePlayer = withProGate(_LottiePlayer, 'LottiePlayer')

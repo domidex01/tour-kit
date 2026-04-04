@@ -52,17 +52,14 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@tour-kit/core": "workspace:*"
+    "@tour-kit/core": "workspace:*",
+    "@tour-kit/license": "workspace:*"
   },
   "peerDependencies": {
-    "@tour-kit/license": ">=0.0.1",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
-    "@tour-kit/license": {
-      "optional": true
-    },
     "@amplitude/analytics-browser": {
       "optional": true
     },

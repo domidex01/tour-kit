@@ -40,3 +40,12 @@ export function clearCache(domain: string): void {
   if (typeof window === 'undefined') return
   localStorage.removeItem(`${CACHE_PREFIX}${domain}`)
 }
+
+/**
+ * Returns true if a non-expired, valid cache entry exists for this domain.
+ * Used by error-state handling: error + fresh cache = grace period (licensed),
+ * error + no cache = unlicensed.
+ */
+export function hasFreshCache(domain: string): boolean {
+  return readCache(domain) !== null
+}

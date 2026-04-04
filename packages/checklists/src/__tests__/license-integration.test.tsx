@@ -1,26 +1,14 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-type LicenseState = 'not-installed' | 'invalid' | 'valid'
+// Mock @tour-kit/license — ProGate is the hard gate used by the provider
+vi.mock('@tour-kit/license', () => ({
+  ProGate: ({ children }: { children: React.ReactNode; package: string }) => {
+    return <>{children}</>
+  },
+}))
 
-const LICENSE_RESULTS: Record<LicenseState, { isLicensed: boolean; isLoading: boolean }> = {
-  'not-installed': { isLicensed: true, isLoading: false },
-  invalid: { isLicensed: false, isLoading: false },
-  valid: { isLicensed: true, isLoading: false },
-}
-
-function setupLicenseMock(state: LicenseState) {
-  vi.resetModules()
-  const result = LICENSE_RESULTS[state]
-  vi.doMock('../lib/use-license-check', () => ({
-    useLicenseCheck: () => result,
-  }))
-}
-
-async function importProvider() {
-  const mod = await import('../context/checklist-provider')
-  return mod.ChecklistProvider
-}
+import { ChecklistProvider } from '../context/checklist-provider'
 
 describe('ChecklistProvider — license integration', () => {
   afterEach(() => {
@@ -28,124 +16,55 @@ describe('ChecklistProvider — license integration', () => {
     vi.restoreAllMocks()
   })
 
-  describe('when @tour-kit/license is NOT installed', () => {
-    beforeEach(() => {
-      setupLicenseMock('not-installed')
-    })
+  it('renders children when ProGate allows (licensed)', () => {
+    render(
+      <ChecklistProvider checklists={[]}>
+        <div data-testid="child">Hello</div>
+      </ChecklistProvider>
+    )
 
-    it('renders children without errors', async () => {
-      const ChecklistProvider = await importProvider()
-
-      render(
-        <ChecklistProvider checklists={[]}>
-          <div data-testid="child">Hello</div>
-        </ChecklistProvider>
-      )
-
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-    })
-
-    it('does not render watermark', async () => {
-      const ChecklistProvider = await importProvider()
-
-      render(
-        <ChecklistProvider checklists={[]}>
-          <div>Hello</div>
-        </ChecklistProvider>
-      )
-
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const ChecklistProvider = await importProvider()
-
-      render(
-        <ChecklistProvider checklists={[]}>
-          <div>Hello</div>
-        </ChecklistProvider>
-      )
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTestId('child')).toBeInTheDocument()
   })
 
-  describe('when @tour-kit/license is installed but license is invalid', () => {
-    beforeEach(() => {
-      setupLicenseMock('invalid')
-    })
+  it('does not render watermark (hard gate replaces watermark)', () => {
+    render(
+      <ChecklistProvider checklists={[]}>
+        <div>Hello</div>
+      </ChecklistProvider>
+    )
 
-    it('renders children (soft enforcement)', async () => {
-      const ChecklistProvider = await importProvider()
+    expect(screen.queryByText('UNLICENSED')).toBeNull()
+    expect(screen.queryByText('Tour Kit Pro license required')).toBeNull()
+  })
+})
 
-      render(
-        <ChecklistProvider checklists={[]}>
-          <div data-testid="child">Hello</div>
-        </ChecklistProvider>
-      )
-
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-    })
-
-    it('renders UNLICENSED watermark overlay', async () => {
-      const ChecklistProvider = await importProvider()
-
-      render(
-        <ChecklistProvider checklists={[]}>
-          <div>Hello</div>
-        </ChecklistProvider>
-      )
-
-      const watermark = screen.getByText('UNLICENSED')
-      expect(watermark).toBeInTheDocument()
-      expect(watermark).toHaveAttribute('aria-hidden', 'true')
-    })
-
-    it('fires console.warn with package name in development', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const ChecklistProvider = await importProvider()
-
-      render(
-        <ChecklistProvider checklists={[]}>
-          <div>Hello</div>
-        </ChecklistProvider>
-      )
-
-      expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/checklists'))
-    })
+describe('ChecklistProvider — ProGate blocks when unlicensed', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.doMock('@tour-kit/license', () => ({
+      ProGate: ({ package: pkg }: { children: React.ReactNode; package: string }) => (
+        <div data-testid="pro-gate-placeholder">Tour Kit Pro license required — {pkg}</div>
+      ),
+    }))
   })
 
-  describe('when @tour-kit/license is installed with valid license', () => {
-    beforeEach(() => {
-      setupLicenseMock('valid')
-    })
+  afterEach(() => {
+    cleanup()
+    vi.restoreAllMocks()
+  })
 
-    it('renders children without watermark', async () => {
-      const ChecklistProvider = await importProvider()
+  it('shows placeholder instead of children when unlicensed', async () => {
+    const { ChecklistProvider } = await import('../context/checklist-provider')
 
-      render(
-        <ChecklistProvider checklists={[]}>
-          <div data-testid="child">Hello</div>
-        </ChecklistProvider>
-      )
+    render(
+      <ChecklistProvider checklists={[]}>
+        <div data-testid="child">Hello</div>
+      </ChecklistProvider>
+    )
 
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const ChecklistProvider = await importProvider()
-
-      render(
-        <ChecklistProvider checklists={[]}>
-          <div>Hello</div>
-        </ChecklistProvider>
-      )
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTestId('pro-gate-placeholder')).toBeInTheDocument()
+    expect(screen.getByText(/Tour Kit Pro license required/)).toBeInTheDocument()
+    expect(screen.getByText(/@tour-kit\/checklists/)).toBeInTheDocument()
+    expect(screen.queryByTestId('child')).toBeNull()
   })
 })

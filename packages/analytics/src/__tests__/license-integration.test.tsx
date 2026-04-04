@@ -1,26 +1,14 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-type LicenseState = 'not-installed' | 'invalid' | 'valid'
+// Mock @tour-kit/license — ProGate is the hard gate used by the provider
+vi.mock('@tour-kit/license', () => ({
+  ProGate: ({ children }: { children: React.ReactNode; package: string }) => {
+    return <>{children}</>
+  },
+}))
 
-const LICENSE_RESULTS: Record<LicenseState, { isLicensed: boolean; isLoading: boolean }> = {
-  'not-installed': { isLicensed: true, isLoading: false },
-  invalid: { isLicensed: false, isLoading: false },
-  valid: { isLicensed: true, isLoading: false },
-}
-
-function setupLicenseMock(state: LicenseState) {
-  vi.resetModules()
-  const result = LICENSE_RESULTS[state]
-  vi.doMock('../lib/use-license-check', () => ({
-    useLicenseCheck: () => result,
-  }))
-}
-
-async function importProvider() {
-  const mod = await import('../core/context')
-  return mod.AnalyticsProvider
-}
+import { AnalyticsProvider } from '../core/context'
 
 describe('AnalyticsProvider — license integration', () => {
   afterEach(() => {
@@ -28,142 +16,55 @@ describe('AnalyticsProvider — license integration', () => {
     vi.restoreAllMocks()
   })
 
-  describe('when @tour-kit/license is NOT installed', () => {
-    beforeEach(() => {
-      setupLicenseMock('not-installed')
-    })
+  it('renders children when ProGate allows (licensed)', () => {
+    render(
+      <AnalyticsProvider config={{ plugins: [], enabled: false }}>
+        <div data-testid="child">Hello</div>
+      </AnalyticsProvider>
+    )
 
-    it('renders children without errors', async () => {
-      const AnalyticsProvider = await importProvider()
-
-      render(
-        <AnalyticsProvider config={{ plugins: [], enabled: false }}>
-          <div data-testid="child">Hello</div>
-        </AnalyticsProvider>
-      )
-
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-    })
-
-    it('does not render watermark', async () => {
-      const AnalyticsProvider = await importProvider()
-
-      render(
-        <AnalyticsProvider config={{ plugins: [], enabled: false }}>
-          <div>Hello</div>
-        </AnalyticsProvider>
-      )
-
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const AnalyticsProvider = await importProvider()
-
-      render(
-        <AnalyticsProvider config={{ plugins: [], enabled: false }}>
-          <div>Hello</div>
-        </AnalyticsProvider>
-      )
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTestId('child')).toBeInTheDocument()
   })
 
-  describe('when @tour-kit/license is installed but license is invalid', () => {
-    beforeEach(() => {
-      setupLicenseMock('invalid')
-    })
+  it('does not render watermark (hard gate replaces watermark)', () => {
+    render(
+      <AnalyticsProvider config={{ plugins: [], enabled: false }}>
+        <div>Hello</div>
+      </AnalyticsProvider>
+    )
 
-    it('renders children (soft enforcement)', async () => {
-      const AnalyticsProvider = await importProvider()
+    expect(screen.queryByText('UNLICENSED')).toBeNull()
+    expect(screen.queryByText('Tour Kit Pro license required')).toBeNull()
+  })
+})
 
-      render(
-        <AnalyticsProvider config={{ plugins: [], enabled: false }}>
-          <div data-testid="child">Hello</div>
-        </AnalyticsProvider>
-      )
-
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-    })
-
-    it('renders UNLICENSED watermark overlay', async () => {
-      const AnalyticsProvider = await importProvider()
-
-      render(
-        <AnalyticsProvider config={{ plugins: [], enabled: false }}>
-          <div>Hello</div>
-        </AnalyticsProvider>
-      )
-
-      const watermark = screen.getByText('UNLICENSED')
-      expect(watermark).toBeInTheDocument()
-      expect(watermark).toHaveAttribute('aria-hidden', 'true')
-    })
-
-    it('fires console.warn with package name in development', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const AnalyticsProvider = await importProvider()
-
-      render(
-        <AnalyticsProvider config={{ plugins: [], enabled: false }}>
-          <div>Hello</div>
-        </AnalyticsProvider>
-      )
-
-      expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/analytics'))
-    })
-
-    it('analytics functionality still works when unlicensed', async () => {
-      const AnalyticsProvider = await importProvider()
-      const { useAnalytics } = await import('../core/context')
-
-      function Consumer() {
-        const analytics = useAnalytics()
-        return <div data-testid="has-analytics">{analytics ? 'yes' : 'no'}</div>
-      }
-
-      render(
-        <AnalyticsProvider config={{ plugins: [], enabled: false }}>
-          <Consumer />
-        </AnalyticsProvider>
-      )
-
-      expect(screen.getByTestId('has-analytics')).toHaveTextContent('yes')
-    })
+describe('AnalyticsProvider — ProGate blocks when unlicensed', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.doMock('@tour-kit/license', () => ({
+      ProGate: ({ package: pkg }: { children: React.ReactNode; package: string }) => (
+        <div data-testid="pro-gate-placeholder">Tour Kit Pro license required — {pkg}</div>
+      ),
+    }))
   })
 
-  describe('when @tour-kit/license is installed with valid license', () => {
-    beforeEach(() => {
-      setupLicenseMock('valid')
-    })
+  afterEach(() => {
+    cleanup()
+    vi.restoreAllMocks()
+  })
 
-    it('renders children without watermark', async () => {
-      const AnalyticsProvider = await importProvider()
+  it('shows placeholder instead of children when unlicensed', async () => {
+    const { AnalyticsProvider } = await import('../core/context')
 
-      render(
-        <AnalyticsProvider config={{ plugins: [], enabled: false }}>
-          <div data-testid="child">Hello</div>
-        </AnalyticsProvider>
-      )
+    render(
+      <AnalyticsProvider config={{ plugins: [], enabled: false }}>
+        <div data-testid="child">Hello</div>
+      </AnalyticsProvider>
+    )
 
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const AnalyticsProvider = await importProvider()
-
-      render(
-        <AnalyticsProvider config={{ plugins: [], enabled: false }}>
-          <div>Hello</div>
-        </AnalyticsProvider>
-      )
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTestId('pro-gate-placeholder')).toBeInTheDocument()
+    expect(screen.getByText(/Tour Kit Pro license required/)).toBeInTheDocument()
+    expect(screen.getByText(/@tour-kit\/analytics/)).toBeInTheDocument()
+    expect(screen.queryByTestId('child')).toBeNull()
   })
 })

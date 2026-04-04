@@ -2,151 +2,70 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-type LicenseState = 'not-installed' | 'invalid' | 'valid'
+// Mock @tour-kit/license — ProGate wraps ScheduleGate
+vi.mock('@tour-kit/license', () => ({
+  ProGate: ({ children }: { children: React.ReactNode; package: string }) => {
+    return <>{children}</>
+  },
+}))
 
-const LICENSE_RESULTS: Record<LicenseState, { isLicensed: boolean; isLoading: boolean }> = {
-  'not-installed': { isLicensed: true, isLoading: false },
-  invalid: { isLicensed: false, isLoading: false },
-  valid: { isLicensed: true, isLoading: false },
-}
+import { ScheduleGate } from '../components/schedule-gate'
 
-function setupLicenseMock(state: LicenseState) {
-  vi.resetModules()
-  const result = LICENSE_RESULTS[state]
-  vi.doMock('../lib/use-license-check', () => ({
-    useLicenseCheck: () => result,
-  }))
-}
-
-async function importScheduleGate() {
-  const mod = await import('../components/schedule-gate')
-  return mod.ScheduleGate
-}
-
-describe('ScheduleGate — license integration', () => {
+describe('ScheduleGate — license integration (ProGate)', () => {
   afterEach(() => {
     cleanup()
     vi.restoreAllMocks()
   })
 
-  describe('when @tour-kit/license is NOT installed', () => {
-    beforeEach(() => {
-      setupLicenseMock('not-installed')
-    })
+  it('renders children when ProGate allows (licensed)', () => {
+    render(
+      <ScheduleGate>
+        <div data-testid="child">Hello</div>
+      </ScheduleGate>
+    )
 
-    it('renders children without errors', async () => {
-      const ScheduleGate = await importScheduleGate()
-
-      render(
-        <ScheduleGate>
-          <div data-testid="child">Hello</div>
-        </ScheduleGate>
-      )
-
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-    })
-
-    it('does not render watermark', async () => {
-      const ScheduleGate = await importScheduleGate()
-
-      render(
-        <ScheduleGate>
-          <div>Hello</div>
-        </ScheduleGate>
-      )
-
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const ScheduleGate = await importScheduleGate()
-
-      render(
-        <ScheduleGate>
-          <div>Hello</div>
-        </ScheduleGate>
-      )
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTestId('child')).toBeInTheDocument()
   })
 
-  describe('when @tour-kit/license is installed but license is invalid', () => {
-    beforeEach(() => {
-      setupLicenseMock('invalid')
-    })
+  it('does not render watermark (hard gate replaces watermark)', () => {
+    render(
+      <ScheduleGate>
+        <div>Hello</div>
+      </ScheduleGate>
+    )
 
-    it('renders children (soft enforcement)', async () => {
-      const ScheduleGate = await importScheduleGate()
+    expect(screen.queryByText('UNLICENSED')).toBeNull()
+    expect(screen.queryByText('Tour Kit Pro license required')).toBeNull()
+  })
+})
 
-      render(
-        <ScheduleGate>
-          <div data-testid="child">Hello</div>
-        </ScheduleGate>
-      )
-
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-    })
-
-    it('renders UNLICENSED watermark overlay', async () => {
-      const ScheduleGate = await importScheduleGate()
-
-      render(
-        <ScheduleGate>
-          <div>Hello</div>
-        </ScheduleGate>
-      )
-
-      const watermark = screen.getByText('UNLICENSED')
-      expect(watermark).toBeInTheDocument()
-      expect(watermark).toHaveAttribute('aria-hidden', 'true')
-    })
-
-    it('fires console.warn with package name in development', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const ScheduleGate = await importScheduleGate()
-
-      render(
-        <ScheduleGate>
-          <div>Hello</div>
-        </ScheduleGate>
-      )
-
-      expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/scheduling'))
-    })
+describe('ScheduleGate — ProGate blocks when unlicensed', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.doMock('@tour-kit/license', () => ({
+      ProGate: ({ package: pkg }: { children: React.ReactNode; package: string }) => (
+        <div data-testid="pro-gate-placeholder">Tour Kit Pro license required — {pkg}</div>
+      ),
+    }))
   })
 
-  describe('when @tour-kit/license is installed with valid license', () => {
-    beforeEach(() => {
-      setupLicenseMock('valid')
-    })
+  afterEach(() => {
+    cleanup()
+    vi.restoreAllMocks()
+  })
 
-    it('renders children without watermark', async () => {
-      const ScheduleGate = await importScheduleGate()
+  it('shows placeholder instead of children when unlicensed', async () => {
+    const { ScheduleGate } = await import('../components/schedule-gate')
 
-      render(
-        <ScheduleGate>
-          <div data-testid="child">Hello</div>
-        </ScheduleGate>
-      )
+    render(
+      <ScheduleGate>
+        <div data-testid="child">Hello</div>
+      </ScheduleGate>
+    )
 
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const ScheduleGate = await importScheduleGate()
-
-      render(
-        <ScheduleGate>
-          <div>Hello</div>
-        </ScheduleGate>
-      )
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTestId('pro-gate-placeholder')).toBeInTheDocument()
+    expect(screen.getByText(/Tour Kit Pro license required/)).toBeInTheDocument()
+    expect(screen.getByText(/@tour-kit\/scheduling/)).toBeInTheDocument()
+    expect(screen.queryByTestId('child')).toBeNull()
   })
 })

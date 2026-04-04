@@ -20,44 +20,14 @@ vi.mock('ai', () => ({
   DefaultChatTransport: vi.fn(),
 }))
 
-type LicenseState = 'not-installed' | 'invalid' | 'valid'
+// Mock @tour-kit/license — ProGate is the hard gate used by the provider
+vi.mock('@tour-kit/license', () => ({
+  ProGate: ({ children }: { children: React.ReactNode; package: string }) => {
+    return <>{children}</>
+  },
+}))
 
-const LICENSE_RESULTS: Record<LicenseState, { isLicensed: boolean; isLoading: boolean }> = {
-  'not-installed': { isLicensed: true, isLoading: false },
-  invalid: { isLicensed: false, isLoading: false },
-  valid: { isLicensed: true, isLoading: false },
-}
-
-function setupLicenseMock(state: LicenseState) {
-  vi.resetModules()
-  const result = LICENSE_RESULTS[state]
-
-  // Re-register the static mocks after resetModules
-  vi.doMock('@ai-sdk/react', () => ({
-    useChat: () => ({
-      messages: [],
-      status: 'awaiting_message',
-      error: null,
-      sendMessage: vi.fn(),
-      stop: vi.fn(),
-      regenerate: vi.fn(),
-      setMessages: vi.fn(),
-    }),
-  }))
-
-  vi.doMock('ai', () => ({
-    DefaultChatTransport: vi.fn(),
-  }))
-
-  vi.doMock('../lib/use-license-check', () => ({
-    useLicenseCheck: () => result,
-  }))
-}
-
-async function importProvider() {
-  const mod = await import('../context/ai-chat-provider')
-  return mod.AiChatProvider
-}
+import { AiChatProvider } from '../context/ai-chat-provider'
 
 const minimalConfig = {
   endpoint: '/api/chat',
@@ -69,124 +39,72 @@ describe('AiChatProvider — license integration', () => {
     vi.restoreAllMocks()
   })
 
-  describe('when @tour-kit/license is NOT installed', () => {
-    beforeEach(() => {
-      setupLicenseMock('not-installed')
-    })
+  it('renders children when ProGate allows (licensed)', () => {
+    render(
+      <AiChatProvider config={minimalConfig}>
+        <div data-testid="child">Hello</div>
+      </AiChatProvider>
+    )
 
-    it('renders children without errors', async () => {
-      const AiChatProvider = await importProvider()
-
-      render(
-        <AiChatProvider config={minimalConfig}>
-          <div data-testid="child">Hello</div>
-        </AiChatProvider>
-      )
-
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-    })
-
-    it('does not render watermark', async () => {
-      const AiChatProvider = await importProvider()
-
-      render(
-        <AiChatProvider config={minimalConfig}>
-          <div>Hello</div>
-        </AiChatProvider>
-      )
-
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const AiChatProvider = await importProvider()
-
-      render(
-        <AiChatProvider config={minimalConfig}>
-          <div>Hello</div>
-        </AiChatProvider>
-      )
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTestId('child')).toBeInTheDocument()
   })
 
-  describe('when @tour-kit/license is installed but license is invalid', () => {
-    beforeEach(() => {
-      setupLicenseMock('invalid')
-    })
+  it('does not render watermark (hard gate replaces watermark)', () => {
+    render(
+      <AiChatProvider config={minimalConfig}>
+        <div>Hello</div>
+      </AiChatProvider>
+    )
 
-    it('renders children (soft enforcement)', async () => {
-      const AiChatProvider = await importProvider()
+    expect(screen.queryByText('UNLICENSED')).toBeNull()
+    expect(screen.queryByText('Tour Kit Pro license required')).toBeNull()
+  })
+})
 
-      render(
-        <AiChatProvider config={minimalConfig}>
-          <div data-testid="child">Hello</div>
-        </AiChatProvider>
-      )
+describe('AiChatProvider — ProGate blocks when unlicensed', () => {
+  beforeEach(() => {
+    vi.resetModules()
 
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-    })
+    vi.doMock('@ai-sdk/react', () => ({
+      useChat: () => ({
+        messages: [],
+        status: 'awaiting_message',
+        error: null,
+        sendMessage: vi.fn(),
+        stop: vi.fn(),
+        regenerate: vi.fn(),
+        setMessages: vi.fn(),
+      }),
+    }))
 
-    it('renders UNLICENSED watermark overlay', async () => {
-      const AiChatProvider = await importProvider()
+    vi.doMock('ai', () => ({
+      DefaultChatTransport: vi.fn(),
+    }))
 
-      render(
-        <AiChatProvider config={minimalConfig}>
-          <div>Hello</div>
-        </AiChatProvider>
-      )
-
-      const watermark = screen.getByText('UNLICENSED')
-      expect(watermark).toBeInTheDocument()
-      expect(watermark).toHaveAttribute('aria-hidden', 'true')
-    })
-
-    it('fires console.warn with package name in development', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const AiChatProvider = await importProvider()
-
-      render(
-        <AiChatProvider config={minimalConfig}>
-          <div>Hello</div>
-        </AiChatProvider>
-      )
-
-      expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/ai'))
-    })
+    vi.doMock('@tour-kit/license', () => ({
+      ProGate: ({ package: pkg }: { children: React.ReactNode; package: string }) => (
+        <div data-testid="pro-gate-placeholder">Tour Kit Pro license required — {pkg}</div>
+      ),
+    }))
   })
 
-  describe('when @tour-kit/license is installed with valid license', () => {
-    beforeEach(() => {
-      setupLicenseMock('valid')
-    })
+  afterEach(() => {
+    cleanup()
+    vi.restoreAllMocks()
+  })
 
-    it('renders children without watermark', async () => {
-      const AiChatProvider = await importProvider()
+  it('shows placeholder instead of children when unlicensed', async () => {
+    const { AiChatProvider } = await import('../context/ai-chat-provider')
 
-      render(
-        <AiChatProvider config={minimalConfig}>
-          <div data-testid="child">Hello</div>
-        </AiChatProvider>
-      )
+    render(
+      <AiChatProvider config={minimalConfig}>
+        <div data-testid="child">Hello</div>
+      </AiChatProvider>
+    )
 
-      expect(screen.getByTestId('child')).toBeInTheDocument()
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const AiChatProvider = await importProvider()
-
-      render(
-        <AiChatProvider config={minimalConfig}>
-          <div>Hello</div>
-        </AiChatProvider>
-      )
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTestId('pro-gate-placeholder')).toBeInTheDocument()
+    expect(screen.getByText(/Tour Kit Pro license required/)).toBeInTheDocument()
+    expect(screen.getByText(/@tour-kit\/ai/)).toBeInTheDocument()
+    expect(screen.queryByTestId('child')).toBeNull()
   })
 })

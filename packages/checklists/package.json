@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@tour-kit/core": "workspace:*",
+    "@tour-kit/license": "workspace:*",
     "@floating-ui/react": "^0.27.19",
     "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.1",
@@ -54,15 +55,11 @@
     "tailwind-merge": "^3.5.0"
   },
   "peerDependencies": {
-    "@tour-kit/license": ">=0.0.1",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "@mui/base": "^5.0.0-beta.0"
   },
   "peerDependenciesMeta": {
-    "@tour-kit/license": {
-      "optional": true
-    },
     "@mui/base": {
       "optional": true
     }

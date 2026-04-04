@@ -20,7 +20,7 @@ export {
 } from './lib/polar-client'
 
 // Cache
-export { readCache, writeCache, clearCache } from './lib/cache'
+export { readCache, writeCache, clearCache, hasFreshCache } from './lib/cache'
 
 // Domain
 export {

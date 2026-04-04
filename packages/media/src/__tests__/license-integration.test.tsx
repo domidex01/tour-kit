@@ -1,119 +1,58 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-type LicenseState = 'not-installed' | 'invalid' | 'valid'
+// Mock @tour-kit/license — ProGate wraps each embed component
+vi.mock('@tour-kit/license', () => ({
+  ProGate: ({ children }: { children: React.ReactNode; package: string }) => {
+    return <>{children}</>
+  },
+}))
 
-const LICENSE_RESULTS: Record<LicenseState, { isLicensed: boolean; isLoading: boolean }> = {
-  'not-installed': { isLicensed: true, isLoading: false },
-  invalid: { isLicensed: false, isLoading: false },
-  valid: { isLicensed: true, isLoading: false },
-}
+import { YouTubeEmbed } from '../components/embeds'
 
-function setupLicenseMock(state: LicenseState) {
-  vi.resetModules()
-  const result = LICENSE_RESULTS[state]
-  vi.doMock('../lib/use-license-check', () => ({
-    useLicenseCheck: () => result,
-  }))
-}
-
-async function importYouTubeEmbed() {
-  const mod = await import('../components/embeds')
-  return mod.YouTubeEmbed
-}
-
-describe('YouTubeEmbed — license integration (HOC)', () => {
+describe('YouTubeEmbed — license integration (ProGate)', () => {
   afterEach(() => {
     cleanup()
     vi.restoreAllMocks()
   })
 
-  describe('when @tour-kit/license is NOT installed', () => {
-    beforeEach(() => {
-      setupLicenseMock('not-installed')
-    })
+  it('renders component when ProGate allows (licensed)', () => {
+    render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
 
-    it('renders component without errors', async () => {
-      const YouTubeEmbed = await importYouTubeEmbed()
-
-      render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
-
-      expect(screen.getByTitle('Test Video')).toBeInTheDocument()
-    })
-
-    it('does not render watermark', async () => {
-      const YouTubeEmbed = await importYouTubeEmbed()
-
-      render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
-
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const YouTubeEmbed = await importYouTubeEmbed()
-
-      render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTitle('Test Video')).toBeInTheDocument()
   })
 
-  describe('when @tour-kit/license is installed but license is invalid', () => {
-    beforeEach(() => {
-      setupLicenseMock('invalid')
-    })
+  it('does not render watermark (hard gate replaces watermark)', () => {
+    render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
 
-    it('renders component (soft enforcement)', async () => {
-      const YouTubeEmbed = await importYouTubeEmbed()
+    expect(screen.queryByText('UNLICENSED')).toBeNull()
+    expect(screen.queryByText('Tour Kit Pro license required')).toBeNull()
+  })
+})
 
-      render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
-
-      expect(screen.getByTitle('Test Video')).toBeInTheDocument()
-    })
-
-    it('renders UNLICENSED watermark overlay', async () => {
-      const YouTubeEmbed = await importYouTubeEmbed()
-
-      render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
-
-      const watermark = screen.getByText('UNLICENSED')
-      expect(watermark).toBeInTheDocument()
-      expect(watermark).toHaveAttribute('aria-hidden', 'true')
-    })
-
-    it('fires console.warn with package name in development', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const YouTubeEmbed = await importYouTubeEmbed()
-
-      render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
-
-      expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/media'))
-    })
+describe('YouTubeEmbed — ProGate blocks when unlicensed', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.doMock('@tour-kit/license', () => ({
+      ProGate: ({ package: pkg }: { children: React.ReactNode; package: string }) => (
+        <div data-testid="pro-gate-placeholder">Tour Kit Pro license required — {pkg}</div>
+      ),
+    }))
   })
 
-  describe('when @tour-kit/license is installed with valid license', () => {
-    beforeEach(() => {
-      setupLicenseMock('valid')
-    })
+  afterEach(() => {
+    cleanup()
+    vi.restoreAllMocks()
+  })
 
-    it('renders component without watermark', async () => {
-      const YouTubeEmbed = await importYouTubeEmbed()
+  it('shows placeholder instead of embed when unlicensed', async () => {
+    const { YouTubeEmbed } = await import('../components/embeds')
 
-      render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
+    render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
 
-      expect(screen.getByTitle('Test Video')).toBeInTheDocument()
-      expect(screen.queryByText('UNLICENSED')).toBeNull()
-    })
-
-    it('does not fire console.warn', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      const YouTubeEmbed = await importYouTubeEmbed()
-
-      render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
-
-      expect(warnSpy).not.toHaveBeenCalled()
-    })
+    expect(screen.getByTestId('pro-gate-placeholder')).toBeInTheDocument()
+    expect(screen.getByText(/Tour Kit Pro license required/)).toBeInTheDocument()
+    expect(screen.getByText(/@tour-kit\/media/)).toBeInTheDocument()
+    expect(screen.queryByTitle('Test Video')).toBeNull()
   })
 })
