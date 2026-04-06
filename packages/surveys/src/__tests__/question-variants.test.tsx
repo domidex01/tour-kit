@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
-  ratingOptionVariants,
-  textInputVariants,
-  selectOptionVariants,
   booleanOptionVariants,
   progressBarVariants,
+  ratingOptionVariants,
+  selectOptionVariants,
+  textInputVariants,
 } from '../components/ui/question-variants'
 
 describe('ratingOptionVariants', () => {

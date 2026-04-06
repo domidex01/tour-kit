@@ -1,6 +1,6 @@
+import { ProGate } from '@tour-kit/license'
 import * as React from 'react'
 import { useChecklistPersistence } from '../hooks/use-checklist-persistence'
-import { ProGate } from '@tour-kit/license'
 import type {
   ChecklistConfig,
   ChecklistContext as ChecklistContextType,
@@ -459,9 +459,7 @@ export function ChecklistProvider({
 
   return (
     <ProGate package="@tour-kit/checklists">
-      <ChecklistContext.Provider value={contextValue}>
-        {children}
-      </ChecklistContext.Provider>
+      <ChecklistContext.Provider value={contextValue}>{children}</ChecklistContext.Provider>
     </ProGate>
   )
 }

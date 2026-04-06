@@ -1,10 +1,8 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { LicenseTestPage, PRO_PACKAGES, PRO_PACKAGE_NAMES } from '../fixtures/license-test-page'
 
 test.describe('Next.js — Production domain, placeholder UI verification', () => {
-  test('placeholder shows correct text, package name, and accessible markup', async ({
-    page,
-  }) => {
+  test('placeholder shows correct text, package name, and accessible markup', async ({ page }) => {
     await page.goto('/license-invalid')
     await page.waitForTimeout(2000)
 

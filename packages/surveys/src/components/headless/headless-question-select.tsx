@@ -62,10 +62,7 @@ export function HeadlessQuestionSelect({
 
   const currentValue = isControlled ? controlledValue : internalValue
 
-  const enabledOptions = React.useMemo(
-    () => options.filter((opt) => !opt.disabled),
-    [options]
-  )
+  const enabledOptions = React.useMemo(() => options.filter((opt) => !opt.disabled), [options])
 
   const setValue = React.useCallback(
     (val: string | string[]) => {
@@ -116,7 +113,7 @@ export function HeadlessQuestionSelect({
         tabIndex: disabled ? -1 : enabledIdx === focusedIndex ? 0 : -1,
       }
     },
-    [options, enabledOptions, mode, isSelected, focusedIndex]
+    [options, enabledOptions, mode, isSelected]
   )
 
   return children({

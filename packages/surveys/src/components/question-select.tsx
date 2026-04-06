@@ -48,10 +48,7 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
 
     const currentValue = isControlled ? controlledValue : internalValue
 
-    const enabledOptions = React.useMemo(
-      () => options.filter((opt) => !opt.disabled),
-      [options]
-    )
+    const enabledOptions = React.useMemo(() => options.filter((opt) => !opt.disabled), [options])
 
     // Roving tabindex for single-select mode
     const [focusedIndex, setFocusedIndex] = React.useState(0)
@@ -200,7 +197,9 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
                       stroke="currentColor"
                       strokeWidth={3}
                       className="h-3 w-3"
+                      aria-hidden="true"
                     >
+                      <title>Selected</title>
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   )}

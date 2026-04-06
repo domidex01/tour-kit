@@ -1,5 +1,5 @@
-import * as React from 'react'
 import { ProGate } from '@tour-kit/license'
+import * as React from 'react'
 import type { AnalyticsConfig } from '../types/plugin'
 import { type TourAnalytics, createAnalytics } from './tracker'
 
@@ -45,9 +45,7 @@ export function AnalyticsProvider({ config, children }: AnalyticsProviderProps) 
 
   return (
     <ProGate package="@tour-kit/analytics">
-      <AnalyticsContext.Provider value={analyticsRef.current}>
-        {children}
-      </AnalyticsContext.Provider>
+      <AnalyticsContext.Provider value={analyticsRef.current}>{children}</AnalyticsContext.Provider>
     </ProGate>
   )
 }

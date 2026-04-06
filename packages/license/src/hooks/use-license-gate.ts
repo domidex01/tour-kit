@@ -2,8 +2,8 @@
 
 import { useContext } from 'react'
 import { LicenseContext } from '../context/license-context'
-import { getCurrentDomain, isDevEnvironment } from '../lib/domain'
 import { hasFreshCache } from '../lib/cache'
+import { getCurrentDomain, isDevEnvironment } from '../lib/domain'
 
 export interface LicenseGateResult {
   /** True if the component should be blocked (show placeholder) */

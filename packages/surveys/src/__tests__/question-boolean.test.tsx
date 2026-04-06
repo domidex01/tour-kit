@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { axe } from 'vitest-axe'
 import { describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 import { QuestionBoolean } from '../components/question-boolean'
 
 vi.mock('@tour-kit/license', () => ({
@@ -104,9 +104,7 @@ describe('QuestionBoolean', () => {
   // -------------------------------------------------------------------------
 
   it('should render custom yes/no labels', () => {
-    render(
-      <QuestionBoolean {...defaultProps} yesLabel="Absolutely" noLabel="Not really" />
-    )
+    render(<QuestionBoolean {...defaultProps} yesLabel="Absolutely" noLabel="Not really" />)
     expect(screen.getByText('Absolutely')).toBeInTheDocument()
     expect(screen.getByText('Not really')).toBeInTheDocument()
   })

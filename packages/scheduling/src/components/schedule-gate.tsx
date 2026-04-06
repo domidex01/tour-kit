@@ -1,5 +1,5 @@
-import type * as React from 'react'
 import { ProGate } from '@tour-kit/license'
+import type * as React from 'react'
 
 interface ScheduleGateProps {
   children: React.ReactNode

@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/console'
+import { expect, test } from '../fixtures/console'
 import { PRO_CONSOLE_PACKAGES } from '../fixtures/license-test-page'
 
 test.describe('Vite — Production domain, console error messages', () => {

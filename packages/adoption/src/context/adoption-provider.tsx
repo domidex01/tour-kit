@@ -1,3 +1,4 @@
+import { ProGate } from '@tour-kit/license'
 import * as React from 'react'
 import {
   createInitialUsage,
@@ -9,7 +10,6 @@ import {
   snoozeNudge as snoozeNudgeState,
   trackFeatureUsage,
 } from '../engine'
-import { ProGate } from '@tour-kit/license'
 import { createStorageAdapter } from '../storage'
 import type {
   AdoptionProviderProps,
@@ -178,9 +178,7 @@ export function AdoptionProvider({
 
   return (
     <ProGate package="@tour-kit/adoption">
-      <AdoptionContext.Provider value={contextValue}>
-        {children}
-      </AdoptionContext.Provider>
+      <AdoptionContext.Provider value={contextValue}>{children}</AdoptionContext.Provider>
     </ProGate>
   )
 }

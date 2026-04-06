@@ -27,13 +27,13 @@ describe('HeadlessQuestionRating', () => {
     )
 
     expect(captured).toBeDefined()
-    expect(captured!.value).toBeNull()
-    expect(captured!.setValue).toBeTypeOf('function')
-    expect(captured!.options).toEqual([1, 2, 3, 4, 5])
-    expect(captured!.focusedIndex).toBe(0)
-    expect(captured!.setFocusedIndex).toBeTypeOf('function')
-    expect(captured!.ratingGroupProps).toBeDefined()
-    expect(captured!.getOptionProps).toBeTypeOf('function')
+    expect(captured?.value).toBeNull()
+    expect(captured?.setValue).toBeTypeOf('function')
+    expect(captured?.options).toEqual([1, 2, 3, 4, 5])
+    expect(captured?.focusedIndex).toBe(0)
+    expect(captured?.setFocusedIndex).toBeTypeOf('function')
+    expect(captured?.ratingGroupProps).toBeDefined()
+    expect(captured?.getOptionProps).toBeTypeOf('function')
   })
 
   it('should produce zero extra DOM — only child output', () => {
@@ -56,9 +56,9 @@ describe('HeadlessQuestionRating', () => {
       </HeadlessQuestionRating>
     )
 
-    expect(captured!.ratingGroupProps.role).toBe('radiogroup')
-    expect(captured!.ratingGroupProps['aria-label']).toBe('Rate')
-    expect(captured!.ratingGroupProps['aria-required']).toBe(true)
+    expect(captured?.ratingGroupProps.role).toBe('radiogroup')
+    expect(captured?.ratingGroupProps['aria-label']).toBe('Rate')
+    expect(captured?.ratingGroupProps['aria-required']).toBe(true)
   })
 
   it('should provide correct getOptionProps shape', () => {
@@ -72,7 +72,7 @@ describe('HeadlessQuestionRating', () => {
       </HeadlessQuestionRating>
     )
 
-    const optProps = captured!.getOptionProps(2)
+    const optProps = captured?.getOptionProps(2)
     expect(optProps.role).toBe('radio')
     expect(optProps['aria-checked']).toBe(false)
     expect(optProps['aria-label']).toBe('Rate 2 out of 3')
@@ -93,12 +93,12 @@ describe('HeadlessQuestionText', () => {
     )
 
     expect(captured).toBeDefined()
-    expect(captured!.value).toBe('')
-    expect(captured!.setValue).toBeTypeOf('function')
-    expect(captured!.characterCount).toBe(0)
-    expect(captured!.isAtLimit).toBe(false)
-    expect(captured!.inputProps).toBeDefined()
-    expect(captured!.characterCountProps).toBeDefined()
+    expect(captured?.value).toBe('')
+    expect(captured?.setValue).toBeTypeOf('function')
+    expect(captured?.characterCount).toBe(0)
+    expect(captured?.isAtLimit).toBe(false)
+    expect(captured?.inputProps).toBeDefined()
+    expect(captured?.characterCountProps).toBeDefined()
   })
 
   it('should produce zero extra DOM', () => {
@@ -121,11 +121,11 @@ describe('HeadlessQuestionText', () => {
       </HeadlessQuestionText>
     )
 
-    expect(captured!.inputProps.id).toBe('ht')
-    expect(captured!.inputProps['aria-label']).toBe('Feedback')
-    expect(captured!.inputProps['aria-required']).toBe(true)
-    expect(captured!.inputProps['aria-describedby']).toBe('ht-char-count')
-    expect(captured!.inputProps.maxLength).toBe(100)
+    expect(captured?.inputProps.id).toBe('ht')
+    expect(captured?.inputProps['aria-label']).toBe('Feedback')
+    expect(captured?.inputProps['aria-required']).toBe(true)
+    expect(captured?.inputProps['aria-describedby']).toBe('ht-char-count')
+    expect(captured?.inputProps.maxLength).toBe(100)
   })
 
   it('should provide correct characterCountProps shape', () => {
@@ -139,8 +139,8 @@ describe('HeadlessQuestionText', () => {
       </HeadlessQuestionText>
     )
 
-    expect(captured!.characterCountProps.id).toBe('ht-char-count')
-    expect(captured!.characterCountProps['aria-live']).toBe('polite')
+    expect(captured?.characterCountProps.id).toBe('ht-char-count')
+    expect(captured?.characterCountProps['aria-live']).toBe('polite')
   })
 })
 
@@ -162,12 +162,12 @@ describe('HeadlessQuestionSelect', () => {
     )
 
     expect(captured).toBeDefined()
-    expect(captured!.value).toBe('')
-    expect(captured!.setValue).toBeTypeOf('function')
-    expect(captured!.options).toBeDefined()
-    expect(captured!.groupProps).toBeDefined()
-    expect(captured!.getOptionProps).toBeTypeOf('function')
-    expect(captured!.groupProps.role).toBe('radiogroup')
+    expect(captured?.value).toBe('')
+    expect(captured?.setValue).toBeTypeOf('function')
+    expect(captured?.options).toBeDefined()
+    expect(captured?.groupProps).toBeDefined()
+    expect(captured?.getOptionProps).toBeTypeOf('function')
+    expect(captured?.groupProps.role).toBe('radiogroup')
   })
 
   it('should provide group role for multi mode', () => {
@@ -181,8 +181,8 @@ describe('HeadlessQuestionSelect', () => {
       </HeadlessQuestionSelect>
     )
 
-    expect(captured!.groupProps.role).toBe('group')
-    expect(captured!.getOptionProps('a').role).toBe('checkbox')
+    expect(captured?.groupProps.role).toBe('group')
+    expect(captured?.getOptionProps('a').role).toBe('checkbox')
   })
 
   it('should produce zero extra DOM', () => {
@@ -205,7 +205,7 @@ describe('HeadlessQuestionSelect', () => {
       </HeadlessQuestionSelect>
     )
 
-    const optProps = captured!.getOptionProps('a')
+    const optProps = captured?.getOptionProps('a')
     expect(optProps.role).toBe('radio')
     expect(optProps['aria-checked']).toBe(false)
     expect(optProps['aria-label']).toBe('A')
@@ -225,10 +225,10 @@ describe('HeadlessQuestionBoolean', () => {
     )
 
     expect(captured).toBeDefined()
-    expect(captured!.value).toBeNull()
-    expect(captured!.setValue).toBeTypeOf('function')
-    expect(captured!.groupProps).toBeDefined()
-    expect(captured!.getOptionProps).toBeTypeOf('function')
+    expect(captured?.value).toBeNull()
+    expect(captured?.setValue).toBeTypeOf('function')
+    expect(captured?.groupProps).toBeDefined()
+    expect(captured?.getOptionProps).toBeTypeOf('function')
   })
 
   it('should produce zero extra DOM', () => {
@@ -251,9 +251,9 @@ describe('HeadlessQuestionBoolean', () => {
       </HeadlessQuestionBoolean>
     )
 
-    expect(captured!.groupProps.role).toBe('radiogroup')
-    expect(captured!.groupProps['aria-label']).toBe('Yes or No')
-    expect(captured!.groupProps['aria-required']).toBe(true)
+    expect(captured?.groupProps.role).toBe('radiogroup')
+    expect(captured?.groupProps['aria-label']).toBe('Yes or No')
+    expect(captured?.groupProps['aria-required']).toBe(true)
   })
 
   it('should provide correct getOptionProps shape', () => {
@@ -267,12 +267,12 @@ describe('HeadlessQuestionBoolean', () => {
       </HeadlessQuestionBoolean>
     )
 
-    const yesProps = captured!.getOptionProps(true)
+    const yesProps = captured?.getOptionProps(true)
     expect(yesProps.role).toBe('radio')
     expect(yesProps['aria-checked']).toBe(false)
     expect(yesProps['aria-label']).toBe('Yes')
 
-    const noProps = captured!.getOptionProps(false)
+    const noProps = captured?.getOptionProps(false)
     expect(noProps['aria-label']).toBe('No')
   })
 })

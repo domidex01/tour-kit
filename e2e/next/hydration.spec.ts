@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/console'
+import { expect, test } from '../fixtures/console'
 
 test.describe('Next.js — Hydration checks', () => {
   const routes = ['/license-valid', '/license-invalid', '/license-none', '/license-empty']

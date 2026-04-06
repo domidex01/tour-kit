@@ -81,7 +81,7 @@ export function HeadlessQuestionBoolean({
         tabIndex: index === focusedIndex ? 0 : -1,
       }
     },
-    [currentValue, focusedIndex, yesLabel, noLabel]
+    [currentValue, yesLabel, noLabel]
   )
 
   return children({

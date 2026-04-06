@@ -46,10 +46,13 @@ const QuestionBoolean = React.forwardRef<HTMLDivElement, QuestionBooleanProps>(
 
     const currentValue = isControlled ? controlledValue : internalValue
 
-    const boolOptions: Array<{ value: boolean; label: string }> = [
-      { value: true, label: yesLabel },
-      { value: false, label: noLabel },
-    ]
+    const boolOptions = React.useMemo<Array<{ value: boolean; label: string }>>(
+      () => [
+        { value: true, label: yesLabel },
+        { value: false, label: noLabel },
+      ],
+      [yesLabel, noLabel]
+    )
 
     const selectValue = React.useCallback(
       (val: boolean) => {

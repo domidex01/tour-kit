@@ -257,9 +257,7 @@ describe('ProGate', () => {
     )
 
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('@tour-kit/adoption')
-      )
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('@tour-kit/adoption'))
     })
   })
 

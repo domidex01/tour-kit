@@ -53,6 +53,7 @@ const SurveyProgress = React.forwardRef<HTMLDivElement, SurveyProgressProps>(
         )}
         {showBar && (
           <div className="w-full rounded-full bg-secondary">
+            {/* biome-ignore lint/a11y/useFocusableInteractive: progressbar is a visual indicator, not an interactive control */}
             <div
               role="progressbar"
               aria-valuenow={current}

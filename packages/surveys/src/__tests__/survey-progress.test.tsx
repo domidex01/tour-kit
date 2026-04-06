@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { axe } from 'vitest-axe'
 import { describe, expect, it } from 'vitest'
+import { axe } from 'vitest-axe'
 import { SurveyProgress } from '../components/survey-progress'
 
 describe('SurveyProgress', () => {
@@ -64,13 +64,7 @@ describe('SurveyProgress', () => {
   // -------------------------------------------------------------------------
 
   it('should use custom labelTemplate', () => {
-    render(
-      <SurveyProgress
-        current={3}
-        total={8}
-        labelTemplate="Step {current}/{total}"
-      />
-    )
+    render(<SurveyProgress current={3} total={8} labelTemplate="Step {current}/{total}" />)
     expect(screen.getByText('Step 3/8')).toBeInTheDocument()
   })
 })

@@ -90,17 +90,10 @@ const QuestionText = React.forwardRef<HTMLDivElement, QuestionTextProps>(
           <textarea
             {...sharedProps}
             rows={rows}
-            className={cn(
-              textInputVariants({ size }),
-              'h-auto py-2 resize-y'
-            )}
+            className={cn(textInputVariants({ size }), 'h-auto py-2 resize-y')}
           />
         ) : (
-          <input
-            {...sharedProps}
-            type="text"
-            className={cn(textInputVariants({ size }))}
-          />
+          <input {...sharedProps} type="text" className={cn(textInputVariants({ size }))} />
         )}
         {showCharacterCount && (
           <span

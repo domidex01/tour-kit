@@ -1,10 +1,10 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
+import { ProGate } from '@tour-kit/license'
 import { DefaultChatTransport } from 'ai'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePersistence } from '../hooks/use-persistence'
-import { ProGate } from '@tour-kit/license'
 import type { AiChatConfig, ChatStatus } from '../types'
 import { AiChatContext, type AiChatContextValue } from './ai-chat-context'
 
@@ -198,9 +198,7 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
 
   return (
     <ProGate package="@tour-kit/ai">
-      <AiChatContext.Provider value={value}>
-        {children}
-      </AiChatContext.Provider>
+      <AiChatContext.Provider value={value}>{children}</AiChatContext.Provider>
     </ProGate>
   )
 }

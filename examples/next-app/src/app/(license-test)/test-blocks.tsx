@@ -21,9 +21,7 @@ import { ScheduleGate } from '@tour-kit/scheduling'
 export function AllTestBlocks() {
   return (
     <>
-      <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
-        Free Packages (3)
-      </h2>
+      <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>Free Packages (3)</h2>
 
       <TestBlock testId="core" pkg="@tour-kit/core" type="free">
         <TourProvider>
@@ -149,9 +147,7 @@ function TestBlock({
         </span>
       </div>
       <div style={{ padding: '16px' }} data-testid={`test-content-${testId}`}>
-        <ErrorBoundary
-          fallback={<div data-testid={`test-error-${testId}`}>Component error</div>}
-        >
+        <ErrorBoundary fallback={<div data-testid={`test-error-${testId}`}>Component error</div>}>
           {children}
         </ErrorBoundary>
       </div>

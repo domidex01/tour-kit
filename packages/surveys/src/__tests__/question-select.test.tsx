@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { axe } from 'vitest-axe'
 import { describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 import { QuestionSelect } from '../components/question-select'
 
 vi.mock('@tour-kit/license', () => ({
@@ -183,9 +183,9 @@ describe('QuestionSelect', () => {
     const user = userEvent.setup()
     render(<QuestionSelect {...defaultProps} options={optionsWithDisabled} onChange={onChange} />)
 
-    const enabledRadios = screen.getAllByRole('radio').filter(
-      (r) => r.getAttribute('aria-disabled') !== 'true'
-    )
+    const enabledRadios = screen
+      .getAllByRole('radio')
+      .filter((r) => r.getAttribute('aria-disabled') !== 'true')
     await user.tab()
     expect(enabledRadios[0]).toHaveFocus()
 
@@ -201,9 +201,7 @@ describe('QuestionSelect', () => {
   it('should work in controlled single-select mode', async () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
-    const { rerender } = render(
-      <QuestionSelect {...defaultProps} value="a" onChange={onChange} />
-    )
+    const { rerender } = render(<QuestionSelect {...defaultProps} value="a" onChange={onChange} />)
 
     const radios = screen.getAllByRole('radio')
     expect(radios[0]).toHaveAttribute('aria-checked', 'true')
