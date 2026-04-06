@@ -20,7 +20,10 @@ function withProGate<P extends Record<string, any>>(
   const Wrapped: React.FC<P> = (props) =>
     React.createElement(
       ProGate,
-      { package: '@tour-kit/media', children: React.createElement(Component, props) }
+      { package: '@tour-kit/media', children: null } as unknown as React.ComponentProps<
+        typeof ProGate
+      >,
+      React.createElement(Component, props)
     )
   Wrapped.displayName = `Licensed(${displayName})`
   return Wrapped

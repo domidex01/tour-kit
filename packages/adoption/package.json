@@ -30,9 +30,7 @@
     "./styles/variables.css": "./src/styles/variables.css",
     "./styles/theme.css": "./src/styles/theme.css"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "license": "SEE LICENSE IN LICENSE.md",
   "publishConfig": {
     "access": "restricted",

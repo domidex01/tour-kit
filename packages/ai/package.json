@@ -51,12 +51,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "CHANGELOG.md",
-    "styles"
-  ],
+  "files": ["dist", "README.md", "CHANGELOG.md", "styles"],
   "sideEffects": false,
   "publishConfig": {
     "access": "restricted",

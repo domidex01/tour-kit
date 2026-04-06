@@ -111,6 +111,7 @@ export function LicenseTestPage() {
       >
         {SCENARIOS.map((s) => (
           <button
+            type="button"
             key={s.id}
             data-testid={`scenario-selector-${s.id}`}
             onClick={() => setScenario(s.id)}
@@ -198,7 +199,8 @@ export function LicenseTestPage() {
           fontSize: '13px',
         }}
       >
-        Open your browser DevTools console to see license validation logs and ProGate error messages.
+        Open your browser DevTools console to see license validation logs and ProGate error
+        messages.
       </div>
     </div>
   )
@@ -335,9 +337,7 @@ function TestBlock({
         </span>
       </div>
       <div style={{ padding: '16px' }} data-testid={`test-content-${testId}`}>
-        <ErrorBoundary
-          fallback={<div data-testid={`test-error-${testId}`}>Component error</div>}
-        >
+        <ErrorBoundary fallback={<div data-testid={`test-error-${testId}`}>Component error</div>}>
           {children}
         </ErrorBoundary>
       </div>
