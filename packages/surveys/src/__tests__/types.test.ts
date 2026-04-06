@@ -1,34 +1,34 @@
-import { describe, it, expect, expectTypeOf } from 'vitest'
+import { describe, expect, expectTypeOf, it } from 'vitest'
 import type {
-  SurveyType,
-  DisplayMode,
-  SurveyPriority,
-  FrequencyRule,
-  DismissalReason,
-  SurveyConfig,
-  SurveyState,
-  QuestionType,
-  QuestionConfig,
   AnswerValue,
-  SkipLogic,
+  CESResult,
+  CSATResult,
+  DismissalReason,
+  DisplayMode,
+  FrequencyRule,
+  NPSResult,
+  PriorityOrder,
+  QuestionConfig,
+  QuestionType,
   RatingScale,
   SelectOption,
-  NPSResult,
-  CSATResult,
-  CESResult,
+  SkipLogic,
+  StackBehavior,
+  SurveyCompletedEvent,
+  SurveyConfig,
+  SurveyDismissedEvent,
   SurveyEvent,
   SurveyEventType,
-  SurveyShownEvent,
-  SurveyDismissedEvent,
-  SurveyCompletedEvent,
+  SurveyPriority,
   SurveyQuestionAnsweredEvent,
-  SurveyScoreCalculatedEvent,
-  SurveysContextValue,
-  SurveysProviderProps,
-  PriorityOrder,
-  StackBehavior,
   SurveyQueueConfig,
   SurveyQueueItem,
+  SurveyScoreCalculatedEvent,
+  SurveyShownEvent,
+  SurveyState,
+  SurveyType,
+  SurveysContextValue,
+  SurveysProviderProps,
 } from '../types'
 import { DEFAULT_SURVEY_QUEUE_CONFIG } from '../types'
 
@@ -66,7 +66,12 @@ describe('Survey type definitions compile', () => {
 
   it('QuestionType and AnswerValue cover all input types', () => {
     const types: QuestionType[] = [
-      'rating', 'text', 'textarea', 'single-select', 'multi-select', 'boolean',
+      'rating',
+      'text',
+      'textarea',
+      'single-select',
+      'multi-select',
+      'boolean',
     ]
     expect(types).toHaveLength(6)
 

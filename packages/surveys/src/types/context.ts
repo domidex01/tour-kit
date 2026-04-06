@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import type { SurveyConfig, SurveyState, DismissalReason } from './survey'
 import type { AnswerValue } from './question'
 import type { SurveyQueueConfig } from './queue'
+import type { DismissalReason, SurveyConfig, SurveyState } from './survey'
 
 /** Surveys context value exposed to consumers */
 export interface SurveysContextValue {

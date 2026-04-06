@@ -1,17 +1,12 @@
-import { describe, it, expect } from 'vitest'
 import { existsSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { describe, expect, it } from 'vitest'
 
 const DIST = resolve(__dirname, '../../dist')
 
 describe('Build output verification', () => {
   it('index entry point produces ESM, CJS, and declaration files', () => {
-    const files = [
-      'index.js',
-      'index.cjs',
-      'index.d.ts',
-      'index.d.cts',
-    ]
+    const files = ['index.js', 'index.cjs', 'index.d.ts', 'index.d.cts']
 
     for (const file of files) {
       const filePath = resolve(DIST, file)
@@ -21,12 +16,7 @@ describe('Build output verification', () => {
   })
 
   it('headless entry point produces ESM, CJS, and declaration files', () => {
-    const files = [
-      'headless.js',
-      'headless.cjs',
-      'headless.d.ts',
-      'headless.d.cts',
-    ]
+    const files = ['headless.js', 'headless.cjs', 'headless.d.ts', 'headless.d.cts']
 
     for (const file of files) {
       const filePath = resolve(DIST, file)

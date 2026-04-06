@@ -1,5 +1,5 @@
-import type { SurveyType, DisplayMode, DismissalReason } from './survey'
-import type { QuestionType, AnswerValue } from './question'
+import type { AnswerValue, QuestionType } from './question'
+import type { DismissalReason, DisplayMode, SurveyType } from './survey'
 
 /** Survey analytics event types */
 export type SurveyEventType =
