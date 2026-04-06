@@ -1,31 +1,94 @@
 // Types
-export * from './types'
+export type {
+  SurveyConfig,
+  SurveyState,
+  SurveyType,
+  DisplayMode,
+  SurveyPriority,
+  FrequencyRule,
+  DismissalReason,
+  SurveyStorageAdapter,
+  ModalOptions,
+  SlideoutOptions,
+  BannerOptions,
+  PopoverOptions,
+  AudienceCondition,
+  SlideoutPosition,
+  BannerPosition,
+  PopoverPosition,
+} from './types/survey'
 
-// Core logic
-export * from './core'
+export type {
+  QuestionConfig,
+  QuestionType,
+  AnswerValue,
+  SkipLogic,
+  RatingScale,
+  SelectOption,
+} from './types/question'
 
-// Context
+export type {
+  NPSResult,
+  CSATResult,
+  CESResult,
+} from './types/scoring'
+
+export type {
+  SurveysContextValue,
+  SurveysProviderProps,
+} from './types/context'
+
+export type {
+  SurveyEvent,
+  SurveyEventType,
+  BaseSurveyEvent,
+  SurveyShownEvent,
+  SurveyDismissedEvent,
+  SurveySnoozedEvent,
+  SurveyCompletedEvent,
+  SurveyQuestionAnsweredEvent,
+  SurveyScoreCalculatedEvent,
+} from './types/events'
+
+export type {
+  SurveyQueueConfig,
+  SurveyQueueItem,
+  PriorityOrder,
+  StackBehavior,
+} from './types/queue'
+
+// Provider
 export { SurveysProvider } from './context'
 export { useSurveysContext } from './context'
 
 // Hooks
 export { useSurvey, useSurveys, useSurveyScoring } from './hooks'
 
-// Components
-export { QuestionRating } from './components/question-rating'
-export type { QuestionRatingProps } from './components/question-rating'
+// Scoring functions
+export { calculateNPS, calculateCSAT, calculateCES } from './core'
 
-export { QuestionText } from './components/question-text'
-export type { QuestionTextProps } from './components/question-text'
+// Styled display components
+export { SurveyPopover } from './components'
+export { SurveyModal } from './components'
+export { SurveySlideout } from './components'
+export { SurveyBanner } from './components'
+export { SurveyInline } from './components'
 
-export { QuestionSelect } from './components/question-select'
-export type { QuestionSelectProps } from './components/question-select'
+// Question components
+export { QuestionRating } from './components'
+export type { QuestionRatingProps } from './components'
 
-export { QuestionBoolean } from './components/question-boolean'
-export type { QuestionBooleanProps } from './components/question-boolean'
+export { QuestionText } from './components'
+export type { QuestionTextProps } from './components'
 
-export { SurveyProgress } from './components/survey-progress'
-export type { SurveyProgressProps } from './components/survey-progress'
+export { QuestionSelect } from './components'
+export type { QuestionSelectProps } from './components'
+
+export { QuestionBoolean } from './components'
+export type { QuestionBooleanProps } from './components'
+
+export { SurveyProgress } from './components'
+export type { SurveyProgressProps } from './components'
 
 // CVA variants
 export {

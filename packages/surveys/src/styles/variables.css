@@ -1,2 +1,46 @@
-/* @tour-kit/surveys CSS custom properties */
-/* Populated in Phase 5 */
+:root {
+  /* Colors */
+  --survey-bg: #ffffff;
+  --survey-bg-overlay: rgba(0, 0, 0, 0.4);
+  --survey-border: #e2e8f0;
+  --survey-text: #1a202c;
+  --survey-text-muted: #718096;
+  --survey-primary: #3182ce;
+  --survey-primary-hover: #2c5282;
+  --survey-error: #e53e3e;
+  --survey-success: #38a169;
+
+  /* Spacing */
+  --survey-padding: 1rem;
+  --survey-padding-sm: 0.5rem;
+  --survey-padding-lg: 1.5rem;
+  --survey-gap: 0.75rem;
+  --survey-radius: 0.5rem;
+
+  /* Sizing */
+  --survey-popover-width: 360px;
+  --survey-modal-width-sm: 400px;
+  --survey-modal-width-md: 520px;
+  --survey-modal-width-lg: 640px;
+  --survey-slideout-width: 380px;
+
+  /* Animation */
+  --survey-duration: 200ms;
+  --survey-duration-slow: 300ms;
+  --survey-easing: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Rating */
+  --survey-rating-size: 2rem;
+  --survey-rating-gap: 0.25rem;
+  --survey-rating-active: #f6ad55;
+  --survey-rating-inactive: #e2e8f0;
+
+  /* Progress */
+  --survey-progress-height: 4px;
+  --survey-progress-bg: #e2e8f0;
+  --survey-progress-fill: #3182ce;
+
+  /* Shadow */
+  --survey-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --survey-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
