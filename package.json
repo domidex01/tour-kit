@@ -10,7 +10,12 @@
   "license": "MIT",
   "packageManager": "pnpm@10.26.1",
   "workspaces": {
-    "packages": ["packages/*", "apps/*", "tooling/*", "examples/*"],
+    "packages": [
+      "packages/*",
+      "apps/*",
+      "tooling/*",
+      "examples/*"
+    ],
     "catalog": {
       "vitest": "^4.1.0",
       "jsdom": "^27.3.0",
@@ -43,12 +48,17 @@
     "example:vite": "turbo run dev --filter=vite-tour-kit-demo",
     "example:next": "turbo run dev --filter=next-tour-kit-demo",
     "bench": "turbo run bench",
-    "bench:core": "turbo run bench --filter=@tour-kit/core"
+    "bench:core": "turbo run bench --filter=@tour-kit/core",
+    "e2e": "playwright test",
+    "e2e:vite": "playwright test --project=vite-localhost --project=vite-production",
+    "e2e:next": "playwright test --project=next-localhost --project=next-production",
+    "e2e:report": "playwright show-report"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.0",
     "@changesets/cli": "^2.30.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
+    "@playwright/test": "^1.59.1",
     "@polar-sh/sdk": "^0.46.7",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -64,8 +74,15 @@
     "zod": "^4.3.6"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": ["esbuild", "sharp"],
-    "onlyBuiltDependencies": ["@biomejs/biome", "esbuild", "sharp"]
+    "ignoredBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ],
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "esbuild",
+      "sharp"
+    ]
   },
   "overrides": {
     "react-router": ">=7.12.0",

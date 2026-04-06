@@ -26,6 +26,10 @@
     "bench": {
       "dependsOn": ["build"],
       "outputs": ["benchmark-results.json"]
+    },
+    "e2e": {
+      "dependsOn": ["build"],
+      "cache": false
     }
   }
 }
