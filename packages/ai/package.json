@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/ai",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "AI-powered RAG Q&A chat widget for React apps",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
