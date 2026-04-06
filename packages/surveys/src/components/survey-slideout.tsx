@@ -9,5 +9,9 @@ export interface SurveySlideoutProps {
 }
 
 export function SurveySlideout({ children, className }: SurveySlideoutProps) {
-  return <div className={className} data-survey-slideout="">{children}</div>
+  return (
+    <div className={className} data-survey-slideout="">
+      {children}
+    </div>
+  )
 }

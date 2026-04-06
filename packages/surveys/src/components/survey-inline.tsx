@@ -9,5 +9,9 @@ export interface SurveyInlineProps {
 }
 
 export function SurveyInline({ children, className }: SurveyInlineProps) {
-  return <div className={className} data-survey-inline="">{children}</div>
+  return (
+    <div className={className} data-survey-inline="">
+      {children}
+    </div>
+  )
 }

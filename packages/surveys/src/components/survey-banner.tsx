@@ -9,5 +9,9 @@ export interface SurveyBannerProps {
 }
 
 export function SurveyBanner({ children, className }: SurveyBannerProps) {
-  return <div className={className} data-survey-banner="">{children}</div>
+  return (
+    <div className={className} data-survey-banner="">
+      {children}
+    </div>
+  )
 }

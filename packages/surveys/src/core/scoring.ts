@@ -52,10 +52,7 @@ export function calculateNPS(responses: number[]): NPSResult {
  * Score = percentage of responses at or above threshold.
  * Default threshold: 4 on a 1-5 scale.
  */
-export function calculateCSAT(
-  responses: number[],
-  threshold = 4,
-): CSATResult {
+export function calculateCSAT(responses: number[], threshold = 4): CSATResult {
   const total = responses.length
   if (total === 0) {
     return { score: 0, positive: 0, negative: 0, total: 0, threshold, responses: [] }

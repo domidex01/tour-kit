@@ -110,6 +110,9 @@ export interface SurveysProviderProps {
   onScoreCalculated?: (
     surveyId: string,
     scoreType: 'nps' | 'csat' | 'ces',
-    result: import('./scoring').NPSResult | import('./scoring').CSATResult | import('./scoring').CESResult
+    result:
+      | import('./scoring').NPSResult
+      | import('./scoring').CSATResult
+      | import('./scoring').CESResult
   ) => void
 }

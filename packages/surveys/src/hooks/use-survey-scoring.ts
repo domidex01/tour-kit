@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useSurveysContext } from '../context/surveys-context'
-import { calculateNPS, calculateCSAT, calculateCES } from '../core/scoring'
+import { calculateCES, calculateCSAT, calculateNPS } from '../core/scoring'
 import type { CESResult, CSATResult, NPSResult } from '../types/scoring'
 
 interface UseSurveyScoringReturn {
@@ -28,7 +28,7 @@ export function useSurveyScoring(): UseSurveyScoringReturn {
         if (!state || !config || !state.isCompleted) return null
 
         const values = Array.from(state.responses.values()).filter(
-          (v): v is number => typeof v === 'number',
+          (v): v is number => typeof v === 'number'
         )
         if (values.length === 0) return null
 
@@ -44,6 +44,6 @@ export function useSurveyScoring(): UseSurveyScoringReturn {
         }
       },
     }),
-    [ctx],
+    [ctx]
   )
 }

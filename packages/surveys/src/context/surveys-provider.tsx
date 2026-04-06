@@ -1,17 +1,10 @@
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-} from 'react'
 import { useTourContext } from '@tour-kit/core'
+import { type ReactNode, useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
+import { calculateCES, calculateCSAT, calculateNPS } from '../core/scoring'
+import type { SurveysContextValue, SurveysProviderProps } from '../types/context'
 import type { AnswerValue } from '../types/question'
 import type { CESResult, CSATResult, NPSResult } from '../types/scoring'
 import type { DismissalReason, SurveyConfig, SurveyState } from '../types/survey'
-import type { SurveysContextValue, SurveysProviderProps } from '../types/context'
-import { calculateNPS, calculateCSAT, calculateCES } from '../core/scoring'
 import { SurveysContext } from './surveys-context'
 
 // ── Reducer types ──────────────────────────────────────────
@@ -56,189 +49,168 @@ function createInitialSurveyState(id: string): SurveyState {
   }
 }
 
-function surveysReducer(
+function updateSurvey(
   state: SurveysReducerState,
-  action: SurveysAction,
+  id: string,
+  updater: (existing: SurveyState) => SurveyState,
+  clearActive = false
 ): SurveysReducerState {
-  switch (action.type) {
-    case 'REGISTER': {
-      const surveys = new Map(state.surveys)
-      if (!surveys.has(action.config.id)) {
-        surveys.set(action.config.id, createInitialSurveyState(action.config.id))
-      }
-      return { ...state, surveys }
-    }
+  const surveys = new Map(state.surveys)
+  const existing = surveys.get(id)
+  if (!existing) return state
+  surveys.set(id, updater(existing))
+  return {
+    ...state,
+    surveys,
+    activeSurvey: clearActive && state.activeSurvey === id ? null : state.activeSurvey,
+  }
+}
 
-    case 'UNREGISTER': {
-      const surveys = new Map(state.surveys)
-      surveys.delete(action.id)
-      return {
-        ...state,
-        surveys,
-        activeSurvey: state.activeSurvey === action.id ? null : state.activeSurvey,
-        queue: state.queue.filter((id) => id !== action.id),
-      }
-    }
+function handleRegister(state: SurveysReducerState, config: SurveyConfig): SurveysReducerState {
+  const surveys = new Map(state.surveys)
+  if (!surveys.has(config.id)) {
+    surveys.set(config.id, createInitialSurveyState(config.id))
+  }
+  return { ...state, surveys }
+}
 
-    case 'SHOW': {
-      const surveys = new Map(state.surveys)
-      const existing = surveys.get(action.id)
-      if (!existing) return state
+function handleUnregister(state: SurveysReducerState, id: string): SurveysReducerState {
+  const surveys = new Map(state.surveys)
+  surveys.delete(id)
+  return {
+    ...state,
+    surveys,
+    activeSurvey: state.activeSurvey === id ? null : state.activeSurvey,
+    queue: state.queue.filter((qid) => qid !== id),
+  }
+}
 
-      if (state.activeSurvey && state.activeSurvey !== action.id) {
-        // Queue it if another survey is active
-        return {
-          ...state,
-          queue: [...state.queue, action.id],
-        }
-      }
+function handleShow(state: SurveysReducerState, id: string): SurveysReducerState {
+  const existing = state.surveys.get(id)
+  if (!existing) return state
 
-      surveys.set(action.id, {
-        ...existing,
-        isActive: true,
-        isVisible: true,
-        viewCount: existing.viewCount + 1,
-        lastViewedAt: new Date(),
-      })
+  if (state.activeSurvey && state.activeSurvey !== id) {
+    return { ...state, queue: [...state.queue, id] }
+  }
 
-      return { ...state, surveys, activeSurvey: action.id }
-    }
+  const surveys = new Map(state.surveys)
+  surveys.set(id, {
+    ...existing,
+    isActive: true,
+    isVisible: true,
+    viewCount: existing.viewCount + 1,
+    lastViewedAt: new Date(),
+  })
+  return { ...state, surveys, activeSurvey: id }
+}
 
-    case 'HIDE': {
-      const surveys = new Map(state.surveys)
-      const existing = surveys.get(action.id)
-      if (!existing) return state
+function handleAnswer(
+  state: SurveysReducerState,
+  id: string,
+  questionId: string,
+  value: AnswerValue
+): SurveysReducerState {
+  return updateSurvey(state, id, (existing) => {
+    const responses = new Map(existing.responses)
+    responses.set(questionId, value)
+    return { ...existing, responses }
+  })
+}
 
-      surveys.set(action.id, {
-        ...existing,
-        isActive: false,
-        isVisible: false,
-      })
-
-      return {
-        ...state,
-        surveys,
-        activeSurvey: state.activeSurvey === action.id ? null : state.activeSurvey,
-      }
-    }
-
-    case 'DISMISS': {
-      const surveys = new Map(state.surveys)
-      const existing = surveys.get(action.id)
-      if (!existing) return state
-
-      surveys.set(action.id, {
-        ...existing,
+const reducerHandlers: Record<
+  string,
+  (state: SurveysReducerState, action: SurveysAction) => SurveysReducerState
+> = {
+  REGISTER: (state, action) => handleRegister(state, (action as { config: SurveyConfig }).config),
+  UNREGISTER: (state, action) => handleUnregister(state, (action as { id: string }).id),
+  SHOW: (state, action) => handleShow(state, (action as { id: string }).id),
+  HIDE: (state, action) =>
+    updateSurvey(
+      state,
+      (action as { id: string }).id,
+      (e) => ({ ...e, isActive: false, isVisible: false }),
+      true
+    ),
+  DISMISS: (state, action) => {
+    const { id, reason } = action as { id: string; reason: DismissalReason }
+    return updateSurvey(
+      state,
+      id,
+      (e) => ({
+        ...e,
         isActive: false,
         isVisible: false,
         isDismissed: true,
         dismissedAt: new Date(),
-        dismissalReason: action.reason,
-      })
-
-      return {
-        ...state,
-        surveys,
-        activeSurvey: state.activeSurvey === action.id ? null : state.activeSurvey,
-      }
-    }
-
-    case 'SNOOZE': {
-      const surveys = new Map(state.surveys)
-      const existing = surveys.get(action.id)
-      if (!existing) return state
-
-      surveys.set(action.id, {
-        ...existing,
+        dismissalReason: reason,
+      }),
+      true
+    )
+  },
+  SNOOZE: (state, action) =>
+    updateSurvey(
+      state,
+      (action as { id: string }).id,
+      (e) => ({
+        ...e,
         isActive: false,
         isVisible: false,
         isSnoozed: true,
-        snoozeCount: existing.snoozeCount + 1,
-      })
-
-      return {
-        ...state,
-        surveys,
-        activeSurvey: state.activeSurvey === action.id ? null : state.activeSurvey,
-      }
+        snoozeCount: e.snoozeCount + 1,
+      }),
+      true
+    ),
+  ANSWER: (state, action) => {
+    const { id, questionId, value } = action as {
+      id: string
+      questionId: string
+      value: AnswerValue
     }
-
-    case 'ANSWER': {
-      const surveys = new Map(state.surveys)
-      const existing = surveys.get(action.id)
-      if (!existing) return state
-
-      const responses = new Map(existing.responses)
-      responses.set(action.questionId, action.value)
-
-      surveys.set(action.id, { ...existing, responses })
-
-      return { ...state, surveys }
-    }
-
-    case 'NEXT_QUESTION': {
-      const surveys = new Map(state.surveys)
-      const existing = surveys.get(action.id)
-      if (!existing) return state
-
-      surveys.set(action.id, {
-        ...existing,
-        currentStep: existing.currentStep + 1,
-      })
-
-      return { ...state, surveys }
-    }
-
-    case 'PREV_QUESTION': {
-      const surveys = new Map(state.surveys)
-      const existing = surveys.get(action.id)
-      if (!existing) return state
-
-      surveys.set(action.id, {
-        ...existing,
-        currentStep: Math.max(0, existing.currentStep - 1),
-      })
-
-      return { ...state, surveys }
-    }
-
-    case 'COMPLETE': {
-      const surveys = new Map(state.surveys)
-      const existing = surveys.get(action.id)
-      if (!existing) return state
-
-      surveys.set(action.id, {
-        ...existing,
+    return handleAnswer(state, id, questionId, value)
+  },
+  NEXT_QUESTION: (state, action) =>
+    updateSurvey(state, (action as { id: string }).id, (e) => ({
+      ...e,
+      currentStep: e.currentStep + 1,
+    })),
+  PREV_QUESTION: (state, action) =>
+    updateSurvey(state, (action as { id: string }).id, (e) => ({
+      ...e,
+      currentStep: Math.max(0, e.currentStep - 1),
+    })),
+  COMPLETE: (state, action) =>
+    updateSurvey(
+      state,
+      (action as { id: string }).id,
+      (e) => ({
+        ...e,
         isActive: false,
         isVisible: false,
         isCompleted: true,
         completedAt: new Date(),
-      })
-
-      return {
-        ...state,
-        surveys,
-        activeSurvey: state.activeSurvey === action.id ? null : state.activeSurvey,
-      }
+      }),
+      true
+    ),
+  RESET: (state, action) => {
+    const surveys = new Map(state.surveys)
+    surveys.set(
+      (action as { id: string }).id,
+      createInitialSurveyState((action as { id: string }).id)
+    )
+    return { ...state, surveys }
+  },
+  RESET_ALL: (state) => {
+    const surveys = new Map<string, SurveyState>()
+    for (const [id] of state.surveys) {
+      surveys.set(id, createInitialSurveyState(id))
     }
+    return { ...state, surveys, activeSurvey: null, queue: [] }
+  },
+}
 
-    case 'RESET': {
-      const surveys = new Map(state.surveys)
-      surveys.set(action.id, createInitialSurveyState(action.id))
-      return { ...state, surveys }
-    }
-
-    case 'RESET_ALL': {
-      const surveys = new Map<string, SurveyState>()
-      for (const [id] of state.surveys) {
-        surveys.set(id, createInitialSurveyState(id))
-      }
-      return { ...state, surveys, activeSurvey: null, queue: [] }
-    }
-
-    default:
-      return state
-  }
+function surveysReducer(state: SurveysReducerState, action: SurveysAction): SurveysReducerState {
+  const handler = reducerHandlers[action.type]
+  return handler ? handler(state, action) : state
 }
 
 // ── Context awareness ──────────────────────────────────────
@@ -299,7 +271,7 @@ export function SurveysProvider({
       dispatch({ type: 'SHOW', id })
       onSurveyShow?.(id)
     },
-    [isTourActive, onSurveyShow],
+    [isTourActive, onSurveyShow]
   )
 
   const handleHide = useCallback((id: string) => {
@@ -311,7 +283,7 @@ export function SurveysProvider({
       dispatch({ type: 'DISMISS', id, reason })
       onSurveyDismiss?.(id, reason)
     },
-    [onSurveyDismiss],
+    [onSurveyDismiss]
   )
 
   const handleSnooze = useCallback(
@@ -319,7 +291,7 @@ export function SurveysProvider({
       dispatch({ type: 'SNOOZE', id })
       onSurveySnooze?.(id)
     },
-    [onSurveySnooze],
+    [onSurveySnooze]
   )
 
   const handleAnswer = useCallback(
@@ -328,7 +300,7 @@ export function SurveysProvider({
       onQuestionAnswered?.(surveyId, questionId, value)
       onSurveyAnswer?.(surveyId, questionId, value)
     },
-    [onQuestionAnswered, onSurveyAnswer],
+    [onQuestionAnswered, onSurveyAnswer]
   )
 
   const handleNextQuestion = useCallback((surveyId: string) => {
@@ -351,7 +323,7 @@ export function SurveysProvider({
       const config = configsRef.current.find((s) => s.id === surveyId)
       if (config?.type && config.type !== 'custom' && onScoreCalculated) {
         const values = Array.from(responses.values()).filter(
-          (v): v is number => typeof v === 'number',
+          (v): v is number => typeof v === 'number'
         )
         if (values.length > 0) {
           let result: NPSResult | CSATResult | CESResult
@@ -370,7 +342,7 @@ export function SurveysProvider({
         }
       }
     },
-    [state.surveys, onSurveyComplete, onScoreCalculated],
+    [state.surveys, onSurveyComplete, onScoreCalculated]
   )
 
   const handleRegister = useCallback((config: SurveyConfig) => {
@@ -389,15 +361,9 @@ export function SurveysProvider({
     dispatch({ type: 'RESET_ALL' })
   }, [])
 
-  const getState = useCallback(
-    (id: string) => state.surveys.get(id),
-    [state.surveys],
-  )
+  const getState = useCallback((id: string) => state.surveys.get(id), [state.surveys])
 
-  const getConfig = useCallback(
-    (id: string) => configsRef.current.find((s) => s.id === id),
-    [],
-  )
+  const getConfig = useCallback((id: string) => configsRef.current.find((s) => s.id === id), [])
 
   const canShow = useCallback(
     (id: string) => {
@@ -407,7 +373,7 @@ export function SurveysProvider({
       if (surveyState.isCompleted || surveyState.isDismissed) return false
       return true
     },
-    [isTourActive, state.surveys],
+    [isTourActive, state.surveys]
   )
 
   const value = useMemo<SurveysContextValue>(
@@ -450,7 +416,7 @@ export function SurveysProvider({
       getState,
       getConfig,
       canShow,
-    ],
+    ]
   )
 
   return <SurveysContext.Provider value={value}>{children}</SurveysContext.Provider>

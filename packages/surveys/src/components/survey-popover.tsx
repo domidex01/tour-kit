@@ -9,5 +9,9 @@ export interface SurveyPopoverProps {
 }
 
 export function SurveyPopover({ children, className }: SurveyPopoverProps) {
-  return <div className={className} data-survey-popover="">{children}</div>
+  return (
+    <div className={className} data-survey-popover="">
+      {children}
+    </div>
+  )
 }

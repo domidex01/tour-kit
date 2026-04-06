@@ -9,5 +9,9 @@ export interface SurveyModalProps {
 }
 
 export function SurveyModal({ children, className }: SurveyModalProps) {
-  return <div className={className} data-survey-modal="">{children}</div>
+  return (
+    <div className={className} data-survey-modal="">
+      {children}
+    </div>
+  )
 }

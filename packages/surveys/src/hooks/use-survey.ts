@@ -33,14 +33,13 @@ export function useSurvey(surveyId: string): UseSurveyReturn {
       hide: () => ctx.hide(surveyId),
       dismiss: (reason?: DismissalReason) => ctx.dismiss(surveyId, reason),
       snooze: () => ctx.snooze(surveyId),
-      answer: (questionId: string, value: AnswerValue) =>
-        ctx.answer(surveyId, questionId, value),
+      answer: (questionId: string, value: AnswerValue) => ctx.answer(surveyId, questionId, value),
       nextQuestion: () => ctx.nextQuestion(surveyId),
       prevQuestion: () => ctx.prevQuestion(surveyId),
       complete: () => ctx.complete(surveyId),
       reset: () => ctx.reset(surveyId),
       canShow: ctx.canShow(surveyId),
     }),
-    [ctx, surveyId],
+    [ctx, surveyId]
   )
 }
