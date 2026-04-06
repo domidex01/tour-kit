@@ -1,19 +1,29 @@
 {
-  "name": "@tour-kit/license",
-  "version": "1.0.0",
-  "description": "License validation for Tour Kit premium features",
+  "name": "@tour-kit/surveys",
+  "version": "0.1.0",
+  "description": "In-app microsurveys for TourKit - NPS, CSAT, CES, and custom feedback with fatigue prevention",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/DomiDex/tour-kit#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DomiDex/tour-kit.git",
-    "directory": "packages/license"
+    "directory": "packages/surveys"
   },
   "bugs": {
     "url": "https://github.com/DomiDex/tour-kit/issues"
   },
-  "keywords": ["react", "license", "tour-kit", "premium", "polar"],
+  "keywords": [
+    "react",
+    "surveys",
+    "nps",
+    "csat",
+    "ces",
+    "feedback",
+    "microsurvey",
+    "onboarding",
+    "tour-kit"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -39,9 +49,11 @@
         "default": "./dist/headless.cjs"
       }
     },
+    "./styles/variables.css": "./src/styles/variables.css",
+    "./styles.css": "./dist/styles/variables.css",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "files": ["dist", "src/styles", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "restricted",
@@ -51,28 +63,51 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "zod": "catalog:"
+    "@tour-kit/core": "workspace:*",
+    "@tour-kit/license": "workspace:*",
+    "@floating-ui/react": "^0.27.19",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.5.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "tailwindcss": "^3.4.0 || ^4.0.0",
+    "@mui/base": "^5.0.0-beta.0",
+    "@tour-kit/scheduling": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    },
+    "@mui/base": {
+      "optional": true
+    },
+    "@tour-kit/scheduling": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@vitejs/plugin-react": "^4.7.0",
+    "@vitejs/plugin-react": "^4.5.2",
     "@vitest/coverage-v8": "catalog:",
     "jsdom": "catalog:",
+    "vitest-axe": "^1.0.0-pre.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.8",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
