@@ -33,6 +33,7 @@ import {
   ContactPage,
   FeaturesPage,
   HomePage,
+  LicenseTestPage,
   MediaPage,
   PricingPage,
 } from './pages'
@@ -421,6 +422,7 @@ function AppContent() {
               <Route path="/base-ui" element={<BaseUIPage />} />
               <Route path="/media" element={<MediaPage />} />
               <Route path="/ai-chat" element={<AiChatPage />} />
+              <Route path="/license-test" element={<LicenseTestPage />} />
             </Routes>
           </Layout>
         </HintsProvider>
@@ -438,9 +440,17 @@ function App() {
   // Load Google Analytics if configured
   useGoogleAnalytics()
 
+  const location = useLocation()
+
+  // License test page renders outside the main LicenseProvider
+  // so "no-provider" scenario actually has no provider in the tree
+  if (location.pathname === '/license-test') {
+    return <LicenseTestPage />
+  }
+
   return (
     <LicenseProvider
-      organizationId="your-polar-org-id" // TODO: replace with your Polar organization ID
+      organizationId={import.meta.env.VITE_POLAR_ORG_ID ?? ''}
       licenseKey={import.meta.env.VITE_TOUR_KIT_LICENSE_KEY ?? ''}
     >
       <AiChatProvider

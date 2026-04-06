@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/announcements",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Product announcements for TourKit - Modal, Slideout, Banner, Toast, and Spotlight variants",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
@@ -13,7 +13,15 @@
   "bugs": {
     "url": "https://github.com/DomiDex/tour-kit/issues"
   },
-  "keywords": ["react", "announcements", "modal", "toast", "banner", "onboarding", "tour-kit"],
+  "keywords": [
+    "react",
+    "announcements",
+    "modal",
+    "toast",
+    "banner",
+    "onboarding",
+    "tour-kit"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -53,7 +61,12 @@
     "./styles.css": "./dist/styles/variables.css",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "src/styles", "README.md", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "src/styles",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "restricted",

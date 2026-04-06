@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/license",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "License validation for Tour Kit premium features",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
@@ -13,7 +13,13 @@
   "bugs": {
     "url": "https://github.com/DomiDex/tour-kit/issues"
   },
-  "keywords": ["react", "license", "tour-kit", "premium", "polar"],
+  "keywords": [
+    "react",
+    "license",
+    "tour-kit",
+    "premium",
+    "polar"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -41,7 +47,11 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "restricted",
