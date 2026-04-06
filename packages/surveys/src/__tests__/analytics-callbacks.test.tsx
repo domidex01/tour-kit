@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
 import type * as React from 'react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SurveysProvider } from '../context'
 import { useSurveys } from '../hooks'
 import type { SurveyConfig } from '../types'
@@ -47,10 +47,7 @@ function createTestSurveyConfig(overrides?: Partial<SurveyConfig>): SurveyConfig
   }
 }
 
-function createWrapper(
-  surveys: SurveyConfig[],
-  callbacks: ReturnType<typeof createCallbackSpies>,
-) {
+function createWrapper(surveys: SurveyConfig[], callbacks: ReturnType<typeof createCallbackSpies>) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <SurveysProvider surveys={surveys} {...callbacks}>
@@ -97,10 +94,7 @@ describe('Analytics callbacks', () => {
     })
 
     expect(spies.onSurveyDismiss).toHaveBeenCalledTimes(1)
-    expect(spies.onSurveyDismiss).toHaveBeenCalledWith(
-      'test-survey-1',
-      'close_button',
-    )
+    expect(spies.onSurveyDismiss).toHaveBeenCalledWith('test-survey-1', 'close_button')
   })
 
   it('fires onSurveySnooze with id after SNOOZE action', () => {
@@ -142,10 +136,7 @@ describe('Analytics callbacks', () => {
     })
 
     expect(spies.onSurveyComplete).toHaveBeenCalledTimes(1)
-    expect(spies.onSurveyComplete).toHaveBeenCalledWith(
-      'test-survey-1',
-      expect.any(Map),
-    )
+    expect(spies.onSurveyComplete).toHaveBeenCalledWith('test-survey-1', expect.any(Map))
     const responses = spies.onSurveyComplete.mock.calls[0][1] as Map<string, unknown>
     expect(responses.get('q1')).toBe(9)
   })
@@ -166,18 +157,12 @@ describe('Analytics callbacks', () => {
     })
 
     expect(spies.onQuestionAnswered).toHaveBeenCalledTimes(1)
-    expect(spies.onQuestionAnswered).toHaveBeenCalledWith(
-      'test-survey-1',
-      'q1',
-      8,
-    )
+    expect(spies.onQuestionAnswered).toHaveBeenCalledWith('test-survey-1', 'q1', 8)
   })
 
   it('fires onScoreCalculated with id, scoreType, and result after COMPLETE when survey has scoreType', () => {
     const spies = createCallbackSpies()
-    const surveys = [
-      createTestSurveyConfig({ id: 'nps-survey', type: 'nps' }),
-    ]
+    const surveys = [createTestSurveyConfig({ id: 'nps-survey', type: 'nps' })]
     const { result } = renderHook(() => useSurveys(), {
       wrapper: createWrapper(surveys, spies),
     })
@@ -202,7 +187,7 @@ describe('Analytics callbacks', () => {
         promoters: expect.any(Number),
         passives: expect.any(Number),
         detractors: expect.any(Number),
-      }),
+      })
     )
   })
 

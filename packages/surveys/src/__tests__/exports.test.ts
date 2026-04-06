@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import * as SurveysIndex from '../index'
+import { describe, expect, it } from 'vitest'
 import * as SurveysHeadless from '../headless'
+import * as SurveysIndex from '../index'
 
 describe('index.ts barrel exports', () => {
   it('exports all styled components, hooks, scoring functions, and provider', () => {
