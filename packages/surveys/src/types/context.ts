@@ -99,4 +99,20 @@ export interface SurveysProviderProps {
 
   /** Callback when any question is answered */
   onSurveyAnswer?: (surveyId: string, questionId: string, value: AnswerValue) => void
+
+  /** Callback when any survey is snoozed */
+  onSurveySnooze?: (id: string) => void
+
+  /** Callback when a question is answered (alias for analytics) */
+  onQuestionAnswered?: (surveyId: string, questionId: string, value: AnswerValue) => void
+
+  /** Callback when a score is calculated after survey completion */
+  onScoreCalculated?: (
+    surveyId: string,
+    scoreType: 'nps' | 'csat' | 'ces',
+    result:
+      | import('./scoring').NPSResult
+      | import('./scoring').CSATResult
+      | import('./scoring').CESResult
+  ) => void
 }
