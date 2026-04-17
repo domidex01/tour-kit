@@ -1,0 +1,189 @@
+---
+title: "GitHub stars don't pay the bills (but they help)"
+slug: "github-stars-business"
+description: "A solo developer's honest look at what GitHub stars actually do for an open-source library. Real numbers on the gap between stars and revenue."
+primary_keyword: "github stars business"
+secondary_keywords: ["open source marketing github stars", "github stars strategy", "github stars value", "open source developer marketing"]
+category: "Thought Leadership"
+schema_type: "TechArticle"
+spreadsheet_row: 235
+date: "2026-04-11"
+updated: "2026-04-11"
+published: true
+ogImage: /og-images/github-stars-business.png
+---
+
+# GitHub stars don't pay the bills (but they help)
+
+I watched the star count on [Tour Kit](https://usertourkit.com/) tick past a milestone last month. My first instinct was to screenshot it and post it somewhere. My second instinct was to check my Polar dashboard.
+
+The numbers told two different stories. Stars go up. Revenue doesn't follow in lockstep.
+
+If you're building an open-source developer library as a solo developer in 2026, understanding the gap between those two lines is the difference between a sustainable project and an unpaid job. This isn't a "stars are useless" take. They aren't useless. But the relationship between stars and money is weirder, more indirect, and more useful than most people assume.
+
+## The starting point
+
+Every open-source project starts with the same dopamine loop: push code, watch stars accumulate, feel validated, repeat. I launched Tour Kit as a headless React library for product tours with ten packages, MIT-licensed core, and TypeScript-strict configuration. Stars started accumulating almost immediately. And I started paying close attention to a number that felt meaningful but didn't map cleanly to anything else I was tracking.
+
+A GitHub star is a bookmark with social proof attached. Someone saw your repo, thought "looks interesting," and clicked a button. That's it. As of April 2026, a [study by He et al.](https://www.ndss-symposium.org/wp-content/uploads/madweb2024-4-paper.pdf) found over 4.5 million suspected fake stars on GitHub. Fake stars cost as little as EUR 0.08/star for bulk purchases and up to EUR 0.80/star for [premium stars from aged accounts](https://the-guild.dev/blog/judging-open-source-by-github-stars).
+
+I'm not saying anyone starring Tour Kit is fake. But when a metric can be purchased for less than the cost of a coffee, that tells you something about its weight as a business signal.
+
+## Key decisions
+
+The two architectural choices I made early on determined whether GitHub stars would be a vanity metric or a functional part of Tour Kit's growth strategy, and neither decision was obvious at the time.
+
+First, I went open core instead of hosted. MIT-licensed core packages, proprietary extended packages at [$99 one-time](https://usertourkit.com/). This means stars matter mostly as a trust signal. A developer evaluating two libraries with identical READMEs will click into the one with 5,000 stars before the one with 50. Is that fair? No. Is it how decisions actually get made? Yes.
+
+Second, I treated GitHub search ranking as a growth channel. GitHub's search results weight star counts. More stars means higher ranking, which drives organic discovery, which drives more stars. For a solo developer without a marketing budget, that flywheel is the single most concrete business value stars provide.
+
+GitHub added [36 million new developers in 2025](https://github.blog/open-source/maintainers/what-to-expect-for-open-source-in-2026/). AI-related repositories jumped 178% year-over-year. That's a bigger audience than ever searching for libraries, and stars are the ranking signal in that marketplace.
+
+## What went wrong
+
+The biggest mistake I made in Tour Kit's first year was treating GitHub stars as a leading indicator of project health, when they're actually a lagging indicator of awareness that tells you almost nothing about adoption or revenue potential.
+
+I'd check the star count before checking npm installs. A day where stars climbed felt productive even when nothing downstream moved. And when I looked at the numbers honestly, the correlation between stars and actual package adoption was moderate at best.
+
+Research across hundreds of thousands of packages confirms this. JavaScript libraries show a moderately stronger relationship between stars and downloads than PHP or Ruby, but "moderate" still isn't "strong."
+
+Worse, I watched what happens when you rely on donations. OpenSSL, one of the most critical pieces of software on the internet, received [roughly $2,000 annually in donations](https://news.ycombinator.com/item?id=33540293) as of 2024. Two thousand dollars. For software that secures the internet. One developer on Hacker News shared that after placing a donation link on their 5,000+ star repo, they received exactly one recurring donation: $1 per month.
+
+Stars don't translate to donations. They don't translate to sponsorships. As one HN commenter put it: "Stars don't pay rent. Real contributions, thoughtful PRs, and working code do."
+
+## What worked
+
+After recalibrating how I thought about stars, three specific changes moved Tour Kit from "growing star count, flat revenue" to "stars feed a funnel that actually converts," and only one of them was directly star-related.
+
+**Using stars as a discovery engine, not a scoreboard.** Once I stopped obsessing over the daily count and started treating GitHub search ranking as a marketing channel, stars became useful. People searching "react product tour library" find Tour Kit because it ranks well. That ranking comes partly from stars. The stars are means, not ends.
+
+**Tracking what matters downstream.** After a year of tracking everything I could, here's what I actually look at now:
+
+<table>
+  <thead>
+    <tr>
+      <th>Signal</th>
+      <th>Correlation with stars</th>
+      <th>Correlation with revenue</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GitHub search visibility</td>
+      <td>Strong</td>
+      <td>Indirect (discovery funnel)</td>
+    </tr>
+    <tr>
+      <td>npm weekly downloads</td>
+      <td>Moderate</td>
+      <td>Moderate</td>
+    </tr>
+    <tr>
+      <td>Production deployments</td>
+      <td>Weak</td>
+      <td>Strong</td>
+    </tr>
+    <tr>
+      <td>Documentation page views</td>
+      <td>Moderate</td>
+      <td>Strong</td>
+    </tr>
+    <tr>
+      <td>Issue quality (detailed bug reports)</td>
+      <td>Weak</td>
+      <td>Strong</td>
+    </tr>
+  </tbody>
+</table>
+
+Time to second interaction turned out to be the strongest predictor. Someone who stars today and opens an issue tomorrow is worth more than a hundred people who starred and disappeared.
+
+**Learning from projects that turned stars into money.** [Postiz](https://www.indiehackers.com/post/i-did-it-my-open-source-company-now-makes-14-2k-monthly-as-a-single-developer-f2fec088a4), an open-source social media tool, reached $14,200/month MRR as a solo developer. Revenue came from cloud hosting, not the code itself. Growth from $6,523 to $12,648 MRR between July and August 2025 coincided with 4.79 million Docker downloads. Stars drove awareness. A separate product drove revenue.
+
+The pattern is consistent. As [senko on HN](https://news.ycombinator.com/item?id=33540293) put it: "Open source is not a business model. You have to make something people want AND convince those people it's in their best interest to pay you."
+
+## What I'd do differently
+
+Looking back, the relationship between GitHub stars and actual business outcomes follows a pattern that most open-source maintainers learn the hard way: stars are necessary for discovery but insufficient for sustainability on their own. I tracked what caused star growth spikes, and the pattern matches what [other maintainers report](https://dev.to/iris1031/how-to-get-more-github-stars-the-definitive-guide-33k-stars-case-study-2kjo): growth is event-driven, not linear. Hacker News front page gives the biggest single-day spike but low retention. Reddit r/reactjs posts produce smaller spikes with higher-quality users. Blog posts with code examples are a slow burn that compounds over months.
+
+If I were starting over, three changes:
+
+First, plan monetization from day one. Not charging for the core, but architecting the paid tier alongside it. One HN commenter's advice is tattooed on my brain: "Think about monetization when you start the project, not when it's done."
+
+Second, spend less energy chasing stars and more on downstream metrics. A single blog post that drives 50 npm installs beats a trending repo day that drives 500 stars and zero installs.
+
+Third, accept that Tour Kit has real limitations. There's no visual builder. You need React developers to implement it. The community is smaller than React Joyride or Shepherd.js. Acknowledging these honestly in content actually builds more trust than pretending they don't exist.
+
+## What's next
+
+The star count on Tour Kit will keep climbing, but the dashboard I check every morning now shows npm installs, documentation page views, and issue quality scores instead of the GitHub star counter that used to be my browser's default tab.
+
+I'm measuring success by how many developers ship a product tour and come back for extended packages because the free tier proved the code is solid. Stars get them to the repo. The README gets them to the docs. Docs get them to `npm install`. And that installation experience decides whether they stay.
+
+That last part is where the real work happens. Not in the star count.
+
+---
+
+**Building something in open source?** [Tour Kit](https://usertourkit.com/) is headless, composable, and MIT-licensed at its core. Ten packages, under 8KB gzipped core, TypeScript-strict. [Check the repo](https://github.com/user-tour-kit/tour-kit) or install directly:
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+---
+
+*Sources: [The Guild: Judging Open Source by GitHub Stars](https://the-guild.dev/blog/judging-open-source-by-github-stars) | [StateShift: Beyond GitHub Stars](https://blog.stateshift.com/beyond-github-stars/) | [Star History: Do GitHub Stars Equal Money?](https://www.star-history.com/blog/do-github-stars-equal-money) | [GitHub Octoverse 2025](https://github.blog/open-source/maintainers/what-to-expect-for-open-source-in-2026/) | [He et al., 2024: Fake Star Detection](https://www.ndss-symposium.org/wp-content/uploads/madweb2024-4-paper.pdf) | [CSS-Tricks: Open Source & Sustainability](https://css-tricks.com/open-source-sustainability/)*
+
+---
+
+**Internal linking suggestions:**
+- Link FROM this article TO: [The open-source business model for developer libraries](/blog/open-source-business-model-developer-libraries)
+- Link FROM this article TO: [Open-source onboarding: the real cost is developer time](/blog/open-source-onboarding-cost-developer-time)
+- Link TO this article FROM: any future "building in public" or open-source strategy articles
+
+**Distribution checklist:**
+- Hacker News: "Show HN" or "GitHub Stars Don't Pay the Bills" framing
+- Reddit: r/opensource, r/indiehackers, r/reactjs
+- Dev.to: cross-post with canonical URL
+- Indie Hackers: thread in "building in public" group
+- Twitter/X: thread format with key stats (4.5M fake stars, $2K OpenSSL donations, Postiz $14.2K MRR)
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "GitHub stars don't pay the bills (but they help)",
+  "description": "A solo developer's honest look at what GitHub stars actually do for an open-source library. Real numbers on the gap between stars and revenue.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://usertourkit.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-11",
+  "dateModified": "2026-04-11",
+  "image": "https://usertourkit.com/og-images/github-stars-business.png",
+  "url": "https://usertourkit.com/blog/github-stars-business",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/github-stars-business"
+  },
+  "keywords": ["github stars business", "open source marketing github stars", "github stars strategy", "open source developer marketing"],
+  "proficiencyLevel": "Beginner",
+  "dependencies": "N/A",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```

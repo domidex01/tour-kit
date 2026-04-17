@@ -1,0 +1,668 @@
+---
+title: "Unit testing Tour Kit components with Vitest"
+slug: "unit-testing-tour-kit-components-vitest"
+description: "Test product tour components with Vitest and React Testing Library. Set up providers, test hooks, verify accessibility, and catch regressions."
+primary_keyword: "vitest test tour component"
+secondary_keywords: ["unit test product tour react", "vitest onboarding test", "react testing library tour", "vitest react component testing"]
+category: "Tutorials"
+schema_type: "TechArticle"
+spreadsheet_row: 84
+date: "2026-04-07"
+updated: "2026-04-07"
+published: true
+ogImage: /og-images/unit-testing-tour-kit-components-vitest.png
+---
+
+# Unit testing Tour Kit components with Vitest
+
+Product tour components are tricky to test. They rely on context providers, DOM positioning, keyboard navigation, and accessibility attributes that most component tests never touch. Skip testing and you'll ship a tour that works in your browser but breaks under screen readers or silently loses progress.
+
+Vitest and React Testing Library make this manageable. Vitest cold-starts in roughly 200ms compared to Jest's 2-4 seconds, and watch mode re-runs a single file change in about 380ms ([Better Stack, 2025](https://betterstack.com/community/guides/scaling-nodejs/vitest-vs-jest/)). That speed matters when you're iterating on tour behavior.
+
+By the end of this tutorial, you'll have a working test suite covering Tour Kit's providers, hooks, components, and accessibility requirements.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What you'll build
+
+A complete Vitest test suite for a Tour Kit integration. The tests cover four areas: provider setup with a reusable `renderWithProviders` utility, hook behavior for `useTour` and `useStep`, component rendering for `TourCard` and `TourOverlay`, and accessibility compliance for keyboard navigation and ARIA attributes. Every test in this tutorial runs in jsdom without a real browser.
+
+## Prerequisites
+
+- React 18.2+ or React 19
+- A Vite-based project (CRA works too, but Vitest config differs)
+- TypeScript 5.0+
+- Familiarity with React Testing Library's `getByRole` and `getByText` queries
+
+## Step 1: Install the testing stack
+
+Vitest ships with native TypeScript and ESM support, so you won't fight with `ts-jest` transforms or `--experimental-vm-modules` flags. Install everything at once:
+
+```bash
+npm install -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom vitest-axe
+```
+
+### Configure Vitest
+
+Create a `vitest.config.ts` at your project root. The `globals: true` setting gives you `describe`, `it`, and `expect` without imports, matching the Jest API most teams already know.
+
+```ts
+// vitest.config.ts
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    css: true,
+  },
+})
+```
+
+### Add the setup file
+
+This file registers `@testing-library/jest-dom` matchers like `toBeInTheDocument()` and `toHaveAttribute()` so every test gets them automatically.
+
+```ts
+// src/test/setup.ts
+import '@testing-library/jest-dom/vitest'
+```
+
+Run `npx vitest --run` to confirm the setup works. You should see zero tests found, zero errors. If you get a `Cannot find module` error pointing at `@testing-library/jest-dom/vitest`, make sure you're on `@testing-library/jest-dom` v6.0 or later.
+
+## Step 2: Build a provider wrapper
+
+Tour Kit components need `TourProvider` and often `TourKitProvider` wrapping them. Testing each component means nesting those providers every time. Instead of copy-pasting provider trees, build a `renderWithProviders` utility that wraps the component in all necessary context with sensible defaults.
+
+This follows [React Testing Library's own recommendation](https://testing-library.com/docs/example-react-context/) for testing context consumers. Don't mock context. Wrap in real providers.
+
+```tsx
+// src/test/render-with-providers.tsx
+import { render, type RenderOptions } from '@testing-library/react'
+import {
+  TourProvider,
+  TourKitProvider,
+  createTour,
+  createStep,
+} from '@tour-kit/react'
+import type { Tour, TourKitConfig } from '@tour-kit/react'
+import type { ReactElement } from 'react'
+
+const defaultSteps = [
+  createStep({
+    id: 'step-1',
+    target: '#welcome',
+    title: 'Welcome',
+    content: 'This is the first step',
+  }),
+  createStep({
+    id: 'step-2',
+    target: '#features',
+    title: 'Features',
+    content: 'This is the second step',
+  }),
+]
+
+const defaultTour: Tour = createTour({
+  id: 'test-tour',
+  steps: defaultSteps,
+})
+
+interface ProviderOptions {
+  tour?: Tour
+  tourKitConfig?: Partial<TourKitConfig>
+  initialOpen?: boolean
+}
+
+export function renderWithProviders(
+  ui: ReactElement,
+  {
+    tour = defaultTour,
+    tourKitConfig = {},
+    initialOpen = true,
+    ...renderOptions
+  }: ProviderOptions & Omit<RenderOptions, 'wrapper'> = {}
+) {
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <TourKitProvider config={tourKitConfig}>
+        <TourProvider tour={tour} initialOpen={initialOpen}>
+          {children}
+        </TourProvider>
+      </TourKitProvider>
+    )
+  }
+
+  return render(ui, { wrapper: Wrapper, ...renderOptions })
+}
+```
+
+The `createTour` and `createStep` factories from `@tour-kit/core` give you type-safe tour definitions with proper defaults. No need to manually construct the full object shape.
+
+## Step 3: Test the useTour hook
+
+Custom hooks need the `renderHook` utility from React Testing Library. The `useTour` hook returns tour state and actions like `next()`, `prev()`, and `close()`. We test that state transitions work correctly.
+
+```tsx
+// src/test/use-tour.test.tsx
+import { renderHook, act } from '@testing-library/react'
+import { useTour, TourProvider, TourKitProvider, createTour, createStep } from '@tour-kit/react'
+
+const steps = [
+  createStep({ id: 'a', target: '#a', title: 'Step A', content: 'First' }),
+  createStep({ id: 'b', target: '#b', title: 'Step B', content: 'Second' }),
+  createStep({ id: 'c', target: '#c', title: 'Step C', content: 'Third' }),
+]
+const tour = createTour({ id: 'hook-test', steps })
+
+function wrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <TourKitProvider>
+      <TourProvider tour={tour} initialOpen={true}>
+        {children}
+      </TourProvider>
+    </TourKitProvider>
+  )
+}
+
+describe('useTour', () => {
+  it('starts at step 0 when tour is open', () => {
+    const { result } = renderHook(() => useTour(), { wrapper })
+    expect(result.current.currentStepIndex).toBe(0)
+    expect(result.current.isOpen).toBe(true)
+  })
+
+  it('advances to the next step', () => {
+    const { result } = renderHook(() => useTour(), { wrapper })
+
+    act(() => {
+      result.current.next()
+    })
+
+    expect(result.current.currentStepIndex).toBe(1)
+  })
+
+  it('goes back to the previous step', () => {
+    const { result } = renderHook(() => useTour(), { wrapper })
+
+    act(() => {
+      result.current.next()
+    })
+    act(() => {
+      result.current.prev()
+    })
+
+    expect(result.current.currentStepIndex).toBe(0)
+  })
+
+  it('closes the tour', () => {
+    const { result } = renderHook(() => useTour(), { wrapper })
+
+    act(() => {
+      result.current.close()
+    })
+
+    expect(result.current.isOpen).toBe(false)
+  })
+
+  it('reports total step count correctly', () => {
+    const { result } = renderHook(() => useTour(), { wrapper })
+    expect(result.current.totalSteps).toBe(3)
+  })
+})
+```
+
+Each `act()` call wraps a state update so React processes it before we assert. Without `act()`, you'll get the stale pre-update state and a console warning.
+
+## Step 4: Test TourCard rendering
+
+Component tests verify that Tour Kit renders the right content, not just that hooks work. Here we test `TourCard` shows the current step's title and content, then updates when the user clicks "Next."
+
+```tsx
+// src/test/tour-card.test.tsx
+import { screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import {
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+  TourNavigation,
+  TourProgress,
+} from '@tour-kit/react'
+import { renderWithProviders } from './render-with-providers'
+
+function TestTourCard() {
+  return (
+    <TourCard>
+      <TourCardHeader />
+      <TourCardContent />
+      <TourCardFooter>
+        <TourProgress />
+        <TourNavigation />
+      </TourCardFooter>
+    </TourCard>
+  )
+}
+
+describe('TourCard', () => {
+  it('renders the first step content', () => {
+    renderWithProviders(<TestTourCard />)
+
+    expect(screen.getByText('Welcome')).toBeInTheDocument()
+    expect(screen.getByText('This is the first step')).toBeInTheDocument()
+  })
+
+  it('shows the next step after clicking Next', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<TestTourCard />)
+
+    const nextButton = screen.getByRole('button', { name: /next/i })
+    await user.click(nextButton)
+
+    expect(screen.getByText('Features')).toBeInTheDocument()
+    expect(screen.getByText('This is the second step')).toBeInTheDocument()
+  })
+
+  it('displays step progress', () => {
+    renderWithProviders(<TestTourCard />)
+
+    // Progress indicators should show 2 dots for 2 steps
+    const progressDots = screen.getAllByRole('tab')
+    expect(progressDots).toHaveLength(2)
+  })
+})
+```
+
+Notice that `userEvent.setup()` is called before each interaction. The `userEvent` library simulates real user behavior (click events, keyboard events, focus changes) rather than firing synthetic React events. That's why it catches bugs that `fireEvent.click()` misses.
+
+## Step 5: Test keyboard navigation and accessibility
+
+Tour components must be keyboard-navigable. Tour Kit ships with `useKeyboardNavigation` that handles Escape to close, arrow keys for step navigation, and Tab/Shift+Tab within focused elements. Testing these patterns catches regressions that visual testing misses entirely.
+
+As of April 2026, axe-core catches up to 57% of WCAG issues automatically ([Smashing Magazine](https://www.smashingmagazine.com/2021/06/complete-guide-accessibility-tooling/)). Combine automated checks with explicit ARIA assertions for higher coverage.
+
+```tsx
+// src/test/tour-accessibility.test.tsx
+import { screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { axe, toHaveNoViolations } from 'vitest-axe'
+import {
+  TourCard,
+  TourCardHeader,
+  TourCardContent,
+  TourCardFooter,
+  TourNavigation,
+  TourClose,
+} from '@tour-kit/react'
+import { renderWithProviders } from './render-with-providers'
+
+expect.extend(toHaveNoViolations)
+
+function AccessibleTourCard() {
+  return (
+    <TourCard>
+      <TourCardHeader />
+      <TourCardContent />
+      <TourCardFooter>
+        <TourNavigation />
+        <TourClose />
+      </TourCardFooter>
+    </TourCard>
+  )
+}
+
+describe('Tour accessibility', () => {
+  it('passes automated axe checks', async () => {
+    const { container } = renderWithProviders(<AccessibleTourCard />)
+    const results = await axe(container)
+    expect(results).toHaveNoViolations()
+  })
+
+  it('has the correct ARIA role on the tour card', () => {
+    renderWithProviders(<AccessibleTourCard />)
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('labels the dialog with the step title', () => {
+    renderWithProviders(<AccessibleTourCard />)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toHaveAttribute('aria-labelledby')
+  })
+
+  it('closes the tour on Escape key', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AccessibleTourCard />)
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+    await user.keyboard('{Escape}')
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('traps focus within the tour card', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AccessibleTourCard />)
+
+    const dialog = screen.getByRole('dialog')
+    const focusableElements = dialog.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+
+    // Tab through all focusable elements
+    for (let i = 0; i < focusableElements.length; i++) {
+      await user.tab()
+    }
+
+    // Next tab should cycle back to the first focusable element
+    await user.tab()
+    expect(document.activeElement).toBe(focusableElements[0])
+  })
+})
+```
+
+The `vitest-axe` integration runs axe-core against your rendered HTML and reports violations with specific WCAG rule IDs. A passing `toHaveNoViolations()` check doesn't mean your component is fully accessible, but a failing check always means something is broken.
+
+## Step 6: Test storage adapters
+
+Tour Kit persists progress through `createStorageAdapter()` and `createPrefixedStorage()`. These utilities wrap `localStorage` by default, but the adapter pattern means you can swap in `sessionStorage`, cookies, or a remote backend. Testing the adapter in isolation catches serialization bugs before they corrupt user progress.
+
+```tsx
+// src/test/storage-adapter.test.ts
+import { createStorageAdapter, createPrefixedStorage, safeJSONParse } from '@tour-kit/core'
+
+describe('createStorageAdapter', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('stores and retrieves a value', () => {
+    const storage = createStorageAdapter(localStorage)
+
+    storage.setItem('tour-progress', JSON.stringify({ step: 2 }))
+    const result = safeJSONParse(storage.getItem('tour-progress') ?? '')
+
+    expect(result).toEqual({ step: 2 })
+  })
+
+  it('returns null for missing keys', () => {
+    const storage = createStorageAdapter(localStorage)
+    expect(storage.getItem('nonexistent')).toBeNull()
+  })
+
+  it('removes a value', () => {
+    const storage = createStorageAdapter(localStorage)
+
+    storage.setItem('key', 'value')
+    storage.removeItem('key')
+
+    expect(storage.getItem('key')).toBeNull()
+  })
+})
+
+describe('createPrefixedStorage', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('namespaces keys with the prefix', () => {
+    const storage = createPrefixedStorage('myapp')
+    storage.setItem('tour-done', 'true')
+
+    // Verify the actual localStorage key includes the prefix
+    expect(localStorage.getItem('myapp:tour-done')).toBe('true')
+  })
+
+  it('isolates different prefixes', () => {
+    const appA = createPrefixedStorage('app-a')
+    const appB = createPrefixedStorage('app-b')
+
+    appA.setItem('progress', '1')
+    appB.setItem('progress', '5')
+
+    expect(appA.getItem('progress')).toBe('1')
+    expect(appB.getItem('progress')).toBe('5')
+  })
+})
+```
+
+Vitest resets the jsdom environment between test files, but `localStorage` persists within a file. The `beforeEach(() => localStorage.clear())` keeps tests independent.
+
+## Common issues and troubleshooting
+
+### "Cannot find module '@tour-kit/react'"
+
+Vitest resolves modules differently than your bundler. If you're in a monorepo, add path aliases to `vitest.config.ts`:
+
+```ts
+// vitest.config.ts
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@tour-kit/core': '../packages/core/src',
+      '@tour-kit/react': '../packages/react/src',
+    },
+  },
+  // ...rest of config
+})
+```
+
+Or if you're using Turborepo, configure `projects` in your root `vitest.config.ts` so Vitest discovers all packages. As of Vitest 3.x, use `projects` instead of the deprecated `workspaces` field ([Vitest docs](https://vitest.dev/guide/browser/component-testing)).
+
+### "act() warning: an update was not wrapped in act(...)"
+
+This happens when a state update fires after your test finishes. Common culprits: `useEffect` in `TourProvider` that runs after render, or `waitForElement` polling for a target. Fix it by awaiting the next tick:
+
+```ts
+import { waitFor } from '@testing-library/react'
+
+it('waits for async state updates', async () => {
+  renderWithProviders(<TestTourCard />)
+  await waitFor(() => {
+    expect(screen.getByText('Welcome')).toBeInTheDocument()
+  })
+})
+```
+
+### "Element position returns 0,0 in tests"
+
+jsdom doesn't compute layout. Functions like `getBoundingClientRect()` return zeroes. If you're testing position-dependent logic, mock the DOM measurement:
+
+```ts
+vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+  top: 100,
+  left: 200,
+  bottom: 140,
+  right: 350,
+  width: 150,
+  height: 40,
+  x: 200,
+  y: 100,
+  toJSON: () => {},
+})
+```
+
+This is a known limitation of jsdom testing. For layout-dependent behavior, consider [Vitest Browser Mode](https://vitest.dev/guide/browser/) which runs tests in a real browser.
+
+### "Provider not found" error in tests
+
+Tour Kit hooks throw if used outside their provider. The error message tells you which provider is missing.
+
+Make sure `renderWithProviders` wraps with all required contexts. If you're testing a component that also needs analytics or checklist providers, extend the wrapper:
+
+```tsx
+// Add more providers as needed
+function Wrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <TourKitProvider>
+      <TourProvider tour={tour} initialOpen>
+        <AnalyticsProvider plugins={[]}>
+          {children}
+        </AnalyticsProvider>
+      </TourProvider>
+    </TourKitProvider>
+  )
+}
+```
+
+## Next steps
+
+You now have tests covering providers, hooks, components, accessibility, and storage. Here's where to go from there:
+
+- **Add coverage thresholds** to your Vitest config: `coverage: { thresholds: { statements: 80 } }` catches regressions before merge.
+- **Test tour callbacks**: `onStepChange`, `onTourComplete`, and `onTourClose` are good candidates for `vi.fn()` spy tests.
+- **Run axe on every component**: We tested one card. Apply the same `vitest-axe` pattern to `TourOverlay`, hint components, and any custom step renderers.
+- **Try Vitest Browser Mode**: For tour positioning logic that depends on real layout, browser mode runs the same test files in Chromium, Firefox, or WebKit.
+
+Tour Kit is our own project, and we test it this way. The gotcha we hit most often: forgetting to wrap components in enough providers. The `renderWithProviders` pattern eliminated that entirely.
+
+## FAQ
+
+### Does Vitest work with React 19?
+
+Tour Kit supports React 18.2+ and React 19. Vitest works with both through `@vitejs/plugin-react`. No special configuration needed. If you're on React 19 with the new compiler, Vitest runs the compiled output the same way your production build does.
+
+### How is Vitest different from Jest for testing React components?
+
+Vitest uses Vite's transform pipeline instead of Jest's `jest-haste-map`. It only processes files as imported during execution, giving roughly 5.6x faster runs on a 500-test suite with native TypeScript and ESM support ([Better Stack, 2025](https://betterstack.com/community/guides/scaling-nodejs/vitest-vs-jest/)).
+
+### Can I test Tour Kit's position engine in jsdom?
+
+Partially. jsdom doesn't compute layout, so `getBoundingClientRect()` returns zeroes. You can mock these values with `vi.spyOn()` for basic position logic tests. For full positioning tests with real CSS, use Vitest's browser mode or Playwright component testing instead of jsdom.
+
+### Do I need to mock Tour Kit's context providers?
+
+No. The React Testing Library docs recommend wrapping components in real providers with controlled values rather than mocking context. Tour Kit's `TourProvider` accepts a `tour` prop and `initialOpen` flag, which gives you full control over test state without mocks.
+
+### Does adding a product tour affect test suite performance?
+
+Tour Kit's core is under 8KB gzipped with zero runtime dependencies. In our test suite, adding tour component tests added roughly 200ms to the total run time on Vitest's jsdom environment. The overhead comes from rendering the provider tree, not from the library itself.
+
+{/* Schema markup */}
+export const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Unit testing Tour Kit components with Vitest",
+    "description": "Test product tour components with Vitest and React Testing Library. Set up providers, test hooks, verify accessibility, and catch regressions.",
+    "author": {
+      "@type": "Person",
+      "name": "DomiDex",
+      "url": "https://domidex.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Tour Kit",
+      "url": "https://tourkit.dev",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://tourkit.dev/logo.png"
+      }
+    },
+    "datePublished": "2026-04-07",
+    "dateModified": "2026-04-07",
+    "image": "https://tourkit.dev/og-images/unit-testing-tour-kit-components-vitest.png",
+    "url": "https://tourkit.dev/blog/unit-testing-tour-kit-components-vitest",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://tourkit.dev/blog/unit-testing-tour-kit-components-vitest"
+    },
+    "keywords": ["vitest test tour component", "unit test product tour react", "vitest onboarding test", "react testing library tour"],
+    "proficiencyLevel": "Intermediate",
+    "dependencies": "React 18+, TypeScript 5+, Vitest 3+",
+    "programmingLanguage": {
+      "@type": "ComputerLanguage",
+      "name": "TypeScript"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://tourkit.dev"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Blog",
+        "item": "https://tourkit.dev/blog"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Unit testing Tour Kit components with Vitest",
+        "item": "https://tourkit.dev/blog/unit-testing-tour-kit-components-vitest"
+      }
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Does Vitest work with React 19?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tour Kit supports React 18.2+ and React 19. Vitest works with both through @vitejs/plugin-react. No special configuration needed. If you're on React 19 with the new compiler, Vitest runs the compiled output the same way your production build does."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is Vitest different from Jest for testing React components?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Vitest uses Vite's module transform pipeline instead of Jest's jest-haste-map, which means it only processes files as they're imported during test execution. That gives roughly 5.6x faster execution on a 500-test suite and native TypeScript and ESM support without extra configuration."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I test Tour Kit's position engine in jsdom?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Partially. jsdom doesn't compute layout, so getBoundingClientRect() returns zeroes. You can mock these values with vi.spyOn() for basic position logic tests. For full positioning tests with real CSS, use Vitest's browser mode or Playwright component testing instead of jsdom."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to mock Tour Kit's context providers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. The React Testing Library docs recommend wrapping components in real providers with controlled values rather than mocking context. Tour Kit's TourProvider accepts a tour prop and initialOpen flag, which gives you full control over test state without mocks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does adding a product tour affect test suite performance?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tour Kit's core is under 8KB gzipped with zero runtime dependencies. In our test suite, adding tour component tests added roughly 200ms to the total run time on Vitest's jsdom environment. The overhead comes from rendering the provider tree, not from the library itself."
+        }
+      }
+    ]
+  }
+]
+
+{/* Internal linking suggestions:
+  - Link FROM: /blog/vite-react-tailwind-product-tour (mention testing in the "next steps")
+  - Link FROM: /blog/react-tour-library-benchmark-2026 (testing section)
+  - Link TO: /docs/getting-started (prerequisites)
+  - Link TO: /blog/add-product-tour-react-19 (React 19 compatibility mention)
+*/}
+
+{/* Distribution checklist:
+  - Cross-post to Dev.to with canonical URL to tourkit.dev
+  - Cross-post to Hashnode with canonical URL
+  - Share on Reddit r/reactjs as "How we test our product tour components with Vitest"
+  - Answer Stack Overflow questions about "testing react context providers vitest"
+*/}

@@ -1,0 +1,415 @@
+---
+title: "Can you use Tour Kit without the Pro license? (free vs Pro breakdown)"
+slug: "tour-kit-free-vs-pro"
+description: "See exactly what Tour Kit's free MIT packages include and when the $99 Pro license becomes worth it. Package-by-package comparison with code examples."
+primary_keyword: "tour kit free vs pro"
+secondary_keywords: ["tour kit pricing breakdown", "tour kit open source free", "tour kit pro license", "tour kit MIT packages"]
+category: "Build vs Buy"
+schema_type: "TechArticle"
+spreadsheet_row: 149
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/tour-kit-free-vs-pro.png
+---
+
+# Can you use Tour Kit without the Pro license?
+
+Yes. Tour Kit's three core packages are MIT-licensed and free forever. You can ship production product tours, multi-step onboarding flows, and persistent feature hints without paying anything or hitting a usage cap. The free tier isn't a trial. There's no time limit, no watermark, no gate on the core tour functionality.
+
+We built Tour Kit, so take everything below with that context. Every claim maps to a specific package you can inspect on GitHub, and every number comes from bundlephobia or the source code.
+
+```bash
+npm install @tour-kit/core @tour-kit/react
+```
+
+## What is Tour Kit's free vs Pro model?
+
+Tour Kit uses an open-core licensing model where the foundational packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free, while nine extended packages (analytics, checklists, surveys, announcements, media, scheduling, adoption, AI, license validation) require a one-time $99 Pro license. Unlike SaaS onboarding tools that charge $129-$599 per month, Tour Kit's Pro is a single payment with no MAU limits, no seat limits, and no recurring fees. This follows the same pattern as AG Grid, MUI X, and Tailwind CSS, where the open-source core is production-ready and the paid tier adds specialized capabilities.
+
+## Why this breakdown matters for your team
+
+Picking the wrong tier wastes either money or developer time. Teams that buy Pro when the free packages would have been enough overpay for features they never use. Teams that stick with Free when they need analytics or checklists spend 20-40 hours rebuilding what Pro provides out of the box (at $100/hour, that's $2,000-$4,000 in developer time versus $99).
+
+As of April 2026, 78% of finance decision-makers report increased scrutiny of recurring software costs ([Getmonetizely, 2026](https://www.getmonetizely.com/articles/why-are-one-time-pricing-models-making-a-comeback-in-saas)). Understanding exactly what ships for free helps your team make that call without guessing.
+
+## What exactly ships in the free tier?
+
+Tour Kit's free tier includes three MIT-licensed npm packages totaling under 25KB gzipped. These aren't stripped-down demos. They contain the same position engine, accessibility layer, and component architecture that the Pro packages build on top of.
+
+Here's the full breakdown:
+
+<table>
+  <thead>
+    <tr>
+      <th>Package</th>
+      <th>License</th>
+      <th>Size (gzipped)</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>@tour-kit/core</code></td>
+      <td>MIT</td>
+      <td>&lt;8KB</td>
+      <td>Hooks, position engine, focus management, keyboard nav, persistence, storage adapters, branching logic, RTL support</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/react</code></td>
+      <td>MIT</td>
+      <td>&lt;12KB</td>
+      <td>Tour components, card system, overlay, navigation, progress, router adapters (Next.js, React Router), headless variants, multi-tour registry</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/hints</code></td>
+      <td>MIT</td>
+      <td>&lt;5KB</td>
+      <td>Persistent hotspot beacons, hint tooltips, independent dismiss/hide state per hint</td>
+    </tr>
+  </tbody>
+</table>
+
+### What you can build with the free packages alone
+
+This isn't hypothetical. The free tier covers the same use cases that tools like React Joyride (MIT, ~45KB gzipped) and Shepherd.js (AGPL, ~25KB gzipped) handle, but with a headless architecture and smaller footprint.
+
+With `@tour-kit/core` + `@tour-kit/react`, you get:
+
+```tsx
+// src/components/OnboardingTour.tsx
+import { Tour, TourCard, TourCardContent, TourCardFooter,
+         TourNavigation, TourOverlay, TourProgress } from '@tour-kit/react'
+
+const steps = [
+  { id: 'welcome', target: '#sidebar', content: 'Start here.' },
+  { id: 'search', target: '#search-bar', content: 'Find anything.' },
+  { id: 'profile', target: '#avatar', content: 'Your settings live here.' },
+]
+
+export function OnboardingTour() {
+  return (
+    <Tour tourId="onboarding" steps={steps}>
+      <TourOverlay />
+      <TourCard>
+        <TourCardContent />
+        <TourCardFooter>
+          <TourNavigation />
+          <TourProgress variant="dots" />
+        </TourCardFooter>
+      </TourCard>
+    </Tour>
+  )
+}
+```
+
+That gives you element targeting, scroll-into-view, keyboard navigation (arrow keys, Escape, Enter), WCAG 2.1 AA focus management, and `prefers-reduced-motion` respect. No Pro license involved.
+
+Add `@tour-kit/hints` and you get persistent feature discovery beacons that live outside the tour flow. Think pulsing dots on new features that users can dismiss individually.
+
+### Free tier capabilities at a glance
+
+Here's what you don't need Pro for:
+
+- Multi-step sequential tours with branching logic
+- Element highlighting with configurable spotlight
+- Keyboard navigation and full focus trapping
+- Router-aware tours (Next.js App Router, Pages Router, React Router)
+- Multi-tour registry (run different tours for different user segments)
+- LocalStorage persistence (resume where the user left off)
+- Custom storage adapters (cookie, sessionStorage, or your own backend)
+- RTL/LTR support with automatic placement mirroring
+- Headless mode (bring your own components, keep the logic)
+- shadcn/ui and Tailwind compatibility via class-variance-authority variants
+
+That's a lot. For many teams, it's enough.
+
+## What does Pro add?
+
+The Pro license ($99 one-time per project) adds nine additional packages. These cover the features you'd normally build yourself after the basic tour is working: analytics, checklists, announcements, surveys, and more.
+
+<table>
+  <thead>
+    <tr>
+      <th>Pro package</th>
+      <th>What it adds</th>
+      <th>The DIY alternative</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>@tour-kit/analytics</code></td>
+      <td>Plugin-based analytics (PostHog, Mixpanel, GA4, Plausible, custom)</td>
+      <td>Wire up event callbacks manually per provider</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/checklists</code></td>
+      <td>Onboarding checklists with task dependencies and progress tracking</td>
+      <td>Build a checklist UI + state machine from scratch</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/announcements</code></td>
+      <td>Product announcements (modal, toast, banner, slideout, spotlight)</td>
+      <td>Build 5 announcement components + frequency/dismissal logic</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/surveys</code></td>
+      <td>In-app microsurveys (NPS, CSAT, CES) with fatigue prevention</td>
+      <td>Build survey UI + scoring engine + rate limiting</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/adoption</code></td>
+      <td>Feature adoption tracking, nudge scheduler, adoption dashboard</td>
+      <td>Custom tracking + nudge logic + dashboard UI</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/media</code></td>
+      <td>Embed YouTube, Vimeo, Loom, Wistia, GIF, Lottie in tour steps</td>
+      <td>Build embed components with proper aspect ratios and a11y</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/scheduling</code></td>
+      <td>Time-based scheduling with timezone support and recurring patterns</td>
+      <td>Build a scheduler with date-fns/Luxon + cron expressions</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/ai</code></td>
+      <td>AI-powered tour generation and content suggestions</td>
+      <td>Integrate an LLM yourself</td>
+    </tr>
+    <tr>
+      <td><code>@tour-kit/license</code></td>
+      <td>License validation (Polar.sh integration, domain activation)</td>
+      <td>N/A (this is the Pro gating mechanism)</td>
+    </tr>
+  </tbody>
+</table>
+
+Every Pro package is optional. Install only what you need, and tree-shaking removes the rest. The architecture is modular by design: Pro packages import from `@tour-kit/core` but the free packages never import from Pro.
+
+## When does Pro become worth the $99?
+
+The honest answer: when you'd spend more than a few hours building the equivalent yourself. Developer time at US market rates runs $75-150/hour. If `@tour-kit/analytics` saves you four hours of wiring up PostHog event callbacks, the math already works.
+
+But there are specific inflection points where the free tier stops being enough:
+
+**You need analytics integration.** The free packages emit tour lifecycle events (step viewed, tour completed, tour skipped), but routing those events to your analytics provider is your job. `@tour-kit/analytics` handles PostHog, Mixpanel, GA4, Plausible, and Amplitude with a plugin interface. Without it, you're writing callback plumbing for each provider.
+
+**You need onboarding checklists.** Tours are sequential (step 1, step 2, step 3). Checklists are non-linear: users complete tasks in any order, with dependencies between them. `@tour-kit/checklists` handles the task dependency graph, progress calculation, and persistence. Building this from scratch takes 2-3 days for a senior React developer.
+
+**You need product announcements.** Modal, toast, banner, slideout, spotlight. Five display variants with frequency rules, dismissal tracking, and queue management. That's a week of work if you're doing it right.
+
+**You need in-app surveys.** NPS, CSAT, and CES surveys need scoring engines, fatigue prevention (don't survey the same user twice in a week), and context awareness (don't show a satisfaction survey during an error state). Building survey infrastructure from scratch is its own project.
+
+If none of those apply, if you just need tours and hints, the free tier is the right choice. No asterisk.
+
+## How Tour Kit's model compares to alternatives
+
+Tour Kit follows the open-core pattern used by AG Grid, MUI X, and Tailwind CSS. The core product is MIT and fully functional. Premium features extend it without limiting the base.
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Free tier</th>
+      <th>Paid tier</th>
+      <th>Pricing model</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tour Kit</td>
+      <td>Core tours, hints, components (MIT)</td>
+      <td>Analytics, checklists, surveys, announcements, media, scheduling, AI</td>
+      <td>$99 one-time per project</td>
+    </tr>
+    <tr>
+      <td>React Joyride</td>
+      <td>Full library (MIT)</td>
+      <td>None</td>
+      <td>Free (community maintained)</td>
+    </tr>
+    <tr>
+      <td>Shepherd.js</td>
+      <td>Full library (AGPL)</td>
+      <td>Commercial license removes AGPL obligation</td>
+      <td>Contact sales</td>
+    </tr>
+    <tr>
+      <td>Appcues</td>
+      <td>None</td>
+      <td>Full platform</td>
+      <td>$249/mo+ (per MAU)</td>
+    </tr>
+    <tr>
+      <td>Pendo</td>
+      <td>Free tier (500 MAU limit)</td>
+      <td>Full platform</td>
+      <td>Custom pricing (per MAU)</td>
+    </tr>
+    <tr>
+      <td>AG Grid</td>
+      <td>Community Edition (MIT)</td>
+      <td>Enterprise features</td>
+      <td>$999+/developer/year</td>
+    </tr>
+    <tr>
+      <td>MUI X</td>
+      <td>Community (MIT)</td>
+      <td>Pro + Premium components</td>
+      <td>$180+/developer/year</td>
+    </tr>
+  </tbody>
+</table>
+
+Two things stand out. First, Tour Kit's free tier is more complete than most open-core offerings. AG Grid Community doesn't include row grouping or server-side row models. MUI X Community doesn't include the Date Range Picker. Tour Kit Free includes the entire tour engine, every hook, every component, every router adapter.
+
+Second, $99 one-time is lower than one month of most SaaS alternatives. Appcues starts at $249/month. Over three years, that's $8,964 versus $99.
+
+Appcues and Pendo are different products, to be fair. They include a visual builder, a no-code editor, and a managed backend. Tour Kit requires React developers. If your team doesn't have them, Tour Kit isn't the right tool regardless of pricing.
+
+## The licensing details that matter
+
+The MIT license on Tour Kit's free packages means:
+
+- Use them in commercial projects without attribution (though we appreciate it)
+- Modify the source code however you want
+- Bundle them in proprietary applications
+- No copyleft obligations (unlike Shepherd.js's AGPL, which requires you to open-source your entire application if you distribute it)
+
+Pro packages use a proprietary license tied to a Polar.sh license key. One key covers one project (defined as a single deployable application). You get up to 5 domain activations per key (enough for production, staging, preview, and a couple of development environments). Localhost and `*.local` domains bypass activation entirely during development.
+
+No MAU limit, no seat limit, no usage cap. $99 is the total cost. Updates and patches are included for the major version you purchased.
+
+## Common mistakes when choosing a tier
+
+**Buying Pro before you need it.** If your app is in early development and you just need a basic onboarding tour, start with Free. You can add Pro packages later without any migration. Premature purchasing is low-cost ($99 isn't devastating), but it adds complexity you may not need yet.
+
+**Building Pro features from scratch to avoid the $99.** We've seen teams spend 40+ hours rebuilding analytics integration, checklist state management, or survey fatigue prevention. At $100/hour, that's $4,000 in developer time to avoid a $99 purchase. Run the math before committing to DIY.
+
+**Assuming Free means limited.** Tour Kit's free tier includes the full position engine, every accessibility feature, all router adapters, headless mode, and the complete component library. It's not a demo. Some teams evaluate Pro thinking they need it for basic tours when Free already covers their use case entirely.
+
+**Ignoring the AGPL on alternatives.** Shepherd.js is "free" but uses the AGPL license, which requires you to open-source your entire application if you distribute it. Tour Kit's MIT license carries no such obligation. Free doesn't always mean the same thing across libraries.
+
+## FAQ
+
+**Can I start with Free and upgrade to Pro later?**
+Tour Kit Free and Pro are additive, not replacements. Pro packages import from `@tour-kit/core`, the same core you're already using. Adding `@tour-kit/analytics` to an existing project is `npm install @tour-kit/analytics` plus a provider wrapper. No migration, no breaking changes.
+
+**Does the free tier have a watermark or usage limit?**
+No. The free packages are standard MIT open source with no restrictions. The watermark mechanism exists in the Pro packages for unlicensed usage of Pro features. It doesn't touch the free tier.
+
+**What happens if my Pro license expires?**
+It doesn't expire. The $99 is a one-time purchase, not a subscription. You keep access to every Pro package version released under that major version. When Tour Kit releases a new major version (v2, v3), you'd purchase a new license if you want to upgrade. But v1 Pro continues working indefinitely.
+
+**Can I use Tour Kit Free in a client project I'm building for someone else?**
+Yes. MIT allows this without restriction. The Pro license is per-project, so if the client needs Pro features, the license would be tied to their project domain.
+
+**Is Tour Kit Free just a trial that gets worse over time?**
+No. The free packages are actively maintained alongside Pro. Security patches, React version support (React 18 and 19), and bug fixes ship to all packages equally. We have no incentive to degrade the free tier because it's the foundation Pro builds on.
+
+---
+
+**Get started with Tour Kit.** The free packages cover most product tour use cases out of the box. Install them now and evaluate whether Pro features would save you enough development time to justify the $99.
+
+```bash
+npm install @tour-kit/core @tour-kit/react @tour-kit/hints
+```
+
+Full documentation: [https://usertourkit.com/docs](https://usertourkit.com/docs) | GitHub: [https://github.com/DomiDex/tour-kit](https://github.com/DomiDex/tour-kit)
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json">{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Can you use Tour Kit without the Pro license? (free vs Pro breakdown)",
+  "description": "See exactly what Tour Kit's free MIT packages include and when the $99 Pro license becomes worth it. Package-by-package comparison with code examples.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://github.com/DomiDex"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com"
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://usertourkit.com/og-images/tour-kit-free-vs-pro.png",
+  "url": "https://usertourkit.com/blog/tour-kit-free-vs-pro",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/tour-kit-free-vs-pro"
+  },
+  "keywords": ["tour kit free vs pro", "tour kit pricing breakdown", "tour kit open source free"],
+  "proficiencyLevel": "Beginner",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+})}</script>
+
+<script type="application/ld+json">{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I start with Tour Kit Free and upgrade to Pro later?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Tour Kit Free and Pro are additive packages. Pro packages import from @tour-kit/core, the same core you already use. Adding @tour-kit/analytics to an existing project requires npm install plus a provider wrapper. No migration or breaking changes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the Tour Kit free tier have a watermark or usage limit?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The free packages (@tour-kit/core, @tour-kit/react, @tour-kit/hints) are standard MIT open source with no restrictions, no watermark, and no usage caps."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if my Tour Kit Pro license expires?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit Pro licenses don't expire. The $99 is a one-time purchase. You keep access to every Pro package version released under that major version indefinitely."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use Tour Kit Free in a client project?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The MIT license allows unrestricted commercial use, including client projects. The Pro license is per-project, so if the client needs Pro features, the license would be tied to their project domain."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Tour Kit Free just a trial that gets worse over time?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The free packages are actively maintained alongside Pro. Security patches, React 18 and 19 support, and bug fixes ship to all packages equally. Tour Kit has no incentive to degrade the free tier since it's the foundation Pro builds on."
+      }
+    }
+  ]
+})}</script>
+
+{/* Internal linking suggestions:
+- Link FROM: /blog/one-time-license-vs-subscription-math-bootstrapped-teams (pricing context)
+- Link FROM: /blog/open-source-onboarding-cost-developer-time (cost analysis)
+- Link FROM: /blog/build-vs-buy-product-tour-calculator (decision framework)
+- Link FROM: /blog/best-free-product-tour-libraries-open-source (Tour Kit entry)
+- Link TO: /docs/getting-started (for readers ready to install)
+- Link TO: /blog/composable-tour-library-architecture (architecture details)
+*/}
+
+{/* Distribution checklist:
+- Dev.to (canonical to usertourkit.com/blog/tour-kit-free-vs-pro)
+- Hashnode (canonical)
+- Reddit r/reactjs (if community guidelines allow)
+- Hacker News (Show HN context)
+*/}

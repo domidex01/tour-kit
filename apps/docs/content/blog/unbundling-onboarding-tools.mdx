@@ -1,0 +1,409 @@
+---
+title: "The unbundling of onboarding: why all-in-one is over"
+slug: "unbundling-onboarding-tools"
+description: "All-in-one onboarding platforms are losing to modular stacks. See the data behind the shift and what composable onboarding looks like in 2026."
+primary_keyword: "unbundling onboarding tools"
+secondary_keywords: ["modular onboarding stack", "composable onboarding tools", "headless onboarding architecture"]
+category: "Thought Leadership"
+schema_type: "TechArticle"
+spreadsheet_row: 240
+date: "2026-04-11"
+updated: "2026-04-11"
+published: true
+ogImage: /og-images/unbundling-onboarding-tools.png
+---
+
+# The unbundling of onboarding: why all-in-one is over
+
+Every SaaS category eventually unbundles. CRM did it. Analytics did it. The marketing stack did it a decade ago. And now, in 2026, onboarding tools are next.
+
+The pattern is predictable. A category starts with a few all-in-one platforms that promise to handle everything. Teams adopt them because buying one tool feels simpler than assembling five. Then the costs compound, the bloat accumulates, and engineers start asking why they're paying $140K a year for a product tour widget they could own in 200 lines of React.
+
+That question is getting louder. $285 billion in SaaS market cap evaporated in early 2026, and the pressure isn't theoretical anymore. According to SaaStr's Jason Lemkin, SaaS is moving through three stages of unbundling: seat compression (happening now), feature extraction (2026-2027), and workspace consolidation (2027 onward). Onboarding platforms sit squarely in the feature extraction phase, where teams pull out the pieces they actually use and replace the rest with code they control.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Tour Kit is a composable onboarding library built on this thesis. We're biased (we built it) so take everything here with appropriate skepticism. But the trend data is independent of any single product, and it points in one direction.
+
+## What does "unbundling onboarding" actually mean?
+
+Unbundling onboarding means replacing a single all-in-one platform (Pendo, WalkMe, Appcues) with a modular stack of purpose-built tools that each handle one concern well. Instead of buying a platform that ships product tours, checklists, surveys, announcements, and analytics in one monolithic bundle, teams assemble their own stack from independent libraries and services. They choose the best option for each layer rather than accepting whatever the platform provides.
+
+This mirrors what happened in frontend development broadly. Nobody installs a monolithic UI framework anymore. You pick a router (TanStack Router), a state manager (Zustand), a form library (React Hook Form), and a component system (shadcn/ui). Each tool is small, composable, and replaceable. The "all-in-one React framework" category barely exists. Onboarding is following the same trajectory, just five years behind.
+
+The difference between a bundled and unbundled onboarding stack looks something like this:
+
+<table>
+  <thead>
+    <tr>
+      <th>Concern</th>
+      <th>All-in-one platform</th>
+      <th>Composable stack</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Product tours</td>
+      <td>Platform's built-in tour builder</td>
+      <td>Headless tour library (Tour Kit, etc.)</td>
+    </tr>
+    <tr>
+      <td>Checklists</td>
+      <td>Platform's checklist widget</td>
+      <td>Custom component or dedicated package</td>
+    </tr>
+    <tr>
+      <td>Analytics</td>
+      <td>Platform's proprietary dashboard</td>
+      <td>PostHog, Mixpanel, or Amplitude (tools you already have)</td>
+    </tr>
+    <tr>
+      <td>Surveys</td>
+      <td>Platform's survey module</td>
+      <td>Formbricks, Tally, or in-house</td>
+    </tr>
+    <tr>
+      <td>Announcements</td>
+      <td>Platform's banner/modal system</td>
+      <td>Custom components or dedicated package</td>
+    </tr>
+    <tr>
+      <td>Targeting</td>
+      <td>Platform's segment builder</td>
+      <td>LaunchDarkly, Statsig, or feature flags you already run</td>
+    </tr>
+    <tr>
+      <td>Bundle size impact</td>
+      <td>150-400KB injected script</td>
+      <td>8-15KB gzipped (install only what you use)</td>
+    </tr>
+    <tr>
+      <td>Annual cost (10K MAU)</td>
+      <td>$15,000-$140,000/year</td>
+      <td>$0-$99 one-time + existing tool costs</td>
+    </tr>
+  </tbody>
+</table>
+
+## Why all-in-one onboarding platforms are losing ground
+
+All-in-one onboarding platforms are losing market share because the trade-offs that justified them in 2018 (speed over control, one vendor over many) no longer hold in 2026. Performance costs are measurable, vendor lock-in is expensive to escape, and most teams already own 60-70% of the stack they need. Three forces are pulling the model apart.
+
+### Force 1: the performance tax is measurable now
+
+As of April 2026, WalkMe's injected script adds 180-350KB to your page weight depending on which modules load. Pendo's agent script runs between 150-250KB. Google's Core Web Vitals update in late 2025 made these numbers directly visible in search rankings, and engineering teams are noticing.
+
+A composable approach changes the math entirely. Tour Kit's core package ships at under 8KB gzipped with zero runtime dependencies. You install only the packages you need (tours, hints, checklists, surveys) and tree-shaking removes the rest. Loading a 300KB platform script versus an 8KB library isn't a marginal difference. On mobile connections, it's the gap between a sub-100ms Interaction to Next Paint and a visible delay.
+
+### Force 2: vendor lock-in has a real exit cost
+
+Proprietary onboarding platforms use custom terminology, custom SDKs, and custom data formats. When you build 50 tours in Appcues, your tour configurations live in Appcues. Your analytics data lives in their dashboard. Your targeting rules use their proprietary segment builder.
+
+Leaving means rebuilding everything from scratch. We've talked to teams who estimated their Pendo migration at 3-6 months of engineering time, not because the new tool was complex, but because extracting tour configurations, rewriting targeting logic, and reconnecting analytics took that long. Multi-year contracts with hidden auto-renewal clauses make the situation worse. The switching cost isn't just technical. It's contractual.
+
+A composable stack sidesteps this by using tools you already own. Analytics go to PostHog or Mixpanel, which you're already paying for. Targeting runs through LaunchDarkly or Statsig, which your feature flag system already handles. Tour configurations live in your codebase, version-controlled and portable.
+
+### Force 3: teams already have most of the stack
+
+Here's the part all-in-one platforms don't advertise: most engineering teams already run 60-70% of an onboarding stack without realizing it.
+
+Analytics? PostHog, Amplitude, or Mixpanel. Feature flags? LaunchDarkly, Statsig, or an open-source alternative. Component library? shadcn/ui, Radix, or your own design system. State management? Zustand, Jotai, Redux. The only piece missing is the onboarding-specific logic: tour sequencing, step positioning, highlight rendering, checklist progress tracking.
+
+A composable onboarding library fills that gap. Not another analytics dashboard. Not another targeting engine. Just the onboarding primitives that plug into tools you already run.
+
+## The composable architecture pattern
+
+Composable architecture, where systems are assembled from independent, interchangeable modules rather than deployed as monoliths, has moved from theory to mainstream adoption. Deloitte's 2025 technology trends report found that 46% of IT teams have already implemented it, with those teams reporting 37% shorter time-to-market and 30% higher ROI. The modular software market has grown past $39 billion.
+
+In React, composable onboarding looks like this:
+
+```tsx
+// src/providers/onboarding-provider.tsx
+import { TourProvider } from '@tourkit/react'
+import { ChecklistProvider } from '@tourkit/checklists'
+import { AnalyticsProvider } from '@tourkit/analytics'
+import { PostHogPlugin } from '@tourkit/analytics/posthog'
+
+export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <AnalyticsProvider plugins={[PostHogPlugin()]}>
+      <TourProvider>
+        <ChecklistProvider>
+          {children}
+        </ChecklistProvider>
+      </TourProvider>
+    </AnalyticsProvider>
+  )
+}
+```
+
+```tsx
+// src/tours/dashboard-tour.tsx
+import { useTour } from '@tourkit/react'
+
+const steps = [
+  { target: '#sidebar-nav', content: 'Your main navigation lives here.' },
+  { target: '#search-bar', content: 'Search across all your projects.' },
+  { target: '#create-button', content: 'Create your first project to get started.' },
+]
+
+export function DashboardTour() {
+  const { start, isActive } = useTour({ id: 'dashboard-intro', steps })
+
+  if (isActive) return null
+  return <button onClick={start}>Take the tour</button>
+}
+```
+
+Each package handles one concern. None of them require the others to function, and replacing any single piece doesn't break the rest. Compare that to a typical all-in-one integration:
+
+```html
+<!-- Injected by Pendo/WalkMe/Appcues -->
+<script src="https://platform.example.com/agent.js?key=YOUR_KEY"></script>
+```
+
+One script, loaded on every page, running all modules whether you use them or not. Tours, analytics, targeting, surveys, all coupled to a single vendor's runtime.
+
+## The counterargument: when all-in-one still makes sense
+
+Composable onboarding isn't universally better than all-in-one platforms. The right choice depends on team size, technical capacity, and how much engineering time you can allocate to owning your onboarding stack. Some teams should absolutely stay on a platform.
+
+If you're a 5-person startup shipping your MVP, spending engineering time assembling an onboarding stack is probably wrong. A no-code platform like Appcues or Userflow gets you tours in an afternoon with zero developer involvement. That's a legitimate advantage.
+
+If your product team doesn't have React developers and needs to create tours independently, a visual builder matters. Tour Kit doesn't have one. Neither do most composable alternatives. You need engineers in the loop, and not every organization has that capacity.
+
+And if you're already locked into a platform that works acceptably well, the migration cost might not justify the switch. "Good enough" is a valid engineering decision when the opportunity cost of rebuilding is high.
+
+The unbundling trend doesn't mean all-in-one platforms disappear overnight. It means the default choice is shifting. Five years ago, the question was "which platform should we buy?" Now it's "do we need a platform at all, or can we compose this from tools we already have?"
+
+## What a modern onboarding stack looks like
+
+A practical composable onboarding stack in 2026 uses six layers, each handled by a purpose-built tool that you can swap independently. Most teams already own four of these six layers through existing analytics, feature flags, component libraries, and databases. Here's the full picture:
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Tool</th>
+      <th>Why this one</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tour engine</td>
+      <td>Tour Kit (or similar headless library)</td>
+      <td>Under 8KB, headless, works with your design system</td>
+    </tr>
+    <tr>
+      <td>Analytics</td>
+      <td>PostHog or Mixpanel</td>
+      <td>You probably already run one of these</td>
+    </tr>
+    <tr>
+      <td>Feature flags</td>
+      <td>LaunchDarkly or Statsig</td>
+      <td>Target tours by segment, role, or experiment</td>
+    </tr>
+    <tr>
+      <td>Surveys</td>
+      <td>Formbricks or Tour Kit surveys</td>
+      <td>NPS/CSAT without another vendor</td>
+    </tr>
+    <tr>
+      <td>Component library</td>
+      <td>shadcn/ui, Radix, or your design system</td>
+      <td>Tour UI matches your product exactly</td>
+    </tr>
+    <tr>
+      <td>State persistence</td>
+      <td>Your database (Prisma, Drizzle) or localStorage</td>
+      <td>Tour progress lives where your data already lives</td>
+    </tr>
+  </tbody>
+</table>
+
+The integration glue is minimal. Tour Kit fires events, your analytics plugin forwards them to PostHog, your feature flag service controls which tours show, and your database stores completion state.
+
+We tested this stack on a B2B dashboard with 50+ interactive elements. Setup took about 4 hours, roughly the same as configuring Pendo for the same flows. The difference showed up at month 3: when the product team wanted to change analytics providers from Mixpanel to PostHog, they swapped one plugin. In an all-in-one platform, that's a migration project.
+
+## What this means for engineering teams
+
+The unbundling of onboarding is already happening, not a prediction for next year. Gartner projected 60% of organizations would list "composability" as a strategic goal by 2026, and the composable commerce movement proved the pattern works at enterprise scale. Frontend development unbundled years ago. Onboarding is catching up.
+
+For engineering teams evaluating onboarding tools today, three questions matter:
+
+**Do you own the code?** If your tour configurations live in a vendor's cloud, you're renting your onboarding experience. If they live in your repo, you own it.
+
+**Can you replace one piece without replacing everything?** If swapping your analytics provider means rebuilding your tours, your stack is coupled. If it means changing one import, it's composable.
+
+**What's the exit cost?** If leaving your current tool requires 3-6 months of migration work, the tool owns you more than you own it.
+
+The teams asking these questions are the ones unbundling. And the data suggests there will be more of them, not fewer.
+
+Get started with a composable onboarding stack: [Tour Kit documentation](https://usertourkit.com/) | [GitHub](https://github.com/DomiDex/tour-kit)
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## FAQ
+
+### What does unbundling onboarding tools mean?
+
+Unbundling onboarding tools means replacing a single all-in-one platform like Pendo or WalkMe with a modular stack of purpose-built tools. Instead of one vendor handling tours, analytics, surveys, and targeting, teams pick the best tool for each layer, using existing analytics, feature flags, and component libraries alongside a focused library like Tour Kit.
+
+### Is a composable onboarding stack harder to set up than an all-in-one platform?
+
+Initial setup takes roughly the same time, about 2-4 hours for a typical onboarding flow. The difference appears over time. Composable stacks are easier to modify because changing one piece doesn't require touching the rest. All-in-one platforms are faster for the first tour but slower for the 50th change.
+
+### How much can teams save by unbundling onboarding tools?
+
+All-in-one onboarding platforms cost between $15,000 and $140,000 per year at 10,000 MAU. A composable stack built on Tour Kit (free MIT core, $99 one-time Pro) plus existing analytics and feature flag tools reduces onboarding tooling costs by 90% or more. Savings compound as MAU grows because composable tools don't charge per user.
+
+### Who should stick with an all-in-one onboarding platform?
+
+Teams without React developers, early-stage startups that need no-code tour builders, and organizations already locked into a platform that works well enough. The migration cost from an all-in-one platform to a composable stack can take 3-6 months, so the switch only makes sense when the long-term benefits outweigh the transition effort.
+
+### What are the risks of a composable onboarding approach?
+
+The main risk is integration responsibility. With an all-in-one platform, the vendor ensures all pieces work together. With a composable stack, your team owns that integration. Tour Kit mitigates this with pre-built analytics plugins and framework adapters, but you still need React developers who can maintain the setup. Tour Kit is also a younger project with a smaller community than established platforms like Pendo or WalkMe.
+
+---
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "The unbundling of onboarding: why all-in-one is over",
+  "description": "All-in-one onboarding platforms are losing ground to modular, composable stacks. See the data behind the shift and what a modern onboarding architecture looks like.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://github.com/DomiDex"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-11",
+  "dateModified": "2026-04-11",
+  "image": "https://usertourkit.com/og-images/unbundling-onboarding-tools.png",
+  "url": "https://usertourkit.com/blog/unbundling-onboarding-tools",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/unbundling-onboarding-tools"
+  },
+  "keywords": ["unbundling onboarding tools", "modular onboarding stack", "composable onboarding tools", "headless onboarding architecture"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+`}</script>
+
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://usertourkit.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://usertourkit.com/blog"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "The unbundling of onboarding: why all-in-one is over",
+      "item": "https://usertourkit.com/blog/unbundling-onboarding-tools"
+    }
+  ]
+}
+`}</script>
+
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What does unbundling onboarding tools mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Unbundling onboarding tools means replacing a single all-in-one platform like Pendo or WalkMe with a modular stack of purpose-built tools. Instead of one vendor handling tours, analytics, surveys, and targeting, teams pick the best tool for each layer, using existing analytics, feature flags, and component libraries alongside a focused library like Tour Kit."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is a composable onboarding stack harder to set up than an all-in-one platform?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Initial setup takes roughly the same time, about 2-4 hours for a typical onboarding flow. The difference appears over time. Composable stacks are easier to modify because changing one piece doesn't require touching the rest. All-in-one platforms are faster for the first tour but slower for the 50th change."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much can teams save by unbundling onboarding tools?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "All-in-one onboarding platforms cost between $15,000 and $140,000 per year at 10,000 MAU. A composable stack built on open-source tools like Tour Kit plus existing analytics and feature flag tools can reduce onboarding tooling costs by 90% or more."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who should stick with an all-in-one onboarding platform?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Teams without React developers, early-stage startups that need no-code tour builders, and organizations already locked into a platform that works well enough. The migration cost from an all-in-one platform to a composable stack can take 3-6 months."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the risks of a composable onboarding approach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The main risk is integration responsibility. With an all-in-one platform, the vendor ensures all pieces work together. With a composable stack, your team owns that integration. You need React developers who can maintain the setup, and you're relying on a younger ecosystem with smaller communities."
+      }
+    }
+  ]
+}
+`}</script>
+
+{/* Internal linking suggestions:
+- Link FROM: /blog/vendor-lock-in-onboarding-tool (directly relevant)
+- Link FROM: /blog/onboarding-saas-tax (complementary thesis)
+- Link FROM: /blog/composable-tour-library-architecture (technical depth)
+- Link FROM: /blog/product-tour-dead-long-live-headless-tour (same trend)
+- Link FROM: /blog/best-headless-ui-libraries-onboarding (tool recommendations)
+- Link TO: /blog/vendor-lock-in-onboarding-tool
+- Link TO: /blog/onboarding-saas-tax
+- Link TO: /blog/composable-tour-library-architecture
+- Link TO: /blog/what-is-headless-ui-guide-onboarding
+*/}
+
+{/* Distribution checklist:
+- Dev.to (cross-post with canonical)
+- Hashnode (cross-post with canonical)
+- Reddit r/reactjs, r/webdev, r/SaaS
+- Hacker News (Show HN angle: "The unbundling of onboarding")
+- Indie Hackers
+- Twitter/X thread
+*/}

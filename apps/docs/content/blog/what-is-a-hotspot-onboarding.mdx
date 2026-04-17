@@ -1,0 +1,226 @@
+---
+title: "What is a hotspot? In-app guidance element explained"
+slug: "what-is-a-hotspot-onboarding"
+description: "Learn what a hotspot is in onboarding UX. Covers definition, accessibility, code examples, and when to use hotspots vs tooltips in your React app."
+primary_keyword: "what is a hotspot onboarding"
+secondary_keywords: ["hotspot definition", "hotspot ux meaning", "hotspot tooltip difference", "in-app hotspot"]
+category: "Glossary"
+schema_type: "TechArticle"
+spreadsheet_row: 305
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/what-is-a-hotspot-onboarding.png
+---
+
+# What is a hotspot? In-app guidance element explained
+
+You added a feature your users asked for. A month later, support tickets say nobody can find it. A modal would interrupt everyone. A tooltip only appears on hover, which is invisible on mobile. What you need is a hotspot.
+
+```bash
+npm install @tour-kit/core @tour-kit/hints
+```
+
+## Definition
+
+In onboarding UX, a hotspot is a small pulsing visual indicator placed on a UI element to draw attention without blocking the user's workflow. Unlike modals or guided tours, hotspots are opt-in: the user clicks or taps the beacon to reveal guidance content, and ignores it otherwise. UserGuiding defines it as "a UX/UI pattern that aims to draw a website/app user's attention to a specific area or spot on the screen" ([UserGuiding](https://userguiding.com/blog/hotspot-ux)). Every major onboarding platform, as of April 2026, ships hotspots as a core pattern.
+
+"Beacon" and "hotspot" get used interchangeably, but they're different things. The beacon is the animated dot. The hotspot is the full pattern: beacon plus the tooltip it reveals on interaction.
+
+## How hotspots work
+
+Every hotspot implementation has three moving parts: a trigger element (the 12-16px pulsing beacon), content (a tooltip or popover with 1-2 sentences of guidance), and a lifecycle system that tracks whether the user has seen and dismissed the hint across sessions.
+
+Clicking the beacon expands a tooltip positioned relative to the target element. That tooltip must follow WCAG 2.1 SC 1.4.13: dismissible via Escape, hoverable without disappearing, persistent until closed ([W3C WAI-ARIA](https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/)). Sarah Higley puts it bluntly: "do not use a timeout to hide the tooltip" ([sarahmhigley.com](https://sarahmhigley.com/writing/tooltips-in-wcag-21/)).
+
+Positioning is the hard part. Beacons need to stay anchored through scrolls, resizes, and layout shifts. Most use Floating UI or a comparable engine. Tour Kit's `@tour-kit/hints` recalculates position without re-rendering the React tree.
+
+The lifecycle works as a state machine:
+
+1. **Idle**: beacon visible, pulsing
+2. **Active**: user clicked, tooltip open
+3. **Dismissed**: user closed, persisted to storage
+4. **Retired**: engagement threshold hit, hotspot removed
+
+## Hotspot examples
+
+Hotspots appear across SaaS dashboards, e-commerce, and developer tools. Here are five real-world patterns from production apps, each mapping to a different stage of the user journey:
+
+1. **Feature discovery.** SendGrid places hotspots on new dashboard elements. Users who care click through; everyone else keeps working.
+2. **Contextual onboarding.** Typeform uses beacons during first-run to introduce the form builder without a forced walkthrough.
+3. **New feature announcements.** Plandisc adds pulsing indicators for timeline features, auto-retiring after 30 days.
+4. **Purchase guidance.** Cuepath positions hotspots near checkout CTAs with 44x44px touch targets (the WCAG 2.5.8 minimum).
+5. **Supplementary help.** Krispy Kreme links hotspots to "learn more" content, keeping the primary ordering flow clean.
+
+Hand-coded implementation takes 1-5 hours depending on positioning complexity ([UserGuiding](https://userguiding.com/blog/hotspot-ux)). With a headless library like Tour Kit, under 30 minutes.
+
+## Hotspots vs tooltips vs modals
+
+Choosing between hotspots, tooltips, and modals comes down to how urgently the user needs the information and whether you can afford to interrupt their workflow. Hotspots are the least intrusive of the three, sitting at zero cognitive load until the user opts in.
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Hotspot</th>
+      <th>Tooltip</th>
+      <th>Modal</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Trigger</td>
+      <td>Click or tap</td>
+      <td>Hover or focus</td>
+      <td>Page load or event</td>
+    </tr>
+    <tr>
+      <td>User opt-in</td>
+      <td>Yes (must click beacon)</td>
+      <td>Partial (appears on hover)</td>
+      <td>No (blocks workflow)</td>
+    </tr>
+    <tr>
+      <td>Mobile support</td>
+      <td>Good (tap-friendly)</td>
+      <td>Poor (no hover on touch)</td>
+      <td>Good (if responsive)</td>
+    </tr>
+    <tr>
+      <td>Content depth</td>
+      <td>1-2 sentences + CTA</td>
+      <td>1 sentence max</td>
+      <td>Paragraphs, media, forms</td>
+    </tr>
+    <tr>
+      <td>Interruption level</td>
+      <td>None until clicked</td>
+      <td>Low</td>
+      <td>High (blocks entire page)</td>
+    </tr>
+    <tr>
+      <td>Best for</td>
+      <td>Feature discovery</td>
+      <td>Label clarification</td>
+      <td>Critical announcements</td>
+    </tr>
+  </tbody>
+</table>
+
+Hotspots signal "there's something here" without demanding attention. UX Myths research found less than 20% of page copy gets read ([UX Myths](https://uxmyths.com/post/647473628/myth-people-read-on-the-web)), which makes opt-in patterns more effective than walls of text.
+
+## Why hotspots matter for onboarding
+
+Feature adoption is where most SaaS apps lose users: you build something useful, nobody notices it, and the feature sits unused while support tickets pile up. Hotspots solve discovery without the friction that makes users close a tour after step one.
+
+They work for ongoing guidance too. Shipped a new widget? Add a hotspot that disappears after one click. Whatfix reports in-context enablement makes end users 82% more confident navigating new features ([Whatfix](https://www.walkme.com/glossary/ux-hotspots/)). Keep beacon colors above the 4.5:1 WCAG contrast minimum so the indicator is visible to everyone.
+
+Three rules before you add hotspots everywhere:
+
+- **Cap density at 2-3 per view.** More creates visual noise. Queue the rest.
+- **Persist dismissals.** If closed, don't show again. Use localStorage or your backend.
+- **Respect `prefers-reduced-motion`.** Swap the pulse for a static dot when users opt out of animation.
+
+## Hotspots in Tour Kit
+
+Tour Kit's `@tour-kit/hints` package provides headless hotspot components. You control the rendering; the library handles positioning, keyboard navigation, ARIA attributes, and dismissal tracking.
+
+```tsx
+// src/components/FeatureHotspot.tsx
+import { HintHotspot, HintTooltip } from '@tour-kit/hints';
+
+export function FeatureHotspot() {
+  return (
+    <HintHotspot
+      targetSelector="#new-export-button"
+      hintId="export-feature-2026"
+      dismissible
+    >
+      <HintTooltip side="bottom" sideOffset={8}>
+        <p>Export your data as CSV or JSON.</p>
+        <button onClick={() => console.log('CTA clicked')}>
+          Try it now
+        </button>
+      </HintTooltip>
+    </HintHotspot>
+  );
+}
+```
+
+The `hintId` ties to Tour Kit's storage adapter, so dismissed hotspots stay dismissed across sessions. Beacon animation respects `prefers-reduced-motion` by default. The tooltip follows WCAG 1.4.13: Escape dismisses, hovering keeps it open, no timeouts.
+
+Honest limitation: Tour Kit requires React 18+ and has no visual builder. You write JSX, not drag and drop. For teams that need a no-code editor, UserGuiding or Chameleon are better fits. For code-owned guidance integrated into a design system, that's the point of headless.
+
+Get started at [usertourkit.com/docs](https://usertourkit.com/docs), or see the [hotspot tutorial](/blog/react-hotspot-component) for a full implementation walkthrough.
+
+## FAQ
+
+### What is the difference between a hotspot and a tooltip?
+
+A hotspot combines a visual beacon with a tooltip that appears on click. Standalone tooltips appear on hover or focus without any indicator. The key difference: hotspots are opt-in and work on touch devices, while tooltips rely on hover, which doesn't exist on mobile. Tour Kit's `@tour-kit/hints` supports both patterns.
+
+### Are hotspots accessible?
+
+Yes, when implemented correctly. The beacon needs keyboard focus and an `aria-label`. The tooltip must be dismissible via Escape, hoverable without vanishing, and persistent until closed per WCAG 2.1 SC 1.4.13 ([W3C](https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/)). Pulse animations should respect `prefers-reduced-motion`.
+
+### When should I use a hotspot instead of a product tour?
+
+Use hotspots for single-feature discovery where the user doesn't need sequential steps. A product tour walks users through a multi-step workflow in order. A hotspot says "hey, this button exists" and lets the user engage on their own terms. Combine both: use tours for first-run onboarding and hotspots for ongoing feature announcements.
+
+### How many hotspots should I show at once?
+
+Two to three per view is the practical ceiling. More creates visual clutter and splits attention. Queue extras: show two now, reveal the next pair after the user interacts with the first batch. Tour Kit's scheduling package supports this progressive disclosure pattern.
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json">{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "What is a hotspot? In-app guidance element explained",
+  "description": "Learn what a hotspot is in onboarding UX. Covers definition, accessibility, code examples, and when to use hotspots vs tooltips in your React app.",
+  "author": { "@type": "Person", "name": "DomiDex", "url": "https://github.com/DomiDex" },
+  "publisher": { "@type": "Organization", "name": "Tour Kit", "url": "https://usertourkit.com", "logo": { "@type": "ImageObject", "url": "https://usertourkit.com/logo.png" } },
+  "datePublished": "2026-04-12",
+  "dateModified": "2026-04-12",
+  "image": "https://usertourkit.com/og-images/what-is-a-hotspot-onboarding.png",
+  "url": "https://usertourkit.com/blog/what-is-a-hotspot-onboarding",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://usertourkit.com/blog/what-is-a-hotspot-onboarding" },
+  "keywords": ["what is a hotspot onboarding", "hotspot definition", "hotspot ux meaning"],
+  "proficiencyLevel": "Beginner",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": { "@type": "ComputerLanguage", "name": "TypeScript" }
+})}</script>
+
+<script type="application/ld+json">{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://usertourkit.com" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://usertourkit.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "What is a hotspot? In-app guidance element explained", "item": "https://usertourkit.com/blog/what-is-a-hotspot-onboarding" }
+  ]
+})}</script>
+
+<script type="application/ld+json">{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is the difference between a hotspot and a tooltip?", "acceptedAnswer": { "@type": "Answer", "text": "A hotspot combines a visual beacon (the pulsing dot) with a tooltip that appears on click. A standalone tooltip appears on hover or focus without any visual indicator. Hotspots are opt-in and work on touch devices. Tooltips rely on hover, which doesn't exist on mobile. Tour Kit's @tour-kit/hints package supports both patterns with the same headless architecture." } },
+    { "@type": "Question", "name": "Are hotspots accessible?", "acceptedAnswer": { "@type": "Answer", "text": "Hotspots can be accessible if implemented correctly. The beacon needs a keyboard-focusable element with an aria-label. The revealed tooltip must be dismissible via Escape, hoverable without disappearing, and persistent until the user closes it, per WCAG 2.1 SC 1.4.13. Pulsing animations should respect prefers-reduced-motion." } },
+    { "@type": "Question", "name": "When should I use a hotspot instead of a product tour?", "acceptedAnswer": { "@type": "Answer", "text": "Use hotspots for single-feature discovery where the user doesn't need sequential steps. A product tour walks users through a multi-step workflow in order. A hotspot says hey, this button exists and lets the user engage on their own terms. Combine both: use tours for first-run onboarding and hotspots for ongoing feature announcements." } },
+    { "@type": "Question", "name": "How many hotspots should I show at once?", "acceptedAnswer": { "@type": "Answer", "text": "Two to three per view is the practical ceiling. More than that creates visual clutter and splits attention. If you have five features to highlight, queue them: show two hotspots now, reveal the next pair after the user interacts with or dismisses the first batch." } }
+  ]
+})}</script>
+
+{/* Internal linking suggestions:
+- Link FROM react-hotspot-component.mdx (tutorial) TO this glossary entry for definition context
+- Link FROM best-in-app-guidance-tools-saas.mdx TO this article for hotspot definition
+- Link FROM progressive-disclosure-onboarding.mdx TO this article for hotspot as a progressive disclosure pattern
+- Link TO react-hotspot-component.mdx for implementation tutorial
+- Link TO product-tour-ux-patterns-2026.mdx for broader UX pattern context
+*/}
+
+{/* Distribution checklist:
+- Dev.to: Cross-post with canonical URL
+- Hashnode: Cross-post with canonical URL
+- Reddit r/reactjs: Share as educational glossary content
+*/}

@@ -1,3 +1,5 @@
+'use client'
+
 import { TourProvider, type TourStep as TourStepType, type Tour as TourType } from '@tour-kit/core'
 import * as React from 'react'
 import { TourCard } from '../card/tour-card'

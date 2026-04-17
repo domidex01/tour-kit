@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/announcements Context File
-Version: 0.1.0 | Generated: 2026-04-04
+Version: 0.1.2 | Generated: 2026-04-17
 Paste this into your LLM to get accurate answers about @tour-kit/announcements.
 =========================================================================
 
@@ -23,34 +23,289 @@ Peer dependencies:
 EXPORTS
 -------
 
+Types:
+    AnnouncementOverlayProps
+    AnnouncementCloseProps
+    AnnouncementContentProps
+    AnnouncementActionsProps
+    AnnouncementModalProps
+    AnnouncementSlideoutProps
+    AnnouncementBannerProps
+    AnnouncementToastProps
+    AnnouncementSpotlightProps
+    HeadlessModalProps
+    HeadlessModalRenderProps
+    HeadlessSlideoutProps
+    HeadlessSlideoutRenderProps
+    HeadlessBannerProps
+    HeadlessBannerRenderProps
+    HeadlessToastProps
+    HeadlessToastRenderProps
+    HeadlessSpotlightProps
+    HeadlessSpotlightRenderProps
+    UseAnnouncementReturn
+    AnnouncementsFilter
+    UseAnnouncementsReturn
+    UseAnnouncementQueueReturn
+    RenderProp
+    UnifiedSlotProps
+    UILibraryProviderProps
+    // Announcement types
+  AnnouncementVariant
+    AnnouncementPriority
+    FrequencyRule
+    DismissalReason
+    AnnouncementState
+    AnnouncementAction
+    AnnouncementMedia
+    BannerPosition
+    SlideoutPosition
+    ToastPosition
+    ModalOptions
+    SlideoutOptions
+    BannerOptions
+    ToastOptions
+    SpotlightOptions
+    AnnouncementConfig
+    AudienceCondition
+    AnnouncementStorageAdapter
+    // Context types
+  AnnouncementsContextValue
+    AnnouncementsProviderProps
+    // Queue types
+  PriorityOrder
+    StackBehavior
+    QueueConfig
+    QueueItem
+    // Event types
+  AnnouncementEventType
+    BaseAnnouncementEvent
+    AnnouncementRegisteredEvent
+    AnnouncementShownEvent
+    AnnouncementDismissedEvent
+    AnnouncementCompletedEvent
+    AnnouncementActionClickedEvent
+    AnnouncementQueuedEvent
+    AnnouncementDequeuedEvent
+    AnnouncementEvent
+
 Hooks:
+    useAnnouncementsContext — Announcements context
+    useAnnouncement — Return type for useAnnouncement hook
+    useAnnouncements — Filter options for announcements
+    useAnnouncementQueue — Return type for useAnnouncementQueue hook
     useUILibrary
 
 Components:
+    AnnouncementOverlay
+    AnnouncementClose
+    AnnouncementContent
+    AnnouncementActions
+    AnnouncementModal
+    AnnouncementSlideout
+    AnnouncementBanner
+    AnnouncementToast
+    AnnouncementSpotlight
+    HeadlessModal
+    HeadlessSlideout
+    HeadlessBanner
+    HeadlessToast
+    HeadlessSpotlight
+    AnnouncementsContext
+    AnnouncementsProvider
+    PriorityQueue
+    AnnouncementScheduler
+    Slot
+    UnifiedSlot
     UILibraryProvider
     UILibrary
+    DEFAULT_QUEUE_CONFIG
 
 Utilities:
+    modalOverlayVariants
+    modalContentVariants
+    slideoutOverlayVariants
+    slideoutContentVariants
+    bannerVariants
+    toastContainerVariants
+    toastVariants
+    toastProgressVariants
+    spotlightOverlayVariants
+    spotlightContentVariants
+    createComparator
+    canShowByFrequency
+    canShowAfterDismissal
+    getViewLimit
+    matchesAudience
+    validateConditions
     cn
 
 TYPES
 -----
 
-    export interface UILibraryProviderProps {
-      library?: UILibrary
-      children: React.ReactNode
+    export interface AnnouncementOverlayProps
+      extends React.HTMLAttributes<HTMLDivElement>,
+        VariantProps<typeof overlayVariants> {
+      /** Whether the overlay is visible */
+      open?: boolean
+      /** Callback when overlay is clicked */
+      onClose?: () => void
     }
 
-    export type UILibrary = 'radix-ui' | 'base-ui'
+    export interface AnnouncementCloseProps
+      extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'> {
+      asChild?: boolean
+      children?: React.ReactNode | RenderProp
+      /** Callback when close button is clicked */
+      onClose?: () => void
+    }
+
+    export interface AnnouncementContentProps extends React.HTMLAttributes<HTMLDivElement> {
+      /** Title of the announcement */
+      title?: string
+      /** Description/body content */
+      description?: React.ReactNode
+      /** Media to display */
+      media?: AnnouncementMedia
+      /** Title element props */
+      titleProps?: React.HTMLAttributes<HTMLHeadingElement>
+      /** Description element props */
+      descriptionProps?: React.HTMLAttributes<HTMLDivElement>
+    }
+
+    export interface AnnouncementActionsProps extends React.HTMLAttributes<HTMLDivElement> {
+      /** Primary action configuration */
+      primaryAction?: AnnouncementAction
+      /** Secondary action configuration */
+      secondaryAction?: AnnouncementAction
+      /** Callback when any action is clicked */
+      onAction?: (type: 'primary' | 'secondary') => void
+      /** Callback when dismiss should happen (if action.dismissOnClick is true) */
+      onDismiss?: () => void
+      /** Layout direction */
+      direction?: 'horizontal' | 'vertical'
+    }
+
+    export interface AnnouncementModalProps
+      extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+        VariantProps<typeof modalContentVariants> {
+      /** Announcement ID */
+      id: string
+      /** Whether the modal is open (controlled) */
+      open?: boolean
+      /** Callback when open state changes */
+      onOpenChange?: (open: boolean) => void
+      /** Modal options */
+      options?: ModalOptions
+      /** Content to render inside modal */
+      children?: React.ReactNode
+      /** Use config from provider */
+      useConfig?: boolean
+    }
+
+    export interface AnnouncementSlideoutProps
+      extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+        VariantProps<typeof slideoutContentVariants> {
+      /** Announcement ID */
+      id: string
+      /** Whether the slideout is open (controlled) */
+      open?: boolean
+      /** Callback when open state changes */
+      onOpenChange?: (open: boolean) => void
+      /** Slideout options */
+      options?: SlideoutOptions
+      /** Content to render inside slideout */
+      children?: React.ReactNode
+      /** Use config from provider */
+      useConfig?: boolean
+    }
+
+    export interface AnnouncementBannerProps
+      extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+        VariantProps<typeof bannerVariants> {
+      /** Announcement ID */
+      id: string
+      /** Whether the banner is visible (controlled) */
+      open?: boolean
+      /** Callback when visibility changes */
+      onOpenChange?: (open: boolean) => void
+      /** Banner options */
+      options?: BannerOptions
+      /** Content to render inside banner */
+      children?: React.ReactNode
+      /** Use config from provider */
+      useConfig?: boolean
+    }
+
+    export interface AnnouncementToastProps
+      extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+        VariantProps<typeof toastVariants> {
+      /** Announcement ID */
+      id: string
+      /** Whether the toast is visible (controlled) */
+      open?: boolean
+      /** Callback when visibility changes */
+      onOpenChange?: (open: boolean) => void
+      /** Toast options */
+      options?: ToastOptions
+      /** Content to render inside toast */
+      children?: React.ReactNode
+      /** Use config from provider */
+      useConfig?: boolean
+    }
+
+    export interface AnnouncementSpotlightProps
+      extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+        VariantProps<typeof spotlightContentVariants> {
+      /** Announcement ID */
+      id: string
+      /** Whether the spotlight is visible (controlled) */
+      open?: boolean
+      /** Callback when visibility changes */
+      onOpenChange?: (open: boolean) => void
+      /** Spotlight options */
+      options?: SpotlightOptions
+      /** Content to render inside spotlight */
+      children?: React.ReactNode
+      /** Use config from provider */
+      useConfig?: boolean
+    }
+
+    ... and 46 more types. See source for full definitions.
 
 HOOKS
 -----
+    useAnnouncementsContext(): AnnouncementsContextValue
+    useAnnouncement(id: string): UseAnnouncementReturn
+    useAnnouncements(): UseAnnouncementsReturn
+    useAnnouncementQueue(): UseAnnouncementQueueReturn
     useUILibrary(): UILibrary
 
 COMPONENTS
 ----------
+    <AnnouncementOverlay />
+    <AnnouncementClose />
+    <AnnouncementContent />
+    <AnnouncementActions />
+    <AnnouncementModal />
+    <AnnouncementSlideout />
+    <AnnouncementBanner />
+    <AnnouncementToast />
+    <AnnouncementSpotlight />
+    <HeadlessModal />
+    <HeadlessSlideout />
+    <HeadlessBanner />
+    <HeadlessToast />
+    <HeadlessSpotlight />
+    <AnnouncementsContext />
+    <AnnouncementsProvider />
+    <PriorityQueue />
+    <AnnouncementScheduler />
+    <Slot />
+    <UnifiedSlot />
     <UILibraryProvider />
     <UILibrary />
+    <DEFAULT_QUEUE_CONFIG />
 
 EXAMPLES
 --------

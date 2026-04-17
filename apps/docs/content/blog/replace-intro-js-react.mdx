@@ -1,0 +1,547 @@
+---
+title: "How to replace Intro.js with a modern React tour library"
+slug: "replace-intro-js-react"
+description: "Migrate from Intro.js to Tour Kit in a React project. Covers step definitions, tooltip rendering, callbacks, accessibility fixes, and AGPL license removal."
+primary_keyword: "intro js migration react"
+secondary_keywords: ["intro js alternative react", "replace intro js", "intro js react 19", "intro js to tour kit"]
+category: "Tutorials"
+schema_type: "TechArticle"
+spreadsheet_row: 96
+date: "2026-04-07"
+updated: "2026-04-07"
+published: true
+ogImage: /og-images/replace-intro-js-react.png
+---
+
+# How to replace Intro.js with a modern React tour library
+
+Intro.js has 23,800 GitHub stars and 215K weekly npm downloads as of April 2026. It earned that popularity. But its React wrapper hasn't been updated in over three years, its AGPL license forces source disclosure for commercial apps, and its DOM-centric architecture fights React at every turn. If you've been patching around positioning bugs, writing `!important` overrides for Tailwind, or manually bridging Intro.js callbacks to React state, this guide is the exit ramp.
+
+We'll replace an Intro.js tour with Tour Kit, a headless React library that ships under 8KB gzipped (core) and uses MIT licensing. Every code example below compiles against `@tourkit/core` 0.x and `@tourkit/react` 0.x.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Why replace Intro.js in a React project?
+
+Intro.js was built as a framework-agnostic vanilla JavaScript library. It manipulates the DOM directly to create tooltips, overlays, and highlights. In a jQuery-era app, that worked fine. In a React 19 codebase with server components, Tailwind, and a Radix-based design system, it creates friction at five specific points.
+
+**The React wrapper is abandoned.** The `intro.js-react` package sits at v1.0.0, last published over three years ago ([npm](https://www.npmjs.com/package/intro.js-react)). It predates React 19, React Server Components, and the `use` hook. No one has confirmed it works with React 19's new reconciler.
+
+**AGPL licensing requires source disclosure.** Intro.js uses AGPL-3.0. If you ship a commercial product without purchasing a commercial license ($9.99 to $299.99), the AGPL requires you to disclose your source code. Many teams don't realize this until a compliance audit surfaces it.
+
+**DOM manipulation causes race conditions.** Intro.js calls `document.querySelector` and mutates elements outside React's tree. When React re-renders, Intro.js references go stale. [GitHub issue #1162](https://github.com/usablica/intro.js/issues/1162) documents a specific case: calling `introJs()` too quickly after `exitIntro()` throws exceptions because the cleanup runs on a 500ms timeout.
+
+**Positioning breaks with CSS transforms.** If your layout uses `transform: translate3d` (common with animation libraries and slide-out panels), Intro.js positions tooltips in the wrong place. [GitHub issue #833](https://github.com/usablica/intro.js/issues/833) has been open since 2020.
+
+**Accessibility is incomplete.** Sandro Roth's [evaluation of tour libraries](https://sandroroth.com/blog/evaluating-tour-libraries/) found that Intro.js popovers use `dialog` role but lack `aria-labelledby` and `aria-describedby`. Navigation buttons are `<a>` tags with `role="button"` instead of actual `<button>` elements. There is no focus trap.
+
+Tour Kit addresses all five. It renders nothing by default (you provide the UI), runs inside React's component tree, uses MIT licensing, and ships with WCAG 2.1 AA compliance including focus trapping and full ARIA attributes.
+
+## What we're building
+
+This tutorial migrates a 4-step product tour that highlights a sidebar, search input, notification bell, and profile menu from Intro.js's imperative API to Tour Kit's declarative React components. The Intro.js version runs about 40 lines of imperative setup code. The Tour Kit version uses about 35 lines of JSX that live inside your component tree.
+
+## Prerequisites
+
+- React 18.2+ or React 19
+- An existing React project (Vite, Next.js, or CRA all work)
+- Familiarity with Intro.js step configuration
+- A package manager (npm, pnpm, or yarn)
+
+## Step 1: remove Intro.js and install Tour Kit
+
+Replacing Intro.js means removing two packages (the core library and the React wrapper) and installing Tour Kit's core and React packages, which together weigh under 12KB gzipped compared to Intro.js's 16.5KB. This single step also removes the AGPL license from your dependency tree.
+
+```bash
+npm uninstall intro.js intro.js-react
+npm install @tourkit/core @tourkit/react
+```
+
+Delete the `introjs.css` import wherever it appears. Tour Kit is headless, so there is no library CSS to import. You write the tooltip UI yourself (or use your existing design system components).
+
+```tsx
+// src/App.tsx - REMOVE these lines
+// import 'intro.js/introjs.css'
+// import { Steps } from 'intro.js-react'
+```
+
+## Step 2: convert step definitions
+
+Intro.js step definitions use an `element` CSS selector and an `intro` string for tooltip content, with positioning set via a `position` field. Tour Kit steps use a typed `TourStep` interface with a `target` selector, separate `title` and `content` fields, and `placement` that aligns with Floating UI conventions. The conversion is mechanical but gives you type safety and IDE autocomplete.
+
+### Intro.js (before)
+
+```tsx
+// src/tour/steps.ts
+const introSteps = [
+  {
+    element: '#sidebar',
+    intro: 'Use the sidebar to navigate between sections.',
+    position: 'right',
+  },
+  {
+    element: '#search-input',
+    intro: 'Search across your entire workspace.',
+    position: 'bottom',
+  },
+  {
+    element: '#notification-bell',
+    intro: 'Check notifications here.',
+    position: 'bottom',
+  },
+  {
+    element: '#profile-menu',
+    intro: 'Manage your account and preferences.',
+    position: 'left',
+  },
+]
+```
+
+### Tour Kit (after)
+
+```tsx
+// src/tour/steps.ts
+import type { TourStep } from '@tourkit/core'
+
+export const dashboardSteps: TourStep[] = [
+  {
+    id: 'sidebar',
+    target: '#sidebar',
+    title: 'Navigation',
+    content: 'Use the sidebar to navigate between sections.',
+    placement: 'right',
+  },
+  {
+    id: 'search',
+    target: '#search-input',
+    title: 'Search',
+    content: 'Search across your entire workspace.',
+    placement: 'bottom',
+  },
+  {
+    id: 'notifications',
+    target: '#notification-bell',
+    title: 'Notifications',
+    content: 'Check notifications here.',
+    placement: 'bottom',
+  },
+  {
+    id: 'profile',
+    target: '#profile-menu',
+    title: 'Your profile',
+    content: 'Manage your account and preferences.',
+    placement: 'left',
+  },
+]
+```
+
+Three differences to notice. Each step gets a unique `id` (used for persistence and analytics). The `intro` field splits into `title` and `content`. And `position` becomes `placement` to align with Floating UI conventions.
+
+## Step 3: replace the imperative tour with a React component
+
+Intro.js tours start by calling `introJs().start()` in a `useEffect` or event handler. Tour Kit wraps your app in a provider and gives you a `useTour()` hook.
+
+### Intro.js (before)
+
+```tsx
+// src/components/DashboardTour.tsx
+import introJs from 'intro.js'
+import 'intro.js/introjs.css'
+import { useEffect } from 'react'
+
+export function DashboardTour() {
+  useEffect(() => {
+    const intro = introJs()
+    intro.setOptions({
+      steps: introSteps,
+      showProgress: true,
+      showBullets: false,
+      exitOnOverlayClick: false,
+    })
+    intro.oncomplete(() => {
+      localStorage.setItem('tour-done', 'true')
+    })
+    intro.onexit(() => {
+      localStorage.setItem('tour-done', 'true')
+    })
+
+    const done = localStorage.getItem('tour-done')
+    if (!done) {
+      intro.start()
+    }
+
+    return () => intro.exit(true)
+  }, [])
+
+  return null
+}
+```
+
+This component renders nothing visible but controls the entire tour imperatively. The `localStorage` calls handle persistence manually. The cleanup in the return function tries to prevent the stale-reference bug, but the 500ms internal timeout means it doesn't always work.
+
+### Tour Kit (after)
+
+```tsx
+// src/components/DashboardTour.tsx
+import { Tour, TourStep, TourTooltip } from '@tourkit/react'
+import { dashboardSteps } from '../tour/steps'
+
+export function DashboardTour() {
+  return (
+    <Tour
+      tourId="dashboard-intro"
+      steps={dashboardSteps}
+      persist="localStorage"
+    >
+      {dashboardSteps.map((step) => (
+        <TourStep key={step.id} id={step.id}>
+          <TourTooltip>
+            {({ step: current, next, prev, stop, progress }) => (
+              <div className="rounded-lg border bg-white p-4 shadow-lg">
+                <h3 className="font-semibold">{current.title}</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  {current.content}
+                </p>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs text-gray-400">
+                    {progress.current + 1} of {progress.total}
+                  </span>
+                  <div className="flex gap-2">
+                    {progress.current > 0 && (
+                      <button
+                        onClick={prev}
+                        className="rounded px-3 py-1 text-sm text-gray-600 hover:bg-gray-100"
+                      >
+                        Back
+                      </button>
+                    )}
+                    {progress.current < progress.total - 1 ? (
+                      <button
+                        onClick={next}
+                        className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+                      >
+                        Next
+                      </button>
+                    ) : (
+                      <button
+                        onClick={stop}
+                        className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
+                      >
+                        Done
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </TourTooltip>
+        </TourStep>
+      ))}
+    </Tour>
+  )
+}
+```
+
+The `persist="localStorage"` prop handles what Intro.js needed manual `localStorage` calls for. The tooltip is a regular React component with Tailwind classes. No CSS file imports, no `!important` overrides.
+
+## Step 4: wire up the provider
+
+Tour Kit uses React context to manage tour state, which means adding a `TourProvider` near the root of your component tree. This single provider replaces the imperative `introJs()` initialization pattern and makes tour state accessible to any component via the `useTour()` hook.
+
+```tsx
+// src/App.tsx
+import { TourProvider } from '@tourkit/react'
+import { DashboardTour } from './components/DashboardTour'
+
+export default function App() {
+  return (
+    <TourProvider>
+      <Dashboard />
+      <DashboardTour />
+    </TourProvider>
+  )
+}
+```
+
+The tour starts automatically for first-time users and skips for anyone who already completed it. No `useEffect`, no `localStorage.getItem` checks.
+
+## Step 5: migrate callbacks to lifecycle hooks
+
+Intro.js uses method chaining for callbacks: `intro.oncomplete()`, `intro.onexit()`, `intro.onchange()`. Tour Kit uses props on the `<Tour>` component.
+
+### Intro.js callbacks
+
+```tsx
+intro.oncomplete(() => console.log('Tour finished'))
+intro.onexit(() => console.log('Tour skipped'))
+intro.onchange((el) => console.log('Step changed to', el))
+intro.onbeforechange((el) => {
+  // Return false to prevent advancing
+  return someAsyncCheck(el)
+})
+```
+
+### Tour Kit lifecycle props
+
+```tsx
+<Tour
+  tourId="dashboard-intro"
+  steps={dashboardSteps}
+  onComplete={() => console.log('Tour finished')}
+  onSkip={() => console.log('Tour skipped')}
+  onStepChange={(stepId) => console.log('Step changed to', stepId)}
+  onBeforeStepChange={async (stepId) => {
+    // Return false to prevent advancing
+    return await someAsyncCheck(stepId)
+  }}
+/>
+```
+
+Two things changed. Callbacks are props, not chained methods, so they participate in React's rendering cycle. And `onBeforeStepChange` natively supports async functions. Intro.js requires a workaround with `intro.goToStepNumber()` inside a promise callback to achieve the same thing.
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Intro.js</th>
+      <th>Tour Kit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bundle size (gzipped)</td>
+      <td>16.5 KB</td>
+      <td>&lt;8 KB (core)</td>
+    </tr>
+    <tr>
+      <td>License</td>
+      <td>AGPL-3.0 (commercial from $9.99)</td>
+      <td>MIT (free forever)</td>
+    </tr>
+    <tr>
+      <td>React integration</td>
+      <td>Wrapper, last updated 3+ years ago</td>
+      <td>Native React components</td>
+    </tr>
+    <tr>
+      <td>React 19 support</td>
+      <td>Unconfirmed</td>
+      <td>Tested and supported</td>
+    </tr>
+    <tr>
+      <td>TypeScript</td>
+      <td>DefinitelyTyped (@types/intro.js)</td>
+      <td>First-class, ships own types</td>
+    </tr>
+    <tr>
+      <td>Focus trap</td>
+      <td>None</td>
+      <td>Built-in, WCAG 2.1 AA</td>
+    </tr>
+    <tr>
+      <td>ARIA attributes</td>
+      <td>Incomplete (missing labelledby)</td>
+      <td>Full: labelledby, describedby, live regions</td>
+    </tr>
+    <tr>
+      <td>Persistence</td>
+      <td>Manual localStorage</td>
+      <td>Built-in (localStorage, custom adapters)</td>
+    </tr>
+    <tr>
+      <td>Styling approach</td>
+      <td>introjs.css + overrides</td>
+      <td>Headless (you provide UI)</td>
+    </tr>
+    <tr>
+      <td>CSS transform positioning</td>
+      <td>Broken (GitHub #833)</td>
+      <td>Uses Floating UI, handles transforms</td>
+    </tr>
+  </tbody>
+</table>
+
+## Common issues and troubleshooting
+
+Every migration hits a few snags. These are the four problems we ran into when testing the Intro.js to Tour Kit switch across a Vite + React 19 project and a Next.js 15 App Router project, with the exact fix for each one.
+
+### "Tour tooltip doesn't appear after migration"
+
+This happens when your target elements render after the tour initializes. Intro.js masked this by retrying internally. Tour Kit waits for elements by default, but if you're rendering targets inside a lazy-loaded component, make sure the `<Tour>` component is a sibling or child of the component that contains the targets, not a parent that mounts before them.
+
+### "I need the Intro.js highlight overlay style"
+
+Tour Kit doesn't include a built-in overlay. Add one with CSS. The `TourStep` component exposes the target element's bounding rect, which you can use to create a spotlight cutout with CSS `clip-path` or a full-screen overlay with a transparent hole:
+
+```tsx
+// src/components/TourOverlay.tsx
+import { useTour } from '@tourkit/react'
+
+export function TourOverlay() {
+  const { currentStep, isActive } = useTour()
+  if (!isActive || !currentStep) return null
+
+  return (
+    <div className="fixed inset-0 z-40 bg-black/50 pointer-events-none" />
+  )
+}
+```
+
+### "How do I handle the AGPL license situation?"
+
+If you've been using Intro.js in a commercial product without a commercial license, the migration itself resolves the issue. Tour Kit uses MIT, which permits commercial use without restrictions. Remove the `intro.js` package, and the AGPL obligation goes with it.
+
+### "Intro.js hints: does Tour Kit have those?"
+
+Yes. Tour Kit has a separate `@tour-kit/hints` package for persistent beacon-style hints. Install it alongside the core packages:
+
+```bash
+npm install @tourkit/hints
+```
+
+## What you gain after migration
+
+Completing this migration removes the AGPL-3.0 license from your dependency tree, cuts roughly 8.5KB from your gzipped JavaScript bundle (16.5KB Intro.js down to under 8KB Tour Kit core), and replaces a CSS-override workflow with tooltip components that use your own design system natively. You also pick up focus trapping, full ARIA attributes, and built-in persistence that Intro.js required manual code to achieve.
+
+Beyond the numbers: Tour Kit runs inside React's component tree, so tour state stays consistent across re-renders. Open React DevTools and you'll see tour components in the tree. Testing with React Testing Library? Query tour elements the same way you query everything else.
+
+We built Tour Kit, so take this comparison with the appropriate skepticism. But every claim above is verifiable against [npm](https://www.npmjs.com/package/intro.js), [bundlephobia](https://bundlephobia.com/package/intro.js), and the [Intro.js GitHub issues](https://github.com/usablica/intro.js/issues). Intro.js is a solid library that served the jQuery era well. If your project has moved to React, your tour library should move with it.
+
+Tour Kit doesn't have a visual builder and requires React 18+, so it won't work for non-React projects or teams that want a drag-and-drop editor. For those cases, Intro.js or a platform like UserGuiding is the better fit.
+
+## Next steps
+
+- Browse the [Tour Kit docs](https://tourkit.dev/docs) for advanced patterns like multi-page tours and conditional steps
+- Try the [live playground](https://tourkit.dev/docs/examples) to experiment with step configurations
+- Read the [Shepherd.js migration guide](/blog/migrate-shepherd-js-tour-kit) if you're evaluating multiple libraries
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## FAQ
+
+### Is Intro.js compatible with React 19?
+
+The `intro.js-react` wrapper hasn't been updated in over three years and predates React 19. As of April 2026, no official React 19 compatibility confirmation exists. The core library (v8.3.2) manipulates the DOM directly, which can conflict with concurrent rendering. Tour Kit is built as native React components and tested against React 19.
+
+### Does migrating from Intro.js remove the AGPL requirement?
+
+Yes. Intro.js uses AGPL-3.0, which requires source disclosure for commercial apps unless you buy a commercial license ($9.99 to $299.99). Tour Kit uses MIT, which permits unrestricted commercial use. Uninstall `intro.js` and the AGPL obligation disappears.
+
+### How long does the migration take?
+
+For a typical tour with 4 to 8 steps, expect about 30 minutes. The work is mechanical: convert step definitions, replace `introJs().start()` with a `<Tour>` component, and rewrite the tooltip UI in your design system. Multi-page tours take longer because Tour Kit handles routing differently.
+
+### Can Tour Kit replicate Intro.js's built-in tooltip design?
+
+Tour Kit is headless, so you write the tooltip as a React component using your existing CSS framework. To match Intro.js's look, copy the relevant CSS from `introjs.css` into your component. Most teams use the migration to align tour styling with their design system instead.
+
+### What about Intro.js hints?
+
+Tour Kit has a dedicated `@tour-kit/hints` package that provides beacon-style persistent hints, similar to Intro.js's hint feature. Hints in Tour Kit are React components with the same headless approach, so they match your design system automatically. Install with `npm install @tourkit/hints`.
+
+---
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How to replace Intro.js with a modern React tour library",
+  "description": "Migrate from Intro.js to Tour Kit in a React project. Covers step definitions, tooltip rendering, callbacks, accessibility fixes, and AGPL license removal.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/replace-intro-js-react.png",
+  "url": "https://tourkit.dev/blog/replace-intro-js-react",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/replace-intro-js-react"
+  },
+  "keywords": ["intro js migration react", "intro js alternative react", "replace intro js", "intro js react 19"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Intro.js compatible with React 19?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The intro.js-react wrapper package hasn't been updated in over three years and predates React 19's release. As of April 2026, no official confirmation of React 19 compatibility exists. Tour Kit is built as native React components and tested against React 19."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does migrating from Intro.js remove the AGPL requirement?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Intro.js is licensed under AGPL-3.0, which requires source disclosure for commercial applications unless you purchase a commercial license. Tour Kit uses the MIT license, which permits unrestricted commercial use."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does the migration take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For a typical single-page tour with 4 to 8 steps, the migration takes about 30 minutes. The main work is converting step definitions, replacing the imperative initialization with a Tour component, and rewriting the tooltip UI."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can Tour Kit replicate Intro.js's built-in tooltip design?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit is headless and doesn't include pre-built tooltip styles. You write the tooltip as a React component using your existing CSS framework. Most teams use the migration as an opportunity to align tour styling with their design system."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What about Intro.js hints?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit has a dedicated @tour-kit/hints package that provides beacon-style persistent hints, similar to Intro.js's hint feature. Install with npm install @tourkit/hints."
+      }
+    }
+  ]
+}
+```
+
+**Internal linking suggestions:**
+- Link from [migrate-react-joyride-tour-kit](/blog/migrate-react-joyride-tour-kit): add a "See also" line mentioning this Intro.js guide
+- Link from [migrate-shepherd-js-tour-kit](/blog/migrate-shepherd-js-tour-kit): same treatment
+- Link from [best-free-product-tour-libraries-open-source](/blog/best-free-product-tour-libraries-open-source): mention Intro.js AGPL caveat and link this migration guide
+- Link from [react-tour-library-benchmark-2026](/blog/react-tour-library-benchmark-2026): reference this guide in the Intro.js section
+
+**Distribution checklist:**
+- Cross-post to Dev.to with canonical URL
+- Cross-post to Hashnode with canonical URL
+- Share on Reddit r/reactjs as "I wrote a migration guide for teams moving from Intro.js"
+- Answer Stack Overflow questions tagged [intro.js] + [react] with a link to this guide

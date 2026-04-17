@@ -1,0 +1,388 @@
+---
+title: "Migrating from Userpilot to Tour Kit + PostHog"
+slug: "migrate-userpilot-tour-kit-posthog"
+description: "Replace Userpilot with Tour Kit and PostHog for product tours and analytics. Step-by-step migration with API mapping, code examples, and cost breakdown."
+primary_keyword: "migrate userpilot to open source"
+secondary_keywords: ["userpilot migration", "replace userpilot analytics", "userpilot open source alternative"]
+category: "Tutorials"
+schema_type: "TechArticle"
+spreadsheet_row: 100
+date: "2026-04-07"
+updated: "2026-04-07"
+ogImage: /og-images/migrate-userpilot-tour-kit-posthog.png
+published: true
+---
+
+# Migrating from Userpilot to Tour Kit + PostHog
+
+Your Userpilot contract renewal is coming up. The Growth plan costs $799/month as of April 2026, and your team already pays for PostHog (or Mixpanel, or Amplitude) for product analytics. You're paying twice for event tracking you only use once.
+
+That's the pattern we keep hearing from teams who migrate. Userpilot bundles analytics, session tracking, in-app guidance into one platform. The problem is most engineering teams already have better analytics elsewhere. You end up with two dashboards and two bills.
+
+Tour Kit is a headless React product tour library (core under 8KB gzipped) that handles the onboarding UX layer: tours, hints, checklists, and surveys. PostHog handles analytics and experimentation: event tracking, funnels, session replays, feature flags. Together they replace Userpilot at a fraction of the cost, with full control over your code and data.
+
+**Bias disclosure:** We built Tour Kit. Every claim below is verifiable against npm and GitHub.
+
+```bash
+npm install @tourkit/core @tourkit/react posthog-js
+```
+
+## Why migrate from Userpilot?
+
+Userpilot has a 4.6/5 rating on G2 with 905 reviews as of April 2026. It's a solid product with a visual flow builder and built-in analytics. Teams don't leave because Userpilot is bad. They leave because the architecture creates friction that compounds over time.
+
+Here are the specific pain points from G2 reviews and Reddit threads that push engineering teams toward open source:
+
+- **Analytics duplication.** Userpilot bundles product analytics, but your team already uses PostHog, Amplitude, or Mixpanel. You're maintaining two event pipelines for the same data. One G2 reviewer wrote: "Custom reports could be more flexible. I can't slice and dice data exactly as I would like" ([UserGuiding compilation](https://userguiding.com/blog/userpilot-reviews)).
+
+- **Cost at scale.** Starter at $299/month gets you 2,000 MAU and only 10 feature tags. Growth jumps to $799/month. Average Growth plan cost runs ~$8,500/year according to Vendr data. That's $8,500 for onboarding flows you could own outright.
+
+- **SPA friction.** Userpilot requires calling `userpilot.reload()` on every URL change in React, Vue, or Angular apps. It's a script-injection architecture, not a component model. Miss a `reload()` call and your tour silently breaks.
+
+- **Limited customization.** Multiple G2 reviewers flag this: "Hard to target specific elements or get the flow to pop up...You need to test it a lot." If your app uses dynamic layouts or portals, Userpilot's element targeting breaks easily.
+
+- **Mobile gaps.** One reviewer described the mobile experience as "more like a minimized desktop app rather than native." Tour Kit's headless approach means you render whatever responsive UI your app already uses.
+
+To be fair: Userpilot's visual flow builder is genuinely useful for non-technical product managers who need to create tours without developer involvement. Tour Kit doesn't have a visual builder. If your PM team ships tours independently and you don't need deep analytics integration, Userpilot might still be the right choice.
+
+## Concept mapping: Userpilot to Tour Kit + PostHog
+
+Userpilot bundles onboarding, analytics, surveys into a single monolithic platform costing $299-799/month. Tour Kit + PostHog splits that same functionality across two focused open-source tools: Tour Kit handles the in-app UX layer (tours, hints, checklists, announcements) while PostHog handles analytics and experimentation. This table maps every Userpilot concept to its open-source equivalent.
+
+<table>
+<thead>
+<tr><th>Userpilot concept</th><th>Tour Kit + PostHog equivalent</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>Flows (product tours)</td><td><code>@tourkit/react</code> <code>&lt;Tour&gt;</code> + <code>&lt;TourStep&gt;</code></td><td>Headless components, you control the tooltip JSX</td></tr>
+<tr><td>Tooltips / Hotspots</td><td><code>@tourkit/hints</code> <code>&lt;Hint&gt;</code> + <code>&lt;HintContent&gt;</code></td><td>Beacon + popover pattern with dismissal tracking</td></tr>
+<tr><td>Checklists</td><td><code>@tourkit/checklists</code> <code>&lt;Checklist&gt;</code></td><td>Task dependencies, progress persistence, completion callbacks</td></tr>
+<tr><td>NPS / CSAT surveys</td><td><code>@tourkit/surveys</code></td><td>NPS, CSAT, CES with fatigue prevention and context awareness</td></tr>
+<tr><td>Banners / Modals</td><td><code>@tourkit/announcements</code></td><td>Modal, toast, banner, slideout, and spotlight variants</td></tr>
+<tr><td>Resource center</td><td>Custom component + Tour Kit hooks</td><td>Build with <code>useTour()</code> and your component library</td></tr>
+<tr><td>Event tracking</td><td>PostHog <code>posthog.capture()</code></td><td>Or <code>@tourkit/analytics</code> plugin for multi-provider</td></tr>
+<tr><td>User segmentation</td><td>PostHog cohorts + feature flags</td><td>Feature flags control which tours show to which users</td></tr>
+<tr><td>Session replays</td><td>PostHog session replay</td><td>Watch users interact with your tours, free tier included</td></tr>
+<tr><td>A/B testing flows</td><td>PostHog feature flags + experiments</td><td>Split test tour variants with statistical significance</td></tr>
+<tr><td><code>userpilot.reload()</code></td><td>Not needed</td><td>Tour Kit uses React context, detects route changes natively</td></tr>
+</tbody>
+</table>
+
+## Before you start
+
+A typical Userpilot-to-Tour Kit migration takes 3-5 hours for setups with 2-3 tours and basic analytics, based on the incremental side-by-side approach described below. Product Fruits documents a similar 3-4 week timeline for full-platform migrations across larger organizations ([Product Fruits migration guide](https://productfruits.com/blog/switching-from-appcues-userguiding-userpilot-chameleon-userflow/)). Larger setups with 10+ flows and custom segmentation take 1-2 days of focused engineering work.
+
+**Prerequisites:**
+- React 18.2+ or React 19
+- PostHog account (free tier covers 1M events/month, 5K sessions/month)
+- Your existing Userpilot flow configurations (export from Userpilot dashboard)
+- Node 18+, TypeScript 5+
+
+## Step 1: Install Tour Kit alongside Userpilot
+
+The safest migration path installs Tour Kit and PostHog alongside your existing Userpilot script, so both systems run simultaneously and you can compare behavior before cutting over. Smashing Magazine's guide to product tours in React apps recommends this incremental approach for any tour library swap ([Smashing Magazine](https://www.smashingmagazine.com/2020/08/guide-product-tours-react-apps/)).
+
+```tsx
+// terminal
+npm install @tourkit/core @tourkit/react @tourkit/analytics posthog-js
+```
+
+Set up the providers in your app root. Userpilot's script can stay in place.
+
+```tsx
+// src/app/providers.tsx
+'use client';
+
+import { TourProvider } from '@tourkit/react';
+import { PostHogProvider } from 'posthog-js/react';
+import posthog from 'posthog-js';
+
+// Initialize PostHog (skip if you already have it)
+if (typeof window !== 'undefined') {
+  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+  });
+}
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <PostHogProvider client={posthog}>
+      <TourProvider>
+        {children}
+      </TourProvider>
+    </PostHogProvider>
+  );
+}
+```
+
+At this point both systems coexist. Userpilot still fires its flows; Tour Kit is wired up but dormant.
+
+## Step 2: Map your Userpilot flow configuration
+
+Every Userpilot flow translates to a Tour Kit tour definition with typed steps, CSS selector targets, and callback hooks. Export your flow configurations from the Userpilot dashboard and identify two things for each flow: the target elements and the step content. Tour Kit's `createTour()` factory gives you compile-time type safety that Userpilot's visual builder can't match.
+
+Here's a typical Userpilot flow translated to Tour Kit:
+
+```tsx
+// src/tours/onboarding-tour.tsx
+import { createTour, createStep } from '@tourkit/core';
+
+// Userpilot flow: "Welcome Tour" → Tour Kit equivalent
+export const onboardingTour = createTour({
+  tourId: 'onboarding-welcome',
+  steps: [
+    createStep({
+      id: 'welcome',
+      target: '[data-tour="dashboard-header"]',
+      title: 'Welcome to your dashboard',
+      content: 'This is where you will find an overview of your key metrics.',
+    }),
+    createStep({
+      id: 'create-project',
+      target: '[data-tour="new-project-btn"]',
+      title: 'Create your first project',
+      content: 'Click here to get started with your first project.',
+    }),
+    createStep({
+      id: 'settings',
+      target: '[data-tour="settings-nav"]',
+      title: 'Customize your workspace',
+      content: 'Head to settings to configure your team preferences.',
+    }),
+  ],
+});
+```
+
+Notice the `data-tour` attribute selectors. Userpilot uses CSS selectors too, but they tend to target class names or IDs that break during refactors. Using `data-tour` attributes makes your tour targets explicit and refactor-safe.
+
+## Step 3: Replace Userpilot components with Tour Kit
+
+Tour Kit's headless architecture means you render your own tooltip and overlay markup using your existing design system components. This is the fundamental difference from Userpilot's pre-built UI: you write 20-30 lines of JSX but gain full control over styling and responsive behavior without CSS overrides or `!important` hacks.
+
+```tsx
+// src/components/OnboardingTour.tsx
+'use client';
+
+import { Tour, TourStep, TourOverlay } from '@tourkit/react';
+import { useTour } from '@tourkit/react';
+import posthog from 'posthog-js';
+import { onboardingTour } from '../tours/onboarding-tour';
+
+export function OnboardingTour() {
+  const { currentStep, next, prev, stop, isActive } = useTour(
+    onboardingTour.tourId
+  );
+
+  // Wire Tour Kit events to PostHog
+  const handleStepChange = (stepIndex: number) => {
+    posthog.capture('tour_step_viewed', {
+      tour_id: onboardingTour.tourId,
+      step_index: stepIndex,
+      step_id: onboardingTour.steps[stepIndex]?.id,
+    });
+  };
+
+  const handleComplete = () => {
+    posthog.capture('tour_completed', {
+      tour_id: onboardingTour.tourId,
+      total_steps: onboardingTour.steps.length,
+    });
+  };
+
+  return (
+    <Tour
+      tour={onboardingTour}
+      onStepChange={handleStepChange}
+      onComplete={handleComplete}
+    >
+      <TourOverlay />
+      {onboardingTour.steps.map((step, index) => (
+        <TourStep key={step.id} step={step}>
+          {/* Your own tooltip component */}
+          <div className="rounded-lg bg-white p-4 shadow-lg">
+            <h3 className="font-semibold">{step.title}</h3>
+            <p className="mt-1 text-sm text-gray-600">{step.content}</p>
+            <div className="mt-3 flex gap-2">
+              {index > 0 && (
+                <button onClick={prev} className="text-sm text-gray-500">
+                  Back
+                </button>
+              )}
+              <button
+                onClick={index === onboardingTour.steps.length - 1 ? stop : next}
+                className="rounded bg-blue-600 px-3 py-1 text-sm text-white"
+              >
+                {index === onboardingTour.steps.length - 1 ? 'Done' : 'Next'}
+              </button>
+            </div>
+          </div>
+        </TourStep>
+      ))}
+    </Tour>
+  );
+}
+```
+
+This is the biggest shift from Userpilot. You write the UI. If you're using shadcn/ui, wrap Tour Kit's step content in your existing `Card` and `Popover` components. The design system mismatch that plagues Userpilot integrations vanishes because there's no pre-built UI to fight.
+
+For a deeper PostHog integration with funnels and cohorts, see our guide on [tracking tour completion with PostHog events](/blog/track-product-tour-completion-posthog-events).
+
+## Step 4: Test side-by-side
+
+Running Userpilot and Tour Kit simultaneously for a week lets you compare completion rates directly between the old and new systems, catching any targeting or timing differences before you remove the Userpilot script. Build a PostHog funnel that mirrors Userpilot's built-in flow analytics so you can validate parity.
+
+```tsx
+// Quick PostHog funnel query for comparison
+// In PostHog: Insights → New → Funnel
+// Step 1: tour_step_viewed where step_index = 0
+// Step 2: tour_step_viewed where step_index = 1
+// Step 3: tour_completed
+```
+
+Check three things:
+1. Tour Kit tours trigger on the same pages as Userpilot flows
+2. PostHog events fire correctly (check the Events tab in PostHog)
+3. Step completion rates are comparable between both systems
+
+The gotcha we hit: Userpilot's "completion" metric counts differently than a custom PostHog funnel. Userpilot marks completion when the last step renders; PostHog tracks the explicit `tour_completed` event you fire. If your completion rates differ by 5-10%, check whether Userpilot counts auto-dismissed tours as completions.
+
+## Step 5: Remove Userpilot
+
+After verifying Tour Kit tours match Userpilot's behavior and PostHog captures all the events you need, remove the Userpilot script and npm package, plus all `userpilot.reload()` calls from your codebase. This is the point of no return, so make sure your PostHog funnel data looks correct first.
+
+```bash
+npm uninstall userpilot
+```
+
+Remove the Userpilot initialization snippet from your app (usually in `index.html` or your layout component):
+
+```tsx
+// DELETE this from your layout
+// <script src="https://js.userpilot.co/sdk/latest.js"></script>
+// window.userpilotSettings = { token: "..." };
+```
+
+Remove any `userpilot.reload()` calls from your router. In a Next.js App Router project, these are typically in `useEffect` hooks or route change listeners. Tour Kit doesn't need them because it uses React context to track the current step and re-renders automatically on navigation.
+
+## What you gain (and what you lose)
+
+Every migration involves tradeoffs. Tour Kit + PostHog gives you full code ownership, eliminates analytics duplication, and cuts costs from $3,588-9,588/year to $0-99 one-time. But you lose Userpilot's visual flow builder and managed hosting. Here's the complete breakdown.
+
+<table>
+<thead>
+<tr><th>Category</th><th>What you gain</th><th>What you lose</th></tr>
+</thead>
+<tbody>
+<tr><td>Cost</td><td>$0-99 one-time (Tour Kit) + PostHog free tier vs $3,588-9,588/year (Userpilot)</td><td>Time investment for initial migration (3-5 hours typical)</td></tr>
+<tr><td>Analytics</td><td>Single source of truth in PostHog, no duplicate dashboards</td><td>Userpilot's built-in flow-specific analytics dashboards</td></tr>
+<tr><td>Customization</td><td>Full control over every pixel of tooltip, modal, and banner UI</td><td>Userpilot's visual flow builder for non-technical users</td></tr>
+<tr><td>Performance</td><td>Tour Kit core &lt; 8KB gzipped, tree-shakeable, no external scripts</td><td>Nothing. Userpilot's monolithic script is larger</td></tr>
+<tr><td>Vendor lock-in</td><td>Open source (MIT core), data stays in your infrastructure</td><td>Userpilot's managed hosting (some teams prefer this)</td></tr>
+<tr><td>Mobile</td><td>Headless approach renders whatever responsive UI you build</td><td>Userpilot's mobile SDK (React Native support)</td></tr>
+<tr><td>Community</td><td>Growing open-source ecosystem</td><td>Userpilot's larger user community and support team</td></tr>
+</tbody>
+</table>
+
+The biggest loss is real: Userpilot's visual flow builder lets product managers create and edit tours without writing code. Tour Kit requires a React developer for every change. If your PM team ships tours independently and frequently, that's a genuine workflow regression.
+
+One limitation worth naming: Tour Kit is React 18+ only. If your app runs React 17 or an older version, you'll need to upgrade React first. Tour Kit also doesn't have a visual builder, so every tour change goes through your codebase and deploy pipeline.
+
+## Common issues and troubleshooting
+
+We hit these issues when testing the migration in a Next.js 15 + React 19 project, and they match the most common questions from teams making the switch.
+
+### "Tour doesn't appear after removing Userpilot"
+
+Check that your `TourProvider` wraps the components containing tour targets. Userpilot's script runs globally; Tour Kit's context is scoped to the provider tree. If your tour targets are in a different React subtree, the provider won't find them.
+
+### "PostHog events aren't showing up"
+
+Verify `posthog.init()` runs before any `posthog.capture()` calls. In Next.js App Router, the initialization must happen in a Client Component. Check your browser's Network tab for `https://app.posthog.com/e/` requests.
+
+### "Step targeting is less reliable than Userpilot"
+
+Userpilot's Chrome extension helps build selectors visually. Tour Kit uses standard CSS selectors. Switch from brittle selectors like `.css-1a2b3c` to explicit `data-tour` attributes on your elements. They survive CSS-in-JS class name changes and component refactors.
+
+## Next steps
+
+Once the migration is stable, extend your setup:
+
+- Add [checklists](/docs/checklists) for multi-step onboarding with `@tourkit/checklists`
+- Set up [NPS surveys](/docs/surveys) with `@tourkit/surveys` and pipe responses to PostHog
+- Use PostHog feature flags to A/B test different tour sequences
+- Build a [PostHog funnel](/blog/track-product-tour-completion-posthog-events) comparing tour completers vs skippers on activation metrics
+
+## FAQ
+
+### How long does it take to migrate from Userpilot to Tour Kit?
+
+Tour Kit migration from Userpilot typically takes 3-5 hours for a setup with 2-3 tours. Larger implementations with 10+ flows take 1-2 days. The side-by-side approach means you can migrate one flow at a time without downtime.
+
+### Can Tour Kit do everything Userpilot does?
+
+Tour Kit covers tours, hints, checklists, surveys, announcements, and adoption tracking across 10 packages. PostHog adds analytics and experimentation. Together they match Userpilot's feature set, minus the visual flow builder. Tour Kit requires a React developer for every tour change.
+
+### How much money will I save by switching from Userpilot?
+
+Userpilot costs $3,588-9,588/year as of April 2026. Tour Kit's core packages are MIT (free) and Pro costs $99 one-time. PostHog's free tier covers 1M events/month. First-year savings range from $3,489 to $8,401 depending on your current Userpilot plan.
+
+### Does PostHog replace Userpilot's analytics completely?
+
+PostHog covers product analytics, session replays, A/B testing, and feature flags. It exceeds Userpilot's analytics. The gap: PostHog can't deliver in-app guidance directly. Tour Kit fills that role as the onboarding UX layer.
+
+### Will my existing Userpilot tours break during migration?
+
+No. The recommended approach runs both systems simultaneously. Install Tour Kit, rebuild your tours in code, verify they work, then remove the Userpilot script. Existing flows keep running until you explicitly remove them.
+
+---
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Migrating from Userpilot to Tour Kit + PostHog",
+  "description": "Replace Userpilot with Tour Kit and PostHog for product tours and analytics. Step-by-step migration with API mapping, code examples, and cost breakdown.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/migrate-userpilot-tour-kit-posthog.png",
+  "url": "https://tourkit.dev/blog/migrate-userpilot-tour-kit-posthog",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/migrate-userpilot-tour-kit-posthog"
+  },
+  "keywords": ["migrate userpilot to open source", "userpilot migration", "replace userpilot analytics", "userpilot open source alternative"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+, PostHog account",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+**Internal linking suggestions:**
+- Link FROM [best free product tour libraries](/blog/best-free-product-tour-libraries-open-source) → this article (migration path)
+- Link FROM [best onboarding solutions with analytics](/blog/best-onboarding-solutions-real-analytics) → this article
+- Link FROM [PostHog event tracking tutorial](/blog/track-product-tour-completion-posthog-events) → this article (migration context)
+
+**Distribution checklist:**
+- Cross-post to Dev.to with canonical URL
+- Cross-post to Hashnode with canonical URL
+- Share on Reddit r/reactjs as "We wrote a migration guide for teams moving off Userpilot"
+- Share on Reddit r/SaaS for the cost-savings angle

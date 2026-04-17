@@ -52,7 +52,12 @@ const SurveyProgress = React.forwardRef<HTMLDivElement, SurveyProgressProps>(
           </span>
         )}
         {showBar && (
-          <div className="w-full rounded-full bg-secondary">
+          <div
+            className={cn(
+              'w-full rounded-full bg-secondary overflow-hidden',
+              size === 'sm' ? 'h-1' : size === 'lg' ? 'h-3' : 'h-2'
+            )}
+          >
             {/* biome-ignore lint/a11y/useFocusableInteractive: progressbar is a visual indicator, not an interactive control */}
             <div
               role="progressbar"

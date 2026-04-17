@@ -1,0 +1,281 @@
+---
+title: "Data ownership in onboarding: who owns your tour analytics?"
+slug: "data-ownership-onboarding-tour-analytics"
+description: "Examine who actually owns your product tour analytics data when using SaaS onboarding tools. Compare vendor custody, GDPR roles, and code-owned alternatives."
+primary_keyword: "data ownership onboarding tool"
+secondary_keywords: ["onboarding data privacy", "product tour data ownership", "GDPR onboarding tool", "self-hosted tour analytics"]
+category: "Build vs Buy"
+schema_type: "TechArticle"
+spreadsheet_row: 145
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/data-ownership-onboarding-tour-analytics.png
+---
+
+# Data ownership in onboarding: who owns your tour analytics?
+
+You shipped a 7-step onboarding tour last quarter. It runs through Pendo. Users complete it, skip steps, drop off at step 4. All of that behavior data, hundreds of thousands of events per month for a 10,000 MAU product, sits on Pendo's servers. Accessed through Pendo's dashboard. Exported through Pendo's API at Pendo's rate limits.
+
+You call it "your data." But can you actually take it with you?
+
+As of April 2026, most SaaS onboarding tools operate as data custodians, not partners. They hold your tour analytics in proprietary formats, behind premium export tiers, subject to retention policies you didn't write. The EU Data Act (enforced September 2025) now requires machine-readable exports at no cost, but compliance across onboarding vendors remains inconsistent at best.
+
+This article breaks down who really owns your onboarding data, what GDPR says about the relationship between your team and your vendor, and why code-owned solutions eliminate the question entirely.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/analytics
+```
+
+## The ownership illusion in SaaS onboarding
+
+Most product teams assume they own their tour analytics because the data describes their users, but that assumption crumbles the moment you try to migrate. As of April 2026, Pendo stores analytics on vendor-managed cloud infrastructure with proprietary API export, Appcues offers CSV via async polling, and WalkMe requires manual requests with 90-day processing windows. Your data. Their terms.
+
+Onur Alp Soner, CEO at Countly, put it plainly: "When you rely on third-party tools, you're essentially renting insight. The data might live on someone else's servers, and you access it via their interfaces" ([Countly Blog](https://countly.com/blog/data-ownership)).
+
+Here's what "ownership" actually looks like across major vendors:
+
+<table>
+  <thead>
+    <tr>
+      <th>Dimension</th>
+      <th>Pendo</th>
+      <th>Appcues</th>
+      <th>WalkMe</th>
+      <th>Code-owned (Tour Kit)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Data location</td>
+      <td>Vendor cloud</td>
+      <td>Vendor cloud</td>
+      <td>US or EU data center</td>
+      <td>Your app bundle + your DB</td>
+    </tr>
+    <tr>
+      <td>Export formats</td>
+      <td>API (proprietary)</td>
+      <td>CSV, JSON via async API</td>
+      <td>By request (90-day processing)</td>
+      <td>Direct DB/localStorage access</td>
+    </tr>
+    <tr>
+      <td>Retention control</td>
+      <td>Per vendor ToS</td>
+      <td>Per vendor ToS</td>
+      <td>7 years max (personal data)</td>
+      <td>Full control</td>
+    </tr>
+    <tr>
+      <td>Vendor lock-in risk</td>
+      <td>High</td>
+      <td>Medium</td>
+      <td>High</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>DPA required</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+    </tr>
+  </tbody>
+</table>
+
+WalkMe retains personal data for up to 7 years for backup and litigation purposes, and processes deletion requests within 90 days ([WalkMe Support](https://support.walkme.com/knowledge-base/what-data-does-walkme-collect/)). That's three months between "delete my users' data" and it actually happening.
+
+Appcues frames this as a "shared responsibility model" ([Appcues Docs](https://docs.appcues.com/installation-overview/faq-shared-responsibility-model-for-security-privacy)). Technically accurate. Also a way of saying: we hold the data, you hold the liability.
+
+## What GDPR actually requires (and what vendors don't tell you)
+
+Under GDPR, the company deploying an onboarding tool is the data controller, and the vendor is the data processor. This distinction carries real consequences: GDPR Article 28 mandates a Data Processing Agreement, subject access requests require a 30-day response window, and 94% of businesses agree that insufficient data protection discourages customers (IAPP, 2023). Most vendor comparison pages skip over all of this.
+
+As the controller, your company determines why and how user data gets processed. The vendor merely acts on your instructions. But here's the catch: you bear ultimate accountability for data practices, even when the data sits on someone else's infrastructure.
+
+Three requirements flow from this:
+
+1. **A Data Processing Agreement is mandatory.** Every SaaS onboarding vendor must sign a DPA with you. If they haven't, you're in violation of GDPR Article 28 right now.
+
+2. **You must be able to delete and export user data on demand.** Subject access requests (SARs) have a 30-day response window. If your vendor takes 90 days to process a deletion request, you're the one who fails the compliance deadline.
+
+3. **Data minimization isn't optional.** The Usetiful blog states it clearly: "For every variable stored or user profile maintained, you must have a legitimate reason" ([Usetiful](https://blog.usetiful.com/2021/03/user-onboarding-tools-and-gdpr.html)). SaaS tools that collect IP addresses, geolocation, and behavioral metadata by default put the burden of justifying that collection on you.
+
+WalkMe claims not to collect PII "by default," but still captures IP addresses in logs and geolocation data. Under GDPR, both can constitute personal data. The gap between "we don't collect PII" and "we collect data that qualifies as PII under European law" is where compliance risks hide.
+
+Code-owned solutions sidestep this entirely. When tour analytics stay in your application's own database, there is no processor. No DPA. No third-party retention policy. You decide what gets stored, for how long, and where.
+
+## The EU Data Act changes the calculus
+
+Since September 2025, the EU Data Act requires SaaS vendors to provide data exports in structured, machine-readable formats at no additional cost, covering raw data and associated metadata alike. This regulation applies to any vendor processing data for EU-based customers. Penalties for non-compliance can reach 2% of annual global turnover ([AssetBank](https://www.assetbank.co.uk/blog/eu-data-act-dam-vendor-lock-in-portability)).
+
+As of April 2026, no major onboarding vendor has publicly documented how they comply. Pendo's export goes through a proprietary API. Appcues offers CSV and JSON via an async API that requires polling for results. WalkMe processes export requests manually.
+
+Compare that to a code-owned architecture: your tour analytics live in your database. Export means running a SQL query. Full compliance, zero negotiation. The EU Data Act is automatically satisfied because there's no intermediary to gatekeep anything.
+
+Thirteen US states now have consumer privacy laws in effect or pending as of April 2026. The regulatory direction isn't slowing down.
+
+Building on a vendor that treats data export as a premium feature is a bet against the current. GDPR fines totaled over EUR 4.5 billion between 2018 and 2025, with data processing violations accounting for a significant share. Not theoretical.
+
+## The counterargument: why vendor-hosted data isn't always wrong
+
+Self-hosting analytics means self-maintaining analytics, and for teams without dedicated infrastructure engineers, that trade-off is real. SOC 2 Type II certification alone costs $50,000-$100,000 for initial audit, plus $20,000-$50,000 annually. Vendors like Pendo and WalkMe amortize those costs across thousands of customers, passing certifications down to you without the overhead.
+
+Arturs Sosins, CTO at Countly, acknowledged this directly: "It basically inherits the company's security. The more secure the company's infrastructure and practices are, the more secure Countly will be" ([Countly](https://countly.com/blog/data-ownership)). A 5-person startup with a single part-time ops engineer isn't better off running self-hosted PostHog.
+
+If your infrastructure isn't hardened, self-hosting your analytics doesn't automatically make them safer. It just makes you directly responsible for the failures.
+
+There are also legitimate reasons to choose SaaS onboarding tools:
+
+- **Non-technical product teams** need visual builders that code-owned solutions don't provide. Tour Kit doesn't have a visual builder, and won't for the foreseeable future.
+- **Rapid prototyping** is faster with a SaaS tool. Drag, drop, publish. No deploy cycle.
+- **Enterprise compliance certifications** (SOC 2 Type II, ISO 27001) are expensive to obtain independently. Vendors amortize that cost across thousands of customers.
+
+The question isn't "is SaaS onboarding always bad." It's whether your team has made a conscious choice about where tour analytics live, or whether you defaulted into vendor custody because Pendo was already in the stack.
+
+## What code-owned onboarding actually looks like
+
+A code-owned approach means tour logic ships in your application bundle at under 8KB gzipped (Tour Kit core), analytics pipe through your existing infrastructure, and no third-party JavaScript loads on your users' pages. Plausible's self-hosted analytics processes data in under 24 hours with no cookies. PostHog offers 7-year retention on self-hosted instances with unlimited event volume.
+
+Pair either with Tour Kit and the entire analytics pipeline stays on your servers.
+
+Here's what a Tour Kit + PostHog setup looks like:
+
+```tsx
+// src/components/OnboardingTour.tsx
+import { TourProvider, useTour } from '@tourkit/react';
+import { useAnalytics } from '@tourkit/analytics';
+import posthog from 'posthog-js';
+
+const tourAnalytics = {
+  onStepView: (stepId: string) => {
+    posthog.capture('tour_step_viewed', { step: stepId });
+  },
+  onStepComplete: (stepId: string) => {
+    posthog.capture('tour_step_completed', { step: stepId });
+  },
+  onTourComplete: (tourId: string) => {
+    posthog.capture('tour_completed', { tour: tourId });
+  },
+  onTourDismiss: (tourId: string, stepId: string) => {
+    posthog.capture('tour_dismissed', { tour: tourId, step: stepId });
+  },
+};
+
+export function OnboardingTour({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProvider analytics={tourAnalytics}>
+      {children}
+    </TourProvider>
+  );
+}
+```
+
+Every event flows through PostHog, which you can self-host. Or Mixpanel. Or Plausible. Or a custom endpoint that writes to your own Postgres instance. The analytics adapter is 15 lines of code, and swapping providers doesn't touch your tour configuration at all.
+
+Tour Kit's `@tourkit/analytics` package provides the plugin interface. PostHog provides the storage. Your team provides the query layer. No vendor in the middle.
+
+For a full integration walkthrough, see [Track product tour completion with PostHog events](https://usertourkit.com/blog/track-product-tour-completion-posthog-events).
+
+## The data sovereignty checklist
+
+Before your next vendor renewal, audit your onboarding tool against these five questions. SmartSaaS recommends that "data exports should include all relevant fields, including associated metadata, timestamps, logs, and audit trails" ([SmartSaaS](https://smartsaas.works/blog/post/saas-data-ownership-and-portability-dont-be-a-vendor-hostage/95)). Apply that standard, and most vendors fall short on at least two items.
+
+1. **Can you export all tour analytics in a standard format (CSV, JSON, Parquet) without contacting support?** If the answer is "yes, but only on the Enterprise plan," that's a red flag.
+
+2. **Do you have a signed DPA?** GDPR Article 28 requires it. Check.
+
+3. **What happens to your data if the vendor shuts down?** Builder.ai's collapse in May 2025 left customers scrambling. Do you have a contingency?
+
+4. **Can you satisfy a GDPR deletion request within 30 days using only vendor-provided tools?** If your vendor takes 90 days to process deletions, that's your compliance gap, not theirs.
+
+5. **Is your tour analytics data included in your disaster recovery plan?** If it lives on a third party's servers and isn't regularly backed up to your own infrastructure, it's not covered.
+
+The numbers back up the urgency. The average data breach cost reached $4.45 million in 2023, up 15% over three years (IBM Cost of a Data Breach Report). Cisco's 2023 Consumer Privacy Survey found 92% of companies acknowledge inadequate data security discourages purchases. The IAPP reported 94% of businesses agree insufficient data protection drives customers away.
+
+Tour analytics might seem low-stakes compared to payment data. But behavioral data about your users' product journeys still qualifies as personal data under GDPR. A Pendo or WalkMe instance processing data for 50,000 MAUs generates millions of behavioral records annually, each one a potential compliance liability if you can't prove lawful processing.
+
+## What we'd do (and what we'd acknowledge)
+
+We built Tour Kit, so take this recommendation with appropriate skepticism. Every claim here is verifiable against public vendor documentation. If we were evaluating onboarding tools purely on data ownership, we'd ask two questions: can we pipe analytics into our own infrastructure today, and can we export all historical data in under an hour if we need to leave tomorrow?
+
+Tour Kit answers both by design because there's no vendor server in the architecture. Tour analytics flow through whatever provider your team already uses: PostHog, Mixpanel, Plausible, GA4, or a custom endpoint. Switching? Fifteen lines of adapter code and a single PR. No data export negotiations, no 90-day processing queues.
+
+But Tour Kit requires React 18+. It has no visual builder. It has a smaller community than React Joyride or Shepherd.js. If your product team includes non-technical stakeholders who need to edit tours without a deploy cycle, a SaaS tool with proper data export provisions might genuinely be the better fit.
+
+The right answer depends on how much your team values data sovereignty versus convenience. What matters is that it's a deliberate choice, not a default.
+
+Get started with Tour Kit: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/DomiDex/tour-kit) | `npm install @tourkit/core @tourkit/react`
+
+## FAQ
+
+### Who legally owns product tour analytics data under GDPR?
+
+Under GDPR, the company deploying the data ownership onboarding tool is the data controller. The SaaS vendor is the data processor. You legally own the data and determine how it gets used. But the vendor controls physical access to it, creating a gap between legal ownership and operational control. Code-owned solutions eliminate the processor entirely.
+
+### Does the EU Data Act affect onboarding tool data exports?
+
+Yes. The EU Data Act, enforced since September 2025, requires SaaS vendors to provide data exports in structured, machine-readable formats at no cost. As of April 2026, most data ownership onboarding tool vendors haven't documented their compliance. Code-owned solutions like Tour Kit are inherently compliant because there's no intermediary restricting access.
+
+### Can I self-host my product tour analytics?
+
+Yes. A code-owned onboarding library like Tour Kit combined with a self-hosted analytics platform like PostHog or Matomo gives you full control over tour analytics data. Every event stays on your infrastructure. Tour Kit's analytics plugin interface requires roughly 15 lines of adapter code to connect to any analytics provider, and switching providers doesn't affect your tour configuration.
+
+### What data do SaaS onboarding tools collect by default?
+
+Collection varies by vendor. Pendo captures usage analytics and metadata. WalkMe logs IP addresses and geolocation despite claiming no default PII collection. Appcues records user events and profiles. Under GDPR, IP addresses constitute personal data, making you responsible for justifying collection regardless of what the vendor claims.
+
+### Is vendor-hosted onboarding data included in disaster recovery?
+
+Usually not. Most DR plans cover infrastructure you operate directly. Tour analytics on a SaaS vendor's servers aren't backed up unless you've explicitly scheduled exports. When Builder.ai collapsed in May 2025, customers lost access to vendor-hosted data. Regular automated exports to your own infrastructure are the standard mitigation.
+
+{/* JSON-LD Schema */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Data ownership in onboarding: who owns your tour analytics?",
+  "description": "Examine who actually owns your product tour analytics data when using SaaS onboarding tools. Compare vendor custody, GDPR roles, and code-owned alternatives.",
+  "author": {
+    "@type": "Person",
+    "name": "Dominik Sumer",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://usertourkit.com/og-images/data-ownership-onboarding-tour-analytics.png",
+  "url": "https://usertourkit.com/blog/data-ownership-onboarding-tour-analytics",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/data-ownership-onboarding-tour-analytics"
+  },
+  "keywords": ["data ownership onboarding tool", "onboarding data privacy", "product tour data ownership", "GDPR onboarding tool"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+};
+
+{/* Internal linking suggestions:
+- Link FROM: best-product-tour-tools-gdpr-compliance, vendor-lock-in-onboarding-tool, how-onboarding-tools-inject-code, best-self-hosted-onboarding-tools
+- Link TO: track-product-tour-completion-posthog-events, plausible-analytics-product-tour, migrate-pendo-to-react, vendor-lock-in-onboarding-tool
+*/}
+
+{/* Distribution checklist:
+- Dev.to (canonical to usertourkit.com)
+- Hashnode (canonical to usertourkit.com)
+- Reddit r/reactjs, r/webdev, r/SaaS
+- Hacker News (data ownership angle resonates with HN audience)
+- Indie Hackers (build vs buy angle)
+*/}

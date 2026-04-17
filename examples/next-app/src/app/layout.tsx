@@ -59,6 +59,12 @@ function Navigation() {
             Branching
           </Link>
           <Link
+            href="/surveys"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Surveys
+          </Link>
+          <Link
             href="/base-ui"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >

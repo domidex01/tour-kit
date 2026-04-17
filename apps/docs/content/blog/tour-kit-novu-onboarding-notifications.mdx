@@ -1,0 +1,402 @@
+---
+title: "Tour Kit + Novu: omnichannel onboarding notifications"
+slug: "tour-kit-novu-onboarding-notifications"
+description: "Connect Tour Kit tour events to Novu's notification infrastructure for omnichannel onboarding. Send emails, push, and in-app messages based on tour behavior."
+primary_keyword: "novu onboarding notifications"
+secondary_keywords: ["notification infrastructure onboarding", "novu tour events", "omnichannel onboarding react"]
+category: "Integrations"
+schema_type: "TechArticle"
+spreadsheet_row: 194
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/tour-kit-novu-onboarding-notifications.png
+---
+
+# Tour Kit + Novu: omnichannel onboarding notifications
+
+A product tour teaches your user something. Then it vanishes. If that user doesn't come back, the lesson disappears with it. The fix isn't a longer tour or more tooltips. It's a notification (an email, a push message, an in-app reminder) that arrives based on what actually happened during the tour.
+
+Novu is open-source notification infrastructure that sends across in-app, email, SMS, push, and chat channels through a single API. As of April 2026, it has over 36,000 GitHub stars, 400+ contributors, and ships a free tier of 10,000 events per month ([Novu GitHub](https://github.com/novuhq/novu)). Tour Kit's analytics plugin system gives you structured events for every tour lifecycle moment. Connect the two, and your onboarding doesn't stop at the browser tab. It follows the user wherever they go.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/analytics @novu/node
+```
+
+The [Tour Kit docs](https://usertourkit.com/) cover the full analytics plugin API used in this guide.
+
+## What you'll build
+
+This guide produces a Tour Kit analytics plugin that fires Novu workflow triggers whenever a user completes, skips, or abandons a tour. Novu then handles routing: in-app notification immediately, email 24 hours later if the user hasn't returned, push notification on day three. About 60 lines of TypeScript for the plugin, plus a Novu workflow definition.
+
+The visible result: a notification in Novu's inbox component and a follow-up email in the user's mailbox, both driven by real tour behavior. Tour Kit requires React 18+ and doesn't have a visual builder. You write steps in code. If your team needs drag-and-drop tour creation, Chameleon or Appcues are better fits.
+
+## Why Novu + Tour Kit?
+
+Omnichannel onboarding (where in-app guidance, email, and push coordinate based on user behavior) retains users at roughly 2x the rate of single-channel approaches, with cross-channel campaigns boosting retention by 130% compared to 71% for in-app alone ([Braze, 2025](https://www.braze.com/resources/articles/onboarding-messages-example)). But most teams wire their product tour to one analytics tool and their email to another. The systems don't talk. A user completes a tour and still gets the "Have you tried Feature X?" email the next morning.
+
+Novu solves this with a unified notification API. One `novu.trigger()` call can fan out to five channels: in-app, email, SMS, push, chat. The workflow orchestration layer handles delays, digests, channel preferences. You don't write that logic yourself.
+
+<table>
+<thead>
+<tr><th>Approach</th><th>Channels</th><th>Code changes per channel</th><th>Digest/delay support</th></tr>
+</thead>
+<tbody>
+<tr><td>Manual (Resend + FCM + custom in-app)</td><td>3 separate integrations</td><td>New service + API route each</td><td>You build it</td></tr>
+<tr><td>Novu</td><td>In-App, Email, SMS, Push, Chat via one API</td><td>Zero (configure in Novu dashboard)</td><td>Built-in digest engine</td></tr>
+</tbody>
+</table>
+
+Novu's development was shaped by conversations with engineering teams at over 100 companies. The team realized "it was actually the development teams that were responsible for implementing and maintaining notification workflows" ([Decibel VC](https://www.decibel.vc/articles/novu-omni-channel-notification-infrastructure-for-developers)). That developer-first philosophy maps well to Tour Kit's code-first approach. Both tools expect you to define behavior in TypeScript, not a GUI.
+
+The tradeoff is operational complexity. Novu cloud handles hosting, but self-hosted Novu requires MongoDB, Redis, a Node.js backend. The `@novu/js` SDK ships at 1.67 MB unminified, so lazy-load it or use the lighter `@novu/node` package (649 KB) server-side only.
+
+## Prerequisites
+
+Before starting, make sure you have these in place:
+
+- React 18.2+ or React 19 project with Tour Kit configured. The [Next.js App Router tutorial](https://usertourkit.com/docs/getting-started) gets you there in five minutes.
+- A [Novu Cloud](https://novu.co) account (free tier: 10,000 events/month, perpetual) or a self-hosted Novu instance.
+- Your Novu API key and Application Identifier (Settings > API Keys in the Novu dashboard).
+- A Novu workflow created with at least an In-App step. We'll build one in Step 2.
+
+Versions used: Tour Kit latest, `@novu/node` 2.x, `@novu/react` latest, Next.js 15.
+
+## Step 1: build the Novu analytics plugin
+
+Tour Kit's `@tour-kit/analytics` package accepts plugins that implement a `track` method receiving a typed `TourEvent` with event name, tour ID, step index, duration, and custom metadata. Writing a Novu plugin means mapping those events to Novu workflow triggers, which takes about 30 lines of TypeScript. The plugin filters to only the events worth notifying on, then POSTs them to Novu's API.
+
+```tsx
+// src/lib/novu-analytics-plugin.ts
+import { Novu } from "@novu/node";
+import type { AnalyticsPlugin, TourEvent } from "@tourkit/analytics";
+
+const novu = new Novu({ secretKey: process.env.NOVU_API_KEY! });
+
+// Map Tour Kit events to Novu workflow IDs
+const WORKFLOW_MAP: Record<string, string> = {
+  tour_completed: "onboarding-tour-completed",
+  tour_skipped: "onboarding-tour-skipped",
+  tour_abandoned: "onboarding-tour-abandoned",
+};
+
+export const novuPlugin: AnalyticsPlugin = {
+  name: "novu",
+
+  async track(event: TourEvent) {
+    const workflowId = WORKFLOW_MAP[event.eventName];
+    if (!workflowId) return; // Only trigger on mapped events
+
+    await novu.trigger({
+      name: workflowId,
+      to: { subscriberId: event.userId ?? "anonymous" },
+      payload: {
+        tourId: event.tourId,
+        stepId: event.stepId,
+        stepIndex: event.stepIndex,
+        totalSteps: event.totalSteps,
+        duration: event.duration,
+        completedAt: new Date(event.timestamp).toISOString(),
+        ...event.metadata,
+      },
+    });
+  },
+};
+```
+
+The `WORKFLOW_MAP` controls which tour events become notifications. Not every event needs one. A `step_viewed` event firing a notification on every step would annoy users fast. We trigger on completion, skip, and abandonment. Those are the moments that matter for follow-up.
+
+The gotcha we hit: Novu's `@novu/node` SDK is server-side only. Don't import it in a client component. If your Tour Kit setup runs entirely on the client, you need to proxy through an API route. We'll cover that in Step 3.
+
+## Step 2: create the Novu workflow
+
+Novu workflows define the multi-channel notification sequence that fires when your plugin sends a trigger. Each workflow contains ordered steps (in-app, delay, email, digest) that Novu executes automatically, handling timing and channel routing without custom server logic. In the Novu dashboard, create a workflow named `onboarding-tour-completed` with these steps:
+
+1. **In-App**: immediate notification saying "Nice work finishing the {{tourId}} tour. Here's what to try next."
+2. **Delay**: wait 24 hours.
+3. **Email**: follow-up saying "You completed {{totalSteps}} steps yesterday. Here are 3 features you haven't explored yet."
+4. **Digest**: batch any additional tour completions from the same user within 6 hours to avoid notification fatigue.
+
+Novu's digest engine combines multiple triggers into a single notification. If a user finishes three tours in quick succession, they get one summary email instead of three separate messages. This matters for onboarding. Aggressive teams sometimes configure five or six micro-tours, and nobody wants six emails in an afternoon.
+
+For the skipped and abandoned workflows, adjust the messaging:
+
+- `onboarding-tour-skipped`: delay 4 hours, send in-app nudge about the skipped feature. No email since skipping is often intentional.
+- `onboarding-tour-abandoned`: delay 1 hour, send in-app reminder. If no return after 48 hours, send email with a direct link to resume the tour.
+
+```tsx
+// Novu workflow definition (code-first approach)
+// src/novu/workflows/onboarding-tour-completed.ts
+import { workflow } from "@novu/framework";
+
+export const tourCompletedWorkflow = workflow(
+  "onboarding-tour-completed",
+  async ({ step, payload }) => {
+    // Immediate in-app notification
+    await step.inApp("congrats-notification", async () => ({
+      subject: "Tour completed",
+      body: `You finished the ${payload.tourId} tour. Check out what's next.`,
+    }));
+
+    // Wait 24 hours before email
+    await step.delay("wait-for-return", async () => ({
+      amount: 24,
+      unit: "hours",
+    }));
+
+    // Follow-up email if they haven't returned
+    await step.email("follow-up-email", async () => ({
+      subject: `You explored ${payload.totalSteps} features, here are 3 more`,
+      body: `You completed the onboarding tour in ${Math.round(payload.duration / 1000)}s. 
+             Here are features worth trying next...`,
+    }));
+  },
+  {
+    payloadSchema: {
+      type: "object",
+      properties: {
+        tourId: { type: "string" },
+        totalSteps: { type: "number" },
+        duration: { type: "number" },
+        completedAt: { type: "string" },
+      },
+    },
+  }
+);
+```
+
+Novu's code-first workflow definition keeps the notification logic in your repo alongside your application code. No more context-switching to a dashboard to figure out what happens after a tour completes.
+
+## Step 3: proxy tour events through an API route
+
+Since `@novu/node` runs server-side and Tour Kit's analytics callbacks execute in the browser, you need a thin server endpoint to bridge the two. A Next.js App Router API route works well here: it receives the `TourEvent` payload from the client plugin, validates the event name against the workflow map, and calls `novu.trigger()` with the API key safely on the server.
+
+```tsx
+// src/app/api/tour-events/route.ts
+import { Novu } from "@novu/node";
+import { NextResponse } from "next/server";
+
+const novu = new Novu({ secretKey: process.env.NOVU_API_KEY! });
+
+const WORKFLOW_MAP: Record<string, string> = {
+  tour_completed: "onboarding-tour-completed",
+  tour_skipped: "onboarding-tour-skipped",
+  tour_abandoned: "onboarding-tour-abandoned",
+};
+
+export async function POST(request: Request) {
+  const event = await request.json();
+  const workflowId = WORKFLOW_MAP[event.eventName];
+
+  if (!workflowId) {
+    return NextResponse.json({ status: "ignored" });
+  }
+
+  await novu.trigger({
+    name: workflowId,
+    to: { subscriberId: event.userId ?? "anonymous" },
+    payload: {
+      tourId: event.tourId,
+      stepId: event.stepId,
+      stepIndex: event.stepIndex,
+      totalSteps: event.totalSteps,
+      duration: event.duration,
+      completedAt: new Date(event.timestamp).toISOString(),
+    },
+  });
+
+  return NextResponse.json({ status: "triggered", workflowId });
+}
+```
+
+Then update the plugin to POST to this route instead of importing `@novu/node` directly:
+
+```tsx
+// src/lib/novu-analytics-plugin.ts (client-safe version)
+import type { AnalyticsPlugin, TourEvent } from "@tourkit/analytics";
+
+export const novuPlugin: AnalyticsPlugin = {
+  name: "novu",
+
+  async track(event: TourEvent) {
+    const mapped = ["tour_completed", "tour_skipped", "tour_abandoned"];
+    if (!mapped.includes(event.eventName)) return;
+
+    await fetch("/api/tour-events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(event),
+    });
+  },
+};
+```
+
+This version runs safely in the browser. The server route handles the Novu SDK interaction and keeps your API key out of the client bundle.
+
+## Step 4: wire up the provider
+
+With the plugin and API route in place, the last wiring step is registering the plugin in Tour Kit's `AnalyticsProvider`. This goes in your root layout or providers file so every tour in the app automatically sends events through the Novu pipeline. One registration, all tours covered.
+
+```tsx
+// src/app/providers.tsx
+"use client";
+
+import { TourProvider } from "@tourkit/react";
+import { AnalyticsProvider } from "@tourkit/analytics";
+import { novuPlugin } from "@/lib/novu-analytics-plugin";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <AnalyticsProvider
+      config={{
+        plugins: [novuPlugin],
+        userId: "current-user-id", // Replace with your auth user ID
+      }}
+    >
+      <TourProvider>
+        {children}
+      </TourProvider>
+    </AnalyticsProvider>
+  );
+}
+```
+
+Every tour event now flows through the Novu plugin. Complete a tour, and Novu sends an in-app notification immediately, then queues the email for 24 hours later.
+
+## Step 5: add the Novu inbox component
+
+Novu's `@novu/react` package provides a pre-built `<Inbox />` component that renders in-app notifications with a bell icon, unread count, and notification list. This is where the immediate in-app step from the workflow lands, giving users a visible indicator that something happened after their tour completed. Setup takes 6 lines.
+
+```tsx
+// src/components/notification-bell.tsx
+"use client";
+
+import { Inbox } from "@novu/react";
+
+export function NotificationBell() {
+  return (
+    <Inbox
+      applicationIdentifier={process.env.NEXT_PUBLIC_NOVU_APP_ID!}
+      subscriberId="current-user-id"
+      routerPush={(path) => window.location.assign(path)}
+    />
+  );
+}
+```
+
+Drop this in your header or navigation bar. When a tour completes and the Novu workflow fires, the bell lights up with the congratulation message within seconds. Novu auto-creates subscribers if the `subscriberId` doesn't exist yet, so you don't need a separate registration step.
+
+The component supports custom rendering via render props if you want to match your design system. But the default UI works out of the box and saves time for a first integration.
+
+## Verify it works
+
+Testing the end-to-end flow confirms that Tour Kit events reach Novu and trigger the correct workflow steps. Run through this checklist in your development environment before deploying to production.
+
+1. Start your dev server and trigger a Tour Kit tour.
+2. Complete the tour.
+3. Check the Novu dashboard Activity Feed. You should see the `onboarding-tour-completed` trigger.
+4. The in-app notification appears in the `<Inbox />` component immediately.
+5. The email queues with a 24-hour delay (you can override to 1 minute for testing in the Novu workflow editor).
+
+If the trigger doesn't appear in the Activity Feed, check that your API key matches and the workflow name in code matches the dashboard exactly. Also verify the `subscriberId` isn't empty.
+
+## Going further
+
+Once the basic tour-to-notification pipeline works, three extensions make it production-ready: user-controlled channel preferences, conditional workflow steps that skip redundant messages, and personalized content driven by Tour Kit metadata.
+
+**Channel preferences.** Novu lets subscribers control which channels they receive notifications on. Expose this in your settings page so users can opt out of email follow-ups while keeping in-app nudges. The `@novu/react` Inbox component includes a preferences UI out of the box.
+
+**Conditional steps.** Novu's workflow step conditions (launched Winter 2025) let you skip the follow-up email if the user has already logged in again. Query your analytics to check recent activity before sending.
+
+**Tour Kit metadata.** Pass feature names, user roles, or plan tier through `event.metadata` in the Tour Kit step config. Use these in the Novu workflow to personalize messages. "You skipped the reporting feature, here's a 2-minute video walkthrough" converts better than a generic "Come back and explore."
+
+<table>
+<thead>
+<tr><th>Feature</th><th>Tour Kit</th><th>Novu</th></tr>
+</thead>
+<tbody>
+<tr><td>In-app guidance</td><td>Product tours, tooltips, hints</td><td>Inbox notifications, toasts</td></tr>
+<tr><td>Email</td><td>Via analytics callbacks</td><td>Built-in with template editor</td></tr>
+<tr><td>Push notifications</td><td>Not supported</td><td>FCM, APNs via single API</td></tr>
+<tr><td>SMS</td><td>Not supported</td><td>Twilio, Vonage, Plivo integrations</td></tr>
+<tr><td>Digest/batching</td><td>Not supported</td><td>Built-in digest engine</td></tr>
+<tr><td>User preferences</td><td>Per-tour dismissal state</td><td>Per-channel, per-workflow preferences</td></tr>
+<tr><td>Pricing</td><td>MIT free tier, $99 one-time Pro</td><td>Free: 10K events/month, paid tiers above</td></tr>
+</tbody>
+</table>
+
+## FAQ
+
+### Can I use Novu with Tour Kit without a server-side API route?
+
+Tour Kit's analytics callbacks run on the client, but Novu's Node SDK requires a server environment to protect your API key. You need a proxy: a Next.js API route, Express endpoint, or serverless function. The SDK approach is recommended over raw REST calls because it handles retries and type safety.
+
+### Does Novu's free tier cover a typical SaaS onboarding setup?
+
+Novu's free tier includes 10,000 events per month. For 1,000 monthly active users completing an average of 3 tours, that's roughly 3,000 trigger events. Each workflow step counts separately, so a 3-step workflow (in-app, delay, email) consumes 3 events per trigger. Budget accordingly.
+
+### How does Novu handle notification fatigue during onboarding?
+
+Novu's digest engine batches multiple triggers into one notification within a configurable time window. If a user completes five micro-tours in 30 minutes, they get one summary instead of five messages. Set the digest window to 6 hours for onboarding to catch the full first session.
+
+### What happens if the user already saw the in-app notification before the email sends?
+
+Novu doesn't suppress the email based on in-app read status by default. Add a step condition that checks read status via Novu's API, then skips the email if the user already engaged. This uses the conditional steps feature launched Winter 2025.
+
+### Is Tour Kit's analytics plugin compatible with other notification services?
+
+Tour Kit's `AnalyticsPlugin` interface accepts any service that can receive structured event data. The same pattern works with Knock, Courier, or a custom service. Swap the `track` implementation and point it at a different API. Novu's open-source model and 10K free events make it a good starting point, but nothing locks you in.
+
+---
+
+{/* JSON-LD Schema */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Tour Kit + Novu: omnichannel onboarding notifications",
+  "description": "Connect Tour Kit tour events to Novu's notification infrastructure for omnichannel onboarding. Send emails, push, and in-app messages based on tour behavior.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://usertourkit.com/og-images/tour-kit-novu-onboarding-notifications.png",
+  "url": "https://usertourkit.com/blog/tour-kit-novu-onboarding-notifications",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/tour-kit-novu-onboarding-notifications"
+  },
+  "keywords": ["novu onboarding notifications", "notification infrastructure onboarding", "novu tour events", "omnichannel onboarding react"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+, Novu account",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+
+{/*
+Internal linking suggestions:
+- Link FROM: tour-kit-react-email-onboarding-emails (related multi-channel pattern)
+- Link FROM: segment-product-tour-events (similar analytics plugin pattern)
+- Link FROM: track-product-tour-completion-posthog-events (analytics integration)
+- Link TO: composable-tour-library-architecture (plugin architecture)
+- Link TO: tour-kit-sentry-error-tracking (error handling in integrations)
+
+Distribution checklist:
+- Dev.to: Cross-post with canonical URL
+- Hashnode: Cross-post with canonical URL
+- Reddit r/reactjs: "Show: connecting product tour events to Novu for omnichannel onboarding"
+- Novu Discord/Community: Share as community integration example
+*/}

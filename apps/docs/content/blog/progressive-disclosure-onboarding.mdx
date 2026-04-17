@@ -1,0 +1,473 @@
+---
+title: "Progressive disclosure in onboarding: the right amount of information"
+slug: "progressive-disclosure-onboarding"
+description: "Apply progressive disclosure to your onboarding flow. Data-backed patterns, React code examples, and the metrics framework to measure each disclosure layer."
+primary_keyword: "progressive disclosure onboarding"
+secondary_keywords: ["progressive onboarding ux", "contextual feature reveal", "onboarding information overload", "progressive disclosure react"]
+category: "Use Cases"
+schema_type: "TechArticle"
+spreadsheet_row: 154
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/progressive-disclosure-onboarding.png
+---
+
+# Progressive disclosure in onboarding: the right amount of information
+
+Jakob Nielsen introduced progressive disclosure in 1995 to solve a tension that hasn't gone away: users want powerful software, but they don't want to learn it all at once. Thirty years later, SaaS onboarding still gets this wrong. Most product tours dump every feature into a linear walkthrough, hope for the best, and then wonder why 47% of users skip the tour entirely ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)).
+
+Progressive disclosure flips that approach. Show the core action first. Surface secondary features when the user reaches them. Reveal advanced capabilities once someone has demonstrated they need them.
+
+Companies using contextual onboarding with this pattern boosted completion rates to 75% and saw a 30% increase in paid conversions ([Userpilot, 2025](https://userpilot.com/blog/progressive-disclosure-examples/)).
+
+This guide covers the theory, the data, the React implementation, and the measurement framework. We built [Tour Kit](https://usertourkit.com/) to implement progressive disclosure as a first-class architecture, so we'll use it for examples. The principles apply to any stack.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/hints
+```
+
+## What is progressive disclosure in onboarding?
+
+Progressive disclosure in onboarding is a design strategy that reveals interface complexity gradually, matching information delivery to user readiness rather than front-loading every feature at once. Nielsen Norman Group's research confirms the pattern improves 3 of usability's 5 core components: learnability, efficiency of use, and error rate ([NN/g](https://www.nngroup.com/articles/progressive-disclosure/)). In an onboarding context, this means a new user sees only the single action needed to reach their first success, with additional features surfacing through tooltips, hotspots, and contextual prompts as behavior signals indicate readiness. The alternative, a 12-step product tour on first login, creates the information overload that kills activation.
+
+## Why progressive disclosure matters for onboarding
+
+Progressive disclosure matters because linear onboarding fundamentally mismatches how people learn new software. Showing every feature at once overloads working memory, which handles roughly 4 items at a time, and produces the 53% average completion rate that Chameleon's 15-million-interaction dataset documents ([Chameleon, 2026](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)). Companies that switch to contextual, behavior-triggered disclosure see completion climb to 75% and paid conversions increase by 30% ([Userpilot, 2025](https://userpilot.com/blog/progressive-disclosure-examples/)).
+
+Linear onboarding treats every user the same way. Everyone gets the same tour, in the same order, showing the same features. Research from NN/g shows that multi-level disclosure beyond 2 layers causes navigation confusion, and most linear tours violate this by cramming 8-12 steps into a single flow ([NN/g](https://www.nngroup.com/articles/progressive-disclosure/)).
+
+Here's the breakdown:
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Completion rate</th>
+      <th>Paid conversion impact</th>
+      <th>Information retention</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Linear tour (8+ steps)</td>
+      <td>53% average</td>
+      <td>Baseline</td>
+      <td>Users recall 2-3 of 10 features shown</td>
+    </tr>
+    <tr>
+      <td>Progressive disclosure (contextual)</td>
+      <td>75%</td>
+      <td>+30% paid conversions</td>
+      <td>Users recall features when they need them</td>
+    </tr>
+    <tr>
+      <td>Self-serve launcher</td>
+      <td>67%</td>
+      <td>+20% feature adoption</td>
+      <td>Users choose what to learn</td>
+    </tr>
+  </tbody>
+</table>
+
+*Sources: Chameleon 15M-interaction benchmark ([2026](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)), Userpilot ([2025](https://userpilot.com/blog/progressive-disclosure-examples/))*
+
+The 22-point gap between linear and progressive isn't about better copy or prettier tooltips. It's structural. Progressive disclosure respects the user's cognitive budget.
+
+## The three layers of progressive onboarding
+
+Progressive onboarding in practice works in three distinct layers, each triggered by different user behavior signals rather than arbitrary timelines. Layer 1 handles first-session orientation with a single guided action, Layer 2 adds contextual hints as users explore new screens during their first week, and Layer 3 surfaces power-user features to people who've earned them through consistent usage. Think of it as a pyramid: the base is passive, the middle is reactive, the top is earned.
+
+### Layer 1: Orientation (first session)
+
+The first layer answers one question: "What's the single most important thing I should do right now?" Everything else stays hidden.
+
+Good orientation means a welcome modal that collects just enough to personalize the path (role, team size, primary use case), followed by one guided action. Not five. One.
+
+Airtable does this well: a branched welcome flow that routes users to different starting templates based on their answers. Notion uses empty states with micro-videos. Both avoid the 12-step tour trap.
+
+```tsx
+// src/components/OrientationTour.tsx
+import { TourProvider, Tour, TourStep } from '@tourkit/react';
+
+function OrientationTour() {
+  return (
+    <TourProvider>
+      <Tour
+        tourId="orientation"
+        trigger="manual"
+        onComplete={() => {
+          // Mark first action complete, enable layer 2
+          localStorage.setItem('orientation-done', 'true');
+        }}
+      >
+        <TourStep
+          target="#create-first-project"
+          title="Create your first project"
+          content="This is the only thing that matters right now."
+          placement="bottom"
+        />
+      </Tour>
+    </TourProvider>
+  );
+}
+```
+
+One step. That's the whole orientation tour. The restraint is the point.
+
+### Layer 2: Contextual guidance (first week)
+
+Once a user completes their first core action, layer 2 activates. Hints and hotspots appear next to features the user hasn't discovered yet, but only when they navigate to the relevant screen.
+
+This is where progressive disclosure gets its name. You're disclosing features progressively, triggered by user behavior rather than a schedule.
+
+```tsx
+// src/components/ContextualHints.tsx
+import { HintProvider, Hint } from '@tourkit/hints';
+
+function ContextualHints() {
+  const orientationDone = localStorage.getItem('orientation-done');
+
+  if (!orientationDone) return null;
+
+  return (
+    <HintProvider>
+      {/* Only shows when user visits the dashboard */}
+      <Hint
+        hintId="dashboard-filters"
+        target="#filter-bar"
+        content="Filter by status, assignee, or date range"
+        trigger="hover"
+        dismissible
+      />
+      {/* Only shows after user creates 3+ items */}
+      <Hint
+        hintId="bulk-actions"
+        target="#bulk-select"
+        content="Select multiple items to move, archive, or tag in bulk"
+        trigger="click"
+        showWhen={() => getItemCount() >= 3}
+      />
+    </HintProvider>
+  );
+}
+```
+
+The `showWhen` prop is doing the progressive disclosure work here. Bulk actions don't exist in the user's mental model until they have enough items to need them.
+
+### Layer 3: Power user features (weeks 2+)
+
+The final layer surfaces advanced capabilities to users who've demonstrated proficiency. Keyboard shortcuts, API access, automation rules, admin features. These appear through announcements, checklists, or in-app prompts that reference what the user has already accomplished.
+
+```tsx
+// src/components/PowerUserChecklist.tsx
+import { ChecklistProvider, Checklist } from '@tourkit/checklists';
+
+function PowerUserChecklist({ userStats }) {
+  // Only render for users who've hit power user threshold
+  if (userStats.projectsCreated < 5 || userStats.daysActive < 14) {
+    return null;
+  }
+
+  return (
+    <ChecklistProvider>
+      <Checklist
+        checklistId="power-features"
+        title="Level up your workflow"
+        tasks={[
+          {
+            id: 'keyboard-shortcuts',
+            label: 'Try keyboard shortcuts (press ?)',
+            completed: userStats.usedKeyboardShortcuts,
+          },
+          {
+            id: 'api-key',
+            label: 'Generate an API key',
+            completed: userStats.hasApiKey,
+          },
+          {
+            id: 'automation',
+            label: 'Create your first automation rule',
+            completed: userStats.automationCount > 0,
+          },
+        ]}
+      />
+    </ChecklistProvider>
+  );
+}
+```
+
+Nobody sees the automation checklist on day one. By the time it appears, the user has enough context to actually want it.
+
+## Patterns that work (with SaaS examples)
+
+Progressive disclosure in real products follows a handful of recognizable patterns, each mapping to a specific stage of the user journey and a specific disclosure layer. We studied implementations across Crowdfire, ConvertKit, Airtable, Notion, and Slack to identify what actually drives feature adoption rather than just looking polished in a demo.
+
+### Empty states as disclosure triggers
+
+When a user lands on an empty screen, that's a disclosure opportunity. Instead of showing a blank table, show the one action that fills it. Crowdfire uses this during onboarding: empty states guide topic selection, and each selection reveals the next layer of the product.
+
+### Branched onboarding paths
+
+Ask a segmentation question, then show different features based on the answer. ConvertKit asks whether you're migrating from another platform or starting fresh. Each path reveals different functionality because each user needs different things first.
+
+### Hotspots on first encounter
+
+When a user navigates to a new screen for the first time, subtle pulsing indicators (hotspots) draw attention to the 1-2 most important elements. Airtable uses this pattern: spotlights and tooltips highlight features progressively as users explore different views.
+
+### Quiet update announcements
+
+Slack gets this right. New feature announcements appear as dismissable banners or subtle indicators rather than modal interruptions. The feature is disclosed, but the user's workflow isn't broken.
+
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>Best for</th>
+      <th>Disclosure layer</th>
+      <th>Tour Kit package</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Welcome modal + single action</td>
+      <td>First session orientation</td>
+      <td>Layer 1</td>
+      <td><code>@tourkit/react</code></td>
+    </tr>
+    <tr>
+      <td>Contextual hotspots</td>
+      <td>Feature discovery on new screens</td>
+      <td>Layer 2</td>
+      <td><code>@tourkit/hints</code></td>
+    </tr>
+    <tr>
+      <td>Empty state guidance</td>
+      <td>Action-oriented onboarding</td>
+      <td>Layer 1-2</td>
+      <td><code>@tourkit/react</code></td>
+    </tr>
+    <tr>
+      <td>Branched flows</td>
+      <td>Role-based products</td>
+      <td>Layer 1</td>
+      <td><code>@tourkit/react</code> + conditional logic</td>
+    </tr>
+    <tr>
+      <td>Feature announcements</td>
+      <td>Existing user re-engagement</td>
+      <td>Layer 3</td>
+      <td><code>@tourkit/announcements</code></td>
+    </tr>
+    <tr>
+      <td>Progressive checklists</td>
+      <td>Power user activation</td>
+      <td>Layer 3</td>
+      <td><code>@tourkit/checklists</code></td>
+    </tr>
+  </tbody>
+</table>
+
+## Common mistakes that kill progressive disclosure
+
+Progressive disclosure fails when teams confuse "hiding features" with "revealing them at the right moment," or when they use time-based drip schedules instead of behavior-triggered gates. Nielsen's research warns against more than 2 disclosure levels per interaction, yet most implementations blow past that limit. Here are the pitfalls we see most often.
+
+### Treating it as "hide everything"
+
+Progressive disclosure doesn't mean making features hard to find. It means making the most important action obvious and everything else discoverable. If users can't find a feature when they need it, you've hidden it, not disclosed it progressively. Nielsen's research specifically warns that more than 2 disclosure levels causes navigation confusion ([NN/g](https://www.nngroup.com/articles/progressive-disclosure/)).
+
+### Ignoring behavior signals
+
+The worst version of "progressive" is time-based: showing feature X on day 3 and feature Y on day 7 regardless of what the user has actually done. Real progressive disclosure is behavior-triggered. Did the user create their third project? Show bulk actions. Did they invite a teammate? Surface collaboration features.
+
+Calendar-based drip campaigns aren't progressive disclosure. They're scheduled interruptions.
+
+### The Zoom anti-pattern
+
+Zoom is the most cited negative example in progressive disclosure literature, and for good reason. Overlapping tooltips, multiple CTAs competing for attention, and new-feature modals stacking on top of each other. Every individual tooltip might be well-intentioned. Together, they create the exact cognitive overload that progressive disclosure is supposed to prevent.
+
+### Skipping accessibility
+
+Disclosure widgets have specific ARIA requirements that get missed in onboarding implementations. The [W3C WAI ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/) specifies: `aria-expanded` (true/false) on the trigger element, `aria-controls` pointing to the disclosed content, and keyboard support including Esc to dismiss per WCAG 2.1 1.4.13 (Content on Hover or Focus).
+
+Tour Kit handles these ARIA attributes automatically. If you're building custom disclosure components, test with a screen reader. VoiceOver + Safari and NVDA + Firefox are the minimum.
+
+## Measuring progressive disclosure effectiveness
+
+A proper metrics framework for progressive disclosure onboarding tracks each disclosure layer independently rather than lumping everything into a single "tour completion rate." Measuring the delivery mechanism tells you whether users clicked through your tooltips. Measuring outcomes tells you whether those tooltips actually drove feature adoption, activation, or retention across your three disclosure layers.
+
+### The four metrics per layer
+
+For each disclosure layer (orientation, contextual, power user), track:
+
+1. **Trigger rate**: what percentage of eligible users see this layer?
+2. **Completion rate**: of those who see it, what percentage complete the guided action?
+3. **Activation correlation**: does completing this layer correlate with reaching the activation milestone?
+4. **Time to value**: how long after disclosure does the user first use the feature independently?
+
+```tsx
+// src/components/TrackedTour.tsx
+import { TourProvider, Tour, TourStep } from '@tourkit/react';
+import { AnalyticsProvider } from '@tourkit/analytics';
+
+function TrackedTour() {
+  return (
+    <AnalyticsProvider
+      onEvent={(event) => {
+        // Send to your analytics platform
+        posthog.capture(`tour_${event.type}`, {
+          tourId: event.tourId,
+          stepId: event.stepId,
+          disclosureLayer: event.metadata?.layer,
+          timestamp: Date.now(),
+        });
+      }}
+    >
+      <TourProvider>
+        <Tour tourId="orientation" metadata={{ layer: 'orientation' }}>
+          <TourStep
+            target="#create-project"
+            title="Start here"
+            content="Create your first project to see the dashboard in action."
+          />
+        </Tour>
+      </TourProvider>
+    </AnalyticsProvider>
+  );
+}
+```
+
+### What good looks like
+
+Based on Chameleon's benchmark data across 15 million tour interactions ([2026](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)) and Userpilot's progressive onboarding studies, here are the targets:
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Trigger rate target</th>
+      <th>Completion rate target</th>
+      <th>Activation correlation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Orientation (Layer 1)</td>
+      <td>95%+ (nearly all new users)</td>
+      <td>75%+</td>
+      <td>Strong (0.6+ correlation)</td>
+    </tr>
+    <tr>
+      <td>Contextual (Layer 2)</td>
+      <td>60-80% (behavior-gated)</td>
+      <td>50%+</td>
+      <td>Moderate (0.3-0.5)</td>
+    </tr>
+    <tr>
+      <td>Power user (Layer 3)</td>
+      <td>20-30% (earned)</td>
+      <td>40%+</td>
+      <td>Retention-focused, not activation</td>
+    </tr>
+  </tbody>
+</table>
+
+If your Layer 1 completion is below 60%, the orientation step is asking too much. Cut it down. If Layer 2 trigger rate is above 90%, your behavior gates are too loose and you're showing hints to users who aren't ready.
+
+## The architecture angle: why your tour library should be progressive too
+
+Here's something no other article on progressive disclosure covers: the library itself should follow the same pattern.
+
+A monolithic tour library that loads 40KB of tooltip, modal, checklist, and analytics code on first page load violates progressive disclosure at the technical level. Your user needs a tooltip. Why load the survey engine?
+
+Tour Kit's 10-package architecture is progressive disclosure applied to developer tooling. Install `@tourkit/core` (under 8KB gzipped) and `@tourkit/react` for Layer 1. Add `@tourkit/hints` when you need Layer 2. Bring in `@tourkit/checklists` and `@tourkit/announcements` for Layer 3. Each package tree-shakes independently.
+
+```bash
+# Layer 1: Orientation tours
+npm install @tourkit/core @tourkit/react
+
+# Layer 2: Add contextual hints
+npm install @tourkit/hints
+
+# Layer 3: Add advanced features as needed
+npm install @tourkit/checklists @tourkit/announcements @tourkit/analytics
+```
+
+We're biased here since we built Tour Kit, so take the architecture pitch with appropriate skepticism. The principle applies regardless: whatever tool you use, load disclosure layers on demand rather than upfront. React.lazy and dynamic imports make this straightforward.
+
+One real limitation: Tour Kit requires React 18+ and doesn't have a visual builder. If your team needs a no-code solution, tools like Appcues or Userpilot handle progressive disclosure through their dashboards instead of through code. The tradeoff is control versus convenience.
+
+## FAQ
+
+### What is the difference between progressive disclosure and progressive onboarding?
+
+Progressive disclosure is the broader interaction design principle (Jakob Nielsen, 1995) of showing only essential information first and revealing complexity on demand. Progressive onboarding applies this specifically to the new user experience, structuring feature revelation across days or weeks based on behavior signals. In practice, progressive disclosure onboarding combines tooltips, hotspots, and checklists triggered by user actions rather than a calendar schedule.
+
+### How many disclosure layers should an onboarding flow have?
+
+Nielsen Norman Group recommends a maximum of 2 disclosure levels for any single interaction. For onboarding across the full user journey, 3 layers (orientation, contextual, power user) works well as a framework. Each layer operates independently with its own triggers and metrics. Going beyond 3 layers typically fragments the experience and makes it harder to attribute which layer drove activation.
+
+### Does progressive disclosure hurt feature discoverability?
+
+Progressive disclosure improves discoverability when implemented correctly. NN/g research shows users "understand a system better when you help them prioritize features" rather than presenting everything simultaneously. The risk is over-hiding: if users can't find a feature when they need it, the disclosure threshold is set wrong. Track "feature search" and "help request" rates per feature to calibrate your behavior triggers.
+
+### How do you make progressive disclosure accessible?
+
+Follow the W3C WAI ARIA Authoring Practices Guide disclosure pattern. Every toggle element needs `aria-expanded` (true/false), disclosed content should be reachable via keyboard Tab, and content shown on hover or focus must be dismissible with Esc per WCAG 2.1 Success Criterion 1.4.13. Tour Kit implements these attributes by default. If building custom components, test with VoiceOver and NVDA at minimum.
+
+### Can progressive disclosure work with AI-driven onboarding?
+
+As of April 2026, progressive disclosure is being applied to AI agent architectures as a context management strategy. Google's Agent Developer Kit uses a 3-level skill loading pattern (metadata, instructions, resources) that mirrors the onboarding approach: load what's needed when it's needed. For user-facing AI-assisted onboarding, progressive disclosure determines which AI suggestions surface based on user proficiency signals rather than showing every available AI action at once.
+
+---
+
+**Internal linking suggestions:**
+- Link from [Product tour UX patterns](/blog/product-tour-ux-patterns-2026) (related hub article)
+- Link from [Conditional product tours by user role](/blog/conditional-product-tour-user-role)
+- Link from [React hotspot component](/blog/react-hotspot-component)
+- Link from [Feature announcement banner](/blog/feature-announcement-banner-react)
+
+**Distribution checklist:**
+- Cross-post to Dev.to (canonical URL to usertourkit.com)
+- Cross-post to Hashnode (canonical URL to usertourkit.com)
+- Share on Reddit r/reactjs and r/userexperience
+- Submit to Hacker News (angle: progressive disclosure as architecture principle)
+
+**JSON-LD Schema:**
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Progressive disclosure in onboarding: the right amount of information",
+  "description": "Apply progressive disclosure to your onboarding flow. Data-backed patterns, React code examples, and the metrics framework to measure each disclosure layer.",
+  "author": {
+    "@type": "Person",
+    "name": "Dominik Sumer",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://usertourkit.com/og-images/progressive-disclosure-onboarding.png",
+  "url": "https://usertourkit.com/blog/progressive-disclosure-onboarding",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/progressive-disclosure-onboarding"
+  },
+  "keywords": ["progressive disclosure onboarding", "progressive onboarding ux", "contextual feature reveal", "onboarding information overload"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```

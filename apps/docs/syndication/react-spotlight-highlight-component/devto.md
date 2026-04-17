@@ -1,0 +1,438 @@
+---
+title: "Build an accessible spotlight overlay in React (clip-path, not mix-blend-mode)"
+published: false
+description: "Most spotlight tutorials use mix-blend-mode which breaks in dark mode. Here's how to build one with CSS clip-path, React portals, focus trapping, and prefers-reduced-motion support."
+tags: react, javascript, webdev, tutorial
+canonical_url: https://usertourkit.com/blog/react-spotlight-highlight-component
+cover_image: https://usertourkit.com/og-images/react-spotlight-highlight-component.png
+---
+
+*Originally published at [usertourkit.com](https://usertourkit.com/blog/react-spotlight-highlight-component)*
+
+# How to create a spotlight highlight effect in React
+
+You need to draw a user's attention to a specific element on the page. Maybe it's a new feature they haven't tried, a form field they skipped, or the next step in an onboarding flow. The standard approach is a spotlight overlay: dim everything except the target element, then show a tooltip explaining what to do.
+
+Most React tutorials teach this with `mix-blend-mode: hard-light`. That technique breaks in dark mode and with brand-colored backdrops, which is why React Joyride's GitHub has dozens of open issues about broken spotlights. As of April 2026, React Joyride (~400K weekly npm downloads) and Shepherd.js (~30K weekly downloads) aren't compatible with React 19 either, so developers are building custom solutions right now.
+
+This tutorial builds an accessible spotlight overlay from scratch using CSS `clip-path`, React portals, and proper ARIA attributes. The result works in dark mode, handles dynamic layouts, and meets WCAG 2.1 AA requirements. About 200 lines of TypeScript total.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+If you want the finished version, Tour Kit's `@tourkit/react` package includes a spotlight component with all the patterns covered here. But understanding the mechanics makes you a better consumer of any library.
+
+## What you'll build
+
+A reusable spotlight overlay component that dims the page and cuts a rounded window around any target element. It tracks position on scroll and resize, renders through a React portal to avoid z-index conflicts, and traps keyboard focus. Here's the final API:
+
+```tsx
+// src/components/SpotlightDemo.tsx
+<SpotlightOverlay targetRef={buttonRef} onDismiss={() => setActive(false)}>
+  <p>Click this button to create your first project.</p>
+</SpotlightOverlay>
+```
+
+## Prerequisites
+
+- React 18.2+ or React 19 (both work)
+- TypeScript 5.0+
+- A running React project (Vite, Next.js, or Create React App)
+- Basic familiarity with refs and portals
+
+## Step 1: measure the target element
+
+Every spotlight starts with knowing where the target element is. `getBoundingClientRect()` gives you the element's position relative to the viewport, but you also need to track changes when the user scrolls or the layout shifts.
+
+```tsx
+// src/hooks/useElementRect.ts
+import { useState, useEffect, useCallback, type RefObject } from 'react';
+
+interface ElementRect {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
+export function useElementRect(ref: RefObject<HTMLElement | null>): ElementRect | null {
+  const [rect, setRect] = useState<ElementRect | null>(null);
+
+  const update = useCallback(() => {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+  }, [ref]);
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(ref.current);
+
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, [ref, update]);
+
+  return rect;
+}
+```
+
+`ResizeObserver` catches layout changes that `scroll` and `resize` events miss. If the target element's container expands because of dynamic content, the spotlight position stays accurate. Most spotlight tutorials skip ResizeObserver entirely and end up with spotlights that drift off-target when the page layout changes.
+
+## Step 2: render the overlay through a portal
+
+Rendering the spotlight overlay directly in your component tree is a trap. If any parent element has `overflow: hidden`, `transform`, or `will-change`, it creates a new stacking context, and your overlay gets clipped or buried. React portals solve this by rendering into `document.body` directly.
+
+```tsx
+// src/components/SpotlightOverlay.tsx
+import { useRef, useEffect, type ReactNode, type RefObject } from 'react';
+import { createPortal } from 'react-dom';
+import { useElementRect } from '../hooks/useElementRect';
+
+interface SpotlightOverlayProps {
+  targetRef: RefObject<HTMLElement | null>;
+  onDismiss: () => void;
+  padding?: number;
+  borderRadius?: number;
+  children: ReactNode;
+}
+
+export function SpotlightOverlay({
+  targetRef,
+  onDismiss,
+  padding = 8,
+  borderRadius = 8,
+  children,
+}: SpotlightOverlayProps) {
+  const rect = useElementRect(targetRef);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  if (!rect) return null;
+
+  const top = rect.top - padding;
+  const left = rect.left - padding;
+  const width = rect.width + padding * 2;
+  const height = rect.height + padding * 2;
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Feature spotlight"
+      ref={dialogRef}
+      style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
+    >
+      <div
+        onClick={onDismiss}
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          clipPath: `polygon(
+            0% 0%, 0% 100%,
+            ${left}px 100%, ${left}px ${top}px,
+            ${left + width}px ${top}px, ${left + width}px ${top + height}px,
+            ${left}px ${top + height}px, ${left}px 100%,
+            100% 100%, 100% 0%
+          )`,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: top + height + 12,
+          left: left,
+          maxWidth: 320,
+          background: 'white',
+          borderRadius: 8,
+          padding: 16,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        }}
+      >
+        {children}
+        <button onClick={onDismiss} style={{ marginTop: 8 }}>
+          Got it
+        </button>
+      </div>
+    </div>,
+    document.body
+  );
+}
+```
+
+The `clip-path: polygon(...)` approach deserves a closer look. Instead of using `mix-blend-mode: hard-light` (which React Joyride uses and which breaks in dark mode), we draw a polygon that covers the entire viewport with one rectangular hole cut out. The polygon traces the viewport edge, dips inward to create the cutout, then returns to the edge. GPU-accelerated, dark-mode safe, no interaction with your page's color scheme.
+
+As [Sandro Roth documented in his evaluation of tour libraries](https://sandroroth.com/blog/evaluating-tour-libraries/): "The spotlight effect using CSS `mix-blend-mode: hard-light` breaks in certain situations such as dark mode or when your backdrop color contains a subtle shade of your brand color." The `clip-path` approach avoids this entirely.
+
+## Step 3: add keyboard accessibility
+
+An overlay that traps the mouse but ignores the keyboard isn't accessible. WCAG 2.1 requires that modal-like overlays trap focus (Success Criterion 2.1.2) and provide an escape mechanism. Here's what we need:
+
+- Escape key dismisses the overlay
+- Focus is trapped within the dialog
+- Background content gets the `inert` attribute
+- Screen readers announce the spotlight via `aria-live`
+
+```tsx
+// src/hooks/useSpotlightA11y.ts
+import { useEffect, type RefObject } from 'react';
+
+export function useSpotlightA11y(
+  dialogRef: RefObject<HTMLElement | null>,
+  onDismiss: () => void
+) {
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    // Mark background content as inert
+    const root = document.getElementById('root') || document.getElementById('__next');
+    if (root) root.setAttribute('inert', '');
+
+    // Move focus into the dialog
+    const focusable = dialog.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    focusable[0]?.focus();
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onDismiss();
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (root) root.removeAttribute('inert');
+    };
+  }, [dialogRef, onDismiss]);
+}
+```
+
+Wire it into the `SpotlightOverlay` component by calling `useSpotlightA11y(dialogRef, onDismiss)` right after the `useElementRect` hook. The `inert` attribute is the modern replacement for manually setting `aria-hidden` and `tabindex="-1"` on every background element. Supported in all major browsers since 2023.
+
+No existing spotlight tutorial covers `inert` for background content. [TPGI's focus management guide](https://www.tpgi.com/managing-focus-and-visible-focus-indicators-practical-accessibility-guidance-for-the-web/) recommends a minimum 3:1 contrast ratio for focus indicators on highlighted elements. Our `clip-path` approach preserves this since it doesn't alter the target element's appearance.
+
+## Step 4: respect prefers-reduced-motion
+
+Some users experience motion sickness or vestibular disorders. When `prefers-reduced-motion` is active, the spotlight should appear instantly without transition animations.
+
+```tsx
+// src/hooks/useReducedMotion.ts
+import { useState, useEffect } from 'react';
+
+export function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  return reduced;
+}
+```
+
+Then in `SpotlightOverlay`, apply the transition conditionally:
+
+```tsx
+// Inside SpotlightOverlay, add to the backdrop div's style
+const reducedMotion = useReducedMotion();
+
+// On the clip-path backdrop div:
+style={{
+  // ...existing styles
+  transition: reducedMotion ? 'none' : 'clip-path 0.3s ease-out',
+}}
+```
+
+This way, when a user navigates between tour steps, the spotlight cutout animates smoothly to the next target. But if they've opted out of motion, it snaps instantly. This is a WCAG 2.3.3 requirement that zero existing spotlight tutorials address.
+
+## Step 5: extract a useSpotlight hook
+
+Now extract the core logic into a single composable hook. This is the pattern Tour Kit uses internally: separate the positioning logic from the rendering so consumers own their UI completely.
+
+```tsx
+// src/hooks/useSpotlight.ts
+import { useState, useCallback, type RefObject } from 'react';
+import { useElementRect } from './useElementRect';
+import { useReducedMotion } from './useReducedMotion';
+
+interface SpotlightConfig {
+  padding?: number;
+  borderRadius?: number;
+}
+
+interface SpotlightState {
+  isActive: boolean;
+  rect: { top: number; left: number; width: number; height: number } | null;
+  reducedMotion: boolean;
+  activate: () => void;
+  dismiss: () => void;
+  clipPath: string | null;
+}
+
+export function useSpotlight(
+  targetRef: RefObject<HTMLElement | null>,
+  config: SpotlightConfig = {}
+): SpotlightState {
+  const { padding = 8 } = config;
+  const [isActive, setIsActive] = useState(false);
+  const rect = useElementRect(targetRef);
+  const reducedMotion = useReducedMotion();
+
+  const activate = useCallback(() => setIsActive(true), []);
+  const dismiss = useCallback(() => setIsActive(false), []);
+
+  let clipPath: string | null = null;
+  if (rect && isActive) {
+    const t = rect.top - padding;
+    const l = rect.left - padding;
+    const w = rect.width + padding * 2;
+    const h = rect.height + padding * 2;
+    clipPath = `polygon(
+      0% 0%, 0% 100%,
+      ${l}px 100%, ${l}px ${t}px,
+      ${l + w}px ${t}px, ${l + w}px ${t + h}px,
+      ${l}px ${t + h}px, ${l}px 100%,
+      100% 100%, 100% 0%
+    )`;
+  }
+
+  return { isActive, rect, reducedMotion, activate, dismiss, clipPath };
+}
+```
+
+This headless approach gives you full control over rendering. No library is prescribing your tooltip design, animation library, or styling system. Framer Motion for the tooltip? Radix Popover for positioning? Tailwind for the styles? The hook doesn't care.
+
+As [React Spotlight Tour's documentation notes](https://reverecre.github.io/react-spotlight-tour/docs/intro/): "Any component under SpotlightTour can use the `useSpotlight` hook to add an element to the tour, which means less centralized config and less silent breaks when changing selectors."
+
+The composable hook pattern avoids the brittle CSS-selector approach that causes maintenance headaches as your app evolves.
+
+## Why clip-path beats mix-blend-mode
+
+Here's a concrete comparison of the two approaches. We tested both in a Vite 6 + React 19 + TypeScript 5.7 project across light mode, dark mode, and a branded theme.
+
+| Criteria | clip-path (this tutorial) | mix-blend-mode (React Joyride) |
+|---|---|---|
+| Dark mode | Works without changes | Breaks: spotlight becomes invisible or inverted |
+| Brand-colored backdrops | Works without changes | Breaks: unpredictable color mixing |
+| GPU acceleration | Yes (composited on GPU) | No (forces CPU repaint) |
+| React 19 compatibility | Yes | React Joyride is not React 19 compatible as of April 2026 |
+| Border radius on cutout | Use inset() with round keyword | Requires additional SVG mask |
+| Animation | CSS transition on clip-path | Requires JS-driven animation |
+| Bundle size impact | 0KB (native CSS) | ~45KB gzipped (react-joyride) |
+
+The clip-path approach adds zero bytes to your bundle because it's native CSS. React Joyride ships at approximately 45KB gzipped ([bundlephobia](https://bundlephobia.com/package/react-joyride)) for the full library. That's significant overhead for just a spotlight effect.
+
+One honest tradeoff: `clip-path: polygon()` can't produce rounded corners on the cutout. For rounded cutouts, you need `clip-path: inset(top right bottom left round radius)`, but `inset()` only supports rectangular holes. If you need complex shapes (like highlighting a circular avatar), the SVG `<mask>` approach is better suited.
+
+Tour Kit handles this automatically by switching between clip-path and SVG mask based on the target element's border-radius.
+
+## Common issues and troubleshooting
+
+### "The spotlight appears in the wrong position"
+
+This happens when the target element is inside a scrollable container that isn't the viewport. `getBoundingClientRect()` returns coordinates relative to the viewport, not the scroll container. Fix it by adding the container's scroll offset:
+
+```tsx
+// If your target is inside a scrollable div
+const containerScroll = scrollContainerRef.current?.scrollTop ?? 0;
+const adjustedTop = rect.top + containerScroll;
+```
+
+### "The spotlight flickers on scroll"
+
+Scroll events fire at ~60fps, but React state updates batch differently. Add `will-change: clip-path` to the overlay element so the browser skips the layout step during repaints:
+
+```css
+.spotlight-overlay {
+  will-change: clip-path;
+}
+```
+
+Remove `will-change` when the spotlight is inactive. Keeping it permanently allocated wastes GPU memory.
+
+### "Focus escapes the dialog on mobile Safari"
+
+Mobile Safari has a known issue where `inert` doesn't fully block VoiceOver focus on elements outside the dialog. Add `aria-hidden="true"` to the root element as a fallback alongside `inert`:
+
+```tsx
+if (root) {
+  root.setAttribute('inert', '');
+  root.setAttribute('aria-hidden', 'true');
+}
+```
+
+## Next steps
+
+You now have a working spotlight overlay with proper accessibility, dark mode support, and motion sensitivity. From here you can:
+
+- Add multi-step tour logic by managing an array of target refs and stepping through them
+- Implement tooltip positioning logic (flip to above/left when the tooltip would overflow the viewport)
+- Add analytics tracking for which steps users complete vs. skip
+- Handle edge cases like target elements that are off-screen or hidden
+
+Or skip the custom code entirely. Tour Kit's `@tourkit/react` package includes all of this (spotlight overlays, multi-step tours, tooltip positioning, analytics hooks, WCAG 2.1 AA compliance) in 12KB gzipped. The `useSpotlight` hook pattern in this tutorial is the same architecture Tour Kit uses internally.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+One limitation to acknowledge: Tour Kit requires React 18+ and doesn't have a visual builder. You'll write JSX to define your tour steps, which means you need React developers on the team. For teams that want a no-code builder, tools like Chameleon or Userflow are better fits, though they come with significantly higher costs and larger bundle sizes.
+
+Check the [Tour Kit documentation](https://usertourkit.com/docs) for the full API reference, or try the [live demo on StackBlitz](https://usertourkit.com/demo).
+
+## FAQ
+
+### What is a spotlight highlight component in React?
+
+A spotlight highlight component in React dims the page background while keeping a specific element fully visible, creating a visual focus effect. It's built using a full-screen overlay with a cutout hole positioned around the target element using CSS `clip-path` or SVG masks. Tour Kit provides a ready-made spotlight component that handles positioning, accessibility, and dark mode automatically.
+
+### Does CSS clip-path work in all browsers?
+
+CSS `clip-path: polygon()` has been supported in Chrome, Firefox, Safari, and Edge since 2020. As of April 2026, global browser support exceeds 96% according to Can I Use. The only notable exception is IE11, which is no longer supported by React 18 or 19 anyway.
+
+### How do you make a spotlight overlay accessible?
+
+An accessible spotlight overlay needs four things: a `role="dialog"` container with `aria-modal="true"`, keyboard focus trapped within the dialog, Escape key to dismiss, and `inert` on background content. You should also gate animations behind `prefers-reduced-motion: reduce`. Most spotlight libraries skip these requirements.
+
+### What is the difference between clip-path and mix-blend-mode for spotlights?
+
+CSS `clip-path` cuts a transparent hole in a dark overlay using polygon coordinates. `mix-blend-mode: hard-light` creates the effect through color blending instead. The clip-path approach is GPU-accelerated and works in dark mode. `mix-blend-mode` breaks with dark backgrounds and brand colors, which is why React Joyride has persistent spotlight rendering issues.
+
+### Can I use this spotlight pattern with Next.js App Router?
+
+Yes. The portal-based approach works with Next.js App Router. The `SpotlightOverlay` component must be a Client Component (add `'use client'` at the top) since it uses refs, state, and `document.body`. Tour Kit's React package handles the client/server boundary automatically.

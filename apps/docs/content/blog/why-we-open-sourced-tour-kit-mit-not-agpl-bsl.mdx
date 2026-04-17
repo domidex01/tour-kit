@@ -1,0 +1,216 @@
+---
+title: "Why we open-sourced Tour Kit under MIT (not AGPL, not BSL)"
+slug: "why-we-open-sourced-tour-kit-mit-not-agpl-bsl"
+description: "Why I chose MIT over AGPL and BSL for Tour Kit. Real data from HashiCorp, Redis, Elastic, and Shepherd.js shaped the open source license decision."
+primary_keyword: "open source mit license choice"
+secondary_keywords: ["mit vs agpl license", "open source license strategy", "bsl license controversy"]
+category: "Thought Leadership"
+schema_type: "TechArticle"
+spreadsheet_row: 238
+date: "2026-04-11"
+updated: "2026-04-11"
+published: true
+ogImage: /og-images/why-we-open-sourced-tour-kit-mit-not-agpl-bsl.png
+---
+
+# Why we open-sourced Tour Kit under MIT (not AGPL, not BSL)
+
+I spent months building [Tour Kit](https://usertourkit.com/) — a headless product tour library for React, split across 10 composable packages. When it came time to pick a license, the decision took about fifteen minutes.
+
+MIT. Done.
+
+But that fifteen minutes followed weeks of watching the open source licensing wars play out across the industry. HashiCorp. Redis. Elastic. MongoDB. Every few months, another company switched to a restrictive license, got forked, and ended up worse off than before. I didn't want to repeat that pattern. More importantly, I didn't want to build a library that developers had to run past their legal team before installing.
+
+Here's the reasoning, the tradeoffs I accepted, and what I think the license-change pattern actually tells us about building sustainable open source in 2026.
+
+## Key decisions: why I ruled out AGPL and BSL
+
+Two licenses made the shortlist before I rejected them. Both had merit on the surface. Neither survived contact with reality.
+
+<table>
+<thead>
+<tr><th>Factor</th><th>MIT</th><th>AGPL-3.0</th><th>BSL</th></tr>
+</thead>
+<tbody>
+<tr><td>Prevalence (2025 OSSRA)</td><td>92% of reviewed projects</td><td>~3% of projects</td><td>&lt;1% of projects</td></tr>
+<tr><td>Enterprise adoption friction</td><td>None</td><td>Google company-wide ban; legal review required</td><td>Not OSI-approved; procurement blockers</td></tr>
+<tr><td>Community fork risk</td><td>Low (no incentive)</td><td>Medium (dual-license resentment)</td><td>High (100% fork rate: OpenTofu, Valkey, OpenSearch)</td></tr>
+<tr><td>Revenue model</td><td>Open core / paid extensions</td><td>Dual-license (free + commercial)</td><td>Time-delayed open source</td></tr>
+<tr><td>Trust signal</td><td>Strong positive</td><td>Mixed (perceived as bait-and-switch)</td><td>Negative (erodes trust per VictoriaMetrics)</td></tr>
+<tr><td>Used by</td><td>React, Next.js, Tailwind, Radix UI</td><td>Shepherd.js, MongoDB (pre-SSPL)</td><td>HashiCorp Terraform (pre-IBM acquisition)</td></tr>
+</tbody>
+</table>
+
+### The AGPL problem
+
+AGPL (Affero General Public License) sounds reasonable on paper. Use the code for free. Modify it, deploy it as a service, share your changes. Copyleft for the cloud era.
+
+In practice, AGPL kills adoption for developer libraries.
+
+Google has a [company-wide ban on AGPL-licensed software](https://opensource.google/documentation/reference/using/agpl-policy). Not a recommendation, a ban. Any developer inside Google can't use an AGPL library without a legal exception. For a React library that might end up inside dashboards at Fortune 500 companies, that's a massive slice of potential users gone before they write a single line of code.
+
+Shepherd.js, one of the most popular product tour libraries, uses exactly this model. The core is [AGPL-3.0 with a commercial license requirement](https://docs.shepherdjs.dev/guides/license/) for any revenue-generating product, SaaS application, or closed-source project. Even internal dashboards at for-profit companies need a commercial license. The `react-shepherd` wrapper is MIT, but it depends on the AGPL core, so commercial users still need to pay.
+
+That's not technically wrong. Shepherd.js needs revenue, and dual-licensing is a legitimate model. But it creates friction I wanted to avoid: a developer evaluates the library, builds a proof of concept, gets buy-in from their team, and then discovers they need a commercial license to ship. The AGPL wall shows up after the investment.
+
+Armin Ronacher, who built Flask, described this dynamic bluntly: the AGPL became "the perfect base license to make dual licensing with a commercial license feasible" ([Open Core Ventures](https://www.opencoreventures.com/blog/agpl-license-is-a-non-starter-for-most-companies)). A toll gate disguised as open source.
+
+I wanted Tour Kit to be the kind of library where you `npm install`, build your tour, and ship it. No license review. No procurement ticket.
+
+### The BSL detour
+
+Business Source License is the newer alternative. Code is source-available but not truly open source. After a specified period (usually 2-4 years), it converts to a permissive license. In the meantime, the original company controls commercial use.
+
+The track record is grim.
+
+HashiCorp switched Terraform from MPL to BSL in August 2023. Within five days, the OpenTofu fork launched. The Linux Foundation adopted it by September. The OpenTofu team described BSL as "ambiguous and challenging for companies, vendors, and developers" to interpret ([Spacelift](https://spacelift.io/blog/terraform-license-change)).
+
+Redis moved from BSD to RSALv2 in March 2024. Valkey forked within 30 days under the Linux Foundation. As of April 2026, Valkey has 19.8K GitHub stars, over 1,000 commits from 150+ contributors, and roughly 50 contributing companies. An estimated 83% of enterprises migrated away from Redis within months ([SoftwareSeni](https://www.softwareseni.com/the-open-source-license-change-pattern-mongodb-to-redis-timeline-2018-to-2026-and-what-comes-next/)).
+
+HashiCorp was acquired by IBM for $6.4 billion in February 2025. Acquired, not IPO'd. The BSL didn't create a moat. It created a fork and an exit.
+
+VictoriaMetrics, a company that explicitly rejected BSL, put it plainly: "Switching an open source license to the BSL erodes trust in your product and your company" ([VictoriaMetrics blog](https://victoriametrics.com/blog/bsl-is-short-term-fix-why-we-choose-open-source/)).
+
+For a solo developer building a React library, BSL made even less sense. I'm not competing with AWS. Nobody is going to take Tour Kit and offer "managed Tour Kit as a service." The threat BSL defends against doesn't apply to UI libraries.
+
+## What went wrong (or: what MIT actually costs me)
+
+I won't pretend MIT is costless. It means anyone can take Tour Kit's code, fork it, sell it, and never contribute back. That's the deal.
+
+A competitor could copy the entire codebase, slap a different name on it, and sell it. Legally, they'd be within their rights. In practice, this rarely happens with actively maintained projects because the fork immediately falls behind. But it could happen.
+
+A company could use Tour Kit across 500 internal dashboards and never pay a dollar. Completely within the license terms. The typical open source user-to-customer conversion rate sits around 1% according to Open Core Ventures data. That means 99 out of 100 users will never pay. I accepted that math.
+
+These are real tradeoffs. But the alternative has a terrible track record. Restricting usage to capture more revenue creates forks, not revenue.
+
+## What worked: the open core split
+
+Tour Kit uses an open core model. The core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT and always will be. No asterisks, no time bombs, no "MIT until we get enough traction to switch."
+
+The extended packages — adoption tracking, analytics integrations, announcements, checklists, media embeds, scheduling, surveys — are proprietary with a one-time license fee. These packages add value at scale. A solo developer building a side project doesn't need an analytics pipeline. A team shipping a B2B SaaS onboarding flow to 50,000 users does.
+
+This separation matters. The license boundary follows the value boundary, not the "how much can we charge" boundary. As the [Open Core Ventures Handbook](https://handbook.opencoreventures.com/open-core-business-model/) puts it: "Free covers the use case that creates awareness, paid covers the use case that creates value at scale."
+
+I didn't invent this model. AG Grid, MUI X, and Grafana all do variations of it. The free tier creates adoption. The paid tier captures value where value exists. Nobody complains that Grafana Enterprise costs money because Grafana OSS is genuinely useful on its own.
+
+The key constraint I set for myself: the free packages can never feel artificially crippled. If `@tour-kit/core` and `@tour-kit/react` can't stand alone as a solid product tour library, the model fails. Developers will smell the bait-and-switch from the install command.
+
+## The license-change pattern is a warning, not a strategy
+
+MongoDB switched from AGPL to SSPL in 2018. Elastic went from Apache 2.0 to SSPL in 2021. HashiCorp went BSL in 2023. Redis went RSALv2 in 2024.
+
+Every single one got forked. OpenSearch. OpenTofu. Valkey. The pattern is consistent.
+
+And none of them achieved the stated goal. The revenue trajectory didn't bend upward because of the license change. Cloud providers didn't suddenly start paying. The community just left.
+
+Elastic actually reversed course, adding AGPL back as a licensing option in August 2024. An implicit admission that the restriction didn't work.
+
+The lesson I took from this: if you're going to be MIT, be MIT from day one. The trust penalty for changing later is asymmetric. Going from MIT to AGPL destroys trust instantly. Going from AGPL back to MIT (like Elastic tried) recovers trust slowly, if at all. Starting permissive has a lower total cost than starting restrictive and "relaxing" later.
+
+## The real argument for MIT: spreadability
+
+Here's the argument that convinced me in those fifteen minutes, and it's specific to UI component libraries.
+
+By 2019, 67% of software already favored permissive licenses over copyleft (Mend.io). As of 2025, MIT appears in 92% of open source projects reviewed by the OSSRA report ([OSI, 2025](https://opensource.org/blog/top-open-source-licenses-in-2025)). The trend is accelerating, not slowing. Nearly 90% of organizations now use open source, and 85% prefer projects with strong community backing over single-vendor control.
+
+For developer-facing libraries, MIT is the default expectation. React is MIT. Next.js is MIT. Tailwind is MIT. Radix UI is MIT. shadcn/ui is MIT. Every tool in the stack Tour Kit sits alongside is MIT.
+
+When a developer evaluates a product tour library, the license check takes about three seconds. MIT? Install it. AGPL? Google "AGPL commercial use" and probably move on. That three-second decision happens thousands of times across thousands of developers, and each one is either a door opening or a door closing.
+
+For infrastructure software like databases, the calculus is different. If you're PostgreSQL and AWS is making billions running your code, AGPL or a commercial license makes strategic sense. Market power exists. Switching costs are real. Bargaining position is strong.
+
+A UI library has none of that. Nobody is locked into a product tour library. The switching cost is a weekend of work. If your license creates any friction, developers will just use the MIT alternative. And there's always an MIT alternative.
+
+Tour Kit needs to spread. It needs to be in side projects and enterprise dashboards and YC startups and government apps. MIT is the only license that doesn't create a reason to say "no."
+
+## What I'd do differently
+
+Honestly? Not much on the licensing front. The one thing I'd change is being more explicit about the business model from the start. I should have put "MIT core, paid extensions" on the homepage from day one instead of just "open source." Transparency about how money works builds more trust than hiding it.
+
+I also underestimated how much time I'd spend explaining the model to developers who'd been burned by bait-and-switch projects. The muscle memory from MongoDB and HashiCorp is strong. "What's the catch?" is a fair question, and I should have pre-empted it with clearer documentation.
+
+## What's next
+
+Tour Kit's MIT license isn't changing. I'm writing that here, publicly, because I think it matters. Every company that changed licenses said "we'll never change the license" until they did. I can't prove I won't. But I can describe why the incentives are different: Tour Kit's revenue model doesn't depend on restricting the core. It depends on the core being so widely used that the paid extensions sell themselves.
+
+As of April 2026, the library has 10 packages, ships under 8KB gzipped for the core, and works with React 18 and 19. Three packages are MIT. Eight are paid. The split works because the boundary is honest.
+
+If you're building a library and weighing license options, I'd say this: look at the graveyard of BSL and SSPL switches. Look at who got forked and who didn't. Then ask yourself whether the revenue you'd capture from a restrictive license is worth the developers who'll never try your library because of it.
+
+For Tour Kit, the answer was clear. MIT. Fifteen minutes.
+
+---
+
+**Try Tour Kit yourself.** The core is MIT and always will be.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Full documentation at [usertourkit.com](https://usertourkit.com/).
+
+---
+
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Why we open-sourced Tour Kit under MIT (not AGPL, not BSL)",
+  "description": "Why I chose MIT over AGPL and BSL for Tour Kit. Real data from HashiCorp, Redis, Elastic, and Shepherd.js shaped the open source license decision.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-11",
+  "dateModified": "2026-04-11",
+  "image": "https://usertourkit.com/og-images/why-we-open-sourced-tour-kit-mit-not-agpl-bsl.png",
+  "url": "https://usertourkit.com/blog/why-we-open-sourced-tour-kit-mit-not-agpl-bsl",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/why-we-open-sourced-tour-kit-mit-not-agpl-bsl"
+  },
+  "keywords": ["open source mit license choice", "mit vs agpl license", "open source license strategy", "bsl license controversy"],
+  "proficiencyLevel": "Intermediate",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+})}
+</script>
+
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://usertourkit.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://usertourkit.com/blog"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Why we open-sourced Tour Kit under MIT (not AGPL, not BSL)",
+      "item": "https://usertourkit.com/blog/why-we-open-sourced-tour-kit-mit-not-agpl-bsl"
+    }
+  ]
+})}
+</script>

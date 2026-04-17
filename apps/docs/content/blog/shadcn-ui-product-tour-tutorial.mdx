@@ -1,0 +1,485 @@
+---
+title: "Building product tours with shadcn/ui components from scratch"
+slug: "shadcn-ui-product-tour-tutorial"
+description: "Build an accessible product tour using shadcn/ui Card, Button, and Popover with Tour Kit. Step-by-step TypeScript tutorial with copy-paste components."
+primary_keyword: "shadcn ui product tour tutorial"
+secondary_keywords: ["shadcn onboarding component tutorial", "radix product tour", "shadcn tour component react", "headless product tour shadcn"]
+category: "Tutorials"
+schema_type: "TechArticle"
+spreadsheet_row: 89
+date: "2026-04-07"
+updated: "2026-04-07"
+ogImage: /og-images/shadcn-ui-product-tour-tutorial.png
+published: true
+lastUpdated: "2026-04-07"
+---
+
+# Building product tours with shadcn/ui components from scratch
+
+shadcn/ui has 75,000+ GitHub stars and no product tour primitive. Radix UI, the headless layer underneath, has [an open discussion from 2022](https://github.com/radix-ui/primitives/discussions/1199) requesting a `@radix-ui/react-tour-point` component. It was never built. A Radix team member explained why: "It seems this pattern altogether would need quite a bit of research to see how it can be made accessible seeing that it needs to 'isolate' portions of the rendered page rather than separate modal content." That accessibility challenge is real, and it's the reason most shadcn/ui projects end up hacking tours together with Popover plus a raw div overlay.
+
+Tour Kit is a headless React product tour library (core under 8KB gzipped) built specifically to pair with component libraries like shadcn/ui. It handles the hard parts (step sequencing, element highlighting, focus management, keyboard navigation, screen reader announcements) while you render tour steps with your existing shadcn/ui Card, Button, and Badge components. No style overrides. No `!important` hacks. Your design system stays intact because the tour literally uses your design system.
+
+By the end of this tutorial, you'll have a 5-step product tour built entirely from shadcn/ui components, with WCAG 2.1 AA accessibility, localStorage persistence, and dark mode support.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What you'll build
+
+A product tour built from shadcn/ui Card, Button, Badge, and Progress components, wired to Tour Kit's headless hooks for step sequencing, spotlight overlays, and WCAG 2.1 AA keyboard navigation. The result looks native to your app because it literally uses your design system components. We tested this setup in a Next.js 15 + React 19 + shadcn/ui + Tailwind v4.1 + TypeScript 5.7 project. The tour uses Card for the tooltip container, Button for navigation controls, Badge for the step counter, and Progress for a completion bar. Setup takes about 15 minutes.
+
+## Prerequisites
+
+- React 18.2+ or React 19
+- shadcn/ui installed with Tailwind CSS (v3.4+ or v4.x)
+- TypeScript 5.0+ (recommended)
+- These shadcn/ui components installed: Card, Button, Badge, Progress
+- A few UI elements worth touring (dashboard, sidebar, form)
+
+If you haven't installed shadcn/ui yet, [follow the official CLI setup](https://ui.shadcn.com/docs/installation). The `npx shadcn@latest init` command handles Tailwind configuration, CSS variables, and the `cn()` utility function.
+
+## Step 1: install Tour Kit alongside shadcn/ui
+
+Installing Tour Kit into a shadcn/ui project requires two npm packages and zero configuration changes. The packages are ESM-first and tree-shakeable, so Vite and Next.js resolve them without manual dep pre-bundling entries or alias workarounds. Tour Kit ships two packages. `@tourkit/core` contains the framework-agnostic engine: step state machine, position calculations, localStorage persistence, and ARIA attribute management. `@tourkit/react` adds React-specific hooks and components. Both are ESM-first and tree-shakeable.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Or with pnpm (common in shadcn/ui projects):
+
+```bash
+pnpm add @tourkit/core @tourkit/react
+```
+
+shadcn/ui components are copy-pasted into your project, not installed as npm dependencies. That means zero runtime conflict between Tour Kit and your UI layer. Tour Kit doesn't know or care that your buttons come from shadcn/ui. It just manages tour state and lets you render whatever you want.
+
+## Step 2: build the tour tooltip with shadcn/ui Card and Button
+
+The headless approach means your tour tooltip is a regular React component composed from shadcn/ui primitives, not a pre-styled overlay you have to fight with CSS overrides. Every Card, Button, and Badge inherits your CSS variable theme automatically. Instead of overriding a library's built-in tooltip with CSS specificity battles, you compose a tooltip from the same components your app already uses.
+
+```tsx
+// src/components/tour-tooltip.tsx
+import { useTour } from '@tourkit/react'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { X } from 'lucide-react'
+
+export function TourTooltip() {
+  const { currentStep, next, prev, stop, isFirst, isLast, progress } = useTour()
+
+  if (!currentStep) return null
+
+  const percentage = (progress.current / progress.total) * 100
+
+  return (
+    <Card
+      className="w-80 shadow-lg"
+      role="dialog"
+      aria-label={currentStep.title}
+    >
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Badge variant="secondary">
+          {progress.current} of {progress.total}
+        </Badge>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6"
+          onClick={stop}
+          aria-label="Close tour"
+        >
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </CardHeader>
+      <CardContent className="pb-3">
+        <h3 className="mb-1 text-sm font-semibold">{currentStep.title}</h3>
+        <p className="text-sm text-muted-foreground">{currentStep.content}</p>
+      </CardContent>
+      <Progress value={percentage} className="mx-4 mb-3 h-1" />
+      <CardFooter className="flex justify-between pt-0">
+        {!isFirst ? (
+          <Button variant="outline" size="sm" onClick={prev}>
+            Back
+          </Button>
+        ) : (
+          <span />
+        )}
+        <Button size="sm" onClick={isLast ? stop : next}>
+          {isLast ? 'Finish' : 'Next'}
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+```
+
+Every element is a shadcn/ui primitive. The Card respects your CSS variables for `--radius`, `--border`, and `--card`. The Button matches your primary color. Dark mode works automatically through shadcn/ui's CSS variable theming. If you've customized your theme in `globals.css`, the tour tooltip inherits those customizations with zero extra work.
+
+## Step 3: define tour steps
+
+Tour steps are plain TypeScript objects that map CSS selectors to content. Each step targets a DOM element by `data-tour` attribute and carries the title and description text for that stop in the tour. Keep step definitions in a separate file so they're easy to update without touching UI logic. Keep step definitions separate from component code so they're easy to update without touching UI logic.
+
+```tsx
+// src/tours/dashboard-tour.ts
+import type { TourStep } from '@tourkit/core'
+
+export const dashboardSteps: TourStep[] = [
+  {
+    id: 'sidebar-nav',
+    target: '[data-tour="sidebar"]',
+    title: 'Navigation',
+    content: 'Browse projects, team settings, and billing from the sidebar.',
+  },
+  {
+    id: 'command-palette',
+    target: '[data-tour="search"]',
+    title: 'Command palette',
+    content: 'Press Cmd+K to search across projects, docs, and team members.',
+  },
+  {
+    id: 'new-project',
+    target: '[data-tour="create-btn"]',
+    title: 'Create a project',
+    content: 'Start from a template or import an existing repository.',
+  },
+  {
+    id: 'notifications',
+    target: '[data-tour="notifications"]',
+    title: 'Activity feed',
+    content: 'Deployment alerts, review requests, and mentions appear here.',
+  },
+  {
+    id: 'user-menu',
+    target: '[data-tour="profile"]',
+    title: 'Your account',
+    content: 'API keys, connected integrations, and appearance settings.',
+  },
+]
+```
+
+The `data-tour` attribute approach keeps selectors stable across refactors. Class names change. IDs get renamed. Data attributes are explicit contracts between your UI and your tour definitions.
+
+## Step 4: wire up the provider and tour component
+
+Tour Kit manages tour state through a React context provider that shares step progress, navigation callbacks, and completion status across your component tree. Place `TourProvider` near your app root so any child component can read and control the active tour without prop drilling. Wrap your app with `TourProvider`, then place the `Tour` component wherever you want the tour to be available.
+
+```tsx
+// src/app/layout.tsx (Next.js) or src/App.tsx (Vite)
+import { TourProvider } from '@tourkit/react'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <TourProvider>
+          {children}
+        </TourProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+Now connect the steps, tooltip, and trigger in your dashboard component:
+
+```tsx
+// src/components/dashboard.tsx
+import { Tour, useTourControls } from '@tourkit/react'
+import { TourTooltip } from './tour-tooltip'
+import { dashboardSteps } from '@/tours/dashboard-tour'
+import { Button } from '@/components/ui/button'
+import { HelpCircle } from 'lucide-react'
+
+function TourTrigger() {
+  const { start } = useTourControls('dashboard-tour')
+
+  return (
+    <Button variant="outline" size="sm" onClick={() => start()}>
+      <HelpCircle className="mr-2 h-4 w-4" />
+      Take a tour
+    </Button>
+  )
+}
+
+export function Dashboard() {
+  return (
+    <>
+      <Tour
+        tourId="dashboard-tour"
+        steps={dashboardSteps}
+        persist={{ key: 'dashboard-tour-v1', storage: 'localStorage' }}
+      >
+        <TourTooltip />
+      </Tour>
+
+      <header className="flex items-center justify-between border-b px-6 py-4">
+        <h1 className="text-lg font-semibold">Dashboard</h1>
+        <TourTrigger />
+      </header>
+
+      <nav data-tour="sidebar">{/* sidebar content */}</nav>
+      <div data-tour="search">{/* command palette trigger */}</div>
+      <button data-tour="create-btn">{/* new project button */}</button>
+      <div data-tour="notifications">{/* notification bell */}</div>
+      <div data-tour="profile">{/* user avatar menu */}</div>
+    </>
+  )
+}
+```
+
+The `persist` prop stores completion state in localStorage. Returning users skip the tour automatically. Bump the key from `v1` to `v2` when you change steps and want everyone to see the updated tour.
+
+Notice the trigger button uses shadcn/ui's `Button` component. Everything stays consistent.
+
+## Step 5: add keyboard navigation and screen reader announcements
+
+Keyboard navigation and screen reader support are built into Tour Kit's core, requiring zero configuration. Escape closes the tour, Tab and Arrow keys navigate between steps, and Enter activates the current action. Focus moves to the tooltip when a step activates and returns to the trigger element when the tour ends. Focus moves to the tooltip when a step activates and returns to the trigger element when the tour ends.
+
+For screen readers, Tour Kit manages a live region that announces step changes ("Step 2 of 5: Command palette"). Your tooltip's `role="dialog"` and `aria-label` attributes (already in the Card code from Step 2) complete the accessibility picture.
+
+Test it. Fire up VoiceOver on macOS or NVDA on Windows and tab through the tour. Each step title and content should be announced, along with progress updates.
+
+This isn't optional polish. Product tours are interactive overlays that trap focus, which puts them under [WCAG success criterion 2.1.1 (Keyboard)](https://www.w3.org/WAI/WCAG21/Understanding/keyboard.html) and [2.4.3 (Focus Order)](https://www.w3.org/WAI/WCAG21/Understanding/focus-order.html). [Smashing Magazine's guide to React product tours](https://www.smashingmagazine.com/2020/08/guide-product-tours-react-apps/), the top-ranking result for "product tour React app", doesn't mention accessibility once. Neither does the LogRocket guide. The WAI-ARIA Authoring Practices Guide doesn't even have a "tour" pattern. Tour Kit fills that gap with WCAG 2.1 AA compliance built into the core.
+
+## Customizing the tooltip with more shadcn/ui primitives
+
+Because Tour Kit renders your React component as the tooltip, you can swap in any shadcn/ui primitive without changing the tour configuration. Card, Popover, Alert, Separator, and custom Lucide icons all work. Here are three variations we tested. Here are three variations we tested.
+
+**Minimal tooltip with just text and buttons:**
+
+```tsx
+// Compact variant: no Card wrapper, just a styled div
+<div className="rounded-md border bg-popover p-3 text-popover-foreground shadow-md">
+  <p className="text-sm">{currentStep.content}</p>
+  <div className="mt-2 flex justify-end gap-2">
+    <Button variant="ghost" size="sm" onClick={prev}>Back</Button>
+    <Button size="sm" onClick={next}>Next</Button>
+  </div>
+</div>
+```
+
+**Rich tooltip with an icon and separator:**
+
+```tsx
+import { Separator } from '@/components/ui/separator'
+import { Lightbulb } from 'lucide-react'
+
+<Card className="w-80">
+  <CardHeader className="flex flex-row items-center gap-2 pb-2">
+    <Lightbulb className="h-4 w-4 text-yellow-500" />
+    <span className="text-sm font-semibold">{currentStep.title}</span>
+  </CardHeader>
+  <Separator />
+  <CardContent className="pt-3">
+    <p className="text-sm text-muted-foreground">{currentStep.content}</p>
+  </CardContent>
+</Card>
+```
+
+**Tooltip with step-specific actions:**
+
+```tsx
+// Add a custom action button per step
+{currentStep.meta?.action && (
+  <Button
+    variant="link"
+    size="sm"
+    onClick={currentStep.meta.action}
+    className="mt-1 h-auto p-0 text-xs"
+  >
+    Try it now →
+  </Button>
+)}
+```
+
+Pass step-specific metadata through the `meta` field on each `TourStep`. Tour Kit forwards it untouched, so you can attach callbacks, icons, or custom data to any step.
+
+## Why not just use Radix Popover for tours?
+
+Radix UI's Popover is the obvious first thought for building a product tour in a shadcn/ui project, since shadcn/ui already wraps it. We tried the Popover-based approach and hit three problems that pushed us toward a purpose-built tour engine instead. Several developers in [Radix Discussion #1199](https://github.com/radix-ui/primitives/discussions/1199) suggested exactly that: use Popover with `modal={true}` plus a positioned overlay div.
+
+We tried it. Three problems surfaced immediately.
+
+First, Popover doesn't manage multi-step sequences. You'd need to build your own state machine for step ordering, back/next navigation, and completion tracking. That's the core of what a tour library does.
+
+Second, focus management across steps is tricky. Popover traps focus within a single popover instance. When moving between tour steps (closing one popover, opening another at a different target), focus can jump to the body element between transitions. Screen readers lose context.
+
+Third, the overlay isolation pattern (dimming everything except the highlighted element) requires z-index coordination that Popover doesn't handle. One developer in the Radix discussion noted: "Rendering a transparent overlay on top of the UI would also make those elements non-clickable."
+
+Tour Kit solves all three. Step sequencing, cross-step focus management, and spotlight overlays are built into the core. You still render with shadcn/ui components. But the tour engine underneath handles the complexity that a raw Popover can't.
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Bundle cost</th>
+      <th>Step management</th>
+      <th>Focus handling</th>
+      <th>WCAG 2.1 AA</th>
+      <th>Time to implement</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tour Kit + shadcn/ui</td>
+      <td>&#126;6KB gzipped</td>
+      <td>Built-in state machine</td>
+      <td>Automatic cross-step</td>
+      <td>Yes</td>
+      <td>&#126;15 minutes</td>
+    </tr>
+    <tr>
+      <td>Raw Radix Popover + custom state</td>
+      <td>&#126;3KB gzipped</td>
+      <td>Build your own</td>
+      <td>Manual, error-prone</td>
+      <td>Partial</td>
+      <td>2-4 hours</td>
+    </tr>
+    <tr>
+      <td>React Joyride</td>
+      <td>&#126;37KB gzipped</td>
+      <td>Built-in callbacks</td>
+      <td>Limited</td>
+      <td>Partial</td>
+      <td>&#126;30 minutes</td>
+    </tr>
+    <tr>
+      <td>shadcn-tour (community)</td>
+      <td>&#126;4KB gzipped</td>
+      <td>Hook-based</td>
+      <td>Basic</td>
+      <td>Basic</td>
+      <td>&#126;20 minutes</td>
+    </tr>
+  </tbody>
+</table>
+
+## Common issues and troubleshooting
+
+Product tours interact with z-index stacking contexts, portal rendering, and component re-renders in ways that surface edge cases specific to shadcn/ui's Radix-based architecture. These are the three issues we hit most often when testing Tour Kit with shadcn/ui projects, with exact fixes.
+
+### "Tour tooltip renders behind the shadcn/ui Sheet or Dialog"
+
+shadcn/ui's Sheet and Dialog use Radix portals that render at the document root with high z-index values. If your tour targets an element inside a Sheet, the tooltip renders behind it.
+
+Fix: set the `portalContainer` prop on the Tour component to render the tooltip into the same portal container:
+
+```tsx
+<Tour
+  tourId="dashboard-tour"
+  steps={dashboardSteps}
+  portalContainer={document.body}
+>
+  <TourTooltip />
+</Tour>
+```
+
+Or avoid touring elements inside modals and sheets. Tours work best on always-visible page content.
+
+### "Step targets don't match after shadcn/ui component updates"
+
+If you target elements by className and shadcn/ui changes a class during an update, your selectors break silently. The tour just skips that step.
+
+Fix: always use `data-tour` attributes instead of class or ID selectors. Data attributes are explicit, semantic, and immune to styling refactors.
+
+```tsx
+// Breaks on style refactors:
+{ target: '.border-sidebar-border' }
+
+// Stable:
+{ target: '[data-tour="sidebar"]' }
+```
+
+### "Progress bar jumps or resets during step transitions"
+
+This happens when you create the steps array inside a render function, causing a new reference on every render. Tour Kit detects the array change and resets state.
+
+Fix: define steps outside the component or memoize with `useMemo`:
+
+```tsx
+// Outside the component (preferred)
+const dashboardSteps: TourStep[] = [/* ... */]
+
+// Or inside with memoization
+const steps = useMemo(() => dashboardSteps, [])
+```
+
+## Next steps
+
+You now have a fully accessible product tour built from shadcn/ui Card, Button, Badge, and Progress components, with WCAG 2.1 AA keyboard navigation, localStorage persistence, and dark mode support through CSS variable theming. Here's what to build next.
+
+- **Multi-page tours.** If your app uses Next.js App Router, Tour Kit persists step state across route changes. Define steps that target elements on different pages and Tour Kit picks up where the user left off after navigation.
+- **Conditional tours by role.** Show admin-specific tours for admin users, onboarding tours for new signups. See our [conditional tour guide](/blog/conditional-product-tour-user-role).
+- **Animated transitions.** Add Framer Motion enter/exit animations to your Card tooltip. Tour Kit exposes lifecycle callbacks (`onBeforeStep`, `onAfterStep`) for animation coordination. See [tour animations with Framer Motion](/blog/product-tour-framer-motion-animations).
+- **Hints and hotspots.** Pair `@tourkit/hints` with your tour for always-visible pulsing indicators on new features. See the [hotspot component guide](/blog/react-hotspot-component).
+
+An honest limitation: Tour Kit has no visual builder. You define steps in TypeScript, which means a developer needs to be involved. The community is also smaller than React Joyride (5,100+ stars) or Shepherd.js, so Stack Overflow answers are sparse. If your product team needs a no-code drag-and-drop editor, Tour Kit isn't the right fit today. But if your team already works in React and shadcn/ui, writing tour steps in code is faster than configuring them in a GUI, and you get version control, type checking, and code review for free.
+
+## FAQ
+
+### Does Tour Kit work with shadcn/ui's CSS variable theming?
+
+Tour Kit is headless, so the tooltip component you build inherits whatever CSS variables shadcn/ui defines in your `globals.css`. Change `--primary` from blue to purple, and your tour buttons update automatically. Tour Kit adds zero styling of its own. All visual output comes from your shadcn/ui components and Tailwind classes.
+
+### How is this different from the shadcn-tour community component?
+
+The [shadcn-tour package by NiazMorshed2007](https://github.com/NiazMorshed2007/shadcn-tour) provides a TourProvider and TourAlertDialog with shadcn/ui styling. Tour Kit goes deeper: it handles spotlight overlays with proper z-index management, cross-step focus trapping for WCAG 2.1 AA compliance, localStorage persistence, multi-tour orchestration, and keyboard navigation. Tour Kit also ships as two separate packages (core + react) so you can tree-shake aggressively.
+
+### Does adding a product tour affect my shadcn/ui app's bundle size?
+
+Tour Kit's core and React packages together add roughly 6KB gzipped to your production bundle for a typical 5-step tour. For context, a single shadcn/ui Dialog component (with its Radix primitives) adds about 8KB. Tour Kit tree-shakes unused exports, so you pay only for hooks and components you actually import.
+
+### Can I use Tour Kit with other component libraries besides shadcn/ui?
+
+Tour Kit is framework-agnostic at the component level. The same `useTour` hook and `Tour` component work with Radix UI directly, Mantine, Chakra UI, Headless UI, or plain HTML elements styled with Tailwind. shadcn/ui is a natural fit because both follow the headless-first, composable pattern, but Tour Kit doesn't require it.
+
+### What if I need to tour elements inside a shadcn/ui Dialog or Sheet?
+
+Radix-based modals render in portals outside the main DOM tree. Tour Kit can target portal-rendered elements, but the spotlight overlay may not cover the modal backdrop correctly. The recommended approach is to close the modal, tour the trigger element, then guide the user to open the modal themselves. For in-modal tours, set `portalContainer` to match the Radix portal root.
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Building product tours with shadcn/ui components from scratch",
+  "description": "Build an accessible product tour using shadcn/ui Card, Button, and Popover with Tour Kit. Step-by-step TypeScript tutorial with copy-paste components.",
+  "author": { "@type": "Organization", "name": "Tour Kit", "url": "https://tourkit.dev" },
+  "publisher": { "@type": "Organization", "name": "Tour Kit", "url": "https://tourkit.dev", "logo": { "@type": "ImageObject", "url": "https://tourkit.dev/logo.png" } },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/shadcn-ui-product-tour-tutorial.png",
+  "url": "https://tourkit.dev/blog/shadcn-ui-product-tour-tutorial",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://tourkit.dev/blog/shadcn-ui-product-tour-tutorial" },
+  "keywords": ["shadcn ui product tour tutorial", "shadcn onboarding component tutorial", "radix product tour", "shadcn tour component react"],
+  "proficiencyLevel": "Beginner",
+  "dependencies": "React 18+, shadcn/ui, Tailwind CSS, TypeScript 5+",
+  "programmingLanguage": { "@type": "ComputerLanguage", "name": "TypeScript" }
+}) }} />
+
+<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://tourkit.dev" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://tourkit.dev/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Building product tours with shadcn/ui components from scratch", "item": "https://tourkit.dev/blog/shadcn-ui-product-tour-tutorial" }
+  ]
+}) }} />
+
+<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Does Tour Kit work with shadcn/ui's CSS variable theming?", "acceptedAnswer": { "@type": "Answer", "text": "Tour Kit is headless, so the tooltip component you build inherits whatever CSS variables shadcn/ui defines in your globals.css. Change --primary from blue to purple, and your tour buttons update automatically. Tour Kit adds zero styling of its own. All visual output comes from your shadcn/ui components and Tailwind classes." } },
+    { "@type": "Question", "name": "How is this different from the shadcn-tour community component?", "acceptedAnswer": { "@type": "Answer", "text": "The shadcn-tour package by NiazMorshed2007 provides a TourProvider and TourAlertDialog with shadcn/ui styling. Tour Kit goes deeper: spotlight overlays with z-index management, cross-step focus trapping for WCAG 2.1 AA compliance, localStorage persistence, multi-tour orchestration, and keyboard navigation. Tour Kit ships as two packages (core + react) for aggressive tree-shaking." } },
+    { "@type": "Question", "name": "Does adding a product tour affect my shadcn/ui app's bundle size?", "acceptedAnswer": { "@type": "Answer", "text": "Tour Kit's core and React packages together add roughly 6KB gzipped to your production bundle for a typical 5-step tour. For context, a single shadcn/ui Dialog component with Radix primitives adds about 8KB. Tour Kit tree-shakes unused exports, so you pay only for hooks and components you actually import." } },
+    { "@type": "Question", "name": "Can I use Tour Kit with other component libraries besides shadcn/ui?", "acceptedAnswer": { "@type": "Answer", "text": "Tour Kit is framework-agnostic at the component level. The same useTour hook and Tour component work with Radix UI directly, Mantine, Chakra UI, Headless UI, or plain HTML with Tailwind. shadcn/ui is a natural fit because both follow the headless-first composable pattern, but Tour Kit doesn't require it." } },
+    { "@type": "Question", "name": "What if I need to tour elements inside a shadcn/ui Dialog or Sheet?", "acceptedAnswer": { "@type": "Answer", "text": "Radix-based modals render in portals outside the main DOM tree. Tour Kit can target portal-rendered elements, but the spotlight overlay may not cover the modal backdrop correctly. Close the modal, tour the trigger element, then guide the user to open the modal. For in-modal tours, set portalContainer to match the Radix portal root." } }
+  ]
+}) }} />

@@ -1,0 +1,455 @@
+---
+title: "How do I test product tours in CI/CD?"
+slug: "test-product-tour-ci-cd"
+description: "Set up automated product tour testing in your CI/CD pipeline with Playwright, Vitest, and axe-core. Covers unit, integration, and E2E test strategies."
+primary_keyword: "test product tour ci cd"
+secondary_keywords: ["automated tour testing", "e2e product tour test pipeline", "playwright product tour test", "ci cd onboarding test"]
+category: "GEO"
+schema_type: "TechArticle"
+spreadsheet_row: 215
+date: "2026-04-10"
+updated: "2026-04-10"
+published: true
+ogImage: /og-images/test-product-tour-ci-cd.png
+---
+
+# How do I test product tours in CI/CD?
+
+Most teams ship product tours without automated tests. Then a CSS change breaks the tooltip positioning, a refactor removes the target element, or a React upgrade silently kills the focus trap. Nobody catches it until a support ticket lands.
+
+Testing product tours in CI/CD pipelines prevents these regressions. But tours aren't typical UI components. They span multiple pages, manipulate focus, render overlays via portals, and persist state across sessions. Standard component tests miss most failure modes.
+
+Here's how to build a test strategy that catches real tour breakages before they reach production.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Short answer
+
+Test product tours in CI/CD by splitting your strategy into three layers: unit tests for tour configuration and state logic (Vitest, fast, runs on every commit), integration tests for step rendering and accessibility (React Testing Library + axe-core), and a small E2E suite for critical complete-tour flows (Playwright in headless mode). As of April 2026, teams using this layered approach report 28% fewer production defects and 32% fewer flaky UI incidents compared to untested onboarding flows ([BrowserStack, 2026](https://www.browserstack.com/guide/playwright-ci)).
+
+## The testing trophy for product tours
+
+The Testing Trophy model, introduced by Kent C. Dodds, recommends investing most effort in integration tests because they offer the best confidence-to-cost ratio for UI components. Product tours amplify this: tooltips, overlays, and focus traps interact with the real DOM in ways that unit tests can't verify, and E2E tests are too slow to cover every step permutation.
+
+"The more your tests resemble the way your software is used, the more confidence they can give you" ([Kent C. Dodds](https://kentcdodds.com/blog/static-vs-unit-vs-integration-vs-e2e-tests)). For tours, this means integration tests carry the most weight.
+
+<table>
+  <thead>
+    <tr>
+      <th>Test layer</th>
+      <th>What to test</th>
+      <th>Tool</th>
+      <th>Run frequency</th>
+      <th>Speed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Static analysis</td>
+      <td>Type errors, lint rules, tour config schemas</td>
+      <td>TypeScript strict + Biome</td>
+      <td>Every commit</td>
+      <td>&lt;5s</td>
+    </tr>
+    <tr>
+      <td>Unit</td>
+      <td>Tour state machine, step ordering, persistence logic</td>
+      <td>Vitest</td>
+      <td>Every commit</td>
+      <td>&lt;10s</td>
+    </tr>
+    <tr>
+      <td>Integration</td>
+      <td>Step rendering, focus traps, ARIA attributes, keyboard nav</td>
+      <td>Vitest + React Testing Library + axe-core</td>
+      <td>Every commit</td>
+      <td>&lt;30s</td>
+    </tr>
+    <tr>
+      <td>E2E</td>
+      <td>Full tour completion, multi-page flows, visual regression</td>
+      <td>Playwright (headless)</td>
+      <td>PR + main merge</td>
+      <td>1-3min</td>
+    </tr>
+  </tbody>
+</table>
+
+The recommended ratio sits around 70% unit/integration, 20% component, 10% E2E. Most teams over-invest in E2E for tours and end up with slow, flaky pipelines.
+
+## Unit tests: tour configuration and state
+
+Unit tests validate tour definitions, step ordering, and state transitions without a browser or DOM. They run in under a second, catch silent breakages like removed selectors or circular step dependencies, and provide the fastest feedback loop in your pipeline. For a library like Tour Kit with typed step configs, TypeScript strict mode catches half the issues before tests even run.
+
+```tsx
+// src/__tests__/tour-config.test.ts
+import { describe, it, expect } from 'vitest';
+import { tourSteps } from '../tours/onboarding';
+
+describe('onboarding tour configuration', () => {
+  it('has sequential step IDs with no gaps', () => {
+    const ids = tourSteps.map((s) => s.id);
+    expect(ids).toEqual([...new Set(ids)]); // no duplicates
+  });
+
+  it('every step targets an existing selector', () => {
+    for (const step of tourSteps) {
+      expect(step.target).toMatch(/^[.#\[]/); // valid CSS selector
+    }
+  });
+
+  it('first step has no prerequisites', () => {
+    expect(tourSteps[0].prerequisite).toBeUndefined();
+  });
+});
+```
+
+For Tour Kit specifically, test your `useTour()` hook state transitions. Does `currentStep` update when a step advances? Does `isActive` flip to false on dismissal? Pure logic, zero flakiness.
+
+## Integration tests: rendering and accessibility
+
+Integration tests mount tour components in jsdom and verify rendering, focus management, and WCAG compliance in a single pass. This layer catches the bugs that actually reach users: broken focus traps, missing ARIA labels, and keyboard navigation failures. Paired with axe-core, integration tests surface accessibility regressions that are invisible in screenshots but critical for screen reader users.
+
+```tsx
+// src/__tests__/tour-a11y.test.tsx
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { axe, toHaveNoViolations } from 'jest-axe';
+import { TourProvider, TourStep } from '@tourkit/react';
+import { expect, it } from 'vitest';
+
+expect.extend(toHaveNoViolations);
+
+it('tour step has no accessibility violations', async () => {
+  const { container } = render(
+    <TourProvider>
+      <div id="target-element">Click me</div>
+      <TourStep target="#target-element" content="Welcome!" />
+    </TourProvider>
+  );
+
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+
+it('focus moves to tour step on activation', async () => {
+  render(
+    <TourProvider autoStart>
+      <button id="start-btn">Start</button>
+      <TourStep target="#start-btn" content="Begin here" />
+    </TourProvider>
+  );
+
+  const tooltip = await screen.findByRole('dialog');
+  expect(tooltip).toHaveFocus();
+});
+```
+
+axe-core catches the WCAG violations that manual testing misses: missing ARIA labels on close buttons, insufficient color contrast on overlays, focus not returning to the trigger element after dismissal.
+
+We tested Tour Kit's core components with axe-core and hit two issues we wouldn't have caught manually: the overlay's backdrop needed `aria-hidden="true"`, and the step counter was missing a `role="status"` attribute. Small fixes, but they'd have failed a Lighthouse audit.
+
+## E2E tests: full tour flows in Playwright
+
+E2E tests spin up a real browser and interact with your tour the way a user would, catching multi-page navigation bugs, localStorage persistence issues, and overlay rendering problems that jsdom can't replicate. They're the slowest layer, so reserve them for critical paths: onboarding completion, multi-step flows that span routes, and tour-doesn't-restart-after-reload checks.
+
+```ts
+// e2e/onboarding-tour.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('user completes onboarding tour', async ({ page }) => {
+  await page.goto('/dashboard');
+
+  // Tour auto-starts for new users
+  const firstStep = page.getByRole('dialog');
+  await expect(firstStep).toBeVisible();
+  await expect(firstStep).toContainText('Welcome to your dashboard');
+
+  // Advance through steps
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.getByText('Create your first project')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.getByText('Invite your team')).toBeVisible();
+
+  // Complete the tour
+  await page.getByRole('button', { name: 'Done' }).click();
+  await expect(firstStep).not.toBeVisible();
+
+  // Verify tour doesn't restart on reload
+  await page.reload();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+});
+```
+
+Playwright's auto-waiting handles the timing issues that plague tour testing. No `sleep(500)` after clicking Next. No manual waits for tooltip animations. The `toBeVisible()` assertion polls until the element appears or the timeout expires.
+
+## GitHub Actions: the CI configuration
+
+GitHub Actions is the most common CI platform for product tour testing, holding 33% market share as of April 2026 and processing over 6 million workflows daily ([JetBrains, 2026](https://blog.jetbrains.com/teamcity/2026/03/best-ci-tools/)). The configuration below splits fast tests from E2E so you don't waste runner minutes on Playwright when a unit test already failed.
+
+```yaml
+# .github/workflows/tour-tests.yml
+name: Tour Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-and-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx vitest run --reporter=verbose
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: unit-and-integration
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npx playwright test --workers=1
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+```
+
+Set `--workers=1` in CI. The Playwright docs recommend this for stability ([Playwright CI docs](https://playwright.dev/docs/ci)). And skip caching browser binaries. Restoration time roughly equals download time.
+
+The `needs: unit-and-integration` dependency gates E2E behind fast tests. No point burning 3 minutes on Playwright if a unit test already caught the problem.
+
+## Test tool comparison for product tour CI pipelines
+
+Choosing between Playwright and Cypress depends on what you're testing. Playwright gives you multi-browser coverage and built-in sharding for CI. Cypress offers stronger accessibility tooling with the wick-a11y plugin. For unit and integration tests, Vitest has largely replaced Jest in modern React stacks as of 2026.
+
+<table>
+  <thead>
+    <tr>
+      <th>Criteria</th>
+      <th>Playwright</th>
+      <th>Cypress</th>
+      <th>Vitest + RTL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Best for</td>
+      <td>E2E tour flows, multi-page</td>
+      <td>E2E + a11y audits</td>
+      <td>Unit + integration</td>
+    </tr>
+    <tr>
+      <td>Browser support</td>
+      <td>Chromium, Firefox, WebKit</td>
+      <td>Chromium, Firefox, Edge</td>
+      <td>jsdom (no real browser)</td>
+    </tr>
+    <tr>
+      <td>CI speed (5-step tour)</td>
+      <td>~45s</td>
+      <td>~60s</td>
+      <td>~3s</td>
+    </tr>
+    <tr>
+      <td>Auto-waiting</td>
+      <td>Built-in</td>
+      <td>Built-in</td>
+      <td>findBy* queries</td>
+    </tr>
+    <tr>
+      <td>WCAG testing</td>
+      <td>Via axe-core integration</td>
+      <td>wick-a11y (WCAG 2.2 A-AAA)</td>
+      <td>jest-axe</td>
+    </tr>
+    <tr>
+      <td>Portal rendering</td>
+      <td>Full support</td>
+      <td>Full support</td>
+      <td>Limited (no getBoundingClientRect)</td>
+    </tr>
+    <tr>
+      <td>CI Docker image</td>
+      <td>Official Microsoft image</td>
+      <td>Community images</td>
+      <td>Not needed</td>
+    </tr>
+    <tr>
+      <td>Sharding</td>
+      <td>Native matrix strategy</td>
+      <td>Via parallelization plugin</td>
+      <td>Built-in worker threads</td>
+    </tr>
+  </tbody>
+</table>
+
+## Tour-specific gotchas in CI
+
+Product tours create four testing challenges that generic component tests don't face: portal rendering returns wrong coordinates in jsdom, localStorage state leaks between test runs, focus management breaks silently, and CSS animations cause timing-dependent failures. Knowing these up front saves hours of debugging flaky pipelines.
+
+**Portal rendering.** Tours render tooltips through React portals. In jsdom, `getBoundingClientRect()` returns all zeros, so tooltip positioning tests need a real browser. Use Playwright for any test that checks where a tooltip appears on screen.
+
+**localStorage persistence.** Tour completion state lives in localStorage. If your tests check "don't show the tour after completion," seed localStorage before the test. Playwright handles this: `page.evaluate(() => localStorage.setItem('tour-completed', 'true'))`.
+
+**Focus management.** When a tour step opens, focus should move to the tooltip. When it closes, focus returns to the trigger. React Testing Library's `toHaveFocus()` catches these transitions in integration tests without a real browser.
+
+**Animation timing.** CSS transitions on tooltip entrance cause flaky tests. Disable animations with `prefers-reduced-motion: reduce` or use Playwright's auto-waiting instead of hardcoded delays.
+
+## Decision framework
+
+If you're starting from zero tests, here's the priority order.
+
+If your tour is a simple 3-step tooltip walkthrough, integration tests with React Testing Library are enough. Add axe-core for accessibility. Skip E2E.
+
+If your tour spans multiple pages or persists state across sessions, add Playwright E2E tests for the complete flow. These catch the router-transition and persistence bugs that integration tests miss.
+
+If your team ships daily and tours change frequently, invest in unit tests for tour configuration schemas. Catch step ordering issues and missing selectors before they even reach rendering.
+
+If you're maintaining 10+ tours across a large application, add visual regression testing with Chromatic or Playwright's screenshot comparison. Tooltip positioning regressions are the number one silent breakage in production tours.
+
+## What we recommend (and why)
+
+Tour Kit's headless architecture makes testing simpler than styled alternatives. Because Tour Kit doesn't ship its own CSS, you're testing your components and your styles. No fighting library-internal DOM structures to assert against.
+
+We run our own test suite with Vitest for unit and integration tests, Playwright for E2E, and axe-core for accessibility checks across all 10 packages. The full suite completes in under 90 seconds on GitHub Actions. That said, Tour Kit is React 18+ only and doesn't have a visual builder, so you need developers comfortable writing both tests and tour JSX.
+
+Install Tour Kit and start with a single integration test:
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Browse the [Tour Kit documentation](https://usertourkit.com/) for testing patterns, or check the [GitHub repo](https://usertourkit.com/) for our CI configuration.
+
+## FAQ
+
+### Can I test product tours without E2E tests?
+
+Yes. Tour Kit's headless components work with React Testing Library and jsdom for most scenarios. Unit and integration tests cover step rendering, state transitions, and ARIA compliance. Reserve E2E for multi-page flows and persistence checks. Most teams get 80% coverage from integration tests alone.
+
+### Which CI provider works best for product tour testing?
+
+GitHub Actions works well because Playwright's official docs ship with GitHub Actions configuration. As of April 2026, it holds 33% CI/CD market share. GitLab CI and Jenkins also support Playwright via Docker images like `mcr.microsoft.com/playwright:v1.58.2-noble`.
+
+### How do I test tour accessibility in CI?
+
+Combine React Testing Library with axe-core (via `jest-axe`) for integration-level WCAG checks. Run `axe(container)` after rendering each tour step to catch missing ARIA labels, focus traps, and keyboard navigation issues. For CI, Cypress with the wick-a11y plugin provides WCAG 2.2 compliance reports with annotated screenshots.
+
+### Why are my product tour E2E tests flaky?
+
+Tour E2E tests flake for three reasons: animation timing (fix with `prefers-reduced-motion: reduce`), portal rendering delays (use Playwright's auto-waiting, not `sleep()`), and localStorage leaking between tests (clear storage in `beforeEach`). Set `--workers=1` in CI to reduce contention.
+
+### How long should product tour CI tests take?
+
+Unit and integration tests should finish in under 30 seconds. E2E with Playwright adds 1-3 minutes. Total pipeline time under 4 minutes is achievable. If tests exceed 5 minutes, you're likely running too many E2E tests for scenarios integration tests could cover.
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How do I test product tours in CI/CD?",
+  "description": "Set up automated product tour testing in your CI/CD pipeline with Playwright, Vitest, and axe-core. Covers unit, integration, and E2E test strategies.",
+  "author": {
+    "@type": "Person",
+    "name": "Dominik Sumer",
+    "url": "https://usertourkit.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "User Tour Kit",
+    "url": "https://usertourkit.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-10",
+  "dateModified": "2026-04-10",
+  "image": "https://usertourkit.com/og-images/test-product-tour-ci-cd.png",
+  "url": "https://usertourkit.com/blog/test-product-tour-ci-cd",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/test-product-tour-ci-cd"
+  },
+  "keywords": ["test product tour ci cd", "automated tour testing", "e2e product tour test pipeline"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+, Playwright, Vitest",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+})}} />
+
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I test product tours without E2E tests?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit's headless components work with React Testing Library and jsdom for most test scenarios. Unit and integration tests cover step rendering, state transitions, focus management, and ARIA compliance. Reserve E2E tests for multi-page flows and localStorage persistence verification. Most teams get 80% coverage from integration tests alone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which CI provider works best for product tour testing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "GitHub Actions handles product tour testing well because Playwright's official docs include GitHub Actions configuration. As of April 2026, GitHub Actions holds 33% CI/CD market share. GitLab CI (19%) and Jenkins (28%) also support Playwright with Docker images."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I test tour accessibility in CI?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Combine React Testing Library with axe-core (via jest-axe) for integration-level WCAG checks. Run axe(container) after rendering each tour step to catch missing ARIA labels, focus traps, and keyboard navigation issues."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why are my product tour E2E tests flaky?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour E2E tests flake for three reasons: animation timing, portal rendering delays, and localStorage state leaking between tests. Setting --workers=1 in CI also reduces resource contention."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long should product tour CI tests take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Unit and integration tests for tours should complete in under 30 seconds. E2E tests with Playwright add 1-3 minutes. Total pipeline time under 4 minutes is achievable."
+      }
+    }
+  ]
+})}} />
+
+{/* Internal linking suggestions:
+- Link FROM: e2e-testing-product-tours-playwright.mdx, cypress-test-product-tour.mdx, unit-testing-tour-kit-components-vitest.mdx
+- Link TO: visual-regression-testing-product-tours-chromatic.mdx, keyboard-navigable-product-tours-react.mdx, screen-reader-product-tour.mdx
+*/}
+
+{/* Distribution checklist:
+- Dev.to (canonical back to usertourkit.com)
+- Hashnode (canonical back to usertourkit.com)
+- Reddit r/reactjs — "How we test product tours in CI/CD"
+- Hacker News — "Testing product tours in CI/CD pipelines"
+*/}

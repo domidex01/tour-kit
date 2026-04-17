@@ -1,0 +1,458 @@
+---
+title: "Tour Kit security: XSS prevention in dynamic tooltip content"
+slug: "product-tour-xss-prevention"
+description: "How product tour libraries handle XSS in tooltip rendering. Compare HTML string vs ReactNode, add DOMPurify, and configure CSP."
+primary_keyword: "product tour xss prevention"
+secondary_keywords: ["tooltip xss security", "safe html rendering tooltip react", "react xss dangerouslySetInnerHTML", "content security policy product tour"]
+category: "Deep-Dives"
+schema_type: "TechArticle"
+spreadsheet_row: 127
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/product-tour-xss-prevention.png
+---
+
+# XSS prevention in product tour tooltip content
+
+Product tours inject HTML into your app at runtime. Every tooltip, popover, and overlay is a potential XSS vector if the library renders unsanitized user input. In the first half of 2025, cross-site scripting and SQL injection accounted for 38% of all identified web application weaknesses ([Security Boulevard, March 2026](https://securityboulevard.com/2026/03/46-vulnerability-statistics-2026-key-trends-in-discovery-exploitation-and-risk/)). And tooltip libraries have been hit before — Bootstrap's tooltip component had a stored XSS vulnerability (CVE-2019-8331) that persisted across two major versions.
+
+This isn't theoretical. If your product tour pulls step content from a CMS, translation service, or database, you need to know exactly how that content reaches the DOM.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+[See the live demo on StackBlitz →](https://tourkit.dev/docs/examples)
+
+## Why XSS prevention matters for product tours
+
+Cross-site scripting costs real money. Web application attacks reached 6.29 billion incidents in 2025, a 56% year-over-year increase ([Indusface State of Application Security Report, 2026](https://www.indusface.com/blog/key-cybersecurity-statistics/)). Exploited vulnerabilities in web applications cost organizations an average of $4.44 million in damages. Over 6,227 XSS-specific CVEs were published in 2025 alone.
+
+Product tours are a particularly attractive attack surface because they run inside authenticated sessions. A successful XSS in a tour tooltip can steal session cookies, redirect users to phishing pages, or exfiltrate data from the DOM. The `react-tooltip` package had exactly this kind of vulnerability in versions before 3.8.1 ([Snyk: SNYK-JS-REACTTOOLTIP-72363](https://security.snyk.io/vuln/SNYK-JS-REACTTOOLTIP-72363)).
+
+The fix isn't complicated. Choose a library with safe defaults, sanitize external content, and add CSP headers. The rest of this article shows you how.
+
+## What makes tooltips an XSS target?
+
+Product tour tooltips are high-value XSS targets because they render dynamic content inside trusted UI elements. A tooltip that displays a user's name, a feature description from a CMS, or a translated string is executing a data-to-DOM pipeline. If any part of that pipeline accepts raw HTML without escaping, an attacker can inject `<script>` tags or event handlers that execute in the user's browser session.
+
+The attack surface is wider than most developers expect. Three common vectors exist in tour libraries:
+
+1. **HTML string content.** Libraries like Shepherd.js accept raw HTML strings as step text. The content goes straight into the DOM via `innerHTML`. If that string originates from an API response, a CMS field, or a URL parameter, the library will render whatever HTML it contains.
+
+2. **Attribute injection.** Bootstrap's tooltip XSS (CVE-2019-8331) came through unsanitized `title`, `data-title`, and `data-template` attributes. No `innerHTML` needed. The XSS lived in element attributes that the tooltip read and rendered.
+
+3. **URL scheme injection.** React protects against `<script>` tags in JSX, but it doesn't validate `href` values. A `javascript:alert(1)` URL in a tooltip link bypasses React's escaping entirely. The [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html) explicitly flags this: "React cannot handle `javascript:` or `data:` URLs without specialized validation."
+
+## How tour libraries render content differently
+
+The rendering approach a tour library uses determines its default XSS posture. The difference between "safe by default" and "vulnerable by default" comes down to one architectural decision: does the library accept HTML strings or React elements?
+
+<table>
+  <thead>
+    <tr>
+      <th>Library</th>
+      <th>Content type</th>
+      <th>Rendering method</th>
+      <th>Default XSS posture</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tour Kit</td>
+      <td><code>React.ReactNode</code></td>
+      <td>JSX auto-escaping</td>
+      <td>Safe by default</td>
+    </tr>
+    <tr>
+      <td>React Joyride</td>
+      <td><code>string | ReactNode</code></td>
+      <td>Accepts HTML elements</td>
+      <td>Safe when using JSX, risky with string HTML</td>
+    </tr>
+    <tr>
+      <td>Shepherd.js</td>
+      <td><code>string | HTMLElement</code></td>
+      <td><code>innerHTML</code></td>
+      <td>Vulnerable if content is untrusted</td>
+    </tr>
+    <tr>
+      <td>Driver.js</td>
+      <td><code>string</code></td>
+      <td><code>innerHTML</code></td>
+      <td>Vulnerable if content is untrusted</td>
+    </tr>
+    <tr>
+      <td>Intro.js</td>
+      <td><code>string</code></td>
+      <td><code>innerHTML</code></td>
+      <td>Vulnerable if content is untrusted</td>
+    </tr>
+  </tbody>
+</table>
+
+Shepherd.js documentation confirms the `text` property accepts "a regular HTML string or an HTMLElement object." That HTML string hits the DOM without sanitization. If you're pulling tour content from an external source, you're one unsanitized API response away from a stored XSS.
+
+## Why React.ReactNode is the safer default
+
+Tour Kit's step type definition uses `React.ReactNode` for content, not HTML strings. This is an architectural decision, not an oversight. When you pass JSX to a Tour Kit step, React's rendering pipeline handles escaping automatically. There's no intermediate `innerHTML` call. No raw string-to-DOM conversion.
+
+Here's what a Tour Kit step definition looks like:
+
+```tsx
+// src/tours/onboarding.tsx
+import type { TourStep } from '@tourkit/core'
+
+const steps: TourStep[] = [
+  {
+    id: 'welcome',
+    target: '#dashboard-header',
+    content: (
+      <div>
+        <h3>Welcome, {userName}</h3>
+        <p>Here's your dashboard. We'll walk you through the key features.</p>
+      </div>
+    ),
+  },
+]
+```
+
+That `{userName}` variable gets escaped by React before it reaches the DOM. If `userName` contains `<script>alert('xss')</script>`, it renders as a harmless text string. No sanitization library required. No configuration. It just works.
+
+Compare this with a Shepherd.js step where the same content would be:
+
+```js
+// Shepherd.js — HTML string approach
+const step = {
+  text: `<div>
+    <h3>Welcome, ${userName}</h3>
+    <p>Here's your dashboard.</p>
+  </div>`,
+}
+// If userName = "<img src=x onerror=alert(1)>", that's XSS
+```
+
+The Shepherd.js example injects `userName` directly into an HTML string. If that value comes from user input, a database, or an API, you've got a stored XSS vulnerability. We built Tour Kit around `ReactNode` specifically to avoid this class of bug.
+
+That said, Tour Kit doesn't have a visual builder. You need React developers writing JSX. That's a real tradeoff. Libraries that accept HTML strings make it easier for non-developers to author content through a CMS. But easy authoring and safe rendering are at odds when the authoring pipeline doesn't sanitize.
+
+## When you still need to sanitize (even with React)
+
+React's auto-escaping covers the common case, but it doesn't cover everything. Three situations require additional defense even in a Tour Kit app.
+
+### Rendering CMS content with dangerouslySetInnerHTML
+
+If your tour content comes from a headless CMS as HTML, you'll need `dangerouslySetInnerHTML`, and that means you need DOMPurify. Tour Kit itself never uses `dangerouslySetInnerHTML` in its source code. But you might use it inside the `ReactNode` you pass as step content.
+
+```tsx
+// src/tours/cms-tour.tsx
+import DOMPurify from 'dompurify'
+import type { TourStep } from '@tourkit/core'
+
+function CmsStepContent({ html }: { html: string }) {
+  const clean = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  })
+  return <div dangerouslySetInnerHTML={{ __html: clean }} />
+}
+
+const steps: TourStep[] = [
+  {
+    id: 'feature-intro',
+    target: '#new-feature',
+    content: <CmsStepContent html={cmsResponse.body} />,
+  },
+]
+```
+
+DOMPurify adds roughly 6.4KB gzipped to your bundle ([npm: dompurify](https://www.npmjs.com/package/dompurify)). Tour Kit's core is under 8KB gzipped, so you're looking at ~14KB total, still smaller than React Joyride alone.
+
+### Validating URL schemes in tooltip links
+
+React won't stop a `javascript:` URL from rendering in an `<a>` tag. If your tour step includes user-generated links, validate the protocol:
+
+```tsx
+// src/utils/safe-url.ts
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return ['http:', 'https:', 'mailto:'].includes(parsed.protocol)
+  } catch {
+    return false
+  }
+}
+
+// In your step content
+function StepWithLink({ url, label }: { url: string; label: string }) {
+  if (!isSafeUrl(url)) {
+    return <span>{label}</span>
+  }
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      {label}
+    </a>
+  )
+}
+```
+
+### Handling dynamic attribute values
+
+If your tour steps set `data-*` attributes, `title`, or `aria-label` values from external data, those strings need escaping too. React handles this for JSX attributes, but not for values passed to the DOM via refs or vanilla JS.
+
+```tsx
+// Safe — React escapes the attribute value
+<div data-tour-step={stepId} aria-label={stepDescription}>
+  {content}
+</div>
+
+// Unsafe — direct DOM manipulation bypasses React
+elementRef.current.setAttribute('title', untrustedValue) // Don't do this
+```
+
+## Content Security Policy and product tours
+
+As of 2025, 43% of tested web applications had no Content Security Policy header defined at all, and another 19% had an overly permissive one ([2NS Cybersecurity, 2025](https://www.2ns.fi/en/application-security-in-2025-what-the-data-really-tells-us/)). CSP is your second line of defense. If sanitization fails, a strict CSP prevents injected scripts from executing.
+
+Product tour libraries create unique CSP challenges. Overlays and tooltips often use inline styles for positioning (absolute coordinates, z-index stacking). A strict `style-src` policy breaks the tour UI.
+
+### Setting up CSP with Tour Kit in Next.js
+
+Tour Kit works with nonce-based CSP because it doesn't inject inline `<style>` blocks. Positioning relies on the `style` attribute on individual elements. You allow `'unsafe-inline'` for `style-src` only, keeping `script-src` strict:
+
+```tsx
+// src/middleware.ts
+import { NextRequest, NextResponse } from 'next/server'
+
+export function middleware(request: NextRequest) {
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
+  const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'nonce-${nonce}';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: https:;
+    connect-src 'self';
+    frame-ancestors 'none';
+  `.replace(/\n/g, '')
+
+  const response = NextResponse.next()
+  response.headers.set('Content-Security-Policy', cspHeader)
+  response.headers.set('x-nonce', nonce)
+  return response
+}
+```
+
+The `'unsafe-inline'` for `style-src` is a pragmatic concession. Almost every UI library that handles dynamic positioning needs it. The important thing is keeping `script-src` locked down with nonces.
+
+### The CSS-in-JS complication
+
+If your app uses styled-components or Emotion, those libraries inject `<style>` tags at runtime, which breaks `style-src 'self'`. You'll need to pass the nonce through their provider:
+
+```tsx
+// For styled-components
+import { StyleSheetManager } from 'styled-components'
+
+function App({ nonce }: { nonce: string }) {
+  return (
+    <StyleSheetManager nonce={nonce}>
+      <TourProvider steps={steps}>
+        <YourApp />
+      </TourProvider>
+    </StyleSheetManager>
+  )
+}
+```
+
+Tour Kit itself doesn't ship CSS-in-JS. It's headless, so you bring your own styles. Fewer CSP complications compared to libraries that bundle their own styled components.
+
+## A security audit checklist for your product tour
+
+We tested Tour Kit against the [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html) during development. Here's the checklist we use, adapted for any tour library:
+
+1. **Check the content type.** Does the library accept HTML strings or `ReactNode`? If it accepts strings and you pass external data, sanitize with DOMPurify.
+
+2. **Audit all dangerouslySetInnerHTML usage.** Search your codebase for `dangerouslySetInnerHTML`. Every instance that renders external data needs a sanitization wrapper.
+
+3. **Validate URL schemes.** Any `href` in tour content should be validated against an allowlist of protocols (`http:`, `https:`, `mailto:`).
+
+4. **Check attribute injection.** If your tour library reads `data-*` or `title` attributes for display content, verify those values are escaped before rendering.
+
+5. **Verify CSP headers.** Run `curl -I https://yourapp.com` and check for a `Content-Security-Policy` header. At minimum, `script-src` should not include `'unsafe-inline'` or `'unsafe-eval'`.
+
+6. **Test with payloads.** Pass these strings as tour step content and verify they render as text, not executable code:
+   - `<img src=x onerror=alert(1)>`
+   - `<script>alert(document.cookie)</script>`
+   - `javascript:alert(1)` (as a link href)
+   - `" onmouseover="alert(1)" data-x="`
+
+7. **Check third-party dependencies.** The `react-tooltip` package had an XSS vulnerability in versions before 3.8.1 ([Snyk: SNYK-JS-REACTTOOLTIP-72363](https://security.snyk.io/vuln/SNYK-JS-REACTTOOLTIP-72363)). Run `npm audit` regularly.
+
+## Common mistakes and anti-patterns
+
+These are the XSS anti-patterns we see most often when reviewing product tour code. Each is fixable with a one-line change.
+
+### Pattern 1: Template literal step content
+
+```tsx
+// Vulnerable — string interpolation into HTML
+const step = {
+  content: `<p>Welcome, ${user.name}!</p>`,
+}
+
+// Fixed — use JSX
+const step = {
+  content: <p>Welcome, {user.name}!</p>,
+}
+```
+
+### Pattern 2: Markdown rendering without sanitization
+
+```tsx
+// Vulnerable — markdown to HTML without sanitization
+import { marked } from 'marked'
+
+const step = {
+  content: (
+    <div
+      dangerouslySetInnerHTML={{
+        __html: marked(cmsContent), // marked doesn't sanitize
+      }}
+    />
+  ),
+}
+
+// Fixed — sanitize after markdown conversion
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
+
+const step = {
+  content: (
+    <div
+      dangerouslySetInnerHTML={{
+        __html: DOMPurify.sanitize(marked(cmsContent)),
+      }}
+    />
+  ),
+}
+```
+
+### Pattern 3: Dynamic image sources
+
+```tsx
+// Vulnerable — user-controlled image source with error handler
+const step = {
+  content: (
+    <img src={userProvidedUrl} alt="Feature" />
+  ),
+}
+// An attacker sets src to trigger onerror in older browsers
+
+// Fixed — validate the URL and use a fallback
+const step = {
+  content: (
+    <img
+      src={isSafeUrl(userProvidedUrl) ? userProvidedUrl : '/fallback.png'}
+      alt="Feature"
+    />
+  ),
+}
+```
+
+[Try the security-hardened tour demo on StackBlitz →](https://tourkit.dev/docs/examples)
+
+## How Tour Kit handles security internally
+
+Tour Kit's architecture eliminates the most common XSS vectors by design. But here's exactly what happens under the hood, so you can verify rather than trust:
+
+- **Step content is typed as `React.ReactNode`** (`packages/core/src/types/step.ts`). No HTML string overload exists. You can't accidentally pass raw HTML.
+- **No `dangerouslySetInnerHTML` in production code.** We searched the codebase. It appears only in test setup files (clearing `document.body.innerHTML` between tests) and in a spike comment explicitly noting its absence.
+- **The live announcer uses `textContent`** (`packages/core/src/utils/a11y.ts`), not `innerHTML`. Screen reader announcements can't execute scripts even if you passed one.
+- **Overlay positioning uses React's `style` prop**, not `element.style` or `setAttribute`. React escapes style values.
+
+Tour Kit is a younger project with a smaller community than React Joyride or Shepherd.js. We haven't been battle-tested at the same enterprise scale. But the architectural decision to use `ReactNode` exclusively means an entire class of XSS vulnerabilities simply doesn't apply.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+[Get started with Tour Kit →](https://tourkit.dev/docs/getting-started) | [View source on GitHub →](https://github.com/AmanVarshney01/tour-kit)
+
+## FAQ
+
+### Does React fully protect against XSS in product tours?
+
+React's JSX auto-escaping prevents most XSS when rendering dynamic values through curly braces. But it doesn't cover `dangerouslySetInnerHTML`, `javascript:` URLs, or direct DOM manipulation via refs. Tour Kit uses `React.ReactNode` for step content, so React's escaping applies automatically. Add DOMPurify if you render CMS HTML.
+
+### What is the XSS risk of using dangerouslySetInnerHTML in tooltips?
+
+Using `dangerouslySetInnerHTML` bypasses all of React's built-in escaping. Any `<script>` tags, `onerror` attributes, or event handlers in the HTML string will execute in the browser. The OWASP XSS Prevention Cheat Sheet lists this as a known React vulnerability. Always sanitize with DOMPurify first, restricting allowed tags to `<b>`, `<em>`, and `<a>`.
+
+### How do I test my product tour for XSS vulnerabilities?
+
+Pass known XSS payloads as step content: `<img src=x onerror=alert(1)>` and `<script>alert(1)</script>`. Verify they render as visible text, not executable code. Run `npm audit` to check for known vulnerabilities in your tour dependencies. Add automated scans with StackHawk or OWASP ZAP for production coverage.
+
+### Should I add a Content Security Policy if I use Tour Kit?
+
+Yes. CSP is defense-in-depth: if sanitization fails, it prevents injected scripts from running. As of 2025, 43% of web applications had no CSP header at all. Set `script-src 'self' 'nonce-...'` at minimum. Tour Kit works with strict CSP because it doesn't inject inline scripts.
+
+### Which product tour libraries are vulnerable to XSS by default?
+
+As of April 2026, Shepherd.js and Driver.js accept HTML strings rendered via `innerHTML`. Intro.js also renders HTML string content directly. React Joyride accepts both `ReactNode` and strings. Tour Kit accepts only `React.ReactNode`. The vulnerability depends on whether you pass untrusted data. Hardcoded content is safe regardless of rendering method.
+
+---
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Tour Kit security: XSS prevention in dynamic tooltip content",
+  "description": "Learn how product tour libraries handle XSS risks in tooltip rendering. Compare HTML string vs ReactNode approaches, add DOMPurify sanitization, and configure CSP headers.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://tourkit.dev/og-images/product-tour-xss-prevention.png",
+  "url": "https://tourkit.dev/blog/product-tour-xss-prevention",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/product-tour-xss-prevention"
+  },
+  "keywords": ["product tour xss prevention", "tooltip xss security", "safe html rendering tooltip react", "react xss dangerouslySetInnerHTML", "content security policy product tour"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+**Internal linking suggestions:**
+- Link FROM: `how-onboarding-tools-inject-code` (security context)
+- Link FROM: `aria-tooltip-component-react` (tooltip rendering)
+- Link FROM: `portal-rendering-product-tours-createportal` (DOM rendering)
+- Link TO: `keyboard-navigable-product-tours-react` (a11y + security)
+- Link TO: `screen-reader-product-tour` (textContent usage)
+- Link TO: `best-product-tour-tools-react` (library comparison)
+
+**Distribution checklist:**
+- Dev.to (cross-post with canonical URL)
+- Hashnode (cross-post with canonical URL)
+- Reddit r/reactjs (discussion post, not self-promotion)
+- Reddit r/netsec (security angle)
+- Hacker News (if paired with a security audit release)

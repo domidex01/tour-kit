@@ -1,3 +1,5 @@
+'use client'
+
 import { useHintsContext } from '../context/hints-context'
 
 export function useHints() {

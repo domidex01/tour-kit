@@ -1,3 +1,5 @@
+'use client'
+
 import { useTour } from '@tour-kit/core'
 import type { RouterAdapter, TourStep } from '@tour-kit/core'
 import * as React from 'react'

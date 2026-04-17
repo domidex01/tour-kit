@@ -1,0 +1,240 @@
+---
+title: "What is a progress bar? Onboarding progress indicators explained"
+slug: "what-is-progress-bar-onboarding"
+description: "Progress bars in onboarding explained for developers. Covers ARIA accessibility, React implementation, and when progress indicators help or hurt."
+primary_keyword: "what is progress bar onboarding"
+secondary_keywords: ["progress bar definition", "onboarding progress indicator", "progress bar accessibility", "progress bar react onboarding"]
+category: "Glossary"
+schema_type: "TechArticle"
+spreadsheet_row: 313
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/what-is-progress-bar-onboarding.png
+---
+
+# What is a progress bar? Onboarding progress indicators explained
+
+Every SaaS onboarding flow with more than three steps faces the same question: do users know where they are? Progress bars answer that. But the implementation details (which type, what ARIA attributes, when they actually help) get buried under product-manager-focused advice. Here's the developer version.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Definition
+
+A progress bar is a visual indicator that communicates how much of a multi-step process a user has completed and how much remains. In onboarding, it typically sits at the top of a setup flow or checklist, showing the ratio of finished steps to total steps. The HTML spec defines a native `<progress>` element for this ([MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress)), and the WAI-ARIA spec adds `role="progressbar"` for custom implementations that need accessible state attributes like `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` ([MDN ARIA progressbar](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/progressbar_role)).
+
+Progress bars differ from spinners. A spinner is indeterminate: it loops without telling you when things will finish. A progress bar is determinate, showing actual completion percentage. Jakob Nielsen's research established a 10-second threshold. After 10 seconds without progress feedback, users assume the process has stalled ([Smashing Magazine](https://www.smashingmagazine.com/2016/12/best-practices-for-animated-progress-indicators/)). Onboarding flows routinely exceed that, which is why 78% of products now include progress indicators during setup (UserGuiding, 2026).
+
+## How progress bars work in onboarding
+
+Progress bars in onboarding track step completion, not loading time. The core mechanic is a ratio: completed steps divided by total steps, rendered as a visual fill. In React, a minimal implementation looks like this:
+
+```tsx
+// src/components/OnboardingProgress.tsx
+function OnboardingProgress({ current, total }: { current: number; total: number }) {
+  const percent = Math.round((current / total) * 100);
+
+  return (
+    <div
+      role="progressbar"
+      aria-valuenow={percent}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`Onboarding progress: step ${current} of ${total}`}
+    >
+      <div style={{ width: `${percent}%` }} />
+      <span>{current} of {total} complete</span>
+    </div>
+  );
+}
+```
+
+That covers the basics. Production implementations add persistence (so progress survives page reloads) and screen reader announcements when the value changes. You also need a live region or `aria-valuetext` update to announce transitions, or assistive technology users won't know they advanced.
+
+Five psychological principles explain why progress bars increase onboarding completion rates by 20-30% ([UserPilot](https://userpilot.com/blog/progress-bar-psychology/)):
+
+<table>
+  <thead>
+    <tr>
+      <th>Principle</th>
+      <th>What it does</th>
+      <th>Onboarding application</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Zeigarnik effect</td>
+      <td>Incomplete tasks nag at memory</td>
+      <td>Seeing "3 of 5 done" creates pull to finish</td>
+    </tr>
+    <tr>
+      <td>Endowed progress</td>
+      <td>Starting ahead boosts motivation</td>
+      <td>Pre-filling the first step (account creation) as complete</td>
+    </tr>
+    <tr>
+      <td>Goal gradient</td>
+      <td>Effort increases near the finish</td>
+      <td>Users rush through the last 2 steps</td>
+    </tr>
+    <tr>
+      <td>Anchoring</td>
+      <td>First number sets expectations</td>
+      <td>"Step 1 of 4" feels lighter than "Step 1 of 12"</td>
+    </tr>
+    <tr>
+      <td>Perceived control</td>
+      <td>Visibility reduces anxiety</td>
+      <td>Users tolerate longer flows when they see the end</td>
+    </tr>
+  </tbody>
+</table>
+
+One caveat: progress bars can *decrease* completion when early progress feels slow. A meta-analysis of 32 experiments found that bars perceived as decelerating led to higher abandonment ([Irrational Labs, 2025](https://irrationallabs.com/blog/knowledge-cuts-both-ways-when-progress-bars-backfire/)). Start the animation slow and accelerate toward the end for the best perceived speed.
+
+## Progress bar examples and types
+
+Not every onboarding flow needs the same indicator. Six common types map to different use cases:
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Best for</th>
+      <th>User clarity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Linear (continuous fill)</td>
+      <td>Simple 3-5 step flows</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td>Segmented / stepped</td>
+      <td>Multi-step wizards, onboarding checklists</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td>Circular / radial</td>
+      <td>Dashboards, compact sidebars</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td>Percentage text</td>
+      <td>Inline status where bar space is tight</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td>Hybrid (steps + percentage)</td>
+      <td>Complex onboarding with 8+ steps</td>
+      <td>Very high</td>
+    </tr>
+    <tr>
+      <td>Indeterminate (spinner)</td>
+      <td>Unknown-duration tasks only</td>
+      <td>Low</td>
+    </tr>
+  </tbody>
+</table>
+
+Segmented progress bars dominate onboarding because they answer two questions at once: "how far am I?" and "what's the next step?" LinkedIn's profile completion meter is the classic example, boosting completions by combining a percentage with specific missing-item prompts.
+
+## Why progress bars matter for onboarding
+
+The median checklist completion rate sits at 10.1% ([Userpilot, 2026](https://userpilot.com/blog/onboarding-checklist-completion-rate-benchmarks/)). Progress bars won't fix a broken flow, but they reduce one specific failure mode: users quitting because they don't know how much is left.
+
+The real question isn't whether to show progress. It's whether your flow has a clear enough structure to make progress meaningful. Branching paths, optional steps, or context-dependent screens will make a linear progress bar lie to users. And they'll notice.
+
+## Progress bars in Tour Kit
+
+Tour Kit's `@tour-kit/checklists` package handles onboarding progress tracking with step completion state, persistence across sessions, and accessible announcements built in. Because Tour Kit is headless, you render the progress bar however you want: your Tailwind classes, your design tokens, your component library.
+
+```tsx
+// src/components/TourProgress.tsx
+import { useChecklist } from '@tour-kit/checklists';
+
+function TourProgress() {
+  const { completedCount, totalCount, percentComplete } = useChecklist('onboarding');
+
+  return (
+    <div
+      role="progressbar"
+      aria-valuenow={percentComplete}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="Onboarding progress"
+      className="h-2 w-full rounded-full bg-gray-200"
+    >
+      <div
+        className="h-full rounded-full bg-blue-600 transition-all duration-300"
+        style={{ width: `${percentComplete}%` }}
+      />
+    </div>
+  );
+}
+```
+
+Tour Kit doesn't prescribe the UI. It tracks which steps are done, persists that state to `localStorage` (or your own storage adapter), and exposes the numbers. You decide whether that's a bar, a ring, a fraction, or a percentage label.
+
+Explore the full API at [usertourkit.com](https://usertourkit.com/).
+
+## FAQ
+
+### Do progress bars actually improve onboarding completion rates?
+
+Progress bars combined with checklists increase onboarding completion rates by 20-30%, according to UserPilot's analysis. The effect comes from the Zeigarnik effect (incomplete tasks nag at memory) and the goal gradient hypothesis (users accelerate near the finish). But bars that decelerate visually or misrepresent remaining effort can reduce completion instead.
+
+### What ARIA attributes does a progress bar need?
+
+An accessible progress bar needs `role="progressbar"`, `aria-valuenow` for the current value, `aria-valuemin` and `aria-valuemax` for the range, and `aria-label` for an accessible name. For indeterminate bars, omit `aria-valuenow` entirely. Its absence signals unknown progress to screen readers ([MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/progressbar_role)).
+
+### When should you not use a progress bar in onboarding?
+
+Skip the progress bar when your onboarding has fewer than three steps, when steps have wildly different durations (the bar will feel uneven), or when paths branch based on user choices. A linear bar misrepresents nonlinear flows. Also skip them for tasks under 10 seconds; Nielsen's research shows users don't need progress feedback for quick interactions.
+
+### What's the difference between a progress bar and a stepper?
+
+A progress bar shows continuous completion as a filled region (30%, 60%, 90%). A stepper shows discrete numbered steps with distinct states: complete, active, upcoming. When step names matter ("Profile," "Team," "Integrations"), steppers give more structural information. For simpler flows where users just need to see how far along they are, a progress bar keeps the UI quieter.
+
+{/* JSON-LD */}
+<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "What is a progress bar? Onboarding progress indicators explained",
+  "description": "Progress bars in onboarding explained for developers. Covers ARIA accessibility, React implementation, and when progress indicators help or hurt.",
+  "author": { "@type": "Person", "name": "DomiDex", "url": "https://github.com/DomiDex" },
+  "publisher": { "@type": "Organization", "name": "Tour Kit", "url": "https://usertourkit.com", "logo": { "@type": "ImageObject", "url": "https://usertourkit.com/logo.png" } },
+  "datePublished": "2026-04-12",
+  "dateModified": "2026-04-12",
+  "image": "https://usertourkit.com/og-images/what-is-progress-bar-onboarding.png",
+  "url": "https://usertourkit.com/blog/what-is-progress-bar-onboarding",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://usertourkit.com/blog/what-is-progress-bar-onboarding" },
+  "keywords": ["what is progress bar onboarding", "progress bar definition", "onboarding progress indicator"],
+  "proficiencyLevel": "Beginner",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": { "@type": "ComputerLanguage", "name": "TypeScript" }
+}) }} />
+
+<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://usertourkit.com" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://usertourkit.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "What is a progress bar?", "item": "https://usertourkit.com/blog/what-is-progress-bar-onboarding" }
+  ]
+}) }} />
+
+<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Do progress bars actually improve onboarding completion rates?", "acceptedAnswer": { "@type": "Answer", "text": "Progress bars combined with checklists increase onboarding completion rates by 20-30%, according to UserPilot's analysis. The effect comes from the Zeigarnik effect and goal gradient hypothesis. But poorly implemented progress bars can reduce completion instead." } },
+    { "@type": "Question", "name": "What ARIA attributes does a progress bar need?", "acceptedAnswer": { "@type": "Answer", "text": "An accessible progress bar needs role='progressbar', aria-valuenow for the current value, aria-valuemin and aria-valuemax for the range, and either aria-label or aria-labelledby for an accessible name. For indeterminate bars, omit aria-valuenow entirely." } },
+    { "@type": "Question", "name": "When should you not use a progress bar in onboarding?", "acceptedAnswer": { "@type": "Answer", "text": "Skip the progress bar when onboarding has fewer than three steps, when steps have wildly different durations, when paths branch based on user choices, or for tasks under 10 seconds." } },
+    { "@type": "Question", "name": "What's the difference between a progress bar and a stepper?", "acceptedAnswer": { "@type": "Answer", "text": "A progress bar shows continuous completion as a filled region. A stepper shows discrete numbered steps with distinct states. Steppers give more structural information with individual step labels." } }
+  ]
+}) }} />

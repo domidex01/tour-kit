@@ -1,0 +1,688 @@
+---
+title: "Migrating from Driver.js to Tour Kit: adding headless power"
+slug: "migrate-driver-js-tour-kit"
+description: "Step-by-step guide to replacing Driver.js with userTourKit in a React project. Covers step definitions, popover rendering, highlight migration, callbacks, and multi-page tours."
+primary_keyword: "driver js migration"
+secondary_keywords: ["replace driver js", "driver js alternative react", "driver js to tour kit", "headless product tour migration"]
+category: "Tutorials"
+schema_type: "TechArticle"
+date: "2026-04-07"
+updated: "2026-04-07"
+published: true
+ogImage: /og-images/migrate-driver-js-tour-kit.png
+---
+
+# Migrating from Driver.js to Tour Kit: adding headless power
+
+Driver.js is a lightweight, dependency-free library for creating product tours and element highlights. It ships at roughly 5KB gzipped and works in any JavaScript framework. If your project has outgrown its popover-only UI, imperative API, or lack of React integration, this guide walks you through replacing Driver.js with userTourKit step by step. Every code example compiles against `@tourkit/core` 0.x and `@tourkit/react` 0.x.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Why migrate?
+
+Driver.js solves the simple case well. You call `driver()`, pass some steps, and call `drive()`. The problems show up when your project needs any of these:
+
+- **Custom UI beyond popovers.** Driver.js renders a single popover template. You cannot swap it for a shadcn/ui card, a Radix dialog, or a custom React component without hacking the DOM after render via `onPopoverRender`.
+- **React state integration.** Driver.js operates imperatively outside React's component tree. Updating app state when a user completes a step requires manual bridge code between Driver.js callbacks and your React state.
+- **Multi-page tours.** Driver.js has no built-in support for tours that span multiple routes. You must manually detect page changes, reinitialize the driver, and track which step the user reached.
+- **Accessibility.** Driver.js popovers lack complete ARIA attributes. GitHub issues document missing `aria-expanded`, duplicate heading landmarks, and no focus trapping.
+- **Analytics.** There is no built-in way to track where users drop off, which steps they skip, or completion rates.
+
+userTourKit addresses all five. It is headless -- you provide the UI components, and it handles step sequencing, element positioning, scroll management, keyboard navigation, and persistence. The core package is under 8KB gzipped.
+
+## Migration overview
+
+The migration touches five areas. Each section below shows the Driver.js pattern, explains what changes, and gives the Tour Kit equivalent.
+
+1. **Step definitions** -- from plain objects to typed `TourStep` configs
+2. **Tour lifecycle** -- from imperative `drive()`/`destroy()` to React hooks
+3. **Popover rendering** -- from built-in template to your own components
+4. **Highlighting and overlay** -- from automatic to configurable
+5. **Callbacks and events** -- from Driver.js handlers to Tour Kit lifecycle hooks
+
+## Step 1: replace step definitions
+
+### Driver.js (before)
+
+```js
+import { driver } from 'driver.js'
+import 'driver.js/dist/driver.css'
+
+const driverObj = driver({
+  showProgress: true,
+  steps: [
+    {
+      element: '#sidebar',
+      popover: {
+        title: 'Navigation',
+        description: 'Use the sidebar to switch sections.',
+        side: 'right',
+        align: 'start',
+      },
+    },
+    {
+      element: '#search-input',
+      popover: {
+        title: 'Search',
+        description: 'Find anything in your workspace.',
+        side: 'bottom',
+        align: 'center',
+      },
+    },
+    {
+      element: '#profile-menu',
+      popover: {
+        title: 'Your profile',
+        description: 'Manage settings and preferences.',
+        side: 'left',
+        align: 'end',
+      },
+    },
+  ],
+})
+
+driverObj.drive()
+```
+
+### Tour Kit (after)
+
+```tsx
+import { TourProvider } from '@tourkit/react'
+import type { TourStep } from '@tourkit/core'
+
+const steps: TourStep[] = [
+  {
+    id: 'sidebar',
+    target: '[data-tour="sidebar"]',
+    title: 'Navigation',
+    content: 'Use the sidebar to switch sections.',
+    placement: 'right-start',
+  },
+  {
+    id: 'search',
+    target: '[data-tour="search"]',
+    title: 'Search',
+    content: 'Find anything in your workspace.',
+    placement: 'bottom',
+  },
+  {
+    id: 'profile',
+    target: '[data-tour="profile"]',
+    title: 'Your profile',
+    content: 'Manage settings and preferences.',
+    placement: 'left-end',
+  },
+]
+
+function App() {
+  return (
+    <TourProvider tourId="onboarding" steps={steps}>
+      {/* your app */}
+    </TourProvider>
+  )
+}
+```
+
+### What changed
+
+| Driver.js | Tour Kit | Notes |
+|-----------|----------|-------|
+| `element: '#sidebar'` | `target: '[data-tour="sidebar"]'` | Data attributes are more stable than IDs across refactors |
+| `popover.title` | `title` | Flat property, not nested under `popover` |
+| `popover.description` | `content` | Accepts `React.ReactNode`, not just strings |
+| `side: 'right', align: 'start'` | `placement: 'right-start'` | Combined Floating UI placement string |
+| No `id` field | `id` required | Used for persistence, analytics, and conditional logic |
+| CSS import required | No CSS import | You control all styling |
+
+**Tip:** Add `data-tour` attributes to your markup instead of relying on CSS selectors. This decouples tours from your component structure and survives refactors.
+
+## Step 2: replace tour lifecycle
+
+### Driver.js (before)
+
+```js
+// Start
+driverObj.drive()
+
+// Navigate
+driverObj.moveNext()
+driverObj.movePrevious()
+driverObj.moveTo(2)
+
+// Stop
+driverObj.destroy()
+
+// Check state
+driverObj.isActive()
+driverObj.getActiveIndex()
+driverObj.isLastStep()
+```
+
+### Tour Kit (after)
+
+```tsx
+import { useTour } from '@tourkit/react'
+
+function TourControls() {
+  const {
+    start,
+    next,
+    prev,
+    goTo,
+    stop,
+    complete,
+    isActive,
+    currentStepIndex,
+    isLastStep,
+    isFirstStep,
+    totalSteps,
+  } = useTour('onboarding')
+
+  return (
+    <button onClick={() => (isActive ? stop() : start())}>
+      {isActive
+        ? `Step ${currentStepIndex + 1} of ${totalSteps}`
+        : 'Start tour'}
+    </button>
+  )
+}
+```
+
+### What changed
+
+| Driver.js | Tour Kit | Notes |
+|-----------|----------|-------|
+| `driverObj.drive()` | `start()` | Called from a React component, not globally |
+| `driverObj.moveNext()` | `next()` | Same concept, hook-based |
+| `driverObj.moveTo(2)` | `goTo(2)` | Same concept |
+| `driverObj.destroy()` | `stop()` or `complete()` | `complete()` marks tour as finished for persistence |
+| `driverObj.isActive()` | `isActive` | Reactive boolean, triggers re-renders |
+| `driverObj.getActiveIndex()` | `currentStepIndex` | Reactive, no method call needed |
+
+The key difference is reactivity. Driver.js methods return values at call time. Tour Kit properties are reactive state -- your component re-renders when they change. No manual polling or callback wiring needed.
+
+## Step 3: replace popover rendering
+
+This is the biggest difference between the two libraries. Driver.js renders its own popover. Tour Kit gives you hooks and you render whatever you want.
+
+### Driver.js (before)
+
+```js
+const driverObj = driver({
+  popoverClass: 'my-custom-popover',
+  nextBtnText: 'Continue →',
+  prevBtnText: '← Back',
+  doneBtnText: 'Finish',
+  showButtons: ['next', 'previous', 'close'],
+  onPopoverRender: (popover, { config, state }) => {
+    // Hack: inject custom HTML after render
+    const customEl = document.createElement('div')
+    customEl.textContent = `Step ${state.activeIndex + 1} of ${config.steps.length}`
+    popover.description.appendChild(customEl)
+  },
+  steps: [/* ... */],
+})
+```
+
+### Tour Kit (after)
+
+```tsx
+import { useTour } from '@tourkit/react'
+import { TourCard, TourCardHeader, TourCardContent, TourCardFooter } from '@tourkit/react'
+
+function CustomTourTooltip() {
+  const { currentStep, next, prev, stop, isFirstStep, isLastStep, currentStepIndex, totalSteps } =
+    useTour('onboarding')
+
+  if (!currentStep) return null
+
+  return (
+    <TourCard>
+      <TourCardHeader>
+        <h3>{currentStep.title}</h3>
+        <button onClick={stop} aria-label="Close tour">×</button>
+      </TourCardHeader>
+      <TourCardContent>
+        <p>{currentStep.content}</p>
+      </TourCardContent>
+      <TourCardFooter>
+        <span>
+          Step {currentStepIndex + 1} of {totalSteps}
+        </span>
+        <div>
+          {!isFirstStep && <button onClick={prev}>← Back</button>}
+          <button onClick={isLastStep ? stop : next}>
+            {isLastStep ? 'Finish' : 'Continue →'}
+          </button>
+        </div>
+      </TourCardFooter>
+    </TourCard>
+  )
+}
+```
+
+You can also skip `TourCard` entirely and use your own design system components:
+
+```tsx
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+
+function ShadcnTourTooltip() {
+  const { currentStep, next, prev, stop, isFirstStep, isLastStep } = useTour('onboarding')
+
+  if (!currentStep) return null
+
+  return (
+    <Card className="w-80 shadow-lg">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <h3 className="text-sm font-semibold">{currentStep.title}</h3>
+        <Button variant="ghost" size="icon" onClick={stop} aria-label="Close tour">
+          ×
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">{currentStep.content}</p>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        {!isFirstStep && (
+          <Button variant="outline" size="sm" onClick={prev}>
+            Back
+          </Button>
+        )}
+        <Button size="sm" onClick={isLastStep ? stop : next}>
+          {isLastStep ? 'Done' : 'Next'}
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+```
+
+No `popoverClass`, no `onPopoverRender` hacks, no DOM manipulation. Your tooltip is a React component with full access to your design tokens.
+
+## Step 4: replace highlighting and overlay
+
+### Driver.js (before)
+
+```js
+const driverObj = driver({
+  overlayOpacity: 0.7,
+  stagePadding: 10,
+  stageRadius: 8,
+  animate: true,
+  steps: [
+    {
+      element: '#sidebar',
+      popover: { title: 'Sidebar', description: '...' },
+    },
+  ],
+})
+
+// Single-element highlight (no tour)
+driverObj.highlight({
+  element: '#new-feature',
+  popover: { title: 'New!', description: 'Check this out.' },
+})
+```
+
+### Tour Kit (after)
+
+```tsx
+import { TourProvider } from '@tourkit/react'
+
+function App() {
+  return (
+    <TourProvider
+      tourId="onboarding"
+      steps={steps}
+      spotlight={{
+        enabled: true,
+        color: 'rgba(0, 0, 0, 0.7)',
+        padding: 10,
+        borderRadius: 8,
+        animate: true,
+      }}
+    >
+      {/* your app */}
+    </TourProvider>
+  )
+}
+```
+
+### Configuration mapping
+
+| Driver.js | Tour Kit | Notes |
+|-----------|----------|-------|
+| `overlayOpacity: 0.7` | `spotlight.color: 'rgba(0,0,0,0.7)'` | Full color control, not just opacity |
+| `stagePadding: 10` | `spotlight.padding: 10` | Same concept |
+| `stageRadius: 8` | `spotlight.borderRadius: 8` | Same concept |
+| `animate: true` | `spotlight.animate: true` | Respects `prefers-reduced-motion` automatically |
+
+For per-step overrides, use `spotlightPadding` and `spotlightRadius` on individual step definitions:
+
+```tsx
+const steps: TourStep[] = [
+  {
+    id: 'hero',
+    target: '[data-tour="hero"]',
+    title: 'Welcome',
+    content: 'Start here.',
+    spotlightPadding: 20,
+    spotlightRadius: 16,
+  },
+]
+```
+
+### Standalone highlighting
+
+Driver.js has `driverObj.highlight()` for one-off element highlights without a full tour. In Tour Kit, use the `@tourkit/hints` package instead:
+
+```bash
+npm install @tourkit/hints
+```
+
+```tsx
+import { Hint } from '@tourkit/hints'
+
+function NewFeatureBadge() {
+  return (
+    <Hint target="[data-tour='new-feature']" placement="top">
+      <div className="rounded bg-blue-500 px-3 py-1 text-sm text-white">
+        New! Check this out.
+      </div>
+    </Hint>
+  )
+}
+```
+
+## Step 5: replace callbacks and events
+
+### Driver.js (before)
+
+```js
+const driverObj = driver({
+  onNextClick: (element, step, { config, state }) => {
+    console.log('Moving to next step:', state.activeIndex + 1)
+    // Must manually advance
+    driverObj.moveNext()
+  },
+  onPrevClick: (element, step, { config, state }) => {
+    driverObj.movePrevious()
+  },
+  onCloseClick: () => {
+    console.log('User closed the tour')
+    driverObj.destroy()
+  },
+  onDestroyStarted: () => {
+    if (!confirm('Are you sure you want to exit?')) {
+      return // Prevents destruction
+    }
+    driverObj.destroy()
+  },
+  onDestroyed: () => {
+    console.log('Tour destroyed')
+  },
+  steps: [
+    {
+      element: '#step-1',
+      popover: { title: 'Step 1', description: '...' },
+      onDeselected: (element, step) => {
+        console.log('Left step 1')
+      },
+    },
+  ],
+})
+```
+
+### Tour Kit (after)
+
+Tour Kit splits callbacks into tour-level and step-level hooks:
+
+```tsx
+import type { TourStep, Tour } from '@tourkit/core'
+
+const steps: TourStep[] = [
+  {
+    id: 'step-1',
+    target: '[data-tour="step-1"]',
+    title: 'Step 1',
+    content: '...',
+    onShow: (context) => {
+      console.log('Entered step 1')
+    },
+    onHide: (context) => {
+      console.log('Left step 1')
+    },
+    onBeforeShow: (context) => {
+      // Return false to prevent showing this step
+      return true
+    },
+  },
+]
+
+// Tour-level callbacks
+<TourProvider
+  tourId="onboarding"
+  steps={steps}
+  onStart={(context) => console.log('Tour started')}
+  onComplete={(context) => console.log('Tour completed')}
+  onSkip={(context) => console.log('Tour skipped')}
+  onStepChange={(step, index, context) => {
+    console.log(`Moved to step ${index + 1}: ${step.id}`)
+  }}
+>
+  {/* your app */}
+</TourProvider>
+```
+
+### Callback mapping
+
+| Driver.js | Tour Kit | Notes |
+|-----------|----------|-------|
+| `onNextClick` | Handle in your UI component | You own the Next button, call `next()` directly |
+| `onPrevClick` | Handle in your UI component | You own the Prev button, call `prev()` directly |
+| `onCloseClick` | Handle in your UI component | You own the Close button, call `stop()` directly |
+| `onDestroyStarted` | `onBeforeHide` on step | Return `false` to prevent transition |
+| `onDestroyed` | `onComplete` or `onSkip` | Separate handlers for complete vs skip |
+| `onDeselected` (step) | `onHide` (step) | Fires when leaving a step |
+| `onPopoverRender` | Not needed | You render the popover yourself |
+| `onHighlighted` (step) | `onShow` (step) | Fires when entering a step |
+
+The pattern shift: Driver.js gives you callbacks because it owns the UI. Tour Kit gives you hooks and state because you own the UI. Instead of intercepting `onNextClick` to add custom logic before advancing, you write your own button that runs your logic and then calls `next()`.
+
+## Step 6: add multi-page support
+
+Driver.js has no built-in multi-page support. You would typically destroy the driver on navigation and re-create it on the new page, manually tracking progress in localStorage.
+
+Tour Kit handles this natively:
+
+```tsx
+import { TourProvider } from '@tourkit/react'
+
+const steps: TourStep[] = [
+  {
+    id: 'dashboard-welcome',
+    target: '[data-tour="dashboard"]',
+    title: 'Dashboard',
+    content: 'This is your main dashboard.',
+    route: '/dashboard',
+    routeMatch: 'exact',
+  },
+  {
+    id: 'settings-intro',
+    target: '[data-tour="settings"]',
+    title: 'Settings',
+    content: 'Configure your preferences here.',
+    route: '/settings',
+    routeMatch: 'exact',
+  },
+]
+
+function App() {
+  return (
+    <TourProvider
+      tourId="onboarding"
+      steps={steps}
+      persist="localStorage"
+    >
+      {/* your router and app */}
+    </TourProvider>
+  )
+}
+```
+
+The `route` property on each step tells Tour Kit which page the step belongs to. When the user navigates to that route, the tour picks up where it left off. The `persist` option saves progress across page reloads.
+
+For Next.js App Router projects, Tour Kit includes a dedicated router adapter:
+
+```tsx
+import { useAppRouterAdapter } from '@tourkit/react'
+```
+
+## Step 7: add features Driver.js does not have
+
+Once you have migrated the basics, Tour Kit gives you access to capabilities that would require significant custom code with Driver.js.
+
+### Conditional steps
+
+Show or hide steps based on user state:
+
+```tsx
+const steps: TourStep[] = [
+  {
+    id: 'admin-panel',
+    target: '[data-tour="admin"]',
+    title: 'Admin panel',
+    content: 'Manage your team from here.',
+    when: (context) => currentUser.role === 'admin',
+  },
+]
+```
+
+### Branching tours
+
+Route users to different steps based on their actions:
+
+```tsx
+const steps: TourStep[] = [
+  {
+    id: 'choose-path',
+    target: '[data-tour="role-select"]',
+    title: 'What describes you best?',
+    content: 'Pick your role to customize the tour.',
+    onAction: {
+      developer: 'dev-step-1',
+      designer: 'design-step-1',
+      manager: 'manager-step-1',
+    },
+  },
+]
+```
+
+### Keyboard navigation
+
+Built into Tour Kit by default. Users can press Arrow Right/Left to navigate, Escape to close. No configuration needed -- but it is configurable if you want to change the keybindings.
+
+### Persistence
+
+Tour Kit tracks which tours a user has completed and which step they reached. This works across page reloads and browser sessions:
+
+```tsx
+<TourProvider
+  tourId="onboarding"
+  steps={steps}
+  persist="localStorage"
+/>
+```
+
+Driver.js has no built-in persistence. You would need to write your own localStorage wrapper and wire it into `onDestroyed`.
+
+## Migration checklist
+
+Use this checklist to track your migration:
+
+- [ ] Install `@tourkit/core` and `@tourkit/react`
+- [ ] Remove `driver.js` and its CSS import (`driver.js/dist/driver.css`)
+- [ ] Convert step definitions to `TourStep[]` format
+- [ ] Add `data-tour` attributes to target elements
+- [ ] Wrap your app in `<TourProvider>`
+- [ ] Build your tooltip component using `useTour()` hook
+- [ ] Migrate callbacks to step-level hooks (`onShow`, `onHide`, `onBeforeShow`)
+- [ ] Configure spotlight/overlay settings
+- [ ] Add `persist="localStorage"` if you need progress persistence
+- [ ] Add `route` properties if you have multi-page tours
+- [ ] Test keyboard navigation (Arrow keys, Escape)
+- [ ] Test with a screen reader to verify ARIA announcements
+- [ ] Remove the `driver.js` package from `package.json`
+
+## API mapping reference
+
+Complete reference mapping every Driver.js API to its Tour Kit equivalent.
+
+### Initialization
+
+| Driver.js | Tour Kit |
+|-----------|----------|
+| `import { driver } from 'driver.js'` | `import { TourProvider, useTour } from '@tourkit/react'` |
+| `import 'driver.js/dist/driver.css'` | Not needed (you control styles) |
+| `const d = driver({ steps })` | `<TourProvider tourId="id" steps={steps}>` |
+| `d.drive()` | `const { start } = useTour('id')` then `start()` |
+| `d.drive(2)` | `start('id', 2)` |
+
+### Navigation
+
+| Driver.js | Tour Kit |
+|-----------|----------|
+| `d.moveNext()` | `next()` |
+| `d.movePrevious()` | `prev()` |
+| `d.moveTo(n)` | `goTo(n)` |
+| `d.destroy()` | `stop()` or `complete()` |
+
+### State
+
+| Driver.js | Tour Kit |
+|-----------|----------|
+| `d.isActive()` | `isActive` (reactive) |
+| `d.getActiveIndex()` | `currentStepIndex` (reactive) |
+| `d.getActiveStep()` | `currentStep` (reactive) |
+| `d.isFirstStep()` | `isFirstStep` (reactive) |
+| `d.isLastStep()` | `isLastStep` (reactive) |
+| `d.hasNextStep()` | `!isLastStep` |
+| `d.hasPreviousStep()` | `!isFirstStep` |
+
+### Configuration
+
+| Driver.js | Tour Kit |
+|-----------|----------|
+| `showProgress: true` | Render in your component |
+| `progressText: '{{current}}/{{total}}'` | Use `currentStepIndex` and `totalSteps` in JSX |
+| `nextBtnText: 'Next'` | Set button text in your component |
+| `prevBtnText: 'Back'` | Set button text in your component |
+| `doneBtnText: 'Done'` | Set button text in your component |
+| `popoverClass: 'custom'` | Use `className` on your component |
+| `overlayOpacity: 0.7` | `spotlight.color: 'rgba(0,0,0,0.7)'` |
+| `stagePadding: 10` | `spotlight.padding: 10` |
+| `allowKeyboardControl: true` | Enabled by default |
+
+### Callbacks
+
+| Driver.js | Tour Kit |
+|-----------|----------|
+| `onNextClick` | Your button's `onClick` handler |
+| `onPrevClick` | Your button's `onClick` handler |
+| `onCloseClick` | Your button's `onClick` handler |
+| `onPopoverRender` | Not needed |
+| `onDestroyStarted` | Step `onBeforeHide` (return `false` to block) |
+| `onDestroyed` | `onComplete` or `onSkip` on provider |
+| Step `onDeselected` | Step `onHide` |
+| Step `onHighlightStarted` | Step `onBeforeShow` |
+
+## Wrapping up
+
+The migration from Driver.js to Tour Kit is straightforward for simple tours -- convert step definitions, wrap in a provider, build a tooltip component. The real payoff comes from what you gain after migrating: full control over tour UI through your design system, React-native state management, multi-page support, conditional steps, branching logic, persistence, and keyboard accessibility out of the box. If your project has a component library and needs more than basic popovers, the migration is worth the effort.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```

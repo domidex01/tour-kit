@@ -1,3 +1,5 @@
+'use client'
+
 import {
   type Placement as FloatingPlacement,
   FloatingPortal,

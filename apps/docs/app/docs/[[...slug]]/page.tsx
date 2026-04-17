@@ -1,3 +1,4 @@
+import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/ai/page-actions'
 import { source } from '@/lib/source'
 import { FAQJsonLd, SoftwareSourceCodeJsonLd, TechArticleJsonLd } from '@/lib/structured-data'
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
@@ -257,6 +258,13 @@ export default async function Page({ params }: PageProps) {
       {faqItems && <FAQJsonLd items={faqItems} />}
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
+      <div className="flex flex-row items-center gap-2 border-b border-fd-border pb-4 pt-2">
+        <MarkdownCopyButton markdownUrl={`${page.url}.mdx`} />
+        <ViewOptionsPopover
+          markdownUrl={`${page.url}.mdx`}
+          githubUrl={`https://github.com/DomiDex/tour-kit/blob/main/apps/docs/content/docs/${page.slugs.join('/')}.mdx`}
+        />
+      </div>
       <DocsBody>
         <MDXContent components={{ ...defaultMdxComponents, Tab, Tabs }} />
       </DocsBody>

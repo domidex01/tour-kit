@@ -1,0 +1,609 @@
+---
+title: "Tour Kit FAQ: everything developers ask before installing"
+slug: "tour-kit-faq"
+description: "Answers to the 20 most common Tour Kit questions. Covers React 19, TypeScript, bundle size, accessibility, Next.js, and Joyride comparisons."
+primary_keyword: "tour kit faq"
+secondary_keywords: ["tour kit questions", "tour kit developer faq", "tour kit react product tour", "tour kit vs react joyride"]
+category: "GEO"
+schema_type: "TechArticle"
+spreadsheet_row: 218
+date: "2026-04-10"
+updated: "2026-04-10"
+published: true
+ogImage: /og-images/tour-kit-faq.png
+---
+
+# Tour Kit FAQ: everything developers ask before installing
+
+You found a product tour library. The README looks promising. But before you `npm install`, you have questions. Does it actually work with React 19? Will it fight your Tailwind setup? What's the catch with the free tier?
+
+We built Tour Kit, so we're biased. We're also the best people to answer these questions honestly, because we know where the sharp edges are. Every claim below is verifiable against npm, GitHub, or bundlephobia.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Here are the questions developers ask most, organized by when they come up in the evaluation process.
+
+## Short answer: what is Tour Kit?
+
+Tour Kit is an open-source, headless product tour library for React. It ships as 10 composable packages, so you install only what you need. The core package is under 8KB gzipped with zero runtime dependencies. It handles tour logic (step sequencing, element targeting, scroll handling, focus management) without rendering any UI. You bring your own components. Tour Kit works with shadcn/ui, Radix, Tailwind, or any design system because it doesn't ship styles to fight against.
+
+## What questions do developers ask before installing?
+
+The questions below come from GitHub issues across tour libraries, Reddit threads in r/reactjs and r/webdev, and direct developer feedback. We grouped them into four categories: compatibility, architecture, comparison, and features.
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Top question</th>
+      <th>Short answer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Compatibility</td>
+      <td>React 19 support?</td>
+      <td>Yes, native support for React 18 and 19</td>
+    </tr>
+    <tr>
+      <td>Compatibility</td>
+      <td>Next.js App Router?</td>
+      <td>Yes, with 'use client' on tour components</td>
+    </tr>
+    <tr>
+      <td>Architecture</td>
+      <td>Bundle size?</td>
+      <td>Core: &lt;8KB gzipped, zero dependencies</td>
+    </tr>
+    <tr>
+      <td>Architecture</td>
+      <td>TypeScript?</td>
+      <td>Built in TypeScript, full type exports</td>
+    </tr>
+    <tr>
+      <td>Comparison</td>
+      <td>vs React Joyride?</td>
+      <td>Headless vs opinionated, 8KB vs 498KB unpacked</td>
+    </tr>
+    <tr>
+      <td>Features</td>
+      <td>Accessibility?</td>
+      <td>WCAG 2.1 AA, focus trap, keyboard nav, ARIA</td>
+    </tr>
+  </tbody>
+</table>
+
+## Does Tour Kit work with React 19?
+
+Tour Kit supports React 18 and React 19 natively, including concurrent features and the new use hook. React 19 Server Components are stable and "will not break between minor versions" ([React Official Blog](https://react.dev/blog/2024/12/05/react-19)). Tour Kit's architecture was designed around this constraint from the start.
+
+This matters because the most popular alternative hasn't kept up. As of April 2026, React Joyride "hasn't been updated in 9 months and isn't compatible with React 19" ([Sandro Roth](https://sandroroth.com/blog/evaluating-tour-libraries/)). Shepherd's React wrapper has reported compatibility issues too. If you're on React 19, check whether your tour library actually runs on it before installing.
+
+```tsx
+// src/components/ProductTour.tsx
+'use client';
+
+import { TourProvider, useTour } from '@tourkit/react';
+
+const steps = [
+  { id: 'welcome', target: '#dashboard-header', title: 'Welcome', content: 'Start here.' },
+  { id: 'sidebar', target: '#nav-sidebar', title: 'Navigation', content: 'Find your way around.' },
+];
+
+function TourContent() {
+  const { currentStep, nextStep, isActive } = useTour();
+  if (!isActive) return null;
+  // Render your own tooltip. Tour Kit handles the logic.
+  return <YourTooltipComponent step={currentStep} onNext={nextStep} />;
+}
+
+export function ProductTour({ children }: { children: React.ReactNode }) {
+  return <TourProvider steps={steps}>{children}<TourContent /></TourProvider>;
+}
+```
+
+## Does Tour Kit work with Next.js App Router?
+
+Yes, fully supported. Components that use `TourProvider` need the `'use client'` directive because product tours are inherently client-side: they interact with the DOM, manage focus, and listen to scroll events. Create a client component that wraps `TourProvider` and lazy-load it so tour code stays out of the server bundle.
+
+```tsx
+// app/layout.tsx
+import dynamic from 'next/dynamic';
+
+const ProductTour = dynamic(() => import('@/components/ProductTour'), { ssr: false });
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>{children}<ProductTour /></body>
+    </html>
+  );
+}
+```
+
+LogRocket recommends this pattern explicitly: "Tour libraries should be loaded dynamically rather than included in the initial bundle, using lazy loading to fetch tour functionality only when needed" ([LogRocket](https://blog.logrocket.com/complete-guide-to-build-product-tours-on-your-react-apps/)).
+
+## How big is the Tour Kit bundle?
+
+Tour Kit's core package is under 8KB gzipped with zero runtime dependencies. The React package adds roughly 4KB. You install only the packages you need. Analytics, checklists, surveys, and other features are separate packages that tree-shake independently.
+
+For context, the bundle size spread across tour libraries is enormous:
+
+<table>
+  <thead>
+    <tr>
+      <th>Library</th>
+      <th>Size (gzipped)</th>
+      <th>Dependencies</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Driver.js</td>
+      <td>~5KB</td>
+      <td>Zero</td>
+    </tr>
+    <tr>
+      <td>Tour Kit (core)</td>
+      <td>&lt;8KB</td>
+      <td>Zero</td>
+    </tr>
+    <tr>
+      <td>Tour Kit (core + react)</td>
+      <td>~12KB</td>
+      <td>React (peer)</td>
+    </tr>
+    <tr>
+      <td>Reactour</td>
+      <td>~15KB</td>
+      <td>Few</td>
+    </tr>
+    <tr>
+      <td>React Joyride</td>
+      <td>~45KB (498KB unpacked)</td>
+      <td>React Floater, Popper</td>
+    </tr>
+  </tbody>
+</table>
+
+We measured these using bundlephobia and our own build tooling. Driver.js wins on raw size but isn't React-specific and doesn't provide hooks or providers. Tour Kit is the smallest React-native option with a headless architecture.
+
+**Tour Kit limitation:** if your only requirement is a highlight overlay with no React integration, Driver.js at ~5KB is lighter. Tour Kit targets teams that want composable React hooks and providers.
+
+## Does Tour Kit support TypeScript?
+
+Tour Kit is written in TypeScript with strict mode enabled. Every public API exports its types. You get full IntelliSense for step definitions, hook return values, and provider props without installing separate `@types/` packages.
+
+This isn't unusual in 2026. Driver.js, OnboardJS, and React Joyride's source are all TypeScript. But "built in TypeScript" and "usable in TypeScript" aren't the same thing. Tour Kit's types are designed for inference, not annotation:
+
+```tsx
+// Types are inferred from the step definition
+const steps = [
+  { id: 'step-1', target: '#header', title: 'Welcome' },
+  { id: 'step-2', target: '#sidebar', title: 'Navigate' },
+] as const;
+
+// useTour() returns typed state, no manual type annotations needed
+const { currentStep, goToStep } = useTour();
+// currentStep.id is typed as 'step-1' | 'step-2'
+```
+
+## What does "headless" mean in practice?
+
+A headless tour library handles the behavior (step sequencing, element targeting, scroll positioning, focus management, keyboard navigation, ARIA attributes) without rendering any visual output. You write the tooltip, the overlay, the progress indicator. Tour Kit provides the hooks; you provide the JSX.
+
+OnboardJS describes the pattern well: "The headless approach means it handles the flow logic, state management, data persistence, and navigation completely separate from the user interface" ([OnboardJS](https://onboardjs.com/blog/what-is-onboardjs)).
+
+In practice, this means two things:
+
+1. Your tour matches your design system automatically because you're rendering your own components
+2. You write more JSX than you would with a styled library like React Joyride
+
+That's the tradeoff. Teams with an existing component library (shadcn/ui, your own design system, Chakra) save time because they reuse components they already have. Teams without a component library have to build the tooltip from scratch. We provide examples for both cases in the [Tour Kit docs](https://usertourkit.com/docs).
+
+## Does Tour Kit work with Tailwind and shadcn/ui?
+
+Yes, and this is one of the main reasons Tour Kit exists. Styled tour libraries fight your CSS. React Joyride "relies on inline styles without custom class name support" ([Sandro Roth](https://sandroroth.com/blog/evaluating-tour-libraries/)), which means overriding styles requires replacing the entire tooltip component. Shepherd.js uses HTML strings instead of JSX for anything beyond basic content.
+
+Tour Kit renders nothing. You pass your own shadcn/ui `<Card>`, your own `<Button>`, your own `<Popover>`. No CSS specificity wars. No `!important` overrides. No matching hex values to your Tailwind config.
+
+```tsx
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useTour } from '@tourkit/react';
+
+function TourTooltip() {
+  const { currentStep, nextStep, prevStep, endTour, progress } = useTour();
+  if (!currentStep) return null;
+
+  return (
+    <Card className="w-80 shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-sm">{currentStep.title}</CardTitle>
+      </CardHeader>
+      <CardContent className="text-sm text-muted-foreground">
+        {currentStep.content}
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button variant="ghost" size="sm" onClick={prevStep}>Back</Button>
+        <span className="text-xs text-muted-foreground">{progress.current}/{progress.total}</span>
+        <Button size="sm" onClick={nextStep}>Next</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+## How is accessibility handled?
+
+Tour Kit targets WCAG 2.1 AA compliance. Every tour step receives proper `aria-labelledby` and `aria-describedby` attributes. Focus is trapped within the active tooltip during keyboard navigation. Users can navigate with Tab, Escape to dismiss, and arrow keys to move between steps.
+
+Accessibility isn't a given in tour libraries. An audit of Intro.js found "popovers lack `aria-labelledby` and `aria-describedby` attributes, buttons are implemented as links with `role='button'` rather than actual button elements, and there's no focus trap for keyboard navigation" ([Sandro Roth](https://sandroroth.com/blog/evaluating-tour-libraries/)). Shepherd.js does better with built-in keyboard navigation and ARIA attributes. Tour Kit goes further with focus trapping and `prefers-reduced-motion` support.
+
+**Tour Kit limitation:** accessibility compliance depends partly on how you build your tooltip component. Tour Kit provides the ARIA attributes and focus management, but if your custom tooltip doesn't render them, you lose the guarantee. We include accessible tooltip examples in the docs to prevent this.
+
+## How does Tour Kit compare to React Joyride?
+
+React Joyride has 400,000+ weekly npm downloads and 5,100+ GitHub stars. It's the most popular React tour library. Tour Kit is younger and smaller. Here's an honest comparison:
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Tour Kit</th>
+      <th>React Joyride</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Architecture</td>
+      <td>Headless (hooks + providers)</td>
+      <td>Styled (opinionated UI)</td>
+    </tr>
+    <tr>
+      <td>Bundle size</td>
+      <td>&lt;8KB core, ~12KB with React</td>
+      <td>498KB unpacked</td>
+    </tr>
+    <tr>
+      <td>React 19</td>
+      <td>✅ Native support</td>
+      <td>❌ Not updated in 9+ months</td>
+    </tr>
+    <tr>
+      <td>TypeScript</td>
+      <td>✅ Strict mode, full inference</td>
+      <td>✅ TypeScript source</td>
+    </tr>
+    <tr>
+      <td>Tailwind / shadcn/ui</td>
+      <td>✅ Render your own components</td>
+      <td>⚠️ Requires component overrides</td>
+    </tr>
+    <tr>
+      <td>Community size</td>
+      <td>Smaller (newer project)</td>
+      <td>Large (400K+ weekly downloads)</td>
+    </tr>
+    <tr>
+      <td>Visual builder</td>
+      <td>❌ None (code-only)</td>
+      <td>❌ None</td>
+    </tr>
+    <tr>
+      <td>License</td>
+      <td>MIT (free) + Pro ($99 one-time)</td>
+      <td>MIT (free)</td>
+    </tr>
+    <tr>
+      <td>Best for</td>
+      <td>Design system teams, headless-first</td>
+      <td>Quick prototyping, opinionated UI OK</td>
+    </tr>
+  </tbody>
+</table>
+
+We built Tour Kit, so take this comparison with appropriate skepticism. Every number is verifiable against npm, GitHub, and bundlephobia.
+
+React Joyride is a solid choice if you want a working tour in 10 minutes and don't mind the default UI. Choose Tour Kit if you need your tours to match your design system exactly, you're on React 19, or bundle size matters for your use case.
+
+For the full comparison, see [Tour Kit vs React Joyride](/blog/tour-kit-vs-react-joyride).
+
+## How does Tour Kit compare to Shepherd.js?
+
+Shepherd.js is a well-maintained, framework-agnostic tour library. Userorbit calls it "one of the strongest open-source product tour libraries if your team wants serious control without adopting a full onboarding platform" ([Userorbit](https://userorbit.com/blog/best-open-source-product-tour-libraries)).
+
+The key differences:
+
+- **React integration:** Tour Kit is React-native (hooks and providers). Shepherd has a React wrapper, but the core is vanilla JS. This matters for Server Components and concurrent features.
+- **Licensing:** Shepherd's core is MIT, but "a paid license is required for commercial use" of advanced features ([Usertour](https://www.usertour.io/blog/product-tour-joyride)). Tour Kit is MIT for core packages, $99 one-time for Pro.
+- **Content model:** Shepherd uses HTML strings for custom step content. Tour Kit uses JSX, so you render React components directly inside steps.
+- **Accessibility:** Shepherd provides keyboard navigation and ARIA attributes. Tour Kit adds focus trapping and `prefers-reduced-motion`.
+
+Choose Shepherd if you need a framework-agnostic solution that works outside React.
+
+## When should I use a SaaS tool instead of Tour Kit?
+
+Use a SaaS tool (Appcues, Pendo, Chameleon, Userpilot) when non-technical team members need to create and edit tours without developer involvement. SaaS platforms provide visual builders with built-in analytics dashboards. The tradeoff is cost (typically $249-$999/month) and control (the tour code lives outside your repo).
+
+The market "has split between full-stack tools like Appcues and Pendo that handle everything but cost money and live outside your codebase, while open-source JavaScript libraries are now laser-focused on the code layer" ([Chameleon](https://www.chameleon.io/blog/javascript-product-tours)).
+
+Tour Kit sits in the code-owned, developer-controlled camp. Use it when:
+
+- Your team has React developers who will maintain the onboarding code
+- You need pixel-perfect integration with your design system
+- Per-MAU pricing doesn't make sense for your usage
+- You want tour state in your own database, not a third-party service
+
+**Tour Kit limitation:** there's no visual builder. Every tour change requires a code deploy. If your product managers want to edit tour copy without opening a PR, a SaaS tool might be a better fit.
+
+## What license does Tour Kit use?
+
+Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed. Free for commercial use, no restrictions. The extended packages (analytics, adoption, checklists, surveys, announcements, media, scheduling) require a Pro license at $99 one-time per project.
+
+For context, licensing varies widely across tour libraries:
+
+<table>
+  <thead>
+    <tr>
+      <th>Library</th>
+      <th>License</th>
+      <th>Commercial use</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tour Kit (core)</td>
+      <td>MIT</td>
+      <td>Free</td>
+    </tr>
+    <tr>
+      <td>React Joyride</td>
+      <td>MIT</td>
+      <td>Free</td>
+    </tr>
+    <tr>
+      <td>Driver.js</td>
+      <td>MIT</td>
+      <td>Free</td>
+    </tr>
+    <tr>
+      <td>Reactour</td>
+      <td>MIT</td>
+      <td>Free</td>
+    </tr>
+    <tr>
+      <td>Intro.js</td>
+      <td>AGPL / Commercial</td>
+      <td>Paid license required</td>
+    </tr>
+    <tr>
+      <td>Shepherd.js</td>
+      <td>MIT + Commercial tiers</td>
+      <td>Paid for advanced features</td>
+    </tr>
+  </tbody>
+</table>
+
+"MIT and Apache are very different from AGPL when legal review shows up" ([Userorbit](https://userorbit.com/blog/best-open-source-product-tour-libraries)). If your legal team cares about open-source licensing (and they should), check the license before installing.
+
+## How do I store tour progress so users don't see the same tour twice?
+
+Tour Kit provides a pluggable storage adapter. By default, it uses `localStorage` for client-side persistence. For production apps, you should store tour state server-side so progress syncs across devices and browsers.
+
+LogRocket recommends the server-side approach: "Store user tour state in your database rather than local storage" and "implement logic to decide when tours appear to prevent users from seeing the same tour repeatedly" ([LogRocket](https://blog.logrocket.com/complete-guide-to-build-product-tours-on-your-react-apps/)).
+
+```tsx
+import { TourProvider, createStorageAdapter } from '@tourkit/core';
+
+// Custom storage adapter: connect to your API
+const apiStorage = createStorageAdapter({
+  get: async (tourId) => {
+    const res = await fetch(`/api/tours/${tourId}/progress`);
+    return res.json();
+  },
+  set: async (tourId, state) => {
+    await fetch(`/api/tours/${tourId}/progress`, {
+      method: 'PUT',
+      body: JSON.stringify(state),
+    });
+  },
+});
+
+<TourProvider storage={apiStorage} steps={steps}>
+  {children}
+</TourProvider>
+```
+
+Use `localStorage` for prototyping and internal tools. Use your database for production apps with real users.
+
+## Can I run multiple tours in the same app?
+
+Yes. Tour Kit supports a multi-tour registry. Each `TourProvider` manages its own tour independently. You can nest providers, trigger tours based on user roles or feature flags, and run focused micro-tours rather than one long walkthrough.
+
+Best practice from Smashing Magazine: "Multiple focused tours beat one comprehensive tour" ([Smashing Magazine](https://www.smashingmagazine.com/2020/08/guide-product-tours-react-apps/)). Keep tours to 2-3 steps per sequence. Show the feature when the user reaches the relevant screen, not during a 15-step onboarding marathon.
+
+## Does Tour Kit handle elements that load after mount?
+
+Tour Kit uses a mutation observer to detect when target elements appear in the DOM. If a tour step targets `#dashboard-chart` and that element loads 500ms after the page renders (waiting on an API call), Tour Kit waits for it.
+
+This is a genuine pain point across the ecosystem. Sandro Roth's evaluation found that none of the major libraries natively handle async element targeting without custom workarounds ([Sandro Roth](https://sandroroth.com/blog/evaluating-tour-libraries/)). Tour Kit's mutation observer approach handles most cases automatically, but complex dynamic layouts (virtualized lists, portaled components) may still need manual step triggers.
+
+## Does Tour Kit work on mobile?
+
+Tour Kit works in mobile browsers. The positioning engine adapts to viewport size, tooltips reposition to avoid overflow, and touch events are handled alongside click events. There's no React Native support.
+
+**Tour Kit limitation:** there is no native mobile SDK. If you need product tours in a React Native app, Tour Kit won't help. It targets web applications running in a browser.
+
+## Does Tour Kit support analytics?
+
+Yes. The `@tourkit/analytics` package provides a plugin-based integration system. Connect tour events (start, step view, completion, dismissal) to PostHog, Mixpanel, Amplitude, Google Analytics, Plausible, or any custom backend.
+
+Analytics is a Pro package ($99 one-time, includes all extended packages). The core tour functionality, including callback events you can wire to any analytics tool manually, is free.
+
+## Can I add video or media inside tour steps?
+
+The `@tourkit/media` package supports embedding YouTube, Vimeo, Loom, Wistia, and Lottie animations inside tour steps. Since Tour Kit is headless, you can also render any React component inside a step, including your own custom video player.
+
+Media support is a Pro feature.
+
+## What we recommend
+
+If you're evaluating Tour Kit, here's the decision framework:
+
+**Choose Tour Kit if:**
+- You have a React 18+ app with a design system or Tailwind setup
+- You want tours that look exactly like the rest of your app
+- Bundle size matters (core is under 8KB gzipped)
+- You want tour state in your own database
+- Your team is comfortable writing React components
+
+**Choose a styled library (React Joyride, Shepherd) if:**
+- You want a working tour in 10 minutes without building UI
+- Design consistency with your app isn't a priority
+- You're not on React 19 (though Joyride may not work there either)
+
+**Choose a SaaS tool (Appcues, Pendo) if:**
+- Non-developers need to create and edit tours
+- You need a visual builder and built-in analytics dashboard
+- Per-MAU pricing works for your budget
+
+Start with the [Tour Kit docs](https://usertourkit.com/docs) or try the install:
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## FAQ
+
+### Is Tour Kit free?
+
+Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed and free for commercial use. Extended packages for analytics, checklists, surveys, and media require a Pro license at $99 one-time per project. No per-user or per-MAU pricing.
+
+### Does Tour Kit require React?
+
+Yes. Tour Kit is built specifically for React 18+. The `@tourkit/core` package contains framework-agnostic logic, but the intended usage is through `@tourkit/react` hooks and providers. If you need a framework-agnostic tour library, consider Driver.js or Shepherd.js.
+
+### How long does it take to add a basic tour?
+
+A 3-step tour with your existing components takes roughly 15 minutes. Define your steps, wrap your app with `TourProvider`, and use the `useTour()` hook in your tooltip component. If you need to build the tooltip from scratch (no existing component library), budget 30-45 minutes for the first tour.
+
+### Can I use Tour Kit with Remix or Astro?
+
+Tour Kit works with any framework that supports React components. For Remix, wrap your tour in a client-only component. For Astro, use React islands with the `client:only="react"` directive. We have guides for both at [usertourkit.com/docs](https://usertourkit.com/docs).
+
+### Does Tour Kit collect any user data?
+
+No. Tour Kit runs entirely in the browser. It doesn't phone home, doesn't collect telemetry, and doesn't require an account. Tour state is stored wherever you configure it: localStorage by default, your own API if you set up a custom storage adapter. Your users' data stays in your infrastructure.
+
+{/* schema: TechArticle + FAQPage */}
+
+export const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Tour Kit FAQ: everything developers ask before installing",
+    "description": "Get answers to the 20 most common Tour Kit questions. Covers React 19, TypeScript, bundle size, accessibility, Next.js, and how it compares to Joyride and Shepherd.",
+    "author": {
+      "@type": "Person",
+      "name": "DomiDex",
+      "url": "https://github.com/DomiDex"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Tour Kit",
+      "url": "https://usertourkit.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://usertourkit.com/logo.png"
+      }
+    },
+    "datePublished": "2026-04-10",
+    "dateModified": "2026-04-10",
+    "image": "https://usertourkit.com/og-images/tour-kit-faq.png",
+    "url": "https://usertourkit.com/blog/tour-kit-faq",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://usertourkit.com/blog/tour-kit-faq"
+    },
+    "keywords": ["tour kit faq", "tour kit questions", "tour kit developer faq", "tour kit react product tour"],
+    "proficiencyLevel": "Beginner",
+    "dependencies": "React 18+, TypeScript 5+",
+    "programmingLanguage": {
+      "@type": "ComputerLanguage",
+      "name": "TypeScript"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://usertourkit.com" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://usertourkit.com/blog" },
+      { "@type": "ListItem", "position": 3, "name": "Tour Kit FAQ", "item": "https://usertourkit.com/blog/tour-kit-faq" }
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is Tour Kit free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tour Kit's core packages are MIT-licensed and free for commercial use. Extended packages for analytics, checklists, surveys, and media require a Pro license at $99 one-time per project."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Tour Kit require React?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Tour Kit is built specifically for React 18+. If you need a framework-agnostic tour library, consider Driver.js or Shepherd.js."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does it take to add a basic tour?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 3-step tour with your existing components takes roughly 15 minutes. If you need to build the tooltip from scratch, budget 30-45 minutes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use Tour Kit with Remix or Astro?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tour Kit works with any framework that supports React components. For Remix, use a client-only component. For Astro, use React islands with the client:only directive."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Tour Kit collect any user data?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Tour Kit runs entirely in the browser. It doesn't phone home or collect telemetry. Tour state is stored wherever you configure it."
+        }
+      }
+    ]
+  }
+];
+
+{/* Internal linking suggestions:
+- Link FROM: /blog/best-free-product-tour-libraries-open-source → this FAQ
+- Link FROM: /blog/best-typescript-product-tour-libraries → this FAQ
+- Link FROM: /blog/add-product-tour-react-19 → this FAQ
+- Link TO: /blog/tour-kit-vs-react-joyride (done in article)
+- Link TO: /docs (done in article)
+*/}
+
+{/* Distribution checklist:
+- Dev.to (with canonical to usertourkit.com/blog/tour-kit-faq)
+- Hashnode (with canonical)
+- Reddit r/reactjs (as a comment in relevant threads, not self-promotion)
+- Not HN (FAQ articles don't perform well on HN, save for Show HN or research)
+*/}

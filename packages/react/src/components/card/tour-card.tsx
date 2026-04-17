@@ -1,3 +1,5 @@
+'use client'
+
 import {
   type Placement as FloatingPlacement,
   arrow,
@@ -111,7 +113,7 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
           ref={(node) => {
             refs.setFloating(node)
             if (containerRef) {
-              ;(containerRef as React.MutableRefObject<HTMLElement | null>).current = node
+              containerRef.current = node
             }
             // Forward the ref
             if (typeof ref === 'function') {

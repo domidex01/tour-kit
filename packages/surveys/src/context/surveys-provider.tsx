@@ -1,4 +1,5 @@
 import { useTourContext } from '@tour-kit/core'
+import { ProGate } from '@tour-kit/license'
 import { type ReactNode, useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
 import { calculateCES, calculateCSAT, calculateNPS } from '../core/scoring'
 import type { SurveysContextValue, SurveysProviderProps } from '../types/context'
@@ -419,5 +420,9 @@ export function SurveysProvider({
     ]
   )
 
-  return <SurveysContext.Provider value={value}>{children}</SurveysContext.Provider>
+  return (
+    <ProGate package="@tour-kit/surveys">
+      <SurveysContext.Provider value={value}>{children}</SurveysContext.Provider>
+    </ProGate>
+  )
 }

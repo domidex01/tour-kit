@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { useAdoptionStats } from '../../hooks/use-adoption-stats'
 import { cn } from '../../lib/utils'

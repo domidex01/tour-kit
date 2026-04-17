@@ -1,0 +1,354 @@
+---
+title: "CSS layers and product tour styles: avoiding specificity conflicts"
+slug: "css-layers-product-tour-styles"
+description: "Use CSS cascade layers to fix specificity conflicts between product tour components and your app. Practical @layer patterns for React tour libraries."
+primary_keyword: "css layers product tour"
+secondary_keywords: ["css cascade layers tooltip", "style isolation onboarding component", "css specificity product tour overlay", "tailwind css layers tour kit"]
+category: "Deep-Dives"
+schema_type: "TechArticle"
+spreadsheet_row: 124
+date: "2026-04-08"
+updated: "2026-04-08"
+published: true
+ogImage: /og-images/css-layers-product-tour-styles.png
+---
+
+# CSS layers and product tour styles: avoiding specificity conflicts
+
+You add a product tour library to your React app. The tooltips render. Then your app's button styles bleed into the tour popover, your overlay hides behind a modal, and someone on your team adds `!important` to fix it. Two sprints later the entire tooltip is styled with `!important` declarations and nobody wants to touch the CSS.
+
+CSS cascade layers (`@layer`) fix this by replacing the specificity arms race with explicit priority ordering. Instead of fighting your app's stylesheet, you declare which styles win and which yield at parse time, with zero runtime cost.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What is a CSS cascade layer?
+
+A CSS cascade layer is a named priority tier created with the `@layer` at-rule. When two CSS rules target the same element, the layer each belongs to determines which wins, not the selector's specificity and not the source order in your stylesheet. As of April 2026, `@layer` has approximately 96% global browser support (Chrome 99+, Firefox 97+, Safari 15.4+) and requires no polyfill ([Can I Use, 2026](https://caniuse.com/css-cascade-layers)). Despite four years of availability, only about 2.71% of production websites use `@layer` outside of framework internals like Tailwind ([Project Wallace CSS Selection 2026](https://www.projectwallace.com/the-css-selection/2026)).
+
+That gap between support and adoption is why specificity conflicts keep plaguing component library integrations.
+
+Layers declared first have the lowest priority. Layers declared last have the highest. Any CSS written outside a layer beats all layered styles automatically.
+
+```css
+/* Priority: reset < base < components < utilities */
+@layer reset, base, components, utilities;
+
+@layer base {
+  .tooltip { background: white; }
+}
+
+@layer utilities {
+  .bg-slate-900 { background: rgb(15 23 42); }
+}
+```
+
+Here `.bg-slate-900` wins over `.tooltip`'s background, regardless of specificity or source order. A single class selector in a higher layer beats `#app .card .tooltip.active` in a lower layer.
+
+## Why specificity conflicts matter for onboarding UI
+
+Product tour libraries inject UI into your existing page. Tooltips, overlays, spotlights, and step popovers all compete with your app's styles for the same CSS properties on the same DOM elements. We measured three failure modes that show up repeatedly when integrating tour components into production apps. A broken tour tooltip doesn't just look bad; it blocks users from completing onboarding flows, which directly reduces activation rates.
+
+### The z-index stacking context trap
+
+Tour overlays portalled to `document.body` with `z-index: 9999` still render behind app modals. Why? Because z-index comparison only works within the same stacking context. An app modal inside a parent with `transform: translateZ(0)` or `opacity: 0.99` creates its own context. The tour overlay, sitting in the root context, can't compete regardless of its z-index value.
+
+Josh Comeau explains this well: "There is no way to 'break free' of a stacking context, and an element inside one stacking context can never be compared against elements in another" ([joshwcomeau.com](https://www.joshwcomeau.com/css/stacking-contexts/)). Radix UI's GitHub issue [#368](https://github.com/radix-ui/primitives/issues/368) documents this exact problem with portalled tooltips, and it's been open since 2021.
+
+### The specificity arms race
+
+Your app uses Bootstrap, MUI, or a custom design system. The components ship with selectors like `.btn-primary`, `.MuiTooltip-root`, or `.card-header`. When a tour library tries to highlight or dim these elements, its selectors must match or exceed the app's specificity. That means increasingly specific selectors, and eventually `!important`.
+
+Bootstrap v5.3 assigns tooltip z-index at 1,070 and modal z-index at 1,055. A tour overlay trying to sit between these two values is playing a number guessing game that breaks the moment Bootstrap ships a patch.
+
+### Source order fragility
+
+With code-splitting and async CSS loading, the order your stylesheets arrive in isn't deterministic. A tour library's styles might load before or after the app's framework CSS depending on the bundle chunk graph. Whoever loads last wins on equal specificity, and that order can change between deploys.
+
+## How @layer solves the cascade conflict
+
+CSS cascade layers replace all three of these heuristics (specificity, source order, `!important` count) with a single predictable dimension: layer position. As the CSS-Tricks cascade layers guide puts it, "integrating third-party CSS with a project is one of the most common places to run into cascade issues" ([CSS-Tricks](https://css-tricks.com/css-cascade-layers/)). Layers were built for exactly this scenario.
+
+Here's a layer stack built for a React app with a tour library:
+
+```css
+/* Declare layer order once, at the top of your entry CSS */
+@layer reset, third-party, host-app, tour-kit.base, tour-kit.theme, utilities;
+```
+
+This single line establishes priority. `reset` has the lowest priority. `utilities` has the highest. Tour Kit's base styles sit above the host app's component styles, and Tailwind utilities sit above everything.
+
+### Layered tour styles in practice
+
+```css
+/* tour-kit/styles.css */
+@layer tour-kit.base {
+  .tk-tooltip {
+    position: absolute;
+    background: var(--tk-bg, white);
+    border-radius: var(--tk-radius, 8px);
+    padding: var(--tk-padding, 16px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .tk-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--tk-overlay-bg, rgba(0, 0, 0, 0.5));
+  }
+}
+
+@layer tour-kit.theme {
+  .tk-tooltip[data-theme="dark"] {
+    --tk-bg: rgb(15 23 42);
+    color: white;
+  }
+}
+```
+
+The host app can override any Tour Kit style without touching `!important`:
+
+```css
+@layer host-app {
+  .tk-tooltip {
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+  }
+}
+```
+
+Hold on. `host-app` is declared *before* `tour-kit.base` in the layer order, so it has lower priority. That's intentional. You choose the priority relationship at declaration time. If your app's styles should override tour styles, put `host-app` after `tour-kit.base`:
+
+```css
+@layer reset, third-party, tour-kit.base, tour-kit.theme, host-app, utilities;
+```
+
+### The unlayered escape hatch
+
+CSS written outside any `@layer` block beats all layered styles. This is the mechanism for tour overlay lockout, styles that must win unconditionally:
+
+```css
+/* Critical overlay styles — unlayered, wins everything */
+.tk-overlay-lockout {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: all;
+}
+```
+
+No `!important`. No specificity tricks. The unlayered position in the cascade guarantees this style wins over every `@layer` block in the document. We use this pattern in Tour Kit for overlay backgrounds and spotlight cutouts that must never be occluded by app styles.
+
+## Tailwind CSS integration
+
+Tailwind v3 and v4 both use `@layer` internally with the order `theme, base, components, utilities`. When you add a tour library alongside Tailwind, you have two integration approaches.
+
+### Option A: Tour styles inside Tailwind's components layer
+
+```css
+/* globals.css */
+@layer components {
+  @import '@tourkit/styles';
+}
+```
+
+This registers tour styles at the `components` layer priority. Any Tailwind utility class in your JSX overrides tour defaults. Simple, but your tour styles compete with every other `@layer components` rule.
+
+### Option B: Tour styles as a named layer above components
+
+```css
+@layer theme, base, components, tour-kit, utilities;
+```
+
+Tour Kit's defaults now beat component-level styles but lose to utility classes. This is the approach we recommend because it gives you predictable override behavior without requiring Tailwind `@apply` directives or wrapper classes. CSS-Tricks confirms this produces "cleaner HTML and easier style maintenance" versus inlining everything into the components layer ([CSS-Tricks](https://css-tricks.com/using-css-cascade-layers-with-tailwind-utilities/)).
+
+## Why shadow DOM isn't the answer for tour components
+
+When developers hear "style isolation," shadow DOM comes up. But shadow DOM creates bidirectional isolation where styles can't leak in *or* out. That's the wrong model for product tours.
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Isolation type</th>
+      <th>Theming</th>
+      <th>Runtime cost</th>
+      <th>Tour library fit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Shadow DOM</td>
+      <td>Bidirectional (blocks in + out)</td>
+      <td>CSS custom properties only</td>
+      <td>Web Component overhead</td>
+      <td>Poor</td>
+    </tr>
+    <tr>
+      <td>CSS @layer</td>
+      <td>Priority ordering</td>
+      <td>Full cascade access</td>
+      <td>Zero (parse-time only)</td>
+      <td>Excellent</td>
+    </tr>
+    <tr>
+      <td>CSS isolation: isolate</td>
+      <td>Stacking context only</td>
+      <td>Full cascade access</td>
+      <td>Zero</td>
+      <td>Partial (z-index only)</td>
+    </tr>
+  </tbody>
+</table>
+
+Shadow DOM breaks three things product tours need:
+
+1. **Focus management.** Tour steps move keyboard focus to highlighted elements. Shadow DOM boundaries block `element.focus()` calls from reaching elements inside a shadow root.
+2. **Event bubbling.** Tour navigation relies on keyboard events (Escape to dismiss, Tab to move through step content). Events stop at the shadow boundary.
+3. **Accessibility tree traversal.** Screen readers traverse the accessibility tree linearly. A shadow root creates a subtree boundary that disrupts `aria-describedby` and `aria-labelledby` references between tour tooltips and highlighted elements.
+
+CSS layers give you priority control without breaking any of these. The styles still participate in the normal cascade; only their relative priority changes.
+
+## Implementation in a Tour Kit project
+
+Here's a complete setup for a Next.js app using Tour Kit with Tailwind:
+
+```tsx
+// src/styles/layers.css
+@layer reset, third-party, tour-kit.base, tour-kit.theme, components, utilities;
+
+// Import Tour Kit base styles into its layer
+@import '@tourkit/react/styles.css' layer(tour-kit.base);
+```
+
+```tsx
+// src/app/layout.tsx
+import './styles/layers.css';
+import './globals.css'; // Tailwind directives
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+```tsx
+// src/components/ProductTour.tsx
+'use client';
+
+import { TourProvider, TourStep, TourTooltip, TourOverlay } from '@tourkit/react';
+
+const steps = [
+  { target: '#dashboard-nav', title: 'Navigation', content: 'Find all your tools here.' },
+  { target: '#create-button', title: 'Create', content: 'Start a new project.' },
+];
+
+export function ProductTour() {
+  return (
+    <TourProvider steps={steps}>
+      <TourOverlay />
+      <TourStep>
+        {({ step }) => (
+          <TourTooltip>
+            <h3>{step.title}</h3>
+            <p>{step.content}</p>
+          </TourTooltip>
+        )}
+      </TourStep>
+    </TourProvider>
+  );
+}
+```
+
+The layer declaration in `layers.css` runs before any component CSS loads. Tour Kit's base styles are contained in `tour-kit.base`, your component styles in `components`, and Tailwind utilities above everything. No conflicts. No `!important`.
+
+## Common mistakes to avoid
+
+**Declaring layers in multiple files without a shared order.** Layer priority locks on first appearance. If `tour-kit.base` appears before `components` in one file but after it in another, the first file's order wins. Always declare the full layer stack in a single entry file.
+
+**Using `@import` without `layer()`.** A bare `@import 'library.css'` loads styles as unlayered, meaning they beat everything in your layer stack. Always wrap third-party imports: `@import 'library.css' layer(third-party)`.
+
+**Forgetting `!important` reversal.** Inside `@layer`, `!important` declarations reverse the priority order. An `!important` rule in a low-priority layer beats `!important` in a high-priority layer. If you're reaching for `!important` inside layers, restructure your layers instead.
+
+**Assuming @layer fixes z-index.** Layers control cascade priority, while z-index controls paint order within stacking contexts. Different problems, different solutions. Use `@layer` for "which background-color wins" and stacking context management for "which element renders on top." For the z-index side, see our [z-index product tour overlay guide](/blog/z-index-product-tour-overlay).
+
+## FAQ
+
+### Do CSS cascade layers work with React 19?
+
+CSS cascade layers are a browser-level feature processed at stylesheet parse time, independent of any JavaScript framework. Tour Kit works with React 18 and React 19. The `@layer` declarations run in the browser's CSS engine before React renders a single component. No framework-specific configuration is needed.
+
+### Can I use @layer with CSS-in-JS libraries like Emotion or styled-components?
+
+CSS-in-JS libraries that inject `<style>` tags at runtime don't integrate well with `@layer` because layer order must be established before runtime injection. CSS Modules, Tailwind, and static CSS files work well. If your tour library uses CSS-in-JS, extract critical styles to a static file wrapped in a layer declaration.
+
+### What happens in browsers that don't support @layer?
+
+In unsupported browsers (pre-2022), `@layer` declarations are ignored and styles fall back to normal cascade behavior based on specificity and source order. With approximately 96% global support as of April 2026, this affects less than 4% of users. No polyfill exists because cascade layers operate at the CSS parser level.
+
+### Does @layer affect CSS performance?
+
+Layer declarations are processed at stylesheet parse time with zero runtime overhead. The browser resolves layer priority once during parsing, not on every style recalculation. Bundle size impact is negligible. The only cost to watch is `@import layer()`, which carries the same network overhead as any CSS `@import`.
+
+### How does Tour Kit handle CSS specificity conflicts?
+
+Tour Kit is a headless library that ships minimal base styles and exposes CSS custom properties for theming. Place Tour Kit's styles in a named `@layer` to control where they sit in your cascade priority. One limitation: Tour Kit requires React 18+ and has no visual builder, so you write layer declarations yourself. That's also why specificity conflicts are solvable instead of buried inside a black box.
+
+---
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "CSS layers and product tour styles: avoiding specificity conflicts",
+  "description": "Use CSS cascade layers to fix specificity conflicts between product tour components and your app. Practical @layer patterns for React tour libraries.",
+  "author": {
+    "@type": "Person",
+    "name": "Dominic Bérubé",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-08",
+  "dateModified": "2026-04-08",
+  "image": "https://tourkit.dev/og-images/css-layers-product-tour-styles.png",
+  "url": "https://tourkit.dev/blog/css-layers-product-tour-styles",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/css-layers-product-tour-styles"
+  },
+  "keywords": ["css layers product tour", "css cascade layers tooltip", "style isolation onboarding component"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+**Internal linking suggestions:**
+- Link FROM `z-index-product-tour-overlay.mdx` → this article (CSS layers as the modern approach)
+- Link FROM `tailwind-product-tour-styling-design-tokens.mdx` → this article (Tailwind layer integration)
+- Link FROM `web-components-vs-react-product-tour.mdx` → this article (shadow DOM comparison)
+- Link FROM this article → `z-index-product-tour-overlay.mdx` (z-index stacking context guide)
+- Link FROM this article → `shadcn-ui-product-tour-tutorial.mdx` (practical styling tutorial)
+
+**Distribution checklist:**
+- Dev.to (canonical to tourkit.dev)
+- Hashnode (canonical to tourkit.dev)
+- Reddit r/reactjs, r/css, r/webdev
+- CSS-Tricks community

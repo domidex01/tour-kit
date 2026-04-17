@@ -1,0 +1,239 @@
+---
+title: "What is a tooltip? (and when to use tooltips in product tours)"
+slug: "what-is-a-tooltip"
+description: "A developer's definition of tooltips covering ARIA patterns, WCAG 1.4.13, the four tooltip types, and how tooltips work inside product tours."
+primary_keyword: "what is a tooltip"
+secondary_keywords: ["tooltip definition", "tooltip ux meaning", "tooltip accessibility", "tooltip product tour"]
+category: "Glossary"
+schema_type: "TechArticle"
+spreadsheet_row: 304
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/what-is-a-tooltip.png
+---
+
+# What is a tooltip? (and when to use tooltips in product tours)
+
+You've built them, styled them, debugged the z-index on them. But search "what is a tooltip" and you'll get marketing fluff about "enhancing user experiences." Here's the developer version.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Definition
+
+A tooltip is a small floating text label that appears when a user hovers over or focuses on a trigger element. It provides supplementary, non-essential information and disappears when the interaction ends. The W3C defines it as "a popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it" ([W3C APG](https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/)). As of April 2026, the W3C's own tooltip pattern spec still lacks task force consensus, meaning you're building against a moving target.
+
+Tooltips differ from two commonly confused UI patterns. A popover requires a deliberate click or tap, holds richer interactive content like forms, and stays visible until the user explicitly closes it. A toast is an autonomous notification about a completed action that auto-dismisses after a few seconds and isn't tied to any trigger element.
+
+Tooltips do none of that. They appear on hover, hold brief text (recommended maximum: 150 characters per UXPin research), and vanish on mouseout.
+
+## How tooltips work under the hood
+
+The minimum viable tooltip needs three things: a trigger element, a floating label, and a positioning engine that keeps the label anchored to the trigger without clipping at viewport edges.
+
+In React, that typically looks like this:
+
+```tsx
+// src/components/SimpleTooltip.tsx
+import { useState } from 'react';
+
+function Tooltip({ label, children }: { label: string; children: React.ReactNode }) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <span
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}
+      onFocus={() => setVisible(true)}
+      onBlur={() => setVisible(false)}
+      aria-describedby={visible ? 'tooltip' : undefined}
+    >
+      {children}
+      {visible && (
+        <span id="tooltip" role="tooltip">
+          {label}
+        </span>
+      )}
+    </span>
+  );
+}
+```
+
+That's the bare bones. Production tooltips add collision detection (flipping when the trigger sits near the viewport edge), a 200-300ms delay before showing (NN/g research shows faster delays cause accidental activations), and keyboard dismissal via Escape.
+
+Libraries handle the positioning math so you don't have to. Floating UI ships at roughly 3KB gzipped with zero dependencies. Radix UI's tooltip primitive adds accessible defaults on top of that: Escape dismissal, hover persistence, and `aria-describedby` wiring included. The native HTML `title` attribute costs 0KB but offers no keyboard support, no styling control, and inconsistent screen reader behavior across browsers.
+
+One thing worth knowing: `role="tooltip"` is defined in the WAI-ARIA spec but has no meaningful effect on screen reader announcements. Sarah Higley, a Microsoft accessibility engineer, confirmed that "`aria-describedby` and `aria-labelledby` do all the heavy lifting" ([sarahmhigley.com](https://sarahmhigley.com/writing/tooltips-in-wcag-21/)). You still need the role for spec compliance, but don't expect it to do anything.
+
+## Tooltip examples
+
+Tooltips show up in three distinct contexts, each with different implementation requirements.
+
+**Icon buttons.** A trash can icon with no visible label needs a tooltip reading "Delete item." Without it, screen reader users get nothing and sighted users guess. This is the most common tooltip use case — GitHub uses over 200 tooltip instances on a single repository page.
+
+**Form fields.** A password input might show "Must include 8+ characters and one number" on focus. This is the validation tooltip type, and it's where most accessibility errors happen. The content is actionable (users need it to complete the field), which means it should arguably be visible inline instead of hidden behind hover. The NN/g guideline is clear: if users must act on the information, don't put it in a tooltip.
+
+**Onboarding steps.** A tooltip anchored to a "Create Project" button reading "Start here — click to create your first project" is a product tour step. Unlike standard tooltips, these persist until explicitly dismissed and often include navigation controls (next, back, skip). Tour Kit's `@tour-kit/react` package handles this pattern with sequential step management and focus trapping.
+
+## The four tooltip types
+
+Tooltips break into four functional categories by purpose:
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Purpose</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Informational</td>
+      <td>Explains what an element does</td>
+      <td>"Export as CSV"</td>
+    </tr>
+    <tr>
+      <td>Instructional</td>
+      <td>Guides how to interact</td>
+      <td>"Drag to reorder items"</td>
+    </tr>
+    <tr>
+      <td>Validation</td>
+      <td>Feedback on input correctness</td>
+      <td>"Password must include a number"</td>
+    </tr>
+    <tr>
+      <td>Progress</td>
+      <td>Completion status within a flow</td>
+      <td>"Step 3 of 5: configure settings"</td>
+    </tr>
+  </tbody>
+</table>
+
+The first two belong in standard UI. The last two show up more often in [product tours and onboarding flows](/blog/product-tour-guide-2026). When a tooltip carries progress state or validation logic, you're no longer building a simple hover label. You're building a step in a guided experience.
+
+## Why tooltips matter for product tours
+
+Product tour tools split tooltips into two categories that standard UI design glossaries ignore. Action-driven tooltips require users to complete a task before the next step appears — Appcues reports these achieve 2-3x higher engagement than passive alternatives. Non-action tooltips provide context without blocking progress. Appcues calls these "slightly less demanding of user attention" ([Appcues](https://www.appcues.com/blog/tooltips)), which is a polite way of saying most users will ignore them.
+
+We tested both while building [Tour Kit](https://usertourkit.com/docs). Action-driven tooltips in a checklist-style onboarding flow had noticeably higher step completion than passive informational tooltips scattered across the page. But they also had higher skip rates when the required action felt forced. The balance depends on whether the user is learning a workflow (action-driven wins) or exploring features at their own pace ([contextual tooltips win](/blog/contextual-tooltips-vs-linear-tours)).
+
+Tour Kit handles this distinction at the architecture level. The `@tour-kit/react` package renders sequential tour tooltips. The `@tour-kit/hints` package renders persistent contextual hotspots. Same positioning engine, different interaction patterns.
+
+## Accessibility requirements you can't skip
+
+WCAG 1.4.13 "Content on Hover or Focus" mandates three properties for any content triggered by hover or focus. Tooltips must be **dismissable** (pressing Escape hides the tooltip without moving focus), **hoverable** (moving the mouse over the tooltip itself doesn't cause it to vanish), and **persistent** (the tooltip stays visible until the user actively moves away or presses Escape).
+
+The Nielsen Norman Group adds a practical layer: "Instructions or other directly actionable information shouldn't be in a tooltip. If it is, people will have to commit it to their working memory in order to act upon it" ([NN/g](https://www.nngroup.com/articles/tooltip-guidelines/)).
+
+And here's the gap nobody talks about enough: touch devices can't trigger hover. As of April 2026, mobile accounts for roughly 59% of global web traffic (Statcounter), yet a hover-only tooltip is invisible to all of those users.
+
+Your options are long-press to reveal, tap-to-toggle, or replacing the tooltip with persistent inline text on small screens. Tour Kit defaults to tap-to-toggle on touch devices, but there's no perfect answer here. For a deep-dive into the ARIA implementation, see [building ARIA-compliant tooltip components from scratch](/blog/aria-tooltip-component-react).
+
+## Tooltips in Tour Kit
+
+Tour Kit uses tooltips as the primary UI pattern for product tours, but it doesn't render them for you. As a headless library shipping at under 8KB gzipped across its core package, Tour Kit provides the positioning, step sequencing, keyboard navigation, and ARIA attributes. You bring your own `<Card>`, `<Popover>`, or shadcn/ui component. No visual builder, no preset themes. Tour Kit is for React 18+ teams that want full control.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+The core positioning engine handles viewport collision detection, scroll tracking, and element highlighting. The React package gives you `useTour()` and `useTourStep()` hooks that manage tooltip visibility, progress state, and focus trapping. For persistent contextual hints (the non-action tooltip pattern), `@tour-kit/hints` adds beacon-style hotspots that expand into tooltip content on interaction.
+
+Get started at [usertourkit.com](https://usertourkit.com/).
+
+## FAQ
+
+### What is the difference between a tooltip and a popover?
+
+A tooltip appears on hover or focus and contains brief, non-interactive text that vanishes when the user moves away. A popover requires an explicit click, holds interactive content like forms, and stays visible until dismissed. If users need to interact with the content, use a popover. See our [tooltip library comparison](/blog/best-tooltip-libraries-react-2026) for tools that handle both.
+
+### Are tooltips accessible by default?
+
+No. A hover-only tooltip fails WCAG 1.4.13 because keyboard and touch users can't reach it. Accessible tooltips need focus triggers, Escape-key dismissal, hover persistence, and `aria-describedby` linking the trigger to the tooltip content. Don't rely on the native HTML `title` attribute; screen readers announce it inconsistently.
+
+### Should I use tooltips in product tours?
+
+Tooltips are the most common UI element in product tours, but they work best as one part of a broader onboarding system. Sequential tooltip tours work for teaching workflows. Contextual tooltip hints work for feature discovery. Combining both with [checklists](/blog/onboarding-checklist-psychology) and progress indicators produces higher completion rates than tooltips alone. Tour Kit provides all three patterns across its `react`, `hints`, and `checklists` packages.
+
+### What is the recommended maximum tooltip length?
+
+Keep tooltip text under 150 characters. UX research shows tooltips exceeding two lines get ignored. If your content needs more space, use a popover, an inline help panel, or a dedicated onboarding step. Tooltips work because they're brief.
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json">{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "What is a tooltip? (and when to use tooltips in product tours)",
+  "description": "A developer's definition of tooltips covering ARIA patterns, WCAG 1.4.13, the four tooltip types, and how tooltips work inside product tours.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://github.com/DomiDex"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-12",
+  "dateModified": "2026-04-12",
+  "image": "https://usertourkit.com/og-images/what-is-a-tooltip.png",
+  "url": "https://usertourkit.com/blog/what-is-a-tooltip",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/what-is-a-tooltip"
+  },
+  "keywords": ["what is a tooltip", "tooltip definition", "tooltip ux meaning", "tooltip accessibility"],
+  "proficiencyLevel": "Beginner",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+})}</script>
+
+<script type="application/ld+json">{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the difference between a tooltip and a popover?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A tooltip appears automatically on hover or keyboard focus and contains brief, non-interactive text. It disappears when the user moves away. A popover requires an explicit click or tap to open, can contain interactive elements like buttons or forms, and stays visible until the user explicitly closes it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are tooltips accessible by default?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. A tooltip that only responds to mouse hover fails WCAG 1.4.13 because keyboard-only users and touch device users can't access it. Accessible tooltips require focus triggers, Escape-key dismissal, hover persistence, and aria-describedby linking the trigger to the tooltip content."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use tooltips in product tours?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tooltips are the most common UI element in product tours, but they work best as one part of a broader onboarding system. Sequential tooltip tours work for teaching workflows. Contextual tooltip hints work for feature discovery. Combining both with checklists and progress indicators produces higher completion rates than tooltips alone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the recommended maximum tooltip length?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keep tooltip text under 150 characters. UX research consistently shows that tooltips containing more than two lines of text get ignored. If your content exceeds 150 characters, consider using a popover, an inline help panel, or a dedicated onboarding step instead."
+      }
+    }
+  ]
+})}</script>

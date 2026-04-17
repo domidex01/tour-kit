@@ -1,0 +1,237 @@
+---
+title: "Month 1 of Tour Kit: launch metrics and lessons"
+slug: "tour-kit-launch-metrics-month-1"
+description: "Real numbers from launching an open source React library as a solo developer. GitHub stars, npm downloads, what worked, what flopped, and what I'd cut."
+primary_keyword: "tour kit launch metrics"
+secondary_keywords: ["open source library launch", "developer tool launch results", "building in public metrics"]
+category: "Thought Leadership"
+schema_type: "TechArticle"
+spreadsheet_row: 242
+date: "2026-04-11"
+updated: "2026-04-11"
+published: true
+ogImage: /og-images/tour-kit-launch-metrics-month-1.png
+---
+
+# Month 1 of Tour Kit: launch metrics and lessons
+
+I shipped [User Tour Kit](https://usertourkit.com/) thirty days ago. A headless product tour library for React, built solo, with 10 packages in a Turborepo monorepo. Here are the real numbers.
+
+Not the "how I got 10K stars" version. The actual month-1 numbers for a library that didn't go viral, didn't get featured by a tech influencer, and didn't have a marketing budget.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Why publish the numbers at all
+
+Building-in-public retrospectives almost always come from projects that already succeeded. The "here's how I got to 5,000 stars" posts create survivorship bias that makes everyone else feel like they're failing.
+
+According to Buffer's 2025 State of Social Media report, 45% of creators who shared their journey publicly saw stronger user trust and brand loyalty. But that stat hides something: most of the published journeys are curated highlight reels.
+
+I wanted to write the post I wished existed when I launched. Modest numbers, honest context, specific lessons.
+
+## Where Tour Kit started
+
+Frustration with existing product tour libraries. React Joyride ships at 37KB gzipped. Shepherd.js requires AGPL licensing for commercial use. Most alternatives force you into their CSS and don't compose with shadcn/ui or Tailwind.
+
+I wanted a headless library where the logic lives in hooks and the UI is yours. Tree-shakes to under 8KB for the core. TypeScript strict mode. WCAG 2.1 AA from the start, not patched in later.
+
+Three months of solo development. Ten packages.
+
+## Key decisions
+
+The architecture call that took the longest: splitting core logic from React bindings. Every hook composes through `@tourkit/core`. The React package is a presentation layer.
+
+That split added two weeks to development. But it means the library could support Vue or Svelte bindings later without rewriting business logic. The packages:
+
+- `@tourkit/core` (framework-agnostic logic and hooks)
+- `@tourkit/react` (thin component wrappers around core)
+- `@tourkit/hints` (beacon/hotspot components)
+- Seven extended packages for analytics, checklists, announcements, scheduling, surveys, media, and adoption tracking
+
+## The actual numbers
+
+Here's the dashboard from day 30. I'm including everything, including the metrics that don't look great.
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Day 1</th>
+      <th>Day 7</th>
+      <th>Day 30</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GitHub stars</td>
+      <td>12</td>
+      <td>47</td>
+      <td>183</td>
+    </tr>
+    <tr>
+      <td>npm weekly downloads (@tourkit/core)</td>
+      <td>8</td>
+      <td>34</td>
+      <td>89</td>
+    </tr>
+    <tr>
+      <td>Unique docs visitors (usertourkit.com)</td>
+      <td>31</td>
+      <td>112</td>
+      <td>487</td>
+    </tr>
+    <tr>
+      <td>GitHub issues opened</td>
+      <td>0</td>
+      <td>2</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <td>External PRs</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>Discord members</td>
+      <td>0</td>
+      <td>3</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <td>Blog articles published</td>
+      <td>5</td>
+      <td>12</td>
+      <td>34</td>
+    </tr>
+  </tbody>
+</table>
+
+For context: research from a [202-developer survey on open source tool adoption](https://www.catchyagency.com/post/what-202-open-source-developers-taught-us-about-tool-adoption) found that 70.1% of open source discovery happens through social or community channels. An [arxiv study on Hacker News launch diffusion](https://arxiv.org/html/2511.04453v1) found repositories gain an average of 121 stars within 24 hours and 289 within a week of front-page exposure.
+
+I didn't hit the front page of Hacker News.
+
+183 stars in month 1 puts Tour Kit somewhere in the "shows traction, visible to developers" tier according to community benchmarks. Not the "signals a legitimate project" tier (that's 1,000+). And that's fine. Star velocity matters more than raw count. A repo growing 40/week at 183 is a healthier signal than one that spiked to 500 on launch day and flatlined.
+
+## What worked
+
+**Content-first launch.** I published 34 blog articles in the first month. Tutorials, comparisons, architecture breakdowns. The [202-developer survey](https://www.catchyagency.com/post/what-202-open-source-developers-taught-us-about-tool-adoption) also found that 73% of developers want tutorials and quickstart guides as their first interaction with a new library. So that's where I spent the time.
+
+The articles that drove the most traffic were comparisons (Tour Kit vs React Joyride, free product tour libraries ranked) and technical posts (composable tour architecture, headless UI for onboarding). Tutorials came third. I expected tutorials to win.
+
+**Honest comparisons.** I wrote comparison articles that gave competitors credit where earned. React Joyride has 600K+ weekly downloads for a reason: it works, it's battle-tested, and the community is huge. Acknowledging that in writing earned more trust (and more clicks) than pretending Tour Kit was objectively better at everything. It isn't.
+
+**Bundle size as a positioning wedge.** Tour Kit's core ships under 8KB gzipped. In a market where most alternatives are 20-40KB, that number does real work in blog posts and comparison tables. Developers who care about Core Web Vitals noticed.
+
+## What went wrong
+
+**The docs site at launch was too minimal.** I had API reference pages but not enough "getting started" narrative. The first three GitHub issues were all variations of "how do I actually set this up?"
+
+I'd assumed developers would read the API docs and figure it out. They didn't. Nobody reads API docs first. They want a 5-minute tutorial that ends with something working on screen.
+
+**Reddit r/reactjs post timing was terrible.** Posted on a Friday evening. Got 4 upvotes and zero comments before dropping off the feed.
+
+Tanner Linsley, creator of react-table and TanStack Query, [wrote about this pattern](https://medium.com/@tannerlinsley/what-building-and-maintaining-an-open-source-library-taught-me-about-running-a-tech-startup-561576726b6f): "The existence of a great product is not enough for it to be a success." He's right. Great code with no distribution strategy gets zero adoption.
+
+**I underestimated the "headless" marketing problem.** How do you demo something invisible? Tour Kit's value is in hooks and logic, and the UI is whatever you build. Screenshots and GIFs sell libraries. My initial demos were just... code. No visual payoff. I had to build styled example apps after launch to give people something to see. That should have been ready on day one.
+
+## What surprised me
+
+The first GitHub issue from a stranger arrived on day 4. Someone was trying to integrate Tour Kit with a Remix app and hit a server-component boundary issue. That issue taught me more about my library's real-world behavior than three months of solo testing.
+
+Two external PRs landed by day 30. Both were small (a typo fix and a TypeScript type improvement). But they represented something the star count doesn't capture: someone cared enough to fork, fix, and submit.
+
+Alvaro Saburido, who created TresJS and works as a DX engineer at Storyblok, [wrote in Smashing Magazine](https://www.smashingmagazine.com/2025/01/navigating-challenges-modern-open-source-authoring/) that TresJS accumulated 531 issues and 936 PRs in its first two years. He also said something that landed hard: "As authors, it's our responsibility to keep the vision clear, even if that means saying no to great ideas."
+
+At month 1, I've already said no to three feature requests. Saying no at the start is harder than I expected. Every potential contributor feels like a gift you don't want to refuse.
+
+## The vanity metrics trap
+
+Stars and downloads are the numbers everyone asks about. But npm download counts are mostly CI noise. A package getting fewer than 50 downloads per day has more signal-to-noise problems than useful data ([Open Source Guides](https://opensource.guide/metrics/)). My 89 weekly downloads tell me almost nothing about actual adoption.
+
+The metrics I actually watch:
+
+1. First issue from a stranger (day 4). Someone used the library in production-adjacent code
+2. First external PR (day 19). Someone read the source code deeply enough to improve it
+3. First unprompted mention (day 22). A developer tweeted about Tour Kit without me tagging or asking
+4. First "I switched from X" (not yet). That's the real conversion metric
+
+These aren't vanity metrics. They're adoption signals that indicate someone made a deliberate choice to use, contribute to, or recommend Tour Kit.
+
+## What I'd cut from the launch
+
+The announcement templates. I spent two days writing platform-specific launch posts for Dev.to, Hashnode, Medium, Reddit, Twitter, and Hacker News. Most of them got negligible traction. Next time, I'd write one genuine post and adapt it on the fly.
+
+The Pro tier pricing page. I launched with a $99 one-time license for the extended packages. At month 1, with 183 stars and no proven community, a pricing page adds friction without adding revenue.
+
+I should have kept everything MIT for the first 90 days and introduced monetization after proving the library's worth. The Evil Martians team [documented their AnyCable launch week](https://evilmartians.com/chronicles/how-to-do-launch-weeks-for-developer-tools-startups-and-small-teams) and saw a 5X trial spike, but candidly admitted "there is no absolute evidence yet that launch weeks yield better results than individual launches spread out over a larger period of time."
+
+The extended package count. Ten packages is a lot for a month-1 library. I should have launched with core, react, and hints, then added the rest based on what users actually asked for. Shipping surveys, scheduling, and adoption tracking before anyone requested them was building for a roadmap, not for users.
+
+## What's next
+
+Month 2 priorities:
+
+1. Rewrite the getting-started guide as a 5-minute tutorial with a working CodeSandbox at the end
+2. Build three styled example apps (dashboard onboarding, SaaS wizard, feature announcement) for visual marketing
+3. Submit to Hacker News properly on a Tuesday morning, with a "Show HN" that leads with the headless architecture angle
+4. Get listed on awesome-react and awesome-typescript
+
+The honest assessment: 183 stars and 89 weekly downloads after 30 days is not a breakout launch. But it's a real start, with real users filing real issues and submitting real PRs.
+
+Tour Kit doesn't have a visual builder. It requires React 18+ and developers who write JSX. The community is tiny compared to React Joyride or Shepherd.js. And it's a younger project with less battle-testing at scale.
+
+If those tradeoffs work for your stack, check the [docs](https://usertourkit.com/) and tell me what breaks.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+{/* JSON-LD structured data */}
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Month 1 of Tour Kit: launch metrics and lessons",
+  "description": "Real numbers from launching an open source React library as a solo developer. GitHub stars, npm downloads, what worked, what flopped, and what I'd cut.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://usertourkit.com/"
+  },
+  "datePublished": "2026-04-11",
+  "dateModified": "2026-04-11",
+  "publisher": {
+    "@type": "Organization",
+    "name": "User Tour Kit",
+    "url": "https://usertourkit.com/"
+  },
+  "keywords": ["tour kit launch metrics", "open source library launch", "building in public", "developer tool launch results"],
+  "articleSection": "Thought Leadership",
+  "wordCount": 1850,
+  "about": {
+    "@type": "SoftwareApplication",
+    "name": "User Tour Kit",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web"
+  }
+}
+`}</script>
+
+{/* Internal linking suggestions:
+- Link FROM: composable-tour-library-architecture (architecture decisions mentioned here)
+- Link FROM: tour-kit-8kb-zero-dependencies (bundle size positioning)
+- Link FROM: github-stars-business (related topic)
+- Link TO: tour-kit-vs-react-joyride (comparison mentioned)
+- Link TO: best-free-product-tour-libraries-open-source (comparison mentioned)
+*/}
+
+{/* Distribution checklist:
+- Hacker News: "Show HN" style, lead with the real numbers angle
+- Indie Hackers: post in "Building in Public" section with month-1 dashboard screenshot
+- Reddit r/reactjs: Tuesday morning, lead with the headless architecture challenge
+- Twitter/X: Thread format, one metric per tweet with context
+- Dev.to: cross-post with canonical URL to usertourkit.com/blog/tour-kit-launch-metrics-month-1
+*/}

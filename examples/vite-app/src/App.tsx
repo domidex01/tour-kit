@@ -36,6 +36,7 @@ import {
   LicenseTestPage,
   MediaPage,
   PricingPage,
+  SurveysPage,
 } from './pages'
 
 // Load Google Analytics script dynamically
@@ -421,6 +422,7 @@ function AppContent() {
               <Route path="/branching" element={<BranchingPage />} />
               <Route path="/base-ui" element={<BaseUIPage />} />
               <Route path="/media" element={<MediaPage />} />
+              <Route path="/surveys" element={<SurveysPage />} />
               <Route path="/ai-chat" element={<AiChatPage />} />
               <Route path="/license-test" element={<LicenseTestPage />} />
             </Routes>

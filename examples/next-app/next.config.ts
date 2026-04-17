@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     '@tour-kit/hints',
     '@tour-kit/analytics',
     '@tour-kit/adoption',
+    '@tour-kit/surveys',
   ],
   webpack: (config) => {
     config.resolve.alias = {

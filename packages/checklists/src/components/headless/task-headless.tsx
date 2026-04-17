@@ -1,3 +1,5 @@
+'use client'
+
 import { logger } from '@tour-kit/core'
 import type * as React from 'react'
 import { useTask } from '../../hooks/use-task'

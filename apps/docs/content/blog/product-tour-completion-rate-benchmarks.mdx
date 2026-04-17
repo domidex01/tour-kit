@@ -1,0 +1,516 @@
+---
+title: "Product tour completion rate: benchmarks and how to improve it"
+slug: "product-tour-completion-rate-benchmarks"
+description: "Real product tour completion rate benchmarks from 15M interactions, plus React code examples for step-level tracking. Average is 61%."
+primary_keyword: "product tour completion rate benchmark"
+secondary_keywords: ["tour completion rate average", "improve tour completion rate", "product tour analytics", "onboarding tour benchmarks"]
+category: "Metrics"
+schema_type: "TechArticle"
+spreadsheet_row: 246
+date: "2026-04-11"
+updated: "2026-04-11"
+published: true
+ogImage: /og-images/product-tour-completion-rate-benchmarks.png
+---
+
+# Product tour completion rate: benchmarks and how to improve it
+
+Most product teams track whether users finish their onboarding tours. Few know what "good" actually looks like. The largest public dataset on tour completion (15 million interactions analyzed by Chameleon) puts the average at 61%. But that number hides a brutal step-count cliff: tours with 3-4 steps hit 72-74% completion, while 5-step tours crash to 34%.
+
+This guide breaks down the benchmarks, shows you how to instrument step-level tracking in React, and covers the specific patterns that move completion rates up. Every code example uses Tour Kit's analytics callbacks, but the principles apply to any tour library.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/analytics
+```
+
+## What is product tour completion rate?
+
+Product tour completion rate measures the percentage of users who reach the final step of a guided product tour after starting it. The formula: divide users who completed by users who began, then multiply by 100. Unlike feature adoption or activation rate, completion rate isolates the tour experience itself. It tells you whether your guidance is working, not whether the feature stuck.
+
+As of April 2026, the industry average sits around 61% based on Chameleon's analysis of [15 million tour interactions](https://www.chameleon.io/blog/product-tour-benchmarks-highlights), though that figure varies dramatically by tour length and trigger type.
+
+## Why completion rate matters (and when it doesn't)
+
+Completion rate is the canary in your onboarding coal mine. When it drops, something in the tour experience broke: too many steps, bad targeting, or a tooltip covering the element it's supposed to highlight. Teams that track completion alongside activation find the correlation quickly: [Rocketbots doubled their activation rate from 15% to 30%](https://www.chameleon.io/blog/product-tour-benchmarks-highlights) after optimizing tour flows, which lifted conversion from 3% to 5%.
+
+But completion rate has a ceiling as a metric. A user can click "Next" through every step without reading a word. Chameleon's own team [acknowledged this in 2025](https://www.chameleon.io/blog/effective-product-tour-metrics): "Completion rate measures whether users clicked through your tour, not whether your tour moved the business outcome it was designed to drive." The real signal comes from pairing completion with activation. Did users who finished the tour actually use the feature?
+
+Track completion rate as a diagnostic, not a success metric. If it's below 50%, your tour has a structural problem. If it's above 70%, shift focus to whether completers convert.
+
+## Benchmarks: what the data actually says
+
+The only large-scale public dataset on product tour completion rates comes from Chameleon's analysis of 15 million tour interactions across SaaS products. The data reveals that tour length, trigger type, and design elements each have measurable effects on whether users finish, with some factors cutting completion in half. Here's what the numbers look like.
+
+### Completion rate by tour length
+
+<table>
+  <thead>
+    <tr>
+      <th>Tour length</th>
+      <th>Completion rate</th>
+      <th>Interpretation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2-3 steps</td>
+      <td>72%</td>
+      <td>Sweet spot for feature highlights</td>
+    </tr>
+    <tr>
+      <td>4 steps</td>
+      <td>74%</td>
+      <td>Highest recorded, still concise enough</td>
+    </tr>
+    <tr>
+      <td>5 steps</td>
+      <td>34%</td>
+      <td>Cliff edge, half the rate of 4 steps</td>
+    </tr>
+    <tr>
+      <td>7+ steps</td>
+      <td>16%</td>
+      <td>Near failure, most users bail early</td>
+    </tr>
+  </tbody>
+</table>
+
+*Source: [Chameleon, 15M interactions](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)*
+
+The jump from 4 to 5 steps is the most important number in this table. Completion doesn't degrade linearly. It falls off a cliff. That fifth step isn't 10% worse. It's 54% worse.
+
+### Completion rate by trigger type
+
+How the tour starts matters as much as how long it runs.
+
+<table>
+  <thead>
+    <tr>
+      <th>Trigger type</th>
+      <th>Completion rate</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>User-initiated (click/launcher)</td>
+      <td>~67%</td>
+      <td>User chose to start, high intent</td>
+    </tr>
+    <tr>
+      <td>Contextual (on-page event)</td>
+      <td>69.56%</td>
+      <td>Triggered by user action on page</td>
+    </tr>
+    <tr>
+      <td>Self-serve (help menu)</td>
+      <td>123% higher than baseline</td>
+      <td>Highest intent category</td>
+    </tr>
+    <tr>
+      <td>Time-delayed (auto-play)</td>
+      <td>~31%</td>
+      <td>Lowest, interrupts user flow</td>
+    </tr>
+  </tbody>
+</table>
+
+*Source: [Chameleon benchmark data](https://www.chameleon.io/blog/mastering-product-tours)*
+
+Self-serve tours outperform auto-triggered ones by more than double. When users choose to learn, they finish. When you interrupt them, they dismiss.
+
+### The checklist gap
+
+Userpilot's [2024 Product Metrics Report](https://userpilot.com/blog/onboarding-checklist-completion-rate-benchmarks/) found that onboarding checklist completion averages just 19.2% (median: 10.1%). Compare that to tour completion at 61%. The gap is rarely discussed, but it makes sense. A checklist asks for repeated effort across sessions. A tour asks for 30 seconds of attention right now.
+
+Fintech and insurance companies hit 24.5% checklist completion, the highest of any vertical, likely because their users have stronger motivation to complete setup (money is involved).
+
+The practical takeaway: connect checklists to tours. Chameleon found that checklist-triggered tours are [21% more likely to be completed](https://www.chameleon.io/blog/product-tour-benchmarks-highlights) than average, and 60% of those users go on to finish multiple checklist tasks. Tour Kit's `@tour-kit/checklists` package supports this pattern directly.
+
+## How to track completion rate with Tour Kit
+
+Every benchmark article out there explains what to measure but stops short of showing how. Here's how to instrument step-level tracking in a React app using Tour Kit's analytics callbacks.
+
+### Basic completion tracking
+
+```tsx
+// src/components/OnboardingTour.tsx
+import { TourProvider, useTour } from '@tourkit/react';
+import type { TourStep, TourAnalyticsEvent } from '@tourkit/core';
+
+const steps: TourStep[] = [
+  { id: 'welcome', target: '#dashboard-header', title: 'Welcome to your dashboard' },
+  { id: 'create-project', target: '#new-project-btn', title: 'Create your first project' },
+  { id: 'invite-team', target: '#invite-btn', title: 'Invite your team' },
+];
+
+function handleAnalytics(event: TourAnalyticsEvent) {
+  // Send to your analytics provider
+  if (event.type === 'tour:complete') {
+    posthog.capture('tour_completed', {
+      tour_id: event.tourId,
+      steps_viewed: event.stepsCompleted,
+      total_steps: event.totalSteps,
+      duration_ms: event.duration,
+    });
+  }
+
+  if (event.type === 'step:complete') {
+    posthog.capture('tour_step_completed', {
+      tour_id: event.tourId,
+      step_id: event.stepId,
+      step_index: event.stepIndex,
+    });
+  }
+
+  if (event.type === 'tour:dismiss') {
+    posthog.capture('tour_dismissed', {
+      tour_id: event.tourId,
+      dismissed_at_step: event.stepIndex,
+      total_steps: event.totalSteps,
+    });
+  }
+}
+
+export function OnboardingTour() {
+  return (
+    <TourProvider steps={steps} onAnalyticsEvent={handleAnalytics}>
+      {/* Your tour UI components */}
+    </TourProvider>
+  );
+}
+```
+
+The `dismissed_at_step` field is what makes step-level drop-off analysis possible. Without it, you know your completion rate is 40% but have no idea where users leave.
+
+### Step-level drop-off event schema
+
+Structure your events so you can build a funnel in PostHog, Mixpanel, or any analytics tool that supports sequential event analysis.
+
+```tsx
+// src/lib/tour-analytics.ts
+import type { TourAnalyticsEvent } from '@tourkit/core';
+
+interface StepEvent {
+  event: string;
+  properties: {
+    tour_id: string;
+    step_id: string;
+    step_index: number;
+    total_steps: number;
+    timestamp: number;
+  };
+}
+
+export function toStepEvent(event: TourAnalyticsEvent): StepEvent | null {
+  if (event.type !== 'step:view' && event.type !== 'step:complete') {
+    return null;
+  }
+
+  return {
+    event: `tour_${event.type.replace(':', '_')}`,
+    properties: {
+      tour_id: event.tourId,
+      step_id: event.stepId,
+      step_index: event.stepIndex,
+      total_steps: event.totalSteps,
+      timestamp: Date.now(),
+    },
+  };
+}
+```
+
+With this schema, building a step-by-step funnel in PostHog takes one query: filter by `tour_step_view` events, break down by `step_index`, and the funnel visualization shows exactly where users drop off.
+
+### Calculating completion rate from raw events
+
+If you're using a headless library with no built-in dashboard (which is any open-source tour library), you need to compute completion rate yourself.
+
+```tsx
+// src/lib/calculate-completion-rate.ts
+
+interface TourEvent {
+  type: 'tour_started' | 'tour_completed' | 'tour_dismissed';
+  tour_id: string;
+  user_id: string;
+  timestamp: number;
+}
+
+export function calculateCompletionRate(events: TourEvent[], tourId: string): number {
+  const tourEvents = events.filter((e) => e.tour_id === tourId);
+
+  const uniqueStarts = new Set(
+    tourEvents.filter((e) => e.type === 'tour_started').map((e) => e.user_id)
+  );
+
+  const uniqueCompletions = new Set(
+    tourEvents.filter((e) => e.type === 'tour_completed').map((e) => e.user_id)
+  );
+
+  if (uniqueStarts.size === 0) return 0;
+
+  return Math.round((uniqueCompletions.size / uniqueStarts.size) * 100);
+}
+```
+
+Count unique users, not events. A user who restarts and completes on the second attempt is one start and one completion, not two starts.
+
+## Five ways to improve your completion rate
+
+These five patterns come directly from Chameleon's benchmark data and practitioner reports, not guesswork. Each has a measured effect on tour completion rate, ranging from a 12% lift (progress indicators) to a 123% increase (user-initiated triggers). Apply them in order of impact.
+
+### 1. Keep tours under 5 steps
+
+The data is unambiguous. Four steps or fewer gets you 72-74% completion. Five steps halves that number. If your current tour has 7 steps, split it into two tours of 3-4 steps each and trigger the second contextually after the user completes a related action.
+
+Smashing Magazine's [guide to product tours in React](https://www.smashingmagazine.com/2020/08/guide-product-tours-react-apps/) puts it directly: "Focus on a single feature, and create a tour of two to three steps to highlight that feature. Show many small tours, rather than a single long tour."
+
+### 2. Let users initiate tours
+
+Self-serve tours complete 123% more often than auto-triggered ones. Add a help menu, a resource center, or a "Show me how" button near complex features. The user's decision to start a tour carries intent that no targeting rule can replicate.
+
+```tsx
+// src/components/FeatureHelpButton.tsx
+import { useTour } from '@tourkit/react';
+
+export function FeatureHelpButton({ tourId }: { tourId: string }) {
+  const { startTour } = useTour();
+
+  return (
+    <button
+      onClick={() => startTour(tourId)}
+      aria-label="Start guided tour for this feature"
+    >
+      Show me how
+    </button>
+  );
+}
+```
+
+### 3. Add progress indicators
+
+Progress bars or step counters improve completion by 12% and reduce dismissal by 20%. Users need to know how much is left. Without a progress indicator, every "Next" click is a gamble. The user doesn't know if there are 2 steps remaining or 12.
+
+### 4. Use contextual triggers over time delays
+
+Tours triggered by on-page user actions hit 69.56% completion. Time-delayed auto-play tours hit 31%. The difference is context: a tour that appears after a user clicks "New Project" for the first time is relevant. A tour that pops up 5 seconds after page load is an interruption.
+
+### 5. Connect tours to checklists
+
+Checklist-triggered tours are 21% more likely to be completed, and 60% of users who complete one checklist-triggered tour go on to finish multiple tasks. The checklist provides the "why" (complete your setup), and the tour provides the "how" (here's where to click).
+
+## Why these benchmarks come with caveats
+
+Two things to know before you pin "61%" to your OKRs.
+
+The Chameleon dataset is from 2019 and skewed toward SaaS companies using Chameleon's platform. Your fintech dashboard with complex forms will have different numbers than a social media app with a quick setup. As practitioners on the [Intercom Community noted](https://community.intercom.com/product-tours-10/what-is-the-industry-standard-completion-goal-rate-for-product-tours-299): "There is no single answer, not even a range of % you should expect." The right baseline is your own first measurement, not an industry average.
+
+And the industry is shifting away from completion rate as the primary success metric. Chameleon's [2025 analysis](https://www.chameleon.io/blog/effective-product-tour-metrics) proposes an Engagement-Initiative-Speed model. Did users engage with the content? Did they take initiative afterward? How quickly did they activate?
+
+About 70% of users skip traditional linear tours entirely, which means completion rate captures only the 30% who opted in.
+
+Use the benchmarks as a diagnostic starting point. If you're below 50%, fix the tour. If you're above 70%, stop optimizing completion and start measuring whether completers actually adopt the feature.
+
+## Accessibility and completion: the gap nobody measures
+
+No published benchmark data exists on how WCAG compliance, keyboard navigation, or focus management affects product tour completion rates. Every benchmark report from Chameleon, Userpilot, and Appcues ignores accessibility entirely. That's a blind spot worth calling out, because accessible tours reduce the cognitive friction that causes users to dismiss.
+
+Keyboard navigation, focus management, proper ARIA labels, and respecting `prefers-reduced-motion` all reduce cognitive friction during a tour. A tooltip that traps focus correctly means the user doesn't accidentally tab into the background and lose their place. A tour that disables animations for users with vestibular disorders doesn't trigger discomfort that leads to dismissal.
+
+Tour Kit ships with WCAG 2.1 AA compliance built in. Focus trapping, keyboard navigation, ARIA attributes, and motion reduction are defaults, not opt-ins. We haven't published our own completion data comparing accessible vs. non-accessible tour implementations (the project is too young for that dataset), but the mechanical argument is sound: fewer friction points mean fewer exits.
+
+## Tools for tracking tour completion rate
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Type</th>
+      <th>Tour analytics</th>
+      <th>Step-level tracking</th>
+      <th>Best for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PostHog</td>
+      <td>Product analytics</td>
+      <td>Via custom events</td>
+      <td>Yes (funnel builder)</td>
+      <td>Teams wanting self-hosted analytics</td>
+    </tr>
+    <tr>
+      <td>Mixpanel</td>
+      <td>Product analytics</td>
+      <td>Via custom events</td>
+      <td>Yes (funnel analysis)</td>
+      <td>Advanced segmentation needs</td>
+    </tr>
+    <tr>
+      <td>Amplitude</td>
+      <td>Product analytics</td>
+      <td>Via custom events</td>
+      <td>Yes (journey maps)</td>
+      <td>Enterprise teams with complex funnels</td>
+    </tr>
+    <tr>
+      <td>GA4</td>
+      <td>Web analytics</td>
+      <td>Via custom events</td>
+      <td>Limited (exploration reports)</td>
+      <td>Teams already using Google Analytics</td>
+    </tr>
+    <tr>
+      <td>Tour Kit Analytics</td>
+      <td>Tour-specific</td>
+      <td>Built-in callbacks</td>
+      <td>Yes (event schema)</td>
+      <td>React teams using Tour Kit</td>
+    </tr>
+  </tbody>
+</table>
+
+Tour Kit's `@tour-kit/analytics` package provides a plugin interface that normalizes events across providers. Wire up PostHog, Mixpanel, or any custom endpoint without changing your tour components.
+
+Tour Kit is our project, so take the recommendation with appropriate skepticism. The analytics callbacks work the same way in any headless tour library. The code examples above use Tour Kit's API, but the event schema pattern applies to React Joyride, Shepherd.js, or a custom implementation.
+
+Tour Kit doesn't have a visual builder, a built-in analytics dashboard, or a mobile SDK. It requires React 18+ and developers comfortable writing JSX. That means you need an external analytics tool regardless, and non-technical team members can't create tours on their own.
+
+Check the [Tour Kit documentation](https://usertourkit.com/) for the full analytics API reference, or explore the integration guides for [PostHog](/blog/track-product-tour-completion-posthog-events), [Mixpanel](/blog/mixpanel-product-tour-funnel), and [Amplitude](/blog/amplitude-tour-kit-onboarding-retention).
+
+## FAQ
+
+### What is a good product tour completion rate?
+
+Tour Kit benchmark data from Chameleon's 15M-interaction study shows the average product tour completion rate is 61%. Tours with 3-4 steps reach 72-74%, which most teams consider good. Above 70% means your tour structure is working, so shift focus to measuring whether completers actually adopt the feature. Below 50% signals a structural problem worth investigating.
+
+### How many steps should a product tour have?
+
+Product tours should have 4 steps or fewer based on benchmark data. Completion rates for 3-4 step tours sit at 72-74%, but adding a fifth step drops completion to 34%. If your onboarding requires more content, split it into multiple short tours triggered contextually rather than one long sequence. Smashing Magazine and Chameleon both recommend this single-feature, multi-tour approach.
+
+### How do you calculate product tour completion rate?
+
+Divide the number of unique users who reached the final step by the number of unique users who started the tour, then multiply by 100. Count users, not events. A user who restarts and completes on the second attempt counts as one start and one completion. Track `tour_started`, `tour_completed`, and `tour_dismissed` events with user IDs and step indices for accurate funnel analysis.
+
+### Why is my product tour completion rate low?
+
+The three most common causes are: too many steps (over 4 drops completion dramatically), auto-triggering without context (31% completion vs 67% for user-initiated), and missing progress indicators (+12% improvement when added). Check step-level drop-off data to find exactly where users leave.
+
+### Should I track tour completion rate or feature adoption?
+
+Track both. Tour completion rate is a diagnostic metric that tells you whether the tour experience works. Feature adoption is the outcome metric that tells you whether the tour achieved its goal. Pair completion tracking with a follow-up event (did the user perform the target action within 24 hours?) for the full picture.
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Product tour completion rate: benchmarks and how to improve it",
+  "description": "Measure and improve your product tour completion rate with real benchmarks from 15M interactions. Includes code examples for tracking step-level analytics in React.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-11",
+  "dateModified": "2026-04-11",
+  "image": "https://usertourkit.com/og-images/product-tour-completion-rate-benchmarks.png",
+  "url": "https://usertourkit.com/blog/product-tour-completion-rate-benchmarks",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/product-tour-completion-rate-benchmarks"
+  },
+  "keywords": ["product tour completion rate benchmark", "tour completion rate average", "improve tour completion rate", "product tour analytics"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+})}
+</script>
+
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a good product tour completion rate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The average product tour completion rate is 61% based on Chameleon's analysis of 15M interactions. Tours with 3-4 steps reach 72-74%, which most teams consider good. Above 70% means your tour structure is working. Below 50% signals a structural problem."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many steps should a product tour have?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Product tours should have 4 steps or fewer. Completion rates for 3-4 step tours sit at 72-74%, but a fifth step drops completion to 34%. Split longer flows into multiple short tours triggered contextually."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you calculate product tour completion rate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Divide unique users who reached the final step by unique users who started, then multiply by 100. Count users, not events. Track tour_started, tour_completed, and tour_dismissed events with user IDs for accurate funnel analysis."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is my product tour completion rate low?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The three most common causes are: too many steps (over 4 drops completion dramatically), auto-triggering without context (31% vs 67% for user-initiated), and missing progress indicators (adding them improves completion by 12%)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I track tour completion rate or feature adoption?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Track both. Completion rate is diagnostic, it tells you if the tour works. Feature adoption is the outcome, it tells you if the tour achieved its goal. Pair completion with a follow-up action event within 24 hours for the full picture."
+      }
+    }
+  ]
+})}
+</script>
+
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://usertourkit.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://usertourkit.com/blog"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Product tour completion rate: benchmarks and how to improve it",
+      "item": "https://usertourkit.com/blog/product-tour-completion-rate-benchmarks"
+    }
+  ]
+})}
+</script>

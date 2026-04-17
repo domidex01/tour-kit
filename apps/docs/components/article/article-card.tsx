@@ -8,20 +8,47 @@ interface ArticleCardProps {
   href: string
   badge?: string
   image?: string
+  publishedAt?: string
+  readingTime?: string
 }
 
-export function ArticleCard({ title, description, href, badge, image }: ArticleCardProps) {
+export function ArticleCard({
+  title,
+  description,
+  href,
+  badge,
+  image,
+  publishedAt,
+  readingTime,
+}: ArticleCardProps) {
+  const formattedDate = publishedAt
+    ? new Date(publishedAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : null
+
   return (
     <Link
       href={href}
       className="group flex flex-col overflow-hidden rounded-lg border border-fd-border bg-fd-card transition-all hover:border-fd-border/80 hover:shadow-md"
     >
       <div className="flex flex-1 flex-col p-6">
-        {badge && (
-          <span className="mb-3 inline-flex w-fit items-center rounded-full bg-fd-muted px-2.5 py-0.5 text-[11px] font-medium text-fd-muted-foreground">
-            {badge}
-          </span>
-        )}
+        <div className="mb-3 flex items-center gap-2">
+          {badge && (
+            <span className="inline-flex w-fit items-center rounded-full bg-fd-muted px-2.5 py-0.5 text-[11px] font-medium text-fd-muted-foreground">
+              {badge}
+            </span>
+          )}
+          {(formattedDate || readingTime) && (
+            <span className="text-[11px] text-fd-muted-foreground">
+              {formattedDate}
+              {formattedDate && readingTime && ' · '}
+              {readingTime}
+            </span>
+          )}
+        </div>
         {image && (
           <div className="relative mb-4 aspect-[1200/630] w-full overflow-hidden rounded-md">
             <Image

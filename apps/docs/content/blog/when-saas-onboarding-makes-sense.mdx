@@ -1,0 +1,258 @@
+---
+title: "When SaaS onboarding makes sense (honest assessment from a library author)"
+slug: "when-saas-onboarding-makes-sense"
+description: "A library author explains six scenarios where SaaS onboarding tools beat code-based libraries. Honest trade-offs with sourced data to help you decide."
+primary_keyword: "saas onboarding vs library when to use"
+secondary_keywords: ["no code vs code onboarding", "build vs buy onboarding", "saas onboarding tool", "when to use appcues vs library"]
+category: "Build vs Buy"
+schema_type: "TechArticle"
+spreadsheet_row: 143
+date: "2026-04-09"
+updated: "2026-04-09"
+ogImage: /og-images/when-saas-onboarding-makes-sense.png
+published: true
+---
+
+# When SaaS onboarding makes sense (honest assessment from a library author)
+
+I build Tour Kit, an open-source React library for product tours. My entire business depends on developers choosing code over SaaS platforms. So when I tell you that SaaS onboarding tools are the right choice for a lot of teams, you can assume I mean it.
+
+The build-vs-buy conversation has gotten stale. Library authors say "own your code." SaaS vendors say "don't reinvent the wheel." Both sides cherry-pick the scenarios that favor their product. That's not helpful when you're a team lead staring at a $300/month Appcues invoice or a two-month engineering estimate for custom onboarding.
+
+Here's my honest read on when SaaS wins, when it doesn't, and the specific signals that should drive your decision.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Why this conversation keeps going in circles
+
+The SaaS onboarding market hit $2.8B in 2026, growing at 19.6% CAGR. Vendors like Appcues, Userpilot, Pendo, and Chameleon have mature products with real capabilities. At the same time, Retool's 2026 Build vs. Buy Report found that 35% of enterprises have already replaced at least one SaaS tool with a custom build, and 78% plan to build more this year ([Retool, 2026](https://retool.com/blog/ai-build-vs-buy-report-2026)).
+
+Both trends are true simultaneously. The market is growing *and* teams are leaving it.
+
+That contradiction only makes sense when you realize the decision isn't about technology. It's about who owns onboarding at your company. If a product manager owns onboarding and iterates weekly, SaaS tools remove the developer bottleneck. If engineering owns it and treats tours as product code, a library gives them full control. The org chart matters more than the tech stack.
+
+## The argument: six scenarios where SaaS genuinely wins
+
+Deciding between SaaS onboarding and a library comes down to team structure, timeline, and scale. After building Tour Kit and watching teams adopt both approaches, I've identified six scenarios where a SaaS platform is the objectively better choice.
+
+These aren't strawmen. These are real situations where I'd tell someone not to use Tour Kit.
+
+### Your onboarding owner can't write React
+
+When product managers, marketers, or customer success teams own the onboarding experience, a SaaS visual editor removes the dependency on engineering entirely. They update copy, change targeting rules, and rearrange flow logic without filing a Jira ticket.
+
+Tour Kit requires a developer for every change. A heading typo? Developer. New user segment? Developer. Rearranged steps? Developer.
+
+If your onboarding changes weekly and the person making those decisions can't write JSX, a library creates a bottleneck that a SaaS tool eliminates.
+
+As of April 2026, tools like Product Fruits claim AI-assisted setup reduces onboarding creation time from 20+ hours to roughly 2 hours for non-technical users. That's a real capability gap.
+
+### You need onboarding live this week
+
+Appcues estimates the minimum cost of building onboarding in-house at $45,018 upfront, requiring a UX designer, a PM, and three engineers over two months ([Appcues, 2026](https://www.appcues.com/blog/build-vs-buy-saas)). Add $25,766/year in maintenance. Year-one total: $70,784 for a single flow.
+
+SaaS tools deploy in under an hour. For an early-stage startup racing to reduce first-week churn (roughly 60% of users drop off within 7 days, per Mixpanel data), speed is existential. A library is a better long-term investment. But "long-term" assumes you survive long enough to get there.
+
+### You need built-in analytics and A/B testing
+
+SaaS platforms bundle segmentation, funnel tracking, and experimentation in one dashboard. With a library, you wire up PostHog or Mixpanel yourself, build your own segmentation logic, and either buy a separate A/B testing tool or skip experimentation altogether.
+
+Tour Kit ships hooks for analytics integration (`onStepView`, `onStepComplete`, `onTourEnd`). But it doesn't ship a dashboard, a segmentation engine, or an A/B testing framework. If you need all three on day one, SaaS is faster to value. The [Tour Kit + PostHog integration](/blog/track-product-tour-completion-posthog-events) gets you most of the way there, but "most" isn't "all."
+
+### Onboarding spans more than just in-app
+
+Modern onboarding involves email drips, in-app tours, push notifications, and sometimes SMS. SaaS platforms increasingly offer cross-channel orchestration. A React library covers the in-app layer and nothing else.
+
+If you need to coordinate a welcome email sequence with an in-app tour that triggers a push notification three days later, you need either a platform or three tools stitched together. Tour Kit handles the in-app part well. The rest is on you.
+
+### Enterprise compliance requirements
+
+When enterprise customers demand SOC 2 Type II reports, data residency guarantees in specific regions, and audit logs for every onboarding interaction, mature SaaS vendors (Pendo, WalkMe) have that infrastructure ready. Building it yourself takes months.
+
+A library gives you data control by default since nothing leaves your servers. But proving that control to an auditor is your responsibility. You still need the documentation, the penetration tests, and the compliance certifications.
+
+### You manage 50+ flows across multiple products
+
+At scale, the operational overhead of managing onboarding through code becomes real. Fifty flows means fifty files, and every copy change requires a pull request, a review, and a deploy. Non-engineers can't contribute.
+
+Libraries scale well technically (no per-MAU pricing, no third-party script overhead). They scale poorly operationally if every content change requires an engineer. SaaS tools flip that trade-off.
+
+<table>
+  <thead>
+    <tr>
+      <th>Scenario</th>
+      <th>SaaS wins</th>
+      <th>Library wins</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PM owns onboarding</td>
+      <td>Visual editor, no dev dependency</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <td>Need it live this week</td>
+      <td>Deploy in under 1 hour</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <td>Analytics + A/B testing</td>
+      <td>Bundled dashboard</td>
+      <td>Custom integration possible</td>
+    </tr>
+    <tr>
+      <td>Cross-channel orchestration</td>
+      <td>Email + in-app + push</td>
+      <td>In-app only</td>
+    </tr>
+    <tr>
+      <td>SOC 2 / audit logs</td>
+      <td>Pre-built compliance</td>
+      <td>Data control (self-prove)</td>
+    </tr>
+    <tr>
+      <td>50+ flows, non-eng editors</td>
+      <td>No PRs for copy changes</td>
+      <td>No MAU pricing at scale</td>
+    </tr>
+    <tr>
+      <td>Design system consistency</td>
+      <td>--</td>
+      <td>Render your own components</td>
+    </tr>
+    <tr>
+      <td>Performance-sensitive app</td>
+      <td>--</td>
+      <td>No third-party scripts, 8KB gzipped</td>
+    </tr>
+    <tr>
+      <td>100K+ MAU</td>
+      <td>--</td>
+      <td>Flat cost vs $50K+/year SaaS</td>
+    </tr>
+  </tbody>
+</table>
+
+## The counterargument: when libraries win instead
+
+Libraries beat SaaS tools on cost predictability, performance, design control, and long-term ownership. These aren't theoretical advantages; they're the reasons 35% of enterprises have already replaced SaaS tools with custom builds, per the Retool 2026 report. Here are the scenarios where I genuinely believe a library is the better path.
+
+**Your MAU count is above 50K.** SaaS onboarding tools charge per monthly active user. Appcues starts at $300/month, Userflow at $595/month. At 100K+ MAU, you can easily hit $50K+/year. Tour Kit Pro is $99 once. The math gets obvious fast. (Full breakdown in our [build vs buy calculator](/blog/build-vs-buy-product-tour-calculator).)
+
+**Performance is a real constraint.** SaaS tools inject third-party JavaScript. We measured the impact in our [Lighthouse audit](/blog/onboarding-tool-lighthouse-performance) and found meaningful Core Web Vitals degradation. Tour Kit's core ships at under 8KB gzipped with zero runtime dependencies. If your Lighthouse score matters (and for SEO-dependent products, it does), you want library code you control.
+
+**Your design system is non-negotiable.** SaaS tool UI never perfectly matches your design tokens. Close, but not exact. A headless library like Tour Kit renders your components. The tooltip is your tooltip. The overlay is your overlay. For products where brand consistency matters down to the pixel, this gap is real.
+
+**You're already a React shop with available engineering time.** If your team writes React daily and has capacity, the "2 months to build" estimate from SaaS vendors is outdated. AI-assisted development has compressed timelines significantly.
+
+Borys Aptekar at ClickUp noted they eliminated $200K annually in SaaS costs by building custom tools, with AI accelerating the process ([Retool, 2026](https://retool.com/blog/ai-build-vs-buy-report-2026)). Tour Kit gives you a head start since you aren't building from scratch.
+
+**Vendor lock-in worries you.** Migrating from Appcues to Userpilot means rebuilding every flow from scratch. Library code lives in your repo. You can swap Tour Kit for another library or go fully custom without losing your tour configurations.
+
+## The decision framework I actually recommend
+
+The right choice between SaaS onboarding and a library depends on four variables: who owns onboarding, your MAU trajectory, how much performance matters, and whether onboarding spans multiple channels. Stop thinking about "build vs buy" as a binary. Ask these questions instead:
+
+1. **Who owns onboarding at your company?** If it's a PM or marketer who ships weekly changes, lean SaaS. If it's engineering and changes ship with product releases, lean library.
+
+2. **What's your MAU trajectory?** Below 10K MAU, SaaS pricing is manageable. Above 50K, run the numbers carefully. Above 100K, a library almost certainly wins on cost.
+
+3. **How important is performance?** If you're a consumer app competing on page speed, every third-party script hurts. If you're a B2B dashboard where users expect a heavier page, the performance hit matters less.
+
+4. **How many channels does onboarding span?** In-app only? Library. In-app plus email plus mobile? You need a platform or a multi-tool stack regardless.
+
+There's a middle path too. Start with a SaaS tool to validate your onboarding flows quickly. Once you know what works, migrate the proven flows to a library for long-term ownership. We wrote a [migration guide from Appcues](/blog/migrate-appcues-code-owned-onboarding) for exactly this pattern.
+
+## What I'd change about libraries (including mine)
+
+Code-based onboarding libraries still have real gaps compared to SaaS platforms, and pretending otherwise doesn't help anyone pick the right tool. If I'm being honest about the state of code-based onboarding, here's what needs work.
+
+Libraries are still harder to adopt than they should be. The gap between "install the package" and "production-ready onboarding with analytics" is wider than I'd like. Tour Kit ships 10 packages that compose well, but composability adds setup cost.
+
+A PM comparing Tour Kit's docs to Appcues's visual builder will choose Appcues every time. They're not wrong to.
+
+We don't have a visual editor. Building one is on the roadmap, but today every Tour Kit change requires code. That's a real limitation for teams where product or growth owns onboarding. React 18+ is the minimum too, which excludes legacy codebases.
+
+The honest answer is that the market has room for both approaches. SaaS tools aren't going away. Neither are libraries. The question is which trade-offs your team can live with.
+
+## FAQ
+
+### Is SaaS onboarding better than using a library?
+
+SaaS onboarding tools are better when non-technical teams own the experience, when you need to ship in days, or when you need built-in analytics and A/B testing. Libraries win on design system consistency, performance control, and cost predictability at scale. Neither is universally better; the choice depends on who owns onboarding at your company.
+
+### How much does SaaS onboarding cost compared to a library?
+
+SaaS tools range from $89/month (UserGuiding) to $595/month (Userflow), scaling with MAU count. At 100K+ MAU, annual costs can exceed $50K. Building in-house costs roughly $70,784 in year one per Appcues estimates. Tour Kit Pro costs $99 one-time with no per-MAU pricing, though you invest developer time in integration.
+
+### When should a startup choose SaaS onboarding over building?
+
+Startups should choose SaaS when speed matters more than long-term cost. If your team lacks a frontend engineer, you're losing 60% of users in the first week, or your PM needs to iterate without engineering, SaaS gets you live faster. Revisit the decision once you've validated flows and MAU pricing becomes uncomfortable.
+
+### Can you start with SaaS and migrate to a library later?
+
+Yes, and we recommend this for many teams. Use a SaaS tool to validate which flows actually move activation metrics. Once proven, migrate them to a library like Tour Kit for long-term ownership and cost control. The main risk: migration means rebuilding every flow since no standard export format exists between platforms.
+
+### What are the main disadvantages of SaaS onboarding tools?
+
+SaaS onboarding tools have four main drawbacks: MAU-based pricing that scales with growth, third-party JavaScript that impacts Core Web Vitals, UI that can't match your design system, and vendor lock-in. The Retool 2026 report found 35% of enterprises have already replaced SaaS tools with custom builds.
+
+{/* JSON-LD Schema */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "When SaaS onboarding makes sense (honest assessment from a library author)",
+  "description": "A library author explains six scenarios where SaaS onboarding tools beat code-based libraries. Honest trade-offs with sourced data to help you decide.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://tourkit.dev/og-images/when-saas-onboarding-makes-sense.png",
+  "url": "https://tourkit.dev/blog/when-saas-onboarding-makes-sense",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/when-saas-onboarding-makes-sense"
+  },
+  "keywords": ["saas onboarding vs library when to use", "no code vs code onboarding", "build vs buy onboarding"],
+  "proficiencyLevel": "Beginner",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+
+{/*
+Internal linking suggestions:
+- FROM this article TO: /blog/build-vs-buy-product-tour-calculator (cost comparison)
+- FROM this article TO: /blog/onboarding-tool-lighthouse-performance (performance data)
+- FROM this article TO: /blog/migrate-appcues-code-owned-onboarding (migration guide)
+- FROM this article TO: /blog/track-product-tour-completion-posthog-events (analytics integration)
+- FROM this article TO: /blog/onboarding-software-cost-2026 (pricing details)
+- FROM /blog/best-alternatives-building-onboarding-in-house TO this article (related opinion)
+- FROM /blog/mau-pricing-onboarding-tool TO this article (related cost discussion)
+- FROM /blog/open-source-onboarding-cost-developer-time TO this article (related cost discussion)
+
+Distribution checklist:
+- Dev.to (canonical to tourkit.dev)
+- Hashnode (canonical to tourkit.dev)
+- Reddit r/reactjs (discussion post, not link drop)
+- Reddit r/SaaS (relevant to build vs buy)
+- Hacker News (honest take angle plays well)
+- Indie Hackers (founder perspective)
+*/}

@@ -24,7 +24,7 @@ const MONOREPO_ROOT = path.resolve(DOCS_ROOT, '../..')
 const CONTENT_DIR = path.resolve(DOCS_ROOT, 'content/docs')
 const PUBLIC_DIR = path.resolve(DOCS_ROOT, 'public')
 
-const BASE_URL = 'https://tour-kit-docs.vercel.app/docs'
+const BASE_URL = 'https://usertourkit.com/docs'
 
 const PROJECT_DESCRIPTION =
   'userTourKit is a headless onboarding and product tour library for React. ' +

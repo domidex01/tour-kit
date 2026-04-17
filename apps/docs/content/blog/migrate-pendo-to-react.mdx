@@ -1,0 +1,496 @@
+---
+title: "How to export Pendo tours to a self-owned React solution"
+slug: "migrate-pendo-to-react"
+description: "Replace Pendo guides with a code-owned React tour library. Step-by-step migration with API mapping, working TypeScript code, and cost analysis."
+primary_keyword: "pendo migration open source"
+secondary_keywords: ["leave pendo alternative", "pendo react replacement", "migrate pendo to react"]
+category: "Tutorials"
+schema_type: "TechArticle"
+spreadsheet_row: 98
+date: "2026-04-07"
+updated: "2026-04-07"
+published: true
+ogImage: /og-images/migrate-pendo-to-react.png
+---
+
+# How to export Pendo tours to a self-owned React solution
+
+You're paying Pendo $40K-$80K a year for product tours. Your React app has grown. The guides take 54KB of third-party JavaScript on every page load, your SPA throws `pendo is undefined` errors after navigation, and your design team gave up trying to match your Tailwind tokens inside Pendo's theme editor.
+
+This isn't a "Pendo is bad" article. Pendo does analytics, session replay, and NPS surveys across web and mobile. But if your primary use case is in-app guides and you have a React codebase, owning that code eliminates a six-figure annual dependency and gives you full control over rendering, accessibility, and data.
+
+This guide walks you through exporting your Pendo guide configurations, rebuilding them as React components with Tour Kit, and removing the Pendo snippet. The process is incremental, so nothing breaks in production. Budget 3-5 hours for a typical setup with 5-10 guides.
+
+**Bias disclosure:** We built Tour Kit. Every claim below is verifiable against npm, GitHub, and Pendo's own documentation.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What you'll build
+
+By the end of this tutorial, you'll have replaced Pendo's third-party guide system with React components you own and deploy from your codebase. Your Pendo tooltip walkthroughs become `<Tour>` components with typed steps, your badges become `<HintSpot>` components, and your segment targeting becomes standard React conditional logic. The Pendo snippet is gone, saving 54KB of third-party JavaScript per page load and $40K-$80K per year in SaaS spend.
+
+## Why migrate away from Pendo guides?
+
+Pendo serves over 10,000 companies and combines product analytics, session replay, and in-app guidance in a single platform. As of April 2026, mid-market customers pay $40K-$80K annually, with renewal increases of 5-20% unless capped by multi-year contracts ([Userorbit, 2026](https://userorbit.com/blog/pendo-pricing-guide)). Teams migrate when the guides portion of that spend stops justifying the cost, particularly React teams that can build the same functionality in their own codebase.
+
+One former customer put it plainly: "High price was the decision criteria because we were paying lots and not using it" ([UXtweak](https://blog.uxtweak.com/top-pendo-alternatives/)).
+
+Here are the specific technical pain points that push React teams toward a code-owned solution:
+
+- **SPA routing friction.** Pendo uses `window.pendo.initialize` and DOM mutation observers. React's virtual DOM and client-side routing cause "page mismatch" errors where guides target elements that have already unmounted
+- **54KB third-party script** on every page, loaded before your app code, fetching guide configs from Pendo's servers on each session. Tour Kit's core is under 8KB gzipped and tree-shakes to only what you import
+- **Design system conflicts.** Pendo's theme editor constrains you to their CSS variables. Teams using Tailwind or shadcn/ui end up overriding every tooltip, modal, and badge to match design tokens
+- **Accessibility gaps.** Pendo claims WCAG 2.2 AA alignment but admits they're "in the process" of full compliance. Their own docs recommend badge-activated guides over automatic ones for accessibility ([Pendo Help Center](https://support.pendo.io/hc/en-us/articles/4403005253659-Guide-accessibility))
+- **Data lock-in.** Full data export (Data Sync to S3/Snowflake) requires the Ultimate tier at $100K+/year. Base and Core customers export guide configs via API but can't bulk-export analytics or event data in standard formats ([Pendo Data Export Methods](https://support.pendo.io/hc/en-us/articles/44083309544219-Methods-for-exporting-Pendo-data))
+
+To be fair: Pendo's visual guide builder lets non-technical product managers create tours without deploying code. Tour Kit requires React developers. If your PM team creates and iterates on guides independently, Pendo's no-code workflow has real value. Migrate when your engineering team owns guide creation and the SaaS cost no longer makes sense.
+
+## What this migration replaces (and what it doesn't)
+
+This migration targets Pendo's in-app guide system specifically, not the entire Pendo platform. If you use Pendo for product analytics, session replay, and guides, you're replacing one slice of that bundle, not all three. This migration covers in-app guides (tooltips, walkthroughs, lightboxes, banners) that you built inside Pendo's guide builder. Tour Kit replaces these with React components you own.
+
+This migration does **not** replace:
+
+- **Product analytics** (feature usage, page views, funnels): use PostHog, Mixpanel, or Amplitude instead
+- **Session replay**: use PostHog, LogRocket, or Highlight.io
+- **NPS/CSAT surveys**: Tour Kit's `@tour-kit/surveys` package handles this, or use a standalone tool
+- **Mobile guides** (iOS/Android SDK): Tour Kit is web-only
+
+If you use Pendo for analytics and guides, plan the analytics migration separately. PostHog has a dedicated [Pendo migration guide](https://posthog.com/docs/migrate/pendo) for the analytics side.
+
+## Pendo to Tour Kit concept mapping
+
+Pendo is a hosted platform that injects guides via a third-party script and a global `window.pendo` object. Tour Kit is a React library where guides are components in your codebase, rendered through your component tree with typed props. This table maps the Pendo concepts you already know to their Tour Kit equivalents so you can translate your existing configuration into React code.
+
+<table>
+<thead>
+<tr><th>Pendo concept</th><th>Tour Kit equivalent</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>Pendo snippet (<code>&lt;script&gt;</code>)</td><td><code>@tourkit/react</code> package</td><td>npm dependency, no external script</td></tr>
+<tr><td>Guide (tooltip walkthrough)</td><td><code>&lt;Tour&gt;</code> component</td><td>Declared in JSX, type-safe steps</td></tr>
+<tr><td>Guide step</td><td><code>&lt;TourStep&gt;</code></td><td>Each step is a React component</td></tr>
+<tr><td>Lightbox guide</td><td><code>&lt;Tour&gt;</code> with modal layout</td><td>You control the modal rendering</td></tr>
+<tr><td>Banner guide</td><td><code>@tour-kit/announcements</code></td><td>Banner, toast, modal, slideout variants</td></tr>
+<tr><td>Badge (hotspot)</td><td><code>@tour-kit/hints</code></td><td>Pulsing beacons with tooltip on click</td></tr>
+<tr><td><code>pendo.initialize()</code></td><td><code>&lt;TourKitProvider&gt;</code></td><td>Wraps your app, no <code>window</code> globals</td></tr>
+<tr><td><code>pendo.track()</code></td><td><code>@tour-kit/analytics</code></td><td>Plugin-based: PostHog, Mixpanel, GA4, custom</td></tr>
+<tr><td>Segment targeting</td><td><code>when</code> prop / conditional rendering</td><td>Standard React conditional logic</td></tr>
+<tr><td>Guide activation rules</td><td><code>@tour-kit/scheduling</code></td><td>Time-based, URL-based, event-based triggers</td></tr>
+<tr><td>Guide throttling</td><td><code>@tour-kit/scheduling</code> frequency rules</td><td>Per-user cooldowns and priority queues</td></tr>
+<tr><td>CSS theme editor</td><td>Your CSS / Tailwind classes</td><td>Full design system control</td></tr>
+<tr><td>ARIA role config per guide</td><td>Automatic ARIA roles</td><td>WCAG 2.1 AA built-in, not manual</td></tr>
+<tr><td>Resource Center</td><td><code>@tour-kit/checklists</code></td><td>Task lists with dependencies and progress</td></tr>
+<tr><td>NPS/survey guides</td><td><code>@tour-kit/surveys</code></td><td>NPS, CSAT, CES with fatigue prevention</td></tr>
+</tbody>
+</table>
+
+## Prerequisites
+
+You need a React 18.2+ or React 19 project with TypeScript 5+ (recommended but not strictly required), access to your Pendo guide list from the dashboard under Settings, Product, then Guides, and your Pendo API key from Settings, App Details. Gather these before writing any migration code, because the first step pulls guide configs from Pendo's API.
+
+**Time estimate:** 3-5 hours for 5-10 guides. Complex guides with segment targeting or multi-page flows take longer. Plan for one guide at a time. Don't try to migrate everything in a single PR.
+
+## Step 1: export your Pendo guide configurations
+
+Pendo doesn't offer a one-click "export all guides" button, so you need to pull guide data from their REST API and save each guide's step selectors, content HTML, and targeting rules as JSON files. This step typically takes 15-30 minutes depending on how many guides you have configured.
+
+Fetch your guide list using Pendo's REST API:
+
+```bash
+# List all guides for your app
+curl -X GET "https://app.pendo.io/api/v1/guide" \
+  -H "x-pendo-integration-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  | jq '.[].name, .[].id, .[].state' > pendo-guides.txt
+```
+
+For each guide, pull the detailed configuration:
+
+```bash
+# Get a single guide's steps and targeting rules
+curl -X GET "https://app.pendo.io/api/v1/guide/GUIDE_ID" \
+  -H "x-pendo-integration-key: YOUR_API_KEY" \
+  | jq '{name, steps: [.steps[] | {content, elementPathRule, type}], \
+         segment: .audienceUiHint}' > guide-detail.json
+```
+
+Save these JSON files. You'll reference them when building your Tour Kit steps. The key fields to capture for each step:
+
+- `elementPathRule`: the CSS selector Pendo uses to target elements (maps to Tour Kit's `target` prop)
+- `content`: the HTML body of the tooltip (you'll convert this to JSX)
+- `type`: tooltip, lightbox, or banner (determines which Tour Kit component to use)
+- `audienceUiHint`: segment targeting rules (you'll convert these to React conditionals)
+
+## Step 2: install Tour Kit alongside Pendo
+
+The safest migration approach is running both tools simultaneously, because Tour Kit and Pendo target DOM elements independently and don't interfere with each other. Install Tour Kit while Pendo is still active, then migrate one guide at a time without breaking production tours.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Wrap your app with Tour Kit's provider. This doesn't affect Pendo. Both can coexist:
+
+```tsx
+// src/app/layout.tsx (Next.js) or src/App.tsx (Vite)
+import { TourKitProvider } from '@tourkit/react';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <TourKitProvider>
+      {children}
+    </TourKitProvider>
+  );
+}
+```
+
+## Step 3: rebuild your first guide as a React component
+
+Start with your simplest Pendo guide, something like a 3-4 step tooltip walkthrough, and convert it from Pendo's JSON configuration into Tour Kit components. This first conversion takes the longest because you're learning the API, but subsequent guides go much faster once you have a working template.
+
+Here's a Pendo guide that walks users through a dashboard. The Pendo version uses `elementPathRule` selectors and HTML content strings. The Tour Kit version uses the same CSS selectors but renders through your React components:
+
+```tsx
+// src/tours/dashboard-tour.tsx
+import { Tour, TourStep, TourCard, TourOverlay } from '@tourkit/react';
+import { useTour } from '@tourkit/react';
+
+const steps = [
+  {
+    id: 'welcome',
+    target: '[data-pendo="dashboard-header"]', // Same selector Pendo used
+    title: 'Welcome to your dashboard',
+    content: 'This is where you track key metrics. Click Next to continue.',
+  },
+  {
+    id: 'metrics',
+    target: '[data-pendo="metrics-panel"]',
+    title: 'Your metrics at a glance',
+    content: 'Revenue, churn, and activation rates update in real time.',
+  },
+  {
+    id: 'actions',
+    target: '[data-pendo="quick-actions"]',
+    title: 'Quick actions',
+    content: 'Create segments, export reports, or invite teammates from here.',
+  },
+];
+
+export function DashboardTour() {
+  const { isActive } = useTour('dashboard-tour');
+
+  return (
+    <Tour tourId="dashboard-tour" steps={steps}>
+      <TourOverlay />
+      <TourStep>
+        {({ step, next, prev, stop, currentIndex, totalSteps }) => (
+          <TourCard>
+            <TourCard.Header>
+              <TourCard.Title>{step.title}</TourCard.Title>
+              <TourCard.Close onClick={stop} />
+            </TourCard.Header>
+            <TourCard.Body>{step.content}</TourCard.Body>
+            <TourCard.Footer>
+              <TourCard.Progress current={currentIndex + 1} total={totalSteps} />
+              <div className="flex gap-2">
+                {currentIndex > 0 && (
+                  <button onClick={prev} className="text-sm text-muted-foreground">
+                    Back
+                  </button>
+                )}
+                <button onClick={next} className="text-sm font-medium">
+                  {currentIndex === totalSteps - 1 ? 'Done' : 'Next'}
+                </button>
+              </div>
+            </TourCard.Footer>
+          </TourCard>
+        )}
+      </TourStep>
+    </Tour>
+  );
+}
+```
+
+Notice the `data-pendo` selectors. Pendo typically generates its own selectors, but many teams add `data-pendo` attributes for stability. Keep those attributes. They work as Tour Kit targets too. Rename them to `data-tour` if you want, but there's no rush.
+
+## Step 4: convert Pendo targeting rules to React logic
+
+Pendo's segment targeting uses a visual rules builder where product managers configure conditions like "visited page X" or "account property Z equals true." In Tour Kit, targeting is just React code, meaning you write conditionals, use hooks, or check context values the same way you would for any other conditional UI in your app.
+
+Here's how common Pendo targeting patterns translate:
+
+```tsx
+// src/tours/conditional-tour.tsx
+import { useTour } from '@tourkit/react';
+import { useUser } from '@/hooks/use-user'; // Your auth hook
+
+export function OnboardingTour() {
+  const { user } = useUser();
+  const { start } = useTour('onboarding');
+
+  // Pendo equivalent: segment = "signed up within 7 days"
+  const isNewUser = user.createdAt > Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+  // Pendo equivalent: activation rule = "visited /dashboard"
+  // In React, just render the tour on the dashboard page
+  if (!isNewUser) return null;
+
+  return (
+    <button onClick={() => start()}>
+      Start tour
+    </button>
+  );
+}
+```
+
+For more complex scheduling (time-based triggers, frequency caps, cooldowns), use `@tour-kit/scheduling`:
+
+```bash
+npm install @tourkit/scheduling
+```
+
+```tsx
+// src/tours/scheduled-tour.tsx
+import { ScheduleProvider, useSchedule } from '@tourkit/scheduling';
+
+// Pendo equivalent: "Show once per user, only on weekdays between 9am-5pm"
+const schedule = {
+  frequency: 'once',
+  timezone: 'America/New_York',
+  windows: [{ days: [1, 2, 3, 4, 5], startHour: 9, endHour: 17 }],
+};
+```
+
+## Step 5: migrate Pendo badges to Tour Kit hints
+
+Pendo's badge feature renders pulsing dots on the page that expand into tooltips when clicked, typically used to highlight new features or draw attention to underused UI elements. The Tour Kit equivalent is `@tour-kit/hints`, which provides the same pulsing beacon pattern but renders through your React component tree instead of injected DOM nodes.
+
+```bash
+npm install @tourkit/hints
+```
+
+```tsx
+// src/components/feature-hint.tsx
+import { HintSpot, HintContent } from '@tourkit/hints';
+
+export function NewExportHint() {
+  return (
+    <HintSpot target="[data-pendo='export-button']" pulse>
+      <HintContent>
+        <p className="text-sm">New: export reports as CSV or PDF.</p>
+        <a href="/docs/exports" className="text-sm underline">Learn more</a>
+      </HintContent>
+    </HintSpot>
+  );
+}
+```
+
+The key difference: Pendo badges are configured in their dashboard and injected at runtime. Tour Kit hints live in your component tree. You can conditionally render them, style them with your CSS, and test them in Vitest like any other component.
+
+## Step 6: disable Pendo guides and remove the snippet
+
+After you've migrated and tested all your guides for at least one sprint with both systems running in parallel, start the Pendo removal process by disabling guides first, then monitoring, then removing the snippet entirely. This staged approach catches any tours you missed before cutting the dependency.
+
+1. **Disable guides in Pendo:** In the Pendo dashboard, set each migrated guide to "Draft" status. This stops them from displaying while you verify your Tour Kit replacements
+2. **Monitor for one release cycle.** Watch error tracking and analytics to confirm the Tour Kit versions perform correctly
+3. **Remove the Pendo snippet:**
+
+```tsx
+// BEFORE: Remove this from your layout
+// <script src="https://cdn.pendo.io/agent/static/YOUR_KEY/pendo.js" />
+
+// AFTER: Just TourKitProvider remains
+<TourKitProvider>
+  {children}
+</TourKitProvider>
+```
+
+4. **Clean up:** Uninstall any Pendo npm packages (`@pendo/agent`, `pendo-sdk`, etc.) and remove `window.pendo` references from your codebase
+
+If you're keeping Pendo for analytics only (not guides), you can leave the snippet and just stop creating guides. But at $40K+/year, most teams find a dedicated analytics tool is cheaper.
+
+## What you gain (and what you lose)
+
+Every migration involves tradeoffs, and moving from a full-featured SaaS platform to a code-owned library means gaining some capabilities while giving up others. This table compares the two approaches across ten dimensions that matter most to React teams evaluating a pendo migration open source path.
+
+<table>
+<thead>
+<tr><th>Dimension</th><th>Pendo</th><th>Tour Kit</th></tr>
+</thead>
+<tbody>
+<tr><td>Annual cost (mid-market)</td><td>$40K-$80K</td><td>$0 (MIT) or $99 one-time Pro</td></tr>
+<tr><td>Bundle impact</td><td>54KB third-party script</td><td>&lt;8KB core gzipped, tree-shakeable</td></tr>
+<tr><td>Guide creation</td><td>Visual builder, no-code</td><td>React components, requires developers</td></tr>
+<tr><td>Design system fit</td><td>Theme editor with constraints</td><td>Full headless, your CSS</td></tr>
+<tr><td>React 19 support</td><td>Manual initialization, SPA workarounds</td><td>Native hooks, zero workarounds</td></tr>
+<tr><td>Accessibility</td><td>"In process" WCAG 2.2 AA</td><td>WCAG 2.1 AA built-in</td></tr>
+<tr><td>Data ownership</td><td>Pendo servers, export costs extra</td><td>Your database, standard JSON</td></tr>
+<tr><td>Mobile support</td><td>iOS + Android SDK</td><td>Web only (no React Native)</td></tr>
+<tr><td>Built-in analytics</td><td>Full product analytics suite</td><td>Event callbacks (bring your own analytics)</td></tr>
+<tr><td>Vendor lock-in</td><td>Multi-year contracts, proprietary formats</td><td>npm install, MIT license</td></tr>
+</tbody>
+</table>
+
+**What you lose:** Pendo's visual guide builder, mobile SDK, built-in product analytics, and session replay. If non-technical PMs create guides independently, they'll need developer involvement with Tour Kit.
+
+**What you gain:** Full rendering control, your design system's CSS, automatic accessibility, React-native architecture (hooks, composition, TypeScript), data ownership, and $40K-$80K/year back in your budget.
+
+Tour Kit has no visual builder and requires React developers. That's a genuine limitation. For teams where engineering owns onboarding flows, it's irrelevant. For teams where PMs iterate on guide copy daily, it matters.
+
+## Common issues and troubleshooting
+
+Most migration problems come from CSS selector mismatches between what Pendo generated and what Tour Kit expects, or from forgetting to disable the old Pendo guide before activating the Tour Kit replacement. Here are the three issues we see most often.
+
+### "Tour tooltip doesn't appear after migration"
+
+Check that the `data-pendo` (or `data-tour`) attribute is still on the target element. Pendo sometimes uses generated CSS selectors like `#app > div:nth-child(3) > button` that break when your component tree changes. Tour Kit uses the same selectors, so if Pendo's selector broke easily, yours will too. Switch to stable `data-tour` attributes:
+
+```tsx
+<button data-tour="export-button">Export</button>
+```
+
+### "Pendo guide still shows alongside Tour Kit tour"
+
+You forgot to disable the guide in Pendo's dashboard. Set the migrated guide to "Draft" status, or add `pendo.excludeAllText()` as a temporary measure while you're in the transition period.
+
+### "How do I migrate Pendo analytics events?"
+
+Tour Kit doesn't replace Pendo's analytics. Use Tour Kit's `@tour-kit/analytics` package to send tour events to your analytics provider:
+
+```tsx
+import { AnalyticsProvider } from '@tourkit/analytics';
+import { posthogPlugin } from '@tourkit/analytics/posthog';
+
+<AnalyticsProvider plugins={[posthogPlugin()]}>
+  <TourKitProvider>{children}</TourKitProvider>
+</AnalyticsProvider>
+```
+
+See our [PostHog integration guide](/blog/track-product-tour-completion-posthog-events) and [Mixpanel funnel analysis guide](/blog/mixpanel-product-tour-funnel) for detailed analytics setup.
+
+## Next steps
+
+Once your Pendo guides are running as Tour Kit components, you can add capabilities that Pendo either locks behind expensive tiers or doesn't support at all. Each of these packages installs independently and integrates with the same `TourKitProvider` you already set up.
+
+- **Checklists.** `@tour-kit/checklists` adds onboarding task lists with dependency tracking ([docs](/docs/checklists))
+- **Surveys.** `@tour-kit/surveys` handles NPS, CSAT, and CES without Pendo's white-label surcharge ([docs](/docs/surveys))
+- **Feature adoption.** `@tour-kit/adoption` tracks which features users have adopted and nudges toward underused ones ([docs](/docs/adoption))
+- **Announcements.** `@tour-kit/announcements` replaces Pendo banners and lightboxes with React components ([docs](/docs/announcements))
+
+Each package is installed separately. No monolithic bundle. Import only what you use.
+
+## FAQ
+
+### Can I migrate from Pendo to Tour Kit incrementally?
+
+Tour Kit and Pendo coexist without conflicts. Install Tour Kit alongside Pendo, migrate one guide at a time, and remove the Pendo snippet only after all guides are rebuilt and tested. Most teams complete the pendo migration open source path across 2-3 sprints, handling 3-5 guides per sprint.
+
+### Does Tour Kit replace Pendo's product analytics?
+
+Tour Kit handles guides and onboarding, not analytics. It fires typed event callbacks (`onStepComplete`, `onTourFinish`, `onStepSkip`) that you route to PostHog, Mixpanel, or GA4 via `@tour-kit/analytics`. For the analytics side of a Pendo migration, PostHog offers a dedicated [migration path](https://posthog.com/docs/migrate/pendo).
+
+### How much does a Pendo migration save?
+
+A mid-market Pendo contract runs $40K-$80K per year with 5-20% annual renewal increases. Tour Kit's core packages are MIT-licensed and free. Pro features (adoption tracking, scheduling, surveys) are a one-time $99 purchase. Even accounting for 40 hours of developer time at $150/hour ($6,000), the migration pays for itself within the first quarter.
+
+### What about Pendo's mobile SDK?
+
+Tour Kit is web-only. If you use Pendo guides on iOS and Android, you'll need a separate mobile solution (or skip mobile guide migration). Most teams migrating to Tour Kit only use Pendo for web guides and keep a separate mobile onboarding approach.
+
+### Is Tour Kit accessible enough to replace Pendo?
+
+Tour Kit ships with WCAG 2.1 AA compliance built in: automatic ARIA roles, keyboard navigation, focus management, and `prefers-reduced-motion` support. Pendo claims WCAG 2.2 AA alignment but is still "in the process" of full compliance. Their own documentation recommends specific guide types for better accessibility. Tour Kit's accessibility is automatic, not a per-guide configuration step.
+
+{/* schema-start */}
+
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How to export Pendo tours to a self-owned React solution",
+  "description": "Replace Pendo guides with a code-owned React tour library. Step-by-step migration with API mapping, working TypeScript code, and cost analysis.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/migrate-pendo-to-react.png",
+  "url": "https://tourkit.dev/blog/migrate-pendo-to-react",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/migrate-pendo-to-react"
+  },
+  "keywords": ["pendo migration open source", "leave pendo alternative", "pendo react replacement", "migrate pendo to react"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+
+export const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I migrate from Pendo to Tour Kit incrementally?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit and Pendo coexist without conflicts. Install Tour Kit alongside Pendo, migrate one guide at a time, and remove the Pendo snippet only after all guides are rebuilt and tested. Most teams complete the migration across 2-3 sprints."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Tour Kit replace Pendo's product analytics?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit is a guide and onboarding library, not an analytics platform. It fires typed event callbacks that you route to your analytics provider via @tour-kit/analytics. For Pendo analytics migration, PostHog offers a dedicated migration path."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does a Pendo migration save?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A mid-market Pendo contract runs $40K-$80K per year. Tour Kit's core packages are MIT-licensed and free. Pro features are a one-time $99 purchase. Even accounting for developer time, the migration pays for itself within the first quarter."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What about Pendo's mobile SDK?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit is web-only. If you use Pendo guides on iOS and Android, you'll need a separate mobile solution. Most teams migrating to Tour Kit only use Pendo for web guides."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Tour Kit accessible enough to replace Pendo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit ships with WCAG 2.1 AA compliance built in: automatic ARIA roles, keyboard navigation, focus management, and prefers-reduced-motion support. Pendo is still working toward full WCAG 2.2 AA compliance."
+      }
+    }
+  ]
+}
+
+{/* schema-end */}
+
+{/* internal-links: migrate-react-joyride-tour-kit, migrate-shepherd-js-tour-kit, migrate-driver-js-tour-kit, track-product-tour-completion-posthog-events, mixpanel-product-tour-funnel, best-self-hosted-onboarding-tools */}
+
+{/* distribution: dev.to (canonical to tourkit.dev), hashnode (canonical), reddit r/reactjs "migrating from Pendo to code-owned React tours" */}

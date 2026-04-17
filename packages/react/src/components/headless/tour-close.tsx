@@ -1,3 +1,5 @@
+'use client'
+
 import { useTour } from '@tour-kit/core'
 import type * as React from 'react'
 

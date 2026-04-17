@@ -1,0 +1,539 @@
+---
+title: "Gamification in onboarding: badges, streaks, and progress bars that work"
+slug: "gamification-onboarding-badges-streaks-progress-bars"
+description: "Build gamified onboarding with progress bars, streaks, and badges in React. Data-backed patterns, accessible code examples, and when gamification backfires."
+primary_keyword: "gamification onboarding saas"
+secondary_keywords: ["onboarding gamification examples", "gamified product tour", "progress bar onboarding", "streak retention"]
+category: "Use Cases"
+schema_type: "TechArticle"
+spreadsheet_row: 160
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/gamification-onboarding-badges-streaks-progress-bars.png
+---
+
+# Gamification in onboarding: badges, streaks, and progress bars that work
+
+Most SaaS onboarding flows have a completion problem. The median checklist completion rate sits at 10.1%, with an average of 19.2% across the industry ([Userpilot, 2026](https://userpilot.com/blog/onboarding-checklist-completion-rate-benchmarks/)). That means roughly 80% of your new users abandon setup before reaching the features they signed up for.
+
+Gamification (progress bars, streaks, badges, and milestone rewards) is how products like Duolingo pushed retention from 12% to 55% ([Trophy.so](https://trophy.so/blog/duolingo-gamification-case-study)). But slapping a progress bar on your onboarding flow doesn't automatically fix anything. A meta-analysis of 32 experiments found that progress bars *decreased* completion when early progress felt slow ([Irrational Labs, 2025](https://irrationallabs.com/blog/knowledge-cuts-both-ways-when-progress-bars-backfire/)). The implementation details matter more than the pattern itself.
+
+This guide covers the three gamification mechanics that actually move activation metrics (progress bars, streaks, and badges) with accessible React code, the psychology behind each, and honest guidance on when to skip gamification entirely.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/checklists
+```
+
+Try the [live demo on StackBlitz](https://usertourkit.com/) or browse the full docs at [usertourkit.com](https://usertourkit.com/).
+
+## What is gamification in SaaS onboarding?
+
+Gamification in SaaS onboarding applies game mechanics like progress visualization, achievement systems, and habit loops to guide new users through product setup and feature discovery. Unlike consumer gamification with leaderboards, points, and avatars, SaaS gamification focuses on activation: getting users to the moment where they experience real product value. As of April 2026, 70% of Global 2000 companies use some form of gamification, and the market is projected to reach $92.5B by 2030 (Coherent Market Insights).
+
+The three mechanics that consistently move SaaS onboarding metrics are progress bars for completion visualization, streaks for habit formation, and badges for milestone recognition. Each taps into a different psychological driver. And each has failure modes that most guides don't mention.
+
+## Why gamification matters for SaaS activation
+
+Gamification in SaaS onboarding matters because it directly attacks the activation gap between signup and first value. A 25% increase in activation rate correlates with a 34% revenue boost, according to Userpilot's 2026 benchmark data. Companies reaching 70-80% onboarding completion see trial-to-paid conversion rates of 15-30%, compared to single digits for those stuck at the 19% industry average. The business case isn't abstract: Salesforce reported a 47% productivity increase and 72% reduction in onboarding time after gamifying their setup flow, while dacadoo saw a 62% jump in monthly active users after adding progress mechanics ([Chameleon](https://www.chameleon.io/blog/gamify-user-onboarding)).
+
+The reason gamification works where static instructions fail comes down to three psychological principles. The Zeigarnik Effect makes incomplete tasks mentally sticky. Loss aversion makes breaking a streak feel worse than skipping a single session. And the endowed progress effect means even small visible progress creates momentum. These aren't marketing claims; they're well-replicated findings from behavioral economics applied to product design.
+
+## Why progress bars work (and when they backfire)
+
+Progress bars increase onboarding completion by roughly 40% when implemented correctly, according to aggregated benchmark data from Userpilot and UserGuiding. The psychology is well-documented: the Zeigarnik Effect makes our brains remember incomplete tasks more strongly than completed ones, creating a pull toward closure. The Goal Gradient Hypothesis explains why users speed up as they approach the end.
+
+But here's what most gamification articles skip. Irrational Labs analyzed 32 experiments and found that progress bars hurt completion when the bar decelerates — when early steps feel fast but later steps drag. The fix is counterintuitive: front-load the difficult steps so the bar accelerates toward the end. Users who feel momentum building are far more likely to finish.
+
+### The endowed progress effect
+
+Pre-filling a progress bar to 10-20% before the user does anything measurably increases completion. This isn't a trick. You're crediting users for actions they already took — creating an account, verifying email, landing on the setup page. The effect was first documented by Nunes and Drèze in 2006 and has been replicated consistently in SaaS contexts since.
+
+Here's an accessible progress bar component that implements endowed progress:
+
+```tsx
+// src/components/OnboardingProgress.tsx
+import { useChecklist, type ChecklistTask } from '@tourkit/checklists';
+
+interface ProgressBarProps {
+  tasks: ChecklistTask[];
+  endowedSteps?: number;
+}
+
+export function OnboardingProgress({ tasks, endowedSteps = 1 }: ProgressBarProps) {
+  const { completedCount } = useChecklist(tasks);
+  const total = tasks.length + endowedSteps;
+  const completed = completedCount + endowedSteps;
+  const percent = Math.round((completed / total) * 100);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between text-sm text-muted-foreground">
+        <span>{completed} of {total} steps complete</span>
+        <span>{percent}%</span>
+      </div>
+      <div
+        role="progressbar"
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Onboarding progress: ${percent}% complete`}
+        className="h-2 w-full rounded-full bg-muted overflow-hidden"
+      >
+        <div
+          className="h-full rounded-full bg-primary transition-all duration-500"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+Two details matter here. The `role="progressbar"` with `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` is required by [WCAG](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/progressbar_role) — screen readers need all three attributes to announce progress correctly. And the `endowedSteps` prop credits users for pre-completion actions without inflating the visible total.
+
+### Placement changes everything
+
+Where you put the progress bar affects completion more than how you style it. Irrational Labs found that bars placed at the top of a page *increased* drop-off — users saw how much was left and bailed. Bars placed at the bottom, visible only when users scrolled past the current step, improved completion. The explanation: bottom placement feels like a reward for progress already made rather than a reminder of work remaining.
+
+## Streaks: the habit loop that keeps users coming back
+
+Streak mechanics track consecutive days (or sessions) where a user completes a target action, creating a habit loop that compounds over time. Duolingo's streak system is the most studied example in product design — users who maintain a 7-day streak are 3.6x more likely to remain active long-term, and the introduction of an iOS widget showing streak counts increased daily commitment by 60% ([Orizon Design](https://orizondesign.com/)).
+
+The psychological mechanism is loss aversion. Breaking a 30-day streak feels worse than missing a single session, which keeps users returning even when motivation dips. But this cuts both ways. Streak anxiety is real, and products that don't offer recovery mechanics (like Duolingo's Streak Freeze) see users abandon entirely after a single break.
+
+### Building a streak tracker in React
+
+```tsx
+// src/hooks/useStreak.ts
+import { useState, useEffect, useCallback } from 'react';
+
+interface StreakState {
+  current: number;
+  longest: number;
+  lastActiveDate: string | null;
+  frozenDays: number;
+}
+
+const STORAGE_KEY = 'tourkit-streak';
+const MAX_FREEZE_DAYS = 2;
+
+function getToday(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function daysBetween(a: string, b: string): number {
+  const msPerDay = 86_400_000;
+  return Math.floor(
+    (new Date(b).getTime() - new Date(a).getTime()) / msPerDay
+  );
+}
+
+export function useStreak() {
+  const [streak, setStreak] = useState<StreakState>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return { current: 0, longest: 0, lastActiveDate: null, frozenDays: MAX_FREEZE_DAYS };
+    return JSON.parse(stored);
+  });
+
+  // Check streak validity on mount
+  useEffect(() => {
+    if (!streak.lastActiveDate) return;
+    const gap = daysBetween(streak.lastActiveDate, getToday());
+
+    if (gap > 1 + streak.frozenDays) {
+      // Streak broken — reset current but keep longest
+      setStreak(prev => ({
+        ...prev,
+        current: 0,
+        frozenDays: MAX_FREEZE_DAYS,
+      }));
+    }
+  }, [streak.lastActiveDate, streak.frozenDays]);
+
+  // Persist to localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(streak));
+  }, [streak]);
+
+  const recordActivity = useCallback(() => {
+    const today = getToday();
+    setStreak(prev => {
+      if (prev.lastActiveDate === today) return prev;
+
+      const gap = prev.lastActiveDate
+        ? daysBetween(prev.lastActiveDate, today)
+        : 0;
+      const wasFrozen = gap > 1 && gap <= 1 + prev.frozenDays;
+      const newCurrent = gap <= 1 || wasFrozen ? prev.current + 1 : 1;
+
+      return {
+        current: newCurrent,
+        longest: Math.max(prev.longest, newCurrent),
+        lastActiveDate: today,
+        frozenDays: wasFrozen ? prev.frozenDays - (gap - 1) : MAX_FREEZE_DAYS,
+      };
+    });
+  }, []);
+
+  return { ...streak, recordActivity };
+}
+```
+
+The `frozenDays` mechanic is critical. Duolingo found that Streak Freeze alone reduced churn by 21% among at-risk users ([Lenny's Newsletter](https://www.lennysnewsletter.com/p/how-duolingo-reignited-user-growth)). Without it, a single missed day kills the streak and the user's motivation along with it. This implementation gives users two freeze days by default — enough forgiveness to prevent rage-quits without removing the commitment entirely.
+
+### Streak wagers: a retention multiplier
+
+Duolingo's streak wager feature lets users bet in-app currency on maintaining their streak for 7 days. It yielded a 14% boost in day-14 retention. The mechanic works because it transforms a passive commitment into an active one. You could adapt this for SaaS onboarding by letting users "bet" they'll complete three features this week, with a reward (template access, extended trial) on success.
+
+## Badges: milestones that validate real progress
+
+Badge systems assign visual achievements when users hit specific milestones: completing their first workflow, inviting a team member, configuring an integration. Apps with badge-based gamification see 50% higher completion rates on average ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)). But the effect depends entirely on whether badges reflect achievements users actually care about.
+
+A badge for "Logged in 5 times" is patronizing. A badge for "Built your first dashboard" marks genuine progress. The distinction tracks with self-determination theory: badges work when they reinforce competence (you accomplished something real) rather than compliance (you showed up).
+
+### Accessible badge announcements
+
+Badges are visual by nature, which creates an accessibility gap. Screen reader users need to know they earned an achievement, and the announcement shouldn't interrupt their workflow. Here's a pattern using `aria-live`:
+
+```tsx
+// src/components/BadgeNotification.tsx
+import { useState, useEffect } from 'react';
+
+interface Badge {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+interface BadgeNotificationProps {
+  badge: Badge | null;
+  onDismiss: () => void;
+}
+
+export function BadgeNotification({ badge, onDismiss }: BadgeNotificationProps) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (badge) {
+      setVisible(true);
+      const timer = setTimeout(() => {
+        setVisible(false);
+        onDismiss();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [badge, onDismiss]);
+
+  return (
+    <>
+      {/* Screen reader announcement — always in DOM */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {badge ? `Achievement earned: ${badge.title}. ${badge.description}` : ''}
+      </div>
+
+      {/* Visual notification */}
+      {visible && badge && (
+        <div
+          role="status"
+          className="fixed bottom-4 right-4 flex items-center gap-3 rounded-lg
+                     border bg-card p-4 shadow-lg animate-in slide-in-from-bottom-4"
+        >
+          <span className="text-2xl" aria-hidden="true">{badge.icon}</span>
+          <div>
+            <p className="font-medium">{badge.title}</p>
+            <p className="text-sm text-muted-foreground">{badge.description}</p>
+          </div>
+          <button
+            onClick={() => { setVisible(false); onDismiss(); }}
+            aria-label={`Dismiss ${badge.title} badge notification`}
+            className="ml-2 text-muted-foreground hover:text-foreground"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+```
+
+The `aria-live="polite"` region announces badges without interrupting screen reader navigation. The `aria-atomic="true"` ensures the full message is read each time, not just the changed portion. And the visual notification auto-dismisses after 5 seconds — long enough to notice, short enough to not block the interface.
+
+## Comparing gamification mechanics: which one fits your product?
+
+Choosing between progress bars, streaks, and badges depends on two factors: how quickly you need users to activate and how frequently they use your product. Progress bars and checklists target first-session activation measured in minutes. Streaks require daily usage patterns over a week or more. Badges span the longest timeline and work best for month-long feature discovery after initial setup is complete.
+
+<table>
+  <thead>
+    <tr>
+      <th>Mechanic</th>
+      <th>Best for</th>
+      <th>Activation timeline</th>
+      <th>Engagement lift</th>
+      <th>Risk</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Progress bars</td>
+      <td>Multi-step onboarding flows</td>
+      <td>First session (minutes)</td>
+      <td>+40% completion (Userpilot)</td>
+      <td>Backfires if early steps feel slow</td>
+    </tr>
+    <tr>
+      <td>Streaks</td>
+      <td>Daily-use products (learning, fitness, productivity)</td>
+      <td>First week (7+ days)</td>
+      <td>3.6x retention at 7 days (Orizon)</td>
+      <td>Streak anxiety drives abandonment without freeze mechanics</td>
+    </tr>
+    <tr>
+      <td>Badges</td>
+      <td>Feature discovery, team activation</td>
+      <td>First month (milestones)</td>
+      <td>+50% completion (UserGuiding)</td>
+      <td>Feels patronizing if badges don't reflect real achievement</td>
+    </tr>
+    <tr>
+      <td>Checklists</td>
+      <td>Linear onboarding with clear steps</td>
+      <td>First session (minutes)</td>
+      <td>Top tier: 70-80% completion (Userpilot)</td>
+      <td>Overwhelming if more than 5-7 items visible</td>
+    </tr>
+  </tbody>
+</table>
+
+The pattern worth noting: progress bars and checklists work for first-session activation. Streaks require a product people use daily. Badges span the longest timeline and work best for discovery-phase engagement after initial setup.
+
+## When gamification hurts onboarding
+
+Gamification backfires in roughly three product categories: developer tools where engineers find badges condescending, enterprise B2B with mandatory rollouts where streaks create anxiety, and irregularly-used products where daily mechanics punish normal usage patterns. Smashing Magazine's "Persuasive Design: Ten Years Later" survey (March 2026) captured the core problem: "Once the novelty wore off, many of these systems felt shallow." Gamification fatigue is measurable. The same dopamine response that drives initial engagement diminishes with repetition, creating micro-stress when users fail to earn expected rewards.
+
+Three situations where you should skip gamification entirely:
+
+**Developer tools.** Engineers building with your API don't want badges for completing API calls. They want clear docs, working code samples, and fast time-to-first-request. A progress bar tracking API integration steps can work. Badges and streaks almost never do. (This is a pattern we see repeatedly in Tour Kit's developer-focused users.)
+
+**Enterprise B2B with mandatory adoption.** If IT is rolling out your product to 500 employees, streaks create anxiety rather than motivation. The "you broke your streak" notification at 8 AM on Monday isn't motivating. It's annoying. Checklists and progress bars still work here because they track required setup, not optional engagement.
+
+**Products with irregular usage patterns.** A project management tool used three times a week doesn't benefit from daily streaks. The mechanic punishes your power users for having weekends. Match the streak interval to your natural usage frequency, or don't use streaks at all.
+
+The Smashing Magazine piece put it well: "If your 'gamification' fights against what people actually care about, it will eventually fail."
+
+## Implementing gamified onboarding with Tour Kit
+
+Building gamified onboarding with Tour Kit means combining three packages: `@tourkit/checklists` for progress tracking and task completion state, `@tourkit/react` for step-by-step guided tours, and optionally `@tourkit/analytics` for measuring the impact of each gamification mechanic on your activation funnel. You get a gamified onboarding flow without third-party SaaS pricing.
+
+```tsx
+// src/components/GamifiedOnboarding.tsx
+import { ChecklistProvider, useChecklist } from '@tourkit/checklists';
+import { TourProvider, useTour } from '@tourkit/react';
+import { OnboardingProgress } from './OnboardingProgress';
+import { BadgeNotification } from './BadgeNotification';
+import { useStreak } from '../hooks/useStreak';
+import { useState, useCallback } from 'react';
+
+const onboardingTasks = [
+  { id: 'profile', label: 'Complete your profile', target: '#profile-btn' },
+  { id: 'workspace', label: 'Create a workspace', target: '#workspace-btn' },
+  { id: 'invite', label: 'Invite a team member', target: '#invite-btn' },
+  { id: 'first-project', label: 'Start your first project', target: '#project-btn' },
+];
+
+export function GamifiedOnboarding() {
+  const { recordActivity } = useStreak();
+  const [earnedBadge, setEarnedBadge] = useState(null);
+
+  const handleTaskComplete = useCallback((taskId: string) => {
+    recordActivity();
+
+    if (taskId === 'first-project') {
+      setEarnedBadge({
+        id: 'first-project',
+        title: 'Project Pioneer',
+        description: 'You created your first project',
+        icon: '🚀',
+      });
+    }
+  }, [recordActivity]);
+
+  return (
+    <TourProvider>
+      <ChecklistProvider tasks={onboardingTasks} onTaskComplete={handleTaskComplete}>
+        <OnboardingProgress tasks={onboardingTasks} endowedSteps={1} />
+        <BadgeNotification badge={earnedBadge} onDismiss={() => setEarnedBadge(null)} />
+      </ChecklistProvider>
+    </TourProvider>
+  );
+}
+```
+
+This is headless. You control every pixel of the progress bar, badge notification, and checklist UI. Tour Kit handles the state, storage, and analytics callbacks. The full component weighs under 12KB gzipped across all three packages.
+
+**Honest limitation:** Tour Kit doesn't include pre-built badge artwork or streak calendar widgets. You're building the visual layer yourself, which means more work upfront but complete design control. If you need drag-and-drop badge creation, a no-code tool like Appcues or UserGuiding is a better fit.
+
+## Common mistakes to avoid
+
+Four implementation mistakes account for most gamified onboarding failures, and they all stem from the same root cause: treating gamification as decoration rather than a behavioral system with real psychological effects on your users.
+
+**Showing all tasks at once.** Onboarding checklists with more than 5-7 visible items overwhelm users. Progressive disclosure (showing the next 3 tasks and collapsing completed ones) keeps the interface manageable. The 19.2% average completion rate often correlates with checklists that dump 15 tasks on day one.
+
+**Rewarding attendance, not accomplishment.** "Logged in 3 days in a row" is not an achievement. "Processed your first 100 records" is. Badges should mark capability milestones, not login counts.
+
+**Ignoring reduced motion preferences.** Badge celebrations with confetti animations and progress bar transitions need `prefers-reduced-motion` alternatives. Skip the animation entirely for users who've opted out — don't just slow it down.
+
+```css
+/* Respect reduced motion for all gamification animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-in { animation: none; }
+  .transition-all { transition: none; }
+}
+```
+
+**Linear progress when steps aren't linear.** If users can complete onboarding steps in any order, a linear progress bar misrepresents the flow. Use a completion counter ("3 of 5 tasks") instead of a percentage bar that implies a sequence.
+
+## Tools and libraries for gamified onboarding
+
+A quick comparison of approaches available as of April 2026:
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Approach</th>
+      <th>Gamification features</th>
+      <th>Pricing</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tour Kit</td>
+      <td>Headless React library</td>
+      <td>Checklists, progress tracking, analytics hooks. Build badges/streaks yourself</td>
+      <td>MIT free, Pro $99 one-time</td>
+    </tr>
+    <tr>
+      <td>Appcues</td>
+      <td>No-code SaaS</td>
+      <td>Checklists with progress bars, goal tracking</td>
+      <td>From $249/mo</td>
+    </tr>
+    <tr>
+      <td>UserGuiding</td>
+      <td>No-code SaaS</td>
+      <td>Checklists, resource center, NPS</td>
+      <td>From $89/mo</td>
+    </tr>
+    <tr>
+      <td>Chameleon</td>
+      <td>No-code SaaS</td>
+      <td>Tours, tooltips, surveys, launchers</td>
+      <td>From $279/mo</td>
+    </tr>
+    <tr>
+      <td>Custom build</td>
+      <td>From scratch</td>
+      <td>Anything, but 200+ hours of dev time</td>
+      <td>$30K+ in developer cost (at $150/hr)</td>
+    </tr>
+  </tbody>
+</table>
+
+We built Tour Kit, so take the comparison with appropriate skepticism. Every claim here is verifiable — check the pricing pages yourself. The main tradeoff: Tour Kit gives you full control and no recurring cost, but you write the UI code. No-code tools give you drag-and-drop setup but lock you into monthly billing and their component library.
+
+## FAQ
+
+### Does gamification actually improve SaaS onboarding completion rates?
+
+Gamification in SaaS onboarding improves completion rates by 40-50% when tied to meaningful user actions. Progress bars alone increase onboarding completion by roughly 40% (Userpilot benchmarks), and badge-based systems see 50% higher task completion (UserGuiding, 2026). The caveat: arbitrary gamification — badges for logging in, points for page views — shows diminishing returns within weeks.
+
+### What's the difference between gamification and dark patterns in onboarding?
+
+Gamification becomes a dark pattern when it manipulates users into actions that benefit the company but not the user. Streak anxiety that pressures daily logins to an app used weekly crosses the line. As Smashing Magazine noted in March 2026: "The difference between persuasion and deception is intention, plus accountability." Test by asking whether removing the mechanic would harm users.
+
+### How do I make gamified onboarding accessible?
+
+Accessible gamification requires three things: progress bars with `role="progressbar"` and `aria-valuenow`/`aria-valuemin`/`aria-valuemax` attributes ([MDN docs](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/progressbar_role)), badge announcements via `aria-live="polite"` regions so screen readers announce achievements without interrupting navigation, and `prefers-reduced-motion` media queries that disable celebration animations for users who've opted out.
+
+### When should I avoid gamification in onboarding?
+
+Skip gamification for developer tools where engineers find badges patronizing, enterprise B2B with mandatory rollouts where streaks create anxiety, and products with irregular usage patterns where daily streaks punish normal behavior. Focus on clear documentation and fast time-to-value instead. Progress bars can still work in these contexts because they track required setup, not optional engagement.
+
+### Can I add gamification to an existing onboarding flow without rebuilding?
+
+Tour Kit's `@tourkit/checklists` package wraps your existing onboarding flow with progress tracking and completion state. You define tasks pointing to existing UI elements, and the library tracks completion without restructuring your app. Add `OnboardingProgress` at the top of your layout and `BadgeNotification` in a portal — that's two components on top of what you already have.
+
+---
+
+**Get started with Tour Kit** — the headless React library for building onboarding flows you actually control.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/checklists
+```
+
+Explore the [full documentation](https://usertourkit.com/) or browse the source on [GitHub](https://github.com/DomiDex/tour-kit).
+
+---
+
+## Internal linking suggestions
+
+**Link from this article to:**
+- [React onboarding wizard](/blog/react-onboarding-wizard) — related tutorial on wizard flows
+- [Tour Kit checklist docs](https://usertourkit.com/) — @tourkit/checklists API reference
+- [Managing tour state with Zustand](/blog/managing-tour-state-zustand) — state management patterns
+
+**Link to this article from:**
+- [Best onboarding tools for developer platforms](/blog/best-onboarding-tools-developer-platforms) — "when not to gamify" angle
+- [React onboarding wizard](/blog/react-onboarding-wizard) — gamification as enhancement
+- [Best in-app guidance tools for SaaS](/blog/best-in-app-guidance-tools-saas) — gamification comparison
+
+## Distribution checklist
+
+- Dev.to: Full article with canonical URL
+- Hashnode: Full article with canonical URL
+- Reddit r/reactjs: "How we implemented accessible gamified onboarding in React"
+- Reddit r/SaaS: "Data-backed gamification patterns for SaaS onboarding (with code)"
+- Hacker News: "When progress bars backfire: a meta-analysis of 32 experiments"
+
+## JSON-LD Schema
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Gamification in onboarding: badges, streaks, and progress bars that work",
+  "description": "Build gamified onboarding with progress bars, streaks, and badges in React. Data-backed patterns, accessible code examples, and when gamification backfires.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://github.com/DomiDex"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://usertourkit.com/og-images/gamification-onboarding-badges-streaks-progress-bars.png",
+  "url": "https://usertourkit.com/blog/gamification-onboarding-badges-streaks-progress-bars",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/gamification-onboarding-badges-streaks-progress-bars"
+  },
+  "keywords": ["gamification onboarding saas", "onboarding gamification examples", "gamified product tour", "progress bar onboarding", "streak retention"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```

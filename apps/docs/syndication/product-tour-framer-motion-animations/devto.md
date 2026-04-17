@@ -1,0 +1,401 @@
+---
+title: "Animated product tours in React with Motion (Framer Motion) + LazyMotion"
+published: false
+description: "Build a 5-step product tour with spring-physics tooltips, morphing spotlights via layoutId, and automatic prefers-reduced-motion support. Initial animation payload: 4.6KB."
+tags: react, javascript, webdev, tutorial
+canonical_url: https://usertourkit.com/blog/product-tour-framer-motion-animations
+cover_image: https://usertourkit.com/og-images/product-tour-framer-motion-animations.png
+---
+
+*Originally published at [usertourkit.com](https://usertourkit.com/blog/product-tour-framer-motion-animations)*
+
+# Build a product tour with Framer Motion animations
+
+Most React product tours feel static. A tooltip appears, you click next, another tooltip appears in a different spot. No entrance animation, no exit, no sense of spatial connection between steps. Users notice, even if they can't articulate why the experience feels cheap.
+
+Motion (formerly Framer Motion) fixes this. `AnimatePresence` handles enter/exit transitions. `layoutId` morphs spotlights between target elements. Spring physics make tooltip arrivals feel natural instead of mechanical. As of April 2026, Motion pulls 3.6M weekly npm downloads and scores 10/10 on DX in [LogRocket's React animation benchmark](https://blog.logrocket.com/best-react-animation-libraries/).
+
+By the end of this tutorial, you'll have a 5-step animated product tour with smooth tooltip transitions and a morphing spotlight. Full `prefers-reduced-motion` support is baked in. The initial animation payload is 4.6KB thanks to LazyMotion.
+
+```bash
+npm install @tourkit/core @tourkit/react motion
+```
+
+## Prerequisites
+
+You need a working React project with TypeScript before starting this tutorial. Tour Kit requires React 18.2 or newer, and Motion's latest release (v12) works with both React 18 and React 19, including the new React compiler.
+
+- React 18.2+ or React 19
+- TypeScript 5.0+
+- An existing React project (Vite, Next.js, or CRA)
+- Basic familiarity with Tour Kit's `useTour` hook (see the [getting started guide](https://usertourkit.com/docs/getting-started))
+
+## What you'll build
+
+The finished product is a 5-step animated product tour with three distinct animation layers: tooltip enter/exit with spring physics, spotlight morphing between target elements via `layoutId`, and automatic reduced-motion fallbacks using `MotionConfig`. Each layer works independently, so you can adopt just the pieces that fit your design.
+
+Users who prefer reduced motion get instant opacity transitions instead of transforms.
+
+The finished code weighs 4.6KB at page load. Motion's `domAnimation` features lazy-load only when the tour actually starts.
+
+## Step 1: set up LazyMotion for deferred loading
+
+Product tours don't run on every page load. Loading the full Motion bundle (34KB gzipped) upfront wastes bandwidth for users who never trigger the tour. LazyMotion solves this by splitting the animation engine from the rendering components.
+
+```tsx
+// src/components/tour/AnimatedTourProvider.tsx
+import { LazyMotion, domAnimation } from "motion/react"
+import { TourProvider } from "@tourkit/react"
+
+interface AnimatedTourProviderProps {
+  children: React.ReactNode
+}
+
+export function AnimatedTourProvider({ children }: AnimatedTourProviderProps) {
+  return (
+    <LazyMotion features={domAnimation} strict>
+      <TourProvider>
+        {children}
+      </TourProvider>
+    </LazyMotion>
+  )
+}
+```
+
+The `strict` prop throws an error if you accidentally use the full `motion` component inside a `LazyMotion` boundary. This catches bundle size regressions during development. Use the `m` component (from `motion/react`) instead of `motion.div` inside this boundary.
+
+With this setup, your app ships 4.6KB for the `m` component renderer. The `domAnimation` feature pack (15KB) downloads asynchronously the first time an animation triggers. That 15KB covers everything a product tour needs: variants, exit animations, and hover/focus/tap gestures ([Motion docs: Reduce bundle size](https://motion.dev/docs/react-reduce-bundle-size)).
+
+## Step 2: animate tooltip enter and exit with AnimatePresence
+
+`AnimatePresence` tracks when its direct children mount and unmount, running exit animations before removal. Without it, React instantly removes DOM nodes and your exit animation never plays.
+
+```tsx
+// src/components/tour/AnimatedTooltip.tsx
+import { AnimatePresence, m } from "motion/react"
+import { useTour } from "@tourkit/react"
+
+const tooltipVariants = {
+  hidden: { opacity: 0, y: 8, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 24,
+      mass: 0.8,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -4,
+    scale: 0.98,
+    transition: { duration: 0.15, ease: "easeIn" },
+  },
+}
+
+export function AnimatedTooltip() {
+  const { currentStep, isActive } = useTour()
+
+  return (
+    <AnimatePresence mode="wait">
+      {isActive && currentStep && (
+        <m.div
+          key={currentStep.id}
+          variants={tooltipVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="rounded-lg border bg-popover p-4 shadow-lg"
+        >
+          <h3 className="font-semibold">{currentStep.title}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {currentStep.content}
+          </p>
+        </m.div>
+      )}
+    </AnimatePresence>
+  )
+}
+```
+
+Notice the spring config on the entry animation: `stiffness: 300, damping: 24, mass: 0.8`. These values produce a quick settle with a subtle overshoot. Responsive, not bouncy. The exit uses a shorter duration-based tween because exits should feel decisive.
+
+The `key={currentStep.id}` on the `m.div` is critical. It tells `AnimatePresence` that each step is a distinct element. Without it, React reuses the same DOM node and you get no transition at all.
+
+Setting `mode="wait"` ensures the exiting step fully animates out before the entering step begins. Two tooltips overlapping mid-transition looks broken.
+
+## Step 3: morph the spotlight with layoutId
+
+When your tour highlights a target element, jumping the spotlight instantly from one element to another breaks spatial continuity. The `layoutId` prop tells Motion to interpolate position and size between elements that share the same ID.
+
+```tsx
+// src/components/tour/AnimatedSpotlight.tsx
+import { m } from "motion/react"
+import { useTour } from "@tourkit/react"
+
+interface SpotlightProps {
+  targetRect: DOMRect | null
+  padding?: number
+}
+
+export function AnimatedSpotlight({
+  targetRect,
+  padding = 8,
+}: SpotlightProps) {
+  if (!targetRect) return null
+
+  return (
+    <m.div
+      layoutId="tour-spotlight"
+      className="pointer-events-none fixed z-40 rounded-md ring-2 ring-primary/50"
+      style={{
+        top: targetRect.top - padding,
+        left: targetRect.left - padding,
+        width: targetRect.width + padding * 2,
+        height: targetRect.height + padding * 2,
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 200,
+        damping: 28,
+      }}
+    />
+  )
+}
+```
+
+When `targetRect` changes between steps, Motion smoothly animates the spotlight's position and dimensions. The spring physics make it feel like the spotlight is physically sliding across the page rather than teleporting.
+
+One gotcha we hit: if your target elements have very different sizes (a small icon button to a wide card), lower the stiffness to 150 and increase damping to 32. Faster springs look jittery when covering large distances.
+
+## Step 4: wire it together with step definitions
+
+Now combine the animated tooltip, spotlight, and Tour Kit's step management into a complete tour.
+
+```tsx
+// src/components/tour/ProductTour.tsx
+import { useRef, useCallback } from "react"
+import { AnimatePresence } from "motion/react"
+import { useTour } from "@tourkit/react"
+import { AnimatedTooltip } from "./AnimatedTooltip"
+import { AnimatedSpotlight } from "./AnimatedSpotlight"
+import { useTargetRect } from "./useTargetRect"
+
+const tourSteps = [
+  {
+    id: "welcome",
+    target: "#dashboard-header",
+    title: "Welcome to your dashboard",
+    content: "This is where you'll find your key metrics at a glance.",
+  },
+  {
+    id: "create-project",
+    target: "#create-project-btn",
+    title: "Create your first project",
+    content: "Click here to set up a new project in under a minute.",
+  },
+  {
+    id: "sidebar-nav",
+    target: "#sidebar-nav",
+    title: "Navigate your workspace",
+    content: "Use the sidebar to switch between projects, settings, and team management.",
+  },
+  {
+    id: "notifications",
+    target: "#notification-bell",
+    title: "Stay in the loop",
+    content: "You'll see updates from your team and system alerts here.",
+  },
+  {
+    id: "profile",
+    target: "#profile-menu",
+    title: "Customize your experience",
+    content: "Set your preferences, theme, and notification settings.",
+  },
+]
+
+export function ProductTour() {
+  const { currentStep, isActive, next, prev, stop } = useTour()
+  const targetRect = useTargetRect(currentStep?.target ?? null)
+
+  if (!isActive) return null
+
+  return (
+    <>
+      {/* Backdrop overlay */}
+      <AnimatePresence>
+        {isActive && (
+          <div className="fixed inset-0 z-30 bg-black/40" />
+        )}
+      </AnimatePresence>
+
+      {/* Morphing spotlight */}
+      <AnimatedSpotlight targetRect={targetRect} />
+
+      {/* Positioned tooltip */}
+      <div
+        className="fixed z-50"
+        style={{
+          top: targetRect
+            ? targetRect.bottom + 12
+            : "50%",
+          left: targetRect
+            ? targetRect.left
+            : "50%",
+        }}
+      >
+        <AnimatedTooltip />
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            onClick={prev}
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Back
+          </button>
+          <button
+            onClick={currentStep?.id === "profile" ? stop : next}
+            className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground"
+          >
+            {currentStep?.id === "profile" ? "Done" : "Next"}
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
+```
+
+And the `useTargetRect` hook that tracks element position:
+
+```tsx
+// src/components/tour/useTargetRect.ts
+import { useState, useEffect, useCallback } from "react"
+
+export function useTargetRect(selector: string | null) {
+  const [rect, setRect] = useState<DOMRect | null>(null)
+
+  const updateRect = useCallback(() => {
+    if (!selector) {
+      setRect(null)
+      return
+    }
+    const el = document.querySelector(selector)
+    if (el) {
+      setRect(el.getBoundingClientRect())
+    }
+  }, [selector])
+
+  useEffect(() => {
+    updateRect()
+    window.addEventListener("resize", updateRect)
+    window.addEventListener("scroll", updateRect)
+    return () => {
+      window.removeEventListener("resize", updateRect)
+      window.removeEventListener("scroll", updateRect)
+    }
+  }, [updateRect])
+
+  return rect
+}
+```
+
+## Step 5: respect prefers-reduced-motion
+
+About 30% of iOS users and a growing number of desktop users enable reduced motion ([W3C WCAG 2.1 - Animation from Interactions](https://www.w3.org/WAI/WCAG21/Understanding/animation-from-interactions.html)). Motion handles this better than any competing library.
+
+A single `MotionConfig` prop disables transforms and layout animations while preserving opacity and color changes. Your tour still fades in and out without triggering vestibular discomfort.
+
+```tsx
+// src/components/tour/AnimatedTourProvider.tsx (updated)
+import { LazyMotion, MotionConfig, domAnimation } from "motion/react"
+import { TourProvider } from "@tourkit/react"
+
+interface AnimatedTourProviderProps {
+  children: React.ReactNode
+}
+
+export function AnimatedTourProvider({ children }: AnimatedTourProviderProps) {
+  return (
+    <LazyMotion features={domAnimation} strict>
+      <MotionConfig reducedMotion="user">
+        <TourProvider>
+          {children}
+        </TourProvider>
+      </MotionConfig>
+    </LazyMotion>
+  )
+}
+```
+
+With `reducedMotion="user"`, Motion reads the user's system preference and automatically strips out transform animations (`x`, `y`, `scale`) plus layout transitions. Opacity and color changes still play.
+
+Your tooltip still fades in. The spotlight still appears over the target. But nothing slides, bounces, or morphs. No extra code required.
+
+React Spring, by comparison, requires you to manually check `useReducedMotion()` and conditionally swap out every animation config ([Motion docs: Accessibility](https://motion.dev/docs/react-accessibility)). That's tedious in a 5-step tour. In a 20-step onboarding flow, it's a maintenance problem.
+
+## Common issues and troubleshooting
+
+These are the four problems we ran into most often while building animated tours with Motion. Each includes the exact symptom and the fix that resolved it in our testing.
+
+### "Exit animation doesn't play, tooltip just disappears"
+
+This happens when the animated element isn't a direct child of `AnimatePresence`. If you wrap your `m.div` in another component, that wrapper must forward the `key` prop. Also check that the `key` actually changes between steps. Same key = React reuses the node = no exit/enter cycle.
+
+### "Spotlight jumps instead of morphing on the first step"
+
+`layoutId` animations only interpolate when a previous element with the same `layoutId` existed in the tree. On the very first step, there's no previous position to animate from. Fix it by rendering an invisible zero-size spotlight at the center of the viewport before the tour starts, so the first step morphs from center to target.
+
+### "Tour animations feel sluggish on mobile"
+
+Check two things. First, make sure you're using `m` (not `motion.div`) inside a `LazyMotion` boundary. Second, reduce your spring stiffness on mobile.
+
+We tested on a Pixel 7 and found `stiffness: 200` with `damping: 22` gives a responsive feel without frame drops. The default desktop values can cause dropped frames on mid-range Android devices.
+
+### "Bundle size increased by 34KB after adding Motion"
+
+You're importing from `motion/react` with the full `motion` component instead of `m`. Switch to the `LazyMotion` + `m` pattern from Step 1. The initial payload drops from 34KB to 4.6KB, and the animation features load asynchronously when the tour starts.
+
+| Animation approach | Initial bundle | Deferred load | Reduced motion | Best for |
+|---|---|---|---|---|
+| CSS transitions only | 0 KB | None | Manual media query | Simple fade-in tooltips |
+| Motion (LazyMotion) | 4.6 KB | +15 KB | Built-in auto | Full tour animations with spotlight morphing |
+| Motion (full bundle) | 34 KB | None | Built-in auto | Apps already using Motion elsewhere |
+| React Spring | ~22 KB | None | Manual hook check | Physics-heavy gesture interactions |
+| GSAP | ~78 KB | None | Manual implementation | Complex timeline sequences |
+
+## Next steps
+
+You now have a product tour with spring-physics tooltips and a morphing spotlight. Reduced-motion support works automatically. One limitation worth noting: Tour Kit doesn't include a visual tour builder, so you'll write step definitions in code. That's a tradeoff for full animation control.
+
+A few directions to take it further:
+
+- **Directional transitions:** Detect whether the next target is above or below the current one, then set `y` to positive or negative accordingly. Users get a sense of spatial navigation.
+- **Completion celebration:** Use Motion's `useAnimate` to trigger a confetti burst when the tour finishes. At 2.3KB for the mini bundle, it's a cheap reward.
+- **Persist and resume:** Pair Tour Kit's built-in persistence with your animations so returning users see the spotlight morph directly to their last completed step.
+
+Check out the [Tour Kit docs](https://usertourkit.com/docs) for step configuration and analytics integration. The full example code from this tutorial is available on [GitHub](https://github.com/tourkit/examples).
+
+## FAQ
+
+### Does Motion (Framer Motion) work with React 19?
+
+Motion v12 has full React 19 support, including the new React compiler. As of April 2026, Motion pulls 3.6M weekly npm downloads and ships in production at Framer and Figma. Tour Kit also supports React 19 natively, so the two work together without shims.
+
+### How much does Framer Motion add to my product tour's bundle size?
+
+Using the `LazyMotion` pattern shown in this tutorial, the initial cost is 4.6KB gzipped. The animation features (15KB) load asynchronously when the tour first triggers. If your app already uses Motion for other animations, the cost is zero since the features are already loaded. Compare this to React Spring at ~22KB or GSAP at ~78KB with no lazy-loading option.
+
+### Can I use product tour animations without triggering motion sickness?
+
+Yes. Motion's `reducedMotion="user"` prop on `MotionConfig` automatically disables slide, scale, and layout animations for users with "reduce motion" enabled. Opacity transitions still play, keeping the tour functional. This is automatic, unlike React Spring where you must manually check `useReducedMotion()` per animation.
+
+### What is the best animation library for React product tours?
+
+Motion (formerly Framer Motion) fits product tours best thanks to `AnimatePresence` for step transitions and `layoutId` for morphing spotlights. Built-in `prefers-reduced-motion` support means zero extra accessibility code. Tour Kit pairs with Motion out of the box at under 5KB initial cost. That said, Tour Kit is our project, so weigh this accordingly.
+
+### Do I need Framer Motion for Tour Kit, or does it have built-in animations?
+
+Tour Kit is headless by design. It handles step sequencing, element targeting, scroll management, and persistence but doesn't prescribe any animation library. You can use Motion, React Spring, CSS transitions, or skip animations entirely. This tutorial picks Motion for its DX, but it's not a dependency.

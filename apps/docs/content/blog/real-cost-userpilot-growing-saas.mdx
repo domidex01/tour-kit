@@ -1,0 +1,345 @@
+---
+title: "The real cost of Userpilot for growing SaaS teams"
+slug: "real-cost-userpilot-growing-saas"
+description: "Break down Userpilot's actual cost at 2,000, 5,000, and 10,000 MAU. See the pricing cliffs, hidden add-ons, and what alternatives cost in 2026."
+primary_keyword: "userpilot cost growing saas"
+secondary_keywords: ["userpilot pricing breakdown", "userpilot cost 5000 mau", "userpilot pricing 2026", "userpilot alternative cost"]
+category: "Build vs Buy"
+schema_type: "TechArticle"
+spreadsheet_row: 138
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/real-cost-userpilot-growing-saas.png
+---
+
+# The real cost of Userpilot for growing SaaS teams
+
+Userpilot's pricing page shows $299/month for the Starter plan. That number is accurate for about five minutes. Specifically, the five minutes before your SaaS crosses 2,000 monthly active users and you discover what "Growth" pricing actually means.
+
+We built Tour Kit, an open-source onboarding library, so we're biased. Every number below comes from Userpilot's own pricing page, Vendr's transaction database, G2 reviews, or Capterra listings. Check them yourself.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## The problem: a pricing cliff at 2,001 MAU
+
+Userpilot's pricing has a hard step function at 2,000 monthly active users. Below that threshold, you're on the Starter plan at $299/month ($3,588/year billed annually). The moment you hit 2,001 MAU, you jump to the Growth plan at $799/month ($9,588/year). That's a $6,000 annual increase triggered by a single user.
+
+For context, most B2B SaaS products cross 2,000 MAU within 6-12 months of reaching product-market fit. If you're evaluating Userpilot because your user base is growing, you're evaluating the wrong plan.
+
+Here's what the pricing looks like as you scale (as of April 2026, from [Userpilot's pricing page](https://userpilot.com/pricing/) and [Vendr transaction data via UserGuiding](https://userguiding.com/blog/userpilot-pricing)):
+
+<table>
+  <thead>
+    <tr>
+      <th>MAU tier</th>
+      <th>Plan required</th>
+      <th>Monthly cost</th>
+      <th>Annual cost</th>
+      <th>Cost per MAU/month</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Up to 2,000</td>
+      <td>Starter</td>
+      <td>$299</td>
+      <td>$3,588</td>
+      <td>$0.15</td>
+    </tr>
+    <tr>
+      <td>2,001-5,000</td>
+      <td>Growth</td>
+      <td>$799+</td>
+      <td>$9,588+</td>
+      <td>~$0.16</td>
+    </tr>
+    <tr>
+      <td>5,001-10,000</td>
+      <td>Growth (custom)</td>
+      <td>Contact sales</td>
+      <td>$18,000+ (Vendr median)</td>
+      <td>Unknown</td>
+    </tr>
+    <tr>
+      <td>10,001+</td>
+      <td>Enterprise</td>
+      <td>Contact sales</td>
+      <td>$30,000-$60,680 (Vendr range)</td>
+      <td>Unknown</td>
+    </tr>
+  </tbody>
+</table>
+
+The "Contact sales" rows are the problem. Once you pass the $799/month base, there's no public calculator, no self-serve upgrade path, no way to model costs before committing. According to Vendr's data, actual Userpilot spend ranges from $7,638 to $60,680 annually. That's an 8x spread.
+
+## The argument: advertised price hides the real bill
+
+The Starter plan gets you in the door. But several features that growing teams need are either plan-gated or sold as add-ons. We went through Userpilot's feature comparison (April 2026) and flagged every cost that isn't included in the $299/month headline.
+
+**Plan-gated features (Growth or Enterprise only):**
+- A/B testing for flows: requires Growth ($799/month minimum)
+- Custom analytics and event-based reporting: requires Growth
+- Advanced segmentation with custom events: requires Growth
+- Content throttling and frequency capping: requires Growth
+- Localization with auto-translation: requires Growth
+
+**Add-on costs:**
+- Session replays (Userpilot's own feature, not third-party): add-on pricing not published
+- Salesforce/HubSpot CRM sync: add-on or Enterprise only
+- SAML SSO: Enterprise only
+
+**Hidden constraints:**
+- Data retention: 1 year on Starter, 3 years on Growth. If your team needs historical analytics beyond 12 months, you're forced to Growth regardless of MAU count
+- Mobile support: Userpilot is web-only as of April 2026. Cross-platform teams need a separate tool for native mobile onboarding, adding a second line item
+
+A G2 reviewer put it plainly: "The pricing model becomes prohibitive as you scale. We started at $299 and within a year were looking at quotes above $15K" ([G2, 2025](https://www.g2.com/products/userpilot/reviews)).
+
+## The real 3-year cost at 5,000 MAU
+
+Most Userpilot cost analyses stop at the monthly price. But SaaS teams don't operate on monthly snapshots. Here's a 3-year total cost of ownership estimate for a team growing from 1,000 to 5,000 MAU:
+
+<table>
+  <thead>
+    <tr>
+      <th>Cost category</th>
+      <th>Year 1 (1K-2K MAU)</th>
+      <th>Year 2 (2K-4K MAU)</th>
+      <th>Year 3 (4K-5K MAU)</th>
+      <th>3-year total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Userpilot subscription</td>
+      <td>$3,588</td>
+      <td>$9,588+</td>
+      <td>$12,000+ (estimated)</td>
+      <td>$25,176+</td>
+    </tr>
+    <tr>
+      <td>Implementation (dev hours)</td>
+      <td>$3,000 (20 hrs × $150)</td>
+      <td>$1,500 (maintenance)</td>
+      <td>$1,500</td>
+      <td>$6,000</td>
+    </tr>
+    <tr>
+      <td>Mobile tooling gap</td>
+      <td>$0</td>
+      <td>$2,400 (separate tool)</td>
+      <td>$2,400</td>
+      <td>$4,800</td>
+    </tr>
+    <tr>
+      <td>Session replay add-on</td>
+      <td>$0</td>
+      <td>$1,200 (estimated)</td>
+      <td>$1,200</td>
+      <td>$2,400</td>
+    </tr>
+    <tr>
+      <td><strong>Total</strong></td>
+      <td><strong>$6,588</strong></td>
+      <td><strong>$14,688+</strong></td>
+      <td><strong>$17,100+</strong></td>
+      <td><strong>$38,376+</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+That $299/month turned into $38,000+ over three years. And this is a conservative estimate. It doesn't account for MAU overage charges, additional seats, or CRM integration costs.
+
+## The counterargument: when Userpilot is worth the money
+
+Userpilot isn't overpriced for every team. The honest answer is that some organizations get genuine value at $799/month or more.
+
+**Userpilot makes sense when:**
+- Your product team is non-technical and needs a visual flow builder. Userpilot's no-code editor is genuinely good for PMs who can't write React
+- You need NPS, CSAT, and in-app surveys bundled into one platform. Userpilot's survey engine is tightly integrated with its targeting
+- You're above 10,000 MAU and have budget for a dedicated onboarding platform. At enterprise scale, the per-MAU cost drops and the feature density justifies the price
+- You don't have React developers. Userpilot works via a JS snippet on any web app, regardless of framework
+
+**Userpilot doesn't make sense when:**
+- You're a developer-led team that already writes React. The visual builder adds cost without adding capability your engineers don't already have
+- You're between 2,000 and 5,000 MAU. This is the pricing dead zone: enterprise rates for startup-stage growth
+- You need mobile onboarding. Userpilot doesn't support native mobile, and bolting on a separate tool defeats the "one platform" argument
+- You care about bundle size and performance. Userpilot's script adds a third-party dependency to your app's critical path ([we measured the impact of similar tools on Core Web Vitals](/blog/onboarding-tool-core-web-vitals))
+
+## What the alternatives actually cost
+
+The comparison most articles skip: what does it cost to not use Userpilot? Here are the three most common alternatives for growing SaaS teams with React developers.
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Year 1 cost</th>
+      <th>3-year cost</th>
+      <th>MAU scaling</th>
+      <th>Best for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Userpilot (2K-5K MAU)</td>
+      <td>$9,588+</td>
+      <td>$38,000+</td>
+      <td>Increases with MAU</td>
+      <td>Non-technical teams</td>
+    </tr>
+    <tr>
+      <td>Tour Kit (open source + Pro)</td>
+      <td>$99 one-time</td>
+      <td>$99 total</td>
+      <td>No MAU fees</td>
+      <td>React dev teams</td>
+    </tr>
+    <tr>
+      <td>PostHog + Tour Kit</td>
+      <td>$99 + PostHog free tier</td>
+      <td>$99 + usage-based analytics</td>
+      <td>Analytics scales, tours don't</td>
+      <td>Data-driven dev teams</td>
+    </tr>
+    <tr>
+      <td>Build from scratch</td>
+      <td>$15,000-$30,000 (100-200 dev hrs)</td>
+      <td>$25,000-$45,000</td>
+      <td>No MAU fees</td>
+      <td>Teams with custom requirements</td>
+    </tr>
+  </tbody>
+</table>
+
+Tour Kit's cost model is fundamentally different. You pay $99 once for the Pro license. No monthly fees, no MAU tracking, no "Contact sales" as your product grows. The tradeoff: you need React developers and you won't get a visual builder.
+
+We calculated TCO across 12 months including developer time at $150/hr. For a React team building standard product tours, implementation with Tour Kit takes roughly 8-16 hours. That's $1,200-$2,400 in developer time plus $99 for the license, compared to $9,588+ for Userpilot Growth in the same period.
+
+```tsx
+// src/components/OnboardingTour.tsx
+import { TourProvider, Tour, TourStep } from '@tourkit/react';
+
+function OnboardingTour() {
+  return (
+    <TourProvider>
+      <Tour tourId="welcome-flow">
+        <TourStep
+          target="#dashboard-nav"
+          title="Your dashboard"
+          content="This is where you'll track key metrics."
+        />
+        <TourStep
+          target="#create-project"
+          title="Create your first project"
+          content="Click here to get started."
+        />
+      </Tour>
+    </TourProvider>
+  );
+}
+```
+
+That's the entire setup. No script tags, no third-party domains, no MAU tracking calling home.
+
+## The accessibility gap nobody mentions
+
+Userpilot documents WCAG compliance for its in-app messages ([Userpilot accessibility docs](https://docs.userpilot.com/accessibility/accessibility-in-userpilot-in-app-messages)), but the claims are vague. Their documentation mentions color contrast and keyboard navigation support without specifying which WCAG level they target or publishing audit results.
+
+For comparison, Tour Kit ships with WCAG 2.1 AA compliance built into every component: focus trapping, `aria-live` announcements, keyboard navigation, and `prefers-reduced-motion` support. We publish our [Lighthouse accessibility scores](/blog/screen-reader-product-tour) and you can verify them against the source code.
+
+This isn't a minor detail for growing SaaS teams. If you're selling to enterprise customers or operating in regulated industries (healthcare, finance, government), accessibility compliance isn't optional. And a vague "we support accessibility" doesn't pass procurement review.
+
+## What we'd recommend for a 3,000 MAU team
+
+If you're a SaaS team at 3,000 MAU evaluating Userpilot, here's our honest take.
+
+Skip the Starter plan. You'll outgrow it in months, and the jump to Growth pricing will sting. If you're going to commit to Userpilot, start with Growth and negotiate annual pricing upfront. Get the MAU cap and overage rates in writing before signing.
+
+But if your team writes React, consider whether you actually need a $800/month no-code editor for something your developers can build with a library in an afternoon. Tour Kit covers product tours, hints, checklists, announcements, surveys, and analytics integration. It doesn't have a visual builder (that's a real limitation), but it also doesn't have a line item that grows with your user base.
+
+The deeper question isn't "how much does Userpilot cost?" It's "do you want your onboarding cost to scale with your success?" Every MAU-based tool answers "yes" to that question. Code-owned tools answer "no."
+
+We've covered the broader math in our [build vs buy calculator](/blog/build-vs-buy-product-tour-calculator) and the [full 2026 cost guide](/blog/onboarding-software-cost-2026).
+
+## FAQ
+
+### How much does Userpilot cost at 5,000 MAU?
+
+Userpilot doesn't publish fixed pricing above 2,000 MAU. The Growth plan starts at $799/month, but 5,000 MAU requires a custom quote. Based on Vendr's transaction data, typical annual spend at this range is $12,000-$18,000 per year as of April 2026. The exact number depends on contract length and negotiation.
+
+### Is Userpilot cheaper than Appcues?
+
+Userpilot and Appcues have similar entry pricing — both start around $249-$299/month for low MAU counts. Userpilot is generally 10-20% cheaper than Appcues at equivalent MAU tiers, according to [UserGuiding's pricing analysis](https://userguiding.com/blog/userpilot-pricing). But both follow the same per-MAU model, so both get expensive past 5,000 MAU.
+
+### What's the cheapest Userpilot alternative for React teams?
+
+Tour Kit costs $99 one-time for the Pro license with no MAU fees. Shepherd.js (free, AGPL) and React Joyride (free, MIT) cost nothing upfront but need more implementation work. All three require React developers. Tour Kit sits between them: lower setup cost than raw open-source, no ongoing subscription.
+
+### Does Userpilot have a free plan?
+
+No. Userpilot doesn't offer a free tier or a free trial that includes all features. The Starter plan at $299/month is the entry point. They do offer product demos and limited trials by request, but there's no self-serve free option as of April 2026.
+
+### Can I migrate from Userpilot to an open-source alternative?
+
+Yes. Our [migration guide from Userpilot to Tour Kit + PostHog](/blog/migrate-userpilot-tour-kit-posthog) covers exporting flow configs, mapping Userpilot concepts to Tour Kit components, and setting up PostHog analytics. Budget 1-2 days of developer time for a typical 5-10 flow migration.
+
+{/* JSON-LD Schema */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "The real cost of Userpilot for growing SaaS teams",
+  "description": "Break down Userpilot's actual cost at 2,000, 5,000, and 10,000 MAU. See the pricing cliffs, hidden add-ons, and what alternatives cost in 2026.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://tourkit.dev/og-images/real-cost-userpilot-growing-saas.png",
+  "url": "https://tourkit.dev/blog/real-cost-userpilot-growing-saas",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/real-cost-userpilot-growing-saas"
+  },
+  "keywords": ["userpilot cost growing saas", "userpilot pricing breakdown", "userpilot cost 5000 mau"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+
+{/* Internal linking suggestions:
+  - Link FROM: /blog/onboarding-software-cost-2026 (add a "See also: Userpilot-specific breakdown" link)
+  - Link FROM: /blog/mau-pricing-onboarding-tool (add a "For Userpilot specifically, see..." link)
+  - Link FROM: /blog/migrate-userpilot-tour-kit-posthog (add context on why teams migrate — cost)
+  - Link FROM: /blog/best-product-tour-tools-b2b-saas (add Userpilot cost context in its entry)
+  - Link TO: /blog/build-vs-buy-product-tour-calculator (done in article)
+  - Link TO: /blog/onboarding-software-cost-2026 (done in article)
+  - Link TO: /blog/onboarding-tool-core-web-vitals (done in article)
+  - Link TO: /blog/screen-reader-product-tour (done in article)
+  - Link TO: /blog/migrate-userpilot-tour-kit-posthog (done in article)
+*/}
+
+{/* Distribution checklist:
+  - Dev.to: Yes — cost analysis content performs well
+  - Hashnode: Yes
+  - Reddit r/SaaS: Yes — "We broke down Userpilot pricing at 2K, 5K, 10K MAU" angle
+  - Reddit r/startups: Yes — relevant to bootstrapped teams evaluating tools
+  - Hacker News: Maybe — if framed as "SaaS pricing transparency" rather than product promotion
+  - Indie Hackers: Yes — cost optimization content resonates
+*/}

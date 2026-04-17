@@ -1,0 +1,107 @@
+---
+title: "What is AGPL? Why license choice matters for open-source libraries"
+slug: "what-is-agpl-license"
+description: "Learn what the AGPL license requires, how it differs from MIT, and why it matters when picking open-source JavaScript libraries. Includes real examples."
+primary_keyword: "what is agpl license"
+secondary_keywords: ["agpl license definition", "agpl vs mit license", "agpl open source"]
+category: "Glossary"
+schema_type: "TechArticle"
+spreadsheet_row: 321
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/what-is-agpl-license.png
+---
+
+# What is AGPL? Why license choice matters for open-source libraries
+
+You found a JavaScript library that does exactly what you need. Good star count, active maintenance, clean API. You run `npm install` and move on.
+
+Three months later, your legal team flags it. The license is AGPL-3.0, and your SaaS product just became subject to source code disclosure requirements you didn't plan for. Not a hypothetical scenario. Of the roughly 2.7 million packages on npm as of April 2026, only around 4,200 use AGPL — but a single one in your dependency tree is enough to trigger obligations.
+
+Understanding what the AGPL license actually requires takes five minutes. Those five minutes can save your team from a painful conversation later.
+
+## Definition
+
+The GNU Affero General Public License (AGPL-3.0) is a strong copyleft license published by the Free Software Foundation in 2007. It requires anyone who runs modified AGPL software over a network to make the complete source code available to users of that service. As of 2025, roughly 3% of open-source projects use AGPL, compared to 92% using permissive licenses like MIT ([2025 Synopsys OSSRA Report](https://www.synopsys.com/software-integrity/resources/analyst-reports/open-source-security-risk-analysis.html)).
+
+AGPL was created to close a perceived loophole in the GPL. The regular GPL requires source code sharing only when you distribute binaries. SaaS companies could modify GPL code, run it on their servers, and never release their changes because they weren't distributing anything. AGPL's Section 13 closes that gap by treating network interaction as distribution.
+
+## How AGPL works in practice
+
+The core mechanism is straightforward. If you modify AGPL-licensed code and users interact with it over a network, you must offer those users access to your complete corresponding source code. "Complete" means everything needed to build and run the service.
+
+Here's where it gets complicated for JavaScript developers.
+
+When you `npm install` an AGPL package into a React app, your bundler (webpack, Vite, esbuild) combines that code with yours into a single output. Whether that creates a "derivative work" under AGPL is a legal question your engineering team can't answer. Lawyers disagree on it. And that uncertainty is the real problem.
+
+<table>
+<thead>
+<tr><th>Scenario</th><th>AGPL obligation</th><th>Risk level</th></tr>
+</thead>
+<tbody>
+<tr><td>Running unmodified AGPL code as a separate service</td><td>Provide source of that service</td><td>Low</td></tr>
+<tr><td>Modifying AGPL code deployed to users</td><td>Provide source of your modifications</td><td>Medium</td></tr>
+<tr><td>Bundling AGPL code into your SaaS frontend</td><td>Possibly your entire frontend source</td><td>High (legally ambiguous)</td></tr>
+<tr><td>Using AGPL code in a backend API your app calls</td><td>Provide source of that API service</td><td>Medium-High</td></tr>
+</tbody>
+</table>
+
+The ambiguity in row three is what keeps legal teams up at night. And it's the exact scenario that happens when you install an AGPL npm package into a React project.
+
+One thing that catches developers off guard: JavaScript delivered to a browser is effectively distributed code. The SaaS loophole that AGPL was designed to close doesn't even apply here. Your bundled JS ships to users' browsers, so you're distributing it in the traditional GPL sense too. According to a 2025 Black Duck audit report, 30% of license compliance conflicts originate from hidden transitive dependencies in `node_modules`.
+
+## AGPL examples in the JavaScript ecosystem
+
+The most notable AGPL library in the product tour space is [Shepherd.js](https://shepherdjs.dev/), which adopted AGPL-3.0 as part of a dual-licensing model. As of April 2026, Shepherd.js has roughly 13,000 GitHub stars and pulls around 120,000 weekly npm downloads. Solid numbers. But compare that to React Joyride's 520,000+ weekly downloads under MIT — the license gap correlates with an adoption gap.
+
+Google bans AGPL software company-wide. Their internal policy prohibits AGPL-licensed code in any project, including internal tools. Google employs over 180,000 people. That's a lot of developers who won't even evaluate your library.
+
+MongoDB originally used AGPL before creating the even more restrictive SSPL in 2018. Grafana uses AGPL for its server component, which works because they sell managed hosting as the commercial alternative.
+
+Other AGPL projects: Nextcloud, Mastodon, Mattermost. Notice the pattern. These are standalone services, not libraries you embed into your application. AGPL makes more sense for self-hosted software than for npm packages that get bundled into other people's code.
+
+## Why AGPL matters when choosing dependencies
+
+License choice isn't a legal formality. It directly affects who can use your software and how.
+
+For library authors, AGPL limits your potential user base. Enterprise companies with blanket AGPL bans won't evaluate your library regardless of its technical merits. A 2024 survey by Tidelift found that 62% of organizations have formal open-source license policies, and AGPL consistently appears on the "do not use" list alongside SSPL and Commons Clause. Startups building commercial SaaS products skip it too. They don't have the legal budget to evaluate ambiguous copyleft obligations.
+
+The practical effect: MIT-licensed libraries get adopted. AGPL-licensed alternatives get admired from a distance.
+
+For library consumers, the question is simpler. Can you explain to your legal team exactly what source code obligations you're accepting? If the answer is "I'm not sure," that is the answer.
+
+The [SPDX License List](https://spdx.org/licenses/) maintained by the Linux Foundation classifies AGPL-3.0 as a "strong copyleft" license. The Open Source Initiative approves it. But approval and practical compatibility are different things.
+
+## License choice in the product tour ecosystem
+
+When we built [Tour Kit](https://usertourkit.com/), we chose MIT licensing deliberately. The reasoning was practical: a product tour library gets bundled directly into your application's frontend. AGPL would mean every SaaS company using Tour Kit might need to disclose their application source code. That's a non-starter for most teams.
+
+MIT imposes zero restrictions. Copy it, modify it, sell products with it, never mention it again. The entire license text is 21 lines. Your legal team won't flag it because there's nothing to flag.
+
+The tradeoff is real, though. MIT doesn't prevent large companies from taking Tour Kit's code and building a competing product. AGPL would. We decided wider adoption mattered more than protection from theoretical competition. (For more on that decision, see [why we chose MIT over AGPL and BSL](/blog/why-we-open-sourced-tour-kit-mit-not-agpl-bsl).)
+
+```bash
+# MIT-licensed: install without a legal review
+npm install @tourkit/core @tourkit/react
+```
+
+Tour Kit isn't alone in this approach. React, Next.js, Tailwind CSS, Radix UI, and shadcn/ui all use MIT. The libraries that form the modern React stack overwhelmingly chose permissive licensing because they're designed to be embedded in commercial products.
+
+## FAQ
+
+### Is AGPL the same as GPL?
+
+AGPL-3.0 extends GPL-3.0 with one additional requirement: Section 13, the "network use" clause. Standard GPL only triggers source code obligations when you distribute binaries. AGPL triggers them when users interact with your modified software over a network, which covers every SaaS application. For npm packages bundled into web apps, that single clause makes AGPL significantly more restrictive.
+
+### Can I use AGPL libraries in a commercial SaaS product?
+
+Technically yes, but you must provide your complete corresponding source code to your users. The practical definition of "corresponding source" for a bundled JavaScript application remains legally contested. Many companies avoid AGPL entirely rather than risk an incorrect interpretation. Google, for instance, bans all AGPL software from its codebase regardless of use case.
+
+### What is the difference between AGPL and MIT for npm packages?
+
+MIT lets you use, modify, and redistribute code with no obligations beyond preserving the copyright notice. AGPL requires you to share your source code if users interact with the modified software over a network. For an npm package bundled into a SaaS frontend, MIT means zero legal overhead. AGPL means a conversation with your legal team about source disclosure scope.
+
+### Why does Shepherd.js use AGPL?
+
+Shepherd.js adopted AGPL-3.0 as a dual-licensing strategy. Free users get the AGPL version; commercial users who can't accept AGPL terms purchase a proprietary license ($50 Business, $300 Enterprise as of April 2026). This is a valid business model, but it creates friction for developers who need to evaluate the library before committing to a license purchase. Even using Shepherd.js for an internal dashboard at a for-profit company requires the commercial license.

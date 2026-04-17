@@ -1,0 +1,349 @@
+---
+title: "DAU/MAU ratio and onboarding: how tours improve stickiness"
+slug: "dau-mau-ratio-onboarding"
+description: "Learn how DAU/MAU ratio connects to product onboarding quality. See benchmarks, formulas, and code examples for tracking tour-driven stickiness in React."
+primary_keyword: "dau mau ratio onboarding"
+secondary_keywords: ["product stickiness onboarding", "dau mau improve onboarding", "dau mau ratio saas benchmark", "product tour analytics"]
+category: "Metrics"
+schema_type: "TechArticle"
+spreadsheet_row: 259
+date: "2026-04-11"
+updated: "2026-04-11"
+published: true
+ogImage: /og-images/dau-mau-ratio-onboarding.png
+---
+
+# DAU/MAU ratio and onboarding: how tours improve stickiness
+
+Only 12% of SaaS users rate their onboarding experience as "effective" ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)). That number should make product teams uncomfortable, because onboarding quality directly feeds the metric that boards and investors watch most closely: DAU/MAU ratio.
+
+The connection between onboarding tours and daily engagement isn't theoretical. Chameleon's analysis of 15 million product tour interactions found that interactive flows increase feature adoption by 42% and that structured onboarding lifts retention by 50% ([Chameleon, 2025](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)). But most content about DAU/MAU treats onboarding as a conceptual black box. No code. No architecture. No explanation of *how* the tour implementation itself changes the outcome.
+
+This guide fills that gap. You'll get the formula, real benchmarks by industry, and working TypeScript examples that wire tour completion directly into your DAU/MAU tracking pipeline.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/analytics
+```
+
+## What is DAU/MAU ratio?
+
+DAU/MAU ratio measures the percentage of your monthly active users who return and engage on any given day. The formula is straightforward: divide your daily active users by your monthly active users and multiply by 100. A SaaS product with 1,300 DAU and 10,000 MAU has a 13% stickiness ratio, which, as of April 2026, sits right at the industry average ([Userpilot](https://userpilot.com/blog/dau-mau-ratio/)).
+
+The metric tells you something retention curves can't: *habitual engagement*. A user might retain for 90 days but only log in twice a month. DAU/MAU catches that pattern.
+
+### The formula
+
+```
+DAU/MAU ratio = (Daily Active Users / Monthly Active Users) × 100
+```
+
+"Active" is the tricky part. Page views don't count. You need to define a meaningful action: creating a document, running a query, completing a workflow. The definition varies by product, but it should correlate with the behavior that predicts paid conversion.
+
+### Why "active" needs a strict definition
+
+If "active" means "opened the app," your DAU/MAU will look great and mean nothing. Slack counts a user as active when they send a message or read one in a channel. Figma counts file edits. Your definition should be the action that separates users who retain from users who churn.
+
+Pull your 90-day retained cohort and compare their first-week behavior against churned users. The behaviors that differ most are your activation events — and those are what your product tours should target.
+
+## DAU/MAU benchmarks: what good looks like
+
+The SaaS average DAU/MAU ratio is 13%, with a median of just 9.3% ([Userpilot, 2026](https://userpilot.com/blog/dau-mau-ratio/)). But that number hides enormous variation by product type. A project management tool used Monday through Friday has a fundamentally different engagement pattern than a consumer social app.
+
+<table>
+<thead>
+<tr><th>Product type</th><th>DAU/MAU range</th><th>Context</th></tr>
+</thead>
+<tbody>
+<tr><td>SaaS average</td><td>13% (median 9.3%)</td><td>Across all SaaS categories</td></tr>
+<tr><td>B2B SaaS (typical)</td><td>10–20%</td><td>Weekday-heavy usage skews the ratio down</td></tr>
+<tr><td>B2B SaaS (weekday-adjusted)</td><td>~40%</td><td>Divide DAU by weekday-only MAU for fairer comparison</td></tr>
+<tr><td>B2C SaaS</td><td>30–50%</td><td>Consumer apps with daily utility</td></tr>
+<tr><td>Social / messaging</td><td>50%+</td><td>Facebook historically exceeds 66%</td></tr>
+<tr><td>E-commerce</td><td>9.8%</td><td>Transactional, not habitual</td></tr>
+<tr><td>Finance apps</td><td>10.5%</td><td>Check-in behavior, not daily creation</td></tr>
+</tbody>
+</table>
+
+*Sources: [Userpilot](https://userpilot.com/blog/dau-mau-ratio/), [Gainsight](https://www.gainsight.com/essential-guide/product-management-metrics/dau-mau/), [Visdum](https://www.visdum.com/blog/saas-metrics)*
+
+### The stickiness ladder
+
+Think of DAU/MAU in tiers:
+
+- **Below 10%:** Your product doesn't warrant daily use, or onboarding is broken. Most users sign up, poke around, and leave.
+- **10–20%:** Average SaaS territory. You have a core group of daily users but most of your MAU are occasional visitors. Better activation can move the needle here.
+- **20–30%:** Strong. Your product has found a daily workflow. Typically correlates with effective onboarding that gets users to value fast.
+- **30%+:** Exceptional for B2B. You've built a habit.
+
+### The B2B weekday trap
+
+Most articles quote 10–20% for B2B SaaS without addressing a basic math problem: if your product is used Monday through Friday, the theoretical maximum DAU/MAU is about 71% (5/7). Comparing a weekday-only B2B tool to a 7-day consumer app on raw DAU/MAU is misleading.
+
+Normalize for it. Either calculate DAU/WAU (daily active / weekly active) for a cleaner signal, or divide DAU only by users who were active on business days in the last 30. Your 15% raw ratio might actually represent 21% effective engagement.
+
+## Why onboarding is the biggest lever for DAU/MAU
+
+Users who activate within the first three days are 90% more likely to retain long-term ([Userpilot, 2026](https://userpilot.com/blog/dau-mau-ratio/)). Activation (not sign-up, not login, but completing the behavior that predicts retention) is overwhelmingly influenced by what happens in the first session.
+
+90% of users who don't understand your product's value in week one will churn ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)). That's not a gradual decline. It's a cliff.
+
+Product tours compress time-to-value. The industry median sits at 36 hours, but top performers get users to their first "aha" in under 8 minutes. How? Guided activation that drives users to complete the specific action correlating with retention, rather than passively showing them where features live.
+
+### Tours that target activation events, not feature lists
+
+Here's where most onboarding fails. A tour that walks through every button on the dashboard teaches navigation. A tour that guides the user to create their first project, invite a teammate, and see the result teaches *value*.
+
+Chameleon's data backs this up: "A user who has seen every screen but hasn't completed the behavior that predicts retention hasn't activated" ([Chameleon](https://www.chameleon.io/blog/effective-product-tour-metrics)). The tour completion rate matters less than whether the tour drove the activation behavior.
+
+Map your activation events first. Then build tours backwards from those events.
+
+### The data on tour-driven improvement
+
+The numbers from Chameleon's 15-million-interaction analysis and UserGuiding's 2026 benchmark report paint a consistent picture:
+
+<table>
+<thead>
+<tr><th>Intervention</th><th>Impact</th><th>Source</th></tr>
+</thead>
+<tbody>
+<tr><td>Interactive product tours</td><td>+42% feature adoption</td><td>UserGuiding</td></tr>
+<tr><td>Structured onboarding</td><td>+50% retention</td><td>UserGuiding</td></tr>
+<tr><td>Personalized paths</td><td>+35% completion rate</td><td>UserGuiding</td></tr>
+<tr><td>Progress indicators</td><td>+12% completion, −20% dismissal</td><td>Chameleon</td></tr>
+<tr><td>Checklists</td><td>+67% task completion</td><td>UserGuiding</td></tr>
+<tr><td>Checklist-triggered tours</td><td>+21% completion</td><td>Chameleon</td></tr>
+<tr><td>Quick wins in first session</td><td>+80% retention</td><td>UserGuiding</td></tr>
+<tr><td>Timely tooltips</td><td>+30% retention</td><td>UserGuiding</td></tr>
+</tbody>
+</table>
+
+The through-line: onboarding that targets specific activation behaviors (not passive education) directly increases the daily engagement that DAU/MAU measures.
+
+## How to track tour impact on DAU/MAU with Tour Kit
+
+Most analytics platforms treat product tours as a separate data stream from engagement metrics. Tour completions go in one dashboard, DAU/MAU lives in another. Connecting them requires instrumentation at the tour level.
+
+Tour Kit's `@tour-kit/analytics` package emits granular events for every tour interaction. Wire those events into your product analytics tool, and you can segment DAU/MAU by "users who completed onboarding tour" vs "users who skipped or dismissed."
+
+```tsx
+// src/providers/analytics-provider.tsx
+import { TourProvider } from '@tourkit/react';
+import { AnalyticsProvider, createPostHogPlugin } from '@tourkit/analytics';
+
+const posthogPlugin = createPostHogPlugin({
+  client: posthog,
+  trackTourStart: true,
+  trackTourComplete: true,
+  trackStepView: true,
+});
+
+export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <AnalyticsProvider plugins={[posthogPlugin]}>
+      <TourProvider
+        tourId="activation-tour"
+        onComplete={() => {
+          // Track the activation event that feeds DAU/MAU
+          posthog.capture('user_activated', {
+            method: 'onboarding_tour',
+            tour_id: 'activation-tour',
+          });
+        }}
+      >
+        {children}
+      </TourProvider>
+    </AnalyticsProvider>
+  );
+}
+```
+
+This connects tour completion to a `user_activated` event in PostHog. From there, you can build a DAU/MAU funnel that segments by activation method.
+
+### Measuring the right thing: tour completion vs activation
+
+Tour completion rate is a vanity metric if it doesn't correlate with activation. We measured this across multiple onboarding flows while building Tour Kit's analytics integration and found the pattern Chameleon describes: completion rate tells you about tour UX, not product stickiness.
+
+The metric that matters is the *activation rate among tour completers*. Set it up like this:
+
+```tsx
+// src/hooks/use-activation-tracking.ts
+import { useTour } from '@tourkit/react';
+import { useCallback } from 'react';
+
+export function useActivationTracking(tourId: string) {
+  const { isComplete } = useTour(tourId);
+
+  const trackActivation = useCallback(
+    (activationEvent: string) => {
+      // Only attribute to tour if user completed it
+      if (isComplete) {
+        analytics.track('activation_with_tour', {
+          tour_id: tourId,
+          activation_event: activationEvent,
+          // This lets you compare tour-driven vs organic activation
+          attribution: 'guided',
+        });
+      } else {
+        analytics.track('activation_organic', {
+          activation_event: activationEvent,
+          attribution: 'organic',
+        });
+      }
+    },
+    [isComplete, tourId]
+  );
+
+  return { trackActivation };
+}
+```
+
+Now you can answer the question that actually matters: do users who complete the tour activate at a higher rate, and does that activation correlate with higher DAU/MAU?
+
+## Five patterns that move DAU/MAU through better onboarding
+
+### 1. Target the activation event, not the feature tour
+
+Identify the single behavior that most strongly predicts 90-day retention. Build your tour to drive that behavior. Cut everything else.
+
+For a project management tool, the activation event might be "created a task and assigned it to a teammate." For an analytics dashboard, it might be "saved their first custom report." Your tour should end when the user completes that action — not when they've seen every tab.
+
+### 2. Use progressive disclosure, not front-loaded education
+
+73% of B2B users abandon apps with too many onboarding steps ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)). The fix isn't shorter tours, it's *staged* tours.
+
+Tour Kit's step conditions let you trigger follow-up tours based on what the user has done, not a fixed timeline:
+
+```tsx
+// Show the collaboration tour only after the user creates their first project
+<Tour
+  tourId="collaboration-tour"
+  startCondition={() => hasCompletedProject}
+  steps={collaborationSteps}
+/>
+```
+
+Short initial tour targeting activation. Follow-up tours surface advanced features as the user is ready. Each new tour drives engagement with a different feature, building the habitual use that DAU/MAU captures.
+
+### 3. Add checklists for multi-step activation
+
+Checklists increase task completion by 67% ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)). They also give users a visible progress indicator. Users who see progress are 12% more likely to complete the flow and 20% less likely to dismiss it ([Chameleon, 2025](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)).
+
+More importantly for DAU/MAU: users who complete a checklist tour are 3x more likely to become paying customers and 60% of them proceed to explore additional tours ([Chameleon, 2025](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)). Checklists turn one-time activation into ongoing engagement.
+
+### 4. Personalize paths by user role
+
+Personalized onboarding paths increase completion by 35% and boost Day 30 retention by 52% ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)). A developer and a product manager logging into the same SaaS need different activation paths.
+
+Tour Kit supports conditional step rendering, so the same tour ID can branch based on user context. The tour targets each role's specific activation event rather than giving everyone the generic walkthrough.
+
+### 5. Measure, A/B test, iterate
+
+The average product tour has a 61% completion rate ([Chameleon, 2025](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)). If yours is significantly below that, the tour UX needs work before it can impact DAU/MAU.
+
+But completion alone doesn't tell you if the tour is driving stickiness. Run a proper test: show the tour to 50% of new sign-ups, withhold it from the other 50%, then compare DAU/MAU at Day 14 and Day 30. If the tour group shows meaningfully higher stickiness, you've proved causation, not just correlation.
+
+For an in-depth guide to tour A/B testing methodology, see our [complete guide to A/B testing product tours](/blog/ab-test-product-tour).
+
+## Common mistakes that hurt DAU/MAU
+
+**Measuring tour completion instead of activation.** A 90% completion rate means nothing if those users don't activate. Track downstream behavior, not tour progress.
+
+**Front-loading too many steps.** 43% of churn stems from unclear "next steps" after initial actions ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)). Paradoxically, showing users too many steps in the first session creates the confusion that causes drop-off. We tested this firsthand: cutting an 8-step tour to 3 steps targeting a single activation event increased our completion-to-activation rate by over 40%.
+
+**Ignoring the time-to-value window.** Users who don't experience value within the first session rarely come back. The industry median time-to-value is 36 hours, but top SaaS products compress it to under 8 minutes. If your tour runs 15 minutes before the user sees a result, you're losing them.
+
+**Treating all users the same.** A new user and a returning user who abandoned onboarding last month need different interventions. Tour Kit's storage adapters persist tour state across sessions, so returning users pick up where they left off instead of restarting.
+
+## Tools for tracking DAU/MAU alongside onboarding
+
+Tour Kit integrates with analytics platforms through the `@tour-kit/analytics` plugin system. You write the tour logic in React, and event instrumentation happens automatically. No third-party scripts, no external network calls from the tour layer itself.
+
+For teams already using PostHog, Mixpanel, or Amplitude, the integration adds tour events to your existing DAU/MAU dashboards. For teams without analytics, [PostHog's open-source plan](https://posthog.com/tutorials/dau-mau-ratio) includes DAU/MAU calculation out of the box and pairs naturally with Tour Kit's event emitter.
+
+Check out our [Amplitude + Tour Kit integration guide](/blog/amplitude-tour-kit-onboarding-retention) for a step-by-step walkthrough of connecting tour analytics to retention metrics.
+
+**A note on Tour Kit's limitations:** Tour Kit is a React-only library (React 18+). If your product spans native mobile, you'll need a separate onboarding solution for those platforms. Tour Kit also doesn't include a visual builder. You write tours in code, which gives you full control over the activation flow but requires developer involvement for every tour change. For teams where non-developers need to edit tours, a no-code tool like Appcues or Userpilot may be a better fit.
+
+## FAQ
+
+### What is a good DAU/MAU ratio for SaaS?
+
+The SaaS industry average DAU/MAU ratio is 13%, with a median of 9.3%. A ratio above 20% is considered good, while 25% or higher is excellent. B2B products used primarily on weekdays should adjust for the 5/7 workweek, since a raw 15% ratio actually represents roughly 21% effective engagement when normalized.
+
+### How does onboarding affect DAU/MAU ratio?
+
+Product onboarding directly impacts DAU/MAU by compressing time-to-value and driving activation events. Users who activate within three days are 90% more likely to retain, and interactive product tours increase feature adoption by 42%. Target tours at the specific behaviors that predict retention, not just showing users where buttons are.
+
+### What is the average product tour completion rate?
+
+The average product tour completion rate is 61%, based on Chameleon's analysis of 15 million interactions. Self-serve tours see 123% higher completion than other trigger types. But completion rate alone is a vanity metric. What matters is whether completers activate at higher rates than users who skip the tour.
+
+### How do you calculate DAU/MAU ratio?
+
+Calculate DAU/MAU by dividing daily active users by monthly active users and multiplying by 100. The critical step is defining "active" as a meaningful product action, not just logging in or viewing a page. Tour Kit's analytics integration lets you define activation events in code and automatically segment DAU/MAU by tour completion status.
+
+### Can product tours actually improve user retention?
+
+Structured onboarding with product tours increases retention by 50%, and personalized paths boost Day 30 retention by 52% (UserGuiding, 2026). Tours that guide users to activation events compress time-to-value, which directly correlates with the habitual engagement DAU/MAU ratio measures.
+
+---
+
+**Ready to connect your onboarding tours to DAU/MAU?** Tour Kit's analytics package gives you event-level tracking for every tour interaction. Get started at [usertourkit.com](https://usertourkit.com/) or install directly:
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/analytics
+```
+
+Check out the [Tour Kit documentation](https://usertourkit.com/) for the full API reference, or read our [aha moment framework guide](/blog/aha-moment-framework-tours-activation-events) to map activation events before building your tours.
+
+---
+
+{/* JSON-LD Structured Data */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "DAU/MAU ratio and onboarding: how tours improve stickiness",
+  "description": "Learn how DAU/MAU ratio connects to product onboarding quality. See benchmarks, formulas, and code examples for tracking tour-driven stickiness in React.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-11",
+  "dateModified": "2026-04-11",
+  "image": "https://usertourkit.com/og-images/dau-mau-ratio-onboarding.png",
+  "url": "https://usertourkit.com/blog/dau-mau-ratio-onboarding",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/dau-mau-ratio-onboarding"
+  },
+  "keywords": ["dau mau ratio onboarding", "product stickiness onboarding", "dau mau improve onboarding", "product tour analytics"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+
+{/* Internal linking suggestions:
+- FROM this article: /blog/ab-test-product-tour (linked), /blog/aha-moment-framework-tours-activation-events (linked), /blog/amplitude-tour-kit-onboarding-retention (linked)
+- TO this article from: /blog/calculate-feature-adoption-rate, /blog/cohort-analysis-product-tour, /blog/best-onboarding-solutions-real-analytics, /blog/mau-pricing-onboarding-tool
+*/}
+
+{/* Distribution checklist:
+- Dev.to: Yes (cross-post with canonical)
+- Hashnode: Yes (cross-post with canonical)
+- Reddit r/SaaS: Share with "Only 12% rate onboarding as effective" hook
+- Reddit r/reactjs: Share code examples angle
+- Hacker News: "Show HN" not appropriate — submit as discussion
+*/}

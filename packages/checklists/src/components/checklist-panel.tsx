@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'
 import { Slot, UnifiedSlot } from '../lib/slot'

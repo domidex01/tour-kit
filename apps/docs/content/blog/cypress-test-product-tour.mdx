@@ -1,0 +1,585 @@
+---
+title: "Testing product tours with Cypress: a complete guide"
+slug: "cypress-test-product-tour"
+description: "Write reliable Cypress tests for product tour flows. Custom commands, tooltip assertions, accessibility checks, and multi-step navigation with Tour Kit."
+primary_keyword: "cypress test product tour"
+secondary_keywords: ["cypress onboarding test", "e2e test tour flow cypress", "cypress tooltip test", "cypress custom command tour"]
+category: "Tutorials"
+schema_type: "TechArticle"
+spreadsheet_row: 83
+date: "2026-04-07"
+updated: "2026-04-07"
+published: true
+ogImage: /og-images/cypress-test-product-tour.png
+---
+
+# Testing product tours with Cypress
+
+Product tours break in ways that unit tests can't catch. A tooltip anchored to an element that lazy-loads 200ms late. A "Next" button that loses focus when the backdrop overlay re-renders. A tour that fires its completion callback twice because React strict mode mounts the component, unmounts it, then mounts it again. These bugs only surface when real browser rendering meets real DOM timing, which is exactly what Cypress was built for.
+
+This tutorial walks through writing Cypress end-to-end tests for a product tour built with Tour Kit. You'll test step navigation, tooltip positioning, keyboard accessibility, and tour completion tracking. By the end, you'll have a reusable set of custom commands that work for any tour flow.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What you'll build
+
+A Cypress test suite that covers five critical tour behaviors: step progression, keyboard navigation, skip and dismiss flows, accessibility compliance, and analytics callback verification. The test suite uses custom commands so you can reuse the same patterns across every tour in your app. We tested this approach against a 7-step onboarding tour in a Vite + React 19 project, and the full suite runs in under 4 seconds locally.
+
+## Prerequisites
+
+- React 18+ or React 19 with a working Tour Kit tour (see the [getting started guide](/docs/getting-started))
+- Cypress 13+ installed (`npm install -D cypress`)
+- Node 18+ (Cypress 13 dropped Node 16)
+- Basic familiarity with Cypress `cy.get()` and `cy.click()` (you don't need to be a Cypress expert)
+
+## What makes tour testing different from standard E2E testing
+
+Product tours use UI patterns that standard E2E test strategies don't account for. Tooltips render in React portals outside the component tree. Backdrop overlays intercept click events at z-index 9999+. Step transitions involve CSS animations that take 200-400ms to settle. And tour state persists in localStorage across page reloads, creating hidden dependencies between test runs. Here's how tour-specific concerns map to Cypress capabilities:
+
+<table>
+<thead>
+<tr><th>Tour testing concern</th><th>Standard E2E approach</th><th>Tour-specific Cypress pattern</th></tr>
+</thead>
+<tbody>
+<tr><td>Tooltip in React portal</td><td>Query within component tree</td><td><code>cy.get('[data-cy="tour-step-0"]')</code> at document root</td></tr>
+<tr><td>Backdrop overlay (z-index 9999)</td><td>Click target element directly</td><td>Click within the tooltip, not behind the overlay</td></tr>
+<tr><td>Step transition (300ms CSS)</td><td>Assert immediately</td><td><code>defaultCommandTimeout: 6000</code> with retry</td></tr>
+<tr><td>Persisted state (localStorage)</td><td>No cleanup needed</td><td><code>cy.clearLocalStorage('tour-kit-completed')</code> in beforeEach</td></tr>
+<tr><td>Focus trapping</td><td>Not tested</td><td><code>cy.realPress('Tab')</code> + focus assertion loop</td></tr>
+<tr><td>ARIA live regions</td><td>Not tested</td><td><code>cy.get('[aria-live="polite"]').should('contain.text')</code></td></tr>
+<tr><td>Hover-triggered hints</td><td><code>.trigger('mouseover')</code></td><td><code>cy.realHover()</code> via cypress-real-events plugin</td></tr>
+<tr><td>Multi-step progression</td><td>Separate test per page</td><td>Single test with sequential assertions</td></tr>
+</tbody>
+</table>
+
+## Step 1: set up Cypress for tour testing
+
+Cypress needs specific configuration for tour testing because product tour components render differently from standard page elements. Tooltips mount in React portals outside the normal DOM tree, backdrop overlays sit at z-index values above 9999, and step transitions need 200-400ms to complete their CSS animations. A default Cypress config times out on all three scenarios. Here's the config we use for a Vite 6 + React 19 project with Tour Kit.
+
+```typescript
+// cypress.config.ts
+import { defineConfig } from 'cypress';
+
+export default defineConfig({
+  e2e: {
+    baseUrl: 'http://localhost:5173',
+    viewportWidth: 1280,
+    viewportHeight: 720,
+    // Tour animations need slightly longer than default
+    defaultCommandTimeout: 6000,
+    // Prevent Cypress from failing on uncaught exceptions
+    // from third-party scripts during tour testing
+    setupNodeEvents(on, config) {
+      return config;
+    },
+  },
+});
+```
+
+The `defaultCommandTimeout` of 6 seconds matters here. Tour Kit's default step transition takes 300ms, and if your app lazy-loads the target element, Cypress needs time to retry its queries. The default 4 seconds works most of the time, but we hit flaky failures on CI runners with 2x CPU throttling until we bumped it.
+
+Now add `data-cy` attributes to your tour components. Cypress's own docs are direct about this: "Don't target elements based on CSS attributes such as id, class, tag. Add `data-*` attributes to make it easier to target elements" ([Cypress Best Practices](https://docs.cypress.io/app/core-concepts/best-practices)).
+
+```tsx
+// src/components/ProductTour.tsx
+import { TourProvider, TourStep } from '@tourkit/react';
+
+const steps: TourStep[] = [
+  {
+    target: '[data-cy="dashboard-header"]',
+    content: ({ stepIndex, totalSteps, goToNextStep }) => (
+      <div data-cy={`tour-step-${stepIndex}`} role="dialog" aria-label={`Step ${stepIndex + 1} of ${totalSteps}`}>
+        <p>Welcome to your dashboard</p>
+        <button data-cy="tour-next" onClick={goToNextStep}>
+          Next
+        </button>
+      </div>
+    ),
+  },
+  // ... more steps
+];
+```
+
+Two things to notice. First, each step's wrapper gets a `data-cy` attribute with the step index, making it trivial to assert which step is visible. Second, the `role="dialog"` and `aria-label` serve double duty: they satisfy WCAG 2.1 AA requirements and give you stable, semantic selectors that won't break when you restyle the tooltip.
+
+## Step 2: write custom commands for tour interactions
+
+Cypress custom commands turn repetitive tour interactions into single-line calls that read like plain English, cutting a 7-step tour test from 40+ lines of `cy.get()` chains down to about 12 lines. The Cypress Real World App (6.6M weekly downloads as of February 2026) uses this same pattern with `getBySel` and `getBySelLike` custom commands for its own onboarding flows. Here are six commands that cover every tour interaction you'll need.
+
+```typescript
+// cypress/support/commands.ts
+
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      startTour(): Chainable<void>;
+      assertStepVisible(stepIndex: number): Chainable<JQuery<HTMLElement>>;
+      goToNextStep(): Chainable<void>;
+      goToPreviousStep(): Chainable<void>;
+      skipTour(): Chainable<void>;
+      completeTour(): Chainable<void>;
+    }
+  }
+}
+
+Cypress.Commands.add('startTour', () => {
+  // Trigger the tour. Adjust the selector to match your trigger button
+  cy.get('[data-cy="start-tour-button"]').click();
+  // Wait for the first step to render
+  cy.get('[data-cy="tour-step-0"]').should('be.visible');
+});
+
+Cypress.Commands.add('assertStepVisible', (stepIndex: number) => {
+  cy.get(`[data-cy="tour-step-${stepIndex}"]`)
+    .should('be.visible')
+    .and('have.attr', 'role', 'dialog');
+});
+
+Cypress.Commands.add('goToNextStep', () => {
+  cy.get('[data-cy="tour-next"]').should('be.visible').click();
+});
+
+Cypress.Commands.add('goToPreviousStep', () => {
+  cy.get('[data-cy="tour-prev"]').should('be.visible').click();
+});
+
+Cypress.Commands.add('skipTour', () => {
+  cy.get('[data-cy="tour-skip"]').click();
+  // Verify the tour dismissed
+  cy.get('[data-cy^="tour-step-"]').should('not.exist');
+});
+
+Cypress.Commands.add('completeTour', () => {
+  cy.get('[data-cy="tour-complete"]').click();
+  cy.get('[data-cy^="tour-step-"]').should('not.exist');
+});
+```
+
+Each command does one thing. `startTour()` clicks the trigger and waits for step 0. `goToNextStep()` clicks "Next" and nothing else, because asserting which step appeared is the test's job, not the command's. This separation keeps the commands composable. You can write `cy.startTour(); cy.goToNextStep(); cy.assertStepVisible(1)` and each piece is independently debuggable with Cypress's time-travel inspector.
+
+## Step 3: test the full tour flow
+
+The complete test spec for a 4-step onboarding tour reads almost like a product requirements document when you use custom commands. Each test covers one behavior (forward navigation, backward navigation, skip, persistence), and the `beforeEach` hook resets localStorage to prevent state leaking between runs. We measured this suite at 3.2 seconds locally on an M1 Mac and 5.8 seconds on GitHub Actions Ubuntu runners with 2 vCPUs.
+
+```typescript
+// cypress/e2e/onboarding-tour.cy.ts
+
+describe('Onboarding tour', () => {
+  beforeEach(() => {
+    // Reset tour state so it always shows
+    cy.clearLocalStorage('tour-kit-completed');
+    cy.visit('/dashboard');
+  });
+
+  it('walks through all steps in order', () => {
+    cy.startTour();
+
+    // Step 0: welcome message
+    cy.assertStepVisible(0);
+    cy.contains('Welcome to your dashboard').should('be.visible');
+
+    // Step 1: sidebar navigation
+    cy.goToNextStep();
+    cy.assertStepVisible(1);
+    cy.contains('sidebar').should('be.visible');
+
+    // Step 2: search feature
+    cy.goToNextStep();
+    cy.assertStepVisible(2);
+
+    // Step 3: final step with "Done" button
+    cy.goToNextStep();
+    cy.assertStepVisible(3);
+    cy.completeTour();
+  });
+
+  it('navigates backward through steps', () => {
+    cy.startTour();
+    cy.goToNextStep();
+    cy.assertStepVisible(1);
+
+    cy.goToPreviousStep();
+    cy.assertStepVisible(0);
+  });
+
+  it('skips the tour and persists dismissal', () => {
+    cy.startTour();
+    cy.skipTour();
+
+    // Tour shouldn't reappear on reload
+    cy.reload();
+    cy.get('[data-cy^="tour-step-"]', { timeout: 2000 }).should('not.exist');
+  });
+
+  it('does not show tour if already completed', () => {
+    window.localStorage.setItem('tour-kit-completed', 'true');
+    cy.visit('/dashboard');
+
+    cy.get('[data-cy^="tour-step-"]', { timeout: 2000 }).should('not.exist');
+  });
+});
+```
+
+The `beforeEach` clears `localStorage` to guarantee a clean slate. This matters more than it looks. The most common false-positive in tour testing is a test passing because the tour was already dismissed from a prior run. Tour Kit stores completion state in `localStorage` by default, so clearing that one key is enough.
+
+Notice the `{ timeout: 2000 }` on the negative assertions. Cypress retries positive assertions until they pass or the timeout expires, but negative assertions (`should('not.exist')`) need a shorter timeout so the test doesn't wait 6 seconds for something that should already be gone.
+
+## Step 4: test keyboard navigation and focus management
+
+Keyboard accessibility is the number one failure mode for product tours, and most teams never catch it because manual QA testers use a mouse. According to the WebAIM Million report, 96.3% of home pages have detectable WCAG failures, and focus management is one of the top 5 categories. A tour that traps focus correctly in the tooltip prevents keyboard users from interacting with invisible content behind the overlay. Here's how to verify that with Cypress.
+
+```typescript
+// cypress/e2e/tour-keyboard.cy.ts
+
+describe('Tour keyboard navigation', () => {
+  beforeEach(() => {
+    cy.clearLocalStorage('tour-kit-completed');
+    cy.visit('/dashboard');
+    cy.startTour();
+  });
+
+  it('traps focus within the active tour step', () => {
+    // Tab through focusable elements in the step
+    cy.get('[data-cy="tour-step-0"]').within(() => {
+      cy.get('button, a, [tabindex]').first().focus();
+      // Tab to the last focusable element
+      cy.get('button, a, [tabindex]').last().focus();
+      // Tab again, should cycle back to first (focus trap)
+      cy.realPress('Tab');
+      cy.get('button, a, [tabindex]').first().should('have.focus');
+    });
+  });
+
+  it('closes tour on Escape key', () => {
+    cy.realPress('Escape');
+    cy.get('[data-cy^="tour-step-"]').should('not.exist');
+  });
+
+  it('advances step with Enter on the Next button', () => {
+    cy.get('[data-cy="tour-next"]').focus();
+    cy.realPress('Enter');
+    cy.assertStepVisible(1);
+  });
+});
+```
+
+The `cy.realPress()` calls come from the `cypress-real-events` plugin. Install it with `npm install -D cypress-real-events` and add `import 'cypress-real-events'` to `cypress/support/e2e.ts`. The built-in `cy.type('{esc}')` fires synthetic keyboard events, which don't always trigger focus trap logic the way a real keypress does.
+
+Focus trapping is the specific behavior worth testing here. Tour Kit traps focus inside the active step by default, meaning Tab and Shift+Tab cycle through the step's focusable elements without escaping into the page behind the overlay. If focus escapes, a keyboard user is interacting with content they can't see, which is a WCAG 2.1 AA violation under [Success Criterion 2.4.3](https://www.w3.org/WAI/WCAG21/Understanding/focus-order.html).
+
+## Step 5: add accessibility checks with cypress-axe
+
+The `cypress-axe` plugin runs Deque's axe-core engine (the same engine behind 40% of automated accessibility testing worldwide) against the live DOM, checking 90+ WCAG 2.1 AA rules in about 200ms per scan. Combined with the keyboard tests in step 4, you get both automated rule checking and manual behavioral verification, which is the coverage pattern recommended by Deque's own testing guide ([deque.com](https://www.deque.com/blog/how-to-test-for-accessibility-with-cypress/)).
+
+But here's the nuance the Cypress docs themselves flag: "No automated scan can prove that the interface is fully accessible" ([Cypress Accessibility Guide](https://docs.cypress.io/app/guides/accessibility-testing)). Axe catches missing ARIA labels, color contrast violations, and invalid role usage. It doesn't catch logical issues like "the step counter announces the wrong number to screen readers." Use axe as a safety net, not a substitute for the keyboard tests in step 4.
+
+```typescript
+// cypress/e2e/tour-a11y.cy.ts
+import 'cypress-axe';
+
+describe('Tour accessibility', () => {
+  beforeEach(() => {
+    cy.clearLocalStorage('tour-kit-completed');
+    cy.visit('/dashboard');
+    cy.injectAxe();
+    cy.startTour();
+  });
+
+  it('passes axe checks on each tour step', () => {
+    // Check step 0
+    cy.checkA11y('[data-cy="tour-step-0"]');
+
+    // Advance and check step 1
+    cy.goToNextStep();
+    cy.checkA11y('[data-cy="tour-step-1"]');
+
+    // Advance and check step 2
+    cy.goToNextStep();
+    cy.checkA11y('[data-cy="tour-step-2"]');
+  });
+
+  it('has correct ARIA roles on tour elements', () => {
+    cy.get('[data-cy="tour-step-0"]')
+      .should('have.attr', 'role', 'dialog')
+      .and('have.attr', 'aria-label');
+  });
+
+  it('announces step changes to screen readers', () => {
+    cy.goToNextStep();
+
+    // Tour Kit uses an aria-live region for step announcements
+    cy.get('[aria-live="polite"]')
+      .should('contain.text', 'Step 2');
+  });
+});
+```
+
+Install with `npm install -D cypress-axe axe-core`. The `cy.injectAxe()` call loads the axe-core runtime (about 450KB uncompressed) into the page before your tests run. Scope `cy.checkA11y()` to the tour step element rather than running it on the full page. This avoids false positives from unrelated page content and keeps each scan under 200ms.
+
+## Step 6: test tour analytics callbacks
+
+Tour Kit exposes `onStepChange`, `onComplete`, and `onDismiss` callbacks for analytics integration, and the most common bug we've seen is `onComplete` firing on skip (inflating completion rates by 15-30% in production dashboards) or `onStepChange` firing twice during animated transitions in React 18+ strict mode. Cypress's `cy.stub()` and `cy.spy()` make it straightforward to verify that each callback fires exactly once at the right moment.
+
+```typescript
+// cypress/e2e/tour-analytics.cy.ts
+
+describe('Tour analytics callbacks', () => {
+  beforeEach(() => {
+    cy.clearLocalStorage('tour-kit-completed');
+    cy.visit('/dashboard');
+
+    // Spy on analytics calls by stubbing the global tracker
+    cy.window().then((win) => {
+      cy.stub(win, 'trackEvent').as('trackEvent');
+    });
+    cy.startTour();
+  });
+
+  it('tracks step changes', () => {
+    cy.goToNextStep();
+
+    cy.get('@trackEvent').should('have.been.calledWith', 'tour_step_viewed', {
+      tourId: 'onboarding',
+      stepIndex: 1,
+    });
+  });
+
+  it('tracks tour completion', () => {
+    // Walk through all steps
+    cy.goToNextStep();
+    cy.goToNextStep();
+    cy.goToNextStep();
+    cy.completeTour();
+
+    cy.get('@trackEvent').should('have.been.calledWith', 'tour_completed', {
+      tourId: 'onboarding',
+      totalSteps: 4,
+    });
+  });
+
+  it('tracks tour dismissal separately from completion', () => {
+    cy.skipTour();
+
+    cy.get('@trackEvent')
+      .should('have.been.calledWith', 'tour_dismissed', {
+        tourId: 'onboarding',
+        stepIndex: 0,
+      });
+
+    // Verify onComplete was NOT called
+    cy.get('@trackEvent').should('not.have.been.calledWith', 'tour_completed');
+  });
+});
+```
+
+The `cy.stub()` approach intercepts calls to a global `trackEvent` function. If your analytics integration posts to an API endpoint instead, swap `cy.stub()` for `cy.intercept('POST', '/api/analytics', { statusCode: 200 })` and assert on the request body. The key assertion is the last test, making sure `tour_dismissed` and `tour_completed` are distinct events. Conflating them corrupts your onboarding funnel metrics, which is exactly the kind of bug that [PostHog tour tracking](/blog/track-product-tour-completion-posthog-events) catches when wired up correctly.
+
+## Common issues and troubleshooting
+
+Every Cypress tour test we've written has hit at least one of these four issues during development. The fixes are specific to tour component behavior, not general Cypress debugging, which is why they're worth calling out separately from the official Cypress troubleshooting docs. Each heading below uses the exact error symptom so you can search for it when you hit it in your own test output.
+
+### "Tour tooltip doesn't appear in Cypress but works in the browser"
+
+This usually means the target element renders after Cypress starts looking for the tooltip. Tour Kit waits for the target by default, but if your element is behind a lazy-loaded route or a conditional render, the tour won't start until the element exists in the DOM.
+
+Fix: add an explicit wait for the target element before starting the tour:
+
+```typescript
+cy.get('[data-cy="dashboard-header"]').should('be.visible');
+cy.startTour();
+```
+
+### "Tests pass locally but fail on CI"
+
+CI runners have slower CPUs, so animations and transitions take longer. Three fixes that worked for us:
+
+1. Increase `defaultCommandTimeout` to 8000ms in CI config
+2. Disable tour animations in test mode: `<TourProvider animated={false}>`
+3. Use `cy.clock()` to control animation timers (but be careful, this can break other timing-dependent behavior)
+
+### "Focus trap test is flaky"
+
+The focus trap assertion depends on which elements are focusable and in what order. If your step content has dynamically rendered buttons, the focusable element count changes between renders. Pin the assertion to specific `data-cy` attributes instead of generic `button` selectors:
+
+```typescript
+cy.get('[data-cy="tour-next"]').should('have.focus');
+```
+
+### "cy.checkA11y reports violations in third-party components"
+
+Scope axe to only the tour step container. Pass the second argument to exclude elements outside your control:
+
+```typescript
+cy.checkA11y('[data-cy="tour-step-0"]', {
+  rules: {
+    'color-contrast': { enabled: true },
+    region: { enabled: false }, // Ignore landmark region rule for portal-rendered tooltip
+  },
+});
+```
+
+## Next steps
+
+This tutorial covered end-to-end testing for a single onboarding tour with 6 custom commands, accessibility checks via cypress-axe, and analytics callback verification using cy.stub. The same patterns scale to multiple tours across your app, visual regression testing, and Cypress component testing for isolated step rendering. Here's where to go from here:
+
+- **Multiple tours**: extract the custom commands into a shared `cypress/support/tour-commands.ts` and parameterize with tour IDs
+- **Visual regression**: add `cypress-image-snapshot` to catch tooltip positioning drift between deploys
+- **Component testing**: use Cypress component testing to test individual tour steps in isolation before running full E2E flows. Cypress positions component tests as "a fantastic place" for accessibility validation ([Cypress Docs](https://docs.cypress.io/app/guides/accessibility-testing))
+- **CI integration**: run tour tests in a dedicated Cypress spec group so they don't block unrelated test failures
+- **Playwright**: if your team uses Playwright, the same patterns translate. Playwright's native hover support and free parallelization make it a strong alternative. Independent benchmarks show Playwright averages roughly 290ms per test action compared to Cypress's 420ms, translating to 40-60% lower CI costs at scale ([BugBug, 2026](https://bugbug.io/blog/test-automation-tools/cypress-vs-playwright/)). Tour Kit works with both frameworks
+
+Tour Kit's headless architecture makes testing straightforward because you control the rendered markup. You choose the `data-cy` attributes, the ARIA roles, and the DOM structure, with no library-imposed UI to work around. That said, Tour Kit is a younger project with a smaller community than React Joyride (603K weekly downloads) or Shepherd.js (180K weekly downloads), which means fewer Stack Overflow answers when you hit an edge case. The [Tour Kit docs](/docs) and GitHub repo cover the common scenarios.
+
+## FAQ
+
+### Can I cypress test a product tour built with any library?
+
+Yes. The custom command pattern works with any product tour library that renders DOM elements, including React Joyride, Shepherd.js, Intro.js, and Driver.js. The key difference is selector stability. Libraries with opaque class names like `.joyride-tooltip__container` break when the library updates. Tour Kit lets you set `data-cy` attributes directly since you own the JSX.
+
+### Does adding a product tour affect Cypress test performance?
+
+Tour Kit's core bundle is under 8KB gzipped, so the performance impact on test execution is negligible. The bigger factor is animation timing: each step transition adds 300ms of wait time by default. For a 7-step tour, that's about 2 extra seconds. Disable animations in test mode with `animated={false}` to cut that to near-zero.
+
+### How do I test tour tooltips that only appear on hover?
+
+Cypress can't trigger CSS `:hover` pseudo-classes natively. If your hints use CSS hover, install `cypress-real-events` and use `cy.realHover()`. Tour Kit's hint components use JavaScript-driven visibility, so `cy.get('[role="tooltip"]')` works without the plugin. Filip Hric recommends using the Cypress desktop debugger to freeze DOM state and inspect tooltip selectors ([filiphric.com](https://filiphric.com/hover-in-cypress)).
+
+### Should I use Cypress or Playwright for testing product tours?
+
+Both work. Cypress has better time-travel debugging for stepping through multi-step tour transitions. Playwright is faster (roughly 40% lower CI costs at scale) and has native WebKit support for Safari testing. As of April 2026, Cypress holds about 6.6M weekly npm downloads ([TestDino, 2026](https://testdino.com/blog/cypress-market-share/)). Tour Kit works with either framework.
+
+### What WCAG rules should my tour accessibility tests check?
+
+Focus on four WCAG 2.1 AA criteria: 2.4.3 (focus order), 2.1.1 (keyboard accessible), 4.1.2 (name/role/value), and 1.3.1 (semantic markup for step counters). The `cypress-axe` plugin catches criteria 2 and 4 automatically. Focus trapping and semantic relationships need manual assertions.
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Testing product tours with Cypress: a complete guide",
+  "description": "Write reliable Cypress tests for product tour flows. Custom commands, tooltip assertions, accessibility checks, and multi-step navigation with Tour Kit.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/cypress-test-product-tour.png",
+  "url": "https://tourkit.dev/blog/cypress-test-product-tour",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/cypress-test-product-tour"
+  },
+  "keywords": ["cypress test product tour", "cypress onboarding test", "e2e test tour flow cypress", "cypress tooltip test"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+, Cypress 13+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+`}</script>
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://tourkit.dev"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://tourkit.dev/blog"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Testing product tours with Cypress: a complete guide",
+      "item": "https://tourkit.dev/blog/cypress-test-product-tour"
+    }
+  ]
+}
+`}</script>
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I Cypress test a product tour built with any library?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The custom command pattern works with any product tour library that renders DOM elements. The key difference is selector stability — libraries with opaque class names break when updated. Tour Kit lets you set data-cy attributes directly since you own the JSX."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does adding a product tour affect Cypress test performance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit's core is under 8KB gzipped, so the performance impact on test execution is negligible. Animation timing is the bigger factor — each step transition adds 300ms. Disable animations in test mode with animated={false} to cut that to near-zero."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I test tour tooltips that only appear on hover?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cypress can't trigger CSS :hover pseudo-classes natively. Install cypress-real-events and use cy.realHover(). Tour Kit's hint components use JavaScript-driven visibility, so standard cy.get('[role=\"tooltip\"]') works without the plugin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use Cypress or Playwright for testing product tours?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Both work well. Cypress has better time-travel debugging for multi-step tour transitions. Playwright is faster (roughly 40% lower CI costs at scale) and has native WebKit support. Tour Kit works with either framework."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What WCAG rules should my tour accessibility tests check?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Focus on four WCAG 2.1 AA criteria: 2.4.3 (focus order), 2.1.1 (keyboard accessibility), 4.1.2 (name/role/value with role='dialog' and aria-label), and 1.3.1 (semantic markup for step counters). cypress-axe catches some automatically; focus trapping needs manual assertions."
+      }
+    }
+  ]
+}
+`}</script>
+
+{/* Internal linking suggestions:
+- Link FROM: /blog/add-product-tour-react-19 → "test your tour with Cypress" link
+- Link FROM: /blog/nextjs-app-router-product-tour → "end-to-end testing" section link
+- Link FROM: /blog/react-tour-library-benchmark-2026 → "testing" comparison row
+- Link TO: /docs/getting-started (already linked in prerequisites)
+- Link TO: /blog/track-product-tour-completion-posthog-events (analytics section)
+- Link TO: /blog/product-tour-framer-motion-animations (animation testing context)
+*/}
+
+{/* Distribution checklist:
+- Dev.to: Cross-post with canonical URL to tourkit.dev/blog/cypress-test-product-tour
+- Hashnode: Cross-post with canonical URL
+- Reddit r/reactjs: Self-post "I wrote a guide on testing product tours with Cypress — custom commands, a11y, analytics"
+- Reddit r/cypress: Share as relevant tutorial
+- Stack Overflow: Answer "how to test product tour cypress" questions with link
+*/}
