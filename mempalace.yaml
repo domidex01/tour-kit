@@ -1,0 +1,30 @@
+wing: tour_kit
+rooms:
+- name: examples
+  description: Files from examples/
+- name: packages
+  description: Files from packages/
+- name: tooling
+  description: Files from tooling/
+- name: e2e
+  description: Files from e2e/
+- name: apps
+  description: Files from apps/
+- name: playwright_report
+  description: Files from playwright-report/
+- name: marketing_strategy
+  description: Files from marketing-strategy/
+- name: test_results
+  description: Files from test-results/
+- name: plan
+  description: Files from plan/
+- name: planning
+  description: Files from specs/
+- name: scripts
+  description: Files from scripts/
+- name: tour_kit
+  description: Files from tour-kit/
+- name: documentation
+  description: Files from docs/
+- name: general
+  description: Files that don't fit other rooms

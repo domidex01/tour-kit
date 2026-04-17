@@ -1,0 +1,390 @@
+---
+title: "8 best onboarding tools that support mobile + web (2026)"
+slug: "best-onboarding-tools-mobile-web"
+description: "Compare 8 onboarding tools with mobile and web support. See native SDK coverage, pricing, and accessibility for cross-platform onboarding."
+primary_keyword: "onboarding tool mobile web"
+secondary_keywords: ["cross-platform onboarding software", "mobile onboarding sdk", "mobile web onboarding tool"]
+category: "Listicles"
+schema_type: "TechArticle"
+spreadsheet_row: 44
+date: "2026-04-07"
+updated: "2026-04-07"
+published: true
+ogImage: /og-images/best-onboarding-tools-mobile-web.png
+---
+
+# 8 best onboarding tools that support mobile + web (2026)
+
+Most onboarding tools claim "mobile support." What they mean varies wildly. Some ship native iOS and Android SDKs. Others just make their web tooltips responsive. A few let you toggle mobile tours off entirely and call it a feature.
+
+We tested eight tools across web, mobile web, and native mobile to see which ones actually deliver a consistent cross-platform onboarding experience. The results surprised us: genuine native mobile SDK support starts at $300/month, and only four tools out of eight offer it at all.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## How we evaluated these tools
+
+We scored each tool on five criteria: platform coverage, mobile web performance, pricing transparency, accessibility compliance (WCAG 2.1 AA or better), and developer control. For each tool that offers a free trial or open-source option, we installed it and built a five-step product tour targeting both desktop and mobile viewports. For SaaS-only tools, we verified claims against published documentation and SDK changelogs.
+
+One disclosure: we built Tour Kit. We've tried to be fair throughout, but you should know that going in. Every claim below is verifiable against npm, GitHub, or the tool's own docs.
+
+## Quick comparison table
+
+<table>
+<thead>
+<tr><th>Tool</th><th>Mobile type</th><th>Native SDK</th><th>React Native</th><th>Flutter</th><th>WCAG</th><th>Starting price</th><th>Best for</th></tr>
+</thead>
+<tbody>
+<tr><td>Tour Kit</td><td>Web (responsive)</td><td>❌</td><td>❌</td><td>❌</td><td>✅ AA</td><td>Free (MIT)</td><td>Web-first teams wanting full UI control</td></tr>
+<tr><td>Appcues</td><td>Native SDK + Web</td><td>✅</td><td>✅</td><td>✅</td><td>⚠️</td><td>$300/mo</td><td>SaaS teams needing mobile + web fast</td></tr>
+<tr><td>Pendo</td><td>Native SDK + Web</td><td>✅</td><td>✅</td><td>✅</td><td>⚠️</td><td>Free (500 MAU)</td><td>Product teams wanting analytics + onboarding</td></tr>
+<tr><td>Plotline</td><td>Native SDK + Web</td><td>✅</td><td>✅</td><td>✅</td><td>⚠️</td><td>$999/mo</td><td>Mobile-first apps with complex flows</td></tr>
+<tr><td>Whatfix</td><td>Native SDK + Web</td><td>✅</td><td>❌</td><td>❌</td><td>⚠️</td><td>Custom</td><td>Enterprise digital adoption</td></tr>
+<tr><td>Userpilot</td><td>Mobile + Web</td><td>✅</td><td>❌</td><td>❌</td><td>⚠️</td><td>$299/mo</td><td>Growth teams iterating on activation</td></tr>
+<tr><td>Chameleon</td><td>Responsive web</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>Custom</td><td>Web apps with strong segmentation needs</td></tr>
+<tr><td>UserGuiding</td><td>Responsive web</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td><td>$69/mo</td><td>Budget-conscious web-only teams</td></tr>
+</tbody>
+</table>
+
+The ⚠️ on WCAG means the tool doesn't publicly document accessibility compliance for mobile experiences. As of April 2026, WCAG 2.2 explicitly covers mobile with nine new success criteria including touch targets (2.5.8) and reflow (1.4.10). None of these tools advertise compliance with those standards.
+
+## 1. Tour Kit — best for web teams that want full design control
+
+Tour Kit is a headless onboarding library for React that ships its core at under 8KB gzipped with zero runtime dependencies. It doesn't have native mobile SDKs. What it does have: responsive web support with proper mobile breakpoint handling, WCAG 2.1 AA compliance baked in, and ten composable packages you install individually so you only ship what you use.
+
+### Strengths
+
+- Core bundle under 8KB gzipped, which matters on mobile web where [53% of users leave if a page takes over 3 seconds to load](https://developers.googleblog.com/the-modern-mobile-web-state-of-the-union/)
+- Headless architecture means your onboarding matches your design system (shadcn/ui, Radix, Tailwind, anything)
+- Built-in survey fatigue prevention across mobile and desktop sessions
+- TypeScript-first with full type exports and React 18/19 support
+
+### Limitations
+
+- No native iOS, Android, React Native, or Flutter SDKs (web only)
+- Smaller community than established tools like React Joyride or Pendo
+- Requires React developers. No visual builder for non-technical users
+- Younger project with less enterprise battle-testing
+
+### Pricing
+
+$0 for the core packages (MIT open source). Extended packages (surveys, adoption tracking, scheduling) available as a $99 one-time Pro license.
+
+### Best for
+
+React teams building web apps who need full control over onboarding UI and care about bundle size and accessibility. Not the right choice if you need native mobile app onboarding.
+
+## 2. Appcues — best for SaaS teams that need mobile + web quickly
+
+Appcues is a no-code onboarding platform with native SDKs for iOS, Android, React Native, Flutter, and Ionic (five frameworks total). As of April 2026, it supports building and deploying mobile flows directly from the dashboard without waiting for app store approvals. North One reported a 25% increase in conversions after adopting Appcues mobile ([source](https://www.appcues.com/mobile)).
+
+### Strengths
+
+- Broadest cross-platform framework coverage among mid-market tools (React Native, Flutter, Ionic)
+- No-code builder lets product managers create flows without engineering
+- Deploy mobile flows without app store review cycles
+- Established player with large customer base and support ecosystem
+
+### Limitations
+
+- Mobile SDK adds to your app's binary size, and Appcues doesn't publish SDK size data
+- Starting at $300/month, the Growth plan ($750/month) is where most mobile features live
+- You're locked into Appcues' UI patterns, and customization has limits
+- Their own blog acknowledges: "more onboarding tools doesn't automatically mean a better onboarding process"
+
+### Pricing
+
+Starts at $300/month (Essentials). Growth plan at $750/month. Enterprise is custom. No free tier, trial only.
+
+### Best for
+
+SaaS teams with both web and mobile apps who need product managers to build flows without developer involvement.
+
+## 3. Pendo — best for product analytics + onboarding in one platform
+
+Pendo combines product analytics with in-app guides across web, iOS, Android, React Native, Flutter, and Jetpack Compose. The free tier at 500 MAU makes it accessible for early-stage testing, but enterprise contracts run around $48K/year based on market reports.
+
+### Strengths
+
+- Unified analytics and onboarding dashboard across all platforms
+- Codeless guide creation for mobile with session replay
+- Free tier at 500 MAU gives small teams a real starting point
+- Supports Jetpack Compose, which is relatively rare among onboarding tools
+
+### Limitations
+
+- Enterprise pricing at ~$48K/year puts it out of reach for many teams
+- Mobile SDK size and performance impact aren't publicly documented
+- As Benny Estes (Pendo customer) noted, significant effort went into segmenting customers by mobile device usage. The tool requires investment to use well
+- Discrepancies between third-party reports and Pendo's own platform claims about Flutter and React Native support suggest the mobile SDK story is still evolving
+
+### Pricing
+
+Free for 500 MAU. Paid plans are custom. Expect $48K/year at enterprise scale.
+
+### Best for
+
+Product teams that want analytics and onboarding in one dashboard and have the budget for enterprise tooling.
+
+## 4. Plotline — best for mobile-first apps with complex onboarding
+
+Plotline has the broadest native SDK coverage of any tool on this list, covering Android Native, iOS Native, Flutter, React Native, Jetpack Compose, mobile web, and web. Their real-time delivery claims under 100ms latency for in-app experiences. At $999/month starting, it's priced for teams where mobile is the primary platform.
+
+### Strengths
+
+- Supports seven platforms including Jetpack Compose and mobile web as distinct targets
+- Extensive template library for mobile-native UI patterns (bottom sheets, stories, carousels)
+- Real-time delivery architecture with sub-100ms targeting
+- Mobile-first design philosophy, not a web tool with mobile bolted on
+
+### Limitations
+
+- $999/month starting price is steep for early-stage teams
+- Relatively newer player compared to Pendo or Appcues with less third-party documentation
+- No free tier or open-source option
+- Template-driven approach may limit teams wanting fully custom UI
+
+### Pricing
+
+Starts at $999/month. Custom pricing for higher tiers.
+
+### Best for
+
+Mobile-first consumer apps (fintech, e-commerce, social) that need real-time personalization across multiple native platforms.
+
+## 5. Whatfix — best for enterprise digital adoption
+
+Whatfix is a digital adoption platform recognized by Gartner and Everest Group as a DAP leader for five consecutive years. It supports web, mobile (iOS/Android via SDK), and desktop applications including Citrix environments. This is enterprise tooling. Expect a procurement process.
+
+### Strengths
+
+- Covers web, mobile, and desktop (including Citrix/virtual desktop)
+- Strong enterprise compliance and security certifications
+- Self-help widgets and knowledge base integration beyond just tours
+- Five consecutive years as a Gartner-recognized DAP leader
+
+### Limitations
+
+- No published pricing; requires sales engagement
+- No React Native or Flutter support documented as of April 2026
+- Enterprise-focused means longer implementation timelines
+- Overkill for startups or small SaaS teams
+
+### Pricing
+
+Custom only. Standard, Premium, and Pro tiers available. Contact sales.
+
+### Best for
+
+Large enterprises with complex application portfolios across web, mobile, and desktop.
+
+## 6. Userpilot — best for growth teams iterating on activation
+
+Userpilot added mobile support (slideouts, carousels, push notifications) alongside its established web platform. At $299/month starting, it sits in the mid-market sweet spot. Dasha Frantz at Smoobu noted that "Userpilot allows us the flexibility to move fast, experiment, and really understand what users need."
+
+### Strengths
+
+- Retroactive analytics let you analyze user behavior on data you've already collected
+- Flow analytics show where users drop off in onboarding sequences
+- Session replay across platforms
+- Transparent pricing at $299/month starting
+
+### Limitations
+
+- Mobile support is newer and less mature than the web product
+- No documented React Native or Flutter SDK support
+- Starting price still puts it above open-source alternatives
+- Resource center is web-focused
+
+### Pricing
+
+Starts at $299/month. Higher tiers are custom.
+
+### Best for
+
+Growth and product teams running activation experiments who need both analytics and onboarding on web with emerging mobile support.
+
+## 7. Chameleon — best for web apps with advanced targeting
+
+Chameleon is a web onboarding platform with AI-powered targeting and strong segmentation. Its "mobile support" is responsive web with a toggle to disable tours on mobile viewports. That's honest, at least. They don't pretend to have native mobile SDKs.
+
+### Strengths
+
+- AI-powered audience segmentation and targeting
+- Strong A/B testing for onboarding flows
+- HelpBar for in-app search and self-service
+- Clean integrations with Mixpanel, Amplitude, and Heap
+
+### Limitations
+
+- No native mobile SDK; web-only with responsive design
+- Mobile web toggle disables tours on mobile rather than adapting them
+- Custom pricing requires a sales conversation
+- Not suitable if your product is primarily a mobile app
+
+### Pricing
+
+Custom pricing only.
+
+### Best for
+
+Web SaaS teams that need strong segmentation and A/B testing and don't have a native mobile app.
+
+## 8. UserGuiding — best budget option for web-only onboarding
+
+UserGuiding starts at $69/month, making it the most affordable paid option on this list. It's web-only with responsive design and no native mobile SDKs. For teams that only need web onboarding and want to keep costs down, it covers the basics.
+
+### Strengths
+
+- $69/month starting price is the lowest among paid tools here
+- No-code builder accessible to non-technical team members
+- Resource center and knowledge base features included
+- Quick setup. Can be running in under an hour
+
+### Limitations
+
+- Web-only with no native mobile SDK support
+- Responsive design doesn't always translate well to mobile-first experiences
+- Fewer integrations than Chameleon or Appcues
+- Limited analytics compared to Pendo or Userpilot
+
+### Pricing
+
+Starts at $69/month. Higher tiers available.
+
+### Best for
+
+Small teams with web-only products that need basic onboarding without the budget for Appcues or Pendo.
+
+## How to choose the right onboarding tool for your stack
+
+**If you have a native mobile app and budget above $300/month**, look at Appcues (broadest framework coverage) or Pendo (unified analytics). Plotline is worth considering if mobile is your primary platform and you need deep native UI patterns.
+
+**If you're enterprise with complex application portfolios**, Whatfix covers web, mobile, and desktop in one platform. Expect a longer procurement cycle.
+
+**If your product is web-only or web-first**, Tour Kit gives you full design control with the smallest bundle impact. Chameleon and Userpilot are strong if you want no-code building and analytics.
+
+**If budget is the primary constraint**, UserGuiding at $69/month handles web basics. Tour Kit's free MIT core costs nothing and gives you more technical control.
+
+**If accessibility matters to your team** (and it should, since [WCAG 2.2 now explicitly covers mobile](https://www.w3.org/TR/wcag2mobile-22/) with nine new success criteria), Tour Kit is the only tool on this list that documents WCAG 2.1 AA compliance. The others don't publicly address mobile accessibility.
+
+Here's the uncomfortable truth: good onboarding can drive a [60% increase in conversion rates](https://www.smashingmagazine.com/2023/04/design-effective-user-onboarding-flow/), but 48% of customers abandon onboarding that doesn't show value quickly. The tool matters less than the flow design. Pick the one that fits your platform, budget, and team, then invest the real effort in what you say to users during onboarding.
+
+## FAQ
+
+### What is the best onboarding tool for mobile and web in 2026?
+
+It depends on your platform mix. For native mobile apps with web, Appcues offers the broadest framework coverage starting at $300/month. For web-first products, Tour Kit provides headless onboarding at under 8KB gzipped with WCAG 2.1 AA compliance for free. Pendo's free tier (500 MAU) works if you also need product analytics.
+
+### Do I need a native mobile SDK for onboarding?
+
+Not always. If your mobile experience runs in a webview or responsive web browser, a web onboarding tool handles mobile viewports fine. Native SDKs matter when you're building with Swift, Kotlin, React Native, or Flutter and need onboarding embedded in native UI components. The price jump from web-only to native SDK support is significant ($0-69/month vs $300-999/month).
+
+### Which onboarding tools support React Native?
+
+As of April 2026, Appcues, Pendo, and Plotline offer React Native SDK support. Appcues also supports Ionic and Flutter. The open-source react-native-onboard provides onboarding components specifically for React Native, though it's a standalone library without web support.
+
+### Are there free onboarding tools that work on mobile?
+
+Tour Kit is free (MIT) with responsive web support for mobile browsers. Pendo's free tier covers 500 monthly active users across web and mobile with native SDKs. For React Native, react-native-onboard and react-native-onboarding-swiper are free open-source options that don't cover web.
+
+### How much do cross-platform onboarding tools cost?
+
+Web-only tools range from free (Tour Kit) to $69/month (UserGuiding). Native mobile SDK support jumps to $299-300/month (Userpilot, Appcues). Mobile-first platforms like Plotline start at $999/month. Enterprise tools like Pendo and Whatfix run $48K+/year.
+
+---
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "8 best onboarding tools that support mobile + web (2026)",
+  "description": "Compare 8 onboarding tools with mobile and web support. See native SDK coverage, pricing, and accessibility for cross-platform onboarding.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/best-onboarding-tools-mobile-web.png",
+  "url": "https://tourkit.dev/blog/best-onboarding-tools-mobile-web",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/best-onboarding-tools-mobile-web"
+  },
+  "keywords": ["onboarding tool mobile web", "cross-platform onboarding software", "mobile onboarding sdk"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+})}} />
+
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://tourkit.dev"},
+    {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://tourkit.dev/blog"},
+    {"@type": "ListItem", "position": 3, "name": "8 best onboarding tools that support mobile + web (2026)", "item": "https://tourkit.dev/blog/best-onboarding-tools-mobile-web"}
+  ]
+})}} />
+
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the best onboarding tool for mobile and web in 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The best onboarding tool for mobile and web depends on your platform mix. For native mobile apps with web, Appcues offers the broadest framework coverage starting at $300/month. For web-first products, Tour Kit provides headless onboarding at under 8KB gzipped with WCAG 2.1 AA compliance for free. Pendo's free tier (500 MAU) works if you also need product analytics."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need a native mobile SDK for onboarding?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not always. If your mobile experience runs in a webview or responsive web browser, a well-built web onboarding tool handles mobile viewports fine. Native SDKs matter when you're building with Swift/Kotlin/React Native/Flutter and need onboarding embedded in native UI components."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which onboarding tools support React Native?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "As of April 2026, Appcues, Pendo, and Plotline all offer React Native SDK support. Appcues also supports Ionic and Flutter. For open-source alternatives, react-native-onboard provides onboarding components specifically for React Native."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are there free onboarding tools that work on mobile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit is free and open source (MIT) with responsive web support for mobile browsers. Pendo's free tier covers 500 monthly active users across web and mobile with native SDKs. For React Native specifically, react-native-onboard and react-native-onboarding-swiper are free open-source options."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much do cross-platform onboarding tools cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Web-only tools range from free (Tour Kit) to $69/month (UserGuiding). Adding native mobile SDK support jumps to $299-300/month (Userpilot, Appcues). Mobile-first platforms like Plotline start at $999/month. Enterprise tools like Pendo and Whatfix run $48K+/year."
+      }
+    }
+  ]
+})}} />

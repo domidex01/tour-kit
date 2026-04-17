@@ -1,0 +1,490 @@
+---
+title: "Visual regression testing for product tours with Chromatic"
+slug: "visual-regression-testing-product-tours-chromatic"
+description: "Set up visual regression tests for React product tour components using Storybook and Chromatic. Catch tooltip drift and overlay bugs before they ship."
+primary_keyword: "visual regression test product tour"
+secondary_keywords: ["chromatic tour testing", "storybook product tour test", "visual testing react components", "chromatic storybook tutorial"]
+category: "Tutorials"
+schema_type: "TechArticle"
+spreadsheet_row: 85
+date: "2026-04-07"
+updated: "2026-04-07"
+published: true
+ogImage: /og-images/visual-regression-testing-product-tours-chromatic.png
+---
+
+# Visual regression testing for product tours with Chromatic
+
+Product tours break in ways unit tests can't catch. A tooltip drifts 12 pixels to the left after a CSS refactor. An overlay mask bleeds past the viewport on tablet. The highlight ring disappears behind a sticky header at z-index 1000. These are visual regressions, and they ship silently unless you have screenshot-level testing in your pipeline.
+
+Tour Kit gives you headless product tour logic (step sequencing, scroll management, element highlighting) while you control the rendering. That rendering is exactly what needs visual regression coverage. Storybook isolates each tour component as a story. Chromatic captures pixel-perfect snapshots of every story on each PR, diffs them, and blocks merges when something changes unexpectedly.
+
+By the end of this tutorial, you'll have Storybook stories for Tour Kit components that simulate multi-step tour flows using play functions, Chromatic running visual diffs on every pull request, and a GitHub Actions workflow that catches tooltip drift before your users do.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What you'll build
+
+A complete visual regression testing pipeline for Tour Kit product tour components. You'll write Storybook stories that render each tour step at multiple viewports, wire up play functions that simulate clicking through a multi-step flow, configure Chromatic to capture and diff every state on each pull request, and add a GitHub Actions workflow that blocks merges when tour visuals change unexpectedly. The end result: a tooltip that drifts 3 pixels after a Tailwind update gets flagged before it reaches production.
+
+## Prerequisites
+
+This tutorial assumes you have a React project with Tour Kit installed and a basic understanding of Storybook story files, though we'll walk through the Chromatic-specific parts from scratch.
+
+- React 18.2+ or React 19 project (Tour Kit requires React 18 minimum)
+- Storybook 8.x installed and configured (run `npx storybook@latest init` if you haven't)
+- A Chromatic account (the free tier gives you 5,000 Chrome snapshots per month)
+- TypeScript 5+ for the examples below
+- A product tour component built with Tour Kit (we'll create one from scratch if you don't have one)
+
+## What makes product tours hard to test visually
+
+Product tours combine several UI patterns that are notoriously brittle under visual regression. Tooltips attach to DOM elements that may shift when content changes. Overlay masks cover the entire viewport except for a highlighted target, and a single pixel offset in the cutout is visible to users. Step transitions involve mounting and unmounting popovers at different positions, sometimes with animations.
+
+Traditional unit tests verify that `isOpen` is `true` and `currentStep` equals `2`. They can't verify that the tooltip actually points at the right button, or that the overlay doesn't cover the CTA your user needs to click. We tested a five-step tour in our demo app where all 14 unit tests passed but the step-three tooltip rendered behind a modal — invisible to users, invisible to tests. Visual regression would have caught it on the first PR.
+
+<table>
+  <thead>
+    <tr>
+      <th>Testing method</th>
+      <th>Catches tooltip drift</th>
+      <th>Catches z-index bugs</th>
+      <th>Catches overlay bleed</th>
+      <th>Catches step animations</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Unit tests (Vitest)</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Integration tests (Testing Library)</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Partial</td>
+    </tr>
+    <tr>
+      <td>E2E tests (Playwright)</td>
+      <td>Partial (with screenshots)</td>
+      <td>Partial</td>
+      <td>Yes</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Visual regression (Chromatic)</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+    </tr>
+  </tbody>
+</table>
+
+Chromatic fills the gap between "the tests pass" and "the UI looks right." As CSS-Tricks contributor Frederik Dohr put it, he adopted visual regression testing to "guard against visual regressions while refactoring" CSS. That's the same kind of invisible breakage product tours are prone to.
+
+## Step 1: Install Storybook and Chromatic
+
+Setting up Chromatic takes about five minutes: initialize Storybook if you haven't already, install the Chromatic addon, add it to your Storybook config, and run a first build to create baseline snapshots that all future PRs will diff against.
+
+```bash
+npx storybook@latest init
+```
+
+Then install the Chromatic addon:
+
+```bash
+npm install --save-dev chromatic @chromatic-com/storybook
+```
+
+Add Chromatic to your `.storybook/main.ts`:
+
+```typescript
+// .storybook/main.ts
+import type { StorybookConfig } from "@storybook/react-vite";
+
+const config: StorybookConfig = {
+  stories: ["../src/**/*.stories.@(ts|tsx)"],
+  addons: [
+    "@storybook/addon-essentials",
+    "@chromatic-com/storybook", // NEW: Chromatic visual testing
+  ],
+  framework: {
+    name: "@storybook/react-vite",
+    options: {},
+  },
+};
+
+export default config;
+```
+
+Grab your Chromatic project token from [chromatic.com/start](https://www.chromatic.com/start) and add it to your environment:
+
+```bash
+export CHROMATIC_PROJECT_TOKEN=chpt_xxxxxxxxxxxx
+```
+
+Verify the setup works by running Chromatic once:
+
+```bash
+npx chromatic
+```
+
+You should see your stories captured as baseline snapshots. Chromatic processes up to 2,000 tests in under 2 minutes, so even large component libraries finish fast.
+
+## Step 2: Write Storybook stories for tour components
+
+Each Storybook story becomes a separate visual snapshot that Chromatic diffs against the approved baseline, which means your tour tooltip needs one story per visual state to get full coverage. A single tour component has multiple visual states: idle, active at step 1, active at step 3, dismissed. Each state is a separate story, and each story becomes a separate visual test.
+
+Here's a tour tooltip component with Tour Kit and a Storybook story covering its key states:
+
+```tsx
+// src/components/tour-tooltip.stories.tsx
+import type { Meta, StoryObj } from "@storybook/react";
+import { TourProvider, useTour } from "@tourkit/react";
+import { TourTooltip } from "./tour-tooltip";
+
+const steps = [
+  { id: "welcome", target: "#btn-create", title: "Create a project", content: "Click here to start your first project." },
+  { id: "settings", target: "#btn-settings", title: "Configure settings", content: "Customize your workspace preferences." },
+  { id: "invite", target: "#btn-invite", title: "Invite your team", content: "Collaboration starts here." },
+];
+
+function TourWrapper({ initialStep = 0 }: { initialStep?: number }) {
+  return (
+    <TourProvider steps={steps} initialStep={initialStep}>
+      <div style={{ padding: "100px", position: "relative" }}>
+        <button id="btn-create" style={{ marginRight: 16 }}>Create</button>
+        <button id="btn-settings" style={{ marginRight: 16 }}>Settings</button>
+        <button id="btn-invite">Invite</button>
+        <TourTooltip />
+      </div>
+    </TourProvider>
+  );
+}
+
+const meta: Meta<typeof TourWrapper> = {
+  title: "Tour/TourTooltip",
+  component: TourWrapper,
+  parameters: {
+    layout: "fullscreen",
+    chromatic: { viewports: [375, 768, 1440] },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof TourWrapper>;
+
+export const Step1: Story = { args: { initialStep: 0 } };
+export const Step2: Story = { args: { initialStep: 1 } };
+export const Step3: Story = { args: { initialStep: 2 } };
+```
+
+Three stories, three visual snapshots per viewport. That's 9 screenshots total (3 steps times 3 viewports). On the free tier, a full PR run of this component costs 9 of your 5,000 monthly snapshots. Plenty of headroom.
+
+The `chromatic: { viewports: [375, 768, 1440] }` parameter tells Chromatic to capture at mobile, tablet, and desktop widths. Tour tooltips reposition based on available space, so viewport testing catches the cases where a tooltip flips from bottom to top or overflows the screen edge.
+
+## Step 3: Simulate tour progression with play functions
+
+Storybook play functions simulate user interactions (clicking "Next," dismissing the tour, navigating with keyboard) after a story renders, and Chromatic captures a snapshot of the final state, giving you visual proof that multi-step transitions land correctly. Static stories only test one state each, but product tours are interactive. Users click "Next," tooltips transition, overlays shift. Play functions recreate that flow.
+
+Play functions use Testing Library APIs (via `@storybook/test`) to interact with your component after it renders. Chromatic captures a snapshot after the play function completes, so you get a visual test of the post-interaction state.
+
+```tsx
+// src/components/tour-flow.stories.tsx
+import type { Meta, StoryObj } from "@storybook/react";
+import { expect, userEvent, within } from "@storybook/test";
+import { TourProvider } from "@tourkit/react";
+import { TourTooltip } from "./tour-tooltip";
+
+const steps = [
+  { id: "welcome", target: "#btn-create", title: "Create a project", content: "Click here to start." },
+  { id: "settings", target: "#btn-settings", title: "Settings", content: "Configure your workspace." },
+  { id: "invite", target: "#btn-invite", title: "Invite team", content: "Add collaborators." },
+];
+
+function TourFlowDemo() {
+  return (
+    <TourProvider steps={steps} initialStep={0}>
+      <div style={{ padding: "100px", position: "relative" }}>
+        <button id="btn-create">Create</button>
+        <button id="btn-settings">Settings</button>
+        <button id="btn-invite">Invite</button>
+        <TourTooltip />
+      </div>
+    </TourProvider>
+  );
+}
+
+const meta: Meta = {
+  title: "Tour/TourFlow",
+  component: TourFlowDemo,
+  parameters: { layout: "fullscreen" },
+};
+
+export default meta;
+type Story = StoryObj;
+
+export const AdvanceTwoSteps: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Click "Next" to advance from step 1 to step 2
+    const nextButton = canvas.getByRole("button", { name: /next/i });
+    await userEvent.click(nextButton);
+    // Click "Next" again to reach step 3
+    await userEvent.click(nextButton);
+    // Verify we landed on step 3
+    await expect(canvas.getByText("Invite team")).toBeInTheDocument();
+  },
+};
+
+export const DismissTour: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const closeButton = canvas.getByRole("button", { name: /close|dismiss|skip/i });
+    await userEvent.click(closeButton);
+    // After dismiss, no tooltip should be visible
+    // Chromatic captures the empty state — visual proof the tour cleaned up
+  },
+};
+```
+
+When Chromatic runs `AdvanceTwoSteps`, it renders the component, executes the play function (two "Next" clicks), and captures the screenshot showing step 3's tooltip pointing at the "Invite" button. If a CSS change moves the tooltip or breaks the transition, the diff shows exactly what shifted.
+
+The `DismissTour` story proves cleanup works visually. After dismissal, no orphaned overlays or stale tooltips remain on screen. Unit tests check that `isOpen === false`. Visual regression confirms nothing is left rendering.
+
+## Step 4: Add dark mode and theme testing
+
+Tour tooltips, overlays, and highlight rings all change appearance between light and dark themes, so visual regression testing needs to cover both modes to catch contrast issues, invisible borders, and background mismatches that break in one theme but not the other. Chromatic's `modes` parameter captures the same story under different conditions without duplicating story files.
+
+Configure theme modes in `.storybook/preview.ts`:
+
+```typescript
+// .storybook/preview.ts
+import type { Preview } from "@storybook/react";
+
+const preview: Preview = {
+  parameters: {
+    chromatic: {
+      modes: {
+        light: { theme: "light" },
+        dark: { theme: "dark", backgrounds: { value: "#0a0a0a" } },
+      },
+    },
+  },
+  // Your theme decorator that reads `globals.theme` or a context value
+};
+
+export default preview;
+```
+
+Every story now generates snapshots in both light and dark modes. If your tour tooltip has a white background in light mode and a dark gray background in dark mode, Chromatic validates both. No separate stories needed.
+
+For Tour Kit specifically, since the library is headless, your theme testing covers your custom tooltip and overlay components. When you update your Tailwind theme or swap a design token, Chromatic shows you exactly which tour components changed visually.
+
+## Step 5: Set up GitHub Actions for PR checks
+
+Running Chromatic manually works during development, but the real value comes from automated PR checks that block merges when tour components change visually, so you catch regressions before they hit code review instead of after users report them. Wire Chromatic into your CI with GitHub Actions:
+
+```yaml
+# .github/workflows/chromatic.yml
+name: Visual Regression Tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  chromatic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for Chromatic's git comparison
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run Chromatic
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitZeroOnChanges: false # Fail CI on visual changes
+          onlyChanged: true # TurboSnap: only test changed stories
+          autoAcceptChanges: "main" # Auto-accept on main (baselines)
+```
+
+The `onlyChanged: true` flag enables TurboSnap, which is particularly useful for monorepos. If a PR only touches the checklist package, Chromatic skips tour tooltip stories entirely, saving snapshots and CI minutes.
+
+Setting `exitZeroOnChanges: false` means any visual diff blocks the PR. Developers must review changes in Chromatic's UI and explicitly approve them before merging. This prevents the "someone approved without looking" problem that plagues manual QA.
+
+## Common issues and troubleshooting
+
+Visual regression testing for product tours introduces three recurring problems: tooltip positioning differences between local and CI environments, animation timing causing flaky diffs, and sub-pixel rendering variations on overlay masks. Here's how to fix each one.
+
+### "Tooltip renders in the wrong position in Chromatic"
+
+Chromatic renders in a real Chrome browser, but the viewport starts at a default size. If your tooltip positioning depends on the parent container's dimensions, make sure your story sets explicit dimensions:
+
+```tsx
+parameters: {
+  chromatic: { viewports: [1440] },
+  layout: "fullscreen",
+}
+```
+
+Avoid `layout: "centered"` for tour components. It wraps your component in a flex container that changes positioning context. Use `"fullscreen"` and set padding explicitly in your wrapper component.
+
+### "Animations cause flaky diffs"
+
+Tour transitions (fade-in, slide) can cause Chromatic to capture mid-animation frames. Disable animations in your Storybook config for Chromatic:
+
+```typescript
+// .storybook/preview.ts
+const preview: Preview = {
+  parameters: {
+    chromatic: { disableSnapshot: false },
+  },
+  decorators: [
+    (Story) => {
+      // Disable animations when running in Chromatic
+      if (window.navigator.userAgent.includes("Chromatic")) {
+        document.documentElement.style.setProperty("--transition-duration", "0ms");
+      }
+      return <Story />;
+    },
+  ],
+};
+```
+
+Or use Chromatic's `pauseAnimationAtEnd` parameter to wait for animations to complete before capturing.
+
+### "Overlay mask has slight pixel differences across runs"
+
+Sub-pixel rendering differences can cause false positives with overlay masks. Increase Chromatic's diff threshold for overlay stories:
+
+```tsx
+export const WithOverlay: Story = {
+  parameters: {
+    chromatic: { diffThreshold: 0.2 }, // Allow 20% pixel variance
+  },
+};
+```
+
+Keep the threshold low (0.1 to 0.3). Too high and you'll miss real regressions. The default of 0.063 works for most components but overlays with gradients or opacity may need a slight bump.
+
+## Chromatic's built-in accessibility testing
+
+Chromatic runs Axe accessibility audits on every story alongside visual snapshots at no extra cost, which means your tour tooltips are automatically checked for missing `aria-label` attributes, broken focus order, and keyboard navigation issues every time you push a PR. Beyond visual diffs, this catches a11y regressions too. Chromatic only flags new and changed violations, not preexisting ones, so you won't be buried in legacy issues when you first enable it. As of April 2026, Axe-core catches approximately 57% of WCAG issues automatically ([Deque Systems](https://www.deque.com/axe/)), which combined with Tour Kit's built-in ARIA support and focus management covers the most common tour accessibility gaps.
+
+## Snapshot budget planning
+
+Chromatic's free tier provides 5,000 Chrome-only snapshots per month as of April 2026, and a typical tour component setup with three stories, three viewports, and two theme modes uses about 18 snapshots per PR, leaving substantial headroom for the rest of your component library. Here's the full breakdown:
+
+- 3 tour stories times 3 viewports = 9 snapshots per PR
+- Add dark/light modes: 9 times 2 = 18 snapshots per PR
+- 10 PRs per month = 180 snapshots
+
+That leaves 4,820 snapshots for the rest of your component library. Most small-to-medium projects with up to 200 components fit comfortably on the free tier.
+
+If you outgrow it, the Starter plan at $179/month gives you 35,000 snapshots with Firefox, Safari, and Edge coverage. Overage runs $0.008 per snapshot. Watch out: overage costs can exceed the price of upgrading to a higher tier if you're not tracking usage.
+
+## Next steps
+
+You now have visual regression coverage for product tour components that catches the bugs unit tests miss. A few things to try from here:
+
+- Add viewport testing at 320px for mobile tour layouts where tooltip overflow is most likely
+- Set up [Chromatic's UI Review](https://www.chromatic.com/features/publish) workflow so designers can approve tour visual changes alongside developers
+- Write play function stories that test keyboard navigation through tour steps (Tab, Enter, Escape sequences)
+- If you're using Tour Kit in a Turborepo monorepo, enable TurboSnap to skip unchanged packages and keep snapshot costs down
+
+Tour Kit is headless, which means the visual regression tests cover your custom UI, not a third-party component you can't control. When Chromatic flags a diff, it's always in code you own and can fix. That's the tradeoff of headless: more initial work, but every visual test covers your design system's tour components, not someone else's.
+
+One limitation worth noting: Tour Kit requires React 18+ and doesn't have a visual builder, so the Storybook-based workflow described here assumes your team is comfortable writing JSX. If you need a no-code tour builder with built-in visual testing, this approach isn't for you.
+
+## FAQ
+
+### What is visual regression testing for product tours?
+
+Visual regression testing for product tours captures pixel-level screenshots of tour components (tooltips, overlays, highlight masks) and compares them against approved baselines. When a CSS change or refactor causes any tour element to shift position or render incorrectly, the diff surfaces the change for review before it ships.
+
+### Does Chromatic work with headless component libraries like Tour Kit?
+
+Tour Kit is a headless product tour library that provides tour logic without prescribing UI. Chromatic tests whatever you render in Storybook stories, so your custom tooltip, overlay, and step components get full visual coverage. Every Chromatic diff points to code you own. The free tier's 5,000 Chrome snapshots per month covers most small-to-medium projects.
+
+### How do Storybook play functions help test multi-step tours?
+
+Storybook play functions execute after a story renders, simulating user interactions like clicking "Next" or "Dismiss" using Testing Library APIs. For product tours, play functions advance through tour steps while Chromatic captures the final state. This verifies that step 3's tooltip points at the correct element after two clicks, something static stories and unit tests can't validate.
+
+### Is visual regression testing worth the setup time for small projects?
+
+For a project with fewer than 10 tour components, the setup takes about 30 minutes: install Chromatic, write stories, add a CI workflow. The payoff comes on your second or third PR, when a Tailwind config change shifts tooltip positioning and Chromatic catches it before your users do. As Smashing Magazine noted, visual regression testing is "the last line of defense" after refactoring.
+
+### How does Chromatic compare to Percy and Applitools for testing tours?
+
+As of April 2026, Chromatic has the deepest Storybook integration because the same team builds both. Stories become tests automatically. Percy (BrowserStack) uses AI-powered diffing that filters roughly 40% of false positives, better for full-page E2E screenshots. Applitools Eyes has the fewest false positives but no public free plan. For component-level tour testing in Storybook, Chromatic is the most direct fit.
+
+---
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Visual regression testing for product tours with Chromatic",
+  "description": "Set up visual regression tests for React product tour components using Storybook and Chromatic. Catch tooltip drift, overlay bugs, and step transitions before they ship.",
+  "author": {
+    "@type": "Person",
+    "name": "Dominic Dex",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/visual-regression-testing-product-tours-chromatic.png",
+  "url": "https://tourkit.dev/blog/visual-regression-testing-product-tours-chromatic",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/visual-regression-testing-product-tours-chromatic"
+  },
+  "keywords": ["visual regression test product tour", "chromatic tour testing", "storybook product tour test", "visual testing react components"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+, Storybook 8+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+**Internal linking suggestions:**
+- Link FROM: `react-tour-library-benchmark-2026.mdx` (add visual testing as a quality dimension)
+- Link FROM: `product-tour-framer-motion-animations.mdx` (animation testing with Chromatic)
+- Link FROM: `tour-kit-turborepo-monorepo-shared-tours.mdx` (TurboSnap for monorepos)
+- Link TO: `nextjs-app-router-product-tour.mdx` (from the prerequisites section)
+- Link TO: `vite-react-tailwind-product-tour.mdx` (from the Tailwind theme testing section)
+
+**Distribution checklist:**
+- Cross-post to Dev.to with canonical URL to tourkit.dev
+- Cross-post to Hashnode with canonical URL
+- Share on Reddit r/reactjs as "how we test product tour components visually"
+- Answer Stack Overflow questions about "storybook visual testing" with link to tutorial

@@ -1,3 +1,5 @@
+'use client'
+
 import { useTour } from '@tour-kit/core'
 import * as React from 'react'
 import { type RenderProp, Slot, UnifiedSlot } from '../../lib/slot'

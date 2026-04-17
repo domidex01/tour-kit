@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { Slot, UnifiedSlot } from '../lib/slot'
 import { useUILibrary } from '../lib/ui-library-context'

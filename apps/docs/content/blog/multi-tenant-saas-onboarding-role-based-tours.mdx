@@ -1,0 +1,490 @@
+---
+title: "Onboarding for multi-tenant SaaS: role-based tour strategies"
+slug: "multi-tenant-saas-onboarding-role-based-tours"
+description: "Design role-based onboarding tours for multi-tenant SaaS apps. Covers tenant-scoped config, permission-aware steps, and React patterns with Tour Kit."
+primary_keyword: "multi-tenant saas onboarding"
+secondary_keywords: ["role-based onboarding", "multi-role product tour", "tenant-scoped onboarding", "saas onboarding strategy"]
+category: "Use Cases"
+schema_type: "TechArticle"
+spreadsheet_row: 155
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/multi-tenant-saas-onboarding-role-based-tours.png
+---
+
+# Onboarding for multi-tenant SaaS: role-based tour strategies
+
+Your project management SaaS has three roles: workspace owner, team lead, and contributor. The owner needs to configure billing and invite members. The contributor needs to create their first task. Showing both the same 12-step product tour wastes everyone's time and teaches the contributor about buttons they can't even see.
+
+As of April 2026, personalized onboarding flows achieve 65% higher completion rates than generic ones ([Monetizely, 2026](https://www.getmonetizely.com/articles/how-to-measure-onboarding-completion-rates-a-strategic-guide-for-saas-executives)). And 59% of SaaS buyers regret at least one purchase in the last 18 months, with adoption failures cited as a primary driver ([Gartner, 2025 via Litmos](https://www.litmos.com/blog/articles/top-saas-onboarding-trends)). The onboarding experience that greets each user role is often the difference between a retained customer and a churned one.
+
+This guide covers the architecture and implementation patterns for building role-aware product tours in a multi-tenant React app. We built Tour Kit to handle exactly this scenario, so the examples use Tour Kit's `when` prop and context system. But the patterns apply to any tour library that supports conditional rendering.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What is role-based onboarding in multi-tenant SaaS?
+
+Role-based onboarding is a product tour strategy where each user sees a tour tailored to their permissions, responsibilities, and tenant configuration rather than a one-size-fits-all walkthrough. In a multi-tenant system, tours vary along two dimensions: the user's role within their organization (admin, editor, viewer) and the tenant's plan tier (free, pro, enterprise). Tour Kit implements this through its `when` prop on each step, which receives the full tour context and returns a boolean to include or skip the step. The result is a single tour definition that branches per user at runtime, with no wasted renders for hidden steps.
+
+Unlike single-tenant apps where roles map to a global user table, multi-tenant SaaS scopes roles to an organization membership. A user might be an admin in one workspace and a viewer in another. Your tour system needs to respect that boundary.
+
+## Why role-based onboarding matters for multi-tenant products
+
+Generic onboarding tours waste time and erode trust in multi-tenant SaaS applications, where users within the same product have fundamentally different permissions and feature access depending on their role and tenant plan. The average SaaS onboarding completion rate sits between 40% and 60% ([AlexanderJarvis, 2026](https://www.alexanderjarvis.com/what-is-user-onboarding-completion-rate-in-saas/)). Top performers hit 70-80%. The gap often comes down to relevance.
+
+Generic tours create three specific problems in multi-tenant products:
+
+**The permission mismatch.** A viewer gets walked to the "Invite Team Members" button. They click it. Nothing happens because they don't have permission. That's worse than no tour at all. The user now trusts your onboarding less than they did before it started.
+
+**The cognitive overload.** Smashing Magazine's onboarding research found that people hold 5-7 items in working memory at once ([Smashing Magazine, 2023](https://www.smashingmagazine.com/2023/04/design-effective-user-onboarding-flow/)). A 15-step tour that covers admin, editor, and viewer features burns through that limit by step 6. The viewer only needed 4 of those steps.
+
+**The tenant configuration gap.** Enterprise tenants with SSO enabled don't need a tour step about password setup. Free-tier tenants without the analytics module don't need a step about dashboard widgets. Generic tours can't account for what's actually available in this tenant's plan.
+
+Role-based personalization lifts 7-day retention by 35% compared to generic flows ([DesignRevision, 2026](https://designrevision.com/blog/saas-onboarding-best-practices)). The math is clear: segmented tours keep users around.
+
+## The two dimensions of multi-tenant tour segmentation
+
+Multi-tenant tour segmentation operates on two axes that intersect at runtime: the user's role within an organization and the tenant's plan configuration. Both determine which features are visible and relevant to a specific user session. Understanding these dimensions before writing any code prevents the most common architectural mistakes in role-based tour systems.
+
+### Dimension 1: user role within the organization
+
+Most B2B SaaS products define 3-5 roles. A common pattern:
+
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Tour focus</th>
+      <th>Typical step count</th>
+      <th>Key actions to cover</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Owner / Admin</td>
+      <td>Setup and configuration</td>
+      <td>8-12</td>
+      <td>Billing, integrations, team invites, security settings</td>
+    </tr>
+    <tr>
+      <td>Manager / Team Lead</td>
+      <td>Team workflows</td>
+      <td>6-8</td>
+      <td>Project creation, task assignment, reporting</td>
+    </tr>
+    <tr>
+      <td>Member / Contributor</td>
+      <td>Daily tasks</td>
+      <td>4-6</td>
+      <td>Creating items, updating status, notifications</td>
+    </tr>
+    <tr>
+      <td>Viewer / Guest</td>
+      <td>Consumption only</td>
+      <td>3-4</td>
+      <td>Navigation, filtering, commenting (if allowed)</td>
+    </tr>
+  </tbody>
+</table>
+
+Roles determine which features a user can access. But roles alone aren't enough.
+
+### Dimension 2: tenant plan and configuration
+
+The same "admin" role behaves differently on a free plan versus an enterprise plan. Enterprise admins see SSO configuration and audit logs. Free-tier admins see upgrade prompts where those features would be.
+
+Your tour system needs to know both: what can this user do (role), and what has this tenant enabled (plan + feature flags).
+
+## Architecture: tenant context meets tour context
+
+The standard React pattern for multi-tenant apps uses a context provider that resolves the current tenant from the URL (subdomain or path segment) and loads their configuration, including plan tier, feature flags, and branding. Tour Kit's context system layers on top of this by accepting an arbitrary `context` object that gets passed to every step's `when` function, bridging your existing auth and tenant providers with the tour engine.
+
+Here's the pattern we use in a real B2B dashboard with 50+ interactive elements:
+
+```tsx
+// src/providers/tenant-tour-provider.tsx
+import { TourProvider } from '@tourkit/react';
+import { useTenant } from './tenant-context';
+import { useAuth } from './auth-context';
+import { getTourSteps } from '../tours/registry';
+
+export function TenantTourProvider({ children }: { children: React.ReactNode }) {
+  const { tenant } = useTenant();
+  const { user, membership } = useAuth();
+
+  // Build tour context from tenant + user data
+  const tourContext = {
+    role: membership.role,           // 'admin' | 'manager' | 'member' | 'viewer'
+    permissions: membership.permissions, // ['billing.manage', 'team.invite', ...]
+    plan: tenant.plan,               // 'free' | 'pro' | 'enterprise'
+    features: tenant.featureFlags,   // { sso: true, analytics: false, ... }
+    tenantId: tenant.id,
+  };
+
+  return (
+    <TourProvider
+      tourId="onboarding"
+      steps={getTourSteps()}
+      context={tourContext}
+    >
+      {children}
+    </TourProvider>
+  );
+}
+```
+
+The `context` prop passes arbitrary data into every step's `when` function. This is the bridge between your auth system and your tour logic.
+
+## Permission-aware steps with the `when` prop
+
+Checking permissions instead of roles directly is the better pattern. Bitsrc's access control research recommends checking granular permissions (`billing.manage`) over role names (`admin`) because roles change across organizations ([Bitsrc, 2024](https://blog.bitsrc.io/designing-implementing-access-control-in-react-34eb8bc67511)). A user might be an "admin" in one workspace but your admin role in that workspace might not include billing access.
+
+Here's how permission-aware tour steps look:
+
+```tsx
+// src/tours/registry.ts
+import type { TourStep } from '@tourkit/core';
+
+interface OnboardingContext {
+  role: string;
+  permissions: string[];
+  plan: string;
+  features: Record<string, boolean>;
+  tenantId: string;
+}
+
+export function getTourSteps(): TourStep<OnboardingContext>[] {
+  return [
+    // Everyone sees the welcome step
+    {
+      target: '#dashboard-header',
+      title: 'Welcome to your workspace',
+      content: 'Here is a quick tour of the features available to you.',
+    },
+
+    // Only users with billing permission
+    {
+      target: '#billing-nav',
+      title: 'Manage your subscription',
+      content: 'View invoices, update payment methods, and manage your plan.',
+      when: (ctx) => ctx.permissions.includes('billing.manage'),
+    },
+
+    // Only if tenant has SSO enabled
+    {
+      target: '#sso-settings',
+      title: 'Single sign-on is active',
+      content: 'Your team signs in through your identity provider.',
+      when: (ctx) =>
+        ctx.features.sso && ctx.permissions.includes('security.manage'),
+    },
+
+    // Team invite — managers and above
+    {
+      target: '#invite-button',
+      title: 'Invite your team',
+      content: 'Add team members and assign them roles.',
+      when: (ctx) => ctx.permissions.includes('team.invite'),
+    },
+
+    // Create first item — everyone except viewers
+    {
+      target: '#create-button',
+      title: 'Create your first item',
+      content: 'Click here to get started with your first project.',
+      when: (ctx) => ctx.role !== 'viewer',
+    },
+
+    // Analytics — only on pro/enterprise plans
+    {
+      target: '#analytics-tab',
+      title: 'Track your progress',
+      content: 'View team performance metrics and trends.',
+      when: (ctx) =>
+        ['pro', 'enterprise'].includes(ctx.plan) &&
+        ctx.permissions.includes('analytics.view'),
+    },
+
+    // Everyone sees the help step
+    {
+      target: '#help-menu',
+      title: 'Need help?',
+      content: 'Access docs, support, and keyboard shortcuts here.',
+    },
+  ];
+}
+```
+
+Tour Kit's `when` prop evaluates at render time. When it returns `false`, the step is skipped entirely. No DOM element is queried, no tooltip is positioned, no render cycle is wasted. A viewer in the example above sees 3 steps (welcome, create first item is skipped for viewers, help). An enterprise admin with full permissions sees all 7.
+
+## Tenant-scoped tour completion storage
+
+Tour completion state in a multi-tenant app must be scoped to both user and tenant, because the same person can hold different roles across different workspaces and each requires its own onboarding track. If a user is an admin in Workspace A and a viewer in Workspace B, completing the admin tour in A should not mark the viewer tour in B as done.
+
+The storage key pattern:
+
+```tsx
+// src/tours/storage.ts
+function getTourStorageKey(
+  tourId: string,
+  userId: string,
+  tenantId: string
+): string {
+  return `tour:${tenantId}:${userId}:${tourId}`;
+}
+
+// Usage with Tour Kit's storage adapter
+import { createStorageAdapter } from '@tourkit/core';
+
+export function createTenantStorage(userId: string, tenantId: string) {
+  return createStorageAdapter({
+    get: (tourId) => {
+      const key = getTourStorageKey(tourId, userId, tenantId);
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : null;
+    },
+    set: (tourId, state) => {
+      const key = getTourStorageKey(tourId, userId, tenantId);
+      localStorage.setItem(key, JSON.stringify(state));
+    },
+  });
+}
+```
+
+For production apps, store completion state server-side (keyed by `org_id + user_id + tour_id`). LocalStorage works for prototyping but won't survive device switches. The O'Reilly multi-tenant SaaS guide recommends tying all user state to the tenant's data partition ([O'Reilly, 2024](https://www.oreilly.com/library/view/building-multi-tenant-saas/9781098140632/ch04.html)).
+
+## Common patterns for role-based tour design
+
+Three architectural patterns cover the majority of multi-tenant onboarding scenarios, each with different tradeoffs around maintainability, complexity, and user experience as the number of roles and tenant configurations grows. We tested all three across a B2B dashboard app.
+
+### Pattern 1: shared core with role-specific branches
+
+Define a base tour that every role sees (welcome, navigation overview, help), then branch into role-specific sequences. This keeps the tour definition in one place and avoids maintaining separate tour configs per role.
+
+Tour Kit handles this naturally through the `when` prop. The shared steps have no `when` condition; the branching steps filter by permission or role.
+
+### Pattern 2: separate tours per role
+
+For complex products where admin onboarding has nothing in common with viewer onboarding, define entirely separate tours. Register them conditionally:
+
+```tsx
+// src/tours/role-tours.ts
+const adminTour = { tourId: 'onboarding-admin', steps: [...] };
+const memberTour = { tourId: 'onboarding-member', steps: [...] };
+const viewerTour = { tourId: 'onboarding-viewer', steps: [...] };
+
+export function getTourForRole(role: string) {
+  switch (role) {
+    case 'admin':
+    case 'owner':
+      return adminTour;
+    case 'manager':
+    case 'member':
+      return memberTour;
+    default:
+      return viewerTour;
+  }
+}
+```
+
+The tradeoff: separate tours are easier to reason about individually but harder to maintain as your product grows. Shared-core with branches scales better in our experience.
+
+### Pattern 3: progressive disclosure tours
+
+Instead of one long tour, trigger short 2-3 step tours as users encounter features for the first time. A manager gets a "reporting" mini-tour only when they visit the reports page. A member gets a "task creation" mini-tour only when they click "New Task" for the first time.
+
+This respects the 5-7 item cognitive load limit and spreads the onboarding over natural usage patterns.
+
+## Tour analytics segmented by role
+
+Measuring tour performance without role segmentation hides the real story because aggregate metrics flatten meaningful differences between user groups into a single misleading number. Your overall 55% completion rate might mask that admins complete at 78% while viewers abandon at 31%, and without that breakdown you'll end up improving the wrong flows.
+
+Track these metrics per role:
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>What it tells you</th>
+      <th>Action threshold</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Completion rate by role</td>
+      <td>Which roles find the tour useful</td>
+      <td>Below 50% for any role = redesign that role's flow</td>
+    </tr>
+    <tr>
+      <td>Step drop-off by role</td>
+      <td>Where each role loses interest</td>
+      <td>Any step with &gt;30% drop-off = step is irrelevant or confusing</td>
+    </tr>
+    <tr>
+      <td>Time-to-completion by role</td>
+      <td>Tour length calibration</td>
+      <td>Over 3 minutes for any role = tour is too long</td>
+    </tr>
+    <tr>
+      <td>Feature activation after tour</td>
+      <td>Whether the tour drives the right behavior</td>
+      <td>No activation increase = tour isn't actionable</td>
+    </tr>
+  </tbody>
+</table>
+
+Monetizely's research found segmented completion analysis reveals 15-30% performance variations between user groups ([Monetizely, 2026](https://www.getmonetizely.com/articles/how-to-measure-onboarding-completion-rates-a-strategic-guide-for-saas-executives)). If you're not segmenting, you're optimizing for an average that doesn't represent any real user.
+
+Tour Kit's analytics callback provides the context object with every event, so filtering by role in your analytics tool (PostHog, Mixpanel, Amplitude) requires no extra code:
+
+```tsx
+<TourProvider
+  tourId="onboarding"
+  steps={steps}
+  context={tourContext}
+  onStepChange={(step, ctx) => {
+    posthog.capture('tour_step_viewed', {
+      tour_id: 'onboarding',
+      step_index: step.index,
+      step_title: step.title,
+      user_role: ctx.role,
+      tenant_plan: ctx.plan,
+      tenant_id: ctx.tenantId,
+    });
+  }}
+  onComplete={(ctx) => {
+    posthog.capture('tour_completed', {
+      tour_id: 'onboarding',
+      user_role: ctx.role,
+      tenant_plan: ctx.plan,
+    });
+  }}
+/>
+```
+
+## Accessibility in role-conditional tours
+
+Conditionally filtered tour steps must handle screen readers and progress indicators correctly to avoid confusing users who rely on assistive technology. When Tour Kit skips a step via the `when` prop, the step never renders. No tooltip appears, no focus trap activates, no ARIA attributes are injected. Screen readers don't announce elements that were never in the DOM, which is the correct behavior.
+
+But there's a subtle issue. If your tour progress indicator shows "Step 2 of 7" and then jumps to "Step 4 of 7" because step 3 was filtered out, that confuses everyone, sighted users and screen reader users alike.
+
+Tour Kit recalculates the step count after applying `when` filters. A viewer who qualifies for 3 of 7 defined steps sees "Step 1 of 3", "Step 2 of 3", "Step 3 of 3". The filtered steps don't exist in the count.
+
+All tour step tooltips should use `role="dialog"` and `aria-label` describing the step content. WCAG 4.1.2 (Name, Role, Value) requires interactive elements to expose their purpose ([W3C WAI](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value.html)). Tour Kit handles this by default, but if you're building custom tooltip components, verify with axe-core.
+
+## Common mistakes to avoid
+
+**Checking roles instead of permissions.** Roles are named bundles of permissions that vary across tenants. "Admin" in Tenant A might have billing access while "Admin" in Tenant B does not. Check `permissions.includes('billing.manage')`, not `role === 'admin'`.
+
+**Storing completion state globally.** A user who completes onboarding in one workspace shouldn't see it marked complete in another workspace where they have a different role. Scope storage keys to `tenantId + userId + tourId`.
+
+**Building separate codebases per role.** Maintaining 4 separate tour definitions for 4 roles creates drift. Use a single step array with `when` conditions. When a product manager adds a feature, they add one step with the right permission check instead of four steps across four files.
+
+**Ignoring the tenant plan dimension.** Role-only segmentation misses half the picture. An admin on a free plan and an admin on an enterprise plan need different tours because they have access to different features.
+
+**Overloading the first session.** Even a well-segmented admin tour shouldn't be 15 steps. Cap each role's first-session tour at 5-7 steps and defer advanced features to progressive disclosure tours triggered by usage.
+
+## Tools for building role-based tours
+
+A few libraries support conditional step rendering. Here's how they compare for multi-tenant use cases:
+
+**Tour Kit** provides the `when` prop that receives arbitrary context, tenant-scoped storage adapters, and analytics callbacks with full context passthrough. It's headless, so your tooltips use your design system. Core bundle is under 8KB gzipped. Limitation: requires React 18+ and a developer to implement (no visual builder). We built Tour Kit, so take this recommendation with appropriate skepticism.
+
+**React Joyride** supports `disableBeacon` and custom callback logic for conditional steps, but doesn't have a built-in context system. You'd wire the role/tenant logic yourself through the callback prop. Ships at ~37KB gzipped.
+
+**Shepherd.js** has `showOn` functions per step that can check external state. Capable, but its AGPL license complicates commercial SaaS use. As of April 2026, Shepherd.js requires AGPL licensing for proprietary products.
+
+**Appcues and Pendo** handle role-based targeting through their SaaS dashboards. Powerful for non-technical teams but add 100-200KB of client-side weight and charge per MAU, a cost that compounds in multi-tenant apps with many organizations.
+
+For a deeper comparison, see our [product tour tools for B2B SaaS](/blog/best-product-tour-tools-b2b-saas) roundup.
+
+## FAQ
+
+### How many onboarding steps should each role have?
+
+Tour Kit recommends 4-7 steps per role for the initial onboarding tour. Research confirms users hold 5-7 items in working memory ([Smashing Magazine, 2023](https://www.smashingmagazine.com/2023/04/design-effective-user-onboarding-flow/)). Admin tours work at the higher end; viewer tours stay at 3-4 steps. Defer advanced features to progressive disclosure tours triggered by usage.
+
+### Should I create separate tours per role or filter steps from one tour?
+
+A single tour with `when` conditions is easier to maintain for products with 3-5 roles. Separate tours make sense when roles have zero overlap, say if your admin onboarding covers billing and security while your member onboarding covers task creation. Tour Kit supports both patterns. Start with filtered steps and refactor to separate tours only if the single definition becomes unwieldy.
+
+### How do I handle users who switch roles or organizations?
+
+Scope tour completion to `tenantId + userId + tourId`. When a user switches organizations, their new membership triggers a fresh tour evaluation. Tour Kit's storage adapter swaps the storage key on organization change. For role promotions, trigger a supplemental "admin features" tour covering only the new capabilities rather than replaying the full onboarding.
+
+### What metrics prove role-based onboarding is working?
+
+Track completion rate, step drop-off, and feature activation rate, all segmented by role. Compare feature activation within 7 days for users who completed the role-specific tour versus those who skipped it. Segmented analysis reveals 15-30% variation between groups ([Monetizely, 2026](https://www.getmonetizely.com/articles/how-to-measure-onboarding-completion-rates-a-strategic-guide-for-saas-executives)). Below 50% completion for any role means that flow needs rework.
+
+### Does role-based tour logic belong on the client or the server?
+
+Keep the tour step definitions and `when` logic on the client, where the UI renders and tour positioning happens. Store tour completion state and tenant configuration on the server. The client reads the user's role and permissions from the session (JWT or API response) and evaluates `when` conditions locally. This avoids a network round-trip per step while keeping state authoritative on the server.
+
+---
+
+Get started with role-based onboarding in your multi-tenant app:
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Explore the full documentation and examples at [usertourkit.com](https://usertourkit.com/). For step-level conditional logic, see our [conditional product tours tutorial](/blog/conditional-product-tour-user-role). For analytics integration, check out [PostHog event tracking](/blog/track-product-tour-completion-posthog-events) or [Mixpanel funnel analysis](/blog/mixpanel-product-tour-funnel).
+
+---
+
+**Internal linking suggestions:**
+- Link from [conditional-product-tour-user-role](/blog/conditional-product-tour-user-role) → this article (broader architecture guide)
+- Link from [best-product-tour-tools-b2b-saas](/blog/best-product-tour-tools-b2b-saas) → this article (use case depth)
+- Link from [micro-frontends-product-tours-shared-state](/blog/micro-frontends-product-tours-shared-state) → this article (multi-tenant overlap)
+- Link from this article → [managing-tour-state-zustand](/blog/managing-tour-state-zustand) (state management patterns)
+- Link from this article → [tour-kit-turborepo-monorepo-shared-tours](/blog/tour-kit-turborepo-monorepo-shared-tours) (shared tours across apps)
+
+**Distribution checklist:**
+- Dev.to (full repost with canonical)
+- Hashnode (full repost with canonical)
+- Reddit r/reactjs (discussion thread, not self-promotion)
+- Reddit r/SaaS (use case framing)
+- Hacker News (only if discussion gains traction organically)
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Onboarding for multi-tenant SaaS: role-based tour strategies",
+  "description": "Design role-based onboarding tours for multi-tenant SaaS apps. Covers tenant-scoped config, permission-aware steps, and React patterns with Tour Kit.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://usertourkit.com/og-images/multi-tenant-saas-onboarding-role-based-tours.png",
+  "url": "https://usertourkit.com/blog/multi-tenant-saas-onboarding-role-based-tours",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/multi-tenant-saas-onboarding-role-based-tours"
+  },
+  "keywords": ["multi-tenant saas onboarding", "role-based onboarding", "multi-role product tour", "tenant-scoped onboarding"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```

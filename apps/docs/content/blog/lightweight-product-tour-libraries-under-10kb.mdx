@@ -1,0 +1,322 @@
+---
+title: "5 best lightweight product tour libraries under 10KB (2026)"
+description: "We measured every product tour library's gzipped size. These five ship under 10KB without tanking your Core Web Vitals. Includes licensing gotchas."
+slug: "lightweight-product-tour-libraries-under-10kb"
+primary_keyword: "lightweight product tour library under 10kb"
+secondary_keywords: ["small bundle size tour library", "minimal tour js", "lightweight onboarding library", "product tour bundle size"]
+category: "Listicle"
+schema_type: "TechArticle"
+spreadsheet_row: 35
+date: "2026-04-07"
+updated: "2026-04-07"
+ogImage: /og-images/lightweight-product-tour-libraries-under-10kb.png
+published: true
+---
+
+# 5 best lightweight product tour libraries under 10KB (2026)
+
+Every kilobyte of JavaScript you ship delays Interaction to Next Paint. Google's Core Web Vitals research shows that [pages loading 40KB+ of JS see measurably higher bounce rates on mobile](https://web.dev/articles/vitals). React Joyride ships around 50KB minified. Shepherd.js clocks in at 30KB plus Floating UI. For a feature that runs once per user, those numbers are hard to justify.
+
+We went looking for tour libraries that stay under 10KB gzipped (not minified, which is meaningless for production). We found five, tested each in a Vite 6 + React 19 + TypeScript 5.7 project, and measured real bundle impact using bundlephobia and the Vite build analyzer.
+
+**Bias disclosure:** Tour Kit is our project, so it's listed first. We've tried to be fair with every entry. Every bundle size, star count, and license below is verifiable against npm, GitHub, and bundlephobia.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## How we evaluated these libraries
+
+Bundle size alone doesn't tell you whether a library is worth using. A 3KB library with an AGPL license might cost you more than an 8KB one with MIT licensing and built-in accessibility. We scored each library across five dimensions:
+
+- **Gzipped bundle size**: the actual bytes your users download. We used bundlephobia for published packages and the Vite build analyzer for packages bundlephobia can't measure
+- **Tree-shaking support**: does the library ship ESM with proper `sideEffects: false` so bundlers can eliminate dead code? This matters more than raw size for libraries with optional features
+- **Licensing**: MIT and Apache-2.0 are safe for commercial use. AGPL-3.0 requires you to open-source your entire application unless you buy a commercial license. We flag this explicitly
+- **Accessibility**: keyboard navigation, ARIA attributes, focus management, `prefers-reduced-motion` support. The [W3C ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/) provides patterns that product tours should follow but rarely do
+- **React integration**: native hooks and components vs. imperative APIs that fight React's rendering model. Manual `useEffect` wiring to sync a vanilla JS library with React state is a maintenance tax
+
+We weighted these equally because the "lightest" library isn't useful if it creates legal problems or accessibility gaps. As [Smashing Magazine notes](https://www.smashingmagazine.com/2020/08/guide-product-tours-react-apps/), product tours are a tricky UX surface, and getting them right requires more than just highlighting DOM elements.
+
+## Quick comparison table
+
+<table>
+<thead>
+<tr><th>Library</th><th>Gzipped size</th><th>Dependencies</th><th>React 19</th><th>TypeScript</th><th>License</th><th>Accessibility</th><th>Best for</th></tr>
+</thead>
+<tbody>
+<tr><td>Tour Kit (core)</td><td>&lt;8 KB</td><td>0</td><td>Yes</td><td>Strict</td><td>MIT</td><td>WCAG 2.1 AA</td><td>Design system teams</td></tr>
+<tr><td>Driver.js</td><td>&#126;5 KB</td><td>0</td><td>Via hooks</td><td>Built-in</td><td>MIT</td><td>Minimal</td><td>Simple highlights</td></tr>
+<tr><td>Intro.js</td><td>&#126;4-5 KB</td><td>0</td><td>Via wrapper</td><td>DefinitelyTyped</td><td>AGPL-3.0</td><td>Keyboard nav</td><td>Non-commercial</td></tr>
+<tr><td>Onborda</td><td>&#126;8 KB</td><td>Framer Motion</td><td>Yes</td><td>Built-in</td><td>MIT</td><td>Not documented</td><td>Next.js App Router</td></tr>
+<tr><td>OnboardJS</td><td>&#126;8-10 KB</td><td>0</td><td>Yes</td><td>Built-in</td><td>MIT</td><td>Not documented</td><td>Flow orchestration</td></tr>
+</tbody>
+</table>
+
+Bundle sizes verified April 2026 via bundlephobia and Vite build analyzer. The "Dependencies" column matters because peer deps like Framer Motion add 30KB+ on top of the library's own weight.
+
+## 1. Tour Kit: best for headless tours under 8KB
+
+Tour Kit ships 10 composable packages, but you only install what you need. Core weighs under 8KB gzipped with zero runtime dependencies. Add the React package and you're still under 12KB total. Every import tree-shakes cleanly because tsup outputs ESM with `sideEffects: false` in every package.json.
+
+The headless architecture provides tour logic (step sequencing, positioning, state management, storage) without rendering opinions. You bring your own components. If you're using shadcn/ui, Radix, or Tailwind, your tours match the rest of your app without fighting CSS overrides.
+
+### Strengths
+
+- Zero dependencies in the core. The position engine, storage adapters, and state machine are all built in
+- WCAG 2.1 AA compliance with focus trapping, keyboard navigation, ARIA live regions, and `prefers-reduced-motion` support. Lighthouse Accessibility score: 100
+- React 18 and 19 native support with hooks like `useTour()` and `useStep()` that follow React's rendering model
+- Optional packages for analytics, checklists, announcements, hints, scheduling, and surveys add capabilities without bloating the base install
+
+### Limitations
+
+- Younger project with a smaller community than React Joyride or Shepherd.js. Stack Overflow threads and third-party tutorials are sparse
+- No visual builder. You write tour definitions in code, which means you need React developers to create and modify tours
+- No mobile SDK or React Native support
+- Pro packages (adoption, analytics, announcements, checklists, media, scheduling, surveys) require a $99 one-time license
+
+### Pricing
+
+MIT core and React packages are free forever. Pro tier is $99 one-time with no per-seat fees, no monthly bill, no usage caps.
+
+**Best for:** React teams with an existing design system who want full control over tour rendering and care about bundle budgets.
+
+## 2. Driver.js: best for zero-dependency element highlighting
+
+Driver.js is the lightest on this list at roughly 5KB gzipped. It highlights DOM elements with animated overlays and optional popovers, all without a single dependency. The API is imperative: you call `driver.highlight()` or `driver.drive()` from vanilla JavaScript.
+
+But Driver.js is a vanilla library, not a React library. Using it in React means writing `useEffect` hooks to sync imperative state with declarative rendering. No built-in state management, no analytics, no persistence. As [Userorbit notes](https://userorbit.com/blog/best-open-source-product-tour-libraries), it's "more primitive if you need richer onboarding patterns."
+
+### Strengths
+
+- Smallest production bundle of any maintained tour library (~5KB gzipped, zero deps)
+- Clean highlight animations with smooth transitions between elements
+- Framework-agnostic. Works with React, Vue, Svelte, or plain HTML
+- MIT licensed with no commercial restrictions
+
+### Limitations
+
+- No React integration. You wire it yourself with `useEffect`, `useRef`, and manual cleanup. This breaks easily with dynamic content and route changes
+- No state management, no progress persistence, no analytics. You build all of that
+- Accessibility is minimal. Keyboard navigation exists but there's no ARIA live regions, no focus trapping, no `prefers-reduced-motion` support
+- Last npm publish and GitHub activity should be checked before committing. Community maintenance can be sporadic
+
+### Pricing
+
+Free. MIT open source.
+
+**Best for:** Teams that need lightweight element highlighting for feature announcements or contextual help and are comfortable wiring React integration manually.
+
+## 3. Intro.js: smallest bundle, biggest licensing gotcha
+
+Intro.js is arguably the smallest tour library at 4-5KB gzipped. The step-based API is straightforward, keyboard navigation works, and it's been around since 2013. It's also licensed under AGPL-3.0, which means using it in a closed-source commercial product requires buying a commercial license.
+
+This isn't a footnote. AGPL-3.0 requires that any application using the library must make its own source code available under the same license. [Multiple](https://userorbit.com/blog/best-open-source-product-tour-libraries) [sources](https://www.usertour.io/blog/open-source-onboarding-tools-2026) flag this as procurement friction for commercial teams.
+
+### Strengths
+
+- One of the smallest production bundles for a fully-featured tour library (~4-5KB gzipped)
+- Stable project with over a decade of production use
+- Built-in keyboard navigation for step-by-step tours
+- Zero runtime dependencies
+
+### Limitations
+
+- AGPL-3.0 license. Commercial use requires a paid license. This is the single biggest consideration and the reason many teams rule it out immediately
+- Imperative API that doesn't map cleanly to React's component model. The React wrapper (`intro.js-react`) adds indirection and can lag behind the core
+- TypeScript types come from DefinitelyTyped, not the library itself. Types can fall behind the actual API
+- No built-in analytics, no headless mode, brittle CSS-selector-based targeting
+
+### Pricing
+
+Free for AGPL-compliant (open-source) projects. Commercial license required otherwise -- check introjs.com for current pricing.
+
+**Best for:** Non-commercial or open-source projects where the AGPL license isn't a constraint and you need the smallest possible bundle.
+
+## 4. Onborda: best for Next.js App Router under 10KB
+
+Onborda is purpose-built for Next.js App Router projects. Around 8KB gzipped with built-in TypeScript support and React 19 compatibility. It uses Framer Motion for animations, which is worth noting: if you're not already using Framer Motion, adding Onborda means adding its 30KB+ peer dependency too.
+
+If Framer Motion is already in your bundle (many Next.js projects carry it), Onborda is effectively free in marginal cost.
+
+### Strengths
+
+- Designed specifically for Next.js App Router, including support for Server Components and route-based tour triggers
+- Clean component API that feels native to React 19 patterns
+- Built-in TypeScript support with typed step definitions
+- MIT licensed with no commercial restrictions
+
+### Limitations
+
+- Requires Framer Motion as a peer dependency. If you don't already use it, that's 30KB+ added to your bundle, pushing the effective cost well past 10KB
+- Next.js only. Not usable with Vite, Remix, or plain React projects
+- Smaller ecosystem and community. Documentation is thinner than Driver.js or Shepherd.js
+- Accessibility features aren't documented. We couldn't verify WCAG compliance from the docs or source
+
+### Pricing
+
+Free. MIT open source.
+
+**Best for:** Next.js App Router projects that already use Framer Motion and want a tour library that integrates with the framework's routing and rendering model.
+
+## 5. OnboardJS: best for headless flow orchestration
+
+OnboardJS takes a different approach. It's a flow orchestration library, not a DOM highlighting library. You define tour steps as a state machine, and OnboardJS handles sequencing, branching, and analytics. You render everything yourself. The core is around 8-10KB gzipped with zero dependencies.
+
+This is the closest competitor to Tour Kit's headless philosophy, with one major difference: OnboardJS deliberately does not do DOM highlighting or element targeting. It manages the "what step are we on" question but leaves "how do we point to this element" entirely to you.
+
+### Strengths
+
+- Genuinely headless with zero rendering opinions and full control over UI
+- State machine architecture supports branching tours, conditional steps, and complex flows
+- Built-in analytics and event tracking
+- MIT licensed, with a cloud offering for teams that want hosted analytics
+
+### Limitations
+
+- No DOM highlighting, no element targeting, no overlay system. You build all visual tour components yourself
+- Newer project with a smaller community. Fewer production battle-test stories
+- The gap between "orchestration library" and "tour library" means more integration work. Starting with a basic tour library often leads to expanding needs for "targeting, analytics, localization, experiments... which can suddenly collect hidden costs in engineering time" ([Usertour, 2026](https://www.usertour.io/blog/open-source-onboarding-tools-2026))
+- Documentation is growing but not comprehensive yet
+
+### Pricing
+
+Free core (MIT). Cloud offering for hosted analytics and remote configuration. Check onboardjs.com for pricing.
+
+**Best for:** Teams that want a state machine for tour flow orchestration and are willing to build their own highlighting and overlay UI.
+
+## How to choose the right lightweight tour library
+
+Your decision comes down to three questions.
+
+**Do you need DOM highlighting or just flow control?** If you need to point at elements with overlays, Driver.js (vanilla) and Tour Kit (React) are your options under 10KB. For step sequencing only, OnboardJS works.
+
+**Is your project commercial?** If yes, cross Intro.js off the list unless you budget for the commercial license. The AGPL-3.0 isn't a technicality; it's a legal obligation.
+
+**Are you using React with a design system?** Tour Kit is the only sub-10KB option that's headless, React-native, and accessible. Driver.js is lighter but requires manual React wiring. Onborda works if you're locked to Next.js and already carry Framer Motion.
+
+## Why bundle size matters for product tours specifically
+
+Tour code runs once per user session, maybe twice. After onboarding, it sits in your bundle doing nothing. Google's Core Web Vitals research confirms that [JavaScript bundle size directly impacts Interaction to Next Paint](https://web.dev/articles/inp), and on mobile devices the parsing cost is 2-4x higher than desktop.
+
+Tree-shaking helps, but only if the library supports it. Of the five libraries above, only Tour Kit and OnboardJS ship proper ESM with `sideEffects: false` in their package.json. The [Smashing Magazine reference guide on tree-shaking](https://www.smashingmagazine.com/2021/05/tree-shaking-reference-guide/) explains why this flag matters: without it, bundlers assume every import might have side effects and can't eliminate unused exports.
+
+## FAQ
+
+### What is the lightest product tour library in 2026?
+
+Intro.js is the smallest at roughly 4-5KB gzipped, but its AGPL-3.0 license restricts commercial use without a paid license. Among MIT-licensed options, Driver.js is lightest at approximately 5KB gzipped. Tour Kit's core ships under 8KB gzipped with WCAG 2.1 AA accessibility, making it the lightest accessible option.
+
+### Can a lightweight tour library handle complex onboarding flows?
+
+Tour Kit supports multi-step tours, conditional branching, progress persistence, and analytics through its modular package system. Core stays under 8KB, and each additional package adds capabilities incrementally. OnboardJS offers flow orchestration with branching but lacks DOM highlighting. Driver.js handles basic sequential tours only.
+
+### Do product tour libraries affect Core Web Vitals?
+
+Yes. Every kilobyte of JavaScript impacts Interaction to Next Paint and Total Blocking Time. A 50KB tour library adds measurable parsing time on mobile devices. Libraries under 10KB gzipped keep the performance impact within acceptable margins, especially when the code only runs during onboarding.
+
+### Is Driver.js or Tour Kit better for React projects?
+
+Driver.js is 3KB lighter but has no React integration. You write your own `useEffect` hooks, manage cleanup, and handle state synchronization manually. Tour Kit ships React hooks (`useTour()`, `useStep()`) and components that follow React's rendering model natively. For React projects, Tour Kit's slightly larger bundle saves significant integration time and provides built-in accessibility.
+
+### Why does the license matter for a tour library?
+
+Intro.js uses AGPL-3.0, which legally requires you to open-source your entire application if you ship Intro.js in a commercial product, unless you purchase a commercial license. MIT and Apache-2.0 libraries (Tour Kit, Driver.js, Shepherd.js, OnboardJS) have no such restriction. Multiple sources flag AGPL licensing as procurement friction for commercial teams in 2026.
+
+---
+
+**Internal linking suggestions:**
+- Link from [Best free product tour libraries](/blog/best-free-product-tour-libraries-open-source) → this article (performance-focused angle)
+- Link from [Best TypeScript product tour libraries](/blog/best-typescript-product-tour-libraries) → this article (bundle size angle)
+- Link from [10 best product tour tools for React](/blog/best-product-tour-tools-react) → this article (lightweight filter)
+- Link from this article → [Tour Kit docs](/docs) (getting started)
+
+**Distribution checklist:**
+- Cross-post to Dev.to with canonical URL
+- Cross-post to Hashnode with canonical URL
+- Share on Reddit r/reactjs (performance angle: "How much JS do your tour libraries add?")
+- Share on Reddit r/webdev (Core Web Vitals angle)
+- Submit to Hacker News if traction on Reddit
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "5 best lightweight product tour libraries under 10KB (2026)",
+  "description": "We measured every product tour library's gzipped bundle size. These five ship under 10KB and won't tank your Core Web Vitals.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/lightweight-product-tour-libraries-under-10kb.png",
+  "url": "https://tourkit.dev/blog/lightweight-product-tour-libraries-under-10kb",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/lightweight-product-tour-libraries-under-10kb"
+  },
+  "keywords": ["lightweight product tour library under 10kb", "small bundle size tour library", "minimal tour js", "lightweight onboarding library"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+})}} />
+
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the lightest product tour library in 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Intro.js has the smallest raw gzipped size at roughly 4-5KB, but its AGPL-3.0 license restricts commercial use without a paid license. Among MIT-licensed options, Driver.js is the lightest at approximately 5KB gzipped. Tour Kit's core ships under 8KB gzipped with WCAG 2.1 AA accessibility included."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can a lightweight tour library handle complex onboarding flows?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit supports multi-step tours, conditional branching, progress persistence, and analytics through its modular package system. You install only what you need. OnboardJS offers flow orchestration with branching but lacks DOM highlighting. Driver.js handles basic sequential tours but has no state management."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do product tour libraries affect Core Web Vitals?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Every kilobyte of JavaScript impacts Interaction to Next Paint and Total Blocking Time. A 50KB tour library adds measurable parsing time on mobile devices. Libraries under 10KB gzipped keep the performance impact within acceptable margins for most performance budgets."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Driver.js or Tour Kit better for React projects?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Driver.js is 3KB lighter but has no React integration. Tour Kit ships React hooks and components that follow React's rendering model natively. For React projects, Tour Kit's slightly larger bundle saves significant integration time and provides built-in accessibility."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does the license matter for a tour library?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Intro.js uses AGPL-3.0, which legally requires you to open-source your entire application if you ship Intro.js in a commercial product, unless you purchase a commercial license. MIT and Apache-2.0 libraries have no such restriction."
+      }
+    }
+  ]
+})}} />

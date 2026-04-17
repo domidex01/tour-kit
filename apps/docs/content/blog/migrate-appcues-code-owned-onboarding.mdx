@@ -1,0 +1,445 @@
+---
+title: "Migrating from Appcues to code-owned onboarding (complete guide)"
+slug: "migrate-appcues-code-owned-onboarding"
+description: "Replace Appcues with code-owned React onboarding using Tour Kit. Step-by-step migration with API mapping, side-by-side testing, and honest tradeoffs."
+primary_keyword: "appcues migration guide"
+secondary_keywords: ["leave appcues alternative", "appcues to open source", "code-owned onboarding react", "appcues alternative developer"]
+category: "Tutorials"
+schema_type: "TechArticle"
+spreadsheet_row: 97
+date: "2026-04-07"
+updated: "2026-04-07"
+published: true
+ogImage: /og-images/migrate-appcues-code-owned-onboarding.png
+---
+
+# Migrating from Appcues to code-owned onboarding
+
+Appcues works until it doesn't. The $249/month starting price climbs as your MAU count grows, the "no-code" builder still needs a developer when flows get complex, and every tour you've built lives on someone else's servers. If your team has outgrown the tradeoffs, this guide walks through replacing Appcues with Tour Kit, a headless React library where onboarding flows live in your codebase, ship with your deploys, and cost nothing per user.
+
+Budget 4-6 hours for a typical migration of 5-10 Appcues flows. You won't rip everything out on day one. The strategy here is incremental: install Tour Kit alongside Appcues, rebuild one flow at a time, run both systems in parallel, then remove the Appcues SDK once you're confident.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Why migrate from Appcues to code-owned onboarding?
+
+Teams migrate from Appcues when per-user pricing outpaces the value delivered, when the "no-code" builder requires developer workarounds for complex flows, or when the lack of version control over onboarding content becomes a deployment risk. Here are the three patterns we see most often.
+
+**Cost scales with users, not value.** Appcues Growth starts at $879/month for 2,500 MAUs on an annual contract ([TrustRadius, April 2026](https://www.trustradius.com/products/appcues/pricing)). Hit 5,000 MAUs and you're at $1,150+/month. A React library costs zero per user. For a B2B SaaS with 10,000 active users, the annual Appcues bill can top $15,000.
+
+**"No-code" still needs developers.** One G2 reviewer wrote: "The implementation required us to hire JS developers. It was lengthy and confusing to set up" ([G2 Reviews, 2026](https://www.g2.com/products/appcues/reviews)). When flows need conditional logic or design system integration, teams write CSS overrides and JavaScript callbacks anyway. You end up maintaining two systems.
+
+**Flows don't live in your repo.** Appcues stores every flow on their servers, not version-controlled alongside your components. You can't code-review a flow change or roll back a broken tooltip with `git revert`. Cancel your subscription and your onboarding disappears.
+
+None of this means Appcues is bad. Your team might have simply crossed the threshold where owning the code costs less than renting the platform.
+
+## Appcues to Tour Kit concept mapping
+
+Every Appcues feature maps to a Tour Kit package or a standard React pattern, with one notable exception: the visual no-code builder has no equivalent because Tour Kit is code-first by design. Map what you have in Appcues to these equivalents before writing any migration code.
+
+<table>
+  <thead>
+    <tr>
+      <th>Appcues concept</th>
+      <th>Tour Kit equivalent</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Flow (multi-step)</td>
+      <td><code>useTour()</code> with step array</td>
+      <td>Steps defined as TypeScript objects in your codebase</td>
+    </tr>
+    <tr>
+      <td>Tooltip / Hotspot</td>
+      <td><code>@tour-kit/hints</code> package</td>
+      <td>Beacon + popover, 5KB gzipped</td>
+    </tr>
+    <tr>
+      <td>Modal</td>
+      <td><code>@tour-kit/announcements</code></td>
+      <td>Modal, toast, banner, slideout, spotlight variants</td>
+    </tr>
+    <tr>
+      <td>Checklist</td>
+      <td><code>@tour-kit/checklists</code></td>
+      <td>Task dependencies and progress calculation built in</td>
+    </tr>
+    <tr>
+      <td>NPS survey</td>
+      <td><code>@tour-kit/surveys</code></td>
+      <td>NPS, CSAT, CES with fatigue prevention</td>
+    </tr>
+    <tr>
+      <td>Segment targeting</td>
+      <td>React conditional rendering</td>
+      <td><code>if (user.role === 'admin')</code> — it's just code</td>
+    </tr>
+    <tr>
+      <td>Analytics dashboard</td>
+      <td><code>@tour-kit/analytics</code> + your stack</td>
+      <td>Plugin-based: PostHog, Mixpanel, Amplitude, GA4, Plausible</td>
+    </tr>
+    <tr>
+      <td>Visual builder (Chrome ext)</td>
+      <td>No equivalent</td>
+      <td>Tour Kit is code-first — you write JSX, not drag and drop</td>
+    </tr>
+    <tr>
+      <td>Appcues SDK (~external script)</td>
+      <td><code>@tourkit/core</code> at 8KB gzipped</td>
+      <td>Tree-shakeable, zero runtime dependencies, ships in your bundle</td>
+    </tr>
+  </tbody>
+</table>
+
+The visual builder is the one Appcues feature with no Tour Kit equivalent. If non-technical team members create flows without developer involvement today, this migration changes that workflow. Be upfront about it with your team before starting.
+
+## Before you start
+
+A successful migration requires a React 18+ codebase, access to your Appcues dashboard for flow auditing, and roughly 4-6 hours of focused developer time for a typical 5-10 flow migration. Tour Kit supports React 19 and Server Components natively, something Appcues hasn't documented support for as of April 2026.
+
+**Prerequisites:**
+- React 18.2+ or React 19
+- TypeScript 5+ (recommended, not required)
+- Access to your Appcues dashboard to export flow configurations
+- A list of your active Appcues flows and their target pages
+
+**Time estimate:** 4-6 hours for 5-10 flows. Complex flows with conditional branching take longer. Simple tooltip sequences take 15-20 minutes each.
+
+## Step 1: Audit your existing Appcues flows
+
+Before writing a single line of Tour Kit code, log into the Appcues dashboard and catalog every active flow with its type, target page, segmentation rules, and weekly impression count, because most teams find that 30-40% of their flows are dead weight that shouldn't be migrated at all.
+
+Sort the remaining flows by weekly impressions. Start with the highest-traffic flow. If it works there, the rest will be straightforward.
+
+```typescript
+// src/migration/appcues-audit.ts
+// Document what you're migrating
+
+interface AppcuesFlow {
+  name: string;
+  type: 'tooltip' | 'modal' | 'checklist' | 'nps' | 'multi-step';
+  targetPage: string;
+  weeklyImpressions: number;
+  segments: string[];
+  steps: number;
+  status: 'migrate' | 'kill' | 'defer';
+}
+
+const flowAudit: AppcuesFlow[] = [
+  {
+    name: 'New user onboarding',
+    type: 'multi-step',
+    targetPage: '/dashboard',
+    weeklyImpressions: 1240,
+    segments: ['new-users'],
+    steps: 5,
+    status: 'migrate', // Highest traffic — migrate first
+  },
+  {
+    name: 'Feature announcement Q1',
+    type: 'modal',
+    targetPage: '/settings',
+    weeklyImpressions: 0,
+    segments: ['all'],
+    steps: 1,
+    status: 'kill', // Zero impressions — delete it
+  },
+];
+```
+
+## Step 2: Install Tour Kit alongside Appcues
+
+The safest migration path keeps Appcues running while you install Tour Kit as an additional dependency, letting both systems coexist until every flow has been rebuilt and validated with real user data. Don't remove anything yet.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+If you're migrating checklists, surveys, or announcements, install those packages too:
+
+```bash
+npm install @tourkit/checklists @tourkit/surveys @tourkit/announcements
+```
+
+Wrap your app with the Tour Kit provider. This doesn't affect Appcues. Both systems coexist:
+
+```tsx
+// src/app/layout.tsx (Next.js App Router)
+import { TourKitProvider } from '@tourkit/react';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <TourKitProvider>
+          {children}
+        </TourKitProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+Tour Kit's core package is under 8KB gzipped with zero runtime dependencies. Adding it alongside Appcues won't meaningfully change your bundle size during the transition period.
+
+## Step 3: Rebuild your highest-traffic flow
+
+Converting an Appcues flow to Tour Kit means translating each step's target selector, title, and content into a TypeScript step array, then rendering the UI with your own components instead of Appcues' widget. Here's a typical 5-step onboarding flow rebuilt from scratch:
+
+```tsx
+// src/components/onboarding-tour.tsx
+'use client';
+
+import { useTour } from '@tourkit/react';
+
+const steps = [
+  {
+    target: '#sidebar-nav',
+    title: 'Navigate your workspace',
+    content: 'Use the sidebar to switch between projects, settings, and team views.',
+  },
+  {
+    target: '#create-button',
+    title: 'Create your first project',
+    content: 'Click here to set up a new project. It takes about 30 seconds.',
+  },
+  {
+    target: '#invite-team',
+    title: 'Invite your team',
+    content: 'Add collaborators by email. They get access immediately.',
+  },
+  {
+    target: '#notification-bell',
+    title: 'Stay updated',
+    content: 'Notifications appear here when teammates comment or share.',
+  },
+  {
+    target: '#help-center',
+    title: 'Need help?',
+    content: 'Documentation, tutorials, and support — all in one place.',
+  },
+];
+
+export function OnboardingTour() {
+  const tour = useTour({
+    steps,
+    onComplete: () => {
+      // Mark onboarding as done — your logic, your database
+      fetch('/api/user/onboarding', { method: 'POST' });
+    },
+  });
+
+  if (!tour.isActive) return null;
+
+  return (
+    <div role="dialog" aria-label="Onboarding tour">
+      <h2>{tour.currentStep.title}</h2>
+      <p>{tour.currentStep.content}</p>
+      <div>
+        <button onClick={tour.prev} disabled={tour.isFirst}>Back</button>
+        <span>{tour.currentStepIndex + 1} / {tour.totalSteps}</span>
+        <button onClick={tour.isLast ? tour.complete : tour.next}>
+          {tour.isLast ? 'Done' : 'Next'}
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+Notice what changed. Step definitions are TypeScript objects you can code-review. The completion callback hits your own API. And the UI is plain JSX, so you style it with Tailwind, shadcn/ui, or whatever your design system uses.
+
+## Step 4: Add analytics and user targeting
+
+Appcues bundles analytics and user segmentation into its platform, but Tour Kit gives you more control by routing tour events through your existing analytics stack (PostHog, Mixpanel, Amplitude, GA4, or Plausible) and handling targeting with standard React conditional rendering.
+
+If you already use PostHog, Mixpanel, or Amplitude, the `@tour-kit/analytics` plugin sends tour events to the same pipeline:
+
+```tsx
+// src/lib/tour-analytics.ts
+import { createAnalyticsPlugin } from '@tourkit/analytics';
+
+export const tourAnalytics = createAnalyticsPlugin({
+  onStepView: (step) => {
+    posthog.capture('tour_step_viewed', {
+      tour: step.tourId,
+      step: step.index,
+    });
+  },
+  onComplete: (tour) => {
+    posthog.capture('tour_completed', { tour: tour.id });
+  },
+  onDismiss: (tour, step) => {
+    posthog.capture('tour_dismissed', {
+      tour: tour.id,
+      step: step.index,
+    });
+  },
+});
+```
+
+For user targeting, replace Appcues dashboard segment rules with conditional rendering:
+
+```tsx
+// src/components/conditional-tour.tsx
+export function DashboardTours({ user }: { user: User }) {
+  // Only show onboarding to users created in the last 7 days
+  const isNewUser = Date.now() - user.createdAt < 7 * 24 * 60 * 60 * 1000;
+
+  // Only show feature tour to admins
+  const isAdmin = user.role === 'admin';
+
+  return (
+    <>
+      {isNewUser && <OnboardingTour />}
+      {isAdmin && <AdminFeatureTour />}
+    </>
+  );
+}
+```
+
+You can test this logic, debug it, set a breakpoint. No more guessing why a flow isn't showing.
+
+## Step 5: Run both systems in parallel
+
+Running Appcues and Tour Kit side-by-side for 1-2 weeks lets you compare completion rates on migrated flows against the originals, catching regressions before you commit to removing the Appcues SDK entirely.
+
+Disable individual Appcues flows as you rebuild them. Tour Kit's analytics plugin gives you step views, completion rates, and drop-off points through your own stack. Build funnels without the dashboard limitations G2 reviewers flagged.
+
+If a Tour Kit flow underperforms, the Appcues version is still there. Don't delete Appcues flows until their replacement has run for at least a week with stable metrics.
+
+## Step 6: Remove the Appcues SDK
+
+After every active flow has been rebuilt, validated with real users, and running stable for at least one week, you can safely remove the Appcues SDK and its initialization code from your codebase, cutting the external script dependency entirely.
+
+```bash
+npm uninstall @appcues/web-sdk
+```
+
+Or remove the script tag if you used the CDN approach:
+
+```diff
+- <script src="//fast.appcues.com/YOUR_APPCUES_ID.js"></script>
+```
+
+Delete any remaining Appcues initialization code, user identification calls, and event tracking. Search your codebase for `Appcues.` and `appcues` to catch stragglers.
+
+After removal, run a Lighthouse performance audit. You should see an improvement in Total Blocking Time since you've replaced an external CDN-loaded script with a tree-shaken local dependency.
+
+## What you gain and what you lose
+
+Every migration involves real tradeoffs, and being honest about them upfront prevents surprises six months later when your PM asks why they can't drag-and-drop a tooltip anymore. Here's the full picture.
+
+**What you gain:**
+- Zero per-user cost. Tour Kit core is MIT-licensed. Pro packages cost $99 one-time, not a monthly fee that scales with MAUs.
+- Version-controlled flows. Tour changes go through pull requests with code review and `git revert` rollbacks.
+- Design system integration. Tour Kit is headless. You render with your own components.
+- React 19 and Server Components support out of the box.
+- Full TypeScript coverage across step definitions, hooks, and callbacks.
+- Bundle size under 8KB gzipped for core. Ship only what you use.
+
+**What you lose:**
+- The visual builder. Non-technical team members need a developer to create or edit flows. This causes the most friction.
+- Hosted analytics dashboard. You build your own dashboards using your analytics stack.
+- Managed infrastructure. Appcues handles CDN delivery and A/B testing. With Tour Kit, you own that (which is also why it's cheaper).
+- Pre-built templates. You write components from scratch or use [shadcn/ui examples from Tour Kit docs](https://tourkit.dev/docs).
+
+We built Tour Kit, so take this comparison with appropriate skepticism. Every claim here is verifiable against npm, GitHub, and the Appcues pricing page.
+
+## Common issues during migration
+
+### "My Appcues flow targets a dynamic element"
+
+Appcues uses CSS selectors to find target elements. Tour Kit uses the `target` prop, which accepts a CSS selector string or a React ref. For dynamic elements that render after page load, Tour Kit waits for the target automatically. If the element never appears, the step is skipped rather than showing a broken tooltip.
+
+### "We use Appcues event tracking extensively"
+
+Map each `Appcues.track()` call to your analytics library. The `@tour-kit/analytics` plugin provides `onStepView`, `onComplete`, `onDismiss`, and `onSkip` callbacks that fire at the same lifecycle points Appcues tracks.
+
+### "Our PM creates flows without developers"
+
+This is the hardest part of the migration. Options: pair the PM with a developer for flow creation, use a [Storybook](https://storybook.js.org/) setup where PMs can preview tour steps visually, or keep Appcues for flows that change frequently and use Tour Kit for stable onboarding sequences.
+
+## FAQ
+
+### How long does it take to migrate from Appcues to Tour Kit?
+
+Tour Kit migration typically takes 4-6 hours for teams with 5-10 active Appcues flows. Simple tooltip sequences convert in 15-20 minutes each, while complex multi-step flows with conditional branching take 45-60 minutes including testing. Running both systems in parallel means you don't need to block a sprint.
+
+### Can Tour Kit replace all Appcues features?
+
+Tour Kit covers product tours, tooltips, hotspots, checklists, modals, announcements, NPS/CSAT surveys, and analytics integration across its 10 packages. The main Appcues feature without a Tour Kit equivalent is the visual no-code builder. Tour Kit requires React developers to create and modify onboarding flows in code. Teams where non-technical staff create flows independently should evaluate this tradeoff carefully.
+
+### How much money does switching from Appcues save?
+
+Tour Kit core is free (MIT). Pro features cost $99 one-time. Appcues Growth runs $879/month at 2,500 MAUs on annual billing ([TrustRadius, April 2026](https://www.trustradius.com/products/appcues/pricing)). Switching saves roughly $10,000-$14,000 per year depending on MAU volume, minus developer hours for migration.
+
+### Does Tour Kit work with Next.js App Router and React Server Components?
+
+Tour Kit supports React 18 and React 19, including Server Components in the Next.js App Router. The provider wraps your layout as a client component, while your page content stays server-rendered. Appcues hasn't published documentation on Server Components compatibility as of April 2026, which is a concern for teams adopting the latest React architecture.
+
+### Is Tour Kit accessible?
+
+Tour Kit ships with WCAG 2.1 AA compliance: ARIA attributes, keyboard navigation, focus management, and `prefers-reduced-motion` support in the core package. Appcues notes that "improper use of custom CSS and images could adversely impact accessibility" ([Appcues Docs](https://docs.appcues.com/user-experiences-faq/faq-accessibility)). With Tour Kit, accessibility lives in component code you control.
+
+---
+
+*Disclosure: We built Tour Kit. This migration guide is written from our perspective, and we've tried to be fair about the tradeoffs. Verify pricing on the [Appcues pricing page](https://www.appcues.com/pricing) and bundle sizes on [bundlephobia](https://bundlephobia.com/).*
+
+{/* JSON-LD Schema */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Migrating from Appcues to code-owned onboarding (complete guide)",
+  "description": "Replace Appcues with code-owned React onboarding using Tour Kit. Step-by-step migration with API mapping, side-by-side testing, and honest tradeoffs.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/migrate-appcues-code-owned-onboarding.png",
+  "url": "https://tourkit.dev/blog/migrate-appcues-code-owned-onboarding",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/migrate-appcues-code-owned-onboarding"
+  },
+  "keywords": ["appcues migration guide", "leave appcues alternative", "code-owned onboarding react"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+};
+
+{/* Internal linking suggestions:
+  - Link FROM: best-digital-adoption-platforms-startups (mention Tour Kit migration path)
+  - Link FROM: best-in-app-guidance-tools-saas (add migration guide reference)
+  - Link TO: shadcn-ui-product-tour-tutorial (for styling after migration)
+  - Link TO: track-product-tour-completion-posthog-events (for analytics setup)
+  - Link TO: conditional-product-tour-user-role (for targeting logic)
+*/}
+
+{/* Distribution checklist:
+  - Dev.to (canonical to tourkit.dev/blog)
+  - Hashnode (canonical to tourkit.dev/blog)
+  - Reddit r/reactjs — "We wrote a migration guide for teams leaving Appcues"
+  - Reddit r/SaaS — relevant for the cost comparison angle
+  - Hacker News — "Show HN: Open source alternative to Appcues for React teams"
+*/}

@@ -55,6 +55,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
               Base UI
             </Link>
             <Link
+              to="/surveys"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Surveys
+            </Link>
+            <Link
               to="/ai-chat"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >

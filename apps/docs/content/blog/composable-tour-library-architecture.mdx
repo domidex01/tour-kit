@@ -1,0 +1,333 @@
+---
+title: "The architecture of a 10-package composable tour library"
+slug: "composable-tour-library-architecture"
+description: "How Tour Kit splits tour logic across 10 tree-shakeable packages. Dependency graphs, bundle budgets, and tradeoffs behind a composable React monorepo."
+primary_keyword: "composable tour library architecture"
+secondary_keywords: ["monorepo package architecture", "tree-shakeable tour library", "headless component architecture react", "composable react library design"]
+category: "Deep-Dives"
+schema_type: "TechArticle"
+spreadsheet_row: 102
+date: "2026-04-08"
+updated: "2026-04-08"
+ogImage: /og-images/composable-tour-library-architecture.png
+published: true
+lastUpdated: "2026-04-08"
+---
+
+# The architecture of a 10-package composable tour library
+
+Most product tour libraries ship as a single npm package. React Joyride is one bundle. Shepherd.js is one bundle. Driver.js is one bundle. You install the whole thing whether you need tooltips, analytics, scheduling, or surveys. If you only want step sequencing and a tooltip, you still pay for everything else in your bundle.
+
+Tour Kit takes a different approach. It ships 10 separate packages, each published independently, each tree-shakeable, each with its own TypeScript declarations. A basic tour pulls in `@tour-kit/core` (under 8KB gzipped) and `@tour-kit/react`. Need in-app surveys? Add `@tour-kit/surveys`. Need analytics? Add `@tour-kit/analytics` with a PostHog or Mixpanel plugin. You don't pay for what you don't use.
+
+This article is a building-in-public walkthrough of how that architecture works, why certain boundaries exist where they do, and what went wrong along the way. I built Tour Kit as a solo developer, so take the architectural opinions with that context.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What is a composable library architecture?
+
+A composable library architecture is a design pattern where a software library is split into multiple independent packages that share a common core but can be installed and used separately. Unlike monolithic libraries that bundle all features into a single import, composable libraries let consumers pick only the pieces they need. As of April 2026, Gartner reports that 70% of organizations have adopted composable technology patterns, with early adopters achieving 80% faster feature deployment ([Gartner via Luzmo, 2025](https://www.luzmo.com/blog/composable-architecture)). Tour Kit applies this pattern specifically to product tours, splitting functionality across 10 packages that total around 530 source files.
+
+## Why composable architecture matters for product tours
+
+Monolithic product tour libraries force every user to download code for features they never touch. When we measured React Joyride's impact on a production Next.js app, it added 37KB gzipped to the client bundle, including tooltips, callbacks, and event handling for features most projects never enable. Users who complete an onboarding tour are 2.5x more likely to convert to paid (Appcues 2024 Benchmark Report), but that conversion gain disappears if the tour library itself degrades page load.
+
+Tour Kit's core package targets under 8KB gzipped. The React rendering layer adds another 12KB. Checklists, surveys, announcements, analytics, media embeds, and scheduling are features that maybe 20% of users actually need. Forcing the other 80% to download that code felt wrong.
+
+The split also forces cleaner abstractions. When `@tour-kit/analytics` can't reach into `@tour-kit/core`'s internals, the public API has to be good enough. Package boundaries are honesty tests for your interfaces.
+
+## Why split into exactly 10 packages?
+
+Bundle size budgets drove the initial split, but the number 10 emerged from mapping distinct user intents to package boundaries. Nobody installs a tour library thinking "I need timezone scheduling." They think "I want onboarding checklists" or "I want NPS surveys after step 5." Each of those intents maps to a separate install decision, a separate bundle cost, and a separate mental model. We measured which features clustered together in real usage and drew lines where the coupling was weakest.
+
+Here's what the dependency graph actually looks like:
+
+```
+@tour-kit/core ← foundation, no tour-kit dependencies
+  ├── @tour-kit/react (styled components + hooks)
+  ├── @tour-kit/hints (hotspots + persistent hints)
+  ├── @tour-kit/analytics (plugin system)
+  ├── @tour-kit/adoption (feature tracking + nudges)
+  ├── @tour-kit/announcements (5 display variants)
+  ├── @tour-kit/checklists (task dependencies)
+  ├── @tour-kit/media (video embeds)
+  ├── @tour-kit/scheduling (timezone-aware scheduling)
+  └── @tour-kit/surveys (NPS, CSAT, CES)
+```
+
+Every extended package depends on `@tour-kit/core`. None of them depend on each other as hard dependencies. `@tour-kit/announcements` can optionally use `@tour-kit/scheduling` for time-based rules, but it works without it. Same for `@tour-kit/surveys`.
+
+## The core package: where all the logic lives
+
+Tour Kit follows what Martin Fowler calls the [headless component pattern](https://martinfowler.com/articles/headless-component.html): "a component responsible solely for logic and state management without prescribing any specific UI." The `@tour-kit/core` package contains 62 source files exporting hooks, utilities, types, and context providers. Zero UI. Zero CSS. Zero opinions about how your tour looks.
+
+The core exports fall into four categories:
+
+**Hooks** handle state and behavior. `useTour()` manages the step state machine. `useSpotlight()` calculates overlay cutout positions. `useFocusTrap()` traps keyboard focus inside the active step.
+
+`useKeyboardNavigation()` handles arrow keys, Escape, and Tab. `usePersistence()` saves progress to localStorage or cookies. These hooks don't render anything, though they do depend on React's hook system.
+
+**Utilities** are pure functions. Position calculations (`calculatePositionWithCollision`), element queries (`waitForElement`, `isElementVisible`), scroll management (`scrollIntoView`, `lockScroll`), and storage adapters (`createStorageAdapter`, `createCookieStorage`). These are individually importable and tree-shake cleanly because they have no side effects.
+
+**Types** are exported separately with explicit `type` keyword imports so TypeScript strips them at compile time. Tour Kit exports over 30 named types: `TourStep`, `Placement`, `KeyboardConfig`, `SpotlightConfig`, `A11yConfig`, `ScrollConfig`, and more. Naming things is hard, but precise type names make the API self-documenting.
+
+**Context providers** (`TourProvider`, `TourKitProvider`) handle React's context layer. They're thin wrappers that wire hooks together and expose state to child components.
+
+```tsx
+// src/components/MyTour.tsx
+import { useTour, useStep, useSpotlight } from '@tourkit/core';
+
+function MyCustomTooltip() {
+  const { currentStep, next, previous, stop } = useTour();
+  const { targetRect } = useSpotlight();
+  const step = useStep();
+
+  // Render whatever UI you want. Tour Kit doesn't care.
+  return (
+    <div style={{ position: 'absolute', top: targetRect.bottom + 8 }}>
+      <h3>{step.title}</h3>
+      <p>{step.content}</p>
+      <button onClick={previous}>Back</button>
+      <button onClick={next}>Next</button>
+      <button onClick={stop}>Skip</button>
+    </div>
+  );
+}
+```
+
+The core ships with `"use client"` as a banner directive, meaning Next.js App Router projects don't need manual client boundary annotations.
+
+## How tree-shaking works across 10 packages
+
+Tree-shaking isn't automatic. It requires deliberate library design decisions that most tutorial articles skip over. Carl Rippon's [tree-shaking guide](https://carlrippon.com/how-to-make-your-react-component-library-tree-shakeable/) explains the core requirement: "The `sideEffects: false` flag signals to bundlers that all files in the component library are pure and free from side effects."
+
+Tour Kit uses tsup (version 8.5.1) to bundle each package with these settings:
+
+<table>
+  <thead>
+    <tr>
+      <th>Configuration</th>
+      <th>Value</th>
+      <th>Why it matters</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Output formats</td>
+      <td>ESM + CJS</td>
+      <td>ESM enables static analysis for tree-shaking; CJS provides Node.js compatibility</td>
+    </tr>
+    <tr>
+      <td>Tree-shaking</td>
+      <td>Enabled</td>
+      <td>tsup marks pure functions with <code>/*#__PURE__*/</code> annotations</td>
+    </tr>
+    <tr>
+      <td>Code splitting</td>
+      <td>Enabled (most packages)</td>
+      <td>Preserves module boundaries so bundlers can drop unused chunks</td>
+    </tr>
+    <tr>
+      <td>Minification</td>
+      <td>Enabled</td>
+      <td>Reduces transfer size without affecting tree-shaking</td>
+    </tr>
+    <tr>
+      <td>Target</td>
+      <td>ES2020</td>
+      <td>Modern syntax ships smaller code; supported by all current browsers</td>
+    </tr>
+    <tr>
+      <td>Source maps</td>
+      <td>Enabled</td>
+      <td>Debugging without sacrificing production bundle size</td>
+    </tr>
+  </tbody>
+</table>
+
+Some packages use multiple entry points. `@tour-kit/react` exposes four: `index` (styled components), `headless` (unstyled render-prop components), `lazy` (code-split loading), and `tailwind/index` (Tailwind plugin). If you import from `@tourkit/react/headless`, you don't load styled component code.
+
+The gotcha we hit: tsup's `splitting: true` option interacts poorly with packages that re-export from dependencies. `@tour-kit/analytics` re-exports types from `@tour-kit/core`, and enabling splitting caused duplicate chunks in consumer bundles. We disabled splitting for analytics and adoption packages specifically.
+
+## The build pipeline: Turborepo in practice
+
+Building 10 interdependent packages requires a build orchestrator that understands the dependency graph, caches aggressively, and runs independent work in parallel. Tour Kit uses Turborepo with pnpm workspaces, and the entire pipeline is defined in a 36-line `turbo.json` file:
+
+```json
+{
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    }
+  }
+}
+```
+
+`"dependsOn": ["^build"]` means "build my dependencies before building me." So `@tour-kit/react` waits for `@tour-kit/core` to finish before starting. Turborepo handles the topological sort and runs independent packages in parallel. With `concurrency: 20` set in the config, a full clean build of all 10 packages completes in seconds rather than minutes.
+
+Turborepo's cache is the real win. After the first build, subsequent runs only rebuild packages whose source files changed. Change a file in `@tour-kit/surveys`? Only surveys rebuilds. The other 9 packages serve cached output.
+
+As the DEV Community's [Turborepo analysis](https://dev.to/dataformathub/turborepo-nx-and-lerna-the-truth-about-monorepo-tooling-in-2026-71) puts it: "Turborepo's core philosophy is to 'do the least amount of work necessary' through intelligent graph traversal." That matches what we've seen in practice. A typical development cycle touches 1-2 packages, and the rebuild is near-instant.
+
+## Package boundaries: where to draw the lines
+
+Drawing package boundaries is the single hardest design decision in a composable architecture, because the cost of getting it wrong compounds over time. Split too aggressively and you create dependency hell where users install 6 packages for one feature. Split too conservatively and you're back to a monolith wearing a trenchcoat. Tour Kit's 10-package graph went through three iterations before settling on the current structure.
+
+The boundaries reflect different extension patterns:
+
+- **Core + React + Hints** are the foundation. MIT licensed. Every Tour Kit user installs at least core + react. Hints is separate because not every tour needs persistent hotspots.
+- **Analytics** uses a plugin architecture. Five built-in plugins (PostHog, Mixpanel, Amplitude, Google Analytics, console) ship as separate entry points within the package. You import only the plugin you use.
+- **Announcements and Surveys** both share a queue system pattern (priority-based scheduling, frequency rules, dismissal tracking) but target different UI intents. Announcements have 5 display variants (modal, slideout, banner, toast, spotlight). Surveys have 4 question types (rating, text, select, boolean) with NPS/CSAT/CES scoring.
+- **Scheduling** is a pure logic package with zero UI components. It exports timezone-aware date evaluation, business hours checking, blackout periods, and recurring patterns. Both announcements and surveys can optionally use it.
+
+One decision I'd reconsider: `@tour-kit/media` probably should have been part of `@tour-kit/announcements`. Media embeds (YouTube, Vimeo, Loom, Wistia, GIF, Lottie) are almost exclusively used inside announcement content. Making media a separate package means users need two installs for a common use case. But package boundaries, once published to npm, are hard to undo.
+
+## Accessibility as an architectural concern
+
+Accessibility in a multi-package library is an architecture problem, not a component problem. Most articles focus on adding `aria-label` to individual buttons, but the real challenge is deciding where focus trap logic, keyboard navigation, and screen reader announcements live when 10 packages need them. Getting this wrong means inconsistent keyboard behavior across your tour, hints, and survey components.
+
+Tour Kit centralizes accessibility in `@tour-kit/core`. Focus trap management, keyboard navigation, screen reader announcements (`announce()` utility), and ARIA attribute generation all live in core hooks. When `@tour-kit/react` renders a tooltip, it calls `useKeyboardNavigation()` and `useFocusTrap()` from core. `@tour-kit/announcements` uses the same hooks for its modals.
+
+This means consistent accessibility across all 10 packages without re-implementing focus traps. The `defaultA11yConfig` type in core defines the contract: live region strategy, focus return behavior, step announcement format.
+
+We tested this with axe-core across all component variants. Target: Lighthouse Accessibility 100 and WCAG 2.1 AA compliance. The gotcha was `@tour-kit/surveys`, which introduced new challenges. Rating scales need `role="radiogroup"`, text inputs need proper label association. We had to extend core's accessibility utilities for survey-specific patterns rather than putting that logic in the surveys package.
+
+## The shared utility problem
+
+Every UI package in a composable monorepo needs the same handful of utility functions, and deciding where those utilities live reveals a tension between DRY principles and clean dependency graphs that most monorepo guides gloss over. In Tour Kit's case, `cn()` for class merging, `Slot` for Radix UI composition, and `UnifiedSlot` for dual Radix/Base UI support are needed by 7 of 10 packages.
+
+We didn't do that. Each UI package has its own copy in `lib/slot.tsx` and `lib/ui-library-context.tsx`.
+
+Why? Because `@tour-kit/core` is framework-agnostic logic. Adding Radix UI's `@radix-ui/react-slot` as a dependency of core would mean every Tour Kit user pays for slot composition code, even headless-only users who render their own UI. Core's peer dependencies are just `react` and `react-dom`. Adding UI library dependencies would break that contract.
+
+The duplication costs about 2KB per package. For a library obsessed with bundle size, that's a real tradeoff. But the alternative (a shared `@tour-kit/utils` package) would add another node in the dependency graph, another package to version, and another layer of indirection. Copying 40 lines of utility code across 7 packages is the pragmatic choice.
+
+As [Smashing Magazine's component design article](https://www.smashingmagazine.com/2023/12/building-components-consumption-not-complexity-part1/) notes: "Building components independent of the application is an important aspect of modularity, helping to identify problems early and prevent unforeseen dependencies."
+
+## What this architecture makes hard
+
+A 10-package composable architecture adds real costs that a single-package library never pays: coordinated releases, cross-package testing, longer initial setup, and the cognitive overhead of maintaining clean interfaces at every boundary. These are the specific pain points we deal with on every PR.
+
+**Cross-package features require coordination.** When we added context-aware surveys (surveys that know about active tours and checklist progress), the surveys package needed to read state from core's tour context. That meant designing a context bridge rather than just importing an internal module.
+
+**Version management is a constant tax.** Tour Kit uses Changesets for versioning. All packages are linked, meaning a breaking change in core bumps all 10 packages. But a patch in surveys only bumps surveys. Keeping that matrix sane requires discipline. Every PR asks: does this change affect other packages?
+
+**Testing multiplies.** Each package has its own test suite, its own test configuration, its own mock setup. Vitest with jsdom runs across all packages, but integration tests that verify package interop (e.g., analytics plugin receiving events from announcements) need explicit cross-package test fixtures.
+
+**Local development needs the full graph.** You can't develop `@tour-kit/surveys` without `@tour-kit/core` built and available. Turborepo's watch mode handles this, but the initial `pnpm install && pnpm build` on a fresh clone takes longer than a single-package repo.
+
+Tour Kit is React 18+ only and has no visual builder. You need React developers to use it. For teams who want a Figma-to-tour drag-and-drop experience, this architecture is the wrong answer entirely.
+
+## Common mistakes when splitting a library into packages
+
+These are patterns we hit during Tour Kit's development that wasted time. Avoid them.
+
+**Splitting by technical layer instead of user intent.** An early prototype had `@tour-kit/hooks`, `@tour-kit/components`, and `@tour-kit/utils`. That meant every feature required three imports. Users don't think in layers. They think in features.
+
+**Making every cross-package dependency required.** If `@tour-kit/surveys` hard-depended on `@tour-kit/scheduling`, users who want surveys without scheduling pay for both. Use optional peer dependencies and feature-detect at runtime.
+
+**Sharing too much through a utility package.** A `@tour-kit/shared` package sounds clean until it becomes a dumping ground that every package depends on. Changes to shared trigger rebuilds everywhere. Copy small utilities instead.
+
+**Forgetting that package boundaries are public API.** Once published to npm, your package names and import paths are contracts. Renaming `@tour-kit/media` to `@tour-kit/embeds` would break every consumer.
+
+**Skipping bundle size budgets.** Without explicit limits (core < 8KB, react < 12KB gzipped), package sizes creep upward with every feature addition. We enforce these as CI checks that fail the build.
+
+## Applying this pattern to your own library
+
+If you're building a React library and considering a composable split, here are the patterns that worked:
+
+1. **Start with one package.** Split only when you have concrete evidence that users want subsets. Tour Kit was a single package for its first three months.
+2. **Put logic in core, UI in wrappers.** The headless pattern forces clean interfaces. If your hook API is ugly, your component API will be too.
+3. **Use tsup + Turborepo + pnpm workspaces.** This stack handles ESM/CJS dual output, incremental builds, and workspace linking with minimal configuration. As of April 2026, Turborepo 2.7 supports [composable configuration](https://turborepo.dev/docs/guides/publishing-libraries) for sharing task definitions across packages.
+4. **Set bundle size budgets and enforce them.** Tour Kit's quality gates (core < 8KB, react < 12KB, hints < 5KB gzipped) are CI checks, not aspirations. If a PR exceeds the budget, it fails.
+5. **Accept the duplication tax.** Some shared code belongs in each package rather than in a shared utility. The alternative is a dependency web that's harder to reason about.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## FAQ
+
+### How does tree-shaking work with Tour Kit's 10 packages?
+
+Tour Kit builds each package with tsup, outputting ESM with `sideEffects: false` and code splitting enabled. Your bundler (Vite, webpack, esbuild) drops unused exports automatically. Multiple entry points per package (index, headless, tailwind) add further granularity so you only load the code path you actually import.
+
+### Can I use just one Tour Kit package without installing all 10?
+
+Yes. Only `@tour-kit/core` and `@tour-kit/react` are needed for a basic product tour. The other 8 packages (hints, analytics, adoption, announcements, checklists, media, scheduling, surveys) are fully optional. Install them individually when you need their specific functionality. Your bundle only includes packages you explicitly import.
+
+### What build tools does Tour Kit use for its monorepo?
+
+Tour Kit uses pnpm workspaces for package management, Turborepo for dependency-aware build orchestration with incremental caching, and tsup 8.5.1 for bundling each package into ESM + CJS with TypeScript declarations. The build targets ES2020 with strict TypeScript and source maps enabled.
+
+### Is Tour Kit's architecture suitable for small projects?
+
+Tour Kit's composable architecture benefits projects of any size because you only install what you need. A minimal setup (`@tourkit/core` + `@tourkit/react`, under 20KB gzipped combined) is smaller than most single-package tour libraries. The 10-package split means you never pay a bundle size penalty for features you don't use.
+
+### How does Tour Kit handle accessibility across multiple packages?
+
+Tour Kit centralizes all accessibility logic (focus traps, keyboard navigation, screen reader announcements, ARIA attribute generation) in `@tour-kit/core`. UI packages like `@tour-kit/react`, `@tour-kit/announcements`, and `@tour-kit/surveys` inherit these behaviors through shared hooks. This means WCAG 2.1 AA compliance is consistent across all packages without re-implementing accessibility in each one.
+
+---
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "The architecture of a 10-package composable tour library",
+  "description": "How Tour Kit splits product tour logic across 10 tree-shakeable packages. Real dependency graphs, bundle budgets, and the architectural tradeoffs behind a composable React monorepo.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://github.com/DomiDex"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-08",
+  "dateModified": "2026-04-08",
+  "image": "https://tourkit.dev/og-images/composable-tour-library-architecture.png",
+  "url": "https://tourkit.dev/blog/composable-tour-library-architecture",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/composable-tour-library-architecture"
+  },
+  "keywords": ["composable tour library architecture", "monorepo package architecture", "tree-shakeable tour library", "headless component architecture react"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+**Internal linking suggestions:**
+- Link FROM: [best-product-tour-libraries-monorepo-design-system-teams](/blog/best-product-tour-libraries-monorepo-design-system-teams) (add link to this article in the architecture section)
+- Link FROM: [tour-kit-turborepo-monorepo-shared-tours](/blog/tour-kit-turborepo-monorepo-shared-tours) (cross-reference the build pipeline discussion)
+- Link FROM: [lightweight-product-tour-libraries-under-10kb](/blog/lightweight-product-tour-libraries-under-10kb) (reference the bundle size budgets)
+- Link TO: [shadcn-ui-product-tour-tutorial](/blog/shadcn-ui-product-tour-tutorial) (from the headless pattern section)
+- Link TO: [react-tour-library-benchmark-2026](/blog/react-tour-library-benchmark-2026) (from the bundle size comparison)
+
+**Distribution checklist:**
+- Dev.to: Yes (technical deep-dive, good fit)
+- Hashnode: Yes
+- Reddit r/reactjs: Yes (architecture discussion)
+- Hacker News: Yes ("Show HN" angle on composable library design)

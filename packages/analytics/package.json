@@ -20,20 +20,44 @@
       }
     },
     "./posthog": {
-      "import": "./dist/plugins/posthog.js",
-      "require": "./dist/plugins/posthog.cjs"
+      "import": {
+        "types": "./dist/plugins/posthog.d.ts",
+        "default": "./dist/plugins/posthog.js"
+      },
+      "require": {
+        "types": "./dist/plugins/posthog.d.cts",
+        "default": "./dist/plugins/posthog.cjs"
+      }
     },
     "./mixpanel": {
-      "import": "./dist/plugins/mixpanel.js",
-      "require": "./dist/plugins/mixpanel.cjs"
+      "import": {
+        "types": "./dist/plugins/mixpanel.d.ts",
+        "default": "./dist/plugins/mixpanel.js"
+      },
+      "require": {
+        "types": "./dist/plugins/mixpanel.d.cts",
+        "default": "./dist/plugins/mixpanel.cjs"
+      }
     },
     "./amplitude": {
-      "import": "./dist/plugins/amplitude.js",
-      "require": "./dist/plugins/amplitude.cjs"
+      "import": {
+        "types": "./dist/plugins/amplitude.d.ts",
+        "default": "./dist/plugins/amplitude.js"
+      },
+      "require": {
+        "types": "./dist/plugins/amplitude.d.cts",
+        "default": "./dist/plugins/amplitude.cjs"
+      }
     },
     "./google-analytics": {
-      "import": "./dist/plugins/google-analytics.js",
-      "require": "./dist/plugins/google-analytics.cjs"
+      "import": {
+        "types": "./dist/plugins/google-analytics.d.ts",
+        "default": "./dist/plugins/google-analytics.js"
+      },
+      "require": {
+        "types": "./dist/plugins/google-analytics.d.cts",
+        "default": "./dist/plugins/google-analytics.cjs"
+      }
     },
     "./package.json": "./package.json"
   },

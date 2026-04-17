@@ -1,3 +1,5 @@
+'use client'
+
 import { useElementPosition } from '@tour-kit/core'
 import * as React from 'react'
 import { useHint } from '../hooks/use-hint'
@@ -74,7 +76,7 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
     // Merge refs
     const mergedRef = React.useMemo(() => {
       return (node: HTMLButtonElement | null) => {
-        ;(hotspotRef as React.MutableRefObject<HTMLButtonElement | null>).current = node
+        hotspotRef.current = node
         if (typeof ref === 'function') {
           ref(node)
         } else if (ref) {

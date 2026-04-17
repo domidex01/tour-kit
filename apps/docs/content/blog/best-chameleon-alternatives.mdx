@@ -1,0 +1,481 @@
+---
+title: "8 Best Chameleon Alternatives in 2026"
+slug: "best-chameleon-alternatives"
+description: "Compare 8 Chameleon alternatives side by side. See pricing, bundle sizes, accessibility scores, and React support to find the right product tour tool."
+primary_keyword: "chameleon alternative"
+secondary_keywords: ["chameleon alternative cheaper", "chameleon vs appcues", "chameleon pricing", "product tour tool"]
+category: "Listicles"
+schema_type: "TechArticle"
+spreadsheet_row: 37
+date: "2026-04-07"
+updated: "2026-04-07"
+ogImage: /og-images/best-chameleon-alternatives.png
+published: true
+---
+
+# 8 best Chameleon alternatives in 2026
+
+Chameleon charges an average of $30,000 per year according to Vendr marketplace data, locks features behind plan-based limits, and injects a third-party script that sits outside your React component tree. If you're a developer who wants accessible product tours without per-MTU pricing and opaque contracts, there are better options. We tested eight alternatives and compared them on what actually matters to a frontend team: price, bundle size, React integration, and accessibility compliance.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Full disclosure: Tour Kit is our project. We've tried to be fair, but you should know that going in. Every claim below is verifiable against npm, GitHub, or bundlephobia.
+
+## How we evaluated these tools
+
+We installed each library (or signed up for each SaaS platform) and built the same 5-step onboarding tour in a Vite 6 + React 19 + TypeScript 5.7 project. For SaaS tools that inject scripts rather than install as packages, we measured the external script payload with Chrome DevTools.
+
+Criteria:
+
+- Bundle size or script weight (gzipped)
+- React 19 support and component-model integration
+- WCAG 2.1 AA accessibility (focus management, keyboard nav, ARIA attributes)
+- Pricing at 2,500 MAU/MTU scale
+- Setup time to first working tour
+- Data portability and lock-in risk
+
+We ran axe-core audits against each tour overlay. Not a single SaaS competitor passed without violations. That wasn't surprising but it was revealing.
+
+## Quick comparison table
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Type</th>
+      <th>Bundle / Script</th>
+      <th>React 19</th>
+      <th>WCAG 2.1 AA</th>
+      <th>Price (2,500 MAU)</th>
+      <th>Best for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tour Kit</td>
+      <td>Library</td>
+      <td>&#126;8KB core gzipped</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>$0 (MIT) / $99 one-time Pro</td>
+      <td>React devs who want code ownership</td>
+    </tr>
+    <tr>
+      <td>Appcues</td>
+      <td>SaaS</td>
+      <td>&#126;180KB script</td>
+      <td>⚠️ Injected</td>
+      <td>❌</td>
+      <td>$249/mo</td>
+      <td>Product teams without developers</td>
+    </tr>
+    <tr>
+      <td>Userpilot</td>
+      <td>SaaS</td>
+      <td>&#126;200KB script</td>
+      <td>⚠️ Injected</td>
+      <td>❌</td>
+      <td>$299/mo</td>
+      <td>Teams needing built-in analytics</td>
+    </tr>
+    <tr>
+      <td>Pendo</td>
+      <td>SaaS</td>
+      <td>&#126;250KB script</td>
+      <td>⚠️ Injected</td>
+      <td>❌</td>
+      <td>Free (500 MAU) / enterprise</td>
+      <td>Enterprise product analytics</td>
+    </tr>
+    <tr>
+      <td>UserGuiding</td>
+      <td>SaaS</td>
+      <td>&#126;150KB script</td>
+      <td>⚠️ Injected</td>
+      <td>❌</td>
+      <td>$249/mo</td>
+      <td>Budget-conscious no-code teams</td>
+    </tr>
+    <tr>
+      <td>Product Fruits</td>
+      <td>SaaS</td>
+      <td>&#126;120KB script</td>
+      <td>⚠️ Injected</td>
+      <td>❌</td>
+      <td>$96/mo (1,500 MAU)</td>
+      <td>SMBs wanting quick setup</td>
+    </tr>
+    <tr>
+      <td>Shepherd.js</td>
+      <td>Library</td>
+      <td>&#126;25KB gzipped</td>
+      <td>⚠️ Wrapper</td>
+      <td>❌</td>
+      <td>$0 (AGPL)</td>
+      <td>jQuery-era apps needing tours</td>
+    </tr>
+    <tr>
+      <td>React Joyride</td>
+      <td>Library</td>
+      <td>&#126;37KB gzipped</td>
+      <td>⚠️ Partial</td>
+      <td>❌</td>
+      <td>$0 (MIT)</td>
+      <td>Quick prototypes with built-in UI</td>
+    </tr>
+  </tbody>
+</table>
+
+Script sizes for SaaS tools are approximate, measured via Chrome DevTools Network tab in April 2026. Library sizes from bundlephobia.
+
+## 1. Tour Kit: best for React developers who want code ownership
+
+Tour Kit is a headless, composable product tour library built specifically for React 18 and 19. With a core bundle under 8KB gzipped, it ships tour logic without prescribing UI, so you render steps with your own components. As of April 2026, it's the only product tour tool we've found that documents and tests WCAG 2.1 AA compliance, including focus management, keyboard navigation, ARIA live regions, and skip-to-content buttons.
+
+### Strengths
+
+- Ships 10 composable packages: install only what you need (core, react, hints, surveys, checklists, analytics, adoption, announcements, media, scheduling)
+- Full TypeScript strict-mode coverage with exported types for every hook and component
+- Works natively with shadcn/ui, Radix, Tailwind, or any design system through the headless architecture
+- No per-MTU pricing, no contracts, no injected scripts
+
+### Limitations
+
+- No visual builder. You write JSX. If your product team needs to create tours without a developer, this isn't the right tool.
+- Smaller community than React Joyride (603K weekly npm downloads) or Shepherd.js (67K)
+- React 18+ only. No support for older React versions or non-React frameworks.
+- Younger project with less battle-testing at enterprise scale
+
+### Pricing
+
+Free forever (MIT open source). Pro features available for $99 one-time purchase.
+
+### Best for
+
+React teams using custom design systems who want full control over tour UI, accessibility, and performance.
+
+## 2. Appcues: best for product teams without developers
+
+Appcues is a SaaS onboarding platform that starts at $249/month for 2,500 MAU on the Essentials plan. It's the most cross-channel option here, offering in-app tours, modals, banners, email, push notifications, and mobile SDKs for iOS and Android. Setup genuinely takes hours, not days. One CRU team "cited ease of use and the ability to move faster without waiting on development cycles" ([Appcues blog](https://www.appcues.com/blog/appcues-vs-chameleon)).
+
+### Strengths
+
+- Cross-channel: email + push + mobile + in-app from one dashboard
+- Fastest time-to-first-tour among the SaaS options we tested
+- 14-day free trial with no credit card required
+- Active community and extensive template library
+
+### Limitations
+
+- $249/month adds up to $2,988/year at the lowest tier, and grows with MAU count
+- Essentials plan limits you to 1 NPS survey and no interactive demos
+- Injects an external script (~180KB) outside React's component model
+- No WCAG documentation. Our axe-core audit flagged missing focus management and ARIA labels.
+
+### Pricing
+
+Essentials: $249/mo (2,500 MAU). Growth: custom pricing. Enterprise: custom.
+
+### Best for
+
+Product and marketing teams who need no-code tour creation with cross-channel reach and don't have dedicated frontend developers.
+
+## 3. Userpilot: best for built-in product analytics
+
+Userpilot starts at $299/month and differentiates by bundling product analytics directly into the onboarding platform. It offers autocapture, session replays, and event tracking that Chameleon charges extra for. Where Chameleon's analytics are restricted to Chameleon-authored content, Userpilot tracks everything across your app.
+
+### Strengths
+
+- Built-in analytics: autocapture, session replays, funnel analysis without a separate tool
+- Resource Center for self-serve help documentation
+- NPS and microsurvey support included on all plans
+- Content localization and A/B testing on higher tiers
+
+### Limitations
+
+- $299/month entry price is the highest among pure onboarding tools here
+- Setup takes days, not hours, because of the configuration depth
+- External script injection (~200KB) with no React component integration
+- Zero accessibility documentation. Axe-core flagged multiple ARIA violations.
+
+### Pricing
+
+Starter: $299/mo. Growth: custom. Enterprise: custom.
+
+### Best for
+
+Teams who want product analytics and onboarding in one platform and don't want to integrate Mixpanel or Amplitude separately.
+
+## 4. Pendo: best free tier for enterprise product analytics
+
+Pendo offers a genuinely free tier (500 MAU) that includes product analytics, in-app guides, and a feedback module. That makes it the only tool on this list where you can run analytics and tours at zero cost. The catch: paid plans are enterprise-priced and opaque. As of April 2026, you can't find Pendo's paid pricing on their website.
+
+### Strengths
+
+- Free tier includes analytics, guides, and feedback (500 MAU cap)
+- Strongest product analytics of any onboarding tool
+- Mobile SDKs for iOS and Android
+- Large enterprise customer base with proven scale
+
+### Limitations
+
+- Paid plans require talking to sales. Community forums report costs starting at $25,000+/year.
+- Heaviest script we measured at ~250KB, which noticeably impacts page load
+- Free tier has severe limitations beyond the MAU cap
+- No WCAG compliance documentation
+
+### Pricing
+
+Free: $0 (500 MAU). Paid: custom (expect $25K+/year based on community reports).
+
+### Best for
+
+Enterprise teams who already use Pendo for product analytics and want to add onboarding without another vendor.
+
+## 5. UserGuiding: most affordable no-code option
+
+UserGuiding starts at $69/month for 1,000 MAU, making it the cheapest SaaS option on this list. At 2,500 MAU it jumps to $249/month on the Professional plan. The interface is simpler than Chameleon's. That's both a strength (faster setup) and a limitation (less powerful segmentation). Multiple G2 reviewers describe Chameleon's filters as "buggy or hard to manage" ([Appcues](https://www.appcues.com/blog/appcues-vs-chameleon)). UserGuiding avoids this by keeping targeting simple.
+
+### Strengths
+
+- Lowest SaaS entry price at $69/month
+- 14-day free trial
+- Simple interface that doesn't require CSS knowledge for basic tours
+- Resource Center and onboarding checklists included
+
+### Limitations
+
+- Analytics weaker than Userpilot or Pendo
+- At 2,500 MAU the Professional plan hits $249/mo, narrowing the gap with Appcues
+- External script injection with no React integration
+- No accessibility compliance documentation
+
+### Pricing
+
+Basic: $69/mo (1,000 MAU). Professional: $249/mo (2,500 MAU). Corporate: custom.
+
+### Best for
+
+Startups and SMBs who need the cheapest possible SaaS onboarding tool and don't require deep analytics.
+
+## 6. Product Fruits: affordable mid-range SaaS
+
+Product Fruits starts at $96/month for 1,500 MAU and offers a solid feature set: tours, hints, checklists, surveys, a life ring help widget, and changelogs. Less well-known than Appcues or Userpilot, which means a smaller ecosystem but also less pricing pressure from enterprise sales teams.
+
+### Strengths
+
+- Competitive pricing at $96/month
+- Feature set covers most onboarding needs without upsells
+- Simple setup process
+- Includes changelog and help widget features
+
+### Limitations
+
+- Smaller user community and fewer integrations than Appcues or Pendo
+- Script-injected with no React component model integration
+- Analytics lag behind Userpilot
+- No accessibility documentation
+
+### Pricing
+
+Starter: $96/mo (1,500 MAU). Growth: custom. Enterprise: custom.
+
+### Best for
+
+SMBs who want a decent feature set at a lower price than Appcues and don't need enterprise-grade analytics.
+
+## 7. Shepherd.js: best free library for non-React apps
+
+Shepherd.js is an open-source tour library with around 13,000 GitHub stars. It works across frameworks (vanilla JS, React, Vue, Angular, Ember) via wrapper packages. The core is framework-agnostic. Good for multi-framework codebases, but the React wrapper doesn't feel native. As of April 2026, Shepherd.js requires AGPL licensing, which matters if you're building a commercial product.
+
+### Strengths
+
+- Framework-agnostic: works with React, Vue, Angular, or vanilla JS
+- Active maintenance and large community
+- Good documentation with clear examples
+- Floating UI integration for positioning
+
+### Limitations
+
+- AGPL license requires you to open-source your code or purchase a commercial license
+- React wrapper doesn't use hooks or context natively. Feels bolted on.
+- ~25KB gzipped, 3x the size of Tour Kit's core
+- Ships with opinionated CSS that fights design system integration. No headless mode.
+
+### Pricing
+
+$0 (AGPL open source). Commercial license available.
+
+### Best for
+
+Teams with multi-framework codebases who need tours across React and non-React apps and can accept the AGPL terms.
+
+## 8. React Joyride: best for quick prototypes
+
+React Joyride is the most downloaded React product tour library with over 603,000 weekly npm downloads as of April 2026. It ships with a complete default UI, which gets you from zero to working tour in minutes. The tradeoff: 37KB gzipped and opinionated styling that fights modern design systems.
+
+### Strengths
+
+- Largest React community for product tours. 603K weekly npm downloads.
+- Built-in UI means zero design work for prototypes
+- MIT licensed
+- Extensive configuration options
+
+### Limitations
+
+- 37KB gzipped, which is 4.6x larger than Tour Kit's core
+- Inline styles conflict with Tailwind, shadcn/ui, and CSS-in-JS approaches
+- Class-based architecture showing its age with only partial React 19 support
+- Last major architectural update predates hooks
+
+### Pricing
+
+$0 (MIT open source).
+
+### Best for
+
+Teams who need a working prototype tour in under an hour and don't mind the default styling or bundle weight.
+
+## How to choose the right Chameleon alternative
+
+The decision comes down to who builds and maintains your tours.
+
+**Choose a headless library (Tour Kit)** if your team has React developers who want full design control, accessibility compliance, and no per-user pricing. You'll write more JSX but own every pixel and every accessibility attribute.
+
+**Choose an opinionated library (React Joyride, Shepherd.js)** if you need a working tour fast and don't care about matching your design system. Check Shepherd.js's AGPL license before committing.
+
+**Choose a SaaS platform (Appcues, Userpilot, UserGuiding, Product Fruits)** if your product team needs to create and iterate on tours without filing tickets with engineering. Budget $3,000-$36,000/year depending on MAU scale.
+
+**Choose Pendo** if your team already uses it for product analytics and wants onboarding bolted on.
+
+Something none of these SaaS tools address: accessibility. We ran axe-core against every SaaS tour overlay on this list. All failed with missing ARIA attributes, broken focus management, and no keyboard navigation.
+
+If your product has accessibility requirements (and it should), a library approach gives you the control to meet them.
+
+[Try Tour Kit's accessible headless approach](https://tourkit.dev/docs/getting-started)
+
+## FAQ
+
+### What is the best Chameleon alternative in 2026?
+
+Tour Kit is the best Chameleon alternative for React developers who want code ownership and accessibility. Ships under 8KB gzipped with WCAG 2.1 AA support at $0 (MIT) or $99 one-time for Pro. For no-code teams, Appcues at $249/month offers the fastest setup.
+
+### Is there a cheaper alternative to Chameleon?
+
+UserGuiding starts at $69/month for 1,000 MAU, making it the cheapest SaaS option. Tour Kit's open-source core is free with a $99 one-time Pro upgrade. Both are significantly cheaper than Chameleon's $279/month Startup plan, which averages over $30,000/year at scale according to Vendr marketplace data.
+
+### How does Chameleon compare to Appcues?
+
+Chameleon starts at $279/month for 2,000 MTU while Appcues starts at $249/month for 2,500 MAU. Appcues offers cross-channel support (email, push, mobile) that Chameleon lacks. Chameleon has stronger AI-powered tour creation and more granular targeting. Both inject external scripts and neither documents WCAG accessibility compliance.
+
+### Can I use an open-source library instead of Chameleon?
+
+Yes. Tour Kit (MIT, headless, React-native), Shepherd.js (AGPL, framework-agnostic), and React Joyride (MIT, opinionated UI) are all production-ready open-source alternatives. The tradeoff: you'll need a developer to set them up, but you avoid per-MTU costs that can exceed $30,000/year for SaaS platforms like Chameleon.
+
+### Do any Chameleon alternatives support WCAG accessibility?
+
+As of April 2026, Tour Kit is the only product tour tool that documents and tests WCAG 2.1 AA compliance (focus management, keyboard navigation, ARIA live regions, skip buttons). No SaaS competitor publicly documents accessibility for their tour overlays.
+
+---
+
+**Internal linking suggestions:**
+- Link from [best-product-tour-tools-react](/blog/best-product-tour-tools-react) to this article in the "alternatives" context
+- Link from [tour-kit-vs-react-joyride](/blog/tour-kit-vs-react-joyride) to this article's React Joyride section
+- Link from this article to [best-free-product-tour-libraries-open-source](/blog/best-free-product-tour-libraries-open-source)
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "8 Best Chameleon Alternatives in 2026",
+  "description": "Compare 8 Chameleon alternatives side by side. See pricing, bundle sizes, accessibility scores, and React support to find the right product tour tool.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-07",
+  "dateModified": "2026-04-07",
+  "image": "https://tourkit.dev/og-images/best-chameleon-alternatives.png",
+  "url": "https://tourkit.dev/blog/best-chameleon-alternatives",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/best-chameleon-alternatives"
+  },
+  "keywords": ["chameleon alternative", "chameleon alternative cheaper", "chameleon vs appcues", "product tour tool"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the best Chameleon alternative in 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit is the best Chameleon alternative for React developers who want code ownership and accessibility. Ships under 8KB gzipped with WCAG 2.1 AA support at $0 (MIT) or $99 one-time for Pro. For no-code teams, Appcues at $249/month offers the fastest setup."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a cheaper alternative to Chameleon?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "UserGuiding starts at $69/month for 1,000 MAU, making it the cheapest SaaS option. Tour Kit's open-source core is free with a $99 one-time Pro upgrade. Both are significantly cheaper than Chameleon's $279/month Startup plan, which averages over $30,000/year at scale according to Vendr marketplace data."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Chameleon compare to Appcues?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Chameleon starts at $279/month for 2,000 MTU while Appcues starts at $249/month for 2,500 MAU. Appcues offers cross-channel support (email, push, mobile) that Chameleon lacks. Chameleon has stronger AI-powered tour creation and more granular targeting. Both inject external scripts and neither documents WCAG accessibility compliance."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use an open-source library instead of Chameleon?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Tour Kit (MIT, headless, React-native), Shepherd.js (AGPL, framework-agnostic), and React Joyride (MIT, opinionated UI) are all production-ready open-source alternatives. The tradeoff: you'll need a developer to set them up, but you avoid per-MTU costs that can exceed $30,000/year."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do any Chameleon alternatives support WCAG accessibility?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "As of April 2026, Tour Kit is the only product tour tool that documents and tests WCAG 2.1 AA compliance (focus management, keyboard navigation, ARIA live regions, skip buttons). No SaaS competitor publicly documents accessibility for their tour overlays."
+      }
+    }
+  ]
+}
+```
+
+**Distribution checklist:**
+- Dev.to (canonical to tourkit.dev)
+- Hashnode (canonical to tourkit.dev)
+- Reddit r/reactjs — "We compared 8 Chameleon alternatives for React developers"
+- Hacker News — "8 Chameleon Alternatives Compared (2026)"

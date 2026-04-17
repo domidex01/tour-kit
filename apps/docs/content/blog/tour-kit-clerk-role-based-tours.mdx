@@ -1,0 +1,378 @@
+---
+title: "Tour Kit + Clerk: role-based tours with auth context"
+slug: "tour-kit-clerk-role-based-tours"
+description: "Build role-based product tours using Clerk's useAuth and useOrganization hooks with Tour Kit. TypeScript examples for admin, member, and custom role onboarding."
+primary_keyword: "clerk auth product tour"
+secondary_keywords: ["clerk onboarding integration", "role-based tour clerk", "clerk react product tour", "clerk useOrganization tour"]
+category: "Integrations"
+schema_type: "TechArticle"
+spreadsheet_row: 182
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/tour-kit-clerk-role-based-tours.png
+---
+
+# Tour Kit + Clerk: role-based tours with auth context
+
+Your admin needs a tour of billing settings, team management, and API keys. Your member needs a tour of the dashboard, task creation, and notifications. Showing both the same 12-step walkthrough wastes everyone's time and teaches nobody anything.
+
+Clerk gives you the auth context. Tour Kit gives you the tour engine. The glue between them is about 30 lines of TypeScript. As of April 2026, Clerk's free tier covers 50,000 monthly active users ([Clerk pricing, Feb 2026](https://clerk.com/changelog/2026-02-05-new-plans-more-value)), and Tour Kit's core ships at under 8KB gzipped. That's a role-based onboarding system for $0 at most startup scales.
+
+This tutorial walks through wiring Clerk's `useAuth()`, `useUser()`, and `useOrganization()` hooks into Tour Kit's `when` prop so each role sees only the steps relevant to their permissions.
+
+```bash
+npm install @tourkit/core @tourkit/react @clerk/nextjs
+```
+
+Check out the [Tour Kit docs](https://usertourkit.com/) for full API reference.
+
+## What you'll build
+
+A role-aware onboarding tour reading Clerk's organization membership, filtering steps per user. Admins see 4 steps, members see 3, custom roles get tailored subsets. Total glue code: under 50 lines of TypeScript across 3 files.
+
+- Admins see tour steps covering billing, team management, and settings
+- Members see tour steps covering the dashboard, task creation, and collaboration features
+- Custom roles (like `analyst` or `moderator`) get tailored steps matching their permissions
+- Tour state persists per user through Clerk's `publicMetadata`
+
+No backend changes required.
+
+## Why Clerk + Tour Kit?
+
+Clerk serves over 300,000 applications as of early 2026, with a free tier covering 50,000 MAU and Pro starting at $0.02/MAU after that. Auth0 charges $0.07/MAU after just 7,500 free users. For a 40,000-user SaaS app, Clerk costs $0 while Auth0 runs roughly $2,275/month. Pair that with Tour Kit's under 8KB gzipped core (also free), and you have a role-based onboarding system at zero cost for most startups.
+
+Both APIs are hook-based and TypeScript-first. Clerk's `useAuth`, `useUser`, and `useOrganization` expose role data in client components. Tour Kit's `when` prop accepts a filtering function. Connecting them takes minimal glue code.
+
+You could build role filtering from scratch with React Context. We covered that in our [conditional tours by user role](/blog/conditional-product-tour-user-role) tutorial. But if you're already using Clerk, why maintain a separate role system? Clerk is the source of truth.
+
+Clerk handles authentication and authorization. Tour Kit handles presentation. Keeping these separate means tour definitions stay declarative.
+
+<table>
+<thead><tr><th>Approach</th><th>Auth cost (40K MAU)</th><th>Tour library</th><th>Combined bundle</th><th>Role filtering</th></tr></thead>
+<tbody>
+<tr><td>Clerk + Tour Kit</td><td>$0/mo</td><td>Free (MIT)</td><td>8KB gzipped (tour only)</td><td>Built-in via hooks</td></tr>
+<tr><td>Auth0 + React Joyride</td><td>$2,275/mo</td><td>Free (MIT)</td><td>37KB gzipped</td><td>DIY with React Context</td></tr>
+<tr><td>Clerk + Appcues</td><td>$0/mo</td><td>$300/mo</td><td>External script (180KB)</td><td>Segment-based UI</td></tr>
+<tr><td>WalkMe enterprise</td><td>Included</td><td>$15,000+/yr</td><td>External script (250KB)</td><td>Built-in RBAC targeting</td></tr>
+</tbody>
+</table>
+
+## Prerequisites
+
+Setting up this integration takes about 20 minutes if you already have Clerk and Next.js running. Clerk's React quickstart was last updated April 6, 2026, and `@clerk/nextjs` v6 has same-day support for Next.js 15. You need:
+
+- `@clerk/nextjs` v5+ installed and `ClerkProvider` wrapping your app
+- At least one Clerk organization created with roles assigned to test users
+- Tour Kit packages installed (`@tourkit/core` and `@tourkit/react`)
+- TypeScript 5.0+ (the type definitions use `satisfies` and template literals)
+
+If you haven't set up Clerk organizations yet, follow their [organizations quickstart](https://clerk.com/docs/guides/organizations/control-access/roles-and-permissions). You'll need at least two users with different roles to test.
+
+## Step 1: read roles from Clerk's organization hooks
+
+Clerk's `useOrganization()` hook returns the current user's membership object, including their `role` string (`org:admin`, `org:member`, or up to 10 custom roles per instance) and a `permissions` array using the `org:<feature>:<permission>` format. Wrap this in a custom hook to keep the Clerk dependency out of your tour code:
+
+```tsx
+// src/hooks/use-clerk-role.ts
+import { useOrganization, useUser } from "@clerk/nextjs";
+
+export type ClerkRole = "org:admin" | "org:member" | string;
+
+export function useClerkRole() {
+  const { membership, isLoaded: orgLoaded } = useOrganization();
+  const { user, isLoaded: userLoaded } = useUser();
+
+  const isLoaded = orgLoaded && userLoaded;
+  const role: ClerkRole = membership?.role ?? "org:member";
+
+  // Check custom permissions for granular tour targeting
+  const hasPermission = (permission: string): boolean => {
+    if (!membership) return false;
+    return membership.permissions?.includes(permission) ?? false;
+  };
+
+  return {
+    role,
+    isLoaded,
+    userId: user?.id ?? null,
+    hasPermission,
+  };
+}
+```
+
+Here's the gotcha we hit: Clerk's 8 system permissions (`org:sys_profile:manage`, `org:sys_memberships:read`, etc.) are **not** included in session claims. Gate tour steps on custom permissions instead. Documented in [Clerk's RBAC guide](https://clerk.com/docs/guides/organizations/control-access/roles-and-permissions), but easy to miss.
+
+## Step 2: define role-filtered tour steps
+
+Tour Kit's `when` prop is where the filtering happens. It accepts a function returning `true` or `false`. Steps returning `false` are removed before the tour engine processes them, so no DOM queries fire for skipped steps and the step counter adjusts automatically. Here's a 5-step tour where admins see 4 steps and members see 3:
+
+```tsx
+// src/tours/dashboard-tour.ts
+import type { TourStep } from "@tourkit/core";
+
+type RoleContext = {
+  role: string;
+  hasPermission: (p: string) => boolean;
+};
+
+export function getDashboardSteps(ctx: RoleContext): TourStep[] {
+  return [
+    {
+      id: "welcome",
+      target: "#dashboard-header",
+      title: "Welcome to your dashboard",
+      content: "Here's a quick overview of what you can do.",
+      // Everyone sees the welcome step
+    },
+    {
+      id: "team-management",
+      target: "#team-settings",
+      title: "Manage your team",
+      content: "Invite members, assign roles, and set permissions.",
+      when: () => ctx.role === "org:admin",
+    },
+    {
+      id: "billing",
+      target: "#billing-section",
+      title: "Billing and subscription",
+      content: "View invoices, update payment methods, and manage your plan.",
+      when: () => ctx.hasPermission("org:billing:manage"),
+    },
+    {
+      id: "create-task",
+      target: "#new-task-btn",
+      title: "Create your first task",
+      content: "Click here to create a task and assign it to a team member.",
+      when: () => ctx.role === "org:member",
+    },
+    {
+      id: "analytics",
+      target: "#analytics-panel",
+      title: "Your analytics dashboard",
+      content: "Track team performance and project metrics here.",
+      when: () =>
+        ctx.role === "org:admin" ||
+        ctx.hasPermission("org:analytics:read"),
+    },
+  ];
+}
+```
+
+Notice that the `welcome` step has no `when` prop, so every role sees it. The `billing` step uses permission-based filtering (`org:billing:manage`) instead of role names. Permissions can be reassigned in Clerk's dashboard without changing tour code.
+
+The `analytics` step combines role checks with permission checks using `||`. This means admins always see it, and non-admin users with the `org:analytics:read` permission see it too.
+
+## Step 3: wire it together with a custom hook
+
+The `useRoleTour` hook combines Clerk's auth state with Tour Kit's `useTour` in about 15 lines. It memoizes the filtered steps, blocks initialization until Clerk loads, and returns the standard tour controller. This is the only file that imports both libraries:
+
+```tsx
+// src/hooks/use-role-tour.ts
+import { useTour } from "@tourkit/react";
+import { useClerkRole } from "./use-clerk-role";
+import { getDashboardSteps } from "../tours/dashboard-tour";
+import { useMemo } from "react";
+
+export function useRoleTour(tourId: string) {
+  const { role, isLoaded, userId, hasPermission } = useClerkRole();
+
+  const steps = useMemo(
+    () => getDashboardSteps({ role, hasPermission }),
+    [role, hasPermission]
+  );
+
+  const tour = useTour({
+    tourId,
+    steps,
+    enabled: isLoaded && !!userId,
+  });
+
+  return tour;
+}
+```
+
+Without the `enabled` flag, you'd see a flash of the wrong tour while Clerk resolves the session. Setting it to `isLoaded && !!userId` means Tour Kit skips initialization entirely until auth state is ready. No wasted work.
+
+## Step 4: render the tour and verify role filtering
+
+The final step adds the `TourProvider` to your dashboard layout. Tour Kit renders the overlay and tooltip as siblings of your page content, so the tour doesn't affect your component tree or re-render your dashboard. The entire provider setup is 8 lines:
+
+```tsx
+// src/app/dashboard/layout.tsx
+"use client";
+
+import { useRoleTour } from "@/hooks/use-role-tour";
+import { TourProvider, TourOverlay, TourTooltip } from "@tourkit/react";
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const tour = useRoleTour("dashboard-onboarding");
+
+  return (
+    <TourProvider tour={tour}>
+      {children}
+      <TourOverlay />
+      <TourTooltip />
+    </TourProvider>
+  );
+}
+```
+
+Sign in as two different users to verify: one `org:admin`, one `org:member`. Admins should see team management and billing steps. Members see task creation. Both see welcome.
+
+In React DevTools, inspect the Tour Kit provider's `steps` array. It should contain only filtered steps. If you see all 5 instead of 3-4, verify `isLoaded` is `true` and `membership.role` returns the expected value.
+
+## Going further
+
+The basic integration covers most use cases. These extensions handle persistence, tiered plans, performance, and accessibility.
+
+### Persist tour completion in Clerk metadata
+
+Clerk's `publicMetadata` field on the user object is a good place to store whether a user has completed the onboarding tour. This avoids setting up a separate database table for tour state.
+
+```tsx
+// src/actions/complete-tour.ts
+"use server";
+
+import { clerkClient, currentUser } from "@clerk/nextjs/server";
+
+export async function markTourComplete(tourId: string) {
+  const user = await currentUser();
+  if (!user) return;
+
+  const completedTours =
+    (user.publicMetadata.completedTours as string[]) ?? [];
+
+  if (completedTours.includes(tourId)) return;
+
+  await clerkClient.users.updateUser(user.id, {
+    publicMetadata: {
+      ...user.publicMetadata,
+      completedTours: [...completedTours, tourId],
+    },
+  });
+}
+```
+
+Heads up: `publicMetadata` updates don't appear in the client session immediately. Clerk's session token refreshes every ~60 seconds. Call `user.reload()` client-side if you need the change reflected instantly.
+
+### Handle Role Sets for tiered onboarding
+
+Clerk shipped Role Sets in January 2026 ([changelog](https://clerk.com/changelog/2026-01-12-organization-role-sets)). Different organizations can have different available roles. A free-tier org might only have `admin` and `member`, while a Pro org adds `analyst` or `moderator`.
+
+Your `getDashboardSteps` function already handles arbitrary role strings. When a Pro org adds a role, add steps with `when: () => ctx.role === "org:analyst"`. No changes to the hook or provider needed.
+
+### Lazy-load tours to manage combined bundle size
+
+Clerk's `@clerk/clerk-react` package weighs roughly 1.02 MB uncompressed ([GitHub issue #1578](https://github.com/clerk/javascript/issues/1578)), though tree-shaking and the newer `@clerk/react` package reduce the runtime cost. Tour Kit adds under 8KB gzipped on top of that. Lazy-loading the tour after auth resolves keeps your First Contentful Paint under control:
+
+```tsx
+import { lazy, Suspense } from "react";
+
+const TourShell = lazy(() => import("@/components/tour-shell"));
+
+function Dashboard() {
+  const { isLoaded } = useClerkRole();
+
+  return (
+    <>
+      {/* Dashboard content renders immediately */}
+      {isLoaded && (
+        <Suspense fallback={null}>
+          <TourShell />
+        </Suspense>
+      )}
+    </>
+  );
+}
+```
+
+Clerk resolves the session first, then Tour Kit loads. Your dashboard appears instantly; the tour follows a moment later.
+
+### Accessibility for role-gated steps
+
+When Tour Kit skips steps based on role, it re-indexes automatically. A member seeing 3 of 5 total steps hears "Step 1 of 3," "Step 2 of 3," "Step 3 of 3." No extra ARIA work needed.
+
+Focus management and keyboard navigation ([keyboard-navigable tours guide](/blog/keyboard-navigable-product-tours-react)) work unchanged with filtered steps. The `when` prop removes steps before the tour engine processes them.
+
+## Limitations to know about
+
+Tour Kit requires React 18+ and has no visual builder. If your product team wants to edit tour content without deploying code, this approach won't work. A no-code tool like Appcues ($300+/month) or Pendo ($500+/month) offers a WYSIWYG editor instead.
+
+Clerk's Organizations feature (which provides roles and permissions) requires the user to be part of an organization. Personal accounts need a different approach: store roles in `publicMetadata` or custom claims. And Clerk caps custom roles at 10 per app instance, so if your permission model has more than 10 distinct roles, you'll need to use permission-based filtering (`hasPermission`) instead of role-string matching.
+
+## FAQ
+
+### Can I use Clerk's personal account roles instead of organization roles?
+
+Tour Kit works with any role source. Without Clerk Organizations, read roles from `user.publicMetadata.role` instead of `membership.role` in `useClerkRole`. Everything else stays the same.
+
+### Does Tour Kit re-render when the Clerk session refreshes?
+
+Tour Kit evaluates `when` at initialization and when steps change. If a role changes mid-session, steps update on the next render cycle. Clerk's session token refreshes every 60 seconds, so role changes propagate within that window.
+
+### How do I show different tours for free vs paid organizations?
+
+Store the plan tier in Clerk's `organization.publicMetadata`, then add a `plan` field to your role context. Filter with `when: () => ctx.plan === "pro"`. Role Sets (January 2026) let different orgs have different role structures, enabling distinct tour variants per tier.
+
+### What happens if Clerk hasn't loaded when Tour Kit initializes?
+
+Tour Kit's `enabled` prop prevents initialization until Clerk resolves. The tour won't render, and no DOM queries run. Once `isLoaded` flips to `true`, Tour Kit initializes with the correct role data. There is no flash of incorrect content.
+
+### Is this approach compatible with React Server Components?
+
+The tour runs on the client (DOM manipulation), so `TourProvider` must live in a `"use client"` component. But you can read Clerk's auth state server-side using `auth()` from `@clerk/nextjs/server` and pass the role as a prop. This skips the client-side loading delay.
+
+---
+
+**Get started with Tour Kit:** Install from npm with `npm install @tourkit/core @tourkit/react`, explore the [GitHub repo](https://github.com/AmanVarshney01/tour-kit), or read the full documentation at [usertourkit.com](https://usertourkit.com/).
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Tour Kit + Clerk: role-based tours with auth context",
+  "description": "Build role-based product tours using Clerk's useAuth and useOrganization hooks with Tour Kit. TypeScript examples for admin, member, and custom role onboarding.",
+  "author": { "@type": "Person", "name": "Dominic Bérubé", "url": "https://usertourkit.com" },
+  "publisher": { "@type": "Organization", "name": "Tour Kit", "url": "https://usertourkit.com", "logo": { "@type": "ImageObject", "url": "https://usertourkit.com/logo.png" } },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://usertourkit.com/og-images/tour-kit-clerk-role-based-tours.png",
+  "url": "https://usertourkit.com/blog/tour-kit-clerk-role-based-tours",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://usertourkit.com/blog/tour-kit-clerk-role-based-tours" },
+  "keywords": ["clerk auth product tour", "clerk onboarding integration", "role-based tour clerk"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+, Clerk v5+",
+  "programmingLanguage": { "@type": "ComputerLanguage", "name": "TypeScript" }
+}) }} />
+
+<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Can I use Clerk's personal account roles instead of organization roles?", "acceptedAnswer": { "@type": "Answer", "text": "Tour Kit works with any role data source. If you're not using Clerk Organizations, read roles from user.publicMetadata.role instead of membership.role in the useClerkRole hook. The rest of the integration stays the same." } },
+    { "@type": "Question", "name": "Does Tour Kit re-render when the Clerk session refreshes?", "acceptedAnswer": { "@type": "Answer", "text": "Tour Kit's when prop is evaluated when the tour initializes and when steps change. If a user's role changes mid-session, the tour steps update on the next render cycle. Clerk's session token refreshes every 60 seconds by default." } },
+    { "@type": "Question", "name": "How do I show different tours for free vs paid organizations?", "acceptedAnswer": { "@type": "Answer", "text": "Use Clerk's organization.publicMetadata to store the plan tier, then add a plan field to your role context. Filter steps with when: () => ctx.plan === 'pro' for Pro-only features. Combined with Role Sets (January 2026), different orgs can have entirely different role structures." } },
+    { "@type": "Question", "name": "What happens if Clerk hasn't loaded when Tour Kit initializes?", "acceptedAnswer": { "@type": "Answer", "text": "Tour Kit's enabled prop prevents initialization until Clerk resolves. The tour won't render, and no DOM queries run. Once isLoaded flips to true, Tour Kit initializes with the correct role data. There is no flash of incorrect content." } },
+    { "@type": "Question", "name": "Is this approach compatible with React Server Components?", "acceptedAnswer": { "@type": "Answer", "text": "The tour itself runs on the client, so the TourProvider and hook must live in a 'use client' component. But you can read Clerk's auth state server-side using auth() from @clerk/nextjs/server and pass the role as a prop to your client tour component." } }
+  ]
+}) }} />
+
+{/*
+Internal linking suggestions:
+- Link FROM: /blog/conditional-product-tour-user-role (mentions "if you're using Clerk, see our dedicated integration guide")
+- Link FROM: /blog/managing-tour-state-zustand (alternative state management)
+- Link FROM: /blog/nextjs-app-router-product-tour (Next.js integration cross-reference)
+- Link TO: /blog/keyboard-navigable-product-tours-react (already linked above)
+- Link TO: /blog/conditional-product-tour-user-role (already linked above)
+
+Distribution checklist:
+- Dev.to (with canonical URL to usertourkit.com)
+- Hashnode (with canonical URL)
+- Reddit r/nextjs, r/reactjs (Clerk is popular in both communities)
+- Clerk community Discord (if allowed)
+*/}

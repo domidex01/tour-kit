@@ -1,3 +1,5 @@
+'use client'
+
 import { autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/react'
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'

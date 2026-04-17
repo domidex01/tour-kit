@@ -1,0 +1,248 @@
+---
+title: "How to pitch your CTO on switching from SaaS to open-source onboarding"
+slug: "pitch-cto-open-source-onboarding"
+description: "Build a CTO-ready case for replacing Appcues or Pendo with an open-source onboarding library. Includes cost math, security arguments, and objection handling."
+primary_keyword: "pitch cto open source onboarding"
+secondary_keywords: ["convince team open source tool", "cto buy-in code-first onboarding", "open source vs saas onboarding cost"]
+category: "Build vs Buy"
+schema_type: "TechArticle"
+spreadsheet_row: 139
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/pitch-cto-open-source-onboarding.png
+---
+
+# How to pitch your CTO on switching from SaaS to open-source onboarding
+
+You know the SaaS onboarding tool your team uses is the wrong fit. The bundle is bloated, the no-code editor creates flows nobody reviews, and finance just flagged a 15% renewal uplift on the annual contract. Knowing it's wrong and getting your CTO to approve a switch are two different problems.
+
+This guide is for the internal champion: the senior engineer or engineering lead who needs to build a CTO-ready case for replacing a SaaS onboarding platform with an open-source library. Not a from-scratch build. A maintained, typed, MIT-licensed library that your team owns and ships like any other dependency.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+We built [Tour Kit](https://tourkit.dev/docs), so take everything here with appropriate skepticism. The arguments hold regardless of which library you choose. The case for code-owned onboarding is structural, not brand-specific.
+
+## What is open-source onboarding, and how does it differ from SaaS tools?
+
+Open-source onboarding is a code-first approach where product tours, tooltips, checklists, and feature announcements are built using MIT-licensed React libraries that ship inside your application bundle, rather than injected by a third-party SaaS vendor's external script. Unlike platforms like Appcues or Pendo that charge per monthly active user and control the rendering pipeline, an open-source library gives engineering teams full ownership of the onboarding logic, styling, and deployment lifecycle. As of April 2026, libraries like Tour Kit ship at under 8KB gzipped with zero runtime dependencies, compared to 50-200KB of uncontrollable injected scripts from SaaS alternatives.
+
+The distinction matters because it changes who controls the onboarding experience. With SaaS, your product team builds flows in a vendor's editor, and those flows render through code you can't inspect or version. With a library, onboarding flows are TypeScript files that go through the same code review, testing, and CI/CD pipeline as the rest of your application.
+
+## Why pitching your CTO on open source matters right now
+
+Engineering teams that delay the switch from SaaS onboarding tools to code-owned alternatives face compounding costs in three dimensions: annual license fees that increase 5-20% per renewal cycle, growing process lock-in as more flows are encoded in proprietary editors, and expanding attack surface from third-party script injection that security audits are increasingly flagging. The longer a team stays on a SaaS platform, the more expensive migration becomes.
+
+Two market shifts make this conversation urgent in 2026. First, SaaS onboarding pricing has crossed a threshold where a mid-market team paying Pendo's average of $48,000/year ([Appcues, 2026](https://www.appcues.com/blog/pendo-vs-appcues)) could fund an entire senior engineer's time instead. Second, 84% of organizations now must meet compliance policies that favor auditable, self-hosted code over opaque third-party scripts ([CTO Magazine](https://ctomagazine.com/open-source-software-pros-and-cons/)).
+
+If your CTO hasn't heard this pitch yet, someone on another team will make it first.
+
+## Why the "build vs buy" framing is wrong
+
+Every existing analysis of onboarding tooling presents two options: build from scratch (expensive, slow) or buy SaaS (fast, recurring cost). This binary misses the third path that 97% of modern applications already use for other concerns, which is adopting an open-source library ([IJCTT journal, 2025](https://www.ijcttjournal.org/archives/ijctt-v73i1p104)). The framing gap is the biggest obstacle to CTO buy-in, because it forces a false choice between overspending on SaaS or overspending on a custom build.
+
+Building a positioning engine, popover system, step state machine, and scroll-management layer from scratch costs $60,000 for a startup and up to $3 million at enterprise scale. Atlassian's growth team reportedly spent $3 million over three years on an internal onboarding platform ([Userpilot, 2025](https://userpilot.com/blog/build-vs-buy-user-onboarding/)). Nobody is suggesting you do that.
+
+Buying SaaS means $3,000 to $4,000 per month at 10,000 MAU for tools like Appcues or Pendo. That's $36,000 to $48,000 annually before the renewal uplift hits. You get zero code ownership and a third-party script injecting JavaScript into your production app.
+
+Adopting an MIT-licensed library is neither path. It costs one sprint of integration work and $0/month ongoing. The positioning engine, state machine, and accessibility layer come pre-built. Ship it like React Router or Zustand: a dependency your team controls.
+
+## The cost math your CTO actually needs
+
+CTOs respond to numbers, not opinions, and the three-year total cost of ownership comparison between SaaS onboarding platforms and open-source libraries is the single most persuasive artifact you can bring to the conversation. As of April 2026, these are representative ranges based on published pricing and reported customer spend across Appcues, Pendo, and WalkMe.
+
+<table>
+  <thead>
+    <tr>
+      <th>Factor</th>
+      <th>SaaS (Appcues/Pendo tier)</th>
+      <th>Open-source library</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Year 1 cost (10K MAU)</td>
+      <td>$36,000-$48,000</td>
+      <td>1-2 sprint integration ($5,000-$15,000 eng time)</td>
+    </tr>
+    <tr>
+      <td>Year 2 cost</td>
+      <td>$39,000-$57,000 (5-20% renewal uplift)</td>
+      <td>$0 licensing, marginal maintenance</td>
+    </tr>
+    <tr>
+      <td>Year 3 cumulative</td>
+      <td>$115,000-$160,000+</td>
+      <td>$5,000-$20,000 total</td>
+    </tr>
+    <tr>
+      <td>Per-seat/MAU scaling</td>
+      <td>Cost increases with user growth</td>
+      <td>Flat, no per-user pricing</td>
+    </tr>
+    <tr>
+      <td>Bundle size impact</td>
+      <td>50-200KB+ injected script (uncontrollable)</td>
+      <td>8KB gzipped core (tree-shakeable)</td>
+    </tr>
+    <tr>
+      <td>Training cost per engineer</td>
+      <td>$1,200/year avg (<a href="https://ctomagazine.com/open-source-software-pros-and-cons/">CTO Magazine</a>)</td>
+      <td>One-time ramp on familiar React patterns</td>
+    </tr>
+    <tr>
+      <td>Code ownership</td>
+      <td>Zero, vendor controls logic</td>
+      <td>Full, MIT license, forkable</td>
+    </tr>
+  </tbody>
+</table>
+
+The crossover point is typically two to four months. After that, every dollar spent on SaaS is a dollar you didn't need to spend. A developer on Reddit reported being quoted "$30k USD just to use [Pendo's] webhook" ([Userpilot, Pendo vs WalkMe analysis](https://userpilot.com/blog/pendo-vs-walkme/)). That's 30,000 reasons to check what open-source libraries can do before signing the next renewal.
+
+## The security argument CTOs actually care about
+
+SaaS onboarding tools work by injecting third-party JavaScript into your application from an external CDN, creating an attack surface that security-conscious engineering organizations are increasingly unwilling to accept. When your CISO asks "what third-party scripts run in our production app?", an onboarding SaaS adds a line item that's hard to justify against the alternative of bundled, auditable library code.
+
+Here's what the injection model looks like in practice. The vendor's script loads asynchronously, reads your DOM to find target elements, then renders overlays on top of your UI. When the script updates, you don't control the timing. Auditing what data it reads? Not possible. Pinning a version? Also not possible. If the vendor's CDN gets compromised, your users are exposed.
+
+An open-source library is bundled into your application at build time. It sits in your `node_modules`, gets audited by your lockfile, stays pinned to a version you choose, and runs through your CI pipeline. No external network request. No runtime code injection.
+
+Open-source vulnerabilities get patched in roughly 8 hours on average, compared to 7 days for proprietary software ([CTO Magazine](https://ctomagazine.com/open-source-software-pros-and-cons/)). For teams subject to SOC 2, GDPR, or HIPAA requirements, the difference between "we inject a third-party script we can't inspect" and "we bundle an MIT-licensed library we fully audit" is the difference between a compliance finding and a clean report.
+
+## Seven CTO objections and how to answer them
+
+Every CTO pitch hits objections, and the seven below are the ones engineering teams encounter most often when proposing a switch from SaaS onboarding tools to open-source libraries. Each response is grounded in published data and real-world cost figures rather than vague promises about developer experience or flexibility.
+
+### "Open source isn't free, we'd spend more in engineering time"
+
+Correct for building from scratch. Wrong for adopting a library. The $60,000 to $3 million estimates from Userpilot's analysis assume you're building a positioning engine, popover system, and state machine from zero. A library like Tour Kit ships all of that. Integration is measured in hours, not months.
+
+```tsx
+// src/components/ProductTour.tsx
+import { TourProvider, Tour, TourStep } from '@tourkit/react';
+
+export function OnboardingTour() {
+  return (
+    <TourProvider>
+      <Tour tourId="onboarding">
+        <TourStep target="#dashboard-nav" title="Navigation">
+          Your main dashboard controls live here.
+        </TourStep>
+        <TourStep target="#create-btn" title="Create your first project">
+          Click here to get started with your first project.
+        </TourStep>
+      </Tour>
+    </TourProvider>
+  );
+}
+```
+
+That's a working tour. No SDK initialization. No API keys. No CDN scripts.
+
+### "What if the library stops being maintained?"
+
+The right question to ask. Evaluate commit recency, contributor count, release cadence, and license type. For MIT-licensed code, worst case is you maintain a fork of code you already understand. For SaaS, worst case is the vendor sunsets your product tier or raises prices 20% on renewal. You have zero recourse and zero source code.
+
+The Linux Foundation publishes frameworks for evaluating open-source project sustainability ([Linux Foundation Open Source Guides](https://www.linuxfoundation.org/resources/open-source-guides/setting-an-open-source-strategy)). Point your CTO there.
+
+### "We need enterprise support and SLAs"
+
+SaaS SLAs cover platform uptime, not your onboarding logic. If Pendo's DOM detection breaks because your team shipped a CSS refactor, you file a support ticket and wait. With a library in your codebase, your own engineers fix it in the same sprint. The "support" argument only holds if the team lacks React engineers, and if you're reading this, it doesn't.
+
+### "Security and compliance are concerns"
+
+This objection actually favors open source. A SaaS tool injects code you can't inspect into pages that may contain user data. An open-source library is auditable down to the line. For regulated industries, this distinction is increasingly material. See the security section above for the full argument.
+
+### "Our product team uses the no-code editor"
+
+Legitimate constraint. If your product managers build and manage onboarding flows without engineering involvement, a headless library isn't a direct replacement. But consider: are those no-code flows reviewed before they reach production? Are they tested? Do they go through your deployment pipeline?
+
+Tour Kit doesn't have a visual editor. That's a real limitation. It's also a feature for teams that want onboarding flows to be code, with version control, code review, and deployment through the same CI/CD pipeline as everything else.
+
+### "License compliance is a risk"
+
+Real concern. 63% of enterprises have experienced open-source license violations in the past two years ([CTO Magazine](https://ctomagazine.com/open-source-software-pros-and-cons/)). The mitigation is choosing permissive licenses. Tour Kit uses MIT, which allows unrestricted use, modification, and distribution with no copyleft obligations. No GPL contamination risk.
+
+Compare that to Shepherd.js, which uses AGPL, a copyleft license that can affect your proprietary codebase if you're not careful about distribution boundaries.
+
+### "Switching from our current tool will be painful"
+
+Vendor lock-in operates across multiple dimensions. Data lock-in means proprietary tour definitions that don't export cleanly. Process lock-in means team workflows are encoded in the platform's specific UI. And contractual lock-in means auto-renewals with 5-20% uplifts and short notice periods ([SaaS Vendor Lock-In Guide](https://atonementlicensing.com/blog/saas-lock-in/)).
+
+Process lock-in is the most underestimated. Every month your product team builds more flows in Pendo's no-code editor, the switching cost grows. The right time to migrate is before you have 200 flows encoded in a proprietary format. With a library, flows are TypeScript files: exportable, diffable, and portable.
+
+## Common mistakes when pitching open-source adoption
+
+Internal champions make predictable errors that kill the pitch before the CTO even evaluates the technical merits. Avoiding these five mistakes is often the difference between approval and a quick "let's revisit next quarter" that never gets revisited.
+
+**Leading with ideology instead of math.** CTOs don't care that open source is philosophically better. They care about cost and risk. Start with the three-year TCO table. If the numbers don't sell it, the philosophy won't either.
+
+**Asking for a full migration commitment upfront.** This triggers loss aversion. Instead, ask for a one-sprint spike to rebuild three existing flows. Low cost, low risk, measurable result. If the spike fails, you renew. If it succeeds, the CTO has evidence, not just your opinion.
+
+**Ignoring the product team's workflow.** If your PM builds 40 flows per quarter in Appcues' visual editor, saying "we'll replace it with TypeScript" sounds like you're creating work for them. Address this directly: explain the deployment safety benefits, or propose a phased approach where new flows use the library while existing ones stay in the SaaS tool during transition.
+
+**Underestimating process lock-in.** Teams fixate on data export and contractual terms. The deeper lock-in is cognitive: your product team thinks in Appcues' flow builder patterns. Acknowledge this cost honestly, and budget time for workflow retraining in your proposal.
+
+**Skipping the security angle.** For CTOs at companies with SOC 2, HIPAA, or GDPR obligations, the "third-party script injection" framing is often more persuasive than the cost argument. Don't bury it. For some CTOs, this alone justifies the switch.
+
+## How to structure the actual pitch
+
+Structuring the CTO pitch as a 10-minute conversation or one-page brief converts better than a Slack essay, because CTOs evaluate decisions on the density of the argument rather than the length of the document. Use this format and customize the brackets with your team's specifics.
+
+**Problem statement (2 sentences):** We're spending $X/year on [tool] and our engineers still work around its limitations. The renewal is coming up on [date].
+
+**Proposed alternative (3 sentences):** Replace [tool] with [library]. It's MIT-licensed, ships at [size] gzipped, and handles [specific features we need]. Integration takes [estimate] based on [proof point].
+
+**Cost comparison (the table above):** Three-year TCO side by side. Let the numbers speak.
+
+**Risk mitigation (3 bullets):**
+- MIT license, no copyleft risk, forkable if project stalls
+- No third-party script injection, cleaner security posture
+- Gradual migration path, run both tools in parallel during transition
+
+**Ask:** Approve a one-sprint spike to build the same 3 onboarding flows we currently run in [tool]. Compare quality, performance, and developer experience. If it's worse, we renew.
+
+The spike is the key. Don't ask for a full migration commitment. Ask for permission to prove the concept. One sprint, three flows, measurable results.
+
+## What Tour Kit doesn't do (and when SaaS still wins)
+
+Tour Kit is designed for engineering-led teams who want full code ownership over their onboarding flows, which means it deliberately doesn't cover use cases where non-technical product managers need to build and deploy tours without writing code. Acknowledging these gaps in your CTO pitch actually strengthens your credibility.
+
+Tour Kit doesn't have a visual editor. If your product team builds flows without engineering involvement and that workflow is non-negotiable, a SaaS tool with a no-code builder is the right call. Tour Kit also has a smaller community than React Joyride or Shepherd.js. It requires React 18 or later. And it's a younger project with less battle-testing at enterprise scale.
+
+SaaS tools win when the team doing onboarding doesn't write code. They also win when the switching cost from an existing platform genuinely exceeds the value of migrating. Be honest about these tradeoffs in your pitch. Acknowledging them builds credibility.
+
+## Related reading
+
+These articles expand on the individual arguments covered in this guide, from TCO calculations to the technical details of how SaaS tools inject their code into your application.
+
+- [Open source onboarding: what $0 actually costs in developer time](/blog/open-source-onboarding-cost-developer-time) - the TCO math in detail
+- [How SaaS onboarding tools inject their code (and why you should care)](/blog/how-onboarding-tools-inject-code) - the security argument expanded
+- [The developer's calculator: DIY tour vs library vs SaaS](/blog/build-vs-buy-product-tour-calculator) - interactive cost comparison
+- [Why onboarding SaaS tools charge per MAU (and why that's a problem)](/blog/mau-pricing-onboarding-tool) - the pricing model critique
+- [The real cost of Pendo for a Series A startup](/blog/pendo-cost-startup) - Pendo-specific breakdown
+
+## FAQ
+
+### How long does it take to replace a SaaS onboarding tool with an open-source library?
+
+Tour Kit integration typically takes one to two sprints for a team with React experience. The initial setup (provider, first tour, basic styling) takes hours. Migrating existing flows depends on complexity, but most teams report full migration within four to six weeks when running both tools in parallel during the transition period.
+
+### Can open-source onboarding tools handle enterprise compliance requirements?
+
+Open-source libraries have a structural advantage for compliance. The source code is fully auditable, runs inside your application bundle without external script injection, and can be pinned to specific versions in your lockfile. For SOC 2, GDPR, and HIPAA requirements, this is materially easier to document than a third-party SaaS script you can't inspect.
+
+### What happens if the open-source library I choose stops being maintained?
+
+MIT-licensed code gives you the right to fork and maintain it indefinitely. Your team already has the source code in `node_modules` and understands the API surface. Compare this to a SaaS vendor sunsetting your product tier, where you lose access entirely. The Linux Foundation provides evaluation frameworks for assessing open-source project health before adoption.
+
+### Is open-source onboarding cheaper than SaaS tools like Appcues or Pendo?
+
+As of April 2026, Appcues starts at $249/month and Pendo averages roughly $48,000/year in reported customer spend. An open-source library costs zero in licensing. The engineering investment for integration is typically $5,000 to $15,000 in developer time, a one-time cost that breaks even within two to four months compared to annual SaaS contracts.
+
+### How do I convince a non-technical CTO to approve an open-source tool?
+
+Focus on two arguments non-technical CTOs understand immediately: cost (three-year TCO comparison) and risk (vendor lock-in plus renewal uplifts). Then add the security angle if your organization has compliance requirements. Propose a time-boxed spike, one sprint to rebuild three existing flows, rather than asking for a full migration commitment upfront.

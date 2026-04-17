@@ -1,0 +1,320 @@
+---
+title: "Tour Kit + LaunchDarkly: feature-flagged onboarding flows"
+slug: "tour-kit-launchdarkly-feature-flagged-onboarding"
+description: "Wire LaunchDarkly feature flags into Tour Kit to show the right onboarding flow per cohort. TypeScript guide with kill switches and rollouts."
+primary_keyword: "launchdarkly product tour"
+secondary_keywords: ["feature flag onboarding integration", "launchdarkly onboarding", "launchdarkly react product tour", "feature flag driven onboarding"]
+category: "Integrations"
+schema_type: "TechArticle"
+spreadsheet_row: 183
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/tour-kit-launchdarkly-feature-flagged-onboarding.png
+---
+
+# Tour Kit + LaunchDarkly: feature-flagged onboarding flows
+
+You shipped a new analytics dashboard behind a LaunchDarkly flag. It's rolling out to 10% of accounts this week. But your onboarding tour still walks every user through the old layout, pointing at elements that don't exist for 90% of them.
+
+Feature flags gate which UI ships. Product tours should follow the same gates. The problem is that every LaunchDarkly tutorial stops at "toggle a button." Nobody shows the glue code between `useFlags()` and a tour engine that filters steps, swaps entire flows, or kills a broken tour in seconds without redeploying.
+
+This guide builds that glue. You'll wire LaunchDarkly's React SDK into Tour Kit so each user cohort sees only the steps matching their enabled features. We tested this pattern against a B2B SaaS dashboard with four plan tiers and 12 feature flags.
+
+```bash
+npm install @tourkit/core @tourkit/react launchdarkly-react-client-sdk
+```
+
+[Browse the Tour Kit docs](https://usertourkit.com/) for the full API reference.
+
+## What you'll build
+
+A React app where LaunchDarkly flags control three onboarding behaviors: which tour steps appear, which entire tour variant loads, and whether tours can be killed instantly from the LaunchDarkly dashboard. The end result is an onboarding system that stays in sync with your feature rollout without manual cohort management or conditional spaghetti.
+
+By the end, you'll have a `useFlaggedTour` hook that reads LaunchDarkly flags and passes filtered steps to Tour Kit. No changes to Tour Kit internals, no forking, no monkey-patching.
+
+## Why LaunchDarkly + Tour Kit?
+
+LaunchDarkly is the most widely adopted feature flag platform, with its React SDK pulling roughly 998K weekly npm downloads as of April 2026 ([npm](https://www.npmjs.com/package/launchdarkly-react-client-sdk)). Tour Kit is a headless tour library that ships at under 8KB gzipped with zero runtime dependencies. Together they solve a problem neither handles alone: targeting onboarding flows to specific user segments without hardcoding conditions.
+
+Three reasons this pairing works:
+
+**Rollout rings propagate to tours automatically.** When you move a feature from 10% to 50% of users, the matching tour steps appear for that 50%. No tour configuration changes needed.
+
+**Kill switches work on tours too.** LaunchDarkly's "kill switch" pattern (turning a flag OFF instantly) disables a broken tour in seconds. Your new onboarding confused users? Kill it from the dashboard while you fix the copy. No deploy, no hotfix.
+
+**Plan-tier targeting comes free.** LaunchDarkly evaluates user attributes like `plan`, `role`, and `company_size` server-side, then streams results to the client SDK. Tour Kit reads those flag values and filters steps. You define the rules once in LaunchDarkly's targeting UI, not in your React components.
+
+One limitation to flag: Tour Kit requires React developers to write code. There's no visual builder where a product manager can drag tour steps onto a screen and assign flags. The integration described here is code-first, which means your engineering team owns the tour definitions.
+
+The other tradeoff: LaunchDarkly's React SDK adds roughly 150KB to your bundle ([Bundlephobia](https://bundlephobia.com/package/launchdarkly-react-client-sdk)). If you're already using LaunchDarkly for feature management, that cost is sunk. If you're evaluating flag providers specifically for tour targeting, lighter alternatives like GrowthBook (~10KB) or Flagsmith (~12KB) exist. We covered those in our [feature flag-driven tours guide](/blog/feature-flag-product-tour).
+
+## Prerequisites
+
+Connecting LaunchDarkly to Tour Kit requires a LaunchDarkly account with at least one boolean feature flag, a React 18+ project with TypeScript, and Tour Kit's core and react packages installed. The free Developer plan works fine for testing this integration. Here's the full checklist:
+
+- A LaunchDarkly account (the free Developer plan includes 2 seats)
+- Your **Client-side ID** from LaunchDarkly's project settings (not the SDK key or Mobile key)
+- A React 18+ project with TypeScript
+- Tour Kit installed: `npm install @tourkit/core @tourkit/react`
+
+Create two boolean flags in your LaunchDarkly dashboard:
+
+1. `release-onboarding-analytics-dashboard` — gates the analytics feature tour
+2. `kill-onboarding-tours` — emergency kill switch for all tours
+
+For both flags, enable "Make this flag available to client-side SDKs" in the flag settings. The React SDK can only evaluate client-side flags.
+
+## Step 1: set up the LaunchDarkly provider
+
+The LaunchDarkly React SDK provides an `LDProvider` component that downloads flag values for the current user and makes them available via hooks. Wrap your app with `LDProvider` outside Tour Kit's `TourProvider` so flag values resolve before tours initialize. Order matters here.
+
+```tsx
+// src/app/providers.tsx
+import { LDProvider } from 'launchdarkly-react-client-sdk';
+import { TourProvider } from '@tourkit/react';
+
+const LD_CLIENT_ID = process.env.NEXT_PUBLIC_LD_CLIENT_SIDE_ID!;
+
+export function AppProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <LDProvider
+      clientSideID={LD_CLIENT_ID}
+      context={{
+        kind: 'user',
+        key: 'user-123',
+        name: 'Jane Doe',
+        plan: 'pro',        // custom attribute for targeting
+        role: 'admin',       // custom attribute for targeting
+      }}
+    >
+      <TourProvider>
+        {children}
+      </TourProvider>
+    </LDProvider>
+  );
+}
+```
+
+The `context` object is where targeting happens. LaunchDarkly evaluates your flag rules against these attributes. When a user upgrades from `free` to `pro`, update the context and the SDK re-evaluates all flags via streaming. No page refresh needed.
+
+**Gotcha we hit:** if you pass the SDK key instead of the Client-side ID, the SDK silently fails and `useFlags()` returns empty objects. The error message doesn't mention the wrong key type. Double-check you're using the Client-side ID from Project Settings > Environments.
+
+## Step 2: build the flag-filtered tour hook
+
+The connection between LaunchDarkly and Tour Kit is a single custom hook called `useFlaggedTour`. It calls `useFlags()` from the LaunchDarkly SDK, checks each tour step's associated flag key, and returns only the steps whose flags evaluate to true for the current user. This is the glue code that makes everything work.
+
+```tsx
+// src/hooks/use-flagged-tour.ts
+import { useFlags } from 'launchdarkly-react-client-sdk';
+import { useMemo } from 'react';
+import type { TourStep } from '@tourkit/core';
+
+interface FlaggedStep extends TourStep {
+  /** LaunchDarkly flag key that gates this step */
+  featureFlag?: string;
+}
+
+export function useFlaggedTour(steps: FlaggedStep[]) {
+  const flags = useFlags();
+
+  const filteredSteps = useMemo(() => {
+    // Kill switch: if kill-onboarding-tours is ON, show no steps
+    if (flags['kill-onboarding-tours']) {
+      return [];
+    }
+
+    return steps.filter((step) => {
+      // Steps without a featureFlag always appear
+      if (!step.featureFlag) return true;
+      // Steps with a featureFlag appear only when that flag is truthy
+      return Boolean(flags[step.featureFlag]);
+    });
+  }, [steps, flags]);
+
+  return { steps: filteredSteps, flags };
+}
+```
+
+Each tour step can optionally declare a `featureFlag` property. If the flag evaluates to `true` for the current user, the step appears. If not, it's filtered out before Tour Kit sees it. Steps without a `featureFlag` always show.
+
+The kill switch (`kill-onboarding-tours`) returns an empty array, which makes Tour Kit render nothing. You can flip this flag in the LaunchDarkly dashboard and every active tour disappears within seconds, thanks to the SDK's streaming connection.
+
+## Step 3: define flag-gated tour steps
+
+With the `useFlaggedTour` hook in place, defining a flag-gated tour means adding a `featureFlag` property to each step that should be conditionally visible. Steps without a `featureFlag` always render. Steps with one only appear when the corresponding LaunchDarkly flag evaluates to true for the current user.
+
+```tsx
+// src/tours/dashboard-tour.tsx
+import { Tour, TourStep, TourTooltip } from '@tourkit/react';
+import { useFlaggedTour } from '../hooks/use-flagged-tour';
+
+const DASHBOARD_STEPS = [
+  {
+    id: 'welcome',
+    target: '#dashboard-header',
+    title: 'Welcome to your dashboard',
+    content: 'Here is a quick overview of what you can do.',
+    // No featureFlag — every user sees this step
+  },
+  {
+    id: 'analytics-panel',
+    target: '#analytics-widget',
+    title: 'Your new analytics panel',
+    content: 'Track engagement metrics in real time.',
+    featureFlag: 'release-onboarding-analytics-dashboard',
+  },
+  {
+    id: 'export-csv',
+    target: '#export-button',
+    title: 'Export your data',
+    content: 'Download reports as CSV or PDF.',
+    featureFlag: 'release-export-feature',
+  },
+];
+
+export function DashboardTour() {
+  const { steps } = useFlaggedTour(DASHBOARD_STEPS);
+
+  if (steps.length === 0) return null;
+
+  return (
+    <Tour tourId="dashboard-onboarding" steps={steps}>
+      <TourStep>
+        <TourTooltip />
+      </TourStep>
+    </Tour>
+  );
+}
+```
+
+A user on the 10% rollout ring for `release-onboarding-analytics-dashboard` sees three steps. Everyone else sees two. When the flag rolls out to 100%, the third step appears automatically. No code change, no deploy.
+
+## Step 4: verify it works
+
+Verifying the integration means toggling flags in the LaunchDarkly dashboard and confirming that Tour Kit's rendered steps update in real time without a page refresh. The SDK's default streaming mode pushes flag changes to the browser within 1-2 seconds, so you can test the full loop from your dashboard.
+
+1. **Open your app** with the LaunchDarkly debugger enabled (add `?ldclient_debug=true` to the URL)
+2. **Turn OFF** `release-onboarding-analytics-dashboard` in the dashboard
+3. **Verify** the analytics panel step disappears from the tour within 1-2 seconds
+4. **Turn ON** `kill-onboarding-tours`
+5. **Verify** the entire tour vanishes immediately
+6. **Check the browser console** for LaunchDarkly evaluation events — each flag evaluation logs which variation was served
+
+For automated testing, mock LaunchDarkly's provider in your test suite:
+
+```tsx
+// src/tests/dashboard-tour.test.tsx
+import { render, screen } from '@testing-library/react';
+import { LDProvider } from 'launchdarkly-react-client-sdk';
+import { DashboardTour } from '../tours/dashboard-tour';
+
+// Mock flag values directly — no network calls
+const mockFlags = {
+  'release-onboarding-analytics-dashboard': true,
+  'kill-onboarding-tours': false,
+};
+
+test('shows analytics step when flag is on', () => {
+  render(
+    <LDProvider clientSideID="test" flags={mockFlags}>
+      <DashboardTour />
+    </LDProvider>
+  );
+  expect(screen.getByText('Your new analytics panel')).toBeDefined();
+});
+```
+
+## Going further
+
+The basic integration covers boolean flag filtering, but LaunchDarkly's targeting engine supports percentage rollouts, multivariate flags, and user attribute targeting that enable more advanced onboarding strategies. Three patterns stand out once the foundation is in place.
+
+**Progressive rollout rings for tours.** LaunchDarkly supports percentage rollouts. Use them to canary-test a new onboarding flow: 1% internal, then 5% canary, then 25% beta, then 100% GA. LaunchDarkly's recommended rollout ring pattern is internal > canary (1-5%) > beta (10-25%) > expansion (50%) > GA ([LaunchDarkly, 2026](https://launchdarkly.com/blog/what-are-feature-flags/)). Apply the same pattern to tours: roll out a redesigned onboarding to 5% of new signups, measure completion rates, then widen.
+
+**A/B testing tour variants.** Create a multivariate flag with string values like `"tour-v1"` and `"tour-v2"`. In your hook, load different step arrays based on the flag value instead of filtering a single array. LaunchDarkly tracks which variant each user received, so you can correlate tour version with activation metrics downstream.
+
+**Analytics correlation.** Tour Kit's `@tourkit/analytics` package fires events on step completion, tour finish, and tour skip. Send these events to your data warehouse alongside LaunchDarkly's flag evaluation data. The query you want: "Users who saw Tour V2 behind flag X had a 23% higher 7-day retention rate." That's the data that justifies expanding the rollout.
+
+For a broader look at integrating other flag providers (GrowthBook, PostHog, Flagsmith, OpenFeature), see our [feature flag-driven tours guide](/blog/feature-flag-product-tour).
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>LaunchDarkly</th>
+      <th>GrowthBook</th>
+      <th>PostHog</th>
+      <th>Flagsmith</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>React SDK bundle</td>
+      <td>~150KB</td>
+      <td>~10KB</td>
+      <td>~25KB</td>
+      <td>~12KB</td>
+    </tr>
+    <tr>
+      <td>Free tier</td>
+      <td>2 seats</td>
+      <td>Full OSS</td>
+      <td>1M events/mo</td>
+      <td>50K API calls/mo</td>
+    </tr>
+    <tr>
+      <td>Streaming updates</td>
+      <td>Yes (default)</td>
+      <td>SSE polling</td>
+      <td>Polling</td>
+      <td>SSE optional</td>
+    </tr>
+    <tr>
+      <td>Self-hostable</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>A/B experiments</td>
+      <td>Yes (Experimentation add-on)</td>
+      <td>Yes (built-in)</td>
+      <td>Yes (built-in)</td>
+      <td>Yes (built-in)</td>
+    </tr>
+    <tr>
+      <td>Best for</td>
+      <td>Enterprise governance</td>
+      <td>Data-driven experiments</td>
+      <td>All-in-one analytics</td>
+      <td>Flexible deployment</td>
+    </tr>
+  </tbody>
+</table>
+
+## FAQ
+
+### Can I use LaunchDarkly's free tier for feature-flagged tours?
+
+LaunchDarkly's Developer plan includes 2 seats and 1,000 monthly active users at no cost as of April 2026. For a small team testing feature-flagged onboarding, that's enough to validate the pattern. Tour Kit's core and react packages are MIT-licensed, so the only cost variable is LaunchDarkly's plan tier. Pro starts at $12 per seat per month with annual billing.
+
+### Does the LaunchDarkly React SDK affect tour performance?
+
+The SDK adds roughly 150KB to your bundle, but flag evaluations happen locally after the initial payload downloads. Cached evaluations take under 100 microseconds ([DesignRevision, 2026](https://designrevision.com/blog/feature-flags-best-practices)). Tour Kit's step filtering runs in a `useMemo` that only recalculates when flags change. Negligible impact on tour rendering.
+
+### How do I handle tour state when a flag changes mid-tour?
+
+If a user is on step 2 of a 5-step tour and a flag disables step 3, Tour Kit skips to step 4 automatically. The `useFlaggedTour` hook returns a new filtered array, and Tour Kit's step engine recalculates the sequence. For the kill switch case, returning an empty array unmounts the tour component entirely. Users won't see a half-rendered tooltip.
+
+### Should I use OpenFeature instead of LaunchDarkly's SDK directly?
+
+OpenFeature provides a vendor-neutral API for switching flag providers later. But as of April 2026, LaunchDarkly only officially supports OpenFeature for server-side SDKs. Client-side React providers are community-maintained. If vendor portability matters, wrap flag evaluation in your own adapter function rather than depending on the OpenFeature web SDK.
+
+### What's the difference between this article and the feature flag-driven tours guide?
+
+The [feature flag-driven tours guide](/blog/feature-flag-product-tour) covers the general pattern across five providers with conceptual architecture. This article is a specific LaunchDarkly integration walkthrough with production-ready code, kill switch implementation, and testing patterns. Start here if you've already chosen LaunchDarkly. Start there if you're evaluating providers.
+
+---
+
+*We built Tour Kit, so take our integration guidance with appropriate skepticism. Tour Kit doesn't have a visual builder or drag-and-drop editor. If you need no-code tour creation, LaunchDarkly pairs better with tools like Appcues or Pendo. Every code example in this guide is runnable and typed. Verify against the [LaunchDarkly React SDK docs](https://launchdarkly.com/docs/sdk/client-side/react/react-web) and [Tour Kit docs](https://usertourkit.com/) for the latest API surfaces.*

@@ -1,0 +1,804 @@
+---
+title: "Onboarding metrics explained: every KPI with formulas (2026)"
+slug: "onboarding-metrics-explained"
+description: "Master every onboarding KPI from activation rate to NPS. Each metric includes the formula, benchmark data, and React tracking code."
+primary_keyword: "onboarding metrics explained"
+secondary_keywords: ["onboarding kpi hub", "user activation metrics guide", "onboarding measurement framework", "saas onboarding kpis"]
+category: "Pillar Pages"
+schema_type: "TechArticle"
+spreadsheet_row: 294
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/onboarding-metrics-explained.png
+---
+
+# Onboarding metrics explained: every KPI with formulas
+
+Most SaaS teams measure signups and churn. Everything between those two numbers is onboarding, and most teams fly blind through it.
+
+As of April 2026, 59% of SaaS buyers regret at least one software purchase made in the past 18 months ([Gartner 2025 Software Buying Trends](https://www.gartner.com/en/digital-markets/insights/software-buying-trends)). That regret almost always crystallizes during onboarding, the first 7 to 30 days where users decide if your product is worth keeping or not. If you aren't measuring what happens in that window, you're optimizing blind.
+
+This guide covers every onboarding metric worth tracking. Each section includes the formula, real benchmark data, and a quick overview of how to instrument it. For deeper implementation detail on any metric, follow the links to the dedicated articles.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/analytics
+```
+
+## What are onboarding metrics?
+
+Onboarding metrics are quantitative measurements that track how effectively new users progress from signup to their first meaningful outcome in your product. They differ from general product analytics in scope and timing: onboarding metrics focus specifically on the first 7-30 days and measure behavior changes, not just page views. A 2024 study of 547 SaaS companies found the average time to first value is 1 day, 12 hours, and 23 minutes ([Userpilot TTV Benchmark Report](https://userpilot.com/blog/time-to-value-benchmark-report-2024/)), but that number swings wildly depending on product complexity and industry vertical.
+
+The metrics in this guide fall into four categories: activation metrics (did users reach value?), engagement metrics (are users coming back?), satisfaction metrics (what do users think?), and business metrics (what's the revenue impact?). Each category serves a different audience: product managers care about activation, executives care about ROI, and engineers care about what to instrument.
+
+## Why onboarding metrics matter more than vanity numbers
+
+SaaS companies lose 30-50% of new users during onboarding alone ([Amplitude](https://amplitude.com/guides/measure-user-onboarding)). That's not a leaky bucket. It's a bucket with no bottom. And yet most teams track tour completion rate as their primary onboarding metric, which tells you whether users clicked through your slides without telling you whether they did anything real.
+
+The gap between completion and activation is where most onboarding efforts quietly fail. Chameleon's analysis of 15 million product tour interactions found the average completion rate is 61% ([Chameleon 2025 Benchmark Report](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)). But completion doesn't predict retention. What predicts retention is whether users performed the activation behavior your tour was supposed to guide them toward.
+
+Structured onboarding lifts retention by 50% and increases feature adoption by 42% ([Chameleon, 2025](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)). Those numbers only materialize when you measure the right things.
+
+For a deeper breakdown of which metrics predict retention best, see [How to measure onboarding success: 10 metrics that matter](/blog/measure-onboarding-success-metrics).
+
+---
+
+## Types of onboarding metrics
+
+Onboarding metrics split into four categories, each serving a different team and answering a different question about the user journey from signup to retained customer. Understanding these categories prevents the common mistake of tracking everything and analyzing nothing.
+
+**Activation metrics** measure whether users reached your product's core value. User activation rate, time to value, and feature adoption rate belong here. Product managers own these.
+
+**Engagement metrics** measure whether users come back after the initial onboarding window. Tour completion rate, DAU/MAU ratio, and retention curves track habit formation. Growth teams own these.
+
+**Satisfaction metrics** capture qualitative user sentiment. NPS, CSAT, and CES tell you *how* users feel about the experience, which quantitative metrics miss entirely. Customer success owns these.
+
+**Business impact metrics** connect onboarding to revenue. ROI calculations, trial-to-paid conversion, and support ticket reduction give finance teams the numbers they need for budget decisions.
+
+For a framework that ties all four categories into a unified measurement system, see [Product tour analytics: the complete measurement framework](/blog/product-tour-analytics-framework).
+
+---
+
+## Activation metrics
+
+Activation metrics measure whether new users reached value within the onboarding window, making them the single most predictive category for long-term retention. If activation numbers are low, nothing else in this guide matters yet.
+
+### User activation rate
+
+User activation rate measures the percentage of new signups who complete a defined set of activation events within a time window. This is the single most important onboarding metric. As of April 2026, the average SaaS activation rate sits at 36% ([Userpilot](https://userpilot.com/blog/user-activation-for-saas/)), meaning nearly two-thirds of signups leave without experiencing core value.
+
+**Formula:**
+
+```
+Activation Rate = (Users who completed activation event / Total new signups) x 100
+```
+
+**Benchmarks:**
+
+<table>
+  <thead>
+    <tr>
+      <th>Rating</th>
+      <th>Activation rate</th>
+      <th>What it means</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Poor</td>
+      <td>&lt;20%</td>
+      <td>Onboarding is broken or targeting wrong users</td>
+    </tr>
+    <tr>
+      <td>Average</td>
+      <td>20-40%</td>
+      <td>Industry norm, room for improvement</td>
+    </tr>
+    <tr>
+      <td>Good</td>
+      <td>40-60%</td>
+      <td>Effective onboarding, clear value delivery</td>
+    </tr>
+    <tr>
+      <td>Excellent</td>
+      <td>60%+</td>
+      <td>Top-tier, likely using behavioral triggers</td>
+    </tr>
+  </tbody>
+</table>
+
+The key insight: tours that require users to perform actions (not just click "Next") show 123% higher completion rates that actually correlate with activation ([Chameleon 2025](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)).
+
+For the full implementation guide with Tour Kit code examples, see [User activation rate: how product tours move the needle](/blog/user-activation-rate-product-tour).
+
+### Time to value (TTV)
+
+Time to value measures the elapsed time between a user's first interaction and the moment they experience your product's core benefit. Teams that measure TTV instead of completion rate see 15-25% higher trial-to-paid conversion ([Userpilot](https://userpilot.com/blog/time-to-value-benchmark-report-2024/)).
+
+**Formula:**
+
+```
+TTV = Timestamp of activation event - Timestamp of first login
+```
+
+**Benchmarks:**
+
+<table>
+  <thead>
+    <tr>
+      <th>Product type</th>
+      <th>Typical TTV</th>
+      <th>Target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Simple SaaS (e.g., scheduling tool)</td>
+      <td>&lt;5 minutes</td>
+      <td>&lt;2 minutes</td>
+    </tr>
+    <tr>
+      <td>Mid-complexity (e.g., project management)</td>
+      <td>1-3 days</td>
+      <td>&lt;1 day</td>
+    </tr>
+    <tr>
+      <td>Enterprise/technical (e.g., data platform)</td>
+      <td>1-2 weeks</td>
+      <td>&lt;1 week</td>
+    </tr>
+    <tr>
+      <td>Cross-industry average (547 companies)</td>
+      <td>1d 12h 23m</td>
+      <td>Varies by complexity</td>
+    </tr>
+  </tbody>
+</table>
+
+TTV variants matter too. Time to first value (TTFV) measures the first "aha" moment. Time to recurring value measures when usage becomes habitual. Both are worth tracking separately.
+
+Full guide with code examples: [Time to value: the most important onboarding metric](/blog/time-to-value-onboarding-metric).
+
+### The aha moment
+
+The aha moment isn't a metric you calculate directly. It's the activation event you discover through data analysis, the specific behavior that correlates most strongly with long-term retention. Facebook's was "7 friends in 10 days." Slack's was "2,000 messages sent." Your product has one too.
+
+Finding it requires cohort analysis: split users into retained vs. churned groups, then look for the behavior that most strongly separates them. Once identified, every product tour should be engineered to guide users toward that exact behavior.
+
+See [The aha moment framework: mapping tours to activation events](/blog/aha-moment-framework-tours-activation-events) for the methodology.
+
+### Feature adoption rate
+
+Feature adoption rate tracks what percentage of active users engage with a specific feature within a time window. It answers: are users discovering and using the capabilities you built?
+
+**Formula:**
+
+```
+Feature Adoption Rate = (Users who used feature / Total active users) x 100
+```
+
+Healthy feature adoption depends on the feature's criticality. Core features should hit 80%+ adoption. Secondary features hover around 30-50%. If a core feature sits below 40%, your onboarding isn't surfacing it effectively.
+
+Full calculation guide with code: [How to calculate feature adoption rate](/blog/calculate-feature-adoption-rate).
+
+---
+
+## Engagement metrics
+
+Engagement metrics track whether users return to your product after the initial onboarding window closes, measuring habit formation and stickiness across days, weeks, and months. While activation tells you users reached value once, engagement tells you whether that value was strong enough to build a habit. These metrics require longer observation windows and cohort segmentation to interpret correctly.
+
+### Tour completion rate
+
+Tour completion rate is what most teams track first. It's useful as a diagnostic tool but misleading as a success metric. As mentioned above, the average sits at 61% across 15 million interactions ([Chameleon, 2025](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)).
+
+**Formula:**
+
+```
+Tour Completion Rate = (Users who finished all steps / Users who started the tour) x 100
+```
+
+What matters more than the topline number is *where* users drop off. Step-level tracking reveals whether the problem is the tour itself (bad content, too many steps) or the product (confusing UI, broken flow).
+
+Build step-level tracking: [How to track product tour drop-off points](/blog/product-tour-drop-off-tracking).
+
+### Step-level drop-off rate
+
+A refinement of completion rate. Instead of measuring the whole tour, measure the conversion rate between each pair of steps. This surfaces the exact friction points.
+
+**Formula:**
+
+```
+Step Drop-off Rate = (Users at Step N - Users at Step N+1) / Users at Step N x 100
+```
+
+If step 3 to step 4 drops 25% of users while other transitions lose 5-8%, you've found your problem. The fix is usually one of three things: the step asks for too much information, the step's target element is confusing, or the step arrives before the user has context.
+
+### DAU/MAU ratio (stickiness)
+
+DAU/MAU ratio measures the percentage of monthly active users who return daily. It's the executive-level metric that boards and investors watch most closely.
+
+**Formula:**
+
+```
+DAU/MAU Ratio = (Daily Active Users / Monthly Active Users) x 100
+```
+
+**Benchmarks:**
+
+<table>
+  <thead>
+    <tr>
+      <th>Product category</th>
+      <th>Median DAU/MAU</th>
+      <th>Top quartile</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Social / messaging</td>
+      <td>30-50%</td>
+      <td>60%+</td>
+    </tr>
+    <tr>
+      <td>SaaS / productivity</td>
+      <td>10-20%</td>
+      <td>25%+</td>
+    </tr>
+    <tr>
+      <td>E-commerce</td>
+      <td>5-10%</td>
+      <td>15%+</td>
+    </tr>
+    <tr>
+      <td>Cross-industry SaaS average</td>
+      <td>13%</td>
+      <td>20%+</td>
+    </tr>
+  </tbody>
+</table>
+
+Only 12% of SaaS users rate their onboarding experience as "effective" ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)). Products with structured onboarding consistently score higher on stickiness.
+
+Implementation: [DAU/MAU ratio and onboarding: how tours improve stickiness](/blog/dau-mau-ratio-onboarding).
+
+### Retention curves (week 1 / week 4 / week 12)
+
+Single-point retention is a snapshot. Retention curves show the trajectory.
+
+**Formulas:**
+
+```
+Week N Retention = (Users active in week N / Users in original cohort) x 100
+```
+
+**Benchmarks (median SaaS):**
+
+<table>
+  <thead>
+    <tr>
+      <th>Time period</th>
+      <th>Median retention</th>
+      <th>With structured onboarding</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Week 1</td>
+      <td>35%</td>
+      <td>55-65%</td>
+    </tr>
+    <tr>
+      <td>Week 4</td>
+      <td>20%</td>
+      <td>35-45%</td>
+    </tr>
+    <tr>
+      <td>Week 12</td>
+      <td>15%</td>
+      <td>25-30%</td>
+    </tr>
+  </tbody>
+</table>
+
+Products with structured onboarding flows retain 2.6x more users at week 4 than those without ([Appcues 2024 Onboarding Benchmarks](https://www.appcues.com/blog/onboarding-benchmarks)).
+
+The shape of the curve tells you more than the numbers. A steep early drop with a flat tail means your onboarding qualifies the wrong users but retains the right ones. A gradual decline means users are getting value but not enough to build a habit.
+
+Full guide: [Retention analytics for onboarding: week 1 vs week 4 vs week 12](/blog/retention-analytics-onboarding-week-1-week-4-week-12).
+
+---
+
+## Satisfaction metrics
+
+Satisfaction metrics capture qualitative user sentiment that quantitative behavioral data misses entirely, measuring how users perceive the onboarding experience through direct feedback. Three survey types dominate this category: NPS for relationship measurement, CSAT for touchpoint evaluation, and CES for friction detection. Each serves a different purpose and should be triggered at different onboarding milestones.
+
+### Net promoter score (NPS)
+
+NPS asks one question: "How likely are you to recommend this product?" Scored 0-10, respondents are grouped into promoters (9-10), passives (7-8), and detractors (0-6).
+
+**Formula:**
+
+```
+NPS = % Promoters - % Detractors
+```
+
+**Benchmarks:**
+
+<table>
+  <thead>
+    <tr>
+      <th>NPS range</th>
+      <th>Rating</th>
+      <th>SaaS context</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>-100 to 0</td>
+      <td>Needs work</td>
+      <td>Onboarding is creating detractors</td>
+    </tr>
+    <tr>
+      <td>0 to 30</td>
+      <td>Average</td>
+      <td>Typical for SaaS (median is ~31)</td>
+    </tr>
+    <tr>
+      <td>30 to 70</td>
+      <td>Good</td>
+      <td>Strong onboarding experience</td>
+    </tr>
+    <tr>
+      <td>70+</td>
+      <td>Excellent</td>
+      <td>Top-tier user experience</td>
+    </tr>
+  </tbody>
+</table>
+
+Timing matters. Asking NPS during onboarding (day 3-7) captures onboarding quality. Asking after onboarding (day 30+) captures product quality. They're different measurements.
+
+See [Onboarding NPS: when, how, and what to do with the score](/blog/onboarding-nps-survey) and [In-app NPS vs post-tour feedback: when to ask](/blog/in-app-nps-vs-post-tour-feedback).
+
+### Customer satisfaction score (CSAT)
+
+CSAT is simpler than NPS: "How satisfied are you with [specific experience]?" Scored 1-5 or 1-7. Unlike NPS, CSAT measures a specific touchpoint, making it better suited for evaluating individual onboarding steps.
+
+**Formula:**
+
+```
+CSAT = (Satisfied responses / Total responses) x 100
+```
+
+CSAT works best when triggered after a specific milestone: completing the setup wizard, finishing the first tour, or reaching the activation event. Tour Kit's `@tour-kit/surveys` package supports embedded CSAT surveys at any tour step.
+
+### Customer effort score (CES)
+
+CES asks: "How easy was it to [complete this task]?" Scored 1-7, where 1 is "very difficult" and 7 is "very easy." CES is the strongest predictor of customer loyalty, stronger than CSAT or NPS ([Gartner](https://www.gartner.com/en/customer-service-support/insights/customer-effort-score)).
+
+**Formula:**
+
+```
+CES = Sum of all scores / Number of responses
+```
+
+CES above 5.0 indicates low-friction onboarding. Below 4.0 signals a problem. The metric is especially useful for identifying specific steps where users struggle, because you can ask the question immediately after each step completes.
+
+---
+
+## Funnel and behavioral metrics
+
+Funnel and behavioral metrics examine the shape of user journeys through onboarding by tracking conversion rates between steps, grouping users into comparable cohorts, and measuring response rates to behavioral triggers. Unlike endpoint metrics that only tell you "did users activate," these metrics reveal *where* and *why* users struggle, making them the primary diagnostic tools for improving onboarding flows.
+
+### Onboarding funnel conversion
+
+Funnel analysis maps each step a new user takes from signup to first value and calculates the conversion rate between adjacent steps.
+
+**Formula (per step):**
+
+```
+Step Conversion = (Users completing Step N / Users completing Step N-1) x 100
+```
+
+The power is in the per-step view. A healthy funnel loses 5-10% at each step. A broken funnel has one step that drops 30%+ while others are fine. That's your bottleneck.
+
+Full developer's guide: [Funnel analysis for onboarding flows](/blog/funnel-analysis-onboarding-flows).
+
+### Cohort analysis
+
+Cohort analysis groups users by their signup date (or another shared characteristic) and tracks their behavior over time. It's how you measure whether onboarding changes actually improve outcomes, not just for the average user, but for the specific group exposed to the change.
+
+Without cohort analysis, you can't tell if your retention improved because of a product change or because you happened to acquire better-fit users that month.
+
+Methodology: [Cohort analysis for product tours: finding what works](/blog/cohort-analysis-product-tour).
+
+### Behavioral trigger response rate
+
+Behavioral triggers fire tours or nudges when users exhibit specific behaviors (or don't). The response rate measures how often triggered tours convert to action.
+
+```
+Trigger Response Rate = (Users who completed triggered action / Users who received trigger) x 100
+```
+
+This metric is particularly valuable for secondary onboarding — guiding existing users to features they haven't discovered). A trigger response rate below 10% usually means the trigger fires at the wrong moment.
+
+---
+
+## Business impact metrics
+
+Business impact metrics translate onboarding performance into revenue numbers that finance teams and executives can evaluate during budget discussions. ROI calculations, trial-to-paid conversion rates, and support ticket analysis connect the dots between product tours and actual revenue, giving you the ammunition to justify continued investment in onboarding infrastructure.
+
+### Onboarding ROI
+
+ROI connects onboarding investment (tooling cost, developer time, content creation) to measurable business outcomes (activation lift, churn prevention, support savings, expansion revenue).
+
+**Formula:**
+
+```
+ROI = ((Revenue impact - Total cost) / Total cost) x 100
+```
+
+The hard part is calculating "revenue impact." It decomposes into four sub-formulas: activation lift revenue, churn prevention savings, support ticket reduction, and expansion revenue acceleration. Each requires different inputs.
+
+Full formula breakdown: [How to measure the ROI of product tours](/blog/roi-product-tour-formula). Cost calculation: [How to calculate onboarding software ROI](/blog/calculate-onboarding-software-roi).
+
+### Trial-to-paid conversion
+
+Trial-to-paid conversion is the revenue-side metric most directly influenced by onboarding.
+
+**Formula:**
+
+```
+Trial-to-Paid = (Users who converted to paid / Total trial users) x 100
+```
+
+**Benchmarks:**
+
+<table>
+  <thead>
+    <tr>
+      <th>Trial model</th>
+      <th>Median conversion</th>
+      <th>With guided onboarding</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Free trial (no card required)</td>
+      <td>8-12%</td>
+      <td>15-20%</td>
+    </tr>
+    <tr>
+      <td>Free trial (card required)</td>
+      <td>45-55%</td>
+      <td>55-65%</td>
+    </tr>
+    <tr>
+      <td>Freemium</td>
+      <td>3-5%</td>
+      <td>5-8%</td>
+    </tr>
+  </tbody>
+</table>
+
+The difference between "with" and "without" guided onboarding consistently falls in the 40-60% improvement range across published benchmarks ([Userpilot](https://userpilot.com/blog/user-activation-for-saas/), [Appcues](https://www.appcues.com/blog/onboarding-benchmarks)).
+
+### Support ticket volume
+
+Support tickets during onboarding signal confusion. Tracking the volume and categorizing tickets by onboarding stage reveals which parts of the experience need work.
+
+**Formula:**
+
+```
+Onboarding Support Rate = (Support tickets from days 1-30 users / Total new users) x 100
+```
+
+A decreasing trend in onboarding support tickets after implementing guided tours directly translates to dollar savings. At $15-25 per ticket ([Zendesk benchmark](https://www.zendesk.com/blog/customer-service-costs/)), even a modest 20% reduction adds up.
+
+---
+
+## How to instrument onboarding metrics in React
+
+Every metric in this guide requires event data flowing from your product to an analytics backend, and Tour Kit's `@tour-kit/analytics` package provides the hooks to capture tour lifecycle events without building a custom tracking layer from scratch. The setup takes about 15 lines of code for basic instrumentation, with step-level granularity out of the box.
+
+```tsx
+// src/providers/analytics-provider.tsx
+import { AnalyticsProvider, createPostHogPlugin } from '@tourkit/analytics';
+
+const posthogPlugin = createPostHogPlugin({
+  client: posthog,
+  trackTourEvents: true,
+  trackStepEvents: true,
+});
+
+export function OnboardingAnalytics({ children }: { children: React.ReactNode }) {
+  return (
+    <AnalyticsProvider plugins={[posthogPlugin]}>
+      {children}
+    </AnalyticsProvider>
+  );
+}
+```
+
+The analytics package fires events at each tour lifecycle point: `tour_started`, `step_viewed`, `step_completed`, `tour_completed`, and `tour_abandoned`. These events feed every metric in this guide.
+
+For the full implementation, see [Setting up custom events for tour analytics in React](/blog/custom-events-tour-analytics-react) and [Building an onboarding analytics dashboard with PostHog](/blog/onboarding-analytics-dashboard-posthog).
+
+## Tools for tracking onboarding metrics
+
+Most product analytics tools already track onboarding metrics if you send the right events, so you rarely need a dedicated onboarding analytics platform. The table below maps each tool to its strengths and shows how Tour Kit's analytics package integrates with each one through built-in or custom plugins.
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Best for</th>
+      <th>Tour Kit integration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PostHog</td>
+      <td>Funnels, cohorts, session replay</td>
+      <td>Built-in plugin</td>
+    </tr>
+    <tr>
+      <td>Mixpanel</td>
+      <td>Event analytics, retention curves</td>
+      <td>Built-in plugin</td>
+    </tr>
+    <tr>
+      <td>Amplitude</td>
+      <td>Behavioral cohorts, path analysis</td>
+      <td>Built-in plugin</td>
+    </tr>
+    <tr>
+      <td>Google Analytics 4</td>
+      <td>Free, basic funnel analysis</td>
+      <td>Custom event plugin</td>
+    </tr>
+    <tr>
+      <td>Plausible</td>
+      <td>Privacy-first, simple analytics</td>
+      <td>Custom event plugin</td>
+    </tr>
+  </tbody>
+</table>
+
+For a comparison of what SaaS onboarding vendors track versus what you should actually measure, see [The metrics that Appcues, Userpilot, and Pendo track (and what's missing)](/blog/metrics-appcues-userpilot-pendo-track).
+
+We built [Tour Kit](https://usertourkit.com/) as an open-source alternative to these closed platforms. The core package ships at under 8KB gzipped with zero dependencies, and the analytics package adds pluggable integrations for PostHog, Mixpanel, Amplitude, and GA4. Fair disclosure: we're biased. But every claim in this guide is verifiable against the linked benchmark reports.
+
+## The metrics that matter most (a decision framework)
+
+Not every team needs every metric in this guide, and tracking too many at once leads to dashboard overload without actionable insight. The right set depends on your company stage, team size, and whether you've found product-market fit yet. Here's how to prioritize.
+
+**Pre-product-market-fit (seed/early stage):** Focus on activation rate and TTV. If users aren't reaching value, nothing else matters. Skip NPS because your sample size is too small.
+
+**Post-PMF, pre-scale (Series A/B):** Add retention curves (week 1/4/12), funnel analysis, and trial-to-paid conversion. You need to prove the unit economics work.
+
+**Scale stage (Series C+):** Layer in DAU/MAU, CES, support ticket analysis, and ROI calculations. Executives need business-case numbers, not product metrics.
+
+**Everyone, always:** Track tour completion and step drop-off. They're diagnostic tools that don't measure success, but they pinpoint problems fast.
+
+## A/B testing your onboarding
+
+Metrics without experimentation are just dashboards that look interesting but don't drive decisions. A/B testing connects specific onboarding changes to measurable outcome improvements, but testing onboarding flows is harder than testing button colors for three reasons:
+
+1. Sample sizes are smaller (only new users qualify)
+2. The outcome (retention) takes weeks to measure
+3. A bad experiment can tank your entire activation funnel
+
+Start with step-level changes (copy, ordering, required vs. optional actions) before testing entirely different flows. The statistical power needed for onboarding experiments typically requires 2-4 weeks of data collection per variant.
+
+Guides: [How to A/B test product tours](/blog/ab-test-product-tour) and [How to A/B test onboarding flows with Statsig + Tour Kit](/blog/ab-test-onboarding-statsig).
+
+## Onboarding metrics best practices
+
+Eight practices that separate teams who measure onboarding from teams who actually improve it, based on patterns from published benchmark reports and our own experience building Tour Kit's analytics package.
+
+**Define activation before instrumentation.** Pick the specific user behavior that correlates with retention before writing a single line of tracking code. Instrumenting "everything" creates noise. Instrumenting the activation event creates signal.
+
+**Measure at the step level, not just the tour level.** Tour-level completion rate hides the friction points. Step-level tracking reveals the exact moment users disengage, which is the information you need to fix the problem.
+
+**Pair quantitative metrics with qualitative surveys.** A 40% activation rate tells you the outcome. A CES score of 3.2 on step 4 tells you the cause. Run both.
+
+**Segment by user cohort, not just time period.** Users who signed up during a marketing push behave differently from organic signups. If you don't segment, your metrics blend different populations and produce misleading averages.
+
+**Set benchmark targets by product complexity.** A collaboration tool and an enterprise data platform can't share the same activation rate target. Use the benchmarks in this guide as starting points, then calibrate to your specific product within 60-90 days.
+
+**Review metrics weekly, not monthly.** Monthly reviews mean a broken onboarding flow runs for 30 days before anyone notices. Weekly reviews catch regressions when they're still small.
+
+**Test one variable at a time.** Changing the tour copy, step order, and trigger timing simultaneously makes it impossible to attribute results. Isolate variables even if it slows your iteration pace.
+
+**Track leading and lagging indicators together.** Tour completion (leading) and week-4 retention (lagging) tell different stories. If completion rises but retention stays flat, your tour is entertaining but not guiding users toward value.
+
+## Limitations of onboarding metrics
+
+No metric captures the full picture. Three honest caveats:
+
+Activation rate depends entirely on how you define the activation event. A poorly chosen event (too easy or too hard) makes the entire metric meaningless. Your aha moment analysis needs to be rigorous, or everything downstream is built on sand.
+
+Benchmarks are useful directional guides, not targets. A 36% average activation rate across all SaaS doesn't mean your specific B2B data platform should aim for 36%. Your product, your audience, your benchmarks.
+
+Tour Kit doesn't have a built-in visual builder, so you need React developers to create and modify tours. This is a real limitation if your product team wants to iterate on onboarding without code changes. It's also why every metric in this guide requires a developer to instrument. {/* TODO: link to no-code visual builder article when published */}
+
+## FAQ
+
+### What is the most important onboarding metric for SaaS?
+
+User activation rate is the most important onboarding metric for SaaS companies because it directly measures whether new signups reached the product's core value. As of April 2026, the average SaaS activation rate is 36%, meaning nearly two-thirds of signups churn before experiencing what the product does ([Userpilot](https://userpilot.com/blog/user-activation-for-saas/)). Tour completion rate, while easier to track, doesn't correlate with retention unless tours guide users toward performing real activation behaviors.
+
+### How do you calculate onboarding completion rate?
+
+Onboarding completion rate equals the number of users who finished all onboarding steps divided by the number who started, multiplied by 100. The average product tour completion rate is 61% across 15 million interactions ([Chameleon 2025](https://www.chameleon.io/blog/product-tour-benchmarks-highlights)). The more useful version is step-level completion, which shows where users drop off. Tour Kit's `@tour-kit/analytics` package fires `step_completed` events at each step for this purpose.
+
+### What is a good time to value for SaaS onboarding?
+
+A good time to value depends on product complexity. Simple tools should target under 5 minutes. Mid-complexity products aim for under 1 day. Enterprise platforms target under 1 week. The cross-industry average across 547 SaaS companies is 1 day, 12 hours, and 23 minutes ([Userpilot](https://userpilot.com/blog/time-to-value-benchmark-report-2024/)). Reducing TTV by even 25% typically correlates with a 15-25% improvement in trial-to-paid conversion.
+
+### How many onboarding metrics should a team track?
+
+Start with three to five metrics. Activation rate and time to value are non-negotiable. Add tour completion rate for diagnostics, one retention metric (week 1 or week 4 retention), and one satisfaction metric (NPS or CES). Tracking more than eight metrics simultaneously leads to dashboard overload and analysis paralysis. Add business-impact metrics (ROI, trial-to-paid) once your sample size supports reliable calculation.
+
+### What's the difference between onboarding metrics and product analytics?
+
+Onboarding metrics focus exclusively on the first 7-30 days and measure progress from signup to activation. Product analytics measure ongoing usage across the entire lifecycle. The overlap is real (activation rate shows up in both) but the lens differs: onboarding asks "did users reach value?" while product analytics asks "how are users creating value over time?"
+
+### How does NPS differ from CSAT for measuring onboarding?
+
+NPS measures overall likelihood to recommend (a relationship metric), while CSAT measures satisfaction with a specific experience (a touchpoint metric). For onboarding measurement, CSAT is more actionable because you can tie it to a specific step or milestone. NPS is better for tracking onboarding quality trends over time. CES (customer effort score) is arguably the best of the three for onboarding, since it directly measures friction, and friction is what kills activation.
+
+### When should I survey users during onboarding?
+
+Trigger satisfaction surveys at milestone completions, not arbitrary time intervals. The three high-signal moments are: after the first tour completes (captures initial impression), after the user reaches the activation event (captures value delivery), and at day 7 (captures early habit formation). Avoid surveying before users have enough experience to form an opinion, and never survey more than once per session. Tour Kit's `@tour-kit/surveys` package supports milestone-triggered surveys with [fatigue prevention](/blog/onboarding-nps-survey) built in.
+
+### What tools integrate with Tour Kit for onboarding analytics?
+
+Tour Kit's `@tour-kit/analytics` package has built-in plugins for PostHog, Mixpanel, Amplitude, and GA4, plus a custom plugin interface for other providers. Each plugin receives lifecycle events automatically. See the [PostHog dashboard tutorial](/blog/onboarding-analytics-dashboard-posthog), [Mixpanel funnel guide](/blog/mixpanel-product-tour-funnel), and [GA4 event tracking guide](/blog/ga4-tour-kit-event-tracking-onboarding) for implementation details.
+
+---
+
+## Internal linking suggestions
+
+This pillar page links to the following spoke articles:
+
+- [How to measure onboarding success](/blog/measure-onboarding-success-metrics)
+- [User activation rate](/blog/user-activation-rate-product-tour)
+- [Time to value](/blog/time-to-value-onboarding-metric)
+- [DAU/MAU ratio](/blog/dau-mau-ratio-onboarding)
+- [ROI of product tours](/blog/roi-product-tour-formula)
+- [Retention analytics](/blog/retention-analytics-onboarding-week-1-week-4-week-12)
+- [Funnel analysis](/blog/funnel-analysis-onboarding-flows)
+- [Drop-off tracking](/blog/product-tour-drop-off-tracking)
+- [Cohort analysis](/blog/cohort-analysis-product-tour)
+- [Feature adoption rate](/blog/calculate-feature-adoption-rate)
+- [Aha moment framework](/blog/aha-moment-framework-tours-activation-events)
+- [Onboarding NPS](/blog/onboarding-nps-survey)
+- [In-app NPS vs post-tour feedback](/blog/in-app-nps-vs-post-tour-feedback)
+- [Custom events for analytics](/blog/custom-events-tour-analytics-react)
+- [PostHog dashboard](/blog/onboarding-analytics-dashboard-posthog)
+- [A/B testing tours](/blog/ab-test-product-tour)
+- [A/B testing with Statsig](/blog/ab-test-onboarding-statsig)
+- [Vendor metrics comparison](/blog/metrics-appcues-userpilot-pendo-track)
+- [Product tour analytics framework](/blog/product-tour-analytics-framework)
+- [Onboarding software ROI calculation](/blog/calculate-onboarding-software-roi)
+- [Mixpanel funnel](/blog/mixpanel-product-tour-funnel)
+- [Amplitude retention](/blog/amplitude-tour-kit-onboarding-retention)
+- [GA4 event tracking](/blog/ga4-tour-kit-event-tracking-onboarding)
+
+## Distribution checklist
+
+- Dev.to (canonical to usertourkit.com)
+- Hashnode (canonical to usertourkit.com)
+- Reddit r/SaaS, r/ProductManagement, r/analytics
+- Hacker News (if paired with original benchmark data)
+- Newsletter pitch to product-led growth newsletters
+
+{/* JSON-LD */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Onboarding metrics explained: every KPI with formulas (2026)",
+  "description": "Master every onboarding KPI from activation rate to NPS. Each metric includes the formula, benchmark data, and React tracking code.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "User Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-12",
+  "dateModified": "2026-04-12",
+  "image": "https://usertourkit.com/og-images/onboarding-metrics-explained.png",
+  "url": "https://usertourkit.com/blog/onboarding-metrics-explained",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/onboarding-metrics-explained"
+  },
+  "keywords": ["onboarding metrics explained", "onboarding kpi hub", "user activation metrics guide", "saas onboarding kpis"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+
+export const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the most important onboarding metric for SaaS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "User activation rate is the most important onboarding metric for SaaS companies because it directly measures whether new signups reached the product's core value. As of April 2026, the average SaaS activation rate is 36%, meaning nearly two-thirds of signups churn before experiencing what the product does."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you calculate onboarding completion rate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Onboarding completion rate equals the number of users who finished all onboarding steps divided by the number who started, multiplied by 100. The average product tour completion rate is 61% across 15 million interactions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good time to value for SaaS onboarding?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A good time to value depends on product complexity. Simple tools should target under 5 minutes. Mid-complexity products aim for under 1 day. Enterprise platforms target under 1 week. The cross-industry average across 547 SaaS companies is 1 day, 12 hours, and 23 minutes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many onboarding metrics should a team track?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Start with three to five metrics. Activation rate and time to value are non-negotiable. Add tour completion rate for diagnostics, one retention metric (week 1 or week 4 retention), and one satisfaction metric (NPS or CES). Tracking more than eight metrics simultaneously leads to dashboard overload."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between onboarding metrics and product analytics?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Onboarding metrics focus exclusively on the first 7-30 days and measure progress from signup to activation. Product analytics measure ongoing usage across the entire user lifecycle. The overlap is real but the analysis lens differs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does NPS differ from CSAT for measuring onboarding?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "NPS measures overall likelihood to recommend (a relationship metric), while CSAT measures satisfaction with a specific experience (a touchpoint metric). For onboarding measurement, CSAT is more actionable because you can tie it to a specific step or milestone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When should I survey users during onboarding?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Trigger satisfaction surveys at milestone completions, not arbitrary time intervals. The three high-signal moments are: after the first tour completes, after the user reaches the activation event, and at day 7."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What tools integrate with Tour Kit for onboarding analytics?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit's @tour-kit/analytics package provides built-in plugins for PostHog, Mixpanel, Amplitude, and Google Analytics 4, plus a custom plugin interface for any other analytics provider."
+      }
+    }
+  ]
+}

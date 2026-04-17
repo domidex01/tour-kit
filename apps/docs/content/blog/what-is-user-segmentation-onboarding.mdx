@@ -1,0 +1,166 @@
+---
+title: "What is user segmentation? Targeting tours to the right users"
+slug: "what-is-user-segmentation-onboarding"
+description: "Learn what user segmentation means for onboarding. Six types, real stats, and React code patterns for targeting tours to the right users."
+primary_keyword: "what is user segmentation onboarding"
+secondary_keywords: ["user segmentation definition", "onboarding targeting", "behavioral segmentation onboarding", "segment-based product tours"]
+category: "Glossary"
+schema_type: "TechArticle"
+spreadsheet_row: 314
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/what-is-user-segmentation-onboarding.png
+---
+
+# What is user segmentation? Targeting tours to the right users
+
+Your admin user and your free-trial signup don't need the same product tour. One already knows the dashboard layout. The other needs to find the "Create Project" button before they bounce. User segmentation is how you stop treating them identically.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Definition
+
+User segmentation in onboarding is the practice of grouping users by shared characteristics (demographics, behavior, experience level, journey stage, or firmographic data) and delivering a different onboarding experience to each group. The goal is to show every user the shortest path to their first meaningful outcome instead of a generic walkthrough that fits nobody well. Teams that segment onboarding see 20-35% higher activation rates compared to one-size-fits-all flows.
+
+"Segments should be clearly different in their needs. If they're too similar, they might not be a separate group," as Talke Hoppmann-Walton wrote in [Smashing Magazine](https://www.smashingmagazine.com/2024/05/building-user-segmentation-matrix-cross-org-alignment/).
+
+## How user segmentation works in onboarding
+
+User segmentation follows a five-step cycle: collect signals at signup or from in-app behavior, assign users to groups using rules or scoring, map each group to a specific tour, measure per-segment outcomes like completion rate and time-to-first-action, then refine segments that underperform. The cycle runs continuously, not once at launch.
+
+The key distinction: demographic segmentation groups users by *who they are* (role, industry, plan tier). Behavioral segmentation groups them by *what they do* (features used, pages visited, tasks completed). Behavioral data predicts future engagement more reliably ([Netcore Cloud](https://netcorecloud.com/blog/behavioral-segmentation-vs-demographic-segmentation/)). But demographics give you targeting data before a user has done anything.
+
+Most teams combine both. Keboola accelerated onboarding and improved feature adoption by separating users into experience-level groups first, then layering behavioral triggers on top ([ProductFruits, 2026](https://productfruits.com/blog/the-role-of-user-segmentation-during-onboarding)).
+
+## Six segmentation types for product tours
+
+Product tour targeting splits into six types, each drawing from a different data source. Demographic and firmographic segments work from day one because the data comes from signup or CRM. Behavioral and psychographic segments get more accurate over time as usage data accumulates.
+
+<table>
+<thead>
+<tr><th>Type</th><th>Signal source</th><th>Tour targeting example</th></tr>
+</thead>
+<tbody>
+<tr><td>Demographic</td><td>Signup form, CRM</td><td>Show marketing-specific tours to marketers, dev-specific tours to engineers</td></tr>
+<tr><td>Behavioral</td><td>Event tracking, feature flags</td><td>Users who haven't created a project after 3 sessions get a guided creation tour</td></tr>
+<tr><td>Psychographic</td><td>Onboarding survey</td><td>Users who say "I'm exploring" get a high-level overview; "I have a deadline" get the quickstart</td></tr>
+<tr><td>Experience level</td><td>Self-reported or inferred</td><td>Power users skip the basics, new users get progressive disclosure</td></tr>
+<tr><td>Journey stage</td><td>Account age, activation events</td><td>Returning churned users see a "what's new" tour, not the original onboarding</td></tr>
+<tr><td>Firmographic (B2B)</td><td>CRM, plan tier</td><td>Enterprise accounts see admin/SSO setup tours; startups see quick-start flows</td></tr>
+</tbody>
+</table>
+
+SocialPilot saw a 20% increase in activation rates and 15% decrease in churn after implementing segment-based onboarding ([ProductFruits, 2026](https://productfruits.com/blog/the-role-of-user-segmentation-during-onboarding)). Personalized onboarding paths increase tour completion rates by roughly 35% compared to one-size-fits-all flows ([Formbricks, 2026](https://formbricks.com/blog/user-onboarding-best-practices)). ClearCals saw similar gains in user activation by applying role-specific segmentation to their onboarding ([Userpilot](https://userpilot.com/blog/user-segmentation/)).
+
+## Segmentation examples with code
+
+In a React codebase, segment-based tour targeting comes down to conditional rendering. A function maps user data to a segment, and each segment loads a different tour configuration. The pattern below handles three segments in under 20 lines. No external segmentation service required; the logic deploys with your app and runs at zero additional latency.
+
+```tsx
+// src/components/OnboardingRouter.tsx
+import { TourProvider, useTour } from '@tourkit/react';
+
+type UserSegment = 'new_user' | 'power_user' | 'returning';
+
+function getSegment(user: { signupDate: Date; sessionsCount: number; churned: boolean }): UserSegment {
+  if (user.churned) return 'returning';
+  if (user.sessionsCount > 20) return 'power_user';
+  return 'new_user';
+}
+
+const toursBySegment: Record<UserSegment, string> = {
+  new_user: 'getting-started',
+  power_user: 'advanced-features',
+  returning: 'whats-new-april',
+};
+
+export function OnboardingRouter({ user }: { user: Parameters<typeof getSegment>[0] }) {
+  const segment = getSegment(user);
+  return <TourProvider tourId={toursBySegment[segment]} />;
+}
+```
+
+The segmentation logic lives in your code. You version-control it, test it, and deploy it with your app.
+
+## Why segmentation matters for onboarding
+
+User segmentation directly impacts the three metrics growth teams care about most: activation rate, time-to-value, and retention. Generic tours waste time — a user who signed up for one specific feature doesn't care about a five-step walkthrough of features they'll never touch. The wasted steps create friction. Friction kills activation.
+
+And the numbers go beyond activation. As of 2026, hyper-personalized onboarding (AI-driven, real-time segment adaptation) is one of the top three trends in SaaS user experience ([Formbricks](https://formbricks.com/best-practices/onboarding-segmentation)).
+
+Segmentation also matters for accessibility. [W3C WAI supplemental guidance](https://www.w3.org/WAI/WCAG2/supplemental/objectives/o8-personalization/) calls for supporting adaptation and personalization, including simplification for users with cognitive disabilities. WCAG 3.0 is expanding these guidelines further.
+
+Segments that account for `prefers-reduced-motion`, screen reader usage, or cognitive load differences aren't just good UX. They're compliance-forward.
+
+## User segmentation in Tour Kit
+
+Tour Kit is a headless React library, so segmentation logic stays in your codebase rather than locked inside a vendor dashboard. You pass a different `tourId` to `TourProvider` based on segment, use `useTour()` to conditionally show or skip steps, and combine with feature flags from LaunchDarkly or Statsig for gradual per-segment rollouts. Tour Kit's core ships at under 8KB gzipped, so adding segment-conditional tours doesn't bloat your bundle.
+
+Tour Kit's `@tourkit/analytics` package fires events per tour step. Measure completion rates, drop-off points, and activation per segment using PostHog, Mixpanel, or Amplitude.
+
+The tradeoff: you need React 18+ developers to implement segmentation logic. There's no visual rule builder — that's by design. For teams that need a marketing-managed GUI, Userpilot or Appcues is a better fit.
+
+Check the [Tour Kit docs](https://usertourkit.com/) and the [conditional tours guide](/blog/conditional-product-tour-user-role) for implementation details.
+
+## FAQ
+
+### What is the difference between user segmentation and personalization?
+
+User segmentation groups users into categories (new, power user, enterprise) and delivers a shared experience per group. Personalization adapts to the individual based on specific behavior. Segmentation comes first. Start with 3-5 segments and add individual-level personalization once you have enough behavioral data.
+
+### Which segmentation type works best for product tours?
+
+Behavioral segmentation predicts engagement more reliably than demographics, because it groups users by what they actually do. But it requires existing usage data. For day-one targeting, combine a lightweight signup question (role, goal) with behavioral triggers that fire after the first session. Tour Kit supports both through conditional `tourId` assignment.
+
+### How many segments should I start with?
+
+Three: new users, returning users, and power users. That covers the most common onboarding divergence. SocialPilot and Keboola both report activation improvements from starting with experience-level segments, then layering firmographic or psychographic criteria later ([ProductFruits](https://productfruits.com/blog/the-role-of-user-segmentation-during-onboarding)).
+
+### Can segmentation affect accessibility?
+
+Yes. W3C WAI guidelines recommend personalization that accounts for cognitive and motor needs ([Objective 8](https://www.w3.org/WAI/WCAG2/supplemental/objectives/o8-personalization/)). Segments that respect `prefers-reduced-motion`, adjust tour density for cognitive load, or provide keyboard-only navigation make onboarding more inclusive. Tour Kit's headless architecture gives you full control over these adaptations.
+
+{/* Internal linking: FROM persona-based-onboarding, conditional-product-tour-user-role, secondary-onboarding-feature-adoption → this article. TO conditional-product-tour-user-role (already linked). Distribution: Dev.to, Hashnode (canonical), Reddit r/reactjs r/SaaS */}
+
+{/* JSON-LD */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "What is user segmentation? Targeting tours to the right users",
+  "description": "Learn what user segmentation means for onboarding. Six types, real stats, and React code patterns for targeting tours to the right users.",
+  "author": { "@type": "Person", "name": "DomiDex", "url": "https://domidex.com" },
+  "publisher": { "@type": "Organization", "name": "Tour Kit", "url": "https://usertourkit.com", "logo": { "@type": "ImageObject", "url": "https://usertourkit.com/logo.png" } },
+  "datePublished": "2026-04-12",
+  "dateModified": "2026-04-12",
+  "image": "https://usertourkit.com/og-images/what-is-user-segmentation-onboarding.png",
+  "url": "https://usertourkit.com/blog/what-is-user-segmentation-onboarding",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://usertourkit.com/blog/what-is-user-segmentation-onboarding" },
+  "keywords": ["what is user segmentation onboarding", "user segmentation definition", "onboarding targeting"],
+  "proficiencyLevel": "Beginner",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": { "@type": "ComputerLanguage", "name": "TypeScript" }
+}
+
+export const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://usertourkit.com" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://usertourkit.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "What is user segmentation?", "item": "https://usertourkit.com/blog/what-is-user-segmentation-onboarding" }
+  ]
+}
+
+export const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is the difference between user segmentation and personalization?", "acceptedAnswer": { "@type": "Answer", "text": "User segmentation groups users into categories and delivers a shared experience per group. Personalization adapts content to the individual based on their specific behavior. Segmentation is the prerequisite for personalization. Most teams start with 3-5 segments." } },
+    { "@type": "Question", "name": "Which segmentation type works best for product tours?", "acceptedAnswer": { "@type": "Answer", "text": "Behavioral segmentation tends to predict engagement more reliably than demographics alone. For day-one targeting, combine a lightweight signup question with behavioral triggers that fire after the first session." } },
+    { "@type": "Question", "name": "How many segments should I start with?", "acceptedAnswer": { "@type": "Answer", "text": "Start with three: new users, returning users, and power users. That covers the most common onboarding divergence point. Add firmographic or psychographic criteria once you have baseline data." } },
+    { "@type": "Question", "name": "Can segmentation affect accessibility?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. W3C WAI guidelines recommend that personalization account for cognitive and motor accessibility needs. Segments that respect prefers-reduced-motion and adjust tour density for cognitive load make onboarding more inclusive." } }
+  ]
+}

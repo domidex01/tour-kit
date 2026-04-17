@@ -1,0 +1,250 @@
+---
+title: "Why onboarding SaaS tools charge per MAU (and why that's a problem)"
+slug: "mau-pricing-onboarding-tool"
+description: "Break down why per-MAU pricing in onboarding tools like Appcues and Pendo penalizes product growth. See real costs at scale and alternatives."
+primary_keyword: "mau pricing onboarding tool"
+secondary_keywords: ["per user pricing onboarding", "mau based saas pricing problem", "onboarding tool cost comparison", "appcues pricing per mau"]
+category: "Build vs Buy"
+schema_type: "TechArticle"
+spreadsheet_row: 134
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/mau-pricing-onboarding-tool.png
+---
+
+# Why onboarding SaaS tools charge per MAU (and why that's a problem)
+
+Every major onboarding SaaS product (Appcues, Pendo, Userpilot, Chameleon, UserGuiding) bills by monthly active users. The model is simple: more people use your product, you pay more for onboarding. On the surface, that sounds fair. But follow the math through two years of growth and you'll find a pricing structure that punishes you for succeeding.
+
+We built [Tour Kit](https://tourkit.dev) as an open-source alternative, so we're obviously biased. Take what follows with appropriate skepticism. Every cost figure below is sourced from vendor pricing pages or Vendr's transaction database, and you can check them yourself.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## The pricing model every onboarding tool shares
+
+Per-MAU pricing in onboarding tools works like this: you pick a plan tier, that tier includes a monthly active user cap, and when your product grows past that cap you either upgrade or negotiate. As of April 2026, here's what that looks like across the market:
+
+<table>
+  <thead>
+    <tr>
+      <th>Vendor</th>
+      <th>2,000 MAU/mo</th>
+      <th>10,000 MAU/mo</th>
+      <th>50,000+ MAU/mo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>UserGuiding</td>
+      <td>$69/mo</td>
+      <td>$299/mo</td>
+      <td>$499+/mo (custom)</td>
+    </tr>
+    <tr>
+      <td>Chameleon</td>
+      <td>$279/mo</td>
+      <td>≈$850/mo</td>
+      <td>Custom</td>
+    </tr>
+    <tr>
+      <td>Appcues</td>
+      <td>≈$249/mo</td>
+      <td>≈$879/mo</td>
+      <td>Custom</td>
+    </tr>
+    <tr>
+      <td>Userpilot</td>
+      <td>$299/mo</td>
+      <td>$799+/mo</td>
+      <td>Custom</td>
+    </tr>
+    <tr>
+      <td>Pendo</td>
+      <td>≈$600/mo</td>
+      <td>≈$1,667/mo</td>
+      <td>$6,250+/mo</td>
+    </tr>
+  </tbody>
+</table>
+
+*Sources: vendor pricing pages (April 2026); Pendo estimates from [Vendr marketplace data](https://www.vendr.com/marketplace/pendo) across 530 real purchases.*
+
+UserGuiding at $69/month looks reasonable. But notice: even the cheapest vendor quadruples your bill as you grow from 2K to 10K MAUs. Pendo triples it. And once you cross into "custom" territory, you're negotiating against a vendor who already has your data locked in.
+
+## The structural problem: you pay more when you win
+
+Per-MAU pricing creates a specific misalignment between vendor incentives and customer outcomes. The vendor profits when users log in. Whether those users convert, retain, or generate any revenue for you is irrelevant to the bill.
+
+[Baremetrics](https://baremetrics.com/blog/per-user-pricing) put it bluntly: "Per user pricing kills your growth and sets you up for long term failure, because it's rarely where value is ascribed to your product."
+
+Consider a real scenario documented by [SSOJet](https://ssojet.com/blog/mau-pricing-is-broken-fair-models-for-fast-growing-saas): a company grows from 3,000 to 30,000 MAUs over 18 months. Their onboarding tool bill jumps 10x, from $120/month to $1,200/month. But their revenue only doubled during the same period. The tool vendor captured proportionally more of the new revenue than the customer kept.
+
+This isn't a bug in the model. It's the model working as designed.
+
+Three assumptions baked into per-MAU pricing all fail under scrutiny:
+
+1. **Every user creates equal onboarding value.** They don't. A power user who already knows your product counts the same as a trial signup who bounces after 30 seconds. Both are "monthly active."
+
+2. **Growth always means higher profitability.** It doesn't, especially for freemium products. If half your MAUs are free-tier users, you're paying to onboard people who generate zero revenue. Your onboarding tool vendor doesn't share that distinction.
+
+3. **"Active" means something consistent.** It doesn't. Pendo counts anyone who loads a page with their snippet. Appcues counts unique logins in a rolling 30-day window. A user who logs in once to check a notification and leaves is "active" for billing purposes.
+
+## What this costs at real growth rates
+
+Here's where the math gets uncomfortable. Take a B2B SaaS product growing at 15% month-over-month. Aggressive, but not unusual for a seed-stage company with product-market fit.
+
+Starting at 2,000 MAUs with Userpilot's Starter plan ($299/month):
+
+- **Month 1:** 2,000 MAUs at $299/month ($3,588/year)
+- **Month 12:** roughly 10,000 MAUs at $799+/month ($9,588+/year)
+- **Month 18:** roughly 20,000 MAUs, Growth plan, custom pricing
+- **Month 24:** roughly 40,000 MAUs, enterprise negotiation territory
+
+You started at $3,588/year. Within two years, you're looking at $15,000–$40,000/year for the same product doing the same thing. And that's Userpilot, a mid-range option.
+
+Pendo is steeper. Vendr's data from 530 real enterprise purchases shows a median annual contract of $48,500, with deals reaching $147,264/year. One customer reported paying $120,000/year locked into a mandatory three-year commitment ([Vendr marketplace](https://www.vendr.com/marketplace/pendo)).
+
+At those numbers, you're not paying for an onboarding tool anymore. You're paying a growth tax.
+
+## The freemium trap nobody talks about
+
+If you run a freemium product, per-MAU pricing creates a structural contradiction. The entire point of freemium is maximizing monthly active users. More free users = bigger top of funnel = more eventual conversions. But under MAU pricing, more free users = higher onboarding tool bills on users who may never pay you.
+
+Say you have 50,000 MAUs and a 5% paid conversion rate. You're paying to "onboard" 47,500 users who generate zero revenue. At Chameleon's Growth plan pricing (around $999/month at 15K MAUs, extrapolated higher), that means the majority of your onboarding spend goes to users who haven't paid you a dollar.
+
+No vendor's pricing page mentions this. The Pendo free tier caps at 500 MAUs, probably the most honest signal in the market about where the math stops working for them.
+
+## The counterargument: why vendors use MAU pricing
+
+To be fair, per-MAU pricing exists for real reasons.
+
+**It aligns cost with infrastructure load.** More users means more events tracked, more analytics processed, more experiences served. The vendor's costs genuinely scale with your MAU count, even if the scaling ratio isn't linear.
+
+**It's simple to understand.** "You pay based on how many people use your product" is easier to budget for than complex usage-based metrics with multiple dimensions. You know roughly how many users you have.
+
+**It captures value at scale.** If your product has 100,000 MAUs and you're generating $10M ARR, paying $50K/year for an onboarding tool is a 0.5% cost of revenue. That's not unreasonable.
+
+And honestly, for companies with predictable, slow user growth (internal tools, niche B2B with stable customer bases), the MAU model is fine. Your bill won't surprise you. You can budget it.
+
+The model breaks specifically for products with non-linear growth, freemium tiers, seasonal spikes, or viral acquisition channels. Which, if we're being honest, describes most modern SaaS products.
+
+## What we'd do instead
+
+We built Tour Kit as an open-source headless library because we believe onboarding infrastructure should be a fixed cost, not a variable one that scales with your success.
+
+The tradeoff is real: you write more code. Tour Kit gives you hooks, components, and logic, not a no-code visual builder. You need React developers. You won't drag-and-drop a tour in 10 minutes.
+
+But the cost calculus flips at scale. Engineering time to implement a basic product tour with Tour Kit is typically 1–3 days. At $150/hour fully loaded, that's $1,800–$3,600 one-time. Compare that to $48,500/year median for Pendo, and the open-source approach pays for itself in the first month.
+
+```tsx
+// src/components/OnboardingTour.tsx
+import { TourProvider, useTour } from '@tourkit/react';
+
+const steps = [
+  { target: '#welcome', content: 'Welcome to the app' },
+  { target: '#dashboard', content: 'Here is your dashboard' },
+  { target: '#settings', content: 'Configure your account' },
+];
+
+function App() {
+  return (
+    <TourProvider steps={steps}>
+      <YourApp />
+    </TourProvider>
+  );
+}
+```
+
+No MAU cap. No overage fees. No three-year commitment.
+
+Tour Kit's core ships at under 8KB gzipped with zero runtime dependencies. You can add analytics ([`@tour-kit/analytics`](/docs/analytics/overview)), checklists ([`@tour-kit/checklists`](/docs/checklists/overview)), or surveys ([`@tour-kit/surveys`](/docs/surveys/overview)). Each is a separate package, installed only when needed.
+
+The limitation is real, though: Tour Kit has a smaller community than React Joyride (603K weekly npm downloads) or Shepherd.js (200K+). It's React 18+ only. There's no mobile SDK. And you won't get a customer success manager helping you improve conversion funnels. For some teams, that matters more than cost savings.
+
+## The broader pricing shift
+
+This isn't just an onboarding tools problem. The entire SaaS industry is rethinking per-user pricing. As of Q1 2026, [65% of SaaS vendors](https://editorialge.com/saas-trends-q1/) with AI features are layering usage-based metrics rather than raising per-seat costs. [Growth Unhinged](https://www.saastr.com/the-great-price-surge-of-2025-a-comprehensive-breakdown-of-pricing-increases-and-the-issues-they-have-created-for-all-of-us/) tracked 1,800+ pricing changes among the top 500 SaaS vendors in 2025 alone.
+
+The onboarding tool category hasn't caught up. Every major player still prices on MAU because the model captures value efficiently (for the vendor). Until a viable no-code alternative drops MAU pricing (or until enough teams switch to open-source), the model won't change.
+
+If you're evaluating onboarding tools today, ask one question: **does the vendor win when I win, or does the vendor win when my users log in?** If the answer is the latter, you're paying a growth tax.
+
+[Try Tour Kit](https://tourkit.dev/docs/getting-started): zero MAU fees, MIT licensed. Check the [live demo on StackBlitz](https://tourkit.dev/docs/examples) to see what headless onboarding looks like in practice.
+
+## FAQ
+
+### Is per-MAU pricing always bad for onboarding tools?
+
+Per-MAU pricing works for companies with stable, predictable user counts like internal tools or niche B2B products with low growth. The model breaks when growth is non-linear, freemium users inflate MAU counts, or seasonal spikes push you into higher tiers temporarily. For a SaaS product growing 15% month-over-month, MAU-based onboarding costs can double every 5 months.
+
+### How much does Pendo really cost per year?
+
+As of April 2026, Vendr's data from 530 real purchases shows Pendo contracts range from $17,665 to $147,264 per year, with a median of $48,500. Hidden costs (implementation, add-on modules, premium support) push total cost of ownership 30–50% higher than the base contract.
+
+### Can open-source product tour libraries replace Appcues or Pendo?
+
+Open-source libraries like Tour Kit replace the tour and onboarding functionality (step-by-step guides, tooltips, checklists, announcements) without MAU-based billing. Tour Kit's core is under 8KB gzipped with zero dependencies. You need React developers and won't get a visual builder. For engineering teams already building in React, the implementation cost of 1 to 3 days is typically recovered within the first month compared to SaaS pricing.
+
+### Why do all onboarding tools use the same pricing model?
+
+Onboarding SaaS vendors use MAU pricing because their infrastructure costs scale with user count and the model captures maximum revenue from growing customers. It's the industry standard. Until competitive pressure from open-source alternatives forces a change, expect every major vendor to keep billing this way.
+
+### What's the cheapest onboarding tool for a growing SaaS product?
+
+At 2,000 MAUs, UserGuiding is cheapest at $69/month. But "cheapest at launch" isn't the right metric. You need to model cost at your projected MAU count in 12 and 24 months. At 10,000 MAUs, the cheapest SaaS option is still $299/month ($3,588/year). Open-source libraries like Tour Kit, React Joyride, or Shepherd.js have zero MAU cost regardless of scale, though they require engineering time to implement.
+
+---
+
+{/* JSON-LD Schema */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Why onboarding SaaS tools charge per MAU (and why that's a problem)",
+  "description": "Break down why per-MAU pricing in onboarding tools like Appcues and Pendo penalizes product growth. See real costs at scale and alternatives.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://tourkit.dev/og-images/mau-pricing-onboarding-tool.png",
+  "url": "https://tourkit.dev/blog/mau-pricing-onboarding-tool",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/mau-pricing-onboarding-tool"
+  },
+  "keywords": ["mau pricing onboarding tool", "per user pricing onboarding", "mau based saas pricing problem", "onboarding tool cost comparison"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+
+{/* Internal linking suggestions:
+- Link FROM: best-alternatives-building-onboarding-in-house, onboarding-tool-lighthouse-performance, how-onboarding-tools-inject-code
+- Link TO: best-product-tour-tools-b2b-saas, best-free-product-tour-libraries-open-source, migrate-appcues-code-owned-onboarding
+*/}
+
+{/* Distribution checklist:
+- Dev.to: Full article with canonical URL
+- Hashnode: Full article with canonical URL
+- Reddit r/SaaS: "The math on per-MAU pricing in onboarding tools" (discussion, not promotional)
+- Reddit r/reactjs: Not ideal fit (more business than code)
+- Hacker News: "Why onboarding SaaS tools charge per MAU" (if it resonates with pricing debates)
+- Indie Hackers: Great fit, pricing/business model angle
+*/}

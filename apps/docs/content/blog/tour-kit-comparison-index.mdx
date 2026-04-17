@@ -1,0 +1,405 @@
+---
+title: "Tour Kit vs everything: the complete comparison index (2026)"
+slug: "tour-kit-comparison-index"
+description: "Compare Tour Kit against every product tour library and SaaS platform. Head-to-head benchmarks, migration guides, and pricing breakdowns in one place."
+primary_keyword: "tour kit comparison index"
+secondary_keywords: ["tour kit vs alternatives", "tour kit comparison hub", "product tour library comparison", "react tour library comparison"]
+category: "Pillar Pages"
+schema_type: "TechArticle"
+spreadsheet_row: 295
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/tour-kit-comparison-index.png
+---
+
+# Tour Kit vs everything: the complete comparison index
+
+We've published over 50 comparison articles, migration guides, and alternatives roundups since launching Tour Kit. Finding the right one meant digging through the blog. This page fixes that.
+
+Every comparison we've written is organized below by category: head-to-head matchups, library roundups, SaaS alternatives, migration paths, and pricing breakdowns. Each section includes a summary table so you can scan without clicking through, plus links to the full deep-dives when you want the details.
+
+**Quick install for Tour Kit (open-source, MIT):**
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+**Disclosure:** We built [Tour Kit](https://usertourkit.com/). Every comparison is written from our perspective, but we test every library we cover, cite verifiable data, and acknowledge where competitors do things better. If a number appears on this page, you can verify it on npm, GitHub, or bundlephobia.
+
+## What is Tour Kit?
+
+Tour Kit is a headless, composable product tour library for React. It ships as 10 individual packages you install based on what you need: tours, hints, checklists, announcements, surveys, analytics, scheduling, and more. The core package weighs under 8KB gzipped with zero runtime dependencies. It works with any design system because it doesn't ship UI. You render your own components using the hooks and primitives it provides.
+
+That headless architecture is the thing every comparison on this page comes back to. Libraries like React Joyride and Shepherd.js ship pre-built tooltips. SaaS platforms like Appcues and Userpilot inject an external script. Tour Kit does neither. You get the tour logic, state management, positioning, and accessibility primitives. You write the JSX.
+
+For teams already using shadcn/ui, Radix, or Tailwind, that means your tours look like the rest of your app from day one. For teams with strict CSP policies or SOC 2 requirements, it means no third-party scripts phoning home. The tradeoff is real: you need React developers, and you'll write more code than a drag-and-drop builder requires. Whether that tradeoff works depends on your team, which is exactly why this comparison index exists.
+
+## The master comparison table
+
+This table compares Tour Kit against every major open-source library and SaaS platform we've tested. As of April 2026, these numbers come from npm, GitHub, and bundlephobia. We update this table monthly.
+
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>Bundle size</th>
+<th>License</th>
+<th>React 19</th>
+<th>Headless</th>
+<th>TypeScript</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tour Kit</strong></td>
+<td>Library</td>
+<td>&lt;8KB core (gzipped)</td>
+<td>MIT</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ Native</td>
+<td>Free / $99 one-time Pro</td>
+</tr>
+<tr>
+<td>React Joyride</td>
+<td>Library</td>
+<td>~45KB (gzipped)</td>
+<td>MIT</td>
+<td>❌</td>
+<td>❌</td>
+<td>⚠️ DefinitelyTyped</td>
+<td>Free</td>
+</tr>
+<tr>
+<td>Shepherd.js</td>
+<td>Library</td>
+<td>~25KB (gzipped)</td>
+<td>AGPL-3.0</td>
+<td>⚠️ Via wrapper</td>
+<td>❌</td>
+<td>✅ Native</td>
+<td>Free / Commercial license</td>
+</tr>
+<tr>
+<td>Driver.js</td>
+<td>Library</td>
+<td>~5KB (gzipped)</td>
+<td>MIT</td>
+<td>❌ No wrapper</td>
+<td>❌</td>
+<td>✅ Native</td>
+<td>Free</td>
+</tr>
+<tr>
+<td>Intro.js</td>
+<td>Library</td>
+<td>~18KB (gzipped)</td>
+<td>AGPL-3.0</td>
+<td>❌</td>
+<td>❌</td>
+<td>⚠️ DefinitelyTyped</td>
+<td>Free / $9.99+ commercial</td>
+</tr>
+<tr>
+<td>OnboardJS</td>
+<td>Library</td>
+<td>~12KB (gzipped)</td>
+<td>MIT</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ Native</td>
+<td>Free / $59/month SaaS</td>
+</tr>
+<tr>
+<td>Appcues</td>
+<td>SaaS</td>
+<td>External script</td>
+<td>Proprietary</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>~$249/month</td>
+</tr>
+<tr>
+<td>Userpilot</td>
+<td>SaaS</td>
+<td>External script</td>
+<td>Proprietary</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>~$249/month</td>
+</tr>
+<tr>
+<td>Pendo</td>
+<td>SaaS</td>
+<td>External script</td>
+<td>Proprietary</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>~$48,000/year</td>
+</tr>
+<tr>
+<td>Chameleon</td>
+<td>SaaS</td>
+<td>External script</td>
+<td>Proprietary</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>~$279/month</td>
+</tr>
+<tr>
+<td>Whatfix</td>
+<td>SaaS/DAP</td>
+<td>External script</td>
+<td>Proprietary</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>Enterprise (custom)</td>
+</tr>
+<tr>
+<td>Userflow</td>
+<td>SaaS</td>
+<td>External script</td>
+<td>Proprietary</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>~$240/month</td>
+</tr>
+</tbody>
+</table>
+
+Two things jump out. First, every open-source library except Tour Kit and OnboardJS ships opinionated UI. Second, every SaaS platform runs an external script you don't control. Those two facts drive most of the comparisons below.
+
+## Head-to-head comparisons
+
+These articles pit Tour Kit directly against a specific library, covering architecture, bundle size, API design, accessibility, and migration difficulty. Start here if you already know which tool you're evaluating against.
+
+### Tour Kit vs React Joyride
+
+React Joyride has 603K+ weekly npm downloads and is most developers' first React tour experience. It works out of the box with minimal configuration. But its class-based architecture doesn't support React 19, and its inline styles conflict with Tailwind and design systems. We measured its bundle at ~45KB gzipped, roughly 5.6x Tour Kit's core.
+
+**Full comparison:** [Tour Kit vs React Joyride: headless vs opinionated](/blog/tour-kit-vs-react-joyride)
+
+### Tour Kit vs Shepherd.js
+
+Shepherd.js is framework-agnostic with clean documentation and active maintenance from Ship Shape. The AGPL-3.0 license is the dealbreaker for most commercial projects: you either open-source your entire application or purchase a commercial license. Tour Kit is MIT.
+
+{/* TODO: link to tour-kit-vs-shepherd-js when published */}
+
+### Tour Kit vs Driver.js
+
+Driver.js has the highest GitHub star count in the category (25K+) and the smallest bundle (~5KB). But it manipulates the DOM directly with no React wrapper, which conflicts with React's virtual DOM reconciliation. Tour Kit is React-native, so it works with concurrent mode, strict mode, and React 19 transitions.
+
+{/* TODO: link to tour-kit-vs-driver-js when published */}
+
+### Tour Kit vs Intro.js
+
+Intro.js was one of the original product tour libraries. It hasn't had a meaningful architectural update in years, ships AGPL-licensed, and has no React integration. The migration guide below covers moving off it.
+
+**Migration guide:** [Replace Intro.js with a React-native alternative](/blog/replace-intro-js-react)
+
+## Open-source library roundups
+
+The open-source product tour ecosystem includes over a dozen actively maintained libraries, each making different tradeoffs around bundle size, framework coupling, TypeScript support, and styling approach. These roundup articles compare multiple libraries at once, testing them in the same Vite 6 + React 19 + TypeScript 5.7 project so the comparisons are apples-to-apples.
+
+### By framework and language
+
+| Article | Focus |
+|---------|-------|
+| [10 best product tour tools for React developers (2026)](/blog/best-product-tour-tools-react) | The main React roundup — covers all major options |
+| [8 TypeScript product tour libraries ranked by DX](/blog/best-typescript-product-tour-libraries) | Focused on type safety, IntelliSense, and generics |
+| [7 best headless UI libraries for onboarding](/blog/best-headless-ui-libraries-onboarding) | Headless-first libraries only |
+| [Best shadcn/ui compatible tour library](/blog/best-shadcn-ui-compatible-tour-library) | For teams already on shadcn/ui |
+| [Best product tour library for SSR](/blog/best-product-tour-library-ssr) | Server-side rendering compatibility |
+
+### By constraint
+
+| Article | Focus |
+|---------|-------|
+| [Best free product tour libraries (open source only)](/blog/best-free-product-tour-libraries-open-source) | MIT and permissive licenses only |
+| [Lightweight product tour libraries under 10KB](/blog/lightweight-product-tour-libraries-under-10kb) | Bundle size as the primary filter |
+| [Best product tour libraries for monorepo teams](/blog/best-product-tour-libraries-monorepo-design-system-teams) | Multi-package and design system integration |
+| [Best product tour tools with GDPR compliance](/blog/best-product-tour-tools-gdpr-compliance) | Privacy-first, no external scripts |
+| [Best self-hosted onboarding tools](/blog/best-self-hosted-onboarding-tools) | Full data ownership |
+| [10 best tooltip libraries for React (2026)](/blog/best-tooltip-libraries-react-2026) | Positioning primitives that product tours build on |
+
+### Benchmarks and architecture
+
+| Article | Focus |
+|---------|-------|
+| [React tour library benchmark 2026](/blog/react-tour-library-benchmark-2026) | Performance measurements across all libraries |
+| [How we benchmark React libraries](/blog/benchmark-react-library-methodology) | The methodology behind our numbers |
+| [Floating UI vs Popper.js for tour positioning](/blog/floating-ui-vs-popper-js-tour-positioning) | The positioning engine underneath |
+
+## SaaS platform alternatives
+
+If you're currently paying for a SaaS onboarding platform and wondering whether an open-source library could replace it, these articles break down the switch. Every alternatives article includes pricing, feature matrices, and honest assessments of what you'd lose by switching to code-owned onboarding.
+
+### Vendor-specific alternatives
+
+| Article | What it replaces |
+|---------|-----------------|
+| [Best Appcues alternatives for developers](/blog/best-appcues-alternatives-developers) | Appcues ($249+/month) |
+| [Best Chameleon alternatives](/blog/best-chameleon-alternatives) | Chameleon ($279+/month) |
+| [Best Intercom product tour alternatives](/blog/best-intercom-product-tour-alternatives) | Intercom's tour feature |
+| [Best Userflow alternatives for SaaS teams](/blog/best-userflow-alternatives-saas-teams) | Userflow ($240+/month) |
+| [Best Whatfix alternatives for small teams](/blog/best-whatfix-alternatives-small-teams) | Whatfix (enterprise pricing) |
+| [Pendo vs Appcues vs open source](/blog/pendo-vs-appcues-vs-open-source) | Three-way comparison |
+
+### Category roundups
+
+| Article | Audience |
+|---------|---------|
+| [Best product tour tools for B2B SaaS](/blog/best-product-tour-tools-b2b-saas) | B2B teams with enterprise requirements |
+| [Best in-app guidance tools for SaaS](/blog/best-in-app-guidance-tools-saas) | Broader than just tours |
+| [Best digital adoption platforms for startups](/blog/best-digital-adoption-platforms-startups) | Startup budgets |
+| [Best onboarding tools for developer platforms](/blog/best-onboarding-tools-developer-platforms) | DevTools and APIs |
+| [Best onboarding tools with A/B testing](/blog/best-onboarding-tools-ab-testing) | Experimentation built in |
+| [Best onboarding tools for mobile + web](/blog/best-onboarding-tools-mobile-web) | Cross-platform |
+| [Best onboarding Chrome extensions](/blog/best-onboarding-chrome-extensions) | Browser-based tools |
+| [Best onboarding solutions with real analytics](/blog/best-onboarding-solutions-real-analytics) | Analytics that go beyond vanity metrics |
+| [Onboarding tools ranked by customer reviews](/blog/best-onboarding-tool-reviews) | G2 and Capterra data |
+| [Best open-source onboarding framework](/blog/best-open-source-onboarding-framework) | OSS-only |
+
+## Migration guides
+
+Already using another tool? These step-by-step guides cover the API mapping, incremental migration strategy, and gotchas we discovered during the actual migration process. Each guide includes a time estimate and a "what you'll gain and lose" section.
+
+| From | Guide | Estimated time |
+|------|-------|---------------|
+| React Joyride | [Migrate from React Joyride to Tour Kit](/blog/migrate-react-joyride-tour-kit) | 2-4 hours |
+| Shepherd.js | [Migrate from Shepherd.js to Tour Kit](/blog/migrate-shepherd-js-tour-kit) | 2-3 hours |
+| Driver.js | [Migrate from Driver.js to Tour Kit](/blog/migrate-driver-js-tour-kit) | 1-2 hours |
+| Intro.js | [Replace Intro.js with React-native tours](/blog/replace-intro-js-react) | 2-4 hours |
+| Appcues | [Migrate from Appcues to code-owned onboarding](/blog/migrate-appcues-code-owned-onboarding) | 4-8 hours |
+| Userpilot | [Migrate from Userpilot to Tour Kit + PostHog](/blog/migrate-userpilot-tour-kit-posthog) | 4-8 hours |
+| Pendo | [Migrate from Pendo to React-native tours](/blog/migrate-pendo-to-react) | 4-8 hours |
+
+The SaaS migrations take longer because you're replacing not just the tour engine but also the analytics pipeline. We recommend connecting Tour Kit's analytics package to PostHog or Mixpanel to preserve the metrics you had before.
+
+## Concept comparisons
+
+Before you pick a specific tool, you need to decide what kind of solution fits your team. Should you use a no-code builder or a code library? Are linear step-by-step tours the right pattern, or would contextual hints work better? These articles compare approaches and architectures, not products.
+
+| Article | Question it answers |
+|---------|-------------------|
+| [No-code vs library: which product tour approach fits?](/blog/no-code-vs-library-product-tour) | Should your team use a visual builder or write code? |
+| [Contextual tooltips vs linear tours](/blog/contextual-tooltips-vs-linear-tours) | When to guide step-by-step vs show hints in context |
+| [Product tour vs interactive walkthrough](/blog/product-tour-vs-interactive-walkthrough) | Passive tours vs active walkthroughs with user input |
+| [Web components vs React for product tours](/blog/web-components-vs-react-product-tour) | Framework-agnostic vs framework-native tradeoffs |
+| [5 best alternatives to building onboarding in-house](/blog/best-alternatives-building-onboarding-in-house) | When DIY isn't the right call |
+| [Why the best onboarding software is a React library](/blog/best-onboarding-software-is-library) | The case for library-based onboarding |
+
+## Pricing and business case
+
+Money matters. These articles break down the real costs, not just sticker prices but total cost of ownership including developer time, maintenance burden, and vendor lock-in risk.
+
+| Article | What it covers |
+|---------|---------------|
+| [TCO comparison: Appcues vs Tour Kit](/blog/tco-comparison-appcues-tour-kit) | 12-month total cost of ownership |
+| [Build vs buy calculator](/blog/build-vs-buy-product-tour-calculator) | Interactive cost comparison across DIY, library, and SaaS |
+| [One-time license vs subscription](/blog/one-time-license-vs-subscription-math-bootstrapped-teams) | The math for bootstrapped teams |
+| [Tour Kit free vs Pro](/blog/tour-kit-free-vs-pro) | What's in each tier |
+| [Best onboarding tool free tiers](/blog/onboarding-tool-best-free-tier) | Comparing free plans across tools |
+| [Cheapest product tour tool (2026)](/blog/cheapest-product-tour-tool-2026) | Price as the primary filter |
+| [Free trial vs freemium onboarding](/blog/free-trial-vs-freemium-onboarding) | Onboarding strategy, not tour tools |
+
+Tour Kit's pricing model is simple. The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed and free forever. The seven extended packages require a one-time $99 Pro license. No monthly fees. No per-MAU pricing.
+
+## How to choose the right comparison
+
+With 50+ comparison articles on this page, the fastest path to a decision depends on where you are in the evaluation process. Developers who already have a shortlist need head-to-head articles. Teams starting from scratch need the market-level roundups first.
+
+**Evaluating against a specific tool?** Jump to the head-to-head section or search for the tool name. We have dedicated deep-dives for React Joyride, Shepherd.js, Driver.js, Intro.js, Appcues, Userpilot, Pendo, Chameleon, Whatfix, Userflow, and Intercom.
+
+**Scouting the whole market?** Start with [10 best product tour tools for React developers](/blog/best-product-tour-tools-react). It covers all major options in one article with a comparison table.
+
+**Have a specific constraint?** The "by constraint" roundups filter by what matters most to you: bundle size, TypeScript support, SSR compatibility, GDPR compliance, or self-hosting requirements.
+
+**Switching from a SaaS platform?** Read the concept comparison [No-code vs library](/blog/no-code-vs-library-product-tour) first to make sure code-owned onboarding is right for your team. Then check the migration guide for your specific platform.
+
+**Budget is the primary driver?** Start with [Build vs buy calculator](/blog/build-vs-buy-product-tour-calculator) and the [TCO comparison](/blog/tco-comparison-appcues-tour-kit) to understand the true cost of each approach.
+
+## Best practices for comparing product tour tools
+
+We've tested every tool on this page. Here's what we learned about running a fair evaluation.
+
+**Test with your actual design system.** Bundle size and feature lists don't tell you how a library feels inside your codebase. Install the top two candidates alongside your real components. Build the same 3-step tour with each. The one that takes less glue code to match your Tailwind tokens or shadcn/ui theme is probably the right pick.
+
+**Measure performance with Lighthouse, not gut feeling.** We use Chrome DevTools Performance panel on a throttled 4x CPU, mid-tier Android device profile. First Contentful Paint delta with and without the tour library loaded tells you more than any marketing page. Our [benchmark methodology](/blog/benchmark-react-library-methodology) describes the full setup.
+
+**Check the license before you prototype.** AGPL-3.0 (Shepherd.js, Intro.js) requires you to open-source your entire application unless you purchase a commercial license. We've seen teams build a proof-of-concept, show it to stakeholders, then discover the license isn't compatible with their distribution model. Read the LICENSE file first. Five minutes of reading saves weeks of rework.
+
+**Ask about React 19 compatibility now, not later.** As of April 2026, React 19 is stable and widely adopted. Libraries built on class components (React Joyride) or direct DOM manipulation (Driver.js) can't use concurrent features, `useTransition`, or the new `use` hook. Even if you're still on React 18, evaluate whether the library you choose will work when you upgrade.
+
+**Calculate total cost over 12 months, not sticker price.** A $249/month SaaS tool costs $2,988/year. A $99 one-time library license costs $99 total. But the SaaS includes analytics and a visual builder your PM team might need. Factor in developer hours for building and maintaining code-owned tours. The [build vs buy calculator](/blog/build-vs-buy-product-tour-calculator) makes this math concrete.
+
+## What Tour Kit doesn't do well
+
+No comparison index is honest without acknowledging real limitations. These are the situations where Tour Kit is probably the wrong choice:
+
+**No visual builder.** Product managers can't drag-and-drop tours into existence. Someone on your team needs to write React code. If your PM team wants to create and edit tours without developer involvement, a SaaS platform like Appcues or Chameleon is a better fit.
+
+**React only.** Tour Kit requires React 18 or later. Applications built with Vue, Angular, or Svelte should look at Shepherd.js (framework-agnostic) or Driver.js (vanilla JS).
+
+**Smaller community.** React Joyride has 603K+ weekly downloads and years of Stack Overflow answers. Tour Kit is newer with a smaller community. You'll find fewer blog posts, tutorials, and community-built extensions compared to established libraries.
+
+**No mobile SDK.** Tour Kit works on mobile web browsers but doesn't have a React Native or native iOS/Android SDK. If mobile app onboarding is a primary requirement, SaaS platforms with mobile SDKs are a better fit.
+
+**Younger project.** Tour Kit hasn't been battle-tested at the same scale as libraries like React Joyride or enterprise platforms like Pendo. If you need five years of production stability data, we can't provide that yet.
+
+## Related resources
+
+For the broader onboarding software market beyond Tour Kit comparisons, see our [onboarding software comparison hub](/blog/onboarding-software-comparison-hub), which covers enterprise digital adoption platforms, mid-market SaaS tools, and open-source libraries across all categories.
+
+For performance data behind these comparisons, our [benchmark methodology](/blog/benchmark-react-library-methodology) explains exactly how we test, and the [2026 benchmark results](/blog/react-tour-library-benchmark-2026) show the raw numbers.
+
+**Get started with Tour Kit:**
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Browse the [documentation](https://usertourkit.com/) or check out the source on GitHub.
+
+## FAQ
+
+### What is the best product tour library for React in 2026?
+
+Tour Kit is the best product tour library for React developers who want full design control. Its headless architecture lets you render tours with your existing components, whether that's shadcn/ui, Radix, Tailwind, or something custom. The core package ships at under 8KB gzipped with native React 19 support. React Joyride remains the most popular by download count if you want pre-built UI instead.
+
+### How does Tour Kit compare to SaaS tools like Appcues?
+
+Tour Kit is a React library you install as a dependency. Appcues is a hosted platform that injects an external JavaScript snippet. Tour Kit costs $99 once for the Pro tier; Appcues starts at $249 per month. The tradeoff is that Tour Kit requires developers to build and maintain tours in code, while Appcues provides a visual builder for non-technical team members. We break this down in our [TCO comparison](/blog/tco-comparison-appcues-tour-kit).
+
+### Is Tour Kit free?
+
+The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed and free forever. The seven extended packages require a one-time $99 Pro license. No subscriptions. No per-MAU pricing. See [Tour Kit free vs Pro](/blog/tour-kit-free-vs-pro) for the full breakdown.
+
+### Can I migrate from React Joyride to Tour Kit?
+
+Yes. We have a dedicated [migration guide from React Joyride to Tour Kit](/blog/migrate-react-joyride-tour-kit) with step-by-step instructions, an API mapping table, and time estimate. Budget 2-4 hours for a typical migration. The guide covers installing Tour Kit alongside React Joyride, remapping your tour configuration, and testing both side-by-side before removing Joyride.
+
+### Does Tour Kit work with Next.js App Router?
+
+Tour Kit works with Next.js App Router. Because it ships as client-side React components, you add the `"use client"` directive to any component that renders a tour. We have a dedicated tutorial: [Next.js App Router product tour](/blog/nextjs-app-router-product-tour).
+
+### Why is Tour Kit headless?
+
+A headless product tour library gives you the tour logic (step sequencing, positioning, state management, keyboard navigation, ARIA attributes) without prescribing what the tour looks like. This means your tours automatically match your design system. The alternative (opinionated libraries like React Joyride) ships its own tooltip UI that you then override with CSS to match your brand. We explain the architecture in detail in [what is headless UI](/blog/what-is-headless-ui-guide-onboarding).
+
+### How does Tour Kit handle accessibility?
+
+Tour Kit implements WCAG 2.1 AA compliance through built-in ARIA attributes, focus management, and keyboard navigation (arrow keys, Escape to close, Tab to move between elements). It also respects `prefers-reduced-motion` out of the box. Every component is tested with axe-core. See our [screen reader product tour guide](/blog/screen-reader-product-tour) and [keyboard-navigable tours](/blog/keyboard-navigable-product-tours-react) for implementation details.
+
+### Which Tour Kit comparison should I read first?
+
+Start with [10 best product tour tools for React developers](/blog/best-product-tour-tools-react) for a market overview when evaluating Tour Kit for the first time. Already comparing against a specific tool? Go straight to the head-to-head comparison. Cost is the main concern? The [build vs buy calculator](/blog/build-vs-buy-product-tour-calculator) breaks down the math.

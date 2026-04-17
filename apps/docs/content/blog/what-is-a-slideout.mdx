@@ -1,0 +1,251 @@
+---
+title: "What is a slideout? In-app messaging element explained"
+slug: "what-is-a-slideout"
+description: "Learn what a slideout is, how it differs from modals and drawers, and when to use slideout panels for in-app messaging and onboarding."
+primary_keyword: "what is a slideout"
+secondary_keywords: ["slideout definition", "slideout vs modal", "slideout panel UX", "in-app slideout notification"]
+category: "Glossary"
+schema_type: "TechArticle"
+spreadsheet_row: 315
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/what-is-a-slideout.png
+---
+
+# What is a slideout? In-app messaging element explained
+
+You're filling out a form in a SaaS dashboard. A panel glides in from the right edge of the screen, showing a tip or feature announcement. The rest of the page stays visible behind it, slightly dimmed. You glance at the message, dismiss it, and keep working.
+
+That's a slideout.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+This glossary entry defines the slideout pattern, maps the confusing terminology around it, and explains when to reach for a slideout instead of a modal or toast. We built [Tour Kit](https://usertourkit.com/docs) with a dedicated slideout variant in `@tour-kit/announcements`, so we'll reference it where relevant.
+
+## Definition
+
+A slideout is a UI panel that animates in from the edge of the screen (typically the right) and overlays current page content without fully blocking it. The parent page remains partially visible behind a semi-transparent shade, preserving the user's sense of place. Adobe's Commerce Pattern Library defines slideouts as panels for "tertiary actions or sub-processes related to the user's primary path" that "allow for greater content and/or more complex interactions thus behaving much like an additional webpage while maintaining a contextual connection to the primary task" ([Adobe Developer](https://developer.adobe.com/commerce/admin-developer/pattern-library/containers/slideouts-modals-overlays)).
+
+In the product-led growth space, the same visual pattern is used for non-intrusive in-app notifications. As of April 2026, tools like Appcues (starting at $249/month), Userpilot ($249/month), and Chameleon ($279/month) all include slideout as a core messaging format alongside modals, tooltips, and banners.
+
+## How a slideout works
+
+A trigger fires: a button click, a user event, or a timed system event. The panel slides into view from one viewport edge, usually via a CSS `transform: translateX()` transition running at 200-300ms. A semi-transparent shade covers the parent content to signal that focus has shifted.
+
+Six structural elements make up a slideout, per Adobe's pattern library: a content container with fixed width (typically 320-480px on desktop), a heading, a close control, action buttons, a scrollable content area, and a semi-transparent shade over the parent page. The visible strip of parent content is called the "alley," and clicking it dismisses the panel.
+
+Slideouts can nest up to two sequential panels per task flow, each indenting progressively to the left. This is rare in practice but useful for drill-down workflows.
+
+## Slideout vs modal vs drawer vs toast
+
+The industry uses these terms loosely. Here's how they differ.
+
+<table>
+  <thead>
+    <tr>
+      <th>Attribute</th>
+      <th>Slideout</th>
+      <th>Modal</th>
+      <th>Drawer</th>
+      <th>Toast</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Blocks parent content</td>
+      <td>Partially (shade)</td>
+      <td>Fully</td>
+      <td>Partially (shade)</td>
+      <td>Never</td>
+    </tr>
+    <tr>
+      <td>Interrupts workflow</td>
+      <td>Low</td>
+      <td>High</td>
+      <td>Low</td>
+      <td>Minimal</td>
+    </tr>
+    <tr>
+      <td>Content capacity</td>
+      <td>Forms, sub-workflows, rich content</td>
+      <td>Short confirmations, alerts</td>
+      <td>Navigation links, filters</td>
+      <td>One-line status (under 50 chars)</td>
+    </tr>
+    <tr>
+      <td>Dismiss behavior</td>
+      <td>Click alley, ESC, close button</td>
+      <td>ESC, close button</td>
+      <td>Click outside, ESC, close button</td>
+      <td>Auto-dismiss (3-5s timeout)</td>
+    </tr>
+    <tr>
+      <td>Typical ARIA role</td>
+      <td><code>dialog</code> or <code>complementary</code></td>
+      <td><code>alertdialog</code> or <code>dialog</code></td>
+      <td><code>navigation</code></td>
+      <td><code>status</code> or <code>alert</code></td>
+    </tr>
+    <tr>
+      <td>Best for</td>
+      <td>Sub-tasks, announcements, surveys</td>
+      <td>Destructive confirmations</td>
+      <td>Navigation menus, filter panels</td>
+      <td>Success/error feedback</td>
+    </tr>
+  </tbody>
+</table>
+
+The key distinction: a modal demands attention. A slideout requests it. Toasts inform without asking for anything. UserGuiding describes slideouts as having "the vibe of a 'psst' message" ([UserGuiding](https://userguiding.com/blog/in-app-notifications)).
+
+Then there's the naming problem. What Adobe calls a "slideout," Material UI calls a "drawer." PatternFly (Red Hat's design system, used by over 200 enterprise products) also uses "drawer." Creative Bloq notes that the industry uses "slideout," "drawer," "side panel," and "sliding pane" interchangeably with no agreed standard ([Creative Bloq](https://www.creativebloq.com/ux/ui-design-pattern-tips-slideouts-sidebars-101413343)). The functional difference comes down to intent: slideouts appear for contextual sub-tasks or messages, while drawers hold navigation or filters.
+
+## Slideout examples
+
+Miro uses a slideout to teach the Shift+drag shortcut. The panel slides in from the side, keeping the command visible while users practice it. UserOnboarding.Academy observed that "since it's off to the side, users can follow along without breaking focus" ([UserOnboarding.Academy](https://useronboarding.academy/user-onboarding-inspirations)).
+
+Appcues implements slideouts as one of their core flow types. Their documentation positions slideouts alongside modals, noting that slideouts handle scrollable content and multi-button layouts better than centered dialogs ([Appcues Docs](https://docs.appcues.com/flows/modals-slideouts)). SEB Group, a Nordic financial services company managing over $300B in assets, uses slideout modals across their enterprise design system for complex form workflows ([SEB Design Library](https://designlibrary.sebgroup.com/components/component-slideout)).
+
+## Why slideouts matter for onboarding
+
+Modals interrupt. That's by design. But onboarding isn't the right moment for full-screen interruptions. A user exploring your app doesn't want their workflow blocked every 30 seconds by a centered dialog.
+
+Slideouts sit in the peripheral attention zone. Userpilot's research on mobile slideouts recommends connecting them to application logic: "dynamically update content based on user behavior" and "avoid showing redundant messages to users who've completed actions" ([Userpilot](https://userpilot.com/blog/mobile-slideouts/)). That's fatigue prevention.
+
+Three onboarding patterns where slideouts outperform modals:
+
+- Feature announcements that appear while users work (not as a blocking popup)
+- Contextual help panels that stay visible during multi-step instructions
+- Micro-surveys (2-question NPS or CSAT) that collect feedback without derailing tasks
+
+## Slideout accessibility requirements
+
+Slideouts require proper focus management, keyboard support, and ARIA semantics. Knowbility's research identifies the critical requirements for WCAG 2.1 AA compliance ([Knowbility](https://knowbility.org/blog/2020/accessible-slide-menus)).
+
+Focus must move to the first focusable element when the panel opens. Tab and Shift+Tab should cycle within the panel (focus trapping). When the panel closes, focus returns to the trigger element. The Escape key must close the panel.
+
+```tsx
+// Trigger button
+<button
+  aria-expanded={isOpen}
+  aria-controls="slideout-panel"
+  aria-label="Open feature announcement"
+  onClick={() => setIsOpen(true)}
+>
+  What's new
+</button>
+
+// Slideout panel
+<div
+  id="slideout-panel"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Feature announcement"
+>
+  {/* Panel content */}
+</div>
+```
+
+Use `role="dialog"` with `aria-modal="true"` for workflow-style slideouts that shade the background. For notification-style slideouts that don't block interaction, use `role="complementary"` with `aria-live="polite"` so screen readers announce without interrupting.
+
+## Slideouts in Tour Kit
+
+Tour Kit's `@tour-kit/announcements` package includes slideout as one of five display variants (modal, toast, banner, slideout, and spotlight). The slideout variant ships at under 5KB gzipped. It handles animation, shade, focus trapping, and Escape-key dismissal.
+
+```tsx
+// src/components/FeatureAnnouncement.tsx
+import { Announcement } from '@tour-kit/announcements';
+
+function FeatureAnnouncement() {
+  return (
+    <Announcement
+      id="new-export-feature"
+      display="slideout"
+      position="right"
+      frequency={{ type: 'once' }}
+    >
+      <Announcement.Content>
+        <h3>CSV export is here</h3>
+        <p>Export any dashboard view to CSV.</p>
+        <Announcement.Dismiss>Got it</Announcement.Dismiss>
+      </Announcement.Content>
+    </Announcement>
+  );
+}
+```
+
+Tour Kit is our project, so take this with appropriate context. The slideout pattern works in any UI library that supports panel overlays. Radix UI's `Dialog` can be styled as a slideout with a `transform` transition. shadcn/ui's Drawer component (built on Vaul, 4.2K GitHub stars) handles side-panel patterns too. The architectural approach matters more than the specific tool.
+
+Get started with Tour Kit at [usertourkit.com](https://usertourkit.com/).
+
+## FAQ
+
+### What is the difference between a slideout and a modal?
+
+A slideout slides in from the screen edge and partially covers parent content, leaving a visible "alley" for context. Modals center on screen and fully block the parent with an opaque backdrop. Slideouts are lower-interruption, better for announcements and sub-tasks. Modals suit destructive confirmations.
+
+### Is a slideout the same as a drawer?
+
+Functionally, they're almost identical. Adobe and Appcues call it "slideout." Material UI and PatternFly call it "drawer." The distinction is intent: slideouts appear for contextual content or messages, drawers hold navigation or filtering UI. Both slide in from the screen edge and overlay content.
+
+### When should I use a slideout instead of a toast?
+
+Use a slideout when you need the user to take action or read more than one sentence. Toasts auto-dismiss after 3-5 seconds with minimal content. Slideouts persist until dismissed, support rich content (forms, images, buttons), and can collect input.
+
+### Are slideouts accessible?
+
+Yes, with explicit work. Move focus into the panel on open, trap focus within it, close on Escape, and return focus to the trigger on close. Knowbility confirms these as minimum WCAG 2.1 AA requirements ([Knowbility](https://knowbility.org/blog/2020/accessible-slide-menus)).
+
+---
+
+**Internal linking suggestions:**
+- Link from: `feature-announcement-banner-react.mdx` (mentions slideout as an alternative to banners)
+- Link from: `whats-new-modal-react.mdx` (slideout is an alternative to the modal pattern)
+- Link to: `what-is-headless-ui-guide-onboarding.mdx` (headless architecture reference)
+- Link to: Tour Kit announcements docs at https://usertourkit.com/docs/announcements
+
+**Distribution checklist:**
+- Dev.to (canonical to usertourkit.com/blog/what-is-a-slideout)
+- Hashnode
+- Reddit r/webdev, r/reactjs (as a reference when someone asks "slideout vs drawer")
+
+**JSON-LD Schema:**
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "What is a slideout? In-app messaging element explained",
+  "description": "Learn what a slideout is, how it differs from modals and drawers, and when to use slideout panels for in-app messaging and onboarding.",
+  "author": {
+    "@type": "Person",
+    "name": "Dominik Sumer",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-12",
+  "dateModified": "2026-04-12",
+  "image": "https://usertourkit.com/og-images/what-is-a-slideout.png",
+  "url": "https://usertourkit.com/blog/what-is-a-slideout",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/what-is-a-slideout"
+  },
+  "keywords": ["what is a slideout", "slideout definition", "slideout vs modal", "slideout panel UX"],
+  "proficiencyLevel": "Beginner",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```

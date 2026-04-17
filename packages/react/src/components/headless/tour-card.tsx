@@ -1,3 +1,5 @@
+'use client'
+
 import {
   type Placement as FloatingPlacement,
   arrow,
@@ -123,7 +125,7 @@ export function TourCardHeadless({ className, style, children, render }: TourCar
         ref={(node) => {
           refs.setFloating(node)
           if (containerRef) {
-            ;(containerRef as React.MutableRefObject<HTMLElement | null>).current = node
+            containerRef.current = node
           }
         }}
         style={{ ...floatingStyles, ...style }}

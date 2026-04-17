@@ -1,0 +1,124 @@
+---
+title: "What is product-led growth? (and how tours enable it)"
+published: false
+description: "58% of companies now use PLG. But most users never activate. Here's how product tours close the gap between signup and aha moment."
+tags: react, javascript, webdev, productivity
+canonical_url: https://usertourkit.com/blog/what-is-product-led-growth
+cover_image: https://usertourkit.com/og-images/what-is-product-led-growth.png
+---
+
+*Originally published at [usertourkit.com](https://usertourkit.com/blog/what-is-product-led-growth)*
+
+# What is product-led growth? (and how tours enable it)
+
+Product-led growth is the reason you can sign up for Figma, Notion, or Slack and start using them before talking to anyone in sales. The product sells itself. No demo calls, no "request access" forms. You try it, you see the value, you stay.
+
+As of April 2026, 58% of companies use a PLG model according to Mixpanel's State of Digital Analytics report covering 12,000+ companies. But PLG only works if new users reach their "aha moment" fast enough. That's where product tours come in.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Definition
+
+Product-led growth (PLG) is a go-to-market strategy where the product itself drives customer acquisition, activation, conversion, and expansion. Instead of relying on sales teams or marketing funnels to push users through a pipeline, PLG companies build self-serve experiences that let users extract value before paying. The term was coined in 2016 by Blake Bartlett at [OpenView Venture Partners](https://openviewpartners.com/blog/what-is-product-led-growth/) to describe what companies like Dropbox and Slack were already doing.
+
+PLG isn't a feature. It's an organizational model. Every team (engineering, design, support, marketing) orients around the product experience rather than sales processes.
+
+## How product-led growth works
+
+Product-led growth works as a self-reinforcing loop rather than a linear funnel: users sign up for free, experience core value quickly, convert to paid plans, and then invite colleagues who repeat the cycle, compounding growth without proportional increases in sales headcount or marketing spend.
+
+Allan Wille, co-founder of Klipfolio, puts it directly: "Product-led growth means every team influences the product, creating a culture built around enduring customer value" ([ProductLed](https://productled.com/blog/product-led-growth-definition)). Three mechanics make the loop spin:
+
+1. **Low-friction entry.** No credit card, no sales call. Dropbox grew to 700 million users and $2.3 billion in annual revenue through freemium and referrals.
+2. **Fast time-to-value.** Top PLG products get users to their first "wow moment" in under five minutes.
+3. **Built-in virality.** Calendly hit 20 million users and a $3 billion valuation because every meeting link is a product demo.
+
+PLG businesses grow 20-30% faster on average and are valued 30% higher than the public SaaS Index Fund average ([Mixpanel, 2026](https://mixpanel.com/blog/product-led-growth/)).
+
+## PLG vs. sales-led growth
+
+Product-led growth and sales-led growth differ primarily in how users first encounter and adopt the product: PLG lets users self-serve and experience value before paying, while sales-led growth routes prospects through demos and sales conversations, resulting in higher acquisition costs but potentially deeper enterprise relationships from day one.
+
+| | Product-led growth | Sales-led growth |
+|---|---|---|
+| First touch | Self-serve signup, free tier | Demo request, outbound sales |
+| Conversion driver | Product experience | Sales team |
+| Typical CAC | Lower (users acquire themselves) | Higher (55% CAC rise 2013-2018, ProfitWell) |
+| Best for | Self-serve SaaS, dev tools, SMB | Enterprise, complex integrations, high ACV |
+| Scaling constraint | Product quality and onboarding | Headcount and quota |
+| Lead qualification | PQL (product-qualified lead, 15-30% conversion) | MQL (marketing-qualified lead, under 2% conversion) |
+
+Cursor, the AI code editor, is the clearest recent example. It reached $500 million ARR in under 24 months and hit $200 million before hiring its first enterprise sales rep. The product did the selling.
+
+## Product-led growth examples
+
+Product-led growth isn't theoretical. Companies like Slack, Atlassian, and Figma grew to billions in revenue by making the product the primary acquisition channel, letting end users drive adoption from the bottom up rather than selling top-down through procurement teams and enterprise contracts.
+
+- **Slack** filed its S-1 stating "organic growth is generated as users realize the benefits of Slack." They had 12 million daily active users and 156,000 business subscriptions before any enterprise push.
+- **Atlassian** went public with zero traditional salesforce. Their S-1 reads: "users drive the adoption and proliferation of our products."
+- **Figma** grew through collaboration. Every shared design file was a new user acquisition channel.
+- **Lovable** hit $100 million ARR in eight months in 2025. Fastest any software company reached that milestone.
+
+## Why tours matter for PLG
+
+Product tours are the activation mechanism that makes PLG work in practice. Signing up is easy. But average activation rates sit around 40% for single-user products and drop to 20% for multi-user tools ([Statsig PLG metrics](https://www.statsig.com/perspectives/plg-metrics-activation-retention)), meaning the majority of signups never reach the moment where they understand why your product exists.
+
+Product tours fix this by shortening the path between "I just signed up" and "I get it." AB Tasty redesigned their onboarding with guided tours and saw tour completion jump from 2% to 15%. Free trial-to-PQL conversion went from 0% to 20%.
+
+A 10% improvement in activation rate typically produces a bigger revenue impact than a 10% increase in signups. That math matters. You can spend more on top-of-funnel marketing or you can help the users you already have actually reach value.
+
+68% of developers who abandon trials cite "too much setup time" as the reason. Only 12% cite pricing. Product tours attack the real problem.
+
+```tsx
+// A PLG activation tour that guides users to their first value moment
+import { TourProvider, Tour, Step } from '@tourkit/react';
+
+function ActivationTour() {
+  return (
+    <TourProvider>
+      <Tour
+        tourId="plg-activation"
+        onComplete={() => {
+          // Track activation event for PQL scoring
+          analytics.track('activation_complete');
+        }}
+      >
+        <Step target="#create-first-project" title="Start here">
+          Create your first project. Takes about 30 seconds.
+        </Step>
+        <Step target="#invite-teammate" title="Better together">
+          Invite a teammate to see collaboration in action.
+        </Step>
+      </Tour>
+    </TourProvider>
+  );
+}
+```
+
+## PLG in Tour Kit
+
+Tour Kit is a [headless product tour library](https://usertourkit.com/) for React teams building product-led products. Unlike injected-script tools like Appcues or Pendo, Tour Kit gives you code-level control over your activation flows: you own the components, the styling, and the conditional logic that routes different user segments to different "aha moments."
+
+That matters because a developer evaluating your API needs a different tour than a product manager exploring your dashboard. Tour Kit's [analytics integration](https://usertourkit.com/docs/analytics) lets you track PQL signals from tour interactions and feed them into your existing data stack.
+
+We built Tour Kit as a solo developer. Smaller community than React Joyride or Shepherd.js. No visual builder. But if your team writes React and wants full control over PLG onboarding, it's worth evaluating at [usertourkit.com](https://usertourkit.com/).
+
+## FAQ
+
+### What does PLG stand for?
+
+PLG stands for product-led growth, a go-to-market strategy where the product drives acquisition, activation, and expansion. Blake Bartlett at OpenView coined the term in 2016. As of April 2026, 58% of SaaS companies use a PLG model (Mixpanel, 12,000+ companies surveyed).
+
+### How is PLG different from freemium?
+
+Freemium is a pricing model (free tier plus paid upgrades). Product-led growth is a broader strategy that includes freemium but also covers onboarding design, activation metrics, and product-qualified leads. You can have freemium without PLG, but most PLG companies offer some form of free access.
+
+### What is a product-qualified lead (PQL)?
+
+A product-qualified lead is a user who has demonstrated buying intent through product usage rather than form fills. PQLs convert at 15-30%, far higher than marketing-qualified leads. In PLG, the product identifies ready-to-buy users based on activation milestones, feature adoption, and usage patterns.
+
+### Do product tours actually improve activation rates?
+
+Yes, when implemented with user goals in mind. AB Tasty improved tour completion from 2% to 15% and free trial-to-PQL conversion from 0% to 20% by redesigning their guided tour experience. Generic "click next" tours rarely move metrics. Goal-oriented tours that guide users to their first value moment do.

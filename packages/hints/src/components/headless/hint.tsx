@@ -1,3 +1,5 @@
+'use client'
+
 import { useElementPosition } from '@tour-kit/core'
 import * as React from 'react'
 import { useHint } from '../../hooks/use-hint'

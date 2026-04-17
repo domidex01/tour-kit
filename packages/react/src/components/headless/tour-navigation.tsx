@@ -1,3 +1,5 @@
+'use client'
+
 import type * as React from 'react'
 
 export interface TourNavigationHeadlessProps {

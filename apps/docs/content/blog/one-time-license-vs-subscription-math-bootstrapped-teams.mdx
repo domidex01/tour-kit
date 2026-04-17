@@ -1,0 +1,214 @@
+---
+title: "One-time license vs subscription: the math for bootstrapped teams"
+slug: "one-time-license-vs-subscription-math-bootstrapped-teams"
+description: "Compare 3-year total cost of one-time licenses vs subscriptions for bootstrapped teams. Real pricing data from onboarding tools and subscription fatigue."
+primary_keyword: "one-time license vs subscription software"
+secondary_keywords: ["lifetime deal vs subscription", "perpetual license onboarding", "subscription fatigue developer tools", "one-time purchase software"]
+category: "Build vs Buy"
+schema_type: "TechArticle"
+spreadsheet_row: 135
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/one-time-license-vs-subscription-math-bootstrapped-teams.png
+---
+
+# One-time license vs subscription: the math for bootstrapped teams
+
+Your dev tool budget isn't infinite. If you're bootstrapped, it's probably somewhere between $300 and $800 a month for everything: hosting, CI, monitoring, analytics, and whatever onboarding solution you pick. Every subscription you add permanently reduces that number.
+
+As of April 2026, 78% of finance decision-makers report increased scrutiny of recurring software costs, and 62% of businesses are actively consolidating their SaaS portfolios ([Getmonetizely, 2026](https://www.getmonetizely.com/articles/why-are-one-time-pricing-models-making-a-comeback-in-saas)). The average mid-size company manages over 130 SaaS subscriptions. Enterprises juggle north of 300.
+
+That's the macro picture. But what does it look like when you're a 2-person team trying to ship onboarding flows without bleeding $129/month to a tool you'll outgrow in a year?
+
+We ran the numbers. They're not subtle.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Why this conversation matters right now
+
+Subscription fatigue stopped being a buzzword sometime in 2025 and became a measurable market shift. As of early 2026, 41% of software buyers actively express interest in one-time purchase alternatives, up from roughly 25% two years ago, driven by AI budget reallocation and SaaS consolidation pressure ([Getmonetizely](https://www.getmonetizely.com/articles/why-are-one-time-pricing-models-making-a-comeback-in-saas)). The pressure is coming from two directions simultaneously: AI tools absorbing budget that used to go to traditional SaaS, and CIOs consolidating rather than expanding their vendor lists. "App fatigue is real," as one DEV.to analysis put it. "CIOs are consolidating, not expanding — the 'best of breed' era is over" ([DEV.to, 2026](https://dev.to/digitalwareshub/what-will-actually-work-in-saas-in-2026-and-what-wont-2c7l)).
+
+The developer tools category has felt this acutely. JetBrains raised IDE subscription prices in 2025 and faced immediate community backlash. Cursor's new Pro plan triggered a wave of refund requests ([FintechWeekly](https://www.fintechweekly.com/magazine/articles/cursor-pricing-change-user-backlash-refund)). Claude Code's $200/month Max plan drew complaints about daily limits hit within 30 minutes. Unity scrapped its controversial runtime fee model entirely after developers revolted ([Finimize](https://finimize.com/content/unity-software-scraps-controversial-pricing-model-after-developer-backlash)).
+
+These aren't edge cases. They're a pattern. And it extends directly to onboarding tools, where per-seat and per-MAU pricing creates the same friction at smaller scale.
+
+## The 3-year cost comparison nobody publishes
+
+Onboarding tool vendors show monthly pricing on their websites, but none of them publish what happens when you multiply that number by 36. The cumulative cost tells a different story than the sticker price, especially for bootstrapped teams where every recurring dollar competes against runway. So we did the math.
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Monthly cost</th>
+      <th>Year 1</th>
+      <th>Year 2</th>
+      <th>Year 3 total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>HelpHero</td>
+      <td>$55/mo</td>
+      <td>$660</td>
+      <td>$1,320</td>
+      <td>$1,980</td>
+    </tr>
+    <tr>
+      <td>UserGuiding</td>
+      <td>$89/mo</td>
+      <td>$1,068</td>
+      <td>$2,136</td>
+      <td>$3,204</td>
+    </tr>
+    <tr>
+      <td>Hopscotch</td>
+      <td>$99/mo</td>
+      <td>$1,188</td>
+      <td>$2,376</td>
+      <td>$3,564</td>
+    </tr>
+    <tr>
+      <td>Product Fruits</td>
+      <td>$129/mo</td>
+      <td>$1,548</td>
+      <td>$3,096</td>
+      <td>$4,644</td>
+    </tr>
+    <tr>
+      <td>Appcues</td>
+      <td>$249+/mo</td>
+      <td>$2,988+</td>
+      <td>$5,976+</td>
+      <td>$8,964+</td>
+    </tr>
+    <tr>
+      <td>Tour Kit (open source core)</td>
+      <td>$0</td>
+      <td>$0</td>
+      <td>$0</td>
+      <td>$0</td>
+    </tr>
+  </tbody>
+</table>
+
+*Pricing as of April 2026 from vendor websites. Entry-tier plans; MAU overages not included.*
+
+That Product Fruits subscription costs $4,644 over three years. For a bootstrapped team, that's a meaningful chunk of runway spent renting functionality that disappears the moment you cancel.
+
+"If you're bootstrapped, you can't afford to spend $300 per month on onboarding apps," as UserGuiding's own blog acknowledges ([UserGuiding](https://userguiding.com/blog/user-onboarding-cost-saas-product)). They're right. But their solution is still $89/month.
+
+## The counterargument: why subscriptions exist and when they make sense
+
+Subscriptions aren't a scam. They're a legitimate business model backed by real economics, and dismissing them wholesale would be dishonest. Hosted onboarding platforms have genuine ongoing costs that justify recurring revenue, and the model works well for certain buyer profiles. Here's why someone might reasonably disagree with the pay-once thesis.
+
+Hosted onboarding platforms like Appcues and Pendo run cloud infrastructure on your behalf. They store tour configurations, track analytics across your user base, serve scripts via CDN, and handle cross-session persistence. That infrastructure has real, ongoing costs. Subscriptions make economic sense when the vendor maintains servers, databases, and uptime guarantees for you.
+
+From the vendor's perspective, subscription revenue is also more predictable. Subscription businesses command 8-12x ARR valuation multiples compared to 3-5x for perpetual license businesses ([DEV.to, Soraco Technologies](https://dev.to/soraco-technologies/perpetual-vs-subscription-licenses-which-business-model-wins-in-2026-19nb)). That matters if you're raising venture capital or planning an exit.
+
+And subscriptions reduce upfront friction. A $49/month commitment feels lighter than a $499 one-time payment, even when the math says otherwise. Trial-to-paid conversion rates for subscription models run 15-25%, versus 2-5% for perpetual licenses ([DEV.to, Soraco Technologies](https://dev.to/soraco-technologies/perpetual-vs-subscription-licenses-which-business-model-wins-in-2026-19nb)).
+
+So the subscription model isn't irrational. But the question is whether it's rational *for you* — a bootstrapped team that doesn't need to chase ARR multiples and doesn't want to rent its onboarding experience indefinitely.
+
+## The argument for paying once
+
+When software runs entirely in the customer's browser bundle with no cloud component, the vendor's ongoing operational cost is close to zero. A headless JavaScript library doesn't run on anyone's servers. It ships as a bundle that runs entirely in your application. No CDN to maintain, no database to host, no analytics infrastructure to scale. The ongoing operational cost to the library author is close to zero.
+
+When you pay a monthly fee for a tool that has no cloud component, you're not paying for infrastructure. You're paying for the business model.
+
+That's the core insight. Not all software has the same cost structure. A hosted platform with servers, storage, and real-time processing has legitimate ongoing costs. A client-side library that tree-shakes into your bundle does not.
+
+We built Tour Kit with this in mind. The core packages are MIT-licensed and free. Tour Kit Pro is a one-time purchase: you get the code, it runs in your app, and there's no server calling home. The breakeven versus a $89/month subscription is about three weeks.
+
+> "I paid $200 for this 5 years ago and it still works perfectly. Why would I pay $10/month forever?"
+> — Developer sentiment on perpetual vs subscription licensing ([DEV.to, 2026](https://dev.to/soraco-technologies/perpetual-vs-subscription-licenses-which-business-model-wins-in-2026-19nb))
+
+Perpetual licensing also eliminates a risk that subscription advocates rarely mention: if you stop paying, your tours vanish. Cancel a hosted platform and your users see a broken onboarding experience until you rip the integration out. With a headless library, you own the code. Cancel anything you want. The tours keep running.
+
+## The lifetime deal trap (and how to avoid it)
+
+One-time pricing and "lifetime deals" sound similar but operate on completely different economics, and confusing them is the fastest way to end up with a tool that disappears in two years. The distinction matters because roughly 40% of AppSumo products shut down within three years of their launch promotion.
+
+AppSumo-style lifetime deals have a roughly 40% shutdown rate within three years ([AppSumo analysis](https://appsumo.com/blog/is-launching-a-lifetime-deal-worth-it)). The economics are brutal for founders. AppSumo takes a 70/30 split, so a company grossing $160K in a two-week promotion actually nets under $50K while taking on thousands of permanently-supported customers ([The Bootstrapped Founder](https://thebootstrappedfounder.com/lifetime-deals-and-saas-businesses/)). Robert Gelb of HeySumo reframed this as "primarily a marketing and community-building opportunity," essentially growth spending disguised as revenue.
+
+The sustainable alternative is a perpetual license with a defined scope. You pay once for the current version. Major updates are optional paid upgrades, typically at a steep discount. JetBrains popularized this hybrid: subscribe for continuous updates, or buy a perpetual fallback license that keeps working at the version you purchased.
+
+For a client-side library, the model is even simpler. You buy the code. It's yours. Future major versions are separate purchases if you want them. No servers to shut down, no ongoing support burden that scales linearly with customer count.
+
+The pricing formula that works, according to Freemius research: 14-16x the equivalent monthly fee ([Freemius](https://freemius.com/blog/saas-lifetime-deals/)). For a tool that would cost $10/month, the one-time price should land around $140-160. Below that, you're leaving money on the table. Above that, you're fighting the "$149 feels like an impulse buy" psychology that makes one-time pricing attractive in the first place.
+
+[See Tour Kit's live demo on CodeSandbox →](https://tourkit.dev/demo)
+
+## What this means if you're bootstrapped
+
+For a small team spending $300 to $800 per month on all developer tools combined, the licensing model of each tool directly affects how many months of runway you have left. The decision tree for choosing between one-time and subscription pricing is shorter than most vendor comparison pages suggest.
+
+**Do you need hosted infrastructure?** If your onboarding requires server-side tour targeting, cross-device session persistence, or a visual builder for non-technical teammates, a subscription tool may be the right call. Appcues and Pendo exist for a reason.
+
+**Does your team include a developer?** A headless library gives full control at a fraction of the cost. Write the JSX, own the styling, decide when and how tours trigger based on application state. No developer on the team? A no-code platform is probably worth the monthly fee.
+
+**Is the total dev tool budget under $500/month?** Every recurring subscription creates permanent drag on runway. Converting a recurring liability into a one-time capital expense frees up monthly budget for the tools that genuinely need ongoing infrastructure.
+
+We calculated our own tool budget when building Tour Kit. At $89-249/month for onboarding alone, it would've consumed 15-50% of our total dev tool spend. That wasn't tenable. So we built the tool we wanted: MIT core, one-time Pro, no monthly drain.
+
+*Disclosure: We built Tour Kit, so our position here isn't neutral. Every cost number in this article is verifiable against vendor pricing pages and the sources linked. Tour Kit doesn't have a visual builder, requires React 18+, and has a smaller community than established tools like React Joyride. Factor that into your math.*
+
+## A practical approach to the buy decision
+
+The single most useful change you can make to your software purchasing process is to stop comparing monthly prices and start comparing 3-year total cost of ownership, including switching costs and MAU overages that vendors don't advertise on their pricing pages.
+
+Here's the framework we'd use:
+
+1. **List every feature you actually need.** Not the feature matrix on the vendor's pricing page, but what your onboarding flows require today. Most teams need step-by-step tours, hotspots, and maybe a checklist. Not A/B testing, NPS surveys, and resource centers on day one.
+
+2. **Price out the subscription at 36 months.** Include MAU overages if your product is growing. A "$89/month" plan can quietly become $150/month when you cross 2,500 MAUs.
+
+3. **Compare against the one-time alternatives.** Tour Kit Pro, Shepherd.js (but check the AGPL license), or building on top of a headless core. Include developer time for integration, typically 4-8 hours for a standard implementation.
+
+4. **Factor in switching costs.** With a hosted platform, migrating away means rebuilding every tour from scratch. With a headless library, your tour definitions live in your codebase. Switching libraries means updating component imports, not recreating content.
+
+```tsx
+// Tour Kit: your tours live in your code
+// Switch libraries later? The definitions stay.
+const steps = [
+  {
+    target: '#welcome-header',
+    title: 'Welcome to the dashboard',
+    content: 'This is where you will track your metrics.',
+  },
+  {
+    target: '#create-project',
+    title: 'Create your first project',
+    content: 'Click here to get started.',
+  },
+];
+```
+
+The math usually points the same direction for bootstrapped teams. Pay once, own the code, ship the tours.
+
+Get started with Tour Kit: [GitHub](https://github.com/AnniversaryArchive/tour-kit) | `npm install @tourkit/core @tourkit/react`
+
+## FAQ
+
+### Is a one-time license vs subscription always cheaper long-term?
+
+Almost always, yes. The breakeven point for perpetual vs subscription pricing is approximately 5 years according to industry analysis ([DEV.to, 2026](https://dev.to/soraco-technologies/perpetual-vs-subscription-licenses-which-business-model-wins-in-2026-19nb)). For bootstrapped teams with tight budgets, the math favors one-time purchases even earlier because the opportunity cost of recurring spend is higher when capital is constrained.
+
+### What happens with updates if I buy a one-time license?
+
+It depends on the vendor's model. Tour Kit Pro includes the version you purchase plus all patch and minor updates. Major version upgrades are separate purchases at a discount. The MIT-licensed core packages receive free updates indefinitely. Your existing code keeps working regardless because there's no server dependency that could be turned off.
+
+### Are lifetime deals on AppSumo a good alternative to subscriptions?
+
+Proceed with extreme caution. Roughly 40% of AppSumo products shut down within 3 years, and the platform takes a 70% revenue cut from founders. A structured one-time license from the vendor directly is more sustainable for both parties. Look for clear version scoping and a funded, active maintainer rather than a marketplace fire sale.
+
+### Can a headless library really replace a full onboarding platform?
+
+For most bootstrapped teams building React apps, yes. Tour Kit's core handles step sequencing, positioning, highlighting, keyboard navigation, and WCAG 2.1 AA accessibility. What you won't get: a visual drag-and-drop builder, server-side user targeting without custom code, or a dedicated customer success manager. If those are requirements, a hosted platform may still be worth the monthly cost.
+
+### How do I calculate the real cost of a subscription onboarding tool?
+
+Multiply the monthly price by 36 for a 3-year total. Add MAU overage fees if your product is growing (check the vendor's pricing page for tier thresholds). Add the switching cost: rebuilding tours from scratch if you ever migrate. For a $129/month tool, the 3-year TCO is at least $4,644 before overages, and that number resets to zero the day you cancel.

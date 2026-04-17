@@ -1,0 +1,118 @@
+---
+title: "What is contextual onboarding? A developer's guide to showing help at the right time"
+published: false
+description: "Contextual onboarding surfaces guidance based on user behavior — not a fixed tour sequence. Here's how it works, with React code examples and ARIA patterns."
+tags: react, javascript, webdev, tutorial
+canonical_url: https://usertourkit.com/blog/what-is-contextual-onboarding
+cover_image: https://usertourkit.com/og-images/what-is-contextual-onboarding.png
+---
+
+*Originally published at [usertourkit.com](https://usertourkit.com/blog/what-is-contextual-onboarding)*
+
+# What is contextual onboarding? Showing the right help at the right time
+
+Most onboarding flows dump a 7-step tour on users the moment they sign in. Users click "Next" until it stops, retain almost nothing, and then poke around the UI on their own anyway. Nielsen Norman Group's research calls this the "paradox of the active user": people skip tutorials because they'd rather start doing than start reading ([NNG, 2023](https://www.nngroup.com/articles/onboarding-tutorials/)).
+
+Contextual onboarding flips the model. Instead of front-loading information, it surfaces help at the exact moment a user needs it. A tooltip appears when someone hovers over an unfamiliar icon. Checklist items highlight after a user completes a prerequisite. Banners show up when the account hits a usage threshold.
+
+This is the difference between handing someone a manual and answering their question mid-task.
+
+## Definition
+
+Contextual onboarding is an onboarding strategy that delivers guidance based on a user's current behavior, state, and intent rather than following a predetermined linear sequence. It triggers help elements (tooltips, hints, checklists, banners) in response to specific user actions or conditions, making each interaction relevant to what the user is actually trying to do. As of April 2026, contextual approaches reduce inbound support tickets by 20–30% compared to static tours ([Chameleon, 2026](https://www.chameleon.io/blog/contextual-help-ux)).
+
+## How contextual onboarding works
+
+NNG researcher Page Laubheimer calls contextual onboarding a form of "pull revelations": help content triggered by a signal that the user would benefit from information at that specific moment. Traditional product tours are "push revelations." They push information regardless of whether the user needs it right now ([NNG, 2023](https://www.nngroup.com/articles/onboarding-tutorials/)).
+
+In practice, this means three things happen:
+
+**A trigger fires.** Something in the UI signals that help is relevant. This could be a user hovering over an unfamiliar element, visiting a page for the first time, completing a prerequisite task, or sitting idle for more than a few seconds.
+
+**The system checks context.** Before showing anything, the application checks user state: have they seen this hint before? Are they mid-task? What's their role? As of 2026, 81% of organizations plan to invest in AI-powered onboarding that makes these context checks adaptive ([AIHR / Appical](https://www.aihr.com/)).
+
+**One relevant element appears.** Not five. Research from Chameleon shows that surfacing more than 3–5 help items in a user's first session causes "help fatigue," the same disengagement that linear tours produce ([Chameleon, 2026](https://www.chameleon.io/blog/contextual-help-ux)).
+
+## Contextual onboarding examples
+
+Here's what this looks like in code. A hint that only appears when a user reaches the settings page for the first time:
+
+```tsx
+// src/components/SettingsHint.tsx
+import { useHint } from '@tourkit/hints';
+
+export function SettingsHint() {
+  const { isVisible, dismiss } = useHint({
+    hintId: 'settings-intro',
+    target: '#notification-toggle',
+    trigger: 'first-visit',    // fires once per user
+    placement: 'right',
+  });
+
+  if (!isVisible) return null;
+
+  return (
+    <div role="status" aria-live="polite">
+      Turn on browser notifications to get
+      alerts when teammates comment.
+      <button onClick={dismiss}>Got it</button>
+    </div>
+  );
+}
+```
+
+Compare that to a linear tour that forces users through a fixed sequence regardless of where they are or what they're doing. The hint above shows up at the right moment, says one thing, and gets out of the way.
+
+Other common contextual patterns:
+
+| Pattern | Trigger | Best for |
+|---|---|---|
+| Hotspot hint | First visit to a feature area | Feature discovery |
+| Inline tooltip | Hover or focus on unfamiliar element | Complex form fields |
+| Contextual checklist | Prerequisite task completed | Setup flows with dependencies |
+| Nudge banner | Usage threshold reached | Upgrade prompts, feature adoption |
+| Empty state guidance | No data present | First-time sections of the app |
+
+## Why contextual onboarding matters for product teams
+
+Linear tours have an average checklist completion rate of 19.2% across industries ([Userpilot, 2026](https://userpilot.com/blog/onboarding-checklist-completion-rate-benchmarks/)). That number varies wildly by vertical: FinTech apps see 24.5% while MarTech apps hover around 12.5%. But the pattern holds: most users don't finish linear onboarding.
+
+Contextual onboarding doesn't have a single "completion rate" because there's no single sequence to complete. Each hint or checklist item stands on its own. Users encounter guidance when it's relevant, so they act on it.
+
+What does that mean in practice?
+
+- Support ticket reduction of 16–21% when in-app guides replace documentation lookups ([Whatfix, 2026](https://whatfix.com/blog/user-onboarding-examples/))
+- Higher feature adoption because users discover features in context, not in a tour they already forgot
+- Less maintenance than linear tours, which break whenever the UI changes the order of elements
+
+## Contextual onboarding in Tour Kit
+
+[Tour Kit](https://usertourkit.com/) was built around contextual patterns. The `@tourkit/hints` package handles individual hints with trigger conditions. `@tourkit/checklists` supports task dependencies, so checklist items only become available after prerequisites are met. And `@tourkit/scheduling` lets you time-gate guidance based on account age, usage milestones, or custom events.
+
+All of it ships under 8KB gzipped for the core, with no runtime dependencies. You render your own components. Tour Kit handles the logic: when to show, when to dismiss, what the user has already seen.
+
+That said, Tour Kit doesn't have a visual builder. You write JSX. If your team needs a no-code drag-and-drop editor, a SaaS platform like Userpilot or Chameleon will be a better fit. Tour Kit is for teams that want full control over their onboarding code.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/hints
+```
+
+## FAQ
+
+### What is the difference between contextual onboarding and a product tour?
+
+Contextual onboarding surfaces guidance based on user behavior and state: a tooltip when someone hovers, a checklist item after a prerequisite is met. A product tour is a fixed linear sequence that plays regardless of what the user is doing. Tours are a subset of onboarding; contextual onboarding is the broader strategy that includes tours, hints, checklists, and banners triggered by context.
+
+### Does contextual onboarding replace linear tours entirely?
+
+Not always. Linear tours still work for initial orientation in complex products (a 3-step overview of core navigation, for instance). Nielsen Norman Group suggests using short tours (under 4 steps) for spatial orientation, then switching to contextual patterns for feature-specific guidance ([NNG, 2023](https://www.nngroup.com/articles/onboarding-tutorials/)). Most production apps use both.
+
+### How do you make contextual onboarding accessible?
+
+Each contextual element needs the right ARIA role. Tooltips use `role="tooltip"` with `aria-describedby`. Announcements use `role="status"` with `aria-live="polite"` so screen readers pick them up without interrupting the current task.
+
+Focus management matters too. A modal hint should trap focus, while an inline tooltip shouldn't steal it. Tour Kit's components handle these patterns by default.
+
+### What triggers should you use for contextual onboarding?
+
+Common triggers include first visit to a page, idle time exceeding a threshold (indicating confusion), completion of a prerequisite task, hover or focus on an unfamiliar element, and usage milestones like account age or action count. The key constraint from Chameleon's research: keep it to 3–5 help items per session maximum to avoid fatigue.

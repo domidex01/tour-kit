@@ -58,7 +58,7 @@ function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>): React.RefCallba
       if (typeof ref === 'function') {
         ref(value)
       } else if (ref != null) {
-        ;(ref as React.MutableRefObject<T | null>).current = value
+        ;(ref as React.RefObject<T | null>).current = value
       }
     }
   }

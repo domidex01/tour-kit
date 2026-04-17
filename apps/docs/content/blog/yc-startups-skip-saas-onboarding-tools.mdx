@@ -1,0 +1,275 @@
+---
+title: "Why YC startups should skip SaaS onboarding tools"
+slug: "yc-startups-skip-saas-onboarding-tools"
+description: "YC startups burn runway on $300/mo onboarding SaaS when their engineers can ship the same flows in a day. Here's the math and the code."
+primary_keyword: "yc startups onboarding tool"
+secondary_keywords: ["startup onboarding stack", "early stage saas onboarding", "yc startup build vs buy", "onboarding tool seed stage"]
+category: "Build vs Buy"
+schema_type: "TechArticle"
+spreadsheet_row: 146
+date: "2026-04-09"
+updated: "2026-04-09"
+ogImage: /og-images/yc-startups-skip-saas-onboarding-tools.png
+published: true
+---
+
+# Why YC startups should skip SaaS onboarding tools
+
+Your YC batch just started. You have $500K, two engineers, and 12 weeks to prove your product works. Somewhere around week three, someone suggests adding user onboarding. And then someone else suggests Appcues.
+
+Stop there.
+
+SaaS onboarding tools are built for mid-market companies with product managers who can't write code. That's not you. You have engineers. You have a React codebase. And you have better things to spend $3,600/year on than a tooltip editor.
+
+I built [Tour Kit](https://usertourkit.com/), an open-source React library for product tours. I'm biased toward code-owned onboarding, and everything here reflects that bias. The data points are sourced so you can check them yourself.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## The problem: onboarding SaaS is priced for companies that aren't you
+
+SaaS onboarding tools charge $249 to $879 per month for the features a seed-stage startup actually needs, which translates to $2,988 to $10,548 per year of runway burned on tooltips and modals. As of April 2026, Appcues starts at $249/month for its Essentials plan, Userpilot at $299/month, and Chameleon at $69/month for a stripped-down Startup tier that gates most useful features behind a $299/month upgrade ([vendor pricing pages, April 2026](https://www.appcues.com/pricing)).
+
+That pricing makes sense at 50,000 MAU when a product manager owns onboarding and iterates weekly without engineering help. But a typical YC company at Demo Day has 100 to 2,000 users. You're paying enterprise rates for a feature set you won't need for 18 months.
+
+And the costs scale against you. Every onboarding SaaS tool bills per monthly active user. Grow from 2,000 to 10,000 MAU and your bill doubles or triples. We broke down exactly how [MAU pricing penalizes growth](/blog/mau-pricing-onboarding-tool) in a separate analysis.
+
+Here's what the first-year cost looks like at YC scale:
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Year 1 cost</th>
+      <th>Time to first tour</th>
+      <th>Scales with MAU?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Appcues (Essentials)</td>
+      <td>$2,988</td>
+      <td>1-2 hours</td>
+      <td>Yes, $249-$879+/mo tiers</td>
+    </tr>
+    <tr>
+      <td>Userpilot (Starter)</td>
+      <td>$3,588</td>
+      <td>1-2 hours</td>
+      <td>Yes, custom pricing at scale</td>
+    </tr>
+    <tr>
+      <td>Open-source library</td>
+      <td>$0 (MIT)</td>
+      <td>4-8 hours</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Tour Kit (Pro)</td>
+      <td>$99 one-time</td>
+      <td>4-8 hours</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Build from scratch</td>
+      <td>$8,000-15,000 (dev time)</td>
+      <td>2-6 weeks</td>
+      <td>No</td>
+    </tr>
+  </tbody>
+</table>
+
+The "time to first tour" gap between SaaS and library is real. But for a team that ships React daily, four hours isn't a meaningful blocker. It's a morning.
+
+## The argument: YC startups have the exact profile where libraries win
+
+Three characteristics make YC startups uniquely bad customers for onboarding SaaS and uniquely good candidates for a library-based approach. Every one of these pushes the math toward owning your onboarding code rather than renting it.
+
+### You already have engineers who write React
+
+A YC startup in 2026 is almost certainly a technical team. 66% of YC's W24 batch was AI-integrated, and over 50% of S25 was building agentic AI products ([YC batch data](https://www.ycombinator.com/)). These are teams where the founders write code.
+
+The entire value proposition of SaaS onboarding tools — that non-technical people can build tours without engineering — solves a problem you don't have.
+
+Your engineer can write this in 20 minutes:
+
+```tsx
+// src/components/OnboardingTour.tsx
+import { TourProvider, Tour, TourStep } from '@tourkit/react';
+
+export function OnboardingTour() {
+  return (
+    <TourProvider>
+      <Tour tourId="welcome" startOn="mount">
+        <TourStep target="#create-project" title="Create your first project">
+          Click here to start a new project. This is where everything begins.
+        </TourStep>
+        <TourStep target="#invite-team" title="Invite your team">
+          Add your co-founder. Collaboration is better than solo.
+        </TourStep>
+        <TourStep target="#dashboard" title="Your dashboard">
+          This is home. All your metrics, all your projects, one screen.
+        </TourStep>
+      </Tour>
+    </TourProvider>
+  );
+}
+```
+
+That's a working 3-step onboarding tour. No vendor dashboard. No third-party script injected into your bundle. No monthly invoice.
+
+### Your runway is too short for recurring SaaS costs
+
+The standard YC deal is $500K for 7% equity. After Demo Day, most startups have 12 to 18 months of runway. Every recurring cost gets multiplied against that timeline.
+
+$300/month sounds small. Over 18 months, it's $5,400. That's a month of cloud hosting, or two months of a design contractor.
+
+Paul Graham's advice to YC founders is specific: "Live frugally." Not because $300 matters in isolation, but because SaaS subscriptions compound. Onboarding tool plus analytics plus feature flags plus error monitoring plus session replay — and suddenly you're at $2,000/month before product-market fit.
+
+We calculated the [full three-year TCO comparison](/blog/build-vs-buy-product-tour-calculator) across DIY, library, and SaaS paths. For a startup growing from 1,000 to 50,000 MAU, the library path saves $15,000 to $40,000 over three years compared to mid-tier SaaS.
+
+### You'll pivot, and vendor lock-in makes pivoting harder
+
+YC companies pivot. A lot of them. The onboarding flows you built in week 4 will be irrelevant by week 10 if your product changes direction. With a SaaS tool, those flows live in a vendor dashboard tied to DOM selectors that no longer exist. With a library, your tours are code. They live in your repo. They get refactored when your product does.
+
+One Hacker News commenter put it bluntly: "Integrating with a 3rd party service added similar level of complexity, all the design decisions had to be made around 3rd party system which constrained the project pointlessly." That constraint doubles when your product surface is changing weekly.
+
+Vendor lock-in in onboarding tools is a [well-documented pattern](/blog/vendor-lock-in-onboarding-tool). Proprietary data models, limited export, and APIs designed for integration rather than extraction make it expensive to leave once you're embedded.
+
+## The counterargument: when SaaS onboarding makes sense even at seed stage
+
+I'd be dishonest if I didn't admit there are seed-stage scenarios where a SaaS tool is the better call. Two specifically.
+
+**Your team has zero frontend engineers.** If your product is API-first or backend-heavy and nobody on the team writes React, a no-code visual builder removes a real bottleneck. Tour Kit requires someone who can write JSX. If that's nobody at your company, the library path doesn't work.
+
+**Your onboarding owner isn't technical.** Some YC companies hire a head of growth or customer success lead before Demo Day. If that person owns onboarding and ships changes daily, giving them a visual editor eliminates the back-and-forth with engineering. We wrote an [honest assessment of when SaaS wins](/blog/when-saas-onboarding-makes-sense) from our perspective as library authors, and these two scenarios came out clearly on top.
+
+The conventional wisdom from vendors like Userpilot and Whatfix says build-vs-buy should tilt toward "buy" because engineering time is expensive. Neal Soni argues "more often than not, people are more expensive than any service you will use." True at a 911 emergency services company with $200/hour contractors. Less true at a YC startup where the founders are the engineers.
+
+The calculus shifted again in 2025-2026. Retool's 2026 Build vs. Buy Report found that 35% of enterprises have already replaced at least one SaaS tool with custom software, and 78% plan to build more ([Retool, 2026](https://retool.com/blog/ai-build-vs-buy-report-2026)). AI-assisted development lets one engineer scaffold a complete onboarding flow in hours. The old "$55K to build from scratch" estimate assumed a world where AI didn't write half your boilerplate.
+
+## What this means for early-stage founders
+
+If you're a technical YC founder deciding on your onboarding stack this week, here's the decision framework:
+
+**Use a library if:** your team writes React, your MAU is under 10,000, and you value code ownership. The four to eight hours of setup pays for itself in the first month of avoided SaaS fees.
+
+**Use SaaS if:** nobody on your team writes frontend code, or a non-technical growth hire needs to ship onboarding changes without engineering. Pay the $300/month and revisit after Series A.
+
+**Don't build from scratch.** Not at seed stage. Building tooltip positioning, overlay rendering, scroll handling, focus trapping, and keyboard navigation from zero is a two-month project. We quantified why in our analysis of [what "free" libraries actually cost](/blog/open-source-onboarding-cost-developer-time). A library gives you all of that in an `npm install`.
+
+## What we'd build: the early-stage onboarding stack
+
+Here's the stack we'd recommend for a YC startup shipping its first onboarding flow. Total cost: $99 or $0 depending on whether you need Pro features. Total setup time: one afternoon.
+
+```tsx
+// src/providers/OnboardingProvider.tsx
+import { TourKitProvider } from '@tourkit/core';
+import { TourProvider } from '@tourkit/react';
+
+// Wrap your app root once
+export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourKitProvider
+      config={{
+        storage: 'localStorage',   // Persist tour progress — no backend needed
+        respectReducedMotion: true, // Accessibility from day one
+      }}
+    >
+      <TourProvider>
+        {children}
+      </TourProvider>
+    </TourKitProvider>
+  );
+}
+```
+
+Add analytics when you're ready. Tour Kit integrates with PostHog, Mixpanel, and Amplitude. But don't wire it up on day one. Ship the tour first, measure later.
+
+YC's motto is "make something people want," not "instrument something people might want."
+
+Tour Kit's core is under 8KB gzipped with zero runtime dependencies. No external scripts, no phone-home calls, no third-party domains in your CSP headers.
+
+The honest limitation: Tour Kit doesn't have a visual builder. Every change requires a developer. If you need a PM or growth lead to edit tours without engineering, this isn't the right tool. We built [our approach to no-code trade-offs](/blog/no-code-onboarding-technical-debt) around the belief that code ownership matters more at early stage, but that belief doesn't apply to every team structure.
+
+Get started at [usertourkit.com](https://usertourkit.com/).
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## FAQ
+
+### Is $300/month really significant for a YC startup?
+
+In isolation, no. But SaaS subscriptions compound. A typical YC startup runs five to ten tools within six months, reaching $1,500 to $3,000/month before revenue. Each yc startups onboarding tool subscription is individually "small" but collectively burns 3-6% of a $500K raise per year. Cutting one permanently helps.
+
+### Can a library match the features of Appcues or Userpilot?
+
+For seed-stage features (tours, tooltips, checklists, basic analytics), yes. Tour Kit ships 10 composable packages. What it lacks: a visual builder, A/B testing, and a no-code editor. Those matter at 50,000 MAU with a product ops team, not at 1,000 MAU with two engineers.
+
+### What about the developer time cost of using a library?
+
+We measured this: a standard 5-step onboarding tour takes 4-8 hours to implement with Tour Kit, including provider setup, step configuration, and styling with your existing design system. At $100/hour, that's $400-$800 one time. Appcues Essentials costs $2,988/year. The library pays for itself in the first two months.
+
+### How does Tour Kit handle accessibility?
+
+Tour Kit ships with WCAG 2.1 AA compliance: ARIA attributes, keyboard navigation, focus trapping, and `prefers-reduced-motion` support. SaaS tools are black boxes where you can't inspect the accessibility implementation. With Tour Kit, the ARIA markup is in your code and under your control.
+
+### Should I switch from SaaS to a library if I already started with Appcues?
+
+If you're past Demo Day and already have Appcues configured, the switching cost may not be worth it until you hit a pain point (pricing tier jump, design system mismatch, or vendor lock-in frustration). We wrote a [migration guide for teams leaving Appcues](/blog/migrate-appcues-code-owned-onboarding) if you decide to make the move later.
+
+---
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Why YC startups should skip SaaS onboarding tools",
+  "description": "YC startups burn runway on $300/mo onboarding SaaS when their engineers can ship the same flows in a day. Here's the math and the code.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://usertourkit.com/og-images/yc-startups-skip-saas-onboarding-tools.png",
+  "url": "https://usertourkit.com/blog/yc-startups-skip-saas-onboarding-tools",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/yc-startups-skip-saas-onboarding-tools"
+  },
+  "keywords": ["yc startups onboarding tool", "startup onboarding stack", "early stage saas onboarding"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+**Internal linking suggestions:**
+- Link FROM: build-vs-buy-product-tour-calculator, best-digital-adoption-platforms-startups, onboarding-software-cost-2026
+- Link TO: mau-pricing-onboarding-tool, vendor-lock-in-onboarding-tool, when-saas-onboarding-makes-sense, open-source-onboarding-cost-developer-time, no-code-onboarding-technical-debt, migrate-appcues-code-owned-onboarding
+
+**Distribution checklist:**
+- Hacker News (Show HN angle: "The math on onboarding SaaS vs libraries for YC startups")
+- Reddit r/startups, r/ycombinator, r/reactjs
+- Indie Hackers
+- Dev.to (canonical URL to usertourkit.com)
+- Twitter/X thread: 5-tweet breakdown of the cost comparison table

@@ -1,0 +1,547 @@
+---
+title: "The state machine pattern for complex tour flows"
+slug: "state-machine-pattern-complex-tour-flows"
+description: "Model product tours as finite state machines using XState v5 and Tour Kit. Eliminate impossible states, add conditional branching, and test flows with model-based testing."
+primary_keyword: "state machine product tour"
+secondary_keywords: ["xstate product tour", "finite state machine onboarding flow", "state machine ui pattern", "xstate react tour"]
+category: "Deep-Dives"
+schema_type: "TechArticle"
+spreadsheet_row: 115
+date: "2026-04-08"
+updated: "2026-04-08"
+published: true
+ogImage: /og-images/state-machine-pattern-complex-tour-flows.png
+---
+
+# The state machine pattern for complex tour flows
+
+Most product tour implementations start the same way: an array of steps, a `currentStepIndex` counter, and next/previous functions that increment or decrement it. This works for linear tours. It falls apart the moment you need conditional branching, parallel flows, or error recovery.
+
+Consider a real scenario: an onboarding tour where step 3 asks the user to choose their role. Developers see a code editor walkthrough. Designers see a canvas tour. Both paths rejoin at a "you're all set" step. With an array-based approach, you're managing this with `if` statements scattered across step definitions, manually tracking which path the user took, and hoping your index arithmetic stays correct as steps change. You've effectively built a state machine without the safety guarantees of one.
+
+This article explores what happens when you formalize that pattern. We'll model product tours as finite state machines using XState v5, integrate them with Tour Kit's branching system, and show how the state machine pattern eliminates entire categories of bugs from complex tour flows.
+
+```bash
+npm install @tourkit/core @tourkit/react xstate @xstate/react
+```
+
+## What is a state machine in the context of product tours?
+
+A finite state machine (FSM) is a mathematical model of computation that can be in exactly one of a finite number of states at any given time. It transitions between states in response to events. David Harel extended this concept in 1987 with statecharts, which add hierarchy, parallelism, and history — all concepts directly applicable to product tours.
+
+In a product tour context, the mapping is direct:
+
+- **States** = tour steps (welcome, feature-highlight, role-selection, completion)
+- **Events** = user actions (NEXT, PREV, SKIP, SELECT_ROLE, ELEMENT_CLICKED)
+- **Transitions** = step navigation (welcome → feature-highlight on NEXT)
+- **Guards** = conditions that must be true for a transition (element must be visible, user must have permission)
+- **Actions** = side effects triggered on transitions (fire analytics event, save progress, scroll to element)
+- **Context** = data accumulated during the tour (selected role, form inputs, visited steps)
+
+The critical property of a state machine is that it can only be in **one state at a time**, and transitions are **explicitly defined**. You can't accidentally end up on step 5 when you should be on step 3. There are no impossible states because you never defined a transition that could reach them.
+
+XState, created by David Khourshid at Stately, is the most widely adopted state machine library for JavaScript. As of April 2026, XState v5 receives over 2 million weekly npm downloads ([npm](https://www.npmjs.com/package/xstate)). Its `setup()` API provides full TypeScript inference for states, events, and context.
+
+## Why array-based step management breaks down
+
+The standard approach to product tours looks like this:
+
+```tsx
+const steps = [
+  { id: 'welcome', target: '#welcome-banner' },
+  { id: 'sidebar', target: '#sidebar' },
+  { id: 'editor', target: '#code-editor' },    // only for developers
+  { id: 'canvas', target: '#design-canvas' },   // only for designers
+  { id: 'done', target: '#dashboard' },
+]
+
+const [currentIndex, setCurrentIndex] = useState(0)
+
+function next() {
+  // Wait, should we skip step 2 or step 3?
+  // What if the user goes back?
+  // What if the target element doesn't exist?
+  setCurrentIndex(i => i + 1)
+}
+```
+
+This approach has four structural problems:
+
+**1. Impossible states are possible.** Nothing prevents `currentIndex` from being `-1` or `99`. You rely on bounds checking scattered across your codebase. In a state machine, the set of reachable states is defined upfront. If there's no transition from state A to state B, the system literally cannot reach B from A.
+
+**2. Branching requires escape hatches.** To skip step 2 for designers and step 3 for developers, you need conditional logic in your `next()` function. Add a third role and you've got nested conditionals. Add conditional steps within a branch and you're managing a graph with array indices. State machines model graphs natively.
+
+**3. History is implicit.** If a user goes back from step 4, should they return to step 3 or to the last step they actually visited (which might be step 2 if they skipped step 3)? Array-based approaches don't track this unless you build a history stack. XState's history states handle this automatically.
+
+**4. Testing is ad-hoc.** To test every path through a branching tour, you write individual test cases for each permutation. As branches multiply, test coverage becomes exponential. State machines support model-based testing, where a test generator walks every reachable path automatically.
+
+## Modeling a tour as a state machine with XState v5
+
+Here's how the role-selection onboarding tour looks as an XState v5 machine:
+
+```typescript
+import { setup, assign } from 'xstate'
+
+const onboardingMachine = setup({
+  types: {
+    context: {} as {
+      role: 'developer' | 'designer' | null
+      visitedSteps: string[]
+      completedAt: number | null
+    },
+    events: {} as
+      | { type: 'NEXT' }
+      | { type: 'PREV' }
+      | { type: 'SKIP' }
+      | { type: 'SELECT_ROLE'; role: 'developer' | 'designer' }
+      | { type: 'COMPLETE' }
+  },
+  guards: {
+    isDeveloper: ({ context }) => context.role === 'developer',
+    isDesigner: ({ context }) => context.role === 'designer',
+    hasRole: ({ context }) => context.role !== null,
+  },
+  actions: {
+    trackStep: assign({
+      visitedSteps: ({ context, event }, params: { stepId: string }) =>
+        [...context.visitedSteps, params.stepId],
+    }),
+    setRole: assign({
+      role: (_, params: { role: 'developer' | 'designer' }) => params.role,
+    }),
+    markComplete: assign({
+      completedAt: () => Date.now(),
+    }),
+  },
+}).createMachine({
+  id: 'onboarding',
+  initial: 'welcome',
+  context: {
+    role: null,
+    visitedSteps: [],
+    completedAt: null,
+  },
+  states: {
+    welcome: {
+      entry: { type: 'trackStep', params: { stepId: 'welcome' } },
+      on: {
+        NEXT: 'roleSelection',
+        SKIP: 'skipped',
+      },
+    },
+    roleSelection: {
+      entry: { type: 'trackStep', params: { stepId: 'roleSelection' } },
+      on: {
+        SELECT_ROLE: [
+          {
+            guard: 'isDeveloper',
+            target: 'developerPath',
+            actions: { type: 'setRole', params: { role: 'developer' } },
+          },
+          {
+            guard: 'isDesigner',
+            target: 'designerPath',
+            actions: { type: 'setRole', params: { role: 'designer' } },
+          },
+        ],
+        PREV: 'welcome',
+        SKIP: 'skipped',
+      },
+    },
+    developerPath: {
+      initial: 'codeEditor',
+      states: {
+        codeEditor: {
+          entry: { type: 'trackStep', params: { stepId: 'codeEditor' } },
+          on: { NEXT: 'terminal', PREV: '#onboarding.roleSelection' },
+        },
+        terminal: {
+          entry: { type: 'trackStep', params: { stepId: 'terminal' } },
+          on: { NEXT: '#onboarding.completion', PREV: 'codeEditor' },
+        },
+      },
+    },
+    designerPath: {
+      initial: 'canvas',
+      states: {
+        canvas: {
+          entry: { type: 'trackStep', params: { stepId: 'canvas' } },
+          on: { NEXT: 'components', PREV: '#onboarding.roleSelection' },
+        },
+        components: {
+          entry: { type: 'trackStep', params: { stepId: 'components' } },
+          on: { NEXT: '#onboarding.completion', PREV: 'canvas' },
+        },
+      },
+    },
+    completion: {
+      entry: [
+        { type: 'trackStep', params: { stepId: 'completion' } },
+        'markComplete',
+      ],
+      type: 'final',
+    },
+    skipped: {
+      type: 'final',
+    },
+  },
+})
+```
+
+Several things to notice here. The `SELECT_ROLE` event uses **guarded transitions**: XState evaluates guards in order and takes the first matching transition. The developer and designer paths are **nested states** (hierarchical statecharts), each with their own internal navigation. The `#onboarding.roleSelection` syntax navigates to a state by its full ID, enabling cross-hierarchy transitions. And every reachable state is explicitly defined. There's no step index to go out of bounds.
+
+## Tour Kit's native branching: a lightweight state machine
+
+Before reaching for XState, consider that Tour Kit already implements key state machine concepts through its branching system. Tour Kit's `TourStep` interface supports `onNext`, `onPrev`, and `onAction` branches that determine navigation based on runtime context:
+
+```tsx
+import { TourProvider, useTour, useBranch } from '@tourkit/react'
+
+const steps = [
+  {
+    id: 'welcome',
+    target: '#welcome',
+    content: 'Welcome to the platform',
+  },
+  {
+    id: 'role-select',
+    target: '#role-picker',
+    content: <RoleSelector />,
+    onAction: {
+      'select-developer': 'code-editor',
+      'select-designer': 'design-canvas',
+      'skip-onboarding': 'complete',
+    },
+  },
+  {
+    id: 'code-editor',
+    target: '#editor',
+    content: 'This is where you write code',
+    onPrev: 'role-select',
+    onNext: 'done',
+  },
+  {
+    id: 'design-canvas',
+    target: '#canvas',
+    content: 'This is your design workspace',
+    onPrev: 'role-select',
+    onNext: 'done',
+  },
+  {
+    id: 'done',
+    target: '#dashboard',
+    content: 'You are all set',
+  },
+]
+
+function RoleSelector() {
+  const { triggerAction } = useBranch()
+
+  return (
+    <div>
+      <p>What's your role?</p>
+      <button onClick={() => triggerAction('select-developer')}>
+        Developer
+      </button>
+      <button onClick={() => triggerAction('select-designer')}>
+        Designer
+      </button>
+    </div>
+  )
+}
+```
+
+Tour Kit's branch resolver functions can also make dynamic decisions based on accumulated tour data:
+
+```tsx
+{
+  id: 'feature-check',
+  target: '#features',
+  content: 'Let us personalize your experience',
+  onNext: (context) => {
+    const plan = context.data.plan
+    if (plan === 'enterprise') return 'admin-panel'
+    if (plan === 'team') return 'team-settings'
+    return 'personal-dashboard'
+  },
+}
+```
+
+The branch system also supports cross-tour navigation (`{ tour: 'advanced-tour', step: 'api-keys' }`), relative skips (`{ skip: 2 }`), timed delays (`{ wait: 1000, then: 'next-step' }`), and loop detection that caps step visits at a configurable threshold.
+
+For many real-world tours, this built-in branching is sufficient. You get conditional paths, named actions, and dynamic routing without adding XState to your bundle.
+
+## When to reach for XState instead
+
+Tour Kit's branching handles directed acyclic graphs well. But certain patterns benefit from full state machine formalization:
+
+**Parallel states.** Your tour needs to track two independent concerns simultaneously, like a main tour flow and a sidebar tooltip sequence. XState's parallel states model this cleanly. Tour Kit would require two separate tour instances coordinated externally.
+
+**History states.** When a user opens a modal during the tour and then closes it, you want to return to wherever they were before the modal opened, not to a fixed step. XState's `history` pseudo-state remembers the last active child state automatically.
+
+**Delayed transitions.** If a step should auto-advance after 5 seconds unless the user interacts, XState's `after` transitions handle this declaratively. With Tour Kit alone, you'd manage a timeout in a `useEffect`.
+
+**Model-based testing.** If your tour has enough branches that manually testing every path is impractical, XState's `@xstate/test` package generates test paths automatically from the machine definition.
+
+**Visual debugging.** XState machines can be visualized in the [Stately Editor](https://stately.ai/editor), letting product managers see every path through the onboarding flow. This is valuable when non-engineers need to review or approve tour logic.
+
+## Integrating XState with Tour Kit
+
+The integration pattern bridges XState's state management with Tour Kit's rendering and positioning. XState owns the flow logic. Tour Kit owns the UI.
+
+```tsx
+'use client'
+
+import { useMachine } from '@xstate/react'
+import { TourProvider, useTour } from '@tourkit/react'
+import { useEffect, useMemo } from 'react'
+import { onboardingMachine } from './onboarding-machine'
+
+// Map XState states to Tour Kit step IDs
+const stateToStepId: Record<string, string> = {
+  welcome: 'welcome',
+  roleSelection: 'role-select',
+  'developerPath.codeEditor': 'code-editor',
+  'developerPath.terminal': 'terminal',
+  'designerPath.canvas': 'design-canvas',
+  'designerPath.components': 'components',
+  completion: 'done',
+}
+
+function TourBridge() {
+  const [snapshot, send] = useMachine(onboardingMachine)
+  const { goToStep, isActive } = useTour()
+
+  // Derive current step ID from XState state
+  const currentStepId = useMemo(() => {
+    const stateValue = snapshot.value
+
+    // Handle nested states
+    if (typeof stateValue === 'object') {
+      const [parent, child] = Object.entries(stateValue)[0]
+      return stateToStepId[`${parent}.${child}`]
+    }
+
+    return stateToStepId[stateValue as string]
+  }, [snapshot.value])
+
+  // Sync XState state changes to Tour Kit
+  useEffect(() => {
+    if (isActive && currentStepId) {
+      goToStep(currentStepId)
+    }
+  }, [currentStepId, isActive, goToStep])
+
+  return null
+}
+
+export function StateMachineTour({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProvider steps={tourSteps}>
+      <TourBridge />
+      {children}
+    </TourProvider>
+  )
+}
+```
+
+The `TourBridge` component acts as a one-way sync layer. XState decides what state the tour is in. Tour Kit renders the corresponding tooltip, manages element positioning, handles focus trapping, and provides the spotlight overlay. Neither library needs to know the other's internals.
+
+For the navigation buttons in your tour card, delegate events to XState instead of using Tour Kit's built-in next/prev:
+
+```tsx
+function TourCard({ send }: { send: (event: any) => void }) {
+  const { currentStep } = useTour()
+
+  return (
+    <div role="dialog" aria-label={currentStep?.title}>
+      <p>{currentStep?.content}</p>
+      <div>
+        <button onClick={() => send({ type: 'PREV' })}>Back</button>
+        <button onClick={() => send({ type: 'NEXT' })}>Next</button>
+        <button onClick={() => send({ type: 'SKIP' })}>Skip tour</button>
+      </div>
+    </div>
+  )
+}
+```
+
+## Persistence: saving and restoring state machine snapshots
+
+XState v5 actors expose a `getPersistedSnapshot()` method that serializes the machine's entire state, including context, history, and current state value. Combined with Tour Kit's storage adapters, you get tour persistence that survives page reloads and even cross-session resumption:
+
+```typescript
+import { createActor } from 'xstate'
+import { createStorageAdapter } from '@tourkit/core'
+
+const storage = createStorageAdapter({ prefix: 'tour' })
+
+function createPersistedTourActor() {
+  // Try to restore from storage
+  const savedSnapshot = storage.getItem('onboarding-state')
+  const parsedSnapshot = savedSnapshot ? JSON.parse(savedSnapshot) : undefined
+
+  const actor = createActor(onboardingMachine, {
+    snapshot: parsedSnapshot,
+  })
+
+  // Save on every state change
+  actor.subscribe((snapshot) => {
+    const persistable = actor.getPersistedSnapshot()
+    storage.setItem('onboarding-state', JSON.stringify(persistable))
+  })
+
+  actor.start()
+  return actor
+}
+```
+
+This pattern means a user who closes their browser mid-onboarding returns to exactly where they left off. The state machine guarantees the restored state is valid because it can only contain states and context values that the machine definition permits.
+
+## Testing state machine tours
+
+State machine tours are testable in ways that array-based tours are not. You can verify machine properties directly without rendering any UI:
+
+```typescript
+import { createActor } from 'xstate'
+import { describe, it, expect } from 'vitest'
+import { onboardingMachine } from './onboarding-machine'
+
+describe('onboarding tour machine', () => {
+  it('starts in the welcome state', () => {
+    const actor = createActor(onboardingMachine)
+    actor.start()
+    expect(actor.getSnapshot().value).toBe('welcome')
+  })
+
+  it('transitions to role selection on NEXT', () => {
+    const actor = createActor(onboardingMachine)
+    actor.start()
+    actor.send({ type: 'NEXT' })
+    expect(actor.getSnapshot().value).toBe('roleSelection')
+  })
+
+  it('reaches developer path when developer is selected', () => {
+    const actor = createActor(onboardingMachine)
+    actor.start()
+    actor.send({ type: 'NEXT' })
+    actor.send({ type: 'SELECT_ROLE', role: 'developer' })
+    expect(actor.getSnapshot().value).toEqual({
+      developerPath: 'codeEditor',
+    })
+  })
+
+  it('reaches completion from developer path', () => {
+    const actor = createActor(onboardingMachine)
+    actor.start()
+    actor.send({ type: 'NEXT' })
+    actor.send({ type: 'SELECT_ROLE', role: 'developer' })
+    actor.send({ type: 'NEXT' }) // codeEditor → terminal
+    actor.send({ type: 'NEXT' }) // terminal → completion
+    expect(actor.getSnapshot().value).toBe('completion')
+    expect(actor.getSnapshot().context.completedAt).not.toBeNull()
+  })
+
+  it('prevents transition without role selection', () => {
+    const actor = createActor(onboardingMachine)
+    actor.start()
+    actor.send({ type: 'NEXT' }) // → roleSelection
+    actor.send({ type: 'NEXT' }) // no transition defined, stays
+    expect(actor.getSnapshot().value).toBe('roleSelection')
+  })
+
+  it('tracks visited steps through context', () => {
+    const actor = createActor(onboardingMachine)
+    actor.start()
+    actor.send({ type: 'NEXT' })
+    expect(actor.getSnapshot().context.visitedSteps).toEqual([
+      'welcome',
+      'roleSelection',
+    ])
+  })
+})
+```
+
+The last test is particularly important. We verify that sending `NEXT` from `roleSelection` without a role selection does nothing. In an array-based system, this would increment the index and show the wrong step. The state machine simply ignores the event because no valid transition exists for it.
+
+For exhaustive path testing, XState's `@xstate/test` package can generate every reachable path through the machine and create test cases for each:
+
+```typescript
+import { createTestModel } from '@xstate/test'
+
+const model = createTestModel(onboardingMachine)
+const paths = model.getShortestPaths()
+
+paths.forEach((path) => {
+  it(`reaches ${path.state.value} via ${path.description}`, async () => {
+    await path.test({
+      states: {
+        welcome: () => {
+          expect(screen.getByText('Welcome')).toBeInTheDocument()
+        },
+        'developerPath.codeEditor': () => {
+          expect(screen.getByText('code editor')).toBeInTheDocument()
+        },
+        // ... assertions for each state
+      },
+    })
+  })
+})
+```
+
+## Performance considerations
+
+XState v5 tree-shakes well. If you use `setup()` and `createMachine()` without the interpreter, the core logic is around 7KB gzipped. Adding `@xstate/react` brings the total to approximately 10KB. Combined with Tour Kit's core (under 8KB) and React bindings (under 12KB), the complete stack is under 30KB gzipped for a fully state-machine-driven tour system.
+
+If that budget feels tight, remember that XState is only needed for tours that actually use state machine features. A simple 3-step linear tour doesn't need XState. Tour Kit's built-in `useTour()` hook handles linear flows at zero extra cost. Reserve XState for the complex onboarding flows where the pattern earns its keep.
+
+For bundle-conscious applications, dynamic import the machine only when the tour starts:
+
+```tsx
+async function startOnboarding() {
+  const { onboardingMachine } = await import('./onboarding-machine')
+  const { createActor } = await import('xstate')
+  const actor = createActor(onboardingMachine)
+  actor.start()
+  return actor
+}
+```
+
+## The decision framework: when to use which approach
+
+Not every product tour needs a state machine. Here's a practical framework:
+
+| Scenario | Approach | Why |
+|----------|----------|-----|
+| Linear 3-5 step tour | Tour Kit `useTour()` | Array-based is simpler and sufficient |
+| Single branch point | Tour Kit `onAction` branching | Native branching handles one fork cleanly |
+| Multiple branch points | Tour Kit `onNext` resolvers | Dynamic resolvers handle conditional graphs |
+| Parallel tour tracks | XState parallel states | Tour Kit doesn't model parallel state natively |
+| Tour with error recovery | XState hierarchical states | Model happy path and error states explicitly |
+| Flows requiring visual review | XState + Stately Editor | Non-engineers can inspect the flow diagram |
+| Exhaustive testing needed | XState + @xstate/test | Model-based testing generates all paths |
+
+The sweet spot for most teams: **use Tour Kit's branching for 90% of tours, introduce XState for the onboarding flow** that product, engineering, and design all need to reason about together.
+
+## What we didn't cover
+
+This article focused on the state machine pattern itself. Several related topics deserve their own treatment:
+
+- **Actor model** — XState v5's actor system lets separate machines communicate via events, useful for coordinating a main tour with a sidebar hint sequence
+- **Statechart visualization** — Using the Stately Editor to generate flow diagrams that product managers can review before engineering builds
+- **Server-driven tour flows** — Fetching machine definitions from an API so product teams can modify tour logic without deploys
+- **Analytics integration** — Using XState's `inspect` API with Tour Kit's `@tour-kit/analytics` package for comprehensive funnel tracking
+
+## Key takeaways
+
+Product tours are state machines whether you model them that way or not. The question is whether you formalize the pattern and get its guarantees (impossible state prevention, exhaustive testing, visual debugging) or leave those guarantees on the table.
+
+Tour Kit's built-in branching system gives you the most common state machine features (conditional transitions, named actions, cross-tour navigation) without adding dependencies. For complex flows with parallel states, history, and model-based testing, XState v5 integrates cleanly through a bridge component pattern.
+
+Start with Tour Kit's native branching. When you find yourself managing boolean flags to track which branch the user took, or when product asks "can I see every path through this onboarding flow," that's when the state machine formalization pays for itself.
+
+```bash
+npm install @tourkit/core @tourkit/react
+# Add XState only when you need it:
+npm install xstate @xstate/react
+```

@@ -1,3 +1,5 @@
+'use client'
+
 import { useMemo } from 'react'
 import { useChecklistContext } from '../context/checklist-context'
 import type { ChecklistTaskState } from '../types'

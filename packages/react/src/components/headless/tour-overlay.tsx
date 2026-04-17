@@ -1,3 +1,5 @@
+'use client'
+
 import { usePrefersReducedMotion, useSpotlight, useTour } from '@tour-kit/core'
 import * as React from 'react'
 import { TourPortal } from '../primitives/tour-portal'

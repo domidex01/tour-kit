@@ -1,0 +1,447 @@
+---
+title: "Product tours: the complete 2026 guide for developers"
+description: "Learn what product tours are, how they work, and how to build them in React. Tour types, completion benchmarks, accessibility, and code examples."
+slug: "product-tour-guide-2026"
+primary_keyword: "product tour guide 2026"
+secondary_keywords: ["what is product tour", "product tour definition", "product tour complete guide", "product tour react", "product tour best practices"]
+category: "Pillar Pages"
+schema_type: "TechArticle"
+spreadsheet_row: 286
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/product-tour-guide-2026.png
+---
+
+# Product tours: the complete 2026 guide for developers
+
+Most product tour guides are written for product managers choosing a SaaS tool. This one isn't. This guide is for developers who need to understand what product tours are, how they work technically, and how to build them well. We'll cover the four tour patterns, the data behind what actually gets completed, accessibility requirements that every other guide ignores, and implementation approaches from vanilla JS to headless React libraries.
+
+If you want to skip the theory and start building, install [User Tour Kit](https://usertourkit.com/) and follow the [React 19 quickstart](/blog/add-product-tour-react-19).
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What is a product tour?
+
+A product tour is an in-context UI sequence that guides users through a product's interface. Unlike documentation or tutorial videos, tours are interactive and contextual. They appear inside the application itself, pointing at real UI elements, and advance based on user actions. Tours typically use tooltips, modals, hotspots, or highlighted overlays to direct attention to specific parts of the interface.
+
+The term covers a range of patterns: a three-step tooltip sequence introducing a new feature, a full onboarding walkthrough that runs on first login, a pulsating hotspot hinting at an underused button, or a modal announcing a product update. What unifies them is context. The guidance appears where and when the user needs it, not in a separate help center.
+
+For developers, a product tour is a stateful UI component. It tracks which step the user is on, manages focus and scroll position, renders overlays and tooltips relative to target elements, handles dismissal and completion, and optionally persists progress. The complexity lives in the positioning engine (keeping tooltips anchored to their targets during scroll and resize), focus management (trapping keyboard focus within the tour step for accessibility), and state transitions (advancing, going back, skipping, branching).
+
+## Why product tours matter (with numbers)
+
+Product tours are an activation mechanism. Flagsmith, the open-source feature flag platform, reported a 1.7x increase in signups and a 1.5x increase in in-app activation rate after adding interactive product tours (as of March 2026). That lines up with the broader pattern: users who complete onboarding tours are 2.5x more likely to convert to paid, according to [Appcues' 2024 Benchmark Report](https://www.appcues.com/blog/product-tour-benchmarks).
+
+But the data also shows that most tours fail. Chameleon analyzed 550 million tour interactions and found that tours longer than five steps drop to a 34% completion rate. Seven-step tours? Only 16% of users finish. The average across all tours is 61%.
+
+Three numbers matter more than any others:
+
+1. **Three-step tours hit 72% completion.** Short and focused wins.
+2. **User-initiated tours complete at 67%**, while delay-triggered tours only hit 31%. Let users opt in.
+3. **Progress indicators improve completion by 12%** and reduce dismissal by 20%.
+
+The takeaway for developers: build short tours with user-initiated triggers and visible progress. The architecture should support this pattern by default, not fight against it.
+
+For more on measuring tour effectiveness, see our guides on [tour completion rate benchmarks](/blog/funnel-analysis-onboarding-flows) and [A/B testing product tours](/blog/ab-test-product-tour).
+
+## Types of product tours
+
+As of April 2026, product tours follow four distinct UI patterns. Each has different invasiveness, user effort requirements, and use cases. Picking the wrong pattern for the context is the most common reason tours get dismissed. [Appcues' research on UI patterns](https://www.appcues.com/blog/product-tours-ui-patterns) documents this in detail.
+
+### Action-driven tooltips
+
+Action-driven tooltips require the user to complete a task before advancing to the next step. Click this button. Fill in this field. Select this option. They are the most effective pattern for critical setup flows where skipping a step would leave the user stuck.
+
+The risk: they feel controlling on non-critical features. Appcues calls them "heavy-handed and overbearing when you use them on non-critical features." Reserve them for account setup, first-time configuration, or workflows where order matters.
+
+```tsx
+// src/components/SetupTour.tsx
+import { TourProvider, useTour } from '@tourkit/react';
+
+const steps = [
+  {
+    id: 'create-project',
+    target: '#new-project-btn',
+    content: 'Start by creating your first project.',
+    advanceOn: { selector: '#new-project-btn', event: 'click' },
+  },
+  {
+    id: 'name-project',
+    target: '#project-name-input',
+    content: 'Give your project a name.',
+    advanceOn: { selector: '#project-name-input', event: 'blur' },
+  },
+];
+```
+
+### Non-action tooltips
+
+Non-action tooltips only require the user to click "Next" or "Got it" to advance. They're the standard pattern for feature discovery and progressive disclosure. IBM Cognos Analytics and InVision both use this pattern for guided feature tours.
+
+Best for introducing new features to existing users. Lower friction than action-driven tooltips, but also lower engagement, since users can click through without reading.
+
+### Modals
+
+Modals overlay the main interface for high-level overviews. They're "inherently interruptive," as Appcues puts it. But that interruption is the point when you need full attention: welcome sequences, major announcements, or content that requires images and video.
+
+Use modals as the first step of a tour (the welcome screen), then transition to tooltips for the interactive portion. See our guide on [welcome screens that work](/blog/welcome-screens-that-work) and [announcement modals in React](/blog/whats-new-modal-react).
+
+### Hotspots
+
+Hotspots are small, pulsating indicators placed near UI elements. Grammarly uses them on demo documents. Slack combines small modals with hotspots. They are "the least invasive UI pattern for product tours," and users self-select whether to engage.
+
+Hotspots work well for features that don't need immediate attention but should be discoverable. Tour Kit has a dedicated [@tour-kit/hints](/blog/react-hotspot-component) package for this pattern, separate from the step-based tour system.
+
+### Choosing the right pattern
+
+<table>
+<thead>
+<tr><th>Pattern</th><th>Invasiveness</th><th>User effort</th><th>Best for</th><th>Completion rate</th></tr>
+</thead>
+<tbody>
+<tr><td>Action-driven tooltip</td><td>High</td><td>High (must complete task)</td><td>Critical setup flows</td><td>Highest when relevant</td></tr>
+<tr><td>Non-action tooltip</td><td>Medium</td><td>Low (click Next)</td><td>Feature discovery</td><td>67% (click-triggered)</td></tr>
+<tr><td>Modal</td><td>High</td><td>Medium</td><td>Welcome, announcements</td><td>Varies</td></tr>
+<tr><td>Hotspot</td><td>Low</td><td>Optional</td><td>Subtle feature hints</td><td>Self-selecting</td></tr>
+</tbody>
+</table>
+
+## How to implement product tours in React
+
+Product tour implementation comes down to two architectural decisions: opinionated vs. headless, and how you manage tour state. The right choice depends on your design system and how much control you need over rendering.
+
+### Opinionated libraries
+
+Opinionated libraries like React Joyride ship their own tooltip components, overlay styles, and positioning logic. You configure steps as data and the library renders everything. Fast to set up. The tradeoff: customizing the UI means fighting the library's CSS, and matching your design system requires overriding most of the default styles.
+
+React Joyride ships at approximately 30KB gzipped with its default styling. That's fine for a marketing site, but worth measuring if you're already shipping a component library.
+
+### Headless libraries
+
+Headless libraries separate tour logic from rendering. You get hooks for step state, positioning data, and lifecycle events, but you render the actual tooltips, overlays, and buttons yourself. More JSX to write. Full design system integration.
+
+This is the approach User Tour Kit takes. The core logic lives in `@tourkit/core` at under 8KB gzipped. The React bindings in `@tourkit/react` give you hooks like `useTour()` and `useStep()` that return state and callbacks, and you render them however you want.
+
+```tsx
+// src/components/FeatureTour.tsx
+import { TourProvider, TourStep, TourOverlay } from '@tourkit/react';
+
+function FeatureTour() {
+  return (
+    <TourProvider
+      tourId="feature-intro"
+      steps={[
+        { id: 'search', target: '#search-bar', content: 'Find anything fast.' },
+        { id: 'filters', target: '#filter-panel', content: 'Narrow results here.' },
+        { id: 'export', target: '#export-btn', content: 'Export when ready.' },
+      ]}
+    >
+      <TourOverlay />
+      <TourStep>
+        {({ step, currentStepIndex, totalSteps, next, prev, close }) => (
+          <div className="rounded-lg border bg-popover p-4 shadow-md">
+            <p className="text-sm">{step.content}</p>
+            <div className="mt-3 flex justify-between">
+              <span className="text-xs text-muted-foreground">
+                {currentStepIndex + 1} / {totalSteps}
+              </span>
+              <div className="flex gap-2">
+                {currentStepIndex > 0 && (
+                  <button onClick={prev} className="text-sm">Back</button>
+                )}
+                <button onClick={next} className="text-sm font-medium">
+                  {currentStepIndex === totalSteps - 1 ? 'Done' : 'Next'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </TourStep>
+    </TourProvider>
+  );
+}
+```
+
+For a step-by-step tutorial, see [how to add a product tour to React 19](/blog/add-product-tour-react-19) or [product tours with shadcn/ui](/blog/shadcn-ui-product-tour-tutorial).
+
+### State management patterns
+
+Tour state is inherently client-side. It tracks which step the user is on, whether the tour is active, and which tours have been completed. But where you persist that state varies:
+
+- **localStorage** for anonymous users and simple apps. See [tour progress persistence with localStorage](/blog/tour-progress-persistence-localstorage).
+- **Zustand** for complex multi-tour flows with shared state. See [managing tour state with Zustand](/blog/managing-tour-state-zustand).
+- **Database** for cross-device persistence. See [Tour Kit + Prisma for storing tour progress](/blog/tour-kit-prisma-storing-tour-progress).
+- **State machines** for tours with branching logic. See [state machine patterns for complex tour flows](/blog/state-machine-pattern-complex-tour-flows).
+
+### Framework considerations
+
+React Server Components changed how client-side libraries work in Next.js. Tours are inherently client-side (they interact with DOM elements), so you need the `'use client'` boundary. Our guide on [server components and client-side tours](/blog/server-components-client-side-tours-boundary-problem) covers the boundary pattern in detail.
+
+For framework-specific implementations:
+- [Next.js App Router product tour](/blog/nextjs-app-router-product-tour)
+- [Vite + React + Tailwind product tour](/blog/vite-react-tailwind-product-tour)
+- [Astro + React islands product tour](/blog/astro-react-product-tour)
+- [Remix product tour](/blog/remix-product-tour)
+
+## Product tour best practices
+
+Product tour best practices aren't guesswork. They're patterns extracted from Chameleon's analysis of 550 million tour interactions and our own testing across multiple Tour Kit implementations. The data consistently shows that shorter, user-initiated tours with progress indicators outperform longer, auto-triggered tours by a factor of two or more.
+
+### Keep tours under four steps
+
+The data is clear: 3-step tours complete at 72%, while 7-step tours drop to 16%. If you have more than four things to show, split them into separate tours triggered at different points in the user journey. Chameleon's research confirms that "a tour's context makes the difference between a tour being relevant and requested, or appearing at random."
+
+GitHub does this well. Instead of one giant onboarding tour, they show minimal one-card tours when users access specific features like Projects for the first time. ProductFruits documented this pattern: "GitHub provides succinct, one-card tours with links to detailed documentation, perfectly catering to its more experienced audience."
+
+### Let users trigger tours themselves
+
+Click-triggered tours complete at 67%. Delay-triggered tours complete at 31%. That's a 2x difference just from respecting user intent. Offer a "Take a tour" button or checklist instead of auto-launching tours on page load.
+
+Checklist-triggered tours are 21% more likely to be completed than average, and 60% of users who start from a checklist go on to take multiple tours. See our guide on building [onboarding checklists](/blog/react-onboarding-wizard) for the implementation pattern.
+
+### Show progress
+
+Progress indicators improve completion by 12% and reduce dismissal by 20%. Display "Step 2 of 3" or a progress bar. Users are more likely to finish something when they can see how close they are to done.
+
+### Test with real users
+
+Build tours in development, then validate them with actual user behavior. A/B test tour variants to find the right step count, trigger timing, and content. See [how to A/B test product tours](/blog/ab-test-product-tour) and [E2E testing product tours with Playwright](/blog/e2e-testing-product-tours-playwright).
+
+### Respect motion preferences
+
+Users with `prefers-reduced-motion: reduce` should see no animated transitions in tour overlays or tooltip positioning. CSS handles this:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .tour-overlay,
+  .tour-tooltip {
+    transition: none;
+    animation: none;
+  }
+}
+```
+
+Tour Kit checks this media query by default and disables animations automatically. For more, see [reduced motion in product tours](/blog/reduced-motion-product-tour).
+
+## Accessibility requirements for product tours
+
+Most product tour guides skip accessibility entirely. That's a problem, because tours are interactive overlays that manipulate focus, layer content on top of the page, and require keyboard navigation. Those are exactly the patterns where accessibility breaks.
+
+### WCAG 2.1 AA compliance
+
+Product tours must meet [WCAG 2.1 Level AA](https://www.w3.org/WAI/standards-guidelines/wcag/), the accepted conformance target for web applications. Key requirements for tours:
+
+- **Focus management:** When a tour step appears, focus must move to the tooltip. When the tour ends, focus must return to where it was before the tour started.
+- **Keyboard navigation:** Users must be able to advance, go back, and dismiss tours using only the keyboard. Tab through interactive elements, Enter/Space to activate buttons, Escape to dismiss.
+- **Screen reader announcements:** Use `aria-live` regions to announce step changes. Screen readers need to know when new content appears without interrupting the user's current task. The [W3C ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/) documents the exact patterns.
+- **Color contrast:** Tour tooltip text and backgrounds must meet 4.5:1 contrast ratio minimums.
+- **Visible focus indicators:** Tour buttons and interactive elements must show clear focus rings.
+
+We built Tour Kit from the start with these requirements. See our detailed guides on [screen reader accessible product tours](/blog/screen-reader-product-tour), [keyboard-navigable tours](/blog/keyboard-navigable-product-tours-react), and [building ARIA-compliant tooltip components](/blog/aria-tooltip-component-react).
+
+### Focus trapping
+
+Tour tooltips need focus trapping: Tab should cycle through the tooltip's interactive elements (Next, Back, Close buttons) without escaping to the page behind. But it shouldn't be a hard trap. Escape must dismiss the tour and return focus to the page.
+
+```tsx
+// Simplified focus trap pattern
+function TourTooltip({ children, onClose }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const focusable = ref.current?.querySelectorAll(
+      'button, [href], input, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable?.length) {
+      (focusable[0] as HTMLElement).focus();
+    }
+  }, []);
+
+  return (
+    <div ref={ref} role="dialog" aria-modal="true" aria-label="Tour step">
+      {children}
+    </div>
+  );
+}
+```
+
+## Product tour tools and libraries
+
+As of April 2026, React product tour libraries fall into three categories: opinionated component libraries, headless/composable libraries, and no-code SaaS platforms. The right choice depends on whether you have a design system, how much you care about bundle size, and whether engineers or product managers will maintain the tours.
+
+### React libraries (open-source)
+
+<table>
+<thead>
+<tr><th>Library</th><th>Approach</th><th>Bundle (gzip)</th><th>TypeScript</th><th>React 19</th><th>Best for</th></tr>
+</thead>
+<tbody>
+<tr><td>User Tour Kit</td><td>Headless, composable</td><td>Under 8KB core</td><td>Strict mode</td><td>Yes</td><td>Design system teams</td></tr>
+<tr><td>React Joyride</td><td>Opinionated</td><td>~30KB</td><td>Built-in (v3)</td><td>v3 only</td><td>Quick drop-in tours</td></tr>
+<tr><td>Shepherd.js</td><td>Framework-agnostic</td><td>~25KB</td><td>Built-in</td><td>Via wrapper</td><td>Multi-framework teams</td></tr>
+<tr><td>Driver.js</td><td>Vanilla JS</td><td>~5KB</td><td>Built-in</td><td>Manual</td><td>Lightweight highlights</td></tr>
+<tr><td>Reactour</td><td>Styled-components</td><td>~15KB</td><td>Partial</td><td>Limited</td><td>Simple tours</td></tr>
+</tbody>
+</table>
+
+**Bias disclosure:** We built User Tour Kit, so take our placement with appropriate skepticism. Every bundle size is verifiable via [bundlephobia](https://bundlephobia.com). User Tour Kit doesn't have a visual builder and requires React 18+. That's a real tradeoff if your team has non-technical stakeholders creating tours.
+
+For detailed comparisons, see [User Tour Kit vs React Joyride](/blog/tour-kit-vs-react-joyride), [best free product tour libraries](/blog/best-free-product-tour-libraries-open-source), [best TypeScript product tour libraries](/blog/best-typescript-product-tour-libraries), and our [React tour library benchmark](/blog/react-tour-library-benchmark-2026).
+
+### No-code SaaS platforms
+
+If your team needs non-engineers to create and edit tours without code deployments, SaaS platforms like Appcues, Userpilot, Chameleon, and Pendo offer visual builders and audience targeting. The tradeoff is bundle size (typically 100KB+ of injected scripts), vendor lock-in, and monthly pricing that scales with MAU.
+
+For evaluating these options, see [best product tour tools for B2B SaaS](/blog/best-product-tour-tools-b2b-saas), [best Appcues alternatives for developers](/blog/best-appcues-alternatives-developers), [best Chameleon alternatives](/blog/best-chameleon-alternatives), and our [build vs. buy calculator](/blog/build-vs-buy-product-tour-calculator).
+
+## Measuring product tour success
+
+You can't improve tours you don't measure. Three metrics determine whether a product tour is helping or hurting: completion rate (are users finishing), activation rate (are they using the feature afterward), and time-to-value (did the tour compress the path to the user's first meaningful action).
+
+### Completion rate
+
+What percentage of users who start a tour finish it. Chameleon's benchmark across 550M interactions puts the average at 61%. Anything above 70% is strong. Below 40% means the tour is too long, poorly timed, or targeting the wrong users.
+
+Track per-step drop-off to find where users bail. If 80% complete step 1 but only 30% reach step 3, the problem is between those steps.
+
+### Activation rate
+
+Did users who completed the tour go on to use the feature? A tour with 90% completion but no downstream behavior change is a distraction, not onboarding. Track the specific action you wanted the tour to drive: creating a project, inviting a teammate, using the filter for the first time.
+
+### Time-to-value
+
+How long between signup and the user's first meaningful action. Tours should compress this. If tours aren't shortening time-to-value, they're adding friction rather than removing it.
+
+For implementation, see our integration guides with analytics platforms:
+- [Mixpanel + Tour Kit funnel analysis](/blog/mixpanel-product-tour-funnel)
+- [Amplitude + Tour Kit retention measurement](/blog/amplitude-tour-kit-onboarding-retention)
+- [PostHog + Tour Kit event tracking](/blog/track-product-tour-completion-posthog-events)
+- [GA4 + Tour Kit event tracking](/blog/ga4-tour-kit-event-tracking-onboarding)
+- [Plausible + Tour Kit analytics](/blog/plausible-analytics-product-tour)
+
+## Advanced patterns
+
+Once you have a basic product tour working in your React application, you'll encounter architectural challenges that simple step-by-step sequences don't address: coordinating multiple tours, triggering tours based on user behavior, and keeping tooltips anchored during layout shifts.
+
+### Multi-tour orchestration
+
+Most apps need more than one tour. A welcome tour, a feature-specific tour, a what's-new tour after updates. These tours need coordination. Don't show the feature tour if the welcome tour hasn't completed, don't stack two tours at once, respect tour fatigue.
+
+User Tour Kit's `@tourkit/react` package handles this with a multi-tour registry and priority system. See [secondary onboarding and feature adoption](/blog/secondary-onboarding-feature-adoption) for the pattern.
+
+### Behavioral triggers
+
+Instead of showing tours on page load or after a delay, trigger them based on user behavior. User clicked the export button three times without results? Show the export tour. User hasn't used filters after a week? Surface a hint.
+
+See [behavioral triggers for event-based onboarding](/blog/behavioral-triggers-product-tours-event-based-onboarding) and [the aha moment framework](/blog/aha-moment-framework-tours-activation-events).
+
+### Positioning and scroll handling
+
+Tour tooltips must stay anchored to their target elements during scroll, resize, and layout shifts. This is where most tour implementations break. Floating UI (the successor to Popper.js) handles the positioning math, but you still need to handle scroll-to-target behavior and dynamic content.
+
+See [scroll handling in product tours](/blog/scroll-handling-product-tour), [Floating UI vs Popper.js](/blog/floating-ui-vs-popper-js-tour-positioning), and [portal rendering with createPortal](/blog/portal-rendering-product-tours-createportal).
+
+### Performance budgets
+
+Product tours run early in the user lifecycle, often on the first or second page load. A tour library that adds 50KB to your initial bundle delays the very experience it's supposed to improve. Target under 10KB gzipped for core tour logic. Tree-shake aggressively.
+
+See [lightweight product tour libraries under 10KB](/blog/lightweight-product-tour-libraries-under-10kb), [tree-shaking product tour libraries](/blog/tree-shaking-product-tour-libraries), and [lazy-loading tours with React.lazy and Suspense](/blog/lazy-loading-product-tours-react-lazy-suspense).
+
+## FAQ
+
+### What is a product tour?
+
+A product tour is an interactive, in-app UI sequence that guides users through a product's interface using tooltips, modals, hotspots, or highlighted overlays. Product tours appear contextually inside the application, pointing at real UI elements and advancing based on user actions. They differ from documentation or videos because the guidance happens in context, right where the user needs it.
+
+### How many steps should a product tour have?
+
+Three to four steps is optimal. Chameleon's analysis of 550 million tour interactions found that 3-step tours achieve 72% completion, while tours with 7 or more steps drop to just 16% completion. If you need to cover more ground, split the content into multiple focused tours triggered at different points in the user journey.
+
+### What's the difference between a product tour and a walkthrough?
+
+A product tour is a broader category that includes walkthroughs. A walkthrough specifically refers to a step-by-step guided sequence, which is one of the four tour patterns alongside modals, hotspots, and action-driven tooltips. In practice, most developers use the terms interchangeably.
+
+### Should product tours auto-start or be user-triggered?
+
+User-triggered tours consistently outperform auto-started ones. Click-triggered tours complete at 67% compared to 31% for delay-triggered tours, according to Chameleon's benchmark data. Offer a "Take a tour" button, a checklist, or a contextual prompt instead of launching tours automatically on page load.
+
+### How do I make product tours accessible?
+
+Product tours must meet WCAG 2.1 Level AA. That means managing focus (move it to the tooltip on step change, return it when the tour ends), supporting keyboard navigation (Tab, Enter, Escape), announcing step changes via `aria-live` regions, and maintaining 4.5:1 color contrast ratios.
+
+### What's the best product tour library for React in 2026?
+
+As of April 2026, the main React tour libraries are React Joyride (~30KB, opinionated), Shepherd.js (~25KB, framework-agnostic), Driver.js (~5KB, lightweight), and User Tour Kit (under 8KB, headless). Which one fits depends on your stack: React Joyride for quick setup, Driver.js for minimal footprint, and User Tour Kit for design system integration. We built User Tour Kit, so verify our claims on [bundlephobia](https://bundlephobia.com) and [GitHub](https://github.com).
+
+### Do product tours actually improve activation?
+
+Yes, when done right. Flagsmith reported 1.7x more signups and 1.5x higher activation after adding interactive tours. But poorly designed tours (too long, auto-triggered, no clear goal) can hurt more than help. The key factors are short step count, user-initiated triggers, and a clear connection between the tour and the activation event.
+
+### How do I measure product tour effectiveness?
+
+Track three metrics: completion rate (what percentage of users finish the tour, benchmark is 61% average), activation rate (did users who completed the tour go on to use the feature), and time-to-value (how long between signup and first meaningful action). Per-step drop-off analysis shows exactly where users bail.
+
+### Can I use product tours with Next.js App Router?
+
+Yes, but product tours are client-side components that interact with the DOM, so they need the `'use client'` directive in Next.js App Router. Wrap your tour provider and step components in a client component, then import them into server-rendered pages. User Tour Kit supports this pattern natively. See our [Next.js App Router tutorial](/blog/nextjs-app-router-product-tour) for the full setup.
+
+### How do product tours affect page performance?
+
+A tour library's impact depends on its bundle size and initialization cost. Opinionated libraries like React Joyride add ~30KB gzipped. Headless libraries like User Tour Kit add under 8KB. For pages already near the 170KB script budget where bounce rates spike, choose a library that tree-shakes well and supports lazy loading. Load the tour library only when it's needed, not on every page.
+
+---
+
+{/* Internal linking suggestions:
+- Link FROM: best-product-tour-tools-react, best-free-product-tour-libraries-open-source, best-typescript-product-tour-libraries → this pillar page
+- Link FROM: add-product-tour-react-19, nextjs-app-router-product-tour, shadcn-ui-product-tour-tutorial → this pillar page
+- Link FROM: tour-kit-vs-react-joyride → this pillar page
+- This page links TO: 30+ spoke articles covering each topic in depth
+*/}
+
+{/* Distribution checklist:
+- Dev.to (with canonical URL to usertourkit.com/blog/product-tour-guide-2026)
+- Hashnode (with canonical)
+- Reddit r/reactjs, r/webdev — as a resource post, not promotional
+- Hacker News — "Show HN: The developer's guide to product tours (2026)"
+*/}
+
+{/* JSON-LD Schema:
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Product tours: the complete 2026 guide for developers",
+  "description": "Learn what product tours are, how they work, and how to build them in React. Covers tour types, completion benchmarks, accessibility, and implementation patterns.",
+  "author": {
+    "@type": "Person",
+    "name": "Dominic Fournier",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-12",
+  "dateModified": "2026-04-12",
+  "image": "https://usertourkit.com/og-images/product-tour-guide-2026.png",
+  "url": "https://usertourkit.com/blog/product-tour-guide-2026",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/product-tour-guide-2026"
+  },
+  "keywords": ["product tour guide 2026", "what is product tour", "product tour definition", "product tour complete guide", "product tour react"],
+  "proficiencyLevel": "Beginner",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+*/}

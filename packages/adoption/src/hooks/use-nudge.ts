@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { useAdoptionContext } from '../context/adoption-context'
 import type { Feature } from '../types'

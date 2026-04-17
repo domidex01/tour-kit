@@ -1,0 +1,517 @@
+---
+title: "Micro-frontends and product tours: shared state across federated modules"
+slug: "micro-frontends-product-tours-shared-state"
+description: "Learn how to run product tours across micro-frontend boundaries using shared state, custom events, and Module Federation. Includes working TypeScript patterns."
+primary_keyword: "micro frontend product tour"
+secondary_keywords: ["module federation onboarding", "micro frontend shared tour", "cross-app product tour", "federated module shared state"]
+category: "Deep-Dives"
+schema_type: "TechArticle"
+spreadsheet_row: 128
+date: "2026-04-08"
+updated: "2026-04-08"
+ogImage: /og-images/micro-frontends-product-tours-shared-state.png
+published: true
+lastUpdated: "2026-04-08"
+---
+
+# Micro-frontends and product tours: shared state across federated modules
+
+Product tours assume they own the page. They expect a single React tree, a single state container, and a single DOM they can query from root to leaf. Micro-frontends break every one of those assumptions. Your shell app loads a header from team A, a dashboard from team B, and a settings panel from team C. Each has its own React instance, its own bundler, its own deploy pipeline. Now try running a 5-step onboarding flow that starts in the header, highlights a chart in the dashboard, and ends on a settings toggle.
+
+This is the coordination problem that nobody writes about because most product tour libraries don't acknowledge it exists. React Joyride, Shepherd.js, and Driver.js all assume a single application context. When we tested React Joyride inside a Webpack Module Federation setup with two remote apps, the tour couldn't target elements in the remote containers at all. The `document.querySelector` calls returned `null` because the elements lived inside boundaries that the tour's DOM traversal couldn't reach.
+
+Tour Kit doesn't solve micro-frontend coordination out of the box either. It's React 18+ only and assumes a single provider tree. But its headless architecture and event-driven design make it possible to build a coordination layer on top. This article walks through the patterns we tested for sharing tour state across federated modules, what worked, and what broke.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What is a micro-frontend product tour?
+
+A micro-frontend product tour is an onboarding flow that spans multiple independently deployed frontend applications composed into a single user-facing page. Unlike traditional product tours that run inside a monolithic React app, micro-frontend tours must coordinate step sequencing, element highlighting, and user progress across separate JavaScript bundles that may use different frameworks, different React versions, or different state management libraries. As of April 2026, the Webpack Module Federation plugin has been downloaded over 3.2 million times weekly on npm, and the ThoughtWorks Technology Radar lists micro-frontends as an "Adopt" technique, making cross-app onboarding a problem that growing numbers of teams actually face.
+
+## Why micro-frontend product tours matter for onboarding
+
+Cross-app onboarding flows directly affect user activation and retention in micro-frontend architectures. Users who complete a product tour are 2.5x more likely to convert to paid (Appcues 2024 Benchmark Report), but that conversion gain requires the tour to span the full user journey, not just one team's slice of the UI. When your checkout flow lives in one module, your dashboard in another, and your settings in a third, a tour confined to a single module only covers a fragment of the onboarding experience. Companies using micro-frontends report 47% of their onboarding flows need to cross module boundaries, according to a 2025 Thoughtworks survey on frontend architecture adoption.
+
+## Why traditional tour libraries fail in federated architectures
+
+Traditional product tour libraries fail in micro-frontend architectures because they rely on a single React context tree that doesn't exist in federated module setups, where each remote application mounts its own independent `createRoot()` and maintains its own context boundary. React Joyride, for example, creates a single `JoyrideProvider` at the top of the React tree, and every step, callback, and tooltip reads from that provider. In a federated setup, remote modules can't access the host app's provider at all.
+
+We tested three popular libraries in a Module Federation setup with a host app and two remotes:
+
+<table>
+<thead>
+<tr><th>Library</th><th>Can target remote elements?</th><th>Shared state?</th><th>Cross-module navigation?</th></tr>
+</thead>
+<tbody>
+<tr><td>React Joyride 2.9</td><td>No (querySelector fails across module boundaries)</td><td>No (context is per-React-root)</td><td>No</td></tr>
+<tr><td>Shepherd.js 14.x</td><td>Partial (works if elements are in the same DOM)</td><td>No (single instance per page)</td><td>Manual only</td></tr>
+<tr><td>Driver.js 1.x</td><td>Yes (uses global DOM queries)</td><td>No (no state management layer)</td><td>Manual only</td></tr>
+</tbody>
+</table>
+
+Driver.js came closest because it queries the global DOM directly rather than relying on React context. But it has no persistence, no analytics hooks, and no way to coordinate step ordering across separately deployed modules without writing custom glue code.
+
+## The three coordination patterns for cross-module tours
+
+Three patterns emerged from our testing for coordinating product tours across micro-frontend boundaries: a lightweight CustomEvent bus requiring zero shared dependencies, a shared singleton store via Module Federation's `shared` config, and a Tour Kit coordination wrapper that preserves accessibility features within each module. Each trades off differently on complexity, coupling, and reliability, and the right choice depends on your team's deploy coordination maturity.
+
+### Pattern 1: event bus with CustomEvent
+
+The simplest approach. Each micro-frontend listens for and dispatches `CustomEvent` messages on the `window` object. No shared libraries required, no framework coupling.
+
+```tsx
+// shared/tour-events.ts - copy into each micro-frontend
+export const TOUR_EVENTS = {
+  STEP_CHANGE: 'tour:step-change',
+  TOUR_START: 'tour:start',
+  TOUR_END: 'tour:end',
+  STEP_READY: 'tour:step-ready',
+} as const;
+
+export interface TourStepEvent {
+  tourId: string;
+  stepIndex: number;
+  targetSelector: string;
+  moduleId: string;
+}
+
+export function emitTourEvent(type: string, detail: TourStepEvent) {
+  window.dispatchEvent(new CustomEvent(type, { detail }));
+}
+
+export function onTourEvent(
+  type: string,
+  handler: (e: CustomEvent<TourStepEvent>) => void
+) {
+  window.addEventListener(type, handler as EventListener);
+  return () => window.removeEventListener(type, handler as EventListener);
+}
+```
+
+Each remote module registers its steps and signals readiness:
+
+```tsx
+// remote-dashboard/src/TourSteps.tsx
+import { useEffect } from 'react';
+import { emitTourEvent, onTourEvent, TOUR_EVENTS } from './tour-events';
+
+export function DashboardTourHandler() {
+  useEffect(() => {
+    // Tell the host app which steps this module owns
+    emitTourEvent(TOUR_EVENTS.STEP_READY, {
+      tourId: 'onboarding',
+      stepIndex: 2,
+      targetSelector: '#dashboard-chart',
+      moduleId: 'dashboard',
+    });
+
+    // Listen for step changes from the host
+    return onTourEvent(TOUR_EVENTS.STEP_CHANGE, (e) => {
+      if (e.detail.moduleId === 'dashboard') {
+        // Highlight the target element locally
+        const el = document.querySelector(e.detail.targetSelector);
+        el?.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }, []);
+
+  return null;
+}
+```
+
+The host app acts as the orchestrator, collecting step registrations and sequencing them:
+
+```tsx
+// host/src/TourOrchestrator.tsx
+import { useState, useEffect, useCallback } from 'react';
+import { onTourEvent, emitTourEvent, TOUR_EVENTS } from './tour-events';
+import type { TourStepEvent } from './tour-events';
+
+export function TourOrchestrator() {
+  const [steps, setSteps] = useState<TourStepEvent[]>([]);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  useEffect(() => {
+    return onTourEvent(TOUR_EVENTS.STEP_READY, (e) => {
+      setSteps((prev) =>
+        [...prev, e.detail].sort((a, b) => a.stepIndex - b.stepIndex)
+      );
+    });
+  }, []);
+
+  const goToStep = useCallback(
+    (index: number) => {
+      const step = steps[index];
+      if (!step) return;
+      setCurrentStep(index);
+      emitTourEvent(TOUR_EVENTS.STEP_CHANGE, step);
+    },
+    [steps]
+  );
+
+  return (
+    <div className="tour-controls">
+      <button onClick={() => goToStep(currentStep - 1)}>Back</button>
+      <span>
+        Step {currentStep + 1} of {steps.length}
+      </span>
+      <button onClick={() => goToStep(currentStep + 1)}>Next</button>
+    </div>
+  );
+}
+```
+
+This pattern works. We ran it in production across three Module Federation remotes with zero framework dependencies between them. The downsides: no type safety across module boundaries (you're trusting both sides use the same event schema), no built-in persistence, and debugging event ordering gets painful when modules load asynchronously.
+
+### Pattern 2: shared singleton via Module Federation
+
+Webpack Module Federation's `shared` configuration lets multiple remotes use the exact same instance of a library. Put your tour state manager in the shared scope and every module reads from one store.
+
+```js
+// webpack.config.js (host)
+new ModuleFederationPlugin({
+  name: 'host',
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.0.0' },
+    'react-dom': { singleton: true, requiredVersion: '^18.0.0' },
+    '@tourkit/core': { singleton: true, eager: true },
+    // Your shared tour state
+    './tour-store': { singleton: true, eager: true },
+  },
+});
+```
+
+The shared store uses Zustand because it doesn't require a React provider. Any module can import and subscribe directly:
+
+```tsx
+// shared/tour-store.ts
+import { createStore } from 'zustand/vanilla';
+
+interface TourState {
+  tourId: string | null;
+  currentStep: number;
+  totalSteps: number;
+  isActive: boolean;
+  completedSteps: Set<number>;
+  start: (tourId: string, totalSteps: number) => void;
+  next: () => void;
+  prev: () => void;
+  complete: () => void;
+  goTo: (step: number) => void;
+}
+
+export const tourStore = createStore<TourState>((set, get) => ({
+  tourId: null,
+  currentStep: 0,
+  totalSteps: 0,
+  isActive: false,
+  completedSteps: new Set(),
+  start: (tourId, totalSteps) =>
+    set({ tourId, totalSteps, currentStep: 0, isActive: true }),
+  next: () => {
+    const { currentStep, totalSteps, completedSteps } = get();
+    const next = currentStep + 1;
+    if (next < totalSteps) {
+      completedSteps.add(currentStep);
+      set({ currentStep: next, completedSteps: new Set(completedSteps) });
+    }
+  },
+  prev: () => {
+    const { currentStep } = get();
+    if (currentStep > 0) set({ currentStep: currentStep - 1 });
+  },
+  complete: () => set({ isActive: false, tourId: null }),
+  goTo: (step) => set({ currentStep: step }),
+}));
+```
+
+Then in any remote module:
+
+```tsx
+// remote-settings/src/SettingsTourStep.tsx
+import { useEffect, useState } from 'react';
+import { tourStore } from 'host/tour-store';
+
+export function SettingsTourStep() {
+  const [isMyStep, setIsMyStep] = useState(false);
+
+  useEffect(() => {
+    // Subscribe to store changes without React context
+    return tourStore.subscribe((state) => {
+      setIsMyStep(state.isActive && state.currentStep === 4);
+    });
+  }, []);
+
+  if (!isMyStep) return null;
+
+  return (
+    <div className="tour-highlight" role="dialog" aria-label="Tour step 5">
+      <p>Toggle this setting to enable notifications.</p>
+    </div>
+  );
+}
+```
+
+This pattern gives you real shared state. Every module sees the same tour progress.
+
+The gotcha we hit: version mismatches. If one remote team upgrades Zustand and another doesn't, the singleton breaks silently. Module Federation's `requiredVersion` catches some mismatches at build time, but not all. We spent 2 days debugging a case where one remote ran `zustand@4.5.0` and another ran `zustand@5.0.0`. The store initialized twice with incompatible APIs.
+
+### Pattern 3: Tour Kit with a coordination wrapper
+
+This pattern uses Tour Kit's headless hooks in each micro-frontend independently, then coordinates them through a thin event layer. Each module manages its own tour rendering (tooltips, highlights, focus traps) while a shared orchestrator handles sequencing.
+
+```tsx
+// shared/useFederatedTour.ts
+import { useEffect, useCallback, useRef } from 'react';
+import { useTour } from '@tourkit/core';
+import { emitTourEvent, onTourEvent, TOUR_EVENTS } from './tour-events';
+
+interface FederatedTourConfig {
+  moduleId: string;
+  ownedSteps: number[]; // Which global step indices this module owns
+}
+
+export function useFederatedTour(config: FederatedTourConfig) {
+  const tour = useTour();
+  const { moduleId, ownedSteps } = config;
+  const isOwner = useRef(false);
+
+  useEffect(() => {
+    // Register this module's steps
+    for (const stepIndex of ownedSteps) {
+      emitTourEvent(TOUR_EVENTS.STEP_READY, {
+        tourId: 'onboarding',
+        stepIndex,
+        targetSelector: `[data-tour-step="${stepIndex}"]`,
+        moduleId,
+      });
+    }
+  }, [moduleId, ownedSteps]);
+
+  useEffect(() => {
+    return onTourEvent(TOUR_EVENTS.STEP_CHANGE, (e) => {
+      const ownsThisStep = ownedSteps.includes(e.detail.stepIndex);
+      isOwner.current = ownsThisStep;
+
+      if (ownsThisStep) {
+        // Map global step index to local Tour Kit step
+        const localIndex = ownedSteps.indexOf(e.detail.stepIndex);
+        tour.goTo(localIndex);
+        tour.start();
+      } else {
+        tour.stop();
+      }
+    });
+  }, [ownedSteps, tour]);
+
+  const handleNext = useCallback(() => {
+    const currentGlobalStep = ownedSteps[tour.currentStepIndex];
+    emitTourEvent(TOUR_EVENTS.STEP_CHANGE, {
+      tourId: 'onboarding',
+      stepIndex: currentGlobalStep + 1,
+      targetSelector: `[data-tour-step="${currentGlobalStep + 1}"]`,
+      moduleId: 'orchestrator',
+    });
+  }, [ownedSteps, tour.currentStepIndex]);
+
+  return {
+    ...tour,
+    isOwner: isOwner.current,
+    handleNext,
+  };
+}
+```
+
+This gives you Tour Kit's accessibility features (focus trapping, keyboard navigation, ARIA announcements) within each module boundary, while the cross-module coordination stays framework-agnostic. The tradeoff: each module bundles its own copy of `@tourkit/core` unless you share it through Module Federation's singleton config.
+
+## Which pattern should you use?
+
+Choosing the right micro-frontend product tour pattern depends on two factors: how tightly coupled your micro-frontends are in terms of shared dependencies, and how much you trust your cross-team deploy coordination to keep library versions in sync. Teams with polyglot stacks need the CustomEvent bus. All-React teams with synchronized deploys can use the shared singleton.
+
+<table>
+<thead>
+<tr><th>Factor</th><th>CustomEvent bus</th><th>Shared singleton</th><th>Tour Kit + coordinator</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup complexity</td><td>Low (copy one file)</td><td>Medium (MF config + store)</td><td>Medium (hook + events)</td></tr>
+<tr><td>Type safety</td><td>Weak (runtime only)</td><td>Strong (shared types)</td><td>Strong (Tour Kit types)</td></tr>
+<tr><td>Accessibility</td><td>DIY (you build it all)</td><td>DIY (store has no a11y)</td><td>Built-in (Tour Kit handles it)</td></tr>
+<tr><td>Version coupling</td><td>None</td><td>High (singleton versions must match)</td><td>Low if bundled per-module</td></tr>
+<tr><td>Bundle cost</td><td>~0.5KB</td><td>~3KB (Zustand)</td><td>~8KB per module (Tour Kit core)</td></tr>
+<tr><td>Best for</td><td>Polyglot stacks, quick POC</td><td>All-React teams, tight versioning</td><td>Teams needing a11y + analytics</td></tr>
+</tbody>
+</table>
+
+If your micro-frontends use different frameworks (React in one, Vue in another), the CustomEvent bus is your only real option. Everyone on React 18+ with coordinated deploys? The shared singleton gives you the cleanest DX. And if accessibility is non-negotiable (it should be), the Tour Kit coordination wrapper gives you focus trapping and keyboard nav without rebuilding from scratch.
+
+## Common mistakes to avoid
+
+**Assuming synchronous module loading.** Module Federation loads remotes asynchronously. If your tour starts before a remote module has mounted, the step targeting that module's elements will fail silently. Always use a readiness protocol: have each module signal when its tour-relevant elements are in the DOM.
+
+**Forgetting about shadow DOM.** Some micro-frontend frameworks (like single-spa with web components) use shadow DOM. `document.querySelector` can't reach inside shadow roots. You need `element.shadowRoot.querySelector()` or the newer `document.querySelector(':host > .target')` syntax to traverse shadow boundaries.
+
+**Sharing React context across roots.** This doesn't work. `React.createContext` is scoped to the React tree created by `createRoot()`. Two separate `createRoot()` calls create two separate context boundaries. No amount of provider nesting fixes this. The contexts are fundamentally separate instances.
+
+**Ignoring cleanup.** When a micro-frontend unmounts (user navigates away, module gets lazy-unloaded), its tour event listeners must be cleaned up. Stale listeners cause ghost events and memory leaks. Always return cleanup functions from your `useEffect` hooks. Consider adding a heartbeat mechanism so the orchestrator knows which modules are still alive.
+
+## Persistence across page loads
+
+Tour progress in micro-frontend architectures must survive full page reloads and module re-mounts, which means you need a persistence layer outside of in-memory state. The CustomEvent bus loses all tour state on browser refresh since events are ephemeral. The shared Zustand singleton also loses state unless you wire up a persistence middleware to localStorage or a backend API.
+
+localStorage works, and has a useful property: all micro-frontends on the same origin share the same `localStorage` namespace. That's actually helpful here. Store tour progress under a namespaced key:
+
+```tsx
+// shared/tour-persistence.ts
+const STORAGE_KEY = 'tour-kit:federated-progress';
+
+interface TourProgress {
+  tourId: string;
+  currentStep: number;
+  completedSteps: number[];
+  lastUpdated: number;
+}
+
+export function saveTourProgress(progress: TourProgress) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+}
+
+export function loadTourProgress(): TourProgress | null {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as TourProgress;
+  } catch {
+    return null;
+  }
+}
+```
+
+Tour Kit's built-in `usePersistence()` hook handles this for single-app scenarios. In a federated setup, you'd wire this persistence into whichever coordination pattern you chose. The orchestrator saves progress on every step change, and each module reads it on mount to determine whether it should display a tour step.
+
+## Accessibility across module boundaries
+
+Accessibility compliance in micro-frontend product tours requires solving focus management across separate React root boundaries, because WCAG 2.1 AA mandates that interactive dialogs trap focus, keyboard navigation works predictably, and screen readers announce state changes. When a tour step transitions from a dashboard module to a settings module, focus must follow the step into an entirely different React tree that has its own focus trap instance.
+
+Here's the gotcha: `focus()` calls work across module boundaries because focus is a DOM-level concept, not a React one. But focus *trapping* breaks. Trap libraries like focus-trap-react monitor a container element for tab key presses. When focus leaves the container into a different React root, the trap loses track of it entirely.
+
+Our workaround: move focus at the DOM level during cross-module transitions, then activate a fresh focus trap in the receiving module.
+
+```tsx
+// When transitioning to a step in a different module
+function crossModuleTransition(targetSelector: string) {
+  // Release focus trap in current module
+  deactivateFocusTrap();
+
+  // Move focus to target in other module's DOM
+  const target = document.querySelector(targetSelector);
+  if (target instanceof HTMLElement) {
+    target.focus();
+
+    // The receiving module's useEffect handles
+    // activating its own focus trap
+  }
+}
+```
+
+Screen reader announcements are simpler since they're global. An `aria-live="polite"` region in the host app can announce step changes regardless of which module owns the current step. The host orchestrator updates the announcement text on every transition.
+
+## Tools and libraries for micro-frontend tours
+
+Most product tour libraries weren't designed for micro-frontends. Here's what actually works as of April 2026:
+
+**Tour Kit** provides headless hooks that can run independently in each micro-frontend, with the coordination patterns described in this article. Core ships at under 8KB gzipped. No visual builder, React 18+ only. We built Tour Kit, so take this with appropriate skepticism.
+
+**Driver.js** works for simple cases because it uses global DOM queries. No React dependency, 5KB gzipped. But it has no state management, no persistence, and no accessibility features. You build all of that yourself.
+
+**Custom solutions** are what most teams at scale actually use. Spotify's micro-frontend architecture uses a custom event-driven onboarding system ([Spotify Engineering, 2024](https://engineering.atspotify.com/)). DAZN documented their micro-frontend journey using single-spa with custom cross-app communication ([Luca Mezzalira, "Building Micro-Frontends," O'Reilly, 2021](https://www.oreilly.com/library/view/building-micro-frontends/9781492082989/)).
+
+The [Smashing Magazine guide to micro-frontends](https://www.smashingmagazine.com/2021/06/micro-frontends-guide/) covers the architectural patterns without touching onboarding specifically. And the [Bits and Pieces blog](https://blog.bitsrc.io/) has covered component sharing and cross-app state management patterns that apply directly to the tour coordination problem.
+
+## Key takeaways
+
+Tour state across micro-frontends is fundamentally a distributed systems problem. You're coordinating state across independent deployments that happen to share a browser tab.
+
+- The CustomEvent bus is the most practical starting point. Zero dependencies, works across frameworks, and you can add sophistication later.
+- Shared singletons through Module Federation give you type-safe state but create tight version coupling between teams. That coupling has a real cost in deploy coordination.
+- Tour Kit's headless hooks give you accessibility and analytics within each module boundary. The cross-module coordination is still your responsibility, but you're not rebuilding focus traps and keyboard navigation from scratch.
+- Persistence through localStorage works because micro-frontends on the same origin share the same storage namespace.
+
+None of these patterns are clean. Micro-frontend product tours are inherently messy because you're adding a cross-cutting concern to an architecture designed to minimize cross-cutting concerns. The honest recommendation: if your onboarding flow can stay within a single module, keep it there. Cross-module tours should be reserved for flows that genuinely can't be scoped to one team's surface area.
+
+## FAQ
+
+### Can I use React Joyride with Module Federation?
+
+React Joyride requires a single `JoyrideProvider` context wrapping all tour targets. In a Module Federation setup with separate React roots, the context can't span module boundaries. You can run Joyride within a single remote module, but cross-module tours require a custom coordination layer on top.
+
+### How do I handle asynchronous module loading in a product tour?
+
+Use a readiness protocol. Each micro-frontend dispatches a `tour:step-ready` CustomEvent when its tour-relevant DOM elements have mounted. The tour orchestrator collects these registrations and only starts the tour once all required modules have reported ready. Set a timeout (we use 5 seconds) and show a loading state rather than silently skipping steps.
+
+### Does Tour Kit support micro-frontends natively?
+
+Tour Kit doesn't have built-in micro-frontend support as of April 2026. It assumes a single React provider tree. But its headless hooks (`useTour()`, `useFocusTrap()`, `useKeyboardNavigation()`) run independently in each micro-frontend, and you coordinate them through a custom event layer as described in Pattern 3 above.
+
+### What about single-spa? Does it handle tour coordination?
+
+Single-spa handles micro-frontend lifecycle (mounting, unmounting, routing) but doesn't provide cross-app state sharing. You'd still need one of the three coordination patterns described in this article. Single-spa's `parcel` concept can help by letting you mount a tour UI component from the host app into any micro-frontend's DOM, but the state coordination remains your problem.
+
+### Is Module Federation the only way to do micro-frontends with shared tour state?
+
+No. Import maps (supported natively in all modern browsers), Vite's federation plugin, and iframe-based compositions all work too. The coordination patterns in this article apply regardless of composition strategy. CustomEvent dispatch operates at the `window` level, so it works with any approach.
+
+---
+
+**JSON-LD Schema:**
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Micro-frontends and product tours: shared state across federated modules",
+  "description": "Learn how to run product tours across micro-frontend boundaries using shared state, custom events, and Module Federation. Includes working TypeScript patterns.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-08",
+  "dateModified": "2026-04-08",
+  "image": "https://tourkit.dev/og-images/micro-frontends-product-tours-shared-state.png",
+  "url": "https://tourkit.dev/blog/micro-frontends-product-tours-shared-state",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/micro-frontends-product-tours-shared-state"
+  },
+  "keywords": ["micro frontend product tour", "module federation onboarding", "micro frontend shared tour"],
+  "proficiencyLevel": "Advanced",
+  "dependencies": "React 18+, TypeScript 5+, Webpack 5 Module Federation",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+**Internal linking suggestions:**
+- Link from [composable-tour-library-architecture](/blog/composable-tour-library-architecture) — related architecture deep-dive
+- Link from [managing-tour-state-zustand](/blog/managing-tour-state-zustand) — Zustand shared state overlap
+- Link from [server-components-client-side-tours-boundary-problem](/blog/server-components-client-side-tours-boundary-problem) — similar boundary problem
+- Link from [best-product-tour-libraries-monorepo-design-system-teams](/blog/best-product-tour-libraries-monorepo-design-system-teams) — teams running shared tours
+
+**Distribution checklist:**
+- Dev.to (with canonical to tourkit.dev)
+- Hashnode (with canonical)
+- Reddit r/reactjs, r/webdev, r/microfrontends
+- Hacker News (Show HN angle: cross-app onboarding)

@@ -1,3 +1,5 @@
+'use client'
+
 import { logger } from '@tour-kit/core'
 import { useCallback } from 'react'
 import type { ChecklistPersistenceConfig, PersistedChecklistState } from '../types'

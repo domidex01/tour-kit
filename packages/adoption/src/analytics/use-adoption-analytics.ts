@@ -1,3 +1,5 @@
+'use client'
+
 import { useAnalyticsOptional } from '@tour-kit/analytics'
 
 import type { AdoptionStatus, Feature, FeatureUsage } from '../types'

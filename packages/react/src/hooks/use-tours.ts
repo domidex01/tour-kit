@@ -1,3 +1,5 @@
+'use client'
+
 import { useTourContext } from '@tour-kit/core'
 import * as React from 'react'
 import { useTourRegistryContext } from '../components/provider/tourkit-provider'

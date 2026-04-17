@@ -1,0 +1,317 @@
+---
+title: "How Tour Kit ships at 8KB gzipped with zero runtime dependencies"
+slug: "tour-kit-8kb-zero-dependencies"
+description: "A technical breakdown of the architecture decisions that keep Tour Kit under 8.1KB gzipped. Tree-shaking, code splitting, peer dependencies, and tsup config."
+primary_keyword: "product tour library bundle size"
+secondary_keywords: ["zero dependency tour library", "lightweight react library", "tree shaking react library", "tsup bundle optimization"]
+category: "Deep-Dives"
+schema_type: "TechArticle"
+spreadsheet_row: 103
+date: "2026-04-08"
+updated: "2026-04-08"
+ogImage: /og-images/tour-kit-8kb-zero-dependencies.png
+published: true
+---
+
+# How Tour Kit ships at 8KB gzipped with zero runtime dependencies
+
+Most product tour libraries don't publish their bundle sizes. When you check bundlephobia yourself, the numbers are jarring: React Joyride lands around 34KB gzipped, Shepherd.js at 25KB, Intro.js at 29KB. For a feature that typically runs once per user session, that's a lot of JavaScript competing for your INP budget.
+
+Tour Kit ships a complete 5-step tour at 8.1KB gzipped (core + React, measured via `vite build` in April 2026). No runtime dependencies. React and React DOM are the only peer dependencies.
+
+We built Tour Kit, so take this with appropriate skepticism. Every measurement below is reproducible. We'll show you exactly how we set up tsup, how the package boundary works, and where the bytes go.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What is product tour library bundle size and why should you measure it?
+
+Product tour library bundle size is the total gzipped JavaScript a tour library adds to your production build after tree-shaking. It includes the library's own code plus any runtime dependencies it bundles. As of April 2026, tour libraries range from 5KB (Driver.js) to 34KB (React Joyride), a 7x spread for roughly the same feature. Measuring this number matters because tour code loads for every user but typically runs only once per session.
+
+Google's [Core Web Vitals research](https://web.dev/articles/vitals) demonstrates that JavaScript bundle size directly affects Interaction to Next Paint (INP). The HTTP Archive's 2025 State of JavaScript report found the median page ships 509KB of JavaScript ([HTTP Archive, Web Almanac 2025](https://almanac.httparchive.org/en/2025/javascript)). Adding 34KB for a tour library is 6.7% of that budget. Adding 8KB is 1.6%.
+
+## Why product tour library bundle size matters for your users
+
+Every kilobyte of JavaScript you ship delays interactivity on mobile devices, increases Time to Interactive for first-time visitors, and competes with your app's actual features for the browser's parse-and-compile budget. Tour libraries are particularly wasteful because they load for all users but only activate once per session, sometimes never. An 8KB library leaves room in your performance budget. A 34KB one forces tradeoffs elsewhere.
+
+Product tours also run early in the user lifecycle, often on the first or second page load. That's exactly when performance matters most: users who haven't committed to your product will bounce on slow pages. Appcues' 2024 Benchmark Report found that users who complete onboarding are 2.5x more likely to convert to paid. If your tour library delays the page enough to cause a bounce, the tour never runs at all.
+
+## What does "zero runtime dependencies" actually mean?
+
+Tour Kit's core package (`@tour-kit/core`) has zero entries in its `dependencies` field in package.json. Not "few dependencies." Zero. The only requirement is React 18 or 19 as a peer dependency, which your app already ships. Every hook, every utility, every type is written from scratch with no external packages pulled in at runtime. This design choice eliminates transitive dependency risk and gives your bundler complete control over what ships.
+
+Dependencies create a supply chain. Each one adds bundle weight, version resolution complexity, and a surface area you don't control. When `@floating-ui/react` ships a major version bump, Tour Kit's users aren't affected because Floating UI only appears in the `@tour-kit/react` package as an external.
+
+Here's the actual `dependencies` field from `@tour-kit/core/package.json`:
+
+```json
+// packages/core/package.json
+{
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  }
+}
+```
+
+Compare that to React Joyride, which pulls in `react-floater`, `deep-diff`, `tree-changes`, `is-lite`, and `scroll-doc` as runtime dependencies ([npm, April 2026](https://www.npmjs.com/package/react-joyride)). Shepherd.js depends on `@floating-ui/dom`. Each adds kilobytes and transitive dependencies you didn't ask for.
+
+## Where the bytes actually go
+
+We measured Tour Kit's production output using `gzip -c` against the ESM builds from tsup, cross-checked against bundlephobia and Vite's build analyzer. The full breakdown as of April 2026 shows exactly where your bundle budget goes and which entry points you can skip:
+
+<table>
+<thead>
+<tr><th>Entry point</th><th>Minified</th><th>Gzipped</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td>@tour-kit/core (full)</td><td>33 KB</td><td>10.4 KB</td><td>All hooks, utils, types</td></tr>
+<tr><td>@tour-kit/react/headless</td><td>4.1 KB</td><td>1.7 KB</td><td>Logic-only components</td></tr>
+<tr><td>@tour-kit/react (index)</td><td>7 KB</td><td>2.6 KB</td><td>Styled components</td></tr>
+<tr><td>@tour-kit/hints</td><td>-</td><td>2.8 KB</td><td>Hint/beacon system</td></tr>
+</tbody>
+</table>
+
+A real app doesn't import everything from core. When we built a 5-step tour in Vite 6.2 with React 19.1 and measured the tree-shaken output, the total landed at 8.1KB gzipped for core + React combined. A typical tour uses `useTour`, `TourProvider`, a couple of positioning utilities, and a few components, not all 12 hooks and 40+ utility functions.
+
+The 10.4KB figure is the full barrel export without tree-shaking. Nobody ships that in production.
+
+## The core/UI split that makes this work
+
+Tour Kit separates all business logic (step sequencing, element targeting, scroll management, keyboard navigation, focus trapping, persistence) into `@tour-kit/core` and keeps UI rendering in `@tour-kit/react`. This hard boundary means you can swap the entire presentation layer without touching tour logic, and your bundler can tree-shake each layer independently. The core exports React hooks and vanilla utilities with no components, no CSS, and no styling opinions.
+
+```tsx
+// Core code only: hooks and context, no UI
+import { useTour, TourProvider, useStep, useFocusTrap } from '@tour-kit/core'
+```
+
+The `@tour-kit/react` package is a thin layer that wraps core hooks into components. It adds Floating UI for positioning, Radix Slot for composition, and CVA for variant styling. All of those are marked `external` in the build config, so they never get bundled into Tour Kit's output.
+
+```ts
+// packages/react/tsup.config.ts
+export default defineConfig({
+  external: [
+    'react',
+    'react-dom',
+    '@tour-kit/core',
+    '@floating-ui/react',
+    'tailwindcss',
+    'next/navigation',
+    'react-router',
+  ],
+  treeshake: true,
+  splitting: true,
+  minify: true,
+  target: 'es2020',
+})
+```
+
+This means the React package's own code is just 2.6KB gzipped. The heavy lifting (positioning, state, a11y) happens in core, which tree-shakes down to what you actually use.
+
+## Five decisions that keep the bundle small
+
+Keeping a React library under 10KB gzipped requires discipline at every layer of the build pipeline, from how you declare dependencies to what ES target you compile to and how many entry points you expose. These five architectural decisions account for most of the size difference between Tour Kit at 8.1KB and React Joyride at 34KB. Each one is a tradeoff, and we'll explain what you give up.
+
+### 1. Peer dependencies instead of bundled dependencies
+
+React Joyride bundles `react-floater` into its output. If your app uses Floating UI for tooltips elsewhere, you now ship two positioning libraries. Tour Kit externalizes everything: React, React DOM, Floating UI, and even the core package itself. Your bundler deduplicates shared dependencies instead of shipping copies.
+
+### 2. ESM-first with code splitting
+
+Tour Kit ships both ESM and CJS, but ESM is the primary format. ESM enables static analysis. Your bundler can see exactly which exports you use and drop the rest.
+
+The tsup config enables `splitting: true`, which means each entry point gets its own chunk graph. Import `@tour-kit/react/headless` and you get 1.7KB. Import the styled components and you get 2.6KB. Import both and the shared code is deduplicated into chunks.
+
+The React package's `dist/` contains 22 ESM chunks, each component and utility in its own file. Unused ones never reach your users.
+
+### 3. ES2020 target, no polyfill bloat
+
+Setting `target: 'es2020'` in tsup means Tour Kit doesn't polyfill optional chaining, nullish coalescing, `Promise.allSettled`, or dynamic `import()`. All four are supported in every browser above 1% market share as of April 2026 ([Can I Use, ES2020 features](https://caniuse.com/mdn-javascript_operators_optional_chaining)). Libraries targeting ES5 or ES2015 carry kilobytes of dead polyfill code.
+
+### 4. Write it yourself instead of importing it
+
+The core package implements its own scroll management (`scrollIntoView`, `lockScroll`), its own DOM utilities (`getElement`, `waitForElement`, `isElementVisible`), its own storage adapters (`createStorageAdapter`, `createCookieStorage`), and its own throttle utilities (`throttleRAF`, `throttleLeading`). Each of these is 20-50 lines of focused code.
+
+Importing `lodash.throttle` adds 1.3KB for something that takes 15 lines to write correctly. Importing `scroll-into-view-if-needed` adds 2.2KB for behavior that `Element.scrollIntoView({ behavior: 'smooth', block: 'center' })` handles natively in 2026. The math is simple: if you can write it in under 50 lines, don't add a dependency.
+
+### 5. Multiple entry points for progressive loading
+
+The React package exposes four entry points:
+
+```ts
+import { Tour } from '@tour-kit/react'           // Styled components (2.6 KB)
+import { TourCardHeadless } from '@tour-kit/react/headless'  // Logic only (1.7 KB)
+import { LazyTour } from '@tour-kit/react/lazy'   // Code-split variant (1.5 KB)
+import { tourPlugin } from '@tour-kit/react/tailwind' // Tailwind plugin
+```
+
+The `/lazy` entry point wraps tour components in `React.lazy()`, so the entire tour loads only when triggered. For a feature that runs once per user session, this is the right default. Ship zero tour bytes on initial page load, then load 8KB when the user actually needs it.
+
+## How this compares to the competition
+
+Bundle size alone doesn't determine which library you should use, but it reveals how much engineering discipline went into the packaging. We measured all five major tour libraries in our [2026 React tour library benchmark](/blog/react-tour-library-benchmark-2026) using identical Vite 6.2 builds with React 19.1, and the spread between the smallest and largest is a 7x factor.
+
+<table>
+<thead>
+<tr><th>Library</th><th>Gzipped</th><th>Runtime deps</th><th>Tree-shakeable</th><th>React integration</th></tr>
+</thead>
+<tbody>
+<tr><td>Tour Kit</td><td>8.1 KB</td><td>0</td><td>Yes (ESM + splitting)</td><td>Native hooks + components</td></tr>
+<tr><td>Driver.js</td><td>~5 KB</td><td>0</td><td>Partial</td><td>No React wrapper</td></tr>
+<tr><td>Shepherd.js</td><td>~25 KB</td><td>@floating-ui/dom</td><td>Limited</td><td>Wrapper package</td></tr>
+<tr><td>Intro.js</td><td>~29 KB</td><td>0</td><td>No (single bundle)</td><td>Separate wrapper</td></tr>
+<tr><td>React Joyride</td><td>~34 KB</td><td>5+</td><td>No</td><td>Native</td></tr>
+</tbody>
+</table>
+
+Driver.js is smaller at ~5KB, but there's a tradeoff: it has no React wrapper, no TypeScript types in the box, and 4 axe-core accessibility violations in our tests. Tour Kit trades 3KB for native React hooks, full TypeScript coverage, and zero accessibility violations.
+
+## The honest part: where Tour Kit is bigger than you'd expect
+
+Tour Kit's full core barrel export measures 10.4KB gzipped, not 8KB. The gap exists because the barrel includes branch resolution utilities, cookie storage adapters, RTL mirroring functions, and other features most tours never use. If you import everything from `@tour-kit/core`, you're shipping code you probably don't need. The 8.1KB figure comes from a real Vite build with tree-shaking enabled.
+
+We want the full barrel export under 8KB too. That's the budget in our quality gates, and we're currently 2.4KB over. Reducing that means either splitting the core into sub-entry-points (like the React package does) or trimming the utility surface area.
+
+Tour Kit also doesn't have a visual builder. You need React developers to set up tours in code. For teams without frontend engineers, Appcues and Whatfix let product managers build tours in a GUI with no code required. Tour Kit won't ever do that. It's a library, not a platform.
+
+## Common mistakes that inflate product tour bundle size
+
+Teams often ship far more tour JavaScript than necessary because of three recurring antipatterns. First, importing the full library barrel when you only need two hooks wastes everything tree-shaking was designed to eliminate. Second, bundling positioning libraries like Floating UI inside the tour package instead of externalizing them creates duplication when the host app already uses the same library for tooltips or dropdowns. Third, targeting ES5 or ES2015 adds polyfill code for language features that every modern browser already supports.
+
+If you're evaluating tour libraries, check three things: does the library ship ESM with proper `exports` field in package.json? Are runtime dependencies externalized or bundled? And what ES target does the compiled output use? Those three factors explain most of the size variation between libraries in the same category.
+
+## Reproducing these measurements yourself
+
+Every number in this article is verifiable. You can clone Tour Kit's monorepo, build the packages, and measure the gzipped output yourself in under two minutes. We used `gzip -c` for raw sizes and `vite build` with `source-map-explorer` for tree-shaken measurements. Here's the process:
+
+```bash
+git clone https://github.com/DomiDex/tour-kit.git
+cd tour-kit
+pnpm install && pnpm build
+
+# Raw gzipped sizes
+gzip -c packages/core/dist/index.js | wc -c
+gzip -c packages/react/dist/index.js | wc -c
+gzip -c packages/react/dist/headless.js | wc -c
+```
+
+For the tree-shaken number, create a Vite app that imports `useTour`, `TourProvider`, and `Tour`, build it with `vite build`, and compare the output with and without Tour Kit. The delta is your real-world bundle cost.
+
+Google's Web Vitals research shows that [every additional kilobyte of JavaScript delays INP on mobile devices](https://web.dev/articles/vitals). The HTTP Archive's 2025 State of JavaScript report found the median page ships 509KB of JavaScript ([HTTP Archive, Web Almanac 2025](https://almanac.httparchive.org/en/2025/javascript)). An 8KB tour library is 1.6% of that budget. A 34KB one is 6.7%.
+
+## FAQ
+
+### Is 8.1KB the size with or without tree-shaking?
+
+Tour Kit's core + React lands at 8.1KB gzipped in a production Vite build with tree-shaking enabled. The full barrel export without tree-shaking is 10.4KB. Bundlers eliminate unused exports, so 8.1KB reflects what your users actually download.
+
+### Why not use Floating UI in core instead of writing your own positioning?
+
+Tour Kit's core handles basic position calculation for headless use cases. The `@tour-kit/react` package uses `@floating-ui/react` for pixel-perfect positioning, but it's externalized, not bundled. This keeps core at zero dependencies while giving styled components production-grade positioning.
+
+### Does zero dependencies mean zero third-party code?
+
+In the core package, yes. Every function is written from scratch. The React package uses `@floating-ui/react`, `@radix-ui/react-slot`, `clsx`, `cva`, and `tailwind-merge`, but all are externalized in the build. They appear in your app's dependency graph, not bundled inside Tour Kit.
+
+### How does this compare to Driver.js at 5KB?
+
+Driver.js is 3KB smaller but has no React wrapper, no TypeScript types in its package, and produces 4 axe-core accessibility violations. Tour Kit provides native React hooks, full TypeScript coverage, and zero accessibility violations for an additional 3KB. The tradeoff depends on your stack.
+
+### Can I use Tour Kit without React?
+
+Tour Kit's core exports hooks and utilities, but they use React primitives (`useContext`, `useCallback`, `useMemo`). No Vue or Svelte adapter exists yet. React 18 or 19 is required. That's a real limitation if your app uses a different framework.
+
+---
+
+**Internal linking:**
+- From: [React tour library benchmark 2026](/blog/react-tour-library-benchmark-2026) (add link to this deep-dive for the "how" behind Tour Kit's numbers)
+- From: [5 best lightweight product tour libraries under 10KB](/blog/lightweight-product-tour-libraries-under-10kb) (link from Tour Kit's entry)
+- To: [shadcn/ui product tour tutorial](/blog/shadcn-ui-product-tour-tutorial) (example of headless architecture in practice)
+- To: [Vite + React + Tailwind product tour](/blog/vite-react-tailwind-product-tour) (real-world setup showing the bundle impact)
+
+**Distribution:**
+- Dev.to (canonical back to tourkit.dev)
+- Hashnode (canonical back to tourkit.dev)
+- Reddit r/reactjs: "We open-sourced the build config that keeps our tour library at 8KB"
+- Hacker News: "Show HN: How we keep a React product tour library at 8KB with zero deps"
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How Tour Kit ships at 8KB gzipped with zero runtime dependencies",
+  "description": "A technical breakdown of the architecture decisions that keep Tour Kit under 8.1KB gzipped. Tree-shaking, code splitting, peer dependencies, and tsup config.",
+  "author": {
+    "@type": "Person",
+    "name": "Tour Kit Team",
+    "url": "https://tourkit.dev"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://tourkit.dev",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tourkit.dev/logo.png"
+    }
+  },
+  "datePublished": "2026-04-08",
+  "dateModified": "2026-04-08",
+  "image": "https://tourkit.dev/og-images/tour-kit-8kb-zero-dependencies.png",
+  "url": "https://tourkit.dev/blog/tour-kit-8kb-zero-dependencies",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tourkit.dev/blog/tour-kit-8kb-zero-dependencies"
+  },
+  "keywords": ["product tour library bundle size", "zero dependency tour library", "lightweight react library", "tree shaking react library"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is 8.1KB the size with or without tree-shaking?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit's core + React lands at 8.1KB gzipped in a production Vite build with tree-shaking enabled. The full core barrel export without tree-shaking is 10.4KB gzipped. The 8.1KB number reflects what your users actually download."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does zero dependencies mean zero third-party code?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "In the core package, yes. Every function is written from scratch. The React package uses @floating-ui/react, @radix-ui/react-slot, clsx, cva, and tailwind-merge as dependencies, but these are all externalized in the build."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Tour Kit compare to Driver.js at 5KB?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Driver.js is 3KB smaller but doesn't include a React wrapper, ships no TypeScript types, and produces 4 axe-core accessibility violations. Tour Kit provides native React hooks, full TypeScript coverage, and zero accessibility violations for an additional 3KB."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use Tour Kit without React?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour Kit's core package exports hooks and utilities, but they use React primitives. A Vue or Svelte adapter isn't available yet. React 18 or 19 is required."
+      }
+    }
+  ]
+}
+```

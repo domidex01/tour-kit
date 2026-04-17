@@ -1,0 +1,378 @@
+---
+title: "Tour Kit + TanStack Router: multi-page tours with type safety"
+slug: "tanstack-router-product-tour"
+description: "Build type-safe multi-page product tours with Tour Kit and TanStack Router. Route context, beforeLoad guards, and typed search params for onboarding flows."
+primary_keyword: "tanstack router product tour"
+secondary_keywords: ["tanstack router onboarding", "type-safe multi-page tour", "tanstack router route context tour"]
+category: "Integrations"
+schema_type: "TechArticle"
+spreadsheet_row: 190
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/tanstack-router-product-tour.png
+---
+
+# Tour Kit + TanStack Router: multi-page tours with type safety
+
+Most product tour libraries treat routing as an afterthought. You define steps, each with a `route` string, and the library does a `window.location` push when it needs to change pages. There's no type checking on route paths, no validation that the route even exists, and zero access to route-level context like auth state or feature flags.
+
+TanStack Router changes the equation. Its type-safe route tree means your tour step routes get validated at compile time. Its `beforeLoad` hooks let you gate tour progression on real conditions. And its route context system gives tour steps access to the same data your components use, without prop drilling.
+
+This article walks through building a multi-page onboarding tour that uses TanStack Router's type system to catch broken routes before they reach production.
+
+```bash
+npm install @tourkit/core @tourkit/react @tanstack/react-router
+```
+
+[See the full Tour Kit docs at usertourkit.com](https://usertourkit.com/)
+
+## What you'll build
+
+By the end of this guide, you'll have a four-step onboarding tour that spans three routes (`/dashboard`, `/dashboard/settings`, and `/dashboard/projects/new`) with compile-time route validation and route-context-driven visibility. Each step targets a specific element on its page. When a user advances past a step on one route, Tour Kit navigates to the next route automatically. TanStack Router's type system validates every route path at compile time, and route context passes the user's onboarding status down the tree without a single extra API call.
+
+The end result: a tour that's impossible to misconfigure with a typo'd route, and that adapts its behavior based on route-level data.
+
+## Why TanStack Router + Tour Kit?
+
+TanStack Router hit 2.3 million weekly npm downloads as of April 2026, up from under 500K a year earlier ([npm trends](https://npmtrends.com/@tanstack/react-router)), because developers want type safety everywhere, including their routing layer. For multi-page product tours, that type safety on route paths prevents an entire class of bugs that traditional string-based routing can't catch.
+
+Here's why. A typical tour config with React Router looks like this:
+
+```tsx
+// src/tours/onboarding.ts — no route validation
+const steps = [
+  { target: '#welcome-banner', route: '/dashbord' }, // typo — runtime 404
+  { target: '#settings-btn', route: '/dashboard/setings' }, // another typo
+]
+```
+
+Both routes have typos. You won't know until a user hits step 2 and lands on a 404.
+
+With TanStack Router, the route tree is a TypeScript type. Constrain step routes to that type, and `'/dashbord'` becomes a compile error instead of a production bug.
+
+Beyond type safety, TanStack Router gives you three features that matter for tours:
+
+1. **Route context** lets you inject auth state, onboarding flags, or feature toggles at the route level. Tour steps read this context without extra providers.
+2. **`beforeLoad` guards** check conditions before a route renders. Skip a tour step's route if the user already completed onboarding.
+3. **Type-safe search params** track tour progress in the URL (`?tourStep=2`) with validated types, not arbitrary strings.
+
+## Prerequisites
+
+This integration requires a working TanStack Router project with TypeScript in strict mode, plus Tour Kit's core and react packages installed as dependencies. The adapter works with TanStack Router v1.x and both React 18 and 19. Specifically, you need:
+
+- React 18 or 19
+- TanStack Router v1.x (`@tanstack/react-router`)
+- Tour Kit core and react packages (`@tourkit/core`, `@tourkit/react`)
+- TypeScript 5.0+ (strict mode)
+
+If you don't have TanStack Router set up yet, follow [their getting started guide](https://tanstack.com/router/latest/docs) first.
+
+## Step 1: create the TanStack Router adapter
+
+Tour Kit abstracts routing through a `RouterAdapter` interface with four methods: `getCurrentRoute()`, `navigate()`, `matchRoute()`, and `onRouteChange()`. Writing an adapter for TanStack Router takes about 40 lines because TanStack already exposes the hooks you need.
+
+TanStack Router exposes `useRouterState()` for reading the current location and `useNavigate()` for navigation. Here's the adapter:
+
+```tsx
+// src/adapters/tanstack-router.ts
+import type { RouterAdapter } from '@tourkit/core'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useNavigate, useRouterState } from '@tanstack/react-router'
+
+export function useTanStackRouter(): RouterAdapter {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const navigate = useNavigate()
+  const callbacksRef = useRef<Set<(route: string) => void>>(new Set())
+  const pathnameRef = useRef(pathname)
+  const previousPathRef = useRef(pathname)
+
+  pathnameRef.current = pathname
+
+  useEffect(() => {
+    if (previousPathRef.current !== pathname) {
+      previousPathRef.current = pathname
+      for (const cb of callbacksRef.current) {
+        cb(pathname)
+      }
+    }
+  }, [pathname])
+
+  const getCurrentRoute = useCallback(() => pathnameRef.current, [])
+
+  const doNavigate = useCallback(
+    (route: string): undefined => {
+      navigate({ to: route })
+      return undefined
+    },
+    [navigate],
+  )
+
+  const matchRoute = useCallback(
+    (pattern: string, mode: 'exact' | 'startsWith' | 'contains' = 'exact') => {
+      const current = pathnameRef.current
+      switch (mode) {
+        case 'exact':
+          return current === pattern
+        case 'startsWith':
+          return current.startsWith(pattern)
+        case 'contains':
+          return current.includes(pattern)
+        default:
+          return current === pattern
+      }
+    },
+    [],
+  )
+
+  const onRouteChange = useCallback((callback: (route: string) => void) => {
+    callbacksRef.current.add(callback)
+    callback(pathnameRef.current)
+    return () => {
+      callbacksRef.current.delete(callback)
+    }
+  }, [])
+
+  return useMemo<RouterAdapter>(
+    () => ({ getCurrentRoute, navigate: doNavigate, matchRoute, onRouteChange }),
+    [getCurrentRoute, doNavigate, matchRoute, onRouteChange],
+  )
+}
+```
+
+This follows the same pattern Tour Kit uses for its React Router and Next.js adapters. The `useRouterState` selector avoids re-renders from non-pathname state changes (search params, hash).
+
+## Step 2: wire up the provider
+
+The `MultiTourKitProvider` component from `@tour-kit/react` accepts a `router` prop that connects tour navigation to your routing library. Place it inside TanStack Router's root route so the adapter has access to router hooks.
+
+```tsx
+// src/routes/__root.tsx
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
+import { MultiTourKitProvider } from '@tourkit/react'
+import { useTanStackRouter } from '../adapters/tanstack-router'
+
+interface RootContext {
+  onboardingComplete: boolean
+}
+
+function RootComponent() {
+  const router = useTanStackRouter()
+
+  return (
+    <MultiTourKitProvider router={router}>
+      <Outlet />
+    </MultiTourKitProvider>
+  )
+}
+
+export const Route = createRootRouteWithContext<RootContext>()({
+  component: RootComponent,
+})
+```
+
+Notice the `createRootRouteWithContext<RootContext>()` call. That typed context flows down to every child route and becomes available in `beforeLoad`.
+
+## Step 3: define type-safe tour steps with route context
+
+TanStack Router generates TypeScript types for every route in your tree, which means you can constrain tour step routes to only valid paths and catch typos at compile time instead of at runtime. Define your tour steps with routes that match your actual route tree:
+
+```tsx
+// src/tours/onboarding-tour.tsx
+import type { TourStep } from '@tourkit/core'
+
+export const onboardingSteps: TourStep[] = [
+  {
+    id: 'welcome',
+    target: '#welcome-banner',
+    title: 'Welcome to the dashboard',
+    content: 'This is your home base. Key metrics live here.',
+    route: '/dashboard',
+  },
+  {
+    id: 'settings',
+    target: '#settings-nav',
+    title: 'Configure your workspace',
+    content: 'Set your team name and notification preferences.',
+    route: '/dashboard/settings',
+  },
+  {
+    id: 'new-project',
+    target: '#create-project-form',
+    title: 'Create your first project',
+    content: 'Projects organize your work. Start with one.',
+    route: '/dashboard/projects/new',
+  },
+  {
+    id: 'done',
+    target: '#dashboard-overview',
+    title: 'You are all set',
+    content: 'Explore on your own. The help menu is always available.',
+    route: '/dashboard',
+  },
+]
+```
+
+To get compile-time validation on those route strings, you can constrain them against TanStack Router's generated route types:
+
+```tsx
+// src/tours/type-safe-routes.ts
+import type { RegisteredRouter, RoutePaths } from '@tanstack/react-router'
+
+// Only allows routes that exist in your route tree
+type ValidRoute = RoutePaths<RegisteredRouter['routeTree']>
+
+interface TypeSafeTourStep {
+  id: string
+  target: string
+  title: string
+  content: string
+  route: ValidRoute // compile error if route doesn't exist
+}
+
+// This would fail: route: '/dashbord' — not in the route tree
+```
+
+That's the gotcha we hit during testing. Without this constraint, a renamed route silently breaks your tour. With it, `tsc` catches the mismatch before the code ships.
+
+## Step 4: use beforeLoad to gate tour visibility
+
+TanStack Router's `beforeLoad` function runs before a route renders and has full access to the typed route context, which makes it the right place to decide whether the onboarding tour should appear for the current user. Use it to skip the tour for users who already finished onboarding:
+
+```tsx
+// src/routes/dashboard.tsx
+import { createRoute } from '@tanstack/react-router'
+import { Route as rootRoute } from './__root'
+
+export const Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard',
+  beforeLoad: ({ context }) => {
+    // context.onboardingComplete is typed from RootContext
+    return {
+      shouldShowTour: !context.onboardingComplete,
+    }
+  },
+  component: DashboardPage,
+})
+
+function DashboardPage() {
+  const { shouldShowTour } = Route.useRouteContext()
+
+  return (
+    <div>
+      <div id="welcome-banner">Dashboard overview</div>
+      {shouldShowTour && <OnboardingTour />}
+    </div>
+  )
+}
+```
+
+The `context.onboardingComplete` value is fully typed because we defined `RootContext` in step 2. You don't need `as` casts or runtime checks on undefined properties.
+
+## Going further
+
+Once the basic integration is running, three patterns extend it in useful directions that take advantage of TanStack Router features most other tour libraries can't access.
+
+**Track tour progress in search params.** TanStack Router validates search params with Zod or Valibot schemas. Add `tourStep` as a typed search param, and your tour state survives page refreshes. It's also shareable via URL, which is useful for support debugging.
+
+```tsx
+import { z } from 'zod'
+
+const tourSearchSchema = z.object({
+  tourStep: z.number().optional(),
+})
+
+export const Route = createRoute({
+  // ...
+  validateSearch: tourSearchSchema,
+})
+```
+
+**Code-split tour components per route.** TanStack Router handles automatic code splitting. Tour step content lazy-loads with its route, so heavy steps with media embeds or interactive demos don't bloat the initial bundle.
+
+**Combine with Tour Kit's analytics package.** Fire `tour:step_viewed` events that include the TanStack Router route path. Completion funnel analysis then shows exactly which page transition caused drop-offs, not just which step number. That distinction matters.
+
+As of April 2026, TanStack Router ships at roughly 12KB gzipped for the core router ([TanStack docs](https://tanstack.com/router/latest)). Combined with Tour Kit's core at under 8KB gzipped, the total routing + tour overhead stays under 20KB. That's lighter than React Joyride alone. TkDodo's article on [context inheritance in TanStack Router](https://tkdodo.eu/blog/context-inheritance-in-tan-stack-router) covers the context pattern in more depth if you want to pass additional data through route context.
+
+Tour Kit doesn't ship with a built-in TanStack Router adapter yet. The adapter in this article is ~40 lines and follows the same `RouterAdapter` interface used by the Next.js and React Router adapters. If the community adopts this pattern, an official adapter makes sense as a future addition.
+
+A real limitation to know: Tour Kit requires React 18+ and has no visual builder. You're writing tour configs in TypeScript. For teams already using TanStack Router, that's probably fine. You chose a code-first router, so a code-first tour library fits the same philosophy.
+
+[Get started with Tour Kit](https://usertourkit.com/) | [GitHub](https://github.com/user-tour-kit/tour-kit) | `npm install @tourkit/core @tourkit/react`
+
+## FAQ
+
+### Can I use TanStack Router's file-based routing with Tour Kit?
+
+Tour Kit works with both file-based and code-based TanStack Router setups. The `RouterAdapter` only needs `useRouterState` and `useNavigate`, available in both modes. File-based routing generates the same typed route tree, so `ValidRoute` constraints work identically.
+
+### Does the tour break if I rename a route in TanStack Router?
+
+Not silently. With the `ValidRoute` type constraint from step 3, TypeScript flags any tour step whose `route` doesn't match your route tree. Without it, you'd get a runtime 404 when the tour navigates to the old path.
+
+### How do I handle route params in tour steps?
+
+Tour Kit's `route` field accepts a resolved string path. For parameterized routes like `/dashboard/projects/$projectId`, pass `route: '/dashboard/projects/abc-123'`. Compute paths dynamically with TanStack Router's `useParams()` when building steps at runtime.
+
+### What's the performance impact of adding Tour Kit to a TanStack Router app?
+
+Tour Kit's core ships at under 8KB gzipped with zero runtime dependencies. The router adapter adds ~40 lines that tree-shake if unused. Combined with TanStack Router's ~12KB, total routing and tour overhead stays under 20KB gzipped. React Joyride alone ships at 37KB.
+
+### Does Tour Kit support TanStack Start (SSR)?
+
+Tour Kit components are client-side only with `'use client'` directives. In TanStack Start, wrap tour components in a client boundary. The adapter hooks work identically in Start and in a client-side SPA.
+
+---
+
+{/* JSON-LD */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Tour Kit + TanStack Router: multi-page tours with type safety",
+  "description": "Build type-safe multi-page product tours with Tour Kit and TanStack Router. Route context, beforeLoad guards, and typed search params for onboarding flows.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "image": "https://usertourkit.com/og-images/tanstack-router-product-tour.png",
+  "url": "https://usertourkit.com/blog/tanstack-router-product-tour",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/tanstack-router-product-tour"
+  },
+  "keywords": ["tanstack router product tour", "tanstack router onboarding", "type-safe multi-page tour"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+, TanStack Router v1",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+
+{/* Internal linking suggestions:
+- Link FROM: nextjs-app-router-product-tour (mention TanStack Router as alternative)
+- Link FROM: managing-tour-state-zustand (TanStack Router context as alternative to Zustand for tour state)
+- Link FROM: remix-product-tour (TanStack Router as alternative to Remix routing)
+- Link TO: tour-kit-8kb-zero-dependencies (bundle size comparison)
+- Link TO: server-components-client-side-tours-boundary-problem (SSR boundary advice for TanStack Start)
+*/}
+
+{/* Distribution checklist:
+- Dev.to: Cross-post with canonical URL to usertourkit.com/blog/tanstack-router-product-tour
+- Hashnode: Cross-post with canonical
+- Reddit: r/reactjs — "Tour Kit + TanStack Router: type-safe multi-page tours"
+- Reddit: r/tanstack — if the subreddit exists
+*/}

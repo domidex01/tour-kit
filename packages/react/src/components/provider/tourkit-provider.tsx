@@ -1,3 +1,5 @@
+'use client'
+
 import {
   TourKitProvider as CoreTourKitProvider,
   type MultiPagePersistenceConfig,

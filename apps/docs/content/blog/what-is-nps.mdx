@@ -1,0 +1,190 @@
+---
+title: "What is Net Promoter Score (NPS)? A developer's guide to measuring onboarding satisfaction"
+slug: "what-is-nps"
+description: "Learn what NPS is, how the scoring formula works, and how to collect Net Promoter Score data in-app after onboarding. Includes SaaS benchmarks and React code."
+primary_keyword: "what is nps"
+secondary_keywords: ["nps definition", "net promoter score meaning", "nps score calculation"]
+category: "Glossary"
+schema_type: "TechArticle"
+spreadsheet_row: 323
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/what-is-nps.png
+---
+
+# What is Net Promoter Score (NPS)? Measuring onboarding satisfaction
+
+Net Promoter Score is a single-question survey metric that measures how likely someone is to recommend your product. Ask users to rate from 0 to 10, group them into three buckets, subtract the unhappy percentage from the happy one. You get a number between -100 and +100.
+
+Fred Reichheld introduced NPS in a 2003 Harvard Business Review article titled "The One Number You Need to Grow." It remains the most recognized loyalty metric in SaaS, though its dominance is fading. As of 2025, only 23% of enterprise CX leaders still treat NPS as their primary metric ([CMSWire](https://www.cmswire.com/customer-experience/why-nps-became-customer-experiences-favorite-punching-bag/)).
+
+For developers building onboarding flows, NPS is the quickest signal that your tour actually helped. Install [User Tour Kit](https://usertourkit.com/) to pair product tours with in-app NPS surveys:
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/surveys
+```
+
+## How NPS scoring works
+
+NPS divides respondents into three groups based on their 0-10 rating. Promoters score 9 or 10 and actively recommend your product. Passives land on 7 or 8, satisfied but unenthusiastic. Detractors score 0 through 6.
+
+The formula:
+
+```
+NPS = (% Promoters) - (% Detractors)
+```
+
+Say 100 users respond: 60 Promoters, 25 Passives, 15 Detractors. Your NPS is 60 - 15 = **+45**. Passives count toward the total but don't affect the calculation directly. That's a quirk worth noting: the largest segment often gets ignored.
+
+<table>
+  <thead>
+    <tr>
+      <th>Group</th>
+      <th>Score range</th>
+      <th>What it means</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Promoter</td>
+      <td>9-10</td>
+      <td>Loyal, will recommend</td>
+      <td>Ask for referrals, case studies</td>
+    </tr>
+    <tr>
+      <td>Passive</td>
+      <td>7-8</td>
+      <td>Satisfied but switchable</td>
+      <td>Identify what's missing from their experience</td>
+    </tr>
+    <tr>
+      <td>Detractor</td>
+      <td>0-6</td>
+      <td>Unhappy, may churn</td>
+      <td>Follow up within 48 hours, fix blockers</td>
+    </tr>
+  </tbody>
+</table>
+
+## NPS benchmarks for SaaS
+
+Knowing your score means nothing without context. The average SaaS NPS is +36, according to [CustomerGauge's 2025 benchmark report](https://customergauge.com/benchmarks/blog/nps-saas-net-promoter-score-benchmarks). B2B SaaS specifically averages +29, while B2C software sits higher at +47.
+
+A few reference points: Zoom scores +72, Snowflake +71, Slack +55, Salesforce +20. Only about 3% of SaaS companies hit +70 or above.
+
+What counts as "good" depends on your segment:
+- **Below 0:** Something is broken. Investigate immediately.
+- **0 to 30:** Not unusual for early-stage products. Room to grow.
+- **30 to 50:** At or above the SaaS average.
+- **50+:** Strong loyalty. Your onboarding is working.
+
+## NPS examples in practice
+
+A B2B dashboard tool runs a 5-step onboarding tour, then triggers an NPS survey 3 sessions later. Promoters (9-10) get invited to a case study. Detractors (0-6) receive a follow-up asking what went wrong. The team discovers that users who skip step 3 score 20 points lower on average, so they redesign that step.
+
+An e-commerce SaaS compares two tour variants over 4 weeks. Version A (linear walkthrough) averages +38. Version B (contextual tooltips) averages +54. The 16-point gap is a concrete signal, not a gut feeling.
+
+## How to collect NPS after onboarding
+
+The biggest mistake with NPS is bad timing. Asking during a product tour interrupts the flow. Asking three months later measures something other than onboarding quality.
+
+In-app NPS surveys get 20-40% response rates versus 5-15% for email ([Refiner.io](https://refiner.io/blog/in-app-nps/)). The difference is context: users responding inside your app have a fresh opinion.
+
+Trigger the survey after your onboarding tour completes, not during it. Wait for at least 3 sessions. And never ask more than once every 60 days.
+
+```tsx
+// src/components/PostTourNPS.tsx
+import { useSurvey } from '@tourkit/surveys';
+
+export function PostTourNPS() {
+  const { show, response } = useSurvey({
+    type: 'nps',
+    question: 'How likely are you to recommend this product?',
+    followUp: 'What could we improve?',
+    throttle: { minInterval: '60d' },
+  });
+
+  // Trigger after onboarding tour completes
+  // show() is called from your tour's onComplete callback
+
+  return null; // Renders via portal when show() is called
+}
+```
+
+One question plus one optional follow-up. That's enough signal without annoying anyone.
+
+## Why NPS matters for product tours
+
+NPS measured right after onboarding tells you whether your tour helped users reach their first "aha" moment. A confusing tour shows up as a low score within days, not months. Pair Tour Kit's `@tourkit/surveys` with `@tourkit/analytics` to track this automatically.
+
+But NPS isn't a silver bullet. The 0-6 detractor range groups someone mildly disappointed (a 6) with someone who hates the product (a 0). Cultural norms affect scores by 15-20 points across regions ([Qualtrics XM Institute](https://www.qualtrics.com/articles/customer-experience/net-promoter-score/)). And Passives, often your biggest segment, vanish from the math entirely.
+
+Use NPS as a directional signal alongside completion rates and time-to-value, not the single source of truth.
+
+## NPS in User Tour Kit
+
+User Tour Kit's `@tour-kit/surveys` package includes built-in NPS with fatigue prevention. The scoring engine handles Promoter/Passive/Detractor bucketing automatically, and results feed into whatever analytics pipeline you're already running.
+
+Tour Kit is headless, so you own the survey UI completely. No visual builder (you need React developers), but the survey matches your design system exactly and ships zero third-party scripts. Get started at [usertourkit.com](https://usertourkit.com/).
+
+## FAQ
+
+### What does NPS stand for?
+
+NPS stands for Net Promoter Score, a customer loyalty metric created by Fred Reichheld and Bain & Company in 2003. Subtract detractor percentage from promoter percentage to get a score between -100 and +100. Most SaaS products fall between +20 and +50.
+
+### What is a good NPS score for SaaS?
+
+A good NPS score for SaaS is +36 or above, matching the 2025 industry average from CustomerGauge. Scores above +50 indicate strong user loyalty. Only about 3% of SaaS companies reach +70, which is top-tier. B2B SaaS averages +29 while B2C software averages +47, so compare within your segment.
+
+### How often should I send NPS surveys?
+
+No more than once every 60 days per user. For onboarding NPS, trigger after the user completes your product tour and has used the product for 3+ sessions. In-app surveys pull 20-40% response rates versus 5-15% for email.
+
+### Can I measure NPS with code instead of a SaaS tool?
+
+Yes. Libraries like User Tour Kit's `@tourkit/surveys` package let you collect NPS responses directly in your React app without third-party scripts. You own the data, control the UI, and avoid per-MAU pricing. The tradeoff is implementation time — expect 2-4 hours to build a basic NPS flow versus minutes with a no-code tool.
+
+---
+
+*Sources: [Bain & Company NPS methodology](https://www.netpromotersystem.com/about/measuring-your-net-promoter-score/), [CustomerGauge SaaS benchmarks 2025](https://customergauge.com/benchmarks/blog/nps-saas-net-promoter-score-benchmarks), [Refiner.io in-app NPS guide](https://refiner.io/blog/in-app-nps/), [Qualtrics NPS methodology](https://www.qualtrics.com/articles/customer-experience/net-promoter-score/), [CMSWire NPS adoption data](https://www.cmswire.com/customer-experience/why-nps-became-customer-experiences-favorite-punching-bag/)*
+
+{/* Internal linking suggestions:
+- Link FROM onboarding-nps-survey.mdx → this article for "what is NPS" definition
+- Link FROM in-app-nps-vs-post-tour-feedback.mdx → this article for NPS basics
+- Link FROM onboarding-metrics-explained.mdx → this article for NPS definition
+- Link FROM measure-onboarding-success-metrics.mdx → this article for NPS section
+- Link TO onboarding-nps-survey for deeper NPS implementation guidance
+- Link TO in-app-nps-vs-post-tour-feedback for timing strategies
+*/}
+
+{/* JSON-LD */}
+<script type="application/ld+json">{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "What is Net Promoter Score (NPS)? A developer's guide to measuring onboarding satisfaction",
+  "description": "Learn what NPS is, how the scoring formula works, and how to collect Net Promoter Score data in-app after onboarding. Includes SaaS benchmarks and React code.",
+  "author": { "@type": "Person", "name": "DomiDex", "url": "https://github.com/DomiDex" },
+  "publisher": { "@type": "Organization", "name": "User Tour Kit", "url": "https://usertourkit.com", "logo": { "@type": "ImageObject", "url": "https://usertourkit.com/logo.png" } },
+  "datePublished": "2026-04-12",
+  "dateModified": "2026-04-12",
+  "image": "https://usertourkit.com/og-images/what-is-nps.png",
+  "url": "https://usertourkit.com/blog/what-is-nps",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://usertourkit.com/blog/what-is-nps" },
+  "keywords": ["what is nps", "nps definition", "net promoter score meaning", "nps score calculation"],
+  "proficiencyLevel": "Beginner",
+  "programmingLanguage": { "@type": "ComputerLanguage", "name": "TypeScript" }
+})}</script>
+
+<script type="application/ld+json">{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What does NPS stand for?", "acceptedAnswer": { "@type": "Answer", "text": "NPS stands for Net Promoter Score, a customer loyalty metric created by Fred Reichheld and Bain & Company in 2003. The 'net' refers to the calculation: subtract detractor percentage from promoter percentage. The result ranges from -100 (everyone is a detractor) to +100 (everyone is a promoter). Most SaaS products fall between +20 and +50." } },
+    { "@type": "Question", "name": "What is a good NPS score for SaaS?", "acceptedAnswer": { "@type": "Answer", "text": "A good NPS score for SaaS is +36 or above, matching the 2025 industry average from CustomerGauge. Scores above +50 indicate strong user loyalty. Only about 3% of SaaS companies reach +70, which is top-tier. B2B SaaS averages +29 while B2C software averages +47, so compare within your segment." } },
+    { "@type": "Question", "name": "How often should I send NPS surveys?", "acceptedAnswer": { "@type": "Answer", "text": "Send NPS surveys no more than once every 60 days per user. For onboarding-specific NPS, trigger the survey after the user has completed your product tour and used the product for at least 3 sessions. In-app surveys get 20-40% response rates compared to 5-15% for email." } },
+    { "@type": "Question", "name": "Can I measure NPS with code instead of a SaaS tool?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Libraries like User Tour Kit's @tourkit/surveys package let you collect NPS responses directly in your React app without third-party scripts. You own the data, control the UI, and avoid per-MAU pricing. The tradeoff is implementation time — expect 2-4 hours versus minutes with a no-code tool." } }
+  ]
+})}</script>

@@ -1,3 +1,5 @@
+'use client'
+
 import type { TourStep as TourStepType } from '@tour-kit/core'
 
 export function TourStep(_props: TourStepType): null {

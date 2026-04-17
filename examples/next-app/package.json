@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "start": "next start"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
     "@tour-kit/license": "workspace:*",
     "@tour-kit/react": "workspace:*",
     "@tour-kit/scheduling": "workspace:*",
+    "@tour-kit/surveys": "workspace:*",
     "@ai-sdk/openai": "^2.0.0",
     "@ai-sdk/react": "^2.0.0",
     "ai": "^5.0.0",

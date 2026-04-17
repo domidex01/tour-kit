@@ -1,3 +1,5 @@
+'use client'
+
 import type { RouterAdapter } from '@tour-kit/core'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 

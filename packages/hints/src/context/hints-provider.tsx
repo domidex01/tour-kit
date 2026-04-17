@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import type { HintState, HintsContextValue } from '../types'
 import { HintsContext } from './hints-context'

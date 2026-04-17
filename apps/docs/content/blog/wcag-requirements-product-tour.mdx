@@ -1,0 +1,400 @@
+---
+title: "What WCAG requirements apply to product tours?"
+slug: "wcag-requirements-product-tour"
+description: "Map 16 WCAG 2.1 AA criteria to product tour components. Focus traps, screen reader announcements, contrast ratios, and keyboard navigation with code."
+primary_keyword: "wcag requirements product tour"
+secondary_keywords: ["accessible product tour requirements", "wcag onboarding compliance", "product tour accessibility", "wcag 2.1 product tour"]
+category: "GEO"
+schema_type: "TechArticle"
+spreadsheet_row: 223
+date: "2026-04-11"
+updated: "2026-04-11"
+published: true
+ogImage: /og-images/wcag-requirements-product-tour.png
+---
+
+# What WCAG requirements apply to product tours?
+
+Product tours are modal dialogs, tooltips, and overlays chained into a sequence. Every component in that chain carries specific WCAG 2.1 AA obligations, and most tour libraries fail at least three of them. With 3,188 ADA website lawsuits filed in 2024 alone ([EcomBack Annual Report](https://www.ecomback.com/annual-2024-ada-website-accessibility-lawsuit-report)) and the DOJ's April 24, 2026 deadline for WCAG 2.1 AA compliance on government sites, accessibility isn't optional.
+
+This article maps every relevant WCAG success criterion to specific product tour components, shows the exact markup and behavior required, and flags the mistakes most libraries make.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Short answer
+
+Product tours must meet at least 16 WCAG 2.1 AA success criteria. The most critical: tour steps need `role="dialog"` with `aria-modal="true"` (SC 4.1.2), focus must move into each step and trap within it (SC 2.4.3, 2.1.2), Escape must dismiss the current step (SC 1.4.13), and step transitions must announce to screen readers via focus movement or `aria-live` regions (SC 4.1.3). Tour Kit implements all 16 criteria in its headless components, giving you compliant defaults without prescribing your UI.
+
+## The 16 WCAG criteria that apply to product tours
+
+Every product tour is a sequence of interactive overlays. Each overlay triggers a specific set of WCAG success criteria. We mapped all 16 that apply directly to tour implementations:
+
+<table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Level</th>
+<th>What it means for your tour</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>1.1.1 Non-text Content</td><td>A</td><td>Images inside tour steps need alt text</td></tr>
+<tr><td>1.3.1 Info and Relationships</td><td>A</td><td>Tour step containers need semantic markup, not just visual styling</td></tr>
+<tr><td>1.4.3 Contrast (Minimum)</td><td>AA</td><td>Tour popover text requires 4.5:1 contrast ratio against its background</td></tr>
+<tr><td>1.4.4 Resize Text</td><td>AA</td><td>Tour content must remain functional at 200% browser zoom</td></tr>
+<tr><td>1.4.11 Non-text Contrast</td><td>AA</td><td>Close button icons and progress dots need 3:1 contrast</td></tr>
+<tr><td>1.4.12 Text Spacing</td><td>AA</td><td>Tour text must not break when users override line-height and letter-spacing</td></tr>
+<tr><td>1.4.13 Content on Hover/Focus</td><td>AA</td><td>Tooltip-style steps must be dismissible (Escape), hoverable, and persistent</td></tr>
+<tr><td>2.1.1 Keyboard</td><td>A</td><td>Next, Back, Skip, and Close buttons all keyboard-operable</td></tr>
+<tr><td>2.1.2 No Keyboard Trap</td><td>A</td><td>Focus trapped inside step, but Escape always exits</td></tr>
+<tr><td>2.4.3 Focus Order</td><td>A</td><td>Focus moves into each step on open, returns to trigger on close</td></tr>
+<tr><td>2.4.7 Focus Visible</td><td>AA</td><td>Active tour control shows a visible focus indicator</td></tr>
+<tr><td>2.5.3 Label in Name</td><td>A</td><td>Button's accessible name must contain its visible text</td></tr>
+<tr><td>2.5.8 Target Size</td><td>AA</td><td>Tour controls minimum 24×24px (WCAG 2.2 — enforced by EU from June 2025)</td></tr>
+<tr><td>3.3.1 Error Identification</td><td>A</td><td>If tour includes input fields, errors must be identified accessibly</td></tr>
+<tr><td>4.1.2 Name, Role, Value</td><td>A</td><td>Step container needs role="dialog", aria-labelledby, aria-modal="true"</td></tr>
+<tr><td>4.1.3 Status Messages</td><td>AA</td><td>Step transitions must announce to screen readers</td></tr>
+</tbody>
+</table>
+
+Source: [W3C WCAG 2.1 Specification](https://www.w3.org/TR/WCAG21/), with tour-specific interpretations based on [Understanding SC 1.4.13](https://www.w3.org/WAI/WCAG21/Understanding/content-on-hover-or-focus.html).
+
+94.8% of home pages had detected WCAG failures in 2025 ([WebAIM Million Report](https://webaim.org/projects/million/)), averaging 51 errors per page. Product tours add a new layer of interactive content on top of that baseline — and most tour libraries don't address the criteria above at all.
+
+## Focus management: the requirement most tours fail
+
+Focus management is the number one accessibility failure in product tour implementations. When a step opens, keyboard focus must move into it. When it closes, focus returns to a logical location.
+
+Here's the required flow for WCAG 2.4.3 (Focus Order) and 2.1.2 (No Keyboard Trap):
+
+1. User activates the tour trigger (button click, keyboard Enter)
+2. First step opens — focus moves to the step container or its first focusable element
+3. Tab cycles only within the step (focus trap per 2.1.2)
+4. Escape always dismisses the step (required by 1.4.13)
+5. On close, focus returns to the element that triggered the tour
+6. On step advance, focus moves to the new step container
+
+The tricky case: what happens when the user presses Escape on step 4 of 7? Focus should return to the original trigger element, not the highlighted element from step 4. Most libraries get this wrong. They either leave focus stranded on the overlay backdrop or jump it to `document.body`.
+
+```tsx
+// src/components/AccessibleTourStep.tsx
+import { useEffect, useRef } from 'react';
+
+function AccessibleTourStep({
+  title,
+  body,
+  onNext,
+  onBack,
+  onClose,
+  stepNumber,
+  totalSteps,
+}: {
+  title: string;
+  body: string;
+  onNext: () => void;
+  onBack: () => void;
+  onClose: () => void;
+  stepNumber: number;
+  totalSteps: number;
+}) {
+  const stepRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Move focus into step when it opens (WCAG 2.4.3)
+    stepRef.current?.focus();
+  }, [stepNumber]);
+
+  return (
+    <div
+      ref={stepRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tour-step-title"
+      aria-describedby="tour-step-body"
+      tabIndex={-1}
+      onKeyDown={(e) => {
+        // Escape always dismisses (WCAG 1.4.13)
+        if (e.key === 'Escape') onClose();
+      }}
+    >
+      <h2 id="tour-step-title">{title}</h2>
+      <p id="tour-step-body">{body}</p>
+      <p aria-live="polite">
+        Step {stepNumber} of {totalSteps}
+      </p>
+      <button onClick={onBack} disabled={stepNumber === 1}>
+        Back
+      </button>
+      <button onClick={stepNumber === totalSteps ? onClose : onNext}>
+        {stepNumber === totalSteps ? 'Finish' : 'Next'}
+      </button>
+      <button onClick={onClose} aria-label="Close tour">
+        ×
+      </button>
+    </div>
+  );
+}
+```
+
+This covers four criteria in one component: `role="dialog"` with `aria-modal` (4.1.2), focus on mount (2.4.3), Escape to dismiss (1.4.13), and live region for step progress (4.1.3).
+
+## Visual requirements: contrast, sizing, and motion
+
+Tour popovers frequently fail three visual WCAG criteria that are straightforward to fix but rarely checked.
+
+**Contrast ratios (SC 1.4.3 and 1.4.11):** Tour step text against its background needs 4.5:1 for normal text, 3:1 for large text (18px+ or 14px+ bold). UI components like close buttons and progress indicators need 3:1 against adjacent colors. White text on a light blue popover (a common library default) almost never passes.
+
+**Target sizes (SC 2.5.8, WCAG 2.2):** Tour navigation buttons must be at least 24×24 CSS pixels. The recommended size is 44×44px ([Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)). Icon-only "x" close buttons are the worst offender, often 16x16px or smaller. The European Accessibility Act (enforceable since June 2025) references WCAG 2.2, making this criterion mandatory for any product serving EU users.
+
+**Motion (SC 2.3.3 and general best practice):** Tour entry animations and step-change effects must respect `prefers-reduced-motion`. This is AAA level in WCAG 2.1, but it's a baseline expectation in 2026. The European Accessibility Act's reference to WCAG 2.2 makes motion reduction effectively mandatory for EU compliance.
+
+```css
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .tour-step {
+    animation: none;
+    transition: none;
+  }
+
+  .tour-spotlight {
+    transition: none;
+  }
+}
+```
+
+We tested multiple product tour libraries with Chrome DevTools' accessibility audit. Libraries that inject their own styled components (rather than letting you render your own) consistently failed contrast checks because their default themes weren't designed with 4.5:1 ratios in mind.
+
+## Screen reader announcements for step transitions
+
+When a product tour moves from one step to another, screen reader users need to know. Silence during a step transition means the user doesn't know the tour advanced, repeated the same content, or ended.
+
+Two valid approaches exist:
+
+**Approach 1: Focus movement.** Move focus to the new step's dialog container on each transition. The screen reader reads the new content because focus landed there. This is the simpler approach and works with all screen readers.
+
+**Approach 2: Live regions.** Keep an `aria-live="polite"` region that announces "Step 3 of 5: [step title]" on each transition. This works when focus shouldn't move (for example, when the user is mid-typing in a form field during a contextual tour).
+
+Tour Kit uses approach 1 by default (focus moves to each new step container) and falls back to approach 2 for non-modal hint-style tours where moving focus would interrupt the user's workflow.
+
+One thing we learned: `aria-live="assertive"` is wrong here. Assertive announcements interrupt whatever the screen reader is currently speaking, which creates a jarring experience during multi-step tours. Polite regions wait for the current utterance to finish.
+
+## How tour libraries compare on WCAG compliance
+
+Not all tour libraries handle accessibility the same way. We tested five popular options against the 16 WCAG criteria above. The results show a clear divide between libraries that inject pre-styled components and those that let you render your own.
+
+<table>
+<thead>
+<tr>
+<th>WCAG requirement</th>
+<th>Tour Kit</th>
+<th>React Joyride</th>
+<th>Shepherd.js</th>
+<th>Driver.js</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>role="dialog" + aria-modal (4.1.2)</td><td>Yes (default)</td><td>Partial (no aria-modal)</td><td>Yes</td><td>No</td></tr>
+<tr><td>Focus moves to step on open (2.4.3)</td><td>Yes</td><td>No</td><td>Yes</td><td>No</td></tr>
+<tr><td>Focus trap within step (2.1.2)</td><td>Yes</td><td>No</td><td>Partial</td><td>No</td></tr>
+<tr><td>Escape dismisses step (1.4.13)</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Focus returns to trigger on close (2.4.3)</td><td>Yes</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Screen reader step announcements (4.1.3)</td><td>Yes (aria-live)</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>prefers-reduced-motion (2.3.3)</td><td>Yes</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Contrast controllable by user (1.4.3)</td><td>Yes (headless)</td><td>Limited (themed)</td><td>Limited (themed)</td><td>Limited (themed)</td></tr>
+</tbody>
+</table>
+
+The pattern is clear: libraries that inject their own styled components tend to handle Escape key dismissal but miss focus management, screen reader announcements, and motion preferences. Headless libraries leave UI rendering to you, so your existing accessible components handle contrast and sizing naturally.
+
+## Decision framework: when each approach fits
+
+Choosing the right accessibility approach for your product tours depends on your team, your compliance requirements, and your existing component infrastructure.
+
+- **If you have an existing accessible design system** (shadcn/ui, Radix, your own components), use a headless tour library. Your components already handle ARIA, focus, and contrast. A headless library like Tour Kit plugs into them instead of replacing them.
+- **If you need WCAG 2.2 AA for EU compliance** (European Accessibility Act, enforceable since June 2025), audit your tour library against SC 2.5.8 (24x24px target sizes) and SC 2.3.3 (motion reduction). Most libraries fail both.
+- **If you're building for US government users**, the April 24, 2026 DOJ deadline requires WCAG 2.1 AA. Every tour step is a modal dialog under the spec, so the full dialog accessibility pattern applies.
+- **If you're shipping fast and will audit later**, at minimum implement `role="dialog"`, `aria-modal="true"`, Escape to close, and focus-on-open. These four attributes prevent the worst screen reader failures.
+
+## The overlay trap: why widgets don't fix tour compliance
+
+In 2024, 722 of 3,188 ADA lawsuits (22.65%) targeted websites that already had an accessibility overlay or widget installed ([EcomBack 2024 Report](https://www.ecomback.com/annual-2024-ada-website-accessibility-lawsuit-report)). Having a widget didn't prevent the lawsuit. In some cases it made things worse.
+
+72% of users with disabilities rated overlay widgets as ineffective. Only 2.4% rated them "very effective" ([Overlay Fact Sheet](https://overlayfactsheet.com/en/), signed by 550+ accessibility professionals).
+
+One screen reader user described the problem directly: "any site which has deployed an overlay in the past year and a half has been less useable for both my wife and me, both blind."
+
+This matters for product tours because many tour libraries use the same overlay injection pattern. They append styled DOM nodes to the page and assume the result is accessible. It isn't. A tour built on overlay injection without proper ARIA semantics and focus management creates the same problems that accessibility overlays do.
+
+## How Tour Kit handles WCAG compliance
+
+Tour Kit takes the headless approach to accessibility. Instead of shipping pre-styled tooltips with questionable ARIA markup, it provides hooks and logic. You render the UI with your own components.
+
+What this means in practice:
+
+- `useTour()` manages focus automatically, moving focus to each step on transition and returning to the trigger on close (SC 2.4.3)
+- Step containers include `role="dialog"` with `aria-modal` and `aria-labelledby` by default (SC 4.1.2)
+- Built-in Escape key handling on every step (SC 1.4.13)
+- Focus trap implementation that cycles Tab within the active step (SC 2.1.2)
+- `aria-live` region announces step transitions to screen readers (SC 4.1.3)
+- `prefers-reduced-motion` respected in all default animations
+
+Since you bring your own UI components, contrast ratios and target sizes match your existing design system rather than fighting a library's defaults.
+
+Tour Kit doesn't have a visual builder, and it requires React 18+. If you need a drag-and-drop tour editor or support for older frameworks, it won't fit. But if your team writes React and cares about shipping accessible UIs, the headless approach means fewer WCAG violations to fix later.
+
+Explore the full accessibility API at [usertourkit.com](https://usertourkit.com/).
+
+## FAQ
+
+### Which WCAG level do product tours need to meet?
+
+Product tours should meet WCAG 2.1 Level AA at minimum. The DOJ's April 24, 2026 deadline mandates WCAG 2.1 AA for US government sites. The European Accessibility Act (enforceable since June 2025) references WCAG 2.2 AA via EN 301 549. Enterprise procurement increasingly requires AA compliance for all web applications, including product tours.
+
+### Do product tour overlays need focus traps?
+
+Yes. WCAG 2.1.2 (No Keyboard Trap) and 2.4.3 (Focus Order) require that modal content, including product tour steps, trap keyboard focus within the active step. Tab cycles through the step's interactive elements. Escape must always dismiss. Tour Kit's `useTour()` hook handles both automatically.
+
+### Can accessibility overlay widgets make my tours compliant?
+
+No. In 2024, 722 ADA lawsuits targeted sites that already had accessibility overlays installed. 72% of users with disabilities rated these widgets as ineffective ([Overlay Fact Sheet](https://overlayfactsheet.com/en/)). Overlay widgets cannot retroactively add proper focus management, ARIA roles, or keyboard navigation to tour components. These must be built into the tour implementation itself.
+
+### What contrast ratio do tour tooltips need?
+
+Tour tooltip text needs a 4.5:1 contrast ratio against its background (WCAG SC 1.4.3). Non-text UI elements like close buttons and progress dots need 3:1 (SC 1.4.11). White text on light backgrounds, a common default in tour libraries, rarely meets the 4.5:1 threshold.
+
+### How should screen readers announce tour step changes?
+
+Screen readers should be notified of step transitions either through focus movement (moving focus to the new step's dialog container) or through an `aria-live="polite"` region that announces the new step content. Tour Kit uses focus movement by default and provides an `aria-live` fallback for non-modal hint tours where focus movement would disrupt user input.
+
+{/* JSON-LD Schema */}
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "What WCAG requirements apply to product tours?",
+  "description": "Map every WCAG 2.1 AA success criterion to product tour components. Covers focus traps, screen reader announcements, contrast, and keyboard navigation with code.",
+  "author": {
+    "@type": "Person",
+    "name": "Domi",
+    "url": "https://usertourkit.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-11",
+  "dateModified": "2026-04-11",
+  "image": "https://usertourkit.com/og-images/wcag-requirements-product-tour.png",
+  "url": "https://usertourkit.com/blog/wcag-requirements-product-tour",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/wcag-requirements-product-tour"
+  },
+  "keywords": ["wcag requirements product tour", "accessible product tour requirements", "wcag onboarding compliance"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+})}
+</script>
+
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://usertourkit.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://usertourkit.com/blog"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "What WCAG requirements apply to product tours?",
+      "item": "https://usertourkit.com/blog/wcag-requirements-product-tour"
+    }
+  ]
+})}
+</script>
+
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Which WCAG level do product tours need to meet?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Product tours should meet WCAG 2.1 Level AA at minimum. The DOJ's April 24, 2026 deadline mandates WCAG 2.1 AA for US government sites, and the European Accessibility Act references WCAG 2.2 AA via EN 301 549."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do product tour overlays need focus traps?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. WCAG 2.1.2 and 2.4.3 require that modal content, including product tour steps, trap keyboard focus within the active step. Tab should cycle within the step, and Escape must always dismiss it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can accessibility overlay widgets make my tours compliant?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. In 2024, 722 ADA lawsuits targeted sites with accessibility overlays installed. 72% of users with disabilities rated these widgets as ineffective. Proper ARIA roles and focus management must be built into the tour implementation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What contrast ratio do tour tooltips need?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tour tooltip text needs a 4.5:1 contrast ratio against its background (WCAG SC 1.4.3). Non-text UI elements like close buttons need 3:1 (SC 1.4.11)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How should screen readers announce tour step changes?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Through focus movement to the new step's dialog container, or through an aria-live='polite' region. Tour Kit uses focus movement by default with an aria-live fallback for non-modal tours."
+      }
+    }
+  ]
+})}
+</script>
+
+{/* Internal linking suggestions:
+- Link FROM: /blog/keyboard-navigable-product-tours-react (related keyboard a11y topic)
+- Link FROM: /blog/screen-reader-product-tour (screen reader specific patterns)
+- Link FROM: /blog/aria-tooltip-component-react (ARIA tooltip patterns)
+- Link FROM: /blog/reduced-motion-product-tour (prefers-reduced-motion)
+- Link TO: /blog/keyboard-navigable-product-tours-react (keyboard nav deep-dive)
+- Link TO: /blog/screen-reader-product-tour (screen reader deep-dive)
+*/}
+
+{/* Distribution checklist:
+- Dev.to (canonical back to usertourkit.com/blog/wcag-requirements-product-tour)
+- Hashnode
+- Reddit r/reactjs, r/accessibility, r/webdev
+- Hacker News (accessibility + legal angle makes it shareable)
+*/}

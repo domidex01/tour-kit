@@ -1,3 +1,5 @@
+'use client'
+
 import { FloatingArrow } from '@floating-ui/react'
 import type { FloatingContext } from '@floating-ui/react'
 import * as React from 'react'

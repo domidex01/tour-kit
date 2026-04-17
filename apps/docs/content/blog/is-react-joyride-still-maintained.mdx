@@ -1,0 +1,228 @@
+---
+title: "Is React Joyride still maintained in 2026?"
+slug: "is-react-joyride-still-maintained"
+description: "React Joyride v3 shipped March 2026 with React 19 support and a full rewrite. Check the release timeline, known issues, and what to consider before choosing it."
+primary_keyword: "is react joyride still maintained"
+secondary_keywords: ["react joyride last update", "react joyride react 19 support", "react joyride v3", "react joyride alternative 2026"]
+category: "GEO"
+schema_type: "TechArticle"
+spreadsheet_row: 203
+date: "2026-04-10"
+updated: "2026-04-10"
+published: true
+ogImage: /og-images/is-react-joyride-still-maintained.png
+---
+
+# Is React Joyride still maintained in 2026?
+
+If you searched this question, you probably found conflicting answers. Multiple blog posts published in late 2025 and early 2026 declared React Joyride "discontinued" or "unmaintained." Those posts were written during a release gap between November 2024 and March 2026. They're now outdated.
+
+Here's what actually happened.
+
+## Short answer: yes, React Joyride is actively maintained
+
+React Joyride is maintained and received a ground-up V3 rewrite on March 23, 2026. As of April 2026, it has 673K weekly npm downloads, 7,687 GitHub stars, and only 3 open issues. Version 3.0.2 was published on April 1, 2026. The library supports React 16.8 through React 19, replaced Popper.js with Floating UI, and ships with a new hook-based API. It remains MIT-licensed and free.
+
+## What happened during the "gap"
+
+React Joyride went silent between November 2024 and March 2026, with no npm releases for roughly four months. During that window, React 19 shipped and broke V2, automated health checkers flagged the project, and competitor blogs declared it dead. The maintainer was quietly building V3 from scratch, but without any public communication about the rewrite.
+
+Here's the timeline of what happened in parallel:
+
+React 19 shipped. React Joyride V2 broke because it relied on `unmountComponentAtNode` and `unstable_renderSubtreeIntoContainer`, both removed in React 19. [GitHub issue #1122](https://github.com/gilbarbara/react-joyride/issues/1122) tracked this.
+
+Package health analyzers like Snyk flagged the library. Their automated assessment noted "no new versions released to npm in the past 12 months" and suggested it "could be considered as discontinued."
+
+Competitor articles piled on. OnboardJS wrote that "React Joyride hasn't been updated for nine months and isn't compatible with React 19." UserGuiding published a "6 React Joyride Alternatives" post. Multiple listicles moved React Joyride down their rankings or dropped it entirely.
+
+Then V3 dropped. Three releases in nine days (3.0.0 on March 23, 3.0.1 on March 31, 3.0.2 on April 1). The maintainer, gilbarbara, had been quietly building a complete rewrite.
+
+## What V3 actually changed
+
+React Joyride V3 is a complete rewrite, not an incremental update. The maintainer replaced the positioning engine, rewrote the rendering pipeline, and introduced a modern hook-based API. Every major system in the library was rebuilt. If you're evaluating React Joyride today, V3 is the version that matters.
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>V2</th>
+      <th>V3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>React 19 support</td>
+      <td>Broken</td>
+      <td>Full support (React 16.8-19)</td>
+    </tr>
+    <tr>
+      <td>Positioning engine</td>
+      <td>Popper.js / react-floater</td>
+      <td>@floating-ui/react-dom</td>
+    </tr>
+    <tr>
+      <td>Spotlight rendering</td>
+      <td>CSS box-shadow</td>
+      <td>SVG overlay (more precise)</td>
+    </tr>
+    <tr>
+      <td>API style</td>
+      <td>getHelpers callback</td>
+      <td>useJoyride() hook</td>
+    </tr>
+    <tr>
+      <td>Event system</td>
+      <td>Single callback with action/type strings</td>
+      <td>Discriminated event types (tour:start, step:before, tooltip)</td>
+    </tr>
+    <tr>
+      <td>Async steps</td>
+      <td>Not supported</td>
+      <td>before/after hooks with loader support</td>
+    </tr>
+    <tr>
+      <td>Bundle size</td>
+      <td>~498KB unpacked</td>
+      <td>~30% smaller</td>
+    </tr>
+    <tr>
+      <td>Import style</td>
+      <td>Default export</td>
+      <td>Named export: import &#123; Joyride &#125;</td>
+    </tr>
+    <tr>
+      <td>Default run behavior</td>
+      <td>run defaults to true</td>
+      <td>run defaults to false</td>
+    </tr>
+  </tbody>
+</table>
+
+The Floating UI migration alone is significant. Popper.js stopped active development, so React Joyride was carrying a dependency with its own maintenance question mark. Floating UI is actively maintained by the same original author and used by Radix UI, Headless UI, and most modern positioning systems.
+
+## Known issues that persist
+
+Active maintenance doesn't mean every problem is solved. We tested React Joyride V3 and reviewed its GitHub issues and community discussions. Several pain points from V2 carried forward into the new version, and a few are architectural decisions that won't change without a fundamentally different approach.
+
+**Inline styles only.** React Joyride renders its tooltips with inline styles. If your team uses Tailwind CSS or a design token system, you'll end up overriding the default components to match your design system. One developer called this being "forced to override the default components" just to get consistent styling. At that point, you're fighting the library more than using it.
+
+**Touch device quirks.** Double-tap required. Users on mobile report needing two taps to interact with tutorial elements, which breaks the expected flow.
+
+**Multi-instance conflicts.** Running multiple Joyride instances on a single page causes unexpected behavior. Need a main tour and a feature tooltip running simultaneously? You'll hit this wall.
+
+**Solo maintainer.** gilbarbara maintains React Joyride alone. No co-maintainers, no corporate sponsor, no visible sustainability model. The V3 rewrite proves commitment, but the bus factor remains 1.
+
+The four-month gap happened because one person was heads-down on a rewrite with no communication channel to signal "still alive, just building." That's a risk pattern worth factoring into your decision.
+
+> If you want to see how a headless approach compares, check the [User Tour Kit docs](https://usertourkit.com/) or try `npm install @tourkit/core @tourkit/react` in a scratch project.
+
+## How React Joyride compares to alternatives
+
+The product tour library market looks different than it did when React Joyride first launched in 2016. Several new entrants have arrived, licensing models have changed, and the "headless UI" pattern has created a new category. Here's where the main options stand as of April 2026.
+
+<table>
+  <thead>
+    <tr>
+      <th>Library</th>
+      <th>Weekly downloads</th>
+      <th>React 19</th>
+      <th>License</th>
+      <th>Approach</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>React Joyride</td>
+      <td>673K</td>
+      <td>Yes (V3)</td>
+      <td>MIT</td>
+      <td>Opinionated UI with component overrides</td>
+    </tr>
+    <tr>
+      <td>Shepherd.js</td>
+      <td>~130K</td>
+      <td>Vanilla JS works, React wrapper has issues</td>
+      <td>Commercial license required</td>
+      <td>Framework-agnostic with wrappers</td>
+    </tr>
+    <tr>
+      <td>Driver.js</td>
+      <td>Lower</td>
+      <td>Framework-agnostic</td>
+      <td>MIT</td>
+      <td>Vanilla JS, smallest bundle</td>
+    </tr>
+    <tr>
+      <td>User Tour Kit</td>
+      <td>New</td>
+      <td>Yes</td>
+      <td>MIT (core) / Pro</td>
+      <td>Headless, composable packages</td>
+    </tr>
+  </tbody>
+</table>
+
+**Bias disclosure:** We built User Tour Kit, so take this table with appropriate skepticism. Every data point is verifiable on npm and GitHub.
+
+React Joyride's 673K weekly downloads dwarf every other React-specific tour library. That install base means more Stack Overflow answers, more blog posts, and more people who've solved the edge case you're about to hit.
+
+## When to choose React Joyride (and when not to)
+
+Picking a tour library depends on your team's constraints, design system maturity, and how much UI control you need. React Joyride is the right choice for some projects and the wrong one for others. Here's a decision framework based on real tradeoffs, not marketing claims.
+
+**Choose React Joyride if:**
+- You need something working fast and don't mind the default UI
+- Your team doesn't use Tailwind or a strict design system
+- You're on React 16.8+ through 19 and want broad version support
+- Community size and existing solutions matter to your team
+
+**Consider alternatives if:**
+- You need full control over tooltip styling without fighting inline styles
+- Your product runs on mobile devices where touch issues are a dealbreaker
+- You need concurrent tour instances on the same page
+- Solo-maintainer risk is a concern for your procurement process
+- You want a headless approach where the library provides logic and you provide all the UI
+
+User Tour Kit takes the headless approach. You get tour state management, step sequencing, positioning, and accessibility, but you write the actual tooltip components. Zero style conflicts with your design system.
+
+The tradeoff: more JSX upfront. For teams already using shadcn/ui or Radix, that's usually a net win because the tour components match everything else in the app. If you want something working in 10 minutes with minimal code, React Joyride's built-in UI is the faster path.
+
+**User Tour Kit limitation worth noting:** it's a younger project with a smaller community. React Joyride has a decade of production usage and battle-testing that Tour Kit hasn't accumulated yet. It also requires React 18+ (no support for React 16 or 17).
+
+## FAQ
+
+### Does React Joyride work with React 19?
+
+React Joyride V3 (released March 23, 2026) officially supports React 19. Version 2.x was incompatible because it depended on APIs removed in React 19, specifically `unmountComponentAtNode` and `unstable_renderSubtreeIntoContainer`. If you're on React 19, make sure you're using react-joyride 3.0.0 or later.
+
+### When was the last React Joyride update?
+
+As of April 10, 2026, the most recent release is react-joyride v3.0.2, published April 1, 2026. The V3 line launched March 23, 2026 as a complete rewrite. The library's GitHub repository shows the last push on April 3, 2026.
+
+### Is React Joyride free?
+
+Yes. React Joyride is MIT-licensed and completely free. There are no paid tiers, no usage limits, and no pricing changes planned. The maintainer gilbarbara has not introduced any commercial model for the library.
+
+### What is the bundle size of React Joyride?
+
+React Joyride V3 is approximately 30% smaller than V2 (which was 498KB unpacked). One developer measured a 37KB client bundle increase when adding it to a Next.js app. Driver.js is smaller at 82.5KB unpacked, but it's vanilla JS rather than React-specific.
+
+### Should I migrate from React Joyride V2 to V3?
+
+If you're on React 19 or planning to upgrade, yes. V2 is broken on React 19. The [migration guide](https://react-joyride.com/docs/migration) covers breaking changes: imports switch from default to named export, `run` defaults to `false`, and callbacks become discriminated event types. Budget a few hours for a typical 10-step tour migration.
+
+---
+
+*Sources: [npm registry](https://www.npmjs.com/package/react-joyride) (accessed April 10, 2026), [GitHub gilbarbara/react-joyride](https://github.com/gilbarbara/react-joyride) (accessed April 10, 2026), [React Joyride V3 docs](https://react-joyride.com/docs/new-in-v3), [Smashing Magazine](https://www.smashingmagazine.com/2020/08/guide-product-tours-react-apps/), [Sandro Roth's evaluation](https://sandroroth.com/blog/evaluating-tour-libraries/).*
+
+---
+
+**Get started with a headless alternative:**
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+Explore the docs at [usertourkit.com](https://usertourkit.com/) or check the [GitHub repo](https://github.com/user-tour-kit/tour-kit).
+
+{/* Internal links: /blog/tour-kit-vs-react-joyride, /blog/migrate-react-joyride-tour-kit, /blog/best-free-product-tour-libraries-open-source */}

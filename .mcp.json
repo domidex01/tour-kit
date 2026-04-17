@@ -5,6 +5,12 @@
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],
       "env": {}
+    },
+    "mempalace": {
+      "type": "stdio",
+      "command": "/home/domidex/.local/share/uv/tools/mempalace/bin/python3",
+      "args": ["-m", "mempalace.mcp_server"],
+      "env": {}
     }
   }
 }

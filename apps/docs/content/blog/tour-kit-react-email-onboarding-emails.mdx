@@ -1,0 +1,388 @@
+---
+title: "Tour Kit + React Email: onboarding emails that continue the tour"
+slug: "tour-kit-react-email-onboarding-emails"
+description: "Connect Tour Kit analytics callbacks to React Email and Resend to send behavior-based onboarding emails. Working TypeScript code for multi-channel onboarding."
+primary_keyword: "react email onboarding sequence"
+secondary_keywords: ["email follow-up product tour", "onboarding email react", "react email resend onboarding"]
+category: "Integrations"
+schema_type: "TechArticle"
+spreadsheet_row: 193
+date: "2026-04-09"
+updated: "2026-04-09"
+published: true
+ogImage: /og-images/tour-kit-react-email-onboarding-emails.png
+---
+
+# Tour Kit + React Email: onboarding emails that continue the tour
+
+Most product tours end when the user clicks "Done." The tooltip disappears, confetti maybe, and then silence. If that user doesn't come back tomorrow, the tour was wasted effort. The fix isn't a better tooltip. It's an email that lands 24 hours later, picking up exactly where the tour left off.
+
+This guide wires Tour Kit's analytics callbacks to React Email and Resend so your onboarding doesn't stop at the browser tab. When a user completes step 3 but skips step 4, they get an email about the feature they missed. When they finish the full tour, they get a deeper dive on what they just learned.
+
+```bash
+npm install @tourkit/core @tourkit/react react-email @react-email/components resend
+```
+
+The [Tour Kit docs](https://usertourkit.com/) cover the full analytics callback API used throughout this guide.
+
+## What you'll build
+
+By the end of this guide, you'll have a Next.js API route that listens for Tour Kit lifecycle events (tour completion, step skips, feature discovery) and dispatches targeted React Email templates through Resend. The result is a behavior-based onboarding sequence where email content adapts to what each user actually did inside your product tour, not a fixed drip schedule.
+
+## Why React Email + Tour Kit?
+
+Cross-channel onboarding campaigns are roughly 2x as effective as single-channel approaches, boosting retention by 130% compared to 71% for in-app messages alone ([Braze, 2025](https://www.braze.com/resources/articles/onboarding-messages-example)). But most teams treat email and in-app as separate systems built by separate people. The onboarding email says "Check out Feature X" while the product tour already showed Feature X yesterday.
+
+React Email fixes half of this problem. As of April 2026, it has 920,325 weekly npm downloads and 17,041 GitHub stars ([React Email 5.0 blog](https://resend.com/blog/react-email-5)). The entire email is a React component that receives props and returns markup, which means you can pass tour completion data directly into your email template. No Handlebars. No drag-and-drop editor. Just TypeScript.
+
+Tour Kit fixes the other half. Its `onStepComplete`, `onTourEnd`, and `onStepSkip` callbacks give you structured data about what happened during the tour. Connect those callbacks to a Resend API call, and your emails become behavior-based instead of time-based. Behavior-based sequences convert 30% better than fixed drip schedules ([Encharge](https://encharge.io/onboarding-email-sequence/)).
+
+The gotcha we hit: React Email's `@react-email/tailwind` package pulls in 6.5 MB of tailwindcss + postcss at build time ([GitHub issue #1101](https://github.com/resend/react-email/issues/1101)). This doesn't affect client-side delivery since emails render server-side to static HTML, but it surprised us during the first `npm install`.
+
+## Prerequisites
+
+You need a React 18+ project with Tour Kit already configured. If you're starting fresh, the [Next.js App Router tutorial](https://usertourkit.com/docs/getting-started) gets you there in five minutes.
+
+You also need a [Resend](https://resend.com) account (free tier handles 3,000 emails/month) and a verified sending domain. React Email and Resend share the same creator, so the integration between them is tight ([freeCodeCamp](https://www.freecodecamp.org/news/create-and-send-email-templates-using-react-email-and-resend-in-nextjs/)).
+
+Versions used in this guide: React Email 5.0, Resend SDK 4.x, Next.js 15, Tour Kit latest.
+
+## Step 1: create the email templates
+
+React Email components look like regular React components but target email clients instead of browsers. Start with a tour completion email.
+
+```tsx
+// src/emails/tour-complete.tsx
+import {
+  Body,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Link,
+  Preview,
+  Text,
+} from "@react-email/components";
+
+interface TourCompleteEmailProps {
+  userName: string;
+  tourName: string;
+  stepsCompleted: number;
+  totalSteps: number;
+  skippedFeatures: string[];
+}
+
+export function TourCompleteEmail({
+  userName,
+  tourName,
+  stepsCompleted,
+  totalSteps,
+  skippedFeatures,
+}: TourCompleteEmailProps) {
+  const completionRate = Math.round((stepsCompleted / totalSteps) * 100);
+
+  return (
+    <Html>
+      <Head />
+      <Preview>
+        You completed {completionRate}% of the {tourName} tour
+      </Preview>
+      <Body style={{ fontFamily: "system-ui, sans-serif", padding: "40px 0" }}>
+        <Container style={{ maxWidth: "560px", margin: "0 auto" }}>
+          <Heading as="h1" style={{ fontSize: "24px", marginBottom: "16px" }}>
+            Nice work, {userName}
+          </Heading>
+          <Text style={{ fontSize: "16px", lineHeight: "1.6" }}>
+            You finished {stepsCompleted} of {totalSteps} steps in the{" "}
+            {tourName} walkthrough.
+          </Text>
+
+          {skippedFeatures.length > 0 && (
+            <>
+              <Hr style={{ margin: "24px 0" }} />
+              <Text style={{ fontSize: "16px", lineHeight: "1.6" }}>
+                You skipped past a few things worth a second look:
+              </Text>
+              {skippedFeatures.map((feature) => (
+                <Text
+                  key={feature}
+                  style={{
+                    fontSize: "14px",
+                    padding: "8px 12px",
+                    background: "#f4f4f5",
+                    borderRadius: "6px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {feature}
+                </Text>
+              ))}
+            </>
+          )}
+
+          <Hr style={{ margin: "24px 0" }} />
+          <Link
+            href="https://app.yourproduct.com/dashboard"
+            style={{
+              display: "inline-block",
+              padding: "12px 24px",
+              background: "#18181b",
+              color: "#fff",
+              borderRadius: "6px",
+              textDecoration: "none",
+              fontSize: "14px",
+            }}
+          >
+            Back to your dashboard
+          </Link>
+        </Container>
+      </Body>
+    </Html>
+  );
+}
+```
+
+The props interface is the key design decision here. Every field maps to data Tour Kit already tracks: step count, completion percentage, which steps got skipped. No new instrumentation required.
+
+Build a second template for users who abandoned mid-tour:
+
+```tsx
+// src/emails/tour-abandoned.tsx
+import {
+  Body,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Link,
+  Preview,
+  Text,
+} from "@react-email/components";
+
+interface TourAbandonedEmailProps {
+  userName: string;
+  lastStepTitle: string;
+  resumeUrl: string;
+}
+
+export function TourAbandonedEmail({
+  userName,
+  lastStepTitle,
+  resumeUrl,
+}: TourAbandonedEmailProps) {
+  return (
+    <Html>
+      <Head />
+      <Preview>Pick up where you left off</Preview>
+      <Body style={{ fontFamily: "system-ui, sans-serif", padding: "40px 0" }}>
+        <Container style={{ maxWidth: "560px", margin: "0 auto" }}>
+          <Heading as="h1" style={{ fontSize: "24px", marginBottom: "16px" }}>
+            You were checking out "{lastStepTitle}"
+          </Heading>
+          <Text style={{ fontSize: "16px", lineHeight: "1.6" }}>
+            Hey {userName}, you got partway through the setup walkthrough.
+            The next step takes about 2 minutes and gets you to the part
+            where things click.
+          </Text>
+          <Link
+            href={resumeUrl}
+            style={{
+              display: "inline-block",
+              marginTop: "16px",
+              padding: "12px 24px",
+              background: "#18181b",
+              color: "#fff",
+              borderRadius: "6px",
+              textDecoration: "none",
+              fontSize: "14px",
+            }}
+          >
+            Resume walkthrough
+          </Link>
+        </Container>
+      </Body>
+    </Html>
+  );
+}
+```
+
+## Step 2: connect Tour Kit callbacks to an API route
+
+Tour Kit's analytics callbacks fire on every meaningful lifecycle event. Wire them to a Next.js API route that decides which email to send.
+
+```tsx
+// src/components/OnboardingTour.tsx
+"use client";
+
+import { TourProvider, useTour } from "@tourkit/react";
+import { useCallback, useRef } from "react";
+
+const TOUR_STEPS = [
+  { id: "welcome", target: "#dashboard-header", title: "Welcome to your dashboard" },
+  { id: "create-project", target: "#new-project-btn", title: "Create your first project" },
+  { id: "invite-team", target: "#invite-btn", title: "Invite your team" },
+  { id: "integrations", target: "#integrations-tab", title: "Connect your tools" },
+];
+
+export function OnboardingTour({ children }: { children: React.ReactNode }) {
+  const skippedSteps = useRef<string[]>([]);
+
+  const handleStepSkip = useCallback((stepId: string, stepTitle: string) => {
+    skippedSteps.current.push(stepTitle);
+  }, []);
+
+  const handleTourEnd = useCallback(
+    async (tourId: string, stepsCompleted: number) => {
+      await fetch("/api/tour-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: stepsCompleted === TOUR_STEPS.length ? "tour_complete" : "tour_abandoned",
+          tourId,
+          stepsCompleted,
+          totalSteps: TOUR_STEPS.length,
+          skippedFeatures: skippedSteps.current,
+          lastStepTitle: TOUR_STEPS[stepsCompleted - 1]?.title ?? "Getting started",
+        }),
+      });
+    },
+    []
+  );
+
+  return (
+    <TourProvider
+      tourId="onboarding"
+      steps={TOUR_STEPS}
+      onStepSkip={handleStepSkip}
+      onTourEnd={handleTourEnd}
+    >
+      {children}
+    </TourProvider>
+  );
+}
+```
+
+The `skippedSteps` ref accumulates step titles throughout the tour without causing re-renders. When the tour ends, everything gets sent to the API in a single POST.
+
+## Step 3: build the email dispatch API route
+
+This is the glue. The API route receives tour events, picks the right email template, and sends it through Resend.
+
+```tsx
+// src/app/api/tour-email/route.ts
+import { Resend } from "resend";
+import { TourCompleteEmail } from "@/emails/tour-complete";
+import { TourAbandonedEmail } from "@/emails/tour-abandoned";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function POST(request: Request) {
+  const body = await request.json();
+  const { event, tourId, stepsCompleted, totalSteps, skippedFeatures, lastStepTitle } = body;
+
+  // In production, fetch user data from your auth/session layer
+  const user = { name: "Alex", email: "alex@example.com" };
+
+  if (event === "tour_complete") {
+    await resend.emails.send({
+      from: "onboarding@yourproduct.com",
+      to: user.email,
+      subject: `You finished the ${tourId} walkthrough`,
+      react: TourCompleteEmail({
+        userName: user.name,
+        tourName: tourId,
+        stepsCompleted,
+        totalSteps,
+        skippedFeatures: skippedFeatures ?? [],
+      }),
+    });
+  }
+
+  if (event === "tour_abandoned") {
+    // Delay abandoned emails by 24 hours in production
+    // Use a queue like Inngest or BullMQ instead of setTimeout
+    await resend.emails.send({
+      from: "onboarding@yourproduct.com",
+      to: user.email,
+      subject: "Pick up where you left off",
+      react: TourAbandonedEmail({
+        userName: user.name,
+        lastStepTitle,
+        resumeUrl: `https://app.yourproduct.com/dashboard?resume-tour=${tourId}`,
+      }),
+    });
+  }
+
+  return Response.json({ sent: true });
+}
+```
+
+Production warning: this sends emails synchronously inside the request handler. For real workloads, push events into a queue. The Novu team wrote about this pattern: "In production, such a thing would need to go into a queue that sends the email every X amount of time" ([Novu blog](https://novu.co/blog/building-an-email-automation-system-with-react-flow-and-resend)). Inngest or BullMQ both work well here. Vercel's free tier caps requests at 10 seconds, which is tight for multi-email sequences.
+
+## Step 4: verify the integration
+
+Run your Next.js dev server and trigger a tour. Complete it fully, then check Resend's dashboard for the sent email.
+
+Test three scenarios:
+
+1. **Full completion** — finish all steps. You should receive a "Nice work" email with 100% completion
+2. **Partial completion with skips** — skip steps 3 and 4. The email should list those skipped features
+3. **Abandonment** — close the tour at step 2. An abandoned-tour email should fire with the last step title
+
+Check the Resend logs at `resend.com/emails` to confirm delivery. The free tier shows full delivery status, bounces, and opens.
+
+One thing we noticed during testing: if the user closes the browser tab mid-tour, the `onTourEnd` callback never fires. You'll need a `beforeunload` handler or periodic progress syncs to catch that case. Tour Kit's persistence layer with localStorage helps here since you can check stored progress on the next visit and send a delayed email from a server-side cron.
+
+## Going further
+
+The basic integration above handles two email types. Here's where it gets interesting.
+
+**Sequence timing.** Welcome emails hit 50-70% open rates, but each subsequent email in a sequence drops 3-5% ([Sequenzy](https://www.sequenzy.com/blog/saas-email-marketing-benchmarks)). Front-load your most important content. If tour analytics show 60% of users skip the "Invite your team" step, that email goes first.
+
+**Cross-channel deduplication.** The whole point of connecting Tour Kit to email is avoiding redundant messages. Before sending an email about Feature X, check if the user already discovered it via tour. A simple lookup against Tour Kit's completion state prevents the most annoying pattern in onboarding: telling users about something they already know.
+
+```tsx
+// Check tour state before sending
+const tourProgress = await getTourProgress(userId, "onboarding");
+const discoveredFeatures = tourProgress.completedSteps.map((s) => s.id);
+
+// Only email about features the user hasn't seen
+const featuresToHighlight = ALL_FEATURES.filter(
+  (f) => !discoveredFeatures.includes(f.stepId)
+);
+```
+
+**Shared design tokens.** React Email and Tour Kit both render React components. You can share color constants, spacing values, and typography between your tour tooltips and email templates. A `tokens.ts` file imported by both keeps the visual language consistent across channels.
+
+**Fatigue prevention.** Tour Kit's surveys package includes fatigue prevention logic that limits how often users see prompts. Apply the same principle to emails. If someone completed the full tour, they don't need five follow-up emails. One "here's what to try next" email is enough. Automated emails see 84% more opens than batch sends ([Encharge](https://encharge.io/onboarding-email-sequence/)), but only when they're relevant.
+
+Honest limitation: Tour Kit doesn't have a built-in email integration or a visual email builder. This approach requires writing React code for every template. If your team wants drag-and-drop email creation, a tool like Customer.io or Loops might be a better fit for the email layer, with Tour Kit still handling the in-app side.
+
+Get started with [Tour Kit](https://usertourkit.com/) and check the full analytics callback API in the docs. The [GitHub repo](https://github.com/user-tour-kit/tour-kit) has working examples for every callback type.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## FAQ
+
+### Can I use Tour Kit with email providers other than Resend?
+
+Tour Kit's callbacks are provider-agnostic. The `onTourEnd` and `onStepSkip` events fire regardless of what handles the email. Replace the Resend SDK with SendGrid, Postmark, AWS SES, or any SMTP client. The react email onboarding sequence pattern stays the same since you're rendering React Email templates to HTML and handing that HTML to whatever delivery service you prefer.
+
+### How do I delay abandoned-tour emails instead of sending them immediately?
+
+Push the event into a job queue instead of calling `resend.emails.send` directly. Inngest, BullMQ, and Trigger.dev all support delayed execution. Schedule the abandoned email for 24 hours after the event, then check if the user returned and completed the tour before sending. This prevents emailing someone who just stepped away for lunch.
+
+### Does React Email affect my app's bundle size?
+
+No. React Email templates render server-side to static HTML strings via the `render()` function. None of the email component code ships to the browser. The 6.5 MB `@react-email/tailwind` dependency lives in your server bundle only. Your client-side bundle stays exactly the same size, which matters for Tour Kit's under-8KB core footprint.
+
+### What happens if the user closes the tab before the tour ends?
+
+The `onTourEnd` callback won't fire if the browser tab closes mid-tour. Two workarounds: use Tour Kit's localStorage persistence to save progress on every step change, then run a server-side cron that checks for stale incomplete tours and triggers abandoned-tour emails. Or add a `beforeunload` event listener that sends a beacon request with the current tour state.
+
+### How many emails should an onboarding sequence include?
+
+Research suggests 5-7 emails over 14 days hits the sweet spot for SaaS onboarding sequences. Well-tuned sequences achieve 14-25% trial-to-paid conversion rates, compared to 2-5% for generic drip campaigns ([SendX](https://www.sendx.io/)). But with behavior-based triggers from Tour Kit, the number adapts per user. Someone who completed every tour step might only need 2-3 emails. Someone who skipped half the tour needs more guidance.

@@ -1,0 +1,427 @@
+---
+title: "User onboarding: the developer's complete handbook (2026)"
+slug: "user-onboarding-handbook"
+description: "A code-first guide to user onboarding covering patterns, metrics, accessibility, and implementation with working React examples and real benchmark data."
+primary_keyword: "user onboarding handbook"
+secondary_keywords: ["user onboarding guide", "developer onboarding handbook", "user onboarding best practices"]
+category: "Pillar Pages"
+schema_type: "TechArticle"
+spreadsheet_row: 287
+date: "2026-04-12"
+lastUpdated: "2026-04-12"
+ogImage: /og-images/user-onboarding-handbook.png
+published: true
+---
+
+# User onboarding: the developer's complete handbook (2026)
+
+Three out of four new users will leave your app within the first week. Not because your product is bad, but because they never found the part that would have made them stay. As of April 2026, the average SaaS activation rate sits at roughly 36%, and only 12% of users describe their onboarding experience as "effective" ([UserGuiding, 2025](https://userguiding.com/blog/user-onboarding-statistics)). Those numbers represent a massive gap between what teams build and what users actually experience.
+
+This handbook covers user onboarding from a developer's perspective: the patterns that work, the metrics that matter, the architecture decisions you'll face, and the code to make it happen. We built [User Tour Kit](https://usertourkit.com/) to solve the implementation side of this problem, so you'll find React examples throughout. But the patterns apply regardless of which library or tool you choose.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## What is user onboarding?
+
+User onboarding is the process of guiding new users from first login to their first moment of realized value inside your application. It covers everything between account creation and the point where a user understands why your product is worth returning to. That first-value moment, sometimes called the "aha moment," typically happens within the first session for well-onboarded users and never happens for the 75% who churn in week one ([Rocketlane, 2025](https://onramp.us/blog/2026-state-of-onboarding-report)).
+
+Onboarding isn't a single feature. It's a system of coordinated patterns: product tours, tooltips, checklists, empty states, contextual hints, and embedded help. Each pattern serves a different moment in the user's journey. The mistake most teams make is treating onboarding as a one-time walkthrough rather than an ongoing, context-aware system that evolves with the user.
+
+For developers, onboarding sits at a tricky intersection. Product and design teams define the experience, but engineering owns the implementation. And that implementation has real constraints: bundle size budgets, accessibility requirements, state management complexity, and the challenge of targeting DOM elements that may not exist yet.
+
+## Why user onboarding matters for your product
+
+A 25% improvement in activation rates translates to a 34% increase in revenue, according to growth benchmarking data from 2025. That's not a rounding error. Onboarding quality is the single highest-impact feature most SaaS products aren't investing in properly.
+
+Here's what the data actually shows:
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Impact</th>
+      <th>Source</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Interactive tours vs static tutorials</td>
+      <td>50% higher activation</td>
+      <td>Glean, 2023</td>
+    </tr>
+    <tr>
+      <td>Personalized vs generic flows</td>
+      <td>40% higher retention</td>
+      <td>UserGuiding, 2025</td>
+    </tr>
+    <tr>
+      <td>Adding progress bars</td>
+      <td>22% completion increase</td>
+      <td>Nielsen Norman Group</td>
+    </tr>
+    <tr>
+      <td>Onboarding checklists</td>
+      <td>3x more likely to convert to paid</td>
+      <td>UserGuiding, 2025</td>
+    </tr>
+    <tr>
+      <td>Role-based segmentation</td>
+      <td>20% activation increase, 15% churn decrease</td>
+      <td>UserGuiding, 2025</td>
+    </tr>
+    <tr>
+      <td>Quick win in first session</td>
+      <td>80% more users retained</td>
+      <td>UserGuiding, 2025</td>
+    </tr>
+  </tbody>
+</table>
+
+68% of B2B renewal decisions directly reference the onboarding experience ([Rocketlane, 2025](https://onramp.us/blog/2026-state-of-onboarding-report)). And 83% of B2B buyers say slow onboarding is a dealbreaker. Your onboarding isn't just a first impression for new signups. It's an ongoing factor in retention and expansion revenue.
+
+The business case is clear. The implementation is where most teams get stuck.
+
+## Types of user onboarding patterns
+
+User onboarding in 2026 isn't one thing. It's a taxonomy of patterns, each suited to different moments, different complexity levels, and different user segments. The right onboarding system uses several of these together.
+
+### Product tours
+
+Guided step-by-step walkthroughs that highlight UI elements sequentially. Tours work best for showing users a critical path through your application: "here's the sidebar, here's how to create a project, here's where your analytics live." Keep tours to 5 steps or fewer. 72% of users abandon onboarding that requires too many steps ([Clutch, 2024](https://userguiding.com/blog/user-onboarding-statistics)), and cognitive load research from [Smashing Magazine](https://www.smashingmagazine.com/2023/04/design-effective-user-onboarding-flow/) confirms humans hold roughly 5-7 items in working memory at once.
+
+```tsx
+// src/components/WelcomeTour.tsx
+import { TourProvider, Tour, TourStep } from '@tourkit/react';
+
+export function WelcomeTour() {
+  return (
+    <TourProvider>
+      <Tour tourId="welcome" startOn="mount">
+        <TourStep target="#sidebar-nav" title="Navigation">
+          Your workspace, projects, and settings live here.
+        </TourStep>
+        <TourStep target="#create-button" title="Create your first project">
+          Hit this button to get started. Takes about 30 seconds.
+        </TourStep>
+        <TourStep target="#analytics-tab" title="Track progress">
+          Once you have data flowing, your metrics show up here.
+        </TourStep>
+      </Tour>
+    </TourProvider>
+  );
+}
+```
+
+For deeper implementation details, see our tutorial on [adding a product tour to a React 19 app](/blog/add-product-tour-react-19).
+
+### Contextual tooltips and hints
+
+Unlike tours that run sequentially, contextual hints appear when users encounter a feature for the first time. A pulsing beacon on a button, a tooltip that explains a toggle. These work well for secondary features that don't belong in the initial tour but still need explanation. Notion, Airtable, and Loom all use this pattern heavily.
+
+Read more about [contextual tooltips vs linear tours](/blog/contextual-tooltips-vs-linear-tours) for guidance on when to pick which.
+
+### Onboarding checklists
+
+Task-based progress trackers that give users a list of actions to complete. Checklists convert at 3x the rate of unstructured onboarding because they create commitment and show progress. The average checklist completion rate across SaaS is 19.2%, with a median of just 10.1% ([Userpilot, 2025](https://userpilot.com/blog/onboarding-checklist-completion-rate-benchmarks/)). That sounds low, but the users who do complete checklists are dramatically more likely to activate and pay.
+
+{/* TODO: link to onboarding checklist implementation article when published */}
+
+### Empty states
+
+The first screen a new user sees is usually empty. No projects, no data, no content. Empty states are onboarding real estate. A good empty state includes a clear call to action ("Create your first project"), an example of what the populated state looks like, and maybe a short video. Bad empty states just say "Nothing here yet." See our guide on [building React empty state components](/blog/react-empty-state-component) for implementation patterns.
+
+### Progressive onboarding
+
+Progressive onboarding reveals guidance as users explore, rather than front-loading it. Tooltips appear when you hover a feature for the first time. Explanations show up when you reach a new section. As of 2026, progressive onboarding has largely replaced the linear "click next through 10 steps" approach in complex applications.
+
+Companies that use progressive patterns include Slack (minimal chrome with contextual tooltips), ConvertKit (branched paths for beginners vs experienced users), and Airtable (feature hints triggered by context). Interactive progressive flows show 50% higher activation than static tutorials ([Glean, 2023](https://userguiding.com/blog/user-onboarding-statistics)).
+
+The trade-off: progressive onboarding requires more engineering work. You need event tracking to know which features a user has seen, state management to control which hints are active, and conditional logic to render guidance based on user segments. That's the kind of complexity that justifies using a purpose-built library rather than building from scratch.
+
+### Microsurveys
+
+Short, in-context surveys (1-3 questions) embedded in the onboarding flow capture feedback while the experience is fresh. CSAT after completing a checklist. NPS after the first week. CES after a complex workflow. If more than an hour passes between the experience and the survey, you're collecting memory, not feedback.
+
+For implementation patterns, see [onboarding NPS surveys](/blog/onboarding-nps-survey) and [the aha moment framework](/blog/aha-moment-framework-tours-activation-events).
+
+## How to implement user onboarding
+
+The implementation path depends on your stack, team size, and how much control you need. Here are the three approaches, each with real trade-offs.
+
+### Approach 1: SaaS tools (Appcues, Userpilot, Pendo)
+
+No-code tools that inject onboarding via a script tag. Product managers can build flows without engineering involvement. Pricing starts around $250/month and scales to $1,000+ for mid-market features.
+
+The catch: these tools inject third-party JavaScript into your app. You're adding 50-200KB to your bundle. You lose control over styling (fighting CSS specificity becomes a recurring chore). The onboarding data lives on someone else's servers. And when the tool's DOM injection breaks because you refactored a component, your PM files a ticket that lands on your desk anyway.
+
+For a deeper cost analysis, see our [build vs buy calculator](/blog/build-vs-buy-product-tour-calculator) and [onboarding software cost breakdown](/blog/onboarding-software-cost-2026).
+
+### Approach 2: open-source libraries
+
+Libraries like React Joyride (37KB gzipped, 603K weekly npm downloads as of March 2026), Shepherd.js (AGPL licensed), and Driver.js give you more control than SaaS tools but less than building from scratch. They ship with opinions about rendering, styling, and state management that may or may not match your architecture.
+
+We maintain a detailed comparison in [the best free product tour libraries](/blog/best-free-product-tour-libraries-open-source) and [React tour library benchmarks](/blog/react-tour-library-benchmark-2026).
+
+### Approach 3: headless component libraries
+
+Headless libraries provide tour logic (step sequencing, element targeting, scroll management, keyboard navigation) without prescribing UI. You render steps with your own components. User Tour Kit follows this approach: the core ships under 8KB gzipped with zero runtime dependencies, and you compose it with whatever design system you're running.
+
+```tsx
+// src/components/OnboardingSystem.tsx
+import { TourProvider } from '@tourkit/react';
+import { ChecklistProvider } from '@tourkit/checklists';
+import { HintProvider } from '@tourkit/hints';
+
+export function OnboardingSystem({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProvider>
+      <ChecklistProvider>
+        <HintProvider>
+          {children}
+        </HintProvider>
+      </ChecklistProvider>
+    </TourProvider>
+  );
+}
+```
+
+User Tour Kit uses a composable architecture: 10 packages, install only what you need. Product tours, checklists, hints, announcements, surveys, analytics, scheduling, media, and adoption tracking each ship as a separate package. Tree-shaking works because there's nothing to shake if you don't import it.
+
+We built User Tour Kit, so take our enthusiasm for this approach with appropriate skepticism. The honest limitation: headless means you write more JSX. There's no visual builder. You need React developers. If your team is non-technical, a SaaS tool is probably a better fit. For the full architecture story, see [the composable tour library architecture](/blog/composable-tour-library-architecture).
+
+<table>
+  <thead>
+    <tr>
+      <th>Criteria</th>
+      <th>SaaS tools</th>
+      <th>Open-source libraries</th>
+      <th>Headless (User Tour Kit)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bundle impact</td>
+      <td>50-200KB injected</td>
+      <td>15-40KB gzipped</td>
+      <td>Under 8KB core (gzipped)</td>
+    </tr>
+    <tr>
+      <td>Styling control</td>
+      <td>Limited (CSS overrides)</td>
+      <td>Moderate (theme props)</td>
+      <td>Full (you render everything)</td>
+    </tr>
+    <tr>
+      <td>Data ownership</td>
+      <td>Vendor-hosted</td>
+      <td>Self-hosted</td>
+      <td>Self-hosted</td>
+    </tr>
+    <tr>
+      <td>Non-technical editing</td>
+      <td>Yes (visual builder)</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>React 19 support</td>
+      <td>Varies</td>
+      <td>Varies (check compatibility)</td>
+      <td>Native (ref-as-prop, no forwardRef)</td>
+    </tr>
+    <tr>
+      <td>Accessibility</td>
+      <td>Varies</td>
+      <td>Partial</td>
+      <td>WCAG 2.1 AA built-in</td>
+    </tr>
+    <tr>
+      <td>Cost</td>
+      <td>$250-1,000+/month</td>
+      <td>Free (check license)</td>
+      <td>Free (MIT) / $99 one-time Pro</td>
+    </tr>
+  </tbody>
+</table>
+
+## User onboarding best practices
+
+These patterns come from studying what works across hundreds of SaaS onboarding flows, plus our own experience building and testing tour implementations.
+
+### Start with the aha moment, not the feature list
+
+Map backward from the moment users understand your product's value. For Slack, that's sending the first message in a channel. For Figma, it's dragging a frame onto the canvas. Every onboarding step should push users toward that moment. If a step doesn't contribute to reaching the aha moment, cut it.
+
+We covered this in depth in [the aha moment framework](/blog/aha-moment-framework-tours-activation-events).
+
+### Segment by role, not by plan
+
+74% of users prefer onboarding that adapts to their behavior ([UserGuiding, 2025](https://userguiding.com/blog/user-onboarding-statistics)). Role-based segmentation drives a 20% increase in activation and a 15% decrease in churn. An admin exploring team settings needs a different tour than a contributor who just wants to complete their first task.
+
+```tsx
+// src/hooks/useSegmentedTour.tsx
+import { useTour } from '@tourkit/react';
+
+type UserRole = 'admin' | 'contributor' | 'viewer';
+
+export function useSegmentedTour(role: UserRole) {
+  const tour = useTour();
+
+  const tourSteps = {
+    admin: ['team-settings', 'billing', 'integrations', 'invite-members'],
+    contributor: ['create-project', 'editor-basics', 'collaboration'],
+    viewer: ['dashboard-overview', 'filters', 'export-data'],
+  };
+
+  return { ...tour, steps: tourSteps[role] };
+}
+```
+
+For conditional tour logic, see [building conditional product tours based on user role](/blog/conditional-product-tour-user-role).
+
+### Keep it under 5 steps
+
+Cognitive load is real. Five steps is the sweet spot. If your onboarding requires more, split it into phases: an initial welcome tour (3 steps), a first-task checklist (4 items), and contextual hints that appear later as users explore. That's 3 different patterns working together, not one 12-step marathon.
+
+### Make every step interactive
+
+Static "here's a tooltip, click next" tours underperform interactive ones by 50% ([Glean, 2023](https://userguiding.com/blog/user-onboarding-statistics)). When a step says "Create your first project," the user should actually create a project before advancing. When a step highlights the search bar, the user should type a query. Passive tours teach nothing. Interactive tours build muscle memory.
+
+### Build for accessibility from day one
+
+Almost no onboarding content in 2026 addresses accessibility, and that's a problem. Your product tours need focus management so keyboard users can navigate between steps. Tooltips need proper ARIA roles (`role="tooltip"`, `aria-describedby`). Step transitions need screen reader announcements via `aria-live` regions. And animated highlights should respect `prefers-reduced-motion`.
+
+User Tour Kit ships with WCAG 2.1 AA compliance built in: focus trapping, keyboard navigation (arrow keys, Escape to dismiss), screen reader announcements, and reduced-motion support. For details, see our guides on [keyboard-navigable product tours](/blog/keyboard-navigable-product-tours-react) and [screen reader product tours](/blog/screen-reader-product-tour).
+
+### Persist progress across sessions
+
+Users don't finish onboarding in one sitting. Store progress in `localStorage`, a database, or both. When a user returns three days later, they should pick up where they left off, not start over. Restarting onboarding is a guaranteed way to annoy returning users.
+
+See [tour progress persistence with localStorage](/blog/tour-progress-persistence-localstorage) for implementation details.
+
+## Tools for user onboarding
+
+User onboarding tooling in 2026 splits into three tiers. Here's a snapshot with specific data points so you can make an informed decision.
+
+### No-code SaaS platforms
+
+- **Appcues**: No-code builder, analytics included. Starts at $249/month. Best for product teams without dedicated frontend engineers.
+- **Userpilot**: Strong segmentation and NPS surveys. Starts at $249/month. Heavier JavaScript footprint.
+- **Pendo**: Enterprise analytics and session replay. Contact for pricing. Good for large organizations that need product analytics bundled with onboarding.
+- **Chameleon**: Customizable tours with deep CSS control. Starts at $279/month.
+
+For detailed comparisons: [best product tour tools for B2B SaaS](/blog/best-product-tour-tools-b2b-saas), [best in-app guidance tools](/blog/best-in-app-guidance-tools-saas).
+
+### Open-source libraries
+
+- **React Joyride**: 603K weekly downloads, 37KB gzipped. The most popular React tour library. Class-based architecture showing its age with React 19.
+- **Shepherd.js**: Framework-agnostic, AGPL licensed (commercial license required for proprietary use).
+- **Driver.js**: Lightweight at 5KB, but limited feature set. No checklists, no hints, no surveys.
+
+For full benchmarks: [react tour library benchmarks](/blog/react-tour-library-benchmark-2026), [best TypeScript product tour libraries](/blog/best-typescript-product-tour-libraries).
+
+### Headless component libraries
+
+- **User Tour Kit**: Headless, composable, TypeScript-first. Core under 8KB gzipped. 10 packages (tours, checklists, hints, announcements, surveys, analytics, scheduling, media, adoption). MIT free tier, $99 one-time Pro. React 18 and 19. WCAG 2.1 AA. No visual builder (the honest trade-off).
+
+We maintain detailed comparisons: [User Tour Kit vs React Joyride](/blog/tour-kit-vs-react-joyride), [best free open-source product tour libraries](/blog/best-free-product-tour-libraries-open-source), [best headless UI libraries for onboarding](/blog/best-headless-ui-libraries-onboarding).
+
+## Measuring user onboarding success
+
+You can't improve what you don't measure. These are the metrics that actually predict whether your onboarding is working, not vanity metrics like "number of tours shown."
+
+### Activation rate
+
+The percentage of new signups who reach your defined activation event. Top-quartile SaaS products hit 40%+ activation rates, while the median sits around 30% ([Lenny's Newsletter](https://www.lennysnewsletter.com/p/what-is-a-good-activation-rate)). AI/ML companies see 54.8% activation (users are motivated), while FinTech averages just 5% (compliance friction).
+
+Define your activation event specifically: "User created a project AND added at least one team member" is better than "User logged in twice."
+
+### Time to value
+
+How long from signup to the aha moment. In 2026, users expect value within minutes, not days. The PLG (product-led growth) model assumes users can self-serve to their first value without talking to a human. If your time-to-value exceeds 5 minutes for a simple product, your onboarding has friction worth investigating.
+
+See [time to value as an onboarding metric](/blog/time-to-value-onboarding-metric) for measurement approaches.
+
+### Tour completion rate
+
+What percentage of users who start a tour finish it. If your 5-step tour has a 30% completion rate, the problem isn't the users. It's the tour. Common culprits: too many steps, targeting elements that aren't visible, steps that don't match the user's current context, or tooltips that block the UI element the user needs to interact with.
+
+For benchmarks and optimization strategies: [product tour completion rate benchmarks](/blog/product-tour-completion-rate-benchmarks) and [product tour drop-off tracking](/blog/product-tour-drop-off-tracking).
+
+### Checklist completion rate
+
+The SaaS average is 19.2% with a median of 10.1% ([Userpilot, 2025](https://userpilot.com/blog/onboarding-checklist-completion-rate-benchmarks/)). If you're above 25%, you're outperforming most of the market. Below 10%, your checklist is either too long, not relevant to the user's goal, or buried in the UI.
+
+### Retention at Day 7, Day 30, Day 90
+
+Onboarding's job is to prevent early churn. Measure cohort retention at week 1, month 1, and quarter 1. Compare cohorts that completed onboarding versus those that didn't. The gap between those cohorts is your onboarding's measurable impact.
+
+We covered cohort analysis in depth: [cohort analysis for product tours](/blog/cohort-analysis-product-tour), [retention analytics for onboarding](/blog/retention-analytics-onboarding-week-1-week-4-week-12).
+
+For a full metrics framework, see [how to measure onboarding success](/blog/measure-onboarding-success-metrics) and [the product tour analytics framework](/blog/product-tour-analytics-framework).
+
+## What's changing in 2026
+
+User onboarding isn't static. A few trends are reshaping how teams think about and implement onboarding in 2026.
+
+**AI-assisted onboarding** is moving from hype to production. Chatbots now handle 75% of onboarding questions instantly, reducing support load. But AI chatbots complement guided tours, they don't replace them. Users still need spatial orientation ("where is the settings page?") that a chat interface can't provide. See [how AI will change product onboarding](/blog/ai-onboarding-future).
+
+**Product-led sales** is the new normal. PLG doesn't mean "no humans." High-value accounts still get white-glove onboarding, but the initial self-serve experience determines whether they reach the sales conversation at all. Hybrid onboarding (73% satisfaction) dramatically outperforms digital-only (41% satisfaction) ([TalenTech, 2025](https://userguiding.com/blog/user-onboarding-statistics)).
+
+**Accessibility enforcement** is tightening. The EU's European Accessibility Act takes effect in 2025, and US courts continue expanding ADA interpretations to cover web applications. Onboarding that isn't keyboard-navigable and screen-reader-compatible is a legal risk, not just a UX gap. [Keyboard-navigable product tours](/blog/keyboard-navigable-product-tours-react) and [screen reader support](/blog/screen-reader-product-tour) aren't optional anymore.
+
+**Bundle performance budgets** keep shrinking. Core Web Vitals matter for SEO, and they matter for the user's first experience with your app. A 200KB onboarding script that blocks the main thread for 400ms is sabotaging the very first impression it's supposed to improve. We wrote about the measurement methodology in [onboarding tool Lighthouse performance](/blog/onboarding-tool-lighthouse-performance) and [Core Web Vitals impact](/blog/onboarding-tool-core-web-vitals).
+
+## FAQ
+
+### What is user onboarding in software?
+
+User onboarding in software is the process of guiding new users from their first login to their first moment of value inside your application. It includes product tours, tooltips, checklists, empty states, and contextual help that work together to reduce time-to-value. As of April 2026, the average SaaS activation rate is 36%, meaning 64% of signups never reach their aha moment without effective onboarding.
+
+### How many steps should a product tour have?
+
+A product tour should have no more than 5 steps. Cognitive load research shows humans hold 5-7 items in working memory, and 72% of users abandon onboarding with too many steps. If you need to cover more ground, split the experience into a short welcome tour, a task-based checklist, and contextual hints that appear as users explore deeper features.
+
+### What is progressive onboarding?
+
+Progressive onboarding reveals guidance contextually as users explore, rather than forcing them through a linear sequence upfront. Tooltips appear when a user encounters a feature for the first time. Checklists update as tasks are completed. As of 2026, progressive onboarding shows 50% higher activation rates than static walkthroughs, making it the preferred approach for complex applications.
+
+### How do you measure onboarding success?
+
+Track activation rate (percentage reaching your defined value event), time to value (minutes from signup to aha moment), tour completion rate, and cohort retention at Day 7 and Day 30. Top-quartile SaaS products achieve 40%+ activation and under 5 minutes time-to-value. Compare onboarded vs non-onboarded cohorts to quantify impact.
+
+### Should I build onboarding myself or use a tool?
+
+The answer depends on your team and constraints. SaaS tools ($250-1,000+/month) work for non-technical teams needing quick results. Open-source libraries work for teams comfortable with code but wanting pre-built patterns. Headless libraries like User Tour Kit ($99 one-time for Pro) work for React teams that need full design control and minimal bundle impact. We built User Tour Kit, so factor that bias into this recommendation.
+
+### What is the best user onboarding tool for React?
+
+For React applications in 2026, the main options are React Joyride (most popular, 603K weekly downloads, 37KB), Shepherd.js (framework-agnostic, AGPL), Driver.js (lightweight, limited features), and User Tour Kit (headless, under 8KB core, composable). Which one fits depends on whether you need a visual builder (use a SaaS tool), a batteries-included library (React Joyride), or full rendering control (User Tour Kit).
+
+### How do you make onboarding accessible?
+
+Accessible onboarding requires focus management between tour steps, proper ARIA attributes (`role="tooltip"`, `aria-describedby`, `aria-live` for announcements), keyboard navigation support (arrow keys to advance, Escape to dismiss), and respect for `prefers-reduced-motion`. User Tour Kit ships with WCAG 2.1 AA compliance built in, but these requirements apply regardless of which tool you use.
+
+### What is a good activation rate?
+
+A good activation rate depends on your industry and product complexity. The median across SaaS is roughly 30%, with top-quartile products hitting 40%+. AI/ML companies see 54.8% activation due to high user motivation, while FinTech averages just 5% due to compliance friction. Define "activated" precisely for your product, then benchmark against your vertical rather than SaaS averages.
+
+### How long should onboarding take?
+
+Users expect to reach their first moment of value within 5 minutes for simple products and within the first session for complex ones. In the product-led growth model, time-to-value is the primary metric. If onboarding takes longer than one session, ensure progress persists across sessions so returning users pick up where they left off rather than starting over.
+
+### Does onboarding affect revenue?
+
+Yes. A 25% improvement in activation rates leads to a 34% increase in revenue (growth benchmarking data, 2025). Users who complete onboarding checklists are 3x more likely to convert to paid accounts. And 68% of B2B renewal decisions reference the onboarding experience. Onboarding isn't a cost center. It's one of the highest-returning investments a product team can make.
+
+---
+
+*Get started with User Tour Kit at [usertourkit.com](https://usertourkit.com/) or install directly:*
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+*User Tour Kit is MIT licensed. Free forever for core features. Pro packages available for a $99 one-time payment. [Browse the documentation](https://usertourkit.com/) or [view the source on GitHub](https://usertourkit.com/).*

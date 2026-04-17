@@ -7,6 +7,21 @@ const config = {
   output: 'standalone',
   reactStrictMode: true,
   transpilePackages: ['@tour-kit/core', '@tour-kit/react', '@tour-kit/hints'],
+  images: {
+    remotePatterns: [{ hostname: 'github.com' }, { hostname: 'avatars.githubusercontent.com' }],
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/docs/:path*.mdx',
+        destination: '/llms.mdx/docs/:path*',
+      },
+      {
+        source: '/blog/:slug.mdx',
+        destination: '/llms.mdx/blog/:slug',
+      },
+    ]
+  },
   async headers() {
     const buildDate = new Date().toUTCString()
     return [

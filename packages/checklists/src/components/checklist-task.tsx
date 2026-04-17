@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import type { ChecklistTaskState } from '../types'
 import { cn } from './cn'

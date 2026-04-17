@@ -1,3 +1,5 @@
+'use client'
+
 import { ProGate } from '@tour-kit/license'
 import * as React from 'react'
 import {

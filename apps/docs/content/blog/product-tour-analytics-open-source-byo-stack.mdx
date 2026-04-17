@@ -1,0 +1,459 @@
+---
+title: "Product tour analytics without SaaS: the BYO stack"
+slug: "product-tour-analytics-open-source-byo-stack"
+description: "Build your own onboarding analytics with open-source tools like PostHog, Plausible, and Umami. Own your tour data without SaaS lock-in or per-seat pricing."
+primary_keyword: "product tour analytics open source"
+secondary_keywords: ["build your own onboarding analytics", "open source tour analytics", "self-hosted product tour tracking"]
+category: "Metrics"
+schema_type: "TechArticle"
+spreadsheet_row: 252
+date: "2026-04-11"
+updated: "2026-04-11"
+ogImage: /og-images/product-tour-analytics-open-source-byo-stack.png
+published: true
+---
+
+# Product tour analytics without SaaS: the BYO stack
+
+Appcues charges $249/month to show tooltips and tell you how many people clicked "Next." Pendo's analytics tier starts even higher. And the data those platforms collect about your users sits on their servers, governed by their retention policies, accessible only through their dashboards.
+
+There's another way. You wire your product tour library to open-source analytics tools you already control, and the resulting pipeline costs nothing beyond the infrastructure you're running anyway. We built Tour Kit's analytics plugin system specifically for this approach: a 2 KB adapter layer that routes tour events to any backend you choose.
+
+This guide walks through four open-source analytics stacks that replace SaaS tour analytics entirely. Each one captures the same metrics (tour completion rate, step drop-off, time-to-complete) without vendor lock-in, per-seat pricing, or third-party data processing agreements.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/analytics
+```
+
+## What is BYO analytics for product tours?
+
+BYO (build your own) analytics for product tours means routing onboarding event data to analytics infrastructure you own and operate, rather than relying on a SaaS vendor's embedded dashboard. The tour library emits structured events (tour started, step viewed, tour completed) and a thin plugin translates those events into the format your analytics backend expects. Unlike SaaS platforms like Appcues or Userpilot that bundle analytics into their proprietary UI, a BYO stack gives you full query access to raw event data, no per-seat costs, and complete data residency control. As of April 2026, PostHog alone handles over 30 billion events per month across self-hosted and cloud deployments ([PostHog, 2026](https://posthog.com/handbook/company/story)).
+
+## Why SaaS analytics creates problems you shouldn't have
+
+Three issues come up repeatedly when teams rely on SaaS onboarding platforms for analytics.
+
+**Data portability.** When you cancel Appcues, your historical tour analytics go with it. You can export CSVs, sometimes, if your plan includes that feature. But the funnel definitions, cohort filters, and dashboard configurations? Gone. Teams we've talked to describe migrating away from Pendo as a six-month project partly because untangling the analytics dependency took longer than replacing the tour UI.
+
+**Cost scaling.** SaaS analytics pricing scales with monthly tracked users (MTUs) or monthly active users (MAUs). Appcues jumps from $249 to custom enterprise pricing above 2,500 MTUs. Userpilot starts at $249/month for up to 2,000 MAUs ([Userpilot pricing, April 2026](https://userpilot.com/pricing)). Your analytics costs grow linearly with your user base, which is exactly when you can least afford surprises on the invoice.
+
+**Query limitations.** SaaS dashboards show you the aggregations they decided to build. Want to correlate tour completion with 30-day retention by acquisition channel? That requires exporting data to your own warehouse. At that point, you're maintaining two analytics systems.
+
+## Why owning your tour analytics matters for product teams
+
+Product tour data is behavioral data. It tells you which features users explored, where they got confused, and whether guided experiences actually correlate with retention. Handing that signal to a third-party vendor means your product decisions depend on someone else's data model, query capabilities, and uptime. According to a 2025 Segment survey, 71% of engineering teams cite data silos as their top analytics frustration ([Segment State of Data, 2025](https://segment.com/state-of-data/)). When tour analytics lives in the same warehouse as your product events, activation analysis becomes a SQL join instead of a CSV export. That's the core argument for BYO: not cost savings alone, but analytical power.
+
+## The four open-source stacks worth considering
+
+The most common mistake teams make when choosing a BYO analytics tool is conflating web analytics with product analytics. Web analytics platforms like Plausible and Umami track pageviews, referrers, and geography. Product analytics platforms like PostHog and OpenPanel track custom events, funnels, retention curves, and cohort behavior. Product tour data is product analytics data. Picking a web analytics tool for tour tracking means you'll get event counts but no funnel visualization, no step-level drop-off analysis, and no retention correlation. Here's how the four main options compare for tour-specific use cases.
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Type</th>
+      <th>Self-host</th>
+      <th>Custom events</th>
+      <th>Funnels</th>
+      <th>Retention</th>
+      <th>License</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PostHog</td>
+      <td>Product analytics</td>
+      <td>Docker / k8s</td>
+      <td>Unlimited properties</td>
+      <td>Built-in</td>
+      <td>Built-in</td>
+      <td>MIT (core)</td>
+    </tr>
+    <tr>
+      <td>Plausible</td>
+      <td>Web analytics</td>
+      <td>Docker</td>
+      <td>Custom goals only</td>
+      <td>Basic (custom props)</td>
+      <td>No</td>
+      <td>AGPL-3.0</td>
+    </tr>
+    <tr>
+      <td>Umami</td>
+      <td>Web analytics</td>
+      <td>Docker / Vercel</td>
+      <td>Yes (v2+)</td>
+      <td>No built-in</td>
+      <td>No</td>
+      <td>MIT</td>
+    </tr>
+    <tr>
+      <td>Custom (your DB)</td>
+      <td>Roll your own</td>
+      <td>Your infra</td>
+      <td>Whatever you build</td>
+      <td>SQL queries</td>
+      <td>SQL queries</td>
+      <td>N/A</td>
+    </tr>
+  </tbody>
+</table>
+
+PostHog is the closest to a full Mixpanel/Amplitude replacement. Plausible and Umami work when you need basic event counts without the overhead of a product analytics platform. Rolling your own makes sense if you already have a data pipeline and just need tour events fed into it.
+
+## Stack 1: PostHog (the full replacement)
+
+PostHog is the strongest open-source option for product tour analytics because it ships funnels, retention tables, session replay, and feature flags in a single self-hosted deployment, covering everything Amplitude and Mixpanel charge for under an MIT license. Funnels, retention curves, session replay, feature flags: it handles everything Amplitude does, except you can self-host it. The free cloud tier covers 1 million events per month.
+
+Tour Kit ships a first-party PostHog plugin. Setup takes about five minutes:
+
+```tsx
+// src/lib/analytics.ts
+import { createAnalytics } from '@tourkit/analytics'
+import { posthogPlugin } from '@tourkit/analytics'
+
+export const tourAnalytics = createAnalytics({
+  plugins: [
+    posthogPlugin({
+      apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!,
+      apiHost: 'https://your-posthog.example.com', // self-hosted
+      eventPrefix: 'tourkit_',
+    }),
+  ],
+  debug: process.env.NODE_ENV === 'development',
+})
+```
+
+Once wired up, every tour interaction fires a PostHog event with structured properties:
+
+```tsx
+// Events emitted automatically:
+// tourkit_tour_started    { tour_id, total_steps }
+// tourkit_step_viewed     { tour_id, step_id, step_index }
+// tourkit_step_completed  { tour_id, step_id, duration_ms }
+// tourkit_tour_completed  { tour_id, duration_ms }
+// tourkit_tour_skipped    { tour_id, step_index }
+// tourkit_tour_abandoned  { tour_id, step_index }
+```
+
+Build a funnel in PostHog's UI by chaining `tourkit_tour_started` → `tourkit_step_completed` (for each step) → `tourkit_tour_completed`. The resulting visualization shows exactly where users drop off, step by step.
+
+For teams already running PostHog, this is the path of least resistance. You get the same funnel analysis Appcues charges $249+/month for, using infrastructure you already pay for.
+
+## Stack 2: Plausible (privacy-first, minimal)
+
+Plausible is the right choice when your analytics requirements are "did users complete the tour?" and your compliance requirements are "no cookies, no consent banners, no third-party data processing." It doesn't have funnels or retention charts. What it does have: zero cookies, ~1 KB script, GDPR compliance without consent banners, and custom event goals. If your analytics needs are "how many people completed the tour?" rather than "what's the step-3-to-step-4 conversion rate by cohort?", Plausible is enough.
+
+Tour Kit doesn't ship a Plausible plugin, but writing one takes 20 lines:
+
+```tsx
+// src/plugins/plausible-plugin.ts
+import type { AnalyticsPlugin } from '@tourkit/analytics'
+
+export function plausiblePlugin(): AnalyticsPlugin {
+  return {
+    name: 'plausible',
+
+    track(event) {
+      if (typeof window === 'undefined') return
+      // plausible-tracker or window.plausible
+      const plausible = (window as any).plausible
+      if (!plausible) return
+
+      plausible(event.eventName, {
+        props: {
+          tour_id: event.tourId,
+          step_id: event.stepId ?? '',
+          step_index: String(event.stepIndex ?? ''),
+          duration_ms: String(event.duration ?? ''),
+        },
+      })
+    },
+  }
+}
+```
+
+Register each event name as a custom goal in Plausible's dashboard. You'll see aggregate counts per event type, filterable by the properties you attached. Not as powerful as PostHog's funnels, but you get accurate completion data without any cookies or consent logic.
+
+We covered this integration in depth in [Track tour metrics with Plausible Analytics (privacy-first)](/blog/plausible-analytics-product-tour).
+
+## Stack 3: Umami (deploy to Vercel, query with SQL)
+
+Umami occupies the middle ground between Plausible's minimalism and PostHog's full product analytics suite: it's MIT-licensed (Plausible is AGPL), supports custom events with arbitrary properties since v2, and deploys to Vercel or Docker with a Postgres or MySQL database. As of April 2026, Umami has over 24,000 GitHub stars ([Umami GitHub](https://github.com/umami-is/umami)).
+
+The custom plugin follows the same pattern:
+
+```tsx
+// src/plugins/umami-plugin.ts
+import type { AnalyticsPlugin } from '@tourkit/analytics'
+
+export function umamiPlugin(websiteId: string): AnalyticsPlugin {
+  return {
+    name: 'umami',
+
+    track(event) {
+      if (typeof window === 'undefined') return
+      const umami = (window as any).umami
+      if (!umami) return
+
+      umami.track(event.eventName, {
+        tour_id: event.tourId,
+        step_id: event.stepId,
+        step_index: event.stepIndex,
+        duration_ms: event.duration,
+      })
+    },
+  }
+}
+```
+
+Umami's advantage is direct database access. Since events land in your Postgres instance, you can write SQL queries against raw tour data without going through a dashboard UI. That matters when you need ad-hoc analysis: "What percentage of users who skipped step 3 churned within 14 days?" is a SQL join, not a dashboard feature request.
+
+## Stack 4: Roll your own (API route + database)
+
+For teams that already run a data pipeline or warehouse, the simplest approach is a POST endpoint and a database table: no third-party scripts, no external dependencies, total control over the event schema and storage layer. No third-party scripts, no external dependencies, total control. This is the lightest-weight option and works well for teams that already have a data pipeline or warehouse.
+
+```tsx
+// src/plugins/custom-api-plugin.ts
+import type { AnalyticsPlugin } from '@tourkit/analytics'
+
+export function apiPlugin(endpoint: string): AnalyticsPlugin {
+  const queue: any[] = []
+  let timer: ReturnType<typeof setTimeout> | null = null
+
+  function flush() {
+    if (queue.length === 0) return
+    const batch = queue.splice(0, queue.length)
+    navigator.sendBeacon(endpoint, JSON.stringify(batch))
+  }
+
+  return {
+    name: 'custom-api',
+
+    track(event) {
+      queue.push({
+        event_name: event.eventName,
+        tour_id: event.tourId,
+        step_id: event.stepId,
+        step_index: event.stepIndex,
+        duration_ms: event.duration,
+        timestamp: event.timestamp,
+        session_id: event.sessionId,
+        metadata: event.metadata,
+      })
+      // Batch: flush every 5 seconds or when queue hits 10
+      if (queue.length >= 10) {
+        flush()
+      } else if (!timer) {
+        timer = setTimeout(() => {
+          flush()
+          timer = null
+        }, 5000)
+      }
+    },
+
+    flush,
+
+    destroy() {
+      if (timer) clearTimeout(timer)
+      flush()
+    },
+  }
+}
+```
+
+The server side is a thin API route that inserts into your events table:
+
+```tsx
+// app/api/tour-events/route.ts (Next.js App Router)
+import { NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { tourEvents } from '@/lib/schema'
+
+export async function POST(request: Request) {
+  const events = await request.json()
+
+  await db.insert(tourEvents).values(
+    events.map((e: any) => ({
+      eventName: e.event_name,
+      tourId: e.tour_id,
+      stepId: e.step_id,
+      stepIndex: e.step_index,
+      durationMs: e.duration_ms,
+      timestamp: new Date(e.timestamp),
+      sessionId: e.session_id,
+      metadata: e.metadata,
+    }))
+  )
+
+  return NextResponse.json({ ok: true })
+}
+```
+
+Once the data is in your database, tour analytics is just SQL:
+
+```sql
+-- Tour completion rate
+SELECT
+  tour_id,
+  COUNT(DISTINCT session_id) FILTER (
+    WHERE event_name = 'tour_started'
+  ) AS started,
+  COUNT(DISTINCT session_id) FILTER (
+    WHERE event_name = 'tour_completed'
+  ) AS completed,
+  ROUND(
+    COUNT(DISTINCT session_id) FILTER (WHERE event_name = 'tour_completed')::numeric /
+    NULLIF(COUNT(DISTINCT session_id) FILTER (WHERE event_name = 'tour_started'), 0) * 100,
+    1
+  ) AS completion_rate
+FROM tour_events
+WHERE timestamp > NOW() - INTERVAL '30 days'
+GROUP BY tour_id;
+```
+
+No dashboard subscription needed. The tradeoff: you build and maintain the visualization layer yourself, whether that's a Grafana dashboard, a Metabase instance, or a custom admin page.
+
+## The metrics that actually matter
+
+SaaS analytics dashboards default to vanity metrics because vanity metrics look good in pitch decks. "12,000 tours started" means nothing without completion context. The five numbers below are the ones worth tracking regardless of which stack you choose, and they map directly to Tour Kit's event schema.
+
+**Tour completion rate.** Percentage of users who reach the final step. Industry benchmarks from Appcues put the median at 68% for tours under 5 steps, dropping to 42% above 7 steps ([Appcues Product Adoption Report, 2025](https://www.appcues.com/blog/product-adoption-report)). Track this weekly.
+
+**Step drop-off index.** The step number where the largest percentage of users abandon. If 40% of users bail at step 4, that step has a content or UX problem. Tour Kit emits `tour_abandoned` with the `stepIndex` property, so filtering for the most common abandonment step is a single query.
+
+**Median time-on-step.** Steps where users linger (above 15 seconds) often indicate confusion, not engagement. Steps completed in under 2 seconds suggest users are clicking through without reading. Tour Kit tracks `duration_ms` on every `step_completed` event.
+
+**Tour-to-activation correlation.** The percentage of users who completed the tour and subsequently used the feature the tour was promoting. This requires joining tour events with product usage events, which is why owning your data matters. SaaS platforms can't correlate across systems.
+
+**Skip rate.** How often users hit "Skip tour" at step 1 versus step 5 tells different stories. Early skips suggest bad targeting (wrong user, wrong time). Late skips suggest the tour ran too long.
+
+## Combining plugins for defense in depth
+
+Tour Kit's analytics plugin system accepts an array of plugins and dispatches every event to all of them in registration order. Running multiple analytics backends simultaneously gives you redundancy against ad blockers, a migration path between tools, and the ability to serve different teams (product uses PostHog funnels, marketing uses Plausible counts) from the same event stream.
+```tsx
+// src/lib/analytics.ts
+import { createAnalytics, posthogPlugin } from '@tourkit/analytics'
+import { plausiblePlugin } from './plugins/plausible-plugin'
+import { apiPlugin } from './plugins/custom-api-plugin'
+
+export const tourAnalytics = createAnalytics({
+  plugins: [
+    // Primary: PostHog for funnels and retention
+    posthogPlugin({
+      apiKey: process.env.NEXT_PUBLIC_POSTHOG_KEY!,
+    }),
+    // Secondary: Plausible for privacy-compliant counts
+    plausiblePlugin(),
+    // Backup: raw events to your own database
+    apiPlugin('/api/tour-events'),
+  ],
+  batchSize: 5,
+  batchInterval: 3000,
+})
+```
+
+Events dispatch to all plugins in registration order. If PostHog's JavaScript fails to load (ad blockers strip it in about 26% of developer-heavy audiences), Plausible still captures the event since its script is first-party. And your API endpoint always works because it's your domain.
+
+This pattern doesn't add meaningful overhead. Tour Kit's analytics layer is 2 KB gzipped. Each plugin is under 1 KB. The total cost of three-backend redundancy is a few kilobytes and a few extra network requests, batched.
+
+## Limitations of the BYO approach
+
+BYO analytics trades subscription fees for engineering time, and that tradeoff isn't always favorable. If your team lacks a developer who can write SQL queries and maintain a self-hosted deployment, a SaaS platform might genuinely be the better call. Here's what you're signing up for.
+
+**No drag-and-drop dashboards.** PostHog has a good dashboard builder, but Plausible and Umami show basic event tables. For custom stacks, you're writing SQL or building Grafana panels. If your product manager expects Pendo-style visual reports, they'll need training.
+
+**Maintenance overhead.** Self-hosted PostHog needs Kubernetes or Docker Compose, ClickHouse for the event store, and periodic upgrades. Umami is lighter but still requires a database. This isn't a "set it and forget it" approach.
+
+**Tour Kit requires React developers.** There's no visual tour builder. If your team includes non-technical product managers who need to create tours without code, a SaaS platform might still be the right call for the tour creation side, even if you route the analytics to your own stack.
+
+**Smaller community.** PostHog has an active open-source community (20,000+ GitHub stars). Umami has 24,000+ stars. But neither has the enterprise support contracts that Amplitude or Mixpanel offer. If you need SOC 2 compliance on your analytics vendor, self-hosting adds that burden to your own team.
+
+## What the BYO stack actually costs vs SaaS
+
+The cost argument for BYO analytics is straightforward once you compare annual spend at realistic user counts. SaaS onboarding platforms charge per-seat or per-MAU fees that scale with your user base, while open-source tools charge only for infrastructure you'd likely run anyway. At 10K MAU the gap is stark.
+
+<table>
+  <thead>
+    <tr>
+      <th>Stack</th>
+      <th>Monthly cost (10K MAU)</th>
+      <th>Annual cost</th>
+      <th>Data ownership</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Appcues (Essentials)</td>
+      <td>$249</td>
+      <td>$2,988</td>
+      <td>Their servers</td>
+    </tr>
+    <tr>
+      <td>Chameleon (Growth)</td>
+      <td>$279</td>
+      <td>$3,348</td>
+      <td>Their servers</td>
+    </tr>
+    <tr>
+      <td>Pendo (custom)</td>
+      <td>~$833</td>
+      <td>$10,000+</td>
+      <td>Their servers</td>
+    </tr>
+    <tr>
+      <td>Tour Kit + PostHog cloud</td>
+      <td>$0</td>
+      <td>$0</td>
+      <td>PostHog (1M events free)</td>
+    </tr>
+    <tr>
+      <td>Tour Kit + PostHog self-hosted</td>
+      <td>~$40-80 (VPS)</td>
+      <td>$480-960</td>
+      <td>Your infrastructure</td>
+    </tr>
+    <tr>
+      <td>Tour Kit + custom API</td>
+      <td>$0 (existing DB)</td>
+      <td>$0</td>
+      <td>Your database</td>
+    </tr>
+  </tbody>
+</table>
+
+The SaaS platforms include tour creation UI, visual builders, and targeting rules. The BYO stack doesn't. If you're writing tour code in React anyway (which Tour Kit assumes), those features have less value. The savings compound: at 50K MAU, Appcues custom pricing starts around $749/month. Your PostHog free tier still covers the analytics side.
+
+## Common mistakes to avoid
+
+Most BYO analytics failures aren't tool failures. They're pipeline design mistakes: tracking the wrong events, losing data on page transitions, or ignoring the 26% of developer-heavy audiences running ad blockers that strip third-party analytics scripts entirely. These are the mistakes we've seen most often.
+
+**Tracking too many events.** Start with the five core tour events (`tour_started`, `step_viewed`, `step_completed`, `tour_skipped`, `tour_completed`). Add `tour_abandoned` and `step_interaction` once you have a baseline. Tracking every mouse hover on a tooltip creates noise without signal.
+
+**Forgetting `navigator.sendBeacon`.** If you're sending analytics to your own API, use `sendBeacon()` instead of `fetch()` for the flush-on-page-close case. Regular `fetch` requests get cancelled when the user navigates away. `sendBeacon` survives navigation. Tour Kit's event queue handles this internally.
+
+**Ignoring ad blockers.** PostHog's cloud endpoint (`app.posthog.com`) gets blocked by about 26% of users running ad blockers ([PostHog docs](https://posthog.com/docs/advanced/proxy)). Self-hosting behind your own domain solves this. Plausible's script, served from your domain, isn't blocked because it doesn't appear on any filter list.
+
+**Missing the correlation.** Tour completion rate in isolation is vanity. The number that matters is whether tour completers activate at a higher rate than non-completers. That analysis requires joining tour events with product events, which means both datasets need to live in the same system or be joinable through a shared user ID.
+
+## FAQ
+
+### Is PostHog really free for self-hosted deployments?
+
+PostHog's open-source edition (MIT licensed) is free to self-host with no event limits. The cloud version includes 1 million free events per month, then charges $0.00031 per event. Self-hosting requires infrastructure costs (a ClickHouse-backed deployment needs at minimum 8 GB RAM and 100 GB storage), but there are no license fees. As of April 2026, the self-hosted and cloud versions share the same codebase.
+
+### Can I use open-source analytics with product tour analytics tools other than Tour Kit?
+
+Yes. The plugin pattern described here works with any tour library that exposes lifecycle callbacks. React Joyride's `callback` prop, Shepherd.js's event system, and Driver.js's `onHighlighted`/`onDeselected` hooks all provide the same data points. Tour Kit's advantage is that its `@tourkit/analytics` package handles batching, offline queuing, and multi-plugin dispatch out of the box, so you don't rebuild that plumbing for each backend.
+
+### What's the minimum viable BYO analytics stack?
+
+A single API route that inserts events into a Postgres table, plus a SQL query for completion rate. That's two files: one route handler and one analytics plugin. Tour Kit's custom plugin interface requires only a `name` and a `track` function. You can build a working product tour analytics pipeline in under an hour with zero external dependencies. Add PostHog or Grafana dashboards later when you need visualization.
+
+### How do I handle GDPR with self-hosted analytics?
+
+Self-hosting means your tour analytics data stays on your infrastructure, under your data processing agreements. No third-party sub-processors. Plausible and Umami both operate without cookies and don't collect personal identifiers by default, so they fall outside GDPR consent requirements for many implementations. PostHog collects more detailed behavioral data, so you may still need a lawful basis (legitimate interest or consent) depending on what properties you attach to tour events.
+
+### Does the BYO approach work for mobile apps?
+
+Tour Kit is React-only and doesn't support React Native as of April 2026. For mobile, you'd need a separate tour library with similar event hooks. The analytics side of the BYO stack (PostHog, your own API) works identically on mobile since it's just HTTP requests. The gap is on the tour UI side, not the analytics side.

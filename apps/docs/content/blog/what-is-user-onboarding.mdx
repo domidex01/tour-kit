@@ -1,0 +1,223 @@
+---
+title: "What is user onboarding? A developer's definition"
+slug: "what-is-user-onboarding"
+description: "User onboarding defined from a developer's perspective. Covers the technical implementation, patterns, accessibility requirements, and code examples."
+primary_keyword: "what is user onboarding"
+secondary_keywords: ["user onboarding definition", "onboarding meaning saas", "user onboarding examples"]
+category: "Glossary"
+schema_type: "TechArticle"
+spreadsheet_row: 297
+date: "2026-04-12"
+updated: "2026-04-12"
+published: true
+ogImage: /og-images/what-is-user-onboarding.png
+---
+
+# What is user onboarding? A developer's definition
+
+Search "what is user onboarding" and you'll get pages written by product marketers selling $500/month SaaS platforms. They'll tell you it's about "guiding users to value." True enough, but useless if your job is to build the thing.
+
+This definition is for the person writing the JSX and making sure a screen reader can navigate it.
+
+```bash
+npm install @tourkit/core @tourkit/react
+```
+
+## Definition
+
+User onboarding is the system of in-app interactions that moves a new user from first login to productive usage by surfacing relevant features and confirming key actions through contextual UI elements: tooltips, checklists, modals, walkthroughs. As of April 2026, 63% of customers say onboarding directly influences their subscription decision ([UserGuiding](https://userguiding.com/blog/user-onboarding-statistics)).
+
+For developers, onboarding is a state management problem. You're tracking which steps a user has completed, conditionally rendering UI based on that state, and persisting progress across sessions.
+
+The hard part isn't explaining a feature. It's knowing when to explain it, to whom, and making sure the explanation doesn't break the existing UI.
+
+The marketing definition stops at "guide users to their aha moment." The engineering definition adds: where does the state live, how does it survive a page refresh, and does it work with a keyboard?
+
+## How user onboarding works
+
+User onboarding breaks down into four concerns that run in parallel across every guided interaction. Most onboarding failures trace back to one of these, not to bad copy or ugly tooltips.
+
+**State tracking.** Store which tours, checklists, and hints a user has seen. localStorage works for simple apps, but anything with accounts needs a database. A flat `{ welcomeTourDone: true }` breaks down fast when you're managing ten flows across three user roles.
+
+**Conditional logic.** Decide what to trigger based on user attributes (role, plan, signup date), behavioral signals (hasn't used feature X after three sessions), and which page they're on. A single `if (isNewUser)` check works for a demo, not for production with multiple personas.
+
+**Rendering.** Display guidance without breaking layout: portals for overlays, positioning engines for tooltips, focus trapping, z-index management so the tour step sits above your existing modals.
+
+**Measurement.** Without tracking completion rates and drop-off points, you're guessing whether onboarding works at all. Appcues' 2024 benchmarks show tour completers convert to paid at 2.5x the rate of non-completers, but only when tours stay under five steps.
+
+```tsx
+// src/hooks/useOnboardingState.ts
+import { useSyncExternalStore, useCallback } from 'react';
+
+function getSnapshot(): Record<string, boolean> {
+  const raw = localStorage.getItem('onboarding');
+  return raw ? JSON.parse(raw) : {};
+}
+
+export function useOnboardingState(flowId: string) {
+  const state = useSyncExternalStore(
+    (cb) => { window.addEventListener('storage', cb); return () => window.removeEventListener('storage', cb); },
+    getSnapshot,
+  );
+
+  const markComplete = useCallback(() => {
+    const next = { ...getSnapshot(), [flowId]: true };
+    localStorage.setItem('onboarding', JSON.stringify(next));
+    window.dispatchEvent(new Event('storage'));
+  }, [flowId]);
+
+  return { isComplete: state[flowId] ?? false, markComplete };
+}
+```
+
+## User onboarding examples
+
+Three patterns cover the majority of SaaS onboarding as of 2026, each solving a different problem at a different lifecycle stage. Picking the wrong pattern is more common than picking the wrong tool ([Smashing Magazine](https://www.smashingmagazine.com/2023/04/design-effective-user-onboarding-flow/)).
+
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>What it does</th>
+      <th>When to use</th>
+      <th>Complexity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Welcome tour</td>
+      <td>3-5 tooltip steps pointing at core UI elements</td>
+      <td>First login, orienting new users</td>
+      <td>Low</td>
+    </tr>
+    <tr>
+      <td>Setup checklist</td>
+      <td>Task list tracking required configuration steps</td>
+      <td>Products requiring setup (integrations, team invites)</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td>Contextual hints</td>
+      <td>Hotspots that appear when a user reaches a feature for the first time</td>
+      <td>Feature discovery after initial onboarding</td>
+      <td>Low per hint, high at scale</td>
+    </tr>
+  </tbody>
+</table>
+
+**Welcome tours** are the most common and most abused. Miller's "7 plus or minus 2" rule explains why long tours fail: users hold five to seven items in working memory. A ten-step tour dumps information faster than anyone absorbs it. Keep tours under five steps. Make them action-driven, not "click Next."
+
+**Setup checklists** work when the product genuinely requires configuration. Stripe's onboarding checklist is the canonical example. But checklists fail when the tasks are artificial, padding out a list to make the product feel feature-rich.
+
+**Contextual hints** are underrated. Instead of front-loading everything into day one, hints appear when users encounter a feature organically. Harder to implement, but 80% of users delete apps they can't figure out ([UserGuiding](https://userguiding.com/blog/user-onboarding-statistics)). Spreading guidance across the lifecycle beats dumping it all upfront.
+
+## Why user onboarding matters for developers
+
+This isn't just a PM problem. The technical choices you make directly determine whether onboarding succeeds or fails. A tour that blocks keyboard navigation violates [WCAG 2.1 SC 2.1.1](https://www.w3.org/WAI/WCAG21/Understanding/keyboard.html). An overlay loading 40KB of JavaScript pushes Time to Interactive past acceptable thresholds on mobile.
+
+Search for "user onboarding WCAG" or "onboarding ARIA" and you'll find almost nothing. Yet every tooltip in a product tour should have `role="dialog"`, `aria-label`, and trapped focus. Almost none do.
+
+90% of users who don't understand a product's value in their first week will churn ([UserGuiding](https://userguiding.com/blog/user-onboarding-statistics)). Developers control whether onboarding renders for the right user, at the right time, in a way they can interact with regardless of how they use their computer.
+
+## User onboarding in Tour Kit
+
+[Tour Kit](https://usertourkit.com/) approaches user onboarding as a code-first problem. Hooks and headless components for tours, checklists, hints, and announcements. You supply the UI. Core ships under 8KB gzipped with zero runtime dependencies.
+
+No visual builder. If your team needs drag-and-drop flow creation without code, a SaaS tool like Userpilot or Appcues fits better.
+
+Tour Kit is for teams that already have a component library and want onboarding that belongs in their app. Requires React 18+, TypeScript-first, smaller community than established tools.
+
+Read the [complete user onboarding handbook](/blog/user-onboarding-handbook) for implementation patterns, or start with the [React 19 quickstart](/blog/add-product-tour-react-19).
+
+## FAQ
+
+### What is the difference between user onboarding and a product tour?
+
+User onboarding is the broader system for moving new users to productive usage. Product tours are one tactic within that system. A complete strategy also includes checklists, contextual hints, and in-app announcements. Tour Kit provides separate packages for each pattern.
+
+### How long should user onboarding take?
+
+Keep individual flows under five steps. Chameleon's analysis of 15 million interactions found completion drops from 72% at three steps to 16% at seven. Focus the first session on one core action and spread remaining guidance across the first week using contextual hints.
+
+### Does user onboarding need to be accessible?
+
+Yes. Onboarding overlays and tooltips are interactive UI elements covered by WCAG 2.1, requiring keyboard navigation, focus trapping, and ARIA attributes. Skipping accessibility means your first interaction with assistive technology users is broken. Tour Kit builds focus management and ARIA support into its core hooks.
+
+### What metrics should I track for user onboarding?
+
+Four metrics matter: tour completion rate (target above 60%), time to first key action, activation rate within the first week, and seven-day retention for onboarded versus non-onboarded users. The completion-to-activation correlation reveals whether your onboarding teaches anything or just adds clicks.
+
+{/* JSON-LD Schema */}
+export const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "What is user onboarding? A developer's definition",
+  "description": "User onboarding defined from a developer's perspective. Covers the technical implementation, patterns, accessibility requirements, and code examples.",
+  "author": {
+    "@type": "Person",
+    "name": "DomiDex",
+    "url": "https://github.com/DomiDex"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-12",
+  "dateModified": "2026-04-12",
+  "image": "https://usertourkit.com/og-images/what-is-user-onboarding.png",
+  "url": "https://usertourkit.com/blog/what-is-user-onboarding",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/what-is-user-onboarding"
+  },
+  "keywords": ["what is user onboarding", "user onboarding definition", "onboarding meaning saas"],
+  "proficiencyLevel": "Beginner",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+
+export const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the difference between user onboarding and a product tour?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "User onboarding is the broader system for moving new users to productive usage. Product tours are one component of that system. A complete onboarding strategy also includes setup checklists, contextual hints, empty state design, welcome emails, and in-app announcements."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long should user onboarding take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keep individual onboarding flows under five steps. Chameleon's analysis of 15 million tour interactions found completion drops from 72% at three steps to 16% at seven steps. Spread remaining guidance across the first week using contextual hints rather than front-loading everything."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does user onboarding need to be accessible?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Onboarding overlays, tooltips, and modals are interactive UI elements covered by WCAG 2.1. They require keyboard navigation, focus trapping, ARIA attributes, and screen reader announcements. Tour Kit builds focus management and ARIA support into its core hooks by default."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What metrics should I track for user onboarding?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Track four metrics: tour completion rate (target above 60%), time to first key action, activation rate within the first week, and seven-day retention for users who completed onboarding versus those who skipped it."
+      }
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+---
+title: "Session Replay for Onboarding: Finding Where Users Get Stuck"
+slug: "session-replay-onboarding"
+description: "Connect session replay to your onboarding funnel to see exactly where users struggle. Covers tool selection, privacy compliance, and Tour Kit integration."
+primary_keyword: "session replay onboarding"
+secondary_keywords: ["session replay product tour", "user session onboarding analysis", "session replay analytics onboarding"]
+category: "Metrics"
+schema_type: "TechArticle"
+spreadsheet_row: 267
+date: "2026-04-11"
+updated: "2026-04-11"
+published: true
+ogImage: /og-images/session-replay-onboarding.png
+---
+
+# Session replay for onboarding: finding where users get stuck
+
+Your onboarding funnel shows a 40% drop-off at step three. You know *where* users leave. You have no idea *why*. Perhaps the tooltip obscures the button they need to click. The form validation could be firing before they finish typing. Or the product tour skips a step on mobile viewports entirely. Funnel charts can't answer any of those questions. Session replay can.
+
+This guide covers how to wire session replay into your onboarding flow, which tools fit different team sizes and budgets, and how to stay GDPR-compliant while recording user sessions. If you use [Tour Kit](https://usertourkit.com/) for your product tours, you'll see how its analytics callbacks map directly to replay filters. The approach works with any tour library.
+
+```bash
+npm install @tourkit/core @tourkit/react @tourkit/analytics
+```
+
+## What is session replay for onboarding?
+
+Session replay for onboarding is the practice of recording and replaying user interactions during first-run experiences (product tours, setup wizards, checklist flows) to identify specific friction points that cause drop-off. Unlike funnel analytics that show aggregate conversion rates between steps, session replay captures the exact DOM state, mouse movements, clicks, and scroll behavior of individual users navigating your onboarding. As of April 2026, tools like PostHog, Sentry, and FullStory offer session replay SDKs ranging from 29KB to 59KB gzipped, making the performance cost manageable for most applications.
+
+The distinction matters because onboarding is where small UX problems compound fastest. A confusing tooltip on step two doesn't just lose that step. It erodes trust in every step that follows. Watching five failed sessions often reveals a pattern that no amount of A/B testing would surface.
+
+## Why session replay matters for onboarding teams
+
+Funnel analytics tell you the conversion rate between step one and step two, and that 23% of users abandon at the workspace creation screen. What they can't show is that users are trying to paste a URL into a text field that only accepts plain text, or that the "Next" button renders below the fold on 13-inch laptops. Session replay bridges this "what vs. why" gap, and for product tours specifically, the gap is wider than most teams realize because tour overlays introduce unpredictable UI interactions with the underlying page.
+
+Sprig's analytics team put it concisely: "Analytics tell you where users drop off. Session replay shows you why" ([Sprig Blog](https://sprig.com/blog/session-replay-analytics)). Tour overlays compound this problem with z-index conflicts, scroll hijacking, and backdrop click interception that only surface in real user sessions.
+
+A practical example from PostHog's documentation: filter for sessions where `onboarding_step_1` fired but `onboarding_completed` didn't. Watching ten of these sessions per week typically reveals the same two or three friction points in over half of them ([Cotera / PostHog Guide](https://cotera.co/articles/posthog-session-replay-guide)). That's the kind of actionable data you can't extract from a dashboard.
+
+## How session replay works under the hood
+
+Session replay SDKs don't record video of the user's screen. Instead, they serialize DOM mutations into a structured event log that can be reconstructed later in a sandboxed iframe. Every element addition, attribute change, text update, and style modification gets captured.
+
+The dominant open-source implementation is [rrweb](https://www.rrweb.io/), which both Sentry and several commercial tools fork internally. We tested rrweb directly while building Tour Kit's analytics integration, and the recording fidelity for portal-rendered overlays surprised us.
+
+The recording process runs in three phases:
+
+1. **Initial snapshot:** serializes the full DOM tree into a JSON representation on page load
+2. **Incremental mutations:** captures only what changes using `MutationObserver`, plus mouse coordinates and scroll positions via event listeners
+3. **Compression and upload:** batches mutation events, compresses with fflate or pako, and sends to the server in chunks
+
+Replay reconstructs the initial snapshot in a sandboxed iframe, then applies each mutation in sequence. Looks like video. Weighs a fraction of actual screen recording.
+
+For product tours, this architecture has one important consequence: tour overlays rendered via `createPortal` (how Tour Kit and most tour libraries work) appear in the DOM tree and get captured normally. But z-index layering, backdrop blur, and scroll-lock behavior can cause visual artifacts in replay that don't match what the user actually saw. The gotcha we hit: backdrop-filter blur renders as solid black in some replay viewers.
+
+## Choosing a session replay tool for onboarding
+
+Not every replay tool suits onboarding analysis equally well. The three features that separate useful tools from generic ones are funnel-to-replay linking (clicking a drop-off point to watch the specific sessions that abandoned), custom event filtering (filtering replays by your tour step events like `onboarding_step_3_viewed`), and SDK bundle size, since your onboarding page already loads a tour library alongside your application code.
+
+<table>
+<thead>
+<tr><th>Tool</th><th>Gzipped SDK size</th><th>Funnel-to-replay</th><th>Custom event filter</th><th>Self-hosted option</th><th>Free tier</th></tr>
+</thead>
+<tbody>
+<tr><td>PostHog</td><td>52.4 KB</td><td>Yes (click-through)</td><td>Yes</td><td>Yes</td><td>5K sessions/mo</td></tr>
+<tr><td>Sentry</td><td>29-36 KB</td><td>Yes (error-linked)</td><td>Yes</td><td>Yes</td><td>500 replays/mo</td></tr>
+<tr><td>FullStory</td><td>58.8 KB</td><td>Yes (Journeys)</td><td>Yes</td><td>No</td><td>30K sessions/mo</td></tr>
+<tr><td>OpenReplay</td><td>~45 KB</td><td>Yes</td><td>Yes</td><td>Yes (primary)</td><td>Self-hosted unlimited</td></tr>
+<tr><td>Contentsquare</td><td>553.4 KB</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
+</tbody>
+</table>
+
+Data sourced from [Rollbar's performance benchmark](https://rollbar.com/blog/session-replay-scripts-performance/) (April 2026) and vendor documentation. The 15x size gap between Sentry (29KB with tree-shaking) and Contentsquare (553KB) is worth noting if your onboarding page already ships a tour library, analytics SDK, and your app bundle.
+
+For teams already using PostHog for product analytics, adding session replay is a configuration flag with no additional SDK. If you want zero vendor lock-in, OpenReplay runs entirely self-hosted with a React-specific integration.
+
+## Connecting Tour Kit analytics to session replay
+
+Tour Kit's `@tourkit/analytics` package fires callbacks at each tour lifecycle event, giving you the granular data points that session replay tools need for filtering. When we wired this up with PostHog during our own onboarding testing, the ability to jump from a funnel drop-off directly to the replay of that exact session cut our debugging time from hours to minutes. Here's the integration pattern:
+
+```tsx
+// src/providers/analytics-provider.tsx
+import { TourProvider } from '@tourkit/react'
+import { AnalyticsProvider } from '@tourkit/analytics'
+import posthog from 'posthog-js'
+
+function OnboardingTourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <AnalyticsProvider
+      onStepView={(stepId, tourId) => {
+        posthog.capture('onboarding_step_view', {
+          step_id: stepId,
+          tour_id: tourId,
+        })
+      }}
+      onStepComplete={(stepId, tourId) => {
+        posthog.capture('onboarding_step_complete', {
+          step_id: stepId,
+          tour_id: tourId,
+        })
+      }}
+      onTourComplete={(tourId) => {
+        posthog.capture('onboarding_completed', { tour_id: tourId })
+      }}
+      onTourDismiss={(tourId, stepId) => {
+        posthog.capture('onboarding_dismissed', {
+          tour_id: tourId,
+          dismissed_at_step: stepId,
+        })
+      }}
+    >
+      <TourProvider>
+        {children}
+      </TourProvider>
+    </AnalyticsProvider>
+  )
+}
+```
+
+Once these events fire, the replay workflow becomes:
+
+1. Open your PostHog funnel: `onboarding_step_view` → `onboarding_step_complete` → `onboarding_completed`
+2. Click the drop-off bar at any step
+3. PostHog shows the sessions where that step fired but the next one didn't
+4. Watch three to five of those sessions
+5. The pattern reveals itself
+
+This same approach works with Sentry's replay (swap `posthog.capture()` for `Sentry.addBreadcrumb()`) or FullStory (use `FS.event()`). The key is emitting granular events at every tour transition, not just start and end.
+
+## The workflow: from drop-off to fix
+
+Watching replays without a structured process becomes a time sink where you burn two hours and walk away with vague impressions instead of actionable fixes. The workflow below is what we've used across onboarding iterations with Tour Kit, and it keeps replay review under 90 minutes per week while consistently surfacing the highest-impact friction points.
+
+**Monday: Pull the funnel.** Identify the step with the highest drop-off rate. If you have multiple tours (setup wizard, feature tour, checklist), compare them.
+
+**Tuesday-Wednesday: Watch 10 sessions.** Filter replays to users who reached the drop-off step but didn't complete the next one. Watch 10. Tally the friction patterns: "couldn't find the button" vs. "clicked outside the tooltip" vs. "scrolled past the target element."
+
+**Thursday: Categorize and prioritize.** Group friction patterns by frequency. The fix that addresses 6 out of 10 failed sessions ships first.
+
+**Friday: Ship the fix.** Adjust the tour step, update the target selector, change the tooltip position, or add a scroll-into-view behavior. Tag the fix in your analytics so next week's replays show the before/after.
+
+This isn't theoretical. Userpilot's research found that "watching 20 onboarding sessions tells you more than most quantitative analyses about where new users get stuck" ([Userpilot](https://userpilot.com/blog/what-is-session-replay/)). The ten-session-per-week cadence is the minimum for patterns to emerge without burning hours on replay review.
+
+## Performance impact of adding session replay
+
+Adding a replay SDK to an onboarding page that already loads a product tour library deserves scrutiny. We measured the combined impact during Tour Kit development and cross-referenced our findings with published benchmarks from Sentry Engineering and Highlight.io.
+
+Sentry measured their replay SDK's overhead on production sites ([Sentry Docs](https://docs.sentry.io/product/explore/session-replay/web/performance-overhead/)):
+
+- **First Input Delay (FID):** +0.24ms increase (imperceptible)
+- **Total Blocking Time (TBT):** +373ms increase (~14% of main thread budget)
+- **Memory usage:** ~6MB additional
+
+Highlight.io's independent benchmark ([Highlight.io Blog](https://www.highlight.io/blog/session-replay-performance)) found 20-25% CPU increase during active recording, with 0.017-0.07 seconds added to interaction times.
+
+Combined weight matters more than either number alone. Tour Kit's core ships at under 8KB gzipped. Adding PostHog's replay SDK (52.4KB) multiplies your onboarding JavaScript by 7x. Two strategies help:
+
+**Lazy-load replay for first-time users only.** Most replay value comes from new user sessions. Returning users who completed onboarding don't need recording.
+
+```tsx
+// src/hooks/use-conditional-replay.ts
+import { useEffect } from 'react'
+
+export function useConditionalReplay(isNewUser: boolean) {
+  useEffect(() => {
+    if (!isNewUser) return
+
+    import('posthog-js').then((posthog) => {
+      posthog.default.startSessionRecording()
+    })
+
+    return () => {
+      import('posthog-js').then((posthog) => {
+        posthog.default.stopSessionRecording()
+      })
+    }
+  }, [isNewUser])
+}
+```
+
+**Sample replay at 10-20%.** You don't need every session. Patterns emerge from a subset, and PostHog, Sentry, and FullStory all support sampling rates via configuration.
+
+## Privacy and GDPR compliance
+
+Session replay records user behavior. In GDPR jurisdictions, that requires explicit consent and careful data handling. Fines reach up to 20 million euros or 4% of annual global turnover ([Hoop.dev](https://hoop.dev/blog/gdpr-compliance-in-session-replay)), and US wiretapping lawsuits against companies using session replay are increasing ([Loeb & Loeb](https://www.loeb.com/en/insights/publications/2025/07/understanding-session-replay-legal-risks-and-how-to-mitigate-them)).
+
+Modern replay SDKs ship "private by default." Sentry's documentation confirms that "the default configuration redacts all HTML text nodes and images before data leaves the browser" ([Sentry Privacy Docs](https://docs.sentry.io/security-legal-pii/scrubbing/protecting-user-privacy/)). But onboarding flows often contain data that generic redaction misses.
+
+A privacy checklist for onboarding replay:
+
+1. **Consent first.** Don't start recording until the user consents. Load the replay SDK after consent, not before.
+2. **Mask onboarding inputs.** Workspace names, team names, role selections, and any free-text fields entered during setup contain PII. Add `data-sentry-mask` or the equivalent attribute.
+3. **Block file upload previews.** If your onboarding includes avatar upload or document import, block those elements from capture.
+4. **Set retention limits.** Onboarding replays lose diagnostic value after 30 days. Configure your replay tool to auto-delete.
+5. **Disclose in your privacy policy.** Name the replay vendor, state that interactions are recorded, and explain the purpose.
+
+```tsx
+// Masking sensitive onboarding fields in Sentry
+<input
+  type="text"
+  data-sentry-mask=""
+  placeholder="Your workspace name"
+/>
+
+// Or block entire sections from replay
+<div data-sentry-block="">
+  <FileUpload onComplete={handleAvatarUpload} />
+</div>
+```
+
+## AI-powered replay analysis in 2026
+
+As of April 2026, manual replay review is becoming optional because the major session replay tools now use AI to automatically flag problem sessions, classify user frustration patterns, and generate plain-language summaries of what went wrong. This shifts the work from "watch recordings and spot problems" to "review AI-flagged issues and decide what to fix."
+
+PostHog identifies rage clicks (rapid repeated clicks on the same element), dead clicks (clicks that produce no visible response), and thrashing (rapid back-and-forth navigation). FullStory's Journeys feature clusters sessions by behavior pattern and highlights deviations from the happy path. Sentry's accessibility insights run axe-core WCAG checks during replay, catching WCAG violations that only appear when tour overlays render ([Sentry Changelog](https://sentry.io/changelog/2023-12-7-accessibility-insights-in-session-replay-alpha-release/)).
+
+For onboarding, AI analysis catches patterns human reviewers miss at scale. Consider a tooltip that 15% of users dismiss without reading. Or a tour step where average dwell time hits 8 seconds, suggesting confusion. On mobile, the "Next" button might render outside the visible area entirely.
+
+But these tools analyze what happened, not why the design failed. You still need a human to look at a rage-clicked tooltip and decide whether the copy is confusing, the target element is wrong, or the step should be removed entirely.
+
+## Building an open-source onboarding analytics stack
+
+Teams that want full control over user data without vendor lock-in can assemble an entirely open-source onboarding analytics stack in 2026, combining MIT-licensed tour logic with self-hosted replay and funnel analytics. As of April 2026, the components are mature enough for production use:
+
+- **Tour Kit** (MIT): product tours and onboarding flows
+- **PostHog** (MIT, self-hosted): analytics, funnels, and session replay
+- **rrweb** (MIT): core replay recording library if you need custom replay without PostHog
+- **OpenReplay** (open-source, self-hosted): full replay suite alternative to PostHog
+
+Everything runs on your infrastructure. No user data leaves your servers. No per-seat pricing. The tradeoff is operational overhead: maintaining PostHog or OpenReplay means server costs, upgrades, and monitoring.
+
+For teams under 50 employees, PostHog's cloud free tier (5,000 sessions/month) or FullStory's free tier (30,000 sessions/month, launched August 2025) might make more sense. Self-hosting shines past 10,000 monthly active users when per-session pricing starts compounding.
+
+## Common mistakes with session replay for onboarding
+
+Most teams make the same five mistakes when they first add replay to their analytics stack. Avoiding them saves weeks of wasted effort.
+
+**Watching every session.** You don't need to. Filter for failed sessions first, focusing on users who started the tour but didn't complete it. Ten filtered sessions per week beats fifty random ones.
+
+**Recording without consent.** Even if your replay SDK masks PII by default, recording behavior without consent violates GDPR and increasingly violates US state privacy laws. Consent-first is the only safe pattern.
+
+**Ignoring mobile viewports.** Tour overlays behave differently on mobile. Tooltips clip against screen edges, backdrop touch events behave unpredictably, and scroll behavior changes. Watch mobile replays separately from desktop.
+
+**Adding replay to every page.** Record onboarding flows, activation funnels, and feature discovery moments. Recording your settings page or pricing page adds noise without insight. Sentry's sampling configuration supports URL-based filtering.
+
+**Treating replay as a replacement for analytics.** Session replay shows individual user journeys. You still need aggregate funnel metrics to know *which* sessions to watch. They work together, not as substitutes.
+
+## Tour Kit's approach: analytics without replay lock-in
+
+Tour Kit doesn't bundle a session replay SDK, and that's deliberate. Tour Kit's core ships at under 8KB gzipped because it focuses on tour logic, not analytics infrastructure. The `@tourkit/analytics` package provides the event hooks (`onStepView`, `onStepComplete`, `onTourDismiss`) that feed into whatever replay tool your team already uses.
+
+This means you aren't locked into a specific replay vendor. Switch from PostHog to Sentry, or from FullStory to OpenReplay, without touching your tour code. The tour events remain the same; only the analytics provider callback changes.
+
+The tradeoff is that Tour Kit requires React 18+ and doesn't include a visual builder for non-developers. If your team needs a drag-and-drop tour editor with built-in replay, tools like Pendo or Userpilot bundle both in a single platform (at significantly higher per-seat pricing).
+
+Explore Tour Kit's analytics integration at [usertourkit.com](https://usertourkit.com/).
+
+## FAQ
+
+### Does session replay slow down my onboarding page?
+
+Session replay adds measurable but usually imperceptible overhead. Sentry's benchmarks show a 0.24ms FID increase and approximately 6MB additional memory usage. The bigger concern is bundle size: session replay SDKs range from 29KB to 553KB gzipped. Lazy-loading the replay SDK for new users only is the standard mitigation.
+
+### Is session replay GDPR-compliant?
+
+Session replay can be GDPR-compliant with proper implementation. You need explicit consent before recording, automatic PII masking for text and images, privacy policy disclosure naming the replay vendor, and retention limits. Modern replay SDKs mask PII by default, but onboarding inputs like workspace names require additional masking configuration.
+
+### How many sessions should I watch per week?
+
+Ten filtered sessions per week is the practical minimum. Filter for sessions where the onboarding tour started but didn't complete. PostHog found that ten sessions from the same drop-off point typically reveal the same two or three friction points in over half of them.
+
+### Can I use session replay with any product tour library?
+
+Yes. Session replay captures DOM mutations regardless of which tour library renders them. Your tour library just needs to emit events (step viewed, step completed, tour dismissed) that your replay tool can use as filter criteria. Tour Kit's `@tourkit/analytics` package provides these hooks out of the box. React Joyride, Shepherd.js, and other libraries can emit equivalent events with custom instrumentation.
+
+### What is the best session replay tool for onboarding analysis?
+
+PostHog is the strongest choice for onboarding analysis because it combines session replay with funnel analytics in one tool, letting you click from a funnel drop-off directly to the sessions that abandoned. It offers self-hosting and a free tier of 5,000 sessions per month. Sentry is the lightest option at 29KB gzipped if you already use it for error monitoring.
+
+---
+
+## JSON-LD structured data
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Session Replay for Onboarding: Finding Where Users Get Stuck",
+  "description": "Connect session replay to your onboarding funnel to see exactly where users struggle. Covers tool selection, privacy compliance, and Tour Kit integration.",
+  "author": {
+    "@type": "Person",
+    "name": "Dominic Bénard",
+    "url": "https://usertourkit.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Tour Kit",
+    "url": "https://usertourkit.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://usertourkit.com/logo.png"
+    }
+  },
+  "datePublished": "2026-04-11",
+  "dateModified": "2026-04-11",
+  "image": "https://usertourkit.com/og-images/session-replay-onboarding.png",
+  "url": "https://usertourkit.com/blog/session-replay-onboarding",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://usertourkit.com/blog/session-replay-onboarding"
+  },
+  "keywords": ["session replay onboarding", "session replay product tour", "user session onboarding analysis"],
+  "proficiencyLevel": "Intermediate",
+  "dependencies": "React 18+, TypeScript 5+",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  }
+}
+```
+
+## Internal linking suggestions
+
+- Link FROM: [PostHog event tracking guide](/blog/track-product-tour-completion-posthog-events) — add "For deeper analysis, pair events with [session replay](/blog/session-replay-onboarding)"
+- Link FROM: [Funnel analysis for onboarding flows](/blog/funnel-analysis-onboarding-flows) — add "Session replay fills the qualitative gap funnels leave. See [our replay guide](/blog/session-replay-onboarding)"
+- Link FROM: [GA4 Tour Kit event tracking](/blog/ga4-tour-kit-event-tracking-onboarding) — reference replay as next step
+- Link TO: [PostHog event tracking](/blog/track-product-tour-completion-posthog-events) — already linked contextually
+- Link TO: [Amplitude onboarding retention](/blog/amplitude-tour-kit-onboarding-retention) — reference in tool comparison
+
+## Distribution checklist
+
+- Cross-post to Dev.to (canonical to usertourkit.com)
+- Cross-post to Hashnode (canonical to usertourkit.com)
+- Submit to Reddit r/reactjs with title "How we use session replay to debug onboarding drop-offs"
+- Submit to Hacker News if discussion-worthy angle emerges

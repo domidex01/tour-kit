@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { useNudge } from '../hooks'
 import { Slot, UnifiedSlot } from '../lib/slot'
