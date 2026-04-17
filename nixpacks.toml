@@ -1,0 +1,13 @@
+providers = ["node"]
+
+[phases.setup]
+aptPkgs = []
+
+[phases.install]
+cmds = ["pnpm i --frozen-lockfile"]
+
+[phases.build]
+cmds = ["pnpm build --filter=@tour-kit/docs"]
+
+[start]
+cmd = "pnpm --filter @tour-kit/docs start"
