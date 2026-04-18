@@ -1,0 +1,27 @@
+name: Link Check
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Mondays at 06:00 UTC
+  workflow_dispatch:      # manual trigger
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --exclude-path 'node_modules'
+            --exclude-path '.next'
+            --exclude-mail
+            --accept 200,204,206,403
+            'apps/docs/content/**/*.mdx'
+            'apps/docs/content/**/*.md'
+            'README.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true  # Phase 5 exit: non-blocking; flip to strict after 2 weeks

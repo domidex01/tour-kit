@@ -255,38 +255,50 @@ function FAQ() {
         </h3>
       </div>
       <div className="mx-auto max-w-3xl divide-y divide-fd-border overflow-hidden rounded-xl border border-fd-border">
-        {FAQ_ITEMS.map((item, i) => (
-          <div key={item.q}>
-            <button
-              type="button"
-              onClick={() => setOpenIndex(openIndex === i ? null : i)}
-              className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50"
-            >
-              {item.q}
-              <svg
-                className={`h-4 w-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 ${openIndex === i ? 'rotate-180' : ''}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+        {FAQ_ITEMS.map((item, i) => {
+          const isOpen = openIndex === i
+          const panelId = `faq-panel-${i}`
+          const triggerId = `faq-trigger-${i}`
+          return (
+            <div key={item.q}>
+              <button
+                type="button"
+                id={triggerId}
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                onClick={() => setOpenIndex(isOpen ? null : i)}
+                className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50"
               >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </button>
-            <div
-              className={`grid transition-all duration-200 ${openIndex === i ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
-            >
-              <div className="overflow-hidden">
-                <p className="px-6 pb-5 text-[14px] leading-relaxed text-fd-muted-foreground">
-                  {item.a}
-                </p>
+                {item.q}
+                <svg
+                  className={`h-4 w-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <div
+                id={panelId}
+                role="region"
+                aria-labelledby={triggerId}
+                hidden={!isOpen}
+                className={`grid transition-all duration-200 ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+              >
+                <div className="overflow-hidden">
+                  <p className="px-6 pb-5 text-[14px] leading-relaxed text-fd-muted-foreground">
+                    {item.a}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

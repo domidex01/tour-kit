@@ -38,7 +38,7 @@ export function BlogPagination({ currentPage, totalPages }: BlogPaginationProps)
           key={page}
           href={pageHref(page)}
           aria-current={page === currentPage ? 'page' : undefined}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors ${
+          className={`inline-flex h-11 w-11 items-center justify-center rounded-md text-sm font-medium transition-colors ${
             page === currentPage
               ? 'bg-[#0197f6] text-white'
               : 'border border-fd-border text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'

@@ -21,7 +21,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <HomeLayout {...baseOptions()}>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
+      <main id="main-content" className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
         <h1 className="mb-2 text-3xl font-bold tracking-tight">Search</h1>
         <form method="get" action="/search" className="mb-8">
           <label htmlFor="q" className="sr-only">

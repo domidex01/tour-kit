@@ -27,11 +27,13 @@ function BackgroundPattern() {
       <img
         src="/tourkit-lighthouse.png"
         alt=""
+        role="presentation"
         className="absolute inset-0 h-full w-full object-cover opacity-90 dark:hidden"
       />
       <img
         src="/hero-dark.avif"
         alt=""
+        role="presentation"
         className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
       />
     </div>

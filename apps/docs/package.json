@@ -14,6 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@next/third-parties": "^16.2.4",
     "@polar-sh/nextjs": "^0.9.5",
     "@radix-ui/react-popover": "^1.1.15",
     "@tour-kit/core": "workspace:*",
@@ -33,6 +34,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.4",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/mdx": "^2.0.13",
     "@types/node": "^22.10.0",

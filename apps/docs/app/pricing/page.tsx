@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function PricingPage() {
   return (
     <HomeLayout {...baseOptions()}>
-      <main className="flex flex-1 flex-col">
+      <main id="main-content" className="flex flex-1 flex-col">
         <Pricing />
       </main>
     </HomeLayout>

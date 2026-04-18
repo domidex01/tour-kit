@@ -22,7 +22,9 @@ export default function Layout({ children }: { children: ReactNode }) {
         ),
       }}
     >
-      {children}
+      <main id="main-content" className="flex flex-1 flex-col [grid-area:main]">
+        {children}
+      </main>
     </DocsLayout>
   )
 }

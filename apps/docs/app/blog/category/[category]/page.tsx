@@ -65,17 +65,19 @@ export default async function CategoryPage({ params }: PageProps) {
           <img
             src="/blog-hero-light.png"
             alt=""
+            role="presentation"
             className="h-full w-full object-cover opacity-60 dark:hidden"
           />
           <img
             src="/blog-hero-dark.png"
             alt=""
+            role="presentation"
             className="hidden h-full w-full object-cover opacity-60 dark:block"
           />
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-[1400px] px-6 py-10 sm:px-8 lg:px-12">
+      <main id="main-content" className="mx-auto w-full max-w-[1400px] px-6 py-10 sm:px-8 lg:px-12">
         <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
           {posts.map((post) => {
             const formattedDate = post.publishedAt

@@ -179,9 +179,10 @@ function TourDemo() {
                   <button
                     type="button"
                     onClick={() => setStep((s) => (s ?? 1) - 1)}
+                    aria-label="Previous step"
                     className="flex h-6 w-6 items-center justify-center rounded-md border border-fd-border text-fd-muted-foreground hover:bg-fd-muted"
                   >
-                    <ChevronLeft className="h-3 w-3" />
+                    <ChevronLeft className="h-3 w-3" aria-hidden="true" />
                   </button>
                 )}
                 <button
@@ -270,10 +271,17 @@ function HintsDemo() {
               <button
                 type="button"
                 onClick={() => toggle(row.id)}
+                aria-label={`Show hint for ${row.label}`}
                 className="relative flex h-5 w-5 items-center justify-center"
               >
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--tk-primary)] opacity-40" />
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-[var(--tk-primary)]" />
+                <span
+                  aria-hidden="true"
+                  className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--tk-primary)] opacity-40"
+                />
+                <span
+                  aria-hidden="true"
+                  className="relative inline-flex h-3 w-3 rounded-full bg-[var(--tk-primary)]"
+                />
               </button>
             )}
 
@@ -362,9 +370,10 @@ function AnnouncementsDemo() {
             <button
               type="button"
               onClick={() => setVariant(null)}
+              aria-label="Dismiss banner"
               className="rounded-md p-0.5 text-white/70 hover:text-white"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </div>
         )}
@@ -377,9 +386,10 @@ function AnnouncementsDemo() {
               <button
                 type="button"
                 onClick={() => setVariant(null)}
+                aria-label="Dismiss toast"
                 className="rounded-md p-0.5 text-fd-muted-foreground hover:text-fd-foreground"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" aria-hidden="true" />
               </button>
             </div>
             <p className="mb-2 text-[12px] text-fd-muted-foreground">
@@ -1106,13 +1116,18 @@ export function DemoTour() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
+              aria-label={tab.label}
+              aria-pressed={activeTab === tab.id}
               className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
                 activeTab === tab.id
                   ? 'bg-[#0197f6] text-white shadow-sm'
                   : 'text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
               }`}
             >
-              <tab.icon className={`h-3.5 w-3.5 ${activeTab === tab.id ? '' : tab.color}`} />
+              <tab.icon
+                aria-hidden="true"
+                className={`h-3.5 w-3.5 ${activeTab === tab.id ? '' : tab.color}`}
+              />
               <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}

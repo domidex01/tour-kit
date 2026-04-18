@@ -52,6 +52,7 @@ export function ArticleLayout({
     <HomeLayout {...baseOptions()}>
       <BreadcrumbJsonLd items={breadcrumbs.map((b) => ({ name: b.label, url: b.href }))} />
       <main
+        id="main-content"
         className={`mx-auto w-full px-6 py-12 sm:px-8 lg:px-12 ${toc ? 'max-w-[1100px]' : 'max-w-[860px]'}`}
       >
         {/* Breadcrumbs */}

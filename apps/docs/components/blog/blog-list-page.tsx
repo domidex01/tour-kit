@@ -67,17 +67,19 @@ export function BlogListPage({ page }: BlogListPageProps) {
           <img
             src="/blog-hero-light.png"
             alt=""
+            role="presentation"
             className="h-full w-full object-cover opacity-60 dark:hidden"
           />
           <img
             src="/blog-hero-dark.png"
             alt=""
+            role="presentation"
             className="hidden h-full w-full object-cover opacity-60 dark:block"
           />
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-[1400px] px-6 py-10 sm:px-8 lg:px-12">
+      <main id="main-content" className="mx-auto w-full max-w-[1400px] px-6 py-10 sm:px-8 lg:px-12">
         {/* Category filters */}
         <nav className="mb-8 flex flex-wrap gap-1.5" aria-label="Filter by category">
           {categories.map((cat) => (

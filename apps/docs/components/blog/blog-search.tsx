@@ -40,15 +40,17 @@ export function BlogSearch({ posts }: { posts: SearchablePost[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search articles..."
+          aria-label="Search articles"
           className="h-10 w-full rounded-xl border border-fd-border/50 bg-fd-card pl-10 pr-10 text-[14px] text-fd-foreground placeholder:text-fd-muted-foreground focus:border-[#0197f6] focus:outline-none focus:ring-1 focus:ring-[#0197f6] dark:border-fd-border"
         />
         {query && (
           <button
             type="button"
             onClick={() => setQuery('')}
+            aria-label="Clear search"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-fd-muted-foreground hover:text-fd-foreground"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         )}
       </div>

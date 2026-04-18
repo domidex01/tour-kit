@@ -1,11 +1,8 @@
-import { ComparisonTable } from '@/components/landing/comparison-table'
-import { DemoTour } from '@/components/landing/demo-tour'
 import { Features } from '@/components/landing/features'
 import { Footer } from '@/components/landing/footer'
 import { Hero } from '@/components/landing/hero'
 import { Packages } from '@/components/landing/packages'
 import { QuickStart } from '@/components/landing/quick-start'
-import { SocialProof } from '@/components/landing/social-proof'
 import { baseOptions } from '@/lib/layout.shared'
 import {
   OrganizationJsonLd,
@@ -15,7 +12,45 @@ import {
 } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowRight } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
+
+const DemoTour = dynamic(
+  () => import('@/components/landing/demo-tour').then((m) => ({ default: m.DemoTour })),
+  {
+    loading: () => (
+      <div
+        aria-hidden="true"
+        className="mx-auto my-12 h-[640px] w-full max-w-[1120px] animate-pulse rounded-2xl bg-fd-muted/30"
+      />
+    ),
+  }
+)
+
+const ComparisonTable = dynamic(
+  () =>
+    import('@/components/landing/comparison-table').then((m) => ({ default: m.ComparisonTable })),
+  {
+    loading: () => (
+      <div
+        aria-hidden="true"
+        className="mx-auto my-12 h-[560px] w-full max-w-[1120px] animate-pulse rounded-2xl bg-fd-muted/30"
+      />
+    ),
+  }
+)
+
+const SocialProof = dynamic(
+  () => import('@/components/landing/social-proof').then((m) => ({ default: m.SocialProof })),
+  {
+    loading: () => (
+      <div
+        aria-hidden="true"
+        className="mx-auto my-12 h-[360px] w-full max-w-[1120px] animate-pulse rounded-2xl bg-fd-muted/30"
+      />
+    ),
+  }
+)
 
 const HOMEPAGE_NAME = 'userTourKit'
 const HOMEPAGE_DESCRIPTION =
@@ -32,7 +67,7 @@ export default function HomePage() {
       />
       <OrganizationJsonLd />
       <ProductJsonLd />
-      <main className="flex flex-1 flex-col">
+      <main id="main-content" className="flex flex-1 flex-col">
         <Hero />
         <DemoTour />
         <QuickStart />
@@ -48,11 +83,13 @@ export default function HomePage() {
             <img
               src="/tourkit-lighthouse.png"
               alt=""
+              role="presentation"
               className="absolute inset-0 h-full w-full object-cover dark:hidden"
             />
             <img
               src="/hero-dark.avif"
               alt=""
+              role="presentation"
               className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
             />
           </div>

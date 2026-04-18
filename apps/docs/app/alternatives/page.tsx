@@ -28,7 +28,7 @@ export default function AlternativesHub() {
           { name: 'Alternatives', url: '/alternatives' },
         ]}
       />
-      <main className="mx-auto w-full max-w-[1120px] px-6 py-16 sm:px-8 lg:px-12">
+      <main id="main-content" className="mx-auto w-full max-w-[1120px] px-6 py-16 sm:px-8 lg:px-12">
         <header className="mb-16 max-w-2xl">
           <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-fd-foreground sm:text-4xl">
             Alternatives to popular onboarding tools
