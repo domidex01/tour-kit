@@ -6,6 +6,7 @@ const withMDX = createMDX()
 const config = {
   output: 'standalone',
   reactStrictMode: true,
+  trailingSlash: false,
   transpilePackages: ['@tour-kit/core', '@tour-kit/react', '@tour-kit/hints'],
   images: {
     remotePatterns: [{ hostname: 'github.com' }, { hostname: 'avatars.githubusercontent.com' }],

@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://usertourkit.com'),
   title: {
     template: '%s | userTourKit',
     default: 'userTourKit - Product Tours for React',
@@ -26,20 +27,20 @@ export const metadata: Metadata = {
     'shadcn',
   ],
   authors: [{ name: 'userTourKit Team' }],
-  robots: {
-    index: false,
-    follow: false,
-  },
   openGraph: {
     title: 'userTourKit - Product Tours for React',
     description: 'The most developer-friendly, accessible product tour library for React.',
     type: 'website',
     locale: 'en_US',
+    url: 'https://usertourkit.com',
+    siteName: 'userTourKit',
+    images: ['/og-default.png'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'userTourKit - Product Tours for React',
     description: 'The most developer-friendly, accessible product tour library for React.',
+    images: ['/og-default.png'],
   },
 }
 
