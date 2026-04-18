@@ -7,13 +7,31 @@ import { Packages } from '@/components/landing/packages'
 import { QuickStart } from '@/components/landing/quick-start'
 import { SocialProof } from '@/components/landing/social-proof'
 import { baseOptions } from '@/lib/layout.shared'
+import {
+  OrganizationJsonLd,
+  ProductJsonLd,
+  SoftwareApplicationJsonLd,
+  WebSiteJsonLd,
+} from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
+const HOMEPAGE_NAME = 'userTourKit'
+const HOMEPAGE_DESCRIPTION =
+  'Headless, accessible product tours, onboarding flows, and in-app messaging for React. Open-source core with optional Pro packages.'
+
 export default function HomePage() {
   return (
     <HomeLayout {...baseOptions()}>
+      <SoftwareApplicationJsonLd name={HOMEPAGE_NAME} description={HOMEPAGE_DESCRIPTION} />
+      <WebSiteJsonLd
+        name={HOMEPAGE_NAME}
+        description={HOMEPAGE_DESCRIPTION}
+        searchUrl="https://usertourkit.com/search"
+      />
+      <OrganizationJsonLd />
+      <ProductJsonLd />
       <main className="flex flex-1 flex-col">
         <Hero />
         <DemoTour />

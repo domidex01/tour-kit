@@ -1,16 +1,40 @@
 import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/ai/page-actions'
 import { source } from '@/lib/source'
-import { FAQJsonLd, SoftwareSourceCodeJsonLd, TechArticleJsonLd } from '@/lib/structured-data'
+import {
+  FAQJsonLd,
+  HowToJsonLd,
+  SoftwareSourceCodeJsonLd,
+  TechArticleJsonLd,
+} from '@/lib/structured-data'
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 import defaultMdxComponents from 'fumadocs-ui/mdx'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
+const SITE_URL = 'https://usertourkit.com'
+
+// TOC titles are ReactNode. For simple headings they wrap as <a>Heading Text</a>.
+// Recurse through children to extract plain text.
+function stringifyReactNode(node: unknown): string {
+  if (typeof node === 'string') return node
+  if (typeof node === 'number') return String(node)
+  if (node == null || typeof node === 'boolean') return ''
+  if (Array.isArray(node)) return node.map(stringifyReactNode).join('')
+  if (typeof node === 'object' && node !== null && 'props' in node) {
+    const props = (node as { props?: { children?: unknown } }).props
+    if (props && 'children' in props) return stringifyReactNode(props.children)
+  }
+  return ''
+}
+
+function tocTitleToString(title: unknown): string {
+  return stringifyReactNode(title).replace(/\s+/g, ' ').trim()
+}
+
 // ── FAQ Data (inline — Fumadocs default schema doesn't support custom frontmatter) ──
 
 const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
-  // 1. Getting Started / Installation
   'getting-started/installation': [
     {
       question: 'How do I install userTourKit?',
@@ -33,7 +57,6 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         '@tour-kit/react is the main package for most projects. It includes @tour-kit/core automatically. Add @tour-kit/hints for feature discovery beacons.',
     },
   ],
-  // 2. Getting Started / Quick Start
   'getting-started/quick-start': [
     {
       question: 'How do I create my first product tour?',
@@ -51,7 +74,6 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'Use the target prop on TourStep with a CSS selector string like "#my-button" or ".feature-card". userTourKit will highlight and position the tooltip near that element.',
     },
   ],
-  // 3. Core / Hooks / useTour
   'core/hooks/use-tour': [
     {
       question: 'What does the useTour hook return?',
@@ -74,7 +96,6 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'Pass onStart, onComplete, onSkip, and onStepChange callback props to the Tour component. These fire at each lifecycle event with tour state.',
     },
   ],
-  // 4. Core / Hooks / useStep
   'core/hooks/use-step': [
     {
       question: 'How do I access the current step data?',
@@ -92,7 +113,6 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'Each step has target (CSS selector), content (React node), placement (tooltip position), title, and optional advanceOn trigger configuration.',
     },
   ],
-  // 5. React / Components / Tour
   'react/components/tour': [
     {
       question: 'How do I define tour steps?',
@@ -115,7 +135,6 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'Add TourOverlay as a child of Tour. It automatically highlights the current step target with a dimmed backdrop and configurable padding.',
     },
   ],
-  // 6. React / Components / TourCard
   'react/components/tour-card': [
     {
       question: 'What props does TourCard accept?',
@@ -133,7 +152,6 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'Place TourNavigation inside TourCardFooter. It renders previous/next buttons automatically with disabled states based on step position.',
     },
   ],
-  // 7. React / Headless / Overview
   'react/headless': [
     {
       question: 'What is headless mode in userTourKit?',
@@ -156,7 +174,6 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'Yes, you can use pre-styled components like TourOverlay alongside headless ones like HeadlessTourCard in the same tour for maximum flexibility.',
     },
   ],
-  // 8. Guides / Accessibility
   'guides/accessibility': [
     {
       question: 'Is userTourKit accessible?',
@@ -179,7 +196,6 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'userTourKit automatically detects the prefers-reduced-motion media query and disables animations. The useMediaQuery hook lets you customize behavior further.',
     },
   ],
-  // 9. Hints / Overview
   hints: [
     {
       question: 'What are hints in userTourKit?',
@@ -202,7 +218,6 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'Yes, @tour-kit/hints supports localStorage and custom storage adapters to remember which hints a user has dismissed across sessions.',
     },
   ],
-  // 10. Examples / Basic Tour
   'examples/basic-tour': [
     {
       question: 'How do I create a basic multi-step tour?',
@@ -222,14 +237,8 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
   ],
 }
 
-interface PageProps {
-  params: Promise<{ slug?: string[] }>
-}
-
-export default async function Page({ params }: PageProps) {
-  const { slug } = await params
+export async function renderDocsPage(slug: string[] | undefined) {
   const page = source.getPage(slug)
-
   if (!page) notFound()
 
   const MDXContent = page.data.body
@@ -237,6 +246,21 @@ export default async function Page({ params }: PageProps) {
   const section = page.slugs[0]
   const faqItems = FAQ_DATA[slugPath]
   const isApiPage = section === 'api'
+
+  const howToSteps =
+    page.data.howto === true
+      ? (page.data.toc ?? [])
+          .filter((t) => t.depth === 2)
+          .map((t) => {
+            const name = tocTitleToString(t.title)
+            return {
+              name,
+              text: name,
+              url: `${SITE_URL}${page.url}${t.url}`,
+            }
+          })
+          .filter((step) => step.name.length > 0)
+      : []
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -253,6 +277,13 @@ export default async function Page({ params }: PageProps) {
           url={page.url}
           programmingLanguage="TypeScript"
           runtimePlatform="Node.js"
+        />
+      )}
+      {howToSteps.length >= 2 && (
+        <HowToJsonLd
+          name={page.data.title}
+          description={page.data.description ?? ''}
+          steps={howToSteps}
         />
       )}
       {faqItems && <FAQJsonLd items={faqItems} />}
@@ -272,15 +303,44 @@ export default async function Page({ params }: PageProps) {
   )
 }
 
-export async function generateStaticParams() {
-  return source.generateParams()
+const SECTION_LABELS: Record<string, string> = {
+  'getting-started': 'GETTING STARTED',
+  core: 'CORE',
+  react: 'REACT',
+  hints: 'HINTS',
+  adoption: 'ADOPTION',
+  analytics: 'ANALYTICS',
+  announcements: 'ANNOUNCEMENTS',
+  checklists: 'CHECKLISTS',
+  media: 'MEDIA',
+  scheduling: 'SCHEDULING',
+  surveys: 'SURVEYS',
+  guides: 'GUIDE',
+  examples: 'EXAMPLE',
+  api: 'API',
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params
-  const page = source.getPage(slug)
+function buildDocsOgUrl(title: string, description: string, section: string | undefined): string {
+  const params = new URLSearchParams({ title })
+  if (description) params.set('subtitle', description)
+  if (section) {
+    const label = SECTION_LABELS[section] ?? 'DOCS'
+    params.set('category', label)
+  } else {
+    params.set('category', 'DOCS')
+  }
+  return `/api/og?${params.toString()}`
+}
 
+export async function getDocsMetadata(slug: string[] | undefined): Promise<Metadata> {
+  const page = source.getPage(slug)
   if (!page) return {}
+
+  const ogImage = buildDocsOgUrl(
+    page.data.title,
+    page.data.description ?? '',
+    page.slugs[0]
+  )
 
   return {
     title: page.data.title,
@@ -289,6 +349,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: page.data.title,
       description: page.data.description,
       type: 'article',
+      images: [ogImage],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: page.data.title,
+      description: page.data.description,
+      images: [ogImage],
     },
   }
 }

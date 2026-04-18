@@ -299,3 +299,140 @@ export function SoftwareSourceCodeJsonLd({
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   )
 }
+
+// ── SoftwareApplication ──
+
+interface SoftwareApplicationProps {
+  name: string
+  description: string
+  /** Path appended to SITE_URL, e.g. "" for homepage or "/docs" */
+  url?: string
+  /** Defaults to "DeveloperApplication" */
+  applicationCategory?: string
+  softwareVersion?: string
+}
+
+export function SoftwareApplicationJsonLd({
+  name,
+  description,
+  url = '',
+  applicationCategory = 'DeveloperApplication',
+  softwareVersion,
+}: SoftwareApplicationProps): ReactNode {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name,
+    applicationCategory,
+    operatingSystem: 'Any',
+    description,
+    url: `${SITE_URL}${url}`,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    ...(softwareVersion && { softwareVersion }),
+    author: {
+      '@type': 'Organization',
+      name: 'userTourKit',
+      url: SITE_URL,
+    },
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+// ── WebSite (+ optional SearchAction) ──
+
+interface WebSiteJsonLdProps {
+  name: string
+  description: string
+  /** Absolute or relative site URL. If relative, prefixed with SITE_URL. */
+  url?: string
+  /**
+   * Absolute search endpoint URL that accepts `?q=` — enables sitelinks searchbox.
+   * Omit to skip SearchAction (preferred over emitting a stub pointing at a 404).
+   */
+  searchUrl?: string
+}
+
+export function WebSiteJsonLd({
+  name,
+  description,
+  url,
+  searchUrl,
+}: WebSiteJsonLdProps): ReactNode {
+  const resolvedUrl = url ? (url.startsWith('http') ? url : `${SITE_URL}${url}`) : SITE_URL
+  const data: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name,
+    url: resolvedUrl,
+    description,
+  }
+  if (searchUrl) {
+    data.potentialAction = {
+      '@type': 'SearchAction',
+      target: `${searchUrl}?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    }
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+// ── HowTo ──
+
+interface HowToStep {
+  name: string
+  text: string
+  url?: string
+}
+
+interface HowToJsonLdProps {
+  name: string
+  description: string
+  /** Must be ≥2 entries; caller should skip emission otherwise. */
+  steps: HowToStep[]
+  /** ISO 8601 duration, e.g. "PT15M" for 15 minutes. */
+  totalTime?: string
+  estimatedCost?: string
+}
+
+export function HowToJsonLd({
+  name,
+  description,
+  steps,
+  totalTime,
+  estimatedCost,
+}: HowToJsonLdProps): ReactNode {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name,
+    description,
+    ...(totalTime && { totalTime }),
+    ...(estimatedCost && { estimatedCost }),
+    step: steps.map((step, index) => ({
+      '@type': 'HowToStep',
+      position: index + 1,
+      name: step.name,
+      text: step.text,
+      ...(step.url && {
+        url: step.url.startsWith('http') ? step.url : `${SITE_URL}${step.url}`,
+      }),
+    })),
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
