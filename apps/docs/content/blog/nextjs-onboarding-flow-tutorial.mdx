@@ -1,0 +1,321 @@
+---
+title: "Build a complete Next.js 15 onboarding flow: tour + checklist + analytics"
+slug: "nextjs-onboarding-flow-tutorial"
+description: "Step-by-step Next.js 15 onboarding tutorial. Combine a product tour, activation checklist, and analytics plugin with userTourKit in under 45 minutes."
+primary_keyword: "next.js onboarding flow tutorial"
+secondary_keywords: ["next.js onboarding tutorial", "react onboarding checklist nextjs", "nextjs product tour analytics", "complete onboarding flow react"]
+category: "Tutorial"
+schema_type: "TechArticle"
+date: "2026-04-18"
+updated: "2026-04-18"
+published: true
+ogImage: /og-images/nextjs-onboarding-flow-tutorial.png
+---
+
+# Build a complete Next.js 15 onboarding flow: tour + checklist + analytics
+
+A product tour by itself is an introduction — not an onboarding flow. A real onboarding flow guides users from sign-up to activation across multiple sessions, tracks which steps they've completed, and reports what's working to an analytics pipeline. This tutorial builds that full flow in a Next.js 15 App Router project: a three-step first-run tour, a persistent activation checklist that survives reloads, and an analytics plugin that reports every event to your provider of choice. Ship in about forty-five minutes; no Server Component fighting, no SSR workarounds, no third-party runtime.
+
+```bash
+pnpm add @tour-kit/react @tour-kit/checklists @tour-kit/analytics
+```
+
+## What you'll build
+
+- A first-run `Tour` that auto-starts on a new user's first visit to `/dashboard`.
+- A persistent `Checklist` widget with four activation tasks, progress persistence, and task dependencies.
+- An analytics integration that reports `tour_started`, `step_viewed`, `tour_completed`, `checklist_task_completed`, and more to PostHog (swap for Mixpanel / Amplitude / GA4 by changing one line).
+
+The finished flow looks like what Linear, Vercel, or Stripe ship on first log-in — minus the third-party runtime and the per-seat pricing.
+
+## Prerequisites
+
+- Next.js 15 project using the App Router (`app/` directory).
+- React 18 or 19.
+- A PostHog project (free tier works) or another analytics provider you already use.
+
+If you don't have a Next.js project yet:
+
+```bash
+pnpm create next-app@latest onboarding-demo
+cd onboarding-demo
+```
+
+## Step 1 — Install the packages
+
+```bash
+pnpm add @tour-kit/react @tour-kit/checklists @tour-kit/analytics posthog-js
+```
+
+The three Tour Kit packages have a combined gzipped footprint well under 20KB — `@tour-kit/analytics` adds only the plugin wiring; the provider SDK (`posthog-js` here) is what you'd ship anyway.
+
+## Step 2 — Create the onboarding provider
+
+Tour Kit's onboarding pieces all plug into a shared provider tree. Put them in a dedicated client component so Server Components above can stay untouched.
+
+```tsx title="app/_providers/onboarding-provider.tsx"
+'use client'
+
+import { TourProvider } from '@tour-kit/react'
+import { ChecklistProvider } from '@tour-kit/checklists'
+import { AnalyticsProvider, PostHogPlugin } from '@tour-kit/analytics'
+import posthog from 'posthog-js'
+import { useEffect } from 'react'
+
+export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    })
+  }, [])
+
+  return (
+    <AnalyticsProvider plugins={[new PostHogPlugin(posthog)]}>
+      <TourProvider>
+        <ChecklistProvider persistence="localStorage">
+          {children}
+        </ChecklistProvider>
+      </TourProvider>
+    </AnalyticsProvider>
+  )
+}
+```
+
+Add this provider to `app/layout.tsx`:
+
+```tsx title="app/layout.tsx"
+import { OnboardingProvider } from './_providers/onboarding-provider'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <OnboardingProvider>{children}</OnboardingProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+Server Components above `OnboardingProvider` are untouched — this is the App Router pattern for mixing client-side state with a predominantly server-rendered app.
+
+## Step 3 — Build the first-run tour
+
+Add three steps to the dashboard, starting the tour automatically for new users:
+
+```tsx title="app/dashboard/page.tsx"
+'use client'
+
+import { Tour, TourStep, TourCard, TourOverlay, useTour } from '@tour-kit/react'
+import { useEffect } from 'react'
+
+function AutoStart() {
+  const { start, isComplete } = useTour('dashboard-onboarding')
+  useEffect(() => {
+    if (!isComplete) start()
+  }, [isComplete, start])
+  return null
+}
+
+export default function Dashboard() {
+  return (
+    <Tour id="dashboard-onboarding" persistence="localStorage">
+      <TourStep
+        target="#create-project"
+        title="Create your first project"
+        content="Everything lives inside a project. Start by creating one."
+        placement="bottom"
+      />
+      <TourStep
+        target="#invite-team"
+        title="Invite your teammates"
+        content="Onboarding is faster with a partner in crime."
+        placement="right"
+      />
+      <TourStep
+        target="#install-cli"
+        title="Install the CLI"
+        content="The CLI is how you ship. We'll walk through it next."
+        placement="left"
+      />
+      <TourOverlay />
+      <TourCard />
+      <AutoStart />
+      <main>
+        <h1>Dashboard</h1>
+        <button id="create-project">Create project</button>
+        <button id="invite-team">Invite team</button>
+        <button id="install-cli">Install CLI</button>
+      </main>
+    </Tour>
+  )
+}
+```
+
+`persistence="localStorage"` means the tour won't restart after the user completes it. For testing, clear localStorage to reset.
+
+## Step 4 — Add the activation checklist
+
+The tour introduces the workflow. The checklist sticks around until the user actually completes it — including across sessions.
+
+```tsx title="app/dashboard/_components/activation-checklist.tsx"
+'use client'
+
+import { Checklist, ChecklistTask, ChecklistProgress } from '@tour-kit/checklists'
+
+export function ActivationChecklist() {
+  return (
+    <Checklist id="activation" title="Get started in 4 steps">
+      <ChecklistProgress />
+      <ChecklistTask
+        id="create-project"
+        title="Create your first project"
+        description="Every workspace starts with a project."
+      />
+      <ChecklistTask
+        id="invite-team"
+        title="Invite a teammate"
+        description="Onboarding is easier together."
+        dependsOn="create-project"
+      />
+      <ChecklistTask
+        id="install-cli"
+        title="Install the CLI"
+        description="Ship from your terminal."
+      />
+      <ChecklistTask
+        id="first-deploy"
+        title="Ship your first deploy"
+        description="The activation event — congrats."
+        dependsOn="install-cli"
+      />
+    </Checklist>
+  )
+}
+```
+
+Add the widget to the dashboard:
+
+```tsx
+import { ActivationChecklist } from './_components/activation-checklist'
+
+// Inside the Tour, alongside your dashboard UI:
+<ActivationChecklist />
+```
+
+Task dependencies (`dependsOn`) lock later steps until prerequisites complete. "Invite a teammate" stays disabled until "Create your first project" is done. The checklist persists via `ChecklistProvider`'s `localStorage` adapter — close the browser, come back, the progress is still there.
+
+## Step 5 — Mark tasks complete from server actions
+
+When a user creates a project via a server action, flag the corresponding task:
+
+```tsx title="app/dashboard/_components/new-project-form.tsx"
+'use client'
+
+import { useChecklist } from '@tour-kit/checklists'
+import { createProject } from '../actions'
+
+export function NewProjectForm() {
+  const { complete } = useChecklist('activation')
+
+  async function handleSubmit(formData: FormData) {
+    const result = await createProject(formData)
+    if (result.ok) {
+      complete('create-project')
+    }
+  }
+
+  return (
+    <form action={handleSubmit}>
+      <input name="name" placeholder="Project name" />
+      <button type="submit">Create</button>
+    </form>
+  )
+}
+```
+
+The Server Action (`createProject`) stays in a Server Component file (`actions.ts`). The checklist update happens in the Client Component on success — exactly how Next.js App Router wants you to split server and client logic.
+
+## Step 6 — Verify analytics events fire
+
+Open your PostHog dashboard. Start the tour as a brand-new user. You should see:
+
+```
+tour_started                { tour_id: "dashboard-onboarding" }
+tour_step_viewed            { tour_id: "dashboard-onboarding", step_index: 0 }
+tour_step_viewed            { tour_id: "dashboard-onboarding", step_index: 1 }
+tour_step_viewed            { tour_id: "dashboard-onboarding", step_index: 2 }
+tour_completed              { tour_id: "dashboard-onboarding" }
+checklist_task_completed    { checklist_id: "activation", task_id: "create-project" }
+```
+
+The plugin fires events automatically — no manual `track()` calls needed. To swap provider, change the plugin in `OnboardingProvider`:
+
+```tsx
+// Mixpanel
+import { MixpanelPlugin } from '@tour-kit/analytics'
+new MixpanelPlugin(mixpanel)
+
+// Amplitude
+import { AmplitudePlugin } from '@tour-kit/analytics'
+new AmplitudePlugin(amplitude)
+
+// GA4
+import { GA4Plugin } from '@tour-kit/analytics'
+new GA4Plugin({ measurementId: 'G-XXXXX' })
+
+// Custom — implement the plugin interface
+import { AnalyticsPlugin } from '@tour-kit/analytics'
+class MySink implements AnalyticsPlugin {
+  track(event: string, props: Record<string, unknown>) {
+    fetch('/api/track', { method: 'POST', body: JSON.stringify({ event, props }) })
+  }
+}
+```
+
+## Step 7 — Measure activation, not just engagement
+
+Now that events are flowing, build a PostHog funnel:
+
+1. `user_signed_up`
+2. `tour_started`
+3. `tour_completed`
+4. `checklist_task_completed` (with `task_id == "first-deploy"`)
+
+That's your **activation funnel**. It tells you where users drop off — and because the tour and checklist share IDs across the same user, you can segment by completion state in future queries.
+
+## FAQ
+
+### Do I need the Pro packages (`@tour-kit/checklists`, `@tour-kit/analytics`)?
+
+The tour (`@tour-kit/react`) and hints are free under MIT. Checklists, analytics, announcements, adoption, media, and scheduling are Pro — $99 one-time for all of them. For production onboarding flows, the Pro packages pay for themselves in the first week.
+
+### Does this work with Next.js Server Components?
+
+Yes. `OnboardingProvider` is a Client Component and lives under `<body>` in `app/layout.tsx`. Everything above it in the tree (including server-rendered layouts and pages) stays server-rendered. Only the interactive onboarding pieces need to be client-side.
+
+### Can I gate the tour on a user segment (e.g., only paying users)?
+
+Yes. Put a condition around `AutoStart`:
+
+```tsx
+{user.plan !== 'free' && user.createdAt > firstRunCutoff && <AutoStart />}
+```
+
+Or gate at the `TourProvider` level if you want to hide tour UI entirely.
+
+### What if my users span multiple timezones for scheduled onboarding?
+
+Pair this flow with `@tour-kit/scheduling` (Pro) to time-box announcements or checklists to a specific timezone or business-hours window. See the scheduling docs for IANA timezone support.
+
+### What about mobile?
+
+All Tour Kit components are responsive by default, but mobile-first onboarding often uses different UX (bottom sheets, simpler tours). The headless packages (`@tour-kit/react/headless`) give you complete markup control to implement mobile-specific variants without forking the library.
+
+## Next steps
+
+- [`@tour-kit/checklists` reference](/docs/checklists) — task dependencies, custom completion checks.
+- [`@tour-kit/analytics` reference](/docs/analytics) — plugin interface and built-in providers.
+- [SaaS onboarding use case](/docs/use-cases/saas-onboarding) — extending this pattern to a real dashboard.
+
+Ready to build? [Install the Tour Kit packages](/docs/getting-started/installation) and ship your first complete onboarding flow today.

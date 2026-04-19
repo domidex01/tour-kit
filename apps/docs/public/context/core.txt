@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/core Context File
-Version: 0.3.0 | Generated: 2026-04-18
+Version: 0.3.0 | Generated: 2026-04-19
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -187,52 +187,41 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: interactive
+Example 1: Usage
 
-    <TourStep
-      id="role-select"
-      target="#role-buttons"
-      title="Choose Your Role"
-      content="Click a button below to select your path"
-      interactive  // Allows clicking buttons within the spotlight
-      onNext={null}  // Disable Next button - user must click a role
-      onAction={{
-        developer: 'dev-track',
-        designer: 'design-track',
-      }}
-    />
-
-Example 2: onAction
-
-    <TourStep
-      id="feature-select"
-      target="#features"
-      interactive
-      onNext={null}
-      onAction={{
-        analytics: 'analytics-intro',      // Navigate to step by ID
-        reports: { tour: 'reports-tour' }, // Switch to different tour
-        skip: 'complete',                  // Complete the tour
-      }}
-    />
-
-Example 3: onNext
-
-    // Navigate to specific step instead of sequential next
-    <TourStep
-      id="dev-intro"
-      onNext="summary"  // Skip to summary step
-    />
+    import { TourKitProvider } from '@tour-kit/core';
     
-    // Disable Next button (require action)
-    <TourStep
-      id="role-select"
-      onNext={null}
-      onAction={{ ... }}
-    />
-    
-    // Conditional navigation
-    <TourStep
-      id="feature-step"
-      onNext={(ctx) => ctx.data.isAdvanced ? 'advanced-section' : 'basic-section'}
-    />
+    function App() {
+      return (
+        <TourKitProvider>
+          <YourApp />
+        </TourKitProvider>
+      );
+    }
+
+Example 2: With Global Config
+
+    <TourKitProvider
+      defaultConfig={{
+        keyboard: true,
+        spotlight: {
+          padding: 8,
+        },
+      }}
+      persistence={{
+        strategy: 'localStorage',
+        key: 'tour-kit-state',
+      }}
+    >
+      <App />
+    </TourKitProvider>
+
+Example 3: Multiple Tours
+
+    <TourKitProvider>
+      <TourProvider tour={onboardingTour}>
+        <TourProvider tour={featureTour}>
+          <App />
+        </TourProvider>
+      </TourProvider>
+    </TourKitProvider>

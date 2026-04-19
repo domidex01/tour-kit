@@ -1,4 +1,4 @@
-# userTourKit v0.3.0 — Generated 2026-04-18T08:06:39Z
+# userTourKit v0.3.0 — Generated 2026-04-19T13:00:04Z
 
 # userTourKit
 
@@ -27,6 +27,7 @@
 - [useTour](https://usertourkit.com/docs/core/hooks/use-tour): useTour hook: control tour state with start, next, prev, skip, and complete actions plus step tracking in React
 - [TourKitProvider](https://usertourkit.com/docs/core/providers/tour-kit-provider): TourKitProvider: wrap your app to enable global tour management, shared configuration, and multi-tour coordination
 - [TourProvider](https://usertourkit.com/docs/core/providers/tour-provider): TourProvider: context provider that manages state, steps, and lifecycle for an individual product tour instance
+- [Types](https://usertourkit.com/docs/core/types): TypeScript type definitions for userTourKit — tour, step, and configuration interfaces that power fully type-safe onboarding flows.
 - [Config Types](https://usertourkit.com/docs/core/types/config-types): TypeScript interfaces for TourConfig, SpotlightConfig, KeyboardConfig, and other userTourKit configuration options
 - [Step Types](https://usertourkit.com/docs/core/types/step-types): TypeScript interfaces for StepConfig, StepTarget, StepPlacement, and step-level configuration in userTourKit tours
 - [Tour Types](https://usertourkit.com/docs/core/types/tour-types): TypeScript interfaces for TourState, TourActions, TourCallbacks, and the complete tour lifecycle type system
@@ -254,3 +255,9 @@
 ## Licensing
 
 - [Licensing](https://usertourkit.com/docs/licensing): Set up userTourKit Pro licensing with Polar.sh — installation, configuration, and CI/CD
+
+## Use cases
+
+- [Use Cases](https://usertourkit.com/docs/use-cases): Practical Tour Kit use cases: SaaS onboarding, feature announcements, contextual help, and product-led growth patterns for React apps
+- [Feature Announcements](https://usertourkit.com/docs/use-cases/feature-announcements): Announce new features to existing React app users with Tour Kit. Use announcements, hints, and spotlight variants without shipping a sprint.
+- [SaaS Onboarding](https://usertourkit.com/docs/use-cases/saas-onboarding): Ship a headless first-run onboarding tour in a React SaaS app. Use Tour Kit hooks, checklists, and analytics to get new users to their activation event.

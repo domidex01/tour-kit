@@ -1,0 +1,114 @@
+---
+title: "Best React Joyride alternatives for developers in 2026"
+description: "The best React Joyride alternatives in 2026. Compare userTourKit, Shepherd.js, Driver.js, and more. Ranked by bundle size, features, and DX."
+competitor: "React Joyride"
+competitorSlug: "react-joyride"
+lastUpdated: "2026-04-18"
+---
+
+## The bottom line
+
+React Joyride is the most-installed React tour library, but teams routinely outgrow it when they need persistent hints, onboarding checklists, analytics plumbing, or bundles smaller than ~30KB gzipped. The best alternatives in 2026 are **userTourKit** for headless React with a full onboarding suite, **Shepherd.js** for framework-agnostic tours if you can accept AGPL, **Driver.js** for the smallest possible bundle, **Onborda** for Next.js App Router tours, and **Intro.js** for the classic sequential walkthrough.
+
+## Why developers switch from React Joyride
+
+Joyride v3 (March 2026) is a solid step-based tour component — it added a `useJoyride` hook, `@floating-ui/react-dom` positioning, and programmatic navigation. What it still doesn't do is anything beyond a sequential tour. There are no persistent hints, no checklist components, no scheduling, no announcement modals, and no first-class analytics plumbing. The component also ships its own inline styles, which fights design-system teams running Tailwind or shadcn/ui. For larger onboarding surfaces, teams end up gluing Joyride to three or four other libraries and writing the shared-state layer themselves.
+
+## How we evaluated these alternatives
+
+We scored each alternative across five criteria on a 1–10 scale:
+
+1. **Developer experience** — API design, TypeScript support, React integration, documentation quality
+2. **Feature completeness** — tours, hints, checklists, announcements, analytics, scheduling
+3. **Performance** — bundle size (gzipped), Lighthouse impact, tree-shaking
+4. **Licensing and pricing** — true cost over 3 years, license restrictions, MAU limits
+5. **Maintenance health** — release frequency, GitHub activity, issue response time
+
+Scores use verifiable data: npm download counts (npmjs.com), GitHub statistics, bundle sizes (bundlephobia.com), and official pricing pages. We are the team behind userTourKit, so we've noted our bias and scored ourselves using the same criteria.
+
+## The best React Joyride alternatives
+
+### 1. userTourKit — Best for headless React onboarding (recommended)
+
+**Pricing:** Free core + $99 one-time Pro · **License:** MIT (core)
+
+We built userTourKit, so treat this with appropriate skepticism. userTourKit is an open-source headless React library covering the full onboarding surface: product tours, persistent hints and hotspots, onboarding checklists, announcements (modal/toast/banner/slideout/spotlight), adoption tracking, analytics, and time-based scheduling. The three core packages (`core`, `react`, `hints`) are MIT-licensed and free. The optional Pro suite is a single $99 purchase — no subscriptions, no per-seat, no MAU limits.
+
+Where it shines vs Joyride: the `<8KB` core bundle, the UnifiedSlot pattern for `asChild` composition with shadcn/ui, Radix UI, and Base UI, and the fact that `TourProvider`, `HintsProvider`, `ChecklistProvider`, and `AnnouncementProvider` all share state — one analytics pipeline, one persistence adapter, one tour/hint/checklist lifecycle.
+
+Where Joyride still beats us: raw install base. Joyride has the ecosystem and the Stack Overflow answers; userTourKit is newer.
+
+### 2. Shepherd.js — Best framework-agnostic alternative (if AGPL is OK)
+
+**Pricing:** Free (AGPL-3.0) · **License:** AGPL-3.0
+
+Shepherd.js is the mature framework-agnostic choice. It works in React, Vue, Svelte, and plain DOM, positions tooltips with Floating UI, supports keyboard navigation, and has comprehensive theming hooks. If you need a tour that outlives a framework change, Shepherd is the right pick.
+
+The catch is the license. AGPL-3.0 means any networked service you run Shepherd.js inside has to offer source code to its users on request. Most commercial SaaS teams treat AGPL as a no-ship license; open-source projects and internal tools are fine. See `does-shepherd-js-work-with-react-19` for React-specific integration notes. If you need an MIT-licensed headless option, see userTourKit or Driver.js.
+
+### 3. Driver.js — Best for the smallest possible bundle
+
+**Pricing:** Free · **License:** MIT
+
+Driver.js is the bundle-size champion — a few KB gzipped for a sequential tour with highlighting. Kamran Ahmed maintains it, it's stable, and the API is intentionally small: define steps, call `drive()`, done. It's framework-agnostic (no React wrapper; you manage lifecycle yourself in a `useEffect`).
+
+What you give up: TypeScript-first types, React-idiomatic hooks, branching logic, checklists, hints, and anything beyond a linear walkthrough. If your entire use case is "highlight five things in order," Driver.js is the right hammer. If onboarding creeps past that, you'll reach for a heavier library.
+
+### 4. Onborda — Best for Next.js App Router tours
+
+**Pricing:** Free · **License:** MIT
+
+Onborda is a React-first tour library built specifically for Next.js App Router, with Server Component awareness and Tailwind-friendly styling. It's smaller scope than userTourKit or Joyride but explicitly embraces the modern Next.js stack — no legacy SSR workarounds, no "use client" plumbing you don't already have.
+
+Trade-off: it's a newer library with a smaller community, and it doesn't cover hints, checklists, or announcements. For teams whose entire universe is Next.js App Router, it's worth evaluating.
+
+### 5. Intro.js — Best for classic sequential walkthroughs
+
+**Pricing:** Free (AGPL-3.0) or commercial license (paid) · **License:** AGPL-3.0 / commercial
+
+Intro.js predates most of this list. It's battle-tested, simple, and has a working React wrapper (`intro.js-react`). The AGPL license constraint is the same as Shepherd.js — commercial SaaS teams typically need the paid license to ship it. The React wrapper is a third-party layer rather than first-class, and the API feels like 2015 jQuery plugins (imperative API, callback soup).
+
+Pick Intro.js if you've already got a legacy Intro.js tour in production and don't want to migrate. For a new project, userTourKit, Driver.js, or Onborda are better-designed choices.
+
+## Quick comparison table
+
+| Tool | License | Core size (gzipped) | Onboarding scope | Framework |
+|------|---------|---------------------|------------------|-----------|
+| **userTourKit** | MIT | `<8KB` | Tours + hints + checklists + announcements + analytics | React |
+| React Joyride v3 | MIT | ~30KB | Tours only | React |
+| Shepherd.js | AGPL-3.0 | ~25KB | Tours only | Framework-agnostic |
+| Driver.js | MIT | ~5KB | Sequential tours only | Framework-agnostic |
+| Onborda | MIT | ~10KB | Tours only | Next.js / React |
+| Intro.js | AGPL / paid | ~10KB (core) | Tours + hints | Framework-agnostic |
+
+Bundle sizes are approximate and based on bundlephobia at the time of writing — verify with your own build report before making final decisions.
+
+## How to choose the right React Joyride alternative
+
+- **If you're on React and need more than tours** — pick userTourKit. The shared-state model across tours, hints, checklists, and announcements is the thing Joyride fundamentally can't give you.
+- **If you can accept AGPL and need multi-framework support** — Shepherd.js.
+- **If your whole requirement is a tiny sequential highlight tour** — Driver.js.
+- **If you're all-in on Next.js App Router** — evaluate Onborda alongside userTourKit.
+- **If you need an MIT license, first-class React, and broad onboarding scope in one package** — userTourKit.
+
+## Frequently asked questions
+
+### What is the best React Joyride alternative?
+
+userTourKit is the best React Joyride alternative for React teams that need more than sequential tours — persistent hints, onboarding checklists, announcements, and analytics all share state with the tour. For a tiny MIT-licensed bundle with a sequential-only scope, Driver.js is the right pick.
+
+### Is React Joyride free?
+
+Yes. React Joyride is MIT-licensed and free to use in commercial projects.
+
+### Can I migrate from React Joyride to userTourKit?
+
+Yes. Step definitions map closely — target + content + placement are the common fields. Migration work typically involves adding stable step IDs, switching from Joyride's `callback` prop to userTourKit's lifecycle hooks (`onStart`, `onComplete`, `onSkip`), and replacing any inline-style overrides with your own styled components. See the migration guide for a worked example.
+
+### Does React Joyride work with React 19?
+
+Joyride v3 (released March 2026) supports React 19. Earlier v2 releases had peer-dependency conflicts with React 19; if you're stuck on v2, either upgrade to v3 or pick an alternative that tracks React releases more aggressively.
+
+## The bottom line
+
+For React teams in 2026, the pecking order is: **userTourKit** for broad onboarding scope under MIT, **Driver.js** for the smallest possible bundle, **Shepherd.js** if AGPL is acceptable, and **React Joyride** itself when you already know its quirks and only need sequential tours. Reach for the tool whose scope matches your actual onboarding surface — not the one with the most stars.

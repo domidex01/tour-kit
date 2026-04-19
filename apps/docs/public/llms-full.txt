@@ -1,4 +1,4 @@
-# userTourKit v0.3.0 — Generated 2026-04-18T08:06:39Z
+# userTourKit v0.3.0 — Generated 2026-04-19T13:00:04Z
 
 # Feature Adoption Tracking
 
@@ -18118,7 +18118,6 @@ Hook for triggering branch actions defined in a step's `onAction` prop. Use this
 
 ```tsx
 
-
 function RoleSelectStep() {
   const { triggerAction, hasAction, availableActions } = useBranch();
 
@@ -18142,20 +18141,13 @@ function RoleSelectStep() {
 }
 ```
 
-
-
 ## Return Value
-
 
 ```
 
 ---
 
 ## Important Notes
-
-
-
-
 
 ---
 
@@ -18248,7 +18240,6 @@ Traps focus within the tour UI for accessibility compliance.
 
 ```tsx
 
-
 function TourTooltip() {
   const tooltipRef = useRef
 
@@ -18292,7 +18283,6 @@ Manages keyboard navigation within tours.
 
 ```tsx
 
-
 function TourWithKeyboard() {
   useKeyboard({
     enabled: true,
@@ -18308,8 +18298,6 @@ function TourWithKeyboard() {
 ```
 
 ## Configuration
-
-
 
 ## Default Key Bindings
 
@@ -18573,7 +18561,6 @@ Persists tour completion state across sessions.
 ## Usage
 
 ```tsx
-
 
 function App() {
   const {
@@ -18862,7 +18849,6 @@ Controls the spotlight overlay that highlights target elements.
 
 ```tsx
 
-
 function CustomOverlay() {
   const { isVisible, targetRect, overlayStyle } = useSpotlight();
 
@@ -18939,7 +18925,6 @@ Access the current step data and computed properties.
 
 ```tsx
 
-
 function StepContent() {
   const {
     step,
@@ -18960,8 +18945,6 @@ function StepContent() {
 ```
 
 ## Return Value
-
-
 
 ## Accessing Target Element
 
@@ -18989,7 +18972,6 @@ The primary hook for controlling tour state and actions.
 ## Usage
 
 ```tsx
-
 
 function MyComponent() {
   const {
@@ -19069,7 +19051,6 @@ Global provider that manages multiple tours across your application.
 
 ```tsx
 
-
 function App() {
   return (
     
@@ -19078,7 +19059,6 @@ function App() {
 ```
 
 ## Props
-
 
 ```
 
@@ -19106,7 +19086,6 @@ Provides context for a single tour.
 
 ```tsx
 
-
 function App() {
   return (
     
@@ -19116,13 +19095,27 @@ function App() {
 
 ## Props
 
-
-
 ## With Options
 
 ```tsx
 
 ```
+
+---
+
+# Types
+
+> TypeScript type definitions for userTourKit — tour, step, and configuration interfaces that power fully type-safe onboarding flows.
+
+userTourKit ships full TypeScript definitions for every primitive in the library, so your editor can autocomplete tour configuration and catch mismatches at build time. The types live in `@tour-kit/core` and are re-exported from `@tour-kit/react`, so you only need one import path regardless of which package you consume.
+
+Types are grouped into three clusters that map to the library's runtime structure:
+
+- **[Tour Types](/docs/core/types/tour-types)** — the top-level `TourConfig`, the `TourState` union describing where a tour is in its lifecycle, and the action + callback signatures you use when wiring a custom controller.
+- **[Step Types](/docs/core/types/step-types)** — per-step schemas including target selectors, content renderers, placement options, and the lifecycle hooks that fire on `onEnter`, `onLeave`, and `onSkip`.
+- **[Config Types](/docs/core/types/config-types)** — provider-level configuration: `TourProviderProps`, storage adapters, locale overrides, and the `RouterAdapter` interface used by the Next.js and React Router integrations.
+
+Every exported type is stable across minor releases and follows semver; breaking renames are always flagged in the [changelog](https://github.com/DomiDex/tour-kit/releases). If you need a type that isn't surfaced here (for example, an internal payload shape), open an issue — if it's safe to expose we'll export it in the next minor.
 
 ---
 
@@ -19605,7 +19598,6 @@ Factory function that creates a fully typed step configuration.
 
 ```tsx
 
-
 const welcomeStep = createStep({
   id: 'welcome',
   target: '#hero',
@@ -19699,7 +19691,6 @@ Factory function that creates a fully typed tour configuration.
 ## Usage
 
 ```tsx
-
 
 const onboardingTour = createTour({
   id: 'onboarding',
@@ -21052,7 +21043,6 @@ RAF-based throttling for smooth 60fps updates during scroll/resize. Coalesces ra
 
 ```tsx
 
-
 const throttledUpdate = throttleRAF(() => {
   // Expensive DOM measurement
   element.getBoundingClientRect();
@@ -21068,8 +21058,6 @@ window.removeEventListener('scroll', throttledUpdate);
 
 ### Parameters
 
-
-
 ---
 
 ## throttleTime
@@ -21079,7 +21067,6 @@ Time-based throttling with trailing edge execution. Queues the most recent call 
 ### Usage
 
 ```tsx
-
 
 const throttled = throttleTime(sendAnalytics, 1000);
 
@@ -21138,7 +21125,6 @@ Leading-edge throttle - fires immediately, then ignores calls for the interval. 
 ### Usage
 
 ```tsx
-
 
 const throttled = throttleLeading(onClick, 500);
 
@@ -21218,8 +21204,6 @@ interface ThrottledFunctionWithFlush<T extends AnyFunction>
 
 ```tsx
 
-
-
 function useSpotlightPosition(targetRef: RefObject<HTMLElement>) {
   const [rect, setRect] = useState<DOMRect | null>(null);
 
@@ -21250,7 +21234,6 @@ function useSpotlightPosition(targetRef: RefObject<HTMLElement>) {
 
 ```tsx
 
-
 function setupFeatureTracking(featureId: string, onUsage: () => void) {
   // Prevent rapid-fire events (1 second cooldown)
   const throttledUsage = throttleLeading(onUsage, 1000);
@@ -21272,7 +21255,6 @@ function setupFeatureTracking(featureId: string, onUsage: () => void) {
 ### Analytics Debouncing
 
 ```tsx
-
 
 const analytics = {
   queue: [] as Event[],
@@ -22001,7 +21983,6 @@ userTourKit provides a flexible foundation for building:
 
 ## Quick Install
 
-
   
   
   
@@ -22035,8 +22016,6 @@ userTourKit requires React 18 or 19:
 > Create your first multi-step product tour in under 5 minutes with Tour, TourStep, and useTour hook examples
 
 # Quick Start
-
-
 
   
       );
@@ -33270,12 +33249,9 @@ The main wrapper component that provides tour context.
 
 ```tsx
 
-
-
 ```
 
 ## Props
-
 
   );
 }
@@ -33284,7 +33260,6 @@ The main wrapper component that provides tour context.
 ## Controlling the Tour
 
 ```tsx
-
 
 function StartButton() {
   const { start, isActive } = useTour('welcome-tour');
@@ -33317,12 +33292,9 @@ The tooltip card that displays step content. Uses compound components for maximu
   TourCardFooter,
 } from '@tour-kit/react';
 
-
 ```
 
 ## Props
-
-
 
 ## Compound Components
 
@@ -33408,13 +33380,9 @@ A button to dismiss or skip the tour.
 
 ```tsx
 
-
-
 ```
 
 ## Props
-
-
 
 ## Default Appearance
 
@@ -33434,8 +33402,6 @@ By default, renders an X icon button:
 ## With Icon
 
 ```tsx
-
-
 
 ```
 
@@ -33475,8 +33441,6 @@ Use with custom button components:
 
 ```tsx
 
-
-
 </TourClose>
 ```
 
@@ -33485,7 +33449,6 @@ Use with custom button components:
 For advanced scenarios:
 
 ```tsx
-
 
 function CustomClose() {
   const { skip } = useTour('my-tour');
@@ -33531,13 +33494,9 @@ Provides previous, next, and complete buttons for navigating the tour.
 
 ```tsx
 
-
-
 ```
 
 ## Props
-
-
 
 ## Custom Labels
 
@@ -33549,8 +33508,6 @@ Provides previous, next, and complete buttons for navigating the tour.
 
 ```tsx
 
-
-
 ```
 
 ## Custom Navigation
@@ -33558,7 +33515,6 @@ Provides previous, next, and complete buttons for navigating the tour.
 For full control, build your own:
 
 ```tsx
-
 
 function CustomNavigation() {
   const { next, prev, skip, complete, isFirstStep, isLastStep } = useTour('my-tour');
@@ -33601,12 +33557,9 @@ Creates a spotlight effect that highlights the target element.
 
 ```tsx
 
-
-
 ```
 
 ## Props
-
 
 ```
 
@@ -33615,7 +33568,6 @@ Creates a spotlight effect that highlights the target element.
 For full control, use the headless hook:
 
 ```tsx
-
 
 function CustomOverlay() {
   const { isVisible, targetRect, padding, borderRadius } = useSpotlight();
@@ -33664,19 +33616,15 @@ Displays the current progress through the tour.
 
 ```tsx
 
-
-
 ```
 
 ## Props
-
 
 ```
 
 ## Custom Progress Component
 
 ```tsx
-
 
 function CustomProgress() {
   const { currentStepIndex, totalSteps } = useTour('my-tour');
@@ -33715,7 +33663,6 @@ Defines a single step in the tour.
 ```
 
 ## Props
-
 
   );
 }
@@ -33780,8 +33727,6 @@ Headless components provide all the tour logic without any styling, giving you c
 } from '@tour-kit/react/headless';
 ```
 
-
-
 ## Why Headless?
 
 - **Full Design Control** - No default styles to override
@@ -33792,7 +33737,6 @@ Headless components provide all the tour logic without any styling, giving you c
 ## Basic Example
 
 ```tsx
-
 
 function MyTourCard() {
   return (
@@ -33816,7 +33760,6 @@ For maximum flexibility, use hooks directly:
 
 ```tsx
 
-
 function CompletelyCustomTour() {
   const tour = useTour('my-tour');
   const step = useStep();
@@ -33837,9 +33780,6 @@ function CompletelyCustomTour() {
 Mix headless and styled components:
 
 ```tsx
-
-
-
 
 </Tour>
 ```
@@ -34081,20 +34021,15 @@ An unstyled tour card that exposes all state and actions via render props.
 
 ```tsx
 
-
-
 ```
 
 ## Render Props
-
 
 ```
 
 ## With Framer Motion
 
 ```tsx
-
-
 
   )}
 </HeadlessTourCard>
@@ -34122,13 +34057,9 @@ An unstyled overlay that exposes spotlight positioning data via render props.
 
 ```tsx
 
-
-
 ```
 
 ## Render Props
-
-
 
 ## SVG Mask Example
 
@@ -34145,8 +34076,6 @@ An unstyled overlay that exposes spotlight positioning data via render props.
 ## Animated Overlay
 
 ```tsx
-
-
 
 ```
 
@@ -34631,7 +34560,6 @@ function CustomCard() {
 
 ```tsx
 
-
 function FullyCustomTour() {
   const { isActive, currentStep, next, prev, skip } = useTour('my-tour');
 
@@ -34656,7 +34584,6 @@ function FullyCustomTour() {
 ## Custom Overlay
 
 ```tsx
-
 
 function CustomOverlay() {
   const { isVisible, targetRect, padding } = useSpotlight();
@@ -34688,7 +34615,6 @@ function CustomOverlay() {
 
 ```tsx
 
-
 function StepIndicator() {
   const { currentStepIndex, totalSteps } = useTour('my-tour');
 
@@ -34712,8 +34638,6 @@ function StepIndicator() {
 ## Custom Navigation
 
 ```tsx
-
-
 
 function TourButtons() {
   const {
@@ -34747,8 +34671,6 @@ function TourButtons() {
 ## Complete Custom Implementation
 
 ```tsx
-
-
 
 function CustomTourUI() {
   const { isActive, currentStep, currentStepIndex, totalSteps, next, prev, skip } = useTour('custom');
@@ -39114,3 +39036,191 @@ const summerNY = getDateInTimezone(summerDate, 'America/New_York')
 
 - [useUserTimezone](/docs/scheduling/hooks/use-user-timezone) - React hook wrapper
 - [Schedule.timezone](/docs/scheduling/types#schedule) - Schedule timezone option
+
+---
+
+# Use Cases
+
+> Practical Tour Kit use cases: SaaS onboarding, feature announcements, contextual help, and product-led growth patterns for React apps
+
+Tour Kit is a headless React library, which means it fits into whatever product pattern you're already running. These guides walk through the two most common shapes teams reach for first: **onboarding new users** and **announcing new features to existing users**.
+
+  }
+    href="/docs/use-cases/feature-announcements"
+  >
+    Surface new features to existing users without shipping a sprint.
+  </Card>
+</Cards>
+
+## Not listed?
+
+The same primitives — `Tour`, `TourStep`, `Hint`, and the `useTour` hook — also power contextual help, empty-state education, onboarding checklists, and role-based tours. Start from [Quick Start](/docs/getting-started/quick-start) and wire in the pieces you need.
+
+---
+
+# Feature Announcements
+
+> Announce new features to existing React app users with Tour Kit. Use announcements, hints, and spotlight variants without shipping a sprint.
+
+Tour Kit is a headless React library for announcing new features inside your app without shipping a redesign or a release blog post. The [`@tour-kit/announcements`](/docs/announcements) package provides modal, toast, banner, slideout, and spotlight variants; the [`@tour-kit/hints`](/docs/hints) package adds persistent beacons for discoverability after the announcement is dismissed. Both share the same headless contract as the rest of Tour Kit — every pixel is yours.
+
+This page walks through the shape of a typical feature announcement: a one-time spotlight when users first see the new thing, plus a persistent hint that stays until the user dismisses it.
+
+## When to reach for an announcement vs. a tour
+
+| Pattern | Use when |
+|---------|----------|
+| Announcement | One-shot message about a new feature, release, or policy change. |
+| Tour | Multi-step walkthrough of how to use a feature. |
+| Hint | Ongoing discoverability — stays until dismissed, doesn't block the UI. |
+
+You can — and often should — combine them: a one-time announcement on launch day, a hint that persists for the next 30 days, and a tour that teaches the deeper workflow when the user clicks into the feature.
+
+## Minimum example — spotlight announcement
+
+The spotlight variant dims the page, highlights a single element, and shows a short message. Good for launches where you want to point at the new thing without hijacking the page.
+
+```tsx title="app/layout.tsx"
+'use client'
+
+  return (
+    
+  )
+}
+```
+
+`frequency="once"` persists dismissal in storage — the announcement won't show again on repeat visits.
+
+## Add a persistent hint for ongoing discovery
+
+Once the spotlight is dismissed, the feature is still new to users who didn't click through. A persistent [`Hint`](/docs/hints/components) keeps a pulsing beacon on the feature until the user interacts with it or dismisses explicitly.
+
+```tsx
+
+```
+
+Set `persist` to store dismissal across sessions; leave it off for a beacon that reappears on each reload.
+
+## Gate announcements on user segment
+
+Announcements without targeting become noise. Combine Tour Kit with your own feature flag or user-segment system:
+
+```tsx
+const shouldSeeLaunch =
+  flags.commentingEnabled && user.plan !== 'free' && user.createdAt < launchDate
+
+```
+
+The `when` prop short-circuits rendering — cheaper than wrapping in a conditional and avoids a mount/unmount flash.
+
+## Queue multiple announcements
+
+If a release shipped more than one thing, queue them so users don't get a wall of modals. `@tour-kit/announcements` has an internal queue that respects `frequency` per ID:
+
+```tsx
+
+```
+
+Only the highest-priority unseen announcement shows at a time. See [Queue system](/docs/announcements/queue) for priority rules.
+
+## Measure announcement effectiveness
+
+Fire analytics events on view, click, and dismiss so you can tell "was it seen" from "was it clicked":
+
+```tsx
+<Announcement
+  id="comments-launch"
+  variant="spotlight"
+  target="#comments-button"
+  title="Comments are here"
+  content="Tag teammates and keep review conversations in context."
+  onShow={() => analytics.track('announcement_shown', { id: 'comments-launch' })}
+  onCtaClick={() => analytics.track('announcement_clicked', { id: 'comments-launch' })}
+  onDismiss={() => analytics.track('announcement_dismissed', { id: 'comments-launch' })}
+/>
+```
+
+## Next steps
+
+- [`@tour-kit/announcements` overview](/docs/announcements) — all five variants.
+- [`@tour-kit/hints`](/docs/hints) — persistent beacons and tooltips.
+- [Scheduling](/docs/scheduling) — time-box announcements to a release window.
+
+Ready to build? [Install `@tour-kit/announcements`](/docs/getting-started/installation) and ship your first in-app release note today.
+
+---
+
+# SaaS Onboarding
+
+> Ship a headless first-run onboarding tour in a React SaaS app. Use Tour Kit hooks, checklists, and analytics to get new users to their activation event.
+
+Tour Kit is a headless React library for building first-run onboarding flows in SaaS products. Wrap your dashboard in a `Tour`, point `TourStep` elements at the UI you want to highlight, and the library handles positioning, keyboard navigation, focus management, and WCAG 2.1 AA accessibility for you. Every visual element is yours to style — there is no themed runtime to fight.
+
+This page walks through the minimum pieces of a SaaS onboarding flow: a first-run tour, a persistent checklist for multi-step activation, and analytics events so you can measure activation rate.
+
+## When to reach for a tour
+
+A first-run product tour is the right pattern when:
+
+- New users sign up and land in an empty dashboard.
+- There is a clear **activation event** — the moment a user is likely to keep using the product — and a 2–5 step path to reach it.
+- You want the same flow to run in development, staging, and production without shipping a third-party runtime.
+
+If your onboarding is long, branching, or asynchronous (requires waiting on a background job), consider pairing the tour with an [onboarding checklist](/docs/checklists) so users can leave and resume.
+
+## Minimum example
+
+```tsx title="app/dashboard/page.tsx"
+'use client'
+
+function StartOnboarding() {
+  const { start } = useTour('saas-onboarding')
+
+  useEffect(() => {
+    // Only auto-start for brand new users. Gate on your own flag.
+    const isFirstVisit = localStorage.getItem('tk-saas-onboarding') !== 'done'
+    if (isFirstVisit) start()
+  }, [start])
+
+  return null
+}
+
+  return (
+    
+  )
+}
+```
+
+## Pair with a checklist for longer activation paths
+
+If activation requires actions a user has to take between sessions (e.g. verifying email, inviting a teammate, connecting an integration), a static tour becomes awkward. The [`@tour-kit/checklists`](/docs/checklists) package renders a persistent progress widget that users can re-open on each visit, with task dependencies and completion persistence built in.
+
+```tsx
+
+```
+
+## Instrument activation
+
+Onboarding without analytics is a guess. Tour Kit's lifecycle callbacks make it easy to fire events into whatever analytics stack you already run:
+
+```tsx
+
+```
+
+For a turnkey integration, wire the [`@tour-kit/analytics`](/docs/analytics) plugin with your provider (Mixpanel, PostHog, Amplitude, GA4, or a custom sink) and every tour/step event is captured automatically.
+
+## Accessibility reminders
+
+- Focus is trapped inside the active step and restored when the tour ends.
+- `Esc` skips the tour unless you disable it on a `TourStep`.
+- Respect `prefers-reduced-motion` — animations are reduced automatically.
+
+See the [Accessibility guide](/docs/guides/accessibility) for the full list.
+
+## Next steps
+
+- [Quick Start](/docs/getting-started/quick-start) — install and render your first tour.
+- [`useTour` hook reference](/docs/core/hooks/use-tour) — programmatic control.
+- [Headless components](/docs/react/headless) — build a fully custom tour UI.
+
+Ready to build? [Install `@tour-kit/react`](/docs/getting-started/installation) and ship your first onboarding tour today.

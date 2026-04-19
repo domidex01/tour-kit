@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/adoption Context File
-Version: 0.0.3 | Generated: 2026-04-18
+Version: 0.0.3 | Generated: 2026-04-19
 Paste this into your LLM to get accurate answers about @tour-kit/adoption.
 =========================================================================
 

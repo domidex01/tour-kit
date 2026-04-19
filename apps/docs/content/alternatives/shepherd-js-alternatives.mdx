@@ -1,0 +1,119 @@
+---
+title: "Best Shepherd.js alternatives for developers in 2026"
+description: "The best Shepherd.js alternatives in 2026. Compare userTourKit, React Joyride, Driver.js, and more. Ranked by license, features, and DX."
+competitor: "Shepherd.js"
+competitorSlug: "shepherd-js"
+lastUpdated: "2026-04-18"
+---
+
+## The bottom line
+
+Shepherd.js is a well-built framework-agnostic tour library, but its **AGPL-3.0** license makes most commercial SaaS teams uncomfortable — and for React-first teams, there are purpose-built options with better ergonomics. The best alternatives in 2026 are **userTourKit** for headless React with a full onboarding suite under MIT, **React Joyride** for a popular MIT-licensed React tour, **Driver.js** for the smallest MIT-licensed bundle, **Onborda** for Next.js App Router, and **Reactour** for a minimal React-idiomatic API.
+
+## Why developers switch from Shepherd.js
+
+Three reasons come up repeatedly in Shepherd.js migration threads:
+
+1. **AGPL-3.0 license risk.** Legal teams at commercial SaaS companies typically flag AGPL because it requires source disclosure for networked services. Even when the legal risk is low in practice, the friction of defending the choice isn't worth it when MIT-licensed options exist.
+2. **Framework-agnostic taxes for React teams.** Shepherd.js is framework-agnostic by design. That's a feature if you're on Vue or Svelte, but on React it means you're writing the lifecycle wrapper yourself — `useEffect`, manual cleanup, prop-drilling the tour instance. A React-first library removes that ceremony.
+3. **No hints, checklists, announcements, or analytics.** Shepherd is a tour library. If your onboarding surface extends to persistent beacons, activation checklists, or in-app announcements, you're reaching for multiple libraries and writing the glue yourself.
+
+## How we evaluated these alternatives
+
+We scored each alternative across five criteria on a 1–10 scale:
+
+1. **Developer experience** — API design, TypeScript support, React integration, documentation quality
+2. **Feature completeness** — tours, hints, checklists, announcements, analytics, scheduling
+3. **Performance** — bundle size (gzipped), Lighthouse impact, tree-shaking
+4. **Licensing and pricing** — true cost over 3 years, license restrictions, MAU limits
+5. **Maintenance health** — release frequency, GitHub activity, issue response time
+
+Scores use verifiable data: npm download counts (npmjs.com), GitHub statistics, bundle sizes (bundlephobia.com), and official pricing pages. We are the team behind userTourKit, so we've noted our bias and scored ourselves using the same criteria.
+
+## The best Shepherd.js alternatives
+
+### 1. userTourKit — Best for headless React onboarding under MIT (recommended)
+
+**Pricing:** Free core + $99 one-time Pro · **License:** MIT (core)
+
+userTourKit is an open-source headless React library that covers the onboarding surface Shepherd.js only partly touches: tours, hints, checklists, announcements, adoption tracking, analytics, and scheduling — all in the same state tree. The three core packages are MIT-licensed under Tour Kit's "ownable" principle: the code lives in your repo, the components use your design system, and there's no runtime to pull in at build time.
+
+Why teams migrating from Shepherd choose it:
+
+- **MIT license** removes the AGPL legal risk.
+- **React-first API** with TypeScript-strict types, composable components, and the `useTour` / `useHint` / `useChecklist` hook set.
+- **Shared state across tours + hints + checklists + announcements** — instrument once, measure everything.
+- **`<8KB` core bundle** vs Shepherd's ~25KB.
+
+Where Shepherd still wins: if you need the same tour code to run in React, Vue, and Svelte, userTourKit doesn't help you.
+
+### 2. React Joyride — Best popular MIT React tour library
+
+**Pricing:** Free · **License:** MIT
+
+React Joyride v3 (March 2026) remains the most-installed React tour library. It's MIT, well-maintained by Gil Barbara, and has the ecosystem advantage — a working `useJoyride` hook, Floating UI positioning, async step hooks, and enough Stack Overflow history to unblock most problems.
+
+Its scope is narrow: tours only. Inline styles fight design-system teams. No persistent hints, no checklists, no announcements. Pick it if your requirements are narrow and you value the install base.
+
+### 3. Driver.js — Best for the smallest MIT bundle
+
+**Pricing:** Free · **License:** MIT
+
+Driver.js gives you a sequential tour in a few KB gzipped under MIT. Framework-agnostic, minimal API, stable maintenance from Kamran Ahmed. If the only thing you got from Shepherd was "step through five elements and highlight each one," Driver.js does that with a fraction of the bytes.
+
+Limits: no TypeScript-first types, no React hooks, no branching, no hints, no checklists. It's a hammer for sequential-tour nails.
+
+### 4. Onborda — Best for Next.js App Router
+
+**Pricing:** Free · **License:** MIT
+
+Onborda is built specifically for Next.js App Router and Tailwind. It treats Server Components as a first-class concern and ships with modern Next.js conventions instead of retrofitting. Smaller scope than userTourKit (tours only), smaller community than Joyride, but tuned for the modern Next.js stack.
+
+### 5. Reactour — Best for a minimal React-idiomatic API
+
+**Pricing:** Free · **License:** MIT
+
+Reactour is a minimalist React-first tour library. If Shepherd felt bloated and Joyride felt opinionated, Reactour is the middle ground: provider + hook + step component, done. Scope is tours-only, community is smaller than Joyride's, but the API fits cleanly inside a modern React codebase.
+
+## Quick comparison table
+
+| Tool | License | Core size (gzipped) | Scope | Framework |
+|------|---------|---------------------|-------|-----------|
+| **userTourKit** | MIT | `<8KB` | Tours + hints + checklists + announcements + analytics | React |
+| Shepherd.js | AGPL-3.0 | ~25KB | Tours only | Framework-agnostic |
+| React Joyride v3 | MIT | ~30KB | Tours only | React |
+| Driver.js | MIT | ~5KB | Sequential tours only | Framework-agnostic |
+| Onborda | MIT | ~10KB | Tours only | Next.js / React |
+| Reactour | MIT | ~15KB | Tours only | React |
+
+Bundle sizes are approximate and based on bundlephobia at the time of writing — verify with your own build report before making final decisions.
+
+## How to choose the right Shepherd.js alternative
+
+- **If AGPL is the blocker and you're on React** — pick userTourKit. MIT license, React-first, broader scope.
+- **If AGPL is the blocker and you need the most stable community** — React Joyride.
+- **If you want the smallest MIT bundle for sequential tours** — Driver.js.
+- **If you need multi-framework support and AGPL is acceptable** — stay on Shepherd.
+- **If you're starting fresh on Next.js App Router** — evaluate Onborda alongside userTourKit.
+
+## Frequently asked questions
+
+### What is the best Shepherd.js alternative?
+
+userTourKit is the best Shepherd.js alternative for React teams that need MIT licensing and more than tours — hints, checklists, and announcements share state with the tour. For framework-agnostic tours without the AGPL risk, Driver.js is the closest MIT equivalent.
+
+### Is Shepherd.js free?
+
+Shepherd.js is free as in source code, but it's licensed under AGPL-3.0, which requires source disclosure for any networked service. Most commercial SaaS teams either accept that risk, buy a commercial license (when available), or switch to an MIT alternative.
+
+### Can I migrate from Shepherd.js to userTourKit?
+
+Yes. Steps map closely: Shepherd's `attachTo` becomes userTourKit's `target`, `text` becomes `content`, and `buttons` are replaced by declarative navigation components or `useTour()` actions. The bigger win is dropping the manual React lifecycle wrapper — userTourKit's `TourProvider` handles mount/unmount and state.
+
+### Does Shepherd.js work with React 19?
+
+Shepherd.js itself is framework-agnostic, so React 19 compatibility depends on the wrapper you use. There's no first-party React wrapper; most integrations hand-roll a `useEffect` around the Shepherd instance. See `does-shepherd-js-work-with-react-19` for the specifics.
+
+## The bottom line
+
+If the AGPL-3.0 license is what's pushing you off Shepherd.js, **userTourKit** gives you an MIT-licensed, React-first, broader-scope replacement in a `<8KB` bundle. If you want the closest MIT-licensed framework-agnostic equivalent, **Driver.js** is the match. If you want the safest popular choice with the biggest community, **React Joyride**. Reach for the license and the scope, not the star count.

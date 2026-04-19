@@ -1,0 +1,125 @@
+---
+title: "Best Intro.js alternatives for developers in 2026"
+description: "The best Intro.js alternatives in 2026. Compare userTourKit, Shepherd.js, Driver.js, and more. Ranked by license, features, and DX."
+competitor: "Intro.js"
+competitorSlug: "intro-js"
+lastUpdated: "2026-04-18"
+---
+
+## The bottom line
+
+Intro.js is one of the oldest product-tour libraries still shipping — but the **dual AGPL / paid commercial license** and an API that feels like 2015 jQuery push most 2026 teams to alternatives. The best picks are **userTourKit** for headless React with a full onboarding suite under MIT, **React Joyride** for the most-installed MIT React option, **Driver.js** for the smallest MIT bundle, **Shepherd.js** for framework-agnostic tours (if AGPL is acceptable), and **Onborda** for Next.js App Router projects.
+
+## Why developers switch from Intro.js
+
+- **License friction.** Intro.js ships under AGPL-3.0 or a paid commercial license. Commercial SaaS teams typically either buy the commercial license or migrate off. The pricing isn't huge, but it's a recurring line item in a category where MIT alternatives are abundant.
+- **API age.** Intro.js predates modern JS frameworks. The wrapper for React (`intro.js-react`) is third-party, and the primary API is imperative (`introJs().setOptions().start()`). That fights React's declarative model.
+- **Narrow scope.** Intro.js does sequential tours and a hint system. It doesn't do onboarding checklists, announcement modals, adoption tracking, or first-class analytics. Teams pulling those in from separate libraries end up with four mounts and no shared state.
+
+## How we evaluated these alternatives
+
+We scored each alternative across five criteria on a 1–10 scale:
+
+1. **Developer experience** — API design, TypeScript support, React integration, documentation quality
+2. **Feature completeness** — tours, hints, checklists, announcements, analytics, scheduling
+3. **Performance** — bundle size (gzipped), Lighthouse impact, tree-shaking
+4. **Licensing and pricing** — true cost over 3 years, license restrictions, MAU limits
+5. **Maintenance health** — release frequency, GitHub activity, issue response time
+
+Scores use verifiable data: npm download counts (npmjs.com), GitHub statistics, bundle sizes (bundlephobia.com), and official pricing pages. We are the team behind userTourKit, so we've noted our bias and scored ourselves using the same criteria.
+
+## The best Intro.js alternatives
+
+### 1. userTourKit — Best for headless React onboarding (recommended)
+
+**Pricing:** Free core + $99 one-time Pro · **License:** MIT (core)
+
+userTourKit is an open-source headless React library that replaces Intro.js on every axis where Intro.js struggles: React-first declarative API, TypeScript strict types, MIT license, and a scope that extends from tours to hints, checklists, announcements, adoption tracking, analytics, and scheduling.
+
+Concretely, an Intro.js tour becomes:
+
+```tsx
+import { Tour, TourStep, useTour } from '@tour-kit/react'
+
+function StartButton() {
+  const { start } = useTour('onboarding')
+  return <button onClick={() => start()}>Start tour</button>
+}
+
+<Tour id="onboarding">
+  <TourStep target="#btn-1" content="Welcome to the app" placement="bottom" />
+  <TourStep target="#btn-2" content="This is where you create projects" placement="right" />
+  <StartButton />
+</Tour>
+```
+
+No `useEffect`, no imperative start/stop, no class instances to clean up.
+
+Where Intro.js still wins: install base. If you're already shipping Intro.js and it works, the ROI on migration is limited. For new projects, the gap is hard to justify.
+
+### 2. React Joyride — Best popular MIT React alternative
+
+**Pricing:** Free · **License:** MIT
+
+React Joyride v3 is the most-installed React tour library (~672K weekly npm installs as of March 2026) and is MIT-licensed. If you want the library with the biggest community, the most Stack Overflow answers, and first-class React types, this is it. Scope is narrower than userTourKit (tours only, no hints/checklists), and the inline-style approach can fight Tailwind / shadcn teams.
+
+### 3. Driver.js — Best for the smallest MIT bundle
+
+**Pricing:** Free · **License:** MIT
+
+Driver.js does sequential tours in a handful of KB gzipped under MIT. Framework-agnostic, minimal API, stable maintenance. If you used Intro.js for a simple "highlight these five things" walkthrough and don't need anything more, Driver.js is the closest lightweight replacement.
+
+### 4. Shepherd.js — Best framework-agnostic (if AGPL is OK)
+
+**Pricing:** Free (AGPL-3.0) · **License:** AGPL-3.0
+
+Shepherd.js is the mature framework-agnostic choice — React, Vue, Svelte, or vanilla. It replaces one AGPL library with another, but the code quality is higher and the community is more active. If Intro.js is AGPL-friction for your team, Shepherd is not the fix.
+
+### 5. Onborda — Best for Next.js App Router
+
+**Pricing:** Free · **License:** MIT
+
+Onborda is built for Next.js App Router with Tailwind and Server Components in mind. Smaller scope than userTourKit, smaller community than Joyride, but a clean fit if your entire stack is modern Next.js. Not a fit for non-Next.js React projects.
+
+## Quick comparison table
+
+| Tool | License | Core size (gzipped) | Scope | Framework |
+|------|---------|---------------------|-------|-----------|
+| **userTourKit** | MIT | `<8KB` | Tours + hints + checklists + announcements + analytics | React |
+| Intro.js | AGPL-3.0 / paid | ~10KB (core) | Tours + hints | Framework-agnostic |
+| React Joyride v3 | MIT | ~30KB | Tours only | React |
+| Driver.js | MIT | ~5KB | Sequential tours only | Framework-agnostic |
+| Shepherd.js | AGPL-3.0 | ~25KB | Tours only | Framework-agnostic |
+| Onborda | MIT | ~10KB | Tours only | Next.js / React |
+
+Bundle sizes are approximate and based on bundlephobia at the time of writing — verify with your own build report before making final decisions.
+
+## How to choose the right Intro.js alternative
+
+- **If you're on React and want to drop the AGPL/paid license** — pick userTourKit. MIT, React-first, broader scope.
+- **If the AGPL license is the only blocker and you need the biggest community** — React Joyride.
+- **If your use case is literally "a sequential walkthrough"** — Driver.js.
+- **If you need multi-framework support** — Shepherd.js (AGPL) or weigh the framework-agnostic trade-offs against userTourKit's React-first ergonomics.
+- **If your stack is modern Next.js App Router** — evaluate Onborda alongside userTourKit.
+
+## Frequently asked questions
+
+### What is the best Intro.js alternative?
+
+userTourKit is the best Intro.js alternative for React teams — MIT licensed, React-first, and broader in scope (hints, checklists, announcements, and analytics all share state with the tour). For a minimal MIT-licensed framework-agnostic option, Driver.js is the closest match.
+
+### Is Intro.js free?
+
+Intro.js is dual-licensed: AGPL-3.0 (free with source-disclosure obligations) or a paid commercial license. Commercial SaaS teams typically buy the commercial license or switch to an MIT alternative like userTourKit, React Joyride, or Driver.js.
+
+### Can I migrate from Intro.js to userTourKit?
+
+Yes. Intro.js steps map directly — `element`, `intro`, and `position` become `target`, `content`, and `placement`. The bigger change is architectural: Intro.js's imperative `introJs().start()` becomes declarative `<Tour>` with a `useTour()` hook for programmatic control. That also removes the manual cleanup you were doing in `useEffect`.
+
+### Does Intro.js work with React 19?
+
+Intro.js itself is framework-agnostic so it works, but the `intro.js-react` wrapper is third-party and its React 19 compatibility depends on the maintainer. For a first-class React 19 experience, use a React-native library like userTourKit or React Joyride.
+
+## The bottom line
+
+If Intro.js's AGPL/paid-license split is friction, **userTourKit** is the modern React-first replacement under MIT with a much broader onboarding scope. **React Joyride** is the safest popular MIT choice if you only need tours. **Driver.js** wins on bundle size. Pick the license and the scope first — that dictates the answer.

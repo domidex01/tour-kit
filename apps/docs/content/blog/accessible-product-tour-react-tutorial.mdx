@@ -1,0 +1,237 @@
+---
+title: "Build an accessible product tour in React: a step-by-step tutorial"
+slug: "accessible-product-tour-react-tutorial"
+description: "Build a WCAG 2.1 AA accessible product tour in React step by step. Focus trapping, keyboard navigation, screen reader support, and prefers-reduced-motion in under 30 minutes."
+primary_keyword: "accessible product tour react"
+secondary_keywords: ["react product tour accessibility", "wcag 2.1 aa tour", "keyboard navigable tour", "screen reader product tour"]
+category: "Tutorial"
+schema_type: "TechArticle"
+date: "2026-04-18"
+updated: "2026-04-18"
+published: true
+ogImage: /og-images/accessible-product-tour-react-tutorial.png
+---
+
+# Build an accessible product tour in React: a step-by-step tutorial
+
+Most product tour libraries ship keyboard handling, focus trapping, and screen reader support as afterthoughts — or not at all. That's a problem when a tour blocks the UI for screen-reader and keyboard-only users, because a broken tour is more disruptive than no tour. This tutorial builds a fully WCAG 2.1 AA-compliant product tour in React using `@tour-kit/react`, covering focus management, keyboard navigation, semantic announcements, and `prefers-reduced-motion` handling. The finished tour works for sighted mouse users, keyboard-only users, screen-reader users, and users who opt out of animation — and you'll have it running in about thirty minutes.
+
+```bash
+pnpm add @tour-kit/react
+```
+
+## What you'll build
+
+A three-step onboarding tour on a dashboard that:
+
+- Traps focus inside the active step while the tour is running.
+- Restores focus to the triggering button when the tour ends.
+- Responds to `Tab`, `Shift+Tab`, `Enter`, `Space`, and `Esc` without a trackpad.
+- Announces step changes to assistive technology via `aria-live`.
+- Disables motion for users with `prefers-reduced-motion: reduce`.
+
+You can drop this pattern into any React 18+ or React 19 project — Next.js App Router, Vite, Remix, or plain CRA.
+
+## Why accessibility matters for tours
+
+A product tour interrupts the user's normal flow. Done well, that interruption is informative. Done badly, it's a trap:
+
+- **Screen reader users** never hear the tour start — the new content lives outside the document reading order.
+- **Keyboard users** tab out of the tooltip and get lost in the page behind it.
+- **Users with cognitive differences** get overwhelmed by animated transitions and time pressure.
+- **Users with motion sensitivity** trigger vestibular discomfort from entrance animations.
+
+WCAG 2.1 AA compliance addresses all four. The good news: if your tour library is built correctly, you get most of this for free.
+
+## Step 1 — Install and set up
+
+```bash
+pnpm add @tour-kit/react
+```
+
+Peer dependencies: React 18 or 19, and a bundler that supports ESM (anything modern — Vite, Next.js 13+, webpack 5+).
+
+Create a basic dashboard page. We'll add the tour in Step 2.
+
+```tsx title="app/dashboard/page.tsx"
+'use client'
+
+export default function Dashboard() {
+  return (
+    <main>
+      <h1>Dashboard</h1>
+      <button id="create-project">Create project</button>
+      <button id="invite-team">Invite team</button>
+      <button id="settings">Settings</button>
+    </main>
+  )
+}
+```
+
+## Step 2 — Add the tour with a named `id`
+
+Wrap your UI in a `Tour` component and define the steps. Each `TourStep` points at a DOM selector — `@tour-kit/react` handles positioning, portalling, and focus transitions for you.
+
+```tsx title="app/dashboard/page.tsx"
+'use client'
+
+import { Tour, TourStep, TourCard, TourOverlay, useTour } from '@tour-kit/react'
+
+function StartButton() {
+  const { start } = useTour('dashboard-tour')
+  return (
+    <button type="button" onClick={() => start()} aria-label="Start dashboard tour">
+      Start tour
+    </button>
+  )
+}
+
+export default function Dashboard() {
+  return (
+    <Tour id="dashboard-tour">
+      <TourStep
+        target="#create-project"
+        title="Create your first project"
+        content="Everything you do lives inside a project. Create one to get started."
+        placement="bottom"
+      />
+      <TourStep
+        target="#invite-team"
+        title="Invite your team"
+        content="Onboarding is easier with a teammate. Invite them from here."
+        placement="right"
+      />
+      <TourStep
+        target="#settings"
+        title="Customize your workspace"
+        content="Adjust branding, defaults, and notifications in Settings."
+        placement="left"
+      />
+      <TourOverlay />
+      <TourCard />
+      <main>
+        <h1>Dashboard</h1>
+        <button id="create-project">Create project</button>
+        <button id="invite-team">Invite team</button>
+        <button id="settings">Settings</button>
+        <StartButton />
+      </main>
+    </Tour>
+  )
+}
+```
+
+Click "Start tour" and the tour runs. So far, so normal.
+
+## Step 3 — Verify focus is trapped
+
+Start the tour, then press `Tab` repeatedly. Focus should cycle through the tour card's controls — **Next**, **Back**, **Close** — and never escape into the page behind it. This is a WCAG 2.1 requirement (success criterion 2.4.3 "Focus Order"): when a modal experience is active, focus cannot leave it.
+
+`@tour-kit/react` traps focus by default. If focus escapes in your app, the most common cause is a custom `<TourCard />` override that doesn't use the `TourCardContent` primitive. Stick with the defaults until you've verified focus behaves correctly.
+
+When the tour ends (via Close, Skip, or Complete), focus returns to the element that triggered it — in our case, the Start button. This is WCAG 2.4.3 again: predictable focus restoration.
+
+## Step 4 — Keyboard navigation
+
+Close the tour and restart it. Without touching the mouse:
+
+- `Tab` moves to Next.
+- `Enter` or `Space` advances the step.
+- `Shift+Tab` moves backward through controls.
+- `Esc` dismisses the tour (restoring focus to the trigger).
+
+`@tour-kit/react` binds these by default. To disable `Esc` for a specific step — sometimes you don't want users to skip a required step — use:
+
+```tsx
+<TourStep
+  target="#required-step"
+  title="Complete this step"
+  content="You'll need to finish this before continuing."
+  dismissOnEscape={false}
+/>
+```
+
+Leave `Esc` enabled for the other steps. Removing it globally violates WCAG 2.1.1 "Keyboard" — users must have a keyboard escape hatch from any modal experience.
+
+## Step 5 — Screen reader announcements
+
+Turn on VoiceOver (macOS: ⌘+F5), NVDA (Windows), or Orca (Linux). Start the tour. You should hear:
+
+1. A polite announcement when the tour starts.
+2. The title and content of the current step.
+3. A polite announcement when the step changes.
+
+Under the hood, `TourCard` renders with `role="dialog"` and `aria-modal="true"` plus an `aria-live="polite"` region for step changes. If you're building a custom `TourCard` with the headless primitives, you need to preserve these attributes:
+
+```tsx
+import { HeadlessTourCard } from '@tour-kit/react/headless'
+
+<HeadlessTourCard
+  render={({ step, totalSteps, currentIndex }) => (
+    <div role="dialog" aria-modal="true" aria-labelledby="tour-title">
+      <h2 id="tour-title">{step.title}</h2>
+      <div aria-live="polite">
+        Step {currentIndex + 1} of {totalSteps}
+      </div>
+      <p>{step.content}</p>
+    </div>
+  )}
+/>
+```
+
+## Step 6 — Respect `prefers-reduced-motion`
+
+Open DevTools → Rendering → "Emulate CSS media feature prefers-reduced-motion: reduce". Start the tour. Entrance animations are replaced with a fade — no scaling, no sliding, no spring motion.
+
+`@tour-kit/react` honors this automatically. If you're writing custom styles, use the same pattern:
+
+```css
+.tour-card {
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-card {
+    transition: opacity 180ms ease;
+    transform: none !important;
+  }
+}
+```
+
+This covers WCAG 2.3.3 "Animation from Interactions" — animation must be avoidable, and on sites that claim WCAG 2.1 AAA, animation that takes more than 5 seconds must be pausable.
+
+## Step 7 — Verify with a screen reader and an accessibility audit
+
+Before shipping, run three checks:
+
+1. **Lighthouse accessibility audit.** In DevTools → Lighthouse → "Accessibility" only. `@tour-kit/react` targets a score of 100.
+2. **axe DevTools scan.** Install the axe DevTools extension, start the tour, and run a scan. There should be zero serious or critical issues.
+3. **Manual screen-reader run.** Start the tour with a real screen reader active and run all the way through. Listen for awkward announcements, missing labels, or steps that read out of order.
+
+If any step fails, the fix is usually in your custom markup — not the library.
+
+## FAQ
+
+### Does `@tour-kit/react` meet WCAG 2.1 AA out of the box?
+
+Yes. The library is designed around WCAG 2.1 AA requirements: focus trapping, focus restoration, keyboard navigation, `role="dialog"` + `aria-modal`, `aria-live` announcements, and `prefers-reduced-motion` support all ship by default. Custom markup can break these guarantees — test with a screen reader when you override `TourCard`.
+
+### Do I need the `@tour-kit/react/headless` package for accessibility?
+
+No. The default `TourCard` is fully accessible. Use the headless primitives when you want complete markup control — e.g., to match a strict design system.
+
+### What about right-to-left (RTL) languages?
+
+`TourCard` positioning uses logical properties (`inline-start`/`inline-end`) so RTL layouts flip correctly when `dir="rtl"` is on the `<html>` element. The tour navigation buttons also reverse order in RTL.
+
+### How do I test accessibility without a screen reader installed?
+
+macOS: ⌘+F5 toggles VoiceOver. Windows: download NVDA (free). Linux: Orca ships with most distros. The 15-minute investment to install and learn a screen reader pays back every time you ship client-side UI.
+
+## Next steps
+
+- [Accessibility guide](/docs/guides/accessibility) — the full WCAG 2.1 AA reference for Tour Kit.
+- [`useFocusTrap` hook](/docs/core/hooks/use-focus-trap) — the primitive behind the default trap.
+- [`Tour` component reference](/docs/react/components/tour) — every prop, every default.
+
+Ready to ship? [Install `@tour-kit/react`](/docs/getting-started/installation) and your next product tour will be accessible by default.
