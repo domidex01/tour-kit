@@ -1,4 +1,5 @@
 import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/ai/page-actions'
+import { getGitFirstCommitted, getGitLastModified } from '@/lib/git-dates'
 import { source } from '@/lib/source'
 import {
   FAQJsonLd,
@@ -262,6 +263,10 @@ export async function renderDocsPage(slug: string[] | undefined) {
           .filter((step) => step.name.length > 0)
       : []
 
+  const absPath = page.absolutePath
+  const datePublished = absPath ? getGitFirstCommitted(absPath).toISOString() : undefined
+  const dateModified = absPath ? getGitLastModified(absPath).toISOString() : undefined
+
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <TechArticleJsonLd
@@ -269,6 +274,8 @@ export async function renderDocsPage(slug: string[] | undefined) {
         description={page.data.description ?? ''}
         url={page.url}
         section={section}
+        datePublished={datePublished}
+        dateModified={dateModified}
       />
       {isApiPage && (
         <SoftwareSourceCodeJsonLd
@@ -345,10 +352,12 @@ export async function getDocsMetadata(slug: string[] | undefined): Promise<Metad
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: { canonical: page.url },
     openGraph: {
       title: page.data.title,
       description: page.data.description,
       type: 'article',
+      url: page.url,
       images: [ogImage],
     },
     twitter: {

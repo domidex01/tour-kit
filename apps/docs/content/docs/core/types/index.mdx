@@ -1,0 +1,16 @@
+---
+title: Types
+description: >-
+  TypeScript type definitions for userTourKit — tour, step, and configuration
+  interfaces that power fully type-safe onboarding flows.
+---
+
+userTourKit ships full TypeScript definitions for every primitive in the library, so your editor can autocomplete tour configuration and catch mismatches at build time. The types live in `@tour-kit/core` and are re-exported from `@tour-kit/react`, so you only need one import path regardless of which package you consume.
+
+Types are grouped into three clusters that map to the library's runtime structure:
+
+- **[Tour Types](/docs/core/types/tour-types)** — the top-level `TourConfig`, the `TourState` union describing where a tour is in its lifecycle, and the action + callback signatures you use when wiring a custom controller.
+- **[Step Types](/docs/core/types/step-types)** — per-step schemas including target selectors, content renderers, placement options, and the lifecycle hooks that fire on `onEnter`, `onLeave`, and `onSkip`.
+- **[Config Types](/docs/core/types/config-types)** — provider-level configuration: `TourProviderProps`, storage adapters, locale overrides, and the `RouterAdapter` interface used by the Next.js and React Router integrations.
+
+Every exported type is stable across minor releases and follows semver; breaking renames are always flagged in the [changelog](https://github.com/DomiDex/tour-kit/releases). If you need a type that isn't surfaced here (for example, an internal payload shape), open an issue — if it's safe to expose we'll export it in the next minor.

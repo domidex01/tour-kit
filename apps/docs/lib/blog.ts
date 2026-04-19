@@ -39,6 +39,17 @@ export function getReadingTime(slug: string): string {
   }
 }
 
+/** Normalize a category name into a URL-safe slug: lowercase, spaces→hyphens, strip non [a-z0-9-]. */
+export function slugifyCategory(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 /** Get all unique categories from published posts. */
 export function getBlogCategories(): string[] {
   const posts = getPublishedBlogPosts()
@@ -46,9 +57,14 @@ export function getBlogCategories(): string[] {
   return [...categories].sort()
 }
 
-/** Get published posts filtered by category. */
-export function getPostsByCategory(category: string): BlogMeta[] {
-  return getPublishedBlogPosts().filter((p) => p.category.toLowerCase() === category.toLowerCase())
+/** Get published posts filtered by slugified category (e.g. "build-vs-buy"). */
+export function getPostsByCategory(categorySlug: string): BlogMeta[] {
+  return getPublishedBlogPosts().filter((p) => slugifyCategory(p.category) === categorySlug)
+}
+
+/** Look up the original category display name from a slug, or undefined. */
+export function getCategoryDisplayName(categorySlug: string): string | undefined {
+  return getBlogCategories().find((c) => slugifyCategory(c) === categorySlug)
 }
 
 export function getPaginatedBlogPosts(page: number) {

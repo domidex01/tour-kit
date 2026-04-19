@@ -3,7 +3,7 @@ import { ArticleLayout } from '@/components/article/article-layout'
 import { ReadingProgress } from '@/components/blog/reading-progress'
 import { BlogTableOfContents } from '@/components/blog/table-of-contents'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
-import { getAdjacentPosts, getReadingTime } from '@/lib/blog'
+import { getAdjacentPosts, getReadingTime, slugifyCategory } from '@/lib/blog'
 import { getBlogPost, getPublishedBlogPosts, getRelatedBlogPosts } from '@/lib/comparisons'
 import { getBlogArticle } from '@/lib/source'
 import { ArticleJsonLd, FAQJsonLd } from '@/lib/structured-data'
@@ -32,20 +32,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const post = getBlogPost(slug)
   if (!post) return {}
 
+  const fallbackOg = `/api/og?title=${encodeURIComponent(post.title)}&category=BLOG`
+  const ogImage = post.ogImage ?? fallbackOg
+
   return {
     title: post.metaTitle,
     description: post.description,
     keywords: post.keywords,
+    alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
       title: post.metaTitle,
       description: post.description,
       type: 'article',
       url: `/blog/${post.slug}`,
-      ...(post.ogImage && {
-        images: [{ url: post.ogImage, width: 1200, height: 630, alt: post.title }],
-      }),
+      images: [{ url: ogImage, width: 1200, height: 630, alt: post.title }],
     },
-    twitter: post.ogImage ? { card: 'summary_large_image', images: [post.ogImage] } : undefined,
+    twitter: { card: 'summary_large_image', images: [ogImage] },
   }
 }
 
@@ -72,7 +74,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         breadcrumbs={[
           { label: 'Home', href: '/' },
           { label: 'Blog', href: '/blog' },
-          { label: post.category, href: `/blog/category/${encodeURIComponent(post.category)}` },
+          { label: post.category, href: `/blog/category/${slugifyCategory(post.category)}` },
           { label: post.title, href: `/blog/${post.slug}` },
         ]}
         publishedAt={post.publishedAt ?? today}

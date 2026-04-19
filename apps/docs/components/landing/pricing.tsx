@@ -47,29 +47,15 @@ const COMPARISON_ROWS = [
 
 export function Pricing() {
   return (
-    <section className="px-6 py-20 sm:px-8 md:py-28 lg:px-12">
+    <section className="px-6 pb-20 sm:px-8 md:pb-28 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        {/* Header */}
-        <div className="mb-16 text-center">
-          <p className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tk-primary)]">
-            Pricing
-          </p>
-          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            Simple, one-time pricing
-          </h2>
-          <p className="mx-auto max-w-xl text-[16px] leading-[1.6] text-fd-muted-foreground">
-            Core packages are free forever. Pay once for extended packages — no subscriptions, no
-            per-seat fees.
-          </p>
-        </div>
-
         {/* Pricing cards */}
         <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 md:gap-8">
           {/* Free tier */}
           <div className="group flex flex-col rounded-xl border border-fd-border bg-fd-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-fd-border bg-fd-muted">
-                <Code2 className="h-5 w-5 text-fd-muted-foreground" />
+                <Code2 className="h-5 w-5 text-fd-muted-foreground" aria-hidden="true" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-fd-foreground">Free</h3>
@@ -96,7 +82,10 @@ export function Pricing() {
                   key={feature}
                   className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
                 >
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  <Check
+                className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+                aria-hidden="true"
+              />
                   {feature}
                 </li>
               ))}
@@ -104,23 +93,23 @@ export function Pricing() {
 
             <Link
               href="/docs/getting-started"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
             >
               Get started
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
 
           {/* Pro tier */}
           <div className="group relative flex flex-col rounded-xl border-2 border-[var(--tk-primary)] bg-fd-card p-8 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
             <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-primary)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-[var(--tk-primary)]/20">
-              <Sparkles className="h-3 w-3" />
+              <Sparkles className="h-3 w-3" aria-hidden="true" />
               One-time purchase
             </div>
 
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--tk-primary)]/10 ring-1 ring-[var(--tk-primary)]/20">
-                <Zap className="h-5 w-5 text-[var(--tk-primary)]" />
+                <Zap className="h-5 w-5 text-[var(--tk-primary)]" aria-hidden="true" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-fd-foreground">Pro</h3>
@@ -149,7 +138,7 @@ export function Pricing() {
                   key={feature}
                   className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
                 >
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tk-primary)]" />
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tk-primary)]" aria-hidden="true" />
                   {feature}
                 </li>
               ))}
@@ -159,10 +148,10 @@ export function Pricing() {
               href={POLAR_CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--tk-primary)]/30"
+              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
             >
               Buy Pro License
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </a>
           </div>
         </div>
@@ -179,15 +168,25 @@ export function Pricing() {
           </div>
           <div className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-fd-border">
             <table className="w-full text-sm">
+              <caption className="sr-only">Feature comparison between Free and Pro tiers.</caption>
               <thead>
                 <tr className="border-b border-fd-border bg-fd-muted/50">
-                  <th className="px-6 py-3.5 text-left text-[13px] font-semibold text-fd-foreground">
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-left text-[13px] font-semibold text-fd-foreground"
+                  >
                     Feature
                   </th>
-                  <th className="px-6 py-3.5 text-center text-[13px] font-semibold text-fd-foreground">
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-center text-[13px] font-semibold text-fd-foreground"
+                  >
                     Free
                   </th>
-                  <th className="px-6 py-3.5 text-center text-[13px] font-semibold text-[var(--tk-primary)]">
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-center text-[13px] font-semibold text-[var(--tk-primary)]"
+                  >
                     Pro
                   </th>
                 </tr>
@@ -198,7 +197,12 @@ export function Pricing() {
                     key={row.feature}
                     className="border-b border-fd-border transition-colors last:border-b-0 hover:bg-fd-muted/30"
                   >
-                    <td className="px-6 py-3 text-[14px] text-fd-foreground">{row.feature}</td>
+                    <th
+                      scope="row"
+                      className="px-6 py-3 text-left text-[14px] font-normal text-fd-foreground"
+                    >
+                      {row.feature}
+                    </th>
                     <td className="px-6 py-3 text-center">
                       <ComparisonCell value={row.free} />
                     </td>
@@ -231,14 +235,23 @@ function ComparisonCell({
   }
   if (value) {
     return (
-      <Check
-        className={`mx-auto h-4 w-4 ${
-          isPro ? 'text-[var(--tk-primary)]' : 'text-emerald-600 dark:text-emerald-400'
-        }`}
-      />
+      <>
+        <Check
+          aria-hidden="true"
+          className={`mx-auto h-4 w-4 ${
+            isPro ? 'text-[var(--tk-primary)]' : 'text-emerald-600 dark:text-emerald-400'
+          }`}
+        />
+        <span className="sr-only">Included</span>
+      </>
     )
   }
-  return <X className="mx-auto h-4 w-4 text-fd-muted-foreground/30" />
+  return (
+    <>
+      <X aria-hidden="true" className="mx-auto h-4 w-4 text-fd-muted-foreground/30" />
+      <span className="sr-only">Not included</span>
+    </>
+  )
 }
 
 function FAQ() {
@@ -267,7 +280,7 @@ function FAQ() {
                 aria-expanded={isOpen}
                 aria-controls={panelId}
                 onClick={() => setOpenIndex(isOpen ? null : i)}
-                className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50"
+                className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
               >
                 {item.q}
                 <svg

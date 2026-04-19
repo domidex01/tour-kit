@@ -1,0 +1,129 @@
+---
+title: SaaS Onboarding
+description: >-
+  Ship a headless first-run onboarding tour in a React SaaS app. Use Tour Kit
+  hooks, checklists, and analytics to get new users to their activation event.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Tour Kit is a headless React library for building first-run onboarding flows in SaaS products. Wrap your dashboard in a `Tour`, point `TourStep` elements at the UI you want to highlight, and the library handles positioning, keyboard navigation, focus management, and WCAG 2.1 AA accessibility for you. Every visual element is yours to style — there is no themed runtime to fight.
+
+This page walks through the minimum pieces of a SaaS onboarding flow: a first-run tour, a persistent checklist for multi-step activation, and analytics events so you can measure activation rate.
+
+## When to reach for a tour
+
+A first-run product tour is the right pattern when:
+
+- New users sign up and land in an empty dashboard.
+- There is a clear **activation event** — the moment a user is likely to keep using the product — and a 2–5 step path to reach it.
+- You want the same flow to run in development, staging, and production without shipping a third-party runtime.
+
+If your onboarding is long, branching, or asynchronous (requires waiting on a background job), consider pairing the tour with an [onboarding checklist](/docs/checklists) so users can leave and resume.
+
+## Minimum example
+
+```tsx title="app/dashboard/page.tsx"
+'use client'
+
+import { Tour, TourStep, TourCard, TourOverlay, useTour } from '@tour-kit/react'
+import { useEffect } from 'react'
+
+function StartOnboarding() {
+  const { start } = useTour('saas-onboarding')
+
+  useEffect(() => {
+    // Only auto-start for brand new users. Gate on your own flag.
+    const isFirstVisit = localStorage.getItem('tk-saas-onboarding') !== 'done'
+    if (isFirstVisit) start()
+  }, [start])
+
+  return null
+}
+
+export default function Dashboard() {
+  return (
+    <Tour
+      id="saas-onboarding"
+      onComplete={() => {
+        localStorage.setItem('tk-saas-onboarding', 'done')
+      }}
+    >
+      <TourStep
+        target="#create-project"
+        title="Create your first project"
+        content="Everything in the app lives inside a project. Create one to get started."
+        placement="bottom"
+      />
+      <TourStep
+        target="#invite-team"
+        title="Invite your team"
+        content="Onboarding is faster with a teammate. Invite them from the top-right."
+        placement="left"
+      />
+      <TourStep
+        target="#billing"
+        title="Upgrade when you're ready"
+        content="You have a 14-day trial — no credit card required."
+        placement="right"
+      />
+
+      <TourOverlay />
+      <TourCard />
+      <StartOnboarding />
+      {/* Your dashboard UI */}
+    </Tour>
+  )
+}
+```
+
+## Pair with a checklist for longer activation paths
+
+If activation requires actions a user has to take between sessions (e.g. verifying email, inviting a teammate, connecting an integration), a static tour becomes awkward. The [`@tour-kit/checklists`](/docs/checklists) package renders a persistent progress widget that users can re-open on each visit, with task dependencies and completion persistence built in.
+
+```tsx
+import { Checklist, ChecklistTask } from '@tour-kit/checklists'
+
+<Checklist id="activation">
+  <ChecklistTask id="create-project" title="Create your first project" />
+  <ChecklistTask id="invite-team" title="Invite a teammate" dependsOn="create-project" />
+  <ChecklistTask id="connect-source" title="Connect a data source" />
+</Checklist>
+```
+
+## Instrument activation
+
+Onboarding without analytics is a guess. Tour Kit's lifecycle callbacks make it easy to fire events into whatever analytics stack you already run:
+
+```tsx
+<Tour
+  id="saas-onboarding"
+  onStart={() => analytics.track('onboarding_started')}
+  onComplete={() => analytics.track('onboarding_completed')}
+  onSkip={() => analytics.track('onboarding_skipped')}
+>
+  {/* ... */}
+</Tour>
+```
+
+For a turnkey integration, wire the [`@tour-kit/analytics`](/docs/analytics) plugin with your provider (Mixpanel, PostHog, Amplitude, GA4, or a custom sink) and every tour/step event is captured automatically.
+
+<Callout type="info">
+  Tour Kit does not ship its own analytics backend. Events you emit go to your own provider — you own the data.
+</Callout>
+
+## Accessibility reminders
+
+- Focus is trapped inside the active step and restored when the tour ends.
+- `Esc` skips the tour unless you disable it on a `TourStep`.
+- Respect `prefers-reduced-motion` — animations are reduced automatically.
+
+See the [Accessibility guide](/docs/guides/accessibility) for the full list.
+
+## Next steps
+
+- [Quick Start](/docs/getting-started/quick-start) — install and render your first tour.
+- [`useTour` hook reference](/docs/core/hooks/use-tour) — programmatic control.
+- [Headless components](/docs/react/headless) — build a fully custom tour UI.
+
+Ready to build? [Install `@tour-kit/react`](/docs/getting-started/installation) and ship your first onboarding tour today.

@@ -57,7 +57,7 @@ export const COMPARISONS: ComparisonMeta[] = [
     title: 'userTourKit vs React Joyride: Which React Tour Library Should You Choose in 2026?',
     metaTitle: 'userTourKit vs React Joyride: 2026 Comparison for Developers',
     description:
-      'Compare userTourKit vs React Joyride for React product tours. See features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026.',
+      'Compare userTourKit vs React Joyride: features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026.',
     keywords: [
       'usertourkit',
       'react joyride',
@@ -75,7 +75,7 @@ export const COMPARISONS: ComparisonMeta[] = [
     title: 'userTourKit vs Shepherd.js: Which Product Tour Library Should You Choose in 2026?',
     metaTitle: 'userTourKit vs Shepherd.js: 2026 Comparison for Developers',
     description:
-      'Compare userTourKit vs Shepherd.js for product tours. See features, bundle size, licensing, and accessibility side-by-side. Find which fits your stack in 2026.',
+      'Compare userTourKit vs Shepherd.js: features, bundle size, licensing, and accessibility side-by-side. Find which fits your stack in 2026.',
     keywords: [
       'usertourkit',
       'shepherd.js',
@@ -428,6 +428,9 @@ export const ALTERNATIVES: AlternativeMeta[] = [
       'react tour library',
       'product tour',
     ],
+    published: true,
+    publishedAt: '2026-04-18',
+    lastUpdated: '2026-04-18',
   },
   {
     slug: 'shepherd-js-alternatives',
@@ -443,6 +446,9 @@ export const ALTERNATIVES: AlternativeMeta[] = [
       'product tour library',
       'AGPL alternative',
     ],
+    published: true,
+    publishedAt: '2026-04-18',
+    lastUpdated: '2026-04-18',
   },
   {
     slug: 'intro-js-alternatives',
@@ -458,6 +464,9 @@ export const ALTERNATIVES: AlternativeMeta[] = [
       'product tour library',
       'AGPL alternative',
     ],
+    published: true,
+    publishedAt: '2026-04-18',
+    lastUpdated: '2026-04-18',
   },
   {
     slug: 'frigade-alternatives',
@@ -479,6 +488,40 @@ export const ALTERNATIVES: AlternativeMeta[] = [
 // ── Blog Posts ──
 
 export const BLOG_POSTS: BlogMeta[] = [
+  {
+    slug: 'accessible-product-tour-react-tutorial',
+    title: 'Build an accessible product tour in React: a step-by-step tutorial',
+    metaTitle: 'Accessible Product Tour in React (WCAG 2.1 AA Tutorial, 2026)',
+    description:
+      'Build a WCAG 2.1 AA accessible product tour in React step by step. Focus trapping, keyboard navigation, screen reader support, and prefers-reduced-motion in under 30 minutes.',
+    keywords: [
+      'accessible product tour react',
+      'react product tour accessibility',
+      'wcag 2.1 aa tour',
+      'keyboard navigable tour',
+    ],
+    category: 'Tutorial',
+    published: true,
+    publishedAt: '2026-04-18',
+    lastUpdated: '2026-04-18',
+  },
+  {
+    slug: 'nextjs-onboarding-flow-tutorial',
+    title: 'Build a complete Next.js 15 onboarding flow: tour + checklist + analytics',
+    metaTitle: 'Next.js 15 Onboarding Flow Tutorial (Tour + Checklist + Analytics)',
+    description:
+      'Step-by-step Next.js 15 onboarding tutorial. Combine a product tour, activation checklist, and analytics plugin with userTourKit in under 45 minutes.',
+    keywords: [
+      'next.js onboarding flow tutorial',
+      'next.js onboarding tutorial',
+      'react onboarding checklist nextjs',
+      'nextjs product tour analytics',
+    ],
+    category: 'Tutorial',
+    published: true,
+    publishedAt: '2026-04-18',
+    lastUpdated: '2026-04-18',
+  },
   {
     slug: 'best-react-product-tour-libraries-2026',
     title: 'The 12 Best React Product Tour Libraries in 2026, Ranked',

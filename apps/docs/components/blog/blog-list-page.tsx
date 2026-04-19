@@ -5,6 +5,7 @@ import {
   getFeaturedBlogPosts,
   getPaginatedBlogPosts,
   getReadingTime,
+  slugifyCategory,
 } from '@/lib/blog'
 import { baseOptions } from '@/lib/layout.shared'
 import { BreadcrumbJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
@@ -53,7 +54,7 @@ export function BlogListPage({ page }: BlogListPageProps) {
             href="/blog/feed.xml"
             className="mt-3 inline-flex items-center gap-1.5 text-[13px] text-fd-muted-foreground transition-colors hover:text-fd-foreground"
           >
-            <Rss className="h-3.5 w-3.5" />
+            <Rss className="h-3.5 w-3.5" aria-hidden="true" />
             RSS feed
           </Link>
         </div>
@@ -67,13 +68,13 @@ export function BlogListPage({ page }: BlogListPageProps) {
           <img
             src="/blog-hero-light.png"
             alt=""
-            role="presentation"
+            aria-hidden="true"
             className="h-full w-full object-cover opacity-60 dark:hidden"
           />
           <img
             src="/blog-hero-dark.png"
             alt=""
-            role="presentation"
+            aria-hidden="true"
             className="hidden h-full w-full object-cover opacity-60 dark:block"
           />
         </div>
@@ -85,7 +86,7 @@ export function BlogListPage({ page }: BlogListPageProps) {
           {categories.map((cat) => (
             <Link
               key={cat}
-              href={`/blog/category/${encodeURIComponent(cat)}`}
+              href={`/blog/category/${slugifyCategory(cat)}`}
               className="rounded-lg border border-fd-border/50 px-3 py-1.5 text-[12px] font-medium text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground dark:border-fd-border"
             >
               {cat}
@@ -97,7 +98,7 @@ export function BlogListPage({ page }: BlogListPageProps) {
         {featured.length > 0 && (
           <section className="mb-10">
             <div className="mb-4 flex items-center gap-2">
-              <Star className="h-4 w-4 text-[#0197f6]" />
+              <Star className="h-4 w-4 text-[#0197f6]" aria-hidden="true" />
               <h2 className="text-sm font-semibold text-fd-foreground">Featured</h2>
             </div>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -164,7 +165,7 @@ function FeaturedCard({
         <div className="relative mb-3 aspect-[1200/630] w-full overflow-hidden rounded-lg">
           <Image
             src={image}
-            alt={title}
+            alt=""
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -177,7 +178,10 @@ function FeaturedCard({
       </span>
       <span className="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-medium text-[#0197f6]">
         Read article
-        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+        <ArrowRight
+          className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
+          aria-hidden="true"
+        />
         {readingTime && (
           <span className="ml-1 font-normal text-fd-muted-foreground">· {readingTime}</span>
         )}
@@ -223,7 +227,7 @@ function BlogCard({
         <div className="relative mb-3 aspect-[1200/630] w-full overflow-hidden rounded-lg">
           <Image
             src={image}
-            alt={title}
+            alt=""
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover transition-transform duration-300 group-hover:scale-105"

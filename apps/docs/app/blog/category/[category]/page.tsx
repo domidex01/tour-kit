@@ -1,5 +1,11 @@
 import { Footer } from '@/components/landing/footer'
-import { getBlogCategories, getPostsByCategory, getReadingTime } from '@/lib/blog'
+import {
+  getBlogCategories,
+  getCategoryDisplayName,
+  getPostsByCategory,
+  getReadingTime,
+  slugifyCategory,
+} from '@/lib/blog'
 import { baseOptions } from '@/lib/layout.shared'
 import { BreadcrumbJsonLd } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
@@ -13,22 +19,29 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  return getBlogCategories().map((c) => ({ category: encodeURIComponent(c) }))
+  return getBlogCategories().map((c) => ({ category: slugifyCategory(c) }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { category } = await params
-  const decoded = decodeURIComponent(category)
+  const display = getCategoryDisplayName(category) ?? category
   return {
-    title: `${decoded} articles — userTourKit Blog`,
-    description: `Browse all ${decoded} articles on the userTourKit blog.`,
+    title: `${display} articles — userTourKit Blog`,
+    description: `Browse all ${display} articles on the userTourKit blog.`,
+    alternates: { canonical: `/blog/category/${category}` },
+    openGraph: {
+      title: `${display} articles — userTourKit Blog`,
+      description: `Browse all ${display} articles on the userTourKit blog.`,
+      type: 'website',
+      url: `/blog/category/${category}`,
+    },
   }
 }
 
 export default async function CategoryPage({ params }: PageProps) {
   const { category } = await params
-  const decoded = decodeURIComponent(category)
-  const posts = getPostsByCategory(decoded)
+  const display = getCategoryDisplayName(category) ?? category
+  const posts = getPostsByCategory(category)
   if (posts.length === 0) notFound()
 
   return (
@@ -37,7 +50,7 @@ export default async function CategoryPage({ params }: PageProps) {
         items={[
           { name: 'Home', url: '/' },
           { name: 'Blog', url: '/blog' },
-          { name: decoded, url: `/blog/category/${category}` },
+          { name: display, url: `/blog/category/${category}` },
         ]}
       />
 
@@ -50,7 +63,7 @@ export default async function CategoryPage({ params }: PageProps) {
           >
             &larr; All articles
           </Link>
-          <h1 className="mb-2 text-3xl font-bold text-fd-foreground sm:text-4xl">{decoded}</h1>
+          <h1 className="mb-2 text-3xl font-bold text-fd-foreground sm:text-4xl">{display}</h1>
           <p className="text-[15px] text-fd-muted-foreground">
             {posts.length} article{posts.length !== 1 ? 's' : ''}
           </p>
@@ -65,13 +78,13 @@ export default async function CategoryPage({ params }: PageProps) {
           <img
             src="/blog-hero-light.png"
             alt=""
-            role="presentation"
+            aria-hidden="true"
             className="h-full w-full object-cover opacity-60 dark:hidden"
           />
           <img
             src="/blog-hero-dark.png"
             alt=""
-            role="presentation"
+            aria-hidden="true"
             className="hidden h-full w-full object-cover opacity-60 dark:block"
           />
         </div>

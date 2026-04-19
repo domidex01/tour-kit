@@ -8,6 +8,7 @@ interface TechArticleProps {
   title: string
   description: string
   url: string
+  datePublished?: string
   dateModified?: string
   section?: string
 }
@@ -31,6 +32,7 @@ export function TechArticleJsonLd({
   title,
   description,
   url,
+  datePublished,
   dateModified,
   section,
 }: TechArticleProps): ReactNode {
@@ -40,6 +42,7 @@ export function TechArticleJsonLd({
     headline: title,
     description,
     url: `${SITE_URL}${url}`,
+    ...(datePublished && { datePublished }),
     ...(dateModified && { dateModified }),
     ...(section && { articleSection: section }),
     author: {

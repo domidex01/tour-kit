@@ -67,7 +67,7 @@ const config = {
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
           },
           {
-            key: 'Content-Security-Policy-Report-Only',
+            key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' https://vercel.live",
@@ -77,7 +77,7 @@ const config = {
               "connect-src 'self' https://vercel.live https://vitals.vercel-analytics.com",
               "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://fast.wistia.net",
               "base-uri 'self'",
-              "form-action 'self'",
+              "form-action 'self' https://buy.polar.sh",
               "frame-ancestors 'self'",
               "object-src 'none'",
             ].join('; '),

@@ -1,0 +1,32 @@
+---
+title: Use Cases
+description: >-
+  Practical Tour Kit use cases: SaaS onboarding, feature announcements,
+  contextual help, and product-led growth patterns for React apps
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card'
+import { Rocket, Megaphone } from 'lucide-react'
+
+Tour Kit is a headless React library, which means it fits into whatever product pattern you're already running. These guides walk through the two most common shapes teams reach for first: **onboarding new users** and **announcing new features to existing users**.
+
+<Cards>
+  <Card
+    title="SaaS Onboarding"
+    icon={<Rocket className="w-5 h-5" />}
+    href="/docs/use-cases/saas-onboarding"
+  >
+    Ship a first-run tour that gets new users to their activation event faster.
+  </Card>
+  <Card
+    title="Feature Announcements"
+    icon={<Megaphone className="w-5 h-5" />}
+    href="/docs/use-cases/feature-announcements"
+  >
+    Surface new features to existing users without shipping a sprint.
+  </Card>
+</Cards>
+
+## Not listed?
+
+The same primitives — `Tour`, `TourStep`, `Hint`, and the `useTour` hook — also power contextual help, empty-state education, onboarding checklists, and role-based tours. Start from [Quick Start](/docs/getting-started/quick-start) and wire in the pieces you need.

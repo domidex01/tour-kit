@@ -1,25 +1,14 @@
-import { execSync } from 'node:child_process'
 import path from 'node:path'
 import {
   getPublishedAlternatives,
   getPublishedBlogPosts,
   getPublishedComparisons,
 } from '@/lib/comparisons'
+import { getGitLastModified } from '@/lib/git-dates'
 import { source } from '@/lib/source'
 import type { MetadataRoute } from 'next'
 
 const SITE_URL = 'https://usertourkit.com'
-
-function getGitLastModified(filePath: string): Date {
-  try {
-    const result = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
-      encoding: 'utf-8',
-    }).trim()
-    return result ? new Date(result) : new Date()
-  } catch {
-    return new Date()
-  }
-}
 
 function mdxPath(collection: 'blog' | 'compare' | 'alternatives', slug: string): string {
   return path.join(process.cwd(), 'content', collection, `${slug}.mdx`)

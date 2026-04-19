@@ -15,8 +15,10 @@ const footerLinks = {
     { label: '@tour-kit/hints', href: '/docs/hints' },
     { label: '@tour-kit/analytics', href: '/docs/analytics' },
   ],
-  community: [
-    { label: 'GitHub', href: 'https://github.com/DomiDex/tour-kit' },
+  company: [
+    { label: 'About', href: '/about' },
+    { label: 'Privacy', href: '/legal/privacy' },
+    { label: 'Contact', href: 'https://github.com/DomiDex/tour-kit/issues/new' },
     { label: 'Changelog', href: 'https://github.com/DomiDex/tour-kit/releases' },
     {
       label: 'Contributing',
@@ -80,13 +82,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Community */}
+          {/* Company */}
           <div>
             <h3 className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-fd-foreground">
-              Community
+              Company
             </h3>
             <ul className="space-y-2.5">
-              {footerLinks.community.map((link) => (
+              {footerLinks.company.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -109,16 +111,29 @@ export function Footer() {
             <Link
               href="https://github.com/DomiDex/tour-kit"
               className="text-fd-muted-foreground transition-colors hover:text-fd-foreground"
-              aria-label="GitHub"
+              aria-label="userTourKit on GitHub"
             >
               <svg
                 className="h-4.5 w-4.5"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                role="img"
-                aria-label="GitHub"
+                aria-hidden="true"
               >
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+            </Link>
+            <Link
+              href="https://www.npmjs.com/package/@tour-kit/core"
+              className="text-fd-muted-foreground transition-colors hover:text-fd-foreground"
+              aria-label="userTourKit on npm"
+            >
+              <svg
+                className="h-4.5 w-4.5"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M0 0v24h24V0Zm19.35 19.35h-2.4v-9.6h-4.8v9.6H2.4V4.65h16.95Z" />
               </svg>
             </Link>
           </div>

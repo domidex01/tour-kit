@@ -1,0 +1,134 @@
+---
+title: Feature Announcements
+description: >-
+  Announce new features to existing React app users with Tour Kit. Use
+  announcements, hints, and spotlight variants without shipping a sprint.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Tour Kit is a headless React library for announcing new features inside your app without shipping a redesign or a release blog post. The [`@tour-kit/announcements`](/docs/announcements) package provides modal, toast, banner, slideout, and spotlight variants; the [`@tour-kit/hints`](/docs/hints) package adds persistent beacons for discoverability after the announcement is dismissed. Both share the same headless contract as the rest of Tour Kit — every pixel is yours.
+
+This page walks through the shape of a typical feature announcement: a one-time spotlight when users first see the new thing, plus a persistent hint that stays until the user dismisses it.
+
+## When to reach for an announcement vs. a tour
+
+| Pattern | Use when |
+|---------|----------|
+| Announcement | One-shot message about a new feature, release, or policy change. |
+| Tour | Multi-step walkthrough of how to use a feature. |
+| Hint | Ongoing discoverability — stays until dismissed, doesn't block the UI. |
+
+You can — and often should — combine them: a one-time announcement on launch day, a hint that persists for the next 30 days, and a tour that teaches the deeper workflow when the user clicks into the feature.
+
+## Minimum example — spotlight announcement
+
+The spotlight variant dims the page, highlights a single element, and shows a short message. Good for launches where you want to point at the new thing without hijacking the page.
+
+```tsx title="app/layout.tsx"
+'use client'
+
+import { AnnouncementProvider, Announcement } from '@tour-kit/announcements'
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <AnnouncementProvider>
+      <Announcement
+        id="commenting-launch-2026-04"
+        variant="spotlight"
+        target="#comments-button"
+        title="Comments are here"
+        content="Tag teammates, resolve threads, and keep review conversations in context."
+        cta={{ label: 'Try it out', href: '/help/comments' }}
+        frequency="once"
+      />
+      {children}
+    </AnnouncementProvider>
+  )
+}
+```
+
+`frequency="once"` persists dismissal in storage — the announcement won't show again on repeat visits.
+
+## Add a persistent hint for ongoing discovery
+
+Once the spotlight is dismissed, the feature is still new to users who didn't click through. A persistent [`Hint`](/docs/hints/components) keeps a pulsing beacon on the feature until the user interacts with it or dismisses explicitly.
+
+```tsx
+import { HintsProvider, Hint } from '@tour-kit/hints'
+
+<HintsProvider>
+  <Hint
+    id="comments-beacon"
+    target="#comments-button"
+    content="New — threaded comments on any item."
+    persist
+  />
+
+  <YourAppChrome />
+</HintsProvider>
+```
+
+Set `persist` to store dismissal across sessions; leave it off for a beacon that reappears on each reload.
+
+## Gate announcements on user segment
+
+Announcements without targeting become noise. Combine Tour Kit with your own feature flag or user-segment system:
+
+```tsx
+const shouldSeeLaunch =
+  flags.commentingEnabled && user.plan !== 'free' && user.createdAt < launchDate
+
+<Announcement
+  id="commenting-launch"
+  variant="spotlight"
+  target="#comments-button"
+  title="Comments are here"
+  content="Tag teammates and keep review conversations in context."
+  // Render nothing if the user isn't in the target segment
+  when={shouldSeeLaunch}
+/>
+```
+
+The `when` prop short-circuits rendering — cheaper than wrapping in a conditional and avoids a mount/unmount flash.
+
+## Queue multiple announcements
+
+If a release shipped more than one thing, queue them so users don't get a wall of modals. `@tour-kit/announcements` has an internal queue that respects `frequency` per ID:
+
+```tsx
+<Announcement id="comments-launch" variant="toast" frequency="once" {...props} />
+<Announcement id="search-upgrade" variant="banner" frequency="once" {...props} />
+<Announcement id="billing-policy" variant="modal" frequency="session" {...props} />
+```
+
+Only the highest-priority unseen announcement shows at a time. See [Queue system](/docs/announcements/queue) for priority rules.
+
+<Callout type="info">
+  Announcements respect `prefers-reduced-motion` — entrance animations are replaced with a fade on users who opt out.
+</Callout>
+
+## Measure announcement effectiveness
+
+Fire analytics events on view, click, and dismiss so you can tell "was it seen" from "was it clicked":
+
+```tsx
+<Announcement
+  id="comments-launch"
+  variant="spotlight"
+  target="#comments-button"
+  title="Comments are here"
+  content="Tag teammates and keep review conversations in context."
+  onShow={() => analytics.track('announcement_shown', { id: 'comments-launch' })}
+  onCtaClick={() => analytics.track('announcement_clicked', { id: 'comments-launch' })}
+  onDismiss={() => analytics.track('announcement_dismissed', { id: 'comments-launch' })}
+/>
+```
+
+## Next steps
+
+- [`@tour-kit/announcements` overview](/docs/announcements) — all five variants.
+- [`@tour-kit/hints`](/docs/hints) — persistent beacons and tooltips.
+- [Scheduling](/docs/scheduling) — time-box announcements to a release window.
+
+Ready to build? [Install `@tour-kit/announcements`](/docs/getting-started/installation) and ship your first in-app release note today.
