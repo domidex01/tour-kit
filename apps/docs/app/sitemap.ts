@@ -50,6 +50,49 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }))
 
+  const trustPages: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE_URL}/about`,
+      lastModified: getGitLastModified(path.join(process.cwd(), 'app/about/page.tsx')),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${SITE_URL}/editorial-policy`,
+      lastModified: getGitLastModified(path.join(process.cwd(), 'app/editorial-policy/page.tsx')),
+      changeFrequency: 'yearly' as const,
+      priority: 0.5,
+    },
+    {
+      url: `${SITE_URL}/how-we-test`,
+      lastModified: getGitLastModified(path.join(process.cwd(), 'app/how-we-test/page.tsx')),
+      changeFrequency: 'yearly' as const,
+      priority: 0.5,
+    },
+    {
+      url: `${SITE_URL}/benchmarks`,
+      lastModified: getGitLastModified(
+        path.join(process.cwd(), 'content/benchmarks/bundle-sizes.json'),
+      ),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${SITE_URL}/benchmarks/bundle-size`,
+      lastModified: getGitLastModified(
+        path.join(process.cwd(), 'content/benchmarks/bundle-sizes.json'),
+      ),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${SITE_URL}/sitemap`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.4,
+    },
+  ]
+
   return [
     {
       url: SITE_URL,
@@ -57,6 +100,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly' as const,
       priority: 1.0,
     },
+    ...trustPages,
     ...docEntries,
     ...blogEntries,
     ...compareEntries,

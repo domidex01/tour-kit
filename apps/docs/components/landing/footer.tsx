@@ -6,6 +6,7 @@ const footerLinks = {
     { label: 'Documentation', href: '/docs' },
     { label: 'Getting started', href: '/docs/getting-started' },
     { label: 'Compare', href: '/compare' },
+    { label: 'Benchmarks', href: '/benchmarks' },
     { label: 'Blog', href: '/blog' },
     { label: 'Pricing', href: '/pricing' },
   ],
@@ -17,6 +18,8 @@ const footerLinks = {
   ],
   company: [
     { label: 'About', href: '/about' },
+    { label: 'Editorial policy', href: '/editorial-policy' },
+    { label: 'How we test', href: '/how-we-test' },
     { label: 'Privacy', href: '/legal/privacy' },
     { label: 'Contact', href: 'https://github.com/DomiDex/tour-kit/issues/new' },
     { label: 'Changelog', href: 'https://github.com/DomiDex/tour-kit/releases' },
@@ -25,6 +28,29 @@ const footerLinks = {
       href: 'https://github.com/DomiDex/tour-kit/blob/main/CONTRIBUTING.md',
     },
     { label: 'License', href: 'https://github.com/DomiDex/tour-kit/blob/main/LICENSE' },
+    { label: 'Site map', href: '/sitemap' },
+  ],
+  machineReadable: [
+    {
+      label: 'llms.txt',
+      href: '/llms.txt',
+      title: 'Concise site summary for AI assistants (llmstxt.org spec)',
+    },
+    {
+      label: 'llms-full.txt',
+      href: '/llms-full.txt',
+      title: 'Full documentation corpus for AI ingestion',
+    },
+    {
+      label: 'sitemap.xml',
+      href: '/sitemap.xml',
+      title: 'Machine-readable sitemap for search engines',
+    },
+    {
+      label: 'RSS feed',
+      href: '/blog/feed.xml',
+      title: 'Blog RSS feed',
+    },
   ],
 }
 
@@ -102,8 +128,23 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Machine-readable resources */}
+        <ul className="mt-10 flex flex-wrap gap-x-5 gap-y-2 border-t border-fd-border pt-6">
+          {footerLinks.machineReadable.map((link) => (
+            <li key={link.href}>
+              <a
+                href={link.href}
+                title={link.title}
+                className="font-mono text-[12px] text-fd-muted-foreground transition-colors hover:text-fd-foreground"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+
         {/* Bottom bar */}
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-fd-border pt-8">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-fd-border pt-6">
           <p className="text-[12px] text-fd-muted-foreground">
             &copy; {new Date().getFullYear()} userTourKit. MIT Licensed.
           </p>

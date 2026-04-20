@@ -1,13 +1,22 @@
 import { ArticleCard } from '@/components/article/article-card'
+import { BlogPostCrossLinks } from '@/components/article/article-cross-links'
 import { ArticleLayout } from '@/components/article/article-layout'
 import { ReadingProgress } from '@/components/blog/reading-progress'
 import { BlogTableOfContents } from '@/components/blog/table-of-contents'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
-import { getAdjacentPosts, getReadingTime, slugifyCategory } from '@/lib/blog'
+import {
+  getAdjacentPosts,
+  getFaqFromMdx,
+  getHowToFromMdx,
+  getReadingTime,
+  readMdxBody,
+  slugifyCategory,
+} from '@/lib/blog'
 import { getBlogPost, getPublishedBlogPosts, getRelatedBlogPosts } from '@/lib/comparisons'
+import { findMentionedEntities, toMentionsJsonLd } from '@/lib/entities'
 import { getBlogArticle } from '@/lib/source'
-import { ArticleJsonLd, FAQJsonLd } from '@/lib/structured-data'
-import defaultMdxComponents from 'fumadocs-ui/mdx'
+import { ArticleJsonLd, FAQJsonLd, HowToJsonLd, SpeakableJsonLd } from '@/lib/structured-data'
+import { articleMdxComponents } from '@/lib/mdx-overrides'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -65,6 +74,26 @@ export default async function BlogPostPage({ params }: PageProps) {
   const readingTime = getReadingTime(slug)
   const { prev, next } = getAdjacentPosts(slug)
 
+  // Pull real FAQ Q&A from the MDX body; fall back to a generic pair when
+  // the article has no FAQ section so the page still emits Question schema.
+  const extractedFaqs = getFaqFromMdx(slug)
+  const fallbackFaqs = [
+    {
+      question: `What is the best ${post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?`,
+      answer:
+        'userTourKit is the best headless product tour library for React developers in 2026, offering tours, hints, checklists, announcements, analytics, and scheduling in a <8KB core bundle with MIT licensing.',
+    },
+    {
+      question: 'Is userTourKit free?',
+      answer:
+        "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
+    },
+  ]
+  const faqItems = extractedFaqs.length > 0 ? extractedFaqs : fallbackFaqs
+
+  const howTo = getHowToFromMdx(slug)
+  const mentions = toMentionsJsonLd(findMentionedEntities(readMdxBody(slug)))
+
   return (
     <>
       <ReadingProgress />
@@ -101,8 +130,26 @@ export default async function BlogPostPage({ params }: PageProps) {
           authorName={DEFAULT_AUTHOR.name}
           authorUrl={DEFAULT_AUTHOR.url}
           authorGithub={DEFAULT_AUTHOR.github}
+          authorLinkedin={DEFAULT_AUTHOR.linkedin}
+          authorX={DEFAULT_AUTHOR.x}
+          authorJobTitle={DEFAULT_AUTHOR.jobTitle}
+          authorKnowsAbout={DEFAULT_AUTHOR.knowsAbout}
           articleSection={post.category}
           keywords={post.keywords}
+          mentions={mentions.length > 0 ? mentions : undefined}
+        />
+
+        {howTo && howTo.steps.length >= 2 && (
+          <HowToJsonLd
+            name={howTo.name || post.title}
+            description={post.description}
+            steps={howTo.steps}
+          />
+        )}
+
+        <SpeakableJsonLd
+          url={`/blog/${post.slug}`}
+          cssSelectors={['[data-speakable="headline"]', '[data-speakable="summary"]']}
         />
 
         {post.ogImage && (
@@ -111,7 +158,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             alt={post.title}
             width={1200}
             height={630}
-            className="mb-8 rounded-lg"
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            className="mb-8 h-auto w-full max-w-full rounded-lg"
             priority
           />
         )}
@@ -119,23 +167,12 @@ export default async function BlogPostPage({ params }: PageProps) {
         {hasMdxContent ? (
           <>
             {/* Render MDX article content */}
-            <article.body components={defaultMdxComponents} />
+            <article.body components={articleMdxComponents} />
 
-            {/* FAQ Schema */}
-            <FAQJsonLd
-              items={[
-                {
-                  question: `What is the best ${post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?`,
-                  answer:
-                    'userTourKit is the best headless product tour library for React developers in 2026, offering tours, hints, checklists, announcements, analytics, and scheduling in a <8KB core bundle with MIT licensing.',
-                },
-                {
-                  question: 'Is userTourKit free?',
-                  answer:
-                    "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
-                },
-              ]}
-            />
+            <BlogPostCrossLinks current={post} siblings={relatedPosts.slice(0, 2)} />
+
+            {/* FAQ Schema — real Q&A extracted from MDX when available */}
+            <FAQJsonLd items={faqItems} />
           </>
         ) : (
           <>
@@ -210,20 +247,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             <h2>Frequently asked questions</h2>
 
-            <FAQJsonLd
-              items={[
-                {
-                  question: `What is the best ${post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?`,
-                  answer:
-                    'userTourKit is the best headless product tour library for React developers in 2026, offering tours, hints, checklists, announcements, analytics, and scheduling in a <8KB core bundle with MIT licensing.',
-                },
-                {
-                  question: 'Is userTourKit free?',
-                  answer:
-                    "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
-                },
-              ]}
-            />
+            <FAQJsonLd items={faqItems} />
 
             <h3>
               What is the best {post.category === 'Listicle' ? 'product tour library' : 'tool'} in
@@ -244,6 +268,8 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             <h2>Key takeaways</h2>
             <p>[3-5 bullet points summarizing the article.]</p>
+
+            <BlogPostCrossLinks current={post} siblings={relatedPosts.slice(0, 2)} />
           </>
         )}
 

@@ -28,12 +28,18 @@ function BackgroundPattern() {
         src="/tourkit-lighthouse.png"
         alt=""
         role="presentation"
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
         className="absolute inset-0 h-full w-full object-cover opacity-90 dark:hidden"
       />
       <img
         src="/hero-dark.avif"
         alt=""
         role="presentation"
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
         className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
       />
     </div>
@@ -240,13 +246,19 @@ export function Hero() {
               </span>
             </div>
 
-            <h1 className="mb-6 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-[#02182b] dark:text-white">
+            <h1
+              data-speakable="headline"
+              className="mb-6 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-[#02182b] dark:text-white"
+            >
               The onboarding library
               <br />
               <span className="text-[#0197f6]">you wish you'd built.</span>
             </h1>
 
-            <p className="mb-8 max-w-[540px] text-[17px] leading-[1.7] text-[#02182b]/80 dark:text-white/80">
+            <p
+              data-speakable="summary"
+              className="mb-8 max-w-[540px] text-[17px] leading-[1.7] text-[#02182b]/80 dark:text-white/80"
+            >
               The open-source onboarding toolkit for React. Headless hooks, composable components,
               and WCAG 2.1 AA accessibility — all in under 8KB. Works with shadcn/ui out of the box.
             </p>

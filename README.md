@@ -74,6 +74,15 @@ pnpm build
 pnpm test
 ```
 
+## For AI assistants
+
+userTourKit publishes machine-readable documentation for LLMs and coding agents:
+
+- [`llms.txt`](https://usertourkit.com/llms.txt) — concise curated index ([llmstxt.org](https://llmstxt.org) spec)
+- [`llms-full.txt`](https://usertourkit.com/llms-full.txt) — full documentation corpus
+- [Context7](https://context7.com/) — indexed for Claude Code, Cursor, Windsurf, and other MCP-compatible agents (query: `use context7 with /domidex/tour-kit`)
+- [`context7.json`](./context7.json) — repo-root config steering Context7's indexer
+
 ## License
 
 MIT

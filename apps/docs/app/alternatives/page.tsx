@@ -6,15 +6,28 @@ import { BreadcrumbJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 
+const ALT_TITLE = 'Alternatives — userTourKit'
+const ALT_DESC =
+  'Find the best alternatives to Appcues, Pendo, WalkMe, Userpilot, UserGuiding, React Joyride, Shepherd.js, and more. Ranked by developers for developers.'
+const ALT_OG_IMAGE = `/api/og?title=${encodeURIComponent('Alternatives')}&category=ALTERNATIVES`
+
 export const metadata: Metadata = {
-  title: 'Alternatives — userTourKit',
-  description:
-    'Find the best alternatives to Appcues, Pendo, WalkMe, Userpilot, UserGuiding, React Joyride, Shepherd.js, and more. Ranked by developers for developers.',
+  title: ALT_TITLE,
+  description: ALT_DESC,
+  alternates: { canonical: '/alternatives' },
   openGraph: {
-    title: 'Alternatives — userTourKit',
+    title: ALT_TITLE,
     description:
       'Find the best alternatives to popular onboarding tools and product tour libraries. Developer-focused rankings.',
     type: 'website',
+    url: '/alternatives',
+    images: [ALT_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: ALT_TITLE,
+    description: ALT_DESC,
+    images: [ALT_OG_IMAGE],
   },
 }
 
@@ -34,9 +47,14 @@ export default function AlternativesHub() {
             Alternatives to popular onboarding tools
           </h1>
           <p className="text-[16px] leading-relaxed text-fd-muted-foreground">
-            Looking to switch from your current product tour or onboarding platform? We ranked the
-            best alternatives for each tool based on developer experience, features, performance,
-            licensing, and maintenance health.
+            Outgrew your current product tour or onboarding platform? Each roundup ranks the best
+            alternatives for a specific tool — Appcues, Pendo, WalkMe, Userpilot, UserGuiding,
+            React Joyride, Shepherd.js, Driver.js, Intro.js, and others — across developer
+            experience, framework support, bundle size, accessibility, licensing, pricing, and
+            project health (release cadence, open issues, maintainer responsiveness). We also flag
+            the migration cost: API surface differences, behavioral gaps, and the migration
+            patterns that have worked for teams who have already made the switch. Use these to
+            shortlist three options worth a serious evaluation.
           </p>
         </header>
 

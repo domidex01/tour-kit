@@ -1,5 +1,7 @@
 import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/ai/page-actions'
-import { getGitFirstCommitted, getGitLastModified } from '@/lib/git-dates'
+import { DocsByline } from '@/components/article/docs-byline'
+import { DEFAULT_AUTHOR } from '@/lib/authors'
+import { SITE_LAUNCH_FALLBACK, getGitFirstCommitted, getGitLastModified } from '@/lib/git-dates'
 import { source } from '@/lib/source'
 import {
   FAQJsonLd,
@@ -264,8 +266,10 @@ export async function renderDocsPage(slug: string[] | undefined) {
       : []
 
   const absPath = page.absolutePath
-  const datePublished = absPath ? getGitFirstCommitted(absPath).toISOString() : undefined
-  const dateModified = absPath ? getGitLastModified(absPath).toISOString() : undefined
+  const datePublished = absPath
+    ? getGitFirstCommitted(absPath).toISOString()
+    : SITE_LAUNCH_FALLBACK
+  const dateModified = absPath ? getGitLastModified(absPath).toISOString() : SITE_LAUNCH_FALLBACK
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -296,7 +300,12 @@ export async function renderDocsPage(slug: string[] | undefined) {
       {faqItems && <FAQJsonLd items={faqItems} />}
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
-      <div className="flex flex-row items-center gap-2 border-b border-fd-border pb-4 pt-2">
+      <DocsByline
+        author={DEFAULT_AUTHOR}
+        datePublished={datePublished}
+        dateModified={dateModified}
+      />
+      <div className="mt-4 flex flex-row items-center gap-2 border-b border-fd-border pb-4 pt-2">
         <MarkdownCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptionsPopover
           markdownUrl={`${page.url}.mdx`}

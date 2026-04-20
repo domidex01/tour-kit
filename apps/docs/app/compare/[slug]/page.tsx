@@ -1,8 +1,9 @@
 import { ArticleLayout } from '@/components/article/article-layout'
+import { CompareArticleCrossLinks } from '@/components/article/article-cross-links'
 import { getComparison, getPublishedComparisons, getRelatedComparisons } from '@/lib/comparisons'
 import { getCompareArticle } from '@/lib/source'
 import { ArticleJsonLd, FAQJsonLd } from '@/lib/structured-data'
-import defaultMdxComponents from 'fumadocs-ui/mdx'
+import { articleMdxComponents } from '@/lib/mdx-overrides'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -20,15 +21,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const comparison = getComparison(slug)
   if (!comparison) return {}
 
+  const ogImage = `/api/og?title=${encodeURIComponent(`userTourKit vs ${comparison.competitor}`)}&category=COMPARE`
+  const canonical = `/compare/${comparison.slug}`
+
   return {
     title: comparison.metaTitle,
     description: comparison.description,
     keywords: comparison.keywords,
+    alternates: { canonical },
     openGraph: {
       title: comparison.metaTitle,
       description: comparison.description,
       type: 'article',
-      url: `/compare/${comparison.slug}`,
+      url: canonical,
+      images: [ogImage],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: comparison.metaTitle,
+      description: comparison.description,
+      images: [ogImage],
     },
   }
 }
@@ -73,7 +85,9 @@ export default async function ComparisonPage({ params }: PageProps) {
       {hasMdxContent ? (
         <>
           {/* Render MDX article content */}
-          <article.body components={defaultMdxComponents} />
+          <article.body components={articleMdxComponents} />
+
+          <CompareArticleCrossLinks current={comparison} siblings={related.slice(0, 2)} />
 
           {/* FAQ Schema (extracted from MDX heading structure) */}
           <FAQJsonLd
@@ -257,6 +271,8 @@ export default async function ComparisonPage({ params }: PageProps) {
             [Write a 50-70 word conclusion with a definitive recommendation based on specific use
             cases.]
           </p>
+
+          <CompareArticleCrossLinks current={comparison} siblings={related.slice(0, 2)} />
         </>
       )}
 

@@ -1,4 +1,4 @@
-# userTourKit v0.3.0 — Generated 2026-04-19T13:00:04Z
+# userTourKit v0.3.0 — Generated 2026-04-20T05:10:37Z
 
 # userTourKit
 
@@ -261,3 +261,45 @@
 - [Use Cases](https://usertourkit.com/docs/use-cases): Practical Tour Kit use cases: SaaS onboarding, feature announcements, contextual help, and product-led growth patterns for React apps
 - [Feature Announcements](https://usertourkit.com/docs/use-cases/feature-announcements): Announce new features to existing React app users with Tour Kit. Use announcements, hints, and spotlight variants without shipping a sprint.
 - [SaaS Onboarding](https://usertourkit.com/docs/use-cases/saas-onboarding): Ship a headless first-run onboarding tour in a React SaaS app. Use Tour Kit hooks, checklists, and analytics to get new users to their activation event.
+
+## Pillar Articles (Blog)
+
+- [Headless onboarding: what it means, why it matters, and how to start](https://usertourkit.com/blog/headless-onboarding-explained): What headless onboarding is, why it beats styled tour libraries for design system teams, and how to implement it with code examples.
+- [Onboarding metrics explained: every KPI with formulas (2026)](https://usertourkit.com/blog/onboarding-metrics-explained): Master every onboarding KPI from activation rate to NPS. Each metric includes the formula, benchmark data, and React tracking code.
+- [Onboarding software: every tool, library, and platform compared (2026)](https://usertourkit.com/blog/onboarding-software-comparison-hub): Compare 25+ onboarding tools across enterprise DAPs, mid-market SaaS, and open-source libraries. Pricing, bundle sizes, and decision framework included.
+- [The open-source onboarding stack: build your own with code](https://usertourkit.com/blog/open-source-onboarding-stack): Assemble a code-first onboarding stack from open-source tools. Compare tour libraries, analytics, and surveys to own your onboarding.
+- [Product tour best practices for React developers (2026)](https://usertourkit.com/blog/product-tour-best-practices-react): 14 product tour best practices for React. Code examples, accessibility, state management, and performance from real implementations.
+- [Product tours: the complete 2026 guide for developers](https://usertourkit.com/blog/product-tour-guide-2026): Learn what product tours are, how they work, and how to build them in React. Tour types, completion benchmarks, accessibility, and code examples.
+- [Tour Kit vs everything: the complete comparison index (2026)](https://usertourkit.com/blog/tour-kit-comparison-index): Compare Tour Kit against every product tour library and SaaS platform. Head-to-head benchmarks, migration guides, and pricing breakdowns in one place.
+- [Tour Kit documentation hub: guides, tutorials, and API reference](https://usertourkit.com/blog/tour-kit-documentation-hub): Navigate Tour Kit's complete documentation. Find guides, API references, tutorials, and examples for all 10 packages across the React product tour library.
+- [User onboarding: the developers complete handbook (2026)](https://usertourkit.com/blog/user-onboarding-handbook): A code-first guide to user onboarding covering patterns, metrics, accessibility, and implementation with working React examples and real benchmark data.
+
+## Comparisons
+
+- [userTourKit vs Appcues](https://usertourkit.com/compare/tour-kit-vs-appcues): Compare userTourKit vs Appcues for product onboarding. $99 one-time vs $300+/month. See features, pricing, and developer experience side-by-side in 2026.
+- [userTourKit vs Chameleon](https://usertourkit.com/compare/tour-kit-vs-chameleon): Compare userTourKit vs Chameleon for product onboarding. See features, pricing, and developer experience side-by-side in 2026.
+- [userTourKit vs Driver.js](https://usertourkit.com/compare/tour-kit-vs-driver-js): Compare userTourKit vs Driver.js for product tours. See features, bundle size, React integration, and accessibility side-by-side in 2026.
+- [userTourKit vs Intro.js](https://usertourkit.com/compare/tour-kit-vs-intro-js): Compare userTourKit vs Intro.js for product tours and onboarding. See features, bundle size, licensing, and accessibility side-by-side in 2026.
+- [userTourKit vs OnboardJS](https://usertourkit.com/compare/tour-kit-vs-onboardjs): Compare userTourKit vs OnboardJS for headless product tours. See features, visual components, and TypeScript support side-by-side in 2026.
+- [userTourKit vs Onborda](https://usertourkit.com/compare/tour-kit-vs-onborda): Compare userTourKit vs Onborda for Next.js product tours. See features, framework support, and compatibility side-by-side in 2026.
+- [userTourKit vs React Joyride](https://usertourkit.com/compare/tour-kit-vs-react-joyride): Compare userTourKit vs React Joyride: features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026.
+- [userTourKit vs Reactour](https://usertourkit.com/compare/tour-kit-vs-reactour): Compare userTourKit vs Reactour for React product tours. See features, bundle size, pricing, accessibility, and TypeScript side-by-side in 2026.
+- [userTourKit vs Shepherd.js](https://usertourkit.com/compare/tour-kit-vs-shepherd-js): Compare userTourKit vs Shepherd.js: features, bundle size, licensing, and accessibility side-by-side. Find which fits your stack in 2026.
+- [userTourKit vs Userflow](https://usertourkit.com/compare/tour-kit-vs-userflow): Compare userTourKit vs Userflow for product onboarding. See features, pricing, flow builder, and developer experience side-by-side in 2026.
+- [userTourKit vs UserGuiding](https://usertourkit.com/compare/tour-kit-vs-userguiding): Compare userTourKit vs UserGuiding for product onboarding. See features, pricing, customization, and developer control side-by-side in 2026.
+- [userTourKit vs Userpilot](https://usertourkit.com/compare/tour-kit-vs-userpilot): Compare userTourKit vs Userpilot for product onboarding. See features, pricing, analytics, and developer experience side-by-side in 2026.
+- [userTourKit vs WalkMe](https://usertourkit.com/compare/tour-kit-vs-walkme): Compare userTourKit vs WalkMe for digital adoption. See features, pricing, performance, and implementation complexity side-by-side in 2026.
+
+## Alternatives
+
+- [Intro.js alternatives](https://usertourkit.com/alternatives/intro-js-alternatives): The best Intro.js alternatives in 2026. Compare userTourKit, Shepherd.js, Driver.js, and more. Ranked by license, features, and DX.
+- [React Joyride alternatives](https://usertourkit.com/alternatives/react-joyride-alternatives): The best React Joyride alternatives in 2026. Compare userTourKit, Shepherd.js, Driver.js, and more. Ranked by bundle size, features, and DX.
+- [Shepherd.js alternatives](https://usertourkit.com/alternatives/shepherd-js-alternatives): The best Shepherd.js alternatives in 2026. Compare userTourKit, React Joyride, Driver.js, and more. Ranked by license, features, and DX.
+
+## About & Editorial
+
+- [About userTourKit](https://usertourkit.com/about): About page with maintainer bio (Dominique Degottex / DomiDex), verifiable external profiles, and Person schema.
+- [Editorial Policy](https://usertourkit.com/editorial-policy): How userTourKit content is produced, reviewed, sourced, corrected, and disclosed — including AI-assistance disclosure.
+- [How We Test](https://usertourkit.com/how-we-test): Methodology behind benchmarks, bundle-size claims, accessibility scores, and comparison data. CI gates, manual verification, reproducibility.
+- [Benchmarks](https://usertourkit.com/benchmarks): Reproducible benchmarks comparing userTourKit against other React product tour libraries. Published methodology, timestamped snapshots, linked sources.
+- [Bundle Size Benchmark](https://usertourkit.com/benchmarks/bundle-size): Gzipped + minified production-build sizes for userTourKit, React Joyride, Shepherd.js, Driver.js, Intro.js, Onborda, and Reactour. Sourced from bundlephobia.

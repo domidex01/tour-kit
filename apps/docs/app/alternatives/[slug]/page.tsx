@@ -1,4 +1,5 @@
 import { ArticleLayout } from '@/components/article/article-layout'
+import { AlternativeArticleCrossLinks } from '@/components/article/article-cross-links'
 import {
   getAlternative,
   getPublishedAlternatives,
@@ -6,7 +7,7 @@ import {
 } from '@/lib/comparisons'
 import { getAlternativeArticle } from '@/lib/source'
 import { ArticleJsonLd, FAQJsonLd } from '@/lib/structured-data'
-import defaultMdxComponents from 'fumadocs-ui/mdx'
+import { articleMdxComponents } from '@/lib/mdx-overrides'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -57,6 +58,9 @@ export default async function AlternativesPage({ params }: PageProps) {
 
   const article = getAlternativeArticle(slug)
   const hasMdxContent = !!article
+  const adjacentAlternatives = getPublishedAlternatives()
+    .filter((a) => a.slug !== slug)
+    .slice(0, 2)
 
   return (
     <ArticleLayout
@@ -93,7 +97,13 @@ export default async function AlternativesPage({ params }: PageProps) {
 
       {hasMdxContent ? (
         <>
-          <article.body components={defaultMdxComponents} />
+          <article.body components={articleMdxComponents} />
+
+          <AlternativeArticleCrossLinks
+            current={alt}
+            vsComparison={vsPage}
+            adjacentAlternatives={adjacentAlternatives}
+          />
 
           <FAQJsonLd
             items={[
@@ -213,6 +223,12 @@ export default async function AlternativesPage({ params }: PageProps) {
             [Write a 50-70 word conclusion summarizing the best alternatives and when to choose
             each.]
           </p>
+
+          <AlternativeArticleCrossLinks
+            current={alt}
+            vsComparison={vsPage}
+            adjacentAlternatives={adjacentAlternatives}
+          />
         </>
       )}
 

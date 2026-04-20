@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 const SITE_URL = 'https://usertourkit.com'
+const SITE_LAUNCH_DATE = '2025-01-01T00:00:00.000Z'
 
 // ── Types ──
 
@@ -36,29 +37,27 @@ export function TechArticleJsonLd({
   dateModified,
   section,
 }: TechArticleProps): ReactNode {
+  const resolvedPublished = datePublished ?? SITE_LAUNCH_DATE
+  const resolvedModified = dateModified ?? resolvedPublished
   const data = {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
     headline: title,
     description,
     url: `${SITE_URL}${url}`,
-    ...(datePublished && { datePublished }),
-    ...(dateModified && { dateModified }),
+    datePublished: resolvedPublished,
+    dateModified: resolvedModified,
     ...(section && { articleSection: section }),
-    author: {
-      '@type': 'Organization',
-      name: 'userTourKit',
-      url: SITE_URL,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'userTourKit',
-      url: SITE_URL,
-    },
+    author: { '@id': `${SITE_URL}/about#person` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: {
       '@type': 'WebSite',
       name: 'userTourKit Documentation',
       url: `${SITE_URL}/docs`,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}${url}`,
     },
   }
 
@@ -66,6 +65,12 @@ export function TechArticleJsonLd({
     // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   )
+}
+
+interface ArticleMention {
+  '@type': 'SoftwareApplication' | 'Organization'
+  name: string
+  sameAs: string
 }
 
 interface ArticleJsonLdProps {
@@ -78,10 +83,14 @@ interface ArticleJsonLdProps {
   authorUrl?: string
   authorGithub?: string
   authorLinkedin?: string
+  authorX?: string
+  authorJobTitle?: string
+  authorKnowsAbout?: string[]
   image?: string
   wordCount?: number
   articleSection?: string
   keywords?: string[]
+  mentions?: ArticleMention[]
 }
 
 interface BreadcrumbItem {
@@ -121,12 +130,16 @@ export function ArticleJsonLd({
   authorUrl,
   authorGithub,
   authorLinkedin,
+  authorX,
+  authorJobTitle,
+  authorKnowsAbout,
   image,
   wordCount,
   articleSection,
   keywords,
+  mentions,
 }: ArticleJsonLdProps): ReactNode {
-  const sameAs = [authorGithub, authorLinkedin].filter(Boolean)
+  const sameAs = [authorGithub, authorLinkedin, authorX].filter(Boolean)
   const data = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -137,9 +150,12 @@ export function ArticleJsonLd({
     dateModified,
     author: {
       '@type': 'Person',
+      '@id': `${SITE_URL}/about#person`,
       name: authorName,
       ...(authorUrl && { url: authorUrl }),
       ...(sameAs.length > 0 && { sameAs }),
+      ...(authorJobTitle && { jobTitle: authorJobTitle }),
+      ...(authorKnowsAbout && authorKnowsAbout.length > 0 && { knowsAbout: authorKnowsAbout }),
     },
     publisher: {
       '@type': 'Organization',
@@ -157,6 +173,7 @@ export function ArticleJsonLd({
     ...(wordCount && { wordCount }),
     ...(articleSection && { articleSection }),
     ...(keywords && { keywords }),
+    ...(mentions && mentions.length > 0 && { mentions }),
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': url.startsWith('http') ? url : `${SITE_URL}${url}`,
@@ -192,6 +209,11 @@ export function OrganizationJsonLd(): ReactNode {
     '@context': 'https://schema.org',
     ...ORGANIZATION,
     sameAs: ['https://github.com/DomiDex/tour-kit', 'https://www.npmjs.com/package/@tour-kit/core'],
+    publishingPrinciples: `${SITE_URL}/editorial-policy`,
+    ethicsPolicy: `${SITE_URL}/editorial-policy#ethics`,
+    correctionsPolicy: `${SITE_URL}/editorial-policy#corrections`,
+    verificationFactCheckingPolicy: `${SITE_URL}/how-we-test`,
+    founder: { '@id': `${SITE_URL}/about#person` },
   }
 
   return (
@@ -201,14 +223,19 @@ export function OrganizationJsonLd(): ReactNode {
 }
 
 export function ProductJsonLd(): ReactNode {
+  // Tour Kit is software, not a physical good. Using `Product` triggers
+  // Google's Merchant listings validator (shippingDetails / hasMerchantReturnPolicy).
+  // `SoftwareApplication` is the correct schema type for a digital library
+  // and exempts us from those retail-product rules.
   const data = {
     '@context': 'https://schema.org',
-    '@type': 'Product',
+    '@type': 'SoftwareApplication',
     name: 'userTourKit',
     description:
       'Open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling.',
-    brand: { '@type': 'Organization', '@id': `${SITE_URL}/#organization` },
-    category: 'Developer Tools > Frontend Libraries',
+    brand: { '@type': 'Brand', name: 'userTourKit' },
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'Any',
     url: SITE_URL,
     image: `${SITE_URL}/images/tour-kit-og.png`,
     offers: [
@@ -238,6 +265,7 @@ export function ProductJsonLd(): ReactNode {
         },
       },
     ],
+    publisher: { '@id': `${SITE_URL}/#organization` },
   }
 
   return (
@@ -383,6 +411,156 @@ export function WebSiteJsonLd({
       target: `${searchUrl}?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     }
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+// ── Person (canonical author entity, emitted once from /about) ──
+
+interface PersonJsonLdProps {
+  /** Display handle (e.g. "DomiDex"). */
+  name: string
+  /** Legal/real name (e.g. "Dominique Degottex"). Maps to schema name; handle becomes alternateName. */
+  legalName?: string
+  /** Canonical page for this Person (absolute or path). Used as `url` and to build `@id`. */
+  url: string
+  jobTitle?: string
+  image?: string
+  description?: string
+  knowsAbout?: string[]
+  /** External profile URLs used for `sameAs` (GitHub, LinkedIn, X, etc.). Falsy entries are dropped. */
+  sameAs?: (string | undefined)[]
+}
+
+export function PersonJsonLd({
+  name,
+  legalName,
+  url,
+  jobTitle,
+  image,
+  description,
+  knowsAbout,
+  sameAs,
+}: PersonJsonLdProps): ReactNode {
+  const resolvedUrl = url.startsWith('http') ? url : `${SITE_URL}${url}`
+  const resolvedSameAs = (sameAs ?? []).filter((s): s is string => Boolean(s))
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': `${resolvedUrl}#person`,
+    name: legalName ?? name,
+    ...(legalName && { alternateName: name }),
+    url: resolvedUrl,
+    mainEntityOfPage: resolvedUrl,
+    ...(image && { image }),
+    ...(description && { description }),
+    ...(jobTitle && { jobTitle }),
+    ...(knowsAbout && knowsAbout.length > 0 && { knowsAbout }),
+    ...(resolvedSameAs.length > 0 && { sameAs: resolvedSameAs }),
+    worksFor: { '@id': `${SITE_URL}/#organization` },
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+// ── Speakable ──
+
+interface SpeakableJsonLdProps {
+  /** URL this speakable spec applies to. Defaults to the current origin. */
+  url?: string
+  /** CSS selectors AI voice assistants should read aloud (e.g. `[data-speakable="summary"]`). */
+  cssSelectors: string[]
+}
+
+export function SpeakableJsonLd({ url, cssSelectors }: SpeakableJsonLdProps): ReactNode {
+  if (cssSelectors.length === 0) return null
+  const resolvedUrl = url ? (url.startsWith('http') ? url : `${SITE_URL}${url}`) : SITE_URL
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    url: resolvedUrl,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: cssSelectors,
+    },
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+// ── Dataset (benchmarks, comparison tables, any quantitative snapshot) ──
+
+interface DatasetVariable {
+  /** Variable label (column header, e.g. "Gzip size (bytes)"). */
+  name: string
+  /** Units (schema.org/unitText — "B", "ms", "%", etc.). */
+  unitText?: string
+  /** Free-form description of what is being measured. */
+  description?: string
+}
+
+interface DatasetJsonLdProps {
+  name: string
+  description: string
+  /** Page URL (absolute or path). */
+  url: string
+  /** ISO 8601 date the measurements were taken. */
+  dateModified: string
+  /** Methodology page or section URL. */
+  measurementMethod?: string
+  /** Column variables being measured. */
+  variables: DatasetVariable[]
+  /** License URL (default: CC-BY, since the data is editorial). */
+  license?: string
+  /** Optional keywords aiding discovery. */
+  keywords?: string[]
+}
+
+export function DatasetJsonLd({
+  name,
+  description,
+  url,
+  dateModified,
+  measurementMethod,
+  variables,
+  license = 'https://creativecommons.org/licenses/by/4.0/',
+  keywords,
+}: DatasetJsonLdProps): ReactNode {
+  const resolvedUrl = url.startsWith('http') ? url : `${SITE_URL}${url}`
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name,
+    description,
+    url: resolvedUrl,
+    dateModified,
+    license,
+    isAccessibleForFree: true,
+    creator: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': resolvedUrl },
+    ...(keywords && keywords.length > 0 && { keywords }),
+    ...(measurementMethod && {
+      measurementTechnique: measurementMethod.startsWith('http')
+        ? measurementMethod
+        : `${SITE_URL}${measurementMethod}`,
+    }),
+    variableMeasured: variables.map((v) => ({
+      '@type': 'PropertyValue',
+      name: v.name,
+      ...(v.unitText && { unitText: v.unitText }),
+      ...(v.description && { description: v.description }),
+    })),
   }
 
   return (

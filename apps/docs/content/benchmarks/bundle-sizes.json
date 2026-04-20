@@ -1,0 +1,108 @@
+{
+  "measuredAt": "2026-04-20T04:51:53.753Z",
+  "methodology": "Gzipped production-build sizes pulled from bundlephobia.com API. Methodology documented at /how-we-test. Re-run `scripts/fetch-bundle-sizes.ts` to refresh.",
+  "rows": [
+    {
+      "name": "@tour-kit/core",
+      "label": "@tour-kit/core",
+      "homepage": "https://usertourkit.com/docs/core",
+      "isOurs": true,
+      "status": "measured",
+      "version": "0.3.0",
+      "minifiedBytes": 17116,
+      "gzipBytes": 5753,
+      "dependencyCount": 1,
+      "sourceUrl": "https://bundlephobia.com/package/%40tour-kit%2Fcore"
+    },
+    {
+      "name": "@tour-kit/react",
+      "label": "@tour-kit/react",
+      "homepage": "https://usertourkit.com/docs/react",
+      "isOurs": true,
+      "status": "measured",
+      "version": "0.4.1",
+      "minifiedBytes": 64225,
+      "gzipBytes": 22533,
+      "dependencyCount": 4,
+      "sourceUrl": "https://bundlephobia.com/package/%40tour-kit%2Freact"
+    },
+    {
+      "name": "@tour-kit/hints",
+      "label": "@tour-kit/hints",
+      "homepage": "https://usertourkit.com/docs/hints",
+      "isOurs": true,
+      "status": "measured",
+      "version": "0.4.1",
+      "minifiedBytes": 42444,
+      "gzipBytes": 15486,
+      "dependencyCount": 4,
+      "sourceUrl": "https://bundlephobia.com/package/%40tour-kit%2Fhints"
+    },
+    {
+      "name": "react-joyride",
+      "label": "React Joyride",
+      "homepage": "https://react-joyride.com/",
+      "status": "measured",
+      "version": "3.0.2",
+      "minifiedBytes": 74905,
+      "gzipBytes": 25592,
+      "dependencyCount": 10,
+      "sourceUrl": "https://bundlephobia.com/package/react-joyride"
+    },
+    {
+      "name": "shepherd.js",
+      "label": "Shepherd.js",
+      "homepage": "https://shepherdjs.dev/",
+      "status": "measured",
+      "version": "15.2.2",
+      "minifiedBytes": 40647,
+      "gzipBytes": 14077,
+      "dependencyCount": 2,
+      "sourceUrl": "https://bundlephobia.com/package/shepherd.js"
+    },
+    {
+      "name": "driver.js",
+      "label": "Driver.js",
+      "homepage": "https://driverjs.com/",
+      "status": "measured",
+      "version": "1.4.0",
+      "minifiedBytes": 20429,
+      "gzipBytes": 6070,
+      "dependencyCount": 0,
+      "sourceUrl": "https://bundlephobia.com/package/driver.js"
+    },
+    {
+      "name": "intro.js",
+      "label": "Intro.js",
+      "homepage": "https://introjs.com/",
+      "status": "measured",
+      "version": "8.3.2",
+      "minifiedBytes": 61836,
+      "gzipBytes": 16920,
+      "dependencyCount": 0,
+      "sourceUrl": "https://bundlephobia.com/package/intro.js"
+    },
+    {
+      "name": "onborda",
+      "label": "Onborda",
+      "homepage": "https://onborda.dev/",
+      "status": "measured",
+      "version": "1.2.5",
+      "minifiedBytes": 6989,
+      "gzipBytes": 2324,
+      "dependencyCount": 0,
+      "sourceUrl": "https://bundlephobia.com/package/onborda"
+    },
+    {
+      "name": "@reactour/tour",
+      "label": "Reactour",
+      "homepage": "https://docs.react.tours/",
+      "status": "measured",
+      "version": "3.8.0",
+      "minifiedBytes": 20504,
+      "gzipBytes": 7152,
+      "dependencyCount": 3,
+      "sourceUrl": "https://bundlephobia.com/package/%40reactour%2Ftour"
+    }
+  ]
+}

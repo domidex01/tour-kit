@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     description: 'The most developer-friendly, accessible product tour library for React.',
     type: 'website',
     locale: 'en_US',
-    url: 'https://usertourkit.com',
+    url: '/',
     siteName: 'userTourKit',
     images: ['/og-default.png'],
   },

@@ -75,18 +75,24 @@ export function ArticleLayout({
 
         {/* Header */}
         <header className="mb-12">
-          <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-fd-foreground sm:text-4xl">
+          <h1
+            data-speakable="headline"
+            className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-fd-foreground sm:text-4xl"
+          >
             {title}
           </h1>
-          <p className="text-[16px] leading-relaxed text-fd-muted-foreground">{description}</p>
+          <p
+            data-speakable="summary"
+            className="text-[16px] leading-relaxed text-fd-muted-foreground"
+          >
+            {description}
+          </p>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-y-3">
             <div className="flex items-center gap-3">
               {author && (
-                <a
+                <Link
                   href={author.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex shrink-0 items-center gap-2.5"
+                  className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
                 >
                   <Image
                     src={author.avatar}
@@ -101,7 +107,7 @@ export function ArticleLayout({
                     </span>
                     <span className="text-[11px] text-fd-muted-foreground">{author.role}</span>
                   </div>
-                </a>
+                </Link>
               )}
               {author && (formattedPublished || readingTime) && (
                 <span className="text-fd-border" aria-hidden="true">

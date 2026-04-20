@@ -15,6 +15,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { globSync } from 'glob'
 import matter from 'gray-matter'
+import { ALTERNATIVES, BLOG_POSTS, COMPARISONS, type BlogMeta } from '../lib/comparisons'
 
 // ─── Configuration ───────────────────────────────────────────────
 
@@ -22,9 +23,56 @@ const SCRIPT_DIR = path.dirname(new URL(import.meta.url).pathname)
 const DOCS_ROOT = path.resolve(SCRIPT_DIR, '..')
 const MONOREPO_ROOT = path.resolve(DOCS_ROOT, '../..')
 const CONTENT_DIR = path.resolve(DOCS_ROOT, 'content/docs')
+const BLOG_DIR = path.resolve(DOCS_ROOT, 'content/blog')
+const COMPARE_DIR = path.resolve(DOCS_ROOT, 'content/compare')
+const ALTERNATIVES_DIR = path.resolve(DOCS_ROOT, 'content/alternatives')
 const PUBLIC_DIR = path.resolve(DOCS_ROOT, 'public')
 
-const BASE_URL = 'https://usertourkit.com/docs'
+const SITE_URL = 'https://usertourkit.com'
+const BASE_URL = `${SITE_URL}/docs`
+
+/**
+ * Trust / editorial pages surfaced in llms.txt so AI assistants can cite the
+ * publisher, methodology, and author when summarizing userTourKit content.
+ */
+interface TrustPage {
+  title: string
+  description: string
+  url: string
+}
+
+const TRUST_PAGES: TrustPage[] = [
+  {
+    title: 'About userTourKit',
+    description:
+      'About page with maintainer bio (Dominique Degottex / DomiDex), verifiable external profiles, and Person schema.',
+    url: `${SITE_URL}/about`,
+  },
+  {
+    title: 'Editorial Policy',
+    description:
+      'How userTourKit content is produced, reviewed, sourced, corrected, and disclosed — including AI-assistance disclosure.',
+    url: `${SITE_URL}/editorial-policy`,
+  },
+  {
+    title: 'How We Test',
+    description:
+      'Methodology behind benchmarks, bundle-size claims, accessibility scores, and comparison data. CI gates, manual verification, reproducibility.',
+    url: `${SITE_URL}/how-we-test`,
+  },
+  {
+    title: 'Benchmarks',
+    description:
+      'Reproducible benchmarks comparing userTourKit against other React product tour libraries. Published methodology, timestamped snapshots, linked sources.',
+    url: `${SITE_URL}/benchmarks`,
+  },
+  {
+    title: 'Bundle Size Benchmark',
+    description:
+      'Gzipped + minified production-build sizes for userTourKit, React Joyride, Shepherd.js, Driver.js, Intro.js, Onborda, and Reactour. Sourced from bundlephobia.',
+    url: `${SITE_URL}/benchmarks/bundle-size`,
+  },
+]
 
 const PROJECT_DESCRIPTION =
   'userTourKit is a headless onboarding and product tour library for React. ' +
@@ -101,6 +149,65 @@ function formatFileSize(bytes: number): string {
   if (kb < 1024) return `${kb.toFixed(1)} KB`
   const mb = kb / 1024
   return `${mb.toFixed(2)} MB`
+}
+
+// ─── Blog / Compare / Alternatives collection ────────────────────
+//
+// These use the editorial registry in lib/comparisons.ts as the source of
+// truth for "published" state and canonical titles. Bodies are read from
+// the corresponding MDX file when it exists; when no MDX file has been
+// written yet (registry entry exists with `published: false`), the entry
+// is skipped entirely.
+
+function readMdxBody(dir: string, slug: string): string | undefined {
+  const file = path.resolve(dir, `${slug}.mdx`)
+  if (!fs.existsSync(file)) return undefined
+  const raw = fs.readFileSync(file, 'utf-8')
+  const { content } = matter(raw)
+  return stripMdxSyntax(content)
+}
+
+function collectBlogPages(): PageMeta[] {
+  return BLOG_POSTS.filter((p) => p.published)
+    .map((post) => ({
+      title: post.title,
+      description: post.description,
+      slug: post.slug,
+      section: 'blog',
+      content: readMdxBody(BLOG_DIR, post.slug) ?? post.description,
+    }))
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+}
+
+function collectComparePages(): PageMeta[] {
+  return COMPARISONS.filter((c) => c.published)
+    .map((c) => ({
+      title: c.title,
+      description: c.description,
+      slug: c.slug,
+      section: 'compare',
+      content: readMdxBody(COMPARE_DIR, c.slug) ?? c.description,
+    }))
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+}
+
+function collectAlternativePages(): PageMeta[] {
+  return ALTERNATIVES.filter((a) => a.published)
+    .map((a) => ({
+      title: a.title,
+      description: a.description,
+      slug: a.slug,
+      section: 'alternatives',
+      content: readMdxBody(ALTERNATIVES_DIR, a.slug) ?? a.description,
+    }))
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+}
+
+/** Blog posts categorized as "Pillar Pages" — featured in the curated llms.txt. */
+function getPillarPosts(): BlogMeta[] {
+  return BLOG_POSTS.filter((p) => p.published && p.category === 'Pillar Pages').sort((a, b) =>
+    a.slug.localeCompare(b.slug),
+  )
 }
 
 // ─── Page Collection ─────────────────────────────────────────────
@@ -193,6 +300,53 @@ function generateLlmsTxt(pages: PageMeta[], versionStamp: string): string {
     lines.push('')
   }
 
+  // Pillar blog posts — curated long-form hubs LLMs cite for topic coverage.
+  const pillars = getPillarPosts()
+  if (pillars.length > 0) {
+    lines.push('## Pillar Articles (Blog)')
+    lines.push('')
+    for (const post of pillars) {
+      const url = `${SITE_URL}/blog/${post.slug}`
+      const desc = post.description ? `: ${post.description}` : ''
+      lines.push(`- [${post.title.replace(/["']/g, '')}](${url})${desc}`)
+    }
+    lines.push('')
+  }
+
+  // Comparisons — head-to-head articles against every major tour library.
+  const compares = COMPARISONS.filter((c) => c.published).sort((a, b) =>
+    a.slug.localeCompare(b.slug),
+  )
+  if (compares.length > 0) {
+    lines.push('## Comparisons')
+    lines.push('')
+    for (const c of compares) {
+      const url = `${SITE_URL}/compare/${c.slug}`
+      lines.push(`- [userTourKit vs ${c.competitor}](${url}): ${c.description}`)
+    }
+    lines.push('')
+  }
+
+  // Alternatives — roundup articles for people searching "X alternatives".
+  const alts = ALTERNATIVES.filter((a) => a.published).sort((a, b) => a.slug.localeCompare(b.slug))
+  if (alts.length > 0) {
+    lines.push('## Alternatives')
+    lines.push('')
+    for (const a of alts) {
+      const url = `${SITE_URL}/alternatives/${a.slug}`
+      lines.push(`- [${a.competitor} alternatives](${url}): ${a.description}`)
+    }
+    lines.push('')
+  }
+
+  // Trust / editorial — the pages LLMs cite when asked "is this credible?"
+  lines.push('## About & Editorial')
+  lines.push('')
+  for (const p of TRUST_PAGES) {
+    lines.push(`- [${p.title}](${p.url}): ${p.description}`)
+  }
+  lines.push('')
+
   return lines.join('\n')
 }
 
@@ -280,17 +434,24 @@ function main(): void {
 
   // Collect all MDX pages
   const pages = collectPages()
-  console.log(`  Found ${pages.length} MDX pages`)
+  const blogPages = collectBlogPages()
+  const comparePages = collectComparePages()
+  const alternativePages = collectAlternativePages()
+  console.log(`  Found ${pages.length} docs pages`)
+  console.log(`  Found ${blogPages.length} published blog posts`)
+  console.log(`  Found ${comparePages.length} published comparisons`)
+  console.log(`  Found ${alternativePages.length} published alternatives`)
   console.log('')
 
-  // Generate llms.txt
+  // Generate llms.txt (curated index — uses docs pages + pillar blog + compare + alts + trust)
   const llmsTxt = generateLlmsTxt(pages, versionStamp)
   const llmsTxtPath = path.resolve(PUBLIC_DIR, 'llms.txt')
   fs.writeFileSync(llmsTxtPath, llmsTxt, 'utf-8')
   console.log(`  llms.txt:      ${formatFileSize(Buffer.byteLength(llmsTxt, 'utf-8'))}`)
 
-  // Generate llms-full.txt
-  const llmsFullTxt = generateLlmsFullTxt(pages, versionStamp)
+  // Generate llms-full.txt (full corpus — every published page body)
+  const fullCorpus = [...pages, ...blogPages, ...comparePages, ...alternativePages]
+  const llmsFullTxt = generateLlmsFullTxt(fullCorpus, versionStamp)
   const llmsFullTxtPath = path.resolve(PUBLIC_DIR, 'llms-full.txt')
   fs.writeFileSync(llmsFullTxtPath, llmsFullTxt, 'utf-8')
   console.log(`  llms-full.txt: ${formatFileSize(Buffer.byteLength(llmsFullTxt, 'utf-8'))}`)

@@ -46,9 +46,14 @@ export function BlogListPage({ page }: BlogListPageProps) {
       <div className="relative overflow-hidden border-b border-fd-border/50 dark:border-fd-border">
         <div className="relative z-10 mx-auto max-w-[1400px] px-6 pb-16 pt-24 sm:px-8 sm:pb-20 sm:pt-32 lg:px-12">
           <h1 className="mb-2 text-3xl font-bold text-fd-foreground sm:text-4xl">Blog</h1>
-          <p className="max-w-lg text-[15px] text-fd-muted-foreground">
-            Guides, comparisons, and insights on product tours, onboarding, and developer
-            experience.
+          <p className="max-w-2xl text-[15px] leading-relaxed text-fd-muted-foreground">
+            Practical writing on product tours, user onboarding, feature adoption, and
+            developer-led growth. Every post is engineered for the people who actually ship the
+            code: tutorials with copy-pasteable React snippets, head-to-head comparisons against
+            tools like React Joyride, Shepherd.js, Driver.js, Appcues, and Pendo, build-vs-buy
+            breakdowns, accessibility deep-dives, and field notes from teams running production
+            onboarding flows. New articles ship weekly. Skim by category below or subscribe to the
+            RSS feed for everything as it drops.
           </p>
           <Link
             href="/blog/feed.xml"
@@ -69,12 +74,18 @@ export function BlogListPage({ page }: BlogListPageProps) {
             src="/blog-hero-light.png"
             alt=""
             aria-hidden="true"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             className="h-full w-full object-cover opacity-60 dark:hidden"
           />
           <img
             src="/blog-hero-dark.png"
             alt=""
             aria-hidden="true"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             className="hidden h-full w-full object-cover opacity-60 dark:block"
           />
         </div>
@@ -211,7 +222,6 @@ function BlogCard({
     ? new Date(publishedAt).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
-        year: 'numeric',
       })
     : null
 

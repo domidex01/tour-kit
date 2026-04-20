@@ -1,30 +1,4 @@
-'use client'
-
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
-
-function useReveal() {
-  const ref = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true)
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.15 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  return { ref, visible }
-}
 
 const corePackages = [
   {
@@ -94,13 +68,8 @@ const extensions = [
 ]
 
 export function Packages() {
-  const { ref, visible } = useReveal()
-
   return (
-    <section
-      ref={ref}
-      className="bg-[#EDF6FB] dark:bg-fd-muted/30 px-6 py-28 sm:px-8 md:py-36 lg:px-12"
-    >
+    <section className="bg-[#EDF6FB] dark:bg-fd-muted/30 px-6 py-28 sm:px-8 md:py-36 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
         {/* Header — right-aligned for contrast with previous left-aligned sections */}
         <div className="mb-16 ml-auto max-w-lg text-right">
@@ -124,9 +93,8 @@ export function Packages() {
             <div
               key={pkg.name}
               className={`rounded-lg border border-fd-border bg-fd-card p-6 transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                visible ? 'animate-fade-in-up' : 'opacity-0'
-              } ${i === 0 ? 'md:row-span-1' : ''}`}
-              style={{ animationDelay: `${i * 100}ms` }}
+                i === 0 ? 'md:row-span-1' : ''
+              }`}
             >
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-mono text-[14px] font-bold text-fd-foreground">{pkg.name}</h3>
@@ -172,13 +140,10 @@ export function Packages() {
 
         {/* Extensions — compact grid */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {extensions.map((pkg, i) => (
+          {extensions.map((pkg) => (
             <div
               key={pkg.name}
-              className={`group flex items-center justify-between rounded-lg border border-dashed border-fd-border bg-fd-card px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-solid hover:shadow-sm ${
-                visible ? 'animate-fade-in-up' : 'opacity-0'
-              }`}
-              style={{ animationDelay: `${300 + i * 80}ms` }}
+              className="group flex items-center justify-between rounded-lg border border-dashed border-fd-border bg-fd-card px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-solid hover:shadow-sm"
             >
               <div className="min-w-0">
                 <h3 className="font-mono text-[12px] font-bold text-fd-foreground">{pkg.name}</h3>

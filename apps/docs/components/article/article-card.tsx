@@ -25,7 +25,6 @@ export function ArticleCard({
     ? new Date(publishedAt).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
-        year: 'numeric',
       })
     : null
 

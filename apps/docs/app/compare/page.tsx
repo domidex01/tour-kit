@@ -6,15 +6,28 @@ import { BreadcrumbJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 
+const COMPARE_TITLE = 'Compare userTourKit — Side-by-Side Comparisons'
+const COMPARE_DESC =
+  'Compare userTourKit with Shepherd.js, React Joyride, Driver.js, Intro.js, Appcues, Pendo, WalkMe, and more. Side-by-side feature, pricing, and performance comparisons.'
+const COMPARE_OG_IMAGE = `/api/og?title=${encodeURIComponent('Compare')}&category=COMPARE`
+
 export const metadata: Metadata = {
-  title: 'Compare userTourKit — Side-by-Side Comparisons',
-  description:
-    'Compare userTourKit with Shepherd.js, React Joyride, Driver.js, Intro.js, Appcues, Pendo, WalkMe, and more. Side-by-side feature, pricing, and performance comparisons.',
+  title: COMPARE_TITLE,
+  description: COMPARE_DESC,
+  alternates: { canonical: '/compare' },
   openGraph: {
-    title: 'Compare userTourKit — Side-by-Side Comparisons',
+    title: COMPARE_TITLE,
     description:
       'Compare userTourKit with popular product tour libraries and onboarding platforms. Features, pricing, bundle size, and accessibility compared.',
     type: 'website',
+    url: '/compare',
+    images: [COMPARE_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: COMPARE_TITLE,
+    description: COMPARE_DESC,
+    images: [COMPARE_OG_IMAGE],
   },
 }
 
@@ -39,8 +52,13 @@ export default function CompareHub() {
           </h1>
           <p className="text-[16px] leading-relaxed text-fd-muted-foreground">
             Honest, data-driven comparisons between userTourKit and every major product tour library
-            and onboarding platform. We cover features, bundle size, accessibility, licensing, and
-            pricing so you can make the right choice for your stack.
+            and onboarding platform. Each page covers feature parity, gzipped bundle weight,
+            accessibility (WCAG 2.1 focus management, keyboard nav, screen-reader support),
+            license terms, framework fit, and the pricing model — so you can make the call that
+            fits your stack and your team. Where it matters, we also walk through the migration
+            path: API mappings, behavioral differences, and the gotchas that bite once you start
+            replacing code in production. No marketing language — just the trade-offs that
+            actually inform a tooling choice.
           </p>
         </header>
 

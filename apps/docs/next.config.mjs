@@ -25,6 +25,16 @@ const config = {
       },
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.usertourkit.com' }],
+        destination: 'https://usertourkit.com/:path*',
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     const buildDate = new Date().toUTCString()
     return [
@@ -34,6 +44,7 @@ const config = {
           { key: 'Last-Modified', value: buildDate },
           { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
           { key: 'Content-Type', value: 'text/plain; charset=utf-8' },
+          { key: 'Link', value: '<https://usertourkit.com/llms.txt>; rel="canonical"' },
         ],
       },
       {
@@ -42,6 +53,7 @@ const config = {
           { key: 'Last-Modified', value: buildDate },
           { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
           { key: 'Content-Type', value: 'text/plain; charset=utf-8' },
+          { key: 'Link', value: '<https://usertourkit.com/llms-full.txt>; rel="canonical"' },
         ],
       },
       {

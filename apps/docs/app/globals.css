@@ -17,6 +17,28 @@ samp {
   font-family: var(--font-geist-mono), monospace;
 }
 
+/* Prevent horizontal overflow from code blocks, tables, and images on mobile */
+html,
+body {
+  overflow-x: clip;
+}
+
+pre {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 @layer base {
   :root {
     /* ========================================

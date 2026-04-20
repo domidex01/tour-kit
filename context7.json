@@ -1,0 +1,50 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "userTourKit",
+  "description": "Headless, accessible product tour library for React. Ships tours, hints, onboarding checklists, product announcements, adoption tracking, analytics, media embeds, scheduling, and microsurveys. WCAG 2.1 AA compliant, TypeScript strict, tree-shakeable. Three MIT-licensed core packages (@tour-kit/core, @tour-kit/react, @tour-kit/hints) plus an optional Pro suite.",
+  "folders": [
+    "apps/docs/content/docs",
+    "packages/core/CLAUDE.md",
+    "packages/react/CLAUDE.md",
+    "packages/hints/CLAUDE.md",
+    "packages/adoption/CLAUDE.md",
+    "packages/analytics/CLAUDE.md",
+    "packages/announcements/CLAUDE.md",
+    "packages/checklists/CLAUDE.md",
+    "packages/media/CLAUDE.md",
+    "packages/scheduling/CLAUDE.md",
+    "packages/surveys/CLAUDE.md",
+    "apps/docs/CLAUDE.md",
+    "CLAUDE.md"
+  ],
+  "excludeFolders": [
+    "apps/docs/.source",
+    "apps/docs/.next",
+    "apps/docs/public",
+    "apps/docs/reports",
+    "apps/docs/scripts",
+    "apps/docs/content/blog",
+    "apps/docs/content/compare",
+    "apps/docs/content/alternatives",
+    "apps/docs/content/benchmarks",
+    "node_modules",
+    ".turbo",
+    "dist"
+  ],
+  "excludeFiles": [
+    "meta.json"
+  ],
+  "rules": [
+    "Core logic lives in @tour-kit/core as headless hooks and utilities. UI components live in @tour-kit/react and are thin wrappers over core hooks — never duplicate logic between packages.",
+    "Compound components use the Unified Slot pattern for `asChild` composition. Both Radix-style (element cloning via `children={<MyComponent />}`) and Base UI-style (render prop via `children={(props) => <MyComponent {...props} />}`) are supported — prefer render prop when you need access to the computed props.",
+    "All interactive components are WCAG 2.1 AA compliant with focus management, keyboard navigation, ARIA live regions, and reduced-motion support built in. Do not disable these defaults without explicit accessibility review.",
+    "TypeScript is strict mode with `noUncheckedIndexedAccess`. Never use `any`; prefer `unknown` + narrowing. Component prop interfaces are exported from the package root with the component.",
+    "Bundle budgets are enforced: @tour-kit/core < 8KB gzipped, @tour-kit/react < 12KB, @tour-kit/hints < 5KB. When adding features, measure with size-limit or bundlephobia before merging.",
+    "Free packages (MIT): core, react, hints. Pro packages (commercial license, $99 lifetime): adoption, analytics, announcements, checklists, media, scheduling, surveys. Do not import Pro packages in examples targeting free-tier users.",
+    "Router integration for multi-page tours uses adapters — `createNextAppRouterAdapter`, `createNextPagesRouterAdapter`, `createReactRouterAdapter`. Never hardcode route awareness into tour components.",
+    "Persistence uses storage adapters. Default is localStorage via `createLocalStorageAdapter`; SSR-safe builds should use `createMemoryStorageAdapter` on the server side.",
+    "Providers compose: TourKitProvider wraps multi-tour apps; TourProvider scopes a single tour. Extended packages add their own providers (AdoptionProvider, ChecklistProvider, etc.) inside TourKitProvider.",
+    "For integration with shadcn/ui, Radix, or Base UI, use the `asChild` prop on TourCard, TourNavigation, TourClose, and related compound parts — do not override the internal primitives directly."
+  ],
+  "previousVersions": []
+}

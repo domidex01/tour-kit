@@ -2,6 +2,7 @@ import { Footer } from '@/components/landing/footer'
 import {
   getBlogCategories,
   getCategoryDisplayName,
+  getCategoryIntro,
   getPostsByCategory,
   getReadingTime,
   slugifyCategory,
@@ -25,15 +26,24 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { category } = await params
   const display = getCategoryDisplayName(category) ?? category
+  const title = `${display} articles — userTourKit Blog`
+  const desc = `Browse all ${display} articles on the userTourKit blog.`
   return {
-    title: `${display} articles — userTourKit Blog`,
-    description: `Browse all ${display} articles on the userTourKit blog.`,
+    title,
+    description: desc,
     alternates: { canonical: `/blog/category/${category}` },
     openGraph: {
-      title: `${display} articles — userTourKit Blog`,
-      description: `Browse all ${display} articles on the userTourKit blog.`,
+      title,
+      description: desc,
       type: 'website',
       url: `/blog/category/${category}`,
+      images: ['/og-default.png'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: desc,
+      images: ['/og-default.png'],
     },
   }
 }
@@ -64,9 +74,26 @@ export default async function CategoryPage({ params }: PageProps) {
             &larr; All articles
           </Link>
           <h1 className="mb-2 text-3xl font-bold text-fd-foreground sm:text-4xl">{display}</h1>
-          <p className="text-[15px] text-fd-muted-foreground">
-            {posts.length} article{posts.length !== 1 ? 's' : ''}
-          </p>
+          {(() => {
+            const intro = getCategoryIntro(category)
+            if (intro) {
+              return (
+                <>
+                  <p className="max-w-2xl text-[15px] leading-relaxed text-fd-muted-foreground">
+                    {intro}
+                  </p>
+                  <p className="mt-3 text-[13px] text-fd-muted-foreground">
+                    {posts.length} article{posts.length !== 1 ? 's' : ''}
+                  </p>
+                </>
+              )
+            }
+            return (
+              <p className="text-[15px] text-fd-muted-foreground">
+                {posts.length} article{posts.length !== 1 ? 's' : ''}
+              </p>
+            )
+          })()}
         </div>
         <div
           className="pointer-events-none absolute inset-0 -z-0"
@@ -79,12 +106,18 @@ export default async function CategoryPage({ params }: PageProps) {
             src="/blog-hero-light.png"
             alt=""
             aria-hidden="true"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             className="h-full w-full object-cover opacity-60 dark:hidden"
           />
           <img
             src="/blog-hero-dark.png"
             alt=""
             aria-hidden="true"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             className="hidden h-full w-full object-cover opacity-60 dark:block"
           />
         </div>
@@ -97,7 +130,6 @@ export default async function CategoryPage({ params }: PageProps) {
               ? new Date(post.publishedAt).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
-                  year: 'numeric',
                 })
               : null
             const rt = getReadingTime(post.slug)

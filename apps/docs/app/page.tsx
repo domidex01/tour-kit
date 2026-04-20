@@ -7,13 +7,37 @@ import { baseOptions } from '@/lib/layout.shared'
 import {
   OrganizationJsonLd,
   ProductJsonLd,
-  SoftwareApplicationJsonLd,
+  SpeakableJsonLd,
   WebSiteJsonLd,
 } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowRight } from 'lucide-react'
+import type { Metadata } from 'next'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+
+const HOME_TITLE = 'userTourKit - Product Tours for React'
+const HOME_DESC =
+  'The most developer-friendly, accessible product tour library for React. Headless hooks and pre-styled components.'
+
+export const metadata: Metadata = {
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESC,
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: HOME_TITLE,
+    description: HOME_DESC,
+    type: 'website',
+    url: '/',
+    images: ['/og-default.png'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: HOME_TITLE,
+    description: HOME_DESC,
+    images: ['/og-default.png'],
+  },
+}
 
 const DemoTour = dynamic(
   () => import('@/components/landing/demo-tour').then((m) => ({ default: m.DemoTour })),
@@ -59,7 +83,6 @@ const HOMEPAGE_DESCRIPTION =
 export default function HomePage() {
   return (
     <HomeLayout {...baseOptions()}>
-      <SoftwareApplicationJsonLd name={HOMEPAGE_NAME} description={HOMEPAGE_DESCRIPTION} />
       <WebSiteJsonLd
         name={HOMEPAGE_NAME}
         description={HOMEPAGE_DESCRIPTION}
@@ -67,6 +90,10 @@ export default function HomePage() {
       />
       <OrganizationJsonLd />
       <ProductJsonLd />
+      <SpeakableJsonLd
+        url="/"
+        cssSelectors={['[data-speakable="headline"]', '[data-speakable="summary"]']}
+      />
       <main id="main-content" className="flex flex-1 flex-col">
         <Hero />
         <DemoTour />
@@ -84,12 +111,16 @@ export default function HomePage() {
               src="/tourkit-lighthouse.png"
               alt=""
               role="presentation"
+              loading="lazy"
+              decoding="async"
               className="absolute inset-0 h-full w-full object-cover dark:hidden"
             />
             <img
               src="/hero-dark.avif"
               alt=""
               role="presentation"
+              loading="lazy"
+              decoding="async"
               className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
             />
           </div>

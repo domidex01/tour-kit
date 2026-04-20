@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "generate:llm": "tsx scripts/generate-llm-files.ts",
     "generate:context": "tsx scripts/generate-context-files.ts",
+    "check:freshness": "tsx scripts/check-mdx-freshness.ts",
     "postinstall": "fumadocs-mdx",
     "test": "vitest run"
   },
