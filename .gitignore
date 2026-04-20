@@ -64,3 +64,5 @@ tour-kit/*
 plan/*
 .claude\settings.json
 syndication/*
+# SEO audit raw JSON (can be multiple MB each; regenerate with scripts)
+reports/seo-*.json
