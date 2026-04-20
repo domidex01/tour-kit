@@ -2,7 +2,7 @@ import { ArticleCard } from '@/components/article/article-card'
 import { Footer } from '@/components/landing/footer'
 import { getPublishedAlternatives } from '@/lib/comparisons'
 import { baseOptions } from '@/lib/layout.shared'
-import { BreadcrumbJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
+import { BreadcrumbJsonLd, ItemListJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 
@@ -40,6 +40,15 @@ export default function AlternativesHub() {
           { name: 'Home', url: '/' },
           { name: 'Alternatives', url: '/alternatives' },
         ]}
+      />
+      <ItemListJsonLd
+        name="Alternatives to popular onboarding tools"
+        url="/alternatives"
+        description="Ranked alternatives to Appcues, Pendo, WalkMe, Userpilot, UserGuiding, React Joyride, Shepherd.js, Driver.js, and Intro.js."
+        items={getPublishedAlternatives().map((alt) => ({
+          url: `/alternatives/${alt.slug}`,
+          name: `Best ${alt.competitor} alternatives`,
+        }))}
       />
       <main id="main-content" className="mx-auto w-full max-w-[1120px] px-6 py-16 sm:px-8 lg:px-12">
         <header className="mb-16 max-w-2xl">

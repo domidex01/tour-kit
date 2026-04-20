@@ -6,7 +6,12 @@ import {
   getPublishedComparisons,
 } from '@/lib/comparisons'
 import { getAlternativeArticle } from '@/lib/source'
-import { ArticleJsonLd, FAQJsonLd } from '@/lib/structured-data'
+import {
+  ArticleJsonLd,
+  DEFAULT_SPEAKABLE_SELECTORS,
+  FAQJsonLd,
+  SpeakableJsonLd,
+} from '@/lib/structured-data'
 import { articleMdxComponents } from '@/lib/mdx-overrides'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -93,6 +98,10 @@ export default async function AlternativesPage({ params }: PageProps) {
         dateModified={alt.lastUpdated ?? today}
         articleSection="Alternatives"
         keywords={alt.keywords}
+      />
+      <SpeakableJsonLd
+        url={`/alternatives/${alt.slug}`}
+        cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]}
       />
 
       {hasMdxContent ? (

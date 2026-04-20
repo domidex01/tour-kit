@@ -2,7 +2,12 @@ import { ArticleLayout } from '@/components/article/article-layout'
 import { CompareArticleCrossLinks } from '@/components/article/article-cross-links'
 import { getComparison, getPublishedComparisons, getRelatedComparisons } from '@/lib/comparisons'
 import { getCompareArticle } from '@/lib/source'
-import { ArticleJsonLd, FAQJsonLd } from '@/lib/structured-data'
+import {
+  ArticleJsonLd,
+  DEFAULT_SPEAKABLE_SELECTORS,
+  FAQJsonLd,
+  SpeakableJsonLd,
+} from '@/lib/structured-data'
 import { articleMdxComponents } from '@/lib/mdx-overrides'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -80,6 +85,10 @@ export default async function ComparisonPage({ params }: PageProps) {
         dateModified={comparison.lastUpdated ?? today}
         articleSection="Comparisons"
         keywords={comparison.keywords}
+      />
+      <SpeakableJsonLd
+        url={`/compare/${comparison.slug}`}
+        cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]}
       />
 
       {hasMdxContent ? (

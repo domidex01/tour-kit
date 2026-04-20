@@ -8,7 +8,7 @@ import {
   slugifyCategory,
 } from '@/lib/blog'
 import { baseOptions } from '@/lib/layout.shared'
-import { BreadcrumbJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
+import { BreadcrumbJsonLd, ItemListJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowRight, Rss, Star } from 'lucide-react'
 import Image from 'next/image'
@@ -40,6 +40,14 @@ export function BlogListPage({ page }: BlogListPageProps) {
           { name: 'Blog', url: '/blog' },
           ...(page > 1 ? [{ name: `Page ${page}`, url: `/blog/page/${page}` }] : []),
         ]}
+      />
+      <ItemListJsonLd
+        name={page === 1 ? 'userTourKit blog' : `userTourKit blog — page ${page}`}
+        url={pageHref(page)}
+        items={posts.map((post) => ({
+          url: `/blog/${post.slug}`,
+          name: post.title.replace(/["']/g, ''),
+        }))}
       />
 
       {/* Hero banner */}

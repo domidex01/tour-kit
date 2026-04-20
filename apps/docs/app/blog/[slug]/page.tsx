@@ -15,7 +15,13 @@ import {
 import { getBlogPost, getPublishedBlogPosts, getRelatedBlogPosts } from '@/lib/comparisons'
 import { findMentionedEntities, toMentionsJsonLd } from '@/lib/entities'
 import { getBlogArticle } from '@/lib/source'
-import { ArticleJsonLd, FAQJsonLd, HowToJsonLd, SpeakableJsonLd } from '@/lib/structured-data'
+import {
+  ArticleJsonLd,
+  DEFAULT_SPEAKABLE_SELECTORS,
+  FAQJsonLd,
+  HowToJsonLd,
+  SpeakableJsonLd,
+} from '@/lib/structured-data'
 import { articleMdxComponents } from '@/lib/mdx-overrides'
 import type { Metadata } from 'next'
 import Image from 'next/image'
@@ -149,7 +155,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
         <SpeakableJsonLd
           url={`/blog/${post.slug}`}
-          cssSelectors={['[data-speakable="headline"]', '[data-speakable="summary"]']}
+          cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]}
         />
 
         {post.ogImage && (

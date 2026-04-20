@@ -4,9 +4,11 @@ import { DEFAULT_AUTHOR } from '@/lib/authors'
 import { SITE_LAUNCH_FALLBACK, getGitFirstCommitted, getGitLastModified } from '@/lib/git-dates'
 import { source } from '@/lib/source'
 import {
+  DEFAULT_SPEAKABLE_SELECTORS,
   FAQJsonLd,
   HowToJsonLd,
   SoftwareSourceCodeJsonLd,
+  SpeakableJsonLd,
   TechArticleJsonLd,
 } from '@/lib/structured-data'
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
@@ -298,6 +300,16 @@ export async function renderDocsPage(slug: string[] | undefined) {
         />
       )}
       {faqItems && <FAQJsonLd items={faqItems} />}
+      <SpeakableJsonLd
+        url={page.url}
+        cssSelectors={[
+          ...DEFAULT_SPEAKABLE_SELECTORS,
+          // Fumadocs-specific: DocsTitle renders an <h1>, DocsDescription a <p>.
+          'main h1',
+          'main h1 + p',
+          'main h2 + p',
+        ]}
+      />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsByline
@@ -362,6 +374,11 @@ export async function getDocsMetadata(slug: string[] | undefined): Promise<Metad
     title: page.data.title,
     description: page.data.description,
     alternates: { canonical: page.url },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
+    },
     openGraph: {
       title: page.data.title,
       description: page.data.description,

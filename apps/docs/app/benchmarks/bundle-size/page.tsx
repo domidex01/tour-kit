@@ -1,5 +1,10 @@
 import { baseOptions } from '@/lib/layout.shared'
-import { BreadcrumbJsonLd, DatasetJsonLd } from '@/lib/structured-data'
+import {
+  BreadcrumbJsonLd,
+  DEFAULT_SPEAKABLE_SELECTORS,
+  DatasetJsonLd,
+  SpeakableJsonLd,
+} from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -83,6 +88,10 @@ export default function BundleSizeBenchmarkPage() {
           { name: 'Benchmarks', url: '/benchmarks' },
           { name: 'Bundle size', url: '/benchmarks/bundle-size' },
         ]}
+      />
+      <SpeakableJsonLd
+        url="/benchmarks/bundle-size"
+        cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]}
       />
       <DatasetJsonLd
         name={TITLE}

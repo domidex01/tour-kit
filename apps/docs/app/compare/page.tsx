@@ -1,8 +1,8 @@
 import { ArticleCard } from '@/components/article/article-card'
 import { Footer } from '@/components/landing/footer'
-import { getComparisonsByCategory } from '@/lib/comparisons'
+import { getComparisonsByCategory, getPublishedComparisons } from '@/lib/comparisons'
 import { baseOptions } from '@/lib/layout.shared'
-import { BreadcrumbJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
+import { BreadcrumbJsonLd, ItemListJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 
@@ -44,6 +44,15 @@ export default function CompareHub() {
           { name: 'Home', url: '/' },
           { name: 'Compare', url: '/compare' },
         ]}
+      />
+      <ItemListJsonLd
+        name="userTourKit head-to-head comparisons"
+        url="/compare"
+        description="Side-by-side comparisons of userTourKit against every major React product tour library and SaaS onboarding platform."
+        items={getPublishedComparisons().map((c) => ({
+          url: `/compare/${c.slug}`,
+          name: `userTourKit vs ${c.competitor}`,
+        }))}
       />
       <main id="main-content" className="mx-auto w-full max-w-[1120px] px-6 py-16 sm:px-8 lg:px-12">
         <header className="mb-16 max-w-2xl">

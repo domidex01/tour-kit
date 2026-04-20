@@ -1,6 +1,10 @@
 import { SITE_LAUNCH_FALLBACK, getGitLastModified } from '@/lib/git-dates'
 import { baseOptions } from '@/lib/layout.shared'
-import { BreadcrumbJsonLd } from '@/lib/structured-data'
+import {
+  BreadcrumbJsonLd,
+  DEFAULT_SPEAKABLE_SELECTORS,
+  SpeakableJsonLd,
+} from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -49,15 +53,24 @@ export default function HowWeTestPage() {
           { name: 'How We Test', url: '/how-we-test' },
         ]}
       />
+      <SpeakableJsonLd url="/how-we-test" cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]} />
       <main
         id="main-content"
         className="mx-auto w-full max-w-[820px] px-6 py-16 sm:px-8 sm:py-20 lg:px-12"
       >
         <header className="mb-10">
-          <h1 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
+          <h1
+            data-speakable="headline"
+            className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl"
+          >
             {TITLE}
           </h1>
-          <p className="text-[16px] leading-relaxed text-fd-muted-foreground">{DESCRIPTION}</p>
+          <p
+            data-speakable="summary"
+            className="text-[16px] leading-relaxed text-fd-muted-foreground"
+          >
+            {DESCRIPTION}
+          </p>
           <p className="mt-3 text-[13px] text-fd-muted-foreground">
             Last updated <time dateTime={lastUpdatedIso}>{lastUpdatedDisplay}</time>
           </p>

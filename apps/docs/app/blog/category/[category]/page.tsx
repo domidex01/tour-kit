@@ -8,7 +8,7 @@ import {
   slugifyCategory,
 } from '@/lib/blog'
 import { baseOptions } from '@/lib/layout.shared'
-import { BreadcrumbJsonLd } from '@/lib/structured-data'
+import { BreadcrumbJsonLd, ItemListJsonLd } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Image from 'next/image'
@@ -62,6 +62,14 @@ export default async function CategoryPage({ params }: PageProps) {
           { name: 'Blog', url: '/blog' },
           { name: display, url: `/blog/category/${category}` },
         ]}
+      />
+      <ItemListJsonLd
+        name={`${display} articles`}
+        url={`/blog/category/${category}`}
+        items={posts.map((post) => ({
+          url: `/blog/${post.slug}`,
+          name: post.title.replace(/["']/g, ''),
+        }))}
       />
 
       {/* Hero banner */}

@@ -472,6 +472,25 @@ export function PersonJsonLd({
 
 // ── Speakable ──
 
+/**
+ * Default CSS selectors used across article-like pages to mark content
+ * suitable for text-to-speech and AI voice summarization.
+ *
+ * Combines explicit `data-speakable` attributes (author-controlled) with
+ * structural fallbacks (`.prose > p:first-of-type` for intros, `.prose h3 + p`
+ * for FAQ-style answers) so no MDX edits are required on 300+ existing
+ * articles.
+ */
+export const DEFAULT_SPEAKABLE_SELECTORS: readonly string[] = [
+  '[data-speakable="headline"]',
+  '[data-speakable="summary"]',
+  '[data-speakable="intro"]',
+  '[data-speakable="faq-answer"]',
+  '.prose > p:first-of-type',
+  '.prose h3 + p',
+]
+
+
 interface SpeakableJsonLdProps {
   /** URL this speakable spec applies to. Defaults to the current origin. */
   url?: string
@@ -490,6 +509,63 @@ export function SpeakableJsonLd({ url, cssSelectors }: SpeakableJsonLdProps): Re
       '@type': 'SpeakableSpecification',
       cssSelector: cssSelectors,
     },
+  }
+
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
+// ── ItemList (listing / index / category pages) ──
+//
+// Google's "summary page" carousel format — each ListItem needs just
+// `position` + `url`. Google then fetches the article schema from the
+// linked detail page to build the rich carousel. Use for /blog, /compare,
+// /alternatives, and category indexes. Do NOT emit on the home page or
+// other non-listing surfaces; it's specifically a listing-page signal.
+
+interface ItemListEntry {
+  url: string
+  /** Optional display name — helps AI crawlers label items in quick summaries. */
+  name?: string
+}
+
+interface ItemListJsonLdProps {
+  /** Name of the list (e.g. "Blog posts", "React tour library comparisons"). */
+  name: string
+  /** Canonical URL of the listing page itself. */
+  url: string
+  /** Items in display order. Position is added automatically (1-indexed). */
+  items: ItemListEntry[]
+  /** Optional human-readable description. */
+  description?: string
+}
+
+export function ItemListJsonLd({
+  name,
+  url,
+  items,
+  description,
+}: ItemListJsonLdProps): ReactNode {
+  if (items.length === 0) return null
+  const resolvedUrl = url.startsWith('http') ? url : `${SITE_URL}${url}`
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name,
+    url: resolvedUrl,
+    numberOfItems: items.length,
+    ...(description && { description }),
+    itemListElement: items.map((item, index) => {
+      const itemUrl = item.url.startsWith('http') ? item.url : `${SITE_URL}${item.url}`
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        url: itemUrl,
+        ...(item.name && { name: item.name }),
+      }
+    }),
   }
 
   return (
