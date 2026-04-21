@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/ai",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "AI-powered RAG Q&A chat widget for React apps",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
@@ -51,7 +51,12 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "CHANGELOG.md", "styles"],
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "styles"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "restricted",

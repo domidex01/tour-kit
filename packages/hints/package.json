@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/hints",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Persistent hints and hotspots for TourKit - works with or without Tailwind CSS",
   "author": "Tour Kit Team",
   "license": "MIT",
@@ -13,7 +13,14 @@
   "bugs": {
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
-  "keywords": ["react", "hints", "hotspot", "tooltips", "onboarding", "tour-kit"],
+  "keywords": [
+    "react",
+    "hints",
+    "hotspot",
+    "tooltips",
+    "onboarding",
+    "tour-kit"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -54,7 +61,12 @@
     "./styles.css": "./dist/styles/variables.css",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "src/styles", "README.md", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "src/styles",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",

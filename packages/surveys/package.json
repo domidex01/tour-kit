@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/surveys",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "In-app microsurveys for TourKit - NPS, CSAT, CES, and custom feedback with fatigue prevention",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
@@ -53,7 +53,12 @@
     "./styles.css": "./dist/styles/variables.css",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "src/styles", "README.md", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "src/styles",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "restricted",
