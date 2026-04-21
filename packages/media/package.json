@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/media",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Embedded video and media support for TourKit tours and announcements",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",

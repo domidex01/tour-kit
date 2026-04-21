@@ -1,5 +1,17 @@
 # @tour-kit/adoption
 
+## 0.0.5
+
+### Patch Changes
+
+- a7a0840: chore: publish Pro packages as public on npm
+
+  Flip `publishConfig.access` from `restricted` to `public`. Pro-tier gating stays at runtime via `@tour-kit/license` + Polar.sh keys (watermark + console warning on unlicensed use), matching the documented "no hard block" licensing model. No code or API changes.
+
+- Updated dependencies [a7a0840]
+  - @tour-kit/analytics@0.1.4
+  - @tour-kit/license@1.0.2
+
 ## 0.0.4
 
 ### Patch Changes
