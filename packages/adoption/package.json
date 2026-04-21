@@ -35,7 +35,7 @@
   ],
   "license": "SEE LICENSE IN LICENSE.md",
   "publishConfig": {
-    "access": "restricted",
+    "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
