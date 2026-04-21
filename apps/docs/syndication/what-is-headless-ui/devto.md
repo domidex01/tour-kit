@@ -109,7 +109,7 @@ Your product tour matches your design system exactly. No CSS overrides, no `!imp
 
 For a deeper walkthrough of headless architecture applied to onboarding, see the [guide for onboarding engineers](https://usertourkit.com/blog/what-is-headless-ui-guide-onboarding).
 
-Get started with [Tour Kit on GitHub](https://github.com/domidex/tour-kit) or install it now:
+Get started with [Tour Kit on GitHub](https://github.com/domidex01/tour-kit) or install it now:
 
 ```bash
 npm install @tourkit/core @tourkit/react

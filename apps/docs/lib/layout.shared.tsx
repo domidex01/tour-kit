@@ -104,6 +104,6 @@ export function baseOptions(): BaseLayoutProps {
         icon: <CreditCard className="w-4 h-4" />,
       },
     ],
-    githubUrl: 'https://github.com/domidex/tour-kit',
+    githubUrl: 'https://github.com/domidex01/tour-kit',
   }
 }
