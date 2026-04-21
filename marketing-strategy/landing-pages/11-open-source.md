@@ -96,7 +96,7 @@
 |   |   +--------------------------------------------------+          ||
 |   |                                                                  ||
 |   |   2. FORK & CODE                                                 ||
-|   |   $ git clone https://github.com/you/tour-kit                    ||
+|   |   $ git clone https://github.com/domidex01/tour-kit                    ||
 |   |   $ pnpm install && pnpm dev                                     ||
 |   |                                                                  ||
 |   |   3. SUBMIT A PR                                                 ||
