@@ -1,5 +1,20 @@
 # next-tour-kit-demo
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [a7a0840]
+  - @tour-kit/adoption@0.0.5
+  - @tour-kit/ai@0.0.4
+  - @tour-kit/analytics@0.1.4
+  - @tour-kit/announcements@0.1.4
+  - @tour-kit/checklists@0.1.4
+  - @tour-kit/license@1.0.2
+  - @tour-kit/media@0.1.4
+  - @tour-kit/scheduling@0.1.4
+  - @tour-kit/surveys@0.1.2
+
 ## 0.0.4
 
 ### Patch Changes
