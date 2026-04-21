@@ -199,4 +199,4 @@ Manual testing across at least two screen readers is required. Automated tools c
 
 Full article with comparison table and complete code examples: [usertourkit.com/blog/screen-reader-product-tour](https://usertourkit.com/blog/screen-reader-product-tour)
 
-Tour Kit is an open-source headless product tour library for React. [GitHub](https://github.com/AnnaBurd/tour-kit) | [Docs](https://usertourkit.com/docs)
+Tour Kit is an open-source headless product tour library for React. [GitHub](https://github.com/domidex01/tour-kit) | [Docs](https://usertourkit.com/docs)

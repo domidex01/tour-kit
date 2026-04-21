@@ -105,4 +105,4 @@ The problem isn't open source itself. It's the assumption that "free" means "low
 
 Tour Kit isn't free of tradeoffs. It requires React 18 or later, has no visual builder, and its community is smaller than React Joyride's. But the core is MIT-licensed, the bundle is under 8KB gzipped, and the extended packages cover what you'll need in month six without a custom build.
 
-Get started with [Tour Kit](https://tourkit.dev/docs) or browse the [GitHub repo](https://github.com/AmanDubeyCS/tour-kit).
+Get started with [Tour Kit](https://tourkit.dev/docs) or browse the [GitHub repo](https://github.com/domidex01/tour-kit).

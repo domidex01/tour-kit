@@ -107,4 +107,4 @@ Full article with the complete implementation pattern and accessibility requirem
 
 ---
 
-*Get started: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/tourkit/tour-kit)*
+*Get started: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/domidex01/tour-kit)*

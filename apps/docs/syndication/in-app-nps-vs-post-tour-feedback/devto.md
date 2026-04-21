@@ -242,7 +242,7 @@ Most in-app survey tools don't meet WCAG 2.1 AA standards out of the box. Common
 
 ---
 
-*Get started with Tour Kit's survey components: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/tourkit/tour-kit)*
+*Get started with Tour Kit's survey components: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/domidex01/tour-kit)*
 
 ```bash
 npm install @tourkit/core @tourkit/react @tourkit/surveys
