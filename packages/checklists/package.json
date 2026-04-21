@@ -13,14 +13,7 @@
   "bugs": {
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
-  "keywords": [
-    "react",
-    "checklist",
-    "onboarding",
-    "workflow",
-    "progress",
-    "tour-kit"
-  ],
+  "keywords": ["react", "checklist", "onboarding", "workflow", "progress", "tour-kit"],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -38,11 +31,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "CHANGELOG.md"
-  ],
+  "files": ["dist", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",

@@ -77,12 +77,7 @@
     "./components.css": "./dist/styles/components.css",
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "src/styles",
-    "README.md",
-    "CHANGELOG.md"
-  ],
+  "files": ["dist", "src/styles", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
