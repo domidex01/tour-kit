@@ -268,9 +268,7 @@ export async function renderDocsPage(slug: string[] | undefined) {
       : []
 
   const absPath = page.absolutePath
-  const datePublished = absPath
-    ? getGitFirstCommitted(absPath).toISOString()
-    : SITE_LAUNCH_FALLBACK
+  const datePublished = absPath ? getGitFirstCommitted(absPath).toISOString() : SITE_LAUNCH_FALLBACK
   const dateModified = absPath ? getGitLastModified(absPath).toISOString() : SITE_LAUNCH_FALLBACK
 
   return (
@@ -364,11 +362,7 @@ export async function getDocsMetadata(slug: string[] | undefined): Promise<Metad
   const page = source.getPage(slug)
   if (!page) return {}
 
-  const ogImage = buildDocsOgUrl(
-    page.data.title,
-    page.data.description ?? '',
-    page.slugs[0]
-  )
+  const ogImage = buildDocsOgUrl(page.data.title, page.data.description ?? '', page.slugs[0])
 
   return {
     title: page.data.title,

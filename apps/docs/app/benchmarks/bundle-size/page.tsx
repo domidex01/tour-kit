@@ -1,3 +1,4 @@
+import bundleSizesRaw from '@/content/benchmarks/bundle-sizes.json'
 import { baseOptions } from '@/lib/layout.shared'
 import {
   BreadcrumbJsonLd,
@@ -8,7 +9,6 @@ import {
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import bundleSizesRaw from '@/content/benchmarks/bundle-sizes.json'
 
 interface BundleSizeRow {
   name: string
@@ -74,7 +74,7 @@ export default function BundleSizeBenchmarkPage() {
   const measuredRows = bundleSizes.rows.filter((r) => r.status === 'measured')
   const unavailableRows = bundleSizes.rows.filter((r) => r.status === 'unavailable')
   const sortedByGzip = [...measuredRows].sort(
-    (a, b) => (a.gzipBytes ?? Infinity) - (b.gzipBytes ?? Infinity),
+    (a, b) => (a.gzipBytes ?? Number.POSITIVE_INFINITY) - (b.gzipBytes ?? Number.POSITIVE_INFINITY)
   )
   const measuredDate = formatDate(bundleSizes.measuredAt)
   const smallest = sortedByGzip[0]
@@ -178,9 +178,7 @@ export default function BundleSizeBenchmarkPage() {
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-fd-muted-foreground">
                 Smallest
               </p>
-              <p className="mt-2 text-[20px] font-semibold text-fd-foreground">
-                {smallest.label}
-              </p>
+              <p className="mt-2 text-[20px] font-semibold text-fd-foreground">{smallest.label}</p>
               <p className="text-[13px] text-fd-muted-foreground">
                 {formatBytes(smallest.gzipBytes)} gzipped · v{smallest.version}
               </p>
@@ -189,9 +187,7 @@ export default function BundleSizeBenchmarkPage() {
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-fd-muted-foreground">
                 Largest
               </p>
-              <p className="mt-2 text-[20px] font-semibold text-fd-foreground">
-                {largest.label}
-              </p>
+              <p className="mt-2 text-[20px] font-semibold text-fd-foreground">{largest.label}</p>
               <p className="text-[13px] text-fd-muted-foreground">
                 {formatBytes(largest.gzipBytes)} gzipped · v{largest.version}
               </p>
@@ -267,7 +263,10 @@ export default function BundleSizeBenchmarkPage() {
                   </tr>
                 ))}
                 {unavailableRows.map((r) => (
-                  <tr key={r.name} className="border-b border-fd-border/60 text-fd-muted-foreground">
+                  <tr
+                    key={r.name}
+                    className="border-b border-fd-border/60 text-fd-muted-foreground"
+                  >
                     <td className="px-3 py-2">
                       <a
                         href={r.homepage}
@@ -327,14 +326,14 @@ export default function BundleSizeBenchmarkPage() {
             <li>
               <strong>Full-package vs tree-shaken.</strong> Bundlephobia reports the default-export
               size. A package that&apos;s heavily tree-shaken in real usage (userTourKit/hints
-              especially, which ships many independent primitives) can measure much higher here
-              than the subset you actually import. When you care about your real bundle cost,
-              measure your production build with <code>size-limit</code> or{' '}
+              especially, which ships many independent primitives) can measure much higher here than
+              the subset you actually import. When you care about your real bundle cost, measure
+              your production build with <code>size-limit</code> or{' '}
               <code>next build --profile</code>, not this table.
             </li>
             <li>
-              <strong>Peer dependencies.</strong> React and React DOM are standard peer deps and
-              are excluded from every measurement — otherwise every library would show a false
+              <strong>Peer dependencies.</strong> React and React DOM are standard peer deps and are
+              excluded from every measurement — otherwise every library would show a false
               +42&nbsp;KB.
             </li>
             <li>
@@ -344,26 +343,26 @@ export default function BundleSizeBenchmarkPage() {
             </li>
             <li>
               <strong>Feature parity is not equal.</strong> userTourKit and Shepherd.js include
-              checklists, hints, analytics hooks, and announcement primitives in their builds.
-              React Joyride is a single-purpose tour component. Compare features{' '}
-              <em>and</em> size together — see our{' '}
-              <Link href="/compare">comparison articles</Link> for per-competitor context.
+              checklists, hints, analytics hooks, and announcement primitives in their builds. React
+              Joyride is a single-purpose tour component. Compare features <em>and</em> size
+              together — see our <Link href="/compare">comparison articles</Link> for per-competitor
+              context.
             </li>
           </ul>
 
           <h2>What this means in practice</h2>
           <p>
-            If shaving every kilobyte matters (landing pages, marketing sites, mobile-first
-            B2C), the single-purpose libraries at the top of the table —{' '}
+            If shaving every kilobyte matters (landing pages, marketing sites, mobile-first B2C),
+            the single-purpose libraries at the top of the table —{' '}
             {sortedByGzip
               .slice(0, 3)
               .map((r) => r.label)
               .join(', ')}
-            &nbsp;— are the right starting point. If you need tours{' '}
-            <em>plus</em> hints, checklists, announcements, and analytics in one install, the
-            middle of the table (userTourKit, Shepherd.js) costs more but replaces multiple
-            packages. When in doubt, run <Link href="/docs/getting-started">a proof-of-concept</Link>{' '}
-            and measure your actual production build.
+            &nbsp;— are the right starting point. If you need tours <em>plus</em> hints, checklists,
+            announcements, and analytics in one install, the middle of the table (userTourKit,
+            Shepherd.js) costs more but replaces multiple packages. When in doubt, run{' '}
+            <Link href="/docs/getting-started">a proof-of-concept</Link> and measure your actual
+            production build.
           </p>
 
           <h2>Related</h2>

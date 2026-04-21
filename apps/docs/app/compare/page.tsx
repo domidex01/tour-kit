@@ -62,12 +62,12 @@ export default function CompareHub() {
           <p className="text-[16px] leading-relaxed text-fd-muted-foreground">
             Honest, data-driven comparisons between userTourKit and every major product tour library
             and onboarding platform. Each page covers feature parity, gzipped bundle weight,
-            accessibility (WCAG 2.1 focus management, keyboard nav, screen-reader support),
-            license terms, framework fit, and the pricing model — so you can make the call that
-            fits your stack and your team. Where it matters, we also walk through the migration
-            path: API mappings, behavioral differences, and the gotchas that bite once you start
-            replacing code in production. No marketing language — just the trade-offs that
-            actually inform a tooling choice.
+            accessibility (WCAG 2.1 focus management, keyboard nav, screen-reader support), license
+            terms, framework fit, and the pricing model — so you can make the call that fits your
+            stack and your team. Where it matters, we also walk through the migration path: API
+            mappings, behavioral differences, and the gotchas that bite once you start replacing
+            code in production. No marketing language — just the trade-offs that actually inform a
+            tooling choice.
           </p>
         </header>
 

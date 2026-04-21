@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { SITE_LAUNCH_FALLBACK, getGitLastModified } from '@/lib/git-dates'
 import { baseOptions } from '@/lib/layout.shared'
 import {
@@ -8,7 +9,6 @@ import {
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import path from 'node:path'
 
 const TITLE = 'How We Test'
 const DESCRIPTION =
@@ -120,8 +120,8 @@ export default function HowWeTestPage() {
               either reduce scope or justify the increase in the changeset.
             </li>
             <li>
-              <strong>Linting</strong> via Biome for consistency and basic correctness
-              (unused vars, obvious anti-patterns).
+              <strong>Linting</strong> via Biome for consistency and basic correctness (unused vars,
+              obvious anti-patterns).
             </li>
           </ul>
 
@@ -151,30 +151,28 @@ export default function HowWeTestPage() {
               bundlephobia.com
             </a>{' '}
             or measured locally with <code>size-limit</code> against the package&apos;s exported
-            entry points. Tree-shaken sizes (subset imports) are labeled separately. When we
-            compare competitor bundles we use the same tooling on the same day, against each
-            package&apos;s published npm version — never a stale figure from a blog post. The{' '}
-            <Link href="/benchmarks/bundle-size">live bundle-size benchmark</Link> publishes the
-            raw numbers with the measurement date and source links.
+            entry points. Tree-shaken sizes (subset imports) are labeled separately. When we compare
+            competitor bundles we use the same tooling on the same day, against each package&apos;s
+            published npm version — never a stale figure from a blog post. The{' '}
+            <Link href="/benchmarks/bundle-size">live bundle-size benchmark</Link> publishes the raw
+            numbers with the measurement date and source links.
           </p>
 
           <h2 id="benchmarks">Benchmark methodology</h2>
           <p>
             Performance comparisons (render time, time-to-first-step, memory usage) use a
-            deterministic harness run on a reference machine with fixed CPU throttling in a
-            headless Chromium session. Each scenario runs ≥10 iterations; we report the{' '}
-            <strong>median and p95</strong>, not the single fastest run. The harness source and
-            raw results are published alongside every benchmark so they can be rerun.
+            deterministic harness run on a reference machine with fixed CPU throttling in a headless
+            Chromium session. Each scenario runs ≥10 iterations; we report the{' '}
+            <strong>median and p95</strong>, not the single fastest run. The harness source and raw
+            results are published alongside every benchmark so they can be rerun.
           </p>
           <p>
-            Until published harness URLs land, benchmark figures are labeled{' '}
-            <em>preliminary</em> and the underlying data file is linked directly from the article.
+            Until published harness URLs land, benchmark figures are labeled <em>preliminary</em>{' '}
+            and the underlying data file is linked directly from the article.
           </p>
 
           <h2 id="comparisons">Comparison article methodology</h2>
-          <p>
-            For articles that compare userTourKit against other libraries or SaaS tools:
-          </p>
+          <p>For articles that compare userTourKit against other libraries or SaaS tools:</p>
           <ul>
             <li>
               We read the <strong>current</strong> official docs of the compared tool — version and
@@ -195,9 +193,7 @@ export default function HowWeTestPage() {
           </ul>
 
           <h2 id="reproducibility">Reproducibility</h2>
-          <p>
-            Everything we publish should be reproducible by a reader:
-          </p>
+          <p>Everything we publish should be reproducible by a reader:</p>
           <ul>
             <li>
               The full source of the library and the docs site lives in the{' '}
@@ -212,12 +208,11 @@ export default function HowWeTestPage() {
             </li>
             <li>
               Build commands (<code>pnpm build</code>, <code>pnpm typecheck</code>,{' '}
-              <code>pnpm test</code>) are documented in the root <code>CLAUDE.md</code> and
-              package READMEs.
+              <code>pnpm test</code>) are documented in the root <code>CLAUDE.md</code> and package
+              READMEs.
             </li>
             <li>
-              Benchmark data files (when published) are committed as JSON alongside the article
-              MDX.
+              Benchmark data files (when published) are committed as JSON alongside the article MDX.
             </li>
           </ul>
 

@@ -54,8 +54,8 @@ export default function PrivacyPage() {
           <ul>
             <li>
               <strong>Aggregate analytics</strong> (Vercel Analytics): page views, referrers,
-              country-level geography, device type. No cross-site tracking, no personal
-              identifiers, no advertising cookies.
+              country-level geography, device type. No cross-site tracking, no personal identifiers,
+              no advertising cookies.
             </li>
             <li>
               <strong>Error telemetry</strong> (server logs): request paths, response codes, and
@@ -81,7 +81,11 @@ export default function PrivacyPage() {
           <ul>
             <li>
               <strong>Vercel</strong> — hosting and analytics.{' '}
-              <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://vercel.com/legal/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Vercel's privacy policy
               </a>
               .

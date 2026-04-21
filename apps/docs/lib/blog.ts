@@ -48,6 +48,7 @@ export interface FAQEntry {
  * H3, H2, or horizontal rule. Used to emit proper schema.org/Question entries
  * instead of hardcoded generic FAQs.
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: MDX FAQ parser with multiple boundary conditions (H2/H3/HR); linear flow is clearer than nested helpers
 export function getFaqFromMdx(slug: string): FAQEntry[] {
   const body = readMdxBody(slug)
   if (!body) return []
@@ -127,6 +128,7 @@ const TUTORIAL_SLUG_PATTERN = /^(add-|how-|migrate-|setup-|build-|integrate-)/
  *   - `## 1. …`, `## 2. …` (numbered list-style)
  * Returns null when fewer than 2 steps are found (Google's minimum for HowTo).
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: MDX HowTo parser with multiple heading patterns and slug heuristics; linear flow keeps the parse steps readable
 export function getHowToFromMdx(slug: string): HowToExtraction | null {
   const raw = readMdxRaw(slug)
   if (!raw) return null

@@ -110,7 +110,6 @@ export default function HomePage() {
             <img
               src="/tourkit-lighthouse.png"
               alt=""
-              role="presentation"
               loading="lazy"
               decoding="async"
               className="absolute inset-0 h-full w-full object-cover dark:hidden"
@@ -118,7 +117,6 @@ export default function HomePage() {
             <img
               src="/hero-dark.avif"
               alt=""
-              role="presentation"
               loading="lazy"
               decoding="async"
               className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"

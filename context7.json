@@ -31,9 +31,7 @@
     ".turbo",
     "dist"
   ],
-  "excludeFiles": [
-    "meta.json"
-  ],
+  "excludeFiles": ["meta.json"],
   "rules": [
     "Core logic lives in @tour-kit/core as headless hooks and utilities. UI components live in @tour-kit/react and are thin wrappers over core hooks — never duplicate logic between packages.",
     "Compound components use the Unified Slot pattern for `asChild` composition. Both Radix-style (element cloning via `children={<MyComponent />}`) and Base UI-style (render prop via `children={(props) => <MyComponent {...props} />}`) are supported — prefer render prop when you need access to the computed props.",

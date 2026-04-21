@@ -148,6 +148,7 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
 
     if (mode === 'multi') {
       return (
+        // biome-ignore lint/a11y/useSemanticElements: role=group container; <fieldset> brings default styling that breaks the design system
         <div
           ref={ref}
           role="group"
@@ -161,6 +162,7 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
             const disabled = option.disabled ?? false
 
             return (
+              // biome-ignore lint/a11y/useSemanticElements: custom checkbox pattern; native <input type=checkbox> cannot be styled to match the design system
               <div
                 key={option.value}
                 role="checkbox"
@@ -229,6 +231,7 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
           const isFocusTarget = enabledIdx === focusedIndex
 
           return (
+            // biome-ignore lint/a11y/useSemanticElements: custom radio pattern; native <input type=radio> cannot be styled to match the design system
             <div
               key={option.value}
               role="radio"

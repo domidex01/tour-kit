@@ -208,7 +208,10 @@ export function OrganizationJsonLd(): ReactNode {
   const data = {
     '@context': 'https://schema.org',
     ...ORGANIZATION,
-    sameAs: ['https://github.com/domidex01/tour-kit', 'https://www.npmjs.com/package/@tour-kit/core'],
+    sameAs: [
+      'https://github.com/domidex01/tour-kit',
+      'https://www.npmjs.com/package/@tour-kit/core',
+    ],
     publishingPrinciples: `${SITE_URL}/editorial-policy`,
     ethicsPolicy: `${SITE_URL}/editorial-policy#ethics`,
     correctionsPolicy: `${SITE_URL}/editorial-policy#corrections`,
@@ -490,7 +493,6 @@ export const DEFAULT_SPEAKABLE_SELECTORS: readonly string[] = [
   '.prose h3 + p',
 ]
 
-
 interface SpeakableJsonLdProps {
   /** URL this speakable spec applies to. Defaults to the current origin. */
   url?: string
@@ -542,12 +544,7 @@ interface ItemListJsonLdProps {
   description?: string
 }
 
-export function ItemListJsonLd({
-  name,
-  url,
-  items,
-  description,
-}: ItemListJsonLdProps): ReactNode {
+export function ItemListJsonLd({ name, url, items, description }: ItemListJsonLdProps): ReactNode {
   if (items.length === 0) return null
   const resolvedUrl = url.startsWith('http') ? url : `${SITE_URL}${url}`
   const data = {

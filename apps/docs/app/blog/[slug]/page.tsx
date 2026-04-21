@@ -14,6 +14,7 @@ import {
 } from '@/lib/blog'
 import { getBlogPost, getPublishedBlogPosts, getRelatedBlogPosts } from '@/lib/comparisons'
 import { findMentionedEntities, toMentionsJsonLd } from '@/lib/entities'
+import { articleMdxComponents } from '@/lib/mdx-overrides'
 import { getBlogArticle } from '@/lib/source'
 import {
   ArticleJsonLd,
@@ -22,7 +23,6 @@ import {
   HowToJsonLd,
   SpeakableJsonLd,
 } from '@/lib/structured-data'
-import { articleMdxComponents } from '@/lib/mdx-overrides'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -66,6 +66,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: page composes several JSON-LD schemas, cross-links, and layout slots — splitting would fragment the template
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params
   const post = getBlogPost(slug)

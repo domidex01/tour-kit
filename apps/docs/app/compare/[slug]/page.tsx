@@ -1,6 +1,7 @@
-import { ArticleLayout } from '@/components/article/article-layout'
 import { CompareArticleCrossLinks } from '@/components/article/article-cross-links'
+import { ArticleLayout } from '@/components/article/article-layout'
 import { getComparison, getPublishedComparisons, getRelatedComparisons } from '@/lib/comparisons'
+import { articleMdxComponents } from '@/lib/mdx-overrides'
 import { getCompareArticle } from '@/lib/source'
 import {
   ArticleJsonLd,
@@ -8,7 +9,6 @@ import {
   FAQJsonLd,
   SpeakableJsonLd,
 } from '@/lib/structured-data'
-import { articleMdxComponents } from '@/lib/mdx-overrides'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'

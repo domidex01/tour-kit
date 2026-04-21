@@ -55,13 +55,13 @@ export function BlogListPage({ page }: BlogListPageProps) {
         <div className="relative z-10 mx-auto max-w-[1400px] px-6 pb-16 pt-24 sm:px-8 sm:pb-20 sm:pt-32 lg:px-12">
           <h1 className="mb-2 text-3xl font-bold text-fd-foreground sm:text-4xl">Blog</h1>
           <p className="max-w-2xl text-[15px] leading-relaxed text-fd-muted-foreground">
-            Practical writing on product tours, user onboarding, feature adoption, and
-            developer-led growth. Every post is engineered for the people who actually ship the
-            code: tutorials with copy-pasteable React snippets, head-to-head comparisons against
-            tools like React Joyride, Shepherd.js, Driver.js, Appcues, and Pendo, build-vs-buy
-            breakdowns, accessibility deep-dives, and field notes from teams running production
-            onboarding flows. New articles ship weekly. Skim by category below or subscribe to the
-            RSS feed for everything as it drops.
+            Practical writing on product tours, user onboarding, feature adoption, and developer-led
+            growth. Every post is engineered for the people who actually ship the code: tutorials
+            with copy-pasteable React snippets, head-to-head comparisons against tools like React
+            Joyride, Shepherd.js, Driver.js, Appcues, and Pendo, build-vs-buy breakdowns,
+            accessibility deep-dives, and field notes from teams running production onboarding
+            flows. New articles ship weekly. Skim by category below or subscribe to the RSS feed for
+            everything as it drops.
           </p>
           <Link
             href="/blog/feed.xml"

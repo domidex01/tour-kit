@@ -33,34 +33,22 @@ export function CompareArticleCrossLinks({ current, siblings }: CompareCrossLink
       <p className="mb-0">
         <strong className="text-fd-foreground">Further reading.</strong> For the broader landscape,
         see the{' '}
-        <Link
-          href="/blog/tour-kit-comparison-index"
-          className={LINK_CLASS}
-        >
+        <Link href="/blog/tour-kit-comparison-index" className={LINK_CLASS}>
           userTourKit comparison index
         </Link>{' '}
         — our pillar page covering every tour library we&apos;ve benchmarked. To get started with
         userTourKit itself, follow the{' '}
-        <Link
-          href="/docs/getting-started"
-          className={LINK_CLASS}
-        >
+        <Link href="/docs/getting-started" className={LINK_CLASS}>
           getting started guide
         </Link>{' '}
         or jump straight to the{' '}
-        <Link
-          href="/docs/core"
-          className={LINK_CLASS}
-        >
+        <Link href="/docs/core" className={LINK_CLASS}>
           @tour-kit/core API reference
         </Link>
         {first && (
           <>
             . If you&apos;re weighing {current.competitor} against others, our{' '}
-            <Link
-              href={`/compare/${first.slug}`}
-              className={LINK_CLASS}
-            >
+            <Link href={`/compare/${first.slug}`} className={LINK_CLASS}>
               userTourKit vs {first.competitor}
             </Link>{' '}
             comparison
@@ -68,10 +56,7 @@ export function CompareArticleCrossLinks({ current, siblings }: CompareCrossLink
               <>
                 {' '}
                 and{' '}
-                <Link
-                  href={`/compare/${second.slug}`}
-                  className={LINK_CLASS}
-                >
+                <Link href={`/compare/${second.slug}`} className={LINK_CLASS}>
                   userTourKit vs {second.competitor}
                 </Link>{' '}
                 cover adjacent trade-offs
@@ -94,19 +79,31 @@ export function CompareArticleCrossLinks({ current, siblings }: CompareCrossLink
  * Every other category gets routed to the most topically adjacent pillar so
  * every under-linked spoke gains at least one prose link back to the right hub.
  */
-const CATEGORY_TO_PILLAR: Record<
-  string,
-  { slug: string; anchorText: string } | undefined
-> = {
-  'Build vs Buy': { slug: 'open-source-onboarding-stack', anchorText: 'the open-source onboarding stack' },
+const CATEGORY_TO_PILLAR: Record<string, { slug: string; anchorText: string } | undefined> = {
+  'Build vs Buy': {
+    slug: 'open-source-onboarding-stack',
+    anchorText: 'the open-source onboarding stack',
+  },
   Comparison: { slug: 'tour-kit-comparison-index', anchorText: 'the userTourKit comparison index' },
-  Comparisons: { slug: 'tour-kit-comparison-index', anchorText: 'the userTourKit comparison index' },
-  'Deep-Dives': { slug: 'headless-onboarding-explained', anchorText: 'headless onboarding explained' },
-  'Deep Dives': { slug: 'headless-onboarding-explained', anchorText: 'headless onboarding explained' },
+  Comparisons: {
+    slug: 'tour-kit-comparison-index',
+    anchorText: 'the userTourKit comparison index',
+  },
+  'Deep-Dives': {
+    slug: 'headless-onboarding-explained',
+    anchorText: 'headless onboarding explained',
+  },
+  'Deep Dives': {
+    slug: 'headless-onboarding-explained',
+    anchorText: 'headless onboarding explained',
+  },
   GEO: { slug: 'tour-kit-documentation-hub', anchorText: 'the documentation hub' },
   Glossary: { slug: 'user-onboarding-handbook', anchorText: 'the user onboarding handbook' },
   Industry: { slug: 'user-onboarding-handbook', anchorText: 'the user onboarding handbook' },
-  'Industry Guides': { slug: 'user-onboarding-handbook', anchorText: 'the user onboarding handbook' },
+  'Industry Guides': {
+    slug: 'user-onboarding-handbook',
+    anchorText: 'the user onboarding handbook',
+  },
   Integrations: {
     slug: 'product-tour-best-practices-react',
     anchorText: 'React product tour best practices',
@@ -125,9 +122,18 @@ const CATEGORY_TO_PILLAR: Record<
     anchorText: 'onboarding metrics explained',
   },
   'Pillar Pages': { slug: 'tour-kit-documentation-hub', anchorText: 'the documentation hub' },
-  'Thought Leadership': { slug: 'user-onboarding-handbook', anchorText: 'the user onboarding handbook' },
-  Tutorial: { slug: 'product-tour-guide-2026', anchorText: 'the complete React product tour guide' },
-  Tutorials: { slug: 'product-tour-guide-2026', anchorText: 'the complete React product tour guide' },
+  'Thought Leadership': {
+    slug: 'user-onboarding-handbook',
+    anchorText: 'the user onboarding handbook',
+  },
+  Tutorial: {
+    slug: 'product-tour-guide-2026',
+    anchorText: 'the complete React product tour guide',
+  },
+  Tutorials: {
+    slug: 'product-tour-guide-2026',
+    anchorText: 'the complete React product tour guide',
+  },
   'Use Cases': {
     slug: 'product-tour-best-practices-react',
     anchorText: 'React product tour best practices',
@@ -229,49 +235,34 @@ export function AlternativeArticleCrossLinks({
       <p className="mb-0">
         <strong className="text-fd-foreground">Further reading.</strong> Our onboarding pillar
         article,{' '}
-        <Link
-          href="/blog/onboarding-software-comparison-hub"
-          className={LINK_CLASS}
-        >
+        <Link href="/blog/onboarding-software-comparison-hub" className={LINK_CLASS}>
           the onboarding software comparison hub
         </Link>
         , groups every major category of tour and onboarding tool.{' '}
         {vsComparison && (
           <>
             For a direct head-to-head with {current.competitor}, read{' '}
-            <Link
-              href={`/compare/${vsComparison.slug}`}
-              className={LINK_CLASS}
-            >
+            <Link href={`/compare/${vsComparison.slug}`} className={LINK_CLASS}>
               userTourKit vs {current.competitor}
             </Link>
             .{' '}
           </>
         )}
         To evaluate userTourKit on your own stack, start with the{' '}
-        <Link
-          href="/docs/getting-started"
-          className={LINK_CLASS}
-        >
+        <Link href="/docs/getting-started" className={LINK_CLASS}>
           getting started guide
         </Link>
         {first && (
           <>
             , or explore alternatives to{' '}
-            <Link
-              href={`/alternatives/${first.slug}`}
-              className={LINK_CLASS}
-            >
+            <Link href={`/alternatives/${first.slug}`} className={LINK_CLASS}>
               {first.competitor}
             </Link>
             {second && (
               <>
                 {' '}
                 and{' '}
-                <Link
-                  href={`/alternatives/${second.slug}`}
-                  className={LINK_CLASS}
-                >
+                <Link href={`/alternatives/${second.slug}`} className={LINK_CLASS}>
                   {second.competitor}
                 </Link>
               </>

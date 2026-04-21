@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { AUTHORS } from '@/lib/authors'
 import { SITE_LAUNCH_FALLBACK, getGitLastModified } from '@/lib/git-dates'
 import { baseOptions } from '@/lib/layout.shared'
@@ -9,7 +10,6 @@ import {
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import path from 'node:path'
 
 const TITLE = 'Editorial Policy'
 const DESCRIPTION =
@@ -55,10 +55,7 @@ export default function EditorialPolicyPage() {
           { name: 'Editorial Policy', url: '/editorial-policy' },
         ]}
       />
-      <SpeakableJsonLd
-        url="/editorial-policy"
-        cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]}
-      />
+      <SpeakableJsonLd url="/editorial-policy" cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]} />
       <main
         id="main-content"
         className="mx-auto w-full max-w-[820px] px-6 py-16 sm:px-8 sm:py-20 lg:px-12"
@@ -77,8 +74,7 @@ export default function EditorialPolicyPage() {
             {DESCRIPTION}
           </p>
           <p className="mt-3 text-[13px] text-fd-muted-foreground">
-            Last updated{' '}
-            <time dateTime={lastUpdatedIso}>{lastUpdatedDisplay}</time>
+            Last updated <time dateTime={lastUpdatedIso}>{lastUpdatedDisplay}</time>
           </p>
         </header>
 
@@ -87,10 +83,12 @@ export default function EditorialPolicyPage() {
           <p>
             userTourKit is a solo-maintained project. All documentation, guides, comparisons, and
             blog posts are written and reviewed by{' '}
-            <Link href="/about">{author.legalName} ({author.name})</Link>, a software engineer with
-            working experience in React, TypeScript, and developer tooling. The{' '}
-            <Link href="/about">about page</Link> lists verifiable external profiles (GitHub,
-            LinkedIn, X) so readers can assess expertise independently.
+            <Link href="/about">
+              {author.legalName} ({author.name})
+            </Link>
+            , a software engineer with working experience in React, TypeScript, and developer
+            tooling. The <Link href="/about">about page</Link> lists verifiable external profiles
+            (GitHub, LinkedIn, X) so readers can assess expertise independently.
           </p>
 
           <h2>How content is reviewed</h2>
@@ -198,8 +196,8 @@ export default function EditorialPolicyPage() {
               version, and at least every 6 months.
             </li>
             <li>
-              <strong>Tutorials and guides</strong> are reviewed when a referenced dependency (React,
-              Next.js, Fumadocs, etc.) ships a breaking version, or every 12 months.
+              <strong>Tutorials and guides</strong> are reviewed when a referenced dependency
+              (React, Next.js, Fumadocs, etc.) ships a breaking version, or every 12 months.
             </li>
             <li>
               The "Last updated" stamp on each docs page is derived from git history and updates

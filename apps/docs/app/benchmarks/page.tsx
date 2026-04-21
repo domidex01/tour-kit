@@ -1,3 +1,4 @@
+import bundleSizes from '@/content/benchmarks/bundle-sizes.json'
 import { baseOptions } from '@/lib/layout.shared'
 import {
   BreadcrumbJsonLd,
@@ -7,7 +8,6 @@ import {
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import bundleSizes from '@/content/benchmarks/bundle-sizes.json'
 
 const TITLE = 'Benchmarks'
 const DESCRIPTION =
@@ -95,7 +95,8 @@ export default function BenchmarksIndexPage() {
               <time dateTime={bundleSizes.measuredAt}>{formatDate(bundleSizes.measuredAt)}</time>.
             </p>
             <p className="mt-3 text-[13px] text-fd-muted-foreground">
-              {bundleSizes.rows.length} packages · {bundleSizes.rows.filter((r) => r.status === 'measured').length} measured
+              {bundleSizes.rows.length} packages ·{' '}
+              {bundleSizes.rows.filter((r) => r.status === 'measured').length} measured
             </p>
           </Link>
 
@@ -112,7 +113,11 @@ export default function BenchmarksIndexPage() {
               results are reproducible.
             </p>
             <p className="mt-3 text-[13px] text-fd-muted-foreground">
-              See our <Link href="/how-we-test#benchmarks" className="underline">render-benchmark methodology</Link>.
+              See our{' '}
+              <Link href="/how-we-test#benchmarks" className="underline">
+                render-benchmark methodology
+              </Link>
+              .
             </p>
           </div>
         </div>

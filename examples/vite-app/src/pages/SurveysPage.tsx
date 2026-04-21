@@ -172,6 +172,7 @@ function ScoreDisplay({
 
 // ── Survey card component ──────────────────────────────────
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: demo page renders several survey variants inline; linear JSX is clearer than extracting wrappers
 function SurveyCard({
   surveyId,
   scoreType,

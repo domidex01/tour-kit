@@ -83,9 +83,9 @@ export function Pricing() {
                   className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
                 >
                   <Check
-                className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
-                aria-hidden="true"
-              />
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+                    aria-hidden="true"
+                  />
                   {feature}
                 </li>
               ))}
@@ -138,7 +138,10 @@ export function Pricing() {
                   key={feature}
                   className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
                 >
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tk-primary)]" aria-hidden="true" />
+                  <Check
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tk-primary)]"
+                    aria-hidden="true"
+                  />
                   {feature}
                 </li>
               ))}
@@ -296,6 +299,7 @@ function FAQ() {
                   <path d="m6 9 6 6 6-6" />
                 </svg>
               </button>
+              {/* biome-ignore lint/a11y/useSemanticElements: accordion panel needs role=region per ARIA authoring practices */}
               <div
                 id={panelId}
                 role="region"

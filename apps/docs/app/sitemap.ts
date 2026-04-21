@@ -72,7 +72,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${SITE_URL}/benchmarks`,
       lastModified: getGitLastModified(
-        path.join(process.cwd(), 'content/benchmarks/bundle-sizes.json'),
+        path.join(process.cwd(), 'content/benchmarks/bundle-sizes.json')
       ),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -80,7 +80,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${SITE_URL}/benchmarks/bundle-size`,
       lastModified: getGitLastModified(
-        path.join(process.cwd(), 'content/benchmarks/bundle-sizes.json'),
+        path.join(process.cwd(), 'content/benchmarks/bundle-sizes.json')
       ),
       changeFrequency: 'monthly' as const,
       priority: 0.7,

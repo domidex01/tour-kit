@@ -1,10 +1,11 @@
-import { ArticleLayout } from '@/components/article/article-layout'
 import { AlternativeArticleCrossLinks } from '@/components/article/article-cross-links'
+import { ArticleLayout } from '@/components/article/article-layout'
 import {
   getAlternative,
   getPublishedAlternatives,
   getPublishedComparisons,
 } from '@/lib/comparisons'
+import { articleMdxComponents } from '@/lib/mdx-overrides'
 import { getAlternativeArticle } from '@/lib/source'
 import {
   ArticleJsonLd,
@@ -12,7 +13,6 @@ import {
   FAQJsonLd,
   SpeakableJsonLd,
 } from '@/lib/structured-data'
-import { articleMdxComponents } from '@/lib/mdx-overrides'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -157,8 +157,8 @@ export default async function AlternativesPage({ params }: PageProps) {
               <strong>Performance</strong> — Bundle size (gzipped), Lighthouse impact, tree-shaking
             </li>
             <li>
-              <strong>Licensing and pricing</strong> — True cost over 3 years, license
-              restrictions, MAU limits
+              <strong>Licensing and pricing</strong> — True cost over 3 years, license restrictions,
+              MAU limits
             </li>
             <li>
               <strong>Maintenance health</strong> — Release frequency, GitHub activity, issue

@@ -27,7 +27,6 @@ function BackgroundPattern() {
       <img
         src="/tourkit-lighthouse.png"
         alt=""
-        role="presentation"
         loading="eager"
         decoding="async"
         fetchPriority="high"
@@ -36,7 +35,6 @@ function BackgroundPattern() {
       <img
         src="/hero-dark.avif"
         alt=""
-        role="presentation"
         loading="eager"
         decoding="async"
         fetchPriority="high"

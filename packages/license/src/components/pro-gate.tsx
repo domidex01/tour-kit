@@ -73,6 +73,7 @@ export function ProGate({ package: packageName, children }: ProGateProps) {
 
   // Gated — render placeholder
   return (
+    // biome-ignore lint/a11y/useSemanticElements: role=status for live-region announcement, no semantic element fits
     <div style={placeholderContainerStyles} role="status" aria-label="License required">
       <div style={placeholderInnerStyles}>
         <p style={titleStyles}>Tour Kit Pro license required</p>

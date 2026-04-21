@@ -295,10 +295,7 @@ export default function SitemapPage() {
           <SitemapSection title="Benchmarks" count={2}>
             <ul className="grid gap-1.5 sm:grid-cols-2">
               <li>
-                <Link
-                  href="/benchmarks"
-                  className="text-[14px] text-fd-foreground hover:underline"
-                >
+                <Link href="/benchmarks" className="text-[14px] text-fd-foreground hover:underline">
                   Benchmarks index
                 </Link>
               </li>

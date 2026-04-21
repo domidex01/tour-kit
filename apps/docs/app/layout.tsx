@@ -1,10 +1,10 @@
 import './globals.css'
 import { SkipNav } from '@/components/skip-nav'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
 import type { Metadata } from 'next'
-import { GoogleAnalytics } from '@next/third-parties/google'
 import type { ReactNode } from 'react'
 
 const GA_ID =

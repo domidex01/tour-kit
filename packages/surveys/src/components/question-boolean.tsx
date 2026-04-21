@@ -111,6 +111,7 @@ const QuestionBoolean = React.forwardRef<HTMLDivElement, QuestionBooleanProps>(
           const isSelected = currentValue === option.value
 
           return (
+            // biome-ignore lint/a11y/useSemanticElements: custom radio group pattern; native <input type=radio> doesn't support the required styling/keyboard semantics
             <button
               key={String(option.value)}
               type="button"
