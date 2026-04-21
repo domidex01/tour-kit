@@ -105,7 +105,7 @@ Zero downloads. Zero stars. That's uncomfortable to publish, but it's the truth.
 4. Write docs before you think you need them
 5. Get human eyes on your code, especially the AI-generated parts
 
-Tour Kit's source is at [github.com/DomiDex/tour-kit](https://github.com/DomiDex/tour-kit). If you're building product tours in React and want a headless library that doesn't fight your design system, give it a look.
+Tour Kit's source is at [github.com/domidex01/tour-kit](https://github.com/domidex01/tour-kit). If you're building product tours in React and want a headless library that doesn't fight your design system, give it a look.
 
 ---
 

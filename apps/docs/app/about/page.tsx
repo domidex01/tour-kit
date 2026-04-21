@@ -13,11 +13,11 @@ import Link from 'next/link'
 
 const TITLE = 'About userTourKit'
 const DESCRIPTION =
-  'userTourKit is an open-source headless product tour library for React, built by Dominique Degottex (DomiDex). Three MIT-licensed core packages, plus an optional $99 Pro suite.'
+  'userTourKit is an open-source headless product tour library for React, built by Dominique Degottex (domidex01). Three MIT-licensed core packages, plus an optional $99 Pro suite.'
 
 const author = AUTHORS.domidex
 const AUTHOR_BIO =
-  'Dominique Degottex (DomiDex) is a software engineer focused on accessible React components, product onboarding, and developer tooling. He created userTourKit to ship a genuinely headless tour library that composes with shadcn/ui, Radix, and Base UI rather than fighting them.'
+  'Dominique Degottex (domidex01) is a software engineer focused on accessible React components, product onboarding, and developer tooling. He created userTourKit to ship a genuinely headless tour library that composes with shadcn/ui, Radix, and Base UI rather than fighting them.'
 
 export const metadata: Metadata = {
   title: `${TITLE} — userTourKit`,
@@ -215,11 +215,11 @@ export default function AboutPage() {
             , a software engineer focused on accessible onboarding and developer tooling.
             Development happens in the open at{' '}
             <a
-              href="https://github.com/DomiDex/tour-kit"
+              href="https://github.com/domidex01/tour-kit"
               target="_blank"
               rel="noopener noreferrer"
             >
-              github.com/DomiDex/tour-kit
+              github.com/domidex01/tour-kit
             </a>
             .
           </p>
@@ -237,7 +237,7 @@ export default function AboutPage() {
           <p>
             For bugs, feature requests, and general questions, please use{' '}
             <a
-              href="https://github.com/DomiDex/tour-kit/issues"
+              href="https://github.com/domidex01/tour-kit/issues"
               target="_blank"
               rel="noopener noreferrer"
             >

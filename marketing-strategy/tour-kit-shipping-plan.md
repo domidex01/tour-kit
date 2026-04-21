@@ -241,7 +241,7 @@ Production-ready onboarding and product tour library designed for Shadcn UI. Hea
 **Links:**
 - 🌐 [Documentation](https://tourkit.domidex.dev)
 - 📦 [npm](https://npmjs.com/package/@tour-kit/react)
-- 💻 [GitHub](https://github.com/DomiDex/tour-kit)
+- 💻 [GitHub](https://github.com/domidex01/tour-kit)
 - 🎨 [Live Demo](https://tourkit.domidex.dev/examples)
 
 **Key features:**

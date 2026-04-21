@@ -233,4 +233,4 @@ npm install @tourkit/core @tourkit/react
 
 Start with the checkout trust tour. It has the most direct connection to revenue and takes about 15 minutes to implement. Measure checkout completion rate for 2 weeks before and after, then iterate.
 
-[Full article with comparison tables and FAQ](https://usertourkit.com/blog/ecommerce-product-tour) | [Tour Kit on GitHub](https://github.com/DomiDex/tour-kit)
+[Full article with comparison tables and FAQ](https://usertourkit.com/blog/ecommerce-product-tour) | [Tour Kit on GitHub](https://github.com/domidex01/tour-kit)

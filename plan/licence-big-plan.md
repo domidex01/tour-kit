@@ -1,7 +1,7 @@
 # Tour Kit Licensing System — Implementation Plan
 
 **Project:** Replace JWT-based licensing with Polar.sh-backed license key validation, activation, and gating for Tour Kit Pro
-**Owner:** DomiDex
+**Owner:** domidex01
 **Start Date:** Week of March 31, 2026
 **Target Completion:** 4 weeks (April 25, 2026)
 **Total Estimated Effort:** 47–60 hours
@@ -300,8 +300,8 @@ apps/docs/app/api/webhooks/polar/route.ts
 
 | Item | Status |
 |------|--------|
-| `DomiDex/tour-kit` | **PUBLIC** GitHub repo — pro source exposed |
-| `DomiDex/tour-kit-pro` | **Does not exist yet** |
+| `domidex01/tour-kit` | **PUBLIC** GitHub repo — pro source exposed |
+| `domidex01/tour-kit-pro` | **Does not exist yet** |
 | npm Pro/Org plan | Active |
 | Pro packages on npm | **All PUBLIC** — anyone can `npm install` them |
 | Published versions | adoption@0.0.1, ai@0.0.0, analytics@0.1.0, announcements@0.1.0, checklists@0.1.0, license@0.0.1, media@0.1.0, scheduling@0.1.0 |
@@ -321,7 +321,7 @@ All 8 pro packages are publicly installable right now. Switch them to restricted
 
 | # | Task | Hours | Dependencies | Output |
 |---|------|-------|-------------|--------|
-| 6.1 | Create private GitHub repo: `gh repo create DomiDex/tour-kit-pro --private` | 0.25h | — | Repo created |
+| 6.1 | Create private GitHub repo: `gh repo create domidex01/tour-kit-pro --private` | 0.25h | — | Repo created |
 | 6.2 | Clone and initialize as pnpm monorepo with Turborepo. Copy root configs (`tsconfig.json`, `turbo.json`, `pnpm-workspace.yaml`, `.npmrc`) from public repo and adapt. | 0.5h | 6.1 | Monorepo scaffolded |
 | 6.3 | Copy all 8 pro package directories into `tour-kit-pro/packages/`: `license`, `adoption`, `ai`, `analytics`, `announcements`, `checklists`, `media`, `scheduling` | 0.5h | 6.2 | 8 packages copied |
 | 6.4 | Update all pro `package.json` deps — replace `workspace:*` references with published npm versions: `"@tour-kit/core": "^0.3.0"`, `"@tour-kit/react": "^0.4.1"`, `"@tour-kit/hints": "^0.4.1"`. Also fix cross-pro deps (e.g., announcements→scheduling, adoption→analytics). | 0.5h | 6.3 | 8× `package.json` updated |
@@ -344,7 +344,7 @@ All 8 pro packages are publicly installable right now. Switch them to restricted
 |---|------|-------|-------------|--------|
 | 6.12 | Configure Changesets in `tour-kit-pro`: `.changeset/config.json` with `"access": "restricted"`, linked pro packages, `updateInternalDependencies: "patch"` | 0.25h | 6.3 | `.changeset/config.json` |
 | 6.13 | Set up GitHub Actions: `.github/workflows/ci.yml` (build + test on PR) and `.github/workflows/release.yml` (Changesets publish with `--access restricted`) — see **Release Workflow** section | 1h | 6.5 | Workflows committed |
-| 6.14 | Add `NPM_TOKEN` secret to `DomiDex/tour-kit-pro` GitHub repo settings | 0.1h | 6.13 | Secret configured |
+| 6.14 | Add `NPM_TOKEN` secret to `domidex01/tour-kit-pro` GitHub repo settings | 0.1h | 6.13 | Secret configured |
 | 6.15 | Dry-run full release: `pnpm changeset` → `pnpm version-packages` → `pnpm build` → `npm publish --dry-run --access restricted` for all 8 packages | 0.5h | 6.12, 6.13 | Verification log |
 
 #### Step 5: Verify & Document
@@ -358,9 +358,9 @@ All 8 pro packages are publicly installable right now. Switch them to restricted
 | 6.20 | Push `tour-kit-pro` to GitHub: `git push -u origin main` | 0.1h | 6.15 | Private repo live |
 
 **Exit Criteria:**
-- [ ] `DomiDex/tour-kit-pro` is a **private** GitHub repo with all 8 pro packages
+- [ ] `domidex01/tour-kit-pro` is a **private** GitHub repo with all 8 pro packages
 - [ ] All 8 pro packages build and pass tests in the private repo against published npm core/react/hints
-- [ ] Public `DomiDex/tour-kit` repo contains **zero** pro package source code at HEAD
+- [ ] Public `domidex01/tour-kit` repo contains **zero** pro package source code at HEAD
 - [ ] Pro packages depend on `@tour-kit/core: "^0.3.0"` via npm (not `workspace:*`)
 - [ ] **All 8 pro packages are `restricted` on npm** (not public)
 - [ ] GitHub Actions in private repo can build + publish restricted npm packages
@@ -380,7 +380,7 @@ All 8 pro packages are publicly installable right now. Switch them to restricted
 With the public/private repo split, releases must be coordinated but are independent pipelines:
 
 ```
-PUBLIC REPO (DomiDex/tour-kit)          PRIVATE REPO (DomiDex/tour-kit-pro)
+PUBLIC REPO (domidex01/tour-kit)          PRIVATE REPO (domidex01/tour-kit-pro)
 ──────────────────────────────          ───────────────────────────────────
 1. pnpm changeset                       1. pnpm changeset
 2. Push → PR "chore: version packages"  2. Push → PR "chore: version packages"
@@ -573,19 +573,19 @@ Assumes ~15h/week of productive engineering. Week 4 is lighter — mostly repo r
 
 ### CRITICAL: Source Code Separation
 
-**Problem discovered:** The GitHub repo `DomiDex/tour-kit` is **PUBLIC**. All pro package source code (adoption, analytics, announcements, checklists, media, scheduling, ai, license) is readable by anyone. npm `restricted` access is meaningless when the full source is on GitHub.
+**Problem discovered:** The GitHub repo `domidex01/tour-kit` is **PUBLIC**. All pro package source code (adoption, analytics, announcements, checklists, media, scheduling, ai, license) is readable by anyone. npm `restricted` access is meaningless when the full source is on GitHub.
 
 **Solution: Two-repo architecture.**
 
 ```
-PUBLIC REPO: DomiDex/tour-kit (GitHub public)
+PUBLIC REPO: domidex01/tour-kit (GitHub public)
 ├── packages/core/          ← MIT, open source
 ├── packages/react/         ← MIT, open source
 ├── packages/hints/         ← MIT, open source
 ├── apps/docs/              ← docs site
 └── examples/               ← example apps
 
-PRIVATE REPO: DomiDex/tour-kit-pro (GitHub private)
+PRIVATE REPO: domidex01/tour-kit-pro (GitHub private)
 ├── packages/license/       ← proprietary, npm restricted
 ├── packages/adoption/      ← proprietary, npm restricted
 ├── packages/analytics/     ← proprietary, npm restricted

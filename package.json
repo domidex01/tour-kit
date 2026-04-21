@@ -5,7 +5,7 @@
   "description": "Headless onboarding and product tour library for React",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DomiDex/tour-kit.git"
+    "url": "git+https://github.com/domidex01/tour-kit.git"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.26.1",

@@ -242,4 +242,4 @@ Onboarding NPS is a transactional survey tied to completing product setup. Relat
 
 ---
 
-*Get started with [Tour Kit](https://usertourkit.com/) — install `@tourkit/surveys` to add NPS surveys tied to your onboarding flow. View the full API in the [surveys docs](https://usertourkit.com/docs/surveys), or explore the [source on GitHub](https://github.com/DomiDex/tour-kit).*
+*Get started with [Tour Kit](https://usertourkit.com/) — install `@tourkit/surveys` to add NPS surveys tied to your onboarding flow. View the full API in the [surveys docs](https://usertourkit.com/docs/surveys), or explore the [source on GitHub](https://github.com/domidex01/tour-kit).*

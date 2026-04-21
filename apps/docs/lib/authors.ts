@@ -21,11 +21,11 @@ export const AUTHOR_PERSON_ID = 'https://usertourkit.com/about#person'
 
 export const AUTHORS: Record<string, Author> = {
   domidex: {
-    name: 'DomiDex',
+    name: 'domidex01',
     legalName: 'Dominique Degottex',
-    avatar: 'https://github.com/DomiDex.png',
+    avatar: 'https://github.com/domidex01.png',
     url: '/about',
-    github: 'https://github.com/DomiDex',
+    github: 'https://github.com/domidex01',
     linkedin: 'https://www.linkedin.com/in/domidex/',
     x: 'https://x.com/domidexdesign',
     role: 'Creator of userTourKit',

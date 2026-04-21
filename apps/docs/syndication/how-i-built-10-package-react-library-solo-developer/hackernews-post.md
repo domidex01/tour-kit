@@ -16,6 +16,6 @@ Some specific things I cover:
 
 The three biggest lessons: ship the smallest useful thing first, set bundle budgets from day one, write docs before you think you need them.
 
-Source: https://github.com/DomiDex/tour-kit
+Source: https://github.com/domidex01/tour-kit
 
 Happy to answer questions about the architecture, tooling choices, or the building-in-public experience.

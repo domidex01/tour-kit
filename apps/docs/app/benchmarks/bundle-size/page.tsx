@@ -309,7 +309,7 @@ export default function BundleSizeBenchmarkPage() {
             </a>
             &apos;s public API via a script committed alongside this page (
             <a
-              href="https://github.com/DomiDex/tour-kit/blob/main/apps/docs/scripts/fetch-bundle-sizes.ts"
+              href="https://github.com/domidex01/tour-kit/blob/main/apps/docs/scripts/fetch-bundle-sizes.ts"
               target="_blank"
               rel="noopener noreferrer"
             >

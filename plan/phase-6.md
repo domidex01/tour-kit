@@ -10,12 +10,12 @@
 
 ## 1. Objective + What Success Looks Like
 
-Split the Tour Kit monorepo into two independent repositories: a public `DomiDex/tour-kit` containing only the 3 MIT-licensed free packages (`core`, `react`, `hints`) and a private `DomiDex/tour-kit-pro` containing all 8 proprietary packages (`license`, `adoption`, `ai`, `analytics`, `announcements`, `checklists`, `media`, `scheduling`). Fix npm access so all pro packages are restricted (currently all 8 are publicly installable). Set up independent CI/CD and Changesets release pipelines for the private repo.
+Split the Tour Kit monorepo into two independent repositories: a public `domidex01/tour-kit` containing only the 3 MIT-licensed free packages (`core`, `react`, `hints`) and a private `domidex01/tour-kit-pro` containing all 8 proprietary packages (`license`, `adoption`, `ai`, `analytics`, `announcements`, `checklists`, `media`, `scheduling`). Fix npm access so all pro packages are restricted (currently all 8 are publicly installable). Set up independent CI/CD and Changesets release pipelines for the private repo.
 
 **Success looks like:**
 
 - Running `npm access get status @tour-kit/announcements` returns `restricted` for all 8 pro packages
-- `DomiDex/tour-kit-pro` is a private GitHub repo with its own pnpm + Turborepo monorepo scaffold
+- `domidex01/tour-kit-pro` is a private GitHub repo with its own pnpm + Turborepo monorepo scaffold
 - All 8 pro packages build and pass tests in the private repo, depending on `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` via npm (not `workspace:*`)
 - `git ls-files packages/{adoption,ai,analytics,announcements,checklists,license,media,scheduling}` in the public repo returns empty
 - Public repo `pnpm install && pnpm build && pnpm typecheck` passes with only free packages
@@ -60,7 +60,7 @@ After removing pro package directories from the public repo, the docs site must 
 
 | # | Task | Hours | Dependencies | Output |
 |---|------|-------|-------------|--------|
-| 6.1 | Create private GitHub repo | 0.25h | -- | `DomiDex/tour-kit-pro` exists |
+| 6.1 | Create private GitHub repo | 0.25h | -- | `domidex01/tour-kit-pro` exists |
 | 6.2 | Initialize as pnpm monorepo with Turborepo, copy and adapt root configs | 0.5h | 6.1 | Monorepo scaffolded |
 | 6.3 | Copy all 8 pro package directories | 0.5h | 6.2 | 8 packages in `packages/` |
 | 6.4 | Update all `package.json` deps -- `workspace:*` to published npm versions for free packages | 0.5h | 6.3 | 8 `package.json` files updated |
@@ -100,7 +100,7 @@ After removing pro package directories from the public repo, the docs site must 
 
 ## 4. Deliverables
 
-### Public Repo (`DomiDex/tour-kit`) -- After Cleanup
+### Public Repo (`domidex01/tour-kit`) -- After Cleanup
 
 ```
 tour-kit/
@@ -124,7 +124,7 @@ tour-kit/
 └── package.json
 ```
 
-### Private Repo (`DomiDex/tour-kit-pro`) -- New
+### Private Repo (`domidex01/tour-kit-pro`) -- New
 
 ```
 tour-kit-pro/
@@ -158,7 +158,7 @@ tour-kit-pro/
 
 | # | Criterion | Verification Command |
 |---|-----------|---------------------|
-| EC1 | `DomiDex/tour-kit-pro` is a private GitHub repo | `gh repo view DomiDex/tour-kit-pro --json visibility -q .visibility` returns `PRIVATE` |
+| EC1 | `domidex01/tour-kit-pro` is a private GitHub repo | `gh repo view domidex01/tour-kit-pro --json visibility -q .visibility` returns `PRIVATE` |
 | EC2 | Private repo contains all 8 pro packages | `ls tour-kit-pro/packages/` lists: adoption, ai, analytics, announcements, checklists, license, media, scheduling |
 | EC3 | All 8 pro packages build in private repo | `cd tour-kit-pro && pnpm build` exits 0 |
 | EC4 | All 8 pro packages pass tests in private repo | `cd tour-kit-pro && pnpm test` exits 0 |
@@ -212,7 +212,7 @@ done
 
 ```bash
 # Create and clone
-gh repo create DomiDex/tour-kit-pro --private --clone
+gh repo create domidex01/tour-kit-pro --private --clone
 cd tour-kit-pro
 ```
 
@@ -360,7 +360,7 @@ mkdir -p .changeset
 cat > .changeset/config.json << 'CSCONFIG'
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "DomiDex/tour-kit-pro" }],
+  "changelog": ["@changesets/changelog-github", { "repo": "domidex01/tour-kit-pro" }],
   "commit": false,
   "fixed": [],
   "linked": [[
@@ -544,7 +544,7 @@ cd ../tour-kit-pro
 
 # Add NPM_TOKEN secret (manual step via GitHub UI)
 echo "ACTION REQUIRED: Add NPM_TOKEN secret at:"
-echo "  https://github.com/DomiDex/tour-kit-pro/settings/secrets/actions"
+echo "  https://github.com/domidex01/tour-kit-pro/settings/secrets/actions"
 
 # Commit everything
 git add -A
@@ -563,7 +563,7 @@ git push -u origin main
 
 ```bash
 # 1. Private repo exists and is private
-gh repo view DomiDex/tour-kit-pro --json visibility -q .visibility
+gh repo view domidex01/tour-kit-pro --json visibility -q .visibility
 # Expected: PRIVATE
 
 # 2. Public repo has zero pro source

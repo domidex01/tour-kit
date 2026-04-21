@@ -230,7 +230,7 @@ Run a completers-vs-skippers cohort comparison at each checkpoint. If the gap be
 
 For deeper coverage of specific integrations, see [Amplitude + Tour Kit: measuring onboarding impact on retention](https://usertourkit.com/blog/amplitude-tour-kit-onboarding-retention), [Funnel analysis for product tours with Mixpanel](https://usertourkit.com/blog/mixpanel-product-tour-funnel), and [Track product tour completion with PostHog events](https://usertourkit.com/blog/track-product-tour-completion-posthog-events).
 
-Get started with Tour Kit: [documentation and examples](https://usertourkit.com/) | [GitHub](https://github.com/DomiDex/tour-kit)
+Get started with Tour Kit: [documentation and examples](https://usertourkit.com/) | [GitHub](https://github.com/domidex01/tour-kit)
 
 ```bash
 npm install @tourkit/core @tourkit/react @tourkit/analytics

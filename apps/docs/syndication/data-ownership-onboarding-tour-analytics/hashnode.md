@@ -98,4 +98,4 @@ The average data breach cost: $4.45 million in 2023, up 15% over three years (IB
 
 *We built Tour Kit, so take our take with appropriate skepticism. Every claim is verifiable against public vendor documentation.*
 
-*Get started: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/DomiDex/tour-kit)*
+*Get started: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/domidex01/tour-kit)*

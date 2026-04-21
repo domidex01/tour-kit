@@ -95,4 +95,4 @@ Full article with all code examples: [usertourkit.com/blog/tour-kit-stripe-billi
 
 ---
 
-Get started: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/DomiDex/tour-kit) | `npm install @tourkit/core @tourkit/react`
+Get started: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/domidex01/tour-kit) | `npm install @tourkit/core @tourkit/react`

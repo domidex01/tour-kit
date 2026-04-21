@@ -208,7 +208,7 @@ export function OrganizationJsonLd(): ReactNode {
   const data = {
     '@context': 'https://schema.org',
     ...ORGANIZATION,
-    sameAs: ['https://github.com/DomiDex/tour-kit', 'https://www.npmjs.com/package/@tour-kit/core'],
+    sameAs: ['https://github.com/domidex01/tour-kit', 'https://www.npmjs.com/package/@tour-kit/core'],
     publishingPrinciples: `${SITE_URL}/editorial-policy`,
     ethicsPolicy: `${SITE_URL}/editorial-policy#ethics`,
     correctionsPolicy: `${SITE_URL}/editorial-policy#corrections`,
@@ -321,7 +321,7 @@ export function SoftwareSourceCodeJsonLd({
     url: `${SITE_URL}${url}`,
     programmingLanguage,
     ...(runtimePlatform && { runtimePlatform }),
-    codeRepository: 'https://github.com/DomiDex/tour-kit',
+    codeRepository: 'https://github.com/domidex01/tour-kit',
     license: 'https://opensource.org/licenses/MIT',
   }
 
@@ -422,7 +422,7 @@ export function WebSiteJsonLd({
 // ── Person (canonical author entity, emitted once from /about) ──
 
 interface PersonJsonLdProps {
-  /** Display handle (e.g. "DomiDex"). */
+  /** Display handle (e.g. "domidex01"). */
   name: string
   /** Legal/real name (e.g. "Dominique Degottex"). Maps to schema name; handle becomes alternateName. */
   legalName?: string

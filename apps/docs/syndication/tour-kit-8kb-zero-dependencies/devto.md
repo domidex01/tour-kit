@@ -108,7 +108,7 @@ Tour Kit also doesn't have a visual builder. You need React developers to set up
 ## Reproduce it yourself
 
 ```bash
-git clone https://github.com/DomiDex/tour-kit.git
+git clone https://github.com/domidex01/tour-kit.git
 cd tour-kit
 pnpm install && pnpm build
 

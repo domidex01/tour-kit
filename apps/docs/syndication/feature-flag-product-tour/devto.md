@@ -269,4 +269,4 @@ Most flag SDKs cache the last-known values locally and fall back to defaults you
 
 ---
 
-**Get started with Tour Kit:** Install with `npm install @tourkit/core @tourkit/react`, check the [documentation](https://usertourkit.com/), or browse the source on [GitHub](https://github.com/DomiDex/tour-kit).
+**Get started with Tour Kit:** Install with `npm install @tourkit/core @tourkit/react`, check the [documentation](https://usertourkit.com/), or browse the source on [GitHub](https://github.com/domidex01/tour-kit).

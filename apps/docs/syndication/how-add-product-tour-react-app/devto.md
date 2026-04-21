@@ -175,7 +175,7 @@ For teams that write React and want code-level control over their onboarding, st
 npm install @tourkit/core @tourkit/react
 ```
 
-Read the full docs at [usertourkit.com](https://usertourkit.com/) or browse the [source on GitHub](https://github.com/DomiDex/tour-kit).
+Read the full docs at [usertourkit.com](https://usertourkit.com/) or browse the [source on GitHub](https://github.com/domidex01/tour-kit).
 
 ## FAQ
 

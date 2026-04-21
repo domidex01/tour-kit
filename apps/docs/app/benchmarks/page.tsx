@@ -129,7 +129,7 @@ export default function BenchmarksIndexPage() {
             If a number here contradicts a marketing claim on a package&apos;s landing page (ours
             included), trust the benchmark. The data file is{' '}
             <a
-              href="https://github.com/DomiDex/tour-kit/blob/main/apps/docs/content/benchmarks/bundle-sizes.json"
+              href="https://github.com/domidex01/tour-kit/blob/main/apps/docs/content/benchmarks/bundle-sizes.json"
               target="_blank"
               rel="noopener noreferrer"
             >

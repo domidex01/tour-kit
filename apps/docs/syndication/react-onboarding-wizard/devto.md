@@ -307,7 +307,7 @@ You now have a working onboarding wizard with proper ARIA roles, focus managemen
 - **Step animations:** add CSS transitions between steps, using `prefers-reduced-motion` to disable animation for users who request it
 - **Connect `@tour-kit/analytics`:** get structured funnel analysis instead of raw events
 
-Check the [Tour Kit documentation](https://usertourkit.com/docs) for the full API reference and more examples. The source code for this tutorial is on [GitHub](https://github.com/DomiDex/tour-kit).
+Check the [Tour Kit documentation](https://usertourkit.com/docs) for the full API reference and more examples. The source code for this tutorial is on [GitHub](https://github.com/domidex01/tour-kit).
 
 ## FAQ
 

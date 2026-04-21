@@ -202,7 +202,7 @@ Tours go stale faster than documentation. Three practices prevent rot:
 
 ---
 
-**Get started with Tour Kit.** Install the core packages, build your first 3-step tour in under 5 minutes, and measure what matters. [Read the docs](https://usertourkit.com/) or grab the code from [GitHub](https://github.com/DomiDex/tour-kit).
+**Get started with Tour Kit.** Install the core packages, build your first 3-step tour in under 5 minutes, and measure what matters. [Read the docs](https://usertourkit.com/) or grab the code from [GitHub](https://github.com/domidex01/tour-kit).
 
 ```bash
 npm install @tourkit/core @tourkit/react @tourkit/analytics

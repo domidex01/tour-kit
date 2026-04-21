@@ -1,7 +1,7 @@
 # Default owners for everything
-* @DomiDex
+* @domidex01
 
 # Package owners
-/packages/core/ @DomiDex
-/packages/react/ @DomiDex
-/packages/hints/ @DomiDex
+/packages/core/ @domidex01
+/packages/react/ @domidex01
+/packages/hints/ @domidex01

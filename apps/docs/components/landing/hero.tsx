@@ -278,7 +278,7 @@ export function Hero() {
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
-                href="https://github.com/DomiDex/tour-kit"
+                href="https://github.com/domidex01/tour-kit"
                 className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-5 py-3 text-[14px] font-semibold text-[#02182b] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md dark:text-white"
               >
                 View on GitHub

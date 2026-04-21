@@ -98,11 +98,11 @@ export default function EditorialPolicyPage() {
             Every content change — docs, comparisons, blog posts, landing copy — is submitted as a
             pull request to the public repository at{' '}
             <a
-              href="https://github.com/DomiDex/tour-kit"
+              href="https://github.com/domidex01/tour-kit"
               target="_blank"
               rel="noopener noreferrer"
             >
-              github.com/DomiDex/tour-kit
+              github.com/domidex01/tour-kit
             </a>
             . The full edit history is public and auditable. Each PR is type-checked, tested, and
             built before merge; technical claims that depend on code behavior are verified against
@@ -143,11 +143,11 @@ export default function EditorialPolicyPage() {
             If you find an error — a broken API signature, an outdated comparison claim, a
             miscredited source — please open an issue at{' '}
             <a
-              href="https://github.com/DomiDex/tour-kit/issues/new"
+              href="https://github.com/domidex01/tour-kit/issues/new"
               target="_blank"
               rel="noopener noreferrer"
             >
-              github.com/DomiDex/tour-kit/issues
+              github.com/domidex01/tour-kit/issues
             </a>{' '}
             with the page URL and the specific claim. We aim to acknowledge corrections within 7
             days and fix or retract substantive errors within 30 days. Significant corrections are

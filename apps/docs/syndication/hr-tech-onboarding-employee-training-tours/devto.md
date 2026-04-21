@@ -298,4 +298,4 @@ Tour Kit's core package is under 8KB gzipped with zero runtime dependencies. Add
 npm install @tourkit/core @tourkit/react @tourkit/analytics
 ```
 
-[Tour Kit documentation](https://usertourkit.com/) | [GitHub repository](https://github.com/DomiDex/tour-kit)
+[Tour Kit documentation](https://usertourkit.com/) | [GitHub repository](https://github.com/domidex01/tour-kit)

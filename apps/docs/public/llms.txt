@@ -298,7 +298,7 @@
 
 ## About & Editorial
 
-- [About userTourKit](https://usertourkit.com/about): About page with maintainer bio (Dominique Degottex / DomiDex), verifiable external profiles, and Person schema.
+- [About userTourKit](https://usertourkit.com/about): About page with maintainer bio (Dominique Degottex / domidex01), verifiable external profiles, and Person schema.
 - [Editorial Policy](https://usertourkit.com/editorial-policy): How userTourKit content is produced, reviewed, sourced, corrected, and disclosed — including AI-assistance disclosure.
 - [How We Test](https://usertourkit.com/how-we-test): Methodology behind benchmarks, bundle-size claims, accessibility scores, and comparison data. CI gates, manual verification, reproducibility.
 - [Benchmarks](https://usertourkit.com/benchmarks): Reproducible benchmarks comparing userTourKit against other React product tour libraries. Published methodology, timestamped snapshots, linked sources.

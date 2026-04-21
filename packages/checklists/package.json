@@ -4,14 +4,14 @@
   "description": "Interactive checklists for user onboarding and workflow guidance",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
-  "homepage": "https://github.com/DomiDex/tour-kit#readme",
+  "homepage": "https://github.com/domidex01/tour-kit#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DomiDex/tour-kit.git",
+    "url": "git+https://github.com/domidex01/tour-kit.git",
     "directory": "packages/checklists"
   },
   "bugs": {
-    "url": "https://github.com/DomiDex/tour-kit/issues"
+    "url": "https://github.com/domidex01/tour-kit/issues"
   },
   "keywords": ["react", "checklist", "onboarding", "workflow", "progress", "tour-kit"],
   "type": "module",

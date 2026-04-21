@@ -323,4 +323,4 @@ Use conditional rendering based on user tier. Tour Kit's `useTour` and `useCheck
 
 ---
 
-*Get started with [Tour Kit](https://usertourkit.com/) to build onboarding flows that adapt to your pricing model. Install with `npm install @tourkit/core @tourkit/react`, explore the [docs](https://usertourkit.com/docs), or check the source on [GitHub](https://github.com/DomiDex/tour-kit).*
+*Get started with [Tour Kit](https://usertourkit.com/) to build onboarding flows that adapt to your pricing model. Install with `npm install @tourkit/core @tourkit/react`, explore the [docs](https://usertourkit.com/docs), or check the source on [GitHub](https://github.com/domidex01/tour-kit).*

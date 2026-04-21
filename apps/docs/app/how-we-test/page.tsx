@@ -90,11 +90,11 @@ export default function HowWeTestPage() {
           <p>
             Every pull request to{' '}
             <a
-              href="https://github.com/DomiDex/tour-kit"
+              href="https://github.com/domidex01/tour-kit"
               target="_blank"
               rel="noopener noreferrer"
             >
-              github.com/DomiDex/tour-kit
+              github.com/domidex01/tour-kit
             </a>{' '}
             passes the following before merge:
           </p>
@@ -202,7 +202,7 @@ export default function HowWeTestPage() {
             <li>
               The full source of the library and the docs site lives in the{' '}
               <a
-                href="https://github.com/DomiDex/tour-kit"
+                href="https://github.com/domidex01/tour-kit"
                 target="_blank"
                 rel="noopener noreferrer"
               >

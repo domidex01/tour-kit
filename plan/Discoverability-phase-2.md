@@ -284,7 +284,7 @@ export function SoftwareSourceCodeJsonLd({
     url: `${SITE_URL}${url}`,
     programmingLanguage,
     ...(runtimePlatform && { runtimePlatform }),
-    codeRepository: 'https://github.com/DomiDex/tour-kit',
+    codeRepository: 'https://github.com/domidex01/tour-kit',
     license: 'https://opensource.org/licenses/MIT',
   }
 

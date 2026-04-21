@@ -324,7 +324,7 @@ Pick a primary persona based on the user's stated goal during signup. Tour Kit t
 
 ---
 
-_Get started with Tour Kit at [usertourkit.com](https://usertourkit.com/). Source code on [GitHub](https://github.com/DomiDex/tour-kit)._
+_Get started with Tour Kit at [usertourkit.com](https://usertourkit.com/). Source code on [GitHub](https://github.com/domidex01/tour-kit)._
 
 ```bash
 npm install @tourkit/core @tourkit/react

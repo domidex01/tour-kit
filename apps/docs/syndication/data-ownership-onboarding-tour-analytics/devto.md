@@ -133,4 +133,4 @@ Yes. A code-owned library like Tour Kit combined with PostHog or Matomo gives yo
 
 *Tour Kit is a headless product tour library for React. We built it, so take our take on data ownership with appropriate skepticism. Every claim is verifiable against public vendor documentation.*
 
-*Get started: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/DomiDex/tour-kit)*
+*Get started: [usertourkit.com](https://usertourkit.com/) | [GitHub](https://github.com/domidex01/tour-kit)*

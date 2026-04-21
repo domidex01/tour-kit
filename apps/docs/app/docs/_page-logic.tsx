@@ -321,7 +321,7 @@ export async function renderDocsPage(slug: string[] | undefined) {
         <MarkdownCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptionsPopover
           markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/DomiDex/tour-kit/blob/main/apps/docs/content/docs/${page.slugs.join('/')}.mdx`}
+          githubUrl={`https://github.com/domidex01/tour-kit/blob/main/apps/docs/content/docs/${page.slugs.join('/')}.mdx`}
         />
       </div>
       <DocsBody>

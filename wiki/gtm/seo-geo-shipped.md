@@ -60,7 +60,7 @@ Six GEO improvements to help AI search engines (ChatGPT, Perplexity, Google AI O
 
 ### Task details
 
-**1. E-E-A-T author schema.** `ArticleJsonLd` accepts `authorLinkedin`, `authorX`, `authorJobTitle`, `authorKnowsAbout`. `Author` interface extended with optional `x?`, `jobTitle?`, `knowsAbout?`. Values for DomiDex not filled in — LinkedIn URL, X URL, jobTitle, knowsAbout topics need human confirmation before emission.
+**1. E-E-A-T author schema.** `ArticleJsonLd` accepts `authorLinkedin`, `authorX`, `authorJobTitle`, `authorKnowsAbout`. `Author` interface extended with optional `x?`, `jobTitle?`, `knowsAbout?`. Values for domidex01 not filled in — LinkedIn URL, X URL, jobTitle, knowsAbout topics need human confirmation before emission.
 
 **2. HowTo schema.** `getHowToFromMdx(slug)` extracts step H2s from tutorial articles. Matches `## Step N:`, `## Step N —`, `## Step N -`, `## Step N …`, `## 1. …`. Gated by slug regex `^(add-|how-|migrate-|setup-|build-|integrate-)` OR `schema_type: HowTo` frontmatter. Skips emission when `steps.length < 2` (Google minimum).
 
@@ -100,7 +100,7 @@ Constraints honored: TypeScript strict, no `any`, no new runtime deps, no MDX co
 
 ## Gaps / open questions
 
-- **Task 1 author data** — LinkedIn, X, jobTitle, knowsAbout for DomiDex still required. Type surface ready; blocked on values.
+- **Task 1 author data** — LinkedIn, X, jobTitle, knowsAbout for domidex01 still required. Type surface ready; blocked on values.
 - **`llms.txt` blog coverage** — `generate-llm-files.ts` currently scans only `content/docs/**`, not `content/blog/**`. Blog articles do not flow into `llms.txt`. Follow-up to decide whether to extend.
 - **QAPage schema** — deliberately skipped (FAQPage already covers).
 - **DefinedTerm glossary** — deliberately skipped (no glossary page exists).

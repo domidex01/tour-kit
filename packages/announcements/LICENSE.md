@@ -1,6 +1,6 @@
 # Tour Kit Pro License
 
-Copyright (c) 2026 DomiDex. All rights reserved.
+Copyright (c) 2026 domidex01. All rights reserved.
 
 This software is proprietary and confidential. Unauthorized copying, modification, distribution, or use of this software, via any medium, is strictly prohibited.
 

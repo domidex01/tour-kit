@@ -12,7 +12,7 @@
 | ID | Story | Acceptance Criteria | Test Tier |
 |----|-------|---------------------|-----------|
 | US-1 | As a maintainer, I want all 8 pro packages restricted on npm, so that unauthorized users cannot install them | `npm access get status @tour-kit/<pkg>` returns `restricted` for all 8 | Verification (npm CLI) |
-| US-2 | As a maintainer, I want a private GitHub repo containing all 8 pro packages, so that source code is not publicly visible | `gh repo view DomiDex/tour-kit-pro --json visibility` returns `PRIVATE`; `ls packages/` lists all 8 | Verification (gh CLI + filesystem) |
+| US-2 | As a maintainer, I want a private GitHub repo containing all 8 pro packages, so that source code is not publicly visible | `gh repo view domidex01/tour-kit-pro --json visibility` returns `PRIVATE`; `ls packages/` lists all 8 | Verification (gh CLI + filesystem) |
 | US-3 | As a maintainer, I want pro packages to build and pass tests in the private repo, so that the separation did not break anything | `pnpm build` and `pnpm test` exit 0 in private repo | Verification (build + test) |
 | US-4 | As a maintainer, I want the public repo to contain zero pro source, so that proprietary code is not exposed | `git ls-files packages/{adoption,ai,...}` returns empty | Verification (git CLI) |
 | US-5 | As a maintainer, I want the public repo to build with only free packages, so that the open-source project remains functional | `pnpm install && pnpm build && pnpm typecheck` exits 0 | Verification (build) |
@@ -175,12 +175,12 @@ fi
 echo ""
 echo "--- Private Repo ---"
 if gh auth status >/dev/null 2>&1; then
-  visibility=$(gh repo view DomiDex/tour-kit-pro --json visibility -q .visibility 2>&1 || echo "NOT_FOUND")
+  visibility=$(gh repo view domidex01/tour-kit-pro --json visibility -q .visibility 2>&1 || echo "NOT_FOUND")
   if [ "$visibility" = "PRIVATE" ]; then
-    echo "PASS  V-02: DomiDex/tour-kit-pro is PRIVATE"
+    echo "PASS  V-02: domidex01/tour-kit-pro is PRIVATE"
     ((PASS++))
   else
-    echo "FAIL  V-02: DomiDex/tour-kit-pro visibility is $visibility (expected PRIVATE)"
+    echo "FAIL  V-02: domidex01/tour-kit-pro visibility is $visibility (expected PRIVATE)"
     ((FAIL++))
   fi
 else
@@ -417,7 +417,7 @@ Run `npm access get status @tour-kit/<pkg>` for all 8 pro packages: adoption, ai
 
 **Step 2: Private repo existence and privacy**
 
-Run `gh repo view DomiDex/tour-kit-pro --json visibility -q .visibility`. Must return `PRIVATE`.
+Run `gh repo view domidex01/tour-kit-pro --json visibility -q .visibility`. Must return `PRIVATE`.
 
 **Step 3: Private repo contents and build**
 
@@ -464,7 +464,7 @@ for pkg in adoption ai analytics announcements checklists license media scheduli
 done
 
 # V-02: Private repo visibility
-gh repo view DomiDex/tour-kit-pro --json visibility -q .visibility
+gh repo view domidex01/tour-kit-pro --json visibility -q .visibility
 
 # V-03: Private repo package listing
 ls ~/projects/tour-kit-pro/packages/

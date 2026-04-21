@@ -7,7 +7,7 @@ export function SocialProof() {
         <span>MIT Licensed</span>
         <span className="text-fd-muted-foreground/30">&middot;</span>
         <Link
-          href="https://github.com/DomiDex/tour-kit"
+          href="https://github.com/domidex01/tour-kit"
           className="text-fd-foreground underline underline-offset-4 transition-colors hover:text-[var(--landing-accent)]"
         >
           Star on GitHub
@@ -16,7 +16,7 @@ export function SocialProof() {
         <span>100% TypeScript</span>
         <span className="text-fd-muted-foreground/30">&middot;</span>
         <Link
-          href="https://github.com/DomiDex/tour-kit/fork"
+          href="https://github.com/domidex01/tour-kit/fork"
           className="text-fd-foreground underline underline-offset-4 transition-colors hover:text-[var(--landing-accent)]"
         >
           Contribute

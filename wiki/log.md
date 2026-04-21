@@ -58,7 +58,7 @@ Ingested the context summary files from `../marketing-strategy/` (manifest.md, t
 
 **New wiki page (1):**
 
-- `gtm/seo-geo-shipped.md` — documents the 2026-04-19 SEO audit journey (baseline 68.1/D → rerun 95–96/A across 240 pages) and the GEO (Generative Engine Optimization) work shipped 2026-04-20: 5 of 6 tasks complete (HowTo schema, entity mentions, Speakable schema, `dateModified` freshness check, `llms.txt` CI regeneration verified). Task 1 (E-E-A-T author schema) plumbed but awaits LinkedIn/X/jobTitle/knowsAbout values for DomiDex.
+- `gtm/seo-geo-shipped.md` — documents the 2026-04-19 SEO audit journey (baseline 68.1/D → rerun 95–96/A across 240 pages) and the GEO (Generative Engine Optimization) work shipped 2026-04-20: 5 of 6 tasks complete (HowTo schema, entity mentions, Speakable schema, `dateModified` freshness check, `llms.txt` CI regeneration verified). Task 1 (E-E-A-T author schema) plumbed but awaits LinkedIn/X/jobTitle/knowsAbout values for domidex01.
 
 **Updated:** `index.md` (GTM section entry).
 

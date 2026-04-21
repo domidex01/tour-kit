@@ -45,7 +45,7 @@ const TRUST_PAGES: TrustPage[] = [
   {
     title: 'About userTourKit',
     description:
-      'About page with maintainer bio (Dominique Degottex / DomiDex), verifiable external profiles, and Person schema.',
+      'About page with maintainer bio (Dominique Degottex / domidex01), verifiable external profiles, and Person schema.',
     url: `${SITE_URL}/about`,
   },
   {

@@ -21,13 +21,13 @@ const footerLinks = {
     { label: 'Editorial policy', href: '/editorial-policy' },
     { label: 'How we test', href: '/how-we-test' },
     { label: 'Privacy', href: '/legal/privacy' },
-    { label: 'Contact', href: 'https://github.com/DomiDex/tour-kit/issues/new' },
-    { label: 'Changelog', href: 'https://github.com/DomiDex/tour-kit/releases' },
+    { label: 'Contact', href: 'https://github.com/domidex01/tour-kit/issues/new' },
+    { label: 'Changelog', href: 'https://github.com/domidex01/tour-kit/releases' },
     {
       label: 'Contributing',
-      href: 'https://github.com/DomiDex/tour-kit/blob/main/CONTRIBUTING.md',
+      href: 'https://github.com/domidex01/tour-kit/blob/main/CONTRIBUTING.md',
     },
-    { label: 'License', href: 'https://github.com/DomiDex/tour-kit/blob/main/LICENSE' },
+    { label: 'License', href: 'https://github.com/domidex01/tour-kit/blob/main/LICENSE' },
     { label: 'Site map', href: '/sitemap' },
   ],
   machineReadable: [
@@ -150,7 +150,7 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-4">
             <Link
-              href="https://github.com/DomiDex/tour-kit"
+              href="https://github.com/domidex01/tour-kit"
               className="text-fd-muted-foreground transition-colors hover:text-fd-foreground"
               aria-label="userTourKit on GitHub"
             >

@@ -30,7 +30,7 @@ export function generateBlogRSS(): string {
       date: new Date(post.publishedAt ?? post.lastUpdated ?? new Date().toISOString()),
       category: [{ name: post.category }],
       ...(post.ogImage && { image: `${SITE_URL}${post.ogImage}` }),
-      author: [{ name: 'DomiDex', link: 'https://github.com/DomiDex' }],
+      author: [{ name: 'domidex01', link: 'https://github.com/domidex01' }],
     })
   }
 

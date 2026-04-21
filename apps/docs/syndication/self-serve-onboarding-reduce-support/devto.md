@@ -222,4 +222,4 @@ Get started with Tour Kit for your self-serve onboarding:
 npm install @tourkit/core @tourkit/react @tourkit/hints @tourkit/checklists
 ```
 
-Explore the full documentation at [usertourkit.com](https://usertourkit.com/) and browse the source on [GitHub](https://github.com/DomiDex/tour-kit).
+Explore the full documentation at [usertourkit.com](https://usertourkit.com/) and browse the source on [GitHub](https://github.com/domidex01/tour-kit).

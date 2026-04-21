@@ -233,4 +233,4 @@ Yes. Progress indicators increase completion rate by 12% and reduce dismissal ra
 
 ---
 
-*Get started with Tour Kit: [documentation](https://usertourkit.com/) | [GitHub](https://github.com/DomiDex/tour-kit) | `npm install @tourkit/core @tourkit/react @tourkit/analytics`*
+*Get started with Tour Kit: [documentation](https://usertourkit.com/) | [GitHub](https://github.com/domidex01/tour-kit) | `npm install @tourkit/core @tourkit/react @tourkit/analytics`*

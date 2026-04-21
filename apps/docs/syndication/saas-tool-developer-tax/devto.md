@@ -163,4 +163,4 @@ The best defense is intentional: audit your frontend script tags quarterly, calc
 
 ---
 
-Get started at [usertourkit.com](https://usertourkit.com/) or browse the [source on GitHub](https://github.com/DomiDex/tour-kit).
+Get started at [usertourkit.com](https://usertourkit.com/) or browse the [source on GitHub](https://github.com/domidex01/tour-kit).

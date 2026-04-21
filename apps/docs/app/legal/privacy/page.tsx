@@ -110,7 +110,7 @@ export default function PrivacyPage() {
           <p>
             If you bought a Pro license and want your record deleted, email support via{' '}
             <a
-              href="https://github.com/DomiDex/tour-kit/issues/new"
+              href="https://github.com/domidex01/tour-kit/issues/new"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -125,11 +125,11 @@ export default function PrivacyPage() {
           <p>
             Questions about this policy? Open an issue at{' '}
             <a
-              href="https://github.com/DomiDex/tour-kit/issues"
+              href="https://github.com/domidex01/tour-kit/issues"
               target="_blank"
               rel="noopener noreferrer"
             >
-              github.com/DomiDex/tour-kit/issues
+              github.com/domidex01/tour-kit/issues
             </a>{' '}
             or see our <Link href="/about">about page</Link>.
           </p>
