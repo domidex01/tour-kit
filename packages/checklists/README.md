@@ -137,6 +137,11 @@ Checklist progress is automatically persisted:
 
 Full documentation: [https://tour-kit.dev/docs/checklists](https://tour-kit.dev/docs/checklists)
 
+## Integration gotchas
+
+- `<ChecklistPanel defaultExpanded>` only writes the expanded state once per mount to avoid an infinite render loop with context-scoped callbacks.
+- Pair with a `<LicenseProvider>` in production (dev environments bypass the Pro gate).
+
 ## License
 
 MIT

@@ -68,8 +68,13 @@ export const ChecklistPanel = React.forwardRef<HTMLDivElement, ChecklistPanelPro
       setExpanded,
     } = useChecklist(checklistId)
 
-    // Set initial expanded state
+    // Set initial expanded state — only on first mount.
+    // Re-running on every render (e.g., when setExpanded identity changes)
+    // causes a feedback loop through the reducer.
+    const initializedRef = React.useRef(false)
     React.useEffect(() => {
+      if (initializedRef.current) return
+      initializedRef.current = true
       setExpanded(defaultExpanded)
     }, [defaultExpanded, setExpanded])
 

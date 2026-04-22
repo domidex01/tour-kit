@@ -96,8 +96,12 @@ function handleTaskCompletion(
   complete: boolean,
   { configs, context }: ReducerContext
 ): ChecklistReducerState {
+  const existing = state.completed[checklistId] ?? new Set<string>()
+  const alreadyComplete = existing.has(taskId)
+  if (complete === alreadyComplete) return state
+
   const newCompleted = { ...state.completed }
-  const tasks = new Set(newCompleted[checklistId] ?? [])
+  const tasks = new Set(existing)
   if (complete) {
     tasks.add(taskId)
   } else {
@@ -187,18 +191,22 @@ function checklistReducer(
     case 'UNCOMPLETE_TASK':
       return handleTaskCompletion(state, action.checklistId, action.taskId, false, reducerCtx)
 
-    case 'DISMISS_CHECKLIST':
+    case 'DISMISS_CHECKLIST': {
+      if (state.dismissed.has(action.checklistId)) return state
       return handleDismissRestore(state, action.checklistId, true)
+    }
 
-    case 'RESTORE_CHECKLIST':
+    case 'RESTORE_CHECKLIST': {
+      if (!state.dismissed.has(action.checklistId)) return state
       return handleDismissRestore(state, action.checklistId, false)
+    }
 
     case 'SET_EXPANDED': {
+      const existing = state.checklists.get(action.checklistId)
+      if (!existing) return state
+      if (existing.isExpanded === action.expanded) return state
       const newChecklists = new Map(state.checklists)
-      const existing = newChecklists.get(action.checklistId)
-      if (existing) {
-        newChecklists.set(action.checklistId, { ...existing, isExpanded: action.expanded })
-      }
+      newChecklists.set(action.checklistId, { ...existing, isExpanded: action.expanded })
       return { ...state, checklists: newChecklists }
     }
 
