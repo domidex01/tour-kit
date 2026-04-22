@@ -394,6 +394,22 @@ export function TourProvider({
     }
   }, [])
 
+  // Auto-start tours declaring autoStart on mount
+  // Persistence restore takes precedence — read persisted state synchronously
+  // so we don't double-dispatch in the same mount batch.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only autoStart trigger
+  React.useEffect(() => {
+    const persisted = load()
+    if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) return
+    const auto = tours.find((t) => t.autoStart)
+    if (!auto) return
+    dispatch({
+      type: 'START_TOUR',
+      tourId: auto.id,
+      stepIndex: auto.startAt ?? 0,
+    })
+  }, [])
+
   // Save state on changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally only save on specific state changes
   React.useEffect(() => {

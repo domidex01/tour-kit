@@ -89,6 +89,11 @@ import { TourCard, tourCardVariants } from '@tour-kit/react'
 <TourCard className={tourCardVariants({ size: 'sm' })} />
 ```
 
+## Integration gotchas
+
+- `<Tour autoStart>` is honored at the enclosing `TourProvider` — but persistence restore takes precedence when a tour was previously interrupted.
+- See [Troubleshooting](https://usertourkit.com/docs/troubleshooting) for React 19 / Next 16 caveats.
+
 ## License
 
 MIT
