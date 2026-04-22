@@ -318,6 +318,67 @@ export function AnnouncementsProvider({
     }
   }, [initialAnnouncements, restoreState])
 
+  // Auto-show eligible announcements after registration / on userContext change.
+  // Respects priority queueing via the scheduler.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: evaluates on register + audience changes
+  React.useEffect(() => {
+    if (state.announcements.size === 0) return
+
+    // Collect eligible candidates first so we can show highest-priority immediately
+    // and queue the rest.
+    const eligible: AnnouncementConfig[] = []
+    for (const config of initialAnnouncements) {
+      if (config.autoShow === false) continue
+      const st = state.announcements.get(config.id)
+      if (!st) continue
+      // Skip already active / visible / queued
+      if (st.isActive || st.isVisible) continue
+      if (schedulerRef.current.isQueued(config.id)) continue
+      if (!schedulerRef.current.canShow(config, st, userContext)) continue
+      eligible.push(config)
+    }
+
+    if (eligible.length === 0) return
+
+    const priorityOrder: Record<string, number> = {
+      critical: 0,
+      high: 1,
+      normal: 2,
+      low: 3,
+    }
+    eligible.sort(
+      (a, b) =>
+        (priorityOrder[a.priority ?? 'normal'] ?? 2) -
+        (priorityOrder[b.priority ?? 'normal'] ?? 2)
+    )
+
+    for (const config of eligible) {
+      const st = state.announcements.get(config.id)
+      if (!st) continue
+
+      if (schedulerRef.current.shouldQueue(config, st, userContext)) {
+        schedulerRef.current.enqueue(config)
+        dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
+        continue
+      }
+
+      schedulerRef.current.markActive()
+      dispatch({ type: 'SHOW', id: config.id })
+
+      const updatedState: AnnouncementState = {
+        ...st,
+        isActive: true,
+        isVisible: true,
+        viewCount: st.viewCount + 1,
+        lastViewedAt: new Date(),
+      }
+      persistState(config.id, updatedState)
+
+      config.onShow?.()
+      onAnnouncementShow?.(config.id)
+    }
+  }, [state.announcements, userContext, initialAnnouncements])
+
   // Context methods
   const register = React.useCallback((config: AnnouncementConfig) => {
     dispatch({ type: 'REGISTER', config })

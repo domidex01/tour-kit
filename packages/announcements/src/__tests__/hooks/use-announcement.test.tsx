@@ -10,6 +10,9 @@ const testConfig: AnnouncementConfig = {
   variant: 'modal',
   title: 'Test Announcement',
   description: 'Test description',
+  // These tests exercise the imperative API; opt out of the auto-show default
+  // so show() / hide() can be asserted in isolation.
+  autoShow: false,
 }
 
 function createWrapper(announcements: AnnouncementConfig[] = [testConfig]) {

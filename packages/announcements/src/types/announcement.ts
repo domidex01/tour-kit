@@ -175,6 +175,12 @@ export interface AnnouncementConfig {
   /** Custom metadata */
   metadata?: Record<string, unknown>
 
+  /**
+   * Show this announcement automatically on mount or when eligibility changes.
+   * Default: `true`. Set to `false` to trigger imperatively via `show(id)`.
+   */
+  autoShow?: boolean
+
   /** Callback when announcement is shown */
   onShow?: () => void
 
