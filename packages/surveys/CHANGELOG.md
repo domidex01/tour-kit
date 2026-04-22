@@ -1,5 +1,12 @@
 # @tour-kit/surveys
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [65ee7f9]
+  - @tour-kit/core@0.5.0
+
 ## 0.1.2
 
 ### Patch Changes

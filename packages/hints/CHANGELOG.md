@@ -1,5 +1,23 @@
 # @tour-kit/hints
 
+## 0.5.0
+
+### Minor Changes
+
+- 65ee7f9: Wire `autoStart` through to `TourProvider`. Any tour declared with `autoStart: true`
+  now activates on provider mount, matching the documented quick-start behavior.
+  Persistence restore still wins — if a tour was previously interrupted, that tour
+  resumes instead.
+
+### Patch Changes
+
+- 5bb583f: Fix infinite `Maximum update depth exceeded` when using `<Hint autoShow>`. The
+  auto-show effect now fires exactly once per component instance, and the reducer
+  short-circuits `SHOW_HINT`, `HIDE_HINT`, and `DISMISS_HINT` when the requested
+  value already matches current state.
+- Updated dependencies [65ee7f9]
+  - @tour-kit/core@0.5.0
+
 ## 0.4.2
 
 ### Patch Changes
