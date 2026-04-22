@@ -38,7 +38,7 @@
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",
-    "version-packages": "changeset version && biome check --write 'packages/*/package.json' 'examples/*/package.json' 'apps/*/package.json'",
+    "version-packages": "changeset version && biome check --write .",
     "release": "turbo run build --filter='./packages/*' && changeset publish",
     "example:vite": "turbo run dev --filter=vite-tour-kit-demo",
     "example:next": "turbo run dev --filter=next-tour-kit-demo",
