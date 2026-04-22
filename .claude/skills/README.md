@@ -7,6 +7,7 @@ Project-scoped Claude Code skills that encode the bug-hunting workflows document
 | `/tk-publish-audit` | `@arethetypeswrong/cli` + `publint` + `apps/smoke` across every package. Catches tarball-level bugs. |
 | `/tk-bundle-audit` | Gzipped dist sizes vs the CLAUDE.md budgets (core < 8 KB, react < 12 KB, hints < 5 KB). |
 | `/tk-docs-audit` | Diffs every package's public exports (from `dist/index.d.ts`) against `apps/docs/content/docs/`. Flags undocumented symbols. |
+| `/tk-bug-hunter` | Deep source-tree bug hunt. Stacks typecheck + lint + knip + publint + pattern scan + test-gap + contract check. Every finding tagged with confidence and evidence; 95%+ precision on HIGH findings. |
 | `/tk-ship-check` | Composite: typecheck + tests + publish + bundle + docs. Produces a single SHIP / HOLD verdict. |
 
 ## When to use each
