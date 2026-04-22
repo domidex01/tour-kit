@@ -1,5 +1,15 @@
 # @tour-kit/checklists
 
+## 0.1.5
+
+### Patch Changes
+
+- 5690518: Fix infinite `Maximum update depth exceeded` when mounting `<ChecklistPanel>` inside
+  `<ChecklistProvider>`. The `defaultExpanded` effect now fires exactly once per mount,
+  and every reducer action short-circuits when the dispatched value matches current state.
+- Updated dependencies [65ee7f9]
+  - @tour-kit/core@0.5.0
+
 ## 0.1.4
 
 ### Patch Changes
