@@ -1,16 +1,16 @@
 'use client'
 
-import { use, useState, useMemo } from 'react'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { ArrowLeft, Download } from 'lucide-react'
-import { IfNotAdopted, NewFeatureBadge } from '@tour-kit/adoption'
+import { ExportHint } from '@/components/tour-kit/hints'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ExportHint } from '@/components/tour-kit/hints'
-import { kanbanCards, projects, type KanbanColumn } from '@/lib/mock-data'
+import { type KanbanColumn, kanbanCards, projects } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
+import { IfNotAdopted, NewFeatureBadge } from '@tour-kit/adoption'
+import { ArrowLeft, Download } from 'lucide-react'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { use, useMemo, useState } from 'react'
 
 const columns: { id: KanbanColumn; label: string; accent: string; dot: string }[] = [
   { id: 'todo', label: 'To Do', accent: 'border-t-zinc-400/60', dot: 'bg-zinc-400' },

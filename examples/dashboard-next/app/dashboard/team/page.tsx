@@ -1,12 +1,12 @@
 'use client'
 
-import { Mail, UserPlus } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { teamMembers, type Role } from '@/lib/mock-data'
+import { type Role, teamMembers } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
+import { Mail, UserPlus } from 'lucide-react'
 
 const roleStyle: Record<Role, string> = {
   admin: 'bg-primary/10 text-primary',
@@ -24,10 +24,7 @@ export default function TeamPage() {
             {teamMembers.length} people who can see this workspace.
           </p>
         </div>
-        <Button
-          size="sm"
-          onClick={() => window.dispatchEvent(new CustomEvent('team:invite-sent'))}
-        >
+        <Button size="sm" onClick={() => window.dispatchEvent(new CustomEvent('team:invite-sent'))}>
           <UserPlus className="mr-1.5 h-4 w-4" />
           Invite
         </Button>
@@ -35,10 +32,7 @@ export default function TeamPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {teamMembers.map((m) => (
-          <Card
-            key={m.id}
-            className="group overflow-hidden transition hover:shadow-md"
-          >
+          <Card key={m.id} className="group overflow-hidden transition hover:shadow-md">
             <div className="h-16 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent" />
             <CardContent className="-mt-8 flex flex-col items-center gap-2 p-5 text-center">
               <Avatar className="h-14 w-14 ring-4 ring-background">

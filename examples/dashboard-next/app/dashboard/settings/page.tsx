@@ -1,14 +1,14 @@
 'use client'
 
-import { LicenseGate } from '@tour-kit/license'
+import { LicenseDebugPanel } from '@/components/tour-kit/license-debug-panel'
+import { UpgradePromptCard } from '@/components/tour-kit/upgrade-prompt-card'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { LicenseDebugPanel } from '@/components/tour-kit/license-debug-panel'
-import { UpgradePromptCard } from '@/components/tour-kit/upgrade-prompt-card'
+import { LicenseGate } from '@tour-kit/license'
 
 function AdvancedBillingControls() {
   return (
@@ -38,7 +38,9 @@ export default function SettingsPage() {
     <div className="mx-auto w-full max-w-4xl space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground">Your profile, notifications, billing, and integrations.</p>
+        <p className="text-sm text-muted-foreground">
+          Your profile, notifications, billing, and integrations.
+        </p>
       </div>
 
       <Tabs defaultValue="profile">
@@ -120,7 +122,9 @@ export default function SettingsPage() {
               {['Slack', 'Linear', 'GitHub', 'Figma'].map((name) => (
                 <div key={name} className="flex items-center justify-between rounded-md border p-3">
                   <div className="font-medium">{name}</div>
-                  <Button variant="outline" size="sm">Connect</Button>
+                  <Button variant="outline" size="sm">
+                    Connect
+                  </Button>
                 </div>
               ))}
             </CardContent>

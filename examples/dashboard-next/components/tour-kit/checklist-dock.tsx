@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
 import { ChecklistLauncher, useChecklist } from '@tour-kit/checklists'
+import { useEffect } from 'react'
 
 function ChecklistEventBridge() {
   const { completeTask } = useChecklist('get-started')

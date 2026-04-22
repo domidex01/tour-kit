@@ -1,13 +1,13 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { BookOpen, HelpCircle, MessageCircle, Search, Sparkles } from 'lucide-react'
-import { useAiChat } from '@tour-kit/ai'
 import { AiChatHost } from '@/components/tour-kit/ai-chat-host'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { faqEntries } from '@/lib/mock-data'
+import { useAiChat } from '@tour-kit/ai'
+import { BookOpen, HelpCircle, MessageCircle, Search, Sparkles } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
 function AskAiLauncher() {
   const { toggle, isOpen } = useAiChat()
@@ -47,9 +47,7 @@ export default function HelpPage() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim()
     if (!q) return faqEntries
-    return faqEntries.filter(
-      (f) => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q)
-    )
+    return faqEntries.filter((f) => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q))
   }, [query])
 
   return (

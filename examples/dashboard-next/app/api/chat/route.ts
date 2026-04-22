@@ -1,5 +1,5 @@
-import { createChatRouteHandler } from '@tour-kit/ai/server'
 import { openai } from '@ai-sdk/openai'
+import { createChatRouteHandler } from '@tour-kit/ai/server'
 
 export const runtime = 'nodejs'
 

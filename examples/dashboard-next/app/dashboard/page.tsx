@@ -1,10 +1,10 @@
 'use client'
 
-import { Activity, CheckCircle2, FolderKanban, Plus, Users } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { activityFeed } from '@/lib/mock-data'
+import { Activity, CheckCircle2, FolderKanban, Plus, Users } from 'lucide-react'
 
 const statCards = [
   {
@@ -89,7 +89,10 @@ export default function DashboardHome() {
                   )}
                   <Avatar className="relative z-10 h-8 w-8 ring-4 ring-background">
                     <AvatarFallback className="text-[11px]">
-                      {a.actor.split(' ').map((p) => p[0]).join('')}
+                      {a.actor
+                        .split(' ')
+                        .map((p) => p[0])
+                        .join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 pt-0.5 text-sm">
@@ -129,9 +132,7 @@ export default function DashboardHome() {
                 <div className="h-full w-[75%] rounded-full bg-emerald-500 transition-all" />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              On pace to beat last week’s throughput.
-            </p>
+            <p className="text-xs text-muted-foreground">On pace to beat last week’s throughput.</p>
           </CardContent>
         </Card>
       </div>

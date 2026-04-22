@@ -1,7 +1,7 @@
-import Link from 'next/link'
-import { ArrowRight, Check, Layers, Shield, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ArrowRight, Check, Layers, Shield, Zap } from 'lucide-react'
+import Link from 'next/link'
 
 const features = [
   {
@@ -44,9 +44,15 @@ export default function LandingPage() {
           <span className="text-base font-semibold tracking-tight">Stacks</span>
         </div>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <a href="#features" className="hover:text-foreground">Features</a>
-          <a href="#trust" className="hover:text-foreground">Trust</a>
-          <Link href="/dashboard" className="hover:text-foreground">Live demo</Link>
+          <a href="#features" className="hover:text-foreground">
+            Features
+          </a>
+          <a href="#trust" className="hover:text-foreground">
+            Trust
+          </a>
+          <Link href="/dashboard" className="hover:text-foreground">
+            Live demo
+          </Link>
         </nav>
         <Button render={<Link href="/login">Sign in</Link>} variant="outline" size="sm" />
       </header>
@@ -68,7 +74,14 @@ export default function LandingPage() {
             in-app help, and AI assistance built in.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Button render={<Link href="/login">Sign in to demo<ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>} />
+            <Button
+              render={
+                <Link href="/login">
+                  Sign in to demo
+                  <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                </Link>
+              }
+            />
             <Button render={<Link href="/dashboard">Skip to dashboard</Link>} variant="outline" />
           </div>
 
@@ -80,7 +93,9 @@ export default function LandingPage() {
                 <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
                 <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
                 <span className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
-                <span className="ml-3 text-[11px] text-muted-foreground">stacks.app / dashboard</span>
+                <span className="ml-3 text-[11px] text-muted-foreground">
+                  stacks.app / dashboard
+                </span>
               </div>
               <div className="grid grid-cols-4 gap-0 text-left">
                 <aside className="col-span-1 space-y-1 border-r bg-muted/30 p-3 text-xs">
@@ -134,10 +149,18 @@ export default function LandingPage() {
         <section id="trust" className="mx-auto mb-20 w-full max-w-4xl px-6">
           <div className="rounded-xl border bg-card/50 p-6 backdrop-blur">
             <ul className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground sm:justify-between">
-              <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> SOC 2 Type II</li>
-              <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> SSO on every plan</li>
-              <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> 99.99% uptime</li>
-              <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Audit logs</li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" /> SOC 2 Type II
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" /> SSO on every plan
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" /> 99.99% uptime
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" /> Audit logs
+              </li>
             </ul>
           </div>
         </section>

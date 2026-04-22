@@ -1,5 +1,3 @@
-import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Card } from '@/components/ui/card'
 import {
@@ -10,8 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { projects, type ProjectStatus } from '@/lib/mock-data'
+import { type ProjectStatus, projects } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
+import { ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 
 const statusStyle: Record<ProjectStatus, { dot: string; label: string }> = {
   active: { dot: 'bg-emerald-500', label: 'text-emerald-700 dark:text-emerald-400' },

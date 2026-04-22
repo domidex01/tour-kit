@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Tour, TourStep } from '@tour-kit/react'
 import { useSurvey } from '@tour-kit/surveys'
+import { useEffect, useState } from 'react'
 
 export function OnboardingTour() {
   const [mounted, setMounted] = useState(false)

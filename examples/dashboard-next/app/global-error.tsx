@@ -11,9 +11,7 @@ export default function GlobalError({
     <html lang="en">
       <body style={{ padding: 24, fontFamily: 'system-ui, sans-serif' }}>
         <h1 style={{ fontSize: 18, marginBottom: 8 }}>Something went wrong</h1>
-        <p style={{ color: '#6b7280', marginBottom: 12 }}>
-          {error.message || 'Unknown error'}
-        </p>
+        <p style={{ color: '#6b7280', marginBottom: 12 }}>{error.message || 'Unknown error'}</p>
         <button
           type="button"
           onClick={reset}

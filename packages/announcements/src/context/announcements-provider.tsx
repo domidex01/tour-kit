@@ -348,8 +348,7 @@ export function AnnouncementsProvider({
     }
     eligible.sort(
       (a, b) =>
-        (priorityOrder[a.priority ?? 'normal'] ?? 2) -
-        (priorityOrder[b.priority ?? 'normal'] ?? 2)
+        (priorityOrder[a.priority ?? 'normal'] ?? 2) - (priorityOrder[b.priority ?? 'normal'] ?? 2)
     )
 
     for (const config of eligible) {

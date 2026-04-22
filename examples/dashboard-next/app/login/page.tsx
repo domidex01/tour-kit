@@ -1,12 +1,19 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -49,7 +56,9 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full">Sign in</Button>
+            <Button type="submit" className="w-full">
+              Sign in
+            </Button>
             <Link href="/" className="text-xs text-muted-foreground hover:underline">
               Back to home
             </Link>

@@ -1,6 +1,6 @@
+import type { Feature } from '@tour-kit/adoption'
 import type { AnnouncementConfig } from '@tour-kit/announcements'
 import type { ChecklistConfig } from '@tour-kit/checklists'
-import type { Feature } from '@tour-kit/adoption'
 import type { SurveyConfig } from '@tour-kit/surveys'
 
 export const demoUser = {
@@ -31,9 +31,7 @@ export const announcements: AnnouncementConfig[] = [
     priority: 'normal',
     title: 'Scheduled maintenance Sunday 2 AM UTC',
     description: 'Expect ~15 minutes of downtime while we upgrade the kanban engine.',
-    audience: [
-      { type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' },
-    ],
+    audience: [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }],
     // ScheduledBanner decides when to show this — only during business hours.
     autoShow: false,
   },

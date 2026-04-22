@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { DashboardTopbar } from '@/components/dashboard/topbar'
-import { OnboardingTour } from '@/components/tour-kit/onboarding-tour'
 import { AnnouncementsHost } from '@/components/tour-kit/announcements-host'
 import { ChecklistDock } from '@/components/tour-kit/checklist-dock'
 import { CsatSurveyHost } from '@/components/tour-kit/csat-survey-host'
 import { DarkModeHint } from '@/components/tour-kit/hints'
+import { OnboardingTour } from '@/components/tour-kit/onboarding-tour'
+import type { ReactNode } from 'react'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (

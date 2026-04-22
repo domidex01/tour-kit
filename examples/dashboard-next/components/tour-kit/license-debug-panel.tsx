@@ -1,7 +1,7 @@
 'use client'
 
-import { useLicense } from '@tour-kit/license'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useLicense } from '@tour-kit/license'
 
 export function LicenseDebugPanel() {
   const { state } = useLicense()

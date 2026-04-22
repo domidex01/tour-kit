@@ -1,10 +1,8 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Bell, ChevronRight, Keyboard, Menu, Search } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,9 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { Bell, ChevronRight, Keyboard, Menu, Search } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { DashboardSidebar } from './sidebar'
 
 function useCrumbs() {
@@ -23,7 +23,7 @@ function useCrumbs() {
   const crumbs: { label: string; href: string }[] = []
   let acc = ''
   for (const part of parts) {
-    acc += '/' + part
+    acc += `/${part}`
     crumbs.push({ label: part.replace(/-/g, ' '), href: acc })
   }
   return crumbs
@@ -47,14 +47,14 @@ export function DashboardTopbar() {
         </SheetContent>
       </Sheet>
 
-      <nav aria-label="Breadcrumb" className="hidden items-center gap-1 text-sm text-muted-foreground md:flex">
+      <nav
+        aria-label="Breadcrumb"
+        className="hidden items-center gap-1 text-sm text-muted-foreground md:flex"
+      >
         {crumbs.map((c, i) => (
           <span key={c.href} className="flex items-center gap-1">
             {i > 0 && <ChevronRight className="h-3.5 w-3.5" />}
-            <Link
-              href={c.href}
-              className="capitalize hover:text-foreground"
-            >
+            <Link href={c.href} className="capitalize hover:text-foreground">
               {c.label}
             </Link>
           </span>
@@ -94,7 +94,12 @@ export function DashboardTopbar() {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <button id="user-menu" className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="User menu">
+              <button
+                type="button"
+                id="user-menu"
+                className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="User menu"
+              >
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>DM</AvatarFallback>
                 </Avatar>

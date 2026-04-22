@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { AnnouncementBanner, useAnnouncement } from '@tour-kit/announcements'
-import { useSchedule, type Schedule } from '@tour-kit/scheduling'
+import { type Schedule, useSchedule } from '@tour-kit/scheduling'
+import { useEffect, useRef } from 'react'
 
 const businessHours: Schedule = {
   daysOfWeek: [1, 2, 3, 4, 5],

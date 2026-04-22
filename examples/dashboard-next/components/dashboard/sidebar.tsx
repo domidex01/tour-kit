@@ -1,10 +1,10 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { FolderKanban, HelpCircle, LayoutDashboard, Settings, Users } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { FolderKanban, HelpCircle, LayoutDashboard, Settings, Users } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const nav = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -36,8 +36,7 @@ export function DashboardSidebar() {
           Workspace
         </p>
         {nav.map(({ href, label, icon: Icon }) => {
-          const active =
-            href === '/dashboard' ? pathname === href : pathname.startsWith(href)
+          const active = href === '/dashboard' ? pathname === href : pathname.startsWith(href)
           return (
             <Link
               key={href}
@@ -52,7 +51,12 @@ export function DashboardSidebar() {
               {active && (
                 <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary" />
               )}
-              <Icon className={cn('h-4 w-4 transition', active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
+              <Icon
+                className={cn(
+                  'h-4 w-4 transition',
+                  active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                )}
+              />
               {label}
             </Link>
           )
