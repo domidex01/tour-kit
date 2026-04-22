@@ -57,6 +57,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/tk-*/
+!.claude/skills/README.md
 CLAUDE.md
 
 marketing-strategy/*
