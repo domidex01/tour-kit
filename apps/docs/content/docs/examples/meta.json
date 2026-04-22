@@ -1,5 +1,5 @@
 {
   "title": "Examples",
   "icon": "Code2",
-  "pages": ["index", "basic-tour", "onboarding-flow", "headless-custom"]
+  "pages": ["index", "basic-tour", "onboarding-flow", "headless-custom", "dashboard"]
 }

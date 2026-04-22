@@ -1,0 +1,99 @@
+---
+title: Dashboard (full integration)
+description: >-
+  Reference example exercising every @tour-kit/* package in one Next.js 16 +
+  React 19 + Tailwind v4 + shadcn/ui app.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`examples/dashboard-next/` is the canonical, end-to-end integration of the
+entire Tour Kit suite. It's a small team-workspace dashboard ("Stacks") with
+an onboarding tour, hints, announcements, a checklist, adoption nudges, CSAT
+surveys, and an AI help panel — every package wired into realistic product
+surfaces.
+
+## Why this example exists
+
+Unit tests catch bugs inside a package. They don't catch the class of bugs
+that appear when eight providers stack together and every headless component
+is mounted at once — the "works in isolation, breaks in integration" failures.
+Tour Kit caught four such regressions (see
+[Troubleshooting](/docs/troubleshooting)) only because this demo was built
+against real packages. It's the required pre-release smoke test.
+
+## Run it
+
+```bash
+git clone https://github.com/domidex01/tour-kit
+cd tour-kit
+pnpm install
+pnpm --filter dashboard-next dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). License validation
+bypasses localhost, so no keys are needed in dev.
+
+## Stack
+
+- Next.js 16.2 (App Router, Turbopack)
+- React 19.2
+- Tailwind CSS v4
+- shadcn/ui on `@base-ui/react`
+- All 11 `@tour-kit/*` packages via `workspace:*`
+
+## Provider stack
+
+Peel the onion in `app/providers.tsx`:
+
+```
+LicenseProvider
+└── AnalyticsProvider (console plugin)
+    └── HintsProvider
+        └── AnnouncementsProvider
+            └── ChecklistProvider
+                └── AdoptionProvider
+                    └── SurveysProvider
+                        └── AiChatProvider
+```
+
+## Package map
+
+| Package | File | What it does here |
+| --- | --- | --- |
+| `@tour-kit/license` | `app/providers.tsx`, `app/dashboard/settings/page.tsx` | Wraps the app; Settings → Billing gates Pro controls behind `<LicenseGate>`. |
+| `@tour-kit/analytics` | `app/providers.tsx` | `consolePlugin` streams every event (tour/hint/announcement/checklist/adoption) to the browser console. |
+| `@tour-kit/react` | `components/tour-kit/onboarding-tour.tsx` | 5-step dashboard tour using `<Tour autoStart>` + `<TourStep>`. `onComplete` fires the CSAT survey. |
+| `@tour-kit/hints` | `components/tour-kit/hints.tsx` | `DarkModeHint` on `#dark-mode-toggle`; `ExportHint` on `#export-btn`. |
+| `@tour-kit/announcements` | `lib/tour-kit-config.ts`, `components/tour-kit/announcements-host.tsx` | Welcome modal (with `<TourMedia>`), maintenance banner (Pro audience + business-hours schedule), AI-live toast. |
+| `@tour-kit/checklists` | `lib/tour-kit-config.ts`, `components/tour-kit/checklist-dock.tsx` | 4-item "Get started" checklist with auto-completion via DOM events. |
+| `@tour-kit/adoption` | `lib/tour-kit-config.ts`, `app/dashboard/projects/[id]/page.tsx` | Tracks `dark-mode`, `keyboard-shortcuts`, `export-csv`. `<NewFeatureBadge>` fades after use. |
+| `@tour-kit/media` | `components/tour-kit/announcements-host.tsx` | `<TourMedia>` with a YouTube URL inside the welcome modal. |
+| `@tour-kit/scheduling` | `components/tour-kit/scheduled-banner.tsx` | `useSchedule` gates the maintenance banner to business hours. |
+| `@tour-kit/surveys` | `lib/tour-kit-config.ts`, `components/tour-kit/csat-survey-host.tsx` | CSAT modal on tour completion, 90-day cooldown. |
+| `@tour-kit/ai` | `app/api/chat/route.ts`, `app/dashboard/help/page.tsx` | `createChatRouteHandler` + `<AiChatPanel>` with `tourContext: true`. |
+
+## What to look at
+
+- `lib/tour-kit-config.ts` — the only "config" file. Every package reads from it.
+- `app/providers.tsx` — the full provider stack.
+- `app/dashboard/layout.tsx` — where Tour Kit's visible surfaces mount
+  (`<OnboardingTour>`, `<AnnouncementsHost>`, `<ChecklistDock>`,
+  `<DarkModeHint>`, `<CsatSurveyHost>`).
+
+<Callout type="info">
+Once Tour Kit 0.4.3 / 0.1.5 is released, this example is **the** reference
+for how to wire the suite correctly. Earlier demo versions worked around
+four bugs; those workarounds are removed and called out in the example's
+README.
+</Callout>
+
+## Known limitation
+
+Production `next build` currently fails on the synthetic `/_global-error`
+and `/_not-found` prerender step with
+`TypeError: Cannot read properties of null (reading 'useContext')`. This
+reproduces on the upstream demo too and appears to be a Next 16.2 + React
+19.2 + Turbopack SSR quirk unrelated to Tour Kit. `pnpm dev` and
+`pnpm typecheck` both work; use dev mode for integration testing until
+upstream lands a fix.
