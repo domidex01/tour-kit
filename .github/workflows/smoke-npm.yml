@@ -1,0 +1,60 @@
+name: Smoke (npm release)
+
+on:
+  # Run after the release workflow has (possibly) published to npm.
+  workflow_run:
+    workflows: ['Release']
+    types: [completed]
+  # Weekly canary: a fresh install against whatever is `latest` on npm.
+  schedule:
+    - cron: '0 12 * * 1'
+  # Manual trigger for ad-hoc verification.
+  workflow_dispatch:
+
+concurrency:
+  group: smoke-npm-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: Install + run against published tarballs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Skip when the triggering Release run failed — no new tarballs to test.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Intentionally NOT using frozen-lockfile or the workspace cache: we want
+      # the install to re-resolve against the current npm registry and expose
+      # any broken tarballs / missing peers / export-map drift.
+      - name: Install smoke app from npm
+        working-directory: apps/smoke
+        run: pnpm install --ignore-workspace --no-frozen-lockfile
+
+      - name: Typecheck
+        working-directory: apps/smoke
+        run: pnpm typecheck
+
+      - name: Boot dev server and probe
+        working-directory: apps/smoke
+        run: bash ./scripts/run-smoke.sh
+
+      - name: Upload dev log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-dev-log
+          path: /tmp/tour-kit-smoke-dev.log
+          if-no-files-found: ignore

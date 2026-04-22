@@ -1,0 +1,43 @@
+{
+  "name": "@tour-kit/smoke",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Release smoke app — installs every @tour-kit/* package from the npm registry (no workspace:*) and exercises each in a single page. Runs post-publish in CI to catch broken tarballs.",
+  "scripts": {
+    "install:npm": "rm -rf node_modules .next pnpm-lock.yaml && pnpm install --ignore-workspace --no-frozen-lockfile",
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "next start -p 3100",
+    "typecheck": "tsc --noEmit",
+    "probe": "curl -sf --max-time 60 --retry 20 --retry-delay 2 --retry-all-errors --retry-connrefused http://localhost:3100/ | grep -q 'data-smoke-ok'",
+    "smoke": "pnpm install:npm && pnpm typecheck && bash ./scripts/run-smoke.sh"
+  },
+  "dependencies": {
+    "@tour-kit/adoption": "latest",
+    "@tour-kit/ai": "latest",
+    "@tour-kit/analytics": "latest",
+    "@tour-kit/announcements": "latest",
+    "@tour-kit/checklists": "latest",
+    "@tour-kit/core": "latest",
+    "@tour-kit/hints": "latest",
+    "@tour-kit/license": "latest",
+    "@tour-kit/media": "latest",
+    "@tour-kit/react": "latest",
+    "@tour-kit/scheduling": "latest",
+    "@tour-kit/surveys": "latest",
+    "@lottiefiles/react-lottie-player": "^3.5.0",
+    "@mui/base": "5.0.0-beta.70",
+    "@base-ui/react": "^1.4.1",
+    "@ai-sdk/react": "^2.0.0",
+    "ai": "^5.0.0",
+    "next": "16.2.4",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}
