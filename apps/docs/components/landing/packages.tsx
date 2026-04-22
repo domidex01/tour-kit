@@ -73,9 +73,6 @@ export function Packages() {
       <div className="mx-auto max-w-[1120px]">
         {/* Header — right-aligned for contrast with previous left-aligned sections */}
         <div className="mb-16 ml-auto max-w-lg text-right">
-          <span className="mb-4 inline-block font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--landing-accent)]">
-            Modular by design
-          </span>
           <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
             One install.
             <br />

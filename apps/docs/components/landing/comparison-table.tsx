@@ -50,7 +50,7 @@ export function ComparisonTable() {
       <div className="mx-auto max-w-[1120px]">
         <div className="mb-12 max-w-lg">
           <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            Stop <span className="text-[#0197f6]">renting</span> your onboarding
+            Stop renting your onboarding
           </h2>
           <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
             SaaS platforms charge hundreds a month for UI you can&apos;t customize. Open-source
@@ -60,19 +60,19 @@ export function ComparisonTable() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[540px] border-collapse">
+          <table className="w-full min-w-[540px] table-fixed border-collapse">
             <thead>
               <tr className="border-b border-fd-border">
-                <th className="py-3 pr-6 text-left font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-fd-muted-foreground" />
-                <th className="bg-[#0197f6]/5 px-5 py-3 text-center">
+                <th className="w-[40%] py-3 pr-6 text-left font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-fd-muted-foreground" />
+                <th className="w-[20%] bg-[#0197f6]/5 px-5 py-3 text-center">
                   <span className="font-mono text-[13px] font-bold text-[#0197f6]">
                     userTourKit
                   </span>
                 </th>
-                <th className="px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
+                <th className="w-[20%] px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
                   SaaS platforms
                 </th>
-                <th className="px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
+                <th className="w-[20%] px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
                   OSS libraries
                 </th>
               </tr>

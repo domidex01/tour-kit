@@ -1,3 +1,10 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Theme Preview',
+  robots: { index: false, follow: false },
+}
+
 export default function ThemePreview() {
   return (
     <div className="min-h-screen bg-tk-surface p-8 space-y-12">

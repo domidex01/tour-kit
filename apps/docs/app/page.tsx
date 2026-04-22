@@ -1,3 +1,4 @@
+import { BlogPreview } from '@/components/landing/blog-preview'
 import { Features } from '@/components/landing/features'
 import { Footer } from '@/components/landing/footer'
 import { Hero } from '@/components/landing/hero'
@@ -76,6 +77,27 @@ const SocialProof = dynamic(
   }
 )
 
+const PricingTeaser = dynamic(
+  () => import('@/components/landing/pricing-teaser').then((m) => ({ default: m.PricingTeaser })),
+  {
+    loading: () => (
+      <div
+        aria-hidden="true"
+        className="mx-auto my-12 h-[560px] w-full max-w-[1120px] animate-pulse rounded-2xl bg-fd-muted/30"
+      />
+    ),
+  }
+)
+
+const FAQ = dynamic(() => import('@/components/landing/faq').then((m) => ({ default: m.FAQ })), {
+  loading: () => (
+    <div
+      aria-hidden="true"
+      className="mx-auto my-12 h-[480px] w-full max-w-[1120px] animate-pulse rounded-2xl bg-fd-muted/30"
+    />
+  ),
+})
+
 const HOMEPAGE_NAME = 'userTourKit'
 const HOMEPAGE_DESCRIPTION =
   'Headless, accessible product tours, onboarding flows, and in-app messaging for React. Open-source core with optional Pro packages.'
@@ -101,7 +123,10 @@ export default function HomePage() {
         <Features />
         <Packages />
         <ComparisonTable />
+        <PricingTeaser />
         <SocialProof />
+        <BlogPreview />
+        <FAQ />
 
         {/* CTA Footer */}
         <section className="relative overflow-hidden px-6 py-24 sm:px-8 md:py-32 lg:px-12">

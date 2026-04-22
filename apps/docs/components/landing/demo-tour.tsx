@@ -15,6 +15,9 @@ import {
   Lock,
   MessageSquare,
   Play,
+  Send,
+  Sparkles,
+  Star,
   TrendingUp,
   X,
 } from 'lucide-react'
@@ -1017,6 +1020,326 @@ function SchedulingDemo() {
 }
 
 /* ═══════════════════════════════════════════
+   Demo 9: Surveys (@tour-kit/surveys)
+   ═══════════════════════════════════════════ */
+
+type SurveyType = 'nps' | 'csat' | 'ces'
+
+function SurveysDemo() {
+  const [surveyType, setSurveyType] = useState<SurveyType>('nps')
+  const [rating, setRating] = useState<number | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+
+  const surveys: Record<
+    SurveyType,
+    {
+      title: string
+      question: string
+      scaleMin: number
+      scaleMax: number
+      lowLabel: string
+      highLabel: string
+    }
+  > = {
+    nps: {
+      title: 'NPS',
+      question: 'How likely are you to recommend userTourKit to a colleague?',
+      scaleMin: 0,
+      scaleMax: 10,
+      lowLabel: 'Not likely',
+      highLabel: 'Very likely',
+    },
+    csat: {
+      title: 'CSAT',
+      question: 'How satisfied are you with the new onboarding flow?',
+      scaleMin: 1,
+      scaleMax: 5,
+      lowLabel: 'Very unsatisfied',
+      highLabel: 'Very satisfied',
+    },
+    ces: {
+      title: 'CES',
+      question: 'It was easy to complete the setup.',
+      scaleMin: 1,
+      scaleMax: 7,
+      lowLabel: 'Strongly disagree',
+      highLabel: 'Strongly agree',
+    },
+  }
+
+  const current = surveys[surveyType]
+  const scale = Array.from(
+    { length: current.scaleMax - current.scaleMin + 1 },
+    (_, i) => i + current.scaleMin
+  )
+
+  const handleType = (t: SurveyType) => {
+    setSurveyType(t)
+    setRating(null)
+    setSubmitted(false)
+  }
+
+  return (
+    <AppChrome title="your-app.com/feedback">
+      <div className="relative min-h-[340px] p-5">
+        {/* Type switcher */}
+        <div className="mb-4 flex items-center justify-center gap-1.5">
+          {(['nps', 'csat', 'ces'] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => handleType(t)}
+              className={`rounded-md px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition-all ${
+                surveyType === t
+                  ? 'bg-[var(--tk-primary)] text-white'
+                  : 'border border-fd-border text-fd-muted-foreground hover:bg-fd-muted'
+              }`}
+            >
+              {surveys[t].title}
+            </button>
+          ))}
+        </div>
+
+        {/* Survey card */}
+        <div className="mx-auto max-w-md rounded-xl border border-fd-border bg-fd-background p-5 shadow-sm">
+          {!submitted ? (
+            <>
+              <p className="mb-4 text-[13px] font-semibold leading-snug text-fd-foreground">
+                {current.question}
+              </p>
+
+              {surveyType === 'csat' ? (
+                <div className="mb-3 flex items-center justify-center gap-2">
+                  {scale.map((n) => {
+                    const isSelected = rating !== null && n <= rating
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setRating(n)}
+                        aria-label={`${n} star${n > 1 ? 's' : ''}`}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`h-7 w-7 ${
+                            isSelected
+                              ? 'fill-amber-400 text-amber-400'
+                              : 'text-fd-muted-foreground/30'
+                          }`}
+                          aria-hidden="true"
+                        />
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div
+                  className="mb-3 grid gap-1"
+                  style={{ gridTemplateColumns: `repeat(${scale.length}, minmax(0, 1fr))` }}
+                >
+                  {scale.map((n) => {
+                    const isSelected = rating === n
+                    const tone =
+                      n <= (current.scaleMax - current.scaleMin) / 3 + current.scaleMin
+                        ? 'hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/40'
+                        : n <= ((current.scaleMax - current.scaleMin) * 2) / 3 + current.scaleMin
+                          ? 'hover:bg-amber-500/10 hover:text-amber-500 hover:border-amber-500/40'
+                          : 'hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/40'
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setRating(n)}
+                        className={`rounded-md border py-1.5 text-[12px] font-semibold transition-all ${
+                          isSelected
+                            ? 'border-[var(--tk-primary)] bg-[var(--tk-primary)] text-white'
+                            : `border-fd-border text-fd-muted-foreground ${tone}`
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+
+              <div className="mb-4 flex justify-between text-[10px] text-fd-muted-foreground">
+                <span>{current.lowLabel}</span>
+                <span>{current.highLabel}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => rating !== null && setSubmitted(true)}
+                disabled={rating === null}
+                className="w-full rounded-lg bg-[var(--tk-primary)] py-2 text-[12px] font-semibold text-white transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Submit
+              </button>
+            </>
+          ) : (
+            <div className="py-4 text-center">
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10">
+                <CheckCircle2 className="h-5 w-5 text-emerald-500" aria-hidden="true" />
+              </div>
+              <p className="mb-1 text-[13px] font-bold text-fd-foreground">
+                Thanks for the feedback
+              </p>
+              <p className="text-[11px] text-fd-muted-foreground">
+                Score logged &middot; routed to PostHog
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Fatigue rule chip */}
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-[10px] text-fd-muted-foreground/70">
+          <Lock className="h-3 w-3" aria-hidden="true" />
+          <span>Fatigue rule: 1 per user / 90 days &middot; skipped for high-churn segment</span>
+        </div>
+      </div>
+    </AppChrome>
+  )
+}
+
+/* ═══════════════════════════════════════════
+   Demo 10: AI assistant (@tour-kit/ai)
+   ═══════════════════════════════════════════ */
+
+const aiPrompts = [
+  {
+    q: 'How do I trigger a tour after a user logs in?',
+    a: "Call startTour('onboarding') inside a useEffect that depends on your auth state. The tour engine waits for the target element to mount — no need to manually orchestrate timing.",
+    sources: ['docs/core/useTour', 'guides/auth-integration'],
+  },
+  {
+    q: "What's the smallest setup to add hints to a shadcn/ui app?",
+    a: 'Wrap your app in <HintProvider>, then drop <Hint target="#feature-x" title="New!" /> next to the element. The beacon positions itself and persists dismissal to localStorage.',
+    sources: ['docs/hints/quickstart', 'examples/shadcn-hints'],
+  },
+  {
+    q: 'Can I use this with React Server Components?',
+    a: 'Yes. The tour components are client-side ("use client"), but they hydrate safely inside Server Components. Put <Tour /> in any client boundary — no SSR work needed.',
+    sources: ['guides/nextjs-app-router', 'docs/react/ssr'],
+  },
+]
+
+function AIDemo() {
+  const [promptIndex, setPromptIndex] = useState(0)
+  const [revealed, setRevealed] = useState(false)
+
+  const current = aiPrompts[promptIndex]
+
+  const nextPrompt = useCallback(() => {
+    setRevealed(false)
+    setPromptIndex((i) => (i + 1) % aiPrompts.length)
+    setTimeout(() => setRevealed(true), 700)
+  }, [])
+
+  useEffect(() => {
+    const revealTimer = setTimeout(() => setRevealed(true), 700)
+    return () => clearTimeout(revealTimer)
+  }, [])
+
+  return (
+    <AppChrome title="your-app.com/help">
+      <div className="relative flex min-h-[340px] flex-col">
+        {/* Chat header */}
+        <div className="flex items-center gap-2 border-b border-fd-border bg-fd-muted/30 px-4 py-2.5">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-[var(--tk-primary)] to-violet-500">
+            <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="text-[12px] font-semibold text-fd-foreground">Docs assistant</p>
+            <p className="text-[10px] text-fd-muted-foreground">
+              Answering from your indexed docs &middot; streaming
+            </p>
+          </div>
+          <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-500">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Online
+          </span>
+        </div>
+
+        {/* Conversation */}
+        <div className="flex-1 space-y-3 overflow-hidden px-4 py-4">
+          {/* User message */}
+          <div className="flex justify-end">
+            <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-[var(--tk-primary)] px-3.5 py-2 text-[12px] text-white">
+              {current.q}
+            </div>
+          </div>
+
+          {/* AI response */}
+          <div className="flex gap-2">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--tk-primary)] to-violet-500">
+              <Sparkles className="h-3 w-3 text-white" aria-hidden="true" />
+            </div>
+            <div className="min-w-0 max-w-[85%] rounded-2xl rounded-tl-sm bg-fd-muted px-3.5 py-2">
+              {revealed ? (
+                <>
+                  <p className="text-[12px] leading-relaxed text-fd-foreground">{current.a}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-fd-border/50 pt-2">
+                    <span className="text-[10px] font-semibold text-fd-muted-foreground">
+                      Sources:
+                    </span>
+                    {current.sources.map((s) => (
+                      <span
+                        key={s}
+                        className="inline-flex items-center gap-1 rounded-md bg-fd-background px-2 py-0.5 font-mono text-[10px] text-fd-muted-foreground"
+                      >
+                        <MessageSquare className="h-2.5 w-2.5" aria-hidden="true" />
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center gap-1 py-1">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-fd-muted-foreground/50" />
+                  <span
+                    className="h-1.5 w-1.5 animate-pulse rounded-full bg-fd-muted-foreground/50"
+                    style={{ animationDelay: '150ms' }}
+                  />
+                  <span
+                    className="h-1.5 w-1.5 animate-pulse rounded-full bg-fd-muted-foreground/50"
+                    style={{ animationDelay: '300ms' }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Input bar */}
+        <div className="border-t border-fd-border bg-fd-background px-4 py-3">
+          <div className="flex items-center gap-2 rounded-lg border border-fd-border bg-fd-muted/30 px-3 py-2">
+            <input
+              type="text"
+              readOnly
+              value="Ask anything about the docs..."
+              className="flex-1 bg-transparent text-[12px] text-fd-muted-foreground/70 outline-none"
+              aria-label="Ask the docs assistant"
+            />
+            <button
+              type="button"
+              onClick={nextPrompt}
+              aria-label="Next example question"
+              className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--tk-primary)] text-white transition-all hover:brightness-110"
+            >
+              <Send className="h-3 w-3" aria-hidden="true" />
+            </button>
+          </div>
+          <p className="mt-2 text-center text-[10px] text-fd-muted-foreground/60">
+            Click send to see the next example answer
+          </p>
+        </div>
+      </div>
+    </AppChrome>
+  )
+}
+
+/* ═══════════════════════════════════════════
    Tab definitions
    ═══════════════════════════════════════════ */
 
@@ -1028,6 +1351,7 @@ const tabs = [
     icon: Component,
     color: 'text-[var(--tk-primary)]',
     component: TourDemo,
+    tier: 'free',
   },
   {
     id: 'hints',
@@ -1036,6 +1360,7 @@ const tabs = [
     icon: Lightbulb,
     color: 'text-amber-500',
     component: HintsDemo,
+    tier: 'free',
   },
   {
     id: 'announcements',
@@ -1044,6 +1369,7 @@ const tabs = [
     icon: Bell,
     color: 'text-rose-500',
     component: AnnouncementsDemo,
+    tier: 'pro',
   },
   {
     id: 'checklists',
@@ -1052,6 +1378,7 @@ const tabs = [
     icon: CheckSquare,
     color: 'text-emerald-500',
     component: ChecklistsDemo,
+    tier: 'pro',
   },
   {
     id: 'media',
@@ -1060,6 +1387,7 @@ const tabs = [
     icon: Eye,
     color: 'text-pink-500',
     component: MediaDemo,
+    tier: 'pro',
   },
   {
     id: 'analytics',
@@ -1068,6 +1396,7 @@ const tabs = [
     icon: BarChart3,
     color: 'text-sky-500',
     component: AnalyticsDemo,
+    tier: 'pro',
   },
   {
     id: 'adoption',
@@ -1076,6 +1405,7 @@ const tabs = [
     icon: TrendingUp,
     color: 'text-orange-500',
     component: AdoptionDemo,
+    tier: 'pro',
   },
   {
     id: 'scheduling',
@@ -1084,6 +1414,25 @@ const tabs = [
     icon: Clock,
     color: 'text-teal-500',
     component: SchedulingDemo,
+    tier: 'pro',
+  },
+  {
+    id: 'surveys',
+    label: 'Surveys',
+    pkg: '@tour-kit/surveys',
+    icon: Star,
+    color: 'text-amber-500',
+    component: SurveysDemo,
+    tier: 'pro',
+  },
+  {
+    id: 'ai',
+    label: 'AI assistant',
+    pkg: '@tour-kit/ai',
+    icon: Sparkles,
+    color: 'text-violet-500',
+    component: AIDemo,
+    tier: 'pro',
   },
 ] as const
 
@@ -1111,34 +1460,60 @@ export function DemoTour() {
 
         {/* Tab bar */}
         <div className="mb-6 flex flex-wrap justify-center gap-1.5">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              aria-label={tab.label}
-              aria-pressed={activeTab === tab.id}
-              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'bg-[#0197f6] text-white shadow-sm'
-                  : 'text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
-              }`}
-            >
-              <tab.icon
-                aria-hidden="true"
-                className={`h-3.5 w-3.5 ${activeTab === tab.id ? '' : tab.color}`}
-              />
-              <span className="hidden sm:inline">{tab.label}</span>
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id
+            const isPro = tab.tier === 'pro'
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                aria-label={`${tab.label}${isPro ? ' (Pro)' : ''}`}
+                aria-pressed={isActive}
+                className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
+                  isActive
+                    ? 'bg-[#0197f6] text-white shadow-sm'
+                    : 'text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
+                }`}
+              >
+                <tab.icon
+                  aria-hidden="true"
+                  className={`h-3.5 w-3.5 ${isActive ? '' : tab.color}`}
+                />
+                <span className="hidden sm:inline">{tab.label}</span>
+                {isPro && (
+                  <span
+                    className={`inline-flex items-center gap-0.5 rounded-[4px] px-1 py-px text-[9px] font-bold uppercase tracking-wide ${
+                      isActive ? 'bg-white/25 text-white' : 'bg-violet-500/10 text-violet-500'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <Sparkles className="h-2 w-2" aria-hidden="true" />
+                    Pro
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
 
         {/* Package name label */}
-        <div className="mb-4 text-center">
+        <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
           <span className="inline-flex items-center gap-2 rounded-full border border-black/[0.04] bg-fd-card px-4 py-1.5 font-mono text-[12px] text-fd-muted-foreground shadow-elegant dark:border-white/[0.06]">
             <span className={`h-2 w-2 rounded-full ${active.color.replace('text-', 'bg-')}`} />
             {active.pkg}
           </span>
+          {active.tier === 'pro' ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-500">
+              <Sparkles className="h-3 w-3" aria-hidden="true" />
+              Pro &middot; $99 one-time
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-500">
+              <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+              Free &middot; MIT
+            </span>
+          )}
         </div>
 
         {/* Demo area */}
