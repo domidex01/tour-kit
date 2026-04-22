@@ -1,4 +1,4 @@
-# userTourKit v0.4.2 — Generated 2026-04-21T07:59:35Z
+# userTourKit v0.4.2 — Generated 2026-04-22T09:38:11Z
 
 # userTourKit
 
@@ -228,6 +228,7 @@
 
 - [Examples](https://usertourkit.com/docs/examples): Copy-paste examples for common userTourKit patterns: basic tours, onboarding flows, and fully custom headless interfaces
 - [Basic Tour](https://usertourkit.com/docs/examples/basic-tour): Build a 3-step product tour with spotlight overlay, keyboard navigation, and progress indicators — full working code
+- [Dashboard (full integration)](https://usertourkit.com/docs/examples/dashboard): Reference example exercising every @tour-kit/* package in one Next.js 16 + React 19 + Tailwind v4 + shadcn/ui app.
 - [Headless Custom UI](https://usertourkit.com/docs/examples/headless-custom): Build a completely custom tour UI with headless components, render props, and your own design system or CSS framework
 - [Onboarding Flow](https://usertourkit.com/docs/examples/onboarding-flow): Complete user onboarding flow with persistent progress, conditional steps, checklists, and tour completion callbacks
 
@@ -255,6 +256,10 @@
 ## Licensing
 
 - [Licensing](https://usertourkit.com/docs/licensing): Set up userTourKit Pro licensing with Polar.sh — installation, configuration, and CI/CD
+
+## Troubleshooting
+
+- [Troubleshooting](https://usertourkit.com/docs/troubleshooting): Common integration issues with Tour Kit and how to fix them.
 
 ## Use cases
 

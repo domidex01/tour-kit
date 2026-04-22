@@ -125,7 +125,7 @@ export function DarkModeToggle() {
     <button id="dark-mode-toggle" className="relative">
       Toggle Dark Mode
       <IfNotAdopted featureId="dark-mode">
-        <NewFeatureBadge>New!</NewFeatureBadge>
+        <NewFeatureBadge featureId="dark-mode" text="New!" />
       </IfNotAdopted>
     </button>
   )

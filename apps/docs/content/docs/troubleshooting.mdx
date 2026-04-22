@@ -1,0 +1,193 @@
+---
+title: Troubleshooting
+description: Common integration issues with Tour Kit and how to fix them.
+---
+
+Common issues when integrating Tour Kit into real apps. Each entry lists the
+minimum package version containing the fix.
+
+## Tour doesn't start when `<Tour autoStart>` is used
+
+**Symptom** — You render a standalone `<Tour id="x" autoStart>...</Tour>` and
+nothing appears. No overlay, no card, no errors.
+
+**Cause** — Before `@tour-kit/core@0.4.3`, the `autoStart` prop on a declarative
+`<Tour>` or on a tour config object was parsed but never dispatched. Only
+persistence restore, `useTour().start()`, and branch navigation would activate
+a tour.
+
+**Fix** — Upgrade to `@tour-kit/core@0.4.3` (or later). `autoStart` is now
+honored on mount of the enclosing `TourProvider`. If a persisted tour is
+restored, it takes precedence and `autoStart` is skipped for that mount.
+
+```tsx
+// Works on >= 0.4.3
+<Tour id="onboarding" autoStart>
+  <TourStep id="welcome" target="#app" content="Welcome" />
+</Tour>
+
+// Or equivalently via TourProvider + tours config
+<TourProvider tours={[{ id: 'x', autoStart: true, steps: [...] }]}>
+  ...
+</TourProvider>
+```
+
+If upgrading is not an option yet, trigger the tour imperatively:
+
+```tsx
+function AutoStart() {
+  const { start } = useTour()
+  React.useEffect(() => {
+    start('onboarding')
+  }, [start])
+  return null
+}
+```
+
+## "Maximum update depth exceeded" from `<ChecklistPanel>` or `<Hint autoShow>`
+
+**Symptom** — The console spams `Maximum update depth exceeded` infinitely when
+a `<ChecklistPanel>` (with or without `defaultExpanded`) or a `<Hint autoShow>`
+is mounted.
+
+**Cause** — In `@tour-kit/checklists@0.1.4` and `@tour-kit/hints@0.4.2`, the
+mount effects re-ran on every render because dependent callbacks (`setExpanded`,
+`show`, `onShow`) were recreated across context updates and inline closures.
+Each re-run dispatched a reducer action, which re-rendered the provider, which
+re-created the callbacks, which re-ran the effect — a feedback loop.
+
+**Fix** — Upgrade to `@tour-kit/checklists@0.1.5` and `@tour-kit/hints@0.4.3`
+(or later). Both fixes have two parts:
+
+1. The mount effects now fire exactly once per component instance via a
+   `useRef` guard.
+2. The reducers short-circuit when the dispatched action would not change
+   state, so repeated dispatches are cheap and don't cascade.
+
+If you can't upgrade immediately, two workarounds:
+
+```tsx
+// 1. Stabilize inline callbacks with useCallback
+const onShow = React.useCallback(() => track('hint_shown'), [])
+<Hint id="x" autoShow onShow={onShow} ... />
+
+// 2. Call show() imperatively from a mount effect instead of autoShow
+const { show } = useHint('x')
+React.useEffect(() => { show() }, []) // eslint-disable-line
+```
+
+## Announcement is configured but never shows
+
+**Symptom** — You pass an announcement config to
+`<AnnouncementsProvider announcements={[...]}>` and render the matching
+`<AnnouncementModal id="..." />`, but nothing appears. The state is registered
+but `isVisible` stays `false`.
+
+**Cause** — Before `@tour-kit/announcements@0.1.5`, the provider registered
+configs on mount but never evaluated eligibility to actually show them. Only
+explicit `show(id)` calls or queue replays would surface an announcement.
+
+**Fix** — Upgrade to `@tour-kit/announcements@0.1.5` (or later). Registered
+announcements are now auto-shown on mount (and when `userContext` changes)
+whenever they pass eligibility checks (frequency, audience, schedule, queue
+capacity).
+
+**Opt out** — If you need the old behavior for a specific announcement, set
+`autoShow: false` and drive it from code:
+
+```tsx
+const config: AnnouncementConfig = {
+  id: 'welcome',
+  variant: 'modal',
+  title: 'Welcome',
+  autoShow: false, // we'll trigger it ourselves
+}
+
+const { show } = useAnnouncement('welcome')
+show() // fires per eligibility rules
+```
+
+The default is `autoShow: true` because the prior behavior was a behavior gap
+vs. the documented frequency semantics — everyone who configured an
+announcement expected it to appear when its rules allowed.
+
+## React 19 and Next.js 16 compatibility
+
+Tour Kit targets React 18 and 19, and Next.js App Router (13+). A few things
+to know for the latest React/Next versions:
+
+### `'use client'` on providers
+
+All Tour Kit providers run in the client runtime (they use `useReducer`,
+`useContext`, and browser APIs). If you wrap them in your own provider
+component, add `'use client'` at the top of that file. Importing a provider
+into a Server Component will surface as a hydration or "useContext only works
+in a Client Component" error.
+
+```tsx
+// app/providers.tsx
+'use client'
+
+import { TourProvider } from '@tour-kit/react'
+import { HintsProvider } from '@tour-kit/hints'
+import { ChecklistProvider } from '@tour-kit/checklists'
+import { AnnouncementsProvider } from '@tour-kit/announcements'
+
+export function AppProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProvider>
+      <HintsProvider>
+        <ChecklistProvider checklists={[]}>
+          <AnnouncementsProvider>{children}</AnnouncementsProvider>
+        </ChecklistProvider>
+      </HintsProvider>
+    </TourProvider>
+  )
+}
+```
+
+### Anti-flash (FOUC) scripts
+
+If you inject theme or feature-flag state before hydration, use Next.js's
+`next/script` with `strategy="beforeInteractive"` inside `<head>` (App Router)
+rather than inlining a `<script>` in a client component:
+
+```tsx
+// app/layout.tsx
+import Script from 'next/script'
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <head>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`(() => { try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {} })()`}
+        </Script>
+      </head>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+### `@mui/base` (Base UI) peer
+
+The optional Base UI rendering path depends on `@mui/base`, which shipped a
+preview that was subsequently deprecated in favor of the new `@base-ui-components/react`.
+If you don't opt into Base UI (default), this is not a concern. If you do,
+pin to the last supported `@mui/base` preview or follow the migration to
+`@base-ui-components/react` once we add first-class support. Track progress in
+the `UnifiedSlot` source in each package (`lib/slot.tsx`,
+`lib/ui-library-context.tsx`).
+
+## Prop name differences between variants
+
+`AnnouncementModal` uses `id`. `SurveyModal` (and the other survey variants —
+`SurveyInline`, `SurveySlideout`, `SurveyPopover`, `SurveyBanner`) uses
+`surveyId`. This is intentional for now — both are stable public APIs. Use
+the prop matching the component you're rendering.
+
+```tsx
+<AnnouncementModal id="welcome" />
+<SurveyModal surveyId="nps-q3" />
+```

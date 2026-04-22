@@ -43,7 +43,7 @@ function App() {
 function DarkModeToggle() {
   return (
     <IfNotAdopted featureId="dark-mode">
-      <NewFeatureBadge>Try dark mode!</NewFeatureBadge>
+      <NewFeatureBadge featureId="dark-mode" text="Try dark mode!" />
     </IfNotAdopted>
   )
 }

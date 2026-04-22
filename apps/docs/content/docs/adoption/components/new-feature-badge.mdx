@@ -154,12 +154,11 @@ function FeatureCard({ featureId, title, description }) {
 ```tsx
 import { Sparkles } from 'lucide-react'
 
-<button>
+{/* NewFeatureBadge renders text only. Compose an icon beside it: */}
+<button className="flex items-center gap-1">
   AI Assistant
-  <NewFeatureBadge featureId="ai-assist">
-    <Sparkles className="h-3 w-3" />
-    AI
-  </NewFeatureBadge>
+  <Sparkles className="h-3 w-3" />
+  <NewFeatureBadge featureId="ai-assist" text="AI" />
 </button>
 ```
 

@@ -187,7 +187,7 @@ Conditional rendering based on adoption status.
 import { IfNotAdopted, IfAdopted } from '@tour-kit/adoption';
 
 <IfNotAdopted featureId="feature-search">
-  <NewFeatureBadge>New!</NewFeatureBadge>
+  <NewFeatureBadge featureId="feature-search" text="New!" />
 </IfNotAdopted>
 
 <IfAdopted featureId="feature-search">
@@ -202,10 +202,17 @@ Badge component for new features.
 ```tsx
 import { NewFeatureBadge } from '@tour-kit/adoption';
 
-<NewFeatureBadge variant="default" size="sm">
-  New
-</NewFeatureBadge>
+<NewFeatureBadge featureId="feature-id" text="New" variant="default" size="sm" />
 ```
+
+**Props**
+
+| Prop        | Type                                                    | Default  | Description                                  |
+| ----------- | ------------------------------------------------------- | -------- | -------------------------------------------- |
+| `featureId` | `string`                                                | –        | Required. Feature to check adoption against. |
+| `text`      | `string`                                                | `'New'`  | Badge label.                                 |
+| `variant`   | `'default' \| 'secondary' \| 'outline' \| 'destructive'` | `'default'` | Badge color/style variant.                   |
+| `size`      | `'sm' \| 'md' \| 'lg'`                                  | `'md'`   | Badge size.                                  |
 
 ---
 

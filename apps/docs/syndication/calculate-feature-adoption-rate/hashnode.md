@@ -135,7 +135,7 @@ function ExportButton() {
     <button onClick={trackUsage}>
       Export CSV
       <IfNotAdopted featureId="export-csv">
-        <NewFeatureBadge>New</NewFeatureBadge>
+        <NewFeatureBadge featureId="export-csv" text="New" />
       </IfNotAdopted>
     </button>
   )
