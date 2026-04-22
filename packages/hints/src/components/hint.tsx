@@ -92,11 +92,15 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
       targetSelector ?? targetRefElement
     )
 
+    // Fire autoShow exactly once for this hint instance.
+    // Re-running on every render (when show/onShow identities change) loops.
+    const autoShownRef = React.useRef(false)
     React.useEffect(() => {
-      if (autoShow && !isDismissed) {
-        show()
-        onShow?.()
-      }
+      if (autoShownRef.current) return
+      if (!autoShow || isDismissed) return
+      autoShownRef.current = true
+      show()
+      onShow?.()
     }, [autoShow, isDismissed, show, onShow])
 
     const handleHotspotClick = React.useCallback(() => {

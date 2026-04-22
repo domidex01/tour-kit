@@ -67,6 +67,11 @@ import { HintHeadless } from '@tour-kit/hints/headless'
 />
 ```
 
+## Integration gotchas
+
+- `<Hint autoShow>` fires exactly once per component instance — inline `onShow` handlers are safe and won't re-trigger on re-render.
+- Unmounting a hint resets its auto-show ref; remounting will fire once again unless the hint is persisted as dismissed.
+
 ## License
 
 MIT

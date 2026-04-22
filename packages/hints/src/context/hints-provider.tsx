@@ -41,46 +41,49 @@ function handleUnregister(state: HintsState, id: string): HintsState {
 }
 
 function handleShow(state: HintsState, id: string): HintsState {
+  const hint = state.hints.get(id)
+  if (!hint || hint.isDismissed) return state
+  // No-op if already the active open hint
+  if (hint.isOpen && state.activeHint === id) return state
+
   const newHints = new Map(state.hints)
-  const hint = newHints.get(id)
-  if (hint && !hint.isDismissed) {
-    // Close currently active hint
-    if (state.activeHint && state.activeHint !== id) {
-      const activeHint = newHints.get(state.activeHint)
-      if (activeHint) {
-        newHints.set(state.activeHint, { ...activeHint, isOpen: false })
-      }
+  // Close currently active hint
+  if (state.activeHint && state.activeHint !== id) {
+    const activeHint = newHints.get(state.activeHint)
+    if (activeHint?.isOpen) {
+      newHints.set(state.activeHint, { ...activeHint, isOpen: false })
     }
-    newHints.set(id, { ...hint, isOpen: true })
-    return { hints: newHints, activeHint: id }
   }
-  return state
+  newHints.set(id, { ...hint, isOpen: true })
+  return { hints: newHints, activeHint: id }
 }
 
 function handleHide(state: HintsState, id: string): HintsState {
+  const hint = state.hints.get(id)
+  if (!hint) return state
+  const wasActive = state.activeHint === id
+  // No-op if already hidden and not the active reference
+  if (!hint.isOpen && !wasActive) return state
+
   const newHints = new Map(state.hints)
-  const hint = newHints.get(id)
-  if (hint) {
-    newHints.set(id, { ...hint, isOpen: false })
-    return {
-      hints: newHints,
-      activeHint: state.activeHint === id ? null : state.activeHint,
-    }
+  newHints.set(id, { ...hint, isOpen: false })
+  return {
+    hints: newHints,
+    activeHint: wasActive ? null : state.activeHint,
   }
-  return state
 }
 
 function handleDismiss(state: HintsState, id: string): HintsState {
+  const hint = state.hints.get(id)
+  if (!hint) return state
+  if (hint.isDismissed && !hint.isOpen && state.activeHint !== id) return state
+
   const newHints = new Map(state.hints)
-  const hint = newHints.get(id)
-  if (hint) {
-    newHints.set(id, { ...hint, isOpen: false, isDismissed: true })
-    return {
-      hints: newHints,
-      activeHint: state.activeHint === id ? null : state.activeHint,
-    }
+  newHints.set(id, { ...hint, isOpen: false, isDismissed: true })
+  return {
+    hints: newHints,
+    activeHint: state.activeHint === id ? null : state.activeHint,
   }
-  return state
 }
 
 function handleReset(state: HintsState, id: string): HintsState {
