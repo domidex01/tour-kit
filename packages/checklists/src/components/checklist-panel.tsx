@@ -69,10 +69,10 @@ export const ChecklistPanel = React.forwardRef<HTMLDivElement, ChecklistPanelPro
     } = useChecklist(checklistId)
 
     // Set initial expanded state — only on first mount.
-    // Re-running on every render (e.g., when setExpanded identity changes)
-    // causes a feedback loop through the reducer.
+    // useLayoutEffect runs before paint, so `defaultExpanded={false}` doesn't
+    // flash as expanded for a frame before collapsing.
     const initializedRef = React.useRef(false)
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
       if (initializedRef.current) return
       initializedRef.current = true
       setExpanded(defaultExpanded)
@@ -96,7 +96,10 @@ export const ChecklistPanel = React.forwardRef<HTMLDivElement, ChecklistPanelPro
           <div className="flex items-center gap-3">
             {checklist.config.icon && <div className="text-primary">{checklist.config.icon}</div>}
             <div className="text-left">
-              <h3 className="font-semibold">{checklist.config.title}</h3>
+              {/* biome-ignore lint/a11y/useSemanticElements: <h3> is invalid inside <button>; span with heading role keeps SR semantics without invalid HTML */}
+              <span role="heading" aria-level={3} className="font-semibold block">
+                {checklist.config.title}
+              </span>
               <p className="text-sm text-muted-foreground">
                 {progress.completed} of {progress.total} complete
               </p>

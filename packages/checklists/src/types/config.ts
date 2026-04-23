@@ -26,6 +26,10 @@ export interface PersistedChecklistState {
   dismissed: string[]
   /** Last updated timestamp */
   timestamp: number
+  /** Per-task completion timestamps, keyed by checklistId → taskId */
+  completedAt?: Record<string, Record<string, number>>
+  /** Checklist IDs whose onComplete callback has already fired (prevents duplicate notifications across reloads) */
+  notifiedComplete?: string[]
 }
 
 /**

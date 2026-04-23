@@ -16,15 +16,27 @@ export function canCompleteTask(
 }
 
 /**
- * Resolve task dependencies and return execution order
+ * Resolve task dependencies and return execution order.
+ *
+ * Throws on circular dependencies — a silent wrong-order result would be harder
+ * to debug than a thrown error.
  */
 export function resolveTaskDependencies(tasks: ChecklistTaskConfig[]): ChecklistTaskConfig[] {
   const resolved: ChecklistTaskConfig[] = []
   const seen = new Set<string>()
+  const visiting = new Set<string>()
+  const path: string[] = []
 
   function visit(task: ChecklistTaskConfig) {
     if (seen.has(task.id)) return
-    seen.add(task.id)
+    if (visiting.has(task.id)) {
+      const cycleStart = path.indexOf(task.id)
+      const cycle = [...path.slice(cycleStart), task.id].join(' → ')
+      throw new Error(`Circular dependency detected in tasks: ${cycle}`)
+    }
+
+    visiting.add(task.id)
+    path.push(task.id)
 
     if (task.dependsOn) {
       for (const depId of task.dependsOn) {
@@ -35,6 +47,9 @@ export function resolveTaskDependencies(tasks: ChecklistTaskConfig[]): Checklist
       }
     }
 
+    visiting.delete(task.id)
+    path.pop()
+    seen.add(task.id)
     resolved.push(task)
   }
 

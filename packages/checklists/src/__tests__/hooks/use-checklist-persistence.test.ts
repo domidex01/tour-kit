@@ -245,7 +245,7 @@ describe('useChecklistPersistence', () => {
       expect(loaded).toEqual(mockState)
     })
 
-    it('returns null for async onLoad (sync only)', () => {
+    it('returns the Promise for async onLoad', async () => {
       const onLoad = vi.fn().mockReturnValue(Promise.resolve(mockState))
       const config: ChecklistPersistenceConfig = {
         enabled: true,
@@ -256,7 +256,8 @@ describe('useChecklistPersistence', () => {
       const loaded = result.current.load()
 
       expect(onLoad).toHaveBeenCalled()
-      expect(loaded).toBeNull()
+      expect(loaded).toBeInstanceOf(Promise)
+      await expect(loaded).resolves.toEqual(mockState)
     })
 
     it('custom onLoad can return null', () => {

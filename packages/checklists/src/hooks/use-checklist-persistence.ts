@@ -8,7 +8,7 @@ const DEFAULT_KEY = 'tourkit-checklists'
 
 export interface UseChecklistPersistenceReturn {
   save: (state: PersistedChecklistState) => void
-  load: () => PersistedChecklistState | null
+  load: () => PersistedChecklistState | Promise<PersistedChecklistState | null> | null
   clear: () => void
 }
 
@@ -78,17 +78,15 @@ export function useChecklistPersistence(
     [config.enabled, config.onSave, getStorage, storageKey]
   )
 
-  const load = useCallback((): PersistedChecklistState | null => {
+  const load = useCallback(():
+    | PersistedChecklistState
+    | Promise<PersistedChecklistState | null>
+    | null => {
     if (!config.enabled) return null
 
-    // Custom handler
+    // Custom handler — pass through both sync and async results
     if (config.onLoad) {
-      const result = config.onLoad()
-      if (result instanceof Promise) {
-        // For async, return null and let component handle
-        return null
-      }
-      return result
+      return config.onLoad()
     }
 
     const storage = getStorage()

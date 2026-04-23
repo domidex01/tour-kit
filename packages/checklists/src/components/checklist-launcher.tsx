@@ -1,6 +1,16 @@
 'use client'
 
-import { autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/react'
+import {
+  FloatingFocusManager,
+  autoUpdate,
+  flip,
+  offset,
+  shift,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  useRole,
+} from '@floating-ui/react'
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'
 import { Checklist } from './checklist'
@@ -63,16 +73,22 @@ export const ChecklistLauncher = React.forwardRef<HTMLButtonElement, ChecklistLa
     ref
   ) => {
     const [isOpen, setIsOpen] = React.useState(false)
+    const panelId = React.useId()
     const { checklist, progress, isDismissed, isComplete } = useChecklist(checklistId)
 
-    const { refs, floatingStyles } = useFloating({
+    const { refs, floatingStyles, context } = useFloating({
       open: isOpen,
+      onOpenChange: setIsOpen,
       placement: position?.includes('right') ? 'top-end' : 'top-start',
       middleware: [offset(12), flip(), shift({ padding: 8 })],
       whileElementsMounted: autoUpdate,
     })
 
-    // Merge refs
+    const dismiss = useDismiss(context, { escapeKey: true, outsidePress: true })
+    const role = useRole(context, { role: 'dialog' })
+    const { getReferenceProps, getFloatingProps } = useInteractions([dismiss, role])
+
+    // Merge floating-ui ref with forwarded ref
     const mergedRef = React.useCallback(
       (node: HTMLButtonElement | null) => {
         refs.setReference(node)
@@ -94,10 +110,12 @@ export const ChecklistLauncher = React.forwardRef<HTMLButtonElement, ChecklistLa
         <button
           ref={mergedRef}
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
           className={cn(checklistLauncherVariants({ size, variant }), className)}
           aria-label={isOpen ? 'Close checklist' : 'Open checklist'}
-          aria-expanded={isOpen}
+          {...getReferenceProps({
+            onClick: () => setIsOpen(!isOpen),
+          })}
+          aria-controls={panelId}
           {...props}
         >
           {children ?? (
@@ -127,13 +145,17 @@ export const ChecklistLauncher = React.forwardRef<HTMLButtonElement, ChecklistLa
 
         {/* Panel */}
         {isOpen && (
-          <div
-            ref={refs.setFloating}
-            style={floatingStyles}
-            className={cn('w-80 z-50', panelClassName)}
-          >
-            <Checklist checklistId={checklistId} />
-          </div>
+          <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
+            <div
+              ref={refs.setFloating}
+              style={floatingStyles}
+              className={cn('w-80 z-50', panelClassName)}
+              {...getFloatingProps()}
+              id={panelId}
+            >
+              <Checklist checklistId={checklistId} />
+            </div>
+          </FloatingFocusManager>
         )}
       </div>
     )

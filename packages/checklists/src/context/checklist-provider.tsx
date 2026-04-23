@@ -21,7 +21,7 @@ interface ChecklistProviderProps extends ChecklistProviderConfig {
 }
 
 type ChecklistAction =
-  | { type: 'COMPLETE_TASK'; checklistId: string; taskId: string }
+  | { type: 'COMPLETE_TASK'; checklistId: string; taskId: string; at: number }
   | { type: 'UNCOMPLETE_TASK'; checklistId: string; taskId: string }
   | { type: 'DISMISS_CHECKLIST'; checklistId: string }
   | { type: 'RESTORE_CHECKLIST'; checklistId: string }
@@ -29,18 +29,24 @@ type ChecklistAction =
   | { type: 'RESET_CHECKLIST'; checklistId: string }
   | { type: 'RESET_ALL' }
   | { type: 'LOAD_PERSISTED'; state: PersistedChecklistState }
+  | { type: 'MARK_NOTIFIED_COMPLETE'; checklistId: string }
 
 interface ChecklistReducerState {
   checklists: Map<string, ChecklistState>
   completed: Record<string, Set<string>>
   dismissed: Set<string>
+  /** Per-task completion timestamps — the source of truth for ChecklistTaskState.completedAt */
+  completedAt: Record<string, Record<string, number>>
+  /** Checklist IDs for which onComplete has already fired — persisted to prevent re-firing across reloads */
+  notifiedComplete: Set<string>
 }
 
 function createInitialTaskState(
   task: ChecklistConfig['tasks'][0],
   context: ChecklistContextType,
   completedTasks: Set<string>,
-  allTasks: ChecklistConfig['tasks']
+  allTasks: ChecklistConfig['tasks'],
+  completedAtMap: Record<string, number> | undefined
 ): ChecklistTaskState {
   const visible = task.when ? task.when(context) : true
   const locked = !canCompleteTask(task, completedTasks, allTasks)
@@ -52,7 +58,7 @@ function createInitialTaskState(
     locked,
     visible,
     active: false,
-    completedAt: completed ? Date.now() : undefined,
+    completedAt: completed ? completedAtMap?.[task.id] : undefined,
   }
 }
 
@@ -61,10 +67,11 @@ function createChecklistState(
   context: ChecklistContextType,
   completedTasks: Set<string>,
   isDismissed: boolean,
-  isExpanded: boolean
+  isExpanded: boolean,
+  completedAtMap: Record<string, number> | undefined
 ): ChecklistState {
   const tasks = config.tasks.map((task) =>
-    createInitialTaskState(task, context, completedTasks, config.tasks)
+    createInitialTaskState(task, context, completedTasks, config.tasks, completedAtMap)
   )
 
   const visibleTasks = tasks.filter((t) => t.visible)
@@ -94,6 +101,7 @@ function handleTaskCompletion(
   checklistId: string,
   taskId: string,
   complete: boolean,
+  at: number | undefined,
   { configs, context }: ReducerContext
 ): ChecklistReducerState {
   const existing = state.completed[checklistId] ?? new Set<string>()
@@ -109,6 +117,15 @@ function handleTaskCompletion(
   }
   newCompleted[checklistId] = tasks
 
+  const newCompletedAt = { ...state.completedAt }
+  const checklistCompletedAt = { ...(newCompletedAt[checklistId] ?? {}) }
+  if (complete && at !== undefined) {
+    checklistCompletedAt[taskId] = at
+  } else {
+    delete checklistCompletedAt[taskId]
+  }
+  newCompletedAt[checklistId] = checklistCompletedAt
+
   const config = configs.find((c) => c.id === checklistId)
   if (!config) return state
 
@@ -120,11 +137,17 @@ function handleTaskCompletion(
       { ...context, completedTasks: Array.from(tasks) },
       tasks,
       state.dismissed.has(checklistId),
-      state.checklists.get(checklistId)?.isExpanded ?? true
+      state.checklists.get(checklistId)?.isExpanded ?? true,
+      checklistCompletedAt
     )
   )
 
-  return { ...state, completed: newCompleted, checklists: newChecklists }
+  return {
+    ...state,
+    completed: newCompleted,
+    completedAt: newCompletedAt,
+    checklists: newChecklists,
+  }
 }
 
 function handleDismissRestore(
@@ -157,6 +180,11 @@ function handleLoadPersisted(
     newCompleted[id] = new Set(tasks)
   }
   const newDismissed = new Set(state.dismissed)
+  const newCompletedAt: Record<string, Record<string, number>> = {}
+  for (const [id, map] of Object.entries(state.completedAt ?? {})) {
+    newCompletedAt[id] = { ...map }
+  }
+  const newNotifiedComplete = new Set(state.notifiedComplete ?? [])
 
   const newChecklists = new Map<string, ChecklistState>()
   for (const config of configs) {
@@ -168,12 +196,19 @@ function handleLoadPersisted(
         { ...context, completedTasks: Array.from(tasks) },
         tasks,
         newDismissed.has(config.id),
-        true
+        true,
+        newCompletedAt[config.id]
       )
     )
   }
 
-  return { completed: newCompleted, dismissed: newDismissed, checklists: newChecklists }
+  return {
+    completed: newCompleted,
+    dismissed: newDismissed,
+    checklists: newChecklists,
+    completedAt: newCompletedAt,
+    notifiedComplete: newNotifiedComplete,
+  }
 }
 
 function checklistReducer(
@@ -186,10 +221,24 @@ function checklistReducer(
 
   switch (action.type) {
     case 'COMPLETE_TASK':
-      return handleTaskCompletion(state, action.checklistId, action.taskId, true, reducerCtx)
+      return handleTaskCompletion(
+        state,
+        action.checklistId,
+        action.taskId,
+        true,
+        action.at,
+        reducerCtx
+      )
 
     case 'UNCOMPLETE_TASK':
-      return handleTaskCompletion(state, action.checklistId, action.taskId, false, reducerCtx)
+      return handleTaskCompletion(
+        state,
+        action.checklistId,
+        action.taskId,
+        false,
+        undefined,
+        reducerCtx
+      )
 
     case 'DISMISS_CHECKLIST': {
       if (state.dismissed.has(action.checklistId)) return state
@@ -220,25 +269,53 @@ function checklistReducer(
       const newDismissed = new Set(state.dismissed)
       newDismissed.delete(action.checklistId)
 
+      const newCompletedAt = { ...state.completedAt }
+      delete newCompletedAt[action.checklistId]
+
+      const newNotifiedComplete = new Set(state.notifiedComplete)
+      newNotifiedComplete.delete(action.checklistId)
+
       const newChecklists = new Map(state.checklists)
       newChecklists.set(
         action.checklistId,
-        createChecklistState(config, context, new Set(), false, true)
+        createChecklistState(config, context, new Set(), false, true, undefined)
       )
 
-      return { completed: newCompleted, dismissed: newDismissed, checklists: newChecklists }
+      return {
+        completed: newCompleted,
+        dismissed: newDismissed,
+        checklists: newChecklists,
+        completedAt: newCompletedAt,
+        notifiedComplete: newNotifiedComplete,
+      }
     }
 
     case 'RESET_ALL': {
       const newChecklists = new Map<string, ChecklistState>()
       for (const config of configs) {
-        newChecklists.set(config.id, createChecklistState(config, context, new Set(), false, true))
+        newChecklists.set(
+          config.id,
+          createChecklistState(config, context, new Set(), false, true, undefined)
+        )
       }
-      return { completed: {}, dismissed: new Set(), checklists: newChecklists }
+      return {
+        completed: {},
+        dismissed: new Set(),
+        checklists: newChecklists,
+        completedAt: {},
+        notifiedComplete: new Set(),
+      }
     }
 
     case 'LOAD_PERSISTED':
       return handleLoadPersisted(action.state, reducerCtx)
+
+    case 'MARK_NOTIFIED_COMPLETE': {
+      if (state.notifiedComplete.has(action.checklistId)) return state
+      const next = new Set(state.notifiedComplete)
+      next.add(action.checklistId)
+      return { ...state, notifiedComplete: next }
+    }
 
     default:
       return state
@@ -256,9 +333,6 @@ export function ChecklistProvider({
   onChecklistDismiss,
   onTaskAction,
 }: ChecklistProviderProps) {
-  // Track completed checklists to prevent duplicate callbacks
-  const completedChecklistsRef = React.useRef(new Set<string>())
-
   // Build context
   const checklistContext: ChecklistContextType = React.useMemo(
     () => ({
@@ -276,13 +350,15 @@ export function ChecklistProvider({
     for (const config of checklistConfigs) {
       checklists.set(
         config.id,
-        createChecklistState(config, checklistContext, new Set(), false, true)
+        createChecklistState(config, checklistContext, new Set(), false, true, undefined)
       )
     }
     return {
       checklists,
       completed: {},
       dismissed: new Set(),
+      completedAt: {},
+      notifiedComplete: new Set(),
     }
   }, [checklistConfigs, checklistContext])
 
@@ -295,13 +371,27 @@ export function ChecklistProvider({
   // Persistence
   const { save, load } = useChecklistPersistence(persistence)
 
-  // Load persisted state on mount
+  // Load persisted state on mount (only once — re-running on consumer callback
+  // ref changes causes race conditions with in-progress user edits).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally mount-only
   React.useEffect(() => {
-    const persisted = load()
-    if (persisted) {
-      dispatch({ type: 'LOAD_PERSISTED', state: persisted })
+    const result = load()
+    if (result instanceof Promise) {
+      let cancelled = false
+      result.then((persisted) => {
+        if (!cancelled && persisted) {
+          dispatch({ type: 'LOAD_PERSISTED', state: persisted })
+        }
+      })
+      return () => {
+        cancelled = true
+      }
     }
-  }, [load])
+    if (result) {
+      dispatch({ type: 'LOAD_PERSISTED', state: result })
+    }
+    return undefined
+  }, [])
 
   // Save state changes
   React.useEffect(() => {
@@ -311,25 +401,27 @@ export function ChecklistProvider({
       ),
       dismissed: Array.from(state.dismissed),
       timestamp: Date.now(),
+      completedAt: state.completedAt,
+      notifiedComplete: Array.from(state.notifiedComplete),
     }
     save(persistedState)
-  }, [state.completed, state.dismissed, save])
+  }, [state.completed, state.dismissed, state.completedAt, state.notifiedComplete, save])
 
   // Check for checklist completion
   React.useEffect(() => {
     for (const [id, checklist] of state.checklists) {
-      if (checklist.isComplete && !completedChecklistsRef.current.has(id)) {
-        completedChecklistsRef.current.add(id)
+      if (checklist.isComplete && !state.notifiedComplete.has(id)) {
+        dispatch({ type: 'MARK_NOTIFIED_COMPLETE', checklistId: id })
         onChecklistComplete?.(id)
         checklist.config.onComplete?.()
       }
     }
-  }, [state.checklists, onChecklistComplete])
+  }, [state.checklists, state.notifiedComplete, onChecklistComplete])
 
   // Actions
   const completeTask = React.useCallback(
     (checklistId: string, taskId: string) => {
-      dispatch({ type: 'COMPLETE_TASK', checklistId, taskId })
+      dispatch({ type: 'COMPLETE_TASK', checklistId, taskId, at: Date.now() })
       onTaskComplete?.(checklistId, taskId)
     },
     [onTaskComplete]
@@ -409,12 +501,10 @@ export function ChecklistProvider({
   }, [])
 
   const resetChecklist = React.useCallback((checklistId: string) => {
-    completedChecklistsRef.current.delete(checklistId)
     dispatch({ type: 'RESET_CHECKLIST', checklistId })
   }, [])
 
   const resetAll = React.useCallback(() => {
-    completedChecklistsRef.current.clear()
     dispatch({ type: 'RESET_ALL' })
   }, [])
 

@@ -186,6 +186,33 @@ describe('dependencies', () => {
 
       expect(result).toEqual([])
     })
+
+    it('throws on direct self-reference (A -> A)', () => {
+      const tasks: ChecklistTaskConfig[] = [
+        { id: 'task-a', title: 'Task A', dependsOn: ['task-a'] },
+      ]
+
+      expect(() => resolveTaskDependencies(tasks)).toThrow(/Circular dependency/)
+    })
+
+    it('throws on two-step cycle (A -> B -> A)', () => {
+      const tasks: ChecklistTaskConfig[] = [
+        { id: 'task-a', title: 'Task A', dependsOn: ['task-b'] },
+        { id: 'task-b', title: 'Task B', dependsOn: ['task-a'] },
+      ]
+
+      expect(() => resolveTaskDependencies(tasks)).toThrow(/Circular dependency/)
+    })
+
+    it('throws on multi-step cycle and names the path', () => {
+      const tasks: ChecklistTaskConfig[] = [
+        { id: 'task-a', title: 'Task A', dependsOn: ['task-b'] },
+        { id: 'task-b', title: 'Task B', dependsOn: ['task-c'] },
+        { id: 'task-c', title: 'Task C', dependsOn: ['task-a'] },
+      ]
+
+      expect(() => resolveTaskDependencies(tasks)).toThrow(/task-a.*task-b.*task-c.*task-a/)
+    })
   })
 
   describe('hasCircularDependency', () => {

@@ -2,22 +2,16 @@ import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { afterEach, vi } from 'vitest'
 
-// Mock @floating-ui/react globally
-vi.mock('@floating-ui/react', () => ({
-  useFloating: vi.fn(() => ({
-    refs: {
-      setReference: vi.fn(),
-      setFloating: vi.fn(),
-    },
-    floatingStyles: { position: 'absolute', top: 0, left: 0 },
-    context: {},
-    middlewareData: { arrow: {} },
-  })),
-  autoUpdate: vi.fn(),
-  offset: vi.fn(),
-  flip: vi.fn(),
-  shift: vi.fn(),
-}))
+// Partially mock @floating-ui/react: stub the positioning-only pieces that
+// depend on layout (which jsdom can't compute), but pass through interaction
+// hooks and FloatingFocusManager so a11y flows in the launcher work.
+vi.mock('@floating-ui/react', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return {
+    ...actual,
+    autoUpdate: vi.fn(() => () => undefined),
+  }
+})
 
 // Cleanup after each test
 afterEach(() => {

@@ -5,4 +5,4 @@ export { Slot, Slottable } from '@radix-ui/react-slot'
 
 // Export Unified Slot for Base UI support
 export { UnifiedSlot } from './unified-slot'
-export type { RenderProp, UnifiedSlotProps } from './unified-slot'
+export type { UnifiedSlotProps } from './unified-slot'

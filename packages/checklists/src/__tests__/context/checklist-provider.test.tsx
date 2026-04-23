@@ -521,6 +521,100 @@ describe('ChecklistProvider', () => {
         expect(onComplete).toHaveBeenCalled()
       })
     })
+
+    it('does NOT re-fire onChecklistComplete after LOAD_PERSISTED of an already-notified complete checklist', async () => {
+      const onChecklistComplete = vi.fn()
+      const onComplete = vi.fn()
+      const checklistWithCallback: ChecklistConfig = {
+        ...mockNoDepsChecklist,
+        onComplete,
+      }
+      const persistence = {
+        enabled: true as const,
+        onLoad: () => ({
+          completed: { 'no-deps-checklist': ['task-a', 'task-b', 'task-c'] },
+          dismissed: [],
+          timestamp: 0,
+          notifiedComplete: ['no-deps-checklist'],
+        }),
+        onSave: () => undefined,
+      }
+
+      const { result } = renderHook(() => useChecklistContext(), {
+        wrapper: createWrapper({
+          checklists: [checklistWithCallback],
+          persistence,
+          onChecklistComplete,
+        }),
+      })
+
+      // Wait until LOAD_PERSISTED has reconstituted the complete state.
+      await waitFor(() => {
+        const checklist = result.current.getChecklist('no-deps-checklist')
+        expect(checklist?.isComplete).toBe(true)
+      })
+
+      // The completion-check effect must not fire callbacks for a checklist
+      // whose completion was already notified in a prior session.
+      expect(onChecklistComplete).not.toHaveBeenCalled()
+      expect(onComplete).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('completedAt timestamps', () => {
+    it('preserves completedAt for task A when an unrelated task B completes', async () => {
+      const { result } = renderHook(() => useChecklistContext(), {
+        wrapper: createWrapper({ checklists: [mockNoDepsChecklist] }),
+      })
+
+      act(() => {
+        result.current.completeTask('no-deps-checklist', 'task-a')
+      })
+
+      const firstStampA = result.current
+        .getChecklist('no-deps-checklist')
+        ?.tasks.find((t) => t.config.id === 'task-a')?.completedAt
+      expect(firstStampA).toBeTypeOf('number')
+
+      // Wait a tick so Date.now() for task-b would differ if recomputed.
+      await new Promise((r) => setTimeout(r, 5))
+
+      act(() => {
+        result.current.completeTask('no-deps-checklist', 'task-b')
+      })
+
+      const secondStampA = result.current
+        .getChecklist('no-deps-checklist')
+        ?.tasks.find((t) => t.config.id === 'task-a')?.completedAt
+
+      expect(secondStampA).toBe(firstStampA)
+    })
+
+    it('clears completedAt when a task is uncompleted', () => {
+      const { result } = renderHook(() => useChecklistContext(), {
+        wrapper: createWrapper({ checklists: [mockNoDepsChecklist] }),
+      })
+
+      act(() => {
+        result.current.completeTask('no-deps-checklist', 'task-a')
+      })
+
+      expect(
+        result.current
+          .getChecklist('no-deps-checklist')
+          ?.tasks.find((t) => t.config.id === 'task-a')?.completedAt
+      ).toBeTypeOf('number')
+
+      act(() => {
+        result.current.uncompleteTask('no-deps-checklist', 'task-a')
+      })
+
+      expect(
+        result.current
+          .getChecklist('no-deps-checklist')
+          ?.tasks.find((t) => t.config.id === 'task-a')?.completedAt
+      ).toBeUndefined()
+    })
   })
 
   describe('task action execution', () => {
