@@ -5,5 +5,5 @@ export {
   type TourKitContextValue,
 } from './tourkit-context'
 export { TourKitProvider, type TourKitProviderProps } from './tourkit-provider'
-export { TourContext, useTourContext } from './tour-context'
+export { TourContext, useTourContext, useTourContextOptional } from './tour-context'
 export { TourProvider, type TourProviderProps } from './tour-provider'

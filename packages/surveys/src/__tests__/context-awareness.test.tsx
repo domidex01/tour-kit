@@ -15,6 +15,15 @@ vi.mock('@tour-kit/core', () => ({
     }
     return { isActive: mockTourActive }
   },
+  useTourContextOptional: () => {
+    if (!mockTourProviderExists) return null
+    return { isActive: mockTourActive }
+  },
+  createStorageAdapter: () => ({
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+  }),
 }))
 
 function createTestSurveyConfig(): SurveyConfig {

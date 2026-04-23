@@ -1,17 +1,37 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import * as React from 'react'
+import { useSurvey } from '../hooks/use-survey'
+import { cn } from '../lib/utils'
 
-export interface SurveyInlineProps {
+export interface SurveyInlineProps extends React.HTMLAttributes<HTMLDivElement> {
   surveyId: string
-  children?: ReactNode
-  className?: string
+  /** If true, the inline survey renders even when the survey is hidden (useful for preview) */
+  alwaysRender?: boolean
+  children?: React.ReactNode
 }
 
-export function SurveyInline({ children, className }: SurveyInlineProps) {
-  return (
-    <div className={className} data-survey-inline="">
-      {children}
-    </div>
-  )
-}
+export const SurveyInline = React.forwardRef<HTMLDivElement, SurveyInlineProps>(
+  ({ surveyId, alwaysRender = false, className, children, ...props }, ref) => {
+    const survey = useSurvey(surveyId)
+    if (!alwaysRender && !survey.state?.isVisible) return null
+
+    return (
+      <div
+        ref={ref}
+        role="region"
+        aria-label={survey.config?.title ?? 'Survey'}
+        data-survey-inline={surveyId}
+        className={cn('flex flex-col gap-4', className)}
+        {...props}
+      >
+        {survey.config?.title && <h3 className="font-medium">{survey.config.title}</h3>}
+        {survey.config?.description && typeof survey.config.description === 'string' && (
+          <p className="text-sm text-muted-foreground">{survey.config.description}</p>
+        )}
+        {children}
+      </div>
+    )
+  }
+)
+SurveyInline.displayName = 'SurveyInline'

@@ -80,10 +80,12 @@ const QuestionBoolean = React.forwardRef<HTMLDivElement, QuestionBooleanProps>(
             nextIndex = (focusedIndex - 1 + 2) % 2
             break
           case ' ':
-          case 'Enter':
+          case 'Enter': {
             event.preventDefault()
-            selectValue(boolOptions[focusedIndex].value)
+            const chosen = boolOptions[focusedIndex]
+            if (chosen !== undefined) selectValue(chosen.value)
             return
+          }
           default:
             return
         }

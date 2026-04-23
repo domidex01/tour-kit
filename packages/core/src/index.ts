@@ -59,6 +59,7 @@ export {
   TourKitProvider,
   TourContext,
   useTourContext,
+  useTourContextOptional,
   TourProvider,
 } from './context'
 export type { TourKitContextValue, TourKitProviderProps, TourProviderProps } from './context'

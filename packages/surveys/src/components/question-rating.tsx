@@ -112,10 +112,12 @@ const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
             nextIndex = options.length - 1
             break
           case ' ':
-          case 'Enter':
+          case 'Enter': {
             event.preventDefault()
-            selectValue(options[focusedIndex])
+            const chosen = options[focusedIndex]
+            if (chosen !== undefined) selectValue(chosen)
             return
+          }
           default:
             return
         }

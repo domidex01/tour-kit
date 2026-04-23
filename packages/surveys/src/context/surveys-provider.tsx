@@ -1,9 +1,19 @@
-import { useTourContext } from '@tour-kit/core'
+import { createStorageAdapter, useTourContextOptional } from '@tour-kit/core'
 import { ProGate } from '@tour-kit/license'
-import { type ReactNode, useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react'
 import { calculateCES, calculateCSAT, calculateNPS } from '../core/scoring'
+import { SurveyScheduler } from '../core/scheduler'
 import type { SurveysContextValue, SurveysProviderProps } from '../types/context'
 import type { AnswerValue } from '../types/question'
+import { DEFAULT_SURVEY_QUEUE_CONFIG, type SurveyQueueConfig } from '../types/queue'
 import type { CESResult, CSATResult, NPSResult } from '../types/scoring'
 import type { DismissalReason, SurveyConfig, SurveyState } from '../types/survey'
 import { SurveysContext } from './surveys-context'
@@ -14,15 +24,16 @@ type SurveysAction =
   | { type: 'REGISTER'; config: SurveyConfig }
   | { type: 'UNREGISTER'; id: string }
   | { type: 'SHOW'; id: string }
-  | { type: 'HIDE'; id: string }
-  | { type: 'DISMISS'; id: string; reason: DismissalReason }
-  | { type: 'SNOOZE'; id: string }
+  | { type: 'HIDE'; id: string; drain: boolean }
+  | { type: 'DISMISS'; id: string; reason: DismissalReason; drain: boolean }
+  | { type: 'SNOOZE'; id: string; delayDays?: number; drain: boolean }
   | { type: 'ANSWER'; id: string; questionId: string; value: AnswerValue }
   | { type: 'NEXT_QUESTION'; id: string }
   | { type: 'PREV_QUESTION'; id: string }
-  | { type: 'COMPLETE'; id: string }
+  | { type: 'COMPLETE'; id: string; drain: boolean }
   | { type: 'RESET'; id: string }
   | { type: 'RESET_ALL' }
+  | { type: 'HYDRATE'; surveys: Map<string, SurveyState>; queue: string[] }
 
 interface SurveysReducerState {
   surveys: Map<string, SurveyState>
@@ -50,179 +61,279 @@ function createInitialSurveyState(id: string): SurveyState {
   }
 }
 
-function updateSurvey(
-  state: SurveysReducerState,
-  id: string,
-  updater: (existing: SurveyState) => SurveyState,
-  clearActive = false
-): SurveysReducerState {
-  const surveys = new Map(state.surveys)
-  const existing = surveys.get(id)
-  if (!existing) return state
-  surveys.set(id, updater(existing))
-  return {
-    ...state,
-    surveys,
-    activeSurvey: clearActive && state.activeSurvey === id ? null : state.activeSurvey,
+function drainQueue(state: SurveysReducerState): SurveysReducerState {
+  if (state.queue.length === 0) {
+    return { ...state, activeSurvey: null }
   }
-}
-
-function handleRegister(state: SurveysReducerState, config: SurveyConfig): SurveysReducerState {
-  const surveys = new Map(state.surveys)
-  if (!surveys.has(config.id)) {
-    surveys.set(config.id, createInitialSurveyState(config.id))
+  const [nextId, ...rest] = state.queue
+  if (!nextId) return { ...state, activeSurvey: null, queue: rest }
+  const existing = state.surveys.get(nextId)
+  if (!existing) {
+    return drainQueue({ ...state, queue: rest })
   }
-  return { ...state, surveys }
-}
-
-function handleUnregister(state: SurveysReducerState, id: string): SurveysReducerState {
-  const surveys = new Map(state.surveys)
-  surveys.delete(id)
-  return {
-    ...state,
-    surveys,
-    activeSurvey: state.activeSurvey === id ? null : state.activeSurvey,
-    queue: state.queue.filter((qid) => qid !== id),
+  if (existing.isCompleted || existing.isDismissed) {
+    return drainQueue({ ...state, queue: rest })
   }
-}
-
-function handleShow(state: SurveysReducerState, id: string): SurveysReducerState {
-  const existing = state.surveys.get(id)
-  if (!existing) return state
-
-  if (state.activeSurvey && state.activeSurvey !== id) {
-    return { ...state, queue: [...state.queue, id] }
-  }
-
   const surveys = new Map(state.surveys)
-  surveys.set(id, {
+  surveys.set(nextId, {
     ...existing,
     isActive: true,
     isVisible: true,
     viewCount: existing.viewCount + 1,
     lastViewedAt: new Date(),
   })
-  return { ...state, surveys, activeSurvey: id }
+  return { ...state, surveys, activeSurvey: nextId, queue: rest }
 }
 
-function handleAnswer(
+function updateSurvey(
   state: SurveysReducerState,
   id: string,
-  questionId: string,
-  value: AnswerValue
+  updater: (existing: SurveyState) => SurveyState
 ): SurveysReducerState {
-  return updateSurvey(state, id, (existing) => {
-    const responses = new Map(existing.responses)
-    responses.set(questionId, value)
-    return { ...existing, responses }
-  })
+  const existing = state.surveys.get(id)
+  if (!existing) return state
+  const surveys = new Map(state.surveys)
+  surveys.set(id, updater(existing))
+  return { ...state, surveys }
 }
 
-const reducerHandlers: Record<
-  string,
-  (state: SurveysReducerState, action: SurveysAction) => SurveysReducerState
-> = {
-  REGISTER: (state, action) => handleRegister(state, (action as { config: SurveyConfig }).config),
-  UNREGISTER: (state, action) => handleUnregister(state, (action as { id: string }).id),
-  SHOW: (state, action) => handleShow(state, (action as { id: string }).id),
-  HIDE: (state, action) =>
-    updateSurvey(
-      state,
-      (action as { id: string }).id,
-      (e) => ({ ...e, isActive: false, isVisible: false }),
-      true
-    ),
-  DISMISS: (state, action) => {
-    const { id, reason } = action as { id: string; reason: DismissalReason }
-    return updateSurvey(
-      state,
-      id,
-      (e) => ({
+function surveysReducer(state: SurveysReducerState, action: SurveysAction): SurveysReducerState {
+  switch (action.type) {
+    case 'REGISTER': {
+      if (state.surveys.has(action.config.id)) return state
+      const surveys = new Map(state.surveys)
+      surveys.set(action.config.id, createInitialSurveyState(action.config.id))
+      return { ...state, surveys }
+    }
+
+    case 'UNREGISTER': {
+      if (!state.surveys.has(action.id)) return state
+      const surveys = new Map(state.surveys)
+      surveys.delete(action.id)
+      return {
+        ...state,
+        surveys,
+        activeSurvey: state.activeSurvey === action.id ? null : state.activeSurvey,
+        queue: state.queue.filter((qid) => qid !== action.id),
+      }
+    }
+
+    case 'SHOW': {
+      const existing = state.surveys.get(action.id)
+      if (!existing) return state
+      if (existing.isCompleted || existing.isDismissed) return state
+      if (state.activeSurvey === action.id && existing.isVisible) return state
+
+      if (state.activeSurvey && state.activeSurvey !== action.id) {
+        if (state.queue.includes(action.id)) return state
+        return { ...state, queue: [...state.queue, action.id] }
+      }
+
+      const surveys = new Map(state.surveys)
+      surveys.set(action.id, {
+        ...existing,
+        isActive: true,
+        isVisible: true,
+        viewCount: existing.viewCount + 1,
+        lastViewedAt: new Date(),
+      })
+      return { ...state, surveys, activeSurvey: action.id }
+    }
+
+    case 'HIDE': {
+      const next = updateSurvey(state, action.id, (e) => ({
+        ...e,
+        isActive: false,
+        isVisible: false,
+      }))
+      if (state.activeSurvey !== action.id) return next
+      return action.drain
+        ? drainQueue(next)
+        : { ...next, activeSurvey: null }
+    }
+
+    case 'DISMISS': {
+      const next = updateSurvey(state, action.id, (e) => ({
         ...e,
         isActive: false,
         isVisible: false,
         isDismissed: true,
         dismissedAt: new Date(),
-        dismissalReason: reason,
-      }),
-      true
-    )
-  },
-  SNOOZE: (state, action) =>
-    updateSurvey(
-      state,
-      (action as { id: string }).id,
-      (e) => ({
+        dismissalReason: action.reason,
+      }))
+      if (state.activeSurvey !== action.id) return next
+      return action.drain
+        ? drainQueue({
+            ...next,
+            queue: next.queue.filter((qid) => qid !== action.id),
+          })
+        : { ...next, activeSurvey: null }
+    }
+
+    case 'SNOOZE': {
+      const days = action.delayDays
+      const next = updateSurvey(state, action.id, (e) => ({
         ...e,
         isActive: false,
         isVisible: false,
         isSnoozed: true,
         snoozeCount: e.snoozeCount + 1,
-      }),
-      true
-    ),
-  ANSWER: (state, action) => {
-    const { id, questionId, value } = action as {
-      id: string
-      questionId: string
-      value: AnswerValue
+        snoozeUntil: days !== undefined
+          ? new Date(Date.now() + days * 24 * 60 * 60 * 1000)
+          : e.snoozeUntil,
+      }))
+      if (state.activeSurvey !== action.id) return next
+      return action.drain
+        ? drainQueue(next)
+        : { ...next, activeSurvey: null }
     }
-    return handleAnswer(state, id, questionId, value)
-  },
-  NEXT_QUESTION: (state, action) =>
-    updateSurvey(state, (action as { id: string }).id, (e) => ({
-      ...e,
-      currentStep: e.currentStep + 1,
-    })),
-  PREV_QUESTION: (state, action) =>
-    updateSurvey(state, (action as { id: string }).id, (e) => ({
-      ...e,
-      currentStep: Math.max(0, e.currentStep - 1),
-    })),
-  COMPLETE: (state, action) =>
-    updateSurvey(
-      state,
-      (action as { id: string }).id,
-      (e) => ({
+
+    case 'ANSWER':
+      return updateSurvey(state, action.id, (existing) => {
+        const responses = new Map(existing.responses)
+        responses.set(action.questionId, action.value)
+        return { ...existing, responses }
+      })
+
+    case 'NEXT_QUESTION':
+      return updateSurvey(state, action.id, (e) => ({
+        ...e,
+        currentStep: e.currentStep + 1,
+      }))
+
+    case 'PREV_QUESTION':
+      return updateSurvey(state, action.id, (e) => ({
+        ...e,
+        currentStep: Math.max(0, e.currentStep - 1),
+      }))
+
+    case 'COMPLETE': {
+      const next = updateSurvey(state, action.id, (e) => ({
         ...e,
         isActive: false,
         isVisible: false,
         isCompleted: true,
         completedAt: new Date(),
-      }),
-      true
-    ),
-  RESET: (state, action) => {
-    const surveys = new Map(state.surveys)
-    surveys.set(
-      (action as { id: string }).id,
-      createInitialSurveyState((action as { id: string }).id)
-    )
-    return { ...state, surveys }
-  },
-  RESET_ALL: (state) => {
-    const surveys = new Map<string, SurveyState>()
-    for (const [id] of state.surveys) {
-      surveys.set(id, createInitialSurveyState(id))
+      }))
+      if (state.activeSurvey !== action.id) return next
+      return action.drain
+        ? drainQueue(next)
+        : { ...next, activeSurvey: null }
     }
-    return { ...state, surveys, activeSurvey: null, queue: [] }
-  },
+
+    case 'RESET': {
+      if (!state.surveys.has(action.id)) return state
+      const surveys = new Map(state.surveys)
+      surveys.set(action.id, createInitialSurveyState(action.id))
+      return { ...state, surveys }
+    }
+
+    case 'RESET_ALL': {
+      const surveys = new Map<string, SurveyState>()
+      for (const [id] of state.surveys) {
+        surveys.set(id, createInitialSurveyState(id))
+      }
+      return { ...state, surveys, activeSurvey: null, queue: [] }
+    }
+
+    case 'HYDRATE':
+      return { ...state, surveys: action.surveys, queue: action.queue }
+
+    default:
+      return state
+  }
 }
 
-function surveysReducer(state: SurveysReducerState, action: SurveysAction): SurveysReducerState {
-  const handler = reducerHandlers[action.type]
-  return handler ? handler(state, action) : state
+// ── Storage serialization ──────────────────────────────────
+
+interface SerializedSurveyState {
+  id: string
+  isActive: boolean
+  isVisible: boolean
+  isDismissed: boolean
+  isSnoozed: boolean
+  isCompleted: boolean
+  viewCount: number
+  lastViewedAt: string | null
+  dismissedAt: string | null
+  dismissalReason: DismissalReason | null
+  completedAt: string | null
+  snoozeCount: number
+  snoozeUntil: string | null
+  currentStep: number
+  responses: Array<[string, AnswerValue]>
 }
 
-// ── Context awareness ──────────────────────────────────────
+interface SerializedState {
+  surveys: Array<[string, SerializedSurveyState]>
+  queue: string[]
+  lastShownAt: string | null
+}
 
-function useOptionalTourContext(): { isActive: boolean } | null {
+function serializeState(
+  surveys: Map<string, SurveyState>,
+  queue: string[],
+  lastShownAt: Date | null
+): string {
+  const payload: SerializedState = {
+    surveys: Array.from(surveys.entries()).map(([id, s]) => [
+      id,
+      {
+        ...s,
+        lastViewedAt: s.lastViewedAt?.toISOString() ?? null,
+        dismissedAt: s.dismissedAt?.toISOString() ?? null,
+        completedAt: s.completedAt?.toISOString() ?? null,
+        snoozeUntil: s.snoozeUntil?.toISOString() ?? null,
+        responses: Array.from(s.responses.entries()),
+      },
+    ]),
+    queue,
+    lastShownAt: lastShownAt?.toISOString() ?? null,
+  }
+  return JSON.stringify(payload)
+}
+
+function deserializeState(raw: string | null): {
+  surveys: Map<string, SurveyState>
+  queue: string[]
+  lastShownAt: Date | null
+} | null {
+  if (!raw) return null
   try {
-    const ctx = useTourContext()
-    return ctx
+    const parsed = JSON.parse(raw) as SerializedState
+    const surveys = new Map<string, SurveyState>()
+    for (const [id, s] of parsed.surveys) {
+      surveys.set(id, {
+        id: s.id,
+        isActive: false,
+        isVisible: false,
+        isDismissed: s.isDismissed,
+        isSnoozed: s.isSnoozed,
+        isCompleted: s.isCompleted,
+        viewCount: s.viewCount,
+        lastViewedAt: s.lastViewedAt ? new Date(s.lastViewedAt) : null,
+        dismissedAt: s.dismissedAt ? new Date(s.dismissedAt) : null,
+        dismissalReason: s.dismissalReason,
+        completedAt: s.completedAt ? new Date(s.completedAt) : null,
+        snoozeCount: s.snoozeCount,
+        snoozeUntil: s.snoozeUntil ? new Date(s.snoozeUntil) : null,
+        currentStep: s.currentStep,
+        responses: new Map(s.responses),
+      })
+    }
+    return {
+      surveys,
+      queue: parsed.queue ?? [],
+      lastShownAt: parsed.lastShownAt ? new Date(parsed.lastShownAt) : null,
+    }
   } catch {
     return null
   }
+}
+
+function daysBetween(a: Date, b: Date): number {
+  const msPerDay = 24 * 60 * 60 * 1000
+  return Math.floor(Math.abs(b.getTime() - a.getTime()) / msPerDay)
 }
 
 // ── Provider ───────────────────────────────────────────────
@@ -230,6 +341,13 @@ function useOptionalTourContext(): { isActive: boolean } | null {
 export function SurveysProvider({
   children,
   surveys: surveyConfigs = [],
+  queueConfig,
+  storage: storageProp,
+  storageKey = 'tour-kit:surveys',
+  userContext,
+  globalCooldownDays,
+  samplingRate = 1,
+  maxPerSession,
   onSurveyShow,
   onSurveyDismiss,
   onSurveyComplete,
@@ -247,49 +365,154 @@ export function SurveysProvider({
   const configsRef = useRef(surveyConfigs)
   configsRef.current = surveyConfigs
 
-  // Register configs on mount
+  const stateRef = useRef(state)
+  stateRef.current = state
+
+  const mergedQueueConfig = useMemo<SurveyQueueConfig>(
+    () => ({ ...DEFAULT_SURVEY_QUEUE_CONFIG, ...queueConfig }),
+    [queueConfig]
+  )
+
+  const schedulerRef = useRef<SurveyScheduler | null>(null)
+  if (schedulerRef.current === null) {
+    schedulerRef.current = new SurveyScheduler(mergedQueueConfig)
+  }
   useEffect(() => {
-    for (const config of surveyConfigs) {
+    schedulerRef.current?.updateConfig(mergedQueueConfig)
+  }, [mergedQueueConfig])
+
+  const storage = useMemo(() => {
+    if (storageProp === null) return null
+    return createStorageAdapter(storageProp ?? 'localStorage')
+  }, [storageProp])
+
+  const storageStateKey = `${storageKey}:state`
+  const hydratedRef = useRef(false)
+  const lastShownAtRef = useRef<Date | null>(null)
+  const sessionShowCountRef = useRef(0)
+
+  const [userRoll] = useState(() => Math.random())
+
+  // Hydrate from storage on mount
+  useEffect(() => {
+    if (hydratedRef.current || !storage) {
+      hydratedRef.current = true
+      return
+    }
+    let cancelled = false
+    Promise.resolve(storage.getItem(storageStateKey)).then((raw) => {
+      if (cancelled) return
+      const hydrated = deserializeState(raw)
+      if (hydrated) {
+        dispatch({ type: 'HYDRATE', surveys: hydrated.surveys, queue: hydrated.queue })
+        lastShownAtRef.current = hydrated.lastShownAt
+      }
+      hydratedRef.current = true
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [storage, storageStateKey])
+
+  // Register configs after hydration
+  const ids = useMemo(() => surveyConfigs.map((c) => c.id).join('|'), [surveyConfigs])
+  useEffect(() => {
+    for (const config of configsRef.current) {
       dispatch({ type: 'REGISTER', config })
     }
-  }, [surveyConfigs])
+  }, [ids])
 
-  // Context awareness — suppress surveys when tour is active
-  const tourContext = useOptionalTourContext()
+  // Persist on state change
+  useEffect(() => {
+    if (!storage || !hydratedRef.current) return
+    const serialized = serializeState(state.surveys, state.queue, lastShownAtRef.current)
+    storage.setItem(storageStateKey, serialized)
+  }, [state.surveys, state.queue, storage, storageStateKey])
+
+  // Suppress surveys while a tour is active
+  const tourContext = useTourContextOptional()
   const isTourActive = tourContext?.isActive ?? false
 
   useEffect(() => {
     if (isTourActive && state.activeSurvey) {
-      dispatch({ type: 'HIDE', id: state.activeSurvey })
+      dispatch({ type: 'HIDE', id: state.activeSurvey, drain: false })
     }
   }, [isTourActive, state.activeSurvey])
 
-  // ── Action handlers with analytics callbacks ──
+  // ── Gate: can this survey be shown right now? ──
+
+  const canShowInternal = useCallback(
+    (id: string): boolean => {
+      if (isTourActive) return false
+      const config = configsRef.current.find((c) => c.id === id)
+      const surveyState = stateRef.current.surveys.get(id)
+      if (!config || !surveyState) return false
+
+      const scheduler = schedulerRef.current
+      if (scheduler && !scheduler.canShow(config, surveyState, userContext)) return false
+
+      const effectiveSampling = Math.min(samplingRate, config.samplingRate ?? 1)
+      if (userRoll >= effectiveSampling) return false
+
+      const effectiveCooldown = config.globalCooldownDays ?? globalCooldownDays
+      if (
+        effectiveCooldown !== undefined &&
+        lastShownAtRef.current &&
+        daysBetween(lastShownAtRef.current, new Date()) < effectiveCooldown
+      ) {
+        return false
+      }
+
+      const effectiveMaxPerSession = config.maxPerSession ?? maxPerSession
+      if (
+        effectiveMaxPerSession !== undefined &&
+        sessionShowCountRef.current >= effectiveMaxPerSession
+      ) {
+        return false
+      }
+
+      if (config.maxSnoozeCount !== undefined && surveyState.snoozeCount >= config.maxSnoozeCount) {
+        return false
+      }
+
+      return true
+    },
+    [isTourActive, userContext, samplingRate, globalCooldownDays, maxPerSession, userRoll]
+  )
+
+  // ── Action handlers ──
 
   const handleShow = useCallback(
     (id: string) => {
-      if (isTourActive) return
+      if (!canShowInternal(id)) return
       dispatch({ type: 'SHOW', id })
+      lastShownAtRef.current = new Date()
+      sessionShowCountRef.current += 1
       onSurveyShow?.(id)
+      const cfg = configsRef.current.find((c) => c.id === id)
+      cfg?.onShow?.()
     },
-    [isTourActive, onSurveyShow]
+    [canShowInternal, onSurveyShow]
   )
 
   const handleHide = useCallback((id: string) => {
-    dispatch({ type: 'HIDE', id })
+    dispatch({ type: 'HIDE', id, drain: true })
   }, [])
 
   const handleDismiss = useCallback(
     (id: string, reason: DismissalReason = 'programmatic') => {
-      dispatch({ type: 'DISMISS', id, reason })
+      dispatch({ type: 'DISMISS', id, reason, drain: true })
       onSurveyDismiss?.(id, reason)
+      const cfg = configsRef.current.find((c) => c.id === id)
+      cfg?.onDismiss?.(reason)
     },
     [onSurveyDismiss]
   )
 
   const handleSnooze = useCallback(
     (id: string) => {
-      dispatch({ type: 'SNOOZE', id })
+      const cfg = configsRef.current.find((c) => c.id === id)
+      dispatch({ type: 'SNOOZE', id, delayDays: cfg?.snoozeDelayDays, drain: true })
       onSurveySnooze?.(id)
     },
     [onSurveySnooze]
@@ -300,6 +523,8 @@ export function SurveysProvider({
       dispatch({ type: 'ANSWER', id: surveyId, questionId, value })
       onQuestionAnswered?.(surveyId, questionId, value)
       onSurveyAnswer?.(surveyId, questionId, value)
+      const cfg = configsRef.current.find((c) => c.id === surveyId)
+      cfg?.onAnswer?.(questionId, value)
     },
     [onQuestionAnswered, onSurveyAnswer]
   )
@@ -314,14 +539,15 @@ export function SurveysProvider({
 
   const handleComplete = useCallback(
     (surveyId: string) => {
-      const surveyState = state.surveys.get(surveyId)
-      const responses = surveyState?.responses ?? new Map()
+      const surveyState = stateRef.current.surveys.get(surveyId)
+      const responses = surveyState?.responses ?? new Map<string, AnswerValue>()
 
-      dispatch({ type: 'COMPLETE', id: surveyId })
+      dispatch({ type: 'COMPLETE', id: surveyId, drain: true })
       onSurveyComplete?.(surveyId, responses)
 
-      // Calculate score if survey has a scoreType configured
       const config = configsRef.current.find((s) => s.id === surveyId)
+      config?.onComplete?.(responses)
+
       if (config?.type && config.type !== 'custom' && onScoreCalculated) {
         const values = Array.from(responses.values()).filter(
           (v): v is number => typeof v === 'number'
@@ -343,7 +569,7 @@ export function SurveysProvider({
         }
       }
     },
-    [state.surveys, onSurveyComplete, onScoreCalculated]
+    [onSurveyComplete, onScoreCalculated]
   )
 
   const handleRegister = useCallback((config: SurveyConfig) => {
@@ -366,17 +592,6 @@ export function SurveysProvider({
 
   const getConfig = useCallback((id: string) => configsRef.current.find((s) => s.id === id), [])
 
-  const canShow = useCallback(
-    (id: string) => {
-      if (isTourActive) return false
-      const surveyState = state.surveys.get(id)
-      if (!surveyState) return false
-      if (surveyState.isCompleted || surveyState.isDismissed) return false
-      return true
-    },
-    [isTourActive, state.surveys]
-  )
-
   const value = useMemo<SurveysContextValue>(
     () => ({
       surveys: state.surveys,
@@ -396,7 +611,7 @@ export function SurveysProvider({
       resetAll: handleResetAll,
       getState,
       getConfig,
-      canShow,
+      canShow: canShowInternal,
     }),
     [
       state.surveys,
@@ -416,7 +631,7 @@ export function SurveysProvider({
       handleResetAll,
       getState,
       getConfig,
-      canShow,
+      canShowInternal,
     ]
   )
 

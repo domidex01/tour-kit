@@ -14,3 +14,7 @@ export function useTourContext(): TourContextValue {
 
   return context
 }
+
+export function useTourContextOptional(): TourContextValue | null {
+  return useContext(TourContext)
+}

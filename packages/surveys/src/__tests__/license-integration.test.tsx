@@ -11,6 +11,12 @@ vi.mock('@tour-kit/license', () => ({
 // Mock @tour-kit/core to avoid requiring TourProvider
 vi.mock('@tour-kit/core', () => ({
   useTourContext: () => ({ isActive: false }),
+  useTourContextOptional: () => ({ isActive: false }),
+  createStorageAdapter: () => ({
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+  }),
 }))
 
 import { SurveysProvider } from '../context/surveys-provider'
@@ -53,6 +59,12 @@ describe('SurveysProvider — ProGate blocks when unlicensed', () => {
     }))
     vi.doMock('@tour-kit/core', () => ({
       useTourContext: () => ({ isActive: false }),
+      useTourContextOptional: () => ({ isActive: false }),
+      createStorageAdapter: () => ({
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {},
+      }),
     }))
   })
 

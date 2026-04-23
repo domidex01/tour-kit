@@ -113,16 +113,19 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
             nextIndex = enabledOptions.length - 1
             break
           case ' ':
-          case 'Enter':
+          case 'Enter': {
             event.preventDefault()
-            selectSingle(enabledOptions[focusedIndex].value)
+            const chosen = enabledOptions[focusedIndex]
+            if (chosen !== undefined) selectSingle(chosen.value)
             return
+          }
           default:
             return
         }
 
         setFocusedIndex(nextIndex)
-        selectSingle(enabledOptions[nextIndex].value)
+        const nextOpt = enabledOptions[nextIndex]
+        if (nextOpt !== undefined) selectSingle(nextOpt.value)
 
         // Focus the element at the new index
         const container = (event.currentTarget as HTMLElement).closest(
