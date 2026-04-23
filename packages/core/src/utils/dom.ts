@@ -97,11 +97,15 @@ const FOCUSABLE_SELECTOR = [
 
 /**
  * Get all focusable elements within a container
+ *
+ * Uses getComputedStyle rather than offsetParent so `position: fixed`
+ * descendants (which have a null offsetParent) are still included.
  */
 export function getFocusableElements(container: HTMLElement): HTMLElement[] {
-  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (el) => el.offsetParent !== null
-  )
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter((el) => {
+    const style = getComputedStyle(el)
+    return style.display !== 'none' && style.visibility !== 'hidden'
+  })
 }
 
 /**

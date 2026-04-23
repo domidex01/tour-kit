@@ -2,6 +2,7 @@ import { render } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { HintHeadless } from '../../components/headless/hint'
 import { Hint } from '../../components/hint'
 import { HintsProvider } from '../../context/hints-provider'
 import { useHint } from '../../hooks/use-hint'
@@ -138,6 +139,55 @@ describe('Hint — autoShow does not infinite-loop', () => {
 
     // StrictMode double-invokes effects on mount; the ref guard must prevent
     // the second run from firing onShow again.
+    expect(onShowCalls).toBe(1)
+  })
+
+  it('HintHeadless — does not re-fire onShow when parent re-renders with inline callback', () => {
+    let onShowCalls = 0
+
+    function Parent({ n }: { n: number }) {
+      return (
+        <HintsProvider>
+          <div>{n}</div>
+          <HintHeadless
+            id="h"
+            target="#target"
+            content="Hello"
+            autoShow
+            onShow={() => {
+              onShowCalls += 1
+            }}
+          />
+        </HintsProvider>
+      )
+    }
+
+    const { rerender } = render(<Parent n={1} />)
+    rerender(<Parent n={2} />)
+    rerender(<Parent n={3} />)
+
+    expect(onShowCalls).toBe(1)
+  })
+
+  it('HintHeadless — survives React.StrictMode without looping', () => {
+    let onShowCalls = 0
+
+    render(
+      <React.StrictMode>
+        <HintsProvider>
+          <HintHeadless
+            id="h"
+            target="#target"
+            content="Hello"
+            autoShow
+            onShow={() => {
+              onShowCalls += 1
+            }}
+          />
+        </HintsProvider>
+      </React.StrictMode>
+    )
+
     expect(onShowCalls).toBe(1)
   })
 

@@ -234,6 +234,103 @@ describe('useKeyboardNavigation', () => {
     document.body.removeChild(textarea)
   })
 
+  it('ignores keyboard when focus is in select', async () => {
+    const wrapper = createWrapper()
+
+    const select = document.createElement('select')
+    const option = document.createElement('option')
+    option.textContent = 'one'
+    select.appendChild(option)
+    document.body.appendChild(select)
+
+    const { result } = renderHook(
+      () => {
+        const tour = useTour()
+        useKeyboardNavigation()
+        return tour
+      },
+      { wrapper }
+    )
+
+    await act(async () => {
+      await result.current.start()
+    })
+
+    select.focus()
+
+    act(() => {
+      dispatchKeyEvent('ArrowRight')
+    })
+
+    expect(result.current.currentStepIndex).toBe(0)
+
+    document.body.removeChild(select)
+  })
+
+  it('ignores keyboard when focus is in contenteditable element', async () => {
+    const wrapper = createWrapper()
+
+    const editable = document.createElement('div')
+    editable.setAttribute('contenteditable', 'true')
+    editable.tabIndex = 0
+    document.body.appendChild(editable)
+
+    const { result } = renderHook(
+      () => {
+        const tour = useTour()
+        useKeyboardNavigation()
+        return tour
+      },
+      { wrapper }
+    )
+
+    await act(async () => {
+      await result.current.start()
+    })
+
+    editable.focus()
+
+    act(() => {
+      dispatchKeyEvent('ArrowRight')
+    })
+
+    expect(result.current.currentStepIndex).toBe(0)
+
+    document.body.removeChild(editable)
+  })
+
+  it('ignores keyboard when focus is in role="textbox"', async () => {
+    const wrapper = createWrapper()
+
+    const textbox = document.createElement('div')
+    textbox.setAttribute('role', 'textbox')
+    textbox.tabIndex = 0
+    document.body.appendChild(textbox)
+
+    const { result } = renderHook(
+      () => {
+        const tour = useTour()
+        useKeyboardNavigation()
+        return tour
+      },
+      { wrapper }
+    )
+
+    await act(async () => {
+      await result.current.start()
+    })
+
+    textbox.focus()
+
+    act(() => {
+      dispatchKeyEvent('ArrowRight')
+    })
+
+    expect(result.current.currentStepIndex).toBe(0)
+
+    document.body.removeChild(textbox)
+  })
+
   it('uses custom key configuration for next', async () => {
     const wrapper = createWrapper()
 

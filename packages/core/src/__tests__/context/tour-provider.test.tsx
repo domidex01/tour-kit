@@ -449,6 +449,52 @@ describe('TourProvider', () => {
   })
 })
 
+describe('TourProvider — UPDATE_TOURS reducer', () => {
+  it('short-circuits when tours array is shallow-equal (regression)', () => {
+    // Stable tour references — mimics the common pattern where module-scope
+    // tours are passed in a freshly-spread array on each render.
+    const t1: Tour = {
+      id: 'tour-a',
+      steps: [{ id: 'a1', target: '#a1', content: 'A1' }],
+    }
+    const t2: Tour = {
+      id: 'tour-b',
+      steps: [{ id: 'b1', target: '#b1', content: 'B1' }],
+    }
+
+    let consumerRenders = 0
+
+    function Consumer() {
+      useTour()
+      consumerRenders += 1
+      return null
+    }
+
+    function Harness({ n }: { n: number }) {
+      // Fresh array identity per render (inline literal), but same tour refs.
+      return (
+        <TourProvider tours={[t1, t2]}>
+          <Consumer />
+          <span data-testid="n">{n}</span>
+        </TourProvider>
+      )
+    }
+
+    const { rerender } = render(<Harness n={0} />)
+    const initial = consumerRenders
+
+    // Force several parent re-renders with the same tour references.
+    for (let i = 1; i <= 5; i++) {
+      rerender(<Harness n={i} />)
+    }
+
+    // Consumer may still render due to parent re-renders, but the reducer
+    // short-circuit means each re-render is at most a single pass rather
+    // than triggering an additional UPDATE_TOURS-induced render.
+    expect(consumerRenders - initial).toBeLessThanOrEqual(5)
+  })
+})
+
 describe('useTourContext', () => {
   it('throws error when used outside TourProvider', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})

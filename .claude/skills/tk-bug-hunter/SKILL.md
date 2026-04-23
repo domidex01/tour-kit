@@ -29,10 +29,12 @@ Precision comes from **refusing to lie**, not from being thorough. The layered d
 | 3. Dead code | `knip` | ~95% | HIGH if exported + not imported anywhere |
 | 4. Dep graph | `depcruise` / simple grep for cycles | ~99% | HIGH |
 | 5. Publish hygiene | `publint` | ~99% | HIGH |
-| 6. Known anti-patterns | grep + read surrounding 5 lines | ~90% | MED by default, HIGH only after context confirms |
-| 7. Semantic review (`--deep`) | LLM reads files, reasons | ~60-70% | LOW by default, MED only if corroborated |
+| 6a. AST rules-of-hooks | `scripts/ast-rules-of-hooks.mjs` | ~100% | HIGH (all rules it emits) |
+| 6b. Exports diff | `scripts/dist-vs-src-exports.mjs` | 100% | HIGH (100% on diffs) |
+| 7. Known anti-patterns (ripgrep) | `rg` + read surrounding 5 lines | ~90% | MED by default, HIGH only with a second layer |
+| 8. Semantic review (`--deep`) | LLM reads files, reasons | ~60-70% | LOW by default, MED only if corroborated |
 
-**Rule:** a finding is only HIGH if **two or more layers flag the same location** OR layer 1/2/3/4/5 produced it directly.
+**Rule:** a finding is only HIGH if a deterministic layer (1–6) produced it directly, OR two or more layers flag the same location. A ripgrep-only match in layer 7 is never HIGH by itself.
 
 ## Workflow
 
@@ -58,38 +60,68 @@ pnpm dlx dependency-cruiser --validate packages/<name>/src 2>/dev/null || true
 
 If any tool isn't installed, note it and move on — don't block.
 
-### Step 2 — Anti-pattern scan (always runs)
+### Step 2 — AST layer (always runs, HIGH confidence)
 
-For each package in scope, grep the source tree. For every match, **read 5 lines of context** before deciding whether it's real. Anti-patterns to scan:
+Run the bundled AST verifier. It uses the TypeScript compiler to disambiguate control flow that regex can't — this is what lets the findings it emits be HIGH by default.
 
-| Pattern | Why it's a bug candidate | Confidence after context |
-|---|---|---|
-| `window.` or `document.` at module scope | SSR hazard — crashes Next.js build | HIGH if outside function body |
-| `useEffect(.*, \[\])` where body references a var | stale closure | HIGH if unmemoed ref |
-| `addEventListener` with no matching `removeEventListener` | memory leak | HIGH if inside useEffect with no cleanup return |
-| `setTimeout` / `setInterval` with no `clear*` | leak | same |
-| `as any` or `as unknown as X` | type hole | MED always (may be necessary) |
-| `dangerouslySetInnerHTML` | XSS vector | MED unless source is user-controlled (then HIGH) |
-| `useMemo\(\(\)` or `useCallback\(\(\)` with `, \[\]` | always-stable but referencing props | HIGH on stale capture |
-| `Math.random()` inside render (not effect) | hydration mismatch | HIGH |
-| `new Date()` / `Date.now()` inside render | same | HIGH |
-| hooks inside `if`, `for`, early-return | rules-of-hooks violation | HIGH |
-| `async` function passed to `useEffect` directly | silent promise leak | HIGH |
-| `console.log` / `debugger` | should not ship | MINOR / MED |
-
-Run with ripgrep for speed:
 ```bash
-rg --type ts --type tsx -n 'pattern' packages/<name>/src
+node .claude/skills/tk-bug-hunter/scripts/ast-rules-of-hooks.mjs packages/<name> [packages/<other> ...]
 ```
+
+Rules emitted (all HIGH, all with `file:line:col` + quoted evidence):
+
+| Rule | Trigger | Why AST beats regex |
+|---|---|---|
+| `rules-of-hooks/conditional-call` | hook call inside `if`/`switch`/`for`/`while`/`catch`, **RHS** of `&&`/`\|\|`/`??`, or `whenTrue`/`whenFalse` of `? :` | Regex can't tell `usePathname() ?? '/'` (LHS, fine) from `flag && useState()` (RHS, broken) |
+| `rules-of-hooks/after-early-return` | hook call preceded by an `if`/`switch`/`try` whose body contains a `return` | Regex can't distinguish `if (!x) throw` (fine) from `if (!x) return` (broken), and can't see that the tail `return useMemo(...)` isn't an early return of itself |
+| `react/async-effect` | `async` function literal passed directly to `useEffect`/`useLayoutEffect`/`useInsertionEffect` | Regex would miss parenthesized / multi-line forms; AST catches them regardless of formatting |
+| `ssr/module-scope-dom` | `window`/`document`/`navigator`/`localStorage`/`sessionStorage` property access at module depth 0, not guarded by an enclosing `typeof X !== 'undefined'` check | Regex can't measure function-nesting depth or see enclosing `typeof` guards |
+
+Output is JSON; pipe into the report. Runtime: ~50 ms per package.
+
+### Step 2b — Ripgrep supplement (fills gaps the AST doesn't cover)
+
+For patterns outside the AST script's scope, `rg` + context is the fallback. These findings are **MED by default** and can only be promoted to HIGH if a second layer (typecheck, lint, knip, etc.) flags the same location.
+
+| Pattern | Trigger regex | Confidence rule |
+|---|---|---|
+| `addEventListener` with no matching `removeEventListener` | `rg -n 'addEventListener\(' packages/<name>/src` | HIGH only if: call is inside `useEffect`'s body AND the effect's cleanup return (if any) has no matching `removeEventListener` call. Otherwise MED. |
+| `setTimeout`/`setInterval` with no `clear*` | `rg -n '(setTimeout\|setInterval)\(' packages/<name>/src` | Same rule as above. |
+| `as any` / `as unknown as X` | `rg -n '\bas (any\|unknown as )' packages/<name>/src` | MED always. Never auto-promote — may be a necessary escape hatch. Comment asking whether the cast is intentional. |
+| `dangerouslySetInnerHTML` | `rg -n 'dangerouslySetInnerHTML' packages/<name>/src` | MED. HIGH only if the value flows from a prop or state that traces to user input. |
+| `Math.random()` / `new Date()` / `Date.now()` outside effects | `rg -n '(Math\.random\(\)\|new Date\(\)\|Date\.now\(\))' packages/<name>/src` | MED. HIGH only if inside a function that returns JSX AND the call is not wrapped in `useEffect`/`useMemo`/`useCallback`/`useRef`. |
+| `console.log` / `debugger` | `rg -n '(console\.log\|^\s*debugger)' packages/<name>/src` | MINOR. |
+
+Do not pattern-scan for rules-of-hooks, async effects, or SSR module-scope access — the AST script handles those with higher precision.
 
 ### Step 3 — Test gap scan (always runs)
 
-For each exported symbol in `dist/index.d.ts`, check if it's referenced in any `*.test.ts` or `*.test.tsx` under the package. Flag **public APIs with zero test references** as MED / test-gap. A missing test isn't a bug — but a missing test on a component that has no types, no docs, and no integration in `examples/dashboard-next` is a strong smell.
+For each exported symbol in `dist/index.d.ts`, check if it's referenced in any `*.test.ts` or `*.test.tsx` under the package. Flag public APIs with zero test references using this promotion rule:
+
+- **MINOR** — zero test refs, but symbol is covered by a doc page under `apps/docs/content/` OR used in `examples/dashboard-next`. Likely tested implicitly by the integration surface.
+- **MED / test-gap** — zero test refs AND (no doc page) AND (no integration usage in `examples/dashboard-next` or `apps/smoke`). A missing test alone isn't a bug, but an untested + undocumented + unintegrated public API is a strong smell and almost always ships with regressions.
+- Never tag a test-gap finding HIGH — missing tests are never bugs by themselves.
 
 ### Step 4 — Cross-package contract check (always runs)
 
-- For every `import { X } from '@tour-kit/<pkg>'` in sibling packages or the example app, verify `X` is actually exported from `dist/index.d.ts`. Stale imports → HIGH.
-- For every provider (`*Provider`), verify the corresponding context uses a default-value contract (throws when used without provider) — missing guards are MED.
+- **Stale imports** — For every `import { X } from '@tour-kit/<pkg>'` found in sibling packages, `examples/dashboard-next`, `apps/docs`, or `apps/smoke`, verify `X` is actually exported from the target package's `dist/index.d.ts`. Mechanism:
+  1. `rg -n "from ['\"]@tour-kit/<pkg>['\"]" --type ts --type tsx` to collect every call site + imported symbol list.
+  2. Parse the target package's `dist/index.d.ts` (same loader as `dist-vs-src-exports.mjs`) for the set of named exports.
+  3. Any imported symbol not in that set → HIGH, MAJOR. Cross-check with a `pnpm typecheck --filter <consumer>` run to confirm it actually fails — if typecheck passes, downgrade to MED and note the contradiction (usually means an ambient `.d.ts` or path alias is masking it).
+- **Provider context guards** — For every `*Provider` in scope, grep for the paired `createContext(` call and verify the initial value is either `null` with a `throw new Error` in the consumer hook OR a non-null default object. Missing guards (silent `undefined` return when no provider is mounted) → MED.
+
+### Step 4b — Dist/src export diff (always runs, HIGH confidence)
+
+Run the bundled exports-diff script per package. It follows `export * from './...'` chains in `src/index.ts` and enumerates named exports in `dist/index.d.ts`, then diffs the two sets. Every mismatch is a 100%-precision finding (stale build, tsup misconfig, drifted re-export, or unintentional public-API drop).
+
+```bash
+node .claude/skills/tk-bug-hunter/scripts/dist-vs-src-exports.mjs packages/<name>
+```
+
+Output shape: `{ missing_in_dist: [...], extra_in_dist: [...], findings: [...] }`.
+
+- `missing_in_dist` → HIGH, MAJOR. Downstream `import { X } from '@tour-kit/<name>'` will fail at type-check or run-time. Common cause: stale `dist/` — rebuild and re-run.
+- `extra_in_dist` → HIGH, MINOR. Indicates a stale `dist/` from a prior build; easy to miss during release and lets removed APIs linger in `.d.ts`.
 
 ### Step 5 — Optional deep semantic review (`--deep`)
 
@@ -100,7 +132,10 @@ For each package in scope, read `src/index.ts` + the main hook / provider file. 
 - Forgotten cleanup when props change mid-lifecycle
 - Missing boundary behavior (first / last / empty list)
 
-Each semantic finding is **LOW confidence unless layer 1-6 also flagged the same location**. Never promote LOW → HIGH on LLM confidence alone.
+**Promotion path for semantic findings:**
+- **LOW (default)** — semantic review alone, no corroboration from any other layer.
+- **MED** — semantic finding + at least one of: (a) a layer 7 ripgrep pattern flagged the same file:line ±3 lines, OR (b) a test-gap for the same symbol, OR (c) a TODO/FIXME comment in the surrounding function.
+- **HIGH** — only if a deterministic layer (1–6b) independently flags the same file:line. Never promote to HIGH on semantic confidence alone, even if the semantic layer runs twice and agrees with itself. Two semantic passes count as one layer for promotion purposes.
 
 ### Step 6 — Report
 
@@ -108,7 +143,7 @@ Output exactly this shape:
 
 ```
 # tk-bug-hunter — <shortsha> · <ISO timestamp>
-Scope: <packages audited>  ·  Layers: deterministic + patterns + tests + contracts<  + semantic if --deep>
+Scope: <packages audited>  ·  Layers: deterministic + patterns + tests + contracts [+ semantic if --deep]
 Runtime: <elapsed>
 
 ## Summary
@@ -146,17 +181,19 @@ Ask: is the type gap intentional? If so, add a comment explaining why.
 - packages/surveys/src/engine.ts:188 — potential off-by-one in `calculateNPS` when `responses.length === 0`. Semantic review only; layer 1-6 clean.
 
 ## Layer coverage
-| Layer            | Status | Findings |
-|------------------|--------|----------|
-| typecheck        | ✓       | 0        |
-| lint             | —       | skipped (no lint script) |
-| knip             | ✓       | 3 HIGH   |
-| publint          | ✓       | 1 HIGH   |
-| depcruise        | ✓       | 0        |
-| pattern scan     | ✓       | 6 HIGH, 5 MED |
-| test gap         | ✓       | 3 MED    |
-| contract check   | ✓       | 2 HIGH   |
-| semantic (deep)  | skipped | —        |
+| Layer              | Status | Findings |
+|--------------------|--------|----------|
+| typecheck          | ✓       | 0        |
+| lint               | —       | skipped (no lint script) |
+| knip               | ✓       | 3 HIGH   |
+| publint            | ✓       | 1 HIGH   |
+| depcruise          | ✓       | 0        |
+| ast (hooks + ssr)  | ✓       | 4 HIGH   |
+| exports diff       | ✓       | 2 HIGH   |
+| ripgrep supplement | ✓       | 2 HIGH (corroborated), 5 MED |
+| test gap           | ✓       | 3 MED    |
+| contract check     | ✓       | 2 HIGH   |
+| semantic (deep)    | skipped | —        |
 
 ## Verdict
 Found 12 HIGH-confidence bugs. Fix them before release.
@@ -165,9 +202,10 @@ Found 12 HIGH-confidence bugs. Fix them before release.
 ## Hard rules
 
 - **Never report a finding without `file:line` + a quoted evidence line.** A finding without evidence is a guess, and guesses are what keep precision below 95%.
-- **Never tag a finding HIGH on a single pattern match.** Require a second signal (another tool, or context verification that rules out the common false-positive case).
+- **Never tag a finding HIGH on a single ripgrep pattern match.** Layer 7 alone is not enough. A deterministic layer (1–6b) must either produce the finding directly or corroborate the same location.
 - **Never auto-apply fixes.** Suggest edits under `--fix-suggestions` but wait for approval. A 95% precision skill still has 5% wrong; 5% of auto-applied fixes corrupts the codebase.
-- **Pass-through errors.** If `pnpm dlx knip` fails to install or errors, note it in layer coverage but continue — don't fail the whole run.
+- **Pass-through errors.** If `pnpm dlx knip` fails to install, or the bundled node scripts fail to resolve `typescript`, note it in layer coverage but continue — don't fail the whole run.
+- **Run from the repo root.** The bundled node scripts resolve `typescript` from `./node_modules`; invoke them with absolute paths but with `cwd = /path/to/tour-kit`.
 
 ## Caveats
 

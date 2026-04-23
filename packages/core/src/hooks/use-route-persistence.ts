@@ -23,6 +23,12 @@ export interface UseRoutePersistenceReturn {
   clear: () => void
   /** Check if state is stale */
   isStale: () => boolean
+  /**
+   * Increments whenever another tab writes to the same storage key while
+   * `syncTabs` is enabled. Subscribe to this value from a `useEffect` to
+   * re-hydrate state in response to cross-tab writes.
+   */
+  externalVersion: number
 }
 
 // Simple in-memory storage for SSR or when storage is unavailable
@@ -93,21 +99,14 @@ export function useRoutePersistence(config: MultiPagePersistenceConfig): UseRout
 
       try {
         storage.setItem(storageKey, JSON.stringify(data))
-
-        // Sync across tabs if enabled (localStorage only)
-        if (config.syncTabs && config.storage === 'localStorage' && typeof window !== 'undefined') {
-          window.dispatchEvent(
-            new StorageEvent('storage', {
-              key: storageKey,
-              newValue: JSON.stringify(data),
-            })
-          )
-        }
+        // Browsers automatically fire `storage` events on other tabs when
+        // localStorage is written; no manual dispatch is needed (and firing
+        // one on the writing tab is a no-op in terms of real cross-tab sync).
       } catch (e) {
         logger.warn('Failed to save route state:', e)
       }
     },
-    [config.enabled, config.syncTabs, config.storage, getStorage, storageKey]
+    [config.enabled, getStorage, storageKey]
   )
 
   const load = React.useCallback((): PersistedRouteState | null => {
@@ -145,19 +144,23 @@ export function useRoutePersistence(config: MultiPagePersistenceConfig): UseRout
     return Date.now() - data.timestamp > expiryMs
   }, [load, expiryMs])
 
-  // Listen for cross-tab sync
+  // Listen for cross-tab sync — bump a version counter on writes to our key
+  // so consumers can subscribe via a useEffect dep and re-load().
+  const [externalVersion, setExternalVersion] = React.useState(0)
+
   React.useEffect(() => {
     if (!config.syncTabs || config.storage !== 'localStorage') return
     if (typeof window === 'undefined') return
 
-    const handler = (_e: StorageEvent) => {
-      // State changed in another tab - consumers can re-load
-      // This is intentionally a no-op; consumers should poll or listen themselves
+    const handler = (e: StorageEvent) => {
+      if (e.key === storageKey) {
+        setExternalVersion((v) => v + 1)
+      }
     }
 
     window.addEventListener('storage', handler)
     return () => window.removeEventListener('storage', handler)
-  }, [config.syncTabs, config.storage])
+  }, [config.syncTabs, config.storage, storageKey])
 
-  return { save, load, clear, isStale }
+  return { save, load, clear, isStale, externalVersion }
 }

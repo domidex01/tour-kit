@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import * as React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { type RenderProp, UnifiedSlot } from '../unified-slot'
@@ -19,7 +19,7 @@ describe('UnifiedSlot', () => {
       expect(button).toHaveAttribute('data-testid', 'slot')
     })
 
-    it('child props take precedence over slot props', () => {
+    it('child props take precedence over slot props for plain keys', () => {
       render(
         <UnifiedSlot data-value="slot-value">
           <button type="button" data-value="child-value">
@@ -30,6 +30,69 @@ describe('UnifiedSlot', () => {
 
       const button = screen.getByRole('button')
       expect(button).toHaveAttribute('data-value', 'child-value')
+    })
+
+    it('concatenates className from slot and child', () => {
+      render(
+        <UnifiedSlot className="slot-cls">
+          <button type="button" className="child-cls" data-testid="child">
+            Click
+          </button>
+        </UnifiedSlot>
+      )
+
+      const btn = screen.getByTestId('child')
+      expect(btn).toHaveClass('slot-cls')
+      expect(btn).toHaveClass('child-cls')
+    })
+
+    it('merges style so child wins on collision but slot-only keys survive', () => {
+      render(
+        <UnifiedSlot style={{ top: 10, left: 20, color: 'red' }}>
+          <button type="button" data-testid="child" style={{ color: 'blue' }}>
+            Click
+          </button>
+        </UnifiedSlot>
+      )
+
+      const btn = screen.getByTestId('child')
+      expect(btn.style.top).toBe('10px')
+      expect(btn.style.left).toBe('20px')
+      expect(btn.style.color).toBe('blue')
+    })
+
+    it('composes on* handlers so both fire (child first, then slot)', () => {
+      const order: string[] = []
+      const slotClick = vi.fn(() => order.push('slot'))
+      const childClick = vi.fn(() => order.push('child'))
+
+      render(
+        <UnifiedSlot onClick={slotClick}>
+          <button type="button" data-testid="child" onClick={childClick}>
+            Click
+          </button>
+        </UnifiedSlot>
+      )
+
+      fireEvent.click(screen.getByTestId('child'))
+      expect(childClick).toHaveBeenCalledTimes(1)
+      expect(slotClick).toHaveBeenCalledTimes(1)
+      expect(order).toEqual(['child', 'slot'])
+    })
+
+    it('passes slot on* handler through when child has none', () => {
+      const slotClick = vi.fn()
+
+      render(
+        <UnifiedSlot onClick={slotClick}>
+          <button type="button" data-testid="child">
+            Click
+          </button>
+        </UnifiedSlot>
+      )
+
+      fireEvent.click(screen.getByTestId('child'))
+      expect(slotClick).toHaveBeenCalledTimes(1)
     })
 
     it('merges refs from both slot and child', () => {

@@ -19,10 +19,14 @@ export function useKeyboardNavigation(config?: KeyboardConfig): void {
     const handleKeyDown = (event: KeyboardEvent) => {
       const { key } = event
 
-      // Ignore if user is typing in an input
+      // Ignore if user is typing in an input, select, or editable region
+      const active = document.activeElement as HTMLElement | null
       if (
-        document.activeElement instanceof HTMLInputElement ||
-        document.activeElement instanceof HTMLTextAreaElement
+        active instanceof HTMLInputElement ||
+        active instanceof HTMLTextAreaElement ||
+        active instanceof HTMLSelectElement ||
+        active?.isContentEditable ||
+        active?.getAttribute('role') === 'textbox'
       ) {
         return
       }

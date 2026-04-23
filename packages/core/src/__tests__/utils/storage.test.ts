@@ -150,5 +150,18 @@ describe('Storage Utilities', () => {
       storage.setItem('encoded', value)
       expect(storage.getItem('encoded')).toBe(value)
     })
+
+    it('handles keys containing regex metacharacters (regression)', () => {
+      const storage = createCookieStorage()
+      // Typical prefixed tour key shape: `tourkit:feature.x.release-2`
+      const key = 'tourkit:feature.x.release-2'
+      storage.setItem(key, 'ok')
+      expect(storage.getItem(key)).toBe('ok')
+
+      // Also cover a broader set of metacharacters
+      const keyWithMore = 'a+b*c?d(e)f[g]h{i}j|k^'
+      storage.setItem(keyWithMore, 'also-ok')
+      expect(storage.getItem(keyWithMore)).toBe('also-ok')
+    })
   })
 })

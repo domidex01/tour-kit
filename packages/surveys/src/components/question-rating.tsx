@@ -175,10 +175,10 @@ const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
             const isSelected = currentValue === val
 
             return (
-              // biome-ignore lint/a11y/useSemanticElements: custom radio group pattern; native <input type=radio> doesn't support the required styling/keyboard semantics
               <button
                 key={val}
                 type="button"
+                // biome-ignore lint/a11y/useSemanticElements: custom radio group pattern; native <input type=radio> doesn't support the required styling/keyboard semantics
                 role="radio"
                 aria-checked={isSelected}
                 aria-label={getOptionLabel(val)}

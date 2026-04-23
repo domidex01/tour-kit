@@ -1,5 +1,6 @@
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
+import 'vitest-axe/extend-expect'
 import { afterEach, vi } from 'vitest'
 
 // Mock @floating-ui/react globally

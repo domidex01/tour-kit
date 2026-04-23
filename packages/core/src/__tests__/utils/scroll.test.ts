@@ -246,10 +246,12 @@ describe('getScrollPosition', () => {
 
 describe('lockScroll', () => {
   const originalScrollY = Object.getOwnPropertyDescriptor(window, 'scrollY')
+  const LOCK_KEY = Symbol.for('tourkit.scroll-lock')
 
   beforeEach(() => {
-    // Reset body styles
+    // Reset body styles and any shared lock state from a previous test
     document.body.style.cssText = ''
+    delete (document.body as HTMLElement & { [LOCK_KEY]?: unknown })[LOCK_KEY]
   })
 
   afterEach(() => {
@@ -257,6 +259,8 @@ describe('lockScroll', () => {
     if (originalScrollY) {
       Object.defineProperty(window, 'scrollY', originalScrollY)
     }
+    // Drop any lingering lock state so later suites aren't polluted
+    delete (document.body as HTMLElement & { [LOCK_KEY]?: unknown })[LOCK_KEY]
   })
 
   it('locks body scroll with fixed position', () => {
@@ -314,5 +318,67 @@ describe('lockScroll', () => {
     unlock()
 
     expect(scrollSpy).toHaveBeenCalledWith(0, 200)
+  })
+
+  it('nested calls preserve outer scroll position (regression)', () => {
+    Object.defineProperty(window, 'scrollY', {
+      value: 500,
+      writable: true,
+      configurable: true,
+    })
+
+    const scrollSpy = vi.spyOn(window, 'scrollTo')
+
+    const releaseOuter = lockScroll()
+    expect(document.body.style.position).toBe('fixed')
+    expect(document.body.style.top).toBe('-500px')
+
+    // Simulate the inner body already being fixed — scrollY would read as 0
+    // if the nested lock naively snapshotted it again.
+    Object.defineProperty(window, 'scrollY', {
+      value: 0,
+      writable: true,
+      configurable: true,
+    })
+
+    const releaseInner = lockScroll()
+    // Inner release must not pop the lock or scroll the page
+    releaseInner()
+    expect(document.body.style.position).toBe('fixed')
+    expect(scrollSpy).not.toHaveBeenCalled()
+
+    // Outer release restores the original scroll position
+    releaseOuter()
+    expect(document.body.style.position).toBe('')
+    expect(document.body.style.top).toBe('')
+    expect(scrollSpy).toHaveBeenCalledWith(0, 500)
+  })
+
+  it('releasing an unlock function twice is a no-op', () => {
+    const release = lockScroll()
+    release()
+    expect(document.body.style.position).toBe('')
+
+    // Second call must not throw or corrupt state if a fresh lock was acquired.
+    const fresh = lockScroll()
+    expect(document.body.style.position).toBe('fixed')
+    release() // noop on the stale release
+    expect(document.body.style.position).toBe('fixed') // fresh lock still active
+
+    fresh()
+    expect(document.body.style.position).toBe('')
+  })
+
+  it('restores prior inline body styles (does not clobber consumer CSS)', () => {
+    document.body.style.position = 'relative'
+    document.body.style.overflowY = 'auto'
+
+    const release = lockScroll()
+    expect(document.body.style.position).toBe('fixed')
+    expect(document.body.style.overflowY).toBe('scroll')
+
+    release()
+    expect(document.body.style.position).toBe('relative')
+    expect(document.body.style.overflowY).toBe('auto')
   })
 })

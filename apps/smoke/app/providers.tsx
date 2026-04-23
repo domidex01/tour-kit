@@ -1,6 +1,12 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import {
+  announcements,
+  checklists,
+  demoUser,
+  surveys,
+  trackedFeatures,
+} from '@/lib/tour-kit-config'
 import { AdoptionProvider } from '@tour-kit/adoption'
 import { AiChatProvider } from '@tour-kit/ai'
 import { AnalyticsProvider, consolePlugin } from '@tour-kit/analytics'
@@ -9,13 +15,7 @@ import { ChecklistProvider } from '@tour-kit/checklists'
 import { HintsProvider } from '@tour-kit/hints'
 import { LicenseProvider } from '@tour-kit/license'
 import { SurveysProvider } from '@tour-kit/surveys'
-import {
-  announcements,
-  checklists,
-  demoUser,
-  surveys,
-  trackedFeatures,
-} from '@/lib/tour-kit-config'
+import type { ReactNode } from 'react'
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
