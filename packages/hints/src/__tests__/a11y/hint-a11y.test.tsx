@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 import { Hint } from '../../components/hint'
 import { HintsProvider } from '../../context/hints-provider'
 
@@ -177,5 +178,26 @@ describe('Hint Accessibility', () => {
 
     const hotspot = screen.getByRole('button', { name: /show hint/i })
     expect(hotspot).toHaveAttribute('type', 'button')
+  })
+
+  it('closed hotspot has no axe violations', async () => {
+    const { container } = render(<Hint id="test" target="#target" content="Help text" />, {
+      wrapper,
+    })
+
+    expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('opened tooltip has no axe violations', async () => {
+    const user = userEvent.setup()
+
+    const { container } = render(<Hint id="test" target="#target" content="Help text" />, {
+      wrapper,
+    })
+
+    await user.click(screen.getByRole('button', { name: /show hint/i }))
+    expect(screen.getByText('Help text')).toBeInTheDocument()
+
+    expect(await axe(container)).toHaveNoViolations()
   })
 })
