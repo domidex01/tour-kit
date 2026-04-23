@@ -34,27 +34,6 @@ export function dayNumberToName(day: DayOfWeek): DayName {
 }
 
 /**
- * Get the next occurrence of a specific day
- * @param date - Current date
- * @param targetDay - Target day of week (0-6)
- * @param timezone - Timezone
- * @returns Date of the next occurrence of that day
- */
-export function getNextDayOccurrence(date: Date, targetDay: DayOfWeek, timezone: string): Date {
-  const currentDay = getDayOfWeek(date, timezone)
-  let daysUntil = targetDay - currentDay
-
-  if (daysUntil <= 0) {
-    daysUntil += 7 // Next week
-  }
-
-  const nextDate = new Date(date.getTime())
-  nextDate.setDate(nextDate.getDate() + daysUntil)
-  nextDate.setHours(0, 0, 0, 0)
-  return nextDate
-}
-
-/**
  * Get the next allowed day from a list
  * @param date - Current date
  * @param allowedDays - List of allowed days (0-6)

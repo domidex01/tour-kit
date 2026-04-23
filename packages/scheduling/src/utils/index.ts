@@ -11,7 +11,7 @@ export {
 } from './timezone'
 
 // Date range utilities
-export { getDateRangeEnd, getDateRangeStart, isWithinDateRange } from './date-range'
+export { getDateRangeStart, isWithinDateRange } from './date-range'
 
 // Time of day utilities
 export { getNextTimeRangeStart, isWithinAnyTimeRange, isWithinTimeRange } from './time-of-day'
@@ -23,16 +23,13 @@ export {
   dayNumberToName,
   getDayOfWeek,
   getNextAllowedDay,
-  getNextDayOccurrence,
   isAllowedDay,
 } from './day-of-week'
 
 // Blackout utilities
 export {
-  getActiveBlackouts,
   getBlackoutEndTime,
   getCurrentBlackout,
-  getNextBlackout,
   isInAnyBlackout,
   isInBlackoutPeriod,
 } from './blackout'

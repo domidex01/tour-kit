@@ -43,14 +43,3 @@ export function getDateRangeStart(startDate: DateString | Date | undefined): Dat
   if (!startDate) return undefined
   return startDate instanceof Date ? startDate : parseDateString(startDate)
 }
-
-/**
- * Calculate when a date range will end
- */
-export function getDateRangeEnd(endDate: DateString | Date | undefined): Date | undefined {
-  if (!endDate) return undefined
-  const end = endDate instanceof Date ? endDate : parseDateString(endDate)
-  // End of day
-  end.setUTCHours(23, 59, 59, 999)
-  return end
-}

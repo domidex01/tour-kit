@@ -5,7 +5,7 @@ import { parseDateString } from './timezone'
  * Normalize a blackout period date to a Date object
  */
 function normalizeBlackoutDate(date: string | Date): Date {
-  if (date instanceof Date) return date
+  if (date instanceof Date) return new Date(date.getTime())
   return parseDateString(date)
 }
 
@@ -40,39 +40,10 @@ export function isInAnyBlackout(date: Date, blackouts: BlackoutPeriod[]): boolea
 }
 
 /**
- * Get the next blackout period start after a given date
- */
-export function getNextBlackout(
-  date: Date,
-  blackouts: BlackoutPeriod[]
-): BlackoutPeriod | undefined {
-  const futureBlackouts = blackouts
-    .map((blackout) => ({
-      ...blackout,
-      startDate: normalizeBlackoutDate(blackout.start),
-    }))
-    .filter((b) => b.startDate > date)
-    .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
-
-  return futureBlackouts[0]
-}
-
-/**
  * Get when the current blackout ends
  */
 export function getBlackoutEndTime(blackout: BlackoutPeriod): Date {
   const end = normalizeBlackoutDate(blackout.end)
   end.setUTCHours(23, 59, 59, 999)
   return end
-}
-
-/**
- * Filter out past blackouts
- */
-export function getActiveBlackouts(blackouts: BlackoutPeriod[], now: Date): BlackoutPeriod[] {
-  return blackouts.filter((blackout) => {
-    const end = normalizeBlackoutDate(blackout.end)
-    end.setUTCHours(23, 59, 59, 999)
-    return end >= now
-  })
 }
