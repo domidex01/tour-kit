@@ -27,13 +27,10 @@ export function UnifiedSlot({ children, ...props }: UnifiedSlotProps): ReactElem
     const childRef = (childProps as { ref?: React.Ref<unknown> }).ref
     const mergedRef = mergeRefs(propsRef, childRef)
 
-    const mergedProps = {
-      ...props,
-      ...childProps,
-    }
+    const mergedProps = mergeProps(props, childProps)
 
     if (mergedRef) {
-      ;(mergedProps as Record<string, unknown>).ref = mergedRef
+      mergedProps.ref = mergedRef
     }
 
     return React.cloneElement(children, mergedProps as Partial<unknown> & React.Attributes)
@@ -52,4 +49,39 @@ function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>): React.RefCallba
       }
     }
   }
+}
+
+function mergeProps(
+  slotProps: Record<string, unknown>,
+  childProps: Record<string, unknown>
+): Record<string, unknown> {
+  // Child props override slot props by default, except for className (concat),
+  // style (merge), and on* handlers (compose) — matches @radix-ui/react-slot.
+  const overrideProps: Record<string, unknown> = { ...childProps }
+
+  for (const propName in childProps) {
+    const slotValue = slotProps[propName]
+    const childValue = childProps[propName]
+    const isHandler = /^on[A-Z]/.test(propName)
+
+    if (isHandler) {
+      if (typeof slotValue === 'function' && typeof childValue === 'function') {
+        overrideProps[propName] = (...args: unknown[]) => {
+          ;(childValue as (...a: unknown[]) => unknown)(...args)
+          ;(slotValue as (...a: unknown[]) => unknown)(...args)
+        }
+      } else if (typeof slotValue === 'function') {
+        overrideProps[propName] = slotValue
+      }
+    } else if (propName === 'style') {
+      overrideProps[propName] = {
+        ...(slotValue as React.CSSProperties | undefined),
+        ...(childValue as React.CSSProperties | undefined),
+      }
+    } else if (propName === 'className') {
+      overrideProps[propName] = [slotValue, childValue].filter(Boolean).join(' ')
+    }
+  }
+
+  return { ...slotProps, ...overrideProps }
 }
