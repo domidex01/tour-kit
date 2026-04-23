@@ -1,5 +1,21 @@
 # @tour-kit/announcements
 
+## 0.2.0
+
+### Minor Changes
+
+- 0afd485: Registered announcements now auto-show on mount (and when `userContext` changes)
+  whenever eligibility rules (`frequency`, `audience`, `schedule`, queue capacity)
+  allow. This closes a behavior gap where configs registered but never surfaced.
+
+  Opt out per-announcement with `autoShow: false` to drive the component imperatively
+  via `show(id)`.
+
+### Patch Changes
+
+- Updated dependencies [65ee7f9]
+  - @tour-kit/core@0.5.0
+
 ## 0.1.4
 
 ### Patch Changes

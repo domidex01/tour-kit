@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/react",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "React components for TourKit - works with or without Tailwind CSS",
   "author": "Tour Kit Team",
   "license": "MIT",

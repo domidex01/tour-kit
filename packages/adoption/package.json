@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/adoption",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Feature adoption tracking and nudging for TourKit",
   "type": "module",
   "main": "./dist/index.cjs",

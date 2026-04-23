@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/hints",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Persistent hints and hotspots for TourKit - works with or without Tailwind CSS",
   "author": "Tour Kit Team",
   "license": "MIT",
