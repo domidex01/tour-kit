@@ -3,7 +3,7 @@
 import * as React from 'react'
 import type { ReactElement, ReactNode } from 'react'
 
-export type RenderProp = (props: Record<string, unknown>) => ReactElement
+type RenderProp = (props: Record<string, unknown>) => ReactElement
 
 export interface UnifiedSlotProps {
   children: ReactNode | RenderProp

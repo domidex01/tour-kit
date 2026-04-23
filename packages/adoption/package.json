@@ -27,8 +27,8 @@
         "default": "./dist/tailwind/index.cjs"
       }
     },
-    "./styles/variables.css": "./src/styles/variables.css",
-    "./styles/theme.css": "./src/styles/theme.css"
+    "./styles/variables.css": "./dist/styles/variables.css",
+    "./styles/theme.css": "./dist/styles/theme.css"
   },
   "files": ["dist"],
   "license": "SEE LICENSE IN LICENSE.md",

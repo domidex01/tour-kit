@@ -45,7 +45,12 @@ export function AdoptionProvider({
   onChurn,
   onNudge,
 }: AdoptionProviderProps) {
-  const storageAdapter = React.useMemo(() => createStorageAdapter(storage), [storage])
+  // Primitive deps — an inline `storage={{ type: 'localStorage' }}` prop would
+  // otherwise invalidate this memo every render and trigger a storage-load loop.
+  const storageAdapter = React.useMemo(
+    () => createStorageAdapter(storage),
+    [storage.type, storage.key]
+  )
 
   // State
   const [usageMap, setUsageMap] = React.useState<Record<string, FeatureUsage>>({})
@@ -76,11 +81,51 @@ export function AdoptionProvider({
     storageAdapter.save(state)
   }, [usageMap, nudgeState, userId, initialized, storageAdapter])
 
-  // Set up click/event tracking for features
+  // Pure state update — side effects for adopted/churned transitions live in the
+  // effect below, so StrictMode / concurrent re-invocations of the updater don't
+  // double-fire callbacks.
+  const trackUsage = React.useCallback(
+    (featureId: string) => {
+      const feature = features.find((f) => f.id === featureId)
+      if (!feature) return
+
+      setUsageMap((prev) => {
+        const current = prev[featureId] ?? createInitialUsage(featureId)
+        const updated = trackFeatureUsage(current, feature.adoptionCriteria)
+        return { ...prev, [featureId]: updated }
+      })
+    },
+    [features]
+  )
+
+  // Fire onAdoption / onChurn when a feature's status transitions.
+  const prevUsageRef = React.useRef(usageMap)
+  React.useEffect(() => {
+    for (const id of Object.keys(usageMap)) {
+      const prev = prevUsageRef.current[id]
+      const curr = usageMap[id]
+      if (!prev || !curr || prev.status === curr.status) continue
+      const feature = features.find((f) => f.id === id)
+      if (!feature) continue
+      const { adopted, churned } = didStatusChange(prev.status, curr.status)
+      if (adopted) onAdoption?.(feature)
+      if (churned) onChurn?.(feature)
+    }
+    prevUsageRef.current = usageMap
+  }, [usageMap, features, onAdoption, onChurn])
+
+  // Stable subscription: tracking effect only resubscribes when `features` change.
+  // `trackUsage` is read through a ref so callback-prop updates don't tear down
+  // and rebuild DOM/event listeners.
+  const trackUsageRef = React.useRef(trackUsage)
+  React.useEffect(() => {
+    trackUsageRef.current = trackUsage
+  }, [trackUsage])
+
   React.useEffect(() => {
     const cleanups = features.map((feature) =>
       setupFeatureTracking(feature, (featureId) => {
-        trackUsage(featureId)
+        trackUsageRef.current(featureId)
       })
     )
 
@@ -90,32 +135,6 @@ export function AdoptionProvider({
       }
     }
   }, [features])
-
-  // Track feature usage
-  const trackUsage = React.useCallback(
-    (featureId: string) => {
-      const feature = features.find((f) => f.id === featureId)
-      if (!feature) return
-
-      setUsageMap((prev) => {
-        const current = prev[featureId] ?? createInitialUsage(featureId)
-        const updated = trackFeatureUsage(current, feature.adoptionCriteria)
-
-        // Check for status changes
-        const changes = didStatusChange(current.status, updated.status)
-
-        if (changes.adopted) {
-          onAdoption?.(feature)
-        }
-        if (changes.churned) {
-          onChurn?.(feature)
-        }
-
-        return { ...prev, [featureId]: updated }
-      })
-    },
-    [features, onAdoption, onChurn]
-  )
 
   // Get feature with usage
   const getFeature = React.useCallback(

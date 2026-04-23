@@ -4,7 +4,7 @@ const DEFAULT_COOLDOWN = 24 * 60 * 60 * 1000 // 24 hours
 const DEFAULT_MAX_PER_SESSION = 3
 const DEFAULT_MAX_FEATURES = 1
 
-export interface NudgeDecision {
+interface NudgeDecision {
   shouldNudge: boolean
   features: Feature[]
   reason?: string

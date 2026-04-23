@@ -33,7 +33,8 @@ function setupClickTracking(selector: string, callback: () => void): () => void 
   const throttledCallback = throttleLeading(callback, 1000)
 
   const handler = (event: MouseEvent) => {
-    const target = event.target as Element
+    const target = event.target
+    if (!(target instanceof Element)) return
     if (target.matches(selector) || target.closest(selector)) {
       throttledCallback()
     }

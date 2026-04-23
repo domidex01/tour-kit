@@ -34,8 +34,8 @@ export function createLocalStorageAdapter(key: string): StorageAdapter {
       if (typeof window === 'undefined') return
 
       try {
-        state.updatedAt = new Date().toISOString()
-        localStorage.setItem(key, JSON.stringify(state))
+        const stamped: PersistedState = { ...state, updatedAt: new Date().toISOString() }
+        localStorage.setItem(key, JSON.stringify(stamped))
       } catch (e) {
         logger.warn('Adoption: Failed to save state:', e)
       }
@@ -66,8 +66,8 @@ export function createSessionStorageAdapter(key: string): StorageAdapter {
       if (typeof window === 'undefined') return
 
       try {
-        state.updatedAt = new Date().toISOString()
-        sessionStorage.setItem(key, JSON.stringify(state))
+        const stamped: PersistedState = { ...state, updatedAt: new Date().toISOString() }
+        sessionStorage.setItem(key, JSON.stringify(stamped))
       } catch (e) {
         logger.warn('Adoption: Failed to save state:', e)
       }

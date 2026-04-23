@@ -16,6 +16,3 @@ export function createStorageAdapter(config: StorageConfig): StorageAdapter {
       return createLocalStorageAdapter(key)
   }
 }
-
-export { createLocalStorageAdapter, createSessionStorageAdapter } from './local-storage'
-export { createMemoryStorageAdapter } from './memory-storage'
