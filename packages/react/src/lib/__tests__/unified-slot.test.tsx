@@ -49,11 +49,7 @@ describe('UnifiedSlot', () => {
     it('merges style so child wins on collision but slot-only keys survive', () => {
       render(
         <UnifiedSlot style={{ top: 10, left: 20, color: 'red' }}>
-          <button
-            type="button"
-            data-testid="child"
-            style={{ color: 'blue' }}
-          >
+          <button type="button" data-testid="child" style={{ color: 'blue' }}>
             Click
           </button>
         </UnifiedSlot>
