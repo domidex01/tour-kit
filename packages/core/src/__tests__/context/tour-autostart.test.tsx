@@ -1,4 +1,4 @@
-import { render, renderHook, waitFor } from '@testing-library/react'
+import { act, render, renderHook, waitFor } from '@testing-library/react'
 import type * as React from 'react'
 import { describe, expect, it } from 'vitest'
 import { useTourContext } from '../../context/tour-context'
@@ -139,6 +139,64 @@ describe('TourProvider — autoStart', () => {
     const { result } = renderHook(() => useTour(), { wrapper })
 
     expect(result.current.isActive).toBe(false)
+  })
+
+  it('re-hydrates from a cross-tab storage write when syncTabs is enabled', async () => {
+    const storageKey = 'tourkit-route-state-sync'
+
+    const tours: Tour[] = [
+      {
+        id: 'cross-tab',
+        steps: [
+          { id: 's1', target: '#t1', content: 'Step 1' },
+          { id: 's2', target: '#t2', content: 'Step 2' },
+          { id: 's3', target: '#t3', content: 'Step 3' },
+        ],
+      },
+    ]
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      return (
+        <TourProvider
+          tours={tours}
+          routePersistence={{
+            enabled: true,
+            storage: 'localStorage',
+            key: storageKey,
+            syncTabs: true,
+          }}
+        >
+          {children}
+        </TourProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useTourContext(), { wrapper: Wrapper })
+
+    expect(result.current.isActive).toBe(false)
+
+    // Simulate another tab writing to the same key and the browser firing a
+    // storage event on this tab. The provider must pick up the state.
+    const payload = JSON.stringify({
+      tourId: 'cross-tab',
+      stepIndex: 2,
+      completedTours: [],
+      skippedTours: [],
+      timestamp: Date.now(),
+    })
+    window.localStorage.setItem(storageKey, payload)
+
+    await act(async () => {
+      window.dispatchEvent(new StorageEvent('storage', { key: storageKey, newValue: payload }))
+    })
+
+    await waitFor(() => {
+      expect(result.current.isActive).toBe(true)
+    })
+    expect(result.current.tourId).toBe('cross-tab')
+    expect(result.current.currentStepIndex).toBe(2)
+
+    window.localStorage.removeItem(storageKey)
   })
 
   it('renders via <TourProvider> + consumer without crashing', async () => {

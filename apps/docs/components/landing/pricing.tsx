@@ -299,9 +299,9 @@ function FAQ() {
                   <path d="m6 9 6 6 6-6" />
                 </svg>
               </button>
-              {/* biome-ignore lint/a11y/useSemanticElements: accordion panel needs role=region per ARIA authoring practices */}
               <div
                 id={panelId}
+                // biome-ignore lint/a11y/useSemanticElements: accordion panel needs role=region per ARIA authoring practices
                 role="region"
                 aria-labelledby={triggerId}
                 hidden={!isOpen}

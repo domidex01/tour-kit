@@ -287,6 +287,16 @@ function tourReducer(state: TourReducerState, action: TourAction): TourReducerSt
     case 'RESET':
       return handleReset(state, action.tourId)
     case 'UPDATE_TOURS': {
+      // Fast-path: if the incoming array is shallow-equal to what we already
+      // have (same size, same per-id reference), skip the re-keyed Map and
+      // the downstream currentTour/stepIdMap invalidation. Consumers often
+      // pass inline arrays like `tours={[a, b]}` where the array identity
+      // changes every render but the tour objects themselves don't.
+      const sameIdentity =
+        state.tours.size === action.tours.length &&
+        action.tours.every((t) => state.tours.get(t.id) === t)
+      if (sameIdentity) return state
+
       const newTours = new Map(action.tours.map((t) => [t.id, t]))
 
       // If there's an active tour, refresh currentStep from the updated tour
@@ -353,7 +363,7 @@ export function TourProvider({
 }: TourProviderProps) {
   const tourKitContext = React.useContext(TourKitContext)
   const [data, setDataState] = React.useState<Record<string, unknown>>({})
-  const { save, load, clear } = useRoutePersistence(routePersistence)
+  const { save, load, clear, externalVersion } = useRoutePersistence(routePersistence)
 
   const initialState: TourReducerState = {
     tourId: null,
@@ -381,8 +391,9 @@ export function TourProvider({
   // Get current tour
   const currentTour = state.tourId ? (state.tours.get(state.tourId) ?? null) : null
 
-  // Restore persisted state on mount
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Only run on mount, load is stable
+  // Restore persisted state on mount — and re-run when another tab writes
+  // (externalVersion bumps whenever `syncTabs` is on and the storage key changes).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only run on mount / external sync
   React.useEffect(() => {
     const persisted = load()
     if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) {
@@ -392,7 +403,7 @@ export function TourProvider({
         stepIndex: persisted.stepIndex,
       })
     }
-  }, [])
+  }, [externalVersion])
 
   // Auto-start tours declaring autoStart on mount
   // Persistence restore takes precedence — read persisted state synchronously

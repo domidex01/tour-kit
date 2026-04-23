@@ -223,6 +223,84 @@ describe('useRoutePersistence', () => {
       expect(sessionSpy).toHaveBeenCalled()
     })
   })
+
+  describe('syncTabs (cross-tab sync)', () => {
+    it('does not manually dispatch a StorageEvent from save() (regression)', () => {
+      const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+
+      const { result } = renderHook(() => useRoutePersistence({ ...defaultConfig, syncTabs: true }))
+
+      act(() => {
+        result.current.save({ tourId: 'test-tour', currentStepIndex: 0 })
+      })
+
+      // None of the dispatches should be a StorageEvent — browsers fire
+      // those on OTHER tabs automatically, so manual dispatch was pointless
+      // and semantically wrong.
+      const storageDispatches = dispatchSpy.mock.calls.filter(([e]) => e instanceof StorageEvent)
+      expect(storageDispatches).toHaveLength(0)
+
+      dispatchSpy.mockRestore()
+    })
+
+    it('increments externalVersion when another tab writes to our key', () => {
+      const { result } = renderHook(() => useRoutePersistence({ ...defaultConfig, syncTabs: true }))
+
+      expect(result.current.externalVersion).toBe(0)
+
+      act(() => {
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'test-tourkit-state',
+            newValue: JSON.stringify({ tourId: 'cross-tab' }),
+          })
+        )
+      })
+
+      expect(result.current.externalVersion).toBe(1)
+
+      act(() => {
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'test-tourkit-state',
+            newValue: JSON.stringify({ tourId: 'another' }),
+          })
+        )
+      })
+
+      expect(result.current.externalVersion).toBe(2)
+    })
+
+    it('ignores storage events for unrelated keys', () => {
+      const { result } = renderHook(() => useRoutePersistence({ ...defaultConfig, syncTabs: true }))
+
+      act(() => {
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'some-other-app',
+            newValue: '{}',
+          })
+        )
+      })
+
+      expect(result.current.externalVersion).toBe(0)
+    })
+
+    it('does not increment externalVersion when syncTabs is disabled', () => {
+      const { result } = renderHook(() => useRoutePersistence(defaultConfig))
+
+      act(() => {
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'test-tourkit-state',
+            newValue: '{}',
+          })
+        )
+      })
+
+      expect(result.current.externalVersion).toBe(0)
+    })
+  })
 })
 
 describe('useRoutePersistence - memory leak prevention', () => {

@@ -196,6 +196,41 @@ describe('DOM Utilities', () => {
       const focusable = getFocusableElements(container)
       expect(focusable).toHaveLength(0)
     })
+
+    it('includes position:fixed elements (regression: offsetParent is null for fixed)', () => {
+      container.innerHTML = `
+        <button style="position: fixed">Fixed Button</button>
+        <button>Regular Button</button>
+      `
+
+      // Intentionally do NOT mock offsetParent — the fixed button's offsetParent
+      // is null in real browsers, and our filter must not drop it.
+      const focusable = getFocusableElements(container)
+      expect(focusable).toHaveLength(2)
+      expect(focusable[0].textContent).toBe('Fixed Button')
+    })
+
+    it('excludes elements with display:none via computed style', () => {
+      container.innerHTML = `
+        <button>Visible</button>
+        <button style="display: none">Hidden</button>
+      `
+
+      const focusable = getFocusableElements(container)
+      expect(focusable).toHaveLength(1)
+      expect(focusable[0].textContent).toBe('Visible')
+    })
+
+    it('excludes elements with visibility:hidden via computed style', () => {
+      container.innerHTML = `
+        <button>Visible</button>
+        <button style="visibility: hidden">Hidden</button>
+      `
+
+      const focusable = getFocusableElements(container)
+      expect(focusable).toHaveLength(1)
+      expect(focusable[0].textContent).toBe('Visible')
+    })
   })
 
   describe('waitForElement', () => {

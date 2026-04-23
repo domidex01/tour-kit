@@ -34,6 +34,12 @@ export function createNoopStorage(): Storage {
 }
 
 /**
+ * Escape regex metacharacters so arbitrary cookie keys (which may include
+ * `.`, `:`, `-`, etc. after prefixing) can be matched literally.
+ */
+const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/**
  * Cookie-based storage adapter
  */
 export function createCookieStorage(options: { expires?: number; path?: string } = {}): Storage {
@@ -42,7 +48,7 @@ export function createCookieStorage(options: { expires?: number; path?: string }
   return {
     getItem: (key: string) => {
       if (typeof document === 'undefined') return null
-      const match = document.cookie.match(new RegExp(`(^| )${key}=([^;]+)`))
+      const match = document.cookie.match(new RegExp(`(^| )${escapeRegex(key)}=([^;]+)`))
       return match ? decodeURIComponent(match[2]) : null
     },
 

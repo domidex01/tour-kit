@@ -148,9 +148,9 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
 
     if (mode === 'multi') {
       return (
-        // biome-ignore lint/a11y/useSemanticElements: role=group container; <fieldset> brings default styling that breaks the design system
         <div
           ref={ref}
+          // biome-ignore lint/a11y/useSemanticElements: role=group container; <fieldset> brings default styling that breaks the design system
           role="group"
           aria-label={label}
           aria-required={isRequired}
@@ -162,9 +162,9 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
             const disabled = option.disabled ?? false
 
             return (
-              // biome-ignore lint/a11y/useSemanticElements: custom checkbox pattern; native <input type=checkbox> cannot be styled to match the design system
               <div
                 key={option.value}
+                // biome-ignore lint/a11y/useSemanticElements: custom checkbox pattern; native <input type=checkbox> cannot be styled to match the design system
                 role="checkbox"
                 aria-checked={selected}
                 aria-disabled={disabled || undefined}
@@ -231,9 +231,9 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
           const isFocusTarget = enabledIdx === focusedIndex
 
           return (
-            // biome-ignore lint/a11y/useSemanticElements: custom radio pattern; native <input type=radio> cannot be styled to match the design system
             <div
               key={option.value}
+              // biome-ignore lint/a11y/useSemanticElements: custom radio pattern; native <input type=radio> cannot be styled to match the design system
               role="radio"
               aria-checked={selected}
               aria-disabled={disabled || undefined}
