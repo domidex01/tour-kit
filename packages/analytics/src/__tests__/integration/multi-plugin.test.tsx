@@ -307,7 +307,11 @@ describe('Multi-Plugin Integration', () => {
       expect(plugin2.flush).toHaveBeenCalledTimes(1)
     })
 
-    it('destroys all plugins on unmount', () => {
+    it('does not destroy plugins on unmount (Strict Mode safety)', () => {
+      // Provider unmount no longer triggers plugin destroy — React 18 Strict
+      // Mode fires effect cleanup without re-running render, so destroying on
+      // cleanup would leave the committed context pointing at a torn-down
+      // tracker. Manual teardown is available via analytics.destroy().
       const plugin1 = createMockPlugin('plugin-1')
       const plugin2 = createMockPlugin('plugin-2')
 
@@ -324,8 +328,8 @@ describe('Multi-Plugin Integration', () => {
 
       unmount()
 
-      expect(plugin1.destroy).toHaveBeenCalledTimes(1)
-      expect(plugin2.destroy).toHaveBeenCalledTimes(1)
+      expect(plugin1.destroy).not.toHaveBeenCalled()
+      expect(plugin2.destroy).not.toHaveBeenCalled()
     })
   })
 

@@ -50,6 +50,8 @@ export function amplitudePlugin(options: AmplitudePluginOptions): AnalyticsPlugi
 
       try {
         const amp = await import('@amplitude/analytics-browser')
+        // @amplitude/analytics-browser exports its namespace directly (no default);
+        // at runtime the namespace matches our AmplitudeInstance shape.
         amplitude = amp as unknown as AmplitudeInstance
 
         amplitude.init(options.apiKey, {

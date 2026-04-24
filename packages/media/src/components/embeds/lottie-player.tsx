@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { usePrefersReducedMotion } from '../../hooks/use-prefers-reduced-motion'
 import { cn } from '../../lib/utils'
 import type { LottieOptions } from '../../types'
 import { type MediaContainerVariants, mediaContainerVariants } from '../ui/media-variants'
@@ -62,11 +63,7 @@ export const LottiePlayer = React.forwardRef<HTMLDivElement, LottiePlayerProps>(
     const [loadError, setLoadError] = React.useState(false)
     const [isLoading, setIsLoading] = React.useState(true)
 
-    // Check for reduced motion preference
-    const prefersReducedMotion = React.useMemo(() => {
-      if (typeof window === 'undefined') return false
-      return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    }, [])
+    const prefersReducedMotion = usePrefersReducedMotion()
 
     // Dynamically import Lottie player
     React.useEffect(() => {

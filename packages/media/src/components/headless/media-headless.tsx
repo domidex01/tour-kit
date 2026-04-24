@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { usePrefersReducedMotion } from '../../hooks/use-prefers-reduced-motion'
 import type { MediaHeadlessProps, MediaHeadlessRenderProps, MediaType } from '../../types'
 import { detectMediaType, parseMediaUrl } from '../../utils/parse-media-url'
 
@@ -35,11 +36,7 @@ export function MediaHeadless({ src, type, children }: MediaHeadlessProps): Reac
   const [currentTime, setCurrentTime] = React.useState(0)
   const [duration, setDuration] = React.useState(0)
 
-  // Check for reduced motion preference
-  const prefersReducedMotion = React.useMemo(() => {
-    if (typeof window === 'undefined') return false
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  }, [])
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   // Parse media URL
   const mediaType: MediaType = type ?? detectMediaType(src)

@@ -8,42 +8,29 @@ export { TourStep } from './components/tour/tour-step'
 export type { TourProps } from './components/tour/tour'
 
 // Card components
-export { TourCard } from './components/card/tour-card'
-export { TourCardHeader } from './components/card/tour-card-header'
-export { TourCardContent } from './components/card/tour-card-content'
-export { TourCardFooter } from './components/card/tour-card-footer'
-export type {
-  TourCardProps,
-  TourCardHeaderProps,
-  TourCardContentProps,
-  TourCardFooterProps,
-} from './components/card'
+export { TourCard, type TourCardProps } from './components/card/tour-card'
+export { TourCardHeader, type TourCardHeaderProps } from './components/card/tour-card-header'
+export { TourCardContent, type TourCardContentProps } from './components/card/tour-card-content'
+export { TourCardFooter, type TourCardFooterProps } from './components/card/tour-card-footer'
 
 // Navigation components
-export { TourNavigation } from './components/navigation/tour-navigation'
-export { TourProgress } from './components/navigation/tour-progress'
-export { TourClose } from './components/navigation/tour-close'
+export { TourNavigation, type TourNavigationProps } from './components/navigation/tour-navigation'
+export { TourProgress, type TourProgressProps } from './components/navigation/tour-progress'
+export { TourClose, type TourCloseProps } from './components/navigation/tour-close'
 export { TourRoutePrompt } from './components/navigation/tour-route-prompt'
-export type {
-  TourNavigationProps,
-  TourProgressProps,
-  TourCloseProps,
-} from './components/navigation'
 
 // Overlay components
-export { TourOverlay } from './components/overlay/tour-overlay'
-export type { TourOverlayProps } from './components/overlay'
+export { TourOverlay, type TourOverlayProps } from './components/overlay/tour-overlay'
 
 // Primitives
-export { TourPortal } from './components/primitives/tour-portal'
+export { TourPortal, type TourPortalProps } from './components/primitives/tour-portal'
 export { TourArrow } from './components/primitives/tour-arrow'
-export type { TourPortalProps } from './components/primitives'
 
 // Provider components
 export {
   MultiTourKitProvider,
   type MultiTourKitProviderProps,
-} from './components/provider'
+} from './components/provider/tourkit-provider'
 
 // ============================================
 // UI VARIANTS (for customization)

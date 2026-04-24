@@ -32,26 +32,23 @@ export function selectResponsiveSource(
 }
 
 /**
- * Hook for responsive source selection with resize listener
+ * Hook for responsive source selection with resize listener.
+ *
+ * The initial state is always `defaultSrc` to keep the first client render
+ * identical to the server render (no hydration mismatch). The effect then
+ * syncs to the media-query-matched source after mount.
  */
 export function useResponsiveSource(
   sources: ResponsiveSource[] | undefined,
   defaultSrc: string
 ): string {
-  const [selectedSrc, setSelectedSrc] = React.useState(() =>
-    selectResponsiveSource(sources, defaultSrc)
-  )
+  const [selectedSrc, setSelectedSrc] = React.useState(defaultSrc)
 
   React.useEffect(() => {
-    if (!sources || sources.length === 0) {
-      setSelectedSrc(defaultSrc)
-      return
-    }
-
-    // Update source on mount
     setSelectedSrc(selectResponsiveSource(sources, defaultSrc))
 
-    // Listen for resize events
+    if (!sources || sources.length === 0) return
+
     const handleResize = () => {
       setSelectedSrc(selectResponsiveSource(sources, defaultSrc))
     }

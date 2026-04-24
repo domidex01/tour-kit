@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { usePrefersReducedMotion } from '../../hooks/use-prefers-reduced-motion'
 import { cn } from '../../lib/utils'
 import {
   type MediaContainerVariants,
@@ -45,29 +46,16 @@ export const GifPlayer = React.forwardRef<HTMLImageElement, GifPlayerProps>(
     },
     ref
   ) => {
-    // Check for reduced motion preference
-    const prefersReducedMotion = React.useMemo(() => {
-      if (typeof window === 'undefined') return false
-      return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    }, [])
-
-    const [isPlaying, setIsPlaying] = React.useState(autoplay && !prefersReducedMotion)
+    const prefersReducedMotion = usePrefersReducedMotion()
+    const [isPlaying, setIsPlaying] = React.useState(autoplay)
     const [isLoaded, setIsLoaded] = React.useState(false)
 
-    // Listen for reduced motion changes
+    // Pause whenever the user's reduced-motion preference becomes true
     React.useEffect(() => {
-      if (typeof window === 'undefined') return
-
-      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-      const handleChange = (e: MediaQueryListEvent) => {
-        if (e.matches) {
-          setIsPlaying(false)
-        }
+      if (prefersReducedMotion) {
+        setIsPlaying(false)
       }
-
-      mediaQuery.addEventListener('change', handleChange)
-      return () => mediaQuery.removeEventListener('change', handleChange)
-    }, [])
+    }, [prefersReducedMotion])
 
     const handleLoad = React.useCallback(() => {
       setIsLoaded(true)

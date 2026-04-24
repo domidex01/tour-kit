@@ -12,19 +12,15 @@ import { type YouTubeEmbedProps, YouTubeEmbed as _YouTubeEmbed } from './youtube
 
 export type { YouTubeEmbedProps, VimeoEmbedProps, LoomEmbedProps, WistiaEmbedProps }
 
-// biome-ignore lint/suspicious/noExplicitAny: HOC generic needs flexible constraint
-function withProGate<P extends Record<string, any>>(
+function withProGate<P extends object>(
   Component: React.ComponentType<P>,
   displayName: string
 ): React.FC<P> {
   const Wrapped: React.FC<P> = (props) =>
-    React.createElement(
-      ProGate,
-      { package: '@tour-kit/media', children: null } as unknown as React.ComponentProps<
-        typeof ProGate
-      >,
-      React.createElement(Component, props)
-    )
+    React.createElement(ProGate, {
+      package: '@tour-kit/media',
+      children: React.createElement<P>(Component, props),
+    })
   Wrapped.displayName = `Licensed(${displayName})`
   return Wrapped
 }

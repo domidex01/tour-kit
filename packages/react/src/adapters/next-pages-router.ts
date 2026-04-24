@@ -1,7 +1,7 @@
 'use client'
 
 import type { RouterAdapter } from '@tour-kit/core'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 // biome-ignore lint/suspicious/noExplicitAny: require returns dynamic module
 declare const require: (module: string) => any
@@ -42,6 +42,9 @@ export function createNextPagesRouterAdapter(useRouter: UseRouter): () => Router
   return function useNextPagesRouter(): RouterAdapter {
     const router = useRouter()
     const callbacksRef = useRef<Set<(route: string) => void>>(new Set())
+    // Store current pathname in ref for stable callbacks
+    const pathnameRef = useRef<string>(router.pathname)
+    pathnameRef.current = router.pathname
 
     // Listen to Next.js Pages Router events
     useEffect(() => {
@@ -59,7 +62,8 @@ export function createNextPagesRouterAdapter(useRouter: UseRouter): () => Router
       }
     }, [router.events])
 
-    const getCurrentRoute = useCallback(() => router.pathname, [router.pathname])
+    // Use refs in callbacks to avoid recreating them on every pathname change
+    const getCurrentRoute = useCallback(() => pathnameRef.current, [])
 
     const navigate = useCallback(
       async (route: string) => {
@@ -70,39 +74,40 @@ export function createNextPagesRouterAdapter(useRouter: UseRouter): () => Router
 
     const matchRoute = useCallback(
       (pattern: string, mode: 'exact' | 'startsWith' | 'contains' = 'exact') => {
-        const pathname = router.pathname
+        const currentPath = pathnameRef.current
         switch (mode) {
           case 'exact':
-            return pathname === pattern
+            return currentPath === pattern
           case 'startsWith':
-            return pathname.startsWith(pattern)
+            return currentPath.startsWith(pattern)
           case 'contains':
-            return pathname.includes(pattern)
+            return currentPath.includes(pattern)
           default:
-            return pathname === pattern
+            return currentPath === pattern
         }
       },
-      [router.pathname]
+      []
     )
 
-    const onRouteChange = useCallback(
-      (callback: (route: string) => void) => {
-        callbacksRef.current.add(callback)
-        // Call immediately with current route for initialization
-        callback(router.pathname)
-        return () => {
-          callbacksRef.current.delete(callback)
-        }
-      },
-      [router.pathname]
-    )
+    const onRouteChange = useCallback((callback: (route: string) => void) => {
+      callbacksRef.current.add(callback)
+      // Call immediately with current route for initialization
+      callback(pathnameRef.current)
+      return () => {
+        callbacksRef.current.delete(callback)
+      }
+    }, [])
 
-    return {
-      getCurrentRoute,
-      navigate,
-      matchRoute,
-      onRouteChange,
-    }
+    // Memoize the router adapter object to prevent unnecessary re-renders
+    return useMemo<RouterAdapter>(
+      () => ({
+        getCurrentRoute,
+        navigate,
+        matchRoute,
+        onRouteChange,
+      }),
+      [getCurrentRoute, navigate, matchRoute, onRouteChange]
+    )
   }
 }
 

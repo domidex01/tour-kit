@@ -1,2 +1,2 @@
-export { tourKitPlugin, default } from './plugin'
+export { tourKitPlugin } from './plugin'
 export { tourKitPreset } from './preset'

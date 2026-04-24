@@ -32,7 +32,7 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
     }
 
     if (variant === 'bar') {
-      const percentage = (current / total) * 100
+      const percentage = total > 0 ? (current / total) * 100 : 0
       return (
         // biome-ignore lint/a11y/useFocusableInteractive: Progress bar is read-only indicator
         <div

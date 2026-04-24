@@ -64,6 +64,7 @@ export function TourCardHeadless({ className, style, children, render }: TourCar
   const targetElement = React.useMemo(() => {
     if (!currentStep?.target) return null
     if (typeof currentStep.target === 'string') {
+      if (typeof document === 'undefined') return null
       return document.querySelector<HTMLElement>(currentStep.target)
     }
     return currentStep.target.current

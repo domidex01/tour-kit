@@ -689,3 +689,45 @@ describe('createAnalytics', () => {
     expect(analytics).toBeInstanceOf(TourAnalytics)
   })
 })
+
+describe('post-destroy guards', () => {
+  it('no-ops track() after destroy() instead of dispatching to torn-down plugins', () => {
+    const trackSpy = vi.fn()
+    const analytics = createAnalytics({
+      plugins: [createMockPlugin({ track: trackSpy })],
+      enabled: false,
+    })
+
+    analytics.destroy()
+    analytics.track('tour_started', { tourId: 'tour-1' })
+
+    expect(trackSpy).not.toHaveBeenCalled()
+  })
+
+  it('no-ops identify() after destroy()', () => {
+    const identifySpy = vi.fn()
+    const analytics = createAnalytics({
+      plugins: [createMockPlugin({ identify: identifySpy })],
+      enabled: false,
+    })
+
+    analytics.destroy()
+    analytics.identify('user-1')
+
+    expect(identifySpy).not.toHaveBeenCalled()
+  })
+
+  it('destroy() is idempotent — plugin.destroy fires exactly once', () => {
+    const destroySpy = vi.fn()
+    const analytics = createAnalytics({
+      plugins: [createMockPlugin({ destroy: destroySpy })],
+      enabled: false,
+    })
+
+    analytics.destroy()
+    analytics.destroy()
+    analytics.destroy()
+
+    expect(destroySpy).toHaveBeenCalledTimes(1)
+  })
+})

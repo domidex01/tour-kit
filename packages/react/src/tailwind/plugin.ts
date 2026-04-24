@@ -87,5 +87,3 @@ export const tourKitPlugin: ReturnType<typeof plugin> = plugin(
     },
   } as Partial<Config>
 )
-
-export default tourKitPlugin

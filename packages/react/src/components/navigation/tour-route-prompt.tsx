@@ -55,7 +55,15 @@ export function TourRoutePrompt({
 }: TourRoutePromptProps) {
   const [pendingNavigation, setPendingNavigation] = React.useState<PendingNavigation | null>(null)
   const dialogRef = React.useRef<HTMLDialogElement>(null)
+  const isMountedRef = React.useRef(true)
   const tour = useTour()
+
+  React.useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   // Check if current step requires navigation
   React.useEffect(() => {
@@ -104,7 +112,9 @@ export function TourRoutePrompt({
   const handleNavigate = async () => {
     onNavigate?.(pendingNavigation.route)
     await router.navigate(pendingNavigation.route)
-    setPendingNavigation(null)
+    if (isMountedRef.current) {
+      setPendingNavigation(null)
+    }
   }
 
   const handleSkip = () => {

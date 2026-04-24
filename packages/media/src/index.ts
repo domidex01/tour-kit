@@ -102,6 +102,7 @@ export {
 // ============================================
 
 export type {
+  AspectRatio,
   MediaType,
   CaptionTrack,
   ResponsiveSource,

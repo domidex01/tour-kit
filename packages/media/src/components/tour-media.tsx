@@ -1,17 +1,20 @@
 'use client'
 
 import * as React from 'react'
+import { usePrefersReducedMotion } from '../hooks/use-prefers-reduced-motion'
 import { cn } from '../lib/utils'
 import type { TourMediaProps } from '../types'
 import { detectMediaType, parseMediaUrl } from '../utils/parse-media-url'
 import { useResponsiveSource } from '../utils/responsive'
-import { GifPlayer } from './embeds/gif-player'
-import { LoomEmbed } from './embeds/loom-embed'
-import { LottiePlayer } from './embeds/lottie-player'
-import { NativeVideo } from './embeds/native-video'
-import { VimeoEmbed } from './embeds/vimeo-embed'
-import { WistiaEmbed } from './embeds/wistia-embed'
-import { YouTubeEmbed } from './embeds/youtube-embed'
+import {
+  GifPlayer,
+  LoomEmbed,
+  LottiePlayer,
+  NativeVideo,
+  VimeoEmbed,
+  WistiaEmbed,
+  YouTubeEmbed,
+} from './embeds'
 import { type MediaContainerVariants, mediaContainerVariants } from './ui/media-variants'
 
 export interface TourMediaComponentProps
@@ -81,11 +84,7 @@ export const TourMedia = React.forwardRef<HTMLDivElement, TourMediaComponentProp
     },
     ref
   ) => {
-    // Check for reduced motion preference
-    const prefersReducedMotion = React.useMemo(() => {
-      if (typeof window === 'undefined') return false
-      return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    }, [])
+    const prefersReducedMotion = usePrefersReducedMotion()
 
     // Select responsive source
     const responsiveSrc = useResponsiveSource(sources, src)

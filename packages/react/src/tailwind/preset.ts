@@ -28,5 +28,3 @@ export const tourKitPreset: Partial<Config> = {
     },
   },
 }
-
-export default tourKitPreset

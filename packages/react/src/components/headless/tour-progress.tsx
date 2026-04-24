@@ -26,7 +26,7 @@ export function TourProgressHeadless({
   style,
   render,
 }: TourProgressHeadlessProps) {
-  const percentage = (current / total) * 100
+  const percentage = total > 0 ? (current / total) * 100 : 0
   const renderProps: TourProgressRenderProps = { current, total, percentage }
 
   if (render) {

@@ -1,0 +1,59 @@
+# Docs App
+
+Fumadocs-powered documentation site.
+
+## Content Structure
+
+```
+content/docs/
+├── index.mdx              # Landing page
+├── getting-started/       # Installation, quick start
+├── core/                  # @tour-kit/core docs
+│   ├── hooks/
+│   ├── providers/
+│   ├── types/
+│   └── utilities/
+├── react/                 # @tour-kit/react docs
+│   ├── components/
+│   ├── headless/
+│   └── styling/
+├── hints/                 # @tour-kit/hints docs
+├── guides/                # Tutorials (Base UI, etc.)
+├── examples/              # Code examples
+└── api/                   # API reference
+```
+
+## MDX Conventions
+
+### Frontmatter
+```mdx
+---
+title: Component Name
+description: One-line description
+---
+```
+
+### Code Blocks
+Use language hints for syntax highlighting:
+```tsx
+<Tour tourId="demo">
+```
+
+### Component Examples
+Live examples should be in separate example files, imported into MDX.
+
+## Gotchas
+
+- **File naming**: Use kebab-case for MDX files
+- **Meta files**: Each directory needs `meta.json` for navigation order
+- **Internal links**: Use relative paths, Fumadocs handles routing
+
+## Commands
+
+```bash
+pnpm --filter docs dev      # Start dev server
+pnpm --filter docs build    # Build static site
+```
+
+## Related Files
+- `.claude/agents/docs-writer.md` - Agent for writing documentation

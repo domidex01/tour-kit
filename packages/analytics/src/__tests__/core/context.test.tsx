@@ -1,4 +1,5 @@
 import { act, render, renderHook, screen } from '@testing-library/react'
+import { StrictMode } from 'react'
 import type * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AnalyticsProvider, useAnalytics, useAnalyticsOptional } from '../../core/context'
@@ -95,7 +96,11 @@ describe('AnalyticsProvider', () => {
     expect(session1).toBe(session2)
   })
 
-  it('calls destroy on unmount', () => {
+  it('does not call destroy on unmount (Strict Mode safety)', () => {
+    // The provider intentionally keeps the analytics instance alive across
+    // unmount — React 18 Strict Mode fires cleanup without re-running render,
+    // so a destroy-on-cleanup would brick the committed context. Apps that
+    // need teardown call analytics.destroy() imperatively.
     const mockPlugin = createMockPlugin()
     const config = createConfig({ plugins: [mockPlugin] })
 
@@ -109,7 +114,7 @@ describe('AnalyticsProvider', () => {
 
     unmount()
 
-    expect(mockPlugin.destroy).toHaveBeenCalledTimes(1)
+    expect(mockPlugin.destroy).not.toHaveBeenCalled()
   })
 
   it('registers beforeunload handler for flush', () => {
@@ -328,5 +333,39 @@ describe('Multiple providers (nested)', () => {
 
     expect(innerPlugin.track).toHaveBeenCalled()
     expect(outerPlugin.track).not.toHaveBeenCalled()
+  })
+
+  it('keeps a live analytics instance under React Strict Mode', () => {
+    // Regression: prior useRef + render-init + cleanup-destroy pattern left
+    // the ref pointing at a destroyed instance after Strict Mode's simulated
+    // unmount, silently dropping every subsequent track() call.
+    const trackSpy = vi.fn()
+    const destroySpy = vi.fn()
+    const config = createConfig({
+      plugins: [createMockPlugin({ track: trackSpy, destroy: destroySpy })],
+    })
+
+    type Captured = { analytics: ReturnType<typeof useAnalytics> | null }
+    const captured: Captured = { analytics: null }
+    function Consumer() {
+      captured.analytics = useAnalytics()
+      return null
+    }
+
+    render(
+      <StrictMode>
+        <AnalyticsProvider config={config}>
+          <Consumer />
+        </AnalyticsProvider>
+      </StrictMode>
+    )
+
+    expect(captured.analytics).not.toBeNull()
+    // biome-ignore lint/style/noNonNullAssertion: asserted above
+    captured.analytics!.track('tour_started', { tourId: 't1' })
+    // Instance must be live — destroy must not have fired during the simulated
+    // unmount, and track() must still reach the plugin.
+    expect(destroySpy).not.toHaveBeenCalled()
+    expect(trackSpy).toHaveBeenCalledTimes(1)
   })
 })

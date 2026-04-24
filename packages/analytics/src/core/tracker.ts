@@ -13,6 +13,7 @@ export class TourAnalytics {
   private stepStartTime = 0
   private tourStartTime = 0
   private initialized = false
+  private destroyed = false
   private eventQueue: EventQueue | null = null
 
   constructor(config: AnalyticsConfig) {
@@ -58,6 +59,7 @@ export class TourAnalytics {
    * Identify a user
    */
   identify(userId: string, properties?: Record<string, unknown>) {
+    if (this.destroyed) return
     for (const plugin of this.plugins) {
       try {
         plugin.identify?.(userId, properties)
@@ -73,6 +75,7 @@ export class TourAnalytics {
    * Track a raw event
    */
   track(eventName: TourEventName, data: TourEventData = { tourId: '' }) {
+    if (this.destroyed) return
     const event: TourEvent = {
       eventName,
       timestamp: Date.now(),
@@ -277,6 +280,7 @@ export class TourAnalytics {
    * Flush all queued events
    */
   async flush() {
+    if (this.destroyed) return
     // Flush internal event queue first
     this.eventQueue?.flush()
 
@@ -296,6 +300,8 @@ export class TourAnalytics {
    * Destroy tracker and clean up
    */
   destroy() {
+    if (this.destroyed) return
+    this.destroyed = true
     // Clean up event queue
     this.eventQueue?.destroy()
     this.eventQueue = null

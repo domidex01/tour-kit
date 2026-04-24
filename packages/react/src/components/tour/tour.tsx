@@ -127,22 +127,14 @@ function TourRegistrar({
   }
 }) {
   const { registerTour, unregisterTour } = registryContext
-  const tourRef = React.useRef(tour)
 
-  // Update ref when tour changes
+  // Register on mount and whenever the tour object changes.
+  // Capture id at effect time so an id change correctly unregisters the previous tour.
   React.useEffect(() => {
-    tourRef.current = tour
-  }, [tour])
-
-  React.useEffect(() => {
-    registerTour(tourRef.current)
-    return () => unregisterTour(tourRef.current.id)
-  }, [registerTour, unregisterTour])
-
-  // Re-register when tour config changes
-  React.useEffect(() => {
+    const id = tour.id
     registerTour(tour)
-  }, [tour, registerTour])
+    return () => unregisterTour(id)
+  }, [tour, registerTour, unregisterTour])
 
   // Render nothing - tour is registered in context
   return null

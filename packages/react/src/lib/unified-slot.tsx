@@ -11,26 +11,34 @@ export interface UnifiedSlotProps {
 }
 
 /**
- * Unified Slot component that works with both Radix UI and Base UI
+ * Unified Slot component that works with both Radix UI and Base UI.
  *
- * For Radix UI: Uses @radix-ui/react-slot
- * For Base UI: Clones element with merged props (similar behavior)
+ * For Radix UI: clones element with merged props (className concat,
+ * style merge, on* handler compose, ref merge).
+ * For Base UI: calls `children` as a render prop with the merged props.
  *
- * This component provides a unified API for the `asChild` pattern,
- * allowing components to work with either Radix UI or Base UI.
+ * Wrapped in `React.forwardRef` so the `ref` prop reaches this component
+ * on both React 18 (where `ref` is stripped from `props` by createElement)
+ * and React 19 (where it's a regular prop).
  */
-export function UnifiedSlot({ children, ...props }: UnifiedSlotProps): ReactElement {
+export const UnifiedSlot = React.forwardRef<unknown, UnifiedSlotProps>(function UnifiedSlot(
+  { children, ...props },
+  ref
+) {
   // Handle render prop pattern (Base UI style)
   if (typeof children === 'function') {
-    return (children as RenderProp)(props)
+    const forwarded = ref ? { ...props, ref } : props
+    return (children as RenderProp)(forwarded)
   }
 
   // Clone element with merged props (Radix UI style)
   if (React.isValidElement(children)) {
     const childProps = children.props as Record<string, unknown>
-    const propsRef = (props as { ref?: React.Ref<unknown> }).ref
-    const childRef = (childProps as { ref?: React.Ref<unknown> }).ref
-    const mergedRef = mergeRefs(propsRef, childRef)
+    // React 18 stores ref on element.ref; React 19 stores it in props.ref. Read both.
+    const elementRef = (children as unknown as { ref?: React.Ref<unknown> }).ref
+    const propsRef = (childProps as { ref?: React.Ref<unknown> }).ref
+    const childRef = elementRef ?? propsRef
+    const mergedRef = mergeRefs(ref ?? undefined, childRef)
 
     const mergedProps = mergeProps(props, childProps)
 
@@ -44,14 +52,18 @@ export function UnifiedSlot({ children, ...props }: UnifiedSlotProps): ReactElem
 
   // Fallback: return empty fragment (should not happen with proper usage)
   return <>{children}</>
-}
+})
+
+UnifiedSlot.displayName = 'UnifiedSlot'
 
 /**
  * Merges multiple refs into a single ref callback
  */
 function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>): React.RefCallback<T> | null {
+  const validRefs = refs.filter((r): r is React.Ref<T> => r != null)
+  if (validRefs.length === 0) return null
   return (value: T) => {
-    for (const ref of refs) {
+    for (const ref of validRefs) {
       if (typeof ref === 'function') {
         ref(value)
       } else if (ref != null) {
