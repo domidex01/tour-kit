@@ -59,8 +59,8 @@ __pycache__/
 .pytest_cache/
 
 # Internal planning and marketing docs (kept local)
-marketing-strategy/*
-plan/*
-
-# SEO audit raw JSON (can be multiple MB each; regenerate with scripts)
-reports/seo-*.json
+/marketing-strategy/
+/plan/
+/wiki/
+/reports/
+/specs/
