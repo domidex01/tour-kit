@@ -221,6 +221,16 @@ export function Pricing() {
 
         {/* FAQ */}
         <FAQ />
+
+        <p className="mt-12 text-center text-[13px] text-fd-muted-foreground">
+          Already a customer?{' '}
+          <Link
+            href="/account"
+            className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"
+          >
+            Manage your license →
+          </Link>
+        </p>
       </div>
     </section>
   )
