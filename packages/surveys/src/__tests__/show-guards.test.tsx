@@ -19,9 +19,7 @@ vi.mock('@tour-kit/core', () => ({
   }),
 }))
 
-const configs: SurveyConfig[] = [
-  { id: 'a', type: 'csat', displayMode: 'modal', questions: [] },
-]
+const configs: SurveyConfig[] = [{ id: 'a', type: 'csat', displayMode: 'modal', questions: [] }]
 
 function wrapper({ children }: { children: React.ReactNode }) {
   return <SurveysProvider surveys={configs}>{children}</SurveysProvider>

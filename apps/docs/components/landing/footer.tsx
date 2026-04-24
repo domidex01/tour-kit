@@ -9,6 +9,7 @@ const footerLinks = {
     { label: 'Benchmarks', href: '/benchmarks' },
     { label: 'Blog', href: '/blog' },
     { label: 'Pricing', href: '/pricing' },
+    { label: 'Manage license', href: '/account' },
   ],
   packages: [
     { label: '@tour-kit/core', href: '/docs/core' },

@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/media Context File
-Version: 0.1.4 | Generated: 2026-04-23
+Version: 0.1.4 | Generated: 2026-04-24
 Paste this into your LLM to get accurate answers about @tour-kit/media.
 =========================================================================
 
@@ -40,6 +40,7 @@ Types:
     UnifiedSlotProps
     UILibraryProviderProps
     EmbedUrlOptions
+    AspectRatio
     MediaType
     CaptionTrack
     ResponsiveSource

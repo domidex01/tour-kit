@@ -85,7 +85,13 @@ describe('SurveySlideout', () => {
 
 describe('HeadlessSurvey', () => {
   it('render prop exposes state, config, and actions', () => {
-    const received: Array<{ surveyId: string; show: unknown; dismiss: unknown; answer: unknown; complete: unknown }> = []
+    const received: Array<{
+      surveyId: string
+      show: unknown
+      dismiss: unknown
+      answer: unknown
+      complete: unknown
+    }> = []
     render(
       <SurveysProvider surveys={[cfg]}>
         <HeadlessSurvey surveyId="s1">

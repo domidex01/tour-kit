@@ -19,6 +19,7 @@ function withProGate<P extends object>(
   const Wrapped: React.FC<P> = (props) =>
     React.createElement(ProGate, {
       package: '@tour-kit/media',
+      // biome-ignore lint/correctness/noChildrenProp: ProGateProps requires children in the props object
       children: React.createElement<P>(Component, props),
     })
   Wrapped.displayName = `Licensed(${displayName})`

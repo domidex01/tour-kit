@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/core Context File
-Version: 0.5.0 | Generated: 2026-04-23
+Version: 0.5.0 | Generated: 2026-04-24
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -81,6 +81,7 @@ Hooks:
     useTourKitContext
     useDirection
     useTourContext
+    useTourContextOptional
     useTour
     useStep
     useSpotlight
@@ -164,6 +165,7 @@ HOOKS
     useTourKitContext(...)
     useDirection(...)
     useTourContext(...)
+    useTourContextOptional(...)
     useTour(...)
     useStep(...)
     useSpotlight(...)

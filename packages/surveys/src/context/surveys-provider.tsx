@@ -9,8 +9,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import { calculateCES, calculateCSAT, calculateNPS } from '../core/scoring'
 import { SurveyScheduler } from '../core/scheduler'
+import { calculateCES, calculateCSAT, calculateNPS } from '../core/scoring'
 import type { SurveysContextValue, SurveysProviderProps } from '../types/context'
 import type { AnswerValue } from '../types/question'
 import { DEFAULT_SURVEY_QUEUE_CONFIG, type SurveyQueueConfig } from '../types/queue'
@@ -147,9 +147,7 @@ function surveysReducer(state: SurveysReducerState, action: SurveysAction): Surv
         isVisible: false,
       }))
       if (state.activeSurvey !== action.id) return next
-      return action.drain
-        ? drainQueue(next)
-        : { ...next, activeSurvey: null }
+      return action.drain ? drainQueue(next) : { ...next, activeSurvey: null }
     }
 
     case 'DISMISS': {
@@ -178,14 +176,11 @@ function surveysReducer(state: SurveysReducerState, action: SurveysAction): Surv
         isVisible: false,
         isSnoozed: true,
         snoozeCount: e.snoozeCount + 1,
-        snoozeUntil: days !== undefined
-          ? new Date(Date.now() + days * 24 * 60 * 60 * 1000)
-          : e.snoozeUntil,
+        snoozeUntil:
+          days !== undefined ? new Date(Date.now() + days * 24 * 60 * 60 * 1000) : e.snoozeUntil,
       }))
       if (state.activeSurvey !== action.id) return next
-      return action.drain
-        ? drainQueue(next)
-        : { ...next, activeSurvey: null }
+      return action.drain ? drainQueue(next) : { ...next, activeSurvey: null }
     }
 
     case 'ANSWER':
@@ -216,9 +211,7 @@ function surveysReducer(state: SurveysReducerState, action: SurveysAction): Surv
         completedAt: new Date(),
       }))
       if (state.activeSurvey !== action.id) return next
-      return action.drain
-        ? drainQueue(next)
-        : { ...next, activeSurvey: null }
+      return action.drain ? drainQueue(next) : { ...next, activeSurvey: null }
     }
 
     case 'RESET': {

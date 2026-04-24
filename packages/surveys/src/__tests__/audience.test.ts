@@ -24,7 +24,10 @@ describe('matchesAudience', () => {
   it('equals/not_equals', () => {
     const ctx = { plan: 'pro' }
     expect(
-      matchesAudience([{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }], ctx)
+      matchesAudience(
+        [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }],
+        ctx
+      )
     ).toBe(true)
     expect(
       matchesAudience(
@@ -51,10 +54,9 @@ describe('matchesAudience', () => {
 
   it('in / not_in', () => {
     expect(
-      matchesAudience(
-        [{ type: 'segment', key: 'segment', operator: 'in', value: ['a', 'b'] }],
-        { segment: 'a' }
-      )
+      matchesAudience([{ type: 'segment', key: 'segment', operator: 'in', value: ['a', 'b'] }], {
+        segment: 'a',
+      })
     ).toBe(true)
     expect(
       matchesAudience(
@@ -66,10 +68,7 @@ describe('matchesAudience', () => {
 
   it('exists / not_exists', () => {
     expect(
-      matchesAudience(
-        [{ type: 'user_property', key: 'plan', operator: 'exists' }],
-        { plan: 'pro' }
-      )
+      matchesAudience([{ type: 'user_property', key: 'plan', operator: 'exists' }], { plan: 'pro' })
     ).toBe(true)
     expect(
       matchesAudience([{ type: 'user_property', key: 'plan', operator: 'not_exists' }], {})

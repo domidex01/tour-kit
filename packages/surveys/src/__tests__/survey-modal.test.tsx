@@ -50,7 +50,11 @@ describe('SurveyModal', () => {
     }
     function Opener() {
       // show via controlled prop simplest: open modal directly
-      return <SurveyModal surveyId="m1" open>only one should appear</SurveyModal>
+      return (
+        <SurveyModal surveyId="m1" open>
+          only one should appear
+        </SurveyModal>
+      )
     }
     render(<Harness />)
     expect(screen.getAllByText('NPS Survey').length).toBeGreaterThan(0)

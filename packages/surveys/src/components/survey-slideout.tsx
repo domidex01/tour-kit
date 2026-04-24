@@ -74,9 +74,7 @@ export const SurveySlideout = React.forwardRef<HTMLDivElement, SurveySlideoutPro
           <Dialog.Overlay
             className={cn(slideoutOverlayVariants())}
             onClick={
-              slideoutOptions.closeOnOverlayClick
-                ? () => handleDismiss('overlay_click')
-                : undefined
+              slideoutOptions.closeOnOverlayClick ? () => handleDismiss('overlay_click') : undefined
             }
           />
           <Dialog.Content

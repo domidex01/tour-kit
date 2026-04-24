@@ -1,5 +1,5 @@
-import type { SurveyPriority } from '../types/survey'
 import type { SurveyQueueConfig, SurveyQueueItem } from '../types/queue'
+import type { SurveyPriority } from '../types/survey'
 
 export class SurveyPriorityQueue {
   private items: SurveyQueueItem[] = []

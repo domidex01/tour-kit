@@ -75,9 +75,9 @@ describe('canShowByFrequency', () => {
 
   it('blocks when snoozed and snoozeUntil is in the future', () => {
     const future = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
-    expect(
-      canShowByFrequency(makeState({ isSnoozed: true, snoozeUntil: future }), 'always')
-    ).toBe(false)
+    expect(canShowByFrequency(makeState({ isSnoozed: true, snoozeUntil: future }), 'always')).toBe(
+      false
+    )
   })
 })
 
