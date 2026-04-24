@@ -43,6 +43,7 @@ test-results/
 #tour kit plan
 tour-kit/*
 # Claude Code
+.claude/*
 .claude/memory.db
 .claude/settings.local.json
 .claude/commands/
@@ -56,17 +57,10 @@ wizardry-state.json
 __pycache__/
 *.pyc
 .pytest_cache/
-.claude/*
-!.claude/skills/
-.claude/skills/*
-!.claude/skills/tk-*/
-!.claude/skills/README.md
-CLAUDE.md
 
+# Internal planning and marketing docs (kept local)
 marketing-strategy/*
-tour-kit/*
 plan/*
-.claude\settings.json
-syndication/*
+
 # SEO audit raw JSON (can be multiple MB each; regenerate with scripts)
 reports/seo-*.json
