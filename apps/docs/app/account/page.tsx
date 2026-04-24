@@ -1,3 +1,4 @@
+import { EmailPortalForm } from '@/components/account/email-portal-form'
 import { Footer } from '@/components/landing/footer'
 import { baseOptions } from '@/lib/layout.shared'
 import { POLAR_PORTAL_URL } from '@/lib/polar-config'
@@ -36,24 +37,23 @@ export default function AccountPage() {
               Manage your license
             </h1>
             <p className="mx-auto max-w-xl text-[16px] leading-[1.6] text-fd-muted-foreground">
-              Your userTourKit Pro license is managed through Polar, our billing partner. Sign in
-              with the email you used to purchase to view your license keys, manage activated
-              domains, download invoices, and update your subscription.
+              Enter the email you used to purchase Tour Kit. We&apos;ll email you a secure link to
+              view your keys, manage activated domains, and download invoices.
             </p>
 
-            <div className="mt-10 flex flex-col items-center gap-4">
+            <EmailPortalForm />
+
+            <div className="mt-10 flex flex-col items-center gap-2">
+              <p className="text-[13px] text-fd-muted-foreground">Or sign in directly at Polar —</p>
               <Link
                 href={POLAR_PORTAL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-md bg-fd-primary px-6 py-3 text-[15px] font-semibold text-fd-primary-foreground transition-colors hover:bg-fd-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:ring-offset-2"
+                className="inline-flex items-center gap-2 rounded-md border border-fd-border bg-transparent px-6 py-3 text-[14px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:ring-offset-2"
               >
                 Open Polar Portal
                 <ArrowUpRight className="size-4" aria-hidden="true" />
               </Link>
-              <p className="text-[13px] text-fd-muted-foreground">
-                Polar will email you a one-time code to sign in.
-              </p>
             </div>
           </div>
 
