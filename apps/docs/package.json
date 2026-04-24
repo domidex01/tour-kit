@@ -11,12 +11,14 @@
     "generate:llm": "tsx scripts/generate-llm-files.ts",
     "generate:context": "tsx scripts/generate-context-files.ts",
     "check:freshness": "tsx scripts/check-mdx-freshness.ts",
+    "check:secrets": "node scripts/check-secrets.mjs",
     "postinstall": "fumadocs-mdx",
     "test": "vitest run"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.4",
     "@polar-sh/nextjs": "^0.9.5",
+    "@polar-sh/sdk": "^0.46.7",
     "@radix-ui/react-popover": "^1.1.15",
     "@tour-kit/core": "workspace:*",
     "@tour-kit/hints": "workspace:*",
@@ -31,8 +33,10 @@
     "next": "canary",
     "react": "canary",
     "react-dom": "canary",
+    "resend": "^6.12.2",
     "sharp": "^0.34.5",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.4",

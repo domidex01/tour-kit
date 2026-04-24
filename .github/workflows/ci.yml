@@ -37,6 +37,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check for leaked server secrets
+        run: pnpm --filter @tour-kit/docs check:secrets
+
       - name: Lint
         run: pnpm lint
 
@@ -48,6 +51,9 @@ jobs:
 
       - name: Test
         run: pnpm test --filter='./packages/*'
+
+      - name: Test docs
+        run: pnpm --filter @tour-kit/docs test
 
   # TODO: Re-enable when tooling/bundle-check package exists
   # size:
