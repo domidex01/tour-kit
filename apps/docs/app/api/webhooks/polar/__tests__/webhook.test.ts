@@ -3,6 +3,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // --- Mock state ---
 let mockBehavior: 'valid' | 'invalid-sig' | 'stale' | 'malformed' = 'valid'
 
+type ResendSendArgs = { from: string; to: string; subject: string; text: string }
+type ResendSendResult = { data: { id: string } | null; error: { message: string } | null }
+
+const { sendMock } = vi.hoisted(() => ({
+  sendMock: vi.fn<(args: ResendSendArgs) => Promise<ResendSendResult>>(),
+}))
+
+vi.mock('resend', () => ({
+  Resend: class MockResend {
+    emails = { send: sendMock }
+  },
+}))
+
 vi.mock('@polar-sh/nextjs', () => ({
   Webhooks: vi.fn(
     (config: {
@@ -90,7 +103,14 @@ let consoleSpy: ReturnType<typeof vi.spyOn>
 
 beforeEach(async () => {
   vi.stubEnv('POLAR_WEBHOOK_SECRET', 'whsec_test_placeholder_not_real')
+  vi.stubEnv('RESEND_API_KEY', 're_test')
+  vi.stubEnv('OPS_ALERT_EMAIL', 'ops@test.local')
   consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  sendMock.mockReset()
+  sendMock.mockResolvedValue({
+    data: { id: 'email_mock_123' },
+    error: null,
+  })
   simulateValidSignature()
 
   // Reset module to clear the idempotency map
@@ -374,5 +394,183 @@ describe('Response time', () => {
     await POST(req)
     const elapsed = performance.now() - start
     expect(elapsed).toBeLessThan(2000)
+  })
+})
+
+// === Section I: Ops alerts (Resend) ===
+
+function makeOrderRefundedPayload() {
+  return {
+    type: 'order.refunded',
+    data: {
+      id: 'ord_refund_789',
+      customer_id: 'cust_abc456',
+      amount: 4900,
+      refunded_at: new Date().toISOString(),
+    },
+  }
+}
+
+describe('Ops alerts', () => {
+  it('fires Resend alert on benefit_grant.revoked (snake_case payload)', async () => {
+    const POST = await getPostHandler()
+    const req = createWebhookRequest({
+      body: makeBenefitGrantPayload('benefit_grant.revoked'),
+    })
+    simulateValidSignature()
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(202)
+    expect(sendMock).toHaveBeenCalledTimes(1)
+    const call = sendMock.mock.calls[0]![0]
+    expect(call.to).toBe('ops@test.local')
+    expect(call.from).toBe('alerts@usertourkit.com')
+    expect(call.subject).toContain('[TK] benefit_grant.revoked:')
+    expect(call.subject).toContain('cust_abc456')
+    expect(call.text).toContain('cust_abc456')
+  })
+
+  it('fires alert using customerId (camelCase, real SDK-parsed shape)', async () => {
+    // @polar-sh/sdk's $inboundSchema transforms snake_case → camelCase before
+    // calling onPayload. This test simulates the real runtime shape.
+    const POST = await getPostHandler()
+    const req = createWebhookRequest({
+      body: {
+        type: 'benefit_grant.revoked',
+        data: {
+          id: 'bg_camel_1',
+          benefitId: 'ben_camel_pro',
+          customerId: 'cust_camel_999',
+          grantedAt: new Date().toISOString(),
+        },
+      },
+    })
+    simulateValidSignature()
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(202)
+    expect(sendMock).toHaveBeenCalledTimes(1)
+    const call = sendMock.mock.calls[0]![0]
+    expect(call.subject).toContain('cust_camel_999')
+    expect(call.subject).not.toContain('unknown')
+    expect(consoleSpy).toHaveBeenCalledWith(
+      '[polar-webhook]',
+      expect.objectContaining({
+        type: 'benefit_grant.revoked',
+        benefit_id: 'ben_camel_pro',
+        customer_id: 'cust_camel_999',
+      })
+    )
+  })
+
+  it('fires Resend alert on order.refunded', async () => {
+    const POST = await getPostHandler()
+    const req = createWebhookRequest({ body: makeOrderRefundedPayload() })
+    simulateValidSignature()
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(202)
+    expect(sendMock).toHaveBeenCalledTimes(1)
+    const call = sendMock.mock.calls[0]![0]
+    expect(call.subject).toContain('[TK] order.refunded:')
+    expect(call.subject).toContain('cust_abc456')
+  })
+
+  it('does NOT fire alert on benefit_grant.created', async () => {
+    const POST = await getPostHandler()
+    const req = createWebhookRequest({
+      body: makeBenefitGrantPayload('benefit_grant.created'),
+    })
+    simulateValidSignature()
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(202)
+    expect(sendMock).not.toHaveBeenCalled()
+  })
+
+  it('does NOT fire alert on benefit_grant.updated', async () => {
+    const POST = await getPostHandler()
+    const req = createWebhookRequest({
+      body: makeBenefitGrantPayload('benefit_grant.updated'),
+    })
+    simulateValidSignature()
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(202)
+    expect(sendMock).not.toHaveBeenCalled()
+  })
+
+  it('Resend returning { error } does not poison the 202 response', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    sendMock.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'boom' },
+    })
+
+    const POST = await getPostHandler()
+    const req = createWebhookRequest({
+      body: makeBenefitGrantPayload('benefit_grant.revoked'),
+    })
+    simulateValidSignature()
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(202)
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[webhook] alert failed',
+      expect.objectContaining({ message: 'boom' })
+    )
+  })
+
+  it('Resend network throw does not poison the 202 response', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    sendMock.mockRejectedValueOnce(new Error('network down'))
+
+    const POST = await getPostHandler()
+    const req = createWebhookRequest({
+      body: makeBenefitGrantPayload('benefit_grant.revoked'),
+    })
+    simulateValidSignature()
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(202)
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[webhook] alert failed',
+      expect.any(Error)
+    )
+  })
+
+  it('returns 202 and does not call Resend when RESEND_API_KEY is unset', async () => {
+    vi.stubEnv('RESEND_API_KEY', '')
+    const POST = await getPostHandler()
+    const req = createWebhookRequest({
+      body: makeBenefitGrantPayload('benefit_grant.revoked'),
+    })
+    simulateValidSignature()
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(202)
+    expect(sendMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 202 and does not call Resend when OPS_ALERT_EMAIL is unset', async () => {
+    vi.stubEnv('OPS_ALERT_EMAIL', '')
+    const POST = await getPostHandler()
+    const req = createWebhookRequest({
+      body: makeBenefitGrantPayload('benefit_grant.revoked'),
+    })
+    simulateValidSignature()
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(202)
+    expect(sendMock).not.toHaveBeenCalled()
   })
 })
