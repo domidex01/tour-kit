@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/scheduling",
   "version": "0.1.4",
-  "description": "Time-based scheduling utilities for TourKit tours and announcements",
+  "description": "Time-based scheduling for React with timezone support, business hours, blackout windows, recurring patterns, and reactive hooks for showing tours, announcements, or any UI on a schedule",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -13,7 +13,21 @@
   "bugs": {
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
-  "keywords": ["react", "scheduling", "timezone", "business-hours", "tour-kit"],
+  "keywords": [
+    "react",
+    "scheduling",
+    "schedule",
+    "timezone",
+    "business-hours",
+    "recurring",
+    "cron",
+    "blackout",
+    "time-window",
+    "iana-timezone",
+    "dst",
+    "react-hooks",
+    "tour-kit"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

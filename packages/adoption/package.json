@@ -1,7 +1,34 @@
 {
   "name": "@tour-kit/adoption",
   "version": "0.0.6",
-  "description": "Feature adoption tracking and nudging for TourKit",
+  "description": "Feature adoption tracking, nudges, and dashboards for React — measure which product features users actually adopt and re-engage them with contextual prompts",
+  "author": "Tour Kit Team",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "homepage": "https://github.com/domidex01/tour-kit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domidex01/tour-kit.git",
+    "directory": "packages/adoption"
+  },
+  "bugs": {
+    "url": "https://github.com/domidex01/tour-kit/issues"
+  },
+  "keywords": [
+    "react",
+    "feature-adoption",
+    "adoption-tracking",
+    "feature-discovery",
+    "nudge",
+    "in-app-nudge",
+    "user-engagement",
+    "product-analytics",
+    "feature-usage",
+    "onboarding",
+    "tour-kit",
+    "userpilot-alternative",
+    "appcues-alternative",
+    "pendo-alternative"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -31,7 +58,6 @@
     "./styles/theme.css": "./dist/styles/theme.css"
   },
   "files": ["dist"],
-  "license": "SEE LICENSE IN LICENSE.md",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

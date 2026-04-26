@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/announcements",
   "version": "0.2.0",
-  "description": "Product announcements for TourKit - Modal, Slideout, Banner, Toast, and Spotlight variants",
+  "description": "In-app product announcements for React — modal, slideout, banner, toast, and spotlight variants with frequency rules, scheduling, audience targeting, and a priority queue for changelog and release communication",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -13,7 +13,25 @@
   "bugs": {
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
-  "keywords": ["react", "announcements", "modal", "toast", "banner", "onboarding", "tour-kit"],
+  "keywords": [
+    "react",
+    "announcements",
+    "in-app-message",
+    "in-app-notification",
+    "product-announcement",
+    "release-notes",
+    "changelog",
+    "whats-new",
+    "modal",
+    "toast",
+    "banner",
+    "slideout",
+    "spotlight",
+    "notification",
+    "onboarding",
+    "tour-kit",
+    "beamer-alternative"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

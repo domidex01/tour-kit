@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/checklists",
   "version": "0.1.5",
-  "description": "Interactive checklists for user onboarding and workflow guidance",
+  "description": "Interactive onboarding checklists for React with task dependencies, progress tracking, persistence, and headless or styled components for getting-started flows and activation funnels",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -13,7 +13,25 @@
   "bugs": {
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
-  "keywords": ["react", "checklist", "onboarding", "workflow", "progress", "tour-kit"],
+  "keywords": [
+    "react",
+    "checklist",
+    "onboarding-checklist",
+    "getting-started",
+    "user-onboarding",
+    "activation",
+    "task-list",
+    "todo",
+    "progress",
+    "progress-tracking",
+    "workflow",
+    "guided-setup",
+    "task-dependencies",
+    "headless",
+    "tour-kit",
+    "userpilot-alternative",
+    "appcues-alternative"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

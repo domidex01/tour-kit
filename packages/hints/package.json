@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/hints",
   "version": "0.5.0",
-  "description": "Persistent hints and hotspots for TourKit - works with or without Tailwind CSS",
+  "description": "Persistent hints, hotspots, and beacons for React — pulse-animated indicators that draw attention to UI elements with dismissal tracking, works with or without Tailwind CSS",
   "author": "Tour Kit Team",
   "license": "MIT",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -13,7 +13,23 @@
   "bugs": {
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
-  "keywords": ["react", "hints", "hotspot", "tooltips", "onboarding", "tour-kit"],
+  "keywords": [
+    "react",
+    "hint",
+    "hints",
+    "hotspot",
+    "beacon",
+    "pulse",
+    "tooltip",
+    "popover",
+    "feature-discovery",
+    "feature-callout",
+    "in-app-hint",
+    "onboarding",
+    "headless",
+    "shadcn",
+    "tour-kit"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
