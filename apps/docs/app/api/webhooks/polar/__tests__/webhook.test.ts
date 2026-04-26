@@ -540,10 +540,7 @@ describe('Ops alerts', () => {
     const res = await POST(req)
 
     expect(res.status).toBe(202)
-    expect(errorSpy).toHaveBeenCalledWith(
-      '[webhook] alert failed',
-      expect.any(Error)
-    )
+    expect(errorSpy).toHaveBeenCalledWith('[webhook] alert failed', expect.any(Error))
   })
 
   it('returns 202 and does not call Resend when RESEND_API_KEY is unset', async () => {

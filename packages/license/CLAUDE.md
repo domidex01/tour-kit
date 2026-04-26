@@ -4,12 +4,12 @@ Polar.sh-based license key validation, domain activation, and React gating compo
 
 ## Package Purpose
 
-Validates license keys against the Polar customer portal API, manages domain activations (up to 5 per key), caches validation results in localStorage with a 24h TTL, and provides React components for conditional rendering based on license status.
+Validates license keys against the Polar customer portal API, manages domain activations (up to 5 per key), caches validation results in localStorage with a 72h TTL, and provides React components for conditional rendering based on license status.
 
 ## Key Files
 
 - `src/lib/polar-client.ts` — `validateKey()`, `activateKey()`, `deactivateKey()` via raw `fetch()` against Polar API
-- `src/lib/cache.ts` — `readCache()`, `writeCache()`, `clearCache()` with 24h TTL, domain-scoped localStorage keys
+- `src/lib/cache.ts` — `readCache()`, `writeCache()`, `clearCache()`, `hasFreshCache()` with 72h TTL, domain-scoped localStorage keys, optional `keyHash` binding to invalidate when the license key changes
 - `src/lib/domain.ts` — `getCurrentDomain()`, `isDevEnvironment()`, `validateDomainAtRender()` for hostname checks
 - `src/lib/schemas.ts` — Zod schemas for Polar API responses and cache shape
 - `src/types/index.ts` — `LicenseState`, `LicenseTier`, `LicenseCache`, `LicenseConfig`, error types
@@ -54,7 +54,7 @@ Validates license keys against the Polar customer portal API, manages domain act
 - Dev bypass only applies to `localhost`, `127.0.0.1`, and `*.local` — no other hostnames
 - `headless.ts` entry point must not import React (tree-shaking boundary)
 - `organizationId` is optional in `LicenseProviderProps` but required for Polar validation to work
-- Cache keys are domain-scoped: `tourkit-license-{domain}`
+- Cache keys are domain-scoped: `tourkit:license:{domain}`
 
 ## Commands
 

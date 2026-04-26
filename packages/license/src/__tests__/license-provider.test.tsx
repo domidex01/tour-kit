@@ -15,6 +15,7 @@ vi.mock('../lib/domain', () => ({
 
 vi.mock('../lib/cache', () => ({
   clearCache: vi.fn(),
+  hasFreshCache: vi.fn().mockReturnValue(false),
 }))
 
 import { clearCache } from '../lib/cache'

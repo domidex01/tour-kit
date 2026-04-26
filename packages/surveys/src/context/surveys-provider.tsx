@@ -329,6 +329,50 @@ function daysBetween(a: Date, b: Date): number {
   return Math.floor(Math.abs(b.getTime() - a.getTime()) / msPerDay)
 }
 
+function passesSampling(effectiveSampling: number, userRoll: number): boolean {
+  return userRoll < effectiveSampling
+}
+
+function passesGlobalCooldown(
+  effectiveCooldownDays: number | undefined,
+  lastShownAt: Date | null,
+  now: Date
+): boolean {
+  if (effectiveCooldownDays === undefined || !lastShownAt) return true
+  return daysBetween(lastShownAt, now) >= effectiveCooldownDays
+}
+
+function passesSessionLimit(effectiveMax: number | undefined, sessionShowCount: number): boolean {
+  return effectiveMax === undefined || sessionShowCount < effectiveMax
+}
+
+function passesSnoozeLimit(maxSnoozeCount: number | undefined, snoozeCount: number): boolean {
+  return maxSnoozeCount === undefined || snoozeCount < maxSnoozeCount
+}
+
+interface SurveyGateInput {
+  config: SurveyConfig
+  surveyState: SurveyState
+  userRoll: number
+  providerSamplingRate: number
+  providerGlobalCooldownDays: number | undefined
+  providerMaxPerSession: number | undefined
+  lastShownAt: Date | null
+  sessionShowCount: number
+  now: Date
+}
+
+function passesFrequencyGates(input: SurveyGateInput): boolean {
+  const { config, surveyState } = input
+  const effectiveSampling = Math.min(input.providerSamplingRate, config.samplingRate ?? 1)
+  if (!passesSampling(effectiveSampling, input.userRoll)) return false
+  const effectiveCooldown = config.globalCooldownDays ?? input.providerGlobalCooldownDays
+  if (!passesGlobalCooldown(effectiveCooldown, input.lastShownAt, input.now)) return false
+  const effectiveMax = config.maxPerSession ?? input.providerMaxPerSession
+  if (!passesSessionLimit(effectiveMax, input.sessionShowCount)) return false
+  return passesSnoozeLimit(config.maxSnoozeCount, surveyState.snoozeCount)
+}
+
 // ── Provider ───────────────────────────────────────────────
 
 export function SurveysProvider({
@@ -407,8 +451,9 @@ export function SurveysProvider({
     }
   }, [storage, storageStateKey])
 
-  // Register configs after hydration
+  // Register configs after hydration; re-run when the set of config ids changes.
   const ids = useMemo(() => surveyConfigs.map((c) => c.id).join('|'), [surveyConfigs])
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `ids` is a stable re-run trigger; effect body reads the mutable ref.
   useEffect(() => {
     for (const config of configsRef.current) {
       dispatch({ type: 'REGISTER', config })
@@ -444,31 +489,17 @@ export function SurveysProvider({
       const scheduler = schedulerRef.current
       if (scheduler && !scheduler.canShow(config, surveyState, userContext)) return false
 
-      const effectiveSampling = Math.min(samplingRate, config.samplingRate ?? 1)
-      if (userRoll >= effectiveSampling) return false
-
-      const effectiveCooldown = config.globalCooldownDays ?? globalCooldownDays
-      if (
-        effectiveCooldown !== undefined &&
-        lastShownAtRef.current &&
-        daysBetween(lastShownAtRef.current, new Date()) < effectiveCooldown
-      ) {
-        return false
-      }
-
-      const effectiveMaxPerSession = config.maxPerSession ?? maxPerSession
-      if (
-        effectiveMaxPerSession !== undefined &&
-        sessionShowCountRef.current >= effectiveMaxPerSession
-      ) {
-        return false
-      }
-
-      if (config.maxSnoozeCount !== undefined && surveyState.snoozeCount >= config.maxSnoozeCount) {
-        return false
-      }
-
-      return true
+      return passesFrequencyGates({
+        config,
+        surveyState,
+        userRoll,
+        providerSamplingRate: samplingRate,
+        providerGlobalCooldownDays: globalCooldownDays,
+        providerMaxPerSession: maxPerSession,
+        lastShownAt: lastShownAtRef.current,
+        sessionShowCount: sessionShowCountRef.current,
+        now: new Date(),
+      })
     },
     [isTourActive, userContext, samplingRate, globalCooldownDays, maxPerSession, userRoll]
   )

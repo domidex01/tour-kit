@@ -17,7 +17,7 @@ const DESCRIPTION =
 
 const author = AUTHORS.domidex
 const AUTHOR_BIO =
-  'Dominique Degottex (domidex01) is a software engineer focused on accessible React components, product onboarding, and developer tooling. He created userTourKit to ship a genuinely headless tour library that composes with shadcn/ui, Radix, and Base UI rather than fighting them.'
+  'Dominique Degottex (domidex01) is a software engineer who builds open-source developer tools focused on accessible React components and product onboarding. He created userTourKit to ship a genuinely headless tour library that composes with shadcn/ui, Radix, and Base UI rather than fighting them. He maintains the eleven-package userTourKit monorepo (core, react, hints, adoption, analytics, announcements, checklists, media, scheduling, surveys, and AI integrations) and writes about onboarding architecture, schema/SEO, and headless component design on this site’s blog. Active in open source on GitHub at github.com/domidex01.'
 
 export const metadata: Metadata = {
   title: `${TITLE} — userTourKit`,

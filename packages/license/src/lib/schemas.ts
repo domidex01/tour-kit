@@ -50,6 +50,10 @@ export const PolarActivateResponseSchema = z.object({
 
 /**
  * Cache schema — flat LicenseState shape.
+ *
+ * `keyHash` is optional for backward compatibility with v1.0.x cache entries
+ * that predate the per-key hash. New entries always set it; readers ignore the
+ * field when the caller does not pass a current `key` to compare against.
  */
 export const LicenseCacheSchema = z.object({
   state: z.object({
@@ -64,4 +68,5 @@ export const LicenseCacheSchema = z.object({
   }),
   cachedAt: z.number(),
   domain: z.string(),
+  keyHash: z.string().optional(),
 })

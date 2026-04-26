@@ -1,7 +1,7 @@
 'use client'
 
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
-import { clearCache } from '../lib/cache'
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { clearCache, hasFreshCache } from '../lib/cache'
 import { getCurrentDomain, isDevEnvironment } from '../lib/domain'
 import { validateLicenseKey } from '../lib/polar-client'
 import type { LicenseContextValue, LicenseProviderProps, LicenseState } from '../types'
@@ -41,6 +41,15 @@ export function LicenseProvider({
 }: LicenseProviderProps) {
   const [state, setState] = useState<LicenseState>(LOADING_STATE)
 
+  // Stabilize user-supplied callbacks via refs so inline `onValidate`/`onError`
+  // props do not invalidate `validate` on every render and trigger a re-validation loop.
+  const onValidateRef = useRef(onValidate)
+  const onErrorRef = useRef(onError)
+  useEffect(() => {
+    onValidateRef.current = onValidate
+    onErrorRef.current = onError
+  })
+
   const validate = useCallback(async () => {
     if (isDevEnvironment()) {
       const devState: LicenseState = {
@@ -48,7 +57,7 @@ export function LicenseProvider({
         validatedAt: Date.now(),
       }
       setState(devState)
-      onValidate?.(devState)
+      onValidateRef.current?.(devState)
       return
     }
 
@@ -57,7 +66,7 @@ export function LicenseProvider({
         ? await validateLicenseKey(licenseKey, organizationId)
         : await validateLicenseKey(licenseKey)
       setState(result)
-      onValidate?.(result)
+      onValidateRef.current?.(result)
     } catch (error) {
       const errorState: LicenseState = {
         status: 'error',
@@ -70,9 +79,9 @@ export function LicenseProvider({
         renderKey: undefined,
       }
       setState(errorState)
-      onError?.(error instanceof Error ? error : new Error(String(error)))
+      onErrorRef.current?.(error instanceof Error ? error : new Error(String(error)))
     }
-  }, [licenseKey, organizationId, onValidate, onError])
+  }, [licenseKey, organizationId])
 
   useEffect(() => {
     validate()
@@ -86,7 +95,31 @@ export function LicenseProvider({
     await validate()
   }, [validate])
 
-  const contextValue = useMemo<LicenseContextValue>(() => ({ state, refresh }), [state, refresh])
+  // Derived gating signals — computed once per state change so consumers
+  // (`useLicenseGate`, `<LicenseGate>`, `<ProGate>`) never read localStorage
+  // on every render. Both gates now share this single source of truth.
+  const { isGated, isLoading, gracePeriodActive } = useMemo(() => {
+    if (isDevEnvironment()) {
+      return { isGated: false, isLoading: false, gracePeriodActive: false }
+    }
+    if (state.status === 'loading') {
+      return { isGated: false, isLoading: true, gracePeriodActive: false }
+    }
+    if (state.status === 'valid' && state.tier === 'pro' && state.renderKey !== undefined) {
+      return { isGated: false, isLoading: false, gracePeriodActive: false }
+    }
+    if (state.status === 'error') {
+      const domain = getCurrentDomain()
+      const grace = domain ? hasFreshCache(domain, licenseKey) : false
+      return { isGated: !grace, isLoading: false, gracePeriodActive: grace }
+    }
+    return { isGated: true, isLoading: false, gracePeriodActive: false }
+  }, [state, licenseKey])
+
+  const contextValue = useMemo<LicenseContextValue>(
+    () => ({ state, refresh, isGated, isLoading, gracePeriodActive }),
+    [state, refresh, isGated, isLoading, gracePeriodActive]
+  )
 
   return (
     <LicenseContext.Provider value={contextValue}>

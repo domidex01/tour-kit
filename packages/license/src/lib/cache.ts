@@ -4,7 +4,18 @@ import { LicenseCacheSchema } from './schemas'
 const CACHE_PREFIX = 'tourkit:license:'
 const CACHE_TTL_MS = 72 * 60 * 60 * 1000 // 72 hours
 
-export function readCache(domain: string): LicenseState | null {
+// Deterministic short hash. Not a security primitive — used only to bind a
+// cache entry to the license key it was issued for, so switching `licenseKey`
+// in <LicenseProvider> does not return another key's cached state.
+function hashKey(key: string): string {
+  let hash = 0
+  for (let i = 0; i < key.length; i++) {
+    hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0
+  }
+  return Math.abs(hash).toString(36)
+}
+
+export function readCache(domain: string, key?: string): LicenseState | null {
   if (typeof window === 'undefined') return null
   try {
     const raw = localStorage.getItem(`${CACHE_PREFIX}${domain}`)
@@ -19,6 +30,10 @@ export function readCache(domain: string): LicenseState | null {
       clearCache(domain)
       return null
     }
+    if (key !== undefined && parsed.data.keyHash !== undefined && parsed.data.keyHash !== hashKey(key)) {
+      clearCache(domain)
+      return null
+    }
     return parsed.data.state as LicenseState
   } catch {
     clearCache(domain)
@@ -26,10 +41,15 @@ export function readCache(domain: string): LicenseState | null {
   }
 }
 
-export function writeCache(domain: string, state: LicenseState): void {
+export function writeCache(domain: string, state: LicenseState, key?: string): void {
   if (typeof window === 'undefined') return
   try {
-    const entry: LicenseCache = { state, cachedAt: Date.now(), domain }
+    const entry: LicenseCache = {
+      state,
+      cachedAt: Date.now(),
+      domain,
+      ...(key !== undefined ? { keyHash: hashKey(key) } : {}),
+    }
     localStorage.setItem(`${CACHE_PREFIX}${domain}`, JSON.stringify(entry))
   } catch {
     // localStorage quota exceeded — fail silently
@@ -43,9 +63,10 @@ export function clearCache(domain: string): void {
 
 /**
  * Returns true if a non-expired, valid cache entry exists for this domain.
- * Used by error-state handling: error + fresh cache = grace period (licensed),
- * error + no cache = unlicensed.
+ * Pass `key` to also require the cached entry's keyHash to match the current
+ * license key. Used by error-state handling: error + fresh cache = grace
+ * period (licensed), error + no cache = unlicensed.
  */
-export function hasFreshCache(domain: string): boolean {
-  return readCache(domain) !== null
+export function hasFreshCache(domain: string, key?: string): boolean {
+  return readCache(domain, key) !== null
 }

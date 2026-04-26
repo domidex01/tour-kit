@@ -205,9 +205,9 @@ export async function validateLicenseKey(
     }
   }
 
-  // 2. Cache check
+  // 2. Cache check (bound to current key — switching licenseKey invalidates)
   if (domain) {
-    const cached = readCache(domain)
+    const cached = readCache(domain, key)
     if (cached) return cached
   }
 
@@ -227,7 +227,7 @@ export async function validateLicenseKey(
         validatedAt: now,
         renderKey: undefined,
       }
-      if (domain) writeCache(domain, state)
+      if (domain) writeCache(domain, state, key)
       return state
     }
 
@@ -242,7 +242,7 @@ export async function validateLicenseKey(
         validatedAt: now,
         renderKey: undefined,
       }
-      if (domain) writeCache(domain, state)
+      if (domain) writeCache(domain, state, key)
       return state
     }
 
@@ -280,7 +280,7 @@ export async function validateLicenseKey(
       validatedAt: now,
       renderKey: generateRenderKey(key, activationLabel),
     }
-    if (domain) writeCache(domain, state)
+    if (domain) writeCache(domain, state, key)
     return state
   } catch (error) {
     if (error instanceof PolarApiError && error.statusCode === 404) {

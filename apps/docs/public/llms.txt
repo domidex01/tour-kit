@@ -1,4 +1,4 @@
-# userTourKit v0.5.0 — Generated 2026-04-24T10:10:43Z
+# userTourKit v0.5.0 — Generated 2026-04-26T05:02:12Z
 
 # userTourKit
 
@@ -251,7 +251,7 @@
 
 ## Index
 
-- [userTourKit](https://usertourkit.com/docs/index): userTourKit is a headless, accessible product tour library for React with shadcn/ui support and full TypeScript coverage
+- [Tour Kit Docs — React Onboarding Library](https://usertourkit.com/docs/index): Documentation for userTourKit — install, configure, and build accessible product tours, hints, and onboarding flows in React with shadcn/ui and TypeScript-strict types.
 
 ## Licensing
 
@@ -289,7 +289,7 @@
 - [userTourKit vs Onborda](https://usertourkit.com/compare/tour-kit-vs-onborda): Compare userTourKit vs Onborda for Next.js product tours. See features, framework support, and compatibility side-by-side in 2026.
 - [userTourKit vs React Joyride](https://usertourkit.com/compare/tour-kit-vs-react-joyride): Compare userTourKit vs React Joyride: features, bundle size, pricing, and accessibility side-by-side. Find which fits your React stack in 2026.
 - [userTourKit vs Reactour](https://usertourkit.com/compare/tour-kit-vs-reactour): Compare userTourKit vs Reactour for React product tours. See features, bundle size, pricing, accessibility, and TypeScript side-by-side in 2026.
-- [userTourKit vs Shepherd.js](https://usertourkit.com/compare/tour-kit-vs-shepherd-js): Compare userTourKit vs Shepherd.js: features, bundle size, licensing, and accessibility side-by-side. Find which fits your stack in 2026.
+- [userTourKit vs Shepherd.js](https://usertourkit.com/compare/tour-kit-vs-shepherd-js): Switching from Shepherd.js? Compare userTourKit vs Shepherd.js: bundle size, licensing (AGPL vs MIT), React fit, and migration path. Find the right alternative for your stack in 2026.
 - [userTourKit vs Userflow](https://usertourkit.com/compare/tour-kit-vs-userflow): Compare userTourKit vs Userflow for product onboarding. See features, pricing, flow builder, and developer experience side-by-side in 2026.
 - [userTourKit vs UserGuiding](https://usertourkit.com/compare/tour-kit-vs-userguiding): Compare userTourKit vs UserGuiding for product onboarding. See features, pricing, customization, and developer control side-by-side in 2026.
 - [userTourKit vs Userpilot](https://usertourkit.com/compare/tour-kit-vs-userpilot): Compare userTourKit vs Userpilot for product onboarding. See features, pricing, analytics, and developer experience side-by-side in 2026.

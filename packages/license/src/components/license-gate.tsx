@@ -7,15 +7,13 @@ import { LicenseWarning } from './license-warning'
 import { LicenseWatermark } from './license-watermark'
 
 export function LicenseGate({ require: _require, children, fallback, loading }: LicenseGateProps) {
-  const { state } = useLicense()
+  const { state, isGated, isLoading } = useLicense()
 
-  if (state.status === 'loading') {
+  if (isLoading) {
     return <>{loading ?? null}</>
   }
 
-  const isValid = state.status === 'valid' && state.tier === 'pro' && state.renderKey !== undefined
-
-  if (isValid) {
+  if (!isGated) {
     return (
       <LicenseRenderContext.Provider value={state.renderKey}>
         {children}

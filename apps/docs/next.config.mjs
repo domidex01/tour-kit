@@ -9,6 +9,7 @@ const config = {
   output: 'standalone',
   reactStrictMode: true,
   trailingSlash: false,
+  poweredByHeader: false,
   transpilePackages: ['@tour-kit/core', '@tour-kit/react', '@tour-kit/hints'],
   images: {
     remotePatterns: [{ hostname: 'github.com' }, { hostname: 'avatars.githubusercontent.com' }],
@@ -79,11 +80,20 @@ const config = {
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
           },
           {
+            // Notes on CSP:
+            // - script-src keeps 'unsafe-inline' because Next.js inlines hydration
+            //   bootstrap scripts at static-prerender time. A nonce-based migration
+            //   would require dropping prerender (every page becomes per-request).
+            //   Tracked as a backlog item.
+            // - style-src dropped 'unsafe-inline'. Tailwind compiles to static CSS
+            //   files; inline `style="..."` attributes are governed by `style-src-attr`
+            //   (unset → allowed), so the change does not break dynamic style props.
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' https://vercel.live",
-              "style-src 'self' 'unsafe-inline'",
+              "style-src 'self'",
+              "style-src-attr 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://github.com https://avatars.githubusercontent.com https://usertourkit.com",
               "font-src 'self' data:",
               "connect-src 'self' https://vercel.live https://vitals.vercel-analytics.com",

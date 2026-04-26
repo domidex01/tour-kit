@@ -14,6 +14,19 @@ function mdxPath(collection: 'blog' | 'compare' | 'alternatives', slug: string):
   return path.join(process.cwd(), 'content', collection, `${slug}.mdx`)
 }
 
+/**
+ * Resolve a freshness signal that Google won't ignore. Frontmatter `lastUpdated`
+ * (manually curated) wins; otherwise fall back to git mtime; otherwise today.
+ * Avoids returning a stale "site launch" sentinel that Google flags as fabricated.
+ */
+function resolveLastModified(filePath: string, frontmatterLastUpdated?: string): Date {
+  if (frontmatterLastUpdated) {
+    const parsed = new Date(frontmatterLastUpdated)
+    if (!Number.isNaN(parsed.getTime())) return parsed
+  }
+  return getGitLastModified(filePath)
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages = source.getPages()
 
@@ -30,7 +43,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const blogEntries: MetadataRoute.Sitemap = getPublishedBlogPosts().map((post) => ({
     url: `${SITE_URL}/blog/${post.slug}`,
-    lastModified: getGitLastModified(mdxPath('blog', post.slug)),
+    lastModified: resolveLastModified(mdxPath('blog', post.slug), post.lastUpdated),
     changeFrequency: 'monthly' as const,
     priority: 0.7,
     images: [`${SITE_URL}/blog/${post.slug}/opengraph-image`],
@@ -38,19 +51,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const compareEntries: MetadataRoute.Sitemap = getPublishedComparisons().map((c) => ({
     url: `${SITE_URL}/compare/${c.slug}`,
-    lastModified: getGitLastModified(mdxPath('compare', c.slug)),
+    lastModified: resolveLastModified(mdxPath('compare', c.slug), c.lastUpdated),
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }))
 
   const alternativeEntries: MetadataRoute.Sitemap = getPublishedAlternatives().map((a) => ({
     url: `${SITE_URL}/alternatives/${a.slug}`,
-    lastModified: getGitLastModified(mdxPath('alternatives', a.slug)),
+    lastModified: resolveLastModified(mdxPath('alternatives', a.slug), a.lastUpdated),
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }))
 
   const trustPages: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE_URL}/pricing`,
+      lastModified: getGitLastModified(path.join(process.cwd(), 'app/pricing/page.tsx')),
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/compare`,
+      lastModified: getGitLastModified(path.join(process.cwd(), 'app/compare/page.tsx')),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
     {
       url: `${SITE_URL}/about`,
       lastModified: getGitLastModified(path.join(process.cwd(), 'app/about/page.tsx')),

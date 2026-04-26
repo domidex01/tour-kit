@@ -103,7 +103,7 @@ export function ComparisonTable() {
 
         <div className="mt-6">
           <Link
-            href="/docs/getting-started"
+            href="/compare"
             className="font-mono text-[13px] font-semibold text-[#0197f6] underline underline-offset-4 transition-colors hover:opacity-80"
           >
             See full comparison &rarr;

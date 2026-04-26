@@ -1,15 +1,19 @@
 import { execSync } from 'node:child_process'
 
-export const SITE_LAUNCH_FALLBACK = '2025-01-01T00:00:00.000Z'
+/**
+ * Build-time fallback. Today's date prevents broadcasting an identical sentinel
+ * across many URLs, which Google flags as fabricated and ignores wholesale.
+ */
+export const SITE_LAUNCH_FALLBACK = new Date().toISOString()
 
 export function getGitLastModified(filePath: string): Date {
   try {
     const result = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
       encoding: 'utf-8',
     }).trim()
-    return result ? new Date(result) : new Date(SITE_LAUNCH_FALLBACK)
+    return result ? new Date(result) : new Date()
   } catch {
-    return new Date(SITE_LAUNCH_FALLBACK)
+    return new Date()
   }
 }
 
@@ -21,8 +25,8 @@ export function getGitFirstCommitted(filePath: string): Date {
       .trim()
       .split('\n')
       .pop()
-    return result ? new Date(result) : new Date(SITE_LAUNCH_FALLBACK)
+    return result ? new Date(result) : new Date()
   } catch {
-    return new Date(SITE_LAUNCH_FALLBACK)
+    return new Date()
   }
 }

@@ -30,7 +30,20 @@ export const AUTHORS: Record<string, Author> = {
     x: 'https://x.com/domidexdesign',
     role: 'Creator of userTourKit',
     jobTitle: 'Software Engineer',
-    knowsAbout: ['React', 'TypeScript', 'Product Tours', 'Developer Tools'],
+    knowsAbout: [
+      'React',
+      'Next.js',
+      'TypeScript',
+      'Product Tours',
+      'User Onboarding',
+      'Headless UI',
+      'Web Accessibility (WCAG 2.1 AA)',
+      'shadcn/ui',
+      'Radix UI',
+      'Base UI',
+      'Open Source',
+      'Developer Tools',
+    ],
   },
 }
 

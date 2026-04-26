@@ -44,12 +44,17 @@ export type LicenseState = {
 }
 
 /**
- * Shape stored in localStorage
+ * Shape stored in localStorage.
+ *
+ * `keyHash` is set when the cache is written with a license key; readers
+ * compare it against the current key's hash and invalidate on mismatch so
+ * switching `licenseKey` does not return another key's cached state.
  */
 export type LicenseCache = {
   state: LicenseState
   cachedAt: number
   domain: string
+  keyHash?: string
 }
 
 /**
@@ -107,11 +112,18 @@ export type PolarActivateResponse = {
 }
 
 /**
- * License context value (used by React integration)
+ * License context value (used by React integration).
+ *
+ * `isGated` / `isLoading` / `gracePeriodActive` are derived from `state` and
+ * cache freshness once per validation, so consumers never need to read
+ * localStorage on every render.
  */
 export type LicenseContextValue = {
   state: LicenseState
   refresh: () => Promise<void>
+  isGated: boolean
+  isLoading: boolean
+  gracePeriodActive: boolean
 }
 
 /**

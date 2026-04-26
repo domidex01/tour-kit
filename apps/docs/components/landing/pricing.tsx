@@ -6,6 +6,22 @@ import { useState } from 'react'
 
 import { POLAR_CHECKOUT_URL } from '@/lib/polar-config'
 
+function FAQJsonLdInline({ items }: { items: { q: string; a: string }[] }) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  }
+  return (
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD requires innerHTML
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  )
+}
+
 const FREE_FEATURES = [
   'Product tours & steps',
   'Spotlight overlays',
@@ -52,7 +68,7 @@ export function Pricing() {
         {/* Pricing cards */}
         <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 md:gap-8">
           {/* Free tier */}
-          <div className="group flex flex-col rounded-xl border border-fd-border bg-fd-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+          <div className="group order-2 flex flex-col rounded-xl border border-fd-border bg-fd-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md md:order-1">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-fd-border bg-fd-muted">
                 <Code2 className="h-5 w-5 text-fd-muted-foreground" aria-hidden="true" />
@@ -101,7 +117,7 @@ export function Pricing() {
           </div>
 
           {/* Pro tier */}
-          <div className="group relative flex flex-col rounded-xl border-2 border-[var(--tk-primary)] bg-fd-card p-8 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+          <div className="group relative order-1 flex flex-col rounded-xl border-2 border-[var(--tk-primary)] bg-fd-card p-8 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg md:order-2">
             <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-primary)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-[var(--tk-primary)]/20">
               <Sparkles className="h-3 w-3" aria-hidden="true" />
               One-time purchase
@@ -222,6 +238,11 @@ export function Pricing() {
         {/* FAQ */}
         <FAQ />
 
+        {/* License & fulfillment — H5 expansion (license terms, refund, Polar fulfillment) */}
+        <LicenseTerms />
+
+        <FAQJsonLdInline items={FAQ_ITEMS} />
+
         <p className="mt-12 text-center text-[13px] text-fd-muted-foreground">
           Already a customer?{' '}
           <Link
@@ -233,6 +254,84 @@ export function Pricing() {
         </p>
       </div>
     </section>
+  )
+}
+
+function LicenseTerms() {
+  return (
+    <div className="mx-auto mt-20 max-w-3xl">
+      <div className="mb-8 text-center">
+        <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tk-primary)]">
+          License &amp; fulfillment
+        </p>
+        <h3 className="text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
+          What you&apos;re actually buying
+        </h3>
+      </div>
+      <dl className="space-y-6 text-[14px] leading-relaxed text-fd-muted-foreground">
+        <div>
+          <dt className="mb-1 font-semibold text-fd-foreground">License grant</dt>
+          <dd>
+            A non-exclusive, non-transferable commercial license to use the eight Pro packages in up
+            to five production domains. Includes all future updates to those packages. The MIT-core
+            packages remain MIT-licensed and unrestricted regardless of Pro purchase.
+          </dd>
+        </div>
+        <div>
+          <dt className="mb-1 font-semibold text-fd-foreground">14-day refund</dt>
+          <dd>
+            If Tour Kit doesn&apos;t fit your stack within 14 days of purchase, email{' '}
+            <a
+              href="mailto:hello@usertourkit.com"
+              className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"
+            >
+              hello@usertourkit.com
+            </a>{' '}
+            from your purchase address with your order ID. Refunds are processed by Polar in 5–10
+            business days.
+          </dd>
+        </div>
+        <div>
+          <dt className="mb-1 font-semibold text-fd-foreground">Fulfillment</dt>
+          <dd>
+            Checkout runs on{' '}
+            <a
+              href="https://polar.sh"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"
+            >
+              Polar.sh
+            </a>
+            , which acts as merchant of record. Card, Apple Pay, Google Pay, and Link are accepted.
+            VAT and sales tax are calculated and remitted to your tax authority automatically. Your
+            license key is delivered to your billing email within a few minutes of payment.
+          </dd>
+        </div>
+        <div>
+          <dt className="mb-1 font-semibold text-fd-foreground">Activation &amp; reassignment</dt>
+          <dd>
+            Add the license key as an environment variable. The first production page load on each
+            domain consumes one of five activation slots automatically — no manual claim step.
+            Domains can be deactivated and reassigned at any time from your{' '}
+            <Link
+              href="/account"
+              className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"
+            >
+              account portal
+            </Link>
+            .
+          </dd>
+        </div>
+        <div>
+          <dt className="mb-1 font-semibold text-fd-foreground">No subscription, no auto-charge</dt>
+          <dd>
+            Pro is a one-time purchase. There is no recurring billing, no per-seat charge, and no
+            future upgrade fee for the eight packages covered by the license.
+          </dd>
+        </div>
+      </dl>
+    </div>
   )
 }
 
@@ -355,5 +454,17 @@ const FAQ_ITEMS = [
   {
     q: 'How does activation work?',
     a: 'Add your license key as an environment variable. On the first production page load, your domain is automatically activated (using 1 of 5 slots). No manual activation steps required.',
+  },
+  {
+    q: 'Can I get a refund?',
+    a: 'Yes. We offer a 14-day refund window from the date of purchase. Email hello@usertourkit.com from your purchase address with your order ID. Refunds are processed by Polar within 5–10 business days.',
+  },
+  {
+    q: 'Do you handle VAT and sales tax?',
+    a: 'Yes. Polar acts as merchant of record and calculates, collects, and remits the correct VAT, GST, or sales tax based on your billing country. The price you see at checkout is the final price.',
+  },
+  {
+    q: 'Can I get a business invoice?',
+    a: 'Polar generates a tax-compliant invoice automatically and emails it with the receipt. You can update the company name, billing address, and VAT number during checkout or anytime from your Polar customer portal.',
   },
 ]
