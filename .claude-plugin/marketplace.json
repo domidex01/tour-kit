@@ -1,0 +1,49 @@
+{
+  "name": "user-tour-kit",
+  "owner": {
+    "name": "domidex01",
+    "email": "sniperdomi@gmail.com",
+    "url": "https://usertourkit.com"
+  },
+  "metadata": {
+    "description": "Skills for adding product tours, onboarding flows, hints, checklists, announcements, and feature adoption tracking to React/Next.js apps using userTourKit (https://usertourkit.com).",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "user-tour-kit",
+      "source": "./user-tour-kit",
+      "description": "AI assistant skills that guide Claude to add product tours, onboarding flows, hints, checklists, announcements, and adoption tracking to React/Next.js apps using @tour-kit/* npm packages.",
+      "version": "0.1.0",
+      "author": {
+        "name": "domidex01",
+        "email": "sniperdomi@gmail.com"
+      },
+      "homepage": "https://usertourkit.com",
+      "repository": "https://github.com/domidex01/tour-kit",
+      "license": "MIT",
+      "category": "developer-tools",
+      "keywords": [
+        "react",
+        "nextjs",
+        "onboarding",
+        "product-tour",
+        "walkthrough",
+        "checklist",
+        "announcement",
+        "tooltip",
+        "hotspot",
+        "user-onboarding",
+        "feature-adoption",
+        "shadcn-ui"
+      ],
+      "tags": [
+        "react",
+        "nextjs",
+        "onboarding",
+        "product-tour",
+        "walkthrough"
+      ]
+    }
+  ]
+}

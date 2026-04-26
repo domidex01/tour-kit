@@ -1,0 +1,27 @@
+{
+  "name": "user-tour-kit",
+  "description": "AI assistant skills for adding product tours, onboarding flows, hints, checklists, in-app announcements, and feature adoption tracking to React/Next.js apps. Uses @tour-kit/* npm packages — headless, TypeScript-first, WCAG 2.1 AA, shadcn/ui-compatible. Alternative to Shepherd.js, Driver.js, Reactour, Appcues, Userpilot, and Pendo.",
+  "version": "0.1.0",
+  "author": {
+    "name": "domidex01",
+    "email": "sniperdomi@gmail.com",
+    "url": "https://usertourkit.com"
+  },
+  "homepage": "https://usertourkit.com",
+  "repository": "https://github.com/domidex01/tour-kit",
+  "license": "MIT",
+  "keywords": [
+    "product-tour",
+    "onboarding",
+    "react",
+    "nextjs",
+    "walkthrough",
+    "checklist",
+    "announcement",
+    "tooltip",
+    "hotspot",
+    "user-onboarding",
+    "feature-adoption",
+    "shadcn-ui"
+  ]
+}
