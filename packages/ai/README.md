@@ -1,6 +1,8 @@
 # @tour-kit/ai
 
-AI-powered chat assistant for product tours. Add a conversational AI layer that understands your tour structure and guides users through onboarding.
+AI-powered chat assistant for product tours. Adds a conversational AI layer that understands your tour structure and guides users through onboarding.
+
+**Alternative to:** Intercom Fin, Crisp MagicReply embedded for onboarding, Pendo Listen, hand-rolled OpenAI/Anthropic chat-with-tour-context.
 
 ## Installation
 

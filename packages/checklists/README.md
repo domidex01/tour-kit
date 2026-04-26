@@ -1,6 +1,8 @@
 # @tour-kit/checklists
 
-Onboarding checklists and task management for Tour Kit.
+Onboarding checklists with task dependencies, progress tracking, and tour integration.
+
+**Alternative to:** Appcues checklists, Userpilot checklists, Userflow, Userlist onboarding.
 
 ## Installation
 

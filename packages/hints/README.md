@@ -1,6 +1,8 @@
 # @tour-kit/hints
 
-shadcn/ui-compatible hint/beacon components for contextual help.
+shadcn/ui-compatible hint/beacon components for contextual help and feature discovery.
+
+**Alternative to:** Hopscotch.js beacons, Shepherd.js hints, Pendo guides, hand-rolled tooltip-on-pulse patterns.
 
 ## Installation
 

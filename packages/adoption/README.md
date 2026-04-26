@@ -1,6 +1,8 @@
 # @tour-kit/adoption
 
-Feature adoption tracking and nudging system for Tour Kit.
+Feature adoption tracking and nudge system — measure which features users actually use and surface unused ones with hints, modals, or callouts.
+
+**Alternative to:** Pendo adoption analytics, Userpilot, Amplitude feature engagement, FullStory adoption signals.
 
 ## Installation
 

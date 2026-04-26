@@ -1,7 +1,8 @@
 # @tour-kit/announcements
 
-Product announcements with five UI variants (Modal, Slideout, Banner, Toast, Spotlight),
-queued by priority and gated by frequency, audience, and schedule rules.
+Product announcements with five UI variants (Modal, Slideout, Banner, Toast, Spotlight), queued by priority and gated by frequency, audience, and schedule rules.
+
+**Alternative to:** Headway, Beamer, Announcekit, Pendo announcements, in-app changelog widgets.
 
 ```bash
 pnpm add @tour-kit/announcements

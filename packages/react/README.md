@@ -2,6 +2,8 @@
 
 shadcn/ui-compatible React components for product tours and onboarding.
 
+**Alternative to:** Shepherd.js, Driver.js, Intro.js, Reactour, React Joyride.
+
 ## Installation
 
 ```bash

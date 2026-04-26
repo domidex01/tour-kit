@@ -1,6 +1,8 @@
 # @tour-kit/core
 
-Framework-agnostic core logic, types, and utilities for Tour Kit.
+Framework-agnostic, headless engine for product tours, onboarding flows, and walkthroughs.
+
+**Alternative to:** Shepherd.js, Driver.js, Intro.js, Reactour, React Joyride (use this when you want the logic without prebuilt UI).
 
 ## Installation
 

@@ -12,7 +12,7 @@
     "generate:context": "tsx scripts/generate-context-files.ts",
     "check:freshness": "tsx scripts/check-mdx-freshness.ts",
     "check:secrets": "node scripts/check-secrets.mjs",
-    "indexnow:ping": "node scripts/indexnow-ping.mjs",
+    "indexnow:ping": "tsx scripts/indexnow-ping.ts",
     "postinstall": "fumadocs-mdx",
     "test": "vitest run"
   },

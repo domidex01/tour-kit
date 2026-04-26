@@ -15,6 +15,8 @@
 
 **Tour Kit is a headless React library for building product tours, onboarding flows, hints, checklists, in-app announcements, and microsurveys.** It ships as 12 composable packages, is TypeScript-first, WCAG 2.1 AA compliant, and designed natively for shadcn/ui — but works with any component library.
 
+**Alternative to:** Shepherd.js, Driver.js, Intro.js, Reactour, React Joyride, Appcues, Userpilot, Pendo — when you want a code-owned, headless, MIT-licensed primitive instead of a hosted SaaS.
+
 - 🌐 Website & docs: <https://usertourkit.com>
 - 📦 npm scope: [`@tour-kit/*`](https://www.npmjs.com/org/tour-kit)
 - 💬 Issues & discussions: <https://github.com/domidex01/tour-kit/issues>

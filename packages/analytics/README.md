@@ -1,6 +1,8 @@
 # @tour-kit/analytics
 
-Analytics plugin system for Tour Kit.
+Plugin-based analytics integration for Tour Kit — pipe tour, hint, checklist, and announcement events into Segment, Mixpanel, PostHog, Amplitude, or any custom destination.
+
+**Alternative to:** Pendo, FullStory, Heap, LogRocket session-based product analytics (use this when you already have your own analytics stack).
 
 ## Installation
 
