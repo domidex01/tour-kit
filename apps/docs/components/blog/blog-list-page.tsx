@@ -52,9 +52,15 @@ export function BlogListPage({ page }: BlogListPageProps) {
 
       {/* Hero banner */}
       <div className="relative overflow-hidden border-b border-fd-border/50 dark:border-fd-border">
-        <div className="relative z-10 mx-auto max-w-[1400px] px-6 pb-16 pt-24 sm:px-8 sm:pb-20 sm:pt-32 lg:px-12">
+        <div className="relative z-10 mx-auto max-w-[1400px] px-6 pb-8 pt-16 sm:px-8 sm:pb-20 sm:pt-32 lg:px-12">
           <h1 className="mb-2 text-3xl font-bold text-fd-foreground sm:text-4xl">Blog</h1>
-          <p className="max-w-2xl text-[15px] leading-relaxed text-fd-muted-foreground">
+          {/* Mobile: tight intro keeps post cards above the fold */}
+          <p className="max-w-2xl text-[15px] leading-relaxed text-fd-muted-foreground sm:hidden">
+            Tutorials, comparisons, and field notes on React product tours and onboarding. New
+            articles weekly.
+          </p>
+          {/* Desktop: full intro */}
+          <p className="hidden max-w-2xl text-[15px] leading-relaxed text-fd-muted-foreground sm:block">
             Practical writing on product tours, user onboarding, feature adoption, and developer-led
             growth. Every post is engineered for the people who actually ship the code: tutorials
             with copy-pasteable React snippets, head-to-head comparisons against tools like React
@@ -78,8 +84,20 @@ export function BlogListPage({ page }: BlogListPageProps) {
             WebkitMaskImage: 'linear-gradient(to bottom, white 40%, transparent)',
           }}
         >
+          <link
+            rel="preload"
+            as="image"
+            href="/blog-hero-light.avif"
+            media="(prefers-color-scheme: light)"
+          />
+          <link
+            rel="preload"
+            as="image"
+            href="/blog-hero-dark.avif"
+            media="(prefers-color-scheme: dark)"
+          />
           <img
-            src="/blog-hero-light.png"
+            src="/blog-hero-light.avif"
             alt=""
             aria-hidden="true"
             loading="eager"
@@ -88,7 +106,7 @@ export function BlogListPage({ page }: BlogListPageProps) {
             className="h-full w-full object-cover opacity-60 dark:hidden"
           />
           <img
-            src="/blog-hero-dark.png"
+            src="/blog-hero-dark.avif"
             alt=""
             aria-hidden="true"
             loading="eager"

@@ -22,6 +22,7 @@ const footerLinks = {
     { label: 'Editorial policy', href: '/editorial-policy' },
     { label: 'How we test', href: '/how-we-test' },
     { label: 'Privacy', href: '/legal/privacy' },
+    { label: 'Terms', href: '/legal/terms' },
     { label: 'Contact', href: 'https://github.com/domidex01/tour-kit/issues/new' },
     { label: 'Changelog', href: 'https://github.com/domidex01/tour-kit/releases' },
     {

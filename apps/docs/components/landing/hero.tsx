@@ -24,9 +24,24 @@ const steps = [
 function BackgroundPattern() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      {/* React 19 hoists these <link> tags to <head>, scoped by color-scheme so
+          we only download the variant the user will actually see. */}
+      <link
+        rel="preload"
+        as="image"
+        href="/tourkit-lighthouse.avif"
+        media="(prefers-color-scheme: light)"
+      />
+      <link
+        rel="preload"
+        as="image"
+        href="/hero-dark.avif"
+        media="(prefers-color-scheme: dark)"
+      />
       <img
-        src="/tourkit-lighthouse.png"
+        src="/tourkit-lighthouse.avif"
         alt=""
+        aria-hidden="true"
         loading="eager"
         decoding="async"
         fetchPriority="high"
@@ -35,9 +50,9 @@ function BackgroundPattern() {
       <img
         src="/hero-dark.avif"
         alt=""
+        aria-hidden="true"
         loading="eager"
         decoding="async"
-        fetchPriority="high"
         className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
       />
     </div>
@@ -173,7 +188,7 @@ function HeroDemo() {
       {/* Install command below the mockup */}
       <div className="mt-4 flex items-center gap-2 rounded-lg border border-fd-border/50 bg-fd-card/60 px-4 py-2.5 backdrop-blur-sm">
         <Terminal className="h-3.5 w-3.5 text-fd-muted-foreground" />
-        <code className="flex-1 font-mono text-[12px] text-fd-muted-foreground">
+        <code className="flex-1 font-mono text-[14px] text-fd-muted-foreground sm:text-[12px]">
           <span className="select-none opacity-40">$ </span>
           {installCmd}
         </code>
@@ -261,13 +276,7 @@ export function Hero() {
               and WCAG 2.1 AA accessibility — all in under 8KB. Works with shadcn/ui out of the box.
             </p>
 
-            <p className="mb-8 font-mono text-[13px] font-bold text-[#02182b]/60 dark:text-white/60">
-              pnpm add @tour-kit/react <span className="mx-1 opacity-40">&middot;</span> {'<'} 8KB
-              gzipped <span className="mx-1 opacity-40">&middot;</span> TypeScript strict{' '}
-              <span className="mx-1 opacity-40">&middot;</span> own your code
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="mb-6 flex flex-wrap items-center gap-3">
               <Link
                 href="/docs/getting-started"
                 className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-6 py-3 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30"
@@ -282,6 +291,12 @@ export function Hero() {
                 View on GitHub
               </Link>
             </div>
+
+            <p className="font-mono text-[13px] font-bold text-[#02182b]/60 dark:text-white/60">
+              pnpm add @tour-kit/react <span className="mx-1 opacity-40">&middot;</span> {'<'} 8KB
+              gzipped <span className="mx-1 opacity-40">&middot;</span> TypeScript strict{' '}
+              <span className="mx-1 opacity-40">&middot;</span> own your code
+            </p>
           </div>
 
           {/* Right — animated mini app mockup */}

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 
 const SITE_URL = 'https://usertourkit.com'
-const SITE_LAUNCH_DATE = '2025-01-01T00:00:00.000Z'
 
 // ── Types ──
 
@@ -37,7 +36,10 @@ export function TechArticleJsonLd({
   dateModified,
   section,
 }: TechArticleProps): ReactNode {
-  const resolvedPublished = datePublished ?? SITE_LAUNCH_DATE
+  // Fall back to build time when callers don't supply a date. Today is a less
+  // misleading freshness signal than a hardcoded launch sentinel.
+  const buildTimeIso = new Date().toISOString()
+  const resolvedPublished = datePublished ?? buildTimeIso
   const resolvedModified = dateModified ?? resolvedPublished
   const data = {
     '@context': 'https://schema.org',
@@ -50,6 +52,7 @@ export function TechArticleJsonLd({
     ...(section && { articleSection: section }),
     author: { '@id': `${SITE_URL}/about#person` },
     publisher: { '@id': `${SITE_URL}/#organization` },
+    image: `${SITE_URL}/og-default.png`,
     isPartOf: {
       '@type': 'WebSite',
       name: 'userTourKit Documentation',
@@ -79,13 +82,18 @@ interface ArticleJsonLdProps {
   url: string
   datePublished: string
   dateModified: string
+  /** Display handle (e.g. "domidex01"). Used as `alternateName` when `authorLegalName` is provided. */
   authorName?: string
+  /** Legal/real name (e.g. "Dominique Degottex"). Becomes the canonical `name`. */
+  authorLegalName?: string
+  /** Author profile URL. Relative paths are resolved to absolute against SITE_URL. */
   authorUrl?: string
   authorGithub?: string
   authorLinkedin?: string
   authorX?: string
   authorJobTitle?: string
   authorKnowsAbout?: string[]
+  /** Required for Google Article rich-result eligibility. Relative paths resolved to absolute. */
   image?: string
   wordCount?: number
   articleSection?: string
@@ -127,6 +135,7 @@ export function ArticleJsonLd({
   datePublished,
   dateModified,
   authorName = 'userTourKit Team',
+  authorLegalName,
   authorUrl,
   authorGithub,
   authorLinkedin,
@@ -140,19 +149,33 @@ export function ArticleJsonLd({
   mentions,
 }: ArticleJsonLdProps): ReactNode {
   const sameAs = [authorGithub, authorLinkedin, authorX].filter(Boolean)
+  const absoluteUrl = url.startsWith('http') ? url : `${SITE_URL}${url}`
+  const absoluteAuthorUrl = authorUrl
+    ? authorUrl.startsWith('http')
+      ? authorUrl
+      : `${SITE_URL}${authorUrl}`
+    : undefined
+  const absoluteImage = image
+    ? image.startsWith('http')
+      ? image
+      : `${SITE_URL}${image}`
+    : `${SITE_URL}/og-default.png`
+  const canonicalName = authorLegalName ?? authorName
+
   const data = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline,
     description,
-    url: url.startsWith('http') ? url : `${SITE_URL}${url}`,
+    url: absoluteUrl,
     datePublished,
     dateModified,
     author: {
       '@type': 'Person',
       '@id': `${SITE_URL}/about#person`,
-      name: authorName,
-      ...(authorUrl && { url: authorUrl }),
+      name: canonicalName,
+      ...(authorLegalName && authorName && { alternateName: authorName }),
+      ...(absoluteAuthorUrl && { url: absoluteAuthorUrl }),
       ...(sameAs.length > 0 && { sameAs }),
       ...(authorJobTitle && { jobTitle: authorJobTitle }),
       ...(authorKnowsAbout && authorKnowsAbout.length > 0 && { knowsAbout: authorKnowsAbout }),
@@ -169,14 +192,14 @@ export function ArticleJsonLd({
         height: 60,
       },
     },
-    ...(image && { image }),
+    image: absoluteImage,
     ...(wordCount && { wordCount }),
     ...(articleSection && { articleSection }),
     ...(keywords && { keywords }),
     ...(mentions && mentions.length > 0 && { mentions }),
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': url.startsWith('http') ? url : `${SITE_URL}${url}`,
+      '@id': absoluteUrl,
     },
   }
 
@@ -186,10 +209,22 @@ export function ArticleJsonLd({
   )
 }
 
-export function BreadcrumbJsonLd({ items }: { items: BreadcrumbItem[] }): ReactNode {
-  const data = {
+export function BreadcrumbJsonLd({
+  items,
+  pageUrl,
+}: {
+  items: BreadcrumbItem[]
+  /** Current page path (e.g. "/pricing"). Used to mint a stable `@id` so other
+      schema blocks on the page can reference this BreadcrumbList via `@id`. */
+  pageUrl?: string
+}): ReactNode {
+  const resolvedId = pageUrl
+    ? `${pageUrl.startsWith('http') ? pageUrl : `${SITE_URL}${pageUrl}`}#breadcrumb`
+    : undefined
+  const data: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
+    ...(resolvedId && { '@id': resolvedId }),
     itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',
       position: index + 1,
@@ -249,7 +284,7 @@ export function ProductJsonLd(): ReactNode {
         priceCurrency: 'USD',
         description: 'Core library, React bindings, and hints package. MIT licensed.',
         availability: 'https://schema.org/InStock',
-        url: `${SITE_URL}/pricing/`,
+        url: `${SITE_URL}/pricing`,
       },
       {
         '@type': 'Offer',
@@ -257,15 +292,9 @@ export function ProductJsonLd(): ReactNode {
         price: '99',
         priceCurrency: 'USD',
         description:
-          'One-time purchase. Adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.',
+          'One-time purchase, no recurring fees. Adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.',
         availability: 'https://schema.org/InStock',
-        url: `${SITE_URL}/pricing/`,
-        priceSpecification: {
-          '@type': 'UnitPriceSpecification',
-          price: '99',
-          priceCurrency: 'USD',
-          billingDuration: { '@type': 'Duration', name: 'Lifetime' },
-        },
+        url: `${SITE_URL}/pricing`,
       },
     ],
     publisher: { '@id': `${SITE_URL}/#organization` },
@@ -404,6 +433,7 @@ export function WebSiteJsonLd({
   const data: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
     name,
     url: resolvedUrl,
     description,

@@ -18,6 +18,7 @@ import { articleMdxComponents } from '@/lib/mdx-overrides'
 import { getBlogArticle } from '@/lib/source'
 import {
   ArticleJsonLd,
+  BreadcrumbJsonLd,
   DEFAULT_SPEAKABLE_SELECTORS,
   FAQJsonLd,
   HowToJsonLd,
@@ -81,19 +82,20 @@ export default async function BlogPostPage({ params }: PageProps) {
   const readingTime = getReadingTime(slug)
   const { prev, next } = getAdjacentPosts(slug)
 
-  // Pull real FAQ Q&A from the MDX body; fall back to a generic pair when
-  // the article has no FAQ section so the page still emits Question schema.
+  // Pull real FAQ Q&A from the MDX body; fall back to neutral, factual answers
+  // when the article has no FAQ section so the page still emits Question schema
+  // without shipping superlative marketing claims into JSON-LD.
   const extractedFaqs = getFaqFromMdx(slug)
   const fallbackFaqs = [
     {
-      question: `What is the best ${post.category === 'Listicle' ? 'product tour library' : 'tool'} in 2026?`,
+      question: 'What is userTourKit?',
       answer:
-        'userTourKit is the best headless product tour library for React developers in 2026, offering tours, hints, checklists, announcements, analytics, and scheduling in a <8KB core bundle with MIT licensing.',
+        'userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Its core weighs under 8KB gzipped and ships with WCAG 2.1 AA accessibility.',
     },
     {
-      question: 'Is userTourKit free?',
+      question: 'How is userTourKit licensed and priced?',
       answer:
-        "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
+        "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier is a one-time $99 purchase that adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
     },
   ]
   const faqItems = extractedFaqs.length > 0 ? extractedFaqs : fallbackFaqs
@@ -135,15 +137,27 @@ export default async function BlogPostPage({ params }: PageProps) {
           datePublished={post.publishedAt ?? today}
           dateModified={post.lastUpdated ?? today}
           authorName={DEFAULT_AUTHOR.name}
+          authorLegalName={DEFAULT_AUTHOR.legalName}
           authorUrl={DEFAULT_AUTHOR.url}
           authorGithub={DEFAULT_AUTHOR.github}
           authorLinkedin={DEFAULT_AUTHOR.linkedin}
           authorX={DEFAULT_AUTHOR.x}
           authorJobTitle={DEFAULT_AUTHOR.jobTitle}
           authorKnowsAbout={DEFAULT_AUTHOR.knowsAbout}
+          image={post.ogImage ?? `/api/og?title=${encodeURIComponent(post.title)}&category=BLOG`}
           articleSection={post.category}
           keywords={post.keywords}
           mentions={mentions.length > 0 ? mentions : undefined}
+        />
+
+        <BreadcrumbJsonLd
+          pageUrl={`/blog/${post.slug}`}
+          items={[
+            { name: 'Home', url: '/' },
+            { name: 'Blog', url: '/blog' },
+            { name: post.category, url: `/blog/category/${slugifyCategory(post.category)}` },
+            { name: post.title, url: `/blog/${post.slug}` },
+          ]}
         />
 
         {howTo && howTo.steps.length >= 2 && (

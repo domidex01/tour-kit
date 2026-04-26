@@ -65,6 +65,18 @@ const ComparisonTable = dynamic(
   }
 )
 
+const CompareGrid = dynamic(
+  () => import('@/components/landing/compare-grid').then((m) => ({ default: m.CompareGrid })),
+  {
+    loading: () => (
+      <div
+        aria-hidden="true"
+        className="mx-auto my-12 h-[640px] w-full max-w-[1120px] animate-pulse rounded-2xl bg-fd-muted/30"
+      />
+    ),
+  }
+)
+
 const SocialProof = dynamic(
   () => import('@/components/landing/social-proof').then((m) => ({ default: m.SocialProof })),
   {
@@ -123,6 +135,7 @@ export default function HomePage() {
         <Features />
         <Packages />
         <ComparisonTable />
+        <CompareGrid />
         <PricingTeaser />
         <SocialProof />
         <BlogPreview />
@@ -133,8 +146,9 @@ export default function HomePage() {
           {/* Background images - same as hero */}
           <div className="pointer-events-none absolute inset-0 -z-10">
             <img
-              src="/tourkit-lighthouse.png"
+              src="/tourkit-lighthouse.avif"
               alt=""
+              aria-hidden="true"
               loading="lazy"
               decoding="async"
               className="absolute inset-0 h-full w-full object-cover dark:hidden"
@@ -142,6 +156,7 @@ export default function HomePage() {
             <img
               src="/hero-dark.avif"
               alt=""
+              aria-hidden="true"
               loading="lazy"
               decoding="async"
               className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"

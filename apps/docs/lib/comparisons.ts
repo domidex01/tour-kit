@@ -72,16 +72,19 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'shepherd-js',
     category: 'open-source',
     published: true,
-    title: 'userTourKit vs Shepherd.js: Which Product Tour Library Should You Choose in 2026?',
-    metaTitle: 'userTourKit vs Shepherd.js: 2026 Comparison for Developers',
+    lastUpdated: '2026-04-26',
+    title: 'Looking for a Shepherd.js alternative? userTourKit vs Shepherd.js compared',
+    metaTitle: 'Shepherd.js Alternative for React (2026): userTourKit vs Shepherd.js',
     description:
-      'Compare userTourKit vs Shepherd.js: features, bundle size, licensing, and accessibility side-by-side. Find which fits your stack in 2026.',
+      'Switching from Shepherd.js? Compare userTourKit vs Shepherd.js: bundle size, licensing (AGPL vs MIT), React fit, and migration path. Find the right alternative for your stack in 2026.',
     keywords: [
+      'shepherd.js alternative',
+      'switch from shepherd.js',
       'usertourkit',
       'shepherd.js',
-      'shepherd.js alternative',
-      'product tour library',
+      'react tour library',
       'AGPL license',
+      'migrate from shepherd',
     ],
   },
   {
@@ -504,6 +507,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     published: true,
     publishedAt: '2026-04-18',
     lastUpdated: '2026-04-18',
+    ogImage: '/og-images/accessible-product-tour-react-tutorial.avif',
   },
   {
     slug: 'nextjs-onboarding-flow-tutorial',
@@ -521,6 +525,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     published: true,
     publishedAt: '2026-04-18',
     lastUpdated: '2026-04-18',
+    ogImage: '/og-images/nextjs-onboarding-flow-tutorial.avif',
   },
   {
     slug: 'best-react-product-tour-libraries-2026',
@@ -2889,7 +2894,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     published: true,
     publishedAt: '2026-04-08',
     lastUpdated: '2026-04-08',
-    ogImage: '/og-images/react-19-concurrent-mode-product-tours.png',
+    ogImage: '/og-images/react-19-concurrent-mode-product-tours.avif',
   },
   {
     slug: 'react-compiler-product-tours-automatic-memoization',
@@ -4874,7 +4879,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     published: true,
     publishedAt: '2026-04-11',
     lastUpdated: '2026-04-11',
-    ogImage: '/og-images/session-replay-onboarding.png',
+    ogImage: '/og-images/session-replay-onboarding.avif',
   },
   {
     slug: 'shadcn-ui-effect-unstyled-components',
@@ -5136,7 +5141,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     published: true,
     publishedAt: '2026-04-12',
     lastUpdated: '2026-04-12',
-    ogImage: '/og-images/web3-app-onboarding.png',
+    ogImage: '/og-images/web3-app-onboarding.avif',
   },
   {
     slug: 'what-i-learned-reviewing-50-competitor-blogs',

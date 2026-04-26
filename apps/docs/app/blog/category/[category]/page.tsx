@@ -110,8 +110,20 @@ export default async function CategoryPage({ params }: PageProps) {
             WebkitMaskImage: 'linear-gradient(to bottom, white 40%, transparent)',
           }}
         >
+          <link
+            rel="preload"
+            as="image"
+            href="/blog-hero-light.avif"
+            media="(prefers-color-scheme: light)"
+          />
+          <link
+            rel="preload"
+            as="image"
+            href="/blog-hero-dark.avif"
+            media="(prefers-color-scheme: dark)"
+          />
           <img
-            src="/blog-hero-light.png"
+            src="/blog-hero-light.avif"
             alt=""
             aria-hidden="true"
             loading="eager"
@@ -120,7 +132,7 @@ export default async function CategoryPage({ params }: PageProps) {
             className="h-full w-full object-cover opacity-60 dark:hidden"
           />
           <img
-            src="/blog-hero-dark.png"
+            src="/blog-hero-dark.avif"
             alt=""
             aria-hidden="true"
             loading="eager"

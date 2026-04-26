@@ -1,10 +1,12 @@
 import { CompareArticleCrossLinks } from '@/components/article/article-cross-links'
 import { ArticleLayout } from '@/components/article/article-layout'
+import { DEFAULT_AUTHOR } from '@/lib/authors'
 import { getComparison, getPublishedComparisons, getRelatedComparisons } from '@/lib/comparisons'
 import { articleMdxComponents } from '@/lib/mdx-overrides'
 import { getCompareArticle } from '@/lib/source'
 import {
   ArticleJsonLd,
+  BreadcrumbJsonLd,
   DEFAULT_SPEAKABLE_SELECTORS,
   FAQJsonLd,
   SpeakableJsonLd,
@@ -71,7 +73,9 @@ export default async function ComparisonPage({ params }: PageProps) {
         { label: 'Compare', href: '/compare' },
         { label: `userTourKit vs ${comparison.competitor}`, href: `/compare/${comparison.slug}` },
       ]}
+      publishedAt={comparison.publishedAt ?? today}
       lastUpdated={comparison.lastUpdated ?? today}
+      author={DEFAULT_AUTHOR}
       relatedLinks={related.map((r) => ({
         label: `userTourKit vs ${r.competitor}`,
         href: `/compare/${r.slug}`,
@@ -83,12 +87,29 @@ export default async function ComparisonPage({ params }: PageProps) {
         url={`/compare/${comparison.slug}`}
         datePublished={comparison.publishedAt ?? today}
         dateModified={comparison.lastUpdated ?? today}
+        authorName={DEFAULT_AUTHOR.name}
+        authorLegalName={DEFAULT_AUTHOR.legalName}
+        authorUrl={DEFAULT_AUTHOR.url}
+        authorGithub={DEFAULT_AUTHOR.github}
+        authorLinkedin={DEFAULT_AUTHOR.linkedin}
+        authorX={DEFAULT_AUTHOR.x}
+        authorJobTitle={DEFAULT_AUTHOR.jobTitle}
+        authorKnowsAbout={DEFAULT_AUTHOR.knowsAbout}
+        image={`/api/og?title=${encodeURIComponent(`userTourKit vs ${comparison.competitor}`)}&category=COMPARE`}
         articleSection="Comparisons"
         keywords={comparison.keywords}
       />
       <SpeakableJsonLd
         url={`/compare/${comparison.slug}`}
         cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]}
+      />
+      <BreadcrumbJsonLd
+        pageUrl={`/compare/${comparison.slug}`}
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Compare', url: '/compare' },
+          { name: `userTourKit vs ${comparison.competitor}`, url: `/compare/${comparison.slug}` },
+        ]}
       />
 
       {hasMdxContent ? (

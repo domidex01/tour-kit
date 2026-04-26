@@ -92,20 +92,25 @@ export function ArticleLayout({
               {author && (
                 <Link
                   href={author.url}
+                  rel="author"
                   className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
                 >
                   <Image
                     src={author.avatar}
-                    alt={author.name}
+                    alt={author.legalName ?? author.name}
                     width={32}
                     height={32}
                     className="rounded-full"
                   />
                   <div className="flex flex-col">
+                    {/* Show legal name as the primary visible byline (E-E-A-T signal AI
+                        crawlers extract); handle stays visible as a secondary label. */}
                     <span className="text-[13px] font-medium text-fd-foreground">
-                      {author.name}
+                      {author.legalName ?? author.name}
                     </span>
-                    <span className="text-[11px] text-fd-muted-foreground">{author.role}</span>
+                    <span className="text-[11px] text-fd-muted-foreground">
+                      {author.legalName ? `@${author.name} · ${author.role}` : author.role}
+                    </span>
                   </div>
                 </Link>
               )}
