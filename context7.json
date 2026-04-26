@@ -70,7 +70,7 @@
     "All interactive components are WCAG 2.1 AA compliant with focus management, keyboard navigation, ARIA live regions, and reduced-motion support built in. Do not disable these defaults without explicit accessibility review.",
     "TypeScript is strict mode with `noUncheckedIndexedAccess`. Never use `any`; prefer `unknown` + narrowing. Component prop interfaces are exported from the package root with the component.",
     "Bundle budgets are enforced: @tour-kit/core < 8KB gzipped, @tour-kit/react < 12KB, @tour-kit/hints < 5KB. When adding features, measure with size-limit or bundlephobia before merging.",
-    "MIT-licensed: @tour-kit/core, react, hints. Commercial-licensed Pro: adoption, analytics, announcements, checklists, media, scheduling, surveys. Avoid Pro packages in free-tier examples.",
+    "MIT-licensed: @tour-kit/core, react, hints. Commercial Pro: adoption, ai, analytics, announcements, checklists, license, media, scheduling, surveys. Avoid Pro packages in free-tier examples.",
     "Router integration for multi-page tours uses adapters — `createNextAppRouterAdapter`, `createNextPagesRouterAdapter`, `createReactRouterAdapter`. Never hardcode route awareness into tour components.",
     "Persistence uses storage adapters. Default is localStorage via `createLocalStorageAdapter`; SSR-safe builds should use `createMemoryStorageAdapter` on the server side.",
     "Providers compose: TourKitProvider wraps multi-tour apps; TourProvider scopes a single tour. Extended packages add their own providers (AdoptionProvider, ChecklistProvider, etc.) inside TourKitProvider.",
