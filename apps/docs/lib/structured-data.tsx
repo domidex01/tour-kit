@@ -246,6 +246,7 @@ export function OrganizationJsonLd(): ReactNode {
     sameAs: [
       'https://github.com/domidex01/tour-kit',
       'https://www.npmjs.com/package/@tour-kit/core',
+      'https://www.wikidata.org/wiki/Q139562503',
     ],
     publishingPrinciples: `${SITE_URL}/editorial-policy`,
     ethicsPolicy: `${SITE_URL}/editorial-policy#ethics`,
