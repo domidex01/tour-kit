@@ -256,9 +256,9 @@ Yes — Tour Kit is framework-agnostic. Router adapters are provided for Next.js
 
 ## Licensing
 
-Tour Kit uses a **dual licensing model** — see the [`LICENSE`](./LICENSE) file for full text.
+Tour Kit uses a **dual licensing model** — see [`NOTICE.md`](./NOTICE.md) for the per-package breakdown.
 
-- **MIT (free, open-source):** `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`
+- **MIT (free, open-source):** `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints` — covered by the root [`LICENSE`](./LICENSE).
 - **Commercial (proprietary, paid):** `@tour-kit/adoption`, `@tour-kit/ai`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/license`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/surveys`
 
 Each commercial package has a `LICENSE.md` describing its terms. Buy a license at <https://usertourkit.com/pricing>.
