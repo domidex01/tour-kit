@@ -30,7 +30,7 @@ export const tourProgressDotVariants = cva('rounded-full transition-colors', {
     },
     active: {
       true: 'bg-primary',
-      false: 'bg-secondary',
+      false: 'bg-muted',
     },
   },
   defaultVariants: {

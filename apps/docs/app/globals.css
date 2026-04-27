@@ -5,6 +5,56 @@
 /* Tell Tailwind to scan Fumadocs UI classes */
 @source '../node_modules/fumadocs-ui/dist/**/*.js';
 
+/* Scan tour-kit package sources so JIT generates utilities used by TourCard,
+   Hint, button-variants, etc. (bg-popover, text-muted-foreground, border-input,
+   ring-ring, …). Without this, classes inside node_modules are invisible to
+   Tailwind and the card renders unstyled (transparent background). */
+@source '../../../packages/react/src/**/*.{ts,tsx}';
+@source '../../../packages/hints/src/**/*.{ts,tsx}';
+@source '../../../packages/core/src/**/*.{ts,tsx}';
+
+/* shadcn/ui-compatible token aliases for components from @tour-kit/*.
+   Tailwind v4 generates utilities like `bg-popover` from these `--color-*`
+   entries. Aliased to existing Fumadocs vars so light/dark mode flips
+   automatically via the `.dark` class on <html>. */
+/* Animations consumed by @tour-kit/* components.
+   The package ships a Tailwind v3 JS plugin (tourKitPlugin) that defines these,
+   but the docs app uses Tailwind v4 — define them inline here.
+   color-mix() is used so the alpha works with hex/oklch/any modern color (the
+   plugin's `hsl(var(--primary) / 0.7)` only worked with HSL channel triplets). */
+@theme {
+  --animate-tour-pulse: tour-pulse 1.5s ease-in-out infinite;
+
+  @keyframes tour-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 70%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-primary) 0%, transparent);
+    }
+  }
+}
+
+@theme inline {
+  --color-background: var(--color-fd-background);
+  --color-foreground: var(--color-fd-foreground);
+  --color-popover: var(--color-fd-popover);
+  --color-popover-foreground: var(--color-fd-popover-foreground);
+  --color-muted: var(--color-fd-muted);
+  --color-muted-foreground: var(--color-fd-muted-foreground);
+  --color-border: var(--color-fd-border);
+  --color-input: var(--color-fd-border);
+  --color-primary: var(--color-fd-primary);
+  --color-primary-foreground: var(--color-fd-primary-foreground);
+  --color-secondary: var(--color-fd-secondary);
+  --color-secondary-foreground: var(--color-fd-secondary-foreground);
+  --color-accent: var(--color-fd-accent);
+  --color-accent-foreground: var(--color-fd-accent-foreground);
+  --color-destructive: var(--color-fd-destructive);
+  --color-destructive-foreground: var(--color-fd-destructive-foreground);
+  --color-ring: var(--color-fd-ring);
+}
+
 /* Apply Geist fonts */
 body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;

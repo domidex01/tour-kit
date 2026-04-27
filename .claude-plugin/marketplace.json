@@ -37,13 +37,7 @@
         "feature-adoption",
         "shadcn-ui"
       ],
-      "tags": [
-        "react",
-        "nextjs",
-        "onboarding",
-        "product-tour",
-        "walkthrough"
-      ]
+      "tags": ["react", "nextjs", "onboarding", "product-tour", "walkthrough"]
     }
   ]
 }

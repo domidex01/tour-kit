@@ -111,6 +111,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${SITE_URL}/demo`,
+      lastModified: getGitLastModified(path.join(process.cwd(), 'app/demo/page.tsx')),
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
       url: `${SITE_URL}/sitemap`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,

@@ -45,10 +45,9 @@ export default function TermsPage() {
         <article className="prose prose-neutral dark:prose-invert max-w-none">
           <h2>Summary</h2>
           <p>
-            These terms cover three things: how you may use this website
-            (usertourkit.com), how the open-source userTourKit packages are licensed, and how the
-            optional Pro license works. By using the site or installing the packages, you agree to
-            these terms.
+            These terms cover three things: how you may use this website (usertourkit.com), how the
+            open-source userTourKit packages are licensed, and how the optional Pro license works.
+            By using the site or installing the packages, you agree to these terms.
           </p>
 
           <h2>The open-source packages</h2>
@@ -94,8 +93,8 @@ export default function TermsPage() {
               >
                 GitHub Issues
               </a>{' '}
-              (private email also fine — see the{' '}
-              <Link href="/about">about page</Link> for contact). Refunds process through Polar.
+              (private email also fine — see the <Link href="/about">about page</Link> for contact).
+              Refunds process through Polar.
             </li>
             <li>
               <strong>Termination</strong>: we may revoke a license for material breach (resale,
@@ -128,8 +127,7 @@ export default function TermsPage() {
             <li>Republish documentation as your own work without attribution.</li>
             <li>
               Train an AI model on the content of this site without honoring the rules in{' '}
-              <a href="/robots.txt">robots.txt</a> and{' '}
-              <a href="/llms.txt">llms.txt</a>.
+              <a href="/robots.txt">robots.txt</a> and <a href="/llms.txt">llms.txt</a>.
             </li>
           </ul>
 

@@ -32,12 +32,7 @@ function BackgroundPattern() {
         href="/tourkit-lighthouse.avif"
         media="(prefers-color-scheme: light)"
       />
-      <link
-        rel="preload"
-        as="image"
-        href="/hero-dark.avif"
-        media="(prefers-color-scheme: dark)"
-      />
+      <link rel="preload" as="image" href="/hero-dark.avif" media="(prefers-color-scheme: dark)" />
       <img
         src="/tourkit-lighthouse.avif"
         alt=""

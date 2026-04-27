@@ -31,7 +31,7 @@ describe('TourProgress', () => {
       const dots = container.querySelectorAll('.rounded-full')
       // 2nd dot (index 1) should have primary color
       expect(dots[1]).toHaveClass('bg-primary')
-      expect(dots[0]).toHaveClass('bg-secondary')
+      expect(dots[0]).toHaveClass('bg-muted')
     })
 
     it('renders single dot for single step', () => {

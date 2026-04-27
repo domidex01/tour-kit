@@ -37,9 +37,7 @@ export interface PingResult {
   batches: BatchResult[]
 }
 
-export async function fetchSitemapUrls(
-  fetchImpl: typeof fetch = fetch,
-): Promise<string[]> {
+export async function fetchSitemapUrls(fetchImpl: typeof fetch = fetch): Promise<string[]> {
   const res = await fetchImpl(INDEXNOW_SITEMAP_URL)
   if (!res.ok) throw new Error(`sitemap fetch failed: HTTP ${res.status}`)
   const xml = await res.text()
@@ -64,7 +62,7 @@ export async function fetchSitemapUrls(
 
 export async function postBatch(
   urlList: string[],
-  fetchImpl: typeof fetch = fetch,
+  fetchImpl: typeof fetch = fetch
 ): Promise<BatchResult> {
   const body = {
     host: INDEXNOW_HOST,
@@ -81,7 +79,7 @@ export async function postBatch(
 }
 
 export async function pingIndexNow(
-  options: { latest?: number; fetchImpl?: typeof fetch } = {},
+  options: { latest?: number; fetchImpl?: typeof fetch } = {}
 ): Promise<PingResult> {
   const { latest, fetchImpl = fetch } = options
   const allUrls = await fetchSitemapUrls(fetchImpl)

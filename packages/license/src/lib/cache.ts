@@ -30,7 +30,11 @@ export function readCache(domain: string, key?: string): LicenseState | null {
       clearCache(domain)
       return null
     }
-    if (key !== undefined && parsed.data.keyHash !== undefined && parsed.data.keyHash !== hashKey(key)) {
+    if (
+      key !== undefined &&
+      parsed.data.keyHash !== undefined &&
+      parsed.data.keyHash !== hashKey(key)
+    ) {
       clearCache(domain)
       return null
     }

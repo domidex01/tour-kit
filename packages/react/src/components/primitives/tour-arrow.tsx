@@ -16,8 +16,8 @@ export const TourArrow = React.forwardRef<SVGSVGElement, TourArrowProps>(
         ref={ref}
         context={context}
         className={className}
-        fill="hsl(var(--popover))"
-        stroke="hsl(var(--border))"
+        fill="var(--color-popover)"
+        stroke="var(--color-border)"
         strokeWidth={1}
       />
     )
