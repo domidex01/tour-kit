@@ -4,6 +4,7 @@ import Link from 'next/link'
 const footerLinks = {
   product: [
     { label: 'Documentation', href: '/docs' },
+    { label: 'Live demo', href: '/demo' },
     { label: 'Getting started', href: '/docs/getting-started' },
     { label: 'Compare', href: '/compare' },
     { label: 'Benchmarks', href: '/benchmarks' },
@@ -15,7 +16,13 @@ const footerLinks = {
     { label: '@tour-kit/core', href: '/docs/core' },
     { label: '@tour-kit/react', href: '/docs/react' },
     { label: '@tour-kit/hints', href: '/docs/hints' },
+    { label: '@tour-kit/adoption', href: '/docs/adoption' },
+    { label: '@tour-kit/ai', href: '/docs/ai' },
     { label: '@tour-kit/analytics', href: '/docs/analytics' },
+    { label: '@tour-kit/announcements', href: '/docs/announcements' },
+    { label: '@tour-kit/checklists', href: '/docs/checklists' },
+    { label: '@tour-kit/media', href: '/docs/media' },
+    { label: '@tour-kit/scheduling', href: '/docs/scheduling' },
   ],
   company: [
     { label: 'About', href: '/about' },

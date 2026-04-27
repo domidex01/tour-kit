@@ -143,7 +143,7 @@ export default function SitemapPage() {
 
         <nav aria-label="All pages" className="flex flex-col gap-4">
           {/* ── Top-level pages ── */}
-          <SitemapSection title="Top pages" count={8} defaultOpen>
+          <SitemapSection title="Top pages" count={9} defaultOpen>
             <ul className="grid gap-2 sm:grid-cols-2">
               <li>
                 <Link href="/" className="text-fd-foreground hover:underline">
@@ -153,6 +153,11 @@ export default function SitemapPage() {
               <li>
                 <Link href="/docs" className="text-fd-foreground hover:underline">
                   Documentation
+                </Link>
+              </li>
+              <li>
+                <Link href="/demo" className="text-fd-foreground hover:underline">
+                  Live demo
                 </Link>
               </li>
               <li>
