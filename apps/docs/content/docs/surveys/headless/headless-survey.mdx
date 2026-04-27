@@ -1,0 +1,150 @@
+---
+title: HeadlessSurvey
+description: >-
+  Render-prop wrapper around useSurvey — exposes full survey state and actions
+  without rendering any DOM elements
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`HeadlessSurvey` calls `useSurvey` internally and passes the result to the `children` render prop. Use it to access survey state deep in a component tree where calling the hook directly would require prop drilling.
+
+## Import
+
+```tsx
+import { HeadlessSurvey } from '@tour-kit/surveys/headless';
+```
+
+## Usage
+
+```tsx
+import { HeadlessSurvey, HeadlessQuestionRating } from '@tour-kit/surveys/headless';
+
+function CustomNPSSurvey() {
+  return (
+    <HeadlessSurvey surveyId="nps-q1">
+      {({ state, config, canShow, show, answer, complete }) => {
+        if (!state?.isVisible) {
+          return (
+            <button onClick={show} disabled={!canShow}>
+              Give feedback
+            </button>
+          );
+        }
+
+        return (
+          <div className="my-custom-modal">
+            <h2>{config?.title}</h2>
+            <HeadlessQuestionRating
+              id="score"
+              label="Rate us 0–10"
+              min={0}
+              max={10}
+              onChange={(value) => {
+                answer('score', value);
+                complete();
+              }}
+            >
+              {({ options, ratingGroupProps, getOptionProps }) => (
+                <div {...ratingGroupProps} className="flex gap-2">
+                  {options.map((opt) => (
+                    <button
+                      key={opt}
+                      {...getOptionProps(opt)}
+                      className="rounded px-3 py-2 border"
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </HeadlessQuestionRating>
+          </div>
+        );
+      }}
+    </HeadlessSurvey>
+  );
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    surveyId: {
+      type: 'string',
+      required: true,
+      description: 'Id of the survey to bind to.',
+    },
+    children: {
+      type: '(props: HeadlessSurveyRenderProps) => ReactNode',
+      required: true,
+      description: 'Render prop receiving the full survey state and actions.',
+    },
+  }}
+/>
+
+## Render prop shape
+
+<TypeTable
+  type={{
+    surveyId: {
+      type: 'string',
+      description: 'The surveyId passed to this component.',
+    },
+    state: {
+      type: 'SurveyState | undefined',
+      description: 'Current survey state. Undefined if the survey has not been registered.',
+    },
+    config: {
+      type: 'SurveyConfig | undefined',
+      description: 'The survey configuration.',
+    },
+    canShow: {
+      type: 'boolean',
+      description: 'Whether the survey passes all fatigue gates.',
+    },
+    show: {
+      type: '() => void',
+      description: 'Show the survey (no-op if gates block it).',
+    },
+    hide: {
+      type: '() => void',
+      description: 'Hide without dismissing.',
+    },
+    dismiss: {
+      type: '(reason?: DismissalReason) => void',
+      description: 'Dismiss the survey.',
+    },
+    snooze: {
+      type: '() => void',
+      description: 'Snooze the survey.',
+    },
+    answer: {
+      type: '(questionId: string, value: AnswerValue) => void',
+      description: 'Record an answer.',
+    },
+    nextQuestion: {
+      type: '() => void',
+      description: 'Advance to the next step.',
+    },
+    prevQuestion: {
+      type: '() => void',
+      description: 'Go back one step.',
+    },
+    complete: {
+      type: '() => void',
+      description: 'Complete the survey.',
+    },
+    reset: {
+      type: '() => void',
+      description: 'Reset the survey.',
+    },
+  }}
+/>
+
+## Related
+
+- [useSurvey](/docs/surveys/hooks/use-survey) — The hook this component wraps
+- [HeadlessQuestionRating](/docs/surveys/headless/headless-question-rating)
+- [Headless overview](/docs/surveys/headless) — Import path details

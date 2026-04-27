@@ -1,0 +1,92 @@
+---
+title: SurveyInline
+description: >-
+  Embeds a survey directly in the page flow, rendering when the survey is
+  visible with an optional alwaysRender flag for preview scenarios
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`SurveyInline` renders as a `div` with `role="region"` inside the normal document flow — no portal, no overlay. Use it to embed a survey directly in a page section or settings panel.
+
+## Import
+
+```tsx
+import { SurveyInline } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+import { SurveyInline, QuestionSelect, SurveyProgress, useSurvey } from '@tour-kit/surveys';
+
+function AccountSettingsPage() {
+  const survey = useSurvey('account-ces');
+
+  return (
+    <section>
+      <h2>Account Settings</h2>
+      {/* settings content */}
+
+      <SurveyInline surveyId="account-ces">
+        <SurveyProgress current={(survey.state?.currentStep ?? 0) + 1} total={2} />
+        <QuestionSelect
+          id="difficulty"
+          label="How easy was it to find what you needed?"
+          options={[
+            { value: '7', label: 'Very easy' },
+            { value: '5', label: 'Easy' },
+            { value: '4', label: 'Neutral' },
+            { value: '2', label: 'Difficult' },
+            { value: '1', label: 'Very difficult' },
+          ]}
+          onChange={(value) => survey.answer('difficulty', value)}
+        />
+        <button onClick={survey.complete}>Submit</button>
+      </SurveyInline>
+    </section>
+  );
+}
+```
+
+### Always render (for preview or storybook)
+
+```tsx
+<SurveyInline surveyId="account-ces" alwaysRender>
+  {/* renders even when survey.state.isVisible is false */}
+</SurveyInline>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    surveyId: {
+      type: 'string',
+      required: true,
+      description: 'Id of the survey this inline section belongs to.',
+    },
+    alwaysRender: {
+      type: 'boolean',
+      default: 'false',
+      description: 'When true, renders even when survey.state.isVisible is false. Useful for previewing in Storybook or design tools.',
+    },
+    children: {
+      type: 'ReactNode',
+      description: 'Survey content.',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names on the section container.',
+    },
+  }}
+/>
+
+## Layout
+
+The container renders as `flex flex-col gap-4`. The survey's `title` and `description` are rendered above `children` if present in the config.
+
+## Related
+
+- [SurveyBanner](/docs/surveys/components/survey-banner)
+- [useSurvey](/docs/surveys/hooks/use-survey)

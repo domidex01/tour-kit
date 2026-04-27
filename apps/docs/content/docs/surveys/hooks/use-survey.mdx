@@ -1,0 +1,198 @@
+---
+title: useSurvey
+description: >-
+  Access and control a single survey by id — show, hide, dismiss, snooze,
+  answer questions, and navigate between steps
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+The primary hook for working with a specific survey. Returns both the current state snapshot and all action functions for that survey.
+
+## Import
+
+```tsx
+import { useSurvey } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+import { useSurvey, SurveyModal, QuestionRating } from '@tour-kit/surveys';
+
+function NPSSurvey() {
+  const survey = useSurvey('nps-q1');
+
+  return (
+    <>
+      <button
+        onClick={survey.show}
+        disabled={!survey.canShow}
+      >
+        Share feedback
+      </button>
+
+      <SurveyModal surveyId="nps-q1">
+        <QuestionRating
+          id="score"
+          label="How likely are you to recommend us?"
+          min={0}
+          max={10}
+          value={survey.state?.responses.get('score') as number ?? null}
+          onChange={(value) => {
+            survey.answer('score', value);
+            survey.complete();
+          }}
+        />
+      </SurveyModal>
+    </>
+  );
+}
+```
+
+## Parameters
+
+<TypeTable
+  type={{
+    surveyId: {
+      type: 'string',
+      required: true,
+      description: 'The id of the survey as defined in SurveyConfig.',
+    },
+  }}
+/>
+
+## Returns
+
+<TypeTable
+  type={{
+    state: {
+      type: 'SurveyState | undefined',
+      description: 'Current runtime state of the survey. Undefined if the survey has not been registered yet.',
+    },
+    config: {
+      type: 'SurveyConfig | undefined',
+      description: 'The survey configuration as registered with the provider.',
+    },
+    canShow: {
+      type: 'boolean',
+      description: 'Whether the survey passes all fatigue gates (cooldown, sampling, session limit, snooze). Use to conditionally show trigger UI.',
+    },
+    show: {
+      type: '() => void',
+      description: 'Request the survey to become visible. No-op if canShow is false.',
+    },
+    hide: {
+      type: '() => void',
+      description: 'Hide the survey without recording a dismissal. The next survey in the queue is shown.',
+    },
+    dismiss: {
+      type: '(reason?: DismissalReason) => void',
+      description: "Mark the survey as dismissed. Default reason is 'programmatic'. Triggers onDismiss callbacks.",
+    },
+    snooze: {
+      type: '() => void',
+      description: 'Snooze the survey for snoozeDelayDays (from SurveyConfig). Increments snoozeCount.',
+    },
+    answer: {
+      type: '(questionId: string, value: AnswerValue) => void',
+      description: 'Record an answer. Persists immediately to storage.',
+    },
+    nextQuestion: {
+      type: '() => void',
+      description: 'Increment currentStep by 1.',
+    },
+    prevQuestion: {
+      type: '() => void',
+      description: 'Decrement currentStep by 1 (minimum 0).',
+    },
+    complete: {
+      type: '() => void',
+      description: 'Mark the survey as completed. Triggers onComplete callbacks and score calculation.',
+    },
+    reset: {
+      type: '() => void',
+      description: 'Reset the survey to its initial state, clearing all responses and flags.',
+    },
+  }}
+/>
+
+## Examples
+
+### Show a survey programmatically
+
+```tsx
+function PostCheckoutPrompt() {
+  const survey = useSurvey('post-checkout-csat');
+
+  useEffect(() => {
+    // Only show if the gate stack allows it
+    if (survey.canShow) {
+      survey.show();
+    }
+  }, [survey]);
+
+  return null;
+}
+```
+
+### Multi-step navigation
+
+```tsx
+function SteppedSurvey() {
+  const survey = useSurvey('onboarding-survey');
+  const currentStep = survey.state?.currentStep ?? 0;
+  const questions = survey.config?.questions ?? [];
+  const question = questions[currentStep];
+
+  if (!survey.state?.isVisible || !question) return null;
+
+  return (
+    <div>
+      <p>{question.text}</p>
+
+      <button
+        onClick={survey.prevQuestion}
+        disabled={currentStep === 0}
+      >
+        Back
+      </button>
+
+      {currentStep < questions.length - 1 ? (
+        <button onClick={survey.nextQuestion}>Next</button>
+      ) : (
+        <button onClick={survey.complete}>Submit</button>
+      )}
+    </div>
+  );
+}
+```
+
+### Dismissal with reason
+
+```tsx
+function SurveyWithSnooze() {
+  const survey = useSurvey('nps-q1');
+
+  return (
+    <div>
+      {/* survey content */}
+      <button onClick={() => survey.dismiss('close_button')}>Close</button>
+      <button onClick={survey.snooze}>Remind me later</button>
+    </div>
+  );
+}
+```
+
+<Callout type="warn">
+  `answer()` persists each response to storage immediately, not on `complete()`. If the user closes
+  the browser mid-survey, their partial answers survive to the next session. Read `state.responses`
+  on mount if you need to restore a partially completed survey.
+</Callout>
+
+## Related
+
+- [useSurveys](/docs/surveys/hooks/use-surveys) — Access the full context
+- [SurveysProvider](/docs/surveys/providers/surveys-provider) — Configure fatigue rules
+- [SurveyState type](/docs/surveys/types#surveystate) — Full state shape

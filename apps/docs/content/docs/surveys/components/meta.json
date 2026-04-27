@@ -1,0 +1,16 @@
+{
+  "title": "Components",
+  "pages": [
+    "index",
+    "survey-modal",
+    "survey-slideout",
+    "survey-banner",
+    "survey-popover",
+    "survey-inline",
+    "question-rating",
+    "question-text",
+    "question-select",
+    "question-boolean",
+    "survey-progress"
+  ]
+}

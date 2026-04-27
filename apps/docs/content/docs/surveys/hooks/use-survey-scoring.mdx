@@ -1,0 +1,115 @@
+---
+title: useSurveyScoring
+description: >-
+  Access NPS, CSAT, and CES scoring utilities plus a getSurveyScore helper
+  that automatically selects the right algorithm for a completed survey
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`useSurveyScoring` returns scoring functions bound to the current surveys context. The `getSurveyScore` helper reads a completed survey's responses and applies the correct algorithm based on `SurveyConfig.type`.
+
+## Import
+
+```tsx
+import { useSurveyScoring } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+import { useSurveyScoring } from '@tour-kit/surveys';
+
+function NPSResults() {
+  const scoring = useSurveyScoring();
+
+  // Auto-select algorithm from survey type
+  const result = scoring.getSurveyScore('nps-q1');
+
+  if (!result) return <p>No completed responses yet.</p>;
+
+  // result is NPSResult when the survey type is 'nps'
+  const nps = result as import('@tour-kit/surveys').NPSResult;
+
+  return (
+    <div>
+      <p>NPS Score: {nps.score}</p>
+      <p>Promoters: {nps.promoters} ({nps.promoterPct.toFixed(1)}%)</p>
+      <p>Passives: {nps.passives}</p>
+      <p>Detractors: {nps.detractors}</p>
+    </div>
+  );
+}
+```
+
+### Manual scoring
+
+```tsx
+function CustomScoring() {
+  const { calculateNPS, calculateCSAT, calculateCES } = useSurveyScoring();
+
+  const ratings = [8, 9, 10, 6, 7, 9, 10];
+
+  const nps = calculateNPS(ratings);
+  const csat = calculateCSAT([4, 5, 3, 5, 4], 4);   // threshold: 4 of 5
+  const ces = calculateCES([5, 6, 4, 7, 5]);          // 1–7 scale
+
+  return (
+    <dl>
+      <dt>NPS</dt><dd>{nps.score}</dd>
+      <dt>CSAT</dt><dd>{csat.score}%</dd>
+      <dt>CES</dt><dd>{ces.score} avg</dd>
+    </dl>
+  );
+}
+```
+
+## Returns
+
+<TypeTable
+  type={{
+    calculateNPS: {
+      type: '(responses: number[]) => NPSResult',
+      description: 'Calculate NPS from an array of 0–10 ratings. Promoters ≥ 9, Passives 7–8, Detractors ≤ 6.',
+    },
+    calculateCSAT: {
+      type: '(responses: number[], threshold?: number) => CSATResult',
+      description: 'Calculate CSAT. Score = % of responses at or above threshold. Default threshold: 4.',
+    },
+    calculateCES: {
+      type: '(responses: number[]) => CESResult',
+      description: 'Calculate CES (Customer Effort Score). Score = average. On a 1–7 scale: easy ≥ 5, difficult ≤ 3, neutral = 4.',
+    },
+    getSurveyScore: {
+      type: '(surveyId: string) => NPSResult | CSATResult | CESResult | null',
+      description: 'Get the score for a completed survey. Returns null if the survey is incomplete, has no numeric responses, or is type "custom".',
+    },
+  }}
+/>
+
+<Callout type="info">
+  `getSurveyScore` returns `null` for `type: 'custom'` surveys — custom surveys have no standard
+  scoring algorithm. Use `calculateNPS`, `calculateCSAT`, or `calculateCES` directly with manually
+  extracted response values if you need scoring for a custom survey.
+</Callout>
+
+## Standalone scoring functions
+
+The same algorithms are exported as standalone functions that do not require a provider:
+
+```tsx
+import { calculateNPS, calculateCSAT, calculateCES } from '@tour-kit/surveys';
+
+// Use in server actions, API routes, or analytics pipelines
+const nps = calculateNPS([9, 10, 6, 8, 10]);
+```
+
+See the [Utilities section](/docs/surveys/utilities) for detailed documentation.
+
+## Related
+
+- [calculateNPS](/docs/surveys/utilities/calculate-nps)
+- [calculateCSAT](/docs/surveys/utilities/calculate-csat)
+- [calculateCES](/docs/surveys/utilities/calculate-ces)
+- [Scoring types](/docs/surveys/types#scoring)

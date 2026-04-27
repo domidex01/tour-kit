@@ -1,0 +1,128 @@
+---
+title: HeadlessQuestionBoolean
+description: >-
+  Headless yes/no toggle — manages boolean state and returns groupProps and
+  getOptionProps for accessible yes/no buttons
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`HeadlessQuestionBoolean` manages a `boolean | null` value and returns ARIA props for a two-option radiogroup. Use it when you need custom styling on the yes/no buttons.
+
+## Import
+
+```tsx
+import { HeadlessQuestionBoolean } from '@tour-kit/surveys/headless';
+```
+
+## Usage
+
+```tsx
+import { HeadlessQuestionBoolean } from '@tour-kit/surveys/headless';
+
+<HeadlessQuestionBoolean
+  id="helpful"
+  label="Was this article helpful?"
+  yesLabel="Yes, it helped"
+  noLabel="No, I need more help"
+  onChange={(value) => {
+    survey.answer('helpful', value);
+    survey.complete();
+  }}
+>
+  {({ value, groupProps, getOptionProps, setValue }) => (
+    <div {...groupProps} className="flex gap-3">
+      {[true, false].map((boolVal) => {
+        const optProps = getOptionProps(boolVal);
+        return (
+          <button
+            key={String(boolVal)}
+            type="button"
+            {...optProps}
+            onClick={() => setValue(boolVal)}
+            className={`px-6 py-2 rounded border font-medium ${
+              optProps['aria-checked']
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {optProps['aria-label']}
+          </button>
+        );
+      })}
+    </div>
+  )}
+</HeadlessQuestionBoolean>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Unique identifier for the group.',
+    },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'aria-label for the radiogroup container.',
+    },
+    yesLabel: {
+      type: 'string',
+      default: "'Yes'",
+      description: 'Label text for the true option.',
+    },
+    noLabel: {
+      type: 'string',
+      default: "'No'",
+      description: 'Label text for the false option.',
+    },
+    isRequired: {
+      type: 'boolean',
+      description: 'Sets aria-required on the group.',
+    },
+    value: {
+      type: 'boolean | null',
+      description: 'Controlled value.',
+    },
+    onChange: {
+      type: '(value: boolean) => void',
+      description: 'Called when an option is selected.',
+    },
+    children: {
+      type: '(props: HeadlessQuestionBooleanRenderProps) => ReactNode',
+      required: true,
+      description: 'Render prop.',
+    },
+  }}
+/>
+
+## Render prop shape
+
+<TypeTable
+  type={{
+    value: {
+      type: 'boolean | null',
+      description: 'Currently selected value. null when nothing is selected.',
+    },
+    setValue: {
+      type: '(value: boolean) => void',
+      description: 'Select a value directly.',
+    },
+    groupProps: {
+      type: "{ role: 'radiogroup'; 'aria-label': string; 'aria-required': boolean | undefined }",
+      description: 'Spread onto the container element.',
+    },
+    getOptionProps: {
+      type: "(booleanValue: boolean) => { role: 'radio'; 'aria-checked': boolean; 'aria-label': string; tabIndex: number }",
+      description: 'Call with true for yes, false for no.',
+    },
+  }}
+/>
+
+## Related
+
+- [QuestionBoolean](/docs/surveys/components/question-boolean) — Styled variant
+- [HeadlessSurvey](/docs/surveys/headless/headless-survey)

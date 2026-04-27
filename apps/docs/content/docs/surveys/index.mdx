@@ -1,0 +1,267 @@
+---
+title: '@tour-kit/surveys'
+description: >-
+  In-app microsurveys: NPS, CSAT, CES, and custom question flows with fatigue
+  prevention, skip logic, and five display modes for React apps
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+{/* llm-context-callout */}
+<Callout type="info" title="LLM Context File">
+  Working with an AI assistant? Download the
+  <a href="/context/surveys.txt" download>context file for @tour-kit/surveys</a>
+  and paste it into your conversation for accurate code generation.
+</Callout>
+
+<Callout type="warn" title="Pro package">
+  `@tour-kit/surveys` is a Pro-tier package. A valid license key is required. The `SurveysProvider`
+  is wrapped in `ProGate` — without a license the tree renders nothing and a warning is logged to
+  the console.
+</Callout>
+
+In-app microsurveys that surface at the right moment without overwhelming your users. Three industry-standard survey types (NPS, CSAT, CES) plus fully custom question flows, all delivered through five display modes and protected by a multi-layer fatigue prevention system.
+
+## Why surveys?
+
+Point-in-time feedback forms tell you what users think right now, in context — before they forget. A support ticket or app store review is too late and too filtered. Surveys close the loop between behavior data and qualitative intent.
+
+- **NPS** — "How likely are you to recommend us?" Tracks loyalty trends over time.
+- **CSAT** — "How satisfied were you with this experience?" Pinpoints interaction quality.
+- **CES** — "How easy was it to accomplish your goal?" Surfaces friction before it becomes churn.
+- **Custom** — Multi-step question flows for anything else: feature sentiment, cancellation reasons, onboarding barriers.
+
+---
+
+## Installation
+
+```bash
+pnpm add @tour-kit/surveys
+```
+
+```bash
+npm install @tour-kit/surveys
+```
+
+```bash
+yarn add @tour-kit/surveys
+```
+
+---
+
+## Quick Start
+
+A minimal NPS survey delivered in a modal. Register the config, mount the display component, and call `show()` when the moment is right.
+
+```tsx
+import { SurveysProvider, SurveyModal, useSurvey } from '@tour-kit/surveys';
+
+const npsConfig = {
+  id: 'nps-q1',
+  type: 'nps',
+  displayMode: 'modal',
+  title: 'How likely are you to recommend us?',
+  questions: [
+    {
+      id: 'score',
+      type: 'rating',
+      text: 'On a scale of 0 to 10, how likely are you to recommend us to a friend or colleague?',
+      ratingScale: { min: 0, max: 10, labels: { min: 'Not at all likely', max: 'Extremely likely' } },
+    },
+  ],
+  onComplete: (responses) => {
+    console.log('NPS score:', responses.get('score'));
+  },
+};
+
+function NPSTrigger() {
+  const survey = useSurvey('nps-q1');
+
+  return (
+    <>
+      <SurveyModal surveyId="nps-q1" />
+      <button onClick={survey.show}>Give feedback</button>
+    </>
+  );
+}
+
+export function App() {
+  return (
+    <SurveysProvider surveys={[npsConfig]}>
+      <NPSTrigger />
+    </SurveysProvider>
+  );
+}
+```
+
+---
+
+## Survey types
+
+| Type | Scale | Scoring |
+|------|-------|---------|
+| `nps` | 0–10 rating | Promoters (9–10) minus detractors (0–6), −100 to 100 |
+| `csat` | Rating with threshold | % of responses at or above threshold, 0–100 |
+| `ces` | 1–7 rating | Average effort score; easy ≥ 5, difficult ≤ 3 |
+| `custom` | Any question mix | No automatic scoring |
+
+## Display modes
+
+| Mode | Description |
+|------|-------------|
+| `modal` | Centered dialog with backdrop |
+| `slideout` | Side panel that slides in from left or right |
+| `banner` | Top or bottom strip, optionally sticky |
+| `popover` | Floating panel anchored to a DOM element |
+| `inline` | Embedded directly in the page flow |
+
+---
+
+## Fatigue prevention
+
+Every `show()` call passes through a gate stack in order. The first failing gate stops evaluation — individual frequency rules never run if the global cooldown blocks.
+
+| Mechanism | Scope | Default |
+|-----------|-------|---------|
+| **Global cooldown** | Between any two surveys, provider-wide | 14 days |
+| **Sampling rate** | Probability a user sees the survey (0–1) | 1.0 (everyone) |
+| **Max per session** | Hard cap on surveys shown in one session | 1 |
+| **Frequency rule** | Per-survey show count or interval | none |
+| **Snooze** | User-initiated delay with max count | unlimited |
+
+<Callout type="warn">
+  The sampling roll happens once when `SurveysProvider` mounts, not on each `show()` call. If a
+  user's roll fails, no survey from this provider instance shows until remount. To re-roll, remount
+  the provider.
+</Callout>
+
+### Frequency rules
+
+```ts
+frequency?: FrequencyRule
+// 'once'                          — shows exactly once per user
+// 'session'                       — once per session
+// 'always'                        — every time show() is called (ignores cooldown)
+// { type: 'times', count: 3 }     — show up to N times total
+// { type: 'interval', days: 30 }  — show at most once every N days
+```
+
+---
+
+## Skip logic
+
+Questions can branch based on previous answers. Define `skipLogic` on any question:
+
+```tsx
+{
+  id: 'reason',
+  type: 'single-select',
+  text: 'What is your main reason for leaving?',
+  options: [
+    { value: 'price', label: 'Price' },
+    { value: 'features', label: 'Missing features' },
+    { value: 'other', label: 'Other' },
+  ],
+  skipLogic: [
+    {
+      questionId: 'reason',
+      condition: (answer) => answer !== 'other',
+      skipTo: 'confirm',   // jump over the free-text follow-up
+    },
+  ],
+}
+```
+
+<Callout type="warn">
+  Skip logic cycles are detected by the FlowEngine's visited-step tracker. A cycle that would
+  create an infinite loop is broken at the point of re-entry, but the question order will appear
+  incorrect. Design skip chains as directed acyclic graphs.
+</Callout>
+
+---
+
+## Architecture
+
+```
+SurveysProvider
+├── Context (useReducer)
+│   ├── surveys Map<id, SurveyState>
+│   ├── activeSurvey string | null
+│   ├── queue string[]
+│   └── Gate stack (sampling → cooldown → session → snooze → frequency)
+├── Display components
+│   ├── SurveyModal, SurveySlideout, SurveyBanner, SurveyPopover, SurveyInline
+│   └── Each reads isVisible from SurveyState via useSurvey()
+├── Question components
+│   ├── QuestionRating, QuestionText, QuestionSelect, QuestionBoolean
+│   └── SurveyProgress
+├── Headless variants
+│   └── HeadlessSurvey, HeadlessQuestion*
+└── Scoring utilities
+    └── calculateNPS, calculateCSAT, calculateCES
+```
+
+### State management
+
+State is managed via `useReducer` inside `SurveysProvider`. Each survey has an independent `SurveyState` record. The provider serializes state to localStorage (or your adapter) on every change and hydrates on mount.
+
+<Callout type="warn">
+  Partial responses persist immediately. Every `answer()` call writes to storage, not just on
+  `complete()`. If a user closes mid-survey, their partial answers will be in storage on next visit.
+  Design your `onComplete` callback to treat the `responses` Map as canonical, not assume it is
+  empty.
+</Callout>
+
+---
+
+## Bundle size
+
+| Package | Gzipped |
+|---------|---------|
+| @tour-kit/surveys | &lt; 12KB |
+
+---
+
+## Package contents
+
+<Cards>
+  <Card title="Providers" href="/docs/surveys/providers/surveys-provider">
+    SurveysProvider — configure fatigue rules, storage, and analytics callbacks
+  </Card>
+  <Card title="Hooks" href="/docs/surveys/hooks/use-survey">
+    useSurvey, useSurveys, useSurveyScoring — programmatic control and state access
+  </Card>
+  <Card title="Components" href="/docs/surveys/components">
+    Modal, Slideout, Banner, Popover, Inline, and question components
+  </Card>
+  <Card title="Headless" href="/docs/surveys/headless">
+    Build entirely custom survey UI with render props
+  </Card>
+  <Card title="Utilities" href="/docs/surveys/utilities">
+    calculateNPS, calculateCSAT, calculateCES — scoring functions
+  </Card>
+  <Card title="Types" href="/docs/surveys/types">
+    TypeScript type definitions and interfaces
+  </Card>
+</Cards>
+
+---
+
+## Accessibility
+
+All display and question components ship with full ARIA support:
+
+- `SurveyModal` and `SurveySlideout` use `@radix-ui/react-dialog` — focus is trapped inside the open dialog and restored on close
+- `SurveyBanner` and `SurveyInline` use `role="region"` with descriptive `aria-label`
+- `QuestionRating` and `QuestionBoolean` implement roving tabindex on a `role="radiogroup"` container
+- `QuestionSelect` uses `role="radiogroup"` (single) or `role="group"` (multi) with per-option `role="radio"` / `role="checkbox"`
+- `SurveyProgress` uses `role="progressbar"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`
+- Character counts in `QuestionText` are announced via `aria-live="polite"`
+
+---
+
+## Related
+
+- [@tour-kit/core](/docs/core) — storage adapters used by the provider
+- [@tour-kit/scheduling](/docs/scheduling) — optional peer for time-based survey gating

@@ -1,0 +1,139 @@
+---
+title: SurveyModal
+description: >-
+  Centered dialog that shows when the survey's isVisible flag is true, built on
+  Radix UI Dialog with configurable size and dismiss behaviour
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`SurveyModal` is a centered dialog built on `@radix-ui/react-dialog`. It reads `survey.state.isVisible` via `useSurvey` and opens or closes accordingly. Pass `open` and `onOpenChange` to take full control.
+
+## Import
+
+```tsx
+import { SurveyModal } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+import { SurveyModal, QuestionRating, useSurvey } from '@tour-kit/surveys';
+
+function NPSSurvey() {
+  const survey = useSurvey('nps-q1');
+
+  return (
+    <SurveyModal surveyId="nps-q1">
+      <QuestionRating
+        id="score"
+        label="How likely are you to recommend us?"
+        min={0}
+        max={10}
+        onChange={(value) => {
+          survey.answer('score', value);
+          survey.complete();
+        }}
+      />
+    </SurveyModal>
+  );
+}
+```
+
+### Controlled open state
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<SurveyModal
+  surveyId="nps-q1"
+  open={open}
+  onOpenChange={setOpen}
+>
+  {/* content */}
+</SurveyModal>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    surveyId: {
+      type: 'string',
+      required: true,
+      description: 'Id of the survey this modal belongs to.',
+    },
+    open: {
+      type: 'boolean',
+      description: 'Controlled open state. When provided, the modal ignores survey.state.isVisible.',
+    },
+    onOpenChange: {
+      type: '(open: boolean) => void',
+      description: 'Called when the dialog requests an open state change.',
+    },
+    options: {
+      type: 'ModalOptions',
+      description: 'Override modal behaviour: closeOnOverlayClick, closeOnEscape, showCloseButton, size.',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg'",
+      default: "'md'",
+      description: 'CVA size variant. Can also be set via options.size or SurveyConfig.modalOptions.size.',
+    },
+    children: {
+      type: 'ReactNode',
+      description: 'Survey content — question components, navigation, etc.',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names merged onto the dialog content element.',
+    },
+  }}
+/>
+
+## Variants
+
+`SurveyModal` uses CVA variants for the content panel size:
+
+| Variant | Values | Default |
+|---------|--------|---------|
+| `size` | `'sm'` `'md'` `'lg'` | `'md'` |
+
+Size maps to max-width: `sm` → `max-w-sm`, `md` → `max-w-md`, `lg` → `max-w-lg`.
+
+## Dismiss behaviour
+
+The modal handles three dismiss triggers automatically:
+
+| Trigger | `DismissalReason` |
+|---------|-------------------|
+| Close button click | `'close_button'` |
+| Overlay click (if `closeOnOverlayClick: true`) | `'overlay_click'` |
+| Escape key (if `closeOnEscape: true`) | `'escape_key'` |
+
+All triggers call `survey.dismiss(reason)` and fire the `onDismiss` callbacks.
+
+<Callout type="info">
+  Focus is trapped inside the dialog while open and restored to the previously focused element on
+  close, courtesy of Radix UI Dialog's built-in focus management.
+</Callout>
+
+## ModalOptions defaults
+
+```ts
+{
+  closeOnOverlayClick: true,
+  closeOnEscape: true,
+  showCloseButton: true,
+  size: 'md',
+}
+```
+
+Override per-survey via `SurveyConfig.modalOptions`, or at render time via the `options` prop. Render-time `options` are merged on top of config options.
+
+## Related
+
+- [SurveySlideout](/docs/surveys/components/survey-slideout)
+- [useSurvey](/docs/surveys/hooks/use-survey)
+- [ModalOptions type](/docs/surveys/types#modaloptions)

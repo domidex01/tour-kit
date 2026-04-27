@@ -1,0 +1,144 @@
+---
+title: QuestionText
+description: >-
+  Single-line input or resizable textarea with optional character count, size
+  variants, and autofocus support
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`QuestionText` renders either an `<input type="text">` or a resizable `<textarea>` controlled by the `mode` prop. Character count is announced via `aria-live="polite"` when enabled.
+
+## Import
+
+```tsx
+import { QuestionText } from '@tour-kit/surveys';
+```
+
+## Usage
+
+### Single-line input
+
+```tsx
+<QuestionText
+  id="email"
+  label="What email should we use to follow up?"
+  placeholder="you@example.com"
+  isRequired
+  onChange={(value) => survey.answer('email', value)}
+/>
+```
+
+### Multi-line textarea with character count
+
+```tsx
+<QuestionText
+  id="feedback"
+  label="Tell us more"
+  mode="textarea"
+  rows={4}
+  maxLength={500}
+  showCharacterCount
+  placeholder="Share your thoughts..."
+  onChange={(value) => survey.answer('feedback', value)}
+/>
+```
+
+### Controlled value
+
+```tsx
+const [text, setText] = useState('');
+
+<QuestionText
+  id="feedback"
+  label="Your feedback"
+  value={text}
+  onChange={setText}
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Id applied to the input/textarea element.',
+    },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'Accessible label (aria-label) for the input.',
+    },
+    mode: {
+      type: "'text' | 'textarea'",
+      default: "'text'",
+      description: "Render a single-line input ('text') or a resizable textarea ('textarea').",
+    },
+    value: {
+      type: 'string',
+      description: 'Controlled value.',
+    },
+    onChange: {
+      type: '(value: string) => void',
+      description: 'Called on every keystroke.',
+    },
+    placeholder: {
+      type: 'string',
+      description: 'Placeholder text.',
+    },
+    maxLength: {
+      type: 'number',
+      description: 'Maximum character length enforced by the native input.',
+    },
+    showCharacterCount: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Show a character count below the input. Announced to screen readers via aria-live.',
+    },
+    rows: {
+      type: 'number',
+      default: '3',
+      description: "Number of visible rows for mode='textarea'.",
+    },
+    isRequired: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Sets aria-required on the input.',
+    },
+    isAutoFocus: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Autofocus the input on mount.',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg'",
+      default: "'md'",
+      description: 'CVA size variant affecting height and font size.',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names on the outer wrapper.',
+    },
+  }}
+/>
+
+## Variants
+
+`QuestionText` uses `textInputVariants` from CVA:
+
+| Variant | Values | Default |
+|---------|--------|---------|
+| `size` | `'sm'` `'md'` `'lg'` | `'md'` |
+
+Size maps to height: `sm` → `h-8`, `md` → `h-10`, `lg` → `h-12`. Textarea mode adds `h-auto py-2 resize-y` overrides.
+
+## Character count accessibility
+
+When `showCharacterCount` is true, a `<span aria-live="polite">` below the input announces the count. When the limit is reached, the span switches to `text-destructive` colour. The span id is linked to the input via `aria-describedby`.
+
+## Related
+
+- [HeadlessQuestionText](/docs/surveys/headless/headless-question-text)
+- [QuestionSelect](/docs/surveys/components/question-select)

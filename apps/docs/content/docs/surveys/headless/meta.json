@@ -1,0 +1,11 @@
+{
+  "title": "Headless",
+  "pages": [
+    "index",
+    "headless-survey",
+    "headless-question-rating",
+    "headless-question-text",
+    "headless-question-select",
+    "headless-question-boolean"
+  ]
+}

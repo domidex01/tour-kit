@@ -34,6 +34,7 @@ const PACKAGES = [
   'checklists',
   'media',
   'scheduling',
+  'surveys',
 ] as const
 
 type PackageName = (typeof PACKAGES)[number]

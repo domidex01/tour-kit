@@ -1,0 +1,120 @@
+---
+title: calculateNPS
+description: >-
+  Calculate Net Promoter Score from an array of 0–10 ratings, returning score,
+  promoter/passive/detractor counts, and percentages
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+Net Promoter Score measures customer loyalty. Ratings 9–10 are promoters, 7–8 are passives, and 0–6 are detractors. The score is `promoter% − detractor%`, ranging from −100 to 100.
+
+## Import
+
+```tsx
+import { calculateNPS } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```ts
+import { calculateNPS } from '@tour-kit/surveys';
+
+const result = calculateNPS([9, 10, 6, 7, 8, 10, 4, 10, 9, 6]);
+
+console.log(result.score);        // 20  (40% promoters − 20% detractors = 20, rounded)
+console.log(result.promoters);    // 4
+console.log(result.promoterPct);  // 40
+console.log(result.detractors);   // 2
+console.log(result.detractorPct); // 20
+console.log(result.total);        // 10
+```
+
+### With survey state
+
+```tsx
+import { useSurvey, calculateNPS } from '@tour-kit/surveys';
+
+function NPSResult() {
+  const survey = useSurvey('nps-q1');
+
+  if (!survey.state?.isCompleted) return null;
+
+  const ratings = Array.from(survey.state.responses.values()).filter(
+    (v): v is number => typeof v === 'number'
+  );
+  const result = calculateNPS(ratings);
+
+  return <p>NPS: {result.score}</p>;
+}
+```
+
+## Parameters
+
+<TypeTable
+  type={{
+    responses: {
+      type: 'number[]',
+      required: true,
+      description: 'Array of 0–10 ratings. Empty array returns all zeros.',
+    },
+  }}
+/>
+
+## Returns — NPSResult
+
+<TypeTable
+  type={{
+    score: {
+      type: 'number',
+      description: 'NPS score from −100 to 100. Calculated as Math.round(promoterPct − detractorPct).',
+    },
+    promoters: {
+      type: 'number',
+      description: 'Count of responses ≥ 9.',
+    },
+    passives: {
+      type: 'number',
+      description: 'Count of responses 7–8.',
+    },
+    detractors: {
+      type: 'number',
+      description: 'Count of responses ≤ 6.',
+    },
+    promoterPct: {
+      type: 'number',
+      description: 'Percentage of promoters (0–100).',
+    },
+    passivePct: {
+      type: 'number',
+      description: 'Percentage of passives (0–100).',
+    },
+    detractorPct: {
+      type: 'number',
+      description: 'Percentage of detractors (0–100).',
+    },
+    total: {
+      type: 'number',
+      description: 'Total number of responses.',
+    },
+    responses: {
+      type: 'number[]',
+      description: 'The original response array passed in.',
+    },
+  }}
+/>
+
+## Classification thresholds
+
+| Rating | Classification |
+|--------|----------------|
+| 0–6 | Detractor |
+| 7–8 | Passive |
+| 9–10 | Promoter |
+
+## Related
+
+- [calculateCSAT](/docs/surveys/utilities/calculate-csat)
+- [calculateCES](/docs/surveys/utilities/calculate-ces)
+- [useSurveyScoring](/docs/surveys/hooks/use-survey-scoring)
+- [NPSResult type](/docs/surveys/types#scoring)

@@ -1,0 +1,168 @@
+---
+title: HeadlessQuestionSelect
+description: >-
+  Headless select — manages single or multi-select state and returns groupProps
+  and getOptionProps with correct ARIA roles for each mode
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`HeadlessQuestionSelect` manages value state and returns ARIA props that adapt to `mode`. In single mode, options receive `role="radio"`; in multi mode they receive `role="checkbox"`.
+
+## Import
+
+```tsx
+import { HeadlessQuestionSelect } from '@tour-kit/surveys/headless';
+```
+
+## Usage
+
+### Single-select
+
+```tsx
+import { HeadlessQuestionSelect } from '@tour-kit/surveys/headless';
+
+const options = [
+  { value: 'price', label: 'Price' },
+  { value: 'features', label: 'Missing features' },
+  { value: 'support', label: 'Poor support' },
+];
+
+<HeadlessQuestionSelect
+  id="cancel-reason"
+  label="Why are you leaving?"
+  options={options}
+  mode="single"
+  onChange={(value) => survey.answer('cancel-reason', value)}
+>
+  {({ value, groupProps, getOptionProps }) => (
+    <div {...groupProps} className="flex flex-col gap-2">
+      {options.map((opt) => {
+        const optProps = getOptionProps(opt.value);
+        return (
+          <div
+            key={opt.value}
+            {...optProps}
+            onClick={() => setValue(opt.value)}
+            className={`p-3 border rounded cursor-pointer ${optProps['aria-checked'] ? 'border-blue-600 bg-blue-50' : ''}`}
+          >
+            {opt.label}
+          </div>
+        );
+      })}
+    </div>
+  )}
+</HeadlessQuestionSelect>
+```
+
+### Multi-select
+
+```tsx
+<HeadlessQuestionSelect
+  id="reasons"
+  label="Select all that apply"
+  options={options}
+  mode="multi"
+  onChange={(value) => survey.answer('reasons', value)}
+>
+  {({ options: opts, groupProps, getOptionProps, setValue, value }) => (
+    <div {...groupProps} className="flex flex-col gap-2">
+      {opts.map((opt) => {
+        const optProps = getOptionProps(opt.value);
+        const current = Array.isArray(value) ? value : [];
+        return (
+          <div
+            key={opt.value}
+            {...optProps}
+            onClick={() => {
+              const next = current.includes(opt.value)
+                ? current.filter((v) => v !== opt.value)
+                : [...current, opt.value];
+              setValue(next);
+            }}
+            className={`p-3 border rounded cursor-pointer ${optProps['aria-checked'] ? 'border-blue-600' : ''}`}
+          >
+            {opt.label}
+          </div>
+        );
+      })}
+    </div>
+  )}
+</HeadlessQuestionSelect>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Identifier for the group.',
+    },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'aria-label for the group container.',
+    },
+    options: {
+      type: 'SelectOption[]',
+      required: true,
+      description: 'Array of { value, label, disabled? } objects.',
+    },
+    mode: {
+      type: "'single' | 'multi'",
+      default: "'single'",
+      description: 'Determines role attributes on options.',
+    },
+    isRequired: {
+      type: 'boolean',
+      description: 'Sets aria-required on the group.',
+    },
+    value: {
+      type: 'string | string[]',
+      description: 'Controlled value.',
+    },
+    onChange: {
+      type: '(value: string | string[]) => void',
+      description: 'Called when selection changes.',
+    },
+    children: {
+      type: '(props: HeadlessQuestionSelectRenderProps) => ReactNode',
+      required: true,
+      description: 'Render prop.',
+    },
+  }}
+/>
+
+## Render prop shape
+
+<TypeTable
+  type={{
+    value: {
+      type: 'string | string[]',
+      description: 'Current selection. String for single, string[] for multi.',
+    },
+    setValue: {
+      type: '(value: string | string[]) => void',
+      description: 'Set selection directly.',
+    },
+    options: {
+      type: 'SelectOption[]',
+      description: 'The options array passed to the component.',
+    },
+    groupProps: {
+      type: "{ role: 'radiogroup' | 'group'; 'aria-label': string; 'aria-required': boolean | undefined }",
+      description: "role is 'radiogroup' for single, 'group' for multi.",
+    },
+    getOptionProps: {
+      type: "(optionValue: string) => { role: 'radio' | 'checkbox'; 'aria-checked': boolean; 'aria-disabled': boolean | undefined; 'aria-label': string; tabIndex: number }",
+      description: "role is 'radio' for single, 'checkbox' for multi.",
+    },
+  }}
+/>
+
+## Related
+
+- [QuestionSelect](/docs/surveys/components/question-select) — Styled variant
+- [SelectOption type](/docs/surveys/types#selectoption)

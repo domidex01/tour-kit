@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/adoption Context File
-Version: 0.0.6 | Generated: 2026-04-26
+Version: 0.0.6 | Generated: 2026-04-27
 Paste this into your LLM to get accurate answers about @tour-kit/adoption.
 =========================================================================
 
 OVERVIEW
 --------
-Feature adoption tracking and nudging for TourKit
+Feature adoption tracking, nudges, and dashboards for React — measure which product features users actually adopt and re-engage them with contextual prompts
 
 INSTALLATION
 ------------
@@ -277,6 +277,15 @@ EXAMPLES
 
 Example 1: Feature
 
+    const feature = {
+      id: 'dark-mode',
+      name: 'Dark Mode',
+      trigger: '#dark-mode-toggle', // CSS selector
+      adoptionCriteria: { minUses: 3, recencyDays: 30 },
+    }
+
+Example 2: Feature
+
     interface Feature {
       id: string
       name: string
@@ -289,7 +298,7 @@ Example 1: Feature
       premium?: boolean
     }
 
-Example 2: FeatureTrigger
+Example 3: FeatureTrigger
 
     // CSS selector (click tracking)
     trigger: '#dark-mode-toggle'
@@ -301,11 +310,3 @@ Example 2: FeatureTrigger
     
     // Callback (polled every 1s)
     trigger: { callback: () => document.fullscreenElement !== null }
-
-Example 3: AdoptionCriteria
-
-    interface AdoptionCriteria {
-      minUses?: number // default: 3
-      recencyDays?: number // default: 30
-      custom?: (usage: FeatureUsage) => boolean
-    }

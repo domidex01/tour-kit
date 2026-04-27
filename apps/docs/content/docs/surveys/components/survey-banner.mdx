@@ -1,0 +1,113 @@
+---
+title: SurveyBanner
+description: >-
+  Top or bottom strip that renders when the survey is visible, with sticky
+  positioning, intent variants, and an optional dismiss button
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`SurveyBanner` renders a horizontal strip at the top or bottom of the viewport. It returns `null` when `survey.state.isVisible` is false, so no portal or dialog wrapping is needed.
+
+## Import
+
+```tsx
+import { SurveyBanner } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+import { SurveyBanner, QuestionBoolean, useSurvey } from '@tour-kit/surveys';
+
+function FeedbackBanner() {
+  const survey = useSurvey('quick-csat');
+
+  return (
+    <SurveyBanner
+      surveyId="quick-csat"
+      position="top"
+      sticky
+      intent="feedback"
+    >
+      <QuestionBoolean
+        id="satisfied"
+        label="Are you satisfied with this page?"
+        yesLabel="Yes"
+        noLabel="No"
+        onChange={(value) => {
+          survey.answer('satisfied', value);
+          survey.complete();
+        }}
+      />
+    </SurveyBanner>
+  );
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    surveyId: {
+      type: 'string',
+      required: true,
+      description: 'Id of the survey this banner belongs to.',
+    },
+    options: {
+      type: 'BannerOptions',
+      description: 'Override behaviour: position, sticky, dismissable, intent.',
+    },
+    position: {
+      type: "'top' | 'bottom'",
+      default: "'top'",
+      description: 'CVA position variant.',
+    },
+    intent: {
+      type: "'info' | 'feedback'",
+      default: "'info'",
+      description: "CVA intent variant. 'info' uses blue tones; 'feedback' uses neutral background.",
+    },
+    sticky: {
+      type: 'boolean',
+      default: 'false',
+      description: 'When true, uses fixed positioning at top-0 or bottom-0.',
+    },
+    children: {
+      type: 'ReactNode',
+      description: 'Survey question content rendered inside the strip.',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names on the banner container.',
+    },
+  }}
+/>
+
+## Variants
+
+| Variant | Values | Default |
+|---------|--------|---------|
+| `position` | `'top'` `'bottom'` | `'top'` |
+| `intent` | `'info'` `'feedback'` | `'info'` |
+| `sticky` | `true` `false` | `false` |
+
+Compound variant: `position='top'` + `sticky=true` → `top-0`; `position='bottom'` + `sticky=true` → `bottom-0`.
+
+## BannerOptions defaults
+
+```ts
+{
+  position: 'top',
+  sticky: false,
+  dismissable: true,
+  intent: 'info',
+}
+```
+
+The `dismissable` option controls whether the dismiss button renders. Clicking it calls `survey.dismiss('close_button')`.
+
+## Related
+
+- [SurveyInline](/docs/surveys/components/survey-inline)
+- [BannerOptions type](/docs/surveys/types#banneroptions)

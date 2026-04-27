@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/analytics Context File
-Version: 0.1.5 | Generated: 2026-04-26
+Version: 0.1.5 | Generated: 2026-04-27
 Paste this into your LLM to get accurate answers about @tour-kit/analytics.
 =========================================================================
 
 OVERVIEW
 --------
-Analytics plugins for TourKit - track tour engagement
+Plugin-based analytics for product tours and onboarding — ship tour engagement events to PostHog, Mixpanel, Amplitude, Google Analytics 4, or any custom backend
 
 INSTALLATION
 ------------

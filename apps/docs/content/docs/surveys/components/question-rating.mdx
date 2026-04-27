@@ -1,0 +1,171 @@
+---
+title: QuestionRating
+description: >-
+  Numeric, star, or emoji rating scale implemented as an accessible radiogroup
+  with roving tabindex and configurable min/max
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`QuestionRating` renders a row of selectable options as an accessible `role="radiogroup"`. Supports numeric buttons, star icons, or emoji, with full keyboard navigation via roving tabindex.
+
+## Import
+
+```tsx
+import { QuestionRating } from '@tour-kit/surveys';
+```
+
+## Usage
+
+### NPS (0–10 numeric)
+
+```tsx
+<QuestionRating
+  id="nps-score"
+  label="How likely are you to recommend us to a friend?"
+  min={0}
+  max={10}
+  style="numeric"
+  lowLabel="Not at all likely"
+  highLabel="Extremely likely"
+  onChange={(value) => survey.answer('nps-score', value)}
+/>
+```
+
+### Star rating (1–5)
+
+```tsx
+<QuestionRating
+  id="satisfaction"
+  label="How satisfied are you?"
+  min={1}
+  max={5}
+  style="stars"
+  onChange={(value) => survey.answer('satisfaction', value)}
+/>
+```
+
+### Emoji rating with custom map
+
+```tsx
+<QuestionRating
+  id="mood"
+  label="How are you feeling today?"
+  min={1}
+  max={5}
+  style="emoji"
+  emojiMap={{ 1: '😡', 2: '😞', 3: '😐', 4: '🙂', 5: '😍' }}
+  onChange={(value) => survey.answer('mood', value)}
+/>
+```
+
+### Controlled value
+
+```tsx
+const [rating, setRating] = useState<number | null>(null);
+
+<QuestionRating
+  id="score"
+  label="Rate this feature"
+  min={1}
+  max={5}
+  value={rating}
+  onChange={setRating}
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Unique identifier for the radiogroup. Used to scope keyboard navigation.',
+    },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'Accessible label for the radiogroup (aria-label on the container).',
+    },
+    min: {
+      type: 'number',
+      default: '0',
+      description: 'Minimum rating value, inclusive.',
+    },
+    max: {
+      type: 'number',
+      default: '10',
+      description: 'Maximum rating value, inclusive.',
+    },
+    style: {
+      type: "'numeric' | 'stars' | 'emoji'",
+      default: "'numeric'",
+      description: 'Visual style for each option button.',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg'",
+      default: "'md'",
+      description: 'CVA size variant for option buttons.',
+    },
+    value: {
+      type: 'number | null',
+      description: 'Controlled value. When provided, the component does not manage internal state.',
+    },
+    onChange: {
+      type: '(value: number) => void',
+      description: 'Called when the user selects an option.',
+    },
+    lowLabel: {
+      type: 'string',
+      description: 'Label displayed below the left end of the scale.',
+    },
+    highLabel: {
+      type: 'string',
+      description: 'Label displayed below the right end of the scale.',
+    },
+    isRequired: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Sets aria-required on the radiogroup.',
+    },
+    emojiMap: {
+      type: 'Record<number, string>',
+      description: "Custom emoji map for style='emoji'. Keys are rating values. Defaults to 1–5 with 😡😞😐🙂😍.",
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names on the outer container.',
+    },
+  }}
+/>
+
+## Variants
+
+`QuestionRating` uses `ratingOptionVariants` from CVA:
+
+| Variant | Values | Default |
+|---------|--------|---------|
+| `size` | `'sm'` `'md'` `'lg'` | `'md'` |
+| `style` | `'numeric'` `'stars'` `'emoji'` | `'numeric'` |
+| `selected` | `true` `false` | `false` |
+
+Import `ratingOptionVariants` to style custom rating buttons:
+
+```tsx
+import { ratingOptionVariants } from '@tour-kit/surveys';
+
+const cls = ratingOptionVariants({ size: 'lg', style: 'stars', selected: true });
+```
+
+## Accessibility
+
+- Container: `role="radiogroup"`, `aria-label={label}`, `aria-required`
+- Each option: `role="radio"`, `aria-checked`, `aria-label` (screen-reader text), `tabIndex` managed via roving tabindex
+- Arrow keys navigate between options; Space and Enter select the focused option
+- Home / End jump to first and last option
+
+## Related
+
+- [HeadlessQuestionRating](/docs/surveys/headless/headless-question-rating)
+- [QuestionBoolean](/docs/surveys/components/question-boolean)

@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/core Context File
-Version: 0.5.0 | Generated: 2026-04-26
+Version: 0.5.0 | Generated: 2026-04-27
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
 OVERVIEW
 --------
-Headless onboarding and product tour library for React - Core package
+Headless onboarding and product tour engine for React — framework-agnostic core with positioning, focus management, storage adapters, and hooks for building guided tours, walkthroughs, and step-by-step flows
 
 INSTALLATION
 ------------
@@ -191,39 +191,35 @@ EXAMPLES
 
 Example 1: Usage
 
-    import { TourKitProvider } from '@tour-kit/core';
+    import { useAdvanceOn } from '@tour-kit/core';
     
-    function App() {
-      return (
-        <TourKitProvider>
-          <YourApp />
-        </TourKitProvider>
-      );
+    function MyTourStep() {
+      // Enables advanceOn behavior based on current step config
+      useAdvanceOn({ enabled: true });
+    
+      return <TourCard>{/* ... */}</TourCard>;
     }
 
-Example 2: With Global Config
+Example 2: Step Configuration
 
-    <TourKitProvider
-      defaultConfig={{
-        keyboard: true,
-        spotlight: {
-          padding: 8,
-        },
+    <TourStep
+      target="#signup-button"
+      title="Click to Sign Up"
+      content="Click this button to continue"
+      advanceOn={{
+        event: 'click',
+        selector: '#signup-button',
       }}
-      persistence={{
-        strategy: 'localStorage',
-        key: 'tour-kit-state',
+    />
+
+Example 3: Event Types
+
+    <TourStep
+      target="#submit-btn"
+      title="Submit the Form"
+      content="Click submit when ready"
+      advanceOn={{
+        event: 'click',
+        selector: '#submit-btn',
       }}
-    >
-      <App />
-    </TourKitProvider>
-
-Example 3: Multiple Tours
-
-    <TourKitProvider>
-      <TourProvider tour={onboardingTour}>
-        <TourProvider tour={featureTour}>
-          <App />
-        </TourProvider>
-      </TourProvider>
-    </TourKitProvider>
+    />

@@ -1,0 +1,156 @@
+---
+title: QuestionSelect
+description: >-
+  Single-select (radiogroup) or multi-select (group of checkboxes) option list
+  with roving tabindex, disabled option support, and size variants
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`QuestionSelect` renders a list of options as either an exclusive radio group or a multi-select checkbox group. Keyboard navigation and ARIA roles adapt automatically to the `mode` prop.
+
+## Import
+
+```tsx
+import { QuestionSelect } from '@tour-kit/surveys';
+```
+
+## Usage
+
+### Single-select
+
+```tsx
+<QuestionSelect
+  id="plan"
+  label="Which plan are you on?"
+  options={[
+    { value: 'free', label: 'Free' },
+    { value: 'pro', label: 'Pro' },
+    { value: 'enterprise', label: 'Enterprise' },
+  ]}
+  onChange={(value) => survey.answer('plan', value as string)}
+/>
+```
+
+### Multi-select
+
+```tsx
+<QuestionSelect
+  id="reasons"
+  label="Why are you cancelling? (select all that apply)"
+  mode="multi"
+  options={[
+    { value: 'price', label: 'Too expensive' },
+    { value: 'missing-features', label: 'Missing features I need' },
+    { value: 'switching', label: "Switching to a competitor" },
+    { value: 'no-longer-needed', label: 'No longer needed' },
+    { value: 'other', label: 'Other', disabled: false },
+  ]}
+  onChange={(value) => survey.answer('reasons', value)}
+/>
+```
+
+### With a disabled option
+
+```tsx
+<QuestionSelect
+  id="tier"
+  label="Choose your tier"
+  options={[
+    { value: 'basic', label: 'Basic' },
+    { value: 'pro', label: 'Pro' },
+    { value: 'enterprise', label: 'Enterprise (contact sales)', disabled: true },
+  ]}
+  onChange={(value) => survey.answer('tier', value as string)}
+/>
+```
+
+### Controlled value
+
+```tsx
+const [selected, setSelected] = useState('');
+
+<QuestionSelect
+  id="reason"
+  label="Primary reason"
+  options={options}
+  value={selected}
+  onChange={(v) => setSelected(v as string)}
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Unique identifier for the group. Used to scope keyboard navigation.',
+    },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'Accessible label for the group container.',
+    },
+    options: {
+      type: 'SelectOption[]',
+      required: true,
+      description: 'Array of { value, label, disabled? } option objects.',
+    },
+    mode: {
+      type: "'single' | 'multi'",
+      default: "'single'",
+      description: "Single-select renders a radiogroup; multi renders a group of checkboxes.",
+    },
+    value: {
+      type: 'string | string[]',
+      description: 'Controlled value. String for single, string[] for multi.',
+    },
+    onChange: {
+      type: '(value: string | string[]) => void',
+      description: 'Called when selection changes. Type mirrors the mode.',
+    },
+    isRequired: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Sets aria-required on the group container.',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg'",
+      default: "'md'",
+      description: 'CVA size variant for option rows.',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names on the group container.',
+    },
+  }}
+/>
+
+## Variants
+
+`QuestionSelect` uses `selectOptionVariants` from CVA:
+
+| Variant | Values | Default |
+|---------|--------|---------|
+| `size` | `'sm'` `'md'` `'lg'` | `'md'` |
+| `selected` | `true` `false` | `false` |
+| `disabled` | `true` `false` | `false` |
+
+## Accessibility
+
+**Single-select (`mode="single"`):**
+- Container: `role="radiogroup"`, `aria-label`, `aria-required`
+- Options: `role="radio"`, `aria-checked`, roving tabindex
+- Arrow keys navigate; Space/Enter select
+
+**Multi-select (`mode="multi"`):**
+- Container: `role="group"`, `aria-label`, `aria-required`
+- Options: `role="checkbox"`, `aria-checked`, `aria-disabled`, each with `tabIndex={0}`
+- Space toggles selection; disabled options have `tabIndex={-1}`
+
+## Related
+
+- [HeadlessQuestionSelect](/docs/surveys/headless/headless-question-select)
+- [SelectOption type](/docs/surveys/types#selectoption)

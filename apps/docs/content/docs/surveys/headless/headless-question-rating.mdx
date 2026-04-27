@@ -1,0 +1,137 @@
+---
+title: HeadlessQuestionRating
+description: >-
+  Headless rating scale — manages value, options array, focusedIndex, and
+  returns pre-built ARIA props via render prop
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`HeadlessQuestionRating` manages the controlled/uncontrolled value toggle, builds the options array, and returns pre-composed ARIA props. You render whatever markup you choose.
+
+## Import
+
+```tsx
+import { HeadlessQuestionRating } from '@tour-kit/surveys/headless';
+```
+
+## Usage
+
+```tsx
+import { HeadlessQuestionRating } from '@tour-kit/surveys/headless';
+
+<HeadlessQuestionRating
+  id="nps-score"
+  label="How likely are you to recommend us?"
+  min={0}
+  max={10}
+  onChange={(value) => survey.answer('nps-score', value)}
+>
+  {({ value, options, focusedIndex, setValue, setFocusedIndex, ratingGroupProps, getOptionProps }) => (
+    <div {...ratingGroupProps} className="flex flex-wrap gap-1">
+      {options.map((opt, index) => {
+        const optProps = getOptionProps(opt);
+        return (
+          <button
+            key={opt}
+            type="button"
+            {...optProps}
+            onClick={() => {
+              setFocusedIndex(index);
+              setValue(opt);
+            }}
+            onFocus={() => setFocusedIndex(index)}
+            className={`w-10 h-10 rounded border ${optProps['aria-checked'] ? 'bg-blue-600 text-white' : 'bg-white'}`}
+          >
+            {opt}
+          </button>
+        );
+      })}
+    </div>
+  )}
+</HeadlessQuestionRating>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Unique identifier, scoped to ratingGroupProps.',
+    },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'aria-label for the radiogroup.',
+    },
+    min: {
+      type: 'number',
+      default: '0',
+      description: 'Minimum value.',
+    },
+    max: {
+      type: 'number',
+      default: '10',
+      description: 'Maximum value.',
+    },
+    isRequired: {
+      type: 'boolean',
+      description: 'Sets aria-required on the group.',
+    },
+    value: {
+      type: 'number | null',
+      description: 'Controlled value.',
+    },
+    onChange: {
+      type: '(value: number) => void',
+      description: 'Called when a value is selected.',
+    },
+    children: {
+      type: '(props: HeadlessQuestionRatingRenderProps) => ReactNode',
+      required: true,
+      description: 'Render prop.',
+    },
+  }}
+/>
+
+## Render prop shape
+
+<TypeTable
+  type={{
+    value: {
+      type: 'number | null',
+      description: 'Currently selected value.',
+    },
+    setValue: {
+      type: '(value: number) => void',
+      description: 'Select a rating value.',
+    },
+    options: {
+      type: 'number[]',
+      description: 'Array of values from min to max (step 1).',
+    },
+    focusedIndex: {
+      type: 'number',
+      description: 'Index of the currently focused option for roving tabindex.',
+    },
+    setFocusedIndex: {
+      type: '(index: number) => void',
+      description: 'Update the focused index.',
+    },
+    ratingGroupProps: {
+      type: "{ role: 'radiogroup'; 'aria-label': string; 'aria-required': boolean | undefined }",
+      description: 'Spread onto the container element.',
+    },
+    getOptionProps: {
+      type: "(optionValue: number) => { role: 'radio'; 'aria-checked': boolean; 'aria-label': string; tabIndex: number }",
+      description: 'Call with an option value to get its ARIA props.',
+    },
+  }}
+/>
+
+## Related
+
+- [QuestionRating](/docs/surveys/components/question-rating) — Styled variant
+- [HeadlessSurvey](/docs/surveys/headless/headless-survey)

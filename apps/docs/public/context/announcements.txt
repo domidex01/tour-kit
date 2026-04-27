@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/announcements Context File
-Version: 0.2.0 | Generated: 2026-04-26
+Version: 0.2.0 | Generated: 2026-04-27
 Paste this into your LLM to get accurate answers about @tour-kit/announcements.
 =========================================================================
 
 OVERVIEW
 --------
-Product announcements for TourKit - Modal, Slideout, Banner, Toast, and Spotlight variants
+In-app product announcements for React — modal, slideout, banner, toast, and spotlight variants with frequency rules, scheduling, audience targeting, and a priority queue for changelog and release communication
 
 INSTALLATION
 ------------
@@ -310,73 +310,45 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: AnnouncementConfig
+Example 1: Quick Start
 
-    interface AnnouncementConfig<TMetadata = any> {
-      // Required
-      id: string;
-      variant: AnnouncementVariant;
+    import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements';
     
-      // Content
-      title?: string;
-      description?: string | ReactNode;
-      media?: AnnouncementMedia;
-    
-      // Actions
-      primaryAction?: AnnouncementAction;
-      secondaryAction?: AnnouncementAction;
-    
-      // Behavior
-      priority?: AnnouncementPriority;
-      frequency?: FrequencyRule;
-      audience?: AudienceCondition[];
-    
-      // Variant Options
-      modalOptions?: ModalOptions;
-      slideoutOptions?: SlideoutOptions;
-      bannerOptions?: BannerOptions;
-      toastOptions?: ToastOptions;
-      spotlightOptions?: SpotlightOptions;
-    
-      // Callbacks
-      onShow?: () => void;
-      onDismiss?: (reason: DismissalReason) => void;
-      onComplete?: () => void;
-    
-      // Custom data
-      metadata?: TMetadata;
+    function App() {
+      return (
+        <AnnouncementsProvider
+          announcements={[
+            {
+              id: 'new-feature',
+              variant: 'modal',
+              priority: 'high',
+              title: 'New Export Feature!',
+              description: 'You can now export your data to CSV and PDF.',
+              primaryAction: {
+                label: 'Try It Now',
+                onClick: () => console.log('Action clicked'),
+              },
+            },
+          ]}
+        >
+          <AnnouncementModal id="new-feature" />
+          <YourApp />
+        </AnnouncementsProvider>
+      );
     }
 
-Example 2: AnnouncementMedia
+Example 2: Modal
 
-    interface AnnouncementMedia {
-      type: 'image' | 'video' | 'custom';
-      src?: string;
-      alt?: string;
-      poster?: string;        // For videos
-      autoPlay?: boolean;     // For videos
-      component?: ReactNode;  // For custom
-    }
+    <AnnouncementModal
+      id="feature-launch"
+      size="md"
+      closeOnOverlayClick={false}
+    />
 
-Example 3: AnnouncementMedia
+Example 3: Slideout
 
-    // Image
-    media: {
-      type: 'image',
-      src: '/feature.png',
-      alt: 'New feature screenshot',
-    }
-    
-    // Video
-    media: {
-      type: 'video',
-      src: '/demo.mp4',
-      poster: '/demo-poster.jpg',
-      autoPlay: true,
-    }
-    
-    // Custom component
-    media: {
-      type: 'custom',
-      component: <MyCustomMedia />,
-    }
+    <AnnouncementSlideout
+      id="product-update"
+      position="right"
+      size="md"
+    />

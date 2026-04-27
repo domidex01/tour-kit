@@ -1,0 +1,137 @@
+---
+title: useSurveys
+description: >-
+  Access the full SurveysContextValue — all survey states, the active survey,
+  the queue, and every action available in the context
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`useSurveys` returns the raw `SurveysContextValue` from context. Use it when you need to operate across multiple surveys or when `useSurvey` would require multiple hook calls.
+
+## Import
+
+```tsx
+import { useSurveys } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+import { useSurveys } from '@tour-kit/surveys';
+
+function SurveyDebugPanel() {
+  const ctx = useSurveys();
+
+  return (
+    <div>
+      <p>Active survey: {ctx.activeSurvey ?? 'none'}</p>
+      <p>Queue length: {ctx.queue.length}</p>
+
+      <ul>
+        {Array.from(ctx.surveys.entries()).map(([id, state]) => (
+          <li key={id}>
+            {id} — visible: {String(state.isVisible)}, completed: {String(state.isCompleted)}
+            <button onClick={() => ctx.resetAll()}>Reset all</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+## Returns
+
+`useSurveys` returns `SurveysContextValue` directly. The full shape:
+
+<TypeTable
+  type={{
+    surveys: {
+      type: 'Map<string, SurveyState>',
+      description: 'All registered survey states, keyed by id.',
+    },
+    activeSurvey: {
+      type: 'string | null',
+      description: 'Id of the currently visible survey, or null.',
+    },
+    queue: {
+      type: 'string[]',
+      description: 'Ordered list of survey ids waiting to be shown.',
+    },
+    register: {
+      type: '(config: SurveyConfig) => void',
+      description: 'Register a survey programmatically. Surveys passed to SurveysProvider are registered automatically.',
+    },
+    unregister: {
+      type: '(id: string) => void',
+      description: 'Remove a survey from the registry.',
+    },
+    show: {
+      type: '(id: string) => void',
+      description: 'Show a survey if it passes all gates.',
+    },
+    hide: {
+      type: '(id: string) => void',
+      description: 'Hide a survey without dismissing it.',
+    },
+    dismiss: {
+      type: '(id: string, reason?: DismissalReason) => void',
+      description: 'Dismiss a survey and record the reason.',
+    },
+    snooze: {
+      type: '(id: string) => void',
+      description: 'Snooze a survey per its snoozeDelayDays config.',
+    },
+    answer: {
+      type: '(surveyId: string, questionId: string, value: AnswerValue) => void',
+      description: 'Record an answer. Persists immediately.',
+    },
+    nextQuestion: {
+      type: '(surveyId: string) => void',
+      description: 'Advance the survey one step.',
+    },
+    prevQuestion: {
+      type: '(surveyId: string) => void',
+      description: 'Go back one step.',
+    },
+    complete: {
+      type: '(surveyId: string) => void',
+      description: 'Complete the survey and fire callbacks.',
+    },
+    reset: {
+      type: '(id: string) => void',
+      description: 'Reset a single survey to initial state.',
+    },
+    resetAll: {
+      type: '() => void',
+      description: 'Reset all surveys and clear the queue.',
+    },
+    getState: {
+      type: '(id: string) => SurveyState | undefined',
+      description: 'Get state for a specific survey.',
+    },
+    getConfig: {
+      type: '(id: string) => SurveyConfig | undefined',
+      description: 'Get config for a specific survey.',
+    },
+    canShow: {
+      type: '(id: string) => boolean',
+      description: 'Check whether a survey passes all fatigue gates.',
+    },
+  }}
+/>
+
+## When to use useSurveys vs useSurvey
+
+| Situation | Use |
+|-----------|-----|
+| Control a specific survey | `useSurvey(id)` |
+| Inspect all surveys or the queue | `useSurveys()` |
+| Reset all surveys on logout | `useSurveys()` + `resetAll()` |
+| Build a survey admin/debug UI | `useSurveys()` |
+
+## Related
+
+- [useSurvey](/docs/surveys/hooks/use-survey) — Single-survey hook
+- [SurveysProvider](/docs/surveys/providers/surveys-provider) — Provider configuration

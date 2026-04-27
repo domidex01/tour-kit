@@ -1,0 +1,212 @@
+---
+title: SurveysProvider
+description: >-
+  Root provider that manages survey state, fatigue prevention, persistence,
+  and analytics callbacks for all surveys in your application
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+The root provider for `@tour-kit/surveys`. Place it once, high in your component tree. All display components and hooks must be descendants of this provider.
+
+## Import
+
+```tsx
+import { SurveysProvider } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+import { SurveysProvider } from '@tour-kit/surveys';
+import type { SurveyConfig } from '@tour-kit/surveys';
+
+const surveys: SurveyConfig[] = [
+  {
+    id: 'nps-q1',
+    type: 'nps',
+    displayMode: 'modal',
+    title: 'How likely are you to recommend us?',
+    questions: [
+      {
+        id: 'score',
+        type: 'rating',
+        text: 'Rate us 0–10',
+        ratingScale: { min: 0, max: 10 },
+      },
+    ],
+  },
+];
+
+export function App() {
+  return (
+    <SurveysProvider
+      surveys={surveys}
+      globalCooldownDays={14}
+      maxPerSession={1}
+      onSurveyComplete={(id, responses) => {
+        analytics.track('survey_completed', { id, responses: Object.fromEntries(responses) });
+      }}
+    >
+      <YourApp />
+    </SurveysProvider>
+  );
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    surveys: {
+      type: 'SurveyConfig[]',
+      default: '[]',
+      description: 'Survey configurations to register on mount. Adding or removing configs at runtime is supported — the provider diffs by id.',
+    },
+    queueConfig: {
+      type: 'Partial<SurveyQueueConfig>',
+      description: 'Override queue behaviour: max concurrent, priority ordering, stack behaviour, delay between surveys.',
+    },
+    storage: {
+      type: 'Storage | null',
+      description: 'Custom storage object implementing getItem/setItem/removeItem. Pass null to disable persistence entirely. Defaults to localStorage.',
+    },
+    storageKey: {
+      type: 'string',
+      default: "'tour-kit:surveys'",
+      description: 'Prefix used for all storage keys.',
+    },
+    userContext: {
+      type: 'Record<string, unknown>',
+      description: 'Arbitrary user properties forwarded to audience targeting conditions.',
+    },
+    globalCooldownDays: {
+      type: 'number',
+      description: 'Minimum days between any two surveys shown by this provider. Checked before per-survey frequency rules.',
+    },
+    samplingRate: {
+      type: 'number',
+      default: '1',
+      description: 'Probability (0–1) that this provider instance shows surveys at all. The roll happens once on mount.',
+    },
+    maxPerSession: {
+      type: 'number',
+      description: 'Hard cap on total surveys shown per page session. Resets on provider remount.',
+    },
+    onSurveyShow: {
+      type: '(id: string) => void',
+      description: 'Called when any survey becomes visible.',
+    },
+    onSurveyDismiss: {
+      type: '(id: string, reason: DismissalReason) => void',
+      description: 'Called when any survey is dismissed.',
+    },
+    onSurveyComplete: {
+      type: '(id: string, responses: Map<string, AnswerValue>) => void',
+      description: 'Called when any survey is completed. Responses Map contains all answered question ids.',
+    },
+    onSurveyAnswer: {
+      type: '(surveyId: string, questionId: string, value: AnswerValue) => void',
+      description: 'Called on every individual question answer.',
+    },
+    onSurveySnooze: {
+      type: '(id: string) => void',
+      description: 'Called when any survey is snoozed.',
+    },
+    onQuestionAnswered: {
+      type: '(surveyId: string, questionId: string, value: AnswerValue) => void',
+      description: 'Alias for onSurveyAnswer, provided for analytics naming conventions.',
+    },
+    onScoreCalculated: {
+      type: "(surveyId: string, scoreType: 'nps' | 'csat' | 'ces', result: NPSResult | CSATResult | CESResult) => void",
+      description: 'Called after completion of an NPS, CSAT, or CES survey with the calculated score.',
+    },
+  }}
+/>
+
+## Persistence
+
+The provider persists full survey state to storage on every state change and hydrates on mount. The stored JSON includes `isCompleted`, `isDismissed`, `isSnoozed`, `snoozeUntil`, `viewCount`, `lastViewedAt`, `responses`, and the current queue.
+
+Disable persistence entirely:
+
+```tsx
+<SurveysProvider surveys={surveys} storage={null}>
+  <App />
+</SurveysProvider>
+```
+
+Use a custom adapter (for example, a server-side or encrypted store):
+
+```tsx
+const adapter: Storage = {
+  getItem: (key) => myDb.get(key),
+  setItem: (key, value) => myDb.set(key, value),
+  removeItem: (key) => myDb.delete(key),
+};
+
+<SurveysProvider surveys={surveys} storage={adapter}>
+  <App />
+</SurveysProvider>
+```
+
+<Callout type="warn">
+  Global cooldown is the first gate evaluated. If the provider's `globalCooldownDays` has not
+  elapsed since the last shown survey, no individual survey's frequency rule is evaluated and
+  `show()` is a no-op. If you are testing frequency behaviour, set `globalCooldownDays={0}` or
+  clear localStorage between runs.
+</Callout>
+
+## Tour suppression
+
+The provider reads from `@tour-kit/core`'s `TourContext`. If a guided tour is active, surveys are suppressed automatically — `show()` becomes a no-op and any currently visible survey is hidden until the tour ends.
+
+## Queue configuration
+
+By default, only one survey shows at a time. Requesting a second survey while one is active adds it to an internal priority queue.
+
+```tsx
+<SurveysProvider
+  surveys={surveys}
+  queueConfig={{
+    maxConcurrent: 1,
+    priorityOrder: 'priority',   // 'priority' | 'fifo' | 'lifo'
+    stackBehavior: 'queue',      // 'queue' | 'replace' | 'stack'
+    delayBetween: 500,           // ms between consecutive surveys
+    autoShow: true,              // drain queue automatically
+  }}
+>
+  <App />
+</SurveysProvider>
+```
+
+## useSurveysContext
+
+Low-level context hook that returns the full `SurveysContextValue`. Prefer `useSurvey` and `useSurveys` for most use-cases.
+
+```tsx
+import { useSurveysContext } from '@tour-kit/surveys';
+
+function AdminDebugPanel() {
+  const ctx = useSurveysContext();
+
+  return (
+    <ul>
+      {Array.from(ctx.surveys.entries()).map(([id, state]) => (
+        <li key={id}>
+          {id}: visible={String(state.isVisible)}, completed={String(state.isCompleted)}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+Throws if called outside a `SurveysProvider`.
+
+## Related
+
+- [useSurvey](/docs/surveys/hooks/use-survey) — Control a single survey
+- [useSurveys](/docs/surveys/hooks/use-surveys) — Full context access
+- [Types](/docs/surveys/types) — SurveyConfig, SurveysProviderProps

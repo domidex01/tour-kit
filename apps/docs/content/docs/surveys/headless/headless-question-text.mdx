@@ -1,0 +1,128 @@
+---
+title: HeadlessQuestionText
+description: >-
+  Headless text input — manages value, character count, and returns pre-built
+  inputProps and characterCountProps via render prop
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`HeadlessQuestionText` manages value state and character counting, and returns prop objects ready to spread onto your `<input>` or `<textarea>` and character count element.
+
+## Import
+
+```tsx
+import { HeadlessQuestionText } from '@tour-kit/surveys/headless';
+```
+
+## Usage
+
+```tsx
+import { HeadlessQuestionText } from '@tour-kit/surveys/headless';
+
+<HeadlessQuestionText
+  id="feedback"
+  label="What could we do better?"
+  maxLength={300}
+  showCharacterCount
+  onChange={(value) => survey.answer('feedback', value)}
+>
+  {({ value, characterCount, isAtLimit, inputProps, characterCountProps }) => (
+    <div className="flex flex-col gap-1">
+      <textarea
+        {...inputProps}
+        rows={4}
+        className={`border rounded p-2 resize-y ${isAtLimit ? 'border-red-500' : 'border-gray-300'}`}
+      />
+      <span
+        {...characterCountProps}
+        className={`text-xs text-right ${isAtLimit ? 'text-red-500' : 'text-gray-500'}`}
+      >
+        {characterCount} / 300
+      </span>
+    </div>
+  )}
+</HeadlessQuestionText>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Applied to inputProps.id and used to generate the character count element id.',
+    },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'aria-label placed in inputProps.',
+    },
+    isRequired: {
+      type: 'boolean',
+      description: 'Sets aria-required in inputProps.',
+    },
+    value: {
+      type: 'string',
+      description: 'Controlled value.',
+    },
+    onChange: {
+      type: '(value: string) => void',
+      description: 'Called on every change.',
+    },
+    maxLength: {
+      type: 'number',
+      description: 'Maximum character length. Placed in inputProps.maxLength.',
+    },
+    placeholder: {
+      type: 'string',
+      description: 'Placed in inputProps.placeholder.',
+    },
+    showCharacterCount: {
+      type: 'boolean',
+      default: 'false',
+      description: 'When true, adds aria-describedby to inputProps linking to the character count element.',
+    },
+    children: {
+      type: '(props: HeadlessQuestionTextRenderProps) => ReactNode',
+      required: true,
+      description: 'Render prop.',
+    },
+  }}
+/>
+
+## Render prop shape
+
+<TypeTable
+  type={{
+    value: {
+      type: 'string',
+      description: 'Current text value.',
+    },
+    setValue: {
+      type: '(value: string) => void',
+      description: 'Set the value directly.',
+    },
+    characterCount: {
+      type: 'number',
+      description: 'Current character count.',
+    },
+    isAtLimit: {
+      type: 'boolean',
+      description: 'True when characterCount >= maxLength.',
+    },
+    inputProps: {
+      type: "{ id; 'aria-label'; 'aria-required'; 'aria-describedby'; value; onChange; maxLength; placeholder }",
+      description: 'Spread onto your <input> or <textarea>.',
+    },
+    characterCountProps: {
+      type: "{ id: string; 'aria-live': 'polite' }",
+      description: "Spread onto the character count element so screen readers announce changes.",
+    },
+  }}
+/>
+
+## Related
+
+- [QuestionText](/docs/surveys/components/question-text) — Styled variant

@@ -1,0 +1,120 @@
+---
+title: calculateCSAT
+description: >-
+  Calculate Customer Satisfaction Score as the percentage of responses at or
+  above a configurable threshold value
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+Customer Satisfaction Score (CSAT) is the percentage of responses that meet or exceed a positive threshold. On a 1–5 scale, ratings ≥ 4 are typically considered positive.
+
+## Import
+
+```tsx
+import { calculateCSAT } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```ts
+import { calculateCSAT } from '@tour-kit/surveys';
+
+// Default threshold: 4 (suitable for a 1–5 scale)
+const result = calculateCSAT([5, 4, 3, 5, 4, 2, 5, 4]);
+
+console.log(result.score);     // 75  (6 of 8 responses ≥ 4)
+console.log(result.positive);  // 6
+console.log(result.negative);  // 2
+console.log(result.total);     // 8
+console.log(result.threshold); // 4
+```
+
+### Custom threshold
+
+```ts
+// On a 1–10 scale, treat ≥ 7 as positive
+const result = calculateCSAT([8, 9, 5, 7, 6, 10], 7);
+
+console.log(result.score);    // 67 (4 of 6 responses ≥ 7, rounded)
+console.log(result.positive); // 4
+console.log(result.negative); // 2
+```
+
+### Typical survey config
+
+```tsx
+const csatSurvey: SurveyConfig = {
+  id: 'support-csat',
+  type: 'csat',
+  displayMode: 'modal',
+  title: 'How satisfied were you with our support?',
+  questions: [
+    {
+      id: 'satisfaction',
+      type: 'rating',
+      text: 'Rate your experience',
+      ratingScale: { min: 1, max: 5, style: 'stars', labels: { min: 'Poor', max: 'Excellent' } },
+    },
+  ],
+  onComplete: (responses) => {
+    const ratings = Array.from(responses.values()).filter((v): v is number => typeof v === 'number');
+    const csat = calculateCSAT(ratings, 4);
+    sendToAnalytics({ csat: csat.score });
+  },
+};
+```
+
+## Parameters
+
+<TypeTable
+  type={{
+    responses: {
+      type: 'number[]',
+      required: true,
+      description: 'Array of numeric ratings.',
+    },
+    threshold: {
+      type: 'number',
+      default: '4',
+      description: 'Minimum rating to count as a positive response.',
+    },
+  }}
+/>
+
+## Returns — CSATResult
+
+<TypeTable
+  type={{
+    score: {
+      type: 'number',
+      description: 'CSAT score 0–100. Calculated as Math.round((positive / total) * 100).',
+    },
+    positive: {
+      type: 'number',
+      description: 'Count of responses at or above threshold.',
+    },
+    negative: {
+      type: 'number',
+      description: 'Count of responses below threshold.',
+    },
+    total: {
+      type: 'number',
+      description: 'Total number of responses.',
+    },
+    threshold: {
+      type: 'number',
+      description: 'The threshold value used in calculation.',
+    },
+    responses: {
+      type: 'number[]',
+      description: 'Original response array.',
+    },
+  }}
+/>
+
+## Related
+
+- [calculateNPS](/docs/surveys/utilities/calculate-nps)
+- [calculateCES](/docs/surveys/utilities/calculate-ces)
+- [CSATResult type](/docs/surveys/types#scoring)

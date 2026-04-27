@@ -23,6 +23,7 @@ const footerLinks = {
     { label: '@tour-kit/checklists', href: '/docs/checklists' },
     { label: '@tour-kit/media', href: '/docs/media' },
     { label: '@tour-kit/scheduling', href: '/docs/scheduling' },
+    { label: '@tour-kit/surveys', href: '/docs/surveys' },
   ],
   company: [
     { label: 'About', href: '/about' },

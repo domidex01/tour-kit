@@ -1,0 +1,85 @@
+---
+title: Headless
+description: >-
+  Render-prop components that supply survey state and ARIA props without
+  rendering any markup — full control over appearance and interaction
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+Headless components expose the same logic as the styled components through render props. You own every element; the component manages state, accessibility attributes, and controlled vs uncontrolled transitions.
+
+## When to use headless
+
+Use headless components when:
+
+- Your design system has bespoke input styles that can't be layered over the defaults
+- You need to compose survey UI into an existing modal or drawer not managed by `@tour-kit/surveys`
+- You want to integrate with a third-party animation library
+
+Use styled components when:
+
+- You want to ship quickly and don't have strong design constraints
+- Your app already uses Tailwind and the defaults are close enough
+
+## Import path
+
+```tsx
+// Styled components (default entry point)
+import { QuestionRating } from '@tour-kit/surveys';
+
+// Headless components — separate entry point
+import {
+  HeadlessSurvey,
+  HeadlessQuestionRating,
+  HeadlessQuestionText,
+  HeadlessQuestionSelect,
+  HeadlessQuestionBoolean,
+} from '@tour-kit/surveys/headless';
+```
+
+## Available headless components
+
+<Cards>
+  <Card title="HeadlessSurvey" href="/docs/surveys/headless/headless-survey">
+    Provides full useSurvey state via render prop — no markup rendered
+  </Card>
+  <Card title="HeadlessQuestionRating" href="/docs/surveys/headless/headless-question-rating">
+    Rating scale state: value, options, ratingGroupProps, getOptionProps
+  </Card>
+  <Card title="HeadlessQuestionText" href="/docs/surveys/headless/headless-question-text">
+    Text input state: value, characterCount, inputProps, characterCountProps
+  </Card>
+  <Card title="HeadlessQuestionSelect" href="/docs/surveys/headless/headless-question-select">
+    Select state: value, groupProps, getOptionProps — works in single or multi mode
+  </Card>
+  <Card title="HeadlessQuestionBoolean" href="/docs/surveys/headless/headless-question-boolean">
+    Boolean state: value, groupProps, getOptionProps for yes/no
+  </Card>
+</Cards>
+
+## Pattern overview
+
+Every headless component follows the same render-prop pattern:
+
+```tsx
+<HeadlessQuestionRating
+  id="score"
+  label="Rate this feature"
+  min={1}
+  max={5}
+  onChange={(value) => survey.answer('score', value)}
+>
+  {({ value, options, ratingGroupProps, getOptionProps }) => (
+    <div {...ratingGroupProps}>
+      {options.map((opt) => (
+        <button key={opt} {...getOptionProps(opt)}>
+          {opt}
+        </button>
+      ))}
+    </div>
+  )}
+</HeadlessQuestionRating>
+```
+
+The `*Props` objects returned by each component contain correctly typed ARIA attributes, `role`, and `tabIndex`. Spread them onto your elements to get full accessibility without writing it yourself.

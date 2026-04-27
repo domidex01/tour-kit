@@ -1,0 +1,146 @@
+---
+title: SurveyPopover
+description: >-
+  Floating panel anchored to a DOM element via Floating UI, with automatic
+  flip and shift collision avoidance
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`SurveyPopover` positions a survey panel adjacent to a target element using `@floating-ui/react`. It renders into a portal and returns `null` when neither visible nor anchored.
+
+## Import
+
+```tsx
+import { SurveyPopover } from '@tour-kit/surveys';
+```
+
+## Usage
+
+### With an element ref
+
+```tsx
+import { useRef } from 'react';
+import { SurveyPopover, QuestionRating, useSurvey } from '@tour-kit/surveys';
+
+function FeatureRating() {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const survey = useSurvey('feature-rating');
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        onClick={survey.show}
+        data-survey-popover-anchor="feature-rating"
+      >
+        Rate this feature
+      </button>
+
+      <SurveyPopover
+        surveyId="feature-rating"
+        anchor={buttonRef.current}
+        options={{ position: 'bottom-right', offset: 8 }}
+      >
+        <QuestionRating
+          id="rating"
+          label="How useful is this feature?"
+          min={1}
+          max={5}
+          style="stars"
+          onChange={(value) => {
+            survey.answer('rating', value);
+            survey.complete();
+          }}
+        />
+      </SurveyPopover>
+    </>
+  );
+}
+```
+
+### With a CSS selector
+
+```tsx
+<SurveyPopover
+  surveyId="feature-rating"
+  anchorSelector="#rate-button"
+  options={{ position: 'top-right' }}
+>
+  {/* content */}
+</SurveyPopover>
+```
+
+### Auto anchor via data attribute
+
+If neither `anchor` nor `anchorSelector` is provided, the popover looks for `[data-survey-popover-anchor="<surveyId>"]` in the document.
+
+## Props
+
+<TypeTable
+  type={{
+    surveyId: {
+      type: 'string',
+      required: true,
+      description: 'Id of the survey this popover belongs to.',
+    },
+    anchor: {
+      type: 'HTMLElement | null',
+      description: 'Element to position the popover against. Takes precedence over anchorSelector.',
+    },
+    anchorSelector: {
+      type: 'string',
+      description: 'CSS selector to resolve the anchor element when no ref is available.',
+    },
+    options: {
+      type: 'PopoverOptions',
+      description: 'Position, offset, and showCloseButton.',
+    },
+    children: {
+      type: 'ReactNode',
+      description: 'Survey content rendered inside the floating panel.',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names on the floating container.',
+    },
+  }}
+/>
+
+## PopoverOptions
+
+<TypeTable
+  type={{
+    position: {
+      type: "'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'",
+      default: "'bottom-right'",
+      description: 'Preferred placement. Floating UI will flip if the preferred side has insufficient space.',
+    },
+    offset: {
+      type: 'number',
+      default: '8',
+      description: 'Gap in pixels between the anchor element and the popover.',
+    },
+    showCloseButton: {
+      type: 'boolean',
+      default: 'true',
+      description: 'Whether to render a close button in the top-right corner.',
+    },
+  }}
+/>
+
+<Callout type="warn">
+  The popover renders `null` if the survey is visible but no anchor can be resolved (no `anchor`
+  prop, no `anchorSelector` match, and no `[data-survey-popover-anchor]` element). Ensure the
+  anchor element is in the DOM before calling `survey.show()`.
+</Callout>
+
+## Collision avoidance
+
+The popover uses Floating UI middleware in order: `offset` → `flip` → `shift({ padding: 8 })`. The panel will flip to the opposite side if the preferred placement overflows the viewport, and will shift along the axis to keep within the viewport with 8px of padding.
+
+## Related
+
+- [SurveyModal](/docs/surveys/components/survey-modal)
+- [PopoverOptions type](/docs/surveys/types#popoveroptions)

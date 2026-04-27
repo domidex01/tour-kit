@@ -1,0 +1,53 @@
+---
+title: Utilities
+description: >-
+  Standalone scoring functions — calculateNPS, calculateCSAT, calculateCES —
+  that work in React components, server actions, and analytics pipelines
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+Three pure functions for scoring survey responses. They have no React dependencies and can be used anywhere: in server actions, API routes, analytics ingestion pipelines, or inside React components.
+
+## Import
+
+```tsx
+import { calculateNPS, calculateCSAT, calculateCES } from '@tour-kit/surveys';
+```
+
+## Available utilities
+
+<Cards>
+  <Card title="calculateNPS" href="/docs/surveys/utilities/calculate-nps">
+    Net Promoter Score from 0–10 ratings. Returns score, promoter/passive/detractor counts, and percentages.
+  </Card>
+  <Card title="calculateCSAT" href="/docs/surveys/utilities/calculate-csat">
+    Customer Satisfaction Score from ratings with a configurable positive threshold.
+  </Card>
+  <Card title="calculateCES" href="/docs/surveys/utilities/calculate-ces">
+    Customer Effort Score average from 1–7 ratings. Returns easy/difficult/neutral breakdown.
+  </Card>
+</Cards>
+
+## Within React components
+
+Use `useSurveyScoring` to access these functions inside a `SurveysProvider`:
+
+```tsx
+import { useSurveyScoring } from '@tour-kit/surveys';
+
+function Results() {
+  const { getSurveyScore } = useSurveyScoring();
+  const result = getSurveyScore('nps-q1'); // auto-selects algorithm
+}
+```
+
+## Outside React
+
+```ts
+import { calculateNPS } from '@tour-kit/surveys';
+
+// In a server action or API route
+const nps = calculateNPS([9, 10, 6, 7, 8, 10, 4]);
+console.log(nps.score); // e.g. 14
+```

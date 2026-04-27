@@ -1,0 +1,89 @@
+---
+title: Components
+description: >-
+  Pre-styled display and question components: five survey containers and four
+  accessible question input types with CVA variant support
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+Pre-built, accessible survey components. Display components control visibility based on survey state. Question components are controlled inputs that call back with typed values.
+
+## Display components
+
+<Cards>
+  <Card title="SurveyModal" href="/docs/surveys/components/survey-modal">
+    Centered dialog with optional size and overlay-click dismiss
+  </Card>
+  <Card title="SurveySlideout" href="/docs/surveys/components/survey-slideout">
+    Side panel that slides in from the left or right edge
+  </Card>
+  <Card title="SurveyBanner" href="/docs/surveys/components/survey-banner">
+    Top or bottom strip, optionally sticky and dismissable
+  </Card>
+  <Card title="SurveyPopover" href="/docs/surveys/components/survey-popover">
+    Floating panel anchored to a DOM element via Floating UI
+  </Card>
+  <Card title="SurveyInline" href="/docs/surveys/components/survey-inline">
+    Embedded directly in the page flow
+  </Card>
+</Cards>
+
+## Question components
+
+<Cards>
+  <Card title="QuestionRating" href="/docs/surveys/components/question-rating">
+    Numeric, star, or emoji rating scale with roving tabindex
+  </Card>
+  <Card title="QuestionText" href="/docs/surveys/components/question-text">
+    Single-line input or resizable textarea with character count
+  </Card>
+  <Card title="QuestionSelect" href="/docs/surveys/components/question-select">
+    Single-select (radio) or multi-select (checkbox) option lists
+  </Card>
+  <Card title="QuestionBoolean" href="/docs/surveys/components/question-boolean">
+    Yes / No toggle pair
+  </Card>
+  <Card title="SurveyProgress" href="/docs/surveys/components/survey-progress">
+    Question progress indicator: text, bar, or both
+  </Card>
+</Cards>
+
+## Composition pattern
+
+Display components render their content through `children`. Compose question components inside:
+
+```tsx
+import { SurveyModal, QuestionRating, SurveyProgress } from '@tour-kit/surveys';
+
+<SurveyModal surveyId="nps-q1">
+  <SurveyProgress current={1} total={2} />
+  <QuestionRating
+    id="score"
+    label="How likely to recommend us (0–10)?"
+    min={0}
+    max={10}
+    lowLabel="Not at all"
+    highLabel="Extremely likely"
+    onChange={(value) => survey.answer('score', value)}
+  />
+</SurveyModal>
+```
+
+## Styling
+
+All components forward `className` and accept standard HTML attributes via rest props. Variants are defined with CVA — import the variant functions to generate class names in custom implementations:
+
+```tsx
+import {
+  ratingOptionVariants,
+  textInputVariants,
+  selectOptionVariants,
+  booleanOptionVariants,
+  progressBarVariants,
+} from '@tour-kit/surveys';
+```
+
+## Headless alternative
+
+If you need full control over markup and styling, use the [headless components](/docs/surveys/headless) instead.

@@ -1,0 +1,534 @@
+---
+title: Types
+description: >-
+  TypeScript type definitions exported by @tour-kit/surveys — survey config,
+  question config, scoring results, context, events, queue, and position types
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+All types are exported from the package root. Import them as type-only:
+
+```ts
+import type {
+  SurveyConfig,
+  QuestionConfig,
+  NPSResult,
+  SurveysProviderProps,
+} from '@tour-kit/surveys';
+```
+
+---
+
+## Survey types
+
+### SurveyConfig
+
+Main configuration object for a survey.
+
+```ts
+interface SurveyConfig {
+  id: string;
+  type: SurveyType;
+  displayMode: DisplayMode;
+  priority?: SurveyPriority;
+  title?: string;
+  description?: string | ReactNode;
+  questions: QuestionConfig[];
+  frequency?: FrequencyRule;
+  schedule?: unknown;           // requires @tour-kit/scheduling
+  audience?: AudienceCondition[];
+  globalCooldownDays?: number;
+  samplingRate?: number;        // 0–1
+  maxSnoozeCount?: number;
+  snoozeDelayDays?: number;
+  maxPerSession?: number;
+  modalOptions?: ModalOptions;
+  slideoutOptions?: SlideoutOptions;
+  bannerOptions?: BannerOptions;
+  popoverOptions?: PopoverOptions;
+  metadata?: Record<string, unknown>;
+  onShow?: () => void;
+  onDismiss?: (reason: DismissalReason) => void;
+  onComplete?: (responses: Map<string, AnswerValue>) => void;
+  onAnswer?: (questionId: string, value: AnswerValue) => void;
+}
+```
+
+### SurveyState
+
+Runtime state for a single survey, managed internally by `SurveysProvider`.
+
+```ts
+interface SurveyState {
+  id: string;
+  isActive: boolean;
+  isVisible: boolean;
+  isDismissed: boolean;
+  isSnoozed: boolean;
+  isCompleted: boolean;
+  viewCount: number;
+  lastViewedAt: Date | null;
+  dismissedAt: Date | null;
+  dismissalReason: DismissalReason | null;
+  completedAt: Date | null;
+  snoozeCount: number;
+  snoozeUntil: Date | null;
+  currentStep: number;
+  responses: Map<string, AnswerValue>;
+}
+```
+
+### SurveyType
+
+```ts
+type SurveyType = 'nps' | 'csat' | 'ces' | 'custom';
+```
+
+### DisplayMode
+
+```ts
+type DisplayMode = 'popover' | 'modal' | 'slideout' | 'banner' | 'inline';
+```
+
+### SurveyPriority
+
+```ts
+type SurveyPriority = 'critical' | 'high' | 'normal' | 'low';
+```
+
+### FrequencyRule
+
+```ts
+type FrequencyRule =
+  | 'once'
+  | 'session'
+  | 'always'
+  | { type: 'times'; count: number }
+  | { type: 'interval'; days: number };
+```
+
+### DismissalReason
+
+```ts
+type DismissalReason =
+  | 'close_button'
+  | 'overlay_click'
+  | 'escape_key'
+  | 'snooze'
+  | 'completed'
+  | 'programmatic';
+```
+
+### SurveyStorageAdapter
+
+```ts
+interface SurveyStorageAdapter {
+  getItem(key: string): string | null | Promise<string | null>;
+  setItem(key: string, value: string): void | Promise<void>;
+  removeItem(key: string): void | Promise<void>;
+}
+```
+
+---
+
+## Question types
+
+### QuestionConfig
+
+```ts
+interface QuestionConfig {
+  id: string;
+  type: QuestionType;
+  text: string;
+  description?: string;
+  required?: boolean;
+  placeholder?: string;
+  ratingScale?: RatingScale;       // only for 'rating'
+  options?: SelectOption[];         // only for 'single-select' | 'multi-select'
+  maxLength?: number;               // only for 'text' | 'textarea'
+  skipLogic?: SkipLogic[];
+  validation?: (value: AnswerValue) => string | null;
+}
+```
+
+### QuestionType
+
+```ts
+type QuestionType =
+  | 'rating'
+  | 'text'
+  | 'textarea'
+  | 'single-select'
+  | 'multi-select'
+  | 'boolean';
+```
+
+### AnswerValue
+
+```ts
+type AnswerValue = string | number | boolean | string[];
+```
+
+### RatingScale
+
+```ts
+interface RatingScale {
+  min: number;
+  max: number;
+  step?: number;
+  labels?: {
+    min?: string;
+    max?: string;
+  };
+  style?: 'numeric' | 'stars' | 'emoji';
+}
+```
+
+### SelectOption
+
+```ts
+interface SelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+```
+
+### SkipLogic
+
+```ts
+interface SkipLogic {
+  questionId: string;
+  condition: (answer: AnswerValue) => boolean;
+  skipTo: string;
+}
+```
+
+---
+
+## Scoring types
+
+### NPSResult
+
+```ts
+interface NPSResult {
+  score: number;         // −100 to 100
+  promoters: number;
+  passives: number;
+  detractors: number;
+  promoterPct: number;
+  passivePct: number;
+  detractorPct: number;
+  total: number;
+  responses: number[];
+}
+```
+
+### CSATResult
+
+```ts
+interface CSATResult {
+  score: number;         // 0–100 (percentage)
+  positive: number;
+  negative: number;
+  total: number;
+  threshold: number;
+  responses: number[];
+}
+```
+
+### CESResult
+
+```ts
+interface CESResult {
+  score: number;         // average response value
+  easy: number;          // responses ≥ 5
+  difficult: number;     // responses ≤ 3
+  neutral: number;       // responses = 4
+  total: number;
+  responses: number[];
+}
+```
+
+---
+
+## Context types
+
+### SurveysContextValue
+
+```ts
+interface SurveysContextValue {
+  surveys: Map<string, SurveyState>;
+  activeSurvey: string | null;
+  queue: string[];
+  register: (config: SurveyConfig) => void;
+  unregister: (id: string) => void;
+  show: (id: string) => void;
+  hide: (id: string) => void;
+  dismiss: (id: string, reason?: DismissalReason) => void;
+  snooze: (id: string) => void;
+  answer: (surveyId: string, questionId: string, value: AnswerValue) => void;
+  nextQuestion: (surveyId: string) => void;
+  prevQuestion: (surveyId: string) => void;
+  complete: (surveyId: string) => void;
+  reset: (id: string) => void;
+  resetAll: () => void;
+  getState: (id: string) => SurveyState | undefined;
+  getConfig: (id: string) => SurveyConfig | undefined;
+  canShow: (id: string) => boolean;
+}
+```
+
+### SurveysProviderProps
+
+```ts
+interface SurveysProviderProps {
+  children: ReactNode;
+  surveys?: SurveyConfig[];
+  queueConfig?: Partial<SurveyQueueConfig>;
+  storage?: Storage | null;
+  storageKey?: string;
+  userContext?: Record<string, unknown>;
+  globalCooldownDays?: number;
+  samplingRate?: number;
+  maxPerSession?: number;
+  onSurveyShow?: (id: string) => void;
+  onSurveyDismiss?: (id: string, reason: DismissalReason) => void;
+  onSurveyComplete?: (id: string, responses: Map<string, AnswerValue>) => void;
+  onSurveyAnswer?: (surveyId: string, questionId: string, value: AnswerValue) => void;
+  onSurveySnooze?: (id: string) => void;
+  onQuestionAnswered?: (surveyId: string, questionId: string, value: AnswerValue) => void;
+  onScoreCalculated?: (
+    surveyId: string,
+    scoreType: 'nps' | 'csat' | 'ces',
+    result: NPSResult | CSATResult | CESResult
+  ) => void;
+}
+```
+
+---
+
+## Events types
+
+### SurveyEventType
+
+```ts
+type SurveyEventType =
+  | 'survey_registered'
+  | 'survey_shown'
+  | 'survey_dismissed'
+  | 'survey_snoozed'
+  | 'survey_completed'
+  | 'survey_question_answered'
+  | 'survey_score_calculated';
+```
+
+### BaseSurveyEvent
+
+```ts
+interface BaseSurveyEvent {
+  type: SurveyEventType;
+  surveyId: string;
+  surveyType: SurveyType;
+  displayMode: DisplayMode;
+  timestamp: number;
+  metadata?: Record<string, unknown>;
+}
+```
+
+### SurveyEvent (discriminated union)
+
+```ts
+type SurveyEvent =
+  | SurveyShownEvent
+  | SurveyDismissedEvent
+  | SurveySnoozedEvent
+  | SurveyCompletedEvent
+  | SurveyQuestionAnsweredEvent
+  | SurveyScoreCalculatedEvent;
+```
+
+Individual event shapes:
+
+```ts
+interface SurveyShownEvent extends BaseSurveyEvent {
+  type: 'survey_shown';
+  viewCount: number;
+  fromQueue: boolean;
+}
+
+interface SurveyDismissedEvent extends BaseSurveyEvent {
+  type: 'survey_dismissed';
+  reason: DismissalReason;
+  viewDuration: number;
+}
+
+interface SurveySnoozedEvent extends BaseSurveyEvent {
+  type: 'survey_snoozed';
+  snoozeCount: number;
+  snoozeUntil: Date;
+}
+
+interface SurveyCompletedEvent extends BaseSurveyEvent {
+  type: 'survey_completed';
+  viewDuration: number;
+  responses: Map<string, AnswerValue>;
+  completionRate: number;   // 0–100
+}
+
+interface SurveyQuestionAnsweredEvent extends BaseSurveyEvent {
+  type: 'survey_question_answered';
+  questionId: string;
+  questionType: QuestionType;
+  stepIndex: number;
+}
+
+interface SurveyScoreCalculatedEvent extends BaseSurveyEvent {
+  type: 'survey_score_calculated';
+  scoreType: 'nps' | 'csat' | 'ces';
+  score: number;
+}
+```
+
+---
+
+## Queue types
+
+### SurveyQueueConfig
+
+```ts
+interface SurveyQueueConfig {
+  maxConcurrent: number;                          // default: 1
+  priorityOrder: PriorityOrder;                   // default: 'priority'
+  stackBehavior: StackBehavior;                   // default: 'queue'
+  delayBetween: number;                           // ms, default: 500
+  priorityWeights: Record<SurveyPriority, number>; // critical: 1000, high: 100, normal: 10, low: 1
+  autoShow: boolean;                              // default: true
+}
+```
+
+### PriorityOrder
+
+```ts
+type PriorityOrder = 'priority' | 'fifo' | 'lifo';
+```
+
+### StackBehavior
+
+```ts
+type StackBehavior = 'queue' | 'replace' | 'stack';
+```
+
+### SurveyQueueItem
+
+```ts
+interface SurveyQueueItem {
+  id: string;
+  priority: SurveyPriority;
+  addedAt: number;
+  weight: number;
+  sequence: number;
+}
+```
+
+---
+
+## Variant option types
+
+### ModalOptions
+
+```ts
+interface ModalOptions {
+  size?: 'sm' | 'md' | 'lg';
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
+  showCloseButton?: boolean;
+}
+```
+
+### SlideoutOptions
+
+```ts
+interface SlideoutOptions {
+  position?: SlideoutPosition;
+  size?: 'sm' | 'md' | 'lg';
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
+  showCloseButton?: boolean;
+}
+```
+
+### BannerOptions
+
+```ts
+interface BannerOptions {
+  position?: BannerPosition;
+  sticky?: boolean;
+  dismissable?: boolean;
+  intent?: 'info' | 'feedback';
+}
+```
+
+### PopoverOptions
+
+```ts
+interface PopoverOptions {
+  position?: PopoverPosition;
+  offset?: number;
+  showCloseButton?: boolean;
+}
+```
+
+---
+
+## Position types
+
+### SlideoutPosition
+
+```ts
+type SlideoutPosition = 'left' | 'right';
+```
+
+### BannerPosition
+
+```ts
+type BannerPosition = 'top' | 'bottom';
+```
+
+### PopoverPosition
+
+```ts
+type PopoverPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+```
+
+---
+
+## Audience types
+
+### AudienceCondition
+
+```ts
+interface AudienceCondition {
+  type: 'user_property' | 'segment' | 'feature_flag' | 'custom';
+  key: string;
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'contains'
+    | 'not_contains'
+    | 'in'
+    | 'not_in'
+    | 'exists'
+    | 'not_exists';
+  value?: unknown;
+}
+```
+
+---
+
+## Related
+
+- [SurveysProvider](/docs/surveys/providers/surveys-provider) — Uses SurveysProviderProps
+- [useSurvey](/docs/surveys/hooks/use-survey) — Returns SurveyState and SurveyConfig
+- [Scoring utilities](/docs/surveys/utilities) — Produce NPSResult, CSATResult, CESResult

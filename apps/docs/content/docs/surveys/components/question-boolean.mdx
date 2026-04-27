@@ -1,0 +1,128 @@
+---
+title: QuestionBoolean
+description: >-
+  Yes / No toggle pair implemented as an accessible radiogroup with configurable
+  labels, size variants, and roving tabindex
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`QuestionBoolean` renders two buttons (Yes and No) as a `role="radiogroup"`. It is the lightest-weight question type — no options array needed, just a label.
+
+## Import
+
+```tsx
+import { QuestionBoolean } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+<QuestionBoolean
+  id="found-what-needed"
+  label="Did you find what you were looking for?"
+  yesLabel="Yes"
+  noLabel="No"
+  onChange={(value) => {
+    survey.answer('found-what-needed', value);
+    survey.complete();
+  }}
+/>
+```
+
+### Custom labels
+
+```tsx
+<QuestionBoolean
+  id="would-recommend"
+  label="Would you recommend us to a colleague?"
+  yesLabel="Definitely"
+  noLabel="Not really"
+  onChange={(value) => survey.answer('would-recommend', value)}
+/>
+```
+
+### Controlled
+
+```tsx
+const [answer, setAnswer] = useState<boolean | null>(null);
+
+<QuestionBoolean
+  id="helpful"
+  label="Was this helpful?"
+  value={answer}
+  onChange={setAnswer}
+/>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Unique identifier for the radiogroup.',
+    },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'Accessible label for the group (aria-label on the container).',
+    },
+    value: {
+      type: 'boolean | null',
+      description: 'Controlled value. null means nothing is selected.',
+    },
+    onChange: {
+      type: '(value: boolean) => void',
+      description: 'Called when the user selects an option.',
+    },
+    yesLabel: {
+      type: 'string',
+      default: "'Yes'",
+      description: 'Display text for the true option.',
+    },
+    noLabel: {
+      type: 'string',
+      default: "'No'",
+      description: 'Display text for the false option.',
+    },
+    isRequired: {
+      type: 'boolean',
+      default: 'false',
+      description: 'Sets aria-required on the radiogroup.',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg'",
+      default: "'md'",
+      description: 'CVA size variant affecting button height and padding.',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names on the container.',
+    },
+  }}
+/>
+
+## Variants
+
+`QuestionBoolean` uses `booleanOptionVariants` from CVA:
+
+| Variant | Values | Default |
+|---------|--------|---------|
+| `size` | `'sm'` `'md'` `'lg'` | `'md'` |
+| `selected` | `true` `false` | `false` |
+
+Size maps to button height: `sm` → `h-8`, `md` → `h-10`, `lg` → `h-12`.
+
+## Accessibility
+
+- Container: `role="radiogroup"`, `aria-label={label}`, `aria-required`
+- Options: `role="radio"`, `aria-checked`, `aria-label` set to `yesLabel` / `noLabel`
+- Roving tabindex: only one button has `tabIndex={0}` at a time
+- Arrow keys navigate between Yes and No; Space/Enter select
+
+## Related
+
+- [HeadlessQuestionBoolean](/docs/surveys/headless/headless-question-boolean)
+- [QuestionRating](/docs/surveys/components/question-rating)

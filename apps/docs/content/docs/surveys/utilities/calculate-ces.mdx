@@ -1,0 +1,116 @@
+---
+title: calculateCES
+description: >-
+  Calculate Customer Effort Score as the average of 1–7 ratings, with easy,
+  difficult, and neutral counts based on fixed thresholds
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+Customer Effort Score (CES) measures how easy it was for customers to accomplish a task. Lower effort (higher score on a 1–7 scale) correlates with loyalty. The score is the average response value, rounded to two decimal places.
+
+## Import
+
+```tsx
+import { calculateCES } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```ts
+import { calculateCES } from '@tour-kit/surveys';
+
+const result = calculateCES([6, 7, 5, 4, 6, 3, 7]);
+
+console.log(result.score);    // 5.43  (average)
+console.log(result.easy);     // 4     (responses ≥ 5)
+console.log(result.neutral);  // 1     (response = 4)
+console.log(result.difficult);// 1     (responses ≤ 3)
+console.log(result.total);    // 7
+```
+
+### Typical survey config
+
+```tsx
+const cesSurvey: SurveyConfig = {
+  id: 'checkout-ces',
+  type: 'ces',
+  displayMode: 'modal',
+  title: 'How easy was it to complete your purchase?',
+  questions: [
+    {
+      id: 'effort',
+      type: 'rating',
+      text: 'Rate the effort required (1 = Very difficult, 7 = Very easy)',
+      ratingScale: {
+        min: 1,
+        max: 7,
+        style: 'numeric',
+        labels: { min: 'Very difficult', max: 'Very easy' },
+      },
+    },
+  ],
+  onComplete: (responses) => {
+    const ratings = Array.from(responses.values()).filter((v): v is number => typeof v === 'number');
+    const ces = calculateCES(ratings);
+    sendToAnalytics({ ces: ces.score, easyPct: (ces.easy / ces.total) * 100 });
+  },
+};
+```
+
+## Parameters
+
+<TypeTable
+  type={{
+    responses: {
+      type: 'number[]',
+      required: true,
+      description: 'Array of 1–7 ratings. Empty array returns all zeros.',
+    },
+  }}
+/>
+
+## Returns — CESResult
+
+<TypeTable
+  type={{
+    score: {
+      type: 'number',
+      description: 'CES score — average of all responses, rounded to two decimal places.',
+    },
+    easy: {
+      type: 'number',
+      description: 'Count of responses ≥ 5.',
+    },
+    difficult: {
+      type: 'number',
+      description: 'Count of responses ≤ 3.',
+    },
+    neutral: {
+      type: 'number',
+      description: 'Count of responses equal to 4.',
+    },
+    total: {
+      type: 'number',
+      description: 'Total number of responses.',
+    },
+    responses: {
+      type: 'number[]',
+      description: 'Original response array.',
+    },
+  }}
+/>
+
+## Classification thresholds (1–7 scale)
+
+| Rating | Classification |
+|--------|----------------|
+| 1–3 | Difficult |
+| 4 | Neutral |
+| 5–7 | Easy |
+
+## Related
+
+- [calculateNPS](/docs/surveys/utilities/calculate-nps)
+- [calculateCSAT](/docs/surveys/utilities/calculate-csat)
+- [CESResult type](/docs/surveys/types#scoring)

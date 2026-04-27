@@ -1,0 +1,119 @@
+---
+title: SurveyProgress
+description: >-
+  Question progress indicator with text, bar, or combined display — uses
+  role="progressbar" and renders null for single-question surveys
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`SurveyProgress` renders a question counter and/or progress bar for multi-step surveys. It returns `null` when `total` is 1 or less — no progress indicator is needed for single-question surveys.
+
+## Import
+
+```tsx
+import { SurveyProgress } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+import { SurveyProgress, useSurvey } from '@tour-kit/surveys';
+
+function SurveyWithProgress() {
+  const survey = useSurvey('multi-step-survey');
+  const currentStep = (survey.state?.currentStep ?? 0) + 1;
+  const totalSteps = survey.config?.questions.length ?? 1;
+
+  return (
+    <div>
+      <SurveyProgress
+        current={currentStep}
+        total={totalSteps}
+        mode="both"
+      />
+      {/* question content */}
+    </div>
+  );
+}
+```
+
+### Text only
+
+```tsx
+<SurveyProgress current={2} total={5} mode="text" />
+// Renders: "Question 2 of 5"
+```
+
+### Bar only
+
+```tsx
+<SurveyProgress current={3} total={5} mode="bar" size="sm" />
+```
+
+### Custom label template
+
+```tsx
+<SurveyProgress
+  current={2}
+  total={4}
+  labelTemplate="Step {current} / {total}"
+/>
+// Renders: "Step 2 / 4"
+```
+
+## Props
+
+<TypeTable
+  type={{
+    current: {
+      type: 'number',
+      required: true,
+      description: '1-based current step number.',
+    },
+    total: {
+      type: 'number',
+      required: true,
+      description: 'Total number of steps. Component returns null when total ≤ 1.',
+    },
+    mode: {
+      type: "'text' | 'bar' | 'both'",
+      default: "'both'",
+      description: 'Display mode: text label, progress bar, or both.',
+    },
+    labelTemplate: {
+      type: 'string',
+      default: "'Question {current} of {total}'",
+      description: 'Template string with {current} and {total} placeholders.',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg'",
+      default: "'md'",
+      description: 'CVA size variant for the progress bar height.',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names on the outer container.',
+    },
+  }}
+/>
+
+## Variants
+
+`SurveyProgress` uses `progressBarVariants` from CVA for the filled bar:
+
+| Variant | Values | Default |
+|---------|--------|---------|
+| `size` | `'sm'` `'md'` `'lg'` | `'md'` |
+
+Bar heights: `sm` → `h-1`, `md` → `h-2`, `lg` → `h-3`.
+
+## Accessibility
+
+- Progress bar: `role="progressbar"`, `aria-valuenow={current}`, `aria-valuemin={1}`, `aria-valuemax={total}`, `aria-label="Survey progress"`
+- Text label: rendered in a `<span aria-live="polite">` so screen readers announce step changes
+
+## Related
+
+- [useSurvey](/docs/surveys/hooks/use-survey) — Read currentStep from survey state
+- [SurveyModal](/docs/surveys/components/survey-modal) — Compose SurveyProgress inside display components

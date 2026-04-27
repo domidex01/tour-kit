@@ -1,0 +1,107 @@
+---
+title: SurveySlideout
+description: >-
+  Side panel that slides in from the left or right edge, built on Radix UI
+  Dialog with configurable position and size variants
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+`SurveySlideout` is a full-height side panel built on `@radix-ui/react-dialog`. It behaves identically to `SurveyModal` in terms of state management and dismiss handling, but positions content at the viewport edge.
+
+## Import
+
+```tsx
+import { SurveySlideout } from '@tour-kit/surveys';
+```
+
+## Usage
+
+```tsx
+import { SurveySlideout, QuestionText, useSurvey } from '@tour-kit/surveys';
+
+function CancellationSurvey() {
+  const survey = useSurvey('cancel-reason');
+
+  return (
+    <SurveySlideout surveyId="cancel-reason" position="right" size="md">
+      <QuestionText
+        id="reason"
+        label="What made you decide to cancel?"
+        mode="textarea"
+        rows={4}
+        onChange={(value) => survey.answer('reason', value)}
+      />
+      <button onClick={survey.complete}>Submit</button>
+    </SurveySlideout>
+  );
+}
+```
+
+## Props
+
+<TypeTable
+  type={{
+    surveyId: {
+      type: 'string',
+      required: true,
+      description: 'Id of the survey this slideout belongs to.',
+    },
+    open: {
+      type: 'boolean',
+      description: 'Controlled open state.',
+    },
+    onOpenChange: {
+      type: '(open: boolean) => void',
+      description: 'Called when open state changes.',
+    },
+    options: {
+      type: 'SlideoutOptions',
+      description: 'Override behaviour: position, size, closeOnOverlayClick, closeOnEscape, showCloseButton.',
+    },
+    position: {
+      type: "'left' | 'right'",
+      default: "'right'",
+      description: 'CVA position variant. Overrides options.position and SurveyConfig.slideoutOptions.position.',
+    },
+    size: {
+      type: "'sm' | 'md' | 'lg'",
+      default: "'md'",
+      description: 'CVA size variant controlling panel width.',
+    },
+    children: {
+      type: 'ReactNode',
+      description: 'Survey content.',
+    },
+    className: {
+      type: 'string',
+      description: 'Additional class names on the panel content element.',
+    },
+  }}
+/>
+
+## Variants
+
+| Variant | Values | Default |
+|---------|--------|---------|
+| `position` | `'left'` `'right'` | `'right'` |
+| `size` | `'sm'` `'md'` `'lg'` | `'md'` |
+
+Width at each size: `sm` → `max-w-sm`, `md` → `max-w-md`, `lg` → `max-w-lg` (at `sm` breakpoint+, 75vw below).
+
+## SlideoutOptions defaults
+
+```ts
+{
+  position: 'right',
+  size: 'md',
+  closeOnOverlayClick: true,
+  closeOnEscape: true,
+  showCloseButton: true,
+}
+```
+
+## Related
+
+- [SurveyModal](/docs/surveys/components/survey-modal)
+- [SlideoutOptions type](/docs/surveys/types#slideout-options)
