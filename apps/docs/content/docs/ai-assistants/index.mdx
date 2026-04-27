@@ -8,6 +8,51 @@ icon: Bot
 
 userTourKit provides machine-readable documentation files following the [llms.txt standard](https://llmstxt.org) for AI coding assistants and LLMs.
 
+## Claude Code Plugin
+
+The fastest way to use userTourKit with Claude Code is the [`user-tour-kit`](https://github.com/domidex01/tour-kit) plugin — it ships **6 task-specific skills** that recognize phrases like *"add an onboarding tour"* or *"build a getting-started checklist"* and walk Claude through the right install + provider setup using the matching `@tour-kit/*` package.
+
+### Install (Claude Code)
+
+Run these inside a Claude Code session (the same prompt where you'd type `/help`) — **not** in your shell. Run them **one at a time**, pressing Enter between commands.
+
+**1. Add the marketplace**
+
+```text
+/plugin marketplace add domidex01/tour-kit
+```
+
+**2. Install the plugin** (after step 1 finishes)
+
+```text
+/plugin install user-tour-kit@user-tour-kit
+```
+
+After install, all 6 skills appear under the `user-tour-kit:` namespace in `/help`.
+
+### Available skills
+
+| Skill | Triggers on |
+|---|---|
+| `/user-tour-kit:add-product-tour` | "add a tour", "user tour", "onboarding walkthrough", "FTUE" |
+| `/user-tour-kit:add-onboarding-checklist` | "onboarding checklist", "getting-started panel", "Stripe-style activation" |
+| `/user-tour-kit:add-product-announcement` | "what's new modal", "in-app changelog", "promotional banner" |
+| `/user-tour-kit:add-feature-hint` | "hotspot", "beacon", "pulsing dot", "single tooltip" |
+| `/user-tour-kit:add-adoption-tracking` | "feature adoption", "feature usage tracking", "Pendo-style adoption" |
+| `/user-tour-kit:add-ai-tour-assistant` | "AI onboarding chat", "tour copilot", "RAG over docs for onboarding" |
+
+### Other AI tools (Cursor, Cline, etc.)
+
+The skills follow the open [Agent Skills](https://agentskills.io) standard. Clone the repo and point your tool at the `user-tour-kit/skills/` directory:
+
+```bash
+git clone https://github.com/domidex01/tour-kit
+# Each subdirectory of tour-kit/user-tour-kit/skills/ is a self-contained
+# SKILL.md that any Agent-Skills-compatible tool can load.
+```
+
+For ChatGPT/Claude.ai/Gemini (no plugin support), use the [llms.txt files](#available-files) below instead.
+
 ## Available Files
 
 ### llms.txt — Documentation Index
