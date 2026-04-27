@@ -527,6 +527,97 @@ interface AudienceCondition {
 
 ---
 
+## Component Props
+
+The headless API exposes per-question render-prop callbacks (`Question*RenderProps`); the styled components below export their own `Question*Props` interfaces. Use the `*Props` types when wrapping or theming the styled components, and the `*RenderProps` types when building custom UI on top of the headless primitives.
+
+### QuestionRatingProps
+
+```ts
+interface QuestionRatingProps {
+  id: string
+  min?: number   // default 0
+  max?: number   // default 10
+  style?: 'numeric' | 'stars' | 'emoji'
+  size?: 'sm' | 'md' | 'lg'
+  value?: number | null
+  onChange?: (value: number) => void
+  label: string
+  lowLabel?: string
+  highLabel?: string
+  isRequired?: boolean
+  emojiMap?: Record<number, string>
+  className?: string
+}
+```
+
+### QuestionTextProps
+
+```ts
+interface QuestionTextProps {
+  id: string
+  mode?: 'text' | 'textarea'
+  value?: string
+  onChange?: (value: string) => void
+  placeholder?: string
+  maxLength?: number
+  showCharacterCount?: boolean
+  rows?: number
+  isRequired?: boolean
+  label: string
+  isAutoFocus?: boolean
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+}
+```
+
+### QuestionSelectProps
+
+```ts
+interface QuestionSelectProps {
+  id: string
+  mode?: 'single' | 'multi'
+  options: SelectOption[]
+  value?: string | string[]
+  onChange?: (value: string | string[]) => void
+  label: string
+  isRequired?: boolean
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+}
+```
+
+### QuestionBooleanProps
+
+```ts
+interface QuestionBooleanProps {
+  id: string
+  value?: boolean | null
+  onChange?: (value: boolean) => void
+  label: string
+  yesLabel?: string
+  noLabel?: string
+  isRequired?: boolean
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+}
+```
+
+### SurveyProgressProps
+
+```ts
+interface SurveyProgressProps {
+  current: number
+  total: number
+  mode?: 'text' | 'bar' | 'both'
+  labelTemplate?: string
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+}
+```
+
+---
+
 ## Related
 
 - [SurveysProvider](/docs/surveys/providers/surveys-provider) — Uses SurveysProviderProps

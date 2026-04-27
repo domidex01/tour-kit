@@ -1,0 +1,489 @@
+---
+title: '@tour-kit/ai API'
+description: >-
+  Complete API reference for @tour-kit/ai — providers, hooks, components,
+  variants, and server-side route + RAG helpers
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Complete API reference for the AI chat package. The package has two entry points: the **client** (`@tour-kit/ai`) for React surface, and the **server** (`@tour-kit/ai/server`) for route handlers and RAG/embedding pipelines.
+
+<Callout type="info">
+For tutorial-level guides see [Quick Start](/docs/ai/quick-start), [CAG Guide](/docs/ai/cag-guide), and [RAG Guide](/docs/ai/rag-guide). This page is the API surface only.
+</Callout>
+
+---
+
+## Providers
+
+### AiChatProvider
+
+```tsx
+import { AiChatProvider } from '@tour-kit/ai'
+
+<AiChatProvider config={{ endpoint: '/api/chat' }}>
+  {children}
+</AiChatProvider>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `config` | `AiChatConfig` | Chat configuration (endpoint, suggestions, rateLimit, ...) |
+| `children` | `ReactNode` | App tree |
+
+### AiChatContext
+
+Raw React context value. Prefer `useAiChat` / `useAiChatContext`. Exposed for advanced cases (custom providers, testing).
+
+```tsx
+import { AiChatContext } from '@tour-kit/ai'
+type Value = React.ContextType<typeof AiChatContext> // AiChatContextValue | null
+```
+
+---
+
+## Components
+
+| Export | Notes |
+|--------|-------|
+| `AiChatPanel` | Pre-built panel (header + messages + suggestions + input) |
+| `AiChatToggle` | Floating open/close button |
+| `AiChatHeader` | Title + close-button bar |
+| `AiChatMessageList` | Scrollable message list |
+| `AiChatMessage` | Single message bubble (role-aware) |
+| `AiChatInput` | Input + send button |
+| `AiChatSuggestions` | Suggestion chip strip |
+| `AiChatPortal` | Portal wrapper |
+
+See [Components](/docs/ai/components) for prop tables and examples.
+
+---
+
+## Hooks
+
+| Hook | Return | Notes |
+|------|--------|-------|
+| `useAiChat` | `UseAiChatReturn` | Primary chat state + actions |
+| `useTourAssistant` | `UseTourAssistantReturn` | Tour-aware extension of `useAiChat` |
+| `useSuggestions` | `UseSuggestionsReturn` | Static + dynamic suggestion helpers |
+| `useOptionalSuggestions` | `UseSuggestionsReturn` | Deprecated alias for `useSuggestions` |
+| `useAiChatContext` | `AiChatContextValue` | Low-level context (unsafe escape hatch) |
+
+See [Hooks](/docs/ai/hooks) for usage and full return types.
+
+---
+
+## Variants
+
+CVA helpers exported for users who want to extend or override styling.
+
+| Export | Variant slots |
+|--------|---------------|
+| `aiChatPanelVariants` | `size`: `'default' \| 'sm' \| 'lg'` |
+| `aiChatToggleVariants` | `size`: `'default' \| 'sm' \| 'lg'` |
+| `aiChatHeaderVariants` | (compound classes only) |
+| `aiChatMessageVariants` | `role`: `'user' \| 'assistant'` |
+| `aiChatSuggestionChipVariants` | (compound classes only) |
+
+```tsx
+import { aiChatPanelVariants } from '@tour-kit/ai'
+
+<div className={aiChatPanelVariants({ size: 'lg' })}>...</div>
+```
+
+---
+
+## Utilities
+
+### createRateLimiter / SlidingWindowRateLimiter
+
+Sliding-window client-side rate limiter. The class is exported for advanced patterns; `createRateLimiter` is the convenience factory.
+
+```tsx
+import { createRateLimiter, SlidingWindowRateLimiter } from '@tour-kit/ai'
+
+const limiter = createRateLimiter({ maxMessages: 10, windowMs: 60_000 })
+if (!limiter.recordMessage()) showToast('Slow down')
+const status = limiter.getStatus() // RateLimitStatus
+```
+
+### createAnalyticsBridge
+
+Adapter that forwards `AiChatEvent`s to `@tour-kit/analytics`'s `track`.
+
+```tsx
+import { createAnalyticsBridge } from '@tour-kit/ai'
+import { useAnalytics } from '@tour-kit/analytics'
+
+const { track } = useAnalytics()
+const onEvent = createAnalyticsBridge({ track, prefix: 'ai_chat' })
+
+<AiChatProvider config={{ endpoint: '/api/chat', onEvent }}>{children}</AiChatProvider>
+```
+
+### assembleTourContext
+
+Pure helper that derives the `TourAssistantContext` snapshot from a `useTourContext()` value. Used internally by `useTourAssistant`. Exposed for tests and custom integrations.
+
+```tsx
+import { assembleTourContext } from '@tour-kit/ai'
+
+const ctx = assembleTourContext(tourState) // TourAssistantContext
+```
+
+---
+
+## Client Types
+
+### AiChatConfig
+
+```tsx
+interface AiChatConfig {
+  endpoint: string
+  chatId?: string
+  tourContext?: boolean
+  suggestions?: SuggestionsConfig
+  persistence?: PersistenceConfig
+  rateLimit?: ClientRateLimitConfig
+  onEvent?(event: AiChatEvent): void
+  strings?: Partial<AiChatStrings>
+  errorMessage?: string
+}
+```
+
+### SuggestionsConfig
+
+```tsx
+interface SuggestionsConfig {
+  static?: string[]
+  dynamic?: boolean
+  cacheTtl?: number // default 60_000
+}
+```
+
+### PersistenceConfig / PersistenceAdapter
+
+```tsx
+type PersistenceConfig = 'local' | { adapter: PersistenceAdapter }
+
+interface PersistenceAdapter {
+  save(chatId: string, messages: UIMessage[]): Promise<void>
+  load(chatId: string): Promise<UIMessage[] | null>
+  clear(chatId: string): Promise<void>
+}
+```
+
+### ClientRateLimitConfig
+
+```tsx
+interface ClientRateLimitConfig {
+  maxMessages?: number // default 10
+  windowMs?: number    // default 60_000
+}
+```
+
+### RateLimitStatus
+
+```tsx
+interface RateLimitStatus {
+  canSend: boolean
+  remaining: number
+  resetInMs: number
+}
+```
+
+### AnalyticsBridgeConfig
+
+```tsx
+interface AnalyticsBridgeConfig {
+  track: (eventName: string, properties?: Record<string, unknown>) => void
+  prefix?: string // default 'ai_chat'
+}
+```
+
+### AiChatStrings
+
+```tsx
+interface AiChatStrings {
+  placeholder: string
+  send: string
+  errorMessage: string
+  emptyState: string
+  stopGenerating: string
+  retry: string
+  title: string
+  closeLabel: string
+  ratePositiveLabel: string
+  rateNegativeLabel: string
+}
+```
+
+### AiChatState
+
+```tsx
+interface AiChatState {
+  messages: UIMessage[]
+  status: ChatStatus
+  error: Error | null
+  isOpen: boolean
+}
+```
+
+### ChatStatus
+
+```tsx
+type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error'
+```
+
+### AiChatEvent / AiChatEventType
+
+```tsx
+type AiChatEventType =
+  | 'chat_opened'
+  | 'chat_closed'
+  | 'message_sent'
+  | 'response_received'
+  | 'suggestion_clicked'
+  | 'message_rated'
+  | 'error'
+
+interface AiChatEvent {
+  type: AiChatEventType
+  data: Record<string, unknown>
+  timestamp: Date
+}
+```
+
+### AiChatContextValue
+
+The shape returned by `useAiChatContext()`. Combines `AiChatState` with actions and configuration. Refer to source for the full union; the safer accessor is `useAiChat`.
+
+### Component Props
+
+| Type | Component |
+|------|-----------|
+| `AiChatPanelProps` | `<AiChatPanel>` |
+| `AiChatToggleProps` | `<AiChatToggle>` |
+| `AiChatHeaderProps` | `<AiChatHeader>` |
+| `AiChatMessageListProps` | `<AiChatMessageList>` |
+| `AiChatMessageProps` | `<AiChatMessage>` |
+| `AiChatInputProps` | `<AiChatInput>` |
+| `AiChatSuggestionsProps` | `<AiChatSuggestions>` |
+| `AiChatPortalProps` | `<AiChatPortal>` |
+
+See [Components](/docs/ai/components) for prop tables.
+
+### Tour Assistant Types
+
+```tsx
+interface TourAssistantContext {
+  activeTour: { id: string; name: string; currentStep: number; totalSteps: number } | null
+  activeStep: { id: string; title: string; content: string } | null
+  completedTours: string[]
+  checklistProgress: { completed: number; total: number } | null
+}
+
+interface UseTourAssistantReturn extends UseAiChatReturn {
+  isLoading: boolean
+  suggestions: string[]
+  askAboutStep(): void
+  askForHelp(topic?: string): void
+  tourContext: TourAssistantContext
+}
+```
+
+---
+
+## Server (`@tour-kit/ai/server`)
+
+Server entry. Node-only — never import from client code.
+
+### Route Handlers
+
+```tsx
+import { createChatRouteHandler } from '@tour-kit/ai/server'
+
+export const POST = createChatRouteHandler({
+  model: 'openai/gpt-4o-mini',
+  context: { strategy: 'context-stuffing', documents },
+  instructions: { tone: 'friendly' },
+  rateLimit: { identifier: (req) => req.headers.get('x-user-id') ?? 'anon' },
+})
+```
+
+| Export | Returns | Notes |
+|--------|---------|-------|
+| `createChatRouteHandler(options)` | `{ POST }` | App-router compatible POST handler |
+| `createSystemPrompt(config?)` | `string` | Build the layered system prompt manually |
+
+### RAG Pipeline
+
+```tsx
+import {
+  createRetriever,
+  createRAGMiddleware,
+  createInMemoryVectorStore,
+  createAiSdkEmbedding,
+  chunkDocument,
+  chunkDocuments,
+} from '@tour-kit/ai/server'
+```
+
+| Export | Notes |
+|--------|-------|
+| `createRetriever(opts)` | Returns `Retriever` (`.index()`, `.search()`) |
+| `createRAGMiddleware(opts)` | AI-SDK middleware that injects retrieved docs |
+| `createInMemoryVectorStore()` | `VectorStoreAdapter` with no persistence |
+| `createAiSdkEmbedding(opts)` | `EmbeddingAdapter` backed by AI SDK |
+| `chunkDocument(doc, size, overlap)` | Split a single doc |
+| `chunkDocuments(docs, size, overlap)` | Split many docs |
+
+### Suggestions
+
+```tsx
+import { generateSuggestions, parseSuggestions } from '@tour-kit/ai/server'
+```
+
+| Export | Notes |
+|--------|-------|
+| `generateSuggestions(opts)` | Calls the LLM for follow-up suggestions |
+| `parseSuggestions(text, count)` | Parse a numbered list response |
+
+### Rate Limiting
+
+```tsx
+import { createServerRateLimiter, createInMemoryRateLimitStore } from '@tour-kit/ai/server'
+```
+
+| Export | Notes |
+|--------|-------|
+| `createServerRateLimiter(config)` | Returns `{ check(req), record(req) }` |
+| `createInMemoryRateLimitStore()` | Default store; replace with Redis in production |
+
+---
+
+## Server Types
+
+### ChatRouteHandlerOptions
+
+```tsx
+interface ChatRouteHandlerOptions {
+  model: LanguageModel
+  context: ContextConfig
+  instructions?: InstructionsConfig
+  rateLimit?: ServerRateLimitConfig
+  beforeSend?(message): Promise<UIMessage | null> | UIMessage | null
+  beforeResponse?(response): Promise<string> | string
+  maxDuration?: number // default 30
+  onEvent?(event: AiChatEvent): void | Promise<void>
+}
+```
+
+### ContextConfig
+
+```tsx
+type ContextConfig = ContextStuffingConfig | RAGConfig
+
+interface ContextStuffingConfig {
+  strategy: 'context-stuffing'
+  documents: Document[]
+}
+
+interface RAGConfig {
+  strategy: 'rag'
+  documents: Document[]
+  embedding: EmbeddingAdapter
+  vectorStore?: VectorStoreAdapter
+  topK?: number
+  minScore?: number
+  chunkSize?: number
+  chunkOverlap?: number
+  rerank?: { model: string; topN?: number }
+}
+```
+
+### InstructionsConfig
+
+```tsx
+interface InstructionsConfig {
+  productName?: string
+  productDescription?: string
+  tone?: 'professional' | 'friendly' | 'concise'
+  boundaries?: string[]
+  custom?: string
+  override?: boolean
+}
+```
+
+### ServerRateLimitConfig / ServerRateLimitResult
+
+```tsx
+interface ServerRateLimitConfig {
+  maxMessages?: number
+  windowMs?: number
+  identifier: (req: Request) => string | Promise<string>
+  store?: RateLimitStore
+}
+
+interface ServerRateLimitResult {
+  allowed: boolean
+  count: number
+  limit: number
+  remaining: number
+  resetAt: number
+}
+```
+
+### RateLimitStore
+
+```tsx
+interface RateLimitStore {
+  increment(identifier: string, windowMs: number): Promise<{ count: number; resetAt: number }>
+  check(identifier: string): Promise<{ count: number; resetAt: number }>
+}
+```
+
+### Document / DocumentMetadata / RetrievedDocument
+
+```tsx
+interface Document {
+  id: string
+  content: string
+  metadata?: DocumentMetadata
+}
+
+interface DocumentMetadata {
+  source?: string
+  title?: string
+  tags?: string[]
+  [key: string]: unknown
+}
+
+interface RetrievedDocument extends Document {
+  score: number
+}
+```
+
+### VectorStoreAdapter
+
+```tsx
+interface VectorStoreAdapter {
+  name: string
+  upsert(documents: Document[], embeddings: number[][]): Promise<void>
+  search(embedding: number[], topK: number, minScore?: number): Promise<RetrievedDocument[]>
+  delete(ids: string[]): Promise<void>
+  clear(): Promise<void>
+}
+```
+
+### EmbeddingAdapter
+
+```tsx
+interface EmbeddingAdapter {
+  name: string
+  embed(text: string): Promise<number[]>
+  embedMany(texts: string[]): Promise<number[][]>
+  dimensions: number
+}
+```

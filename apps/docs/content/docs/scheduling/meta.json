@@ -1,5 +1,5 @@
 {
   "title": "@tour-kit/scheduling",
   "icon": "Calendar",
-  "pages": ["index", "hooks", "utilities", "types", "presets"]
+  "pages": ["index", "components", "hooks", "utilities", "types", "presets"]
 }

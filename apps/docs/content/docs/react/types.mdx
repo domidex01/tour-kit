@@ -1,0 +1,226 @@
+---
+title: Types
+description: >-
+  TypeScript reference for @tour-kit/react — component prop interfaces,
+  hook return shapes, multi-tour types, and shared cross-package aliases
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Type reference for `@tour-kit/react`. This package re-exports every type from `@tour-kit/core`, so consuming components only need a single import path. The types listed below are unique to the React surface (component props + multi-tour types). For the underlying tour/state types, see [`@tour-kit/core` types](/docs/core/types).
+
+## Tour Composition
+
+### TourProps
+
+Props for the declarative `<Tour>` component.
+
+```ts
+interface TourProps {
+  id: string
+  autoStart?: boolean
+  startAt?: number
+  config?: Omit<Tour, 'id' | 'steps'>
+  onStart?: () => void
+  onComplete?: () => void
+  onSkip?: () => void
+  onStepChange?: (step: TourStep, index: number) => void
+  children: React.ReactNode
+}
+```
+
+`Tour` and `TourStep` are re-exported from `@tour-kit/core`.
+
+## Card Components
+
+### TourCardProps
+
+```ts
+interface TourCardProps
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+    TourCardVariants {}
+```
+
+The card reads its content from the active tour step automatically — no `title` / `content` / `footer` props.
+
+### TourCardHeaderProps / TourCardContentProps / TourCardFooterProps
+
+```ts
+interface TourCardHeaderProps
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'title'>,
+    TourCardHeaderVariants {
+  title?: React.ReactNode
+  /** ID for accessibility (aria-labelledby) */
+  titleId: string
+  showClose?: boolean
+}
+
+interface TourCardContentProps
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+    TourCardContentVariants {
+  content?: React.ReactNode
+}
+
+interface TourCardFooterProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    TourCardFooterVariants {
+  currentStep: number
+  totalSteps: number
+  showNavigation?: boolean
+  showProgress?: boolean
+  isFirstStep: boolean
+  isLastStep: boolean
+  onPrev: () => void
+  onNext: () => void
+  onSkip: () => void
+}
+```
+
+## Navigation Components
+
+### TourNavigationProps
+
+```ts
+interface TourNavigationProps extends React.ComponentPropsWithoutRef<'div'> {
+  isFirstStep: boolean
+  isLastStep: boolean
+  onPrev: () => void
+  onNext: () => void
+  onSkip?: () => void
+  prevLabel?: string
+  nextLabel?: string
+  finishLabel?: string
+  skipLabel?: string
+  prevVariant?: TourButtonVariants['variant']
+  nextVariant?: TourButtonVariants['variant']
+}
+```
+
+### TourCloseProps
+
+```ts
+interface TourCloseProps
+  extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'> {
+  asChild?: boolean
+  children?: React.ReactNode | RenderProp
+}
+```
+
+### TourProgressProps
+
+```ts
+interface TourProgressProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    TourProgressVariants {
+  /** Current step (1-indexed) */
+  current: number
+  total: number
+}
+```
+
+### TourOverlayProps
+
+```ts
+interface TourOverlayProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    TourOverlayVariants {
+  onClick?: () => void
+}
+```
+
+### TourPortalProps
+
+```ts
+interface TourPortalProps {
+  children: React.ReactNode
+  /** Container element. Defaults to document.body */
+  container?: HTMLElement | null
+}
+```
+
+## Multi-Tour
+
+### MultiTourKitProviderProps
+
+```ts
+interface MultiTourKitProviderProps {
+  children: React.ReactNode
+  config?: TourKitConfig
+  router?: RouterAdapter
+  routePersistence?: MultiPagePersistenceConfig
+  /** Auto-navigate when step requires different route (default: true) */
+  autoNavigate?: boolean
+  onNavigationRequired?: (route: string, stepId: string) => void
+  onTourStart?: (tourId: string) => void
+  onTourComplete?: (tourId: string) => void
+  onTourSkip?: (tourId: string, stepIndex: number) => void
+  onStepView?: (tourId: string, stepId: string, stepIndex: number) => void
+}
+```
+
+### UseToursReturn
+
+Returned by [`useTours`](/docs/react/hooks/use-tours).
+
+```ts
+interface UseToursReturn {
+  tours: TourInfo[]
+  activeTourId: string | null
+  isAnyTourActive: boolean
+  completedTours: string[]
+  skippedTours: string[]
+  isTourCompleted: (tourId: string) => boolean
+  isTourSkipped: (tourId: string) => boolean
+  getTour: (tourId: string) => TourInfo | undefined
+}
+
+interface TourInfo {
+  id: string
+  stepCount: number
+}
+```
+
+## Variants
+
+CVA-derived variant prop types — see [Styling](/docs/react/styling) for slot-by-slot breakdowns.
+
+| Type | Companion variant fn | Slots |
+|------|----------------------|-------|
+| `TourCardVariants` | `tourCardVariants` | `size` |
+| `TourCardHeaderVariants` | `tourCardHeaderVariants` | `spacing` |
+| `TourCardContentVariants` | `tourCardContentVariants` | `spacing` |
+| `TourCardFooterVariants` | `tourCardFooterVariants` | `justify`, `spacing` |
+| `TourButtonVariants` | `tourButtonVariants` | `variant`, `size` |
+| `TourProgressVariants` | `tourProgressVariants` | `variant` (text/dots/bar) |
+| `TourProgressDotVariants` | `tourProgressDotVariants` | `size`, `active` |
+| `TourOverlayVariants` | `tourOverlayVariants` | `zIndex` |
+
+## Re-Exports from `@tour-kit/core`
+
+For convenience, the React package re-exports the following types — import either from `@tour-kit/react` or `@tour-kit/core`. They behave identically.
+
+| Re-exported type | Source |
+|------------------|--------|
+| `HintsState` | core/types |
+| `StepOptions` | core/types |
+| `TourCallbackContext` | core/types |
+| `TourOptions` | core/types |
+| `UseBranchReturn` | core/hooks |
+| `UseFocusTrapReturn` | core/hooks |
+| `UseRoutePersistenceReturn` | core/hooks |
+| `UseSpotlightReturn` | core/hooks |
+| `UseStepReturn` | core/hooks |
+
+See [`@tour-kit/core` types](/docs/core/types) for definitions.
+
+## Cross-Cutting
+
+| Type | Notes |
+|------|-------|
+| `UILibrary` | `'radix-ui' \| 'base-ui'` — see [Unified Slot](/docs/guides/unified-slot) |
+| `RenderProp` | `(props: Record<string, unknown>) => ReactElement` — see [Unified Slot](/docs/guides/unified-slot#renderprop) |
+| `UnifiedSlotProps` | Props for the `UnifiedSlot` component |
+
+<Callout type="info">
+For the headless render-prop variants of every component, see [Headless](/docs/react/headless). For router adapter types (`RouterAdapter`, `MultiPagePersistenceConfig`), see [Adapters](/docs/react/adapters).
+</Callout>

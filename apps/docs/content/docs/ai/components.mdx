@@ -76,6 +76,152 @@ You can customize rendering with `renderSuggestion`:
 | `renderSuggestion` | `(suggestion: string, onSelect: () => void) => ReactNode` | Custom chip renderer |
 | `className` | `string` | Container class name |
 
+## AiChatPanel
+
+Pre-built chat panel. Renders a header, message list, suggestions strip, and input.
+
+```tsx
+import { AiChatPanel } from '@tour-kit/ai'
+
+<AiChatPanel
+  size="default"
+  position="bottom-right"
+  title="Need help?"
+  emptyState={<p>Ask me anything.</p>}
+  showSuggestions
+/>
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `size` | `'default' \| 'sm' \| 'lg'` | Panel size variant |
+| `position` | `'bottom-right' \| 'bottom-left'` | Anchor position |
+| `title` | `ReactNode` | Header title content |
+| `emptyState` | `ReactNode` | Rendered when no messages |
+| `showSuggestions` | `boolean` | Show the suggestions chip strip |
+| `className` | `string` | Container class name |
+| `children` | `ReactNode` | Override the default body |
+| `renderMessage` | `(message, index) => ReactNode` | Custom message renderer |
+
+## AiChatToggle
+
+Floating button that opens/closes the chat panel.
+
+```tsx
+import { AiChatToggle } from '@tour-kit/ai'
+
+<AiChatToggle size="default" position="bottom-right" />
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `size` | `'default' \| 'sm' \| 'lg'` | Button size variant |
+| `position` | `'bottom-right' \| 'bottom-left'` | Anchor position |
+| `icon` | `ReactNode` | Override the default icon |
+| `className` | `string` | Class name override |
+
+## AiChatHeader
+
+Header bar inside `<AiChatPanel>`. Wires up the close button and panel title slot. Use directly when composing your own panel layout.
+
+```tsx
+import { AiChatHeader } from '@tour-kit/ai'
+
+<AiChatHeader title="Tour Kit AI" showClose onClose={() => /* ... */} />
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `title` | `ReactNode` | Header title |
+| `showClose` | `boolean` | Render the close button |
+| `onClose` | `() => void` | Close-button handler |
+| `className` | `string` | Class name override |
+| `children` | `ReactNode` | Replace default content |
+
+## AiChatMessageList
+
+Scrollable list of chat messages. Auto-scrolls to the latest message; respects `prefers-reduced-motion`.
+
+```tsx
+import { AiChatMessageList } from '@tour-kit/ai'
+
+<AiChatMessageList
+  emptyState={<p>Ask a question to get started.</p>}
+  renderMessage={(message) => <YourBubble message={message} />}
+/>
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `className` | `string` | Class name override |
+| `emptyState` | `ReactNode` | Rendered when there are no messages |
+| `renderMessage` | `(message, index) => ReactNode` | Custom per-message renderer |
+
+## AiChatMessage
+
+Single chat-message bubble. Pass `role` to switch between user/assistant styling.
+
+```tsx
+import { AiChatMessage } from '@tour-kit/ai'
+
+<AiChatMessage role="assistant">
+  Hi! How can I help with your tour?
+</AiChatMessage>
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `role` | `'user' \| 'assistant'` | Message author |
+| `children` | `ReactNode` | Message content |
+| `className` | `string` | Class name override |
+
+## AiChatInput
+
+Message input field with send button. Reads/writes through `useAiChat` so it stays in sync with the rest of the panel.
+
+```tsx
+import { AiChatInput } from '@tour-kit/ai'
+
+<AiChatInput placeholder="Ask anything..." />
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `className` | `string` | Class name override |
+| `placeholder` | `string` | Input placeholder |
+| `disabled` | `boolean` | Disable input (also auto-disables while streaming) |
+
+## AiChatPortal
+
+Portals its `children` to `container` (defaults to `document.body`). Use to escape stacking contexts or to mount the chat panel inside a specific overlay container.
+
+```tsx
+import { AiChatPortal, AiChatPanel } from '@tour-kit/ai'
+
+<AiChatPortal container={document.getElementById('chat-root')}>
+  <AiChatPanel />
+</AiChatPortal>
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `ReactNode` | Subtree to portal |
+| `container` | `HTMLElement \| null` | Target node; defaults to `document.body` when omitted |
+
 ## Headless Pattern
 
 All components follow the headless pattern. Use the hooks directly for full control:
@@ -97,3 +243,5 @@ function CustomChat() {
   )
 }
 ```
+
+See [Hooks](/docs/ai/hooks) for the full hook surface and [API Reference](/docs/api/ai) for variants/types.

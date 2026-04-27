@@ -108,3 +108,59 @@ const defaultScroll: ScrollConfig = {
   inline: 'nearest',
 };
 ```
+
+## TourKitProviderProps
+
+Props for the global `<TourKitProvider>` (re-exported from `@tour-kit/core` and `@tour-kit/react`).
+
+```typescript
+interface TourKitProviderProps {
+  children: React.ReactNode
+  config?: TourKitConfig
+  /** Text direction; 'auto' resolves from document.dir on mount. */
+  dir?: 'ltr' | 'rtl' | 'auto'
+  onTourStart?: (tourId: string) => void
+  onTourComplete?: (tourId: string) => void
+  onTourSkip?: (tourId: string, stepIndex: number) => void
+  onStepView?: (tourId: string, stepId: string, stepIndex: number) => void
+  onBranchAction?: (tourId, stepId, actionId, target) => void
+  onTourBranch?: (fromTourId, toTourId, fromStepId) => void
+}
+```
+
+## TourKitContextValue
+
+Returned by [`useTourKitContext`](/docs/core/hooks/use-tour-kit-context).
+
+```typescript
+interface TourKitContextValue {
+  config: TourKitConfig
+  direction: 'ltr' | 'rtl'
+  isRTL: boolean
+  onTourStart?: (tourId: string) => void
+  onTourComplete?: (tourId: string) => void
+  onTourSkip?: (tourId: string, stepIndex: number) => void
+  onStepView?: (tourId: string, stepId: string, stepIndex: number) => void
+  onBranchAction?: (tourId, stepId, actionId, target) => void
+  onTourBranch?: (fromTourId, toTourId, fromStepId) => void
+}
+```
+
+## Direction
+
+```typescript
+type Direction = 'ltr' | 'rtl' | 'auto'
+```
+
+## ElementPositionResult
+
+Returned by [`useElementPosition`](/docs/core/hooks/use-element-position).
+
+```typescript
+interface ElementPositionResult {
+  element: HTMLElement | null
+  rect: DOMRect | null
+  scrollParent: HTMLElement | null
+  update: () => void
+}
+```

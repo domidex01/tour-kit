@@ -6,6 +6,7 @@
     "checklist-task",
     "checklist-progress",
     "checklist-launcher",
-    "checklist-panel"
+    "checklist-panel",
+    "variants"
   ]
 }

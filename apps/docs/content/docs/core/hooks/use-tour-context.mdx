@@ -1,0 +1,54 @@
+---
+title: useTourContext
+description: >-
+  Low-level hook returning the raw TourContext value. Use useTour for typical
+  tour control; useTourContext for custom integrations.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Low-level access to the raw `TourContext` value. Most consumers should use [`useTour`](/docs/core/hooks/use-tour) — `useTourContext` is the escape hatch when you need direct access to context internals (custom hooks, testing, headless integrations).
+
+## Usage
+
+```tsx
+import { useTourContext } from '@tour-kit/core';
+
+function CustomTourBridge() {
+  const ctx = useTourContext();
+  // ctx is TourContextValue — full state machine + actions
+  return <span>Step: {ctx.state.currentStepIndex}</span>;
+}
+```
+
+`useTourContext` throws if no `<TourProvider>` is mounted above. Use [`useTourContextOptional`](#usetourcontextoptional) if rendering inside a tree that may or may not have a provider.
+
+## Return Value
+
+Returns `TourContextValue` — the full state + actions object. See [Types](/docs/core/types) for the complete shape.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `state` | `TourState` | Current tour state machine |
+| `actions` | `TourActions` | All tour actions (start, next, prev, skip, complete, ...) |
+| `config` | `TourKitConfig` | Resolved configuration |
+
+## useTourContextOptional
+
+Same as `useTourContext` but returns `null` instead of throwing when no provider is present. Useful for components that may render outside a tour context.
+
+```tsx
+import { useTourContextOptional } from '@tour-kit/core';
+
+function ContextAwareButton() {
+  const ctx = useTourContextOptional();
+  if (!ctx) return <button>Static</button>;
+  return <button onClick={ctx.actions.next}>Next</button>;
+}
+```
+
+Returns `TourContextValue | null`.
+
+<Callout type="info">
+For ergonomic tour control, prefer [`useTour`](/docs/core/hooks/use-tour). It wraps `useTourContext` and exposes a flatter API (`isActive`, `currentStep`, `start`, `next`, ...).
+</Callout>

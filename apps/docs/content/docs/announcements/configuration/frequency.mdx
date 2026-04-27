@@ -428,6 +428,45 @@ const intervalRule: FrequencyRule = {
 
 ---
 
+## Programmatic helpers
+
+Pure functions for evaluating frequency rules outside React (tests, server-side checks, custom orchestrators).
+
+### canShowByFrequency
+
+```ts
+import { canShowByFrequency } from '@tour-kit/announcements'
+
+declare function canShowByFrequency(
+  state: AnnouncementState,
+  rule: FrequencyRule | undefined,
+): boolean
+```
+
+Returns `true` when the rule allows showing right now, given the announcement's view history (`viewCount`, `lastShownAt`, dismissal record). Mirrors the gate the provider uses internally.
+
+### canShowAfterDismissal
+
+```ts
+import { canShowAfterDismissal } from '@tour-kit/announcements'
+
+declare function canShowAfterDismissal(rule: FrequencyRule | undefined): boolean
+```
+
+Returns `true` when the rule permits re-show after a dismissal (`'always'` or numeric-interval rules); `false` for `'once'` and `'session'`.
+
+### getViewLimit
+
+```ts
+import { getViewLimit } from '@tour-kit/announcements'
+
+declare function getViewLimit(rule: FrequencyRule | undefined): number
+```
+
+Returns the maximum view count permitted by the rule (`Infinity` for `'always'`, `1` for `'once'` and `'session'`, `n` for `{ type: 'times', count: n }`).
+
+---
+
 ## Related
 
 - [AnnouncementsProvider](/docs/announcements/providers/announcements-provider) - Configure storage

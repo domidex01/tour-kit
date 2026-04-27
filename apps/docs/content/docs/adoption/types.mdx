@@ -473,6 +473,45 @@ const buttonProps: FeatureButtonProps = {
 }
 ```
 
+## Dashboard Component Types
+
+### AdoptionStatsGridProps
+
+Props for the `<AdoptionStatsGrid>` dashboard widget.
+
+```ts
+interface AdoptionStatsGridProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    AdoptionStatsGridVariants {
+  /** Custom stat cards to include alongside defaults */
+  customStats?: AdoptionStatCardProps[]
+  /** Hide the built-in default stats */
+  hideDefaults?: boolean
+}
+```
+
+## Variants Types
+
+CVA-derived variant prop types. Use these when extending or wrapping the styled components.
+
+| Type | Companion variant fn |
+|------|----------------------|
+| `AdoptionNudgeVariants` | [`adoptionNudgeVariants`](/docs/adoption/components/adoption-nudge#variants) |
+| `FeatureButtonVariants` | [`featureButtonVariants`](/docs/adoption/components/feature-button#variants) |
+| `NewFeatureBadgeVariants` | [`newFeatureBadgeVariants`](/docs/adoption/components/new-feature-badge#variants) |
+
+```ts
+import type { AdoptionNudgeVariants } from '@tour-kit/adoption'
+
+type Size = AdoptionNudgeVariants['size'] // 'default' | 'sm' | 'lg' | ...
+```
+
+## Cross-Cutting Types
+
+| Type | Notes |
+|------|-------|
+| `UILibrary` | `'radix-ui' \| 'base-ui'` — see [Unified Slot](/docs/guides/unified-slot) |
+
 ## Next Steps
 
 - [AdoptionProvider](/docs/adoption/providers/adoption-provider) - Provider setup

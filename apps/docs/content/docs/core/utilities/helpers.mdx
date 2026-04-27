@@ -99,3 +99,109 @@ import { isElementVisible } from '@tour-kit/core';
 const visible = isElementVisible(element);
 // Returns: boolean
 ```
+
+## RTL Helpers
+
+### mirrorSide
+
+Mirror a `Side` for RTL layout. `left ↔ right`; `top` / `bottom` are unchanged.
+
+```tsx
+import { mirrorSide } from '@tour-kit/core';
+
+mirrorSide('left', true);  // 'right'
+mirrorSide('top',  true);  // 'top'
+```
+
+### mirrorAlignment
+
+Mirror an `Alignment` for RTL layout. `start ↔ end`; `center` is unchanged.
+
+```tsx
+import { mirrorAlignment } from '@tour-kit/core';
+
+mirrorAlignment('start', true); // 'end'
+```
+
+For full placement mirroring use `mirrorPlacementForRTL`.
+
+## Branch Helpers
+
+These are exported for tours that drive branch logic from custom UI. Most consumers don't need them — `<TourCard>` and the built-in navigation reach for branching automatically.
+
+### MAX_BRANCH_DEPTH
+
+```tsx
+import { MAX_BRANCH_DEPTH } from '@tour-kit/core';
+// 50 — recursion guard for nested branch resolvers
+```
+
+### Type Guards
+
+```tsx
+import {
+  isBranchResolver,
+  isBranchSkip,
+  isBranchToTour,
+  isBranchWait,
+  isSpecialTarget,
+  isLoopDetected,
+} from '@tour-kit/core';
+
+declare function isBranchResolver(
+  branch: Branch
+): branch is (context: BranchContext) => BranchTarget | Promise<BranchTarget>;
+
+declare function isBranchToTour(target: BranchTarget): target is BranchToTour;
+declare function isBranchSkip(target: BranchTarget): target is BranchSkip;
+declare function isBranchWait(target: BranchTarget): target is BranchWait;
+
+declare function isSpecialTarget(
+  target: BranchTarget
+): target is 'next' | 'prev' | 'complete' | 'skip' | 'restart';
+
+declare function isLoopDetected(
+  stepId: string,
+  visitCount: Map<string, number>,
+  maxVisits?: number
+): boolean;
+```
+
+### resolveBranch
+
+Resolve a `Branch` (static or function) into a concrete `BranchTarget`. Throws if depth exceeds `MAX_BRANCH_DEPTH`.
+
+```tsx
+import { resolveBranch } from '@tour-kit/core';
+
+const target = await resolveBranch(branch, context);
+```
+
+### resolveTargetToIndex
+
+Convert a `BranchTarget` to a step index inside the current tour.
+
+```tsx
+import { resolveTargetToIndex } from '@tour-kit/core';
+
+const stepIndex = resolveTargetToIndex(
+  target,
+  currentIndex,
+  stepIdMap,        // Map<string, number>
+  totalSteps,
+);
+// → number | null (null when the target cannot be resolved within this tour)
+```
+
+## Initial State
+
+### initialTourState
+
+The default `TourState` shape used when bootstrapping a tour reducer.
+
+```tsx
+import { initialTourState } from '@tour-kit/core';
+import type { TourState } from '@tour-kit/core';
+
+const state: TourState = { ...initialTourState };
+```

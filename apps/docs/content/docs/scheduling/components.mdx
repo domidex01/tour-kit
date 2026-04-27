@@ -1,0 +1,50 @@
+---
+title: Components
+description: >-
+  ScheduleGate component for the @tour-kit/scheduling package — pro license
+  enforcement wrapper for scheduled content
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`@tour-kit/scheduling` is a Pro package, so it ships with a single component used to enforce licensing at the render boundary.
+
+## ScheduleGate
+
+Wraps any subtree that depends on the scheduling APIs. When a valid Pro license is present, `children` render normally. Without a license, the children are replaced by a branded placeholder and a console warning is emitted. Dev environments (`localhost`, `127.0.0.1`, `*.local`) always render `children`.
+
+```tsx
+import { ScheduleGate, useSchedule } from '@tour-kit/scheduling'
+
+function ScheduledTour() {
+  const { isActive } = useSchedule({
+    startAt: '2026-01-15',
+    endAt: '2026-03-31',
+    timeOfDay: { start: '09:00', end: '17:00' },
+  })
+
+  return (
+    <ScheduleGate>
+      {isActive ? <Tour tourId="weekly" /> : null}
+    </ScheduleGate>
+  )
+}
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `ReactNode` | Subtree to render when licensed |
+
+### Behavior
+
+`ScheduleGate` is a thin wrapper around `<ProGate package="@tour-kit/scheduling">` from `@tour-kit/license`. You get the same gating semantics as every other Pro package:
+
+- **Licensed (production)** — children render as-is
+- **Unlicensed (production)** — children replaced with a placeholder; one-time `console.warn`
+- **Dev environment** — children always render; no warning
+
+<Callout type="info">
+For licensing setup and installation, see [Licensing](/docs/licensing). For the underlying gate, see [ProGate](/docs/api/license#progate).
+</Callout>

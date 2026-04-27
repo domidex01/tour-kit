@@ -540,6 +540,35 @@ const queueConfig: QueueConfig = {
 const priority: AnnouncementPriority = 'high';
 ```
 
+## Custom Comparator
+
+The queue is a `PriorityQueue<QueueItem>`. Order is determined by a comparator built from the configured `priorityOrder` and per-priority `weights`. To inspect or override that ordering, build the same comparator with `createComparator`.
+
+### createComparator
+
+```ts
+import { createComparator } from '@tour-kit/announcements'
+import type { PriorityOrder, AnnouncementPriority, QueueItem } from '@tour-kit/announcements'
+
+declare function createComparator(
+  order: PriorityOrder,
+  weights: Record<AnnouncementPriority, number>,
+): (a: QueueItem, b: QueueItem) => number
+```
+
+Returns a comparator suitable for `Array.prototype.sort`. The provider uses this same factory internally; building a comparator yourself is useful for tests or for sorting a snapshot of `useAnnouncementsContext().queue` outside the queue itself.
+
+```tsx
+const compare = createComparator('priority-then-time', {
+  critical: 1000,
+  high: 100,
+  normal: 10,
+  low: 1,
+})
+
+const sorted = [...queueSnapshot].sort(compare)
+```
+
 ---
 
 ## Related
@@ -547,3 +576,4 @@ const priority: AnnouncementPriority = 'high';
 - [Frequency Rules](/docs/announcements/configuration/frequency) - Control how often announcements show
 - [Audience Targeting](/docs/announcements/configuration/audience) - Target specific users
 - [useAnnouncementQueue](/docs/announcements/hooks/use-announcement-queue) - Programmatic queue control
+- [Type Reference → AnnouncementScheduler](/docs/announcements/types#announcementscheduler)

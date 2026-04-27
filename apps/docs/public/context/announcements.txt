@@ -310,45 +310,73 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: Quick Start
+Example 1: AnnouncementConfig
 
-    import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements';
+    interface AnnouncementConfig<TMetadata = any> {
+      // Required
+      id: string;
+      variant: AnnouncementVariant;
     
-    function App() {
-      return (
-        <AnnouncementsProvider
-          announcements={[
-            {
-              id: 'new-feature',
-              variant: 'modal',
-              priority: 'high',
-              title: 'New Export Feature!',
-              description: 'You can now export your data to CSV and PDF.',
-              primaryAction: {
-                label: 'Try It Now',
-                onClick: () => console.log('Action clicked'),
-              },
-            },
-          ]}
-        >
-          <AnnouncementModal id="new-feature" />
-          <YourApp />
-        </AnnouncementsProvider>
-      );
+      // Content
+      title?: string;
+      description?: string | ReactNode;
+      media?: AnnouncementMedia;
+    
+      // Actions
+      primaryAction?: AnnouncementAction;
+      secondaryAction?: AnnouncementAction;
+    
+      // Behavior
+      priority?: AnnouncementPriority;
+      frequency?: FrequencyRule;
+      audience?: AudienceCondition[];
+    
+      // Variant Options
+      modalOptions?: ModalOptions;
+      slideoutOptions?: SlideoutOptions;
+      bannerOptions?: BannerOptions;
+      toastOptions?: ToastOptions;
+      spotlightOptions?: SpotlightOptions;
+    
+      // Callbacks
+      onShow?: () => void;
+      onDismiss?: (reason: DismissalReason) => void;
+      onComplete?: () => void;
+    
+      // Custom data
+      metadata?: TMetadata;
     }
 
-Example 2: Modal
+Example 2: AnnouncementMedia
 
-    <AnnouncementModal
-      id="feature-launch"
-      size="md"
-      closeOnOverlayClick={false}
-    />
+    interface AnnouncementMedia {
+      type: 'image' | 'video' | 'custom';
+      src?: string;
+      alt?: string;
+      poster?: string;        // For videos
+      autoPlay?: boolean;     // For videos
+      component?: ReactNode;  // For custom
+    }
 
-Example 3: Slideout
+Example 3: AnnouncementMedia
 
-    <AnnouncementSlideout
-      id="product-update"
-      position="right"
-      size="md"
-    />
+    // Image
+    media: {
+      type: 'image',
+      src: '/feature.png',
+      alt: 'New feature screenshot',
+    }
+    
+    // Video
+    media: {
+      type: 'video',
+      src: '/demo.mp4',
+      poster: '/demo-poster.jpg',
+      autoPlay: true,
+    }
+    
+    // Custom component
+    media: {
+      type: 'custom',
+      component: <MyCustomMedia />,
+    }

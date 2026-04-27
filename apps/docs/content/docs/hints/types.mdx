@@ -1,0 +1,107 @@
+---
+title: Types
+description: >-
+  TypeScript reference for @tour-kit/hints — HintProps, HintHotspotProps,
+  HintTooltipProps, context types, and shared UnifiedSlot helpers
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Type reference for `@tour-kit/hints`. Most consumers reach for the components and hooks; this page documents the prop interfaces and context shape.
+
+## HintProps
+
+Props for the all-in-one `<Hint>` component.
+
+```tsx
+interface HintProps extends HintConfig, Omit<Partial<HintHotspotVariants>, 'pulse'> {
+  /** Custom content (overrides config.content) */
+  children?: React.ReactNode
+  /** Additional class name for the tooltip */
+  className?: string
+  /** Additional class name for the hotspot */
+  hotspotClassName?: string
+}
+```
+
+`HintConfig` ships with the hint definition (id, target, content, placement, pulse, persistence, lifecycle callbacks). `HintHotspotVariants` are the CVA-derived size/color/position props.
+
+## HintHotspotProps
+
+Props for the standalone hotspot (the pulsing dot). Use this when you compose your own tooltip layer.
+
+```tsx
+interface HintHotspotProps
+  extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'>,
+    HintHotspotVariants {
+  /** Target element's bounding rect */
+  targetRect: DOMRect
+  /** Position relative to the target element */
+  position: HotspotPosition
+  /** Whether the hint tooltip is open */
+  isOpen?: boolean
+  /** Use custom element via Slot */
+  asChild?: boolean
+}
+```
+
+`HotspotPosition` is `'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'`.
+
+## HintTooltipProps
+
+Props for the standalone tooltip layer.
+
+```tsx
+interface HintTooltipProps
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+    HintTooltipVariants {
+  /** Target element to anchor the tooltip to */
+  target: HTMLElement
+  /** Placement relative to target */
+  placement?: Placement
+  /** Called when the tooltip should close */
+  onClose: () => void
+  /** Content to display */
+  children: React.ReactNode
+  /** Use custom close button */
+  closeButton?: React.ReactNode
+  /** Use custom element via Slot */
+  asChild?: boolean
+}
+```
+
+## HintsContext
+
+Raw React context. Prefer [`useHintsContext`](/docs/hints/hooks#usehintscontext) — it throws when used outside `<HintsProvider>`.
+
+```tsx
+declare const HintsContext: React.Context<HintsContextValue | null>
+```
+
+### HintsContextValue
+
+```tsx
+interface HintsContextValue {
+  hints: Map<string, HintState>
+  activeHint: string | null
+  registerHint: (id: string) => void
+  unregisterHint: (id: string) => void
+  showHint: (id: string) => void
+  hideHint: (id: string) => void
+  dismissHint: (id: string) => void
+  resetHint: (id: string) => void
+  resetAllHints: () => void
+}
+```
+
+## UILibrary
+
+Discriminator used by [Unified Slot](/docs/guides/unified-slot) to switch between Radix UI and Base UI composition. Re-exported from `@tour-kit/hints` for convenience.
+
+```tsx
+type UILibrary = 'radix-ui' | 'base-ui'
+```
+
+<Callout type="info">
+The `UILibraryProvider`, `UnifiedSlot`, and `RenderProp` types are documented in [Unified Slot](/docs/guides/unified-slot).
+</Callout>

@@ -1,0 +1,55 @@
+---
+title: useAnnouncementsContext
+description: >-
+  Low-level hook returning the raw AnnouncementsProvider context — registered
+  announcements, queue, queue config, and the full action surface
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Low-level access to the raw `AnnouncementsContext`. Most consumers should use [`useAnnouncement`](/docs/announcements/hooks/use-announcement) or [`useAnnouncements`](/docs/announcements/hooks/use-announcements) — `useAnnouncementsContext` is the escape hatch when you need everything at once (queue dashboards, debug panels, custom orchestration).
+
+`useAnnouncementsContext` throws if no `<AnnouncementsProvider>` is mounted above.
+
+## Usage
+
+```tsx
+import { useAnnouncementsContext } from '@tour-kit/announcements';
+
+function QueueDebugger() {
+  const { announcements, activeAnnouncement, queue, clearQueue } = useAnnouncementsContext();
+  return (
+    <aside>
+      <p>Active: {activeAnnouncement ?? 'none'}</p>
+      <p>Queue length: {queue.length}</p>
+      <button onClick={clearQueue}>Clear queue</button>
+    </aside>
+  );
+}
+```
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `announcements` | `Map<string, AnnouncementState>` | All registered announcements |
+| `activeAnnouncement` | `string \| null` | Currently visible announcement id |
+| `queue` | `string[]` | Pending announcement ids |
+| `queueConfig` | `QueueConfig` | Resolved queue configuration |
+| `register` | `(config) => void` | Register a new announcement |
+| `unregister` | `(id) => void` | Remove an announcement |
+| `show` | `(id) => void` | Show or queue an announcement |
+| `hide` | `(id) => void` | Temporarily hide |
+| `dismiss` | `(id, reason?) => void` | Persist dismissal |
+| `complete` | `(id) => void` | Mark primary action taken |
+| `reset` | `(id) => void` | Reset a dismissed announcement |
+| `resetAll` | `() => void` | Reset every dismissed announcement |
+| `getState` | `(id) => AnnouncementState \| undefined` | Read state |
+| `getConfig` | `(id) => AnnouncementConfig \| undefined` | Read config |
+| `canShow` | `(id) => boolean` | Frequency/schedule/audience evaluation |
+| `showNext` | `() => void` | Pop next from the queue |
+| `clearQueue` | `() => void` | Drop all queued announcements |
+
+<Callout type="info">
+For typical flows, prefer [`useAnnouncement`](/docs/announcements/hooks/use-announcement) for single-announcement control or [`useAnnouncementQueue`](/docs/announcements/hooks/use-announcement-queue) for queue inspection.
+</Callout>

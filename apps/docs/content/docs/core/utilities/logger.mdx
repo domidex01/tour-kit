@@ -84,6 +84,17 @@ logger.configure({ level: 'silent' });
 
 ### Configuration Options
 
+```ts
+interface LoggerConfig {
+  /** Minimum level to log. Default: 'warn' (dev) / 'error' (prod) */
+  level: LogLevel
+  /** Prefix for all log messages. Default: '[tour-kit]' */
+  prefix: string
+}
+
+type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'silent'
+```
+
 <TypeTable
   type={{
     level: {

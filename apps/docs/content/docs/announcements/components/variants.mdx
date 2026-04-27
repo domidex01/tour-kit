@@ -1,0 +1,68 @@
+---
+title: Variants
+description: >-
+  CVA variant exports for @tour-kit/announcements — bannerVariants,
+  modalContentVariants, modalOverlayVariants, slideoutContentVariants,
+  toastVariants, and the full styling surface
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Each styled component is built on a `cva()` call that exposes its slot/size/variant matrix. Import the variant function to extend or compose the classes; import the matching `*Variants` type to get prop-level autocomplete.
+
+```tsx
+import { modalContentVariants } from '@tour-kit/announcements'
+
+<div className={modalContentVariants({ size: 'lg' })}>
+  {/* ... */}
+</div>
+```
+
+```tsx
+import type { ModalContentVariants } from '@tour-kit/announcements'
+
+type ModalSize = ModalContentVariants['size'] // 'sm' | 'md' | 'lg' | 'xl' | 'full'
+```
+
+## Modal
+
+| Variant fn | Slots |
+|------------|-------|
+| `modalContentVariants` | `size`: `'sm' \| 'md' \| 'lg' \| 'xl' \| 'full'` |
+| `modalOverlayVariants` | (compound classes only) |
+
+## Slideout
+
+| Variant fn | Slots |
+|------------|-------|
+| `slideoutContentVariants` | width / direction (see source) |
+| `slideoutOverlayVariants` | (compound classes only) |
+
+## Banner
+
+| Variant fn | Slots |
+|------------|-------|
+| `bannerVariants` | `position`, `tone` (see source) |
+
+## Toast
+
+| Variant fn | Slots |
+|------------|-------|
+| `toastVariants` | `variant` (default / success / warning / destructive) |
+| `toastContainerVariants` | `position` |
+| `toastProgressVariants` | (compound classes only) |
+
+## Spotlight
+
+| Variant fn | Slots |
+|------------|-------|
+| `spotlightContentVariants` | `placement` (see source) |
+| `spotlightOverlayVariants` | (compound classes only) |
+
+## Type aliases
+
+Every variant function above has a matching `VariantProps` type alias (e.g. `ModalContentVariants`, `BannerVariants`, ...) — listed in [Type Reference](/docs/announcements/types#variants-types).
+
+<Callout type="info">
+For overlay/blur slots, see [`AnnouncementOverlayProps`](/docs/announcements/types#announcementoverlayprops) — the `overlayVariants` slots cascade through that interface.
+</Callout>

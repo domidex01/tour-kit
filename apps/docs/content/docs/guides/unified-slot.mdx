@@ -1,0 +1,123 @@
+---
+title: Unified Slot (Radix UI + Base UI)
+description: >-
+  Single composition primitive that supports both Radix UI's asChild element
+  cloning and Base UI's render-prop style — covers UnifiedSlot, UILibrary,
+  UILibraryProvider, and the RenderProp shape
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Tour Kit's UI packages need to compose with whatever component primitives the host app already uses. Two patterns dominate:
+
+| Pattern | Library | Shape |
+|---------|---------|-------|
+| `asChild` element cloning | Radix UI | `<Button asChild><MyLink>...</MyLink></Button>` |
+| Render prop | Base UI | `<Button render={(props) => <MyLink {...props}>...</MyLink>} />` |
+
+Every Tour Kit UI package — `@tour-kit/react`, `@tour-kit/hints`, `@tour-kit/adoption`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/media`, `@tour-kit/surveys` — ships a `UnifiedSlot` that handles both.
+
+## Consumer usage
+
+### Radix style (`asChild`)
+
+```tsx
+import { TourCardFooter } from '@tour-kit/react'
+
+<TourCardFooter asChild>
+  <MyCustomFooter />
+</TourCardFooter>
+```
+
+### Base UI style (render prop)
+
+```tsx
+import { TourCardFooter } from '@tour-kit/react'
+
+<TourCardFooter>
+  {(props) => <MyCustomFooter {...props} />}
+</TourCardFooter>
+```
+
+Both produce identical output. Refs from parent and child are merged automatically.
+
+## Switching libraries globally
+
+`UILibraryProvider` sets the default integration shape for everything below it. Components consult `useUILibrary()` to decide which compositional path to take when both work.
+
+```tsx
+import { UILibraryProvider } from '@tour-kit/react'
+
+<UILibraryProvider library="base-ui">
+  <App />
+</UILibraryProvider>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `library` | `UILibrary` | `'radix-ui' \| 'base-ui'`. Defaults to `'radix-ui'`. |
+| `children` | `ReactNode` | App tree |
+
+`UILibraryProvider` is exported from every UI package so you can scope the choice (e.g. one part of the app on Radix, another on Base UI).
+
+## Types
+
+### UILibrary
+
+```ts
+type UILibrary = 'radix-ui' | 'base-ui'
+```
+
+### UnifiedSlotProps
+
+```ts
+interface UnifiedSlotProps {
+  children: React.ReactNode | RenderProp
+  // ...standard React props get merged onto the rendered element
+}
+```
+
+### RenderProp
+
+```ts
+type RenderProp = (props: Record<string, unknown>) => React.ReactElement
+```
+
+### UILibraryProviderProps
+
+```ts
+interface UILibraryProviderProps {
+  library?: UILibrary
+  children: React.ReactNode
+}
+```
+
+## Behavior
+
+`UnifiedSlot` resolves `children` using three rules, in order:
+
+1. `typeof children === 'function'` → call it with props (Base UI style)
+2. `React.isValidElement(children)` → clone with merged props and refs (Radix style)
+3. Otherwise → render `children` as-is
+
+Refs are forwarded through both branches; `className` is concatenated; `style` is merged; `on*` handlers are composed (parent fires before child).
+
+## Per-package copies
+
+`UnifiedSlot` is duplicated across packages on purpose — each package can vary the implementation and we avoid a shared peer dependency just for slotting. Importing from any package returns equivalent behavior:
+
+```tsx
+import { UnifiedSlot } from '@tour-kit/react'        // same
+import { UnifiedSlot } from '@tour-kit/hints'        // same
+import { UnifiedSlot } from '@tour-kit/announcements' // same
+```
+
+## Gotchas
+
+- **Don't lose refs.** When writing a custom slot consumer, forward refs through both branches.
+- **No double-wrapping.** Don't pass `asChild` and a render-prop `children` simultaneously — one wins and the other drops silently.
+- **`UILibraryProvider` is opt-in.** Components default to Radix-style cloning even without the provider; only set `library="base-ui"` when you actually need it.
+
+<Callout type="info">
+For the underlying `useUILibrary()` hook (low-level access to the same context), see each package's hooks reference (e.g. [`@tour-kit/react`](/docs/react/hooks)).
+</Callout>

@@ -1,0 +1,77 @@
+---
+title: Variants
+description: >-
+  CVA variant exports for @tour-kit/checklists — checklistVariants,
+  checklistTaskVariants, checklistProgressVariants, checklistLauncherVariants,
+  checklistPanelVariants, and the full styling surface
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Each styled component is built on a `cva()` call. Import the variant function to extend or compose classes; import the matching `*Variants` type for prop-level autocomplete.
+
+```tsx
+import { checklistVariants } from '@tour-kit/checklists'
+
+<div className={checklistVariants({ size: 'lg' })}>
+  {/* ... */}
+</div>
+```
+
+```tsx
+import type { ChecklistVariants } from '@tour-kit/checklists'
+
+type Size = ChecklistVariants['size'] // 'default' | 'sm' | 'lg' | 'md'
+```
+
+## Checklist Container
+
+| Variant fn | Slots |
+|------------|-------|
+| `checklistVariants` | `size`: `'default' \| 'sm' \| 'lg' \| 'md'` |
+| `checklistHeaderVariants` | `spacing`: `'default' \| 'none' \| 'compact'` |
+| `checklistContentVariants` | `spacing`: `'default' \| 'none' \| 'compact'` |
+| `checklistCompleteVariants` | `variant`: `'default' \| 'none' \| 'subtle'` |
+
+## Task
+
+| Variant fn | Slots |
+|------------|-------|
+| `checklistTaskVariants` | `size`: `'default' \| 'sm' \| 'lg'`, `state`: `'default' \| 'completed' \| 'locked'` |
+| `taskCheckboxVariants` | `size`, `state` |
+| `taskTitleVariants` | `size`, `state` |
+| `taskDescriptionVariants` | `size` |
+
+## Progress
+
+| Variant fn | Slots |
+|------------|-------|
+| `checklistProgressVariants` | `size`: `'default' \| 'sm' \| 'lg'` |
+| `progressTrackVariants` | `size` |
+| `progressBarVariants` | `variant`: `'default' \| 'success' \| 'warning' \| 'destructive'` |
+| `progressTextVariants` | `size` |
+
+## Launcher
+
+| Variant fn | Slots |
+|------------|-------|
+| `checklistLauncherVariants` | `size`, `variant`: `'default' \| 'secondary' \| 'outline'` |
+| `launcherBadgeVariants` | `size`, `variant`: `'default' \| 'success' \| 'secondary'` |
+| `launcherPositionVariants` | `position`: `'bottom-right' \| 'bottom-left' \| 'top-right' \| 'top-left'` |
+
+## Panel
+
+| Variant fn | Slots |
+|------------|-------|
+| `checklistPanelVariants` | `size`: `'default' \| 'sm' \| 'lg' \| 'md'` |
+| `panelHeaderVariants` | `spacing`, `collapsible` |
+| `panelContentVariants` | `expanded` |
+| `panelChevronVariants` | `size`, `expanded` |
+
+## Type aliases
+
+Every variant function above has a matching `VariantProps` type alias listed in [Type Reference → Variants Types](/docs/checklists/types#variants-types).
+
+<Callout type="info">
+The launcher uses two CVA layers — `checklistLauncherVariants` controls size/variant; `launcherPositionVariants` controls anchor position. Apply both via `cn()` when composing your own launcher.
+</Callout>

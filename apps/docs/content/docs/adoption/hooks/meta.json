@@ -1,4 +1,4 @@
 {
   "title": "Hooks",
-  "pages": ["use-feature", "use-adoption-stats", "use-nudge"]
+  "pages": ["use-feature", "use-adoption-stats", "use-nudge", "use-adoption-context"]
 }

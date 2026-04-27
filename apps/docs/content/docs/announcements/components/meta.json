@@ -1,4 +1,4 @@
 {
   "title": "Components",
-  "pages": ["index", "modal", "slideout", "banner", "toast", "spotlight"]
+  "pages": ["index", "modal", "slideout", "banner", "toast", "spotlight", "variants"]
 }

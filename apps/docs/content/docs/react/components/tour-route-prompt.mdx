@@ -1,0 +1,61 @@
+---
+title: TourRoutePrompt
+description: >-
+  Component shown when a multi-page tour needs to navigate to a different
+  route — surfaces an explicit "Continue" / "Skip" choice when autoNavigate is
+  off
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`TourRoutePrompt` is the user-facing prompt for multi-page tours when `autoNavigate` is disabled. The tour runtime determines that the next step lives on a different route; instead of jumping silently, this component asks the user whether to continue.
+
+It renders `null` when no navigation is pending — drop it into your layout once and let the tour state decide when it appears.
+
+## Usage
+
+```tsx
+import { TourRoutePrompt } from '@tour-kit/react';
+import { useNextAppRouter } from '@tour-kit/react';
+
+function AppShell({ children }) {
+  const router = useNextAppRouter();
+  return (
+    <>
+      {children}
+      <TourRoutePrompt router={router} />
+    </>
+  );
+}
+```
+
+Pair with `<MultiTourKitProvider autoNavigate={false}>` so the runtime defers the navigation decision to the prompt.
+
+## Custom Copy
+
+```tsx
+<TourRoutePrompt
+  router={router}
+  message={(route, stepTitle) => `Continue to ${stepTitle ?? route}?`}
+  buttonText="Let's go"
+  cancelText="Skip the rest"
+  onNavigate={(route) => analytics.track('tour_navigate', { route })}
+  onSkip={() => analytics.track('tour_skip_at_route')}
+/>
+```
+
+## Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `router` | `RouterAdapter` | Required router adapter — same instance you passed to `MultiTourKitProvider` |
+| `className` | `string` | Class name override |
+| `message` | `string \| (route, stepTitle?) => string` | Prompt copy |
+| `buttonText` | `string` | Confirm-button label |
+| `cancelText` | `string` | Skip-button label |
+| `onNavigate` | `(route: string) => void` | Called when the user confirms navigation |
+| `onSkip` | `() => void` | Called when the user skips the tour |
+
+<Callout type="info">
+For automatic navigation (default behavior), leave `autoNavigate` unset on `MultiTourKitProvider` and omit this component. Use `TourRoutePrompt` only when you need to gate cross-page transitions behind explicit user consent.
+</Callout>

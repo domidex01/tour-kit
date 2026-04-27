@@ -261,7 +261,188 @@ import type {
 } from '@tour-kit/checklists';
 ```
 
+---
+
+## Component Props
+
+### ChecklistProps
+
+```ts
+interface ChecklistProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    ChecklistVariants {
+  checklistId: string
+  showHeader?: boolean
+  showProgress?: boolean
+  showDismiss?: boolean
+  asChild?: boolean
+  renderTask?: (task, actions: { execute(): void; toggle(): void }) => React.ReactNode
+}
+```
+
+### ChecklistTaskProps
+
+```ts
+interface ChecklistTaskProps
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'onClick'>,
+    Omit<ChecklistTaskVariants, 'state'> {
+  task: ChecklistTaskState
+  onClick?: () => void
+  onToggle?: () => void
+  renderIcon?: (task: ChecklistTaskState) => React.ReactNode
+}
+```
+
+### ChecklistProgressProps
+
+```ts
+interface ChecklistProgressProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    ChecklistProgressVariants,
+    ProgressBarVariants {
+  value: number
+  max: number
+  showPercentage?: boolean
+  showCount?: boolean
+  trackClassName?: string
+  barClassName?: string
+}
+```
+
+### ChecklistLauncherProps
+
+```ts
+interface ChecklistLauncherProps
+  extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'>,
+    ChecklistLauncherVariants,
+    LauncherPositionVariants {
+  checklistId: string
+  badgeVariant?: LauncherBadgeVariants['variant']
+  panelClassName?: string
+  children?: React.ReactNode
+}
+```
+
+### ChecklistPanelProps
+
+```ts
+interface ChecklistPanelProps
+  extends React.ComponentPropsWithoutRef<'div'>,
+    ChecklistPanelVariants {
+  checklistId: string
+  defaultExpanded?: boolean
+  collapsible?: boolean
+  asChild?: boolean
+}
+```
+
+## Headless Component Props
+
+### ChecklistHeadlessProps
+
+```ts
+interface ChecklistHeadlessProps {
+  checklistId: string
+  render: (props: ChecklistRenderProps) => React.ReactNode
+  children?: (props: ChecklistRenderProps) => React.ReactNode
+}
+```
+
+### TaskHeadlessProps
+
+```ts
+interface TaskHeadlessProps {
+  checklistId: string
+  taskId: string
+  render: (props: TaskRenderProps) => React.ReactNode
+  children?: (props: TaskRenderProps) => React.ReactNode
+}
+```
+
+## Context Types
+
+### ChecklistContextValue
+
+```ts
+interface ChecklistContextValue {
+  checklists: Map<string, ChecklistState>
+  context: ChecklistContext
+  getChecklist(id: string): ChecklistState | undefined
+  completeTask(checklistId: string, taskId: string): void
+  uncompleteTask(checklistId: string, taskId: string): void
+  executeAction(checklistId: string, taskId: string): void
+  dismissChecklist(checklistId: string): void
+  restoreChecklist(checklistId: string): void
+  toggleExpanded(checklistId: string): void
+  setExpanded(checklistId: string, expanded: boolean): void
+  resetChecklist(checklistId: string): void
+  resetAll(): void
+  getProgress(checklistId: string): ChecklistProgress
+}
+```
+
+### ChecklistContextData
+
+Alias for the user-context object passed via `<ChecklistProvider context={...}>`. Used for evaluating per-task `when()` conditions. Renamed in the public surface so it doesn't collide with the React `ChecklistContext` value.
+
+```ts
+import type { ChecklistContextData } from '@tour-kit/checklists'
+```
+
+### ChecklistProgressType
+
+Alias for `ChecklistProgress` exposed via the public surface (avoids name collision with the `<ChecklistProgress>` component).
+
+```ts
+import type { ChecklistProgressType } from '@tour-kit/checklists'
+```
+
+## Hook Return Types
+
+### UseChecklistPersistenceReturn
+
+```ts
+interface UseChecklistPersistenceReturn {
+  save: (state: PersistedChecklistState) => void
+  load: () => PersistedChecklistState | Promise<PersistedChecklistState | null> | null
+  clear: () => void
+}
+```
+
+## Variants Types
+
+CVA-derived variant prop types. Each pairs with a same-named lowercase function — see [Variants](/docs/checklists/components/variants).
+
+| Type | Variant fn | Slots |
+|------|-----------|-------|
+| `ChecklistVariants` | `checklistVariants` | `size` |
+| `ChecklistHeaderVariants` | `checklistHeaderVariants` | `spacing` |
+| `ChecklistContentVariants` | `checklistContentVariants` | `spacing` |
+| `ChecklistCompleteVariants` | `checklistCompleteVariants` | `variant` |
+| `ChecklistTaskVariants` | `checklistTaskVariants` | `size`, `state` |
+| `TaskCheckboxVariants` | `taskCheckboxVariants` | `size`, `state` |
+| `TaskTitleVariants` | `taskTitleVariants` | `size`, `state` |
+| `TaskDescriptionVariants` | `taskDescriptionVariants` | `size` |
+| `ChecklistProgressVariants` | `checklistProgressVariants` | `size` |
+| `ProgressBarVariants` | `progressBarVariants` | `variant` |
+| `ProgressTrackVariants` | `progressTrackVariants` | `size` |
+| `ProgressTextVariants` | `progressTextVariants` | `size` |
+| `ChecklistLauncherVariants` | `checklistLauncherVariants` | `size`, `variant` |
+| `LauncherBadgeVariants` | `launcherBadgeVariants` | `size`, `variant` |
+| `LauncherPositionVariants` | `launcherPositionVariants` | `position` |
+| `ChecklistPanelVariants` | `checklistPanelVariants` | `size` |
+| `PanelHeaderVariants` | `panelHeaderVariants` | `spacing`, `collapsible` |
+| `PanelContentVariants` | `panelContentVariants` | `expanded` |
+| `PanelChevronVariants` | `panelChevronVariants` | `size`, `expanded` |
+
+## Cross-Cutting
+
+| Type | Notes |
+|------|-------|
+| `UILibrary` | `'radix-ui' \| 'base-ui'` — see [Unified Slot](/docs/guides/unified-slot) |
+
 ## Related
 
 - [ChecklistProvider](/docs/checklists/providers/checklist-provider) - Provider usage
 - [Hooks](/docs/checklists/hooks/use-checklist) - Hook usage
+- [Variants](/docs/checklists/components/variants) - Styling reference

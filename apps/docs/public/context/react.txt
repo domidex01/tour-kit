@@ -375,50 +375,63 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: 1. Direct Hook (Recommended)
+Example 1: TourProps
 
-    import { useNextAppRouter } from '@tour-kit/react';
-    
-    function App() {
-      const router = useNextAppRouter();
-    
-      return (
-        <MultiTourKitProvider router={router}>
-          {/* ... */}
-        </MultiTourKitProvider>
-      );
+    interface TourProps {
+      id: string
+      autoStart?: boolean
+      startAt?: number
+      config?: Omit<Tour, 'id' | 'steps'>
+      onStart?: () => void
+      onComplete?: () => void
+      onSkip?: () => void
+      onStepChange?: (step: TourStep, index: number) => void
+      children: React.ReactNode
     }
 
-Example 2: 2. Factory Function
+Example 2: TourCardHeaderProps / TourCardContentProps / TourCardFooterProps
 
-    import { createNextAppRouterAdapter } from '@tour-kit/react';
-    import { usePathname, useRouter } from 'next/navigation';
+    interface TourCardHeaderProps
+      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'title'>,
+        TourCardHeaderVariants {
+      title?: React.ReactNode
+      /** ID for accessibility (aria-labelledby) */
+      titleId: string
+      showClose?: boolean
+    }
     
-    const useMyRouter = createNextAppRouterAdapter(usePathname, useRouter);
+    interface TourCardContentProps
+      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+        TourCardContentVariants {
+      content?: React.ReactNode
+    }
     
-    function App() {
-      const router = useMyRouter();
-    
-      return (
-        <MultiTourKitProvider router={router}>
-          {/* ... */}
-        </MultiTourKitProvider>
-      );
+    interface TourCardFooterProps
+      extends React.ComponentPropsWithoutRef<'div'>,
+        TourCardFooterVariants {
+      currentStep: number
+      totalSteps: number
+      showNavigation?: boolean
+      showProgress?: boolean
+      isFirstStep: boolean
+      isLastStep: boolean
+      onPrev: () => void
+      onNext: () => void
+      onSkip: () => void
     }
 
-Example 3: Route Matching Modes
+Example 3: TourNavigationProps
 
-    <TourStep
-      route="/dashboard"
-      routeMatch="exact"      // Only "/dashboard"
-    />
-    
-    <TourStep
-      route="/dashboard"
-      routeMatch="startsWith" // "/dashboard", "/dashboard/settings", etc.
-    />
-    
-    <TourStep
-      route="/settings"
-      routeMatch="contains"   // "/app/settings", "/user/settings", etc.
-    />
+    interface TourNavigationProps extends React.ComponentPropsWithoutRef<'div'> {
+      isFirstStep: boolean
+      isLastStep: boolean
+      onPrev: () => void
+      onNext: () => void
+      onSkip?: () => void
+      prevLabel?: string
+      nextLabel?: string
+      finishLabel?: string
+      skipLabel?: string
+      prevVariant?: TourButtonVariants['variant']
+      nextVariant?: TourButtonVariants['variant']
+    }

@@ -765,9 +765,251 @@ import {
 
 ---
 
+## Component Composition Props
+
+Compound parts used to build the styled variants. Most consumers use the variant components directly (Modal, Slideout, Banner, Toast, Spotlight); these props matter when you compose your own layout.
+
+### AnnouncementOverlayProps
+
+```tsx
+interface AnnouncementOverlayProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof overlayVariants> {
+  /** Whether the overlay is visible */
+  open?: boolean
+  /** Callback when overlay is clicked */
+  onClose?: () => void
+}
+```
+
+### AnnouncementContentProps
+
+```tsx
+interface AnnouncementContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  title?: string
+  description?: React.ReactNode
+  media?: AnnouncementMedia
+  titleProps?: React.HTMLAttributes<HTMLHeadingElement>
+  descriptionProps?: React.HTMLAttributes<HTMLDivElement>
+}
+```
+
+### AnnouncementActionsProps
+
+```tsx
+interface AnnouncementActionsProps extends React.HTMLAttributes<HTMLDivElement> {
+  primaryAction?: AnnouncementAction
+  secondaryAction?: AnnouncementAction
+  onAction?: (type: 'primary' | 'secondary') => void
+  /** Fired when action.dismissOnClick is true */
+  onDismiss?: () => void
+  direction?: 'horizontal' | 'vertical'
+}
+```
+
+### AnnouncementCloseProps
+
+```tsx
+interface AnnouncementCloseProps
+  extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'> {
+  asChild?: boolean
+  children?: React.ReactNode | RenderProp
+  onClose?: () => void
+}
+```
+
+## Context Types
+
+### AnnouncementsContext
+
+Raw React context. Prefer [`useAnnouncementsContext`](/docs/announcements/hooks/use-announcements-context) — it throws when used outside `<AnnouncementsProvider>`.
+
+```tsx
+declare const AnnouncementsContext: React.Context<AnnouncementsContextValue | null>
+```
+
+### AnnouncementsContextValue
+
+```tsx
+interface AnnouncementsContextValue {
+  announcements: Map<string, AnnouncementState>
+  activeAnnouncement: string | null
+  queue: string[]
+  queueConfig: QueueConfig
+  register: (config: AnnouncementConfig) => void
+  unregister: (id: string) => void
+  show: (id: string) => void
+  hide: (id: string) => void
+  dismiss: (id: string, reason?: DismissalReason) => void
+  complete: (id: string) => void
+  reset: (id: string) => void
+  resetAll: () => void
+  getState: (id: string) => AnnouncementState | undefined
+  getConfig: (id: string) => AnnouncementConfig | undefined
+  canShow: (id: string) => boolean
+  showNext: () => void
+  clearQueue: () => void
+}
+```
+
+## Queue Types
+
+### QueueItem
+
+```tsx
+interface QueueItem {
+  id: string
+  priority: AnnouncementPriority
+  addedAt: number
+  weight: number
+  /** Monotonic sequence number for ordering items with same timestamp */
+  sequence: number
+}
+```
+
+### DEFAULT_QUEUE_CONFIG
+
+```tsx
+declare const DEFAULT_QUEUE_CONFIG: QueueConfig
+```
+
+The default queue configuration the provider falls back to when no `queueConfig` is supplied. Use as a base when building a partial override.
+
+### AnnouncementScheduler
+
+Class that manages the queue and gating decisions internally. Exported for advanced use (custom orchestrators, test fixtures); typical apps never construct it directly.
+
+```tsx
+declare class AnnouncementScheduler {
+  constructor(config: QueueConfig)
+  canShow(config, state, userContext?): boolean
+  shouldQueue(config, state, userContext?): boolean
+  enqueue(config: AnnouncementConfig): number
+  getNext(): string | undefined
+  peekNext(): string | undefined
+  remove(id: string): boolean
+  isQueued(id: string): boolean
+  getQueuePosition(id: string): number
+  getQueuedIds(): string[]
+  get queueSize(): number
+  canShowMore(): boolean
+  markActive(): void
+  markInactive(): void
+  get currentActiveCount(): number
+  clearQueue(): void
+  resetActive(): void
+  updateConfig(config: QueueConfig): void
+  get delayBetween(): number
+  get autoShow(): boolean
+}
+```
+
+## Storage
+
+### AnnouncementStorageAdapter
+
+Pluggable persistence layer. Default storage uses `localStorage`; pass an adapter on the provider to swap implementations (memory, cookies, SQLite, ...).
+
+```tsx
+interface AnnouncementStorageAdapter {
+  getItem(key: string): string | null | Promise<string | null>
+  setItem(key: string, value: string): void | Promise<void>
+  removeItem(key: string): void | Promise<void>
+}
+```
+
+## Analytics Event Types
+
+The provider's `onEvent` callback receives an `AnnouncementEvent`, which is a discriminated union of seven concrete shapes.
+
+### AnnouncementEventType
+
+```tsx
+type AnnouncementEventType =
+  | 'announcement_registered'
+  | 'announcement_shown'
+  | 'announcement_dismissed'
+  | 'announcement_completed'
+  | 'announcement_action_clicked'
+  | 'announcement_queued'
+  | 'announcement_dequeued'
+```
+
+### BaseAnnouncementEvent
+
+```tsx
+interface BaseAnnouncementEvent {
+  type: AnnouncementEventType
+  announcementId: string
+  variant: AnnouncementVariant
+  timestamp: number
+  metadata?: Record<string, unknown>
+}
+```
+
+### Concrete events
+
+```tsx
+interface AnnouncementRegisteredEvent extends BaseAnnouncementEvent {
+  type: 'announcement_registered'
+}
+
+interface AnnouncementShownEvent extends BaseAnnouncementEvent {
+  type: 'announcement_shown'
+  viewCount: number
+  fromQueue: boolean
+}
+
+interface AnnouncementDismissedEvent extends BaseAnnouncementEvent {
+  type: 'announcement_dismissed'
+  reason: DismissalReason
+  viewDuration: number
+}
+
+interface AnnouncementCompletedEvent extends BaseAnnouncementEvent {
+  type: 'announcement_completed'
+  viewDuration: number
+}
+
+interface AnnouncementActionClickedEvent extends BaseAnnouncementEvent {
+  type: 'announcement_action_clicked'
+  actionType: 'primary' | 'secondary'
+  actionLabel: string
+}
+
+interface AnnouncementQueuedEvent extends BaseAnnouncementEvent {
+  type: 'announcement_queued'
+  queuePosition: number
+}
+
+interface AnnouncementDequeuedEvent extends BaseAnnouncementEvent {
+  type: 'announcement_dequeued'
+  reason: 'shown' | 'expired' | 'removed'
+}
+
+type AnnouncementEvent =
+  | AnnouncementRegisteredEvent
+  | AnnouncementShownEvent
+  | AnnouncementDismissedEvent
+  | AnnouncementCompletedEvent
+  | AnnouncementActionClickedEvent
+  | AnnouncementQueuedEvent
+  | AnnouncementDequeuedEvent
+```
+
+Discriminate on `event.type` — TypeScript narrows the union to the per-event payload.
+
+## Cross-Cutting
+
+| Type | Notes |
+|------|-------|
+| `UILibrary` | `'radix-ui' \| 'base-ui'` — see [Unified Slot](/docs/guides/unified-slot) |
+| `RenderProp` | Generic render-prop callback shape — see [Unified Slot](/docs/guides/unified-slot#renderprop) |
+
 ## Related
 
 - [AnnouncementsProvider](/docs/announcements/providers/announcements-provider) - Provider configuration
 - [Components](/docs/announcements/components) - Styled components
 - [Hooks](/docs/announcements/hooks/use-announcement) - Hook APIs
 - [Headless](/docs/announcements/headless) - Headless components
+- [useAnnouncementsContext](/docs/announcements/hooks/use-announcements-context) - Raw context hook

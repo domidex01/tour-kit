@@ -102,53 +102,58 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: Quick Start
-
-    import { useSchedule } from '@tour-kit/scheduling'
-    
-    function OnboardingTour() {
-      const schedule = {
-        startAt: '2024-01-15',
-        endAt: '2024-03-31',
-        daysOfWeek: [1, 2, 3, 4, 5], // Weekdays only
-        timeOfDay: { start: '09:00', end: '17:00' },
-        useUserTimezone: true,
-      }
-    
-      const { isActive, reason } = useSchedule(schedule)
-    
-      if (!isActive) {
-        return null
-      }
-    
-      return <Tour tourId="onboarding">...</Tour>
-    }
-
-Example 2: Schedule
+Example 1: Schedule
 
     interface Schedule {
+      /** Schedule is enabled (default: true) */
       enabled?: boolean
+    
+      /** Start date (inclusive) - content won't show before this */
       startAt?: DateString | Date
+    
+      /** End date (inclusive) - content won't show after this */
       endAt?: DateString | Date
+    
+      /** Days of the week when content can show (0=Sunday, 6=Saturday) */
       daysOfWeek?: DayOfWeek[]
+    
+      /** Time range during the day when content can show */
       timeOfDay?: TimeRange
+    
+      /** Use user's detected timezone (default: true) */
       useUserTimezone?: boolean
+    
+      /** Override timezone (IANA timezone name) */
       timezone?: string
+    
+      /** Blackout periods when content should not show */
       blackouts?: BlackoutPeriod[]
+    
+      /** Recurring pattern for the schedule */
       recurring?: RecurringPattern
+    
+      /** Custom metadata */
       metadata?: Record<string, unknown>
     }
 
-Example 3: Timezone Handling
+Example 2: Example
 
-    // Use the user's browser timezone
-    const schedule = {
-      useUserTimezone: true,
+    const schedule: Schedule = {
+      enabled: true,
+      startAt: '2024-01-15',
+      endAt: '2024-12-31',
+      daysOfWeek: [1, 2, 3, 4, 5],
       timeOfDay: { start: '09:00', end: '17:00' },
+      useUserTimezone: true,
+    }
+
+Example 3: TimeRange
+
+    interface TimeRange {
+      /** Start time in HH:MM format (24-hour) */
+      start: TimeString
+      /** End time in HH:MM format (24-hour) */
+      end: TimeString
     }
     
-    // Or specify a fixed timezone
-    const schedule = {
-      timezone: 'America/New_York',
-      timeOfDay: { start: '09:00', end: '17:00' },
-    }
+    type TimeString = `${string}:${string}`

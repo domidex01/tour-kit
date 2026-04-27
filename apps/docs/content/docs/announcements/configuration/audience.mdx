@@ -489,6 +489,35 @@ const announcements: AnnouncementConfig<UserContext>[] = [
 
 ---
 
+## Programmatic helpers
+
+Pure functions exposed for tests, custom orchestrators, and SSR-side checks. The provider invokes the same functions internally — use them when you need to mirror the in-tree gating decision outside React.
+
+### matchesAudience
+
+```ts
+import { matchesAudience } from '@tour-kit/announcements'
+
+declare function matchesAudience(
+  conditions: AudienceCondition[] | undefined,
+  userContext: Record<string, unknown> | undefined,
+): boolean
+```
+
+Returns `true` if `userContext` satisfies every condition (or when `conditions` is `undefined`).
+
+### validateConditions
+
+```ts
+import { validateConditions } from '@tour-kit/announcements'
+
+declare function validateConditions(conditions: AudienceCondition[]): string[]
+```
+
+Returns a list of validation errors — useful in tests or admin tools that author audience rules before saving them.
+
+---
+
 ## Related
 
 - [Frequency Rules](/docs/announcements/configuration/frequency) - Control how often announcements show

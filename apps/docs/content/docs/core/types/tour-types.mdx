@@ -67,3 +67,76 @@ type Placement = Side | `${Side}-${Alignment}`;
 // 'left' | 'left-start' | 'left-end'
 // 'right' | 'right-start' | 'right-end'
 ```
+
+## TourCallbackContext
+
+Argument passed to tour-level callbacks (`onStart`, `onComplete`, `onSkip`).
+
+```typescript
+interface TourCallbackContext {
+  tourId: string
+  currentStepIndex: number
+  totalSteps: number
+  completedTours: string[]
+  skippedTours: string[]
+}
+```
+
+## TourContextValue
+
+Returned by [`useTourContext`](/docs/core/hooks/use-tour-context). Throw-on-missing variant; use `useTourContextOptional` to receive `null` instead.
+
+```typescript
+interface TourContextValue {
+  state: TourState
+  actions: TourActions
+  config: TourKitConfig
+}
+```
+
+## TourOptions
+
+Per-tour overrides that mirror `TourKitConfig` (keyboard, spotlight, persistence, a11y, scroll). Used as the `config` prop on `<Tour>` and the `options` parameter on `createTour()`.
+
+```typescript
+type TourOptions = Omit<Tour, 'id' | 'steps'>
+```
+
+## StepOptions
+
+Per-step overrides used by `createStep()` and `createNamedStep()`. Mirrors the optional fields on `TourStep`.
+
+```typescript
+type StepOptions = Omit<TourStep, 'id' | 'target' | 'content'>
+```
+
+## Hints Types (re-exported)
+
+Used by `@tour-kit/hints`; re-exported for consumers that need to type custom hint reducers.
+
+```typescript
+interface HintsState {
+  hints: Map<string, HintState>
+  activeHint: string | null
+}
+
+type HintsActions =
+  | { type: 'SHOW_HINT'; id: string }
+  | { type: 'HIDE_HINT'; id: string }
+  | { type: 'DISMISS_HINT'; id: string }
+  | { type: 'RESET_HINT'; id: string }
+  | { type: 'RESET_ALL' }
+```
+
+## Hook Return Types
+
+Hooks defined in `@tour-kit/core` document their return shape on each hook page; the type aliases below let you reference those shapes without inferring through the hook signature.
+
+| Type | Returned by |
+|------|-------------|
+| `UseStepReturn` | [`useStep`](/docs/core/hooks/use-step) |
+| `UseBranchReturn` | [`useBranch`](/docs/core/hooks/use-branch) |
+| `UseSpotlightReturn` | [`useSpotlight`](/docs/core/hooks/use-spotlight) |
+| `UseFocusTrapReturn` | [`useFocusTrap`](/docs/core/hooks/use-focus-trap) |
+| `UseRoutePersistenceReturn` | [`useRoutePersistence`](/docs/core/hooks/use-route-persistence) |
+| `UseAdvanceOnOptions` | Options for [`useAdvanceOn`](/docs/core/hooks/use-advance-on) |

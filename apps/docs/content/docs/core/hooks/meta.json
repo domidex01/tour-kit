@@ -2,6 +2,8 @@
   "title": "Hooks",
   "pages": [
     "use-tour",
+    "use-tour-context",
+    "use-tour-kit-context",
     "use-step",
     "use-branch",
     "use-spotlight",
@@ -11,6 +13,7 @@
     "use-element-position",
     "use-route-persistence",
     "use-media-query",
-    "use-advance-on"
+    "use-advance-on",
+    "use-direction"
   ]
 }

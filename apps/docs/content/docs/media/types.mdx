@@ -654,6 +654,68 @@ type EmbedComponentProps = MediaComponentProps & {
 type TourMediaComponentProps = TourMediaConfig & MediaEventHandlers
 ```
 
+## Hook Return Types
+
+### UseMediaEventsReturn
+
+```ts
+interface UseMediaEventsReturn {
+  /** Handle media loaded event */
+  handleLoaded: (loadTime?: number) => void
+  /** Handle media play event */
+  handlePlay: () => void
+  /** Handle media pause event */
+  handlePause: (currentTime?: number) => void
+  /** Handle media complete event */
+  handleComplete: (watchTime?: number) => void
+  /** Handle media error event */
+  handleError: (error: string) => void
+  /** Handle time update event */
+  handleTimeUpdate: (currentTime: number, duration: number) => void
+}
+```
+
+Returned by [`useMediaEvents`](/docs/media/hooks/use-media-events). Plug each handler into the matching DOM/SDK event on your custom embed.
+
+## Utility Types
+
+### getSourceType
+
+Resolves a `<source type="...">` MIME hint from a URL extension. Returns `undefined` for unknown types.
+
+```ts
+declare function getSourceType(src: string): string | undefined
+
+// 'video/mp4'  for *.mp4
+// 'video/webm' for *.webm
+// 'image/gif'  for *.gif
+// undefined    otherwise
+```
+
+## Variants Types
+
+CVA-derived variant prop types for the styled embed shell components.
+
+| Type | Companion variant fn |
+|------|----------------------|
+| `IframeVariants` | `iframeVariants` |
+| `MediaContainerVariants` | `mediaContainerVariants` |
+| `MediaOverlayVariants` | `mediaOverlayVariants` |
+| `PlayButtonVariants` | `playButtonVariants` |
+
+```ts
+import type { MediaContainerVariants } from '@tour-kit/media'
+
+type AspectRatio = MediaContainerVariants['aspectRatio'] // '16:9' | '4:3' | ...
+```
+
+## Cross-Cutting Types
+
+| Type | Notes |
+|------|-------|
+| `UILibrary` | `'radix-ui' \| 'base-ui'` — see [Unified Slot](/docs/guides/unified-slot) |
+| `RenderProp` | Generic render-prop callback shape — see [Unified Slot](/docs/guides/unified-slot#renderprop) |
+
 ## See Also
 
 - [TourMedia](/docs/media/components/tour-media) - Main media component

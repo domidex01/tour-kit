@@ -1,0 +1,122 @@
+---
+title: Hooks
+description: >-
+  React hooks for @tour-kit/ai — useAiChat, useAiChatContext,
+  useSuggestions/useOptionalSuggestions, useTourAssistant
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`@tour-kit/ai` ships its state and actions through React hooks. Components built on top of these hooks (see [Components](/docs/ai/components)) are convenient defaults — every screen the package renders can also be built from scratch with the hooks below.
+
+All hooks must be called inside an `<AiChatProvider>` unless noted otherwise.
+
+## useAiChat
+
+Primary chat-state hook. Returns the message list, send/stop/reload actions, and panel open/close state.
+
+```tsx
+import { useAiChat } from '@tour-kit/ai'
+
+function CustomChat() {
+  const { messages, status, sendMessage, isOpen, toggle } = useAiChat()
+
+  return (
+    <>
+      <button onClick={toggle}>{isOpen ? 'Close' : 'Open'} chat</button>
+      {isOpen && (
+        <div>
+          {messages.map((m) => <div key={m.id}>{m.content}</div>)}
+          <button onClick={() => sendMessage({ text: 'Hello' })}>Send</button>
+        </div>
+      )}
+    </>
+  )
+}
+```
+
+### Return Value
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `messages` | `UIMessage[]` | Conversation history |
+| `status` | `ChatStatus` | `'ready' \| 'submitted' \| 'streaming' \| 'error'` |
+| `error` | `Error \| null` | Last error if any |
+| `sendMessage` | `(input: { text: string }) => void` | Send a user message |
+| `stop` | `() => void` | Cancel the current streaming response |
+| `reload` | `() => void` | Re-run the last assistant message |
+| `setMessages` | `(messages \| (prev) => messages) => void` | Replace conversation history |
+| `isOpen` | `boolean` | Whether the panel is open |
+| `open` | `() => void` | Open the panel |
+| `close` | `() => void` | Close the panel |
+| `toggle` | `() => void` | Toggle open state |
+
+## useAiChatContext
+
+Low-level access to the full provider context. Throws if no `AiChatProvider` is mounted above. Most consumers should reach for `useAiChat` instead — `useAiChatContext` is the unsafe escape hatch when you need raw context state (config, internal state machines, custom integrations).
+
+```tsx
+import { useAiChatContext } from '@tour-kit/ai'
+
+function ConfigDebugger() {
+  const ctx = useAiChatContext()
+  return <pre>{JSON.stringify(ctx.config, null, 2)}</pre>
+}
+```
+
+Returns the full `AiChatContextValue`. See [API Reference](/docs/api/ai) for the complete shape.
+
+## useSuggestions
+
+Returns the merged static + dynamic suggestion list and helpers to refresh/select.
+
+```tsx
+import { useSuggestions } from '@tour-kit/ai'
+
+function CustomSuggestions() {
+  const { suggestions, isLoading, isBusy, select } = useSuggestions()
+
+  if (isLoading) return <Spinner />
+  return suggestions.map((s) => (
+    <button key={s} onClick={() => select(s)} disabled={isBusy}>
+      {s}
+    </button>
+  ))
+}
+```
+
+### Return Value
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `suggestions` | `string[]` | Combined static + dynamic suggestions, filtered for relevance |
+| `isLoading` | `boolean` | True while dynamic suggestions are being fetched |
+| `isBusy` | `boolean` | True when chat is busy (`submitted` or `streaming`) and cannot accept new messages |
+| `refresh` | `() => void` | Clear cache and regenerate dynamic suggestions |
+| `select` | `(suggestion: string) => void` | Send a suggestion as a chat message; no-op when busy |
+
+`useSuggestions` works both inside and outside `AiChatProvider` — returns an empty state when no context.
+
+### useOptionalSuggestions (deprecated)
+
+Alias for `useSuggestions` retained for backward compatibility. Will be removed in the next major version. Prefer `useSuggestions`.
+
+## useTourAssistant
+
+Tour-aware extension of `useAiChat`. Adds the active tour, active step, and checklist progress to the assistant context, so the model can answer questions like "what should I do next?".
+
+```tsx
+import { useTourAssistant } from '@tour-kit/ai'
+
+function ContextualChat() {
+  const { messages, sendMessage, isLoading, activeTourContext } = useTourAssistant()
+  // activeTourContext.activeTour.currentStep is available for inline UI
+  return /* ... */
+}
+```
+
+Returns `UseTourAssistantReturn`, which extends `UseAiChatReturn` with `isLoading: boolean` and tour-context fields. See [API Reference](/docs/api/ai#usetourassistant) for the full shape.
+
+<Callout type="info">
+For server-side route handlers (`createChatRouteHandler`, RAG pipeline), see the [API Reference → server](/docs/api/ai#server).
+</Callout>

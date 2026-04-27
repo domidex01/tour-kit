@@ -1,0 +1,39 @@
+---
+title: useDirection
+description: >-
+  Hook returning the resolved text direction (ltr or rtl) and an isRTL boolean
+  for RTL-aware components
+---
+
+Returns the resolved text direction (`'ltr'` or `'rtl'`) and a convenience `isRTL` flag. The value comes from `TourKitProvider`'s `dir` prop — when set to `'auto'`, the provider resolves it from `document.dir` on mount.
+
+Use this hook in tour cards, hint hotspots, and custom UI that needs to mirror layout for RTL languages.
+
+## Usage
+
+```tsx
+import { useDirection } from '@tour-kit/core';
+
+function TourArrow() {
+  const { isRTL } = useDirection();
+  return <span aria-hidden>{isRTL ? '←' : '→'}</span>;
+}
+```
+
+```tsx
+import { useDirection } from '@tour-kit/core';
+
+function MirroredCard() {
+  const { direction } = useDirection();
+  return <div dir={direction} className="card">{/* ... */}</div>;
+}
+```
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `direction` | `'ltr' \| 'rtl'` | Resolved text direction |
+| `isRTL` | `boolean` | Convenience flag (`direction === 'rtl'`) |
+
+`useDirection` requires a `<TourKitProvider>` in the tree — it will throw otherwise.

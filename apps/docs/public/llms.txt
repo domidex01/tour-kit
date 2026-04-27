@@ -1,4 +1,4 @@
-# userTourKit v0.5.0 — Generated 2026-04-26T05:02:12Z
+# userTourKit v0.5.0 — Generated 2026-04-27T04:43:03Z
 
 # userTourKit
 
@@ -16,6 +16,7 @@
 - [@tour-kit/core](https://usertourkit.com/docs/core): Framework-agnostic hooks and utilities for building product tours — state management, positioning, and accessibility
 - [useAdvanceOn](https://usertourkit.com/docs/core/hooks/use-advance-on): useAdvanceOn hook: automatically advance tour steps when users click buttons, submit forms, or interact with elements
 - [useBranch](https://usertourkit.com/docs/core/hooks/use-branch): useBranch hook: trigger conditional branching paths from step content based on user choices or application state
+- [useDirection](https://usertourkit.com/docs/core/hooks/use-direction): Hook returning the resolved text direction (ltr or rtl) and an isRTL boolean for RTL-aware components
 - [useElementPosition](https://usertourkit.com/docs/core/hooks/use-element-position): useElementPosition hook: track DOM element position with automatic updates on scroll, resize, and layout changes
 - [useFocusTrap](https://usertourkit.com/docs/core/hooks/use-focus-trap): useFocusTrap hook: trap keyboard focus within tour step elements for WCAG 2.1 AA accessible navigation
 - [useKeyboard](https://usertourkit.com/docs/core/hooks/use-keyboard): useKeyboard hook: add arrow key navigation, Escape to close, and custom keyboard shortcuts to product tours
@@ -25,6 +26,8 @@
 - [useSpotlight](https://usertourkit.com/docs/core/hooks/use-spotlight): useSpotlight hook: control spotlight overlay visibility, padding, border radius, and animation for tour steps
 - [useStep](https://usertourkit.com/docs/core/hooks/use-step): useStep hook: access current step data, index, progress percentage, and isFirst/isLast flags in tour components
 - [useTour](https://usertourkit.com/docs/core/hooks/use-tour): useTour hook: control tour state with start, next, prev, skip, and complete actions plus step tracking in React
+- [useTourContext](https://usertourkit.com/docs/core/hooks/use-tour-context): Low-level hook returning the raw TourContext value. Use useTour for typical tour control; useTourContext for custom integrations.
+- [useTourKitContext](https://usertourkit.com/docs/core/hooks/use-tour-kit-context): Hook returning the global TourKit context value — config, resolved direction, and global callbacks set on TourKitProvider
 - [TourKitProvider](https://usertourkit.com/docs/core/providers/tour-kit-provider): TourKitProvider: wrap your app to enable global tour management, shared configuration, and multi-tour coordination
 - [TourProvider](https://usertourkit.com/docs/core/providers/tour-provider): TourProvider: context provider that manages state, steps, and lifecycle for an individual product tour instance
 - [Types](https://usertourkit.com/docs/core/types): TypeScript type definitions for userTourKit — tour, step, and configuration interfaces that power fully type-safe onboarding flows.
@@ -55,6 +58,7 @@
 - [TourNavigation](https://usertourkit.com/docs/react/components/tour-navigation): TourNavigation component: previous/next buttons with automatic disable states and customizable button labels
 - [TourOverlay](https://usertourkit.com/docs/react/components/tour-overlay): TourOverlay component: spotlight overlay that highlights the target element with configurable padding and animation
 - [TourProgress](https://usertourkit.com/docs/react/components/tour-progress): TourProgress component: step counter and progress bar showing current position and total steps in the tour
+- [TourRoutePrompt](https://usertourkit.com/docs/react/components/tour-route-prompt): Component shown when a multi-page tour needs to navigate to a different route — surfaces an explicit "Continue" / "Skip" choice when autoNavigate is off
 - [TourStep](https://usertourkit.com/docs/react/components/tour-step): TourStep component: define individual steps with target selectors, placement, content, and advance-on triggers
 - [Headless Components](https://usertourkit.com/docs/react/headless): Headless tour components: unstyled primitives with render props for building completely custom tour interfaces
 - [Headless Examples](https://usertourkit.com/docs/react/headless/examples): Headless component examples: build custom tooltip cards, overlays, and navigation using userTourKit render props
@@ -66,6 +70,7 @@
 - [CSS Variables](https://usertourkit.com/docs/react/styling/css-variables): Customize userTourKit appearance with CSS custom properties for colors, spacing, border radius, and shadow values
 - [Custom Components](https://usertourkit.com/docs/react/styling/custom-components): Build fully custom tour card, overlay, and navigation components using Tour Kit hooks and headless primitives
 - [Tailwind CSS](https://usertourkit.com/docs/react/styling/tailwind): Style userTourKit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints
+- [Types](https://usertourkit.com/docs/react/types): TypeScript reference for @tour-kit/react — component prop interfaces, hook return shapes, multi-tour types, and shared cross-package aliases
 
 ## Hints
 
@@ -77,6 +82,7 @@
 - [HintTooltipHeadless](https://usertourkit.com/docs/hints/headless/hint-tooltip-headless): HeadlessHintTooltip: unstyled floating tooltip with calculated position and collision avoidance via render props
 - [Hooks](https://usertourkit.com/docs/hints/hooks): useHints and useHint hooks: programmatically show, dismiss, and query hint visibility state across your application
 - [Persistence](https://usertourkit.com/docs/hints/persistence): Configure hint dismissal persistence with localStorage, sessionStorage, or custom backends to remember user choices
+- [Types](https://usertourkit.com/docs/hints/types): TypeScript reference for @tour-kit/hints — HintProps, HintHotspotProps, HintTooltipProps, context types, and shared UnifiedSlot helpers
 
 ## Adoption
 
@@ -91,6 +97,7 @@
 - [Charts](https://usertourkit.com/docs/adoption/dashboard/charts): AdoptionCategoryChart and AdoptionStatusBadge: visualize adoption distribution by category and individual feature status
 - [Stat Cards](https://usertourkit.com/docs/adoption/dashboard/stats): AdoptionStatCard and AdoptionStatsGrid: display aggregate adoption metrics with trend indicators and percentage changes
 - [AdoptionTable](https://usertourkit.com/docs/adoption/dashboard/table): AdoptionTable component: sortable, filterable table of tracked features showing adoption status, usage count, and trends
+- [useAdoptionContext](https://usertourkit.com/docs/adoption/hooks/use-adoption-context): Low-level hook returning the raw AdoptionProvider context — features, usage map, nudge state, and full action surface
 - [useAdoptionStats](https://usertourkit.com/docs/adoption/hooks/use-adoption-stats): useAdoptionStats hook: retrieve aggregated adoption metrics across all tracked features for dashboards and reporting
 - [useFeature](https://usertourkit.com/docs/adoption/hooks/use-feature): useFeature hook: track individual feature usage, query adoption state, and record interactions for adoption metrics
 - [useNudge](https://usertourkit.com/docs/adoption/hooks/use-nudge): useNudge hook: manage nudge visibility, dismissal, snooze, and user interaction state for feature discovery prompts
@@ -120,6 +127,7 @@
 - [AnnouncementSlideout](https://usertourkit.com/docs/announcements/components/slideout): AnnouncementSlideout component: side panel drawer for detailed product updates with rich content and multiple sections
 - [AnnouncementSpotlight](https://usertourkit.com/docs/announcements/components/spotlight): AnnouncementSpotlight component: element highlight overlay for contextual feature announcements tied to specific UI areas
 - [AnnouncementToast](https://usertourkit.com/docs/announcements/components/toast): AnnouncementToast component: auto-dismissing corner notification for quick updates with configurable duration and position
+- [Variants](https://usertourkit.com/docs/announcements/components/variants): CVA variant exports for @tour-kit/announcements — bannerVariants, modalContentVariants, modalOverlayVariants, slideoutContentVariants, toastVariants, and the full styling surface
 - [Audience Targeting](https://usertourkit.com/docs/announcements/configuration/audience): Target announcements to user segments with role-based, attribute, and custom predicate audience filtering rules
 - [Frequency Rules](https://usertourkit.com/docs/announcements/configuration/frequency): Control announcement display frequency with once, daily, weekly, and session-based rules to avoid notification fatigue
 - [Queue Management](https://usertourkit.com/docs/announcements/configuration/queue): Priority queue system: rank announcements by urgency, schedule display windows, and prevent overlapping notifications
@@ -132,6 +140,7 @@
 - [useAnnouncement](https://usertourkit.com/docs/announcements/hooks/use-announcement): useAnnouncement hook: control visibility, dismissal, and action tracking for a single announcement instance in React
 - [useAnnouncementQueue](https://usertourkit.com/docs/announcements/hooks/use-announcement-queue): useAnnouncementQueue hook: manage priority-based display ordering and automatic scheduling of queued announcements
 - [useAnnouncements](https://usertourkit.com/docs/announcements/hooks/use-announcements): useAnnouncements hook: query all announcements, filter by status or variant, and manage the announcement collection state
+- [useAnnouncementsContext](https://usertourkit.com/docs/announcements/hooks/use-announcements-context): Low-level hook returning the raw AnnouncementsProvider context — registered announcements, queue, queue config, and the full action surface
 - [AnnouncementsProvider](https://usertourkit.com/docs/announcements/providers/announcements-provider): AnnouncementsProvider: configure announcement storage, queue behavior, frequency rules, and audience targeting at app level
 - [Type Reference](https://usertourkit.com/docs/announcements/types): TypeScript types for Announcement, AnnouncementVariant, QueueConfig, AudienceRule, and the full announcements API surface
 
@@ -144,6 +153,7 @@
 - [ChecklistPanel](https://usertourkit.com/docs/checklists/components/checklist-panel): ChecklistPanel component: floating side panel container with slide-in animation for persistent checklist access
 - [ChecklistProgress](https://usertourkit.com/docs/checklists/components/checklist-progress): ChecklistProgress component: visual progress bar with percentage, completed count, and animated fill for task completion
 - [ChecklistTask](https://usertourkit.com/docs/checklists/components/checklist-task): ChecklistTask component: individual task item with checkbox, label, description, completion state, and action button
+- [Variants](https://usertourkit.com/docs/checklists/components/variants): CVA variant exports for @tour-kit/checklists — checklistVariants, checklistTaskVariants, checklistProgressVariants, checklistLauncherVariants, checklistPanelVariants, and the full styling surface
 - [Headless Components](https://usertourkit.com/docs/checklists/headless): Headless checklist components: unstyled primitives with render props for building custom checklist and task UIs
 - [ChecklistHeadless](https://usertourkit.com/docs/checklists/headless/checklist-headless): HeadlessChecklist component: unstyled checklist container exposing tasks, progress, and actions via render props
 - [TaskHeadless](https://usertourkit.com/docs/checklists/headless/task-headless): HeadlessTask component: unstyled task primitive exposing completion state, actions, and dependency info via render props
@@ -181,6 +191,7 @@
 ## Scheduling
 
 - [@tour-kit/scheduling](https://usertourkit.com/docs/scheduling): Time-based scheduling for controlling when tours, announcements, and content appear — business hours, dates, and timezones
+- [Components](https://usertourkit.com/docs/scheduling/components): ScheduleGate component for the @tour-kit/scheduling package — pro license enforcement wrapper for scheduled content
 - [Scheduling Hooks](https://usertourkit.com/docs/scheduling/hooks): React hooks for reactive schedule evaluation: check active state, get next window, and detect user timezone automatically
 - [useSchedule](https://usertourkit.com/docs/scheduling/hooks/use-schedule): useSchedule hook: evaluate whether a schedule is currently active with automatic refresh and timezone-aware calculations
 - [useScheduleStatus](https://usertourkit.com/docs/scheduling/hooks/use-schedule-status): useScheduleStatus hook: get detailed schedule information including next active window, time remaining, and status reason
@@ -203,6 +214,7 @@
 - [API Reference](https://usertourkit.com/docs/ai/api-reference): Complete API reference for @tour-kit/ai: client hooks, server utilities, chat components, and configuration types
 - [CAG Guide](https://usertourkit.com/docs/ai/cag-guide): Context-Augmented Generation guide: inject tour documentation directly into AI prompts for fast, deterministic responses
 - [Components](https://usertourkit.com/docs/ai/components): Pre-built AI chat components: AiChatPanel, AiChatToggle, AiChatMessageList, and AiChatInput with shadcn/ui styling
+- [Hooks](https://usertourkit.com/docs/ai/hooks): React hooks for @tour-kit/ai — useAiChat, useAiChatContext, useSuggestions/useOptionalSuggestions, useTourAssistant
 - [Quick Start](https://usertourkit.com/docs/ai/quick-start): Set up @tour-kit/ai in under 5 minutes: install the package, configure your AI provider, and add the chat widget to React
 - [RAG Guide](https://usertourkit.com/docs/ai/rag-guide): Retrieval-Augmented Generation guide: use vector search over documentation for scalable AI chat with large content sets
 - [Tour Integration](https://usertourkit.com/docs/ai/tour-integration): Connect AI chat to active tour state: context-aware assistance that knows the current step, tour progress, and user actions
@@ -222,6 +234,7 @@
 - [Persistence](https://usertourkit.com/docs/guides/persistence): Save tour progress, checklist completion, and hint dismissals across browser sessions with pluggable storage adapters
 - [Router Integration](https://usertourkit.com/docs/guides/router-integration): Build multi-page tours with Next.js, React Router, or custom routers using route-aware step targeting and persistence
 - [Troubleshooting](https://usertourkit.com/docs/guides/troubleshooting): Diagnose and fix common userTourKit issues: missing targets, positioning glitches, hydration errors, and focus trap problems
+- [Unified Slot (Radix UI + Base UI)](https://usertourkit.com/docs/guides/unified-slot): Single composition primitive that supports both Radix UI's asChild element cloning and Base UI's render-prop style — covers UnifiedSlot, UILibrary, UILibraryProvider, and the RenderProp shape
 - [Vite Integration](https://usertourkit.com/docs/guides/vite): Configure userTourKit in Vite + React projects with hot module replacement, path aliases, and production build optimization
 
 ## Examples
@@ -236,11 +249,13 @@
 
 - [API Reference](https://usertourkit.com/docs/api): Complete API reference for all userTourKit packages — hooks, components, providers, utilities, and TypeScript type exports
 - [@tour-kit/adoption API](https://usertourkit.com/docs/api/adoption): API reference for @tour-kit/adoption: AdoptionProvider, useFeature, useNudge, useAdoptionStats, and dashboard exports
+- [@tour-kit/ai API](https://usertourkit.com/docs/api/ai): Complete API reference for @tour-kit/ai — providers, hooks, components, variants, and server-side route + RAG helpers
 - [@tour-kit/analytics API](https://usertourkit.com/docs/api/analytics): API reference for @tour-kit/analytics: AnalyticsProvider, useAnalytics, plugin interface, and built-in integrations
 - [@tour-kit/announcements API](https://usertourkit.com/docs/api/announcements): API reference for @tour-kit/announcements: Modal, Toast, Banner, Slideout, Spotlight, queue hooks, and provider config
 - [@tour-kit/checklists API](https://usertourkit.com/docs/api/checklists): API reference for @tour-kit/checklists: Checklist, ChecklistTask, useChecklist, useTask, and progress utilities
 - [@tour-kit/core API](https://usertourkit.com/docs/api/core): API reference for @tour-kit/core: useTour, useStep, useFocusTrap, createTour, createStep, and all utility exports
 - [@tour-kit/hints API](https://usertourkit.com/docs/api/hints): API reference for @tour-kit/hints: Hint, HintHotspot, HintTooltip, useHints, useHint, and headless hint primitives
+- [@tour-kit/license API](https://usertourkit.com/docs/api/license): API reference for @tour-kit/license: LicenseProvider, LicenseGate, ProGate, useLicense, useIsPro, useLicenseGate, validateLicenseKey, and related types
 - [@tour-kit/media API](https://usertourkit.com/docs/api/media): API reference for @tour-kit/media: YouTubeEmbed, VimeoEmbed, LoomEmbed, GifPlayer, LottiePlayer, and TourMedia
 - [@tour-kit/react API](https://usertourkit.com/docs/api/react): API reference for @tour-kit/react: Tour, TourCard, TourStep, headless components, router adapters, and style hooks
 - [@tour-kit/scheduling API](https://usertourkit.com/docs/api/scheduling): API reference for @tour-kit/scheduling: useSchedule, evaluateSchedule, timezone utilities, and preset configurations
@@ -256,6 +271,37 @@
 ## Licensing
 
 - [Licensing](https://usertourkit.com/docs/licensing): Set up userTourKit Pro licensing with Polar.sh — installation, configuration, and CI/CD
+
+## Surveys
+
+- [@tour-kit/surveys](https://usertourkit.com/docs/surveys): In-app microsurveys: NPS, CSAT, CES, and custom question flows with fatigue prevention, skip logic, and five display modes for React apps
+- [Components](https://usertourkit.com/docs/surveys/components): Pre-styled display and question components: five survey containers and four accessible question input types with CVA variant support
+- [QuestionBoolean](https://usertourkit.com/docs/surveys/components/question-boolean): Yes / No toggle pair implemented as an accessible radiogroup with configurable labels, size variants, and roving tabindex
+- [QuestionRating](https://usertourkit.com/docs/surveys/components/question-rating): Numeric, star, or emoji rating scale implemented as an accessible radiogroup with roving tabindex and configurable min/max
+- [QuestionSelect](https://usertourkit.com/docs/surveys/components/question-select): Single-select (radiogroup) or multi-select (group of checkboxes) option list with roving tabindex, disabled option support, and size variants
+- [QuestionText](https://usertourkit.com/docs/surveys/components/question-text): Single-line input or resizable textarea with optional character count, size variants, and autofocus support
+- [SurveyBanner](https://usertourkit.com/docs/surveys/components/survey-banner): Top or bottom strip that renders when the survey is visible, with sticky positioning, intent variants, and an optional dismiss button
+- [SurveyInline](https://usertourkit.com/docs/surveys/components/survey-inline): Embeds a survey directly in the page flow, rendering when the survey is visible with an optional alwaysRender flag for preview scenarios
+- [SurveyModal](https://usertourkit.com/docs/surveys/components/survey-modal): Centered dialog that shows when the survey's isVisible flag is true, built on Radix UI Dialog with configurable size and dismiss behaviour
+- [SurveyPopover](https://usertourkit.com/docs/surveys/components/survey-popover): Floating panel anchored to a DOM element via Floating UI, with automatic flip and shift collision avoidance
+- [SurveyProgress](https://usertourkit.com/docs/surveys/components/survey-progress): Question progress indicator with text, bar, or combined display — uses role="progressbar" and renders null for single-question surveys
+- [SurveySlideout](https://usertourkit.com/docs/surveys/components/survey-slideout): Side panel that slides in from the left or right edge, built on Radix UI Dialog with configurable position and size variants
+- [Headless](https://usertourkit.com/docs/surveys/headless): Render-prop components that supply survey state and ARIA props without rendering any markup — full control over appearance and interaction
+- [HeadlessQuestionBoolean](https://usertourkit.com/docs/surveys/headless/headless-question-boolean): Headless yes/no toggle — manages boolean state and returns groupProps and getOptionProps for accessible yes/no buttons
+- [HeadlessQuestionRating](https://usertourkit.com/docs/surveys/headless/headless-question-rating): Headless rating scale — manages value, options array, focusedIndex, and returns pre-built ARIA props via render prop
+- [HeadlessQuestionSelect](https://usertourkit.com/docs/surveys/headless/headless-question-select): Headless select — manages single or multi-select state and returns groupProps and getOptionProps with correct ARIA roles for each mode
+- [HeadlessQuestionText](https://usertourkit.com/docs/surveys/headless/headless-question-text): Headless text input — manages value, character count, and returns pre-built inputProps and characterCountProps via render prop
+- [HeadlessSurvey](https://usertourkit.com/docs/surveys/headless/headless-survey): Render-prop wrapper around useSurvey — exposes full survey state and actions without rendering any DOM elements
+- [useSurvey](https://usertourkit.com/docs/surveys/hooks/use-survey): Access and control a single survey by id — show, hide, dismiss, snooze, answer questions, and navigate between steps
+- [useSurveyScoring](https://usertourkit.com/docs/surveys/hooks/use-survey-scoring): Access NPS, CSAT, and CES scoring utilities plus a getSurveyScore helper that automatically selects the right algorithm for a completed survey
+- [useSurveys](https://usertourkit.com/docs/surveys/hooks/use-surveys): Access the full SurveysContextValue — all survey states, the active survey, the queue, and every action available in the context
+- [Providers](https://usertourkit.com/docs/surveys/providers): SurveysProvider and useSurveysContext — the root of the surveys state tree
+- [SurveysProvider](https://usertourkit.com/docs/surveys/providers/surveys-provider): Root provider that manages survey state, fatigue prevention, persistence, and analytics callbacks for all surveys in your application
+- [Types](https://usertourkit.com/docs/surveys/types): TypeScript type definitions exported by @tour-kit/surveys — survey config, question config, scoring results, context, events, queue, and position types
+- [Utilities](https://usertourkit.com/docs/surveys/utilities): Standalone scoring functions — calculateNPS, calculateCSAT, calculateCES — that work in React components, server actions, and analytics pipelines
+- [calculateCES](https://usertourkit.com/docs/surveys/utilities/calculate-ces): Calculate Customer Effort Score as the average of 1–7 ratings, with easy, difficult, and neutral counts based on fixed thresholds
+- [calculateCSAT](https://usertourkit.com/docs/surveys/utilities/calculate-csat): Calculate Customer Satisfaction Score as the percentage of responses at or above a configurable threshold value
+- [calculateNPS](https://usertourkit.com/docs/surveys/utilities/calculate-nps): Calculate Net Promoter Score from an array of 0–10 ratings, returning score, promoter/passive/detractor counts, and percentages
 
 ## Troubleshooting
 

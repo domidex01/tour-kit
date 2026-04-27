@@ -1,0 +1,425 @@
+---
+title: '@tour-kit/license API'
+description: >-
+  API reference for @tour-kit/license: LicenseProvider, LicenseGate, ProGate,
+  useLicense, useIsPro, useLicenseGate, validateLicenseKey, and related types
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Complete API reference for the license package. Polar.sh-based key validation, domain activation, and React gating components used by Tour Kit Pro packages.
+
+<Callout type="info">
+For installation and environment setup see [Licensing](/docs/licensing). Free packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) never need this package.
+</Callout>
+
+---
+
+## Providers
+
+### LicenseProvider
+
+Root provider that validates the key against Polar, maintains license state, and exposes it via context. Place once at the top of your app, above any pro components.
+
+```tsx
+import { LicenseProvider } from '@tour-kit/license';
+
+<LicenseProvider
+  licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE_KEY!}
+  organizationId={process.env.NEXT_PUBLIC_POLAR_ORG_ID}
+  onValidate={(state) => console.log('License:', state.status)}
+  onError={(err) => console.error(err)}
+>
+  {children}
+</LicenseProvider>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `licenseKey` | `string` | Polar license key (`TOURKIT-...`) |
+| `organizationId` | `string` | Polar organization id; required for validation against the API |
+| `children` | `ReactNode` | App tree |
+| `onValidate` | `(state: LicenseState) => void` | Called after each successful validation |
+| `onError` | `(error: Error) => void` | Called on validation failure |
+
+---
+
+## Components
+
+### LicenseGate
+
+Conditional rendering based on license tier. Renders `children` when valid, `fallback` when gated, `loading` while validating.
+
+```tsx
+import { LicenseGate } from '@tour-kit/license';
+
+<LicenseGate
+  require="pro"
+  fallback={<UpgradePrompt />}
+  loading={<Skeleton />}
+>
+  <AdoptionDashboard />
+</LicenseGate>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `require` | `'pro'` | Minimum tier required |
+| `children` | `ReactNode` | Rendered when license is valid |
+| `fallback` | `ReactNode` | Rendered when license is invalid/expired/revoked |
+| `loading` | `ReactNode` | Rendered while validation is in progress |
+
+### ProGate
+
+Hard gate for Tour Kit Pro packages. Renders a branded placeholder when unlicensed instead of a custom fallback. Used internally by every pro package; expose only if you build your own pro extension.
+
+```tsx
+import { ProGate } from '@tour-kit/license';
+
+<ProGate package="@your-org/private-pro-pkg">
+  <YourProComponent />
+</ProGate>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `package` | `string` | npm package name shown in the placeholder + console warning |
+| `children` | `ReactNode` | Rendered when licensed; replaced by branded placeholder otherwise |
+
+Dev environments (`localhost`, `127.0.0.1`, `*.local`) always render `children`.
+
+### LicenseWatermark
+
+Semi-transparent "UNLICENSED" overlay with high z-index. Pro packages render this automatically when unlicensed in production. Inline-styled so it cannot be CSS-disabled.
+
+```tsx
+import { LicenseWatermark } from '@tour-kit/license';
+
+{isUnlicensed && <LicenseWatermark />}
+```
+
+No props.
+
+### LicenseWarning
+
+Console-only warning component. Renders nothing visible; calls `console.warn` once on mount when the license is invalid. Use as a low-friction notification in dev/preview builds.
+
+```tsx
+import { LicenseWarning } from '@tour-kit/license';
+
+<LicenseWarning />
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `message` | `string` | Override the default warning message |
+| `pricingUrl` | `string` | URL surfaced in the warning |
+| `dismissible` | `boolean` | Whether the user can dismiss (visual variants only) |
+| `onDismiss` | `() => void` | Dismissal callback |
+| `className` | `string` | Class name override |
+
+---
+
+## Hooks
+
+### useLicense
+
+Returns the full license context value. Throws if no `LicenseProvider` is mounted above.
+
+```tsx
+import { useLicense } from '@tour-kit/license';
+
+const { state, refresh, isGated, isLoading, gracePeriodActive } = useLicense();
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `state` | `LicenseState` | Full license state object |
+| `refresh` | `() => Promise<void>` | Force re-validation against Polar |
+| `isGated` | `boolean` | Whether pro components should be blocked |
+| `isLoading` | `boolean` | Whether validation is in progress |
+| `gracePeriodActive` | `boolean` | True when running on a fresh-but-stale cache after a network failure |
+
+### useIsPro
+
+Boolean shortcut. Equivalent to `useLicense().state.tier === 'pro' && state.status === 'valid'`.
+
+```tsx
+import { useIsPro } from '@tour-kit/license';
+
+const isPro = useIsPro();
+```
+
+Returns `boolean`.
+
+### useLicenseGate
+
+Reads the precomputed gating decision from context. Use this inside pro components instead of recomputing logic on every render.
+
+```tsx
+import { useLicenseGate } from '@tour-kit/license';
+
+const { isGated, isLoading } = useLicenseGate();
+if (isGated) return <UnlicensedPlaceholder />;
+if (isLoading) return null;
+```
+
+| Return | Type | Description |
+|--------|------|-------------|
+| `isGated` | `boolean` | True if the component should be blocked |
+| `isLoading` | `boolean` | True while validation is in progress (avoid flash) |
+
+Logic (mirrors `LicenseProvider`'s derived signals):
+
+- Dev environment (`localhost`, `127.0.0.1`, `*.local`) → never gated
+- No `LicenseProvider` in tree → gated
+- `status: 'loading'` → not gated, `isLoading=true` (avoid flash)
+- `status: 'valid'` + pro + render key → not gated
+- `status: 'error'` + fresh cache → not gated (grace period)
+- `status: 'error'` + no cache → gated
+- `status: 'invalid' | 'expired' | 'revoked'` → gated
+
+---
+
+## Utilities
+
+### validateLicenseKey
+
+Headless validation against the Polar API. Use in CI scripts or server-side checks.
+
+```tsx
+import { validateLicenseKey } from '@tour-kit/license';
+
+const state = await validateLicenseKey({ key: 'TOURKIT-...', organizationId: '...' });
+if (state.status !== 'valid') throw new Error('License invalid');
+```
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `config` | `LicenseConfig` | `{ key, organizationId }` |
+
+Returns `Promise<LicenseState>`.
+
+### getCurrentDomain
+
+Reads `window.location.hostname`. Returns `null` on the server.
+
+```tsx
+import { getCurrentDomain } from '@tour-kit/license';
+
+const domain = getCurrentDomain(); // 'app.example.com' | null
+```
+
+Returns `string | null`.
+
+### isDevEnvironment
+
+Checks whether the current hostname is `localhost`, `127.0.0.1`, or matches `*.local`.
+
+```tsx
+import { isDevEnvironment } from '@tour-kit/license';
+
+if (isDevEnvironment()) {
+  console.log('Skipping license check in dev');
+}
+```
+
+Returns `boolean`.
+
+---
+
+## Types
+
+### LicenseTier
+
+```tsx
+type LicenseTier = 'free' | 'pro';
+```
+
+### LicenseState
+
+Single source of truth for validity. Never derive validity from `tier` alone — a pro tier with `status: 'expired'` is invalid.
+
+```tsx
+type LicenseState = {
+  status: 'valid' | 'invalid' | 'expired' | 'revoked' | 'loading' | 'error';
+  tier: LicenseTier;
+  activations: number;
+  maxActivations: number;
+  domain: string | null;
+  expiresAt: string | null;
+  validatedAt: number;
+  renderKey: string | undefined;
+};
+```
+
+`renderKey` is set only when `status === 'valid'`. It is the anti-bypass mechanism consumed by `<LicenseGate>`.
+
+### LicenseCache
+
+Shape stored in `localStorage`. `keyHash` is set when the cache is written with a license key; readers compare it against the current key's hash and invalidate on mismatch.
+
+```tsx
+type LicenseCache = {
+  state: LicenseState;
+  cachedAt: number;
+  domain: string;
+  keyHash?: string;
+};
+```
+
+Cache keys are domain-scoped: `tourkit:license:{domain}`. TTL is 72 hours.
+
+### LicenseActivation
+
+```tsx
+type LicenseActivation = {
+  id: string;
+  licenseKeyId: string;
+  label: string;
+  createdAt: string;
+  modifiedAt: string | null;
+};
+```
+
+### LicenseError
+
+```tsx
+type LicenseError =
+  | 'invalid_key'
+  | 'network_error'
+  | 'parse_error'
+  | 'activation_limit_reached'
+  | 'domain_mismatch';
+```
+
+### LicenseConfig
+
+```tsx
+type LicenseConfig = {
+  key: string;
+  organizationId: string;
+};
+```
+
+### LicenseContextValue
+
+```tsx
+type LicenseContextValue = {
+  state: LicenseState;
+  refresh: () => Promise<void>;
+  isGated: boolean;
+  isLoading: boolean;
+  gracePeriodActive: boolean;
+};
+```
+
+### LicenseGateResult
+
+```tsx
+type LicenseGateResult = {
+  isGated: boolean;
+  isLoading: boolean;
+};
+```
+
+### LicenseProviderProps
+
+```tsx
+type LicenseProviderProps = {
+  licenseKey: string;
+  organizationId?: string;
+  children: React.ReactNode;
+  onValidate?: (state: LicenseState) => void;
+  onError?: (error: Error) => void;
+};
+```
+
+### LicenseGateProps
+
+```tsx
+type LicenseGateProps = {
+  require: 'pro';
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  loading?: React.ReactNode;
+};
+```
+
+### ProGateProps
+
+```tsx
+type ProGateProps = {
+  package: string;
+  children: React.ReactNode;
+};
+```
+
+### LicenseWarningProps
+
+```tsx
+type LicenseWarningProps = {
+  message?: string;
+  pricingUrl?: string;
+  dismissible?: boolean;
+  onDismiss?: () => void;
+  className?: string;
+};
+```
+
+### Polar Response Types
+
+Raw Polar API response shapes (after camelCase transform). Subject to upstream Polar SDK changes.
+
+```tsx
+type PolarValidateResponse = {
+  id: string;
+  organizationId: string;
+  status: 'granted' | 'revoked' | 'disabled';
+  key: string;
+  limitActivations: number | null;
+  usage: number;
+  validations: number;
+  lastValidatedAt: string;
+  expiresAt: string | null;
+  activation: {
+    id: string;
+    licenseKeyId: string;
+    label: string;
+    meta: Record<string, unknown>;
+    createdAt: string;
+    modifiedAt: string | null;
+  } | null;
+};
+
+type PolarActivateResponse = {
+  id: string;
+  licenseKeyId: string;
+  label: string;
+  meta: Record<string, unknown>;
+  createdAt: string;
+  modifiedAt: string | null;
+  licenseKey: {
+    id: string;
+    organizationId: string;
+    status: 'granted' | 'revoked' | 'disabled';
+    limitActivations: number | null;
+    usage: number;
+    limitUsage: number | null;
+    validations: number;
+    lastValidatedAt: string;
+    expiresAt: string | null;
+  };
+};
+```
+
+---
+
+## Internal Exports
+
+These are exported for advanced use; most consumers should not need them.
+
+| Export | Type | Notes |
+|--------|------|-------|
+| `LicenseContext` | `Context<LicenseContextValue \| null>` | Raw React context. Prefer `useLicense()` |
+| `LicenseRenderContext` | `Context<string \| undefined>` | Internal render-key context used by `<LicenseGate>` for anti-bypass |

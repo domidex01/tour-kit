@@ -1,0 +1,51 @@
+---
+title: useAdoptionContext
+description: >-
+  Low-level hook returning the raw AdoptionProvider context — features, usage
+  map, nudge state, and full action surface
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Low-level access to the raw `AdoptionContext` value. Most consumers should use [`useFeature`](/docs/adoption/hooks/use-feature) or [`useNudge`](/docs/adoption/hooks/use-nudge) — `useAdoptionContext` is the escape hatch when you need everything at once (custom dashboards, debugging, headless integrations).
+
+`useAdoptionContext` throws if no `<AdoptionProvider>` is mounted above.
+
+## Usage
+
+```tsx
+import { useAdoptionContext } from '@tour-kit/adoption';
+
+function FeatureMatrix() {
+  const { features, usageMap, pendingNudges } = useAdoptionContext();
+  return (
+    <table>
+      {features.map((f) => (
+        <tr key={f.id}>
+          <td>{f.name}</td>
+          <td>{usageMap[f.id]?.count ?? 0}</td>
+          <td>{pendingNudges.includes(f) ? 'Pending nudge' : 'OK'}</td>
+        </tr>
+      ))}
+    </table>
+  );
+}
+```
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `features` | `Feature[]` | All registered features |
+| `usageMap` | `Record<string, FeatureUsage>` | Per-feature usage records |
+| `nudgeState` | `NudgeState` | Nudge persistence state (snoozed, dismissed, last shown) |
+| `pendingNudges` | `Feature[]` | Features whose nudge is currently due |
+| `trackUsage` | `(featureId: string) => void` | Manually record a feature usage event |
+| `getFeature` | `(featureId: string) => FeatureWithUsage \| null` | Resolve a feature + its usage |
+| `showNudge` | `(featureId: string) => void` | Force-show a nudge |
+| `dismissNudge` | `(featureId: string) => void` | Persist a dismissal |
+| `snoozeNudge` | `(featureId: string, durationMs: number) => void` | Hide for a duration |
+
+<Callout type="info">
+For typical adoption flows, prefer [`useFeature`](/docs/adoption/hooks/use-feature) (single feature) or [`useNudge`](/docs/adoption/hooks/use-nudge) (single nudge). They wrap `useAdoptionContext` with narrower APIs.
+</Callout>

@@ -1,0 +1,46 @@
+---
+title: useTourKitContext
+description: >-
+  Hook returning the global TourKit context value — config, resolved direction,
+  and global callbacks set on TourKitProvider
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Returns the value provided by [`TourKitProvider`](/docs/core/providers): the resolved configuration, text direction, and global callbacks. Use this hook when a component needs to read the global config (e.g. spotlight padding, keyboard mappings) or react to global tour events.
+
+`useTourKitContext` throws if no `<TourKitProvider>` is mounted above.
+
+## Usage
+
+```tsx
+import { useTourKitContext } from '@tour-kit/core';
+
+function SpotlightDebugger() {
+  const { config, direction } = useTourKitContext();
+  return (
+    <pre>
+      direction = {direction}
+      spotlight padding = {config.spotlight?.padding}
+    </pre>
+  );
+}
+```
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `config` | `TourKitConfig` | Resolved global configuration |
+| `direction` | `'ltr' \| 'rtl'` | Resolved text direction |
+| `isRTL` | `boolean` | Convenience flag, equivalent to `direction === 'rtl'` |
+| `onTourStart` | `(tourId) => void` | Global tour-start callback |
+| `onTourComplete` | `(tourId) => void` | Global tour-complete callback |
+| `onTourSkip` | `(tourId, stepIndex) => void` | Global tour-skip callback |
+| `onStepView` | `(tourId, stepId, stepIndex) => void` | Global step-view callback |
+| `onBranchAction` | `(tourId, stepId, actionId, target) => void` | Branch-action callback |
+| `onTourBranch` | `(fromTourId, toTourId, fromStepId) => void` | Cross-tour branch callback |
+
+<Callout type="info">
+For just the direction, use [`useDirection`](/docs/core/hooks/use-direction) — it's a thin wrapper that pulls only `{ direction, isRTL }` from this context.
+</Callout>
