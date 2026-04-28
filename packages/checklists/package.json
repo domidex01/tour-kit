@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/checklists",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Interactive onboarding checklists for React with task dependencies, progress tracking, persistence, and headless or styled components for getting-started flows and activation funnels",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",

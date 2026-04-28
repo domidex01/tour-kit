@@ -1,6 +1,6 @@
 {
   "name": "dashboard-next",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Canonical Tour Kit integration — Next.js 16 + React 19 + Tailwind v4 + shadcn/ui dashboard exercising every @tour-kit/* package.",
   "scripts": {

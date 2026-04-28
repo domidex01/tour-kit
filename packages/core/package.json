@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/core",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Headless onboarding and product tour engine for React — framework-agnostic core with positioning, focus management, storage adapters, and hooks for building guided tours, walkthroughs, and step-by-step flows",
   "author": "Tour Kit Team",
   "license": "MIT",

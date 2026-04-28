@@ -1,5 +1,15 @@
 # no-tailwind-test
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [c03e87d]
+- Updated dependencies [78dc120]
+  - @tour-kit/core@0.5.1
+  - @tour-kit/react@0.5.1
+  - @tour-kit/hints@0.5.1
+
 ## 0.0.3
 
 ### Patch Changes

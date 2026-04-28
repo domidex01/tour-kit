@@ -1,5 +1,25 @@
 # @tour-kit/core
 
+## 0.5.1
+
+### Patch Changes
+
+- c03e87d: Fix six semantic bugs surfaced by the tk-bug-hunter audit:
+
+  - `useKeyboardNavigation` now ignores keypresses while focus is in `<select>`, `[contenteditable]`, or `role="textbox"` elements, so rich-text editors (TipTap, Lexical, ProseMirror) no longer trigger tour navigation while the user is typing.
+  - `getFocusableElements` (used by `useFocusTrap`) no longer drops `position: fixed` descendants; the filter now uses `getComputedStyle` for `display` / `visibility` instead of `offsetParent`, which is null for fixed-positioned elements.
+  - `createCookieStorage().getItem()` escapes regex metacharacters in cookie keys so tour IDs containing `.`, `-`, `(`, etc. round-trip correctly.
+  - `lockScroll()` is now ref-counted: nested calls share a single lock, the saved scroll position is captured once, and previous inline body styles are restored on unlock. Fixes the case where a tour card opens a modal that also locks scroll.
+  - `useRoutePersistence({ syncTabs: true })` now actually reacts to cross-tab `storage` events via a new additive `externalVersion` return field; the `TourProvider` re-runs its restore effect when this value changes. The no-op manual `StorageEvent` dispatch inside `save()` was removed — browsers already fire those on other tabs automatically.
+  - The `UPDATE_TOURS` reducer shallow-equality-checks the incoming array and skips state updates when tour references are unchanged, preventing unnecessary re-renders when consumers pass `tours` as an inline literal.
+
+  Also removes five unused test-utility factories (`createResizeObserverMock`, `createIntersectionObserverMock`, `createMutationObserverMock`, `createTimerTracker`, `createStorageTracker`) from `cleanup-test-utils.ts`.
+
+- 78dc120: Fix `onComplete` and `onSkip` callbacks firing multiple times, which caused `Maximum update depth exceeded` when the parent unmounted the `<Tour>` synchronously inside the callback (issue #6).
+
+  - `TourProvider` now consolidates every completion path (`complete()`, `next()` at last step, branch `'complete'` / `'skip'` targets, and the no-visible-step auto-finish) through shared `completeTour` / `skipTour` helpers guarded by tour-id-keyed refs. The guard catches both stale-closure synchronous double-calls and post-`COMPLETE_TOUR` re-firing. Refs are re-armed on `start()` and on cross-tour branch transitions, so legitimate restarts still fire the callbacks.
+  - `<Tour>` (in `@tour-kit/react`) wraps the consumer-supplied `onComplete` / `onSkip` with the same idempotency guard as a defense-in-depth layer.
+
 ## 0.5.0
 
 ### Minor Changes

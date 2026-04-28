@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/hints",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Persistent hints, hotspots, and beacons for React — pulse-animated indicators that draw attention to UI elements with dismissal tracking, works with or without Tailwind CSS",
   "author": "Tour Kit Team",
   "license": "MIT",
