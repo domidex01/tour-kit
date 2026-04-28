@@ -19,6 +19,7 @@ export const SurveyInline = React.forwardRef<HTMLDivElement, SurveyInlineProps>(
     return (
       <div
         ref={ref}
+        // biome-ignore lint/a11y/useSemanticElements: <section> would require changing forwardRef to HTMLElement, breaking the public ref type
         role="region"
         aria-label={survey.config?.title ?? 'Survey'}
         data-survey-inline={surveyId}

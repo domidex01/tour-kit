@@ -57,3 +57,6 @@ pnpm --filter docs build    # Build static site
 
 ## Related Files
 - `.claude/agents/docs-writer.md` - Agent for writing documentation
+- `../../wiki/design.md` - Pixel-accurate design reference for the docs website (tokens, sections, components, motion, known issues, reproduction checklist). Read before recreating, redesigning, or porting any landing or docs page.
+- `./STYLEGUIDE.md` - Higher-level homepage styleguide (color palette, typography, component patterns); pairs with `wiki/design.md`.
+

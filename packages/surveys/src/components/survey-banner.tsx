@@ -38,6 +38,7 @@ export const SurveyBanner = React.forwardRef<HTMLDivElement, SurveyBannerProps>(
     return (
       <div
         ref={ref}
+        // biome-ignore lint/a11y/useSemanticElements: <section> would require changing forwardRef to HTMLElement, breaking the public ref type
         role="region"
         aria-label={config?.title ?? 'Survey banner'}
         className={cn(

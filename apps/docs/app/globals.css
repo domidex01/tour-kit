@@ -26,7 +26,8 @@
   --animate-tour-pulse: tour-pulse 1.5s ease-in-out infinite;
 
   @keyframes tour-pulse {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 70%, transparent);
     }
     50% {

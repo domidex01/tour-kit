@@ -91,6 +91,7 @@ export const SurveyPopover = React.forwardRef<HTMLDivElement, SurveyPopoverProps
               ref.current = node
             }
           }}
+          // biome-ignore lint/a11y/useSemanticElements: native <dialog> requires showModal()/show()/close() for correct a11y semantics; this component manages its own visibility via Floating UI
           role="dialog"
           aria-label={config?.title ?? 'Survey'}
           style={floatingStyles}

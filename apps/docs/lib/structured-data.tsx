@@ -128,6 +128,7 @@ const ORGANIZATION = {
     'Open-source headless React library for product tours, onboarding, and in-app messaging.',
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: data-shaping for JSON-LD — many optional fields collapse via `... && {}` spreads; splitting would obscure the schema mapping
 export function ArticleJsonLd({
   headline,
   description,

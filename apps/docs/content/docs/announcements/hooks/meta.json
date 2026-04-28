@@ -1,4 +1,9 @@
 {
   "title": "Hooks",
-  "pages": ["use-announcement", "use-announcements", "use-announcement-queue", "use-announcements-context"]
+  "pages": [
+    "use-announcement",
+    "use-announcements",
+    "use-announcement-queue",
+    "use-announcements-context"
+  ]
 }

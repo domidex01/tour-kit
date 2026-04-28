@@ -97,6 +97,7 @@ function updateSurvey(
   return { ...state, surveys }
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: switch-based reducer; each case is small and self-contained — splitting would obscure state transitions
 function surveysReducer(state: SurveysReducerState, action: SurveysAction): SurveysReducerState {
   switch (action.type) {
     case 'REGISTER': {

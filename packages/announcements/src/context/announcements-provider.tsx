@@ -321,6 +321,7 @@ export function AnnouncementsProvider({
   // Auto-show eligible announcements after registration / on userContext change.
   // Respects priority queueing via the scheduler.
   // biome-ignore lint/correctness/useExhaustiveDependencies: evaluates on register + audience changes
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: orchestrates eligibility filtering, priority sort, and queue/show dispatch — splitting would fragment the scheduler contract
   React.useEffect(() => {
     if (state.announcements.size === 0) return
 

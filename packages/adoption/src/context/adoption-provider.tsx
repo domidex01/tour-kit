@@ -47,6 +47,7 @@ export function AdoptionProvider({
 }: AdoptionProviderProps) {
   // Primitive deps — an inline `storage={{ type: 'localStorage' }}` prop would
   // otherwise invalidate this memo every render and trigger a storage-load loop.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: depend on stable primitives instead of the unstable `storage` object reference
   const storageAdapter = React.useMemo(
     () => createStorageAdapter(storage),
     [storage.type, storage.key]

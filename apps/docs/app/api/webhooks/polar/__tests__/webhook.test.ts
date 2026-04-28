@@ -423,7 +423,7 @@ describe('Ops alerts', () => {
 
     expect(res.status).toBe(202)
     expect(sendMock).toHaveBeenCalledTimes(1)
-    const call = sendMock.mock.calls[0]![0]
+    const call = sendMock.mock.calls[0]?.[0]
     expect(call.to).toBe('ops@test.local')
     expect(call.from).toBe('alerts@usertourkit.com')
     expect(call.subject).toContain('[TK] benefit_grant.revoked:')
@@ -452,7 +452,7 @@ describe('Ops alerts', () => {
 
     expect(res.status).toBe(202)
     expect(sendMock).toHaveBeenCalledTimes(1)
-    const call = sendMock.mock.calls[0]![0]
+    const call = sendMock.mock.calls[0]?.[0]
     expect(call.subject).toContain('cust_camel_999')
     expect(call.subject).not.toContain('unknown')
     expect(consoleSpy).toHaveBeenCalledWith(
@@ -474,7 +474,7 @@ describe('Ops alerts', () => {
 
     expect(res.status).toBe(202)
     expect(sendMock).toHaveBeenCalledTimes(1)
-    const call = sendMock.mock.calls[0]![0]
+    const call = sendMock.mock.calls[0]?.[0]
     expect(call.subject).toContain('[TK] order.refunded:')
     expect(call.subject).toContain('cust_abc456')
   })

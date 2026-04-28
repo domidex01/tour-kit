@@ -28,6 +28,7 @@ interface ArticleLayoutProps {
   relatedLinks?: { label: string; href: string }[]
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: layout component with conditional sections (author, dates, TOC, related links); cohesive as one tree
 export function ArticleLayout({
   children,
   breadcrumbs,
