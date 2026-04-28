@@ -60,6 +60,19 @@ export function Tour({
 }: TourProps) {
   const registryContext = useTourRegistryContextOptional()
 
+  // Idempotency guards: ensure onComplete/onSkip fire at most once per tour
+  // activation. Prevents render-loop footgun when the parent unmounts the
+  // Tour synchronously inside the callback (issue #6).
+  const completedRef = React.useRef(false)
+  const skippedRef = React.useRef(false)
+
+  // Re-arm the guards if the tour identity changes (different tour mounted).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `id` is the trigger; the body only resets refs
+  React.useEffect(() => {
+    completedRef.current = false
+    skippedRef.current = false
+  }, [id])
+
   // Extract TourStep children vs other content
   const { steps, content } = React.useMemo(() => {
     const stepElements: TourStepType[] = []
@@ -93,8 +106,20 @@ export function Tour({
       startAt,
       ...config,
       onStart: onStart ? () => onStart() : undefined,
-      onComplete: onComplete ? () => onComplete() : undefined,
-      onSkip: onSkip ? () => onSkip() : undefined,
+      onComplete: onComplete
+        ? () => {
+            if (completedRef.current) return
+            completedRef.current = true
+            onComplete()
+          }
+        : undefined,
+      onSkip: onSkip
+        ? () => {
+            if (skippedRef.current) return
+            skippedRef.current = true
+            onSkip()
+          }
+        : undefined,
       onStepChange: onStepChange ? (step, index) => onStepChange(step, index) : undefined,
     }),
     [id, steps, autoStart, startAt, config, onStart, onComplete, onSkip, onStepChange]

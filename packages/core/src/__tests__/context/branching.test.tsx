@@ -636,4 +636,146 @@ describe('TourProvider branching logic', () => {
       expect(result.current.currentStep?.id).toBe('step-3')
     })
   })
+
+  // Regression coverage for issue #6: every completion path must fire onComplete
+  // (and onSkip) at most once per tour activation, regardless of how it's reached.
+  describe('terminal-callback idempotency', () => {
+    it('fires onComplete exactly once when reached via "complete" branch target', async () => {
+      const onComplete = vi.fn()
+      const tours: Tour[] = [
+        {
+          id: 'test-tour',
+          onComplete,
+          steps: [createStep('step-1', { onNext: 'complete' }), createStep('step-2')],
+        },
+      ]
+
+      const { result } = renderHook(() => useTourContext(), {
+        wrapper: createWrapper(tours),
+      })
+
+      await act(async () => {
+        await result.current.start('test-tour')
+      })
+      await act(async () => {
+        await result.current.next()
+      })
+
+      expect(onComplete).toHaveBeenCalledTimes(1)
+      expect(result.current.isActive).toBe(false)
+    })
+
+    it('fires onSkip exactly once when reached via "skip" branch target', async () => {
+      const onSkip = vi.fn()
+      const tours: Tour[] = [
+        {
+          id: 'test-tour',
+          onSkip,
+          steps: [createStep('step-1', { onNext: 'skip' }), createStep('step-2')],
+        },
+      ]
+
+      const { result } = renderHook(() => useTourContext(), {
+        wrapper: createWrapper(tours),
+      })
+
+      await act(async () => {
+        await result.current.start('test-tour')
+      })
+      await act(async () => {
+        await result.current.next()
+      })
+
+      expect(onSkip).toHaveBeenCalledTimes(1)
+      expect(result.current.isActive).toBe(false)
+    })
+
+    it('fires onComplete exactly once when no visible step remains after a branch jump', async () => {
+      const onComplete = vi.fn()
+      const tours: Tour[] = [
+        {
+          id: 'test-tour',
+          onComplete,
+          steps: [
+            // jump forward by id; but step-2 is hidden by `when`, leaving no visible step
+            createStep('step-1', { onNext: 'step-2' }),
+            createStep('step-2', { when: () => false }),
+          ],
+        },
+      ]
+
+      const { result } = renderHook(() => useTourContext(), {
+        wrapper: createWrapper(tours),
+      })
+
+      await act(async () => {
+        await result.current.start('test-tour')
+      })
+      await act(async () => {
+        await result.current.next()
+      })
+
+      expect(onComplete).toHaveBeenCalledTimes(1)
+      expect(result.current.isActive).toBe(false)
+    })
+
+    it('fires onComplete exactly once when complete() is called twice synchronously', async () => {
+      const onComplete = vi.fn()
+      const tours: Tour[] = [
+        {
+          id: 'test-tour',
+          onComplete,
+          steps: [createStep('step-1'), createStep('step-2')],
+        },
+      ]
+
+      const { result } = renderHook(() => useTourContext(), {
+        wrapper: createWrapper(tours),
+      })
+
+      await act(async () => {
+        await result.current.start('test-tour')
+      })
+
+      // Two synchronous calls inside the same commit phase — would re-fire
+      // onComplete without the ref guard because state.isActive is closure-stale.
+      await act(async () => {
+        result.current.complete()
+        result.current.complete()
+      })
+
+      expect(onComplete).toHaveBeenCalledTimes(1)
+      expect(result.current.isActive).toBe(false)
+    })
+
+    it('re-arms onComplete after restart so it can fire again on a new activation', async () => {
+      const onComplete = vi.fn()
+      const tours: Tour[] = [
+        {
+          id: 'test-tour',
+          onComplete,
+          steps: [createStep('step-1')],
+        },
+      ]
+
+      const { result } = renderHook(() => useTourContext(), {
+        wrapper: createWrapper(tours),
+      })
+
+      await act(async () => {
+        await result.current.start('test-tour')
+      })
+      await act(async () => {
+        result.current.complete()
+      })
+      await act(async () => {
+        await result.current.start('test-tour')
+      })
+      await act(async () => {
+        result.current.complete()
+      })
+
+      expect(onComplete).toHaveBeenCalledTimes(2)
+    })
+  })
 })

@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useTour } from '@tour-kit/core'
+import * as React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Tour } from './tour'
 import { TourStep } from './tour-step'
@@ -154,6 +155,36 @@ describe('Tour', () => {
     await user.click(screen.getByText('Start'))
     await user.click(screen.getByText('Next')) // Completes single-step tour
 
+    expect(onComplete).toHaveBeenCalledTimes(1)
+  })
+
+  it('calls onComplete only once when parent unmounts Tour inside the callback (issue #6)', async () => {
+    const onComplete = vi.fn()
+    const user = userEvent.setup()
+
+    function App() {
+      const [showTour, setShowTour] = React.useState(true)
+      if (!showTour) return <div data-testid="done">Done</div>
+      return (
+        <Tour
+          id="autostart-test"
+          autoStart
+          onComplete={() => {
+            onComplete()
+            setShowTour(false)
+          }}
+        >
+          <TourStep id="s1" target="#step-1" content="Step 1" />
+        </Tour>
+      )
+    }
+
+    render(<App />)
+
+    const finishButton = await screen.findByRole('button', { name: /finish/i })
+    await user.click(finishButton)
+
+    await waitFor(() => expect(screen.getByTestId('done')).toBeInTheDocument())
     expect(onComplete).toHaveBeenCalledTimes(1)
   })
 
