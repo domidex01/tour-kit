@@ -383,6 +383,13 @@ export function TourProvider({
 
   const [state, dispatch] = React.useReducer(tourReducer, initialState)
 
+  // Idempotency guards: track the last tour for which the terminal callback
+  // (onComplete / onSkip) has already fired. Prevents double-firing inside the
+  // same React commit phase, where reducer state is still closure-stale.
+  // Reset inside start() / handleStartTour-equivalent paths (see below).
+  const completedTourIdRef = React.useRef<string | null>(null)
+  const skippedTourIdRef = React.useRef<string | null>(null)
+
   // Sync tours prop with reducer state when tours are registered/unregistered
   React.useEffect(() => {
     dispatch({ type: 'UPDATE_TOURS', tours })
@@ -478,6 +485,34 @@ export function TourProvider({
     [state, currentTour, data]
   )
 
+  // Helper to complete the current tour. Idempotent across both stale-closure
+  // synchronous double-calls (via ref) and post-COMPLETE_TOUR re-firing (via
+  // isActive). Single source of truth for ALL completion paths — public
+  // complete(), next() at last step, branch 'complete', and the no-visible-step
+  // auto-finish path.
+  const completeTour = React.useCallback(() => {
+    if (!state.isActive || !currentTour) return
+    if (completedTourIdRef.current === currentTour.id) return
+    completedTourIdRef.current = currentTour.id
+    dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
+    dispatch({ type: 'COMPLETE_TOUR' })
+    clear()
+    tourKitContext?.onTourComplete?.(currentTour.id)
+    currentTour.onComplete?.({ ...state, tour: currentTour, data })
+  }, [currentTour, state, data, tourKitContext, clear])
+
+  // Helper to skip the current tour. Mirrors completeTour for skip semantics.
+  const skipTour = React.useCallback(() => {
+    if (!state.isActive || !currentTour) return
+    if (skippedTourIdRef.current === currentTour.id) return
+    skippedTourIdRef.current = currentTour.id
+    dispatch({ type: 'ADD_SKIPPED', tourId: currentTour.id })
+    dispatch({ type: 'SKIP_TOUR' })
+    clear()
+    tourKitContext?.onTourSkip?.(currentTour.id, state.currentStepIndex)
+    currentTour.onSkip?.({ ...state, tour: currentTour, data })
+  }, [currentTour, state, data, tourKitContext, clear])
+
   // Handle branch target resolution and navigation
   const handleBranchTarget = React.useCallback(
     async (
@@ -500,19 +535,11 @@ export function TourProvider({
       if (isSpecialTarget(target)) {
         switch (target) {
           case 'complete':
-            dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
-            dispatch({ type: 'COMPLETE_TOUR' })
-            clear()
-            tourKitContext?.onTourComplete?.(currentTour.id)
-            currentTour.onComplete?.({ ...state, tour: currentTour, data })
+            completeTour()
             return
 
           case 'skip':
-            dispatch({ type: 'ADD_SKIPPED', tourId: currentTour.id })
-            dispatch({ type: 'SKIP_TOUR' })
-            clear()
-            tourKitContext?.onTourSkip?.(currentTour.id, state.currentStepIndex)
-            currentTour.onSkip?.({ ...state, tour: currentTour, data })
+            skipTour()
             return
 
           case 'restart': {
@@ -564,6 +591,10 @@ export function TourProvider({
             newStepIndex = newTourStepMap.get(target.step) ?? 0
           }
         }
+
+        // Re-arm terminal-callback guards for the new tour
+        completedTourIdRef.current = null
+        skippedTourIdRef.current = null
 
         dispatch({ type: 'START_TOUR', tourId: target.tour, stepIndex: newStepIndex })
         tourKitContext?.onTourStart?.(target.tour)
@@ -625,11 +656,7 @@ export function TourProvider({
 
           if (visibleIndex === -1) {
             // No visible steps, complete the tour
-            dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
-            dispatch({ type: 'COMPLETE_TOUR' })
-            clear()
-            tourKitContext?.onTourComplete?.(currentTour.id)
-            currentTour.onComplete?.({ ...state, tour: currentTour, data })
+            completeTour()
             return
           }
 
@@ -671,7 +698,7 @@ export function TourProvider({
         })
       }
     },
-    [currentTour, state, data, stepIdMap, tourKitContext, clear, navigateToStep]
+    [currentTour, state, data, stepIdMap, tourKitContext, navigateToStep, completeTour, skipTour]
   )
 
   // Actions
@@ -707,22 +734,16 @@ export function TourProvider({
         return
       }
 
+      // Re-arm terminal-callback guards for the (re)started tour
+      completedTourIdRef.current = null
+      skippedTourIdRef.current = null
+
       dispatch({ type: 'START_TOUR', tourId: id, stepIndex: visibleIndex })
       tourKitContext?.onTourStart?.(id)
       tour.onStart?.({ ...state, tour, data })
     },
     [tours, state, data, tourKitContext]
   )
-
-  // Helper to complete the current tour
-  const completeTour = React.useCallback(() => {
-    if (!currentTour) return
-    dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
-    dispatch({ type: 'COMPLETE_TOUR' })
-    clear()
-    tourKitContext?.onTourComplete?.(currentTour.id)
-    currentTour.onComplete?.({ ...state, tour: currentTour, data })
-  }, [currentTour, state, data, tourKitContext, clear])
 
   const next = React.useCallback(async () => {
     if (!state.isActive || !currentTour) return
@@ -903,25 +924,8 @@ export function TourProvider({
     [state, currentTour, data, tourKitContext, navigateToStep]
   )
 
-  const skip = React.useCallback(() => {
-    if (!state.isActive || !currentTour) return
-
-    dispatch({ type: 'ADD_SKIPPED', tourId: currentTour.id })
-    dispatch({ type: 'SKIP_TOUR' })
-    clear() // Clear persisted state on skip
-    tourKitContext?.onTourSkip?.(currentTour.id, state.currentStepIndex)
-    currentTour.onSkip?.({ ...state, tour: currentTour, data })
-  }, [state, currentTour, data, tourKitContext, clear])
-
-  const complete = React.useCallback(() => {
-    if (!state.isActive || !currentTour) return
-
-    dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
-    dispatch({ type: 'COMPLETE_TOUR' })
-    clear() // Clear persisted state on complete
-    tourKitContext?.onTourComplete?.(currentTour.id)
-    currentTour.onComplete?.({ ...state, tour: currentTour, data })
-  }, [state, currentTour, data, tourKitContext, clear])
+  const skip = skipTour
+  const complete = completeTour
 
   const stop = React.useCallback(() => {
     dispatch({ type: 'STOP_TOUR' })
