@@ -114,11 +114,11 @@
     "@vitejs/plugin-react": "^4.5.2",
     "@vitest/coverage-v8": "catalog:",
     "jsdom": "catalog:",
-    "vitest-axe": "^1.0.0-pre.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tsup": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "vitest-axe": "catalog:"
   }
 }

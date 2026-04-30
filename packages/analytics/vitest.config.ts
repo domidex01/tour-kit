@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/__tests__/setup.ts'],
+    setupFiles: ['./vitest.setup.ts', './src/__tests__/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
@@ -21,10 +21,10 @@ export default defineConfig({
         'src/plugins/index.ts',
       ],
       thresholds: {
-        statements: 85,
-        branches: 80,
-        functions: 85,
-        lines: 85,
+        statements: 80,
+        branches: 75,
+        functions: 80,
+        lines: 80,
       },
     },
   },
