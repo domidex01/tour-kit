@@ -203,13 +203,15 @@ We tested this with axe-core across all component variants. Target: Lighthouse A
 
 ## The shared utility problem
 
-Every UI package in a composable monorepo needs the same handful of utility functions, and deciding where those utilities live reveals a tension between DRY principles and clean dependency graphs that most monorepo guides gloss over. In Tour Kit's case, `cn()` for class merging, `Slot` for Radix UI composition, and `UnifiedSlot` for dual Radix/Base UI support are needed by 7 of 10 packages.
+Every UI package in a composable monorepo needs the same handful of utility functions, and deciding where those utilities live reveals a tension between DRY principles and clean dependency graphs that most monorepo guides gloss over. In Tour Kit's case, `cn()` for class merging, `Slot` for Radix UI composition, and `UnifiedSlot` for dual Radix/Base UI support are needed by most UI packages.
 
-We didn't do that. Each UI package has its own copy in `lib/slot.tsx` and `lib/ui-library-context.tsx`.
+The original answer was per-package copies — about 40 lines of utility code duplicated across each UI package. The reasoning at the time: `@tour-kit/core` is framework-agnostic logic, so adding Radix UI's `@radix-ui/react-slot` to core would force every Tour Kit user to pay for slot composition code even when rendering headlessly. Copying ~2KB seemed cheaper than coupling core to a UI library.
 
-Why? Because `@tour-kit/core` is framework-agnostic logic. Adding Radix UI's `@radix-ui/react-slot` as a dependency of core would mean every Tour Kit user pays for slot composition code, even headless-only users who render their own UI. Core's peer dependencies are just `react` and `react-dom`. Adding UI library dependencies would break that contract.
+That trade-off didn't survive contact with reality. By early 2026, twenty-two near-identical files (`unified-slot.tsx` ×7, `ui-library-context.tsx` ×7, `cn()` ×8) had drifted independently. Worse, only the `@tour-kit/react` copy of `UnifiedSlot` was wrapped with `forwardRef` — the other six silently dropped refs in React 18, breaking `asChild` composition for any consumer that needed a ref. The duplication wasn't just dead weight; it was hiding bugs.
 
-The duplication costs about 2KB per package. For a library obsessed with bundle size, that's a real tradeoff. But the alternative (a shared `@tour-kit/utils` package) would add another node in the dependency graph, another package to version, and another layer of indirection. Copying 40 lines of utility code across 7 packages is the pragmatic choice.
+The fix shipped in May 2026: hoist a single canonical `UnifiedSlot` (`forwardRef`-wrapped), `UILibraryProvider`, and `cn()` into `@tour-kit/core/lib`. The six UI packages now provide a thin `lib/slot.tsx` barrel that re-exports from core; `surveys` imports from core directly. The "core stays UI-agnostic" concern was theoretical — the slot helpers don't import `@radix-ui/react-slot` at the boundary that matters; the consumer packages still own their own Radix peer deps. Net result: ~700 LOC deleted, the React 18 ref bug fixed, and a `size-limit` CI gate added so the next round of drift can't sneak in.
+
+The principle isn't "always copy" or "always extract." It's: copies are a pragmatic starting point, but treat them as a debt with a deadline. When the count crosses ~5 and the files start mutating independently, hoist before the bugs do.
 
 As [Smashing Magazine's component design article](https://www.smashingmagazine.com/2023/12/building-components-consumption-not-complexity-part1/) notes: "Building components independent of the application is an important aspect of modularity, helping to identify problems early and prevent unforeseen dependencies."
 
