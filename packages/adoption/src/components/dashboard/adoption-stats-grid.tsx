@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { useAdoptionStats } from '../../hooks/use-adoption-stats'
-import { cn } from '../../lib/utils'
 import { type AdoptionStatsGridVariants, adoptionStatsGridVariants } from '../ui/stat-card-variants'
 import { AdoptionStatCard, type AdoptionStatCardProps } from './adoption-stat-card'
 

@@ -1,5 +1,5 @@
+import { cn } from '@tour-kit/core'
 import { describe, expect, it } from 'vitest'
-import { cn } from '../lib/utils'
 
 describe('cn() utility', () => {
   it('merges multiple class strings', () => {

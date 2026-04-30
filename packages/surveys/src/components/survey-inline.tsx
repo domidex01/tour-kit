@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { useSurvey } from '../hooks/use-survey'
-import { cn } from '../lib/utils'
 
 export interface SurveyInlineProps extends React.HTMLAttributes<HTMLDivElement> {
   surveyId: string

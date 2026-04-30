@@ -11,10 +11,10 @@ import {
   useInteractions,
   useRole,
 } from '@floating-ui/react'
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'
 import { Checklist } from './checklist'
-import { cn } from './cn'
 import {
   type ChecklistLauncherVariants,
   type LauncherBadgeVariants,

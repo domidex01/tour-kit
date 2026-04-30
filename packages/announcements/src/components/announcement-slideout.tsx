@@ -1,10 +1,10 @@
 'use client'
 
 import * as Dialog from '@radix-ui/react-dialog'
+import { cn } from '@tour-kit/core'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { useAnnouncement } from '../hooks/use-announcement'
-import { cn } from '../lib/utils'
 import type { DismissalReason, SlideoutOptions } from '../types/announcement'
 import { AnnouncementActions } from './announcement-actions'
 import { AnnouncementClose } from './announcement-close'

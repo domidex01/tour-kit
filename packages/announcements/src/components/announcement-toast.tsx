@@ -1,10 +1,10 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import { useAnnouncement } from '../hooks/use-announcement'
-import { cn } from '../lib/utils'
 import type { DismissalReason, ToastOptions } from '../types/announcement'
 import { AnnouncementClose } from './announcement-close'
 import { toastContainerVariants, toastProgressVariants, toastVariants } from './ui/toast-variants'

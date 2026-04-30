@@ -159,6 +159,7 @@ Utilities:
   throttleRAF
     throttleTime
     throttleLeading
+    cn
 
 HOOKS
 -----

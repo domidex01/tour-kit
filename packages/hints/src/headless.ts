@@ -47,5 +47,5 @@ export {
 } from './components/headless/hint-tooltip'
 
 // Re-export utilities
-export { cn } from './lib/utils'
+export { cn } from '@tour-kit/core'
 export { Slot, Slottable } from './lib/slot'

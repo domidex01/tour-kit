@@ -1,9 +1,9 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import type { ReactNode } from 'react'
 import { useContext } from 'react'
 import { AiChatContext } from '../context/ai-chat-context'
-import { cn } from '../lib/utils'
 import { aiChatSuggestionChipVariants } from './ui/chat-variants'
 
 export interface AiChatSuggestionsProps {

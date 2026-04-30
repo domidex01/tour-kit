@@ -10,8 +10,8 @@ import {
   useFloating,
 } from '@floating-ui/react'
 import { type Placement, useFocusTrap, useTour } from '@tour-kit/core'
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
-import { cn } from '../../lib/utils'
 import { TourArrow } from '../primitives/tour-arrow'
 import { TourPortal } from '../primitives/tour-portal'
 import { type TourCardVariants, tourCardVariants } from '../ui/card-variants'

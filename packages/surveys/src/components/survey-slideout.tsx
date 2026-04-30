@@ -1,10 +1,10 @@
 'use client'
 
 import * as Dialog from '@radix-ui/react-dialog'
+import { cn } from '@tour-kit/core'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { useSurvey } from '../hooks/use-survey'
-import { cn } from '../lib/utils'
 import type { DismissalReason, SlideoutOptions } from '../types/survey'
 import { slideoutContentVariants, slideoutOverlayVariants } from './ui/slideout-variants'
 

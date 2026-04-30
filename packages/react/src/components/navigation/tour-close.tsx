@@ -1,10 +1,10 @@
 'use client'
 
 import { useTour } from '@tour-kit/core'
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { type RenderProp, Slot, UnifiedSlot } from '../../lib/slot'
 import { useUILibrary } from '../../lib/ui-library-context'
-import { cn } from '../../lib/utils'
 import { tourButtonVariants } from '../ui/button-variants'
 
 export interface TourCloseProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'> {

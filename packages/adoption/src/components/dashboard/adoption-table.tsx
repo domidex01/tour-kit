@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { useAdoptionStats } from '../../hooks/use-adoption-stats'
-import { cn } from '../../lib/utils'
 import { adoptionPremiumBadgeVariants } from '../ui/badge-variants'
 import {
   type AdoptionTableVariants,

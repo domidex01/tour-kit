@@ -13,9 +13,13 @@ const mockElementPosition = {
   update: vi.fn(),
 }
 
-vi.mock('@tour-kit/core', () => ({
-  useElementPosition: vi.fn(() => mockElementPosition),
-}))
+vi.mock('@tour-kit/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@tour-kit/core')>()
+  return {
+    ...actual,
+    useElementPosition: vi.fn(() => mockElementPosition),
+  }
+})
 
 describe('HintHeadless', () => {
   const mockRect: DOMRect = {

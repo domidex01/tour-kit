@@ -1,7 +1,7 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
-import { cn } from '../lib/utils'
 import { ratingOptionVariants } from './ui/question-variants'
 
 /** Default emoji map for emoji rating style */
