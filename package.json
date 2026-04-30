@@ -10,7 +10,12 @@
   "license": "MIT",
   "packageManager": "pnpm@10.26.1",
   "workspaces": {
-    "packages": ["packages/*", "apps/*", "tooling/*", "examples/*"],
+    "packages": [
+      "packages/*",
+      "apps/*",
+      "tooling/*",
+      "examples/*"
+    ],
     "catalog": {
       "vitest": "^4.1.0",
       "jsdom": "^27.3.0",
@@ -55,6 +60,7 @@
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@playwright/test": "^1.59.1",
     "@polar-sh/sdk": "^0.46.7",
+    "@size-limit/preset-small-lib": "^11.0.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
@@ -63,14 +69,22 @@
     "gray-matter": "^4.0.3",
     "happy-dom": "^20.8.4",
     "jsdom": "^27.3.0",
+    "size-limit": "^11.0.0",
     "turbo": "^2.8.19",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0",
     "zod": "^4.3.6"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": ["esbuild", "sharp"],
-    "onlyBuiltDependencies": ["@biomejs/biome", "esbuild", "sharp"]
+    "ignoredBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ],
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "esbuild",
+      "sharp"
+    ]
   },
   "overrides": {
     "react-router": ">=7.12.0",

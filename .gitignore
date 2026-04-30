@@ -60,7 +60,10 @@ __pycache__/
 
 # Internal planning and marketing docs (kept local)
 /marketing-strategy/
-/plan/
+/plan/**
+# Exception: code-health baseline is a long-lived measurement contract
+# referenced by verify-phase-0.sh and Phase 6's CI gate.
+!/plan/code-health-baseline.md
 /wiki/
 /wiki-tech/
 /reports/
