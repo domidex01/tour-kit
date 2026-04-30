@@ -13,9 +13,9 @@ import {
   useRole,
 } from '@floating-ui/react'
 import { cn } from '@tour-kit/core'
+import { useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
 import { Slot, UnifiedSlot } from '../lib/slot'
-import { useUILibrary } from '@tour-kit/core'
 import type { Placement } from '../types'
 import {
   type HintTooltipVariants,

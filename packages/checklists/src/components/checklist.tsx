@@ -1,9 +1,9 @@
 'use client'
 
 import { cn } from '@tour-kit/core'
+import { useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'
-import { useUILibrary } from '@tour-kit/core'
 import { ChecklistProgress } from './checklist-progress'
 import { ChecklistTask } from './checklist-task'
 import {

@@ -1,10 +1,10 @@
 'use client'
 
 import { cn } from '@tour-kit/core'
+import { useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
 import { useNudge } from '../hooks'
 import { Slot, UnifiedSlot } from '../lib/slot'
-import { useUILibrary } from '@tour-kit/core'
 import type { Feature } from '../types'
 import { featureButtonVariants } from './ui/button-variants'
 import { type AdoptionNudgeVariants, adoptionNudgeVariants } from './ui/nudge-variants'
