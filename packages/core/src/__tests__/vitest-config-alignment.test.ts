@@ -40,10 +40,10 @@ describe('Phase 4 — vitest config alignment', () => {
 
     it.each(NON_AI)('%s has canonical coverage thresholds', (pkg) => {
       const cfg = readConfig(pkg)
-      expect(cfg).toMatch(/statements:\s*80/)
-      expect(cfg).toMatch(/branches:\s*75/)
-      expect(cfg).toMatch(/functions:\s*80/)
-      expect(cfg).toMatch(/lines:\s*80/)
+      expect(cfg).toMatch(/statements:\s*80\b/)
+      expect(cfg).toMatch(/branches:\s*75\b/)
+      expect(cfg).toMatch(/functions:\s*80\b/)
+      expect(cfg).toMatch(/lines:\s*80\b/)
     })
   })
 
