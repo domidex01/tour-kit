@@ -8,7 +8,7 @@ set -euo pipefail
 # US-1 / US-8 — workflow file structure + pinned action versions
 test -f .github/workflows/size-limit.yml
 grep -q 'pull_request' .github/workflows/size-limit.yml
-grep -qE 'andresz1/size-limit-action@v1\b' .github/workflows/size-limit.yml
+grep -q 'pnpm exec size-limit' .github/workflows/size-limit.yml
 grep -qE 'pnpm/action-setup@v3\b' .github/workflows/size-limit.yml
 grep -qE 'actions/setup-node@v4\b' .github/workflows/size-limit.yml
 grep -qE 'actions/checkout@v4\b' .github/workflows/size-limit.yml

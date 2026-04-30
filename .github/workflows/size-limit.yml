@@ -31,17 +31,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm build --filter='./packages/*'
+        run: pnpm build:packages
 
+      # Direct invocation (no third-party action) — `andresz1/size-limit-action@v1`
+      # tries to compute a diff against the base branch and fails when scripts
+      # introduced in the PR aren't yet on main. The load-bearing test for this
+      # gate is "fails on budget breach"; that works perfectly fine with a plain
+      # CLI call. Trade-off: no PR comment with the diff. Acceptable.
       - name: Check size
-        uses: andresz1/size-limit-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # The action runs `pnpm run <build_script>` on both head and base
-          # branches to compute the diff. Default is `build`, which triggers
-          # the whole turbo graph including apps/docs (out of scope for the
-          # size gate). Use the scoped script instead.
-          build_script: build:packages
-          # We already installed + built head above. `skip_step` only applies
-          # to head, not base — base still needs the build to measure diff.
-          skip_step: install
+        run: pnpm exec size-limit
