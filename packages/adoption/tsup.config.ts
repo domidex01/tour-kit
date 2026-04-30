@@ -24,24 +24,28 @@ export default defineConfig({
   ],
   treeshake: true,
   splitting: false,
-  minify: false,
+  minify: true,
   sourcemap: true,
   target: 'es2020',
   outDir: 'dist',
-  esbuildOptions(options) {
-    options.banner = {
-      js: '"use client";',
-    }
-  },
-  // Copy CSS files to dist
+  // Note: esbuild's banner option is stripped by minify (the directive is
+  // treated as a dead expression once it follows other code). Prepend it
+  // manually in onSuccess instead so it survives.
   async onSuccess() {
     // Use sync methods to avoid dynamic import heap issues on WSL2
     try {
+      for (const file of ['dist/index.js', 'dist/index.cjs']) {
+        if (!fs.existsSync(file)) continue
+        const content = fs.readFileSync(file, 'utf8')
+        if (!/^['"]use client['"];?/.test(content)) {
+          fs.writeFileSync(file, `'use client';\n${content}`)
+        }
+      }
       fs.mkdirSync('dist/styles', { recursive: true })
       fs.copyFileSync('src/styles/variables.css', 'dist/styles/variables.css')
       fs.copyFileSync('src/styles/theme.css', 'dist/styles/theme.css')
     } catch (e) {
-      console.warn('Failed to copy CSS files:', e)
+      console.warn('Failed in onSuccess:', e)
     }
   },
 })
