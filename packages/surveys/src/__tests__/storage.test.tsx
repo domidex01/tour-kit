@@ -11,19 +11,23 @@ vi.mock('@tour-kit/license', () => ({
 
 const sharedStore = new Map<string, string>()
 
-vi.mock('@tour-kit/core', () => ({
-  useTourContext: () => ({ isActive: false }),
-  useTourContextOptional: () => ({ isActive: false }),
-  createStorageAdapter: () => ({
-    getItem: (key: string) => sharedStore.get(key) ?? null,
-    setItem: (key: string, value: string) => {
-      sharedStore.set(key, value)
-    },
-    removeItem: (key: string) => {
-      sharedStore.delete(key)
-    },
-  }),
-}))
+vi.mock('@tour-kit/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@tour-kit/core')>()
+  return {
+    ...actual,
+    useTourContext: () => ({ isActive: false }),
+    useTourContextOptional: () => ({ isActive: false }),
+    createStorageAdapter: () => ({
+      getItem: (key: string) => sharedStore.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        sharedStore.set(key, value)
+      },
+      removeItem: (key: string) => {
+        sharedStore.delete(key)
+      },
+    }),
+  }
+})
 
 const configs: SurveyConfig[] = [
   { id: 'persisted', type: 'csat', displayMode: 'modal', questions: [] },

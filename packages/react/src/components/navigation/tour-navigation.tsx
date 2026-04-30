@@ -1,7 +1,7 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
-import { cn } from '../../lib/utils'
 import { type TourButtonVariants, tourButtonVariants } from '../ui/button-variants'
 
 export interface TourNavigationProps extends React.ComponentPropsWithoutRef<'div'> {

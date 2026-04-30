@@ -1,10 +1,10 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import type { UIMessage } from 'ai'
 import type { ReactNode } from 'react'
 import { useEffect, useRef } from 'react'
 import { useAiChat } from '../hooks/use-ai-chat'
-import { cn } from '../lib/utils'
 import { AiChatMessage } from './ai-chat-message'
 
 export interface AiChatMessageListProps {

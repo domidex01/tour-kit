@@ -14,5 +14,5 @@ export * from './core'
 export * from './components/headless'
 
 // Lib utilities
-export { cn } from './lib/utils'
+export { cn } from '@tour-kit/core'
 export { UILibraryProvider, useUILibrary, type UILibrary } from './lib/ui-library-context'

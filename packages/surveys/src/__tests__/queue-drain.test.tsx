@@ -9,15 +9,19 @@ vi.mock('@tour-kit/license', () => ({
   ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
-vi.mock('@tour-kit/core', () => ({
-  useTourContext: () => ({ isActive: false }),
-  useTourContextOptional: () => ({ isActive: false }),
-  createStorageAdapter: () => ({
-    getItem: () => null,
-    setItem: () => {},
-    removeItem: () => {},
-  }),
-}))
+vi.mock('@tour-kit/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@tour-kit/core')>()
+  return {
+    ...actual,
+    useTourContext: () => ({ isActive: false }),
+    useTourContextOptional: () => ({ isActive: false }),
+    createStorageAdapter: () => ({
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+    }),
+  }
+})
 
 function makeConfig(id: string): SurveyConfig {
   return { id, type: 'csat', displayMode: 'modal', questions: [] }

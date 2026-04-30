@@ -1,9 +1,9 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { Slot, UnifiedSlot } from '../lib/slot'
 import { useUILibrary } from '../lib/ui-library-context'
-import { cn } from '../lib/utils'
 import type { HotspotPosition } from '../types'
 import { type HintHotspotVariants, hintHotspotVariants } from './ui/hint-variants'
 

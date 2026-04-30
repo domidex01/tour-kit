@@ -1,7 +1,7 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
-import { cn } from '../lib/utils'
 import type { AnnouncementMedia } from '../types/announcement'
 
 export interface AnnouncementContentProps extends React.HTMLAttributes<HTMLDivElement> {

@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import type { ReactNode } from 'react'
 import { useAiChat } from '../hooks/use-ai-chat'
-import { cn } from '../lib/utils'
 import { aiChatHeaderVariants } from './ui/chat-variants'
 
 export interface AiChatHeaderProps {

@@ -62,7 +62,7 @@ export {
 // UTILITIES
 // ============================================
 
-export { cn } from './lib/utils'
+export { cn } from '@tour-kit/core'
 export { Slot, Slottable, UnifiedSlot, type RenderProp, type UnifiedSlotProps } from './lib/slot'
 export {
   UILibraryProvider,

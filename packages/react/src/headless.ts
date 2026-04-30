@@ -52,5 +52,5 @@ export {
 } from './components/headless/tour-progress'
 
 // Re-export utilities that are useful for headless components
-export { cn } from './lib/utils'
+export { cn } from '@tour-kit/core'
 export { Slot, Slottable } from './lib/slot'

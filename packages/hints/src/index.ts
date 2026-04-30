@@ -38,7 +38,7 @@ export { useHint } from './hooks/use-hint'
 // UTILITIES
 // ============================================
 
-export { cn } from './lib/utils'
+export { cn } from '@tour-kit/core'
 export { Slot, Slottable, UnifiedSlot, type UnifiedSlotProps } from './lib/slot'
 
 // UI Library Provider (Base UI support)

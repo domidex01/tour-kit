@@ -1,8 +1,8 @@
 'use client'
 
 import { usePrefersReducedMotion, useSpotlight, useTour } from '@tour-kit/core'
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
-import { cn } from '../../lib/utils'
 import { TourPortal } from '../primitives/tour-portal'
 import { type TourOverlayVariants, tourOverlayVariants } from '../ui/overlay-variants'
 

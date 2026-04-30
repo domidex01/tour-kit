@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import { type FormEvent, useState } from 'react'
 import { useAiChat } from '../hooks/use-ai-chat'
-import { cn } from '../lib/utils'
 
 export interface AiChatInputProps {
   className?: string

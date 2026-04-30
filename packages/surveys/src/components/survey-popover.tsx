@@ -9,9 +9,9 @@ import {
   shift,
   useFloating,
 } from '@floating-ui/react'
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { useSurvey } from '../hooks/use-survey'
-import { cn } from '../lib/utils'
 import type { DismissalReason, PopoverOptions, PopoverPosition } from '../types/survey'
 
 const POSITION_MAP: Record<PopoverPosition, FloatingPlacement> = {

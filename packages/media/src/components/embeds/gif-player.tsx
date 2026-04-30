@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { usePrefersReducedMotion } from '../../hooks/use-prefers-reduced-motion'
-import { cn } from '../../lib/utils'
 import {
   type MediaContainerVariants,
   mediaContainerVariants,

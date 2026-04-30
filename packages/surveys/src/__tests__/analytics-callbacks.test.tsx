@@ -8,23 +8,27 @@ import type { SurveyConfig } from '../types'
 let mockTourActive = false
 let mockTourProviderExists = true
 
-vi.mock('@tour-kit/core', () => ({
-  useTourContext: () => {
-    if (!mockTourProviderExists) {
-      throw new Error('useTourContext must be used within a TourProvider')
-    }
-    return { isActive: mockTourActive }
-  },
-  useTourContextOptional: () => {
-    if (!mockTourProviderExists) return null
-    return { isActive: mockTourActive }
-  },
-  createStorageAdapter: () => ({
-    getItem: () => null,
-    setItem: () => {},
-    removeItem: () => {},
-  }),
-}))
+vi.mock('@tour-kit/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@tour-kit/core')>()
+  return {
+    ...actual,
+    useTourContext: () => {
+      if (!mockTourProviderExists) {
+        throw new Error('useTourContext must be used within a TourProvider')
+      }
+      return { isActive: mockTourActive }
+    },
+    useTourContextOptional: () => {
+      if (!mockTourProviderExists) return null
+      return { isActive: mockTourActive }
+    },
+    createStorageAdapter: () => ({
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+    }),
+  }
+})
 
 function createCallbackSpies() {
   return {

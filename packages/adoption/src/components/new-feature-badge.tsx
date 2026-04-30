@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { useFeature } from '../hooks'
-import { cn } from '../lib/utils'
 import { type NewFeatureBadgeVariants, newFeatureBadgeVariants } from './ui/badge-variants'
 
 export interface NewFeatureBadgeProps

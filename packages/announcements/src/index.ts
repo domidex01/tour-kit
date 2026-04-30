@@ -117,7 +117,7 @@ export { matchesAudience, validateConditions } from './core/audience'
 // UTILITIES
 // ============================================
 
-export { cn } from './lib/utils'
+export { cn } from '@tour-kit/core'
 export { Slot } from './lib/slot'
 export { UnifiedSlot } from './lib/slot'
 export type { RenderProp, UnifiedSlotProps } from './lib/slot'

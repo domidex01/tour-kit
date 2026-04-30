@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import type { ChecklistTaskState } from '../types'
-import { cn } from './cn'
 import {
   type ChecklistTaskVariants,
   checklistTaskVariants,

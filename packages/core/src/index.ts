@@ -151,3 +151,6 @@ export type {
   ThrottledFunction,
   ThrottledFunctionWithFlush,
 } from './utils'
+
+// Class-name merge utility (cn = clsx + tailwind-merge)
+export { cn } from './lib/utils'
