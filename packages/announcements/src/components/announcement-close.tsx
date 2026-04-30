@@ -1,10 +1,10 @@
 'use client'
 
 import { cn } from '@tour-kit/core'
+import type { RenderProp } from '@tour-kit/core'
 import * as React from 'react'
 import { Slot, UnifiedSlot } from '../lib/slot'
 import { useUILibrary } from '../lib/ui-library-context'
-import type { RenderProp } from '../lib/unified-slot'
 
 const defaultIcon = (
   <svg

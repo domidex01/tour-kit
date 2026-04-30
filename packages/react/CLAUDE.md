@@ -18,9 +18,10 @@ Two patterns exist for each router framework:
 This package re-exports everything from `@tour-kit/core`. Consumers should import from `@tour-kit/react` only - never mix imports.
 
 ### Unified Slot (Radix + Base UI)
-Located at `src/lib/unified-slot.tsx`. Handles both patterns:
+Canonical source lives in `@tour-kit/core` at `packages/core/src/lib/unified-slot.tsx`. The local `src/lib/slot.tsx` is a re-export barrel from core. Handles both patterns:
 - Render prop (Base UI): `typeof children === 'function'` → call with props
 - Element cloning (Radix): `React.isValidElement(children)` → clone with merged props
+- Wrapped in `React.forwardRef` so the `ref` prop survives both React 18 (where it's stripped from `props` by `createElement`) and React 19 (where it's a regular prop).
 
 ### Multi-Tour Registry
 `MultiTourKitProvider` allows multiple tours to be registered declaratively. Tours are stored in context and can be triggered by ID.

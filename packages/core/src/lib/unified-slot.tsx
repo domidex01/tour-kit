@@ -34,10 +34,7 @@ export const UnifiedSlot = React.forwardRef<unknown, UnifiedSlotProps>(function 
   // Clone element with merged props (Radix UI style)
   if (React.isValidElement(children)) {
     const childProps = children.props as Record<string, unknown>
-    // React 18 stores ref on element.ref; React 19 stores it in props.ref. Read both.
-    const elementRef = (children as unknown as { ref?: React.Ref<unknown> }).ref
-    const propsRef = (childProps as { ref?: React.Ref<unknown> }).ref
-    const childRef = elementRef ?? propsRef
+    const childRef = getElementRef(children)
     const mergedRef = mergeRefs(ref ?? undefined, childRef)
 
     const mergedProps = mergeProps(props, childProps)
@@ -55,6 +52,33 @@ export const UnifiedSlot = React.forwardRef<unknown, UnifiedSlotProps>(function 
 })
 
 UnifiedSlot.displayName = 'UnifiedSlot'
+
+/**
+ * Reads the ref off a ReactElement in a way that works for both React 18 and
+ * React 19 *and* avoids the React 19 `element.ref` deprecation warning.
+ *
+ * - React 18: `ref` lives on `element.ref`; `element.props.ref` is a warning getter.
+ * - React 19: `ref` lives on `element.props.ref`; `element.ref` is a warning getter.
+ *
+ * The runtime decides which side is the warning getter via `isReactWarning`,
+ * mirroring the canonical pattern in `@radix-ui/react-slot`.
+ */
+function getElementRef(element: React.ReactElement): React.Ref<unknown> | undefined {
+  const elementWithRef = element as unknown as { ref?: React.Ref<unknown> }
+  const elementProps = (element.props ?? {}) as { ref?: React.Ref<unknown> }
+
+  const propsGetter = Object.getOwnPropertyDescriptor(elementProps, 'ref')?.get as
+    | (((this: unknown) => unknown) & { isReactWarning?: boolean })
+    | undefined
+  if (propsGetter?.isReactWarning) return elementWithRef.ref
+
+  const elementGetter = Object.getOwnPropertyDescriptor(element, 'ref')?.get as
+    | (((this: unknown) => unknown) & { isReactWarning?: boolean })
+    | undefined
+  if (elementGetter?.isReactWarning) return elementProps.ref
+
+  return elementProps.ref ?? elementWithRef.ref
+}
 
 /**
  * Merges multiple refs into a single ref callback

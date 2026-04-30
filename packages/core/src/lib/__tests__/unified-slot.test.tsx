@@ -212,6 +212,18 @@ describe('UnifiedSlot', () => {
       expect(button).toHaveAttribute('aria-label', 'Test label')
       expect(button).toHaveAttribute('disabled')
     })
+
+    it('forwards ref into the merged props object passed to the function', () => {
+      const fn = vi.fn((p: Record<string, unknown>) => (
+        <span data-testid="rp" {...p} />
+      )) as unknown as RenderProp
+      const parentRef = vi.fn()
+
+      render(<UnifiedSlot ref={parentRef}>{fn}</UnifiedSlot>)
+
+      const merged = (fn as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0]
+      expect(merged).toHaveProperty('ref')
+    })
   })
 
   describe('Fallback Behavior', () => {
@@ -251,6 +263,61 @@ describe('UnifiedSlot', () => {
 
       const div = screen.getByTestId('child')
       expect(div).toHaveAttribute('data-custom', 'custom-value')
+    })
+  })
+
+  describe('TestReactRefShapes — load-bearing regression for the React 18 ref drop', () => {
+    /**
+     * These two tests force-construct each prop shape regardless of which React
+     * version is installed in dev deps. A future refactor that drops the
+     * `element.ref` read MUST fail the R18 test even on a React-19 test runner —
+     * otherwise the regression test isn't load-bearing.
+     */
+
+    it('merges refs when ref is on element.ref (React 18 prop shape)', () => {
+      const childRef = vi.fn()
+      const parentRef = vi.fn()
+
+      // R18 shape: `ref` lives on the element object itself, NOT in
+      // `element.props`. Start from a real createElement (so $$typeof is
+      // valid and isValidElement passes) then move ref off props.
+      const base = React.createElement('div', { 'data-testid': 'r18' }) as unknown as {
+        props: Record<string, unknown>
+      }
+      const r18Element = Object.defineProperty(
+        Object.assign(Object.create(Object.getPrototypeOf(base) as object), base, {
+          props: { ...base.props },
+        }),
+        'ref',
+        { value: childRef, writable: true, enumerable: false, configurable: true }
+      ) as unknown as React.ReactElement
+      ;(r18Element.props as Record<string, unknown>).ref = undefined
+
+      render(<UnifiedSlot ref={parentRef}>{r18Element}</UnifiedSlot>)
+      expect(childRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
+      expect(parentRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
+    })
+
+    it('merges refs when ref is on props.ref (React 19 prop shape)', () => {
+      const childRef = vi.fn()
+      const parentRef = vi.fn()
+
+      // R19 shape: `ref` lives in `element.props`; `element.ref` is absent.
+      const base = React.createElement('div', {
+        'data-testid': 'r19',
+        ref: childRef,
+      }) as unknown as { props: Record<string, unknown> }
+      const r19Element = Object.defineProperty(
+        Object.assign(Object.create(Object.getPrototypeOf(base) as object), base, {
+          props: { ...base.props, ref: childRef },
+        }),
+        'ref',
+        { value: undefined, writable: true, enumerable: false, configurable: true }
+      ) as unknown as React.ReactElement
+
+      render(<UnifiedSlot ref={parentRef}>{r19Element}</UnifiedSlot>)
+      expect(childRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
+      expect(parentRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
     })
   })
 })

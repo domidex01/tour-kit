@@ -76,6 +76,8 @@ Types:
     LoggerConfig
     ThrottledFunction
     ThrottledFunctionWithFlush
+    UnifiedSlotProps
+    RenderProp
 
 Hooks:
     useTourKitContext
@@ -100,6 +102,7 @@ Components:
     TourKitProvider
     TourContext
     TourProvider
+    UnifiedSlot
 
 Utilities:
     defaultKeyboardConfig
@@ -161,6 +164,16 @@ Utilities:
     throttleLeading
     cn
 
+TYPES
+-----
+
+    export interface UnifiedSlotProps {
+      children: ReactNode | RenderProp
+      [key: string]: unknown
+    }
+
+    export type RenderProp = (props: Record<string, unknown>) => ReactElement
+
 HOOKS
 -----
     useTourKitContext(...)
@@ -186,6 +199,7 @@ COMPONENTS
     <TourKitProvider />
     <TourContext />
     <TourProvider />
+    <UnifiedSlot />
 
 EXAMPLES
 --------

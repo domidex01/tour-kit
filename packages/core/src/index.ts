@@ -154,3 +154,8 @@ export type {
 
 // Class-name merge utility (cn = clsx + tailwind-merge)
 export { cn } from './lib/utils'
+
+// Unified Slot — supports both Radix UI (asChild element-clone) and Base UI (render-prop)
+// patterns. forwardRef-wrapped to preserve `ref` on both React 18 and React 19.
+export { UnifiedSlot } from './lib/unified-slot'
+export type { UnifiedSlotProps, RenderProp } from './lib/unified-slot'
