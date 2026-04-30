@@ -32,20 +32,21 @@ export default defineConfig({
   // treated as a dead expression once it follows other code). Prepend it
   // manually in onSuccess instead so it survives.
   async onSuccess() {
-    // Use sync methods to avoid dynamic import heap issues on WSL2
-    try {
-      for (const file of ['dist/index.js', 'dist/index.cjs']) {
-        if (!fs.existsSync(file)) continue
-        const content = fs.readFileSync(file, 'utf8')
-        if (!/^['"]use client['"];?/.test(content)) {
-          fs.writeFileSync(file, `'use client';\n${content}`)
-        }
+    // Banner prepend is correctness-critical (RSC compatibility) — fail loud.
+    for (const file of ['dist/index.js', 'dist/index.cjs']) {
+      if (!fs.existsSync(file)) continue
+      const content = fs.readFileSync(file, 'utf8')
+      if (!/^['"]use client['"];?/.test(content)) {
+        fs.writeFileSync(file, `'use client';\n${content}`)
       }
+    }
+    // CSS copy is best-effort; sync methods avoid dynamic-import heap issues on WSL2.
+    try {
       fs.mkdirSync('dist/styles', { recursive: true })
       fs.copyFileSync('src/styles/variables.css', 'dist/styles/variables.css')
       fs.copyFileSync('src/styles/theme.css', 'dist/styles/theme.css')
     } catch (e) {
-      console.warn('Failed in onSuccess:', e)
+      console.warn('Failed to copy CSS files:', e)
     }
   },
 })
