@@ -39,9 +39,14 @@ describe('Phase 5 — coverage snapshot shape contract', () => {
     }
   })
 
-  it('every row has a Gate Posture value (PASS / TESTS_WRITTEN / THRESHOLD_LOWERED / NOT_RUN)', () => {
+  it('every package row carries a Gate Posture value', () => {
     const txt = readFileSync(SNAP, 'utf8')
-    expect(txt).toMatch(/PASS|TESTS_WRITTEN|THRESHOLD_LOWERED|NOT_RUN/)
+    const POSTURE = /(PASS|TESTS_WRITTEN|THRESHOLD_LOWERED|NOT_RUN)/
+    const lines = txt.split('\n')
+    for (const pkg of PACKAGES) {
+      const row = lines.find((l) => l.includes(`@tour-kit/${pkg}`) && POSTURE.test(l))
+      expect(row, `@tour-kit/${pkg} row missing Gate Posture value`).toBeDefined()
+    }
   })
 
   it('every THRESHOLD_LOWERED row has a follow-up GitHub issue URL', () => {
