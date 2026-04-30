@@ -51,7 +51,7 @@ export {
   useUILibrary,
   type UILibrary,
   type UILibraryProviderProps,
-} from './lib/ui-library-context'
+} from '@tour-kit/core'
 
 // Types
 export type {

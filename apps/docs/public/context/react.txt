@@ -97,7 +97,7 @@ Types:
     UseBranchReturn
 
 Hooks:
-    useUILibrary — Hook to get the current UI library setting
+    useUILibrary
     useTours — All registered tours
     useTourRoute — Router adapter
     useNextAppRouter
@@ -294,13 +294,6 @@ TYPES
       onStepView?: (tourId: string, stepId: string, stepIndex: number) => void
     }
 
-    export interface UILibraryProviderProps {
-      library?: UILibrary
-      children: React.ReactNode
-    }
-
-    export type UILibrary = 'radix-ui' | 'base-ui'
-
     export interface TourInfo {
       id: string
       stepCount: number
@@ -327,7 +320,7 @@ TYPES
 
 HOOKS
 -----
-    useUILibrary(): UILibrary
+    useUILibrary(...)
     useTours(): UseToursReturn
     useTourRoute({ router, tourId }: UseTourRouteOptions): UseTourRouteReturn
     useNextAppRouter(...)

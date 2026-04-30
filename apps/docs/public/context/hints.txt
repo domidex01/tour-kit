@@ -103,13 +103,6 @@ TYPES
       asChild?: boolean
     }
 
-    export interface UILibraryProviderProps {
-      library?: UILibrary
-      children: React.ReactNode
-    }
-
-    export type UILibrary = 'radix-ui' | 'base-ui'
-
     export interface HintConfig {
       id: string
       target: string | React.RefObject<HTMLElement | null>
@@ -149,7 +142,7 @@ HOOKS
     useHintsContext(): HintsContextValue
     useHints()
     useHint(id: string)
-    useUILibrary(): UILibrary
+    useUILibrary(...)
 
 COMPONENTS
 ----------

@@ -113,19 +113,12 @@ TYPES
       extends TourMediaProps,
         Omit<MediaContainerVariants, 'aspectRatio'> {}
 
-    export interface UILibraryProviderProps {
-      library?: UILibrary
-      children: React.ReactNode
-    }
-
-    export type UILibrary = 'radix-ui' | 'base-ui'
-
 HOOKS
 -----
     useMediaEvents(...)
     usePrefersReducedMotion(...)
     useResponsiveSource(...)
-    useUILibrary(): UILibrary
+    useUILibrary(...)
 
 COMPONENTS
 ----------

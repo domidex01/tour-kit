@@ -78,6 +78,8 @@ Types:
     ThrottledFunctionWithFlush
     UnifiedSlotProps
     RenderProp
+    UILibrary
+    UILibraryProviderProps
 
 Hooks:
     useTourKitContext
@@ -96,6 +98,7 @@ Hooks:
     useRoutePersistence
     useAdvanceOn
     useBranch
+    useUILibrary — Hook to get the current UI library setting
 
 Components:
     TourKitContext
@@ -103,6 +106,7 @@ Components:
     TourContext
     TourProvider
     UnifiedSlot
+    UILibraryProvider
 
 Utilities:
     defaultKeyboardConfig
@@ -174,6 +178,13 @@ TYPES
 
     export type RenderProp = (props: Record<string, unknown>) => ReactElement
 
+    export interface UILibraryProviderProps {
+      library?: UILibrary
+      children: React.ReactNode
+    }
+
+    export type UILibrary = 'radix-ui' | 'base-ui'
+
 HOOKS
 -----
     useTourKitContext(...)
@@ -192,6 +203,7 @@ HOOKS
     useRoutePersistence(...)
     useAdvanceOn(...)
     useBranch(...)
+    useUILibrary(): UILibrary
 
 COMPONENTS
 ----------
@@ -200,6 +212,7 @@ COMPONENTS
     <TourContext />
     <TourProvider />
     <UnifiedSlot />
+    <UILibraryProvider />
 
 EXAMPLES
 --------
