@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/announcements",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "In-app product announcements for React — modal, slideout, banner, toast, and spotlight variants with frequency rules, scheduling, audience targeting, and a priority queue for changelog and release communication",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",

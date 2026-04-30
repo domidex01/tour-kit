@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/react",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "React components for product tours and onboarding — accessible TourCard and TourPopover, headless render-prop variants, multi-tour registry, and Next.js, React Router, TanStack Router adapters",
   "author": "Tour Kit Team",
   "license": "MIT",
