@@ -321,4 +321,89 @@ describe('Tour', () => {
     // Tour should be registered but not active initially
     expect(screen.getByTestId('is-active')).toHaveTextContent('false')
   })
+
+  describe('PR #6/#7 — onComplete/onSkip exactly-once regression', () => {
+    it('TestOnCompleteExactlyOnce — fires onComplete once across two consecutive completes', async () => {
+      const onComplete = vi.fn()
+      const user = userEvent.setup()
+
+      function Controller() {
+        const { start, complete, isActive } = useTour()
+        return (
+          <>
+            {!isActive && (
+              <button type="button" onClick={() => start()}>
+                Start
+              </button>
+            )}
+            {isActive && (
+              <button
+                type="button"
+                onClick={() => {
+                  complete()
+                  complete()
+                }}
+              >
+                CompleteTwice
+              </button>
+            )}
+          </>
+        )
+      }
+
+      render(
+        <Tour id="test" onComplete={onComplete}>
+          <TourStep id="s1" target="#step-1" content="Step 1" />
+          <Controller />
+        </Tour>
+      )
+
+      await user.click(screen.getByText('Start'))
+      await user.click(await screen.findByText('CompleteTwice'))
+
+      expect(onComplete).toHaveBeenCalledTimes(1)
+    })
+
+    it('TestOnSkipExactlyOnce — fires onSkip once across two consecutive skips', async () => {
+      const onSkip = vi.fn()
+      const user = userEvent.setup()
+
+      function Controller() {
+        const { start, skip, isActive } = useTour()
+        return (
+          <>
+            {!isActive && (
+              <button type="button" onClick={() => start()}>
+                Start
+              </button>
+            )}
+            {isActive && (
+              <button
+                type="button"
+                onClick={() => {
+                  skip()
+                  skip()
+                }}
+              >
+                SkipTwice
+              </button>
+            )}
+          </>
+        )
+      }
+
+      render(
+        <Tour id="test" onSkip={onSkip}>
+          <TourStep id="s1" target="#step-1" content="Step 1" />
+          <TourStep id="s2" target="#step-2" content="Step 2" />
+          <Controller />
+        </Tour>
+      )
+
+      await user.click(screen.getByText('Start'))
+      await user.click(await screen.findByText('SkipTwice'))
+
+      expect(onSkip).toHaveBeenCalledTimes(1)
+    })
+  })
 })
