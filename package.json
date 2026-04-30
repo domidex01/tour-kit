@@ -10,12 +10,7 @@
   "license": "MIT",
   "packageManager": "pnpm@10.26.1",
   "workspaces": {
-    "packages": [
-      "packages/*",
-      "apps/*",
-      "tooling/*",
-      "examples/*"
-    ],
+    "packages": ["packages/*", "apps/*", "tooling/*", "examples/*"],
     "catalog": {
       "vitest": "^4.1.0",
       "jsdom": "^27.3.0",
@@ -76,15 +71,8 @@
     "zod": "^4.3.6"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": [
-      "esbuild",
-      "sharp"
-    ],
-    "onlyBuiltDependencies": [
-      "@biomejs/biome",
-      "esbuild",
-      "sharp"
-    ]
+    "ignoredBuiltDependencies": ["esbuild", "sharp"],
+    "onlyBuiltDependencies": ["@biomejs/biome", "esbuild", "sharp"]
   },
   "overrides": {
     "react-router": ">=7.12.0",
