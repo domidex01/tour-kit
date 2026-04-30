@@ -39,3 +39,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           script: pnpm exec size-limit
           package_manager: pnpm
+          # We already installed + built above. Tell the action not to redo
+          # those steps (its default `pnpm run build` invokes the whole turbo
+          # graph including docs, which is out of scope for the size gate).
+          skip_step: build
