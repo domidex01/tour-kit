@@ -117,13 +117,6 @@ TYPES
       getProgress: (checklistId: string) => ChecklistProgress
     }
 
-    export interface UILibraryProviderProps {
-      library?: UILibrary
-      children: React.ReactNode
-    }
-
-    export type UILibrary = 'radix-ui' | 'base-ui'
-
 HOOKS
 -----
     useChecklistContext(): ChecklistContextValue
@@ -131,7 +124,7 @@ HOOKS
     useTask(...)
     useChecklistPersistence(...)
     useChecklistsProgress(...)
-    useUILibrary(): UILibrary
+    useUILibrary(...)
 
 COMPONENTS
 ----------

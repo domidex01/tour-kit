@@ -199,13 +199,6 @@ TYPES
       text?: string
     }
 
-    export interface UILibraryProviderProps {
-      library?: UILibrary
-      children: React.ReactNode
-    }
-
-    export type UILibrary = 'radix-ui' | 'base-ui'
-
     /**
      * Nudge configuration
      */
@@ -247,7 +240,7 @@ HOOKS
     useFeature(featureId: string): UseFeatureReturn
     useAdoptionStats(): AdoptionStats
     useNudge(): UseNudgeReturn
-    useUILibrary(): UILibrary
+    useUILibrary(...)
     useAdoptionAnalytics(...)
 
 COMPONENTS

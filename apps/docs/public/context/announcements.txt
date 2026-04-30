@@ -271,7 +271,7 @@ TYPES
       useConfig?: boolean
     }
 
-    ... and 46 more types. See source for full definitions.
+    ... and 44 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -279,7 +279,7 @@ HOOKS
     useAnnouncement(id: string): UseAnnouncementReturn
     useAnnouncements(): UseAnnouncementsReturn
     useAnnouncementQueue(): UseAnnouncementQueueReturn
-    useUILibrary(): UILibrary
+    useUILibrary(...)
 
 COMPONENTS
 ----------

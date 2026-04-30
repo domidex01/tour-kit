@@ -159,3 +159,7 @@ export { cn } from './lib/utils'
 // patterns. forwardRef-wrapped to preserve `ref` on both React 18 and React 19.
 export { UnifiedSlot } from './lib/unified-slot'
 export type { UnifiedSlotProps, RenderProp } from './lib/unified-slot'
+
+// UILibrary context — toggles Radix vs Base UI rendering for downstream UnifiedSlot consumers.
+export { UILibraryProvider, useUILibrary } from './lib/ui-library-context'
+export type { UILibrary, UILibraryProviderProps } from './lib/ui-library-context'
