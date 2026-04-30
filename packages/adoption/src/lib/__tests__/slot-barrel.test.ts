@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { UnifiedSlot as Canonical } from '@tour-kit/core'
+import { describe, expect, it } from 'vitest'
 import { UnifiedSlot as Wrapper } from '../slot'
 
 describe('@tour-kit/adoption lib/slot wrapper', () => {

@@ -214,9 +214,9 @@ describe('UnifiedSlot', () => {
     })
 
     it('forwards ref into the merged props object passed to the function', () => {
-      const fn = vi.fn(
-        (p: Record<string, unknown>) => <span data-testid="rp" {...p} />
-      ) as unknown as RenderProp
+      const fn = vi.fn((p: Record<string, unknown>) => (
+        <span data-testid="rp" {...p} />
+      )) as unknown as RenderProp
       const parentRef = vi.fn()
 
       render(<UnifiedSlot ref={parentRef}>{fn}</UnifiedSlot>)
@@ -285,15 +285,13 @@ describe('UnifiedSlot', () => {
         props: Record<string, unknown>
       }
       const r18Element = Object.defineProperty(
-        Object.assign(
-          Object.create(Object.getPrototypeOf(base) as object),
-          base,
-          { props: { ...base.props } }
-        ),
+        Object.assign(Object.create(Object.getPrototypeOf(base) as object), base, {
+          props: { ...base.props },
+        }),
         'ref',
         { value: childRef, writable: true, enumerable: false, configurable: true }
       ) as unknown as React.ReactElement
-      delete (r18Element.props as Record<string, unknown>).ref
+      ;(r18Element.props as Record<string, unknown>).ref = undefined
 
       render(<UnifiedSlot ref={parentRef}>{r18Element}</UnifiedSlot>)
       expect(childRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
@@ -310,11 +308,9 @@ describe('UnifiedSlot', () => {
         ref: childRef,
       }) as unknown as { props: Record<string, unknown> }
       const r19Element = Object.defineProperty(
-        Object.assign(
-          Object.create(Object.getPrototypeOf(base) as object),
-          base,
-          { props: { ...base.props, ref: childRef } }
-        ),
+        Object.assign(Object.create(Object.getPrototypeOf(base) as object), base, {
+          props: { ...base.props, ref: childRef },
+        }),
         'ref',
         { value: undefined, writable: true, enumerable: false, configurable: true }
       ) as unknown as React.ReactElement
