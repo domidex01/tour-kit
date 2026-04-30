@@ -155,7 +155,16 @@ Run `/safe-ship` before any merge to get a structured report covering:
 All UI packages share the `UnifiedSlot` component for `asChild` pattern compatibility:
 - Render prop = Base UI style: `children={(props) => <MyComponent {...props} />}`
 - Element cloning = Radix UI style: `children={<MyComponent />}`
-- Each package has its own copy in `lib/slot.tsx` and `lib/ui-library-context.tsx`
+- Single canonical source in `@tour-kit/core/lib/unified-slot.tsx`. Six packages
+  (`adoption`, `announcements`, `checklists`, `hints`, `media`, `react`) provide a
+  thin `lib/slot.tsx` barrel that re-exports from core; `surveys` imports from core directly.
+
+### UI Library Context
+`UILibraryProvider` and `useUILibrary` live in `@tour-kit/core/lib/ui-library-context.tsx`.
+All UI packages import from `@tour-kit/core`.
+
+### `cn()` utility
+Single source in `@tour-kit/core/lib/utils.ts`.
 
 ### Provider Architecture
 - `@tour-kit/core` provides base providers (TourProvider, TourKitProvider)
@@ -168,15 +177,17 @@ All UI packages share the `UnifiedSlot` component for `asChild` pattern compatib
 @tour-kit/react ────────┐
 @tour-kit/hints ────────┤
 @tour-kit/adoption ─────┤
-@tour-kit/checklists ───┼──► @tour-kit/core
-@tour-kit/analytics ────┤
+@tour-kit/ai ───────────┤
+@tour-kit/analytics ────┼──► @tour-kit/core
 @tour-kit/announcements ┤
+@tour-kit/checklists ───┤
+@tour-kit/license ──────┤
 @tour-kit/media ────────┤
 @tour-kit/scheduling ───┤
 @tour-kit/surveys ──────┘
 ```
 
-Note: `@tour-kit/scheduling` is an optional peer dependency for `@tour-kit/announcements`.
+Note: `@tour-kit/scheduling` is an optional peer dependency for `@tour-kit/announcements`. `@tour-kit/license` is the runtime validator the other Pro packages consult.
 
 ## Package-Specific Documentation
 
