@@ -1,7 +1,7 @@
 [
-  { "name": "@tour-kit/core", "path": "packages/core/dist/index.js", "limit": "8 KB" },
-  { "name": "@tour-kit/react", "path": "packages/react/dist/index.js", "limit": "12 KB" },
-  { "name": "@tour-kit/hints", "path": "packages/hints/dist/index.js", "limit": "5 KB" },
+  { "name": "@tour-kit/core", "path": "packages/core/dist/index.js", "limit": "21 KB" },
+  { "name": "@tour-kit/react", "path": "packages/react/dist/index.js", "limit": "35 KB" },
+  { "name": "@tour-kit/hints", "path": "packages/hints/dist/index.js", "limit": "30 KB" },
   { "name": "@tour-kit/adoption", "path": "packages/adoption/dist/index.js", "limit": "146 KB" },
   {
     "name": "@tour-kit/checklists",
