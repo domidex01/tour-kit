@@ -296,6 +296,57 @@ describe('TourProvider', () => {
     expect(onSkip).toHaveBeenCalled()
   })
 
+  it('fires onComplete exactly once across two consecutive complete() calls (PR #6/#7 guard)', async () => {
+    const onComplete = vi.fn()
+    const tours: Tour[] = [
+      {
+        id: 'test',
+        steps: [{ id: 's1', target: '#t1', content: 'c' }],
+        onComplete,
+      },
+    ]
+    const wrapper = createWrapper(tours)
+    const { result } = renderHook(() => useTour(), { wrapper })
+
+    await act(async () => {
+      await result.current.start()
+    })
+
+    act(() => {
+      result.current.complete()
+      result.current.complete()
+    })
+
+    expect(onComplete).toHaveBeenCalledTimes(1)
+  })
+
+  it('fires onSkip exactly once across two consecutive skip() calls (PR #6/#7 guard)', async () => {
+    const onSkip = vi.fn()
+    const tours: Tour[] = [
+      {
+        id: 'test',
+        steps: [
+          { id: 's1', target: '#t1', content: 'c1' },
+          { id: 's2', target: '#t2', content: 'c2' },
+        ],
+        onSkip,
+      },
+    ]
+    const wrapper = createWrapper(tours)
+    const { result } = renderHook(() => useTour(), { wrapper })
+
+    await act(async () => {
+      await result.current.start()
+    })
+
+    act(() => {
+      result.current.skip()
+      result.current.skip()
+    })
+
+    expect(onSkip).toHaveBeenCalledTimes(1)
+  })
+
   it('calls onStepChange callback', async () => {
     const onStepChange = vi.fn()
     const tours: Tour[] = [

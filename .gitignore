@@ -64,6 +64,10 @@ __pycache__/
 # Exception: code-health baseline is a long-lived measurement contract
 # referenced by verify-phase-0.sh and Phase 6's CI gate.
 !/plan/code-health-baseline.md
+# Exception: Phase 5 coverage snapshot is the data artifact read by
+# packages/react/src/__tests__/snapshot-shape.test.ts and links the active
+# coverage-debt follow-up issue.
+!/plan/code-health-coverage-snapshot.md
 /wiki/
 /wiki-tech/
 /reports/
