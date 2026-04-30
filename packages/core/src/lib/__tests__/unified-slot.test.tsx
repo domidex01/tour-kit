@@ -212,6 +212,18 @@ describe('UnifiedSlot', () => {
       expect(button).toHaveAttribute('aria-label', 'Test label')
       expect(button).toHaveAttribute('disabled')
     })
+
+    it('forwards ref into the merged props object passed to the function', () => {
+      const fn = vi.fn(
+        (p: Record<string, unknown>) => <span data-testid="rp" {...p} />
+      ) as unknown as RenderProp
+      const parentRef = vi.fn()
+
+      render(<UnifiedSlot ref={parentRef}>{fn}</UnifiedSlot>)
+
+      const merged = (fn as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0]
+      expect(merged).toHaveProperty('ref')
+    })
   })
 
   describe('Fallback Behavior', () => {
@@ -251,6 +263,30 @@ describe('UnifiedSlot', () => {
 
       const div = screen.getByTestId('child')
       expect(div).toHaveAttribute('data-custom', 'custom-value')
+    })
+  })
+
+  describe('TestReactRefShapes — load-bearing regression for the React 18 ref drop', () => {
+    it('merges refs when ref is on element.ref (React 18 prop shape)', () => {
+      const childRef = vi.fn()
+      const parentRef = vi.fn()
+      render(
+        <UnifiedSlot ref={parentRef}>
+          <div data-testid="x" ref={childRef} />
+        </UnifiedSlot>
+      )
+      expect(childRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
+      expect(parentRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
+    })
+
+    it('merges refs when ref is on props.ref (React 19 prop shape)', () => {
+      const childRef = vi.fn()
+      const parentRef = vi.fn()
+      // Synthesise the React 19 shape: ref attached via the props object.
+      const synth = React.createElement('div', { 'data-testid': 'y', ref: childRef })
+      render(<UnifiedSlot ref={parentRef}>{synth}</UnifiedSlot>)
+      expect(childRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
+      expect(parentRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
     })
   })
 })
