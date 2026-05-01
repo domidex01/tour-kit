@@ -9,7 +9,7 @@ import {
   shift,
   useFloating,
 } from '@floating-ui/react'
-import { cn } from '@tour-kit/core'
+import { cn, useFocusTrap } from '@tour-kit/core'
 import * as React from 'react'
 import { useSurvey } from '../hooks/use-survey'
 import type { DismissalReason, PopoverOptions, PopoverPosition } from '../types/survey'
@@ -78,6 +78,36 @@ export const SurveyPopover = React.forwardRef<HTMLDivElement, SurveyPopoverProps
       [survey]
     )
 
+    const {
+      containerRef: focusTrapContainerRef,
+      activate: activateFocusTrap,
+      deactivate: deactivateFocusTrap,
+    } = useFocusTrap(shouldRender)
+
+    // FloatingPortal mounts its node lazily, so the popover content div is
+    // not in the DOM on the first render where shouldRender flips true.
+    // Track the mounted container in state so the focus-trap effect re-runs
+    // once the node actually exists.
+    const [popoverNode, setPopoverNode] = React.useState<HTMLDivElement | null>(null)
+
+    React.useEffect(() => {
+      if (!shouldRender || !popoverNode) return
+      activateFocusTrap()
+      return () => {
+        deactivateFocusTrap()
+      }
+    }, [shouldRender, popoverNode, activateFocusTrap, deactivateFocusTrap])
+
+    const handleKeyDown = React.useCallback(
+      (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation()
+          handleDismiss('escape_key')
+        }
+      },
+      [handleDismiss]
+    )
+
     if (!shouldRender) return null
 
     return (
@@ -85,6 +115,8 @@ export const SurveyPopover = React.forwardRef<HTMLDivElement, SurveyPopoverProps
         <div
           ref={(node: HTMLDivElement | null) => {
             refs.setFloating(node)
+            focusTrapContainerRef.current = node
+            setPopoverNode(node)
             if (typeof ref === 'function') {
               ref(node)
             } else if (ref) {
@@ -94,6 +126,7 @@ export const SurveyPopover = React.forwardRef<HTMLDivElement, SurveyPopoverProps
           // biome-ignore lint/a11y/useSemanticElements: native <dialog> requires showModal()/show()/close() for correct a11y semantics; this component manages its own visibility via Floating UI
           role="dialog"
           aria-label={config?.title ?? 'Survey'}
+          onKeyDown={handleKeyDown}
           style={floatingStyles}
           className={cn(
             'z-50 rounded-md border bg-background p-4 shadow-md min-w-[280px] max-w-sm',
