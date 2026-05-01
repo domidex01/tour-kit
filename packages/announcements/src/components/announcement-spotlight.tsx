@@ -112,36 +112,32 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
     // Calculate spotlight cutout position
     const targetRect = targetElement.getBoundingClientRect()
     const padding = 4
+    const overlayBg = `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + padding}px, rgba(0, 0, 0, ${spotlightOptions.overlayOpacity}) ${Math.max(targetRect.width, targetRect.height) / 2 + padding + 1}px)`
 
     const spotlightContent = (
       <>
-        {/* Overlay with cutout */}
-        {spotlightOptions.showOverlay && (
-          <div
-            className={cn(spotlightOverlayVariants({ visible: true }))}
-            style={{
-              background: `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + padding}px, rgba(0, 0, 0, ${spotlightOptions.overlayOpacity}) ${Math.max(targetRect.width, targetRect.height) / 2 + padding + 1}px)`,
-            }}
-            onClick={
-              spotlightOptions.closeOnOverlayClick
-                ? () => handleDismiss('overlay_click')
-                : undefined
-            }
-            onKeyDown={
-              spotlightOptions.closeOnOverlayClick
-                ? (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleDismiss('overlay_click')
-                    }
-                  }
-                : undefined
-            }
-            role={spotlightOptions.closeOnOverlayClick ? 'button' : undefined}
-            tabIndex={spotlightOptions.closeOnOverlayClick ? 0 : undefined}
-            aria-label={spotlightOptions.closeOnOverlayClick ? 'Close spotlight' : undefined}
-          />
-        )}
+        {/* Overlay with cutout — statically either an interactive <button> or
+            an inert aria-hidden div so the element shape never mixes
+            interactive ARIA on a non-interactive element. */}
+        {spotlightOptions.showOverlay &&
+          (spotlightOptions.closeOnOverlayClick ? (
+            <button
+              type="button"
+              className={cn(
+                spotlightOverlayVariants({ visible: true }),
+                'pointer-events-auto cursor-pointer border-0 p-0'
+              )}
+              style={{ background: overlayBg }}
+              onClick={() => handleDismiss('overlay_click')}
+              aria-label="Close spotlight"
+            />
+          ) : (
+            <div
+              className={cn(spotlightOverlayVariants({ visible: true }))}
+              style={{ background: overlayBg }}
+              aria-hidden="true"
+            />
+          ))}
 
         {/* Spotlight content */}
         <div

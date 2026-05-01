@@ -53,7 +53,15 @@ export function AiChatMessageList({
   }
 
   return (
-    <div className={cn('max-h-60 overflow-y-auto space-y-2', className)} role="log">
+    <div
+      className={cn('max-h-60 overflow-y-auto space-y-2', className)}
+      role="log"
+      aria-live="polite"
+      aria-atomic="false"
+      aria-relevant="additions text"
+      aria-busy={isStreaming}
+      aria-label="Chat conversation"
+    >
       {messages.map((message, index) => {
         if (renderMessage) return renderMessage(message, index)
         const text = getTextContent(message)

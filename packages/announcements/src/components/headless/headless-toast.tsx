@@ -61,6 +61,13 @@ export function HeadlessToast({
     [announcement, onOpenChange]
   )
 
+  // Hold the latest dismiss in a ref so the auto-dismiss timer effect
+  // does not re-subscribe every render when announcement state ticks.
+  const dismissRef = React.useRef(dismiss)
+  React.useEffect(() => {
+    dismissRef.current = dismiss
+  }, [dismiss])
+
   const toastOptions: ToastOptions = {
     position: 'bottom-right',
     autoDismiss: true,
@@ -71,7 +78,8 @@ export function HeadlessToast({
     ...config?.toastOptions,
   }
 
-  // Auto-dismiss timer
+  // Auto-dismiss timer — depends only on primitive scalars so it does
+  // not tear down on every parent re-render.
   React.useEffect(() => {
     if (!open || !toastOptions.autoDismiss) return
 
@@ -85,7 +93,7 @@ export function HeadlessToast({
 
       if (remaining === 0) {
         clearInterval(timer)
-        dismiss('auto_dismiss')
+        dismissRef.current('auto_dismiss')
       }
     }, 50)
 
@@ -93,7 +101,7 @@ export function HeadlessToast({
       clearInterval(timer)
       setProgress(100)
     }
-  }, [open, toastOptions.autoDismiss, toastOptions.autoDismissDelay, dismiss])
+  }, [open, toastOptions.autoDismiss, toastOptions.autoDismissDelay])
 
   const toastProps = {
     role: 'alert' as const,
