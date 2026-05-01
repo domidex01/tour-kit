@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import * as React from 'react'
+import type * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AnnouncementSpotlight } from '../../components/announcement-spotlight'
 import { AnnouncementsProvider } from '../../context/announcements-provider'

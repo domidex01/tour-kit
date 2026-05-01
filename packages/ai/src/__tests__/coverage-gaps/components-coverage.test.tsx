@@ -144,9 +144,7 @@ describe('Component coverage gaps', () => {
     it('reports aria-busy="true" while streaming', async () => {
       mockUseAiChat.mockReturnValue(
         buildChatState({
-          messages: [
-            { id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] } as never,
-          ],
+          messages: [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] } as never],
           status: 'streaming',
         })
       )

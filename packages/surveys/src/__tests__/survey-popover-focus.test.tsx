@@ -54,12 +54,7 @@ function Inner({ children }: { children?: React.ReactNode }) {
   const [anchor, setAnchor] = React.useState<HTMLButtonElement | null>(null)
   return (
     <>
-      <button
-        ref={setAnchor}
-        type="button"
-        data-testid="anchor"
-        onClick={() => survey.show()}
-      >
+      <button ref={setAnchor} type="button" data-testid="anchor" onClick={() => survey.show()}>
         Open
       </button>
       <SurveyPopover surveyId="p1" anchor={anchor} options={{ showCloseButton: false }}>
