@@ -481,22 +481,37 @@ export function TourProvider({
     }
 
     const targetStep = restoredTour.steps[restored.stepIndex]
+    // Narrowing: `needsRouteRestore` proved `currentRoute` is a string.
+    const route = restored.currentRoute as string
+    // Cancellation: the restore IIFE awaits async work (navigate +
+    // MutationObserver). If the provider unmounts mid-await, dispatch /
+    // flow.clear would mutate a dead instance and write to storage on
+    // behalf of a tour the user has already left.
+    let cancelled = false
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: restore orchestrator (navigate + wait + cancellation guards)
     void (async () => {
       try {
-        await router.navigate(restored.currentRoute as string)
+        await router.navigate(route)
+        if (cancelled) return
         if (targetStep) {
           await waitForStepTarget(targetStep, {
-            route: restored.currentRoute as string,
+            route,
             timeoutMs: targetStep.waitTimeout ?? 3000,
           })
+          if (cancelled) return
         }
         dispatchStart()
       } catch {
+        if (cancelled) return
         // Stale session (route 404, target missing). Clear so the next mount
         // doesn't loop on the same broken state.
         flow.clear()
       }
     })()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Restore persisted state on mount — and re-run when another tab writes
@@ -727,16 +742,31 @@ export function TourProvider({
           }
 
           // strategy === 'auto'
-          await router.navigate(step.route)
-
-          // Honor the legacy `routeDelay` knob before observing — gives
-          // route-bound suspense / data-fetch a beat to flush so the
-          // MutationObserver doesn't burn its 3s budget on hydration.
-          if (step.routeDelay && step.routeDelay > 0) {
-            await new Promise((resolve) => setTimeout(resolve, step.routeDelay))
-          }
-
           try {
+            // RouterAdapter.navigate returns:
+            //   App Router / React Router → undefined (sync)
+            //   Pages Router               → Promise<boolean>
+            //
+            // A literal `false` from Pages Router means the navigation was
+            // cancelled (e.g. another `push()` raced ahead, beforeunload, a
+            // route guard rejected). Surface as a typed reject instead of
+            // silently waiting 3 seconds for a target that will never mount.
+            const navResult = await router.navigate(step.route)
+            if (navResult === false) {
+              throw new TourRouteError({
+                code: 'NAVIGATION_REJECTED',
+                route: step.route,
+                message: `Router rejected navigation to "${step.route}".`,
+              })
+            }
+
+            // Honor the legacy `routeDelay` knob before observing — gives
+            // route-bound suspense / data-fetch a beat to flush so the
+            // MutationObserver doesn't burn its 3s budget on hydration.
+            if (step.routeDelay && step.routeDelay > 0) {
+              await new Promise((resolve) => setTimeout(resolve, step.routeDelay))
+            }
+
             await waitForStepTarget(step, {
               route: step.route,
               timeoutMs: step.waitTimeout ?? 3000,
@@ -977,21 +1007,23 @@ export function TourProvider({
 
           // Navigate to the visible step instead
           const navigated = await navigateToStep(visibleIndex)
-          if (navigated) {
-            const step = currentTour.steps[visibleIndex]
-            if (step) {
-              dispatch({
-                type: 'TRACK_STEP_VISIT',
-                stepId: step.id,
-                previousStepId: currentStepId,
-              })
-              tourKitContext?.onStepView?.(currentTour.id, step.id, visibleIndex)
-              currentTour.onStepChange?.(step, visibleIndex, {
-                ...state,
-                tour: currentTour,
-                data,
-              })
-            }
+          if (!navigated) {
+            dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+            return
+          }
+          const step = currentTour.steps[visibleIndex]
+          if (step) {
+            dispatch({
+              type: 'TRACK_STEP_VISIT',
+              stepId: step.id,
+              previousStepId: currentStepId,
+            })
+            tourKitContext?.onStepView?.(currentTour.id, step.id, visibleIndex)
+            currentTour.onStepChange?.(step, visibleIndex, {
+              ...state,
+              tour: currentTour,
+              data,
+            })
           }
           return
         }
@@ -999,7 +1031,11 @@ export function TourProvider({
 
       // Navigate to target step
       const navigated = await navigateToStep(targetIndex)
-      if (navigated && targetStep) {
+      if (!navigated) {
+        dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+        return
+      }
+      if (targetStep) {
         dispatch({
           type: 'TRACK_STEP_VISIT',
           stepId: targetStep.id,
@@ -1099,7 +1135,15 @@ export function TourProvider({
 
     // Navigate to the next visible step
     const navigated = await navigateToStep(nextStepIndex)
-    if (!navigated) return
+    if (!navigated) {
+      // Reset the transitioning flag we set above. The auto-strategy failure
+      // path (TARGET_NOT_FOUND / NAVIGATION_REJECTED) already dispatches
+      // STOP_TOUR which clears the flag — this redundant dispatch only
+      // matters for the prompt / manual / hidden-terminate paths where the
+      // tour is still active but the navigation was deferred.
+      dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+      return
+    }
 
     const nextStep = currentTour.steps[nextStepIndex]
     if (nextStep) {
@@ -1168,21 +1212,24 @@ export function TourProvider({
     // Navigate to the previous visible step
     const navigated = await navigateToStep(prevStepIndex)
 
-    if (navigated) {
-      const prevStep = currentTour.steps[prevStepIndex]
-      if (prevStep) {
-        dispatch({
-          type: 'TRACK_STEP_VISIT',
-          stepId: prevStep.id,
-          previousStepId: currentStep?.id ?? null,
-        })
-        tourKitContext?.onStepView?.(currentTour.id, prevStep.id, prevStepIndex)
-        currentTour.onStepChange?.(prevStep, prevStepIndex, {
-          ...state,
-          tour: currentTour,
-          data,
-        })
-      }
+    if (!navigated) {
+      dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+      return
+    }
+
+    const prevStep = currentTour.steps[prevStepIndex]
+    if (prevStep) {
+      dispatch({
+        type: 'TRACK_STEP_VISIT',
+        stepId: prevStep.id,
+        previousStepId: currentStep?.id ?? null,
+      })
+      tourKitContext?.onStepView?.(currentTour.id, prevStep.id, prevStepIndex)
+      currentTour.onStepChange?.(prevStep, prevStepIndex, {
+        ...state,
+        tour: currentTour,
+        data,
+      })
     }
   }, [
     state,
@@ -1224,7 +1271,10 @@ export function TourProvider({
 
       // Navigate to the target visible step
       const navigated = await navigateToStep(targetIndex)
-      if (!navigated) return
+      if (!navigated) {
+        dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+        return
+      }
 
       const step = currentTour.steps[targetIndex]
       if (step) {

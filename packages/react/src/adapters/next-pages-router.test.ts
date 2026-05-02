@@ -717,6 +717,10 @@ describe('cross-page (Pages Router) — Phase 1.3', () => {
     expect(onNavigationRequired).toHaveBeenCalledWith('/billing', 'b')
     expect(push).not.toHaveBeenCalled()
     expect(result.current.currentStepIndex).toBe(0)
+    // Phase 1.3 fix: provider must clear isTransitioning when next()
+    // bails because the strategy declined the navigation. Otherwise the
+    // UI sticks in the transitioning state forever.
+    expect(result.current.isTransitioning).toBe(false)
   })
 
   it("'manual' strategy: no push, no advance (US-3)", async () => {
@@ -738,6 +742,79 @@ describe('cross-page (Pages Router) — Phase 1.3', () => {
 
     expect(push).not.toHaveBeenCalled()
     expect(result.current.currentStepIndex).toBe(0)
+    // Same transitioning-reset invariant as 'prompt'.
+    expect(result.current.isTransitioning).toBe(false)
+  })
+
+  it("'auto' strategy: router.push resolves false → NAVIGATION_REJECTED, STOP_TOUR", async () => {
+    // Pages Router's documented contract: push() resolves false when the
+    // navigation is cancelled (route guard, racing push, beforeunload).
+    // Phase 1.3 surfaces that as a typed reject instead of silently waiting
+    // 3 seconds for a target that will never mount.
+    const events = {
+      on: vi.fn(),
+      off: vi.fn(),
+    }
+    const state = { path: '/' }
+    const push = vi.fn(() => Promise.resolve(false))
+    const routerProxy = new Proxy(
+      { pathname: state.path, push, events },
+      {
+        get(target, prop) {
+          if (prop === 'pathname') return state.path
+          if (prop === 'push') return target.push
+          if (prop === 'events') return events
+          return target[prop as keyof typeof target]
+        },
+      }
+    )
+    const useRouter = (() => routerProxy) as () => typeof routerProxy
+    const useAdapter = createNextPagesRouterAdapter(useRouter)
+
+    const tours = [
+      {
+        id: 't',
+        steps: [
+          { id: 'a', target: '#dashboard-target', content: 'A' },
+          {
+            id: 'b',
+            route: '/billing',
+            target: '#billing-target',
+            content: 'B',
+            routeChangeStrategy: 'auto' as const,
+          },
+        ],
+      },
+    ]
+    const onStepError = vi.fn()
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      const adapter = useAdapter()
+      return React.createElement(TourProvider, {
+        tours,
+        router: adapter,
+        onStepError,
+        children,
+      })
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      await result.current.start('t')
+    })
+    await act(async () => {
+      await result.current.next()
+    })
+
+    expect(push).toHaveBeenCalledWith('/billing')
+    expect(onStepError).toHaveBeenCalledTimes(1)
+    const [err] = onStepError.mock.calls[0] as [TourRouteError]
+    expect(err.name).toBe('TourRouteError')
+    expect(err.code).toBe('NAVIGATION_REJECTED')
+    expect(err.route).toBe('/billing')
+    // selector is undefined for this code — only TARGET_NOT_FOUND populates it.
+    expect(err.selector).toBeUndefined()
+    expect(result.current.isActive).toBe(false)
   })
 
   it("'auto' strategy: target never mounts → onStepError, STOP_TOUR (US-2)", async () => {
