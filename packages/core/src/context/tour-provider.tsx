@@ -473,9 +473,7 @@ export function TourProvider({
     }
 
     const needsRouteRestore =
-      restored.currentRoute &&
-      router &&
-      restored.currentRoute !== router.getCurrentRoute()
+      restored.currentRoute && router && restored.currentRoute !== router.getCurrentRoute()
 
     if (!needsRouteRestore) {
       dispatchStart()

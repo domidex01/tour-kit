@@ -1,5 +1,5 @@
-import { TourProvider, type TourRouteError, useTour } from '@tour-kit/core'
 import { act, renderHook } from '@testing-library/react'
+import { TourProvider, type TourRouteError, useTour } from '@tour-kit/core'
 import * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createNextPagesRouterAdapter } from './next-pages-router'
