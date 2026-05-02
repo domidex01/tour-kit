@@ -1,4 +1,5 @@
-import { afterAll, describe, expect, it } from 'vitest'
+// SPIKE — delete this file before the first Phase 1.x feature PR merges (Phase 0 fail-safe #1).
+import { describe, expect, it } from 'vitest'
 
 describe('SPIKE: BroadcastChannel in jsdom', () => {
   it('posts and receives messages between two channels of the same name', async () => {
@@ -15,9 +16,5 @@ describe('SPIKE: BroadcastChannel in jsdom', () => {
 
     channelA.close()
     channelB.close()
-  })
-
-  afterAll(() => {
-    // Spike test — to be deleted before Phase 1.x PR merges.
   })
 })

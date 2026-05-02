@@ -58,7 +58,9 @@ Key choices:
 | Flip relevant trait (`t42`: false → true) | **1** | **0.387** | ≤ 16 | **PASS** |
 | Flip irrelevant trait (`t99`: false → true) | **1** | **0.132** | ≤ 16 | **PASS** |
 
-Both flip cases produce a single update render per flip — well under the ≤ 2 budget. `data-tk-theme` flips from `light` to `dark` exactly when `t42` changes; flipping `t99` does not invalidate the memo.
+Both flip cases produce a single update render per flip — well under the ≤ 2 budget. `data-tk-theme` flips from `light` to `dark` exactly when `t42` changes; flipping `t99` keeps the memoized `themeId` stable, so the render is essentially free (no DOM mutation, just a same-attribute reconciliation).
+
+**Caveat — what `useMemo` does and does not do here:** the memo stabilizes the *value* of `themeId`, not the render. When the parent's `traits` state updates, `ThemeProvider` still re-renders; the cheap 0.132 ms cost on an irrelevant flip is React skipping the DOM mutation, not skipping the function call. To fully bail out the subtree (zero re-renders on irrelevant flips), Phase 1.1's production implementation should also wrap `ThemeProvider` in `React.memo` and pass the memoized `themeId` as a primitive prop. The gate budget is met either way; the bailout is a Phase 1.1 polish, not a 1.0 blocker.
 
 Margin: 0.387 ms per flip vs 16 ms cap = **41× headroom**.
 
@@ -82,7 +84,7 @@ No fallback to `useSyncExternalStore` is needed. The `useMemo` baseline:
 `packages/core/src/__tests__/spikes/theme-predicate-perf.test.tsx` — 2 cases:
 
 1. Relevant flip ≤ 2 renders, < 16 ms each, `data-tk-theme` becomes `"dark"`.
-2. Irrelevant flip ≤ 2 renders, < 16 ms each (memo identity preserved).
+2. Irrelevant flip ≤ 2 renders, < 16 ms each, `data-tk-theme` stays `"light"` (memoized value identity preserved — see caveat above re: full subtree bailout).
 
 Both pass:
 

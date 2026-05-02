@@ -1,3 +1,4 @@
+// SPIKE — delete this file before the first Phase 1.x feature PR merges (Phase 0 fail-safe #1).
 import { act, render } from '@testing-library/react'
 import { Profiler, type ProfilerOnRenderCallback, useMemo, useState } from 'react'
 import { afterAll, describe, expect, it } from 'vitest'
@@ -46,7 +47,6 @@ function Harness({ onRender }: { onRender: ProfilerOnRenderCallback }) {
 describe('SPIKE: theme predicate perf — 100-trait fixture', () => {
   afterAll(() => {
     externalSetTraits = null
-    // Spike test — to be deleted before Phase 1.x PR merges.
   })
 
   it('flips one trait in <= 2 renders with actualDuration <= 16ms', () => {
@@ -85,7 +85,14 @@ describe('SPIKE: theme predicate perf — 100-trait fixture', () => {
     expect(root?.getAttribute('data-tk-theme')).toBe('dark')
   })
 
-  it('flipping an unrelated trait does NOT re-render the theme div (memo holds)', () => {
+  it('flipping an unrelated trait stays within ≤2 renders / <16ms and leaves data-tk-theme unchanged', () => {
+    // Note: useMemo with [traits[FLIP_KEY]] stabilizes the *value* of themeId,
+    // not the render itself. ThemeProvider still re-renders when its `traits`
+    // prop reference changes — but it returns the same JSX (same data-tk-theme),
+    // so React skips the DOM mutation and the render is cheap.
+    // Production code that needs full bailout will also wrap ThemeProvider in
+    // React.memo and pass the memoized themeId as a primitive prop. The Phase
+    // 1.0 gate is the perf budget; that strategy upgrade lives in Phase 1.1.
     const samples: ProfileSample[] = []
     const onRender: ProfilerOnRenderCallback = (_id, phase, actualDuration) => {
       samples.push({
@@ -101,13 +108,14 @@ describe('SPIKE: theme predicate perf — 100-trait fixture', () => {
       externalSetTraits?.((t) => ({ ...t, t99: !t.t99 }))
     })
 
-    // The Profiler still records ONE update render of the parent (Harness)
-    // because state changed, but the useMemo identity is preserved so the
-    // ThemeProvider subtree's themeId is unchanged. We assert ≤2 to give
-    // headroom for React Strict-mode double-invocation if future setup adds it.
+    expect(samples.length).toBeGreaterThan(0)
     expect(samples.length).toBeLessThanOrEqual(2)
     for (const s of samples) {
       expect(s.actualDuration).toBeLessThan(16)
     }
+
+    // themeId is stable across an unrelated flip: the attribute does not change.
+    const root = document.querySelector('[data-tk-theme]')
+    expect(root?.getAttribute('data-tk-theme')).toBe('light')
   })
 })
