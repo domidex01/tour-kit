@@ -1,4 +1,4 @@
-# userTourKit v0.6.0 — Generated 2026-05-02T02:57:59Z
+# userTourKit v0.6.0 — Generated 2026-05-02T05:07:20Z
 
 # userTourKit
 
@@ -230,6 +230,8 @@
 - [Base UI Support](https://usertourkit.com/docs/guides/base-ui): Switch from Radix UI to Base UI for tour components using the UnifiedSlot abstraction and UILibraryContext provider
 - [Branching Tours](https://usertourkit.com/docs/guides/branching): Create personalized tour paths with conditional branching, user choice flows, and dynamic step insertion based on state
 - [Checklists with Tours](https://usertourkit.com/docs/guides/checklists-tours): Link checklists to tours for guided onboarding — auto-complete tasks on tour finish and track user progress together
+- [Hidden Steps](https://usertourkit.com/docs/guides/hidden-steps): Run branching logic, trait forks, and completion gates without mounting any UI by marking a step as hidden.
+- [Multi-tab Tours](https://usertourkit.com/docs/guides/multi-tab): Pause an active tour in tab B when the user starts the same flow in tab A — cross-tab coordination via BroadcastChannel.
 - [Next.js Integration](https://usertourkit.com/docs/guides/nextjs): Set up userTourKit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support
 - [Persistence](https://usertourkit.com/docs/guides/persistence): Save tour progress, checklist completion, and hint dismissals across browser sessions with pluggable storage adapters
 - [Router Integration](https://usertourkit.com/docs/guides/router-integration): Build multi-page tours with Next.js, React Router, or custom routers using route-aware step targeting and persistence

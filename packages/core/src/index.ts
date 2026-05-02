@@ -162,6 +162,9 @@ export type {
 // Class-name merge utility (cn = clsx + tailwind-merge)
 export { cn } from './lib/utils'
 
+// Tour validation (hidden-step config gate + runtime loop guard)
+export { TourValidationError, validateTour } from './lib/validate-tour'
+
 // Unified Slot — supports both Radix UI (asChild element-clone) and Base UI (render-prop)
 // patterns. forwardRef-wrapped to preserve `ref` on both React 18 and React 19.
 export { UnifiedSlot } from './lib/unified-slot'

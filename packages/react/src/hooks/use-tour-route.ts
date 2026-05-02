@@ -56,7 +56,10 @@ export function useTourRoute({ router, tourId }: UseTourRouteOptions): UseTourRo
   const [isNavigating, setIsNavigating] = React.useState(false)
 
   const currentStep = tour.currentStep as TourStep | null
-  const currentStepRoute = currentStep?.route
+  // Defensive guard: hidden steps never settle as currentStep through the
+  // normal auto-advance flow, but if state is forced (tests, custom dispatch)
+  // we must not leak the hidden step's route.
+  const currentStepRoute = currentStep?.kind === 'hidden' ? undefined : currentStep?.route
   const currentRoute = router.getCurrentRoute()
 
   const isStepOnCurrentRoute = React.useMemo(() => {
