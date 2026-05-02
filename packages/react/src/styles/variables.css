@@ -86,6 +86,42 @@
   }
 }
 
+/* ==========================================================================
+   Theme variations
+   --------------------------------------------------------------------------
+   Tour Kit uses an attribute-swap pattern (data-tk-theme) rather than the
+   next-themes "render both UIs and CSS-hide one" approach. Because the tour
+   UI is a small controlled portal with no nested host content, swapping the
+   attribute is correct and far cheaper. Do NOT change this without revisiting
+   plan/phase-1-4a-theme-foundation.md § Key design decisions.
+
+   These attribute selectors live OUTSIDE @layer base intentionally so that
+   they win over the @media (prefers-color-scheme: dark) block above when a
+   <ThemeProvider> explicitly forces a theme.
+   ========================================================================== */
+
+[data-tk-theme="dark"] {
+  --tour-card-bg: #0a0a0a;
+  --tour-card-fg: #fafafa;
+  --tour-card-border: #262626;
+  --tour-overlay-bg: rgba(0, 0, 0, 0.7);
+  --tour-secondary-fg: #fafafa;
+  --tour-secondary-border: #262626;
+  --tour-secondary-hover: #262626;
+  --tour-muted-fg: #a3a3a3;
+}
+
+[data-tk-theme="light"] {
+  --tour-card-bg: #ffffff;
+  --tour-card-fg: #171717;
+  --tour-card-border: #e5e7eb;
+  --tour-overlay-bg: rgba(0, 0, 0, 0.5);
+  --tour-secondary-fg: #171717;
+  --tour-secondary-border: #e5e7eb;
+  --tour-secondary-hover: #f5f5f5;
+  --tour-muted-fg: #737373;
+}
+
 /* ===== Keyframes (for non-Tailwind projects) ===== */
 @keyframes tour-pulse {
   0%,
