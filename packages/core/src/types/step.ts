@@ -42,6 +42,21 @@ export interface TourStep {
   routeDelay?: number
   /** Route matching mode (default: 'exact') */
   routeMatch?: 'exact' | 'startsWith' | 'contains'
+  /**
+   * How to handle navigation when the step's `route` differs from the current
+   * route.
+   *
+   * - `'auto'` (default): provider calls `router.navigate(step.route)` and
+   *   awaits the target via `waitForStepTarget` before dispatching `GO_TO_STEP`.
+   *   On timeout, throws `TourRouteError({ code: 'TARGET_NOT_FOUND' })`.
+   * - `'prompt'`: provider raises `onNavigationRequired` for a
+   *   `<TourRoutePrompt>` UI; consumer drives the navigation.
+   * - `'manual'`: provider does nothing; consumer must call
+   *   `useTourRoute().goToStepRoute()` explicitly.
+   *
+   * @default 'auto'
+   */
+  routeChangeStrategy?: 'auto' | 'prompt' | 'manual'
   when?: (context: TourCallbackContext) => boolean | Promise<boolean>
   waitForTarget?: boolean
   waitTimeout?: number

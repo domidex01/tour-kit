@@ -1,4 +1,6 @@
+import { TourProvider, type TourRouteError, useTour } from '@tour-kit/core'
 import { act, renderHook } from '@testing-library/react'
+import * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createNextPagesRouterAdapter } from './next-pages-router'
 
@@ -581,5 +583,237 @@ describe('useNextPagesRouter (direct hook)', () => {
     // The direct hook uses dynamic require which is difficult to mock in Vitest
     // This test documents the expected behavior
     expect(true).toBe(true) // Placeholder - see integration tests
+  })
+})
+
+// -----------------------------------------------------------------------------
+// Phase 1.3 — Cross-page tour integration with TourProvider (Pages Router)
+// -----------------------------------------------------------------------------
+//
+// Pages Router differs from App Router: `router.push()` returns
+// `Promise<boolean>` and the route mutation happens AFTER the promise
+// resolves. We mount the target inside the `.then()` callback to mirror that
+// contract — `waitForStepTarget`'s MutationObserver picks it up after.
+
+describe('cross-page (Pages Router) — Phase 1.3', () => {
+  function makeAdapter(initialPath = '/') {
+    const handlers = new Map<string, Set<(url: string) => void>>()
+    const events = {
+      on: vi.fn((event: string, handler: (url: string) => void) => {
+        if (!handlers.has(event)) handlers.set(event, new Set())
+        handlers.get(event)?.add(handler)
+      }),
+      off: vi.fn((event: string, handler: (url: string) => void) => {
+        handlers.get(event)?.delete(handler)
+      }),
+    }
+    const state = { path: initialPath }
+    const push = vi.fn((href: string) =>
+      Promise.resolve(true).then((ok) => {
+        state.path = href
+        const t = document.createElement('div')
+        t.id = 'billing-target'
+        document.body.appendChild(t)
+        return ok
+      })
+    )
+    const pushNoMount = vi.fn((href: string) =>
+      Promise.resolve(true).then((ok) => {
+        state.path = href
+        return ok
+      })
+    )
+    const routerProxy = new Proxy(
+      { pathname: state.path, push, events },
+      {
+        get(target, prop) {
+          if (prop === 'pathname') return state.path
+          if (prop === 'push') return target.push
+          if (prop === 'events') return events
+          return target[prop as keyof typeof target]
+        },
+      }
+    )
+    const useRouter = (() => routerProxy) as () => typeof routerProxy
+    return {
+      useAdapter: createNextPagesRouterAdapter(useRouter),
+      push,
+      pushNoMount,
+      routerProxy,
+      state,
+    }
+  }
+
+  function makeTours(strategy: 'auto' | 'prompt' | 'manual' = 'auto') {
+    return [
+      {
+        id: 't',
+        steps: [
+          { id: 'a', target: '#dashboard-target', content: 'A' },
+          {
+            id: 'b',
+            route: '/billing',
+            target: '#billing-target',
+            content: 'B',
+            routeChangeStrategy: strategy,
+          },
+        ],
+      },
+    ]
+  }
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="dashboard-target"></div>'
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it("'auto' strategy: navigate via Promise<true>, target mounts on resolve, advance (US-1)", async () => {
+    const { useAdapter, push } = makeAdapter('/')
+    const tours = makeTours('auto')
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      const adapter = useAdapter()
+      return React.createElement(TourProvider, { tours, router: adapter, children })
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      await result.current.start('t')
+    })
+    await act(async () => {
+      await result.current.next()
+    })
+
+    expect(push).toHaveBeenCalledWith('/billing')
+    expect(result.current.currentStepIndex).toBe(1)
+  })
+
+  it("'prompt' strategy: fires onNavigationRequired, no push, no advance (US-3)", async () => {
+    const { useAdapter, push } = makeAdapter('/')
+    const tours = makeTours('prompt')
+    const onNavigationRequired = vi.fn()
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      const adapter = useAdapter()
+      return React.createElement(TourProvider, {
+        tours,
+        router: adapter,
+        onNavigationRequired,
+        children,
+      })
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      await result.current.start('t')
+    })
+    await act(async () => {
+      await result.current.next()
+    })
+
+    expect(onNavigationRequired).toHaveBeenCalledWith('/billing', 'b')
+    expect(push).not.toHaveBeenCalled()
+    expect(result.current.currentStepIndex).toBe(0)
+  })
+
+  it("'manual' strategy: no push, no advance (US-3)", async () => {
+    const { useAdapter, push } = makeAdapter('/')
+    const tours = makeTours('manual')
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      const adapter = useAdapter()
+      return React.createElement(TourProvider, { tours, router: adapter, children })
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      await result.current.start('t')
+    })
+    await act(async () => {
+      await result.current.next()
+    })
+
+    expect(push).not.toHaveBeenCalled()
+    expect(result.current.currentStepIndex).toBe(0)
+  })
+
+  it("'auto' strategy: target never mounts → onStepError, STOP_TOUR (US-2)", async () => {
+    const handlers = new Map<string, Set<(url: string) => void>>()
+    const events = {
+      on: vi.fn((event: string, handler: (url: string) => void) => {
+        if (!handlers.has(event)) handlers.set(event, new Set())
+        handlers.get(event)?.add(handler)
+      }),
+      off: vi.fn(),
+    }
+    const state = { path: '/' }
+    const push = vi.fn((href: string) =>
+      Promise.resolve(true).then((ok) => {
+        state.path = href
+        return ok
+      })
+    )
+    const routerProxy = new Proxy(
+      { pathname: state.path, push, events },
+      {
+        get(target, prop) {
+          if (prop === 'pathname') return state.path
+          if (prop === 'push') return target.push
+          if (prop === 'events') return events
+          return target[prop as keyof typeof target]
+        },
+      }
+    )
+    const useRouter = (() => routerProxy) as () => typeof routerProxy
+    const useAdapter = createNextPagesRouterAdapter(useRouter)
+
+    const tours = [
+      {
+        id: 't',
+        steps: [
+          { id: 'a', target: '#dashboard-target', content: 'A' },
+          {
+            id: 'b',
+            route: '/billing',
+            target: '#billing-target',
+            content: 'B',
+            routeChangeStrategy: 'auto' as const,
+            waitTimeout: 50,
+          },
+        ],
+      },
+    ]
+    const onStepError = vi.fn()
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      const adapter = useAdapter()
+      return React.createElement(TourProvider, {
+        tours,
+        router: adapter,
+        onStepError,
+        children,
+      })
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      await result.current.start('t')
+    })
+    await act(async () => {
+      await result.current.next()
+      await new Promise((resolve) => setTimeout(resolve, 80))
+    })
+
+    expect(push).toHaveBeenCalledWith('/billing')
+    expect(onStepError).toHaveBeenCalledTimes(1)
+    const [err] = onStepError.mock.calls[0] as [TourRouteError]
+    expect(err.name).toBe('TourRouteError')
+    expect(err.code).toBe('TARGET_NOT_FOUND')
+    expect(err.route).toBe('/billing')
+    expect(err.selector).toBe('#billing-target')
+    expect(result.current.isActive).toBe(false)
   })
 })

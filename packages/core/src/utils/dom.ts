@@ -42,10 +42,26 @@ export function isElementPartiallyVisible(element: HTMLElement): boolean {
 }
 
 /**
- * Wait for element to appear in DOM
+ * Wait for element to appear in DOM.
+ *
+ * @param selector - CSS selector to query against `document`
+ * @param timeout - Reject after this many ms (default 5000)
+ * @param signal - Optional `AbortSignal`. When aborted, the observer is
+ *   disconnected and the promise rejects with `Error('aborted')`. If the
+ *   signal is already aborted when called, rejects synchronously without
+ *   ever attaching the observer.
  */
-export function waitForElement(selector: string, timeout = 5000): Promise<HTMLElement> {
+export function waitForElement(
+  selector: string,
+  timeout = 5000,
+  signal?: AbortSignal
+): Promise<HTMLElement> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new Error('aborted'))
+      return
+    }
+
     const element = document.querySelector<HTMLElement>(selector)
     if (element) {
       resolve(element)
@@ -54,6 +70,7 @@ export function waitForElement(selector: string, timeout = 5000): Promise<HTMLEl
 
     let timeoutId: ReturnType<typeof setTimeout> | null = null
     let observer: MutationObserver | null = null
+    let onAbort: (() => void) | null = null
 
     const cleanup = () => {
       if (timeoutId) {
@@ -63,6 +80,10 @@ export function waitForElement(selector: string, timeout = 5000): Promise<HTMLEl
       if (observer) {
         observer.disconnect()
         observer = null
+      }
+      if (onAbort && signal) {
+        signal.removeEventListener('abort', onAbort)
+        onAbort = null
       }
     }
 
@@ -83,6 +104,14 @@ export function waitForElement(selector: string, timeout = 5000): Promise<HTMLEl
       cleanup()
       reject(new Error(`Element "${selector}" not found within ${timeout}ms`))
     }, timeout)
+
+    if (signal) {
+      onAbort = () => {
+        cleanup()
+        reject(new Error('aborted'))
+      }
+      signal.addEventListener('abort', onAbort, { once: true })
+    }
   })
 }
 

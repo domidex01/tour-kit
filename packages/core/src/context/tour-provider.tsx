@@ -4,6 +4,7 @@ import { useBroadcast } from '../hooks/use-broadcast'
 import { useFlowSession } from '../hooks/use-flow-session'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
 import { TourValidationError, validateTour } from '../lib/validate-tour'
+import { TourRouteError, waitForStepTarget } from '../lib/wait-for-step-target'
 import type {
   BranchContext,
   BranchTarget,
@@ -22,37 +23,12 @@ import {
   resolveBranch,
   resolveTargetToIndex,
 } from '../utils/branch'
-import { waitForElement } from '../utils/dom'
 import { logger } from '../utils/logger'
 import { TourContext } from './tour-context'
 import { TourKitContext } from './tourkit-context'
 
 /** Maximum hidden-step chain length before throwing HIDDEN_STEP_LOOP. */
 const MAX_HIDDEN_CHAIN = 50
-
-/**
- * Helper to perform route navigation and wait for target element
- */
-async function performRouteNavigation(
-  router: RouterAdapter,
-  step: TourStep,
-  route: string
-): Promise<void> {
-  await router.navigate(route)
-
-  // Wait for navigation to complete
-  const delay = step.routeDelay ?? 100
-  await new Promise((resolve) => setTimeout(resolve, delay))
-
-  // If waitForTarget, wait for element
-  if (step.waitForTarget && typeof step.target === 'string') {
-    try {
-      await waitForElement(step.target, step.waitTimeout ?? 5000)
-    } catch {
-      // Element not found, but continue anyway
-    }
-  }
-}
 
 /**
  * Check if navigation is needed for a step
@@ -363,6 +339,15 @@ export interface TourProviderProps {
    * `tour:active` on the cross-tab `BroadcastChannel`).
    */
   onTourPaused?: (tourId: string, reason: 'cross-tab') => void
+  /**
+   * Called when a cross-page step fails — typically when the step's target
+   * does not appear on the new route within `routeChangeStrategy: 'auto'`'s
+   * 3000ms wait. The provider stops the tour after this fires.
+   *
+   * Aborts triggered by `STOP_TOUR` or unmount do NOT call this — those are
+   * cooperative cancellation, not failures.
+   */
+  onStepError?: (err: TourRouteError) => void
 }
 
 interface CrossTabActiveMessage {
@@ -380,6 +365,7 @@ export function TourProvider({
   autoNavigate = true,
   onNavigationRequired,
   onTourPaused,
+  onStepError,
 }: TourProviderProps) {
   // Validate synchronously at render time so misconfigured hidden steps throw
   // at the caller's render() instead of leaking into runtime. Cheap: just a
@@ -466,16 +452,53 @@ export function TourProvider({
   // flowSession-restore: takes precedence over useRoutePersistence — it's
   // tour-scoped (single active tour) vs the route-state's multi-tour scope.
   // Mount-only: read whatever flow:active blob exists and start that tour.
+  //
+  // Phase 1.3 — cross-page resume: if the restored blob has a `currentRoute`
+  // that differs from the current router pathname, navigate first and await
+  // the target before dispatching START_TOUR. On any failure, clear the
+  // session — a stale/wrong route will never recover on its own.
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only flow restore
   React.useEffect(() => {
     const restored = flow.session
     if (!restored || flow.isStale) return
-    if (!tours.some((t) => t.id === restored.tourId)) return
-    dispatch({
-      type: 'START_TOUR',
-      tourId: restored.tourId,
-      stepIndex: restored.stepIndex,
-    })
+    const restoredTour = tours.find((t) => t.id === restored.tourId)
+    if (!restoredTour) return
+
+    const dispatchStart = () => {
+      dispatch({
+        type: 'START_TOUR',
+        tourId: restored.tourId,
+        stepIndex: restored.stepIndex,
+      })
+    }
+
+    const needsRouteRestore =
+      restored.currentRoute &&
+      router &&
+      restored.currentRoute !== router.getCurrentRoute()
+
+    if (!needsRouteRestore) {
+      dispatchStart()
+      return
+    }
+
+    const targetStep = restoredTour.steps[restored.stepIndex]
+    void (async () => {
+      try {
+        await router.navigate(restored.currentRoute as string)
+        if (targetStep) {
+          await waitForStepTarget(targetStep, {
+            route: restored.currentRoute as string,
+            timeoutMs: targetStep.waitTimeout ?? 3000,
+          })
+        }
+        dispatchStart()
+      } catch {
+        // Stale session (route 404, target missing). Clear so the next mount
+        // doesn't loop on the same broken state.
+        flow.clear()
+      }
+    })()
   }, [])
 
   // Restore persisted state on mount — and re-run when another tab writes
@@ -522,9 +545,11 @@ export function TourProvider({
 
   // Throttled flowSession save on step change while active. Deps are
   // exhaustive — the throttle inside `flow.save` handles coalescing.
+  // `currentRoute` is included so a hard-refresh during a multi-page tour
+  // resumes on the right URL (Phase 1.3 — FlowSessionV2).
   React.useEffect(() => {
     if (state.isActive && state.tourId && routePersistence.flowSession) {
-      flow.save(state.currentStepIndex)
+      flow.save(state.currentStepIndex, router?.getCurrentRoute())
     }
   }, [
     state.currentStepIndex,
@@ -532,7 +557,21 @@ export function TourProvider({
     state.tourId,
     flow.save,
     routePersistence.flowSession,
+    router,
   ])
+
+  // AbortController scoped to the active tour. Lets `waitForStepTarget`
+  // cancel cleanly on STOP_TOUR and on unmount instead of resolving a stale
+  // navigation onto a torn-down tree. Reset on every tour-id change.
+  const abortControllerRef = React.useRef<AbortController | null>(null)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: tour-scoped — only swap on tour identity / activeness
+  React.useEffect(() => {
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = state.isActive ? new AbortController() : null
+  }, [state.tourId, state.isActive])
+  // Final teardown on unmount — independent of the activeness swap above so
+  // the abort always fires once even when the component unmounts mid-tour.
+  React.useEffect(() => () => abortControllerRef.current?.abort(), [])
 
   // Clear flowSession blob ONLY on a true → false transition (tour ended).
   // The initial mount has `state.isActive === false`; without this guard
@@ -636,6 +675,12 @@ export function TourProvider({
   // Route-aware step navigation. Walks past hidden steps (firing their
   // `onEnter`/`onShow` lifecycle) until a mountable step is reached, then
   // dispatches GO_TO_STEP. Throws TourValidationError on hidden-step loops.
+  //
+  // Per-step `routeChangeStrategy` (Phase 1.3):
+  // - 'auto'   (default): navigate, await target via `waitForStepTarget`,
+  //   dispatch. On `TourRouteError`: fire `onStepError`, STOP_TOUR.
+  // - 'prompt': fire `onNavigationRequired(route, stepId)`, do NOT dispatch.
+  // - 'manual': do nothing — consumer drives navigation explicitly.
   const navigateToStep = React.useCallback(
     // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: hidden-traversal + route navigation in one orchestrator
     async (stepIndex: number): Promise<boolean> => {
@@ -661,11 +706,55 @@ export function TourProvider({
             dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
             return true
           }
+
+          // `autoNavigate: false` (legacy) is equivalent to per-step 'prompt'
+          // and still surfaces via `onNavigationRequired`.
           if (!autoNavigate) {
             onNavigationRequired?.(step.route, step.id)
             return false
           }
-          await performRouteNavigation(router, step, step.route)
+
+          const strategy = step.routeChangeStrategy ?? 'auto'
+
+          if (strategy === 'manual') {
+            // Consumer drives navigation. Do not dispatch — `useTourRoute()`
+            // handles `goToStepRoute()` and the next provider tick will
+            // re-enter once the route matches.
+            return false
+          }
+
+          if (strategy === 'prompt') {
+            onNavigationRequired?.(step.route, step.id)
+            return false
+          }
+
+          // strategy === 'auto'
+          await router.navigate(step.route)
+
+          // Honor the legacy `routeDelay` knob before observing — gives
+          // route-bound suspense / data-fetch a beat to flush so the
+          // MutationObserver doesn't burn its 3s budget on hydration.
+          if (step.routeDelay && step.routeDelay > 0) {
+            await new Promise((resolve) => setTimeout(resolve, step.routeDelay))
+          }
+
+          try {
+            await waitForStepTarget(step, {
+              route: step.route,
+              timeoutMs: step.waitTimeout ?? 3000,
+              signal: abortControllerRef.current?.signal,
+            })
+          } catch (err) {
+            // Cooperative cancellation (STOP_TOUR / unmount) — silent.
+            if (abortControllerRef.current?.signal.aborted) return false
+            if (err instanceof TourRouteError) {
+              onStepError?.(err)
+              dispatch({ type: 'STOP_TOUR' })
+              return false
+            }
+            throw err
+          }
+
           dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
           return true
         }
@@ -687,7 +776,7 @@ export function TourProvider({
         message: `Hidden-step chain exceeded ${MAX_HIDDEN_CHAIN} iterations${stuckStep ? ` at step "${stuckStep.id}"` : ''}. Likely an infinite loop.`,
       })
     },
-    [currentTour, router, autoNavigate, onNavigationRequired, advancePastHiddenStep]
+    [currentTour, router, autoNavigate, onNavigationRequired, onStepError, advancePastHiddenStep]
   )
 
   // Step ID to index map for branch resolution

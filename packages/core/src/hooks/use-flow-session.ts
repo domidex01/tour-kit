@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { type FlowSessionV1, isExpired, parse, serialize } from '../lib/flow-session'
+import { type FlowSessionV2, isExpired, parse, serialize } from '../lib/flow-session'
 import type { FlowSessionConfig } from '../types/config'
 import { logger } from '../utils/logger'
 import { createPrefixedStorage, createStorageAdapter } from '../utils/storage'
@@ -11,8 +11,14 @@ const SAVE_THROTTLE_MS = 200
 const ACTIVE_KEY_SUFFIX = 'flow:active'
 
 export interface UseFlowSessionReturn {
-  session: FlowSessionV1 | null
-  save: (stepIndex: number) => void
+  session: FlowSessionV2 | null
+  /**
+   * Persist the active step. `currentRoute` is included so a hard-refresh
+   * during a multi-page tour resumes on the right URL — pass
+   * `router?.getCurrentRoute()` from the provider, or `undefined` for
+   * single-route tours.
+   */
+  save: (stepIndex: number, currentRoute?: string) => void
   clear: () => void
   isStale: boolean
 }
@@ -68,7 +74,7 @@ export function useFlowSession(
 
   const storageKey = config?.key ?? ACTIVE_KEY_SUFFIX
 
-  const readSession = React.useCallback((): FlowSessionV1 | null => {
+  const readSession = React.useCallback((): FlowSessionV2 | null => {
     if (!storage) return null
     try {
       const raw = storage.getItem(storageKey)
@@ -88,7 +94,7 @@ export function useFlowSession(
     }
   }, [storage, storageKey, ttlMs])
 
-  const [session, setSession] = React.useState<FlowSessionV1 | null>(() => readSession())
+  const [session, setSession] = React.useState<FlowSessionV2 | null>(() => readSession())
 
   // Re-read when storage identity changes (e.g. config.storage swap)
   // biome-ignore lint/correctness/useExhaustiveDependencies: only re-load on storage identity change
@@ -119,13 +125,15 @@ export function useFlowSession(
     () =>
       throttleTime((...args: unknown[]) => {
         const stepIndex = args[0] as number
+        const currentRoute = args[1] as string | undefined
         const ctx = latestRef.current
         if (!ctx.enabled || !ctx.storage || !ctx.tourId) return
         const now = Date.now()
-        const next: FlowSessionV1 = {
-          schemaVersion: 1,
+        const next: FlowSessionV2 = {
+          schemaVersion: 2,
           tourId: ctx.tourId,
           stepIndex,
+          currentRoute,
           startedAt: ctx.startedAt ?? now,
           lastUpdatedAt: now,
         }
@@ -145,8 +153,8 @@ export function useFlowSession(
   React.useEffect(() => () => throttledSave.flush(), [throttledSave])
 
   const save = React.useCallback(
-    (stepIndex: number) => {
-      throttledSave(stepIndex)
+    (stepIndex: number, currentRoute?: string) => {
+      throttledSave(stepIndex, currentRoute)
     },
     [throttledSave]
   )

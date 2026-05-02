@@ -256,6 +256,67 @@ const tour = createTour({
 })
 ```
 
+## Cross-page Tours
+
+When a tour spans multiple routes, the provider has to handle three concerns: trigger the route change, wait for the new step's target to mount, and surface a typed error if the target never appears. The per-step `routeChangeStrategy` selects the navigation policy.
+
+### `routeChangeStrategy`
+
+| Strategy | When to use | Provider behavior |
+| --- | --- | --- |
+| `'auto'` (default) | Self-contained tours that should "just work" | Calls `router.navigate(step.route)`, awaits the step's target via a `MutationObserver` (3000 ms default), then advances. On timeout: fires `onStepError(TourRouteError)` and stops the tour. |
+| `'prompt'` | You want to show a confirmation UI before navigating | Calls `onNavigationRequired(route, stepId)` and pauses. The consumer drives navigation (typically via `<TourRoutePrompt>`). |
+| `'manual'` | You manage navigation yourself (e.g. a custom transition) | Provider does nothing. Consumer must call `useTourRoute().goToStepRoute()` explicitly. |
+
+```tsx
+createStep({
+  id: 'settings-step',
+  target: '#settings',
+  route: '/settings',
+  // Default — set to 'prompt' or 'manual' to opt out.
+  routeChangeStrategy: 'auto',
+})
+```
+
+### Strategy × Adapter Matrix
+
+All three strategies behave identically across the supported adapters. The only difference is the underlying navigation primitive — none of which the consumer sees.
+
+| Strategy | Next.js App Router | Next.js Pages Router | React Router v6/v7 |
+| --- | --- | --- | --- |
+| `'auto'`   | `router.push()` (sync) → `MutationObserver` waits for target | `router.push()` returns `Promise<true>` → wait | `useNavigate()` (sync) → wait |
+| `'prompt'` | `onNavigationRequired` fires; no `push` until consumer acts | Same | Same |
+| `'manual'` | No `push`, no callback. Consumer drives. | Same | Same |
+
+### Handling Failures
+
+When `'auto'` cannot find the new step's target within 3 seconds, the provider calls `onStepError` with a typed `TourRouteError` and stops the tour:
+
+```tsx
+import { TourProvider, type TourRouteError } from '@tour-kit/core'
+
+<TourProvider
+  tours={tours}
+  router={router}
+  onStepError={(err: TourRouteError) => {
+    if (err.code === 'TARGET_NOT_FOUND') {
+      analytics.track('tour_step_target_missing', {
+        route: err.route,
+        selector: err.selector,
+      })
+    }
+  }}
+/>
+```
+
+`TourRouteError` carries `code: 'TARGET_NOT_FOUND' | 'NAVIGATION_REJECTED' | 'TIMEOUT'`, the failing `route`, and (when applicable) the `selector` that timed out — enough to log a useful diagnostic without parsing message strings.
+
+### Resuming on the Right URL
+
+The flow session blob (see [Persistence](/docs/guides/persistence)) records `currentRoute` so a hard refresh during a multi-page tour lands the user back on the correct URL. On mount, if the persisted `currentRoute` differs from the current pathname, the provider navigates first, awaits the target, then dispatches `START_TOUR`. No additional configuration required — enable `routePersistence.flowSession` and it works.
+
+For a complete walk-through, see the [Cross-page tour example](/docs/examples/cross-page-tour).
+
 ### Navigation Callbacks
 
 Control navigation behavior with callbacks:

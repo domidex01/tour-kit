@@ -1,0 +1,205 @@
+---
+title: Cross-page Tour
+description: >-
+  Build a multi-page tour that navigates from /dashboard to /billing and
+  resumes on the right URL after a hard refresh, using the Next.js App
+  Router.
+howto: true
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+A complete example of a tour that spans two routes. Step 1 lives on `/dashboard`, step 2 on `/billing`. The provider auto-navigates between them, waits for each step's target to mount, and resumes on the correct URL if the user reloads mid-flight.
+
+## What You'll Build
+
+- A 2-step tour where each step is anchored to a different route
+- Automatic route change between steps via `routeChangeStrategy: 'auto'` (the default)
+- Hard-refresh resume — close the tab, come back, and the tour picks up where it left off, on the right URL
+- Typed error handling for missing targets
+
+---
+
+## Setup
+
+This example uses the [Next.js App Router adapter](/docs/guides/router-integration#nextjs-app-router). The same patterns apply to [Pages Router](/docs/guides/router-integration#nextjs-pages-router) and [React Router](/docs/guides/router-integration#react-router-v6).
+
+```bash
+npm install @tour-kit/react @tour-kit/core
+```
+
+---
+
+## Provider
+
+Wrap your app with `TourProvider`, pass the router adapter, and enable the flow session for hard-refresh resume.
+
+```tsx title="app/providers.tsx"
+'use client'
+
+import { TourProvider, type TourRouteError } from '@tour-kit/core'
+import { useNextAppRouter } from '@tour-kit/react'
+import type { ReactNode } from 'react'
+
+export function Providers({ children }: { children: ReactNode }) {
+  const router = useNextAppRouter()
+
+  return (
+    <TourProvider
+      tours={[crossPageTour]}
+      router={router}
+      routePersistence={{
+        enabled: true,
+        flowSession: { storage: 'sessionStorage' },
+      }}
+      onStepError={(err: TourRouteError) => {
+        // err.code === 'TARGET_NOT_FOUND' when the step's target never
+        // appeared on the new route within 3000ms.
+        console.warn('[tour]', err.code, err.route, err.selector)
+      }}
+    >
+      {children}
+    </TourProvider>
+  )
+}
+```
+
+<Callout type="info">
+  `useSearchParams()` consumers in App Router prerender must be wrapped in
+  `<Suspense fallback={null}>`. This example does not use search params, so
+  no Suspense boundary is required for the tour itself — only for any other
+  client component that calls `useSearchParams()`.
+</Callout>
+
+---
+
+## Tour Definition
+
+```tsx title="tours/cross-page.ts"
+import { createTour, createStep } from '@tour-kit/core'
+
+export const crossPageTour = createTour({
+  id: 'cross-page',
+  steps: [
+    createStep({
+      id: 'welcome',
+      target: '#dashboard-stats',
+      route: '/dashboard',
+      title: 'Your dashboard',
+      content: 'Stats and recent activity live here.',
+    }),
+    createStep({
+      id: 'billing',
+      target: '#billing-summary',
+      route: '/billing',
+      // 'auto' is the default — the provider will navigate to /billing,
+      // wait up to 3 seconds for #billing-summary to mount, then advance.
+      routeChangeStrategy: 'auto',
+      title: 'Billing',
+      content: 'Manage your plan and invoices.',
+    }),
+  ],
+})
+```
+
+---
+
+## Routes
+
+Each route renders the step's target. Anything that mounts the element with the right id (or a ref-based target) works.
+
+<Tabs items={['Dashboard route', 'Billing route']}>
+<Tab value="Dashboard route">
+
+```tsx title="app/dashboard/page.tsx"
+export default function DashboardPage() {
+  return (
+    <main>
+      <section id="dashboard-stats">
+        <h2>Stats</h2>
+        {/* ... */}
+      </section>
+    </main>
+  )
+}
+```
+
+</Tab>
+<Tab value="Billing route">
+
+```tsx title="app/billing/page.tsx"
+export default function BillingPage() {
+  return (
+    <main>
+      <section id="billing-summary">
+        <h2>Billing</h2>
+        {/* ... */}
+      </section>
+    </main>
+  )
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## How It Works
+
+1. The user starts the tour on `/dashboard`. Step 1 mounts immediately because its target is on the page.
+2. They click **Next**. The provider sees step 2's `route: '/billing'` and the current route is `/dashboard`.
+3. With `routeChangeStrategy: 'auto'`, the provider:
+   1. Calls `router.push('/billing')`
+   2. Awaits `#billing-summary` via a `MutationObserver` (3000 ms default)
+   3. Dispatches `GO_TO_STEP` once the target appears
+4. If the user hard-refreshes mid-flight, the [flow session](/docs/guides/persistence) writes both `stepIndex` and `currentRoute` — on remount the provider navigates back to `/billing` and resumes step 2.
+
+---
+
+## Failure Modes
+
+| Failure | What you see | How to handle |
+| --- | --- | --- |
+| Target never mounts on `/billing` | `onStepError(err)` fires with `err.code === 'TARGET_NOT_FOUND'`; tour stops | Log to analytics; verify the route renders the element |
+| Browser denies navigation | `TourRouteError({ code: 'NAVIGATION_REJECTED' })` | Surface a fallback UI and ask the user to navigate manually |
+| User hits Esc mid-wait | The provider's `AbortController` cancels the wait silently | No callback fires — tour stays paused on the previous step |
+
+---
+
+## Customizing the Strategy
+
+If you want to confirm before navigating, switch to `'prompt'`:
+
+```tsx
+createStep({
+  id: 'billing',
+  route: '/billing',
+  target: '#billing-summary',
+  routeChangeStrategy: 'prompt',
+  // ...
+})
+```
+
+```tsx title="app/providers.tsx"
+<TourProvider
+  tours={[crossPageTour]}
+  router={router}
+  onNavigationRequired={(route, stepId) => {
+    // Surface a `<TourRoutePrompt>` or your own confirm UI here.
+    if (confirm(`Continue to ${route}?`)) {
+      router.push(route)
+    }
+  }}
+/>
+```
+
+For tours that should never navigate automatically, use `'manual'` and call `useTourRoute().goToStepRoute()` from your own UI.
+
+---
+
+## Related Guides
+
+- [Router integration](/docs/guides/router-integration) — adapter setup for Next.js, React Router, and custom routers
+- [Persistence](/docs/guides/persistence) — flow session storage and hard-refresh resume
