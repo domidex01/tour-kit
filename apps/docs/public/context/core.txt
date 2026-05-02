@@ -81,6 +81,7 @@ Types:
     LoggerConfig
     ThrottledFunction
     ThrottledFunctionWithFlush
+    WaitForStepTargetOptions
     UnifiedSlotProps
     RenderProp
     UILibrary
@@ -113,6 +114,7 @@ Components:
     TourContext
     TourProvider
     TourValidationError
+    TourRouteError
     UnifiedSlot
     UILibraryProvider
 
@@ -176,9 +178,23 @@ Utilities:
     throttleLeading
     cn
     validateTour
+    waitForStepTarget
 
 TYPES
 -----
+
+    export interface WaitForStepTargetOptions {
+      /** Route the navigation just landed on — included in the error for diagnostics. */
+      route: string
+      /** Reject after this many ms (default: 3000). */
+      timeoutMs?: number
+      /**
+       * Optional cancellation. When aborted, the wait rejects with
+       * `Error('aborted')` — NOT a `TourRouteError`. Distinct semantics so
+       * `onStepError` can stay scoped to "target missing" failures.
+       */
+      signal?: AbortSignal
+    }
 
     export interface UnifiedSlotProps {
       children: ReactNode | RenderProp
@@ -223,6 +239,7 @@ COMPONENTS
     <TourContext />
     <TourProvider />
     <TourValidationError />
+    <TourRouteError />
     <UnifiedSlot />
     <UILibraryProvider />
 

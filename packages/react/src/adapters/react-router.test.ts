@@ -1,4 +1,6 @@
-import { renderHook } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
+import { TourProvider, type TourRouteError, useTour } from '@tour-kit/core'
+import * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createReactRouterAdapter } from './react-router'
 
@@ -540,5 +542,187 @@ describe('useReactRouter (direct hook)', () => {
       // The _useReactRouter variable caches the adapter factory
       expect(true).toBe(true) // Placeholder - see integration tests
     })
+  })
+})
+
+// -----------------------------------------------------------------------------
+// Phase 1.3 — Cross-page tour integration with TourProvider (React Router)
+// -----------------------------------------------------------------------------
+//
+// React Router runs synchronously inside `act()`. We mock `useNavigate` /
+// `useLocation` directly rather than using `<MemoryRouter>` so the test
+// stays a pure unit/integration boundary on the adapter — no real Routes,
+// no link/route-component wiring. The adapter doesn't care whether a real
+// router is mounted; it only consumes the two hooks.
+
+describe('cross-page (React Router) — Phase 1.3', () => {
+  function makeAdapter(initialPath = '/') {
+    const state = { path: initialPath }
+    const navigate = vi.fn((to: string) => {
+      state.path = to
+      // Synchronous mount — React Router's transition is sync inside act.
+      const t = document.createElement('div')
+      t.id = 'billing-target'
+      document.body.appendChild(t)
+    })
+    const useLocation = (() => ({ pathname: state.path })) as () => { pathname: string }
+    const useNavigate = (() => navigate) as () => (to: string) => void
+    return {
+      useAdapter: createReactRouterAdapter(useLocation, useNavigate),
+      navigate,
+      state,
+    }
+  }
+
+  function makeTours(strategy: 'auto' | 'prompt' | 'manual' = 'auto') {
+    return [
+      {
+        id: 't',
+        steps: [
+          { id: 'a', target: '#dashboard-target', content: 'A' },
+          {
+            id: 'b',
+            route: '/billing',
+            target: '#billing-target',
+            content: 'B',
+            routeChangeStrategy: strategy,
+          },
+        ],
+      },
+    ]
+  }
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="dashboard-target"></div>'
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it("'auto' strategy: navigate, target mounts, advance to step 2 (US-1)", async () => {
+    const { useAdapter, navigate } = makeAdapter('/')
+    const tours = makeTours('auto')
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      const adapter = useAdapter()
+      return React.createElement(TourProvider, { tours, router: adapter, children })
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      await result.current.start('t')
+    })
+    await act(async () => {
+      await result.current.next()
+    })
+
+    expect(navigate).toHaveBeenCalledWith('/billing')
+    expect(result.current.currentStepIndex).toBe(1)
+  })
+
+  it("'prompt' strategy: fires onNavigationRequired, no navigate, no advance (US-3)", async () => {
+    const { useAdapter, navigate } = makeAdapter('/')
+    const tours = makeTours('prompt')
+    const onNavigationRequired = vi.fn()
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      const adapter = useAdapter()
+      return React.createElement(TourProvider, {
+        tours,
+        router: adapter,
+        onNavigationRequired,
+        children,
+      })
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      await result.current.start('t')
+    })
+    await act(async () => {
+      await result.current.next()
+    })
+
+    expect(onNavigationRequired).toHaveBeenCalledWith('/billing', 'b')
+    expect(navigate).not.toHaveBeenCalled()
+    expect(result.current.currentStepIndex).toBe(0)
+  })
+
+  it("'manual' strategy: no navigate, no advance (US-3)", async () => {
+    const { useAdapter, navigate } = makeAdapter('/')
+    const tours = makeTours('manual')
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      const adapter = useAdapter()
+      return React.createElement(TourProvider, { tours, router: adapter, children })
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      await result.current.start('t')
+    })
+    await act(async () => {
+      await result.current.next()
+    })
+
+    expect(navigate).not.toHaveBeenCalled()
+    expect(result.current.currentStepIndex).toBe(0)
+  })
+
+  it("'auto' strategy: target never mounts → onStepError, STOP_TOUR (US-2)", async () => {
+    const state = { path: '/' }
+    const navigate = vi.fn((to: string) => {
+      state.path = to
+    })
+    const useLocation = (() => ({ pathname: state.path })) as () => { pathname: string }
+    const useNavigate = (() => navigate) as () => (to: string) => void
+    const useAdapter = createReactRouterAdapter(useLocation, useNavigate)
+
+    const tours = [
+      {
+        id: 't',
+        steps: [
+          { id: 'a', target: '#dashboard-target', content: 'A' },
+          {
+            id: 'b',
+            route: '/billing',
+            target: '#billing-target',
+            content: 'B',
+            routeChangeStrategy: 'auto' as const,
+            waitTimeout: 50,
+          },
+        ],
+      },
+    ]
+    const onStepError = vi.fn()
+
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      const adapter = useAdapter()
+      return React.createElement(TourProvider, {
+        tours,
+        router: adapter,
+        onStepError,
+        children,
+      })
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      await result.current.start('t')
+    })
+    await act(async () => {
+      await result.current.next()
+      await new Promise((resolve) => setTimeout(resolve, 80))
+    })
+
+    expect(navigate).toHaveBeenCalledWith('/billing')
+    expect(onStepError).toHaveBeenCalledTimes(1)
+    const [err] = onStepError.mock.calls[0] as [TourRouteError]
+    expect(err.name).toBe('TourRouteError')
+    expect(err.code).toBe('TARGET_NOT_FOUND')
+    expect(err.route).toBe('/billing')
+    expect(err.selector).toBe('#billing-target')
+    expect(result.current.isActive).toBe(false)
   })
 })
