@@ -3,6 +3,7 @@ import { useAdvanceOn } from '../hooks/use-advance-on'
 import { useBroadcast } from '../hooks/use-broadcast'
 import { useFlowSession } from '../hooks/use-flow-session'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
+import { TourValidationError, runHiddenStep, validateTour } from '../lib/validate-tour'
 import type {
   BranchContext,
   BranchTarget,
@@ -25,6 +26,9 @@ import { waitForElement } from '../utils/dom'
 import { logger } from '../utils/logger'
 import { TourContext } from './tour-context'
 import { TourKitContext } from './tourkit-context'
+
+/** Maximum hidden-step chain length before throwing HIDDEN_STEP_LOOP. */
+const MAX_HIDDEN_CHAIN = 50
 
 /**
  * Helper to perform route navigation and wait for target element
@@ -377,6 +381,12 @@ export function TourProvider({
   onNavigationRequired,
   onTourPaused,
 }: TourProviderProps) {
+  // Validate synchronously at render time so misconfigured hidden steps throw
+  // at the caller's render() instead of leaking into runtime. Cheap: just a
+  // shallow loop over the steps. Must run before any hook so a thrown error
+  // doesn't leave React with a partial hook order.
+  for (const tour of tours) validateTour(tour)
+
   const tourKitContext = React.useContext(TourKitContext)
   const [data, setDataState] = React.useState<Record<string, unknown>>({})
   const { save, load, clear, externalVersion } = useRoutePersistence(routePersistence)
@@ -579,30 +589,103 @@ export function TourProvider({
     })
   }, [broadcast, tabId])
 
-  // Route-aware step navigation helper
-  const navigateToStep = React.useCallback(
-    async (stepIndex: number): Promise<boolean> => {
-      const step = currentTour?.steps[stepIndex]
-      const { needed } = isNavigationNeeded(step, router)
+  // setData is hoisted above navigateToStep so the hidden-step branch
+  // resolver can access it without depending on a later closure.
+  const setData = React.useCallback((key: string, value: unknown) => {
+    setDataState((prev) => ({ ...prev, [key]: value }))
+  }, [])
 
-      // No navigation needed - just go to step
-      if (!needed || !step?.route || !router) {
+  // Run a hidden step's lifecycle and compute the next cursor. Returns
+  // either the next step index, or 'terminate' (caller should stop the
+  // chain by walking past end of steps array).
+  const advancePastHiddenStep = React.useCallback(
+    async (
+      step: TourStep,
+      cursor: number,
+      tour: Tour,
+      stepIdLookup: Map<string, number>
+    ): Promise<number | 'terminate'> => {
+      const baseCtx = buildCallbackContext(state, tour, data)
+      const stepCtx: TourCallbackContext = {
+        ...baseCtx,
+        currentStepIndex: cursor,
+        currentStep: step,
+      }
+      await runHiddenStep(step, stepCtx)
+
+      if (step.onNext === undefined || step.onNext === null) {
+        return cursor + 1
+      }
+
+      const branchCtx: BranchContext = { ...stepCtx, setData }
+      const target = await resolveBranch(step.onNext, branchCtx)
+
+      if (target === 'complete' || target === 'skip') {
+        return 'terminate'
+      }
+
+      const idx = resolveTargetToIndex(target, cursor, stepIdLookup, tour.steps.length)
+      // Unmappable target (BranchToTour, BranchWait, etc.) — fall back to +1.
+      return idx ?? cursor + 1
+    },
+    [state, data, setData]
+  )
+
+  // Route-aware step navigation. Walks past hidden steps (firing their
+  // `onEnter`/`onShow` lifecycle) until a mountable step is reached, then
+  // dispatches GO_TO_STEP. Throws TourValidationError on hidden-step loops.
+  const navigateToStep = React.useCallback(
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: hidden-traversal + route navigation in one orchestrator
+    async (stepIndex: number): Promise<boolean> => {
+      if (!currentTour) {
         dispatch({ type: 'GO_TO_STEP', stepIndex })
         return true
       }
 
-      // Navigation needed but auto-navigate is off
-      if (!autoNavigate) {
-        onNavigationRequired?.(step.route, step.id)
-        return false
+      const localStepIdMap = new Map<string, number>()
+      currentTour.steps.forEach((s, i) => localStepIdMap.set(s.id, i))
+
+      let cursor = stepIndex
+      for (let chain = 0; chain <= MAX_HIDDEN_CHAIN; chain++) {
+        const step = currentTour.steps[cursor]
+        if (!step) {
+          dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
+          return false
+        }
+
+        if (step.kind !== 'hidden') {
+          const { needed } = isNavigationNeeded(step, router)
+          if (!needed || !step.route || !router) {
+            dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
+            return true
+          }
+          if (!autoNavigate) {
+            onNavigationRequired?.(step.route, step.id)
+            return false
+          }
+          await performRouteNavigation(router, step, step.route)
+          dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
+          return true
+        }
+
+        const next = await advancePastHiddenStep(step, cursor, currentTour, localStepIdMap)
+        if (next === 'terminate') {
+          // Walk past end so caller's outer flow can handle complete/skip.
+          dispatch({ type: 'GO_TO_STEP', stepIndex: currentTour.steps.length })
+          return false
+        }
+        cursor = next
       }
 
-      // Perform navigation
-      await performRouteNavigation(router, step, step.route)
-      dispatch({ type: 'GO_TO_STEP', stepIndex })
-      return true
+      // Loop guard: hidden chain exceeded the maximum.
+      const stuckStep = currentTour.steps[cursor]
+      throw new TourValidationError({
+        code: 'HIDDEN_STEP_LOOP',
+        stepId: stuckStep?.id ?? '?',
+        message: `Hidden-step chain exceeded ${MAX_HIDDEN_CHAIN} iterations${stuckStep ? ` at step "${stuckStep.id}"` : ''}. Likely an infinite loop.`,
+      })
     },
-    [currentTour, router, autoNavigate, onNavigationRequired]
+    [currentTour, router, autoNavigate, onNavigationRequired, advancePastHiddenStep]
   )
 
   // Step ID to index map for branch resolution
@@ -625,7 +708,7 @@ export function TourProvider({
         setData,
       }
     },
-    [state, currentTour, data]
+    [state, currentTour, data, setData]
   )
 
   // Helper to complete the current tour. Idempotent across both stale-closure
@@ -1080,10 +1163,6 @@ export function TourProvider({
 
   const reset = React.useCallback((tourId?: string) => {
     dispatch({ type: 'RESET', tourId })
-  }, [])
-
-  const setData = React.useCallback((key: string, value: unknown) => {
-    setDataState((prev) => ({ ...prev, [key]: value }))
   }, [])
 
   // Navigate to a step by its ID

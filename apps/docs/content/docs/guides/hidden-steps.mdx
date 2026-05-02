@@ -1,0 +1,227 @@
+---
+title: Hidden Steps
+description: >-
+  Run branching logic, trait forks, and completion gates without mounting any
+  UI by marking a step as hidden.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Hidden steps execute lifecycle callbacks (`onEnter`, `onShow`) and branching logic (`onNext`) **without mounting a card or tooltip**. Use them to insert headless decision logic between visible steps.
+
+## When to Use Hidden Steps
+
+- **Trait fork** — branch on a feature flag, plan tier, or user role.
+- **Completion gate** — auto-complete a tour when a condition is met.
+- **Conditional skip** — choose between two visible paths without a "decision" UI.
+- **Side-effect gate** — fire analytics, prefetch data, or check auth before continuing.
+
+For visible decision points (where the user picks the path), see [Branching Tours](./branching).
+
+---
+
+## Anatomy of a Hidden Step
+
+```tsx
+import type { Tour } from '@tour-kit/core';
+
+const tour: Tour = {
+  id: 'onboarding',
+  steps: [
+    { id: 'welcome', target: '#hero', content: 'Welcome!' },
+    {
+      id: 'fork',
+      kind: 'hidden',
+      onEnter: async (ctx) => {
+        // Side effects, prefetches, analytics, etc.
+      },
+      onNext: (ctx) => {
+        const plan = ctx.data.plan ?? 'free';
+        return plan === 'enterprise' ? 'enterprise-step' : 'free-step';
+      },
+    },
+    { id: 'free-step', target: '#free-card', content: 'Free plan tips.' },
+    { id: 'enterprise-step', target: '#ent-card', content: 'Enterprise tools.' },
+  ],
+};
+```
+
+When `next()` is called from `welcome`, the provider:
+
+1. Walks past `fork` (no DOM mounted).
+2. Awaits `fork.onEnter`.
+3. Awaits `fork.onShow` (legacy compatibility).
+4. Resolves `fork.onNext` to either `free-step` or `enterprise-step`.
+5. Mounts the resolved visible step.
+
+`screen.queryByRole('dialog')` returns `null` throughout — there is no transient UI.
+
+---
+
+## Forbidden Fields
+
+Hidden steps must not declare any UI-shape fields. The provider validates this at mount and throws `TourValidationError` immediately if violated.
+
+| Field | Why it's forbidden |
+|---|---|
+| `target` | No element to anchor to. |
+| `content` | No card to render. |
+| `title` | No card to render. |
+| `placement` | No popover to position. |
+| `advanceOn` | No DOM event to listen for. |
+
+```tsx
+// ❌ This throws at mount
+const bad: Tour = {
+  id: 't',
+  steps: [
+    { id: 'fork', kind: 'hidden', target: '#x', content: 'oops' },
+  ],
+};
+
+// ✅ Wrap rendering in a try/catch or error boundary
+try {
+  render(<TourProvider tours={[bad]}>...</TourProvider>);
+} catch (err) {
+  if (err instanceof TourValidationError) {
+    console.error(err.code);   // 'INVALID_HIDDEN_STEP'
+    console.error(err.stepId); // 'fork'
+  }
+}
+```
+
+<Callout type="warn">
+Validation runs synchronously at the top of `<TourProvider>`'s render, before any hook runs. Errors surface to the caller's `render()` — wire an error boundary if you want to display a friendly fallback.
+</Callout>
+
+---
+
+## Lifecycle Order
+
+Hidden steps invoke callbacks in this order:
+
+1. `onEnter(ctx)` — pre-mount hook. New in this release. Available on visible steps too.
+2. `onShow(ctx)` — legacy hook. Fires on hidden steps for backwards compat.
+3. `onNext` resolution — branch target is computed and the cursor advances.
+
+Both `onEnter` and `onShow` receive a `TourCallbackContext`. Branch resolvers (`onNext` as a function) additionally receive `setData` via `BranchContext`.
+
+---
+
+## Trait Fork Example
+
+```tsx
+import { useTour } from '@tour-kit/react';
+import type { Tour } from '@tour-kit/core';
+
+const tour: Tour = {
+  id: 'plan-onboarding',
+  steps: [
+    { id: 'intro', target: '#intro', content: 'Set up your workspace.' },
+    {
+      id: 'detect-plan',
+      kind: 'hidden',
+      onEnter: async (ctx) => {
+        // Mutate state during onNext (BranchContext exposes setData)
+      },
+      onNext: async (ctx) => {
+        const tier = await fetchUserPlan();
+        ctx.setData('plan', tier);
+        return tier === 'enterprise' ? 'team-setup' : 'solo-setup';
+      },
+    },
+    { id: 'solo-setup',  target: '#solo',  content: 'Configure your account.' },
+    { id: 'team-setup',  target: '#teams', content: 'Invite teammates.' },
+  ],
+};
+```
+
+---
+
+## Completion Gate
+
+Use a hidden step at the end to auto-complete when a condition is met:
+
+```tsx
+const tour: Tour = {
+  id: 'checklist-tour',
+  steps: [
+    { id: 'task-1', target: '#t1', content: 'Step 1.' },
+    { id: 'task-2', target: '#t2', content: 'Step 2.' },
+    {
+      id: 'gate',
+      kind: 'hidden',
+      onNext: (ctx) =>
+        ctx.data.allTasksDone ? 'complete' : 'task-1',
+    },
+  ],
+};
+```
+
+---
+
+## Loop Guard
+
+A hidden step that branches to itself (or to another hidden step that branches back) creates an infinite loop. The provider guards against this by counting hidden-step iterations within a single navigation; after **50 iterations** it throws:
+
+```ts
+new TourValidationError({
+  code: 'HIDDEN_STEP_LOOP',
+  stepId: '<offending step id>',
+  message: 'Hidden-step chain exceeded 50 iterations …',
+});
+```
+
+Catch and recover:
+
+```tsx
+try {
+  await tour.next();
+} catch (err) {
+  if (err instanceof TourValidationError && err.code === 'HIDDEN_STEP_LOOP') {
+    // Surface a "tour misconfigured" toast or log to telemetry
+  }
+}
+```
+
+---
+
+## Persistence Behavior
+
+Hidden steps **never settle as `currentStep`** — the auto-advance walks past them before the reducer dispatches `GO_TO_STEP`. As a consequence:
+
+- `routePersistence` and `flowSession` never save a hidden step's index.
+- A hard reload resumes at the last *mountable* step.
+- `useTourRoute` defensively returns `currentStepRoute === undefined` if a hidden step is somehow current (shouldn't happen via the public API).
+
+---
+
+## Common Patterns
+
+| Pattern | Recipe |
+|---|---|
+| Skip-if | Hidden step with `onNext` returning either the next visible step id or `'complete'`. |
+| A/B fork | Hidden step with `onNext` reading from `ctx.data` to pick a branch. |
+| Side-effect | Hidden step with `onEnter` firing analytics; `onNext` falls through to default `+1`. |
+| Tour A → B handoff | Hidden step with `onNext` returning `{ tour: 'next-tour', step: 'start' }`. |
+
+---
+
+## API Summary
+
+```ts
+interface TourStep {
+  /** @default 'visible' */
+  kind?: 'visible' | 'hidden';
+  /** Runs before the step mounts (visible) or auto-advances (hidden). */
+  onEnter?: (context: TourCallbackContext) => void | Promise<void>;
+  // ... other fields
+}
+
+class TourValidationError extends Error {
+  readonly code: 'INVALID_HIDDEN_STEP' | 'HIDDEN_STEP_LOOP';
+  readonly stepId: string;
+}
+
+function validateTour(tour: Tour): void;
+```

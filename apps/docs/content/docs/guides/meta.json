@@ -8,6 +8,7 @@
     "accessibility",
     "animations",
     "branching",
+    "hidden-steps",
     "persistence",
     "multi-tab",
     "router-integration",

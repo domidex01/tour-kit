@@ -40,6 +40,8 @@ Types:
     SpotlightConfig
     Storage
     PersistenceConfig
+    FlowSessionConfig
+    CrossTabConfig
     A11yConfig
     ScrollConfig
     Direction
@@ -70,6 +72,9 @@ Types:
     UseFocusTrapReturn
     UsePersistenceReturn
     UseRoutePersistenceReturn
+    UseFlowSessionConfig
+    UseFlowSessionReturn
+    UseBroadcastReturn
     UseAdvanceOnOptions
     PositionResult
     LogLevel
@@ -96,6 +101,8 @@ Hooks:
     useMediaQuery
     usePrefersReducedMotion
     useRoutePersistence
+    useFlowSession
+    useBroadcast
     useAdvanceOn
     useBranch
     useUILibrary — Hook to get the current UI library setting
@@ -105,6 +112,7 @@ Components:
     TourKitProvider
     TourContext
     TourProvider
+    TourValidationError
     UnifiedSlot
     UILibraryProvider
 
@@ -167,6 +175,7 @@ Utilities:
     throttleTime
     throttleLeading
     cn
+    validateTour
 
 TYPES
 -----
@@ -201,6 +210,8 @@ HOOKS
     useMediaQuery(...)
     usePrefersReducedMotion(...)
     useRoutePersistence(...)
+    useFlowSession(...)
+    useBroadcast(...)
     useAdvanceOn(...)
     useBranch(...)
     useUILibrary(): UILibrary
@@ -211,6 +222,7 @@ COMPONENTS
     <TourKitProvider />
     <TourContext />
     <TourProvider />
+    <TourValidationError />
     <UnifiedSlot />
     <UILibraryProvider />
 

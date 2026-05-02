@@ -8,6 +8,18 @@ import type { TourCallbackContext } from './state'
  */
 export interface TourStep {
   id: string
+  /**
+   * Step kind. Hidden steps run lifecycle callbacks (`onEnter`, `onShow`) and
+   * branching logic (`onNext`) without mounting a DOM element. Useful for
+   * trait-based forks or completion gates.
+   *
+   * Hidden steps must NOT declare any of `target`, `content`, `title`,
+   * `placement`, or `advanceOn` — `validateTour` throws at provider mount
+   * otherwise.
+   *
+   * @default 'visible'
+   */
+  kind?: 'visible' | 'hidden'
   target: string | React.RefObject<HTMLElement | null>
   title?: React.ReactNode
   content: React.ReactNode
@@ -36,6 +48,8 @@ export interface TourStep {
   onBeforeShow?: (
     context: TourCallbackContext
   ) => boolean | undefined | Promise<boolean | undefined>
+  /** Runs before the step mounts (visible) or auto-advances (hidden). */
+  onEnter?: (context: TourCallbackContext) => void | Promise<void>
   onShow?: (context: TourCallbackContext) => void
   onBeforeHide?: (
     context: TourCallbackContext
