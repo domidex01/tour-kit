@@ -655,6 +655,67 @@ async function loadWithMigration(key: string) {
 
 ---
 
+## Flow Session
+
+`useFlowSession` is a tour-scoped session — it remembers **which tour the user was in and what step they reached**, so a hard reload puts them back exactly where they were. It runs in parallel with `useRoutePersistence` (which handles multi-tour, cross-route state) but takes a different shape:
+
+| Concern | `useRoutePersistence` | `useFlowSession` |
+|---|---|---|
+| Scope | All tours, all routes | The single active tour |
+| Use case | "Continue this tour after I navigate" | "Resume this tour after I refresh" |
+| Default storage | `localStorage` | `sessionStorage` (per-tab) |
+| TTL | 24h (configurable) | 1h sessionStorage / 24h localStorage |
+| Storage key | `tourkit-route-state` | `tourkit:flow:active` |
+
+It's **opt-in** via `routePersistence.flowSession`. Existing apps that don't pass the field keep their current behavior bit-for-bit.
+
+### Quick start
+
+```tsx title="Reload-resume tour"
+import { TourProvider } from '@tour-kit/core'
+
+<TourProvider
+  tours={[onboardingTour]}
+  routePersistence={{
+    enabled: true,
+    flowSession: { storage: 'sessionStorage' },
+  }}
+>
+  {children}
+</TourProvider>
+```
+
+That's it — start a tour, hard-reload the page, and it resumes at the same step. Saves are throttled (200ms trailing edge) so a rapid burst of step changes coalesces into one storage write per window.
+
+### Choosing storage
+
+- **`sessionStorage` (default)** — perfect for the common "user accidentally hit refresh" case. Cleared automatically when the tab closes.
+- **`localStorage`** — survives a full browser quit. **Pair it with `crossTab.enabled: true`** (see [Multi-tab Tours](/docs/guides/multi-tab)) so a tour explicitly closed in one tab doesn't reappear when another tab reloads.
+
+```tsx title="Cross-session resume"
+<TourProvider
+  routePersistence={{
+    enabled: true,
+    flowSession: { storage: 'localStorage', ttlMs: 12 * 60 * 60 * 1000 }, // 12h
+    crossTab: { enabled: true },
+  }}
+>
+```
+
+### TTL & expiry
+
+Stale sessions are filtered on read — `useFlowSession` checks `Date.now() - lastUpdatedAt > ttlMs` and removes the blob if it's expired. Defaults: **1 hour** for `sessionStorage`, **24 hours** for `localStorage`. Pass `ttlMs: 0` to disable expiry.
+
+### Failure modes
+
+`useFlowSession` is designed not to crash the tour:
+
+- **Quota exceeded** — `setItem` errors are caught, logged via `logger.warn`, and swallowed.
+- **Stale schema** — a blob written by an older app version (different shape, missing fields, wrong `schemaVersion`) parses to `null`; the bad blob is removed and the next save writes fresh.
+- **SSR** — when `window` is undefined the hook returns no-op `save` / `clear` and `session: null`.
+
+---
+
 ## Best Practices
 
 1. **Use consistent prefixes** - Namespace all keys to avoid collisions
@@ -671,5 +732,6 @@ async function loadWithMigration(key: string) {
 - [usePersistence Hook](/docs/core/hooks/use-persistence)
 - [useRoutePersistence Hook](/docs/core/hooks/use-route-persistence)
 - [useChecklistPersistence Hook](/docs/checklists/hooks/use-checklist-persistence)
+- [Multi-tab Tours](/docs/guides/multi-tab)
 - [Storage Utilities](/docs/core/utilities/storage)
 - [Announcement Frequency Rules](/docs/announcements/configuration/frequency)

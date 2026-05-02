@@ -1,5 +1,7 @@
 import * as React from 'react'
 import { useAdvanceOn } from '../hooks/use-advance-on'
+import { useBroadcast } from '../hooks/use-broadcast'
+import { useFlowSession } from '../hooks/use-flow-session'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
 import type {
   BranchContext,
@@ -351,6 +353,19 @@ export interface TourProviderProps {
   autoNavigate?: boolean
   /** Callback when navigation is needed but autoNavigate is false */
   onNavigationRequired?: (route: string, stepId: string) => void
+  /**
+   * Called when the active tour is paused by an external signal.
+   * Currently the only `reason` is `'cross-tab'` (another tab posted
+   * `tour:active` on the cross-tab `BroadcastChannel`).
+   */
+  onTourPaused?: (tourId: string, reason: 'cross-tab') => void
+}
+
+interface CrossTabActiveMessage {
+  type: 'tour:active'
+  tourId: string
+  tabId: string
+  ts: number
 }
 
 export function TourProvider({
@@ -360,6 +375,7 @@ export function TourProvider({
   routePersistence = { enabled: false },
   autoNavigate = true,
   onNavigationRequired,
+  onTourPaused,
 }: TourProviderProps) {
   const tourKitContext = React.useContext(TourKitContext)
   const [data, setDataState] = React.useState<Record<string, unknown>>({})
@@ -383,6 +399,40 @@ export function TourProvider({
 
   const [state, dispatch] = React.useReducer(tourReducer, initialState)
 
+  // flowSession-restore: tour-scoped resume after reload. The hook uses a
+  // single fixed key (`flow:active`) so we discover the persisted tourId on
+  // mount without needing to know it up front; subsequent saves write the
+  // current state.tourId.
+  const flow = useFlowSession(
+    state.tourId ?? '',
+    routePersistence.flowSession
+      ? { ...routePersistence.flowSession, keyPrefix: routePersistence.key }
+      : undefined
+  )
+
+  const tabId = React.useMemo(
+    () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'ssr'),
+    []
+  )
+  const broadcast = useBroadcast<CrossTabActiveMessage>(
+    routePersistence.crossTab?.channel ?? 'tourkit:active-flow',
+    { enabled: !!routePersistence.crossTab?.enabled }
+  )
+
+  // Stable callback ref for cross-tab pause notification
+  const onTourPausedRef = React.useRef(onTourPaused)
+  React.useEffect(() => {
+    onTourPausedRef.current = onTourPaused
+  })
+
+  // Latest-state ref consumed by the cross-tab subscribe handler so it can
+  // read isActive/tourId at fire time without re-subscribing on every state
+  // change (which would risk dropping in-flight messages).
+  const currentActiveRef = React.useRef<{ isActive: boolean; tourId: string | null }>({
+    isActive: false,
+    tourId: null,
+  })
+
   // Idempotency guards: track the last tour for which the terminal callback
   // (onComplete / onSkip) has already fired. Prevents double-firing inside the
   // same React commit phase, where reducer state is still closure-stale.
@@ -398,10 +448,27 @@ export function TourProvider({
   // Get current tour
   const currentTour = state.tourId ? (state.tours.get(state.tourId) ?? null) : null
 
+  // flowSession-restore: takes precedence over useRoutePersistence — it's
+  // tour-scoped (single active tour) vs the route-state's multi-tour scope.
+  // Mount-only: read whatever flow:active blob exists and start that tour.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only flow restore
+  React.useEffect(() => {
+    if (!flow.session || flow.isStale) return
+    if (!tours.some((t) => t.id === flow.session!.tourId)) return
+    dispatch({
+      type: 'START_TOUR',
+      tourId: flow.session.tourId,
+      stepIndex: flow.session.stepIndex,
+    })
+  }, [])
+
   // Restore persisted state on mount — and re-run when another tab writes
   // (externalVersion bumps whenever `syncTabs` is on and the storage key changes).
   // biome-ignore lint/correctness/useExhaustiveDependencies: Only run on mount / external sync
   React.useEffect(() => {
+    // flowSession restore (above) wins — skip route restore if it already
+    // dispatched START_TOUR.
+    if (flow.session && !flow.isStale) return
     const persisted = load()
     if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) {
       dispatch({
@@ -417,6 +484,7 @@ export function TourProvider({
   // so we don't double-dispatch in the same mount batch.
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only autoStart trigger
   React.useEffect(() => {
+    if (flow.session && !flow.isStale) return
     const persisted = load()
     if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) return
     const auto = tours.find((t) => t.autoStart)
@@ -435,6 +503,64 @@ export function TourProvider({
       save(state)
     }
   }, [state.tourId, state.currentStepIndex, state.isActive, save, routePersistence.enabled])
+
+  // Throttled flowSession save on step change while active.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only save on tracked state transitions
+  React.useEffect(() => {
+    if (state.isActive && state.tourId && routePersistence.flowSession) {
+      flow.save(state.currentStepIndex)
+    }
+  }, [
+    state.currentStepIndex,
+    state.isActive,
+    state.tourId,
+    flow.save,
+    routePersistence.flowSession,
+  ])
+
+  // Clear flowSession blob when tour ends.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only react to isActive flip
+  React.useEffect(() => {
+    if (!state.isActive && routePersistence.flowSession) {
+      flow.clear()
+    }
+  }, [state.isActive])
+
+  // Keep the latest-state ref in sync (read by the cross-tab subscriber).
+  React.useEffect(() => {
+    currentActiveRef.current = { isActive: state.isActive, tourId: state.tourId }
+  })
+
+  // Cross-tab announce: whenever this tab activates a tour, post to the channel.
+  React.useEffect(() => {
+    if (state.isActive && state.tourId) {
+      broadcast.post({
+        type: 'tour:active',
+        tourId: state.tourId,
+        tabId,
+        ts: Date.now(),
+      })
+    }
+  }, [state.isActive, state.tourId, tabId, broadcast])
+
+  // Cross-tab subscribe: pause our active tour when another tab announces.
+  React.useEffect(() => {
+    return broadcast.subscribe((msg) => {
+      if (msg.type !== 'tour:active') return
+      if (msg.tabId === tabId) return
+      // Use functional access to current state via a ref-like read isn't
+      // available here; instead defer the pause condition to the dispatch
+      // by checking via a separate "is currently active" guard at fire time.
+      // We close over the latest state via the effect's identity (it
+      // re-subscribes when state.isActive flips), so this snapshot is
+      // sufficient for the pause-on-active gate.
+      const pausedTourId = currentActiveRef.current.tourId
+      if (currentActiveRef.current.isActive && pausedTourId) {
+        dispatch({ type: 'STOP_TOUR' })
+        onTourPausedRef.current?.(pausedTourId, 'cross-tab')
+      }
+    })
+  }, [broadcast, tabId])
 
   // Route-aware step navigation helper
   const navigateToStep = React.useCallback(

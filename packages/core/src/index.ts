@@ -19,6 +19,8 @@ export type {
   SpotlightConfig,
   Storage,
   PersistenceConfig,
+  FlowSessionConfig,
+  CrossTabConfig,
   A11yConfig,
   ScrollConfig,
   Direction,
@@ -76,6 +78,8 @@ export {
   useMediaQuery,
   usePrefersReducedMotion,
   useRoutePersistence,
+  useFlowSession,
+  useBroadcast,
   useAdvanceOn,
   dispatchAdvanceEvent,
   useBranch,
@@ -88,6 +92,9 @@ export type {
   UseFocusTrapReturn,
   UsePersistenceReturn,
   UseRoutePersistenceReturn,
+  UseFlowSessionConfig,
+  UseFlowSessionReturn,
+  UseBroadcastReturn,
   UseAdvanceOnOptions,
 } from './hooks'
 
