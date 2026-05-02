@@ -39,6 +39,8 @@ export interface RouterAdapter {
   onRouteChange(callback: (route: string) => void): () => void
 }
 
+import type { CrossTabConfig, FlowSessionConfig } from './config'
+
 /**
  * Multi-page persistence configuration.
  * Extends base PersistenceConfig with route-specific options.
@@ -54,4 +56,14 @@ export interface MultiPagePersistenceConfig {
   syncTabs?: boolean
   /** Expiry time in milliseconds (default: 24 hours) */
   expiryMs?: number
+  /**
+   * Active flow session — single tour at a time, scoped to one tab.
+   * When set, a hard reload resumes the active tour at its persisted step.
+   */
+  flowSession?: FlowSessionConfig
+  /**
+   * Cross-tab pause/resume gate (BroadcastChannel-based).
+   * Pauses the tour in this tab when another tab posts `tour:active`.
+   */
+  crossTab?: CrossTabConfig
 }

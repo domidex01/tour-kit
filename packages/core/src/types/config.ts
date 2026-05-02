@@ -65,6 +65,41 @@ export interface Storage {
 }
 
 /**
+ * Active flow session configuration — single tour at a time, scoped to one tab.
+ * Differs from `useRoutePersistence`, which is multi-tour cross-route state.
+ *
+ * @remarks
+ * Opt-in: undefined by default. When set, `useFlowSession` will persist the
+ * active tour's `(tourId, stepIndex)` so a hard reload resumes it in place.
+ */
+export interface FlowSessionConfig {
+  storage: 'sessionStorage' | 'localStorage'
+  /** TTL in ms. Default: 1h for sessionStorage, 24h for localStorage. */
+  ttlMs?: number
+  /**
+   * Storage key (under the configured `keyPrefix`).
+   * Default: `'flow:active'` — full key shape `${keyPrefix}:flow:active`.
+   * The persisted blob carries its own `tourId`, so a single fixed key is
+   * sufficient for the active-tour resume case (one active tour per tab).
+   */
+  key?: string
+}
+
+/**
+ * Cross-tab pause/resume gate (BroadcastChannel-based).
+ * Pauses the tour in this tab when another tab posts `tour:active`.
+ *
+ * @remarks
+ * Opt-in: undefined by default. Recommended when using `flowSession.storage = 'localStorage'`
+ * so a tour started in tab A doesn't double-show after the user closed it in tab B.
+ */
+export interface CrossTabConfig {
+  enabled: boolean
+  /** Channel name. Default: `'tourkit:active-flow'`. */
+  channel?: string
+}
+
+/**
  * Persistence configuration
  */
 export interface PersistenceConfig {
@@ -74,6 +109,16 @@ export interface PersistenceConfig {
   rememberStep?: boolean
   trackCompleted?: boolean
   dontShowAgain?: boolean
+  /**
+   * Active flow session — single tour at a time, scoped to one tab.
+   * Differs from `useRoutePersistence`, which is multi-tour cross-route state.
+   */
+  flowSession?: FlowSessionConfig
+  /**
+   * Cross-tab pause/resume gate (BroadcastChannel-based).
+   * Pauses tour in this tab when another tab posts `tour:active`.
+   */
+  crossTab?: CrossTabConfig
 }
 
 /**
@@ -140,8 +185,12 @@ export const defaultSpotlightConfig: Required<SpotlightConfig> = {
   clickToExit: false,
 }
 
-export const defaultPersistenceConfig: Required<Omit<PersistenceConfig, 'storage'>> & {
+export const defaultPersistenceConfig: Required<
+  Omit<PersistenceConfig, 'storage' | 'flowSession' | 'crossTab'>
+> & {
   storage: 'localStorage'
+  flowSession?: FlowSessionConfig
+  crossTab?: CrossTabConfig
 } = {
   enabled: true,
   storage: 'localStorage',

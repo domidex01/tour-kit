@@ -1,6 +1,10 @@
 import { act, renderHook } from '@testing-library/react'
+import type * as React from 'react'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { TourProvider } from '../../context/tour-provider'
 import { usePersistence } from '../../hooks/use-persistence'
+import { useTour } from '../../hooks/use-tour'
+import type { Tour } from '../../types'
 
 describe('usePersistence', () => {
   beforeEach(() => {
@@ -231,5 +235,47 @@ describe('usePersistence', () => {
     })
 
     expect(result.current.getLastStep('tour-1')).toBe(3)
+  })
+})
+
+// Backward-compat (US-4 — Phase 1.1): omitting flowSession/crossTab must
+// produce the same storage write set as before. We snapshot the sorted
+// localStorage keys after a 3-step provider run; any new key written by
+// the new code path will fail this snapshot.
+describe('TourProvider — backward-compat: no flowSession / crossTab opt-in (US-4)', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    sessionStorage.clear()
+  })
+
+  const tour: Tour = {
+    id: 'tour-1',
+    steps: [
+      { id: 's1', target: '#t1', content: 'Step 1' },
+      { id: 's2', target: '#t2', content: 'Step 2' },
+      { id: 's3', target: '#t3', content: 'Step 3' },
+    ],
+  }
+
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return <TourProvider tours={[tour]}>{children}</TourProvider>
+  }
+
+  it('writes no localStorage keys when routePersistence is unset', async () => {
+    const { result } = renderHook(() => useTour(), { wrapper: Wrapper })
+    await act(async () => {
+      result.current.start('tour-1')
+    })
+    await act(async () => {
+      result.current.next()
+    })
+    await act(async () => {
+      result.current.next()
+    })
+
+    const keys = Object.keys(localStorage).sort()
+    expect(keys).toEqual([])
+    const sessionKeys = Object.keys(sessionStorage).sort()
+    expect(sessionKeys).toEqual([])
   })
 })

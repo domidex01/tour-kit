@@ -1,5 +1,7 @@
 import * as React from 'react'
 import { useAdvanceOn } from '../hooks/use-advance-on'
+import { useBroadcast } from '../hooks/use-broadcast'
+import { useFlowSession } from '../hooks/use-flow-session'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
 import type {
   BranchContext,
@@ -351,6 +353,19 @@ export interface TourProviderProps {
   autoNavigate?: boolean
   /** Callback when navigation is needed but autoNavigate is false */
   onNavigationRequired?: (route: string, stepId: string) => void
+  /**
+   * Called when the active tour is paused by an external signal.
+   * Currently the only `reason` is `'cross-tab'` (another tab posted
+   * `tour:active` on the cross-tab `BroadcastChannel`).
+   */
+  onTourPaused?: (tourId: string, reason: 'cross-tab') => void
+}
+
+interface CrossTabActiveMessage {
+  type: 'tour:active'
+  tourId: string
+  tabId: string
+  ts: number
 }
 
 export function TourProvider({
@@ -360,6 +375,7 @@ export function TourProvider({
   routePersistence = { enabled: false },
   autoNavigate = true,
   onNavigationRequired,
+  onTourPaused,
 }: TourProviderProps) {
   const tourKitContext = React.useContext(TourKitContext)
   const [data, setDataState] = React.useState<Record<string, unknown>>({})
@@ -383,6 +399,45 @@ export function TourProvider({
 
   const [state, dispatch] = React.useReducer(tourReducer, initialState)
 
+  // flowSession-restore: tour-scoped resume after reload. The hook uses a
+  // single fixed key (`flow:active`) so we discover the persisted tourId on
+  // mount without needing to know it up front; subsequent saves write the
+  // current state.tourId.
+  const flow = useFlowSession(
+    state.tourId ?? '',
+    routePersistence.flowSession
+      ? { ...routePersistence.flowSession, keyPrefix: routePersistence.key }
+      : undefined
+  )
+
+  const tabId = React.useMemo(() => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID()
+    }
+    // Random-enough fallback for runtimes without crypto.randomUUID.
+    // A literal sentinel like 'ssr' would collide between tabs and silently
+    // disable the cross-tab self-message filter.
+    return `tab-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  }, [])
+  const broadcast = useBroadcast<CrossTabActiveMessage>(
+    routePersistence.crossTab?.channel ?? 'tourkit:active-flow',
+    { enabled: !!routePersistence.crossTab?.enabled }
+  )
+
+  // Stable callback ref for cross-tab pause notification
+  const onTourPausedRef = React.useRef(onTourPaused)
+  React.useEffect(() => {
+    onTourPausedRef.current = onTourPaused
+  })
+
+  // Latest-state ref consumed by the cross-tab subscribe handler so it can
+  // read isActive/tourId at fire time without re-subscribing on every state
+  // change (which would risk dropping in-flight messages).
+  const currentActiveRef = React.useRef<{ isActive: boolean; tourId: string | null }>({
+    isActive: false,
+    tourId: null,
+  })
+
   // Idempotency guards: track the last tour for which the terminal callback
   // (onComplete / onSkip) has already fired. Prevents double-firing inside the
   // same React commit phase, where reducer state is still closure-stale.
@@ -398,10 +453,28 @@ export function TourProvider({
   // Get current tour
   const currentTour = state.tourId ? (state.tours.get(state.tourId) ?? null) : null
 
+  // flowSession-restore: takes precedence over useRoutePersistence — it's
+  // tour-scoped (single active tour) vs the route-state's multi-tour scope.
+  // Mount-only: read whatever flow:active blob exists and start that tour.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only flow restore
+  React.useEffect(() => {
+    const restored = flow.session
+    if (!restored || flow.isStale) return
+    if (!tours.some((t) => t.id === restored.tourId)) return
+    dispatch({
+      type: 'START_TOUR',
+      tourId: restored.tourId,
+      stepIndex: restored.stepIndex,
+    })
+  }, [])
+
   // Restore persisted state on mount — and re-run when another tab writes
   // (externalVersion bumps whenever `syncTabs` is on and the storage key changes).
   // biome-ignore lint/correctness/useExhaustiveDependencies: Only run on mount / external sync
   React.useEffect(() => {
+    // flowSession restore (above) wins — skip route restore if it already
+    // dispatched START_TOUR.
+    if (flow.session && !flow.isStale) return
     const persisted = load()
     if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) {
       dispatch({
@@ -417,6 +490,7 @@ export function TourProvider({
   // so we don't double-dispatch in the same mount batch.
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only autoStart trigger
   React.useEffect(() => {
+    if (flow.session && !flow.isStale) return
     const persisted = load()
     if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) return
     const auto = tours.find((t) => t.autoStart)
@@ -435,6 +509,75 @@ export function TourProvider({
       save(state)
     }
   }, [state.tourId, state.currentStepIndex, state.isActive, save, routePersistence.enabled])
+
+  // Throttled flowSession save on step change while active. Deps are
+  // exhaustive — the throttle inside `flow.save` handles coalescing.
+  React.useEffect(() => {
+    if (state.isActive && state.tourId && routePersistence.flowSession) {
+      flow.save(state.currentStepIndex)
+    }
+  }, [
+    state.currentStepIndex,
+    state.isActive,
+    state.tourId,
+    flow.save,
+    routePersistence.flowSession,
+  ])
+
+  // Clear flowSession blob ONLY on a true → false transition (tour ended).
+  // The initial mount has `state.isActive === false`; without this guard
+  // we would wipe a freshly restored blob right after the restore effect
+  // dispatched START_TOUR (saved by the leading-edge throttle re-write,
+  // but fragile and an unnecessary storage churn).
+  const wasActiveRef = React.useRef(false)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only react to isActive flip
+  React.useEffect(() => {
+    if (wasActiveRef.current && !state.isActive && routePersistence.flowSession) {
+      flow.clear()
+    }
+    wasActiveRef.current = state.isActive
+  }, [state.isActive])
+
+  // Keep the latest-state ref in sync (read by the cross-tab subscriber).
+  React.useEffect(() => {
+    currentActiveRef.current = { isActive: state.isActive, tourId: state.tourId }
+  })
+
+  // Last-announce timestamp — also used as tie-breaker when two tabs
+  // simultaneously announce (e.g., both restoring from the same persisted
+  // session at cold start). The later announce wins; the earlier one yields.
+  const announceTsRef = React.useRef<number | null>(null)
+
+  // Cross-tab announce: whenever this tab activates a tour, post to the channel.
+  React.useEffect(() => {
+    if (state.isActive && state.tourId) {
+      announceTsRef.current = Date.now()
+      broadcast.post({
+        type: 'tour:active',
+        tourId: state.tourId,
+        tabId,
+        ts: announceTsRef.current,
+      })
+    }
+  }, [state.isActive, state.tourId, tabId, broadcast])
+
+  // Cross-tab subscribe: pause our active tour when another tab announces.
+  React.useEffect(() => {
+    return broadcast.subscribe((msg) => {
+      if (msg.type !== 'tour:active') return
+      if (msg.tabId === tabId) return
+      const pausedTourId = currentActiveRef.current.tourId
+      if (!currentActiveRef.current.isActive || !pausedTourId) return
+      // Tie-break: if we announced AFTER the incoming message, we are the
+      // newer owner and should keep running. Otherwise yield. Without this,
+      // two tabs cold-restoring the same flow.session at the same instant
+      // pause each other and the user sees no tour anywhere.
+      const myTs = announceTsRef.current
+      if (myTs !== null && myTs > msg.ts) return
+      dispatch({ type: 'STOP_TOUR' })
+      onTourPausedRef.current?.(pausedTourId, 'cross-tab')
+    })
+  }, [broadcast, tabId])
 
   // Route-aware step navigation helper
   const navigateToStep = React.useCallback(

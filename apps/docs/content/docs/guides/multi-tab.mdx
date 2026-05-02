@@ -1,0 +1,170 @@
+---
+title: Multi-tab Tours
+description: >-
+  Pause an active tour in tab B when the user starts the same flow in tab A —
+  cross-tab coordination via BroadcastChannel.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+A user with five tabs open is still one user. Without cross-tab coordination, they can trigger your onboarding tour in three of them at once and end up confused about which "step 2" they're looking at.
+
+userTourKit ships a `crossTab` gate built on the native `BroadcastChannel` API — when you opt in, starting a tour in one tab pauses any active tour with the same id in every other tab.
+
+---
+
+## Why this matters
+
+| Without `crossTab` | With `crossTab` |
+|---|---|
+| User opens app in 2 tabs → tour shows in both | Tour shows in the tab that started it; other tab pauses |
+| `localStorage` flow session resumes everywhere on refresh | Resume only happens where the tour is "owned" |
+| `onComplete` may fire twice for the same user session | Single source of truth per browser |
+
+Most apps don't notice the problem until a user opens "the same dashboard, but logged in" in a new tab and gets the welcome tour again. `crossTab.enabled: true` is the fix.
+
+---
+
+## Quick start
+
+```tsx title="One-line opt-in"
+import { TourProvider } from '@tour-kit/core'
+
+<TourProvider
+  tours={[onboardingTour]}
+  routePersistence={{
+    enabled: true,
+    flowSession: { storage: 'localStorage' },
+    crossTab: { enabled: true },
+  }}
+  onTourPaused={(tourId, reason) => {
+    console.log('paused', tourId, 'because', reason) // → 'cross-tab'
+  }}
+>
+  {children}
+</TourProvider>
+```
+
+That's all that's required. The provider:
+
+1. Generates a per-mount `tabId` (via `crypto.randomUUID()`)
+2. Posts `{ type: 'tour:active', tourId, tabId }` whenever a tour activates
+3. Subscribes to the channel and stops the local tour when another tab announces the same tour id
+
+The `onTourPaused` callback is the integration point for analytics ("pause-on-cross-tab") or UX hooks ("resume in this tab" button).
+
+<Callout type="info">
+  `crossTab` is **opt-in**. Apps that don't pass it keep their current behavior. There is no default cross-tab gate.
+</Callout>
+
+---
+
+## When to enable
+
+| Scenario | `crossTab.enabled`? |
+|---|---|
+| Single-page app with `sessionStorage` flow session | **No** — sessionStorage is per-tab anyway |
+| Multi-tab dashboard with `localStorage` flow session | **Yes** — prevents stale resume in tab B after tour was closed in tab A |
+| Tour ends with a destructive action (delete, charge) | **Yes** — avoid the user re-confirming the same action |
+| Tour is purely informational (intro tooltip) | Either; opt in if you want analytics consistency |
+
+The strong recommendation: **always enable `crossTab` when `flowSession.storage` is `'localStorage'`**. The two combine to give "resume after refresh, but only here" — the predictable behavior most users expect.
+
+---
+
+## API
+
+`routePersistence.crossTab` accepts a `CrossTabConfig`:
+
+```ts
+interface CrossTabConfig {
+  /** Master switch. */
+  enabled: boolean
+  /** BroadcastChannel name. Default: 'tourkit:active-flow'. */
+  channel?: string
+}
+```
+
+### `onTourPaused` callback
+
+```ts
+onTourPaused?: (tourId: string, reason: 'cross-tab') => void
+```
+
+Fires after the local tour has been stopped (`state.isActive` is already `false` at this point). The `reason` discriminator is room for future pause sources (idle timeout, focus loss); today only `'cross-tab'` is emitted.
+
+### Custom channel name
+
+By default every tour shares the channel `'tourkit:active-flow'`. If you have multiple isolated apps on the same origin and want them not to interfere, set a unique name:
+
+```tsx
+<TourProvider
+  routePersistence={{
+    enabled: true,
+    crossTab: { enabled: true, channel: 'admin-app:tour' },
+  }}
+>
+```
+
+---
+
+## Browser support
+
+`BroadcastChannel` is available everywhere modern apps run:
+
+| Browser | Minimum version |
+|---|---|
+| Chrome / Edge | 54+ (2016) |
+| Firefox | 38+ (2015) |
+| Safari (macOS) | 15.4+ (2022) |
+| Safari (iOS) | 15.4+ (2022) |
+| Opera | 41+ (2016) |
+
+Older Safari (≤ 15.3) doesn't expose the API. The hook detects this and falls back to a no-op — your tour still runs, it just won't pause across tabs. **No polyfill is required**, and userTourKit deliberately doesn't bundle one (a `BroadcastChannel` polyfill weighs ~6KB gzipped).
+
+If you need cross-tab support on legacy Safari, use a `localStorage` "storage" event polyfill in your app shell — userTourKit will pick it up automatically because the no-op only kicks in when `typeof BroadcastChannel === 'undefined'`.
+
+---
+
+## Failure modes
+
+The hook is built so the tour never crashes from a cross-tab failure:
+
+- **`BroadcastChannel` undefined** → `post` and `subscribe` are no-ops; tour runs normally with no cross-tab coordination.
+- **Channel name collision with non-tour-kit code** → use the `channel` option above.
+- **Self-broadcast** — messages are filtered by `tabId` so you don't pause yourself.
+
+---
+
+## Testing
+
+The recommended pattern in Vitest + jsdom is to mount two `<TourProvider>` siblings in the same test process — they share the native `BroadcastChannel` automatically:
+
+```tsx title="cross-tab.test.tsx"
+import { renderHook, act } from '@testing-library/react'
+
+const tabA = renderHook(() => useTour(), { wrapper: makeWrapper(spyA) })
+const tabB = renderHook(() => useTour(), { wrapper: makeWrapper(spyB) })
+
+await act(async () => tabB.result.current.start('onboarding'))
+await act(async () => tabA.result.current.start('onboarding'))
+await act(async () => new Promise((r) => setTimeout(r, 0)))
+
+expect(spyB).toHaveBeenCalledWith('onboarding', 'cross-tab')
+expect(tabB.result.current.isActive).toBe(false)
+```
+
+For the no-channel fallback, stub `BroadcastChannel` to `undefined` in a single test only:
+
+```ts
+beforeEach(() => vi.stubGlobal('BroadcastChannel', undefined))
+afterEach(() => vi.unstubAllGlobals())
+```
+
+---
+
+## Related Resources
+
+- [Persistence Guide — Flow Session](/docs/guides/persistence#flow-session)
+- [`useBroadcast` Hook](/docs/core/hooks/use-broadcast)
+- [`useFlowSession` Hook](/docs/core/hooks/use-flow-session)

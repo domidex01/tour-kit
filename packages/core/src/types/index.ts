@@ -21,6 +21,8 @@ export type {
   SpotlightConfig,
   Storage,
   PersistenceConfig,
+  FlowSessionConfig,
+  CrossTabConfig,
   A11yConfig,
   ScrollConfig,
   Direction,
