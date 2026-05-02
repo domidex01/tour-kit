@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/analytics",
   "version": "0.1.7",
-  "description": "Plugin-based analytics for product tours and onboarding — ship tour engagement events to PostHog, Mixpanel, Amplitude, Google Analytics 4, or any custom backend",
+  "description": "Plugin-based analytics for React tours & onboarding — ship events to PostHog, Mixpanel, Amplitude, GA4 or any custom backend.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -14,20 +14,19 @@
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
   "keywords": [
-    "react",
-    "analytics",
-    "product-analytics",
-    "event-tracking",
     "tour-analytics",
     "onboarding-analytics",
+    "product-analytics",
+    "event-tracking",
     "posthog",
     "mixpanel",
     "amplitude",
     "google-analytics",
     "ga4",
     "plugin",
-    "user-engagement",
     "funnel-tracking",
+    "user-engagement",
+    "react",
     "tour-kit"
   ],
   "type": "module",

@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/adoption",
   "version": "0.0.8",
-  "description": "Feature adoption tracking, nudges, and dashboards for React — measure which product features users actually adopt and re-engage them with contextual prompts",
+  "description": "React feature adoption tracking — measure which features users actually adopt and re-engage them with contextual nudges.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -14,15 +14,15 @@
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
   "keywords": [
-    "react",
     "feature-adoption",
     "adoption-tracking",
     "feature-discovery",
-    "nudge",
+    "feature-usage",
+    "product-analytics",
     "in-app-nudge",
     "user-engagement",
-    "product-analytics",
-    "feature-usage",
+    "nudge",
+    "react",
     "onboarding",
     "tour-kit",
     "userpilot-alternative",
@@ -75,9 +75,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@tour-kit/core": "workspace:*",
     "@tour-kit/license": "workspace:*",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.5.0"
+    "class-variance-authority": "^0.7.1"
   },
   "peerDependencies": {
     "@tour-kit/analytics": "workspace:*",

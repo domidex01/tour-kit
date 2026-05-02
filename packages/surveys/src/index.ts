@@ -65,7 +65,7 @@ export { useSurveysContext } from './context'
 export { useSurvey, useSurveys, useSurveyScoring } from './hooks'
 
 // Scoring functions
-export { calculateNPS, calculateCSAT, calculateCES } from './core'
+export { calculateNPS, calculateCSAT, calculateCES } from './core/scoring'
 
 // Styled display components
 export { SurveyPopover } from './components'

@@ -1,18 +1,35 @@
 # @tour-kit/license
 
-License validation for Tour Kit Pro features using [Polar.sh](https://polar.sh) license key validation and domain activation.
+> License key validation and activation for Tour Kit Pro packages — Polar.sh-backed key verification with offline cache, domain activation, render-time gating, and watermark enforcement.
+
+[![npm version](https://img.shields.io/npm/v/@tour-kit/license.svg)](https://www.npmjs.com/package/@tour-kit/license)
+[![npm downloads](https://img.shields.io/npm/dm/@tour-kit/license.svg)](https://www.npmjs.com/package/@tour-kit/license)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@tour-kit/license?label=gzip)](https://bundlephobia.com/package/@tour-kit/license)
+[![types](https://img.shields.io/npm/types/@tour-kit/license.svg)](https://www.npmjs.com/package/@tour-kit/license)
+
+The runtime validator that gates **Tour Kit Pro** packages. Validates license keys against the [Polar.sh](https://polar.sh/) customer portal, activates up to 5 domains per key, caches results in `localStorage` with a 72h TTL, and provides React components + hooks for conditional rendering based on license status.
+
+**Required by:** `@tour-kit/adoption`, `@tour-kit/ai`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/surveys`.
+
+**Free packages do not need this:** `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints` work without a license.
+
+## Features
+
+- **Polar.sh validation** — license keys generated and managed via Polar customer portal
+- **Domain activation** — 5 slots per key; bound to hostname
+- **Offline cache** — `localStorage`-backed, 72h TTL, Zod-validated reads
+- **Dev bypass** — `localhost`, `127.0.0.1`, `*.local` skip activation automatically
+- **`<LicenseGate>`** — conditionally render Pro features
+- **`<LicenseWatermark>`** — semi-transparent "UNLICENSED" overlay enforcement
+- **Headless entry** — `@tour-kit/license/headless` for non-React / server-side validation
+- **Render-key anti-bypass** — interleaved validation prevents trivial DevTools tampering
+- **TypeScript-first**, supports React 18 & 19
 
 ## Installation
 
-This is a restricted npm package. Set up `.npmrc` with your auth token first:
-
-```
-//registry.npmjs.org/:_authToken=${NPM_TOKEN}
-```
-
-Then install:
-
 ```bash
+npm install @tour-kit/license
+# or
 pnpm add @tour-kit/license
 ```
 
@@ -27,7 +44,7 @@ function App() {
       organizationId="your-polar-org-id"
       licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY ?? ''}
     >
-      <LicenseGate require="pro">
+      <LicenseGate require="pro" fallback={<UpgradePrompt />}>
         <ProFeature />
       </LicenseGate>
     </LicenseProvider>
@@ -35,96 +52,73 @@ function App() {
 }
 ```
 
-## Configuration
+For most apps you wrap once at the root and the Pro packages handle gating internally — most consumers never need `<LicenseGate>` directly.
+
+## Components
 
 ### `<LicenseProvider>`
 
-Wrap your app (or the section using pro features) with `LicenseProvider`.
+Wraps your app (or the Pro section). Performs validation on mount, caches results, re-validates on `refresh()`.
 
 | Prop | Type | Required | Description |
-|------|------|----------|-------------|
+|---|---|---|---|
 | `organizationId` | `string` | Yes | Your Polar organization ID |
 | `licenseKey` | `string` | Yes | License key with `TOURKIT-` prefix |
 | `onValidate` | `(state: LicenseState) => void` | No | Called after validation completes |
 | `onError` | `(error: Error) => void` | No | Called on validation error |
 
-```tsx
-<LicenseProvider
-  organizationId="your-polar-org-id"
-  licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY ?? ''}
-  onValidate={(state) => console.log('License:', state.status)}
-  onError={(err) => console.error('License error:', err)}
->
-  {children}
-</LicenseProvider>
-```
+### `<LicenseGate>` / `<ProGate>`
 
-## Components
-
-### `<LicenseGate>`
-
-Conditionally renders children based on license status. Uses interleaved render-key validation.
+Conditionally renders children based on license status. `ProGate` is a semantic alias.
 
 | Prop | Type | Required | Description |
-|------|------|----------|-------------|
+|---|---|---|---|
 | `require` | `'pro'` | Yes | Required license tier |
 | `fallback` | `ReactNode` | No | Shown when license is invalid |
 | `loading` | `ReactNode` | No | Shown during validation |
 
-```tsx
-<LicenseGate require="pro" fallback={<UpgradePrompt />}>
-  <AdvancedAnalytics />
-</LicenseGate>
-```
-
 ### `<LicenseWatermark>`
 
-Renders a semi-transparent "UNLICENSED" overlay when the license is invalid. Uses inline styles with high z-index and `pointer-events: none`. Resists basic CSS overrides.
+Renders a semi-transparent "UNLICENSED" overlay when the license is invalid. Inline-styled with high z-index and `pointer-events: none` — resists basic CSS overrides.
 
 ### `<LicenseWarning>`
 
-Displays a dismissible warning banner when the license is invalid.
+Dismissible warning banner.
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `message` | `string` | No | Custom warning message |
-| `pricingUrl` | `string` | No | URL to pricing page |
-| `dismissible` | `boolean` | No | Whether the warning can be dismissed |
-| `onDismiss` | `() => void` | No | Called when dismissed |
-| `className` | `string` | No | Custom CSS class |
+| Prop | Type | Description |
+|---|---|---|
+| `message` | `string` | Custom warning text |
+| `pricingUrl` | `string` | URL to pricing page |
+| `dismissible` | `boolean` | Allow user dismissal |
+| `onDismiss` | `() => void` | Dismissal callback |
+| `className` | `string` | Custom class |
 
 ## Hooks
 
-### `useLicense()`
-
-Returns the current license context. Must be used within `<LicenseProvider>`.
+| Hook | Returns |
+|---|---|
+| `useLicense()` | `LicenseContextValue` — `{ state, refresh }` (throws outside provider) |
+| `useIsPro()` | `boolean` — `true` when status is `'valid'` and tier is `'pro'` |
+| `useLicenseGate()` | `LicenseGateResult` — for custom gating logic |
 
 ```tsx
 const { state, refresh } = useLicense()
-// state.status: 'valid' | 'invalid' | 'expired' | 'revoked' | 'loading' | 'error'
-// state.tier: 'free' | 'pro'
-// state.activations: number
-// state.maxActivations: number
-// state.domain: string | null
-// state.expiresAt: string | null
-// refresh(): re-validates the license (clears cache first)
-```
-
-### `useIsPro()`
-
-Returns `true` when the license tier is `'pro'` and status is `'valid'`, `false` otherwise.
-
-```tsx
-const isPro = useIsPro()
+// state.status:        'loading' | 'valid' | 'invalid' | 'expired' | 'revoked' | 'error'
+// state.tier:          'free' | 'pro'
+// state.activations:   number   (used activation slots)
+// state.maxActivations: number  (5)
+// state.domain:        string | null
+// state.expiresAt:     string | null
 ```
 
 ## Headless API
 
-For non-React usage (Node.js, server-side, other frameworks), import from the headless entry point:
+For Node.js, server-side validation, or non-React frameworks, import from the `/headless` entry — it has zero React dependencies:
 
 ```ts
 import {
   validateLicenseKey,
+  validateKey,
   activateKey,
   deactivateKey,
   readCache,
@@ -132,47 +126,87 @@ import {
   clearCache,
   getCurrentDomain,
   isDevEnvironment,
+  validateDomainAtRender,
 } from '@tour-kit/license/headless'
 
-// Validate a license key
 const state = await validateLicenseKey('TOURKIT-...', 'your-org-id')
-
-// Activate on a domain
 const activation = await activateKey('TOURKIT-...', 'your-org-id', 'example.com')
-
-// Deactivate
 await deactivateKey('TOURKIT-...', 'your-org-id', 'activation-id')
 ```
 
-## Environment Variables
+## License states
 
-Set the license key as an environment variable appropriate for your framework:
+| State | Meaning |
+|---|---|
+| `loading` | Validation in progress |
+| `valid` | Key validated, domain activated, within expiry |
+| `invalid` | Key not recognized |
+| `expired` | Key past `expiresAt` |
+| `revoked` | Key explicitly revoked in Polar |
+| `error` | Network / API failure |
+
+## Environment variables
 
 | Framework | Variable | Access |
-|-----------|----------|--------|
+|---|---|---|
 | Next.js | `NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY` | `process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY` |
 | Vite | `VITE_TOUR_KIT_LICENSE_KEY` | `import.meta.env.VITE_TOUR_KIT_LICENSE_KEY` |
 | Create React App | `REACT_APP_TOUR_KIT_LICENSE_KEY` | `process.env.REACT_APP_TOUR_KIT_LICENSE_KEY` |
 | Node.js / Server | `TOUR_KIT_LICENSE_KEY` | `process.env.TOUR_KIT_LICENSE_KEY` |
 
-## Development Mode
+## Development mode
 
-On `localhost`, `127.0.0.1`, and `*.local` domains, license validation is automatically bypassed. No activation slot is consumed. The provider returns `{ status: 'valid', tier: 'pro' }`.
+On `localhost`, `127.0.0.1`, and `*.local` domains, license validation is automatically bypassed. **No activation slot is consumed.** The provider returns `{ status: 'valid', tier: 'pro' }`.
+
+`staging.example.com` and other non-local hostnames do **not** bypass — even in development.
 
 ## CI/CD
 
-For installing restricted `@tour-kit/*` packages in CI:
+To install restricted `@tour-kit/*` packages in CI:
 
-1. Add `NPM_TOKEN` to your CI secrets (GitHub Actions, Vercel, Netlify, etc.)
+1. Add `NPM_TOKEN` to your CI secrets (GitHub Actions, Vercel, Netlify, etc.).
 2. Ensure `.npmrc` at the repo root contains:
    ```
    //registry.npmjs.org/:_authToken=${NPM_TOKEN}
    ```
-3. `pnpm install` will authenticate automatically using the token from the environment.
+3. `pnpm install` authenticates automatically.
+
+## Types
+
+```ts
+import type {
+  LicenseTier,                 // 'free' | 'pro'
+  LicenseState,
+  LicenseError,
+  LicenseActivation,
+  LicenseCache,
+  LicenseConfig,
+  LicenseContextValue,
+  LicenseProviderProps,
+  LicenseGateProps,
+  LicenseWarningProps,
+  ProGateProps,
+  LicenseGateResult,
+  PolarValidateResponse,
+  PolarActivateResponse,
+} from '@tour-kit/license'
+```
+
+## Gotchas
+
+- **Dev bypass is hostname-scoped** — only `localhost`, `127.0.0.1`, and `*.local`.
+- **`organizationId` is technically optional** in `LicenseProviderProps` but **required** for Polar validation to work.
+- **Cache keys are domain-scoped** — `tourkit:license:{domain}` — so multiple sites on the same browser don't collide.
+- **`headless.ts` ≠ `index.ts`** — don't accidentally import React-using modules from the headless entry; it breaks tree-shaking.
+- **Watermark enforcement lives in Pro packages** via `useLicenseCheck()`, not in this package.
+
+## Related packages
+
+- [`@tour-kit/adoption`](https://www.npmjs.com/package/@tour-kit/adoption), [`@tour-kit/ai`](https://www.npmjs.com/package/@tour-kit/ai), [`@tour-kit/analytics`](https://www.npmjs.com/package/@tour-kit/analytics), [`@tour-kit/announcements`](https://www.npmjs.com/package/@tour-kit/announcements), [`@tour-kit/checklists`](https://www.npmjs.com/package/@tour-kit/checklists), [`@tour-kit/media`](https://www.npmjs.com/package/@tour-kit/media), [`@tour-kit/scheduling`](https://www.npmjs.com/package/@tour-kit/scheduling), [`@tour-kit/surveys`](https://www.npmjs.com/package/@tour-kit/surveys) — all Pro packages depend on this
 
 ## Documentation
 
-Full documentation: [https://tourkit.dev/docs/licensing](https://tourkit.dev/docs/licensing)
+Full documentation: [https://usertourkit.com/docs/licensing](https://usertourkit.com/docs/licensing)
 
 ## License
 

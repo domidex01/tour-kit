@@ -1,4 +1,4 @@
-# userTourKit v0.5.1 — Generated 2026-04-30T07:43:48Z
+# userTourKit v0.6.0 — Generated 2026-05-02T02:57:59Z
 
 # userTourKit
 

@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/surveys",
   "version": "0.1.5",
-  "description": "In-app microsurveys for React — NPS, CSAT, CES, and custom feedback flows with skip logic, audience targeting, fatigue prevention, sampling, and modal/slideout/banner/popover/inline display modes",
+  "description": "React in-app microsurveys — NPS, CSAT, CES with skip logic, audience targeting, fatigue prevention and 5 display modes.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -14,18 +14,16 @@
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
   "keywords": [
-    "react",
-    "survey",
-    "surveys",
-    "nps",
-    "net-promoter-score",
-    "csat",
-    "ces",
-    "customer-feedback",
     "in-app-survey",
     "microsurvey",
+    "nps",
+    "csat",
+    "ces",
+    "net-promoter-score",
+    "customer-feedback",
     "user-feedback",
     "feedback-widget",
+    "react-survey",
     "skip-logic",
     "audience-targeting",
     "fatigue-prevention",
@@ -33,7 +31,8 @@
     "tour-kit",
     "delighted-alternative",
     "sprig-alternative",
-    "wootric-alternative"
+    "wootric-alternative",
+    "typeform-alternative"
   ],
   "type": "module",
   "main": "./dist/index.cjs",
@@ -83,9 +82,7 @@
     "@tour-kit/license": "workspace:*",
     "@floating-ui/react": "^0.27.19",
     "@radix-ui/react-dialog": "^1.1.15",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.5.0"
+    "class-variance-authority": "^0.7.1"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

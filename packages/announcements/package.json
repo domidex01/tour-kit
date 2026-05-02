@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/announcements",
   "version": "0.2.2",
-  "description": "In-app product announcements for React — modal, slideout, banner, toast, and spotlight variants with frequency rules, scheduling, audience targeting, and a priority queue for changelog and release communication",
+  "description": "In-app product announcements for React — modal, toast, banner, slideout, spotlight with frequency rules and changelog support.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -14,23 +14,25 @@
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
   "keywords": [
-    "react",
-    "announcements",
-    "in-app-message",
-    "in-app-notification",
+    "in-app-announcement",
     "product-announcement",
+    "whats-new",
     "release-notes",
     "changelog",
-    "whats-new",
+    "in-app-notification",
+    "in-app-message",
     "modal",
     "toast",
     "banner",
     "slideout",
     "spotlight",
-    "notification",
+    "product-demo",
+    "demo",
     "onboarding",
     "tour-kit",
-    "beamer-alternative"
+    "beamer-alternative",
+    "headway-alternative",
+    "pendo-alternative"
   ],
   "type": "module",
   "main": "./dist/index.cjs",
@@ -91,9 +93,7 @@
     "@floating-ui/react": "^0.27.19",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-dialog": "^1.1.15",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.5.0"
+    "class-variance-authority": "^0.7.1"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
@@ -116,7 +116,6 @@
   "devDependencies": {
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",
-    "@testing-library/user-event": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^4.5.2",

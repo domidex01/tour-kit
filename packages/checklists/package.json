@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/checklists",
   "version": "0.1.7",
-  "description": "Interactive onboarding checklists for React with task dependencies, progress tracking, persistence, and headless or styled components for getting-started flows and activation funnels",
+  "description": "React onboarding checklists with task dependencies, progress tracking & persistence — for getting-started flows and activation.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -14,20 +14,22 @@
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
   "keywords": [
-    "react",
-    "checklist",
     "onboarding-checklist",
     "getting-started",
     "user-onboarding",
     "activation",
     "task-list",
-    "todo",
-    "progress",
+    "todo-list",
     "progress-tracking",
-    "workflow",
     "guided-setup",
+    "onboarding-wizard",
+    "wizard",
     "task-dependencies",
+    "onboarding-flow",
+    "onboarding-tutorial",
+    "onboarding-guide",
     "headless",
+    "react",
     "tour-kit",
     "userpilot-alternative",
     "appcues-alternative"
@@ -68,9 +70,7 @@
     "@tour-kit/license": "workspace:*",
     "@floating-ui/react": "^0.27.19",
     "@radix-ui/react-slot": "^1.2.4",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.5.0"
+    "class-variance-authority": "^0.7.1"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

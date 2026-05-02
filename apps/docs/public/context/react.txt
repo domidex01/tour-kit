@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/react Context File
-Version: 0.5.1 | Generated: 2026-04-30
+Version: 0.6.0 | Generated: 2026-05-02
 Paste this into your LLM to get accurate answers about @tour-kit/react.
 =========================================================================
 
 OVERVIEW
 --------
-React components for product tours and onboarding — accessible TourCard and TourPopover, headless render-prop variants, multi-tour registry, and Next.js, React Router, TanStack Router adapters
+React onboarding & product tour components — accessible, headless, Tailwind & shadcn-ready, with Next.js, React Router, TanStack adapters.
 
 INSTALLATION
 ------------

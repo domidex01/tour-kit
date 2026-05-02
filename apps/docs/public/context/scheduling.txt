@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/scheduling Context File
-Version: 0.1.4 | Generated: 2026-04-30
+Version: 0.1.4 | Generated: 2026-05-02
 Paste this into your LLM to get accurate answers about @tour-kit/scheduling.
 =========================================================================
 
 OVERVIEW
 --------
-Time-based scheduling for React with timezone support, business hours, blackout windows, recurring patterns, and reactive hooks for showing tours, announcements, or any UI on a schedule
+React scheduling hooks with IANA timezones, business hours, blackouts & recurring patterns — show UI on a schedule.
 
 INSTALLATION
 ------------

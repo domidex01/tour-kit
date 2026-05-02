@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/media",
   "version": "0.1.5",
-  "description": "Embedded video and media for React — auto-detecting embeds for YouTube, Vimeo, Loom, Wistia, native HTML5 video, GIF, and Lottie with captions, responsive sources, and reduced-motion fallbacks",
+  "description": "React video & media embeds — YouTube, Vimeo, Loom, Wistia, HTML5, GIF, Lottie with captions and reduced-motion fallbacks.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -14,14 +14,11 @@
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
   "keywords": [
-    "react",
-    "video",
     "video-embed",
-    "media",
     "media-embed",
-    "youtube",
+    "react-video",
     "youtube-embed",
-    "vimeo",
+    "vimeo-embed",
     "loom",
     "wistia",
     "lottie",
@@ -29,6 +26,8 @@
     "html5-video",
     "captions",
     "responsive-video",
+    "product-demo",
+    "demo",
     "onboarding",
     "tour-kit"
   ],
@@ -78,9 +77,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@tour-kit/core": "workspace:*",
     "@tour-kit/license": "workspace:*",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.5.0"
+    "class-variance-authority": "^0.7.1"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/announcements Context File
-Version: 0.2.1 | Generated: 2026-04-30
+Version: 0.2.2 | Generated: 2026-05-02
 Paste this into your LLM to get accurate answers about @tour-kit/announcements.
 =========================================================================
 
 OVERVIEW
 --------
-In-app product announcements for React — modal, slideout, banner, toast, and spotlight variants with frequency rules, scheduling, audience targeting, and a priority queue for changelog and release communication
+In-app product announcements for React — modal, toast, banner, slideout, spotlight with frequency rules and changelog support.
 
 INSTALLATION
 ------------

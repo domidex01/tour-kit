@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/ai",
   "version": "0.0.5",
-  "description": "AI chat widget for React with RAG, CAG, and tour context — drop-in conversational assistant powered by Vercel AI SDK with vector search and tour-aware system prompts",
+  "description": "React AI chat widget with RAG & tour context — drop-in conversational assistant powered by Vercel AI SDK with vector search.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://github.com/domidex01/tour-kit#readme",
@@ -14,26 +14,24 @@
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
   "keywords": [
-    "react",
-    "ai",
     "ai-chat",
-    "ai-chatbot",
     "ai-assistant",
-    "chat-widget",
+    "ai-chatbot",
     "rag",
     "retrieval-augmented-generation",
-    "cag",
-    "context-augmented-generation",
-    "vector-search",
-    "embeddings",
-    "vercel-ai-sdk",
-    "openai",
-    "ai-sdk",
-    "llm",
     "in-app-chat",
     "support-bot",
+    "vercel-ai-sdk",
+    "ai-sdk",
+    "vector-search",
+    "embeddings",
+    "llm",
+    "openai",
+    "react-chat",
     "onboarding",
-    "tour-kit"
+    "tour-kit",
+    "intercom-fin-alternative",
+    "chatbase-alternative"
   ],
   "type": "module",
   "main": "./dist/index.cjs",
@@ -99,9 +97,7 @@
   "dependencies": {
     "@tour-kit/core": "workspace:*",
     "@tour-kit/license": "workspace:*",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.5.0"
+    "class-variance-authority": "^0.7.1"
   },
   "peerDependencies": {
     "@ai-sdk/react": "^2.0.0",
@@ -111,7 +107,6 @@
   },
   "devDependencies": {
     "@ai-sdk/openai": "^2.0.0",
-    "@ai-sdk/provider": "^2.0.0",
     "@ai-sdk/react": "^2.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

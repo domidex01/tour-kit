@@ -1,11 +1,11 @@
 userTourKit — @tour-kit/core Context File
-Version: 0.5.1 | Generated: 2026-04-30
+Version: 0.6.0 | Generated: 2026-05-02
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
 OVERVIEW
 --------
-Headless onboarding and product tour engine for React — framework-agnostic core with positioning, focus management, storage adapters, and hooks for building guided tours, walkthroughs, and step-by-step flows
+Headless React onboarding & product tour engine — positioning, focus management, storage adapters for guided tours and walkthroughs.
 
 INSTALLATION
 ------------
