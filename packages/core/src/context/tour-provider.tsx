@@ -451,18 +451,45 @@ export function TourProvider({
 
   // flowSession-restore: takes precedence over useRoutePersistence — it's
   // tour-scoped (single active tour) vs the route-state's multi-tour scope.
-  // Mount-only: read whatever flow:active blob exists and start that tour.
+  // Runs once per mount, but waits for the tour list to be populated. The
+  // declarative `<Tour>` registration path (via `MultiTourKitProvider`)
+  // mounts children AFTER the parent's first effect tick, so a strict
+  // mount-only effect with `[]` deps would bail with `tours = []`. The ref
+  // guard makes it idempotent across the inevitable tours-change re-runs.
   //
   // Phase 1.3 — cross-page resume: if the restored blob has a `currentRoute`
   // that differs from the current router pathname, navigate first and await
   // the target before dispatching START_TOUR. On any failure, clear the
   // session — a stale/wrong route will never recover on its own.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only flow restore
+  const flowRestoreAttemptedRef = React.useRef(false)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: idempotent via flowRestoreAttemptedRef; we only re-run when `tours` populates
   React.useEffect(() => {
+    if (flowRestoreAttemptedRef.current) return
     const restored = flow.session
     if (!restored || flow.isStale) return
+    if (tours.length === 0) return // wait for declarative <Tour> children
     const restoredTour = tours.find((t) => t.id === restored.tourId)
+    flowRestoreAttemptedRef.current = true
     if (!restoredTour) return
+
+    // `flow-restore` timer — visible in DevTools / Playwright's console
+    // listener, lets consumers verify the hard-refresh resume budget. The
+    // phase-1.3 target is < 200ms wall time from mount to `START_TOUR`.
+    // Instrumented on BOTH paths (sync same-route restore and async
+    // navigate-then-wait) so the metric fires for the common case too.
+    const startTimer = () => {
+      if (typeof console !== 'undefined' && typeof console.time === 'function') {
+        console.time('flow-restore')
+      }
+    }
+    let timerEnded = false
+    const endTimer = () => {
+      if (timerEnded) return
+      timerEnded = true
+      if (typeof console !== 'undefined' && typeof console.timeEnd === 'function') {
+        console.timeEnd('flow-restore')
+      }
+    }
 
     const dispatchStart = () => {
       dispatch({
@@ -476,7 +503,9 @@ export function TourProvider({
       restored.currentRoute && router && restored.currentRoute !== router.getCurrentRoute()
 
     if (!needsRouteRestore) {
+      startTimer()
       dispatchStart()
+      endTimer()
       return
     }
 
@@ -488,20 +517,29 @@ export function TourProvider({
     // flow.clear would mutate a dead instance and write to storage on
     // behalf of a tour the user has already left.
     let cancelled = false
+    startTimer()
     // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: restore orchestrator (navigate + wait + cancellation guards)
     void (async () => {
       try {
         await router.navigate(route)
-        if (cancelled) return
+        if (cancelled) {
+          endTimer()
+          return
+        }
         if (targetStep) {
           await waitForStepTarget(targetStep, {
             route,
             timeoutMs: targetStep.waitTimeout ?? 3000,
           })
-          if (cancelled) return
+          if (cancelled) {
+            endTimer()
+            return
+          }
         }
         dispatchStart()
+        endTimer()
       } catch {
+        endTimer()
         if (cancelled) return
         // Stale session (route 404, target missing). Clear so the next mount
         // doesn't loop on the same broken state.
@@ -512,7 +550,7 @@ export function TourProvider({
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [tours])
 
   // Restore persisted state on mount — and re-run when another tab writes
   // (externalVersion bumps whenever `syncTabs` is on and the storage key changes).

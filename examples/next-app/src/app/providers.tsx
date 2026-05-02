@@ -149,7 +149,14 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
   return (
     <MultiTourKitProvider
       router={router}
-      routePersistence={{ enabled: true, storage: 'sessionStorage' }}
+      routePersistence={{
+        enabled: true,
+        storage: 'sessionStorage',
+        // Phase 1.1 / 1.3 — opt in to flow-session resume so a hard-refresh
+        // during a multi-page tour lands the user back on the right step on
+        // the right URL. Required for the cross-page-demo tour below.
+        flowSession: { storage: 'sessionStorage' },
+      }}
       onTourStart={(tourId) => {
         analytics.tourStarted(tourId, 8) // 8 steps in the onboarding tour
       }}
@@ -278,6 +285,26 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
           placement="bottom"
           waitForTarget
           onNext="complete"
+        />
+      </Tour>
+
+      {/* Phase 1.3 — cross-page flow continuation demo */}
+      <Tour id="cross-page-demo">
+        <TourStep
+          id="dashboard"
+          route="/dashboard"
+          target="#dashboard-stats"
+          title="Dashboard"
+          content="Step 1 lives on /dashboard. Click Next to navigate to /billing — the tour will follow."
+          placement="bottom"
+        />
+        <TourStep
+          id="billing"
+          route="/billing"
+          target="#billing-summary"
+          title="Billing"
+          content="Step 2 lives on /billing. Hard-refresh now — the tour should resume here."
+          placement="bottom"
         />
       </Tour>
 

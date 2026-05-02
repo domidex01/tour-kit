@@ -13,7 +13,9 @@
       "**/.claude/skills/**/evals/**",
       "**/__spikes__/**",
       "**/__tests__/spikes/**",
-      "**/scripts/**"
+      "**/scripts/**",
+      "**/test-results/**",
+      "**/playwright-report/**"
     ]
   }
 }
