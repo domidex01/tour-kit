@@ -3,7 +3,7 @@ import { useAdvanceOn } from '../hooks/use-advance-on'
 import { useBroadcast } from '../hooks/use-broadcast'
 import { useFlowSession } from '../hooks/use-flow-session'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
-import { TourValidationError, runHiddenStep, validateTour } from '../lib/validate-tour'
+import { TourValidationError, validateTour } from '../lib/validate-tour'
 import type {
   BranchContext,
   BranchTarget,
@@ -611,7 +611,9 @@ export function TourProvider({
         currentStepIndex: cursor,
         currentStep: step,
       }
-      await runHiddenStep(step, stepCtx)
+      // Hidden-step lifecycle: onEnter pre-mount, then legacy onShow.
+      await step.onEnter?.(stepCtx)
+      await step.onShow?.(stepCtx)
 
       if (step.onNext === undefined || step.onNext === null) {
         return cursor + 1

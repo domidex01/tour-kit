@@ -1,4 +1,4 @@
-import type { Tour, TourStep } from '../types'
+import type { Tour } from '../types'
 
 const FORBIDDEN_HIDDEN_FIELDS = ['target', 'content', 'title', 'placement', 'advanceOn'] as const
 
@@ -39,17 +39,4 @@ export function validateTour(tour: Tour): void {
       }
     }
   }
-}
-
-/**
- * Run a hidden step's pre-mount lifecycle callbacks. Used by the provider
- * to fire `onEnter` and (for backwards compatibility) `onShow` before the
- * state machine auto-advances past the hidden step.
- */
-export async function runHiddenStep(
-  step: TourStep,
-  context: Parameters<NonNullable<TourStep['onEnter']>>[0]
-): Promise<void> {
-  await step.onEnter?.(context)
-  await step.onShow?.(context)
 }
