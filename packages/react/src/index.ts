@@ -32,6 +32,20 @@ export {
   type MultiTourKitProviderProps,
 } from './components/provider/tourkit-provider'
 
+// Theme
+export {
+  ThemeProvider,
+  useThemeContext,
+  resolveTheme,
+  matchUrl,
+  type ThemeProviderProps,
+  type ThemeContextValue,
+  type ThemeMatcher,
+  type ThemeResolveContext,
+  type ThemeTokens,
+  type ThemeVariation,
+} from './components/theme'
+
 // ============================================
 // UI VARIANTS (for customization)
 // ============================================
