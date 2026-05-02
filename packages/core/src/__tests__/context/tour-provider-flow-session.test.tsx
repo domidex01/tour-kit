@@ -53,6 +53,37 @@ describe('TourProvider — flowSession reload (US-1)', () => {
     expect(second.result.current.isActive).toBe(true)
     expect(second.result.current.currentStepIndex).toBe(1)
     expect(second.result.current.currentStep?.id).toBe('s2')
+    // Regression for clear-on-mount bug: the blob must still exist after the
+    // restored mount. Previously the clear effect fired on initial mount
+    // (state.isActive=false) and wiped the blob right after restore — only
+    // saved by the leading-edge throttle re-write on the next render.
+    expect(sessionStorage.getItem('tourkit:flow:active')).not.toBeNull()
+  })
+
+  it('clears the persisted blob when the tour is explicitly stopped', async () => {
+    function makeWrapper() {
+      return function Wrapper({ children }: { children: React.ReactNode }) {
+        return (
+          <TourProvider
+            tours={[tour]}
+            routePersistence={{ enabled: false, flowSession: { storage: 'sessionStorage' } }}
+          >
+            {children}
+          </TourProvider>
+        )
+      }
+    }
+
+    const { result } = renderHook(() => useTour(), { wrapper: makeWrapper() })
+    await act(async () => {
+      result.current.start('onboarding')
+    })
+    expect(sessionStorage.getItem('tourkit:flow:active')).not.toBeNull()
+
+    await act(async () => {
+      result.current.stop()
+    })
+    expect(sessionStorage.getItem('tourkit:flow:active')).toBeNull()
   })
 })
 

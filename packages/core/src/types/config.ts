@@ -76,7 +76,12 @@ export interface FlowSessionConfig {
   storage: 'sessionStorage' | 'localStorage'
   /** TTL in ms. Default: 1h for sessionStorage, 24h for localStorage. */
   ttlMs?: number
-  /** Storage key suffix (full key is `${keyPrefix}:flow:${tourId}`). */
+  /**
+   * Storage key (under the configured `keyPrefix`).
+   * Default: `'flow:active'` — full key shape `${keyPrefix}:flow:active`.
+   * The persisted blob carries its own `tourId`, so a single fixed key is
+   * sufficient for the active-tour resume case (one active tour per tab).
+   */
   key?: string
 }
 

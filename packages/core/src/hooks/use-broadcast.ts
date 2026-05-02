@@ -61,9 +61,16 @@ export function useBroadcast<TMsg>(
     [channel]
   )
 
+  // Memoize return value so consumers can safely use the hook result in
+  // effect dep arrays without re-running on every render.
+  const value = React.useMemo<UseBroadcastReturn<TMsg>>(
+    () => ({ post, subscribe }),
+    [post, subscribe]
+  )
+
   if (!enabled || !isAvailable) {
     return NOOP_RETURN as UseBroadcastReturn<TMsg>
   }
 
-  return { post, subscribe }
+  return value
 }

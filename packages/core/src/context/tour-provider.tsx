@@ -410,10 +410,15 @@ export function TourProvider({
       : undefined
   )
 
-  const tabId = React.useMemo(
-    () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'ssr'),
-    []
-  )
+  const tabId = React.useMemo(() => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID()
+    }
+    // Random-enough fallback for runtimes without crypto.randomUUID.
+    // A literal sentinel like 'ssr' would collide between tabs and silently
+    // disable the cross-tab self-message filter.
+    return `tab-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  }, [])
   const broadcast = useBroadcast<CrossTabActiveMessage>(
     routePersistence.crossTab?.channel ?? 'tourkit:active-flow',
     { enabled: !!routePersistence.crossTab?.enabled }
@@ -518,12 +523,18 @@ export function TourProvider({
     routePersistence.flowSession,
   ])
 
-  // Clear flowSession blob when tour ends.
+  // Clear flowSession blob ONLY on a true → false transition (tour ended).
+  // The initial mount has `state.isActive === false`; without this guard
+  // we would wipe a freshly restored blob right after the restore effect
+  // dispatched START_TOUR (saved by the leading-edge throttle re-write,
+  // but fragile and an unnecessary storage churn).
+  const wasActiveRef = React.useRef(false)
   // biome-ignore lint/correctness/useExhaustiveDependencies: only react to isActive flip
   React.useEffect(() => {
-    if (!state.isActive && routePersistence.flowSession) {
+    if (wasActiveRef.current && !state.isActive && routePersistence.flowSession) {
       flow.clear()
     }
+    wasActiveRef.current = state.isActive
   }, [state.isActive])
 
   // Keep the latest-state ref in sync (read by the cross-tab subscriber).
@@ -531,14 +542,20 @@ export function TourProvider({
     currentActiveRef.current = { isActive: state.isActive, tourId: state.tourId }
   })
 
+  // Last-announce timestamp — also used as tie-breaker when two tabs
+  // simultaneously announce (e.g., both restoring from the same persisted
+  // session at cold start). The later announce wins; the earlier one yields.
+  const announceTsRef = React.useRef<number | null>(null)
+
   // Cross-tab announce: whenever this tab activates a tour, post to the channel.
   React.useEffect(() => {
     if (state.isActive && state.tourId) {
+      announceTsRef.current = Date.now()
       broadcast.post({
         type: 'tour:active',
         tourId: state.tourId,
         tabId,
-        ts: Date.now(),
+        ts: announceTsRef.current,
       })
     }
   }, [state.isActive, state.tourId, tabId, broadcast])
@@ -548,17 +565,16 @@ export function TourProvider({
     return broadcast.subscribe((msg) => {
       if (msg.type !== 'tour:active') return
       if (msg.tabId === tabId) return
-      // Use functional access to current state via a ref-like read isn't
-      // available here; instead defer the pause condition to the dispatch
-      // by checking via a separate "is currently active" guard at fire time.
-      // We close over the latest state via the effect's identity (it
-      // re-subscribes when state.isActive flips), so this snapshot is
-      // sufficient for the pause-on-active gate.
       const pausedTourId = currentActiveRef.current.tourId
-      if (currentActiveRef.current.isActive && pausedTourId) {
-        dispatch({ type: 'STOP_TOUR' })
-        onTourPausedRef.current?.(pausedTourId, 'cross-tab')
-      }
+      if (!currentActiveRef.current.isActive || !pausedTourId) return
+      // Tie-break: if we announced AFTER the incoming message, we are the
+      // newer owner and should keep running. Otherwise yield. Without this,
+      // two tabs cold-restoring the same flow.session at the same instant
+      // pause each other and the user sees no tour anywhere.
+      const myTs = announceTsRef.current
+      if (myTs !== null && myTs > msg.ts) return
+      dispatch({ type: 'STOP_TOUR' })
+      onTourPausedRef.current?.(pausedTourId, 'cross-tab')
     })
   }, [broadcast, tabId])
 
