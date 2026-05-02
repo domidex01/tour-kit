@@ -1,0 +1,74 @@
+[
+  {
+    "name": "@tour-kit/core",
+    "passed": true,
+    "size": 19591,
+    "sizeLimit": 21000
+  },
+  {
+    "name": "@tour-kit/react",
+    "passed": true,
+    "size": 32786,
+    "sizeLimit": 35000
+  },
+  {
+    "name": "@tour-kit/hints",
+    "passed": true,
+    "size": 27496,
+    "sizeLimit": 30000
+  },
+  {
+    "name": "@tour-kit/adoption",
+    "passed": true,
+    "size": 121496,
+    "sizeLimit": 146000
+  },
+  {
+    "name": "@tour-kit/checklists",
+    "passed": true,
+    "size": 85752,
+    "sizeLimit": 103000
+  },
+  {
+    "name": "@tour-kit/announcements",
+    "passed": true,
+    "size": 88872,
+    "sizeLimit": 107000
+  },
+  {
+    "name": "@tour-kit/media",
+    "passed": true,
+    "size": 140396,
+    "sizeLimit": 169000
+  },
+  {
+    "name": "@tour-kit/surveys",
+    "passed": true,
+    "size": 92543,
+    "sizeLimit": 111000
+  },
+  {
+    "name": "@tour-kit/analytics",
+    "passed": true,
+    "size": 238900,
+    "sizeLimit": 287000
+  },
+  {
+    "name": "@tour-kit/scheduling",
+    "passed": true,
+    "size": 57747,
+    "sizeLimit": 70000
+  },
+  {
+    "name": "@tour-kit/license",
+    "passed": true,
+    "size": 56964,
+    "sizeLimit": 69000
+  },
+  {
+    "name": "@tour-kit/ai",
+    "passed": true,
+    "size": 93742,
+    "sizeLimit": 112000
+  }
+]
