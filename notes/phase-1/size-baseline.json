@@ -1,5 +1,3 @@
- WARN  Issue while reading "/home/domidex/projects/tour-kit/.npmrc". Failed to replace env in config: ${NPM_TOKEN}
- WARN  Issue while reading "/home/domidex/projects/tour-kit/.npmrc". Failed to replace env in config: ${NPM_TOKEN}
 [
   {
     "name": "@tour-kit/core",
