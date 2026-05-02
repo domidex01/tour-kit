@@ -57,9 +57,7 @@ describe('useBroadcast: BroadcastChannel undefined fallback (US-3)', () => {
 describe('useBroadcast: disabled by options.enabled = false', () => {
   it('returns no-op post and subscribe when enabled is false', () => {
     const channelName = `tk-disabled-${Math.random().toString(36).slice(2)}`
-    const sender = renderHook(() =>
-      useBroadcast<TestMsg>(channelName, { enabled: false })
-    )
+    const sender = renderHook(() => useBroadcast<TestMsg>(channelName, { enabled: false }))
 
     // A second instance with enabled=true to receive (would fire if the
     // disabled instance posted anything).

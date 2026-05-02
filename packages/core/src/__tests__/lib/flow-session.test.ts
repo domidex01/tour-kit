@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import {
-  type FlowSessionV1,
-  isExpired,
-  parse,
-  serialize,
-} from '../../lib/flow-session'
+import { type FlowSessionV1, isExpired, parse, serialize } from '../../lib/flow-session'
 
 const validSession: FlowSessionV1 = {
   schemaVersion: 1,

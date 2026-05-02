@@ -59,9 +59,7 @@ describe('useFlowSession: TTL expiry (US-3 / US-1)', () => {
 
 describe('useFlowSession: clear (US-3)', () => {
   it('clear() removes the persisted blob', () => {
-    const { result } = renderHook(() =>
-      useFlowSession('onboarding', { storage: 'sessionStorage' })
-    )
+    const { result } = renderHook(() => useFlowSession('onboarding', { storage: 'sessionStorage' }))
     act(() => {
       result.current.save(1)
     })
@@ -89,9 +87,7 @@ describe('useFlowSession: throttle (US-5)', () => {
 
   it('coalesces 5 saves in 100ms into a single setItem call', () => {
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
-    const { result } = renderHook(() =>
-      useFlowSession('onboarding', { storage: 'sessionStorage' })
-    )
+    const { result } = renderHook(() => useFlowSession('onboarding', { storage: 'sessionStorage' }))
     act(() => {
       for (let i = 0; i < 5; i++) {
         result.current.save(i)
@@ -125,9 +121,7 @@ describe('useFlowSession: fail-safe (US-3)', () => {
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw Object.assign(new DOMException('quota'), { name: 'QuotaExceededError' })
     })
-    const { result } = renderHook(() =>
-      useFlowSession('onboarding', { storage: 'sessionStorage' })
-    )
+    const { result } = renderHook(() => useFlowSession('onboarding', { storage: 'sessionStorage' }))
     expect(() => {
       act(() => {
         result.current.save(1)

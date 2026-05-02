@@ -458,12 +458,13 @@ export function TourProvider({
   // Mount-only: read whatever flow:active blob exists and start that tour.
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only flow restore
   React.useEffect(() => {
-    if (!flow.session || flow.isStale) return
-    if (!tours.some((t) => t.id === flow.session!.tourId)) return
+    const restored = flow.session
+    if (!restored || flow.isStale) return
+    if (!tours.some((t) => t.id === restored.tourId)) return
     dispatch({
       type: 'START_TOUR',
-      tourId: flow.session.tourId,
-      stepIndex: flow.session.stepIndex,
+      tourId: restored.tourId,
+      stepIndex: restored.stepIndex,
     })
   }, [])
 
@@ -509,8 +510,8 @@ export function TourProvider({
     }
   }, [state.tourId, state.currentStepIndex, state.isActive, save, routePersistence.enabled])
 
-  // Throttled flowSession save on step change while active.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: only save on tracked state transitions
+  // Throttled flowSession save on step change while active. Deps are
+  // exhaustive — the throttle inside `flow.save` handles coalescing.
   React.useEffect(() => {
     if (state.isActive && state.tourId && routePersistence.flowSession) {
       flow.save(state.currentStepIndex)

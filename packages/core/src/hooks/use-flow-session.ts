@@ -1,10 +1,5 @@
 import * as React from 'react'
-import {
-  type FlowSessionV1,
-  isExpired,
-  parse,
-  serialize,
-} from '../lib/flow-session'
+import { type FlowSessionV1, isExpired, parse, serialize } from '../lib/flow-session'
 import type { FlowSessionConfig } from '../types/config'
 import { logger } from '../utils/logger'
 import { createPrefixedStorage, createStorageAdapter } from '../utils/storage'
