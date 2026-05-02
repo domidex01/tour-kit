@@ -1,9 +1,6 @@
 import type { ThemeMatcher, ThemeResolveContext, ThemeVariation } from './types'
 
-export function matchUrl(
-  matcher: Extract<ThemeMatcher, { kind: 'url' }>,
-  route: string,
-): boolean {
+export function matchUrl(matcher: Extract<ThemeMatcher, { kind: 'url' }>, route: string): boolean {
   const { pattern, mode = 'exact' } = matcher
   if (pattern instanceof RegExp) return pattern.test(route)
   switch (mode) {
@@ -18,22 +15,32 @@ export function matchUrl(
   }
 }
 
+function findExplicit(variations: ThemeVariation[]): ThemeVariation | undefined {
+  return variations.find((v) => v.when.kind === 'dark' || v.when.kind === 'light')
+}
+
+function findUrl(variations: ThemeVariation[], route: string | null): ThemeVariation | undefined {
+  if (!route) return undefined
+  return variations.find((v) => v.when.kind === 'url' && matchUrl(v.when, route))
+}
+
+function findSystem(
+  variations: ThemeVariation[],
+  scheme: 'light' | 'dark' | null
+): ThemeVariation | undefined {
+  if (!scheme) return undefined
+  return variations.find((v) => v.when.kind === 'system')
+}
+
 export function resolveTheme(
   variations: ThemeVariation[],
-  ctx: ThemeResolveContext,
+  ctx: ThemeResolveContext
 ): ThemeVariation | null {
-  for (const v of variations) {
-    if (v.when.kind === 'dark' || v.when.kind === 'light') return v
-  }
-  if (ctx.route) {
-    for (const v of variations) {
-      if (v.when.kind === 'url' && matchUrl(v.when, ctx.route)) return v
-    }
-  }
-  if (ctx.systemColorScheme) {
-    for (const v of variations) {
-      if (v.when.kind === 'system') return v
-    }
-  }
-  return variations[0] ?? null
+  return (
+    findExplicit(variations) ??
+    findUrl(variations, ctx.route) ??
+    findSystem(variations, ctx.systemColorScheme) ??
+    variations[0] ??
+    null
+  )
 }

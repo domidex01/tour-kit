@@ -23,33 +23,24 @@ export function ThemeProvider({
   defaultId = 'default',
   children,
 }: ThemeProviderProps) {
-  // SSR-safe initial state — never compute on server. The first client effect
-  // resolves and applies the active theme to avoid hydration mismatches.
+  // Server render and first client render both emit `defaultId` because state
+  // is initialized to it and no effect has run yet — so hydration matches.
+  // The effect below flips it to the resolved variation after mount.
   const [activeId, setActiveId] = React.useState<string>(defaultId)
   const [tokens, setTokens] = React.useState<ThemeTokens>({})
   const [route, setRoute] = React.useState<string | null>(null)
-  const [mounted, setMounted] = React.useState(false)
 
   const isDark = useMediaQuery('(prefers-color-scheme: dark)')
-  const systemColorScheme: 'light' | 'dark' | null = mounted
-    ? isDark
-      ? 'dark'
-      : 'light'
-    : null
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  const systemColorScheme: 'light' | 'dark' | null =
+    typeof window === 'undefined' ? null : isDark ? 'dark' : 'light'
 
   React.useEffect(() => {
     if (!router) return
     setRoute(router.getCurrentRoute())
-    const unsubscribe = router.onRouteChange((next) => setRoute(next))
-    return unsubscribe
+    return router.onRouteChange((next) => setRoute(next))
   }, [router])
 
   React.useEffect(() => {
-    if (!mounted) return
     if (forceMode) {
       const forced = variations.find((v) => v.when.kind === forceMode)
       if (forced) {
@@ -63,20 +54,13 @@ export function ThemeProvider({
       setActiveId(match.id)
       setTokens(match.theme)
     }
-  }, [variations, systemColorScheme, route, forceMode, mounted])
+  }, [variations, systemColorScheme, route, forceMode])
 
-  const value = React.useMemo<ThemeContextValue>(
-    () => ({ activeId, tokens }),
-    [activeId, tokens],
-  )
-
-  // Server render and first client render emit the same `defaultId` attribute,
-  // so hydration matches. The effect above flips it to the resolved variation.
-  const styleProp = mounted ? (tokens as React.CSSProperties) : undefined
+  const value = React.useMemo<ThemeContextValue>(() => ({ activeId, tokens }), [activeId, tokens])
 
   return (
     <ThemeContext.Provider value={value}>
-      <div data-tk-theme={mounted ? activeId : defaultId} style={styleProp}>
+      <div data-tk-theme={activeId} style={tokens as React.CSSProperties}>
         {children}
       </div>
     </ThemeContext.Provider>

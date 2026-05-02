@@ -1,5 +1,5 @@
-import type { RouterAdapter } from '@tour-kit/core'
 import { act, render } from '@testing-library/react'
+import type { RouterAdapter } from '@tour-kit/core'
 import * as React from 'react'
 import { renderToString } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -13,7 +13,7 @@ function createMockRouter(initial = '/'): RouterAdapter {
     getCurrentRoute: () => current,
     navigate: vi.fn((r: string) => {
       current = r
-      subs.forEach((cb) => cb(r))
+      for (const cb of subs) cb(r)
       return undefined
     }),
     matchRoute: vi.fn((p: string) => current === p),
@@ -45,7 +45,7 @@ describe('<ThemeProvider> (US-2)', () => {
           addEventListener: vi.fn(),
           removeEventListener: vi.fn(),
           dispatchEvent: vi.fn(),
-        }) as unknown as MediaQueryList,
+        }) as unknown as MediaQueryList
     )
   })
 
@@ -57,7 +57,7 @@ describe('<ThemeProvider> (US-2)', () => {
     const { getByTestId } = render(
       <ThemeProvider variations={variations}>
         <div data-testid="child">hello</div>
-      </ThemeProvider>,
+      </ThemeProvider>
     )
     expect(getByTestId('child').textContent).toBe('hello')
   })
@@ -66,7 +66,7 @@ describe('<ThemeProvider> (US-2)', () => {
     const { container } = render(
       <ThemeProvider variations={variations} forceMode="dark">
         <span>x</span>
-      </ThemeProvider>,
+      </ThemeProvider>
     )
     // Effects flush synchronously inside render with @testing-library; the
     // attribute should be present after the initial mount cycle.
@@ -86,7 +86,7 @@ describe('<ThemeProvider> (US-2)', () => {
     const { container } = render(
       <ThemeProvider variations={urlVariations} router={router}>
         <span>x</span>
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     // Initial route '/' matches nothing → falls back to first variation.
@@ -115,7 +115,7 @@ describe('<ThemeProvider> (US-2)', () => {
           addEventListener: vi.fn(),
           removeEventListener: vi.fn(),
           dispatchEvent: vi.fn(),
-        }) as unknown as MediaQueryList,
+        }) as unknown as MediaQueryList
     )
 
     const sysVariations: ThemeVariation[] = [
@@ -125,7 +125,7 @@ describe('<ThemeProvider> (US-2)', () => {
     const { container } = render(
       <ThemeProvider variations={sysVariations}>
         <span>x</span>
-      </ThemeProvider>,
+      </ThemeProvider>
     )
     // Effect resolves systemColorScheme = 'dark' → matches system variation.
     expect(container.querySelector('[data-tk-theme="systemDark"]')).not.toBeNull()
@@ -137,7 +137,7 @@ describe('<ThemeProvider> SSR safety (US-3)', () => {
     const html = renderToString(
       <ThemeProvider variations={variations} forceMode="dark">
         <span>x</span>
-      </ThemeProvider>,
+      </ThemeProvider>
     )
     expect(html).not.toContain('data-tk-theme="dark"')
     // Acceptable: neutral default attribute (no per-variation theme leak).
@@ -150,7 +150,7 @@ describe('<ThemeProvider> SSR safety (US-3)', () => {
     const html = renderToString(
       <ThemeProvider variations={variations} forceMode="dark">
         <span>x</span>
-      </ThemeProvider>,
+      </ThemeProvider>
     )
     expect(html).not.toMatch(/style="[^"]*--tour-card-bg/)
   })
@@ -183,7 +183,7 @@ describe('<ThemeProvider> render budget (US-2)', () => {
         <ThemeProvider variations={urlVariations} router={router}>
           <ContextConsumer />
         </ThemeProvider>
-      </React.Profiler>,
+      </React.Profiler>
     )
 
     // Reset render count after initial mount; we only measure the cost of one
@@ -207,7 +207,7 @@ describe('useThemeContext', () => {
     // Suppress React's expected error output for this negative-path test.
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(() => render(<Consumer />)).toThrow(
-      /useThemeContext must be used inside <ThemeProvider>/,
+      /useThemeContext must be used inside <ThemeProvider>/
     )
     spy.mockRestore()
   })
@@ -220,7 +220,7 @@ describe('useThemeContext', () => {
     const { getByTestId } = render(
       <ThemeProvider variations={variations} forceMode="light">
         <Consumer />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
     expect(getByTestId('active').textContent).toBe('light')
   })

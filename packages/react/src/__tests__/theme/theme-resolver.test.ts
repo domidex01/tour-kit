@@ -56,9 +56,7 @@ describe('resolveTheme: priority order (US-1)', () => {
   })
 
   it('returns null when variations is empty', () => {
-    expect(
-      resolveTheme([], { systemColorScheme: 'light', route: '/anywhere' }),
-    ).toBeNull()
+    expect(resolveTheme([], { systemColorScheme: 'light', route: '/anywhere' })).toBeNull()
   })
 })
 
@@ -100,7 +98,7 @@ describe('matchUrl modes (US-1)', () => {
 describe('resolver purity (US-4)', () => {
   const resolverPath = resolve(
     dirname(fileURLToPath(import.meta.url)),
-    '../../components/theme/theme-resolver.ts',
+    '../../components/theme/theme-resolver.ts'
   )
   const source = readFileSync(resolverPath, 'utf-8')
 
