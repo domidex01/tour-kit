@@ -32,6 +32,14 @@ function findSystem(
   return variations.find((v) => v.when.kind === 'system')
 }
 
+function findPredicate(
+  variations: ThemeVariation[],
+  traits: unknown
+): ThemeVariation | undefined {
+  if (traits == null) return undefined
+  return variations.find((v) => v.when.kind === 'predicate' && v.when.fn(traits))
+}
+
 export function resolveTheme(
   variations: ThemeVariation[],
   ctx: ThemeResolveContext
@@ -39,6 +47,7 @@ export function resolveTheme(
   return (
     findExplicit(variations) ??
     findUrl(variations, ctx.route) ??
+    findPredicate(variations, ctx.traits) ??
     findSystem(variations, ctx.systemColorScheme) ??
     variations[0] ??
     null
