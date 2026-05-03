@@ -111,7 +111,7 @@ describe('TourProgress', () => {
       render(<TourProgress current={2} total={4} variant="narrow" />)
       const bar = screen.getByRole('progressbar')
       expect(bar.getAttribute('aria-valuenow')).toBe('2')
-      expect(bar.getAttribute('aria-valuemin')).toBe('1')
+      expect(bar.getAttribute('aria-valuemin')).toBe('0')
       expect(bar.getAttribute('aria-valuemax')).toBe('4')
     })
 
@@ -127,7 +127,7 @@ describe('TourProgress', () => {
       render(<TourProgress current={2} total={4} variant="chain" />)
       const bar = screen.getByRole('progressbar')
       expect(bar.getAttribute('aria-valuenow')).toBe('2')
-      expect(bar.getAttribute('aria-valuemin')).toBe('1')
+      expect(bar.getAttribute('aria-valuemin')).toBe('0')
       expect(bar.getAttribute('aria-valuemax')).toBe('4')
     })
 
@@ -147,7 +147,7 @@ describe('TourProgress', () => {
       render(<TourProgress current={3} total={7} variant="numbered" />)
       const bar = screen.getByRole('progressbar')
       expect(bar.getAttribute('aria-valuenow')).toBe('3')
-      expect(bar.getAttribute('aria-valuemin')).toBe('1')
+      expect(bar.getAttribute('aria-valuemin')).toBe('0')
       expect(bar.getAttribute('aria-valuemax')).toBe('7')
     })
 

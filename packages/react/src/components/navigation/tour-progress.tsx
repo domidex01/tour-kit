@@ -26,6 +26,9 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
         <span
           ref={ref as React.Ref<HTMLSpanElement>}
           className={cn(tourProgressVariants({ variant }), className)}
+          role="status"
+          aria-live="polite"
+          aria-label={`Step ${current} of ${total}`}
           {...props}
         >
           {current} of {total}
@@ -42,7 +45,7 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
           className={cn(tourProgressVariants({ variant }), className)}
           role="progressbar"
           aria-valuenow={current}
-          aria-valuemin={1}
+          aria-valuemin={0}
           aria-valuemax={total}
           aria-label={`Step ${current} of ${total}`}
           {...props}
@@ -63,7 +66,7 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
           className={cn(tourProgressVariants({ variant }), className)}
           role="progressbar"
           aria-valuenow={current}
-          aria-valuemin={1}
+          aria-valuemin={0}
           aria-valuemax={total}
           aria-label={`Step ${current} of ${total}`}
           {...props}
@@ -75,7 +78,7 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
                 // biome-ignore lint/suspicious/noArrayIndexKey: Fixed-length segment array never reorders
                 key={`seg-${i}`}
                 data-status={status}
-                className="h-1 flex-1 rounded-full bg-muted data-[status=completed]:bg-primary data-[status=active]:bg-primary"
+                className="h-1 flex-1 rounded-full bg-muted data-[status=completed]:bg-primary data-[status=active]:bg-primary/60"
               />
             )
           })}
@@ -91,7 +94,7 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
           className={cn(tourProgressVariants({ variant }), className)}
           role="progressbar"
           aria-valuenow={current}
-          aria-valuemin={1}
+          aria-valuemin={0}
           aria-valuemax={total}
           aria-label={`Step ${current} of ${total}`}
           {...props}

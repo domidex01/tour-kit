@@ -50,6 +50,9 @@ export interface ChecklistTaskProps
   renderIcon?: (task: ChecklistTaskState) => React.ReactNode
 }
 
+type CompletionPhase = 'pending' | 'completing' | 'completed'
+const COMPLETING_DURATION_MS = 200
+
 /**
  * Individual task item component
  * Follows shadcn/ui patterns with CVA variants
@@ -68,9 +71,6 @@ export interface ChecklistTaskProps
  * <ChecklistTask task={task} size="lg" />
  * ```
  */
-type CompletionPhase = 'pending' | 'completing' | 'completed'
-const COMPLETING_DURATION_MS = 200
-
 export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps>(
   ({ task, onClick, onToggle, size, className, renderIcon, ...props }, ref) => {
     const { config, completed, locked, visible } = task
@@ -142,7 +142,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
         >
           {completed && (
             <svg
-              className={getIconSizeClasses(size)}
+              className={cn('tk-task-icon', getIconSizeClasses(size))}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -165,7 +165,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className={taskTitleVariants({ size, state })}>{config.title}</p>
+          <p className={cn('tk-task-label', taskTitleVariants({ size, state }))}>{config.title}</p>
           {config.description && (
             <p className={taskDescriptionVariants({ size })}>{config.description}</p>
           )}
