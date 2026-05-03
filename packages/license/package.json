@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/license",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "License key validation and activation for Tour Kit Pro packages — Polar.sh-backed key verification with offline cache, domain activation slots, render-time gating, and watermark enforcement",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",

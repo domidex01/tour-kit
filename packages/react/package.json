@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/react",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "React onboarding & product tour components — accessible, headless, Tailwind & shadcn-ready, with Next.js, React Router, TanStack adapters.",
   "author": "Tour Kit Team",
   "license": "MIT",

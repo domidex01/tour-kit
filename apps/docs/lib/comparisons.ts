@@ -492,6 +492,25 @@ export const ALTERNATIVES: AlternativeMeta[] = [
 
 export const BLOG_POSTS: BlogMeta[] = [
   {
+    slug: 'tour-kit-vs-usertour-feature-parity-update',
+    title: 'Tour Kit vs Usertour: feature parity update (Q2 2026)',
+    metaTitle: 'Tour Kit vs Usertour: Feature Parity Update (Q2 2026)',
+    description:
+      "Six client-only Usertour parity gaps closed in Tour Kit's 0.7.x release. Compare bundle size, architecture, and what's still server-only.",
+    keywords: [
+      'tour kit vs usertour',
+      'usertour alternative',
+      'usertour parity',
+      'open source product tour',
+      'headless react tour',
+    ],
+    category: 'Comparison',
+    published: true,
+    publishedAt: '2026-05-03',
+    lastUpdated: '2026-05-03',
+    ogImage: '/og-images/tour-kit-vs-usertour-feature-parity-update.png',
+  },
+  {
     slug: 'accessible-product-tour-react-tutorial',
     title: 'Build an accessible product tour in React: a step-by-step tutorial',
     metaTitle: 'Accessible Product Tour in React (WCAG 2.1 AA Tutorial, 2026)',

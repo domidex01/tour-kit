@@ -1,0 +1,147 @@
+---
+title: "Tour Kit vs Usertour: feature parity update (Q2 2026)"
+slug: "tour-kit-vs-usertour-feature-parity-update"
+description: "Six client-only Usertour parity gaps closed in Tour Kit's 0.7.x release. Compare bundle size, architecture, and what's still server-only."
+primary_keyword: "tour kit vs usertour"
+secondary_keywords: ["usertour alternative", "usertour parity", "open source product tour", "headless react tour"]
+category: "Comparison"
+schema_type: "TechArticle"
+date: "2026-05-03"
+updated: "2026-05-03"
+published: true
+ogImage: /og-images/tour-kit-vs-usertour-feature-parity-update.png
+---
+
+## TL;DR
+
+- Tour Kit's 0.7.x release closes six client-only parity gaps with Usertour: tour resume after reload, cross-tab pause, hidden branching steps, cross-page tours that survive a hard refresh, theme variations driven by URL or trait predicates, and `prefers-reduced-motion` honoured across announcements, surveys, and hints.
+- Total bundle cost across the wave: `@tour-kit/core` +2.9 KB, `@tour-kit/react` +4.1 KB, `@tour-kit/checklists` +0.3 KB, `@tour-kit/announcements`/`surveys`/`hints` +0.05 KB each. No new runtime dependencies.
+- Usertour still wins on the server-defined surface: a self-hosted admin panel, license-key activation flow, event trackers UI, and CSV export of analytics. None of those will land in Tour Kit until Phase 2 (an optional OSS dashboard).
+- If you need a no-code editor, real-time push without polling, and analytics that come with a dashboard, Usertour is still the right pick. If you want tours defined in code, no server, and a sub-12 KB React bundle, Tour Kit now matches Usertour on every client-only feature that actually changes a user's experience.
+
+## Who is Usertour, who is Tour Kit
+
+Usertour ships an open-source platform: a backend API, a self-hostable Next.js admin panel, a visual flow builder, and a vanilla-JS SDK that connects via Socket.IO. The buyer self-hosts the stack, points the SDK at it, and edits flows in a UI. There is no code-defined tour. v0.6.0 (March 2026) added an admin panel, license-key system, event trackers, and CSV export — it is moving fast on the dashboard surface.
+
+Tour Kit is a React-only library. There is no server, no DB, and no admin UI. Tours are TypeScript objects in `node_modules`. The whole stack ships across twelve packages totaling under 700 KB raw, with strict per-package size budgets enforced in CI: `core` ≤ 22 KB, `react` ≤ 36 KB, `hints` ≤ 30 KB. Steps accept JSX, not HTML strings. Accessibility ships as default behaviour, not a configuration toggle.
+
+The two are direct competitors in the open-source slot but ship opposite product shapes. We compare to Usertour, specifically, because the gap matrix matters to anyone choosing between the two.
+
+## What shipped in 0.7.x
+
+### 1. Tours that survive a reload
+
+`@tour-kit/core` now exposes `useFlowSession` and `useBroadcast`. Set `routePersistence.flowSession` on `<TourProvider>` and the active tour's `(tourId, stepIndex, currentRoute)` is written to `sessionStorage` (1 hour TTL, throttled writes at 200 ms trailing edge). On reload, the provider reads the blob and dispatches `START_TOUR` with the persisted step index. No server, no migrations.
+
+Before 0.7.x, a hard refresh during a tour reset progress to step 0 — fine for a one-screen onboarding but broken for any flow longer than 30 seconds. Usertour has had this since v0.1.11. We had it as a P0 gap.
+
+### 2. Multi-tab safety
+
+`routePersistence.crossTab` opts a tab into a `BroadcastChannel` (`tour-kit:flow`). When tab A starts a tour, tab B receives a `tour-started` message and pauses any active tour with the same id. The pause fires a new `onTourPaused(tourId, 'cross-tab')` callback so the host can show its own UI. Browsers without `BroadcastChannel` (older Safari) get a no-op; the tour still works.
+
+Usertour shipped multi-tab sync in v0.4.0 via Socket.IO — same outcome, server-coordinated. Our version costs zero round-trips.
+
+### 3. Branching with hidden steps
+
+`TourStep` gained `kind: 'visible' | 'hidden'`. Hidden steps run their `onEnter` (and the legacy `onShow`) lifecycle plus `onNext` branching, then auto-advance. No DOM card mounts. This is what you reach for when you need to fork a tour based on a trait — `userRole === 'admin'` goes to step 5, anyone else goes to step 8 — without flashing a UI between branches.
+
+Hidden steps are how Usertour does logic-only forks since v0.1.11. We had visible-only steps, so the fork required ugly workarounds (zero-size cards, opacity-zero hacks). Now you write `kind: 'hidden'` and the step runs its function and gets out of the way.
+
+### 4. Cross-page tours that don't break on hard refresh
+
+The big one. `TourStep` now accepts `routeChangeStrategy: 'auto' | 'prompt' | 'manual'`. The default `'auto'` calls `router.navigate(step.route)`, then awaits the new step's target via the existing `MutationObserver`-based `waitForElement` (3000 ms timeout, 100 ms polling). Failures surface as `TourRouteError({ code: 'TARGET_NOT_FOUND' | 'NAVIGATION_REJECTED' | 'TIMEOUT' })` through a new `onStepError` callback.
+
+The flow-session blob bumped to V2 with `currentRoute?: string`. On mount, if the persisted route differs from `window.location.pathname`, the provider navigates first, awaits the target, then dispatches `START_TOUR`. A user who hard-refreshes on `/billing` mid-tour now resumes on `/billing` at the correct step instead of restarting on `/dashboard`.
+
+V1 blobs migrate in-flight (`currentRoute: undefined`) so apps with persisted V1 sessions continue to load.
+
+### 5. Themes that flip with one attribute
+
+`@tour-kit/react` ships `<ThemeProvider>` with five matchers in a discriminated union: `'system' | 'dark' | 'light' | 'url' | 'predicate'`. Themes are applied via a `data-tk-theme` attribute on the provider root, switching CSS variables defined in `@tour-kit/react/styles/variables.css`. SSR renders a fixed `data-tk-theme="default"` with no inline style; the first client effect resolves the active variation.
+
+The interesting matcher is `'predicate'`: pass `traits` to the provider (it is generic over `TTraits`) and a predicate function — `(traits) => traits.plan === 'enterprise'` — flips the active variation as your host data changes. `useThemeVariation()` returns `{ activeId, tokens }` with a stable reference identity across unrelated re-renders, so it is safe in `useEffect` deps.
+
+Memoise the `traits` prop at the consumer. An inline `traits={{ plan: user.plan }}` object creates a new reference each render and forces the resolver effect to re-run.
+
+### 6. Reduced motion across the board
+
+Three packages — announcements, surveys, hints — now honour `prefers-reduced-motion: reduce`. Every `tailwindcss-animate` utility (`animate-in`, `fade-*`, `slide-*`, `zoom-*`) is gated behind Tailwind's `motion-safe:` prefix in the cva variant files. Custom `@keyframes` we own (`tour-pulse`, `tk-strike`, `tk-check-pop`) are wrapped in `@media (prefers-reduced-motion: reduce) { animation: none }`. Render-time class branches use a JS gate via `useReducedMotion()` from `@tour-kit/core`.
+
+This is defense-in-depth: `tailwindcss-animate` does not auto-respect the OS pref, so the prefix is required at the CVA layer. The `@media` wrap catches anything injected outside of Tailwind, and the JS hook covers cases where the class set is computed at render time. The cross-package contract is documented in our [reduced-motion guide](/docs/guides/reduced-motion).
+
+`<TourCard>` also picked up a 150 ms docking transition for placement flips, and `<ChecklistTask>` gained a 200 ms `pending → completing → completed` state machine with a strike-through label keyframe and check-icon scale-pop. Both are skipped under reduced motion.
+
+## The matrix: what's now at parity
+
+| Capability | Usertour | Tour Kit (0.7.x) | Status |
+| --- | --- | --- | --- |
+| Flow session persistence | Yes | `useFlowSession` (sessionStorage, 1h TTL) | Parity |
+| Multi-tab sync | Socket.IO | `BroadcastChannel` | Parity (no server) |
+| Cross-page flows | Server-coordinated | `routeChangeStrategy` + `waitForStepTarget` | Parity (client-only) |
+| Hidden / invisible steps | Yes | `TourStep['kind']: 'hidden'` | Parity |
+| Theme variations (dark / light / URL / trait) | Yes | `<ThemeProvider>` with 5 matchers | Parity (with predicate) |
+| `prefers-reduced-motion` plumbing | Not advertised | Three-tier defense across 6 packages | Tour Kit ahead |
+| Progress bar styles | 5 | 7 (`text`, `dots`, `bar`, `narrow`, `chain`, `numbered`, `none`) | Tour Kit ahead |
+| Tooltip docking transition | Yes | 150 ms `<TourCard>` placement tween | Parity |
+| Checklist completion animation | Yes | 200 ms state machine in `<ChecklistTask>` | Parity |
+| Bundle size (browser SDK) | Full SDK + Socket.IO client | Core ≤ 22 KB, React ≤ 36 KB | Tour Kit ahead |
+| WCAG 2.1 AA | Not advertised | Default behaviour, Lighthouse 100 | Tour Kit ahead |
+
+## What Usertour still has that we don't
+
+We do not pretend the gap closed entirely. Six things on Usertour's surface have no equivalent in Tour Kit, and they all live on the server.
+
+| Capability | Usertour | Tour Kit |
+| --- | --- | --- |
+| Visual no-code flow editor | Yes | No (by design) |
+| Self-hosted admin panel | Yes (v0.6.0) | No (Phase 2) |
+| License-key activation flow | Yes (v0.6.0) | Polar.sh checkout only |
+| Event trackers UI | Yes (v0.6.0) | Plugins to PostHog / Mixpanel / Amplitude |
+| CSV export of analytics | Yes (v0.6.0) | Out of scope |
+| Real-time push | Socket.IO | None |
+| Multi-environment publishing | Yes | Manual via env flags |
+| Segments / user profiles | Yes | None |
+
+The visual builder, segments, and CSV export are not on our roadmap. The dashboard is — see Phase 2 of our roadmap. Triggers fire only on measured demand.
+
+## Why the design is different
+
+Usertour bet on a server. That bet pays off when you need non-technical editors, real-time updates without redeploy, and a single backend behind multiple frontends. It costs you a Postgres instance, a license key for self-hosted enterprise features, and a Socket.IO client in every browser tab.
+
+Tour Kit bet on code as the source of truth. That bet pays off when you have a developer in the loop, you want tours under git, and you want the bundle small enough that you do not have to debate it. It costs you a non-technical editing surface (you do not have one), real-time updates without a deploy (you do not have those either), and a hosted analytics dashboard (your existing one — PostHog, Mixpanel, GA — is what we plug into).
+
+These are two different products shaped by two different opinions about who owns the tour. Neither is wrong; they are not interchangeable.
+
+## When to choose which
+
+Choose **Usertour** if:
+
+- A PM owns the flow content. They will build it in a UI; you will not deploy when they edit.
+- You can run and host a Next.js app + Postgres instance.
+- You need server-defined segments, CSV export, and real-time updates without redeploy.
+- You want one backend behind a vanilla-JS SDK that runs in React, Vue, Angular, or plain HTML.
+
+Choose **Tour Kit** if:
+
+- A developer owns the tour. Tours go through code review and ship with the app.
+- You want zero infra: no server, no database, no Socket.IO.
+- You are on React, you want JSX inside steps, and you want strict TypeScript with full inference.
+- Bundle size is a real budget. Sub-22 KB core matters for your mobile flows.
+- WCAG 2.1 AA is a default, not a sprint.
+
+## What's next for Tour Kit
+
+The terminal phase of "close client-only gaps" is shipping with this release. Next on the roadmap:
+
+- **Phase 2 (weeks 12–26)**: optional OSS dashboard MVP. Reads code-defined tours from the host app, ingests events from `@tour-kit/analytics`, exposes a per-tour completion view. No DB-defined flows, ever — code stays the source of truth. Triggers on 50+ Pro licenses + 10+ inbound dashboard requests.
+- **Phase 3 (weeks 26–40)**: hosted Tour Kit Cloud (Solo $19/mo, Team $49/mo). Triggers on 100+ self-host installs OR 30+ cloud waitlist signups before week 26.
+
+If you want the dashboard before we build it, file an issue at [github.com/domidex01/tour-kit](https://github.com/domidex01/tour-kit). Inbound demand is what flips the trigger.
+
+## Install
+
+```bash
+npm install @tour-kit/core @tour-kit/react
+```
+
+For the full feature set, see [the docs](/docs). Source on [GitHub](https://github.com/domidex01/tour-kit). Migration guides for [React Joyride](/blog/tour-kit-vs-react-joyride), [Shepherd.js](/blog/tour-kit-vs-shepherd-js), and Intro.js are live. A `from-usertour` migration toolkit will follow once Phase 2 lands.

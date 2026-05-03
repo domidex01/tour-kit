@@ -1,5 +1,61 @@
 # @tour-kit/surveys
 
+## 0.1.6
+
+### Patch Changes
+
+- 6d7f23f: Launch-hardening audit fixes A2–A5:
+
+  - announcements: stabilize the toast auto-dismiss `setInterval` so it no longer re-arms on every parent render (audit A2).
+  - ai: declare the chat message list with explicit `aria-live="polite"`, `aria-atomic="false"`, `aria-relevant="additions text"`, and `aria-busy` driven by streaming status so screen readers announce streaming tokens reliably (audit A3).
+  - announcements: render the spotlight overlay as a real `<button>` when `closeOnOverlayClick` is enabled, otherwise an inert `aria-hidden` div — element shape is now statically coherent and Enter/Space activation works through the native button (audit A4).
+  - surveys: trap focus inside `SurveyPopover`, dismiss with reason `"escape_key"` when Escape is pressed, and restore focus to the anchor on close (audit A5).
+
+- Phase 1: Close client-only Usertour parity gaps. Six features ship across six packages with no breaking changes:
+
+  - `useFlowSession` + `useBroadcast` for reload resume and cross-tab gating (`@tour-kit/core`)
+  - `TourStep['kind']: 'visible' | 'hidden'` for branching without UI mounts (`@tour-kit/core`, `@tour-kit/react`)
+  - `routeChangeStrategy` + `waitForStepTarget` + `TourRouteError` for cross-page tours that survive hard refresh (`@tour-kit/core`, `@tour-kit/react`)
+  - `<ThemeProvider>` with system / dark / light / URL / predicate matchers and `useThemeVariation()` (`@tour-kit/react`)
+  - 4 new `<TourProgress>` variants (`narrow`, `chain`, `numbered`, `none`) + 150ms tooltip docking + 200ms checklist completion animation (`@tour-kit/react`, `@tour-kit/checklists`)
+  - `useReducedMotion()` exported from `@tour-kit/core` and honored across `@tour-kit/announcements`, `@tour-kit/surveys`, `@tour-kit/hints`
+
+- 6b58a04: Honor `prefers-reduced-motion: reduce` for `<SurveyModal>` and `<SurveySlideout>`. Every `tailwindcss-animate` utility on the modal + slideout content/overlay is now gated behind Tailwind's `motion-safe:` prefix in the cva variant files. Adds `modalContentVariants`, `modalOverlayVariants`, `slideoutContentVariants`, `slideoutOverlayVariants` to the public exports for consumer customization, and re-exports `useReducedMotion` from `@tour-kit/core` for ergonomic in-package access. No breaking API changes.
+- a35d469: NPM SEO + README accuracy pass. Pure metadata and documentation — no public API changes.
+
+  **`package.json` (11 packages, license unchanged)** — descriptions trimmed to ≤150 chars (front-loading the primary keyword phrase before npm search-card truncation) and keyword arrays reordered with high-intent long-tail terms first (`react-onboarding`, `nextjs-onboarding`, `onboarding-wizard`, `onboarding-flow`, `react-product-tour`, `product-demo`, `feature-hint`, `in-app-survey`, etc.). Generic single-word keywords (`react`, `tour`) deprioritized; `*-alternative` keywords retained or expanded.
+
+  **READMEs (all 12 packages)** — rewritten on a unified template:
+
+  - H1 + keyword-phrase tagline + badge row (npm version, downloads, bundle, types, license)
+  - "Alternative to" line owning competitor-name SEO surface (`react-joyride-alternative`, `intro-js-alternative`, `shepherd-alternative`, etc.)
+  - Quick Start that compiles against the actual exports
+  - Comparison table vs major alternatives
+  - Complete API reference verified against `src/index.ts` for every package — no fictional or missing exports
+  - Cross-links to sibling `@tour-kit/*` npm pages
+  - Docs link migrated from the broken `tour-kit.dev` / `tourkit.dev` to the live `usertourkit.com`
+  - Correct license disclosure (MIT for free packages / Pro tier for proprietary)
+
+  **Accuracy bugs fixed in the rewrite** (none of these compiled before):
+
+  - `core` — Quick Start used `createTour({ id, steps })` and `createStep({ id, target, content: { title, description } })`, neither of which match the real signatures (`createTour(steps, options?)`, `createStep(target, content, options?)`). Rewritten using `createNamedTour` / `createNamedStep` for explicit IDs. Hook list was missing 4 public hooks (`useAdvanceOn`, `useBranch`, `useRoutePersistence`, `useUILibrary`) and 11 public utilities; all now documented.
+  - `checklists` — referenced non-existent `<ChecklistItem>` (real export is `<ChecklistTask>`), `useChecklistItem` (real: `useTask`), `useChecklistProgress` (real: `useChecklistsProgress`), and claimed MIT licensing despite being a Pro package.
+  - `analytics` — referenced non-existent `createAnalyticsPlugin`, `createSegmentPlugin`, and `useTrack`. Real plugin exports are `consolePlugin`, `posthogPlugin`, `mixpanelPlugin`, `amplitudePlugin`, `googleAnalyticsPlugin`. Real hooks are `useAnalytics` and `useAnalyticsOptional`. License also corrected from MIT to Pro.
+  - `adoption`, `core`, `analytics`, `checklists`, `license` — broken docs URLs (`tour-kit.dev` / `tourkit.dev`) updated to `usertourkit.com`.
+  - `media`, `surveys`, `scheduling` — these had no README at all; new ones added.
+
+  This is the foundation for the npm-search SEO push: with corrected metadata and accurate, intent-rich READMEs, npm full-text indexing surfaces the packages for `react-onboarding`, `nextjs-onboarding`, `onboarding-wizard`, and competitor-alternative searches that were previously dead air.
+
+- Updated dependencies
+- Updated dependencies [d5daf74]
+- Updated dependencies [cacf273]
+- Updated dependencies [fa98539]
+- Updated dependencies [716935c]
+- Updated dependencies [a35d469]
+  - @tour-kit/core@0.7.0
+  - @tour-kit/scheduling@0.1.5
+  - @tour-kit/license@1.0.3
+
 ## 0.1.5
 
 ### Patch Changes
