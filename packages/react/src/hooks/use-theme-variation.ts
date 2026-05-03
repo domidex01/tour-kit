@@ -3,7 +3,7 @@
 import { useThemeContext } from '../components/theme/theme-provider'
 import type { ThemeContextValue } from '../components/theme/types'
 
-export interface UseThemeVariationReturn extends ThemeContextValue {}
+export type UseThemeVariationReturn = ThemeContextValue
 
 /**
  * Subscribe to the active theme variation.

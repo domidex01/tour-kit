@@ -39,19 +39,24 @@ Honors the host browser's `prefers-color-scheme` media query.
 
 ### 2. Explicit dark / light (`kind: 'dark' | 'light'`)
 
-A variation with `kind: 'dark'` or `kind: 'light'` is chosen unconditionally. Combine with the `forceMode` prop to flip between them programmatically.
+The first variation in your list with `kind: 'dark'` or `kind: 'light'` is picked unconditionally — these matchers pre-empt URL, predicate, and system. Use `forceMode` to override which one wins; without `forceMode`, declaration order breaks the tie.
 
 ```tsx
-<ThemeProvider
-  forceMode="dark"
-  variations={[
-    { id: 'darkVar', when: { kind: 'dark' }, theme: { '--tour-card-bg': '#000' } },
-    { id: 'lightVar', when: { kind: 'light' }, theme: { '--tour-card-bg': '#fff' } },
-  ]}
->
-  <App />
-</ThemeProvider>
+const variations = [
+  { id: 'darkVar', when: { kind: 'dark' }, theme: { '--tour-card-bg': '#000' } },
+  { id: 'lightVar', when: { kind: 'light' }, theme: { '--tour-card-bg': '#fff' } },
+]
+
+// forceMode={null} (default) → declaration order wins → 'darkVar'
+<ThemeProvider variations={variations}><App /></ThemeProvider>
+
+// forceMode="light" → flips to 'lightVar' regardless of declaration order
+<ThemeProvider variations={variations} forceMode="light"><App /></ThemeProvider>
 ```
+
+<Callout type="warn" title="Heads up">
+Putting a `kind: 'dark'` or `kind: 'light'` variation in your list pre-empts every other matcher kind. Drop them entirely (and rely on `kind: 'system'`) if you want system signals to win.
+</Callout>
 
 ### 3. URL (`kind: 'url'`)
 
@@ -76,16 +81,14 @@ Resolve based on arbitrary, host-supplied data — plan tier, feature flags, A/B
 
 ```tsx
 import { useMemo } from 'react'
-import { ThemeProvider, type ThemePredicate } from '@tour-kit/react'
+import { ThemeProvider } from '@tour-kit/react'
 
 interface MyTraits {
   plan: 'free' | 'enterprise'
   betaUser: boolean
 }
 
-const isEnterprise: ThemePredicate<MyTraits> = (t) => t.plan === 'enterprise'
-
-function App({ user }: { user: { plan: 'free' | 'enterprise'; betaUser: boolean } }) {
+function App({ user }: { user: MyTraits }) {
   // ✅ Memoize traits — see Performance below
   const traits = useMemo<MyTraits>(
     () => ({ plan: user.plan, betaUser: user.betaUser }),
@@ -98,7 +101,9 @@ function App({ user }: { user: { plan: 'free' | 'enterprise'; betaUser: boolean 
       variations={[
         {
           id: 'enterprise',
-          when: { kind: 'predicate', fn: isEnterprise as ThemePredicate<unknown> },
+          // Narrow `t` inline — the matcher stores `ThemePredicate<unknown>`
+          // because `ThemeMatcher` is intentionally non-generic.
+          when: { kind: 'predicate', fn: (t) => (t as MyTraits).plan === 'enterprise' },
           theme: { '--tour-card-bg': '#0f172a' },
         },
         { id: 'system', when: { kind: 'system' }, theme: { '--tour-card-bg': '#fff' } },
@@ -110,7 +115,7 @@ function App({ user }: { user: { plan: 'free' | 'enterprise'; betaUser: boolean 
 }
 ```
 
-The matcher itself stores the function as `ThemePredicate<unknown>` so `ThemeMatcher` is not generic — the host's `TTraits` flows through `<ThemeProvider<TTraits>>`.
+The provider's `TTraits` types the `traits` prop. The matcher's `fn` receives `unknown` — narrow inside the function. We chose this over a generic `ThemeMatcher` to keep the matcher list itself heterogeneous (different predicates can read different shapes of host data).
 
 ### 5. Combining all five
 
@@ -195,11 +200,11 @@ This budget is verified by the package's stress test (100-trait fixture, single 
 ```tsx
 type AppTraits = { plan: 'free' | 'enterprise' }
 
-<ThemeProvider<AppTraits>
-  traits={{ plan: 'enterprise' }}
-  variations={variations}
->
-  {/* `traits.plan` is typed as 'free' | 'enterprise' inside callbacks */}
+const traits = useMemo<AppTraits>(() => ({ plan: user.plan }), [user.plan])
+
+<ThemeProvider<AppTraits> traits={traits} variations={variations}>
+  {/* `traits.plan` is typed as 'free' | 'enterprise' on the provider's prop;
+      narrow inside the predicate fn (which receives `unknown`). */}
 </ThemeProvider>
 ```
 
@@ -208,8 +213,8 @@ type AppTraits = { plan: 'free' | 'enterprise' }
 | Export | Kind | Description |
 |---|---|---|
 | `<ThemeProvider<TTraits>>` | component | Resolves a variation from `variations` + context (system, route, traits) |
-| `useThemeVariation()` | hook | Returns `{ activeId, tokens }` with stable identity |
-| `useThemeContext()` | hook | Same as `useThemeVariation` (older alias) |
+| `useThemeVariation()` | hook | **Recommended.** Returns `{ activeId, tokens }` with stable identity |
+| `useThemeContext()` | hook | Phase 1.4a primitive that `useThemeVariation` delegates to. Both are exported; new code should prefer `useThemeVariation`. |
 | `resolveTheme(variations, ctx)` | pure fn | Headless resolver for SSR / tests |
 | `ThemePredicate<TTraits>` | type | `(traits: TTraits) => boolean` |
 | `ThemeMatcher` | type | Discriminated union of all five matcher kinds |

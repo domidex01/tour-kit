@@ -1,8 +1,9 @@
 import { render } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { ThemeProvider } from '../../components/theme/theme-provider'
 import type { ThemeVariation } from '../../components/theme/types'
 import { type UseThemeVariationReturn, useThemeVariation } from '../../hooks/use-theme-variation'
+import { mockMatchMedia } from './_helpers'
 
 const variations: ThemeVariation[] = [
   { id: 'system', when: { kind: 'system' }, theme: { '--tour-card-bg': '#fff' } },
@@ -20,19 +21,7 @@ function Capture() {
 
 describe('useThemeVariation (Phase 1.4b US-2)', () => {
   beforeEach(() => {
-    vi.mocked(window.matchMedia).mockImplementation(
-      (query: string) =>
-        ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        }) as unknown as MediaQueryList
-    )
+    mockMatchMedia()
   })
 
   afterEach(() => {
