@@ -1,20 +1,18 @@
 // Timezone utilities
 export {
   formatDateString,
-  getCurrentMinutesInTimezone,
   getDateInTimezone,
   getUserTimezone,
   isValidTimezone,
   parseDateString,
   parseTimeString,
-  toMinutesSinceMidnight,
 } from './timezone'
 
 // Date range utilities
-export { getDateRangeStart, isWithinDateRange } from './date-range'
+export { isWithinDateRange } from './date-range'
 
 // Time of day utilities
-export { getNextTimeRangeStart, isWithinAnyTimeRange, isWithinTimeRange } from './time-of-day'
+export { isWithinAnyTimeRange, isWithinTimeRange } from './time-of-day'
 
 // Day of week utilities
 export {
@@ -22,7 +20,6 @@ export {
   dayNameToNumber,
   dayNumberToName,
   getDayOfWeek,
-  getNextAllowedDay,
   isAllowedDay,
 } from './day-of-week'
 

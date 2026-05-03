@@ -246,10 +246,22 @@ export function AnnouncementsProvider({
 
   const schedulerRef = React.useRef<AnnouncementScheduler>(new AnnouncementScheduler(queueConfig))
 
+  // Tracks pending "show next in queue" timers so they can be cleared on unmount.
+  const queueTimersRef = React.useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
+
   // Update scheduler config when it changes
   React.useEffect(() => {
     schedulerRef.current.updateConfig(queueConfig)
   }, [queueConfig])
+
+  // Clear any pending queue advance timers when the provider unmounts.
+  React.useEffect(() => {
+    const timers = queueTimersRef.current
+    return () => {
+      for (const t of timers) clearTimeout(t)
+      timers.clear()
+    }
+  }, [])
 
   // Persist state to storage
   const persistState = React.useCallback(
@@ -459,12 +471,14 @@ export function AnnouncementsProvider({
 
       // Show next in queue after delay
       if (schedulerRef.current.autoShow && schedulerRef.current.queueSize > 0) {
-        setTimeout(() => {
+        const timer = setTimeout(() => {
+          queueTimersRef.current.delete(timer)
           const nextId = schedulerRef.current.getNext()
           if (nextId) {
             show(nextId)
           }
         }, schedulerRef.current.delayBetween)
+        queueTimersRef.current.add(timer)
       }
     },
     [state.announcements, state.configs, persistState, onAnnouncementDismiss, show]
@@ -493,12 +507,14 @@ export function AnnouncementsProvider({
 
       // Show next in queue after delay
       if (schedulerRef.current.autoShow && schedulerRef.current.queueSize > 0) {
-        setTimeout(() => {
+        const timer = setTimeout(() => {
+          queueTimersRef.current.delete(timer)
           const nextId = schedulerRef.current.getNext()
           if (nextId) {
             show(nextId)
           }
         }, schedulerRef.current.delayBetween)
+        queueTimersRef.current.add(timer)
       }
     },
     [state.announcements, state.configs, persistState, onAnnouncementComplete, show]

@@ -26,6 +26,7 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
         <span
           ref={ref as React.Ref<HTMLSpanElement>}
           className={cn(tourProgressVariants({ variant }), className)}
+          // biome-ignore lint/a11y/useSemanticElements: TourProgressProps extends div props; <output> requires HTMLOutputElement event types
           role="status"
           {...props}
         >
