@@ -76,9 +76,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
     const { config, completed, locked, visible } = task
     const reducedMotion = useReducedMotion()
 
-    const [phase, setPhase] = React.useState<CompletionPhase>(
-      completed ? 'completed' : 'pending'
-    )
+    const [phase, setPhase] = React.useState<CompletionPhase>(completed ? 'completed' : 'pending')
 
     React.useEffect(() => {
       if (!completed) {

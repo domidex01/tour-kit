@@ -170,9 +170,7 @@ describe('TourProgress', () => {
     it.each(['narrow', 'chain', 'numbered'] as const)(
       'variant=%s reports zero axe violations',
       async (variant) => {
-        const { container } = render(
-          <TourProgress current={2} total={4} variant={variant} />
-        )
+        const { container } = render(<TourProgress current={2} total={4} variant={variant} />)
         const results = await axe(container)
         expect(results).toHaveNoViolations()
       }

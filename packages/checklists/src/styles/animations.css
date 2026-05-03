@@ -13,11 +13,11 @@
  * forces the attribute (or overrides the JS hook).
  */
 
-[data-tk-completing='true'] .tk-task-label {
+[data-tk-completing="true"] .tk-task-label {
   animation: tk-strike 200ms ease-out forwards;
 }
 
-[data-tk-completing='true'] .tk-task-icon {
+[data-tk-completing="true"] .tk-task-icon {
   animation: tk-check-pop 200ms ease-out forwards;
 }
 
@@ -41,8 +41,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-tk-completing='true'] .tk-task-label,
-  [data-tk-completing='true'] .tk-task-icon {
+  [data-tk-completing="true"] .tk-task-label,
+  [data-tk-completing="true"] .tk-task-icon {
     animation: none;
   }
 }

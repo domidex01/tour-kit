@@ -69,8 +69,7 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
           {...props}
         >
           {Array.from({ length: total }, (_, i) => {
-            const status =
-              i + 1 < current ? 'completed' : i + 1 === current ? 'active' : 'pending'
+            const status = i + 1 < current ? 'completed' : i + 1 === current ? 'active' : 'pending'
             return (
               <div
                 // biome-ignore lint/suspicious/noArrayIndexKey: Fixed-length segment array never reorders
