@@ -27,8 +27,6 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
           ref={ref as React.Ref<HTMLSpanElement>}
           className={cn(tourProgressVariants({ variant }), className)}
           role="status"
-          aria-live="polite"
-          aria-label={`Step ${current} of ${total}`}
           {...props}
         >
           {current} of {total}
