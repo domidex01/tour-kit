@@ -19,11 +19,14 @@ export interface TourProgressProps
 
 export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
   ({ current, total, variant = 'dots', className, ...props }, ref) => {
+    if (variant === 'none') return null
+
     if (variant === 'text') {
       return (
         <span
           ref={ref as React.Ref<HTMLSpanElement>}
           className={cn(tourProgressVariants({ variant }), className)}
+          role="status"
           {...props}
         >
           {current} of {total}
@@ -31,7 +34,7 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
       )
     }
 
-    if (variant === 'bar') {
+    if (variant === 'bar' || variant === 'narrow') {
       const percentage = total > 0 ? (current / total) * 100 : 0
       return (
         // biome-ignore lint/a11y/useFocusableInteractive: Progress bar is read-only indicator
@@ -40,7 +43,7 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
           className={cn(tourProgressVariants({ variant }), className)}
           role="progressbar"
           aria-valuenow={current}
-          aria-valuemin={1}
+          aria-valuemin={0}
           aria-valuemax={total}
           aria-label={`Step ${current} of ${total}`}
           {...props}
@@ -49,6 +52,54 @@ export const TourProgress = React.forwardRef<HTMLDivElement, TourProgressProps>(
             className="h-full bg-primary transition-all duration-300"
             style={{ width: `${percentage}%` }}
           />
+        </div>
+      )
+    }
+
+    if (variant === 'chain') {
+      return (
+        // biome-ignore lint/a11y/useFocusableInteractive: Progress bar is read-only indicator
+        <div
+          ref={ref}
+          className={cn(tourProgressVariants({ variant }), className)}
+          role="progressbar"
+          aria-valuenow={current}
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-label={`Step ${current} of ${total}`}
+          {...props}
+        >
+          {Array.from({ length: total }, (_, i) => {
+            const status = i + 1 < current ? 'completed' : i + 1 === current ? 'active' : 'pending'
+            return (
+              <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: Fixed-length segment array never reorders
+                key={`seg-${i}`}
+                data-status={status}
+                className="h-1 flex-1 rounded-full bg-muted data-[status=completed]:bg-primary data-[status=active]:bg-primary/60"
+              />
+            )
+          })}
+        </div>
+      )
+    }
+
+    if (variant === 'numbered') {
+      return (
+        // biome-ignore lint/a11y/useFocusableInteractive: Progress bar is read-only indicator
+        <div
+          ref={ref}
+          className={cn(tourProgressVariants({ variant }), className)}
+          role="progressbar"
+          aria-valuenow={current}
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-label={`Step ${current} of ${total}`}
+          {...props}
+        >
+          <span className="font-medium">{current}</span>
+          <span className="text-muted-foreground">/</span>
+          <span>{total}</span>
         </div>
       )
     }

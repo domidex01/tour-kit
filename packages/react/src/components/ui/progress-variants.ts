@@ -6,9 +6,13 @@ import { type VariantProps, cva } from 'class-variance-authority'
 export const tourProgressVariants = cva('', {
   variants: {
     variant: {
-      dots: 'flex gap-1',
-      bar: 'h-1.5 w-20 overflow-hidden rounded-full bg-secondary',
       text: 'text-sm text-muted-foreground',
+      narrow: 'h-0.5 w-12 overflow-hidden rounded-full bg-secondary',
+      bar: 'h-1.5 w-20 overflow-hidden rounded-full bg-secondary',
+      chain: 'flex items-center gap-1',
+      dots: 'flex gap-1',
+      numbered: 'inline-flex items-center gap-1 text-sm',
+      none: '',
     },
   },
   defaultVariants: {

@@ -1,6 +1,10 @@
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { useMediaQuery, usePrefersReducedMotion } from '../../hooks/use-media-query'
+import {
+  useMediaQuery,
+  usePrefersReducedMotion,
+  useReducedMotion,
+} from '../../hooks/use-media-query'
 
 describe('useMediaQuery', () => {
   beforeEach(() => {
@@ -133,5 +137,80 @@ describe('usePrefersReducedMotion', () => {
 
     renderHook(() => usePrefersReducedMotion())
     expect(window.matchMedia).toHaveBeenCalledWith('(prefers-reduced-motion: reduce)')
+  })
+})
+
+describe('useReducedMotion (SSR-safe-default-true)', () => {
+  it('renderToString returns reduce=true (Comeau pattern)', async () => {
+    const React = await import('react')
+    const { renderToString } = await import('react-dom/server')
+
+    function Probe() {
+      const reduce = useReducedMotion()
+      return React.createElement('span', { 'data-reduce': String(reduce) })
+    }
+
+    const html = renderToString(React.createElement(Probe))
+    expect(html).toContain('data-reduce="true"')
+  })
+
+  it('flips to actual matchMedia value after effect (matches=false → reduce=false)', () => {
+    vi.mocked(window.matchMedia).mockReturnValue({
+      matches: false,
+      media: '(prefers-reduced-motion: reduce)',
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+    } as unknown as MediaQueryList)
+
+    const { result } = renderHook(() => useReducedMotion())
+    // After effect flush (renderHook flushes effects synchronously), the
+    // wrapper has flipped from the SSR default `true` to actual matchMedia.
+    expect(result.current).toBe(false)
+  })
+
+  it('stays true when matchMedia reports reduce=true', () => {
+    vi.mocked(window.matchMedia).mockReturnValue({
+      matches: true,
+      media: '(prefers-reduced-motion: reduce)',
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+    } as unknown as MediaQueryList)
+
+    const { result } = renderHook(() => useReducedMotion())
+    expect(result.current).toBe(true)
+  })
+
+  it('responds to matchMedia change events', () => {
+    let changeHandler: ((e: MediaQueryListEvent) => void) | undefined
+
+    vi.mocked(window.matchMedia).mockReturnValue({
+      matches: false,
+      media: '(prefers-reduced-motion: reduce)',
+      addEventListener: vi.fn((event, handler) => {
+        if (event === 'change') changeHandler = handler as (e: MediaQueryListEvent) => void
+      }),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+    } as unknown as MediaQueryList)
+
+    const { result } = renderHook(() => useReducedMotion())
+    expect(result.current).toBe(false)
+
+    act(() => {
+      changeHandler?.({ matches: true } as MediaQueryListEvent)
+    })
+
+    expect(result.current).toBe(true)
   })
 })

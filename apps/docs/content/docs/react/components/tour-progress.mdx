@@ -22,7 +22,7 @@ import { TourProgress } from '@tour-kit/react';
 <TypeTable
   type={{
     className: { type: 'string', description: 'Additional CSS classes' },
-    variant: { type: '"dots" | "text" | "bar"', default: '"text"', description: 'Progress display style' },
+    variant: { type: '"text" | "narrow" | "bar" | "chain" | "dots" | "numbered" | "none"', default: '"dots"', description: 'Progress display style' },
     showTotal: { type: 'boolean', default: 'true', description: 'Show total step count' },
     format: { type: '(current, total) => string', description: 'Custom format function' },
   }}
@@ -30,14 +30,31 @@ import { TourProgress } from '@tour-kit/react';
 
 ## Variants
 
-### Text (Default)
+| Variant | Renders | Role / a11y |
+|---------|---------|-------------|
+| `text` | `"<current> of <total>"` text | `role="status"` |
+| `narrow` | thin progress bar (`h-0.5 w-12`) | `role="progressbar"` + `aria-valuenow/min/max` |
+| `bar` | progress bar (`h-1.5 w-20`) | `role="progressbar"` + `aria-valuenow/min/max` |
+| `chain` | N connected segments, completed/active filled | `role="progressbar"` + `aria-valuenow/min/max` |
+| `dots` | one dot per step, current highlighted | `role="group"` + per-dot `aria-current` |
+| `numbered` | `"<current> / <total>"` chip | `role="progressbar"` + `aria-valuenow/min/max` |
+| `none` | renders `null` | n/a |
+
+### Text
 
 ```tsx
 <TourProgress variant="text" />
-// Renders: "Step 1 of 5"
+// Renders: "1 of 5"
 ```
 
-### Dots
+### Narrow
+
+```tsx
+<TourProgress variant="narrow" />
+// Renders: thin filled progress bar
+```
+
+### Dots (Default)
 
 ```tsx
 <TourProgress variant="dots" />
@@ -49,6 +66,27 @@ import { TourProgress } from '@tour-kit/react';
 ```tsx
 <TourProgress variant="bar" />
 // Renders: [====    ] 40%
+```
+
+### Chain
+
+```tsx
+<TourProgress variant="chain" />
+// Renders: ▰ ▰ ▰ ▱ ▱  (segments completed → active → pending)
+```
+
+### Numbered
+
+```tsx
+<TourProgress variant="numbered" />
+// Renders: "2 / 5"
+```
+
+### None
+
+```tsx
+<TourProgress variant="none" />
+// Renders nothing — useful for compound layouts that only sometimes show progress
 ```
 
 ## Custom Format

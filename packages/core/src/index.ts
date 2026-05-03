@@ -77,6 +77,7 @@ export {
   usePersistence,
   useMediaQuery,
   usePrefersReducedMotion,
+  useReducedMotion,
   useRoutePersistence,
   useFlowSession,
   useBroadcast,

@@ -7,6 +7,7 @@
     "onboarding-flow",
     "cross-page-tour",
     "headless-custom",
+    "progress-variants",
     "dashboard"
   ]
 }

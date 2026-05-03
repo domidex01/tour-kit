@@ -1,0 +1,85 @@
+---
+title: Progress Variants
+description: >-
+  Render every TourProgress variant — text, narrow, bar, chain, dots, numbered,
+  none — with accessible roles and reduced-motion-friendly transitions
+howto: true
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`<TourProgress />` ships seven variants. All visible variants expose a screen-reader-friendly role and `aria-value*` attributes. The `none` variant returns `null` for layouts that only sometimes show progress.
+
+## Side-by-side comparison
+
+```tsx
+import { TourProgress } from '@tour-kit/react';
+
+export function ProgressGallery() {
+  const current = 2;
+  const total = 5;
+
+  return (
+    <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
+      <Cell label="text">
+        <TourProgress current={current} total={total} variant="text" />
+      </Cell>
+      <Cell label="narrow">
+        <TourProgress current={current} total={total} variant="narrow" />
+      </Cell>
+      <Cell label="bar">
+        <TourProgress current={current} total={total} variant="bar" />
+      </Cell>
+      <Cell label="chain">
+        <TourProgress current={current} total={total} variant="chain" />
+      </Cell>
+      <Cell label="dots">
+        <TourProgress current={current} total={total} variant="dots" />
+      </Cell>
+      <Cell label="numbered">
+        <TourProgress current={current} total={total} variant="numbered" />
+      </Cell>
+    </div>
+  );
+}
+
+function Cell({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-lg border p-4">
+      <span className="text-xs uppercase tracking-wide text-muted-foreground">{label}</span>
+      {children}
+    </div>
+  );
+}
+```
+
+<Callout type="info">
+  The `none` variant is omitted from the gallery on purpose — it renders `null`. Use it when a parent layout decides whether progress should be visible at all (e.g. hide on the first/last step, or behind a feature flag).
+</Callout>
+
+## Choosing a variant
+
+| Variant | Best for |
+|---------|----------|
+| `text` | Compact written summaries inside a card footer |
+| `narrow` | Inline progress next to a title or breadcrumb |
+| `bar` | Standard product tours with explicit "% complete" feel |
+| `chain` | Linear flows where each segment maps to a visited milestone |
+| `dots` | Carousel-style step indicators (the default) |
+| `numbered` | Wizards where the user benefits from a "step N of M" badge |
+| `none` | Compound layouts that opt out of progress rendering |
+
+## Accessibility
+
+Every visible variant exposes:
+
+- `aria-valuenow={current}` (1-indexed)
+- `aria-valuemin={1}`, `aria-valuemax={total}`
+- `aria-label="Step N of M"` (or `role="status"` for the `text` variant)
+
+This means screen readers announce the same progress regardless of which variant you ship.
+
+## See also
+
+- [Animations guide](/docs/guides/animations) — covers the docking transition on `<TourCard>` and the checklist completion animation, both of which honor `useReducedMotion()`.
+- [TourProgress API](/docs/react/components/tour-progress)

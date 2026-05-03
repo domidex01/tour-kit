@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@tour-kit/core'
+import { cn, useReducedMotion } from '@tour-kit/core'
 import * as React from 'react'
 import type { ChecklistTaskState } from '../types'
 import {
@@ -50,6 +50,9 @@ export interface ChecklistTaskProps
   renderIcon?: (task: ChecklistTaskState) => React.ReactNode
 }
 
+type CompletionPhase = 'pending' | 'completing' | 'completed'
+const COMPLETING_DURATION_MS = 200
+
 /**
  * Individual task item component
  * Follows shadcn/ui patterns with CVA variants
@@ -71,6 +74,28 @@ export interface ChecklistTaskProps
 export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps>(
   ({ task, onClick, onToggle, size, className, renderIcon, ...props }, ref) => {
     const { config, completed, locked, visible } = task
+    const reducedMotion = useReducedMotion()
+
+    const [phase, setPhase] = React.useState<CompletionPhase>(completed ? 'completed' : 'pending')
+
+    React.useEffect(() => {
+      if (!completed) {
+        setPhase('pending')
+        return
+      }
+      // Task just toggled to completed
+      setPhase((prev) => {
+        if (prev === 'completed') return prev
+        if (reducedMotion) return 'completed'
+        return 'completing'
+      })
+    }, [completed, reducedMotion])
+
+    React.useEffect(() => {
+      if (phase !== 'completing') return
+      const timer = setTimeout(() => setPhase('completed'), COMPLETING_DURATION_MS)
+      return () => clearTimeout(timer)
+    }, [phase])
 
     if (!visible) return null
 
@@ -104,6 +129,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
         role="button"
         tabIndex={locked ? -1 : 0}
         aria-disabled={locked}
+        data-tk-completing={phase === 'completing' ? 'true' : undefined}
         {...props}
       >
         {/* Checkbox */}
@@ -116,7 +142,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
         >
           {completed && (
             <svg
-              className={getIconSizeClasses(size)}
+              className={cn('tk-task-icon', getIconSizeClasses(size))}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -139,7 +165,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className={taskTitleVariants({ size, state })}>{config.title}</p>
+          <p className={cn('tk-task-label', taskTitleVariants({ size, state }))}>{config.title}</p>
           {config.description && (
             <p className={taskDescriptionVariants({ size })}>{config.description}</p>
           )}
