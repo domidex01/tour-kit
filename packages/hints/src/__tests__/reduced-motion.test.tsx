@@ -44,6 +44,10 @@ describe('hints: HintHotspot pulse JS-gate (US-4)', () => {
   it('applies animate-tour-pulse class when reduce mode is false (post-effect)', () => {
     mockMatchMedia(false)
 
+    // useReducedMotion's SSR-safe default is `true`; the hook's useEffect flips
+    // it to matchMedia's value (false here). render() wraps in act and flushes
+    // the effect, so the assertion sees the post-effect state — no awaitable
+    // needed.
     render(<HintHotspot targetRect={mockRect} position="top-right" pulse isOpen={false} />)
 
     const button = screen.getByRole('button', { name: 'Show hint' })
