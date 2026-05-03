@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/analytics",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Plugin-based analytics for React tours & onboarding — ship events to PostHog, Mixpanel, Amplitude, GA4 or any custom backend.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
