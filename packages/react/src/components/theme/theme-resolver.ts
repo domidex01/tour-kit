@@ -32,10 +32,7 @@ function findSystem(
   return variations.find((v) => v.when.kind === 'system')
 }
 
-function findPredicate(
-  variations: ThemeVariation[],
-  traits: unknown
-): ThemeVariation | undefined {
+function findPredicate(variations: ThemeVariation[], traits: unknown): ThemeVariation | undefined {
   if (traits == null) return undefined
   return variations.find((v) => v.when.kind === 'predicate' && v.when.fn(traits))
 }

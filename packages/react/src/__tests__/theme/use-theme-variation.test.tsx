@@ -2,10 +2,7 @@ import { render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ThemeProvider } from '../../components/theme/theme-provider'
 import type { ThemeVariation } from '../../components/theme/types'
-import {
-  useThemeVariation,
-  type UseThemeVariationReturn,
-} from '../../hooks/use-theme-variation'
+import { type UseThemeVariationReturn, useThemeVariation } from '../../hooks/use-theme-variation'
 
 const variations: ThemeVariation[] = [
   { id: 'system', when: { kind: 'system' }, theme: { '--tour-card-bg': '#fff' } },
@@ -42,6 +39,12 @@ describe('useThemeVariation (Phase 1.4b US-2)', () => {
     captured = []
   })
 
+  function lastCaptured(): UseThemeVariationReturn {
+    const last = captured[captured.length - 1]
+    if (!last) throw new Error('expected at least one captured render')
+    return last
+  }
+
   it('returns the active variation', () => {
     render(
       <ThemeProvider variations={variations}>
@@ -49,7 +52,7 @@ describe('useThemeVariation (Phase 1.4b US-2)', () => {
       </ThemeProvider>
     )
     expect(captured.length).toBeGreaterThan(0)
-    const last = captured[captured.length - 1]!
+    const last = lastCaptured()
     expect(last.activeId).toBe('system')
     expect(last.tokens).toEqual({ '--tour-card-bg': '#fff' })
   })
@@ -62,7 +65,7 @@ describe('useThemeVariation (Phase 1.4b US-2)', () => {
     )
     // Drop mount captures — the resolver effect commits a fresh value once
     // after the first render, so we only compare references after settle.
-    const settled = captured[captured.length - 1]!
+    const settled = lastCaptured()
     captured = []
     for (let i = 0; i < 5; i++) {
       result.rerender(
@@ -87,7 +90,7 @@ describe('useThemeVariation (Phase 1.4b US-2)', () => {
         <Capture />
       </ThemeProvider>
     )
-    const before = captured[captured.length - 1]!
+    const before = lastCaptured()
     expect(before.activeId).toBe('lightVar')
     captured = []
     result.rerender(
@@ -95,8 +98,8 @@ describe('useThemeVariation (Phase 1.4b US-2)', () => {
         <Capture />
       </ThemeProvider>
     )
-    const post = captured.filter((v) => v.activeId === 'darkVar')
-    expect(post.length).toBeGreaterThan(0)
-    expect(Object.is(post[0]!, before)).toBe(false)
+    const [firstDark] = captured.filter((v) => v.activeId === 'darkVar')
+    expect(firstDark).toBeDefined()
+    expect(Object.is(firstDark, before)).toBe(false)
   })
 })
