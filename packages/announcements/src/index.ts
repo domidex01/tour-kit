@@ -130,6 +130,9 @@ export {
   type UILibraryProviderProps,
 } from '@tour-kit/core'
 
+// Accessibility hooks (re-exported for ergonomic in-package access)
+export { useReducedMotion } from '@tour-kit/core'
+
 // ============================================
 // TYPES
 // ============================================

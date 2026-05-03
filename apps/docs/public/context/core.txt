@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/core Context File
-Version: 0.6.0 | Generated: 2026-05-02
+Version: 0.6.0 | Generated: 2026-05-03
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -101,6 +101,7 @@ Hooks:
     usePersistence
     useMediaQuery
     usePrefersReducedMotion
+    useReducedMotion
     useRoutePersistence
     useFlowSession
     useBroadcast
@@ -225,6 +226,7 @@ HOOKS
     usePersistence(...)
     useMediaQuery(...)
     usePrefersReducedMotion(...)
+    useReducedMotion(...)
     useRoutePersistence(...)
     useFlowSession(...)
     useBroadcast(...)

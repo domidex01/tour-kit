@@ -71,6 +71,10 @@ pnpm --filter @tour-kit/announcements typecheck
 pnpm --filter @tour-kit/announcements test
 ```
 
+## Reduced motion
+
+All five display variants (modal, slideout, banner, toast, spotlight) gate their `tailwindcss-animate` utilities behind the `motion-safe:` Tailwind prefix in their cva variant files. See the cross-package contract in the repo-root [CLAUDE.md § Reduced motion](../../CLAUDE.md) and the user-facing guide at [`apps/docs/content/docs/guides/reduced-motion.mdx`](../../apps/docs/content/docs/guides/reduced-motion.mdx). `useReducedMotion` is re-exported from `@tour-kit/announcements` for ergonomic access in consumer code.
+
 ## Related Rules
 - `tour-kit/rules/components.md` - Component patterns
 - `tour-kit/rules/accessibility.md` - A11y requirements

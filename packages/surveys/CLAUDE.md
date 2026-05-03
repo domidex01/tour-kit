@@ -62,6 +62,10 @@ pnpm --filter @tour-kit/surveys typecheck
 pnpm --filter @tour-kit/surveys test
 ```
 
+## Reduced motion
+
+`SurveyModal` and `SurveySlideout` gate their `tailwindcss-animate` utilities behind the `motion-safe:` Tailwind prefix in `components/ui/{modal,slideout}-variants.ts`. See the cross-package contract in the repo-root [CLAUDE.md § Reduced motion](../../CLAUDE.md) and the user-facing guide at [`apps/docs/content/docs/guides/reduced-motion.mdx`](../../apps/docs/content/docs/guides/reduced-motion.mdx). `useReducedMotion` is re-exported from `@tour-kit/surveys` for ergonomic access in consumer code.
+
 ## Related Rules
 - `tour-kit/rules/components.md` - Component patterns
 - `tour-kit/rules/accessibility.md` - A11y requirements

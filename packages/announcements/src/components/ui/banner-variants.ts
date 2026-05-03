@@ -1,13 +1,13 @@
 import { cva } from 'class-variance-authority'
 
 export const bannerVariants = cva(
-  'relative flex items-center justify-between gap-4 px-4 py-3 text-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+  'relative flex items-center justify-between gap-4 px-4 py-3 text-sm data-[state=open]:motion-safe:animate-in data-[state=closed]:motion-safe:animate-out data-[state=closed]:motion-safe:fade-out-0 data-[state=open]:motion-safe:fade-in-0',
   {
     variants: {
       position: {
-        top: 'border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
+        top: 'border-b data-[state=closed]:motion-safe:slide-out-to-top data-[state=open]:motion-safe:slide-in-from-top',
         bottom:
-          'border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+          'border-t data-[state=closed]:motion-safe:slide-out-to-bottom data-[state=open]:motion-safe:slide-in-from-bottom',
       },
       intent: {
         info: 'bg-blue-50 text-blue-900 border-blue-200 dark:bg-blue-950 dark:text-blue-100 dark:border-blue-800',
