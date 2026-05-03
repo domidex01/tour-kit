@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/react Context File
-Version: 0.6.0 | Generated: 2026-05-02
+Version: 0.6.0 | Generated: 2026-05-03
 Paste this into your LLM to get accurate answers about @tour-kit/react.
 =========================================================================
 
@@ -37,6 +37,8 @@ Types:
     TourOverlayProps
     TourPortalProps
     MultiTourKitProviderProps
+    ThemeProviderProps
+    ThemeContextValue
     TourButtonVariants
     TourCardVariants
     TourCardHeaderVariants
@@ -49,6 +51,7 @@ Types:
     UILibraryProviderProps
     TourInfo
     UseToursReturn
+    UseThemeVariationReturn
     // Config types
   Side
     Alignment
@@ -97,9 +100,11 @@ Types:
     UseBranchReturn
 
 Hooks:
+    useThemeContext
     useUILibrary
     useTours — All registered tours
     useTourRoute — Router adapter
+    useThemeVariation — Subscribe to the active theme variation.
     useNextAppRouter
     useNextPagesRouter
     useReactRouter
@@ -130,6 +135,12 @@ Components:
     TourPortal
     TourArrow
     MultiTourKitProvider
+    ThemeProvider
+    ThemeMatcher
+    ThemePredicate
+    ThemeResolveContext
+    ThemeTokens
+    ThemeVariation
     Slot
     Slottable
     UnifiedSlot
@@ -142,6 +153,8 @@ Components:
     TourKitProvider
 
 Utilities:
+    resolveTheme
+    matchUrl
     // Button variants
   tourButtonVariants
     // Card variants
@@ -318,11 +331,15 @@ TYPES
       getTour: (tourId: string) => TourInfo | undefined
     }
 
+    export type UseThemeVariationReturn = ThemeContextValue
+
 HOOKS
 -----
+    useThemeContext(...)
     useUILibrary(...)
     useTours(): UseToursReturn
     useTourRoute({ router, tourId }: UseTourRouteOptions): UseTourRouteReturn
+    useThemeVariation(): UseThemeVariationReturn
     useNextAppRouter(...)
     useNextPagesRouter(...)
     useReactRouter(...)
@@ -354,6 +371,12 @@ COMPONENTS
     <TourPortal />
     <TourArrow />
     <MultiTourKitProvider />
+    <ThemeProvider />
+    <ThemeMatcher />
+    <ThemePredicate />
+    <ThemeResolveContext />
+    <ThemeTokens />
+    <ThemeVariation />
     <Slot />
     <Slottable />
     <UnifiedSlot />

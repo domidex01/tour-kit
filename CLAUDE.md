@@ -166,6 +166,14 @@ All UI packages import from `@tour-kit/core`.
 ### `cn()` utility
 Single source in `@tour-kit/core/lib/utils.ts`.
 
+### Reduced motion
+All animation-bearing packages honor `prefers-reduced-motion: reduce` via a three-tier defense:
+1. **`motion-safe:` Tailwind prefix** on every `tailwindcss-animate` utility (`animate-in`, `fade-*`, `slide-*`, `zoom-*`) in `announcements` and `surveys` cva variants. Compiles to `@media (prefers-reduced-motion: no-preference)` — under reduce, the utility never applies. Required because `tailwindcss-animate` does not auto-respect the OS pref.
+2. **`@media (prefers-reduced-motion: reduce)` keyframe wrappers** for custom keyframes we own (`tour-pulse` in `hints`, `tour-spotlight-in`/`tour-card-in` in `react`, `tk-strike`/`tk-check-pop` in `checklists`).
+3. **JS gate via `useReducedMotion()`** from `@tour-kit/core` for render-time class branches (`<HintHotspot pulse>`, `<TourCard>` docking transition, checklist `completing` phase). Re-exported from `announcements`, `surveys`, `hints` for ergonomic in-package access.
+
+When adding new animations, prefix with `motion-safe:` if it's a `tailwindcss-animate` utility, wrap custom `@keyframes` in the `@media` block, and use `useReducedMotion()` for any class chosen at render time. Cross-package guarantee documented at [`apps/docs/content/docs/guides/reduced-motion.mdx`](apps/docs/content/docs/guides/reduced-motion.mdx).
+
 ### Provider Architecture
 - `@tour-kit/core` provides base providers (TourProvider, TourKitProvider)
 - Each package wraps with its own context (AdoptionProvider, ChecklistProvider, etc.)

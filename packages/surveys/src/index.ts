@@ -98,3 +98,13 @@ export {
   booleanOptionVariants,
   progressBarVariants,
 } from './components/ui/question-variants'
+
+export { modalContentVariants, modalOverlayVariants } from './components/ui/modal-variants'
+
+export {
+  slideoutContentVariants,
+  slideoutOverlayVariants,
+} from './components/ui/slideout-variants'
+
+// Accessibility hooks (re-exported for ergonomic in-package access)
+export { useReducedMotion } from '@tour-kit/core'

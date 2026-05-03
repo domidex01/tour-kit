@@ -1,7 +1,6 @@
 'use client'
 
-import { cn } from '@tour-kit/core'
-import { useUILibrary } from '@tour-kit/core'
+import { cn, useReducedMotion, useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
 import { Slot, UnifiedSlot } from '../lib/slot'
 import type { HotspotPosition } from '../types'
@@ -60,11 +59,12 @@ export const HintHotspot = React.forwardRef<HTMLButtonElement, HintHotspotProps>
     ref
   ) => {
     const library = useUILibrary()
+    const reducedMotion = useReducedMotion()
     const pos = getHotspotPosition(position, targetRect)
     const Comp = asChild ? (library === 'base-ui' ? UnifiedSlot : Slot) : 'button'
 
-    // Don't pulse when tooltip is open
-    const shouldPulse = pulse && !isOpen
+    // Don't pulse when tooltip is open or when the user prefers reduced motion.
+    const shouldPulse = pulse && !isOpen && !reducedMotion
 
     return (
       <Comp

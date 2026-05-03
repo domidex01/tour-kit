@@ -45,6 +45,10 @@ pnpm --filter @tour-kit/hints typecheck
 pnpm --filter @tour-kit/hints test
 ```
 
+## Reduced motion
+
+`<HintHotspot>` reads `useReducedMotion()` from `@tour-kit/core` and gates the `pulse` cva variant: under reduce mode, `shouldPulse = pulse && !isOpen && !reducedMotion` resolves to `false` and the `animate-tour-pulse` class is never applied. CSS keyframe wrappers in `src/styles/{theme,variables}.css` are kept as defense-in-depth. See the cross-package contract in the repo-root [CLAUDE.md § Reduced motion](../../CLAUDE.md) and the user-facing guide at [`apps/docs/content/docs/guides/reduced-motion.mdx`](../../apps/docs/content/docs/guides/reduced-motion.mdx). `useReducedMotion` is re-exported from `@tour-kit/hints`.
+
 ## Related Rules
 - `tour-kit/rules/components.md` - Component patterns
 - `tour-kit/rules/accessibility.md` - A11y requirements

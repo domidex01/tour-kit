@@ -17,7 +17,7 @@ export const toastContainerVariants = cva('fixed z-50 flex flex-col gap-2 p-4', 
 })
 
 export const toastVariants = cva(
-  'relative flex w-full max-w-sm items-start gap-3 rounded-lg border p-4 shadow-lg transition-all data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+  'relative flex w-full max-w-sm items-start gap-3 rounded-lg border p-4 shadow-lg transition-all data-[state=open]:motion-safe:animate-in data-[state=closed]:motion-safe:animate-out data-[state=closed]:motion-safe:fade-out-0 data-[state=open]:motion-safe:fade-in-0',
   {
     variants: {
       intent: {
@@ -30,14 +30,18 @@ export const toastVariants = cva(
           'bg-red-50 text-red-900 border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800',
       },
       position: {
-        'top-left': 'data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
-        'top-right': 'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
-        'top-center': 'data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
-        'bottom-left': 'data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
+        'top-left':
+          'data-[state=closed]:motion-safe:slide-out-to-left data-[state=open]:motion-safe:slide-in-from-left',
+        'top-right':
+          'data-[state=closed]:motion-safe:slide-out-to-right data-[state=open]:motion-safe:slide-in-from-right',
+        'top-center':
+          'data-[state=closed]:motion-safe:slide-out-to-top data-[state=open]:motion-safe:slide-in-from-top',
+        'bottom-left':
+          'data-[state=closed]:motion-safe:slide-out-to-left data-[state=open]:motion-safe:slide-in-from-left',
         'bottom-right':
-          'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+          'data-[state=closed]:motion-safe:slide-out-to-right data-[state=open]:motion-safe:slide-in-from-right',
         'bottom-center':
-          'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+          'data-[state=closed]:motion-safe:slide-out-to-bottom data-[state=open]:motion-safe:slide-in-from-bottom',
       },
     },
     defaultVariants: {

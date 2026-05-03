@@ -7,6 +7,7 @@
     "vite",
     "accessibility",
     "animations",
+    "reduced-motion",
     "branching",
     "hidden-steps",
     "persistence",

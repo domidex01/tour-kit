@@ -1,0 +1,130 @@
+---
+title: Reduced Motion
+description: >-
+  How Tour Kit honors prefers-reduced-motion across announcements, surveys,
+  hints, checklists, and the core tour runtime
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Users who set their OS-level "reduce motion" preference are signalling a real accessibility need (vestibular disorders, motion sensitivity, attention regulation). Tour Kit takes this seriously: every animation in every Tour Kit package is gated, by either CSS, JS, or both — so reduce-mode users never see one slide, fade, pulse, or zoom from us.
+
+This page documents the cross-package guarantee. If you're customizing or extending Tour Kit, follow the same pattern.
+
+## What is `prefers-reduced-motion`?
+
+A CSS media query exposing the user's OS-level setting (macOS: System Settings → Accessibility → Display → Reduce Motion; Windows: Settings → Accessibility → Visual Effects → Animation Effects). Browsers expose it as `window.matchMedia('(prefers-reduced-motion: reduce)')`. See [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion) for the spec.
+
+## Three-tier defense
+
+Tour Kit uses three layers, each catching what the next one might miss:
+
+1. **OS pref → CSS `motion-safe:` prefix.** Every `tailwindcss-animate` utility (`animate-in`, `animate-out`, `fade-in-0`, `slide-in-from-*`, `zoom-in-95`, …) is prefixed with Tailwind's `motion-safe:` variant, which compiles to `@media (prefers-reduced-motion: no-preference)`. Under reduce mode, none of these utilities apply. Zero JS, zero bundle cost, no first-frame motion flash.
+2. **CSS keyframe wrappers.** Custom keyframes that we own (`tour-pulse`, `tour-spotlight-in`, `tour-card-in`, `tk-strike`, `tk-check-pop`) are wrapped in `@media (prefers-reduced-motion: reduce) { animation: none }` blocks in their stylesheets. This catches any consumer who applies the class outside a `motion-safe:` context.
+3. **JS gate via `useReducedMotion()`.** For animations driven by render branches (a `pulse` prop on a hotspot, a Floating UI `transform` transition that we add programmatically), the React component reads `useReducedMotion()` from `@tour-kit/core` and omits the animation class entirely under reduce mode. This is the only layer that can react to runtime config (e.g., a future `A11yConfig.reducedMotion: 'always-animate'` override).
+
+<Callout type="info">
+**Why three layers?** `tailwindcss-animate` does **not** auto-respect `prefers-reduced-motion` ([upstream discussion](https://github.com/tailwindlabs/tailwindcss/discussions/12864)) — the `motion-safe:` prefix is the contract. CSS keyframe wrappers handle classes added by consumers outside our control. The JS gate handles render-time conditional classes and exposes a hook that future override knobs can plug into.
+</Callout>
+
+## Per-package matrix
+
+| Package | Animations | Layer 1 (`motion-safe:`) | Layer 2 (`@media` wrap) | Layer 3 (JS gate) |
+|---------|-----------|--------------------------|--------------------------|--------------------|
+| `@tour-kit/core` | none directly; exports `useReducedMotion()` | n/a | n/a | hook source |
+| `@tour-kit/react` | `tour-spotlight-in`, `tour-card-in`, card docking transition | n/a | yes (`packages/react/src/styles/theme.css`) | yes (`<TourCard>` docking transition) |
+| `@tour-kit/hints` | `tour-pulse` on `<HintHotspot>` | n/a (custom keyframe, not tailwindcss-animate) | yes (`packages/hints/src/styles/{theme,variables}.css`) | yes (`<HintHotspot pulse>` reads `useReducedMotion`) |
+| `@tour-kit/announcements` | `animate-in`/`animate-out` + `fade-*` + `slide-*` + `zoom-*` on modal/slideout/banner/toast/spotlight | yes (all 6 variant files + overlay) | inherited from `tailwindcss-animate` plugin | n/a |
+| `@tour-kit/surveys` | `animate-in`/`animate-out` + `fade-*` + `slide-*` + `zoom-*` on modal/slideout | yes (both variant files) | inherited from `tailwindcss-animate` plugin | n/a |
+| `@tour-kit/checklists` | `tk-strike`, `tk-check-pop` on task completion | n/a (custom keyframes) | yes (opt-in `@tour-kit/checklists/styles/animations.css`) | yes (skips the `completing` phase under reduce) |
+| `@tour-kit/media` | video / GIF / Lottie autoplay | n/a | n/a | yes (renders poster instead of autoplaying) |
+
+## Using `useReducedMotion()` in your own components
+
+The hook is exported from `@tour-kit/core` and re-exported from every UI package for convenience.
+
+```tsx title="Importing"
+// Import from any of these — they're the same hook:
+import { useReducedMotion } from '@tour-kit/core'
+import { useReducedMotion } from '@tour-kit/announcements'
+import { useReducedMotion } from '@tour-kit/surveys'
+import { useReducedMotion } from '@tour-kit/hints'
+```
+
+```tsx title="Gate a render-time animation class"
+import { cn, useReducedMotion } from '@tour-kit/core'
+
+function MyAnimatedCard({ className, children }) {
+  const reducedMotion = useReducedMotion()
+
+  return (
+    <div
+      className={cn(
+        'rounded-lg border p-4',
+        !reducedMotion && 'transition-transform duration-200 ease-out',
+        className,
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+```
+
+`useReducedMotion()` is **SSR-safe-default-true**: it returns `true` on the server and on the first client render, then flips to the actual `matchMedia` value after the first `useEffect`. This avoids a one-frame motion flash for users who have requested reduced motion. If you need the raw client-side preference and SSR flicker is not a concern, use the lower-level `usePrefersReducedMotion()` (defaults to `false`).
+
+## Override knobs
+
+`A11yConfig.reducedMotion` is part of the `@tour-kit/react` provider config:
+
+```tsx
+<TourKitProvider
+  a11y={{
+    reducedMotion: 'respect', // 'respect' (default) | 'always-animate' | 'never-animate'
+  }}
+>
+  …
+</TourKitProvider>
+```
+
+- **`'respect'`** (default and currently the only fully-implemented value) — defers to the OS preference via `useReducedMotion()`.
+- **`'always-animate'`** and **`'never-animate'`** — reserved for future expansion. The hook layer (#3) is the only piece of the three-tier defense that can be runtime-overridden, since CSS layers are static. Track [issue #TBD](https://github.com/domidex01/tour-kit/issues) for the full implementation.
+
+<Callout type="warn">
+Forcing `'always-animate'` would override an explicit accessibility request. Do this only if you have a strong justification (e.g., an internal tool with no end users, where the developer has confirmed they want the animations).
+</Callout>
+
+## Testing your own components
+
+If you embed a Tour Kit component, our reduce-mode gates already fire — you don't need to do anything. For your own animations:
+
+```tsx title="Vitest pattern (jsdom)"
+import { vi } from 'vitest'
+
+function mockMatchMedia(reduce: boolean) {
+  vi.mocked(window.matchMedia).mockImplementation((q) => ({
+    matches: q.includes('reduce') ? reduce : false,
+    media: q,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  } as unknown as MediaQueryList))
+}
+
+it('omits the pulse class when reduce mode is on', () => {
+  mockMatchMedia(true)
+  render(<MyAnimatedCard />)
+  expect(screen.getByRole('article')).not.toHaveClass('animate-pulse')
+})
+```
+
+For end-to-end verification in a real browser, use Chrome DevTools → Cmd/Ctrl+Shift+P → "Emulate CSS prefers-reduced-motion: reduce".
+
+## Related
+
+- [Animations guide](/docs/guides/animations) — keyframe customization, Framer Motion, performance
+- [Accessibility guide](/docs/guides/accessibility) — broader a11y coverage
+- [`useReducedMotion`](/docs/core/hooks/use-media-query) — hook API reference

@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/hints Context File
-Version: 0.6.0 | Generated: 2026-05-02
+Version: 0.6.0 | Generated: 2026-05-03
 Paste this into your LLM to get accurate answers about @tour-kit/hints.
 =========================================================================
 
@@ -42,6 +42,7 @@ Hooks:
     useHints
     useHint
     useUILibrary
+    useReducedMotion
 
 Components:
     Hint
@@ -143,6 +144,7 @@ HOOKS
     useHints()
     useHint(id: string)
     useUILibrary(...)
+    useReducedMotion(...)
 
 COMPONENTS
 ----------
