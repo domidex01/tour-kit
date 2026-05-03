@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/scheduling",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "React scheduling hooks with IANA timezones, business hours, blackouts & recurring patterns — show UI on a schedule.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",

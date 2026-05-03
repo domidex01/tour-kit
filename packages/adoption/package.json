@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/adoption",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "React feature adoption tracking — measure which features users actually adopt and re-engage them with contextual nudges.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
