@@ -9,7 +9,7 @@ import {
   shift,
   useFloating,
 } from '@floating-ui/react'
-import { type Placement, useFocusTrap, useTour } from '@tour-kit/core'
+import { type Placement, useFocusTrap, useReducedMotion, useTour } from '@tour-kit/core'
 import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { TourArrow } from '../primitives/tour-arrow'
@@ -65,6 +65,7 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
     } = useTour()
 
     const arrowRef = React.useRef<SVGSVGElement>(null)
+    const reducedMotion = useReducedMotion()
     const { containerRef, activate, deactivate } = useFocusTrap(isActive)
 
     const targetElement = React.useMemo(() => {
@@ -124,7 +125,13 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
             }
           }}
           style={floatingStyles}
-          className={cn(tourCardVariants({ size }), 'z-50', currentStep.className, className)}
+          className={cn(
+            tourCardVariants({ size }),
+            'z-50',
+            !reducedMotion && 'transition-[transform,top,left] duration-150 ease-out',
+            currentStep.className,
+            className
+          )}
           // biome-ignore lint/a11y/useSemanticElements: Native dialog has default centering/backdrop incompatible with floating-ui
           role="dialog"
           aria-modal="true"

@@ -12,13 +12,15 @@ userTourKit provides smooth, performant animations out of the box while respecti
 
 ## Built-in Animations
 
-userTourKit includes three core animations:
+userTourKit includes five core animations:
 
 | Animation | Purpose | Duration |
 |-----------|---------|----------|
 | `tour-spotlight-in` | Overlay fade-in | 200ms |
 | `tour-card-in` | Card entrance (scale + fade) | 200ms |
 | `tour-pulse` | Hint beacon pulse | 1.5s (infinite) |
+| **Tour card docking** | Smooth re-positioning when the floating placement flips | 150ms |
+| **Checklist task completion** | Strike-through label + check-icon scale on task complete | 200ms |
 
 ### Default Keyframes
 
@@ -197,21 +199,23 @@ When users enable reduced motion:
 
 ### Using the Hook
 
-Detect reduced motion preference in your components:
+Detect reduced motion preference in your components. There are two hooks:
 
-```tsx title="Using usePrefersReducedMotion"
-import { usePrefersReducedMotion } from '@tour-kit/core'
+- **`useReducedMotion()`** — SSR-safe-default-true. Returns `true` on the server and on the first client render, then flips to the actual `matchMedia` value after the first `useEffect`. Use this for animation classes that must default to "no animation" during the first paint to avoid a one-frame motion flash for users who have requested reduced motion.
+- **`usePrefersReducedMotion()`** — defaults to `false` server-side. Use this when you need the raw client-side preference and SSR flicker is not a concern.
+
+```tsx title="Using useReducedMotion (recommended)"
+import { useReducedMotion } from '@tour-kit/core'
 
 function MyAnimatedComponent() {
-  const prefersReducedMotion = usePrefersReducedMotion()
+  const reducedMotion = useReducedMotion()
 
   return (
     <div
-      style={{
-        transition: prefersReducedMotion
-          ? 'none'
-          : 'transform 200ms ease-out',
-      }}
+      className={cn(
+        'rounded-lg border p-4',
+        !reducedMotion && 'transition-transform duration-200 ease-out',
+      )}
     >
       Content
     </div>
@@ -268,6 +272,24 @@ import { TourCard } from '@tour-kit/react'
 />
 ```
 
+#### Docking transition (placement flip)
+
+`<TourCard>` uses `@floating-ui/react` to position itself near the current step's target. When the placement flips (e.g. `bottom` → `top` because the target scrolled near the viewport edge), Floating UI updates the inline `transform` synchronously. Tour Kit adds `transition-[transform,top,left] duration-150 ease-out` to the floating element so the move tweens smoothly instead of snapping.
+
+The transition class is gated by `useReducedMotion()` — when the user prefers reduced motion, the class is omitted and the placement flip is instant. No additional configuration required.
+
+```tsx
+// What Tour Kit applies internally:
+<div
+  className={cn(
+    tourCardVariants({ size }),
+    'z-50',
+    !reducedMotion && 'transition-[transform,top,left] duration-150 ease-out',
+  )}
+  style={floatingStyles}
+/>
+```
+
 ### Overlay/Spotlight
 
 The overlay fades in with `tour-spotlight-in`:
@@ -280,6 +302,24 @@ import { TourOverlay } from '@tour-kit/react'
   // ...props
 />
 ```
+
+### Checklist Task Completion
+
+`<ChecklistTask>` (from `@tour-kit/checklists`) runs a 3-phase state machine when a task transitions to `completed`:
+
+1. **`pending`** — default state.
+2. **`completing`** — 200ms transient; the root element gains `data-tk-completing="true"`.
+3. **`completed`** — final state.
+
+The completion animation is opt-in via a separate stylesheet so consumers who don't want the visual effect pay no CSS bytes:
+
+```tsx title="Opt in to the completion animation"
+import '@tour-kit/checklists/styles/animations.css'
+```
+
+The stylesheet defines two keyframes (`tk-strike`, `tk-check-pop`) targeting `[data-tk-completing="true"] .tk-task-label` and `[data-tk-completing="true"] .tk-task-icon`, both wrapped in `@media (prefers-reduced-motion: reduce) { animation: none }`.
+
+Defense-in-depth: the React side already skips the `completing` phase when `useReducedMotion()` is true, AND the CSS media query also stops the animation if a downstream consumer forces the attribute.
 
 ### Hints
 
@@ -614,3 +654,4 @@ function TourWithExitAnimation({ children }) {
 - [Tailwind Integration](/docs/react/styling/tailwind)
 - [Accessibility Guide](/docs/guides/accessibility)
 - [usePrefersReducedMotion](/docs/core/hooks/use-media-query)
+- [Progress variants gallery](/docs/examples/progress-variants)

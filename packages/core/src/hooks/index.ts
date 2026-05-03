@@ -5,7 +5,7 @@ export { useElementPosition, type ElementPositionResult } from './use-element-po
 export { useKeyboardNavigation } from './use-keyboard'
 export { useFocusTrap, type UseFocusTrapReturn } from './use-focus-trap'
 export { usePersistence, type UsePersistenceReturn } from './use-persistence'
-export { useMediaQuery, usePrefersReducedMotion } from './use-media-query'
+export { useMediaQuery, usePrefersReducedMotion, useReducedMotion } from './use-media-query'
 export { useRoutePersistence, type UseRoutePersistenceReturn } from './use-route-persistence'
 export {
   useFlowSession,

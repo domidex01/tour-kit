@@ -1,5 +1,7 @@
+/// <reference types="vitest-axe/extend-expect" />
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import { axe } from 'vitest-axe'
 import { TourProgress } from './tour-progress'
 
 describe('TourProgress', () => {
@@ -102,5 +104,78 @@ describe('TourProgress', () => {
     )
 
     expect(container.firstChild).toHaveClass('bar-custom')
+  })
+
+  describe('narrow variant', () => {
+    it('exposes role=progressbar with correct aria values', () => {
+      render(<TourProgress current={2} total={4} variant="narrow" />)
+      const bar = screen.getByRole('progressbar')
+      expect(bar.getAttribute('aria-valuenow')).toBe('2')
+      expect(bar.getAttribute('aria-valuemin')).toBe('1')
+      expect(bar.getAttribute('aria-valuemax')).toBe('4')
+    })
+
+    it('renders inner fill at correct width percentage', () => {
+      const { container } = render(<TourProgress current={2} total={4} variant="narrow" />)
+      const fill = container.querySelector('.bg-primary') as HTMLElement
+      expect(fill.style.width).toBe('50%')
+    })
+  })
+
+  describe('chain variant', () => {
+    it('exposes role=progressbar with correct aria values', () => {
+      render(<TourProgress current={2} total={4} variant="chain" />)
+      const bar = screen.getByRole('progressbar')
+      expect(bar.getAttribute('aria-valuenow')).toBe('2')
+      expect(bar.getAttribute('aria-valuemin')).toBe('1')
+      expect(bar.getAttribute('aria-valuemax')).toBe('4')
+    })
+
+    it('renders one segment per step with correct status attrs', () => {
+      const { container } = render(<TourProgress current={2} total={4} variant="chain" />)
+      const segments = container.querySelectorAll<HTMLElement>('[data-status]')
+      expect(segments).toHaveLength(4)
+      expect(segments[0]?.getAttribute('data-status')).toBe('completed')
+      expect(segments[1]?.getAttribute('data-status')).toBe('active')
+      expect(segments[2]?.getAttribute('data-status')).toBe('pending')
+      expect(segments[3]?.getAttribute('data-status')).toBe('pending')
+    })
+  })
+
+  describe('numbered variant', () => {
+    it('exposes role=progressbar with correct aria values', () => {
+      render(<TourProgress current={3} total={7} variant="numbered" />)
+      const bar = screen.getByRole('progressbar')
+      expect(bar.getAttribute('aria-valuenow')).toBe('3')
+      expect(bar.getAttribute('aria-valuemin')).toBe('1')
+      expect(bar.getAttribute('aria-valuemax')).toBe('7')
+    })
+
+    it('renders the current and total numbers', () => {
+      render(<TourProgress current={3} total={7} variant="numbered" />)
+      const bar = screen.getByRole('progressbar')
+      expect(bar.textContent).toContain('3')
+      expect(bar.textContent).toContain('7')
+    })
+  })
+
+  describe('none variant', () => {
+    it('renders null', () => {
+      const { container } = render(<TourProgress current={2} total={4} variant="none" />)
+      expect(container.firstChild).toBeNull()
+    })
+  })
+
+  describe('a11y (vitest-axe)', () => {
+    it.each(['narrow', 'chain', 'numbered'] as const)(
+      'variant=%s reports zero axe violations',
+      async (variant) => {
+        const { container } = render(
+          <TourProgress current={2} total={4} variant={variant} />
+        )
+        const results = await axe(container)
+        expect(results).toHaveNoViolations()
+      }
+    )
   })
 })

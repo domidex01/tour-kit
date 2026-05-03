@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@tour-kit/core'
+import { cn, useReducedMotion } from '@tour-kit/core'
 import * as React from 'react'
 import type { ChecklistTaskState } from '../types'
 import {
@@ -68,9 +68,36 @@ export interface ChecklistTaskProps
  * <ChecklistTask task={task} size="lg" />
  * ```
  */
+type CompletionPhase = 'pending' | 'completing' | 'completed'
+const COMPLETING_DURATION_MS = 200
+
 export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps>(
   ({ task, onClick, onToggle, size, className, renderIcon, ...props }, ref) => {
     const { config, completed, locked, visible } = task
+    const reducedMotion = useReducedMotion()
+
+    const [phase, setPhase] = React.useState<CompletionPhase>(
+      completed ? 'completed' : 'pending'
+    )
+
+    React.useEffect(() => {
+      if (!completed) {
+        setPhase('pending')
+        return
+      }
+      // Task just toggled to completed
+      setPhase((prev) => {
+        if (prev === 'completed') return prev
+        if (reducedMotion) return 'completed'
+        return 'completing'
+      })
+    }, [completed, reducedMotion])
+
+    React.useEffect(() => {
+      if (phase !== 'completing') return
+      const timer = setTimeout(() => setPhase('completed'), COMPLETING_DURATION_MS)
+      return () => clearTimeout(timer)
+    }, [phase])
 
     if (!visible) return null
 
@@ -104,6 +131,7 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
         role="button"
         tabIndex={locked ? -1 : 0}
         aria-disabled={locked}
+        data-tk-completing={phase === 'completing' ? 'true' : undefined}
         {...props}
       >
         {/* Checkbox */}
