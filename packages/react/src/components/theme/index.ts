@@ -2,6 +2,7 @@ export { ThemeProvider, useThemeContext, type ThemeProviderProps } from './theme
 export type {
   ThemeContextValue,
   ThemeMatcher,
+  ThemePredicate,
   ThemeResolveContext,
   ThemeTokens,
   ThemeVariation,

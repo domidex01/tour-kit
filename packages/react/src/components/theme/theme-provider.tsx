@@ -8,21 +8,28 @@ import type { ThemeContextValue, ThemeTokens, ThemeVariation } from './types'
 
 const ThemeContext = React.createContext<ThemeContextValue | null>(null)
 
-export interface ThemeProviderProps {
+export interface ThemeProviderProps<TTraits = Record<string, unknown>> {
   variations: ThemeVariation[]
   router?: RouterAdapter
   forceMode?: 'dark' | 'light' | null
   defaultId?: string
+  /**
+   * Host-provided traits evaluated by `{ kind: 'predicate' }` matchers.
+   * Memoize this object — the resolver effect's deps include `traits`, so a
+   * fresh reference each render forces re-resolution and breaks the perf budget.
+   */
+  traits?: TTraits
   children: React.ReactNode
 }
 
-export function ThemeProvider({
+export function ThemeProvider<TTraits = Record<string, unknown>>({
   variations,
   router,
   forceMode = null,
   defaultId = 'default',
+  traits,
   children,
-}: ThemeProviderProps) {
+}: ThemeProviderProps<TTraits>) {
   // Server render and first client render both emit `defaultId` because state
   // is initialized to it and no effect has run yet — so hydration matches.
   // The effect below flips it to the resolved variation after mount.
@@ -49,12 +56,12 @@ export function ThemeProvider({
         return
       }
     }
-    const match = resolveTheme(variations, { systemColorScheme, route })
+    const match = resolveTheme(variations, { systemColorScheme, route, traits })
     if (match) {
       setActiveId(match.id)
       setTokens(match.theme)
     }
-  }, [variations, systemColorScheme, route, forceMode])
+  }, [variations, systemColorScheme, route, forceMode, traits])
 
   const value = React.useMemo<ThemeContextValue>(() => ({ activeId, tokens }), [activeId, tokens])
 

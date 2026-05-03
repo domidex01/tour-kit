@@ -5,6 +5,7 @@ import { renderToString } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ThemeProvider, useThemeContext } from '../../components/theme/theme-provider'
 import type { ThemeVariation } from '../../components/theme/types'
+import { mockMatchMedia } from './_helpers'
 
 function createMockRouter(initial = '/'): RouterAdapter {
   let current = initial
@@ -34,19 +35,7 @@ const variations: ThemeVariation[] = [
 describe('<ThemeProvider> (US-2)', () => {
   beforeEach(() => {
     // Reset matchMedia to "light" by default for each test.
-    vi.mocked(window.matchMedia).mockImplementation(
-      (query: string) =>
-        ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        }) as unknown as MediaQueryList
-    )
+    mockMatchMedia()
   })
 
   afterEach(() => {
@@ -104,19 +93,7 @@ describe('<ThemeProvider> (US-2)', () => {
   })
 
   it('reflects system colour scheme via matchMedia mock', () => {
-    vi.mocked(window.matchMedia).mockImplementation(
-      (query: string) =>
-        ({
-          matches: query.includes('prefers-color-scheme: dark'),
-          media: query,
-          onchange: null,
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        }) as unknown as MediaQueryList
-    )
+    mockMatchMedia({ dark: true })
 
     const sysVariations: ThemeVariation[] = [
       { id: 'systemDark', when: { kind: 'system' }, theme: {} },

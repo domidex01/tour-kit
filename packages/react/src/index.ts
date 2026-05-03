@@ -41,6 +41,7 @@ export {
   type ThemeProviderProps,
   type ThemeContextValue,
   type ThemeMatcher,
+  type ThemePredicate,
   type ThemeResolveContext,
   type ThemeTokens,
   type ThemeVariation,
@@ -95,6 +96,10 @@ export {
 export { useTours } from './hooks/use-tours'
 export { useTourRoute } from './hooks/use-tour-route'
 export type { TourInfo, UseToursReturn } from './hooks/use-tours'
+export {
+  useThemeVariation,
+  type UseThemeVariationReturn,
+} from './hooks/use-theme-variation'
 
 // ============================================
 // ADAPTERS

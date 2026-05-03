@@ -95,6 +95,41 @@ describe('matchUrl modes (US-1)', () => {
   })
 })
 
+describe('predicate matcher (Phase 1.4b US-1)', () => {
+  const predicateEnterprise: ThemeVariation = {
+    id: 'enterprise',
+    when: { kind: 'predicate', fn: (t) => (t as { plan?: string } | null)?.plan === 'enterprise' },
+    theme: {},
+  }
+
+  it('predicate true → variation matches', () => {
+    const result = resolveTheme([predicateEnterprise, system], {
+      systemColorScheme: 'light',
+      route: null,
+      traits: { plan: 'enterprise' },
+    })
+    expect(result?.id).toBe('enterprise')
+  })
+
+  it('predicate false → falls through to system', () => {
+    const result = resolveTheme([predicateEnterprise, system], {
+      systemColorScheme: 'light',
+      route: null,
+      traits: { plan: 'free' },
+    })
+    expect(result?.id).toBe('system')
+  })
+
+  it('explicit dark wins over predicate', () => {
+    const result = resolveTheme([dark, predicateEnterprise], {
+      systemColorScheme: null,
+      route: null,
+      traits: { plan: 'enterprise' },
+    })
+    expect(result?.id).toBe('dark')
+  })
+})
+
 describe('resolver purity (US-4)', () => {
   const resolverPath = resolve(
     dirname(fileURLToPath(import.meta.url)),

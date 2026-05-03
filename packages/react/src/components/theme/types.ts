@@ -1,5 +1,7 @@
 export type ThemeTokens = Record<string, string>
 
+export type ThemePredicate<TTraits = unknown> = (traits: TTraits) => boolean
+
 export type ThemeMatcher =
   | { kind: 'system' }
   | { kind: 'dark' }
@@ -9,6 +11,7 @@ export type ThemeMatcher =
       pattern: string | RegExp
       mode?: 'exact' | 'startsWith' | 'contains'
     }
+  | { kind: 'predicate'; fn: ThemePredicate<unknown> }
 
 export interface ThemeVariation {
   id: string
@@ -19,6 +22,7 @@ export interface ThemeVariation {
 export interface ThemeResolveContext {
   systemColorScheme: 'light' | 'dark' | null
   route: string | null
+  traits?: unknown
 }
 
 export interface ThemeContextValue {
