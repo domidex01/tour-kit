@@ -6,6 +6,36 @@ import type { Placement } from './config'
 import type { TourCallbackContext } from './state'
 
 /**
+ * Structural alias of `MediaSlotProps` from `@tour-kit/media`. Re-declared
+ * inline here so `@tour-kit/core` does not take a (type-only or otherwise)
+ * dependency on `@tour-kit/media` — core sits at the bottom of the dep graph.
+ *
+ * The shape MUST stay assignment-compatible with `MediaSlotProps`. Update both
+ * sites if the public surface changes.
+ */
+export interface TourStepMedia {
+  src: string
+  type?:
+    | 'auto'
+    | 'youtube'
+    | 'vimeo'
+    | 'loom'
+    | 'wistia'
+    | 'video'
+    | 'gif'
+    | 'lottie'
+    | 'image'
+  poster?: string
+  aspectRatio?: '16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'
+  className?: string
+  alt?: string
+  title?: string
+  autoplay?: boolean
+  loop?: boolean
+  muted?: boolean
+}
+
+/**
  * Audience prop shape — discriminated by `Array.isArray()`.
  *
  * - Array branch: legacy inline conditions evaluated via `matchesAudience`.
@@ -53,6 +83,12 @@ export interface TourStep {
    * `{ segment: 'name' }` object (resolved via `useSegments`).
    */
   audience?: AudienceProp
+  /**
+   * Optional media (video / GIF / Lottie / image) rendered above the step
+   * description by `<TourCard>`. Auto-detects the embed provider via URL
+   * pattern matching unless `type` is explicit.
+   */
+  media?: TourStepMedia
   placement?: Placement
   offset?: [number, number]
   showNavigation?: boolean

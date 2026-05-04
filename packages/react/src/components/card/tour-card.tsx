@@ -11,6 +11,7 @@ import {
 } from '@floating-ui/react'
 import { type Placement, useFocusTrap, useReducedMotion, useTour } from '@tour-kit/core'
 import { cn } from '@tour-kit/core'
+import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'
 import { useResolvedText } from '../../hooks/use-resolved-text'
 import { TourArrow } from '../primitives/tour-arrow'
@@ -147,6 +148,12 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
             titleId={`tour-step-title-${currentStep.id}`}
             showClose={showClose}
           />
+
+          {currentStep.media && (
+            <div className="px-4" data-slot="tour-card-media">
+              <MediaSlot {...currentStep.media} />
+            </div>
+          )}
 
           <TourCardContent content={currentStep.content} description={resolvedDescription} />
 

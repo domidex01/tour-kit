@@ -5,6 +5,7 @@ import type {
   LocalizedText,
   Placement,
 } from '@tour-kit/core'
+import type { MediaSlotProps } from '@tour-kit/media'
 import type * as React from 'react'
 
 // Re-export Placement from core for convenience
@@ -33,6 +34,11 @@ export interface HintConfig {
    * `{ segment: string }`.
    */
   audience?: AudienceProp
+  /**
+   * Optional media (video / GIF / Lottie / image) rendered above the tooltip
+   * content. Auto-detects the embed provider via URL pattern matching.
+   */
+  media?: MediaSlotProps
   /**
    * How often this hint can be re-shown. Phase 3a addition. Lifted from
    * `@tour-kit/announcements` to `@tour-kit/core` so hints + announcements

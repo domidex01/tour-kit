@@ -758,6 +758,9 @@ importers:
       '@tour-kit/license':
         specifier: workspace:*
         version: link:../license
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       '@tour-kit/scheduling':
         specifier: workspace:*
         version: link:../scheduling
@@ -825,6 +828,9 @@ importers:
       '@tour-kit/license':
         specifier: workspace:*
         version: link:../license
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -935,6 +941,9 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1106,6 +1115,9 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1222,6 +1234,9 @@ importers:
       '@tour-kit/license':
         specifier: workspace:*
         version: link:../license
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       '@tour-kit/scheduling':
         specifier: workspace:*
         version: link:../scheduling

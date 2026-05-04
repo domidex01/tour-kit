@@ -1,6 +1,7 @@
 'use client'
 
 import { useElementPosition } from '@tour-kit/core'
+import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'
 import { useHint } from '../hooks/use-hint'
 import { useResolvedText } from '../hooks/use-resolved-text'
@@ -55,6 +56,7 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
       title,
       content,
       children,
+      media,
       position = 'top-right',
       tooltipPlacement = 'bottom',
       pulse = true,
@@ -151,6 +153,11 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
             className={className}
             title={title}
           >
+            {media && (
+              <div className="mb-2" data-slot="hint-tooltip-media">
+                <MediaSlot {...media} />
+              </div>
+            )}
             {children ?? resolvedContent}
           </HintTooltip>
         )}
