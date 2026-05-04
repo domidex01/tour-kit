@@ -198,6 +198,8 @@ TYPES
       id: string
       autoStart?: boolean
       startAt?: number
+      /** Audience gate for the entire tour (Phase 3a). Mirrors `Tour.audience`. */
+      audience?: TourType['audience']
       config?: Omit<TourType, 'id' | 'steps'>
       onStart?: () => void
       onComplete?: () => void
@@ -226,6 +228,8 @@ TYPES
         TourCardContentVariants {
       /** Content to display */
       content?: React.ReactNode
+      /** Optional short description rendered above `content` (Phase 3a). */
+      description?: React.ReactNode
     }
 
     export interface TourCardFooterProps

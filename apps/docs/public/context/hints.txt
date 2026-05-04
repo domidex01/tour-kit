@@ -88,7 +88,7 @@ TYPES
     }
 
     export interface HintTooltipProps
-      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content' | 'title'>,
         HintTooltipVariants {
       /** Target element to anchor the tooltip to */
       target: HTMLElement
@@ -98,21 +98,63 @@ TYPES
       onClose: () => void
       /** Content to display */
       children: React.ReactNode
+      /**
+       * Optional title rendered above `children` (Phase 3a). Resolved through
+       * `useResolvedText`, so strings interpolate and `{ key }` looks up the
+       * locale dictionary.
+       */
+      title?: LocalizedText
       /** Use custom close button */
       closeButton?: React.ReactNode
       /** Use custom element via Slot */
       asChild?: boolean
     }
 
+    export interface HintsProviderProps {
+      children: React.ReactNode
+      /**
+       * Optional config-driven mode. When provided, the provider auto-registers
+       * each hint, applies `useHintFilter` for audience gating, and consults
+       * `frequency` rules before allowing `showHint`. Omit to keep the legacy
+       * imperative `registerHint(id)` API.
+       */
+      hints?: HintConfig[]
+      /**
+       * Backing storage for hint frequency persistence (Phase 3a). Defaults to
+       * `localStorage`. Tests inject an in-memory mock to keep jsdom global state
+       * untouched. Keys are namespaced as `tourkit:hint:freq:<hintId>`.
+       */
+      storage?: Storage
+    }
+
     export interface HintConfig {
       id: string
       target: string | React.RefObject<HTMLElement | null>
-      content: React.ReactNode
+      /** Optional title rendered above the tooltip content (Phase 3a). */
+      title?: LocalizedText
+      /**
+       * Tooltip body. Accepts a string (interpolated), a `{ key }` dictionary
+       * lookup, or any `ReactNode` for arbitrary JSX. The original
+       * `React.ReactNode`-only contract stays assignable.
+       */
+      content: React.ReactNode | LocalizedText
       position?: HotspotPosition
-      tooltipPlacement?: import('@tour-kit/core').Placement
+      tooltipPlacement?: Placement
       pulse?: boolean
       autoShow?: boolean
       persist?: boolean
+      /**
+       * Filter this hint for users who don't match. Phase 3a addition. Same
+       * shape as `Tour.audience` — array (legacy `AudienceCondition[]`) or
+       * `{ segment: string }`.
+       */
+      audience?: AudienceProp
+      /**
+       * How often this hint can be re-shown. Phase 3a addition. Lifted from
+       * `@tour-kit/announcements` to `@tour-kit/core` so hints + announcements
+       * share one canonical type.
+       */
+      frequency?: FrequencyRule
       onClick?: () => void
       onShow?: () => void
       onDismiss?: () => void
@@ -135,8 +177,6 @@ TYPES
       resetHint: (id: string) => void
       resetAllHints: () => void
     }
-
-    export type HotspotPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
 
 HOOKS
 -----

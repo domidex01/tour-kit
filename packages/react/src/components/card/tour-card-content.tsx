@@ -9,12 +9,19 @@ export interface TourCardContentProps
     TourCardContentVariants {
   /** Content to display */
   content?: React.ReactNode
+  /** Optional short description rendered above `content` (Phase 3a). */
+  description?: React.ReactNode
 }
 
 export const TourCardContent = React.forwardRef<HTMLDivElement, TourCardContentProps>(
-  ({ content, spacing, className, children, ...props }, ref) => {
+  ({ content, description, spacing, className, children, ...props }, ref) => {
     return (
       <div ref={ref} className={cn(tourCardContentVariants({ spacing }), className)} {...props}>
+        {description && (
+          <p className="text-sm text-muted-foreground" data-slot="tour-card-description">
+            {description}
+          </p>
+        )}
         {children ?? content}
       </div>
     )

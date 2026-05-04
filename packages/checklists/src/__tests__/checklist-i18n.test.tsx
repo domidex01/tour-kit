@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { LocaleProvider } from '@tour-kit/core'
+import { LocaleProvider, SegmentationProvider } from '@tour-kit/core'
 import type { ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ChecklistTask } from '../components/checklist-task'
@@ -26,9 +26,11 @@ function withLocale(opts: {
   children: ReactNode
 }): ReactNode {
   return (
-    <LocaleProvider locale="en" messages={opts.messages ?? {}} userContext={opts.userContext}>
-      {opts.children}
-    </LocaleProvider>
+    <SegmentationProvider segments={{}} userContext={opts.userContext}>
+      <LocaleProvider locale="en" messages={opts.messages ?? {}}>
+        {opts.children}
+      </LocaleProvider>
+    </SegmentationProvider>
   )
 }
 

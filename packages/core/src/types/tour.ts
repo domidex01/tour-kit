@@ -7,7 +7,7 @@ import type {
   SpotlightConfig,
 } from './config'
 import type { TourCallbackContext } from './state'
-import type { TourStep } from './step'
+import type { AudienceProp, TourStep } from './step'
 
 /**
  * Tour definition
@@ -15,6 +15,12 @@ import type { TourStep } from './step'
 export interface Tour {
   id: string
   steps: TourStep[]
+  /**
+   * Filter the entire tour for users who don't match. Same shape as
+   * `TourStep.audience`. When the filter rejects, the tour is not registered
+   * and `useTour().isActive` stays false.
+   */
+  audience?: AudienceProp
   autoStart?: boolean
   startAt?: number
   keyboard?: KeyboardConfig | boolean

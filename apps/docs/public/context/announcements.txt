@@ -272,7 +272,7 @@ TYPES
       useConfig?: boolean
     }
 
-    ... and 44 more types. See source for full definitions.
+    ... and 43 more types. See source for full definitions.
 
 HOOKS
 -----

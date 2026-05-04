@@ -48,6 +48,7 @@ Types:
     TourKitConfig
     TourStep
     StepOptions
+    AudienceProp
     Tour
     TourOptions
     TourState
@@ -91,8 +92,10 @@ Types:
     LocaleProviderProps
     Messages
     TranslateFn
-    LocalizedText
     AudienceCondition
+    FrequencyRule
+    FrequencyState
+    LocalizedText
     SegmentDefinition
     StaticSegment
     SegmentSource
@@ -122,7 +125,6 @@ Hooks:
     useUILibrary — Hook to get the current UI library setting
     useLocale
     useT — Hook returning a translator function `t(key, vars?)` that:
-    useResolveLocalizedText — Discriminated text shape used by all UI packages for localizable copy.
     useSegmentationContext
     useSegment
     useSegments
@@ -203,6 +205,10 @@ Utilities:
     interpolate
     matchesAudience
     validateConditions
+    canShowByFrequency
+    canShowAfterDismissal
+    getViewLimit
+    isI18nKey
     parseUserIdsFromCsv
 
 TYPES
@@ -249,12 +255,6 @@ TYPES
       t?: TranslateFn
       /** Auto-derived from locale; consumers can override */
       direction?: 'ltr' | 'rtl'
-      /**
-       * Optional user/template context merged into every interpolation. Keyed values
-       * (e.g. `user.name`) are pulled from this object when a string template like
-       * `'Hi {{user.name}}'` is rendered without explicit call-site vars.
-       */
-      userContext?: Record<string, unknown>
     }
 
     export interface LocaleProviderProps extends Partial<LocaleContextValue> {
@@ -265,16 +265,6 @@ TYPES
     export type TranslateFn = (key: string, vars?: Record<string, unknown>) => string
 
     export type TranslateFn = (key: string, vars?: Record<string, unknown>) => string
-
-    /**
-     * Discriminated text shape used by all UI packages for localizable copy.
-     *
-     * - `string` — rendered as-is, with `{{var}}` tokens interpolated against the
-     *   current `LocaleProvider.userContext` (graceful default-fallback when no
-     *   provider is mounted).
-     * - `{ key: string }` — looked up via `useT()` against `messages[key]`.
-     */
-    export type LocalizedText = string | { key: string }
 
     /**
      * Audience targeting condition.
@@ -305,6 +295,50 @@ TYPES
       value?: unknown
     }
 
+    /**
+     * Frequency rules — promoted from `@tour-kit/announcements` in Phase 3a of the
+     * UserGuiding parity initiative. Re-exported from `@tour-kit/announcements`
+     * with `@deprecated` JSDoc for backward compat.
+     */
+    
+    /**
+     * How often a UI surface (announcement, hint, tour) can be shown.
+     *
+     *   - `'once'`     — show only when never viewed
+     *   - `'session'`  — show until dismissed in the current session
+     *   - `'always'`   — show every time conditions are met
+     *   - `{ type: 'times', count }
+
+    /**
+     * Frequency rules — promoted from `@tour-kit/announcements` in Phase 3a of the
+     * UserGuiding parity initiative. Re-exported from `@tour-kit/announcements`
+     * with `@deprecated` JSDoc for backward compat.
+     */
+    
+    /**
+     * How often a UI surface (announcement, hint, tour) can be shown.
+     *
+     *   - `'once'`     — show only when never viewed
+     *   - `'session'`  — show until dismissed in the current session
+     *   - `'always'`   — show every time conditions are met
+     *   - `{ type: 'times', count }`     — show up to `count` times total
+     *   - `{ type: 'interval', days }`   — re-show after `days` days have passed
+     */
+    export type FrequencyRule =
+      | 'once'
+      | 'session'
+      | 'always'
+      | { type: 'times';
+
+    /**
+     * `LocalizedText` is the shared shape for any human-readable string that
+     * may either be a literal (interpolated via `interpolate`) or a dictionary
+     * key (resolved via `useT()`). The discriminated union narrows on
+     * `typeof === 'string'`, so existing string-based consumers stay assignable
+     * — adding the object branch is a pure widening.
+     */
+    export type LocalizedText = string | { key: string }
+
 HOOKS
 -----
     useTourKitContext(...)
@@ -329,7 +363,6 @@ HOOKS
     useUILibrary(): UILibrary
     useLocale(): LocaleContextValue
     useT(): TranslateFn
-    useResolveLocalizedText(): (value: LocalizedText | undefined) => string
     useSegmentationContext(...)
     useSegment(...)
     useSegments(...)

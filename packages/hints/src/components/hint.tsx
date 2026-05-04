@@ -3,6 +3,7 @@
 import { useElementPosition } from '@tour-kit/core'
 import * as React from 'react'
 import { useHint } from '../hooks/use-hint'
+import { useResolvedText } from '../hooks/use-resolved-text'
 import type { HintConfig } from '../types'
 import { HintHotspot } from './hint-hotspot'
 import { HintTooltip } from './hint-tooltip'
@@ -51,6 +52,7 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
     {
       id,
       target,
+      title,
       content,
       children,
       position = 'top-right',
@@ -72,6 +74,7 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
   ) => {
     const { isOpen, isDismissed, show, hide, dismiss } = useHint(id)
     const hotspotRef = React.useRef<HTMLButtonElement>(null)
+    const resolvedContent = useResolvedText(content)
 
     // Merge refs
     const mergedRef = React.useMemo(() => {
@@ -146,8 +149,9 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
             placement={tooltipPlacement}
             onClose={handleDismiss}
             className={className}
+            title={title}
           >
-            {children ?? content}
+            {children ?? resolvedContent}
           </HintTooltip>
         )}
       </>
