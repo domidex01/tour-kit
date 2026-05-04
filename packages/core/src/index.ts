@@ -192,3 +192,19 @@ export type { Messages, TranslateFn } from './lib/i18n/use-t'
 // Audience targeting — promoted from @tour-kit/announcements in Phase 1
 export { matchesAudience, validateConditions } from './lib/audience'
 export type { AudienceCondition } from './types/audience'
+
+// Segmentation primitives — Phase 2 (UserGuiding parity)
+export {
+  SegmentationProvider,
+  useSegmentationContext,
+  useSegment,
+  useSegments,
+  parseUserIdsFromCsv,
+} from './lib/segmentation'
+export type {
+  SegmentDefinition,
+  StaticSegment,
+  SegmentSource,
+  SegmentationContextValue,
+  SegmentationProviderProps,
+} from './lib/segmentation'
