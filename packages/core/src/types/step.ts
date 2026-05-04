@@ -15,16 +15,7 @@ import type { TourCallbackContext } from './state'
  */
 export interface TourStepMedia {
   src: string
-  type?:
-    | 'auto'
-    | 'youtube'
-    | 'vimeo'
-    | 'loom'
-    | 'wistia'
-    | 'video'
-    | 'gif'
-    | 'lottie'
-    | 'image'
+  type?: 'auto' | 'youtube' | 'vimeo' | 'loom' | 'wistia' | 'video' | 'gif' | 'lottie' | 'image'
   poster?: string
   aspectRatio?: '16/9' | '4/3' | '1/1' | '9/16' | '21/9' | 'auto'
   className?: string

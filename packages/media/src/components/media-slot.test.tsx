@@ -4,28 +4,68 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // --- Embed dispatch stubs (used by the dispatch + reduced-motion suites) ---
 vi.mock('./embeds', () => ({
-  YouTubeEmbed: (p: { videoId?: string; title?: string; autoplay?: boolean; onError?: () => void }) => (
-    <div data-testid="embed" data-type="youtube" data-videoid={p.videoId} data-autoplay={String(p.autoplay ?? false)}>
+  YouTubeEmbed: (p: {
+    videoId?: string
+    title?: string
+    autoplay?: boolean
+    onError?: () => void
+  }) => (
+    <div
+      data-testid="embed"
+      data-type="youtube"
+      data-videoid={p.videoId}
+      data-autoplay={String(p.autoplay ?? false)}
+    >
       <button type="button" data-testid="trigger-error" onClick={() => p.onError?.()} />
     </div>
   ),
   VimeoEmbed: (p: { videoId?: string; autoplay?: boolean }) => (
-    <div data-testid="embed" data-type="vimeo" data-videoid={p.videoId} data-autoplay={String(p.autoplay ?? false)} />
+    <div
+      data-testid="embed"
+      data-type="vimeo"
+      data-videoid={p.videoId}
+      data-autoplay={String(p.autoplay ?? false)}
+    />
   ),
   LoomEmbed: (p: { videoId?: string; autoplay?: boolean }) => (
-    <div data-testid="embed" data-type="loom" data-videoid={p.videoId} data-autoplay={String(p.autoplay ?? false)} />
+    <div
+      data-testid="embed"
+      data-type="loom"
+      data-videoid={p.videoId}
+      data-autoplay={String(p.autoplay ?? false)}
+    />
   ),
   WistiaEmbed: (p: { videoId?: string; autoplay?: boolean }) => (
-    <div data-testid="embed" data-type="wistia" data-videoid={p.videoId} data-autoplay={String(p.autoplay ?? false)} />
+    <div
+      data-testid="embed"
+      data-type="wistia"
+      data-videoid={p.videoId}
+      data-autoplay={String(p.autoplay ?? false)}
+    />
   ),
   NativeVideo: (p: { src?: string; autoplay?: boolean }) => (
-    <div data-testid="embed" data-type="video" data-src={p.src} data-autoplay={String(p.autoplay ?? false)} />
+    <div
+      data-testid="embed"
+      data-type="video"
+      data-src={p.src}
+      data-autoplay={String(p.autoplay ?? false)}
+    />
   ),
   GifPlayer: (p: { src?: string; autoplay?: boolean }) => (
-    <div data-testid="embed" data-type="gif" data-src={p.src} data-autoplay={String(p.autoplay ?? false)} />
+    <div
+      data-testid="embed"
+      data-type="gif"
+      data-src={p.src}
+      data-autoplay={String(p.autoplay ?? false)}
+    />
   ),
   LottiePlayer: (p: { src?: string; autoplay?: boolean }) => (
-    <div data-testid="embed" data-type="lottie" data-src={p.src} data-autoplay={String(p.autoplay ?? false)} />
+    <div
+      data-testid="embed"
+      data-type="lottie"
+      data-src={p.src}
+      data-autoplay={String(p.autoplay ?? false)}
+    />
   ),
 }))
 
@@ -62,15 +102,15 @@ describe('MediaSlot dispatch', () => {
     const { container } = render(<MediaSlot src="https://example.com/x" alt="Hello" />)
     const img = container.querySelector('img')
     expect(img).not.toBeNull()
-    expect(img!.getAttribute('alt')).toBe('Hello')
-    expect(img!.getAttribute('loading')).toBe('lazy')
+    expect(img?.getAttribute('alt')).toBe('Hello')
+    expect(img?.getAttribute('loading')).toBe('lazy')
   })
 
   it('falls back to <img alt=""> for unknown URLs without alt', () => {
     const { container } = render(<MediaSlot src="https://example.com/x" />)
     const img = container.querySelector('img')
     expect(img).not.toBeNull()
-    expect(img!.getAttribute('alt')).toBe('')
+    expect(img?.getAttribute('alt')).toBe('')
   })
 
   it('type override beats URL detection', () => {
@@ -108,7 +148,7 @@ describe('MediaSlot reduced-motion behavior', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     render(<MediaSlot src="/animation.gif" />)
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining('GIF rendered without poster under prefers-reduced-motion: reduce'),
+      expect.stringContaining('GIF rendered without poster under prefers-reduced-motion: reduce')
     )
     warn.mockRestore()
   })

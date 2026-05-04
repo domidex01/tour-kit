@@ -91,11 +91,7 @@ export const AnnouncementBanner = React.forwardRef<HTMLDivElement, AnnouncementB
       >
         <div className="flex flex-1 items-center gap-3">
           {useConfig && config?.media && (
-            <div
-              className="shrink-0"
-              data-slot="announcement-media"
-              style={{ maxWidth: '8rem' }}
-            >
+            <div className="shrink-0" data-slot="announcement-media" style={{ maxWidth: '8rem' }}>
               <MediaSlot
                 src={config.media.src}
                 type={config.media.type}

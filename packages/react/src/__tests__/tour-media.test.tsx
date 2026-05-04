@@ -36,8 +36,8 @@ describe('TourCard renders MediaSlot when step.media is set', () => {
     await screen.findByText('Body')
     const card = document.querySelector('[role="dialog"]')
     expect(card).not.toBeNull()
-    expect(card!.querySelector('[data-slot="tour-card-media"]')).not.toBeNull()
-    expect(card!.querySelector('iframe')).not.toBeNull()
+    expect(card?.querySelector('[data-slot="tour-card-media"]')).not.toBeNull()
+    expect(card?.querySelector('iframe')).not.toBeNull()
   })
 
   it('renders no media slot when step.media is absent', async () => {
@@ -54,7 +54,7 @@ describe('TourCard renders MediaSlot when step.media is set', () => {
     await screen.findByText('Body')
     const card = document.querySelector('[role="dialog"]')
     expect(card).not.toBeNull()
-    expect(card!.querySelector('[data-slot="tour-card-media"]')).toBeNull()
-    expect(card!.querySelector('iframe')).toBeNull()
+    expect(card?.querySelector('[data-slot="tour-card-media"]')).toBeNull()
+    expect(card?.querySelector('iframe')).toBeNull()
   })
 })
