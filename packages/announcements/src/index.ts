@@ -104,6 +104,14 @@ export type { AnnouncementsFilter, UseAnnouncementsReturn } from './hooks/use-an
 export { useAnnouncementQueue } from './hooks/use-announcement-queue'
 export type { UseAnnouncementQueueReturn } from './hooks/use-announcement-queue'
 
+// Phase 3c — audience filter hook + i18n resolver. Mirrors the per-package
+// helpers in `@tour-kit/hints` and `@tour-kit/react`.
+export {
+  useFilteredAnnouncements,
+  evaluateAnnouncementAudience,
+} from './hooks/use-filtered-announcements'
+export { useResolvedText } from './lib/use-resolved-text'
+
 // ============================================
 // CORE UTILITIES
 // ============================================
@@ -156,8 +164,12 @@ export type {
   SpotlightOptions,
   AnnouncementConfig,
   AudienceCondition,
+  AudienceProp,
   AnnouncementStorageAdapter,
 } from './types/announcement'
+
+// Phase 3c — segment-audience type guard
+export { isSegmentAudience } from './types/announcement'
 
 export type {
   // Context types

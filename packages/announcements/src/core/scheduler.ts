@@ -35,8 +35,12 @@ export class AnnouncementScheduler {
       return false
     }
 
-    // Check audience targeting
-    if (!matchesAudience(config.audience, userContext)) {
+    // Check audience targeting — only the legacy array shape goes through
+    // `matchesAudience` here. The segment-shape `{ segment: string }` branch is
+    // resolved upstream by `useFilteredAnnouncements` (Phase 3c) which prunes
+    // ineligible announcements before they reach the scheduler. Treating an
+    // array+undefined as "match" keeps backward compat unchanged.
+    if (Array.isArray(config.audience) && !matchesAudience(config.audience, userContext)) {
       return false
     }
 

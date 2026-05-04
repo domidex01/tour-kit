@@ -6,6 +6,7 @@ import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import { useAnnouncement } from '../hooks/use-announcement'
+import { useResolvedText } from '../lib/use-resolved-text'
 import type { DismissalReason, SpotlightOptions } from '../types/announcement'
 import { AnnouncementActions } from './announcement-actions'
 import { AnnouncementClose } from './announcement-close'
@@ -48,6 +49,9 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
     const config = announcement.config
     const [mounted, setMounted] = React.useState(false)
     const [targetElement, setTargetElement] = React.useState<Element | null>(null)
+
+    const resolvedTitle = useResolvedText(config?.title)
+    const resolvedDescription = useResolvedText(config?.description)
 
     // Controlled or uncontrolled open state
     const isControlled = openProp !== undefined
@@ -163,8 +167,8 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
           {useConfig && config ? (
             <>
               <AnnouncementContent
-                title={config.title}
-                description={config.description}
+                title={resolvedTitle}
+                description={resolvedDescription}
                 media={config.media}
               />
               <AnnouncementActions

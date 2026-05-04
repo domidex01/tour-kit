@@ -1,7 +1,13 @@
 import { ProGate } from '@tour-kit/license'
 import * as React from 'react'
 import { AnnouncementScheduler } from '../core/scheduler'
-import type { AnnouncementConfig, AnnouncementState, DismissalReason } from '../types/announcement'
+import { useFilteredAnnouncements } from '../hooks/use-filtered-announcements'
+import {
+  type AnnouncementConfig,
+  type AnnouncementState,
+  type DismissalReason,
+  isSegmentAudience,
+} from '../types/announcement'
 import type { AnnouncementsContextValue, AnnouncementsProviderProps } from '../types/context'
 import type { QueueConfig } from '../types/queue'
 import { DEFAULT_QUEUE_CONFIG } from '../types/queue'
@@ -237,6 +243,22 @@ export function AnnouncementsProvider({
     [queueConfigOverrides]
   )
 
+  // Phase 3c — filter announcements by audience (segment + array shapes) once
+  // at the top of the provider so the scheduler / auto-show / canShow
+  // eligibility paths only see eligible candidates. The array-shape audience
+  // is also re-checked downstream by the scheduler for backward compat.
+  const filteredAnnouncements = useFilteredAnnouncements(initialAnnouncements)
+
+  // Set of segment-eligible IDs — used to gate imperative `show(id)` and
+  // `canShow(id)` against segment-shape audiences. Without this, an
+  // `audience: { segment: 'admins' }` announcement could be shown via
+  // `useAnnouncement(id).show()` to non-admins because the scheduler only
+  // evaluates the array-shape branch.
+  const filteredIds = React.useMemo(
+    () => new Set(filteredAnnouncements.map((a) => a.id)),
+    [filteredAnnouncements]
+  )
+
   const [state, dispatch] = React.useReducer(announcementsReducer, {
     announcements: new Map(),
     configs: new Map(),
@@ -338,9 +360,11 @@ export function AnnouncementsProvider({
     if (state.announcements.size === 0) return
 
     // Collect eligible candidates first so we can show highest-priority immediately
-    // and queue the rest.
+    // and queue the rest. `filteredAnnouncements` already excludes anything
+    // ruled out by audience (segment + array shapes) so the scheduler only
+    // re-checks the array path for backward-compat semantics.
     const eligible: AnnouncementConfig[] = []
-    for (const config of initialAnnouncements) {
+    for (const config of filteredAnnouncements) {
       if (config.autoShow === false) continue
       const st = state.announcements.get(config.id)
       if (!st) continue
@@ -389,7 +413,7 @@ export function AnnouncementsProvider({
       config.onShow?.()
       onAnnouncementShow?.(config.id)
     }
-  }, [state.announcements, userContext, initialAnnouncements])
+  }, [state.announcements, userContext, filteredAnnouncements])
 
   // Context methods
   const register = React.useCallback((config: AnnouncementConfig) => {
@@ -407,6 +431,14 @@ export function AnnouncementsProvider({
       const config = state.configs.get(id)
 
       if (!announcementState || !config) return
+
+      // Phase 3c — gate imperative show on segment-shape audience eligibility.
+      // The scheduler only evaluates array-shape audiences; segment shapes
+      // are resolved by `useFilteredAnnouncements` upstream and exposed here
+      // via `filteredIds`.
+      if (config.audience && isSegmentAudience(config.audience) && !filteredIds.has(id)) {
+        return
+      }
 
       // Check if can show
       if (!schedulerRef.current.canShow(config, announcementState, userContext)) {
@@ -436,7 +468,7 @@ export function AnnouncementsProvider({
       config.onShow?.()
       onAnnouncementShow?.(id)
     },
-    [state.announcements, state.configs, userContext, persistState, onAnnouncementShow]
+    [state.announcements, state.configs, userContext, persistState, onAnnouncementShow, filteredIds]
   )
 
   const hide = React.useCallback((id: string) => {
@@ -563,9 +595,14 @@ export function AnnouncementsProvider({
 
       if (!announcementState || !config) return false
 
+      // Phase 3c — segment-shape audience eligibility (mirrors `show()`).
+      if (config.audience && isSegmentAudience(config.audience) && !filteredIds.has(id)) {
+        return false
+      }
+
       return schedulerRef.current.canShow(config, announcementState, userContext)
     },
-    [state.announcements, state.configs, userContext]
+    [state.announcements, state.configs, userContext, filteredIds]
   )
 
   const showNext = React.useCallback(() => {

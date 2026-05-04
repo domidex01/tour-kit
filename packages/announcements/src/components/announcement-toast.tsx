@@ -5,6 +5,7 @@ import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import { useAnnouncement } from '../hooks/use-announcement'
+import { useResolvedText } from '../lib/use-resolved-text'
 import type { DismissalReason, ToastOptions } from '../types/announcement'
 import { AnnouncementClose } from './announcement-close'
 import { toastContainerVariants, toastProgressVariants, toastVariants } from './ui/toast-variants'
@@ -46,6 +47,9 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
     const config = announcement.config
     const [progress, setProgress] = React.useState(100)
     const [mounted, setMounted] = React.useState(false)
+
+    const resolvedTitle = useResolvedText(config?.title)
+    const resolvedDescription = useResolvedText(config?.description)
 
     // Controlled or uncontrolled open state
     const isControlled = openProp !== undefined
@@ -116,9 +120,9 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
           <div className="flex-1 space-y-1">
             {useConfig && config ? (
               <>
-                {config.title && <div className="font-medium">{config.title}</div>}
-                {config.description && (
-                  <div className="text-sm opacity-90">{config.description}</div>
+                {resolvedTitle && <div className="font-medium">{resolvedTitle}</div>}
+                {resolvedDescription && (
+                  <div className="text-sm opacity-90">{resolvedDescription}</div>
                 )}
               </>
             ) : (
