@@ -1,8 +1,8 @@
 import { renderHook } from '@testing-library/react'
 import {
   LocaleProvider,
-  SegmentationProvider,
   type SegmentSource,
+  SegmentationProvider,
   type TourStep,
 } from '@tour-kit/core'
 import type { ReactNode } from 'react'
@@ -38,15 +38,15 @@ describe('useStepFilter', () => {
   })
 
   it('filters segment-audience steps via useSegments (always-true segment keeps step)', () => {
-    const steps = [
-      baseStep('keep', { segment: 'beta' }),
-      baseStep('drop', { segment: 'admin' }),
-    ]
+    const steps = [baseStep('keep', { segment: 'beta' }), baseStep('drop', { segment: 'admin' })]
     const { result } = renderHook(() => useStepFilter(steps), {
-      wrapper: wrap({
-        beta: [{ type: 'user_property', key: 'flag', operator: 'equals', value: true }],
-        admin: [{ type: 'user_property', key: 'role', operator: 'equals', value: 'admin' }],
-      }, { flag: true, role: 'guest' }),
+      wrapper: wrap(
+        {
+          beta: [{ type: 'user_property', key: 'flag', operator: 'equals', value: true }],
+          admin: [{ type: 'user_property', key: 'role', operator: 'equals', value: 'admin' }],
+        },
+        { flag: true, role: 'guest' }
+      ),
     })
     expect(result.current.map((s) => s.id)).toEqual(['keep'])
   })
@@ -54,7 +54,9 @@ describe('useStepFilter', () => {
   it('filters legacy AudienceCondition[] steps via matchesAudience', () => {
     const steps = [
       baseStep('keep', [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }]),
-      baseStep('drop', [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'enterprise' }]),
+      baseStep('drop', [
+        { type: 'user_property', key: 'plan', operator: 'equals', value: 'enterprise' },
+      ]),
     ]
     const { result } = renderHook(() => useStepFilter(steps), {
       wrapper: wrap({}, { plan: 'pro' }),

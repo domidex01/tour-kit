@@ -1,9 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import {
-  LocaleProvider,
-  SegmentationProvider,
-  type SegmentSource,
-} from '@tour-kit/core'
+import { LocaleProvider, type SegmentSource, SegmentationProvider } from '@tour-kit/core'
 import type { ReactNode } from 'react'
 import { describe, expect, it } from 'vitest'
 import type { HintConfig } from '../types'
@@ -37,17 +33,12 @@ describe('useHintFilter', () => {
   })
 
   it('filters segment-audience hints via useSegments', () => {
-    const hints = [
-      baseHint('keep', { segment: 'beta' }),
-      baseHint('drop', { segment: 'admin' }),
-    ]
+    const hints = [baseHint('keep', { segment: 'beta' }), baseHint('drop', { segment: 'admin' })]
     const { result } = renderHook(() => useHintFilter(hints), {
       wrapper: wrap(
         {
           beta: [{ type: 'user_property', key: 'flag', operator: 'equals', value: true }],
-          admin: [
-            { type: 'user_property', key: 'role', operator: 'equals', value: 'admin' },
-          ],
+          admin: [{ type: 'user_property', key: 'role', operator: 'equals', value: 'admin' }],
         },
         { flag: true, role: 'guest' }
       ),
@@ -57,9 +48,7 @@ describe('useHintFilter', () => {
 
   it('filters legacy AudienceCondition[] hints via matchesAudience', () => {
     const hints = [
-      baseHint('keep', [
-        { type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' },
-      ]),
+      baseHint('keep', [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }]),
       baseHint('drop', [
         { type: 'user_property', key: 'plan', operator: 'equals', value: 'enterprise' },
       ]),

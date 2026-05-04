@@ -62,12 +62,7 @@ describe('Hint i18n integration', () => {
     const user = userEvent.setup()
     renderWithProviders(
       <HintsProvider>
-        <Hint
-          id="h-i18n-2"
-          target="#hint-target"
-          title={{ key: 'hint.greeting' }}
-          content="Body"
-        />
+        <Hint id="h-i18n-2" target="#hint-target" title={{ key: 'hint.greeting' }} content="Body" />
       </HintsProvider>,
       { messages: { 'hint.greeting': 'Welcome' } }
     )
@@ -81,12 +76,7 @@ describe('Hint i18n integration', () => {
     const user = userEvent.setup()
     renderWithProviders(
       <HintsProvider>
-        <Hint
-          id="h-i18n-3"
-          target="#hint-target"
-          title={{ key: 'hint.absent' }}
-          content="Body"
-        />
+        <Hint id="h-i18n-3" target="#hint-target" title={{ key: 'hint.absent' }} content="Body" />
       </HintsProvider>,
       { messages: {} }
     )

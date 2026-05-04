@@ -133,10 +133,7 @@ export const HintTooltip = React.forwardRef<HTMLDivElement, HintTooltipProps>(
           )}
           <div className="pr-4">
             {resolvedTitle != null && (
-              <p
-                className="font-semibold text-sm leading-none mb-1"
-                data-slot="hint-tooltip-title"
-              >
+              <p className="font-semibold text-sm leading-none mb-1" data-slot="hint-tooltip-title">
                 {resolvedTitle}
               </p>
             )}

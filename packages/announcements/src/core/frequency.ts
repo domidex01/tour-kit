@@ -9,10 +9,10 @@
  * new code. Re-exports here remain through 1.x.
  */
 import {
-  canShowByFrequency as coreCanShowByFrequency,
-  canShowAfterDismissal as coreCanShowAfterDismissal,
-  getViewLimit as coreGetViewLimit,
   type FrequencyRule,
+  canShowAfterDismissal as coreCanShowAfterDismissal,
+  canShowByFrequency as coreCanShowByFrequency,
+  getViewLimit as coreGetViewLimit,
 } from '@tour-kit/core'
 import type { AnnouncementState } from '../types/announcement'
 

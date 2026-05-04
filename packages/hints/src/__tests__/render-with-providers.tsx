@@ -2,8 +2,8 @@ import { type RenderResult, render } from '@testing-library/react'
 import {
   LocaleProvider,
   type Messages,
-  SegmentationProvider,
   type SegmentSource,
+  SegmentationProvider,
 } from '@tour-kit/core'
 import type { ReactNode } from 'react'
 

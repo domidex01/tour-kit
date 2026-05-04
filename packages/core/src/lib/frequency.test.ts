@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  type FrequencyState,
   canShowAfterDismissal,
   canShowByFrequency,
-  type FrequencyState,
   getViewLimit,
 } from './frequency'
 

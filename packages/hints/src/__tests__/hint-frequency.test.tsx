@@ -1,8 +1,8 @@
 import { act, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { HintsProvider } from '../context/hints-provider'
 import { useHintsContext } from '../context/hints-context'
+import { HintsProvider } from '../context/hints-provider'
 import type { HintConfig } from '../types'
 import { createMockStorage, seedHintFrequencyState } from './mock-storage'
 
@@ -45,9 +45,7 @@ function Probe({ probeRef }: { probeRef: { current: ProbeRef | null } }) {
     active: () => ctx.activeHint,
     isOpen: () => ctx.hints.get(HINT_ID)?.isOpen ?? false,
   }
-  return (
-    <span data-testid="active">{ctx.activeHint ?? 'none'}</span>
-  )
+  return <span data-testid="active">{ctx.activeHint ?? 'none'}</span>
 }
 
 describe('Hint frequency rules', () => {
@@ -128,12 +126,12 @@ describe('Hint frequency rules', () => {
 
     for (let i = 0; i < 3; i++) {
       act(() => {
-      probe.current?.show()
-    })
+        probe.current?.show()
+      })
       expect(screen.getByTestId('active')).toHaveTextContent(HINT_ID)
       act(() => {
-      probe.current?.dismiss()
-    })
+        probe.current?.dismiss()
+      })
     }
     // Fourth attempt — blocked. The dismiss above also marks isDismissed,
     // but `times` evaluates viewCount < count first (= 3 < 3 → false).

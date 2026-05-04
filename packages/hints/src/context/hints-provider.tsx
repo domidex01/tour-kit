@@ -334,10 +334,7 @@ export function HintsProvider({ children, hints, storage }: HintsProviderProps) 
   }, [state.frequencyState, prefixedStorage])
 
   const registerHint = React.useCallback((id: string) => dispatch({ type: 'REGISTER', id }), [])
-  const unregisterHint = React.useCallback(
-    (id: string) => dispatch({ type: 'UNREGISTER', id }),
-    []
-  )
+  const unregisterHint = React.useCallback((id: string) => dispatch({ type: 'UNREGISTER', id }), [])
   const hideHint = React.useCallback((id: string) => dispatch({ type: 'HIDE', id }), [])
   const dismissHint = React.useCallback((id: string) => dispatch({ type: 'DISMISS', id }), [])
   const resetHint = React.useCallback((id: string) => dispatch({ type: 'RESET', id }), [])

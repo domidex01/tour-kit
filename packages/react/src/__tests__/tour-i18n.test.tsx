@@ -36,12 +36,7 @@ describe('Tour i18n integration (US-1)', () => {
     document.body.innerHTML = '<div id="t2">Target</div>'
     renderWithProviders(
       <TourComponent id="t-i18n-2">
-        <TourStep
-          id="s1"
-          target="#t2"
-          title={{ key: 'tour.welcome' }}
-          content="Body"
-        />
+        <TourStep id="s1" target="#t2" title={{ key: 'tour.welcome' }} content="Body" />
         <Starter />
       </TourComponent>,
       { messages: { 'tour.welcome': 'Hello' } }
@@ -56,12 +51,7 @@ describe('Tour i18n integration (US-1)', () => {
     document.body.innerHTML = '<div id="t3">Target</div>'
     renderWithProviders(
       <TourComponent id="t-i18n-3">
-        <TourStep
-          id="s1"
-          target="#t3"
-          title={<strong>Custom</strong>}
-          content="Body"
-        />
+        <TourStep id="s1" target="#t3" title={<strong>Custom</strong>} content="Body" />
         <Starter />
       </TourComponent>
     )
@@ -98,12 +88,7 @@ describe('Tour i18n integration (US-1)', () => {
     document.body.innerHTML = '<div id="t5">Target</div>'
     renderWithProviders(
       <TourComponent id="t-i18n-5">
-        <TourStep
-          id="s1"
-          target="#t5"
-          title={{ key: 'tour.missing' }}
-          content="Body"
-        />
+        <TourStep id="s1" target="#t5" title={{ key: 'tour.missing' }} content="Body" />
         <Starter />
       </TourComponent>,
       { messages: {} }
@@ -123,13 +108,9 @@ const _legacy: Tour = {
       id: 's',
       target: '#x',
       content: 'c',
-      audience: [
-        { type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' },
-      ],
+      audience: [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }],
     },
   ],
-  audience: [
-    { type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' },
-  ],
+  audience: [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }],
 }
 void _legacy

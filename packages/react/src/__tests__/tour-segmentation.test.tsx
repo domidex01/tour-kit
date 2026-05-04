@@ -28,12 +28,7 @@ describe('Tour audience filtering (US-2 / US-3)', () => {
           content="Filtered Body"
           audience={{ segment: 'beta' }}
         />
-        <TourStep
-          id="kept"
-          target="#kept-target"
-          title="Kept Title"
-          content="Kept Body"
-        />
+        <TourStep id="kept" target="#kept-target" title="Kept Title" content="Kept Body" />
         <Starter />
       </TourComponent>,
       { segments: { beta: () => false } }
@@ -76,9 +71,7 @@ describe('Tour audience filtering (US-2 / US-3)', () => {
           target="#legacy-target"
           title="Pro Title"
           content="Pro Body"
-          audience={[
-            { type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' },
-          ]}
+          audience={[{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }]}
         />
         <Starter />
       </TourComponent>,
@@ -96,9 +89,7 @@ describe('Tour audience filtering (US-2 / US-3)', () => {
           target="#legacy-target"
           title="Pro Title"
           content="Pro Body"
-          audience={[
-            { type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' },
-          ]}
+          audience={[{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }]}
         />
         <Starter />
       </TourComponent>,

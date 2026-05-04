@@ -39,8 +39,7 @@ export function useHintFilter(hints: HintConfig[]): HintConfig[] {
   const segments = useSegments()
   const { userContext } = useSegmentationContext()
   return React.useMemo(
-    () =>
-      hints.filter((hint) => evaluateHintAudience(hint.audience, segments, userContext)),
+    () => hints.filter((hint) => evaluateHintAudience(hint.audience, segments, userContext)),
     [hints, segments, userContext]
   )
 }

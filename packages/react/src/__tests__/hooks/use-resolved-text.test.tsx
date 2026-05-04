@@ -44,10 +44,9 @@ describe('useResolvedText', () => {
   })
 
   it('caller-supplied vars override userContext', () => {
-    const { result } = renderHook(
-      () => useResolvedText('Hi {{name}}', { name: 'Override' }),
-      { wrapper: wrap({}, { name: 'FromContext' }) }
-    )
+    const { result } = renderHook(() => useResolvedText('Hi {{name}}', { name: 'Override' }), {
+      wrapper: wrap({}, { name: 'FromContext' }),
+    })
     expect(result.current).toBe('Hi Override')
   })
 })
