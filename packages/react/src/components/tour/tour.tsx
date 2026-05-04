@@ -115,15 +115,18 @@ export function Tour({
 
   const filteredSteps = useStepFilter(steps)
 
-  // Build tour config
+  // Build tour config. `...config` is spread first so explicit prop-level
+  // fields below win — otherwise `config.audience` would silently overwrite
+  // the explicit `audience` prop and the registered tour metadata would
+  // diverge from the gate evaluated above.
   const tour: TourType = React.useMemo(
     () => ({
       id,
+      ...config,
       steps: filteredSteps,
       audience: audience ?? config?.audience,
-      autoStart,
-      startAt,
-      ...config,
+      autoStart: autoStart ?? config?.autoStart,
+      startAt: startAt ?? config?.startAt,
       onStart: onStart ? () => onStart() : undefined,
       onComplete: onComplete
         ? () => {

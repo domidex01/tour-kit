@@ -194,13 +194,15 @@ function handleHydrate(
     newFreq.set(id, value)
   }
   // Reflect persisted dismissal into hint state so existing `isDismissed`
-  // consumers (UI) see it on mount.
+  // consumers (UI) see it on mount. Only mirror onto already-registered
+  // hint slots — materializing a slot here would bypass the auto-register
+  // tracking and leave an orphan when filteredHints shrinks.
   const newHints = new Map(state.hints)
   for (const [id, value] of entries) {
-    if (value.isDismissed) {
-      const existing = newHints.get(id) ?? { id, isOpen: false, isDismissed: false }
-      newHints.set(id, { ...existing, isDismissed: true })
-    }
+    if (!value.isDismissed) continue
+    const existing = newHints.get(id)
+    if (!existing) continue
+    newHints.set(id, { ...existing, isDismissed: true })
   }
   return { ...state, hints: newHints, frequencyState: newFreq }
 }
@@ -249,12 +251,82 @@ export interface HintsProviderProps {
   storage?: Storage
 }
 
+/**
+ * The minimal subset of the DOM `Storage` interface used by the persistence
+ * effect. Both `window.localStorage` (DOM `Storage`) and the result of
+ * `createPrefixedStorage` (core's narrower `Storage` shape) satisfy it, so
+ * we can avoid casting between the two types.
+ *
+ * NOTE: callers must pass a SYNCHRONOUS adapter — the persistence effect
+ * reads `getItem` synchronously. Core's `Storage` declares `string | null
+ * | Promise<…>` for async adapters, but those won't work here. localStorage
+ * and the in-memory test mock are both synchronous.
+ */
+interface PersistAdapter {
+  getItem(key: string): string | null
+  setItem(key: string, value: string): void
+  removeItem(key: string): void
+}
+
 function getDefaultStorage(): Storage | null {
   if (typeof window === 'undefined') return null
   try {
     return window.localStorage
   } catch {
     return null
+  }
+}
+
+/**
+ * Read persisted frequency state for any hint id not already hydrated.
+ * Returns the entries to dispatch via `HYDRATE_FREQUENCY` and mutates
+ * `hydratedIds` to record which ids were touched.
+ */
+function readPersistedEntries(
+  storage: PersistAdapter,
+  ids: ReadonlyArray<string>,
+  hydratedIds: Set<string>
+): Array<[string, FrequencyState]> {
+  const entries: Array<[string, FrequencyState]> = []
+  for (const id of ids) {
+    if (hydratedIds.has(id)) continue
+    hydratedIds.add(id)
+    const raw = storage.getItem(freqKey(id))
+    if (!raw) continue
+    const persisted = safeJSONParse<PersistedFrequencyState | null>(raw, null)
+    if (!persisted) continue
+    entries.push([id, thawState(persisted)])
+  }
+  return entries
+}
+
+/**
+ * Diff two frequency-state Maps against storage. Removes keys present in
+ * `prev` but not in `next`; writes every entry in `next`. Failures (quota,
+ * serialization) are swallowed — frequency rules degrade gracefully when
+ * storage is unavailable.
+ */
+function syncStorage(
+  storage: PersistAdapter,
+  prev: ReadonlyMap<string, FrequencyState>,
+  next: ReadonlyMap<string, FrequencyState>,
+  hydratedIds: Set<string>
+): void {
+  for (const id of prev.keys()) {
+    if (next.has(id)) continue
+    try {
+      storage.removeItem(freqKey(id))
+    } catch {
+      // ignore
+    }
+    hydratedIds.delete(id)
+  }
+  for (const [id, value] of next) {
+    try {
+      storage.setItem(freqKey(id), JSON.stringify(freezeState(value)))
+    } catch {
+      // ignore
+    }
   }
 }
 
@@ -268,10 +340,15 @@ export function HintsProvider({ children, hints, storage }: HintsProviderProps) 
 
   // Resolve storage once per mount. Wrapped via createPrefixedStorage so
   // every persisted key carries the `tourkit:` namespace consistently.
-  const prefixedStorage = React.useMemo<Storage | null>(() => {
+  // The cast narrows core's Storage type — which permits async adapters
+  // (Promise-returning getItem/setItem) — down to the sync `PersistAdapter`
+  // this provider relies on. Both DOM `localStorage` and the in-memory test
+  // mock are synchronous; passing an async adapter would silently break the
+  // persistence effect (it reads getItem synchronously).
+  const prefixedStorage = React.useMemo<PersistAdapter | null>(() => {
     const raw = storage ?? getDefaultStorage()
     if (!raw) return null
-    return createPrefixedStorage(raw, 'tourkit') as Storage
+    return createPrefixedStorage(raw, 'tourkit') as PersistAdapter
   }, [storage])
 
   const [state, dispatch] = React.useReducer(hintsReducer, {
@@ -298,39 +375,35 @@ export function HintsProvider({ children, hints, storage }: HintsProviderProps) 
     registeredIds.current = next
   }, [hints, filteredHints])
 
-  // Hydrate frequency state on mount + when the relevant id set changes.
+  // Hydrate frequency state ONCE per provider mount + lazily for
+  // newly-added hint ids. Re-running on every userContext change would
+  // round-trip storage (read → dispatch → write back) and clobber any
+  // in-flight RECORD_VIEW / DISMISS that landed between mount and the
+  // userContext change.
+  const hydratedIdsRef = React.useRef<Set<string>>(new Set())
   React.useEffect(() => {
-    if (!prefixedStorage) return
-    if (!hints) return
-    const entries: Array<[string, FrequencyState]> = []
-    for (const h of filteredHints) {
-      const raw = prefixedStorage.getItem(freqKey(h.id))
-      if (!raw) continue
-      const persisted = safeJSONParse<PersistedFrequencyState | null>(raw, null)
-      if (!persisted) continue
-      entries.push([h.id, thawState(persisted)])
-    }
+    if (!prefixedStorage || !hints) return
+    const entries = readPersistedEntries(
+      prefixedStorage,
+      filteredHints.map((h) => h.id),
+      hydratedIdsRef.current
+    )
     if (entries.length > 0) {
       dispatch({ type: 'HYDRATE_FREQUENCY', entries })
     }
-    // hints config identity drives this effect — filteredHints is derived.
   }, [hints, filteredHints, prefixedStorage])
 
-  // Persist on every frequency change. Skip on first render when we just
-  // hydrated (state.frequencyState already matches storage).
+  // Persist on every frequency change. The diff against the previous Map
+  // ensures removed ids (resetHint / resetAllHints) get deleted from
+  // storage — otherwise a remount would re-hydrate the dropped state and
+  // silently undo the reset.
   const lastPersistedRef = React.useRef(state.frequencyState)
   React.useEffect(() => {
     if (!prefixedStorage) return
-    if (lastPersistedRef.current === state.frequencyState) return
+    const prev = lastPersistedRef.current
+    if (prev === state.frequencyState) return
     lastPersistedRef.current = state.frequencyState
-    for (const [id, value] of state.frequencyState) {
-      try {
-        prefixedStorage.setItem(freqKey(id), JSON.stringify(freezeState(value)))
-      } catch {
-        // ignore quota / serialization failures — frequency rules degrade
-        // gracefully when storage is unavailable
-      }
-    }
+    syncStorage(prefixedStorage, prev, state.frequencyState, hydratedIdsRef.current)
   }, [state.frequencyState, prefixedStorage])
 
   const registerHint = React.useCallback((id: string) => dispatch({ type: 'REGISTER', id }), [])
@@ -343,12 +416,15 @@ export function HintsProvider({ children, hints, storage }: HintsProviderProps) 
   // Stable refs over hintsById + frequencyState so `showHint`'s own
   // identity is invariant — otherwise dispatching `RECORD_VIEW` from inside
   // showHint would change its identity, retriggering downstream effects
-  // (e.g. <Hint autoShow>) that depend on it. Reading state via refs keeps
-  // showHint a permanent function reference per provider mount.
+  // (e.g. <Hint autoShow>) that depend on it. Refs are updated in an
+  // effect (not during render) for concurrent-mode safety; showHint is
+  // event-driven, so a microtask of staleness is inconsequential.
   const hintsByIdRef = React.useRef(hintsById)
-  hintsByIdRef.current = hintsById
   const frequencyStateRef = React.useRef(state.frequencyState)
-  frequencyStateRef.current = state.frequencyState
+  React.useEffect(() => {
+    hintsByIdRef.current = hintsById
+    frequencyStateRef.current = state.frequencyState
+  })
 
   // Gate `showHint` on frequency rules when a config exists for the id.
   // No config (= legacy imperative caller) → fall through to plain SHOW.

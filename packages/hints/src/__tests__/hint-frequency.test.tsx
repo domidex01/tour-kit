@@ -33,6 +33,8 @@ const baseHint: HintConfig = {
 interface ProbeRef {
   show(): void
   dismiss(): void
+  reset(): void
+  resetAll(): void
   active(): string | null
   isOpen(): boolean
 }
@@ -42,6 +44,8 @@ function Probe({ probeRef }: { probeRef: { current: ProbeRef | null } }) {
   probeRef.current = {
     show: () => ctx.showHint(HINT_ID),
     dismiss: () => ctx.dismissHint(HINT_ID),
+    reset: () => ctx.resetHint(HINT_ID),
+    resetAll: () => ctx.resetAllHints(),
     active: () => ctx.activeHint,
     isOpen: () => ctx.hints.get(HINT_ID)?.isOpen ?? false,
   }
@@ -167,5 +171,61 @@ describe('Hint frequency rules', () => {
     const parsed = JSON.parse(raw as string)
     expect(parsed.viewCount).toBe(1)
     expect(typeof parsed.lastViewedAt).toBe('string')
+  })
+
+  it('resetHint deletes the persisted frequency entry — survives remount', () => {
+    const hint: HintConfig = { ...baseHint, frequency: 'once' }
+    const { unmount } = renderProvider(hint)
+
+    // Show + dismiss + persist
+    act(() => {
+      probe.current?.show()
+    })
+    act(() => {
+      probe.current?.dismiss()
+    })
+    expect(storage.getItem(`tourkit:hint:freq:${HINT_ID}`)).not.toBeNull()
+
+    // Reset clears in-memory state
+    act(() => {
+      probe.current?.reset()
+    })
+    // …and the persist effect must have removed the storage entry
+    expect(storage.getItem(`tourkit:hint:freq:${HINT_ID}`)).toBeNull()
+
+    // Remount: the hint should be eligible again (no persisted dismissal to rehydrate)
+    unmount()
+    probe = { current: null }
+    renderProvider(hint)
+    act(() => {
+      probe.current?.show()
+    })
+    expect(screen.getByTestId('active')).toHaveTextContent(HINT_ID)
+  })
+
+  it('resetAllHints clears every persisted entry — survives remount', () => {
+    const hint: HintConfig = { ...baseHint, frequency: 'once' }
+    const { unmount } = renderProvider(hint)
+
+    act(() => {
+      probe.current?.show()
+    })
+    act(() => {
+      probe.current?.dismiss()
+    })
+    expect(storage.getItem(`tourkit:hint:freq:${HINT_ID}`)).not.toBeNull()
+
+    act(() => {
+      probe.current?.resetAll()
+    })
+    expect(storage.getItem(`tourkit:hint:freq:${HINT_ID}`)).toBeNull()
+
+    unmount()
+    probe = { current: null }
+    renderProvider(hint)
+    act(() => {
+      probe.current?.show()
+    })
+    expect(screen.getByTestId('active')).toHaveTextContent(HINT_ID)
   })
 })
