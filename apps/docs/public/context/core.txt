@@ -49,6 +49,7 @@ Types:
     TourStep
     StepOptions
     AudienceProp
+    TourStepMedia
     Tour
     TourOptions
     TourState
@@ -125,6 +126,7 @@ Hooks:
     useUILibrary — Hook to get the current UI library setting
     useLocale
     useT — Hook returning a translator function `t(key, vars?)` that:
+    useResolveLocalizedText — Returns a memoized resolver `(value) => string` that takes a `LocalizedText`
     useSegmentationContext
     useSegment
     useSegments
@@ -363,6 +365,7 @@ HOOKS
     useUILibrary(): UILibrary
     useLocale(): LocaleContextValue
     useT(): TranslateFn
+    useResolveLocalizedText(): (value: LocalizedText | undefined) => string
     useSegmentationContext(...)
     useSegment(...)
     useSegments(...)
