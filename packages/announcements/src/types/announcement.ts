@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react'
 
 // AudienceCondition was promoted to @tour-kit/core in Phase 1 of the
-// UserGuiding parity initiative. Re-exported here for backward compat —
-// existing `import { AudienceCondition } from '@tour-kit/announcements'`
+// UserGuiding parity initiative. FrequencyRule was promoted in Phase 3a.
+// Re-exported here for backward compat — existing
+// `import { AudienceCondition, FrequencyRule } from '@tour-kit/announcements'`
 // consumers continue to work without source changes.
-import type { AudienceCondition } from '@tour-kit/core'
+import type { AudienceCondition, FrequencyRule } from '@tour-kit/core'
 
-export type { AudienceCondition }
+export type { AudienceCondition, FrequencyRule }
 
 /**
  * Announcement display variants
@@ -17,16 +18,6 @@ export type AnnouncementVariant = 'modal' | 'slideout' | 'banner' | 'toast' | 's
  * Announcement priority levels
  */
 export type AnnouncementPriority = 'low' | 'normal' | 'high' | 'critical'
-
-/**
- * Frequency rules for how often an announcement can be shown
- */
-export type FrequencyRule =
-  | 'once' // Show only once ever
-  | 'session' // Show once per session
-  | 'always' // Show every time conditions are met
-  | { type: 'times'; count: number } // Show N times
-  | { type: 'interval'; days: number } // Show every N days
 
 /**
  * Dismissal reasons for analytics and state tracking
