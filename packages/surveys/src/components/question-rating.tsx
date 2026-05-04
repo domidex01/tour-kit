@@ -2,6 +2,7 @@
 
 import { cn } from '@tour-kit/core'
 import * as React from 'react'
+import type { RatingPreset, RatingScale } from '../types/question'
 import { ratingOptionVariants } from './ui/question-variants'
 
 /** Default emoji map for emoji rating style */
@@ -13,9 +14,35 @@ const DEFAULT_EMOJI_MAP: Record<number, string> = {
   5: '\u{1F60D}',
 }
 
+interface PresetDefaults {
+  min: number
+  max: number
+  style: 'numeric' | 'stars' | 'emoji'
+  emojiMap?: Record<number, string>
+}
+
+/**
+ * Resolved defaults per `RatingPreset`. `'thumbs'` uses `1, 2, 3` (low → high)
+ * so it fits the existing `RatingScale.min/max` contract without changing the
+ * scoring engine.
+ */
+const PRESET_DEFAULTS: Record<RatingPreset, PresetDefaults> = {
+  stars: { min: 1, max: 5, style: 'stars' },
+  thumbs: {
+    min: 1,
+    max: 3,
+    style: 'emoji',
+    emojiMap: {
+      1: '\u{1F44E}', // 👎
+      2: '\u{1F610}', // 😐
+      3: '\u{1F44D}', // 👍
+    },
+  },
+}
+
 export interface QuestionRatingProps {
   /** Unique identifier for the rating group */
-  id: string
+  id?: string
   /** Minimum rating value (default: 0) */
   min?: number
   /** Maximum rating value (default: 10) */
@@ -29,7 +56,7 @@ export interface QuestionRatingProps {
   /** Change handler */
   onChange?: (value: number) => void
   /** Accessible label for the rating group */
-  label: string
+  label?: string
   /** Label for the low end of the scale */
   lowLabel?: string
   /** Label for the high end of the scale */
@@ -38,6 +65,17 @@ export interface QuestionRatingProps {
   isRequired?: boolean
   /** Custom emoji map for emoji style */
   emojiMap?: Record<number, string>
+  /**
+   * Optional rating preset that fills in `min`/`max`/`style`/`emojiMap`
+   * defaults. Explicit `ratingScale` wins; explicit `min`/`max`/`style`/`emojiMap`
+   * props win over preset defaults too.
+   */
+  preset?: RatingPreset
+  /**
+   * Explicit rating scale (wins over `preset` and individual prop defaults).
+   * When set, `min`/`max`/`style` from `ratingScale` are used.
+   */
+  ratingScale?: RatingScale
   /** Additional class names */
   className?: string
 }
@@ -45,10 +83,10 @@ export interface QuestionRatingProps {
 const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
   (
     {
-      id,
-      min = 0,
-      max = 10,
-      style = 'numeric',
+      id: idProp,
+      min: minProp,
+      max: maxProp,
+      style: styleProp,
       size = 'md',
       value: controlledValue,
       onChange,
@@ -57,6 +95,8 @@ const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
       highLabel,
       isRequired = false,
       emojiMap,
+      preset,
+      ratingScale,
       className,
     },
     ref
@@ -67,6 +107,16 @@ const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
 
     const currentValue = isControlled ? controlledValue : internalValue
 
+    const presetDefaults = preset ? PRESET_DEFAULTS[preset] : undefined
+
+    // Precedence: explicit `ratingScale` > explicit prop > preset default > hardcoded fallback.
+    const min = ratingScale?.min ?? minProp ?? presetDefaults?.min ?? 0
+    const max = ratingScale?.max ?? maxProp ?? presetDefaults?.max ?? 10
+    const style = ratingScale?.style ?? styleProp ?? presetDefaults?.style ?? 'numeric'
+    const reactId = React.useId()
+    const id = idProp ?? `rating-${reactId}`
+    const accessibleLabel = label ?? 'Rating'
+
     const step = 1
     const options: number[] = React.useMemo(() => {
       const result: number[] = []
@@ -76,7 +126,7 @@ const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
       return result
     }, [min, max])
 
-    const resolvedEmojiMap = emojiMap ?? DEFAULT_EMOJI_MAP
+    const resolvedEmojiMap = emojiMap ?? presetDefaults?.emojiMap ?? DEFAULT_EMOJI_MAP
 
     const selectValue = React.useCallback(
       (val: number) => {
@@ -168,7 +218,7 @@ const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
       <div ref={ref} className={cn('flex flex-col gap-2', className)}>
         <div
           role="radiogroup"
-          aria-label={label}
+          aria-label={accessibleLabel}
           aria-required={isRequired}
           data-rating-group={id}
           className="flex flex-wrap gap-1"

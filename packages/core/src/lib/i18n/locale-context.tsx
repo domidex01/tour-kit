@@ -9,6 +9,12 @@ export interface LocaleContextValue {
   t?: TranslateFn
   /** Auto-derived from locale; consumers can override */
   direction?: 'ltr' | 'rtl'
+  /**
+   * Optional user/template context merged into every interpolation. Keyed values
+   * (e.g. `user.name`) are pulled from this object when a string template like
+   * `'Hi {{user.name}}'` is rendered without explicit call-site vars.
+   */
+  userContext?: Record<string, unknown>
 }
 
 const LocaleContext = createContext<LocaleContextValue>({ locale: 'en', messages: {} })
@@ -22,11 +28,12 @@ export function LocaleProvider({
   messages = {},
   t,
   direction,
+  userContext,
   children,
 }: LocaleProviderProps) {
   const value = useMemo(
-    () => ({ locale, messages, t, direction: direction ?? deriveDir(locale) }),
-    [locale, messages, t, direction]
+    () => ({ locale, messages, t, direction: direction ?? deriveDir(locale), userContext }),
+    [locale, messages, t, direction, userContext]
   )
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
 }

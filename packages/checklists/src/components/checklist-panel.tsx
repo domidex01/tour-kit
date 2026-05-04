@@ -1,7 +1,6 @@
 'use client'
 
-import { cn } from '@tour-kit/core'
-import { useUILibrary } from '@tour-kit/core'
+import { cn, useResolveLocalizedText, useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'
 import { Slot, UnifiedSlot } from '../lib/slot'
@@ -58,6 +57,7 @@ export const ChecklistPanel = React.forwardRef<HTMLDivElement, ChecklistPanelPro
     ref
   ) => {
     const library = useUILibrary()
+    const resolveText = useResolveLocalizedText()
     const {
       checklist,
       progress,
@@ -98,7 +98,7 @@ export const ChecklistPanel = React.forwardRef<HTMLDivElement, ChecklistPanelPro
             <div className="text-left">
               {/* biome-ignore lint/a11y/useSemanticElements: <h3> is invalid inside <button>; span with heading role keeps SR semantics without invalid HTML */}
               <span role="heading" aria-level={3} className="font-semibold block">
-                {checklist.config.title}
+                {resolveText(checklist.config.title)}
               </span>
               <p className="text-sm text-muted-foreground">
                 {progress.completed} of {progress.total} complete

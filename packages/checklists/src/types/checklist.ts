@@ -1,3 +1,4 @@
+import type { LocalizedText } from '@tour-kit/core'
 import type { ReactNode } from 'react'
 
 /**
@@ -11,12 +12,31 @@ export type TaskAction =
   | { type: 'custom'; data: unknown }
 
 /**
+ * Built-in completion shape for tasks that auto-complete when the user
+ * navigates to a matching URL. Browser-only; SSR-safe (the listener no-ops
+ * outside `window`).
+ *
+ * - `urlPattern: string` → substring match against `location.pathname`
+ *   (e.g. `'/dashboard'` matches `'/dashboard/main'`).
+ * - `urlPattern: RegExp` → regex test against `location.pathname`
+ *   (e.g. `/^\/billing/` matches `'/billing/plan'` only).
+ *
+ * Consumers needing non-standard routing (hash routing, in-app sub-paths)
+ * should use `{ custom: (ctx) => ... }` instead.
+ */
+export type UrlVisitCompletion = {
+  type: 'urlVisit'
+  urlPattern: string | RegExp
+}
+
+/**
  * Condition for automatic task completion
  */
 export type TaskCompletionCondition =
   | { tourCompleted: string }
   | { tourStarted: string }
   | { custom: (context: ChecklistContext) => boolean }
+  | UrlVisitCompletion
 
 /**
  * Context available in task conditions
@@ -38,10 +58,11 @@ export interface ChecklistContext {
 export interface ChecklistTaskConfig {
   /** Unique task identifier */
   id: string
-  /** Task title */
-  title: string
-  /** Task description */
-  description?: string
+  /** Task title — accepts plain string templates (interpolated against
+   *  `LocaleProvider.userContext`) or `{ key: string }` for i18n lookup. */
+  title: LocalizedText
+  /** Task description — same `LocalizedText` shape as `title`. */
+  description?: LocalizedText
   /** Icon name or component */
   icon?: string | ReactNode
   /** Action to perform when task is clicked */
@@ -82,10 +103,10 @@ export interface ChecklistTaskState {
 export interface ChecklistConfig {
   /** Unique checklist identifier */
   id: string
-  /** Checklist title */
-  title: string
-  /** Checklist description */
-  description?: string
+  /** Checklist title — `LocalizedText` (string template or `{ key }`). */
+  title: LocalizedText
+  /** Checklist description — same `LocalizedText` shape as `title`. */
+  description?: LocalizedText
   /** Icon name or component */
   icon?: string | ReactNode
   /** Tasks in this checklist */

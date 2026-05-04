@@ -1,5 +1,6 @@
 'use client'
 
+import { useResolveLocalizedText } from '@tour-kit/core'
 import * as React from 'react'
 import type { SelectOption } from '../../types/question'
 
@@ -63,6 +64,7 @@ export function HeadlessQuestionSelect({
   const currentValue = isControlled ? controlledValue : internalValue
 
   const enabledOptions = React.useMemo(() => options.filter((opt) => !opt.disabled), [options])
+  const resolveText = useResolveLocalizedText()
 
   const setValue = React.useCallback(
     (val: string | string[]) => {
@@ -92,7 +94,7 @@ export function HeadlessQuestionSelect({
     (optionValue: string) => {
       const option = options.find((o) => o.value === optionValue)
       const disabled = option?.disabled ?? false
-      const optionLabel = option?.label ?? optionValue
+      const optionLabel = option ? resolveText(option.label) : optionValue
 
       if (mode === 'multi') {
         return {
@@ -113,7 +115,7 @@ export function HeadlessQuestionSelect({
         tabIndex: disabled ? -1 : enabledIdx === focusedIndex ? 0 : -1,
       }
     },
-    [options, enabledOptions, mode, isSelected]
+    [options, enabledOptions, mode, isSelected, resolveText]
   )
 
   return children({

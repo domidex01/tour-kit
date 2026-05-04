@@ -1,6 +1,6 @@
 'use client'
 
-import { logger } from '@tour-kit/core'
+import { logger, useResolveLocalizedText } from '@tour-kit/core'
 import type * as React from 'react'
 import { useChecklist } from '../../hooks/use-checklist'
 import type { ChecklistProgress, ChecklistState, ChecklistTaskState } from '../../types'
@@ -8,6 +8,10 @@ import type { ChecklistProgress, ChecklistState, ChecklistTaskState } from '../.
 export interface ChecklistRenderProps {
   /** Checklist state */
   checklist: ChecklistState
+  /** Resolved checklist title — `LocalizedText` already passed through interpolation/i18n. */
+  title: string
+  /** Resolved checklist description — empty string when undefined. */
+  description: string
   /** Visible tasks */
   visibleTasks: ChecklistTaskState[]
   /** Progress info */
@@ -90,11 +94,14 @@ export function ChecklistHeadless({
     setExpanded,
     reset,
   } = useChecklist(checklistId)
+  const resolveText = useResolveLocalizedText()
 
   if (!checklist) return null
 
   const renderProps: ChecklistRenderProps = {
     checklist,
+    title: resolveText(checklist.config.title),
+    description: resolveText(checklist.config.description),
     visibleTasks,
     progress,
     isComplete,

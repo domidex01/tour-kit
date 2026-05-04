@@ -1,3 +1,5 @@
+import type { LocalizedText } from '@tour-kit/core'
+
 /** Question input types */
 export type QuestionType =
   | 'rating'
@@ -9,6 +11,20 @@ export type QuestionType =
 
 /** Answer value union covering all question types */
 export type AnswerValue = string | number | boolean | string[]
+
+/**
+ * Preset rating shapes that fill in `min`/`max`/`style`/`emojiMap` defaults
+ * so consumers can ship the two most common rating UIs without composing
+ * `RatingScale` by hand.
+ *
+ * - `'stars'` → `min: 1, max: 5, style: 'stars'`
+ * - `'thumbs'` → `min: 1, max: 3, style: 'emoji'` with map `1: 👎, 2: 😐, 3: 👍`
+ *
+ * Thumbs values are `1, 2, 3` (not `-1, 0, 1`) so they fit the existing
+ * `RatingScale.min/max` contract and the existing scoring engine doesn't need
+ * to change.
+ */
+export type RatingPreset = 'thumbs' | 'stars'
 
 /** Rating scale configuration */
 export interface RatingScale {
@@ -30,7 +46,8 @@ export interface RatingScale {
 /** Option for single-select and multi-select questions */
 export interface SelectOption {
   value: string
-  label: string
+  /** Option label — `LocalizedText` (string template or `{ key }`). */
+  label: LocalizedText
   disabled?: boolean
 }
 
@@ -50,16 +67,21 @@ export interface QuestionConfig {
   id: string
   /** Question input type */
   type: QuestionType
-  /** Question prompt text */
-  text: string
-  /** Optional description or helper text */
-  description?: string
+  /** Question prompt text — `LocalizedText` (string template or `{ key }`). */
+  text: LocalizedText
+  /** Optional description or helper text — `LocalizedText`. */
+  description?: LocalizedText
   /** Whether an answer is required before advancing */
   required?: boolean
-  /** Placeholder text for text inputs */
-  placeholder?: string
-  /** Rating scale config (only for 'rating' type) */
+  /** Placeholder text for text inputs — `LocalizedText`. */
+  placeholder?: LocalizedText
+  /** Rating scale config (only for 'rating' type). Wins over `preset` when both are set. */
   ratingScale?: RatingScale
+  /**
+   * Optional rating preset that fills in `min`/`max`/`style`/`emojiMap` defaults.
+   * Only meaningful when `type === 'rating'`. Explicit `ratingScale` overrides.
+   */
+  preset?: RatingPreset
   /** Options (only for 'single-select' and 'multi-select' types) */
   options?: SelectOption[]
   /** Maximum character length (only for 'text' and 'textarea' types) */

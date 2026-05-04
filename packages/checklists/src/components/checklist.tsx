@@ -1,7 +1,6 @@
 'use client'
 
-import { cn } from '@tour-kit/core'
-import { useUILibrary } from '@tour-kit/core'
+import { cn, useResolveLocalizedText, useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
 import { useChecklist } from '../hooks/use-checklist'
 import { ChecklistProgress } from './checklist-progress'
@@ -80,8 +79,13 @@ export const Checklist = React.forwardRef<HTMLDivElement, ChecklistProps>(
       dismiss,
     } = useChecklist(checklistId)
 
+    const resolveText = useResolveLocalizedText()
+
     if (!checklist || isDismissed) return null
     if (isComplete && checklist.config.hideOnComplete) return null
+
+    const resolvedTitle = resolveText(checklist.config.title)
+    const resolvedDescription = resolveText(checklist.config.description)
 
     const internalContent = (
       <>
@@ -89,9 +93,9 @@ export const Checklist = React.forwardRef<HTMLDivElement, ChecklistProps>(
         {showHeader && (
           <div className={checklistHeaderVariants({})}>
             <div>
-              <h3 className="font-semibold">{checklist.config.title}</h3>
-              {checklist.config.description && (
-                <p className="text-sm text-muted-foreground">{checklist.config.description}</p>
+              <h3 className="font-semibold">{resolvedTitle}</h3>
+              {resolvedDescription && (
+                <p className="text-sm text-muted-foreground">{resolvedDescription}</p>
               )}
             </div>
             {showDismiss && checklist.config.dismissible !== false && (

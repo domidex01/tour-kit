@@ -64,6 +64,7 @@ export type {
   ChecklistContext as ChecklistContextData,
   TaskAction,
   TaskCompletionCondition,
+  UrlVisitCompletion,
   // Config types
   ChecklistProviderConfig,
   ChecklistPersistenceConfig,

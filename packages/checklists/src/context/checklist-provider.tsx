@@ -2,6 +2,7 @@
 
 import { ProGate } from '@tour-kit/license'
 import * as React from 'react'
+import { registerUrlVisitTask } from '../engine/url-visit-listener'
 import { useChecklistPersistence } from '../hooks/use-checklist-persistence'
 import type {
   ChecklistConfig,
@@ -426,6 +427,30 @@ export function ChecklistProvider({
     },
     [onTaskComplete]
   )
+
+  // Register `urlVisit` completions with the module-level listener.
+  // Re-runs when configs change or when persistence loads (state.completed
+  // shifts) so already-completed tasks aren't re-registered.
+  React.useEffect(() => {
+    const cleanups: Array<() => void> = []
+    for (const checklist of checklistConfigs) {
+      const completedSet = state.completed[checklist.id]
+      for (const task of checklist.tasks) {
+        const cw = task.completedWhen
+        if (!cw || !('type' in cw) || cw.type !== 'urlVisit') continue
+        if (completedSet?.has(task.id)) continue
+        const compositeId = `${checklist.id}:${task.id}`
+        cleanups.push(
+          registerUrlVisitTask(compositeId, cw.urlPattern, () =>
+            completeTask(checklist.id, task.id)
+          )
+        )
+      }
+    }
+    return () => {
+      for (const fn of cleanups) fn()
+    }
+  }, [checklistConfigs, state.completed, completeTask])
 
   const uncompleteTask = React.useCallback(
     (checklistId: string, taskId: string) => {

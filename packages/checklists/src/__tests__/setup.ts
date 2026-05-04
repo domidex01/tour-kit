@@ -25,6 +25,13 @@ afterEach(() => {
   // Clear localStorage
   localStorage.clear()
   sessionStorage.clear()
+  // Reset module-level URL-visit listener registry between tests so per-spec
+  // mounts/unmounts don't leak handlers into the next test.
+  // Async import to avoid evaluating the module under SSR-style tests that
+  // stub `window` to undefined.
+  void import('../engine/url-visit-listener').then((mod) => {
+    mod.__resetForTests()
+  })
 })
 
 // Mock ResizeObserver

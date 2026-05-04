@@ -1,6 +1,6 @@
 'use client'
 
-import { cn, useReducedMotion } from '@tour-kit/core'
+import { cn, useReducedMotion, useResolveLocalizedText } from '@tour-kit/core'
 import * as React from 'react'
 import type { ChecklistTaskState } from '../types'
 import {
@@ -75,6 +75,9 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
   ({ task, onClick, onToggle, size, className, renderIcon, ...props }, ref) => {
     const { config, completed, locked, visible } = task
     const reducedMotion = useReducedMotion()
+    const resolveText = useResolveLocalizedText()
+    const resolvedTitle = resolveText(config.title)
+    const resolvedDescription = resolveText(config.description)
 
     const [phase, setPhase] = React.useState<CompletionPhase>(completed ? 'completed' : 'pending')
 
@@ -165,9 +168,9 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className={cn('tk-task-label', taskTitleVariants({ size, state }))}>{config.title}</p>
-          {config.description && (
-            <p className={taskDescriptionVariants({ size })}>{config.description}</p>
+          <p className={cn('tk-task-label', taskTitleVariants({ size, state }))}>{resolvedTitle}</p>
+          {resolvedDescription && (
+            <p className={taskDescriptionVariants({ size })}>{resolvedDescription}</p>
           )}
         </div>
 

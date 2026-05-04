@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@tour-kit/core'
+import { cn, useResolveLocalizedText } from '@tour-kit/core'
 import * as React from 'react'
 import type { SelectOption } from '../types/question'
 import { selectOptionVariants } from './ui/question-variants'
@@ -46,6 +46,7 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
       mode === 'multi' ? [] : ''
     )
 
+    const resolveText = useResolveLocalizedText()
     const currentValue = isControlled ? controlledValue : internalValue
 
     const enabledOptions = React.useMemo(() => options.filter((opt) => !opt.disabled), [options])
@@ -171,7 +172,7 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
                 role="checkbox"
                 aria-checked={selected}
                 aria-disabled={disabled || undefined}
-                aria-label={option.label}
+                aria-label={resolveText(option.label)}
                 tabIndex={disabled ? -1 : 0}
                 className={cn(
                   selectOptionVariants({
@@ -209,7 +210,7 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
                     </svg>
                   )}
                 </span>
-                <span>{option.label}</span>
+                <span>{resolveText(option.label)}</span>
               </div>
             )
           })}
@@ -240,7 +241,7 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
               role="radio"
               aria-checked={selected}
               aria-disabled={disabled || undefined}
-              aria-label={option.label}
+              aria-label={resolveText(option.label)}
               tabIndex={disabled ? -1 : isFocusTarget ? 0 : -1}
               className={cn(
                 selectOptionVariants({
@@ -271,7 +272,7 @@ const QuestionSelect = React.forwardRef<HTMLDivElement, QuestionSelectProps>(
               >
                 {selected && <span className="h-2 w-2 rounded-full bg-primary" />}
               </span>
-              <span>{option.label}</span>
+              <span>{resolveText(option.label)}</span>
             </div>
           )
         })}

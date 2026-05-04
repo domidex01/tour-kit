@@ -188,6 +188,8 @@ export { LocaleProvider, useLocale } from './lib/i18n/locale-context'
 export type { LocaleContextValue, LocaleProviderProps } from './lib/i18n/locale-context'
 export { useT } from './lib/i18n/use-t'
 export type { Messages, TranslateFn } from './lib/i18n/use-t'
+export { useResolveLocalizedText } from './lib/i18n/localized-text'
+export type { LocalizedText } from './lib/i18n/localized-text'
 
 // Audience targeting — promoted from @tour-kit/announcements in Phase 1
 export { matchesAudience, validateConditions } from './lib/audience'

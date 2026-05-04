@@ -1,6 +1,6 @@
 'use client'
 
-import { logger } from '@tour-kit/core'
+import { logger, useResolveLocalizedText } from '@tour-kit/core'
 import type * as React from 'react'
 import { useTask } from '../../hooks/use-task'
 import type { ChecklistTaskState } from '../../types'
@@ -8,6 +8,10 @@ import type { ChecklistTaskState } from '../../types'
 export interface TaskRenderProps {
   /** Task state */
   task: ChecklistTaskState
+  /** Resolved task title — `LocalizedText` already passed through interpolation/i18n. */
+  title: string
+  /** Resolved task description — empty string when `task.config.description` is undefined. */
+  description: string
   /** Whether task is completed */
   isCompleted: boolean
   /** Whether task is locked */
@@ -70,11 +74,14 @@ export function TaskHeadless({
     checklistId,
     taskId
   )
+  const resolveText = useResolveLocalizedText()
 
   if (!task || !isVisible) return null
 
   const renderProps: TaskRenderProps = {
     task,
+    title: resolveText(task.config.title),
+    description: resolveText(task.config.description),
     isCompleted,
     isLocked,
     isVisible,
