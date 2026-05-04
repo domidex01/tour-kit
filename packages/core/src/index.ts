@@ -27,6 +27,7 @@ export type {
   TourKitConfig,
   TourStep,
   StepOptions,
+  AudienceProp,
   Tour,
   TourOptions,
   TourState,

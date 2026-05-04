@@ -1,7 +1,20 @@
 import type React from 'react'
+import type { LocalizedText } from '../lib/localized-text'
+import type { AudienceCondition } from './audience'
 import type { Branch } from './branch'
 import type { Placement } from './config'
 import type { TourCallbackContext } from './state'
+
+/**
+ * Audience prop shape — discriminated by `Array.isArray()`.
+ *
+ * - Array branch: legacy inline conditions evaluated via `matchesAudience`.
+ * - Object branch: named segment lookup via `useSegment` / `useSegments`.
+ *
+ * Adding the object branch is a pure widening — pre-Phase-3 consumers using
+ * `audience: AudienceCondition[]` keep compiling unchanged.
+ */
+export type AudienceProp = AudienceCondition[] | { segment: string }
 
 /**
  * Single step in a tour
@@ -21,8 +34,25 @@ export interface TourStep {
    */
   kind?: 'visible' | 'hidden'
   target: string | React.RefObject<HTMLElement | null>
-  title?: React.ReactNode
+  /**
+   * Step title. Accepts a plain string (interpolated via `interpolate`),
+   * a `{ key: string }` dictionary lookup (resolved via `useT()`), or any
+   * `ReactNode` for arbitrary JSX. Strings without `{{var}}` tokens render
+   * unchanged — the widening is back-compat-safe.
+   */
+  title?: React.ReactNode | LocalizedText
+  /**
+   * Optional short description rendered above `content`. i18n-friendly:
+   * accepts string (interpolated) or `{ key }` (translated).
+   */
+  description?: LocalizedText
   content: React.ReactNode
+  /**
+   * Filter this step out for users who don't match. Accepts the legacy
+   * `AudienceCondition[]` array (evaluated via `matchesAudience`) or the
+   * `{ segment: 'name' }` object (resolved via `useSegments`).
+   */
+  audience?: AudienceProp
   placement?: Placement
   offset?: [number, number]
   showNavigation?: boolean

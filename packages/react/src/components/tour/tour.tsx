@@ -1,7 +1,14 @@
 'use client'
 
-import { TourProvider, type TourStep as TourStepType, type Tour as TourType } from '@tour-kit/core'
+import {
+  TourProvider,
+  type TourStep as TourStepType,
+  type Tour as TourType,
+  useSegmentationContext,
+  useSegments,
+} from '@tour-kit/core'
 import * as React from 'react'
+import { evaluateAudience, useStepFilter } from '../../hooks/use-step-filter'
 import { TourCard } from '../card/tour-card'
 import { TourOverlay } from '../overlay/tour-overlay'
 import { useTourRegistryContextOptional } from '../provider/tourkit-provider'
@@ -11,6 +18,8 @@ export interface TourProps {
   id: string
   autoStart?: boolean
   startAt?: number
+  /** Audience gate for the entire tour (Phase 3a). Mirrors `Tour.audience`. */
+  audience?: TourType['audience']
   config?: Omit<TourType, 'id' | 'steps'>
   onStart?: () => void
   onComplete?: () => void
@@ -51,6 +60,7 @@ export function Tour({
   id,
   autoStart = false,
   startAt,
+  audience,
   config,
   onStart,
   onComplete,
@@ -59,6 +69,12 @@ export function Tour({
   children,
 }: TourProps) {
   const registryContext = useTourRegistryContextOptional()
+  const segments = useSegments()
+  const { userContext } = useSegmentationContext()
+  const tourPasses = React.useMemo(
+    () => evaluateAudience(audience ?? config?.audience, segments, userContext),
+    [audience, config?.audience, segments, userContext]
+  )
 
   // Idempotency guards: ensure onComplete/onSkip fire at most once per tour
   // activation. Prevents render-loop footgun when the parent unmounts the
@@ -97,11 +113,14 @@ export function Tour({
     return { steps: stepElements, content: contentElements }
   }, [children])
 
+  const filteredSteps = useStepFilter(steps)
+
   // Build tour config
   const tour: TourType = React.useMemo(
     () => ({
       id,
-      steps,
+      steps: filteredSteps,
+      audience: audience ?? config?.audience,
       autoStart,
       startAt,
       ...config,
@@ -122,8 +141,26 @@ export function Tour({
         : undefined,
       onStepChange: onStepChange ? (step, index) => onStepChange(step, index) : undefined,
     }),
-    [id, steps, autoStart, startAt, config, onStart, onComplete, onSkip, onStepChange]
+    [
+      id,
+      filteredSteps,
+      audience,
+      autoStart,
+      startAt,
+      config,
+      onStart,
+      onComplete,
+      onSkip,
+      onStepChange,
+    ]
   )
+
+  // Tour-level audience gate: when the audience predicate is false, skip
+  // registration entirely so `useTour().isActive` stays false. Standalone
+  // mode short-circuits to render nothing.
+  if (!tourPasses) {
+    return null
+  }
 
   // If inside MultiTourKitProvider, register and render nothing
   if (registryContext) {
