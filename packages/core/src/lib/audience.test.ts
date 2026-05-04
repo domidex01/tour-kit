@@ -47,9 +47,9 @@ describe('matchesAudience', () => {
       expect(matchesAudience([cond('contains', 'tags', 'beta')], { tags: ['beta', 'admin'] })).toBe(
         true
       )
-      expect(matchesAudience([cond('contains', 'tags', 'gamma')], { tags: ['beta', 'admin'] })).toBe(
-        false
-      )
+      expect(
+        matchesAudience([cond('contains', 'tags', 'gamma')], { tags: ['beta', 'admin'] })
+      ).toBe(false)
     })
 
     it('contains: returns false when contextValue type is unsupported', () => {
@@ -83,7 +83,9 @@ describe('matchesAudience', () => {
 
     it('not_in: matches when contextValue is NOT in the value array', () => {
       expect(matchesAudience([cond('not_in', 'plan', ['free'])], { plan: 'pro' })).toBe(true)
-      expect(matchesAudience([cond('not_in', 'plan', ['free', 'pro'])], { plan: 'pro' })).toBe(false)
+      expect(matchesAudience([cond('not_in', 'plan', ['free', 'pro'])], { plan: 'pro' })).toBe(
+        false
+      )
     })
 
     it('not_in: returns true when expected value is not an array', () => {
@@ -146,7 +148,11 @@ describe('validateConditions', () => {
 
   it('flags missing operator', () => {
     // Force a malformed condition (TS would block this, but runtime validation matters)
-    const malformed = { type: 'user_property', key: 'plan', value: 'pro' } as unknown as AudienceCondition
+    const malformed = {
+      type: 'user_property',
+      key: 'plan',
+      value: 'pro',
+    } as unknown as AudienceCondition
     const errors = validateConditions([malformed])
     expect(errors).toContain('Condition operator is required')
   })

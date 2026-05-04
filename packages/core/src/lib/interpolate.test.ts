@@ -8,9 +8,9 @@ describe('interpolate', () => {
     })
 
     it('substitutes a nested key via dot', () => {
-      expect(
-        interpolate('Hi {{user.profile.name}}', { user: { profile: { name: 'D' } } })
-      ).toBe('Hi D')
+      expect(interpolate('Hi {{user.profile.name}}', { user: { profile: { name: 'D' } } })).toBe(
+        'Hi D'
+      )
     })
 
     it.each([
@@ -45,9 +45,9 @@ describe('interpolate', () => {
     })
 
     it('respects opts.defaultFallback when missing key has no inline fallback', () => {
-      expect(
-        interpolate('Hi {{name}}', {}, { warnOnMissing: false, defaultFallback: '???' })
-      ).toBe('Hi ???')
+      expect(interpolate('Hi {{name}}', {}, { warnOnMissing: false, defaultFallback: '???' })).toBe(
+        'Hi ???'
+      )
     })
 
     it('treats null and undefined as missing (uses fallback)', () => {

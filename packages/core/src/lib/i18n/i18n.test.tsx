@@ -87,8 +87,7 @@ describe('i18n primitives', () => {
 
   describe('plural — Russian', () => {
     const messages = {
-      apples:
-        '{count, plural, one {# яблоко} few {# яблока} many {# яблок} other {# яблока}}',
+      apples: '{count, plural, one {# яблоко} few {# яблока} many {# яблок} other {# яблока}}',
     }
 
     it('resolves "few" for count=2', () => {
@@ -194,7 +193,9 @@ describe('i18n primitives', () => {
       render(
         withProvider({
           locale: 'en',
-          messages: { msg: '{count, plural, one {Hi {{name}}, # message} other {Hi {{name}}, # messages}}' },
+          messages: {
+            msg: '{count, plural, one {Hi {{name}}, # message} other {Hi {{name}}, # messages}}',
+          },
           children: <Probe k="msg" vars={{ count: 3, name: 'Domi' }} />,
         })
       )

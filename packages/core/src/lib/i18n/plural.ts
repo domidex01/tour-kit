@@ -26,6 +26,7 @@ function getPluralRules(locale: string): Intl.PluralRules {
   return rules
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ICU subset scanner — brace-depth state machine + plural category lookup
 export function resolvePlural(
   template: string,
   locale: string,
