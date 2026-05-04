@@ -5,19 +5,9 @@ import type { ReactNode } from 'react'
 // Re-exported here for backward compat — existing
 // `import { AudienceCondition, FrequencyRule } from '@tour-kit/announcements'`
 // consumers continue to work without source changes.
-import type { AudienceCondition, FrequencyRule, LocalizedText } from '@tour-kit/core'
+import type { AudienceCondition, AudienceProp, FrequencyRule, LocalizedText } from '@tour-kit/core'
 
-export type { AudienceCondition, FrequencyRule }
-
-/**
- * Audience prop accepting either inline conditions (legacy `AudienceCondition[]`)
- * or a named segment registered in `<SegmentationProvider>`. Discriminated by
- * `Array.isArray()` — the array branch goes through `matchesAudience`, the
- * object branch through `useSegments()`. Mirror of `@tour-kit/core`'s
- * `AudienceProp` (kept as a local re-export so the announcements barrel does
- * not pin a breaking change to core).
- */
-export type AudienceProp = AudienceCondition[] | { segment: string }
+export type { AudienceCondition, AudienceProp, FrequencyRule }
 
 /**
  * Type guard narrowing `AudienceProp` to its segment-named branch. Mirrors the

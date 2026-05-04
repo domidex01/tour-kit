@@ -1,7 +1,10 @@
-import { screen, waitFor } from '@testing-library/react'
+import { act, renderHook, screen, waitFor } from '@testing-library/react'
+import { LocaleProvider, type SegmentSource, SegmentationProvider } from '@tour-kit/core'
+import type { ReactNode } from 'react'
 import { describe, expect, it } from 'vitest'
 import { AnnouncementModal } from '../components/announcement-modal'
 import { AnnouncementsProvider } from '../context/announcements-provider'
+import { useAnnouncement } from '../hooks/use-announcement'
 import type { AnnouncementConfig } from '../types/announcement'
 import { renderWithProviders } from './render-with-providers'
 
@@ -81,6 +84,94 @@ describe('Announcement audience filtering', () => {
       await waitFor(() => {
         expect(screen.queryByText('Pro-only notice')).not.toBeInTheDocument()
       })
+    })
+  })
+
+  // Phase 3c regression guard — imperative `show(id)` and `canShow(id)` must
+  // honor segment-shape audiences too. Without this, the scheduler's
+  // narrowed audience check (only evaluates array shape) would let
+  // `useAnnouncement(id).show()` display admin-only announcements to
+  // non-admins.
+  describe('imperative show/canShow honor segment audience', () => {
+    function makeWrapper(
+      announcements: AnnouncementConfig[],
+      segments: Record<string, SegmentSource>,
+      userContext: Record<string, unknown>
+    ) {
+      return function Wrapper({ children }: { children: ReactNode }) {
+        return (
+          <LocaleProvider>
+            <SegmentationProvider segments={segments} userContext={userContext}>
+              <AnnouncementsProvider announcements={announcements} userContext={userContext}>
+                {children}
+              </AnnouncementsProvider>
+            </SegmentationProvider>
+          </LocaleProvider>
+        )
+      }
+    }
+
+    it('show(id) is suppressed when segment audience is false', async () => {
+      const config: AnnouncementConfig = {
+        id: 'admin-only',
+        variant: 'modal',
+        title: 'Admin notice',
+        audience: { segment: 'admins' },
+        autoShow: false,
+      }
+      const { result } = renderHook(() => useAnnouncement('admin-only'), {
+        wrapper: makeWrapper(
+          [config],
+          {
+            admins: [{ type: 'user_property', key: '__probe__', operator: 'not_exists' }],
+          },
+          { __probe__: 'present' }
+        ),
+      })
+
+      // Wait for REGISTER effect to populate state
+      await waitFor(() => {
+        expect(result.current.config?.id).toBe('admin-only')
+      })
+
+      act(() => {
+        result.current.show()
+      })
+
+      expect(result.current.state?.isVisible).toBe(false)
+      expect(result.current.canShow).toBe(false)
+    })
+
+    it('show(id) succeeds when segment audience is true', async () => {
+      const config: AnnouncementConfig = {
+        id: 'admin-only',
+        variant: 'modal',
+        title: 'Admin notice',
+        audience: { segment: 'admins' },
+        autoShow: false,
+      }
+      const { result } = renderHook(() => useAnnouncement('admin-only'), {
+        wrapper: makeWrapper(
+          [config],
+          {
+            admins: [{ type: 'user_property', key: '__probe__', operator: 'exists' }],
+          },
+          { __probe__: 'present' }
+        ),
+      })
+
+      await waitFor(() => {
+        expect(result.current.config?.id).toBe('admin-only')
+      })
+
+      act(() => {
+        result.current.show()
+      })
+
+      await waitFor(() => {
+        expect(result.current.state?.isVisible).toBe(true)
+      })
+      expect(result.current.canShow).toBe(true)
     })
   })
 
