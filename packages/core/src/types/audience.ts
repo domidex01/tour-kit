@@ -1,15 +1,15 @@
 /**
- * Audience targeting condition
+ * Audience targeting condition.
  *
- * PHASE 0 SPIKE — copied verbatim from packages/announcements/src/types/announcement.ts
- * lines 197–217. Promotion to permanent core resident is Phase 1.6 of
- * userguiding-parity-big-plan.md. Reverted at end of Phase 0 — do not ship.
+ * Promoted from `@tour-kit/announcements` in Phase 1 of the UserGuiding parity
+ * initiative. The shape is byte-identical to the previous announcements-local
+ * declaration so the announcements re-export keeps the same TypeScript identity.
  */
 export interface AudienceCondition {
   /** Condition type */
   type: 'user_property' | 'segment' | 'feature_flag' | 'custom'
 
-  /** Property or segment name */
+  /** Property or segment name (supports dot notation for nested keys) */
   key: string
 
   /** Comparison operator */
@@ -23,6 +23,6 @@ export interface AudienceCondition {
     | 'exists'
     | 'not_exists'
 
-  /** Expected value(s) */
+  /** Expected value(s) — required for every operator except `exists`/`not_exists` */
   value?: unknown
 }

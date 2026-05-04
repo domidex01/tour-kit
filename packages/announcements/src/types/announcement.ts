@@ -1,5 +1,13 @@
 import type { ReactNode } from 'react'
 
+// AudienceCondition was promoted to @tour-kit/core in Phase 1 of the
+// UserGuiding parity initiative. Re-exported here for backward compat —
+// existing `import { AudienceCondition } from '@tour-kit/announcements'`
+// consumers continue to work without source changes.
+import type { AudienceCondition } from '@tour-kit/core'
+
+export type { AudienceCondition }
+
 /**
  * Announcement display variants
  */
@@ -189,31 +197,6 @@ export interface AnnouncementConfig {
 
   /** Callback when primary action is completed */
   onComplete?: () => void
-}
-
-/**
- * Audience targeting condition
- */
-export interface AudienceCondition {
-  /** Condition type */
-  type: 'user_property' | 'segment' | 'feature_flag' | 'custom'
-
-  /** Property or segment name */
-  key: string
-
-  /** Comparison operator */
-  operator:
-    | 'equals'
-    | 'not_equals'
-    | 'contains'
-    | 'not_contains'
-    | 'in'
-    | 'not_in'
-    | 'exists'
-    | 'not_exists'
-
-  /** Expected value(s) */
-  value?: unknown
 }
 
 /**

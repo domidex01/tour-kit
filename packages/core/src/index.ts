@@ -178,3 +178,17 @@ export type { UnifiedSlotProps, RenderProp } from './lib/unified-slot'
 // UILibrary context — toggles Radix vs Base UI rendering for downstream UnifiedSlot consumers.
 export { UILibraryProvider, useUILibrary } from './lib/ui-library-context'
 export type { UILibrary, UILibraryProviderProps } from './lib/ui-library-context'
+
+// Interpolation — Phase 1 (UserGuiding parity)
+export { interpolate } from './lib/interpolate'
+export type { InterpolateOptions } from './lib/interpolate'
+
+// i18n primitives — Phase 1 (UserGuiding parity)
+export { LocaleProvider, useLocale } from './lib/i18n/locale-context'
+export type { LocaleContextValue, LocaleProviderProps } from './lib/i18n/locale-context'
+export { useT } from './lib/i18n/use-t'
+export type { Messages, TranslateFn } from './lib/i18n/use-t'
+
+// Audience targeting — promoted from @tour-kit/announcements in Phase 1
+export { matchesAudience, validateConditions } from './lib/audience'
+export type { AudienceCondition } from './types/audience'
