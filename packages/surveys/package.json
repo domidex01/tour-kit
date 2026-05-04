@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/surveys",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "React in-app microsurveys — NPS, CSAT, CES with skip logic, audience targeting, fatigue prevention and 5 display modes.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
