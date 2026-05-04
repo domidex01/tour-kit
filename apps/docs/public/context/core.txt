@@ -91,7 +91,13 @@ Types:
     LocaleProviderProps
     Messages
     TranslateFn
+    LocalizedText
     AudienceCondition
+    SegmentDefinition
+    StaticSegment
+    SegmentSource
+    SegmentationContextValue
+    SegmentationProviderProps
 
 Hooks:
     useTourKitContext
@@ -116,6 +122,10 @@ Hooks:
     useUILibrary — Hook to get the current UI library setting
     useLocale
     useT — Hook returning a translator function `t(key, vars?)` that:
+    useResolveLocalizedText — Discriminated text shape used by all UI packages for localizable copy.
+    useSegmentationContext
+    useSegment
+    useSegments
 
 Components:
     TourKitContext
@@ -127,6 +137,7 @@ Components:
     UnifiedSlot
     UILibraryProvider
     LocaleProvider
+    SegmentationProvider
 
 Utilities:
     defaultKeyboardConfig
@@ -192,6 +203,7 @@ Utilities:
     interpolate
     matchesAudience
     validateConditions
+    parseUserIdsFromCsv
 
 TYPES
 -----
@@ -237,6 +249,12 @@ TYPES
       t?: TranslateFn
       /** Auto-derived from locale; consumers can override */
       direction?: 'ltr' | 'rtl'
+      /**
+       * Optional user/template context merged into every interpolation. Keyed values
+       * (e.g. `user.name`) are pulled from this object when a string template like
+       * `'Hi {{user.name}}'` is rendered without explicit call-site vars.
+       */
+      userContext?: Record<string, unknown>
     }
 
     export interface LocaleProviderProps extends Partial<LocaleContextValue> {
@@ -247,6 +265,16 @@ TYPES
     export type TranslateFn = (key: string, vars?: Record<string, unknown>) => string
 
     export type TranslateFn = (key: string, vars?: Record<string, unknown>) => string
+
+    /**
+     * Discriminated text shape used by all UI packages for localizable copy.
+     *
+     * - `string` — rendered as-is, with `{{var}}` tokens interpolated against the
+     *   current `LocaleProvider.userContext` (graceful default-fallback when no
+     *   provider is mounted).
+     * - `{ key: string }` — looked up via `useT()` against `messages[key]`.
+     */
+    export type LocalizedText = string | { key: string }
 
     /**
      * Audience targeting condition.
@@ -301,6 +329,10 @@ HOOKS
     useUILibrary(): UILibrary
     useLocale(): LocaleContextValue
     useT(): TranslateFn
+    useResolveLocalizedText(): (value: LocalizedText | undefined) => string
+    useSegmentationContext(...)
+    useSegment(...)
+    useSegments(...)
 
 COMPONENTS
 ----------
@@ -313,6 +345,7 @@ COMPONENTS
     <UnifiedSlot />
     <UILibraryProvider />
     <LocaleProvider />
+    <SegmentationProvider />
 
 EXAMPLES
 --------

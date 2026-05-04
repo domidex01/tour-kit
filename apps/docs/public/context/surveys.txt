@@ -255,7 +255,7 @@ TYPES
       onAnswer?: (questionId: string, value: import('./question').AnswerValue) => void
     }
 
-    ... and 28 more types. See source for full definitions.
+    ... and 30 more types. See source for full definitions.
 
 HOOKS
 -----
