@@ -1,6 +1,7 @@
 'use client'
 
 import { cn, useReducedMotion, useResolveLocalizedText } from '@tour-kit/core'
+import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'
 import type { ChecklistTaskState } from '../types'
 import {
@@ -171,6 +172,11 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
           <p className={cn('tk-task-label', taskTitleVariants({ size, state }))}>{resolvedTitle}</p>
           {resolvedDescription && (
             <p className={taskDescriptionVariants({ size })}>{resolvedDescription}</p>
+          )}
+          {config.media && (
+            <div className="mt-2" data-slot="checklist-task-media">
+              <MediaSlot {...config.media} />
+            </div>
           )}
         </div>
 

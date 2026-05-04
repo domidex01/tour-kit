@@ -1,8 +1,16 @@
 'use client'
 
 import { cn } from '@tour-kit/core'
+import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'
 import type { AnnouncementMedia } from '../types/announcement'
+
+const ASPECT_RATIOS = ['16/9', '4/3', '1/1', '9/16', '21/9', 'auto'] as const
+type AspectRatio = (typeof ASPECT_RATIOS)[number]
+
+function isAspectRatio(value: string | undefined): value is AspectRatio {
+  return value !== undefined && (ASPECT_RATIOS as readonly string[]).includes(value)
+}
 
 export interface AnnouncementContentProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
@@ -26,27 +34,17 @@ export const AnnouncementContent = React.forwardRef<HTMLDivElement, Announcement
     return (
       <div ref={ref} className={cn('space-y-4', className)} {...props}>
         {media && (
-          <div className="relative overflow-hidden rounded-lg">
-            {media.type === 'image' && (
-              <img
-                src={media.src}
-                alt={media.alt ?? ''}
-                className="w-full object-cover"
-                style={{ aspectRatio: media.aspectRatio ?? '16/9' }}
-              />
-            )}
-            {media.type === 'video' && (
-              <video
-                src={media.src}
-                poster={media.poster}
-                autoPlay={media.autoplay ?? false}
-                loop={media.loop ?? false}
-                muted={media.muted ?? true}
-                playsInline
-                className="w-full"
-                style={{ aspectRatio: media.aspectRatio ?? '16/9' }}
-              />
-            )}
+          <div className="relative overflow-hidden rounded-lg" data-slot="announcement-media">
+            <MediaSlot
+              src={media.src}
+              type={media.type}
+              alt={media.alt}
+              poster={media.poster}
+              aspectRatio={isAspectRatio(media.aspectRatio) ? media.aspectRatio : undefined}
+              autoplay={media.autoplay}
+              loop={media.loop}
+              muted={media.muted}
+            />
           </div>
         )}
 

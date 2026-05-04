@@ -10,6 +10,9 @@ export type { QuestionSelectProps } from './question-select'
 export { QuestionBoolean } from './question-boolean'
 export type { QuestionBooleanProps } from './question-boolean'
 
+export { QuestionMedia } from './question-media'
+export type { QuestionMediaProps } from './question-media'
+
 export { SurveyProgress } from './survey-progress'
 export type { SurveyProgressProps } from './survey-progress'
 

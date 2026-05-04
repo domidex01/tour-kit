@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@tour-kit/core'
+import { MediaSlot } from '@tour-kit/media'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
@@ -120,6 +121,19 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
           <div className="flex-1 space-y-1">
             {useConfig && config ? (
               <>
+                {config.media && (
+                  <div className="mb-2" data-slot="announcement-media">
+                    <MediaSlot
+                      src={config.media.src}
+                      type={config.media.type}
+                      alt={config.media.alt}
+                      poster={config.media.poster}
+                      autoplay={config.media.autoplay}
+                      loop={config.media.loop}
+                      muted={config.media.muted}
+                    />
+                  </div>
+                )}
                 {resolvedTitle && <div className="font-medium">{resolvedTitle}</div>}
                 {resolvedDescription && (
                   <div className="text-sm opacity-90">{resolvedDescription}</div>

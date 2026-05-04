@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 // `import { AudienceCondition, FrequencyRule } from '@tour-kit/announcements'`
 // consumers continue to work without source changes.
 import type { AudienceCondition, AudienceProp, FrequencyRule, LocalizedText } from '@tour-kit/core'
+import type { MediaSlotType } from '@tour-kit/media'
 
 export type { AudienceCondition, AudienceProp, FrequencyRule }
 
@@ -68,10 +69,15 @@ export interface AnnouncementAction {
 }
 
 /**
- * Media configuration for announcements
+ * Media configuration for announcements.
+ *
+ * Phase 4 widening: `type` was previously `'image' | 'video' | 'lottie'`. It is
+ * now the full `MediaSlotType` union (9 values incl. `'auto'`) so consumers can
+ * point at YouTube/Vimeo/Loom/Wistia/GIF URLs and have `<MediaSlot>` dispatch
+ * automatically. The narrower legacy values stay assignable — non-breaking.
  */
 export interface AnnouncementMedia {
-  type: 'image' | 'video' | 'lottie'
+  type?: MediaSlotType
   src: string
   alt?: string
   poster?: string

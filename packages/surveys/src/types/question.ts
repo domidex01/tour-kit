@@ -1,4 +1,5 @@
 import type { LocalizedText } from '@tour-kit/core'
+import type { MediaSlotProps } from '@tour-kit/media'
 
 /** Question input types */
 export type QuestionType =
@@ -71,6 +72,11 @@ export interface QuestionConfig {
   text: LocalizedText
   /** Optional description or helper text — `LocalizedText`. */
   description?: LocalizedText
+  /**
+   * Optional media (video / GIF / Lottie / image) rendered above the question
+   * prompt. Auto-detects the embed provider via URL pattern matching.
+   */
+  media?: MediaSlotProps
   /** Whether an answer is required before advancing */
   required?: boolean
   /** Placeholder text for text inputs — `LocalizedText`. */
