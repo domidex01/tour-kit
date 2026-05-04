@@ -24,8 +24,6 @@ import {
   YouTubeEmbed,
 } from './embeds'
 
-export type { MediaSlotType, ResolvedMediaSlotType } from '../lib/detect-media-type'
-
 export interface MediaSlotProps {
   /** Media source URL (or path for native files). */
   src: string
@@ -262,6 +260,14 @@ export const MediaSlot: React.FC<MediaSlotProps> = ({
 }) => {
   const prefersReducedMotion = useReducedMotion()
   const [errored, setErrored] = React.useState(false)
+
+  // Reset error state when the source changes — otherwise a once-failed iframe
+  // locks the fallback in place for any subsequent src on the same component
+  // instance (e.g. tour step advances, announcement queue rotation).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: src is the trigger; setErrored is stable
+  React.useEffect(() => {
+    setErrored(false)
+  }, [src])
 
   const resolved: ResolvedMediaSlotType = type === 'auto' ? detectMediaSlotType(src) : type
 

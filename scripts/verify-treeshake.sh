@@ -6,7 +6,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ESBUILD="$ROOT/node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/bin/esbuild"
+# Use `pnpm exec esbuild` so the resolved binary tracks the lockfile —
+# hardcoding `node_modules/.pnpm/esbuild@<version>/...` breaks on every bump.
 # Run from inside packages/announcements so the workspace symlinks
 # (`packages/announcements/node_modules/@tour-kit/*`) resolve.
 TMP_DIR="$ROOT/packages/announcements/.treeshake-tmp"
@@ -27,7 +28,7 @@ import { AnnouncementToast } from '@tour-kit/announcements'
 console.log(typeof AnnouncementToast)
 ENTRY_EOF
 
-"$ESBUILD" "$ENTRY" \
+pnpm exec esbuild "$ENTRY" \
   --bundle \
   --format=esm \
   --platform=neutral \

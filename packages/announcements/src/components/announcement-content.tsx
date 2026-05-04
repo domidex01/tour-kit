@@ -3,14 +3,8 @@
 import { cn } from '@tour-kit/core'
 import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'
+import { toMediaSlotProps } from '../lib/media-slot-adapter'
 import type { AnnouncementMedia } from '../types/announcement'
-
-const ASPECT_RATIOS = ['16/9', '4/3', '1/1', '9/16', '21/9', 'auto'] as const
-type AspectRatio = (typeof ASPECT_RATIOS)[number]
-
-function isAspectRatio(value: string | undefined): value is AspectRatio {
-  return value !== undefined && (ASPECT_RATIOS as readonly string[]).includes(value)
-}
 
 export interface AnnouncementContentProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
@@ -35,16 +29,7 @@ export const AnnouncementContent = React.forwardRef<HTMLDivElement, Announcement
       <div ref={ref} className={cn('space-y-4', className)} {...props}>
         {media && (
           <div className="relative overflow-hidden rounded-lg" data-slot="announcement-media">
-            <MediaSlot
-              src={media.src}
-              type={media.type}
-              alt={media.alt}
-              poster={media.poster}
-              aspectRatio={isAspectRatio(media.aspectRatio) ? media.aspectRatio : undefined}
-              autoplay={media.autoplay}
-              loop={media.loop}
-              muted={media.muted}
-            />
+            <MediaSlot {...toMediaSlotProps(media)} />
           </div>
         )}
 

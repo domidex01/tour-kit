@@ -6,6 +6,7 @@ import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import { useAnnouncement } from '../hooks/use-announcement'
+import { toMediaSlotProps } from '../lib/media-slot-adapter'
 import { useResolvedText } from '../lib/use-resolved-text'
 import type { DismissalReason, ToastOptions } from '../types/announcement'
 import { AnnouncementClose } from './announcement-close'
@@ -123,15 +124,7 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
               <>
                 {config.media && (
                   <div className="mb-2" data-slot="announcement-media">
-                    <MediaSlot
-                      src={config.media.src}
-                      type={config.media.type}
-                      alt={config.media.alt}
-                      poster={config.media.poster}
-                      autoplay={config.media.autoplay}
-                      loop={config.media.loop}
-                      muted={config.media.muted}
-                    />
+                    <MediaSlot {...toMediaSlotProps(config.media)} />
                   </div>
                 )}
                 {resolvedTitle && <div className="font-medium">{resolvedTitle}</div>}

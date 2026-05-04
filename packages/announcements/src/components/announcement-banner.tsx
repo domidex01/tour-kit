@@ -5,6 +5,7 @@ import { MediaSlot } from '@tour-kit/media'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { useAnnouncement } from '../hooks/use-announcement'
+import { toMediaSlotProps } from '../lib/media-slot-adapter'
 import { useResolvedText } from '../lib/use-resolved-text'
 import type { BannerOptions, DismissalReason } from '../types/announcement'
 import { AnnouncementClose } from './announcement-close'
@@ -92,15 +93,7 @@ export const AnnouncementBanner = React.forwardRef<HTMLDivElement, AnnouncementB
         <div className="flex flex-1 items-center gap-3">
           {useConfig && config?.media && (
             <div className="shrink-0" data-slot="announcement-media" style={{ maxWidth: '8rem' }}>
-              <MediaSlot
-                src={config.media.src}
-                type={config.media.type}
-                alt={config.media.alt}
-                poster={config.media.poster}
-                autoplay={config.media.autoplay}
-                loop={config.media.loop}
-                muted={config.media.muted}
-              />
+              <MediaSlot {...toMediaSlotProps(config.media)} />
             </div>
           )}
           <div className="flex-1">

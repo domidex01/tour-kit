@@ -181,4 +181,16 @@ describe('MediaSlot iframe error fallback', () => {
     expect(screen.getByTestId('embed')).toHaveAttribute('data-type', 'video')
     expect(screen.queryByRole('link', { name: /Watch on/i })).toBeNull()
   })
+
+  it('errored state resets when `src` prop changes', () => {
+    const { rerender } = render(<MediaSlot src="https://youtu.be/aaaaaaaaaaa" />)
+    fireEvent.click(screen.getByTestId('trigger-error'))
+    expect(screen.getByRole('link', { name: /Watch on YouTube/i })).toBeInTheDocument()
+
+    // Re-render with a new src — the next iframe should render normally,
+    // not the stale fallback from the previous src.
+    rerender(<MediaSlot src="https://youtu.be/bbbbbbbbbbb" />)
+    expect(screen.queryByRole('link', { name: /Watch on YouTube/i })).toBeNull()
+    expect(screen.getByTestId('embed')).toHaveAttribute('data-videoid', 'bbbbbbbbbbb')
+  })
 })

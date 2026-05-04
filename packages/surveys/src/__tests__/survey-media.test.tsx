@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { QuestionMedia } from '../components/question-media'
 import type { QuestionConfig } from '../types/question'
@@ -12,7 +12,6 @@ describe('QuestionConfig.media wiring', () => {
       media: { src: 'https://youtu.be/dQw4w9WgXcQ', alt: 'demo' },
     }
     render(<QuestionMedia question={q} />)
-    expect(screen.getByTestId).toBeDefined()
     expect(document.querySelector('[data-slot="question-media"]')).not.toBeNull()
     expect(document.querySelector('iframe')).not.toBeNull()
   })
