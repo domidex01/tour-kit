@@ -5,6 +5,7 @@ import { cn } from '@tour-kit/core'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { useAnnouncement } from '../hooks/use-announcement'
+import { useResolvedText } from '../lib/use-resolved-text'
 import type { DismissalReason, SlideoutOptions } from '../types/announcement'
 import { AnnouncementActions } from './announcement-actions'
 import { AnnouncementClose } from './announcement-close'
@@ -46,6 +47,9 @@ export const AnnouncementSlideout = React.forwardRef<HTMLDivElement, Announcemen
   ) => {
     const announcement = useAnnouncement(id)
     const config = announcement.config
+
+    const resolvedTitle = useResolvedText(config?.title)
+    const resolvedDescription = useResolvedText(config?.description)
 
     // Controlled or uncontrolled open state
     const isControlled = openProp !== undefined
@@ -118,8 +122,8 @@ export const AnnouncementSlideout = React.forwardRef<HTMLDivElement, Announcemen
             {useConfig && config ? (
               <div className="flex h-full flex-col">
                 <AnnouncementContent
-                  title={config.title}
-                  description={config.description}
+                  title={resolvedTitle}
+                  description={resolvedDescription}
                   media={config.media}
                   className="flex-1"
                 />

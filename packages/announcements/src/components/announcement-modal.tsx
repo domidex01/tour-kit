@@ -5,6 +5,7 @@ import { cn } from '@tour-kit/core'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { useAnnouncement } from '../hooks/use-announcement'
+import { useResolvedText } from '../lib/use-resolved-text'
 import type { DismissalReason, ModalOptions } from '../types/announcement'
 import { AnnouncementActions } from './announcement-actions'
 import { AnnouncementClose } from './announcement-close'
@@ -45,6 +46,9 @@ export const AnnouncementModal = React.forwardRef<HTMLDivElement, AnnouncementMo
   ) => {
     const announcement = useAnnouncement(id)
     const config = announcement.config
+
+    const resolvedTitle = useResolvedText(config?.title)
+    const resolvedDescription = useResolvedText(config?.description)
 
     // Controlled or uncontrolled open state
     const isControlled = openProp !== undefined
@@ -113,8 +117,8 @@ export const AnnouncementModal = React.forwardRef<HTMLDivElement, AnnouncementMo
             {useConfig && config ? (
               <>
                 <AnnouncementContent
-                  title={config.title}
-                  description={config.description}
+                  title={resolvedTitle}
+                  description={resolvedDescription}
                   media={config.media}
                 />
                 <AnnouncementActions

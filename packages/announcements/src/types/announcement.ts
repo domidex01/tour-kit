@@ -5,9 +5,28 @@ import type { ReactNode } from 'react'
 // Re-exported here for backward compat — existing
 // `import { AudienceCondition, FrequencyRule } from '@tour-kit/announcements'`
 // consumers continue to work without source changes.
-import type { AudienceCondition, FrequencyRule } from '@tour-kit/core'
+import type { AudienceCondition, FrequencyRule, LocalizedText } from '@tour-kit/core'
 
 export type { AudienceCondition, FrequencyRule }
+
+/**
+ * Audience prop accepting either inline conditions (legacy `AudienceCondition[]`)
+ * or a named segment registered in `<SegmentationProvider>`. Discriminated by
+ * `Array.isArray()` — the array branch goes through `matchesAudience`, the
+ * object branch through `useSegments()`. Mirror of `@tour-kit/core`'s
+ * `AudienceProp` (kept as a local re-export so the announcements barrel does
+ * not pin a breaking change to core).
+ */
+export type AudienceProp = AudienceCondition[] | { segment: string }
+
+/**
+ * Type guard narrowing `AudienceProp` to its segment-named branch. Mirrors the
+ * private guard in `@tour-kit/hints` — keep both in lockstep when changing the
+ * discriminator.
+ */
+export function isSegmentAudience(a: AudienceProp): a is { segment: string } {
+  return !Array.isArray(a) && typeof a === 'object' && a !== null && 'segment' in a
+}
 
 /**
  * Announcement display variants
@@ -140,11 +159,20 @@ export interface AnnouncementConfig {
   /** Priority for queue ordering */
   priority?: AnnouncementPriority
 
-  /** Title of the announcement */
-  title?: string
+  /**
+   * Title of the announcement. Supports plain strings (interpolated against
+   * `userContext` from `<SegmentationProvider>`), i18n keys
+   * (`{ key: 'announcement.foo.title' }` resolved via `useT()`), or any
+   * `ReactNode` body. Strings without `{{var}}` tokens render unchanged.
+   */
+  title?: ReactNode | LocalizedText
 
-  /** Description or body content */
-  description?: string | ReactNode
+  /**
+   * Description or body content. Same `ReactNode | LocalizedText` shape as
+   * `title`; ReactNode children pass through unchanged so consumers can
+   * supply rich JSX bodies.
+   */
+  description?: ReactNode | LocalizedText
 
   /** Media to display */
   media?: AnnouncementMedia
@@ -161,8 +189,13 @@ export interface AnnouncementConfig {
   /** Schedule configuration (requires @tour-kit/scheduling) */
   schedule?: unknown // Will be Schedule type from @tour-kit/scheduling
 
-  /** Audience targeting conditions */
-  audience?: AudienceCondition[]
+  /**
+   * Audience targeting. Accepts either an inline `AudienceCondition[]` (legacy)
+   * evaluated by `matchesAudience(...)`, or a `{ segment: string }` reference
+   * to a segment registered in `<SegmentationProvider>` and evaluated by
+   * `useSegments()`. The array branch is fully backward-compatible.
+   */
+  audience?: AudienceProp
 
   /** Variant-specific options */
   modalOptions?: ModalOptions
@@ -170,6 +203,14 @@ export interface AnnouncementConfig {
   bannerOptions?: BannerOptions
   toastOptions?: ToastOptions
   spotlightOptions?: SpotlightOptions
+
+  /**
+   * Optional free-form category tag — presentation-layer metadata only.
+   * Phase 5a's changelog feed will read this for grouping and filtering;
+   * 3c only round-trips the field through the type system. Examples:
+   * `'feature'`, `'fix'`, `'breaking'`, `'security'`.
+   */
+  category?: string
 
   /** Custom metadata */
   metadata?: Record<string, unknown>

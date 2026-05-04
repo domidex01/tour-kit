@@ -4,9 +4,10 @@ import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import type { AnnouncementMedia } from '../types/announcement'
 
-export interface AnnouncementContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Title of the announcement */
-  title?: string
+export interface AnnouncementContentProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+  /** Title of the announcement (any ReactNode — strings render as <h2>, JSX passes through). */
+  title?: React.ReactNode
   /** Description/body content */
   description?: React.ReactNode
   /** Media to display */

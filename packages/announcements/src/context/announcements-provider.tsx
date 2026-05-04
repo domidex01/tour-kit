@@ -1,6 +1,7 @@
 import { ProGate } from '@tour-kit/license'
 import * as React from 'react'
 import { AnnouncementScheduler } from '../core/scheduler'
+import { useFilteredAnnouncements } from '../hooks/use-filtered-announcements'
 import type { AnnouncementConfig, AnnouncementState, DismissalReason } from '../types/announcement'
 import type { AnnouncementsContextValue, AnnouncementsProviderProps } from '../types/context'
 import type { QueueConfig } from '../types/queue'
@@ -237,6 +238,12 @@ export function AnnouncementsProvider({
     [queueConfigOverrides]
   )
 
+  // Phase 3c — filter announcements by audience (segment + array shapes) once
+  // at the top of the provider so the scheduler / auto-show / canShow
+  // eligibility paths only see eligible candidates. The array-shape audience
+  // is also re-checked downstream by the scheduler for backward compat.
+  const filteredAnnouncements = useFilteredAnnouncements(initialAnnouncements)
+
   const [state, dispatch] = React.useReducer(announcementsReducer, {
     announcements: new Map(),
     configs: new Map(),
@@ -338,9 +345,11 @@ export function AnnouncementsProvider({
     if (state.announcements.size === 0) return
 
     // Collect eligible candidates first so we can show highest-priority immediately
-    // and queue the rest.
+    // and queue the rest. `filteredAnnouncements` already excludes anything
+    // ruled out by audience (segment + array shapes) so the scheduler only
+    // re-checks the array path for backward-compat semantics.
     const eligible: AnnouncementConfig[] = []
-    for (const config of initialAnnouncements) {
+    for (const config of filteredAnnouncements) {
       if (config.autoShow === false) continue
       const st = state.announcements.get(config.id)
       if (!st) continue
@@ -389,7 +398,7 @@ export function AnnouncementsProvider({
       config.onShow?.()
       onAnnouncementShow?.(config.id)
     }
-  }, [state.announcements, userContext, initialAnnouncements])
+  }, [state.announcements, userContext, filteredAnnouncements])
 
   // Context methods
   const register = React.useCallback((config: AnnouncementConfig) => {
