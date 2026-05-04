@@ -24,13 +24,3 @@ export function SegmentationProvider({
 export function useSegmentationContext() {
   return useContext(Ctx)
 }
-
-// Re-export the canonical types so consumers can import them from this module
-// or via the segmentation barrel. Single source of truth lives in `./types`.
-export type {
-  SegmentDefinition,
-  StaticSegment,
-  SegmentSource,
-  SegmentationContextValue,
-  SegmentationProviderProps,
-} from './types'

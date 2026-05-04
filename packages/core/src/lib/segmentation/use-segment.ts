@@ -1,6 +1,25 @@
 import { useMemo } from 'react'
 import { matchesAudience } from '../audience'
 import { useSegmentationContext } from './segmentation-context'
+import type { SegmentSource } from './types'
+
+/**
+ * Pure evaluation of a single registered segment. Shared by `useSegment`
+ * and `useSegments` so the static-vs-audience branch stays in lockstep —
+ * drift between the two would silently let `useSegment('x')` and
+ * `useSegments().x` disagree.
+ */
+function evaluateSegment(
+  seg: SegmentSource,
+  userContext: Record<string, unknown> | undefined,
+  currentUserId: string | undefined
+): boolean {
+  // Array.isArray narrows SegmentDefinition (array) vs StaticSegment (object).
+  if (!Array.isArray(seg)) {
+    return currentUserId !== undefined && seg.userIds.includes(currentUserId)
+  }
+  return matchesAudience(seg, userContext)
+}
 
 /**
  * Resolve a named segment to a boolean for the current user.
@@ -14,7 +33,8 @@ import { useSegmentationContext } from './segmentation-context'
  * Returns `false` (with a dev-only `console.warn`) for unknown names — never
  * throws — so a typo cannot crash the consumer tree. Static segments without
  * a `currentUserId` resolve to `false` (anonymous users by definition cannot
- * be in a closed cohort).
+ * be in a closed cohort). An empty conditions array (`[]`) resolves to `true`
+ * because `matchesAudience` treats "no conditions" as "match everyone".
  *
  * @example
  *   <SegmentationProvider
@@ -42,11 +62,7 @@ export function useSegment(name: string): boolean {
       }
       return false
     }
-    // Array.isArray narrows SegmentDefinition (array) vs StaticSegment (object).
-    if (!Array.isArray(seg)) {
-      return currentUserId !== undefined && seg.userIds.includes(currentUserId)
-    }
-    return matchesAudience(seg, userContext)
+    return evaluateSegment(seg, userContext, currentUserId)
   }, [name, segments, userContext, currentUserId])
 }
 
@@ -62,12 +78,7 @@ export function useSegments(): Record<string, boolean> {
   return useMemo(() => {
     const out: Record<string, boolean> = {}
     for (const name of Object.keys(segments)) {
-      const seg = segments[name]
-      if (!Array.isArray(seg)) {
-        out[name] = currentUserId !== undefined && seg.userIds.includes(currentUserId)
-      } else {
-        out[name] = matchesAudience(seg, userContext)
-      }
+      out[name] = evaluateSegment(segments[name], userContext, currentUserId)
     }
     return out
   }, [segments, userContext, currentUserId])

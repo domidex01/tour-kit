@@ -5,6 +5,10 @@ import { BulkSegmentProbe, SingleSegmentProbe, makeProvider } from './__test-uti
 describe('SegmentationProvider + useSegment', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    // restoreAllMocks does NOT undo vi.stubEnv — explicit unstub prevents
+    // a stubbed NODE_ENV from leaking across tests if an assertion throws
+    // before the in-test unstub call runs.
+    vi.unstubAllEnvs()
   })
 
   describe('named lookup (audience)', () => {
@@ -47,7 +51,6 @@ describe('SegmentationProvider + useSegment', () => {
       )
       expect(screen.getByTestId('single')).toHaveTextContent('false')
       expect(warnSpy).not.toHaveBeenCalled()
-      vi.unstubAllEnvs()
     })
   })
 
@@ -68,6 +71,20 @@ describe('SegmentationProvider + useSegment', () => {
         </Provider>
       )
       expect(screen.getByTestId('single')).toHaveTextContent('false')
+    })
+
+    it('returns true for an empty conditions array (matchesAudience: zero conditions = match-all)', () => {
+      // Locks the cross-package contract: an empty SegmentDefinition inherits
+      // matchesAudience's "no conditions = everyone matches" semantic. If a
+      // future change ever flips this to "no one matches", this test fails
+      // and forces the conversation.
+      const Provider = makeProvider({ everyone: [] }, { role: 'guest' })
+      render(
+        <Provider>
+          <SingleSegmentProbe name="everyone" />
+        </Provider>
+      )
+      expect(screen.getByTestId('single')).toHaveTextContent('true')
     })
 
     it('returns true when all conditions in the segment pass', () => {

@@ -11,8 +11,9 @@
  * - Multi-column rows: only the first column is taken.
  * - Result is trimmed and deduplicated, preserving first-seen order.
  *
- * Hand-rolled to keep `@tour-kit/core` under its 22.5 KB raw budget — adding
- * `papaparse` or `csv-parse` would bust the cap.
+ * Hand-rolled to keep `@tour-kit/core` under its bundle budget — adding
+ * `papaparse` or `csv-parse` would bust the brotli-with-deps cap (24 KB
+ * after Phase 2; measured 23.13 KB).
  *
  * @example
  *   parseUserIdsFromCsv('id\nu_1\nu_2')             // → ['u_1', 'u_2']
@@ -26,12 +27,12 @@ export function parseUserIdsFromCsv(csv: string): string[] {
   const lines = src.split(/\r\n|\n/).filter((line) => line.length > 0)
   if (lines.length === 0) return []
 
-  const startIdx = HEADER_RE.test(firstColumn(lines[0] ?? '')) ? 1 : 0
+  const startIdx = HEADER_RE.test(firstColumn(lines[0])) ? 1 : 0
 
   const seen = new Set<string>()
   const out: string[] = []
   for (let i = startIdx; i < lines.length; i++) {
-    const value = firstColumn(lines[i] ?? '')
+    const value = firstColumn(lines[i])
     if (value && !seen.has(value)) {
       seen.add(value)
       out.push(value)
