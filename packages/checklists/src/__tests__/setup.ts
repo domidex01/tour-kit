@@ -1,6 +1,7 @@
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { afterEach, vi } from 'vitest'
+import { __resetForTests as resetUrlVisitListener } from '../engine/url-visit-listener'
 
 // Partially mock @floating-ui/react: stub the positioning-only pieces that
 // depend on layout (which jsdom can't compute), but pass through interaction
@@ -26,12 +27,10 @@ afterEach(() => {
   localStorage.clear()
   sessionStorage.clear()
   // Reset module-level URL-visit listener registry between tests so per-spec
-  // mounts/unmounts don't leak handlers into the next test.
-  // Async import to avoid evaluating the module under SSR-style tests that
-  // stub `window` to undefined.
-  void import('../engine/url-visit-listener').then((mod) => {
-    mod.__resetForTests()
-  })
+  // mounts/unmounts don't leak handlers into the next test. Sync + static
+  // import — the listener module is SSR-safe (no top-level browser API access),
+  // so importing it without a `window` global is harmless.
+  resetUrlVisitListener()
 })
 
 // Mock ResizeObserver

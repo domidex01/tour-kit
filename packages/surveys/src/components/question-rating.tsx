@@ -3,46 +3,12 @@
 import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import type { RatingPreset, RatingScale } from '../types/question'
+import { DEFAULT_EMOJI_MAP, PRESET_DEFAULTS } from './rating-presets'
 import { ratingOptionVariants } from './ui/question-variants'
-
-/** Default emoji map for emoji rating style */
-const DEFAULT_EMOJI_MAP: Record<number, string> = {
-  1: '\u{1F621}',
-  2: '\u{1F641}',
-  3: '\u{1F610}',
-  4: '\u{1F642}',
-  5: '\u{1F60D}',
-}
-
-interface PresetDefaults {
-  min: number
-  max: number
-  style: 'numeric' | 'stars' | 'emoji'
-  emojiMap?: Record<number, string>
-}
-
-/**
- * Resolved defaults per `RatingPreset`. `'thumbs'` uses `1, 2, 3` (low → high)
- * so it fits the existing `RatingScale.min/max` contract without changing the
- * scoring engine.
- */
-const PRESET_DEFAULTS: Record<RatingPreset, PresetDefaults> = {
-  stars: { min: 1, max: 5, style: 'stars' },
-  thumbs: {
-    min: 1,
-    max: 3,
-    style: 'emoji',
-    emojiMap: {
-      1: '\u{1F44E}', // 👎
-      2: '\u{1F610}', // 😐
-      3: '\u{1F44D}', // 👍
-    },
-  },
-}
 
 export interface QuestionRatingProps {
   /** Unique identifier for the rating group */
-  id?: string
+  id: string
   /** Minimum rating value (default: 0) */
   min?: number
   /** Maximum rating value (default: 10) */
@@ -56,7 +22,7 @@ export interface QuestionRatingProps {
   /** Change handler */
   onChange?: (value: number) => void
   /** Accessible label for the rating group */
-  label?: string
+  label: string
   /** Label for the low end of the scale */
   lowLabel?: string
   /** Label for the high end of the scale */
@@ -83,7 +49,7 @@ export interface QuestionRatingProps {
 const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
   (
     {
-      id: idProp,
+      id,
       min: minProp,
       max: maxProp,
       style: styleProp,
@@ -109,13 +75,14 @@ const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
 
     const presetDefaults = preset ? PRESET_DEFAULTS[preset] : undefined
 
-    // Precedence: explicit `ratingScale` > explicit prop > preset default > hardcoded fallback.
+    // Per-field nullish-merging precedence (each field resolved independently):
+    //   `ratingScale` > explicit prop > preset default > hardcoded fallback.
+    // A partial `ratingScale` (e.g. `{ min, max }` without `style`) lets the
+    // preset's `style` win for that one field — explicit consumer values always
+    // beat preset values; missing values fall through naturally.
     const min = ratingScale?.min ?? minProp ?? presetDefaults?.min ?? 0
     const max = ratingScale?.max ?? maxProp ?? presetDefaults?.max ?? 10
     const style = ratingScale?.style ?? styleProp ?? presetDefaults?.style ?? 'numeric'
-    const reactId = React.useId()
-    const id = idProp ?? `rating-${reactId}`
-    const accessibleLabel = label ?? 'Rating'
 
     const step = 1
     const options: number[] = React.useMemo(() => {
@@ -218,7 +185,7 @@ const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
       <div ref={ref} className={cn('flex flex-col gap-2', className)}>
         <div
           role="radiogroup"
-          aria-label={accessibleLabel}
+          aria-label={label}
           aria-required={isRequired}
           data-rating-group={id}
           className="flex flex-wrap gap-1"

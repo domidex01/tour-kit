@@ -2,6 +2,7 @@ import { act, render } from '@testing-library/react'
 import * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ChecklistProvider } from '../context/checklist-provider'
+import { registerUrlVisitTask } from '../engine/url-visit-listener'
 import { useTask } from '../hooks/use-task'
 import type { ChecklistConfig } from '../types'
 import { countEventOps, spyOnEventListeners } from './history-helpers'
@@ -164,6 +165,18 @@ describe('urlVisit completion (ChecklistProvider integration)', () => {
     const removes = countEventOps(spies.remove, 'popstate')
     expect(adds).toBeGreaterThan(0)
     expect(removes).toBe(adds)
+
+    // Symmetry says 0 live listeners. Prove it: dispatching popstate must not
+    // fire any handler — including any leaked closures from the unmounted cycles.
+    const onMatch = vi.fn()
+    const cleanup = registerUrlVisitTask('post-cleanup', '/never', onMatch)
+    onMatch.mockClear() // ignore the immediate-check call from registration
+    act(() => {
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    // Live registration's pattern doesn't match `/`, so no fire is expected.
+    expect(onMatch).not.toHaveBeenCalled()
+    cleanup()
   })
 
   it('SSR-safe: importing the listener under typeof window === undefined does not throw', async () => {

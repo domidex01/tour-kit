@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { LocaleProvider } from '@tour-kit/core'
 import type { ReactNode } from 'react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ChecklistTask } from '../components/checklist-task'
 import type { ChecklistTaskState } from '../types'
 
@@ -68,6 +68,33 @@ describe('checklists i18n widening', () => {
     const task = makeTaskState({ id: 'plain', title: 'Plain title' })
     render(<ChecklistTask task={task} />)
     expect(screen.getByText('Plain title')).toBeInTheDocument()
+  })
+
+  describe('keyed text without LocaleProvider', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    it('falls back to the key string in dev (Phase 1 contract)', () => {
+      vi.stubEnv('NODE_ENV', 'development')
+      const task = makeTaskState({ id: 'k', title: { key: 'task.profile' } })
+      render(<ChecklistTask task={task} />)
+      expect(screen.getByText('task.profile')).toBeInTheDocument()
+    })
+
+    it('falls back to empty string in production (Phase 1 contract)', () => {
+      vi.stubEnv('NODE_ENV', 'production')
+      const task = makeTaskState({
+        id: 'k',
+        title: { key: 'task.profile' },
+        description: 'static fallback',
+      })
+      render(<ChecklistTask task={task} />)
+      // Title resolves to empty string in prod when no provider/messages.
+      expect(screen.queryByText('task.profile')).toBeNull()
+      // The description still renders so the row isn't a ghost.
+      expect(screen.getByText('static fallback')).toBeInTheDocument()
+    })
   })
 
   it('resolves description LocalizedText alongside title', () => {
