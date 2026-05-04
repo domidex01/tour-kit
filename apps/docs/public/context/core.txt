@@ -48,6 +48,7 @@ Types:
     TourKitConfig
     TourStep
     StepOptions
+    AudienceProp
     Tour
     TourOptions
     TourState
@@ -92,6 +93,14 @@ Types:
     Messages
     TranslateFn
     AudienceCondition
+    FrequencyRule
+    FrequencyState
+    LocalizedText
+    SegmentDefinition
+    StaticSegment
+    SegmentSource
+    SegmentationContextValue
+    SegmentationProviderProps
 
 Hooks:
     useTourKitContext
@@ -116,6 +125,9 @@ Hooks:
     useUILibrary — Hook to get the current UI library setting
     useLocale
     useT — Hook returning a translator function `t(key, vars?)` that:
+    useSegmentationContext
+    useSegment
+    useSegments
 
 Components:
     TourKitContext
@@ -127,6 +139,7 @@ Components:
     UnifiedSlot
     UILibraryProvider
     LocaleProvider
+    SegmentationProvider
 
 Utilities:
     defaultKeyboardConfig
@@ -192,6 +205,11 @@ Utilities:
     interpolate
     matchesAudience
     validateConditions
+    canShowByFrequency
+    canShowAfterDismissal
+    getViewLimit
+    isI18nKey
+    parseUserIdsFromCsv
 
 TYPES
 -----
@@ -277,6 +295,50 @@ TYPES
       value?: unknown
     }
 
+    /**
+     * Frequency rules — promoted from `@tour-kit/announcements` in Phase 3a of the
+     * UserGuiding parity initiative. Re-exported from `@tour-kit/announcements`
+     * with `@deprecated` JSDoc for backward compat.
+     */
+    
+    /**
+     * How often a UI surface (announcement, hint, tour) can be shown.
+     *
+     *   - `'once'`     — show only when never viewed
+     *   - `'session'`  — show until dismissed in the current session
+     *   - `'always'`   — show every time conditions are met
+     *   - `{ type: 'times', count }
+
+    /**
+     * Frequency rules — promoted from `@tour-kit/announcements` in Phase 3a of the
+     * UserGuiding parity initiative. Re-exported from `@tour-kit/announcements`
+     * with `@deprecated` JSDoc for backward compat.
+     */
+    
+    /**
+     * How often a UI surface (announcement, hint, tour) can be shown.
+     *
+     *   - `'once'`     — show only when never viewed
+     *   - `'session'`  — show until dismissed in the current session
+     *   - `'always'`   — show every time conditions are met
+     *   - `{ type: 'times', count }`     — show up to `count` times total
+     *   - `{ type: 'interval', days }`   — re-show after `days` days have passed
+     */
+    export type FrequencyRule =
+      | 'once'
+      | 'session'
+      | 'always'
+      | { type: 'times';
+
+    /**
+     * `LocalizedText` is the shared shape for any human-readable string that
+     * may either be a literal (interpolated via `interpolate`) or a dictionary
+     * key (resolved via `useT()`). The discriminated union narrows on
+     * `typeof === 'string'`, so existing string-based consumers stay assignable
+     * — adding the object branch is a pure widening.
+     */
+    export type LocalizedText = string | { key: string }
+
 HOOKS
 -----
     useTourKitContext(...)
@@ -301,6 +363,9 @@ HOOKS
     useUILibrary(): UILibrary
     useLocale(): LocaleContextValue
     useT(): TranslateFn
+    useSegmentationContext(...)
+    useSegment(...)
+    useSegments(...)
 
 COMPONENTS
 ----------
@@ -313,6 +378,7 @@ COMPONENTS
     <UnifiedSlot />
     <UILibraryProvider />
     <LocaleProvider />
+    <SegmentationProvider />
 
 EXAMPLES
 --------

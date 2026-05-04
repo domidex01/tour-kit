@@ -12,9 +12,11 @@ import {
   useInteractions,
   useRole,
 } from '@floating-ui/react'
+import type { LocalizedText } from '@tour-kit/core'
 import { cn } from '@tour-kit/core'
 import { useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
+import { useResolvedText } from '../hooks/use-resolved-text'
 import { Slot, UnifiedSlot } from '../lib/slot'
 import type { Placement } from '../types'
 import {
@@ -32,7 +34,7 @@ function toFloatingPlacement(placement: Placement): FloatingPlacement {
 }
 
 export interface HintTooltipProps
-  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content' | 'title'>,
     HintTooltipVariants {
   /** Target element to anchor the tooltip to */
   target: HTMLElement
@@ -42,6 +44,12 @@ export interface HintTooltipProps
   onClose: () => void
   /** Content to display */
   children: React.ReactNode
+  /**
+   * Optional title rendered above `children` (Phase 3a). Resolved through
+   * `useResolvedText`, so strings interpolate and `{ key }` looks up the
+   * locale dictionary.
+   */
+  title?: LocalizedText
   /** Use custom close button */
   closeButton?: React.ReactNode
   /** Use custom element via Slot */
@@ -59,11 +67,13 @@ export const HintTooltip = React.forwardRef<HTMLDivElement, HintTooltipProps>(
       asChild = false,
       className,
       children,
+      title,
       closeButton,
       ...props
     },
     ref
   ) => {
+    const resolvedTitle = useResolvedText(title)
     const library = useUILibrary()
     const floatingPlacement = toFloatingPlacement(placement)
 
@@ -121,7 +131,17 @@ export const HintTooltip = React.forwardRef<HTMLDivElement, HintTooltipProps>(
               </svg>
             </button>
           )}
-          <div className="pr-4">{children}</div>
+          <div className="pr-4">
+            {resolvedTitle != null && (
+              <p
+                className="font-semibold text-sm leading-none mb-1"
+                data-slot="hint-tooltip-title"
+              >
+                {resolvedTitle}
+              </p>
+            )}
+            {children}
+          </div>
         </Comp>
       </FloatingPortal>
     )
