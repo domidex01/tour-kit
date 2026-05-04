@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/core Context File
-Version: 0.8.0 | Generated: 2026-05-03
+Version: 0.9.0 | Generated: 2026-05-04
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -86,6 +86,12 @@ Types:
     RenderProp
     UILibrary
     UILibraryProviderProps
+    InterpolateOptions
+    LocaleContextValue
+    LocaleProviderProps
+    Messages
+    TranslateFn
+    AudienceCondition
 
 Hooks:
     useTourKitContext
@@ -108,6 +114,8 @@ Hooks:
     useAdvanceOn
     useBranch
     useUILibrary — Hook to get the current UI library setting
+    useLocale
+    useT — Hook returning a translator function `t(key, vars?)` that:
 
 Components:
     TourKitContext
@@ -118,6 +126,7 @@ Components:
     TourRouteError
     UnifiedSlot
     UILibraryProvider
+    LocaleProvider
 
 Utilities:
     defaultKeyboardConfig
@@ -180,6 +189,9 @@ Utilities:
     cn
     validateTour
     waitForStepTarget
+    interpolate
+    matchesAudience
+    validateConditions
 
 TYPES
 -----
@@ -211,6 +223,60 @@ TYPES
 
     export type UILibrary = 'radix-ui' | 'base-ui'
 
+    export interface InterpolateOptions {
+      /** Returned when a key is missing AND no inline fallback was given. Default: '' */
+      defaultFallback?: string
+      /** Logs unresolved keys to console.warn in dev. Default: true */
+      warnOnMissing?: boolean
+    }
+
+    export interface LocaleContextValue {
+      locale: string
+      messages: Messages
+      /** Optional consumer-side override — delegates t() to host app's i18n */
+      t?: TranslateFn
+      /** Auto-derived from locale; consumers can override */
+      direction?: 'ltr' | 'rtl'
+    }
+
+    export interface LocaleProviderProps extends Partial<LocaleContextValue> {
+      children: ReactNode
+    }
+
+    export type Messages = Record<string, string>
+    export type TranslateFn = (key: string, vars?: Record<string, unknown>) => string
+
+    export type TranslateFn = (key: string, vars?: Record<string, unknown>) => string
+
+    /**
+     * Audience targeting condition.
+     *
+     * Promoted from `@tour-kit/announcements` in Phase 1 of the UserGuiding parity
+     * initiative. The shape is byte-identical to the previous announcements-local
+     * declaration so the announcements re-export keeps the same TypeScript identity.
+     */
+    export interface AudienceCondition {
+      /** Condition type */
+      type: 'user_property' | 'segment' | 'feature_flag' | 'custom'
+    
+      /** Property or segment name (supports dot notation for nested keys) */
+      key: string
+    
+      /** Comparison operator */
+      operator:
+        | 'equals'
+        | 'not_equals'
+        | 'contains'
+        | 'not_contains'
+        | 'in'
+        | 'not_in'
+        | 'exists'
+        | 'not_exists'
+    
+      /** Expected value(s) — required for every operator except `exists`/`not_exists` */
+      value?: unknown
+    }
+
 HOOKS
 -----
     useTourKitContext(...)
@@ -233,6 +299,8 @@ HOOKS
     useAdvanceOn(...)
     useBranch(...)
     useUILibrary(): UILibrary
+    useLocale(): LocaleContextValue
+    useT(): TranslateFn
 
 COMPONENTS
 ----------
@@ -244,6 +312,7 @@ COMPONENTS
     <TourRouteError />
     <UnifiedSlot />
     <UILibraryProvider />
+    <LocaleProvider />
 
 EXAMPLES
 --------
