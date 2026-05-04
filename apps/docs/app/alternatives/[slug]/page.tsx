@@ -61,7 +61,7 @@ export default async function AlternativesPage({ params }: PageProps) {
   const today = new Date().toISOString().split('T')[0]
   const vsPage = getPublishedComparisons().find((c) => c.competitorSlug === alt.competitorSlug)
 
-  const article = getAlternativeArticle(slug)
+  const article = await getAlternativeArticle(slug)
   const hasMdxContent = !!article
   const adjacentAlternatives = getPublishedAlternatives()
     .filter((a) => a.slug !== slug)

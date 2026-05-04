@@ -26,6 +26,9 @@ pnpm-debug.log*
 # Test coverage
 coverage/
 
+# Phase 0 spike artifacts (research notes — not committed)
+notes/
+
 # Playwright
 playwright-report/
 test-results/

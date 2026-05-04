@@ -61,7 +61,7 @@ export default async function ComparisonPage({ params }: PageProps) {
   const today = new Date().toISOString().split('T')[0]
 
   // Try to load MDX content from the collection
-  const article = getCompareArticle(slug)
+  const article = await getCompareArticle(slug)
   const hasMdxContent = !!article
 
   return (

@@ -76,7 +76,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const today = new Date().toISOString().split('T')[0]
 
   // Try to load MDX content from the collection
-  const article = getBlogArticle(slug)
+  const article = await getBlogArticle(slug)
   const hasMdxContent = !!article
   const relatedPosts = getRelatedBlogPosts(slug, 4)
   const readingTime = getReadingTime(slug)
