@@ -12,6 +12,7 @@ import {
 import { type Placement, useFocusTrap, useReducedMotion, useTour } from '@tour-kit/core'
 import { cn } from '@tour-kit/core'
 import * as React from 'react'
+import { useResolvedText } from '../../hooks/use-resolved-text'
 import { TourArrow } from '../primitives/tour-arrow'
 import { TourPortal } from '../primitives/tour-portal'
 import { type TourCardVariants, tourCardVariants } from '../ui/card-variants'
@@ -103,6 +104,9 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
       }
     }, [isActive, activate, deactivate])
 
+    const resolvedTitle = useResolvedText(currentStep?.title)
+    const resolvedDescription = useResolvedText(currentStep?.description)
+
     if (!isActive || !currentStep) return null
 
     const showNavigation = currentStep.showNavigation ?? true
@@ -139,12 +143,12 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
           {...props}
         >
           <TourCardHeader
-            title={currentStep.title}
+            title={resolvedTitle}
             titleId={`tour-step-title-${currentStep.id}`}
             showClose={showClose}
           />
 
-          <TourCardContent content={currentStep.content} />
+          <TourCardContent content={currentStep.content} description={resolvedDescription} />
 
           <TourCardFooter
             currentStep={currentStepIndex + 1}

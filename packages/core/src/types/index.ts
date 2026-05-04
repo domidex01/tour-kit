@@ -39,7 +39,7 @@ export {
 } from './config'
 
 // Step types
-export type { TourStep, StepOptions } from './step'
+export type { TourStep, StepOptions, AudienceProp } from './step'
 
 // Tour types
 export type { Tour, TourOptions } from './tour'

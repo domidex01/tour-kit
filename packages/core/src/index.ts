@@ -27,6 +27,7 @@ export type {
   TourKitConfig,
   TourStep,
   StepOptions,
+  AudienceProp,
   Tour,
   TourOptions,
   TourState,
@@ -192,6 +193,18 @@ export type { Messages, TranslateFn } from './lib/i18n/use-t'
 // Audience targeting — promoted from @tour-kit/announcements in Phase 1
 export { matchesAudience, validateConditions } from './lib/audience'
 export type { AudienceCondition } from './types/audience'
+
+// Frequency rules — Phase 3a (lifted from @tour-kit/announcements)
+export {
+  canShowByFrequency,
+  canShowAfterDismissal,
+  getViewLimit,
+} from './lib/frequency'
+export type { FrequencyRule, FrequencyState } from './lib/frequency'
+
+// LocalizedText — Phase 3a (shared text shape for tours/hints/etc.)
+export { isI18nKey } from './lib/localized-text'
+export type { LocalizedText } from './lib/localized-text'
 
 // Segmentation primitives — Phase 2 (UserGuiding parity)
 export {

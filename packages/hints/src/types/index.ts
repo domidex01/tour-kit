@@ -1,19 +1,44 @@
+import type {
+  AudienceProp,
+  FrequencyRule,
+  HotspotPosition,
+  LocalizedText,
+  Placement,
+} from '@tour-kit/core'
 import type * as React from 'react'
 
 // Re-export Placement from core for convenience
-export type { Placement } from '@tour-kit/core'
-
-export type HotspotPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
+export type { Placement }
+export type { HotspotPosition }
 
 export interface HintConfig {
   id: string
   target: string | React.RefObject<HTMLElement | null>
-  content: React.ReactNode
+  /** Optional title rendered above the tooltip content (Phase 3a). */
+  title?: LocalizedText
+  /**
+   * Tooltip body. Accepts a string (interpolated), a `{ key }` dictionary
+   * lookup, or any `ReactNode` for arbitrary JSX. The original
+   * `React.ReactNode`-only contract stays assignable.
+   */
+  content: React.ReactNode | LocalizedText
   position?: HotspotPosition
-  tooltipPlacement?: import('@tour-kit/core').Placement
+  tooltipPlacement?: Placement
   pulse?: boolean
   autoShow?: boolean
   persist?: boolean
+  /**
+   * Filter this hint for users who don't match. Phase 3a addition. Same
+   * shape as `Tour.audience` — array (legacy `AudienceCondition[]`) or
+   * `{ segment: string }`.
+   */
+  audience?: AudienceProp
+  /**
+   * How often this hint can be re-shown. Phase 3a addition. Lifted from
+   * `@tour-kit/announcements` to `@tour-kit/core` so hints + announcements
+   * share one canonical type.
+   */
+  frequency?: FrequencyRule
   onClick?: () => void
   onShow?: () => void
   onDismiss?: () => void
