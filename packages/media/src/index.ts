@@ -5,6 +5,18 @@
 export { TourMedia, type TourMediaComponentProps } from './components/tour-media'
 
 // ============================================
+// MEDIA SLOT (universal dispatcher)
+// ============================================
+
+export { MediaSlot, type MediaSlotProps } from './components/media-slot'
+export {
+  detectMediaSlotType,
+  PATTERNS as MEDIA_SLOT_PATTERNS,
+  type MediaSlotType,
+  type ResolvedMediaSlotType,
+} from './lib/detect-media-type'
+
+// ============================================
 // EMBED COMPONENTS
 // ============================================
 
