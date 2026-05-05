@@ -1,5 +1,13 @@
 # @tour-kit/adoption
 
+## 1.0.2
+
+### Patch Changes
+
+- Updated dependencies [690ad74]
+  - @tour-kit/core@0.11.0
+  - @tour-kit/analytics@0.9.2
+
 ## 1.0.1
 
 ### Patch Changes

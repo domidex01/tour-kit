@@ -1,5 +1,24 @@
 # @tour-kit/surveys
 
+## 1.2.0
+
+### Minor Changes
+
+- 690ad74: Wire i18n, thumbs/stars question types, and `<MediaSlot>` into surveys:
+
+  - Survey questions accept `LocalizedText` resolved against `<LocaleProvider>`.
+  - New `thumbs` and `stars` question types in addition to existing NPS / CSAT / CES.
+  - Optional `media` slot renders `<MediaSlot>` above the question stem.
+
+  All additions are additive — no breaking changes.
+
+### Patch Changes
+
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+  - @tour-kit/core@0.11.0
+  - @tour-kit/media@0.11.0
+
 ## 1.1.0
 
 ### Minor Changes
