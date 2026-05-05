@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/announcements Context File
-Version: 1.0.0 | Generated: 2026-05-05
+Version: 1.1.0 | Generated: 2026-05-05
 Paste this into your LLM to get accurate answers about @tour-kit/announcements.
 =========================================================================
 
@@ -70,6 +70,13 @@ Types:
     AudienceCondition
     AudienceProp
     AnnouncementStorageAdapter
+    ChangelogEntry
+    SerializeFeedOptions
+    ChangelogPageProps
+    ChangelogEntryProps
+    ChangelogFilterProps
+    Reaction
+    ReactionsProps
     // Context types
   AnnouncementsContextValue
     AnnouncementsProviderProps
@@ -145,6 +152,7 @@ Utilities:
     validateConditions
     cn
     isSegmentAudience
+    serializeFeed
 
 TYPES
 -----
@@ -278,7 +286,7 @@ TYPES
       useConfig?: boolean
     }
 
-    ... and 45 more types. See source for full definitions.
+    ... and 52 more types. See source for full definitions.
 
 HOOKS
 -----
