@@ -1,5 +1,27 @@
 # dashboard-next
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+  - @tour-kit/announcements@1.2.0
+  - @tour-kit/checklists@0.11.0
+  - @tour-kit/core@0.11.0
+  - @tour-kit/hints@0.11.0
+  - @tour-kit/media@0.11.0
+  - @tour-kit/react@0.11.0
+  - @tour-kit/surveys@1.2.0
+  - @tour-kit/adoption@1.0.2
+  - @tour-kit/ai@0.9.2
+  - @tour-kit/analytics@0.9.2
+
 ## 0.1.6
 
 ### Patch Changes

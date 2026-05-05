@@ -1,5 +1,25 @@
 # @tour-kit/hints
 
+## 0.11.0
+
+### Minor Changes
+
+- 690ad74: Wire i18n, audience, frequency rules, and `<MediaSlot>` into hints:
+
+  - `HintConfig` accepts localized labels/content via `<LocaleProvider>`.
+  - `HintConfig.audience` accepts `AudienceCondition[]` or `{ segment: 'name' }`.
+  - Promoted `FrequencyRule` to a public type for cross-package reuse.
+  - Optional `media` slot renders `<MediaSlot>` inside hint cards.
+
+  All additions are additive — no breaking changes.
+
+### Patch Changes
+
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+  - @tour-kit/core@0.11.0
+  - @tour-kit/media@0.11.0
+
 ## 0.10.0
 
 ### Minor Changes

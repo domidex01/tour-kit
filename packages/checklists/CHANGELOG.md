@@ -1,5 +1,24 @@
 # @tour-kit/checklists
 
+## 0.11.0
+
+### Minor Changes
+
+- 690ad74: Wire i18n, the `urlVisit` task type, and `<MediaSlot>` into checklists:
+
+  - Task `title`/`description` accept `LocalizedText` resolved against `<LocaleProvider>`.
+  - New `type: 'urlVisit'` task condition completes when the user navigates to a configured URL pattern.
+  - Optional `media` slot renders `<MediaSlot>` per task.
+
+  All additions are additive — no breaking changes.
+
+### Patch Changes
+
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+  - @tour-kit/core@0.11.0
+  - @tour-kit/media@0.11.0
+
 ## 0.10.0
 
 ### Minor Changes

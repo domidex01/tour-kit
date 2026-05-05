@@ -1,5 +1,22 @@
 # @tour-kit/media
 
+## 0.11.0
+
+### Minor Changes
+
+- 690ad74: Add `<MediaSlot>` polymorphic component:
+
+  - Single component accepts a URL or local source; auto-detects YouTube, Vimeo, Loom, Wistia, native video, GIF, and Lottie sources.
+  - Forwards refs and `aria-*` props.
+  - Honors `prefers-reduced-motion: reduce` (autoplay disabled, Lottie freezes on first frame).
+
+  All additions are additive — no breaking changes.
+
+### Patch Changes
+
+- Updated dependencies [690ad74]
+  - @tour-kit/core@0.11.0
+
 ## 0.10.0
 
 ### Minor Changes

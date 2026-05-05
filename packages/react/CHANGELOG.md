@@ -1,5 +1,24 @@
 # @tour-kit/react
 
+## 0.11.0
+
+### Minor Changes
+
+- 690ad74: Wire i18n, audience, and `<MediaSlot>` into Tour steps:
+
+  - `TourStep` accepts `LocalizedText` titles/content that resolve through `<LocaleProvider>` + `useT`.
+  - `TourStep.audience` accepts `AudienceCondition[]` or `{ segment: 'name' }` (consumes `<SegmentationProvider>`).
+  - Optional `media` slot renders `<MediaSlot>` inside the step card.
+
+  All additions are additive — no breaking changes.
+
+### Patch Changes
+
+- Updated dependencies [690ad74]
+- Updated dependencies [690ad74]
+  - @tour-kit/core@0.11.0
+  - @tour-kit/media@0.11.0
+
 ## 0.10.0
 
 ### Minor Changes
