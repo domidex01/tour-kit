@@ -61,6 +61,25 @@ function App() {
 }
 ```
 
+## i18n & interpolation
+
+All user-facing strings in `@tour-kit/react` accept the `{{var | fallback}}` interpolation grammar from `@tour-kit/core`. Wrap your tree in `<LocaleProvider>` and every step title, content, and button label resolves automatically.
+
+```tsx
+import { LocaleProvider } from '@tour-kit/core'
+import { Tour, TourStep, TourKitProvider } from '@tour-kit/react'
+
+<LocaleProvider locale="en" messages={{ welcome: 'Hi {{user.name | there}}' }}>
+  <TourKitProvider>
+    <Tour id="welcome-tour">
+      <TourStep id="s1" target="#cta" title={{ key: 'welcome' }} />
+    </Tour>
+  </TourKitProvider>
+</LocaleProvider>
+```
+
+> Full guide: https://usertourkit.com/docs/guides/i18n
+
 ## Why @tour-kit/react?
 
 | | @tour-kit/react | React Joyride | Reactour | Intro.js React | Shepherd.js |

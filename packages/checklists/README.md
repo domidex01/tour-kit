@@ -91,6 +91,29 @@ function ProfileForm() {
 }
 ```
 
+## i18n & interpolation
+
+All user-facing strings in `@tour-kit/checklists` accept the `{{var | fallback}}` interpolation grammar from `@tour-kit/core`. Wrap your tree in `<LocaleProvider>` and every task title and description resolves automatically.
+
+```tsx
+import { LocaleProvider } from '@tour-kit/core'
+import { ChecklistProvider, ChecklistTask, createTask } from '@tour-kit/checklists'
+
+const greet = createTask({
+  id: 'greet',
+  title: { key: 'task.greet' },
+  description: 'Welcome {{user.name | aboard}}!',
+})
+
+<LocaleProvider locale="en" messages={{ 'task.greet': 'Say hi to {{user.name | the team}}' }}>
+  <ChecklistProvider checklists={[{ id: 'onboarding', tasks: [greet] }]}>
+    <ChecklistTask taskId="greet" />
+  </ChecklistProvider>
+</LocaleProvider>
+```
+
+> Full guide: https://usertourkit.com/docs/guides/i18n
+
 ## Headless variant
 
 ```tsx

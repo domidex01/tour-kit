@@ -1,3 +1,4 @@
+import { useResolveLocalizedText } from '@tour-kit/core'
 import {
   type AnswerValue,
   type CESResult,
@@ -183,6 +184,7 @@ function SurveyCard({
   const { state, config, show, answer, complete, reset, canShow, nextQuestion } =
     useSurvey(surveyId)
   const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null)
+  const resolveText = useResolveLocalizedText()
 
   if (!config || !state) return null
 
@@ -249,12 +251,12 @@ function SurveyCard({
           {currentQuestion.type === 'rating' && (
             <QuestionRating
               id={currentQuestion.id}
-              label={currentQuestion.text}
+              label={resolveText(currentQuestion.text)}
               isRequired={currentQuestion.required}
               min={currentQuestion.ratingScale?.min ?? 0}
               max={currentQuestion.ratingScale?.max ?? 10}
-              lowLabel={currentQuestion.ratingScale?.labels?.min}
-              highLabel={currentQuestion.ratingScale?.labels?.max}
+              lowLabel={resolveText(currentQuestion.ratingScale?.labels?.min) || undefined}
+              highLabel={resolveText(currentQuestion.ratingScale?.labels?.max) || undefined}
               value={state.responses.get(currentQuestion.id) as number | undefined}
               onChange={(value: number) => answer(currentQuestion.id, value)}
             />
@@ -263,9 +265,9 @@ function SurveyCard({
           {(currentQuestion.type === 'text' || currentQuestion.type === 'textarea') && (
             <QuestionText
               id={currentQuestion.id}
-              label={currentQuestion.text}
+              label={resolveText(currentQuestion.text)}
               isRequired={currentQuestion.required}
-              placeholder={currentQuestion.placeholder}
+              placeholder={resolveText(currentQuestion.placeholder) || undefined}
               mode={currentQuestion.type === 'textarea' ? 'textarea' : 'text'}
               value={(state.responses.get(currentQuestion.id) as string) ?? ''}
               onChange={(value: string) => answer(currentQuestion.id, value)}
@@ -275,7 +277,7 @@ function SurveyCard({
           {currentQuestion.type === 'boolean' && (
             <QuestionBoolean
               id={currentQuestion.id}
-              label={currentQuestion.text}
+              label={resolveText(currentQuestion.text)}
               isRequired={currentQuestion.required}
               value={state.responses.get(currentQuestion.id) as boolean | undefined}
               onChange={(value: boolean) => answer(currentQuestion.id, value)}
@@ -285,7 +287,7 @@ function SurveyCard({
           {currentQuestion.type === 'single-select' && (
             <QuestionSelect
               id={currentQuestion.id}
-              label={currentQuestion.text}
+              label={resolveText(currentQuestion.text)}
               isRequired={currentQuestion.required}
               options={currentQuestion.options ?? []}
               value={state.responses.get(currentQuestion.id) as string | undefined}

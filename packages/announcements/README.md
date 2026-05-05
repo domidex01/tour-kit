@@ -63,6 +63,31 @@ function App() {
 
 Registered announcements that pass their eligibility checks **auto-show** on mount. Set `autoShow: false` on a config to trigger imperatively via `show(id)`.
 
+## i18n & interpolation
+
+All user-facing strings in `@tour-kit/announcements` accept the `{{var | fallback}}` interpolation grammar from `@tour-kit/core`. Wrap your tree in `<LocaleProvider>` and every announcement title and description resolves automatically.
+
+```tsx
+import { LocaleProvider } from '@tour-kit/core'
+import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements'
+
+<LocaleProvider locale="en" messages={{ 'welcome.title': 'Hi {{user.name | there}} — what is new' }}>
+  <AnnouncementsProvider
+    announcements={[{ id: 'welcome', variant: 'modal', title: { key: 'welcome.title' }, description: 'See the highlights below.' }]}
+  >
+    <AnnouncementModal id="welcome" />
+  </AnnouncementsProvider>
+</LocaleProvider>
+```
+
+> Full guide: https://usertourkit.com/docs/guides/i18n
+
+### Public changelog page
+
+`@tour-kit/announcements` also exports `<ChangelogPage>` (server-renderable, category filter, emoji reactions, media support) plus `serializeFeed()` for RSS 2.0 + JSON Feed 1.1 syndication. The page lives behind the `@tour-kit/announcements/changelog` subpath so toast/modal/banner-only consumers tree-shake out the renderer.
+
+> Full guide: https://usertourkit.com/docs/announcements/changelog
+
 ## Variants
 
 | Variant | When to use |

@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/media Context File
-Version: 0.9.0 | Generated: 2026-05-05
+Version: 0.10.0 | Generated: 2026-05-05
 Paste this into your LLM to get accurate answers about @tour-kit/media.
 =========================================================================
 
@@ -194,32 +194,34 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: MediaType
+Example 1: Quick Start
 
-    type MediaType =
-      | 'youtube'
-      | 'vimeo'
-      | 'loom'
-      | 'wistia'
-      | 'video'
-      | 'gif'
-      | 'lottie'
-      | 'image'
+    import { TourMedia } from '@tour-kit/media'
+    
+    export function WelcomeTour() {
+      return (
+        <TourMedia
+          src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          alt="Product walkthrough"
+        />
+      )
+    }
 
-Example 2: AspectRatio
-
-    type AspectRatio =
-      | '16/9'   // Standard widescreen
-      | '4/3'    // Classic TV
-      | '1/1'    // Square
-      | '9/16'   // Vertical/mobile
-      | '21/9'   // Ultra-wide
-      | 'auto'   // Preserve original
-
-Example 3: AspectRatio
+Example 2: Reduced Motion Support
 
     <TourMedia
-      src="video.mp4"
-      alt="Demo"
-      aspectRatio="16/9"
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      alt="Product walkthrough"
+      reducedMotionFallback="/static/thumbnail.jpg"
+    />
+
+Example 3: Caption Support
+
+    <TourMedia
+      src="/videos/demo.mp4"
+      alt="Feature demonstration"
+      captions={[
+        { src: '/captions/en.vtt', srcLang: 'en', label: 'English' },
+        { src: '/captions/es.vtt', srcLang: 'es', label: 'Español' }
+      ]}
     />

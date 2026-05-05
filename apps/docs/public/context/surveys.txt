@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/surveys Context File
-Version: 1.0.0 | Generated: 2026-05-05
+Version: 1.1.0 | Generated: 2026-05-05
 Paste this into your LLM to get accurate answers about @tour-kit/surveys.
 =========================================================================
 
@@ -285,60 +285,72 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: Usage Example
+Example 1: Quick Start
 
-    import type {
-      SurveyConfig,
-      QuestionConfig,
-      NPSResult,
-      SurveysProviderProps,
-    } from '@tour-kit/surveys';
-
-Example 2: SurveyConfig
-
-    interface SurveyConfig {
-      id: string;
-      type: SurveyType;
-      displayMode: DisplayMode;
-      priority?: SurveyPriority;
-      title?: string;
-      description?: string | ReactNode;
-      questions: QuestionConfig[];
-      frequency?: FrequencyRule;
-      schedule?: unknown;           // requires @tour-kit/scheduling
-      audience?: AudienceCondition[];
-      globalCooldownDays?: number;
-      samplingRate?: number;        // 0–1
-      maxSnoozeCount?: number;
-      snoozeDelayDays?: number;
-      maxPerSession?: number;
-      modalOptions?: ModalOptions;
-      slideoutOptions?: SlideoutOptions;
-      bannerOptions?: BannerOptions;
-      popoverOptions?: PopoverOptions;
-      metadata?: Record<string, unknown>;
-      onShow?: () => void;
-      onDismiss?: (reason: DismissalReason) => void;
-      onComplete?: (responses: Map<string, AnswerValue>) => void;
-      onAnswer?: (questionId: string, value: AnswerValue) => void;
+    import { SurveysProvider, SurveyModal, useSurvey } from '@tour-kit/surveys';
+    
+    const npsConfig = {
+      id: 'nps-q1',
+      type: 'nps',
+      displayMode: 'modal',
+      title: 'How likely are you to recommend us?',
+      questions: [
+        {
+          id: 'score',
+          type: 'rating',
+          text: 'On a scale of 0 to 10, how likely are you to recommend us to a friend or colleague?',
+          ratingScale: { min: 0, max: 10, labels: { min: 'Not at all likely', max: 'Extremely likely' } },
+        },
+      ],
+      onComplete: (responses) => {
+        console.log('NPS score:', responses.get('score'));
+      },
+    };
+    
+    function NPSTrigger() {
+      const survey = useSurvey('nps-q1');
+    
+      return (
+        <>
+          <SurveyModal surveyId="nps-q1" />
+          <button onClick={survey.show}>Give feedback</button>
+        </>
+      );
+    }
+    
+    export function App() {
+      return (
+        <SurveysProvider surveys={[npsConfig]}>
+          <NPSTrigger />
+        </SurveysProvider>
+      );
     }
 
-Example 3: SurveyState
+Example 2: Frequency rules
 
-    interface SurveyState {
-      id: string;
-      isActive: boolean;
-      isVisible: boolean;
-      isDismissed: boolean;
-      isSnoozed: boolean;
-      isCompleted: boolean;
-      viewCount: number;
-      lastViewedAt: Date | null;
-      dismissedAt: Date | null;
-      dismissalReason: DismissalReason | null;
-      completedAt: Date | null;
-      snoozeCount: number;
-      snoozeUntil: Date | null;
-      currentStep: number;
-      responses: Map<string, AnswerValue>;
+    frequency?: FrequencyRule
+    // 'once'                          — shows exactly once per user
+    // 'session'                       — once per session
+    // 'always'                        — every time show() is called (ignores cooldown)
+    // { type: 'times', count: 3 }     — show up to N times total
+    // { type: 'interval', days: 30 }  — show at most once every N days
+
+Example 3: Skip logic
+
+    {
+      id: 'reason',
+      type: 'single-select',
+      text: 'What is your main reason for leaving?',
+      options: [
+        { value: 'price', label: 'Price' },
+        { value: 'features', label: 'Missing features' },
+        { value: 'other', label: 'Other' },
+      ],
+      skipLogic: [
+        {
+          questionId: 'reason',
+          condition: (answer) => answer !== 'other',
+          skipTo: 'confirm',   // jump over the free-text follow-up
+        },
+      ],
     }

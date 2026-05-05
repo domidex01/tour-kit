@@ -1,0 +1,162 @@
+---
+title: Internationalization (i18n)
+description: >-
+  Translate every string in Tour Kit with LocaleProvider, useT(), and the
+  {{var | fallback}} interpolation grammar.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Tour Kit ships first-class i18n primitives in `@tour-kit/core`. Every UI package — `@tour-kit/react`, `@tour-kit/hints`, `@tour-kit/checklists`, `@tour-kit/surveys`, `@tour-kit/announcements` — consumes them automatically once `<LocaleProvider>` is mounted. There is nothing to install beyond `@tour-kit/core`.
+
+## Install
+
+```bash
+pnpm add @tour-kit/core @tour-kit/react
+```
+
+## Quick start
+
+Wrap your tree (or just the part that renders Tour Kit UI) in `<LocaleProvider>` and pass a flat `messages` map. Every user-facing string in Tour Kit then resolves through `useT()`.
+
+```tsx
+import { LocaleProvider } from '@tour-kit/core'
+import { TourKitProvider } from '@tour-kit/react'
+
+export default function App() {
+  return (
+    <LocaleProvider
+      locale="en"
+      messages={{
+        welcome: 'Hi {{user.name | there}}',
+        'tour.next': 'Next',
+        'tour.prev': 'Back',
+      }}
+    >
+      <TourKitProvider>
+        <YourApp />
+      </TourKitProvider>
+    </LocaleProvider>
+  )
+}
+```
+
+`{{user.name | there}}` is the canonical interpolation grammar. The fallback after the pipe renders when the key is missing, so localized strings never print `undefined`.
+
+| Vars at render time          | Output     |
+| ---------------------------- | ---------- |
+| `{ user: { name: 'Domi' } }` | `Hi Domi`  |
+| `{}` or `undefined`          | `Hi there` |
+
+## `useT()` in a custom step
+
+Inside any component rendered under `<LocaleProvider>`, call `useT()` to translate at render time:
+
+```tsx
+import { useT } from '@tour-kit/core'
+
+function WelcomeStep() {
+  const t = useT()
+  return <h1>{t('welcome', { user: { name: 'Domi' } })}</h1>
+}
+```
+
+`t(key, vars?)` looks up `messages[key]`, runs ICU-lite plural resolution, then runs `{{var | fallback}}` interpolation. Missing keys return the key itself in dev (visible breadcrumb) and an empty string in production.
+
+## Standalone `interpolate()`
+
+For places without a provider in scope (server components, build-time string assembly, tests), call `interpolate()` directly:
+
+```ts
+import { interpolate } from '@tour-kit/core'
+
+interpolate('Hi {{name | guest}}', { name: 'Domi' })
+// → 'Hi Domi'
+
+interpolate('Hi {{name | guest}}', {})
+// → 'Hi guest'
+```
+
+`interpolate` accepts an `InterpolateOptions` argument (`defaultFallback`, `warnOnMissing`) for tighter control.
+
+## Pluralization
+
+Tour Kit ships an ICU subset (`{count, plural, …}`) backed by `Intl.PluralRules`. `=N` exact matches take precedence over plural categories; `#` inside the chosen branch is replaced with the count.
+
+```ts
+import { interpolate } from '@tour-kit/core'
+import { resolvePlural } from '@tour-kit/core'
+
+const template = '{count, plural, =0 {no tasks} one {# task} other {# tasks}}'
+
+resolvePlural(template, 'en', { count: 0 })  // → 'no tasks'
+resolvePlural(template, 'en', { count: 1 })  // → '1 task'
+resolvePlural(template, 'en', { count: 7 })  // → '7 tasks'
+```
+
+When you call `useT()` the resolver runs first, then `{{var}}` interpolation. You can mix both in one template:
+
+```ts
+'You have {count, plural, one {# task left} other {# tasks left}} for {{user.name | the team}}'
+```
+
+## Adapter mode (delegate to `next-intl` / `react-intl`)
+
+`<LocaleProvider>` accepts an optional `t` prop. When supplied, Tour Kit's `useT()` delegates to it verbatim, bypassing the built-in `messages` lookup. Use this to plug in a host-app translator:
+
+```tsx
+import { LocaleProvider } from '@tour-kit/core'
+import { useTranslations } from 'next-intl'
+
+function TourKitI18nBridge({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('tourkit')
+  return (
+    <LocaleProvider locale="en" t={(key, vars) => t(key, vars)}>
+      {children}
+    </LocaleProvider>
+  )
+}
+```
+
+The same pattern works for `react-intl` (`useIntl().formatMessage`) or any host translator that exposes a `(key, vars) => string` shape.
+
+## Cross-package usage
+
+Once `<LocaleProvider>` is mounted, every consumer package picks it up automatically:
+
+- **`@tour-kit/react`** — `<TourStep title>`, `content`, button labels
+- **`@tour-kit/hints`** — hint titles and bodies
+- **`@tour-kit/checklists`** — task `title`/`description`
+- **`@tour-kit/surveys`** — question stems and answer options
+- **`@tour-kit/announcements`** — announcement title/description, changelog entries, `<ChangelogPage>` chrome
+
+Any string field that accepts `LocalizedText` can be either a literal string with `{{var | fallback}}` tokens or `{ key: 'message.id' }` for full message-catalog routing.
+
+## RTL support
+
+`<LocaleProvider>` derives `direction` from the locale automatically — `ar`, `he`, `fa`, `ur` resolve to `rtl`. Pass `direction="rtl"` explicitly to override. Tour Kit components honor the resolved direction (overlay, focus order, arrow placement) without any extra wiring.
+
+## Testing your strings
+
+Tests don't need a real provider — call `interpolate` directly:
+
+```ts
+import { describe, expect, it } from 'vitest'
+import { interpolate } from '@tour-kit/core'
+
+describe('welcome string', () => {
+  it('renders the name', () => {
+    expect(interpolate('Hi {{user.name | there}}', { user: { name: 'Domi' } })).toBe('Hi Domi')
+  })
+
+  it('falls back when the var is missing', () => {
+    expect(interpolate('Hi {{user.name | there}}', {})).toBe('Hi there')
+  })
+})
+```
+
+For provider-scoped tests, render under `<LocaleProvider>` with a stub `messages` map — no network, no async setup.
+
+<Callout type="info" title="One provider, one tree">
+Mount `<LocaleProvider>` once at or above the deepest Tour Kit consumer. Multiple nested providers compose (innermost wins per key) but add useless re-render cost — prefer a single root-level provider.
+</Callout>

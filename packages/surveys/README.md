@@ -71,6 +71,31 @@ function App() {
 }
 ```
 
+## i18n & interpolation
+
+All user-facing strings in `@tour-kit/surveys` accept the `{{var | fallback}}` interpolation grammar from `@tour-kit/core`. Wrap your tree in `<LocaleProvider>` and every survey title and question label resolves automatically.
+
+```tsx
+import { LocaleProvider } from '@tour-kit/core'
+import { SurveysProvider, SurveyModal } from '@tour-kit/surveys'
+
+const survey = {
+  id: 'nps-q4',
+  type: 'nps',
+  displayMode: 'modal',
+  title: { key: 'nps.title' },
+  questions: [{ id: 'score', type: 'rating', label: 'Hi {{user.name | there}} — score 0–10', scale: { min: 0, max: 10 } }],
+}
+
+<LocaleProvider locale="en" messages={{ 'nps.title': 'How likely is {{user.name | a friend}} to recommend us?' }}>
+  <SurveysProvider surveys={[survey]}>
+    <SurveyModal id="nps-q4" />
+  </SurveysProvider>
+</LocaleProvider>
+```
+
+> Full guide: https://usertourkit.com/docs/guides/i18n
+
 ## Survey types
 
 | Type | Scoring |
