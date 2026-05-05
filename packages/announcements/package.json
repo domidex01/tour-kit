@@ -69,6 +69,16 @@
         "default": "./dist/tailwind/index.cjs"
       }
     },
+    "./changelog": {
+      "import": {
+        "types": "./dist/changelog/index.d.ts",
+        "default": "./dist/changelog/index.js"
+      },
+      "require": {
+        "types": "./dist/changelog/index.d.cts",
+        "default": "./dist/changelog/index.cjs"
+      }
+    },
     "./styles/variables.css": "./src/styles/variables.css",
     "./styles.css": "./dist/styles/variables.css",
     "./package.json": "./package.json"
@@ -117,6 +127,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^4.5.2",

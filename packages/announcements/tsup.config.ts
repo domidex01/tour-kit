@@ -7,6 +7,7 @@ export default defineConfig({
     index: 'src/index.ts',
     headless: 'src/headless.ts',
     'tailwind/index': 'src/tailwind/index.ts',
+    'changelog/index': 'src/changelog/index.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,

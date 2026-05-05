@@ -177,8 +177,20 @@ export { isSegmentAudience } from './types/announcement'
 
 // Pure RSS 2.0 + JSON Feed 1.1 serializer. Zero runtime deps; barrel-isolated
 // under `./changelog` so toast-only consumers tree-shake out the feed code.
-export { serializeFeed } from './changelog'
-export type { ChangelogEntry, SerializeFeedOptions } from './changelog'
+// Explicit deep imports (NOT `export * from './changelog'`) keep the page UI
+// tree out of toast-only consumer bundles.
+export { serializeFeed } from './changelog/feed'
+export type { ChangelogEntry, SerializeFeedOptions } from './changelog/feed'
+
+// Phase 5b — `<ChangelogPage>` and friends are intentionally NOT re-exported
+// at the top level. They live behind the `@tour-kit/announcements/changelog`
+// subpath so toast/modal/banner-only consumers do not pay the bundle cost.
+// Type-only re-exports (no runtime cost) are still convenient for consumers
+// who pass entries through their own type-checked code path.
+export type { ChangelogPageProps } from './changelog/changelog-page'
+export type { ChangelogEntryProps } from './changelog/changelog-entry'
+export type { ChangelogFilterProps } from './changelog/changelog-filter'
+export type { Reaction, ReactionsProps } from './changelog/reactions'
 
 export type {
   // Context types

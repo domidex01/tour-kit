@@ -1,10 +1,142 @@
 ---
-title: Changelog Feed
+title: Changelog
 description: >-
-  Serialize a list of announcements as RSS 2.0 + JSON Feed 1.1 with serializeFeed
+  Render a public changelog page in React and serialize the same entries as RSS 2.0 + JSON Feed 1.1.
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
+
+`@tour-kit/announcements` ships two changelog primitives that share the same `ChangelogEntry` shape:
+
+- **`<ChangelogPage>`** — a drop-in React page (category filter + emoji reactions + media support) you mount on any route.
+- **`serializeFeed`** — a pure RSS 2.0 + JSON Feed 1.1 serializer for the same entries.
+
+Use them together: render the entries to a public web page with `<ChangelogPage>`, syndicate the same list as an RSS feed with `serializeFeed`. The renderer lives behind the `@tour-kit/announcements/changelog` subpath, so toast/modal/banner-only consumers do not pay the bundle cost.
+
+---
+
+## `<ChangelogPage>` — render
+
+Mount it anywhere. No router context required.
+
+```tsx
+import { ChangelogPage } from '@tour-kit/announcements/changelog';
+import type { ChangelogEntry } from '@tour-kit/announcements';
+
+const entries: ChangelogEntry[] = [
+  {
+    id: 'evt-2026-05-04',
+    variant: 'modal',
+    title: 'Bulk export now available',
+    description: 'Export your data to CSV or PDF directly from the dashboard.',
+    permalink: 'https://acme.com/changelog/bulk-export',
+    publishedAt: new Date('2026-05-04T00:00:00Z'),
+    category: 'Features',
+  },
+  // ...
+];
+
+export default function ChangelogRoute() {
+  return <ChangelogPage entries={entries} />;
+}
+```
+
+The component derives its category sidebar from `entry.category`, prepends an "All" reset button, and supports `ArrowDown`/`ArrowUp` keyboard navigation with a roving tabindex.
+
+### Reactions
+
+Pass `onReact` to capture clicks on the per-entry emoji row (👍 😐 👎). The component holds **no reaction state** — wire the callback to your own backend or analytics:
+
+```tsx
+<ChangelogPage
+  entries={entries}
+  onReact={(entryId, emoji) => {
+    fetch('/api/changelog-reaction', {
+      method: 'POST',
+      body: JSON.stringify({ entryId, emoji }),
+    });
+  }}
+/>
+```
+
+### Media
+
+If an entry carries `media` (any URL `<MediaSlot>` understands — YouTube, Vimeo, Loom, Wistia, native video, GIF, Lottie), it renders above the entry body. See the [media docs](/docs/media) for supported sources.
+
+### Next.js URL-sync recipe (controlled mode)
+
+Omitting `category` / `onCategoryChange` runs the page in uncontrolled mode (internal `useState`). Pass both to lift state into your URL:
+
+```tsx
+'use client';
+
+import { ChangelogPage } from '@tour-kit/announcements/changelog';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import type { ChangelogEntry } from '@tour-kit/announcements';
+
+export function MyChangelog({ entries }: { entries: ChangelogEntry[] }) {
+  const sp = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const category = sp.get('category');
+  const onCategoryChange = (next: string | null) => {
+    const params = new URLSearchParams(sp);
+    if (next) params.set('category', next);
+    else params.delete('category');
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
+  return (
+    <ChangelogPage
+      entries={entries}
+      category={category}
+      onCategoryChange={onCategoryChange}
+    />
+  );
+}
+```
+
+The same pattern works with TanStack Router (`useSearch` + `useNavigate`) or Remix loaders — anywhere you can read and write a URL parameter.
+
+### Internationalization
+
+The page reads from `<LocaleProvider>` (Phase 1 i18n primitives). Default English fallbacks ship in the component, so it works without any provider mounted. Override per-key:
+
+| Key | English fallback |
+|---|---|
+| `changelog.empty` | `"No changelog entries yet"` |
+| `changelog.filter.all` | `"All"` |
+| `changelog.filter.label` | `"Filter by category"` |
+| `changelog.reactions.label` | `"Reactions"` |
+| `changelog.reaction.thumbs_up` | `"Thumbs up"` |
+| `changelog.reaction.neutral` | `"Neutral"` |
+| `changelog.reaction.thumbs_down` | `"Thumbs down"` |
+
+```tsx
+import { LocaleProvider } from '@tour-kit/core';
+
+<LocaleProvider
+  locale="es"
+  messages={{
+    'changelog.empty': 'Aún no hay novedades',
+    'changelog.filter.all': 'Todas',
+    'changelog.reaction.thumbs_up': 'Pulgar arriba',
+  }}
+>
+  <ChangelogPage entries={entries} />
+</LocaleProvider>
+```
+
+RTL locales (`ar`, `he`, `fa`, `ur`) automatically apply `dir="rtl"` to the page root.
+
+<Callout type="info" title="Subpath import">
+The page lives behind `@tour-kit/announcements/changelog` so toast/modal/banner-only consumers tree-shake out the renderer. Importing `<ChangelogPage>` from `@tour-kit/announcements` will not work — use the subpath.
+</Callout>
+
+---
+
+## `serializeFeed` — syndicate
 
 `serializeFeed` produces both an RSS 2.0 XML string and a JSON Feed 1.1 string from a list of `ChangelogEntry`s. The output is suitable for serving from `app/changelog/rss.xml/route.ts` and `app/changelog/feed.json/route.ts` in Next.js, or any other framework that returns raw `Response` bodies.
 
