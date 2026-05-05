@@ -1,0 +1,44 @@
+/**
+ * XML entity-escape utilities for the changelog feed serializer.
+ *
+ * The functions here are NOT exported from the package's public barrel —
+ * they are an internal correctness primitive of `serializeFeed`. Consumers
+ * should never call `escapeXml` directly.
+ */
+
+const XML_ENTITY = new Map<string, string>([
+  ['&', '&amp;'],
+  ['<', '&lt;'],
+  ['>', '&gt;'],
+  ['"', '&quot;'],
+  ["'", '&apos;'],
+])
+
+// Disallowed XML 1.0 control chars: U+0000-U+001F EXCEPT \t (U+0009),
+// \n (U+000A), \r (U+000D). Biome's noControlCharactersInRegex rule
+// requires Unicode escape sequences here rather than literal bytes.
+// biome-ignore lint/suspicious/noControlCharactersInRegex: XML 1.0 spec requires stripping these control chars
+const CONTROL_CHARS_RE = /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g
+const XML_ENTITY_RE = /[&<>"']/g
+const CDATA_TERMINATOR_RE = /]]>/g
+
+/**
+ * Escape a string for safe embedding in XML element content OR attribute values.
+ *
+ * Pipeline (order matters):
+ *   1. Strip control chars U+0000-U+001F EXCEPT `\t` (U+0009), `\n` (U+000A),
+ *      `\r` (U+000D). Stripping first prevents emitting broken entities.
+ *   2. Replace the 5 XML special characters with named entities.
+ *   3. Defense-in-depth: escape any residual `]]>` sequence to `]]&gt;`. After
+ *      step 2 the literal `]]>` cannot exist (the `>` is gone), so this is a
+ *      no-op in practice — it stands as a safety net against future edits.
+ *
+ * NOT for use on JSON content — `JSON.stringify` handles JSON escaping
+ * natively and applying this would double-escape literal `<` characters.
+ */
+export function escapeXml(input: string): string {
+  return input
+    .replace(CONTROL_CHARS_RE, '')
+    .replace(XML_ENTITY_RE, (c) => XML_ENTITY.get(c) ?? c)
+    .replace(CDATA_TERMINATOR_RE, ']]&gt;')
+}

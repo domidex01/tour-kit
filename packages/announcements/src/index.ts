@@ -171,6 +171,15 @@ export type {
 // Phase 3c — segment-audience type guard
 export { isSegmentAudience } from './types/announcement'
 
+// ============================================
+// CHANGELOG FEED (Phase 5a)
+// ============================================
+
+// Pure RSS 2.0 + JSON Feed 1.1 serializer. Zero runtime deps; barrel-isolated
+// under `./changelog` so toast-only consumers tree-shake out the feed code.
+export { serializeFeed } from './changelog'
+export type { ChangelogEntry, SerializeFeedOptions } from './changelog'
+
 export type {
   // Context types
   AnnouncementsContextValue,

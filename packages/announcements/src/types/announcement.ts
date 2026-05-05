@@ -10,6 +10,11 @@ import type { MediaSlotType } from '@tour-kit/media'
 
 export type { AudienceCondition, AudienceProp, FrequencyRule }
 
+// Phase 5a — re-export changelog types for discoverability. Source-of-truth
+// definitions live in `../changelog/feed.ts`; this barrel keeps the
+// announcement type surface unified.
+export type { ChangelogEntry, SerializeFeedOptions } from '../changelog/feed'
+
 /**
  * Type guard narrowing `AudienceProp` to its segment-named branch. Mirrors the
  * private guard in `@tour-kit/hints` — keep both in lockstep when changing the
