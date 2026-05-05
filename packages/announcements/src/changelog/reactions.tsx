@@ -2,8 +2,6 @@
 
 import { cn, useT } from '@tour-kit/core'
 
-import { tFallback } from './i18n'
-
 export type Reaction = '👍' | '😐' | '👎'
 
 interface ReactionDef {
@@ -38,13 +36,13 @@ export function Reactions({ entryId, onReact, className }: ReactionsProps) {
     <div
       className={cn('tk-reactions', className)}
       role="group"
-      aria-label={tFallback(t, 'changelog.reactions.label', 'Reactions')}
+      aria-label={resolve(t, 'changelog.reactions.label', 'Reactions')}
     >
       {REACTIONS.map(({ emoji, key, fallback }) => (
         <button
           key={emoji}
           type="button"
-          aria-label={tFallback(t, key, fallback)}
+          aria-label={resolve(t, key, fallback)}
           onClick={() => onReact?.(entryId, emoji)}
           className={cn('tk-reactions__button', 'focus-visible:ring-2 focus-visible:ring-offset-2')}
         >
@@ -53,4 +51,18 @@ export function Reactions({ entryId, onReact, className }: ReactionsProps) {
       ))}
     </div>
   )
+}
+
+/**
+ * `useT()` returns the key itself (dev) or `''` (prod) when a message is
+ * missing. Fall back to the supplied English string in either case so the
+ * UI is meaningful without a `LocaleProvider`.
+ */
+function resolve(
+  t: (key: string, vars?: Record<string, unknown>) => string,
+  key: string,
+  fallback: string
+): string {
+  const value = t(key)
+  return value === '' || value === key ? fallback : value
 }

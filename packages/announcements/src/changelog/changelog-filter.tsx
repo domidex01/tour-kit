@@ -3,8 +3,6 @@
 import { cn, useT } from '@tour-kit/core'
 import * as React from 'react'
 
-import { tFallback } from './i18n'
-
 export interface ChangelogFilterProps {
   /** Distinct categories derived from the entry list (no "All" sentinel — the filter prepends it). */
   categories: string[]
@@ -27,8 +25,8 @@ export function ChangelogFilter({
   className,
 }: ChangelogFilterProps) {
   const t = useT()
-  const allLabel = tFallback(t, 'changelog.filter.all', 'All')
-  const navLabel = tFallback(t, 'changelog.filter.label', 'Filter by category')
+  const allLabel = resolveT(t, 'changelog.filter.all', 'All')
+  const navLabel = resolveT(t, 'changelog.filter.label', 'Filter by category')
   const items: Array<string | null> = React.useMemo(() => [null, ...categories], [categories])
   const itemsRef = React.useRef<Array<HTMLButtonElement | null>>([])
 
@@ -74,4 +72,13 @@ export function ChangelogFilter({
       </ul>
     </nav>
   )
+}
+
+function resolveT(
+  t: (key: string, vars?: Record<string, unknown>) => string,
+  key: string,
+  fallback: string
+): string {
+  const value = t(key)
+  return value === '' || value === key ? fallback : value
 }

@@ -329,73 +329,66 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: AnnouncementConfig
+Example 1: `<ChangelogPage>` — render
 
-    interface AnnouncementConfig<TMetadata = any> {
-      // Required
-      id: string;
-      variant: AnnouncementVariant;
+    import { ChangelogPage } from '@tour-kit/announcements/changelog';
+    import type { ChangelogEntry } from '@tour-kit/announcements';
     
-      // Content
-      title?: string;
-      description?: string | ReactNode;
-      media?: AnnouncementMedia;
+    const entries: ChangelogEntry[] = [
+      {
+        id: 'evt-2026-05-04',
+        variant: 'modal',
+        title: 'Bulk export now available',
+        description: 'Export your data to CSV or PDF directly from the dashboard.',
+        permalink: 'https://acme.com/changelog/bulk-export',
+        publishedAt: new Date('2026-05-04T00:00:00Z'),
+        category: 'Features',
+      },
+      // ...
+    ];
     
-      // Actions
-      primaryAction?: AnnouncementAction;
-      secondaryAction?: AnnouncementAction;
-    
-      // Behavior
-      priority?: AnnouncementPriority;
-      frequency?: FrequencyRule;
-      audience?: AudienceCondition[];
-    
-      // Variant Options
-      modalOptions?: ModalOptions;
-      slideoutOptions?: SlideoutOptions;
-      bannerOptions?: BannerOptions;
-      toastOptions?: ToastOptions;
-      spotlightOptions?: SpotlightOptions;
-    
-      // Callbacks
-      onShow?: () => void;
-      onDismiss?: (reason: DismissalReason) => void;
-      onComplete?: () => void;
-    
-      // Custom data
-      metadata?: TMetadata;
+    export default function ChangelogRoute() {
+      return <ChangelogPage entries={entries} />;
     }
 
-Example 2: AnnouncementMedia
+Example 2: Reactions
 
-    interface AnnouncementMedia {
-      type: 'image' | 'video' | 'custom';
-      src?: string;
-      alt?: string;
-      poster?: string;        // For videos
-      autoPlay?: boolean;     // For videos
-      component?: ReactNode;  // For custom
-    }
+    <ChangelogPage
+      entries={entries}
+      onReact={(entryId, emoji) => {
+        fetch('/api/changelog-reaction', {
+          method: 'POST',
+          body: JSON.stringify({ entryId, emoji }),
+        });
+      }}
+    />
 
-Example 3: AnnouncementMedia
+Example 3: Next.js URL-sync recipe (controlled mode)
 
-    // Image
-    media: {
-      type: 'image',
-      src: '/feature.png',
-      alt: 'New feature screenshot',
-    }
+    'use client';
     
-    // Video
-    media: {
-      type: 'video',
-      src: '/demo.mp4',
-      poster: '/demo-poster.jpg',
-      autoPlay: true,
-    }
+    import { ChangelogPage } from '@tour-kit/announcements/changelog';
+    import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+    import type { ChangelogEntry } from '@tour-kit/announcements';
     
-    // Custom component
-    media: {
-      type: 'custom',
-      component: <MyCustomMedia />,
+    export function MyChangelog({ entries }: { entries: ChangelogEntry[] }) {
+      const sp = useSearchParams();
+      const router = useRouter();
+      const pathname = usePathname();
+    
+      const category = sp.get('category');
+      const onCategoryChange = (next: string | null) => {
+        const params = new URLSearchParams(sp);
+        if (next) params.set('category', next);
+        else params.delete('category');
+        router.replace(`${pathname}?${params.toString()}`);
+      };
+    
+      return (
+        <ChangelogPage
+          entries={entries}
+          category={category}
+          onCategoryChange={onCategoryChange}
+        />
+      );
     }

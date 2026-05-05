@@ -6,7 +6,6 @@ import * as React from 'react'
 import { ChangelogEntry } from './changelog-entry'
 import { ChangelogFilter } from './changelog-filter'
 import type { ChangelogEntry as ChangelogEntryType } from './feed'
-import { tFallback } from './i18n'
 import type { Reaction } from './reactions'
 
 export interface ChangelogPageProps {
@@ -36,7 +35,7 @@ export function ChangelogPage({
   const { direction } = useLocale()
   const [internalCategory, setInternalCategory] = React.useState<string | null>(null)
   const isControlled = controlledCategory !== undefined
-  const selected = isControlled ? controlledCategory : internalCategory
+  const selected = isControlled ? (controlledCategory ?? null) : internalCategory
 
   const handleSelect = React.useCallback(
     (next: string | null) => {
@@ -56,7 +55,7 @@ export function ChangelogPage({
     [entries, selected]
   )
 
-  const emptyText = tFallback(t, 'changelog.empty', 'No changelog entries yet')
+  const emptyText = resolveT(t, 'changelog.empty', 'No changelog entries yet')
 
   return (
     <div dir={direction ?? 'ltr'} className={cn('tk-changelog-page', className)}>
@@ -74,4 +73,13 @@ export function ChangelogPage({
       )}
     </div>
   )
+}
+
+function resolveT(
+  t: (key: string, vars?: Record<string, unknown>) => string,
+  key: string,
+  fallback: string
+): string {
+  const value = t(key)
+  return value === '' || value === key ? fallback : value
 }

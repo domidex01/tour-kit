@@ -2,15 +2,12 @@ import { vi } from 'vitest'
 import type { ChangelogEntry } from './feed'
 
 /**
- * Mocks `matchMedia` so the `motion-safe:` Tailwind utility evaluates
+ * Mocks `window.matchMedia` so the `motion-safe:` Tailwind utility evaluates
  * deterministically. Per CLAUDE.md cross-package contract, motion-safe gates
  * on `@media (prefers-reduced-motion: no-preference)` — when `reduce: true`,
  * the utility does NOT apply.
  *
- * Pair with `afterEach(() => vi.unstubAllGlobals())` so the stub is restored
- * after each test. In jsdom `globalThis.matchMedia === window.matchMedia`,
- * so the single `vi.stubGlobal` covers both access paths and is the only
- * call vi tracks for cleanup.
+ * Use `vi.unstubAllGlobals()` in an afterEach to restore.
  */
 export function mockReducedMotion(reduce: boolean): void {
   vi.stubGlobal(
@@ -26,6 +23,21 @@ export function mockReducedMotion(reduce: boolean): void {
       removeListener: vi.fn(),
     }))
   )
+  // Also patch the Window prototype path the SSR-safe hook reads on first render.
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    configurable: true,
+    value: (query: string) => ({
+      matches: reduce && query.includes('reduce'),
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+      addListener: () => {},
+      removeListener: () => {},
+    }),
+  })
 }
 
 /**
