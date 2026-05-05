@@ -1,9 +1,9 @@
-import { LocaleProvider } from '@tour-kit/core'
 import { render } from '@testing-library/react'
+import { LocaleProvider } from '@tour-kit/core'
 import { describe, expect, it } from 'vitest'
 
-import { ChangelogPage } from './changelog-page'
 import { MOCK_ENTRIES } from './__test-helpers__'
+import { ChangelogPage } from './changelog-page'
 
 describe('<ChangelogPage> RTL', () => {
   it('applies dir="rtl" when wrapped in <LocaleProvider locale="ar">', () => {

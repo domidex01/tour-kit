@@ -44,10 +44,7 @@ export function Reactions({ entryId, onReact, className }: ReactionsProps) {
           type="button"
           aria-label={resolve(t, key, fallback)}
           onClick={() => onReact?.(entryId, emoji)}
-          className={cn(
-            'tk-reactions__button',
-            'focus-visible:ring-2 focus-visible:ring-offset-2'
-          )}
+          className={cn('tk-reactions__button', 'focus-visible:ring-2 focus-visible:ring-offset-2')}
         >
           <span aria-hidden="true">{emoji}</span>
         </button>

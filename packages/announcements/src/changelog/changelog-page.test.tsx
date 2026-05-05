@@ -1,10 +1,10 @@
-import { LocaleProvider } from '@tour-kit/core'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { LocaleProvider } from '@tour-kit/core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { ChangelogPage } from './changelog-page'
 import { MOCK_ENTRIES, mockReducedMotion } from './__test-helpers__'
+import { ChangelogPage } from './changelog-page'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -27,10 +27,7 @@ describe('<ChangelogPage>', () => {
 
     it('localizes the empty state via LocaleProvider', () => {
       render(
-        <LocaleProvider
-          locale="es"
-          messages={{ 'changelog.empty': 'Aún no hay novedades' }}
-        >
+        <LocaleProvider locale="es" messages={{ 'changelog.empty': 'Aún no hay novedades' }}>
           <ChangelogPage entries={[]} />
         </LocaleProvider>
       )
@@ -85,11 +82,7 @@ describe('<ChangelogPage>', () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
       render(
-        <ChangelogPage
-          entries={MOCK_ENTRIES}
-          category="Performance"
-          onCategoryChange={onChange}
-        />
+        <ChangelogPage entries={MOCK_ENTRIES} category="Performance" onCategoryChange={onChange} />
       )
 
       await user.click(screen.getByRole('button', { name: 'Bugfixes' }))
@@ -106,11 +99,7 @@ describe('<ChangelogPage>', () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
       render(
-        <ChangelogPage
-          entries={MOCK_ENTRIES}
-          category="Performance"
-          onCategoryChange={onChange}
-        />
+        <ChangelogPage entries={MOCK_ENTRIES} category="Performance" onCategoryChange={onChange} />
       )
       await user.click(screen.getByRole('button', { name: 'All' }))
       expect(onChange).toHaveBeenCalledWith(null)
@@ -140,13 +129,7 @@ describe('<ChangelogPage>', () => {
     it('Tab → ArrowDown → Enter cycles and activates filter buttons', async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
-      render(
-        <ChangelogPage
-          entries={MOCK_ENTRIES}
-          category={null}
-          onCategoryChange={onChange}
-        />
-      )
+      render(<ChangelogPage entries={MOCK_ENTRIES} category={null} onCategoryChange={onChange} />)
 
       await user.tab()
       expect(screen.getByRole('button', { name: 'All' })).toHaveFocus()

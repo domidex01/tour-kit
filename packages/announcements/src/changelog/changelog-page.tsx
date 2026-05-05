@@ -35,7 +35,7 @@ export function ChangelogPage({
   const { direction } = useLocale()
   const [internalCategory, setInternalCategory] = React.useState<string | null>(null)
   const isControlled = controlledCategory !== undefined
-  const selected = isControlled ? controlledCategory ?? null : internalCategory
+  const selected = isControlled ? (controlledCategory ?? null) : internalCategory
 
   const handleSelect = React.useCallback(
     (next: string | null) => {
@@ -46,8 +46,7 @@ export function ChangelogPage({
   )
 
   const categories = React.useMemo(
-    () =>
-      Array.from(new Set(entries.flatMap((e) => (e.category ? [e.category] : [])))),
+    () => Array.from(new Set(entries.flatMap((e) => (e.category ? [e.category] : [])))),
     [entries]
   )
 
@@ -59,19 +58,12 @@ export function ChangelogPage({
   const emptyText = resolveT(t, 'changelog.empty', 'No changelog entries yet')
 
   return (
-    <div
-      dir={direction ?? 'ltr'}
-      className={cn('tk-changelog-page', className)}
-    >
-      <ChangelogFilter
-        categories={categories}
-        selected={selected}
-        onSelect={handleSelect}
-      />
+    <div dir={direction ?? 'ltr'} className={cn('tk-changelog-page', className)}>
+      <ChangelogFilter categories={categories} selected={selected} onSelect={handleSelect} />
       {filtered.length === 0 ? (
         <p className="tk-changelog-page__empty">{emptyText}</p>
       ) : (
-        <ul role="list" className="tk-changelog-page__list">
+        <ul className="tk-changelog-page__list">
           {filtered.map((entry) => (
             <li key={entry.id}>
               <ChangelogEntry entry={entry} onReact={onReact} />

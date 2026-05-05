@@ -7,7 +7,7 @@ import * as React from 'react'
 import { toMediaSlotProps } from '../lib/media-slot-adapter'
 import { useResolvedText } from '../lib/use-resolved-text'
 import type { ChangelogEntry as ChangelogEntryType } from './feed'
-import { Reactions, type Reaction } from './reactions'
+import { type Reaction, Reactions } from './reactions'
 
 export interface ChangelogEntryProps {
   /** A serialized changelog entry. Inherits `AnnouncementConfig` so the same payload can drive a feed and an in-app modal. */
@@ -61,9 +61,7 @@ export const ChangelogEntry = React.forwardRef<HTMLElement, ChangelogEntryProps>
                 {formattedDate}
               </time>
             )}
-            {entry.category && (
-              <span className="tk-changelog-entry__badge">{entry.category}</span>
-            )}
+            {entry.category && <span className="tk-changelog-entry__badge">{entry.category}</span>}
           </div>
         </header>
         {resolvedDescription !== undefined && resolvedDescription !== null && (

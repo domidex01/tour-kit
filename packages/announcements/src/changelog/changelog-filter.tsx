@@ -43,7 +43,7 @@ export function ChangelogFilter({
 
   return (
     <nav className={cn('tk-changelog-filter', className)} aria-label={navLabel}>
-      <ul className="tk-changelog-filter__list" role="list">
+      <ul className="tk-changelog-filter__list">
         {items.map((cat, idx) => {
           const isSelected = cat === selected
           const label = cat ?? allLabel
