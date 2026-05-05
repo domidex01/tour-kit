@@ -1,10 +1,12 @@
 'use client'
 
 import { cn } from '@tour-kit/core'
+import { MediaSlot } from '@tour-kit/media'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import { useAnnouncement } from '../hooks/use-announcement'
+import { toMediaSlotProps } from '../lib/media-slot-adapter'
 import { useResolvedText } from '../lib/use-resolved-text'
 import type { DismissalReason, ToastOptions } from '../types/announcement'
 import { AnnouncementClose } from './announcement-close'
@@ -120,6 +122,11 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
           <div className="flex-1 space-y-1">
             {useConfig && config ? (
               <>
+                {config.media && (
+                  <div className="mb-2" data-slot="announcement-media">
+                    <MediaSlot {...toMediaSlotProps(config.media)} />
+                  </div>
+                )}
                 {resolvedTitle && <div className="font-medium">{resolvedTitle}</div>}
                 {resolvedDescription && (
                   <div className="text-sm opacity-90">{resolvedDescription}</div>

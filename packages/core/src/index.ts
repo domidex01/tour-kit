@@ -28,6 +28,7 @@ export type {
   TourStep,
   StepOptions,
   AudienceProp,
+  TourStepMedia,
   Tour,
   TourOptions,
   TourState,

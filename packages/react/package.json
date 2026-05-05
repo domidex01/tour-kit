@@ -112,6 +112,7 @@
   },
   "dependencies": {
     "@tour-kit/core": "workspace:*",
+    "@tour-kit/media": "workspace:*",
     "@floating-ui/react": "^0.27.19",
     "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.1"

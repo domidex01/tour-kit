@@ -1,4 +1,5 @@
 import type { LocalizedText } from '@tour-kit/core'
+import type { MediaSlotProps } from '@tour-kit/media'
 import type { ReactNode } from 'react'
 
 /**
@@ -63,6 +64,12 @@ export interface ChecklistTaskConfig {
   title: LocalizedText
   /** Task description — same `LocalizedText` shape as `title`. */
   description?: LocalizedText
+  /**
+   * Optional media (video / GIF / Lottie / image) rendered inside the task
+   * row, below the description. Auto-detects the embed provider via URL
+   * pattern matching.
+   */
+  media?: MediaSlotProps
   /** Icon name or component */
   icon?: string | ReactNode
   /** Action to perform when task is clicked */

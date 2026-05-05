@@ -1,7 +1,9 @@
 'use client'
 
 import { cn } from '@tour-kit/core'
+import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'
+import { toMediaSlotProps } from '../lib/media-slot-adapter'
 import type { AnnouncementMedia } from '../types/announcement'
 
 export interface AnnouncementContentProps
@@ -26,27 +28,8 @@ export const AnnouncementContent = React.forwardRef<HTMLDivElement, Announcement
     return (
       <div ref={ref} className={cn('space-y-4', className)} {...props}>
         {media && (
-          <div className="relative overflow-hidden rounded-lg">
-            {media.type === 'image' && (
-              <img
-                src={media.src}
-                alt={media.alt ?? ''}
-                className="w-full object-cover"
-                style={{ aspectRatio: media.aspectRatio ?? '16/9' }}
-              />
-            )}
-            {media.type === 'video' && (
-              <video
-                src={media.src}
-                poster={media.poster}
-                autoPlay={media.autoplay ?? false}
-                loop={media.loop ?? false}
-                muted={media.muted ?? true}
-                playsInline
-                className="w-full"
-                style={{ aspectRatio: media.aspectRatio ?? '16/9' }}
-              />
-            )}
+          <div className="relative overflow-hidden rounded-lg" data-slot="announcement-media">
+            <MediaSlot {...toMediaSlotProps(media)} />
           </div>
         )}
 

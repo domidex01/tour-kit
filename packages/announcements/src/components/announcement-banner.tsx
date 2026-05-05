@@ -1,9 +1,11 @@
 'use client'
 
 import { cn } from '@tour-kit/core'
+import { MediaSlot } from '@tour-kit/media'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { useAnnouncement } from '../hooks/use-announcement'
+import { toMediaSlotProps } from '../lib/media-slot-adapter'
 import { useResolvedText } from '../lib/use-resolved-text'
 import type { BannerOptions, DismissalReason } from '../types/announcement'
 import { AnnouncementClose } from './announcement-close'
@@ -88,16 +90,23 @@ export const AnnouncementBanner = React.forwardRef<HTMLDivElement, AnnouncementB
         )}
         {...props}
       >
-        <div className="flex-1">
-          {useConfig && config ? (
-            <>
-              {resolvedTitle && <span className="font-medium">{resolvedTitle}</span>}
-              {resolvedTitle && resolvedDescription && ' — '}
-              {resolvedDescription && <span>{resolvedDescription}</span>}
-            </>
-          ) : (
-            children
+        <div className="flex flex-1 items-center gap-3">
+          {useConfig && config?.media && (
+            <div className="shrink-0" data-slot="announcement-media" style={{ maxWidth: '8rem' }}>
+              <MediaSlot {...toMediaSlotProps(config.media)} />
+            </div>
           )}
+          <div className="flex-1">
+            {useConfig && config ? (
+              <>
+                {resolvedTitle && <span className="font-medium">{resolvedTitle}</span>}
+                {resolvedTitle && resolvedDescription && ' — '}
+                {resolvedDescription && <span>{resolvedDescription}</span>}
+              </>
+            ) : (
+              children
+            )}
+          </div>
         </div>
 
         {useConfig && config?.primaryAction && (

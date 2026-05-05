@@ -150,6 +150,11 @@ TYPES
        */
       audience?: AudienceProp
       /**
+       * Optional media (video / GIF / Lottie / image) rendered above the tooltip
+       * content. Auto-detects the embed provider via URL pattern matching.
+       */
+      media?: MediaSlotProps
+      /**
        * How often this hint can be re-shown. Phase 3a addition. Lifted from
        * `@tour-kit/announcements` to `@tour-kit/core` so hints + announcements
        * share one canonical type.

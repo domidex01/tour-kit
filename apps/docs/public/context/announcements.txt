@@ -68,6 +68,7 @@ Types:
     SpotlightOptions
     AnnouncementConfig
     AudienceCondition
+    AudienceProp
     AnnouncementStorageAdapter
     // Context types
   AnnouncementsContextValue
@@ -94,6 +95,8 @@ Hooks:
     useAnnouncement — Return type for useAnnouncement hook
     useAnnouncements — Filter options for announcements
     useAnnouncementQueue — Return type for useAnnouncementQueue hook
+    useFilteredAnnouncements — Filter a list of announcement configs by their `audience` prop. Mirror of
+    useResolvedText — Mirror of `@tour-kit/hints` and `@tour-kit/react`'s `useResolvedText`.
     useUILibrary
     useReducedMotion
 
@@ -133,6 +136,7 @@ Utilities:
     toastProgressVariants
     spotlightOverlayVariants
     spotlightContentVariants
+    evaluateAnnouncementAudience
     createComparator
     canShowByFrequency
     canShowAfterDismissal
@@ -140,6 +144,7 @@ Utilities:
     matchesAudience
     validateConditions
     cn
+    isSegmentAudience
 
 TYPES
 -----
@@ -161,9 +166,10 @@ TYPES
       onClose?: () => void
     }
 
-    export interface AnnouncementContentProps extends React.HTMLAttributes<HTMLDivElement> {
-      /** Title of the announcement */
-      title?: string
+    export interface AnnouncementContentProps
+      extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+      /** Title of the announcement (any ReactNode — strings render as <h2>, JSX passes through). */
+      title?: React.ReactNode
       /** Description/body content */
       description?: React.ReactNode
       /** Media to display */
@@ -272,7 +278,7 @@ TYPES
       useConfig?: boolean
     }
 
-    ... and 43 more types. See source for full definitions.
+    ... and 45 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -280,6 +286,9 @@ HOOKS
     useAnnouncement(id: string): UseAnnouncementReturn
     useAnnouncements(): UseAnnouncementsReturn
     useAnnouncementQueue(): UseAnnouncementQueueReturn
+    useFilteredAnnouncements(announcements: AnnouncementConfig[]): AnnouncementConfig[]
+    useResolvedText(value: React.ReactNode | LocalizedText | undefined,
+  vars?: Record<string, unknown>): React.ReactNode
     useUILibrary(...)
     useReducedMotion(...)
 

@@ -80,6 +80,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.1.0
         version: 4.1.2(vitest@4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(happy-dom@20.8.9)(jsdom@27.4.0)(vite@6.4.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)))
+      esbuild:
+        specifier: ^0.25.0
+        version: 0.25.12
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -758,6 +761,9 @@ importers:
       '@tour-kit/license':
         specifier: workspace:*
         version: link:../license
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       '@tour-kit/scheduling':
         specifier: workspace:*
         version: link:../scheduling
@@ -825,6 +831,9 @@ importers:
       '@tour-kit/license':
         specifier: workspace:*
         version: link:../license
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -935,6 +944,9 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1106,6 +1118,9 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1222,6 +1237,9 @@ importers:
       '@tour-kit/license':
         specifier: workspace:*
         version: link:../license
+      '@tour-kit/media':
+        specifier: workspace:*
+        version: link:../media
       '@tour-kit/scheduling':
         specifier: workspace:*
         version: link:../scheduling

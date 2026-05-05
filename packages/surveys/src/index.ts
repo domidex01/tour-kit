@@ -87,6 +87,9 @@ export type { QuestionSelectProps } from './components'
 export { QuestionBoolean } from './components'
 export type { QuestionBooleanProps } from './components'
 
+export { QuestionMedia } from './components'
+export type { QuestionMediaProps } from './components'
+
 export { SurveyProgress } from './components'
 export type { SurveyProgressProps } from './components'
 

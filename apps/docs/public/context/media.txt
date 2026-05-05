@@ -24,6 +24,7 @@ EXPORTS
 
 Types:
     TourMediaComponentProps
+    MediaSlotProps
     YouTubeEmbedProps
     VimeoEmbedProps
     LoomEmbedProps
@@ -62,6 +63,10 @@ Hooks:
 
 Components:
     TourMedia
+    MediaSlot
+    PATTERNS as MEDIA_SLOT_PATTERNS
+    MediaSlotType
+    ResolvedMediaSlotType
     YouTubeEmbed
     VimeoEmbed
     LoomEmbed
@@ -78,6 +83,7 @@ Components:
     UILibrary
 
 Utilities:
+    detectMediaSlotType
     mediaContainerVariants
     mediaOverlayVariants
     playButtonVariants
@@ -113,6 +119,49 @@ TYPES
       extends TourMediaProps,
         Omit<MediaContainerVariants, 'aspectRatio'> {}
 
+    export interface MediaSlotProps {
+      /** Media source URL (or path for native files). */
+      src: string
+      /** Explicit type override; defaults to `'auto'` (URL-pattern detection). */
+      type?: MediaSlotType
+      /** Poster / static fallback image. Honored by GIF and used as Lottie fallback under reduced motion. */
+      poster?: string
+      /** Display aspect ratio for the surrounding container. */
+      aspectRatio?: AspectRatio
+      /** Extra class name forwarded to the rendered embed. */
+      className?: string
+      /** Accessible alternative text. Required for `<img>` fallback; reused as iframe `title` when set. */
+      alt?: string
+      /** Optional explicit accessible iframe title (overrides `alt` for iframe embeds). */
+      title?: string
+      /** Auto-play the embedded media. Always suppressed under `prefers-reduced-motion: reduce`. */
+      autoplay?: boolean
+      /** Loop playback (where supported). */
+      loop?: boolean
+      /** Mute audio (required for autoplay in most browsers). */
+      muted?: boolean
+    }
+
+    /**
+     * URL pattern detection for the `<MediaSlot>` dispatcher.
+     *
+     * Pure module — zero React imports. The `PATTERNS` array order is the contract:
+     * most-specific URL patterns must precede broader ones.
+     */
+    
+    export type MediaSlotType =
+      | 'auto'
+      | 'youtube'
+      | 'vimeo'
+      | 'loom'
+      | 'wistia'
+      | 'video'
+      | 'gif'
+      | 'lottie'
+      | 'image'
+
+    export type ResolvedMediaSlotType = Exclude<MediaSlotType, 'auto'>
+
 HOOKS
 -----
     useMediaEvents(...)
@@ -123,6 +172,10 @@ HOOKS
 COMPONENTS
 ----------
     <TourMedia />
+    <MediaSlot />
+    <PATTERNS as MEDIA_SLOT_PATTERNS />
+    <MediaSlotType />
+    <ResolvedMediaSlotType />
     <YouTubeEmbed />
     <VimeoEmbed />
     <LoomEmbed />
