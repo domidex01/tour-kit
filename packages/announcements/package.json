@@ -121,6 +121,8 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^4.5.2",
     "@vitest/coverage-v8": "catalog:",
+    "ajv": "^8.20.0",
+    "fast-xml-parser": "^5.7.3",
     "jsdom": "catalog:",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

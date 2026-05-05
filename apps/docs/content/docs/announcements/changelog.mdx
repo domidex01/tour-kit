@@ -1,0 +1,162 @@
+---
+title: Changelog Feed
+description: >-
+  Serialize a list of announcements as RSS 2.0 + JSON Feed 1.1 with serializeFeed
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`serializeFeed` produces both an RSS 2.0 XML string and a JSON Feed 1.1 string from a list of `ChangelogEntry`s. The output is suitable for serving from `app/changelog/rss.xml/route.ts` and `app/changelog/feed.json/route.ts` in Next.js, or any other framework that returns raw `Response` bodies.
+
+The serializer is a pure function — no DOM, no network I/O, no runtime XML library dependency. Every consumer-supplied string is XML-entity-escaped before reaching the output. Invalid `publishedAt` inputs throw `TypeError` rather than emitting `Invalid Date` strings into a live feed.
+
+---
+
+## When to use
+
+Pair `serializeFeed` with a public changelog page when:
+
+- You publish new in-app announcements regularly and want subscribers to follow updates outside the app.
+- You want both formats live (RSS for traditional readers; JSON Feed for modern, JSON-first clients) without two implementations.
+- You already drive announcements through `<AnnouncementsProvider>` — the same `AnnouncementConfig` shape extends to `ChangelogEntry`.
+
+---
+
+## Define your entries
+
+```tsx
+import type { ChangelogEntry } from '@tour-kit/announcements';
+
+const entries: ChangelogEntry[] = [
+  {
+    id: 'evt-2026-05-04',
+    variant: 'modal',
+    title: 'Bulk export now available',
+    description: 'Export your data to CSV or PDF directly from the dashboard.',
+    permalink: 'https://acme.com/changelog/bulk-export',
+    publishedAt: new Date('2026-05-04T00:00:00Z'),
+    category: 'feature',
+  },
+  {
+    id: 'evt-2026-04-22',
+    variant: 'modal',
+    title: 'Fixed: dashboard filter persistence',
+    description: 'Filters now persist across page reloads.',
+    permalink: 'https://acme.com/changelog/filter-fix',
+    publishedAt: new Date('2026-04-22T00:00:00Z'),
+    category: 'fix',
+  },
+];
+```
+
+`ChangelogEntry` extends `AnnouncementConfig`, so any config that already drives an in-app announcement can be reused as a changelog entry by adding `publishedAt` and `permalink`.
+
+<Callout type="warn" title="GUID stability">
+The `id` field becomes the RSS `<guid isPermaLink="false">` and the JSON Feed item `id`. It must be **stable across publishes** — rotating an `id` republishes the item to subscribers. Generate it once (e.g. from your CMS slug or a UUID) and keep it forever.
+</Callout>
+
+---
+
+## Wire the routes (Next.js App Router)
+
+### RSS — `app/changelog/rss.xml/route.ts`
+
+```ts
+import { serializeFeed } from '@tour-kit/announcements';
+import { getChangelogEntries } from '@/lib/changelog';
+
+export async function GET() {
+  const entries = await getChangelogEntries();
+  const { rss } = serializeFeed(entries, {
+    title: 'Acme Changelog',
+    description: 'Product updates from Acme',
+    siteUrl: 'https://acme.com',
+    feedUrl: 'https://acme.com/changelog',
+  });
+  return new Response(rss, {
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=600',
+    },
+  });
+}
+```
+
+### JSON Feed — `app/changelog/feed.json/route.ts`
+
+```ts
+import { serializeFeed } from '@tour-kit/announcements';
+import { getChangelogEntries } from '@/lib/changelog';
+
+export async function GET() {
+  const entries = await getChangelogEntries();
+  const { jsonFeed } = serializeFeed(entries, {
+    title: 'Acme Changelog',
+    description: 'Product updates from Acme',
+    siteUrl: 'https://acme.com',
+    feedUrl: 'https://acme.com/changelog',
+  });
+  return new Response(jsonFeed, {
+    headers: {
+      'Content-Type': 'application/feed+json; charset=utf-8',
+      'Cache-Control': 'public, max-age=600',
+    },
+  });
+}
+```
+
+<Callout type="info" title="Headers">
+RSS readers expect `application/xml` (or `text/xml`) — modern feed validators accept both. JSON Feed 1.1 uses the dedicated `application/feed+json` MIME type. The `charset=utf-8` suffix matches the `<?xml version="1.0" encoding="UTF-8"?>` declaration in the RSS body.
+</Callout>
+
+---
+
+## Options
+
+```ts
+interface SerializeFeedOptions {
+  title: string;        // Channel/feed title
+  description: string;  // Channel/feed description
+  siteUrl: string;      // Home page URL (RSS <link>, JSON Feed home_page_url)
+  feedUrl: string;      // Base feed URL — .xml and .json appended automatically
+  language?: string;    // Defaults to 'en' if omitted
+  copyright?: string;   // Optional copyright statement (RSS only)
+}
+```
+
+Pass `feedUrl` *without* a file extension — the serializer appends `.xml` for the RSS `<atom:link rel="self">` and `.json` for the JSON Feed `feed_url`.
+
+---
+
+## Caching
+
+Most consumers cache aggressively. A 10-minute browser cache and a CDN-level revalidation works well for daily-or-slower changelog updates:
+
+```ts
+'Cache-Control': 'public, max-age=600, s-maxage=3600, stale-while-revalidate=86400'
+```
+
+If you publish more often, drop `max-age` to `60` and rely on `s-maxage` + `stale-while-revalidate` to keep the CDN warm.
+
+---
+
+## Validation
+
+Both outputs are spec-compliant:
+
+- **RSS 2.0** validates against `https://www.rssboard.org/rss-specification`. The serializer round-trips losslessly through `fast-xml-parser` for every emitted field (title, link, guid, pubDate, description, category, atom:link).
+- **JSON Feed 1.1** validates against the official schema. The `version` field is exactly `"https://jsonfeed.org/version/1.1"`.
+
+If you make changes to your entry shape and want to verify, paste the output into the [W3C Feed Validator](https://validator.w3.org/feed/) (RSS) or run it through the JSON Feed [validator](https://validator.jsonfeed.org/) (JSON Feed).
+
+---
+
+## Security
+
+Every consumer-supplied string flows through XML entity escaping before reaching the RSS body. The serializer ships with a 1000-case property-based fuzz test that asserts no raw `<`, `>`, `&`, or `]]>` ever appears in output.
+
+For JSON Feed, `JSON.stringify` handles escaping natively — manually escaping JSON content would double-escape and corrupt data.
+
+<Callout type="warn" title="Trust boundary">
+The serializer is XSS-safe for arbitrary input. But if your `getChangelogEntries()` reads from a CMS that allows raw HTML in the description, that HTML lands in the RSS body as **escaped text** (the entire string is shown, including the tags) — not rendered HTML. Use `contentHtml` for the JSON Feed `content_html` field if you want raw HTML, and accept that RSS will continue to entity-escape the description.
+</Callout>

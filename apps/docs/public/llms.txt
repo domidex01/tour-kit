@@ -1,4 +1,4 @@
-# userTourKit v0.9.0 — Generated 2026-05-04T15:55:00Z
+# userTourKit v0.9.0 — Generated 2026-05-05T02:52:17Z
 
 # userTourKit
 
@@ -121,6 +121,7 @@
 ## Announcements
 
 - [@tour-kit/announcements](https://usertourkit.com/docs/announcements): Product announcements with modal, toast, banner, slideout, and spotlight variants — priority queuing and audience targeting
+- [Changelog Feed](https://usertourkit.com/docs/announcements/changelog): Serialize a list of announcements as RSS 2.0 + JSON Feed 1.1 with serializeFeed
 - [Components](https://usertourkit.com/docs/announcements/components): Pre-styled announcement components: Modal, Toast, Banner, Slideout, and Spotlight with built-in close and action buttons
 - [AnnouncementBanner](https://usertourkit.com/docs/announcements/components/banner): AnnouncementBanner component: full-width persistent bar for system notices with dismiss button and action link support
 - [AnnouncementModal](https://usertourkit.com/docs/announcements/components/modal): AnnouncementModal component: centered dialog overlay for important product updates with title, body, and action buttons
