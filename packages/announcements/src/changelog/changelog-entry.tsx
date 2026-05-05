@@ -31,16 +31,17 @@ export const ChangelogEntry = React.forwardRef<HTMLElement, ChangelogEntryProps>
     const resolvedTitle = useResolvedText(entry.title)
     const resolvedDescription = useResolvedText(entry.description)
 
-    const formattedDate = React.useMemo(() => {
+    const date = React.useMemo(() => {
       const d = new Date(entry.publishedAt)
-      if (Number.isNaN(d.getTime())) return ''
-      return new Intl.DateTimeFormat(locale || 'en', { dateStyle: 'medium' }).format(d)
-    }, [entry.publishedAt, locale])
-
-    const isoDate = React.useMemo(() => {
-      const d = new Date(entry.publishedAt)
-      return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
+      return Number.isNaN(d.getTime()) ? null : d
     }, [entry.publishedAt])
+
+    const formattedDate = React.useMemo(
+      () =>
+        date ? new Intl.DateTimeFormat(locale || 'en', { dateStyle: 'medium' }).format(date) : '',
+      [date, locale]
+    )
+    const isoDate = date?.toISOString()
 
     return (
       <article
