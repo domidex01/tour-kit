@@ -1,5 +1,13 @@
 # @tour-kit/adoption
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies [cfc7da1]
+  - @tour-kit/core@0.10.0
+  - @tour-kit/analytics@0.9.1
+
 ## 1.0.0
 
 ### Minor Changes
