@@ -1,0 +1,21 @@
+{
+  "phase": 4,
+  "status": "pr_open",
+  "iterations": 1,
+  "pr_url": "https://github.com/domidex01/tour-kit/pull/33",
+  "branch": "feat/userguiding-phase-4-media",
+  "stack": "typescript",
+  "runner": "vitest",
+  "timestamp": "2026-05-04T16:10:00Z",
+  "summary": {
+    "media": "40 tests (detect-media-type + media-slot dispatch/reduced-motion/iframe-error)",
+    "react": "457 tests",
+    "hints": "265 tests",
+    "announcements": "173 tests",
+    "surveys": "218 tests",
+    "checklists": "330 tests",
+    "typecheck": "26/26 green",
+    "build": "11 packages compile",
+    "treeshake_gate": "PASS"
+  }
+}
