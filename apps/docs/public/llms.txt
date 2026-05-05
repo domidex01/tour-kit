@@ -1,4 +1,4 @@
-# userTourKit v0.10.0 — Generated 2026-05-05T04:23:20Z
+# userTourKit v0.10.0 — Generated 2026-05-05T05:43:26Z
 
 # userTourKit
 
@@ -232,11 +232,13 @@
 - [Branching Tours](https://usertourkit.com/docs/guides/branching): Create personalized tour paths with conditional branching, user choice flows, and dynamic step insertion based on state
 - [Checklists with Tours](https://usertourkit.com/docs/guides/checklists-tours): Link checklists to tours for guided onboarding — auto-complete tasks on tour finish and track user progress together
 - [Hidden Steps](https://usertourkit.com/docs/guides/hidden-steps): Run branching logic, trait forks, and completion gates without mounting any UI by marking a step as hidden.
+- [Internationalization (i18n)](https://usertourkit.com/docs/guides/i18n): Translate every string in Tour Kit with LocaleProvider, useT(), and the {{var | fallback}} interpolation grammar.
 - [Multi-tab Tours](https://usertourkit.com/docs/guides/multi-tab): Pause an active tour in tab B when the user starts the same flow in tab A — cross-tab coordination via BroadcastChannel.
 - [Next.js Integration](https://usertourkit.com/docs/guides/nextjs): Set up userTourKit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support
 - [Persistence](https://usertourkit.com/docs/guides/persistence): Save tour progress, checklist completion, and hint dismissals across browser sessions with pluggable storage adapters
 - [Reduced Motion](https://usertourkit.com/docs/guides/reduced-motion): How Tour Kit honors prefers-reduced-motion across announcements, surveys, hints, checklists, and the core tour runtime
 - [Router Integration](https://usertourkit.com/docs/guides/router-integration): Build multi-page tours with Next.js, React Router, or custom routers using route-aware step targeting and persistence
+- [Audience Segmentation](https://usertourkit.com/docs/guides/segmentation): Target tours, hints, surveys, and announcements at named user segments using SegmentationProvider, useSegment, and CSV-driven user lists.
 - [Theme Variations](https://usertourkit.com/docs/guides/theme-variations): Resolve tour themes by system colour scheme, explicit mode, route, or arbitrary trait predicates with `<ThemeProvider>` and `useThemeVariation`.
 - [Troubleshooting](https://usertourkit.com/docs/guides/troubleshooting): Diagnose and fix common userTourKit issues: missing targets, positioning glitches, hydration errors, and focus trap problems
 - [Unified Slot (Radix UI + Base UI)](https://usertourkit.com/docs/guides/unified-slot): Single composition primitive that supports both Radix UI's asChild element cloning and Base UI's render-prop style — covers UnifiedSlot, UILibrary, UILibraryProvider, and the RenderProp shape

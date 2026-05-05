@@ -67,6 +67,23 @@ import { HintsProvider, HintHotspot, HintTooltip } from '@tour-kit/hints'
 </HintsProvider>
 ```
 
+## i18n & interpolation
+
+All user-facing strings in `@tour-kit/hints` accept the `{{var | fallback}}` interpolation grammar from `@tour-kit/core`. Wrap your tree in `<LocaleProvider>` and every hint title and content body resolves automatically.
+
+```tsx
+import { LocaleProvider } from '@tour-kit/core'
+import { HintsProvider, Hint } from '@tour-kit/hints'
+
+<LocaleProvider locale="en" messages={{ 'hint.beta': 'Try {{feature.name | this beta feature}}!' }}>
+  <HintsProvider>
+    <Hint id="beta-hint" target="#beta-button" content={{ key: 'hint.beta' }} />
+  </HintsProvider>
+</LocaleProvider>
+```
+
+> Full guide: https://usertourkit.com/docs/guides/i18n
+
 ## Hints vs tours
 
 | | Hints | Tours |

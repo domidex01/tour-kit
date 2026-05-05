@@ -13,6 +13,8 @@
     "persistence",
     "multi-tab",
     "router-integration",
+    "i18n",
+    "segmentation",
     "base-ui",
     "theme-variations",
     "troubleshooting",

@@ -183,6 +183,19 @@ const entries: ChangelogEntry[] = [
 
 `ChangelogEntry` extends `AnnouncementConfig`, so any config that already drives an in-app announcement can be reused as a changelog entry by adding `publishedAt` and `permalink`.
 
+### Entry shape reference
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `id` | `string` | yes | Stable identifier — becomes the RSS `<guid isPermaLink="false">` and JSON Feed `id`. **Never rotate** an `id` after first publish — readers will treat it as a new item. |
+| `title` | `string \| LocalizedText` | yes | Entry headline. Accepts `{{var \| fallback}}` interpolation; resolves through the surrounding `<LocaleProvider>`. |
+| `description` | `string \| LocalizedText` | yes | One- or two-paragraph summary. Same i18n grammar as `title`. Inherits XML-entity escaping in the RSS body. |
+| `permalink` | `string` | yes | Absolute URL of the canonical changelog page for this entry. Used as the RSS `<link>` and JSON Feed `url`. |
+| `publishedAt` | `Date \| string` | yes | Publish timestamp. Accepts a `Date` or any `Date`-parseable string (ISO 8601 recommended). Invalid input causes `serializeFeed` to `throw TypeError`. |
+| `category` | `string` | no | Free-form tag — surfaces as `<category>` in RSS, `tags: [category]` in JSON Feed, and as a sidebar filter row in `<ChangelogPage>`. |
+| `media` | `MediaSlotProps` | no | Any source `<MediaSlot>` understands (YouTube, Vimeo, Loom, Wistia, native video, GIF, Lottie). Renders above the entry body. |
+| `variant` | `'modal' \| 'toast' \| 'banner' \| 'slideout'` | no | Inherited from `AnnouncementConfig` — only consumed when the same entry is reused as an in-app announcement; ignored on the changelog page. |
+
 <Callout type="warn" title="GUID stability">
 The `id` field becomes the RSS `<guid isPermaLink="false">` and the JSON Feed item `id`. It must be **stable across publishes** — rotating an `id` republishes the item to subscribers. Generate it once (e.g. from your CMS slug or a UUID) and keep it forever.
 </Callout>

@@ -1,0 +1,199 @@
+---
+title: Audience Segmentation
+description: >-
+  Target tours, hints, surveys, and announcements at named user segments using
+  SegmentationProvider, useSegment, and CSV-driven user lists.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Tour Kit lets you define named audience segments once and reference them from any consumer package's `audience` prop. Segments come in two flavors:
+
+- **Condition-based** — an `AudienceCondition[]` evaluated against `userContext` at render time (e.g. "admins", "EU pro plan").
+- **Static** — an explicit list of `userIds`, often loaded from a CSV (e.g. "beta-cohort").
+
+Both flavors live behind one provider and one hook, so consumer code never branches on type.
+
+## Define segments with `<SegmentationProvider>`
+
+Mount the provider once near the top of your tree. `segments` is a `Record<string, SegmentSource>`.
+
+```tsx
+import { SegmentationProvider } from '@tour-kit/core'
+
+export default function App({ user }: { user: { id: string; role: string; country: string } }) {
+  return (
+    <SegmentationProvider
+      currentUserId={user.id}
+      userContext={{ role: user.role, country: user.country }}
+      segments={{
+        admins: [
+          { type: 'user_property', key: 'role', operator: 'equals', value: 'admin' },
+        ],
+        'eu-pro': [
+          { type: 'user_property', key: 'country', operator: 'in', value: ['DE', 'FR', 'ES', 'IT'] },
+          { type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' },
+        ],
+        beta: { type: 'static', userIds: ['u_1', 'u_2', 'u_3'] },
+      }}
+    >
+      <YourApp />
+    </SegmentationProvider>
+  )
+}
+```
+
+**Composition rules:**
+
+- Conditions inside one segment are AND-joined (`'eu-pro'` requires both country and plan).
+- To express OR between two condition sets, register two named segments and reference both at the call site.
+- An empty array (`[]`) matches everyone — `matchesAudience` treats "no conditions" as "always pass".
+- Static segments without a `currentUserId` resolve to `false` (anonymous users cannot be in a closed cohort).
+
+## Reference a segment from any package
+
+Every package's `audience` prop accepts the same union — `AudienceCondition[]` (inline rules) or `{ segment: 'name' }` (named reference).
+
+```tsx
+import { TourStep } from '@tour-kit/react'
+import { HintHotspot } from '@tour-kit/hints'
+import { Announcement } from '@tour-kit/announcements'
+
+// Named segment reference
+<TourStep target="#dashboard" audience={{ segment: 'admins' }} title="Admin tour" />
+
+// Inline conditions (no provider needed for this branch)
+<HintHotspot target="#beta-feature" audience={[
+  { type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' },
+]} />
+
+// Same syntax for announcements
+<Announcement
+  id="welcome"
+  audience={{ segment: 'beta' }}
+  title="Welcome to the beta"
+/>
+```
+
+The `{ segment: 'name' }` branch resolves at render time against the nearest `<SegmentationProvider>`. If the segment name is unknown, it resolves to `false` plus a dev-only `console.warn` — never throws.
+
+## CSV import recipe — `parseUserIdsFromCsv`
+
+Static segments often come from a one-column CSV exported from a CRM or analytics tool. `parseUserIdsFromCsv` is RFC 4180-lite: BOM-safe, header-aware (`id`, `user_id`, `userId`), quote-aware, deduped, multi-column-tolerant (only the first column is taken).
+
+```ts
+import { parseUserIdsFromCsv } from '@tour-kit/core'
+
+// One column, header row
+parseUserIdsFromCsv('id\nu_1\nu_2\nu_2')         // → ['u_1', 'u_2']
+
+// Multi-column with quotes
+parseUserIdsFromCsv('id,email\nu_1,a@b.com\n"u,2",c@d.com')  // → ['u_1', 'u,2']
+```
+
+Wire it into a server-loaded segment:
+
+```tsx
+import { parseUserIdsFromCsv, SegmentationProvider } from '@tour-kit/core'
+
+export default async function Layout({ children }: { children: React.ReactNode }) {
+  const csv = await fetch('https://internal.example.com/audiences/beta.csv').then(r => r.text())
+  const beta = { type: 'static' as const, userIds: parseUserIdsFromCsv(csv) }
+
+  return (
+    <SegmentationProvider segments={{ beta }}>
+      {children}
+    </SegmentationProvider>
+  )
+}
+```
+
+## Inline `AudienceCondition[]` for ad-hoc rules
+
+When a rule fires once and isn't worth a registered segment name, pass the condition array inline. This skips the provider lookup entirely:
+
+```tsx
+<TourStep
+  target="#feature"
+  audience={[
+    { type: 'user_property', key: 'createdAt', operator: 'in', value: ['2026-04', '2026-05'] },
+  ]}
+  title="New cohort tour"
+/>
+```
+
+`matchesAudience(condition, userContext)` is the underlying primitive — exported for cases where you want to evaluate a rule outside the React tree (analytics dispatch, server-side rendering).
+
+## `useSegment(name)` and `useSegments()` hooks
+
+Programmatic checks for analytics, routing, or conditional rendering:
+
+```tsx
+import { useSegment, useSegments } from '@tour-kit/core'
+
+function FeatureGate() {
+  const isAdmin = useSegment('admins')
+  if (!isAdmin) return null
+  return <AdminPanel />
+}
+
+function DebugOverlay() {
+  const all = useSegments()
+  // → { admins: false, 'eu-pro': true, beta: true }
+  return <pre>{JSON.stringify(all, null, 2)}</pre>
+}
+```
+
+`useSegment` returns `false` (plus a dev-only warn) for unknown names. `useSegments` enumerates the registered set, so by definition every key is known — no warning path.
+
+## Composition with i18n
+
+Audience evaluation runs **before** render. Localized strings and segment-gated content compose naturally — only the matched cohort pays the render cost:
+
+```tsx
+<LocaleProvider locale="de" messages={{ welcome: 'Hallo {{user.name | da}}' }}>
+  <SegmentationProvider segments={{ 'eu-pro': euProConditions }}>
+    <Announcement
+      id="eu-promo"
+      audience={{ segment: 'eu-pro' }}
+      title={{ key: 'welcome' }}
+    />
+  </SegmentationProvider>
+</LocaleProvider>
+```
+
+When the user is not in `eu-pro`, the announcement never mounts — the localized string is never resolved.
+
+## Testing segments
+
+Use `matchesAudience` directly for unit tests — no React, no provider:
+
+```ts
+import { describe, expect, it } from 'vitest'
+import { matchesAudience } from '@tour-kit/core'
+
+describe('eu-pro segment', () => {
+  const conditions = [
+    { type: 'user_property' as const, key: 'country', operator: 'in' as const, value: ['DE', 'FR'] },
+    { type: 'user_property' as const, key: 'plan', operator: 'equals' as const, value: 'pro' },
+  ]
+
+  it('matches DE pro', () => {
+    expect(matchesAudience(conditions, { country: 'DE', plan: 'pro' })).toBe(true)
+  })
+
+  it('rejects DE free', () => {
+    expect(matchesAudience(conditions, { country: 'DE', plan: 'free' })).toBe(false)
+  })
+
+  it('rejects US pro', () => {
+    expect(matchesAudience(conditions, { country: 'US', plan: 'pro' })).toBe(false)
+  })
+})
+```
+
+For provider-scoped tests, render under `<SegmentationProvider>` with the cohort you want to exercise — segments are pure functions of `userContext` and `currentUserId`, so the harness needs no async setup.
+
+<Callout type="info" title="Operator reference">
+`AudienceCondition.operator` accepts: `equals`, `not_equals`, `contains`, `not_contains`, `in`, `not_in`, `exists`, `not_exists`. The `value` field is required for everything except `exists` / `not_exists`. `key` supports dot notation for nested `userContext` (e.g. `'profile.plan'`).
+</Callout>
