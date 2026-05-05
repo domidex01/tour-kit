@@ -61,7 +61,7 @@ export interface SerializeFeedOptions {
  */
 export function serializeFeed(
   entries: ChangelogEntry[],
-  opts: SerializeFeedOptions,
+  opts: SerializeFeedOptions
 ): { rss: string; jsonFeed: string } {
   for (const e of entries) {
     validateDate(e.publishedAt, e.id)
@@ -75,9 +75,7 @@ export function serializeFeed(
 function validateDate(input: Date | string, entryId: string): Date {
   const d = new Date(input)
   if (Number.isNaN(d.getTime())) {
-    throw new TypeError(
-      `serializeFeed: invalid publishedAt for entry "${entryId}"`,
-    )
+    throw new TypeError(`serializeFeed: invalid publishedAt for entry "${entryId}"`)
   }
   return d
 }
@@ -133,6 +131,6 @@ function serializeJsonFeed(entries: ChangelogEntry[], opts: SerializeFeedOptions
       })),
     },
     null,
-    2,
+    2
   )
 }

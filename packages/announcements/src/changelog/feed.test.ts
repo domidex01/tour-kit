@@ -3,7 +3,7 @@ import { XMLParser } from 'fast-xml-parser'
 import { describe, expect, it } from 'vitest'
 import schema from './__fixtures__/jsonfeed-1.1.schema.json'
 import { ADVERSARIAL_ENTRY, ADVERSARIAL_OPTS } from './adversarial-fixtures'
-import { serializeFeed, type ChangelogEntry, type SerializeFeedOptions } from './feed'
+import { type ChangelogEntry, type SerializeFeedOptions, serializeFeed } from './feed'
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@' })
 
@@ -146,7 +146,8 @@ describe('serializeFeed', () => {
       expect(parsed.feed_url).toBe(`${baseOpts.feedUrl}.json`)
       expect(parsed.language).toBe(baseOpts.language)
       expect(parsed.items).toHaveLength(1)
-      const item = parsed.items[0]!
+      const [item] = parsed.items
+      if (!item) throw new Error('expected first item to exist')
       expect(item.id).toBe(baseEntry.id)
       expect(item.url).toBe(baseEntry.permalink)
       expect(item.title).toBe(baseEntry.title)
@@ -182,7 +183,7 @@ describe('serializeFeed', () => {
 
       // JSON Feed — title preserved literally (JSON.stringify handles its own escaping)
       const parsed = JSON.parse(jsonFeed) as { items: Array<{ title: string }> }
-      expect(parsed.items[0]!.title).toBe(ADVERSARIAL_ENTRY.title)
+      expect(parsed.items[0]?.title).toBe(ADVERSARIAL_ENTRY.title)
     })
 
     it('escapes XSS payloads in option fields (title, description, feedUrl, copyright, language, siteUrl)', () => {
@@ -192,7 +193,7 @@ describe('serializeFeed', () => {
       expect(rss).toContain('&quot;')
       expect(rss).toContain(']]&gt;')
       expect(rss).not.toContain('<script>')
-      expect(rss).not.toContain('alert(\"opts\")')
+      expect(rss).not.toContain('alert("opts")')
       expect(rss).not.toMatch(/]]>/)
     })
 
@@ -212,7 +213,8 @@ describe('serializeFeed', () => {
       const parsed = JSON.parse(jsonFeed) as {
         items: Array<{ title: string; content_text: string; tags: string[] }>
       }
-      const item = parsed.items[0]!
+      const [item] = parsed.items
+      if (!item) throw new Error('expected first item to exist')
       expect(item.title).toBe(ADVERSARIAL_ENTRY.title)
       expect(item.content_text).toBe(ADVERSARIAL_ENTRY.description)
       expect(item.tags).toEqual([ADVERSARIAL_ENTRY.category])
@@ -293,13 +295,13 @@ describe('serializeFeed', () => {
       }
       // Self-closing empty tags parse as undefined / empty
       expect(tree.rss.channel.item.title === undefined || tree.rss.channel.item.title === '').toBe(
-        true,
+        true
       )
       const parsed = JSON.parse(jsonFeed) as {
         items: Array<{ title?: string; content_text?: string }>
       }
-      expect(parsed.items[0]!.title).toBeUndefined()
-      expect(parsed.items[0]!.content_text).toBeUndefined()
+      expect(parsed.items[0]?.title).toBeUndefined()
+      expect(parsed.items[0]?.content_text).toBeUndefined()
     })
   })
 
@@ -323,7 +325,7 @@ describe('serializeFeed', () => {
       const entry: ChangelogEntry = { ...baseEntry, contentHtml: '<p>hi</p>' }
       const { jsonFeed } = serializeFeed([entry], baseOpts)
       const parsed = JSON.parse(jsonFeed) as { items: Array<{ content_html?: string }> }
-      expect(parsed.items[0]!.content_html).toBe('<p>hi</p>')
+      expect(parsed.items[0]?.content_html).toBe('<p>hi</p>')
     })
 
     it('does NOT emit raw HTML in RSS description', () => {
