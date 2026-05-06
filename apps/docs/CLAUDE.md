@@ -60,3 +60,9 @@ pnpm --filter docs build    # Build static site
 - `../../wiki/design.md` - Pixel-accurate design reference for the docs website (tokens, sections, components, motion, known issues, reproduction checklist). Read before recreating, redesigning, or porting any landing or docs page.
 - `./STYLEGUIDE.md` - Higher-level homepage styleguide (color palette, typography, component patterns); pairs with `wiki/design.md`.
 
+
+<!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->
