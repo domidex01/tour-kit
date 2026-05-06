@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/hints Context File
-Version: 0.10.0 | Generated: 2026-05-05
+Version: 0.11.0 | Generated: 2026-05-06
 Paste this into your LLM to get accurate answers about @tour-kit/hints.
 =========================================================================
 
@@ -207,48 +207,33 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: Basic Usage
+Example 1: Hide (Temporary)
 
-    import { HintsProvider, Hint } from '@tour-kit/hints';
+    const { hide, isOpen } = useHint('my-hint');
     
-    function App() {
-      return (
-        <HintsProvider>
-          <Hint
-            id="new-feature"
-            target="#export-button"
-            content="New! Export your data to CSV or PDF"
-          />
-    
-          <button id="export-button">Export</button>
-        </HintsProvider>
-      );
-    }
+    // Clicking the close button hides the tooltip
+    // The hotspot stays visible for reopening
+    hide();
 
-Example 2: Styling Variants
+Example 2: Dismiss (Permanent)
 
-    // Small - subtle indicators
-    <Hint id="subtle" target="#element" content="..." size="sm" />
+    const { dismiss, isDismissed } = useHint('my-hint');
     
-    // Default - standard size
-    <Hint id="normal" target="#element" content="..." size="default" />
-    
-    // Large - prominent indicators
-    <Hint id="prominent" target="#element" content="..." size="lg" />
+    // The hint is permanently dismissed
+    // Component renders null until reset
+    dismiss();
 
-Example 3: Styling Variants
+Example 3: Using the persist Prop
 
-    // Primary (default)
-    <Hint id="primary" target="#element" content="..." color="default" />
+    // Default behavior - hint can be reopened
+    <Hint
+      id="help-hint"
+      target="#help-icon"
+      content="Click for help"
+      persist={false} // default
+    />
     
-    // Secondary
-    <Hint id="secondary" target="#element" content="..." color="secondary" />
-    
-    // Success - for positive features
-    <Hint id="success" target="#element" content="New!" color="success" />
-    
-    // Warning - for important features
-    <Hint id="warning" target="#element" content="Required" color="warning" />
-    
-    // Destructive - for dangerous actions
-    <Hint id="danger" target="#element" content="Caution" color="destructive" />
+    // When user clicks close:
+    // 1. Tooltip closes
+    // 2. Hotspot stays visible
+    // 3. User can click hotspot to reopen

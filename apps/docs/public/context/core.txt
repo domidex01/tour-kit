@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/core Context File
-Version: 0.10.0 | Generated: 2026-05-05
+Version: 0.11.0 | Generated: 2026-05-06
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -388,35 +388,39 @@ EXAMPLES
 
 Example 1: Usage
 
-    import { useAdvanceOn } from '@tour-kit/core';
+    import { TourKitProvider } from '@tour-kit/core';
     
-    function MyTourStep() {
-      // Enables advanceOn behavior based on current step config
-      useAdvanceOn({ enabled: true });
-    
-      return <TourCard>{/* ... */}</TourCard>;
+    function App() {
+      return (
+        <TourKitProvider>
+          <YourApp />
+        </TourKitProvider>
+      );
     }
 
-Example 2: Step Configuration
+Example 2: With Global Config
 
-    <TourStep
-      target="#signup-button"
-      title="Click to Sign Up"
-      content="Click this button to continue"
-      advanceOn={{
-        event: 'click',
-        selector: '#signup-button',
+    <TourKitProvider
+      defaultConfig={{
+        keyboard: true,
+        spotlight: {
+          padding: 8,
+        },
       }}
-    />
-
-Example 3: Event Types
-
-    <TourStep
-      target="#submit-btn"
-      title="Submit the Form"
-      content="Click submit when ready"
-      advanceOn={{
-        event: 'click',
-        selector: '#submit-btn',
+      persistence={{
+        strategy: 'localStorage',
+        key: 'tour-kit-state',
       }}
-    />
+    >
+      <App />
+    </TourKitProvider>
+
+Example 3: Multiple Tours
+
+    <TourKitProvider>
+      <TourProvider tour={onboardingTour}>
+        <TourProvider tour={featureTour}>
+          <App />
+        </TourProvider>
+      </TourProvider>
+    </TourKitProvider>

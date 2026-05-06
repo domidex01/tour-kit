@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/checklists Context File
-Version: 0.10.0 | Generated: 2026-05-05
+Version: 0.11.0 | Generated: 2026-05-06
 Paste this into your LLM to get accurate answers about @tour-kit/checklists.
 =========================================================================
 
@@ -147,79 +147,45 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: Quick Start
+Example 1: ChecklistConfig
 
-    import { ChecklistProvider, Checklist, ChecklistTask } from '@tour-kit/checklists';
-    
-    const onboardingChecklist = {
-      id: 'onboarding',
-      title: 'Get Started',
-      description: 'Complete these steps to get the most out of our app',
-      tasks: [
-        {
-          id: 'create-account',
-          title: 'Create your account',
-          description: 'Sign up and verify your email',
-        },
-        {
-          id: 'add-profile',
-          title: 'Add profile details',
-          description: 'Tell us about yourself',
-          dependsOn: ['create-account'], // Locked until account created
-        },
-        {
-          id: 'first-project',
-          title: 'Create your first project',
-          description: 'Start building something amazing',
-          dependsOn: ['add-profile'],
-          action: { type: 'navigate', url: '/projects/new' },
-        },
-      ],
-    };
-    
-    function App() {
-      return (
-        <ChecklistProvider checklists={[onboardingChecklist]}>
-          <Checklist checklistId="onboarding">
-            <ChecklistTask taskId="create-account" />
-            <ChecklistTask taskId="add-profile" />
-            <ChecklistTask taskId="first-project" />
-          </Checklist>
-    
-          <YourAppContent />
-        </ChecklistProvider>
-      );
+    interface ChecklistConfig {
+      id: string;
+      title: string;
+      description?: string;
+      icon?: string | ReactNode;
+      tasks: ChecklistTaskConfig[];
+      onComplete?: () => void;
+      onDismiss?: () => void;
+      dismissible?: boolean;
+      hideOnComplete?: boolean;
+      meta?: Record<string, unknown>;
     }
 
-Example 2: Task Dependencies
+Example 2: ChecklistTaskConfig
 
-    const tasks = [
-      { id: 'step1', title: 'First step' },
-      { id: 'step2', title: 'Second step', dependsOn: ['step1'] },
-      { id: 'step3', title: 'Final step', dependsOn: ['step1', 'step2'] },
-    ];
+    interface ChecklistTaskConfig {
+      id: string;
+      title: string;
+      description?: string;
+      icon?: string | ReactNode;
+      action?: TaskAction;
+      dependsOn?: string[];
+      when?: (context: ChecklistContext) => boolean;
+      completedWhen?: TaskCompletionCondition;
+      manualComplete?: boolean;
+      meta?: Record<string, unknown>;
+    }
 
-Example 3: Action Triggers
+Example 3: ChecklistState
 
-    const tasks = [
-      {
-        id: 'navigate-task',
-        title: 'View dashboard',
-        action: { type: 'navigate', url: '/dashboard' },
-      },
-      {
-        id: 'tour-task',
-        title: 'Learn the basics',
-        action: { type: 'tour', tourId: 'intro-tour' },
-      },
-      {
-        id: 'callback-task',
-        title: 'Custom action',
-        action: {
-          type: 'callback',
-          handler: async () => {
-            await api.doSomething();
-          }
-        },
-      },
-    ];
+    interface ChecklistState {
+      config: ChecklistConfig;
+      tasks: ChecklistTaskState[];
+      progress: number;
+      completedCount: number;
+      totalCount: number;
+      isComplete: boolean;
+      isDismissed: boolean;
+      isExpanded: boolean;
+    }

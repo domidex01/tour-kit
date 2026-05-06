@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/adoption Context File
-Version: 1.0.1 | Generated: 2026-05-05
+Version: 1.0.2 | Generated: 2026-05-06
 Paste this into your LLM to get accurate answers about @tour-kit/adoption.
 =========================================================================
 
@@ -270,15 +270,6 @@ EXAMPLES
 
 Example 1: Feature
 
-    const feature = {
-      id: 'dark-mode',
-      name: 'Dark Mode',
-      trigger: '#dark-mode-toggle', // CSS selector
-      adoptionCriteria: { minUses: 3, recencyDays: 30 },
-    }
-
-Example 2: Feature
-
     interface Feature {
       id: string
       name: string
@@ -291,7 +282,7 @@ Example 2: Feature
       premium?: boolean
     }
 
-Example 3: FeatureTrigger
+Example 2: FeatureTrigger
 
     // CSS selector (click tracking)
     trigger: '#dark-mode-toggle'
@@ -303,3 +294,11 @@ Example 3: FeatureTrigger
     
     // Callback (polled every 1s)
     trigger: { callback: () => document.fullscreenElement !== null }
+
+Example 3: AdoptionCriteria
+
+    interface AdoptionCriteria {
+      minUses?: number // default: 3
+      recencyDays?: number // default: 30
+      custom?: (usage: FeatureUsage) => boolean
+    }
