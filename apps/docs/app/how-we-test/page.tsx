@@ -36,9 +36,7 @@ export const metadata: Metadata = {
 export default function HowWeTestPage() {
   const pageFile = path.join(process.cwd(), 'app/how-we-test/page.tsx')
   const lastUpdated = getGitLastModified(pageFile)
-  const lastUpdatedIso = Number.isNaN(lastUpdated.getTime())
-    ? SITE_LAUNCH_FALLBACK
-    : lastUpdated.toISOString()
+  const lastUpdatedIso = lastUpdated ? lastUpdated.toISOString() : SITE_LAUNCH_FALLBACK
   const lastUpdatedDisplay = new Date(lastUpdatedIso).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',

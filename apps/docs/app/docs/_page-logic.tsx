@@ -268,8 +268,10 @@ export async function renderDocsPage(slug: string[] | undefined) {
       : []
 
   const absPath = page.absolutePath
-  const datePublished = absPath ? getGitFirstCommitted(absPath).toISOString() : SITE_LAUNCH_FALLBACK
-  const dateModified = absPath ? getGitLastModified(absPath).toISOString() : SITE_LAUNCH_FALLBACK
+  const firstCommitted = absPath ? getGitFirstCommitted(absPath) : null
+  const lastModified = absPath ? getGitLastModified(absPath) : null
+  const datePublished = firstCommitted ? firstCommitted.toISOString() : SITE_LAUNCH_FALLBACK
+  const dateModified = lastModified ? lastModified.toISOString() : SITE_LAUNCH_FALLBACK
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>

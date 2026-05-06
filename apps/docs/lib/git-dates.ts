@@ -1,23 +1,37 @@
 import { execSync } from 'node:child_process'
 
 /**
- * Build-time fallback. Today's date prevents broadcasting an identical sentinel
- * across many URLs, which Google flags as fabricated and ignores wholesale.
+ * Hardcoded launch sentinel for trust pages and other pages with no
+ * frontmatter and no real change history. Per-URL constants in callers
+ * stop Google flagging a single broadcast date as fabricated.
  */
-export const SITE_LAUNCH_FALLBACK = new Date().toISOString()
+export const SITE_LAUNCH_FALLBACK = '2026-04-01T00:00:00.000Z'
 
-export function getGitLastModified(filePath: string): Date {
+/**
+ * Last commit time for `filePath`, or null when git history isn't available
+ * (shallow clones on Dokploy commonly lack the relevant commit). Callers MUST
+ * decide the fallback — silently returning today's date pollutes sitemap
+ * `lastmod` with the build timestamp, which Google ignores as a freshness
+ * signal.
+ */
+export function getGitLastModified(filePath: string): Date | null {
   try {
     const result = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
       encoding: 'utf-8',
     }).trim()
-    return result ? new Date(result) : new Date()
+    if (!result) return null
+    const parsed = new Date(result)
+    return Number.isNaN(parsed.getTime()) ? null : parsed
   } catch {
-    return new Date()
+    return null
   }
 }
 
-export function getGitFirstCommitted(filePath: string): Date {
+/**
+ * First commit time for `filePath`, or null when git history isn't available.
+ * Same contract as `getGitLastModified` — caller picks the fallback.
+ */
+export function getGitFirstCommitted(filePath: string): Date | null {
   try {
     const result = execSync(`git log --diff-filter=A --follow --format=%aI -- "${filePath}"`, {
       encoding: 'utf-8',
@@ -25,8 +39,10 @@ export function getGitFirstCommitted(filePath: string): Date {
       .trim()
       .split('\n')
       .pop()
-    return result ? new Date(result) : new Date()
+    if (!result) return null
+    const parsed = new Date(result)
+    return Number.isNaN(parsed.getTime()) ? null : parsed
   } catch {
-    return new Date()
+    return null
   }
 }
