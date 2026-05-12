@@ -29,7 +29,18 @@ describe('explainAudience', () => {
         operator: 'equals',
         value: 'pro',
       })
-      expect(r.detail?.userContext).toEqual({ plan: 'free' })
+      // `userContext` is deliberately NOT echoed back — would leak PII to
+      // anywhere the diagnostic report is shipped (telemetry, debug overlay).
+      expect(r.detail).not.toHaveProperty('userContext')
+    }
+  })
+
+  it('does not leak userSegments in segment-form failure detail', () => {
+    const r = explainAudience({ segment: 'admins' }, { segments: ['beta', 'qa'] })
+    expect(r.ok).toBe(false)
+    if (!r.ok) {
+      expect(r.detail?.segment).toBe('admins')
+      expect(r.detail).not.toHaveProperty('userSegments')
     }
   })
 

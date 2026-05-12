@@ -68,6 +68,9 @@ export function explainAudience(
   if (Array.isArray(audience)) {
     const result = evaluateConditions(audience, userContext)
     if (result.matched) return { ok: true, gate: 'audience' }
+    // `detail` deliberately omits `userContext` — diagnostic reports are
+    // often shipped to telemetry or rendered in dev panels, so the failing
+    // condition is enough to explain "why" without leaking unrelated PII.
     return {
       ok: false,
       gate: 'audience',
@@ -76,12 +79,13 @@ export function explainAudience(
       detail: {
         failingCondition: result.failingCondition,
         audience,
-        userContext,
       },
     }
   }
 
   // Segment-form: `{ segment: 'admins' }` — resolved against `userContext.segments`.
+  // The user's full segment membership is intentionally NOT echoed back in
+  // `detail` (PII / leak vector for telemetry); only the gating segment id is.
   const segment = audience.segment
   const userSegments = userContext?.segments
   const segments = Array.isArray(userSegments) ? userSegments : []
@@ -95,7 +99,6 @@ export function explainAudience(
     message: `User is not a member of segment '${segment}'`,
     detail: {
       segment,
-      userSegments: segments,
       audience,
     },
   }
