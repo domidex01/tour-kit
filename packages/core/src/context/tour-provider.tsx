@@ -3,6 +3,7 @@ import { useAdvanceOn } from '../hooks/use-advance-on'
 import { useBroadcast } from '../hooks/use-broadcast'
 import { useFlowSession } from '../hooks/use-flow-session'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
+import { explainTour } from '../lib/diagnostic'
 import { TourValidationError, validateTour } from '../lib/validate-tour'
 import { TourRouteError, waitForStepTarget } from '../lib/wait-for-step-target'
 import type {
@@ -14,6 +15,7 @@ import type {
   TourState,
   TourStep,
 } from '../types'
+import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
 import {
   isBranchToTour,
@@ -348,6 +350,26 @@ export interface TourProviderProps {
    * cooperative cancellation, not failures.
    */
   onStepError?: (err: TourRouteError) => void
+  /**
+   * Diagnostic mode — when `true`, the provider runs `explainTour` for every
+   * registered tour and exposes the result via `useTourDiagnostic(tourId)`.
+   * Defaults to `false`; the orchestrator tree-shakes out when unused.
+   *
+   * In `NODE_ENV !== 'production'` builds, leaving this off triggers a
+   * one-time `console.warn` per provider mount nudging dev consumers toward
+   * the better debug surface.
+   */
+  diagnose?: boolean
+  /**
+   * Extension gates (license, scheduling, custom) appended to the diagnostic
+   * pipeline AFTER built-ins. Only consulted when `diagnose` is `true`.
+   */
+  diagnosticGates?: DiagnosticGate[]
+  /**
+   * Optional user context plumbed to diagnostic gates (audience filter, etc).
+   * Only read when `diagnose` is `true`.
+   */
+  userContext?: Record<string, unknown>
 }
 
 interface CrossTabActiveMessage {
@@ -366,12 +388,63 @@ export function TourProvider({
   onNavigationRequired,
   onTourPaused,
   onStepError,
+  diagnose = false,
+  diagnosticGates,
+  userContext,
 }: TourProviderProps) {
   // Validate synchronously at render time so misconfigured hidden steps throw
   // at the caller's render() instead of leaking into runtime. Cheap: just a
   // shallow loop over the steps. Must run before any hook so a thrown error
   // doesn't leave React with a partial hook order.
   for (const tour of tours) validateTour(tour)
+
+  // ─── Diagnostic engine wiring (Phase 3) ──────────────────────────────────
+  // The orchestrator is invoked from a `useEffect` so the consumer's render
+  // path stays sync. Only runs when `diagnose === true`, so consumers who
+  // never opt in pay zero runtime cost (and the import tree-shakes out).
+  const [diagnostics, setDiagnostics] = React.useState<Record<string, EligibilityReport>>({})
+  const diagnosticGatesRef = React.useRef(diagnosticGates)
+  React.useEffect(() => {
+    diagnosticGatesRef.current = diagnosticGates
+  }, [diagnosticGates])
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: tours identity changes on every render — depend on tour ids instead
+  React.useEffect(() => {
+    if (!diagnose) return
+    let cancelled = false
+    const ctx: DiagnosticContext = {
+      userContext,
+      completedTours: [],
+      skippedTours: [],
+      targetResolver: (sel) =>
+        typeof document !== 'undefined' ? document.querySelector<HTMLElement>(sel) : null,
+    }
+    void Promise.all(
+      tours.map((t) =>
+        explainTour(t, ctx, diagnosticGatesRef.current ?? []).then((r) => [t.id, r] as const)
+      )
+    ).then((pairs) => {
+      if (cancelled) return
+      setDiagnostics(Object.fromEntries(pairs))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [diagnose, tours.map((t) => t.id).join('|'), userContext])
+
+  // Dev-mode hint: fire once per provider mount when `diagnose` is unset.
+  // Gated on NODE_ENV !== 'production' so prod builds stay silent.
+  const diagnoseHintFiredRef = React.useRef(false)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-once warning, not a reactive concern
+  React.useEffect(() => {
+    if (diagnose) return
+    if (diagnoseHintFiredRef.current) return
+    if (typeof process === 'undefined' || process.env?.NODE_ENV === 'production') return
+    diagnoseHintFiredRef.current = true
+    console.warn(
+      '[Tour Kit] Tip: pass <TourProvider diagnose> in dev to see why a tour did not fire. https://tourkit.dev/docs/core/diagnostic'
+    )
+  }, [])
 
   const tourKitContext = React.useContext(TourKitContext)
   const [data, setDataState] = React.useState<Record<string, unknown>>({})
@@ -1438,6 +1511,10 @@ export function TourProvider({
       goToStep,
       startTour,
       triggerBranchAction,
+      // Only attach the diagnostics field when `diagnose` is on — keeps
+      // `ctx.diagnostics` strictly undefined for opted-out consumers so the
+      // hook's `null` branch is observable.
+      ...(diagnose ? { diagnostics } : {}),
     }),
     [
       state,
@@ -1456,6 +1533,8 @@ export function TourProvider({
       goToStep,
       startTour,
       triggerBranchAction,
+      diagnose,
+      diagnostics,
     ]
   )
 

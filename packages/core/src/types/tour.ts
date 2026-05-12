@@ -34,6 +34,16 @@ export interface Tour<TStep extends TourStep = TourStep> {
   persistence?: PersistenceConfig | boolean
   a11y?: A11yConfig
   scroll?: ScrollConfig
+  /**
+   * Tour-level eligibility predicate evaluated by the diagnostic engine
+   * (`explainTour`'s `when` gate). Sync callbacks returning `false` flip the
+   * tour to `WHEN_RETURNED_FALSE`; throwing callbacks are captured with the
+   * error in `detail`. Async callbacks are NOT awaited in diagnostic mode —
+   * the gate returns `ok: true` with a `detail.note` documenting that the
+   * async path is evaluated at runtime instead. Step-level `when` (on
+   * `TourStep`) is unaffected — it is owned by the runtime step pipeline.
+   */
+  when?: () => boolean | Promise<boolean>
   onStart?: (context: TourCallbackContext) => void
   onComplete?: (context: TourCallbackContext) => void
   onSkip?: (context: TourCallbackContext) => void

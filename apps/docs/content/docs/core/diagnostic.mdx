@@ -1,0 +1,154 @@
+---
+title: Diagnostic Engine
+description: >-
+  Replace the silent "tour didn't fire" failure mode with a structured
+  `EligibilityReport` that names every gate's outcome.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+The diagnostic engine produces an `EligibilityReport` for every registered
+tour explaining whether it will fire — and, when it won't, exactly which gate
+rejected it. Opt in via `<TourProvider diagnose>` and read the result with
+`useTourDiagnostic(tourId)`.
+
+<Callout type="info" title="Opt-in by default">
+  `diagnose` defaults to `false`. With it off the orchestrator tree-shakes out
+  of the consumer bundle, so the cost is zero in production. In dev builds the
+  provider logs a one-time hint nudging you to enable it.
+</Callout>
+
+## Why diagnostics exist
+
+The most-asked support question on this repo is *"my tour did not fire and I
+have no idea why."* Before the diagnostic engine you had to grep through
+audience filters, route adapters, persistence stores, and license keys to
+guess. Now the provider runs all seven built-in gates plus any extension gates
+you registered, and the report names the first one that said no.
+
+## `<TourProvider diagnose>`
+
+```tsx
+import { TourProvider, useTourDiagnostic } from '@tour-kit/core'
+
+export function App() {
+  return (
+    <TourProvider tours={[myTour]} diagnose userContext={{ plan: 'pro' }}>
+      <DebugPanel />
+      <YourApp />
+    </TourProvider>
+  )
+}
+
+function DebugPanel() {
+  const report = useTourDiagnostic('my-tour')
+  if (!report) return null
+  return (
+    <pre>{JSON.stringify(report, null, 2)}</pre>
+  )
+}
+```
+
+The hook returns:
+
+- `null` when `diagnose` is off, the tour id is unknown, or the diagnostic
+  effect hasn't resolved yet
+- `EligibilityReport` once the orchestrator finishes
+
+## `EligibilityReport` shape
+
+```ts
+interface EligibilityReport {
+  tourId: string
+  willFire: boolean
+  reasons: GateReason[]
+  firstFailingGate: Extract<GateReason, { ok: false }> | null
+  evaluatedAt: number
+}
+```
+
+`reasons[]` is always populated for every built-in gate (in fixed order) plus
+your extension gates. `firstFailingGate` is a convenience — the first
+`ok: false` reason in evaluation order, or `null` when `willFire` is true.
+
+## Built-in gates
+
+Evaluated in this exact order — the contract is observable and tests pin it:
+
+| Order | Gate | Failure code | When it fires |
+|-------|------|--------------|---------------|
+| 1 | `structure` | `STRUCTURE_INVALID` | Tour has no steps, or `validateTour` threw |
+| 2 | `audience` | `AUDIENCE_MISMATCH` | Audience filter rejected the user. `detail.failingCondition` (array form) or `detail.segment` (object form) names the failing piece |
+| 3 | `persistence` | `ALREADY_COMPLETED` / `ALREADY_SKIPPED` | Tour id is in `completedTours` / `skippedTours` |
+| 4 | `route` | `ROUTE_MISMATCH` | Current route does not match the configured matcher under the chosen mode |
+| 5 | `target` | `TARGET_NOT_FOUND` | The first visible step's selector returned no element |
+| 6 | `when` | `WHEN_RETURNED_FALSE` | Tour-level `when()` returned `false` or threw |
+| 7 | `autostart` | `AUTOSTART_DISABLED` | `tour.autoStart === false` |
+
+<Callout type="warn" title="`structure` short-circuits">
+  When `structure` fails, no other built-in gate runs — there's nothing
+  meaningful to ask of a malformed tour. Other gates all run to completion so
+  you can see every rejection at once.
+</Callout>
+
+<Callout type="info" title="Async `when()`">
+  If `tour.when` returns a `Promise`, the gate yields `ok: true` with
+  `detail.note` documenting that the async path is owned by the runtime
+  pipeline. Diagnostics are synchronous-friendly.
+</Callout>
+
+## Extension gates
+
+License, scheduling, or any custom gate plugs in via `diagnosticGates`. The
+contract is `DiagnosticGate` — `@tour-kit/core` does not import the package
+implementing it.
+
+```tsx
+import type { DiagnosticGate } from '@tour-kit/core'
+
+const licenseGate: DiagnosticGate = {
+  id: 'license',
+  evaluate: async (ctx) => {
+    const ok = await checkLicense(ctx.userContext)
+    return ok
+      ? { ok: true, gate: 'license' }
+      : { ok: false, gate: 'license', code: 'LICENSE_INVALID', message: 'License invalid', detail: {} }
+  },
+}
+
+<TourProvider tours={tours} diagnose diagnosticGates={[licenseGate]}>
+  ...
+</TourProvider>
+```
+
+Rules:
+
+- Extensions run **after** every built-in gate, in registration order
+- Extensions may be async; built-ins are sync
+- A throwing extension is caught — the orchestrator inserts a synthetic
+  `{ ok: false, gate: id, code: '${ID}_THREW' }` reason and keeps going
+- `firstFailingGate` only points at an extension when no built-in failed first
+
+## `explainTour` (advanced)
+
+The orchestrator is also exported for non-React callers:
+
+```ts
+import { explainTour } from '@tour-kit/core'
+
+const report = await explainTour(myTour, {
+  completedTours: [],
+  skippedTours: [],
+  userContext: { plan: 'pro' },
+  targetResolver: (sel) => document.querySelector(sel),
+})
+```
+
+`explainTour` never throws. Internal errors land in the structure gate or, for
+extensions, as `_THREW` reasons.
+
+## Performance & bundle cost
+
+- Median **&lt;0.001ms** per call over 100 iterations (5-step tour, no extensions)
+- With `diagnose: false` the diagnostic module tree-shakes out of the consumer
+  bundle. The size-limit budget asserts this.

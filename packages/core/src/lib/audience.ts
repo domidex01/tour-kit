@@ -3,6 +3,39 @@
  * initiative. Re-exported there for backward compat — see `packages/announcements/src/core/audience.ts`.
  */
 import type { AudienceCondition } from '../types/audience'
+import type { GateReason } from '../types/diagnostic'
+import type { AudienceProp } from '../types/step'
+
+interface AudienceEvaluation {
+  matched: boolean
+  failingCondition?: AudienceCondition
+}
+
+/**
+ * Internal shared helper: evaluate an array of conditions against a user
+ * context, returning both the boolean outcome AND (on failure) the first
+ * condition that did not match. `matchesAudience` projects `.matched`;
+ * `explainAudience` reads `.failingCondition` to populate `detail`.
+ */
+function evaluateConditions(
+  conditions: AudienceCondition[] | undefined,
+  userContext: Record<string, unknown> | undefined
+): AudienceEvaluation {
+  if (!conditions || conditions.length === 0) {
+    return { matched: true }
+  }
+
+  for (const condition of conditions) {
+    if (!userContext) {
+      if (condition.operator === 'not_exists') continue
+      return { matched: false, failingCondition: condition }
+    }
+    if (!matchesCondition(condition, userContext)) {
+      return { matched: false, failingCondition: condition }
+    }
+  }
+  return { matched: true }
+}
 
 /**
  * Check if user context matches audience conditions
@@ -11,23 +44,61 @@ export function matchesAudience(
   conditions: AudienceCondition[] | undefined,
   userContext: Record<string, unknown> | undefined
 ): boolean {
-  // No conditions means everyone matches
-  if (!conditions || conditions.length === 0) {
-    return true
+  return evaluateConditions(conditions, userContext).matched
+}
+
+/**
+ * Structured sibling of `matchesAudience` consumed by the diagnostic engine.
+ * Returns a `GateReason` describing the audience-gate outcome — including the
+ * first failing condition (or the failing segment) in `detail` so operators
+ * see WHY the audience filter rejected the user.
+ *
+ * Segment-form audience (`{ segment: 'admins' }`) looks up
+ * `userContext.segments` (a `string[]` listing the user's resolved segments).
+ * If the segment is missing or absent, the gate fails with `AUDIENCE_MISMATCH`.
+ */
+export function explainAudience(
+  audience: AudienceProp | undefined,
+  userContext: Record<string, unknown> | undefined
+): GateReason {
+  if (!audience) {
+    return { ok: true, gate: 'audience' }
   }
 
-  // No user context means only 'not_exists' checks can pass
-  if (!userContext) {
-    return conditions.every((condition) => {
-      if (condition.operator === 'not_exists') {
-        return true
-      }
-      return false
-    })
+  if (Array.isArray(audience)) {
+    const result = evaluateConditions(audience, userContext)
+    if (result.matched) return { ok: true, gate: 'audience' }
+    return {
+      ok: false,
+      gate: 'audience',
+      code: 'AUDIENCE_MISMATCH',
+      message: 'User context did not satisfy audience filter',
+      detail: {
+        failingCondition: result.failingCondition,
+        audience,
+        userContext,
+      },
+    }
   }
 
-  // All conditions must match (AND logic)
-  return conditions.every((condition) => matchesCondition(condition, userContext))
+  // Segment-form: `{ segment: 'admins' }` — resolved against `userContext.segments`.
+  const segment = audience.segment
+  const userSegments = userContext?.segments
+  const segments = Array.isArray(userSegments) ? userSegments : []
+  if (segments.includes(segment)) {
+    return { ok: true, gate: 'audience' }
+  }
+  return {
+    ok: false,
+    gate: 'audience',
+    code: 'AUDIENCE_MISMATCH',
+    message: `User is not a member of segment '${segment}'`,
+    detail: {
+      segment,
+      userSegments: segments,
+      audience,
+    },
+  }
 }
 
 /**

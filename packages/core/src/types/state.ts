@@ -1,3 +1,4 @@
+import type { EligibilityReport } from './diagnostic'
 import type { TourStep } from './step'
 import type { Tour } from './tour'
 
@@ -83,6 +84,13 @@ export interface TourContextValue<TStep extends TourStep = TourStep>
     TourActions<TStep> {
   tour: Tour<TStep> | null
   data: Record<string, unknown>
+  /**
+   * Per-tour diagnostic reports — populated only when the provider is mounted
+   * with `diagnose={true}`. Each key is a registered tour id; the value is the
+   * latest `EligibilityReport` produced by `explainTour`. `undefined` when
+   * diagnostics are off (the default in production builds).
+   */
+  diagnostics?: Record<string, EligibilityReport>
 }
 
 /**
