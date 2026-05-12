@@ -398,39 +398,7 @@ export function TourProvider({
   // doesn't leave React with a partial hook order.
   for (const tour of tours) validateTour(tour)
 
-  // ─── Diagnostic engine wiring (Phase 3) ──────────────────────────────────
-  // The orchestrator is invoked from a `useEffect` so the consumer's render
-  // path stays sync. Only runs when `diagnose === true`, so consumers who
-  // never opt in pay zero runtime cost (and the import tree-shakes out).
   const [diagnostics, setDiagnostics] = React.useState<Record<string, EligibilityReport>>({})
-  const diagnosticGatesRef = React.useRef(diagnosticGates)
-  React.useEffect(() => {
-    diagnosticGatesRef.current = diagnosticGates
-  }, [diagnosticGates])
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: tours identity changes on every render — depend on tour ids instead
-  React.useEffect(() => {
-    if (!diagnose) return
-    let cancelled = false
-    const ctx: DiagnosticContext = {
-      userContext,
-      completedTours: [],
-      skippedTours: [],
-      targetResolver: (sel) =>
-        typeof document !== 'undefined' ? document.querySelector<HTMLElement>(sel) : null,
-    }
-    void Promise.all(
-      tours.map((t) =>
-        explainTour(t, ctx, diagnosticGatesRef.current ?? []).then((r) => [t.id, r] as const)
-      )
-    ).then((pairs) => {
-      if (cancelled) return
-      setDiagnostics(Object.fromEntries(pairs))
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [diagnose, tours.map((t) => t.id).join('|'), userContext])
 
   // Dev-mode hint: fire once per provider mount when `diagnose` is unset.
   // Gated on NODE_ENV !== 'production' so prod builds stay silent.
@@ -467,6 +435,67 @@ export function TourProvider({
   }
 
   const [state, dispatch] = React.useReducer(tourReducer, initialState)
+
+  // ─── Diagnostic engine wiring (Phase 3) ──────────────────────────────────
+  // Runs after the reducer is declared so the persistence gate can read live
+  // `state.completedTours` / `state.skippedTours`. Only fires when
+  // `diagnose === true`, so opted-out consumers pay zero runtime cost (and
+  // the orchestrator import tree-shakes out of their bundle).
+  //
+  // Stability keys: `userContext` and `diagnosticGates` are reference types,
+  // so deep-equality keys (JSON-stringified userContext, gate-id join) prevent
+  // an inline-literal `userContext={{...}}` from re-running the effect every
+  // render. The `cancelled` flag guards against stale `setDiagnostics` writes
+  // when a re-run kicks off before the previous resolves.
+  const userContextKey = React.useMemo(
+    () => (userContext ? JSON.stringify(userContext) : ''),
+    [userContext]
+  )
+  const diagnosticGatesKey = (diagnosticGates ?? []).map((g) => g.id).join('|')
+  const tourIdsKey = tours.map((t) => t.id).join('|')
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stability keys (userContextKey, diagnosticGatesKey, tourIdsKey) replace the reference deps; state.completedTours/skippedTours are tracked as live refs
+  React.useEffect(() => {
+    if (!diagnose) return
+    let cancelled = false
+    const gates = diagnosticGates ?? []
+    const currentRoute = router?.getCurrentRoute()
+    void Promise.all(
+      tours.map((t) => {
+        const firstVisibleStep = t.steps.find((s) => s.kind !== 'hidden')
+        const stepRoute = firstVisibleStep?.route
+        const ctx: DiagnosticContext = {
+          userContext,
+          completedTours: state.completedTours,
+          skippedTours: state.skippedTours,
+          route:
+            stepRoute && currentRoute !== undefined
+              ? {
+                  current: currentRoute,
+                  matcher: stepRoute,
+                  mode: firstVisibleStep?.routeMatch ?? 'exact',
+                }
+              : undefined,
+          targetResolver: (sel) =>
+            typeof document !== 'undefined' ? document.querySelector<HTMLElement>(sel) : null,
+        }
+        return explainTour(t, ctx, gates).then((r) => [t.id, r] as const)
+      })
+    ).then((pairs) => {
+      if (cancelled) return
+      setDiagnostics(Object.fromEntries(pairs))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [
+    diagnose,
+    tourIdsKey,
+    userContextKey,
+    diagnosticGatesKey,
+    state.completedTours,
+    state.skippedTours,
+    router,
+  ])
 
   // flowSession-restore: tour-scoped resume after reload. The hook uses a
   // single fixed key (`flow:active`) so we discover the persisted tourId on
