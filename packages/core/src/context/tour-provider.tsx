@@ -442,18 +442,35 @@ export function TourProvider({
   // `diagnose === true`, so opted-out consumers pay zero runtime cost (and
   // the orchestrator import tree-shakes out of their bundle).
   //
-  // Stability keys: `userContext` and `diagnosticGates` are reference types,
-  // so deep-equality keys (JSON-stringified userContext, gate-id join) prevent
-  // an inline-literal `userContext={{...}}` from re-running the effect every
-  // render. The `cancelled` flag guards against stale `setDiagnostics` writes
-  // when a re-run kicks off before the previous resolves.
-  const userContextKey = React.useMemo(
-    () => (userContext ? JSON.stringify(userContext) : ''),
-    [userContext]
-  )
-  const diagnosticGatesKey = (diagnosticGates ?? []).map((g) => g.id).join('|')
-  const tourIdsKey = tours.map((t) => t.id).join('|')
-  // biome-ignore lint/correctness/useExhaustiveDependencies: stability keys (userContextKey, diagnosticGatesKey, tourIdsKey) replace the reference deps; state.completedTours/skippedTours are tracked as live refs
+  // Stability keys: `userContext`, `diagnosticGates`, and `router` are
+  // reference types, so we derive primitive keys that survive identity
+  // churn from inline-literal props.
+  //
+  // - `userContextKey`: JSON-stringified content (try/catch around it — a
+  //   circular reference in a user-supplied object must NEVER crash the host
+  //   render path; we degrade to a stable sentinel instead).
+  // - `diagnosticGatesKey`: gate ids joined with NUL so kebab-case ids
+  //   cannot collide regardless of payload.
+  // - `tourIdsKey`: same NUL-joined shape as the gates key.
+  // - `currentRouteKey`: the router's current path as a string, so route
+  //   changes inside a stable router re-evaluate the route gate, and inline
+  //   router instances don't reference-thrash the effect.
+  const userContextKey = React.useMemo(() => {
+    if (!userContext) return ''
+    try {
+      return JSON.stringify(userContext)
+    } catch {
+      // Circular or otherwise unserializable. Falling back to a constant
+      // string means the effect won't re-run on content changes for this
+      // shape — acceptable degradation; the alternative (throwing during
+      // render) takes down the host tree even when `diagnose` is off.
+      return '[unserializable]'
+    }
+  }, [userContext])
+  const diagnosticGatesKey = (diagnosticGates ?? []).map((g) => g.id).join('\x00')
+  const tourIdsKey = tours.map((t) => t.id).join('\x00')
+  const currentRouteKey = router?.getCurrentRoute() ?? ''
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stability keys (userContextKey, diagnosticGatesKey, tourIdsKey, currentRouteKey) replace the reference deps; state.completedTours/skippedTours are tracked as live refs
   React.useEffect(() => {
     if (!diagnose) return
     let cancelled = false
@@ -494,7 +511,7 @@ export function TourProvider({
     diagnosticGatesKey,
     state.completedTours,
     state.skippedTours,
-    router,
+    currentRouteKey,
   ])
 
   // flowSession-restore: tour-scoped resume after reload. The hook uses a

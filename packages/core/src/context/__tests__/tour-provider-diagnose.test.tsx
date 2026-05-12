@@ -325,4 +325,62 @@ describe('<TourProvider diagnose> — userContext stability', () => {
     // userContext identity is leaking into the effect deps.
     expect(effectRuns).toBe(baseline)
   })
+
+  it('re-runs the diagnostic effect when userContext content actually changes', async () => {
+    // Complement to the deep-equal test above: prove the stability key
+    // refreshes on content change, so a future refactor that hardcoded the
+    // key to `''` would fail HERE instead of slipping through.
+    let effectRuns = 0
+    const trackingGate: DiagnosticGate = {
+      id: 'tracker',
+      evaluate: () => {
+        effectRuns += 1
+        return { ok: true, gate: 'tracker' }
+      },
+    }
+    function Harness({ ctx }: { ctx: Record<string, unknown> }) {
+      return (
+        <TourProvider
+          tours={[twoStepTour]}
+          diagnose
+          userContext={ctx}
+          diagnosticGates={[trackingGate]}
+        >
+          <span />
+        </TourProvider>
+      )
+    }
+    const { rerender } = render(<Harness ctx={{ plan: 'pro' }} />)
+    await act(async () => {
+      await Promise.resolve()
+    })
+    const baseline = effectRuns
+
+    rerender(<Harness ctx={{ plan: 'enterprise' }} />)
+    await act(async () => {
+      await Promise.resolve()
+    })
+    expect(effectRuns).toBeGreaterThan(baseline)
+  })
+
+  it('does not crash the host tree when userContext contains circular references', async () => {
+    // `JSON.stringify` throws on circular refs — the stability key must
+    // catch the throw and degrade gracefully so a user object with back-
+    // references never takes down the consumer's render.
+    type Circular = Record<string, unknown> & { self?: unknown }
+    const circular: Circular = { plan: 'pro' }
+    circular.self = circular
+
+    const { result } = renderHook(() => useTourDiagnostic('demo'), {
+      wrapper: ({ children }) => (
+        <TourProvider tours={[twoStepTour]} diagnose userContext={circular}>
+          {children}
+        </TourProvider>
+      ),
+    })
+    await act(async () => {
+      await Promise.resolve()
+    })
+    expect(result.current?.tourId).toBe('demo')
+  })
 })
