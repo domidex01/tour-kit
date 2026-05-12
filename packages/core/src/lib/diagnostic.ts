@@ -15,7 +15,7 @@ import type {
 import type { AudienceProp, TourStep } from '../types/step'
 import type { Tour } from '../types/tour'
 import { explainAudience } from './audience'
-import { validateTour } from './validate-tour'
+import { TourValidationError, validateTour } from './validate-tour'
 
 /**
  * Canonical built-in evaluation order. Tests pin this tuple — the order is
@@ -46,12 +46,19 @@ function gateStructure(tour: Tour): GateReason {
     return { ok: true, gate: 'structure' }
   } catch (e) {
     const error = e as Error
+    // Preserve `TourValidationError`'s structured fields (the offending step
+    // id and the specific validation code) so operators can route on them.
+    const detail: Record<string, unknown> = { error: error.message }
+    if (error instanceof TourValidationError) {
+      detail.tourErrorCode = error.code
+      detail.stepId = error.stepId
+    }
     return {
       ok: false,
       gate: 'structure',
       code: 'STRUCTURE_INVALID',
       message: error.message ?? 'Tour failed structural validation',
-      detail: { error: error.message },
+      detail,
     }
   }
 }
@@ -142,7 +149,7 @@ function gateWhen(tour: Tour): GateReason {
         detail: {
           note: 'Async when() callbacks are evaluated at runtime, not in diagnostic mode',
         },
-      } as GateReason
+      }
     }
     if (result === false) {
       return {

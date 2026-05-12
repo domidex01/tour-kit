@@ -47,7 +47,10 @@ describe('explainTour — orchestrator', () => {
 
   it('NEVER throws — internal errors land in firstFailingGate', async () => {
     const malformed = { id: 'x', steps: null } as unknown as Tour
-    await expect(explainTour(malformed, baseCtx())).resolves.toBeTruthy()
+    const r = await explainTour(malformed, baseCtx())
+    expect(r.willFire).toBe(false)
+    expect(r.firstFailingGate?.gate).toBe('structure')
+    expect(r.firstFailingGate?.code).toBe('STRUCTURE_INVALID')
   })
 })
 
