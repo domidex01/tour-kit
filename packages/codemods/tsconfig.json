@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tooling/tsconfig/base.json",
+  "compilerOptions": {
+    "lib": ["ES2020"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "jsx": "preserve"
+  },
+  "include": ["__spike__/**/*", "__tests__/**/*"],
+  "exclude": ["node_modules", "__tests__/fixtures/**/*"]
+}

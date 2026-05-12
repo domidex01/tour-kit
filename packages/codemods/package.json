@@ -1,0 +1,16 @@
+{
+  "name": "@tour-kit/codemods",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Codemod transforms for migrating to Tour Kit (Phase 7a). Phase 0 ships the fixture corpus and tool spike only.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/jscodeshift": "catalog:",
+    "jscodeshift": "catalog:",
+    "typescript": "catalog:"
+  }
+}
