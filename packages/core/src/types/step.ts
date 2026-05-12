@@ -38,10 +38,16 @@ export interface TourStepMedia {
 export type AudienceProp = AudienceCondition[] | { segment: string }
 
 /**
- * Single step in a tour
+ * Single step in a tour.
+ *
+ * `TId` defaults to `string` so existing call sites (`TourStep`, `TourStep[]`)
+ * keep working unchanged. Authors who want compile-time step-id narrowing pass
+ * a literal-string union: `TourStep<'welcome' | 'pricing'>`. The canonical
+ * inference pattern is `[...] as const satisfies ReadonlyArray<TourStep>`
+ * combined with `StepIdOf<typeof steps>` (see below).
  */
-export interface TourStep {
-  id: string
+export interface TourStep<TId extends string = string> {
+  id: TId
   /**
    * Step kind. Hidden steps run lifecycle callbacks (`onEnter`, `onShow`) and
    * branching logic (`onNext`) without mounting a DOM element. Useful for
@@ -154,4 +160,19 @@ export interface TourStep {
   onAction?: Record<string, Branch>
 }
 
-export type StepOptions = Omit<TourStep, 'id'>
+export type StepOptions<TId extends string = string> = Omit<TourStep<TId>, 'id'>
+
+/**
+ * Extract the literal-id union from a const-tuple of steps.
+ *
+ * @example
+ * ```ts
+ * const steps = [
+ *   { id: 'welcome', target: '#a', content: 'a' },
+ *   { id: 'pricing', target: '#b', content: 'b' },
+ * ] as const satisfies ReadonlyArray<TourStep>
+ *
+ * type Ids = StepIdOf<typeof steps>  // 'welcome' | 'pricing'
+ * ```
+ */
+export type StepIdOf<T extends ReadonlyArray<{ id: string }>> = T[number]['id']

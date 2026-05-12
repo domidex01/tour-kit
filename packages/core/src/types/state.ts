@@ -4,11 +4,11 @@ import type { Tour } from './tour'
 /**
  * Current tour state
  */
-export interface TourState {
+export interface TourState<TStep extends TourStep = TourStep> {
   tourId: string | null
   isActive: boolean
   currentStepIndex: number
-  currentStep: TourStep | null
+  currentStep: TStep | null
   totalSteps: number
   isLoading: boolean
   isTransitioning: boolean
@@ -25,15 +25,20 @@ export interface TourState {
 /**
  * Extended tour context data (passed to callbacks)
  */
-export interface TourCallbackContext extends TourState {
-  tour: Tour | null
+export interface TourCallbackContext<TStep extends TourStep = TourStep> extends TourState<TStep> {
+  tour: Tour<TStep> | null
   data: Record<string, unknown>
 }
 
 /**
- * Tour action methods
+ * Tour action methods.
+ *
+ * `goToStep` and `startTour`'s `stepId` are narrowed to `TStep['id']` when a
+ * concrete step type is supplied, giving const-authored tours compile-time
+ * misspelling errors. With the default `TStep = TourStep`, `id`/`stepId` widen
+ * back to `string` — preserving every existing call site.
  */
-export interface TourActions {
+export interface TourActions<TStep extends TourStep = TourStep> {
   start: (tourId?: string, stepIndex?: number) => void
   next: () => void
   prev: () => void
@@ -45,15 +50,23 @@ export interface TourActions {
   reset: (tourId?: string) => void
   setData: (key: string, value: unknown) => void
   /**
-   * Navigate directly to a step by its ID
+   * Navigate directly to a step by its ID.
+   *
+   * The `id` parameter is narrowed to `TStep['id']` — pass a literal-union
+   * step type (e.g., `TourStep<'welcome' | 'pricing'>`) to make misspellings
+   * fail at compile time.
    */
-  goToStep: (stepId: string) => Promise<void>
+  goToStep: <TId extends TStep['id'] = TStep['id']>(stepId: TId) => Promise<void>
   /**
-   * Start a different tour (for cross-tour branching)
+   * Start a different tour (for cross-tour branching).
+   *
    * @param tourId - The tour to start
-   * @param stepId - Optional step ID or index to start at
+   * @param stepId - Optional step ID (narrowed to `TStep['id']`) or numeric index
    */
-  startTour: (tourId: string, stepId?: string | number) => Promise<void>
+  startTour: <TId extends TStep['id'] = TStep['id']>(
+    tourId: string,
+    stepId?: TId | number
+  ) => Promise<void>
   /**
    * Trigger a branch action defined in the current step's onAction
    * @param actionId - The action ID to trigger
@@ -65,8 +78,10 @@ export interface TourActions {
 /**
  * Combined context value
  */
-export interface TourContextValue extends TourState, TourActions {
-  tour: Tour | null
+export interface TourContextValue<TStep extends TourStep = TourStep>
+  extends TourState<TStep>,
+    TourActions<TStep> {
+  tour: Tour<TStep> | null
   data: Record<string, unknown>
 }
 
