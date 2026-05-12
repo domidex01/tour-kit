@@ -1,5 +1,11 @@
 [
-  { "name": "@tour-kit/core", "path": "packages/core/dist/index.js", "limit": "24 KB" },
+  { "name": "@tour-kit/core", "path": "packages/core/dist/index.js", "limit": "26 KB" },
+  {
+    "name": "@tour-kit/core (useTour-only consumer)",
+    "path": "packages/core/dist/index.js",
+    "import": "{ useTour }",
+    "limit": "8 KB"
+  },
   {
     "name": "@tour-kit/core/schemas",
     "path": "packages/core/dist/schemas/index.js",

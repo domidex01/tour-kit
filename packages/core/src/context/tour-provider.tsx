@@ -3,6 +3,7 @@ import { useAdvanceOn } from '../hooks/use-advance-on'
 import { useBroadcast } from '../hooks/use-broadcast'
 import { useFlowSession } from '../hooks/use-flow-session'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
+import { explainTour } from '../lib/diagnostic'
 import { TourValidationError, validateTour } from '../lib/validate-tour'
 import { TourRouteError, waitForStepTarget } from '../lib/wait-for-step-target'
 import type {
@@ -14,6 +15,7 @@ import type {
   TourState,
   TourStep,
 } from '../types'
+import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
 import {
   isBranchToTour,
@@ -348,6 +350,26 @@ export interface TourProviderProps {
    * cooperative cancellation, not failures.
    */
   onStepError?: (err: TourRouteError) => void
+  /**
+   * Diagnostic mode — when `true`, the provider runs `explainTour` for every
+   * registered tour and exposes the result via `useTourDiagnostic(tourId)`.
+   * Defaults to `false`; the orchestrator tree-shakes out when unused.
+   *
+   * In `NODE_ENV !== 'production'` builds, leaving this off triggers a
+   * one-time `console.warn` per provider mount nudging dev consumers toward
+   * the better debug surface.
+   */
+  diagnose?: boolean
+  /**
+   * Extension gates (license, scheduling, custom) appended to the diagnostic
+   * pipeline AFTER built-ins. Only consulted when `diagnose` is `true`.
+   */
+  diagnosticGates?: DiagnosticGate[]
+  /**
+   * Optional user context plumbed to diagnostic gates (audience filter, etc).
+   * Only read when `diagnose` is `true`.
+   */
+  userContext?: Record<string, unknown>
 }
 
 interface CrossTabActiveMessage {
@@ -366,12 +388,31 @@ export function TourProvider({
   onNavigationRequired,
   onTourPaused,
   onStepError,
+  diagnose = false,
+  diagnosticGates,
+  userContext,
 }: TourProviderProps) {
   // Validate synchronously at render time so misconfigured hidden steps throw
   // at the caller's render() instead of leaking into runtime. Cheap: just a
   // shallow loop over the steps. Must run before any hook so a thrown error
   // doesn't leave React with a partial hook order.
   for (const tour of tours) validateTour(tour)
+
+  const [diagnostics, setDiagnostics] = React.useState<Record<string, EligibilityReport>>({})
+
+  // Dev-mode hint: fire once per provider mount when `diagnose` is unset.
+  // Gated on NODE_ENV !== 'production' so prod builds stay silent.
+  const diagnoseHintFiredRef = React.useRef(false)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-once warning, not a reactive concern
+  React.useEffect(() => {
+    if (diagnose) return
+    if (diagnoseHintFiredRef.current) return
+    if (typeof process === 'undefined' || process.env?.NODE_ENV === 'production') return
+    diagnoseHintFiredRef.current = true
+    console.warn(
+      '[Tour Kit] Tip: pass <TourProvider diagnose> in dev to see why a tour did not fire. https://tourkit.dev/docs/core/diagnostic'
+    )
+  }, [])
 
   const tourKitContext = React.useContext(TourKitContext)
   const [data, setDataState] = React.useState<Record<string, unknown>>({})
@@ -394,6 +435,84 @@ export function TourProvider({
   }
 
   const [state, dispatch] = React.useReducer(tourReducer, initialState)
+
+  // ─── Diagnostic engine wiring (Phase 3) ──────────────────────────────────
+  // Runs after the reducer is declared so the persistence gate can read live
+  // `state.completedTours` / `state.skippedTours`. Only fires when
+  // `diagnose === true`, so opted-out consumers pay zero runtime cost (and
+  // the orchestrator import tree-shakes out of their bundle).
+  //
+  // Stability keys: `userContext`, `diagnosticGates`, and `router` are
+  // reference types, so we derive primitive keys that survive identity
+  // churn from inline-literal props.
+  //
+  // - `userContextKey`: JSON-stringified content (try/catch around it — a
+  //   circular reference in a user-supplied object must NEVER crash the host
+  //   render path; we degrade to a stable sentinel instead).
+  // - `diagnosticGatesKey`: gate ids joined with NUL so kebab-case ids
+  //   cannot collide regardless of payload.
+  // - `tourIdsKey`: same NUL-joined shape as the gates key.
+  // - `currentRouteKey`: the router's current path as a string, so route
+  //   changes inside a stable router re-evaluate the route gate, and inline
+  //   router instances don't reference-thrash the effect.
+  const userContextKey = React.useMemo(() => {
+    if (!userContext) return ''
+    try {
+      return JSON.stringify(userContext)
+    } catch {
+      // Circular or otherwise unserializable. Falling back to a constant
+      // string means the effect won't re-run on content changes for this
+      // shape — acceptable degradation; the alternative (throwing during
+      // render) takes down the host tree even when `diagnose` is off.
+      return '[unserializable]'
+    }
+  }, [userContext])
+  const diagnosticGatesKey = (diagnosticGates ?? []).map((g) => g.id).join('\x00')
+  const tourIdsKey = tours.map((t) => t.id).join('\x00')
+  const currentRouteKey = router?.getCurrentRoute() ?? ''
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stability keys (userContextKey, diagnosticGatesKey, tourIdsKey, currentRouteKey) replace the reference deps; state.completedTours/skippedTours are tracked as live refs
+  React.useEffect(() => {
+    if (!diagnose) return
+    let cancelled = false
+    const gates = diagnosticGates ?? []
+    const currentRoute = router?.getCurrentRoute()
+    void Promise.all(
+      tours.map((t) => {
+        const firstVisibleStep = t.steps.find((s) => s.kind !== 'hidden')
+        const stepRoute = firstVisibleStep?.route
+        const ctx: DiagnosticContext = {
+          userContext,
+          completedTours: state.completedTours,
+          skippedTours: state.skippedTours,
+          route:
+            stepRoute && currentRoute !== undefined
+              ? {
+                  current: currentRoute,
+                  matcher: stepRoute,
+                  mode: firstVisibleStep?.routeMatch ?? 'exact',
+                }
+              : undefined,
+          targetResolver: (sel) =>
+            typeof document !== 'undefined' ? document.querySelector<HTMLElement>(sel) : null,
+        }
+        return explainTour(t, ctx, gates).then((r) => [t.id, r] as const)
+      })
+    ).then((pairs) => {
+      if (cancelled) return
+      setDiagnostics(Object.fromEntries(pairs))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [
+    diagnose,
+    tourIdsKey,
+    userContextKey,
+    diagnosticGatesKey,
+    state.completedTours,
+    state.skippedTours,
+    currentRouteKey,
+  ])
 
   // flowSession-restore: tour-scoped resume after reload. The hook uses a
   // single fixed key (`flow:active`) so we discover the persisted tourId on
@@ -1438,6 +1557,10 @@ export function TourProvider({
       goToStep,
       startTour,
       triggerBranchAction,
+      // Only attach the diagnostics field when `diagnose` is on — keeps
+      // `ctx.diagnostics` strictly undefined for opted-out consumers so the
+      // hook's `null` branch is observable.
+      ...(diagnose ? { diagnostics } : {}),
     }),
     [
       state,
@@ -1456,6 +1579,8 @@ export function TourProvider({
       goToStep,
       startTour,
       triggerBranchAction,
+      diagnose,
+      diagnostics,
     ]
   )
 

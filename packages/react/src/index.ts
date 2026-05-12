@@ -139,6 +139,18 @@ export {
   useMediaQuery,
   usePrefersReducedMotion,
   useBranch,
+  useTourDiagnostic,
+} from '@tour-kit/core'
+
+// Diagnostic engine surface (Phase 3 — issue #32)
+export { BUILTIN_GATE_ORDER, explainAudience, explainTour } from '@tour-kit/core'
+export type {
+  DiagnosticContext,
+  DiagnosticGate,
+  EligibilityReport,
+  GateCode,
+  GateName,
+  GateReason,
 } from '@tour-kit/core'
 
 // Utilities
