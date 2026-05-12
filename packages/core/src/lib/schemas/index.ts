@@ -5,7 +5,7 @@ export { flowSourceSchema, tourDefinitionSchema } from './tour.schema'
 
 // Parsers / factory
 export {
-  createTourDefinitionSchema,
+  createTourStepDefinitionSchema,
   parseTourDefinition,
   safeParseTourDefinition,
 } from './parse'

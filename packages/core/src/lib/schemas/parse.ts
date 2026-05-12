@@ -23,11 +23,14 @@ export function safeParseTourDefinition(input: unknown) {
 }
 
 /**
- * Build a stricter step schema where `content` is validated by the caller's
+ * Build a stricter STEP schema where `content` is validated by the caller's
  * schema (e.g. a CMS content-block shape). Useful when the JSON payload has
  * a known content discriminator and you want full-tree validation.
+ *
+ * Returns a step-level schema — wrap it in `z.array(...).min(1)` and feed it
+ * to a custom tour schema if you want a full validation pipeline.
  */
-export function createTourDefinitionSchema<TContent extends z.ZodTypeAny>(opts: {
+export function createTourStepDefinitionSchema<TContent extends z.ZodTypeAny>(opts: {
   contentSchema: TContent
 }) {
   return tourStepDefinitionSchema.extend({ content: opts.contentSchema })

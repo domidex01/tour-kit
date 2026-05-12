@@ -1,6 +1,6 @@
 /**
  * Shared input fixtures for schema tests. Used by `parse.test.ts`,
- * `parse.bench.ts`, and (later) Phase 7a's migration-doc examples.
+ * `parse.bench.test.ts`, and (later) Phase 7a's migration-doc examples.
  *
  * Each export is a typed `unknown` shape — the schema is what validates.
  */

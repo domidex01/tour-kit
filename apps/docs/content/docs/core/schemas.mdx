@@ -91,17 +91,19 @@ if (!result.success) {
 const tour = result.data
 ```
 
-### `createTourDefinitionSchema({ contentSchema })`
+### `createTourStepDefinitionSchema({ contentSchema })`
 
-Build a stricter step schema where `content` is validated by your own Zod
-schema. Useful for CMS payloads with typed content blocks:
+Build a stricter **step** schema where `content` is validated by your own Zod
+schema. Returns a step-level schema — wrap it in `z.array(...).min(1)` and feed
+it to a custom tour schema if you want a full validation pipeline. Useful for
+CMS payloads with typed content blocks:
 
 ```ts
 import { z } from 'zod'
-import { createTourDefinitionSchema } from '@tour-kit/core/schemas'
+import { createTourStepDefinitionSchema } from '@tour-kit/core/schemas'
 
 const TextBlock = z.object({ kind: z.literal('text'), value: z.string() })
-const stepSchema = createTourDefinitionSchema({ contentSchema: TextBlock })
+const stepSchema = createTourStepDefinitionSchema({ contentSchema: TextBlock })
 
 stepSchema.parse({
   id: 'welcome',

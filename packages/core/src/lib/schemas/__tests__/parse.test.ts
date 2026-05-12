@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { ZodError, z } from 'zod'
-import { createTourDefinitionSchema, parseTourDefinition, safeParseTourDefinition } from '../parse'
+import {
+  createTourStepDefinitionSchema,
+  parseTourDefinition,
+  safeParseTourDefinition,
+} from '../parse'
 import * as fx from './_inputs'
 
 describe('parseTourDefinition — happy path', () => {
@@ -90,10 +94,10 @@ describe('safeParseTourDefinition — tagged union shape', () => {
   })
 })
 
-describe('createTourDefinitionSchema factory', () => {
+describe('createTourStepDefinitionSchema factory', () => {
   it('accepts content matching the custom contentSchema', () => {
     const customBlock = z.object({ kind: z.literal('text'), value: z.string() })
-    const stepSchema = createTourDefinitionSchema({ contentSchema: customBlock })
+    const stepSchema = createTourStepDefinitionSchema({ contentSchema: customBlock })
     expect(() =>
       stepSchema.parse({
         id: 's',
@@ -105,7 +109,7 @@ describe('createTourDefinitionSchema factory', () => {
 
   it('rejects content that does NOT match the custom contentSchema', () => {
     const customBlock = z.object({ kind: z.literal('text'), value: z.string() })
-    const stepSchema = createTourDefinitionSchema({ contentSchema: customBlock })
+    const stepSchema = createTourStepDefinitionSchema({ contentSchema: customBlock })
     expect(() =>
       stepSchema.parse({
         id: 's',

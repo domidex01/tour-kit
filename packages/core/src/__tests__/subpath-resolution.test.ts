@@ -7,7 +7,7 @@ describe('@tour-kit/core/schemas subpath resolution', () => {
     const mod = await import('@tour-kit/core/schemas')
     expect(typeof mod.parseTourDefinition).toBe('function')
     expect(typeof mod.safeParseTourDefinition).toBe('function')
-    expect(typeof mod.createTourDefinitionSchema).toBe('function')
+    expect(typeof mod.createTourStepDefinitionSchema).toBe('function')
   })
 
   it.skipIf(!distExists())('resolves via `require()` in a child Node process (CJS)', () => {
