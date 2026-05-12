@@ -8,6 +8,6 @@
     "noEmit": true,
     "jsx": "preserve"
   },
-  "include": ["__spike__/**/*", "__tests__/**/*"],
+  "include": ["__tests__/**/*"],
   "exclude": ["node_modules", "__tests__/fixtures/**/*"]
 }

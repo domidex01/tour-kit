@@ -99,9 +99,15 @@ export function useTour<TStep extends TourStep = TourStep>(tourId?: string): Use
   const isLastStep = totalSteps > 0 && currentStepIndex === totalSteps - 1
   const progress = totalSteps > 0 ? (currentStepIndex + 1) / totalSteps : 0
 
-  const isStepActive = useCallback((stepId: string) => currentStep?.id === stepId, [currentStep])
+  const isStepActive = useCallback(
+    (stepId: TStep['id']) => currentStep?.id === stepId,
+    [currentStep]
+  )
 
-  const getStep = useCallback((stepId: string) => tour?.steps.find((s) => s.id === stepId), [tour])
+  const getStep = useCallback(
+    (stepId: TStep['id']) => tour?.steps.find((s) => s.id === stepId) as TStep | undefined,
+    [tour]
+  )
 
   return useMemo(
     () =>

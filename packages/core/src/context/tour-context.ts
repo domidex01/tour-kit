@@ -12,11 +12,15 @@ export function useTourContext<TStep extends TourStep = TourStep>(): TourContext
     throw new Error('useTourContext must be used within a TourProvider')
   }
 
+  // `as unknown as` is intentional: the runtime context always carries the wide
+  // `TourContextValue<TourStep>`; the `<TStep>` generic is an opt-in narrowing
+  // the caller asserts. Same trade-off React's typed-context pattern accepts.
   return context as unknown as TourContextValue<TStep>
 }
 
 export function useTourContextOptional<
   TStep extends TourStep = TourStep,
 >(): TourContextValue<TStep> | null {
+  // See `useTourContext` — same opt-in narrowing escape hatch.
   return useContext(TourContext) as unknown as TourContextValue<TStep> | null
 }
