@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "node -e \"console.log('codemods: Phase 0 scaffold — typecheck no-op until Phase 7a wires real source')\""
   },
   "devDependencies": {
     "@types/jscodeshift": "catalog:",
