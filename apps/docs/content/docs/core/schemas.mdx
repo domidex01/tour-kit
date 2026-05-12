@@ -1,0 +1,177 @@
+---
+title: Schemas
+description: >-
+  Runtime Zod validation for JSON-authorable tour definitions — load tours from
+  CMS, JSON files, or MDX frontmatter without bloating your main bundle.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+The `@tour-kit/core/schemas` subpath ships Zod schemas plus `parseTourDefinition`
+and `safeParseTourDefinition` helpers for validating a JSON-safe subset of
+`Tour` at runtime. Use it when tours come from a CMS, a JSON file, or any
+boundary where you can't trust the shape at compile time.
+
+<Callout type="warn" title="JSON-safe subset — not the full Tour shape">
+  The schema validates a **strict subset** of `Tour`. JSON cannot represent
+  `React.RefObject`, `ReactNode`, or callbacks. The schema enforces:
+
+  - `target` is a **selector string only** (no refs)
+  - `title` / `description` / `content` are `unknown` — **presence is checked,
+    not React-element shape**
+  - lifecycle callbacks (`onShow`, `onBeforeShow`, `when`, …) are **not on
+    `TourDefinition`** at all
+
+  Your code attaches refs and callbacks to the parsed result *before* passing
+  it to `TourProvider`.
+</Callout>
+
+## Installation
+
+`zod` is an **optional peer dependency**. Install it only if you validate.
+
+```bash
+pnpm add @tour-kit/core zod
+```
+
+The package declares `zod` as `^3.25.0 || ^4.0.0` (the canonical dual-major peer
+range — Zod 4 ships at the root of `zod@^4.x` and at the `zod/v4` subpath
+inside `zod@^3.25.0`). Use the root `import { z } from 'zod'` in new code.
+
+<Callout type="info" title="Main bundle stays Zod-free">
+  Consumers who never call `parseTourDefinition` pay nothing — `@tour-kit/core`
+  imports zero `zod/*` paths in its main entry. The CI suite has a string-grep
+  test against the built bundle that fails the build on accidental leakage.
+</Callout>
+
+## Quick start
+
+```ts
+import { parseTourDefinition } from '@tour-kit/core/schemas'
+
+// JSON from a CMS, file, or MDX frontmatter
+const payload = await fetch('/api/tours/onboarding').then((r) => r.json())
+
+// Throws ZodError on bad input
+const definition = parseTourDefinition(payload)
+
+// Attach runtime-only fields (refs, callbacks) before handing to TourProvider
+const tour = {
+  ...definition,
+  onComplete: () => analytics.track('tour.complete', { id: definition.id }),
+}
+```
+
+## API
+
+### `parseTourDefinition(input)`
+
+Throws `ZodError` on invalid input. Returns a `TourDefinition`.
+
+```ts
+import { parseTourDefinition } from '@tour-kit/core/schemas'
+
+const t = parseTourDefinition({
+  id: 'demo',
+  steps: [{ id: 's1', target: '#welcome', content: 'Welcome!' }],
+})
+```
+
+### `safeParseTourDefinition(input)`
+
+Non-throwing variant. Returns Zod's tagged union — useful when you want to
+surface a friendly error UI instead of catching exceptions:
+
+```ts
+const result = safeParseTourDefinition(payload)
+if (!result.success) {
+  console.error(result.error.issues)
+  return
+}
+const tour = result.data
+```
+
+### `createTourDefinitionSchema({ contentSchema })`
+
+Build a stricter step schema where `content` is validated by your own Zod
+schema. Useful for CMS payloads with typed content blocks:
+
+```ts
+import { z } from 'zod'
+import { createTourDefinitionSchema } from '@tour-kit/core/schemas'
+
+const TextBlock = z.object({ kind: z.literal('text'), value: z.string() })
+const stepSchema = createTourDefinitionSchema({ contentSchema: TextBlock })
+
+stepSchema.parse({
+  id: 'welcome',
+  target: '#hero',
+  content: { kind: 'text', value: 'Hi there!' },
+})
+```
+
+## Schemas re-exported
+
+| Export | Description |
+|--------|-------------|
+| `tourDefinitionSchema` | Top-level tour shape — `{ id, steps, audience?, autoStart?, startAt? }` |
+| `tourStepDefinitionSchema` | Single step — `{ id, target, content, … }` |
+| `audienceSchema` | Discriminated union — `AudienceConditionDefinition[] \| { segment: string }` |
+| `audienceConditionSchema` | One audience condition — `{ key, operator, value? }` |
+| `flowSourceSchema` | Multi-tour container — `{ tours: TourDefinition[] }` |
+
+## Types
+
+The package also re-exports the matching TypeScript types from
+`@tour-kit/core/schemas`:
+
+- `TourDefinition`
+- `TourStepDefinition`
+- `AudienceDefinition`
+- `AudienceConditionDefinition`
+- `JsonValue`
+
+These are hand-authored interfaces, not `z.infer<…>` aliases — Zod 3's inferred
+types occasionally surface internal helper types in tooling, and the hand-authored
+shapes read better in IDE hovers. A compile-time parity test guarantees the
+hand-authored types and the schema's inferred keys stay in sync.
+
+## Example: CMS payload → TourProvider
+
+```tsx
+import { TourProvider } from '@tour-kit/core'
+import { parseTourDefinition } from '@tour-kit/core/schemas'
+
+async function loadTour(slug: string) {
+  const payload = await fetch(`/api/cms/tours/${slug}`).then((r) => r.json())
+  const definition = parseTourDefinition(payload)
+
+  // Attach runtime-only callbacks
+  return {
+    ...definition,
+    onComplete: () => analytics.track('tour.complete'),
+    onSkip: () => analytics.track('tour.skip'),
+  }
+}
+
+export function App({ tour }: { tour: Awaited<ReturnType<typeof loadTour>> }) {
+  return (
+    <TourProvider tour={tour}>
+      {/* … */}
+    </TourProvider>
+  )
+}
+```
+
+## Bundle-size guarantee
+
+Both the main entry and the schemas subpath have CI-enforced size budgets:
+
+| Entry | Budget | Today |
+|-------|--------|-------|
+| `@tour-kit/core` (main) | ≤ 24 KB brotlied | ~23 KB |
+| `@tour-kit/core/schemas` | ≤ 12 KB brotlied (excl. zod) | < 1 KB |
+
+The schemas bundle stays tiny because `zod` is `external` in `tsup` — the
+consumer pulls Zod from their own `node_modules`, not from us. The size-limit
+entry ignores `zod` to measure only the code we ship.

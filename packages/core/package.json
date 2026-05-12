@@ -55,6 +55,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./schemas": {
+      "import": {
+        "types": "./dist/schemas/index.d.ts",
+        "default": "./dist/schemas/index.js"
+      },
+      "require": {
+        "types": "./dist/schemas/index.d.cts",
+        "default": "./dist/schemas/index.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "files": ["dist", "README.md", "CHANGELOG.md"],
@@ -79,7 +89,11 @@
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "zod": "^3.25.0 || ^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": { "optional": true }
   },
   "devDependencies": {
     "@testing-library/jest-dom": "catalog:",
@@ -96,6 +110,7 @@
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "vitest-axe": "catalog:"
+    "vitest-axe": "catalog:",
+    "zod": "catalog:"
   }
 }

@@ -2,11 +2,14 @@ import * as fs from 'node:fs'
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: {
+    index: 'src/index.ts',
+    'schemas/index': 'src/lib/schemas/index.ts',
+  },
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['react', 'react-dom', 'clsx', 'tailwind-merge'],
+  external: ['react', 'react-dom', 'clsx', 'tailwind-merge', 'zod'],
   treeshake: true,
   splitting: true,
   minify: true,

@@ -315,7 +315,7 @@ importers:
         version: 1.8.0(react@19.2.4)
       next:
         specifier: 16.2.4
-        version: 16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 16.2.4(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -415,7 +415,7 @@ importers:
         version: 2.77.0
       next:
         specifier: ^15.1.3
-        version: 15.5.14(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 15.5.14(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       posthog-js:
         specifier: ^1.250.0
         version: 1.363.6
@@ -962,6 +962,9 @@ importers:
       vitest-axe:
         specifier: 'catalog:'
         version: 1.0.0-pre.5(vitest@4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(happy-dom@20.8.9)(jsdom@27.4.0)(vite@6.4.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)))
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
 
   packages/hints:
     dependencies:
@@ -1159,7 +1162,7 @@ importers:
         version: 0.7.1
       next:
         specifier: ^13.0.0 || ^14.0.0 || ^15.0.0
-        version: 15.5.14(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 15.5.14(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-router:
         specifier: ^6.0.0 || ^7.0.0
         version: 7.13.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -12887,7 +12890,7 @@ snapshots:
       react: 19.3.0-canary-ad5dfc82-20260427
       react-dom: 19.3.0-canary-ad5dfc82-20260427(react@19.3.0-canary-ad5dfc82-20260427)
 
-  next@15.5.14(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  next@15.5.14(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 15.5.14
       '@swc/helpers': 0.5.15
@@ -12895,7 +12898,7 @@ snapshots:
       postcss: 8.4.31
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      styled-jsx: 5.1.6(@babel/core@7.29.0)(react@19.2.4)
+      styled-jsx: 5.1.6(react@19.2.4)
     optionalDependencies:
       '@next/swc-darwin-arm64': 15.5.14
       '@next/swc-darwin-x64': 15.5.14
@@ -12912,7 +12915,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  next@16.2.4(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 16.2.4
       '@swc/helpers': 0.5.15
@@ -12921,7 +12924,7 @@ snapshots:
       postcss: 8.4.31
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      styled-jsx: 5.1.6(@babel/core@7.29.0)(react@19.2.4)
+      styled-jsx: 5.1.6(react@19.2.4)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.4
       '@next/swc-darwin-x64': 16.2.4
@@ -14117,12 +14120,10 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-jsx@5.1.6(@babel/core@7.29.0)(react@19.2.4):
+  styled-jsx@5.1.6(react@19.2.4):
     dependencies:
       client-only: 0.0.1
       react: 19.2.4
-    optionalDependencies:
-      '@babel/core': 7.29.0
 
   styled-jsx@5.1.6(react@19.3.0-canary-ad5dfc82-20260427):
     dependencies:

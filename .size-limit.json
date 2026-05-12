@@ -1,5 +1,11 @@
 [
   { "name": "@tour-kit/core", "path": "packages/core/dist/index.js", "limit": "24 KB" },
+  {
+    "name": "@tour-kit/core/schemas",
+    "path": "packages/core/dist/schemas/index.js",
+    "limit": "12 KB",
+    "ignore": ["zod"]
+  },
   { "name": "@tour-kit/react", "path": "packages/react/dist/index.js", "limit": "175 KB" },
   { "name": "@tour-kit/hints", "path": "packages/hints/dist/index.js", "limit": "170 KB" },
   { "name": "@tour-kit/adoption", "path": "packages/adoption/dist/index.js", "limit": "146 KB" },
