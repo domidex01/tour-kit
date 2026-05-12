@@ -49,6 +49,82 @@ function MyComponent() {
 }
 ```
 
+## Typed Step IDs
+
+userTourKit ships generic `TourStep<TId>` and `Tour<TStep>` so that const-authored tours catch misspelled step ids at compile time. The default is `TId extends string = string`, so dynamic tours (server-fetched, JIT-built) keep working without any changes.
+
+### Const-tuple narrowing (recommended)
+
+Author your steps as a `const` tuple with `satisfies` and feed them to `StepIdOf` to derive the literal union:
+
+```tsx
+import { useTour } from '@tour-kit/react';
+import type { StepIdOf, TourStep } from '@tour-kit/react';
+
+const steps = [
+  { id: 'welcome', target: '#hero', content: 'Welcome' },
+  { id: 'pricing', target: '#pricing', content: 'Pricing' },
+] as const satisfies ReadonlyArray<TourStep>;
+
+type StepId = StepIdOf<typeof steps>;
+// StepId = 'welcome' | 'pricing'
+
+function MyComponent() {
+  const tour = useTour<(typeof steps)[number]>();
+
+  // ✅ Compiles
+  tour.goToStep('welcome');
+
+  // ❌ Type error: Argument of type '"biling"' is not assignable...
+  tour.goToStep('biling');
+}
+```
+
+The same narrowing applies to `startTour(tourId, stepId?)`:
+
+```tsx
+tour.startTour('onboarding', 'welcome'); // ✅
+tour.startTour('onboarding', 0);         // ✅ numeric index escape hatch
+tour.startTour('onboarding', 'biling');  // ❌ unknown step id
+```
+
+### Dynamic tours (server-fetched JSON)
+
+When step ids aren't known at compile time, omit the generic — the default `TourStep` widens id back to `string`:
+
+```tsx
+import type { Tour, TourStep } from '@tour-kit/react';
+
+// Server returns arbitrary tour JSON
+const dynamicSteps: TourStep[] = await fetch('/api/tour').then((r) => r.json());
+
+const dynamic: Tour = { id: 'dynamic', steps: dynamicSteps };
+// dynamic.steps[0].id is `string` — no narrowing applied
+```
+
+If you want the widening to be explicit in your type signatures, pass `TourStep<string>` directly:
+
+```tsx
+const widened: Tour<TourStep<string>> = dynamic;
+```
+
+### Narrowed callbacks
+
+`Tour.onStepChange` receives a step typed as `TStep`, not the base `TourStep`. Pass a literal-union step type to narrow `step.id` inside the callback:
+
+```tsx
+const tour: Tour<TourStep<'a' | 'b'>> = {
+  id: 'demo',
+  steps: [/* ... */],
+  onStepChange: (step) => {
+    // step.id is 'a' | 'b'
+    if (step.id === 'a') {/* ... */}
+  },
+};
+```
+
+See [issue #34](https://github.com/domidex01/tour-kit/issues/34) for the design discussion and the test fixtures under `packages/core/src/__tests__/types/` for the canonical patterns.
+
 ## Generic Step Data
 
 You can type custom data attached to steps:

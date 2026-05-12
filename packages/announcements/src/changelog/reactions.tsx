@@ -35,6 +35,7 @@ export function Reactions({ entryId, onReact, className }: ReactionsProps) {
   return (
     <div
       className={cn('tk-reactions', className)}
+      // biome-ignore lint/a11y/useSemanticElements: <fieldset> imposes default browser styling unsuitable for this inline 3-button row; role="group" preserves a11y grouping semantics without a form control.
       role="group"
       aria-label={resolve(t, 'changelog.reactions.label', 'Reactions')}
     >

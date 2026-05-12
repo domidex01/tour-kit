@@ -10,11 +10,17 @@ import type { TourCallbackContext } from './state'
 import type { AudienceProp, TourStep } from './step'
 
 /**
- * Tour definition
+ * Tour definition.
+ *
+ * `TStep` defaults to `TourStep` (which itself defaults `TId` to `string`), so
+ * `Tour` with no generic args keeps accepting dynamic / server-fetched steps.
+ * Pass `TourStep<'a' | 'b' | ...>` to narrow `steps[].id` and the `onStepChange`
+ * step argument at compile time. `Tour<TourStep<string>>` is the explicit
+ * widening escape hatch.
  */
-export interface Tour {
+export interface Tour<TStep extends TourStep = TourStep> {
   id: string
-  steps: TourStep[]
+  steps: TStep[]
   /**
    * Filter the entire tour for users who don't match. Same shape as
    * `TourStep.audience`. When the filter rejects, the tour is not registered
@@ -31,7 +37,7 @@ export interface Tour {
   onStart?: (context: TourCallbackContext) => void
   onComplete?: (context: TourCallbackContext) => void
   onSkip?: (context: TourCallbackContext) => void
-  onStepChange?: (step: TourStep, index: number, context: TourCallbackContext) => void
+  onStepChange?: (step: TStep, index: number, context: TourCallbackContext) => void
   /**
    * Called when a branch action is triggered from a step
    * @param stepId - The step where the action was triggered
@@ -47,4 +53,4 @@ export interface Tour {
   onTourBranch?: (toTourId: string, fromStepId: string) => void
 }
 
-export type TourOptions = Omit<Tour, 'id' | 'steps'>
+export type TourOptions<TStep extends TourStep = TourStep> = Omit<Tour<TStep>, 'id' | 'steps'>
