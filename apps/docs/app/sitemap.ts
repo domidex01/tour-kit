@@ -112,8 +112,7 @@ function resolveLastModified(
 }
 
 function resolveDocLastModified(absolutePath: string | undefined, topSlug: string): Date {
-  const fallback =
-    DOC_SECTION_FALLBACKS[topSlug] ?? DOC_DEFAULT_FALLBACK
+  const fallback = DOC_SECTION_FALLBACKS[topSlug] ?? DOC_DEFAULT_FALLBACK
   if (!absolutePath) return new Date(fallback)
   const fromFile = readFrontmatterDate(absolutePath)
   if (fromFile) {

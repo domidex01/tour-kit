@@ -6,7 +6,7 @@
  * Removing any `@ts-expect-error` line MUST break typecheck:types.
  */
 import type { TourStep } from '@tour-kit/core'
-import { useTour } from '@tour-kit/core'
+import type { useTour } from '@tour-kit/core'
 
 type Steps = readonly [TourStep<'welcome'>, TourStep<'pricing'>]
 

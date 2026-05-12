@@ -49,9 +49,7 @@ export interface UseTourReturn<TStep extends TourStep = TourStep> {
   getStep: (stepId: TStep['id']) => TStep | undefined
 }
 
-export function useTour<TStep extends TourStep = TourStep>(
-  tourId?: string
-): UseTourReturn<TStep> {
+export function useTour<TStep extends TourStep = TourStep>(tourId?: string): UseTourReturn<TStep> {
   const context = useContext(TourContext)
 
   if (!context) {
@@ -101,15 +99,9 @@ export function useTour<TStep extends TourStep = TourStep>(
   const isLastStep = totalSteps > 0 && currentStepIndex === totalSteps - 1
   const progress = totalSteps > 0 ? (currentStepIndex + 1) / totalSteps : 0
 
-  const isStepActive = useCallback(
-    (stepId: string) => currentStep?.id === stepId,
-    [currentStep]
-  )
+  const isStepActive = useCallback((stepId: string) => currentStep?.id === stepId, [currentStep])
 
-  const getStep = useCallback(
-    (stepId: string) => tour?.steps.find((s) => s.id === stepId),
-    [tour]
-  )
+  const getStep = useCallback((stepId: string) => tour?.steps.find((s) => s.id === stepId), [tour])
 
   return useMemo(
     () =>
