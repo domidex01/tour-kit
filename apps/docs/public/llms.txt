@@ -1,4 +1,4 @@
-# userTourKit v0.11.0 — Generated 2026-05-06T13:46:25Z
+# userTourKit v0.11.0 — Generated 2026-05-13T07:39:18Z
 
 # userTourKit
 
@@ -14,6 +14,7 @@
 ## Core
 
 - [@tour-kit/core](https://usertourkit.com/docs/core): Framework-agnostic hooks and utilities for building product tours — state management, positioning, and accessibility
+- [Diagnostic Engine](https://usertourkit.com/docs/core/diagnostic): Replace the silent "tour didn't fire" failure mode with a structured `EligibilityReport` that names every gate's outcome.
 - [useAdvanceOn](https://usertourkit.com/docs/core/hooks/use-advance-on): useAdvanceOn hook: automatically advance tour steps when users click buttons, submit forms, or interact with elements
 - [useBranch](https://usertourkit.com/docs/core/hooks/use-branch): useBranch hook: trigger conditional branching paths from step content based on user choices or application state
 - [useDirection](https://usertourkit.com/docs/core/hooks/use-direction): Hook returning the resolved text direction (ltr or rtl) and an isRTL boolean for RTL-aware components
@@ -30,6 +31,7 @@
 - [useTourKitContext](https://usertourkit.com/docs/core/hooks/use-tour-kit-context): Hook returning the global TourKit context value — config, resolved direction, and global callbacks set on TourKitProvider
 - [TourKitProvider](https://usertourkit.com/docs/core/providers/tour-kit-provider): TourKitProvider: wrap your app to enable global tour management, shared configuration, and multi-tour coordination
 - [TourProvider](https://usertourkit.com/docs/core/providers/tour-provider): TourProvider: context provider that manages state, steps, and lifecycle for an individual product tour instance
+- [Schemas](https://usertourkit.com/docs/core/schemas): Runtime Zod validation for JSON-authorable tour definitions — load tours from CMS, JSON files, or MDX frontmatter without bloating your main bundle.
 - [Types](https://usertourkit.com/docs/core/types): TypeScript type definitions for userTourKit — tour, step, and configuration interfaces that power fully type-safe onboarding flows.
 - [Config Types](https://usertourkit.com/docs/core/types/config-types): TypeScript interfaces for TourConfig, SpotlightConfig, KeyboardConfig, and other userTourKit configuration options
 - [Step Types](https://usertourkit.com/docs/core/types/step-types): TypeScript interfaces for StepConfig, StepTarget, StepPlacement, and step-level configuration in userTourKit tours
@@ -95,11 +97,13 @@
 - [Dashboard Components](https://usertourkit.com/docs/adoption/dashboard): Pre-built admin dashboard components for visualizing feature adoption metrics, trends, and per-feature engagement rates
 - [AdoptionDashboard](https://usertourkit.com/docs/adoption/dashboard/adoption-dashboard): AdoptionDashboard component: complete admin view combining stats grid, category chart, and feature table in one layout
 - [Charts](https://usertourkit.com/docs/adoption/dashboard/charts): AdoptionCategoryChart and AdoptionStatusBadge: visualize adoption distribution by category and individual feature status
+- [Adoption Funnel](https://usertourkit.com/docs/adoption/dashboard/funnel): Step-by-step adoption funnel with drop-off percentages — Pendo/Userpilot parity, native CSS, no chart peer dependency.
 - [Stat Cards](https://usertourkit.com/docs/adoption/dashboard/stats): AdoptionStatCard and AdoptionStatsGrid: display aggregate adoption metrics with trend indicators and percentage changes
 - [AdoptionTable](https://usertourkit.com/docs/adoption/dashboard/table): AdoptionTable component: sortable, filterable table of tracked features showing adoption status, usage count, and trends
 - [useAdoptionContext](https://usertourkit.com/docs/adoption/hooks/use-adoption-context): Low-level hook returning the raw AdoptionProvider context — features, usage map, nudge state, and full action surface
 - [useAdoptionStats](https://usertourkit.com/docs/adoption/hooks/use-adoption-stats): useAdoptionStats hook: retrieve aggregated adoption metrics across all tracked features for dashboards and reporting
 - [useFeature](https://usertourkit.com/docs/adoption/hooks/use-feature): useFeature hook: track individual feature usage, query adoption state, and record interactions for adoption metrics
+- [useFunnelData](https://usertourkit.com/docs/adoption/hooks/use-funnel-data): Derive a current-state adoption funnel from useAdoptionStats — feed straight into AdoptionFunnel.
 - [useNudge](https://usertourkit.com/docs/adoption/hooks/use-nudge): useNudge hook: manage nudge visibility, dismissal, snooze, and user interaction state for feature discovery prompts
 - [AdoptionProvider](https://usertourkit.com/docs/adoption/providers/adoption-provider): AdoptionProvider: configure feature definitions, usage thresholds, nudge rules, and storage for the adoption tracking system
 - [TypeScript Types](https://usertourkit.com/docs/adoption/types): TypeScript types for FeatureConfig, AdoptionState, NudgeRule, UsageThreshold, and the @tour-kit/adoption API surface
@@ -239,6 +243,7 @@
 - [Reduced Motion](https://usertourkit.com/docs/guides/reduced-motion): How Tour Kit honors prefers-reduced-motion across announcements, surveys, hints, checklists, and the core tour runtime
 - [Router Integration](https://usertourkit.com/docs/guides/router-integration): Build multi-page tours with Next.js, React Router, or custom routers using route-aware step targeting and persistence
 - [Audience Segmentation](https://usertourkit.com/docs/guides/segmentation): Target tours, hints, surveys, and announcements at named user segments using SegmentationProvider, useSegment, and CSV-driven user lists.
+- [Testing with React Testing Library](https://usertourkit.com/docs/guides/testing): Test Tour Kit components with React Testing Library and Vitest under jsdom using @tour-kit/testing-library — zero consumer-side act() boilerplate.
 - [Theme Variations](https://usertourkit.com/docs/guides/theme-variations): Resolve tour themes by system colour scheme, explicit mode, route, or arbitrary trait predicates with `<ThemeProvider>` and `useThemeVariation`.
 - [Troubleshooting](https://usertourkit.com/docs/guides/troubleshooting): Diagnose and fix common userTourKit issues: missing targets, positioning glitches, hydration errors, and focus trap problems
 - [Unified Slot (Radix UI + Base UI)](https://usertourkit.com/docs/guides/unified-slot): Single composition primitive that supports both Radix UI's asChild element cloning and Base UI's render-prop style — covers UnifiedSlot, UILibrary, UILibraryProvider, and the RenderProp shape

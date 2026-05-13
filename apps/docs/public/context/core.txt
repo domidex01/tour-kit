@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/core Context File
-Version: 0.11.0 | Generated: 2026-05-06
+Version: 0.11.0 | Generated: 2026-05-13
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -16,6 +16,7 @@ INSTALLATION
 Peer dependencies:
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
+    zod: ^3.25.0 || ^4.0.0
 
 EXPORTS
 -------
@@ -48,6 +49,7 @@ Types:
     TourKitConfig
     TourStep
     StepOptions
+    StepIdOf
     AudienceProp
     TourStepMedia
     Tour
@@ -94,6 +96,12 @@ Types:
     Messages
     TranslateFn
     AudienceCondition
+    DiagnosticContext
+    DiagnosticGate
+    EligibilityReport
+    GateCode
+    GateName
+    GateReason
     FrequencyRule
     FrequencyState
     LocalizedText
@@ -126,6 +134,7 @@ Hooks:
     useUILibrary — Hook to get the current UI library setting
     useLocale
     useT — Hook returning a translator function `t(key, vars?)` that:
+    useTourDiagnostic — Read the diagnostic report for a given tour id. Returns `null` when the
     useResolveLocalizedText — Returns a memoized resolver `(value) => string` that takes a `LocalizedText`
     useSegmentationContext
     useSegment
@@ -141,6 +150,7 @@ Components:
     UnifiedSlot
     UILibraryProvider
     LocaleProvider
+    BUILTIN_GATE_ORDER
     SegmentationProvider
 
 Utilities:
@@ -205,8 +215,10 @@ Utilities:
     validateTour
     waitForStepTarget
     interpolate
+    explainAudience
     matchesAudience
     validateConditions
+    explainTour
     canShowByFrequency
     canShowAfterDismissal
     getViewLimit
@@ -297,49 +309,65 @@ TYPES
       value?: unknown
     }
 
+    export interface EligibilityReport {
+      tourId: string
+      willFire: boolean
+      reasons: GateReason[]
+      firstFailingGate: Extract<GateReason, { ok: false }> | null
+      evaluatedAt: number
+    }
+
+    export interface DiagnosticContext {
+      userContext?: Record<string, unknown>
+      completedTours: readonly string[]
+      skippedTours: readonly string[]
+      schedule?: { from?: Date; to?: Date }
+      route?: {
+        current: string
+        matcher: string
+        mode: 'exact' | 'startsWith' | 'contains'
+      }
+      targetResolver?: (selector: string) => HTMLElement | null
+    }
+
+    export interface DiagnosticGate {
+      /** Stable identifier, e.g. 'license', 'scheduling', 'audience'. */
+      id: string
+      /** Run synchronously OR async. May throw — orchestrator captures the error. */
+      evaluate: (ctx: DiagnosticContext) => GateReason | Promise<GateReason>
+    }
+
     /**
-     * Frequency rules — promoted from `@tour-kit/announcements` in Phase 3a of the
-     * UserGuiding parity initiative. Re-exported from `@tour-kit/announcements`
-     * with `@deprecated` JSDoc for backward compat.
+     * Diagnostic engine types — Phase 3 (full surface).
+     *
+     * The `EligibilityReport` is what `explainTour` produces and
+     * `useTourDiagnostic` exposes. The `DiagnosticGate` interface is the
+     * extension contract — upper packages (`@tour-kit/license`,
+     * `@tour-kit/scheduling`, etc.) implement it WITHOUT this package importing
+     * any of them. Hard rule: `@tour-kit/core` sits at the bottom of the
+     * dependency graph; never `import { ... } from '@tour-kit/<anything>'` here.
      */
     
     /**
-     * How often a UI surface (announcement, hint, tour) can be shown.
-     *
-     *   - `'once'`     — show only when never viewed
-     *   - `'session'`  — show until dismissed in the current session
-     *   - `'always'`   — show every time conditions are met
-     *   - `{ type: 'times', count }
+     * Canonical failure codes. The `(string & {})` escape hatch keeps
+     * literal-union autocomplete for built-ins while allowing extension gates to
+     * surface their own codes (`'LICENSE_INVALID'`, `'OUT_OF_WINDOW'`, ...).
+     */
+    export type GateCode =
+      | 'STRUCTURE_INVALID'
+      | 'AUDIENCE_MISMATCH'
+      | 'ALREADY_COMPLETED'
+      | 'ALREADY_SKIPPED'
+      | 'OUT_OF_WINDOW'
+      | 'LICENSE_INVALID'
+      | 'LICENSE_EXPIRED'
+      | 'TARGET_NOT_FOUND'
+      | 'WHEN_RETURNED_FALSE'
+      | 'ROUTE_MISMATCH'
+      | 'AUTOSTART_DISABLED'
+      | (string & {})
 
-    /**
-     * Frequency rules — promoted from `@tour-kit/announcements` in Phase 3a of the
-     * UserGuiding parity initiative. Re-exported from `@tour-kit/announcements`
-     * with `@deprecated` JSDoc for backward compat.
-     */
-    
-    /**
-     * How often a UI surface (announcement, hint, tour) can be shown.
-     *
-     *   - `'once'`     — show only when never viewed
-     *   - `'session'`  — show until dismissed in the current session
-     *   - `'always'`   — show every time conditions are met
-     *   - `{ type: 'times', count }`     — show up to `count` times total
-     *   - `{ type: 'interval', days }`   — re-show after `days` days have passed
-     */
-    export type FrequencyRule =
-      | 'once'
-      | 'session'
-      | 'always'
-      | { type: 'times';
-
-    /**
-     * `LocalizedText` is the shared shape for any human-readable string that
-     * may either be a literal (interpolated via `interpolate`) or a dictionary
-     * key (resolved via `useT()`). The discriminated union narrows on
-     * `typeof === 'string'`, so existing string-based consumers stay assignable
-     * — adding the object branch is a pure widening.
-     */
-    export type LocalizedText = string | { key: string }
+    ... and 5 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -365,6 +393,7 @@ HOOKS
     useUILibrary(): UILibrary
     useLocale(): LocaleContextValue
     useT(): TranslateFn
+    useTourDiagnostic(tourId: string): EligibilityReport | null
     useResolveLocalizedText(): (value: LocalizedText | undefined) => string
     useSegmentationContext(...)
     useSegment(...)
@@ -381,46 +410,57 @@ COMPONENTS
     <UnifiedSlot />
     <UILibraryProvider />
     <LocaleProvider />
+    <BUILTIN_GATE_ORDER />
     <SegmentationProvider />
 
 EXAMPLES
 --------
 
-Example 1: Usage
+Example 1: `<TourProvider diagnose>`
 
-    import { TourKitProvider } from '@tour-kit/core';
+    import { TourProvider, useTourDiagnostic } from '@tour-kit/core'
     
-    function App() {
+    export function App() {
       return (
-        <TourKitProvider>
+        <TourProvider tours={[myTour]} diagnose userContext={{ plan: 'pro' }}>
+          <DebugPanel />
           <YourApp />
-        </TourKitProvider>
-      );
+        </TourProvider>
+      )
+    }
+    
+    function DebugPanel() {
+      const report = useTourDiagnostic('my-tour')
+      if (!report) return null
+      return (
+        <pre>{JSON.stringify(report, null, 2)}</pre>
+      )
     }
 
-Example 2: With Global Config
+Example 2: `EligibilityReport` shape
 
-    <TourKitProvider
-      defaultConfig={{
-        keyboard: true,
-        spotlight: {
-          padding: 8,
-        },
-      }}
-      persistence={{
-        strategy: 'localStorage',
-        key: 'tour-kit-state',
-      }}
-    >
-      <App />
-    </TourKitProvider>
+    interface EligibilityReport {
+      tourId: string
+      willFire: boolean
+      reasons: GateReason[]
+      firstFailingGate: Extract<GateReason, { ok: false }> | null
+      evaluatedAt: number
+    }
 
-Example 3: Multiple Tours
+Example 3: Extension gates
 
-    <TourKitProvider>
-      <TourProvider tour={onboardingTour}>
-        <TourProvider tour={featureTour}>
-          <App />
-        </TourProvider>
-      </TourProvider>
-    </TourKitProvider>
+    import type { DiagnosticGate } from '@tour-kit/core'
+    
+    const licenseGate: DiagnosticGate = {
+      id: 'license',
+      evaluate: async (ctx) => {
+        const ok = await checkLicense(ctx.userContext)
+        return ok
+          ? { ok: true, gate: 'license' }
+          : { ok: false, gate: 'license', code: 'LICENSE_INVALID', message: 'License invalid', detail: {} }
+      },
+    }
+    
+    <TourProvider tours={tours} diagnose diagnosticGates={[licenseGate]}>
+      ...
+    </TourProvider>

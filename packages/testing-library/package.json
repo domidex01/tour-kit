@@ -1,0 +1,90 @@
+{
+  "name": "@tour-kit/testing-library",
+  "version": "0.1.0",
+  "description": "React Testing Library helpers for Tour Kit — virtual-element Floating UI pattern + act() flush wrapped once, so consumer tests don't repeat the boilerplate.",
+  "author": "Tour Kit Team",
+  "license": "MIT",
+  "homepage": "https://github.com/domidex01/tour-kit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domidex01/tour-kit.git",
+    "directory": "packages/testing-library"
+  },
+  "bugs": {
+    "url": "https://github.com/domidex01/tour-kit/issues"
+  },
+  "keywords": ["tour-kit", "react-testing-library", "vitest", "jsdom", "floating-ui", "testing"],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./setup": {
+      "import": {
+        "types": "./dist/setup.d.ts",
+        "default": "./dist/setup.js"
+      },
+      "require": {
+        "types": "./dist/setup.d.cts",
+        "default": "./dist/setup.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@tour-kit/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.0.0",
+    "vitest": "^4.0.0",
+    "jsdom-testing-mocks": "^1.13.0"
+  },
+  "peerDependenciesMeta": {
+    "jsdom-testing-mocks": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@tour-kit/react": "workspace:*",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^4.5.2",
+    "jsdom": "catalog:",
+    "jsdom-testing-mocks": "catalog:",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "vitest-axe": "catalog:"
+  }
+}

@@ -1,0 +1,177 @@
+---
+title: Testing with React Testing Library
+description: >-
+  Test Tour Kit components with React Testing Library and Vitest under jsdom
+  using @tour-kit/testing-library — zero consumer-side act() boilerplate.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
+
+`@tour-kit/testing-library` packages the Floating UI virtual-element pattern + the `act()` microtask flush behind a small set of helpers, so consumer tests can assert on tour state without re-deriving the pattern every time.
+
+<Callout type="info">
+  The default setup leaves `Element.prototype` untouched. Most teams need nothing more. The optional `positionShim` opt-in lazily loads `jsdom-testing-mocks` only for the rare assertion that depends on a non-zero `getBoundingClientRect`.
+</Callout>
+
+## Install
+
+```bash
+pnpm add -D @tour-kit/testing-library @testing-library/react @testing-library/user-event vitest jsdom
+```
+
+`vitest`, `@testing-library/react`, `@testing-library/user-event`, and `jsdom-testing-mocks` are peer dependencies. `jsdom-testing-mocks` is **optional** — install it only when you opt into `positionShim`.
+
+## Quick start
+
+```ts title="vitest.setup.ts"
+import '@testing-library/jest-dom/vitest'
+import { afterEach } from 'vitest'
+import { cleanup } from '@testing-library/react'
+import { setupTourKitTesting } from '@tour-kit/testing-library/setup'
+
+afterEach(() => {
+  cleanup()
+})
+
+// Default — touches nothing. Opt into positionShim only if needed.
+await setupTourKitTesting()
+```
+
+```tsx title="welcome-tour.test.tsx"
+import * as React from 'react'
+import { render } from '@testing-library/react'
+import { TourProvider, useTour } from '@tour-kit/core'
+import { TourCard } from '@tour-kit/react'
+import {
+  expectStepVisible,
+  advanceTour,
+  completeTour,
+  HookProbe,
+} from '@tour-kit/testing-library'
+import { describe, it } from 'vitest'
+
+const tour = {
+  id: 'demo',
+  steps: [
+    { id: 'welcome', target: '#welcome', title: 'Welcome', content: 'Hi' },
+    { id: 'pricing', target: '#pricing', title: 'Pricing', content: 'Pay' },
+  ],
+}
+
+// <TourProvider> is inactive by default. Mount this tiny helper inside the
+// provider to start the tour on mount — or click your own "Start" button.
+function AutoStart({ id }: { id: string }) {
+  const { start } = useTour()
+  const started = React.useRef(false)
+  React.useEffect(() => {
+    if (started.current) return
+    started.current = true
+    start(id)
+  }, [])
+  return null
+}
+
+describe('welcome tour', () => {
+  it('walks through both steps', async () => {
+    render(
+      <>
+        <div id="welcome" />
+        <div id="pricing" />
+        <TourProvider tours={[tour]}>
+          <AutoStart id="demo" />
+          <TourCard />
+          <HookProbe />
+        </TourProvider>
+      </>,
+    )
+
+    // expectStepVisible flushes Floating UI microtasks for you — no `act` needed.
+    await expectStepVisible('welcome')
+    await advanceTour()
+    await expectStepVisible('pricing')
+    await completeTour('demo')
+  })
+})
+```
+
+<Callout type="warn">
+  `<TourProvider>` doesn't auto-start. Either render a helper component that calls `useTour().start(id)` on mount (as above), or wire your own "Start tour" button. `expectStepVisible` will time out otherwise — the card only mounts once the tour is active.
+</Callout>
+
+## Why no `await act(...)`?
+
+Under jsdom, `@floating-ui/react` computes `{ x: 0, y: 0 }` because there is no layout engine. The positioning state still needs a microtask flush before assertions can read it. Every helper in this package wraps that flush:
+
+```ts title="expect-step-visible.ts (excerpt)"
+await act(async () => {}) // Floating UI microtask flush
+return await waitFor(() => container.querySelector(`[data-tour-step="${stepId}"]`))
+```
+
+The headline contract is enforced inside the package's own test suite: every consumer-side `await act(...)` call would fail the build. See [`floating-ui.com/docs/virtual-elements`](https://floating-ui.com/docs/virtual-elements) for the upstream pattern.
+
+## The Floating UI virtual-element pattern
+
+When you DO need to assert against a positioned element directly (for example, a custom floating tooltip you wrote yourself), use `virtualTarget(rect?)`:
+
+```ts
+import { virtualTarget } from '@tour-kit/testing-library'
+
+// Provides a non-zero rect to Floating UI without patching Element.prototype.
+refs.setReference(virtualTarget({ top: 100, left: 200, width: 320, height: 60 }))
+```
+
+The default rect is 200×100 at the origin. Partial overrides merge with the defaults.
+
+## Optional position shim
+
+The default `setupTourKitTesting()` is a no-op — it does not touch `Element.prototype`. If your own assertions need a per-element `getBoundingClientRect` mock, opt in:
+
+```ts
+import { setupTourKitTesting } from '@tour-kit/testing-library/setup'
+
+await setupTourKitTesting({ positionShim: true })
+// Then per-element, in your beforeEach:
+import { mockElementBoundingClientRect } from 'jsdom-testing-mocks'
+
+mockElementBoundingClientRect(myElement, { top: 100, left: 200, width: 320, height: 60 })
+```
+
+The shim is a thin hint: the lazy import guarantees `jsdom-testing-mocks` is loaded; you still apply per-element rects yourself. Consumers who never opt in never pay for the dep.
+
+<Callout type="warn">
+  The package intentionally does **not** ship a global `Element.prototype` patch. Global patches mask drift between test and production positioning math — pick `virtualTarget()` or `mockElementBoundingClientRect()` so each test owns its layout assumptions.
+</Callout>
+
+## Failure context — `TourKitTestingError`
+
+Every helper throws `TourKitTestingError` (extending `Error`) with `stepId`, `tourId`, and a humanized message:
+
+```ts
+try {
+  await expectStepVisible('not-a-step', { timeout: 50 })
+} catch (e) {
+  if (e instanceof TourKitTestingError) {
+    console.log(e.message) // expectStepVisible: step "not-a-step" not visible within 50ms
+    console.log(e.stepId)  // "not-a-step"
+    console.log(e.cause)   // original RTL waitFor error
+  }
+}
+```
+
+## Helper reference
+
+| Helper | What it does |
+|--------|--------------|
+| `expectStepVisible(stepId, opts?)` | Resolves with the `[data-tour-step="<id>"]` element once it mounts. |
+| `advanceTour(opts?)` | Clicks **Next/Finish/Done**. Pass `steps: n` to click `n` times. |
+| `previousTour(opts?)` | Clicks **Previous/Back**. |
+| `skipTour(opts?)` | Clicks **Skip**. |
+| `completeTour(tourId, opts?)` | Clicks **Next** until the tour ends or the deadline elapses. |
+| `goToStep(stepId)` | Jumps to a non-adjacent step. Requires `<HookProbe />` in the provider tree. |
+| `virtualTarget(rect?, contextElement?)` | Returns a Floating UI virtual element with a merged DOMRect. |
+| `setupTourKitTesting(opts?)` | One-shot orchestrator; default touches nothing, `positionShim: true` lazy-loads `jsdom-testing-mocks`. |
+
+## Browser-positioning tests live elsewhere
+
+This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use Playwright via [`@tour-kit/playwright`](./nextjs#end-to-end-with-playwright) (Phase 6). Phase 5 helpers stop at the jsdom boundary by design.
