@@ -1,3 +1,3 @@
-# Phase 0 codemod tool spike — throwaway research artifact, do not ship.
-# Phase 7a will replace this with a real transform and delete the directory.
-__spike__/
+dist/
+node_modules/
+*.tsbuildinfo

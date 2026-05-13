@@ -1,10 +1,14 @@
-// Migration target for the branching-callback flow.
-// Tour Kit replaces the action enum with onTourEnd/onTourSkip + per-step
-// onAdvance hooks. stepIndex is owned by the TourProvider — consumer doesn't
-// drive it from React state anymore.
+// Source pattern: react-joyride legacy JSX form with a branching callback.
+// Covers `action: 'next' | 'skip' | 'close'` discrimination — the most common
+// shape in OSS Joyride integrations (e.g. dashboards and admin panels).
 
-import { TourProvider, useTour } from '@tour-kit/react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { TourProvider } from '@tour-kit/react';
+
+// TODO: Import 'CallBackProps' has no Tour Kit equivalent — remove this import and rework references — see https://tourkit.dev/migration/joyride#callbackprops
+// TODO: Import 'ACTIONS' has no Tour Kit equivalent — remove this import and rework references — see https://tourkit.dev/migration/joyride#actions
+// TODO: Import 'STATUS' has no Tour Kit equivalent — remove this import and rework references — see https://tourkit.dev/migration/joyride#status
+import { type CallBackProps, ACTIONS, STATUS } from 'react-joyride';
 
 const steps = [
   { target: '#dashboard-header', content: 'Your dashboard summary lives here.' },
@@ -12,22 +16,38 @@ const steps = [
   { target: '#help-link', content: 'Need help? Open the docs.' },
 ]
 
-function DashboardController({ open }: { open: boolean }) {
-  const { start } = useTour()
-  if (open) start()
-  return null
-}
-
 export function DashboardTour() {
   const [run, setRun] = useState(true)
+  const [stepIndex, setStepIndex] = useState(0)
+
+  const handleJoyrideCallback = useCallback((data: CallBackProps) => {
+    const { action, index, status } = data
+
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+      setRun(false)
+      return
+    }
+
+    if (action === ACTIONS.NEXT) {
+      setStepIndex(index + 1)
+    } else if (action === ACTIONS.PREV) {
+      setStepIndex(Math.max(0, index - 1))
+    } else if (action === ACTIONS.SKIP || action === ACTIONS.CLOSE) {
+      setRun(false)
+    }
+  }, [])
 
   return (
+    // TODO: <Joyride run> — Tour Kit is imperative; call useTour().start() from a descendant — see https://tourkit.dev/migration/joyride#run-prop
+    // TODO: <Joyride stepIndex> — Tour Kit owns step index internally; use useTour().goTo() — see https://tourkit.dev/migration/joyride#step-index
+    // TODO: <Joyride continuous> is the default in Tour Kit (no opt-in needed) — see https://tourkit.dev/migration/joyride#continuous
+    // TODO: <Joyride showProgress> → render <TourProgress /> inside <TourCard /> — see https://tourkit.dev/migration/joyride#show-progress
+    // TODO: <Joyride showSkipButton> → render <TourClose /> inside <TourCard /> — see https://tourkit.dev/migration/joyride#show-skip-button
+    // TODO: <Joyride callback> splits into onTourEnd / onTourSkip / onStepAdvance — see https://tourkit.dev/migration/joyride#callback
     <TourProvider
-      tours={[{ id: 'dashboard', steps }]}
-      onTourEnd={() => setRun(false)}
-      onTourSkip={() => setRun(false)}
-    >
-      <DashboardController open={run} />
-    </TourProvider>
-  )
+      tours={[{
+        id: 'migrated-tour',
+        steps: steps,
+      }]} />
+  );
 }

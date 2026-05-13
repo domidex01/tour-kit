@@ -13,6 +13,7 @@
       "**/.claude/skills/**/evals/**",
       "**/__spikes__/**",
       "**/__tests__/spikes/**",
+      "**/__tests__/fixtures/**",
       "**/scripts/**",
       "**/test-results/**",
       "**/playwright-report/**"

@@ -1,8 +1,9 @@
-// Migration target — useJoyride() collapses to Tour Kit's useTour() + a
-// rendered <TourProvider> ancestor that owns the tour registry.
+// Source pattern: react-joyride v2 hook form (modern API).
+// `useJoyride()` returns controls + a Tour component the consumer renders
+// inline. Common in SaaS dashboards that ship Joyride v2.
 
-import { TourProvider, useTour } from '@tour-kit/react'
 import { useEffect } from 'react'
+import { useTour } from '@tour-kit/react'
 
 const steps = [
   { target: '[data-tour="sidebar"]', content: 'Navigation lives here.' },
@@ -10,18 +11,17 @@ const steps = [
   { target: '[data-tour="profile"]', content: 'Open your profile menu here.' },
 ]
 
-function TourBootstrap() {
-  const { start } = useTour()
-  useEffect(() => {
-    start()
-  }, [start])
-  return null
-}
-
 export function ProductTour() {
+  // TODO: useJoyride() collapsed to useTour() — register the tour at a parent: <TourProvider tours={[{ id: "migrated-tour", steps }]}> — see https://tourkit.dev/migration/joyride#use-joyride-hook
+  // TODO: Joyride controls.start/.next/.previous/.skip map to Tour Kit useTour() returns; verify each call site — see https://tourkit.dev/migration/joyride#controls-api
+  const controls = useTour();
+
+  useEffect(() => {
+    controls.start()
+  }, [controls])
+
   return (
-    <TourProvider tours={[{ id: 'product', steps }]}>
-      <TourBootstrap />
-    </TourProvider>
-  )
+    // TODO: <Tour /> from useJoyride was rendered inline — Tour Kit renders via <TourProvider> + <TourCard /> in an ancestor — see https://tourkit.dev/migration/joyride#tour-component
+    null
+  );
 }
