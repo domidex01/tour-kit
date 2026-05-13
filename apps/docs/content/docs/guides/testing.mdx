@@ -174,4 +174,4 @@ try {
 
 ## Browser-positioning tests live elsewhere
 
-This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use Playwright via [`@tour-kit/playwright`](./nextjs#end-to-end-with-playwright) (Phase 6). Phase 5 helpers stop at the jsdom boundary by design.
+This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use [`@tour-kit/playwright`](./playwright) — it ships a `test.extend({ tour })` fixture backed by the opt-in `window.__tourKit__` bridge. Phase 5 helpers stop at the jsdom boundary by design.

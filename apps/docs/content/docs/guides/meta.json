@@ -23,6 +23,7 @@
     "adoption-analytics",
     "announcements-scheduling",
     "checklists-tours",
-    "unified-slot"
+    "unified-slot",
+    "playwright"
   ]
 }

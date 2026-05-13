@@ -1,0 +1,155 @@
+---
+title: Playwright
+description: >-
+  Drive Tour Kit from Playwright with the typed `test.extend({ tour })`
+  fixture and the opt-in `window.__tourKit__` bridge.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+`@tour-kit/playwright` adds a typed `test.extend({ tour })` fixture so your
+end-to-end specs can move a tour forward without writing `page.click`
+boilerplate. It is backed by `window.__tourKit__` — a dev-only bridge that
+`<TourProvider>` exposes only when you explicitly opt in.
+
+<Callout type="warn">
+  **Security**: `enableTestBridge` defaults to `false`. **Never** ship a
+  production bundle with the bridge enabled — wrap it in a `NODE_ENV` guard.
+</Callout>
+
+## Install
+
+```bash
+pnpm add -D @tour-kit/playwright @playwright/test
+```
+
+`@playwright/test` is a peer dependency. Tour Kit supports `^1.58.0` and up.
+
+## 1 — Activate the bridge
+
+The bridge is what Playwright actually drives. Toggle it via `enableTestBridge`
+on `<TourProvider>` — and guard it with `NODE_ENV` so production never gets
+the surface:
+
+```tsx
+import { TourProvider } from '@tour-kit/core'
+
+export function AppProviders({ children }) {
+  return (
+    <TourProvider
+      tours={[onboardingTour]}
+      enableTestBridge={process.env.NODE_ENV !== 'production'}
+    >
+      {children}
+    </TourProvider>
+  )
+}
+```
+
+When `enableTestBridge` is `true`, `<TourProvider>` publishes
+`window.__tourKit__` with the following shape:
+
+```ts
+import type { TestBridge, EligibilityReport } from '@tour-kit/core'
+
+declare global {
+  interface Window {
+    __tourKit__?: TestBridge
+  }
+}
+
+interface TestBridge {
+  start: (tourId: string) => void
+  next: () => void
+  previous: () => void
+  goToStep: (stepId: string) => void
+  complete: () => void
+  skip: () => void
+  getDiagnostic: (tourId: string) => EligibilityReport | null
+}
+```
+
+In development, the provider also logs a single `console.warn` per mount
+reminding you the bridge is on. Production builds are silent.
+
+## 2 — Write a test
+
+Import `test` and `expect` from `@tour-kit/playwright` instead of
+`@playwright/test`. The `tour` fixture is scoped per-test:
+
+```ts
+import { test, expect } from '@tour-kit/playwright'
+
+test('onboarding happy path', async ({ page, tour }) => {
+  await page.goto('/')
+  await tour.start('onboarding')
+  await tour.waitForStep('welcome')
+  await tour.next()
+  await tour.waitForStep('pricing')
+  await tour.complete()
+})
+```
+
+### `tour` helpers
+
+| Helper | Behavior |
+|---|---|
+| `tour.start(id)` | Calls `window.__tourKit__.start(id)`. |
+| `tour.waitForStep(stepId, opts?)` | Waits for `[data-tour-step="<id>"]` to be visible. Accepts `{ timeout }`. |
+| `tour.next()` / `tour.previous()` | Step navigation. |
+| `tour.goToStep(stepId)` | Jump directly. |
+| `tour.complete()` / `tour.skip()` | End the tour. |
+| `tour.getDiagnostic(tourId)` | Read the Phase 3 `EligibilityReport`. Returns `null` without `diagnose`. |
+
+Every helper short-circuits with a clear error pointing at
+`enableTestBridge` if the bridge is missing — saving you ten minutes of
+confused debugging.
+
+## 3 — Diagnostic integration
+
+Mount the provider with both `diagnose` and `enableTestBridge` to surface
+gate diagnostics in your specs:
+
+```tsx
+<TourProvider
+  tours={[onboardingTour]}
+  diagnose
+  enableTestBridge={process.env.NODE_ENV !== 'production'}
+>
+```
+
+```ts
+test('audience gate blocks free users', async ({ page, tour }) => {
+  await page.goto('/?role=free')
+  const report = await tour.getDiagnostic('pro-only-tour')
+  expect(report?.willFire).toBe(false)
+  expect(report?.firstFailingGate?.code).toBe('AUDIENCE_MISMATCH')
+})
+```
+
+See [Diagnostic engine](/docs/core/diagnostic) for the full `EligibilityReport`
+shape and gate codes.
+
+## Security note
+
+`window.__tourKit__` is a tour-control surface. A production build that
+exposes it lets anyone with browser dev tools start, complete, or skip
+your tours. The default is `false` for that reason — keep it that way:
+
+```tsx
+// ✅ Recommended
+enableTestBridge={process.env.NODE_ENV !== 'production'}
+
+// ❌ Never
+enableTestBridge
+```
+
+The provider's effect short-circuits at the top when `enableTestBridge` is
+`false`, so bundlers can dead-code-eliminate the bridge body in production.
+
+## Related
+
+- [Testing Library](/docs/guides/testing) — jsdom helpers for component-level
+  positioning assertions.
+- [Diagnostic engine](/docs/core/diagnostic) — what `tour.getDiagnostic`
+  returns.
