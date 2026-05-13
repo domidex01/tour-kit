@@ -38,17 +38,17 @@
     var(--tour-adoption-timing, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
-.tk-funnel__step[role='button'] {
+.tk-funnel__step[role="button"] {
   cursor: pointer;
 }
 
-.tk-funnel__step[role='button']:hover,
-.tk-funnel__step[role='button']:focus-visible {
+.tk-funnel__step[role="button"]:hover,
+.tk-funnel__step[role="button"]:focus-visible {
   background-color: var(--tour-funnel-step-hover, rgba(0, 0, 0, 0.04));
   outline: none;
 }
 
-.tk-funnel__step[role='button']:focus-visible {
+.tk-funnel__step[role="button"]:focus-visible {
   box-shadow: 0 0 0 2px var(--tour-funnel-focus-ring, hsl(220, 90%, 56%));
 }
 

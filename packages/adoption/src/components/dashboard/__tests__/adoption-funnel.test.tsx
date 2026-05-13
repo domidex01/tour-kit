@@ -8,20 +8,16 @@ describe('<AdoptionFunnel>', () => {
   describe('provider-less rendering (data-first)', () => {
     it('mounts without any provider wrapper', () => {
       const { container } = render(<AdoptionFunnel steps={sampleSteps} />)
-      const labels = Array.from(
-        container.querySelectorAll<HTMLElement>('.tk-funnel__label')
-      ).map((el) => el.textContent)
+      const labels = Array.from(container.querySelectorAll<HTMLElement>('.tk-funnel__label')).map(
+        (el) => el.textContent
+      )
       expect(labels).toEqual(['Viewed', 'Clicked', 'Converted'])
     })
 
     it('renders labels in order', () => {
       const { container } = render(<AdoptionFunnel steps={sampleSteps} />)
       const labelEls = Array.from(container.querySelectorAll('.tk-funnel__label'))
-      expect(labelEls.map((el) => el.textContent)).toEqual([
-        'Viewed',
-        'Clicked',
-        'Converted',
-      ])
+      expect(labelEls.map((el) => el.textContent)).toEqual(['Viewed', 'Clicked', 'Converted'])
     })
 
     it('renders a header when `title` is provided', () => {
@@ -30,9 +26,7 @@ describe('<AdoptionFunnel>', () => {
     })
 
     it('applies an extra className to the root', () => {
-      const { container } = render(
-        <AdoptionFunnel steps={sampleSteps} className="extra-class" />
-      )
+      const { container } = render(<AdoptionFunnel steps={sampleSteps} className="extra-class" />)
       expect(container.firstChild).toHaveClass('tk-funnel')
       expect(container.firstChild).toHaveClass('extra-class')
     })
@@ -81,17 +75,14 @@ describe('<AdoptionFunnel>', () => {
   describe('interaction', () => {
     it('invokes onStepClick with step + index', () => {
       const onClick = vi.fn()
-      const { container } = render(
-        <AdoptionFunnel steps={sampleSteps} onStepClick={onClick} />
-      )
+      const { container } = render(<AdoptionFunnel steps={sampleSteps} onStepClick={onClick} />)
       const stepEls = container.querySelectorAll<HTMLElement>('.tk-funnel__step')
       expect(stepEls).toHaveLength(3)
-      fireEvent.click(stepEls[1]!)
+      const clickedStep = stepEls[1]
+      if (!clickedStep) throw new Error('expected step at index 1')
+      fireEvent.click(clickedStep)
       expect(onClick).toHaveBeenCalledTimes(1)
-      expect(onClick).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'click' }),
-        1
-      )
+      expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'click' }), 1)
     })
 
     it.each([
@@ -99,17 +90,12 @@ describe('<AdoptionFunnel>', () => {
       ['Space', ' '],
     ])('activates onStepClick on %s key', (_label, key) => {
       const onClick = vi.fn()
-      const { container } = render(
-        <AdoptionFunnel steps={sampleSteps} onStepClick={onClick} />
-      )
+      const { container } = render(<AdoptionFunnel steps={sampleSteps} onStepClick={onClick} />)
       const firstStep = container.querySelector<HTMLElement>('.tk-funnel__step')
-      expect(firstStep).not.toBeNull()
-      fireEvent.keyDown(firstStep!, { key })
+      if (!firstStep) throw new Error('expected at least one step')
+      fireEvent.keyDown(firstStep, { key })
       expect(onClick).toHaveBeenCalledTimes(1)
-      expect(onClick).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'view' }),
-        0
-      )
+      expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'view' }), 0)
     })
 
     it('omits role=button when onStepClick is undefined', () => {
@@ -121,9 +107,9 @@ describe('<AdoptionFunnel>', () => {
       render(<AdoptionFunnel steps={sampleSteps} onStepClick={() => {}} />)
       const buttons = screen.getAllByRole('button')
       expect(buttons).toHaveLength(3)
-      buttons.forEach((btn) => {
+      for (const btn of buttons) {
         expect(btn).toHaveAttribute('tabindex', '0')
-      })
+      }
     })
   })
 
@@ -156,24 +142,20 @@ describe('<AdoptionFunnel>', () => {
     it('default aria-label summarizes the funnel', () => {
       render(<AdoptionFunnel steps={sampleSteps} />)
       const chart = screen.getByRole('img')
-      expect(chart.getAttribute('aria-label')).toMatch(
-        /Adoption funnel: 100 → 60 → 30/
-      )
+      expect(chart.getAttribute('aria-label')).toMatch(/Adoption funnel: 100 → 60 → 30/)
     })
 
     it('respects ariaLabel override', () => {
       render(<AdoptionFunnel steps={sampleSteps} ariaLabel="Custom summary" />)
-      expect(screen.getByRole('img').getAttribute('aria-label')).toBe(
-        'Custom summary'
-      )
+      expect(screen.getByRole('img').getAttribute('aria-label')).toBe('Custom summary')
     })
 
     it('bars carry aria-hidden so SR consumers use the table instead', () => {
       const { container } = render(<AdoptionFunnel steps={sampleSteps} />)
       const bars = container.querySelectorAll('.tk-funnel__bar')
-      bars.forEach((bar) => {
+      for (const bar of bars) {
         expect(bar).toHaveAttribute('aria-hidden', 'true')
-      })
+      }
     })
   })
 })

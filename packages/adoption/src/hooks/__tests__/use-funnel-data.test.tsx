@@ -1,17 +1,13 @@
 import { renderHook } from '@testing-library/react'
 import type * as React from 'react'
 import { describe, expect, it } from 'vitest'
-import { AdoptionContext } from '../../context/adoption-context'
 import { mockAdoptionContext } from '../../__tests__/_fixtures'
+import { AdoptionContext } from '../../context/adoption-context'
 import { useFunnelData } from '../use-funnel-data'
 
 function wrapperFactory(value: ReturnType<typeof mockAdoptionContext>) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return (
-      <AdoptionContext.Provider value={value}>
-        {children}
-      </AdoptionContext.Provider>
-    )
+    return <AdoptionContext.Provider value={value}>{children}</AdoptionContext.Provider>
   }
 }
 
@@ -21,10 +17,9 @@ describe('useFunnelData', () => {
       onboarding: { useCount: 5, status: 'adopted' },
       checkout: { useCount: 2, status: 'exploring' },
     })
-    const { result } = renderHook(
-      () => useFunnelData({ featureIds: ['onboarding', 'checkout'] }),
-      { wrapper: wrapperFactory(ctxVal) }
-    )
+    const { result } = renderHook(() => useFunnelData({ featureIds: ['onboarding', 'checkout'] }), {
+      wrapper: wrapperFactory(ctxVal),
+    })
     expect(result.current.steps).toHaveLength(2)
     // Adopted feature: entered = useCount, completed = useCount (100% conversion).
     expect(result.current.steps[0]).toMatchObject({
@@ -47,10 +42,9 @@ describe('useFunnelData', () => {
     const ctxVal = mockAdoptionContext({
       tracked: { useCount: 3, status: 'adopted' },
     })
-    const { result } = renderHook(
-      () => useFunnelData({ featureIds: ['tracked', 'unknown'] }),
-      { wrapper: wrapperFactory(ctxVal) }
-    )
+    const { result } = renderHook(() => useFunnelData({ featureIds: ['tracked', 'unknown'] }), {
+      wrapper: wrapperFactory(ctxVal),
+    })
     expect(result.current.steps).toHaveLength(2)
     expect(result.current.steps[1]).toMatchObject({
       id: 'unknown',
@@ -79,10 +73,9 @@ describe('useFunnelData', () => {
     const ctxVal = mockAdoptionContext({
       feat: { useCount: 1, status: 'exploring', name: 'Friendly Name' },
     })
-    const { result } = renderHook(
-      () => useFunnelData({ featureIds: ['feat'] }),
-      { wrapper: wrapperFactory(ctxVal) }
-    )
+    const { result } = renderHook(() => useFunnelData({ featureIds: ['feat'] }), {
+      wrapper: wrapperFactory(ctxVal),
+    })
     expect(result.current.steps[0]?.label).toBe('Friendly Name')
   })
 })

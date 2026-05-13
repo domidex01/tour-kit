@@ -2,10 +2,7 @@
 
 import { cn } from '@tour-kit/core'
 import * as React from 'react'
-import {
-  type FunnelStepMetrics,
-  calculateFunnelMetrics,
-} from '../../lib/calculate-funnel-metrics'
+import { type FunnelStepMetrics, calculateFunnelMetrics } from '../../lib/calculate-funnel-metrics'
 import type { AdoptionFunnelProps, FunnelStep } from '../../types/feature'
 
 /**
@@ -36,9 +33,7 @@ export function AdoptionFunnel({
   const metrics = React.useMemo(() => calculateFunnelMetrics(steps), [steps])
 
   if (steps.length === 0) {
-    return (
-      <>{emptyState ?? <p className="tk-funnel__empty">No funnel data yet.</p>}</>
-    )
+    return <>{emptyState ?? <p className="tk-funnel__empty">No funnel data yet.</p>}</>
   }
 
   const maxEntered = Math.max(...metrics.map((m) => m.entered), 1)
@@ -56,9 +51,7 @@ export function AdoptionFunnel({
             entered: m.entered,
             completed: m.completed,
           }
-          const handleClick = onStepClick
-            ? () => onStepClick(step, i)
-            : undefined
+          const handleClick = onStepClick ? () => onStepClick(step, i) : undefined
           const handleKeyDown = handleClick
             ? (e: React.KeyboardEvent<HTMLLIElement>) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -77,11 +70,7 @@ export function AdoptionFunnel({
               onKeyDown={handleKeyDown}
             >
               <div className="tk-funnel__label">{m.label}</div>
-              <div
-                className="tk-funnel__bar"
-                style={{ width: `${widthPct}%` }}
-                aria-hidden="true"
-              >
+              <div className="tk-funnel__bar" style={{ width: `${widthPct}%` }} aria-hidden="true">
                 <span className="tk-funnel__value">{m.entered}</span>
               </div>
               {i > 0 ? (
@@ -132,9 +121,6 @@ function buildAriaLabel(metrics: readonly FunnelStepMetrics[]): string {
   const enteredSeq = metrics.map((m) => m.entered).join(' → ')
   const first = metrics[0]?.entered ?? 0
   const last = metrics[metrics.length - 1]?.entered ?? 0
-  const endToEnd =
-    metrics.length > 1 && first > 0
-      ? ((last / first) * 100).toFixed(0)
-      : '100'
+  const endToEnd = metrics.length > 1 && first > 0 ? ((last / first) * 100).toFixed(0) : '100'
   return `Adoption funnel: ${enteredSeq}, ${endToEnd}% end-to-end retention`
 }

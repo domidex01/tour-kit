@@ -35,9 +35,7 @@ describe('calculateFunnelMetrics', () => {
   })
 
   it('handles missing completed (defaults to 0)', () => {
-    const [m] = calculateFunnelMetrics([
-      { id: 'a', label: 'A', entered: 10 },
-    ])
+    const [m] = calculateFunnelMetrics([{ id: 'a', label: 'A', entered: 10 }])
     expect(m?.completed).toBe(0)
     expect(m?.conversion).toBe(0)
   })

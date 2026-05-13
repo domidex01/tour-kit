@@ -8,12 +8,7 @@
  *   `FeatureWithUsage[]`. We construct both shapes here so tests don't have to.
  */
 import type { AdoptionContextValue } from '../context/adoption-context'
-import type {
-  AdoptionStatus,
-  Feature,
-  FeatureUsage,
-  FunnelStep,
-} from '../types/feature'
+import type { AdoptionStatus, Feature, FeatureUsage, FunnelStep } from '../types/feature'
 
 export const sampleSteps: readonly FunnelStep[] = [
   { id: 'view', label: 'Viewed', entered: 100, completed: 60 },

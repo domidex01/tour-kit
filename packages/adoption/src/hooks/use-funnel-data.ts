@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { useAdoptionStats } from './use-adoption-stats'
 import type { FunnelStep } from '../types/feature'
+import { useAdoptionStats } from './use-adoption-stats'
 
 export interface UseFunnelDataInput {
   /** Feature IDs in funnel order. */
@@ -32,10 +32,7 @@ export interface UseFunnelDataResult {
  *
  * Throws via `useAdoptionStats` if used outside `<AdoptionProvider>`.
  */
-export function useFunnelData({
-  featureIds,
-  labels,
-}: UseFunnelDataInput): UseFunnelDataResult {
+export function useFunnelData({ featureIds, labels }: UseFunnelDataInput): UseFunnelDataResult {
   const stats = useAdoptionStats()
   return React.useMemo<UseFunnelDataResult>(() => {
     const steps: FunnelStep[] = featureIds.map((id) => {

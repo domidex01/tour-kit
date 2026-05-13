@@ -25,16 +25,13 @@ export interface FunnelStepMetrics {
  * Empty input returns `[]`. Guards against divide-by-zero in `conversion`
  * and `retentionFromPrev` so the funnel never emits `NaN`/`Infinity`.
  */
-export function calculateFunnelMetrics(
-  steps: readonly FunnelStep[]
-): FunnelStepMetrics[] {
+export function calculateFunnelMetrics(steps: readonly FunnelStep[]): FunnelStepMetrics[] {
   return steps.map((step, i) => {
     const entered = step.entered
     const completed = step.completed ?? 0
     const prevEntered = i === 0 ? entered : (steps[i - 1]?.entered ?? 0)
     const conversion = entered > 0 ? completed / entered : 0
-    const retentionFromPrev =
-      i === 0 ? 1 : prevEntered > 0 ? entered / prevEntered : 0
+    const retentionFromPrev = i === 0 ? 1 : prevEntered > 0 ? entered / prevEntered : 0
     const dropoffFromPrev = i === 0 ? 0 : Math.max(0, prevEntered - entered)
     return {
       id: step.id,
