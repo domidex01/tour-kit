@@ -1,3 +1,5 @@
+import type * as React from 'react'
+
 /**
  * How to detect when a feature is used
  */
@@ -99,4 +101,50 @@ export type AdoptionStatus =
  */
 export interface FeatureWithUsage extends Feature {
   usage: FeatureUsage
+}
+
+/**
+ * One step in an adoption funnel.
+ *
+ * The funnel is data-first: consumers compute these from their own analytics
+ * (e.g. cohort queries) and hand them to `<AdoptionFunnel steps={...}>` —
+ * no provider required. `useFunnelData()` is a convenience selector that
+ * derives a CURRENT-STATE funnel from `useAdoptionStats` for in-provider use.
+ */
+export interface FunnelStep {
+  /** Stable identifier for the step (used as React key + onClick payload). */
+  id: string
+  /** Visible label rendered next to the bar. */
+  label: string
+  /** Number of subjects that reached this step. */
+  entered: number
+  /**
+   * Number of subjects that completed the step.
+   * Defaults to 0 (no one progressed past this step) when omitted.
+   */
+  completed?: number
+}
+
+/**
+ * Props for `<AdoptionFunnel>`.
+ *
+ * Works WITHOUT `<AdoptionProvider>` — data-first by design. Consumers in a
+ * provider tree typically combine with `useFunnelData({ featureIds })`.
+ */
+export interface AdoptionFunnelProps {
+  /** Pre-computed funnel data, in display order. */
+  steps: readonly FunnelStep[]
+  /** Optional header rendered above the bars. */
+  title?: React.ReactNode
+  /** Click/keyboard activation handler. When omitted, steps are not focusable. */
+  onStepClick?: (step: FunnelStep, index: number) => void
+  /** Replaces the default "No funnel data yet." message when `steps` is empty. */
+  emptyState?: React.ReactNode
+  /** Extra className merged onto the root element. */
+  className?: string
+  /**
+   * Overrides the auto-generated chart summary on the `role="img"` element.
+   * Default: `Adoption funnel: 100 → 60 → 30, 30% end-to-end retention`.
+   */
+  ariaLabel?: string
 }

@@ -1,0 +1,207 @@
+---
+title: Adoption Funnel
+description: >-
+  Step-by-step adoption funnel with drop-off percentages — Pendo/Userpilot
+  parity, native CSS, no chart peer dependency.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+`<AdoptionFunnel>` renders a vertical funnel chart with retention and
+drop-off between adjacent steps. It is **data-first**: hand it pre-computed
+`steps` and it works without any provider. Inside an
+`<AdoptionProvider>`, pair it with `useFunnelData({ featureIds })` for a
+one-line in-provider integration.
+
+<Callout type="info">
+  The funnel is rendered with native CSS — no `recharts`, `d3`, or other chart
+  peer dependency. Bundle delta is &lt;2 KB gzipped.
+</Callout>
+
+## Provider-less Usage (Recommended)
+
+Compute funnel data from your analytics layer and pass it in directly:
+
+```tsx
+import { AdoptionFunnel } from '@tour-kit/adoption'
+import '@tour-kit/adoption/styles/funnel.css'
+
+const steps = [
+  { id: 'view', label: 'Viewed', entered: 1000, completed: 720 },
+  { id: 'click', label: 'Clicked CTA', entered: 720, completed: 380 },
+  { id: 'signup', label: 'Signed Up', entered: 380, completed: 240 },
+]
+
+<AdoptionFunnel
+  steps={steps}
+  title="Sign-up funnel"
+  onStepClick={(step, index) => console.log('drilldown:', step, index)}
+/>
+```
+
+This path needs no provider, so the funnel can live in any tree —
+admin dashboards, server-rendered reports, etc.
+
+## In-provider Usage with `useFunnelData`
+
+```tsx
+import {
+  AdoptionFunnel,
+  AdoptionProvider,
+  useFunnelData,
+} from '@tour-kit/adoption'
+
+function OnboardingFunnel() {
+  const { steps } = useFunnelData({
+    featureIds: ['view-pricing', 'start-trial', 'invite-team'],
+    labels: {
+      'view-pricing': 'Viewed Pricing',
+      'start-trial': 'Started Trial',
+      'invite-team': 'Invited Team',
+    },
+  })
+  return <AdoptionFunnel steps={steps} title="Activation funnel" />
+}
+
+<AdoptionProvider features={features}>
+  <OnboardingFunnel />
+</AdoptionProvider>
+```
+
+<Callout type="warn">
+  **Current-state, not historical.** `useFunnelData` derives a per-user
+  snapshot from `useAdoptionStats` — `entered` is the user's `useCount` and
+  `completed` is `useCount` when the feature status is `'adopted'`, else `0`.
+  For aggregated cohort funnels with date ranges, compute them in your
+  analytics layer and hand the result to `<AdoptionFunnel steps={...}>`
+  directly.
+</Callout>
+
+## `<AdoptionFunnel>` Props
+
+<TypeTable
+  type={{
+    steps: {
+      type: 'readonly FunnelStep[]',
+      required: true,
+      description: 'Pre-computed funnel data in display order.',
+    },
+    title: {
+      type: 'React.ReactNode',
+      description: 'Optional header rendered above the bars.',
+    },
+    onStepClick: {
+      type: '(step: FunnelStep, index: number) => void',
+      description:
+        'Click/keyboard activation handler. Steps become focusable (role="button", tabIndex=0) when provided; Enter and Space both fire the callback.',
+    },
+    emptyState: {
+      type: 'React.ReactNode',
+      description:
+        'Replaces the default "No funnel data yet." message when `steps` is empty.',
+    },
+    ariaLabel: {
+      type: 'string',
+      description:
+        'Overrides the auto-generated summary on the `role="img"` chart element.',
+    },
+    className: {
+      type: 'string',
+      description: 'Extra class merged onto the root.',
+    },
+  }}
+/>
+
+## `FunnelStep` Shape
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      required: true,
+      description: 'Stable identifier (React key + onClick payload).',
+    },
+    label: {
+      type: 'string',
+      required: true,
+      description: 'Visible label rendered next to the bar.',
+    },
+    entered: {
+      type: 'number',
+      required: true,
+      description: 'Subjects that reached this step.',
+    },
+    completed: {
+      type: 'number',
+      description: 'Subjects that completed this step. Defaults to 0.',
+    },
+  }}
+/>
+
+## `useFunnelData` Input/Output
+
+<TypeTable
+  type={{
+    featureIds: {
+      type: 'readonly string[]',
+      required: true,
+      description: 'Feature IDs in funnel order.',
+    },
+    labels: {
+      type: 'Partial<Record<string, string>>',
+      description:
+        'Override the visible label per feature ID. Falls back to `feature.name` then the raw id.',
+    },
+  }}
+/>
+
+Returns `{ steps: FunnelStep[]; loading: boolean; error: Error | null }`. The
+`loading`/`error` slots are reserved for future async sources — the
+in-memory provider always returns `false`/`null`.
+
+## Accessibility
+
+- The chart is exposed to assistive tech as a single `role="img"` element with
+  an auto-generated `aria-label` summarizing the funnel
+  (`Adoption funnel: 100 → 60 → 30, 30% end-to-end retention`). Override via
+  the `ariaLabel` prop.
+- Each bar carries `aria-hidden="true"` — screen readers receive the same
+  numbers through a visually-hidden `<table>` mirror placed alongside the
+  visual list.
+- Clickable steps are keyboard-activatable. **Enter** and **Space** both
+  fire `onStepClick`; tab order matches visual order.
+- Honors `prefers-reduced-motion: reduce` — the hover-transition is disabled
+  under the OS preference. See the
+  [reduced-motion guide](/docs/guides/reduced-motion).
+
+## Styling
+
+Import the base stylesheet once at your app root:
+
+```ts
+import '@tour-kit/adoption/styles/funnel.css'
+```
+
+CSS custom properties for theming:
+
+```css
+:root {
+  --tour-funnel-gap: 0.5rem;
+  --tour-funnel-step-gap: 0.5rem;
+  --tour-funnel-bar-bg: hsl(220 90% 56%);
+  --tour-funnel-bar-fg: #fff;
+  --tour-funnel-retention-fg: hsl(0 0% 40%);
+  --tour-funnel-step-hover: rgba(0, 0, 0, 0.04);
+  --tour-funnel-focus-ring: hsl(220 90% 56%);
+}
+```
+
+## Next Steps
+
+- [AdoptionDashboard](/docs/adoption/dashboard/adoption-dashboard) — full
+  dashboard component
+- [useAdoptionStats](/docs/adoption/hooks/use-adoption-stats) — underlying
+  per-feature stats hook
+- [Reduced-motion guide](/docs/guides/reduced-motion) — cross-package
+  motion contract

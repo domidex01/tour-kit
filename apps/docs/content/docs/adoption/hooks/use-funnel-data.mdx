@@ -1,0 +1,104 @@
+---
+title: useFunnelData
+description: >-
+  Derive a current-state adoption funnel from useAdoptionStats — feed straight
+  into AdoptionFunnel.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { TypeTable } from 'fumadocs-ui/components/type-table'
+
+`useFunnelData` is a convenience selector that projects the current user's
+adoption state — read via `useAdoptionStats` — into a `FunnelStep[]` ready
+to hand to `<AdoptionFunnel>`. Must be used inside `<AdoptionProvider>`.
+
+<Callout type="warn">
+  **Current-state, not historical.** This hook describes the *current user*'s
+  progress at this moment. It does NOT support date-ranged cohort funnels.
+  For aggregated multi-user funnels, compute the data in your analytics
+  pipeline and pass it directly to `<AdoptionFunnel steps={data} />`.
+</Callout>
+
+## Usage
+
+```tsx
+import {
+  AdoptionFunnel,
+  AdoptionProvider,
+  useFunnelData,
+} from '@tour-kit/adoption'
+
+function ActivationFunnel() {
+  const { steps } = useFunnelData({
+    featureIds: ['view-pricing', 'start-trial', 'invite-team'],
+    labels: {
+      'view-pricing': 'Viewed Pricing',
+      'start-trial': 'Started Trial',
+      'invite-team': 'Invited Team',
+    },
+  })
+  return <AdoptionFunnel steps={steps} title="Activation funnel" />
+}
+
+<AdoptionProvider features={features}>
+  <ActivationFunnel />
+</AdoptionProvider>
+```
+
+## Input
+
+<TypeTable
+  type={{
+    featureIds: {
+      type: 'readonly string[]',
+      required: true,
+      description: 'Feature IDs in funnel order.',
+    },
+    labels: {
+      type: 'Partial<Record<string, string>>',
+      description:
+        'Override the visible label per feature ID. Falls back to `feature.name`, then the raw id.',
+    },
+  }}
+/>
+
+## Output
+
+<TypeTable
+  type={{
+    steps: {
+      type: 'FunnelStep[]',
+      description:
+        'Funnel steps ready for `<AdoptionFunnel>`. One step per `featureIds` entry, in input order.',
+    },
+    loading: {
+      type: 'boolean',
+      description:
+        'Reserved for future async sources. Always `false` for the in-memory provider.',
+    },
+    error: {
+      type: 'Error | null',
+      description:
+        'Reserved for future async sources. Always `null` for the in-memory provider.',
+    },
+  }}
+/>
+
+## Mapping Semantics
+
+For each `featureIds[i]`, the hook reads the matching `FeatureWithUsage`
+from `useAdoptionStats()` and produces:
+
+- `entered` = `usage.useCount` — number of times the current user has touched
+  the feature.
+- `completed` = `usage.useCount` when `usage.status === 'adopted'`, else `0` —
+  100% per-user conversion once adopted; 0% before.
+
+Unknown feature IDs (no matching feature in the provider) get
+`entered: 0, completed: 0`.
+
+## See Also
+
+- [`<AdoptionFunnel>`](/docs/adoption/dashboard/funnel) — the consumer component
+- [`useAdoptionStats`](/docs/adoption/hooks/use-adoption-stats) — underlying
+  current-state stats hook
