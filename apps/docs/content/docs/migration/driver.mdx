@@ -1,0 +1,292 @@
+---
+title: Migrate from driver.js
+description: >-
+  Use `npx tour-kit-migrate --from driver` to rewrite a driver.js codebase to
+  Tour Kit in seconds. Covers the function-call pattern
+  (`driver({...}).drive()`).
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+## Quick start
+
+```bash
+npx tour-kit-migrate --from driver ./src
+```
+
+The migrate command runs a `jscodeshift` transform over your `.ts`/`.tsx`/`.js`/`.jsx`
+files and reshapes `driver({...})` config objects into Tour Kit tours. The
+`.drive()` chain becomes a TODO pointing at `useTour().start()`. Patterns
+that have no Tour Kit equivalent are kept in place and annotated with `// TODO:`
+comments that link back to this page.
+
+<Callout type="info">
+Run with `--dry-run` to see the diff without writing. Run with `--print` to
+write transformed source to stdout.
+</Callout>
+
+### Flags
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--from <source>` | required | One of `joyride`, `shepherd`, `driver` |
+| `--parser <parser>` | `tsx` | `tsx` / `ts` / `babel` |
+| `--dry-run` | off | Print diffs, don't write |
+| `--print` | off | Write transformed source to stdout |
+| `--extensions <list>` | `ts,tsx,js,jsx` | Comma-separated extension list |
+| `--verbose` | off | Log every file action |
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success |
+| 1 | Parse error during transform |
+| 2 | Bad CLI args |
+| 3 | No files matched |
+
+## What gets migrated
+
+| Pattern | driver.js | Tour Kit |
+| --- | --- | --- |
+| Import | `import { driver } from 'driver.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| Config call | `driver({ steps: [...] })` | `{ id: 'migrated-tour', steps: [...] }` literal + TODO to register at `<TourProvider>` |
+| `Step.element` (selector) | `'#hero'` | `target: '#hero'` |
+| `Step.popover.title` | `'Welcome'` | `title: 'Welcome'` |
+| `Step.popover.description` | `'Hi there'` | `content: 'Hi there'` |
+| `Step.popover.side` | `'top'` / `'bottom'` / ... | `placement: 'top'` / `'bottom'` / ... |
+| `.drive()` chain | `d.drive()` | empty statement + TODO to call `useTour().start()` |
+
+## Anchors emitted by the codemod
+
+Each heading below corresponds to a `// TODO:` link emitted by the transform.
+Grep your migrated codebase for the anchor or follow it here for hand-port
+guidance.
+
+### driver-call
+
+`driver({...})` is replaced with a Tour Kit tour shape:
+
+```tsx
+const d = {
+  id: 'migrated-tour',
+  steps: [/* migrated steps */],
+}
+```
+
+Register the migrated tour at a `<TourProvider>` ancestor and call
+`useTour().start()` from a descendant when you want the tour to begin.
+
+### driver-config-dynamic
+
+The `driver(...)` argument was dynamic (not an inline object). Populate the
+migrated `steps` array manually.
+
+### steps-dynamic
+
+The config's `steps` field was dynamic (not an inline array). Populate the
+migrated `steps` array manually.
+
+### step-dynamic
+
+A step inside the `steps` array was dynamic (not an inline object). Port the
+step shape manually.
+
+### element-function
+
+```ts
+{ element: () => document.body, popover: {...} }
+```
+
+Tour Kit's `target` accepts a CSS selector string or a DOM ref — not a
+function. Rewrite as a selector or pass a ref via the headless slot API.
+
+### element-dom
+
+```ts
+const el = document.getElementById('hero')!
+driver({ steps: [{ element: el, popover: {...} }] })
+```
+
+A captured DOM Element is preserved as `target: el`. Tour Kit accepts a ref
+directly — verify the value resolves at runtime, or rewrite as a CSS
+selector.
+
+### target
+
+The codemod could not resolve `Step.element` to a selector. Set `Step.target`
+by hand to a CSS selector string or DOM ref.
+
+### placement
+
+driver.js's `popover.side` accepts `top` / `bottom` / `left` / `right` and
+`over`. `over` is mapped to `top`; review manually.
+
+### align
+
+`popover.align` (e.g. `start`, `end`) is folded into Tour Kit's compound
+placement values (`top-start`, `top-end`, etc.) — port manually.
+
+### popover-dynamic
+
+`Step.popover` was not an inline object. Port `title` / `content` / `placement`
+manually.
+
+### popover-class
+
+`popover.popoverClass` injected a CSS class. Use theme tokens via your
+`<ThemeProvider>` and `<TourCard />` slots.
+
+### show-progress
+
+`showProgress: true` (tour-level) or `popover.showProgress` (step-level)
+rendered a `step n/N` indicator. Render `<TourProgress />` inside your
+`<TourCard />` slot.
+
+### allow-close
+
+`allowClose: false` removed the close button. Include or omit `<TourClose />`
+inside your `<TourCard />` composition.
+
+### btn-text
+
+`doneBtnText`, `nextBtnText`, `prevBtnText`, `closeBtnText` (and the same
+fields nested in `popover`) overrode button labels. Pass label props to your
+`<TourNavigation />` and `<TourClose />` slot components.
+
+### show-buttons
+
+`showButtons: ['next', 'previous']` (or fewer) selected which buttons to
+render. Compose your `<TourCard />` with only the slots you need — omitted
+slots simply don't render.
+
+### disable-active-interaction
+
+`disableActiveInteraction: true` made the spotlighted element non-interactive.
+Configure the spotlight interactive flag on your `<TourOverlay />` slot.
+
+### smooth-scroll
+
+`smoothScroll: true` enabled smooth scrolling. Tour Kit always scrolls when
+the target is off-screen; gate manually if you need a custom scroll
+behaviour.
+
+### animate
+
+`animate: true` toggled animation. Tour Kit respects
+`prefers-reduced-motion` automatically — drop the flag.
+
+### stage-padding
+
+`stagePadding` controlled padding around the spotlight ring. Pass `padding`
+to your `<TourOverlay />` slot.
+
+### stage-radius
+
+`stageRadius` controlled the spotlight corner radius. Theme tokens via your
+`<ThemeProvider>`.
+
+### overlay-color
+
+`overlayColor` set the backdrop colour. Theme tokens via your
+`<ThemeProvider>`.
+
+### overlay-opacity
+
+`overlayOpacity` set the backdrop opacity. Theme tokens via your
+`<ThemeProvider>`.
+
+### on-highlight-started
+
+`Step.onHighlightStarted` and `onHighlighted` fired when the spotlight moved.
+Port to `onShow` on the migrated step.
+
+### on-highlighted
+
+Alias of `on-highlight-started` — see above.
+
+### on-deselected
+
+`Step.onDeselected` fired when leaving a step. Port to `onHide` on the
+migrated step.
+
+### on-popover-render
+
+`popover.onPopoverRender` was a render callback for the popover DOM. Render
+custom JSX in `<TourCard />` children instead.
+
+### on-next-click
+
+`popover.onNextClick` / `onPrevClick` / `onCloseClick` were per-step button
+callbacks. Handle in your `<TourNavigation />` / `<TourClose />` slot.
+
+### on-prev-click
+
+See `on-next-click`.
+
+### on-close-click
+
+See `on-next-click`.
+
+### on-click
+
+Generic on-click anchor for popover button handlers — see `on-next-click`.
+
+### on-destroy-started
+
+`onDestroyStarted` fired before tour teardown. Use `onSkip` / `onComplete` on
+your `<TourProvider>`.
+
+### on-destroyed
+
+`onDestroyed` fired after tour teardown. Use `onSkip` / `onComplete` on your
+`<TourProvider>`.
+
+### drive
+
+```ts
+d.drive()
+```
+
+The migrated tour object has no `.drive()` method. Call `useTour().start()`
+from inside a descendant of the `<TourProvider>` that registers the tour.
+
+### control-flow
+
+`.destroy()`, `.moveNext()`, `.movePrevious()`, `.moveTo(index)` are replaced
+with empty statements + TODO comments. Their Tour Kit equivalents are:
+
+| driver.js | Tour Kit |
+| --- | --- |
+| `d.destroy()` | `useTour().stop()` |
+| `d.moveNext()` | `useTour().next()` |
+| `d.movePrevious()` | `useTour().prev()` |
+| `d.moveTo(i)` | `useTour().goTo(i)` |
+
+### highlight
+
+`d.highlight()` showed a single popover without a tour. Tour Kit has no
+single-step highlight — render `<HintHotspot>` from `@tour-kit/hints` for the
+same UX.
+
+### unknown-config-field
+
+A tour-level config field not in this matrix. Check the version of driver.js
+you ran against.
+
+### unknown-popover-field
+
+A `popover.*` field not in this matrix.
+
+### unknown-step-field
+
+A `Step.*` field not in this matrix.
+
+## CLI smoke test
+
+```bash
+npx tour-kit-migrate --from driver --dry-run ./src
+```
+
+If the dry-run prints clean diffs and exits 0, run again without `--dry-run`
+to write the changes.
