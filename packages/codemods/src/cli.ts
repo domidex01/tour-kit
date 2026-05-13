@@ -41,7 +41,9 @@ const TRANSFORMS: Partial<Record<CliOptions['from'], JscodeshiftTransform>> = {
 // stable; populated post-fixture-run if a corpus drops below the gate.
 // Tests read this set live (not a hardcoded list) so the experimental status
 // is part of the code review, not buried in a changelog.
-export const EXPERIMENTAL_TRANSFORMS: ReadonlySet<CliOptions['from']> = new Set<CliOptions['from']>([])
+export const EXPERIMENTAL_TRANSFORMS: ReadonlySet<CliOptions['from']> = new Set<CliOptions['from']>(
+  []
+)
 
 // Per-source coverage percentages reported alongside the experimental
 // warning. Numbers come from the actual fixture-runner output — kept here so

@@ -96,9 +96,9 @@ function rewriteTourConstructors(
   let mutated = false
 
   const matches: ASTPath[] = []
-  root.find(j.NewExpression).forEach((path) => {
+  for (const path of root.find(j.NewExpression).paths()) {
     if (isShepherdTourConstructor(path.node, imports)) matches.push(path)
-  })
+  }
   if (matches.length === 0) return false
 
   for (const path of matches) {
@@ -107,13 +107,15 @@ function rewriteTourConstructors(
   return mutated
 }
 
-function isShepherdTourConstructor(
-  node: ASTNode,
-  imports: ShepherdImports
-): boolean {
+function isShepherdTourConstructor(node: ASTNode, imports: ShepherdImports): boolean {
   const ne = node as { type: string; callee?: unknown }
   if (ne.type !== 'NewExpression') return false
-  const callee = ne.callee as { type?: string; name?: string; object?: { name?: string }; property?: { name?: string } }
+  const callee = ne.callee as {
+    type?: string
+    name?: string
+    object?: { name?: string }
+    property?: { name?: string }
+  }
   if (!callee) return false
   if (
     callee.type === 'MemberExpression' &&
@@ -132,11 +134,7 @@ function isShepherdTourConstructor(
   return false
 }
 
-function rewriteOneTourConstructor(
-  j: JSCodeshift,
-  root: Collection,
-  path: ASTPath
-): boolean {
+function rewriteOneTourConstructor(j: JSCodeshift, root: Collection, path: ASTPath): boolean {
   const parent = path.parent.node as { type: string }
   if (parent.type !== 'VariableDeclarator') {
     // Standalone `new Shepherd.Tour({...})` — rare; replace with an object
@@ -177,7 +175,6 @@ function rewriteOneTourConstructor(
     ...allTodos,
   ]
   attachLeadingComments(replacement, constructorTodos)
-
   ;(path as ASTPath<unknown>).replace(replacement as unknown as never)
   return true
 }
@@ -194,7 +191,7 @@ function collectAddStepCalls(
   tourVarName: string
 ): AddStepCollected[] {
   const calls: AddStepCollected[] = []
-  root
+  const addStepPaths = root
     .find(j.CallExpression, {
       callee: {
         type: 'MemberExpression',
@@ -202,33 +199,34 @@ function collectAddStepCalls(
         property: { name: 'addStep' },
       },
     })
-    .forEach((path) => {
-      const node = path.node as { arguments: unknown[] }
-      const arg0 = node.arguments[0] as ASTNode | undefined
-      const objectArg =
-        arg0 && (arg0 as { type: string }).type === 'ObjectExpression'
-          ? (arg0 as ObjectExpression)
-          : null
-      const todoSink: Todo[] = []
-      if (!objectArg && arg0) {
-        todoSink.push(
-          emitTodo(
-            'Shepherd .addStep() argument is not an inline object — port the step shape manually',
-            'add-step-dynamic',
-            SOURCE
-          )
+    .paths()
+  for (const path of addStepPaths) {
+    const node = path.node as { arguments: unknown[] }
+    const arg0 = node.arguments[0] as ASTNode | undefined
+    const objectArg =
+      arg0 && (arg0 as { type: string }).type === 'ObjectExpression'
+        ? (arg0 as ObjectExpression)
+        : null
+    const todoSink: Todo[] = []
+    if (!objectArg && arg0) {
+      todoSink.push(
+        emitTodo(
+          'Shepherd .addStep() argument is not an inline object — port the step shape manually',
+          'add-step-dynamic',
+          SOURCE
         )
-      }
-      calls.push({ objectArg, todoSink, path })
+      )
+    }
+    calls.push({ objectArg, todoSink, path })
 
-      // Replace the wrapping ExpressionStatement with a no-op so the array
-      // captures the data and the tour.addStep(...) lines disappear.
-      let stmtPath: ASTPath | null = path.parent
-      while (stmtPath && (stmtPath.node as { type: string }).type !== 'ExpressionStatement') {
-        stmtPath = stmtPath.parent
-      }
-      if (stmtPath) j(stmtPath).remove()
-    })
+    // Replace the wrapping ExpressionStatement with a no-op so the array
+    // captures the data and the tour.addStep(...) lines disappear.
+    let stmtPath: ASTPath | null = path.parent
+    while (stmtPath && (stmtPath.node as { type: string }).type !== 'ExpressionStatement') {
+      stmtPath = stmtPath.parent
+    }
+    if (stmtPath) j(stmtPath).remove()
+  }
   return calls
 }
 
@@ -245,44 +243,90 @@ function collectStepTodos(steps: AddStepCollected[]): Todo[] {
 // TODO comment. The tour object is now a plain literal — these methods would
 // fail tsc otherwise.
 const SHEPHERD_CONTROL_METHODS: ReadonlyMap<string, { anchor: string; msg: string }> = new Map([
-  ['start', { anchor: 'start', msg: 'Shepherd tour.start() → call useTour().start() from a descendant of <TourProvider>' }],
-  ['show', { anchor: 'control-flow', msg: 'Shepherd .show() → useTour().goTo(index) inside a descendant of <TourProvider>' }],
-  ['hide', { anchor: 'control-flow', msg: 'Shepherd .hide() → useTour().stop() inside a descendant of <TourProvider>' }],
-  ['cancel', { anchor: 'control-flow', msg: 'Shepherd .cancel() → useTour().skip() inside a descendant of <TourProvider>' }],
-  ['complete', { anchor: 'control-flow', msg: 'Shepherd .complete() → useTour().complete() inside a descendant of <TourProvider>' }],
-  ['next', { anchor: 'control-flow', msg: 'Shepherd .next() → useTour().next() inside a descendant of <TourProvider>' }],
-  ['back', { anchor: 'control-flow', msg: 'Shepherd .back() → useTour().prev() inside a descendant of <TourProvider>' }],
+  [
+    'start',
+    {
+      anchor: 'start',
+      msg: 'Shepherd tour.start() → call useTour().start() from a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'show',
+    {
+      anchor: 'control-flow',
+      msg: 'Shepherd .show() → useTour().goTo(index) inside a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'hide',
+    {
+      anchor: 'control-flow',
+      msg: 'Shepherd .hide() → useTour().stop() inside a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'cancel',
+    {
+      anchor: 'control-flow',
+      msg: 'Shepherd .cancel() → useTour().skip() inside a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'complete',
+    {
+      anchor: 'control-flow',
+      msg: 'Shepherd .complete() → useTour().complete() inside a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'next',
+    {
+      anchor: 'control-flow',
+      msg: 'Shepherd .next() → useTour().next() inside a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'back',
+    {
+      anchor: 'control-flow',
+      msg: 'Shepherd .back() → useTour().prev() inside a descendant of <TourProvider>',
+    },
+  ],
 ])
 
 function rewriteControlCalls(j: JSCodeshift, root: Collection): boolean {
   let mutated = false
-  root
+  const stmtPaths = root
     .find(j.ExpressionStatement, {
       expression: {
         type: 'CallExpression',
         callee: { type: 'MemberExpression' },
       },
     })
-    .forEach((path) => {
-      const stmt = path.node as {
-        expression: { type: string; callee?: { property?: { name?: string }; object?: { type?: string } } }
+    .paths()
+  for (const path of stmtPaths) {
+    const stmt = path.node as {
+      expression: {
+        type: string
+        callee?: { property?: { name?: string }; object?: { type?: string } }
       }
-      const callee = stmt.expression.callee
-      if (!callee) return
-      const methodName = callee.property?.name
-      if (!methodName) return
-      const entry = SHEPHERD_CONTROL_METHODS.get(methodName)
-      if (!entry) return
-      // Only rewrite if the object looks like an identifier reference. We
-      // can't easily tell if it's the tour binding, so be conservative: only
-      // when called on an Identifier whose object type is Identifier.
-      if (callee.object?.type !== 'Identifier') return
+    }
+    const callee = stmt.expression.callee
+    if (!callee) continue
+    const methodName = callee.property?.name
+    if (!methodName) continue
+    const entry = SHEPHERD_CONTROL_METHODS.get(methodName)
+    if (!entry) continue
+    // Only rewrite if the object looks like an identifier reference. We
+    // can't easily tell if it's the tour binding, so be conservative: only
+    // when called on an Identifier whose object type is Identifier.
+    if (callee.object?.type !== 'Identifier') continue
 
-      const empty = j.emptyStatement()
-      attachLeadingComments(empty, [emitTodo(entry.msg, entry.anchor, SOURCE)])
-      ;(path as ASTPath<unknown>).replace(empty as unknown as never)
-      mutated = true
-    })
+    const empty = j.emptyStatement()
+    attachLeadingComments(empty, [emitTodo(entry.msg, entry.anchor, SOURCE)])
+    ;(path as ASTPath<unknown>).replace(empty as unknown as never)
+    mutated = true
+  }
   return mutated
 }
 
@@ -305,17 +349,50 @@ const SHEPHERD_PLACEMENT_MAP: Record<string, string> = {
 }
 
 const SHEPHERD_UNSUPPORTED_FIELDS: Record<string, { anchor: string; msg: string }> = {
-  classes: { anchor: 'classes', msg: 'Step.classes — Tour Kit uses theme tokens; port via <ThemeProvider>' },
-  modalOverlayOpeningClass: { anchor: 'modal-overlay-class', msg: 'Step.modalOverlayOpeningClass — configure via <TourOverlay /> slot' },
-  modalOverlayOpeningPadding: { anchor: 'modal-overlay-padding', msg: 'Step.modalOverlayOpeningPadding — pass to the overlay slot' },
-  canClickTarget: { anchor: 'can-click-target', msg: 'Step.canClickTarget → configure the overlay spotlight interactive flag manually' },
-  scrollTo: { anchor: 'scroll-to', msg: 'Step.scrollTo — Tour Kit auto-scrolls; gate manually if you need a custom container' },
-  scrollToHandler: { anchor: 'scroll-to', msg: 'Step.scrollToHandler — wire a custom scroll handler from a descendant' },
-  highlightClass: { anchor: 'highlight-class', msg: 'Step.highlightClass — use theme tokens on the spotlight slot' },
-  when: { anchor: 'when', msg: 'Step.when lifecycle hooks — port to onShow / onHide on the migrated step' },
-  advanceOn: { anchor: 'advance-on', msg: 'Step.advanceOn — wire useTour().next() from your own event handler' },
-  beforeShowPromise: { anchor: 'before-show-promise', msg: 'Step.beforeShowPromise — await before calling useTour().goTo() OR move to a custom onShow' },
-  showOn: { anchor: 'show-on', msg: 'Step.showOn predicate — branch on useTour().currentStepIndex from a descendant' },
+  classes: {
+    anchor: 'classes',
+    msg: 'Step.classes — Tour Kit uses theme tokens; port via <ThemeProvider>',
+  },
+  modalOverlayOpeningClass: {
+    anchor: 'modal-overlay-class',
+    msg: 'Step.modalOverlayOpeningClass — configure via <TourOverlay /> slot',
+  },
+  modalOverlayOpeningPadding: {
+    anchor: 'modal-overlay-padding',
+    msg: 'Step.modalOverlayOpeningPadding — pass to the overlay slot',
+  },
+  canClickTarget: {
+    anchor: 'can-click-target',
+    msg: 'Step.canClickTarget → configure the overlay spotlight interactive flag manually',
+  },
+  scrollTo: {
+    anchor: 'scroll-to',
+    msg: 'Step.scrollTo — Tour Kit auto-scrolls; gate manually if you need a custom container',
+  },
+  scrollToHandler: {
+    anchor: 'scroll-to',
+    msg: 'Step.scrollToHandler — wire a custom scroll handler from a descendant',
+  },
+  highlightClass: {
+    anchor: 'highlight-class',
+    msg: 'Step.highlightClass — use theme tokens on the spotlight slot',
+  },
+  when: {
+    anchor: 'when',
+    msg: 'Step.when lifecycle hooks — port to onShow / onHide on the migrated step',
+  },
+  advanceOn: {
+    anchor: 'advance-on',
+    msg: 'Step.advanceOn — wire useTour().next() from your own event handler',
+  },
+  beforeShowPromise: {
+    anchor: 'before-show-promise',
+    msg: 'Step.beforeShowPromise — await before calling useTour().goTo() OR move to a custom onShow',
+  },
+  showOn: {
+    anchor: 'show-on',
+    msg: 'Step.showOn predicate — branch on useTour().currentStepIndex from a descendant',
+  },
 }
 
 // Map a Shepherd step ObjectExpression to a Tour Kit step ObjectExpression.
@@ -391,11 +468,7 @@ interface MappedAttachTo {
   placement: ASTNode | null
 }
 
-function mapShepherdAttachTo(
-  j: JSCodeshift,
-  value: ASTNode,
-  todoSink: Todo[]
-): MappedAttachTo {
+function mapShepherdAttachTo(j: JSCodeshift, value: ASTNode, todoSink: Todo[]): MappedAttachTo {
   const out: MappedAttachTo = { target: null, placement: null }
   if ((value as { type: string }).type !== 'ObjectExpression') {
     todoSink.push(
@@ -407,51 +480,57 @@ function mapShepherdAttachTo(
     )
     return out
   }
-  const obj = value as ObjectExpression
-  for (const prop of obj.properties) {
+  for (const prop of (value as ObjectExpression).properties) {
     if (!isPropLike(prop)) continue
     const name = getKeyName(prop)
-    if (!name) continue
     if (name === 'element') {
-      const v = prop.value as ASTNode | null
-      if (!v) continue
-      const t = (v as { type: string }).type
-      if (t === 'Literal' || t === 'StringLiteral' || t === 'TemplateLiteral') {
-        out.target = v
-        continue
-      }
-      if (t === 'ArrowFunctionExpression' || t === 'FunctionExpression') {
-        todoSink.push(
-          emitTodo(
-            'Shepherd Step.attachTo.element is a function — Tour Kit expects a selector string or DOM ref',
-            'attach-to-element-function',
-            SOURCE
-          )
-        )
-        continue
-      }
-      // Identifier / MemberExpression — preserve as-is; consumer verifies.
-      out.target = v
-      continue
-    }
-    if (name === 'on') {
-      const literal = readStringLiteral(prop.value as ASTNode)
-      if (literal && SHEPHERD_PLACEMENT_MAP[literal]) {
-        out.placement = j.literal(SHEPHERD_PLACEMENT_MAP[literal])
-      } else if (literal) {
-        todoSink.push(
-          emitTodo(
-            `Shepherd Step.attachTo.on '${literal}' unrecognized — defaulting to 'top'`,
-            'placement',
-            SOURCE
-          )
-        )
-        out.placement = j.literal('top')
-      }
-      continue
+      out.target = mapShepherdAttachToElement(prop.value as ASTNode | null, todoSink)
+    } else if (name === 'on') {
+      out.placement = mapShepherdAttachToOn(j, prop.value as ASTNode | null, todoSink)
     }
   }
   return out
+}
+
+// Resolve `attachTo.element` → Tour Kit `target`. String literals pass through;
+// functions emit a TODO and resolve to null; other expressions (Identifier /
+// MemberExpression) are preserved verbatim for the consumer to verify.
+function mapShepherdAttachToElement(value: ASTNode | null, todoSink: Todo[]): ASTNode | null {
+  if (!value) return null
+  const t = (value as { type: string }).type
+  if (t === 'Literal' || t === 'StringLiteral' || t === 'TemplateLiteral') return value
+  if (t === 'ArrowFunctionExpression' || t === 'FunctionExpression') {
+    todoSink.push(
+      emitTodo(
+        'Shepherd Step.attachTo.element is a function — Tour Kit expects a selector string or DOM ref',
+        'attach-to-element-function',
+        SOURCE
+      )
+    )
+    return null
+  }
+  return value
+}
+
+// Resolve `attachTo.on` → Tour Kit `placement`. Known values pass through the
+// placement map; unknown literals fall back to 'top' with a TODO.
+function mapShepherdAttachToOn(
+  j: JSCodeshift,
+  value: ASTNode | null,
+  todoSink: Todo[]
+): ASTNode | null {
+  const literal = readStringLiteral(value)
+  if (!literal) return null
+  const mapped = SHEPHERD_PLACEMENT_MAP[literal]
+  if (mapped) return j.literal(mapped)
+  todoSink.push(
+    emitTodo(
+      `Shepherd Step.attachTo.on '${literal}' unrecognized — defaulting to 'top'`,
+      'placement',
+      SOURCE
+    )
+  )
+  return j.literal('top')
 }
 
 function mapShepherdButtons(value: ASTNode, todoSink: Todo[]): void {

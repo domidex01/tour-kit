@@ -96,40 +96,45 @@ function rewriteDriverCalls(
   driverVarNames: Set<string>
 ): boolean {
   let mutated = false
-  root
+  const driverCallPaths = root
     .find(j.CallExpression, {
       callee: { type: 'Identifier', name: driverLocal },
     })
-    .forEach((path) => {
-      // Capture the local variable binding so we can rewrite `.drive()`-style
-      // chains later.
-      const parent = path.parent.node as { type: string; id?: { type?: string; name?: string } }
-      if (parent.type === 'VariableDeclarator' && parent.id?.type === 'Identifier' && parent.id.name) {
-        driverVarNames.add(parent.id.name)
-      }
+    .paths()
+  for (const path of driverCallPaths) {
+    // Capture the local variable binding so we can rewrite `.drive()`-style
+    // chains later.
+    const parent = path.parent.node as { type: string; id?: { type?: string; name?: string } }
+    if (
+      parent.type === 'VariableDeclarator' &&
+      parent.id?.type === 'Identifier' &&
+      parent.id.name
+    ) {
+      driverVarNames.add(parent.id.name)
+    }
 
-      const node = path.node as { arguments: unknown[] }
-      const arg0 = node.arguments[0] as ASTNode | undefined
-      const todoSink: Todo[] = []
-      const stepsArray = extractDriverSteps(j, arg0, todoSink)
+    const node = path.node as { arguments: unknown[] }
+    const arg0 = node.arguments[0] as ASTNode | undefined
+    const todoSink: Todo[] = []
+    const stepsArray = extractDriverSteps(j, arg0, todoSink)
 
-      const replacement = j.objectExpression([
-        j.property('init', j.identifier('id'), j.literal('migrated-tour')),
-        j.property('init', j.identifier('steps'), stepsArray),
-      ])
+    const replacement = j.objectExpression([
+      j.property('init', j.identifier('id'), j.literal('migrated-tour')),
+      j.property('init', j.identifier('steps'), stepsArray),
+    ])
 
-      const constructorTodos: Todo[] = [
-        emitTodo(
-          'driver.js config — register via <TourProvider tours={[migratedTour]}> in an ancestor; call useTour().start() to begin',
-          'driver-call',
-          SOURCE
-        ),
-        ...todoSink,
-      ]
-      attachLeadingComments(replacement, constructorTodos)
-      ;(path as ASTPath<unknown>).replace(replacement as unknown as never)
-      mutated = true
-    })
+    const constructorTodos: Todo[] = [
+      emitTodo(
+        'driver.js config — register via <TourProvider tours={[migratedTour]}> in an ancestor; call useTour().start() to begin',
+        'driver-call',
+        SOURCE
+      ),
+      ...todoSink,
+    ]
+    attachLeadingComments(replacement, constructorTodos)
+    ;(path as ASTPath<unknown>).replace(replacement as unknown as never)
+    mutated = true
+  }
   return mutated
 }
 
@@ -137,12 +142,48 @@ function rewriteDriverCalls(
 // rewrite, the binding holds a plain object, so calling these is a TypeError.
 // Replace each statement with an EmptyStatement + leading TODO.
 const DRIVER_CONTROL_METHODS: ReadonlyMap<string, { anchor: string; msg: string }> = new Map([
-  ['drive', { anchor: 'drive', msg: 'driver.js .drive() → call useTour().start() from a descendant of <TourProvider>' }],
-  ['destroy', { anchor: 'control-flow', msg: 'driver.js .destroy() → useTour().stop() inside a descendant of <TourProvider>' }],
-  ['moveNext', { anchor: 'control-flow', msg: 'driver.js .moveNext() → useTour().next() inside a descendant of <TourProvider>' }],
-  ['movePrevious', { anchor: 'control-flow', msg: 'driver.js .movePrevious() → useTour().prev() inside a descendant of <TourProvider>' }],
-  ['moveTo', { anchor: 'control-flow', msg: 'driver.js .moveTo(index) → useTour().goTo(index) inside a descendant of <TourProvider>' }],
-  ['highlight', { anchor: 'highlight', msg: 'driver.js .highlight() — Tour Kit has no single-step highlight; render <HintHotspot> from @tour-kit/hints' }],
+  [
+    'drive',
+    {
+      anchor: 'drive',
+      msg: 'driver.js .drive() → call useTour().start() from a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'destroy',
+    {
+      anchor: 'control-flow',
+      msg: 'driver.js .destroy() → useTour().stop() inside a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'moveNext',
+    {
+      anchor: 'control-flow',
+      msg: 'driver.js .moveNext() → useTour().next() inside a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'movePrevious',
+    {
+      anchor: 'control-flow',
+      msg: 'driver.js .movePrevious() → useTour().prev() inside a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'moveTo',
+    {
+      anchor: 'control-flow',
+      msg: 'driver.js .moveTo(index) → useTour().goTo(index) inside a descendant of <TourProvider>',
+    },
+  ],
+  [
+    'highlight',
+    {
+      anchor: 'highlight',
+      msg: 'driver.js .highlight() — Tour Kit has no single-step highlight; render <HintHotspot> from @tour-kit/hints',
+    },
+  ],
 ])
 
 function rewriteDriverInstanceCalls(
@@ -151,34 +192,37 @@ function rewriteDriverInstanceCalls(
   driverVarNames: Set<string>
 ): boolean {
   let mutated = false
-  root
+  const stmtPaths = root
     .find(j.ExpressionStatement, {
       expression: {
         type: 'CallExpression',
         callee: { type: 'MemberExpression' },
       },
     })
-    .forEach((path) => {
-      const stmt = path.node as {
-        expression: { callee?: { property?: { name?: string }; object?: { type?: string; name?: string } } }
+    .paths()
+  for (const path of stmtPaths) {
+    const stmt = path.node as {
+      expression: {
+        callee?: { property?: { name?: string }; object?: { type?: string; name?: string } }
       }
-      const callee = stmt.expression.callee
-      if (!callee) return
-      const methodName = callee.property?.name
-      if (!methodName) return
-      const entry = DRIVER_CONTROL_METHODS.get(methodName)
-      if (!entry) return
-      // Only rewrite when the receiver is a known driver(...) binding. This
-      // avoids accidentally clobbering unrelated `.destroy()` / `.drive()`
-      // method calls in the file.
-      if (callee.object?.type !== 'Identifier') return
-      if (driverVarNames.size > 0 && !driverVarNames.has(callee.object.name ?? '')) return
+    }
+    const callee = stmt.expression.callee
+    if (!callee) continue
+    const methodName = callee.property?.name
+    if (!methodName) continue
+    const entry = DRIVER_CONTROL_METHODS.get(methodName)
+    if (!entry) continue
+    // Only rewrite when the receiver is a known driver(...) binding. This
+    // avoids accidentally clobbering unrelated `.destroy()` / `.drive()`
+    // method calls in the file.
+    if (callee.object?.type !== 'Identifier') continue
+    if (driverVarNames.size > 0 && !driverVarNames.has(callee.object.name ?? '')) continue
 
-      const empty = j.emptyStatement()
-      attachLeadingComments(empty, [emitTodo(entry.msg, entry.anchor, SOURCE)])
-      ;(path as ASTPath<unknown>).replace(empty as unknown as never)
-      mutated = true
-    })
+    const empty = j.emptyStatement()
+    attachLeadingComments(empty, [emitTodo(entry.msg, entry.anchor, SOURCE)])
+    ;(path as ASTPath<unknown>).replace(empty as unknown as never)
+    mutated = true
+  }
   return mutated
 }
 
@@ -256,29 +300,98 @@ function extractDriverSteps(
 }
 
 const DRIVER_TOUR_LEVEL_FIELDS: Record<string, { anchor: string; msg: string }> = {
-  showProgress: { anchor: 'show-progress', msg: 'driver.js showProgress → render <TourProgress /> inside <TourCard />' },
-  allowClose: { anchor: 'allow-close', msg: 'driver.js allowClose → omit / include <TourClose /> inside <TourCard />' },
-  doneBtnText: { anchor: 'btn-text', msg: 'driver.js doneBtnText → pass labels to your <TourNavigation /> slot' },
-  nextBtnText: { anchor: 'btn-text', msg: 'driver.js nextBtnText → pass labels to your <TourNavigation /> slot' },
-  prevBtnText: { anchor: 'btn-text', msg: 'driver.js prevBtnText → pass labels to your <TourNavigation /> slot' },
-  closeBtnText: { anchor: 'btn-text', msg: 'driver.js closeBtnText → pass labels to your <TourClose /> slot' },
-  showButtons: { anchor: 'show-buttons', msg: 'driver.js showButtons[] → compose <TourCard /> with only the slots you need' },
-  disableActiveInteraction: { anchor: 'disable-active-interaction', msg: 'driver.js disableActiveInteraction → configure the overlay spotlight interactive flag' },
-  smoothScroll: { anchor: 'smooth-scroll', msg: 'driver.js smoothScroll → Tour Kit always scrolls; gate manually if you need otherwise' },
-  animate: { anchor: 'animate', msg: 'driver.js animate → respects prefers-reduced-motion automatically; remove the flag' },
-  stagePadding: { anchor: 'stage-padding', msg: 'driver.js stagePadding → pass `padding` to your <TourOverlay /> slot' },
-  stageRadius: { anchor: 'stage-radius', msg: 'driver.js stageRadius → theme tokens via <ThemeProvider>' },
-  overlayColor: { anchor: 'overlay-color', msg: 'driver.js overlayColor → theme tokens via <ThemeProvider>' },
-  overlayOpacity: { anchor: 'overlay-opacity', msg: 'driver.js overlayOpacity → theme tokens via <ThemeProvider>' },
-  onHighlightStarted: { anchor: 'on-highlight-started', msg: 'driver.js onHighlightStarted → onShow on the per-step handler' },
-  onHighlighted: { anchor: 'on-highlighted', msg: 'driver.js onHighlighted → onShow on the per-step handler' },
-  onDeselected: { anchor: 'on-deselected', msg: 'driver.js onDeselected → onHide on the per-step handler' },
-  onPopoverRender: { anchor: 'on-popover-render', msg: 'driver.js onPopoverRender → render custom JSX in <TourCard /> children' },
-  onNextClick: { anchor: 'on-next-click', msg: 'driver.js onNextClick → handle in your <TourNavigation /> slot' },
-  onPrevClick: { anchor: 'on-prev-click', msg: 'driver.js onPrevClick → handle in your <TourNavigation /> slot' },
-  onCloseClick: { anchor: 'on-close-click', msg: 'driver.js onCloseClick → handle in your <TourClose /> slot' },
-  onDestroyStarted: { anchor: 'on-destroy-started', msg: 'driver.js onDestroyStarted → onSkip / onComplete on <TourProvider>' },
-  onDestroyed: { anchor: 'on-destroyed', msg: 'driver.js onDestroyed → onSkip / onComplete on <TourProvider>' },
+  showProgress: {
+    anchor: 'show-progress',
+    msg: 'driver.js showProgress → render <TourProgress /> inside <TourCard />',
+  },
+  allowClose: {
+    anchor: 'allow-close',
+    msg: 'driver.js allowClose → omit / include <TourClose /> inside <TourCard />',
+  },
+  doneBtnText: {
+    anchor: 'btn-text',
+    msg: 'driver.js doneBtnText → pass labels to your <TourNavigation /> slot',
+  },
+  nextBtnText: {
+    anchor: 'btn-text',
+    msg: 'driver.js nextBtnText → pass labels to your <TourNavigation /> slot',
+  },
+  prevBtnText: {
+    anchor: 'btn-text',
+    msg: 'driver.js prevBtnText → pass labels to your <TourNavigation /> slot',
+  },
+  closeBtnText: {
+    anchor: 'btn-text',
+    msg: 'driver.js closeBtnText → pass labels to your <TourClose /> slot',
+  },
+  showButtons: {
+    anchor: 'show-buttons',
+    msg: 'driver.js showButtons[] → compose <TourCard /> with only the slots you need',
+  },
+  disableActiveInteraction: {
+    anchor: 'disable-active-interaction',
+    msg: 'driver.js disableActiveInteraction → configure the overlay spotlight interactive flag',
+  },
+  smoothScroll: {
+    anchor: 'smooth-scroll',
+    msg: 'driver.js smoothScroll → Tour Kit always scrolls; gate manually if you need otherwise',
+  },
+  animate: {
+    anchor: 'animate',
+    msg: 'driver.js animate → respects prefers-reduced-motion automatically; remove the flag',
+  },
+  stagePadding: {
+    anchor: 'stage-padding',
+    msg: 'driver.js stagePadding → pass `padding` to your <TourOverlay /> slot',
+  },
+  stageRadius: {
+    anchor: 'stage-radius',
+    msg: 'driver.js stageRadius → theme tokens via <ThemeProvider>',
+  },
+  overlayColor: {
+    anchor: 'overlay-color',
+    msg: 'driver.js overlayColor → theme tokens via <ThemeProvider>',
+  },
+  overlayOpacity: {
+    anchor: 'overlay-opacity',
+    msg: 'driver.js overlayOpacity → theme tokens via <ThemeProvider>',
+  },
+  onHighlightStarted: {
+    anchor: 'on-highlight-started',
+    msg: 'driver.js onHighlightStarted → onShow on the per-step handler',
+  },
+  onHighlighted: {
+    anchor: 'on-highlighted',
+    msg: 'driver.js onHighlighted → onShow on the per-step handler',
+  },
+  onDeselected: {
+    anchor: 'on-deselected',
+    msg: 'driver.js onDeselected → onHide on the per-step handler',
+  },
+  onPopoverRender: {
+    anchor: 'on-popover-render',
+    msg: 'driver.js onPopoverRender → render custom JSX in <TourCard /> children',
+  },
+  onNextClick: {
+    anchor: 'on-next-click',
+    msg: 'driver.js onNextClick → handle in your <TourNavigation /> slot',
+  },
+  onPrevClick: {
+    anchor: 'on-prev-click',
+    msg: 'driver.js onPrevClick → handle in your <TourNavigation /> slot',
+  },
+  onCloseClick: {
+    anchor: 'on-close-click',
+    msg: 'driver.js onCloseClick → handle in your <TourClose /> slot',
+  },
+  onDestroyStarted: {
+    anchor: 'on-destroy-started',
+    msg: 'driver.js onDestroyStarted → onSkip / onComplete on <TourProvider>',
+  },
+  onDestroyed: {
+    anchor: 'on-destroyed',
+    msg: 'driver.js onDestroyed → onSkip / onComplete on <TourProvider>',
+  },
 }
 
 const DRIVER_PLACEMENT_MAP: Record<string, string> = {
@@ -290,16 +403,18 @@ const DRIVER_PLACEMENT_MAP: Record<string, string> = {
 }
 
 const DRIVER_UNSUPPORTED_FIELDS: Record<string, { anchor: string; msg: string }> = {
-  disableActiveInteraction: { anchor: 'disable-active-interaction', msg: 'Step.disableActiveInteraction → configure the overlay spotlight interactive flag' },
-  popoverClass: { anchor: 'popover-class', msg: 'Step.popoverClass — theme tokens via <ThemeProvider>' },
+  disableActiveInteraction: {
+    anchor: 'disable-active-interaction',
+    msg: 'Step.disableActiveInteraction → configure the overlay spotlight interactive flag',
+  },
+  popoverClass: {
+    anchor: 'popover-class',
+    msg: 'Step.popoverClass — theme tokens via <ThemeProvider>',
+  },
 }
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: per-field dispatch — splitting hides the contract
-function mapDriverStep(
-  j: JSCodeshift,
-  step: ObjectExpression,
-  todoSink: Todo[]
-): ObjectExpression {
+function mapDriverStep(j: JSCodeshift, step: ObjectExpression, todoSink: Todo[]): ObjectExpression {
   const out: Array<ObjectProperty | Property> = []
   let hasTarget = false
 
@@ -357,7 +472,11 @@ function mapDriverStep(
     }
     if (name === 'onDeselected') {
       todoSink.push(
-        emitTodo('driver.js Step.onDeselected → onHide on the migrated step', 'on-deselected', SOURCE)
+        emitTodo(
+          'driver.js Step.onDeselected → onHide on the migrated step',
+          'on-deselected',
+          SOURCE
+        )
       )
       continue
     }
@@ -383,6 +502,45 @@ function mapDriverStep(
   return j.objectExpression(out)
 }
 
+// driver.js popover fields with no shape-affecting migration — each emits a
+// single TODO. Splitting these out keeps `mapDriverPopover` under the
+// noExcessiveCognitiveComplexity threshold.
+const POPOVER_TODO_FIELDS: Record<string, { anchor: string; msgFor: (name: string) => string }> = {
+  align: {
+    anchor: 'align',
+    msgFor: () =>
+      'driver.js popover.align → fold into Tour Kit placement (e.g. top-start, top-end)',
+  },
+  showButtons: { anchor: 'btn-text', msgFor: (n) => btnTextMsg(n) },
+  doneBtnText: { anchor: 'btn-text', msgFor: (n) => btnTextMsg(n) },
+  nextBtnText: { anchor: 'btn-text', msgFor: (n) => btnTextMsg(n) },
+  prevBtnText: { anchor: 'btn-text', msgFor: (n) => btnTextMsg(n) },
+  showProgress: { anchor: 'show-progress', msgFor: (n) => progressMsg(n) },
+  progressText: { anchor: 'show-progress', msgFor: (n) => progressMsg(n) },
+  popoverClass: {
+    anchor: 'popover-class',
+    msgFor: () => 'driver.js popover.popoverClass → theme tokens via <ThemeProvider>',
+  },
+  onPopoverRender: {
+    anchor: 'on-popover-render',
+    msgFor: () => 'driver.js popover.onPopoverRender → render custom JSX in <TourCard /> children',
+  },
+  onNextClick: { anchor: 'on-click', msgFor: (n) => onClickMsg(n) },
+  onPrevClick: { anchor: 'on-click', msgFor: (n) => onClickMsg(n) },
+  onCloseClick: { anchor: 'on-click', msgFor: (n) => onClickMsg(n) },
+}
+
+function btnTextMsg(name: string): string {
+  return `driver.js popover.${name} → pass labels to your <TourNavigation /> slot or omit the slot`
+}
+function progressMsg(name: string): string {
+  return `driver.js popover.${name} → render <TourProgress /> inside <TourCard />`
+}
+function onClickMsg(name: string): string {
+  return `driver.js popover.${name} → handle in your <TourNavigation /> / <TourClose /> slot`
+}
+
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: per-field dispatch — splitting the title/description/side branches hides the contract
 function mapDriverPopover(
   j: JSCodeshift,
   value: ASTNode,
@@ -399,8 +557,7 @@ function mapDriverPopover(
     return []
   }
   const out: Array<ObjectProperty | Property> = []
-  const obj = value as ObjectExpression
-  for (const prop of obj.properties) {
+  for (const prop of (value as ObjectExpression).properties) {
     if (!isPropLike(prop)) continue
     const name = getKeyName(prop)
     if (!name) continue
@@ -414,81 +571,13 @@ function mapDriverPopover(
       continue
     }
     if (name === 'side') {
-      const literal = readStringLiteral(prop.value as ASTNode)
-      if (literal && DRIVER_PLACEMENT_MAP[literal]) {
-        out.push(
-          j.property('init', j.identifier('placement'), j.literal(DRIVER_PLACEMENT_MAP[literal]) as never)
-        )
-      } else if (literal) {
-        todoSink.push(
-          emitTodo(
-            `driver.js popover.side '${literal}' unrecognized — defaulting to 'top'`,
-            'placement',
-            SOURCE
-          )
-        )
-        out.push(j.property('init', j.identifier('placement'), j.literal('top') as never))
-      }
+      const placementProp = mapDriverPopoverSide(j, prop.value as ASTNode, todoSink)
+      if (placementProp) out.push(placementProp)
       continue
     }
-    if (name === 'align') {
-      todoSink.push(
-        emitTodo(
-          'driver.js popover.align → fold into Tour Kit placement (e.g. top-start, top-end)',
-          'align',
-          SOURCE
-        )
-      )
-      continue
-    }
-    if (name === 'showButtons' || name === 'doneBtnText' || name === 'nextBtnText' || name === 'prevBtnText') {
-      todoSink.push(
-        emitTodo(
-          `driver.js popover.${name} → pass labels to your <TourNavigation /> slot or omit the slot`,
-          'btn-text',
-          SOURCE
-        )
-      )
-      continue
-    }
-    if (name === 'showProgress' || name === 'progressText') {
-      todoSink.push(
-        emitTodo(
-          `driver.js popover.${name} → render <TourProgress /> inside <TourCard />`,
-          'show-progress',
-          SOURCE
-        )
-      )
-      continue
-    }
-    if (name === 'popoverClass') {
-      todoSink.push(
-        emitTodo(
-          'driver.js popover.popoverClass → theme tokens via <ThemeProvider>',
-          'popover-class',
-          SOURCE
-        )
-      )
-      continue
-    }
-    if (name === 'onPopoverRender') {
-      todoSink.push(
-        emitTodo(
-          'driver.js popover.onPopoverRender → render custom JSX in <TourCard /> children',
-          'on-popover-render',
-          SOURCE
-        )
-      )
-      continue
-    }
-    if (name === 'onNextClick' || name === 'onPrevClick' || name === 'onCloseClick') {
-      todoSink.push(
-        emitTodo(
-          `driver.js popover.${name} → handle in your <TourNavigation /> / <TourClose /> slot`,
-          'on-click',
-          SOURCE
-        )
-      )
+    const todoField = POPOVER_TODO_FIELDS[name]
+    if (todoField) {
+      todoSink.push(emitTodo(todoField.msgFor(name), todoField.anchor, SOURCE))
       continue
     }
     todoSink.push(
@@ -500,6 +589,29 @@ function mapDriverPopover(
     )
   }
   return out
+}
+
+// Map `popover.side` to Tour Kit `placement`. Returns null for non-literal
+// values; the consumer drops the slot rather than emitting a guess.
+function mapDriverPopoverSide(
+  j: JSCodeshift,
+  value: ASTNode,
+  todoSink: Todo[]
+): ObjectProperty | Property | null {
+  const literal = readStringLiteral(value)
+  if (!literal) return null
+  const mapped = DRIVER_PLACEMENT_MAP[literal]
+  if (mapped) {
+    return j.property('init', j.identifier('placement'), j.literal(mapped) as never)
+  }
+  todoSink.push(
+    emitTodo(
+      `driver.js popover.side '${literal}' unrecognized — defaulting to 'top'`,
+      'placement',
+      SOURCE
+    )
+  )
+  return j.property('init', j.identifier('placement'), j.literal('top') as never)
 }
 
 // ----- helpers -----

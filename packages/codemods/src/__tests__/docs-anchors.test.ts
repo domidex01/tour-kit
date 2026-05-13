@@ -80,10 +80,7 @@ for (const src of SOURCES) {
       }
 
       const orphans = [...emittedAnchors].filter((a) => !headings.has(a))
-      expect(
-        orphans,
-        `orphan anchors with no MDX heading: ${orphans.join(', ')}`
-      ).toEqual([])
+      expect(orphans, `orphan anchors with no MDX heading: ${orphans.join(', ')}`).toEqual([])
     })
   })
 }

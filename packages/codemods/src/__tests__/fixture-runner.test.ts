@@ -94,7 +94,6 @@ for (const { src, results, skip } of computed) {
     for (const r of results) {
       it(`${r.name} matches expected output (normalized whitespace)`, () => {
         if (!r.diffOk) {
-          // biome-ignore lint/suspicious/noConsole: developer-only debugging
           console.error(`--- ${r.name} actual ---\n${r.actual}`)
         }
         expect(r.diffOk, `normalized diff mismatch for ${r.name}`).toBe(true)
