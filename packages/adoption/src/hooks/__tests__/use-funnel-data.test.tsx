@@ -20,22 +20,20 @@ describe('useFunnelData', () => {
     const { result } = renderHook(() => useFunnelData({ featureIds: ['onboarding', 'checkout'] }), {
       wrapper: wrapperFactory(ctxVal),
     })
-    expect(result.current.steps).toHaveLength(2)
+    expect(result.current).toHaveLength(2)
     // Adopted feature: entered = useCount, completed = useCount (100% conversion).
-    expect(result.current.steps[0]).toMatchObject({
+    expect(result.current[0]).toMatchObject({
       id: 'onboarding',
       label: 'onboarding',
       entered: 5,
       completed: 5,
     })
     // Exploring feature: entered = useCount, completed = 0.
-    expect(result.current.steps[1]).toMatchObject({
+    expect(result.current[1]).toMatchObject({
       id: 'checkout',
       entered: 2,
       completed: 0,
     })
-    expect(result.current.loading).toBe(false)
-    expect(result.current.error).toBeNull()
   })
 
   it('returns zero metrics for unknown feature ids', () => {
@@ -45,8 +43,8 @@ describe('useFunnelData', () => {
     const { result } = renderHook(() => useFunnelData({ featureIds: ['tracked', 'unknown'] }), {
       wrapper: wrapperFactory(ctxVal),
     })
-    expect(result.current.steps).toHaveLength(2)
-    expect(result.current.steps[1]).toMatchObject({
+    expect(result.current).toHaveLength(2)
+    expect(result.current[1]).toMatchObject({
       id: 'unknown',
       label: 'unknown',
       entered: 0,
@@ -66,7 +64,7 @@ describe('useFunnelData', () => {
         }),
       { wrapper: wrapperFactory(ctxVal) }
     )
-    expect(result.current.steps[0]?.label).toBe('Pretty Feature')
+    expect(result.current[0]?.label).toBe('Pretty Feature')
   })
 
   it('falls back to the feature.name when no label override is provided', () => {
@@ -76,6 +74,6 @@ describe('useFunnelData', () => {
     const { result } = renderHook(() => useFunnelData({ featureIds: ['feat'] }), {
       wrapper: wrapperFactory(ctxVal),
     })
-    expect(result.current.steps[0]?.label).toBe('Friendly Name')
+    expect(result.current[0]?.label).toBe('Friendly Name')
   })
 })

@@ -10,11 +10,7 @@ export { useAdoptionContext } from './context/adoption-context'
 export { useFeature, type UseFeatureReturn } from './hooks/use-feature'
 export { useAdoptionStats, type AdoptionStats } from './hooks/use-adoption-stats'
 export { useNudge, type UseNudgeReturn } from './hooks/use-nudge'
-export {
-  useFunnelData,
-  type UseFunnelDataInput,
-  type UseFunnelDataResult,
-} from './hooks/use-funnel-data'
+export { useFunnelData, type UseFunnelDataInput } from './hooks/use-funnel-data'
 
 // ============================================
 // COMPONENTS

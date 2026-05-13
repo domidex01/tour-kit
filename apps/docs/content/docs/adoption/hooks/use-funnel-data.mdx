@@ -29,7 +29,7 @@ import {
 } from '@tour-kit/adoption'
 
 function ActivationFunnel() {
-  const { steps } = useFunnelData({
+  const steps = useFunnelData({
     featureIds: ['view-pricing', 'start-trial', 'invite-team'],
     labels: {
       'view-pricing': 'Viewed Pricing',
@@ -64,25 +64,8 @@ function ActivationFunnel() {
 
 ## Output
 
-<TypeTable
-  type={{
-    steps: {
-      type: 'FunnelStep[]',
-      description:
-        'Funnel steps ready for `<AdoptionFunnel>`. One step per `featureIds` entry, in input order.',
-    },
-    loading: {
-      type: 'boolean',
-      description:
-        'Reserved for future async sources. Always `false` for the in-memory provider.',
-    },
-    error: {
-      type: 'Error | null',
-      description:
-        'Reserved for future async sources. Always `null` for the in-memory provider.',
-    },
-  }}
-/>
+Returns `FunnelStep[]` directly — one step per `featureIds` entry, in input
+order. Pass straight to `<AdoptionFunnel steps={...}>`.
 
 ## Mapping Semantics
 

@@ -53,7 +53,7 @@ import {
 } from '@tour-kit/adoption'
 
 function OnboardingFunnel() {
-  const { steps } = useFunnelData({
+  const steps = useFunnelData({
     featureIds: ['view-pricing', 'start-trial', 'invite-team'],
     labels: {
       'view-pricing': 'Viewed Pricing',
@@ -156,9 +156,9 @@ function OnboardingFunnel() {
   }}
 />
 
-Returns `{ steps: FunnelStep[]; loading: boolean; error: Error | null }`. The
-`loading`/`error` slots are reserved for future async sources — the
-in-memory provider always returns `false`/`null`.
+Returns `FunnelStep[]` ready to pass to `<AdoptionFunnel steps={...}>`. The
+source data is in-memory and synchronous, so the hook returns the steps
+directly — no `loading`/`error` envelope.
 
 ## Accessibility
 

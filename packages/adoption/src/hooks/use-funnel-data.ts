@@ -10,15 +10,6 @@ export interface UseFunnelDataInput {
   labels?: Partial<Record<string, string>>
 }
 
-export interface UseFunnelDataResult {
-  /** Funnel steps ready to hand to `<AdoptionFunnel steps>`. */
-  steps: FunnelStep[]
-  /** Reserved for future async sources. Always `false` for the in-memory provider. */
-  loading: boolean
-  /** Reserved for future async sources. Always `null` for the in-memory provider. */
-  error: Error | null
-}
-
 /**
  * Derive a CURRENT-STATE funnel from `useAdoptionStats`.
  *
@@ -35,9 +26,9 @@ export interface UseFunnelDataResult {
  *
  * Throws via `useAdoptionStats` if used outside `<AdoptionProvider>`.
  */
-export function useFunnelData({ featureIds, labels }: UseFunnelDataInput): UseFunnelDataResult {
+export function useFunnelData({ featureIds, labels }: UseFunnelDataInput): FunnelStep[] {
   const stats = useAdoptionStats()
-  const steps: FunnelStep[] = featureIds.map((id) => {
+  return featureIds.map((id) => {
     const feature = stats.features.find((f) => f.id === id)
     const useCount = feature?.usage.useCount ?? 0
     const isAdopted = feature?.usage.status === 'adopted'
@@ -49,5 +40,4 @@ export function useFunnelData({ featureIds, labels }: UseFunnelDataInput): UseFu
       completed: isAdopted ? useCount : 0,
     }
   })
-  return { steps, loading: false, error: null }
 }
