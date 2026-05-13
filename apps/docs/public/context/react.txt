@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/react Context File
-Version: 0.11.0 | Generated: 2026-05-06
+Version: 0.11.0 | Generated: 2026-05-13
 Paste this into your LLM to get accurate answers about @tour-kit/react.
 =========================================================================
 
@@ -52,6 +52,12 @@ Types:
     TourInfo
     UseToursReturn
     UseThemeVariationReturn
+    DiagnosticContext
+    DiagnosticGate
+    EligibilityReport
+    GateCode
+    GateName
+    GateReason
     // Config types
   Side
     Alignment
@@ -119,6 +125,7 @@ Hooks:
     useMediaQuery
     usePrefersReducedMotion
     useBranch
+    useTourDiagnostic
 
 Components:
     Tour
@@ -151,6 +158,7 @@ Components:
     TourProvider
     TourKitContext
     TourKitProvider
+    BUILTIN_GATE_ORDER
 
 Utilities:
     resolveTheme
@@ -171,6 +179,8 @@ Utilities:
     createNextAppRouterAdapter
     createNextPagesRouterAdapter
     createReactRouterAdapter
+    explainAudience
+    explainTour
     createTour
     createStep
     waitForElement
@@ -358,6 +368,7 @@ HOOKS
     useMediaQuery(...)
     usePrefersReducedMotion(...)
     useBranch(...)
+    useTourDiagnostic(...)
 
 COMPONENTS
 ----------
@@ -391,6 +402,7 @@ COMPONENTS
     <TourProvider />
     <TourKitContext />
     <TourKitProvider />
+    <BUILTIN_GATE_ORDER />
 
 EXAMPLES
 --------

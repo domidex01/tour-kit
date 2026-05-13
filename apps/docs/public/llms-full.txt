@@ -1,4 +1,4 @@
-# userTourKit v0.11.0 — Generated 2026-05-06T13:46:25Z
+# userTourKit v0.11.0 — Generated 2026-05-13T07:39:18Z
 
 # Feature Adoption Tracking
 
@@ -3021,6 +3021,172 @@ import { AdoptionStatusBadge } from '@tour-kit/adoption'
 
 ---
 
+# Adoption Funnel
+
+> Step-by-step adoption funnel with drop-off percentages — Pendo/Userpilot parity, native CSS, no chart peer dependency.
+
+`<AdoptionFunnel>` renders a vertical funnel chart with retention and
+drop-off between adjacent steps. It is **data-first**: hand it pre-computed
+`steps` and it works without any provider. Inside an
+`<AdoptionProvider>`, pair it with `useFunnelData({ featureIds })` for a
+one-line in-provider integration.
+
+## Provider-less Usage (Recommended)
+
+Compute funnel data from your analytics layer and pass it in directly:
+
+```tsx
+import { AdoptionFunnel } from '@tour-kit/adoption'
+import '@tour-kit/adoption/styles/funnel.css'
+
+const steps = [
+  { id: 'view', label: 'Viewed', entered: 1000, completed: 720 },
+  { id: 'click', label: 'Clicked CTA', entered: 720, completed: 380 },
+  { id: 'signup', label: 'Signed Up', entered: 380, completed: 240 },
+]
+
+<AdoptionFunnel
+  steps={steps}
+  title="Sign-up funnel"
+  onStepClick={(step, index) => console.log('drilldown:', step, index)}
+/>
+```
+
+This path needs no provider, so the funnel can live in any tree —
+admin dashboards, server-rendered reports, etc.
+
+## In-provider Usage with `useFunnelData`
+
+```tsx
+import {
+  AdoptionFunnel,
+  AdoptionProvider,
+  useFunnelData,
+} from '@tour-kit/adoption'
+
+function OnboardingFunnel() {
+  const steps = useFunnelData({
+    featureIds: ['view-pricing', 'start-trial', 'invite-team'],
+    labels: {
+      'view-pricing': 'Viewed Pricing',
+      'start-trial': 'Started Trial',
+      'invite-team': 'Invited Team',
+    },
+  })
+  return <AdoptionFunnel steps={steps} title="Activation funnel" />
+}
+
+<AdoptionProvider features={features}>
+  <OnboardingFunnel />
+</AdoptionProvider>
+```
+
+## `<AdoptionFunnel>` Props
+
+<TypeTable
+  type={{
+    steps: {
+      type: 'readonly FunnelStep[]',
+      required: true,
+      description: 'Pre-computed funnel data in display order.',
+    },
+    title: {
+      type: 'React.ReactNode',
+      description: 'Optional header rendered above the bars.',
+    },
+    onStepClick: {
+      type: '(step: FunnelStep, index: number) => void',
+      description:
+        'Click/keyboard activation handler. Steps become focusable (role="button", tabIndex=0) when provided; Enter and Space both fire the callback.',
+    },
+    emptyState: {
+      type: 'React.ReactNode',
+      description:
+        'Replaces the default "No funnel data yet." message when `steps` is empty.',
+    },
+    ariaLabel: {
+      type: 'string',
+      description:
+        'Overrides the auto-generated summary on the `role="img"` chart element.',
+    },
+    className: {
+      type: 'string',
+      description: 'Extra class merged onto the root.',
+    },
+  }}
+/>
+
+## `FunnelStep` Shape
+
+## `useFunnelData` Input/Output
+
+<TypeTable
+  type={{
+    featureIds: {
+      type: 'readonly string[]',
+      required: true,
+      description: 'Feature IDs in funnel order.',
+    },
+    labels: {
+      type: 'Partial<Record<string, string>>',
+      description:
+        'Override the visible label per feature ID. Falls back to `feature.name` then the raw id.',
+    },
+  }}
+/>
+
+Returns `FunnelStep[]` ready to pass to `<AdoptionFunnel steps={...}>`. The
+source data is in-memory and synchronous, so the hook returns the steps
+directly — no `loading`/`error` envelope.
+
+## Accessibility
+
+- The chart is exposed to assistive tech as a single `role="img"` element with
+  an auto-generated `aria-label` summarizing the funnel
+  (`Adoption funnel: 100 → 60 → 30, 30% end-to-end retention`). Override via
+  the `ariaLabel` prop.
+- Each bar carries `aria-hidden="true"` — screen readers receive the same
+  numbers through a visually-hidden `<table>` mirror placed alongside the
+  visual list.
+- Clickable steps are keyboard-activatable. **Enter** and **Space** both
+  fire `onStepClick`; tab order matches visual order.
+- Honors `prefers-reduced-motion: reduce` — the hover-transition is disabled
+  under the OS preference. See the
+  [reduced-motion guide](/docs/guides/reduced-motion).
+
+## Styling
+
+Import the base stylesheet once at your app root:
+
+```ts
+import '@tour-kit/adoption/styles/funnel.css'
+```
+
+CSS custom properties for theming:
+
+```css
+:root {
+  --tour-funnel-gap: 0.5rem;
+  --tour-funnel-step-gap: 0.5rem;
+  --tour-funnel-bar-bg: hsl(220 90% 56%);
+  --tour-funnel-bar-fg: #fff;
+  --tour-funnel-retention-fg: hsl(0 0% 40%);
+  --tour-funnel-step-hover: rgba(0, 0, 0, 0.04);
+  --tour-funnel-focus-ring: hsl(220 90% 56%);
+}
+```
+
+## Next Steps
+
+- [AdoptionDashboard](/docs/adoption/dashboard/adoption-dashboard) — full
+  dashboard component
+- [useAdoptionStats](/docs/adoption/hooks/use-adoption-stats) — underlying
+  per-feature stats hook
+- [Reduced-motion guide](/docs/guides/reduced-motion) — cross-package
+  motion contract
+
+---
+
 # Stat Cards
 
 > AdoptionStatCard and AdoptionStatsGrid: display aggregate adoption metrics with trend indicators and percentage changes
@@ -4433,6 +4599,83 @@ onChange={(e) => {
 - [useAdoptionStats Hook](/docs/adoption/hooks/use-adoption-stats) - Aggregate adoption metrics
 - [IfNotAdopted Component](/docs/adoption/components/conditional) - Conditional rendering based on adoption
 - [Analytics Integration](/docs/adoption/analytics) - Track adoption events automatically
+
+---
+
+# useFunnelData
+
+> Derive a current-state adoption funnel from useAdoptionStats — feed straight into AdoptionFunnel.
+
+`useFunnelData` is a convenience selector that projects the current user's
+adoption state — read via `useAdoptionStats` — into a `FunnelStep[]` ready
+to hand to `<AdoptionFunnel>`. Must be used inside `<AdoptionProvider>`.
+
+## Usage
+
+```tsx
+import {
+  AdoptionFunnel,
+  AdoptionProvider,
+  useFunnelData,
+} from '@tour-kit/adoption'
+
+function ActivationFunnel() {
+  const steps = useFunnelData({
+    featureIds: ['view-pricing', 'start-trial', 'invite-team'],
+    labels: {
+      'view-pricing': 'Viewed Pricing',
+      'start-trial': 'Started Trial',
+      'invite-team': 'Invited Team',
+    },
+  })
+  return <AdoptionFunnel steps={steps} title="Activation funnel" />
+}
+
+<AdoptionProvider features={features}>
+  <ActivationFunnel />
+</AdoptionProvider>
+```
+
+## Input
+
+<TypeTable
+  type={{
+    featureIds: {
+      type: 'readonly string[]',
+      required: true,
+      description: 'Feature IDs in funnel order.',
+    },
+    labels: {
+      type: 'Partial<Record<string, string>>',
+      description:
+        'Override the visible label per feature ID. Falls back to `feature.name`, then the raw id.',
+    },
+  }}
+/>
+
+## Output
+
+Returns `FunnelStep[]` directly — one step per `featureIds` entry, in input
+order. Pass straight to `<AdoptionFunnel steps={...}>`.
+
+## Mapping Semantics
+
+For each `featureIds[i]`, the hook reads the matching `FeatureWithUsage`
+from `useAdoptionStats()` and produces:
+
+- `entered` = `usage.useCount` — number of times the current user has touched
+  the feature.
+- `completed` = `usage.useCount` when `usage.status === 'adopted'`, else `0` —
+  100% per-user conversion once adopted; 0% before.
+
+Unknown feature IDs (no matching feature in the provider) get
+`entered: 0, completed: 0`.
+
+## See Also
+
+- [`<AdoptionFunnel>`](/docs/adoption/dashboard/funnel) — the consumer component
+- [`useAdoptionStats`](/docs/adoption/hooks/use-adoption-stats) — underlying
+  current-state stats hook
 
 ---
 
@@ -27384,6 +27627,140 @@ This package provides:
 
 ---
 
+# Diagnostic Engine
+
+> Replace the silent "tour didn't fire" failure mode with a structured `EligibilityReport` that names every gate's outcome.
+
+The diagnostic engine produces an `EligibilityReport` for every registered
+tour explaining whether it will fire — and, when it won't, exactly which gate
+rejected it. Opt in via `<TourProvider diagnose>` and read the result with
+`useTourDiagnostic(tourId)`.
+
+## Why diagnostics exist
+
+The most-asked support question on this repo is *"my tour did not fire and I
+have no idea why."* Before the diagnostic engine you had to grep through
+audience filters, route adapters, persistence stores, and license keys to
+guess. Now the provider runs all seven built-in gates plus any extension gates
+you registered, and the report names the first one that said no.
+
+## `<TourProvider diagnose>`
+
+```tsx
+import { TourProvider, useTourDiagnostic } from '@tour-kit/core'
+
+export function App() {
+  return (
+    <TourProvider tours={[myTour]} diagnose userContext={{ plan: 'pro' }}>
+      <DebugPanel />
+      <YourApp />
+    </TourProvider>
+  )
+}
+
+function DebugPanel() {
+  const report = useTourDiagnostic('my-tour')
+  if (!report) return null
+  return (
+    <pre>{JSON.stringify(report, null, 2)}</pre>
+  )
+}
+```
+
+The hook returns:
+
+- `null` when `diagnose` is off, the tour id is unknown, or the diagnostic
+  effect hasn't resolved yet
+- `EligibilityReport` once the orchestrator finishes
+
+## `EligibilityReport` shape
+
+```ts
+interface EligibilityReport {
+  tourId: string
+  willFire: boolean
+  reasons: GateReason[]
+  firstFailingGate: Extract<GateReason, { ok: false }> | null
+  evaluatedAt: number
+}
+```
+
+`reasons[]` is always populated for every built-in gate (in fixed order) plus
+your extension gates. `firstFailingGate` is a convenience — the first
+`ok: false` reason in evaluation order, or `null` when `willFire` is true.
+
+## Built-in gates
+
+Evaluated in this exact order — the contract is observable and tests pin it:
+
+| Order | Gate | Failure code | When it fires |
+|-------|------|--------------|---------------|
+| 1 | `structure` | `STRUCTURE_INVALID` | Tour has no steps, or `validateTour` threw |
+| 2 | `audience` | `AUDIENCE_MISMATCH` | Audience filter rejected the user. `detail.failingCondition` (array form) or `detail.segment` (object form) names the failing piece |
+| 3 | `persistence` | `ALREADY_COMPLETED` / `ALREADY_SKIPPED` | Tour id is in `completedTours` / `skippedTours` |
+| 4 | `route` | `ROUTE_MISMATCH` | Current route does not match the configured matcher under the chosen mode |
+| 5 | `target` | `TARGET_NOT_FOUND` | The first visible step's selector returned no element |
+| 6 | `when` | `WHEN_RETURNED_FALSE` | Tour-level `when()` returned `false` or threw |
+| 7 | `autostart` | `AUTOSTART_DISABLED` | `tour.autoStart === false` |
+
+## Extension gates
+
+License, scheduling, or any custom gate plugs in via `diagnosticGates`. The
+contract is `DiagnosticGate` — `@tour-kit/core` does not import the package
+implementing it.
+
+```tsx
+import type { DiagnosticGate } from '@tour-kit/core'
+
+const licenseGate: DiagnosticGate = {
+  id: 'license',
+  evaluate: async (ctx) => {
+    const ok = await checkLicense(ctx.userContext)
+    return ok
+      ? { ok: true, gate: 'license' }
+      : { ok: false, gate: 'license', code: 'LICENSE_INVALID', message: 'License invalid', detail: {} }
+  },
+}
+
+<TourProvider tours={tours} diagnose diagnosticGates={[licenseGate]}>
+  ...
+</TourProvider>
+```
+
+Rules:
+
+- Extensions run **after** every built-in gate, in registration order
+- Extensions may be async; built-ins are sync
+- A throwing extension is caught — the orchestrator inserts a synthetic
+  `{ ok: false, gate: id, code: '${ID}_THREW' }` reason and keeps going
+- `firstFailingGate` only points at an extension when no built-in failed first
+
+## `explainTour` (advanced)
+
+The orchestrator is also exported for non-React callers:
+
+```ts
+import { explainTour } from '@tour-kit/core'
+
+const report = await explainTour(myTour, {
+  completedTours: [],
+  skippedTours: [],
+  userContext: { plan: 'pro' },
+  targetResolver: (sel) => document.querySelector(sel),
+})
+```
+
+`explainTour` never throws. Internal errors land in the structure gate or, for
+extensions, as `_THREW` reasons.
+
+## Performance & bundle cost
+
+- Median **&lt;0.001ms** per call over 100 iterations (5-step tour, no extensions)
+- With `diagnose: false` the diagnostic module tree-shakes out of the consumer
+  bundle. The size-limit budget asserts this.
+
+---
+
 # useAdvanceOn
 
 > useAdvanceOn hook: automatically advance tour steps when users click buttons, submit forms, or interact with elements
@@ -29293,6 +29670,163 @@ function App() {
   <App />
 </TourProvider>
 ```
+
+---
+
+# Schemas
+
+> Runtime Zod validation for JSON-authorable tour definitions — load tours from CMS, JSON files, or MDX frontmatter without bloating your main bundle.
+
+The `@tour-kit/core/schemas` subpath ships Zod schemas plus `parseTourDefinition`
+and `safeParseTourDefinition` helpers for validating a JSON-safe subset of
+`Tour` at runtime. Use it when tours come from a CMS, a JSON file, or any
+boundary where you can't trust the shape at compile time.
+
+## Installation
+
+`zod` is an **optional peer dependency**. Install it only if you validate.
+
+```bash
+pnpm add @tour-kit/core zod
+```
+
+The package declares `zod` as `^3.25.0 || ^4.0.0` (the canonical dual-major peer
+range — Zod 4 ships at the root of `zod@^4.x` and at the `zod/v4` subpath
+inside `zod@^3.25.0`). Use the root `import { z } from 'zod'` in new code.
+
+## Quick start
+
+```ts
+import { parseTourDefinition } from '@tour-kit/core/schemas'
+
+// JSON from a CMS, file, or MDX frontmatter
+const payload = await fetch('/api/tours/onboarding').then((r) => r.json())
+
+// Throws ZodError on bad input
+const definition = parseTourDefinition(payload)
+
+// Attach runtime-only fields (refs, callbacks) before handing to TourProvider
+const tour = {
+  ...definition,
+  onComplete: () => analytics.track('tour.complete', { id: definition.id }),
+}
+```
+
+## API
+
+### `parseTourDefinition(input)`
+
+Throws `ZodError` on invalid input. Returns a `TourDefinition`.
+
+```ts
+import { parseTourDefinition } from '@tour-kit/core/schemas'
+
+const t = parseTourDefinition({
+  id: 'demo',
+  steps: [{ id: 's1', target: '#welcome', content: 'Welcome!' }],
+})
+```
+
+### `safeParseTourDefinition(input)`
+
+Non-throwing variant. Returns Zod's tagged union — useful when you want to
+surface a friendly error UI instead of catching exceptions:
+
+```ts
+const result = safeParseTourDefinition(payload)
+if (!result.success) {
+  console.error(result.error.issues)
+  return
+}
+const tour = result.data
+```
+
+### `createTourStepDefinitionSchema({ contentSchema })`
+
+Build a stricter **step** schema where `content` is validated by your own Zod
+schema. Returns a step-level schema — wrap it in `z.array(...).min(1)` and feed
+it to a custom tour schema if you want a full validation pipeline. Useful for
+CMS payloads with typed content blocks:
+
+```ts
+import { z } from 'zod'
+import { createTourStepDefinitionSchema } from '@tour-kit/core/schemas'
+
+const TextBlock = z.object({ kind: z.literal('text'), value: z.string() })
+const stepSchema = createTourStepDefinitionSchema({ contentSchema: TextBlock })
+
+stepSchema.parse({
+  id: 'welcome',
+  target: '#hero',
+  content: { kind: 'text', value: 'Hi there!' },
+})
+```
+
+## Schemas re-exported
+
+| Export | Description |
+|--------|-------------|
+| `tourDefinitionSchema` | Top-level tour shape — `{ id, steps, audience?, autoStart?, startAt? }` |
+| `tourStepDefinitionSchema` | Single step — `{ id, target, content, … }` |
+| `audienceSchema` | Discriminated union — `AudienceConditionDefinition[] \| { segment: string }` |
+| `audienceConditionSchema` | One audience condition — `{ key, operator, value? }` |
+| `flowSourceSchema` | Multi-tour container — `{ tours: TourDefinition[] }` |
+
+## Types
+
+The package also re-exports the matching TypeScript types from
+`@tour-kit/core/schemas`:
+
+- `TourDefinition`
+- `TourStepDefinition`
+- `AudienceDefinition`
+- `AudienceConditionDefinition`
+- `JsonValue`
+
+These are hand-authored interfaces, not `z.infer<…>` aliases — Zod 3's inferred
+types occasionally surface internal helper types in tooling, and the hand-authored
+shapes read better in IDE hovers. A compile-time parity test guarantees the
+hand-authored types and the schema's inferred keys stay in sync.
+
+## Example: CMS payload → TourProvider
+
+```tsx
+import { TourProvider } from '@tour-kit/core'
+import { parseTourDefinition } from '@tour-kit/core/schemas'
+
+async function loadTour(slug: string) {
+  const payload = await fetch(`/api/cms/tours/${slug}`).then((r) => r.json())
+  const definition = parseTourDefinition(payload)
+
+  // Attach runtime-only callbacks
+  return {
+    ...definition,
+    onComplete: () => analytics.track('tour.complete'),
+    onSkip: () => analytics.track('tour.skip'),
+  }
+}
+
+export function App({ tour }: { tour: Awaited<ReturnType<typeof loadTour>> }) {
+  return (
+    <TourProvider tour={tour}>
+      {/* … */}
+    </TourProvider>
+  )
+}
+```
+
+## Bundle-size guarantee
+
+Both the main entry and the schemas subpath have CI-enforced size budgets:
+
+| Entry | Budget | Today |
+|-------|--------|-------|
+| `@tour-kit/core` (main) | ≤ 24 KB brotlied | ~23 KB |
+| `@tour-kit/core/schemas` | ≤ 12 KB brotlied (excl. zod) | < 1 KB |
+
+The schemas bundle stays tiny because `zod` is `external` in `tsup` — the
+consumer pulls Zod from their own `node_modules`, not from us. The size-limit
+entry ignores `zod` to measure only the code we ship.
 
 ---
 
@@ -33784,6 +34318,82 @@ function MyComponent() {
   // tour.start, tour.next, tour.prev, etc.
 }
 ```
+
+## Typed Step IDs
+
+userTourKit ships generic `TourStep<TId>` and `Tour<TStep>` so that const-authored tours catch misspelled step ids at compile time. The default is `TId extends string = string`, so dynamic tours (server-fetched, JIT-built) keep working without any changes.
+
+### Const-tuple narrowing (recommended)
+
+Author your steps as a `const` tuple with `satisfies` and feed them to `StepIdOf` to derive the literal union:
+
+```tsx
+import { useTour } from '@tour-kit/react';
+import type { StepIdOf, TourStep } from '@tour-kit/react';
+
+const steps = [
+  { id: 'welcome', target: '#hero', content: 'Welcome' },
+  { id: 'pricing', target: '#pricing', content: 'Pricing' },
+] as const satisfies ReadonlyArray<TourStep>;
+
+type StepId = StepIdOf<typeof steps>;
+// StepId = 'welcome' | 'pricing'
+
+function MyComponent() {
+  const tour = useTour<(typeof steps)[number]>();
+
+  // ✅ Compiles
+  tour.goToStep('welcome');
+
+  // ❌ Type error: Argument of type '"biling"' is not assignable...
+  tour.goToStep('biling');
+}
+```
+
+The same narrowing applies to `startTour(tourId, stepId?)`:
+
+```tsx
+tour.startTour('onboarding', 'welcome'); // ✅
+tour.startTour('onboarding', 0);         // ✅ numeric index escape hatch
+tour.startTour('onboarding', 'biling');  // ❌ unknown step id
+```
+
+### Dynamic tours (server-fetched JSON)
+
+When step ids aren't known at compile time, omit the generic — the default `TourStep` widens id back to `string`:
+
+```tsx
+import type { Tour, TourStep } from '@tour-kit/react';
+
+// Server returns arbitrary tour JSON
+const dynamicSteps: TourStep[] = await fetch('/api/tour').then((r) => r.json());
+
+const dynamic: Tour = { id: 'dynamic', steps: dynamicSteps };
+// dynamic.steps[0].id is `string` — no narrowing applied
+```
+
+If you want the widening to be explicit in your type signatures, pass `TourStep<string>` directly:
+
+```tsx
+const widened: Tour<TourStep<string>> = dynamic;
+```
+
+### Narrowed callbacks
+
+`Tour.onStepChange` receives a step typed as `TStep`, not the base `TourStep`. Pass a literal-union step type to narrow `step.id` inside the callback:
+
+```tsx
+const tour: Tour<TourStep<'a' | 'b'>> = {
+  id: 'demo',
+  steps: [/* ... */],
+  onStepChange: (step) => {
+    // step.id is 'a' | 'b'
+    if (step.id === 'a') {/* ... */}
+  },
+};
+```
+
+See [issue #34](https://github.com/domidex01/tour-kit/issues/34) for the design discussion and the test fixtures under `packages/core/src/__tests__/types/` for the canonical patterns.
 
 ## Generic Step Data
 
@@ -39687,6 +40297,153 @@ describe('eu-pro segment', () => {
 ```
 
 For provider-scoped tests, render under `<SegmentationProvider>` with the cohort you want to exercise — segments are pure functions of `userContext` and `currentUserId`, so the harness needs no async setup.
+
+---
+
+# Testing with React Testing Library
+
+> Test Tour Kit components with React Testing Library and Vitest under jsdom using @tour-kit/testing-library — zero consumer-side act() boilerplate.
+
+`@tour-kit/testing-library` packages the Floating UI virtual-element pattern + the `act()` microtask flush behind a small set of helpers, so consumer tests can assert on tour state without re-deriving the pattern every time.
+
+## Install
+
+```bash
+pnpm add -D @tour-kit/testing-library @testing-library/react @testing-library/user-event vitest jsdom
+```
+
+`vitest`, `@testing-library/react`, `@testing-library/user-event`, and `jsdom-testing-mocks` are peer dependencies. `jsdom-testing-mocks` is **optional** — install it only when you opt into `positionShim`.
+
+## Quick start
+
+```ts title="vitest.setup.ts"
+import '@testing-library/jest-dom/vitest'
+import { afterEach } from 'vitest'
+import { cleanup } from '@testing-library/react'
+import { setupTourKitTesting } from '@tour-kit/testing-library/setup'
+
+afterEach(() => {
+  cleanup()
+})
+
+// Default — touches nothing. Opt into positionShim only if needed.
+await setupTourKitTesting()
+```
+
+```tsx title="welcome-tour.test.tsx"
+import { render } from '@testing-library/react'
+import { TourProvider } from '@tour-kit/core'
+import { TourCard } from '@tour-kit/react'
+import {
+  expectStepVisible,
+  advanceTour,
+  completeTour,
+  HookProbe,
+} from '@tour-kit/testing-library'
+import { describe, it } from 'vitest'
+
+const tour = {
+  id: 'demo',
+  steps: [
+    { id: 'welcome', target: '#welcome', title: 'Welcome', content: 'Hi' },
+    { id: 'pricing', target: '#pricing', title: 'Pricing', content: 'Pay' },
+  ],
+}
+
+describe('welcome tour', () => {
+  it('walks through both steps', async () => {
+    render(
+      <>
+        <div id="welcome" />
+        <div id="pricing" />
+        <TourProvider tours={[tour]}>
+          <TourCard />
+          <HookProbe />
+        </TourProvider>
+      </>,
+    )
+
+    // expectStepVisible flushes Floating UI microtasks for you — no `act` needed.
+    await expectStepVisible('welcome')
+    await advanceTour()
+    await expectStepVisible('pricing')
+    await completeTour('demo')
+  })
+})
+```
+
+## Why no `await act(...)`?
+
+Under jsdom, `@floating-ui/react` computes `{ x: 0, y: 0 }` because there is no layout engine. The positioning state still needs a microtask flush before assertions can read it. Every helper in this package wraps that flush:
+
+```ts title="expect-step-visible.ts (excerpt)"
+await act(async () => {}) // Floating UI microtask flush
+return await waitFor(() => container.querySelector(`[data-tour-step="${stepId}"]`))
+```
+
+The headline contract is enforced inside the package's own test suite: every consumer-side `await act(...)` call would fail the build. See [`floating-ui.com/docs/virtual-elements`](https://floating-ui.com/docs/virtual-elements) for the upstream pattern.
+
+## The Floating UI virtual-element pattern
+
+When you DO need to assert against a positioned element directly (for example, a custom floating tooltip you wrote yourself), use `virtualTarget(rect?)`:
+
+```ts
+import { virtualTarget } from '@tour-kit/testing-library'
+
+// Provides a non-zero rect to Floating UI without patching Element.prototype.
+refs.setReference(virtualTarget({ top: 100, left: 200, width: 320, height: 60 }))
+```
+
+The default rect is 200×100 at the origin. Partial overrides merge with the defaults.
+
+## Optional position shim
+
+The default `setupTourKitTesting()` is a no-op — it does not touch `Element.prototype`. If your own assertions need a per-element `getBoundingClientRect` mock, opt in:
+
+```ts
+import { setupTourKitTesting } from '@tour-kit/testing-library/setup'
+
+await setupTourKitTesting({ positionShim: true })
+// Then per-element, in your beforeEach:
+import { mockElementBoundingClientRect } from 'jsdom-testing-mocks'
+
+mockElementBoundingClientRect(myElement, { top: 100, left: 200, width: 320, height: 60 })
+```
+
+The shim is a thin hint: the lazy import guarantees `jsdom-testing-mocks` is loaded; you still apply per-element rects yourself. Consumers who never opt in never pay for the dep.
+
+## Failure context — `TourKitTestingError`
+
+Every helper throws `TourKitTestingError` (extending `Error`) with `stepId`, `tourId`, and a humanized message:
+
+```ts
+try {
+  await expectStepVisible('not-a-step', { timeout: 50 })
+} catch (e) {
+  if (e instanceof TourKitTestingError) {
+    console.log(e.message) // expectStepVisible: step "not-a-step" not visible within 50ms
+    console.log(e.stepId)  // "not-a-step"
+    console.log(e.cause)   // original RTL waitFor error
+  }
+}
+```
+
+## Helper reference
+
+| Helper | What it does |
+|--------|--------------|
+| `expectStepVisible(stepId, opts?)` | Resolves with the `[data-tour-step="<id>"]` element once it mounts. |
+| `advanceTour(opts?)` | Clicks **Next/Finish/Done**. Pass `steps: n` to click `n` times. |
+| `previousTour(opts?)` | Clicks **Previous/Back**. |
+| `skipTour(opts?)` | Clicks **Skip**. |
+| `completeTour(tourId, opts?)` | Clicks **Next** until the tour ends or the deadline elapses. |
+| `goToStep(stepId)` | Jumps to a non-adjacent step. Requires `<HookProbe />` in the provider tree. |
+| `virtualTarget(rect?, contextElement?)` | Returns a Floating UI virtual element with a merged DOMRect. |
+| `setupTourKitTesting(opts?)` | One-shot orchestrator; default touches nothing, `positionShim: true` lazy-loads `jsdom-testing-mocks`. |
+
+## Browser-positioning tests live elsewhere
+
+This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use Playwright via [`@tour-kit/playwright`](./nextjs#end-to-end-with-playwright) (Phase 6). Phase 5 helpers stop at the jsdom boundary by design.
 
 ---
 

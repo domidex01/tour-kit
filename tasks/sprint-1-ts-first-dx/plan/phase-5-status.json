@@ -1,0 +1,10 @@
+{
+  "phase": 5,
+  "status": "green",
+  "iterations": 1,
+  "tests_total": 30,
+  "tests_passed": 30,
+  "bundle_index_gz_bytes": 1573,
+  "bundle_setup_gz_bytes": 181,
+  "timestamp": "2026-05-13T07:42:33.950202+00:00"
+}

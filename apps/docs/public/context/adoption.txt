@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/adoption Context File
-Version: 1.0.2 | Generated: 2026-05-06
+Version: 1.0.2 | Generated: 2026-05-13
 Paste this into your LLM to get accurate answers about @tour-kit/adoption.
 =========================================================================
 
@@ -42,6 +42,8 @@ Types:
     FeatureUsage
     AdoptionStatus
     FeatureWithUsage
+    FunnelStep
+    AdoptionFunnelProps
     StorageConfig
     NudgeConfig
     AdoptionProviderProps
@@ -59,12 +61,14 @@ Hooks:
     useFeature — Feature definition
     useAdoptionStats — All features with their usage data
     useNudge — Features that should be nudged
+    useFunnelData — Feature IDs in funnel order.
     useUILibrary
     useAdoptionAnalytics
 
 Components:
     AdoptionProvider
     AdoptionStats
+    UseFunnelDataInput
     AdoptionNudge
     FeatureButton
     IfNotAdopted
@@ -161,6 +165,13 @@ TYPES
       handleNudgeClick: (featureId: string) => void
     }
 
+    export interface UseFunnelDataInput {
+      /** Feature IDs in funnel order. */
+      featureIds: readonly string[]
+      /** Optional label overrides keyed by feature id. */
+      labels?: Partial<Record<string, string>>
+    }
+
     export interface NudgeRenderProps {
       feature: Feature
       onDismiss: () => void
@@ -240,6 +251,7 @@ HOOKS
     useFeature(featureId: string): UseFeatureReturn
     useAdoptionStats(): AdoptionStats
     useNudge(): UseNudgeReturn
+    useFunnelData({ featureIds, labels }: UseFunnelDataInput): FunnelStep[]
     useUILibrary(...)
     useAdoptionAnalytics(...)
 
@@ -247,6 +259,7 @@ COMPONENTS
 ----------
     <AdoptionProvider />
     <AdoptionStats />
+    <UseFunnelDataInput />
     <AdoptionNudge />
     <FeatureButton />
     <IfNotAdopted />
