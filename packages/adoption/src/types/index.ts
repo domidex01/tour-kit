@@ -8,6 +8,8 @@ export type {
   FeatureUsage,
   AdoptionStatus,
   FeatureWithUsage,
+  FunnelStep,
+  AdoptionFunnelProps,
 } from './feature'
 
 export type {

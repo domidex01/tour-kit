@@ -18,3 +18,5 @@ export type { AdoptionFiltersProps, AdoptionFiltersState } from './adoption-filt
 
 export { AdoptionDashboard } from './adoption-dashboard'
 export type { AdoptionDashboardProps } from './adoption-dashboard'
+
+export { AdoptionFunnel } from './adoption-funnel'
