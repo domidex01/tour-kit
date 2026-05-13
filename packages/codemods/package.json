@@ -1,16 +1,60 @@
 {
   "name": "@tour-kit/codemods",
-  "version": "0.0.0",
-  "private": true,
-  "description": "Codemod transforms for migrating to Tour Kit (Phase 7a). Phase 0 ships the fixture corpus and tool spike only.",
+  "version": "0.1.0",
+  "description": "Codemods to migrate from Joyride, Shepherd, and Driver.js to Tour Kit",
+  "author": "Tour Kit Team",
   "license": "MIT",
+  "homepage": "https://github.com/domidex01/tour-kit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domidex01/tour-kit.git",
+    "directory": "packages/codemods"
+  },
+  "bugs": {
+    "url": "https://github.com/domidex01/tour-kit/issues"
+  },
+  "keywords": ["tour-kit", "codemod", "jscodeshift", "migration", "joyride"],
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "tour-kit-migrate": "./dist/bin/tour-kit-migrate.cjs"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "docs", "README.md", "CHANGELOG.md"],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "jscodeshift": "catalog:"
   },
   "devDependencies": {
     "@types/jscodeshift": "catalog:",
-    "jscodeshift": "catalog:",
-    "typescript": "catalog:"
+    "@types/node": "^22.10.7",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

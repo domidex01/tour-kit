@@ -1,0 +1,295 @@
+---
+title: Migrate from react-joyride
+description: >-
+  Use `npx tour-kit-migrate --from joyride` to rewrite a react-joyride codebase
+  to Tour Kit in seconds. Covers both the legacy `<Joyride>` JSX form and the
+  modern `useJoyride()` hook form.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs'
+
+## Quick start
+
+```bash
+npx tour-kit-migrate --from joyride ./src
+```
+
+The migrate command runs a `jscodeshift` transform over your `.ts`/`.tsx`/`.js`/`.jsx`
+files and rewrites every `react-joyride` import + every `<Joyride>` JSX + every
+`useJoyride()` hook call. Patterns that have no Tour Kit equivalent are kept
+in place and annotated with `// TODO:` comments that link back to this page.
+
+<Callout type="info">
+Run with `--dry-run` to see the diff without writing. Run with `--print` to
+write transformed source to stdout.
+</Callout>
+
+### Flags
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--from <source>` | required | One of `joyride`, `shepherd`, `driver` |
+| `--parser <parser>` | `tsx` | `tsx` / `ts` / `babel` |
+| `--dry-run` | off | Print diffs, don't write |
+| `--print` | off | Write transformed source to stdout |
+| `--extensions <list>` | `ts,tsx,js,jsx` | Comma-separated extension list |
+| `--verbose` | off | Log every file action |
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success |
+| 1 | Parse error during transform |
+| 2 | Bad CLI args |
+| 3 | No files matched |
+
+## What gets migrated
+
+| Pattern | Joyride | Tour Kit |
+| --- | --- | --- |
+| Import | `import Joyride from 'react-joyride'` | `import { TourProvider } from '@tour-kit/react'` |
+| Hook import | `import { useJoyride } from 'react-joyride'` | `import { useTour } from '@tour-kit/react'` |
+| JSX root | `<Joyride steps={steps} ... />` | `<TourProvider tours={[{ id: 'migrated-tour', steps }]} />` |
+| Hook call | `const { Tour, controls } = useJoyride({ steps })` | `const controls = useTour()` (steps move to `<TourProvider>`) |
+
+## Anchors emitted by the codemod
+
+Each pattern below lists a heading the codemod links to from a `// TODO:` comment.
+You can either grep your codebase for these anchors or follow them here to learn how
+to finish the migration by hand.
+
+### run-prop
+
+Tour Kit is imperative: there's no `run={true}` JSX prop. Call `useTour().start()`
+from a descendant of `<TourProvider>` (typically a small effect-only component) when
+you want the tour to begin.
+
+```tsx
+function StartTour() {
+  const { start } = useTour()
+  useEffect(() => { start() }, [start])
+  return null
+}
+```
+
+### continuous
+
+Joyride's `continuous` prop was opt-in chaining. Tour Kit chains by default — drop
+the `continuous` flag entirely.
+
+### show-progress
+
+`<Joyride showProgress>` displayed a `step n/N` indicator. In Tour Kit, render
+`<TourProgress />` inside your `<TourCard />` slot.
+
+### show-skip-button
+
+`<Joyride showSkipButton>` rendered a skip button. In Tour Kit, render `<TourClose />`
+inside `<TourCard />`.
+
+### step-index
+
+Joyride accepted a controlled `stepIndex` prop. Tour Kit owns step index internally.
+Use `useTour().goTo(index)` to navigate imperatively.
+
+### callback
+
+Joyride's single `callback({ action, status, type, index })` becomes three separate
+handlers in Tour Kit:
+
+- `onTourEnd(args)` — tour finished
+- `onTourSkip(args)` — user skipped
+- `onStepAdvance(args)` — step changed
+
+Walk through your original callback body and split each branch into the appropriate
+handler.
+
+### use-joyride-hook
+
+`useJoyride({ steps, ... })` collapses into:
+
+- `useTour()` — controls (start/next/prev/skip/stop)
+- `<TourProvider tours={[{ id, steps }]}>` — declarative tour registration in an ancestor
+
+The codemod cannot synthesize the ancestor provider — move the tour registration to
+the right place in your tree by hand.
+
+### controls-api
+
+Joyride's `controls.start()`, `.next()`, `.previous()`, `.skip()` map to Tour Kit's
+`useTour()` return value. `previous` becomes `prev`. Spot-check each call site.
+
+### tour-component
+
+The `<Tour />` component returned by `useJoyride()` rendered the tour inline. Tour Kit
+does not have an inline `<Tour />` — render `<TourProvider>` + `<TourCard />` in an
+ancestor and remove the inline element.
+
+### callbackprops
+
+The `CallBackProps` type has no Tour Kit equivalent — handlers receive narrow argument
+shapes (`{ index, status }` etc.) instead of one wide union. Remove the import.
+
+### eventdata
+
+The `EventData` type from `useJoyride().onEvent` has no Tour Kit equivalent. Each
+handler (`onTourEnd`, `onStepAdvance`) gets a narrowly-typed argument.
+
+### actions
+
+`ACTIONS.NEXT` / `ACTIONS.PREV` etc. enums have no Tour Kit equivalent — Tour Kit
+splits the callback by handler so the action discriminator is moot.
+
+### status
+
+`STATUS.FINISHED` / `STATUS.SKIPPED` enums have no Tour Kit equivalent — use the
+dedicated `onTourEnd` / `onTourSkip` handlers instead.
+
+## Step shape
+
+### target-function
+
+```tsx
+{ target: () => document.body }  // ✗ not supported
+```
+
+Tour Kit's `target` accepts a CSS selector string or a DOM ref. If your Joyride
+target was a function returning an element, rewrite as a selector OR pass a ref via
+the headless slot API.
+
+### target-dynamic
+
+```tsx
+{ target: someVariable }  // ⚠ verify
+```
+
+A dynamic identifier or expression is preserved as-is — confirm the value resolves
+to a string selector at runtime.
+
+### placement
+
+Joyride placements (`top` / `bottom` / etc.) map 1:1. `auto` and `center` are not
+Tour Kit values — the codemod maps both to `top`; review manually.
+
+### beacon
+
+Joyride pulses a beacon on each step until the user clicks. Tour Kit shows the tour
+immediately and has no default beacon. `Step.disableBeacon` and `Step.skipBeacon`
+are no-ops in Tour Kit — drop them.
+
+### styles
+
+Joyride's `Step.styles` accepted a deep object of inline styles. Tour Kit uses
+theme tokens via `<ThemeProvider />`. Port styling at the theme layer.
+
+### tooltip-component
+
+`Step.tooltipComponent` swapped the entire tooltip shell. Tour Kit uses headless
+slots — see the `<TourCard />` slot documentation for the equivalent.
+
+### beacon-component
+
+`Step.beaconComponent` swapped the beacon. Tour Kit has no default beacon — there
+is nothing to swap.
+
+### spotlight-target
+
+Joyride's `Step.spotlightTarget` let you spotlight a different element from the
+tooltip anchor. Tour Kit's spotlight is anchored to `target`; if you need a split,
+use a custom overlay component.
+
+### spotlight-clicks
+
+`Step.spotlightClicks` let users click through the spotlight onto the target.
+Tour Kit's spotlight is non-interactive by default; configure via the headless
+`<TourOverlay />` slot.
+
+### spotlight-padding
+
+`Step.spotlightPadding` controlled the spotlight ring. Tour Kit accepts a `padding`
+number on the headless overlay slot. If you used an object (per-side padding), pick
+the largest value and review.
+
+### scroll-target
+
+`Step.scrollTarget` chose a different scroll container. Tour Kit auto-detects the
+nearest scroll parent; if you need a custom container, set it manually before the
+tour starts.
+
+### is-fixed
+
+`Step.isFixed` opted into fixed positioning. Tour Kit always uses Floating UI for
+positioning — drop this field.
+
+### portal-element
+
+`Step.portalElement` overrode the portal root. Tour Kit's `<TourPortal />` slot
+accepts a `container` prop — port the value there.
+
+### disable-overlay
+
+Joyride's `disableOverlay` removed the dimmed background. In Tour Kit, omit
+`<TourOverlay />` from your `<TourCard />` composition.
+
+### disable-scrolling
+
+Joyride's `disableScrolling` prevented programmatic scroll to the target. Tour Kit
+scrolls when the target is off-screen; gate this in your own logic if you need to.
+
+### hide-close-button
+
+Joyride's `hideCloseButton` removed the X button. In Tour Kit, omit `<TourClose />`
+from your card composition.
+
+### hide-footer
+
+Joyride's `hideFooter` removed the footer. In Tour Kit, omit `<TourCardFooter />`
+from your card composition.
+
+### hide-back-button
+
+Joyride's `hideBackButton` removed the back button. In Tour Kit, omit the prev
+button from your `<TourNavigation />` composition.
+
+### locale
+
+Joyride's `locale` overrode button labels. In Tour Kit, pass label props to each
+slot component (`<TourNavigation prevLabel="..." nextLabel="..." />`).
+
+### debug
+
+Joyride's `debug` mode dumped state to the console. Tour Kit's `<TourProvider diagnose>`
+prop is the equivalent — see the [Diagnostics guide](/docs/guides) for usage.
+
+### disablecloseonesc
+
+`disableCloseOnEsc` disabled the Escape-key close handler. In Tour Kit, override
+the keyboard handler via the headless slots or the `<TourCard />` `onKeyDown` prop.
+
+## Step shape — unrecognized
+
+### unknown-step-field
+
+The codemod surfaces unknown `Step.*` fields with this anchor. Check the docs for
+the version of `react-joyride` you ran and decide if the field has a Tour Kit
+equivalent that the codemod didn't recognize.
+
+### unknown-jsx-prop
+
+Same idea for `<Joyride someProp={...} />` props the codemod didn't recognize.
+
+### jsx-spread
+
+A JSX spread (`<Joyride {...props} />`) hides what's actually being passed. The
+codemod can't see through it — verify your props against the Tour Kit API manually.
+
+## CLI smoke test
+
+```bash
+npx tour-kit-migrate --from joyride --dry-run ./src
+```
+
+If the dry-run prints clean diffs and exits 0, run again without `--dry-run` to
+write the changes.

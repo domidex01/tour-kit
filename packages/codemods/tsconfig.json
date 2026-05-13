@@ -6,8 +6,9 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "types": ["node"]
   },
-  "include": ["__tests__/**/*"],
-  "exclude": ["node_modules", "__tests__/fixtures/**/*"]
+  "include": ["src/**/*", "__tests__/**/*"],
+  "exclude": ["node_modules", "dist", "__spike__", "__tests__/fixtures/**/*"]
 }
