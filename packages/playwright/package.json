@@ -1,0 +1,68 @@
+{
+  "name": "@tour-kit/playwright",
+  "version": "0.1.0",
+  "description": "Playwright fixtures for Tour Kit — test.extend({ tour }) against window.__tourKit__",
+  "author": "Tour Kit Team",
+  "license": "MIT",
+  "homepage": "https://github.com/domidex01/tour-kit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domidex01/tour-kit.git",
+    "directory": "packages/playwright"
+  },
+  "bugs": {
+    "url": "https://github.com/domidex01/tour-kit/issues"
+  },
+  "keywords": ["tour-kit", "playwright", "playwright-fixtures", "e2e", "testing", "react"],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "playwright test",
+    "test:types": "vitest run",
+    "fixtures:serve": "vite --config fixtures-app/vite.config.ts"
+  },
+  "dependencies": {
+    "@tour-kit/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@playwright/test": "^1.58.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@tour-kit/react": "workspace:*",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vite": "^6.0.3",
+    "vitest": "catalog:"
+  }
+}

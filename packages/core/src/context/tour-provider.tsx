@@ -16,8 +16,8 @@ import type {
   TourStep,
 } from '../types'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
-import type { TestBridge } from '../types/test-bridge'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
+import type { TestBridge } from '../types/test-bridge'
 import {
   isBranchToTour,
   isBranchWait,
@@ -1584,15 +1584,11 @@ export function TourProvider({
 
   const testBridgeWarnedRef = React.useRef(false)
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: the bridge is intentionally established once per enableTestBridge toggle; method dispatch goes through bridgeMethodsRef
   React.useEffect(() => {
     if (!enableTestBridge) return
     if (typeof window === 'undefined') return
 
-    if (
-      typeof process === 'undefined' ||
-      process.env?.NODE_ENV !== 'production'
-    ) {
+    if (typeof process === 'undefined' || process.env?.NODE_ENV !== 'production') {
       if (!testBridgeWarnedRef.current) {
         testBridgeWarnedRef.current = true
         console.warn('[Tour Kit] Test bridge enabled. Disable for production.')
@@ -1626,6 +1622,7 @@ export function TourProvider({
       // Identity check defends against another library reassigning the global
       // between our mount and unmount — see the cleanup-safety unit test.
       if (window.__tourKit__ === bridge) {
+        // biome-ignore lint/performance/noDelete: full removal mirrors the absent-by-default invariant — `= undefined` would leave an own property and break consumer `'__tourKit__' in window` checks
         delete window.__tourKit__
       }
     }

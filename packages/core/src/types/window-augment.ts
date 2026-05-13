@@ -15,5 +15,3 @@ declare global {
     __tourKit__?: TestBridge
   }
 }
-
-export {}

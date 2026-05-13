@@ -6,6 +6,7 @@ import { TourProvider } from '../tour-provider'
 beforeEach(() => {
   // Belt-and-suspenders: previous tests' provider cleanup should already have
   // removed the global, but a missed unmount would leak across this suite.
+  // biome-ignore lint/performance/noDelete: must fully remove the property — `= undefined` leaves it as an own property and would mask leaks
   delete (window as { __tourKit__?: unknown }).__tourKit__
   // Mount the targets referenced by the fixture so any diagnose path resolves.
   document.body.innerHTML = '<div id="a"></div><div id="b"></div>'
@@ -69,6 +70,7 @@ describe('TestBridge — surface & lifecycle', () => {
     unmount()
     expect(window.__tourKit__).toBe(sentinel)
     // Reset for the next test.
+    // biome-ignore lint/performance/noDelete: full removal — keeps test isolation symmetrical with provider cleanup
     delete (window as { __tourKit__?: unknown }).__tourKit__
   })
 
