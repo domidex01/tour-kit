@@ -16,7 +16,7 @@ function parseObject(src: string): ReturnType<typeof j.expression> {
 describe('mapStepObject — supported fields', () => {
   it('maps string target to selector', () => {
     const obj = parseObject(`{ target: '#hero', content: 'Hi' }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.target).toBe('#hero')
     expect(m.todos).toEqual([])
     expect(m.unsupportedFields).toEqual([])
@@ -24,7 +24,7 @@ describe('mapStepObject — supported fields', () => {
 
   it('maps placement', () => {
     const obj = parseObject(`{ target: '#hero', content: 'Hi', placement: 'top' }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.placement).toBe('top')
   })
 
@@ -32,28 +32,28 @@ describe('mapStepObject — supported fields', () => {
     const obj = parseObject(
       `{ target: '#hero', content: 'Hi', id: 'step-1', data: { foo: 'bar' } }`
     )
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.id).toBe('step-1')
     expect(m.todos).toEqual([])
   })
 
   it('preserves content and title expressions', () => {
     const obj = parseObject(`{ target: '#hero', title: 'Hello', content: 'Body' }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.content).toBeDefined()
     expect(m.title).toBeDefined()
   })
 
   it('emits TODO for auto placement', () => {
     const obj = parseObject(`{ target: '#a', content: 'x', placement: 'auto' }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.placement).toBe('top')
     expect(m.todos.some((t) => t.anchor === 'placement')).toBe(true)
   })
 
   it('emits TODO for center placement', () => {
     const obj = parseObject(`{ target: '#a', content: 'x', placement: 'center' }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.placement).toBe('top')
     expect(m.todos.some((t) => t.anchor === 'placement')).toBe(true)
   })
@@ -69,7 +69,7 @@ describe('mapStepObject — unsupported fields emit TODOs', () => {
     ['portalElement', 'document.body', 'portal-element'],
   ])('emits TODO for %s with anchor %s', (field, value, anchor) => {
     const obj = parseObject(`{ target: '#a', content: 'x', ${field}: ${value} }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.unsupportedFields).toContain(field)
     expect(m.todos.some((t) => t.message.includes(`Step.${field}`))).toBe(true)
     expect(m.todos.some((t) => t.anchor === anchor)).toBe(true)
@@ -80,13 +80,13 @@ describe('mapStepObject — unsupported fields emit TODOs', () => {
 describe('mapStepObject — target as function emits TODO', () => {
   it('emits TODO with target-function anchor for arrow target', () => {
     const obj = parseObject(`{ target: () => document.body, content: '' }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.todos.some((t) => t.anchor === 'target-function')).toBe(true)
   })
 
   it('emits TODO with target-function anchor for function expression target', () => {
     const obj = parseObject(`{ target: function () { return null }, content: '' }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.todos.some((t) => t.anchor === 'target-function')).toBe(true)
   })
 })
@@ -94,7 +94,7 @@ describe('mapStepObject — target as function emits TODO', () => {
 describe('mapStepObject — dynamic target emits TODO', () => {
   it('emits TODO with target-dynamic anchor for identifier target', () => {
     const obj = parseObject(`{ target: refId, content: 'x' }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.todos.some((t) => t.anchor === 'target-dynamic')).toBe(true)
   })
 })
@@ -102,7 +102,7 @@ describe('mapStepObject — dynamic target emits TODO', () => {
 describe('mapStepObject — silent no-op fields', () => {
   it.each(['disableBeacon', 'skipBeacon'])('records %s as no-op with beacon anchor', (field) => {
     const obj = parseObject(`{ target: '#a', content: 'x', ${field}: true }`)
-    const m = mapStepObject(j, obj as never)
+    const m = mapStepObject(obj as never)
     expect(m.unsupportedFields).not.toContain(field)
     expect(m.dropped).toContain(field)
     expect(m.todos.some((t) => t.anchor === 'beacon')).toBe(true)

@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -72,62 +72,69 @@ const __here = dirname(fileURLToPath(import.meta.url))
 const TSC_BIN = locateTscBin(__here)
 
 function locateTscBin(start: string): string {
+  const candidates = process.platform === 'win32' ? ['tsc.cmd', 'tsc.ps1', 'tsc'] : ['tsc']
   let dir = start
   while (dir !== dirname(dir)) {
-    const candidate = resolve(dir, 'node_modules', '.bin', 'tsc')
-    if (existsSync(candidate)) return candidate
+    for (const name of candidates) {
+      const candidate = resolve(dir, 'node_modules', '.bin', name)
+      if (existsSync(candidate)) return candidate
+    }
     dir = dirname(dir)
   }
   // Fall back to PATH — let exec fail loudly if it's missing.
-  return 'tsc'
+  return candidates[0]
 }
 
 export function tscNoEmit(tsx: string): TscResult {
   const dir = mkdtempSync(join(tmpdir(), 'tk-codemod-'))
-  const file = join(dir, 'output.tsx')
-  const tsconfig = join(dir, 'tsconfig.json')
-  const stubsDir = join(dir, 'stubs')
-  writeFileSync(file, tsx, 'utf8')
-  writeStubs(stubsDir)
-  writeFileSync(
-    tsconfig,
-    JSON.stringify(
-      {
-        compilerOptions: {
-          noEmit: true,
-          jsx: 'preserve',
-          target: 'es2020',
-          module: 'esnext',
-          moduleResolution: 'bundler',
-          skipLibCheck: true,
-          isolatedModules: true,
-          esModuleInterop: true,
-          allowSyntheticDefaultImports: true,
-          strict: false,
-          noImplicitAny: false,
-          paths: {
-            '@tour-kit/react': ['./stubs/tour-kit-react.d.ts'],
-            react: ['./stubs/react.d.ts'],
-            'react-joyride': ['./stubs/react-joyride.d.ts'],
-          },
-        },
-        include: ['output.tsx', 'stubs/**/*'],
-      },
-      null,
-      2
-    ),
-    'utf8'
-  )
   try {
-    execFileSync(TSC_BIN, ['--noEmit', '-p', tsconfig], {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-      cwd: dir,
-    })
-    return { ok: true, output: '' }
-  } catch (e) {
-    const err = e as { stdout?: Buffer | string; stderr?: Buffer | string }
-    return { ok: false, output: `${String(err.stdout ?? '')}${String(err.stderr ?? '')}` }
+    const file = join(dir, 'output.tsx')
+    const tsconfig = join(dir, 'tsconfig.json')
+    const stubsDir = join(dir, 'stubs')
+    writeFileSync(file, tsx, 'utf8')
+    writeStubs(stubsDir)
+    writeFileSync(
+      tsconfig,
+      JSON.stringify(
+        {
+          compilerOptions: {
+            noEmit: true,
+            jsx: 'preserve',
+            target: 'es2020',
+            module: 'esnext',
+            moduleResolution: 'bundler',
+            skipLibCheck: true,
+            isolatedModules: true,
+            esModuleInterop: true,
+            allowSyntheticDefaultImports: true,
+            strict: false,
+            noImplicitAny: false,
+            paths: {
+              '@tour-kit/react': ['./stubs/tour-kit-react.d.ts'],
+              react: ['./stubs/react.d.ts'],
+              'react-joyride': ['./stubs/react-joyride.d.ts'],
+            },
+          },
+          include: ['output.tsx', 'stubs/**/*'],
+        },
+        null,
+        2
+      ),
+      'utf8'
+    )
+    try {
+      execFileSync(TSC_BIN, ['--noEmit', '-p', tsconfig], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        cwd: dir,
+      })
+      return { ok: true, output: '' }
+    } catch (e) {
+      const err = e as { stdout?: Buffer | string; stderr?: Buffer | string }
+      return { ok: false, output: `${String(err.stdout ?? '')}${String(err.stderr ?? '')}` }
+    }
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
   }
 }
 

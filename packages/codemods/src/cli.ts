@@ -101,6 +101,25 @@ export async function runMigrate(argv: readonly string[]): Promise<number> {
   return parseErrors > 0 ? EXIT_PARSE_ERROR : EXIT_OK
 }
 
+// Accepts both `--flag value` and `--flag=value` forms. Returns null when the
+// arg doesn't match the flag; throws UsageError when the value is missing.
+function takeValue(
+  argv: readonly string[],
+  i: number,
+  flag: string
+): { value: string; consumed: number } | null {
+  const arg = argv[i]
+  if (arg === flag) {
+    const v = argv[i + 1]
+    if (!v) throw new UsageError(`${flag} requires a value`)
+    return { value: v, consumed: 2 }
+  }
+  if (arg.startsWith(`${flag}=`)) {
+    return { value: arg.slice(flag.length + 1), consumed: 1 }
+  }
+  return null
+}
+
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: manual arg-parser — one branch per flag; commander/yargs would be heavier than the function itself
 function parseArgs(argv: readonly string[]): CliOptions {
   let from: CliOptions['from'] | null = null
@@ -114,28 +133,29 @@ function parseArgs(argv: readonly string[]): CliOptions {
   let i = 0
   while (i < argv.length) {
     const arg = argv[i]
-    if (arg === '--from') {
-      const v = argv[i + 1]
-      if (!v) throw new UsageError('--from requires a value (joyride|shepherd|driver)')
-      if (!isFromValue(v))
-        throw new UsageError(`--from='${v}' is not a recognized migration source`)
-      from = v
-      i += 2
+    const fromHit = takeValue(argv, i, '--from')
+    if (fromHit) {
+      if (!isFromValue(fromHit.value))
+        throw new UsageError(`--from='${fromHit.value}' is not a recognized migration source`)
+      from = fromHit.value
+      i += fromHit.consumed
       continue
     }
-    if (arg.startsWith('--from=')) {
-      const v = arg.slice('--from='.length)
-      if (!isFromValue(v))
-        throw new UsageError(`--from='${v}' is not a recognized migration source`)
-      from = v
-      i += 1
+    const parserHit = takeValue(argv, i, '--parser')
+    if (parserHit) {
+      if (!isParserValue(parserHit.value))
+        throw new UsageError("--parser must be one of 'tsx' | 'ts' | 'babel'")
+      parser = parserHit.value
+      i += parserHit.consumed
       continue
     }
-    if (arg === '--parser') {
-      const v = argv[i + 1]
-      if (!isParserValue(v)) throw new UsageError("--parser must be one of 'tsx' | 'ts' | 'babel'")
-      parser = v
-      i += 2
+    const extHit = takeValue(argv, i, '--extensions')
+    if (extHit) {
+      extensions = extHit.value
+        .split(',')
+        .map((s) => s.trim().replace(/^\./, ''))
+        .filter(Boolean)
+      i += extHit.consumed
       continue
     }
     if (arg === '--dry-run') {
@@ -153,16 +173,6 @@ function parseArgs(argv: readonly string[]): CliOptions {
       i += 1
       continue
     }
-    if (arg === '--extensions') {
-      const v = argv[i + 1]
-      if (!v) throw new UsageError('--extensions requires a comma-separated list')
-      extensions = v
-        .split(',')
-        .map((s) => s.trim().replace(/^\./, ''))
-        .filter(Boolean)
-      i += 2
-      continue
-    }
     if (arg === '--help' || arg === '-h') {
       console.log(usageMessage())
       throw new UsageError('help requested')
@@ -175,6 +185,7 @@ function parseArgs(argv: readonly string[]): CliOptions {
   }
 
   if (!from) throw new UsageError('--from is required')
+  if (print && dryRun) throw new UsageError('--print and --dry-run are mutually exclusive')
 
   return {
     from,
@@ -219,6 +230,10 @@ async function collectFiles(
   return out
 }
 
+// Match common gitignore defaults so `tour-kit-migrate ./` from a project root
+// doesn't re-transform compiled output or test artifacts.
+const SKIP_DIRS = new Set(['node_modules', 'dist', 'build', 'out', 'coverage', '.next', '.turbo'])
+
 async function walk(
   dir: string,
   matchExt: (file: string) => boolean,
@@ -226,7 +241,7 @@ async function walk(
 ): Promise<void> {
   const entries = await readdir(dir, { withFileTypes: true })
   for (const entry of entries) {
-    if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue
+    if (SKIP_DIRS.has(entry.name) || entry.name.startsWith('.')) continue
     const full = join(dir, entry.name)
     if (entry.isDirectory()) {
       await walk(full, matchExt, out)

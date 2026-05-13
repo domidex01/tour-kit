@@ -1,4 +1,4 @@
-import type { ASTNode, JSCodeshift, ObjectExpression, ObjectProperty, Property } from 'jscodeshift'
+import type { ASTNode, ObjectExpression, ObjectProperty, Property } from 'jscodeshift'
 import { type Todo, emitTodo } from './todo-emitter'
 
 /**
@@ -79,25 +79,28 @@ function isPropLike(node: ASTNode): node is PropLike {
   return node.type === 'ObjectProperty' || node.type === 'Property'
 }
 
+// Reads a string-literal AST node across both legacy (Literal) and modern
+// (StringLiteral) parser outputs. Returns null for any non-string-literal.
+function readStringLiteral(node: ASTNode | null | undefined): string | null {
+  if (!node) return null
+  if (node.type === 'Literal' && typeof node.value === 'string') return node.value
+  if (node.type === 'StringLiteral') return node.value
+  return null
+}
+
 function getKeyName(prop: PropLike): string | null {
   const key = prop.key
   if (!key) return null
   if (key.type === 'Identifier') return key.name
-  if (key.type === 'Literal' && typeof key.value === 'string') return key.value
-  if (key.type === 'StringLiteral') return key.value
-  return null
+  return readStringLiteral(key)
 }
 
 function stringValueOf(prop: PropLike): string | undefined {
-  const v = prop.value
-  if (!v) return undefined
-  if (v.type === 'Literal' && typeof v.value === 'string') return v.value
-  if (v.type === 'StringLiteral') return v.value
-  return undefined
+  return readStringLiteral(prop.value) ?? undefined
 }
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: dispatch on Joyride Step field names — splitting would add indirection without clarity
-export function mapStepObject(_j: JSCodeshift, obj: ObjectExpression): StepMapping {
+export function mapStepObject(obj: ObjectExpression): StepMapping {
   const mapping: StepMapping = {
     target: '',
     todos: [],
@@ -164,12 +167,9 @@ function mapTarget(prop: PropLike, mapping: StepMapping): void {
     mapping.target = ''
     return
   }
-  if (v.type === 'Literal' && typeof v.value === 'string') {
-    mapping.target = v.value
-    return
-  }
-  if (v.type === 'StringLiteral') {
-    mapping.target = v.value
+  const literal = readStringLiteral(v)
+  if (literal !== null) {
+    mapping.target = literal
     return
   }
   if (v.type === 'ArrowFunctionExpression' || v.type === 'FunctionExpression') {
@@ -192,48 +192,31 @@ function mapTarget(prop: PropLike, mapping: StepMapping): void {
   mapping.target = ''
 }
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: dispatch on placement literal — branches are intentional, not nested logic
 function mapPlacement(prop: PropLike, mapping: StepMapping): void {
-  const v = prop.value
-  if (!v) return
-  if (v.type === 'Literal' && typeof v.value === 'string') {
-    const mapped = PLACEMENT_MAP[v.value]
-    if (mapped) {
-      mapping.placement = mapped
-      if (v.value === 'auto' || v.value === 'center') {
-        mapping.todos.push(
-          emitTodo(
-            `Step.placement '${v.value}' → '${mapped}' (Tour Kit has no '${v.value}'); review manually`,
-            'placement'
-          )
-        )
-      }
-    } else {
+  const literal = readStringLiteral(prop.value)
+  if (literal === null) {
+    if (prop.value) {
       mapping.todos.push(
-        emitTodo(`Step.placement '${v.value}' unrecognized — defaulting to 'top'`, 'placement')
+        emitTodo('Step.placement dynamic expression — verify after migration', 'placement')
       )
-      mapping.placement = 'top'
     }
     return
   }
-  if (v.type === 'StringLiteral') {
-    const mapped = PLACEMENT_MAP[v.value]
-    if (mapped) {
-      mapping.placement = mapped
-      if (v.value === 'auto' || v.value === 'center') {
-        mapping.todos.push(
-          emitTodo(
-            `Step.placement '${v.value}' → '${mapped}' (Tour Kit has no '${v.value}'); review manually`,
-            'placement'
-          )
-        )
-      }
-    } else {
-      mapping.placement = 'top'
-    }
+  const mapped = PLACEMENT_MAP[literal]
+  if (!mapped) {
+    mapping.todos.push(
+      emitTodo(`Step.placement '${literal}' unrecognized — defaulting to 'top'`, 'placement')
+    )
+    mapping.placement = 'top'
     return
   }
-  mapping.todos.push(
-    emitTodo('Step.placement dynamic expression — verify after migration', 'placement')
-  )
+  mapping.placement = mapped
+  if (literal === 'auto' || literal === 'center') {
+    mapping.todos.push(
+      emitTodo(
+        `Step.placement '${literal}' → '${mapped}' (Tour Kit has no '${literal}'); review manually`,
+        'placement'
+      )
+    )
+  }
 }
