@@ -193,8 +193,20 @@ export { useT } from './lib/i18n/use-t'
 export type { Messages, TranslateFn } from './lib/i18n/use-t'
 
 // Audience targeting — promoted from @tour-kit/announcements in Phase 1
-export { matchesAudience, validateConditions } from './lib/audience'
+export { explainAudience, matchesAudience, validateConditions } from './lib/audience'
 export type { AudienceCondition } from './types/audience'
+
+// Diagnostic engine — Phase 3 (issue #32)
+export { BUILTIN_GATE_ORDER, explainTour } from './lib/diagnostic'
+export { useTourDiagnostic } from './hooks/use-tour-diagnostic'
+export type {
+  DiagnosticContext,
+  DiagnosticGate,
+  EligibilityReport,
+  GateCode,
+  GateName,
+  GateReason,
+} from './types/diagnostic'
 
 // Frequency rules — Phase 3a (lifted from @tour-kit/announcements)
 export {

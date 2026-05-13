@@ -45,6 +45,7 @@ export default defineConfig({
       fs.mkdirSync('dist/styles', { recursive: true })
       fs.copyFileSync('src/styles/variables.css', 'dist/styles/variables.css')
       fs.copyFileSync('src/styles/theme.css', 'dist/styles/theme.css')
+      fs.copyFileSync('src/styles/funnel.css', 'dist/styles/funnel.css')
     } catch (e) {
       console.warn('Failed to copy CSS files:', e)
     }

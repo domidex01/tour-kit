@@ -55,7 +55,8 @@
       }
     },
     "./styles/variables.css": "./dist/styles/variables.css",
-    "./styles/theme.css": "./dist/styles/theme.css"
+    "./styles/theme.css": "./dist/styles/theme.css",
+    "./styles/funnel.css": "./dist/styles/funnel.css"
   },
   "files": ["dist"],
   "publishConfig": {
