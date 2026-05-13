@@ -74,19 +74,23 @@ describe('TestBridge — surface & lifecycle', () => {
     delete (window as { __tourKit__?: unknown }).__tourKit__
   })
 
-  it('logs dev warning once per mount', () => {
+  it('logs dev warning once even across an enableTestBridge toggle cycle', () => {
+    // The warn-once guard is only meaningful when the effect actually re-runs.
+    // Toggling `enableTestBridge` forces cleanup → re-mount of the effect; the
+    // `testBridgeWarnedRef` must suppress the second warn. A bare rerender with
+    // identical props wouldn't exercise the guard at all (effect deps stable).
     vi.stubEnv('NODE_ENV', 'development')
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const { rerender } = render(
-      <TourProvider tours={[twoStepTour]} enableTestBridge>
-        <div />
-      </TourProvider>
-    )
-    rerender(
-      <TourProvider tours={[twoStepTour]} enableTestBridge>
-        <div />
-      </TourProvider>
-    )
+    function Harness({ enabled }: { enabled: boolean }) {
+      return (
+        <TourProvider tours={[twoStepTour]} enableTestBridge={enabled}>
+          <div />
+        </TourProvider>
+      )
+    }
+    const { rerender } = render(<Harness enabled={true} />)
+    rerender(<Harness enabled={false} />) // cleanup; bridge gone
+    rerender(<Harness enabled={true} />) // effect runs again; guard must skip warn
     const bridgeCalls = warn.mock.calls.filter((args) =>
       String(args[0] ?? '').includes('Test bridge')
     )
@@ -94,7 +98,7 @@ describe('TestBridge — surface & lifecycle', () => {
     expect(String(bridgeCalls[0]?.[0])).toMatch(/Tour Kit/i)
   })
 
-  it('does NOT warn in production', () => {
+  it('does NOT warn in production but still publishes the bridge when opted in', () => {
     vi.stubEnv('NODE_ENV', 'production')
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     render(
@@ -106,6 +110,10 @@ describe('TestBridge — surface & lifecycle', () => {
       String(args[0] ?? '').includes('Test bridge')
     )
     expect(bridgeCalls).toHaveLength(0)
+    // Explicit opt-in MUST work in any NODE_ENV — guards a regression where the
+    // prod check short-circuits the whole effect instead of just the warning.
+    expect(window.__tourKit__).toBeDefined()
+    expect(typeof window.__tourKit__?.next).toBe('function')
   })
 
   it('getDiagnostic returns a populated EligibilityReport when diagnose is on', async () => {

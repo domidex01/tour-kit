@@ -1563,16 +1563,10 @@ export function TourProvider({
   //   re-creating (and re-publishing) the bridge on every controller-method
   //   identity change, which would invalidate any cached helper closures in
   //   long-running Playwright contexts.
-  const bridgeMethodsRef = React.useRef<{
-    start: typeof start
-    next: typeof next
-    previous: typeof prev
-    goToStep: typeof goToStep
-    complete: typeof complete
-    skip: typeof skip
-    diagnostics: typeof diagnostics
-  }>({ start, next, previous: prev, goToStep, complete, skip, diagnostics })
-  bridgeMethodsRef.current = {
+  // Build the latest-methods snapshot once per render, then publish to the ref.
+  // The ref initial value uses the same object so the first effect run sees a
+  // populated `current` even before this render's assignment commits.
+  const bridgeMethods = {
     start,
     next,
     previous: prev,
@@ -1581,6 +1575,8 @@ export function TourProvider({
     skip,
     diagnostics,
   }
+  const bridgeMethodsRef = React.useRef(bridgeMethods)
+  bridgeMethodsRef.current = bridgeMethods
 
   const testBridgeWarnedRef = React.useRef(false)
 

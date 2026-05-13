@@ -1,3 +1,9 @@
+// Side-effect import: registers the ambient `Window.__tourKit__?` declaration
+// in `./types/window-augment.ts` so consumers writing Playwright tests get
+// strict typing without re-declaring it. The file is type-only; tsup rolls
+// the `declare global` into the published .d.ts.
+import './types/window-augment'
+
 // Types - use explicit type exports for tree shaking
 export type {
   // Branch types
@@ -208,10 +214,8 @@ export type {
   GateReason,
 } from './types/diagnostic'
 
-// Test bridge — Phase 6 (issue #86). Importing `./types/window-augment` for
-// its side-effect registers the ambient `Window.__tourKit__?` declaration so
-// consumers writing Playwright tests get strict typing without re-declaring it.
-import './types/window-augment'
+// Test bridge — Phase 6 (issue #86). The ambient `Window.__tourKit__?`
+// declaration is registered via the side-effect import at the top of this file.
 export type { TestBridge } from './types/test-bridge'
 
 // Frequency rules — Phase 3a (lifted from @tour-kit/announcements)
