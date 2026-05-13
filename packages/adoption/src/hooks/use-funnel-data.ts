@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import type { FunnelStep } from '../types/feature'
 import { useAdoptionStats } from './use-adoption-stats'
 
@@ -30,23 +29,25 @@ export interface UseFunnelDataResult {
  * For aggregated, date-ranged funnels, hand pre-computed data straight to
  * `<AdoptionFunnel steps={...}>` (the data-first path).
  *
+ * No memoization — `featureIds` and `labels` are usually fresh references each
+ * render, which would defeat `useMemo`. The mapping is O(featureIds) and the
+ * caller's render dominates anyway.
+ *
  * Throws via `useAdoptionStats` if used outside `<AdoptionProvider>`.
  */
 export function useFunnelData({ featureIds, labels }: UseFunnelDataInput): UseFunnelDataResult {
   const stats = useAdoptionStats()
-  return React.useMemo<UseFunnelDataResult>(() => {
-    const steps: FunnelStep[] = featureIds.map((id) => {
-      const feature = stats.features.find((f) => f.id === id)
-      const useCount = feature?.usage.useCount ?? 0
-      const isAdopted = feature?.usage.status === 'adopted'
-      const fallbackLabel = feature?.name ?? id
-      return {
-        id,
-        label: labels?.[id] ?? fallbackLabel,
-        entered: useCount,
-        completed: isAdopted ? useCount : 0,
-      }
-    })
-    return { steps, loading: false, error: null }
-  }, [stats.features, featureIds, labels])
+  const steps: FunnelStep[] = featureIds.map((id) => {
+    const feature = stats.features.find((f) => f.id === id)
+    const useCount = feature?.usage.useCount ?? 0
+    const isAdopted = feature?.usage.status === 'adopted'
+    const fallbackLabel = feature?.name ?? id
+    return {
+      id,
+      label: labels?.[id] ?? fallbackLabel,
+      entered: useCount,
+      completed: isAdopted ? useCount : 0,
+    }
+  })
+  return { steps, loading: false, error: null }
 }

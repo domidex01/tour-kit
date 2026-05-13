@@ -6,7 +6,13 @@
  * Reduced motion honored at the bottom of the file.
  */
 
+/* Outer container — holds the visible chart + the visually-hidden SR table.
+   Visual layout is owned by .tk-funnel__chart (the .sr-only sibling is clipped). */
 .tk-funnel {
+  position: relative;
+}
+
+.tk-funnel__chart {
   display: flex;
   flex-direction: column;
   gap: var(--tour-funnel-gap, 0.5rem);

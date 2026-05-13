@@ -130,8 +130,17 @@ export interface FunnelStep {
  *
  * Works WITHOUT `<AdoptionProvider>` — data-first by design. Consumers in a
  * provider tree typically combine with `useFunnelData({ featureIds })`.
+ *
+ * Extends standard `<div>` props so consumers can attach refs, `data-*`,
+ * `aria-describedby`, etc. `role`, `aria-label`, and `children` are owned by
+ * the component (an inner chart wrapper carries `role="img"` + the computed
+ * summary, and an `<sr-only>` table sibling provides the SR mirror).
  */
-export interface AdoptionFunnelProps {
+export interface AdoptionFunnelProps
+  extends Omit<
+    React.ComponentPropsWithoutRef<'div'>,
+    'role' | 'aria-label' | 'children' | 'title'
+  > {
   /** Pre-computed funnel data, in display order. */
   steps: readonly FunnelStep[]
   /** Optional header rendered above the bars. */
@@ -140,8 +149,6 @@ export interface AdoptionFunnelProps {
   onStepClick?: (step: FunnelStep, index: number) => void
   /** Replaces the default "No funnel data yet." message when `steps` is empty. */
   emptyState?: React.ReactNode
-  /** Extra className merged onto the root element. */
-  className?: string
   /**
    * Overrides the auto-generated chart summary on the `role="img"` element.
    * Default: `Adoption funnel: 100 → 60 → 30, 30% end-to-end retention`.

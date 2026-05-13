@@ -12,6 +12,14 @@ import type { AdoptionFunnelProps, FunnelStep } from '../../types/feature'
  * Pair with `useFunnelData({ featureIds })` inside `<AdoptionProvider>` for
  * a one-line in-provider integration (current-state semantics; not historical).
  *
+ * Accessibility:
+ * - The visual chart sits inside a `role="img"` container with an auto-built
+ *   `aria-label` summary. Per WAI-ARIA, `role="img"` with an accessible name
+ *   suppresses its descendants from the AT tree — so the SR-only `<table>`
+ *   mirror is rendered as a SIBLING of the chart (NOT a child), where screen
+ *   readers can actually reach it.
+ * - Clickable steps stay focusable; Enter + Space both fire `onStepClick`.
+ *
  * @example
  * ```tsx
  * <AdoptionFunnel
@@ -22,70 +30,76 @@ import type { AdoptionFunnelProps, FunnelStep } from '../../types/feature'
  * />
  * ```
  */
-export function AdoptionFunnel({
-  steps,
-  title,
-  onStepClick,
-  emptyState,
-  className,
-  ariaLabel,
-}: AdoptionFunnelProps): React.ReactElement {
-  const metrics = React.useMemo(() => calculateFunnelMetrics(steps), [steps])
+export const AdoptionFunnel = React.forwardRef<HTMLDivElement, AdoptionFunnelProps>(
+  ({ steps, title, onStepClick, emptyState, className, ariaLabel, ...rest }, ref) => {
+    const metrics = React.useMemo(() => calculateFunnelMetrics(steps), [steps])
 
-  if (steps.length === 0) {
-    return <>{emptyState ?? <p className="tk-funnel__empty">No funnel data yet.</p>}</>
-  }
+    if (steps.length === 0) {
+      return (
+        <div ref={ref} className={cn('tk-funnel', className)} {...rest}>
+          {emptyState ?? <p className="tk-funnel__empty">No funnel data yet.</p>}
+        </div>
+      )
+    }
 
-  const maxEntered = Math.max(...metrics.map((m) => m.entered), 1)
-  const summary = ariaLabel ?? buildAriaLabel(metrics)
+    const maxEntered = Math.max(...metrics.map((m) => m.entered), 1)
+    const summary = ariaLabel ?? buildAriaLabel(metrics)
 
-  return (
-    <div className={cn('tk-funnel', className)} role="img" aria-label={summary}>
-      {title ? <header className="tk-funnel__title">{title}</header> : null}
-      <ul className="tk-funnel__list">
-        {metrics.map((m, i) => {
-          const widthPct = (m.entered / maxEntered) * 100
-          const step: FunnelStep = {
-            id: m.id,
-            label: m.label,
-            entered: m.entered,
-            completed: m.completed,
-          }
-          const handleClick = onStepClick ? () => onStepClick(step, i) : undefined
-          const handleKeyDown = handleClick
-            ? (e: React.KeyboardEvent<HTMLLIElement>) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleClick()
-                }
+    return (
+      <div ref={ref} className={cn('tk-funnel', className)} {...rest}>
+        <div className="tk-funnel__chart" role="img" aria-label={summary}>
+          {title ? <header className="tk-funnel__title">{title}</header> : null}
+          <ul className="tk-funnel__list">
+            {metrics.map((m, i) => {
+              const widthPct = (m.entered / maxEntered) * 100
+              const step: FunnelStep = {
+                id: m.id,
+                label: m.label,
+                entered: m.entered,
+                completed: m.completed,
               }
-            : undefined
-          return (
-            <li
-              key={m.id}
-              className="tk-funnel__step"
-              role={handleClick ? 'button' : undefined}
-              tabIndex={handleClick ? 0 : undefined}
-              onClick={handleClick}
-              onKeyDown={handleKeyDown}
-            >
-              <div className="tk-funnel__label">{m.label}</div>
-              <div className="tk-funnel__bar" style={{ width: `${widthPct}%` }} aria-hidden="true">
-                <span className="tk-funnel__value">{m.entered}</span>
-              </div>
-              {i > 0 ? (
-                <span className="tk-funnel__retention" aria-hidden="true">
-                  {(m.retentionFromPrev * 100).toFixed(1)}%
-                </span>
-              ) : null}
-            </li>
-          )
-        })}
-      </ul>
-      <FunnelTableForScreenReaders metrics={metrics} />
-    </div>
-  )
-}
+              const handleClick = onStepClick ? () => onStepClick(step, i) : undefined
+              const handleKeyDown = handleClick
+                ? (e: React.KeyboardEvent<HTMLLIElement>) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleClick()
+                    }
+                  }
+                : undefined
+              return (
+                <li
+                  key={m.id}
+                  className="tk-funnel__step"
+                  role={handleClick ? 'button' : undefined}
+                  tabIndex={handleClick ? 0 : undefined}
+                  onClick={handleClick}
+                  onKeyDown={handleKeyDown}
+                >
+                  <div className="tk-funnel__label">{m.label}</div>
+                  <div
+                    className="tk-funnel__bar"
+                    style={{ width: `${widthPct}%` }}
+                    aria-hidden="true"
+                  >
+                    <span className="tk-funnel__value">{m.entered}</span>
+                  </div>
+                  {i > 0 ? (
+                    <span className="tk-funnel__retention" aria-hidden="true">
+                      {(m.retentionFromPrev * 100).toFixed(1)}%
+                    </span>
+                  ) : null}
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+        <FunnelTableForScreenReaders metrics={metrics} />
+      </div>
+    )
+  }
+)
+AdoptionFunnel.displayName = 'AdoptionFunnel'
 
 function FunnelTableForScreenReaders({
   metrics,

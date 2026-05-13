@@ -114,14 +114,28 @@ describe('<AdoptionFunnel>', () => {
   })
 
   describe('screen-reader fallback', () => {
-    it('renders an SR table mirroring values', () => {
+    it('renders the SR table in the accessibility tree (NOT inside role="img")', () => {
+      // No `hidden: true` opt-in — the table MUST be exposed to AT.
+      // role="img" suppresses its descendants from the AT tree, so the table
+      // is rendered as a sibling of the chart, not a child.
       render(<AdoptionFunnel steps={sampleSteps} />)
-      const table = screen.getByRole('table', { hidden: true })
+      const table = screen.getByRole('table')
       expect(table).toBeInTheDocument()
       expect(table.querySelectorAll('tbody tr')).toHaveLength(3)
       expect(table).toHaveTextContent('100')
       expect(table).toHaveTextContent('60')
       expect(table).toHaveTextContent('30')
+    })
+
+    it('SR table is a sibling of the role="img" chart, not a descendant', () => {
+      const { container } = render(<AdoptionFunnel steps={sampleSteps} />)
+      const chart = container.querySelector('[role="img"]')
+      const table = container.querySelector('table')
+      expect(chart).not.toBeNull()
+      expect(table).not.toBeNull()
+      // Containment check — if the table were inside the role="img" container,
+      // screen readers would treat it as decorative and skip it.
+      expect(chart?.contains(table)).toBe(false)
     })
 
     it('SR table has visually-hidden styling via .sr-only class', () => {
