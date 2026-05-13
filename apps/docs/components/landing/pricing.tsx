@@ -4,6 +4,7 @@ import { ArrowRight, Check, Code2, Sparkles, X, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
+import { TrackedBuyButton } from '@/components/analytics/tracked-buy-button'
 import { POLAR_CHECKOUT_URL } from '@/lib/polar-config'
 
 function FAQJsonLdInline({ items }: { items: { q: string; a: string }[] }) {
@@ -163,15 +164,14 @@ export function Pricing() {
               ))}
             </ul>
 
-            <a
+            <TrackedBuyButton
               href={POLAR_CHECKOUT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              placement="pricing_page"
               className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
             >
               Buy Pro License
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
+            </TrackedBuyButton>
           </div>
         </div>
 
