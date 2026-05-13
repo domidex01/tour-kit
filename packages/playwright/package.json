@@ -42,8 +42,8 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "test": "playwright test",
-    "test:types": "vitest run",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
     "fixtures:serve": "vite --config fixtures-app/vite.config.ts"
   },
   "dependencies": {
