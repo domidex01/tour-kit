@@ -16,6 +16,7 @@ import type {
   TourStep,
 } from '../types'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
+import type { TestBridge } from '../types/test-bridge'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
 import {
   isBranchToTour,
@@ -370,6 +371,16 @@ export interface TourProviderProps {
    * Only read when `diagnose` is `true`.
    */
   userContext?: Record<string, unknown>
+  /**
+   * Dev-only test bridge — when `true`, sets `window.__tourKit__` to a
+   * `TestBridge` exposing the imperative controls (mirrors the existing
+   * ref) so Playwright/E2E drivers can advance a tour from outside React.
+   *
+   * Defaults to `false`. Production builds MUST never expose this — wrap
+   * in a `process.env.NODE_ENV !== 'production'` guard at the call site.
+   * Tree-shakes when the prop is a literal `false`.
+   */
+  enableTestBridge?: boolean
 }
 
 interface CrossTabActiveMessage {
@@ -391,6 +402,7 @@ export function TourProvider({
   diagnose = false,
   diagnosticGates,
   userContext,
+  enableTestBridge = false,
 }: TourProviderProps) {
   // Validate synchronously at render time so misconfigured hidden steps throw
   // at the caller's render() instead of leaking into runtime. Cheap: just a
@@ -1538,6 +1550,86 @@ export function TourProvider({
       handleBranchTarget,
     ]
   )
+
+  // ─── Test bridge wiring (Phase 6, issue #86) ─────────────────────────────
+  // `enableTestBridge` opts in to `window.__tourKit__` — used by Playwright
+  // helpers to drive a tour from out-of-process. Default is `false` so
+  // production never leaks the surface. The effect short-circuits at the top
+  // when disabled, making the bridge body dead-code under a literal `false`.
+  //
+  // Why a methods ref:
+  // - The bridge identity is stable per mount, but each call must dispatch
+  //   through the LATEST `start`/`next`/etc. closures. A ref avoids
+  //   re-creating (and re-publishing) the bridge on every controller-method
+  //   identity change, which would invalidate any cached helper closures in
+  //   long-running Playwright contexts.
+  const bridgeMethodsRef = React.useRef<{
+    start: typeof start
+    next: typeof next
+    previous: typeof prev
+    goToStep: typeof goToStep
+    complete: typeof complete
+    skip: typeof skip
+    diagnostics: typeof diagnostics
+  }>({ start, next, previous: prev, goToStep, complete, skip, diagnostics })
+  bridgeMethodsRef.current = {
+    start,
+    next,
+    previous: prev,
+    goToStep,
+    complete,
+    skip,
+    diagnostics,
+  }
+
+  const testBridgeWarnedRef = React.useRef(false)
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the bridge is intentionally established once per enableTestBridge toggle; method dispatch goes through bridgeMethodsRef
+  React.useEffect(() => {
+    if (!enableTestBridge) return
+    if (typeof window === 'undefined') return
+
+    if (
+      typeof process === 'undefined' ||
+      process.env?.NODE_ENV !== 'production'
+    ) {
+      if (!testBridgeWarnedRef.current) {
+        testBridgeWarnedRef.current = true
+        console.warn('[Tour Kit] Test bridge enabled. Disable for production.')
+      }
+    }
+
+    const bridge: TestBridge = {
+      start: (tourId) => {
+        void bridgeMethodsRef.current.start(tourId)
+      },
+      next: () => {
+        void bridgeMethodsRef.current.next()
+      },
+      previous: () => {
+        void bridgeMethodsRef.current.previous()
+      },
+      goToStep: (stepId) => {
+        void bridgeMethodsRef.current.goToStep(stepId)
+      },
+      complete: () => {
+        bridgeMethodsRef.current.complete()
+      },
+      skip: () => {
+        bridgeMethodsRef.current.skip()
+      },
+      getDiagnostic: (tourId) => bridgeMethodsRef.current.diagnostics[tourId] ?? null,
+    }
+    window.__tourKit__ = bridge
+
+    return () => {
+      // Identity check defends against another library reassigning the global
+      // between our mount and unmount — see the cleanup-safety unit test.
+      if (window.__tourKit__ === bridge) {
+        delete window.__tourKit__
+      }
+    }
+  }, [enableTestBridge])
 
   const contextValue = React.useMemo<TourContextValue>(
     () => ({

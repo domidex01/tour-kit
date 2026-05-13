@@ -208,6 +208,12 @@ export type {
   GateReason,
 } from './types/diagnostic'
 
+// Test bridge — Phase 6 (issue #86). Importing `./types/window-augment` for
+// its side-effect registers the ambient `Window.__tourKit__?` declaration so
+// consumers writing Playwright tests get strict typing without re-declaring it.
+import './types/window-augment'
+export type { TestBridge } from './types/test-bridge'
+
 // Frequency rules — Phase 3a (lifted from @tour-kit/announcements)
 export {
   canShowByFrequency,
