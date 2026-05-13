@@ -104,9 +104,9 @@ describe('@tour-kit/testing-library — integration against real <TourCard>', ()
     // <TourCard> portals to document.body, so passing the render container
     // intentionally scopes the query OUT of where the card lives. The helper
     // must throw rather than fall through to body.
-    await expect(
-      expectStepVisible('welcome', { container, timeout: 100 })
-    ).rejects.toBeInstanceOf(TourKitTestingError)
+    await expect(expectStepVisible('welcome', { container, timeout: 100 })).rejects.toBeInstanceOf(
+      TourKitTestingError
+    )
   })
 
   it('container=document.body finds the portalled card', async () => {

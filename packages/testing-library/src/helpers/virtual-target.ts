@@ -21,7 +21,10 @@ export interface VirtualTarget {
   contextElement?: Element
 }
 
-export function virtualTarget(rect: Partial<DOMRect> = {}, contextElement?: Element): VirtualTarget {
+export function virtualTarget(
+  rect: Partial<DOMRect> = {},
+  contextElement?: Element
+): VirtualTarget {
   const merged: DOMRect = { ...DEFAULT_RECT, ...rect }
   return {
     getBoundingClientRect: () => merged,

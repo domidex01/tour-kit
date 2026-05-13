@@ -22,7 +22,10 @@ describe('entry points', () => {
   it.skipIf(!distExists)('CJS require of ./setup resolves setupTourKitTesting', () => {
     const out = execFileSync(
       'node',
-      ['-e', `process.stdout.write(typeof require(${JSON.stringify(SETUP_CJS)}).setupTourKitTesting)`],
+      [
+        '-e',
+        `process.stdout.write(typeof require(${JSON.stringify(SETUP_CJS)}).setupTourKitTesting)`,
+      ],
       { encoding: 'utf8' }
     )
     expect(out).toBe('function')

@@ -13,14 +13,7 @@
   "bugs": {
     "url": "https://github.com/domidex01/tour-kit/issues"
   },
-  "keywords": [
-    "tour-kit",
-    "react-testing-library",
-    "vitest",
-    "jsdom",
-    "floating-ui",
-    "testing"
-  ],
+  "keywords": ["tour-kit", "react-testing-library", "vitest", "jsdom", "floating-ui", "testing"],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
