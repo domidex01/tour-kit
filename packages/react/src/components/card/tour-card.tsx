@@ -141,6 +141,7 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
           role="dialog"
           aria-modal="true"
           aria-labelledby={`tour-step-title-${currentStep.id}`}
+          data-tour-step={currentStep.id}
           {...props}
         >
           <TourCardHeader
