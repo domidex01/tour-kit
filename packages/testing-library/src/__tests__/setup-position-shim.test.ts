@@ -21,11 +21,11 @@ describe('setupTourKitTesting positionShim', () => {
     expect(jdmLoadCount).toBe(0)
   })
 
-  it('with positionShim:true, jsdom-testing-mocks is loaded exactly once', async () => {
+  it('with positionShim:true, jsdom-testing-mocks is loaded at least once', async () => {
     await setupTourKitTesting({ positionShim: true })
     // vi.mock factory runs at most once for a module — the dynamic import
-    // returns the cached module on the second call, so `jdmLoadCount` may
-    // remain at 1 across the suite. Assert "at least once".
+    // returns the cached module on subsequent calls, so we can't assert
+    // "exactly once" without ordering guarantees we don't control.
     expect(jdmLoadCount).toBeGreaterThanOrEqual(1)
   })
 

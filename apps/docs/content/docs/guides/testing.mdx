@@ -39,8 +39,9 @@ await setupTourKitTesting()
 ```
 
 ```tsx title="welcome-tour.test.tsx"
+import * as React from 'react'
 import { render } from '@testing-library/react'
-import { TourProvider } from '@tour-kit/core'
+import { TourProvider, useTour } from '@tour-kit/core'
 import { TourCard } from '@tour-kit/react'
 import {
   expectStepVisible,
@@ -58,6 +59,19 @@ const tour = {
   ],
 }
 
+// <TourProvider> is inactive by default. Mount this tiny helper inside the
+// provider to start the tour on mount — or click your own "Start" button.
+function AutoStart({ id }: { id: string }) {
+  const { start } = useTour()
+  const started = React.useRef(false)
+  React.useEffect(() => {
+    if (started.current) return
+    started.current = true
+    start(id)
+  }, [])
+  return null
+}
+
 describe('welcome tour', () => {
   it('walks through both steps', async () => {
     render(
@@ -65,6 +79,7 @@ describe('welcome tour', () => {
         <div id="welcome" />
         <div id="pricing" />
         <TourProvider tours={[tour]}>
+          <AutoStart id="demo" />
           <TourCard />
           <HookProbe />
         </TourProvider>
@@ -79,6 +94,10 @@ describe('welcome tour', () => {
   })
 })
 ```
+
+<Callout type="warn">
+  `<TourProvider>` doesn't auto-start. Either render a helper component that calls `useTour().start(id)` on mount (as above), or wire your own "Start tour" button. `expectStepVisible` will time out otherwise — the card only mounts once the tour is active.
+</Callout>
 
 ## Why no `await act(...)`?
 

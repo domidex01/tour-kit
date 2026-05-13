@@ -3,12 +3,11 @@ export interface SetupOptions {
    * Opt in to the `jsdom-testing-mocks` lazy shim. When `true`, the package is
    * dynamically imported on demand — consumers who don't opt in never load it.
    *
-   * The optional `defaultRect` is a hint surface; mutating a global default
-   * isn't shipped in Phase 5 (the underlying library is per-element). Call
+   * Per-element rect mocking stays the consumer's responsibility: call
    * `mockElementBoundingClientRect(element, rect)` from `jsdom-testing-mocks`
    * directly in your `beforeEach` for the elements you care about.
    */
-  positionShim?: boolean | { defaultRect?: Partial<DOMRect> }
+  positionShim?: boolean
 }
 
 /**

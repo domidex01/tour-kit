@@ -31,8 +31,7 @@ export async function expectStepVisible(
   try {
     const el = await waitFor(
       () => {
-        const root: ParentNode =
-          opts.container ?? (typeof document !== 'undefined' ? document.body : (null as never))
+        const root: ParentNode = opts.container ?? document.body
         const found = root.querySelector<HTMLElement>(`[data-tour-step="${stepId}"]`)
         if (!found) throw new Error(`step "${stepId}" not in DOM`)
         return found

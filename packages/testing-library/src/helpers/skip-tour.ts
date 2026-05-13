@@ -1,6 +1,5 @@
-import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { TourKitTestingError } from '../error'
+import { clickButtonByName } from './_click-by-name'
 
 type UserEvent = ReturnType<typeof userEvent.setup>
 
@@ -10,12 +9,5 @@ export interface SkipTourOptions {
 
 export async function skipTour(opts: SkipTourOptions = {}): Promise<void> {
   const user = opts.user ?? userEvent.setup()
-  let btn: HTMLElement
-  try {
-    btn = screen.getByRole('button', { name: /skip/i })
-  } catch (e) {
-    throw new TourKitTestingError('skipTour: no Skip button found', { cause: e })
-  }
-  await user.click(btn)
-  await act(async () => {})
+  await clickButtonByName(user, /skip/i, 'skipTour: no Skip button found')
 }
