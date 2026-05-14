@@ -8,8 +8,10 @@ import type { ChecklistConfig } from '../types'
 import { countEventOps, spyOnEventListeners } from './history-helpers'
 import { resetUrlVisitListener } from './url-visit-test-utils'
 
-// ProGate is a hard runtime gate; bypass it for tests so the provider always renders.
+// LicenseGate is the gate used by the provider; bypass it for these tests
+// so the provider always renders. ProGate is kept for any legacy paths.
 vi.mock('@tour-kit/license', () => ({
+  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 

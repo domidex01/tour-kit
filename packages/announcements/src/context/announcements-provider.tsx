@@ -1,4 +1,4 @@
-import { ProGate } from '@tour-kit/license'
+import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import { AnnouncementScheduler } from '../core/scheduler'
 import { useFilteredAnnouncements } from '../hooks/use-filtered-announcements'
@@ -660,8 +660,8 @@ export function AnnouncementsProvider({
   )
 
   return (
-    <ProGate package="@tour-kit/announcements">
+    <LicenseGate require="pro">
       <AnnouncementsContext.Provider value={contextValue}>{children}</AnnouncementsContext.Provider>
-    </ProGate>
+    </LicenseGate>
   )
 }

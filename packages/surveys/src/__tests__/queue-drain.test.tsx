@@ -6,6 +6,7 @@ import { useSurveys } from '../hooks'
 import type { SurveyConfig } from '../types'
 
 vi.mock('@tour-kit/license', () => ({
+  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 

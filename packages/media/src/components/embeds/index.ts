@@ -1,4 +1,4 @@
-import { ProGate } from '@tour-kit/license'
+import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 
 // ============================================
@@ -12,24 +12,24 @@ import { type YouTubeEmbedProps, YouTubeEmbed as _YouTubeEmbed } from './youtube
 
 export type { YouTubeEmbedProps, VimeoEmbedProps, LoomEmbedProps, WistiaEmbedProps }
 
-function withProGate<P extends object>(
+function withLicenseGate<P extends object>(
   Component: React.ComponentType<P>,
   displayName: string
 ): React.FC<P> {
   const Wrapped: React.FC<P> = (props) =>
-    React.createElement(ProGate, {
-      package: '@tour-kit/media',
-      // biome-ignore lint/correctness/noChildrenProp: ProGateProps requires children in the props object
+    React.createElement(LicenseGate, {
+      require: 'pro',
+      // biome-ignore lint/correctness/noChildrenProp: LicenseGateProps requires children in the props object
       children: React.createElement<P>(Component, props),
     })
   Wrapped.displayName = `Licensed(${displayName})`
   return Wrapped
 }
 
-export const YouTubeEmbed = withProGate(_YouTubeEmbed, 'YouTubeEmbed')
-export const VimeoEmbed = withProGate(_VimeoEmbed, 'VimeoEmbed')
-export const LoomEmbed = withProGate(_LoomEmbed, 'LoomEmbed')
-export const WistiaEmbed = withProGate(_WistiaEmbed, 'WistiaEmbed')
+export const YouTubeEmbed = withLicenseGate(_YouTubeEmbed, 'YouTubeEmbed')
+export const VimeoEmbed = withLicenseGate(_VimeoEmbed, 'VimeoEmbed')
+export const LoomEmbed = withLicenseGate(_LoomEmbed, 'LoomEmbed')
+export const WistiaEmbed = withLicenseGate(_WistiaEmbed, 'WistiaEmbed')
 
 // ============================================
 // NATIVE MEDIA
@@ -41,6 +41,6 @@ import { type NativeVideoProps, NativeVideo as _NativeVideo } from './native-vid
 
 export type { NativeVideoProps, GifPlayerProps, LottiePlayerProps }
 
-export const NativeVideo = withProGate(_NativeVideo, 'NativeVideo')
-export const GifPlayer = withProGate(_GifPlayer, 'GifPlayer')
-export const LottiePlayer = withProGate(_LottiePlayer, 'LottiePlayer')
+export const NativeVideo = withLicenseGate(_NativeVideo, 'NativeVideo')
+export const GifPlayer = withLicenseGate(_GifPlayer, 'GifPlayer')
+export const LottiePlayer = withLicenseGate(_LottiePlayer, 'LottiePlayer')

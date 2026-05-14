@@ -1,6 +1,6 @@
 'use client'
 
-import { ProGate } from '@tour-kit/license'
+import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import { registerUrlVisitTask } from '../engine/url-visit-listener'
 import { useChecklistPersistence } from '../hooks/use-checklist-persistence'
@@ -583,8 +583,8 @@ export function ChecklistProvider({
   )
 
   return (
-    <ProGate package="@tour-kit/checklists">
+    <LicenseGate require="pro">
       <ChecklistContext.Provider value={contextValue}>{children}</ChecklistContext.Provider>
-    </ProGate>
+    </LicenseGate>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { ProGate } from '@tour-kit/license'
+import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import {
   createInitialUsage,
@@ -199,8 +199,8 @@ export function AdoptionProvider({
   }
 
   return (
-    <ProGate package="@tour-kit/adoption">
+    <LicenseGate require="pro">
       <AdoptionContext.Provider value={contextValue}>{children}</AdoptionContext.Provider>
-    </ProGate>
+    </LicenseGate>
   )
 }
