@@ -1,41 +1,41 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Mock @tour-kit/license — ProGate wraps each embed component
 vi.mock('@tour-kit/license', () => ({
-  ProGate: ({ children }: { children: React.ReactNode; package: string }) => {
-    return <>{children}</>
-  },
+  LicenseGate: ({ children }: { children: React.ReactNode; require: 'pro' }) => <>{children}</>,
 }))
 
 import { YouTubeEmbed } from '../components/embeds'
 
-describe('YouTubeEmbed — license integration (ProGate)', () => {
+describe('YouTubeEmbed — license integration (licensed)', () => {
   afterEach(() => {
     cleanup()
     vi.restoreAllMocks()
   })
 
-  it('renders component when ProGate allows (licensed)', () => {
+  it('renders component when LicenseGate allows (licensed)', () => {
     render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
 
     expect(screen.getByTitle('Test Video')).toBeInTheDocument()
   })
 
-  it('does not render watermark (hard gate replaces watermark)', () => {
+  it('does not render the legacy hard placeholder copy when licensed', () => {
     render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
 
-    expect(screen.queryByText('UNLICENSED')).toBeNull()
     expect(screen.queryByText('Tour Kit Pro license required')).toBeNull()
+    expect(screen.queryByTestId('license-watermark')).toBeNull()
   })
 })
 
-describe('YouTubeEmbed — ProGate blocks when unlicensed', () => {
+describe('YouTubeEmbed — LicenseGate soft-gates when unlicensed', () => {
   beforeEach(() => {
     vi.resetModules()
     vi.doMock('@tour-kit/license', () => ({
-      ProGate: ({ package: pkg }: { children: React.ReactNode; package: string }) => (
-        <div data-testid="pro-gate-placeholder">Tour Kit Pro license required — {pkg}</div>
+      LicenseGate: ({ children }: { children: React.ReactNode; require: 'pro' }) => (
+        <>
+          {children}
+          <div data-testid="license-watermark">Tour Kit · Unlicensed</div>
+        </>
       ),
     }))
   })
@@ -45,24 +45,26 @@ describe('YouTubeEmbed — ProGate blocks when unlicensed', () => {
     vi.restoreAllMocks()
   })
 
-  it('shows placeholder instead of embed when unlicensed', async () => {
+  it('renders the iframe plus the unlicensed badge when unlicensed', async () => {
     const { YouTubeEmbed } = await import('../components/embeds')
 
     render(<YouTubeEmbed videoId="dQw4w9WgXcQ" title="Test Video" />)
 
-    expect(screen.getByTestId('pro-gate-placeholder')).toBeInTheDocument()
-    expect(screen.getByText(/Tour Kit Pro license required/)).toBeInTheDocument()
-    expect(screen.getByText(/@tour-kit\/media/)).toBeInTheDocument()
-    expect(screen.queryByTitle('Test Video')).toBeNull()
+    expect(screen.getByTitle('Test Video')).toBeInTheDocument()
+    expect(screen.getByTestId('license-watermark')).toBeInTheDocument()
+    expect(screen.queryByText(/Tour Kit Pro license required/)).toBeNull()
   })
 })
 
-describe('TourMedia — internal embeds honor ProGate (regression)', () => {
+describe('TourMedia — routed embeds still go through LicenseGate', () => {
   beforeEach(() => {
     vi.resetModules()
     vi.doMock('@tour-kit/license', () => ({
-      ProGate: ({ package: pkg }: { children: React.ReactNode; package: string }) => (
-        <div data-testid="pro-gate-placeholder">Tour Kit Pro license required — {pkg}</div>
+      LicenseGate: ({ children }: { children: React.ReactNode; require: 'pro' }) => (
+        <>
+          {children}
+          <div data-testid="license-watermark">Tour Kit · Unlicensed</div>
+        </>
       ),
     }))
   })
@@ -72,21 +74,21 @@ describe('TourMedia — internal embeds honor ProGate (regression)', () => {
     vi.restoreAllMocks()
   })
 
-  it('YouTube URL routes through gated embed (not the raw iframe)', async () => {
+  it('YouTube URL renders the gated embed (iframe + badge)', async () => {
     const { TourMedia } = await import('../components/tour-media')
 
     render(<TourMedia src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" alt="demo" />)
 
-    expect(screen.getByTestId('pro-gate-placeholder')).toBeInTheDocument()
-    expect(screen.queryByTitle('demo')).toBeNull()
+    expect(screen.getByTitle('demo')).toBeInTheDocument()
+    expect(screen.getByTestId('license-watermark')).toBeInTheDocument()
   })
 
-  it('native video URL routes through gated embed', async () => {
+  it('native video URL renders the gated embed (video + badge)', async () => {
     const { TourMedia } = await import('../components/tour-media')
 
     render(<TourMedia src="https://example.com/demo.mp4" alt="demo video" />)
 
-    expect(screen.getByTestId('pro-gate-placeholder')).toBeInTheDocument()
-    expect(screen.queryByLabelText('demo video')).toBeNull()
+    expect(screen.getByLabelText('demo video')).toBeInTheDocument()
+    expect(screen.getByTestId('license-watermark')).toBeInTheDocument()
   })
 })

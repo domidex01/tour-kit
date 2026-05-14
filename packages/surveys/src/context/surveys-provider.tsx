@@ -1,5 +1,5 @@
 import { createStorageAdapter, useTourContextOptional } from '@tour-kit/core'
-import { ProGate } from '@tour-kit/license'
+import { LicenseGate } from '@tour-kit/license'
 import {
   type ReactNode,
   useCallback,
@@ -661,8 +661,8 @@ export function SurveysProvider({
   )
 
   return (
-    <ProGate package="@tour-kit/surveys">
+    <LicenseGate require="pro">
       <SurveysContext.Provider value={value}>{children}</SurveysContext.Provider>
-    </ProGate>
+    </LicenseGate>
   )
 }

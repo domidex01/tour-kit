@@ -10,6 +10,7 @@ import type { HeadlessQuestionTextRenderProps } from '../components/headless/hea
 import { HeadlessQuestionText } from '../components/headless/headless-question-text'
 
 vi.mock('@tour-kit/license', () => ({
+  LicenseGate: ({ children }: { children: React.ReactNode }) => children,
   ProGate: ({ children }: { children: React.ReactNode }) => children,
   useLicenseGate: () => ({ isAllowed: true, isLoading: false }),
 }))

@@ -5,6 +5,7 @@ import { axe } from 'vitest-axe'
 import { QuestionText } from '../components/question-text'
 
 vi.mock('@tour-kit/license', () => ({
+  LicenseGate: ({ children }: { children: React.ReactNode }) => children,
   ProGate: ({ children }: { children: React.ReactNode }) => children,
   useLicenseGate: () => ({ isAllowed: true, isLoading: false }),
 }))

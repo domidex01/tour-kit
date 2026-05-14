@@ -293,7 +293,7 @@ describe('ProGate', () => {
       const link = screen.getByText('Get a license →')
       expect(link).toHaveAttribute('target', '_blank')
       expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      expect(link).toHaveAttribute('href', 'https://tourkit.dev/pricing')
+      expect(link).toHaveAttribute('href', 'https://usertourkit.com/pricing')
     })
   })
 })

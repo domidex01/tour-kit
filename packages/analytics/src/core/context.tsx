@@ -1,4 +1,4 @@
-import { ProGate } from '@tour-kit/license'
+import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import type { AnalyticsConfig } from '../types/plugin'
 import { type TourAnalytics, createAnalytics } from './tracker'
@@ -42,9 +42,9 @@ export function AnalyticsProvider({ config, children }: AnalyticsProviderProps) 
   }, [analytics])
 
   return (
-    <ProGate package="@tour-kit/analytics">
+    <LicenseGate require="pro">
       <AnalyticsContext.Provider value={analytics}>{children}</AnalyticsContext.Provider>
-    </ProGate>
+    </LicenseGate>
   )
 }
 

@@ -1,4 +1,4 @@
-import { ProGate } from '@tour-kit/license'
+import { LicenseGate } from '@tour-kit/license'
 import type * as React from 'react'
 
 interface ScheduleGateProps {
@@ -6,5 +6,5 @@ interface ScheduleGateProps {
 }
 
 export function ScheduleGate({ children }: ScheduleGateProps) {
-  return <ProGate package="@tour-kit/scheduling">{children}</ProGate>
+  return <LicenseGate require="pro">{children}</LicenseGate>
 }

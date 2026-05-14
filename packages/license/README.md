@@ -19,10 +19,10 @@ The runtime validator that gates **Tour Kit Pro** packages. Validates license ke
 - **Domain activation** — 5 slots per key; bound to hostname
 - **Offline cache** — `localStorage`-backed, 72h TTL, Zod-validated reads
 - **Dev bypass** — `localhost`, `127.0.0.1`, `*.local` skip activation automatically
-- **`<LicenseGate>`** — conditionally render Pro features
-- **`<LicenseWatermark>`** — semi-transparent "UNLICENSED" overlay enforcement
+- **`<LicenseGate>`** — soft gate used internally by every Tour Kit Pro package. Renders children unconditionally; on non-localhost hosts without a valid license, layers a small badge + dev warning on top
+- **`<ProGate>`** — legacy hard gate that replaces children with a branded placeholder. Tour Kit's own Pro packages no longer use this internally; kept exported for downstream consumers
+- **`<LicenseWatermark>`** — small `Tour Kit · Unlicensed · Buy license` portal badge with singleton ownership transfer
 - **Headless entry** — `@tour-kit/license/headless` for non-React / server-side validation
-- **Render-key anti-bypass** — interleaved validation prevents trivial DevTools tampering
 - **TypeScript-first**, supports React 18 & 19
 
 ## Installation
@@ -67,19 +67,28 @@ Wraps your app (or the Pro section). Performs validation on mount, caches result
 | `onValidate` | `(state: LicenseState) => void` | No | Called after validation completes |
 | `onError` | `(error: Error) => void` | No | Called on validation error |
 
-### `<LicenseGate>` / `<ProGate>`
+### `<LicenseGate>`
 
-Conditionally renders children based on license status. `ProGate` is a semantic alias.
+Soft gate used internally by every Tour Kit Pro package. Always renders `children`. On non-localhost hosts without a valid license, layers a single `<LicenseWatermark>` badge and a dev-only console warning on top. Tolerates a missing `<LicenseProvider>` so a developer can install a Pro package, push a preview deploy, and demo the real UI before buying.
 
 | Prop | Type | Required | Description |
 |---|---|---|---|
 | `require` | `'pro'` | Yes | Required license tier |
-| `fallback` | `ReactNode` | No | Shown when license is invalid |
-| `loading` | `ReactNode` | No | Shown during validation |
+| `children` | `ReactNode` | Yes | Always rendered |
+| `fallback` | `ReactNode` | No | Replaces children + badge **only** when a `<LicenseProvider>` is mounted and the state is gated |
+| `loading` | `ReactNode` | No | Shown during validation when a `<LicenseProvider>` is mounted |
+
+### `<ProGate>`
+
+Legacy hard gate. Renders a branded `"Tour Kit Pro license required"` placeholder when unlicensed. **Tour Kit's own Pro packages no longer use this internally** — they use `<LicenseGate>` so evaluation hosts can render the real UI. Kept exported for downstream consumers who want hard-placeholder behavior.
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `package` | `string` | Yes | npm package name shown in the placeholder + console warning |
 
 ### `<LicenseWatermark>`
 
-Renders a semi-transparent "UNLICENSED" overlay when the license is invalid. Inline-styled with high z-index and `pointer-events: none` — resists basic CSS overrides.
+Small `Tour Kit · Unlicensed · Buy license` badge rendered into a portal at the bottom-right of the viewport. Multiple mounted instances coalesce into a single visible badge via a singleton ownership transfer. Inline-styled with `pointer-events: none` on the wrapper (link is `pointer-events: auto`) so the badge never blocks app clicks outside its own link. Click emits `unlicensed_badge_clicked` via `window.gtag` or `window.dataLayer`.
 
 ### `<LicenseWarning>`
 

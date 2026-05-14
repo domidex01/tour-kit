@@ -13,8 +13,8 @@ This software is proprietary and confidential. Unauthorized copying, modificatio
 
 ## Purchase
 
-Visit [tourkit.dev/pricing](https://tourkit.dev/pricing) to purchase a Tour Kit Pro license.
+Visit [usertourkit.com/pricing](https://usertourkit.com/pricing) to purchase a Tour Kit Pro license.
 
 ## Contact
 
-For licensing questions, contact support@tourkit.dev.
+For licensing questions, contact support@usertourkit.com.

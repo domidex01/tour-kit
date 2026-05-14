@@ -1,4 +1,4 @@
-# userTourKit v0.11.0 — Generated 2026-05-14T02:16:18Z
+# userTourKit v0.11.0 — Generated 2026-05-14T04:13:27Z
 
 # Feature Adoption Tracking
 
@@ -21229,7 +21229,7 @@ import { LicenseProvider } from '@tour-kit/license';
 
 ### LicenseGate
 
-Conditional rendering based on license tier. Renders `children` when valid, `fallback` when gated, `loading` while validating.
+Soft gate used internally by every Tour Kit Pro package. Renders `children` unconditionally; on non-localhost hosts without a valid license, layers a single small badge ([`LicenseWatermark`](#licensewatermark)) and a dev-only console warning over the top. Tolerates a missing `LicenseProvider` so Pro packages stay rendered while a customer evaluates them.
 
 ```tsx
 import { LicenseGate } from '@tour-kit/license';
@@ -21246,13 +21246,23 @@ import { LicenseGate } from '@tour-kit/license';
 | Prop | Type | Description |
 |------|------|-------------|
 | `require` | `'pro'` | Minimum tier required |
-| `children` | `ReactNode` | Rendered when license is valid |
-| `fallback` | `ReactNode` | Rendered when license is invalid/expired/revoked |
-| `loading` | `ReactNode` | Rendered while validation is in progress |
+| `children` | `ReactNode` | Always rendered. On unlicensed non-localhost hosts, the badge layers on top |
+| `fallback` | `ReactNode` | Only used when a `LicenseProvider` is mounted and the state is gated. Replaces children + badge with this node |
+| `loading` | `ReactNode` | Rendered while validation is in progress (only when a `LicenseProvider` is mounted) |
+
+Behavior matrix:
+
+| Host | `LicenseProvider` mounted | License | Rendered |
+|---|---|---|---|
+| `localhost` / `127.0.0.1` / `*.local` | any | any | Children only, no badge |
+| Other host | yes | valid pro | Children only, no badge |
+| Other host | yes | invalid/expired/revoked | Children + badge + dev warning |
+| Other host | yes | error + fresh cache | Children only, no badge |
+| Other host | no | n/a | Children + badge + dev warning. No throw |
 
 ### ProGate
 
-Hard gate for Tour Kit Pro packages. Renders a branded placeholder when unlicensed instead of a custom fallback. Used internally by every pro package; expose only if you build your own pro extension.
+Hard gate that replaces children with a branded placeholder when unlicensed. Tour Kit's own Pro packages **no longer use this internally** — they use [`LicenseGate`](#licensegate) so evaluation hosts can render the real UI. `ProGate` remains exported for downstream packages that want a hard placeholder.
 
 ```tsx
 import { ProGate } from '@tour-kit/license';
@@ -21271,7 +21281,7 @@ Dev environments (`localhost`, `127.0.0.1`, `*.local`) always render `children`.
 
 ### LicenseWatermark
 
-Semi-transparent "UNLICENSED" overlay with high z-index. Pro packages render this automatically when unlicensed in production. Inline-styled so it cannot be CSS-disabled.
+Small `Tour Kit · Unlicensed · Buy license` badge rendered into a portal at the bottom-right of the viewport. Layered by [`LicenseGate`](#licensegate) automatically when unlicensed on a non-localhost host. Multiple mounted instances coalesce into a single visible badge via a singleton ownership transfer, so 8 mounted Pro providers still produce one badge. Inline-styled with `pointer-events: none` on the wrapper and `pointer-events: auto` on the link, so the badge never blocks app clicks outside its own link. Clicking the badge opens pricing with UTM params and emits `unlicensed_badge_clicked` via `window.gtag` or `window.dataLayer` when present.
 
 ```tsx
 import { LicenseWatermark } from '@tour-kit/license';

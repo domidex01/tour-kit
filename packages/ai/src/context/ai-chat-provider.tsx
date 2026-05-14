@@ -1,7 +1,7 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
-import { ProGate } from '@tour-kit/license'
+import { LicenseGate } from '@tour-kit/license'
 import { DefaultChatTransport } from 'ai'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePersistence } from '../hooks/use-persistence'
@@ -197,8 +197,8 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
   )
 
   return (
-    <ProGate package="@tour-kit/ai">
+    <LicenseGate require="pro">
       <AiChatContext.Provider value={value}>{children}</AiChatContext.Provider>
-    </ProGate>
+    </LicenseGate>
   )
 }

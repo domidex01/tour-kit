@@ -1,4 +1,5 @@
 import './globals.css'
+import { YandexMetrika } from '@/components/analytics/yandex-metrika'
 import { SkipNav } from '@/components/skip-nav'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
@@ -10,6 +11,10 @@ import type { ReactNode } from 'react'
 const GA_ID =
   process.env.NEXT_PUBLIC_GA_ID ??
   (process.env.NODE_ENV === 'production' ? 'G-CLV830MRY4' : undefined)
+
+const YANDEX_METRIKA_ID =
+  process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID ??
+  (process.env.NODE_ENV === 'production' ? '109195720' : undefined)
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://usertourkit.com'),
@@ -82,6 +87,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <RootProvider>{children}</RootProvider>
       </body>
       {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
+      {YANDEX_METRIKA_ID ? <YandexMetrika id={YANDEX_METRIKA_ID} /> : null}
     </html>
   )
 }
