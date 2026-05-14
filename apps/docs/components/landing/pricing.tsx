@@ -445,11 +445,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "What happens if I don't have a license?",
-    a: 'Extended packages degrade gracefully — they render their children without the enhanced features and log a developer warning in the console. Nothing crashes or shows a blank screen.',
+    a: 'Pro packages still render fully — your real UI ships with a small "Tour Kit · Unlicensed" badge in the bottom-right and a dev-only console warning. Nothing crashes, nothing is hidden behind a placeholder, and your app keeps working.',
   },
   {
     q: 'Can I try Pro features before buying?',
-    a: 'Pro features work without a license key in development (localhost). You can build and test your full onboarding flow locally before purchasing.',
+    a: 'Yes. Pro packages are fully functional on localhost (no badge) and on preview/staging URLs (with the small badge). You can build, demo, and QA the complete onboarding flow before purchasing — license key only suppresses the badge on production hosts.',
   },
   {
     q: 'How does activation work?',
