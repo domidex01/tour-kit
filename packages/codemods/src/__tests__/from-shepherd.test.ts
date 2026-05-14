@@ -86,4 +86,26 @@ t.start()
     expect(out).toMatch(/target:\s*['"]#x['"]/)
     expect(out).toMatch(/placement:\s*['"]right['"]/)
   })
+
+  // Regression: pre-fix, the control-call rewriter matched on method name
+  // alone and would clobber `.start()`/`.next()`/`.back()` on any identifier
+  // in a file that happened to import 'shepherd.js'.
+  it('does NOT rewrite control-method calls on unrelated bindings', () => {
+    const out = runTransform(
+      transform,
+      `
+import Shepherd from 'shepherd.js'
+const tour = new Shepherd.Tour({})
+tour.addStep({ attachTo: { element: '#a', on: 'top' }, text: 'A' })
+tour.start()
+const carousel = makeCarousel()
+carousel.next()
+carousel.back()
+animation.start()
+`
+    )
+    expect(out).toContain('carousel.next()')
+    expect(out).toContain('carousel.back()')
+    expect(out).toContain('animation.start()')
+  })
 })

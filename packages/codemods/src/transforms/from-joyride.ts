@@ -11,7 +11,7 @@
 // hand-port. A transform that mangles user code is worse than no transform.
 
 import type { API, ASTPath, Collection, FileInfo, JSCodeshift } from 'jscodeshift'
-import { type Todo, emitTodo, todoToComment } from '../lib/todo-emitter'
+import { type Todo, attachLeadingComments, emitTodo } from '../lib/todo-emitter'
 
 export const parser = 'tsx'
 
@@ -378,27 +378,3 @@ function rewriteTourComponentUsage(j: JSCodeshift, path: ASTPath): void {
   ;(path as ASTPath<unknown>).replace(nullLiteral as unknown as never)
 }
 
-function attachLeadingComments(node: unknown, todos: Todo[]): void {
-  if (todos.length === 0) return
-  const target = node as { comments?: unknown[] }
-  const existing = (target.comments as unknown[] | undefined) ?? []
-  const additions = todos.map((t) => makeLineComment(todoToComment(t)))
-  target.comments = [...existing, ...additions]
-}
-
-interface LineComment {
-  type: 'CommentLine'
-  value: string
-  leading: true
-  trailing: false
-}
-
-function makeLineComment(rawComment: string): LineComment {
-  const stripped = rawComment.startsWith('//') ? rawComment.slice(2).trimStart() : rawComment
-  return {
-    type: 'CommentLine',
-    value: ` ${stripped}`,
-    leading: true,
-    trailing: false,
-  }
-}

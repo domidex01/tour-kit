@@ -24,7 +24,7 @@ import type {
   ObjectProperty,
   Property,
 } from 'jscodeshift'
-import { type Todo, emitTodo, todoToComment } from '../lib/todo-emitter'
+import { type Todo, attachLeadingComments, emitTodo } from '../lib/todo-emitter'
 
 export const parser = 'tsx'
 
@@ -49,17 +49,14 @@ export default function transform(file: FileInfo, api: API): string {
   const imports = collectDriverImports(driverImports)
 
   const driverVarNames = new Set<string>()
-  let mutated = false
   if (imports.driverLocal) {
-    if (rewriteDriverCalls(j, root, imports.driverLocal, driverVarNames)) mutated = true
+    rewriteDriverCalls(j, root, imports.driverLocal, driverVarNames)
   }
-  if (rewriteDriverInstanceCalls(j, root, driverVarNames)) mutated = true
+  rewriteDriverInstanceCalls(j, root, driverVarNames)
 
   rewriteDriverImport(j, driverImports)
 
-  return mutated || driverImports.size() > 0
-    ? root.toSource({ quote: 'single', trailingComma: true })
-    : file.source
+  return root.toSource({ quote: 'single', trailingComma: true })
 }
 
 function collectDriverImports(decls: Collection): DriverImports {
@@ -94,8 +91,7 @@ function rewriteDriverCalls(
   root: Collection,
   driverLocal: string,
   driverVarNames: Set<string>
-): boolean {
-  let mutated = false
+): void {
   const driverCallPaths = root
     .find(j.CallExpression, {
       callee: { type: 'Identifier', name: driverLocal },
@@ -133,9 +129,7 @@ function rewriteDriverCalls(
     ]
     attachLeadingComments(replacement, constructorTodos)
     ;(path as ASTPath<unknown>).replace(replacement as unknown as never)
-    mutated = true
   }
-  return mutated
 }
 
 // driver.js instance methods that mutate tour state at runtime. After the
@@ -190,8 +184,7 @@ function rewriteDriverInstanceCalls(
   j: JSCodeshift,
   root: Collection,
   driverVarNames: Set<string>
-): boolean {
-  let mutated = false
+): void {
   const stmtPaths = root
     .find(j.ExpressionStatement, {
       expression: {
@@ -212,18 +205,16 @@ function rewriteDriverInstanceCalls(
     if (!methodName) continue
     const entry = DRIVER_CONTROL_METHODS.get(methodName)
     if (!entry) continue
-    // Only rewrite when the receiver is a known driver(...) binding. This
-    // avoids accidentally clobbering unrelated `.destroy()` / `.drive()`
-    // method calls in the file.
+    // Fail closed: only rewrite when the receiver is a known driver(...)
+    // binding. Method names like `.destroy()` / `.drive()` are common on
+    // unrelated APIs so an unscoped rewrite would silently clobber user code.
     if (callee.object?.type !== 'Identifier') continue
-    if (driverVarNames.size > 0 && !driverVarNames.has(callee.object.name ?? '')) continue
+    if (!driverVarNames.has(callee.object.name ?? '')) continue
 
     const empty = j.emptyStatement()
     attachLeadingComments(empty, [emitTodo(entry.msg, entry.anchor, SOURCE)])
     ;(path as ASTPath<unknown>).replace(empty as unknown as never)
-    mutated = true
   }
-  return mutated
 }
 
 // ----- Step shape mapping -----
@@ -599,7 +590,16 @@ function mapDriverPopoverSide(
   todoSink: Todo[]
 ): ObjectProperty | Property | null {
   const literal = readStringLiteral(value)
-  if (!literal) return null
+  if (!literal) {
+    todoSink.push(
+      emitTodo(
+        'driver.js popover.side is dynamic — set placement manually',
+        'placement',
+        SOURCE
+      )
+    )
+    return null
+  }
   const mapped = DRIVER_PLACEMENT_MAP[literal]
   if (mapped) {
     return j.property('init', j.identifier('placement'), j.literal(mapped) as never)
@@ -634,24 +634,4 @@ function readStringLiteral(node: ASTNode | null | undefined): string | null {
   }
   if (node.type === 'StringLiteral') return (node as { value: string }).value
   return null
-}
-
-interface LineComment {
-  type: 'CommentLine'
-  value: string
-  leading: true
-  trailing: false
-}
-
-function makeLineComment(rawComment: string): LineComment {
-  const stripped = rawComment.startsWith('//') ? rawComment.slice(2).trimStart() : rawComment
-  return { type: 'CommentLine', value: ` ${stripped}`, leading: true, trailing: false }
-}
-
-function attachLeadingComments(node: unknown, todos: Todo[]): void {
-  if (todos.length === 0) return
-  const target = node as { comments?: unknown[] }
-  const existing = (target.comments as unknown[] | undefined) ?? []
-  const additions = todos.map((t) => makeLineComment(todoToComment(t)))
-  target.comments = [...existing, ...additions]
 }

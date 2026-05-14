@@ -77,4 +77,21 @@ d.drive()
     expect(out).toMatch(/\/\/ TODO:.*driver\.js\s+\.drive\(\)/i)
     expect(out).not.toMatch(/d\.drive\(\)/)
   })
+
+  // Regression: pre-fix, when no driver(...) call was bound to a variable
+  // (`driverVarNames.size === 0`), the size guard fell open and ALL matching
+  // method names got rewritten regardless of receiver.
+  it('does NOT rewrite control-method calls on unrelated bindings when no driver binding was captured', () => {
+    const out = runTransform(
+      transform,
+      `
+import { driver } from 'driver.js'
+driver({ steps: [] })
+foo.destroy()
+bar.drive()
+`
+    )
+    expect(out).toContain('foo.destroy()')
+    expect(out).toContain('bar.drive()')
+  })
 })

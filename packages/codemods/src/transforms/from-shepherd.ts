@@ -19,7 +19,7 @@ import type {
   ObjectProperty,
   Property,
 } from 'jscodeshift'
-import { type Todo, emitTodo, todoToComment } from '../lib/todo-emitter'
+import { type Todo, attachLeadingComments, emitTodo } from '../lib/todo-emitter'
 
 export const parser = 'tsx'
 
@@ -44,15 +44,13 @@ export default function transform(file: FileInfo, api: API): string {
 
   const imports = collectShepherdImports(shepherdImports)
 
-  let mutated = false
-  if (rewriteTourConstructors(j, root, imports)) mutated = true
-  if (rewriteControlCalls(j, root)) mutated = true
+  const tourVarNames = new Set<string>()
+  rewriteTourConstructors(j, root, imports, tourVarNames)
+  rewriteControlCalls(j, root, tourVarNames)
 
   rewriteShepherdImport(j, shepherdImports)
 
-  return mutated || shepherdImports.size() > 0
-    ? root.toSource({ quote: 'single', trailingComma: true })
-    : file.source
+  return root.toSource({ quote: 'single', trailingComma: true })
 }
 
 function collectShepherdImports(decls: Collection): ShepherdImports {
@@ -87,24 +85,21 @@ function rewriteShepherdImport(j: JSCodeshift, decls: Collection): void {
 // Find `new Shepherd.Tour(...)` and `new Tour(...)` (named import). Each is
 // expected to live inside a VariableDeclarator so we can rewrite the
 // initializer in place; standalone `new` expressions get a TODO and a no-op
-// replacement.
+// replacement. Captured Identifier-form bindings flow into `tourVarNames` so
+// the control-call rewriter only touches the real tour binding.
 function rewriteTourConstructors(
   j: JSCodeshift,
   root: Collection,
-  imports: ShepherdImports
-): boolean {
-  let mutated = false
-
+  imports: ShepherdImports,
+  tourVarNames: Set<string>
+): void {
   const matches: ASTPath[] = []
   for (const path of root.find(j.NewExpression).paths()) {
     if (isShepherdTourConstructor(path.node, imports)) matches.push(path)
   }
-  if (matches.length === 0) return false
-
   for (const path of matches) {
-    if (rewriteOneTourConstructor(j, root, path)) mutated = true
+    rewriteOneTourConstructor(j, root, path, tourVarNames)
   }
-  return mutated
 }
 
 function isShepherdTourConstructor(node: ASTNode, imports: ShepherdImports): boolean {
@@ -134,7 +129,12 @@ function isShepherdTourConstructor(node: ASTNode, imports: ShepherdImports): boo
   return false
 }
 
-function rewriteOneTourConstructor(j: JSCodeshift, root: Collection, path: ASTPath): boolean {
+function rewriteOneTourConstructor(
+  j: JSCodeshift,
+  root: Collection,
+  path: ASTPath,
+  tourVarNames: Set<string>
+): void {
   const parent = path.parent.node as { type: string }
   if (parent.type !== 'VariableDeclarator') {
     // Standalone `new Shepherd.Tour({...})` — rare; replace with an object
@@ -151,11 +151,12 @@ function rewriteOneTourConstructor(j: JSCodeshift, root: Collection, path: ASTPa
       ),
     ])
     ;(path as ASTPath<unknown>).replace(replacement as unknown as never)
-    return true
+    return
   }
 
   const declarator = parent as { id?: { type?: string; name?: string } }
   const tourVarName = declarator.id?.type === 'Identifier' ? declarator.id.name : null
+  if (tourVarName) tourVarNames.add(tourVarName)
 
   const steps = tourVarName ? collectAddStepCalls(j, root, tourVarName) : []
   const stepObjects = steps.map((s) => mapShepherdStep(j, s.objectArg, s.todoSink))
@@ -176,7 +177,6 @@ function rewriteOneTourConstructor(j: JSCodeshift, root: Collection, path: ASTPa
   ]
   attachLeadingComments(replacement, constructorTodos)
   ;(path as ASTPath<unknown>).replace(replacement as unknown as never)
-  return true
 }
 
 interface AddStepCollected {
@@ -294,8 +294,11 @@ const SHEPHERD_CONTROL_METHODS: ReadonlyMap<string, { anchor: string; msg: strin
   ],
 ])
 
-function rewriteControlCalls(j: JSCodeshift, root: Collection): boolean {
-  let mutated = false
+function rewriteControlCalls(
+  j: JSCodeshift,
+  root: Collection,
+  tourVarNames: Set<string>
+): void {
   const stmtPaths = root
     .find(j.ExpressionStatement, {
       expression: {
@@ -308,7 +311,7 @@ function rewriteControlCalls(j: JSCodeshift, root: Collection): boolean {
     const stmt = path.node as {
       expression: {
         type: string
-        callee?: { property?: { name?: string }; object?: { type?: string } }
+        callee?: { property?: { name?: string }; object?: { type?: string; name?: string } }
       }
     }
     const callee = stmt.expression.callee
@@ -317,17 +320,17 @@ function rewriteControlCalls(j: JSCodeshift, root: Collection): boolean {
     if (!methodName) continue
     const entry = SHEPHERD_CONTROL_METHODS.get(methodName)
     if (!entry) continue
-    // Only rewrite if the object looks like an identifier reference. We
-    // can't easily tell if it's the tour binding, so be conservative: only
-    // when called on an Identifier whose object type is Identifier.
+    // Fail closed: only rewrite when the receiver is a known tour binding.
+    // Method names like `.next()` / `.start()` / `.back()` are common on
+    // unrelated APIs (carousels, iterators, animations) so an unscoped
+    // rewrite would silently clobber user code.
     if (callee.object?.type !== 'Identifier') continue
+    if (!tourVarNames.has(callee.object.name ?? '')) continue
 
     const empty = j.emptyStatement()
     attachLeadingComments(empty, [emitTodo(entry.msg, entry.anchor, SOURCE)])
     ;(path as ASTPath<unknown>).replace(empty as unknown as never)
-    mutated = true
   }
-  return mutated
 }
 
 // ----- Step shape mapping -----
@@ -519,6 +522,16 @@ function mapShepherdAttachToOn(
   value: ASTNode | null,
   todoSink: Todo[]
 ): ASTNode | null {
+  if (value && !readStringLiteral(value)) {
+    todoSink.push(
+      emitTodo(
+        'Shepherd Step.attachTo.on is dynamic — set placement manually',
+        'placement',
+        SOURCE
+      )
+    )
+    return null
+  }
   const literal = readStringLiteral(value)
   if (!literal) return null
   const mapped = SHEPHERD_PLACEMENT_MAP[literal]
@@ -553,7 +566,7 @@ function mapShepherdButtons(value: ASTNode, todoSink: Todo[]): void {
   )
 }
 
-// ----- helpers (local to keep step-mapper.ts pristine per spec rule) -----
+// ----- helpers -----
 
 function isPropLike(node: ASTNode): node is PropLike {
   return node.type === 'ObjectProperty' || node.type === 'Property'
@@ -573,24 +586,4 @@ function readStringLiteral(node: ASTNode | null | undefined): string | null {
   }
   if (node.type === 'StringLiteral') return (node as { value: string }).value
   return null
-}
-
-interface LineComment {
-  type: 'CommentLine'
-  value: string
-  leading: true
-  trailing: false
-}
-
-function makeLineComment(rawComment: string): LineComment {
-  const stripped = rawComment.startsWith('//') ? rawComment.slice(2).trimStart() : rawComment
-  return { type: 'CommentLine', value: ` ${stripped}`, leading: true, trailing: false }
-}
-
-function attachLeadingComments(node: unknown, todos: Todo[]): void {
-  if (todos.length === 0) return
-  const target = node as { comments?: unknown[] }
-  const existing = (target.comments as unknown[] | undefined) ?? []
-  const additions = todos.map((t) => makeLineComment(todoToComment(t)))
-  target.comments = [...existing, ...additions]
 }
