@@ -61,7 +61,7 @@ export function ProGate({ package: packageName, children }: ProGateProps) {
     if (isGated && !isLoading && !warnedRef.current) {
       warnedRef.current = true
       console.error(
-        `[${packageName}] Tour Kit Pro license required. Add a <LicenseProvider> with a valid license key. Get one at https://tourkit.dev/pricing`
+        `[${packageName}] Tour Kit Pro license required. Add a <LicenseProvider> with a valid license key. Get one at https://usertourkit.com/pricing`
       )
     }
   }, [isGated, isLoading, packageName])
@@ -79,7 +79,7 @@ export function ProGate({ package: packageName, children }: ProGateProps) {
         <p style={titleStyles}>Tour Kit Pro license required</p>
         <span style={packageStyles}>{packageName}</span>
         <a
-          href="https://tourkit.dev/pricing"
+          href="https://usertourkit.com/pricing"
           target="_blank"
           rel="noopener noreferrer"
           style={linkStyles}

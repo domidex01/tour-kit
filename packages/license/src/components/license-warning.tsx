@@ -7,7 +7,7 @@ export function LicenseWarning() {
     if (process.env.NODE_ENV === 'production') return
 
     console.warn(
-      '%c[TourKit]%c This application is using Tour Kit Pro without a valid license.\nPurchase a license at https://tourkit.dev/pricing',
+      '%c[TourKit]%c This application is using Tour Kit Pro without a valid license.\nPurchase a license at https://usertourkit.com/pricing',
       'color: #e74c3c; font-weight: bold',
       'color: inherit'
     )

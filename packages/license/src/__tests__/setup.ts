@@ -5,5 +5,7 @@ import { afterEach, vi } from 'vitest'
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
-  document.body.innerHTML = ''
+  if (typeof document !== 'undefined') {
+    document.body.innerHTML = ''
+  }
 })

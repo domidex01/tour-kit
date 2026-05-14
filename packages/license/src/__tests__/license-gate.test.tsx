@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { useContext } from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { renderToString } from 'react-dom/server'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { LicenseGate } from '../components/license-gate'
 import { LicenseProvider, LicenseRenderContext } from '../context/license-context'
 import type { LicenseState } from '../types'
@@ -16,6 +17,7 @@ vi.mock('../lib/domain', () => ({
 
 vi.mock('../lib/cache', () => ({
   clearCache: vi.fn(),
+  hasFreshCache: vi.fn().mockReturnValue(false),
 }))
 
 import { isDevEnvironment } from '../lib/domain'
@@ -57,14 +59,24 @@ const VALID_FREE: LicenseState = {
   renderKey: 'lk_free456hash',
 }
 
+const ORIGINAL_NODE_ENV = process.env.NODE_ENV
+
+function findWatermark() {
+  return document.body.querySelector('[data-tourkit-watermark]')
+}
+
 describe('LicenseGate', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockIsDev.mockReturnValue(false)
-    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    document.body.innerHTML = ''
   })
 
-  it('renders children when license is valid pro', async () => {
+  afterEach(() => {
+    process.env.NODE_ENV = ORIGINAL_NODE_ENV
+  })
+
+  it('renders children when license is valid pro and no badge appears', async () => {
     mockValidate.mockResolvedValue(VALID_PRO)
 
     render(
@@ -79,10 +91,10 @@ describe('LicenseGate', () => {
       expect(screen.getByTestId('pro-content')).toHaveTextContent('Pro Feature')
     })
 
-    expect(screen.queryByText('UNLICENSED')).not.toBeInTheDocument()
+    expect(findWatermark()).toBeNull()
   })
 
-  it('renders children with watermark overlay when invalid and no fallback', async () => {
+  it('renders children plus badge when invalid and no fallback', async () => {
     mockValidate.mockResolvedValue(INVALID)
 
     render(
@@ -94,8 +106,8 @@ describe('LicenseGate', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('UNLICENSED')).toBeInTheDocument()
       expect(screen.getByTestId('pro-content')).toBeInTheDocument()
+      expect(findWatermark()).not.toBeNull()
     })
   })
 
@@ -115,7 +127,7 @@ describe('LicenseGate', () => {
     })
 
     expect(screen.queryByTestId('pro-content')).not.toBeInTheDocument()
-    expect(screen.queryByText('UNLICENSED')).not.toBeInTheDocument()
+    expect(findWatermark()).toBeNull()
   })
 
   it('renders loading slot while validation is in flight', () => {
@@ -147,7 +159,7 @@ describe('LicenseGate', () => {
     expect(screen.queryByTestId('pro-content')).not.toBeInTheDocument()
   })
 
-  it('renders watermark when tier is free but pro is required', async () => {
+  it('renders children plus badge when tier is free but pro is required', async () => {
     mockValidate.mockResolvedValue(VALID_FREE)
 
     render(
@@ -160,6 +172,7 @@ describe('LicenseGate', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('pro-content')).toBeInTheDocument()
+      expect(findWatermark()).not.toBeNull()
     })
   })
 
@@ -184,17 +197,90 @@ describe('LicenseGate', () => {
     })
   })
 
-  it('throws when used outside LicenseProvider', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  it('does not throw when used outside LicenseProvider on a non-dev host', () => {
+    mockIsDev.mockReturnValue(false)
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     expect(() => {
       render(
         <LicenseGate require="pro">
+          <div data-testid="pro-content">Pro Feature</div>
+        </LicenseGate>
+      )
+    }).not.toThrow()
+
+    expect(screen.getByTestId('pro-content')).toBeInTheDocument()
+    expect(findWatermark()).not.toBeNull()
+
+    warnSpy.mockRestore()
+  })
+
+  it('renders children only outside LicenseProvider on a dev host (no badge)', () => {
+    mockIsDev.mockReturnValue(true)
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    render(
+      <LicenseGate require="pro">
+        <div data-testid="pro-content">Pro Feature</div>
+      </LicenseGate>
+    )
+
+    expect(screen.getByTestId('pro-content')).toBeInTheDocument()
+    expect(findWatermark()).toBeNull()
+    expect(warnSpy).not.toHaveBeenCalled()
+
+    warnSpy.mockRestore()
+  })
+
+  it('warns once when no provider and NODE_ENV is not production', async () => {
+    mockIsDev.mockReturnValue(false)
+    process.env.NODE_ENV = 'development'
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    render(
+      <LicenseGate require="pro">
+        <div data-testid="pro-content">Pro Feature</div>
+      </LicenseGate>
+    )
+
+    await waitFor(() => {
+      expect(warnSpy).toHaveBeenCalled()
+    })
+
+    const calls = warnSpy.mock.calls
+    const tourkitCalls = calls.filter((args) =>
+      args.some((arg) => typeof arg === 'string' && arg.includes('[TourKit]'))
+    )
+    expect(tourkitCalls.length).toBeGreaterThanOrEqual(1)
+
+    warnSpy.mockRestore()
+  })
+
+  it('does not warn when no provider and NODE_ENV is production', () => {
+    mockIsDev.mockReturnValue(false)
+    process.env.NODE_ENV = 'production'
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    render(
+      <LicenseGate require="pro">
+        <div data-testid="pro-content">Pro Feature</div>
+      </LicenseGate>
+    )
+
+    expect(warnSpy).not.toHaveBeenCalled()
+
+    warnSpy.mockRestore()
+  })
+
+  it('renderToString does not throw or touch document on SSR', () => {
+    mockIsDev.mockReturnValue(false)
+
+    expect(() => {
+      renderToString(
+        <LicenseGate require="pro">
           <div>Pro Feature</div>
         </LicenseGate>
       )
-    }).toThrow('useLicense must be used within a <LicenseProvider>')
-
-    spy.mockRestore()
+    }).not.toThrow()
   })
 })

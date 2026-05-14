@@ -14,8 +14,9 @@ Validates license keys against the Polar customer portal API, manages domain act
 - `src/lib/schemas.ts` — Zod schemas for Polar API responses and cache shape
 - `src/types/index.ts` — `LicenseState`, `LicenseTier`, `LicenseCache`, `LicenseConfig`, error types
 - `src/context/license-context.tsx` — `LicenseProvider`, `LicenseContext`, `LicenseRenderContext`
-- `src/components/license-gate.tsx` — `<LicenseGate>` with interleaved render-key validation
-- `src/components/license-watermark.tsx` — Semi-transparent "UNLICENSED" overlay (inline styles, high z-index)
+- `src/components/license-gate.tsx` — `<LicenseGate>` soft gate. Renders children unconditionally, layers a single small badge + dev-only warning on non-localhost hosts when unlicensed. Tolerates a missing `<LicenseProvider>`.
+- `src/components/pro-gate.tsx` — `<ProGate>` hard gate. Renders a branded placeholder when unlicensed. **Not used internally by Tour Kit's own Pro packages** — kept exported for downstream consumers who want a hard placeholder.
+- `src/components/license-watermark.tsx` — Small `Tour Kit · Unlicensed · Buy license` portal badge in the bottom-right corner. Singleton ownership transfer so multiple mounted instances coalesce to one DOM node. Inline-styled, max z-index, link `pointer-events: auto` over a `pointer-events: none` wrapper. Click emits `unlicensed_badge_clicked` via `window.gtag` or `window.dataLayer`.
 - `src/components/license-warning.tsx` — Console warning component for invalid licenses
 - `src/hooks/use-license.ts` — `useLicense()` context consumer
 - `src/hooks/use-is-pro.ts` — `useIsPro()` boolean shortcut
@@ -28,7 +29,8 @@ Validates license keys against the Polar customer portal API, manages domain act
 - **Activation slots**: 5 per key, each bound to a domain label
 - **Dev bypass**: `localhost`, `127.0.0.1`, `*.local` skip activation, return `{ valid: true, tier: 'pro' }`
 - **Cache integrity**: Zod parse on every read; corrupted entries are cleared and force re-validation
-- **Render key**: Anti-bypass mechanism set only when `status === 'valid'`; consumed by `<LicenseGate>`
+- **Render key**: Set only when `status === 'valid'`. Exposed via `LicenseRenderContext` from `LicenseProvider` for any future anti-bypass consumer
+- **Soft gate vs hard gate**: `<LicenseGate>` is the canonical internal gate used by all Tour Kit Pro packages — it never hides the real UI, only layers a badge. `<ProGate>` is a legacy hard-placeholder export kept for downstream consumers
 - **Domain verification**: `validateDomainAtRender()` compares runtime hostname against stored activation
 
 ## API Surface
