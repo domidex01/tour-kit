@@ -102,6 +102,7 @@ Types:
     GateCode
     GateName
     GateReason
+    TestBridge
     FrequencyRule
     FrequencyState
     LocalizedText
@@ -367,7 +368,7 @@ TYPES
       | 'AUTOSTART_DISABLED'
       | (string & {})
 
-    ... and 5 more types. See source for full definitions.
+    ... and 6 more types. See source for full definitions.
 
 HOOKS
 -----

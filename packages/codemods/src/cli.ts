@@ -5,7 +5,9 @@ import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { readdir } from 'node:fs/promises'
 import { extname, join, resolve } from 'node:path'
 import jscodeshift from 'jscodeshift'
+import fromDriver from './transforms/from-driver'
 import fromJoyride from './transforms/from-joyride'
+import fromShepherd from './transforms/from-shepherd'
 
 export interface CliOptions {
   from: 'joyride' | 'shepherd' | 'driver'
@@ -30,6 +32,26 @@ type JscodeshiftTransform = (
 
 const TRANSFORMS: Partial<Record<CliOptions['from'], JscodeshiftTransform>> = {
   joyride: fromJoyride as unknown as JscodeshiftTransform,
+  shepherd: fromShepherd as unknown as JscodeshiftTransform,
+  driver: fromDriver as unknown as JscodeshiftTransform,
+}
+
+// Sources whose corpus coverage is below the ≥80% ship gate. Members trigger a
+// one-line warning on stderr when used. Empty when every transform shipped
+// stable; populated post-fixture-run if a corpus drops below the gate.
+// Tests read this set live (not a hardcoded list) so the experimental status
+// is part of the code review, not buried in a changelog.
+export const EXPERIMENTAL_TRANSFORMS: ReadonlySet<CliOptions['from']> = new Set<CliOptions['from']>(
+  []
+)
+
+// Per-source coverage percentages reported alongside the experimental
+// warning. Numbers come from the actual fixture-runner output — kept here so
+// the CLI message names the gap explicitly. Update with each corpus change.
+export const TRANSFORM_COVERAGE: Readonly<Record<CliOptions['from'], number>> = {
+  joyride: 100,
+  shepherd: 100,
+  driver: 100,
 }
 
 const DEFAULT_EXTENSIONS = ['ts', 'tsx', 'js', 'jsx'] as const
@@ -59,6 +81,13 @@ export async function runMigrate(argv: readonly string[]): Promise<number> {
   if (!transform) {
     console.error(`usage error: --from='${opts.from}' is not yet implemented`)
     return EXIT_BAD_ARGS
+  }
+
+  if (EXPERIMENTAL_TRANSFORMS.has(opts.from)) {
+    const pct = TRANSFORM_COVERAGE[opts.from]
+    console.error(
+      `[Tour Kit] ${opts.from} transform is experimental. Coverage: ${pct}%. Review TODOs carefully.`
+    )
   }
 
   const files = await collectFiles(opts.paths, opts.extensions)

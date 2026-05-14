@@ -1,4 +1,4 @@
-# userTourKit v0.11.0 — Generated 2026-05-13T07:39:18Z
+# userTourKit v0.11.0 — Generated 2026-05-13T15:24:38Z
 
 # Feature Adoption Tracking
 
@@ -39580,6 +39580,154 @@ Stale sessions are filtered on read — `useFlowSession` checks `Date.now() - la
 
 ---
 
+# Playwright
+
+> Drive Tour Kit from Playwright with the typed `test.extend({ tour })` fixture and the opt-in `window.__tourKit__` bridge.
+
+`@tour-kit/playwright` adds a typed `test.extend({ tour })` fixture so your
+end-to-end specs can move a tour forward without writing `page.click`
+boilerplate. It is backed by `window.__tourKit__` — a dev-only bridge that
+`<TourProvider>` exposes only when you explicitly opt in.
+
+## Install
+
+```bash
+pnpm add -D @tour-kit/playwright @playwright/test
+```
+
+`@playwright/test` is a peer dependency. Tour Kit supports `^1.58.0` and up.
+
+## 1 — Activate the bridge
+
+The bridge is what Playwright actually drives. Toggle it via `enableTestBridge`
+on `<TourProvider>` — and guard it with `NODE_ENV` so production never gets
+the surface:
+
+```tsx
+import { TourProvider } from '@tour-kit/core'
+
+export function AppProviders({ children }) {
+  return (
+    <TourProvider
+      tours={[onboardingTour]}
+      enableTestBridge={process.env.NODE_ENV !== 'production'}
+    >
+      {children}
+    </TourProvider>
+  )
+}
+```
+
+When `enableTestBridge` is `true`, `<TourProvider>` publishes
+`window.__tourKit__` with the following shape:
+
+```ts
+import type { TestBridge, EligibilityReport } from '@tour-kit/core'
+
+declare global {
+  interface Window {
+    __tourKit__?: TestBridge
+  }
+}
+
+interface TestBridge {
+  start: (tourId: string) => void
+  next: () => void
+  previous: () => void
+  goToStep: (stepId: string) => void
+  complete: () => void
+  skip: () => void
+  getDiagnostic: (tourId: string) => EligibilityReport | null
+}
+```
+
+In development, the provider also logs a single `console.warn` per mount
+reminding you the bridge is on. Production builds are silent.
+
+## 2 — Write a test
+
+Import `test` and `expect` from `@tour-kit/playwright` instead of
+`@playwright/test`. The `tour` fixture is scoped per-test:
+
+```ts
+import { test, expect } from '@tour-kit/playwright'
+
+test('onboarding happy path', async ({ page, tour }) => {
+  await page.goto('/')
+  await tour.start('onboarding')
+  await tour.waitForStep('welcome')
+  await tour.next()
+  await tour.waitForStep('pricing')
+  await tour.complete()
+})
+```
+
+### `tour` helpers
+
+| Helper | Behavior |
+|---|---|
+| `tour.start(id)` | Calls `window.__tourKit__.start(id)`. |
+| `tour.waitForStep(stepId, opts?)` | Waits for `[data-tour-step="<id>"]` to be visible. Accepts `{ timeout }`. |
+| `tour.next()` / `tour.previous()` | Step navigation. |
+| `tour.goToStep(stepId)` | Jump directly. |
+| `tour.complete()` / `tour.skip()` | End the tour. |
+| `tour.getDiagnostic(tourId)` | Read the Phase 3 `EligibilityReport`. Returns `null` without `diagnose`. |
+
+Every helper short-circuits with a clear error pointing at
+`enableTestBridge` if the bridge is missing — saving you ten minutes of
+confused debugging.
+
+## 3 — Diagnostic integration
+
+Mount the provider with both `diagnose` and `enableTestBridge` to surface
+gate diagnostics in your specs:
+
+```tsx
+<TourProvider
+  tours={[onboardingTour]}
+  diagnose
+  enableTestBridge={process.env.NODE_ENV !== 'production'}
+>
+```
+
+```ts
+test('audience gate blocks free users', async ({ page, tour }) => {
+  await page.goto('/?role=free')
+  const report = await tour.getDiagnostic('pro-only-tour')
+  expect(report?.willFire).toBe(false)
+  expect(report?.firstFailingGate?.code).toBe('AUDIENCE_MISMATCH')
+})
+```
+
+See [Diagnostic engine](/docs/core/diagnostic) for the full `EligibilityReport`
+shape and gate codes.
+
+## Security note
+
+`window.__tourKit__` is a tour-control surface. A production build that
+exposes it lets anyone with browser dev tools start, complete, or skip
+your tours. The default is `false` for that reason — keep it that way:
+
+```tsx
+// ✅ Recommended
+enableTestBridge={process.env.NODE_ENV !== 'production'}
+
+// ❌ Never
+enableTestBridge
+```
+
+The provider's effect short-circuits at the top when `enableTestBridge` is
+`false`, so bundlers can dead-code-eliminate the bridge body in production.
+
+## Related
+
+- [Testing Library](/docs/guides/testing) — jsdom helpers for component-level
+  positioning assertions.
+- [Diagnostic engine](/docs/core/diagnostic) — what `tour.getDiagnostic`
+  returns.
+
+---
+
 # Reduced Motion
 
 > How Tour Kit honors prefers-reduced-motion across announcements, surveys, hints, checklists, and the core tour runtime
@@ -40331,8 +40479,9 @@ await setupTourKitTesting()
 ```
 
 ```tsx title="welcome-tour.test.tsx"
+import * as React from 'react'
 import { render } from '@testing-library/react'
-import { TourProvider } from '@tour-kit/core'
+import { TourProvider, useTour } from '@tour-kit/core'
 import { TourCard } from '@tour-kit/react'
 import {
   expectStepVisible,
@@ -40350,6 +40499,19 @@ const tour = {
   ],
 }
 
+// <TourProvider> is inactive by default. Mount this tiny helper inside the
+// provider to start the tour on mount — or click your own "Start" button.
+function AutoStart({ id }: { id: string }) {
+  const { start } = useTour()
+  const started = React.useRef(false)
+  React.useEffect(() => {
+    if (started.current) return
+    started.current = true
+    start(id)
+  }, [])
+  return null
+}
+
 describe('welcome tour', () => {
   it('walks through both steps', async () => {
     render(
@@ -40357,6 +40519,7 @@ describe('welcome tour', () => {
         <div id="welcome" />
         <div id="pricing" />
         <TourProvider tours={[tour]}>
+          <AutoStart id="demo" />
           <TourCard />
           <HookProbe />
         </TourProvider>
@@ -40443,7 +40606,7 @@ try {
 
 ## Browser-positioning tests live elsewhere
 
-This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use Playwright via [`@tour-kit/playwright`](./nextjs#end-to-end-with-playwright) (Phase 6). Phase 5 helpers stop at the jsdom boundary by design.
+This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use [`@tour-kit/playwright`](./playwright) — it ships a `test.extend({ tour })` fixture backed by the opt-in `window.__tourKit__` bridge. Phase 5 helpers stop at the jsdom boundary by design.
 
 ---
 
@@ -51238,6 +51401,789 @@ Always validate with `isSupportedMediaUrl()` first for reliable results.
 - [Embed URL Utilities](/docs/media/utilities/embed-urls) - Build embed URLs
 - [TourMedia](/docs/media/components/tour-media) - Auto-detecting media component
 - [MediaHeadless](/docs/media/headless/media-headless) - Headless API with URL parsing
+
+---
+
+# Migrate from driver.js
+
+> Use `npx tour-kit-migrate --from driver` to rewrite a driver.js codebase to Tour Kit in seconds. Covers the function-call pattern (`driver({...}).drive()`).
+
+## Quick start
+
+```bash
+npx tour-kit-migrate --from driver ./src
+```
+
+The migrate command runs a `jscodeshift` transform over your `.ts`/`.tsx`/`.js`/`.jsx`
+files and reshapes `driver({...})` config objects into Tour Kit tours. The
+`.drive()` chain becomes a TODO pointing at `useTour().start()`. Patterns
+that have no Tour Kit equivalent are kept in place and annotated with `// TODO:`
+comments that link back to this page.
+
+### Flags
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--from <source>` | required | One of `joyride`, `shepherd`, `driver` |
+| `--parser <parser>` | `tsx` | `tsx` / `ts` / `babel` |
+| `--dry-run` | off | Print diffs, don't write |
+| `--print` | off | Write transformed source to stdout |
+| `--extensions <list>` | `ts,tsx,js,jsx` | Comma-separated extension list |
+| `--verbose` | off | Log every file action |
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success |
+| 1 | Parse error during transform |
+| 2 | Bad CLI args |
+| 3 | No files matched |
+
+## What gets migrated
+
+| Pattern | driver.js | Tour Kit |
+| --- | --- | --- |
+| Import | `import { driver } from 'driver.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| Config call | `driver({ steps: [...] })` | `{ id: 'migrated-tour', steps: [...] }` literal + TODO to register at `<TourProvider>` |
+| `Step.element` (selector) | `'#hero'` | `target: '#hero'` |
+| `Step.popover.title` | `'Welcome'` | `title: 'Welcome'` |
+| `Step.popover.description` | `'Hi there'` | `content: 'Hi there'` |
+| `Step.popover.side` | `'top'` / `'bottom'` / ... | `placement: 'top'` / `'bottom'` / ... |
+| `.drive()` chain | `d.drive()` | empty statement + TODO to call `useTour().start()` |
+
+## Anchors emitted by the codemod
+
+Each heading below corresponds to a `// TODO:` link emitted by the transform.
+Grep your migrated codebase for the anchor or follow it here for hand-port
+guidance.
+
+### driver-call
+
+`driver({...})` is replaced with a Tour Kit tour shape:
+
+```tsx
+const d = {
+  id: 'migrated-tour',
+  steps: [/* migrated steps */],
+}
+```
+
+Register the migrated tour at a `<TourProvider>` ancestor and call
+`useTour().start()` from a descendant when you want the tour to begin.
+
+### driver-config-dynamic
+
+The `driver(...)` argument was dynamic (not an inline object). Populate the
+migrated `steps` array manually.
+
+### steps-dynamic
+
+The config's `steps` field was dynamic (not an inline array). Populate the
+migrated `steps` array manually.
+
+### step-dynamic
+
+A step inside the `steps` array was dynamic (not an inline object). Port the
+step shape manually.
+
+### element-function
+
+```ts
+{ element: () => document.body, popover: {...} }
+```
+
+Tour Kit's `target` accepts a CSS selector string or a DOM ref — not a
+function. Rewrite as a selector or pass a ref via the headless slot API.
+
+### element-dom
+
+```ts
+const el = document.getElementById('hero')!
+driver({ steps: [{ element: el, popover: {...} }] })
+```
+
+A captured DOM Element is preserved as `target: el`. Tour Kit accepts a ref
+directly — verify the value resolves at runtime, or rewrite as a CSS
+selector.
+
+### target
+
+The codemod could not resolve `Step.element` to a selector. Set `Step.target`
+by hand to a CSS selector string or DOM ref.
+
+### placement
+
+driver.js's `popover.side` accepts `top` / `bottom` / `left` / `right` and
+`over`. `over` is mapped to `top`; review manually.
+
+### align
+
+`popover.align` (e.g. `start`, `end`) is folded into Tour Kit's compound
+placement values (`top-start`, `top-end`, etc.) — port manually.
+
+### popover-dynamic
+
+`Step.popover` was not an inline object. Port `title` / `content` / `placement`
+manually.
+
+### popover-class
+
+`popover.popoverClass` injected a CSS class. Use theme tokens via your
+`<ThemeProvider>` and `<TourCard />` slots.
+
+### show-progress
+
+`showProgress: true` (tour-level) or `popover.showProgress` (step-level)
+rendered a `step n/N` indicator. Render `<TourProgress />` inside your
+`<TourCard />` slot.
+
+### allow-close
+
+`allowClose: false` removed the close button. Include or omit `<TourClose />`
+inside your `<TourCard />` composition.
+
+### btn-text
+
+`doneBtnText`, `nextBtnText`, `prevBtnText`, `closeBtnText` (and the same
+fields nested in `popover`) overrode button labels. Pass label props to your
+`<TourNavigation />` and `<TourClose />` slot components.
+
+### show-buttons
+
+`showButtons: ['next', 'previous']` (or fewer) selected which buttons to
+render. Compose your `<TourCard />` with only the slots you need — omitted
+slots simply don't render.
+
+### disable-active-interaction
+
+`disableActiveInteraction: true` made the spotlighted element non-interactive.
+Configure the spotlight interactive flag on your `<TourOverlay />` slot.
+
+### smooth-scroll
+
+`smoothScroll: true` enabled smooth scrolling. Tour Kit always scrolls when
+the target is off-screen; gate manually if you need a custom scroll
+behaviour.
+
+### animate
+
+`animate: true` toggled animation. Tour Kit respects
+`prefers-reduced-motion` automatically — drop the flag.
+
+### stage-padding
+
+`stagePadding` controlled padding around the spotlight ring. Pass `padding`
+to your `<TourOverlay />` slot.
+
+### stage-radius
+
+`stageRadius` controlled the spotlight corner radius. Theme tokens via your
+`<ThemeProvider>`.
+
+### overlay-color
+
+`overlayColor` set the backdrop colour. Theme tokens via your
+`<ThemeProvider>`.
+
+### overlay-opacity
+
+`overlayOpacity` set the backdrop opacity. Theme tokens via your
+`<ThemeProvider>`.
+
+### on-highlight-started
+
+`Step.onHighlightStarted` and `onHighlighted` fired when the spotlight moved.
+Port to `onShow` on the migrated step.
+
+### on-highlighted
+
+Alias of `on-highlight-started` — see above.
+
+### on-deselected
+
+`Step.onDeselected` fired when leaving a step. Port to `onHide` on the
+migrated step.
+
+### on-popover-render
+
+`popover.onPopoverRender` was a render callback for the popover DOM. Render
+custom JSX in `<TourCard />` children instead.
+
+### on-next-click
+
+`popover.onNextClick` / `onPrevClick` / `onCloseClick` were per-step button
+callbacks. Handle in your `<TourNavigation />` / `<TourClose />` slot.
+
+### on-prev-click
+
+See `on-next-click`.
+
+### on-close-click
+
+See `on-next-click`.
+
+### on-click
+
+Generic on-click anchor for popover button handlers — see `on-next-click`.
+
+### on-destroy-started
+
+`onDestroyStarted` fired before tour teardown. Use `onSkip` / `onComplete` on
+your `<TourProvider>`.
+
+### on-destroyed
+
+`onDestroyed` fired after tour teardown. Use `onSkip` / `onComplete` on your
+`<TourProvider>`.
+
+### drive
+
+```ts
+d.drive()
+```
+
+The migrated tour object has no `.drive()` method. Call `useTour().start()`
+from inside a descendant of the `<TourProvider>` that registers the tour.
+
+### control-flow
+
+`.destroy()`, `.moveNext()`, `.movePrevious()`, `.moveTo(index)` are replaced
+with empty statements + TODO comments. Their Tour Kit equivalents are:
+
+| driver.js | Tour Kit |
+| --- | --- |
+| `d.destroy()` | `useTour().stop()` |
+| `d.moveNext()` | `useTour().next()` |
+| `d.movePrevious()` | `useTour().prev()` |
+| `d.moveTo(i)` | `useTour().goTo(i)` |
+
+### highlight
+
+`d.highlight()` showed a single popover without a tour. Tour Kit has no
+single-step highlight — render `<HintHotspot>` from `@tour-kit/hints` for the
+same UX.
+
+### unknown-config-field
+
+A tour-level config field not in this matrix. Check the version of driver.js
+you ran against.
+
+### unknown-popover-field
+
+A `popover.*` field not in this matrix.
+
+### unknown-step-field
+
+A `Step.*` field not in this matrix.
+
+## CLI smoke test
+
+```bash
+npx tour-kit-migrate --from driver --dry-run ./src
+```
+
+If the dry-run prints clean diffs and exits 0, run again without `--dry-run`
+to write the changes.
+
+---
+
+# Migrate from react-joyride
+
+> Use `npx tour-kit-migrate --from joyride` to rewrite a react-joyride codebase to Tour Kit in seconds. Covers both the legacy `<Joyride>` JSX form and the modern `useJoyride()` hook form.
+
+## Quick start
+
+```bash
+npx tour-kit-migrate --from joyride ./src
+```
+
+The migrate command runs a `jscodeshift` transform over your `.ts`/`.tsx`/`.js`/`.jsx`
+files and rewrites every `react-joyride` import + every `<Joyride>` JSX + every
+`useJoyride()` hook call. Patterns that have no Tour Kit equivalent are kept
+in place and annotated with `// TODO:` comments that link back to this page.
+
+### Flags
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--from <source>` | required | One of `joyride`, `shepherd`, `driver` |
+| `--parser <parser>` | `tsx` | `tsx` / `ts` / `babel` |
+| `--dry-run` | off | Print diffs, don't write |
+| `--print` | off | Write transformed source to stdout |
+| `--extensions <list>` | `ts,tsx,js,jsx` | Comma-separated extension list |
+| `--verbose` | off | Log every file action |
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success |
+| 1 | Parse error during transform |
+| 2 | Bad CLI args |
+| 3 | No files matched |
+
+## What gets migrated
+
+| Pattern | Joyride | Tour Kit |
+| --- | --- | --- |
+| Import | `import Joyride from 'react-joyride'` | `import { TourProvider } from '@tour-kit/react'` |
+| Hook import | `import { useJoyride } from 'react-joyride'` | `import { useTour } from '@tour-kit/react'` |
+| JSX root | `<Joyride steps={steps} ... />` | `<TourProvider tours={[{ id: 'migrated-tour', steps }]} />` |
+| Hook call | `const { Tour, controls } = useJoyride({ steps })` | `const controls = useTour()` (steps move to `<TourProvider>`) |
+
+## Anchors emitted by the codemod
+
+Each pattern below lists a heading the codemod links to from a `// TODO:` comment.
+You can either grep your codebase for these anchors or follow them here to learn how
+to finish the migration by hand.
+
+### run-prop
+
+Tour Kit is imperative: there's no `run={true}` JSX prop. Call `useTour().start()`
+from a descendant of `<TourProvider>` (typically a small effect-only component) when
+you want the tour to begin.
+
+```tsx
+function StartTour() {
+  const { start } = useTour()
+  useEffect(() => { start() }, [start])
+  return null
+}
+```
+
+### continuous
+
+Joyride's `continuous` prop was opt-in chaining. Tour Kit chains by default — drop
+the `continuous` flag entirely.
+
+### show-progress
+
+`<Joyride showProgress>` displayed a `step n/N` indicator. In Tour Kit, render
+`<TourProgress />` inside your `<TourCard />` slot.
+
+### show-skip-button
+
+`<Joyride showSkipButton>` rendered a skip button. In Tour Kit, render `<TourClose />`
+inside `<TourCard />`.
+
+### step-index
+
+Joyride accepted a controlled `stepIndex` prop. Tour Kit owns step index internally.
+Use `useTour().goTo(index)` to navigate imperatively.
+
+### callback
+
+Joyride's single `callback({ action, status, type, index })` becomes three separate
+handlers in Tour Kit:
+
+- `onTourEnd(args)` — tour finished
+- `onTourSkip(args)` — user skipped
+- `onStepAdvance(args)` — step changed
+
+Walk through your original callback body and split each branch into the appropriate
+handler.
+
+### use-joyride-hook
+
+`useJoyride({ steps, ... })` collapses into:
+
+- `useTour()` — controls (start/next/prev/skip/stop)
+- `<TourProvider tours={[{ id, steps }]}>` — declarative tour registration in an ancestor
+
+The codemod cannot synthesize the ancestor provider — move the tour registration to
+the right place in your tree by hand.
+
+### controls-api
+
+Joyride's `controls.start()`, `.next()`, `.previous()`, `.skip()` map to Tour Kit's
+`useTour()` return value. `previous` becomes `prev`. Spot-check each call site.
+
+### tour-component
+
+The `<Tour />` component returned by `useJoyride()` rendered the tour inline. Tour Kit
+does not have an inline `<Tour />` — render `<TourProvider>` + `<TourCard />` in an
+ancestor and remove the inline element.
+
+### callbackprops
+
+The `CallBackProps` type has no Tour Kit equivalent — handlers receive narrow argument
+shapes (`{ index, status }` etc.) instead of one wide union. Remove the import.
+
+### eventdata
+
+The `EventData` type from `useJoyride().onEvent` has no Tour Kit equivalent. Each
+handler (`onTourEnd`, `onStepAdvance`) gets a narrowly-typed argument.
+
+### actions
+
+`ACTIONS.NEXT` / `ACTIONS.PREV` etc. enums have no Tour Kit equivalent — Tour Kit
+splits the callback by handler so the action discriminator is moot.
+
+### status
+
+`STATUS.FINISHED` / `STATUS.SKIPPED` enums have no Tour Kit equivalent — use the
+dedicated `onTourEnd` / `onTourSkip` handlers instead.
+
+## Step shape
+
+### target-function
+
+```tsx
+{ target: () => document.body }  // ✗ not supported
+```
+
+Tour Kit's `target` accepts a CSS selector string or a DOM ref. If your Joyride
+target was a function returning an element, rewrite as a selector OR pass a ref via
+the headless slot API.
+
+### target-dynamic
+
+```tsx
+{ target: someVariable }  // ⚠ verify
+```
+
+A dynamic identifier or expression is preserved as-is — confirm the value resolves
+to a string selector at runtime.
+
+### placement
+
+Joyride placements (`top` / `bottom` / etc.) map 1:1. `auto` and `center` are not
+Tour Kit values — the codemod maps both to `top`; review manually.
+
+### beacon
+
+Joyride pulses a beacon on each step until the user clicks. Tour Kit shows the tour
+immediately and has no default beacon. `Step.disableBeacon` and `Step.skipBeacon`
+are no-ops in Tour Kit — drop them.
+
+### styles
+
+Joyride's `Step.styles` accepted a deep object of inline styles. Tour Kit uses
+theme tokens via `<ThemeProvider />`. Port styling at the theme layer.
+
+### tooltip-component
+
+`Step.tooltipComponent` swapped the entire tooltip shell. Tour Kit uses headless
+slots — see the `<TourCard />` slot documentation for the equivalent.
+
+### beacon-component
+
+`Step.beaconComponent` swapped the beacon. Tour Kit has no default beacon — there
+is nothing to swap.
+
+### spotlight-target
+
+Joyride's `Step.spotlightTarget` let you spotlight a different element from the
+tooltip anchor. Tour Kit's spotlight is anchored to `target`; if you need a split,
+use a custom overlay component.
+
+### spotlight-clicks
+
+`Step.spotlightClicks` let users click through the spotlight onto the target.
+Tour Kit's spotlight is non-interactive by default; configure via the headless
+`<TourOverlay />` slot.
+
+### spotlight-padding
+
+`Step.spotlightPadding` controlled the spotlight ring. Tour Kit accepts a `padding`
+number on the headless overlay slot. If you used an object (per-side padding), pick
+the largest value and review.
+
+### scroll-target
+
+`Step.scrollTarget` chose a different scroll container. Tour Kit auto-detects the
+nearest scroll parent; if you need a custom container, set it manually before the
+tour starts.
+
+### is-fixed
+
+`Step.isFixed` opted into fixed positioning. Tour Kit always uses Floating UI for
+positioning — drop this field.
+
+### portal-element
+
+`Step.portalElement` overrode the portal root. Tour Kit's `<TourPortal />` slot
+accepts a `container` prop — port the value there.
+
+### disable-overlay
+
+Joyride's `disableOverlay` removed the dimmed background. In Tour Kit, omit
+`<TourOverlay />` from your `<TourCard />` composition.
+
+### disable-scrolling
+
+Joyride's `disableScrolling` prevented programmatic scroll to the target. Tour Kit
+scrolls when the target is off-screen; gate this in your own logic if you need to.
+
+### hide-close-button
+
+Joyride's `hideCloseButton` removed the X button. In Tour Kit, omit `<TourClose />`
+from your card composition.
+
+### hide-footer
+
+Joyride's `hideFooter` removed the footer. In Tour Kit, omit `<TourCardFooter />`
+from your card composition.
+
+### hide-back-button
+
+Joyride's `hideBackButton` removed the back button. In Tour Kit, omit the prev
+button from your `<TourNavigation />` composition.
+
+### locale
+
+Joyride's `locale` overrode button labels. In Tour Kit, pass label props to each
+slot component (`<TourNavigation prevLabel="..." nextLabel="..." />`).
+
+### debug
+
+Joyride's `debug` mode dumped state to the console. Tour Kit's `<TourProvider diagnose>`
+prop is the equivalent — see the [Diagnostics guide](/docs/guides) for usage.
+
+### disablecloseonesc
+
+`disableCloseOnEsc` disabled the Escape-key close handler. In Tour Kit, override
+the keyboard handler via the headless slots or the `<TourCard />` `onKeyDown` prop.
+
+## Step shape — unrecognized
+
+### unknown-step-field
+
+The codemod surfaces unknown `Step.*` fields with this anchor. Check the docs for
+the version of `react-joyride` you ran and decide if the field has a Tour Kit
+equivalent that the codemod didn't recognize.
+
+### unknown-jsx-prop
+
+Same idea for `<Joyride someProp={...} />` props the codemod didn't recognize.
+
+### jsx-spread
+
+A JSX spread (`<Joyride {...props} />`) hides what's actually being passed. The
+codemod can't see through it — verify your props against the Tour Kit API manually.
+
+## CLI smoke test
+
+```bash
+npx tour-kit-migrate --from joyride --dry-run ./src
+```
+
+If the dry-run prints clean diffs and exits 0, run again without `--dry-run` to
+write the changes.
+
+---
+
+# Migrate from shepherd.js
+
+> Use `npx tour-kit-migrate --from shepherd` to rewrite a shepherd.js codebase to Tour Kit in seconds. Covers the class-chain pattern (`new Shepherd.Tour` + `.addStep(...)` + `.start()`).
+
+## Quick start
+
+```bash
+npx tour-kit-migrate --from shepherd ./src
+```
+
+The migrate command runs a `jscodeshift` transform over your `.ts`/`.tsx`/`.js`/`.jsx`
+files and reconstitutes the `new Shepherd.Tour({...})` + `.addStep({...})` +
+`.start()` imperative chain into a single Tour Kit-shaped tour object literal.
+Patterns that have no Tour Kit equivalent are kept in place and annotated with
+`// TODO:` comments that link back to this page.
+
+### Flags
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--from <source>` | required | One of `joyride`, `shepherd`, `driver` |
+| `--parser <parser>` | `tsx` | `tsx` / `ts` / `babel` |
+| `--dry-run` | off | Print diffs, don't write |
+| `--print` | off | Write transformed source to stdout |
+| `--extensions <list>` | `ts,tsx,js,jsx` | Comma-separated extension list |
+| `--verbose` | off | Log every file action |
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success |
+| 1 | Parse error during transform |
+| 2 | Bad CLI args |
+| 3 | No files matched |
+
+## What gets migrated
+
+| Pattern | shepherd.js | Tour Kit |
+| --- | --- | --- |
+| Default import | `import Shepherd from 'shepherd.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| Named import | `import { Tour } from 'shepherd.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| Tour constructor | `new Shepherd.Tour({...})` | `{ id: 'migrated-tour', steps: [...] }` literal + TODO to register at `<TourProvider>` |
+| `.addStep({...})` chain | `tour.addStep({id, attachTo, text})` | merged into `steps: [{id, target, placement, content}]` array |
+| `Step.attachTo.element` | `'#cta'` | `target: '#cta'` |
+| `Step.attachTo.on` | `'top'` / `'bottom'` / ... | `placement: 'top'` / `'bottom'` / ... |
+| `Step.text` | `'Welcome'` | `content: 'Welcome'` |
+
+## Anchors emitted by the codemod
+
+Each heading below corresponds to a `// TODO:` link emitted by the transform.
+Grep your migrated codebase for the anchor or follow it here for hand-port
+guidance.
+
+### tour-constructor
+
+`new Shepherd.Tour({...})` is replaced with a Tour Kit tour shape:
+
+```tsx
+const tour = {
+  id: 'migrated-tour',
+  steps: [/* migrated steps */],
+}
+```
+
+Register the migrated tour at a `<TourProvider>` ancestor and call
+`useTour().start()` from a descendant when you want the tour to begin.
+
+### add-step-dynamic
+
+`.addStep(someVariable)` is dynamic — the codemod cannot inline the step
+shape. Port the variable contents into the `steps` array manually.
+
+### attach-to-dynamic
+
+`attachTo` was not an inline object literal (e.g. spread from another
+variable). Set `target` / `placement` manually.
+
+### attach-to-element-function
+
+```ts
+attachTo: { element: () => document.body, on: 'top' }
+```
+
+Tour Kit's `target` accepts a CSS selector string or a DOM ref — not a
+function. Rewrite as a selector or pass a ref via the headless slot API.
+
+### target
+
+The codemod could not resolve `attachTo.element` to a selector. Set
+`Step.target` by hand to a CSS selector string or DOM ref.
+
+### target-dynamic
+
+A dynamic identifier or member expression was preserved as-is — verify it
+resolves to a string selector at runtime.
+
+### placement
+
+shepherd.js's `attachTo.on` accepts the same primary axis values as Tour Kit
+(`top` / `bottom` / `left` / `right` plus start/end variants). `auto` is
+mapped to `top`; review manually.
+
+### start
+
+```ts
+tour.start()
+```
+
+The migrated tour object has no `.start()` method. Call `useTour().start()`
+from inside a descendant of the `<TourProvider>` that registers the tour.
+
+### control-flow
+
+`tour.show()`, `tour.hide()`, `tour.cancel()`, `tour.complete()`, `tour.next()`,
+and `tour.back()` are replaced with empty statements + TODO comments. Their
+Tour Kit equivalents are:
+
+| Shepherd | Tour Kit |
+| --- | --- |
+| `tour.show(id)` | `useTour().goTo(index)` |
+| `tour.hide()` | `useTour().stop()` |
+| `tour.cancel()` | `useTour().skip()` |
+| `tour.complete()` | `useTour().complete()` |
+| `tour.next()` | `useTour().next()` |
+| `tour.back()` | `useTour().prev()` |
+
+### classes
+
+`Step.classes` injected CSS class names onto the popover. Tour Kit uses theme
+tokens — port styling via your `<ThemeProvider>` and `<TourCard />` slots.
+
+### modal-overlay-class
+
+`Step.modalOverlayOpeningClass` styled the modal overlay opening. Configure
+the spotlight ring via your `<TourOverlay />` slot.
+
+### modal-overlay-padding
+
+`Step.modalOverlayOpeningPadding` set padding on the modal overlay opening.
+Pass `padding` to your `<TourOverlay />` slot.
+
+### can-click-target
+
+`Step.canClickTarget` toggled whether the spotlighted element accepts clicks.
+Tour Kit's spotlight is non-interactive by default — configure the overlay
+spotlight interactive flag manually.
+
+### scroll-to
+
+`Step.scrollTo` / `Step.scrollToHandler` set a custom scroll behaviour. Tour
+Kit auto-scrolls when the target is off-screen; gate manually if you need a
+custom container.
+
+### highlight-class
+
+`Step.highlightClass` injected a CSS class on the highlighted element. Use
+theme tokens on the spotlight slot.
+
+### when
+
+`Step.when` was a map of lifecycle hooks (`show`, `hide`, `complete`, etc.).
+Port each handler to the matching `onShow` / `onHide` property on the
+migrated step, or pass through `<TourProvider>` callbacks for tour-wide
+events.
+
+### advance-on
+
+`Step.advanceOn` advanced the tour on a DOM event from another element.
+Wire `useTour().next()` from your own event handler.
+
+### before-show-promise
+
+`Step.beforeShowPromise` returned a Promise that resolved before the step
+showed. Await it before calling `useTour().goTo()`, or move the deferred
+logic into a custom `onShow` handler.
+
+### show-on
+
+`Step.showOn` was a predicate that conditionally skipped the step. Branch on
+`useTour().currentStepIndex` from a descendant or call `useTour().goTo()` to
+skip.
+
+### buttons
+
+```ts
+buttons: [
+  { text: 'Skip', action: () => tour.cancel() },
+  { text: 'Next', action: () => tour.next() },
+]
+```
+
+shepherd.js's button array is open-ended. Tour Kit ships fixed `<TourCard />`
+slots (Next / Prev / Skip / Close). Wire any custom button actions through
+the `<TourCard />` children — see the
+[card composition guide](/docs/react/components).
+
+### unknown-step-field
+
+A `Step.*` field not in this matrix. Check the version of shepherd.js you ran
+against and decide if it has a Tour Kit equivalent the codemod missed.
+
+## CLI smoke test
+
+```bash
+npx tour-kit-migrate --from shepherd --dry-run ./src
+```
+
+If the dry-run prints clean diffs and exits 0, run again without `--dry-run`
+to write the changes.
 
 ---
 

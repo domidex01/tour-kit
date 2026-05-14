@@ -1,0 +1,221 @@
+---
+title: Migrate from shepherd.js
+description: >-
+  Use `npx tour-kit-migrate --from shepherd` to rewrite a shepherd.js codebase
+  to Tour Kit in seconds. Covers the class-chain pattern (`new Shepherd.Tour`
+  + `.addStep(...)` + `.start()`).
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+## Quick start
+
+```bash
+npx tour-kit-migrate --from shepherd ./src
+```
+
+The migrate command runs a `jscodeshift` transform over your `.ts`/`.tsx`/`.js`/`.jsx`
+files and reconstitutes the `new Shepherd.Tour({...})` + `.addStep({...})` +
+`.start()` imperative chain into a single Tour Kit-shaped tour object literal.
+Patterns that have no Tour Kit equivalent are kept in place and annotated with
+`// TODO:` comments that link back to this page.
+
+<Callout type="info">
+Run with `--dry-run` to see the diff without writing. Run with `--print` to
+write transformed source to stdout.
+</Callout>
+
+### Flags
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--from <source>` | required | One of `joyride`, `shepherd`, `driver` |
+| `--parser <parser>` | `tsx` | `tsx` / `ts` / `babel` |
+| `--dry-run` | off | Print diffs, don't write |
+| `--print` | off | Write transformed source to stdout |
+| `--extensions <list>` | `ts,tsx,js,jsx` | Comma-separated extension list |
+| `--verbose` | off | Log every file action |
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success |
+| 1 | Parse error during transform |
+| 2 | Bad CLI args |
+| 3 | No files matched |
+
+## What gets migrated
+
+| Pattern | shepherd.js | Tour Kit |
+| --- | --- | --- |
+| Default import | `import Shepherd from 'shepherd.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| Named import | `import { Tour } from 'shepherd.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| Tour constructor | `new Shepherd.Tour({...})` | `{ id: 'migrated-tour', steps: [...] }` literal + TODO to register at `<TourProvider>` |
+| `.addStep({...})` chain | `tour.addStep({id, attachTo, text})` | merged into `steps: [{id, target, placement, content}]` array |
+| `Step.attachTo.element` | `'#cta'` | `target: '#cta'` |
+| `Step.attachTo.on` | `'top'` / `'bottom'` / ... | `placement: 'top'` / `'bottom'` / ... |
+| `Step.text` | `'Welcome'` | `content: 'Welcome'` |
+
+## Anchors emitted by the codemod
+
+Each heading below corresponds to a `// TODO:` link emitted by the transform.
+Grep your migrated codebase for the anchor or follow it here for hand-port
+guidance.
+
+### tour-constructor
+
+`new Shepherd.Tour({...})` is replaced with a Tour Kit tour shape:
+
+```tsx
+const tour = {
+  id: 'migrated-tour',
+  steps: [/* migrated steps */],
+}
+```
+
+Register the migrated tour at a `<TourProvider>` ancestor and call
+`useTour().start()` from a descendant when you want the tour to begin.
+
+### add-step-dynamic
+
+`.addStep(someVariable)` is dynamic — the codemod cannot inline the step
+shape. Port the variable contents into the `steps` array manually.
+
+### attach-to-dynamic
+
+`attachTo` was not an inline object literal (e.g. spread from another
+variable). Set `target` / `placement` manually.
+
+### attach-to-element-function
+
+```ts
+attachTo: { element: () => document.body, on: 'top' }
+```
+
+Tour Kit's `target` accepts a CSS selector string or a DOM ref — not a
+function. Rewrite as a selector or pass a ref via the headless slot API.
+
+### target
+
+The codemod could not resolve `attachTo.element` to a selector. Set
+`Step.target` by hand to a CSS selector string or DOM ref.
+
+### target-dynamic
+
+A dynamic identifier or member expression was preserved as-is — verify it
+resolves to a string selector at runtime.
+
+### placement
+
+shepherd.js's `attachTo.on` accepts the same primary axis values as Tour Kit
+(`top` / `bottom` / `left` / `right` plus start/end variants). `auto` is
+mapped to `top`; review manually.
+
+### start
+
+```ts
+tour.start()
+```
+
+The migrated tour object has no `.start()` method. Call `useTour().start()`
+from inside a descendant of the `<TourProvider>` that registers the tour.
+
+### control-flow
+
+`tour.show()`, `tour.hide()`, `tour.cancel()`, `tour.complete()`, `tour.next()`,
+and `tour.back()` are replaced with empty statements + TODO comments. Their
+Tour Kit equivalents are:
+
+| Shepherd | Tour Kit |
+| --- | --- |
+| `tour.show(id)` | `useTour().goTo(index)` |
+| `tour.hide()` | `useTour().stop()` |
+| `tour.cancel()` | `useTour().skip()` |
+| `tour.complete()` | `useTour().complete()` |
+| `tour.next()` | `useTour().next()` |
+| `tour.back()` | `useTour().prev()` |
+
+### classes
+
+`Step.classes` injected CSS class names onto the popover. Tour Kit uses theme
+tokens — port styling via your `<ThemeProvider>` and `<TourCard />` slots.
+
+### modal-overlay-class
+
+`Step.modalOverlayOpeningClass` styled the modal overlay opening. Configure
+the spotlight ring via your `<TourOverlay />` slot.
+
+### modal-overlay-padding
+
+`Step.modalOverlayOpeningPadding` set padding on the modal overlay opening.
+Pass `padding` to your `<TourOverlay />` slot.
+
+### can-click-target
+
+`Step.canClickTarget` toggled whether the spotlighted element accepts clicks.
+Tour Kit's spotlight is non-interactive by default — configure the overlay
+spotlight interactive flag manually.
+
+### scroll-to
+
+`Step.scrollTo` / `Step.scrollToHandler` set a custom scroll behaviour. Tour
+Kit auto-scrolls when the target is off-screen; gate manually if you need a
+custom container.
+
+### highlight-class
+
+`Step.highlightClass` injected a CSS class on the highlighted element. Use
+theme tokens on the spotlight slot.
+
+### when
+
+`Step.when` was a map of lifecycle hooks (`show`, `hide`, `complete`, etc.).
+Port each handler to the matching `onShow` / `onHide` property on the
+migrated step, or pass through `<TourProvider>` callbacks for tour-wide
+events.
+
+### advance-on
+
+`Step.advanceOn` advanced the tour on a DOM event from another element.
+Wire `useTour().next()` from your own event handler.
+
+### before-show-promise
+
+`Step.beforeShowPromise` returned a Promise that resolved before the step
+showed. Await it before calling `useTour().goTo()`, or move the deferred
+logic into a custom `onShow` handler.
+
+### show-on
+
+`Step.showOn` was a predicate that conditionally skipped the step. Branch on
+`useTour().currentStepIndex` from a descendant or call `useTour().goTo()` to
+skip.
+
+### buttons
+
+```ts
+buttons: [
+  { text: 'Skip', action: () => tour.cancel() },
+  { text: 'Next', action: () => tour.next() },
+]
+```
+
+shepherd.js's button array is open-ended. Tour Kit ships fixed `<TourCard />`
+slots (Next / Prev / Skip / Close). Wire any custom button actions through
+the `<TourCard />` children — see the
+[card composition guide](/docs/react/components).
+
+### unknown-step-field
+
+A `Step.*` field not in this matrix. Check the version of shepherd.js you ran
+against and decide if it has a Tour Kit equivalent the codemod missed.
+
+## CLI smoke test
+
+```bash
+npx tour-kit-migrate --from shepherd --dry-run ./src
+```
+
+If the dry-run prints clean diffs and exits 0, run again without `--dry-run`
+to write the changes.

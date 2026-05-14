@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto'
 import { copyFileSync, mkdtempSync, readFileSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
-import { runMigrate } from '../cli'
+import { describe, expect, it, vi } from 'vitest'
+import { EXPERIMENTAL_TRANSFORMS, runMigrate } from '../cli'
 
 const FIXTURES = join(__dirname, '..', '..', '__tests__', 'fixtures', 'joyride')
 
@@ -62,5 +62,68 @@ describe('CLI --dry-run safety (SHA comparison)', () => {
     const after = snapshotDir(dir)
     expect(code).toBe(0)
     expect(after).toEqual(before)
+  })
+})
+
+describe('CLI — TRANSFORMS map recognizes shepherd + driver', () => {
+  // Exit 3 (no paths) proves the --from source is wired into the TRANSFORMS
+  // map. Exit 2 (bad-args) would mean the source isn't registered.
+  it('accepts --from shepherd (exits 3 on no paths)', async () => {
+    const code = await runMigrate(['--from', 'shepherd'])
+    expect(code).toBe(3)
+  })
+  it('accepts --from driver (exits 3 on no paths)', async () => {
+    const code = await runMigrate(['--from', 'driver'])
+    expect(code).toBe(3)
+  })
+})
+
+describe('CLI — experimental warnings', () => {
+  function captureStderr() {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    return {
+      get text(): string {
+        return spy.mock.calls.map((c) => c.map(String).join(' ')).join('\n')
+      },
+      restore: () => spy.mockRestore(),
+    }
+  }
+
+  const SHEPHERD_FIXTURES = join(__dirname, '..', '..', '__tests__', 'fixtures', 'shepherd')
+  const DRIVER_FIXTURES = join(__dirname, '..', '..', '__tests__', 'fixtures', 'driver')
+  const fixturesByName: Record<string, string> = {
+    joyride: FIXTURES,
+    shepherd: SHEPHERD_FIXTURES,
+    driver: DRIVER_FIXTURES,
+  }
+
+  it('prints an experimental warning + percentage when --from is flagged experimental', async () => {
+    if (EXPERIMENTAL_TRANSFORMS.size === 0) {
+      // No transform is flagged — the suite shipped both at ≥80% so there's
+      // nothing to warn about. The remaining tests in this describe still
+      // assert the negative path.
+      return
+    }
+    const flagged = [...EXPERIMENTAL_TRANSFORMS][0]
+    if (!flagged) return
+    const path = fixturesByName[flagged] ?? FIXTURES
+    const stderr = captureStderr()
+    await runMigrate(['--from', flagged, '--dry-run', path])
+    expect(stderr.text).toMatch(/experimental/i)
+    expect(stderr.text).toMatch(/\d+%/)
+    stderr.restore()
+  })
+
+  it('does NOT print the experimental warning for non-flagged sources', async () => {
+    const stable = (['joyride', 'shepherd', 'driver'] as const).filter(
+      (s) => !EXPERIMENTAL_TRANSFORMS.has(s)
+    )
+    if (stable.length === 0) return
+    const sample = stable[0]
+    const path = fixturesByName[sample] ?? FIXTURES
+    const stderr = captureStderr()
+    await runMigrate(['--from', sample, '--dry-run', path])
+    expect(stderr.text).not.toMatch(/experimental/i)
+    stderr.restore()
   })
 })
