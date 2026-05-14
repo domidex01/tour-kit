@@ -592,11 +592,7 @@ function mapDriverPopoverSide(
   const literal = readStringLiteral(value)
   if (!literal) {
     todoSink.push(
-      emitTodo(
-        'driver.js popover.side is dynamic — set placement manually',
-        'placement',
-        SOURCE
-      )
+      emitTodo('driver.js popover.side is dynamic — set placement manually', 'placement', SOURCE)
     )
     return null
   }

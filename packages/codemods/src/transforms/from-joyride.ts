@@ -377,4 +377,3 @@ function rewriteTourComponentUsage(j: JSCodeshift, path: ASTPath): void {
   }
   ;(path as ASTPath<unknown>).replace(nullLiteral as unknown as never)
 }
-

@@ -294,11 +294,7 @@ const SHEPHERD_CONTROL_METHODS: ReadonlyMap<string, { anchor: string; msg: strin
   ],
 ])
 
-function rewriteControlCalls(
-  j: JSCodeshift,
-  root: Collection,
-  tourVarNames: Set<string>
-): void {
+function rewriteControlCalls(j: JSCodeshift, root: Collection, tourVarNames: Set<string>): void {
   const stmtPaths = root
     .find(j.ExpressionStatement, {
       expression: {
@@ -524,11 +520,7 @@ function mapShepherdAttachToOn(
 ): ASTNode | null {
   if (value && !readStringLiteral(value)) {
     todoSink.push(
-      emitTodo(
-        'Shepherd Step.attachTo.on is dynamic — set placement manually',
-        'placement',
-        SOURCE
-      )
+      emitTodo('Shepherd Step.attachTo.on is dynamic — set placement manually', 'placement', SOURCE)
     )
     return null
   }
