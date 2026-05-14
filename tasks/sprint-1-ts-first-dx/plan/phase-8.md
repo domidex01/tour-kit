@@ -1,204 +1,387 @@
-# Phase 8 — License Soft Gate + Try-Before-Buy Watermark
+# Phase 8 - License Soft Gate + Try-Before-Buy Watermark
 
-**Duration:** ~7–9 hours (2026-05-13 → 2026-05-15)
-**Depends on:** Nothing in Sprint 1 — purely additive to the licensing surface
-**Blocks:** Nothing — but unblocks conversion experiments measured by the GA `pricing_buy_clicked` and (new) `unlicensed_badge_clicked` events
-**Risk Level:** MEDIUM — touches 8 Pro providers + 8 test files; behavior change visible to every existing Pro install on next release
-**Stack:** typescript
+**Duration:** ~8-11 hours (2026-05-13 to 2026-05-15)
+**Depends on:** Nothing in Sprint 1. This is additive to the commercial licensing surface.
+**Blocks:** Nothing in Phases 0-7a. Unblocks conversion experiments measured by `pricing_buy_clicked` and the new `unlicensed_badge_clicked` event.
+**Risk Level:** MEDIUM. Touches the shared license package, 8 Pro package gate call sites, package tests, docs copy, and public licensing guidance.
+**Stack:** TypeScript, React, Vitest, Testing Library, jsdom.
 
-> **Note on sprint fit:** This phase is thematically distinct from the rest of Sprint 1 (DX, codemods, AdoptionFunnel). It is added here because it is a high-leverage commercial change blocking real conversion data. Treat as an inline insertion; the Sprint 1 ship date for Phases 0–7a is unaffected.
+> **Sprint fit:** This phase is thematically separate from the TS-first DX sprint. Keep it as an inline commercial insertion and do not let it pull scope from Phases 0-7a.
+
+---
+
+## Repo Analysis Snapshot
+
+The current repo state on 2026-05-14 changes the plan in a few important ways:
+
+| Finding | Impact |
+| --- | --- |
+| `packages/license/src/components/license-gate.tsx` currently calls `useLicense()`, which throws outside `<LicenseProvider>`. | The no-provider evaluation case will crash unless `LicenseGate` reads `LicenseContext` directly. This is the phase blocker. |
+| `LicenseGateProps.require` is currently required in `packages/license/src/types/index.ts`. | Internal swaps must use `<LicenseGate require="pro">` unless this phase also makes the prop optional. Default plan: keep the public type unchanged and pass `require="pro"`. |
+| `LicenseProvider` already wraps children in `LicenseRenderContext.Provider` at `packages/license/src/context/license-context.tsx`. | Remove the redundant provider inside `LicenseGate`; do not create a second source of render-key truth. |
+| `packages/license/src/components/license-watermark.tsx` is still a full-screen rotated `UNLICENSED` overlay. | Replace the component, and replace the existing watermark tests rather than adding a second suite with conflicting expectations. |
+| `packages/license/src/__tests__/setup.ts` assumes `document.body` exists after every test. | The planned node-environment import smoke will fail unless setup guards `typeof document !== 'undefined'`. |
+| Pro package tests mock only `ProGate` in more files than the 8 `license-integration.test.tsx` files. | Update incidental mocks too, especially `packages/surveys/src/__tests__/*` and `packages/checklists/src/__tests__/url-visit-completion.test.tsx`. |
+| `tourkit.dev` still appears in `LicenseWarning`, `ProGate`, `ProGate` tests, and every Pro `LICENSE.md`. | Align the commercial URL in the same changeset, but keep broad blog/codemod fixture URL migration out of this phase. |
+| `LicenseRenderContext` is exported but no Pro package consumes it (verified by repo grep). | Removing the inner `<LicenseRenderContext.Provider>` from `LicenseGate` is safe. The outer wrap in `LicenseProvider` (line 126) continues to expose `state.renderKey` for any future anti-bypass consumer. No Pro package will silently render empty when `renderKey` is `undefined`. |
+| `LicenseWarning` console output is gated on `process.env.NODE_ENV !== 'production'`, not on hostname. | "Dev-only warning" throughout this phase means `NODE_ENV`, not `isDevEnvironment()`. Production previews are silent by design. |
+| `apps/docs/content/docs/api/license.mdx` documents `<LicenseGate>` and `<ProGate>` semantics. | Update prose to reflect soft-gate-by-default for internal Pro use; keep `<ProGate>` documented as the hard-placeholder export. |
 
 ---
 
 ## Objective
 
-Replace the current hard `<ProGate>` block on all Pro packages with the existing soft `<LicenseGate>` so Pro packages render fully functional UI in any environment (localhost, preview, staging, production) without a license — overlaid with a small, non-removable Tour Kit watermark linking to checkout. Mirrors the Clerk dev-keys / Tailwind UI evaluation model.
+Replace the hard `<ProGate>` usage inside Tour Kit's Pro packages with the existing soft `<LicenseGate>` contract so Pro packages render fully functional UI on preview, staging, and production domains without a valid license. Unlicensed non-localhost renders show a single small Tour Kit badge linking to checkout.
 
-The goal is to remove the single biggest top-of-funnel friction point in the current commercial flow: today a developer who installs `@tour-kit/announcements`, demos locally, and pushes to a preview URL sees a "Pro license required" placeholder and abandons before reaching the pricing page.
-
-## What Success Looks Like
-
-1. **Behavior matrix verified manually in browser:**
-
-   | Host | License key | Rendered |
-   |---|---|---|
-   | `localhost` / `127.0.0.1` / `*.local` | any | Children only, no badge |
-   | Any other host | valid Polar key | Children only, no badge |
-   | Any other host | invalid / missing | Children + corner badge + dev-only console warning |
-
-2. `pnpm --filter @tour-kit/license test` exits 0 — `LicenseWatermark` has a new test covering: portal mount, singleton dedup, link href + UTM, `pointer-events` boundary.
-
-3. `pnpm --filter @tour-kit/<pkg> test` exits 0 for all 8 Pro packages — license-integration tests assert "children render AND watermark renders" (was "placeholder renders") when unlicensed.
-
-4. `pnpm typecheck` exits 0 across the workspace.
-
-5. Visual QA on the docs `/demo` preview deploy (with Pro components on a sandbox route) shows: components fully functional, badge bottom-right, no layout shift.
-
-6. The pricing-page FAQ (`apps/docs/components/landing/pricing.tsx`) for *"What happens if I don't have a license?"* and *"Can I try Pro features before buying?"* now matches code behavior.
-
-7. `packages/license/CLAUDE.md` reflects that `<LicenseGate>` is the canonical internal gate; `<ProGate>` is exported for downstream consumers who want a hard gate but is no longer used by Pro packages.
-
-8. A new GA event `unlicensed_badge_clicked` fires when a user clicks the badge link, with `placement: 'watermark'` and the originating hostname.
-
-## What Failure Looks Like (and what to do)
-
-- **Watermark renders multiple times when several Pro providers mount.** Root cause = singleton dedup broke. Fix the module-level mounted flag; do NOT ship multiple badges. Add a regression test.
-- **Watermark renders during SSR and throws on `document` access.** Guard portal with `useEffect` so it only mounts client-side. If SSR-rendered HTML contains the badge node, the rest of the app may shift on hydration — verify with a dev-server reload.
-- **`<LicenseRenderContext>` value goes undefined on the unlicensed branch and breaks downstream consumers of `renderKey`.** This is the main contract change vs `<ProGate>`. Audit any in-tree consumer of `LicenseRenderContext`; if found, either provide a sentinel value `"unlicensed"` or treat undefined as "rendered without enforcement".
-- **A test mocks `ProGate` and asserts placeholder render.** Migrate the test's expectation. Do NOT keep a mocked `ProGate` for paths that no longer use it.
-- **Watermark covers an interactive element via transform-stacking or z-index conflict.** Use a portal to `document.body` and `pointer-events: none` on the wrapper; only the link element gets `pointer-events: auto`.
-- **Browser extensions block the badge as an ad.** Acceptable failure mode — extension-blocked users are not commercial decision-makers; do not ship counter-detection.
+This removes the current top-of-funnel dead end: a developer can install a Pro package, push a preview deploy, and show the real UI to teammates before buying.
 
 ---
 
-## Architecture / Key Design Decisions
+## Success Criteria
 
-```
-packages/license/src/components/
-├── license-watermark.tsx     ← redesigned: portal + singleton + corner pill
-├── license-warning.tsx       ← unchanged (dev-only console.warn)
-└── license-gate.tsx          ← unchanged: already renders children + watermark + warning
+1. **Behavior matrix is verified in browser and unit tests:**
 
-packages/{adoption,announcements,checklists,ai,surveys,scheduling,analytics,media}/
-└── …/<provider>.tsx          ← swap <ProGate package="…"> → <LicenseGate>
-```
+   | Host | `<LicenseProvider>` mounted? | License key | Rendered |
+   | --- | --- | --- | --- |
+   | `localhost` / `127.0.0.1` / `*.local` | any | any | Children only, no badge |
+   | Any other host | yes | valid Polar key | Children only, no badge |
+   | Any other host | yes | invalid / expired / revoked | Children + one badge + dev-only warning |
+   | Any other host | yes | error + fresh cache | Children only, no badge |
+   | Any other host | no | n/a | Children + one badge + dev-only warning; no throw |
 
-### Watermark redesign
+2. `pnpm --filter @tour-kit/license test` passes after replacing the existing watermark assertions and extending `license-gate.test.tsx`.
 
-| Decision | Choice | Reason |
-|---|---|---|
-| Position | Fixed bottom-right, 16px from edges | Bottom-right is the Clerk/Vercel convention; least likely to overlap user UI |
-| Render target | `createPortal(badge, document.body)` after `useEffect` | Escape transformed/clipping ancestors; SSR-safe |
-| Singleton dedup | Module-level `mounted` boolean + render counter ref | Multiple Pro providers each render a `<LicenseGate>` → each tries to render a watermark; only first should win |
-| Pointer events | `pointer-events: none` on portal wrapper, `auto` on link | Badge cannot interfere with underlying clicks |
-| z-index | `2147483647` (max int) | Match current value; ensures visibility over any modal |
-| Visual | Small pill, dark surface, subtle border, system font, ~28px tall | Brand-neutral, won't clash with user theme |
-| Copy | `⚡ Tour Kit · Unlicensed` + `Buy →` chip | Names the product, signals state, drives action |
-| Link target | `https://usertourkit.com/pricing?utm_source=unlicensed_badge&utm_medium=in_app&utm_campaign=watermark` | GA attribution for badge-driven sales |
-| GA event | `sendGAEvent('event', 'unlicensed_badge_clicked', { placement: 'watermark', hostname })` via guarded `window.gtag` lookup | Avoid `@next/third-parties` dep in the library package |
-| Accessibility | `role="region"`, `aria-label="Tour Kit license required — buy a license"`, link with explicit text | Screen readers describe it as a banner, not a control |
-| Removal hostility | Sets `data-tourkit-watermark="true"` on the badge node; React effect re-mounts if removed via DOM tampering | Casual `document.querySelector('[data-tourkit-watermark]').remove()` is deterred but not impossible — that's fine |
+3. All 8 Pro package tests pass after the gate swap:
+   - `@tour-kit/adoption`
+   - `@tour-kit/announcements`
+   - `@tour-kit/checklists`
+   - `@tour-kit/ai`
+   - `@tour-kit/surveys`
+   - `@tour-kit/scheduling`
+   - `@tour-kit/analytics`
+   - `@tour-kit/media`
 
-### Data Model Strategy
+4. `pnpm typecheck` passes across the workspace.
 
-No new types. Reuse existing `LicenseState` and `LicenseRenderContext`. The unlicensed branch of `<LicenseGate>` will now also render the `LicenseRenderContext.Provider` with `value={undefined}` (matches current behavior; no consumer should rely on a defined render key when status is invalid).
+5. A non-localhost preview route with all 8 Pro surfaces mounted shows exactly one badge, no layout shift, no hydration warning, and no blocked app clicks outside the badge link.
 
-### Singleton dedup mechanics
+6. Pricing FAQ and license package docs match runtime behavior.
 
-```ts
-// At module scope inside license-watermark.tsx
-let watermarkMountedCount = 0
-let portalRoot: HTMLDivElement | null = null
+7. `packages/license/CLAUDE.md` and `packages/license/README.md` describe the new split:
+   - `<LicenseGate>` is the canonical internal soft gate.
+   - `<ProGate>` remains exported for downstream hard-gate use, but Pro packages no longer use it internally.
 
-export function LicenseWatermark() {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    watermarkMountedCount += 1
-    if (watermarkMountedCount === 1) {
-      portalRoot = document.createElement('div')
-      portalRoot.setAttribute('data-tourkit-watermark', 'true')
-      document.body.appendChild(portalRoot)
-      setMounted(true)
-    }
-    return () => {
-      watermarkMountedCount -= 1
-      if (watermarkMountedCount === 0 && portalRoot) {
-        portalRoot.remove()
-        portalRoot = null
-      }
-    }
-  }, [])
-  if (!mounted || !portalRoot) return null
-  return createPortal(<Badge />, portalRoot)
+8. Badge clicks emit `unlicensed_badge_clicked` with `placement: 'watermark'` and `hostname`, using `window.gtag` when present and `window.dataLayer.push` as the GTM fallback.
+
+---
+
+## Non-Goals
+
+- Do not refactor `ProGate` to delegate to `LicenseGate`.
+- Do not change Polar validation, cache format, or activation limits.
+- Do not add anti-tamper MutationObserver logic. A `data-tourkit-watermark` attribute is enough for diagnostics and tests.
+- Do not migrate every historical `tourkit.dev` mention in blog content or codemod fixtures.
+- Do not add Playwright for the badge. Unit tests plus one manual preview QA pass are enough.
+- Do not change pricing.
+
+---
+
+## Architecture
+
+### `LicenseGate`
+
+Rewrite `LicenseGate` to read `LicenseContext` directly. Keep `useLicense()` throwing for consumers that deliberately assert a provider is present.
+
+Default implementation contract:
+
+```tsx
+import { useContext } from 'react'
+import { LicenseContext } from '../context/license-context'
+import { isDevEnvironment } from '../lib/domain'
+import type { LicenseGateProps } from '../types'
+import { LicenseWarning } from './license-warning'
+import { LicenseWatermark } from './license-watermark'
+
+export function LicenseGate({
+  require: _require,
+  children,
+  fallback,
+  loading,
+}: LicenseGateProps) {
+  const context = useContext(LicenseContext)
+
+  // No-provider branch. Provider's internal dev short-circuit cannot help here,
+  // so we must check the host directly to keep localhost quiet.
+  if (context === null) {
+    if (isDevEnvironment()) return <>{children}</>
+    return (
+      <>
+        {children}
+        <LicenseWatermark />
+        <LicenseWarning />
+      </>
+    )
+  }
+
+  // Provider mounted: dev hosts already resolve to isGated: false inside
+  // LicenseProvider.useMemo, so we do not re-check isDevEnvironment() here.
+  if (context.isLoading) return <>{loading ?? null}</>
+  if (!context.isGated) return <>{children}</>
+  if (fallback) return <>{fallback}</>
+
+  return (
+    <>
+      {children}
+      <LicenseWatermark />
+      <LicenseWarning />
+    </>
+  )
 }
 ```
 
-This means: 5 Pro providers each render `<LicenseGate>` → each renders `<LicenseWatermark>` → only the first one's effect creates the DOM node; the rest no-op via the ref-counted counter. On unmount of the last gate, the node is removed.
+Notes:
+
+- `require` stays in the prop type for API compatibility, even though only `pro` exists today.
+- Missing provider intentionally ignores `fallback`; Pro package evaluation installs should never hard-block just because the app has not wired `<LicenseProvider>` yet.
+- Licensed render-key context comes from `<LicenseProvider>` (line 126 of `license-context.tsx`), not `LicenseGate`. No Pro package currently consumes `LicenseRenderContext`, so removing the inner wrap has zero runtime impact today.
+- On no-provider paths, consumers of `LicenseRenderContext` receive `undefined` (default value), which matches the current gated branch behavior.
+- `LicenseWarning` is the same component in both unlicensed branches; it logs once per mount when `NODE_ENV !== 'production'`. With 8 Pro providers gated, 8 mounts ⇒ 8 console warns. **Decision for this phase: accept N warnings** because the message is dev-only and the noise actually helps evaluators wire up `<LicenseProvider>`. Add a once-per-page guard only if the dev-console feedback becomes a complaint.
+
+### `LicenseWatermark`
+
+Replace the full-screen overlay with a client-only portal badge:
+
+| Decision | Choice |
+| --- | --- |
+| Position | Fixed bottom-right, 16px inset |
+| Render target | `document.body` portal created in `useEffect`; import is safe without `window` or `document` |
+| Dedup | Module-level singleton store with active instance ownership and ownership transfer on unmount |
+| Pointer boundary | Outer wrapper `pointer-events: none`; link `pointer-events: auto` |
+| z-index | `2147483647` |
+| Copy | `Tour Kit - Unlicensed` plus `Buy license` |
+| URL | `https://usertourkit.com/pricing?utm_source=unlicensed_badge&utm_medium=in_app&utm_campaign=watermark` |
+| Analytics | `gtag('event', 'unlicensed_badge_clicked', payload)` then `dataLayer.push({ event: ..., ...payload })` fallback |
+| Accessibility | Small region with `aria-label="Tour Kit license required"` and an explicit link label |
+| Styling | Inline styles only; no Tailwind, CVA, or docs app dependency |
+
+Do not use a simple `mounted` boolean plus ref count. That design loses the badge when the first owner unmounts while later `<LicenseWatermark>` instances remain mounted. Use ownership transfer instead:
+
+```ts
+type WatermarkInstance = {
+  id: symbol
+  setOwner: (isOwner: boolean) => void
+}
+
+const instances: WatermarkInstance[] = []
+let ownerId: symbol | null = null
+let portalRoot: HTMLDivElement | null = null
+
+function electOwner() {
+  ownerId = instances[0]?.id ?? null
+  for (const instance of instances) {
+    instance.setOwner(instance.id === ownerId)
+  }
+}
+```
+
+The mounted owner renders the single portal. If the owner unmounts and other instances remain, the next active instance becomes owner and keeps the badge visible.
+
+**StrictMode safety.** React StrictMode double-invokes effects in dev. Use id-based deduplication so a mount-cleanup-remount cycle does not leak a stale instance entry:
+
+```ts
+useEffect(() => {
+  const entry: WatermarkInstance = { id: Symbol('watermark'), setOwner }
+  instances.push(entry)
+  electOwner()
+  return () => {
+    const i = instances.findIndex((x) => x.id === entry.id)
+    if (i !== -1) instances.splice(i, 1)
+    electOwner()
+  }
+}, [])
+```
+
+Without `findIndex` on the stable `id`, StrictMode's double-cleanup can remove the wrong instance and leave a zombie owner.
+
+### URL Alignment
+
+Use `usertourkit.com` for Phase 8 commercial links:
+
+- `packages/license/src/components/license-watermark.tsx`
+- `packages/license/src/components/license-warning.tsx`
+- `packages/license/src/components/pro-gate.tsx`
+- `packages/license/src/__tests__/pro-gate.test.tsx`
+- `packages/{adoption,announcements,checklists,ai,surveys,scheduling,analytics,media,license}/LICENSE.md`
+- `apps/docs/components/landing/pricing.tsx`
+- `apps/docs/content/docs/api/license.mdx` (LicenseGate / ProGate / LicenseWatermark sections — replace "anti-bypass mechanism consumed by `<LicenseGate>`" prose and the LicenseWatermark "use as a low-friction notification" hint to match soft-gate-by-default semantics)
+
+Keep `packages/codemods` fixtures and older blog metadata out of this PR unless a separate URL cleanup phase is approved.
 
 ---
 
 ## Task Breakdown
 
-### 8.1 — Redesign `<LicenseWatermark>` (`packages/license/src/components/license-watermark.tsx`) (~2h)
-- Replace viewport-spanning rotated text with corner pill component per Architecture spec
-- Portal to `document.body` after `useEffect`; SSR-safe
-- Module-level ref-counted singleton dedup
-- `data-tourkit-watermark` attribute for diagnostic / extension-friendliness
-- Inline GA event dispatch on link click via `window.gtag` guarded lookup
-- Inline styles only (no Tailwind / cn dependency in license package)
+### 8.1 - Rewrite `LicenseGate` and `LicenseWatermark` (~3h)
 
-### 8.2 — Flip 8 Pro providers from `<ProGate>` to `<LicenseGate>` (~1h)
-One-line swap each:
-- `packages/adoption/src/context/adoption-provider.tsx:202` — replace `<ProGate package="@tour-kit/adoption">` with `<LicenseGate>`; drop the `package` prop
-- `packages/announcements/src/context/announcements-provider.tsx:663` — same
-- `packages/checklists/src/context/checklist-provider.tsx:586` — same
-- `packages/ai/src/context/ai-chat-provider.tsx:200` — same
-- `packages/surveys/src/context/surveys-provider.tsx:664` — same
-- `packages/scheduling/src/components/schedule-gate.tsx:9` — same
-- `packages/analytics/src/core/context.tsx:45` — same
-- `packages/media/src/components/embeds/index.ts:15` — rename HOC `withProGate` → `withLicenseGate`, swap component reference
+Files:
 
-Update the corresponding import in each file from `ProGate` to `LicenseGate`.
+- `packages/license/src/components/license-gate.tsx`
+- `packages/license/src/components/license-watermark.tsx`
+- `packages/license/src/__tests__/setup.ts`
+- Optional local type helper in the watermark file for `window.gtag` and `window.dataLayer`
 
-### 8.3 — Update 8 license-integration tests (~2h)
-For each of:
-- `packages/adoption/src/__tests__/license-integration.test.tsx`
-- `packages/announcements/src/__tests__/license-integration.test.tsx`
-- `packages/checklists/src/__tests__/license-integration.test.tsx`
-- `packages/ai/src/__tests__/license-integration.test.tsx`
-- `packages/surveys/src/__tests__/license-integration.test.tsx`
-- `packages/scheduling/src/__tests__/license-integration.test.tsx`
-- `packages/analytics/src/__tests__/license-integration.test.tsx`
-- `packages/media/src/__tests__/license-integration.test.tsx`
+Work:
 
-Migrate mock target from `ProGate` to `LicenseGate`. Flip "placeholder renders when unlicensed" assertion to "children render AND watermark renders when unlicensed".
+- Replace `useLicense()` with `useContext(LicenseContext)`.
+- Add `isDevEnvironment()` branch before the no-provider branch.
+- Remove the inner `LicenseRenderContext.Provider`.
+- Replace the existing overlay watermark with the portal badge.
+- Implement singleton ownership transfer and cleanup.
+- Add guarded GA/GTM dispatch.
+- Guard test setup so node-environment tests do not touch `document`.
 
-### 8.4 — New watermark unit test (`packages/license/src/__tests__/license-watermark.test.tsx`) (~1h)
-- Portal mount: renders into `document.body`, not the test wrapper
-- Singleton dedup: mounting twice yields one node in the DOM
-- Unmount cleanup: last unmount removes the portal node
-- Link target: includes UTM params
-- GA event dispatch: `window.gtag` is called with correct args when present, no-op when absent
-- `pointer-events` styles: wrapper `none`, link `auto`
+### 8.2 - Swap Pro packages from `ProGate` to `LicenseGate` (~1h)
 
-### 8.5 — Pricing page FAQ + CLAUDE.md docs (~30min)
-- `apps/docs/components/landing/pricing.tsx:447-453` — replace the existing "What happens if I don't have a license?" answer with one that matches the new reality: "Extended packages render fully with a small Tour Kit badge in the corner linking to /pricing. Purchase a license to remove it."
-- Same file, "Can I try Pro features before buying?" answer — expand to mention preview/staging environments now work
-- `packages/license/CLAUDE.md` — update the "Domain Concepts" section: clarify that `<LicenseGate>` is the canonical internal gate; document `<ProGate>` as exported-for-downstream but no longer used by Pro packages
+Use `<LicenseGate require="pro">`, not bare `<LicenseGate>`, unless `LicenseGateProps.require` is intentionally made optional in the same patch.
 
-### 8.6 — Visual QA on a real preview deploy (~1h)
-- Build and deploy `apps/docs` to a non-localhost host (e.g., a Dokploy staging slot)
-- Confirm: corner badge appears, link navigates with UTM, GA `unlicensed_badge_clicked` fires, no layout shift, no SSR hydration warning
-- Test with all 8 Pro providers mounted simultaneously: only one badge renders
+Current call sites:
 
-### 8.7 — Changeset (~15min)
-`pnpm changeset` — minor bump for all 9 Pro packages (incl. `@tour-kit/license`). Title: *"License gate is now soft by default — Pro packages render with a watermark instead of a placeholder when unlicensed"*. Reference Phase 8.
+- `packages/adoption/src/context/adoption-provider.tsx` - provider wrapper at current line ~202
+- `packages/announcements/src/context/announcements-provider.tsx` - provider wrapper at current line ~663
+- `packages/checklists/src/context/checklist-provider.tsx` - provider wrapper at current line ~586
+- `packages/ai/src/context/ai-chat-provider.tsx` - provider wrapper at current line ~200
+- `packages/surveys/src/context/surveys-provider.tsx` - provider wrapper at current line ~664
+- `packages/scheduling/src/components/schedule-gate.tsx` - wrapper at current line ~9
+- `packages/analytics/src/core/context.tsx` - provider wrapper at current line ~45
+- `packages/media/src/components/embeds/index.ts` - rename internal HOC `withProGate` to `withLicenseGate` and swap to `LicenseGate require="pro"`
 
----
+Update imports from `ProGate` to `LicenseGate`.
 
-## Test Strategy
+### 8.3 - Migrate Pro package mocks and tests (~2.5h)
 
-See [`phase-8-tests.md`](./phase-8-tests.md) for the full test plan and mock strategy.
+Update the 8 `license-integration.test.tsx` files so the unlicensed case asserts children plus badge, not a hard placeholder.
 
----
+Also update incidental `@tour-kit/license` mocks that currently expose only `ProGate`:
 
-## Out of Scope
+- `packages/surveys/src/__tests__/survey-popover-focus.test.tsx`
+- `packages/surveys/src/__tests__/question-rating.test.tsx`
+- `packages/surveys/src/__tests__/question-text.test.tsx`
+- `packages/surveys/src/__tests__/display-components.test.tsx`
+- `packages/surveys/src/__tests__/storage.test.tsx`
+- `packages/surveys/src/__tests__/survey-modal.test.tsx`
+- `packages/surveys/src/__tests__/queue-drain.test.tsx`
+- `packages/surveys/src/__tests__/question-boolean.test.tsx`
+- `packages/surveys/src/__tests__/headless-questions.test.tsx`
+- `packages/surveys/src/__tests__/show-guards.test.tsx`
+- `packages/surveys/src/__tests__/question-select.test.tsx`
+- `packages/checklists/src/__tests__/url-visit-completion.test.tsx`
 
-- **Hardening against badge removal** beyond the `data-tourkit-watermark` re-mount effect. Anyone determined to bypass can patch the package; this is a commercial gate, not DRM.
-- **Polar webhook → GA Measurement Protocol** for full attribution (page → click → purchase). Worth doing next, separate phase.
-- **Server-side rendering of the watermark.** Badge is intentionally client-only.
-- **A separate "production-only" gate.** Spec stays: localhost bypass, everywhere else show badge. No three-tier (dev/staging/prod) keys yet.
-- **Refactoring `<ProGate>` to delegate to `<LicenseGate>`.** Both stay exported; downstream consumers can keep using `<ProGate>` for a hard gate.
-- **Pricing changes** ($99 one-time stays the same).
+For simple component tests, mock `LicenseGate` as a passthrough. Keep `ProGate` in the mock only when a test still imports code that uses the hard gate directly.
+
+### 8.4 - Replace and extend license package tests (~1.5-2h)
+
+Replace `packages/license/src/__tests__/license-watermark.test.tsx` expectations that look for full-screen `UNLICENSED` text.
+
+Extend `packages/license/src/__tests__/license-gate.test.tsx`:
+
+- No provider on non-dev host renders children plus badge and does not throw.
+- Dev host with no provider renders children only.
+- SSR `renderToString(<LicenseGate require="pro">...)` does not touch `document`.
+- Valid pro still renders children without badge.
+- Invalid/free/expired still render children plus badge when no fallback is provided.
+- Fallback still hard-blocks only when a provider is mounted and the state is gated.
+- Licensed path still exposes `LicenseRenderContext` from `LicenseProvider`.
+
+Add `packages/license/src/__tests__/license-watermark.import.test.ts` with `@vitest-environment node` after the setup guard is in place.
+
+### 8.5 - Docs and commercial copy (~45m)
+
+Files:
+
+- `apps/docs/components/landing/pricing.tsx`
+- `apps/docs/content/docs/api/license.mdx`
+- `packages/license/CLAUDE.md`
+- `packages/license/README.md`
+- Pro package `LICENSE.md` files listed in URL alignment
+
+Copy changes:
+
+- FAQ: no license means Pro packages render fully with a small Tour Kit badge on non-localhost domains.
+- FAQ: preview and staging evaluation work before purchase.
+- License docs: `LicenseGate` is soft by default for internal Pro package use.
+- License docs: `ProGate` remains available for consumers who want a hard placeholder.
+
+### 8.6 - Verification (~1h)
+
+Run:
+
+```sh
+pnpm --filter @tour-kit/license test
+pnpm --filter @tour-kit/adoption test
+pnpm --filter @tour-kit/announcements test
+pnpm --filter @tour-kit/checklists test
+pnpm --filter @tour-kit/ai test
+pnpm --filter @tour-kit/surveys test
+pnpm --filter @tour-kit/scheduling test
+pnpm --filter @tour-kit/analytics test
+pnpm --filter @tour-kit/media test
+pnpm typecheck
+```
+
+Manual preview QA:
+
+- Deploy or run a non-localhost preview with all 8 Pro surfaces mounted.
+- Confirm exactly one `[data-tourkit-watermark]`.
+- Confirm the badge link includes UTM params and opens pricing.
+- Confirm `gtag` or `dataLayer` receives `unlicensed_badge_clicked`. If the preview has no GA install, stub before clicking:
+  ```js
+  // In DevTools console, before clicking the badge:
+  window.gtag = (...args) => console.log('gtag', args)
+  window.dataLayer = []
+  ```
+  Then click and verify the console log and/or `window.dataLayer[0]`.
+- Confirm no hydration warning and no app click blocking outside the badge link.
+- Toggle React StrictMode on (if not already) and confirm only one badge node still in the DOM.
+
+### 8.7 - Changeset (~15m)
+
+Create a changeset for:
+
+- `@tour-kit/license`
+- `@tour-kit/adoption`
+- `@tour-kit/announcements`
+- `@tour-kit/checklists`
+- `@tour-kit/ai`
+- `@tour-kit/surveys`
+- `@tour-kit/scheduling`
+- `@tour-kit/analytics`
+- `@tour-kit/media`
+
+Use minor bumps. Suggested title:
+
+`License gate is now soft by default for Pro packages`
 
 ---
 
 ## Risk Register
 
 | Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Pro users on existing release ship with watermark by accident after upgrade | Medium | Low — they already have a key | Changeset clearly labelled as behavior change; minor bump signals semantic shift |
-| Singleton dedup race when multiple providers mount in same tick | Low | Medium — duplicate badges | Use ref counter, test concurrent mounts via React 18 Strict Mode double-effect |
-| Existing customers misread badge as a downgrade | Low | Medium | Badge only appears when license check fails; valid keys see no change |
-| GA event payload PII concern | Low | Low | Hostname only, no path or query — verify in test |
-| FAQ change shipped before code change → temporary mismatch in opposite direction | Medium | Low | Ship docs in same PR as code, not separately |
+| --- | --- | --- | --- |
+| Missing provider still crashes because `LicenseGate` accidentally calls `useLicense()` | High if unfixed | High | US-10 test renders `LicenseGate` without provider and asserts no throw. |
+| Provider swaps fail typecheck because `require` is omitted | Medium | Medium | Use `<LicenseGate require="pro">` unless the prop is deliberately made optional. |
+| Badge disappears when the first mounted gate unmounts | Medium | Medium | Use singleton owner transfer, not first-mount-only rendering. Add owner handoff test. |
+| Node import smoke fails through test setup, not component code | Medium | Low | Guard `document` in `packages/license/src/__tests__/setup.ts`. |
+| Incidental package tests fail because mocks still expose only `ProGate` | High | Low | Search all `vi.mock('@tour-kit/license'...)` and update passthrough mocks. |
+| GTM-only sites miss analytics | Medium | Low | `gtag` first, `dataLayer.push` second, no-op third. |
+| URL alignment expands into a broad SEO cleanup | Medium | Medium | Limit this phase to commercial runtime/docs URLs. |
+| FAQ ships before runtime behavior | Medium | Low | Keep docs and code in the same PR. |
+| Watermark singleton state persists across tests in the same file | High | Medium | Always `vi.resetModules()` + dynamic `await import('../components/license-watermark')` in `beforeEach` for watermark tests. Top-level `import` only when each test mounts and fully unmounts. |
+| React StrictMode dev double-mount leaks a zombie owner | Medium | Medium | id-based instance entries with `findIndex` cleanup (see Architecture). Add a StrictMode test case. |
+| Console warning fires N times when N Pro providers gate unlicensed | Medium | Low | Accepted for this phase — dev-only feedback drives provider adoption. Revisit if engineers complain about console spam. |
+| `apps/docs/content/docs/api/license.mdx` keeps stale anti-bypass / hard-placeholder wording | Medium | Low | Update the LicenseGate, ProGate, and LicenseWatermark sections in the same PR. |
+
+---
+
+## Full Test Plan
+
+See [`phase-8-tests.md`](./phase-8-tests.md) for user stories, mock strategy, and concrete test cases.

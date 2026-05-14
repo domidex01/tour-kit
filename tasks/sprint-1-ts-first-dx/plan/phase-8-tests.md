@@ -1,226 +1,349 @@
-# Phase 8 — License Soft Gate + Try-Before-Buy Watermark
+# Phase 8 Test Plan - License Soft Gate + Try-Before-Buy Watermark
 
-**Scope:** `<LicenseWatermark>` redesign (portal, singleton dedup, corner pill, GA event); 8 Pro provider gate swaps; 8 license-integration test updates; new watermark unit test.
-**Key Pattern:** Unit + component tests via Vitest + `@testing-library/react` + jsdom. SSR safety verified by import-time smoke (file should not crash at require-time). Singleton dedup verified by mounting the watermark twice and asserting one DOM node.
-**Dependencies:** `vitest@catalog:`, `@testing-library/react@catalog:`, `@testing-library/jest-dom@catalog:`, `jsdom@catalog:`.
+**Scope:** `LicenseGate` soft no-provider behavior, `LicenseWatermark` portal badge, singleton ownership, GA/GTM click tracking, 8 Pro package gate swaps, Pro package mock cleanup, docs-copy verification.
+
+**Primary stack:** Vitest, `@testing-library/react`, `@testing-library/jest-dom`, jsdom, one `@vitest-environment node` import smoke.
+
+**Important repo correction:** `packages/license/src/__tests__/license-watermark.test.tsx` already exists and asserts the old full-screen `UNLICENSED` overlay. Replace those assertions. Do not add a second test file with conflicting behavior.
+
+---
+
+## Test Inventory
+
+| Area | Current state | Required Phase 8 change |
+| --- | --- | --- |
+| `license-watermark.test.tsx` | 4 tests assert visible `UNLICENSED`, fixed full-screen overlay, no class name, `userSelect`. | Replace with portal, singleton, link, GA/GTM, pointer boundary, cleanup, owner handoff tests. |
+| `license-gate.test.tsx` | Final test asserts `LicenseGate` throws outside `LicenseProvider`. | Replace that assertion with no-provider soft rendering; keep valid/invalid/loading/fallback coverage. |
+| `license-provider` / cache tests | Existing coverage validates provider state and cache behavior. | Do not rewrite unless a new gate test needs a cache mock. |
+| 8 Pro `license-integration.test.tsx` files | Mock `ProGate` and assert hard placeholder when unlicensed. | Mock `LicenseGate` and assert children plus badge when unlicensed. |
+| Incidental package mocks | Several non-integration tests mock only `ProGate`. | Add `LicenseGate` passthrough to those mocks after provider imports change. |
+| Node import safety | No current watermark node-environment import test. | Add `license-watermark.import.test.ts`, but only after guarding shared setup against missing `document`. The test only asserts `import()` resolves — it does not mount or invoke the component. Its purpose is to prove there are no module-level references to `document`, `window`, or DOM-touching side effects at parse time. |
+| StrictMode dev double-mount | Not currently exercised. | Add a StrictMode case to `license-watermark.test.tsx` to prove id-based instance dedup holds under double-effect. |
+| No-provider console warning | Not currently exercised. | Two cases in `license-gate.test.tsx`: warns when `NODE_ENV !== 'production'`, silent when `NODE_ENV === 'production'`. |
 
 ---
 
 ## User Stories
 
 | # | User Story | Validation Check | Pass Condition |
-|---|------------|------------------|----------------|
-| US-1 | As a developer evaluating Pro, I want `@tour-kit/announcements` to render on a preview URL without a license so my team can see it before I pay | `<package>/__tests__/license-integration.test.tsx` `renders children when unlicensed` | Provider renders its visible UI; placeholder copy ("Pro license required") is absent |
-| US-2 | As a Pro buyer, I want my licensed app to show no watermark | `license-watermark.test.tsx` `does not render when license is valid` | No `[data-tourkit-watermark]` node in document |
-| US-3 | As a developer with no license in production, I want a single small badge linking to checkout — not 5 badges if I mount 5 Pro providers | `license-watermark.test.tsx` `singleton dedup` | Mounting 5 `<LicenseWatermark>` instances → exactly one `[data-tourkit-watermark]` in `document.body` |
-| US-4 | As a Pro buyer who scrolls or opens a modal, I want the badge to stay accessible without trapping clicks on app content | `license-watermark.test.tsx` `pointer events` | Wrapper has `pointer-events: none`; link has `pointer-events: auto` |
-| US-5 | As a marketing analyst, I want every badge click to fire a GA event with UTM attribution | `license-watermark.test.tsx` `dispatches GA event on click` | `window.gtag` called once with `'event', 'unlicensed_badge_clicked', { placement: 'watermark', hostname: …, … }`; link href contains all three `utm_*` params |
-| US-6 | As a dev running `pnpm dev`, I want a console warning so I know the badge is showing | existing `license-warning.test.tsx` unchanged | `console.warn` called once in development; silent in production |
-| US-7 | As a Next.js user, I don't want SSR to crash because the watermark touches `document` | `license-watermark.test.tsx` `safe to import without window` | `require('./license-watermark')` succeeds in node environment without `document` |
-| US-8 | As a CI engineer, I want all 8 Pro packages' license-integration suites to pass after the gate swap | `pnpm test` per Pro pkg | All `license-integration.test.tsx` exit 0; assertions updated from "placeholder" to "children + watermark" |
-| US-9 | As a Pro provider author, I want `<LicenseRenderContext>` to still provide the render key on the licensed path so downstream consumers work | new test `license-gate-context.test.tsx` | `LicenseRenderContext` value is the licensed `renderKey` on licensed path; `undefined` on unlicensed path |
+| --- | --- | --- | --- |
+| US-1 | As a developer evaluating Pro, I want a Pro package to render on a preview URL without a license. | Each Pro package `license-integration.test.tsx` unlicensed case. | Provider/component UI renders, badge mock renders, hard placeholder copy is absent. |
+| US-2 | As a licensed buyer, I want no badge. | `license-gate.test.tsx` valid pro case. | Children render; no `[data-tourkit-watermark]`. |
+| US-3 | As an unlicensed evaluator, I want only one badge even with many Pro providers. | `license-watermark.test.tsx` multiple instances case. | Multiple `<LicenseWatermark />` instances produce one DOM node. |
+| US-4 | As an app user, I do not want the badge wrapper to block app clicks. | `license-watermark.test.tsx` pointer boundary. | Wrapper has inline `pointerEvents: none`; link has `pointerEvents: auto`. |
+| US-5 | As marketing, I want badge clicks tracked in GA. | `license-watermark.test.tsx` `gtag` case. | `window.gtag('event', 'unlicensed_badge_clicked', payload)` is called once. |
+| US-6 | As a GTM-only site owner, I still want badge clicks tracked. | `license-watermark.test.tsx` `dataLayer` fallback case. | One payload is pushed to `window.dataLayer` when `gtag` is absent. |
+| US-7 | As a Next.js user, I do not want SSR or import-time crashes. | `license-watermark.import.test.ts` and `license-gate.test.tsx` SSR case. | Import without DOM succeeds; `renderToString` succeeds. |
+| US-8 | As a package maintainer, I want all Pro package tests to pass after the import swap. | Package-level `pnpm --filter ... test`. | All 8 Pro package test commands pass. |
+| US-9 | As a downstream consumer, I want render-key context to keep working when licensed. | Existing `LicenseRenderContext` test in `license-gate.test.tsx`. | Consumer reads the provider's render key on valid pro. |
+| US-10 | As a developer evaluating Pro, I can omit `<LicenseProvider>` and still see the UI. | `license-gate.test.tsx` no-provider case. | Children and badge render; no `"useLicense must be used within a <LicenseProvider>"` throw. |
+| US-11 | As a localhost developer, I do not want a badge. | `license-gate.test.tsx` dev-host no-provider case. | Children render; no badge. |
+| US-12 | As a React app with dynamic Pro surfaces, I want the badge to remain if the first provider unmounts. | `license-watermark.test.tsx` owner handoff case. | Removing the first instance while another remains leaves one badge in the DOM. |
+| US-13 | As a TypeScript maintainer, I want the swap to compile. | `pnpm typecheck`. | Internal usages pass `require="pro"` or the prop is deliberately made optional. |
+| US-14 | As a dev evaluating Pro without `<LicenseProvider>`, I want a one-line console hint. | `license-gate.test.tsx` no-provider warning case. | `console.warn` fires when `NODE_ENV !== 'production'`; stays silent when `NODE_ENV === 'production'`. |
+| US-15 | As a developer using React StrictMode, I want one badge, not two. | `license-watermark.test.tsx` StrictMode case. | Wrapping the tree in `<StrictMode>` leaves exactly one `[data-tourkit-watermark]`. |
 
 ---
 
-## Component Mock Strategy
+## License Package Tests
 
-| Component | Mock Strategy | What to Assert | User Story |
-|-----------|---------------|----------------|------------|
-| `<LicenseWatermark>` (portal singleton) | No mock — render real component into a `<LicenseProvider>` test wrapper with `isDevEnvironment` stub returning `false` | Renders into `document.body` via portal; node has `data-tourkit-watermark`; singleton flag dedups | US-3, US-4 |
-| `validateLicenseKey` (Polar fetch) | `vi.mock('../lib/polar-client', () => ({ validateLicenseKey: vi.fn() }))` — return `{ status: 'valid', tier: 'pro', renderKey: 'ok' }` for licensed tests, `{ status: 'invalid', tier: 'free' }` for unlicensed | Watermark renders only when status is not valid+pro | US-1, US-2 |
-| `isDevEnvironment()` | `vi.mock('../lib/domain', () => ({ ...actual, isDevEnvironment: () => false, getCurrentDomain: () => 'app.acme.com' }))` per-test | Watermark only renders on non-dev hosts | US-1 |
-| `window.gtag` | `vi.stubGlobal('gtag', vi.fn())` for the dispatch test; omit for the no-op test | When present, called with `('event', 'unlicensed_badge_clicked', payload)`; when absent, click does not throw | US-5 |
-| `createPortal` | No mock — testing-library + jsdom support portals natively | Rendered node found via `document.body.querySelector` not `screen` (because screen scoped to render container) | US-3 |
-| `<LicenseGate>` upstream of Pro providers | In each Pro `license-integration.test.tsx`: previously mocked `@tour-kit/license.ProGate`; now mock `LicenseGate` (or use real `<LicenseProvider>` + stubbed `validateLicenseKey`) | Children render; watermark element present in unlicensed test | US-8 |
-| `console.warn` | `vi.spyOn(console, 'warn').mockImplementation(() => {})` in `license-warning.test.tsx` (unchanged) | Called once in dev mode | US-6 |
-| Node-environment import smoke | `vi.config: { environment: 'node' }` in a single test file `license-watermark.import.test.ts` | `await import('../components/license-watermark')` succeeds without `document` | US-7 |
+### Shared Setup Guard
 
----
-
-## Test Tier Table
-
-| Tier | Dependencies | Speed | When to Run |
-|------|--------------|-------|-------------|
-| Unit — watermark | vitest, jsdom, RTL | <1s | Every push |
-| Unit — singleton dedup | vitest, jsdom, RTL | <1s | Every push |
-| Unit — SSR import smoke (node env) | vitest (node env) | <500ms | Every push |
-| Integration — 8 Pro packages license-integration | vitest, jsdom, RTL | <3s per pkg | Every push |
-| Visual QA — preview deploy | manual; Dokploy staging | ~10 min | Before release only |
-
-No E2E tier — Playwright is overkill for a single rendered badge. Visual QA on a real deploy is the substitute.
-
----
-
-## Fake / Mock Implementations
-
-**Minimal mocking.** The watermark, the gate, the provider context — all real. Only the Polar `fetch` boundary and the `isDevEnvironment` host check are stubbed.
-
-Shared helpers:
+Before adding any node-environment test, update `packages/license/src/__tests__/setup.ts`:
 
 ```ts
-// packages/license/src/__tests__/_helpers.ts
-import { vi } from 'vitest'
+afterEach(() => {
+  cleanup()
+  vi.clearAllMocks()
+  if (typeof document !== 'undefined') {
+    document.body.innerHTML = ''
+  }
+})
+```
 
-export function stubProdHost(host = 'app.acme.com') {
-  vi.mock('../lib/domain', async (orig) => ({
-    ...(await orig<typeof import('../lib/domain')>()),
-    isDevEnvironment: () => false,
-    getCurrentDomain: () => host,
-  }))
-}
+Without this guard, a node-environment import smoke can fail from test setup even if `LicenseWatermark` is SSR-safe.
 
-export function stubLicense(status: 'valid' | 'invalid' | 'error' = 'invalid') {
-  vi.mock('../lib/polar-client', () => ({
-    validateLicenseKey: vi.fn(async () => ({
-      status,
-      tier: status === 'valid' ? 'pro' : 'free',
-      activations: 0,
-      maxActivations: 5,
-      domain: null,
-      expiresAt: null,
-      validatedAt: Date.now(),
-      renderKey: status === 'valid' ? 'ok' : undefined,
-    })),
-  }))
-}
+### `license-watermark.test.tsx`
 
-export function findWatermark(): HTMLElement | null {
+Replace the current tests with these cases:
+
+| Test | Notes |
+| --- | --- |
+| Renders into `document.body` via portal | Query `document.body.querySelector('[data-tourkit-watermark]')`. |
+| Does not render before client effect | Optional if implementation has a `mounted` state. |
+| Singleton dedup with 5 instances | Render 5 instances in one tree; expect one watermark node. |
+| Same-tick double mount | Render 2 instances in one tree; expect one watermark node. |
+| Owner handoff | Render two controllable instances, remove the first, expect one badge remains. |
+| StrictMode owner stability | Wrap two `<LicenseWatermark />` in `<StrictMode>`; assert one badge (covers id-based dedup against double-effect). |
+| Last unmount cleanup | Unmount all instances; expect no portal root. |
+| Link href includes UTM params | Assert `utm_source=unlicensed_badge`, `utm_medium=in_app`, `utm_campaign=watermark`. |
+| `gtag` dispatch | Stub `window.gtag`; click the link; assert event name and payload. |
+| `dataLayer` fallback | Stub `window.dataLayer = []` and `delete (window as any).gtag` **before render** so the click handler captures the absent `gtag`. Assert exactly one pushed object with `event: 'unlicensed_badge_clicked'`. |
+| No analytics globals | Click does not throw. |
+| Pointer boundary | Assert inline styles directly, not `getComputedStyle`. |
+| No old overlay text dependency | Do not assert `screen.getByText('UNLICENSED')`; copy is changing. |
+
+Implementation test pattern:
+
+```tsx
+beforeEach(() => {
+  document.body.innerHTML = ''
+  vi.unstubAllGlobals()
+  vi.resetModules()
+})
+
+function findWatermark() {
   return document.body.querySelector('[data-tourkit-watermark]')
 }
 ```
 
----
+Use dynamic import inside tests after `vi.resetModules()` so module-level singleton state resets:
 
-## Concrete Test Cases
+```tsx
+const { LicenseWatermark } = await import('../components/license-watermark')
+```
 
-### `packages/license/src/__tests__/license-watermark.test.tsx` (new)
+Use `waitFor` only when the assertion depends on `useEffect`:
 
-```ts
-describe('<LicenseWatermark>', () => {
-  beforeEach(() => {
-    document.body.innerHTML = ''
-    vi.unstubAllGlobals()
-    // reset module-level singleton state
-    vi.resetModules()
-  })
-
-  it('renders into document.body via portal', async () => {
-    const { LicenseWatermark } = await import('../components/license-watermark')
-    render(<LicenseWatermark />)
-    expect(findWatermark()).toBeInTheDocument()
-    expect(findWatermark()?.parentElement).toBe(document.body)
-  })
-
-  it('singleton dedup — five instances render one node', async () => {
-    const { LicenseWatermark } = await import('../components/license-watermark')
-    render(
-      <>
-        <LicenseWatermark />
-        <LicenseWatermark />
-        <LicenseWatermark />
-        <LicenseWatermark />
-        <LicenseWatermark />
-      </>
-    )
-    expect(document.body.querySelectorAll('[data-tourkit-watermark]')).toHaveLength(1)
-  })
-
-  it('removes the portal node on last unmount', async () => {
-    const { LicenseWatermark } = await import('../components/license-watermark')
-    const { unmount } = render(<LicenseWatermark />)
-    expect(findWatermark()).toBeInTheDocument()
-    unmount()
-    expect(findWatermark()).toBeNull()
-  })
-
-  it('link href contains UTM attribution', async () => {
-    const { LicenseWatermark } = await import('../components/license-watermark')
-    render(<LicenseWatermark />)
-    const link = findWatermark()?.querySelector('a')
-    expect(link?.getAttribute('href')).toMatch(/utm_source=unlicensed_badge/)
-    expect(link?.getAttribute('href')).toMatch(/utm_medium=in_app/)
-    expect(link?.getAttribute('href')).toMatch(/utm_campaign=watermark/)
-  })
-
-  it('dispatches GA event on click when gtag is present', async () => {
-    const gtagSpy = vi.fn()
-    vi.stubGlobal('gtag', gtagSpy)
-    const { LicenseWatermark } = await import('../components/license-watermark')
-    render(<LicenseWatermark />)
-    fireEvent.click(findWatermark()!.querySelector('a')!)
-    expect(gtagSpy).toHaveBeenCalledWith(
-      'event',
-      'unlicensed_badge_clicked',
-      expect.objectContaining({ placement: 'watermark' })
-    )
-  })
-
-  it('click does not throw when gtag is absent', async () => {
-    const { LicenseWatermark } = await import('../components/license-watermark')
-    render(<LicenseWatermark />)
-    expect(() => fireEvent.click(findWatermark()!.querySelector('a')!)).not.toThrow()
-  })
-
-  it('pointer-events boundary', async () => {
-    const { LicenseWatermark } = await import('../components/license-watermark')
-    render(<LicenseWatermark />)
-    const wrapper = findWatermark()!
-    const link = wrapper.querySelector('a')!
-    expect(getComputedStyle(wrapper).pointerEvents).toBe('none')
-    expect(getComputedStyle(link).pointerEvents).toBe('auto')
-  })
+```tsx
+await waitFor(() => {
+  expect(findWatermark()).toBeInTheDocument()
 })
 ```
 
-### `packages/license/src/__tests__/license-watermark.import.test.ts` (new, node env)
+Owner handoff shape:
+
+```tsx
+function Harness({ showFirst = true }) {
+  return (
+    <>
+      {showFirst ? <LicenseWatermark /> : null}
+      <LicenseWatermark />
+    </>
+  )
+}
+
+const { rerender } = render(<Harness />)
+await waitFor(() => expect(document.body.querySelectorAll('[data-tourkit-watermark]')).toHaveLength(1))
+rerender(<Harness showFirst={false} />)
+await waitFor(() => expect(document.body.querySelectorAll('[data-tourkit-watermark]')).toHaveLength(1))
+```
+
+### `license-watermark.import.test.ts`
+
+Add:
 
 ```ts
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
 
 describe('LicenseWatermark module load', () => {
-  it('is safe to import without window/document', async () => {
+  it('is safe to import without window or document', async () => {
     await expect(import('../components/license-watermark')).resolves.toBeDefined()
   })
 })
 ```
 
-### Existing `packages/<pkg>/src/__tests__/license-integration.test.tsx` (8 files, updated)
+This test is import-time only. Runtime DOM behavior belongs in jsdom tests.
 
-Each currently:
-```ts
-vi.mock('@tour-kit/license', () => ({
-  ProGate: ({ children }) => <>{children}</>,
-  // …
-}))
-```
-plus a sibling `describe('… — ProGate blocks when unlicensed')` block that re-mocks `ProGate` to render a placeholder.
+### `license-gate.test.tsx`
 
-After this phase, each becomes:
-```ts
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }) => <>{children}<LicenseWatermark /></>,
-  LicenseProvider: ({ children }) => <>{children}</>,
-  LicenseWatermark: () => <div data-testid="watermark" />,
-  // …
-}))
+Keep the existing valid, invalid, fallback, loading, and render-key tests, then update and add these cases:
 
-it('renders children AND watermark when unlicensed', () => {
-  render(<AnnouncementsProvider … />)
-  expect(screen.getByTestId('watermark')).toBeInTheDocument()
-  expect(screen.getByRole('dialog')).toBeInTheDocument()  // the actual provider UI
-  expect(screen.queryByText(/Pro license required/i)).not.toBeInTheDocument()
+| Test | Required assertion |
+| --- | --- |
+| No provider on non-dev host | `<LicenseGate require="pro">` renders children plus badge and does not throw. |
+| No provider on non-dev host warns in dev NODE_ENV | Stub `process.env.NODE_ENV = 'development'`; `console.warn` is called once with the `[TourKit]` prefix. |
+| No provider on non-dev host is silent in production NODE_ENV | Stub `process.env.NODE_ENV = 'production'`; `console.warn` is not called. |
+| No provider on dev host | Children render and badge is absent; `console.warn` not called. |
+| SSR safety | `renderToString(<LicenseGate require="pro">...</LicenseGate>)` does not throw. |
+| Fallback with provider gated | Fallback renders; children and badge are absent. |
+| Invalid/free with no fallback | Children and badge render. |
+| Valid pro | Children render and badge is absent. |
+
+The old test below must be deleted:
+
+```tsx
+it('throws when used outside LicenseProvider', () => {
+  // This is no longer true for <LicenseGate>.
 })
 ```
 
-The "placeholder when unlicensed" assertion is **deleted** in each file — that behavior no longer exists by design.
+`useLicense()` itself should keep its throwing contract. That belongs in `hooks.test.tsx`, not in `license-gate.test.tsx`.
+
+---
+
+## Pro Package Mock Strategy
+
+### Integration Tests
+
+**Mocking style decision.** `vi.mock(...)` is hoisted and per-file; `vi.doMock(...)` is dynamic and only takes effect on subsequent `await import(...)`. To avoid module-cache surprises, structure the integration suite as:
+
+- **One file, one default mock**: top-level `vi.mock('@tour-kit/license', ...)` with a passthrough `LicenseGate`. Use this file for the licensed case.
+- **Toggle via `await import` only when both cases live in the same file**: in a `beforeEach` call `vi.resetModules()`, then call `vi.doMock(...)` with the unlicensed implementation, then `const { Provider } = await import('...')`. Static `import` at file top will bind to the licensed mock and not switch.
+- **Or split into two files** (`*.licensed.test.tsx`, `*.unlicensed.test.tsx`) — usually simpler than the toggle dance.
+
+Each of these files needs a licensed passthrough case and an unlicensed soft-gate case:
+
+- `packages/adoption/src/__tests__/license-integration.test.tsx`
+- `packages/announcements/src/__tests__/license-integration.test.tsx`
+- `packages/checklists/src/__tests__/license-integration.test.tsx`
+- `packages/ai/src/__tests__/license-integration.test.tsx`
+- `packages/surveys/src/__tests__/license-integration.test.tsx`
+- `packages/scheduling/src/__tests__/license-integration.test.tsx`
+- `packages/analytics/src/__tests__/license-integration.test.tsx`
+- `packages/media/src/__tests__/license-integration.test.tsx`
+
+Licensed mock:
+
+```tsx
+vi.mock('@tour-kit/license', () => ({
+  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+```
+
+Unlicensed mock:
+
+```tsx
+vi.doMock('@tour-kit/license', () => ({
+  LicenseGate: ({ children }: { children: React.ReactNode }) => (
+    <>
+      {children}
+      <div data-testid="license-watermark">Tour Kit - Unlicensed</div>
+    </>
+  ),
+}))
+```
+
+Assertions:
+
+- The actual provider or component UI renders.
+- `screen.getByTestId('license-watermark')` is present in the unlicensed case.
+- `screen.queryByText(/Tour Kit Pro license required/i)` is absent.
+- The old `pro-gate-placeholder` assertions are removed.
+
+### Incidental Mocks
+
+After provider files import `LicenseGate`, any test that mocks `@tour-kit/license` with only `ProGate` can fail with an invalid React component. Update these mocks to include a passthrough `LicenseGate`.
+
+Files found by repo search:
+
+- `packages/surveys/src/__tests__/survey-popover-focus.test.tsx`
+- `packages/surveys/src/__tests__/question-rating.test.tsx`
+- `packages/surveys/src/__tests__/question-text.test.tsx`
+- `packages/surveys/src/__tests__/display-components.test.tsx`
+- `packages/surveys/src/__tests__/storage.test.tsx`
+- `packages/surveys/src/__tests__/survey-modal.test.tsx`
+- `packages/surveys/src/__tests__/queue-drain.test.tsx`
+- `packages/surveys/src/__tests__/question-boolean.test.tsx`
+- `packages/surveys/src/__tests__/headless-questions.test.tsx`
+- `packages/surveys/src/__tests__/show-guards.test.tsx`
+- `packages/surveys/src/__tests__/question-select.test.tsx`
+- `packages/checklists/src/__tests__/url-visit-completion.test.tsx`
+
+Recommended low-risk mock for incidental tests:
+
+```tsx
+vi.mock('@tour-kit/license', () => ({
+  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useLicenseGate: () => ({ isGated: false, isLoading: false }),
+}))
+```
+
+Keep `ProGate` in incidental mocks if the test imports a file that still directly uses the hard gate or `useLicenseGate`.
+
+---
+
+## Package-Specific Assertions
+
+| Package | Minimum assertion after unlicensed mock |
+| --- | --- |
+| `adoption` | Child inside `AdoptionProvider` renders plus `license-watermark`. |
+| `announcements` | Child inside `AnnouncementsProvider` renders plus `license-watermark`. |
+| `checklists` | Child inside `ChecklistProvider` renders plus `license-watermark`. |
+| `ai` | Child inside `AiChatProvider` renders plus `license-watermark`; keep existing `@ai-sdk/react` and `ai` mocks. |
+| `surveys` | Child inside `SurveysProvider` renders plus `license-watermark`; unrelated survey component tests use passthrough mock. |
+| `scheduling` | `ScheduleGate` renders children plus `license-watermark`. |
+| `analytics` | `AnalyticsProvider` renders children plus `license-watermark`. |
+| `media` | `YouTubeEmbed` renders iframe plus `license-watermark`; `TourMedia` routed embeds render their target media plus `license-watermark`. |
+
+For `media`, the old regression expectation "raw iframe is blocked by placeholder" becomes "routed embed still goes through the license gate, but the real media renders with a badge."
+
+---
+
+## Docs and URL Tests
+
+Update or add assertions where tests already cover these files:
+
+- `packages/license/src/__tests__/pro-gate.test.tsx` should expect `https://usertourkit.com/pricing` if Phase 8 aligns `ProGate` URLs.
+- `LicenseWarning` warning text should use `https://usertourkit.com/pricing`.
+- `LicenseWatermark` link should include the full UTM URL.
+
+No new docs test is required for `apps/docs/components/landing/pricing.tsx` unless an existing docs component test already renders the FAQ.
+
+---
+
+## Verification Commands
+
+Run package tests first to isolate failures:
+
+```sh
+pnpm --filter @tour-kit/license test
+pnpm --filter @tour-kit/adoption test
+pnpm --filter @tour-kit/announcements test
+pnpm --filter @tour-kit/checklists test
+pnpm --filter @tour-kit/ai test
+pnpm --filter @tour-kit/surveys test
+pnpm --filter @tour-kit/scheduling test
+pnpm --filter @tour-kit/analytics test
+pnpm --filter @tour-kit/media test
+```
+
+Then run workspace validation:
+
+```sh
+pnpm typecheck
+pnpm test
+```
+
+If `pnpm test` is too slow for the PR loop, run it before merge after all filtered package suites pass.
+
+---
+
+## Manual QA Checklist
+
+On a non-localhost preview or staging host:
+
+- Mount at least one component from each Pro package.
+- Confirm all components render their real UI with no hard placeholder.
+- Confirm exactly one `[data-tourkit-watermark]` node exists.
+- Confirm removing one Pro surface while others remain does not remove the badge.
+- Confirm clicking the badge opens pricing with UTM params.
+- Confirm `window.gtag` receives `unlicensed_badge_clicked` when present.
+- Confirm `window.dataLayer` receives the event when `gtag` is absent.
+  - **If the preview has no GA install** (typical), in DevTools before clicking:
+    ```js
+    window.gtag = (...args) => console.log('gtag', args)
+    window.dataLayer = []
+    ```
+    Click the badge, then verify the console log and `window.dataLayer[0]`.
+- Confirm no hydration warning appears.
+- Confirm app controls under the page still receive clicks outside the badge link.
+
+On localhost:
+
+- Confirm Pro package UI renders.
+- Confirm no badge.
+- Confirm no license warning is logged from `LicenseWarning`.
 
 ---
 
 ## Out of Scope for Tests
 
-- **Polar API live test.** Already covered by `packages/license/src/__tests__/polar-client.test.ts`.
-- **Watermark visual regression / pixel diff.** Visual QA on the preview deploy is the substitute; setting up Storybook visual tests for one badge isn't worth the maintenance.
-- **End-to-end purchase test.** Polar webhook attribution is a separate phase.
-- **Anti-tamper detection** (someone removes the badge via devtools). The `data-tourkit-watermark` re-mount effect is best-effort; testing it would mean racing a `MutationObserver` against deliberate tampering, which adds flake.
-- **Browser extension blocking.** Acceptable failure mode, not tested.
+- Live Polar API calls.
+- Purchase flow or Polar webhook attribution.
+- Pixel-diff visual regression.
+- Browser extension badge blocking.
+- MutationObserver anti-tamper behavior.
+- Sitewide `tourkit.dev` historical URL cleanup.
