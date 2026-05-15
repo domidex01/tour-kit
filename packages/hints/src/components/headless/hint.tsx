@@ -1,5 +1,6 @@
 'use client'
 
+import { useAnalyticsOptional } from '@tour-kit/analytics'
 import { useElementPosition } from '@tour-kit/core'
 import * as React from 'react'
 import { useHint } from '../../hooks/use-hint'
@@ -45,6 +46,7 @@ export function HintHeadless({
   className,
   render,
 }: HintHeadlessProps) {
+  const analytics = useAnalyticsOptional()
   const { isOpen, isDismissed, show, hide, dismiss } = useHint(id)
   const hotspotRef = React.useRef<HTMLButtonElement>(null)
 
@@ -63,8 +65,9 @@ export function HintHeadless({
     if (!autoShow || isDismissed) return
     autoShownRef.current = true
     show()
+    analytics?.hintShown(id, { target: targetSelector ?? 'ref', trigger: 'auto' })
     onShow?.()
-  }, [autoShow, isDismissed, show, onShow])
+  }, [autoShow, isDismissed, show, analytics, id, targetSelector, onShow])
 
   const handleHotspotClick = () => {
     onClick?.()
@@ -72,6 +75,7 @@ export function HintHeadless({
       hide()
     } else {
       show()
+      analytics?.hintShown(id, { target: targetSelector ?? 'ref', trigger: 'hotspot' })
       onShow?.()
     }
   }
@@ -82,8 +86,9 @@ export function HintHeadless({
     } else {
       hide()
     }
+    analytics?.hintDismissed(id, { target: targetSelector ?? 'ref' })
     onDismiss?.()
-  }, [persist, dismiss, hide, onDismiss])
+  }, [persist, dismiss, hide, analytics, id, targetSelector, onDismiss])
 
   if (isDismissed || !targetElement || !targetRect) {
     return null

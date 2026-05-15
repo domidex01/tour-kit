@@ -54,7 +54,12 @@ export default function LandingPage() {
             Live demo
           </Link>
         </nav>
-        <Button render={<Link href="/login">Sign in</Link>} variant="outline" size="sm" />
+        <Button
+          render={<Link href="/login">Sign in</Link>}
+          nativeButton={false}
+          variant="outline"
+          size="sm"
+        />
       </header>
 
       <main className="flex flex-1 flex-col">
@@ -75,6 +80,7 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button
+              nativeButton={false}
               render={
                 <Link href="/login">
                   Sign in to demo
@@ -82,7 +88,11 @@ export default function LandingPage() {
                 </Link>
               }
             />
-            <Button render={<Link href="/dashboard">Skip to dashboard</Link>} variant="outline" />
+            <Button
+              render={<Link href="/dashboard">Skip to dashboard</Link>}
+              nativeButton={false}
+              variant="outline"
+            />
           </div>
 
           {/* product preview — a mock dashboard card */}

@@ -1,3 +1,4 @@
+import { useAnalyticsOptional } from '@tour-kit/analytics'
 import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import { AnnouncementScheduler } from '../core/scheduler'
@@ -227,6 +228,20 @@ function getStorageKey(prefix: string, id: string): string {
   return `${prefix}${id}`
 }
 
+function getAnnouncementAnalyticsMetadata(
+  config: AnnouncementConfig,
+  metadata?: Record<string, unknown>
+): Record<string, unknown> {
+  return {
+    announcementId: config.id,
+    variant: config.variant,
+    priority: config.priority ?? 'normal',
+    category: config.category,
+    announcementMetadata: config.metadata,
+    ...metadata,
+  }
+}
+
 export function AnnouncementsProvider({
   children,
   announcements: initialAnnouncements = [],
@@ -238,6 +253,7 @@ export function AnnouncementsProvider({
   onAnnouncementDismiss,
   onAnnouncementComplete,
 }: AnnouncementsProviderProps) {
+  const analytics = useAnalyticsOptional()
   const queueConfig: QueueConfig = React.useMemo(
     () => ({ ...DEFAULT_QUEUE_CONFIG, ...queueConfigOverrides }),
     [queueConfigOverrides]
@@ -410,10 +426,24 @@ export function AnnouncementsProvider({
       }
       persistState(config.id, updatedState)
 
+      analytics?.track('announcement_shown', {
+        tourId: config.id,
+        metadata: getAnnouncementAnalyticsMetadata(config, {
+          trigger: 'auto',
+          viewCount: updatedState.viewCount,
+        }),
+      })
       config.onShow?.()
       onAnnouncementShow?.(config.id)
     }
-  }, [state.announcements, userContext, filteredAnnouncements])
+  }, [
+    state.announcements,
+    userContext,
+    filteredAnnouncements,
+    persistState,
+    analytics,
+    onAnnouncementShow,
+  ])
 
   // Context methods
   const register = React.useCallback((config: AnnouncementConfig) => {
@@ -465,10 +495,25 @@ export function AnnouncementsProvider({
       }
       persistState(id, updatedState)
 
+      analytics?.track('announcement_shown', {
+        tourId: id,
+        metadata: getAnnouncementAnalyticsMetadata(config, {
+          trigger: 'manual',
+          viewCount: updatedState.viewCount,
+        }),
+      })
       config.onShow?.()
       onAnnouncementShow?.(id)
     },
-    [state.announcements, state.configs, userContext, persistState, onAnnouncementShow, filteredIds]
+    [
+      state.announcements,
+      state.configs,
+      userContext,
+      persistState,
+      analytics,
+      onAnnouncementShow,
+      filteredIds,
+    ]
   )
 
   const hide = React.useCallback((id: string) => {
@@ -498,6 +543,12 @@ export function AnnouncementsProvider({
       }
       persistState(id, updatedState)
 
+      if (config) {
+        analytics?.track('announcement_dismissed', {
+          tourId: id,
+          metadata: getAnnouncementAnalyticsMetadata(config, { reason }),
+        })
+      }
       config?.onDismiss?.(reason)
       onAnnouncementDismiss?.(id, reason)
 
@@ -513,7 +564,7 @@ export function AnnouncementsProvider({
         queueTimersRef.current.add(timer)
       }
     },
-    [state.announcements, state.configs, persistState, onAnnouncementDismiss, show]
+    [state.announcements, state.configs, persistState, analytics, onAnnouncementDismiss, show]
   )
 
   const complete = React.useCallback(
@@ -534,6 +585,12 @@ export function AnnouncementsProvider({
       }
       persistState(id, updatedState)
 
+      if (config) {
+        analytics?.track('announcement_completed', {
+          tourId: id,
+          metadata: getAnnouncementAnalyticsMetadata(config),
+        })
+      }
       config?.onComplete?.()
       onAnnouncementComplete?.(id)
 
@@ -549,7 +606,7 @@ export function AnnouncementsProvider({
         queueTimersRef.current.add(timer)
       }
     },
-    [state.announcements, state.configs, persistState, onAnnouncementComplete, show]
+    [state.announcements, state.configs, persistState, analytics, onAnnouncementComplete, show]
   )
 
   const reset = React.useCallback(

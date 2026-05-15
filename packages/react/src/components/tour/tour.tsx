@@ -1,5 +1,6 @@
 'use client'
 
+import { useAnalyticsOptional } from '@tour-kit/analytics'
 import {
   TourProvider,
   type TourStep as TourStepType,
@@ -69,6 +70,7 @@ export function Tour({
   children,
 }: TourProps) {
   const registryContext = useTourRegistryContextOptional()
+  const analytics = useAnalyticsOptional()
   const segments = useSegments()
   const { userContext } = useSegmentationContext()
   const tourPasses = React.useMemo(
@@ -127,22 +129,36 @@ export function Tour({
       audience: audience ?? config?.audience,
       autoStart: autoStart ?? config?.autoStart,
       startAt: startAt ?? config?.startAt,
-      onStart: onStart ? () => onStart() : undefined,
-      onComplete: onComplete
-        ? () => {
-            if (completedRef.current) return
-            completedRef.current = true
-            onComplete()
-          }
-        : undefined,
-      onSkip: onSkip
-        ? () => {
-            if (skippedRef.current) return
-            skippedRef.current = true
-            onSkip()
-          }
-        : undefined,
-      onStepChange: onStepChange ? (step, index) => onStepChange(step, index) : undefined,
+      onStart: (context) => {
+        const initialStepIndex = startAt ?? config?.startAt ?? 0
+        const initialStep = context.currentStep ?? filteredSteps[initialStepIndex]
+        analytics?.tourStarted(id, filteredSteps.length)
+        if (initialStep) {
+          analytics?.stepViewed(
+            id,
+            initialStep.id,
+            context.currentStep ? context.currentStepIndex : initialStepIndex,
+            context.totalSteps || filteredSteps.length
+          )
+        }
+        onStart?.()
+      },
+      onComplete: () => {
+        if (completedRef.current) return
+        completedRef.current = true
+        analytics?.tourCompleted(id)
+        onComplete?.()
+      },
+      onSkip: (context) => {
+        if (skippedRef.current) return
+        skippedRef.current = true
+        analytics?.tourSkipped(id, context.currentStepIndex, context.currentStep?.id)
+        onSkip?.()
+      },
+      onStepChange: (step, index) => {
+        analytics?.stepViewed(id, step.id, index, filteredSteps.length)
+        onStepChange?.(step, index)
+      },
     }),
     [
       id,
@@ -151,6 +167,7 @@ export function Tour({
       autoStart,
       startAt,
       config,
+      analytics,
       onStart,
       onComplete,
       onSkip,

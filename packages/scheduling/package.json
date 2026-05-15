@@ -60,6 +60,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@tour-kit/analytics": "workspace:*",
     "@tour-kit/license": "workspace:*"
   },
   "peerDependencies": {

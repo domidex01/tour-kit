@@ -1,5 +1,6 @@
 'use client'
 
+import { TourKitDemoPanel } from '@/components/tour-kit/demo-panel'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -54,6 +55,8 @@ export default function DashboardHome() {
           New project
         </Button>
       </div>
+
+      <TourKitDemoPanel />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((s) => (

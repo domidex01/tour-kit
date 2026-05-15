@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useAdvanceOn } from '../hooks/use-advance-on'
 import { useBroadcast } from '../hooks/use-broadcast'
 import { useFlowSession } from '../hooks/use-flow-session'
+import { usePersistence } from '../hooks/use-persistence'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
 import { explainTour } from '../lib/diagnostic'
 import { TourValidationError, validateTour } from '../lib/validate-tour'
@@ -15,6 +16,7 @@ import type {
   TourState,
   TourStep,
 } from '../types'
+import { defaultPersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
 import type { TestBridge } from '../types/test-bridge'
@@ -247,6 +249,7 @@ function handleReset(state: TourReducerState, tourId?: string): TourReducerState
   }
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: reducer handles many action variants in one switch
 function tourReducer(state: TourReducerState, action: TourAction): TourReducerState {
   switch (action.type) {
     case 'START_TOUR':
@@ -266,9 +269,13 @@ function tourReducer(state: TourReducerState, action: TourAction): TourReducerSt
     case 'SET_TRANSITIONING':
       return { ...state, isTransitioning: action.isTransitioning }
     case 'ADD_COMPLETED':
-      return { ...state, completedTours: [...state.completedTours, action.tourId] }
+      return state.completedTours.includes(action.tourId)
+        ? state
+        : { ...state, completedTours: [...state.completedTours, action.tourId] }
     case 'ADD_SKIPPED':
-      return { ...state, skippedTours: [...state.skippedTours, action.tourId] }
+      return state.skippedTours.includes(action.tourId)
+        ? state
+        : { ...state, skippedTours: [...state.skippedTours, action.tourId] }
     case 'RESET':
       return handleReset(state, action.tourId)
     case 'UPDATE_TOURS': {
@@ -427,6 +434,17 @@ export function TourProvider({
   }, [])
 
   const tourKitContext = React.useContext(TourKitContext)
+  const persistenceConfig = tourKitContext?.config.persistence
+  const {
+    getCompletedTours,
+    getSkippedTours,
+    markCompleted,
+    markSkipped,
+    reset: resetPersistence,
+  } = usePersistence(persistenceConfig)
+  const persistTerminalTours =
+    (persistenceConfig?.enabled ?? defaultPersistenceConfig.enabled) &&
+    (persistenceConfig?.trackCompleted ?? defaultPersistenceConfig.trackCompleted)
   const [data, setDataState] = React.useState<Record<string, unknown>>({})
   const { save, load, clear, externalVersion } = useRoutePersistence(routePersistence)
 
@@ -438,8 +456,8 @@ export function TourProvider({
     totalSteps: 0,
     isLoading: false,
     isTransitioning: false,
-    completedTours: [],
-    skippedTours: [],
+    completedTours: persistTerminalTours ? getCompletedTours() : [],
+    skippedTours: persistTerminalTours ? getSkippedTours() : [],
     visitedSteps: [],
     stepVisitCount: new Map(),
     previousStepId: null,
@@ -710,6 +728,8 @@ export function TourProvider({
     if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) return
     const auto = tours.find((t) => t.autoStart)
     if (!auto) return
+    const completedTours = persistTerminalTours ? getCompletedTours() : state.completedTours
+    if (completedTours.includes(auto.id)) return
     dispatch({
       type: 'START_TOUR',
       tourId: auto.id,
@@ -1008,24 +1028,26 @@ export function TourProvider({
     if (!state.isActive || !currentTour) return
     if (completedTourIdRef.current === currentTour.id) return
     completedTourIdRef.current = currentTour.id
+    if (persistTerminalTours) markCompleted(currentTour.id)
     dispatch({ type: 'ADD_COMPLETED', tourId: currentTour.id })
     dispatch({ type: 'COMPLETE_TOUR' })
     clear()
     tourKitContext?.onTourComplete?.(currentTour.id)
     currentTour.onComplete?.({ ...state, tour: currentTour, data })
-  }, [currentTour, state, data, tourKitContext, clear])
+  }, [currentTour, state, data, tourKitContext, clear, persistTerminalTours, markCompleted])
 
   // Helper to skip the current tour. Mirrors completeTour for skip semantics.
   const skipTour = React.useCallback(() => {
     if (!state.isActive || !currentTour) return
     if (skippedTourIdRef.current === currentTour.id) return
     skippedTourIdRef.current = currentTour.id
+    if (persistTerminalTours) markSkipped(currentTour.id)
     dispatch({ type: 'ADD_SKIPPED', tourId: currentTour.id })
     dispatch({ type: 'SKIP_TOUR' })
     clear()
     tourKitContext?.onTourSkip?.(currentTour.id, state.currentStepIndex)
     currentTour.onSkip?.({ ...state, tour: currentTour, data })
-  }, [currentTour, state, data, tourKitContext, clear])
+  }, [currentTour, state, data, tourKitContext, clear, persistTerminalTours, markSkipped])
 
   // Handle branch target resolution and navigation
   const handleBranchTarget = React.useCallback(
@@ -1469,9 +1491,13 @@ export function TourProvider({
     // Implemented in usePersistence hook
   }, [])
 
-  const reset = React.useCallback((tourId?: string) => {
-    dispatch({ type: 'RESET', tourId })
-  }, [])
+  const reset = React.useCallback(
+    (tourId?: string) => {
+      if (persistTerminalTours) resetPersistence(tourId)
+      dispatch({ type: 'RESET', tourId })
+    },
+    [persistTerminalTours, resetPersistence]
+  )
 
   // Navigate to a step by its ID
   const goToStep = React.useCallback(

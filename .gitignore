@@ -29,6 +29,9 @@ coverage/
 # Phase 0 spike artifacts (research notes — not committed)
 notes/
 
+# Manual QA scratch (screenshots, console dumps — not committed)
+manual-qa-artifacts/
+
 # Playwright
 playwright-report/
 test-results/

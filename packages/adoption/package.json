@@ -73,13 +73,13 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@tour-kit/analytics": "workspace:*",
     "@radix-ui/react-slot": "^1.2.4",
     "@tour-kit/core": "workspace:*",
     "@tour-kit/license": "workspace:*",
     "class-variance-authority": "^0.7.1"
   },
   "peerDependencies": {
-    "@tour-kit/analytics": "workspace:*",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "tailwindcss": "^3.4.0 || ^4.0.0",
@@ -87,9 +87,6 @@
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
-      "optional": true
-    },
-    "@tour-kit/analytics": {
       "optional": true
     },
     "@mui/base": {
@@ -100,7 +97,6 @@
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",
     "@testing-library/user-event": "catalog:",
-    "@tour-kit/analytics": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitest/coverage-v8": "catalog:",

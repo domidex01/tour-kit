@@ -1,5 +1,6 @@
 'use client'
 
+import { useAnalyticsOptional } from '@tour-kit/analytics'
 import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import { registerUrlVisitTask } from '../engine/url-visit-listener'
@@ -334,6 +335,8 @@ export function ChecklistProvider({
   onChecklistDismiss,
   onTaskAction,
 }: ChecklistProviderProps) {
+  const analytics = useAnalyticsOptional()
+
   // Build context
   const checklistContext: ChecklistContextType = React.useMemo(
     () => ({
@@ -413,19 +416,42 @@ export function ChecklistProvider({
     for (const [id, checklist] of state.checklists) {
       if (checklist.isComplete && !state.notifiedComplete.has(id)) {
         dispatch({ type: 'MARK_NOTIFIED_COMPLETE', checklistId: id })
+        analytics?.track('checklist_completed', {
+          tourId: id,
+          metadata: {
+            checklistId: id,
+            completedCount: checklist.completedCount,
+            totalCount: checklist.totalCount,
+          },
+        })
         onChecklistComplete?.(id)
         checklist.config.onComplete?.()
       }
     }
-  }, [state.checklists, state.notifiedComplete, onChecklistComplete])
+  }, [state.checklists, state.notifiedComplete, analytics, onChecklistComplete])
 
   // Actions
   const completeTask = React.useCallback(
     (checklistId: string, taskId: string) => {
+      const checklist = state.checklists.get(checklistId)
+      const task = checklist?.tasks.find((candidate) => candidate.config.id === taskId)
+
       dispatch({ type: 'COMPLETE_TASK', checklistId, taskId, at: Date.now() })
+      if (checklist && task && !task.completed) {
+        analytics?.track('checklist_task_completed', {
+          tourId: checklistId,
+          metadata: {
+            checklistId,
+            taskId,
+            taskTitle: task.config.title,
+            completedCount: checklist.completedCount + 1,
+            totalCount: checklist.totalCount,
+          },
+        })
+      }
       onTaskComplete?.(checklistId, taskId)
     },
-    [onTaskComplete]
+    [state.checklists, analytics, onTaskComplete]
   )
 
   // Register `urlVisit` completions with the module-level listener.

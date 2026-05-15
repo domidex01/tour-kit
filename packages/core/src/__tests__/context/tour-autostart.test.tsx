@@ -1,8 +1,9 @@
 import { act, render, renderHook, waitFor } from '@testing-library/react'
 import type * as React from 'react'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useTourContext } from '../../context/tour-context'
 import { TourProvider } from '../../context/tour-provider'
+import { TourKitProvider } from '../../context/tourkit-provider'
 import { useTour } from '../../hooks/use-tour'
 import type { Tour } from '../../types'
 
@@ -12,7 +13,31 @@ function createWrapper(tours: Tour[]) {
   }
 }
 
+function createPersistentWrapper(tours: Tour[]) {
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <TourKitProvider
+        config={{
+          persistence: {
+            enabled: true,
+            storage: 'localStorage',
+            keyPrefix: 'tourkit',
+            trackCompleted: true,
+          },
+        }}
+      >
+        <TourProvider tours={tours}>{children}</TourProvider>
+      </TourKitProvider>
+    )
+  }
+}
+
 describe('TourProvider — autoStart', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    window.sessionStorage.clear()
+  })
+
   it('activates tour on mount when autoStart is true', async () => {
     const tours: Tour[] = [
       {
@@ -222,5 +247,74 @@ describe('TourProvider — autoStart', () => {
     await waitFor(() => {
       expect(getByTestId('active').textContent).toBe('true')
     })
+  })
+
+  it('does not auto-start a completed tour after remount when persistence is enabled', async () => {
+    const tours: Tour[] = [
+      {
+        id: 'completed-auto',
+        autoStart: true,
+        steps: [{ id: 's1', target: '#t1', content: 'Step 1' }],
+      },
+    ]
+    const wrapper = createPersistentWrapper(tours)
+    const first = renderHook(() => useTourContext(), { wrapper })
+
+    await waitFor(() => {
+      expect(first.result.current.isActive).toBe(true)
+    })
+
+    act(() => {
+      first.result.current.complete()
+    })
+
+    await waitFor(() => {
+      expect(first.result.current.isActive).toBe(false)
+    })
+    expect(JSON.parse(window.localStorage.getItem('tourkit:completed') ?? '[]')).toEqual([
+      'completed-auto',
+    ])
+
+    first.unmount()
+
+    const second = renderHook(() => useTourContext(), { wrapper })
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(second.result.current.isActive).toBe(false)
+    expect(second.result.current.tourId).toBeNull()
+  })
+
+  it('auto-starts again after persisted completion is reset', async () => {
+    window.localStorage.setItem('tourkit:completed', JSON.stringify(['reset-auto']))
+
+    const tours: Tour[] = [
+      {
+        id: 'reset-auto',
+        autoStart: true,
+        steps: [{ id: 's1', target: '#t1', content: 'Step 1' }],
+      },
+    ]
+    const wrapper = createPersistentWrapper(tours)
+    const blocked = renderHook(() => useTourContext(), { wrapper })
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(blocked.result.current.isActive).toBe(false)
+
+    act(() => {
+      blocked.result.current.reset('reset-auto')
+    })
+    expect(JSON.parse(window.localStorage.getItem('tourkit:completed') ?? '[]')).toEqual([])
+    blocked.unmount()
+
+    const restarted = renderHook(() => useTourContext(), { wrapper })
+    await waitFor(() => {
+      expect(restarted.result.current.isActive).toBe(true)
+    })
+    expect(restarted.result.current.tourId).toBe('reset-auto')
   })
 })

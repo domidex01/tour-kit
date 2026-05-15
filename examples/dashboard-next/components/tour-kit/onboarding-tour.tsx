@@ -1,8 +1,25 @@
 'use client'
 
+import { useTour } from '@tour-kit/core'
 import { Tour, TourStep } from '@tour-kit/react'
 import { useSurvey } from '@tour-kit/surveys'
 import { useEffect, useState } from 'react'
+
+const REPLAY_EVENT = 'tour-kit-demo:replay-onboarding'
+
+export function triggerOnboardingReplay() {
+  window.dispatchEvent(new CustomEvent(REPLAY_EVENT))
+}
+
+function ReplayBridge() {
+  const tour = useTour('dashboard-onboarding')
+  useEffect(() => {
+    const handler = () => tour.start('dashboard-onboarding')
+    window.addEventListener(REPLAY_EVENT, handler)
+    return () => window.removeEventListener(REPLAY_EVENT, handler)
+  }, [tour])
+  return null
+}
 
 export function OnboardingTour() {
   const [mounted, setMounted] = useState(false)
@@ -17,7 +34,7 @@ export function OnboardingTour() {
   if (!mounted) return null
 
   return (
-    <Tour id="dashboard-onboarding" autoStart onComplete={() => csat.show()}>
+    <Tour id="dashboard-onboarding" onComplete={() => csat.show()}>
       <TourStep
         id="nav"
         target="#sidebar-nav"
@@ -48,6 +65,7 @@ export function OnboardingTour() {
         title="Settings and billing live under your avatar"
         content="Switch themes, invite teammates, manage your plan."
       />
+      <ReplayBridge />
     </Tour>
   )
 }

@@ -18,11 +18,10 @@ export const announcements: AnnouncementConfig[] = [
     description:
       'Stacks is a demo workspace built to exercise every @tour-kit/* package in one place. Watch the walkthrough or skip to explore.',
     media: {
-      type: 'video',
+      type: 'auto',
       src: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       alt: 'Stacks 2-minute walkthrough',
     },
-    frequency: 'once',
     modalOptions: { size: 'md' },
   },
   {
@@ -41,8 +40,27 @@ export const announcements: AnnouncementConfig[] = [
     priority: 'low',
     title: 'AI assistant is live in Help',
     description: 'Ask "how do I export?" — it knows every surface in this demo.',
-    frequency: 'once',
     toastOptions: { position: 'top-right', autoDismiss: true, autoDismissDelay: 8000 },
+  },
+  {
+    id: 'whats-new',
+    variant: 'slideout',
+    priority: 'normal',
+    title: "What's new in Stacks",
+    description:
+      'A scrollable side panel for changelogs, release notes, and longer announcements. Triggered from the demo panel.',
+    autoShow: false,
+    slideoutOptions: { position: 'right', size: 'md' },
+  },
+  {
+    id: 'profile-feature',
+    variant: 'spotlight',
+    priority: 'normal',
+    title: 'New: profile menu',
+    description:
+      'Spotlight a specific element on the page — manage themes, billing, and sign-out from here.',
+    autoShow: false,
+    spotlightOptions: { targetSelector: '#user-menu', placement: 'bottom', offset: 12 },
   },
 ]
 
@@ -104,6 +122,7 @@ export const trackedFeatures: Feature[] = [
     id: 'export-csv',
     name: 'Export CSV',
     trigger: '#export-btn',
+    adoptionCriteria: { minUses: 1 },
     category: 'data',
     description: 'Download kanban cards as CSV.',
   },

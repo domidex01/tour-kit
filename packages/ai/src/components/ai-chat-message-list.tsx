@@ -36,7 +36,7 @@ export function AiChatMessageList({
   emptyState,
   renderMessage,
 }: AiChatMessageListProps) {
-  const { messages, status } = useAiChat()
+  const { messages, status, error } = useAiChat()
   const bottomRef = useRef<HTMLDivElement>(null)
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on message count or status change, not on ref
@@ -46,6 +46,14 @@ export function AiChatMessageList({
 
   const isStreaming = status === 'streaming'
   const hasMessages = messages.length > 0
+
+  if (!hasMessages && error) {
+    return (
+      <div className={cn('text-sm text-destructive', className)} role="alert">
+        Unable to load assistant response. {error.message}
+      </div>
+    )
+  }
 
   if (!hasMessages && !isStreaming) {
     if (!emptyState) return null

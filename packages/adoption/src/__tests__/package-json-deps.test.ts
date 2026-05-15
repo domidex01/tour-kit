@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest'
 describe('package.json — peerDependencies hygiene', () => {
   const pkgPath = resolve(__dirname, '..', '..', 'package.json')
   const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as {
+    dependencies?: Record<string, string>
     peerDependencies?: Record<string, string>
   }
 
@@ -39,14 +40,12 @@ describe('package.json — peerDependencies hygiene', () => {
   it('peerDependencies match the locked Phase 4 snapshot', () => {
     // Snapshot of the legal peers as of Phase 4 — Phase 0 chart decision locked
     // these. Adding a new peer requires an explicit code change + decision log.
-    const expected = new Set([
-      '@tour-kit/analytics',
-      'react',
-      'react-dom',
-      'tailwindcss',
-      '@mui/base',
-    ])
+    const expected = new Set(['react', 'react-dom', 'tailwindcss', '@mui/base'])
     const actual = new Set(Object.keys(pkg.peerDependencies ?? {}))
     expect(actual).toEqual(expected)
+  })
+
+  it('depends on analytics because the provider emits adoption events directly', () => {
+    expect(pkg.dependencies).toHaveProperty('@tour-kit/analytics', 'workspace:*')
   })
 })

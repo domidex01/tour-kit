@@ -13,6 +13,13 @@ export type TourEventName =
   | 'hint_shown'
   | 'hint_dismissed'
   | 'hint_clicked'
+  // Announcement events
+  | 'announcement_shown'
+  | 'announcement_dismissed'
+  | 'announcement_completed'
+  // Checklist events
+  | 'checklist_task_completed'
+  | 'checklist_completed'
   // Feature adoption events
   | 'feature_used'
   | 'feature_adopted'
@@ -20,6 +27,8 @@ export type TourEventName =
   | 'nudge_shown'
   | 'nudge_clicked'
   | 'nudge_dismissed'
+  // Scheduling events
+  | 'schedule_evaluated'
 
 /**
  * Tour analytics event payload

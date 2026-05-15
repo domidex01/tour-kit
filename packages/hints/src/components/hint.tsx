@@ -1,5 +1,6 @@
 'use client'
 
+import { useAnalyticsOptional } from '@tour-kit/analytics'
 import { useElementPosition } from '@tour-kit/core'
 import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'
@@ -74,6 +75,7 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
     },
     ref
   ) => {
+    const analytics = useAnalyticsOptional()
     const { isOpen, isDismissed, show, hide, dismiss } = useHint(id)
     const hotspotRef = React.useRef<HTMLButtonElement>(null)
     const resolvedContent = useResolvedText(content)
@@ -105,8 +107,9 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
       if (!autoShow || isDismissed) return
       autoShownRef.current = true
       show()
+      analytics?.hintShown(id, { target: targetSelector ?? 'ref', trigger: 'auto' })
       onShow?.()
-    }, [autoShow, isDismissed, show, onShow])
+    }, [autoShow, isDismissed, show, analytics, id, targetSelector, onShow])
 
     const handleHotspotClick = React.useCallback(() => {
       onClick?.()
@@ -114,9 +117,10 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
         hide()
       } else {
         show()
+        analytics?.hintShown(id, { target: targetSelector ?? 'ref', trigger: 'hotspot' })
         onShow?.()
       }
-    }, [onClick, isOpen, hide, show, onShow])
+    }, [onClick, isOpen, hide, show, analytics, id, targetSelector, onShow])
 
     const handleDismiss = React.useCallback(() => {
       if (persist) {
@@ -124,8 +128,9 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
       } else {
         hide()
       }
+      analytics?.hintDismissed(id, { target: targetSelector ?? 'ref' })
       onDismiss?.()
-    }, [persist, dismiss, hide, onDismiss])
+    }, [persist, dismiss, hide, analytics, id, targetSelector, onDismiss])
 
     if (isDismissed || !targetElement || !targetRect) {
       return null

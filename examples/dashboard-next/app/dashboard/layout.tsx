@@ -1,5 +1,6 @@
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { DashboardTopbar } from '@/components/dashboard/topbar'
+import { AiChatHost } from '@/components/tour-kit/ai-chat-host'
 import { AnnouncementsHost } from '@/components/tour-kit/announcements-host'
 import { ChecklistDock } from '@/components/tour-kit/checklist-dock'
 import { CsatSurveyHost } from '@/components/tour-kit/csat-survey-host'
@@ -21,6 +22,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <ChecklistDock />
       <DarkModeHint />
       <CsatSurveyHost />
+      <AiChatHost />
     </div>
   )
 }

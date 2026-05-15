@@ -1,6 +1,5 @@
 'use client'
 
-import { AiChatHost } from '@/components/tour-kit/ai-chat-host'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -105,7 +104,6 @@ export default function HelpPage() {
       </div>
 
       <AskAiLauncher />
-      <AiChatHost />
     </div>
   )
 }

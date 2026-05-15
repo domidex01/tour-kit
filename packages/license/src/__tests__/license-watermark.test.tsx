@@ -236,6 +236,6 @@ describe('LicenseWatermark', () => {
 
     const wrapper = findWatermark() as HTMLElement
     expect(wrapper.getAttribute('role')).toBe('region')
-    expect(wrapper.getAttribute('aria-label')).toBe('Tour Kit license required')
+    expect(wrapper.getAttribute('aria-label')).toBe('userTourKit license required')
   })
 })

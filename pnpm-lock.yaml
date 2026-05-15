@@ -584,6 +584,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
+      '@tour-kit/analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
@@ -606,9 +609,6 @@ importers:
       '@testing-library/user-event':
         specifier: 'catalog:'
         version: 14.6.1(@testing-library/dom@10.4.1)
-      '@tour-kit/analytics':
-        specifier: workspace:*
-        version: link:../analytics
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.14
@@ -764,6 +764,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
+      '@tour-kit/analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
@@ -843,6 +846,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
+      '@tour-kit/analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
@@ -990,6 +996,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
+      '@tour-kit/analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
@@ -1204,6 +1213,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
+      '@tour-kit/analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
@@ -1271,6 +1283,9 @@ importers:
 
   packages/scheduling:
     dependencies:
+      '@tour-kit/analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@tour-kit/license':
         specifier: workspace:*
         version: link:../license

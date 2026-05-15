@@ -1,5 +1,6 @@
 'use client'
 
+import { useAnalyticsOptional } from '@tour-kit/analytics'
 import { useCallback, useEffect, useState } from 'react'
 import type { Schedule, ScheduleResult } from '../types'
 import { isScheduleActive } from '../utils/is-schedule-active'
@@ -34,6 +35,7 @@ export function useSchedule(
   schedule: Schedule | undefined | null,
   options: UseScheduleOptions = {}
 ): UseScheduleReturn {
+  const analytics = useAnalyticsOptional()
   const {
     refreshInterval = 60000,
     disableAutoRefresh = false,
@@ -49,18 +51,36 @@ export function useSchedule(
     return isScheduleActive(schedule, { userTimezone: timezone })
   })
 
+  const trackEvaluation = useCallback(
+    (nextResult: ScheduleResult, checkedAt: Date) => {
+      analytics?.track('schedule_evaluated', {
+        tourId: 'schedule',
+        metadata: {
+          active: nextResult.isActive,
+          reason: nextResult.reason ?? null,
+          timezone,
+          checkedAt: checkedAt.toISOString(),
+        },
+      })
+    },
+    [analytics, timezone]
+  )
+
   const refresh = useCallback(() => {
     const now = new Date()
     setLastCheckedAt(now)
 
     if (!schedule) {
-      setResult({ isActive: false, reason: 'disabled' })
+      const disabledResult: ScheduleResult = { isActive: false, reason: 'disabled' }
+      setResult(disabledResult)
+      trackEvaluation(disabledResult, now)
       return
     }
 
     const newResult = isScheduleActive(schedule, { now, userTimezone: timezone })
     setResult(newResult)
-  }, [schedule, timezone])
+    trackEvaluation(newResult, now)
+  }, [schedule, timezone, trackEvaluation])
 
   // Initial evaluation and when schedule/timezone changes
   useEffect(() => {

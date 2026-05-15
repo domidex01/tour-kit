@@ -1,4 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
+import { type AnalyticsPlugin, AnalyticsProvider } from '@tour-kit/analytics'
+import type * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSchedule } from '../../hooks/use-schedule'
 import type { Schedule } from '../../types'
@@ -79,5 +81,34 @@ describe('useSchedule', () => {
     })
 
     expect(result.current.lastCheckedAt.getTime()).toBe(initialCheckedAt.getTime())
+  })
+
+  it('emits analytics when the schedule is evaluated', () => {
+    const track = vi.fn<AnalyticsPlugin['track']>()
+    const plugin: AnalyticsPlugin = { name: 'test', track }
+    const schedule: Schedule = { enabled: false }
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AnalyticsProvider config={{ plugins: [plugin] }}>{children}</AnalyticsProvider>
+    )
+
+    const { result } = renderHook(() => useSchedule(schedule, { timezone: 'UTC' }), {
+      wrapper,
+    })
+
+    act(() => {
+      result.current.refresh()
+    })
+
+    expect(track).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventName: 'schedule_evaluated',
+        tourId: 'schedule',
+        metadata: expect.objectContaining({
+          active: false,
+          reason: 'disabled',
+          timezone: 'UTC',
+        }),
+      })
+    )
   })
 })

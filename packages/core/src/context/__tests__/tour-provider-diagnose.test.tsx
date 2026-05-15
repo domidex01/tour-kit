@@ -8,9 +8,16 @@ import type { DiagnosticGate } from '../../types/diagnostic'
 import type { RouterAdapter } from '../../types/router'
 import { TourProvider } from '../tour-provider'
 
+beforeEach(() => {
+  window.localStorage.clear()
+  window.sessionStorage.clear()
+})
+
 afterEach(() => {
   vi.unstubAllEnvs()
   vi.restoreAllMocks()
+  window.localStorage.clear()
+  window.sessionStorage.clear()
 })
 
 describe('<TourProvider diagnose>', () => {

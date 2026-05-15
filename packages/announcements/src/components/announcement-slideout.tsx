@@ -41,6 +41,7 @@ export const AnnouncementSlideout = React.forwardRef<HTMLDivElement, Announcemen
       className,
       children,
       useConfig = true,
+      'aria-describedby': ariaDescribedBy,
       ...props
     },
     ref
@@ -92,6 +93,7 @@ export const AnnouncementSlideout = React.forwardRef<HTMLDivElement, Announcemen
 
     const effectivePosition = position ?? config?.slideoutOptions?.position ?? 'right'
     const effectiveSize = size ?? config?.slideoutOptions?.size ?? 'md'
+    const hasDescription = Boolean(resolvedDescription)
 
     return (
       <Dialog.Root open={open} onOpenChange={handleOpenChange}>
@@ -113,6 +115,7 @@ export const AnnouncementSlideout = React.forwardRef<HTMLDivElement, Announcemen
                 ? () => handleDismiss('escape_key')
                 : (e) => e.preventDefault()
             }
+            aria-describedby={hasDescription ? ariaDescribedBy : undefined}
             {...props}
           >
             {slideoutOptions.showCloseButton && (
@@ -126,6 +129,7 @@ export const AnnouncementSlideout = React.forwardRef<HTMLDivElement, Announcemen
                   description={resolvedDescription}
                   media={config.media}
                   className="flex-1"
+                  asDialogContent
                 />
                 <AnnouncementActions
                   primaryAction={config.primaryAction}

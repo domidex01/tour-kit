@@ -7,15 +7,35 @@ import {
   OctagonXIcon,
   TriangleAlertIcon,
 } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { type CSSProperties, useEffect, useState } from 'react'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
 
+function useHtmlTheme(): 'light' | 'dark' {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  useEffect(() => {
+    const html = document.documentElement
+    const read = () => setTheme(html.classList.contains('dark') ? 'dark' : 'light')
+    read()
+    const obs = new MutationObserver(read)
+    obs.observe(html, { attributes: true, attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [])
+  return theme
+}
+
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = 'system' } = useTheme()
+  const theme = useHtmlTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
 
   return (
     <Sonner
-      theme={theme as ToasterProps['theme']}
+      theme={theme}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,
@@ -30,7 +50,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           '--normal-text': 'var(--popover-foreground)',
           '--normal-border': 'var(--border)',
           '--border-radius': 'var(--radius)',
-        } as React.CSSProperties
+        } as CSSProperties
       }
       toastOptions={{
         classNames: {

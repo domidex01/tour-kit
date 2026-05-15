@@ -1,21 +1,21 @@
 'use client'
 
-import { AnnouncementModal, AnnouncementToast } from '@tour-kit/announcements'
-import { TourMedia } from '@tour-kit/media'
+import {
+  AnnouncementModal,
+  AnnouncementSlideout,
+  AnnouncementSpotlight,
+  AnnouncementToast,
+} from '@tour-kit/announcements'
 import { ScheduledBanner } from './scheduled-banner'
 
 export function AnnouncementsHost() {
   return (
     <>
-      <AnnouncementModal id="welcome" useConfig>
-        <TourMedia
-          src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          alt="Stacks 2-minute walkthrough"
-          type="video"
-        />
-      </AnnouncementModal>
+      <AnnouncementModal id="welcome" useConfig />
       <ScheduledBanner />
       <AnnouncementToast id="ai-live" useConfig />
+      <AnnouncementSlideout id="whats-new" useConfig />
+      <AnnouncementSpotlight id="profile-feature" useConfig />
     </>
   )
 }

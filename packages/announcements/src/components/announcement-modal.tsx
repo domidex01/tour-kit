@@ -40,6 +40,7 @@ export const AnnouncementModal = React.forwardRef<HTMLDivElement, AnnouncementMo
       className,
       children,
       useConfig = true,
+      'aria-describedby': ariaDescribedBy,
       ...props
     },
     ref
@@ -90,6 +91,7 @@ export const AnnouncementModal = React.forwardRef<HTMLDivElement, AnnouncementMo
     }
 
     const effectiveSize = size ?? config?.modalOptions?.size ?? 'md'
+    const hasDescription = Boolean(resolvedDescription)
 
     return (
       <Dialog.Root open={open} onOpenChange={handleOpenChange}>
@@ -108,6 +110,7 @@ export const AnnouncementModal = React.forwardRef<HTMLDivElement, AnnouncementMo
                 ? () => handleDismiss('escape_key')
                 : (e) => e.preventDefault()
             }
+            aria-describedby={hasDescription ? ariaDescribedBy : undefined}
             {...props}
           >
             {modalOptions.showCloseButton && (
@@ -120,6 +123,7 @@ export const AnnouncementModal = React.forwardRef<HTMLDivElement, AnnouncementMo
                   title={resolvedTitle}
                   description={resolvedDescription}
                   media={config.media}
+                  asDialogContent
                 />
                 <AnnouncementActions
                   primaryAction={config.primaryAction}

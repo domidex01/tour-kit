@@ -1,5 +1,6 @@
 import { openai } from '@ai-sdk/openai'
 import { createChatRouteHandler } from '@tour-kit/ai/server'
+import { createUIMessageStream, createUIMessageStreamResponse } from 'ai'
 
 export const runtime = 'nodejs'
 
@@ -27,11 +28,26 @@ const handler = hasKey
     })
   : null
 
+const fallbackMessage = 'AI key not configured. Set OPENAI_API_KEY to enable live chat.'
+
+function createFallbackResponse() {
+  const textId = 'fallback-text'
+  const stream = createUIMessageStream({
+    execute: ({ writer }) => {
+      writer.write({ type: 'start', messageId: 'fallback-assistant' })
+      writer.write({ type: 'text-start', id: textId })
+      writer.write({ type: 'text-delta', id: textId, delta: fallbackMessage })
+      writer.write({ type: 'text-end', id: textId })
+      writer.write({ type: 'finish', finishReason: 'stop' })
+    },
+  })
+
+  return createUIMessageStreamResponse({ stream })
+}
+
 export async function POST(req: Request) {
   if (!handler) {
-    return new Response('AI key not configured — set OPENAI_API_KEY to enable chat.', {
-      status: 200,
-    })
+    return createFallbackResponse()
   }
   return handler.POST(req)
 }
