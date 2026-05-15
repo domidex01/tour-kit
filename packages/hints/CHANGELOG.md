@@ -1,5 +1,15 @@
 # @tour-kit/hints
 
+## 0.11.1
+
+### Patch Changes
+
+- 6e77a3b: Point each package's `homepage` field at https://usertourkit.com/ so the "Homepage" link in the npm sidebar opens the docs site instead of the GitHub README.
+- Updated dependencies [6e77a3b]
+- Updated dependencies [2f1a88d]
+  - @tour-kit/core@0.11.1
+  - @tour-kit/media@0.12.0
+
 ## 0.11.0
 
 ### Minor Changes

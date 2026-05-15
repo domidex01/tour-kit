@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/codemods",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Codemods to migrate from Joyride, Shepherd, and Driver.js to Tour Kit",
   "author": "Tour Kit Team",
   "license": "MIT",
