@@ -3,6 +3,11 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { clearCache, hasFreshCache } from '../lib/cache'
 import { getCurrentDomain, isDevEnvironment } from '../lib/domain'
+import {
+  createDevBypassState,
+  createUnlicensedState,
+  normalizeLicenseKey,
+} from '../lib/license-state'
 import { validateLicenseKey } from '../lib/polar-client'
 import type { LicenseContextValue, LicenseProviderProps, LicenseState } from '../types'
 
@@ -15,17 +20,6 @@ const LOADING_STATE: LicenseState = {
   expiresAt: null,
   validatedAt: 0,
   renderKey: undefined,
-}
-
-const DEV_BYPASS_STATE: LicenseState = {
-  status: 'valid',
-  tier: 'pro',
-  activations: 0,
-  maxActivations: 0,
-  domain: null,
-  expiresAt: null,
-  validatedAt: Date.now(),
-  renderKey: 'dev_bypass',
 }
 
 export const LicenseContext = createContext<LicenseContextValue | null>(null)
@@ -51,20 +45,29 @@ export function LicenseProvider({
   })
 
   const validate = useCallback(async () => {
+    const normalizedKey = normalizeLicenseKey(licenseKey)
+
+    // Missing key is unlicensed on every host — including localhost. This must
+    // run before the dev short-circuit so a missing env var surfaces the same
+    // unlicensed watermark locally that it would in production.
+    if (normalizedKey.length === 0) {
+      const next = createUnlicensedState()
+      setState(next)
+      onValidateRef.current?.(next)
+      return
+    }
+
     if (isDevEnvironment()) {
-      const devState: LicenseState = {
-        ...DEV_BYPASS_STATE,
-        validatedAt: Date.now(),
-      }
-      setState(devState)
-      onValidateRef.current?.(devState)
+      const next = createDevBypassState()
+      setState(next)
+      onValidateRef.current?.(next)
       return
     }
 
     try {
       const result = organizationId
-        ? await validateLicenseKey(licenseKey, organizationId)
-        : await validateLicenseKey(licenseKey)
+        ? await validateLicenseKey(normalizedKey, organizationId)
+        : await validateLicenseKey(normalizedKey)
       setState(result)
       onValidateRef.current?.(result)
     } catch (error) {
@@ -99,7 +102,12 @@ export function LicenseProvider({
   // (`useLicenseGate`, `<LicenseGate>`, `<ProGate>`) never read localStorage
   // on every render. Both gates now share this single source of truth.
   const { isGated, isLoading, gracePeriodActive } = useMemo(() => {
-    if (isDevEnvironment()) {
+    const normalizedKey = normalizeLicenseKey(licenseKey)
+
+    // Dev bypass only applies when a non-empty key is configured. A missing
+    // key on localhost falls through to the normal status-based gating so the
+    // unlicensed watermark appears just like in production.
+    if (isDevEnvironment() && normalizedKey.length > 0) {
       return { isGated: false, isLoading: false, gracePeriodActive: false }
     }
     if (state.status === 'loading') {
@@ -110,7 +118,8 @@ export function LicenseProvider({
     }
     if (state.status === 'error') {
       const domain = getCurrentDomain()
-      const grace = domain ? hasFreshCache(domain, licenseKey) : false
+      // Use the normalized key so the hash matches what polar-client writes.
+      const grace = domain ? hasFreshCache(domain, normalizedKey) : false
       return { isGated: !grace, isLoading: false, gracePeriodActive: grace }
     }
     return { isGated: true, isLoading: false, gracePeriodActive: false }

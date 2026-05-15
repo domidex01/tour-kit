@@ -2,6 +2,11 @@ import type { ZodError } from 'zod'
 import type { LicenseState, PolarActivateResponse, PolarValidateResponse } from '../types'
 import { readCache, writeCache } from './cache'
 import { getCurrentDomain, isDevEnvironment } from './domain'
+import {
+  createDevBypassState,
+  createUnlicensedState,
+  normalizeLicenseKey,
+} from './license-state'
 import { PolarActivateResponseSchema, PolarValidateResponseSchema } from './schemas'
 
 const POLAR_API_BASE = 'https://api.polar.sh/v1/customer-portal/license-keys'
@@ -190,30 +195,31 @@ export async function validateLicenseKey(
   const domain = getCurrentDomain()
   const orgId = organizationId ?? ''
   const now = Date.now()
+  const normalizedKey = normalizeLicenseKey(key)
 
-  // 1. Dev bypass
+  // 0. Missing or whitespace-only key is unlicensed on every host — including
+  //    localhost. Must run before cache reads so an old valid cache entry
+  //    cannot mask an empty env var, and before the dev bypass so a developer
+  //    sees the same unlicensed watermark locally that production would show.
+  if (normalizedKey.length === 0) {
+    return createUnlicensedState(now)
+  }
+
+  // 1. Dev bypass — only for non-empty keys. We do not validate locally
+  //    because that would consume Polar activation slots during normal dev.
   if (isDevEnvironment()) {
-    return {
-      status: 'valid',
-      tier: 'pro',
-      activations: 0,
-      maxActivations: 0,
-      domain,
-      expiresAt: null,
-      validatedAt: now,
-      renderKey: 'dev_bypass',
-    }
+    return createDevBypassState(now)
   }
 
   // 2. Cache check (bound to current key — switching licenseKey invalidates)
   if (domain) {
-    const cached = readCache(domain, key)
+    const cached = readCache(domain, normalizedKey)
     if (cached) return cached
   }
 
   try {
     // 3. Validate against Polar API
-    const response = await validateKey(key, orgId)
+    const response = await validateKey(normalizedKey, orgId)
 
     // 4. Map Polar status to LicenseState
     if (response.status === 'revoked' || response.status === 'disabled') {
@@ -227,7 +233,7 @@ export async function validateLicenseKey(
         validatedAt: now,
         renderKey: undefined,
       }
-      if (domain) writeCache(domain, state, key)
+      if (domain) writeCache(domain, state, normalizedKey)
       return state
     }
 
@@ -242,7 +248,7 @@ export async function validateLicenseKey(
         validatedAt: now,
         renderKey: undefined,
       }
-      if (domain) writeCache(domain, state, key)
+      if (domain) writeCache(domain, state, normalizedKey)
       return state
     }
 
@@ -251,7 +257,7 @@ export async function validateLicenseKey(
     let usage = response.usage
 
     if (!response.activation && domain) {
-      const activateResponse = await activateKey(key, orgId, domain)
+      const activateResponse = await activateKey(normalizedKey, orgId, domain)
       activationLabel = activateResponse.label
       usage = activateResponse.licenseKey.usage
     }
@@ -278,9 +284,9 @@ export async function validateLicenseKey(
       domain: activationLabel,
       expiresAt: response.expiresAt,
       validatedAt: now,
-      renderKey: generateRenderKey(key, activationLabel),
+      renderKey: generateRenderKey(normalizedKey, activationLabel),
     }
-    if (domain) writeCache(domain, state, key)
+    if (domain) writeCache(domain, state, normalizedKey)
     return state
   } catch (error) {
     if (error instanceof PolarApiError && error.statusCode === 404) {

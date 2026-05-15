@@ -4,7 +4,7 @@
   "description": "Codemods to migrate from Joyride, Shepherd, and Driver.js to Tour Kit",
   "author": "Tour Kit Team",
   "license": "MIT",
-  "homepage": "https://github.com/domidex01/tour-kit#readme",
+  "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/domidex01/tour-kit.git",

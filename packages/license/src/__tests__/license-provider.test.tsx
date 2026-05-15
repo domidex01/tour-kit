@@ -170,11 +170,57 @@ describe('LicenseProvider', () => {
     })
   })
 
-  it('skips validation in dev mode and returns valid pro with dev_bypass renderKey', async () => {
+  it('localhost + empty key returns invalid/free and never calls validateLicenseKey', async () => {
+    mockIsDev.mockReturnValue(true)
+    const onValidate = vi.fn()
+
+    render(
+      <LicenseProvider licenseKey="" onValidate={onValidate}>
+        <TestConsumer />
+      </LicenseProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('status')).toHaveTextContent('invalid')
+      expect(screen.getByTestId('tier')).toHaveTextContent('free')
+      expect(screen.getByTestId('renderKey')).toHaveTextContent('undefined')
+    })
+
+    expect(mockValidate).not.toHaveBeenCalled()
+    expect(onValidate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'invalid',
+        tier: 'free',
+        renderKey: undefined,
+      })
+    )
+  })
+
+  it.each(['   ', '\t\n'])(
+    'localhost + whitespace-only key (%j) is treated as missing',
+    async (key) => {
+      mockIsDev.mockReturnValue(true)
+
+      render(
+        <LicenseProvider licenseKey={key}>
+          <TestConsumer />
+        </LicenseProvider>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByTestId('status')).toHaveTextContent('invalid')
+        expect(screen.getByTestId('tier')).toHaveTextContent('free')
+      })
+
+      expect(mockValidate).not.toHaveBeenCalled()
+    }
+  )
+
+  it('localhost + non-empty key returns dev_bypass and never calls validateLicenseKey', async () => {
     mockIsDev.mockReturnValue(true)
 
     render(
-      <LicenseProvider licenseKey="">
+      <LicenseProvider licenseKey="TOURKIT_local">
         <TestConsumer />
       </LicenseProvider>
     )
@@ -183,6 +229,24 @@ describe('LicenseProvider', () => {
       expect(screen.getByTestId('status')).toHaveTextContent('valid')
       expect(screen.getByTestId('tier')).toHaveTextContent('pro')
       expect(screen.getByTestId('renderKey')).toHaveTextContent('dev_bypass')
+    })
+
+    expect(mockValidate).not.toHaveBeenCalled()
+  })
+
+  it('production-like host + empty key returns invalid/free and never calls validateLicenseKey', async () => {
+    mockIsDev.mockReturnValue(false)
+
+    render(
+      <LicenseProvider licenseKey="">
+        <TestConsumer />
+      </LicenseProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('status')).toHaveTextContent('invalid')
+      expect(screen.getByTestId('tier')).toHaveTextContent('free')
+      expect(screen.getByTestId('renderKey')).toHaveTextContent('undefined')
     })
 
     expect(mockValidate).not.toHaveBeenCalled()

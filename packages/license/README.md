@@ -18,7 +18,7 @@ The runtime validator that gates **Tour Kit Pro** packages. Validates license ke
 - **Polar.sh validation** — license keys generated and managed via Polar customer portal
 - **Domain activation** — 5 slots per key; bound to hostname
 - **Offline cache** — `localStorage`-backed, 72h TTL, Zod-validated reads
-- **Dev bypass** — `localhost`, `127.0.0.1`, `*.local` skip activation automatically
+- **Dev bypass** — `localhost`, `127.0.0.1`, `*.local` skip activation **when a non-empty key is configured**. An empty or whitespace-only `licenseKey` is treated as unlicensed on every host, so a missing env var surfaces the watermark before deploy
 - **`<LicenseGate>`** — soft gate used internally by every Tour Kit Pro package. Renders children unconditionally; on non-localhost hosts without a valid license, layers a small badge + dev warning on top
 - **`<ProGate>`** — legacy hard gate that replaces children with a branded placeholder. Tour Kit's own Pro packages no longer use this internally; kept exported for downstream consumers
 - **`<LicenseWatermark>`** — small `Tour Kit · Unlicensed · Buy license` portal badge with singleton ownership transfer
@@ -165,7 +165,18 @@ await deactivateKey('TOURKIT-...', 'your-org-id', 'activation-id')
 
 ## Development mode
 
-On `localhost`, `127.0.0.1`, and `*.local` domains, license validation is automatically bypassed. **No activation slot is consumed.** The provider returns `{ status: 'valid', tier: 'pro' }`.
+On `localhost`, `127.0.0.1`, and `*.local` domains:
+
+- **Non-empty `licenseKey`** — Tour Kit skips Polar entirely and returns
+  `{ status: 'valid', tier: 'pro', renderKey: 'dev_bypass' }`. No activation
+  slot is consumed. The watermark is not rendered. This applies even if the
+  key would not be valid in production — local bypass does not verify keys.
+- **Empty or whitespace-only `licenseKey`** — Tour Kit treats the app as
+  unlicensed. The Pro packages render their UI (soft gate) and a single
+  `<LicenseWatermark>` badge appears bottom-right. This makes a missing env
+  var surface locally before it reaches production. Outside a
+  `<LicenseProvider>`, the library cannot inspect the key, so localhost
+  remains quiet there.
 
 `staging.example.com` and other non-local hostnames do **not** bypass — even in development.
 
@@ -204,6 +215,7 @@ import type {
 ## Gotchas
 
 - **Dev bypass is hostname-scoped** — only `localhost`, `127.0.0.1`, and `*.local`.
+- **Dev bypass requires a non-empty key** — `licenseKey=""` or whitespace is unlicensed on every host (including localhost), so a missing env var fails loudly.
 - **`organizationId` is technically optional** in `LicenseProviderProps` but **required** for Polar validation to work.
 - **Cache keys are domain-scoped** — `tourkit:license:{domain}` — so multiple sites on the same browser don't collide.
 - **`headless.ts` ≠ `index.ts`** — don't accidentally import React-using modules from the headless entry; it breaks tree-shaking.

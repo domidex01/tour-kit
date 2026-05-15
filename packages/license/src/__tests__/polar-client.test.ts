@@ -274,13 +274,73 @@ describe('validateLicenseKey', () => {
     expect(result.renderKey).toBeUndefined()
   })
 
-  it('returns dev bypass state in dev environment', async () => {
+  it('missing key on localhost returns invalid/free without fetch or cache write', async () => {
     vi.stubGlobal('location', { hostname: 'localhost' })
-    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
+    const result = await validateLicenseKey('', 'org_test_456')
+    expect(mockFetch).not.toHaveBeenCalled()
+    expect(localStorage.setItem).not.toHaveBeenCalled()
+    expect(result.status).toBe('invalid')
+    expect(result.tier).toBe('free')
+    expect(result.renderKey).toBeUndefined()
+  })
+
+  it.each(['   ', '\t\n'])(
+    'whitespace key (%j) on localhost returns invalid/free without fetch or cache write',
+    async (key) => {
+      vi.stubGlobal('location', { hostname: 'localhost' })
+      const result = await validateLicenseKey(key, 'org_test_456')
+      expect(mockFetch).not.toHaveBeenCalled()
+      expect(localStorage.setItem).not.toHaveBeenCalled()
+      expect(result.status).toBe('invalid')
+      expect(result.tier).toBe('free')
+      expect(result.renderKey).toBeUndefined()
+    }
+  )
+
+  it('missing key on production-like host returns invalid/free before cache read', async () => {
+    // Seed a valid cache entry; the missing-key branch must short-circuit
+    // before readCache and not return the stale valid state.
+    localStorage.setItem('tourkit:license:example.com', JSON.stringify(VALID_CACHE_ENTRY))
+
+    const result = await validateLicenseKey('', 'org_test_456')
+
+    expect(mockFetch).not.toHaveBeenCalled()
+    expect(result.status).toBe('invalid')
+    expect(result.tier).toBe('free')
+    expect(result.renderKey).toBeUndefined()
+  })
+
+  it('non-empty key on localhost returns dev_bypass without fetch', async () => {
+    vi.stubGlobal('location', { hostname: 'localhost' })
+    const result = await validateLicenseKey('TOURKIT_local', 'org_test_456')
     expect(mockFetch).not.toHaveBeenCalled()
     expect(result.status).toBe('valid')
     expect(result.tier).toBe('pro')
     expect(result.renderKey).toBe('dev_bypass')
+  })
+
+  it('production validation uses trimmed key in the fetch body', async () => {
+    mockFetch.mockResolvedValue(mockFetchResponse(VALID_VALIDATE_RESPONSE))
+    await validateLicenseKey('  TK-XXXX  ', 'org_test_456')
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body as string)
+    expect(body.key).toBe('TK-XXXX')
+    expect(body.organization_id).toBe('org_test_456')
+  })
+
+  it('production validation uses trimmed key for cache binding (second call hits cache)', async () => {
+    mockFetch.mockResolvedValue(mockFetchResponse(VALID_VALIDATE_RESPONSE))
+
+    // First call with padded key — performs validation and writes cache with
+    // the normalized keyHash.
+    await validateLicenseKey('  TK-XXXX  ', 'org_test_456')
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+
+    // Second call with the same trimmed key must hit the cache — proves the
+    // first call hashed the trimmed key, not the raw spaced string.
+    const second = await validateLicenseKey('TK-XXXX', 'org_test_456')
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(second.status).toBe('valid')
   })
 
   it('writes result to cache after successful validation', async () => {

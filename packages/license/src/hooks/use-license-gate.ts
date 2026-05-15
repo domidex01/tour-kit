@@ -14,31 +14,38 @@ export interface LicenseGateResult {
 /**
  * Determines whether a pro component should render or show a placeholder.
  *
- * The gating decision is computed once per validation inside `LicenseProvider`
- * and exposed on the context, so this hook reads it directly — no localStorage
- * access on every render.
+ * Provider state wins over hostname. When `<LicenseProvider>` is mounted, the
+ * provider's derived `isGated`/`isLoading` flags drive the result so a missing
+ * key on localhost still surfaces as gated. Only when no provider is in the
+ * tree do we fall back to the hostname check — at that point we have no key to
+ * inspect, so localhost stays quiet.
  *
- * Logic (mirrors LicenseProvider's derived signals):
- * - Dev environment (localhost, 127.0.0.1, *.local) → never gated
- * - No LicenseProvider in tree → gated
+ * Provider-derived signals (see LicenseProvider for the full table):
  * - status 'loading' → not gated, isLoading=true (avoid flash)
  * - status 'valid' + pro + renderKey → not gated
  * - status 'error' + fresh cache → not gated (grace period)
  * - status 'error' + no cache → gated
  * - status 'invalid' / 'expired' / 'revoked' → gated
+ *
+ * No-provider fallback:
+ * - dev host → not gated (cannot inspect a key that does not exist)
+ * - non-dev host → gated
  */
 export function useLicenseGate(): LicenseGateResult {
   const context = useContext(LicenseContext)
 
-  // Dev bypass — never gate locally, even when no provider is mounted.
+  // Provider precedence: when a `<LicenseProvider>` is in the tree, trust its
+  // derived gate state. The provider already accounts for the dev bypass for
+  // non-empty keys and falls through to gated state when the key is missing.
+  if (context !== null) {
+    return { isGated: context.isGated, isLoading: context.isLoading }
+  }
+
+  // No provider — fall back to the hostname check. Locally we cannot tell
+  // whether a key was configured, so stay quiet on dev hosts.
   if (isDevEnvironment()) {
     return { isGated: false, isLoading: false }
   }
 
-  // No LicenseProvider in tree — gated.
-  if (context === null) {
-    return { isGated: true, isLoading: false }
-  }
-
-  return { isGated: context.isGated, isLoading: context.isLoading }
+  return { isGated: true, isLoading: false }
 }

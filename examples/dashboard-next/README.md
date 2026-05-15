@@ -22,14 +22,23 @@ pnpm --filter dashboard-next dev
 
 Open http://localhost:3000 (or 3001 if 3000 is taken).
 
-`.env.local` (all optional on localhost — license validation bypasses dev hosts,
-and the `/api/chat` route returns a stub when `OPENAI_API_KEY` is empty):
+`.env.local` (the `/api/chat` route returns a stub when `OPENAI_API_KEY` is
+empty, and the Polar org id is only consulted on non-dev hosts):
 
 ```
 NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY=
 NEXT_PUBLIC_POLAR_ORGANIZATION_ID=
 OPENAI_API_KEY=
 ```
+
+License key behavior on localhost:
+
+- Empty key — Tour Kit treats the app as unlicensed and the standard "Tour Kit
+  · Unlicensed · Buy license" badge renders bottom-right. Useful as a missing
+  env-var canary before deploy and for previewing the free-tier experience of
+  the Pro packages.
+- Non-empty key — the localhost dev bypass kicks in: no Polar call, no
+  activation slot consumed, and no watermark.
 
 ## Package map
 

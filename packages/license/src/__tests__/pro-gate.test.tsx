@@ -231,6 +231,44 @@ describe('ProGate', () => {
     expect(screen.queryByText('Tour Kit Pro license required')).not.toBeInTheDocument()
   })
 
+  it('renders hard placeholder for provider + empty key + localhost', async () => {
+    mockIsDev.mockReturnValue(true)
+
+    render(
+      <LicenseProvider licenseKey="">
+        <ProGate package="@tour-kit/adoption">
+          <div data-testid="pro-content">Pro Feature</div>
+        </ProGate>
+      </LicenseProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Tour Kit Pro license required')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByTestId('pro-content')).not.toBeInTheDocument()
+    expect(mockValidate).not.toHaveBeenCalled()
+  })
+
+  it('renders children for provider + non-empty key + localhost (dev_bypass)', async () => {
+    mockIsDev.mockReturnValue(true)
+
+    render(
+      <LicenseProvider licenseKey="TOURKIT_local">
+        <ProGate package="@tour-kit/adoption">
+          <div data-testid="pro-content">Pro Feature</div>
+        </ProGate>
+      </LicenseProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pro-content')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Tour Kit Pro license required')).not.toBeInTheDocument()
+    expect(mockValidate).not.toHaveBeenCalled()
+  })
+
   it('renders placeholder when no LicenseProvider in tree (non-dev)', () => {
     mockIsDev.mockReturnValue(false)
 

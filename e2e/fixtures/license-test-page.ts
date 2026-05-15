@@ -49,12 +49,31 @@ export class LicenseTestPage {
     return this.page.getByTestId(`test-content-${id}`)
   }
 
+  /**
+   * Hard-placeholder locator. Only meaningful when the test app wraps the pro
+   * package in `<ProGate>`. The license test apps use `<LicenseGate>` (soft),
+   * so prefer {@link watermark} for unlicensed-state assertions.
+   */
   placeholder(id: string): Locator {
     return this.testBlock(id).locator('[role="status"][aria-label="License required"]')
   }
 
   placeholderLink(id: string): Locator {
     return this.placeholder(id).locator('a[href="https://tourkit.dev/pricing"]')
+  }
+
+  /** Singleton unlicensed badge layered by `<LicenseGate>`. */
+  watermark(): Locator {
+    return this.page.locator('[data-tourkit-watermark]')
+  }
+
+  async assertWatermarkVisible(): Promise<void> {
+    await expect(this.watermark()).toHaveCount(1)
+    await expect(this.watermark()).toBeVisible()
+  }
+
+  async assertWatermarkHidden(): Promise<void> {
+    await expect(this.watermark()).toHaveCount(0)
   }
 
   async assertAllFreeRender(): Promise<void> {
@@ -75,6 +94,17 @@ export class LicenseTestPage {
       const ph = this.placeholder(id)
       await expect(ph).toHaveCount(0)
     }
+  }
+
+  /**
+   * Soft-gate unlicensed assertion: pro packages still render their UI and
+   * one global watermark badge is layered on top. This is the contract the
+   * license test apps actually use (they mount the pro providers directly,
+   * relying on `<LicenseGate>` inside each package to layer the watermark).
+   */
+  async assertAllProSoftRender(): Promise<void> {
+    await this.assertAllProRender()
+    await this.assertWatermarkVisible()
   }
 
   async assertAllProGated(): Promise<void> {

@@ -159,15 +159,25 @@ This follows the same soft-enforcement pattern used by AG Grid and MUI X.
 
 ## Development Mode
 
-On `localhost`, `127.0.0.1`, and `*.local` domains, license validation is automatically bypassed:
+On `localhost`, `127.0.0.1`, and `*.local` domains, license validation is automatically bypassed **when a non-empty `licenseKey` is configured**:
 
 - No network request to Polar API
 - No activation slot consumed
-- Provider returns `{ status: 'valid', tier: 'pro' }`
-- All pro features work without a license key
+- Provider returns `{ status: 'valid', tier: 'pro', renderKey: 'dev_bypass' }`
+- All pro features work without verifying the key
+
+An empty or whitespace-only `licenseKey` is treated as unlicensed on every host, including `localhost`. Pro packages still render their UI (soft gate) and a single `Tour Kit · Unlicensed · Buy license` watermark appears bottom-right — making a missing env var surface locally before it ships.
+
+| Host | `licenseKey` | Result |
+|---|---|---|
+| `localhost` / `127.0.0.1` / `*.local` | Non-empty | `valid` / `pro`, no Polar call, no watermark |
+| `localhost` / `127.0.0.1` / `*.local` | Empty or blank | `invalid` / `free`, no Polar call, watermark visible |
+| `localhost` (no `<LicenseProvider>`) | n/a | Quiet — library cannot inspect a key that does not exist |
+| Production-like host | Non-empty | Validated against Polar (cache-aware) |
+| Production-like host | Empty or blank | `invalid` / `free`, no Polar call, watermark visible |
 
 <Callout type="info">
-Development mode bypass is automatic. You do not need a license key for local development.
+The localhost bypass only skips Polar — it does not prove the key is valid. We intentionally do not verify local keys because every validation would consume an activation slot during normal dev.
 </Callout>
 
 ## CI/CD Setup
@@ -241,7 +251,7 @@ Each license key supports up to 5 domain activations. You can deactivate a domai
 
 ### Does localhost count as an activation?
 
-No. Development environments (`localhost`, `127.0.0.1`, `*.local`) are automatically bypassed and do not consume an activation slot.
+No. When a non-empty `licenseKey` is set, development environments (`localhost`, `127.0.0.1`, `*.local`) are automatically bypassed and do not consume an activation slot. An empty key on localhost intentionally shows the unlicensed watermark — see [Development Mode](#development-mode).
 
 ### Can I use one key for staging + production?
 

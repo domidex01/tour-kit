@@ -2,12 +2,13 @@ import { test } from '@playwright/test'
 import { LicenseTestPage } from '../fixtures/license-test-page'
 
 test.describe('Next.js — Production domain, invalid key', () => {
-  test('free packages render, pro packages show placeholder', async ({ page }) => {
+  test('free + pro packages render with one watermark (soft gate)', async ({ page }) => {
     await page.goto('/license-invalid')
     await page.waitForTimeout(2000)
 
     const ltp = new LicenseTestPage(page)
     await ltp.assertAllFreeRender()
-    await ltp.assertAllProGated()
+    await ltp.assertAllProRender()
+    await ltp.assertWatermarkVisible()
   })
 })

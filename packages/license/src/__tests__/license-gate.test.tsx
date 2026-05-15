@@ -232,6 +232,83 @@ describe('LicenseGate', () => {
     warnSpy.mockRestore()
   })
 
+  it('provider + empty key + localhost renders children and one watermark', async () => {
+    mockIsDev.mockReturnValue(true)
+
+    render(
+      <LicenseProvider licenseKey="">
+        <LicenseGate require="pro">
+          <div data-testid="pro-content">Pro Feature</div>
+        </LicenseGate>
+      </LicenseProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pro-content')).toBeInTheDocument()
+      expect(findWatermark()).not.toBeNull()
+    })
+
+    expect(mockValidate).not.toHaveBeenCalled()
+  })
+
+  it.each(['   ', '\t\n'])(
+    'provider + whitespace key (%j) + localhost renders children and one watermark',
+    async (key) => {
+      mockIsDev.mockReturnValue(true)
+
+      render(
+        <LicenseProvider licenseKey={key}>
+          <LicenseGate require="pro">
+            <div data-testid="pro-content">Pro Feature</div>
+          </LicenseGate>
+        </LicenseProvider>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByTestId('pro-content')).toBeInTheDocument()
+        expect(findWatermark()).not.toBeNull()
+      })
+    }
+  )
+
+  it('provider + non-empty key + localhost renders children and no watermark', async () => {
+    mockIsDev.mockReturnValue(true)
+
+    render(
+      <LicenseProvider licenseKey="TOURKIT_local">
+        <LicenseGate require="pro">
+          <div data-testid="pro-content">Pro Feature</div>
+        </LicenseGate>
+      </LicenseProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pro-content')).toBeInTheDocument()
+    })
+
+    expect(findWatermark()).toBeNull()
+    expect(mockValidate).not.toHaveBeenCalled()
+  })
+
+  it('provider + empty key + localhost + explicit fallback renders fallback and no watermark', async () => {
+    mockIsDev.mockReturnValue(true)
+
+    render(
+      <LicenseProvider licenseKey="">
+        <LicenseGate require="pro" fallback={<div data-testid="fallback">Upgrade</div>}>
+          <div data-testid="pro-content">Pro Feature</div>
+        </LicenseGate>
+      </LicenseProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('fallback')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByTestId('pro-content')).not.toBeInTheDocument()
+    expect(findWatermark()).toBeNull()
+  })
+
   it('warns once when no provider and NODE_ENV is not production', async () => {
     mockIsDev.mockReturnValue(false)
     process.env.NODE_ENV = 'development'

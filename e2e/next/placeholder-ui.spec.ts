@@ -1,29 +1,35 @@
 import { expect, test } from '@playwright/test'
-import { LicenseTestPage, PRO_PACKAGES, PRO_PACKAGE_NAMES } from '../fixtures/license-test-page'
+import { LicenseTestPage } from '../fixtures/license-test-page'
 
-test.describe('Next.js — Production domain, placeholder UI verification', () => {
-  test('placeholder shows correct text, package name, and accessible markup', async ({ page }) => {
+test.describe('Next.js — Production domain, watermark UI verification', () => {
+  test('renders a single accessible watermark with correct text and CTA link', async ({ page }) => {
     await page.goto('/license-invalid')
     await page.waitForTimeout(2000)
 
     const ltp = new LicenseTestPage(page)
+    const watermark = ltp.watermark()
 
-    for (const id of PRO_PACKAGES) {
-      const ph = ltp.placeholder(id)
-      await expect(ph).toBeVisible()
-      await expect(ph).toContainText('Tour Kit Pro license required')
+    // Singleton: exactly one badge regardless of how many pro packages mount.
+    await expect(watermark).toHaveCount(1)
+    await expect(watermark).toBeVisible()
 
-      const pkgName = PRO_PACKAGE_NAMES[id]
-      await expect(ph).toContainText(pkgName)
+    // Content matches the soft-gate badge copy.
+    await expect(watermark).toContainText('Tour Kit')
+    await expect(watermark).toContainText('Unlicensed')
+    await expect(watermark).toContainText('Buy license')
 
-      await expect(ph).toHaveAttribute('role', 'status')
-      await expect(ph).toHaveAttribute('aria-label', 'License required')
+    // Accessible region with a meaningful name.
+    await expect(watermark).toHaveAttribute('role', 'region')
+    await expect(watermark).toHaveAttribute('aria-label', 'Tour Kit license required')
 
-      const link = ltp.placeholderLink(id)
-      await expect(link).toBeVisible()
-      await expect(link).toHaveAttribute('target', '_blank')
-      await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      await expect(link).toContainText('Get a license')
-    }
+    // Pricing link opens in a new tab with UTM tagging.
+    const link = watermark.locator('a')
+    await expect(link).toBeVisible()
+    await expect(link).toHaveAttribute('target', '_blank')
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    const href = await link.getAttribute('href')
+    expect(href).toContain('usertourkit.com/pricing')
+    expect(href).toContain('utm_source=unlicensed_badge')
+    expect(href).toContain('utm_campaign=watermark')
   })
 })

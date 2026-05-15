@@ -71,13 +71,16 @@ import { LicenseGate } from '@tour-kit/license';
 
 Behavior matrix:
 
-| Host | `LicenseProvider` mounted | License | Rendered |
-|---|---|---|---|
-| `localhost` / `127.0.0.1` / `*.local` | any | any | Children only, no badge |
-| Other host | yes | valid pro | Children only, no badge |
-| Other host | yes | invalid/expired/revoked | Children + badge + dev warning |
-| Other host | yes | error + fresh cache | Children only, no badge |
-| Other host | no | n/a | Children + badge + dev warning. No throw |
+| Host | `LicenseProvider` mounted | `licenseKey` | License | Rendered |
+|---|---|---|---|---|
+| `localhost` / `127.0.0.1` / `*.local` | yes | non-empty | dev bypass | Children only, no badge |
+| `localhost` / `127.0.0.1` / `*.local` | yes | empty / blank | unlicensed | Children + badge + dev warning |
+| `localhost` / `127.0.0.1` / `*.local` | no | n/a | n/a | Children only, no badge (no key to inspect) |
+| Other host | yes | non-empty | valid pro | Children only, no badge |
+| Other host | yes | non-empty | invalid/expired/revoked | Children + badge + dev warning |
+| Other host | yes | non-empty | error + fresh cache | Children only, no badge |
+| Other host | yes | empty / blank | unlicensed | Children + badge + dev warning |
+| Other host | no | n/a | n/a | Children + badge + dev warning. No throw |
 
 ### ProGate
 
@@ -96,7 +99,7 @@ import { ProGate } from '@tour-kit/license';
 | `package` | `string` | npm package name shown in the placeholder + console warning |
 | `children` | `ReactNode` | Rendered when licensed; replaced by branded placeholder otherwise |
 
-Dev environments (`localhost`, `127.0.0.1`, `*.local`) always render `children`.
+Dev environments (`localhost`, `127.0.0.1`, `*.local`) render `children` when no `LicenseProvider` is mounted, or when a `LicenseProvider` with a non-empty `licenseKey` is mounted. With a `LicenseProvider` and an empty/blank `licenseKey`, the hard placeholder is shown on localhost too.
 
 ### LicenseWatermark
 
@@ -179,15 +182,17 @@ if (isLoading) return null;
 | `isGated` | `boolean` | True if the component should be blocked |
 | `isLoading` | `boolean` | True while validation is in progress (avoid flash) |
 
-Logic (mirrors `LicenseProvider`'s derived signals):
+Provider context takes precedence over the hostname check. When a `LicenseProvider` is mounted, the result follows the provider's derived signals:
 
-- Dev environment (`localhost`, `127.0.0.1`, `*.local`) → never gated
-- No `LicenseProvider` in tree → gated
+- `licenseKey` is empty or blank → gated on every host (including localhost)
+- Dev host + non-empty `licenseKey` → not gated (dev bypass)
 - `status: 'loading'` → not gated, `isLoading=true` (avoid flash)
 - `status: 'valid'` + pro + render key → not gated
 - `status: 'error'` + fresh cache → not gated (grace period)
 - `status: 'error'` + no cache → gated
 - `status: 'invalid' | 'expired' | 'revoked'` → gated
+
+When no `LicenseProvider` is in the tree, the hook falls back to the hostname check: dev hosts stay quiet (no key to inspect), every other host is gated.
 
 ---
 
