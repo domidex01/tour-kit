@@ -2,11 +2,7 @@ import type { ZodError } from 'zod'
 import type { LicenseState, PolarActivateResponse, PolarValidateResponse } from '../types'
 import { readCache, writeCache } from './cache'
 import { getCurrentDomain, isDevEnvironment } from './domain'
-import {
-  createDevBypassState,
-  createUnlicensedState,
-  normalizeLicenseKey,
-} from './license-state'
+import { createDevBypassState, createUnlicensedState, normalizeLicenseKey } from './license-state'
 import { PolarActivateResponseSchema, PolarValidateResponseSchema } from './schemas'
 
 const POLAR_API_BASE = 'https://api.polar.sh/v1/customer-portal/license-keys'
