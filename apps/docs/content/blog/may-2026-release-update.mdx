@@ -1,0 +1,153 @@
+---
+title: "userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license"
+slug: "may-2026-release-update"
+description: "Five phases shipped: @tour-kit/testing-library, @tour-kit/playwright, three migration codemods (Joyride, Shepherd, Driver), license soft-gate with try-before-buy watermark, and a Phase 8 QA pass covering analytics, accessibility, and autostart."
+primary_keyword: "userTourKit release notes"
+secondary_keywords: ["tour-kit codemods", "react onboarding testing library", "joyride to userTourKit", "shepherd.js migration", "soft gate license"]
+category: "Releases"
+schema_type: "Article"
+date: "2026-05-15"
+updated: "2026-05-15"
+published: true
+---
+
+# userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license
+
+Five phases went out in the last few weeks. Most of the work was driven by people we kept watching hit the same walls: Playwright tests scraping the DOM because there was no way to drive a tour deterministically, Joyride users asking "is there a codemod?", and consumers who wanted to evaluate the Pro packages but ran into a runtime throw on the first import. This release fixes all of that.
+
+## TL;DR
+
+- `@tour-kit/testing-library`: React Testing Library helpers that wrap `act()` for you, so your test bodies stay readable.
+- `@tour-kit/playwright`: an opt-in test bridge so e2e specs can step through tours without scraping the DOM.
+- `@tour-kit/codemods`: one-command migration from React Joyride, Shepherd.js, and Driver.js.
+- License soft-gate plus try-before-buy watermark. The Pro packages stop throwing on unlicensed sites and show a small badge instead.
+- Phase 8 QA wave covering analytics events, accessibility, autostart, and a refreshed watermark logo.
+
+## What's new
+
+### `@tour-kit/testing-library` (phase 5)
+
+Testing a tour with React Testing Library has been a known papercut. State transitions between steps fire outside the test's `act()` boundary, you get warnings, and the usual workaround turns every test body into a wall of `await act(async () => ...)`. The new package gives you four helpers (`renderTour`, `nextStep`, `expectStep`, `dismissTour`) that do that wrapping for you.
+
+```tsx
+import { renderTour, nextStep, expectStep } from '@tour-kit/testing-library'
+
+test('walks through onboarding', async () => {
+  const { user } = renderTour(<Onboarding />)
+  await expectStep('Welcome')
+  await nextStep(user)
+  await expectStep('Pick a workspace')
+})
+```
+
+No `act()` calls in your test body, no ESLint suppressions.
+
+### `@tour-kit/playwright` (phase 6)
+
+Driving a tour from a Playwright spec used to mean clicking through the same DOM your users do. That works for happy-path tests but it's brittle: a layout change moves an element by a pixel and the test fails for the wrong reason. The new package ships an opt-in `__TOUR_KIT__` bridge you mount in test builds, and your spec drives the tour through it:
+
+```ts
+import { tourkit } from '@tour-kit/playwright'
+
+test('completes the trial onboarding', async ({ page }) => {
+  await page.goto('/dashboard')
+  const tour = await tourkit(page, 'trial-onboarding')
+  await tour.start()
+  await tour.next()
+  await tour.assertStep('integrations')
+  await tour.complete()
+})
+```
+
+The bridge is gated on `process.env.NODE_ENV === 'test'` so it never reaches a production build.
+
+### `@tour-kit/codemods`: Joyride, Shepherd, Driver (phase 7a / 7b)
+
+The number-one question on the docs landing page was always "is there a way to migrate from X?" Now there is. Three jscodeshift transforms cover prop renames, step-shape differences, and selector-to-ref conversions, and they leave `// TODO(tour-kit):` markers where the rewrite is ambiguous rather than silently dropping config.
+
+```bash
+npx @tour-kit/codemods from-joyride src/
+npx @tour-kit/codemods from-shepherd src/
+npx @tour-kit/codemods from-driver src/
+```
+
+Each codemod is best-effort and idempotent, so you can run it again after manual cleanup. If you're still weighing the move, the [tour-kit vs React Joyride](/compare/tour-kit-vs-react-joyride), [tour-kit vs Shepherd.js](/compare/tour-kit-vs-shepherd-js), and [tour-kit vs Driver.js](/compare/tour-kit-vs-driver-js) comparisons walk through the trade-offs.
+
+### License soft-gate plus try-before-buy watermark (phase 8)
+
+Until this release, calling a Pro package without a valid license key threw at runtime. That kept production tight but made local evaluation painful: you'd `pnpm add @tour-kit/announcements`, render a single component, and get a runtime error before you'd even seen the API. See the [licensing docs](/docs/licensing) for the full model. The behaviour change in plain English:
+
+- On `localhost`, every Pro feature renders normally regardless of license state. The watermark is visible so you know you're in trial mode.
+- On unlicensed production domains, the package still renders. A small `userTourKit` badge appears in the corner.
+- An empty `licenseKey` string on localhost no longer crashes with a Zod error. (That one took a follow-up patch.)
+
+If you're already using a Pro package locally with a valid key, nothing changes. If you're using it without a key, the watermark will now show.
+
+### Phase 8 QA pass
+
+Smaller fixes that landed alongside the rest of the wave:
+
+- Analytics events (`tour_started`, `step_viewed`, `tour_completed`, `tour_skipped`) now fire consistently across all tour types with stable payload shapes, so downstream plugins can rely on the keys.
+- Accessibility cleanup: focus restoration on dismiss, `aria-live` region resets, and a fix for screen-reader announcement order on step transitions.
+- Autostart works without a click trigger, which is what you actually want for first-login onboarding.
+- Refreshed watermark logo using the new userTourKit mark.
+- Docs CSP now allows GA4 and Yandex endpoints so analytics actually works on the blog (it didn't, for a few days).
+
+## Versions shipped
+
+| Package | Version |
+|---|---|
+| `@tour-kit/core` | 0.12.0 |
+| `@tour-kit/react` | 0.12.0 |
+| `@tour-kit/hints` | 0.12.0 |
+| `@tour-kit/adoption` | 2.1.0 |
+| `@tour-kit/analytics` | 0.11.0 |
+| `@tour-kit/announcements` | 3.0.0 |
+| `@tour-kit/checklists` | 0.13.0 |
+| `@tour-kit/media` | 0.12.1 |
+| `@tour-kit/surveys` | 3.0.0 |
+| `@tour-kit/scheduling` | 0.11.0 |
+| `@tour-kit/license` | 1.1.1 |
+| `@tour-kit/ai` | 0.11.0 |
+
+The `3.0.0` on announcements and surveys looks alarming but isn't. Changesets reads any peer-dep range bump on `@tour-kit/core` as a breaking change and forces a major bump on every dependent, even when nothing in the public API moved. The runtime APIs in both packages are unchanged. We're fixing the changeset config; for now just update.
+
+## Upgrading
+
+```bash
+pnpm update @tour-kit/core @tour-kit/react @tour-kit/hints
+pnpm update @tour-kit/announcements @tour-kit/surveys @tour-kit/checklists
+```
+
+No code changes for existing tours. If you're migrating from another library, the codemods are now the fastest path in.
+
+## What's next
+
+We're working on closing the workarounds we hit while building the showcase dashboard: imperative tour control (no more window-event hacks), turnkey CSAT/NPS/CES modals, hint visibility presets, and a TourCard refresh. Posts as each ships.
+
+## FAQ
+
+### What changed in the userTourKit May 2026 release?
+
+Three new packages (`@tour-kit/testing-library`, `@tour-kit/playwright`, `@tour-kit/codemods`), a license soft-gate with try-before-buy watermark, and a Phase 8 polish wave covering analytics events, accessibility, and autostart. Core, React, and hints are at 0.12.0.
+
+### Are there breaking changes I need to handle?
+
+Nothing at runtime. Announcements and surveys jumped to 3.0.0, but only because Changesets misreads a peer-dep range bump on core as a breaking change. The actual public APIs are unchanged. Update them with the rest and you're done.
+
+### How do I migrate from React Joyride, Shepherd.js, or Driver.js?
+
+Run the codemod that matches your source library: `npx @tour-kit/codemods from-joyride src/` (also `from-shepherd`, `from-driver`). It covers prop renames, step-shape differences, and selector-to-ref conversions, and leaves `// TODO(tour-kit):` markers where the rewrite is ambiguous. They're idempotent, so it's safe to run again after manual cleanup.
+
+### What is the try-before-buy watermark?
+
+A small `userTourKit` badge that shows up on unlicensed production domains. Every Pro feature still works; the badge just makes the trial state visible. Localhost shows the badge too, so what you see while evaluating matches what an end user without a license would see. The old behaviour (throw on import) is gone.
+
+### How do I write end-to-end tests for tours with Playwright?
+
+Install `@tour-kit/playwright` and mount the test bridge in builds where `NODE_ENV === 'test'`. Your spec calls `tourkit(page, 'tour-id')` and drives the tour with `.start()`, `.next()`, `.assertStep()`, `.complete()`. No DOM scraping. The bridge is gated on the test env so it doesn't reach production builds.
+
+### Which packages got version bumps?
+
+Core, React, and hints are at 0.12.0. Adoption 2.1.0, analytics 0.11.0, announcements 3.0.0, checklists 0.13.0, media 0.12.1, surveys 3.0.0, scheduling 0.11.0, license 1.1.1, AI 0.11.0. The full table is in the release section above.
+

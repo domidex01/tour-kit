@@ -270,6 +270,8 @@ const CATEGORY_INTROS: Record<string, string> = {
     'The numbers that matter for onboarding and product tours: activation rate, time-to-value, feature adoption, tooltip CTR, completion rate, drop-off curves, North-Star metrics, and how to instrument them without polluting your analytics. We cover what each metric measures, how to calculate it correctly, common pitfalls, and the dashboards that actually drive product decisions.',
   'pillar-pages':
     'Comprehensive, deeply-linked guides that cover an entire topic end-to-end: product tours in React, the complete onboarding playbook, accessibility for in-app guidance, headless UI patterns, and the modern feature-adoption stack. These are the articles you bookmark, share with the team, and come back to. Each one links out to the focused tutorials and comparisons that go deeper.',
+  releases:
+    'Wave-by-wave updates from the userTourKit team: new packages, version bumps, breaking changes, migration paths, and the polish that ships between releases. Each post covers what shipped, why it matters when wiring a real app, the codemods or upgrade steps needed (if any), and a full package-version table so you know exactly what to bump. Skip the changesets folder — these posts give you the narrative behind the numbers, with code snippets, upgrade commands, and notes on the gotchas hit while building each release.',
   'thought-leadership':
     'Opinions, predictions, and field notes on where product onboarding is going: the rise of headless UI, the death of one-size-fits-all SaaS, AI-driven personalization, the developer experience of growth tools, and what the next generation of in-app guidance looks like. Less playbook, more perspective.',
   tutorial:
