@@ -5821,6 +5821,28 @@ export const BLOG_POSTS: BlogMeta[] = [
     lastUpdated: '2026-04-11',
     ogImage: '/og-images/why-we-open-sourced-tour-kit-mit-not-agpl-bsl.png',
   },
+  {
+    slug: 'may-2026-release-update',
+    title:
+      'userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license',
+    metaTitle:
+      'userTourKit May 2026 release notes: codemods, testing-library, soft-gate license',
+    description:
+      'Five phases shipped: @tour-kit/testing-library, @tour-kit/playwright, three migration codemods (Joyride, Shepherd, Driver), license soft-gate with try-before-buy watermark, and a Phase 8 QA pass covering analytics, accessibility, and autostart.',
+    keywords: [
+      'userTourKit release notes',
+      'tour-kit codemods',
+      'react onboarding testing library',
+      'joyride to userTourKit',
+      'shepherd.js migration',
+      'soft gate license',
+    ],
+    category: 'Releases',
+    published: true,
+    publishedAt: '2026-05-15',
+    lastUpdated: '2026-05-15',
+    ogImage: '/og-images/may-2026-release-update.png',
+  },
 ]
 
 // ── Helpers ──
