@@ -56,7 +56,10 @@ async function signToken(privateKey: Uint8Array, opts: SignOptions = {}): Promis
 
 type FetchMock = ReturnType<typeof vi.fn>
 
-function mockFetchOk(jwks: { keys: unknown[] }, revoked: Array<{ jti: string; revokedAt: string }>) {
+function mockFetchOk(
+  jwks: { keys: unknown[] },
+  revoked: Array<{ jti: string; revokedAt: string }>
+) {
   const fetchMock: FetchMock = vi.fn(async (url: string) => {
     if (url.endsWith('/.well-known/jwks.json')) {
       return { ok: true, status: 200, json: async () => jwks } as Response

@@ -5823,10 +5823,8 @@ export const BLOG_POSTS: BlogMeta[] = [
   },
   {
     slug: 'may-2026-release-update',
-    title:
-      'userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license',
-    metaTitle:
-      'userTourKit May 2026 release notes: codemods, testing-library, soft-gate license',
+    title: 'userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license',
+    metaTitle: 'userTourKit May 2026 release notes: codemods, testing-library, soft-gate license',
     description:
       'Five phases shipped: @tour-kit/testing-library, @tour-kit/playwright, three migration codemods (Joyride, Shepherd, Driver), license soft-gate with try-before-buy watermark, and a Phase 8 QA pass covering analytics, accessibility, and autostart.',
     keywords: [
