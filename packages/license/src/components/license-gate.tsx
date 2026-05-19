@@ -31,7 +31,11 @@ export function LicenseGate({ require: _require, children, fallback, loading }: 
     )
   }
 
-  if (context.isLoading) return <>{loading ?? null}</>
+  // Loading default is children, not null: `useEffect` doesn't fire during SSR,
+  // so the loading state is the *only* state the server ever sees. Returning
+  // null here blanks every Pro provider's subtree in SSR HTML and forces a
+  // post-hydration pop-in. Consumers who want a skeleton still pass `loading`.
+  if (context.isLoading) return <>{loading ?? children}</>
   if (!context.isGated) return <>{children}</>
   if (fallback) return <>{fallback}</>
 

@@ -145,7 +145,7 @@ describe('LicenseGate', () => {
     expect(screen.queryByTestId('pro-content')).not.toBeInTheDocument()
   })
 
-  it('renders null when no loading slot provided and loading', () => {
+  it('renders children when no loading slot provided and loading (SSR-safe default)', () => {
     mockValidate.mockImplementation(() => new Promise(() => {}))
 
     render(
@@ -156,7 +156,8 @@ describe('LicenseGate', () => {
       </LicenseProvider>
     )
 
-    expect(screen.queryByTestId('pro-content')).not.toBeInTheDocument()
+    expect(screen.getByTestId('pro-content')).toBeInTheDocument()
+    expect(findWatermark()).toBeNull()
   })
 
   it('renders children plus badge when tier is free but pro is required', async () => {
@@ -359,5 +360,25 @@ describe('LicenseGate', () => {
         </LicenseGate>
       )
     }).not.toThrow()
+  })
+
+  it('renderToString emits children inside a LicenseProvider (no SSR blackout)', () => {
+    // Provider starts in the loading state and validates inside `useEffect`,
+    // which never runs on the server. The gate must render `children` in that
+    // state or every Pro provider's subtree disappears from SSR HTML — the
+    // exact regression Plan 12C inherits and the release smoke probe caught.
+    mockIsDev.mockReturnValue(false)
+    mockValidate.mockImplementation(() => new Promise(() => {}))
+
+    const html = renderToString(
+      <LicenseProvider licenseKey="TOURKIT_key">
+        <LicenseGate require="pro">
+          <div data-ssr-marker="pro">Pro Feature</div>
+        </LicenseGate>
+      </LicenseProvider>
+    )
+
+    expect(html).toContain('data-ssr-marker="pro"')
+    expect(html).toContain('Pro Feature')
   })
 })
