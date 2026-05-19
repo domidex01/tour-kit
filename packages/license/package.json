@@ -72,6 +72,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@noble/ed25519": "^2.3.0",
     "zod": "catalog:"
   },
   "peerDependencies": {

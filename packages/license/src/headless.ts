@@ -19,6 +19,9 @@ export {
   PolarParseError,
 } from './lib/polar-client'
 
+// Cloud SDK JWT (Plan 12C)
+export { isCloudToken, validateCloudToken, CLOUD_TOKEN_TTL } from './lib/cloud-token'
+
 // Cache
 export { readCache, writeCache, clearCache, hasFreshCache } from './lib/cache'
 

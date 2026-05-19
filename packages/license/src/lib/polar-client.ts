@@ -1,6 +1,7 @@
 import type { ZodError } from 'zod'
 import type { LicenseState, PolarActivateResponse, PolarValidateResponse } from '../types'
 import { readCache, writeCache } from './cache'
+import { isCloudToken, validateCloudToken } from './cloud-token'
 import { getCurrentDomain, isDevEnvironment } from './domain'
 import { createDevBypassState, createUnlicensedState, normalizeLicenseKey } from './license-state'
 import { PolarActivateResponseSchema, PolarValidateResponseSchema } from './schemas'
@@ -199,6 +200,14 @@ export async function validateLicenseKey(
   //    sees the same unlicensed watermark locally that production would show.
   if (normalizedKey.length === 0) {
     return createUnlicensedState(now)
+  }
+
+  // 0a. Cloud SDK JWT path (Plan 12C). Routed BEFORE the dev bypass so a
+  //     paying Cloud customer on localhost gets real entitlement from their
+  //     dashboard-minted JWT instead of the dev-bypass mask. The discriminator
+  //     is purely structural; Polar `TOURKIT-...` keys never match.
+  if (isCloudToken(normalizedKey)) {
+    return validateCloudToken(normalizedKey)
   }
 
   // 1. Dev bypass — only for non-empty keys. We do not validate locally

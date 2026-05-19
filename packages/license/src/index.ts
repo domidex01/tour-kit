@@ -34,4 +34,5 @@ export type { LicenseGateResult } from './hooks/use-license-gate'
 
 // Headless utilities (re-exported for convenience)
 export { validateLicenseKey } from './lib/polar-client'
+export { isCloudToken, validateCloudToken } from './lib/cloud-token'
 export { isDevEnvironment, getCurrentDomain } from './lib/domain'

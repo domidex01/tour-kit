@@ -3,6 +3,41 @@ import { LicenseCacheSchema } from './schemas'
 
 const CACHE_PREFIX = 'tourkit:license:'
 const CACHE_TTL_MS = 72 * 60 * 60 * 1000 // 72 hours
+const DOC_CACHE_PREFIX = 'tourkit:doc:'
+
+/**
+ * Generic public-document cache for short-lived signed-config fetches
+ * (Cloud SDK JWKS + revocation list). Separate from the license-state cache
+ * so the two paths can't key-collide and so TTLs can differ. Used by
+ * `lib/cloud-token.ts`; nothing else should depend on this shape.
+ */
+export function readDocumentCache<T>(key: string, ttlMs: number): T | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(`${DOC_CACHE_PREFIX}${key}`)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as { value: T; cachedAt: number }
+    if (Date.now() - parsed.cachedAt > ttlMs) {
+      localStorage.removeItem(`${DOC_CACHE_PREFIX}${key}`)
+      return null
+    }
+    return parsed.value
+  } catch {
+    return null
+  }
+}
+
+export function writeDocumentCache<T>(key: string, value: T): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(
+      `${DOC_CACHE_PREFIX}${key}`,
+      JSON.stringify({ value, cachedAt: Date.now() })
+    )
+  } catch {
+    // localStorage quota exceeded — fail silently, network will refetch
+  }
+}
 
 // Deterministic short hash. Not a security primitive — used only to bind a
 // cache entry to the license key it was issued for, so switching `licenseKey`
