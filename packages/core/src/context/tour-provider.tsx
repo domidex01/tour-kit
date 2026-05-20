@@ -7,6 +7,7 @@ import { useRoutePersistence } from '../hooks/use-route-persistence'
 import { explainTour } from '../lib/diagnostic'
 import { TourValidationError, validateTour } from '../lib/validate-tour'
 import { TourRouteError, waitForStepTarget } from '../lib/wait-for-step-target'
+import { tourRegistry } from '../registry/tour-registry'
 import type {
   BranchContext,
   BranchTarget,
@@ -1576,6 +1577,95 @@ export function TourProvider({
       handleBranchTarget,
     ]
   )
+
+  // ─── Tour registry wiring (Phase 1, useTourActions) ──────────────────────
+  // Every tour in `tours` self-registers in the module-level `tourRegistry` so
+  // a sibling subtree can call `useTourActions(id).start()` without prop
+  // drilling or window-event workarounds. The registry is decoupled from the
+  // React tree (module-level Map<string, WeakRef<RegistryEntry>>), so the
+  // sibling consumer does NOT need to be inside this provider.
+  //
+  // Two effects below:
+  //   1. Lifecycle effect — registers one entry per tour on mount, unregisters
+  //      on unmount. Stable key is the NUL-joined ids so inline `tours={[...]}`
+  //      props don't re-register every render.
+  //   2. State-mirror effect — replaces each entry's `state` slice when the
+  //      reducer fires. The registry only notifies subscribers when the slice
+  //      actually changed, so spurious renders are clamped to one per real
+  //      transition.
+  //
+  // Action methods are wired through latest-state refs (`controllerRef`) so
+  // entries can be created once and the closures stay valid as the controller
+  // identity churns on every state change. This mirrors the `bridgeMethodsRef`
+  // pattern below and keeps the registry entry stable for the lifetime of the
+  // tour.
+  const controllerRef = React.useRef({ start, stop, next, prev, goToStep })
+  React.useEffect(() => {
+    controllerRef.current = { start, stop, next, prev, goToStep }
+  })
+
+  // `tourIdsKey` is declared earlier (diagnostic engine block) — reuse it here.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable key over tour ids replaces the reference dep
+  React.useEffect(() => {
+    if (tourIdsKey.length === 0) return
+    const ids = tourIdsKey.split('\x00').filter(Boolean)
+    const unregisters: Array<() => void> = []
+    for (const id of ids) {
+      const unregister = tourRegistry.register({
+        id,
+        state: { isActive: false, currentStepId: null, progress: 0 },
+        actions: {
+          start: () => {
+            void controllerRef.current.start(id)
+          },
+          stop: () => {
+            controllerRef.current.stop()
+          },
+          restart: () => {
+            void controllerRef.current.start(id, 0)
+          },
+          next: () => {
+            void controllerRef.current.next()
+          },
+          prev: () => {
+            void controllerRef.current.prev()
+          },
+          goToStep: (stepId) => {
+            void controllerRef.current.goToStep(stepId)
+          },
+        },
+      })
+      unregisters.push(unregister)
+    }
+    return () => {
+      for (const u of unregisters) u()
+    }
+  }, [tourIdsKey])
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: state-mirror runs on every transition affecting any registered entry; tourIdsKey gates on id-set changes
+  React.useEffect(() => {
+    if (tourIdsKey.length === 0) return
+    const ids = tourIdsKey.split('\x00').filter(Boolean)
+    for (const id of ids) {
+      const isThisTourActive = state.isActive && state.tourId === id
+      const progress =
+        isThisTourActive && state.totalSteps > 0
+          ? (state.currentStepIndex + 1) / state.totalSteps
+          : 0
+      tourRegistry.update(id, {
+        isActive: isThisTourActive,
+        currentStepId: isThisTourActive ? (state.currentStep?.id ?? null) : null,
+        progress,
+      })
+    }
+  }, [
+    tourIdsKey,
+    state.isActive,
+    state.tourId,
+    state.currentStep,
+    state.currentStepIndex,
+    state.totalSteps,
+  ])
 
   // ─── Test bridge wiring (Phase 6, issue #86) ─────────────────────────────
   // `enableTestBridge` opts in to `window.__tourKit__` — used by Playwright

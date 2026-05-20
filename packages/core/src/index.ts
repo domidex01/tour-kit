@@ -231,6 +231,12 @@ export { isI18nKey } from './lib/localized-text'
 export type { LocalizedText } from './lib/localized-text'
 export { useResolveLocalizedText } from './lib/i18n/use-resolve-localized-text'
 
+// Tour registry — Phase 1 (v2 polish). Module-level singleton so a sibling
+// subtree can drive a tour via `useTourActions(id).start()` without prop
+// drilling or window-event workarounds.
+export { useTourActions } from './registry/use-tour-actions'
+export type { UseTourActionsReturn } from './types/registry'
+
 // Segmentation primitives — Phase 2 (UserGuiding parity)
 export {
   SegmentationProvider,
