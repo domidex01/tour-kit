@@ -1,37 +1,33 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { QuestionRating, SurveyModal, useSurvey } from '@tour-kit/surveys'
+import { CsatModal, useSurvey } from '@tour-kit/surveys'
 
+/**
+ * Phase 2 (v2-package-polish): swapped from the hand-composed
+ * `<SurveyModal>` + `<QuestionRating>` + Skip/Submit assembly to the turnkey
+ * `<CsatModal>` wrapper. We still wire the `open` state through
+ * `useSurvey('onboarding-csat')` so the frequency rule + demo trigger
+ * (`reset()` then `show()`) keep working end-to-end.
+ */
 export function CsatSurveyHost() {
   const survey = useSurvey('onboarding-csat')
-  const rating = survey.state?.responses.get('q1') as number | undefined
-  const hasAnswer = typeof rating === 'number'
 
   return (
-    <SurveyModal surveyId="onboarding-csat">
-      <div className="mt-4 flex flex-col gap-4">
-        <QuestionRating
-          id="q1"
-          ratingScale={{ min: 1, max: 5 }}
-          style="stars"
-          size="lg"
-          label="How would you rate the walkthrough?"
-          lowLabel="Not great"
-          highLabel="Loved it"
-          isRequired
-          value={rating ?? null}
-          onChange={(v) => survey.answer('q1', v)}
-        />
-        <div className="flex items-center justify-end gap-2">
-          <Button variant="ghost" size="sm" onClick={() => survey.dismiss('programmatic')}>
-            Skip
-          </Button>
-          <Button size="sm" disabled={!hasAnswer} onClick={() => survey.complete()}>
-            Submit
-          </Button>
-        </div>
-      </div>
-    </SurveyModal>
+    <CsatModal
+      surveyId="onboarding-csat"
+      question="How would you rate the walkthrough?"
+      ratingScale={{ min: 1, max: 5, style: 'stars' }}
+      lowLabel="Not great"
+      highLabel="Loved it"
+      open={survey.state?.isVisible ?? false}
+      onOpenChange={(next) => {
+        if (!next) survey.hide()
+      }}
+      onSubmit={(rating) => {
+        survey.answer('q1', rating)
+        survey.complete()
+      }}
+      onSkip={() => survey.dismiss('programmatic')}
+    />
   )
 }
