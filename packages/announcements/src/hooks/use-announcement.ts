@@ -22,6 +22,12 @@ export interface UseAnnouncementReturn {
   viewCount: number
   /** Show the announcement */
   show: () => void
+  /**
+   * Force-show the announcement (admin/demo affordance). Bypasses frequency,
+   * cooldown, viewCount, isDismissed, and audience gates. License soft-gate
+   * is preserved — unlicensed renders still show the watermark.
+   */
+  forceShow: () => void
   /** Hide the announcement temporarily */
   hide: () => void
   /** Dismiss the announcement (marks as dismissed) */
@@ -45,6 +51,10 @@ export function useAnnouncement(id: string): UseAnnouncementReturn {
 
   const show = useCallback(() => {
     context.show(id)
+  }, [context, id])
+
+  const forceShow = useCallback(() => {
+    context.forceShow(id)
   }, [context, id])
 
   const hide = useCallback(() => {
@@ -78,11 +88,12 @@ export function useAnnouncement(id: string): UseAnnouncementReturn {
       canShow: canShowValue,
       viewCount: state?.viewCount ?? 0,
       show,
+      forceShow,
       hide,
       dismiss,
       complete,
       reset,
     }),
-    [state, config, canShowValue, show, hide, dismiss, complete, reset]
+    [state, config, canShowValue, show, forceShow, hide, dismiss, complete, reset]
   )
 }

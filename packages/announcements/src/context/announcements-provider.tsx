@@ -14,11 +14,34 @@ import type { QueueConfig } from '../types/queue'
 import { DEFAULT_QUEUE_CONFIG } from '../types/queue'
 import { AnnouncementsContext } from './announcements-context'
 
+/**
+ * Whitelist of gates `forceShow(id)` may bypass.
+ *
+ * Phase 0 §4 sign-off; pinned by a literal-array test in
+ * `__tests__/force-show.test.tsx`. New gates added to `show()` MUST default to
+ * "respect, don't bypass" — adding a gate name here is a deliberate API change
+ * and breaks the pinned test, forcing a review.
+ *
+ * The `<LicenseGate require="pro">` wrapper is intentionally NOT a member of
+ * this list — `forceShow` must not strip the license soft-gate watermark. See
+ * `apps/docs/content/docs/guides/imperative-control.mdx`.
+ */
+export const FORCE_SHOW_BYPASS = [
+  'frequency',
+  'cooldown',
+  'viewCount',
+  'isDismissed',
+  'audience',
+] as const
+
+export type ForceShowBypassKey = (typeof FORCE_SHOW_BYPASS)[number]
+
 // Action types
 type AnnouncementsAction =
   | { type: 'REGISTER'; config: AnnouncementConfig }
   | { type: 'UNREGISTER'; id: string }
   | { type: 'SHOW'; id: string }
+  | { type: 'FORCE_SHOW'; id: string }
   | { type: 'HIDE'; id: string }
   | { type: 'DISMISS'; id: string; reason: DismissalReason }
   | { type: 'COMPLETE'; id: string }
@@ -102,6 +125,32 @@ function announcementsReducer(
         }
       }
       return state
+    }
+
+    case 'FORCE_SHOW': {
+      // Mirror SHOW but bypass the isDismissed guard and clear the dismissal
+      // record. Every other gate (frequency/cooldown/viewCount/audience) is
+      // enforced in `show()` and skipped by `forceShow()` per Phase 0 §4.
+      const newAnnouncements = new Map(state.announcements)
+      const announcement = newAnnouncements.get(action.id)
+
+      if (!announcement) return state
+
+      newAnnouncements.set(action.id, {
+        ...announcement,
+        isActive: true,
+        isVisible: true,
+        viewCount: announcement.viewCount + 1,
+        lastViewedAt: new Date(),
+        isDismissed: false,
+        dismissedAt: null,
+        dismissalReason: null,
+      })
+      return {
+        ...state,
+        announcements: newAnnouncements,
+        activeAnnouncement: action.id,
+      }
     }
 
     case 'HIDE': {
@@ -516,6 +565,45 @@ export function AnnouncementsProvider({
     ]
   )
 
+  // Phase 1 (v2 polish) — admin/demo bypass. Skips every gate listed in
+  // `FORCE_SHOW_BYPASS`; the LicenseGate soft wrapper still enforces the
+  // unlicensed watermark/warning. Increments `viewCount` and stamps the
+  // analytics event with `metadata.trigger="forced"` so dashboards can
+  // filter forced previews out of real-user counts.
+  const forceShow = React.useCallback(
+    (id: string) => {
+      const announcementState = state.announcements.get(id)
+      const config = state.configs.get(id)
+      if (!announcementState || !config) return
+
+      schedulerRef.current.markActive()
+      dispatch({ type: 'FORCE_SHOW', id })
+
+      const updatedState: AnnouncementState = {
+        ...announcementState,
+        isActive: true,
+        isVisible: true,
+        viewCount: announcementState.viewCount + 1,
+        lastViewedAt: new Date(),
+        isDismissed: false,
+        dismissedAt: null,
+        dismissalReason: null,
+      }
+      persistState(id, updatedState)
+
+      analytics?.track('announcement_shown', {
+        tourId: id,
+        metadata: getAnnouncementAnalyticsMetadata(config, {
+          trigger: 'forced',
+          viewCount: updatedState.viewCount,
+        }),
+      })
+      config.onShow?.()
+      onAnnouncementShow?.(id)
+    },
+    [state.announcements, state.configs, persistState, analytics, onAnnouncementShow]
+  )
+
   const hide = React.useCallback((id: string) => {
     dispatch({ type: 'HIDE', id })
     schedulerRef.current.markInactive()
@@ -684,6 +772,7 @@ export function AnnouncementsProvider({
       register,
       unregister,
       show,
+      forceShow,
       hide,
       dismiss,
       complete,
@@ -703,6 +792,7 @@ export function AnnouncementsProvider({
       register,
       unregister,
       show,
+      forceShow,
       hide,
       dismiss,
       complete,

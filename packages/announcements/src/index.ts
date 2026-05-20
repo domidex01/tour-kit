@@ -89,7 +89,8 @@ export {
 // ============================================
 
 export { AnnouncementsContext, useAnnouncementsContext } from './context/announcements-context'
-export { AnnouncementsProvider } from './context/announcements-provider'
+export { AnnouncementsProvider, FORCE_SHOW_BYPASS } from './context/announcements-provider'
+export type { ForceShowBypassKey } from './context/announcements-provider'
 
 // ============================================
 // HOOKS
