@@ -1,0 +1,180 @@
+---
+title: Imperative control
+description: >-
+  Control tours from sibling subtrees with useTourActions, and bypass
+  announcement gates with forceShow for admin previews.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Two new v2 APIs replace the most common workarounds users wrote to drive tours and announcements imperatively:
+
+- **`useTourActions(id)`** in `@tour-kit/core` — read state and call `start` / `stop` / `next` / `prev` / `goToStep` / `restart` for a tour registered anywhere in the tree, including from siblings of the owning `<Tour>` component.
+- **`forceShow(id)`** on `useAnnouncementsContext()` — preview an announcement regardless of frequency, cooldown, view-count, dismissal, or audience gates. The license soft-gate is preserved.
+
+---
+
+## Imperative tour control with `useTourActions`
+
+### What problem this solves
+
+In v1, calling `start()` on a tour from a sibling subtree required dispatching a `CustomEvent('tour-replay')` from the trigger, mounting a `ReplayBridge` child inside `<Tour>` to listen for it, and re-wiring the bridge on every HMR remount. That workaround tied tour control to globals and made hard refresh / cross-page navigation fragile.
+
+`useTourActions(id)` reads from a module-level **tour registry** that every `<TourProvider>` and standalone `<Tour id="...">` populates on mount. No Provider is required around the consumer — the registry is a singleton.
+
+### Quick start
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { useTourActions } from '@tour-kit/core'
+
+function ReplayButton() {
+  const { isActive, start } = useTourActions('welcome')
+  return (
+    <button type="button" onClick={start} disabled={isActive}>
+      {isActive ? 'Tour in progress…' : 'Replay onboarding'}
+    </button>
+  )
+}
+
+export function App() {
+  return (
+    <>
+      <Tour id="welcome">
+        <TourStep id="hero" target="#hero" content="Welcome!" />
+        <TourStep id="cta" target="#cta" content="Get started here." />
+      </Tour>
+
+      {/* Sibling — NOT a descendant of <Tour> */}
+      <ReplayButton />
+    </>
+  )
+}
+```
+
+### Return shape
+
+```ts
+interface UseTourActionsReturn {
+  // State slice (read-only mirror of registry)
+  isActive: boolean
+  currentStepId: string | null
+  progress: number // 0..1
+
+  // Imperative actions
+  start: () => void           // starts at the tour's `startAt` step
+  stop: () => void
+  restart: () => void         // starts at step 0, regardless of `startAt`
+  next: () => void
+  prev: () => void
+  goToStep: (stepId: string) => void
+}
+```
+
+### Unknown tour ids return a frozen no-op
+
+If the tour id you pass isn't registered yet (typo, route transition, lazy mount), `useTourActions` returns a **frozen no-op object** — every method is a silent no-op and `isActive` is `false`. Calls drop on the floor rather than throwing:
+
+```tsx
+function DeepLink({ tourId }: { tourId: string }) {
+  const { start } = useTourActions(tourId)
+  // Safe even when `tourId` is misspelled or the tour hasn't mounted yet.
+  return <button onClick={start}>Start</button>
+}
+```
+
+This is intentional — it lets you wire `useTourActions(id).start()` everywhere without optional chaining.
+
+### StrictMode-safe registration
+
+The registry uses `WeakRef` plus an explicit `unregister()` on unmount. React 18's StrictMode double-mount produces a brief overlap window (two entries under the same id); the registry emits a dev `console.error` and keeps the latest registration. After both cleanups run, the registry slot is empty.
+
+<Callout type="warn">
+  HMR remounts that re-register an existing tour id are normal. If you see the `Tour "..." registered twice` warning in dev outside of HMR or StrictMode, you probably mounted two `<Tour>` components with the same id — fix the call site, don't suppress the warning.
+</Callout>
+
+### Migrating from `ReplayBridge`
+
+The `@tour-kit/codemods` package ships a transform that rewrites the v1 `window.dispatchEvent('tour-replay')` workaround to `useTourActions(id).start()`:
+
+```bash
+pnpm dlx @tour-kit/codemods --from replay-bridge-to-use-tour-actions ./src
+```
+
+It rewrites the dispatch call, strips matching `window.{add,remove}EventListener('tour-replay', …)` blocks, and adds the `useTourActions` import. Re-running it is a no-op (idempotent).
+
+---
+
+## Force-showing announcements (`forceShow`)
+
+### What problem this solves
+
+In v1, previewing a dismissed or frequency-capped announcement required clearing localStorage, calling `reset(id)`, and calling `show(id)` in sequence. Admin dashboards needed this for every preview; the demo app shipped a 30+ LOC `resetAllDemoState()` helper just to drive announcements.
+
+`forceShow(id)` bypasses every gate that controls *whether* an announcement should be shown to a real user, but it does NOT bypass the package-level license check.
+
+### Quick start
+
+```tsx
+import { useAnnouncementsContext } from '@tour-kit/announcements'
+
+function AdminPreviewButton() {
+  const { forceShow } = useAnnouncementsContext()
+  return (
+    <button type="button" onClick={() => forceShow('welcome-modal')}>
+      Preview welcome modal
+    </button>
+  )
+}
+```
+
+Or via the single-announcement hook:
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements'
+
+function PreviewButton() {
+  const { forceShow } = useAnnouncement('welcome-modal')
+  return <button onClick={forceShow}>Preview</button>
+}
+```
+
+### Bypass matrix
+
+`forceShow` skips every gate listed in the `FORCE_SHOW_BYPASS` const tuple exported from `@tour-kit/announcements`. The pin is enforced by a CI test — any future contributor adding a new gate to `show()` must default to "respect, don't bypass."
+
+| Gate                                                | `show()` respects? | `forceShow()` respects? |
+| --------------------------------------------------- | ------------------ | ----------------------- |
+| `frequency` rule (`once`, `session`, `times`, `interval`) | Yes                | **No**                  |
+| Scheduler cooldown (`canShow()`)                    | Yes                | **No**                  |
+| `viewCount` threshold                               | Yes                | **No**                  |
+| `isDismissed` flag                                  | Yes (no-op)        | **No** (re-shows)       |
+| `audience` (segment + array shapes)                 | Yes                | **No**                  |
+| `<LicenseGate require="pro">` (soft wrapper)        | Yes                | **Yes**                 |
+
+The license wrapper is a soft gate — under an invalid or missing license it renders children AND overlays a watermark. `forceShow` does not strip the watermark; admin previews on unlicensed builds will show the unlicensed UX.
+
+### Telemetry: analytics events are stamped `trigger="forced"`
+
+Every analytics event emitted by `forceShow` includes `metadata.trigger: 'forced'`:
+
+```ts
+analytics.track('announcement_shown', {
+  tourId: 'welcome-modal',
+  metadata: { announcementId: 'welcome-modal', trigger: 'forced', viewCount: 4 },
+})
+```
+
+If your dashboard counts "real user views," filter `metadata.trigger !== 'forced'` so admin previews don't skew the numbers. `viewCount` is still incremented so the delta is visible in admin tooling — only the trigger label changes.
+
+<Callout>
+  `forceShow` is intended for admin/preview affordances and demo apps. Don't use it as a general-purpose `show()` — the gate matrix exists for a reason, and a real user seeing the same announcement after dismissing it is poor UX.
+</Callout>
+
+---
+
+## Related guides
+
+- [Animations](./animations) — frequency rules and cooldowns that `forceShow` bypasses
+- [Segmentation](./segmentation) — audience targeting that `forceShow` ignores
+- [Analytics integration](./analytics-integration) — filtering forced previews from real-user telemetry
