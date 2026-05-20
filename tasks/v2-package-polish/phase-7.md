@@ -732,7 +732,7 @@ Two test cases:
 
 #### `packages/announcements/src/__tests__/spotlight.contrast.test.tsx` (NEW — WCAG AA)
 Three cases — one per background color: `#ffffff`, `#f5f5f5`, `#e5e7eb`. For each:
-- Render `<AnnouncementsProvider configs={...}><AnnouncementSpotlight id="s" strokeColor="auto" /></AnnouncementsProvider>` inside a wrapper `<div style={{ background, minHeight: 400 }}>`.
+- Render `<AnnouncementsProvider announcements={...}><AnnouncementSpotlight id="s" strokeColor="auto" /></AnnouncementsProvider>` inside a wrapper `<div style={{ background, minHeight: 400 }}>`.
 - Run `axe(container)` from `vitest-axe`; assert zero violations of `color-contrast` rule.
 - Additionally, query the cutout element and assert `getComputedStyle(cutout).boxShadow` matches `/inset/` and `/2px/`.
 

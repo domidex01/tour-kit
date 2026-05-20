@@ -19,7 +19,7 @@ Kill the "6px dot is invisible" complaint by shipping three named, opinionated p
 3. `<HintHotspot variant="beacon-with-label" label="New" side="right" />` renders a pulsing beacon with the label adjacent on the requested side; `side` accepts `"left" | "right"` (default `"right"`); label uses `aria-hidden` because the beacon's existing `aria-label` covers screen readers
 4. `<HintHotspot variant="what-s-new-pill" label="What's new" />` renders a pill with a sparkle icon that fades to `opacity: 0` over 200ms after the first `pointerdown` or `focus` on the hotspot; under `prefers-reduced-motion: reduce`, the fade is replaced by an immediate `display: none` swap via the `useReducedMotion()` gate
 5. axe-core contrast scan (via `vitest-axe`, already a devDep) reports zero `color-contrast` violations for each variant against a `#ffffff` background and against a `#0a0a0a` background
-6. Playwright visual regression snapshots in `packages/playwright/__tests__/hint-variants.spec.ts` pass for all three variants on light + dark backgrounds (six snapshots total — `{badge,beacon-with-label,whats-new-pill}.{light,dark}.png`)
+6. Playwright visual regression snapshots in the root `e2e/` harness pass for all three variants on light + dark backgrounds (six snapshots total — `{badge,beacon-with-label,whats-new-pill}.{light,dark}.png`). This repo does not have a `packages/playwright` workspace; use the existing `playwright.config.ts` projects and an example-app fixture route.
 7. `apps/docs/content/docs/hints/variants.mdx` renders a live `<HintHotspot>` example for each of the three variants
 8. `pnpm --filter @tour-kit/hints typecheck` exits 0 and `pnpm --filter @tour-kit/hints test` exits 0 with no regressions in the existing `hint-hotspot.test.tsx` suite
 
@@ -89,7 +89,7 @@ export type HintHotspotProps = /* existing base */ & HintHotspotVariantExtras
 - **`cva` is the only class-mapping tool.** Don't inline class concatenation in the variant tsx files — extend `hintHotspotVariants` with a `variant: { ... }` block so the existing `HintHotspotVariants` type still drives consumers' overrides.
 - **Variant components are presentational only.** They accept the same `targetRect` + `position` as the base `<HintHotspot>`, do the positioning with the same `getHotspotPosition` helper, and return a `<button>` (or `<Comp>` via `Slot` when `asChild`). They do NOT introduce new context, refs, or imperative APIs.
 - **Hit target ≥24×24 px** is enforced by giving every variant a base utility class chain that includes `min-h-6 min-w-6` (Tailwind `1.5rem = 24px`). Visual element inside can still be smaller (e.g., the 12px beacon dot inside a 24px tappable area).
-- **Test rule:** Unit tests use `@testing-library/react` + `vitest-axe`. Playwright visual tests go in `packages/playwright/__tests__/hint-variants.spec.ts` and reuse the existing fixtures-app pattern (a new fixture HTML per variant or one combined fixture with three sections). No new servers, no new Playwright projects.
+- **Test rule:** Unit tests use `@testing-library/react` + `vitest-axe` and live under `packages/hints/src/__tests__/`. Playwright visual tests go in the root `e2e/` tree (for example `e2e/next/hint-variants.localhost.spec.ts`) and run against a fixture route added to `examples/next-app`, because the repo's Playwright harness is root-level and project-matched by filename (`next/*localhost`, `vite/*localhost`, etc.). No new Playwright workspace.
 
 ---
 
@@ -262,16 +262,16 @@ Implementation notes:
 Goal: snapshot each variant on light + dark backgrounds; ship the docs page.
 
 Files:
-1. `packages/playwright/fixtures-app/hint-variants.html` (NEW) — a single page that mounts all three variants twice (once on a light section, once on a dark section). Mirrors the existing `two-step.html` fixture's React mount pattern.
-2. `packages/playwright/__tests__/hint-variants.spec.ts` (NEW) — six `expect(locator).toHaveScreenshot('badge.light.png')` assertions etc. Use `page.emulateMedia({ colorScheme: 'light' | 'dark' })` only if needed; otherwise the fixture's two sections handle it.
+1. `examples/next-app/src/app/hint-variants/page.tsx` (NEW) — a fixture page that mounts all three variants twice (once on a light section, once on a dark section). Keep the page out of production nav; it exists for Playwright and can be linked only from tests.
+2. `e2e/next/hint-variants.localhost.spec.ts` (NEW) — six `expect(locator).toHaveScreenshot('badge.light.png')` assertions etc. Use the existing `next-localhost` project and `baseURL` from root `playwright.config.ts`.
 3. `apps/docs/content/docs/hints/variants.mdx` (NEW) — three sections, each with a live preview (use the existing Fumadocs preview component pattern from sibling MDX files in `apps/docs/content/docs/hints/`).
 
 Implementation notes:
-- The Playwright spec lives in `packages/playwright/__tests__/` (where `smoke.spec.ts` already is) and reuses the existing `playwright.config.ts` `webServer` setup; just add a new entry under `webServer.url` matrix if needed, or rely on the existing dev server which serves all fixtures from `fixtures-app/`. Confirm by checking that `fixtures-app/vite.config.ts` serves all html files in the directory.
+- The Playwright spec lives under root `e2e/next/` and must include `localhost` in the filename so it is picked up by the existing `next-localhost` project. Reuse the current root `playwright.config.ts` webServer (`pnpm --filter next-tour-kit-demo dev` on port 3000).
 - Snapshot tolerance: keep Playwright's default (`maxDiffPixels: 0`, `threshold: 0.2`). If anti-aliasing flakes, raise `maxDiffPixelRatio: 0.01` per snapshot, but try defaults first.
 - Each snapshot is taken with the `targetRect` fixed (a hard-coded 100×40 box in the fixture) so positions are deterministic.
 
-**Sanity check:** `cd packages/playwright && pnpm test:e2e hint-variants` runs the six snapshot tests; first run generates baselines (committed); subsequent runs pass. Docs page renders via `cd apps/docs && pnpm dev` with no MDX compile errors.
+**Sanity check:** `pnpm e2e:next -- --project=next-localhost hint-variants.localhost.spec.ts` runs the six snapshot tests; first run generates baselines (committed); subsequent runs pass. Docs page renders via `pnpm --filter @tour-kit/docs dev` with no MDX compile errors.
 
 ---
 
@@ -286,15 +286,16 @@ packages/hints/
 │   │   └── whats-new-pill.tsx                 # NEW — HintWhatsNewPill (uses useReducedMotion gate)
 │   ├── components/
 │   │   ├── hint-hotspot.tsx                   # UPDATED — accept `variant` prop, delegate to variants/
+│   │   ├── hotspot-position.ts                # NEW — factored getHotspotPosition helper shared by legacy + variants
 │   │   └── ui/
 │   │       └── hint-variants.ts               # UPDATED — extend hintHotspotVariants with `variant: { ... }`
 │   └── index.ts                                # UPDATED — re-export the three variant components + types
 
-packages/playwright/
-├── fixtures-app/
-│   └── hint-variants.html                     # NEW — mounts all three variants on light + dark sections
-└── __tests__/
-    └── hint-variants.spec.ts                  # NEW — 6 visual-regression snapshots (3 variants × 2 themes)
+examples/next-app/src/app/
+└── hint-variants/page.tsx                     # NEW — Playwright fixture route, not linked in nav
+
+e2e/next/
+└── hint-variants.localhost.spec.ts            # NEW — 6 visual-regression snapshots (3 variants × 2 themes)
 
 apps/docs/content/docs/hints/
 └── variants.mdx                                # NEW — live preview per variant with copy-pasteable code blocks
@@ -311,9 +312,9 @@ No new dependencies. No `package.json` changes. No provider changes.
 - [ ] `<HintHotspot variant="badge" targetRect={r} position="top-right" />` (no other props) renders a button whose `getBoundingClientRect()` reports `width >= 24 && height >= 24`
 - [ ] `<HintHotspot variant="beacon-with-label" label="New" targetRect={r} position="top-right" />` renders the label with `aria-hidden="true"`; `<HintHotspot variant="what-s-new-pill" label="What's new" .../>` renders with the sparkle icon `aria-hidden="true"` and `aria-label="What's new"` on the button
 - [ ] vitest-axe scan reports `0` `color-contrast` violations for each of the three variants on `#ffffff` and on `#0a0a0a` backgrounds
-- [ ] Six Playwright snapshots in `packages/playwright/__tests__/hint-variants.spec.ts` pass: `{badge,beacon-with-label,whats-new-pill}.{light,dark}.png` — baseline images committed
+- [ ] Six Playwright snapshots in `e2e/next/hint-variants.localhost.spec.ts` pass under the existing `next-localhost` project: `{badge,beacon-with-label,whats-new-pill}.{light,dark}.png` — baseline images committed
 - [ ] Under `prefers-reduced-motion: reduce` (mocked via `useReducedMotion → true`), `variant="what-s-new-pill"` returns `null` after first `pointerdown`; `variant="beacon-with-label"` renders without `animate-tour-pulse` in the className chain
-- [ ] `apps/docs/content/docs/hints/variants.mdx` renders in `pnpm --filter docs dev` with three working live previews; the existing hints sidebar shows the "Variants" entry
+- [ ] `apps/docs/content/docs/hints/variants.mdx` renders in `pnpm --filter @tour-kit/docs dev` with three working live previews; the existing hints sidebar shows the "Variants" entry
 - [ ] The un-variant path (`<HintHotspot />` with no `variant` prop) produces byte-identical DOM versus `main` (verified by the existing `hint-hotspot.test.tsx` snapshot — no snapshot regeneration)
 
 ---
@@ -332,7 +333,7 @@ Tour Kit is a pnpm + Turborepo monorepo of 12 React packages providing headless 
 - Phase 0 (validation gate, complete) locked the cross-cutting API contracts in `tasks/v2-package-polish/phase-0-validation.md`. **This phase does not consume any Phase 0 contract** — it only touches `@tour-kit/hints` internals. The variant prop interface defined here will, however, be consumed by Phase 12 (`<HintGroup>`).
 - `@tour-kit/hints` v0.12.0 ships a working `<HintHotspot>` at `packages/hints/src/components/hint-hotspot.tsx`. Its existing `cva` style table lives at `packages/hints/src/components/ui/hint-variants.ts`. The existing hotspot supports `size: default|sm|lg`, `color: default|secondary|destructive|success|warning`, `pulse: boolean`, `zIndex: default|high`. Under the hood it positions via `getHotspotPosition(position, rect)`, uses `useReducedMotion()` from `@tour-kit/core` to gate the `animate-tour-pulse` class, and switches between `<button>` / `Slot` / `UnifiedSlot` via `useUILibrary()`.
 - `class-variance-authority` (`cva`) is already a `dependencies` entry in `packages/hints/package.json`. **Canonical example to mirror:** `packages/surveys/src/components/ui/banner-variants.ts` (5-line cva with variants + compoundVariants + defaultVariants).
-- Playwright visual regression infra exists at `packages/playwright/`. Existing fixtures live in `packages/playwright/fixtures-app/*.html` (`two-step.html`, `no-bridge.html`, `two-step-with-diagnose.html`). The dev server runs via `pnpm fixtures:serve` on `http://localhost:5180`. Existing E2E spec is `packages/playwright/__tests__/smoke.spec.ts`.
+- Playwright visual regression infra is root-level: `playwright.config.ts` uses `testDir: './e2e'`, with `next-localhost` and `vite-localhost` projects selected by filename. For this phase, add a Next fixture route in `examples/next-app` and a spec named `e2e/next/hint-variants.localhost.spec.ts`.
 - Reduced-motion three-tier defense is the load-bearing cross-package contract — see below.
 
 ### Your Goal for This Phase
@@ -423,14 +424,14 @@ import { useReducedMotion } from '@tour-kit/core'
 const reducedMotion = useReducedMotion()
 ```
 
-**Existing `getHotspotPosition` helper in `hint-hotspot.tsx`:** reuse it directly — do NOT reimplement positioning inside variant components. Either inline the call in each variant, or factor it into a shared helper at `packages/hints/src/variants/_position.ts` if you find yourself duplicating it three times.
+**Existing `getHotspotPosition` helper in `hint-hotspot.tsx`:** it is currently file-local, so factor it into `packages/hints/src/components/hotspot-position.ts` (or `packages/hints/src/variants/_position.ts`) and import it from both the legacy hotspot path and the new variants. Do not maintain four duplicated positioning switch statements.
 
-**Playwright visual regression — existing pattern from `smoke.spec.ts`:**
+**Playwright visual regression — root e2e pattern:**
 ```ts
-import { expect, test } from '../src'
+import { expect, test } from '@playwright/test'
 test.describe('hint variants', () => {
   test('badge — light', async ({ page }) => {
-    await page.goto('/hint-variants.html#badge-light')
+    await page.goto('/hint-variants#badge-light')
     await expect(page.locator('[data-testid="badge-light"]')).toHaveScreenshot('badge.light.png')
   })
   // ... five more
@@ -457,14 +458,14 @@ Add the `variant: { badge, 'beacon-with-label', 'what-s-new-pill' }` key as desc
 #### `packages/hints/src/index.ts` (update)
 Re-export `HintBadge`, `HintBeaconWithLabel`, `HintWhatsNewPill` and their prop interfaces. Re-export the `HintHotspotVariantName` type literal alias.
 
-#### `packages/hints/__tests__/variants/badge.test.tsx`, `beacon-with-label.test.tsx`, `whats-new-pill.test.tsx`
+#### `packages/hints/src/__tests__/variants/badge.test.tsx`, `beacon-with-label.test.tsx`, `whats-new-pill.test.tsx`
 One vitest file per variant. Each tests: (a) renders without throwing on minimal props, (b) `getBoundingClientRect().width >= 24 && height >= 24`, (c) `vitest-axe` contrast scan on `#ffffff` and `#0a0a0a` background wrappers reports zero color-contrast violations. For `whats-new-pill`, an extra test mocks `useReducedMotion → true`, fires `pointerdown`, asserts `queryByRole('button')` is `null`.
 
-#### `packages/playwright/fixtures-app/hint-variants.html`
-A single page that mounts a React tree with six anchored sections — each variant in a light section + a dark section. Each section has a stable `data-testid` (`badge-light`, `badge-dark`, etc.) and contains a fixed-size 100×40 anchor div so positions are deterministic.
+#### `examples/next-app/src/app/hint-variants/page.tsx`
+A fixture route that mounts a React tree with six anchored sections — each variant in a light section + a dark section. Each section has a stable `data-testid` (`badge-light`, `badge-dark`, etc.) and contains a fixed-size 100×40 anchor div so positions are deterministic.
 
-#### `packages/playwright/__tests__/hint-variants.spec.ts`
-Six tests, one per `{variant, theme}` pair, each running `await expect(page.locator('[data-testid="..."]')).toHaveScreenshot('...png')`. Reuse the existing `expect, test` import from `../src`.
+#### `e2e/next/hint-variants.localhost.spec.ts`
+Six tests, one per `{variant, theme}` pair, each running `await expect(page.locator('[data-testid="..."]')).toHaveScreenshot('...png')`. Import `expect` and `test` from `@playwright/test`, matching the existing root `e2e` specs.
 
 #### `apps/docs/content/docs/hints/variants.mdx`
 A new Fumadocs MDX page with three sections — one per variant — each containing a live `<HintHotspot variant="..." />` preview plus a copy-pasteable code block. Mirror the structure of sibling MDX pages in `apps/docs/content/docs/hints/` (check one and replicate the frontmatter + component imports). Add the page to the hints sidebar config if Fumadocs requires explicit registration (check `apps/docs/content/docs/hints/meta.json` or equivalent).
@@ -474,7 +475,7 @@ A new Fumadocs MDX page with three sections — one per variant — each contain
 - `pnpm --filter @tour-kit/hints test` exits 0 with new variant tests green and existing tests untouched
 - Each variant renders at ≥24×24 px (verified by `getBoundingClientRect()` in a unit test)
 - `vitest-axe` reports zero `color-contrast` violations per variant on light + dark backgrounds
-- `pnpm --filter @tour-kit/playwright test:e2e` exits 0 with six new hint-variant snapshots green (baselines committed)
+- `pnpm e2e:next -- --project=next-localhost hint-variants.localhost.spec.ts` exits 0 with six new hint-variant snapshots green (baselines committed)
 - Under mocked `useReducedMotion → true`: `variant="what-s-new-pill"` returns `null` after first `pointerdown`; `variant="beacon-with-label"` className chain does NOT contain `animate-tour-pulse`
 - `apps/docs` builds without MDX errors and the new `/docs/hints/variants` page renders three live previews
 - The existing `<HintHotspot />` un-variant render path is byte-identical (existing `hint-hotspot.test.tsx` snapshot unchanged)
@@ -489,6 +490,7 @@ packages/hints/
 │   │   └── whats-new-pill.tsx                       NEW
 │   ├── components/
 │   │   ├── hint-hotspot.tsx                         UPDATED
+│   │   ├── hotspot-position.ts                      NEW
 │   │   └── ui/hint-variants.ts                      UPDATED
 │   └── index.ts                                     UPDATED
 ├── __tests__/                                       [NEW dir]
@@ -497,9 +499,8 @@ packages/hints/
 │       ├── beacon-with-label.test.tsx               NEW
 │       └── whats-new-pill.test.tsx                  NEW
 
-packages/playwright/
-├── fixtures-app/hint-variants.html                  NEW
-└── __tests__/hint-variants.spec.ts                  NEW
+examples/next-app/src/app/hint-variants/page.tsx     NEW
+e2e/next/hint-variants.localhost.spec.ts             NEW
 
 apps/docs/content/docs/hints/
 └── variants.mdx                                     NEW
@@ -509,9 +510,9 @@ apps/docs/content/docs/hints/
 
 ## Readiness Check
 
-- [PASS] All inputs from prior phases listed and available — Phase 3 has no upstream phase dependencies (`Depends on: Nothing` per big-plan.md). The references it consumes (the existing `hintHotspotVariants` cva, `useReducedMotion()` hook, `getHotspotPosition` helper, Playwright fixtures-app pattern, surveys `banner-variants.ts` canonical cva example) are all verified to exist in-repo at the cited paths.
+- [PASS] All inputs from prior phases listed and available — Phase 3 has no upstream phase dependencies (`Depends on: Nothing` per big-plan.md). The references it consumes (the existing `hintHotspotVariants` cva, `useReducedMotion()` hook, `getHotspotPosition` helper, root Playwright `e2e/` harness, surveys `banner-variants.ts` canonical cva example) are all verified to exist in-repo at the cited paths.
 - [PASS] Every sub-task has a clear, testable completion condition — each of 3.1–3.4 ends with a one-paragraph "Sanity check" specifying the assertion or shell command that proves it.
 - [PASS] Execution prompt is self-contained — prior facts copied inline (existing cva shape pasted verbatim, surveys cva pasted verbatim, three-tier reduced-motion contract pasted verbatim from CLAUDE.md); data model rules explicit (cva-only, discriminated union, no new deps, internal state only); per-file guidance specifies exact exports, props, and gotchas; no "see Phase X" references.
 - [PASS] Exit criteria map 1:1 to deliverables — eight exit checkboxes covering typecheck, unit tests (variants × axe), variant hit-target, accessibility roles, Playwright snapshots (6), reduced-motion behaviour (both gated variants), docs page render, and a byte-identity check for the un-variant path. Each deliverable file is covered by at least one exit check.
 - [PASS] Heavy external deps have a fake/stub strategy noted — no heavy deps in this phase (`cva` is already a dep; `@playwright/test` already a peer; no model loads, no network). Reduced-motion is mocked via direct `useReducedMotion` mock in the whats-new-pill test.
-- [PASS] New libraries have a confirmed snippet from Context7 in the execution prompt — no new libraries this phase. The canonical `cva` snippet is pasted verbatim from `packages/surveys/src/components/ui/banner-variants.ts` (in-repo source-of-truth, per phase instructions). Playwright snapshot pattern is pasted from the existing `smoke.spec.ts`.
+- [PASS] New libraries have a confirmed snippet from Context7 in the execution prompt — no new libraries this phase. The canonical `cva` snippet is pasted verbatim from `packages/surveys/src/components/ui/banner-variants.ts` (in-repo source-of-truth, per phase instructions). Playwright snapshot pattern is aligned to the root `e2e/` harness.

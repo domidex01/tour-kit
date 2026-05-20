@@ -14,8 +14,8 @@ Phase 2 closes two demo-wiring papercuts at once. First, it ships three turnkey 
 
 ## What Success Looks Like
 
-1. `<CsatModal question="How easy was checkout?" onSubmit={(rating) => console.log(rating)} />` renders without any other `@tour-kit/surveys` imports — verified by `packages/surveys/src/__tests__/turnkey-modals.test.tsx` mounting the component with only those two props and asserting (a) the question text is in the DOM, (b) clicking a rating button fires `onSubmit(rating)` with an integer value in the configured scale (default 1..5).
-2. `<NpsModal question="How likely are you to recommend us?" onSubmit={(score, category) => ...} />` renders an 11-point scale (0–10) and the `onSubmit` callback receives the score plus an `NpsCategory` (`'promoter' | 'passive' | 'detractor'`) computed via `packages/surveys/src/core/scoring.ts` — verified by a parameterized test covering one value per category bucket.
+1. `<CsatModal question="How easy was checkout?" onSubmit={(rating) => console.log(rating)} />` renders inside an existing `<SurveysProvider>` without importing `SurveyModal` or `QuestionRating` directly — verified by `packages/surveys/src/__tests__/turnkey-modals.test.tsx` mounting the component with those props plus the provider wrapper and asserting (a) the question text is in the DOM, (b) clicking a rating button fires `onSubmit(rating)` with an integer value in the configured scale (default 1..5).
+2. `<NpsModal question="How likely are you to recommend us?" onSubmit={(score, category) => ...} />` renders an 11-point scale (0–10) and the `onSubmit` callback receives the score plus an `NpsCategory` (`'promoter' | 'passive' | 'detractor'`) computed by new tiny category helpers added to `packages/surveys/src/core/scoring.ts` — verified by a parameterized test covering one value per category bucket.
 3. `<CesModal question="How easy was..." onSubmit={(score, category) => ...} />` renders a 7-point scale (1–7) and the callback receives the score plus a `CesCategory` (`'easy' | 'neutral' | 'difficult'`) — verified the same way.
 4. `AnnouncementsProvider.reset("welcome-modal")` followed by `show("welcome-modal")` actually displays the announcement when `frequency: 'once'` and the announcement had previously been viewed — verified by `packages/announcements/src/__tests__/provider-reset-view-count.test.tsx` regression test that fails on the current `main` branch (because `viewCount >= 1` blocks re-show) and passes after Phase 2.1.
 5. Bundle delta for the three new components combined is `<2 KB gzipped`, measured by the existing `pnpm --filter @tour-kit/surveys build` size-limit report. Each modal must be tree-shakeable: importing only `<CsatModal>` MUST NOT pull `<NpsModal>` or `<CesModal>` into the consumer bundle.
@@ -76,11 +76,11 @@ storage adapter persists merged state (same write path as today)
 |-------|------|-----|
 | Turnkey modal props | `interface` per modal (`CsatModalProps`, `NpsModalProps`, `CesModalProps`) | Public API surface — `interface` gets better declaration-merging error messages than `type` and is the convention everywhere else in `@tour-kit/surveys` |
 | Internal selected-value state | `React.useState<number \| null>` | One transient piece of state per render; no need for a reducer, no need for context — keep the component flat |
-| Submit callback contract | `(value: number, category?: NpsCategory \| CesCategory) => void` | CSAT has no canonical category bucket (just a raw 1–5), so `category` is `undefined` there. NPS/CES include the category so consumers don't re-implement scoring |
+| Submit callback contract | CSAT `(value: number) => void`; NPS/CES `(value: number, category: NpsCategory \| CesCategory) => void` | CSAT has no canonical category bucket (just a raw 1–5). NPS/CES include the category so consumers don't re-implement scoring |
 | `reset()` reducer payload | Existing `AnnouncementState` shape | No new type. The fix is widening the spread to include three more fields — `viewCount`, `lastViewedAt`, `completedAt` — that were already on `AnnouncementState` but missed by the original `RESET` branch |
 
 **Other critical rules for this phase:**
-- **No new core logic.** Each turnkey modal MUST compose `<SurveyModal>` + `<QuestionRating>` from the existing package — do not duplicate the modal-opening, escape-key, focus-trap, or scoring logic. If a feature is missing in the primitive, fix the primitive, don't reimplement in the wrapper.
+- **No new survey runtime.** Each turnkey modal MUST compose `<SurveyModal>` + `<QuestionRating>` from the existing package — do not duplicate escape-key, focus-trap, or answer storage logic. The only new scoring code allowed is two pure category helpers (`computeNpsCategory`, `computeCesCategory`) in `packages/surveys/src/core/scoring.ts`, because the current file exposes aggregate calculators but not single-score category helpers.
 - **Tree-shakeable named exports.** Add to `packages/surveys/src/components/index.ts` as named exports only (no default export, no barrel re-export). Verify with the existing `build-output.test.ts` pattern that consumes `dist/index.mjs` and asserts byte deltas per import.
 - **Reduced motion.** The wrappers inherit the `motion-safe:` prefix and reduced-motion gate from `SurveyModal` automatically; no new keyframes are introduced, so no `@media (prefers-reduced-motion)` block is needed in these files. Add a one-line test in `turnkey-modals.test.tsx` that mounts each modal with `matchMedia('(prefers-reduced-motion: reduce)') = true` and confirms the underlying `data-survey-modal` element renders.
 - **`reset()` semantics: clear three fields, keep config.** The `RESET` branch resets `AnnouncementState` to its `createInitialState(id)` shape EXCEPT it does not touch `AnnouncementsState.configs` — the registered config stays. This matches `RESET_ALL` and avoids accidentally unregistering an announcement at reset time.
@@ -173,6 +173,8 @@ export interface CsatModalProps
   onSubmit: (rating: number) => void
   /** Optional skip handler; when omitted the Skip button is hidden. */
   onSkip?: () => void
+  /** Initial local open state when `open` is uncontrolled. Default: true. */
+  defaultOpen?: boolean
   /** Override the Submit button label. */
   submitLabel?: string
   /** Override the Skip button label. */
@@ -182,8 +184,10 @@ export interface CsatModalProps
 
 Implementation notes:
 - Use `React.useId()` for the default `surveyId` so SSR is stable.
+- Keep the existing provider contract: `<SurveyModal>` calls `useSurvey(surveyId)`, so every turnkey modal still requires an ancestor `<SurveysProvider>`.
+- Support local preview state when `open` is omitted: initialize `const [localOpen, setLocalOpen] = React.useState(defaultOpen ?? true)` and pass `open={openProp ?? localOpen}` plus a merged `onOpenChange` that updates local state and calls the consumer callback.
 - The Submit button is `disabled={value === null}` to enforce a selection before submit.
-- On Submit, call `onSubmit(value)` then trigger the underlying modal's `hide()` via the `onOpenChange` prop (mirrors how `SurveyModal.handleDismiss` is wired today — see `survey-modal.tsx` lines 33–49).
+- On Submit, call `onSubmit(value)` then close via the merged `onOpenChange(false)` path (and call `survey.hide()` only through `<SurveyModal>`'s existing uncontrolled path).
 - Pass through any unrecognized HTML props to `SurveyModal` via `...rest`.
 - Wire `onSkip` to a tertiary text-link button placed inside the modal body, not a primary button — matches the visual hierarchy decision recorded in Phase 0's component guidance and the TourCard refresh slated for Phase 4.
 
@@ -195,7 +199,7 @@ Implementation notes:
 
 **Depends on:** 2.2 (mirrors the CSAT API; same composition pattern).
 
-Create `packages/surveys/src/components/nps-modal.tsx` and `packages/surveys/src/components/ces-modal.tsx`. Both follow the CSAT shape but use the package's NPS / CES scoring helpers (already in `packages/surveys/src/core/scoring.ts`) to compute a category alongside the raw score.
+Create `packages/surveys/src/components/nps-modal.tsx` and `packages/surveys/src/components/ces-modal.tsx`. Both follow the CSAT shape but use the new single-score NPS / CES category helpers added to `packages/surveys/src/core/scoring.ts` in this phase to compute a category alongside the raw score.
 
 ```ts
 // packages/surveys/src/components/nps-modal.tsx
@@ -208,6 +212,7 @@ export interface NpsModalProps
   /** Submit handler; receives the raw score and the NPS category. */
   onSubmit: (score: number, category: NpsCategory) => void
   onSkip?: () => void
+  defaultOpen?: boolean
   submitLabel?: string
   skipLabel?: string
 }
@@ -222,6 +227,7 @@ export interface CesModalProps
   /** Submit handler; receives the raw score and the CES category. */
   onSubmit: (score: number, category: CesCategory) => void
   onSkip?: () => void
+  defaultOpen?: boolean
   submitLabel?: string
   skipLabel?: string
 }
@@ -230,7 +236,7 @@ export interface CesModalProps
 Implementation notes:
 - Default `<NpsModal>` scale is `{ min: 0, max: 10, style: 'numeric' }`; pass `lowLabel="Not likely"` and `highLabel="Very likely"` to `<QuestionRating>` so the standard NPS endpoints render.
 - Default `<CesModal>` scale is `{ min: 1, max: 7, style: 'numeric' }`; pass `lowLabel="Very difficult"` and `highLabel="Very easy"`.
-- Compute the category once on Submit (not on every render): `const category = computeNpsCategory(value)` or `computeCesCategory(value)` then call `onSubmit(value, category)`.
+- Add and export `computeNpsCategory(score: number): NpsCategory` and `computeCesCategory(score: number): CesCategory` from `packages/surveys/src/core/scoring.ts` first, then compute the category once on Submit (not on every render): `const category = computeNpsCategory(value)` or `computeCesCategory(value)` then call `onSubmit(value, category)`.
 - Both components must be tree-shakeable from each other — `<CsatModal>` MUST NOT pull `<NpsModal>` and vice versa. Verify with the existing `build-output.test.ts` pattern: import only one modal, assert the dist chunk's gzipped size delta is below the per-modal budget.
 
 **Sanity check:** `pnpm --filter @tour-kit/surveys typecheck` exits 0; `pnpm --filter @tour-kit/surveys test -- nps-modal ces-modal` covers one value per category bucket (e.g., NPS 9 → promoter, NPS 7 → passive, NPS 3 → detractor; CES 6 → easy, CES 4 → neutral, CES 2 → difficult).
@@ -246,7 +252,7 @@ Create `packages/surveys/src/__tests__/turnkey-modals.test.tsx` with:
 - One snapshot per modal under `prefers-reduced-motion: reduce` (use the existing `matchMedia` mock pattern from `reduced-motion.test.tsx`).
 - One assertion per modal that no other turnkey modal is rendered (so a regression in tree-shaking surfaces as a snapshot diff).
 
-Create `apps/docs/content/docs/surveys/turnkey.mdx` with three one-line examples:
+Create `apps/docs/content/docs/surveys/components/turnkey-modals.mdx` with three one-line examples:
 
 ```mdx
 import { CsatModal, NpsModal, CesModal } from '@tour-kit/surveys'
@@ -256,11 +262,11 @@ import { CsatModal, NpsModal, CesModal } from '@tour-kit/surveys'
 <CesModal  question="How easy was that?" onSubmit={(s, c) => track('ces', s, c)} />
 ```
 
-Add the page to the surveys nav in `apps/docs/content/docs/surveys/meta.json` (or equivalent — verify the right config file by listing `apps/docs/content/docs/surveys/`). Per the project's Content Pipeline Rules, after creating the MDX file update the registry/config with `published: true` and verify the page appears in navigation.
+Add the page to the surveys components nav in `apps/docs/content/docs/surveys/components/meta.json`. The repo already groups survey component pages under `surveys/components/`; do not create a top-level `surveys/turnkey.mdx` unless the docs nav is deliberately reorganized. Per the project's Content Pipeline Rules, set `published: true` when the local MDX convention uses it and verify the page appears in navigation.
 
 Also update `packages/surveys/src/components/index.ts` to export the three new components.
 
-**Sanity check:** `pnpm --filter @tour-kit/surveys test` green; `pnpm --filter @tour-kit/docs build` succeeds; the new docs page appears in the rendered nav at `/docs/surveys/turnkey`.
+**Sanity check:** `pnpm --filter @tour-kit/surveys test` green; `pnpm --filter @tour-kit/docs build` succeeds; the new docs page appears in the rendered nav at `/docs/surveys/components/turnkey-modals`.
 
 ---
 
@@ -274,8 +280,8 @@ packages/surveys/src/components/index.ts                                # UPDATE
 packages/announcements/src/context/announcements-provider.tsx           # UPDATE — RESET + RESET_ALL clear viewCount, lastViewedAt, completedAt
 packages/surveys/src/__tests__/turnkey-modals.test.tsx                  # NEW — snapshots + behaviour + tree-shake assertion for all three modals
 packages/announcements/src/__tests__/provider-reset-view-count.test.tsx # NEW — regression test for reset() clearing viewCount
-apps/docs/content/docs/surveys/turnkey.mdx                              # NEW — docs page with one-line examples for each modal
-apps/docs/content/docs/surveys/meta.json                                # UPDATE — register turnkey page in nav
+apps/docs/content/docs/surveys/components/turnkey-modals.mdx            # NEW — docs page with one-line examples for each modal
+apps/docs/content/docs/surveys/components/meta.json                     # UPDATE — register turnkey-modals page in nav
 ```
 
 No new dependencies. No peer-dep changes. No changes to `package.json` files except optionally bumping the `exports` map if the build pipeline doesn't pick up the new components automatically (verify with `pnpm --filter @tour-kit/surveys build` and inspect `dist/index.d.ts`).
@@ -284,14 +290,14 @@ No new dependencies. No peer-dep changes. No changes to `package.json` files exc
 
 ## Exit Criteria
 
-- [ ] `<CsatModal question="How easy was checkout?" onSubmit={fn} />` works with zero other `@tour-kit/surveys` imports — `turnkey-modals.test.tsx` mounts it with exactly those two props and the test passes.
+- [ ] `<CsatModal question="How easy was checkout?" onSubmit={fn} />` works inside an existing `<SurveysProvider>` with zero primitive imports (`SurveyModal`, `QuestionRating`) — `turnkey-modals.test.tsx` mounts it with those two component props plus the provider wrapper and the test passes.
 - [ ] `<NpsModal>` and `<CesModal>` each render the correct scale and `onSubmit` receives `(score, category)` with the category computed from the existing scoring helpers; one assertion per category bucket per modal is green.
 - [ ] Regression test `packages/announcements/src/__tests__/provider-reset-view-count.test.tsx` is green: `reset(id)` followed by `show(id)` re-displays a `frequency: 'once'` announcement.
 - [ ] `pnpm --filter @tour-kit/surveys build` size-limit report shows combined gzipped bundle delta for the three new components `<2 KB`, and importing one does not pull the other two (tree-shake assertion in `build-output.test.ts`).
 - [ ] Snapshot tests for all three modals pass under both default and `prefers-reduced-motion: reduce`.
 - [ ] `pnpm typecheck` (root) exits 0; no `any` introduced; no new `@ts-expect-error` or `@ts-ignore`.
 - [ ] `pnpm --filter @tour-kit/announcements test` and `pnpm --filter @tour-kit/surveys test` are both green with no skipped tests.
-- [ ] `apps/docs/content/docs/surveys/turnkey.mdx` exists, is registered in nav, and `pnpm --filter @tour-kit/docs build` succeeds. The page renders at `/docs/surveys/turnkey`.
+- [ ] `apps/docs/content/docs/surveys/components/turnkey-modals.mdx` exists, is registered in nav, and `pnpm --filter @tour-kit/docs build` succeeds. The page renders at `/docs/surveys/components/turnkey-modals`.
 
 ---
 
@@ -415,10 +421,21 @@ case 'RESET': {
 ```
 
 ```ts
-// packages/surveys/src/core/scoring.ts (existing — use these helpers verbatim)
-// computeNpsCategory(score: number): 'promoter' | 'passive' | 'detractor'
-// computeCesCategory(score: number): 'easy' | 'neutral' | 'difficult'
-// Verify exact import shape with: grep -rn "export.*computeNps\|export.*computeCes" packages/surveys/src/core/
+// packages/surveys/src/core/scoring.ts (existing aggregate calculators)
+// Existing today: calculateNPS(responses), calculateCSAT(responses), calculateCES(responses)
+// Phase 2 adds these single-score helpers next to the aggregate calculators:
+export type NpsCategory = 'promoter' | 'passive' | 'detractor'
+export type CesCategory = 'easy' | 'neutral' | 'difficult'
+export function computeNpsCategory(score: number): NpsCategory {
+  if (score >= 9) return 'promoter'
+  if (score >= 7) return 'passive'
+  return 'detractor'
+}
+export function computeCesCategory(score: number): CesCategory {
+  if (score >= 5) return 'easy'
+  if (score <= 3) return 'difficult'
+  return 'neutral'
+}
 ```
 
 ### Files to Create / Modify
@@ -438,6 +455,8 @@ Regression test:
 - Export `CsatModalProps` interface and `CsatModal` component.
 - Internal state: `const [value, setValue] = React.useState<number | null>(null)`.
 - Default `surveyId` from `React.useId()`.
+- Still requires an ancestor `<SurveysProvider>` because `<SurveyModal>` calls `useSurvey(surveyId)`. The wrapper removes primitive imports, not the provider requirement.
+- Support both controlled and local preview state: accept `open` / `onOpenChange` from `SurveyModalProps`; when `open` is undefined, use local `const [open, setOpen] = React.useState(defaultOpen ?? true)` so the two-prop examples render in tests.
 - Composes `<SurveyModal>` + `<QuestionRating preset="csat" ratingScale={ratingScale ?? { min: 1, max: 5, style: 'numeric' }} />` + Skip/Submit buttons.
 - Submit fires `onSubmit(value)` then closes the modal via `onOpenChange?.(false)`.
 - Skip is a tertiary text-link button (hidden when `onSkip` is undefined).
@@ -454,6 +473,9 @@ Regression test:
   - Pass `lowLabel="Very difficult"` and `highLabel="Very easy"`.
   - On Submit: `onSubmit(value, computeCesCategory(value))`.
 
+#### `packages/surveys/src/core/scoring.ts` (modify)
+Add `NpsCategory`, `CesCategory`, `computeNpsCategory(score)`, and `computeCesCategory(score)` next to the existing aggregate calculators. Keep `calculateNPS` / `calculateCES` unchanged and add focused unit tests for the new helpers in `packages/surveys/src/__tests__/scoring-category.test.ts`.
+
 #### `packages/surveys/src/components/index.ts` (modify)
 Add three named exports: `export { CsatModal, type CsatModalProps } from './csat-modal'`; same for NPS and CES.
 
@@ -465,18 +487,18 @@ For each of CSAT / NPS / CES:
 - Snapshot under `matchMedia('(prefers-reduced-motion: reduce)') = true` (use the existing mock pattern from `reduced-motion.test.tsx`).
 - Tree-shake assertion: importing only one modal does not bring the others into the test bundle (assert via the existing `build-output.test.ts` pattern).
 
-#### `apps/docs/content/docs/surveys/turnkey.mdx` (new)
+#### `apps/docs/content/docs/surveys/components/turnkey-modals.mdx` (new)
 One-line example per modal. Set `published: true` in the page frontmatter. Per the project's Content Pipeline Rules, after creating the MDX file update the surveys nav config so the page appears in navigation.
 
-#### `apps/docs/content/docs/surveys/meta.json` (modify, or equivalent nav config)
-Add `turnkey` to the surveys page list.
+#### `apps/docs/content/docs/surveys/components/meta.json` (modify)
+Add `turnkey-modals` to the survey components page list.
 
 ### Success Criteria
 - `pnpm typecheck` (root) exits 0.
 - `pnpm --filter @tour-kit/announcements test` green; `provider-reset-view-count.test.tsx` passes all 5 assertions.
 - `pnpm --filter @tour-kit/surveys test` green; `turnkey-modals.test.tsx` snapshots + behaviour assertions pass.
 - `pnpm --filter @tour-kit/surveys build` size-limit shows combined gzipped delta `<2 KB` for the three new components.
-- `pnpm --filter @tour-kit/docs build` succeeds; `/docs/surveys/turnkey` appears in the rendered nav.
+- `pnpm --filter @tour-kit/docs build` succeeds; `/docs/surveys/components/turnkey-modals` appears in the rendered nav.
 - `git diff packages/announcements/src/context/announcements-provider.tsx` shows exactly 6 added lines (3 per branch) — no other file changes in the announcements package outside of the new test file.
 
 ### Expected File Structure at End
@@ -491,10 +513,11 @@ packages/
     │   ├── nps-modal.tsx                                # NEW
     │   ├── ces-modal.tsx                                # NEW
     │   └── index.ts                                     # MODIFIED — 3 exports added
+    ├── src/core/scoring.ts                              # MODIFIED — single-score category helpers
     └── src/__tests__/turnkey-modals.test.tsx            # NEW
-apps/docs/content/docs/surveys/
-├── turnkey.mdx                                          # NEW
-└── meta.json                                            # MODIFIED — turnkey added to nav
+apps/docs/content/docs/surveys/components/
+├── turnkey-modals.mdx                                   # NEW
+└── meta.json                                            # MODIFIED — turnkey-modals added to nav
 ```
 
 Implement task-by-task in order (2.1 → 2.2 → 2.3 → 2.4). Run the per-task sanity check before moving to the next task. If any sanity check fails, stop and report — do not move on.
@@ -503,7 +526,7 @@ Implement task-by-task in order (2.1 → 2.2 → 2.3 → 2.4). Run the per-task 
 
 ## Readiness Check
 
-- [PASS] All inputs from prior phases listed and available — Phase 1's `forceShow(id)` work in `announcements-provider.tsx` is the prerequisite; the file exists at the cited path, the `RESET` branch is verified at lines 172–186, and the scoring helpers in `packages/surveys/src/core/scoring.ts` provide `computeNpsCategory` / `computeCesCategory` for the NPS/CES wrappers.
+- [PASS] All inputs from prior phases listed and available — Phase 1's `forceShow(id)` work in `announcements-provider.tsx` is the prerequisite; the file exists at the cited path, the `RESET` branch is verified at lines 172–186, and `packages/surveys/src/core/scoring.ts` exists with aggregate calculators. Phase 2 explicitly adds the missing single-score `computeNpsCategory` / `computeCesCategory` helpers before building the NPS/CES wrappers.
 - [PASS] Every sub-task has a clear, testable completion condition — each task has a `Sanity check` one-liner (typecheck, test filter, or build verification).
 - [PASS] Execution prompt is self-contained — prior facts copied inline (Phase 1's `forceShow` context, the `RESET` reducer source, `SurveyModalProps` and `QuestionRatingProps` verbatim, scoring helper signatures); data model rules explicit (`interface` over `type`, `useState<number | null>`, no new core logic); per-file implementation guidance specifies exact LOC budget, default scales, label strings, and callback arity per modal.
 - [PASS] Exit criteria map 1:1 to deliverables — 8 exit checkboxes covering: (1) one-line CSAT works, (2) NPS/CES emit category, (3) regression test green, (4) bundle <2KB + tree-shake, (5) reduced-motion snapshot, (6) root typecheck, (7) per-package tests green, (8) docs page registered. Each maps to a named deliverable file.

@@ -15,18 +15,18 @@ Close two checklist-UX gaps that consumers hit on day one:
 1. **Imperative control on `<ChecklistLauncher>`.** Today the launcher is a self-managed open/close button — there is no way to open it from a "Need help?" link in the navbar, a help-menu item, or a tour step's `onComplete`. We expose `{ open(), close(), toggle() }` via `useImperativeHandle` so a parent can hold a `ChecklistLauncherRef` and drive the panel without simulating clicks.
 2. **`<ChecklistCompletion>` celebration.** When the last task flips to complete, fire a one-shot celebration: confetti (canvas), a static check-mark badge, or no-op. Honors `prefers-reduced-motion: reduce` via the three-tier defense — under reduce, even `variant="confetti"` falls back to the static badge so Lighthouse a11y stays 100.
 
-Both APIs land in `@tour-kit/checklists` as additive surface — existing consumers (no `ref`, no `<ChecklistCompletion>` mounted) see byte-identical behaviour. `canvas-confetti` is an **optional** peer (`peerDependenciesMeta.optional`) loaded via `await import()` only when `variant="confetti"` actually runs and reduced-motion is false. The completion-detection signal (`prevTotalComplete < total && newTotalComplete === total`) reuses the existing `state.notifiedComplete` set in `checklist-provider.tsx` (lines 414–431) — we wrap that signal in a `useChecklistCelebration(id)` hook so the component subscribes via a single, testable seam.
+Both APIs land in `@tour-kit/checklists` as additive surface — existing consumers (no `ref`, no `<ChecklistCompletion>` mounted) see byte-identical behaviour. `canvas-confetti` is an **optional** peer (`peerDependenciesMeta.optional`) loaded via `await import()` only when `variant="confetti"` actually runs and reduced-motion is false. The completion-detection signal is component-local (`previousCompleteRef` + `hasFiredRef`) and deliberately independent of the provider's existing `state.notifiedComplete` set in `checklist-provider.tsx` (lines 414–431), which remains reserved for `config.onComplete` callbacks.
 
 ## What Success Looks Like
 
 1. `launcherRef.current?.open()` opens the panel from a sibling subtree without simulating a DOM click — verified by a Vitest test that calls `ref.current.open()` and asserts `getByRole('dialog', { name: /checklist/i })` is in the document
 2. `launcherRef.current?.toggle()` flips between open and closed on consecutive calls — verified by a Vitest test that calls `toggle()` twice and asserts open → closed
 3. `<ChecklistCompletion checklistId="onboarding" variant="confetti">` fires `canvas-confetti` exactly once per mount when the last task transitions from `total - 1` complete to `total` complete — verified by a state-machine test that primes `total - 1` complete tasks, completes the last task, asserts the confetti spy was called exactly once
-4. Re-mount + re-complete is idempotent within a session: after the celebration fires once, completing the same checklist again (e.g., user resets and re-completes in the same tab) does NOT re-fire unless the component is unmounted-then-remounted — gated by the same `state.notifiedComplete` set the provider uses today, so we inherit the cross-reload guard
+4. Re-complete is idempotent within a mounted `<ChecklistCompletion>` instance: after the celebration fires once, completing the same checklist again (e.g., user resets and re-completes in the same tab) does NOT re-fire until the component is unmounted and remounted — gated by the hook's component-local `hasFiredRef`, not the provider's `state.notifiedComplete` set
 5. Under `prefers-reduced-motion: reduce` (mocked via `useReducedMotion → true`), `variant="confetti"` renders the static "Done!" badge — no `<canvas>` element appears in the DOM, `canvas-confetti` is never imported (dynamic import is short-circuited), and a Lighthouse a11y scan on a story page hosting the celebration reports 100
 6. `variant="checkmark"` renders a static SVG check + "Done!" label regardless of motion preference; `variant="none"` renders nothing (used by consumers who track completion via `onComplete` only) — both verified by Vitest snapshots
 7. `pnpm --filter @tour-kit/checklists typecheck` exits 0 and `pnpm --filter @tour-kit/checklists test` exits 0 with new tests green
-8. `apps/docs/content/docs/checklists/imperative-api.mdx` renders in `pnpm --filter docs dev` and is listed in the checklists sidebar; the page has runnable code blocks for both the imperative ref API and each celebration variant
+8. `apps/docs/content/docs/checklists/imperative-api.mdx` renders in `pnpm --filter @tour-kit/docs dev` and is listed in the checklists sidebar; the page has runnable code blocks for both the imperative ref API and each celebration variant
 
 ---
 
@@ -42,10 +42,10 @@ Both APIs land in `@tour-kit/checklists` as additive surface — existing consum
                                   e.g., <button onClick={() => launcherRef.current?.open()}>
 
 <ChecklistCompletion checklistId="onboarding" variant="confetti"> ──┐
-   useChecklistCelebration(id) → boolean (one-shot signal)           │
+   useChecklistCelebration(id) → { shouldFire, hasCelebrated }       │
        └─► reads ctx.getChecklist(id).isComplete + ctx.getProgress  │
            internal ref<boolean> previousComplete                    │
-           returns true exactly on the false→true edge               │
+           shouldFire true exactly on the false→true edge            │
                                                                     │
    useReducedMotion() → boolean   ◄── tier 3 JS gate                 │
        └─► if reducedMotion → render static "Done!" badge            │
@@ -101,7 +101,7 @@ export interface ChecklistCompletionProps {
 | Tier | Mechanism | Where it applies in this phase |
 |---|---|---|
 | 1 | `motion-safe:` Tailwind prefix on `tailwindcss-animate` utilities | The static badge uses `motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:fade-in motion-safe:duration-200` on initial mount so users see a soft pop. Under reduce, the badge appears with no animation. |
-| 2 | `@media (prefers-reduced-motion: reduce)` wrapper around custom `@keyframes` | If we add a `tk-celebrate-pulse` keyframe to `packages/checklists/src/styles/animations.css`, wrap it in `@media (prefers-reduced-motion: reduce) { animation: none; }` — mirrors the existing `tk-fade-completed` / `tk-check-pop` block at lines 48–53. **For Phase 6 we lean on existing tailwindcss-animate utilities** so no new keyframes are needed; if review pushes back on the badge feeling flat, add the keyframe inside this tier-2 wrapper. |
+| 2 | `@media (prefers-reduced-motion: reduce)` wrapper around custom `@keyframes` | If we add a `tk-celebrate-pulse` keyframe to `packages/checklists/src/styles/animations.css`, wrap it in `@media (prefers-reduced-motion: reduce) { animation: none; }` — mirrors the existing `tk-fade-completed` / `tk-check-pop` block at lines 49–54. **For Phase 6 we lean on existing tailwindcss-animate utilities** so no new keyframes are needed; if review pushes back on the badge feeling flat, add the keyframe inside this tier-2 wrapper. |
 | 3 | JS gate via `useReducedMotion()` from `@tour-kit/core` | **Load-bearing:** `if (reducedMotion) → render static badge` is the only thing standing between a reduce-motion user and a fullscreen canvas. Branch first, render second. Also gates the dynamic `await import('canvas-confetti')` — under reduce, the import never happens, so consumers on reduce never pay the 4 KB cost. |
 
 > **`useReducedMotion` re-export.** Checklists currently imports `useReducedMotion` from `@tour-kit/core` directly (`packages/checklists/src/components/checklist-task.tsx:3`). The `announcements`, `surveys`, and `hints` packages re-export it for ergonomics (CLAUDE.md cross-package section). This phase **adds the re-export** to `packages/checklists/src/index.ts` so `<ChecklistCompletion>` consumers can `import { useReducedMotion } from '@tour-kit/checklists'` instead of pulling core. Sub-task of 6.2.
@@ -147,7 +147,7 @@ Tests pin to the workspace devDep so the dynamic import resolves in jsdom; produ
 | Public ref (`ChecklistLauncherRef`) | `interface` exported from `packages/checklists/src/components/checklist-launcher.tsx` | Consumers extend it (e.g., parent components composing the launcher); `interface` is the project convention for public types |
 | `ChecklistCompletionProps` | `interface` exported | Same — consumers may want to wrap it |
 | `ChecklistCompletionVariant` | `type` (literal union) | A `type` is the project convention for closed literal unions; not extensible |
-| `useChecklistCelebration` return | `boolean` | Single one-shot edge signal; no state slice to expose |
+| `useChecklistCelebration` return | `{ shouldFire: boolean; hasCelebrated: boolean }` | `shouldFire` triggers side effects on the edge; `hasCelebrated` keeps the static badge visible after the edge until unmount |
 | `previousComplete` tracking | `React.useRef<boolean>` (component-local) | Edge detection without re-renders; reset on unmount means re-mount can fire once more |
 | Confetti import handle | `React.useRef<typeof import('canvas-confetti') | null>` | Cached after first dynamic import so re-celebrations in the same session don't re-import |
 
@@ -156,7 +156,7 @@ Tests pin to the workspace devDep so the dynamic import resolves in jsdom; produ
 - **No new context, no new provider.** `useChecklistCelebration(id)` is a hook that reads from the existing `useChecklistContext()` — never introduce a `CelebrationProvider`.
 - **One-shot per mount.** The celebration must not fire on every re-render where `isComplete === true`. The edge `prev=false && now=true` is the only trigger. After firing once, `previousComplete.current = true` and stays there until unmount. This is intentional: a consumer who wants the celebration to re-fire after a reset must unmount + remount the component (e.g., by `key`ing it on a session id).
 - **The provider already gates `onComplete` with `notifiedComplete`.** Lines 414–431 of `checklist-provider.tsx` track which checklists have already notified — `<ChecklistCompletion>` does NOT replicate that gate (the provider's `MARK_NOTIFIED_COMPLETE` would fight us). Instead, the hook simply reads `progress.percentage` and `isComplete` from the public context and detects the edge component-locally. The provider's `notifiedComplete` is for `config.onComplete` callbacks — those are independent of UI celebration.
-- **canvas-confetti is `'use client'` only.** Dynamic-import happens inside a `useEffect`, never at module scope. SSR-safe by construction.
+- **canvas-confetti is `'use client'` only — DO NOT static-import at module scope.** Bare `import 'canvas-confetti'` touches `window` at module-eval time and throws `ReferenceError: window is not defined` under Node SSR / Next.js RSC (upstream issue [catdad/canvas-confetti#78](https://github.com/catdad/canvas-confetti/issues/78)). Dynamic-import happens inside a `useEffect`, never at module scope. A future contributor "simplifying" the import to module top will break every SSR consumer — pin this with an inline comment at the import call site.
 - **No new external libraries beyond `canvas-confetti`.** Tailwind animations, existing `useReducedMotion`, existing context — that's it.
 
 ---
@@ -217,7 +217,7 @@ Create the celebration hook first, then the component:
 
 #### `packages/checklists/src/hooks/use-checklist-celebration.ts` (NEW)
 
-One-shot edge detector. Re-emits a `boolean` that flips to `true` exactly once when the underlying checklist transitions from incomplete to complete. After that, returns `false` forever — until the component unmounts.
+One-shot edge detector. Emits `shouldFire: true` exactly once when the underlying checklist transitions from incomplete to complete. `hasCelebrated` stays `true` after that edge until the component unmounts, so the static badge remains visible without re-firing effects.
 
 ```ts
 'use client'
@@ -233,10 +233,14 @@ import { useChecklist } from './use-checklist'
  * Component-local — does NOT touch the provider's `notifiedComplete` set
  * (which exists for `config.onComplete` callbacks). Mount-scoped only.
  */
-export function useChecklistCelebration(checklistId: string): boolean {
+export function useChecklistCelebration(checklistId: string): {
+  shouldFire: boolean
+  hasCelebrated: boolean
+} {
   const { isComplete, progress } = useChecklist(checklistId)
   const previousCompleteRef = React.useRef<boolean>(false)
   const hasFiredRef = React.useRef<boolean>(false)
+  const [hasCelebrated, setHasCelebrated] = React.useState(false)
 
   // Edge: prev=false, now=true, AND total > 0 (an empty checklist can't celebrate)
   const isEdge = isComplete && !previousCompleteRef.current && progress.total > 0
@@ -244,10 +248,13 @@ export function useChecklistCelebration(checklistId: string): boolean {
 
   React.useEffect(() => {
     previousCompleteRef.current = isComplete
-    if (shouldFire) hasFiredRef.current = true
+    if (shouldFire) {
+      hasFiredRef.current = true
+      setHasCelebrated(true)
+    }
   }, [isComplete, shouldFire])
 
-  return shouldFire
+  return { shouldFire, hasCelebrated }
 }
 ```
 
@@ -279,7 +286,7 @@ export function ChecklistCompletion({
   onCelebrate,
   className,
 }: ChecklistCompletionProps): React.ReactElement | null {
-  const shouldFire = useChecklistCelebration(checklistId)
+  const { shouldFire, hasCelebrated } = useChecklistCelebration(checklistId)
   const reducedMotion = useReducedMotion()
   const confettiModuleRef = React.useRef<
     typeof import('canvas-confetti').default | null
@@ -327,27 +334,18 @@ export function ChecklistCompletion({
     }
   }, [shouldFire, variant, reducedMotion, onCelebrate])
 
-  if (variant === 'none') return null
-  // Static badge is rendered for: checkmark variant, confetti+reduced-motion fallback,
-  // and confetti when canvas-confetti is missing (the import-throw path).
-  // It only appears AFTER the edge fires — so re-renders before completion render null.
-  if (!shouldFire && /* not yet completed */ true) {
-    // We still need to render the badge AFTER the edge fires until unmount.
-    // Track persisted "has fired" via the hook's hasFiredRef proxy: since the
-    // hook returns `true` only on the edge, we maintain our own mirror.
-    // See implementation note below.
-  }
+  if (variant === 'none' || !hasCelebrated) return null
 
-  return null // placeholder — see implementation note
+  return (
+    <div role="status" aria-live="polite" className={className}>
+      <CheckIcon aria-hidden="true" />
+      <span>{label}</span>
+    </div>
+  )
 }
 ```
 
-> **Implementation note for the badge render persistence.** The hook returns `true` on exactly one render. After that, the hook returns `false` but we still want the badge visible. Two clean ways:
->
-> 1. **Add `hasCelebrated` to the hook's return:** change `useChecklistCelebration` to return `{ shouldFire: boolean; hasCelebrated: boolean }`. `shouldFire` triggers the effect; `hasCelebrated` (a `useState<boolean>` flipped inside the `useEffect`) gates render.
-> 2. **Mirror locally in the component:** `const [hasCelebrated, setHasCelebrated] = useState(false)`; set inside the effect.
->
-> **Pick option 1** — keeps the component dumb and the hook responsible for "did we celebrate?". Update the hook signature to `{ shouldFire: boolean; hasCelebrated: boolean }`.
+> **Implementation note for badge render persistence.** The hook owns both parts of the state: `shouldFire` is an edge signal used by the effect, and `hasCelebrated` is the persistent render gate used by the badge. Do not mirror this state a second time inside `<ChecklistCompletion>`.
 
 Revised render block:
 
@@ -419,7 +417,7 @@ Otherwise, leave `animations.css` untouched.
 
 ---
 
-### Task 6.4 — Docs + Storybook story for imperative API + celebration variants (1–2 h)
+### Task 6.4 — Docs for imperative API + celebration variants (1–2 h)
 
 **Depends on:** 6.1, 6.2
 
@@ -441,7 +439,7 @@ Update `apps/docs/content/docs/checklists/meta.json` `pages` array to include `"
 
 Optional Storybook story: `packages/checklists/.storybook` does not currently exist, so a story is skipped this phase — the MDX page with live previews is the canonical demo surface.
 
-**Sanity check:** `pnpm --filter docs build` exits 0; `pnpm --filter docs dev` renders the new page in the sidebar under `@tour-kit/checklists`; all code blocks compile (no TS errors in the MDX-rendered snippets).
+**Sanity check:** `pnpm --filter @tour-kit/docs build` exits 0; `pnpm --filter @tour-kit/docs dev` renders the new page in the sidebar under `@tour-kit/checklists`; all code blocks compile (no TS errors in the MDX-rendered snippets).
 
 ---
 
@@ -489,7 +487,7 @@ No other packages touched. No new shared utilities. No provider changes.
   - `checklist-completion.reduced-motion.test.tsx` ≥ 5 cases: (a) `variant="confetti"` with `useReducedMotion → false` fires the confetti spy exactly once on completion edge; (b) re-render after firing does NOT re-fire; (c) `variant="confetti"` with `useReducedMotion → true` does NOT call the dynamic import (assert via `vi.doMock` factory spy) and renders the static badge instead; (d) `variant="checkmark"` renders the static badge with no dynamic import attempted; (e) `variant="none"` renders nothing — `container.firstChild` is `null`
 - [ ] State-machine test in `checklist-completion.reduced-motion.test.tsx` enumerates: empty checklist (no celebration), single-task completion (fires once), 99% → 100% transition (fires once), unmount-then-remount-then-re-complete (fires once after remount), within-same-mount re-complete after reset (does NOT re-fire)
 - [ ] Pinned-array test asserts `ChecklistCompletionVariant` literal-equals `'confetti' | 'checkmark' | 'none'` exactly (snapshot the type via a runtime tuple `['confetti', 'checkmark', 'none'] as const satisfies readonly ChecklistCompletionVariant[]` plus a length assertion) — drift breaks CI
-- [ ] `pnpm --filter docs build` exits 0 and `imperative-api.mdx` appears in the rendered sidebar between `components` and `headless`
+- [ ] `pnpm --filter @tour-kit/docs build` exits 0 and `imperative-api.mdx` appears in the rendered sidebar between `components` and `headless`
 - [ ] Bundle smoke check: building a consumer app with `variant="checkmark"` only (no `canvas-confetti` install) succeeds; building with `variant="confetti"` requires the peer install; both paths produce the static badge under reduced-motion
 - [ ] No regressions: `pnpm --filter @tour-kit/checklists test` covers all existing test files green; `<ChecklistLauncher>` consumers that did NOT pass a `ref` see byte-identical behaviour (existing tests in `src/__tests__/` stay green without snapshot regeneration)
 - [ ] CHANGELOG entry under `@tour-kit/checklists` notes: (a) new `ChecklistLauncherRef` payload — typed ref change with `buttonRef` migration line; (b) new `<ChecklistCompletion>` component; (c) `canvas-confetti` as optional peer
@@ -512,7 +510,7 @@ Tour Kit is a pnpm + Turborepo monorepo of 12 React packages providing headless 
   - `packages/checklists/src/components/checklist-launcher.tsx` — currently `forwardRef<HTMLButtonElement, ChecklistLauncherProps>` with internal `isOpen` state at line 75 and a `mergedRef` helper at lines 92–102. Floating-ui drives positioning; `useDismiss` + `useRole` wire ARIA.
   - `packages/checklists/src/context/checklist-provider.tsx` — completion firing at lines 414–431 uses a `state.notifiedComplete: Set<string>` to prevent re-firing `config.onComplete?.()` across reloads. **Do not touch this.** Your component-local edge detector is independent of it.
   - `packages/checklists/src/hooks/use-checklist.ts` — exposes `isComplete`, `progress`, `progress.total`, `progress.completed`. This is your read path.
-  - `packages/checklists/src/styles/animations.css` — existing tier-2 keyframe wrapper at lines 48–53. Mirror this pattern only if you add a new keyframe.
+  - `packages/checklists/src/styles/animations.css` — existing tier-2 keyframe wrapper at lines 49–54 (wraps `tk-fade-completed` + `tk-check-pop`, NOT `tk-strike` — that name is a stale doc reference in some places). Mirror this pattern only if you add a new keyframe.
   - `packages/checklists/src/components/checklist-task.tsx:3` — imports `useReducedMotion` from `@tour-kit/core` directly. This phase ADDS the re-export to `@tour-kit/checklists/src/index.ts` so consumers can import it from the package.
 - Existing reduced-motion three-tier defense (cross-package contract, see below) is load-bearing.
 
@@ -535,7 +533,7 @@ Tour Kit is a pnpm + Turborepo monorepo of 12 React packages providing headless 
 ### Reduced-Motion Three-Tier Defense (cross-package contract, copied verbatim from repo-root CLAUDE.md)
 
 1. **`motion-safe:` Tailwind prefix** on every `tailwindcss-animate` utility (`animate-in`, `fade-*`, `slide-*`, `zoom-*`) in cva variants. Compiles to `@media (prefers-reduced-motion: no-preference)` — under reduce, the utility never applies. Required because `tailwindcss-animate` does not auto-respect the OS pref.
-2. **`@media (prefers-reduced-motion: reduce)` keyframe wrappers** for custom `@keyframes` we own (`tk-strike` / `tk-check-pop` in `checklists` are already wrapped at `packages/checklists/src/styles/animations.css:48–53`). If you add a new keyframe this phase, wrap it identically.
+2. **`@media (prefers-reduced-motion: reduce)` keyframe wrappers** for custom `@keyframes` we own (`tk-fade-completed` / `tk-check-pop` in `checklists` are already wrapped at `packages/checklists/src/styles/animations.css:49–54`). If you add a new keyframe this phase, wrap it identically.
 3. **JS gate via `useReducedMotion()`** from `@tour-kit/core` for render-time class branches or conditional renders. **This is the load-bearing gate for confetti.** Branch BEFORE the dynamic import — under reduce, the import never runs.
 
 ### Public ref interface (the contract — locks this phase)
@@ -560,6 +558,8 @@ export const ChecklistLauncher = React.forwardRef<
 ### Library Decision — `canvas-confetti` (Context7 confirmed)
 
 **Use `canvas-confetti` (^1.9.0) as an optional peer dep, dynamically imported.** Hand-rolling a canvas RAF with particle physics would be 80–120 LOC of code we'd have to maintain and StrictMode-test ourselves. canvas-confetti is ~4 KB gzipped, MIT, zero transitive deps, High source reputation, and ships a built-in `disableForReducedMotion` flag (defense-in-depth below our own tier-3 JS gate).
+
+> ⚠️ **SSR hazard — do NOT static-import.** Bare `import 'canvas-confetti'` reads `window` at module-eval time and throws `ReferenceError: window is not defined` under Node SSR / Next.js RSC (upstream [catdad/canvas-confetti#78](https://github.com/catdad/canvas-confetti/issues/78)). Always use `await import('canvas-confetti')` inside a `useEffect`, never at module top. Annotate the import call site with a comment so future cleanups don't "simplify" it.
 
 Context7-confirmed API:
 ```ts
@@ -739,7 +739,7 @@ Update `"pages"` to `["index", "providers", "hooks", "components", "imperative-a
 - `<ChecklistCompletion variant="confetti">` fires `canvas-confetti` exactly once per mount on the completion edge
 - Under `useReducedMotion → true`, `variant="confetti"` renders only the static badge — `canvas-confetti` is never dynamically imported
 - `variant="checkmark"` renders a static badge with no dynamic import; `variant="none"` renders nothing
-- `pnpm --filter docs build` exits 0; new MDX page renders in sidebar between `components` and `headless`
+- `pnpm --filter @tour-kit/docs build` exits 0; new MDX page renders in sidebar between `components` and `headless`
 - Existing `<ChecklistLauncher>` tests in `packages/checklists/src/__tests__/` stay green; consumers that did NOT pass a `ref` see byte-identical behaviour
 - CHANGELOG entry documents the typed-ref change with `buttonRef` migration
 
@@ -770,7 +770,7 @@ apps/docs/content/docs/checklists/
 
 ## Readiness Check
 
-- [PASS] All inputs from prior phases listed and available — Phase 6 has no upstream phase dependencies (`Depends on: Nothing` per big-plan.md). Source-of-truth files (`checklist-launcher.tsx` lines 60/75/92–102, `checklist-provider.tsx` lines 414–431, `checklist-task.tsx:3` `useReducedMotion` import, `animations.css:48–53` tier-2 keyframe block, `use-checklist.ts` return shape, `meta.json` pages array) all verified to exist at the cited paths.
+- [PASS] All inputs from prior phases listed and available — Phase 6 has no upstream phase dependencies (`Depends on: Nothing` per big-plan.md). Source-of-truth files (`checklist-launcher.tsx` lines 60/75/92–102, `checklist-provider.tsx` lines 414–431, `checklist-task.tsx:3` `useReducedMotion` import, `animations.css:49–54` tier-2 keyframe block wrapping `tk-fade-completed` + `tk-check-pop`, `use-checklist.ts` return shape, `meta.json` pages array) all verified to exist at the cited paths.
 - [PASS] Every sub-task has a clear, testable completion condition — each of 6.1–6.4 ends with a one-paragraph "Sanity check" (typecheck command + Vitest assertion + docs build).
 - [PASS] Execution prompt is self-contained — three-tier reduced-motion contract pasted verbatim from CLAUDE.md, `ChecklistLauncherRef` interface pasted inline, canvas-confetti API + Context7-confirmed signature pasted inline, package.json patch pasted inline, per-file implementation guidance covers exact exports + props + edge cases + dynamic-import error path. No "see Phase X" references.
 - [PASS] Exit criteria map 1:1 to deliverables — every NEW/UPDATED file is covered by typecheck, a Vitest case, the build smoke check, or the docs sidebar render check. State-machine test enumerates the five required edges. Pinned-literal type test guards against silent variant drift.

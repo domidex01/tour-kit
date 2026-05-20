@@ -226,3 +226,12 @@ Full documentation is available at `apps/docs/`:
 - **Guides** - Accessibility, persistence, animations, framework integration
 - **Examples** - Basic tour, onboarding flow, headless custom
 - **API Reference** - Complete API documentation for all packages
+
+## Sibling Project — `tourkit-dash`
+
+A closed-source SaaS dashboard + API that consumes `@tour-kit/*` lives in a separate repo on disk at `/home/domidex/projects/tourkit-dash/`. When a task spans SDK runtime + cloud consumption (data model, billing/licensing flow, API contract, ADRs, runbooks), the bridge between the two repos lives in pointer pages — start at:
+
+- This repo → dash: [`wiki-tech/sources/tourkit-dash.md`](wiki-tech/sources/tourkit-dash.md) — describes `tourkit-dash/wiki/` and `tourkit-dash/docs/` layout + the cross-link convention (`tourkit-dash-wiki/...`, `tourkit-dash-docs/...`).
+- Dash → this repo: `/home/domidex/projects/tourkit-dash/wiki/sources/tour-kit-wiki-tech.md` (already exists) and the per-package pages under `/home/domidex/projects/tourkit-dash/wiki/tour-kit-integration/`.
+
+Rule: never edit dash files from this repo, and never duplicate dash content here. If you're rephrasing a cloud-side fact, link to dash instead. Conversely, the SDK runtime authoritative source is here, not in dash — dash links here for that.

@@ -10,14 +10,14 @@
 
 ## Objective
 
-Phase 0 is a Markdown-only design gate. It produces `tasks/v2-package-polish/phase-0-validation.md` — a single doc that locks the four cross-cutting TypeScript signatures (`useTourActions`, `target` union, `forceShow` matrix, trial-tier source) before any package code is written. No source files in `packages/*` change in this phase. Every later phase that depends on these contracts (1, 5, 7, 8, 13) reads them from this doc, so the doc must be unambiguous, sign-off-able, and resilient enough that a contract flip in Phase 8 doesn't unravel work in Phase 1.
+Phase 0 is a Markdown-first design gate. It produces `tasks/v2-package-polish/phase-0-validation.md` — a single doc that locks the four cross-cutting TypeScript signatures (`useTourActions`, `target` union, `forceShow` matrix, trial-tier source) before any package code is written. No source files in `packages/*` change in this phase. The only other file that may change is `tasks/v2-package-polish/big-plan.md`, and only if Task 0.1 discovers a gap that needs a TODO for later triage. Every later phase that depends on these contracts (1, 5, 7, 8, 13) reads them from this doc, so the doc must be unambiguous, sign-off-able, and resilient enough that a contract flip in Phase 8 doesn't unravel work in Phase 1.
 
 ## What Success Looks Like
 
 1. `test -f /home/domidex/projects/tour-kit/tasks/v2-package-polish/phase-0-validation.md` exits 0 and the file has six top-level `##` sections matching the six tasks below
 2. The doc contains four code blocks tagged ` ```ts` with the exact signatures of `useTourActions`, the `target` union, `forceShow`, and the trial-tier license schema delta — each compiles when pasted into `packages/core/src/types/*.ts` (verified by running `pnpm --filter @tour-kit/core typecheck` after a throwaway paste)
 3. The doc's "Force-show behaviour matrix" section contains a markdown table with exactly 4 rows (frequency, cooldown, viewCount, isDismissed) and a yes/no for each
-4. The doc's "Peer-dep audit" section lists `sonner`, `posthog-js`, `gtag` (`@types/gtag.js`), `@segment/analytics-next`, `@amplitude/analytics-browser`, `ical.js` — each row marked `peer-optional + runtime feature-detect`
+4. The doc's "Peer-dep audit" section lists `sonner`, `posthog-js`, `gtag` (`@types/gtag.js`), `@segment/analytics-next`, `@amplitude/analytics-browser`, `ical.js`, and `canvas-confetti` — each row marked `peer-optional + runtime feature-detect`
 5. The doc ends with a section titled `## Go/No-Go: Trial Tier Source` containing one of two recorded decisions verbatim: either "Polar API can emit `tier=\"trial\"` → Phase 8 uses server-emitted tier" or "Polar API cannot emit `tier=\"trial\"` → Phase 8 derives `daysLeft` client-side from `issuedAt + trialDays` config"
 6. The doc's final line is a sign-off block (`Signed off by: @domidex01 — YYYY-MM-DD`) and is left blank until user approval
 
@@ -62,7 +62,7 @@ Phase 0 produces only a Markdown doc — no runtime artifacts. The doc itself is
 **Other critical rules for this phase:**
 - **No code changes:** Don't edit any `packages/*` file. Only `tasks/v2-package-polish/phase-0-validation.md` is touched.
 - **Verify-don't-hope on signatures:** For each TypeScript snippet, paste it into a scratch `.ts` file under `/tmp` and run `pnpm tsc --noEmit /tmp/scratch.ts` to confirm it parses (no actual integration test — just syntactic validity).
-- **Polar check is a real API call:** For task 0.6, hit the Polar API (`https://api.polar.sh/v1/customers/{id}/state`) on a known sandbox customer and inspect the JSON for any `trial` / `tier` field. Don't guess from docs.
+- **Polar check prefers a real API call:** For task 0.6, hit the Polar API (`https://api.polar.sh/v1/customer-portal/license-keys/validate`) on a known sandbox key when credentials are available and inspect the JSON for any `trial` / `tier` field. If credentials are unavailable, record that explicitly and use the existing `project_polar_api_findings.md` memory as the fallback source; do not invent a server-emitted trial contract.
 
 ---
 
@@ -72,7 +72,7 @@ Phase 0 produces only a Markdown doc — no runtime artifacts. The doc itself is
 
 Open `examples/dashboard-next/` and re-read the four files that contain workarounds (`ReplayBridge.tsx`, the LS-clear+unregister+register block in `onboarding/page.tsx` or equivalent, the hand-composed CSAT modal, the fake launcher click). Diff against the inbound pain list in `big-plan.md`. Record any additional gaps not already covered by Phases 1–19 as a "Gap Addendum" subsection. Do **not** open new phases — log gaps that warrant new phases as a TODO at the bottom of `big-plan.md` for triage.
 
-**Sanity check:** `grep -c "ReplayBridge\|LS-clear\|unregister.*register" examples/dashboard-next/**/*.tsx` returns a non-zero count, and that count is mirrored in the addendum.
+**Sanity check:** `rg -n "ReplayBridge|LS-clear|unregister.*register|localStorage.*tour|dispatchEvent.*tour" examples/dashboard-next` returns the current workaround count, and that count is mirrored in the addendum.
 
 ---
 
@@ -167,7 +167,7 @@ forceShow: (id: string) => void
 | `viewCount` threshold | Yes | **No** |
 | `isDismissed` flag | Yes (no-op) | **No** (re-shows) |
 | `audience` (segment + array) | Yes | **No** |
-| License gate (`<LicenseGate require="pro">`) | Yes | **Yes** (do not bypass — security boundary) |
+| License gate (`<LicenseGate require="pro">`) | Yes | **Yes** (do not bypass — the existing soft gate still renders watermark/warning state) |
 
 **Sanity check:** Walk the existing `show()` implementation (lines 458–517 of `announcements-provider.tsx`) and confirm every gate above maps to a real branch in the code. If a gate doesn't exist (e.g., scheduler is a no-op for some configs), record that explicitly.
 
@@ -185,10 +185,11 @@ Spec the install footprint policy: every destination/adapter shipped in later ph
 | `@segment/analytics-next` | 14.1 | optional | dynamic-import + `'load' in mod.AnalyticsBrowser` |
 | `@amplitude/analytics-browser` | 14.2 | optional | dynamic-import + `'init' in mod` |
 | `ical.js` | 15.2 | optional (lazy-loaded) | dynamic-import only when `parseIcsFeed` is called |
+| `canvas-confetti` | 6.2 | optional (lazy-loaded) | dynamic-import only when `<ChecklistCompletion variant="confetti">` fires and reduced-motion is false |
 
 Confirm there are **zero hard breakages** for existing consumers: search `package.json` files under `packages/*` for any current peer pin against these libraries — if a pre-existing peer is found, record it and decide whether to widen or move to optional.
 
-**Sanity check:** `grep -rn "sonner\|posthog-js\|@segment/analytics-next\|@amplitude/analytics-browser\|ical.js" packages/*/package.json` returns no current production deps (peerDeps OK if widened, but no `dependencies` or hard `peerDependencies` without `peerDependenciesMeta.optional: true`).
+**Sanity check:** `rg -n "sonner|posthog-js|@segment/analytics-next|@amplitude/analytics-browser|ical.js|canvas-confetti" packages/*/package.json` returns no current production deps (peerDeps OK if widened, but no `dependencies` or hard `peerDependencies` without `peerDependenciesMeta.optional: true`).
 
 ---
 
@@ -202,16 +203,18 @@ Decision tree:
 
   ```ts
   // Client-derived trial fallback:
-  interface LicenseProviderProps {
+  type LicenseProviderProps = {
     licenseKey: string
-    /** When set, render <TrialBadge /> using issuedAt + trialDays */
+    /** Trial length. When set, <TrialBadge /> can render a countdown. */
     trialDays?: number // e.g. 14
+    /** Optional explicit trial start timestamp; otherwise derived from validation state. */
+    trialIssuedAt?: number
   }
   ```
 
 Record the chosen path in the doc's final `## Go/No-Go: Trial Tier Source` section. **This is the binary decision the rest of the doc is checked against.**
 
-**Sanity check:** `curl -s "$POLAR_API_BASE/v1/customers/.../state" -H "Authorization: Bearer $POLAR_KEY" | jq '.tier // "absent"'` returns either a trial-signalling value or `"absent"`. Record the raw JSON snippet (with PII redacted) in the doc.
+**Sanity check:** `curl -s "$POLAR_API_BASE/v1/customer-portal/license-keys/validate" -H "Content-Type: application/json" -d '{"key":"...","organization_id":"..."}' | jq '.tier // .trial // "absent"'` returns either a trial-signalling value or `"absent"`. Record the raw JSON snippet (with PII redacted) in the doc, or record "credentials unavailable; used memory fallback" if no sandbox key is present.
 
 ---
 
@@ -233,7 +236,7 @@ No `packages/*` changes. No tests added. No code shipped.
 - [ ] Force-show behaviour matrix table has exactly 4 functional-gate rows + 1 license-gate row, with yes/no per column, and matches the real branches in `announcements-provider.tsx`
 - [ ] Peer-dep audit table lists all six libraries with `peer-optional` mode; `grep` of `packages/*/package.json` confirms no current hard dep on any of them
 - [ ] Gap Addendum subsection logs zero NEW phases (any new gaps are TODOs at the bottom of `big-plan.md`, not new phase headers)
-- [ ] **Go/no-go on trial tier:** If Polar API can emit `tier="trial"` → proceed to Phase 8 as planned. If not → client-derived trial countdown from `issuedAt + trialDays` config; record decision in `phase-0-validation.md`.
+- [ ] **Go/no-go on trial tier:** If Polar API can emit `tier="trial"` → proceed to Phase 8 with a server-emitted tier override. If not → client-derived trial countdown from `trialIssuedAt + trialDays` config, using validation timestamps only as an anchor; record decision in `phase-0-validation.md`.
 - [ ] User explicitly approves the phase-0 doc (signs the `Signed off by:` line at the bottom) before Phase 1 starts
 
 ---
@@ -362,7 +365,7 @@ Signed off by: ________________________ — YYYY-MM-DD
 - The §5 audit table has 6 rows
 - §6 contains one of the two verbatim decision sentences
 - The doc ends with `Signed off by:` (blank until user signs)
-- **No file under `packages/*` is modified.** Verify with `git status` — only `tasks/v2-package-polish/phase-0-validation.md` should appear.
+- **No file under `packages/*` is modified.** Verify with `git status` — only `tasks/v2-package-polish/phase-0-validation.md` should appear, plus `tasks/v2-package-polish/big-plan.md` if Task 0.1 found a roadmap gap.
 
 ### Expected File Structure at End
 ```

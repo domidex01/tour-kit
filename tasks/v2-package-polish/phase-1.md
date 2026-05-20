@@ -13,21 +13,21 @@
 Convert the two workarounds the user explicitly named as "most of the demo wiring pain" into first-class APIs:
 
 1. A **`useTourActions(id)` registry hook** in `@tour-kit/core` so a standalone `<Tour id="...">` (or a tour driven by `useTourKit`) self-registers at mount and any sibling subtree can read `isActive` / call `start`/`stop`/`restart`/`goToStep`. This kills the `ReplayBridge` window-event hack and the LS-clear+unregister+register dance in `examples/dashboard-next`.
-2. A **`forceShow(id)` method** on `AnnouncementsProvider` that bypasses `frequency` / `scheduler cooldown` / `viewCount` / `isDismissed` / `audience` per the Phase 0 task 0.4 matrix — but **never** bypasses the `<LicenseGate require="pro">` boundary (security). Used by admin previews and the demo's "force-show the welcome modal" affordance.
+2. A **`forceShow(id)` method** on `AnnouncementsProvider` that bypasses `frequency` / `scheduler cooldown` / `viewCount` / `isDismissed` / `audience` per the Phase 0 task 0.4 matrix — but **never** bypasses the existing `<LicenseGate require="pro">` wrapper. In this repo `LicenseGate` is a soft gate: it renders children and overlays watermark/warning state when gated, so the invariant is "forced preview does not clear or suppress the license watermark", not "children disappear." Used by admin previews and the demo's "force-show the welcome modal" affordance.
 
 Both APIs land in core/announcements with backwards-compatible types (existing `useTour` / `show()` / `dismiss()` keep their current shape), are tree-shakeable, and ship a codemod that deprecates the `ReplayBridge` window event in v2.0 (warn) with removal slated for v3.0.
 
 ## What Success Looks Like
 
-1. `useTourActions("welcome").start()` opens the `welcome` tour when called from a sibling subtree (verified by a Storybook story that renders `<Tour id="welcome" steps={...} />` and a sibling `<button onClick={() => useTourActions("welcome").start()}>` — clicking the button transitions `isActive` from `false` to `true` without any prop drilling)
+1. `useTourActions("welcome").start()` opens the `welcome` tour when called from a sibling subtree (verified by a Vitest + Testing Library integration test that renders `<Tour id="welcome" steps={...} />` and a sibling button component calling `useTourActions("welcome").start()` — clicking the button transitions `isActive` from `false` to `true` without any prop drilling)
 2. `forceShow("welcome-modal")` displays the announcement when `frequency: "once"` and `viewCount >= 1` are both true (verified by a Vitest test that primes state, calls `forceShow`, and asserts the modal renders)
-3. `forceShow` does **not** bypass `<LicenseGate require="pro">` (verified by a Vitest test that wraps the modal in a `LicenseGate` with an invalid license — `forceShow` is called and the modal is **not** rendered; a `console.warn` fires)
+3. `forceShow` does **not** bypass `<LicenseGate require="pro">` (verified by a Vitest test with an invalid/no license context — `forceShow` is called, the announcement render path still goes through `LicenseGate`, and the license watermark/warning remains visible)
 4. `useTourActions("does-not-exist")` returns a frozen no-op object (`isActive: false`, `start`/`stop`/etc. are no-ops) and does **not** throw — verified by a unit test that asserts `Object.isFrozen(result) === true`
 5. StrictMode double-render does not leak registry entries (verified by a test that mounts `<Tour id="x" />` inside `<React.StrictMode>`, unmounts, and asserts `tourRegistry.size === 0`; the registry stores `WeakRef`s and prunes on unmount)
 6. `examples/dashboard-next` can delete `ReplayBridge` + the LS-clear+unregister+register block — diff shows **≥30 LOC removed** (M1 milestone gate per big-plan.md)
 7. All existing tour + announcement tests still pass (`pnpm --filter @tour-kit/core test && pnpm --filter @tour-kit/announcements test` exit 0 with zero regressions)
 8. `pnpm --filter @tour-kit/core typecheck && pnpm --filter @tour-kit/announcements typecheck` exits 0
-9. New docs page `apps/docs/content/docs/guides/imperative-control.mdx` renders in dev (`pnpm --filter docs dev` shows it in the sidebar under Guides) and contains runnable code blocks for both `useTourActions` and `forceShow`
+9. New docs page `apps/docs/content/docs/guides/imperative-control.mdx` renders in dev (`pnpm --filter @tour-kit/docs dev` shows it in the sidebar under Guides) and contains runnable code blocks for both `useTourActions` and `forceShow`
 
 ---
 
@@ -68,7 +68,7 @@ Both APIs land in core/announcements with backwards-compatible types (existing `
    │   show(id)        — respects all gates         │
    │   forceShow(id)   — bypasses 5/6 gates per     │
    │                     Phase 0 §4 matrix          │
-   │                     (LicenseGate still enforced)│
+   │                     (LicenseGate wrapper kept)   │
    └──────────────────────────────────────────────┘
 ```
 
@@ -88,7 +88,7 @@ Both APIs land in core/announcements with backwards-compatible types (existing `
 - **Frozen no-op return on unknown id.** Returning `null` would force callers to write `useTourActions(id)?.start()` everywhere. Returning a frozen no-op object lets callers write `useTourActions(id).start()` and have it silently no-op during route transitions when the tour isn't mounted. Documented as intentional in Phase 0 §2.
 - **`forceShow` bypass whitelist is enforced by type, not comment.** The whitelist is a `const` tuple checked at compile time; the runtime `forceShow` implementation iterates `gateChecks: Record<BypassKey, () => boolean>` and skips only those keys present in the whitelist.
 - **No new animations.** This phase ships no DOM transitions, so the three-tier reduced-motion defense from CLAUDE.md does not apply. Existing tour/announcement animations are unchanged.
-- **No new libraries.** `WeakRef` is ES2021 (already in `tsconfig.json target: ES2020` — verify with one-liner; if not available, the deliverable upgrades core's target to ES2021 in a CHANGELOG-noted minor). React 18+ already supports the `useSyncExternalStore` pattern needed for the registry subscription.
+- **No new libraries.** `WeakRef` is ES2021. With `tsconfig.json target: ES2020`, the WeakRef type is not bundled by default — extend `lib` to include the targeted ES2021 sub-libs: `"lib": ["ES2020", "ES2021.WeakRef", "DOM", "DOM.Iterable"]` (NOT `"lib": ["ES2021"]` — TypeScript rejects that as an invalid lib value; see [microsoft/TypeScript#45063](https://github.com/microsoft/TypeScript/issues/45063)). Alternatively bump `target` to `ES2021` or use `"lib": ["ESNext"]`. CHANGELOG the lib widening as a minor since downstream consumers re-derive their `lib` from `@tour-kit/core`'s declared `tsconfig`. React 18+ already supports the `useSyncExternalStore` pattern needed for the registry subscription.
 
 ---
 
@@ -168,7 +168,7 @@ Wire the existing `<TourProvider>` / `useTourKit` to push a `RegistryEntry` on m
 
 `useTourActions(tourId)` implementation uses `React.useSyncExternalStore(tourRegistry.subscribe, () => tourRegistry.get(tourId))`. When the registry entry is null, return a module-level frozen no-op object (allocated once, reused across all unknown-id calls).
 
-**Sanity check:** `pnpm --filter @tour-kit/core typecheck && pnpm --filter @tour-kit/core test -- --run` exits 0; a manual smoke test in Storybook (sibling button calls `useTourActions("welcome").start()`) flips `isActive`.
+**Sanity check:** `pnpm --filter @tour-kit/core typecheck && pnpm --filter @tour-kit/core test -- --run use-tour-actions` exits 0; the sibling-button integration test flips `isActive`.
 
 ---
 
@@ -184,7 +184,7 @@ Create `packages/codemods/src/transforms/replay-bridge-to-use-tour-actions.ts` �
 - Strips the matching `window.addEventListener('tour-replay', ...)` listener block
 - Adds `import { useTourActions } from '@tour-kit/core'` if not already present
 
-Register the transform in `packages/codemods/src/cli.ts` so it shows up in `tour-kit-migrate --list`. Add a `__tests__/transforms/replay-bridge-to-use-tour-actions.test.ts` fixture pair (before/after).
+Register the transform in `packages/codemods/src/cli.ts` by widening the existing `--from` union (`joyride | shepherd | driver`) to include `replay-bridge-to-use-tour-actions`, adding the transform to `TRANSFORMS`, `isFromValue`, `TRANSFORM_COVERAGE`, and the usage text. There is no `--list` command today, so do not reference one unless you implement it in the same PR. Add a `__tests__/transforms/replay-bridge-to-use-tour-actions.test.ts` fixture pair (before/after).
 
 **Sanity check:** `pnpm --filter @tour-kit/codemods test -- --run replay-bridge` exits 0; running the codemod on `examples/dashboard-next/` removes the `ReplayBridge` listener and replaces the dispatch.
 
@@ -205,7 +205,7 @@ Per Phase 0 §4 matrix:
 | `viewCount` threshold                             | Yes                | **No**                  |
 | `isDismissed` flag                                | Yes (no-op)        | **No** (re-shows)       |
 | `audience` (segment + array)                      | Yes                | **No**                  |
-| License gate (`<LicenseGate require="pro">`)      | Yes                | **Yes** (security)      |
+| License gate (`<LicenseGate require="pro">`)      | Yes                | **Yes** (soft gate wrapper and watermark remain) |
 
 Implementation pattern (refactor `show()` to extract gate evaluation, then `forceShow()` reuses the side-effect tail):
 
@@ -218,9 +218,9 @@ const forceShow = React.useCallback((id: string) => {
   const config = state.configs.get(id)
   if (!announcementState || !config) return
 
-  // LicenseGate is NOT bypassed — that's a security boundary, not a UX gate.
-  // The LicenseGate component itself short-circuits rendering when invalid,
-  // so we simply emit the SHOW action and let the gate decide visually.
+  // LicenseGate is NOT bypassed — it is the package-level soft gate.
+  // The gate currently renders children and overlays watermark/warning state
+  // when unlicensed, so forceShow must not clear that state or skip the wrapper.
 
   // Skip every gate in FORCE_SHOW_BYPASS; preserve the existing side-effect tail
   // (queue-or-show, persist, analytics, callbacks) but stamp trigger="forced"
@@ -253,7 +253,7 @@ const forceShow = React.useCallback((id: string) => {
 
 Update `AnnouncementsContextValue` (`packages/announcements/src/types/context.ts`) and `useAnnouncements()` return shape to expose `forceShow`. Add a pinned-array test that asserts `FORCE_SHOW_BYPASS` equals `['frequency', 'cooldown', 'viewCount', 'isDismissed', 'audience']` exactly — any drift breaks CI.
 
-**Sanity check:** `pnpm --filter @tour-kit/announcements test -- --run forceShow` shows a passing test where `frequency: "once"` + `viewCount: 1` + `isDismissed: true` all bypass and the modal renders, plus a passing test where `<LicenseGate require="pro">` blocks even after `forceShow`.
+**Sanity check:** `pnpm --filter @tour-kit/announcements test -- --run force-show` shows a passing test where `frequency: "once"` + `viewCount: 1` + `isDismissed: true` all bypass and the modal renders, plus a passing test where an invalid/no license still shows the license watermark/warning after `forceShow`.
 
 ---
 
@@ -268,7 +268,7 @@ Create `apps/docs/content/docs/guides/imperative-control.mdx` with two H2 sectio
 
 Update `apps/docs/content/docs/guides/meta.json` so the new page appears in the Guides sidebar (slot it after `analytics-integration.mdx` alphabetically).
 
-**Sanity check:** `pnpm --filter docs build` exits 0; `pnpm --filter docs dev` shows the page at `/docs/guides/imperative-control`.
+**Sanity check:** `pnpm --filter @tour-kit/docs build` exits 0; `pnpm --filter @tour-kit/docs dev` shows the page at `/docs/guides/imperative-control`.
 
 ---
 
@@ -299,7 +299,7 @@ packages/announcements/
 │   ├── hooks/
 │   │   └── use-announcements.ts         # UPDATED — surface forceShow in return shape
 │   └── __tests__/
-│       └── force-show.test.tsx          # NEW — bypass matrix tests + LicenseGate boundary test
+│       └── force-show.test.tsx          # NEW — bypass matrix tests + LicenseGate soft-gate test
 
 packages/codemods/
 ├── src/
@@ -325,10 +325,10 @@ examples/dashboard-next/
 
 - [ ] `pnpm --filter @tour-kit/core typecheck` and `pnpm --filter @tour-kit/announcements typecheck` and `pnpm --filter @tour-kit/codemods typecheck` all exit 0
 - [ ] `pnpm --filter @tour-kit/core test -- --run` exits 0 with new tests `tour-registry.test.ts` (≥3 cases: register/unregister/StrictMode-no-leak) and `use-tour-actions.test.tsx` (≥3 cases: sibling-subtree start, unknown-id no-op, frozen return) passing
-- [ ] `pnpm --filter @tour-kit/announcements test -- --run force-show` exits 0 with ≥6 cases proving the Phase 0 §4 matrix row-by-row (one test per bypass row + one test that `LicenseGate` still blocks)
+- [ ] `pnpm --filter @tour-kit/announcements test -- --run force-show` exits 0 with ≥6 cases proving the Phase 0 §4 matrix row-by-row (one test per bypass row + one test that the `LicenseGate` soft gate still renders its watermark/warning state)
 - [ ] Pinned-array test in `force-show.test.tsx` asserts `FORCE_SHOW_BYPASS` literal-equals `['frequency', 'cooldown', 'viewCount', 'isDismissed', 'audience']` — drift breaks CI
 - [ ] `pnpm --filter @tour-kit/codemods test -- --run replay-bridge` exits 0 with before/after fixture parity (input file with `window.dispatchEvent('tour-replay')` → output file with `useTourActions(id).start()` + import added + listener removed)
-- [ ] `pnpm --filter docs build` exits 0 and `imperative-control.mdx` appears in the rendered sidebar under Guides
+- [ ] `pnpm --filter @tour-kit/docs build` exits 0 and `imperative-control.mdx` appears in the rendered sidebar under Guides
 - [ ] StrictMode leak test: mount `<Tour id="x" />` inside `<React.StrictMode>`, unmount, assert `tourRegistry.snapshot().size === 0` after `tourRegistry.prune()`
 - [ ] `examples/dashboard-next` diff: `git diff --stat examples/dashboard-next` after migration shows ≥30 LOC removed (M1 gate)
 - [ ] All existing tour + announcement tests still pass (no regressions): `pnpm test` at repo root exits 0
@@ -343,7 +343,7 @@ Copy everything between the `---` lines into a new Claude session to implement t
 You are building Phase 1 of Tour Kit v2 Package Polish — useTour Reach + Force-Show.
 
 ### What This Project Is
-Tour Kit is a pnpm monorepo of 12 packages providing headless React product-tour primitives (core, react, hints) plus pro packages (announcements, surveys, checklists, adoption, analytics, ai, scheduling, license, media). v2 closes demo-wiring gaps reported while building `examples/dashboard-next/`. Every phase ships as one PR with backwards-compatible types. The stack is TypeScript strict mode, React 18+, tsup, Turborepo, Vitest, pnpm. `WeakRef` is available (ES2021; verify `tsconfig.json target` is at least `ES2020` with `lib: ['ES2021']` — if not, widen the lib in a separate commit and note in CHANGELOG).
+Tour Kit is a pnpm monorepo of 12 packages providing headless React product-tour primitives (core, react, hints) plus pro packages (announcements, surveys, checklists, adoption, analytics, ai, scheduling, license, media). v2 closes demo-wiring gaps reported while building `examples/dashboard-next/`. Every phase ships as one PR with backwards-compatible types. The stack is TypeScript strict mode, React 18+, tsup, Turborepo, Vitest, pnpm. `WeakRef` is ES2021; with `target: ES2020`, widen the `lib` array to `["ES2020", "ES2021.WeakRef", "DOM", "DOM.Iterable"]` (do NOT use `"lib": ["ES2021"]` — TypeScript rejects that as invalid, see [microsoft/TypeScript#45063](https://github.com/microsoft/TypeScript/issues/45063)). Bumping `target` to `ES2021` or `lib` to `["ESNext"]` is also acceptable. Widen in a separate commit and note in CHANGELOG.
 
 ### Established in Prior Phases
 - Phase 0 (signed off in `tasks/v2-package-polish/phase-0-validation.md`) locked these contracts:
@@ -386,7 +386,7 @@ forceShow: (id: string) => void
 | `viewCount` threshold                             | Yes                | **No**                  |
 | `isDismissed` flag                                | Yes (no-op)        | **No** (re-shows)       |
 | `audience` (segment + array)                      | Yes                | **No**                  |
-| License gate (`<LicenseGate require="pro">`)      | Yes                | **Yes** (security)      |
+| License gate (`<LicenseGate require="pro">`)      | Yes                | **Yes** (soft gate wrapper and watermark remain) |
 
 `forceShow` still increments `viewCount` (admins see real telemetry deltas) and stamps analytics events with `metadata.trigger="forced"`.
 
@@ -413,7 +413,7 @@ Ship `useTourActions(id)` in `@tour-kit/core` (registry + hook + frozen no-op re
 @tour-kit/announcements
   src/context/announcements-provider.tsx
     show(id)         — existing; unchanged
-    forceShow(id)    — NEW; bypasses 5 gates per matrix; LicenseGate still enforced
+    forceShow(id)    — NEW; bypasses 5 gates per matrix; LicenseGate soft wrapper still enforced
   src/types/context.ts                ← AnnouncementsContextValue gains forceShow
 
 @tour-kit/codemods
@@ -436,7 +436,8 @@ const snapshot = React.useSyncExternalStore(
 ```
 
 ```ts
-// WeakRef — ES2021; assume tsconfig lib includes ES2021
+// WeakRef — ES2021. Require `lib: ["ES2020", "ES2021.WeakRef", "DOM"]`
+// (or `lib: ["ESNext"]` / `target: "ES2021"`). NOT `lib: ["ES2021"]` — invalid value.
 const ref = new WeakRef(entry)
 const live = ref.deref()  // RegistryEntry | undefined
 ```
@@ -480,7 +481,7 @@ Add `forceShow: (id: string) => void` to `AnnouncementsContextValue` between `sh
 Add the `FORCE_SHOW_BYPASS` const tuple at module scope (above the provider component). Implement `forceShow` as shown in the "Implementation pattern" block of Task 1.3. Place it directly below `show` (around line 518). Include `forceShow` in the `value` object returned to the context, and in every `React.useMemo` deps array that lists `show` (`show`'s deps + `forceShow` should be co-listed). Preserve every other gate path unchanged.
 
 #### `packages/announcements/src/__tests__/force-show.test.tsx` (NEW)
-≥6 cases, one per matrix row plus the LicenseGate boundary: (1) `frequency: "once"` + already viewed → `forceShow` re-renders the modal; (2) scheduler cooldown active → `forceShow` bypasses; (3) `viewCount >= maxViews` → `forceShow` re-renders; (4) `isDismissed: true` → `forceShow` re-renders and re-sets `isDismissed` to false; (5) `audience` mismatch → `forceShow` ignores audience and renders; (6) `<LicenseGate require="pro">` invalid → `forceShow` is called but the modal does NOT render (security boundary preserved). Plus a literal-array snapshot test pinning `FORCE_SHOW_BYPASS` to `['frequency', 'cooldown', 'viewCount', 'isDismissed', 'audience']`.
+≥6 cases, one per matrix row plus the LicenseGate boundary: (1) `frequency: "once"` + already viewed → `forceShow` re-renders the modal; (2) scheduler cooldown active → `forceShow` bypasses; (3) `viewCount >= maxViews` → `forceShow` re-renders; (4) `isDismissed: true` → `forceShow` re-renders and re-sets `isDismissed` to false; (5) `audience` mismatch → `forceShow` ignores audience and renders; (6) invalid/no license context → `forceShow` is called, the announcement still renders through `LicenseGate`, and the watermark/warning remains visible (soft-gate boundary preserved). Plus a literal-array snapshot test pinning `FORCE_SHOW_BYPASS` to `['frequency', 'cooldown', 'viewCount', 'isDismissed', 'audience']`.
 
 #### `packages/codemods/src/transforms/replay-bridge-to-use-tour-actions.ts` (NEW)
 jscodeshift transform. Match `window.dispatchEvent(new CustomEvent('tour-replay', { detail: { id: <expr> } }))` (and small variants) → rewrite to `useTourActions(<expr>).start()`. Strip matching `window.addEventListener('tour-replay', …)` blocks. Add `import { useTourActions } from '@tour-kit/core'` if not already present. Idempotent (running twice is a no-op on second pass). On uncertain matches (custom event name varies), emit `// TODO(tour-kit): replace with useTourActions` and leave the node untouched.
@@ -489,7 +490,7 @@ jscodeshift transform. Match `window.dispatchEvent(new CustomEvent('tour-replay'
 Fixture-based test: input file with a `tour-replay` dispatch + listener → output file matches expected (dispatch rewritten, listener removed, import added). Add a second fixture proving idempotency (running the transform twice produces an unchanged output on the second pass).
 
 #### `packages/codemods/src/cli.ts` (UPDATED)
-Register the new transform under the name `replay-bridge-to-use-tour-actions` so `tour-kit-migrate --list` shows it.
+Register the new transform under the name `replay-bridge-to-use-tour-actions` in the existing `--from` CLI path: update `CliOptions['from']`, `TRANSFORMS`, `isFromValue`, `TRANSFORM_COVERAGE`, and `usageMessage()`. The current CLI has no `--list`; add one only if you also add tests for it.
 
 #### `apps/docs/content/docs/guides/imperative-control.mdx` (NEW)
 Two H2 sections per Task 1.4. Each section contains a runnable code block (TypeScript, fenced as ```tsx). The `forceShow` section pastes the matrix table verbatim. Frontmatter: `title: Imperative control`, `description: Control tours from sibling subtrees with useTourActions, and bypass announcement gates with forceShow.`.
@@ -501,14 +502,14 @@ Slot the new page after `analytics-integration` in the `pages` array.
 Remove `ReplayBridge.tsx`, the LS-clear+unregister+register dance, and any related test. Replace the dispatch call site with `useTourActions("welcome").start()`. Replace the force-show LS-dance with `useAnnouncements().forceShow("welcome-modal")`. Target ≥30 LOC removed (M1 gate). This is the proof point; not a deliverable file.
 
 ### Success Criteria
-- `useTourActions("welcome").start()` flips `isActive` from `false` to `true` when called from a sibling subtree (Storybook + Vitest)
-- `forceShow("welcome-modal")` renders the modal when `frequency: "once"` and `viewCount >= 1`; does NOT render when `<LicenseGate require="pro">` is invalid
+- `useTourActions("welcome").start()` flips `isActive` from `false` to `true` when called from a sibling subtree (Vitest + dashboard-next smoke)
+- `forceShow("welcome-modal")` renders the modal when `frequency: "once"` and `viewCount >= 1`; under invalid/no license it still leaves `LicenseGate`'s watermark/warning visible
 - `useTourActions("does-not-exist")` returns a frozen no-op object, never throws
 - StrictMode mount+unmount leaves zero entries in `tourRegistry.snapshot()` after `prune()`
 - `examples/dashboard-next` diff shows ≥30 LOC removed
 - All tests pass: `pnpm test` exits 0 at repo root
 - All typecheck pass: `pnpm typecheck` exits 0 at repo root
-- Docs build clean: `pnpm --filter docs build` exits 0; new page renders in sidebar
+- Docs build clean: `pnpm --filter @tour-kit/docs build` exits 0; new page renders in sidebar
 
 ### Expected File Structure at End
 ```

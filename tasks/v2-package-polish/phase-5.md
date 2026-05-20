@@ -21,7 +21,7 @@ Stop tour selectors silently breaking on portal'd elements, dynamically-IDed nod
 5. `pnpm --filter @tour-kit/codemods test -- --run target-to-ref` exits 0 with **5 of 5** sample fixtures rewriting cleanly (one of the five is the "ambiguous — emit TODO" case, asserting the codemod leaves the original target untouched and inserts the comment)
 6. `pnpm --filter @tour-kit/core typecheck && pnpm --filter @tour-kit/react typecheck && pnpm --filter @tour-kit/codemods typecheck` all exit 0
 7. All pre-existing tour + multi-tour tests pass with zero regressions (`pnpm test` at repo root exits 0)
-8. New docs page `apps/docs/content/docs/react/target-prop.mdx` renders in dev (`pnpm --filter docs dev` shows it in the React-package sidebar) with one runnable code block per target shape (string, ref, thunk) and a documented order-of-resolution note
+8. New docs page `apps/docs/content/docs/react/target-prop.mdx` renders in dev (`pnpm --filter @tour-kit/docs dev` shows it in the React-package sidebar) with one runnable code block per target shape (string, ref, thunk) and a documented order-of-resolution note
 
 ---
 
@@ -44,9 +44,15 @@ Stop tour selectors silently breaking on portal'd elements, dynamically-IDed nod
                                      │                  │
               ┌──────────────────────┘                  └────────────────────────┐
               │                                                                  │
-   packages/core/src/types/step.ts          packages/react/src/components/tour/tour-step.tsx
-   target: TourTarget                       (consumes resolveTarget via the
-                                             provider's step-render pipeline)
+   packages/core/src/types/step.ts          packages/core/src/hooks/use-step.ts
+   packages/core/src/types/hints.ts         packages/core/src/hooks/use-element-position.ts
+   target: TourTarget                       packages/core/src/lib/wait-for-step-target.ts
+                                           packages/core/src/utils/dom.ts
+                                           packages/react/src/components/card/tour-card.tsx
+                                           packages/react/src/components/headless/tour-card.tsx
+                                           packages/react/src/components/headless/tour-overlay.tsx
+                                           packages/react/src/components/overlay/tour-overlay.tsx
+                                             (all runtime dereference paths consume resolveTarget)
               │
               ▼
    packages/react/src/components/provider/tourkit-provider.tsx
@@ -135,7 +141,7 @@ export function resolveTarget(t: TourTarget): HTMLElement | null {
 }
 ```
 
-Update `packages/core/src/types/step.ts` line 63 — replace `target: string | React.RefObject<HTMLElement | null>` with `target: TourTarget` (imported from `./target`). Audit every other file in `packages/core/src/types/` and `packages/core/src/utils/position.ts` for sites that consume `step.target` as a string and pipe them through `resolveTarget` instead. Same audit pass in `packages/react/src/components/tour/tour-step.tsx` — anywhere the prop is dereferenced as a string, route through `resolveTarget`.
+Update `packages/core/src/types/step.ts` line 63 — replace `target: string | React.RefObject<HTMLElement | null>` with `target: TourTarget` (imported from `./target`). Also update `packages/core/src/types/hints.ts` so `HintConfig.target` shares the same widened shape. Route every runtime dereference through `resolveTarget`: `packages/core/src/hooks/use-step.ts`, `packages/core/src/hooks/use-element-position.ts`, `packages/core/src/lib/wait-for-step-target.ts`, `packages/core/src/utils/dom.ts`, `packages/react/src/components/card/tour-card.tsx`, `packages/react/src/components/headless/tour-card.tsx`, `packages/react/src/components/headless/tour-overlay.tsx`, and `packages/react/src/components/overlay/tour-overlay.tsx`. `packages/react/src/components/tour/tour-step.tsx` is currently a null declarative marker and should not be listed as a resolver consumer unless implementation changes make it dereference `target`.
 
 Add unit tests in `packages/core/src/__tests__/types/target.test.ts`:
 - string → falls back to `document.querySelector` (jsdom)
@@ -145,7 +151,7 @@ Add unit tests in `packages/core/src/__tests__/types/target.test.ts`:
 - thunk returning null → returns null
 - SSR safety: with `globalThis.document = undefined`, string form returns null without throwing
 
-Add a backwards-compat integration test in `packages/react/src/__tests__/components/tour/tour-step.target-back-compat.test.tsx` that mounts a tour with `target="#a"` and asserts the rendered card snapshot is byte-identical to the pre-widening snapshot.
+Add a backwards-compat integration test in `packages/react/src/__tests__/components/card/tour-card.target-back-compat.test.tsx` that mounts a tour with `target="#a"` and asserts the rendered card/overlay behavior is byte-identical to the pre-widening snapshot.
 
 **Sanity check:** `pnpm --filter @tour-kit/core typecheck && pnpm --filter @tour-kit/core test -- --run target` exits 0; `pnpm --filter @tour-kit/react test -- --run target-string-backcompat` exits 0.
 
@@ -153,7 +159,7 @@ Add a backwards-compat integration test in `packages/react/src/__tests__/compone
 
 ### Task 5.2 — `<MultiTourKitProvider>{children}` compose-mode (3–4 h)
 
-The provider at `packages/react/src/components/provider/tourkit-provider.tsx` (lines 75–134) already accepts `children: React.ReactNode` and wraps them in `<CoreTourKitProvider>` → `<TourProvider>` → `{children}`. The current pain — surfaced as part of the dashboard-next walk — is that some example code in docs / Storybook treats `<Tour>` and the consuming components as **siblings of `<MultiTourKitProvider>`**, leaving consumers unsure whether `useTour()` will resolve. Phase 5.2 makes compose-mode the canonical, tested, documented pattern.
+The provider at `packages/react/src/components/provider/tourkit-provider.tsx` already accepts `children: React.ReactNode` and wraps them in `<CoreTourKitProvider>` → `<TourProvider>` → `{children}`. The current pain — surfaced as part of the dashboard-next walk — is that some example code in docs and examples can be read as placing `<Tour>` and consuming components as **siblings of `<MultiTourKitProvider>`**, leaving consumers unsure whether `useTour()` will resolve. Phase 5.2 makes compose-mode the canonical, tested, documented pattern.
 
 Three concrete changes:
 
@@ -187,7 +193,7 @@ Idempotency:
 - A `target={someExpr}` attribute (already a `JSXExpressionContainer`, not a `StringLiteral`) is skipped — running the codemod twice on the same file produces a zero-diff second pass.
 - The TODO comment is only attached once; re-running checks for the existing comment via substring match on the leading comments.
 
-Register the transform in `packages/codemods/src/cli.ts` so `tour-kit-migrate --list` shows `target-to-ref` (mirror the registration pattern of `from-driver`).
+Register the transform in `packages/codemods/src/cli.ts` by widening the existing `--from` union (`joyride | shepherd | driver`) to include `target-to-ref`, adding it to `TRANSFORMS`, `isFromValue`, `TRANSFORM_COVERAGE`, and the usage text. The current CLI has no `--list`; do not reference one unless you implement and test it in the same PR.
 
 Fixtures live at `packages/codemods/src/__tests__/fixtures/target-to-ref/` — five input/output pairs:
 
@@ -211,10 +217,16 @@ packages/core/
 │   ├── types/
 │   │   ├── target.ts                       # NEW — TourTarget union + resolveTarget()
 │   │   ├── step.ts                         # UPDATED — `target: TourTarget`
+│   │   ├── hints.ts                        # UPDATED — `target: TourTarget`
 │   │   └── index.ts                        # UPDATED — re-export TourTarget, TourTargetRef,
 │   │                                       #            TourTargetGetter, resolveTarget
+│   ├── hooks/
+│   │   ├── use-step.ts                     # UPDATED — use resolveTarget via useElementPosition
+│   │   └── use-element-position.ts         # UPDATED — accepts TourTarget/HTMLElement/null
+│   ├── lib/
+│   │   └── wait-for-step-target.ts         # UPDATED — supports selector/ref/getter targets
 │   ├── utils/
-│   │   └── position.ts                     # UPDATED — pipe step.target through resolveTarget
+│   │   └── dom.ts                          # UPDATED — getElement delegates to resolveTarget
 │   └── __tests__/
 │       └── types/
 │           └── target.test.ts              # NEW — 6 cases: string/ref-set/ref-null/
@@ -223,14 +235,19 @@ packages/core/
 packages/react/
 ├── src/
 │   ├── components/
-│   │   ├── tour/
-│   │   │   └── tour-step.tsx               # UPDATED — consume resolveTarget on prop dereference
+│   │   ├── card/
+│   │   │   └── tour-card.tsx               # UPDATED — consume resolveTarget
+│   │   ├── headless/
+│   │   │   ├── tour-card.tsx               # UPDATED — consume resolveTarget
+│   │   │   └── tour-overlay.tsx            # UPDATED — consume resolveTarget
+│   │   ├── overlay/
+│   │   │   └── tour-overlay.tsx            # UPDATED — consume resolveTarget
 │   │   └── provider/
 │   │       └── tourkit-provider.tsx        # UPDATED — docblock example switched to compose-mode
 │   └── __tests__/
 │       ├── components/
-│       │   └── tour/
-│       │       └── tour-step.target-back-compat.test.tsx   # NEW — string-selector parity
+│       │   └── card/
+│       │       └── tour-card.target-back-compat.test.tsx   # NEW — string-selector parity
 │       └── components/
 │           └── provider/
 │               └── multi-tour-kit-compose.test.tsx          # NEW — deeply-nested useTour test
@@ -274,9 +291,9 @@ apps/docs/
 - [ ] `pnpm --filter @tour-kit/codemods test -- --run target-to-ref` exits 0 with **5 of 5** fixture cases passing (happy-path-single, happy-path-multi, no-ref-in-scope emit-TODO, already-ref no-op, mixed-bag partial-rewrite)
 - [ ] Codemod idempotency: running the transform twice on `happy-path-single.input.tsx` produces a byte-identical second-pass output (asserted in the test runner)
 - [ ] `pnpm test` at repo root exits 0 — no regressions in any tour, hint, multi-tour, or codemod suite
-- [ ] `pnpm --filter docs build` exits 0; `target-prop.mdx` appears in the React-package sidebar
+- [ ] `pnpm --filter @tour-kit/docs build` exits 0; `target-prop.mdx` appears in the React-package sidebar
 - [ ] `MultiTourKitProvider` docblock example in `tourkit-provider.tsx` shows `<Tour>`, `<TourOverlay>`, `<TourCard>` as children of the provider (compose-mode), not siblings
-- [ ] Audit pass: `grep -rn "target:.*string |.*RefObject" packages/core/src packages/react/src` returns no remaining call sites that hardcode the old two-way union — every site uses `TourTarget`
+- [ ] Audit pass: `rg "target:.*string \\|.*RefObject|currentStep\\.target|step\\.target|document\\.querySelector<HTMLElement>\\(.*target" packages/core/src packages/react/src` returns no runtime target dereference that bypasses `TourTarget` / `resolveTarget`
 
 ---
 
@@ -343,25 +360,32 @@ Widen the `target` prop across `@tour-kit/core` and `@tour-kit/react` to the thr
 
 ### Data Model Rules (follow exactly)
 - **`type` alias (exported):** `TourTarget`, `TourTargetRef`, `TourTargetGetter` — unions, not records. Live in `packages/core/src/types/target.ts`. Re-exported from the `@tour-kit/core` barrel (`src/types/index.ts` and `src/index.ts`).
-- **Function (exported):** `resolveTarget(t: TourTarget): HTMLElement | null` — co-located in `target.ts`. Same source of truth used by `tour-step.tsx`, `position.ts`, and any future hint/announcement consumer.
+- **Function (exported):** `resolveTarget(t: TourTarget): HTMLElement | null` — co-located in `target.ts`. Same source of truth used by `use-step.ts`, `use-element-position.ts`, `wait-for-step-target.ts`, `utils/dom.ts`, all React card/overlay consumers, and any future hint/announcement consumer.
 - **No new Zod schemas this phase.** `target` does not cross an external validation boundary.
 - **No `interface` for the target union.** A discriminated union is a `type`, not an `interface`.
 - **No new peer deps.** `React.RefObject` is native; jscodeshift is already a `@tour-kit/codemods` dev dep.
-- **Backwards-compat is sacred.** Every existing string-selector call site keeps working. Audit `packages/core/src/utils/position.ts` and any other place that touches `step.target` to ensure it goes through `resolveTarget`.
+- **Backwards-compat is sacred.** Every existing string-selector call site keeps working. Audit `packages/core/src/hooks/use-step.ts`, `packages/core/src/hooks/use-element-position.ts`, `packages/core/src/lib/wait-for-step-target.ts`, `packages/core/src/utils/dom.ts`, and every React card/overlay component that touches `currentStep.target` to ensure it goes through `resolveTarget`.
 
 ### Architecture
 ```
 @tour-kit/core
   src/types/target.ts                ← NEW: TourTarget union + resolveTarget() function
   src/types/step.ts                  ← UPDATED: line 63 → `target: TourTarget`
+  src/types/hints.ts                 ← UPDATED: HintConfig.target → `TourTarget`
   src/types/index.ts                 ← UPDATED: re-export TourTarget*, resolveTarget
-  src/utils/position.ts              ← UPDATED: pipe step.target through resolveTarget
+  src/hooks/use-step.ts              ← UPDATED: route target through resolveTarget
+  src/hooks/use-element-position.ts  ← UPDATED: accepts TourTarget/HTMLElement/null
+  src/lib/wait-for-step-target.ts    ← UPDATED: supports selector/ref/getter
+  src/utils/dom.ts                   ← UPDATED: getElement delegates to resolveTarget
   src/__tests__/types/target.test.ts ← NEW: 6 cases per Task 5.1
 
 @tour-kit/react
-  src/components/tour/tour-step.tsx                                  ← UPDATED: use resolveTarget
+  src/components/card/tour-card.tsx                                  ← UPDATED: use resolveTarget
+  src/components/headless/tour-card.tsx                              ← UPDATED: use resolveTarget
+  src/components/headless/tour-overlay.tsx                           ← UPDATED: use resolveTarget
+  src/components/overlay/tour-overlay.tsx                            ← UPDATED: use resolveTarget
   src/components/provider/tourkit-provider.tsx                       ← UPDATED: compose-mode docblock
-  src/__tests__/components/tour/tour-step.target-back-compat.test.tsx  ← NEW: string-selector parity
+  src/__tests__/components/card/tour-card.target-back-compat.test.tsx  ← NEW: string-selector parity
   src/__tests__/components/provider/multi-tour-kit-compose.test.tsx    ← NEW: deeply-nested useTour
 
 @tour-kit/codemods
@@ -432,8 +456,17 @@ At line 63, replace `target: string | React.RefObject<HTMLElement | null>` with 
 #### `packages/core/src/types/index.ts` (UPDATED)
 Re-export `TourTarget`, `TourTargetRef`, `TourTargetGetter` (as types) and `resolveTarget` (as value) from `./target`.
 
-#### `packages/core/src/utils/position.ts` (UPDATED)
-Find every site that touches `step.target` directly (it's currently typed as string in some downstream consumers). Pipe it through `resolveTarget` so the position engine sees `HTMLElement | null` regardless of which target shape the consumer supplied. Do not change the public signature of `calculatePosition`.
+#### `packages/core/src/hooks/use-step.ts` (UPDATED)
+Remove the local `targetSelector` / `targetRef` split. Pass `step?.target ?? null` to the updated `useElementPosition`, which owns resolution through `resolveTarget`.
+
+#### `packages/core/src/hooks/use-element-position.ts` (UPDATED)
+Widen the hook input from `string | HTMLElement | null` to `TourTarget | HTMLElement | null`. Use `getElement` / `resolveTarget` for selector, ref, and getter targets, while preserving direct `HTMLElement` support for existing internal callers.
+
+#### `packages/core/src/lib/wait-for-step-target.ts` (UPDATED)
+Keep selector targets on the existing `waitForElement(selector, timeout, signal)` path so delayed DOM nodes after route changes still wait. For ref/getter targets, call `resolveTarget(step.target)` at check time and throw the current `TourRouteError` if it returns null; getters are synchronous escape hatches and are not observed via `MutationObserver`.
+
+#### `packages/core/src/utils/dom.ts` (UPDATED)
+Update `getElement` to delegate selector/ref/getter branches to `resolveTarget`, while preserving its direct `HTMLElement` passthrough. Add tests for getter input in `packages/core/src/__tests__/utils/dom.test.ts`.
 
 #### `packages/core/src/__tests__/types/target.test.ts` (NEW)
 Six Vitest cases:
@@ -444,14 +477,14 @@ Six Vitest cases:
 5. `resolveTarget(() => null)` returns null.
 6. `resolveTarget('#anything')` with `globalThis.document = undefined` returns null without throwing. Restore `globalThis.document` in `afterEach`.
 
-#### `packages/react/src/components/tour/tour-step.tsx` (UPDATED)
-Anywhere the `target` prop is dereferenced (search for `props.target`, destructured `target` usage), route it through `resolveTarget` imported from `@tour-kit/core`. The component remains a thin wrapper — no logic changes beyond the resolver call.
+#### React card/overlay consumers (UPDATED)
+`packages/react/src/components/tour/tour-step.tsx` is a null declarative marker today, so do not put resolver logic there unless the implementation changes. Update the actual dereference sites instead: `packages/react/src/components/card/tour-card.tsx`, `packages/react/src/components/headless/tour-card.tsx`, `packages/react/src/components/headless/tour-overlay.tsx`, and `packages/react/src/components/overlay/tour-overlay.tsx`. Replace each local `typeof currentStep.target === 'string' ? document.querySelector(...) : currentStep.target.current` branch with `resolveTarget(currentStep.target)`.
 
 #### `packages/react/src/components/provider/tourkit-provider.tsx` (UPDATED)
 Lines 60–73 — update the JSDoc `@example` block so `<Tour>`, `<TourOverlay>`, `<TourCard>`, and `<App />` all live as children of `<MultiTourKitProvider>` (compose-mode). The implementation (lines 75–134) does not change — the provider already wraps `TourProvider`. No new props.
 
-#### `packages/react/src/__tests__/components/tour/tour-step.target-back-compat.test.tsx` (NEW)
-Mount a tour with `target="#a"` (legacy string) and assert the rendered output matches a snapshot. Run the same setup with `target={refToA}` (ref) and assert the spotlight overlaps the same DOM rect. Asserts no console warnings via `vi.spyOn(console, 'warn')`.
+#### `packages/react/src/__tests__/components/card/tour-card.target-back-compat.test.tsx` (NEW)
+Mount a tour with `target="#a"` (legacy string) and assert the rendered output matches a snapshot. Run the same setup with `target={refToA}` (ref) and `target={() => refToA.current}` (getter) and assert the floating card/spotlight reference resolves to the same DOM rect. Asserts no console warnings via `vi.spyOn(console, 'warn')`.
 
 #### `packages/react/src/__tests__/components/provider/multi-tour-kit-compose.test.tsx` (NEW)
 Render `<MultiTourKitProvider>` wrapping five `<div>`s deep, with a `<Tour id="x" steps={...} />` at the leaf. Use `renderHook(() => useTour(), { wrapper })` to assert (1) the hook returns a controller (not null, not thrown), (2) `useTourRegistryContext().tours` contains the tour id `'x'`, and (3) a re-render of the leaf does not duplicate the registry entry (idempotent register — see the existing `registerTour` body lines 89–98).
@@ -460,7 +493,7 @@ Render `<MultiTourKitProvider>` wrapping five `<div>`s deep, with a `<Tour id="x
 jscodeshift transform with `parser = 'tsx'`. Find JSX attributes named `target` whose value is a `StringLiteral` matching `/^#[A-Za-z_][\w-]*$/`. For each match, search the surrounding file for a `useRef` binding whose name matches `${bareIdentifier}Ref` (where `bareIdentifier` is the string between `#` and the end of the selector). If found, replace the attribute value with `j.jsxExpressionContainer(j.identifier(${bareIdentifier}Ref))`. If not found, attach a leading comment via `emitTodo` + `attachLeadingComments` (helper at `packages/codemods/src/lib/todo-emitter.ts`) with message `'target-to-ref — no matching useRef binding found; pass a RefObject<HTMLElement> or a () => HTMLElement getter'`. Idempotent: skip attributes whose value is already a `JSXExpressionContainer`, and skip nodes whose leading comments already contain the TODO substring. `return root.toSource({ quote: 'single', trailingComma: true })`.
 
 #### `packages/codemods/src/cli.ts` (UPDATED)
-Register `target-to-ref` so it appears in `tour-kit-migrate --list`. Mirror the existing `from-driver` registration pattern exactly.
+Register `target-to-ref` by widening the existing `--from` union (`joyride | shepherd | driver`) to include `target-to-ref`, adding it to `TRANSFORMS`, `isFromValue`, `TRANSFORM_COVERAGE`, and the usage text. The current CLI has no `--list`; do not reference one unless you implement and test it in this PR.
 
 #### `packages/codemods/src/__tests__/transforms/target-to-ref.test.ts` (NEW)
 Vitest suite that reads each `<name>.input.tsx` fixture, runs the transform, and asserts the result equals `<name>.output.tsx`. Five cases per the fixture list in Task 5.3. One additional case asserts idempotency by running the transform twice on `happy-path-single.input.tsx` and asserting the second pass produces a byte-identical output to the first.
@@ -484,7 +517,7 @@ Frontmatter: `title: target Prop`, `description: Three ways to point a tour step
 - Codemod handles 5/5 sample fixtures (best-effort emit-comment on the "no ref in scope" case)
 - All tests pass: `pnpm test` exits 0
 - All typecheck pass: `pnpm typecheck` exits 0
-- Docs build clean: `pnpm --filter docs build` exits 0
+- Docs build clean: `pnpm --filter @tour-kit/docs build` exits 0
 
 ### Expected File Structure at End
 ```
@@ -502,15 +535,23 @@ packages/core/src/
 ├── types/
 │   ├── target.ts                     # NEW
 │   ├── step.ts                       # UPDATED (line 63)
+│   ├── hints.ts                      # UPDATED
 │   └── index.ts                      # UPDATED (re-exports)
-├── utils/position.ts                 # UPDATED (resolveTarget piping)
+├── hooks/
+│   ├── use-step.ts                   # UPDATED
+│   └── use-element-position.ts       # UPDATED
+├── lib/wait-for-step-target.ts       # UPDATED
+├── utils/dom.ts                      # UPDATED
 └── __tests__/types/target.test.ts    # NEW
 
 packages/react/src/
-├── components/tour/tour-step.tsx                                    # UPDATED
+├── components/card/tour-card.tsx                                    # UPDATED
+├── components/headless/tour-card.tsx                                # UPDATED
+├── components/headless/tour-overlay.tsx                             # UPDATED
+├── components/overlay/tour-overlay.tsx                              # UPDATED
 ├── components/provider/tourkit-provider.tsx                         # UPDATED (docblock)
 └── __tests__/
-    ├── components/tour/tour-step.target-back-compat.test.tsx        # NEW
+    ├── components/card/tour-card.target-back-compat.test.tsx        # NEW
     └── components/provider/multi-tour-kit-compose.test.tsx          # NEW
 
 packages/codemods/src/

@@ -10,7 +10,7 @@
 
 ## Objective
 
-Refresh `<TourCard>` to look like a 2026 product tour rather than a 2018 modal: render a step-of-N indicator inside the card header, draw a real arrow/beak that points at the target using Floating UI's `arrow` middleware (already in the file — see `packages/react/src/components/card/tour-card.tsx:5–11, 89`), demote the **Skip** button to a tertiary text link, promote **Next** to primary, and keep **Back** as the secondary outline. Ship a one-minor-cycle opt-out (`<TourCard variant="classic">`) so existing consumers can pin the v1 look while they upgrade their themes. Every change must preserve the existing focus-trap, `role="dialog"` / `aria-modal="true"` contract, and Lighthouse Accessibility score of 100.
+Refresh `<TourCard>` to look like a 2026 product tour rather than a 2018 modal: render a step-of-N indicator inside the card header, draw a real arrow/beak that points at the target using Floating UI's `arrow` middleware (already in the file — see `packages/react/src/components/card/tour-card.tsx:5–11, 89`), confirm **Skip** stays a tertiary text link (it is already `variant="link"` today), promote **Next** with a stronger primary focus ring, and keep **Back** as the secondary outline. Ship a one-minor-cycle opt-out (`<TourCard variant="classic">`) so existing consumers can pin the v1 look while they upgrade their themes. Every change must preserve the existing focus-trap, `role="dialog"` / `aria-modal="true"` contract, and Lighthouse Accessibility score of 100.
 
 ## What Success Looks Like
 
@@ -18,10 +18,10 @@ Refresh `<TourCard>` to look like a 2026 product tour rather than a 2018 modal: 
 2. `arrow({ element: arrowRef })` is in the `useFloating` middleware list (already present) and `<FloatingArrow>` renders for every one of the 12 placements (`top`, `top-start`, `top-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, `left-end`, `right`, `right-start`, `right-end`) — verified by a Playwright matrix test that screenshots each placement and asserts the arrow tip is within 4px of the target's edge.
 3. `pnpm --filter @tour-kit/react test src/__tests__/a11y/tour-card-a11y.test.tsx` exits 0 with the existing 8 cases still green **plus** 3 new assertions: (a) `aria-label` contains the step counter, (b) arrow `<svg>` has `aria-hidden="true"`, (c) no `aria-live` element exists inside the dialog.
 4. Lighthouse Accessibility audit on `examples/dashboard-next` with a tour open returns score = 100 (recorded as a JSON artifact in the PR).
-5. `pnpm --filter @tour-kit/playwright exec playwright test tour-card-placements.spec.ts` passes 12/12 placement screenshots within tolerance.
-6. `<TourCard variant="classic" />` renders the v1 layout (dots progress, no arrow, no step counter, Skip = outline button) and emits a `console.warn` in dev mentioning removal in the next major.
+5. `pnpm e2e:next -- --project=next-localhost tour-card-placements.localhost.spec.ts` passes 12/12 placement screenshots within tolerance. This repo uses a root `e2e/` Playwright harness, not a `packages/playwright` workspace.
+6. `<TourCard variant="classic" />` renders the pre-refresh layout (dots progress, no arrow, no step counter, and the current v1 navigation styling: Skip remains `variant="link"` because that is what the repo ships today) and emits a `console.warn` in dev mentioning removal in the next major.
 7. `pnpm --filter @tour-kit/react typecheck` exits 0; the new `TourCardProps` interface includes `showStepIndicator?: boolean`, `progress?: number`, `arrowSize?: number`, and `variant?: 'refreshed' | 'classic'` (default `'refreshed'`).
-8. Storybook visual regression diff against `examples/dashboard-next` and `apps/docs` shows ≤2 unexpected diffs (anything beyond TourCard itself), reviewed and signed off by the user before merge — this is the **M3 milestone gate**.
+8. Root Playwright screenshots and existing example-app visual checks against `examples/next-app` / `examples/dashboard-next` show ≤2 unexpected diffs (anything beyond TourCard itself), reviewed and signed off by the user before merge — this is the **M3 milestone gate**. No Storybook workflow is assumed for this repo.
 
 ---
 
@@ -29,7 +29,7 @@ Refresh `<TourCard>` to look like a 2026 product tour rather than a 2018 modal: 
 
 - **Visual regression diff shows >2 unexpected diffs in existing example apps** (e.g., consumer themes regress on padding, border-radius, or shadow) → revert the cva refresh, ship the arrow + step counter + button hierarchy only, and keep the existing `tourCardVariants` shadow/border tokens. Document the deferred token refresh as Phase 4.5.
 - **Lighthouse Accessibility drops below 100** → the most likely culprit is the step counter being announced both via `aria-label` and as visible text creating a double-read OR the arrow `<svg>` missing `aria-hidden`. Fix: move the visible `"3 / 7"` to a `<span aria-hidden="true">` and rely solely on `aria-label="Step 3 of 7: <title>"` for the screen-reader path. Re-run Lighthouse before merge.
-- **Arrow misaligns on `*-start` / `*-end` placements or after `flip()` falls back** → `<FloatingArrow>` from `@floating-ui/react` derives `staticSide` from `context.placement.split('-')[0]` automatically when the `context` prop is wired — confirm the rendered SVG's transform matches the resolved placement after `flip` by reading `data-placement` on the floating element. If it still misaligns, switch from `<FloatingArrow>` to a manual `<svg>` reading `context.middlewareData.arrow.{x,y}` plus a `staticSide` lookup table `{ top: 'bottom', bottom: 'top', left: 'right', right: 'left' }`. Do not ship without 12/12 placements green.
+- **Arrow misaligns on `*-start` / `*-end` placements or after `flip()` falls back** → `<FloatingArrow>` from `@floating-ui/react` derives `staticSide` from `context.placement` automatically and handles all 12 placements (including `*-start` / `*-end`) out of the box — confirmed via the official [Floating UI FloatingArrow docs](https://floating-ui.com/docs/FloatingArrow). First debug step is to read `data-placement` on the floating element after `flip` resolves and confirm the `context` prop is actually wired through. Manual `<svg>` reading `context.middlewareData.arrow.{x,y}` is a **last-resort contingency** (used only if Playwright matrix surfaces a real bug); do not start there. Do not ship without 12/12 placements green.
 - **Existing consumer themes break under `variant="refreshed"`** that we did not catch in visual regression → ship `variant="classic"` as the documented escape hatch for one minor cycle (mark deprecated; remove in v3.0). Open a follow-up issue logging which consumer themes regressed so v3.0 has migration notes.
 - **Reduced-motion users see new transitions** → any new transition (e.g., the indicator number tick on step change) must use the `motion-safe:` Tailwind prefix or be gated by `useReducedMotion()` from `@tour-kit/core` (already imported on line 12 of the existing file). Three-tier defense per CLAUDE.md.
 - **Bundle size for `@tour-kit/react` increases >0.5 KB gzipped** → the arrow component is already in the bundle (`TourArrow` at `packages/react/src/components/primitives/tour-arrow.tsx`); any growth must come from the step-counter logic. Inline the `Step N of M` formatter into `tour-card.tsx` instead of a new file if needed.
@@ -76,7 +76,7 @@ Refresh `<TourCard>` to look like a 2026 product tour rather than a 2018 modal: 
 - **Backwards compatibility:** `<TourCard size="default" />` (no `variant` prop) MUST render the refreshed look. The classic opt-out is explicit (`variant="classic"`). All existing tests pass without modification on the new default.
 - **No new runtime deps:** `@floating-ui/react` is already a dep (`useFloating`, `arrow`, `FloatingArrow`). Reuse exclusively.
 - **No `tailwindcss-animate` utilities added** unless prefixed with `motion-safe:`. Per CLAUDE.md cross-package reduced-motion contract.
-- **Verify-don't-hope on Floating UI staticSide:** `<FloatingArrow context={context}>` internally calls `context.middlewareData.arrow` and derives `staticSide` from `context.placement.split('-')[0]`. Confirmed via repo source — `packages/react/src/components/primitives/tour-arrow.tsx:13–24` already wires it correctly. Do not reimplement this manually unless the Playwright matrix proves misalignment.
+- **Verify-don't-hope on Floating UI staticSide:** `<FloatingArrow context={context}>` reads `context.middlewareData.arrow` internally and derives `staticSide` from `context.placement` — including `*-start` and `*-end` placements. Confirmed via the [Floating UI FloatingArrow docs](https://floating-ui.com/docs/FloatingArrow) and the existing in-repo usage at `packages/react/src/components/primitives/tour-arrow.tsx:13–24`. Do not reimplement this manually unless the Playwright matrix proves misalignment.
 - **No `console.warn` spam:** the `variant="classic"` deprecation warning fires **once per mount** (use a module-level `Set<string>` keyed by `currentStep.id`).
 - **Tests must work without a real browser** for unit-level assertions: use `@testing-library/react` + jsdom for `aria-label` / `aria-hidden` assertions; only the placement-matrix screenshot test runs in Playwright.
 
@@ -195,23 +195,23 @@ interface TourArrowProps {
 />
 ```
 
-Create a Playwright placement-matrix test at `packages/playwright/__tests__/tour-card-placements.spec.ts`:
+Create a Playwright placement-matrix test at `e2e/next/tour-card-placements.localhost.spec.ts`:
 
 ```ts
 // One test per placement; runs against a new fixture page that takes ?placement= query param.
 // Placements: top, top-start, top-end, bottom, bottom-start, bottom-end,
 //             left, left-start, left-end, right, right-start, right-end
 //
-// For each: navigate to /placement-matrix.html?placement=top-start,
+// For each: navigate to /tour-card-placement?placement=top-start,
 // wait for the dialog, screenshot, and assert the arrow tip is within
 // 4px of the target's edge using boundingBox math.
 ```
 
-Add a fixture page at `packages/playwright/fixtures-app/placement-matrix.html` that reads `?placement=` and configures the tour step accordingly. Mirror the existing `two-step.html` fixture structure.
+Add a fixture route at `examples/next-app/src/app/tour-card-placement/page.tsx` that reads `?placement=` and configures the tour step accordingly. Keep the route out of public nav; it exists for Playwright. Use a fixed-position target button centered in the viewport so screenshots and bounding-box math are deterministic.
 
 **Sanity check:**
-- `pnpm --filter @tour-kit/playwright exec playwright test tour-card-placements.spec.ts --reporter=list` shows 12 passed.
-- Visual snapshots committed to `packages/playwright/__tests__/__screenshots__/tour-card-placements/` — review-able in the PR diff.
+- `pnpm e2e:next -- --project=next-localhost tour-card-placements.localhost.spec.ts --reporter=list` shows 12 passed.
+- Visual snapshots committed under Playwright's root snapshot directory for `e2e/next/tour-card-placements.localhost.spec.ts` — review-able in the PR diff.
 
 ---
 
@@ -277,8 +277,8 @@ it('does not double-read step counter via aria-live', async () => {
 Implement the `variant="classic"` opt-out. The classic variant:
 - Renders **no** step indicator span (header looks like v1)
 - Renders **no** `<FloatingArrow>` (the existing v1 had no arrow)
-- Falls back to `variant="secondary"` for Skip (the v1 button hierarchy)
-- Logs a one-time `console.warn('[tour-kit/react] <TourCard variant="classic"> is deprecated and will be removed in the next major. See https://tour-kit.dev/docs/react/migration/v2-tour-card-refresh')` in dev (`process.env.NODE_ENV !== 'production'`)
+- Keeps the current shipped navigation hierarchy (`Skip` is already `variant="link"` in `TourNavigation`, `Back` is secondary, `Next` is default)
+- Logs a one-time `console.warn('[tour-kit/react] <TourCard variant="classic"> is deprecated and will be removed in the next major. See https://usertourkit.com/docs/react/components/tour-card-migration')` in dev (`process.env.NODE_ENV !== 'production'`)
 
 Add a docs page at `apps/docs/content/docs/react/components/tour-card-migration.mdx` covering:
 1. What changed visually
@@ -288,7 +288,7 @@ Add a docs page at `apps/docs/content/docs/react/components/tour-card-migration.
 
 **Sanity check:**
 - `pnpm --filter @tour-kit/react test` exits 0 with the 3 new cases green.
-- `<TourCard variant="classic" />` renders without a step indicator, without an arrow, with Skip as a secondary outline button.
+- `<TourCard variant="classic" />` renders without a step indicator and without an arrow, while preserving the current shipped navigation variants.
 - Console warning fires exactly once per mount (verifiable with a `vi.spyOn(console, 'warn')` test).
 
 ---
@@ -308,11 +308,11 @@ packages/react/
 └── src/__tests__/a11y/
     └── tour-card-a11y.test.tsx                       # UPDATE — 3 new cases (aria-label, arrow aria-hidden, no aria-live)
 
-packages/playwright/
-├── __tests__/
-│   └── tour-card-placements.spec.ts                  # NEW — 12-placement screenshot matrix
-└── fixtures-app/
-    └── placement-matrix.html                         # NEW — fixture page with ?placement= query param
+e2e/next/
+└── tour-card-placements.localhost.spec.ts            # NEW — 12-placement screenshot matrix
+
+examples/next-app/src/app/
+└── tour-card-placement/page.tsx                      # NEW — fixture route with ?placement= query param
 
 apps/docs/
 └── content/docs/react/components/
@@ -327,9 +327,9 @@ No new packages, no new runtime deps, no schema changes outside the component pr
 
 - [ ] `pnpm --filter @tour-kit/react typecheck` exits 0 with the extended `TourCardProps` interface (4 new optional props)
 - [ ] `pnpm --filter @tour-kit/react test src/__tests__/a11y/tour-card-a11y.test.tsx` exits 0 with 11 passing cases (8 existing + 3 new)
-- [ ] `pnpm --filter @tour-kit/playwright exec playwright test tour-card-placements.spec.ts` exits 0 with 12 passing placement screenshots; arrow tip within 4px of target edge in every one
+- [ ] `pnpm e2e:next -- --project=next-localhost tour-card-placements.localhost.spec.ts` exits 0 with 12 passing placement screenshots; arrow tip within 4px of target edge in every one
 - [ ] `grep -c "aria-live" packages/react/src/components/card/tour-card.tsx` returns 0 (step counter is in `aria-label` only)
-- [ ] `<TourCard variant="classic" />` renders v1 look (no indicator, no arrow, Skip as secondary outline) and emits a one-time dev `console.warn`
+- [ ] `<TourCard variant="classic" />` renders v1 look (no indicator, no arrow, current shipped navigation variants preserved) and emits a one-time dev `console.warn`
 - [ ] Lighthouse Accessibility on `examples/dashboard-next` with an active tour = 100 (JSON artifact attached to PR)
 - [ ] Visual regression diff against existing example apps reviewed and signed off by the user (≤2 unexpected diffs) — **this is the M3 milestone gate**
 - [ ] `apps/docs/content/docs/react/components/tour-card-migration.mdx` exists with `published: true` (or the equivalent Fumadocs visibility flag) and shows in nav
@@ -357,7 +357,7 @@ Tour Kit is a pnpm + Turborepo monorepo of 12 packages providing headless React 
 - `TourCardProps` currently extends `React.ComponentPropsWithoutRef<'div'>` (omitting `content`) and `TourCardVariants` from `card-variants.ts`. Today's variants are `{ size: 'default' | 'sm' | 'lg' | 'auto' }` only.
 - `<TourNavigation>` (`packages/react/src/components/navigation/tour-navigation.tsx`) **already** renders Skip as `variant="link"` (the demoted style); the button order is already `Skip → Back → Next`. The visual hierarchy work in 4.3 is mostly the focus-ring bump.
 - The existing a11y test suite at `packages/react/src/__tests__/a11y/tour-card-a11y.test.tsx` has 8 cases. They must stay green.
-- The Playwright workspace is at `packages/playwright/` with fixtures at `fixtures-app/*.html`. Existing fixtures: `two-step.html`, `no-bridge.html`, `two-step-with-diagnose.html`. Tests run via `pnpm --filter @tour-kit/playwright exec playwright test`.
+- Playwright is root-level: `playwright.config.ts` uses `testDir: './e2e'` with filename-matched projects. For this phase, use `e2e/next/tour-card-placements.localhost.spec.ts` plus a fixture route in `examples/next-app/src/app/tour-card-placement/page.tsx`.
 - Reduced-motion contract (per `CLAUDE.md`): any new transition uses `motion-safe:` Tailwind prefix or is gated by `useReducedMotion()` from `@tour-kit/core` (already imported at line 12 of the existing file).
 
 ### Your Goal for This Phase
@@ -425,11 +425,11 @@ Change `default` variant string to add `focus-visible:ring-2 focus-visible:ring-
 #### `packages/react/src/__tests__/a11y/tour-card-a11y.test.tsx` (UPDATE)
 Rewrite the `aria-labelledby linked to title` test to assert on `aria-label` instead. Add 3 new cases per Task 4.4 (aria-label contains step counter; arrow svg has aria-hidden; no aria-live region inside dialog).
 
-#### `packages/playwright/__tests__/tour-card-placements.spec.ts` (NEW)
-12 `test()` blocks — one per Floating UI placement. Each: `await page.goto('/placement-matrix.html?placement=top-start')` → wait for `[role="dialog"]` → `await page.screenshot({ path: '__screenshots__/tour-card-placements/top-start.png' })` → assert arrow tip is within 4px of target edge by reading `boundingBox()` on both elements and computing distance. Use `test.describe.parallel('TourCard placement matrix', () => { ... })`.
+#### `e2e/next/tour-card-placements.localhost.spec.ts` (NEW)
+12 `test()` blocks — one per Floating UI placement. Each: `await page.goto('/tour-card-placement?placement=top-start')` → wait for `[role="dialog"]` → `await expect(page.locator('[role="dialog"]')).toHaveScreenshot('top-start.png')` → assert arrow tip is within 4px of target edge by reading `boundingBox()` on both elements and computing distance. Use `test.describe.parallel('TourCard placement matrix', () => { ... })`.
 
-#### `packages/playwright/fixtures-app/placement-matrix.html` (NEW)
-Mirror `two-step.html`. Read `?placement=` from `window.location.search`, configure the tour step with that placement, and auto-start the tour. The target element is a fixed-positioned button centered in the viewport so the placement matrix tests are deterministic.
+#### `examples/next-app/src/app/tour-card-placement/page.tsx` (NEW)
+Read `?placement=` from `searchParams`, configure the tour step with that placement, and auto-start the tour. The target element is a fixed-positioned button centered in the viewport so the placement matrix tests are deterministic.
 
 #### `apps/docs/content/docs/react/components/tour-card-migration.mdx` (NEW)
 Frontmatter `published: true` (per CLAUDE.md content-pipeline rules) and slot into the docs nav under `react > components`. Contents: what changed visually (with before/after screenshot placeholders), the `variant="classic"` opt-out one-liner, the deprecation timeline (`variant="classic"` removed in next major), and a diff snippet showing how to upgrade a custom theme.
@@ -438,7 +438,7 @@ Frontmatter `published: true` (per CLAUDE.md content-pipeline rules) and slot in
 
 - `pnpm --filter @tour-kit/react typecheck` exits 0
 - `pnpm --filter @tour-kit/react test` exits 0 (existing + 3 new a11y cases)
-- `pnpm --filter @tour-kit/playwright exec playwright test tour-card-placements.spec.ts` exits 0 (12/12 placements)
+- `pnpm e2e:next -- --project=next-localhost tour-card-placements.localhost.spec.ts` exits 0 (12/12 placements)
 - `grep -c "aria-live" packages/react/src/components/card/tour-card.tsx` returns 0
 - `<TourCard variant="classic" />` renders v1 layout with one-time dev warn
 - Lighthouse Accessibility on `dashboard-next` with an active tour = 100 (JSON artifact in PR)
@@ -464,11 +464,11 @@ packages/react/src/components/ui/
 packages/react/src/__tests__/a11y/
   tour-card-a11y.test.tsx                         # MODIFIED (3 new cases)
 
-packages/playwright/__tests__/
-  tour-card-placements.spec.ts                    # NEW
+e2e/next/
+  tour-card-placements.localhost.spec.ts          # NEW
 
-packages/playwright/fixtures-app/
-  placement-matrix.html                           # NEW
+examples/next-app/src/app/tour-card-placement/
+  page.tsx                                        # NEW
 
 apps/docs/content/docs/react/components/
   tour-card-migration.mdx                         # NEW (published: true)
