@@ -48,7 +48,8 @@
     "e2e": "playwright test",
     "e2e:vite": "playwright test --project=vite-localhost --project=vite-production",
     "e2e:next": "playwright test --project=next-localhost --project=next-production",
-    "e2e:report": "playwright show-report"
+    "e2e:report": "playwright show-report",
+    "phase-0-doctest": "bash tasks/v2-package-polish/phase-0-doctest.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.0",
