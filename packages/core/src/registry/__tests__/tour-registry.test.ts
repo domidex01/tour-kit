@@ -91,50 +91,48 @@ describe('tourRegistry — StrictMode-safe lifecycle', () => {
   })
 })
 
-describe('tourRegistry — get() notifies on dead-ref prune', () => {
-  it('notifies subscribers when get() drops a GC-collected entry', () => {
-    // Simulate a GC'd entry by injecting a WeakRef whose target is unreachable.
-    // We can't trigger GC directly in jsdom, but we can construct the same
-    // observable state by registering then forcing a dead-ref scenario via
-    // the internal API surface a real GC would produce: a WeakRef whose
-    // deref() returns undefined. Re-creating that without forcing GC requires
-    // bypassing the public API.
-    //
-    // Approach: register an entry, then forcibly replace its slot with a
-    // WeakRef to a different (already-unreferenced) object that has been GC'd
-    // — except we can't reliably GC in jsdom. Fall back to direct Map
-    // manipulation via __reset__ + injection through register, then test
-    // get() by simulating "ref.deref() === undefined" through a one-shot
-    // overwrite: we register, then call __reset__ won't expose internals.
-    //
-    // Simplest path: trust that the bug fix is also covered by use-tour-actions
-    // re-render assertion; here we test the notify path by registering, then
-    // observing that get() on a dead ref calls listeners. We construct the
-    // dead ref by registering and immediately dropping the strong handle —
-    // jsdom won't reclaim it deterministically, so this test asserts the
-    // `notify()` was called by checking the listener-call count delta when
-    // a dead ref IS present.
-    //
-    // Since we can't force GC, we instead exercise `prune()` directly which
-    // shares the notify path. The notify-on-get fix is small and visually
-    // verifiable; the production case is rare. Skip if no gc.
-    if (!globalThis.gc) {
-      // No-op when GC isn't exposed — covered by the prune() notify test.
-      return
-    }
+describe('tourRegistry — WeakRef GC fallback (requires --expose-gc)', () => {
+  // These tests verify that when a provider is GC'd without running its
+  // explicit unregister cleanup (rare — React crash mid-commit, etc.), the
+  // WeakRef path still cleans up correctly. Default `pnpm test` doesn't
+  // expose globalThis.gc, so these skip cleanly; CI can opt in via:
+  //   node --expose-gc node_modules/vitest/vitest.mjs run
 
-    const listener = vi.fn()
-    tourRegistry.subscribe(listener)
-    ;(() => {
-      tourRegistry.register(makeEntry('ephemeral'))
-    })()
-    listener.mockClear()
-    globalThis.gc?.()
-    // Force the read path that prunes dead refs.
-    const result = tourRegistry.get('ephemeral')
-    expect(result).toBeNull()
-    expect(listener).toHaveBeenCalled()
-  })
+  it.skipIf(!globalThis.gc)(
+    'WeakRef cleanup — register without unregister, then GC leaves zero live entries',
+    async () => {
+      ;(() => {
+        // Register inside an IIFE so the strong reference goes out of scope.
+        tourRegistry.register(makeEntry('ephemeral'))
+      })()
+      // GC twice — V8 sometimes needs two passes to collect weakly-held objects.
+      globalThis.gc?.()
+      await new Promise((r) => setTimeout(r, 0))
+      globalThis.gc?.()
+      tourRegistry.prune()
+      expect(tourRegistry.snapshot().size).toBe(0)
+    }
+  )
+
+  it.skipIf(!globalThis.gc)(
+    'get() notifies subscribers when it prunes a GC-collected entry',
+    async () => {
+      const listener = vi.fn()
+      tourRegistry.subscribe(listener)
+      ;(() => {
+        tourRegistry.register(makeEntry('ephemeral'))
+      })()
+      listener.mockClear() // ignore the register notify
+      globalThis.gc?.()
+      await new Promise((r) => setTimeout(r, 0))
+      globalThis.gc?.()
+      // get() returns null because the WeakRef target is gone — and notifies
+      // so any useSyncExternalStore consumer subscribed to this id re-renders
+      // with the frozen no-op instead of holding stale state.
+      expect(tourRegistry.get('ephemeral')).toBeNull()
+      expect(listener).toHaveBeenCalled()
+    }
+  )
 })
 
 describe('tourRegistry — dev double-id console.error', () => {
