@@ -44,6 +44,7 @@ Types:
     HeadlessToastRenderProps
     HeadlessSpotlightProps
     HeadlessSpotlightRenderProps
+    ForceShowBypassKey
     UseAnnouncementReturn
     AnnouncementsFilter
     UseAnnouncementsReturn
@@ -125,6 +126,7 @@ Components:
     HeadlessSpotlight
     AnnouncementsContext
     AnnouncementsProvider
+    FORCE_SHOW_BYPASS
     PriorityQueue
     AnnouncementScheduler
     Slot
@@ -289,7 +291,7 @@ TYPES
       useConfig?: boolean
     }
 
-    ... and 52 more types. See source for full definitions.
+    ... and 53 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -321,6 +323,7 @@ COMPONENTS
     <HeadlessSpotlight />
     <AnnouncementsContext />
     <AnnouncementsProvider />
+    <FORCE_SHOW_BYPASS />
     <PriorityQueue />
     <AnnouncementScheduler />
     <Slot />

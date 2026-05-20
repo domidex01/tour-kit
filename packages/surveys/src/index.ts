@@ -66,6 +66,8 @@ export { useSurvey, useSurveys, useSurveyScoring } from './hooks'
 
 // Scoring functions
 export { calculateNPS, calculateCSAT, calculateCES } from './core/scoring'
+export { computeNpsCategory, computeCesCategory } from './core/scoring'
+export type { NpsCategory, CesCategory } from './core/scoring'
 
 // Styled display components
 export { SurveyPopover } from './components'
@@ -73,6 +75,14 @@ export { SurveyModal } from './components'
 export { SurveySlideout } from './components'
 export { SurveyBanner } from './components'
 export { SurveyInline } from './components'
+
+// Turnkey survey modals (Phase 2)
+export { CsatModal } from './components'
+export type { CsatModalProps } from './components'
+export { NpsModal } from './components'
+export type { NpsModalProps } from './components'
+export { CesModal } from './components'
+export type { CesModalProps } from './components'
 
 // Question components
 export { QuestionRating } from './components'

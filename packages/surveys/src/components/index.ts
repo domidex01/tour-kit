@@ -30,3 +30,12 @@ export type { SurveyBannerProps } from './survey-banner'
 
 export { SurveyInline } from './survey-inline'
 export type { SurveyInlineProps } from './survey-inline'
+
+export { CsatModal } from './csat-modal'
+export type { CsatModalProps } from './csat-modal'
+
+export { NpsModal } from './nps-modal'
+export type { NpsModalProps } from './nps-modal'
+
+export { CesModal } from './ces-modal'
+export type { CesModalProps } from './ces-modal'

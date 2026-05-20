@@ -228,6 +228,9 @@ function announcementsReducer(
           isDismissed: false,
           dismissedAt: null,
           dismissalReason: null,
+          viewCount: 0,
+          lastViewedAt: null,
+          completedAt: null,
         })
         return { ...state, announcements: newAnnouncements }
       }
@@ -242,6 +245,9 @@ function announcementsReducer(
           isDismissed: false,
           dismissedAt: null,
           dismissalReason: null,
+          viewCount: 0,
+          lastViewedAt: null,
+          completedAt: null,
         })
       })
       return { ...state, announcements: newAnnouncements }

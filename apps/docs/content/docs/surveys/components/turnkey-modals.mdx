@@ -1,0 +1,124 @@
+---
+title: Turnkey Survey Modals
+description: >-
+  CsatModal, NpsModal, and CesModal — two-prop wrappers around SurveyModal +
+  QuestionRating with built-in scoring categories.
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`CsatModal`, `NpsModal`, and `CesModal` collapse the common "show a one-question survey" flow into a single import and two required props: `question` and `onSubmit`. Each composes the existing `SurveyModal` + `QuestionRating` primitives — no new focus-trap, escape-key, or storage code — and ships its own selected-value state plus a Submit/Skip pair.
+
+<Callout type="info">
+  These components still require an ancestor `<SurveysProvider>` because the underlying
+  `SurveyModal` calls `useSurvey(surveyId)`. The wrappers remove primitive imports, not the provider
+  requirement.
+</Callout>
+
+## Import
+
+```tsx
+import { CsatModal, NpsModal, CesModal } from '@tour-kit/surveys';
+```
+
+## CsatModal
+
+A 1–5 rating modal. `onSubmit` receives the raw rating.
+
+```tsx
+<CsatModal
+  question="How easy was checkout?"
+  onSubmit={(rating) => track('csat', rating)}
+/>
+```
+
+<TypeTable
+  type={{
+    question: { type: 'string', required: true, description: 'Prompt rendered above the rating scale.' },
+    onSubmit: { type: '(rating: number) => void', required: true, description: 'Fires when the user clicks Submit with the picked rating.' },
+    onSkip: { type: '() => void', description: 'Optional skip handler. When omitted, no Skip button is rendered.' },
+    ratingScale: { type: 'RatingScale', default: '{ min: 1, max: 5, style: \'numeric\' }', description: 'Override the default 1–5 numeric scale (e.g. stars or emoji).' },
+    surveyId: { type: 'string', description: 'Survey id; defaults to a stable React.useId().' },
+    defaultOpen: { type: 'boolean', default: 'true', description: 'Initial local open state when open is uncontrolled.' },
+    open: { type: 'boolean', description: 'Controlled open state. Pair with onOpenChange.' },
+    onOpenChange: { type: '(open: boolean) => void', description: 'Open state change handler.' },
+    submitLabel: { type: 'string', default: "'Submit'", description: 'Override the Submit button label.' },
+    skipLabel: { type: 'string', default: "'Skip'", description: 'Override the Skip button label.' },
+    lowLabel: { type: 'string', description: 'Optional low anchor label under the scale.' },
+    highLabel: { type: 'string', description: 'Optional high anchor label under the scale.' },
+  }}
+/>
+
+## NpsModal
+
+A 0–10 rating modal. `onSubmit` receives the score and a derived `NpsCategory` (`'promoter' | 'passive' | 'detractor'`).
+
+```tsx
+<NpsModal
+  question="How likely are you to recommend us?"
+  onSubmit={(score, category) => track('nps', { score, category })}
+/>
+```
+
+The category is computed by the pure helper `computeNpsCategory(score)`:
+
+| Score | Category |
+|-------|----------|
+| 9 – 10 | `'promoter'` |
+| 7 – 8  | `'passive'`  |
+| 0 – 6  | `'detractor'` |
+
+<TypeTable
+  type={{
+    question: { type: 'string', required: true, description: 'Prompt rendered above the rating scale.' },
+    onSubmit: { type: '(score: number, category: NpsCategory) => void', required: true, description: 'Fires when the user clicks Submit with the picked score and its category.' },
+    onSkip: { type: '() => void', description: 'Optional skip handler.' },
+    ratingScale: { type: 'RatingScale', default: '{ min: 0, max: 10, style: \'numeric\' }', description: 'Override the default 0–10 scale; rarely needed.' },
+    lowLabel: { type: 'string', default: "'Not likely'", description: 'Low anchor under the scale.' },
+    highLabel: { type: 'string', default: "'Very likely'", description: 'High anchor under the scale.' },
+  }}
+/>
+
+## CesModal
+
+A 1–7 rating modal. `onSubmit` receives the score and a derived `CesCategory` (`'easy' | 'neutral' | 'difficult'`).
+
+```tsx
+<CesModal
+  question="How easy was that?"
+  onSubmit={(score, category) => track('ces', { score, category })}
+/>
+```
+
+The category is computed by the pure helper `computeCesCategory(score)`:
+
+| Score | Category |
+|-------|----------|
+| 5 – 7 | `'easy'` |
+| 4     | `'neutral'` |
+| 1 – 3 | `'difficult'` |
+
+<TypeTable
+  type={{
+    question: { type: 'string', required: true, description: 'Prompt rendered above the rating scale.' },
+    onSubmit: { type: '(score: number, category: CesCategory) => void', required: true, description: 'Fires when the user clicks Submit with the picked score and its category.' },
+    onSkip: { type: '() => void', description: 'Optional skip handler.' },
+    ratingScale: { type: 'RatingScale', default: '{ min: 1, max: 7, style: \'numeric\' }', description: 'Override the default 1–7 scale; rarely needed.' },
+    lowLabel: { type: 'string', default: "'Very difficult'", description: 'Low anchor under the scale.' },
+    highLabel: { type: 'string', default: "'Very easy'", description: 'High anchor under the scale.' },
+  }}
+/>
+
+## Behaviour shared across all three
+
+- Internal selected-value state is a transient `React.useState<number | null>`. Submit is disabled until a rating is picked.
+- The modal closes automatically after Submit or Skip; supply `open` + `onOpenChange` for fully controlled state.
+- Reduced motion is inherited from `SurveyModal` via the `motion-safe:` Tailwind prefix — no extra setup required.
+- Each modal is tree-shakeable: importing only `CsatModal` does not pull `NpsModal` or `CesModal`.
+
+## Related
+
+- [SurveyModal](/docs/surveys/components/survey-modal) — the underlying primitive each turnkey wraps.
+- [QuestionRating](/docs/surveys/components/question-rating) — the rating scale used inside each modal.
+- [useSurvey](/docs/surveys/hooks/use-survey) — provider hook called by `SurveyModal`.
