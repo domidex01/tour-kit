@@ -6,6 +6,7 @@ import { ChecklistDock } from '@/components/tour-kit/checklist-dock'
 import { CsatSurveyHost } from '@/components/tour-kit/csat-survey-host'
 import { DarkModeHint } from '@/components/tour-kit/hints'
 import { OnboardingTour } from '@/components/tour-kit/onboarding-tour'
+import { TurnkeySurveyHosts } from '@/components/tour-kit/turnkey-survey-hosts'
 import type { ReactNode } from 'react'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -22,6 +23,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <ChecklistDock />
       <DarkModeHint />
       <CsatSurveyHost />
+      <TurnkeySurveyHosts />
       <AiChatHost />
     </div>
   )

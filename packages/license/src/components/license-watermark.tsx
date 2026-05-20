@@ -171,9 +171,8 @@ export function LicenseWatermark() {
   if (typeof document === 'undefined') return null
 
   return createPortal(
-    <div
+    <section
       data-tourkit-watermark=""
-      role="region"
       aria-label="userTourKit license required"
       style={wrapperStyle}
     >
@@ -191,7 +190,7 @@ export function LicenseWatermark() {
         <span>Unlicensed</span>
         <span style={ctaStyle}>Buy license</span>
       </a>
-    </div>,
+    </section>,
     document.body
   )
 }

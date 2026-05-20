@@ -235,7 +235,9 @@ describe('LicenseWatermark', () => {
     })
 
     const wrapper = findWatermark() as HTMLElement
-    expect(wrapper.getAttribute('role')).toBe('region')
+    // `<section aria-label="...">` is implicitly mapped to role="region" by the
+    // a11y tree — no need for the redundant `role="region"` attribute.
+    expect(wrapper.tagName).toBe('SECTION')
     expect(wrapper.getAttribute('aria-label')).toBe('userTourKit license required')
   })
 })

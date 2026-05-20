@@ -29,6 +29,28 @@ describe('HintHotspot', () => {
     expect(screen.getByRole('button', { name: 'Show hint' })).toBeInTheDocument()
   })
 
+  it('byte-identity guard: un-variant default render outputs a stable DOM shape', () => {
+    const { container } = render(<HintHotspot {...defaultProps} pulse={false} />)
+    // Snapshot covers the legacy dot path. A regen here means the un-variant
+    // contract changed and consumers on v1 will see a visual diff — flag it
+    // explicitly before approving any update.
+    expect(container.firstChild).toMatchInlineSnapshot(`
+      <button
+        aria-expanded="false"
+        aria-label="Show hint"
+        class="fixed rounded-full border-2 border-background shadow-md cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-3 w-3 bg-primary z-50"
+        style="top: 96px; left: 296px;"
+        type="button"
+      >
+        <span
+          class="sr-only"
+        >
+          Show hint
+        </span>
+      </button>
+    `)
+  })
+
   it('has aria-expanded reflecting isOpen state', () => {
     const { rerender } = render(<HintHotspot {...defaultProps} isOpen={false} />)
 

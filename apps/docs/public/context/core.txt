@@ -106,6 +106,7 @@ Types:
     FrequencyRule
     FrequencyState
     LocalizedText
+    UseTourActionsReturn
     SegmentDefinition
     StaticSegment
     SegmentSource
@@ -137,6 +138,7 @@ Hooks:
     useT — Hook returning a translator function `t(key, vars?)` that:
     useTourDiagnostic — Read the diagnostic report for a given tour id. Returns `null` when the
     useResolveLocalizedText — Returns a memoized resolver `(value) => string` that takes a `LocalizedText`
+    useTourActions — Module-level frozen no-op. Allocated once and reused across every unknown-id
     useSegmentationContext
     useSegment
     useSegments
@@ -368,7 +370,7 @@ TYPES
       | 'AUTOSTART_DISABLED'
       | (string & {})
 
-    ... and 6 more types. See source for full definitions.
+    ... and 7 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -396,6 +398,7 @@ HOOKS
     useT(): TranslateFn
     useTourDiagnostic(tourId: string): EligibilityReport | null
     useResolveLocalizedText(): (value: LocalizedText | undefined) => string
+    useTourActions(tourId: string): UseTourActionsReturn
     useSegmentationContext(...)
     useSegment(...)
     useSegments(...)

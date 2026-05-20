@@ -76,7 +76,7 @@ describe('tourRegistry — StrictMode-safe lifecycle', () => {
     consoleErrorSpy.mockRestore()
   })
 
-  it('prune() drops any WeakRef slots whose target was GC\'d', () => {
+  it("prune() drops any WeakRef slots whose target was GC'd", () => {
     // We cannot reliably trigger GC in jsdom, so simulate a dead ref by
     // clearing it via direct entry mutation. The spec accepts this fallback:
     // if `globalThis.gc` isn't available, the StrictMode invariant is checked

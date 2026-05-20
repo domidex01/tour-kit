@@ -1,0 +1,151 @@
+---
+title: Variants
+description: >-
+  Opinionated HintHotspot presets — badge, beacon-with-label, what-s-new-pill —
+  with WCAG-AA contrast and ≥24×24 px hit targets.
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+## Why Variants?
+
+The default `<HintHotspot>` dot ships at 12×12 px, which can be hard to spot on busy interfaces. The three named variants below are opinionated presets that solve the most common discovery patterns:
+
+- `variant="badge"` — count-bearing high-contrast circle (notification-style).
+- `variant="beacon-with-label"` — pulsing dot plus an adjacent label.
+- `variant="what-s-new-pill"` — sparkle pill that fades after the first interaction.
+
+Each preset renders at **≥24×24 px** (above the WCAG 2.5.5 minimum touch target), passes **WCAG 2.1 AA contrast** on light and dark backgrounds, and respects `prefers-reduced-motion: reduce`.
+
+<Callout type="info">
+  All variant props are **additive** — a consumer that doesn't pass `variant` still sees the legacy 12×12 dot with byte-identical output to v1.
+</Callout>
+
+---
+
+## badge
+
+A 24×24 circular badge with an optional `count` slot. Values above 99 clamp to `"99+"`.
+
+```tsx
+import { HintHotspot } from '@tour-kit/hints';
+
+<HintHotspot
+  variant="badge"
+  count={3}
+  targetRect={anchor.getBoundingClientRect()}
+  position="top-right"
+/>
+```
+
+### Props
+
+<TypeTable
+  type={{
+    variant: { type: "'badge'", description: 'Selects the badge preset.' },
+    count: { type: 'number', description: 'Optional numeric value rendered inside the badge. Values > 99 clamp to "99+".' },
+    targetRect: { type: 'DOMRect', description: 'Bounding rect of the anchor element.' },
+    position: { type: "'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'", description: 'Where the badge renders relative to the anchor.' },
+    asChild: { type: 'boolean', default: 'false', description: 'Render through a Slot for custom element composition.' },
+    className: { type: 'string', description: 'Additional CSS classes.' },
+  }}
+/>
+
+---
+
+## beacon-with-label
+
+A pulsing dot adjacent to a short label. The label is `aria-hidden` because the button already exposes an `aria-label`, so screen readers don't double-read.
+
+```tsx
+<HintHotspot
+  variant="beacon-with-label"
+  label="New"
+  side="right"
+  targetRect={anchor.getBoundingClientRect()}
+  position="top-right"
+/>
+```
+
+The beacon pulses via `motion-safe:animate-tour-pulse`. Under `prefers-reduced-motion: reduce`, the `useReducedMotion()` JS gate strips the animation entirely (tier 3 of the reduced-motion contract).
+
+### Props
+
+<TypeTable
+  type={{
+    variant: { type: "'beacon-with-label'", description: 'Selects the beacon preset.' },
+    label: { type: 'string', description: 'Visible label adjacent to the beacon. Required.' },
+    side: { type: "'left' | 'right'", default: "'right'", description: 'Side of the beacon the label sits on. `left` swaps via `flex-row-reverse`.' },
+    targetRect: { type: 'DOMRect', description: 'Bounding rect of the anchor element.' },
+    position: { type: "'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'", description: 'Where the beacon renders relative to the anchor.' },
+    asChild: { type: 'boolean', default: 'false', description: 'Render through a Slot for custom element composition.' },
+    className: { type: 'string', description: 'Additional CSS classes.' },
+  }}
+/>
+
+---
+
+## what-s-new-pill
+
+A pill with an inline sparkle icon plus a label. After the first `pointerdown` or `focus`, the pill fades to `opacity: 0` over 200ms.
+
+```tsx
+<HintHotspot
+  variant="what-s-new-pill"
+  label="What's new"
+  targetRect={anchor.getBoundingClientRect()}
+  position="top-right"
+/>
+```
+
+<Callout type="warn">
+  Under `prefers-reduced-motion: reduce`, the fade is replaced by a hard removal — the component returns `null` after the first interaction so the element doesn't linger as an invisible-but-focusable target in the tab order.
+</Callout>
+
+### Props
+
+<TypeTable
+  type={{
+    variant: { type: "'what-s-new-pill'", description: 'Selects the pill preset.' },
+    label: { type: 'string', description: 'Pill label, also surfaced as the button `aria-label`. Required.' },
+    targetRect: { type: 'DOMRect', description: 'Bounding rect of the anchor element.' },
+    position: { type: "'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'", description: 'Where the pill renders relative to the anchor.' },
+    asChild: { type: 'boolean', default: 'false', description: 'Render through a Slot for custom element composition.' },
+    className: { type: 'string', description: 'Additional CSS classes.' },
+  }}
+/>
+
+---
+
+## Reduced-motion contract
+
+Every variant participates in the three-tier reduced-motion defense:
+
+1. **`motion-safe:` Tailwind prefix** strips animation classes when the OS pref is `reduce`.
+2. **`@media (prefers-reduced-motion: reduce)`** wraps every custom `@keyframes` (e.g. `tour-pulse`).
+3. **`useReducedMotion()` JS gate** drives render-time branches — e.g. `what-s-new-pill` returns `null` (instead of `opacity: 0`) under reduce so the element is fully removed.
+
+Mock the hook in tests:
+
+```ts
+import { vi } from 'vitest';
+
+vi.mock('@tour-kit/core', async (orig) => ({
+  ...(await orig<typeof import('@tour-kit/core')>()),
+  useReducedMotion: vi.fn(() => true),
+}));
+```
+
+---
+
+## Composing the lower-level components
+
+The three variant components are exported for advanced composition:
+
+```tsx
+import { HintBadge, HintBeaconWithLabel, HintWhatsNewPill } from '@tour-kit/hints';
+```
+
+The recommended path is the discriminated `variant` prop on `<HintHotspot>` — it auto-narrows the variant-specific extras (`count`, `label`, `side`) at the call site.

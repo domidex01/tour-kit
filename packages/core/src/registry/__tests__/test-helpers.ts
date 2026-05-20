@@ -14,9 +14,7 @@ import { tourRegistry } from '../tour-registry'
  */
 export function resetTourRegistry(): void {
   if (!tourRegistry.__reset__) {
-    throw new Error(
-      'tourRegistry.__reset__ is unavailable. Tests must run under NODE_ENV=test.'
-    )
+    throw new Error('tourRegistry.__reset__ is unavailable. Tests must run under NODE_ENV=test.')
   }
   tourRegistry.__reset__()
 }

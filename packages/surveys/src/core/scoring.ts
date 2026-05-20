@@ -1,6 +1,38 @@
 import type { CESResult, CSATResult, NPSResult } from '../types/scoring'
 
 /**
+ * Single-score NPS bucket. Mirrors the aggregate cutoffs used by
+ * `calculateNPS`: promoters ≥ 9, passives 7–8, detractors ≤ 6.
+ */
+export type NpsCategory = 'promoter' | 'passive' | 'detractor'
+
+/**
+ * Single-score CES bucket. Mirrors the aggregate cutoffs used by
+ * `calculateCES`: easy ≥ 5, neutral = 4, difficult ≤ 3.
+ */
+export type CesCategory = 'easy' | 'neutral' | 'difficult'
+
+/**
+ * Bucket a single NPS score into its category. Use this in turnkey modal
+ * `onSubmit` callbacks so consumers don't re-implement the cutoffs.
+ */
+export function computeNpsCategory(score: number): NpsCategory {
+  if (score >= 9) return 'promoter'
+  if (score >= 7) return 'passive'
+  return 'detractor'
+}
+
+/**
+ * Bucket a single CES score into its category. Use this in turnkey modal
+ * `onSubmit` callbacks so consumers don't re-implement the cutoffs.
+ */
+export function computeCesCategory(score: number): CesCategory {
+  if (score >= 5) return 'easy'
+  if (score <= 3) return 'difficult'
+  return 'neutral'
+}
+
+/**
  * Calculate Net Promoter Score from an array of ratings (0-10).
  * Promoters: 9-10, Passives: 7-8, Detractors: 0-6
  */

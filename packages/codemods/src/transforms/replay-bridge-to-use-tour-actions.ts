@@ -121,6 +121,7 @@ interface DispatchScanResult {
 function findReplayDispatches(j: JSCodeshift, root: Collection): DispatchScanResult {
   const matches: FoundDispatch[] = []
   let annotated = false
+  // biome-ignore lint/complexity/noForEach: jscodeshift Collection#forEach is the canonical traversal API and has no for...of equivalent
   root
     .find(j.CallExpression, {
       callee: {
@@ -166,6 +167,7 @@ function findReplayDispatches(j: JSCodeshift, root: Collection): DispatchScanRes
   return { matches, annotated }
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: AST walk over jscodeshift node shapes is inherently branchy; splitting would obscure the property-detection flow
 function extractIdFromCustomEventInit(
   init: (ASTNode & { type?: string; properties?: ASTNode[] }) | undefined
 ): ASTNode | null {
@@ -245,50 +247,59 @@ function findReplayCleanupReturns(
   j: JSCodeshift,
   root: Collection
 ): ReturnType<Collection['paths']> {
-  return root
-    .find(j.ReturnStatement)
-    .filter((path) => {
-      const arg = (
-        path.node as { argument?: { type?: string; body?: unknown; params?: unknown[] } }
-      ).argument
-      if (!arg) return false
-      if (arg.type !== 'ArrowFunctionExpression' && arg.type !== 'FunctionExpression') return false
+  return (
+    root
+      .find(j.ReturnStatement)
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: AST shape-matching is inherently branchy; the predicate stays readable as a flat chain of guards
+      .filter((path) => {
+        const arg = (
+          path.node as { argument?: { type?: string; body?: unknown; params?: unknown[] } }
+        ).argument
+        if (!arg) return false
+        if (arg.type !== 'ArrowFunctionExpression' && arg.type !== 'FunctionExpression')
+          return false
 
-      // Body can be a CallExpression (implicit-return arrow) OR a BlockStatement
-      // wrapping exactly one ExpressionStatement whose expression is the call.
-      const rawBody = arg.body as ASTNode & { type?: string } & Record<string, unknown>
-      let callNode: (ASTNode & { type?: string; callee?: unknown; arguments?: unknown[] }) | null =
-        null
-      if (rawBody.type === 'CallExpression') {
-        callNode = rawBody as unknown as typeof callNode
-      } else if (rawBody.type === 'BlockStatement') {
-        const stmts = (rawBody.body as ASTNode[] | undefined) ?? []
-        if (stmts.length !== 1) return false
-        const stmt = stmts[0] as { type?: string; expression?: ASTNode }
-        if (stmt.type !== 'ExpressionStatement') return false
-        const expr = stmt.expression as
+        // Body can be a CallExpression (implicit-return arrow) OR a BlockStatement
+        // wrapping exactly one ExpressionStatement whose expression is the call.
+        const rawBody = arg.body as ASTNode & { type?: string } & Record<string, unknown>
+        let callNode:
           | (ASTNode & { type?: string; callee?: unknown; arguments?: unknown[] })
-          | undefined
-        if (!expr || expr.type !== 'CallExpression') return false
-        callNode = expr
-      }
-      if (!callNode) return false
+          | null = null
+        if (rawBody.type === 'CallExpression') {
+          callNode = rawBody as unknown as typeof callNode
+        } else if (rawBody.type === 'BlockStatement') {
+          const stmts = (rawBody.body as ASTNode[] | undefined) ?? []
+          if (stmts.length !== 1) return false
+          const stmt = stmts[0] as { type?: string; expression?: ASTNode }
+          if (stmt.type !== 'ExpressionStatement') return false
+          const expr = stmt.expression as
+            | (ASTNode & { type?: string; callee?: unknown; arguments?: unknown[] })
+            | undefined
+          if (!expr || expr.type !== 'CallExpression') return false
+          callNode = expr
+        }
+        if (!callNode) return false
 
-      const callee = callNode.callee as
-        | { type?: string; object?: { type?: string; name?: string }; property?: { name?: string } }
-        | undefined
-      if (
-        callee?.type !== 'MemberExpression' ||
-        callee.object?.type !== 'Identifier' ||
-        callee.object.name !== 'window' ||
-        callee.property?.name !== 'removeEventListener'
-      ) {
-        return false
-      }
-      const callArgs = (callNode.arguments ?? []) as ASTNode[]
-      return isStringLiteralWithValue(callArgs[0], TARGET_EVENT)
-    })
-    .paths()
+        const callee = callNode.callee as
+          | {
+              type?: string
+              object?: { type?: string; name?: string }
+              property?: { name?: string }
+            }
+          | undefined
+        if (
+          callee?.type !== 'MemberExpression' ||
+          callee.object?.type !== 'Identifier' ||
+          callee.object.name !== 'window' ||
+          callee.property?.name !== 'removeEventListener'
+        ) {
+          return false
+        }
+        const callArgs = (callNode.arguments ?? []) as ASTNode[]
+        return isStringLiteralWithValue(callArgs[0], TARGET_EVENT)
+      })
+      .paths()
+  )
 }
 
 function addUseTourActionsImport(j: JSCodeshift, root: Collection): void {

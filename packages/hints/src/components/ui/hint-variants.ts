@@ -27,12 +27,34 @@ export const hintHotspotVariants = cva(
         default: 'z-50',
         high: 'z-[9999]',
       },
+      // Named preset variants — Phase 3 of v2 package polish. The un-variant
+      // path (variant undefined) renders the legacy dot byte-identical to v1.
+      variant: {
+        badge:
+          'h-6 w-6 min-h-6 min-w-6 flex items-center justify-center text-[11px] font-semibold text-primary-foreground bg-primary',
+        'beacon-with-label':
+          'inline-flex items-center gap-1.5 min-h-6 min-w-6 bg-transparent border-transparent shadow-none',
+        'what-s-new-pill':
+          'inline-flex items-center gap-1 h-auto w-auto min-h-6 min-w-6 px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground bg-primary',
+      },
     },
     compoundVariants: [
       {
         pulse: true,
         className: 'animate-tour-pulse',
       },
+      // When a named variant is active, neutralise the `size` defaults so the
+      // variant's own size/shape utilities win. The base un-variant render path
+      // is untouched because `variant` is undefined by default.
+      { variant: 'badge', size: 'default', className: '!h-6 !w-6' },
+      { variant: 'badge', size: 'sm', className: '!h-6 !w-6' },
+      { variant: 'badge', size: 'lg', className: '!h-6 !w-6' },
+      { variant: 'beacon-with-label', size: 'default', className: '!h-auto !w-auto' },
+      { variant: 'beacon-with-label', size: 'sm', className: '!h-auto !w-auto' },
+      { variant: 'beacon-with-label', size: 'lg', className: '!h-auto !w-auto' },
+      { variant: 'what-s-new-pill', size: 'default', className: '!h-auto !w-auto' },
+      { variant: 'what-s-new-pill', size: 'sm', className: '!h-auto !w-auto' },
+      { variant: 'what-s-new-pill', size: 'lg', className: '!h-auto !w-auto' },
     ],
     defaultVariants: {
       size: 'default',
@@ -42,6 +64,9 @@ export const hintHotspotVariants = cva(
     },
   }
 )
+
+/** Stable string-literal union for the named hotspot presets. */
+export type HintHotspotVariantName = 'badge' | 'beacon-with-label' | 'what-s-new-pill'
 
 export type HintHotspotVariants = VariantProps<typeof hintHotspotVariants>
 

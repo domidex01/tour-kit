@@ -1,4 +1,4 @@
-# userTourKit v0.12.0 — Generated 2026-05-20T10:16:03Z
+# userTourKit v0.12.0 — Generated 2026-05-20T11:35:29Z
 
 # userTourKit
 
@@ -308,6 +308,7 @@
 - [SurveyPopover](https://usertourkit.com/docs/surveys/components/survey-popover): Floating panel anchored to a DOM element via Floating UI, with automatic flip and shift collision avoidance
 - [SurveyProgress](https://usertourkit.com/docs/surveys/components/survey-progress): Question progress indicator with text, bar, or combined display — uses role="progressbar" and renders null for single-question surveys
 - [SurveySlideout](https://usertourkit.com/docs/surveys/components/survey-slideout): Side panel that slides in from the left or right edge, built on Radix UI Dialog with configurable position and size variants
+- [Turnkey Survey Modals](https://usertourkit.com/docs/surveys/components/turnkey-modals): CsatModal, NpsModal, and CesModal — two-prop wrappers around SurveyModal + QuestionRating with built-in scoring categories.
 - [Headless](https://usertourkit.com/docs/surveys/headless): Render-prop components that supply survey state and ARIA props without rendering any markup — full control over appearance and interaction
 - [HeadlessQuestionBoolean](https://usertourkit.com/docs/surveys/headless/headless-question-boolean): Headless yes/no toggle — manages boolean state and returns groupProps and getOptionProps for accessible yes/no buttons
 - [HeadlessQuestionRating](https://usertourkit.com/docs/surveys/headless/headless-question-rating): Headless rating scale — manages value, options array, focusedIndex, and returns pre-built ARIA props via render prop

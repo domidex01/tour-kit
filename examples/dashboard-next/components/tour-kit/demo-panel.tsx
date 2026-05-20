@@ -1,5 +1,6 @@
 'use client'
 
+import { TURNKEY_CES_EVENT, TURNKEY_NPS_EVENT } from '@/components/tour-kit/turnkey-survey-hosts'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -236,9 +237,9 @@ export function TourKitDemoPanel() {
         <DemoRow
           icon={CheckSquare}
           pkg="@tour-kit/surveys"
-          title="CSAT survey"
+          title="CSAT survey (turnkey wired to provider)"
           state={csat.canShow ? 'ready' : 'cooldown'}
-          description="One-tap rating modal triggered after tour completion. Frequency rule is 90-day interval — demo trigger resets it first."
+          description="Phase 2 <CsatModal> wired through useSurvey('onboarding-csat'). Frequency rule is 90-day interval — demo trigger resets it first."
           action={{
             label: 'Show survey',
             onClick: () => {
@@ -250,8 +251,31 @@ export function TourKitDemoPanel() {
             },
           }}
         />
+
+        <DemoRow
+          icon={CheckSquare}
+          pkg="@tour-kit/surveys"
+          title="NPS turnkey modal (fire-and-forget)"
+          state="two-prop"
+          description="Phase 2 <NpsModal question onSubmit />. 0–10 scale. onSubmit receives (score, NpsCategory) — toasts the result."
+          action={{
+            label: 'Show NPS',
+            onClick: () => window.dispatchEvent(new CustomEvent(TURNKEY_NPS_EVENT)),
+          }}
+        />
+
+        <DemoRow
+          icon={CheckSquare}
+          pkg="@tour-kit/surveys"
+          title="CES turnkey modal (fire-and-forget)"
+          state="two-prop"
+          description="Phase 2 <CesModal question onSubmit />. 1–7 scale. onSubmit receives (score, CesCategory) — toasts the result."
+          action={{
+            label: 'Show CES',
+            onClick: () => window.dispatchEvent(new CustomEvent(TURNKEY_CES_EVENT)),
+          }}
+        />
       </CardContent>
     </Card>
   )
 }
-

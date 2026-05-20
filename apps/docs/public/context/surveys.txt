@@ -64,6 +64,11 @@ Types:
     SurveyQueueItem
     PriorityOrder
     StackBehavior
+    NpsCategory
+    CesCategory
+    CsatModalProps
+    NpsModalProps
+    CesModalProps
     QuestionRatingProps
     QuestionTextProps
     QuestionSelectProps
@@ -85,6 +90,9 @@ Components:
     SurveySlideout
     SurveyBanner
     SurveyInline
+    CsatModal
+    NpsModal
+    CesModal
     QuestionRating
     QuestionText
     QuestionSelect
@@ -96,6 +104,8 @@ Utilities:
     calculateNPS
     calculateCSAT
     calculateCES
+    computeNpsCategory
+    computeCesCategory
     ratingOptionVariants
     textInputVariants
     selectOptionVariants
@@ -257,7 +267,7 @@ TYPES
       onAnswer?: (questionId: string, value: import('./question').AnswerValue) => void
     }
 
-    ... and 30 more types. See source for full definitions.
+    ... and 32 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -275,6 +285,9 @@ COMPONENTS
     <SurveySlideout />
     <SurveyBanner />
     <SurveyInline />
+    <CsatModal />
+    <NpsModal />
+    <CesModal />
     <QuestionRating />
     <QuestionText />
     <QuestionSelect />

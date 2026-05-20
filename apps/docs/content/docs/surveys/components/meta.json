@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "survey-modal",
+    "turnkey-modals",
     "survey-slideout",
     "survey-banner",
     "survey-popover",

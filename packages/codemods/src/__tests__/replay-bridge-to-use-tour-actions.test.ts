@@ -6,7 +6,14 @@ import transform from '../transforms/replay-bridge-to-use-tour-actions'
 import { normalize, reparses, runTransform } from './_helpers'
 
 const __here = dirname(fileURLToPath(import.meta.url))
-const FIXTURES = join(__here, '..', '..', '__tests__', 'fixtures', 'replay-bridge-to-use-tour-actions')
+const FIXTURES = join(
+  __here,
+  '..',
+  '..',
+  '__tests__',
+  'fixtures',
+  'replay-bridge-to-use-tour-actions'
+)
 
 function loadFixture(name: 'basic'): { input: string; expected: string } {
   return {
@@ -77,9 +84,7 @@ export type _T = Tour
     // The original type-only import stays as-is.
     expect(out).toMatch(/import\s+type\s+\{\s*Tour\s*\}\s+from\s+['"]@tour-kit\/core['"]/)
     // A separate value-import was added.
-    expect(out).toMatch(
-      /import\s+\{\s*useTourActions\s*\}\s+from\s+['"]@tour-kit\/core['"]/
-    )
+    expect(out).toMatch(/import\s+\{\s*useTourActions\s*\}\s+from\s+['"]@tour-kit\/core['"]/)
     // And the dispatch was rewritten.
     expect(out).toContain("useTourActions('welcome').start()")
   })
@@ -133,7 +138,9 @@ export function trigger(id: string) {
     // Detail.id missing → no import added (the import would only be needed if
     // we actually rewrote a dispatch). The TODO text references the API name
     // for human reviewers, so we assert the import line specifically.
-    expect(out).not.toMatch(/import\s*\{[^}]*useTourActions[^}]*\}\s*from\s*['"]@tour-kit\/core['"]/)
+    expect(out).not.toMatch(
+      /import\s*\{[^}]*useTourActions[^}]*\}\s*from\s*['"]@tour-kit\/core['"]/
+    )
     // The dispatchEvent call stays put so the dev can rewrite manually.
     expect(out).toContain("new CustomEvent('tour-replay'")
     // And a TODO comment is attached so reviewers see the manual step.
