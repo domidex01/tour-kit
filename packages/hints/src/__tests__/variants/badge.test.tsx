@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import type * as React from 'react'
 import type { ReactElement } from 'react'
 import { describe, expect, it } from 'vitest'
 import { axe } from 'vitest-axe'
@@ -67,5 +68,26 @@ describe('<HintHotspot variant="badge">', () => {
       <HintHotspot variant="badge" count={3} targetRect={mockRect} position="top-right" />,
       '#0a0a0a'
     )
+  })
+
+  it('does not leak cva extras (pulse/size/color/zIndex) onto the button as DOM attributes', () => {
+    // Forced through `as` because the discriminated union forbids these at the type
+    // layer when variant is set — this test pins the runtime defense in case a
+    // consumer reaches it via `as unknown as` or a wider intersection.
+    const leakyProps = {
+      variant: 'badge',
+      count: 3,
+      targetRect: mockRect,
+      position: 'top-right',
+      pulse: false,
+      size: 'lg',
+      color: 'destructive',
+      zIndex: 'high',
+    } as unknown as React.ComponentProps<typeof HintHotspot>
+    render(<HintHotspot {...leakyProps} />)
+    const button = screen.getByRole('button')
+    for (const attr of ['pulse', 'size', 'color', 'zindex', 'zIndex']) {
+      expect(button.hasAttribute(attr)).toBe(false)
+    }
   })
 })

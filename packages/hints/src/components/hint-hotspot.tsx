@@ -14,24 +14,29 @@ import {
   hintHotspotVariants,
 } from './ui/hint-variants'
 
-type HintHotspotBaseProps = Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> &
-  Omit<HintHotspotVariants, 'variant'> & {
-    /** Target element's bounding rect */
-    targetRect: DOMRect
-    /** Position relative to the target element */
-    position: HotspotPosition
-    /** Whether the hint tooltip is open */
-    isOpen?: boolean
-    /** Use custom element via Slot */
-    asChild?: boolean
-  }
+/** Base props shared by every render path (legacy + every variant). */
+type HintHotspotBaseProps = Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> & {
+  /** Target element's bounding rect */
+  targetRect: DOMRect
+  /** Position relative to the target element */
+  position: HotspotPosition
+  /** Whether the hint tooltip is open */
+  isOpen?: boolean
+  /** Use custom element via Slot */
+  asChild?: boolean
+}
+
+/** Legacy cva extras — only attach to the un-variant arm so they cannot leak to variants. */
+type HintHotspotLegacyExtras = Omit<HintHotspotVariants, 'variant'>
 
 /**
- * Phase 12 contract — the three string literals lock here; downstream
- * `<HintGroup>` will narrow on these exact values.
+ * Discriminated union — the Phase 12 contract. The string literals lock here.
+ * Legacy `size`/`color`/`pulse`/`zIndex` live only on the un-variant arm so a
+ * consumer who opts into a variant can't accidentally pass them through to the
+ * DOM as unknown attributes.
  */
 type HintHotspotVariantExtras =
-  | { variant?: undefined }
+  | ({ variant?: undefined } & HintHotspotLegacyExtras)
   | { variant: 'badge'; count?: number }
   | { variant: 'beacon-with-label'; label: string; side?: 'left' | 'right' }
   | { variant: 'what-s-new-pill'; label: string }
@@ -40,57 +45,52 @@ export type HintHotspotProps = HintHotspotBaseProps & HintHotspotVariantExtras
 
 export type { HintHotspotVariantName }
 
+/**
+ * Defensive runtime strip — the discriminated union already forbids legacy
+ * cva extras on variant arms at the type layer, but JS consumers (or anyone
+ * casting through `as unknown as`) can still pass them. Without this, React
+ * surfaces them as unknown DOM attributes on the rendered `<button>`.
+ */
+function stripLegacyCvaProps<T extends object>(obj: T): T {
+  const {
+    size: _s,
+    color: _c,
+    pulse: _p,
+    zIndex: _z,
+    ...rest
+  } = obj as T & Partial<HintHotspotLegacyExtras>
+  return rest as T
+}
+
+/**
+ * Pure dispatcher — calls no hooks itself so every variant arm (including the
+ * legacy `<LegacyHintHotspot>` path) owns an isolated hook context. A consumer
+ * who switches `variant` between renders unmounts/mounts the appropriate
+ * sub-component instead of changing the hook count of this function.
+ */
 export const HintHotspot = React.forwardRef<HTMLButtonElement, HintHotspotProps>((props, ref) => {
   if (props.variant === 'badge') {
     const { variant: _variant, count, ...rest } = props
-    return <HintBadge ref={ref} count={count} {...rest} />
+    return <HintBadge ref={ref} count={count} {...stripLegacyCvaProps(rest)} />
   }
   if (props.variant === 'beacon-with-label') {
     const { variant: _variant, label, side, ...rest } = props
-    return <HintBeaconWithLabel ref={ref} label={label} side={side} {...rest} />
+    return (
+      <HintBeaconWithLabel ref={ref} label={label} side={side} {...stripLegacyCvaProps(rest)} />
+    )
   }
   if (props.variant === 'what-s-new-pill') {
     const { variant: _variant, label, ...rest } = props
-    return <HintWhatsNewPill ref={ref} label={label} {...rest} />
+    return <HintWhatsNewPill ref={ref} label={label} {...stripLegacyCvaProps(rest)} />
   }
-
-  // Legacy un-variant path — byte-identical to v1 render output.
-  const {
-    targetRect,
-    position,
-    size,
-    color,
-    pulse = true,
-    zIndex,
-    isOpen = false,
-    asChild = false,
-    className,
-    children,
-    ...rest
-  } = props
-  return (
-    <LegacyHintHotspot
-      ref={ref}
-      targetRect={targetRect}
-      position={position}
-      size={size}
-      color={color}
-      pulse={pulse}
-      zIndex={zIndex}
-      isOpen={isOpen}
-      asChild={asChild}
-      className={className}
-      {...rest}
-    >
-      {children}
-    </LegacyHintHotspot>
-  )
+  const { variant: _variant, ...legacy } = props
+  return <LegacyHintHotspot ref={ref} {...legacy} />
 })
 HintHotspot.displayName = 'HintHotspot'
 
-type LegacyProps = Omit<HintHotspotBaseProps, never>
+type LegacyHintHotspotProps = HintHotspotBaseProps & HintHotspotLegacyExtras
 
-const LegacyHintHotspot = React.forwardRef<HTMLButtonElement, LegacyProps>(
+const LegacyHintHotspot = React.forwardRef<HTMLButtonElement, LegacyHintHotspotProps>(
   (
     {
       targetRect,

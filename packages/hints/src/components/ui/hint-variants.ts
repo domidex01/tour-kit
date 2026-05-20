@@ -55,10 +55,6 @@ export const hintHotspotVariants = cva(
       { variant: 'what-s-new-pill', size: 'default', className: '!h-auto !w-auto' },
       { variant: 'what-s-new-pill', size: 'sm', className: '!h-auto !w-auto' },
       { variant: 'what-s-new-pill', size: 'lg', className: '!h-auto !w-auto' },
-      // Variants render flush with the target — drop the legacy rounded-full
-      // pill where it would clip text (beacon-with-label uses the wrapper as
-      // a flex row, not a circle; what-s-new-pill defines its own rounded-full).
-      { variant: 'beacon-with-label', className: 'rounded-none' },
     ],
     defaultVariants: {
       size: 'default',
