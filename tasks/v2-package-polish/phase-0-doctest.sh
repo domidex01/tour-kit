@@ -10,15 +10,17 @@ test -f "$DOC" || { echo "FAIL: $DOC missing"; exit 1; }
 sections=$(grep -c "^## " "$DOC")
 [ "$sections" -ge 6 ] || { echo "FAIL: expected >=6 ## sections, got $sections"; exit 1; }
 
-# US-1 — §2 useTourActions snippet must compile and declare both names
-awk '/^## 2\./,/^## 3\./' "$DOC" | awk '/^```ts/{flag=1;next}/^```/{flag=0}flag' > /tmp/scratch-use-tour-actions.ts
+# US-1 — §2 useTourActions snippet must compile and declare both names.
+# Fence regex is anchored at both ends so `\`\`\`tsx` / `\`\`\`typescript` blocks in
+# the same section are NOT pulled into the scratch file.
+awk '/^## 2\./,/^## 3\./' "$DOC" | awk '/^```ts$/{flag=1;next}/^```/{flag=0}flag' > /tmp/scratch-use-tour-actions.ts
 test -s /tmp/scratch-use-tour-actions.ts || { echo "FAIL: §2 TS snippet missing"; exit 1; }
 grep -q "export interface UseTourActionsReturn" /tmp/scratch-use-tour-actions.ts || { echo "FAIL: §2 missing UseTourActionsReturn"; exit 1; }
-grep -q "export.* function useTourActions\|export function useTourActions" /tmp/scratch-use-tour-actions.ts || { echo "FAIL: §2 missing useTourActions export"; exit 1; }
+grep -qE "^export (declare )?function useTourActions\b" /tmp/scratch-use-tour-actions.ts || { echo "FAIL: §2 missing useTourActions export"; exit 1; }
 pnpm tsc --noEmit --target ES2020 --moduleResolution node /tmp/scratch-use-tour-actions.ts
 
-# US-2 — §3 TourTarget snippet must compile and declare the union
-awk '/^## 3\./,/^## 4\./' "$DOC" | awk '/^```ts/{flag=1;next}/^```/{flag=0}flag' > /tmp/scratch-target-union.ts
+# US-2 — §3 TourTarget snippet must compile and declare the union.
+awk '/^## 3\./,/^## 4\./' "$DOC" | awk '/^```ts$/{flag=1;next}/^```/{flag=0}flag' > /tmp/scratch-target-union.ts
 test -s /tmp/scratch-target-union.ts || { echo "FAIL: §3 TS snippet missing"; exit 1; }
 grep -q "type TourTarget" /tmp/scratch-target-union.ts || { echo "FAIL: §3 missing TourTarget type"; exit 1; }
 pnpm tsc --noEmit --target ES2020 --moduleResolution node /tmp/scratch-target-union.ts
@@ -29,7 +31,9 @@ matrix_rows=$(printf '%s\n' "$section4" | grep -cE "^\| (frequency|cooldown|view
 [ "$matrix_rows" -eq 6 ] || { echo "FAIL: expected 6 matrix rows (5 functional + 1 license), got $matrix_rows"; exit 1; }
 bad_force_cells=$(printf '%s\n' "$section4" | awk -F'|' '/^\| (frequency|cooldown|viewCount|isDismissed|audience) / { cell=$4; gsub(/[[:space:]]/, "", cell); if (cell != "No") bad++ } END{print bad+0}')
 [ "$bad_force_cells" -eq 0 ] || { echo "FAIL: all functional forceShow cells must be No"; exit 1; }
-license_force_cell=$(printf '%s\n' "$section4" | awk -F'|' '/^\| License gate / { cell=$4; gsub(/[[:space:]]/, "", cell); print cell }')
+license_rows=$(printf '%s\n' "$section4" | grep -cE "^\| License gate ")
+[ "$license_rows" -eq 1 ] || { echo "FAIL: §4 must have exactly one License gate row, got $license_rows"; exit 1; }
+license_force_cell=$(printf '%s\n' "$section4" | awk -F'|' '/^\| License gate / { cell=$4; gsub(/[[:space:]]/, "", cell); print cell; exit }')
 [ "$license_force_cell" = "Yes" ] || { echo "FAIL: License gate forceShow cell must be Yes (got '$license_force_cell')"; exit 1; }
 
 # US-4 — §5 peer-dep audit lists >= 6 libraries
@@ -65,11 +69,14 @@ no_count=$(printf '%s\n' "$section6" | grep -F -c "$decision_no" || true)
 decision_count=$((yes_count + no_count))
 [ "$decision_count" -eq 1 ] || { echo "FAIL: §6 must contain exactly one Polar decision sentence, got $decision_count"; exit 1; }
 
-# US-6 — final non-blank line begins "Signed off by:"
+# US-6 — final non-blank line must be a fully-signed sign-off in the canonical
+# format: `Signed off by: @<handle> — YYYY-MM-DD`. Rejects the unsigned template
+# (`Signed off by: ________________________ — YYYY-MM-DD`) so the gate is a
+# real blocker, not a passing-by-default check.
 last_nonblank=$(awk 'NF{line=$0} END{print line}' "$DOC")
-case "$last_nonblank" in
-  "Signed off by:"*) ;;
-  *) echo "FAIL: final non-blank line must begin 'Signed off by:' (got '$last_nonblank')"; exit 1 ;;
-esac
+if ! printf '%s\n' "$last_nonblank" | grep -Eq '^Signed off by: @[A-Za-z0-9_-]+ — [0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+  echo "FAIL: final non-blank line must be 'Signed off by: @handle — YYYY-MM-DD' (got '$last_nonblank')"
+  exit 1
+fi
 
 echo "OK: phase-0 doc gate passes"

@@ -109,6 +109,13 @@ Lifecycle:
  * The snippet below uses the structural shape so it compiles in isolation under
  * `tsc --noEmit --target ES2020 --moduleResolution node` without resolving React.
  */
+// Phase 5.1 production type — uncomment once React is in scope:
+//   import type { RefObject } from 'react'
+//   export type TourTargetRef = RefObject<HTMLElement | null>
+//
+// Below is the structural twin used only for the phase-0-doctest compile gate
+// (so the snippet type-checks in isolation without resolving React). DO NOT
+// ship this verbatim — swap to the React import in the Phase 5.1 PR.
 export type TourTargetRef = { readonly current: HTMLElement | null }
 export type TourTargetGetter = () => HTMLElement | null
 
@@ -257,12 +264,17 @@ Polar API cannot emit `tier="trial"` → Phase 8 derives `daysLeft` client-side 
 // from validator timestamps + consumer-supplied trialDays.
 type LicenseProviderProps = {
   licenseKey: string
-  /** Trial length in days. When set, <TrialBadge /> can render a countdown. */
+  /** Trial length in days. When set, <TrialBadge /> renders a countdown. */
   trialDays?: number // e.g. 14
   /**
-   * Optional explicit trial start timestamp.
-   * Defaults to the validator's first successful `created_at` (Polar) or
-   * `last_validated_at` if `created_at` is missing.
+   * Explicit trial start (ms epoch). When omitted, @tour-kit/license stamps the
+   * FIRST successful `last_validated_at` into its persistence cache and reuses
+   * that anchor on every subsequent validate — the trial clock does NOT reset
+   * on cache refresh.
+   *
+   * DO NOT default to Polar's `created_at`: that is the license-key creation
+   * time, not the customer's activation time, so a license bought weeks before
+   * first use would arrive already-expired.
    */
   trialIssuedAt?: number
 }
