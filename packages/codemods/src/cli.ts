@@ -8,9 +8,10 @@ import jscodeshift from 'jscodeshift'
 import fromDriver from './transforms/from-driver'
 import fromJoyride from './transforms/from-joyride'
 import fromShepherd from './transforms/from-shepherd'
+import replayBridgeToUseTourActions from './transforms/replay-bridge-to-use-tour-actions'
 
 export interface CliOptions {
-  from: 'joyride' | 'shepherd' | 'driver'
+  from: 'joyride' | 'shepherd' | 'driver' | 'replay-bridge-to-use-tour-actions'
   parser: 'tsx' | 'ts' | 'babel'
   dryRun: boolean
   print: boolean
@@ -34,6 +35,8 @@ const TRANSFORMS: Partial<Record<CliOptions['from'], JscodeshiftTransform>> = {
   joyride: fromJoyride as unknown as JscodeshiftTransform,
   shepherd: fromShepherd as unknown as JscodeshiftTransform,
   driver: fromDriver as unknown as JscodeshiftTransform,
+  'replay-bridge-to-use-tour-actions':
+    replayBridgeToUseTourActions as unknown as JscodeshiftTransform,
 }
 
 // Sources whose corpus coverage is below the ≥80% ship gate. Members trigger a
@@ -52,6 +55,7 @@ export const TRANSFORM_COVERAGE: Readonly<Record<CliOptions['from'], number>> = 
   joyride: 100,
   shepherd: 100,
   driver: 100,
+  'replay-bridge-to-use-tour-actions': 100,
 }
 
 const DEFAULT_EXTENSIONS = ['ts', 'tsx', 'js', 'jsx'] as const
@@ -228,7 +232,12 @@ function parseArgs(argv: readonly string[]): CliOptions {
 }
 
 function isFromValue(v: string | undefined): v is CliOptions['from'] {
-  return v === 'joyride' || v === 'shepherd' || v === 'driver'
+  return (
+    v === 'joyride' ||
+    v === 'shepherd' ||
+    v === 'driver' ||
+    v === 'replay-bridge-to-use-tour-actions'
+  )
 }
 
 function isParserValue(v: string | undefined): v is CliOptions['parser'] {
@@ -290,7 +299,9 @@ function usageMessage(): string {
     'Usage: tour-kit-migrate --from <source> [options] <paths...>',
     '',
     'Options:',
-    '  --from <source>       Migration source (joyride|shepherd|driver). Required.',
+    '  --from <source>       Migration source. Required. One of:',
+    '                          joyride|shepherd|driver — competitor → @tour-kit/react migration.',
+    '                          replay-bridge-to-use-tour-actions — v1 window-event → useTourActions(id).start().',
     '  --parser <parser>     jscodeshift parser (tsx|ts|babel). Default: tsx.',
     "  --dry-run             Don't write files; only report what would change.",
     '  --print               Print transformed source to stdout.',
