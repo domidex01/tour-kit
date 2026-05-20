@@ -5,7 +5,7 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['react', 'react-dom', '@tour-kit/license'],
+  external: ['react', 'react-dom', '@tour-kit/analytics', '@tour-kit/license'],
   treeshake: true,
   splitting: false,
   minify: true,

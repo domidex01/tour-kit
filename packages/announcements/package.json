@@ -98,7 +98,6 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@tour-kit/analytics": "workspace:*",
     "@tour-kit/core": "workspace:*",
     "@tour-kit/license": "workspace:*",
     "@tour-kit/media": "workspace:*",
@@ -108,6 +107,7 @@
     "class-variance-authority": "^0.7.1"
   },
   "peerDependencies": {
+    "@tour-kit/analytics": "workspace:*",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "tailwindcss": "^3.4.0 || ^4.0.0",
