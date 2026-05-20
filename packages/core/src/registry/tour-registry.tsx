@@ -74,15 +74,14 @@ function notify(): void {
   }
 }
 
-function isDev(): boolean {
-  return typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
-}
-
 /**
- * Test/dev environments expose the `__reset__` helper; production builds
- * strip it. Vitest runs with NODE_ENV=development by default — we gate on
- * `!== 'production'` so both `vitest run` and Storybook-style dev harnesses
- * have access without explicit env-var plumbing.
+ * Single env predicate. Gates both:
+ *   - `console.error` on duplicate-id registration (dev DX signal)
+ *   - `__reset__` test-only helper (so production never carries it)
+ *
+ * Vitest leaves `NODE_ENV` as `development` by default — gating on
+ * `!== 'production'` covers both `vitest run` and Storybook-style dev
+ * harnesses without explicit env-var plumbing.
  */
 function isNonProductionEnv(): boolean {
   return typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
@@ -103,7 +102,7 @@ function isNonProductionEnv(): boolean {
 function register(entry: RegistryEntry): () => void {
   const ref = new WeakRef(entry)
   const existing = entries.get(entry.id)?.deref()
-  if (existing && isDev()) {
+  if (existing && isNonProductionEnv()) {
     console.error(
       `[Tour Kit] Tour "${entry.id}" registered twice. Keeping the latest registration.`
     )
@@ -124,6 +123,10 @@ function register(entry: RegistryEntry): () => void {
  * Read an entry by id. Prunes dead WeakRefs (entries whose owning provider
  * unmounted without calling unregister — rare, but possible if React crashes
  * mid-commit) and returns `null` on miss.
+ *
+ * When a dead WeakRef is pruned, listeners are notified so any
+ * `useSyncExternalStore` consumer still subscribed to the GC'd entry
+ * re-renders with the frozen no-op instead of holding stale state forever.
  */
 function get(id: string): RegistryEntry | null {
   const ref = entries.get(id)
@@ -131,6 +134,7 @@ function get(id: string): RegistryEntry | null {
   const entry = ref.deref()
   if (!entry) {
     entries.delete(id)
+    notify()
     return null
   }
   return entry
