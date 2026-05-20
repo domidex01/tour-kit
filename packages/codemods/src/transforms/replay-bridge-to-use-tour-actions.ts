@@ -63,11 +63,11 @@ export default function transform(file: FileInfo, api: API): string {
     return file.source
   }
 
+  // `dispatchAnnotated` (read in the early-return guard above) guarantees the
+  // file gets serialized so a TODO comment lands in the output. The flag
+  // below tracks whether we did a real rewrite — only then do we add the
+  // `useTourActions` import.
   let rewroteDispatch = false
-  // dispatchAnnotated already guarantees we'll serialize (it bypassed the
-  // short-circuit above). The rewroteDispatch flag gates whether we add the
-  // import — annotation-only runs don't need it.
-  void dispatchAnnotated
 
   for (const { path, match } of dispatchPaths) {
     const idExpr = match.idExpression as unknown as Parameters<typeof j.callExpression>[1][number]
@@ -82,17 +82,19 @@ export default function transform(file: FileInfo, api: API): string {
     rewroteDispatch = true
   }
 
-  for (const path of [...addListenerPaths, ...removeListenerPaths]) {
-    // Statement-level removal — drops the entire `window.addEventListener(...)`
-    // / `window.removeEventListener(...)` line plus its parent ExpressionStatement.
+  // useEffect-cleanup pattern first — must run BEFORE the listener strip so
+  // we can match block-body arrows whose only statement is the
+  // `window.removeEventListener('tour-replay', h)` we'd otherwise strip out.
+  // Running listener-strip first would empty the block and the cleanup-return
+  // matcher would no longer recognise it as a one-statement body.
+  for (const path of findReplayCleanupReturns(j, root)) {
     j(path).remove()
   }
 
-  // useEffect-cleanup pattern: `return () => window.removeEventListener('tour-replay', h)`.
-  // The removeEventListener call lives in the arrow function's body (implicit
-  // return), so the ExpressionStatement matcher above misses it. Strip the
-  // entire `return` statement when the arrow's body matches the target event.
-  for (const path of findReplayCleanupReturns(j, root)) {
+  // Statement-level removal — drops any remaining `window.addEventListener(...)`
+  // / `window.removeEventListener(...)` lines (and their parent ExpressionStatements)
+  // that aren't part of a cleanup-return arrow.
+  for (const path of [...addListenerPaths, ...removeListenerPaths]) {
     j(path).remove()
   }
 
@@ -233,6 +235,11 @@ function findReplayListeners(
  * Match `return () => window.removeEventListener('tour-replay', _)` —
  * the canonical v1 useEffect-cleanup pattern that pairs with the
  * addEventListener we strip elsewhere.
+ *
+ * Handles both implicit-return arrows (`() => window.removeEventListener(...)`)
+ * and block-body forms (`() => { window.removeEventListener(...) }`).
+ * Without the block-body branch, Prettier/ESLint-expanded codebases would
+ * keep a dangling no-op cleanup function after migration.
  */
 function findReplayCleanupReturns(
   j: JSCodeshift,
@@ -246,12 +253,28 @@ function findReplayCleanupReturns(
       ).argument
       if (!arg) return false
       if (arg.type !== 'ArrowFunctionExpression' && arg.type !== 'FunctionExpression') return false
-      // Implicit-return body (single expression) — what the v1 example uses.
-      const body = arg.body as
-        | (ASTNode & { type?: string; callee?: ASTNode & { property?: { name?: string } }; arguments?: unknown[] })
-        | undefined
-      if (!body || body.type !== 'CallExpression') return false
-      const callee = body.callee as
+
+      // Body can be a CallExpression (implicit-return arrow) OR a BlockStatement
+      // wrapping exactly one ExpressionStatement whose expression is the call.
+      const rawBody = arg.body as ASTNode & { type?: string } & Record<string, unknown>
+      let callNode: (ASTNode & { type?: string; callee?: unknown; arguments?: unknown[] }) | null =
+        null
+      if (rawBody.type === 'CallExpression') {
+        callNode = rawBody as unknown as typeof callNode
+      } else if (rawBody.type === 'BlockStatement') {
+        const stmts = (rawBody.body as ASTNode[] | undefined) ?? []
+        if (stmts.length !== 1) return false
+        const stmt = stmts[0] as { type?: string; expression?: ASTNode }
+        if (stmt.type !== 'ExpressionStatement') return false
+        const expr = stmt.expression as
+          | (ASTNode & { type?: string; callee?: unknown; arguments?: unknown[] })
+          | undefined
+        if (!expr || expr.type !== 'CallExpression') return false
+        callNode = expr
+      }
+      if (!callNode) return false
+
+      const callee = callNode.callee as
         | { type?: string; object?: { type?: string; name?: string }; property?: { name?: string } }
         | undefined
       if (
@@ -262,7 +285,7 @@ function findReplayCleanupReturns(
       ) {
         return false
       }
-      const callArgs = (body.arguments ?? []) as ASTNode[]
+      const callArgs = (callNode.arguments ?? []) as ASTNode[]
       return isStringLiteralWithValue(callArgs[0], TARGET_EVENT)
     })
     .paths()
@@ -273,24 +296,22 @@ function addUseTourActionsImport(j: JSCodeshift, root: Collection): void {
     source: { value: TARGET_MODULE },
   })
 
-  if (existing.size() === 0) {
-    const decl = j.importDeclaration(
-      [j.importSpecifier(j.identifier(IMPORT_NAME))],
-      j.literal(TARGET_MODULE)
-    )
-    const program = root.get().node.program as { body: ASTNode[] }
-    program.body.unshift(decl as unknown as ASTNode)
-    return
-  }
-
+  // Find an existing VALUE import we can merge into. Type-only imports
+  // (`import type { ... } from '@tour-kit/core'`) cannot host a runtime value
+  // specifier — TypeScript would strip `useTourActions` and the rewritten
+  // dispatch would throw `useTourActions is not defined` at runtime.
   for (const path of existing.paths()) {
     const decl = path.node as {
+      importKind?: 'type' | 'value'
       specifiers?: Array<{
         type?: string
+        importKind?: 'type' | 'value'
         imported?: { name?: string } | Identifier
         local?: { name?: string }
       }>
     }
+    if (decl.importKind === 'type') continue
+
     const specs = decl.specifiers ?? []
     const already = specs.some(
       (s) =>
@@ -298,12 +319,19 @@ function addUseTourActionsImport(j: JSCodeshift, root: Collection): void {
         (s.imported as { name?: string } | undefined)?.name === IMPORT_NAME
     )
     if (already) return
-    specs.push(
-      j.importSpecifier(j.identifier(IMPORT_NAME)) as unknown as (typeof specs)[number]
-    )
+    specs.push(j.importSpecifier(j.identifier(IMPORT_NAME)) as unknown as (typeof specs)[number])
     decl.specifiers = specs
     return
   }
+
+  // No mergeable value import found (either none at all, or only `import type`).
+  // Synthesize a new value-import declaration at the top of the file.
+  const decl = j.importDeclaration(
+    [j.importSpecifier(j.identifier(IMPORT_NAME))],
+    j.literal(TARGET_MODULE)
+  )
+  const program = root.get().node.program as { body: ASTNode[] }
+  program.body.unshift(decl as unknown as ASTNode)
 }
 
 function attachLeadingTodo(node: ASTNode, message: string): void {

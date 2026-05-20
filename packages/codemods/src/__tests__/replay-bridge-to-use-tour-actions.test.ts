@@ -61,6 +61,67 @@ export function Unrelated() {
   })
 })
 
+describe('replay-bridge-to-use-tour-actions — import-kind correctness', () => {
+  it('does NOT inject useTourActions into a type-only @tour-kit/core import', () => {
+    // Type-only imports get stripped by tsc — adding a runtime value to one
+    // would yield `useTourActions is not defined` at runtime. Verify the
+    // codemod synthesizes a fresh value-import instead.
+    const src = `
+import type { Tour } from '@tour-kit/core'
+export function trigger() {
+  window.dispatchEvent(new CustomEvent('tour-replay', { detail: { id: 'welcome' } }))
+}
+export type _T = Tour
+`
+    const out = runTransform(transform, src, 'type-only.tsx')
+    // The original type-only import stays as-is.
+    expect(out).toMatch(/import\s+type\s+\{\s*Tour\s*\}\s+from\s+['"]@tour-kit\/core['"]/)
+    // A separate value-import was added.
+    expect(out).toMatch(
+      /import\s+\{\s*useTourActions\s*\}\s+from\s+['"]@tour-kit\/core['"]/
+    )
+    // And the dispatch was rewritten.
+    expect(out).toContain("useTourActions('welcome').start()")
+  })
+
+  it('merges into an existing value-import alongside other value specifiers', () => {
+    const src = `
+import { useTour } from '@tour-kit/core'
+export function trigger() {
+  window.dispatchEvent(new CustomEvent('tour-replay', { detail: { id: 'x' } }))
+}
+void useTour
+`
+    const out = runTransform(transform, src, 'merge.tsx')
+    expect(out).toMatch(
+      /import\s+\{[^}]*useTour[^}]*useTourActions[^}]*\}\s+from\s+['"]@tour-kit\/core['"]/
+    )
+  })
+})
+
+describe('replay-bridge-to-use-tour-actions — block-body cleanup return', () => {
+  it('strips block-body arrow cleanup: return () => { window.removeEventListener(...) }', () => {
+    const src = `
+import { useEffect } from 'react'
+function Bridge() {
+  useEffect(() => {
+    const handler = () => {}
+    window.addEventListener('tour-replay', handler)
+    return () => {
+      window.removeEventListener('tour-replay', handler)
+    }
+  }, [])
+}
+void Bridge
+`
+    const out = runTransform(transform, src, 'block-cleanup.tsx')
+    expect(out).not.toContain("window.addEventListener('tour-replay'")
+    expect(out).not.toContain("window.removeEventListener('tour-replay'")
+    // The block-body return was stripped entirely (no dangling no-op cleanup).
+    expect(out).not.toMatch(/return\s*\(\s*\)\s*=>\s*\{/)
+  })
+})
+
 describe('replay-bridge-to-use-tour-actions — heuristic guardrails', () => {
   it('leaves the source untouched and emits a TODO when CustomEvent.detail is not a literal id', () => {
     const ambiguous = `
