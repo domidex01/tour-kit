@@ -4,8 +4,15 @@
 
 export { Hint } from './components/hint'
 export { HintHotspot } from './components/hint-hotspot'
+export type { HintHotspotVariantName } from './components/hint-hotspot'
 export { HintTooltip } from './components/hint-tooltip'
 export type { HintProps, HintHotspotProps, HintTooltipProps } from './components'
+export { HintBadge, type HintBadgeProps } from './variants/badge'
+export {
+  HintBeaconWithLabel,
+  type HintBeaconWithLabelProps,
+} from './variants/beacon-with-label'
+export { HintWhatsNewPill, type HintWhatsNewPillProps } from './variants/whats-new-pill'
 
 // ============================================
 // CONTEXT & PROVIDERS
