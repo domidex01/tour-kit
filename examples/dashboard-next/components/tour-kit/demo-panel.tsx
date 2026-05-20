@@ -1,5 +1,6 @@
 'use client'
 
+import { TURNKEY_CES_EVENT, TURNKEY_NPS_EVENT } from '@/components/tour-kit/turnkey-survey-hosts'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,10 +11,6 @@ import { useChecklist } from '@tour-kit/checklists'
 import { useTourActions } from '@tour-kit/core'
 import { LicenseWatermark, useLicense } from '@tour-kit/license'
 import { useSurvey } from '@tour-kit/surveys'
-import {
-  TURNKEY_CES_EVENT,
-  TURNKEY_NPS_EVENT,
-} from '@/components/tour-kit/turnkey-survey-hosts'
 import {
   Bell,
   CheckSquare,
@@ -282,4 +279,3 @@ export function TourKitDemoPanel() {
     </Card>
   )
 }
-

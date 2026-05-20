@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
-import { type AnalyticsPlugin, AnalyticsProvider } from '@tour-kit/analytics'
 import { cleanup, render, screen } from '@testing-library/react'
+import { type AnalyticsPlugin, AnalyticsProvider } from '@tour-kit/analytics'
 import type * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -8,10 +8,7 @@ vi.mock('@tour-kit/license', () => ({
   LicenseGate: ({ children }: { children: React.ReactNode; require: 'pro' }) => <>{children}</>,
 }))
 
-import {
-  AnnouncementsProvider,
-  FORCE_SHOW_BYPASS,
-} from '../context/announcements-provider'
+import { AnnouncementsProvider, FORCE_SHOW_BYPASS } from '../context/announcements-provider'
 import { useAnnouncement } from '../hooks/use-announcement'
 import type { AnnouncementConfig, AnnouncementState } from '../types/announcement'
 
@@ -81,9 +78,7 @@ function buildWrapper({
     )
     if (!track) return inner
     return (
-      <AnalyticsProvider config={{ plugins: [{ name: 'test', track }] }}>
-        {inner}
-      </AnalyticsProvider>
+      <AnalyticsProvider config={{ plugins: [{ name: 'test', track }] }}>{inner}</AnalyticsProvider>
     )
   }
 }

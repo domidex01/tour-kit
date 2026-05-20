@@ -1605,7 +1605,6 @@ export function TourProvider({
   })
 
   // `tourIdsKey` is declared earlier (diagnostic engine block) — reuse it here.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: stable key over tour ids replaces the reference dep
   React.useEffect(() => {
     if (tourIdsKey.length === 0) return
     const ids = tourIdsKey.split('\x00').filter(Boolean)
@@ -1642,7 +1641,6 @@ export function TourProvider({
     }
   }, [tourIdsKey])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: state-mirror runs on every transition affecting any registered entry; tourIdsKey gates on id-set changes
   React.useEffect(() => {
     if (tourIdsKey.length === 0) return
     const ids = tourIdsKey.split('\x00').filter(Boolean)
