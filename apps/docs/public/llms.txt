@@ -1,4 +1,4 @@
-# userTourKit v0.11.0 — Generated 2026-05-14T04:13:27Z
+# userTourKit v0.12.0 — Generated 2026-05-20T10:16:03Z
 
 # userTourKit
 
@@ -237,6 +237,7 @@
 - [Checklists with Tours](https://usertourkit.com/docs/guides/checklists-tours): Link checklists to tours for guided onboarding — auto-complete tasks on tour finish and track user progress together
 - [Hidden Steps](https://usertourkit.com/docs/guides/hidden-steps): Run branching logic, trait forks, and completion gates without mounting any UI by marking a step as hidden.
 - [Internationalization (i18n)](https://usertourkit.com/docs/guides/i18n): Translate every string in Tour Kit with LocaleProvider, useT(), and the {{var | fallback}} interpolation grammar.
+- [Imperative control](https://usertourkit.com/docs/guides/imperative-control): Control tours from sibling subtrees with useTourActions, and bypass announcement gates with forceShow for admin previews.
 - [Multi-tab Tours](https://usertourkit.com/docs/guides/multi-tab): Pause an active tour in tab B when the user starts the same flow in tab A — cross-tab coordination via BroadcastChannel.
 - [Next.js Integration](https://usertourkit.com/docs/guides/nextjs): Set up userTourKit with Next.js App Router or Pages Router — server component layouts, route-aware tours, and SSR support
 - [Persistence](https://usertourkit.com/docs/guides/persistence): Save tour progress, checklist completion, and hint dismissals across browser sessions with pluggable storage adapters

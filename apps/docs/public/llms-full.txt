@@ -1,4 +1,4 @@
-# userTourKit v0.11.0 — Generated 2026-05-14T04:13:27Z
+# userTourKit v0.12.0 — Generated 2026-05-20T10:16:03Z
 
 # Feature Adoption Tracking
 
@@ -21252,13 +21252,16 @@ import { LicenseGate } from '@tour-kit/license';
 
 Behavior matrix:
 
-| Host | `LicenseProvider` mounted | License | Rendered |
-|---|---|---|---|
-| `localhost` / `127.0.0.1` / `*.local` | any | any | Children only, no badge |
-| Other host | yes | valid pro | Children only, no badge |
-| Other host | yes | invalid/expired/revoked | Children + badge + dev warning |
-| Other host | yes | error + fresh cache | Children only, no badge |
-| Other host | no | n/a | Children + badge + dev warning. No throw |
+| Host | `LicenseProvider` mounted | `licenseKey` | License | Rendered |
+|---|---|---|---|---|
+| `localhost` / `127.0.0.1` / `*.local` | yes | non-empty | dev bypass | Children only, no badge |
+| `localhost` / `127.0.0.1` / `*.local` | yes | empty / blank | unlicensed | Children + badge + dev warning |
+| `localhost` / `127.0.0.1` / `*.local` | no | n/a | n/a | Children only, no badge (no key to inspect) |
+| Other host | yes | non-empty | valid pro | Children only, no badge |
+| Other host | yes | non-empty | invalid/expired/revoked | Children + badge + dev warning |
+| Other host | yes | non-empty | error + fresh cache | Children only, no badge |
+| Other host | yes | empty / blank | unlicensed | Children + badge + dev warning |
+| Other host | no | n/a | n/a | Children + badge + dev warning. No throw |
 
 ### ProGate
 
@@ -21277,7 +21280,7 @@ import { ProGate } from '@tour-kit/license';
 | `package` | `string` | npm package name shown in the placeholder + console warning |
 | `children` | `ReactNode` | Rendered when licensed; replaced by branded placeholder otherwise |
 
-Dev environments (`localhost`, `127.0.0.1`, `*.local`) always render `children`.
+Dev environments (`localhost`, `127.0.0.1`, `*.local`) render `children` when no `LicenseProvider` is mounted, or when a `LicenseProvider` with a non-empty `licenseKey` is mounted. With a `LicenseProvider` and an empty/blank `licenseKey`, the hard placeholder is shown on localhost too.
 
 ### LicenseWatermark
 
@@ -21360,15 +21363,17 @@ if (isLoading) return null;
 | `isGated` | `boolean` | True if the component should be blocked |
 | `isLoading` | `boolean` | True while validation is in progress (avoid flash) |
 
-Logic (mirrors `LicenseProvider`'s derived signals):
+Provider context takes precedence over the hostname check. When a `LicenseProvider` is mounted, the result follows the provider's derived signals:
 
-- Dev environment (`localhost`, `127.0.0.1`, `*.local`) → never gated
-- No `LicenseProvider` in tree → gated
+- `licenseKey` is empty or blank → gated on every host (including localhost)
+- Dev host + non-empty `licenseKey` → not gated (dev bypass)
 - `status: 'loading'` → not gated, `isLoading=true` (avoid flash)
 - `status: 'valid'` + pro + render key → not gated
 - `status: 'error'` + fresh cache → not gated (grace period)
 - `status: 'error'` + no cache → gated
 - `status: 'invalid' | 'expired' | 'revoked'` → gated
+
+When no `LicenseProvider` is in the tree, the hook falls back to the hostname check: dev hosts stay quiet (no key to inspect), every other host is gated.
 
 ---
 
@@ -38528,6 +38533,176 @@ For provider-scoped tests, render under `<LocaleProvider>` with a stub `messages
 
 ---
 
+# Imperative control
+
+> Control tours from sibling subtrees with useTourActions, and bypass announcement gates with forceShow for admin previews.
+
+Two new v2 APIs replace the most common workarounds users wrote to drive tours and announcements imperatively:
+
+- **`useTourActions(id)`** in `@tour-kit/core` — read state and call `start` / `stop` / `next` / `prev` / `goToStep` / `restart` for a tour registered anywhere in the tree, including from siblings of the owning `<Tour>` component.
+- **`forceShow(id)`** on `useAnnouncementsContext()` — preview an announcement regardless of frequency, cooldown, view-count, dismissal, or audience gates. The license soft-gate is preserved.
+
+---
+
+## Imperative tour control with `useTourActions`
+
+### What problem this solves
+
+In v1, calling `start()` on a tour from a sibling subtree required dispatching a `CustomEvent('tour-replay')` from the trigger, mounting a `ReplayBridge` child inside `<Tour>` to listen for it, and re-wiring the bridge on every HMR remount. That workaround tied tour control to globals and made hard refresh / cross-page navigation fragile.
+
+`useTourActions(id)` reads from a module-level **tour registry** that every `<TourProvider>` and standalone `<Tour id="...">` populates on mount. No Provider is required around the consumer — the registry is a singleton.
+
+### Quick start
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { useTourActions } from '@tour-kit/core'
+
+function ReplayButton() {
+  const { isActive, start } = useTourActions('welcome')
+  return (
+    <button type="button" onClick={start} disabled={isActive}>
+      {isActive ? 'Tour in progress…' : 'Replay onboarding'}
+    </button>
+  )
+}
+
+export function App() {
+  return (
+    <>
+      <Tour id="welcome">
+        <TourStep id="hero" target="#hero" content="Welcome!" />
+        <TourStep id="cta" target="#cta" content="Get started here." />
+      </Tour>
+
+      {/* Sibling — NOT a descendant of <Tour> */}
+      <ReplayButton />
+    </>
+  )
+}
+```
+
+### Return shape
+
+```ts
+interface UseTourActionsReturn {
+  // State slice (read-only mirror of registry)
+  isActive: boolean
+  currentStepId: string | null
+  progress: number // 0..1
+
+  // Imperative actions
+  start: () => void           // starts at the tour's `startAt` step
+  stop: () => void
+  restart: () => void         // starts at step 0, regardless of `startAt`
+  next: () => void
+  prev: () => void
+  goToStep: (stepId: string) => void
+}
+```
+
+### Unknown tour ids return a frozen no-op
+
+If the tour id you pass isn't registered yet (typo, route transition, lazy mount), `useTourActions` returns a **frozen no-op object** — every method is a silent no-op and `isActive` is `false`. Calls drop on the floor rather than throwing:
+
+```tsx
+function DeepLink({ tourId }: { tourId: string }) {
+  const { start } = useTourActions(tourId)
+  // Safe even when `tourId` is misspelled or the tour hasn't mounted yet.
+  return <button onClick={start}>Start</button>
+}
+```
+
+This is intentional — it lets you wire `useTourActions(id).start()` everywhere without optional chaining.
+
+### StrictMode-safe registration
+
+The registry uses `WeakRef` plus an explicit `unregister()` on unmount. React 18's StrictMode double-mount produces a brief overlap window (two entries under the same id); the registry emits a dev `console.error` and keeps the latest registration. After both cleanups run, the registry slot is empty.
+
+### Migrating from `ReplayBridge`
+
+The `@tour-kit/codemods` package ships a transform that rewrites the v1 `window.dispatchEvent('tour-replay')` workaround to `useTourActions(id).start()`:
+
+```bash
+pnpm dlx @tour-kit/codemods --from replay-bridge-to-use-tour-actions ./src
+```
+
+It rewrites the dispatch call, strips matching `window.{add,remove}EventListener('tour-replay', …)` blocks, and adds the `useTourActions` import. Re-running it is a no-op (idempotent).
+
+---
+
+## Force-showing announcements (`forceShow`)
+
+### What problem this solves
+
+In v1, previewing a dismissed or frequency-capped announcement required clearing localStorage, calling `reset(id)`, and calling `show(id)` in sequence. Admin dashboards needed this for every preview; the demo app shipped a 30+ LOC `resetAllDemoState()` helper just to drive announcements.
+
+`forceShow(id)` bypasses every gate that controls *whether* an announcement should be shown to a real user, but it does NOT bypass the package-level license check.
+
+### Quick start
+
+```tsx
+import { useAnnouncementsContext } from '@tour-kit/announcements'
+
+function AdminPreviewButton() {
+  const { forceShow } = useAnnouncementsContext()
+  return (
+    <button type="button" onClick={() => forceShow('welcome-modal')}>
+      Preview welcome modal
+    </button>
+  )
+}
+```
+
+Or via the single-announcement hook:
+
+```tsx
+import { useAnnouncement } from '@tour-kit/announcements'
+
+function PreviewButton() {
+  const { forceShow } = useAnnouncement('welcome-modal')
+  return <button onClick={forceShow}>Preview</button>
+}
+```
+
+### Bypass matrix
+
+`forceShow` skips every gate listed in the `FORCE_SHOW_BYPASS` const tuple exported from `@tour-kit/announcements`. The pin is enforced by a CI test — any future contributor adding a new gate to `show()` must default to "respect, don't bypass."
+
+| Gate                                                | `show()` respects? | `forceShow()` respects? |
+| --------------------------------------------------- | ------------------ | ----------------------- |
+| `frequency` rule (`once`, `session`, `times`, `interval`) | Yes                | **No**                  |
+| Scheduler cooldown (`canShow()`)                    | Yes                | **No**                  |
+| `viewCount` threshold                               | Yes                | **No**                  |
+| `isDismissed` flag                                  | Yes (no-op)        | **No** (re-shows)       |
+| `audience` (segment + array shapes)                 | Yes                | **No**                  |
+| `<LicenseGate require="pro">` (soft wrapper)        | Yes                | **Yes**                 |
+
+The license wrapper is a soft gate — under an invalid or missing license it renders children AND overlays a watermark. `forceShow` does not strip the watermark; admin previews on unlicensed builds will show the unlicensed UX.
+
+### Telemetry: analytics events are stamped `trigger="forced"`
+
+Every analytics event emitted by `forceShow` includes `metadata.trigger: 'forced'`:
+
+```ts
+analytics.track('announcement_shown', {
+  tourId: 'welcome-modal',
+  metadata: { announcementId: 'welcome-modal', trigger: 'forced', viewCount: 4 },
+})
+```
+
+If your dashboard counts "real user views," filter `metadata.trigger !== 'forced'` so admin previews don't skew the numbers. `viewCount` is still incremented so the delta is visible in admin tooling — only the trigger label changes.
+
+---
+
+## Related guides
+
+- [Animations](./animations) — frequency rules and cooldowns that `forceShow` bypasses
+- [Segmentation](./segmentation) — audience targeting that `forceShow` ignores
+- [Analytics integration](./analytics-integration) — filtering forced previews from real-user telemetry
+
+---
+
 # Multi-tab Tours
 
 > Pause an active tour in tab B when the user starts the same flow in tab A — cross-tab coordination via BroadcastChannel.
@@ -44138,12 +44313,22 @@ This follows the same soft-enforcement pattern used by AG Grid and MUI X.
 
 ## Development Mode
 
-On `localhost`, `127.0.0.1`, and `*.local` domains, license validation is automatically bypassed:
+On `localhost`, `127.0.0.1`, and `*.local` domains, license validation is automatically bypassed **when a non-empty `licenseKey` is configured**:
 
 - No network request to Polar API
 - No activation slot consumed
-- Provider returns `{ status: 'valid', tier: 'pro' }`
-- All pro features work without a license key
+- Provider returns `{ status: 'valid', tier: 'pro', renderKey: 'dev_bypass' }`
+- All pro features work without verifying the key
+
+An empty or whitespace-only `licenseKey` is treated as unlicensed on every host, including `localhost`. Pro packages still render their UI (soft gate) and a single `Tour Kit · Unlicensed · Buy license` watermark appears bottom-right — making a missing env var surface locally before it ships.
+
+| Host | `licenseKey` | Result |
+|---|---|---|
+| `localhost` / `127.0.0.1` / `*.local` | Non-empty | `valid` / `pro`, no Polar call, no watermark |
+| `localhost` / `127.0.0.1` / `*.local` | Empty or blank | `invalid` / `free`, no Polar call, watermark visible |
+| `localhost` (no `<LicenseProvider>`) | n/a | Quiet — library cannot inspect a key that does not exist |
+| Production-like host | Non-empty | Validated against Polar (cache-aware) |
+| Production-like host | Empty or blank | `invalid` / `free`, no Polar call, watermark visible |
 
 ## CI/CD Setup
 
@@ -44216,7 +44401,7 @@ Each license key supports up to 5 domain activations. You can deactivate a domai
 
 ### Does localhost count as an activation?
 
-No. Development environments (`localhost`, `127.0.0.1`, `*.local`) are automatically bypassed and do not consume an activation slot.
+No. When a non-empty `licenseKey` is set, development environments (`localhost`, `127.0.0.1`, `*.local`) are automatically bypassed and do not consume an activation slot. An empty key on localhost intentionally shows the unlicensed watermark — see [Development Mode](#development-mode).
 
 ### Can I use one key for staging + production?
 
@@ -101528,6 +101713,152 @@ At 2,000 MAUs, UserGuiding is cheapest at $69/month. But "cheapest at launch" is
 - Hacker News: "Why onboarding SaaS tools charge per MAU" (if it resonates with pricing debates)
 - Indie Hackers: Great fit, pricing/business model angle
 */}
+
+---
+
+# userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license
+
+> Five phases shipped: @tour-kit/testing-library, @tour-kit/playwright, three migration codemods (Joyride, Shepherd, Driver), license soft-gate with try-before-buy watermark, and a Phase 8 QA pass covering analytics, accessibility, and autostart.
+
+# userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license
+
+Five phases went out in the last few weeks. Most of the work was driven by people we kept watching hit the same walls: Playwright tests scraping the DOM because there was no way to drive a tour deterministically, Joyride users asking "is there a codemod?", and consumers who wanted to evaluate the Pro packages but ran into a runtime throw on the first import. This release fixes all of that.
+
+## TL;DR
+
+- `@tour-kit/testing-library`: React Testing Library helpers that wrap `act()` for you, so your test bodies stay readable.
+- `@tour-kit/playwright`: an opt-in test bridge so e2e specs can step through tours without scraping the DOM.
+- `@tour-kit/codemods`: one-command migration from React Joyride, Shepherd.js, and Driver.js.
+- License soft-gate plus try-before-buy watermark. The Pro packages stop throwing on unlicensed sites and show a small badge instead.
+- Phase 8 QA wave covering analytics events, accessibility, autostart, and a refreshed watermark logo.
+
+## What's new
+
+### `@tour-kit/testing-library` (phase 5)
+
+Testing a tour with React Testing Library has been a known papercut. State transitions between steps fire outside the test's `act()` boundary, you get warnings, and the usual workaround turns every test body into a wall of `await act(async () => ...)`. The new package gives you four helpers (`renderTour`, `nextStep`, `expectStep`, `dismissTour`) that do that wrapping for you.
+
+```tsx
+import { renderTour, nextStep, expectStep } from '@tour-kit/testing-library'
+
+test('walks through onboarding', async () => {
+  const { user } = renderTour(<Onboarding />)
+  await expectStep('Welcome')
+  await nextStep(user)
+  await expectStep('Pick a workspace')
+})
+```
+
+No `act()` calls in your test body, no ESLint suppressions.
+
+### `@tour-kit/playwright` (phase 6)
+
+Driving a tour from a Playwright spec used to mean clicking through the same DOM your users do. That works for happy-path tests but it's brittle: a layout change moves an element by a pixel and the test fails for the wrong reason. The new package ships an opt-in `__TOUR_KIT__` bridge you mount in test builds, and your spec drives the tour through it:
+
+```ts
+import { tourkit } from '@tour-kit/playwright'
+
+test('completes the trial onboarding', async ({ page }) => {
+  await page.goto('/dashboard')
+  const tour = await tourkit(page, 'trial-onboarding')
+  await tour.start()
+  await tour.next()
+  await tour.assertStep('integrations')
+  await tour.complete()
+})
+```
+
+The bridge is gated on `process.env.NODE_ENV === 'test'` so it never reaches a production build.
+
+### `@tour-kit/codemods`: Joyride, Shepherd, Driver (phase 7a / 7b)
+
+The number-one question on the docs landing page was always "is there a way to migrate from X?" Now there is. Three jscodeshift transforms cover prop renames, step-shape differences, and selector-to-ref conversions, and they leave `// TODO(tour-kit):` markers where the rewrite is ambiguous rather than silently dropping config.
+
+```bash
+npx @tour-kit/codemods from-joyride src/
+npx @tour-kit/codemods from-shepherd src/
+npx @tour-kit/codemods from-driver src/
+```
+
+Each codemod is best-effort and idempotent, so you can run it again after manual cleanup. If you're still weighing the move, the [tour-kit vs React Joyride](/compare/tour-kit-vs-react-joyride), [tour-kit vs Shepherd.js](/compare/tour-kit-vs-shepherd-js), and [tour-kit vs Driver.js](/compare/tour-kit-vs-driver-js) comparisons walk through the trade-offs.
+
+### License soft-gate plus try-before-buy watermark (phase 8)
+
+Until this release, calling a Pro package without a valid license key threw at runtime. That kept production tight but made local evaluation painful: you'd `pnpm add @tour-kit/announcements`, render a single component, and get a runtime error before you'd even seen the API. See the [licensing docs](/docs/licensing) for the full model. The behaviour change in plain English:
+
+- On `localhost`, every Pro feature renders normally regardless of license state. The watermark is visible so you know you're in trial mode.
+- On unlicensed production domains, the package still renders. A small `userTourKit` badge appears in the corner.
+- An empty `licenseKey` string on localhost no longer crashes with a Zod error. (That one took a follow-up patch.)
+
+If you're already using a Pro package locally with a valid key, nothing changes. If you're using it without a key, the watermark will now show.
+
+### Phase 8 QA pass
+
+Smaller fixes that landed alongside the rest of the wave:
+
+- Analytics events (`tour_started`, `step_viewed`, `tour_completed`, `tour_skipped`) now fire consistently across all tour types with stable payload shapes, so downstream plugins can rely on the keys.
+- Accessibility cleanup: focus restoration on dismiss, `aria-live` region resets, and a fix for screen-reader announcement order on step transitions.
+- Autostart works without a click trigger, which is what you actually want for first-login onboarding.
+- Refreshed watermark logo using the new userTourKit mark.
+- Docs CSP now allows GA4 and Yandex endpoints so analytics actually works on the blog (it didn't, for a few days).
+
+## Versions shipped
+
+| Package | Version |
+|---|---|
+| `@tour-kit/core` | 0.12.0 |
+| `@tour-kit/react` | 0.12.0 |
+| `@tour-kit/hints` | 0.12.0 |
+| `@tour-kit/adoption` | 2.1.0 |
+| `@tour-kit/analytics` | 0.11.0 |
+| `@tour-kit/announcements` | 3.0.0 |
+| `@tour-kit/checklists` | 0.13.0 |
+| `@tour-kit/media` | 0.12.1 |
+| `@tour-kit/surveys` | 3.0.0 |
+| `@tour-kit/scheduling` | 0.11.0 |
+| `@tour-kit/license` | 1.1.1 |
+| `@tour-kit/ai` | 0.11.0 |
+
+The `3.0.0` on announcements and surveys looks alarming but isn't. Changesets reads any peer-dep range bump on `@tour-kit/core` as a breaking change and forces a major bump on every dependent, even when nothing in the public API moved. The runtime APIs in both packages are unchanged. We're fixing the changeset config; for now just update.
+
+## Upgrading
+
+```bash
+pnpm update @tour-kit/core @tour-kit/react @tour-kit/hints
+pnpm update @tour-kit/announcements @tour-kit/surveys @tour-kit/checklists
+```
+
+No code changes for existing tours. If you're migrating from another library, the codemods are now the fastest path in.
+
+## What's next
+
+We're working on closing the workarounds we hit while building the showcase dashboard: imperative tour control (no more window-event hacks), turnkey CSAT/NPS/CES modals, hint visibility presets, and a TourCard refresh. Posts as each ships.
+
+## FAQ
+
+### What changed in the userTourKit May 2026 release?
+
+Three new packages (`@tour-kit/testing-library`, `@tour-kit/playwright`, `@tour-kit/codemods`), a license soft-gate with try-before-buy watermark, and a Phase 8 polish wave covering analytics events, accessibility, and autostart. Core, React, and hints are at 0.12.0.
+
+### Are there breaking changes I need to handle?
+
+Nothing at runtime. Announcements and surveys jumped to 3.0.0, but only because Changesets misreads a peer-dep range bump on core as a breaking change. The actual public APIs are unchanged. Update them with the rest and you're done.
+
+### How do I migrate from React Joyride, Shepherd.js, or Driver.js?
+
+Run the codemod that matches your source library: `npx @tour-kit/codemods from-joyride src/` (also `from-shepherd`, `from-driver`). It covers prop renames, step-shape differences, and selector-to-ref conversions, and leaves `// TODO(tour-kit):` markers where the rewrite is ambiguous. They're idempotent, so it's safe to run again after manual cleanup.
+
+### What is the try-before-buy watermark?
+
+A small `userTourKit` badge that shows up on unlicensed production domains. Every Pro feature still works; the badge just makes the trial state visible. Localhost shows the badge too, so what you see while evaluating matches what an end user without a license would see. The old behaviour (throw on import) is gone.
+
+### How do I write end-to-end tests for tours with Playwright?
+
+Install `@tour-kit/playwright` and mount the test bridge in builds where `NODE_ENV === 'test'`. Your spec calls `tourkit(page, 'tour-id')` and drives the tour with `.start()`, `.next()`, `.assertStep()`, `.complete()`. No DOM scraping. The bridge is gated on the test env so it doesn't reach production builds.
+
+### Which packages got version bumps?
+
+Core, React, and hints are at 0.12.0. Adoption 2.1.0, analytics 0.11.0, announcements 3.0.0, checklists 0.13.0, media 0.12.1, surveys 3.0.0, scheduling 0.11.0, license 1.1.1, AI 0.11.0. The full table is in the release section above.
 
 ---
 
