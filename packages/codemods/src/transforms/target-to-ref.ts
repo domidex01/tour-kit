@@ -138,48 +138,37 @@ function attachTodoIfNew(j: JSCodeshift, attrPath: ASTPath<unknown>): void {
     | { type?: string; children?: Array<unknown> }
     | undefined
 
-  if (containerNode && Array.isArray(containerNode.children)) {
-    // Idempotency: don't re-insert if a TODO block comment already precedes
-    // the element.
-    const idx = containerNode.children.indexOf(elementPath.node as unknown)
-    if (idx > 0) {
-      const prev = containerNode.children[idx - 1] as
-        | { type?: string; expression?: { comments?: Array<{ value?: string }> } }
-        | undefined
-      const prevComments = prev?.expression?.comments
-      if (prevComments?.some((c) => typeof c.value === 'string' && c.value.includes(TODO_MARKER))) {
-        return
-      }
-    }
-    const emptyExpr = j.jsxEmptyExpression()
-    ;(emptyExpr as { comments?: Array<unknown> }).comments = [
-      {
-        type: 'CommentBlock',
-        value: TODO_TEXT,
-        leading: true,
-        trailing: false,
-      },
-    ]
-    const todoNode = j.jsxExpressionContainer(emptyExpr)
-    containerNode.children.splice(idx, 0, todoNode as unknown)
+  if (!containerNode || !Array.isArray(containerNode.children)) {
+    // Top-level JSX (e.g. `return <TourStep target="#orphan" />`). There's no
+    // JSX children array to splice a `{/* */}` sibling into, and bare line
+    // comments aren't safe — recast would emit them between `return` and the
+    // JSXElement, where ASI silently turns the return into an `undefined`
+    // bail-out. Better to leave the attribute untouched and let the developer
+    // notice the un-rewritten selector at PR review time.
     return
   }
 
-  // Fallback: top-level JSX element (e.g. `return <TourStep .../>`). Attach
-  // as a leading line comment on the JSXElement — recast renders it above
-  // the JS expression, which is legal in JS but would be illegal if the
-  // JSXElement were inside another JSX node. We've already excluded that
-  // case above.
-  const elNode = elementPath.node as { comments?: Array<{ value?: string }> }
-  const existing = elNode.comments ?? []
-  if (existing.some((c) => typeof c.value === 'string' && c.value.includes(TODO_MARKER))) {
-    return
+  // Idempotency: don't re-insert if a TODO block comment already precedes
+  // the element.
+  const idx = containerNode.children.indexOf(elementPath.node as unknown)
+  if (idx > 0) {
+    const prev = containerNode.children[idx - 1] as
+      | { type?: string; expression?: { comments?: Array<{ value?: string }> } }
+      | undefined
+    const prevComments = prev?.expression?.comments
+    if (prevComments?.some((c) => typeof c.value === 'string' && c.value.includes(TODO_MARKER))) {
+      return
+    }
   }
-  const lineComment = {
-    type: 'CommentLine',
-    value: TODO_TEXT,
-    leading: true,
-    trailing: false,
-  } as unknown as { value?: string }
-  elNode.comments = [...existing, lineComment]
+  const emptyExpr = j.jsxEmptyExpression()
+  ;(emptyExpr as { comments?: Array<unknown> }).comments = [
+    {
+      type: 'CommentBlock',
+      value: TODO_TEXT,
+      leading: true,
+      trailing: false,
+    },
+  ]
+  const todoNode = j.jsxExpressionContainer(emptyExpr)
+  containerNode.children.splice(idx, 0, todoNode as unknown)
 }

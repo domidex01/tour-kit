@@ -26,6 +26,10 @@ const FIXTURES = [
   'no-ref-in-scope',
   'already-ref',
   'mixed-bag',
+  // Top-level `return <TourStep target="#orphan" />` — no JSX children array
+  // available, so the transform leaves the attribute alone (no rewrite, no
+  // TODO) rather than emit a comment that ASI would render unreachable.
+  'top-level-no-ref',
 ] as const
 
 describe('target-to-ref codemod', () => {
