@@ -9,7 +9,7 @@ import {
   shift,
   useFloating,
 } from '@floating-ui/react'
-import { type Placement, useFocusTrap, useTour } from '@tour-kit/core'
+import { type Placement, resolveTarget, useFocusTrap, useTour } from '@tour-kit/core'
 import * as React from 'react'
 import { TourPortal } from '../primitives/tour-portal'
 
@@ -63,11 +63,7 @@ export function TourCardHeadless({ className, style, children, render }: TourCar
 
   const targetElement = React.useMemo(() => {
     if (!currentStep?.target) return null
-    if (typeof currentStep.target === 'string') {
-      if (typeof document === 'undefined') return null
-      return document.querySelector<HTMLElement>(currentStep.target)
-    }
-    return currentStep.target.current
+    return resolveTarget(currentStep.target)
   }, [currentStep?.target])
 
   const { refs, floatingStyles, context } = useFloating({
