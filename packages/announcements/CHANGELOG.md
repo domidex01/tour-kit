@@ -1,5 +1,15 @@
 # @tour-kit/announcements
 
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [8c4ef89]
+  - @tour-kit/core@0.14.0
+  - @tour-kit/analytics@0.11.2
+  - @tour-kit/media@0.12.3
+  - @tour-kit/scheduling@0.11.2
+
 ## 3.0.1
 
 ### Patch Changes
