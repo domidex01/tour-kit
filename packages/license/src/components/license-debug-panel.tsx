@@ -28,10 +28,7 @@ function readEnvLicenseKey(): boolean {
  * literal copy "🟢 Dev bypass active (NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY set,
  * hostname=localhost)" so it is unambiguous what is happening.
  */
-export function LicenseDebugPanel({
-  className,
-  showInProduction = false,
-}: LicenseDebugPanelProps) {
+export function LicenseDebugPanel({ className, showInProduction = false }: LicenseDebugPanelProps) {
   const ctx = useContext(LicenseContext)
   const inProd = process.env.NODE_ENV === 'production'
   if (inProd && !showInProduction) return null
@@ -51,14 +48,13 @@ export function LicenseDebugPanel({
       <h2>Tour Kit License — Debug</h2>
       {devBypassActive ? (
         <p data-state="dev-bypass">
-          🟢 Dev bypass active (
-          {hasEnvKey ? 'NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY set' : 'no env key'},
+          🟢 Dev bypass active ({hasEnvKey ? 'NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY set' : 'no env key'},
           hostname={localhost ? 'localhost' : 'production'})
         </p>
       ) : (
         <p data-state={state.status}>
-          Status: <strong>{state.status}</strong> · Tier: <strong>{state.tier}</strong> ·
-          Domain: <strong>{state.domain ?? 'unset'}</strong>
+          Status: <strong>{state.status}</strong> · Tier: <strong>{state.tier}</strong> · Domain:{' '}
+          <strong>{state.domain ?? 'unset'}</strong>
         </p>
       )}
       {trial ? (

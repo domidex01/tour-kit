@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { LicenseProvider } from '../context/license-context'
 import { TrialBadge } from '../components/trial-badge'
+import { LicenseProvider } from '../context/license-context'
 
 vi.mock('../lib/polar-client', () => ({
   validateLicenseKey: vi.fn(),

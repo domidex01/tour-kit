@@ -141,7 +141,6 @@ export function LicenseProvider({
     if (trialDays === undefined) return null
     if (trialDays <= 0) {
       if (process.env.NODE_ENV !== 'production') {
-        // biome-ignore lint/suspicious/noConsole: dev-only configuration warning
         console.warn('<LicenseProvider> received non-positive trialDays; ignoring')
       }
       return null

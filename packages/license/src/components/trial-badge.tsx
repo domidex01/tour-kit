@@ -40,7 +40,6 @@ export function TrialBadge({
 
   if (resolved === undefined) {
     if (process.env.NODE_ENV !== 'production') {
-      // biome-ignore lint/suspicious/noConsole: dev-only configuration warning
       console.warn(
         '<TrialBadge> rendered without trialDays — pass trialDays to <LicenseProvider> to enable the trial countdown surface.'
       )

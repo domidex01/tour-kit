@@ -25,7 +25,6 @@ export function LicenseTestMode(props: LicenseTestModeProps) {
 
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') {
-      // biome-ignore lint/suspicious/noConsole: production safety warning
       console.warn(
         '<LicenseTestMode> active in production — this overrides real license state and MUST be removed before deploy.'
       )

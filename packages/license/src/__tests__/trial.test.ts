@@ -15,27 +15,18 @@ describe('getDaysLeft', () => {
     [14, 15, 0],
     [14, 30, 0],
     [14, -5, 14],
-  ])(
-    'trialDays=%i, daysElapsed=%i → %i',
-    (trialDays, daysElapsed, expected) => {
-      const validatedAt = ISSUED + daysElapsed * DAY
-      const serverValidatedAt = ISSUED + daysElapsed * DAY
-      expect(
-        getDaysLeft(
-          { issuedAt: ISSUED, trialDays, validatedAt, serverValidatedAt },
-          validatedAt
-        )
-      ).toBe(expected)
-    }
-  )
+  ])('trialDays=%i, daysElapsed=%i → %i', (trialDays, daysElapsed, expected) => {
+    const validatedAt = ISSUED + daysElapsed * DAY
+    const serverValidatedAt = ISSUED + daysElapsed * DAY
+    expect(
+      getDaysLeft({ issuedAt: ISSUED, trialDays, validatedAt, serverValidatedAt }, validatedAt)
+    ).toBe(expected)
+  })
 
   it('falls back to `now` when serverValidatedAt is null', () => {
     const now = ISSUED + 5 * DAY
     expect(
-      getDaysLeft(
-        { issuedAt: ISSUED, trialDays: 14, validatedAt: 0, serverValidatedAt: null },
-        now
-      )
+      getDaysLeft({ issuedAt: ISSUED, trialDays: 14, validatedAt: 0, serverValidatedAt: null }, now)
     ).toBe(9)
   })
 
@@ -70,10 +61,7 @@ describe('getDaysLeft', () => {
     const serverValidatedAt = ISSUED
     const now = validatedAt - 10 * DAY
     expect(
-      getDaysLeft(
-        { issuedAt: ISSUED, trialDays: 14, validatedAt, serverValidatedAt },
-        now
-      )
+      getDaysLeft({ issuedAt: ISSUED, trialDays: 14, validatedAt, serverValidatedAt }, now)
     ).toBe(14)
   })
 })
