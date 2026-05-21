@@ -9,9 +9,15 @@ import fromDriver from './transforms/from-driver'
 import fromJoyride from './transforms/from-joyride'
 import fromShepherd from './transforms/from-shepherd'
 import replayBridgeToUseTourActions from './transforms/replay-bridge-to-use-tour-actions'
+import targetToRef from './transforms/target-to-ref'
 
 export interface CliOptions {
-  from: 'joyride' | 'shepherd' | 'driver' | 'replay-bridge-to-use-tour-actions'
+  from:
+    | 'joyride'
+    | 'shepherd'
+    | 'driver'
+    | 'replay-bridge-to-use-tour-actions'
+    | 'target-to-ref'
   parser: 'tsx' | 'ts' | 'babel'
   dryRun: boolean
   print: boolean
@@ -37,6 +43,7 @@ const TRANSFORMS: Partial<Record<CliOptions['from'], JscodeshiftTransform>> = {
   driver: fromDriver as unknown as JscodeshiftTransform,
   'replay-bridge-to-use-tour-actions':
     replayBridgeToUseTourActions as unknown as JscodeshiftTransform,
+  'target-to-ref': targetToRef as unknown as JscodeshiftTransform,
 }
 
 // Sources whose corpus coverage is below the ≥80% ship gate. Members trigger a
@@ -56,6 +63,7 @@ export const TRANSFORM_COVERAGE: Readonly<Record<CliOptions['from'], number>> = 
   shepherd: 100,
   driver: 100,
   'replay-bridge-to-use-tour-actions': 100,
+  'target-to-ref': 100,
 }
 
 const DEFAULT_EXTENSIONS = ['ts', 'tsx', 'js', 'jsx'] as const
@@ -236,7 +244,8 @@ function isFromValue(v: string | undefined): v is CliOptions['from'] {
     v === 'joyride' ||
     v === 'shepherd' ||
     v === 'driver' ||
-    v === 'replay-bridge-to-use-tour-actions'
+    v === 'replay-bridge-to-use-tour-actions' ||
+    v === 'target-to-ref'
   )
 }
 
@@ -302,6 +311,7 @@ function usageMessage(): string {
     '  --from <source>       Migration source. Required. One of:',
     '                          joyride|shepherd|driver — competitor → @tour-kit/react migration.',
     '                          replay-bridge-to-use-tour-actions — v1 window-event → useTourActions(id).start().',
+    "                          target-to-ref — rewrite `target='#id'` to `target={idRef}` when a matching useRef exists.",
     '  --parser <parser>     jscodeshift parser (tsx|ts|babel). Default: tsx.',
     "  --dry-run             Don't write files; only report what would change.",
     '  --print               Print transformed source to stdout.',
