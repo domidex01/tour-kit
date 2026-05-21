@@ -89,7 +89,7 @@ describe('TourCard', () => {
     expect(dialog).toHaveAttribute('aria-modal', 'true')
   })
 
-  it('has aria-labelledby linked to title', async () => {
+  it('has aria-label combining step counter and title', async () => {
     const user = userEvent.setup()
 
     function Starter() {
@@ -111,10 +111,7 @@ describe('TourCard', () => {
     await user.click(screen.getByText('Start'))
 
     const dialog = await screen.findByRole('dialog')
-    const labelledBy = dialog.getAttribute('aria-labelledby')
-    const title = labelledBy ? document.getElementById(labelledBy) : null
-
-    expect(title).toHaveTextContent('Welcome')
+    expect(dialog.getAttribute('aria-label')).toMatch(/^Step 1 of 1: Welcome$/)
   })
 
   it('renders step title', async () => {

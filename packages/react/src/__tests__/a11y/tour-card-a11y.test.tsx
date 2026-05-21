@@ -78,7 +78,7 @@ describe('TourCard Accessibility', () => {
     expect(await screen.findByRole('dialog')).toHaveAttribute('aria-modal', 'true')
   })
 
-  it('has aria-labelledby linked to title', async () => {
+  it('has aria-label combining step counter and title', async () => {
     const user = userEvent.setup()
 
     function Starter() {
@@ -100,11 +100,72 @@ describe('TourCard Accessibility', () => {
     await user.click(screen.getByText('Start'))
 
     const dialog = await screen.findByRole('dialog')
-    expect(dialog).toHaveAttribute('aria-labelledby')
+    expect(dialog).toHaveAttribute('aria-label', 'Step 1 of 1: Title')
+    expect(dialog).not.toHaveAttribute('aria-labelledby')
+  })
 
-    const labelledBy = dialog.getAttribute('aria-labelledby')
-    const title = labelledBy ? document.getElementById(labelledBy) : null
-    expect(title).toHaveTextContent('Title')
+  it('aria-label contains the step counter', async () => {
+    const tourWithTwoSteps: Tour = {
+      id: 'test',
+      steps: [
+        { id: 's1', target: '#target', title: 'Welcome', content: 'Start here' },
+        { id: 's2', target: '#target', title: 'Next step', content: 'Keep going' },
+      ],
+    }
+
+    const user = userEvent.setup()
+
+    function Starter() {
+      const { start } = useTour()
+      return (
+        <button type="button" onClick={() => start()}>
+          Start
+        </button>
+      )
+    }
+
+    render(
+      <TourProvider tours={[tourWithTwoSteps]}>
+        <TourCard />
+        <Starter />
+      </TourProvider>
+    )
+
+    await user.click(screen.getByText('Start'))
+
+    const dialog = await screen.findByRole('dialog')
+    expect(dialog.getAttribute('aria-label')).toMatch(/^Step 1 of 2: Welcome$/)
+  })
+
+  // NOTE: "arrow svg has aria-hidden" is enforced by the Playwright
+  // placement matrix at e2e/next/tour-card-placements.localhost.spec.ts.
+  // jsdom can't run Floating UI's layout calculations, so <FloatingArrow>
+  // never paints an svg here — the assertion has no signal in this suite.
+
+  it('does not double-read step counter via aria-live', async () => {
+    const user = userEvent.setup()
+
+    function Starter() {
+      const { start } = useTour()
+      return (
+        <button type="button" onClick={() => start()}>
+          Start
+        </button>
+      )
+    }
+
+    render(
+      <TourProvider tours={[testTour]}>
+        <TourCard />
+        <Starter />
+      </TourProvider>
+    )
+
+    await user.click(screen.getByText('Start'))
+    await screen.findByRole('dialog')
+
+    const liveRegion = document.querySelector('[role="dialog"] [aria-live]')
+    expect(liveRegion).toBeNull()
   })
 
   it('close button has accessible name', async () => {

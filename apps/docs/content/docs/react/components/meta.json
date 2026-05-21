@@ -4,6 +4,7 @@
     "tour",
     "tour-step",
     "tour-card",
+    "tour-card-migration",
     "tour-overlay",
     "tour-navigation",
     "tour-progress",

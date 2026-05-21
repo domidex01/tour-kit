@@ -14,9 +14,18 @@ export const tourCardVariants = cva(
         lg: 'w-96 p-5',
         auto: 'w-auto p-4',
       },
+      // The variant axis is intentionally empty: it exists only to expose a
+      // typed prop. Visual differences live in <TourCard> (arrow gate +
+      // step-indicator gate). Add classes here only if classic and refreshed
+      // need different card shells.
+      variant: {
+        refreshed: '',
+        classic: '',
+      },
     },
     defaultVariants: {
       size: 'default',
+      variant: 'refreshed',
     },
   }
 )

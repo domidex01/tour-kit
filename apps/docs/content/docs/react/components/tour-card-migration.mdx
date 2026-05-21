@@ -1,0 +1,133 @@
+---
+title: TourCard Migration (Refresh → Classic Opt-Out)
+description: >-
+  Phase 4 of Tour Kit v2 refreshes the default <TourCard> look. This page
+  explains the visual changes, how to pin the v1 ("classic") layout with
+  variant="classic", and how to upgrade a custom theme.
+published: true
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+The `<TourCard>` default rendering was refreshed in Tour Kit v2. This page
+covers what changed, how to opt out for one minor cycle, and how to migrate
+a custom theme.
+
+## What changed
+
+The refreshed `<TourCard>` (the default) now:
+
+- **Renders a `"N / M"` step indicator** inside the header before the title.
+  The visible span carries `aria-hidden="true"`; the screen-reader path is
+  owned by the dialog's `aria-label="Step N of M: <title>"` to avoid double
+  announcements.
+- **Draws a real arrow/beak** that points at the target across all 12
+  Floating UI placements (`top`, `top-start`, `top-end`, `bottom`,
+  `bottom-start`, `bottom-end`, `left`, `left-start`, `left-end`, `right`,
+  `right-start`, `right-end`). The arrow is decorative
+  (`aria-hidden="true"`).
+- **Primary `Next` button** receives a stronger focus ring
+  (`focus-visible:ring-2 focus-visible:ring-offset-2`) so keyboard users
+  can see the active control at a glance.
+- **`Skip` carries a defensive `aria-label="Skip tour"`** even when the
+  visible text is customized via `skipLabel`, so the screen-reader name
+  stays stable across i18n.
+
+The dialog now uses `aria-label` only — `aria-labelledby` is gone. This is
+load-bearing: the prior dual-announce pattern (visible counter + linked
+title) caused double-reads in some assistive tech stacks.
+
+## The `variant="classic"` opt-out
+
+If your custom theme regressed on the refreshed default, pin the v1 layout
+for one minor cycle:
+
+```tsx
+<TourCard variant="classic" />
+```
+
+When `variant="classic"`:
+
+- No step-indicator span is rendered.
+- No `<FloatingArrow>` SVG is drawn (matches the v1 layout).
+- The existing shipped button variants (`Skip` is `link`, `Back` is
+  `secondary`, `Next` is `default`) are preserved unchanged.
+
+A one-time `console.warn` is emitted in development mode the first time
+each step renders with `variant="classic"`:
+
+```
+[tour-kit/react] <TourCard variant="classic"> is deprecated and will be
+removed in the next major. See https://usertourkit.com/docs/react/components/tour-card-migration
+```
+
+The warning is suppressed in production builds (`NODE_ENV === 'production'`)
+and deduplicated by `currentStep.id`, so each unique step warns at most
+once per session.
+
+### Timeline
+
+- **v2.x** — `variant="classic"` ships as a documented escape hatch.
+- **v3.0** — `variant="classic"` is removed. All consumers must run on the
+  refreshed look. Migration notes will land in the v3.0 release notes.
+
+## New props
+
+The Phase 4 refresh adds four optional props to `TourCardProps`:
+
+<TypeTable
+  type={{
+    showStepIndicator: {
+      type: 'boolean',
+      description: 'Force the N / M indicator on or off. Defaults to true on the refreshed variant and false on classic.',
+    },
+    progress: {
+      type: 'number',
+      description: 'Override the 0..1 progress value used by the progress bar. Defaults to (currentStepIndex + 1) / totalSteps.',
+    },
+    arrowSize: {
+      type: 'number',
+      default: '8',
+      description: 'Arrow height in pixels. Width is automatically 2× the height per FloatingArrow convention.',
+    },
+    variant: {
+      type: "'refreshed' | 'classic'",
+      default: "'refreshed'",
+      description: 'Opt-out for the v1 layout. Deprecated — removed in v3.0.',
+    },
+  }}
+/>
+
+## Upgrading a custom theme
+
+If your theme overrides `<TourCard>` styling (via `className`, `tourCardVariants`, or wrapper components), here's the diff to upgrade:
+
+```diff
+- <TourCard size="lg" className="my-theme-card" />
++ <TourCard
++   size="lg"
++   className="my-theme-card"
++   // No prop changes required — refreshed is the default. If your theme
++   // sets a custom shadow/border that conflicts, you can either:
++   //   1. Stage the upgrade with variant="classic" and migrate the theme,
++   //   2. Or accept the refreshed defaults and remove your overrides.
++ />
+```
+
+If your theme manually rendered a step counter outside the card header,
+remove it — the refreshed variant ships the counter inside the header.
+
+### Verifying the refresh in your app
+
+1. Open your tour on a page with a known target.
+2. Inspect the dialog node — `aria-label` should match
+   `Step <N> of <M>: <your title>`.
+3. The arrow should visibly point at the target across the placements you
+   use.
+4. The `Next` button should show a visible focus ring on `Tab`.
+
+## Related
+
+- [`TourCard` props reference](/docs/react/components/tour-card)
+- [`TourArrow` (renamed from internal arrow primitive)](/docs/react/components/tour-card)
+- [Accessibility guide](/docs/guides/accessibility)
