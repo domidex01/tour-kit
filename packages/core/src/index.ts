@@ -36,6 +36,9 @@ export type {
   StepIdOf,
   AudienceProp,
   TourStepMedia,
+  TourTarget,
+  TourTargetRef,
+  TourTargetGetter,
   Tour,
   TourOptions,
   TourState,
@@ -60,6 +63,9 @@ export {
   defaultA11yConfig,
   defaultScrollConfig,
   initialTourState,
+  // Runtime target resolver (Phase 5) — single source of truth for
+  // string/ref/getter dereference across hooks and React consumers.
+  resolveTarget,
 } from './types'
 
 // Context

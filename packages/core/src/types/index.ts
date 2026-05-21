@@ -41,6 +41,10 @@ export {
 // Step types
 export type { TourStep, StepOptions, StepIdOf, AudienceProp, TourStepMedia } from './step'
 
+// Target types + runtime resolver (Phase 5)
+export type { TourTarget, TourTargetRef, TourTargetGetter } from './target'
+export { resolveTarget } from './target'
+
 // Tour types
 export type { Tour, TourOptions } from './tour'
 

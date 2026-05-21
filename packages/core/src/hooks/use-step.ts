@@ -29,13 +29,7 @@ export function useStep(stepId: string): UseStepReturn {
   const [isVisible, setIsVisible] = useState(false)
   const [hasCompleted, setHasCompleted] = useState(false)
 
-  const target = step?.target
-  const targetSelector = typeof target === 'string' ? target : null
-  const targetRef = typeof target === 'object' ? target?.current : null
-
-  const { element: targetElement, rect: targetRect } = useElementPosition(
-    targetSelector ?? targetRef
-  )
+  const { element: targetElement, rect: targetRect } = useElementPosition(step?.target ?? null)
 
   useEffect(() => {
     if (isActive) {

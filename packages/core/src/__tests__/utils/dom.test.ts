@@ -51,6 +51,16 @@ describe('DOM Utilities', () => {
       const ref = { current: null }
       expect(getElement(ref)).toBeNull()
     })
+
+    it('returns element from getter thunk', () => {
+      const div = document.createElement('div')
+      container.appendChild(div)
+      expect(getElement(() => div)).toBe(div)
+    })
+
+    it('returns null from getter thunk that returns null', () => {
+      expect(getElement(() => null)).toBeNull()
+    })
   })
 
   describe('isElementVisible', () => {
