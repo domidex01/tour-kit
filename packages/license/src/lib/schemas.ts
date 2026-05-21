@@ -64,6 +64,13 @@ export const LicenseCacheSchema = z.object({
     domain: z.string().nullable(),
     expiresAt: z.string().nullable(),
     validatedAt: z.number(),
+    /**
+     * Optional for backward compatibility with v1.0.x cache entries that
+     * predate the Polar server-anchor field. Readers parse cached states
+     * unchanged; writers added in Phase 8 always set it when Polar emits
+     * `last_validated_at`.
+     */
+    serverValidatedAt: z.number().nullable().optional(),
     renderKey: z.string().optional(),
   }),
   cachedAt: z.number(),

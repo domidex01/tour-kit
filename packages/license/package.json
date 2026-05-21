@@ -67,9 +67,10 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "test": "vitest run",
+    "test": "vitest run && pnpm test:license-test-mode-guard",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:license-test-mode-guard": "node scripts/check-license-test-mode.mjs"
   },
   "dependencies": {
     "zod": "catalog:"

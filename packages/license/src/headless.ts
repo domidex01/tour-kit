@@ -28,3 +28,7 @@ export {
   isDevEnvironment,
   validateDomainAtRender,
 } from './lib/domain'
+
+// Trial (pure helpers — no React)
+export { getDaysLeft } from './lib/trial'
+export type { TrialConfig } from './lib/trial'

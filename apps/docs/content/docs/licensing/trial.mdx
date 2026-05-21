@@ -1,0 +1,143 @@
+---
+title: Trial countdown & test mode
+description: Client-derived trial state, the <TrialBadge> surface, and how to simulate license failure on real domains.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+## 1. Why trial state is client-derived
+
+Polar's `/v1/customer-portal/license-keys/validate` endpoint does **not** emit a
+`tier` field. The wire response only includes `id`, `status`, `benefit_id`,
+`customer`, `key`, `display_key`, `limit_activations`, `usage`, `limit_usage`,
+`validations`, `last_validated_at`, and `expires_at`.
+
+Tour Kit therefore derives trial state on the client. You pass `trialDays` (and
+optionally `trialIssuedAt`) to `<LicenseProvider>`, and the provider computes
+`daysLeft` from the elapsed time since the trial start. To absorb client clock
+skew, the math anchors to Polar's `last_validated_at` (stored on
+`LicenseState.serverValidatedAt`) plus the local elapsed delta from
+`state.validatedAt`. On a machine whose clock is six days fast, the trial
+countdown still tracks server time.
+
+<Callout type="info">
+This is the Phase 0 §6 decision recorded against the Polar API inspection — see
+`tasks/v2-package-polish/phase-0-validation.md`. The Zod schema for the validate
+endpoint deliberately excludes `tier`; a regression test pins this constraint.
+</Callout>
+
+## 2. Adding the trial countdown
+
+Pass `trialDays` to `<LicenseProvider>` and drop `<TrialBadge>` anywhere in the
+tree.
+
+```tsx
+import { LicenseProvider, TrialBadge } from '@tour-kit/license'
+
+export function App() {
+  return (
+    <LicenseProvider
+      licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY ?? ''}
+      trialDays={14}
+    >
+      <header>
+        <TrialBadge />
+      </header>
+      {/* …app… */}
+    </LicenseProvider>
+  )
+}
+```
+
+The badge renders `"14 days left"`, `"13 days left"`, … down to day 4. On day
+3 it flips to an **Upgrade** anchor pointing at the pricing page. Pass
+`pricingUrl` to override the default destination.
+
+```tsx
+<TrialBadge pricingUrl="https://my.app/upgrade" />
+```
+
+For a headless render-prop, pass `children`:
+
+```tsx
+<TrialBadge>
+  {({ daysLeft, isUrgent }) => (
+    <MyButton variant={isUrgent ? 'destructive' : 'default'}>
+      {isUrgent ? 'Upgrade now' : `${daysLeft} days left`}
+    </MyButton>
+  )}
+</TrialBadge>
+```
+
+If `trialDays` is not configured on `<LicenseProvider>` and you also don't pass
+a `daysLeft` prop, the badge renders `null` and emits a one-time dev warning.
+This is the default for paying customers — no trial, no badge.
+
+## 3. The `<LicenseDebugPanel>`
+
+Drop `<LicenseDebugPanel>` into a `/dev` or `/admin` route. It auto-hides in
+production (returns `null` when `process.env.NODE_ENV === 'production'`) so you
+can leave it mounted permanently.
+
+```tsx
+import { LicenseDebugPanel } from '@tour-kit/license'
+
+export default function DevRoute() {
+  return <LicenseDebugPanel />
+}
+```
+
+When the dev bypass is active (localhost with `NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY`
+set), the panel renders the literal copy:
+
+```
+🟢 Dev bypass active (NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY set, hostname=localhost)
+```
+
+This is intentionally explicit — it replaces the ambiguous v3.x
+`status: valid, renderKey: dev_bypass` console line that demo viewers found
+confusing. On a real domain it falls back to the status/tier/domain line.
+
+## 4. Simulating failure with `<LicenseTestMode>`
+
+`<LicenseTestMode>` is a QA-only provider that overrides the license context
+with a simulated state so you can verify the watermark, adoption gate, and Pro
+fallbacks **on a real production-like domain** — without unsetting your env var
+or hitting the live Polar API.
+
+```tsx
+import { LicenseTestMode, LicenseWatermark } from '@tour-kit/license'
+
+// example file — staging URL
+export default function StagingFailureProbe() {
+  return (
+    <LicenseTestMode tier="invalid">
+      <LicenseWatermark />
+      <MyProFeature />
+    </LicenseTestMode>
+  )
+}
+```
+
+The three accepted `tier` values are `"invalid"`, `"pro"`, and `"free"`.
+
+<Callout type="warn">
+**Do not import `<LicenseTestMode>` from application source.** A package-local
+static guard at `packages/license/scripts/check-license-test-mode.mjs` fails CI
+on any import outside `__tests__/`, `examples/`, or Storybook (`*.stories.tsx`,
+`*.story.tsx`) files. Production use also emits a loud `console.warn`.
+</Callout>
+
+## 5. Future: server-side trial signalling
+
+If Polar adds a server-side `tier` field to the validate response in a future
+API revision, the integration will be additive and non-breaking:
+
+1. `PolarValidateResponseSchema` gains `tier: z.enum([...]).optional()`.
+2. `getDaysLeft` accepts an optional fourth argument and returns the server
+   value when `tier === 'trial'` is present on `LicenseState`.
+3. Existing `trialDays` consumers see zero behaviour change because the helper
+   falls back to the client-side computation when the override is absent.
+
+The override point is marked with `// FUTURE:` in
+`packages/license/src/lib/trial.ts` so the follow-up PR is one focused diff.

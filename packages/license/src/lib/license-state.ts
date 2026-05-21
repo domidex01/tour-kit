@@ -35,6 +35,7 @@ export function createUnlicensedState(now: number = Date.now()): LicenseState {
     domain: null,
     expiresAt: null,
     validatedAt: now,
+    serverValidatedAt: null,
     renderKey: undefined,
   }
 }
@@ -54,6 +55,7 @@ export function createDevBypassState(now: number = Date.now()): LicenseState {
     domain: null,
     expiresAt: null,
     validatedAt: now,
+    serverValidatedAt: null,
     renderKey: 'dev_bypass',
   }
 }
