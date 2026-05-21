@@ -57,6 +57,12 @@ export interface MultiTourKitProviderProps {
 /**
  * Multi-tour provider that manages multiple tours with shared UI.
  *
+ * **Compose-mode is the documented default.** Every consuming component —
+ * `<Tour>`, `<TourOverlay>`, `<TourCard>`, and your `<App />` — sits as a
+ * child of `<MultiTourKitProvider>` so `useTour()` resolves via the shared
+ * registry regardless of nesting depth. Sibling-style placement (where a
+ * `<Tour>` is rendered outside the provider) is not supported.
+ *
  * @example
  * ```tsx
  * <MultiTourKitProvider onTourComplete={(id) => console.log(`${id} completed!`)}>
@@ -71,6 +77,10 @@ export interface MultiTourKitProviderProps {
  *   <App />
  * </MultiTourKitProvider>
  * ```
+ *
+ * A `useTour()` call from any descendant — no matter how deeply nested —
+ * returns the active controller. Re-registering the same tour id is
+ * idempotent: existing entries are replaced rather than duplicated.
  */
 export function MultiTourKitProvider({
   children,

@@ -1,0 +1,134 @@
+---
+title: target Prop
+description: >-
+  Three ways to point a TourStep at a DOM element — selector string,
+  RefObject, or getter function — and the runtime resolution order.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Every `<TourStep>` and `HintConfig.target` accepts the same three-way union, so
+you can pick whichever shape survives your component's mounting strategy:
+selector string for static markup, `RefObject` for dynamic IDs and portals,
+or a getter function for lazily-mounted nodes. The runtime resolver branches
+on a single `typeof` check — no two shapes overlap.
+
+```ts
+type TourTarget =
+  | string
+  | React.RefObject<HTMLElement | null>
+  | (() => HTMLElement | null)
+```
+
+## Selector string (legacy)
+
+Resolves through `document.querySelector` on every render. Breaks the moment a
+parent serves CSS Modules with mangled class names, mounts the target inside
+a portal, or rotates the `id` between sessions.
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+
+export function Demo() {
+  return (
+    <Tour id="legacy">
+      <TourStep id="welcome" target="#welcome" title="Welcome" content="…" />
+      <button id="welcome" type="button">Click me</button>
+    </Tour>
+  )
+}
+```
+
+<Callout type="info" title="When to use this">
+  Quick prototypes, sandbox playgrounds, server-rendered markup where the id
+  is guaranteed stable. The string form emits no dev warning — it is supported
+  fallback, not deprecation.
+</Callout>
+
+## RefObject (recommended)
+
+`React.useRef` survives portals, CSS Modules, dynamic ids, and route
+transitions. The same ref can be handed to a child component without leaking
+the underlying DOM id.
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { useRef } from 'react'
+
+export function Demo() {
+  const welcomeRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <Tour id="ref-mode">
+      <TourStep id="welcome" target={welcomeRef} title="Welcome" content="…" />
+      <button ref={welcomeRef} type="button">Click me</button>
+    </Tour>
+  )
+}
+```
+
+## Getter function (escape hatch)
+
+A `() => HTMLElement | null` thunk is evaluated when the active step's
+identity changes — i.e., at step-enter time. Use it when the target node is
+mounted asynchronously (data-fetch boundary, route transition) and you don't
+have a ref to capture it.
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+
+export function Demo() {
+  return (
+    <Tour id="thunk-mode">
+      <TourStep
+        id="cta"
+        target={() => document.querySelector<HTMLElement>('[data-cy="cta"]')}
+        title="Call to action"
+        content="…"
+      />
+    </Tour>
+  )
+}
+```
+
+<Callout type="warn" title="Getters are not polled">
+  The getter runs once when the step becomes active. It is **not** observed
+  via `MutationObserver`. If the target node mounts strictly *after* the step
+  activates, the resolver returns `null` and the spotlight stays hidden until
+  the next step transition re-evaluates the getter. For genuinely async DOM,
+  defer `start()` until the node exists, or call `goTo(stepIndex)` again
+  after it mounts. Prefer a `RefObject` when the framework can wire one up —
+  refs cost nothing extra and avoid this gotcha entirely.
+</Callout>
+
+## Resolution order
+
+Tour Kit resolves a `TourTarget` through a single `resolveTarget` function
+exported from `@tour-kit/core`. Branches are closed and non-overlapping —
+strings can't carry `.current`, refs aren't callable, and thunks aren't
+strings.
+
+1. `typeof target === 'string'` → `document.querySelector(target)`
+2. `target && typeof target === 'object' && 'current' in target` → `target.current`
+3. `typeof target === 'function'` → `target()`
+
+Anything else (including `undefined`) resolves to `null`, and the existing
+positioning code falls back to its usual retry / fail behavior.
+
+The string branch is SSR-safe: when `document` is undefined (Next.js RSC,
+Remix server render), `resolveTarget` returns `null` instead of throwing.
+
+## Migration codemod
+
+`@tour-kit/codemods` ships a best-effort `target-to-ref` transform that
+rewrites `target="#foo"` to `target={fooRef}` when a matching `useRef`
+binding lives in the same file:
+
+```bash
+pnpm dlx @tour-kit/codemods --from target-to-ref ./src
+```
+
+When the rewrite is ambiguous (no matching ref in scope), the codemod leaves
+the attribute untouched and inserts a `TODO(tour-kit): target-to-ref` comment
+above the JSX element. Re-running the codemod on a migrated file produces a
+zero-diff second pass.

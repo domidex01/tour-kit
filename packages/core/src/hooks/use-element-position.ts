@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { getScrollParent } from '../utils/dom'
+import type { TourTarget } from '../types/target'
+import { getElement, getScrollParent } from '../utils/dom'
 import { throttleRAF } from '../utils/throttle'
 
 export interface ElementPositionResult {
@@ -9,7 +10,13 @@ export interface ElementPositionResult {
   update: () => void
 }
 
-export function useElementPosition(target: string | HTMLElement | null): ElementPositionResult {
+/**
+ * Subscribe to a target's position. Accepts every `TourTarget` shape (string
+ * selector, `RefObject`, getter) plus a direct `HTMLElement` for callers that
+ * already hold the resolved node. Resolution flows through `getElement`, which
+ * delegates the union branches to `resolveTarget`.
+ */
+export function useElementPosition(target: TourTarget | HTMLElement | null): ElementPositionResult {
   const [element, setElement] = useState<HTMLElement | null>(null)
   const [rect, setRect] = useState<DOMRect | null>(null)
   const [scrollParent, setScrollParent] = useState<HTMLElement | Window | null>(null)
@@ -17,22 +24,9 @@ export function useElementPosition(target: string | HTMLElement | null): Element
 
   // Resolve target to element
   useEffect(() => {
-    if (!target) {
-      setElement(null)
-      setScrollParent(null)
-      return
-    }
-
-    if (typeof target === 'string') {
-      const el = document.querySelector<HTMLElement>(target)
-      setElement(el)
-      if (el) {
-        setScrollParent(getScrollParent(el))
-      }
-    } else {
-      setElement(target)
-      setScrollParent(getScrollParent(target))
-    }
+    const el = getElement(target)
+    setElement(el)
+    setScrollParent(el ? getScrollParent(el) : null)
   }, [target])
 
   const update = useCallback(() => {

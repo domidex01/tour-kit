@@ -1,6 +1,6 @@
 'use client'
 
-import { usePrefersReducedMotion, useSpotlight, useTour } from '@tour-kit/core'
+import { resolveTarget, usePrefersReducedMotion, useSpotlight, useTour } from '@tour-kit/core'
 import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { TourPortal } from '../primitives/tour-portal'
@@ -21,11 +21,7 @@ export const TourOverlay = React.forwardRef<HTMLDivElement, TourOverlayProps>(
 
     const targetElement = React.useMemo(() => {
       if (!currentStep?.target) return null
-      if (typeof currentStep.target === 'string') {
-        if (typeof document === 'undefined') return null
-        return document.querySelector<HTMLElement>(currentStep.target)
-      }
-      return currentStep.target.current
+      return resolveTarget(currentStep.target)
     }, [currentStep?.target])
 
     React.useEffect(() => {

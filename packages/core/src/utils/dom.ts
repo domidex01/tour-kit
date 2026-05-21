@@ -1,22 +1,23 @@
-import type React from 'react'
+import { type TourTarget, resolveTarget } from '../types/target'
 
 /**
- * Safely get an element from various target types
+ * Safely get an element from various target shapes.
+ *
+ * Accepts the full `TourTarget` union (string selector, `RefObject`, or
+ * getter function), plus the legacy direct `HTMLElement` passthrough used by
+ * internal callers that already hold the resolved node. Selector / ref / getter
+ * branches delegate to `resolveTarget` so the resolver stays the single source
+ * of truth.
  */
-export function getElement(
-  target: string | HTMLElement | React.RefObject<HTMLElement | null> | null
-): HTMLElement | null {
+export function getElement(target: TourTarget | HTMLElement | null): HTMLElement | null {
   if (!target) return null
-
-  if (typeof target === 'string') {
-    return document.querySelector<HTMLElement>(target)
-  }
-
-  if ('current' in target) {
-    return target.current
-  }
-
-  return target
+  // SSR-safe instanceof — `HTMLElement` is undefined on bare Node, and
+  // `instanceof undefined` throws TypeError. `resolveTarget` already
+  // SSR-guards its own string branch; this matches that contract. Under
+  // SSR no live `HTMLElement` instance can exist anyway, so the fall-through
+  // path is defensive only.
+  if (typeof HTMLElement !== 'undefined' && target instanceof HTMLElement) return target
+  return resolveTarget(target as TourTarget)
 }
 
 /**

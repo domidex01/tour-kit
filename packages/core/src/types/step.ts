@@ -4,6 +4,7 @@ import type { AudienceCondition } from './audience'
 import type { Branch } from './branch'
 import type { Placement } from './config'
 import type { TourCallbackContext } from './state'
+import type { TourTarget } from './target'
 
 /**
  * Structural alias of `MediaSlotProps` from `@tour-kit/media`. Re-declared
@@ -60,7 +61,7 @@ export interface TourStep<TId extends string = string> {
    * @default 'visible'
    */
   kind?: 'visible' | 'hidden'
-  target: string | React.RefObject<HTMLElement | null>
+  target: TourTarget
   /**
    * Step title. Accepts a plain string (interpolated via `interpolate`),
    * a `{ key: string }` dictionary lookup (resolved via `useT()`), or any

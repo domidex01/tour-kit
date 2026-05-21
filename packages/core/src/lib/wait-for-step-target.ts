@@ -5,6 +5,7 @@
  */
 
 import type { TourStep } from '../types/step'
+import { resolveTarget } from '../types/target'
 import { waitForElement } from '../utils/dom'
 
 /**
@@ -70,13 +71,15 @@ export async function waitForStepTarget(
 ): Promise<HTMLElement> {
   const timeout = opts.timeoutMs ?? 3000
 
+  // Ref / getter targets resolve synchronously through `resolveTarget`. There's
+  // no selector to observe for, so a null result is an immediate failure.
   if (typeof step.target !== 'string') {
-    const el = step.target?.current
+    const el = resolveTarget(step.target)
     if (el) return el
     throw new TourRouteError({
       code: 'TARGET_NOT_FOUND',
       route: opts.route,
-      message: `Step "${step.id}" target ref not populated on route "${opts.route}".`,
+      message: `Step "${step.id}" target ref/getter not populated on route "${opts.route}".`,
     })
   }
 

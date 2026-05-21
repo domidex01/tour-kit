@@ -93,11 +93,8 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
     }, [ref])
 
     const targetSelector = typeof target === 'string' ? target : null
-    const targetRefElement = typeof target === 'object' ? target?.current : null
 
-    const { element: targetElement, rect: targetRect } = useElementPosition(
-      targetSelector ?? targetRefElement
-    )
+    const { element: targetElement, rect: targetRect } = useElementPosition(target ?? null)
 
     // Fire autoShow exactly once for this hint instance.
     // Re-running on every render (when show/onShow identities change) loops.

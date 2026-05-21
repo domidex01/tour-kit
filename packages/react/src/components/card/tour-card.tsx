@@ -9,7 +9,13 @@ import {
   shift,
   useFloating,
 } from '@floating-ui/react'
-import { type Placement, useFocusTrap, useReducedMotion, useTour } from '@tour-kit/core'
+import {
+  type Placement,
+  resolveTarget,
+  useFocusTrap,
+  useReducedMotion,
+  useTour,
+} from '@tour-kit/core'
 import { cn } from '@tour-kit/core'
 import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'
@@ -81,11 +87,7 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
 
     const targetElement = React.useMemo(() => {
       if (!currentStep?.target) return null
-      if (typeof currentStep.target === 'string') {
-        if (typeof document === 'undefined') return null
-        return document.querySelector<HTMLElement>(currentStep.target)
-      }
-      return currentStep.target.current
+      return resolveTarget(currentStep.target)
     }, [currentStep?.target])
 
     const { refs, floatingStyles, context } = useFloating({

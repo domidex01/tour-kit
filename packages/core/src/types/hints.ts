@@ -3,12 +3,13 @@ import type { FrequencyRule } from '../lib/frequency'
 import type { LocalizedText } from '../lib/localized-text'
 import type { Placement } from './config'
 import type { AudienceProp } from './step'
+import type { TourTarget } from './target'
 
 export type HotspotPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
 
 export interface HintConfig {
   id: string
-  target: string | React.RefObject<HTMLElement | null>
+  target: TourTarget
   /** Optional title rendered above the content (Phase 3a). */
   title?: LocalizedText
   content: React.ReactNode | LocalizedText
