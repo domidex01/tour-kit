@@ -1,4 +1,4 @@
-# userTourKit v0.12.0 — Generated 2026-05-20T11:35:29Z
+# userTourKit v0.12.0 — Generated 2026-05-21T06:28:32Z
 
 # Feature Adoption Tracking
 
@@ -21798,8 +21798,6 @@ import { LottiePlayer } from '@tour-kit/media';
 | `autoplay` | `boolean` | Auto-play |
 | `speed` | `number` | Playback speed |
 
-
-
 ---
 
 ## Headless Components
@@ -26501,6 +26499,186 @@ function TaskWithStats({ checklistId, taskId }) {
 
 ---
 
+# Imperative API & Completion
+
+> Drive ChecklistLauncher from anywhere with a typed ref, and celebrate completion with ChecklistCompletion.
+
+`@tour-kit/checklists` exposes two ergonomic APIs on top of the standard `<ChecklistLauncher>` / `<Checklist>` components:
+
+1. An imperative ref (`ChecklistLauncherRef`) so a parent can open, close, or toggle the panel from anywhere — a navbar "Need help?" button, a help-menu item, the `onComplete` of a tour step.
+2. A `<ChecklistCompletion>` component that fires a one-shot celebration (confetti or a static badge) when the checklist's last task is completed.
+
+Both APIs are additive — existing consumers see byte-identical behaviour.
+
+## Imperative control with `useRef<ChecklistLauncherRef>`
+
+`<ChecklistLauncher>` forwards a typed handle exposing `open()`, `close()`, and `toggle()`. Use `React.useRef<ChecklistLauncherRef>(null)` to drive the panel without simulating clicks:
+
+```tsx
+import * as React from 'react'
+import {
+  ChecklistLauncher,
+  ChecklistProvider,
+  type ChecklistLauncherRef,
+} from '@tour-kit/checklists'
+
+function App() {
+  const launcherRef = React.useRef<ChecklistLauncherRef>(null)
+
+  return (
+    <ChecklistProvider checklists={[{ id: 'onboarding', tasks: [/* ... */] }]}>
+      <nav>
+        <button onClick={() => launcherRef.current?.open()}>
+          Need help?
+        </button>
+      </nav>
+
+      <ChecklistLauncher ref={launcherRef} checklistId="onboarding" />
+    </ChecklistProvider>
+  )
+}
+```
+
+Each method is idempotent — calling `open()` on an already-open panel is a no-op, same for `close()`.
+
+### Migrating from `ref={...}` to `buttonRef={...}`
+
+The forwarded `ref` used to be the underlying `<button>` DOM node. Consumers who relied on that (e.g., for focus management or measuring) should switch to the new `buttonRef` prop:
+
+```tsx
+// Before — ref pointed at the DOM button
+<ChecklistLauncher ref={buttonRef} checklistId="onboarding" />
+
+// After — ref is the imperative handle; buttonRef preserves DOM-node access
+<ChecklistLauncher buttonRef={buttonRef} checklistId="onboarding" />
+```
+
+`buttonRef` accepts both object refs (`React.createRef<HTMLButtonElement>()`) and callback refs (`(node) => { ... }`).
+
+## Celebrating completion with `<ChecklistCompletion>`
+
+`<ChecklistCompletion>` watches a checklist for the false→true completion edge and fires a one-shot celebration. Three variants:
+
+```tsx
+type ChecklistCompletionVariant = 'confetti' | 'checkmark' | 'none'
+```
+
+### `variant="checkmark"` (default)
+
+Renders a static "Done!" badge. No new dependencies, no animation under reduce-motion. The simplest choice when you want visible feedback without bundle weight.
+
+```tsx
+import { ChecklistCompletion } from '@tour-kit/checklists'
+
+<ChecklistCompletion checklistId="onboarding" />
+// → renders <div role="status">✓ Done!</div> the moment the last task completes
+```
+
+### `variant="confetti"`
+
+Fires a `canvas-confetti` burst exactly once on the completion edge, then renders the same static badge. `canvas-confetti` is an **optional** peer dep — install it where you use this variant:
+
+```bash
+pnpm add canvas-confetti
+# or
+npm install canvas-confetti
+```
+
+```tsx
+<ChecklistCompletion checklistId="onboarding" variant="confetti" />
+```
+
+### `variant="none"`
+
+Renders nothing. Pair with `onCelebrate` if you want to drive your own UI:
+
+```tsx
+<ChecklistCompletion
+  checklistId="onboarding"
+  variant="none"
+  onCelebrate={() => analytics.track('checklist_completed')}
+/>
+```
+
+### One-shot per mount
+
+The celebration fires exactly **once per mount** — completing the same checklist again in the same tab (e.g., after `reset()`) will NOT re-fire. To re-celebrate after a reset, give `<ChecklistCompletion>` a `key` that changes per session:
+
+```tsx
+<ChecklistCompletion
+  key={sessionId}
+  checklistId="onboarding"
+  variant="confetti"
+/>
+```
+
+## Reduced-motion guarantee
+
+Tour Kit applies a three-tier defense for `prefers-reduced-motion: reduce`. `<ChecklistCompletion>` honors all three:
+
+| Tier | Mechanism | What it does here |
+|---|---|---|
+| 1 | `motion-safe:` Tailwind prefix on `tailwindcss-animate` utilities | The static badge's pop-in (`motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-50`) is dropped under reduce — the badge appears instantly. |
+| 2 | `@media (prefers-reduced-motion: reduce)` wrappers around custom `@keyframes` | Not used by this component (no custom keyframes). |
+| 3 | JS gate via `useReducedMotion()` from `@tour-kit/core` | Load-bearing: under reduce, `variant="confetti"` falls back to the static badge and the `await import('canvas-confetti')` **never runs** — reduce-motion users never pay the bundle cost. |
+
+You can read the reduced-motion preference directly:
+
+```tsx
+import { useReducedMotion } from '@tour-kit/checklists'
+
+const reducedMotion = useReducedMotion()
+```
+
+The hook is re-exported from `@tour-kit/core` for ergonomic in-package use.
+
+## API reference
+
+### `ChecklistLauncherRef`
+
+```ts
+interface ChecklistLauncherRef {
+  /** Open the panel. Idempotent. */
+  open(): void
+  /** Close the panel. Idempotent. */
+  close(): void
+  /** Toggle the panel open state. */
+  toggle(): void
+}
+```
+
+### `ChecklistCompletionProps`
+
+```ts
+interface ChecklistCompletionProps {
+  /** Checklist ID to watch for completion. */
+  checklistId: string
+  /** Celebration style. Defaults to 'checkmark'. */
+  variant?: 'confetti' | 'checkmark' | 'none'
+  /** Label shown on the static badge. Default: "Done!" */
+  label?: string
+  /** Optional callback fired once when the celebration triggers. */
+  onCelebrate?: () => void
+  /** Override className on the badge. */
+  className?: string
+}
+```
+
+### `useChecklistCelebration(checklistId)`
+
+The hook powering `<ChecklistCompletion>`. Use it directly when you want a custom celebration UI:
+
+```ts
+function useChecklistCelebration(checklistId: string): {
+  /** True for exactly one render — the moment the checklist completes. */
+  shouldFire: boolean
+  /** True from the edge onward until the component unmounts. */
+  hasCelebrated: boolean
+}
+```
+
+---
+
 # ChecklistProvider
 
 > ChecklistProvider: configure task definitions, dependencies, storage, and analytics integration for your checklist instance
@@ -27619,7 +27797,6 @@ console.log(`${locked.length} tasks locked`);
 > Framework-agnostic hooks and utilities for building product tours — state management, positioning, and accessibility
 
 {/* llm-context-callout */}
-
 
 The core package contains all the headless logic for userTourKit. The reasoning behind a
 logic-first, UI-later split — and why it matters for shadcn/ui, Radix, and Base UI integration —
@@ -41800,7 +41977,6 @@ function TourButton() {
 
 {/* llm-context-callout */}
 
-
 A lightweight library for adding contextual hints to your React application. Hints are persistent UI elements that guide users to features without interrupting their flow.
 
 ## Why Hints?
@@ -41967,8 +42143,6 @@ import { HintHeadless } from '@tour-kit/hints/headless';
 
 ## Package Contents
 
-
-
 ---
 
 ## Complete Example
@@ -42029,8 +42203,6 @@ All hint components are built with accessibility in mind:
 - **Keyboard support** - Escape to dismiss, Tab navigation
 - **Focus management** - Focus rings on keyboard interaction
 - **Reduced motion** - Pulse animation respects `prefers-reduced-motion`
-
-
 
 ---
 
@@ -44161,6 +44333,122 @@ Discriminator used by [Unified Slot](/docs/guides/unified-slot) to switch betwee
 ```tsx
 type UILibrary = 'radix-ui' | 'base-ui'
 ```
+
+---
+
+# Variants
+
+> Opinionated HintHotspot presets — badge, beacon-with-label, what-s-new-pill — with WCAG-AA contrast and ≥24×24 px hit targets.
+
+## Why Variants?
+
+The default `<HintHotspot>` dot ships at 12×12 px, which can be hard to spot on busy interfaces. The three named variants below are opinionated presets that solve the most common discovery patterns:
+
+- `variant="badge"` — count-bearing high-contrast circle (notification-style).
+- `variant="beacon-with-label"` — pulsing dot plus an adjacent label.
+- `variant="what-s-new-pill"` — sparkle pill that fades after the first interaction.
+
+Each preset renders at **≥24×24 px** (above the WCAG 2.5.5 minimum touch target), passes **WCAG 2.1 AA contrast** on light and dark backgrounds, and respects `prefers-reduced-motion: reduce`.
+
+---
+
+## badge
+
+A 24×24 circular badge with an optional `count` slot. Values above 99 clamp to `"99+"`.
+
+```tsx
+import { HintHotspot } from '@tour-kit/hints';
+
+<HintHotspot
+  variant="badge"
+  count={3}
+  targetRect={anchor.getBoundingClientRect()}
+  position="top-right"
+/>
+```
+
+### Props
+
+<TypeTable
+  type={{
+    variant: { type: "'badge'", description: 'Selects the badge preset.' },
+    count: { type: 'number', description: 'Optional numeric value rendered inside the badge. Values > 99 clamp to "99+".' },
+    targetRect: { type: 'DOMRect', description: 'Bounding rect of the anchor element.' },
+    position: { type: "'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'", description: 'Where the badge renders relative to the anchor.' },
+    asChild: { type: 'boolean', default: 'false', description: 'Render through a Slot for custom element composition.' },
+    className: { type: 'string', description: 'Additional CSS classes.' },
+  }}
+/>
+
+---
+
+## beacon-with-label
+
+A pulsing dot adjacent to a short label. The label is `aria-hidden` because the button already exposes an `aria-label`, so screen readers don't double-read.
+
+```tsx
+<HintHotspot
+  variant="beacon-with-label"
+  label="New"
+  side="right"
+  targetRect={anchor.getBoundingClientRect()}
+  position="top-right"
+/>
+```
+
+The beacon pulses via `motion-safe:animate-tour-pulse`. Under `prefers-reduced-motion: reduce`, the `useReducedMotion()` JS gate strips the animation entirely (tier 3 of the reduced-motion contract).
+
+### Props
+
+---
+
+## what-s-new-pill
+
+A pill with an inline sparkle icon plus a label. After the first `pointerdown` or `focus`, the pill fades to `opacity: 0` over 200ms.
+
+```tsx
+<HintHotspot
+  variant="what-s-new-pill"
+  label="What's new"
+  targetRect={anchor.getBoundingClientRect()}
+  position="top-right"
+/>
+```
+
+### Props
+
+---
+
+## Reduced-motion contract
+
+Every variant participates in the three-tier reduced-motion defense:
+
+1. **`motion-safe:` Tailwind prefix** strips animation classes when the OS pref is `reduce`.
+2. **`@media (prefers-reduced-motion: reduce)`** wraps every custom `@keyframes` (e.g. `tour-pulse`).
+3. **`useReducedMotion()` JS gate** drives render-time branches — e.g. `what-s-new-pill` returns `null` (instead of `opacity: 0`) under reduce so the element is fully removed.
+
+Mock the hook in tests:
+
+```ts
+import { vi } from 'vitest';
+
+vi.mock('@tour-kit/core', async (orig) => ({
+  ...(await orig<typeof import('@tour-kit/core')>()),
+  useReducedMotion: vi.fn(() => true),
+}));
+```
+
+---
+
+## Composing the lower-level components
+
+The three variant components are exported for advanced composition:
+
+```tsx
+import { HintBadge, HintBeaconWithLabel, HintWhatsNewPill } from '@tour-kit/hints';
+```
+
+The recommended path is the discriminated `variant` prop on `<HintHotspot>` — it auto-narrows the variant-specific extras (`count`, `label`, `side`) at the call site.
 
 ---
 
@@ -52388,7 +52676,6 @@ to write the changes.
 
 {/* llm-context-callout */}
 
-
 Pre-built, accessible components styled with Tailwind CSS. For hydration-safe patterns, conditional
 steps, and analytics integration specific to React, see our
 [React product tour best practices](/blog/product-tour-best-practices-react) pillar article.
@@ -53689,6 +53976,112 @@ For simpler use cases:
   {/* Renders default layout with title, content, and navigation */}
 </TourCard>
 ```
+
+---
+
+# TourCard Migration (Refresh → Classic Opt-Out)
+
+> Phase 4 of Tour Kit v2 refreshes the default <TourCard> look. This page explains the visual changes, how to pin the v1 ("classic") layout with variant="classic", and how to upgrade a custom theme.
+
+The `<TourCard>` default rendering was refreshed in Tour Kit v2. This page
+covers what changed, how to opt out for one minor cycle, and how to migrate
+a custom theme.
+
+## What changed
+
+The refreshed `<TourCard>` (the default) now:
+
+- **Renders a `"N / M"` step indicator** inside the header before the title.
+  The visible span carries `aria-hidden="true"`; the screen-reader path is
+  owned by the dialog's `aria-label="Step N of M: <title>"` to avoid double
+  announcements.
+- **Draws a real arrow/beak** that points at the target across all 12
+  Floating UI placements (`top`, `top-start`, `top-end`, `bottom`,
+  `bottom-start`, `bottom-end`, `left`, `left-start`, `left-end`, `right`,
+  `right-start`, `right-end`). The arrow is decorative
+  (`aria-hidden="true"`).
+- **Primary `Next` button** receives a stronger focus ring
+  (`focus-visible:ring-2 focus-visible:ring-offset-2`) so keyboard users
+  can see the active control at a glance.
+- **`Skip` carries a defensive `aria-label="Skip tour"`** even when the
+  visible text is customized via `skipLabel`, so the screen-reader name
+  stays stable across i18n.
+
+The dialog now uses `aria-label` only — `aria-labelledby` is gone. This is
+load-bearing: the prior dual-announce pattern (visible counter + linked
+title) caused double-reads in some assistive tech stacks.
+
+## The `variant="classic"` opt-out
+
+If your custom theme regressed on the refreshed default, pin the v1 layout
+for one minor cycle:
+
+```tsx
+<TourCard variant="classic" />
+```
+
+When `variant="classic"`:
+
+- No step-indicator span is rendered.
+- No `<FloatingArrow>` SVG is drawn (matches the v1 layout).
+- The existing shipped button variants (`Skip` is `link`, `Back` is
+  `secondary`, `Next` is `default`) are preserved unchanged.
+
+A one-time `console.warn` is emitted in development mode the first time
+each step renders with `variant="classic"`:
+
+```
+[tour-kit/react] <TourCard variant="classic"> is deprecated and will be
+removed in the next major. See https://usertourkit.com/docs/react/components/tour-card-migration
+```
+
+The warning is suppressed in production builds (`NODE_ENV === 'production'`)
+and deduplicated by `currentStep.id`, so each unique step warns at most
+once per session.
+
+### Timeline
+
+- **v2.x** — `variant="classic"` ships as a documented escape hatch.
+- **v3.0** — `variant="classic"` is removed. All consumers must run on the
+  refreshed look. Migration notes will land in the v3.0 release notes.
+
+## New props
+
+The Phase 4 refresh adds four optional props to `TourCardProps`:
+
+## Upgrading a custom theme
+
+If your theme overrides `<TourCard>` styling (via `className`, `tourCardVariants`, or wrapper components), here's the diff to upgrade:
+
+```diff
+- <TourCard size="lg" className="my-theme-card" />
++ <TourCard
++   size="lg"
++   className="my-theme-card"
++   // No prop changes required — refreshed is the default. If your theme
++   // sets a custom shadow/border that conflicts, you can either:
++   //   1. Stage the upgrade with variant="classic" and migrate the theme,
++   //   2. Or accept the refreshed defaults and remove your overrides.
++ />
+```
+
+If your theme manually rendered a step counter outside the card header,
+remove it — the refreshed variant ships the counter inside the header.
+
+### Verifying the refresh in your app
+
+1. Open your tour on a page with a known target.
+2. Inspect the dialog node — `aria-label` should match
+   `Step <N> of <M>: <your title>`.
+3. The arrow should visibly point at the target across the placements you
+   use.
+4. The `Next` button should show a visible focus ring on `Tab`.
+
+## Related
+
+- [`TourCard` props reference](/docs/react/components/tour-card)
+- [`TourArrow` (renamed from internal arrow primitive)](/docs/react/components/tour-card)
+- [Accessibility guide](/docs/guides/accessibility)
 
 ---
 
@@ -56596,6 +56989,122 @@ export function TourCard({ className, ...props }) {
   );
 }
 ```
+
+---
+
+# target Prop
+
+> Three ways to point a TourStep at a DOM element — selector string, RefObject, or getter function — and the runtime resolution order.
+
+Every `<TourStep>` and `HintConfig.target` accepts the same three-way union, so
+you can pick whichever shape survives your component's mounting strategy:
+selector string for static markup, `RefObject` for dynamic IDs and portals,
+or a getter function for lazily-mounted nodes. The runtime resolver branches
+on a single `typeof` check — no two shapes overlap.
+
+```ts
+type TourTarget =
+  | string
+  | React.RefObject<HTMLElement | null>
+  | (() => HTMLElement | null)
+```
+
+## Selector string (legacy)
+
+Resolves through `document.querySelector` on every render. Breaks the moment a
+parent serves CSS Modules with mangled class names, mounts the target inside
+a portal, or rotates the `id` between sessions.
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+
+export function Demo() {
+  return (
+    <Tour id="legacy">
+      <TourStep id="welcome" target="#welcome" title="Welcome" content="…" />
+      <button id="welcome" type="button">Click me</button>
+    </Tour>
+  )
+}
+```
+
+## RefObject (recommended)
+
+`React.useRef` survives portals, CSS Modules, dynamic ids, and route
+transitions. The same ref can be handed to a child component without leaking
+the underlying DOM id.
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+import { useRef } from 'react'
+
+export function Demo() {
+  const welcomeRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <Tour id="ref-mode">
+      <TourStep id="welcome" target={welcomeRef} title="Welcome" content="…" />
+      <button ref={welcomeRef} type="button">Click me</button>
+    </Tour>
+  )
+}
+```
+
+## Getter function (escape hatch)
+
+A `() => HTMLElement | null` thunk is evaluated when the active step's
+identity changes — i.e., at step-enter time. Use it when the target node is
+mounted asynchronously (data-fetch boundary, route transition) and you don't
+have a ref to capture it.
+
+```tsx
+import { Tour, TourStep } from '@tour-kit/react'
+
+export function Demo() {
+  return (
+    <Tour id="thunk-mode">
+      <TourStep
+        id="cta"
+        target={() => document.querySelector<HTMLElement>('[data-cy="cta"]')}
+        title="Call to action"
+        content="…"
+      />
+    </Tour>
+  )
+}
+```
+
+## Resolution order
+
+Tour Kit resolves a `TourTarget` through a single `resolveTarget` function
+exported from `@tour-kit/core`. Branches are closed and non-overlapping —
+strings can't carry `.current`, refs aren't callable, and thunks aren't
+strings.
+
+1. `typeof target === 'string'` → `document.querySelector(target)`
+2. `target && typeof target === 'object' && 'current' in target` → `target.current`
+3. `typeof target === 'function'` → `target()`
+
+Anything else (including `undefined`) resolves to `null`, and the existing
+positioning code falls back to its usual retry / fail behavior.
+
+The string branch is SSR-safe: when `document` is undefined (Next.js RSC,
+Remix server render), `resolveTarget` returns `null` instead of throwing.
+
+## Migration codemod
+
+`@tour-kit/codemods` ships a best-effort `target-to-ref` transform that
+rewrites `target="#foo"` to `target={fooRef}` when a matching `useRef`
+binding lives in the same file:
+
+```bash
+pnpm dlx @tour-kit/codemods --from target-to-ref ./src
+```
+
+When the rewrite is ambiguous (no matching ref in scope), the codemod leaves
+the attribute untouched and inserts a `TODO(tour-kit): target-to-ref` comment
+above the JSX element. Re-running the codemod on a migrated file produces a
+zero-diff second pass.
 
 ---
 

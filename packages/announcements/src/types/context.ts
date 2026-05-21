@@ -1,5 +1,6 @@
 import type { AnnouncementConfig, AnnouncementState, DismissalReason } from './announcement'
 import type { QueueConfig } from './queue'
+import type { ToastAdapter } from './toast-adapter'
 
 /**
  * Announcements context value
@@ -67,6 +68,13 @@ export interface AnnouncementsContextValue {
 
   /** Clear the queue */
   clearQueue: () => void
+
+  /**
+   * Optional toast adapter routing `variant="toast"` announcements through an
+   * external transport (Sonner, react-hot-toast, …). When `null`, the built-in
+   * `<AnnouncementToast>` portal renders. See `@tour-kit/announcements/adapters/sonner`.
+   */
+  toastAdapter: ToastAdapter | null
 }
 
 /**
@@ -99,4 +107,19 @@ export interface AnnouncementsProviderProps {
 
   /** Callback when any announcement is completed */
   onAnnouncementComplete?: (id: string) => void
+
+  /**
+   * Optional toast adapter routing `variant="toast"` announcements through an
+   * external transport (Sonner, react-hot-toast, …). The adapter is invoked
+   * inside `<AnnouncementToast>` via context — when `render` returns a non-null
+   * handle, the built-in portal toast is suppressed; when it returns `null`
+   * (e.g., sonner isn't installed), the portal renders as before.
+   *
+   * @example
+   * ```tsx
+   * import { sonnerAdapter } from '@tour-kit/announcements/adapters/sonner'
+   * <AnnouncementsProvider toastAdapter={sonnerAdapter}>{children}</AnnouncementsProvider>
+   * ```
+   */
+  toastAdapter?: ToastAdapter
 }

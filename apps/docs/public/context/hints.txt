@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/hints Context File
-Version: 0.12.0 | Generated: 2026-05-20
+Version: 0.13.0 | Generated: 2026-05-21
 Paste this into your LLM to get accurate answers about @tour-kit/hints.
 =========================================================================
 
@@ -24,9 +24,13 @@ EXPORTS
 -------
 
 Types:
+    HintHotspotVariantName
     HintProps
     HintHotspotProps
     HintTooltipProps
+    HintBadgeProps
+    HintBeaconWithLabelProps
+    HintWhatsNewPillProps
     HintHotspotVariants
     HintTooltipVariants
     HintCloseVariants
@@ -49,6 +53,9 @@ Components:
     Hint
     HintHotspot
     HintTooltip
+    HintBadge
+    HintBeaconWithLabel
+    HintWhatsNewPill
     HintsProvider
     HintsContext
     Slot
@@ -75,18 +82,7 @@ TYPES
       hotspotClassName?: string
     }
 
-    export interface HintHotspotProps
-      extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'>,
-        HintHotspotVariants {
-      /** Target element's bounding rect */
-      targetRect: DOMRect
-      /** Position relative to the target element */
-      position: HotspotPosition
-      /** Whether the hint tooltip is open */
-      isOpen?: boolean
-      /** Use custom element via Slot */
-      asChild?: boolean
-    }
+    export type HintHotspotProps = HintHotspotBaseProps & HintHotspotVariantExtras
 
     export interface HintTooltipProps
       extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content' | 'title'>,
@@ -108,6 +104,49 @@ TYPES
       /** Use custom close button */
       closeButton?: React.ReactNode
       /** Use custom element via Slot */
+      asChild?: boolean
+    }
+
+    export interface HintBadgeProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> {
+      /** Target element's bounding rect. */
+      targetRect: DOMRect
+      /** Position relative to the target element. */
+      position: HotspotPosition
+      /** Optional count rendered inside the badge. Values >99 clamp to "99+". */
+      count?: number
+      /** Whether the parent hint tooltip is open. */
+      isOpen?: boolean
+      /** Render through a Slot for custom element composition. */
+      asChild?: boolean
+    }
+
+    export interface HintBeaconWithLabelProps
+      extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> {
+      /** Target element's bounding rect. */
+      targetRect: DOMRect
+      /** Position relative to the target element. */
+      position: HotspotPosition
+      /** Visible label adjacent to the beacon. Read by SR through the button's aria-label. */
+      label: string
+      /** Side the label sits on relative to the beacon. Defaults to "right". */
+      side?: 'left' | 'right'
+      /** Whether the parent hint tooltip is open. */
+      isOpen?: boolean
+      /** Render through a Slot for custom element composition. */
+      asChild?: boolean
+    }
+
+    export interface HintWhatsNewPillProps
+      extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> {
+      /** Target element's bounding rect. */
+      targetRect: DOMRect
+      /** Position relative to the target element. */
+      position: HotspotPosition
+      /** Pill label (also drives the button's aria-label). */
+      label: string
+      /** Whether the parent hint tooltip is open. */
+      isOpen?: boolean
+      /** Render through a Slot for custom element composition. */
       asChild?: boolean
     }
 
@@ -197,6 +236,9 @@ COMPONENTS
     <Hint />
     <HintHotspot />
     <HintTooltip />
+    <HintBadge />
+    <HintBeaconWithLabel />
+    <HintWhatsNewPill />
     <HintsProvider />
     <HintsContext />
     <Slot />
@@ -208,33 +250,32 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: Hide (Temporary)
+Example 1: badge
 
-    const { hide, isOpen } = useHint('my-hint');
+    import { HintHotspot } from '@tour-kit/hints';
     
-    // Clicking the close button hides the tooltip
-    // The hotspot stays visible for reopening
-    hide();
-
-Example 2: Dismiss (Permanent)
-
-    const { dismiss, isDismissed } = useHint('my-hint');
-    
-    // The hint is permanently dismissed
-    // Component renders null until reset
-    dismiss();
-
-Example 3: Using the persist Prop
-
-    // Default behavior - hint can be reopened
-    <Hint
-      id="help-hint"
-      target="#help-icon"
-      content="Click for help"
-      persist={false} // default
+    <HintHotspot
+      variant="badge"
+      count={3}
+      targetRect={anchor.getBoundingClientRect()}
+      position="top-right"
     />
-    
-    // When user clicks close:
-    // 1. Tooltip closes
-    // 2. Hotspot stays visible
-    // 3. User can click hotspot to reopen
+
+Example 2: beacon-with-label
+
+    <HintHotspot
+      variant="beacon-with-label"
+      label="New"
+      side="right"
+      targetRect={anchor.getBoundingClientRect()}
+      position="top-right"
+    />
+
+Example 3: what-s-new-pill
+
+    <HintHotspot
+      variant="what-s-new-pill"
+      label="What's new"
+      targetRect={anchor.getBoundingClientRect()}
+      position="top-right"
+    />

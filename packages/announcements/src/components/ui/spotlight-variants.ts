@@ -22,9 +22,14 @@ export const spotlightContentVariants = cva(
         bottom: 'data-[state=open]:motion-safe:slide-in-from-top-2',
         left: 'data-[state=open]:motion-safe:slide-in-from-right-2',
       },
+      variant: {
+        default: '',
+        'legacy-spotlight': '',
+      },
     },
     defaultVariants: {
       placement: 'bottom',
+      variant: 'default',
     },
   }
 )

@@ -28,6 +28,95 @@ export interface AnnouncementSpotlightProps
   children?: React.ReactNode
   /** Use config from provider */
   useConfig?: boolean
+  /**
+   * Visual variant.
+   * - `'default'` (v4.0+) renders an inset-stroke cutout + directional arrow,
+   *   passing WCAG 2.1 AA contrast on light backgrounds.
+   * - `'legacy-spotlight'` keeps the v3.0 soft radial-gradient cutout for one
+   *   minor cycle (until v4.1) so themes that rely on the legacy look can
+   *   migrate without a hard break.
+   */
+  variant?: 'default' | 'legacy-spotlight'
+  /**
+   * Color of the inset stroke (and the directional arrow). `'auto'` resolves
+   * to white on dark and `hsl(var(--primary))` on light via
+   * `prefers-color-scheme`. Pass any CSS color string to override.
+   * Ignored when `variant="legacy-spotlight"`.
+   */
+  strokeColor?: 'auto' | string
+}
+
+/**
+ * SSR-safe resolver for `strokeColor='auto'`. Reads
+ * `prefers-color-scheme: dark` via `useSyncExternalStore` so the component
+ * re-renders if the user flips OS theme mid-session.
+ */
+function useResolvedStrokeColor(value: 'auto' | string | undefined): string {
+  const prefersDark = React.useSyncExternalStore(
+    React.useCallback((cb: () => void) => {
+      if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+        return () => {
+          /* no-op */
+        }
+      }
+      const mq = window.matchMedia('(prefers-color-scheme: dark)')
+      if (typeof mq.addEventListener === 'function') {
+        mq.addEventListener('change', cb)
+        return () => mq.removeEventListener('change', cb)
+      }
+      // Older jsdom / Safari fallback
+      mq.addListener(cb)
+      return () => mq.removeListener(cb)
+    }, []),
+    () =>
+      typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        : false,
+    () => false
+  )
+  if (typeof value === 'string' && value !== 'auto') return value
+  return prefersDark ? '#ffffff' : 'hsl(var(--primary))'
+}
+
+// Matches the SVG path `M6 0 L12 8 L0 8 Z` — apex is at the top by default,
+// so for each Floating UI placement we rotate the apex to point AT the
+// content panel (which sits on the named side of the target).
+const ARROW_ROTATION_BY_PLACEMENT: Record<'top' | 'right' | 'bottom' | 'left', number> = {
+  top: 0, // content above target → apex up
+  right: 90, // content right of target → apex right
+  bottom: 180, // content below target → apex down
+  left: 270, // content left of target → apex left
+}
+
+const ARROW_SIZE = 12
+const ARROW_GAP = 6
+
+/**
+ * Compute the screen position of the decorative arrow given the target rect
+ * and the placement chosen by Floating UI. The arrow sits between the cutout
+ * edge and the content panel for the matching side.
+ */
+function computeArrowPosition(
+  targetRect: DOMRect,
+  placement: string,
+  padding: number
+): { top: number; left: number } {
+  const arrowCenterX = targetRect.left + targetRect.width / 2
+  const arrowCenterY = targetRect.top + targetRect.height / 2
+  let arrowLeft = arrowCenterX - ARROW_SIZE / 2
+  let arrowTop = arrowCenterY - ARROW_SIZE / 2
+
+  if (placement === 'top') {
+    arrowTop = targetRect.top - padding - ARROW_SIZE - ARROW_GAP
+  } else if (placement === 'right') {
+    arrowLeft = targetRect.right + padding + ARROW_GAP
+  } else if (placement === 'bottom') {
+    arrowTop = targetRect.bottom + padding + ARROW_GAP
+  } else if (placement === 'left') {
+    arrowLeft = targetRect.left - padding - ARROW_SIZE - ARROW_GAP
+  }
+
+  return { top: arrowTop, left: arrowLeft }
 }
 
 export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, AnnouncementSpotlightProps>(
@@ -41,6 +130,8 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
       className,
       children,
       useConfig = true,
+      variant = 'default',
+      strokeColor: strokeColorProp = 'auto',
       ...props
     },
     ref
@@ -49,9 +140,11 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
     const config = announcement.config
     const [mounted, setMounted] = React.useState(false)
     const [targetElement, setTargetElement] = React.useState<Element | null>(null)
+    const [targetRect, setTargetRect] = React.useState<DOMRect | null>(null)
 
     const resolvedTitle = useResolvedText(config?.title)
     const resolvedDescription = useResolvedText(config?.description)
+    const resolvedStrokeColor = useResolvedStrokeColor(strokeColorProp)
 
     // Controlled or uncontrolled open state
     const isControlled = openProp !== undefined
@@ -98,6 +191,33 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
       }
     }, [targetElement, refs])
 
+    // Track target rect on scroll/resize/element-resize so the cutout + arrow
+    // follow the target. Without this, scrolling the page would leave the
+    // bordered cutout pinned to its initial screen coordinates while the
+    // content panel (which Floating UI auto-updates) drifts away.
+    React.useEffect(() => {
+      if (!targetElement) {
+        setTargetRect(null)
+        return
+      }
+      const update = () => setTargetRect(targetElement.getBoundingClientRect())
+      update()
+
+      let resizeObserver: ResizeObserver | null = null
+      if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(update)
+        resizeObserver.observe(targetElement)
+      }
+      window.addEventListener('scroll', update, true)
+      window.addEventListener('resize', update)
+
+      return () => {
+        resizeObserver?.disconnect()
+        window.removeEventListener('scroll', update, true)
+        window.removeEventListener('resize', update)
+      }
+    }, [targetElement])
+
     const handleDismiss = React.useCallback(
       (reason: DismissalReason = 'close_button') => {
         announcement.dismiss(reason)
@@ -111,12 +231,50 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
       onOpenChange?.(false)
     }, [announcement, onOpenChange])
 
-    if (!open || !mounted || !targetElement) return null
+    if (!open || !mounted || !targetElement || !targetRect) return null
 
-    // Calculate spotlight cutout position
-    const targetRect = targetElement.getBoundingClientRect()
     const padding = 4
+    const isLegacy = variant === 'legacy-spotlight'
+
+    // Radial-gradient dim layer — same for default and legacy variants. Legacy
+    // uses this as the entire cutout; default layers an inset-stroke cutout
+    // on top for the AA-compliant boundary.
     const overlayBg = `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + padding}px, rgba(0, 0, 0, ${spotlightOptions.overlayOpacity}) ${Math.max(targetRect.width, targetRect.height) / 2 + padding + 1}px)`
+
+    // Position style for the 2px inset-stroke cutout. Sized to the target rect
+    // plus padding; pointer-events disabled so clicks pass through to the
+    // overlay button (or content beneath).
+    const cutoutStyle: React.CSSProperties = {
+      position: 'fixed',
+      top: targetRect.top - padding,
+      left: targetRect.left - padding,
+      width: targetRect.width + padding * 2,
+      height: targetRect.height + padding * 2,
+      borderRadius: 8,
+      pointerEvents: 'none',
+      boxShadow: `inset 0 0 0 2px ${resolvedStrokeColor}`,
+      zIndex: 41,
+    }
+
+    const arrowRotation =
+      ARROW_ROTATION_BY_PLACEMENT[effectivePlacement as 'top' | 'right' | 'bottom' | 'left'] ?? 0
+    const { top: arrowTop, left: arrowLeft } = computeArrowPosition(
+      targetRect,
+      effectivePlacement,
+      padding
+    )
+
+    const arrowStyle: React.CSSProperties = {
+      position: 'fixed',
+      top: arrowTop,
+      left: arrowLeft,
+      width: ARROW_SIZE,
+      height: ARROW_SIZE,
+      transform: `rotate(${arrowRotation}deg)`,
+      color: resolvedStrokeColor,
+      pointerEvents: 'none',
+      zIndex: 42,
+    }
 
     const spotlightContent = (
       <>
@@ -127,6 +285,8 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
           (spotlightOptions.closeOnOverlayClick ? (
             <button
               type="button"
+              data-tk-spotlight-overlay
+              data-variant={variant}
               className={cn(
                 spotlightOverlayVariants({ visible: true }),
                 'pointer-events-auto cursor-pointer border-0 p-0'
@@ -137,11 +297,32 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
             />
           ) : (
             <div
+              data-tk-spotlight-overlay
+              data-variant={variant}
               className={cn(spotlightOverlayVariants({ visible: true }))}
               style={{ background: overlayBg }}
               aria-hidden="true"
             />
           ))}
+
+        {/* Inset-stroke cutout + directional arrow — default variant only.
+            Skipped entirely when overlay is hidden so consumers who opt out
+            of the dim layer don't get a stray bordered rectangle. */}
+        {!isLegacy && spotlightOptions.showOverlay && (
+          <>
+            <div data-tk-spotlight-cutout aria-hidden="true" style={cutoutStyle} />
+            <svg
+              data-tk-spotlight-arrow
+              aria-hidden="true"
+              style={arrowStyle}
+              viewBox="0 0 12 12"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M6 0 L12 8 L0 8 Z" />
+            </svg>
+          </>
+        )}
 
         {/* Spotlight content */}
         <div
@@ -154,8 +335,9 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
             }
           }}
           data-state={open ? 'open' : 'closed'}
+          data-variant={variant}
           className={cn(
-            spotlightContentVariants({ placement: effectivePlacement }),
+            spotlightContentVariants({ placement: effectivePlacement, variant }),
             'pointer-events-auto',
             className
           )}
