@@ -78,11 +78,14 @@ function useResolvedStrokeColor(value: 'auto' | string | undefined): string {
   return prefersDark ? '#ffffff' : 'hsl(var(--primary))'
 }
 
+// Matches the SVG path `M6 0 L12 8 L0 8 Z` — apex is at the top by default,
+// so for each Floating UI placement we rotate the apex to point AT the
+// content panel (which sits on the named side of the target).
 const ARROW_ROTATION_BY_PLACEMENT: Record<'top' | 'right' | 'bottom' | 'left', number> = {
-  top: 180,
-  right: 270,
-  bottom: 0,
-  left: 90,
+  top: 0, // content above target → apex up
+  right: 90, // content right of target → apex right
+  bottom: 180, // content below target → apex down
+  left: 270, // content left of target → apex left
 }
 
 const ARROW_SIZE = 12
@@ -132,12 +135,12 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
       ...props
     },
     ref
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: orchestrates target lookup, placement, variant branching, and dismiss/complete flows — extracting further would fragment the rendering contract
   ) => {
     const announcement = useAnnouncement(id)
     const config = announcement.config
     const [mounted, setMounted] = React.useState(false)
     const [targetElement, setTargetElement] = React.useState<Element | null>(null)
+    const [targetRect, setTargetRect] = React.useState<DOMRect | null>(null)
 
     const resolvedTitle = useResolvedText(config?.title)
     const resolvedDescription = useResolvedText(config?.description)
@@ -188,6 +191,33 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
       }
     }, [targetElement, refs])
 
+    // Track target rect on scroll/resize/element-resize so the cutout + arrow
+    // follow the target. Without this, scrolling the page would leave the
+    // bordered cutout pinned to its initial screen coordinates while the
+    // content panel (which Floating UI auto-updates) drifts away.
+    React.useEffect(() => {
+      if (!targetElement) {
+        setTargetRect(null)
+        return
+      }
+      const update = () => setTargetRect(targetElement.getBoundingClientRect())
+      update()
+
+      let resizeObserver: ResizeObserver | null = null
+      if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(update)
+        resizeObserver.observe(targetElement)
+      }
+      window.addEventListener('scroll', update, true)
+      window.addEventListener('resize', update)
+
+      return () => {
+        resizeObserver?.disconnect()
+        window.removeEventListener('scroll', update, true)
+        window.removeEventListener('resize', update)
+      }
+    }, [targetElement])
+
     const handleDismiss = React.useCallback(
       (reason: DismissalReason = 'close_button') => {
         announcement.dismiss(reason)
@@ -201,20 +231,15 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
       onOpenChange?.(false)
     }, [announcement, onOpenChange])
 
-    if (!open || !mounted || !targetElement) return null
+    if (!open || !mounted || !targetElement || !targetRect) return null
 
-    const targetRect = targetElement.getBoundingClientRect()
     const padding = 4
     const isLegacy = variant === 'legacy-spotlight'
 
-    // Legacy: soft radial-gradient cutout (v3.0 look)
-    const legacyOverlayBg = `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + padding}px, rgba(0, 0, 0, ${spotlightOptions.overlayOpacity}) ${Math.max(targetRect.width, targetRect.height) / 2 + padding + 1}px)`
-
-    // Default v4: dimmer overlay (full-screen, no cutout) + inset-stroke
-    // bordered div positioned over the target. The dim layer is the same
-    // radial gradient (consumers' expectations of a "highlighted" feature stay
-    // intact); the new contract is the additional bordered cutout layer.
-    const defaultOverlayBg = legacyOverlayBg
+    // Radial-gradient dim layer — same for default and legacy variants. Legacy
+    // uses this as the entire cutout; default layers an inset-stroke cutout
+    // on top for the AA-compliant boundary.
+    const overlayBg = `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + padding}px, rgba(0, 0, 0, ${spotlightOptions.overlayOpacity}) ${Math.max(targetRect.width, targetRect.height) / 2 + padding + 1}px)`
 
     // Position style for the 2px inset-stroke cutout. Sized to the target rect
     // plus padding; pointer-events disabled so clicks pass through to the
@@ -266,7 +291,7 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
                 spotlightOverlayVariants({ visible: true }),
                 'pointer-events-auto cursor-pointer border-0 p-0'
               )}
-              style={{ background: isLegacy ? legacyOverlayBg : defaultOverlayBg }}
+              style={{ background: overlayBg }}
               onClick={() => handleDismiss('overlay_click')}
               aria-label="Close spotlight"
             />
@@ -275,7 +300,7 @@ export const AnnouncementSpotlight = React.forwardRef<HTMLDivElement, Announceme
               data-tk-spotlight-overlay
               data-variant={variant}
               className={cn(spotlightOverlayVariants({ visible: true }))}
-              style={{ background: isLegacy ? legacyOverlayBg : defaultOverlayBg }}
+              style={{ background: overlayBg }}
               aria-hidden="true"
             />
           ))}

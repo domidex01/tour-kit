@@ -62,8 +62,11 @@ describe('sonnerAdapter — sonner present', () => {
     const callback = customSpy.mock.calls[0]?.[0] as (id: string | number) => React.ReactElement
     const rendered = callback('toast-id')
     // The adapter wraps content in a Fragment so any ReactNode (string,
-    // array, …) satisfies sonner's ReactElement contract.
+    // array, …) satisfies sonner's ReactElement contract. Verify both the
+    // wrapper type AND that the original content survived the wrap.
     expect(rendered.type).toBe(React.Fragment)
+    const props = rendered.props as { children?: React.ReactNode }
+    expect(props.children).toBe(content)
   })
 
   it('falls back to default duration and bottom-right position when options omitted', async () => {

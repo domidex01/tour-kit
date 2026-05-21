@@ -52,7 +52,11 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
     const { toastAdapter } = useAnnouncementsContext()
     const [progress, setProgress] = React.useState(100)
     const [mounted, setMounted] = React.useState(false)
-    const [adapterHandled, setAdapterHandled] = React.useState(false)
+    // When `toastAdapter` is non-null, suppress the portal by default and
+    // only fall back to it if the adapter explicitly returns `null` (e.g.,
+    // sonner isn't installed). This avoids a one-frame flash of the portal
+    // while the adapter's async render resolves.
+    const [adapterFallback, setAdapterFallback] = React.useState(false)
 
     const resolvedTitle = useResolvedText(config?.title)
     const resolvedDescription = useResolvedText(config?.description)
@@ -109,7 +113,7 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
 
     React.useEffect(() => {
       if (!open || !toastAdapter) {
-        setAdapterHandled(false)
+        setAdapterFallback(false)
         return
       }
 
@@ -133,9 +137,10 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
 
         if (result) {
           handle = result
-          setAdapterHandled(true)
+          // adapter handled — keep portal suppressed (adapterFallback stays false)
         } else {
-          setAdapterHandled(false)
+          // adapter returned null (sonner missing, etc.) → use the portal
+          setAdapterFallback(true)
         }
       })()
 
@@ -153,11 +158,14 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
       handleDismiss,
     ])
 
+    // Whether the built-in portal is the active render path.
+    const portalActive = !toastAdapter || adapterFallback
+
     // Auto-dismiss timer — only runs when the built-in portal is the render
     // path. Adapter-handled toasts manage their own lifecycle via the
     // adapter's `duration`/`onDismiss` plumbing.
     React.useEffect(() => {
-      if (!open || !toastOptions.autoDismiss || adapterHandled) return
+      if (!open || !toastOptions.autoDismiss || !portalActive) return
 
       const startTime = Date.now()
       const duration = toastOptions.autoDismissDelay ?? 5000
@@ -177,15 +185,12 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
         clearInterval(timer)
         setProgress(100)
       }
-    }, [
-      open,
-      toastOptions.autoDismiss,
-      toastOptions.autoDismissDelay,
-      handleDismiss,
-      adapterHandled,
-    ])
+    }, [open, toastOptions.autoDismiss, toastOptions.autoDismissDelay, handleDismiss, portalActive])
 
-    if (!open || !mounted || adapterHandled) return null
+    // Suppress the portal whenever an adapter is wired (pessimistic) — only
+    // render it when no adapter is set OR the adapter has explicitly fallen
+    // back via null. Prevents a one-frame flash on toast open.
+    if (!open || !mounted || !portalActive) return null
 
     const toastContent = (
       <div className={cn(toastContainerVariants({ position: effectivePosition }))}>

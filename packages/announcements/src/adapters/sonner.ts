@@ -48,9 +48,13 @@ export const sonnerAdapter: ToastAdapter = {
       return null
     }
 
-    if (!sonner || typeof sonner.toast !== 'function') {
+    if (
+      !sonner ||
+      typeof sonner.toast !== 'function' ||
+      typeof sonner.toast.custom !== 'function'
+    ) {
       warnOnce(
-        'sonnerAdapter loaded sonner but toast() is undefined — falling back to portal toast.'
+        'sonnerAdapter loaded sonner but toast.custom() is unavailable — falling back to portal toast.'
       )
       return null
     }
