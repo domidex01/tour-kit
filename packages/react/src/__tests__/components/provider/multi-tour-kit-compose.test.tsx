@@ -42,33 +42,44 @@ describe('<MultiTourKitProvider> compose-mode', () => {
     expect(ids).toContain('x')
   })
 
-  it('re-rendering the registrar leaf does not duplicate the registry entry', () => {
-    const Registrar = () => (
-      <Tour id="dup">
-        <TourStep id="s1" target="#a" title="Hi" content="There" />
-      </Tour>
-    )
+  it('re-registering the same id with a new tour object never grows the registry', () => {
+    // Same-instance re-render with a prop that forces a fresh `tour` identity
+    // each pass. Pins the contract: regardless of whether the implementation
+    // routes through cleanup→register OR the `if (exists) replace` branch in
+    // `tourkit-provider.tsx` registerTour, the registry must stay at exactly
+    // one entry. Assertion includes a `|${count}` suffix so a regression that
+    // appends without dedup surfaces as a count mismatch, not a string-id one.
+    function Registrar({ contentVersion }: { contentVersion: number }) {
+      return (
+        <Tour id="dup">
+          <TourStep id="s1" target="#a" title="Hi" content={`There v${contentVersion}`} />
+        </Tour>
+      )
+    }
     function RegistryProbe() {
       const ctx = useTourRegistryContext()
-      return <div data-testid="ids">{ctx.tours.map((t) => t.id).join(',')}</div>
+      const ids = ctx.tours.map((t) => t.id).join(',')
+      const count = ctx.tours.length
+      return <div data-testid="ids">{`${ids}|${count}`}</div>
     }
 
     const { rerender, getByTestId } = render(
       <MultiTourKitProvider>
-        <Registrar key="r1" />
+        <Registrar contentVersion={1} />
         <RegistryProbe />
       </MultiTourKitProvider>
     )
 
-    expect(getByTestId('ids').textContent).toBe('dup')
+    expect(getByTestId('ids').textContent).toBe('dup|1')
 
     rerender(
       <MultiTourKitProvider>
-        <Registrar key="r2" />
+        <Registrar contentVersion={2} />
         <RegistryProbe />
       </MultiTourKitProvider>
     )
 
-    expect(getByTestId('ids').textContent).toBe('dup')
+    // Same id, new tour identity → registry must stay at one entry, not two.
+    expect(getByTestId('ids').textContent).toBe('dup|1')
   })
 })
