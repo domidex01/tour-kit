@@ -30,6 +30,8 @@ export { TourArrow } from './components/primitives/tour-arrow'
 export {
   MultiTourKitProvider,
   type MultiTourKitProviderProps,
+  useTourRegistryContext,
+  useTourRegistryContextOptional,
 } from './components/provider/tourkit-provider'
 
 // Theme
