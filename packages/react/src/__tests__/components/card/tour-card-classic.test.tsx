@@ -84,26 +84,11 @@ describe('TourCard variant="classic" opt-out', () => {
     expect(document.querySelector('[data-slot="tour-step-indicator"]')).toBeNull()
   })
 
-  it('renders no FloatingArrow inside the dialog', async () => {
-    const { a } = nextIds()
-    const user = userEvent.setup()
-
-    render(
-      <TourProvider tours={[makeSingleStepTour(a)]}>
-        <TourCard variant="classic" />
-        <Starter />
-      </TourProvider>
-    )
-
-    await user.click(screen.getByText('Start'))
-    await screen.findByRole('dialog')
-
-    // The arrow is a direct child of the dialog (a FloatingArrow svg).
-    // The close icon is also aria-hidden but is nested inside a <button>,
-    // so the direct-child selector below targets the arrow only.
-    const arrowSvg = document.querySelector('[role="dialog"] > svg[aria-hidden="true"]')
-    expect(arrowSvg).toBeNull()
-  })
+  // NOTE: classic-vs-refreshed arrow rendering is enforced by the
+  // Playwright placement matrix at e2e/next/tour-card-placements.localhost.spec.ts.
+  // jsdom can't run Floating UI's layout calculations, so the arrow svg
+  // never paints in either variant here — a jsdom no-arrow assertion is
+  // trivially true and carries no signal.
 
   it('preserves shipped Skip/Back/Next variants', async () => {
     const { a, b } = nextIds()

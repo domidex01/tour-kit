@@ -19,7 +19,8 @@ import { Suspense, useEffect, useMemo } from 'react'
  */
 function PlacementFixture() {
   const search = useSearchParams()
-  const placement = (search?.get('placement') ?? 'bottom') as Placement
+  // `||` (not `??`) so an empty `?placement=` also falls back to bottom.
+  const placement = (search?.get('placement') || 'bottom') as Placement
 
   const tour = useMemo<Tour>(
     () => ({

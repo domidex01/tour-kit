@@ -43,20 +43,22 @@ test.describe
         const dialog = page.locator('[role="dialog"][data-tour-step^="placement-"]')
         await dialog.waitFor({ state: 'visible' })
 
-        // Give Floating UI a tick to finalize the arrow position. Without
-        // this, the first paint can capture the dialog before the arrow
-        // middleware writes its computed offset onto the SVG.
-        await page.waitForTimeout(150)
-
-        await expect(dialog).toHaveScreenshot(`${placement}.png`, {
-          maxDiffPixelRatio: 0.02,
-        })
-
         // The arrow is rendered as a direct child of the dialog
         // (`> svg[aria-hidden]`). The close-button icon is also aria-hidden
         // but is nested inside `> div > button > svg`.
         const arrow = dialog.locator('> svg[aria-hidden="true"]')
         const anchor = page.locator('#tour-card-anchor')
+
+        // Poll for a stable arrow box. Floating UI writes computed offset
+        // on the second paint; this beats a hardcoded `waitForTimeout` —
+        // fast when the box settles fast, patient when CI is slow.
+        await expect
+          .poll(async () => (await arrow.boundingBox())?.width ?? 0, { timeout: 2000 })
+          .toBeGreaterThan(0)
+
+        await expect(dialog).toHaveScreenshot(`${placement}.png`, {
+          maxDiffPixelRatio: 0.02,
+        })
 
         const [arrowBox, anchorBox] = await Promise.all([arrow.boundingBox(), anchor.boundingBox()])
 

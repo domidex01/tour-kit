@@ -36,8 +36,6 @@ export interface TourCardProps
     TourCardVariants {
   /** Show "N / M" indicator inside the header. Default: true on `variant="refreshed"`, false on `variant="classic"`. */
   showStepIndicator?: boolean
-  /** Override the 0..1 progress value (defaults to currentStepIndex+1 / totalSteps). */
-  progress?: number
   /** Floating UI arrow size in pixels. Default: 8. */
   arrowSize?: number
 }
@@ -168,13 +166,17 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
             currentStep.className,
             className
           )}
+          {...props}
+          // The dialog contract (role / aria-modal / aria-label) and the
+          // tour data attributes are load-bearing for the focus trap, SR
+          // announcement, and analytics. They must not be consumer-
+          // overridable — keep them AFTER the spread.
           // biome-ignore lint/a11y/useSemanticElements: Native dialog has default centering/backdrop incompatible with floating-ui
           role="dialog"
           aria-modal="true"
           aria-label={ariaLabel}
           data-tour-step={currentStep.id}
           data-tour-variant={variant}
-          {...props}
         >
           <TourCardHeader
             title={resolvedTitle}

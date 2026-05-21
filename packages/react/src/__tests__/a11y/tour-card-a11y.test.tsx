@@ -137,31 +137,10 @@ describe('TourCard Accessibility', () => {
     expect(dialog.getAttribute('aria-label')).toMatch(/^Step 1 of 2: Welcome$/)
   })
 
-  it('arrow svg has aria-hidden', async () => {
-    const user = userEvent.setup()
-
-    function Starter() {
-      const { start } = useTour()
-      return (
-        <button type="button" onClick={() => start()}>
-          Start
-        </button>
-      )
-    }
-
-    render(
-      <TourProvider tours={[testTour]}>
-        <TourCard />
-        <Starter />
-      </TourProvider>
-    )
-
-    await user.click(screen.getByText('Start'))
-    await screen.findByRole('dialog')
-
-    const arrowSvg = document.querySelector('[role="dialog"] svg[aria-hidden="true"]')
-    expect(arrowSvg).not.toBeNull()
-  })
+  // NOTE: "arrow svg has aria-hidden" is enforced by the Playwright
+  // placement matrix at e2e/next/tour-card-placements.localhost.spec.ts.
+  // jsdom can't run Floating UI's layout calculations, so <FloatingArrow>
+  // never paints an svg here — the assertion has no signal in this suite.
 
   it('does not double-read step counter via aria-live', async () => {
     const user = userEvent.setup()

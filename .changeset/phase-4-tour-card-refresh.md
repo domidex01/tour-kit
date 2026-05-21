@@ -23,7 +23,6 @@ New optional props on `TourCardProps`:
 
 - `showStepIndicator?: boolean` — force the indicator on or off
   (defaults to `true` on `'refreshed'`, `false` on `'classic'`)
-- `progress?: number` — override the `0..1` progress value
 - `arrowSize?: number` — `<FloatingArrow>` height in px (default `8`,
   width is `2 × size`)
 - `variant?: 'refreshed' | 'classic'` — opt-out, defaults to `'refreshed'`
