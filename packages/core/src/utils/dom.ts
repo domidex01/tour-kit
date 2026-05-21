@@ -11,8 +11,13 @@ import { resolveTarget, type TourTarget } from '../types/target'
  */
 export function getElement(target: TourTarget | HTMLElement | null): HTMLElement | null {
   if (!target) return null
-  if (target instanceof HTMLElement) return target
-  return resolveTarget(target)
+  // SSR-safe instanceof — `HTMLElement` is undefined on bare Node, and
+  // `instanceof undefined` throws TypeError. `resolveTarget` already
+  // SSR-guards its own string branch; this matches that contract. Under
+  // SSR no live `HTMLElement` instance can exist anyway, so the fall-through
+  // path is defensive only.
+  if (typeof HTMLElement !== 'undefined' && target instanceof HTMLElement) return target
+  return resolveTarget(target as TourTarget)
 }
 
 /**

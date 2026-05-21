@@ -69,9 +69,10 @@ export function Demo() {
 
 ## Getter function (escape hatch)
 
-A `() => HTMLElement | null` thunk is evaluated at step-enter time. Use it
-when the target node is mounted asynchronously (data-fetch boundary, route
-transition) and you don't have a ref to capture it.
+A `() => HTMLElement | null` thunk is evaluated when the active step's
+identity changes — i.e., at step-enter time. Use it when the target node is
+mounted asynchronously (data-fetch boundary, route transition) and you don't
+have a ref to capture it.
 
 ```tsx
 import { Tour, TourStep } from '@tour-kit/react'
@@ -89,6 +90,16 @@ export function Demo() {
   )
 }
 ```
+
+<Callout type="warn" title="Getters are not polled">
+  The getter runs once when the step becomes active. It is **not** observed
+  via `MutationObserver`. If the target node mounts strictly *after* the step
+  activates, the resolver returns `null` and the spotlight stays hidden until
+  the next step transition re-evaluates the getter. For genuinely async DOM,
+  defer `start()` until the node exists, or call `goTo(stepIndex)` again
+  after it mounts. Prefer a `RefObject` when the framework can wire one up —
+  refs cost nothing extra and avoid this gotcha entirely.
+</Callout>
 
 ## Resolution order
 
