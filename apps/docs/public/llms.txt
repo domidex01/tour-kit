@@ -1,4 +1,4 @@
-# userTourKit v0.12.0 — Generated 2026-05-20T11:35:29Z
+# userTourKit v0.12.0 — Generated 2026-05-21T06:28:32Z
 
 # userTourKit
 
@@ -56,6 +56,7 @@
 - [React Router Adapter](https://usertourkit.com/docs/react/adapters/react-router): React Router v6/v7 adapter: enable cross-route tours with useLocation and useNavigate integration in SPAs
 - [Tour](https://usertourkit.com/docs/react/components/tour): Tour component: main wrapper that provides tour context, keyboard controls, spotlight overlay, and step management
 - [TourCard](https://usertourkit.com/docs/react/components/tour-card): TourCard compound component: render step content with header, body, footer sub-components and asChild slot support
+- [TourCard Migration (Refresh → Classic Opt-Out)](https://usertourkit.com/docs/react/components/tour-card-migration): Phase 4 of Tour Kit v2 refreshes the default <TourCard> look. This page explains the visual changes, how to pin the v1 ("classic") layout with variant="classic", and how to upgrade a custom theme.
 - [TourClose](https://usertourkit.com/docs/react/components/tour-close): TourClose component: accessible close button with customizable icon, aria-label, and asChild polymorphic rendering
 - [TourNavigation](https://usertourkit.com/docs/react/components/tour-navigation): TourNavigation component: previous/next buttons with automatic disable states and customizable button labels
 - [TourOverlay](https://usertourkit.com/docs/react/components/tour-overlay): TourOverlay component: spotlight overlay that highlights the target element with configurable padding and animation
@@ -72,6 +73,7 @@
 - [CSS Variables](https://usertourkit.com/docs/react/styling/css-variables): Customize userTourKit appearance with CSS custom properties for colors, spacing, border radius, and shadow values
 - [Custom Components](https://usertourkit.com/docs/react/styling/custom-components): Build fully custom tour card, overlay, and navigation components using Tour Kit hooks and headless primitives
 - [Tailwind CSS](https://usertourkit.com/docs/react/styling/tailwind): Style userTourKit components with Tailwind CSS utility classes, dark mode variants, and responsive breakpoints
+- [target Prop](https://usertourkit.com/docs/react/target-prop): Three ways to point a TourStep at a DOM element — selector string, RefObject, or getter function — and the runtime resolution order.
 - [Types](https://usertourkit.com/docs/react/types): TypeScript reference for @tour-kit/react — component prop interfaces, hook return shapes, multi-tour types, and shared cross-package aliases
 
 ## Hints
@@ -85,6 +87,7 @@
 - [Hooks](https://usertourkit.com/docs/hints/hooks): useHints and useHint hooks: programmatically show, dismiss, and query hint visibility state across your application
 - [Persistence](https://usertourkit.com/docs/hints/persistence): Configure hint dismissal persistence with localStorage, sessionStorage, or custom backends to remember user choices
 - [Types](https://usertourkit.com/docs/hints/types): TypeScript reference for @tour-kit/hints — HintProps, HintHotspotProps, HintTooltipProps, context types, and shared UnifiedSlot helpers
+- [Variants](https://usertourkit.com/docs/hints/variants): Opinionated HintHotspot presets — badge, beacon-with-label, what-s-new-pill — with WCAG-AA contrast and ≥24×24 px hit targets.
 
 ## Adoption
 
@@ -166,6 +169,7 @@
 - [useChecklistPersistence](https://usertourkit.com/docs/checklists/hooks/use-checklist-persistence): useChecklistPersistence hook: save and restore checklist completion state across sessions with pluggable storage adapters
 - [useChecklistsProgress](https://usertourkit.com/docs/checklists/hooks/use-checklists-progress): useChecklistsProgress hook: get aggregated completion stats across all active checklists for dashboard or summary views
 - [useTask](https://usertourkit.com/docs/checklists/hooks/use-task): useTask hook: control individual task state, trigger completion, handle dependencies, and access task metadata in React
+- [Imperative API & Completion](https://usertourkit.com/docs/checklists/imperative-api): Drive ChecklistLauncher from anywhere with a typed ref, and celebrate completion with ChecklistCompletion.
 - [ChecklistProvider](https://usertourkit.com/docs/checklists/providers/checklist-provider): ChecklistProvider: configure task definitions, dependencies, storage, and analytics integration for your checklist instance
 - [Types](https://usertourkit.com/docs/checklists/types): TypeScript types for ChecklistConfig, TaskConfig, TaskDependency, ChecklistState, and the full checklists type system
 - [Utilities](https://usertourkit.com/docs/checklists/utilities): Checklist utility functions: create type-safe configs, resolve dependencies, and calculate progress with pure functions

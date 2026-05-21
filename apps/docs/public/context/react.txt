@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/react Context File
-Version: 0.12.0 | Generated: 2026-05-20
+Version: 0.13.0 | Generated: 2026-05-21
 Paste this into your LLM to get accurate answers about @tour-kit/react.
 =========================================================================
 
@@ -107,6 +107,8 @@ Types:
     UseBranchReturn
 
 Hooks:
+    useTourRegistryContext
+    useTourRegistryContextOptional
     useThemeContext
     useUILibrary
     useTours — All registered tours
@@ -221,7 +223,12 @@ TYPES
 
     export interface TourCardProps
       extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
-        TourCardVariants {}
+        TourCardVariants {
+      /** Show "N / M" indicator inside the header. Default: true on `variant="refreshed"`, false on `variant="classic"`. */
+      showStepIndicator?: boolean
+      /** Floating UI arrow size in pixels. Default: 8. */
+      arrowSize?: number
+    }
 
     export interface TourCardHeaderProps
       extends Omit<React.ComponentPropsWithoutRef<'div'>, 'title'>,
@@ -232,6 +239,10 @@ TYPES
       titleId: string
       /** Whether to show the close button */
       showClose?: boolean
+      /** Visible step-of-N indicator. When non-null, renders a decorative
+       * `<span aria-hidden="true">{current} / {total}</span>` before the title.
+       * The SR announcement is owned by the parent dialog's `aria-label`. */
+      stepIndicator?: { current: number; total: number } | null
     }
 
     export interface TourCardContentProps
@@ -346,10 +357,12 @@ TYPES
       getTour: (tourId: string) => TourInfo | undefined
     }
 
-    export type UseThemeVariationReturn = ThemeContextValue
+    ... and 1 more types. See source for full definitions.
 
 HOOKS
 -----
+    useTourRegistryContext()
+    useTourRegistryContextOptional()
     useThemeContext(...)
     useUILibrary(...)
     useTours(): UseToursReturn
