@@ -39,7 +39,18 @@ export type LicenseState = {
   maxActivations: number
   domain: string | null
   expiresAt: string | null
+  /**
+   * Local `Date.now()` captured when validation ran. Used for cache freshness
+   * and the elapsed-time delta in `getDaysLeft`. NOT Polar's server timestamp —
+   * use `serverValidatedAt` for that. Renaming this would break v1.0.x caches.
+   */
   validatedAt: number
+  /**
+   * Polar `last_validated_at` parsed to Unix ms. Null on dev bypass, unlicensed,
+   * invalid, and error states. Used by `getDaysLeft` to anchor trial countdowns
+   * to server time and absorb client clock skew.
+   */
+  serverValidatedAt?: number | null
   renderKey: string | undefined
 }
 
@@ -112,11 +123,21 @@ export type PolarActivateResponse = {
 }
 
 /**
+ * Trial context slice. Null on `LicenseContextValue.trial` when no `trialDays`
+ * is configured on `<LicenseProvider>`. `isTrialing` is `daysLeft > 0`.
+ */
+export type TrialContextValue = {
+  daysLeft: number
+  isTrialing: boolean
+}
+
+/**
  * License context value (used by React integration).
  *
  * `isGated` / `isLoading` / `gracePeriodActive` are derived from `state` and
  * cache freshness once per validation, so consumers never need to read
- * localStorage on every render.
+ * localStorage on every render. `trial` is `null` when no `trialDays` is set
+ * on `<LicenseProvider>`.
  */
 export type LicenseContextValue = {
   state: LicenseState
@@ -124,6 +145,7 @@ export type LicenseContextValue = {
   isGated: boolean
   isLoading: boolean
   gracePeriodActive: boolean
+  trial: TrialContextValue | null
 }
 
 /**
@@ -132,6 +154,21 @@ export type LicenseContextValue = {
 export type LicenseProviderProps = {
   licenseKey: string
   organizationId?: string
+  /**
+   * Optional trial length in days. When set, `<LicenseProvider>` exposes a
+   * `trial` slice on the context and `<TrialBadge>` renders a countdown.
+   * Trial state is CLIENT-DERIVED from `issuedAt + trialDays` because Polar's
+   * `/v1/customer-portal/license-keys/validate` endpoint does not emit a
+   * `tier` field (Phase 0 task 0.6, memory project_polar_api_findings.md #187).
+   */
+  trialDays?: number
+  /**
+   * Optional explicit trial start time (Unix ms). Production trials should
+   * pass a stable signup/license-issued timestamp. When omitted, the provider
+   * falls back to `state.serverValidatedAt ?? state.validatedAt` for demo-only
+   * countdowns.
+   */
+  trialIssuedAt?: number
   children: React.ReactNode
   onValidate?: (state: LicenseState) => void
   onError?: (error: Error) => void

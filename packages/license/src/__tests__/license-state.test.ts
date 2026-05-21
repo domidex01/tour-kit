@@ -64,6 +64,7 @@ describe('createUnlicensedState', () => {
       domain: null,
       expiresAt: null,
       validatedAt: 123,
+      serverValidatedAt: null,
       renderKey: undefined,
     })
   })
@@ -92,6 +93,7 @@ describe('createDevBypassState', () => {
       domain: null,
       expiresAt: null,
       validatedAt: 456,
+      serverValidatedAt: null,
       renderKey: 'dev_bypass',
     })
   })

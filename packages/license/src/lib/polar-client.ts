@@ -218,6 +218,10 @@ export async function validateLicenseKey(
     const response = await validateKey(normalizedKey, orgId)
 
     // 4. Map Polar status to LicenseState
+    const serverValidatedAt = response.lastValidatedAt
+      ? Date.parse(response.lastValidatedAt) || null
+      : null
+
     if (response.status === 'revoked' || response.status === 'disabled') {
       const state: LicenseState = {
         status: 'revoked',
@@ -227,6 +231,7 @@ export async function validateLicenseKey(
         domain,
         expiresAt: null,
         validatedAt: now,
+        serverValidatedAt,
         renderKey: undefined,
       }
       if (domain) writeCache(domain, state, normalizedKey)
@@ -242,6 +247,7 @@ export async function validateLicenseKey(
         domain,
         expiresAt: response.expiresAt,
         validatedAt: now,
+        serverValidatedAt,
         renderKey: undefined,
       }
       if (domain) writeCache(domain, state, normalizedKey)
@@ -268,6 +274,7 @@ export async function validateLicenseKey(
         domain: null,
         expiresAt: null,
         validatedAt: now,
+        serverValidatedAt: null,
         renderKey: undefined,
       }
     }
@@ -280,6 +287,7 @@ export async function validateLicenseKey(
       domain: activationLabel,
       expiresAt: response.expiresAt,
       validatedAt: now,
+      serverValidatedAt,
       renderKey: generateRenderKey(normalizedKey, activationLabel),
     }
     if (domain) writeCache(domain, state, normalizedKey)
@@ -294,6 +302,7 @@ export async function validateLicenseKey(
         domain: null,
         expiresAt: null,
         validatedAt: now,
+        serverValidatedAt: null,
         renderKey: undefined,
       }
     }
@@ -306,6 +315,7 @@ export async function validateLicenseKey(
         domain: null,
         expiresAt: null,
         validatedAt: now,
+        serverValidatedAt: null,
         renderKey: undefined,
       }
     }
@@ -318,6 +328,7 @@ export async function validateLicenseKey(
         domain: null,
         expiresAt: null,
         validatedAt: now,
+        serverValidatedAt: null,
         renderKey: undefined,
       }
     }
@@ -329,6 +340,7 @@ export async function validateLicenseKey(
       domain: null,
       expiresAt: null,
       validatedAt: now,
+      serverValidatedAt: null,
       renderKey: undefined,
     }
   }

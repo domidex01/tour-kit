@@ -9,7 +9,13 @@ import {
   normalizeLicenseKey,
 } from '../lib/license-state'
 import { validateLicenseKey } from '../lib/polar-client'
-import type { LicenseContextValue, LicenseProviderProps, LicenseState } from '../types'
+import { getDaysLeft } from '../lib/trial'
+import type {
+  LicenseContextValue,
+  LicenseProviderProps,
+  LicenseState,
+  TrialContextValue,
+} from '../types'
 
 const LOADING_STATE: LicenseState = {
   status: 'loading',
@@ -19,6 +25,7 @@ const LOADING_STATE: LicenseState = {
   domain: null,
   expiresAt: null,
   validatedAt: 0,
+  serverValidatedAt: null,
   renderKey: undefined,
 }
 
@@ -29,6 +36,8 @@ export const LicenseRenderContext = createContext<string | undefined>(undefined)
 export function LicenseProvider({
   licenseKey,
   organizationId,
+  trialDays,
+  trialIssuedAt,
   children,
   onValidate,
   onError,
@@ -79,6 +88,7 @@ export function LicenseProvider({
         domain: null,
         expiresAt: null,
         validatedAt: Date.now(),
+        serverValidatedAt: null,
         renderKey: undefined,
       }
       setState(errorState)
@@ -125,9 +135,31 @@ export function LicenseProvider({
     return { isGated: true, isLoading: false, gracePeriodActive: false }
   }, [state, licenseKey])
 
+  // Trial slice — client-derived from issuedAt + trialDays because Polar's
+  // validate endpoint has no `tier` field (Phase 0 task 0.6, memory #187).
+  const trial = useMemo<TrialContextValue | null>(() => {
+    if (trialDays === undefined) return null
+    if (trialDays <= 0) {
+      if (process.env.NODE_ENV !== 'production') {
+        // biome-ignore lint/suspicious/noConsole: dev-only configuration warning
+        console.warn('<LicenseProvider> received non-positive trialDays; ignoring')
+      }
+      return null
+    }
+    const issuedAt = trialIssuedAt ?? state.serverValidatedAt ?? state.validatedAt
+    if (!issuedAt || issuedAt <= 0) return null
+    const daysLeft = getDaysLeft({
+      issuedAt,
+      trialDays,
+      validatedAt: state.validatedAt,
+      serverValidatedAt: state.serverValidatedAt,
+    })
+    return { daysLeft, isTrialing: daysLeft > 0 }
+  }, [trialDays, trialIssuedAt, state.validatedAt, state.serverValidatedAt])
+
   const contextValue = useMemo<LicenseContextValue>(
-    () => ({ state, refresh, isGated, isLoading, gracePeriodActive }),
-    [state, refresh, isGated, isLoading, gracePeriodActive]
+    () => ({ state, refresh, isGated, isLoading, gracePeriodActive, trial }),
+    [state, refresh, isGated, isLoading, gracePeriodActive, trial]
   )
 
   return (
