@@ -9,7 +9,13 @@ import {
   shift,
   useFloating,
 } from '@floating-ui/react'
-import { type Placement, resolveTarget, useFocusTrap, useReducedMotion, useTour } from '@tour-kit/core'
+import {
+  type Placement,
+  resolveTarget,
+  useFocusTrap,
+  useReducedMotion,
+  useTour,
+} from '@tour-kit/core'
 import { cn } from '@tour-kit/core'
 import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'

@@ -12,12 +12,7 @@ import replayBridgeToUseTourActions from './transforms/replay-bridge-to-use-tour
 import targetToRef from './transforms/target-to-ref'
 
 export interface CliOptions {
-  from:
-    | 'joyride'
-    | 'shepherd'
-    | 'driver'
-    | 'replay-bridge-to-use-tour-actions'
-    | 'target-to-ref'
+  from: 'joyride' | 'shepherd' | 'driver' | 'replay-bridge-to-use-tour-actions' | 'target-to-ref'
   parser: 'tsx' | 'ts' | 'babel'
   dryRun: boolean
   print: boolean

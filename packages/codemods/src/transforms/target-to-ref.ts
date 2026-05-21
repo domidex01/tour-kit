@@ -50,22 +50,22 @@ export default function transform(file: FileInfo, api: API): string {
   const refNames = collectUseRefNames(j, root)
   let mutated = false
 
-  attrs.forEach((path) => {
+  for (const path of attrs.paths()) {
     const node = path.node
     const value = node.value
-    if (!value) return
+    if (!value) continue
 
     // Already migrated (target={someExpr}) — idempotent skip.
-    if (value.type === 'JSXExpressionContainer') return
+    if (value.type === 'JSXExpressionContainer') continue
 
     const literal = readStringLiteralValue(value)
-    if (literal === null) return
+    if (literal === null) continue
 
     const match = SELECTOR_RE.exec(literal)
     if (!match) {
       // Non-`#identifier` selector — leave alone (CSS combinators, data-cy,
       // etc. need manual review, but the codemod has no opinion here).
-      return
+      continue
     }
     const bareId = match[1]
     const candidate = `${bareId}Ref`
@@ -73,13 +73,13 @@ export default function transform(file: FileInfo, api: API): string {
     if (refNames.has(candidate)) {
       node.value = j.jsxExpressionContainer(j.identifier(candidate))
       mutated = true
-      return
+      continue
     }
 
     if (attachTodoIfNew(j, path)) {
       mutated = true
     }
-  })
+  }
 
   // Second early-out: every `target=` attribute matched a no-op branch (already
   // an expression, non-`#id` selector, or top-level JSX with no insertable
@@ -95,35 +95,38 @@ export default function transform(file: FileInfo, api: API): string {
 // binding name, not the callee identifier.
 function collectUseRefNames(j: JSCodeshift, root: ReturnType<JSCodeshift>): Set<string> {
   const names = new Set<string>()
-  root
-    .find(j.VariableDeclarator, {
-      init: { type: 'CallExpression' },
-    })
-    .forEach((path) => {
-      const init = path.node.init as { type: string; callee?: unknown } | null
-      if (!init || init.type !== 'CallExpression') return
-      const callee = init.callee as
-        | { type: 'Identifier'; name?: string }
-        | { type: 'MemberExpression'; property?: { name?: string } }
-        | undefined
-      if (!callee) return
-      let calleeName: string | undefined
-      if (callee.type === 'Identifier') {
-        calleeName = (callee as { name?: string }).name
-      } else if (callee.type === 'MemberExpression') {
-        calleeName = (callee as { property?: { name?: string } }).property?.name
-      }
-      if (calleeName !== 'useRef') return
-      const id = path.node.id
-      if (id.type === 'Identifier') {
-        names.add(id.name)
-      }
-    })
+  const decls = root.find(j.VariableDeclarator, {
+    init: { type: 'CallExpression' },
+  })
+  for (const path of decls.paths()) {
+    const init = path.node.init as { type: string; callee?: unknown } | null
+    if (!init || init.type !== 'CallExpression') continue
+    const callee = init.callee as
+      | { type: 'Identifier'; name?: string }
+      | { type: 'MemberExpression'; property?: { name?: string } }
+      | undefined
+    if (!callee) continue
+    let calleeName: string | undefined
+    if (callee.type === 'Identifier') {
+      calleeName = (callee as { name?: string }).name
+    } else if (callee.type === 'MemberExpression') {
+      calleeName = (callee as { property?: { name?: string } }).property?.name
+    }
+    if (calleeName !== 'useRef') continue
+    const id = path.node.id
+    if (id.type === 'Identifier') {
+      names.add(id.name)
+    }
+  }
   return names
 }
 
 function readStringLiteralValue(value: unknown): string | null {
-  const v = value as { type?: string; value?: unknown; expression?: { type?: string; value?: unknown } } | null
+  const v = value as {
+    type?: string
+    value?: unknown
+    expression?: { type?: string; value?: unknown }
+  } | null
   if (!v) return null
   if (v.type === 'StringLiteral' && typeof v.value === 'string') return v.value
   if (v.type === 'Literal' && typeof v.value === 'string') return v.value

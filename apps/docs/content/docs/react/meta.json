@@ -1,5 +1,15 @@
 {
   "title": "@tour-kit/react",
   "icon": "Component",
-  "pages": ["index", "components", "headless", "adapters", "providers", "hooks", "styling", "target-prop", "types"]
+  "pages": [
+    "index",
+    "components",
+    "headless",
+    "adapters",
+    "providers",
+    "hooks",
+    "styling",
+    "target-prop",
+    "types"
+  ]
 }

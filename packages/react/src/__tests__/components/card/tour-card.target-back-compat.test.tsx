@@ -49,10 +49,7 @@ function ResolvedTargetProbe({ onResolve }: { onResolve: (el: HTMLElement | null
 
 // Mounts the target node + captures its ref so a single React subtree can hand
 // the same node to TourProvider as either a selector, a ref, or a thunk.
-function TargetMount({
-  id,
-  refOut,
-}: { id: string; refOut?: { current: HTMLElement | null } }) {
+function TargetMount({ id, refOut }: { id: string; refOut?: { current: HTMLElement | null } }) {
   return (
     <div
       id={id}

@@ -16,9 +16,7 @@ export interface ElementPositionResult {
  * already hold the resolved node. Resolution flows through `getElement`, which
  * delegates the union branches to `resolveTarget`.
  */
-export function useElementPosition(
-  target: TourTarget | HTMLElement | null
-): ElementPositionResult {
+export function useElementPosition(target: TourTarget | HTMLElement | null): ElementPositionResult {
   const [element, setElement] = useState<HTMLElement | null>(null)
   const [rect, setRect] = useState<DOMRect | null>(null)
   const [scrollParent, setScrollParent] = useState<HTMLElement | Window | null>(null)

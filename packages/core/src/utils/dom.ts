@@ -1,4 +1,4 @@
-import { resolveTarget, type TourTarget } from '../types/target'
+import { type TourTarget, resolveTarget } from '../types/target'
 
 /**
  * Safely get an element from various target shapes.
