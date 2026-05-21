@@ -1,4 +1,9 @@
+// Re-export `AudienceCondition` from `@tour-kit/core` (Phase 1 hoist). The
+// surveys-local interface had a byte-identical shape, so the alias is
+// type-equivalent and existing consumers keep their import path.
+import type { AudienceCondition } from '@tour-kit/core'
 import type { ReactNode } from 'react'
+export type { AudienceCondition }
 
 /** Survey measurement types */
 export type SurveyType = 'nps' | 'csat' | 'ces' | 'custom'
@@ -86,21 +91,8 @@ export interface PopoverOptions {
   showCloseButton?: boolean
 }
 
-/** Audience targeting condition */
-export interface AudienceCondition {
-  type: 'user_property' | 'segment' | 'feature_flag' | 'custom'
-  key: string
-  operator:
-    | 'equals'
-    | 'not_equals'
-    | 'contains'
-    | 'not_contains'
-    | 'in'
-    | 'not_in'
-    | 'exists'
-    | 'not_exists'
-  value?: unknown
-}
+// `AudienceCondition` was re-exported from `@tour-kit/core` at the top of
+// this file (Phase 1 refactor train) — the surveys-local copy is gone.
 
 /** Main survey configuration */
 export interface SurveyConfig {

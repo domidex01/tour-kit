@@ -1,6 +1,6 @@
 'use client'
 
-import { logger } from '@tour-kit/core'
+import { createMemoryStorage, logger } from '@tour-kit/core'
 import { useCallback } from 'react'
 import type { ChecklistPersistenceConfig, PersistedChecklistState } from '../types'
 
@@ -12,28 +12,10 @@ export interface UseChecklistPersistenceReturn {
   clear: () => void
 }
 
-// Simple in-memory storage for SSR
-const memoryStorage: Storage = {
-  _data: {} as Record<string, string>,
-  getItem(key: string) {
-    return (this as unknown as { _data: Record<string, string> })._data[key] ?? null
-  },
-  setItem(key: string, value: string) {
-    ;(this as unknown as { _data: Record<string, string> })._data[key] = value
-  },
-  removeItem(key: string) {
-    delete (this as unknown as { _data: Record<string, string> })._data[key]
-  },
-  clear() {
-    ;(this as unknown as { _data: Record<string, string> })._data = {}
-  },
-  get length() {
-    return Object.keys((this as unknown as { _data: Record<string, string> })._data).length
-  },
-  key(index: number) {
-    return Object.keys((this as unknown as { _data: Record<string, string> })._data)[index] ?? null
-  },
-}
+// Single module-scope memory store, used as SSR / `storage: 'memory'` fallback.
+// Promoted to `@tour-kit/core`'s `createMemoryStorage()` in Phase 1 of the
+// refactor train — single source of the DOM `Storage` shape across packages.
+const memoryStorage = createMemoryStorage()
 
 /**
  * Hook for checklist state persistence

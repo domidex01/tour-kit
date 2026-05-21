@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/surveys Context File
-Version: 3.0.1 | Generated: 2026-05-21
+Version: 3.0.2 | Generated: 2026-05-21
 Paste this into your LLM to get accurate answers about @tour-kit/surveys.
 =========================================================================
 
@@ -176,22 +176,6 @@ TYPES
       showCloseButton?: boolean
     }
 
-    /** Audience targeting condition */
-    export interface AudienceCondition {
-      type: 'user_property' | 'segment' | 'feature_flag' | 'custom'
-      key: string
-      operator:
-        | 'equals'
-        | 'not_equals'
-        | 'contains'
-        | 'not_contains'
-        | 'in'
-        | 'not_in'
-        | 'exists'
-        | 'not_exists'
-      value?: unknown
-    }
-
     /** Main survey configuration */
     export interface SurveyConfig {
       /** Unique identifier for the survey */
@@ -267,7 +251,23 @@ TYPES
       onAnswer?: (questionId: string, value: import('./question').AnswerValue) => void
     }
 
-    ... and 32 more types. See source for full definitions.
+    /** Survey measurement types */
+    export type SurveyType = 'nps' | 'csat' | 'ces' | 'custom'
+
+    /** Display mode variants */
+    export type DisplayMode = 'popover' | 'modal' | 'slideout' | 'banner' | 'inline'
+
+    /** Survey priority levels for queue ordering */
+    export type SurveyPriority = 'critical' | 'high' | 'normal' | 'low'
+
+    /** Frequency rules for how often a survey can be shown */
+    export type FrequencyRule =
+      | 'once'
+      | 'session'
+      | 'always'
+      | { type: 'times';
+
+    ... and 28 more types. See source for full definitions.
 
 HOOKS
 -----

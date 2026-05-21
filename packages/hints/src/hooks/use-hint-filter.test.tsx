@@ -1,7 +1,12 @@
 import { renderHook } from '@testing-library/react'
-import { LocaleProvider, type SegmentSource, SegmentationProvider } from '@tour-kit/core'
+import {
+  LocaleProvider,
+  logger,
+  type SegmentSource,
+  SegmentationProvider,
+} from '@tour-kit/core'
 import type { ReactNode } from 'react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { HintConfig } from '../types'
 import { useHintFilter } from './use-hint-filter'
 
@@ -63,5 +68,28 @@ describe('useHintFilter', () => {
     const hints = [baseHint('orphan', { segment: 'ghost' })]
     const { result } = renderHook(() => useHintFilter(hints), { wrapper: wrap({}, {}) })
     expect(result.current).toHaveLength(0)
+  })
+
+  describe('dev warning (Phase 1 hoist)', () => {
+    let warnSpy: ReturnType<typeof vi.spyOn>
+
+    beforeEach(() => {
+      warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      warnSpy.mockRestore()
+    })
+
+    it('names useHintFilter in the unknown-segment warning', () => {
+      // Unique segment name avoids cross-test coupling with the module-scope
+      // dedupe set in `@tour-kit/core/lib/audience.ts`.
+      const seg = `useHintFilter-only-${Math.random().toString(36).slice(2)}`
+      const hints = [baseHint('orphan', { segment: seg })]
+      renderHook(() => useHintFilter(hints), { wrapper: wrap({}, {}) })
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/useHintFilter/)
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(new RegExp(seg))
+    })
   })
 })

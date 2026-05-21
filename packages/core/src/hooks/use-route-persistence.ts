@@ -2,6 +2,7 @@ import * as React from 'react'
 import type { TourState } from '../types'
 import type { MultiPagePersistenceConfig } from '../types/router'
 import { logger } from '../utils/logger'
+import { createMemoryStorage } from '../utils/storage'
 
 interface PersistedRouteState {
   tourId: string | null
@@ -31,32 +32,10 @@ export interface UseRoutePersistenceReturn {
   externalVersion: number
 }
 
-// Simple in-memory storage for SSR or when storage is unavailable
-const memoryStorage: Storage = (() => {
-  const data: Record<string, string> = {}
-  return {
-    getItem(key: string) {
-      return data[key] ?? null
-    },
-    setItem(key: string, value: string) {
-      data[key] = value
-    },
-    removeItem(key: string) {
-      delete data[key]
-    },
-    clear() {
-      for (const key of Object.keys(data)) {
-        delete data[key]
-      }
-    },
-    get length() {
-      return Object.keys(data).length
-    },
-    key(index: number) {
-      return Object.keys(data)[index] ?? null
-    },
-  }
-})()
+// Single module-scope memory store, used as SSR / `storage: 'memory'` fallback.
+// Promoted to `@tour-kit/core`'s `createMemoryStorage()` in Phase 1 of the
+// refactor train — single source of the DOM `Storage` shape across packages.
+const memoryStorage = createMemoryStorage()
 
 /**
  * Hook for persisting tour state across page navigations.

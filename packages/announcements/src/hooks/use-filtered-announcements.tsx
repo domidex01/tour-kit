@@ -1,24 +1,12 @@
 'use client'
 
-// NOTE: `evaluateAnnouncementAudience` mirrors `evaluateHintAudience` in
-// `@tour-kit/hints/src/hooks/use-hint-filter.tsx` and `evaluateAudience` in
-// `@tour-kit/react/src/hooks/use-step-filter.tsx`. Per Phase 3a's plan the
-// helpers are duplicated per-package to avoid forcing a runtime dep across
-// sibling UI packages. Keep all three in lockstep when changing
-// audience-resolution semantics.
-
-import { useSegments } from '@tour-kit/core'
+import { evaluateAudience as coreEvaluateAudience, useSegments } from '@tour-kit/core'
 import * as React from 'react'
 import {
   type AnnouncementConfig,
   type AudienceProp,
   isSegmentAudience,
 } from '../types/announcement'
-
-// Module-scope dedupe set — see the matching comment in
-// `@tour-kit/hints`'s `use-hint-filter.tsx`. Without this a misconfigured
-// segment reference would log on every render.
-const warnedUnknownSegments = new Set<string>()
 
 /**
  * Resolve a single announcement's audience for the segment-shape branch only.
@@ -29,28 +17,28 @@ const warnedUnknownSegments = new Set<string>()
  * we must preserve. Only segment-shape audiences are filtered here, because
  * those require `<SegmentationProvider>` and can't be evaluated in the
  * scheduler (which is framework-agnostic).
+ *
+ * **Why this wraps `core.evaluateAudience` instead of using it directly:**
+ * the core helper evaluates array audiences via `matchesAudience` — that
+ * would require a `userContext` we don't have at this seam. Short-circuit
+ * the array branch before delegating so the scheduler stays the single
+ * authority on `userContext`-driven matching.
  */
 export function evaluateAnnouncementAudience(
   audience: AudienceProp | undefined,
   segments: Record<string, boolean>
 ): boolean {
   if (!audience) return true
-  if (isSegmentAudience(audience)) {
-    if (
-      !(audience.segment in segments) &&
-      process.env.NODE_ENV !== 'production' &&
-      !warnedUnknownSegments.has(audience.segment)
-    ) {
-      warnedUnknownSegments.add(audience.segment)
-      console.warn(
-        `[tour-kit] useFilteredAnnouncements: announcement references segment "${audience.segment}" not registered in <SegmentationProvider>`
-      )
-    }
-    return segments[audience.segment] === true
-  }
   // Array-shape audiences are forwarded to the scheduler unchanged — it owns
   // the legacy `matchesAudience(audience, userContext)` evaluation against the
-  // provider's `userContext` prop.
+  // provider's `userContext` prop. (See memory #204 / phase-1 Open Question 1.)
+  if (Array.isArray(audience)) return true
+  if (isSegmentAudience(audience)) {
+    // Delegate to core for warn-once + segment lookup; userContext is
+    // intentionally `undefined` because announcements never evaluates arrays
+    // here, so the userContext branch is unreachable.
+    return coreEvaluateAudience(audience, segments, undefined, 'useFilteredAnnouncements')
+  }
   return true
 }
 

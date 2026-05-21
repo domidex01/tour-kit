@@ -1,9 +1,11 @@
-import type { PersistenceConfig, Storage } from '../types'
+// Alias the project's narrow 3-method `Storage` adapter type so it doesn't
+// shadow the DOM `globalThis.Storage` shape used by `createMemoryStorage`.
+import type { PersistenceConfig, Storage as StorageAdapter } from '../types'
 
 /**
  * Create storage adapter from config
  */
-export function createStorageAdapter(storageType: PersistenceConfig['storage']): Storage {
+export function createStorageAdapter(storageType: PersistenceConfig['storage']): StorageAdapter {
   if (typeof storageType === 'object') {
     return storageType
   }
@@ -25,7 +27,7 @@ export function createStorageAdapter(storageType: PersistenceConfig['storage']):
 /**
  * No-op storage for SSR
  */
-export function createNoopStorage(): Storage {
+export function createNoopStorage(): StorageAdapter {
   return {
     getItem: () => null,
     setItem: () => {},
@@ -42,7 +44,9 @@ const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$
 /**
  * Cookie-based storage adapter
  */
-export function createCookieStorage(options: { expires?: number; path?: string } = {}): Storage {
+export function createCookieStorage(
+  options: { expires?: number; path?: string } = {}
+): StorageAdapter {
   const { expires = 365, path = '/' } = options
 
   return {
@@ -84,12 +88,50 @@ export function safeJSONParse<T>(value: string | null, fallback: T): T {
 /**
  * Create storage with key prefix
  */
-export function createPrefixedStorage(storage: Storage, prefix: string): Storage {
+export function createPrefixedStorage(storage: StorageAdapter, prefix: string): StorageAdapter {
   const prefixKey = (key: string) => `${prefix}:${key}`
 
   return {
     getItem: (key: string) => storage.getItem(prefixKey(key)),
     setItem: (key: string, value: string) => storage.setItem(prefixKey(key), value),
     removeItem: (key: string) => storage.removeItem(prefixKey(key)),
+  }
+}
+
+/**
+ * Closure-backed in-memory implementation of the DOM `Storage` shape. Used
+ * by `useRoutePersistence` and `useChecklistPersistence` as the SSR / private-
+ * browsing fallback when `window.localStorage` is unavailable.
+ *
+ * Returns the full DOM shape (including `length` and `key(index)`) because
+ * existing call sites read those properties — promoted from the
+ * `_data` cast hack in `useChecklistPersistence` and the closure version in
+ * `useRoutePersistence`, deduplicated in Phase 1 of the refactor train.
+ *
+ * Each call returns an isolated store — instances do NOT share state.
+ */
+export function createMemoryStorage(): globalThis.Storage {
+  const data: Record<string, string> = {}
+  return {
+    getItem(key: string): string | null {
+      return data[key] ?? null
+    },
+    setItem(key: string, value: string): void {
+      data[key] = value
+    },
+    removeItem(key: string): void {
+      delete data[key]
+    },
+    clear(): void {
+      for (const key of Object.keys(data)) {
+        delete data[key]
+      }
+    },
+    get length(): number {
+      return Object.keys(data).length
+    },
+    key(index: number): string | null {
+      return Object.keys(data)[index] ?? null
+    },
   }
 }

@@ -1,6 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AudienceCondition } from '../types/audience'
-import { matchesAudience, validateConditions } from './audience'
+import type { AudienceProp } from '../types/step'
+import { logger } from '../utils/logger'
+import { uniqueSegment } from '../__tests__/_helpers/unique-segment'
+import { evaluateAudience, isSegmentAudience, matchesAudience, validateConditions } from './audience'
 
 const cond = (
   operator: AudienceCondition['operator'],
@@ -177,3 +180,102 @@ describe('validateConditions', () => {
     expect(errors).toContain("Value must be an array for operator 'not_in'")
   })
 })
+
+describe('isSegmentAudience', () => {
+  it('narrows segment-shape object to true', () => {
+    const audience: AudienceProp = { segment: 'admins' }
+    expect(isSegmentAudience(audience)).toBe(true)
+  })
+
+  it('returns false for array audiences', () => {
+    const arr: AudienceProp = [cond('equals', 'plan', 'pro')]
+    expect(isSegmentAudience(arr)).toBe(false)
+  })
+
+  // `AudienceProp` excludes `undefined`, but the helper runs inside callers
+  // that may receive runtime-narrowed values, so we still cover the path.
+  it('returns false for null-ish runtime values', () => {
+    expect(isSegmentAudience(null as unknown as AudienceProp)).toBe(false)
+    expect(isSegmentAudience(undefined as unknown as AudienceProp)).toBe(false)
+  })
+})
+
+describe('evaluateAudience', () => {
+  let warnSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    warnSpy.mockRestore()
+  })
+
+  describe('short-circuits', () => {
+    it('returns true for undefined audience', () => {
+      expect(evaluateAudience(undefined, {}, undefined, 'useStepFilter')).toBe(true)
+    })
+  })
+
+  describe('segment branch', () => {
+    it('passes when segment is registered true', () => {
+      expect(evaluateAudience({ segment: 'beta' }, { beta: true }, undefined, 'useStepFilter')).toBe(
+        true
+      )
+    })
+
+    it('filters when segment is registered false', () => {
+      expect(
+        evaluateAudience({ segment: 'beta' }, { beta: false }, undefined, 'useStepFilter')
+      ).toBe(false)
+    })
+
+    it('warns once per unknown segment naming the caller', () => {
+      const seg = uniqueSegment('beta')
+      evaluateAudience({ segment: seg }, {}, undefined, 'useStepFilter')
+      evaluateAudience({ segment: seg }, {}, undefined, 'useStepFilter')
+      evaluateAudience({ segment: seg }, {}, undefined, 'useStepFilter')
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/useStepFilter/)
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(new RegExp(seg))
+    })
+
+    it('warns again for a different unknown segment', () => {
+      const a = uniqueSegment('beta-a')
+      const b = uniqueSegment('beta-b')
+      evaluateAudience({ segment: a }, {}, undefined, 'useStepFilter')
+      evaluateAudience({ segment: b }, {}, undefined, 'useStepFilter')
+      expect(warnSpy).toHaveBeenCalledTimes(2)
+    })
+
+    it('does NOT warn when segment is registered (even if false)', () => {
+      const seg = uniqueSegment('known')
+      evaluateAudience({ segment: seg }, { [seg]: false }, undefined, 'useStepFilter')
+      expect(warnSpy).not.toHaveBeenCalled()
+    })
+
+    it('passes through the caller string into the warning', () => {
+      const seg = uniqueSegment('unk')
+      evaluateAudience({ segment: seg }, {}, undefined, 'useHintFilter')
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/useHintFilter/)
+    })
+  })
+
+  describe('array branch — delegates to matchesAudience', () => {
+    it('returns true when conditions match userContext', () => {
+      const audience: AudienceProp = [cond('equals', 'plan', 'pro')]
+      expect(evaluateAudience(audience, {}, { plan: 'pro' }, 'useStepFilter')).toBe(true)
+    })
+
+    it('returns false when conditions miss userContext', () => {
+      const audience: AudienceProp = [cond('equals', 'plan', 'pro')]
+      expect(evaluateAudience(audience, {}, { plan: 'free' }, 'useStepFilter')).toBe(false)
+    })
+
+    it('returns false when userContext is missing and operator is not not_exists', () => {
+      const audience: AudienceProp = [cond('equals', 'plan', 'pro')]
+      expect(evaluateAudience(audience, {}, undefined, 'useStepFilter')).toBe(false)
+    })
+  })
+})
+

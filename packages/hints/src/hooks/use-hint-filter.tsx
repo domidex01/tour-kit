@@ -1,48 +1,26 @@
 'use client'
 
-// NOTE: `isSegmentAudience` and `evaluateHintAudience` mirror
-// `evaluateAudience` in `@tour-kit/react/src/hooks/use-step-filter.tsx`.
-// Per Phase 3a's plan the helpers are duplicated per-package to avoid
-// forcing hints→react. Keep the two files in lockstep when changing
-// audience-resolution semantics.
-
 import {
+  evaluateAudience as coreEvaluateAudience,
   type AudienceProp,
-  matchesAudience,
   useSegmentationContext,
   useSegments,
 } from '@tour-kit/core'
 import * as React from 'react'
 import type { HintConfig } from '../types'
 
-function isSegmentAudience(a: AudienceProp): a is { segment: string } {
-  return !Array.isArray(a) && typeof a === 'object' && a !== null && 'segment' in a
-}
-
-// Module-scope dedupe set — see the matching comment in
-// `@tour-kit/react`'s `use-step-filter.tsx`.
-const warnedUnknownSegments = new Set<string>()
-
+/**
+ * Pure boolean test for a hint's `audience`. Thin adapter over
+ * `@tour-kit/core`'s `evaluateAudience` that pins the caller label so dev
+ * warnings name `useHintFilter`. Kept as an exported symbol because existing
+ * consumers may import it directly.
+ */
 export function evaluateHintAudience(
   audience: AudienceProp | undefined,
   segments: Record<string, boolean>,
   userContext: Record<string, unknown> | undefined
 ): boolean {
-  if (!audience) return true
-  if (isSegmentAudience(audience)) {
-    if (
-      !(audience.segment in segments) &&
-      process.env.NODE_ENV !== 'production' &&
-      !warnedUnknownSegments.has(audience.segment)
-    ) {
-      warnedUnknownSegments.add(audience.segment)
-      console.warn(
-        `[tour-kit] useHintFilter: hint references segment "${audience.segment}" not registered in <SegmentationProvider>`
-      )
-    }
-    return segments[audience.segment] === true
-  }
-  return matchesAudience(audience, userContext)
+  return coreEvaluateAudience(audience, segments, userContext, 'useHintFilter')
 }
 
 /**

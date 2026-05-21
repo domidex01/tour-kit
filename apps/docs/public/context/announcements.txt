@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/announcements Context File
-Version: 3.0.1 | Generated: 2026-05-21
+Version: 4.0.0 | Generated: 2026-05-21
 Paste this into your LLM to get accurate answers about @tour-kit/announcements.
 =========================================================================
 
@@ -20,6 +20,7 @@ Peer dependencies:
     tailwindcss: ^3.4.0 || ^4.0.0
     @mui/base: ^5.0.0-beta.0
     @tour-kit/scheduling: workspace:*
+    sonner: >=1.0.0 <3
 
 EXPORTS
 -------
@@ -52,6 +53,9 @@ Types:
     RenderProp
     UnifiedSlotProps
     UILibraryProviderProps
+    ToastAdapter
+    ToastAdapterHandle
+    ToastAdapterRenderArgs
     // Announcement types
   AnnouncementVariant
     AnnouncementPriority
@@ -105,7 +109,7 @@ Hooks:
     useAnnouncements — Filter options for announcements
     useAnnouncementQueue — Return type for useAnnouncementQueue hook
     useFilteredAnnouncements — Filter a list of announcement configs by their `audience` prop. Mirror of
-    useResolvedText — Mirror of `@tour-kit/hints` and `@tour-kit/react`'s `useResolvedText`.
+    useResolvedText
     useUILibrary
     useReducedMotion
 
@@ -289,9 +293,25 @@ TYPES
       children?: React.ReactNode
       /** Use config from provider */
       useConfig?: boolean
+      /**
+       * Visual variant.
+       * - `'default'` (v4.0+) renders an inset-stroke cutout + directional arrow,
+       *   passing WCAG 2.1 AA contrast on light backgrounds.
+       * - `'legacy-spotlight'` keeps the v3.0 soft radial-gradient cutout for one
+       *   minor cycle (until v4.1) so themes that rely on the legacy look can
+       *   migrate without a hard break.
+       */
+      variant?: 'default' | 'legacy-spotlight'
+      /**
+       * Color of the inset stroke (and the directional arrow). `'auto'` resolves
+       * to white on dark and `hsl(var(--primary))` on light via
+       * `prefers-color-scheme`. Pass any CSS color string to override.
+       * Ignored when `variant="legacy-spotlight"`.
+       */
+      strokeColor?: 'auto' | string
     }
 
-    ... and 53 more types. See source for full definitions.
+    ... and 56 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -300,8 +320,7 @@ HOOKS
     useAnnouncements(): UseAnnouncementsReturn
     useAnnouncementQueue(): UseAnnouncementQueueReturn
     useFilteredAnnouncements(announcements: AnnouncementConfig[]): AnnouncementConfig[]
-    useResolvedText(value: React.ReactNode | LocalizedText | undefined,
-  vars?: Record<string, unknown>): React.ReactNode
+    useResolvedText(...)
     useUILibrary(...)
     useReducedMotion(...)
 

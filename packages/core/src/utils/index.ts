@@ -34,6 +34,7 @@ export {
   createStorageAdapter,
   createNoopStorage,
   createCookieStorage,
+  createMemoryStorage,
   safeJSONParse,
   createPrefixedStorage,
 } from './storage'

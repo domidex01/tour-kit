@@ -1,5 +1,9 @@
 import { renderHook } from '@testing-library/react'
-import { LocaleProvider, SegmentationProvider } from '@tour-kit/core'
+import {
+  LocaleProvider,
+  SegmentationProvider,
+  useResolvedText as coreUseResolvedText,
+} from '@tour-kit/core'
 import type { ReactNode } from 'react'
 import { describe, expect, it } from 'vitest'
 import { useResolvedText } from './use-resolved-text'
@@ -41,5 +45,9 @@ describe('useResolvedText (hints)', () => {
   it('returns undefined for undefined input', () => {
     const { result } = renderHook(() => useResolvedText(undefined), { wrapper: wrap() })
     expect(result.current).toBeUndefined()
+  })
+
+  it('re-exports the core implementation (identity check after Phase 1 hoist)', () => {
+    expect(useResolvedText).toBe(coreUseResolvedText)
   })
 })

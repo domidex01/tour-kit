@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   createCookieStorage,
+  createMemoryStorage,
   createNoopStorage,
   createPrefixedStorage,
   createStorageAdapter,
@@ -162,6 +163,82 @@ describe('Storage Utilities', () => {
       const keyWithMore = 'a+b*c?d(e)f[g]h{i}j|k^'
       storage.setItem(keyWithMore, 'also-ok')
       expect(storage.getItem(keyWithMore)).toBe('also-ok')
+    })
+  })
+
+  describe('createMemoryStorage', () => {
+    it('returns the full DOM Storage shape', () => {
+      const storage = createMemoryStorage()
+      expect(typeof storage.getItem).toBe('function')
+      expect(typeof storage.setItem).toBe('function')
+      expect(typeof storage.removeItem).toBe('function')
+      expect(typeof storage.clear).toBe('function')
+      expect(typeof storage.key).toBe('function')
+      expect(typeof storage.length).toBe('number')
+    })
+
+    it('starts empty (length 0, key(0) null, getItem null)', () => {
+      const storage = createMemoryStorage()
+      expect(storage.length).toBe(0)
+      expect(storage.key(0)).toBeNull()
+      expect(storage.getItem('a')).toBeNull()
+    })
+
+    it('round-trips setItem / getItem and reflects length', () => {
+      const storage = createMemoryStorage()
+      storage.setItem('a', '1')
+      expect(storage.getItem('a')).toBe('1')
+      expect(storage.length).toBe(1)
+      expect(storage.key(0)).toBe('a')
+
+      storage.setItem('b', '2')
+      expect(storage.length).toBe(2)
+      expect(storage.key(1)).toBe('b')
+    })
+
+    it('overwrite preserves length (Storage.setItem replaces, does not append)', () => {
+      const storage = createMemoryStorage()
+      storage.setItem('a', '1')
+      storage.setItem('a', '2')
+      expect(storage.length).toBe(1)
+      expect(storage.getItem('a')).toBe('2')
+    })
+
+    it('removeItem decrements length and getItem returns null', () => {
+      const storage = createMemoryStorage()
+      storage.setItem('a', '1')
+      storage.setItem('b', '2')
+      storage.removeItem('a')
+      expect(storage.length).toBe(1)
+      expect(storage.getItem('a')).toBeNull()
+      expect(storage.key(0)).toBe('b')
+    })
+
+    it('clear() empties the store', () => {
+      const storage = createMemoryStorage()
+      storage.setItem('a', '1')
+      storage.setItem('b', '2')
+      storage.clear()
+      expect(storage.length).toBe(0)
+      expect(storage.key(0)).toBeNull()
+      expect(storage.getItem('a')).toBeNull()
+    })
+
+    it('key(index) returns null for out-of-range index', () => {
+      const storage = createMemoryStorage()
+      storage.setItem('a', '1')
+      expect(storage.key(5)).toBeNull()
+    })
+
+    it('two instances are isolated (no shared state)', () => {
+      const s1 = createMemoryStorage()
+      const s2 = createMemoryStorage()
+      s1.setItem('shared', 'one')
+      s2.setItem('shared', 'two')
+      expect(s1.getItem('shared')).toBe('one')
+      expect(s2.getItem('shared')).toBe('two')
+      expect(s1.length).toBe(1)
+      expect(s2.length).toBe(1)
     })
   })
 })

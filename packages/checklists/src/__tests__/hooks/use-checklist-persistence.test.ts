@@ -1,4 +1,7 @@
 import { renderHook } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useChecklistPersistence } from '../../hooks/use-checklist-persistence'
 import type { ChecklistPersistenceConfig, PersistedChecklistState } from '../../types'
@@ -272,6 +275,41 @@ describe('useChecklistPersistence', () => {
 
       expect(onLoad).toHaveBeenCalled()
       expect(loaded).toBeNull()
+    })
+  })
+
+  describe('memory storage regression (Phase 1)', () => {
+    it('round-trips via two saves and clears (single module-scope store)', () => {
+      const config: ChecklistPersistenceConfig = { enabled: true, storage: 'memory' }
+      const { result } = renderHook(() => useChecklistPersistence(config))
+
+      result.current.save(mockState)
+      const a = result.current.load()
+      expect(a).toEqual(mockState)
+
+      const updated: PersistedChecklistState = { ...mockState, dismissed: ['x', 'y'] }
+      result.current.save(updated)
+      const b = result.current.load()
+      expect(b).toEqual(updated)
+
+      result.current.clear()
+      const c = result.current.load()
+      expect(c).toBeNull()
+    })
+
+    // Source-grep regression — the previous implementation used the `_data` cast
+    // pattern (`(this as unknown as { _data: ... })._data`). That hack is gone
+    // in Phase 1 because `createMemoryStorage()` lives in core via a closure.
+    // If a future change re-introduces the pattern in this file, this test
+    // fails loudly before the diff ships.
+    it('does not use the `_data` cast pattern (regression guard)', () => {
+      const here = dirname(fileURLToPath(import.meta.url))
+      const src = readFileSync(
+        join(here, '..', '..', 'hooks', 'use-checklist-persistence.ts'),
+        'utf8'
+      )
+      expect(src).not.toMatch(/as unknown as \{ _data/)
+      expect(src).not.toMatch(/_data: Record<string/)
     })
   })
 

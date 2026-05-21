@@ -1,4 +1,4 @@
-# userTourKit v0.12.0 — Generated 2026-05-21T06:28:32Z
+# userTourKit v0.14.0 — Generated 2026-05-21T15:47:04Z
 
 # userTourKit
 
@@ -169,7 +169,6 @@
 - [useChecklistPersistence](https://usertourkit.com/docs/checklists/hooks/use-checklist-persistence): useChecklistPersistence hook: save and restore checklist completion state across sessions with pluggable storage adapters
 - [useChecklistsProgress](https://usertourkit.com/docs/checklists/hooks/use-checklists-progress): useChecklistsProgress hook: get aggregated completion stats across all active checklists for dashboard or summary views
 - [useTask](https://usertourkit.com/docs/checklists/hooks/use-task): useTask hook: control individual task state, trigger completion, handle dependencies, and access task metadata in React
-- [Imperative API & Completion](https://usertourkit.com/docs/checklists/imperative-api): Drive ChecklistLauncher from anywhere with a typed ref, and celebrate completion with ChecklistCompletion.
 - [ChecklistProvider](https://usertourkit.com/docs/checklists/providers/checklist-provider): ChecklistProvider: configure task definitions, dependencies, storage, and analytics integration for your checklist instance
 - [Types](https://usertourkit.com/docs/checklists/types): TypeScript types for ChecklistConfig, TaskConfig, TaskDependency, ChecklistState, and the full checklists type system
 - [Utilities](https://usertourkit.com/docs/checklists/utilities): Checklist utility functions: create type-safe configs, resolve dependencies, and calculate progress with pure functions
@@ -291,6 +290,7 @@
 ## Licensing
 
 - [Licensing](https://usertourkit.com/docs/licensing): Set up userTourKit Pro licensing with Polar.sh — installation, configuration, and CI/CD
+- [Trial countdown & test mode](https://usertourkit.com/docs/licensing/trial): Client-derived trial state, the <TrialBadge> surface, and how to simulate license failure on real domains.
 
 ## Migration
 

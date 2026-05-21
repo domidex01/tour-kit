@@ -7,3 +7,4 @@ export {
 export { resolvePlural } from './plural'
 export { useT, type Messages, type TranslateFn } from './use-t'
 export { useResolveLocalizedText } from './use-resolve-localized-text'
+export { useResolvedText } from './use-resolved-text'

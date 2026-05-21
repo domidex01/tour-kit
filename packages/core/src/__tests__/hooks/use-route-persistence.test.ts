@@ -405,4 +405,37 @@ describe('useRoutePersistence - memory leak prevention', () => {
     unmount()
     tracker.assertNoLeaks()
   })
+
+  // Phase 1 (refactor train) — memory fallback uses the hoisted
+  // `createMemoryStorage()`. Round-trip through `storage: 'memory'` covers
+  // the path that previously had a local closure-backed `memoryStorage`.
+  describe('memory storage fallback', () => {
+    it('round-trips state via the in-memory store when storage: memory', () => {
+      const config: MultiPagePersistenceConfig = {
+        enabled: true,
+        storage: 'memory',
+        key: 'mem-route-state',
+      }
+      const { result } = renderHook(() => useRoutePersistence(config))
+
+      act(() => {
+        result.current.save({
+          tourId: 'mem-tour',
+          currentStepIndex: 3,
+          completedTours: ['prior-tour'],
+          skippedTours: [],
+        })
+      })
+
+      const loaded = result.current.load()
+      expect(loaded?.tourId).toBe('mem-tour')
+      expect(loaded?.stepIndex).toBe(3)
+      expect(loaded?.completedTours).toEqual(['prior-tour'])
+
+      act(() => {
+        result.current.clear()
+      })
+      expect(result.current.load()).toBeNull()
+    })
+  })
 })

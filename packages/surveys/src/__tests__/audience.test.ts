@@ -1,3 +1,4 @@
+import { matchesAudience as coreMatchesAudience } from '@tour-kit/core'
 import { describe, expect, it } from 'vitest'
 import { matchesAudience } from '../core/audience'
 import type { AudienceCondition } from '../types/survey'
@@ -103,5 +104,9 @@ describe('matchesAudience', () => {
         { plan: 'pro', country: 'CA' }
       )
     ).toBe(false)
+  })
+
+  it('is identity-equal to @tour-kit/core matchesAudience (Phase 1 re-export)', () => {
+    expect(matchesAudience).toBe(coreMatchesAudience)
   })
 })

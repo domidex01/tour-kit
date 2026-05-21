@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/core Context File
-Version: 0.12.0 | Generated: 2026-05-21
+Version: 0.14.0 | Generated: 2026-05-21
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -141,6 +141,7 @@ Hooks:
     useT — Hook returning a translator function `t(key, vars?)` that:
     useTourDiagnostic — Read the diagnostic report for a given tour id. Returns `null` when the
     useResolveLocalizedText — Returns a memoized resolver `(value) => string` that takes a `LocalizedText`
+    useResolvedText — Resolve a `LocalizedText | ReactNode` value into a `ReactNode`. Drives the
     useTourActions — Module-level frozen no-op. Allocated once and reused across every unknown-id
     useSegmentationContext
     useSegment
@@ -195,6 +196,7 @@ Utilities:
     createStorageAdapter
     createNoopStorage
     createCookieStorage
+    createMemoryStorage
     safeJSONParse
     createPrefixedStorage
     announce
@@ -224,7 +226,9 @@ Utilities:
     validateTour
     waitForStepTarget
     interpolate
+    evaluateAudience
     explainAudience
+    isSegmentAudience
     matchesAudience
     validateConditions
     explainTour
@@ -404,6 +408,8 @@ HOOKS
     useT(): TranslateFn
     useTourDiagnostic(tourId: string): EligibilityReport | null
     useResolveLocalizedText(): (value: LocalizedText | undefined) => string
+    useResolvedText(value: React.ReactNode | LocalizedText | undefined,
+  vars?: Record<string, unknown>): React.ReactNode
     useTourActions(tourId: string): UseTourActionsReturn
     useSegmentationContext(...)
     useSegment(...)

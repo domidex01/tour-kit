@@ -141,6 +141,7 @@ export {
   createStorageAdapter,
   createNoopStorage,
   createCookieStorage,
+  createMemoryStorage,
   safeJSONParse,
   createPrefixedStorage,
   announce,
@@ -205,7 +206,13 @@ export { useT } from './lib/i18n/use-t'
 export type { Messages, TranslateFn } from './lib/i18n/use-t'
 
 // Audience targeting — promoted from @tour-kit/announcements in Phase 1
-export { explainAudience, matchesAudience, validateConditions } from './lib/audience'
+export {
+  evaluateAudience,
+  explainAudience,
+  isSegmentAudience,
+  matchesAudience,
+  validateConditions,
+} from './lib/audience'
 export type { AudienceCondition } from './types/audience'
 
 // Diagnostic engine — Phase 3 (issue #32)
@@ -236,6 +243,10 @@ export type { FrequencyRule, FrequencyState } from './lib/frequency'
 export { isI18nKey } from './lib/localized-text'
 export type { LocalizedText } from './lib/localized-text'
 export { useResolveLocalizedText } from './lib/i18n/use-resolve-localized-text'
+// ReactNode-preserving sibling — promoted from react/hints/announcements in
+// Phase 1 of the refactor train. Returns `ReactNode` so consumers can pass
+// JSX through arbitrary `LocalizedText | ReactNode` fields.
+export { useResolvedText } from './lib/i18n/use-resolved-text'
 
 // Tour registry — Phase 1 (v2 polish). Module-level singleton so a sibling
 // subtree can drive a tour via `useTourActions(id).start()` without prop

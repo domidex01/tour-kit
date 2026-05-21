@@ -5,6 +5,62 @@
 import type { AudienceCondition } from '../types/audience'
 import type { GateReason } from '../types/diagnostic'
 import type { AudienceProp } from '../types/step'
+import { logger } from '../utils/logger'
+
+/**
+ * Type guard narrowing `AudienceProp` to its segment-named branch. Previously
+ * duplicated in `@tour-kit/react`, `@tour-kit/hints`, and `@tour-kit/announcements`.
+ */
+export function isSegmentAudience(audience: AudienceProp): audience is { segment: string } {
+  return (
+    !Array.isArray(audience) &&
+    typeof audience === 'object' &&
+    audience !== null &&
+    'segment' in audience
+  )
+}
+
+// Module-scope dedupe set: `evaluateAudience` runs inside `Array.filter`
+// inside a `useMemo`. Without this set, an unknown segment referenced by N
+// steps would emit N warnings on every memo recompute (e.g. on every
+// userContext change). Module-scope is fine — segment names are app-wide
+// stable. Test isolation: use unique segment names (see
+// `packages/core/src/__tests__/_helpers/unique-segment.ts`).
+const warnedUnknownSegments = new Set<string>()
+
+/**
+ * Pure boolean test: does the current user satisfy this audience? Single
+ * source of truth shared by `useStepFilter` (react), `useHintFilter` (hints),
+ * and the segment branch of `evaluateAnnouncementAudience` (announcements).
+ *
+ * - `undefined` audience → `true` (no filter)
+ * - segment-shape `{ segment: 'x' }` → reads `segments[x] === true`; warns
+ *   once per unknown segment in dev, naming the calling hook.
+ * - array-shape `AudienceCondition[]` → delegates to `matchesAudience` with
+ *   `userContext` (the legacy contract).
+ */
+export function evaluateAudience(
+  audience: AudienceProp | undefined,
+  segments: Record<string, boolean>,
+  userContext: Record<string, unknown> | undefined,
+  caller: string
+): boolean {
+  if (!audience) return true
+  if (isSegmentAudience(audience)) {
+    if (
+      !(audience.segment in segments) &&
+      process.env.NODE_ENV !== 'production' &&
+      !warnedUnknownSegments.has(audience.segment)
+    ) {
+      warnedUnknownSegments.add(audience.segment)
+      logger.warn(
+        `[tour-kit] ${caller}: references segment "${audience.segment}" not registered in <SegmentationProvider>`
+      )
+    }
+    return segments[audience.segment] === true
+  }
+  return matchesAudience(audience, userContext)
+}
 
 interface AudienceEvaluation {
   matched: boolean

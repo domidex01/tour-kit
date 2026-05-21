@@ -1,12 +1,13 @@
 import { renderHook } from '@testing-library/react'
 import {
   LocaleProvider,
+  logger,
   type SegmentSource,
   SegmentationProvider,
   type TourStep,
 } from '@tour-kit/core'
 import type { ReactNode } from 'react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useStepFilter } from '../../hooks/use-step-filter'
 
 function wrap(
@@ -68,5 +69,28 @@ describe('useStepFilter', () => {
     const steps = [baseStep('orphan', { segment: 'ghost' })]
     const { result } = renderHook(() => useStepFilter(steps), { wrapper: wrap({}, {}) })
     expect(result.current).toHaveLength(0)
+  })
+
+  describe('dev warning (Phase 1 hoist)', () => {
+    let warnSpy: ReturnType<typeof vi.spyOn>
+
+    beforeEach(() => {
+      warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      warnSpy.mockRestore()
+    })
+
+    it('names useStepFilter in the unknown-segment warning', () => {
+      // Use a randomized segment name so module-scope dedupe in
+      // `core/lib/audience.ts` never short-circuits across tests.
+      const seg = `useStepFilter-only-${Math.random().toString(36).slice(2)}`
+      const steps = [baseStep('orphan', { segment: seg })]
+      renderHook(() => useStepFilter(steps), { wrapper: wrap({}, {}) })
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/useStepFilter/)
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(new RegExp(seg))
+    })
   })
 })
