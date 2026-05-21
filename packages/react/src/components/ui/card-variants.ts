@@ -14,9 +14,14 @@ export const tourCardVariants = cva(
         lg: 'w-96 p-5',
         auto: 'w-auto p-4',
       },
+      variant: {
+        refreshed: '',
+        classic: '',
+      },
     },
     defaultVariants: {
       size: 'default',
+      variant: 'refreshed',
     },
   }
 )

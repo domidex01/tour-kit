@@ -103,7 +103,10 @@ describe('TourNavigation', () => {
 
     expect(screen.getByRole('button', { name: 'Previous' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Exit' })).toBeInTheDocument()
+    // Skip exposes a constant aria-label="Skip tour" for SR context, so its
+    // visible text is customized but its accessible name remains stable.
+    expect(screen.getByText('Exit')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Skip tour' })).toBeInTheDocument()
   })
 
   it('uses custom finish label on last step', () => {

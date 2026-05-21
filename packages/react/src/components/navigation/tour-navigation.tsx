@@ -45,6 +45,7 @@ export const TourNavigation = React.forwardRef<HTMLDivElement, TourNavigationPro
           <button
             type="button"
             onClick={onSkip}
+            aria-label="Skip tour"
             className={cn(tourButtonVariants({ variant: 'link', size: 'sm' }))}
           >
             {skipLabel}
