@@ -37,11 +37,18 @@ export default function transform(file: FileInfo, api: API): string {
   const j: JSCodeshift = api.jscodeshift
   const root = j(file.source)
 
-  const refNames = collectUseRefNames(j, root)
-
   const attrs = root.find(j.JSXAttribute, {
     name: { type: 'JSXIdentifier', name: 'target' },
   })
+
+  // Cheap early-out: a file with no `target=` attributes has nothing this
+  // transform can rewrite. Returning `file.source` (rather than reserializing
+  // via toSource) avoids recast's whitespace normalization marking the file
+  // as "changed" in `--dry-run --verbose` reports for unrelated source files.
+  if (attrs.size() === 0) return file.source
+
+  const refNames = collectUseRefNames(j, root)
+  let mutated = false
 
   attrs.forEach((path) => {
     const node = path.node
@@ -65,11 +72,19 @@ export default function transform(file: FileInfo, api: API): string {
 
     if (refNames.has(candidate)) {
       node.value = j.jsxExpressionContainer(j.identifier(candidate))
+      mutated = true
       return
     }
 
-    attachTodoIfNew(j, path)
+    if (attachTodoIfNew(j, path)) {
+      mutated = true
+    }
   })
+
+  // Second early-out: every `target=` attribute matched a no-op branch (already
+  // an expression, non-`#id` selector, or top-level JSX with no insertable
+  // parent). Skip reserialization for the same reason as above.
+  if (!mutated) return file.source
 
   return root.toSource({ quote: 'single', trailingComma: true })
 }
@@ -122,17 +137,20 @@ function readStringLiteralValue(value: unknown): string | null {
 // JSX-child grammar — they must be wrapped in `{/* ... */}` (i.e. a
 // JSXExpressionContainer holding a JSXEmptyExpression whose `.comments`
 // array carries a CommentBlock node).
-function attachTodoIfNew(j: JSCodeshift, attrPath: ASTPath<unknown>): void {
+// Returns true when a TODO comment was actually inserted (the caller uses
+// this to decide whether to reserialize the file). Returns false for both
+// "no safe insertion point" and "idempotent skip — TODO already present".
+function attachTodoIfNew(j: JSCodeshift, attrPath: ASTPath<unknown>): boolean {
   // attrPath: JSXAttribute → parent: JSXOpeningElement → parent: JSXElement.
   const openingPath = attrPath.parent
-  if (!openingPath?.node) return
+  if (!openingPath?.node) return false
   const elementPath = openingPath.parent
-  if (!elementPath?.node) return
+  if (!elementPath?.node) return false
 
   // Find the JSXElement's parent container (a JSXElement, JSXFragment, or
   // ArrowFunction/return statement). Inserting as a sibling requires the
-  // parent to have a `children` array; otherwise we attach a leading line
-  // comment on the JSXElement (recast renders it above the JS expression).
+  // parent to have a `children` array; otherwise we leave the attribute
+  // untouched (see comment in the early return below).
   const containerPath = elementPath.parent
   const containerNode = containerPath?.node as
     | { type?: string; children?: Array<unknown> }
@@ -145,7 +163,7 @@ function attachTodoIfNew(j: JSCodeshift, attrPath: ASTPath<unknown>): void {
     // JSXElement, where ASI silently turns the return into an `undefined`
     // bail-out. Better to leave the attribute untouched and let the developer
     // notice the un-rewritten selector at PR review time.
-    return
+    return false
   }
 
   // Idempotency: don't re-insert if a TODO block comment already precedes
@@ -157,7 +175,7 @@ function attachTodoIfNew(j: JSCodeshift, attrPath: ASTPath<unknown>): void {
       | undefined
     const prevComments = prev?.expression?.comments
     if (prevComments?.some((c) => typeof c.value === 'string' && c.value.includes(TODO_MARKER))) {
-      return
+      return false
     }
   }
   const emptyExpr = j.jsxEmptyExpression()
@@ -171,4 +189,5 @@ function attachTodoIfNew(j: JSCodeshift, attrPath: ASTPath<unknown>): void {
   ]
   const todoNode = j.jsxExpressionContainer(emptyExpr)
   containerNode.children.splice(idx, 0, todoNode as unknown)
+  return true
 }
