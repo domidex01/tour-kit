@@ -1,5 +1,14 @@
 # @tour-kit/surveys
 
+## 3.0.1
+
+### Patch Changes
+
+- Updated dependencies [c33b3bc]
+  - @tour-kit/license@1.1.2
+  - @tour-kit/media@0.12.2
+  - @tour-kit/scheduling@0.11.1
+
 ## 3.0.0
 
 ### Patch Changes

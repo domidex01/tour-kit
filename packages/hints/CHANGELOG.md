@@ -1,5 +1,12 @@
 # @tour-kit/hints
 
+## 0.13.0
+
+### Patch Changes
+
+- @tour-kit/analytics@0.11.1
+- @tour-kit/media@0.12.2
+
 ## 0.12.0
 
 ### Minor Changes
