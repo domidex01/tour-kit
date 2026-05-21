@@ -307,6 +307,7 @@ export function AnnouncementsProvider({
   onAnnouncementShow,
   onAnnouncementDismiss,
   onAnnouncementComplete,
+  toastAdapter,
 }: AnnouncementsProviderProps) {
   const analytics = useAnalyticsOptional()
   const queueConfig: QueueConfig = React.useMemo(
@@ -789,6 +790,7 @@ export function AnnouncementsProvider({
       canShow,
       showNext,
       clearQueue,
+      toastAdapter: toastAdapter ?? null,
     }),
     [
       state.announcements,
@@ -809,6 +811,7 @@ export function AnnouncementsProvider({
       canShow,
       showNext,
       clearQueue,
+      toastAdapter,
     ]
   )
 

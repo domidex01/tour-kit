@@ -142,6 +142,14 @@ export {
 // Accessibility hooks (re-exported for ergonomic in-package access)
 export { useReducedMotion } from '@tour-kit/core'
 
+// Phase 7 — Toast adapter contract (interfaces only — peer-optional adapters
+// live at subpaths like `@tour-kit/announcements/adapters/sonner`).
+export type {
+  ToastAdapter,
+  ToastAdapterHandle,
+  ToastAdapterRenderArgs,
+} from './types/toast-adapter'
+
 // ============================================
 // TYPES
 // ============================================

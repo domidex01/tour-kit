@@ -5,10 +5,12 @@ import { MediaSlot } from '@tour-kit/media'
 import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
+import { useAnnouncementsContext } from '../context/announcements-context'
 import { useAnnouncement } from '../hooks/use-announcement'
 import { toMediaSlotProps } from '../lib/media-slot-adapter'
 import { useResolvedText } from '../lib/use-resolved-text'
 import type { DismissalReason, ToastOptions } from '../types/announcement'
+import type { ToastAdapterHandle } from '../types/toast-adapter'
 import { AnnouncementClose } from './announcement-close'
 import { toastContainerVariants, toastProgressVariants, toastVariants } from './ui/toast-variants'
 
@@ -47,8 +49,10 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
   ) => {
     const announcement = useAnnouncement(id)
     const config = announcement.config
+    const { toastAdapter } = useAnnouncementsContext()
     const [progress, setProgress] = React.useState(100)
     const [mounted, setMounted] = React.useState(false)
+    const [adapterHandled, setAdapterHandled] = React.useState(false)
 
     const resolvedTitle = useResolvedText(config?.title)
     const resolvedDescription = useResolvedText(config?.description)
@@ -80,9 +84,80 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
     const effectivePosition = position ?? config?.toastOptions?.position ?? 'bottom-right'
     const effectiveIntent = intent ?? config?.toastOptions?.intent ?? 'info'
 
-    // Auto-dismiss timer
+    // Phase 7 — Toast adapter routing. When the provider is wired with a
+    // `toastAdapter` (e.g., Sonner), dispatch the toast through the adapter
+    // and suppress the built-in portal. If the adapter returns null
+    // (e.g., sonner isn't installed), `adapterHandled` stays false and we
+    // fall back to the portal render below.
+    const renderedContent = React.useMemo(
+      () =>
+        useConfig && config ? (
+          <>
+            {config.media && (
+              <div className="mb-2" data-slot="announcement-media">
+                <MediaSlot {...toMediaSlotProps(config.media)} />
+              </div>
+            )}
+            {resolvedTitle && <div className="font-medium">{resolvedTitle}</div>}
+            {resolvedDescription && <div className="text-sm opacity-90">{resolvedDescription}</div>}
+          </>
+        ) : (
+          children
+        ),
+      [useConfig, config, resolvedTitle, resolvedDescription, children]
+    )
+
     React.useEffect(() => {
-      if (!open || !toastOptions.autoDismiss) return
+      if (!open || !toastAdapter) {
+        setAdapterHandled(false)
+        return
+      }
+
+      let cancelled = false
+      let handle: ToastAdapterHandle | null = null
+      ;(async () => {
+        const result = await toastAdapter.render({
+          id,
+          content: renderedContent,
+          options: {
+            duration: toastOptions.autoDismissDelay ?? 5000,
+            position: effectivePosition,
+          },
+          onDismiss: () => handleDismiss('auto_dismiss'),
+        })
+
+        if (cancelled) {
+          result?.dismiss()
+          return
+        }
+
+        if (result) {
+          handle = result
+          setAdapterHandled(true)
+        } else {
+          setAdapterHandled(false)
+        }
+      })()
+
+      return () => {
+        cancelled = true
+        handle?.dismiss()
+      }
+    }, [
+      open,
+      toastAdapter,
+      id,
+      renderedContent,
+      toastOptions.autoDismissDelay,
+      effectivePosition,
+      handleDismiss,
+    ])
+
+    // Auto-dismiss timer — only runs when the built-in portal is the render
+    // path. Adapter-handled toasts manage their own lifecycle via the
+    // adapter's `duration`/`onDismiss` plumbing.
+    React.useEffect(() => {
+      if (!open || !toastOptions.autoDismiss || adapterHandled) return
 
       const startTime = Date.now()
       const duration = toastOptions.autoDismissDelay ?? 5000
@@ -102,9 +177,15 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
         clearInterval(timer)
         setProgress(100)
       }
-    }, [open, toastOptions.autoDismiss, toastOptions.autoDismissDelay, handleDismiss])
+    }, [
+      open,
+      toastOptions.autoDismiss,
+      toastOptions.autoDismissDelay,
+      handleDismiss,
+      adapterHandled,
+    ])
 
-    if (!open || !mounted) return null
+    if (!open || !mounted || adapterHandled) return null
 
     const toastContent = (
       <div className={cn(toastContainerVariants({ position: effectivePosition }))}>
@@ -119,23 +200,7 @@ export const AnnouncementToast = React.forwardRef<HTMLDivElement, AnnouncementTo
           )}
           {...props}
         >
-          <div className="flex-1 space-y-1">
-            {useConfig && config ? (
-              <>
-                {config.media && (
-                  <div className="mb-2" data-slot="announcement-media">
-                    <MediaSlot {...toMediaSlotProps(config.media)} />
-                  </div>
-                )}
-                {resolvedTitle && <div className="font-medium">{resolvedTitle}</div>}
-                {resolvedDescription && (
-                  <div className="text-sm opacity-90">{resolvedDescription}</div>
-                )}
-              </>
-            ) : (
-              children
-            )}
-          </div>
+          <div className="flex-1 space-y-1">{renderedContent}</div>
 
           <AnnouncementClose
             onClose={() => handleDismiss('close_button')}

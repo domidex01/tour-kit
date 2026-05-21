@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/announcements",
-  "version": "3.0.1",
+  "version": "4.0.0",
   "description": "In-app product announcements for React — modal, toast, banner, slideout, spotlight with frequency rules and changelog support.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
@@ -79,6 +79,16 @@
         "default": "./dist/changelog/index.cjs"
       }
     },
+    "./adapters/sonner": {
+      "import": {
+        "types": "./dist/adapters/sonner.d.ts",
+        "default": "./dist/adapters/sonner.js"
+      },
+      "require": {
+        "types": "./dist/adapters/sonner.d.cts",
+        "default": "./dist/adapters/sonner.cjs"
+      }
+    },
     "./styles/variables.css": "./src/styles/variables.css",
     "./styles.css": "./dist/styles/variables.css",
     "./package.json": "./package.json"
@@ -90,7 +100,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && bash scripts/check-no-sonner-in-main.sh",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -112,7 +122,8 @@
     "react-dom": "^18.0.0 || ^19.0.0",
     "tailwindcss": "^3.4.0 || ^4.0.0",
     "@mui/base": "^5.0.0-beta.0",
-    "@tour-kit/scheduling": "workspace:*"
+    "@tour-kit/scheduling": "workspace:*",
+    "sonner": ">=1.0.0 <3"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
@@ -122,6 +133,9 @@
       "optional": true
     },
     "@tour-kit/scheduling": {
+      "optional": true
+    },
+    "sonner": {
       "optional": true
     }
   },
@@ -138,6 +152,7 @@
     "jsdom": "catalog:",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "sonner": "^2.0.0",
     "tailwindcss": "^4.1.8",
     "tsup": "catalog:",
     "typescript": "catalog:",

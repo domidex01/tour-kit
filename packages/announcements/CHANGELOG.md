@@ -1,5 +1,41 @@
 # @tour-kit/announcements
 
+## 4.0.0
+
+### Changed (visual breaking)
+
+- `<AnnouncementSpotlight>` cutout now uses a 2px inset stroke + directional arrow
+  instead of a soft radial gradient. The new design passes WCAG 2.1 AA contrast on
+  white, off-white, and light-gray backgrounds. Set `strokeColor="auto"` (default)
+  to follow `prefers-color-scheme`, or pass any CSS color string to override.
+
+  **Migration:** if you rely on the legacy radial-gradient look, opt in via
+  `<AnnouncementSpotlight variant="legacy-spotlight">`. The legacy variant is
+  kept for one minor cycle (until v4.1) and will be removed in v5.
+
+### Added
+
+- `@tour-kit/announcements/adapters/sonner` — peer-optional Sonner adapter for
+  `variant="toast"`. Pass it to the provider:
+
+  ```tsx
+  import { AnnouncementsProvider } from '@tour-kit/announcements'
+  import { sonnerAdapter } from '@tour-kit/announcements/adapters/sonner'
+  import { Toaster } from 'sonner'
+
+  // ...
+  <AnnouncementsProvider toastAdapter={sonnerAdapter}>
+    {children}
+    <Toaster />
+  </AnnouncementsProvider>
+  ```
+
+  Requires `sonner` >=1.0.0 <3 installed. Without `sonner` installed, the existing
+  portal toast renders unchanged — no bytes of Sonner ship in the main bundle.
+
+- `<AnnouncementSpotlight>` props: `variant`, `strokeColor`. See migration note above.
+- `ToastAdapter` interface for building custom toast transports (e.g., react-hot-toast).
+
 ## 3.0.1
 
 ### Patch Changes
