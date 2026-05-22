@@ -1,5 +1,16 @@
 # @tour-kit/checklists
 
+## 0.13.3
+
+### Patch Changes
+
+- Updated dependencies [d67d905]
+- Updated dependencies [b01b53c]
+  - @tour-kit/core@1.0.0
+  - @tour-kit/license@1.2.0
+  - @tour-kit/analytics@0.11.3
+  - @tour-kit/media@0.12.4
+
 ## 0.13.2
 
 ### Patch Changes
