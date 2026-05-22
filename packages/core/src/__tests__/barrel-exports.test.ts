@@ -29,6 +29,43 @@ describe('@tour-kit/core barrel', () => {
   it('exports createMemoryStorage', () => {
     expect(typeof core.createMemoryStorage).toBe('function')
   })
+
+  // Phase 3 (refactor train) — dead position API removed from public barrel.
+  // Keep this list aligned with packages/core/src/utils/index.ts.
+  describe('Phase 3 — dead position exports removed', () => {
+    it.each([
+      'calculatePosition',
+      'calculatePositionWithCollision',
+      'wouldOverflow',
+      'getFallbackPlacements',
+      'PositionResult',
+    ])('does not export %s from @tour-kit/core', (name) => {
+      expect(core).not.toHaveProperty(name)
+    })
+
+    it('STILL exports useElementPosition (companion API survives)', () => {
+      expect(typeof core.useElementPosition).toBe('function')
+    })
+  })
+
+  // Phase 3 — hidden-step union exports.
+  describe('Phase 3 — hidden-step union types exported', () => {
+    // Runtime check: the union is type-only, but we can verify both names
+    // resolve through the runtime barrel by constructing values.
+    it('VisibleTourStep and HiddenTourStep are usable from core', () => {
+      const visible: import('../index').VisibleTourStep = {
+        id: 'v1',
+        target: '#x',
+        content: 'hi',
+      }
+      const hidden: import('../index').HiddenTourStep = {
+        id: 'h1',
+        kind: 'hidden',
+      }
+      expect(visible.id).toBe('v1')
+      expect(hidden.id).toBe('h1')
+    })
+  })
 })
 
 // Build-artifact assertion — runs only when `pnpm --filter @tour-kit/core

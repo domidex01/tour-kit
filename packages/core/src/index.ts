@@ -125,11 +125,7 @@ export {
   getElementRect,
   getViewportDimensions,
   parsePlacement,
-  calculatePosition,
-  wouldOverflow,
   getOppositeSide,
-  getFallbackPlacements,
-  calculatePositionWithCollision,
   getDocumentDirection,
   mirrorSide,
   mirrorAlignment,
@@ -169,7 +165,6 @@ export {
   throttleLeading,
 } from './utils'
 export type {
-  PositionResult,
   LogLevel,
   LoggerConfig,
   ThrottledFunction,
