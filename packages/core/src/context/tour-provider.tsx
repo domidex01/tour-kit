@@ -18,12 +18,7 @@ import { validateTour } from '../lib/validate-tour'
 import { waitForStepTarget } from '../lib/wait-for-step-target'
 import type { TourRouteError } from '../lib/wait-for-step-target'
 import { tourRegistry } from '../registry/tour-registry'
-import type {
-  BranchContext,
-  Tour,
-  TourCallbackContext,
-  TourContextValue,
-} from '../types'
+import type { BranchContext, Tour, TourCallbackContext, TourContextValue } from '../types'
 import { defaultPersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
@@ -711,14 +706,11 @@ export function TourProvider({
   // async navigation. Wrappers below are stable (empty-deps `useCallback`).
   const engineContextRef = React.useRef<TourEngineContext | null>(null)
 
-  const navigateToStep = React.useCallback(
-    (stepIndex: number): Promise<boolean> => {
-      const ctx = engineContextRef.current
-      if (!ctx) return Promise.resolve(false)
-      return navigateToStepImpl(ctx, stepIndex)
-    },
-    []
-  )
+  const navigateToStep = React.useCallback((stepIndex: number): Promise<boolean> => {
+    const ctx = engineContextRef.current
+    if (!ctx) return Promise.resolve(false)
+    return navigateToStepImpl(ctx, stepIndex)
+  }, [])
 
   // Step ID to index map for branch resolution
   const stepIdMap = React.useMemo(() => {
