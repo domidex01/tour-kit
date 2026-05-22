@@ -204,4 +204,15 @@ export class AnnouncementScheduler {
   get autoShow(): boolean {
     return this.config.autoShow
   }
+
+  /**
+   * Read-only view of the active queue configuration.
+   *
+   * Phase 3 (refactor train) — exposed so callers (notably the provider's
+   * auto-show effect) can drive ordering from `priorityWeights` /
+   * `priorityOrder` without reaching into the private `config` field.
+   */
+  get queueConfig(): Readonly<QueueConfig> {
+    return this.config
+  }
 }

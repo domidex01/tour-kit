@@ -196,6 +196,105 @@ describe('AnnouncementsProvider — autoShow', () => {
     expect(result.current.queue).toContain('minor')
   })
 
+  // Phase 3 (refactor train) — auto-show ordering must be driven by the
+  // configured `priorityWeights` and `priorityOrder`, not by the previously
+  // hardcoded `{ critical: 0, high: 1, normal: 2, low: 3 }` literal.
+  describe('Phase 3 — autoShow priority is config-driven', () => {
+    it('inverted priorityWeights re-order which announcement shows first', async () => {
+      const critical: AnnouncementConfig = {
+        id: 'critical',
+        variant: 'modal',
+        title: 'Critical',
+        priority: 'critical',
+      }
+      const low: AnnouncementConfig = {
+        id: 'low',
+        variant: 'modal',
+        title: 'Low',
+        priority: 'low',
+      }
+
+      const { result } = renderHook(() => useAnnouncementsContext(), {
+        wrapper: makeWrapper([critical, low], {
+          queueConfig: {
+            maxConcurrent: 1,
+            stackBehavior: 'queue',
+            // Invert: 'low' is most important, 'critical' is least.
+            // If the provider still used the hardcoded literal, 'critical'
+            // would auto-show first. With the comparator wired to
+            // priorityWeights, 'low' wins.
+            priorityWeights: { critical: 1, high: 10, normal: 100, low: 1000 },
+          },
+        }),
+      })
+
+      await waitFor(() => {
+        expect(result.current.activeAnnouncement).toBe('low')
+      })
+      expect(result.current.queue).toContain('critical')
+    })
+
+    it("priorityOrder 'fifo' shows insertion-order first regardless of priority", async () => {
+      const high: AnnouncementConfig = {
+        id: 'first-in',
+        variant: 'modal',
+        title: 'First',
+        priority: 'low',
+      }
+      const critical: AnnouncementConfig = {
+        id: 'second-in',
+        variant: 'modal',
+        title: 'Second',
+        priority: 'critical',
+      }
+
+      const { result } = renderHook(() => useAnnouncementsContext(), {
+        wrapper: makeWrapper([high, critical], {
+          queueConfig: {
+            maxConcurrent: 1,
+            stackBehavior: 'queue',
+            priorityOrder: 'fifo',
+          },
+        }),
+      })
+
+      await waitFor(() => {
+        expect(result.current.activeAnnouncement).toBe('first-in')
+      })
+      expect(result.current.queue).toContain('second-in')
+    })
+
+    it("priorityOrder 'lifo' shows the last-registered announcement first", async () => {
+      const a: AnnouncementConfig = {
+        id: 'first',
+        variant: 'modal',
+        title: 'First',
+        priority: 'critical',
+      }
+      const b: AnnouncementConfig = {
+        id: 'second',
+        variant: 'modal',
+        title: 'Second',
+        priority: 'low',
+      }
+
+      const { result } = renderHook(() => useAnnouncementsContext(), {
+        wrapper: makeWrapper([a, b], {
+          queueConfig: {
+            maxConcurrent: 1,
+            stackBehavior: 'queue',
+            priorityOrder: 'lifo',
+          },
+        }),
+      })
+
+      await waitFor(() => {
+        expect(result.current.activeAnnouncement).toBe('second')
+      })
+      expect(result.current.queue).toContain('first')
+    })
+  })
+
   it('autoShow:false never fires until show() is called explicitly', async () => {
     const onShow = vi.fn()
     const config: AnnouncementConfig = {
