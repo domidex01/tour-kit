@@ -731,3 +731,299 @@ describe('post-destroy guards', () => {
     expect(destroySpy).toHaveBeenCalledTimes(1)
   })
 })
+
+// ─── Phase 4: safeDispatch helper ─────────────────────────────────────────────
+
+function throwingPlugin(method: AnalyticsPluginMethod, msg = 'sync-boom'): AnalyticsPlugin {
+  return createMockPlugin({
+    name: `throwing-${method}`,
+    [method]: vi.fn(() => {
+      throw new Error(msg)
+    }),
+  } as Partial<AnalyticsPlugin>)
+}
+
+function rejectingPlugin(method: AnalyticsPluginMethod, msg = 'async-boom'): AnalyticsPlugin {
+  return createMockPlugin({
+    name: `rejecting-${method}`,
+    [method]: vi.fn().mockRejectedValue(new Error(msg)),
+  } as Partial<AnalyticsPlugin>)
+}
+
+type AnalyticsPluginMethod = 'init' | 'track' | 'identify' | 'flush' | 'destroy'
+
+async function microtask() {
+  // Drain microtask queue so fire-and-forget rejections surface
+  await Promise.resolve()
+  await Promise.resolve()
+}
+
+describe('TourAnalytics.safeDispatch (Phase 4)', () => {
+  let loggerErrorSpy: ReturnType<typeof vi.spyOn>
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'))
+    loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {})
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    loggerErrorSpy.mockRestore()
+    consoleErrorSpy.mockRestore()
+    vi.useRealTimers()
+  })
+
+  describe('error isolation (US-1)', () => {
+    it('continues to next plugin when track throws synchronously', async () => {
+      const bad = throwingPlugin('track')
+      const good = createMockPlugin({ name: 'good' })
+      const tracker = new TourAnalytics(
+        createConfig({
+          plugins: [bad, good],
+          debug: true,
+        })
+      )
+      await vi.runAllTimersAsync()
+
+      tracker.track('tour_started', { tourId: 't1' })
+      await microtask()
+
+      expect(bad.track).toHaveBeenCalledTimes(1)
+      expect(good.track).toHaveBeenCalledTimes(1)
+    })
+
+    it('continues to next plugin when track rejects asynchronously', async () => {
+      const bad = rejectingPlugin('track')
+      const good = createMockPlugin({ name: 'good' })
+      const tracker = new TourAnalytics(
+        createConfig({
+          plugins: [bad, good],
+          debug: true,
+        })
+      )
+      await vi.runAllTimersAsync()
+
+      tracker.track('tour_started', { tourId: 't1' })
+      await microtask()
+
+      expect(bad.track).toHaveBeenCalledTimes(1)
+      expect(good.track).toHaveBeenCalledTimes(1)
+      expect(loggerErrorSpy).toHaveBeenCalled()
+      expect(loggerErrorSpy.mock.calls[0]?.[0]).toMatch(/track/)
+    })
+
+    it('continues to next plugin when init throws (sequential await mode)', async () => {
+      const bad = throwingPlugin('init')
+      const good = createMockPlugin({ name: 'good' })
+      new TourAnalytics(
+        createConfig({
+          plugins: [bad, good],
+          debug: true,
+        })
+      )
+      await vi.runAllTimersAsync()
+
+      expect(bad.init).toHaveBeenCalledTimes(1)
+      expect(good.init).toHaveBeenCalledTimes(1)
+    })
+
+    it('catches rejected init promise without halting downstream plugins', async () => {
+      const bad = rejectingPlugin('init')
+      const good = createMockPlugin({ name: 'good' })
+      new TourAnalytics(
+        createConfig({
+          plugins: [bad, good],
+          debug: true,
+        })
+      )
+      await vi.runAllTimersAsync()
+
+      expect(bad.init).toHaveBeenCalledTimes(1)
+      expect(good.init).toHaveBeenCalledTimes(1)
+      expect(loggerErrorSpy.mock.calls[0]?.[0]).toMatch(/init/)
+    })
+  })
+
+  describe('debug routing (US-3)', () => {
+    it('does NOT log when debug: false', async () => {
+      const tracker = new TourAnalytics(
+        createConfig({
+          plugins: [rejectingPlugin('track')],
+          debug: false,
+        })
+      )
+      await vi.runAllTimersAsync()
+
+      tracker.track('tour_started', { tourId: 't1' })
+      await microtask()
+
+      expect(loggerErrorSpy).not.toHaveBeenCalled()
+      expect(consoleErrorSpy).not.toHaveBeenCalled()
+    })
+
+    it('logs via logger.error (not direct console.error) when debug: true', async () => {
+      const tracker = new TourAnalytics(
+        createConfig({
+          plugins: [rejectingPlugin('track')],
+          debug: true,
+        })
+      )
+      await vi.runAllTimersAsync()
+
+      tracker.track('tour_started', { tourId: 't1' })
+      await microtask()
+
+      expect(loggerErrorSpy).toHaveBeenCalled()
+      // logger.error is mocked above, so it does NOT delegate to console.error in
+      // this test. The negative assertion catches a regression where someone
+      // bypasses logger and writes console.error directly.
+      expect(consoleErrorSpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('destroy ordering (US-2, memory #46 regression)', () => {
+    it('still calls plugin destroy hooks AFTER destroyed=true is set', async () => {
+      let observedDestroyedFlag: boolean | null = null
+      let tracker: TourAnalytics | null = null
+      const plugin = createMockPlugin({
+        destroy: vi.fn(() => {
+          observedDestroyedFlag = (tracker as unknown as { destroyed: boolean }).destroyed
+        }),
+      })
+      tracker = new TourAnalytics(createConfig({ plugins: [plugin] }))
+      await vi.runAllTimersAsync()
+
+      tracker.destroy()
+      await microtask()
+
+      expect(plugin.destroy).toHaveBeenCalledTimes(1)
+      expect(observedDestroyedFlag).toBe(true)
+    })
+
+    it('post-destroy track is a no-op for plugins', async () => {
+      const plugin = createMockPlugin()
+      const tracker = new TourAnalytics(createConfig({ plugins: [plugin] }))
+      await vi.runAllTimersAsync()
+      tracker.destroy()
+      await microtask()
+      ;(plugin.track as ReturnType<typeof vi.fn>).mockClear()
+
+      tracker.track('tour_started', { tourId: 't' })
+      await microtask()
+
+      expect(plugin.track).not.toHaveBeenCalled()
+    })
+
+    it('second destroy() call is a no-op', async () => {
+      const plugin = createMockPlugin()
+      const tracker = new TourAnalytics(createConfig({ plugins: [plugin] }))
+      await vi.runAllTimersAsync()
+      tracker.destroy()
+      await microtask()
+      tracker.destroy()
+      await microtask()
+
+      expect(plugin.destroy).toHaveBeenCalledTimes(1)
+    })
+
+    it('post-destroy flush is a no-op', async () => {
+      const plugin = createMockPlugin()
+      const tracker = new TourAnalytics(createConfig({ plugins: [plugin] }))
+      await vi.runAllTimersAsync()
+      tracker.destroy()
+      ;(plugin.flush as ReturnType<typeof vi.fn>).mockClear()
+
+      await tracker.flush()
+
+      expect(plugin.flush).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('track parallelism (US-4)', () => {
+    it('fire-and-forget — both plugins called synchronously even with slow async track', async () => {
+      let resolveA: (() => void) | null = null
+      let resolveB: (() => void) | null = null
+      const slowA = createMockPlugin({
+        name: 'A',
+        track: vi.fn(
+          () =>
+            new Promise<void>((r) => {
+              resolveA = r
+            })
+        ),
+      })
+      const slowB = createMockPlugin({
+        name: 'B',
+        track: vi.fn(
+          () =>
+            new Promise<void>((r) => {
+              resolveB = r
+            })
+        ),
+      })
+      const tracker = new TourAnalytics(createConfig({ plugins: [slowA, slowB] }))
+      await vi.runAllTimersAsync()
+
+      tracker.track('tour_started', { tourId: 't' })
+      // Without awaiting anything, BOTH plugin track mocks should already be called
+      expect(slowA.track).toHaveBeenCalledTimes(1)
+      expect(slowB.track).toHaveBeenCalledTimes(1)
+      ;(resolveA as (() => void) | null)?.()
+      ;(resolveB as (() => void) | null)?.()
+      await microtask()
+    })
+  })
+
+  describe('flush serial-await (US-5)', () => {
+    it('awaits each plugin flush in order', async () => {
+      const order: string[] = []
+      // Yield a microtask before recording so a parallel/non-awaiting dispatch
+      // would interleave the pushes — only true serial-await keeps them ordered.
+      const a = createMockPlugin({
+        name: 'A',
+        flush: vi.fn(async () => {
+          order.push('A:start')
+          await Promise.resolve()
+          order.push('A:end')
+        }),
+      })
+      const b = createMockPlugin({
+        name: 'B',
+        flush: vi.fn(async () => {
+          order.push('B:start')
+          await Promise.resolve()
+          order.push('B:end')
+        }),
+      })
+      const tracker = new TourAnalytics(createConfig({ plugins: [a, b] }))
+      await vi.runAllTimersAsync()
+
+      await tracker.flush()
+      expect(order).toEqual(['A:start', 'A:end', 'B:start', 'B:end'])
+    })
+
+    it('a rejecting plugin flush does not stop the next plugin', async () => {
+      const order: string[] = []
+      const bad = rejectingPlugin('flush')
+      const good = createMockPlugin({
+        name: 'good',
+        flush: vi.fn(async () => {
+          order.push('good')
+        }),
+      })
+      const tracker = new TourAnalytics(
+        createConfig({
+          plugins: [bad, good],
+          debug: true,
+        })
+      )
+      await vi.runAllTimersAsync()
+
+      await tracker.flush()
+      expect(order).toEqual(['good'])
+      expect(loggerErrorSpy.mock.calls[0]?.[0]).toMatch(/flush/)
+    })
+  })
+})

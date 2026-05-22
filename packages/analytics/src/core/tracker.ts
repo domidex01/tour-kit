@@ -3,6 +3,16 @@ import type { TourEvent, TourEventData, TourEventName } from '../types/events'
 import type { AnalyticsConfig, AnalyticsPlugin } from '../types/plugin'
 import { type EventQueue, createEventQueue } from './event-queue'
 
+type DispatchMode = 'await' | 'fire-and-forget'
+
+type AnalyticsPluginMethod = 'init' | 'track' | 'identify' | 'flush' | 'destroy'
+
+interface SafeDispatchOptions {
+  mode: DispatchMode
+  /** When true, dispatch even if `this.destroyed` is already set (used by `destroy()` itself). */
+  allowDestroyed?: boolean
+}
+
 /**
  * Main analytics tracker class
  */
@@ -38,15 +48,7 @@ export class TourAnalytics {
   private async init() {
     if (this.initialized) return
 
-    for (const plugin of this.plugins) {
-      try {
-        await plugin.init?.()
-      } catch (error) {
-        if (this.config.debug) {
-          logger.error(`Analytics: Failed to init plugin ${plugin.name}:`, error)
-        }
-      }
-    }
+    await this.safeDispatch('init', 'init plugin', [], { mode: 'await' })
 
     if (this.config.userId) {
       this.identify(this.config.userId, this.config.userProperties)
@@ -58,17 +60,11 @@ export class TourAnalytics {
   /**
    * Identify a user
    */
-  identify(userId: string, properties?: Record<string, unknown>) {
+  identify(userId: string, properties?: Record<string, unknown>): void {
     if (this.destroyed) return
-    for (const plugin of this.plugins) {
-      try {
-        plugin.identify?.(userId, properties)
-      } catch (error) {
-        if (this.config.debug) {
-          logger.error(`Analytics: Failed to identify in ${plugin.name}:`, error)
-        }
-      }
-    }
+    void this.safeDispatch('identify', 'identify in', [userId, properties], {
+      mode: 'fire-and-forget',
+    })
   }
 
   /**
@@ -101,17 +97,11 @@ export class TourAnalytics {
   /**
    * Dispatch events to all plugins
    */
-  private dispatchEvents(events: TourEvent[]) {
+  private dispatchEvents(events: TourEvent[]): void {
     for (const event of events) {
-      for (const plugin of this.plugins) {
-        try {
-          plugin.track(event)
-        } catch (error) {
-          if (this.config.debug) {
-            logger.error(`Analytics: Failed to track in ${plugin.name}:`, error)
-          }
-        }
-      }
+      void this.safeDispatch('track', 'track in', [event], {
+        mode: 'fire-and-forget',
+      })
     }
   }
 
@@ -279,40 +269,71 @@ export class TourAnalytics {
   /**
    * Flush all queued events
    */
-  async flush() {
+  async flush(): Promise<void> {
     if (this.destroyed) return
     // Flush internal event queue first
     this.eventQueue?.flush()
 
     // Then flush plugin queues
-    for (const plugin of this.plugins) {
-      try {
-        await plugin.flush?.()
-      } catch (error) {
-        if (this.config.debug) {
-          logger.error(`Analytics: Failed to flush ${plugin.name}:`, error)
-        }
-      }
-    }
+    await this.safeDispatch('flush', 'flush', [], { mode: 'await' })
   }
 
   /**
    * Destroy tracker and clean up
    */
-  destroy() {
+  destroy(): void {
     if (this.destroyed) return
     this.destroyed = true
     // Clean up event queue
     this.eventQueue?.destroy()
     this.eventQueue = null
 
+    void this.safeDispatch('destroy', 'destroy', [], {
+      mode: 'fire-and-forget',
+      allowDestroyed: true,
+    })
+  }
+
+  /**
+   * Dispatch a lifecycle method to every plugin with uniform error handling.
+   *
+   * Preserves the prior behavior:
+   * - One throwing/rejecting plugin does not stop downstream plugins.
+   * - Sync throws and async rejections are reported through the same path.
+   * - `track` and `identify` are fire-and-forget; `init` and `flush` await sequentially.
+   * - `destroy()` opts in via `allowDestroyed: true` so plugin destroy hooks still run
+   *   after `this.destroyed` is set (see memory #46 — short-circuiting here would
+   *   silently drop the destroy event).
+   */
+  private async safeDispatch<M extends AnalyticsPluginMethod>(
+    method: M,
+    errorLabel: string,
+    args: Parameters<NonNullable<AnalyticsPlugin[M]>>,
+    options: SafeDispatchOptions
+  ): Promise<void> {
+    if (!options.allowDestroyed && this.destroyed) return
+
+    const report = (pluginName: string, error: unknown): void => {
+      if (this.config.debug) {
+        logger.error(`Analytics: Failed to ${errorLabel} ${pluginName}:`, error)
+      }
+    }
+
     for (const plugin of this.plugins) {
+      const fn = plugin[method] as ((...a: unknown[]) => void | Promise<void>) | undefined
+      if (!fn) continue
       try {
-        plugin.destroy?.()
-      } catch (error) {
-        if (this.config.debug) {
-          logger.error(`Analytics: Failed to destroy ${plugin.name}:`, error)
+        const result = fn.apply(plugin, args as unknown[])
+        if (result instanceof Promise) {
+          const handled = result.catch((err: unknown) => {
+            report(plugin.name, err)
+          })
+          if (options.mode === 'await') {
+            await handled
+          }
         }
+      } catch (error) {
+        report(plugin.name, error)
       }
     }
   }
