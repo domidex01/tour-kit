@@ -429,8 +429,8 @@ export function TourProvider({
     if (diagnoseHintFiredRef.current) return
     if (typeof process === 'undefined' || process.env?.NODE_ENV === 'production') return
     diagnoseHintFiredRef.current = true
-    console.warn(
-      '[Tour Kit] Tip: pass <TourProvider diagnose> in dev to see why a tour did not fire. https://tourkit.dev/docs/core/diagnostic'
+    logger.warn(
+      'Tip: pass <TourProvider diagnose> in dev to see why a tour did not fire. https://tourkit.dev/docs/core/diagnostic'
     )
   }, [])
 

@@ -105,9 +105,7 @@ function register(entry: RegistryEntry): () => void {
   const ref = new WeakRef(entry)
   const existing = entries.get(entry.id)?.deref()
   if (existing && isNonProductionEnv()) {
-    logger.error(
-      `Tour "${entry.id}" registered twice. Keeping the latest registration.`
-    )
+    logger.error(`Tour "${entry.id}" registered twice. Keeping the latest registration.`)
   }
   entries.set(entry.id, ref)
   notify()
