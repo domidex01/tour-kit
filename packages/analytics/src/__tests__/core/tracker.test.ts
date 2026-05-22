@@ -876,8 +876,10 @@ describe('TourAnalytics.safeDispatch (Phase 4)', () => {
       await microtask()
 
       expect(loggerErrorSpy).toHaveBeenCalled()
-      // logger.error routes through console.error internally; the assertion that
-      // matters is that the helper went through `logger`, asserted above.
+      // logger.error is mocked above, so it does NOT delegate to console.error in
+      // this test. The negative assertion catches a regression where someone
+      // bypasses logger and writes console.error directly.
+      expect(consoleErrorSpy).not.toHaveBeenCalled()
     })
   })
 
@@ -977,23 +979,29 @@ describe('TourAnalytics.safeDispatch (Phase 4)', () => {
   describe('flush serial-await (US-5)', () => {
     it('awaits each plugin flush in order', async () => {
       const order: string[] = []
+      // Yield a microtask before recording so a parallel/non-awaiting dispatch
+      // would interleave the pushes — only true serial-await keeps them ordered.
       const a = createMockPlugin({
         name: 'A',
         flush: vi.fn(async () => {
-          order.push('A')
+          order.push('A:start')
+          await Promise.resolve()
+          order.push('A:end')
         }),
       })
       const b = createMockPlugin({
         name: 'B',
         flush: vi.fn(async () => {
-          order.push('B')
+          order.push('B:start')
+          await Promise.resolve()
+          order.push('B:end')
         }),
       })
       const tracker = new TourAnalytics(createConfig({ plugins: [a, b] }))
       await vi.runAllTimersAsync()
 
       await tracker.flush()
-      expect(order).toEqual(['A', 'B'])
+      expect(order).toEqual(['A:start', 'A:end', 'B:start', 'B:end'])
     })
 
     it('a rejecting plugin flush does not stop the next plugin', async () => {
