@@ -37,7 +37,11 @@ describe('SegmentationProvider + useSegment', () => {
       )
       expect(screen.getByTestId('single')).toHaveTextContent('false')
       expect(warnSpy).toHaveBeenCalledOnce()
-      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/\[tour-kit\] useSegment: unknown segment "ghost"/)
+      // The warn now routes through logger.warn, which forwards as
+      // (prefix, message) — assert against joined args so prefix can move.
+      const joined = (warnSpy.mock.calls[0] ?? []).join(' ')
+      expect(joined).toMatch(/useSegment: unknown segment "ghost"/)
+      expect(joined).toMatch(/\[tour-kit\]/)
     })
 
     it('does NOT warn for unknown segment in production', () => {

@@ -169,7 +169,9 @@ describe('useTourAssistant', () => {
         result.current.askAboutStep()
       })
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('askAboutStep'))
+      // Warn routes through @tour-kit/core logger → (prefix, message).
+      const joined = (consoleWarnSpy.mock.calls[0] ?? []).join(' ')
+      expect(joined).toContain('askAboutStep')
     })
 
     it('is a no-op when tourContextValue is null', () => {

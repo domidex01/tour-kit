@@ -116,7 +116,11 @@ describe('<TrialBadge>', () => {
       expect(container.firstChild).toBeNull()
     })
     expect(warnSpy).toHaveBeenCalled()
-    expect(warnSpy.mock.calls[0]?.[0]).toContain('<TrialBadge>')
+    // The warn now routes through @tour-kit/core's logger, which prepends
+    // '[tour-kit]' as the first arg. The TrialBadge message lands as the
+    // second arg. (Phase 2 logger migration.)
+    const args = warnSpy.mock.calls[0] ?? []
+    expect(args.join(' ')).toContain('<TrialBadge>')
     warnSpy.mockRestore()
   })
 
