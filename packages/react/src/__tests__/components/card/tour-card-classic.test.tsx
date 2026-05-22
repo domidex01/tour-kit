@@ -119,10 +119,11 @@ describe('TourCard variant="classic" opt-out', () => {
     const { a, b } = nextIds()
     const user = userEvent.setup()
 
+    // Warn now routes through @tour-kit/core logger → (prefix, message),
+    // so the deprecation substring may land in either arg.
     const countDeprecationWarns = () =>
-      warnSpy.mock.calls.filter(
-        (call: unknown[]) =>
-          typeof call[0] === 'string' && /variant="classic">? is deprecated/.test(call[0])
+      warnSpy.mock.calls.filter((call: unknown[]) =>
+        /variant="classic">? is deprecated/.test(call.map((a) => String(a ?? '')).join(' '))
       ).length
 
     const tour = makeTwoStepTour(a, b)

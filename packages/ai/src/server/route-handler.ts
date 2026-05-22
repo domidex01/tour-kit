@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import {
   type LanguageModel,
   type UIMessage,
@@ -193,7 +194,7 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
           // Replace last message with hook result
           processedMessages = [...messages.slice(0, -1), hookResult]
         } catch (error) {
-          console.warn('[@tour-kit/ai] beforeSend hook error:', error)
+          logger.warn('AI: beforeSend hook error:', error)
           emitEvent(options.onEvent, 'error', {
             error: 'beforeSend hook failed',
             source: 'server',
@@ -229,7 +230,7 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
             try {
               finalText = await options.beforeResponse(text)
             } catch (error) {
-              console.warn('[@tour-kit/ai] beforeResponse hook error:', error)
+              logger.warn('AI: beforeResponse hook error:', error)
               // Use original text on error
             }
           }

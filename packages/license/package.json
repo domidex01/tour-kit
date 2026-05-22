@@ -73,6 +73,7 @@
     "test:license-test-mode-guard": "node scripts/check-license-test-mode.mjs"
   },
   "dependencies": {
+    "@tour-kit/core": "workspace:*",
     "zod": "catalog:"
   },
   "peerDependencies": {

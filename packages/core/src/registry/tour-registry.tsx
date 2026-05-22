@@ -21,9 +21,11 @@
  *     producing a fresh reference that `useSyncExternalStore` will compare via
  *     `Object.is` and rerender consumers on changes only.
  *   - **Dev double-id is logged, not thrown.** HMR remounts and accidental
- *     double-mounts must not tank DX — emit `console.error`, keep the latest
+ *     double-mounts must not tank DX — log via `logger.error`, keep the latest
  *     registration, and document the behaviour in `imperative-control.mdx`.
  */
+
+import { logger } from '../utils/logger'
 
 /**
  * Live state mirror for a registered tour.
@@ -103,9 +105,7 @@ function register(entry: RegistryEntry): () => void {
   const ref = new WeakRef(entry)
   const existing = entries.get(entry.id)?.deref()
   if (existing && isNonProductionEnv()) {
-    console.error(
-      `[Tour Kit] Tour "${entry.id}" registered twice. Keeping the latest registration.`
-    )
+    logger.error(`Tour "${entry.id}" registered twice. Keeping the latest registration.`)
   }
   entries.set(entry.id, ref)
   notify()

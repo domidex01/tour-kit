@@ -147,9 +147,9 @@ describe('MediaSlot reduced-motion behavior', () => {
   it('GIF without poster emits a dev-only console.warn', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     render(<MediaSlot src="/animation.gif" />)
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining('GIF rendered without poster under prefers-reduced-motion: reduce')
-    )
+    // Warn now routes through @tour-kit/core logger → (prefix, message).
+    const joined = (warn.mock.calls[0] ?? []).join(' ')
+    expect(joined).toContain('GIF rendered without poster under prefers-reduced-motion: reduce')
     warn.mockRestore()
   })
 

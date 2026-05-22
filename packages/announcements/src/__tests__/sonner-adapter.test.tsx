@@ -101,7 +101,9 @@ describe('sonnerAdapter — sonner absent', () => {
 
     expect(handle).toBeNull()
     expect(warnSpy).toHaveBeenCalledTimes(1)
-    expect(warnSpy.mock.calls[0]?.[0]).toEqual(expect.stringContaining('sonner'))
+    // Warn routes through @tour-kit/core logger → (prefix, message).
+    const joined = (warnSpy.mock.calls[0] ?? []).join(' ')
+    expect(joined).toContain('sonner')
   })
 
   it('does not re-warn on subsequent calls (module-scope flag)', async () => {

@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@tour-kit/core'
 import { useContext } from 'react'
 import { LicenseContext } from '../context/license-context'
 
@@ -40,7 +41,7 @@ export function TrialBadge({
 
   if (resolved === undefined) {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn(
+      logger.warn(
         '<TrialBadge> rendered without trialDays — pass trialDays to <LicenseProvider> to enable the trial countdown surface.'
       )
     }

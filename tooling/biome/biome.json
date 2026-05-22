@@ -22,7 +22,13 @@
       },
       "suspicious": {
         "noExplicitAny": "warn",
-        "noArrayIndexKey": "warn"
+        "noArrayIndexKey": "warn",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": []
+          }
+        }
       },
       "a11y": {
         "recommended": true,
@@ -49,5 +55,40 @@
     "formatter": {
       "trailingCommas": "none"
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/__tests__/**",
+        "**/tsup.config.ts",
+        "**/vitest.config.ts",
+        "**/playwright.config.ts",
+        "reports/**",
+        "apps/docs/app/api/**",
+        "apps/tour-kit-mcp/**",
+        "examples/**",
+        "packages/core/src/utils/logger.ts",
+        "packages/core/src/lib/interpolate.ts",
+        "packages/core/src/context/tour-provider.tsx",
+        "packages/analytics/src/plugins/console.ts",
+        "packages/license/src/components/license-test-mode.tsx",
+        "packages/license/src/components/license-warning.tsx",
+        "packages/license/src/components/pro-gate.tsx",
+        "packages/license/src/lib/domain.ts",
+        "packages/codemods/src/cli.ts",
+        "packages/codemods/src/bin/**"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ]
 }

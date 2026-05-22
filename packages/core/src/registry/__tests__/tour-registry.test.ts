@@ -143,9 +143,10 @@ describe('tourRegistry — dev double-id console.error', () => {
     tourRegistry.register(makeEntry('welcome'))
 
     expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Tour "welcome" registered twice')
-    )
+    // The error now routes through logger.error → (prefix, message),
+    // so the substring lands in the second positional arg.
+    const joined = (consoleErrorSpy.mock.calls[0] ?? []).join(' ')
+    expect(joined).toContain('Tour "welcome" registered twice')
 
     consoleErrorSpy.mockRestore()
   })

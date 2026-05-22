@@ -76,8 +76,10 @@ describe('<TourProvider> dev-mode warning', () => {
         <span>x</span>
       </TourProvider>
     )
+    // The warn now routes through logger.warn, which forwards as
+    // (prefix, ...args), so the "diagnose" substring lands in args[1].
     const diagnoseCalls = warn.mock.calls.filter((args) =>
-      String(args[0] ?? '').includes('diagnose')
+      args.some((a) => String(a ?? '').includes('diagnose'))
     )
     expect(diagnoseCalls).toHaveLength(1)
   })
@@ -89,8 +91,10 @@ describe('<TourProvider> dev-mode warning', () => {
         <span>x</span>
       </TourProvider>
     )
+    // The warn now routes through logger.warn, which forwards as
+    // (prefix, ...args), so the "diagnose" substring lands in args[1].
     const diagnoseCalls = warn.mock.calls.filter((args) =>
-      String(args[0] ?? '').includes('diagnose')
+      args.some((a) => String(a ?? '').includes('diagnose'))
     )
     expect(diagnoseCalls).toHaveLength(0)
   })
@@ -108,8 +112,10 @@ describe('<TourProvider> production-mode silence', () => {
         <span>x</span>
       </TourProvider>
     )
+    // The warn now routes through logger.warn, which forwards as
+    // (prefix, ...args), so the "diagnose" substring lands in args[1].
     const diagnoseCalls = warn.mock.calls.filter((args) =>
-      String(args[0] ?? '').includes('diagnose')
+      args.some((a) => String(a ?? '').includes('diagnose'))
     )
     expect(diagnoseCalls).toHaveLength(0)
   })

@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@tour-kit/core'
 import * as React from 'react'
 import type {
   ToastAdapter,
@@ -10,11 +11,10 @@ import type {
 let warned = false
 function warnOnce(msg: string): void {
   if (warned) return
-  // Allow warnings in production too — consumers benefit from one-time visibility
-  // when they misconfigure (e.g., forgot to render <Toaster />). The warned flag
-  // keeps it bounded to one message per page load.
+  // One-time visibility for misconfiguration. Respects `logger.configure({ level })`
+  // so consumers that silence the logger don't get unexpected console output.
   warned = true
-  console.warn(`[tour-kit] ${msg}`)
+  logger.warn(msg)
 }
 
 /**

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { logger } from '../../utils/logger'
 import { matchesAudience } from '../audience'
 import { useSegmentationContext } from './segmentation-context'
 import type { SegmentSource } from './types'
@@ -58,7 +59,7 @@ export function useSegment(name: string): boolean {
     const seg = segments[name]
     if (!seg) {
       if (process.env.NODE_ENV !== 'production') {
-        console.warn(`[tour-kit] useSegment: unknown segment "${name}"`)
+        logger.warn(`useSegment: unknown segment "${name}"`)
       }
       return false
     }

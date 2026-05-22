@@ -6,6 +6,7 @@ import {
   canShowAfterDismissal,
   canShowByFrequency,
   createPrefixedStorage,
+  logger,
   safeJSONParse,
 } from '@tour-kit/core'
 import * as React from 'react'
@@ -437,9 +438,7 @@ export function HintsProvider({ children, hints, storage }: HintsProviderProps) 
     const persistedState = frequencyStateRef.current.get(id) ?? emptyFrequencyState()
     if (rule && !canShowByFrequency(persistedState, rule)) {
       if (process.env.NODE_ENV !== 'production') {
-        console.debug(
-          `[tour-kit] showHint("${id}") suppressed by frequency rule ${JSON.stringify(rule)}`
-        )
+        logger.debug(`showHint("${id}") suppressed by frequency rule ${JSON.stringify(rule)}`)
       }
       return
     }
