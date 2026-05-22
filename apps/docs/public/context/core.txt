@@ -48,6 +48,8 @@ Types:
     Direction
     TourKitConfig
     TourStep
+    VisibleTourStep
+    HiddenTourStep
     StepOptions
     StepIdOf
     AudienceProp
@@ -83,7 +85,6 @@ Types:
     UseFlowSessionReturn
     UseBroadcastReturn
     UseAdvanceOnOptions
-    PositionResult
     LogLevel
     LoggerConfig
     ThrottledFunction
@@ -170,6 +171,8 @@ Utilities:
     // Runtime target resolver (Phase 5) — single source of truth for
   // string/ref/getter dereference across hooks and React consumers.
   resolveTarget
+    // Step union discriminator (Phase 3 — refactor train).
+  isVisibleStep
     dispatchAdvanceEvent
     getElement
     isElementVisible
@@ -180,11 +183,7 @@ Utilities:
     getElementRect
     getViewportDimensions
     parsePlacement
-    calculatePosition
-    wouldOverflow
     getOppositeSide
-    getFallbackPlacements
-    calculatePositionWithCollision
     getDocumentDirection
     mirrorSide
     mirrorAlignment

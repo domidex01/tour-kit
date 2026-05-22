@@ -11,6 +11,7 @@ import {
 } from '@floating-ui/react'
 import {
   type Placement,
+  isVisibleStep,
   logger,
   resolveTarget,
   useFocusTrap,
@@ -86,16 +87,23 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
     const reducedMotion = useReducedMotion()
     const { containerRef, activate, deactivate } = useFocusTrap(isActive)
 
+    // Phase 3 (refactor train) — TourStep is now a discriminated union;
+    // hidden steps don't render UI so we narrow to the visible branch here
+    // and bail out below. The provider already skips hidden steps on advance,
+    // so this is a defensive narrow for typing rather than a runtime gate.
+    const visibleStep =
+      currentStep && isVisibleStep(currentStep) ? currentStep : null
+
     const targetElement = React.useMemo(() => {
-      if (!currentStep?.target) return null
-      return resolveTarget(currentStep.target)
-    }, [currentStep?.target])
+      if (!visibleStep?.target) return null
+      return resolveTarget(visibleStep.target)
+    }, [visibleStep?.target])
 
     const { refs, floatingStyles, context } = useFloating({
       open: isActive,
-      placement: toFloatingPlacement(currentStep?.placement),
+      placement: toFloatingPlacement(visibleStep?.placement),
       middleware: [
-        offset(currentStep?.offset?.[1] ?? 12),
+        offset(visibleStep?.offset?.[1] ?? 12),
         flip({ fallbackAxisSideDirection: 'start' }),
         shift({ padding: 8 }),
         arrow({ element: arrowRef }),
@@ -119,23 +127,23 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
 
     // Emit deprecation warning once per step id when classic variant is in use.
     React.useEffect(() => {
-      if (variant !== 'classic' || !currentStep?.id) return
+      if (variant !== 'classic' || !visibleStep?.id) return
       if (process.env.NODE_ENV === 'production') return
-      if (warnedClassicStepIds.has(currentStep.id)) return
-      warnedClassicStepIds.add(currentStep.id)
+      if (warnedClassicStepIds.has(visibleStep.id)) return
+      warnedClassicStepIds.add(visibleStep.id)
       logger.warn(
         'react: <TourCard variant="classic"> is deprecated and will be removed in the next major. See https://usertourkit.com/docs/react/components/tour-card-migration'
       )
-    }, [variant, currentStep?.id])
+    }, [variant, visibleStep?.id])
 
-    const resolvedTitle = useResolvedText(currentStep?.title)
-    const resolvedDescription = useResolvedText(currentStep?.description)
+    const resolvedTitle = useResolvedText(visibleStep?.title)
+    const resolvedDescription = useResolvedText(visibleStep?.description)
 
-    if (!isActive || !currentStep) return null
+    if (!isActive || !visibleStep) return null
 
-    const showNavigation = currentStep.showNavigation ?? true
-    const showClose = currentStep.showClose ?? true
-    const showProgress = currentStep.showProgress ?? true
+    const showNavigation = visibleStep.showNavigation ?? true
+    const showClose = visibleStep.showClose ?? true
+    const showProgress = visibleStep.showProgress ?? true
 
     const isRefreshed = variant !== 'classic'
     const indicatorEnabled = showStepIndicator ?? isRefreshed
@@ -166,7 +174,7 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
             tourCardVariants({ size, variant }),
             'z-50',
             !reducedMotion && 'transition-[transform,top,left] duration-150 ease-out',
-            currentStep.className,
+            visibleStep.className,
             className
           )}
           {...props}
@@ -178,23 +186,23 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
           role="dialog"
           aria-modal="true"
           aria-label={ariaLabel}
-          data-tour-step={currentStep.id}
+          data-tour-step={visibleStep.id}
           data-tour-variant={variant}
         >
           <TourCardHeader
             title={resolvedTitle}
-            titleId={`tour-step-title-${currentStep.id}`}
+            titleId={`tour-step-title-${visibleStep.id}`}
             showClose={showClose}
             stepIndicator={stepIndicator}
           />
 
-          {currentStep.media && (
+          {visibleStep.media && (
             <div className="px-4" data-slot="tour-card-media">
-              <MediaSlot {...currentStep.media} />
+              <MediaSlot {...visibleStep.media} />
             </div>
           )}
 
-          <TourCardContent content={currentStep.content} description={resolvedDescription} />
+          <TourCardContent content={visibleStep.content} description={resolvedDescription} />
 
           <TourCardFooter
             currentStep={currentStepIndex + 1}

@@ -7,6 +7,7 @@ import { useRoutePersistence } from '../hooks/use-route-persistence'
 import { explainTour } from '../lib/diagnostic'
 import { TourValidationError, validateTour } from '../lib/validate-tour'
 import { TourRouteError, waitForStepTarget } from '../lib/wait-for-step-target'
+import { isVisibleStep } from '../types/step'
 import { tourRegistry } from '../registry/tour-registry'
 import type {
   BranchContext,
@@ -676,7 +677,7 @@ export function TourProvider({
           endTimer()
           return
         }
-        if (targetStep) {
+        if (targetStep && isVisibleStep(targetStep)) {
           await waitForStepTarget(targetStep, {
             route,
             timeoutMs: targetStep.waitTimeout ?? 3000,

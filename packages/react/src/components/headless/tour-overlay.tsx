@@ -1,6 +1,12 @@
 'use client'
 
-import { resolveTarget, usePrefersReducedMotion, useSpotlight, useTour } from '@tour-kit/core'
+import {
+  isVisibleStep,
+  resolveTarget,
+  usePrefersReducedMotion,
+  useSpotlight,
+  useTour,
+} from '@tour-kit/core'
 import * as React from 'react'
 import { TourPortal } from '../primitives/tour-portal'
 
@@ -34,22 +40,27 @@ export function TourOverlayHeadless({
   const { overlayStyle, cutoutStyle, show, hide, targetRect } = useSpotlight()
   const prefersReducedMotion = usePrefersReducedMotion()
 
+  // Phase 3 (refactor train) — narrow to the visible branch of the TourStep
+  // discriminated union; hidden steps have no spotlight settings.
+  const visibleStep =
+    currentStep && isVisibleStep(currentStep) ? currentStep : null
+
   const targetElement = React.useMemo(() => {
-    if (!currentStep?.target) return null
-    return resolveTarget(currentStep.target)
-  }, [currentStep?.target])
+    if (!visibleStep?.target) return null
+    return resolveTarget(visibleStep.target)
+  }, [visibleStep?.target])
 
   React.useEffect(() => {
     if (isActive && targetElement) {
       show(targetElement, {
-        padding: currentStep?.spotlightPadding,
-        borderRadius: currentStep?.spotlightRadius,
+        padding: visibleStep?.spotlightPadding,
+        borderRadius: visibleStep?.spotlightRadius,
         animate: !prefersReducedMotion,
       })
     } else {
       hide()
     }
-  }, [isActive, targetElement, currentStep, show, hide, prefersReducedMotion])
+  }, [isActive, targetElement, visibleStep, show, hide, prefersReducedMotion])
 
   if (!isActive) return null
 
@@ -58,7 +69,7 @@ export function TourOverlayHeadless({
     overlayStyle,
     cutoutStyle,
     targetRect,
-    interactive: currentStep?.interactive ?? false,
+    interactive: visibleStep?.interactive ?? false,
   }
 
   if (render) {
@@ -79,7 +90,7 @@ export function TourOverlayHeadless({
             className={cutoutClassName}
             style={{
               ...cutoutStyle,
-              pointerEvents: currentStep?.interactive ? 'auto' : 'none',
+              pointerEvents: visibleStep?.interactive ? 'auto' : 'none',
               ...customCutoutStyle,
             }}
           />

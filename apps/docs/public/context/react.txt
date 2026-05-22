@@ -197,7 +197,6 @@ Utilities:
     createStorageAdapter
     createPrefixedStorage
     safeJSONParse
-    calculatePosition
     defaultSpotlightConfig
     defaultKeyboardConfig
     defaultPersistenceConfig

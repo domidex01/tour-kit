@@ -9,7 +9,7 @@ import {
   shift,
   useFloating,
 } from '@floating-ui/react'
-import { type Placement, resolveTarget, useFocusTrap, useTour } from '@tour-kit/core'
+import { isVisibleStep, type Placement, resolveTarget, useFocusTrap, useTour } from '@tour-kit/core'
 import * as React from 'react'
 import { TourPortal } from '../primitives/tour-portal'
 
@@ -61,16 +61,21 @@ export function TourCardHeadless({ className, style, children, render }: TourCar
   const arrowRef = React.useRef<SVGSVGElement>(null)
   const { containerRef, activate, deactivate } = useFocusTrap(isActive)
 
+  // Phase 3 (refactor train) — narrow to the visible branch of the TourStep
+  // discriminated union; hidden steps never render a card.
+  const visibleStep =
+    currentStep && isVisibleStep(currentStep) ? currentStep : null
+
   const targetElement = React.useMemo(() => {
-    if (!currentStep?.target) return null
-    return resolveTarget(currentStep.target)
-  }, [currentStep?.target])
+    if (!visibleStep?.target) return null
+    return resolveTarget(visibleStep.target)
+  }, [visibleStep?.target])
 
   const { refs, floatingStyles, context } = useFloating({
     open: isActive,
-    placement: toFloatingPlacement(currentStep?.placement),
+    placement: toFloatingPlacement(visibleStep?.placement),
     middleware: [
-      offset(currentStep?.offset?.[1] ?? 12),
+      offset(visibleStep?.offset?.[1] ?? 12),
       flip({ fallbackAxisSideDirection: 'start' }),
       shift({ padding: 8 }),
       arrow({ element: arrowRef }),
@@ -92,11 +97,11 @@ export function TourCardHeadless({ className, style, children, render }: TourCar
     }
   }, [isActive, activate, deactivate])
 
-  if (!isActive || !currentStep) return null
+  if (!isActive || !visibleStep) return null
 
   const renderProps: TourCardRenderProps = {
     isActive,
-    currentStep,
+    currentStep: visibleStep,
     currentStepIndex,
     totalSteps,
     isFirstStep,
@@ -130,7 +135,7 @@ export function TourCardHeadless({ className, style, children, render }: TourCar
         // biome-ignore lint/a11y/useSemanticElements: Using div for floating-ui positioning compatibility
         role="dialog"
         aria-modal="true"
-        aria-labelledby={`tour-step-title-${currentStep.id}`}
+        aria-labelledby={`tour-step-title-${visibleStep.id}`}
       >
         {children}
       </div>
