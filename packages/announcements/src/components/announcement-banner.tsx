@@ -71,7 +71,10 @@ export const AnnouncementBanner = React.forwardRef<HTMLDivElement, AnnouncementB
 
     const effectivePosition = position ?? config?.bannerOptions?.position ?? 'top'
     const effectiveIntent = intent ?? config?.bannerOptions?.intent ?? 'info'
-    const effectiveSticky = sticky ?? config?.bannerOptions?.sticky ?? false
+    // Default to sticky so a flow-positioned banner never silently competes
+    // for layout space inside a parent flex/grid container. Consumers opt
+    // out via `sticky={false}` or `bannerOptions.sticky: false`.
+    const effectiveSticky = sticky ?? config?.bannerOptions?.sticky ?? true
 
     if (!open) return null
 

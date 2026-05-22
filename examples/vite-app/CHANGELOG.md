@@ -1,5 +1,24 @@
 # vite-tour-kit-demo
 
+## 0.0.18
+
+### Patch Changes
+
+- Updated dependencies [d67d905]
+- Updated dependencies [b01b53c]
+  - @tour-kit/core@1.0.0
+  - @tour-kit/react@1.0.0
+  - @tour-kit/announcements@4.1.0
+  - @tour-kit/license@1.2.0
+  - @tour-kit/adoption@2.1.3
+  - @tour-kit/ai@0.11.3
+  - @tour-kit/analytics@0.11.3
+  - @tour-kit/checklists@0.13.3
+  - @tour-kit/hints@1.0.0
+  - @tour-kit/media@0.12.4
+  - @tour-kit/surveys@3.0.3
+  - @tour-kit/scheduling@0.11.3
+
 ## 0.0.17
 
 ### Patch Changes

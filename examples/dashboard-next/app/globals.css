@@ -1,6 +1,23 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Tell Tailwind v4 to scan every tour-kit package source for utility classes.
+   Without these directives the JIT only sees files inside this dashboard, so
+   arbitrary-value classes used inside the packages (modal centering, overlay
+   opacities, launcher positioning) never get generated and the components
+   render unstyled. For consumers installing the packages from npm, replace
+   each path below with the equivalent node_modules dist glob. */
+@source '../../../packages/adoption/src/**/*.{ts,tsx}';
+@source '../../../packages/ai/src/**/*.{ts,tsx}';
+@source '../../../packages/announcements/src/**/*.{ts,tsx}';
+@source '../../../packages/checklists/src/**/*.{ts,tsx}';
+@source '../../../packages/core/src/**/*.{ts,tsx}';
+@source '../../../packages/hints/src/**/*.{ts,tsx}';
+@source '../../../packages/license/src/**/*.{ts,tsx}';
+@source '../../../packages/media/src/**/*.{ts,tsx}';
+@source '../../../packages/react/src/**/*.{ts,tsx}';
+@source '../../../packages/surveys/src/**/*.{ts,tsx}';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

@@ -1,5 +1,13 @@
 # @tour-kit/scheduling
 
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [b01b53c]
+  - @tour-kit/license@1.2.0
+  - @tour-kit/analytics@0.11.3
+
 ## 0.11.2
 
 ### Patch Changes

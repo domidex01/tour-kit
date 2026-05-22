@@ -30,9 +30,11 @@ export function announce(message: string, politeness: 'polite' | 'assertive' = '
     announcer.textContent = message
   }, 100)
 
-  // Cleanup
+  // Cleanup — `.remove()` is a no-op when the node is already detached, so it
+  // survives the SPA navigation case where `document.body` is replaced between
+  // the announce and the 1s cleanup tick.
   setTimeout(() => {
-    document.body.removeChild(announcer)
+    announcer.remove()
   }, 1000)
 }
 
