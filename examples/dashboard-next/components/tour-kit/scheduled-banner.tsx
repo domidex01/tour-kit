@@ -2,7 +2,7 @@
 
 import { AnnouncementBanner, useAnnouncement } from '@tour-kit/announcements'
 import { type Schedule, useSchedule } from '@tour-kit/scheduling'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const businessHours: Schedule = {
   daysOfWeek: [1, 2, 3, 4, 5],
@@ -11,6 +11,16 @@ const businessHours: Schedule = {
 }
 
 export function ScheduledBanner() {
+  // Announcement registration + schedule evaluation both depend on values
+  // SSR cannot match (provider state + current time). The diagnostic `sr-only`
+  // aside below would otherwise serialize one branch on the server (e.g.
+  // `not_registered`) and another on the client (e.g. `wrong_time`),
+  // triggering React's hydration-mismatch warning on first paint.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const schedule = useSchedule(businessHours)
   const announcement = useAnnouncement('maintenance')
   const shown = useRef(false)
@@ -35,6 +45,9 @@ export function ScheduledBanner() {
       })
     }
   }, [schedule.isActive, schedule.reason, schedule.timezone])
+
+  // SSR pass renders nothing — see mount-guard rationale above.
+  if (!mounted) return null
 
   if (!schedule.isActive) {
     return (

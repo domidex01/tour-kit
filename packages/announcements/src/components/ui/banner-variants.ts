@@ -39,7 +39,13 @@ export const bannerVariants = cva(
     defaultVariants: {
       position: 'top',
       intent: 'info',
-      sticky: false,
+      // Banners pin to the viewport by default — the alternative (relative
+      // flow positioning) silently breaks any consumer who renders
+      // <AnnouncementBanner /> as a sibling inside a flex/grid container,
+      // because the banner then competes for layout space instead of
+      // overlaying. Opt out with `<AnnouncementBanner sticky={false}>` or
+      // `config.bannerOptions.sticky = false` when banner needs flow position.
+      sticky: true,
     },
   }
 )

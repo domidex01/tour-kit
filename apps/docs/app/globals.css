@@ -8,10 +8,21 @@
 /* Scan tour-kit package sources so JIT generates utilities used by TourCard,
    Hint, button-variants, etc. (bg-popover, text-muted-foreground, border-input,
    ring-ring, …). Without this, classes inside node_modules are invisible to
-   Tailwind and the card renders unstyled (transparent background). */
-@source '../../../packages/react/src/**/*.{ts,tsx}';
-@source '../../../packages/hints/src/**/*.{ts,tsx}';
+   Tailwind and the card renders unstyled (transparent background).
+
+   Every styled tour-kit package needs its own entry — Tailwind 4 does not
+   recurse out of the importing file's directory. Missing entries surface as
+   broken modal centering, transparent overlays, or mispositioned launchers. */
+@source '../../../packages/adoption/src/**/*.{ts,tsx}';
+@source '../../../packages/ai/src/**/*.{ts,tsx}';
+@source '../../../packages/announcements/src/**/*.{ts,tsx}';
+@source '../../../packages/checklists/src/**/*.{ts,tsx}';
 @source '../../../packages/core/src/**/*.{ts,tsx}';
+@source '../../../packages/hints/src/**/*.{ts,tsx}';
+@source '../../../packages/license/src/**/*.{ts,tsx}';
+@source '../../../packages/media/src/**/*.{ts,tsx}';
+@source '../../../packages/react/src/**/*.{ts,tsx}';
+@source '../../../packages/surveys/src/**/*.{ts,tsx}';
 
 /* shadcn/ui-compatible token aliases for components from @tour-kit/*.
    Tailwind v4 generates utilities like `bg-popover` from these `--color-*`

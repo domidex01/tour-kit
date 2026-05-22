@@ -104,6 +104,7 @@ export const AnnouncementModal = React.forwardRef<HTMLDivElement, AnnouncementMo
           />
           <Dialog.Content
             ref={ref}
+            aria-modal="true"
             className={cn(modalContentVariants({ size: effectiveSize }), className)}
             onEscapeKeyDown={
               modalOptions.closeOnEscape
