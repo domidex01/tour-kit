@@ -1,6 +1,7 @@
 import { useAnalyticsOptional } from '@tour-kit/analytics'
 import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
+import { createAnnouncementComparator } from '../core/priority-queue'
 import { AnnouncementScheduler } from '../core/scheduler'
 import { useFilteredAnnouncements } from '../hooks/use-filtered-announcements'
 import {
@@ -449,15 +450,14 @@ export function AnnouncementsProvider({
 
     if (eligible.length === 0) return
 
-    const priorityOrder: Record<string, number> = {
-      critical: 0,
-      high: 1,
-      normal: 2,
-      low: 3,
-    }
+    // Phase 3 (refactor train) — sort auto-show candidates by the configured
+    // `priorityOrder` + `priorityWeights` (no more hardcoded critical/high/
+    // normal/low literal). `sequenceById` carries the insertion order from
+    // `filteredAnnouncements` so fifo / lifo break ties deterministically.
+    const queueCfg = schedulerRef.current.queueConfig
+    const sequenceById = new Map(filteredAnnouncements.map((a, index) => [a.id, index]))
     eligible.sort(
-      (a, b) =>
-        (priorityOrder[a.priority ?? 'normal'] ?? 2) - (priorityOrder[b.priority ?? 'normal'] ?? 2)
+      createAnnouncementComparator(queueCfg.priorityOrder, queueCfg.priorityWeights, sequenceById)
     )
 
     for (const config of eligible) {

@@ -20,6 +20,7 @@ import type {
 import { defaultPersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
+import { isVisibleStep } from '../types/step'
 import type { TestBridge } from '../types/test-bridge'
 import {
   isBranchToTour,
@@ -676,7 +677,7 @@ export function TourProvider({
           endTimer()
           return
         }
-        if (targetStep) {
+        if (targetStep && isVisibleStep(targetStep)) {
           await waitForStepTarget(targetStep, {
             route,
             timeoutMs: targetStep.waitTimeout ?? 3000,

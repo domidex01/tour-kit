@@ -1,6 +1,12 @@
 'use client'
 
-import { resolveTarget, usePrefersReducedMotion, useSpotlight, useTour } from '@tour-kit/core'
+import {
+  isVisibleStep,
+  resolveTarget,
+  usePrefersReducedMotion,
+  useSpotlight,
+  useTour,
+} from '@tour-kit/core'
 import { cn } from '@tour-kit/core'
 import * as React from 'react'
 import { TourPortal } from '../primitives/tour-portal'
@@ -19,22 +25,26 @@ export const TourOverlay = React.forwardRef<HTMLDivElement, TourOverlayProps>(
     const { overlayStyle, cutoutStyle, show, hide, targetRect } = useSpotlight()
     const prefersReducedMotion = usePrefersReducedMotion()
 
+    // Phase 3 (refactor train) — narrow to the visible branch of the TourStep
+    // discriminated union; hidden steps have no target / spotlight settings.
+    const visibleStep = currentStep && isVisibleStep(currentStep) ? currentStep : null
+
     const targetElement = React.useMemo(() => {
-      if (!currentStep?.target) return null
-      return resolveTarget(currentStep.target)
-    }, [currentStep?.target])
+      if (!visibleStep?.target) return null
+      return resolveTarget(visibleStep.target)
+    }, [visibleStep?.target])
 
     React.useEffect(() => {
       if (isActive && targetElement) {
         show(targetElement, {
-          padding: currentStep?.spotlightPadding,
-          borderRadius: currentStep?.spotlightRadius,
+          padding: visibleStep?.spotlightPadding,
+          borderRadius: visibleStep?.spotlightRadius,
           animate: !prefersReducedMotion,
         })
       } else {
         hide()
       }
-    }, [isActive, targetElement, currentStep, show, hide, prefersReducedMotion])
+    }, [isActive, targetElement, visibleStep, show, hide, prefersReducedMotion])
 
     if (!isActive) return null
 
@@ -46,7 +56,7 @@ export const TourOverlay = React.forwardRef<HTMLDivElement, TourOverlayProps>(
           style={{
             ...overlayStyle,
             // When interactive, allow clicks to pass through the overlay to page elements
-            pointerEvents: currentStep?.interactive ? 'none' : overlayStyle.pointerEvents,
+            pointerEvents: visibleStep?.interactive ? 'none' : overlayStyle.pointerEvents,
           }}
           onClick={onClick}
           aria-hidden="true"

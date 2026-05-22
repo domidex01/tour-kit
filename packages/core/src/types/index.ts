@@ -39,7 +39,16 @@ export {
 } from './config'
 
 // Step types
-export type { TourStep, StepOptions, StepIdOf, AudienceProp, TourStepMedia } from './step'
+export type {
+  TourStep,
+  VisibleTourStep,
+  HiddenTourStep,
+  StepOptions,
+  StepIdOf,
+  AudienceProp,
+  TourStepMedia,
+} from './step'
+export { isVisibleStep } from './step'
 
 // Target types + runtime resolver (Phase 5)
 export type { TourTarget, TourTargetRef, TourTargetGetter } from './target'

@@ -4,7 +4,7 @@
  * MutationObserver-based `waitForElement` — does NOT re-implement it.
  */
 
-import type { TourStep } from '../types/step'
+import type { VisibleTourStep } from '../types/step'
 import { resolveTarget } from '../types/target'
 import { waitForElement } from '../utils/dom'
 
@@ -66,7 +66,7 @@ export interface WaitForStepTargetOptions {
  *   selector to observe for.
  */
 export async function waitForStepTarget(
-  step: TourStep,
+  step: VisibleTourStep,
   opts: WaitForStepTargetOptions
 ): Promise<HTMLElement> {
   const timeout = opts.timeoutMs ?? 3000

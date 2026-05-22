@@ -25,12 +25,18 @@ export class TourValidationError extends Error {
  *
  * Currently enforces: hidden steps must not declare UI fields. Throws a
  * `TourValidationError` whose message names the offending step id and field.
+ *
+ * Phase 3 (refactor train) — TS now rejects authored hidden steps with
+ * `target`/`content`/`title`/`placement`/`advanceOn` via `?: never` on
+ * `HiddenTourStep`, so this runtime pass exists to protect untyped JSON /
+ * `as any` boundaries. The fields are typed as `never` on the narrowed
+ * branch, so reading them returns `undefined` without needing a cast.
  */
 export function validateTour(tour: Tour): void {
   for (const step of tour.steps) {
     if (step.kind !== 'hidden') continue
     for (const field of FORBIDDEN_HIDDEN_FIELDS) {
-      if ((step as unknown as Record<string, unknown>)[field] != null) {
+      if (step[field] != null) {
         throw new TourValidationError({
           code: 'INVALID_HIDDEN_STEP',
           stepId: step.id,

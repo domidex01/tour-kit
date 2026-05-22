@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { PriorityQueue } from '../../core/priority-queue'
+import { PriorityQueue, createAnnouncementComparator } from '../../core/priority-queue'
+import type { AnnouncementConfig, AnnouncementPriority } from '../../types/announcement'
 import { DEFAULT_QUEUE_CONFIG } from '../../types/queue'
 
 describe('PriorityQueue', () => {
@@ -189,6 +190,108 @@ describe('PriorityQueue', () => {
 
       // Now low has higher weight
       expect(queue.dequeue()?.id).toBe('a')
+    })
+  })
+})
+
+// Phase 3 (refactor train) — comparator used by the provider's auto-show
+// effect to replace an inline `priorityOrder` literal that ignored
+// `QueueConfig.priorityWeights` and `priorityOrder: 'fifo' | 'lifo'`.
+describe('createAnnouncementComparator', () => {
+  const ann = (
+    id: string,
+    priority: AnnouncementPriority
+  ): Pick<AnnouncementConfig, 'id' | 'priority'> => ({ id, priority })
+
+  const sequenceById = (ids: string[]) => new Map(ids.map((id, i) => [id, i]))
+
+  const defaultWeights = DEFAULT_QUEUE_CONFIG.priorityWeights
+
+  describe("order: 'priority' with default weights (critical=1000 > high=100 > normal=10 > low=1)", () => {
+    it('sorts higher-priority items first', () => {
+      const cmp = createAnnouncementComparator(
+        'priority',
+        defaultWeights,
+        sequenceById(['a', 'b', 'c', 'd'])
+      )
+      const list = [ann('a', 'normal'), ann('b', 'critical'), ann('c', 'low'), ann('d', 'high')]
+      list.sort(cmp)
+      expect(list.map((x) => x.id)).toEqual(['b', 'd', 'a', 'c'])
+    })
+
+    it("treats missing priority as 'normal'", () => {
+      const cmp = createAnnouncementComparator('priority', defaultWeights, sequenceById(['a', 'b']))
+      const list = [{ id: 'a' } as Pick<AnnouncementConfig, 'id' | 'priority'>, ann('b', 'low')]
+      list.sort(cmp)
+      expect(list.map((x) => x.id)).toEqual(['a', 'b']) // normal > low
+    })
+
+    it('breaks priority ties by insertion sequence (FIFO)', () => {
+      const cmp = createAnnouncementComparator(
+        'priority',
+        defaultWeights,
+        sequenceById(['a', 'b', 'c'])
+      )
+      const list = [ann('c', 'normal'), ann('a', 'normal'), ann('b', 'normal')]
+      list.sort(cmp)
+      expect(list.map((x) => x.id)).toEqual(['a', 'b', 'c'])
+    })
+  })
+
+  describe('custom weights override defaults (regression: not hardcoded)', () => {
+    it('respects inverted weights — low first, critical last', () => {
+      const cmp = createAnnouncementComparator(
+        'priority',
+        { critical: 1, high: 10, normal: 100, low: 1000 },
+        sequenceById(['a', 'b', 'c', 'd'])
+      )
+      const list = [ann('a', 'critical'), ann('b', 'low'), ann('c', 'normal'), ann('d', 'high')]
+      list.sort(cmp)
+      expect(list.map((x) => x.id)).toEqual(['b', 'c', 'd', 'a'])
+    })
+  })
+
+  describe("order: 'fifo'", () => {
+    it('sorts purely by insertion sequence, ignoring priority', () => {
+      const cmp = createAnnouncementComparator(
+        'fifo',
+        defaultWeights,
+        sequenceById(['first', 'second', 'third'])
+      )
+      const list = [ann('third', 'critical'), ann('second', 'low'), ann('first', 'normal')]
+      list.sort(cmp)
+      expect(list.map((x) => x.id)).toEqual(['first', 'second', 'third'])
+    })
+  })
+
+  describe("order: 'lifo'", () => {
+    it('reverses insertion sequence, ignoring priority', () => {
+      const cmp = createAnnouncementComparator(
+        'lifo',
+        defaultWeights,
+        sequenceById(['first', 'second', 'third'])
+      )
+      const list = [ann('first', 'critical'), ann('second', 'low'), ann('third', 'normal')]
+      list.sort(cmp)
+      expect(list.map((x) => x.id)).toEqual(['third', 'second', 'first'])
+    })
+  })
+
+  describe('parity with PriorityQueue for ties', () => {
+    it("'priority' order matches PriorityQueue ordering for equal priorities", () => {
+      const queue = new PriorityQueue(DEFAULT_QUEUE_CONFIG)
+      queue.enqueue('a', 'normal')
+      queue.enqueue('b', 'normal')
+      queue.enqueue('c', 'normal')
+
+      const cmp = createAnnouncementComparator(
+        'priority',
+        defaultWeights,
+        sequenceById(['a', 'b', 'c'])
+      )
+      const list = [ann('a', 'normal'), ann('b', 'normal'), ann('c', 'normal')]
+      list.sort(cmp)
+      expect(list.map((x) => x.id)).toEqual(queue.getIds())
     })
   })
 })

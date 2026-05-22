@@ -32,6 +32,8 @@ export type {
   Direction,
   TourKitConfig,
   TourStep,
+  VisibleTourStep,
+  HiddenTourStep,
   StepOptions,
   StepIdOf,
   AudienceProp,
@@ -66,6 +68,8 @@ export {
   // Runtime target resolver (Phase 5) — single source of truth for
   // string/ref/getter dereference across hooks and React consumers.
   resolveTarget,
+  // Step union discriminator (Phase 3 — refactor train).
+  isVisibleStep,
 } from './types'
 
 // Context
@@ -125,11 +129,7 @@ export {
   getElementRect,
   getViewportDimensions,
   parsePlacement,
-  calculatePosition,
-  wouldOverflow,
   getOppositeSide,
-  getFallbackPlacements,
-  calculatePositionWithCollision,
   getDocumentDirection,
   mirrorSide,
   mirrorAlignment,
@@ -169,7 +169,6 @@ export {
   throttleLeading,
 } from './utils'
 export type {
-  PositionResult,
   LogLevel,
   LoggerConfig,
   ThrottledFunction,

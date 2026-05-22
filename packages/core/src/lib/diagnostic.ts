@@ -12,7 +12,7 @@ import type {
   EligibilityReport,
   GateReason,
 } from '../types/diagnostic'
-import type { AudienceProp, TourStep } from '../types/step'
+import { type AudienceProp, type VisibleTourStep, isVisibleStep } from '../types/step'
 import type { Tour } from '../types/tour'
 import { explainAudience } from './audience'
 import { TourValidationError, validateTour } from './validate-tour'
@@ -116,8 +116,8 @@ function gateRoute(tour: Tour, ctx: DiagnosticContext): GateReason {
   }
 }
 
-function firstVisibleStep(tour: Tour): TourStep | undefined {
-  return tour.steps.find((s) => s.kind !== 'hidden')
+function firstVisibleStep(tour: Tour): VisibleTourStep | undefined {
+  return tour.steps.find(isVisibleStep)
 }
 
 function gateTarget(tour: Tour, ctx: DiagnosticContext): GateReason {

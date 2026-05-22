@@ -1,15 +1,17 @@
-import type { StepOptions, TourStep } from '../types'
+import type { StepOptions, VisibleTourStep } from '../types'
 
 let stepIdCounter = 0
 
 /**
- * Create a step with auto-generated ID
+ * Create a visible step with auto-generated ID. `target` and `content` are
+ * required — hidden steps should be authored as object literals because they
+ * don't share this surface.
  */
 export function createStep(
-  target: TourStep['target'],
-  content: TourStep['content'],
+  target: VisibleTourStep['target'],
+  content: VisibleTourStep['content'],
   options?: Partial<StepOptions>
-): TourStep {
+): VisibleTourStep {
   return {
     id: `step-${++stepIdCounter}`,
     target,
@@ -19,14 +21,14 @@ export function createStep(
 }
 
 /**
- * Create a step with explicit ID
+ * Create a visible step with an explicit ID.
  */
 export function createNamedStep(
   id: string,
-  target: TourStep['target'],
-  content: TourStep['content'],
+  target: VisibleTourStep['target'],
+  content: VisibleTourStep['content'],
   options?: Partial<StepOptions>
-): TourStep {
+): VisibleTourStep {
   return {
     id,
     target,
