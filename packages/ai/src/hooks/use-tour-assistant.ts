@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@tour-kit/core'
 import { useCallback, useMemo } from 'react'
 import { useAiChatContext } from '../context/ai-chat-context'
 import { type UseAiChatReturn, useAiChat } from './use-ai-chat'
@@ -112,7 +113,7 @@ export function useTourAssistant(): UseTourAssistantReturn {
   const askAboutStep = useCallback(() => {
     if (!tourContext.activeTour || !tourContext.activeStep) {
       if (process.env.NODE_ENV !== 'production') {
-        console.warn('[tour-kit/ai] askAboutStep() called with no active step. Message not sent.')
+        logger.warn('AI: askAboutStep() called with no active step. Message not sent.')
       }
       return
     }

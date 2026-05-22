@@ -1,3 +1,4 @@
+import { logger } from '@tour-kit/core'
 import type { AiChatEvent, AiChatEventType } from '../types/events'
 
 /**
@@ -15,10 +16,10 @@ export function emitEvent(
     // If onEvent returns a promise, catch async errors too
     if (result && typeof result.catch === 'function') {
       result.catch((error: unknown) => {
-        console.warn(`[@tour-kit/ai] Async event handler error for '${type}':`, error)
+        logger.warn(`AI: Async event handler error for '${type}':`, error)
       })
     }
   } catch (error) {
-    console.warn(`[@tour-kit/ai] Event handler error for '${type}':`, error)
+    logger.warn(`AI: Event handler error for '${type}':`, error)
   }
 }

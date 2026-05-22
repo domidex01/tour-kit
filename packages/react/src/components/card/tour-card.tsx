@@ -11,6 +11,7 @@ import {
 } from '@floating-ui/react'
 import {
   type Placement,
+  logger,
   resolveTarget,
   useFocusTrap,
   useReducedMotion,
@@ -122,8 +123,8 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
       if (process.env.NODE_ENV === 'production') return
       if (warnedClassicStepIds.has(currentStep.id)) return
       warnedClassicStepIds.add(currentStep.id)
-      console.warn(
-        '[tour-kit/react] <TourCard variant="classic"> is deprecated and will be removed in the next major. See https://usertourkit.com/docs/react/components/tour-card-migration'
+      logger.warn(
+        'react: <TourCard variant="classic"> is deprecated and will be removed in the next major. See https://usertourkit.com/docs/react/components/tour-card-migration'
       )
     }, [variant, currentStep?.id])
 

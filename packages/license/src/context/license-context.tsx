@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@tour-kit/core'
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { clearCache, hasFreshCache } from '../lib/cache'
 import { getCurrentDomain, isDevEnvironment } from '../lib/domain'
@@ -141,7 +142,7 @@ export function LicenseProvider({
     if (trialDays === undefined) return null
     if (trialDays <= 0) {
       if (process.env.NODE_ENV !== 'production') {
-        console.warn('<LicenseProvider> received non-positive trialDays; ignoring')
+        logger.warn('<LicenseProvider> received non-positive trialDays; ignoring')
       }
       return null
     }

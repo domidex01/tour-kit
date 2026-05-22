@@ -1,6 +1,6 @@
 'use client'
 
-import { useReducedMotion } from '@tour-kit/core'
+import { logger, useReducedMotion } from '@tour-kit/core'
 import * as React from 'react'
 import {
   type MediaSlotType,
@@ -206,7 +206,7 @@ function renderDispatch(props: DispatchProps): React.ReactElement {
       )
     case 'gif':
       if (prefersReducedMotion && !poster && process.env.NODE_ENV !== 'production') {
-        console.warn('[MediaSlot] GIF rendered without poster under prefers-reduced-motion: reduce')
+        logger.warn('MediaSlot: GIF rendered without poster under prefers-reduced-motion: reduce')
       }
       return (
         <GifPlayer

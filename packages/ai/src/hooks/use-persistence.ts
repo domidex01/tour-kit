@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@tour-kit/core'
 import type { UIMessage } from 'ai'
 import { useCallback, useEffect, useRef } from 'react'
 import type { PersistenceAdapter, PersistenceConfig } from '../types/config'
@@ -67,7 +68,7 @@ export function usePersistence(options: UsePersistenceOptions): UsePersistenceRe
       if (onError) {
         onError(err)
       } else {
-        console.warn('[tour-kit/ai] Persistence error:', err)
+        logger.warn('AI: Persistence error:', err)
       }
     },
     [onError]
