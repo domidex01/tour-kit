@@ -1,5 +1,12 @@
 # @tour-kit/testing-library
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [d67d905]
+  - @tour-kit/core@1.0.0
+
 ## 0.1.3
 
 ### Patch Changes

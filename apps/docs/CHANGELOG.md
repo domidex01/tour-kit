@@ -1,5 +1,14 @@
 # @tour-kit/docs
 
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [d67d905]
+  - @tour-kit/core@1.0.0
+  - @tour-kit/react@1.0.0
+  - @tour-kit/hints@1.0.0
+
 ## 0.0.13
 
 ### Patch Changes
