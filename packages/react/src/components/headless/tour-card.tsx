@@ -9,7 +9,7 @@ import {
   shift,
   useFloating,
 } from '@floating-ui/react'
-import { isVisibleStep, type Placement, resolveTarget, useFocusTrap, useTour } from '@tour-kit/core'
+import { type Placement, isVisibleStep, resolveTarget, useFocusTrap, useTour } from '@tour-kit/core'
 import * as React from 'react'
 import { TourPortal } from '../primitives/tour-portal'
 
@@ -63,8 +63,7 @@ export function TourCardHeadless({ className, style, children, render }: TourCar
 
   // Phase 3 (refactor train) — narrow to the visible branch of the TourStep
   // discriminated union; hidden steps never render a card.
-  const visibleStep =
-    currentStep && isVisibleStep(currentStep) ? currentStep : null
+  const visibleStep = currentStep && isVisibleStep(currentStep) ? currentStep : null
 
   const targetElement = React.useMemo(() => {
     if (!visibleStep?.target) return null

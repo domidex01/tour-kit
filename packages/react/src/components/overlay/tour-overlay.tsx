@@ -27,8 +27,7 @@ export const TourOverlay = React.forwardRef<HTMLDivElement, TourOverlayProps>(
 
     // Phase 3 (refactor train) — narrow to the visible branch of the TourStep
     // discriminated union; hidden steps have no target / spotlight settings.
-    const visibleStep =
-      currentStep && isVisibleStep(currentStep) ? currentStep : null
+    const visibleStep = currentStep && isVisibleStep(currentStep) ? currentStep : null
 
     const targetElement = React.useMemo(() => {
       if (!visibleStep?.target) return null

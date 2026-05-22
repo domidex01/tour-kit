@@ -7,12 +7,8 @@ describe('AnnouncementScheduler.queueConfig — Phase 3 public getter', () => {
   it('returns the active config (default)', () => {
     const scheduler = new AnnouncementScheduler(DEFAULT_QUEUE_CONFIG)
 
-    expect(scheduler.queueConfig.priorityWeights).toEqual(
-      DEFAULT_QUEUE_CONFIG.priorityWeights
-    )
-    expect(scheduler.queueConfig.priorityOrder).toBe(
-      DEFAULT_QUEUE_CONFIG.priorityOrder
-    )
+    expect(scheduler.queueConfig.priorityWeights).toEqual(DEFAULT_QUEUE_CONFIG.priorityWeights)
+    expect(scheduler.queueConfig.priorityOrder).toBe(DEFAULT_QUEUE_CONFIG.priorityOrder)
   })
 
   it('returns the custom weights passed to the constructor', () => {

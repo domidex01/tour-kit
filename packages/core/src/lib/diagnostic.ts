@@ -12,7 +12,7 @@ import type {
   EligibilityReport,
   GateReason,
 } from '../types/diagnostic'
-import { type AudienceProp, isVisibleStep, type VisibleTourStep } from '../types/step'
+import { type AudienceProp, type VisibleTourStep, isVisibleStep } from '../types/step'
 import type { Tour } from '../types/tour'
 import { explainAudience } from './audience'
 import { TourValidationError, validateTour } from './validate-tour'

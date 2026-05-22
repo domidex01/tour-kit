@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createAnnouncementComparator, PriorityQueue } from '../../core/priority-queue'
+import { PriorityQueue, createAnnouncementComparator } from '../../core/priority-queue'
 import type { AnnouncementConfig, AnnouncementPriority } from '../../types/announcement'
 import { DEFAULT_QUEUE_CONFIG } from '../../types/queue'
 
@@ -214,26 +214,14 @@ describe('createAnnouncementComparator', () => {
         defaultWeights,
         sequenceById(['a', 'b', 'c', 'd'])
       )
-      const list = [
-        ann('a', 'normal'),
-        ann('b', 'critical'),
-        ann('c', 'low'),
-        ann('d', 'high'),
-      ]
+      const list = [ann('a', 'normal'), ann('b', 'critical'), ann('c', 'low'), ann('d', 'high')]
       list.sort(cmp)
       expect(list.map((x) => x.id)).toEqual(['b', 'd', 'a', 'c'])
     })
 
     it("treats missing priority as 'normal'", () => {
-      const cmp = createAnnouncementComparator(
-        'priority',
-        defaultWeights,
-        sequenceById(['a', 'b'])
-      )
-      const list = [
-        { id: 'a' } as Pick<AnnouncementConfig, 'id' | 'priority'>,
-        ann('b', 'low'),
-      ]
+      const cmp = createAnnouncementComparator('priority', defaultWeights, sequenceById(['a', 'b']))
+      const list = [{ id: 'a' } as Pick<AnnouncementConfig, 'id' | 'priority'>, ann('b', 'low')]
       list.sort(cmp)
       expect(list.map((x) => x.id)).toEqual(['a', 'b']) // normal > low
     })
@@ -257,12 +245,7 @@ describe('createAnnouncementComparator', () => {
         { critical: 1, high: 10, normal: 100, low: 1000 },
         sequenceById(['a', 'b', 'c', 'd'])
       )
-      const list = [
-        ann('a', 'critical'),
-        ann('b', 'low'),
-        ann('c', 'normal'),
-        ann('d', 'high'),
-      ]
+      const list = [ann('a', 'critical'), ann('b', 'low'), ann('c', 'normal'), ann('d', 'high')]
       list.sort(cmp)
       expect(list.map((x) => x.id)).toEqual(['b', 'c', 'd', 'a'])
     })
@@ -275,11 +258,7 @@ describe('createAnnouncementComparator', () => {
         defaultWeights,
         sequenceById(['first', 'second', 'third'])
       )
-      const list = [
-        ann('third', 'critical'),
-        ann('second', 'low'),
-        ann('first', 'normal'),
-      ]
+      const list = [ann('third', 'critical'), ann('second', 'low'), ann('first', 'normal')]
       list.sort(cmp)
       expect(list.map((x) => x.id)).toEqual(['first', 'second', 'third'])
     })
@@ -292,11 +271,7 @@ describe('createAnnouncementComparator', () => {
         defaultWeights,
         sequenceById(['first', 'second', 'third'])
       )
-      const list = [
-        ann('first', 'critical'),
-        ann('second', 'low'),
-        ann('third', 'normal'),
-      ]
+      const list = [ann('first', 'critical'), ann('second', 'low'), ann('third', 'normal')]
       list.sort(cmp)
       expect(list.map((x) => x.id)).toEqual(['third', 'second', 'first'])
     })
@@ -320,4 +295,3 @@ describe('createAnnouncementComparator', () => {
     })
   })
 })
-

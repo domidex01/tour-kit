@@ -7,7 +7,6 @@ import { useRoutePersistence } from '../hooks/use-route-persistence'
 import { explainTour } from '../lib/diagnostic'
 import { TourValidationError, validateTour } from '../lib/validate-tour'
 import { TourRouteError, waitForStepTarget } from '../lib/wait-for-step-target'
-import { isVisibleStep } from '../types/step'
 import { tourRegistry } from '../registry/tour-registry'
 import type {
   BranchContext,
@@ -21,6 +20,7 @@ import type {
 import { defaultPersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
+import { isVisibleStep } from '../types/step'
 import type { TestBridge } from '../types/test-bridge'
 import {
   isBranchToTour,

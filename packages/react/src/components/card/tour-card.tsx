@@ -91,8 +91,7 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
     // hidden steps don't render UI so we narrow to the visible branch here
     // and bail out below. The provider already skips hidden steps on advance,
     // so this is a defensive narrow for typing rather than a runtime gate.
-    const visibleStep =
-      currentStep && isVisibleStep(currentStep) ? currentStep : null
+    const visibleStep = currentStep && isVisibleStep(currentStep) ? currentStep : null
 
     const targetElement = React.useMemo(() => {
       if (!visibleStep?.target) return null
