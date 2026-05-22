@@ -82,6 +82,19 @@ describe('announce', () => {
     const announcers = document.querySelectorAll('[role="status"]')
     expect(announcers).toHaveLength(2)
   })
+
+  it('does not throw when announcer is detached before cleanup runs', () => {
+    announce('orphaned message')
+    const announcer = document.querySelector('[role="status"]')
+    expect(announcer).toBeInTheDocument()
+
+    // Simulate an SPA route swap that empties document.body between the
+    // announce call and the 1s cleanup tick. Pre-fix this would throw
+    // NotFoundError when `document.body.removeChild(announcer)` ran.
+    announcer?.remove()
+
+    expect(() => vi.advanceTimersByTime(1000)).not.toThrow()
+  })
 })
 
 describe('generateId', () => {
