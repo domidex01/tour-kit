@@ -5,172 +5,38 @@ import { useFlowSession } from '../hooks/use-flow-session'
 import { usePersistence } from '../hooks/use-persistence'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
 import { explainTour } from '../lib/diagnostic'
-import { TourValidationError, validateTour } from '../lib/validate-tour'
-import { TourRouteError, waitForStepTarget } from '../lib/wait-for-step-target'
+import type { TourEngineAnalytics, TourEngineContext } from '../lib/tour-engine/context'
+import { handleBranchTargetImpl } from '../lib/tour-engine/handle-branch-target'
+import {
+  buildCallbackContext,
+  evaluateStepWhen,
+  findNearestVisibleStepIndex,
+  findNextVisibleStepIndex,
+} from '../lib/tour-engine/helpers'
+import { navigateToStepImpl } from '../lib/tour-engine/navigate-to-step'
+import { validateTour } from '../lib/validate-tour'
+import { waitForStepTarget } from '../lib/wait-for-step-target'
+import type { TourRouteError } from '../lib/wait-for-step-target'
 import { tourRegistry } from '../registry/tour-registry'
 import type {
   BranchContext,
-  BranchTarget,
   Tour,
   TourCallbackContext,
   TourContextValue,
-  TourState,
-  TourStep,
 } from '../types'
 import { defaultPersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
 import { isVisibleStep } from '../types/step'
 import type { TestBridge } from '../types/test-bridge'
-import {
-  isBranchToTour,
-  isBranchWait,
-  isLoopDetected,
-  isSpecialTarget,
-  resolveBranch,
-  resolveTargetToIndex,
-} from '../utils/branch'
+import type { TourAction, TourReducerState } from '../types/tour-reducer'
+import { resolveBranch } from '../utils/branch'
 import { logger } from '../utils/logger'
 import { TourContext } from './tour-context'
 import { TourKitContext } from './tourkit-context'
 
 /** Maximum hidden-step chain length before throwing HIDDEN_STEP_LOOP. */
 const MAX_HIDDEN_CHAIN = 50
-
-/**
- * Check if navigation is needed for a step
- */
-function isNavigationNeeded(
-  step: TourStep | undefined,
-  router: RouterAdapter | undefined
-): { needed: boolean; isOnRoute: boolean } {
-  if (!step?.route || !router) {
-    return { needed: false, isOnRoute: true }
-  }
-
-  const matchMode = step.routeMatch ?? 'exact'
-  const isOnRoute = router.matchRoute(step.route, matchMode)
-  return { needed: !isOnRoute, isOnRoute }
-}
-
-/**
- * Build TourCallbackContext for when/lifecycle callbacks
- */
-function buildCallbackContext(
-  state: TourState,
-  tour: Tour | null,
-  data: Record<string, unknown>
-): TourCallbackContext {
-  return {
-    tourId: state.tourId,
-    isActive: state.isActive,
-    currentStepIndex: state.currentStepIndex,
-    currentStep: state.currentStep,
-    totalSteps: state.totalSteps,
-    isLoading: state.isLoading,
-    isTransitioning: state.isTransitioning,
-    completedTours: state.completedTours,
-    skippedTours: state.skippedTours,
-    visitedSteps: state.visitedSteps,
-    stepVisitCount: state.stepVisitCount,
-    previousStepId: state.previousStepId,
-    tour,
-    data,
-  }
-}
-
-/**
- * Evaluate step's when condition
- * @returns true if step should be shown, false if it should be skipped
- */
-async function evaluateStepWhen(step: TourStep, context: TourCallbackContext): Promise<boolean> {
-  if (!step.when) return true
-
-  try {
-    return await step.when(context)
-  } catch (error) {
-    logger.warn(`Error evaluating when condition for step "${step.id}":`, error)
-    return false // Skip step on error
-  }
-}
-
-/**
- * Find the next visible step index starting from a given index
- * @param startIndex - Index to start searching from (inclusive)
- * @param direction - 1 for forward, -1 for backward
- * @param steps - Array of tour steps
- * @param context - Callback context for when evaluation
- * @returns Index of next visible step, or -1 if none found
- */
-async function findNextVisibleStepIndex(
-  startIndex: number,
-  direction: 1 | -1,
-  steps: TourStep[],
-  context: TourCallbackContext
-): Promise<number> {
-  let index = startIndex
-
-  while (index >= 0 && index < steps.length) {
-    const step = steps[index]
-    if (!step) break
-
-    // Update context with the potential new index for accurate evaluation
-    const stepContext: TourCallbackContext = {
-      ...context,
-      currentStepIndex: index,
-      currentStep: step,
-    }
-    const shouldShow = await evaluateStepWhen(step, stepContext)
-
-    if (shouldShow) {
-      return index
-    }
-
-    index += direction
-  }
-
-  return -1 // No visible step found
-}
-
-/**
- * Find the nearest visible step from a starting index
- * Tries forward first, then backward
- * @returns Index of nearest visible step, or -1 if none found
- */
-async function findNearestVisibleStepIndex(
-  startIndex: number,
-  steps: TourStep[],
-  context: TourCallbackContext
-): Promise<number> {
-  // Try forward first
-  const forwardIndex = await findNextVisibleStepIndex(startIndex, 1, steps, context)
-  if (forwardIndex !== -1) return forwardIndex
-
-  // Try backward
-  return findNextVisibleStepIndex(startIndex - 1, -1, steps, context)
-}
-
-// Action types for reducer
-type TourAction =
-  | { type: 'START_TOUR'; tourId: string; stepIndex?: number }
-  | { type: 'NEXT_STEP' }
-  | { type: 'PREV_STEP' }
-  | { type: 'GO_TO_STEP'; stepIndex: number }
-  | { type: 'SKIP_TOUR' }
-  | { type: 'COMPLETE_TOUR' }
-  | { type: 'STOP_TOUR' }
-  | { type: 'SET_LOADING'; isLoading: boolean }
-  | { type: 'SET_TRANSITIONING'; isTransitioning: boolean }
-  | { type: 'ADD_COMPLETED'; tourId: string }
-  | { type: 'ADD_SKIPPED'; tourId: string }
-  | { type: 'RESET'; tourId?: string }
-  | { type: 'UPDATE_TOURS'; tours: Tour[] }
-  | { type: 'TRACK_STEP_VISIT'; stepId: string; previousStepId: string | null }
-  | { type: 'CLEAR_VISIT_TRACKING' }
-
-interface TourReducerState extends TourState {
-  tours: Map<string, Tour>
-}
 
 function createStoppedState(state: TourReducerState): TourReducerState {
   return {
@@ -838,164 +704,20 @@ export function TourProvider({
     setDataState((prev) => ({ ...prev, [key]: value }))
   }, [])
 
-  // Run a hidden step's lifecycle and compute the next cursor. Returns
-  // either the next step index, or 'terminate' (caller should stop the
-  // chain by walking past end of steps array).
-  const advancePastHiddenStep = React.useCallback(
-    async (
-      step: TourStep,
-      cursor: number,
-      tour: Tour,
-      stepIdLookup: Map<string, number>
-    ): Promise<number | 'terminate'> => {
-      const baseCtx = buildCallbackContext(state, tour, data)
-      const stepCtx: TourCallbackContext = {
-        ...baseCtx,
-        currentStepIndex: cursor,
-        currentStep: step,
-      }
-      // Hidden-step lifecycle: onEnter pre-mount, then legacy onShow.
-      await step.onEnter?.(stepCtx)
-      await step.onShow?.(stepCtx)
+  // ─── Engine context wiring ───────────────────────────────────────────────
+  // `navigateToStep` and `handleBranchTarget` live in `../lib/tour-engine/`.
+  // The provider holds `engineContextRef` whose `current` is refreshed every
+  // render so the engine impls read fresh state / data / callbacks across
+  // async navigation. Wrappers below are stable (empty-deps `useCallback`).
+  const engineContextRef = React.useRef<TourEngineContext | null>(null)
 
-      if (step.onNext === undefined || step.onNext === null) {
-        return cursor + 1
-      }
-
-      const branchCtx: BranchContext = { ...stepCtx, setData }
-      const target = await resolveBranch(step.onNext, branchCtx)
-
-      if (target === 'complete' || target === 'skip') {
-        return 'terminate'
-      }
-
-      const idx = resolveTargetToIndex(target, cursor, stepIdLookup, tour.steps.length)
-      // Unmappable target (BranchToTour, BranchWait, etc.) — fall back to +1.
-      return idx ?? cursor + 1
-    },
-    [state, data, setData]
-  )
-
-  // Route-aware step navigation. Walks past hidden steps (firing their
-  // `onEnter`/`onShow` lifecycle) until a mountable step is reached, then
-  // dispatches GO_TO_STEP. Throws TourValidationError on hidden-step loops.
-  //
-  // Per-step `routeChangeStrategy` (Phase 1.3):
-  // - 'auto'   (default): navigate, await target via `waitForStepTarget`,
-  //   dispatch. On `TourRouteError`: fire `onStepError`, STOP_TOUR.
-  // - 'prompt': fire `onNavigationRequired(route, stepId)`, do NOT dispatch.
-  // - 'manual': do nothing — consumer drives navigation explicitly.
   const navigateToStep = React.useCallback(
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: hidden-traversal + route navigation in one orchestrator
-    async (stepIndex: number): Promise<boolean> => {
-      if (!currentTour) {
-        dispatch({ type: 'GO_TO_STEP', stepIndex })
-        return true
-      }
-
-      const localStepIdMap = new Map<string, number>()
-      currentTour.steps.forEach((s, i) => localStepIdMap.set(s.id, i))
-
-      let cursor = stepIndex
-      for (let chain = 0; chain <= MAX_HIDDEN_CHAIN; chain++) {
-        const step = currentTour.steps[cursor]
-        if (!step) {
-          dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
-          return false
-        }
-
-        if (step.kind !== 'hidden') {
-          const { needed } = isNavigationNeeded(step, router)
-          if (!needed || !step.route || !router) {
-            dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
-            return true
-          }
-
-          // `autoNavigate: false` (legacy) is equivalent to per-step 'prompt'
-          // and still surfaces via `onNavigationRequired`.
-          if (!autoNavigate) {
-            onNavigationRequired?.(step.route, step.id)
-            return false
-          }
-
-          const strategy = step.routeChangeStrategy ?? 'auto'
-
-          if (strategy === 'manual') {
-            // Consumer drives navigation. Do not dispatch — `useTourRoute()`
-            // handles `goToStepRoute()` and the next provider tick will
-            // re-enter once the route matches.
-            return false
-          }
-
-          if (strategy === 'prompt') {
-            onNavigationRequired?.(step.route, step.id)
-            return false
-          }
-
-          // strategy === 'auto'
-          try {
-            // RouterAdapter.navigate returns:
-            //   App Router / React Router → undefined (sync)
-            //   Pages Router               → Promise<boolean>
-            //
-            // A literal `false` from Pages Router means the navigation was
-            // cancelled (e.g. another `push()` raced ahead, beforeunload, a
-            // route guard rejected). Surface as a typed reject instead of
-            // silently waiting 3 seconds for a target that will never mount.
-            const navResult = await router.navigate(step.route)
-            if (navResult === false) {
-              throw new TourRouteError({
-                code: 'NAVIGATION_REJECTED',
-                route: step.route,
-                message: `Router rejected navigation to "${step.route}".`,
-              })
-            }
-
-            // Honor the legacy `routeDelay` knob before observing — gives
-            // route-bound suspense / data-fetch a beat to flush so the
-            // MutationObserver doesn't burn its 3s budget on hydration.
-            if (step.routeDelay && step.routeDelay > 0) {
-              await new Promise((resolve) => setTimeout(resolve, step.routeDelay))
-            }
-
-            await waitForStepTarget(step, {
-              route: step.route,
-              timeoutMs: step.waitTimeout ?? 3000,
-              signal: abortControllerRef.current?.signal,
-            })
-          } catch (err) {
-            // Cooperative cancellation (STOP_TOUR / unmount) — silent.
-            if (abortControllerRef.current?.signal.aborted) return false
-            if (err instanceof TourRouteError) {
-              onStepError?.(err)
-              dispatch({ type: 'STOP_TOUR' })
-              return false
-            }
-            throw err
-          }
-
-          dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
-          return true
-        }
-
-        const next = await advancePastHiddenStep(step, cursor, currentTour, localStepIdMap)
-        if (next === 'terminate') {
-          // Walk past end so caller's outer flow can handle complete/skip.
-          dispatch({ type: 'GO_TO_STEP', stepIndex: currentTour.steps.length })
-          return false
-        }
-        cursor = next
-      }
-
-      // Loop guard: hidden chain exceeded the maximum.
-      const stuckStep = currentTour.steps[cursor]
-      throw new TourValidationError({
-        code: 'HIDDEN_STEP_LOOP',
-        stepId: stuckStep?.id ?? '?',
-        message: `Hidden-step chain exceeded ${MAX_HIDDEN_CHAIN} iterations${stuckStep ? ` at step "${stuckStep.id}"` : ''}. Likely an infinite loop.`,
-      })
+    (stepIndex: number): Promise<boolean> => {
+      const ctx = engineContextRef.current
+      if (!ctx) return Promise.resolve(false)
+      return navigateToStepImpl(ctx, stepIndex)
     },
-    [currentTour, router, autoNavigate, onNavigationRequired, onStepError, advancePastHiddenStep]
+    []
   )
 
   // Step ID to index map for branch resolution
@@ -1051,199 +773,46 @@ export function TourProvider({
     currentTour.onSkip?.({ ...state, tour: currentTour, data })
   }, [currentTour, state, data, tourKitContext, clear, persistTerminalTours, markSkipped])
 
-  // Handle branch target resolution and navigation
+  // Branch-target orchestration extracted to ../lib/tour-engine/handle-branch-target.
+  // Wrapper delegates through the engine context ref so async branches read
+  // fresh state across awaits.
   const handleBranchTarget = React.useCallback(
-    async (
-      target: BranchTarget,
+    (
+      target: import('../types').BranchTarget,
       branchContext: BranchContext,
       actionId?: string
-      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: branch navigation with multiple target types
     ): Promise<void> => {
-      if (!currentTour || !state.currentStep) return
-
-      const currentStepId = state.currentStep.id
-
-      // null - stay on current step
-      if (target === null) {
-        dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
-        return
-      }
-
-      // Special targets
-      if (isSpecialTarget(target)) {
-        switch (target) {
-          case 'complete':
-            completeTour()
-            return
-
-          case 'skip':
-            skipTour()
-            return
-
-          case 'restart': {
-            dispatch({ type: 'CLEAR_VISIT_TRACKING' })
-            dispatch({ type: 'GO_TO_STEP', stepIndex: 0 })
-            const firstStep = currentTour.steps[0]
-            if (firstStep) {
-              dispatch({
-                type: 'TRACK_STEP_VISIT',
-                stepId: firstStep.id,
-                previousStepId: currentStepId,
-              })
-              tourKitContext?.onStepView?.(currentTour.id, firstStep.id, 0)
-            }
-            return
-          }
-
-          case 'next':
-          case 'prev':
-            // Resolve to index and continue
-            break
-        }
-      }
-
-      // BranchToTour - cross-tour navigation
-      if (isBranchToTour(target)) {
-        const toTour = state.tours.get(target.tour)
-        if (!toTour) {
-          logger.warn(`Branch target tour "${target.tour}" not found`)
-          dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
-          return
-        }
-
-        // Fire analytics callbacks
-        tourKitContext?.onTourBranch?.(currentTour.id, target.tour, currentStepId)
-        currentTour.onTourBranch?.(target.tour, currentStepId)
-
-        // Stop current tour and start new one
-        dispatch({ type: 'STOP_TOUR' })
-
-        // Resolve step in new tour
-        let newStepIndex = 0
-        if (target.step !== undefined) {
-          if (typeof target.step === 'number') {
-            newStepIndex = target.step
-          } else {
-            const newTourStepMap = new Map<string, number>()
-            toTour.steps.forEach((s, i) => newTourStepMap.set(s.id, i))
-            newStepIndex = newTourStepMap.get(target.step) ?? 0
-          }
-        }
-
-        // Re-arm terminal-callback guards for the new tour
-        completedTourIdRef.current = null
-        skippedTourIdRef.current = null
-
-        dispatch({ type: 'START_TOUR', tourId: target.tour, stepIndex: newStepIndex })
-        tourKitContext?.onTourStart?.(target.tour)
-        toTour.onStart?.({ ...state, tour: toTour, data })
-        return
-      }
-
-      // BranchWait - delay before proceeding
-      if (isBranchWait(target)) {
-        await new Promise((resolve) => setTimeout(resolve, target.wait))
-        if (target.then) {
-          await handleBranchTarget(target.then, branchContext, actionId)
-        }
-        return
-      }
-
-      // Resolve target to index
-      const targetIndex = resolveTargetToIndex(
-        target,
-        state.currentStepIndex,
-        stepIdMap,
-        currentTour.steps.length
-      )
-
-      if (targetIndex === null || targetIndex === state.currentStepIndex) {
-        dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
-        return
-      }
-
-      // Check for loop detection
-      const targetStep = currentTour.steps[targetIndex]
-      if (targetStep && isLoopDetected(targetStep.id, state.stepVisitCount)) {
-        logger.warn(
-          `Loop detected: step "${targetStep.id}" visited too many times. Stopping navigation.`
-        )
-        dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
-        return
-      }
-
-      // Apply when filter to the target step
-      const context = buildCallbackContext(state, currentTour, data)
-      const stepContext: TourCallbackContext = {
-        ...context,
-        currentStepIndex: targetIndex,
-        currentStep: targetStep ?? null,
-      }
-
-      if (targetStep) {
-        const shouldShow = await evaluateStepWhen(targetStep, stepContext)
-        if (!shouldShow) {
-          // Find next visible step in the appropriate direction
-          const direction = targetIndex > state.currentStepIndex ? 1 : -1
-          const visibleIndex = await findNextVisibleStepIndex(
-            targetIndex + direction,
-            direction as 1 | -1,
-            currentTour.steps,
-            context
-          )
-
-          if (visibleIndex === -1) {
-            // No visible steps, complete the tour
-            completeTour()
-            return
-          }
-
-          // Navigate to the visible step instead
-          const navigated = await navigateToStep(visibleIndex)
-          if (!navigated) {
-            dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
-            return
-          }
-          const step = currentTour.steps[visibleIndex]
-          if (step) {
-            dispatch({
-              type: 'TRACK_STEP_VISIT',
-              stepId: step.id,
-              previousStepId: currentStepId,
-            })
-            tourKitContext?.onStepView?.(currentTour.id, step.id, visibleIndex)
-            currentTour.onStepChange?.(step, visibleIndex, {
-              ...state,
-              tour: currentTour,
-              data,
-            })
-          }
-          return
-        }
-      }
-
-      // Navigate to target step
-      const navigated = await navigateToStep(targetIndex)
-      if (!navigated) {
-        dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
-        return
-      }
-      if (targetStep) {
-        dispatch({
-          type: 'TRACK_STEP_VISIT',
-          stepId: targetStep.id,
-          previousStepId: currentStepId,
-        })
-        tourKitContext?.onStepView?.(currentTour.id, targetStep.id, targetIndex)
-        currentTour.onStepChange?.(targetStep, targetIndex, {
-          ...state,
-          tour: currentTour,
-          data,
-        })
-      }
+      const ctx = engineContextRef.current
+      if (!ctx) return Promise.resolve()
+      return handleBranchTargetImpl(ctx, target, branchContext, actionId)
     },
-    [currentTour, state, data, stepIdMap, tourKitContext, navigateToStep, completeTour, skipTour]
+    []
   )
+
+  // Refresh engine context on every render so getters close over the latest
+  // state / data / callbacks. Refs may be mutated during render; doing this
+  // synchronously avoids a one-render lag where engine functions would read
+  // a stale snapshot.
+  engineContextRef.current = {
+    getState: () => state,
+    getCurrentTour: () => currentTour,
+    getData: () => data,
+    getStepIdMap: () => stepIdMap,
+    dispatch,
+    abortControllerRef,
+    completedTourIdRef,
+    skippedTourIdRef,
+    router,
+    autoNavigate,
+    maxHiddenChain: MAX_HIDDEN_CHAIN,
+    onNavigationRequired,
+    onStepError,
+    completeTour,
+    skipTour,
+    setData,
+    navigateToStep,
+    tourKitContext: tourKitContext satisfies TourEngineAnalytics | null,
+  }
 
   // Actions
   const start = React.useCallback(
