@@ -116,6 +116,12 @@ describe('handleBranchTargetImpl', () => {
         tourKitContext: { onTourBranch, onTourStart },
       })
 
+      // Pre-arm the terminal-callback guards as if the source tour had already
+      // completed once; the cross-tour branch MUST clear them so the new tour
+      // can fire its own onComplete / onSkip later.
+      handle.ctx.completedTourIdRef.current = 't1'
+      handle.ctx.skippedTourIdRef.current = 't1'
+
       await handleBranchTargetImpl(handle.ctx, { tour: 't2', step: 'step-y' }, noopBranchCtx)
 
       expect(handle.mocks.dispatch).toHaveBeenCalledWith({ type: 'STOP_TOUR' })
@@ -126,7 +132,7 @@ describe('handleBranchTargetImpl', () => {
       })
       expect(onTourBranch).toHaveBeenCalledWith('t1', 't2', 'a')
       expect(onTourStart).toHaveBeenCalledWith('t2')
-      // Terminal-guards re-armed
+      // Now meaningful: refs were 't1', should have been cleared to null.
       expect(handle.ctx.completedTourIdRef.current).toBeNull()
       expect(handle.ctx.skippedTourIdRef.current).toBeNull()
     })
@@ -321,16 +327,58 @@ describe('handleBranchTargetImpl', () => {
   })
 
   describe('stale closure regression (US-5)', () => {
-    it('reads the latest state on each getState call', () => {
+    it('BranchWait recursion sees state mutations applied during the wait', async () => {
+      // Outer call enters at currentStepIndex=0 with target=BranchWait→'b'.
+      // During the wait we mutate state so currentStepIndex moves to 1.
+      // When the recursion resolves 'b' to index 1 it MUST compare against
+      // the fresh currentStepIndex (1), triggering the current-index path
+      // (SET_TRANSITIONING false, no navigation). If state were stale, the
+      // recursion would see index 0 and instead dispatch navigation to 1.
+      const tour = makeTour('t1', [visibleStep('a'), visibleStep('b'), visibleStep('c')])
+      const handle = createFakeEngineContext({
+        currentTour: tour,
+        state: { currentStep: tour.steps[0] ?? null, currentStepIndex: 0 },
+        stepIdMap: new Map([
+          ['a', 0],
+          ['b', 1],
+          ['c', 2],
+        ]),
+      })
+
+      const pending = handleBranchTargetImpl(
+        handle.ctx,
+        // biome-ignore lint/suspicious/noThenProperty: BranchWait's `then` is the public branching API
+        { wait: 20, then: 'b' },
+        noopBranchCtx
+      )
+
+      // Wait long enough for the outer setTimeout to be in flight, then
+      // mutate state mid-wait.
+      await new Promise((r) => setTimeout(r, 5))
+      handle.setState({ currentStep: tour.steps[1] ?? null, currentStepIndex: 1 })
+
+      await pending
+
+      // Recursion's target ('b' → index 1) equals fresh currentStepIndex (1),
+      // so the current-index short-circuit fires.
+      expect(handle.mocks.dispatch).toHaveBeenCalledWith({
+        type: 'SET_TRANSITIONING',
+        isTransitioning: false,
+      })
+      expect(handle.mocks.navigateToStep).not.toHaveBeenCalled()
+    })
+
+    it('getter returns latest state when invoked from a captured ctx', () => {
+      // Sanity check on the engine-context contract itself: a ctx captured
+      // before a mutation MUST observe the mutation on the next getState().
       const tour = makeTour('t1', [visibleStep('a'), visibleStep('b')])
       const handle = createFakeEngineContext({
         currentTour: tour,
         state: { currentStep: tour.steps[0] ?? null, currentStepIndex: 0 },
       })
-
-      expect(handle.ctx.getState().currentStepIndex).toBe(0)
+      const capturedCtx = handle.ctx
       handle.setState({ currentStepIndex: 1 })
-      expect(handle.ctx.getState().currentStepIndex).toBe(1)
+      expect(capturedCtx.getState().currentStepIndex).toBe(1)
     })
   })
 })

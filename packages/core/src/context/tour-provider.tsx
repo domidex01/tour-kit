@@ -18,7 +18,13 @@ import { validateTour } from '../lib/validate-tour'
 import { waitForStepTarget } from '../lib/wait-for-step-target'
 import type { TourRouteError } from '../lib/wait-for-step-target'
 import { tourRegistry } from '../registry/tour-registry'
-import type { BranchContext, Tour, TourCallbackContext, TourContextValue } from '../types'
+import type {
+  BranchContext,
+  BranchTarget,
+  Tour,
+  TourCallbackContext,
+  TourContextValue,
+} from '../types'
 import { defaultPersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
@@ -701,9 +707,20 @@ export function TourProvider({
 
   // ─── Engine context wiring ───────────────────────────────────────────────
   // `navigateToStep` and `handleBranchTarget` live in `../lib/tour-engine/`.
-  // The provider holds `engineContextRef` whose `current` is refreshed every
-  // render so the engine impls read fresh state / data / callbacks across
-  // async navigation. Wrappers below are stable (empty-deps `useCallback`).
+  //
+  // Engine impls are awaited across microtask boundaries. To avoid the stale-
+  // closure trap, the engine context's accessors route through a set of
+  // "live" refs that mirror the latest committed state. Even if an impl
+  // captures `ctx` from render N, calling `ctx.getState()` from render N+1
+  // reads through `stateRef.current` which has already been refreshed.
+  //
+  // `engineContextRef` itself is rebuilt each render so non-getter fields
+  // (router, callbacks) stay current; the getters all read through the same
+  // long-lived refs.
+  const stateRef = React.useRef<TourReducerState>(state)
+  const currentTourLiveRef = React.useRef<Tour | null>(null)
+  const dataRef = React.useRef<Record<string, unknown>>(data)
+  const stepIdMapRef = React.useRef<Map<string, number>>(new Map())
   const engineContextRef = React.useRef<TourEngineContext | null>(null)
 
   const navigateToStep = React.useCallback((stepIndex: number): Promise<boolean> => {
@@ -769,11 +786,7 @@ export function TourProvider({
   // Wrapper delegates through the engine context ref so async branches read
   // fresh state across awaits.
   const handleBranchTarget = React.useCallback(
-    (
-      target: import('../types').BranchTarget,
-      branchContext: BranchContext,
-      actionId?: string
-    ): Promise<void> => {
+    (target: BranchTarget, branchContext: BranchContext, actionId?: string): Promise<void> => {
       const ctx = engineContextRef.current
       if (!ctx) return Promise.resolve()
       return handleBranchTargetImpl(ctx, target, branchContext, actionId)
@@ -781,15 +794,20 @@ export function TourProvider({
     []
   )
 
-  // Refresh engine context on every render so getters close over the latest
-  // state / data / callbacks. Refs may be mutated during render; doing this
-  // synchronously avoids a one-render lag where engine functions would read
-  // a stale snapshot.
+  // Refresh the live refs synchronously each render so engine getters always
+  // resolve to the latest committed state, even when called through a `ctx`
+  // captured during an earlier render (e.g. a BranchWait recursion that
+  // resumes after a state-changing dispatch).
+  stateRef.current = state
+  currentTourLiveRef.current = currentTour
+  dataRef.current = data
+  stepIdMapRef.current = stepIdMap
+
   engineContextRef.current = {
-    getState: () => state,
-    getCurrentTour: () => currentTour,
-    getData: () => data,
-    getStepIdMap: () => stepIdMap,
+    getState: () => stateRef.current,
+    getCurrentTour: () => currentTourLiveRef.current,
+    getData: () => dataRef.current,
+    getStepIdMap: () => stepIdMapRef.current,
     dispatch,
     abortControllerRef,
     completedTourIdRef,

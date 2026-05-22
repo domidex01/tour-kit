@@ -18,10 +18,17 @@ export interface TourEngineAnalytics {
 /**
  * Engine-scoped context shared by `navigateToStep` and `handleBranchTarget`.
  *
- * Every read-back-mutable value is exposed as a getter or ref. This is
- * deliberate — the engine functions are `await`ed across microtask boundaries
- * and would otherwise capture stale state via closure. The provider builds a
- * stable `engineContextRef` once and updates its `current` on each render.
+ * Every read-back-mutable value is exposed as a getter or ref so the engine
+ * impls see fresh state across `await` boundaries. The provider holds a set
+ * of long-lived "live" refs (`stateRef`, `currentTourRef`, `dataRef`,
+ * `stepIdMapRef`) that are refreshed each render to mirror the latest
+ * committed values; the getters here close over those refs, NOT over a
+ * render-scoped `state` const. As a result, even if an engine impl captures
+ * `ctx` during render N, calling `ctx.getState()` after a state-changing
+ * dispatch reads the render-N+1 value through the shared ref.
+ *
+ * `engineContextRef` itself is rebuilt each render so non-getter fields
+ * (`router`, `autoNavigate`, consumer callbacks) stay current.
  */
 export interface TourEngineContext {
   // ─── State accessors (getters — read fresh on every call) ────────────────

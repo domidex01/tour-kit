@@ -24,7 +24,7 @@ export interface FakeRouterMock {
   navigate: Mock<RouterAdapter['navigate']>
   getCurrentRoute: Mock<RouterAdapter['getCurrentRoute']>
   matchRoute: Mock<RouterAdapter['matchRoute']>
-  subscribe: Mock<NonNullable<RouterAdapter['onRouteChange']>>
+  onRouteChange: Mock<NonNullable<RouterAdapter['onRouteChange']>>
 }
 
 export interface FakeEngineHandle {
@@ -69,7 +69,7 @@ function buildFakeRouter(overrides?: Partial<RouterAdapter>): FakeRouterMock {
       RouterAdapter['getCurrentRoute']
     >,
     matchRoute: vi.fn(overrides?.matchRoute ?? (() => false)) as Mock<RouterAdapter['matchRoute']>,
-    subscribe: vi.fn(overrides?.onRouteChange ?? (() => () => {})) as Mock<
+    onRouteChange: vi.fn(overrides?.onRouteChange ?? (() => () => {})) as Mock<
       NonNullable<RouterAdapter['onRouteChange']>
     >,
   }
@@ -119,7 +119,7 @@ export function createFakeEngineContext(overrides: FakeEngineOverrides = {}): Fa
     abortControllerRef,
     completedTourIdRef,
     skippedTourIdRef,
-    router: router as unknown as RouterAdapter,
+    router: router satisfies RouterAdapter,
     autoNavigate: overrides.autoNavigate ?? true,
     maxHiddenChain: overrides.maxHiddenChain ?? 50,
     onNavigationRequired,

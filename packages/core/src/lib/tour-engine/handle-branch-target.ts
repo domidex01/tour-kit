@@ -25,12 +25,12 @@ import { buildCallbackContext, evaluateStepWhen, findNextVisibleStepIndex } from
 export async function handleBranchTargetImpl(
   ctx: TourEngineContext,
   target: BranchTarget,
+  // `branchContext` and `actionId` are forwarded into the BranchWait recursion
+  // below; they're part of the public branching surface but are not consumed
+  // by this impl directly.
   branchContext: BranchContext,
   actionId?: string
 ): Promise<void> {
-  void branchContext
-  void actionId
-
   const state = ctx.getState()
   const currentTour = ctx.getCurrentTour()
   const data = ctx.getData()
