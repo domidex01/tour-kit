@@ -1,10 +1,10 @@
 import { renderHook } from '@testing-library/react'
 import {
   LocaleProvider,
-  logger,
   type SegmentSource,
   SegmentationProvider,
   type TourStep,
+  logger,
 } from '@tour-kit/core'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

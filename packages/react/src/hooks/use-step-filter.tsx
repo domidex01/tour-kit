@@ -1,9 +1,9 @@
 'use client'
 
 import {
-  evaluateAudience as coreEvaluateAudience,
   type AudienceProp,
   type TourStep,
+  evaluateAudience as coreEvaluateAudience,
   useSegmentationContext,
   useSegments,
 } from '@tour-kit/core'

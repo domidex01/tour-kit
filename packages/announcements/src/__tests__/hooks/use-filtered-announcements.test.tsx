@@ -1,10 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import {
-  LocaleProvider,
-  logger,
-  type SegmentSource,
-  SegmentationProvider,
-} from '@tour-kit/core'
+import { LocaleProvider, type SegmentSource, SegmentationProvider, logger } from '@tour-kit/core'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
@@ -13,9 +8,7 @@ import {
 } from '../../hooks/use-filtered-announcements'
 import type { AnnouncementConfig, AudienceCondition } from '../../types/announcement'
 
-function wrap(
-  segments: Record<string, SegmentSource> = {}
-): React.FC<{ children: ReactNode }> {
+function wrap(segments: Record<string, SegmentSource> = {}): React.FC<{ children: ReactNode }> {
   return ({ children }) => (
     <LocaleProvider>
       <SegmentationProvider segments={segments}>{children}</SegmentationProvider>
@@ -30,7 +23,7 @@ function makeAnnouncement(
     variant: 'banner',
     title: overrides.id,
     ...overrides,
-  } as AnnouncementConfig
+  }
 }
 
 describe('evaluateAnnouncementAudience', () => {
@@ -119,10 +112,7 @@ describe('useFilteredAnnouncements', () => {
   })
 
   it('keeps announcements without an audience field', () => {
-    const arr: AnnouncementConfig[] = [
-      makeAnnouncement({ id: 'a' }),
-      makeAnnouncement({ id: 'b' }),
-    ]
+    const arr: AnnouncementConfig[] = [makeAnnouncement({ id: 'a' }), makeAnnouncement({ id: 'b' })]
     const { result } = renderHook(() => useFilteredAnnouncements(arr), { wrapper: wrap() })
     expect(result.current.map((a) => a.id)).toEqual(['a', 'b'])
   })

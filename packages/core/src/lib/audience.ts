@@ -54,7 +54,7 @@ export function evaluateAudience(
     ) {
       warnedUnknownSegments.add(audience.segment)
       logger.warn(
-        `[tour-kit] ${caller}: references segment "${audience.segment}" not registered in <SegmentationProvider>`
+        `[tour-kit] ${caller} references segment "${audience.segment}" not registered in <SegmentationProvider>`
       )
     }
     return segments[audience.segment] === true

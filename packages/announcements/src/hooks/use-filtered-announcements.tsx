@@ -2,11 +2,7 @@
 
 import { evaluateAudience as coreEvaluateAudience, useSegments } from '@tour-kit/core'
 import * as React from 'react'
-import {
-  type AnnouncementConfig,
-  type AudienceProp,
-  isSegmentAudience,
-} from '../types/announcement'
+import type { AnnouncementConfig, AudienceProp } from '../types/announcement'
 
 /**
  * Resolve a single announcement's audience for the segment-shape branch only.
@@ -33,13 +29,10 @@ export function evaluateAnnouncementAudience(
   // the legacy `matchesAudience(audience, userContext)` evaluation against the
   // provider's `userContext` prop. (See memory #204 / phase-1 Open Question 1.)
   if (Array.isArray(audience)) return true
-  if (isSegmentAudience(audience)) {
-    // Delegate to core for warn-once + segment lookup; userContext is
-    // intentionally `undefined` because announcements never evaluates arrays
-    // here, so the userContext branch is unreachable.
-    return coreEvaluateAudience(audience, segments, undefined, 'useFilteredAnnouncements')
-  }
-  return true
+  // After the two guards above, `AudienceProp = AudienceCondition[] | { segment: string }`
+  // narrows to the segment branch — delegate to core for warn-once + segment lookup.
+  // `userContext` is intentionally `undefined`; arrays never reach here.
+  return coreEvaluateAudience(audience, segments, undefined, 'useFilteredAnnouncements')
 }
 
 /**

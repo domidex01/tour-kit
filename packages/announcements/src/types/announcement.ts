@@ -15,14 +15,9 @@ export type { AudienceCondition, AudienceProp, FrequencyRule }
 // announcement type surface unified.
 export type { ChangelogEntry, SerializeFeedOptions } from '../changelog/feed'
 
-/**
- * Type guard narrowing `AudienceProp` to its segment-named branch. Mirrors the
- * private guard in `@tour-kit/hints` — keep both in lockstep when changing the
- * discriminator.
- */
-export function isSegmentAudience(a: AudienceProp): a is { segment: string } {
-  return !Array.isArray(a) && typeof a === 'object' && a !== null && 'segment' in a
-}
+// Phase 1 hoist — segment-audience type guard now lives in @tour-kit/core.
+// Re-export preserves the public `@tour-kit/announcements` surface.
+export { isSegmentAudience } from '@tour-kit/core'
 
 /**
  * Announcement display variants

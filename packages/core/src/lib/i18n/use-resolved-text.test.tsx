@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import * as React from 'react'
+import type * as React from 'react'
 import { describe, expect, it } from 'vitest'
 import type { LocalizedText } from '../localized-text'
 import { SegmentationProvider } from '../segmentation/segmentation-context'

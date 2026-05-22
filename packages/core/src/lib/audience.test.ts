@@ -1,9 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { uniqueSegment } from '../__tests__/_helpers/unique-segment'
 import type { AudienceCondition } from '../types/audience'
 import type { AudienceProp } from '../types/step'
 import { logger } from '../utils/logger'
-import { uniqueSegment } from '../__tests__/_helpers/unique-segment'
-import { evaluateAudience, isSegmentAudience, matchesAudience, validateConditions } from './audience'
+import {
+  evaluateAudience,
+  isSegmentAudience,
+  matchesAudience,
+  validateConditions,
+} from './audience'
 
 const cond = (
   operator: AudienceCondition['operator'],
@@ -219,9 +224,9 @@ describe('evaluateAudience', () => {
 
   describe('segment branch', () => {
     it('passes when segment is registered true', () => {
-      expect(evaluateAudience({ segment: 'beta' }, { beta: true }, undefined, 'useStepFilter')).toBe(
-        true
-      )
+      expect(
+        evaluateAudience({ segment: 'beta' }, { beta: true }, undefined, 'useStepFilter')
+      ).toBe(true)
     })
 
     it('filters when segment is registered false', () => {
@@ -278,4 +283,3 @@ describe('evaluateAudience', () => {
     })
   })
 })
-
