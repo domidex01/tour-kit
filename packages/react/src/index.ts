@@ -170,7 +170,6 @@ export {
   createStorageAdapter,
   createPrefixedStorage,
   safeJSONParse,
-  calculatePosition,
 } from '@tour-kit/core'
 
 // Default configs

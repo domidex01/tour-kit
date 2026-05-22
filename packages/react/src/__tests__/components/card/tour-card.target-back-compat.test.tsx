@@ -41,7 +41,7 @@ function Starter() {
 function ResolvedTargetProbe({ onResolve }: { onResolve: (el: HTMLElement | null) => void }) {
   const { currentStep, isActive } = useTour()
   React.useEffect(() => {
-    if (!isActive || !currentStep) return
+    if (!isActive || !currentStep || currentStep.kind === 'hidden') return
     onResolve(resolveTarget(currentStep.target))
   }, [isActive, currentStep, onResolve])
   return null
