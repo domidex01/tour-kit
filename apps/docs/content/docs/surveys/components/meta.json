@@ -12,6 +12,7 @@
     "question-text",
     "question-select",
     "question-boolean",
+    "question-media",
     "survey-progress"
   ]
 }

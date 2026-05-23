@@ -1,0 +1,57 @@
+---
+title: useTourRegistryContext
+description: >-
+  Low-level hooks for reading the registered tour list inside MultiTourKitProvider.
+  Use useTours for ergonomic access.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Low-level access to the tour registry exposed by [`MultiTourKitProvider`](/docs/react/providers/multi-tour-kit-provider). Most consumers should use [`useTours`](/docs/react/hooks/use-tours) — `useTourRegistryContext` is the escape hatch for custom registry integrations (declarative `<Tour>` mounting, tour deduplication, debug panels).
+
+## Usage
+
+```tsx
+import { useTourRegistryContext } from '@tour-kit/react';
+
+function RegistrySize() {
+  const { tours } = useTourRegistryContext();
+  return <span>Registered tours: {tours.length}</span>;
+}
+```
+
+`useTourRegistryContext` throws if no `<MultiTourKitProvider>` is mounted above. Use `useTourRegistryContextOptional` if rendering inside a tree that may or may not have a provider.
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tours` | `Tour[]` | All currently registered tours. |
+| `registerTour` | `(tour: Tour) => void` | Add a tour to the registry. Called internally by `<Tour>` on mount. |
+| `unregisterTour` | `(tourId: string) => void` | Remove a tour from the registry. Called internally by `<Tour>` on unmount. |
+
+## useTourRegistryContextOptional
+
+Same as `useTourRegistryContext` but returns `null` instead of throwing when no provider is present. Useful for components that may render outside a `MultiTourKitProvider`.
+
+```tsx
+import { useTourRegistryContextOptional } from '@tour-kit/react';
+
+function ContextAwareLauncher() {
+  const ctx = useTourRegistryContextOptional();
+  if (!ctx) return <button>Help</button>; // standalone mode
+  return <TourSelector tours={ctx.tours} />;
+}
+```
+
+Returns `TourRegistryContextValue | null`.
+
+<Callout type="info">
+For tour listing, completion checks, and active-tour state, prefer [`useTours`](/docs/react/hooks/use-tours) — it wraps `useTourRegistryContext` and exposes a flatter API (`tours`, `activeTourId`, `isTourCompleted`, etc.).
+</Callout>
+
+## Related
+
+- [useTours](/docs/react/hooks/use-tours)
+- [MultiTourKitProvider](/docs/react/providers/multi-tour-kit-provider)
+- [Tour](/docs/react/components/tour)

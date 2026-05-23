@@ -320,3 +320,102 @@ interface AnnouncementState {
   completedAt: Date | null;
 }
 ```
+
+### AudienceProp
+
+```tsx
+// Audience prop accepted by AnnouncementConfig.audience
+type AudienceProp = AudienceCondition[] | { segment: string };
+
+// Re-exported from @tour-kit/core
+import { isSegmentAudience } from '@tour-kit/announcements';
+isSegmentAudience(audience): audience is { segment: string };
+```
+
+### Audience Evaluator
+
+```tsx
+import { evaluateAnnouncementAudience } from '@tour-kit/announcements';
+
+// Single-item evaluator used by useFilteredAnnouncements. Returns `true` for
+// undefined and array-shape audiences (deferred to the scheduler); evaluates
+// the segment branch against the current segments map.
+evaluateAnnouncementAudience(
+  audience: AudienceProp | undefined,
+  segments: Record<string, boolean>
+): boolean;
+```
+
+### ForceShowBypassKey
+
+```tsx
+// Storage key used by useAnnouncement(id, { forceShow: true }) to bypass
+// frequency / schedule / persistence gates during development.
+const ForceShowBypassKey: string;
+```
+
+### Reactions
+
+```tsx
+type Reaction = '👍' | '👎' | '🎉' | '🚀' | '❤️' | '🤔';
+
+interface ReactionsProps {
+  announcementId: string;
+  available?: Reaction[];           // default: all
+  onReact?: (reaction: Reaction) => void;
+  className?: string;
+}
+```
+
+### Changelog Components
+
+```tsx
+interface ChangelogPageProps {
+  announcements: AnnouncementConfig[];
+  title?: string;
+  description?: string;
+  filters?: ChangelogFilterProps['filters'];
+  className?: string;
+}
+
+interface ChangelogFilterProps {
+  filters: Array<{ id: string; label: string; predicate: (a: AnnouncementConfig) => boolean }>;
+  value: string | null;
+  onChange: (next: string | null) => void;
+}
+
+interface ChangelogEntryProps {
+  announcement: AnnouncementConfig;
+  className?: string;
+}
+```
+
+See [Changelog page](/docs/announcements/changelog).
+
+### Toast Adapter
+
+Plug a host-app toast library (sonner, react-hot-toast, etc.) into `@tour-kit/announcements` instead of using the built-in toast variant.
+
+```tsx
+interface ToastAdapterRenderArgs {
+  id: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  variant?: 'default' | 'success' | 'warning' | 'destructive';
+  duration?: number;
+  onDismiss?: () => void;
+  onAction?: () => void;
+}
+
+interface ToastAdapterHandle {
+  /** Dismiss the toast programmatically. */
+  dismiss: () => void;
+}
+
+interface ToastAdapter {
+  /** Show a toast and return a handle the provider can use to dismiss it. */
+  show: (args: ToastAdapterRenderArgs) => ToastAdapterHandle;
+}
+```
+
+Pass `<AnnouncementsProvider toastAdapter={...}>` to route toast-variant announcements through your adapter.

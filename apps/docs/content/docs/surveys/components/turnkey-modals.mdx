@@ -117,6 +117,42 @@ The category is computed by the pure helper `computeCesCategory(score)`:
 - Reduced motion is inherited from `SurveyModal` via the `motion-safe:` Tailwind prefix — no extra setup required.
 - Each modal is tree-shakeable: importing only `CsatModal` does not pull `NpsModal` or `CesModal`.
 
+## Props
+
+All three share the same base — they extend `SurveyModalProps` (excluding `surveyId`, `children`, `onSubmit`, `onSelect`) and add their own submit signature.
+
+```tsx
+interface CsatModalProps extends Omit<SurveyModalProps, 'surveyId' | 'children' | 'onSubmit' | 'onSelect'> {
+  surveyId?: string;        // defaults to React.useId()
+  question: string;
+  ratingScale?: RatingScale;  // default: 1–5 numeric
+  lowLabel?: string;
+  highLabel?: string;
+  onSubmit: (rating: number) => void;
+  onSkip?: () => void;
+}
+
+interface NpsModalProps extends Omit<SurveyModalProps, 'surveyId' | 'children' | 'onSubmit' | 'onSelect'> {
+  surveyId?: string;
+  question: string;
+  ratingScale?: RatingScale;  // default: 0–10
+  lowLabel?: string;
+  highLabel?: string;
+  onSubmit: (score: number, category: NpsCategory) => void;
+  onSkip?: () => void;
+}
+
+interface CesModalProps extends Omit<SurveyModalProps, 'surveyId' | 'children' | 'onSubmit' | 'onSelect'> {
+  surveyId?: string;
+  question: string;
+  ratingScale?: RatingScale;  // default: 1–7
+  lowLabel?: string;
+  highLabel?: string;
+  onSubmit: (score: number, category: CesCategory) => void;
+  onSkip?: () => void;
+}
+```
+
 ## Related
 
 - [SurveyModal](/docs/surveys/components/survey-modal) — the underlying primitive each turnkey wraps.

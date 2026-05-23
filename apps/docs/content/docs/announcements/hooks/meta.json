@@ -4,6 +4,8 @@
     "use-announcement",
     "use-announcements",
     "use-announcement-queue",
-    "use-announcements-context"
+    "use-announcements-context",
+    "use-filtered-announcements",
+    "use-resolved-text"
   ]
 }

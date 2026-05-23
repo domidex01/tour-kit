@@ -1,0 +1,52 @@
+---
+title: useResolveLocalizedText
+description: >-
+  Returns a memoized (value) => string resolver. Use for consumer-authored copy
+  that must be a string — aria-label, title, Dialog.Title.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+String-only sibling of [`useResolvedText`](/docs/core/hooks/use-resolved-text). Returns a memoized resolver:
+
+```ts
+function useResolveLocalizedText(): (value: LocalizedText | undefined) => string
+```
+
+Use it whenever the surface you're handing copy to requires a `string` (not a `ReactNode`) — `aria-label`, `title` attributes, `Dialog.Title` text, `document.title` updates, etc.
+
+## Usage
+
+```tsx
+import { useResolveLocalizedText } from '@tour-kit/core';
+
+function TaskRow({ task }: { task: ChecklistTaskConfig }) {
+  const resolveText = useResolveLocalizedText();
+  return (
+    <li aria-label={resolveText(task.title)}>
+      {/* ... */}
+    </li>
+  );
+}
+```
+
+## Resolution rules
+
+| Input | Result |
+|-------|--------|
+| `undefined` / `null` | `''` |
+| `string` | `interpolate(value, userContext, { warnOnMissing: false })` |
+| `{ key }` | `useT()(value.key, userContext)` |
+| any other `ReactNode` | `''` (JSX cannot render to a string) |
+
+`vars` are sourced from `useSegmentationContext().userContext` — the same shape that drives audience targeting. Without a `<SegmentationProvider>`, `userContext` is `undefined` and templates fall back to `{{x | default}}` rules.
+
+<Callout type="info">
+For `ReactNode` outputs (tour body copy, hint titles), use [`useResolvedText`](/docs/core/hooks/use-resolved-text) — it accepts JSX and returns `ReactNode`. This hook is the narrower variant for string-only sinks.
+</Callout>
+
+## Related
+
+- [useResolvedText](/docs/core/hooks/use-resolved-text)
+- [useLocale](/docs/core/hooks/use-locale)
+- [i18n guide](/docs/guides/i18n)
