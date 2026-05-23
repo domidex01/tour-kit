@@ -14,6 +14,10 @@
     "use-route-persistence",
     "use-media-query",
     "use-advance-on",
-    "use-direction"
+    "use-direction",
+    "use-locale",
+    "use-resolved-text",
+    "use-resolve-localized-text",
+    "use-segmentation-context"
   ]
 }

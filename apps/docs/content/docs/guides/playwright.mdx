@@ -105,6 +105,25 @@ Every helper short-circuits with a clear error pointing at
 `enableTestBridge` if the bridge is missing — saving you ten minutes of
 confused debugging.
 
+#### TourHelpers type
+
+The full interface is exported for fixture typing and custom helpers:
+
+```ts
+import type { TourHelpers } from '@tour-kit/playwright';
+
+interface TourHelpers {
+  start: (tourId: string) => Promise<void>;
+  waitForStep: (stepId: string, opts?: { timeout?: number }) => Promise<void>;
+  next: () => Promise<void>;
+  previous: () => Promise<void>;
+  complete: () => Promise<void>;
+  skip: () => Promise<void>;
+  goToStep: (stepId: string) => Promise<void>;
+  getDiagnostic: (tourId: string) => Promise<EligibilityReport | null>;
+}
+```
+
 ## 3 — Diagnostic integration
 
 Mount the provider with both `diagnose` and `enableTestBridge` to surface

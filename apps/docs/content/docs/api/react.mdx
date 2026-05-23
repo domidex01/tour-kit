@@ -445,6 +445,78 @@ import { UILibraryProvider, useUILibrary } from '@tour-kit/react';
 const library = useUILibrary(); // 'radix' | 'base-ui'
 ```
 
+### Audience Utilities
+
+```tsx
+import { explainAudience, matchUrl } from '@tour-kit/react';
+
+// Human-readable explanation of an audience match (debug panels, devtools)
+explainAudience(audience, segments, userContext): string;
+
+// URL pattern matcher used by router-aware steps (segments, glob, exact)
+matchUrl(pattern: string, route: string, mode?: 'exact' | 'startsWith' | 'contains'): boolean;
+```
+
+### Tour Registry Hooks
+
+```tsx
+import {
+  useTourRegistryContext,
+  useTourRegistryContextOptional,
+} from '@tour-kit/react';
+```
+
+Low-level access to the registry inside `MultiTourKitProvider`. See [useTourRegistryContext](/docs/react/hooks/use-tour-registry-context). Prefer [useTours](/docs/react/hooks/use-tours) for the ergonomic surface.
+
+### Theme Variation Types
+
+```tsx
+interface ThemeTokens {
+  colors: Record<string, string>;
+  radius?: string;
+  shadow?: string;
+  font?: string;
+}
+
+interface ThemeContextValue {
+  theme: ThemeTokens;
+  resolve: (token: string) => string;
+}
+
+interface ThemeResolveContext {
+  variation?: string;
+  variables?: Record<string, string>;
+}
+
+interface ThemeProviderProps {
+  tokens: ThemeTokens;
+  variation?: string;
+  children: React.ReactNode;
+}
+
+interface UseThemeVariationReturn {
+  variation: string | undefined;
+  setVariation: (next: string | undefined) => void;
+  resolved: Record<string, string>;
+}
+```
+
+See [Theme variations guide](/docs/guides/theme-variations).
+
+### Diagnostic Re-exports
+
+```tsx
+// Re-exported from @tour-kit/core for ergonomic in-package access
+import {
+  BUILTIN_GATE_ORDER,
+  type DiagnosticContext,
+  type GateCode,
+  type GateName,
+} from '@tour-kit/react';
+```
+
+See [Diagnostic types](/docs/api/core#diagnostic-types) for the full reference.
+
 ---
 
 ## Re-exports from @tour-kit/core

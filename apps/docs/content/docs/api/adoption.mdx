@@ -309,3 +309,34 @@ interface FeatureUsage {
   adoptedAt: Date | null;
 }
 ```
+
+### AdoptionFunnelProps
+
+```tsx
+interface AdoptionFunnelProps
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'role' | 'aria-label' | 'children' | 'title'> {
+  /** Pre-computed funnel data, in display order */
+  steps: readonly FunnelStep[];
+  /** Optional header rendered above the bars */
+  title?: React.ReactNode;
+  /** Click/keyboard activation handler. When omitted, steps are not focusable */
+  onStepClick?: (step: FunnelStep, index: number) => void;
+  /** Replaces the default "No funnel data yet." message when steps is empty */
+  emptyState?: React.ReactNode;
+  /** Override the auto-generated chart summary on the role="img" element */
+  ariaLabel?: string;
+}
+```
+
+### UseFunnelDataInput
+
+```tsx
+interface UseFunnelDataInput {
+  /** Feature IDs in funnel order */
+  featureIds: readonly string[];
+  /** Optional label overrides keyed by feature id */
+  labels?: Partial<Record<string, string>>;
+}
+```
+
+Used by `useFunnelData()` to derive a current-state funnel from `useAdoptionStats`. For aggregated, date-ranged funnels, pass pre-computed data directly to `<AdoptionFunnel steps={...}>`.

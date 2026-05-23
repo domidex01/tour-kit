@@ -1,0 +1,56 @@
+---
+title: useResolvedText
+description: >-
+  Resolve a LocalizedText | ReactNode value into a ReactNode. Handles string
+  interpolation, i18n key lookup, and ReactNode pass-through with one call.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Unified text pipeline used across `@tour-kit/react`, `@tour-kit/hints`, and `@tour-kit/announcements`. Given a `LocalizedText | ReactNode`, returns a `ReactNode` ready to render:
+
+- `string` → interpolated against `vars` (`'Hi {{user.name}}'`)
+- `{ key }` → translated via [`useT`](/docs/core/hooks/use-t)
+- any other `ReactNode` → returned as-is (JSX pass-through)
+
+## Usage
+
+```tsx
+import { useResolvedText } from '@tour-kit/core';
+
+function StepBody({ body }: { body: LocalizedText | React.ReactNode }) {
+  const resolved = useResolvedText(body);
+  return <div>{resolved}</div>;
+}
+```
+
+By default `vars` falls back to `useSegmentationContext().userContext`, so any consumer that wires `userContext` for audience targeting gets interpolation against the same shape for free.
+
+```tsx
+const resolved = useResolvedText('Welcome back, {{user.name}}');
+// With userContext = { user: { name: 'Ada' } } → "Welcome back, Ada"
+```
+
+## Signature
+
+```ts
+function useResolvedText(
+  value: ReactNode | LocalizedText | undefined,
+  vars?: Record<string, unknown>
+): ReactNode
+```
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `value` | `ReactNode \| LocalizedText \| undefined` | Source value. Returned as-is for non-string non-key inputs. |
+| `vars` | `Record<string, unknown>` | Optional override; defaults to `useSegmentationContext().userContext`. |
+
+<Callout type="warn">
+This is a hook — call it from a component body, never from an event handler or `.map()` callback. For string outputs (`aria-label`, `Dialog.Title`), use [`useResolveLocalizedText`](/docs/core/hooks/use-resolve-localized-text) — it returns a memoized `(value) => string` resolver you can call anywhere.
+</Callout>
+
+## Related
+
+- [useResolveLocalizedText](/docs/core/hooks/use-resolve-localized-text) — string-only variant for ARIA attributes
+- [useLocale](/docs/core/hooks/use-locale) — read raw locale context
+- [i18n guide](/docs/guides/i18n)
