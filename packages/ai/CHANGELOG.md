@@ -1,5 +1,13 @@
 # @tour-kit/ai
 
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [a17322c]
+  - @tour-kit/core@1.0.1
+  - @tour-kit/license@1.3.1
+
 ## 0.11.3
 
 ### Patch Changes
