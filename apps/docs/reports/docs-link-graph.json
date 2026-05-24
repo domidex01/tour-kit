@@ -118,10 +118,7 @@
       "file": "content/docs/adoption/dashboard/charts.mdx",
       "section": "adoption",
       "title": "Charts",
-      "outbound": [
-        "/docs/adoption/dashboard/table",
-        "/docs/adoption/hooks/use-adoption-stats"
-      ],
+      "outbound": ["/docs/adoption/dashboard/table", "/docs/adoption/hooks/use-adoption-stats"],
       "inboundCount": 4,
       "inbound": [
         "/docs/adoption/dashboard/adoption-dashboard",
@@ -142,10 +139,7 @@
         "/docs/adoption/hooks/use-funnel-data"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/adoption/hooks/use-funnel-data",
-        "/docs/adoption"
-      ]
+      "inbound": ["/docs/adoption/hooks/use-funnel-data", "/docs/adoption"]
     },
     {
       "url": "/docs/adoption/dashboard",
@@ -159,11 +153,7 @@
         "/docs/adoption/dashboard/charts"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/adoption/hooks/use-adoption-stats",
-        "/docs/adoption",
-        "/docs/api/adoption"
-      ]
+      "inbound": ["/docs/adoption/hooks/use-adoption-stats", "/docs/adoption", "/docs/api/adoption"]
     },
     {
       "url": "/docs/adoption/dashboard/stats",
@@ -187,10 +177,7 @@
       "file": "content/docs/adoption/dashboard/table.mdx",
       "section": "adoption",
       "title": "AdoptionTable",
-      "outbound": [
-        "/docs/adoption/dashboard/charts",
-        "/docs/adoption/hooks/use-adoption-stats"
-      ],
+      "outbound": ["/docs/adoption/dashboard/charts", "/docs/adoption/hooks/use-adoption-stats"],
       "inboundCount": 5,
       "inbound": [
         "/docs/adoption/dashboard/adoption-dashboard",
@@ -205,14 +192,9 @@
       "file": "content/docs/adoption/hooks/use-adoption-context.mdx",
       "section": "adoption",
       "title": "useAdoptionContext",
-      "outbound": [
-        "/docs/adoption/hooks/use-feature",
-        "/docs/adoption/hooks/use-nudge"
-      ],
+      "outbound": ["/docs/adoption/hooks/use-feature", "/docs/adoption/hooks/use-nudge"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/adoption"
-      ]
+      "inbound": ["/docs/adoption"]
     },
     {
       "url": "/docs/adoption/hooks/use-adoption-stats",
@@ -264,14 +246,9 @@
       "file": "content/docs/adoption/hooks/use-funnel-data.mdx",
       "section": "adoption",
       "title": "useFunnelData",
-      "outbound": [
-        "/docs/adoption/dashboard/funnel",
-        "/docs/adoption/hooks/use-adoption-stats"
-      ],
+      "outbound": ["/docs/adoption/dashboard/funnel", "/docs/adoption/hooks/use-adoption-stats"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/adoption/dashboard/funnel"
-      ]
+      "inbound": ["/docs/adoption/dashboard/funnel"]
     },
     {
       "url": "/docs/adoption/hooks/use-nudge",
@@ -313,12 +290,7 @@
         "/docs/adoption/components/adoption-nudge"
       ],
       "inboundCount": 4,
-      "inbound": [
-        "/docs/api/adoption",
-        "/docs/api",
-        "/docs/licensing",
-        "/docs/licensing/trial"
-      ]
+      "inbound": ["/docs/api/adoption", "/docs/api", "/docs/licensing", "/docs/licensing/trial"]
     },
     {
       "url": "/docs/adoption/providers/adoption-provider",
@@ -353,19 +325,14 @@
         "/docs/adoption/hooks/use-feature"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api/adoption"
-      ]
+      "inbound": ["/docs/api/adoption"]
     },
     {
       "url": "/docs/ai/api-reference",
       "file": "content/docs/ai/api-reference.mdx",
       "section": "ai",
       "title": "API Reference",
-      "outbound": [
-        "/docs/ai/components",
-        "/docs/ai/rag-guide"
-      ],
+      "outbound": ["/docs/ai/components", "/docs/ai/rag-guide"],
       "inboundCount": 4,
       "inbound": [
         "/docs/ai/cag-guide",
@@ -379,11 +346,7 @@
       "file": "content/docs/ai/cag-guide.mdx",
       "section": "ai",
       "title": "CAG Guide",
-      "outbound": [
-        "/docs/ai/rag-guide",
-        "/docs/ai/tour-integration",
-        "/docs/ai/api-reference"
-      ],
+      "outbound": ["/docs/ai/rag-guide", "/docs/ai/tour-integration", "/docs/ai/api-reference"],
       "inboundCount": 5,
       "inbound": [
         "/docs/ai",
@@ -398,10 +361,7 @@
       "file": "content/docs/ai/components.mdx",
       "section": "ai",
       "title": "Components",
-      "outbound": [
-        "/docs/ai/hooks",
-        "/docs/api/ai"
-      ],
+      "outbound": ["/docs/ai/hooks", "/docs/api/ai"],
       "inboundCount": 5,
       "inbound": [
         "/docs/ai/api-reference",
@@ -416,17 +376,9 @@
       "file": "content/docs/ai/hooks.mdx",
       "section": "ai",
       "title": "Hooks",
-      "outbound": [
-        "/docs/ai/components",
-        "/docs/api/ai"
-      ],
+      "outbound": ["/docs/ai/components", "/docs/api/ai"],
       "inboundCount": 4,
-      "inbound": [
-        "/docs/ai/components",
-        "/docs/ai",
-        "/docs/ai/tour-integration",
-        "/docs/api/ai"
-      ]
+      "inbound": ["/docs/ai/components", "/docs/ai", "/docs/ai/tour-integration", "/docs/api/ai"]
     },
     {
       "url": "/docs/ai",
@@ -443,12 +395,7 @@
         "/docs/ai/api-reference"
       ],
       "inboundCount": 4,
-      "inbound": [
-        "/docs/api/ai",
-        "/docs/api",
-        "/docs/build-with-llms",
-        "/docs/licensing"
-      ]
+      "inbound": ["/docs/api/ai", "/docs/api", "/docs/build-with-llms", "/docs/licensing"]
     },
     {
       "url": "/docs/ai/quick-start",
@@ -462,21 +409,14 @@
         "/docs/ai/components"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/ai",
-        "/docs/api/ai"
-      ]
+      "inbound": ["/docs/ai", "/docs/api/ai"]
     },
     {
       "url": "/docs/ai/rag-guide",
       "file": "content/docs/ai/rag-guide.mdx",
       "section": "ai",
       "title": "RAG Guide",
-      "outbound": [
-        "/docs/ai/cag-guide",
-        "/docs/ai/tour-integration",
-        "/docs/ai/api-reference"
-      ],
+      "outbound": ["/docs/ai/cag-guide", "/docs/ai/tour-integration", "/docs/ai/api-reference"],
       "inboundCount": 6,
       "inbound": [
         "/docs/ai/api-reference",
@@ -499,23 +439,14 @@
         "/docs/ai/api-reference"
       ],
       "inboundCount": 4,
-      "inbound": [
-        "/docs/ai/cag-guide",
-        "/docs/ai",
-        "/docs/ai/quick-start",
-        "/docs/ai/rag-guide"
-      ]
+      "inbound": ["/docs/ai/cag-guide", "/docs/ai", "/docs/ai/quick-start", "/docs/ai/rag-guide"]
     },
     {
       "url": "/docs/analytics/hooks",
       "file": "content/docs/analytics/hooks/index.mdx",
       "section": "analytics",
       "title": "Analytics Hooks",
-      "outbound": [
-        "/docs/analytics/providers",
-        "/docs/analytics/types",
-        "/docs/analytics/plugins"
-      ],
+      "outbound": ["/docs/analytics/providers", "/docs/analytics/types", "/docs/analytics/plugins"],
       "inboundCount": 4,
       "inbound": [
         "/docs/analytics",
@@ -550,15 +481,9 @@
       "file": "content/docs/analytics/plugins/amplitude.mdx",
       "section": "analytics",
       "title": "Amplitude Plugin",
-      "outbound": [
-        "/docs/analytics/plugins",
-        "/docs/analytics/providers"
-      ],
+      "outbound": ["/docs/analytics/plugins", "/docs/analytics/providers"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/analytics/plugins",
-        "/docs/api/analytics"
-      ]
+      "inbound": ["/docs/analytics/plugins", "/docs/api/analytics"]
     },
     {
       "url": "/docs/analytics/plugins/console",
@@ -571,21 +496,14 @@
         "/docs/analytics/plugins/custom"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/analytics/plugins",
-        "/docs/api/analytics"
-      ]
+      "inbound": ["/docs/analytics/plugins", "/docs/api/analytics"]
     },
     {
       "url": "/docs/analytics/plugins/custom",
       "file": "content/docs/analytics/plugins/custom.mdx",
       "section": "analytics",
       "title": "Custom Analytics Plugins",
-      "outbound": [
-        "/docs/analytics/plugins",
-        "/docs/analytics/types",
-        "/docs/analytics/providers"
-      ],
+      "outbound": ["/docs/analytics/plugins", "/docs/analytics/types", "/docs/analytics/providers"],
       "inboundCount": 4,
       "inbound": [
         "/docs/analytics/plugins/console",
@@ -599,15 +517,9 @@
       "file": "content/docs/analytics/plugins/google-analytics.mdx",
       "section": "analytics",
       "title": "Google Analytics Plugin",
-      "outbound": [
-        "/docs/analytics/plugins",
-        "/docs/analytics/providers"
-      ],
+      "outbound": ["/docs/analytics/plugins", "/docs/analytics/providers"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/analytics/plugins",
-        "/docs/api/analytics"
-      ]
+      "inbound": ["/docs/analytics/plugins", "/docs/api/analytics"]
     },
     {
       "url": "/docs/analytics/plugins",
@@ -642,41 +554,25 @@
       "file": "content/docs/analytics/plugins/mixpanel.mdx",
       "section": "analytics",
       "title": "Mixpanel Plugin",
-      "outbound": [
-        "/docs/analytics/plugins",
-        "/docs/analytics/providers"
-      ],
+      "outbound": ["/docs/analytics/plugins", "/docs/analytics/providers"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/analytics/plugins",
-        "/docs/api/analytics"
-      ]
+      "inbound": ["/docs/analytics/plugins", "/docs/api/analytics"]
     },
     {
       "url": "/docs/analytics/plugins/posthog",
       "file": "content/docs/analytics/plugins/posthog.mdx",
       "section": "analytics",
       "title": "PostHog Plugin",
-      "outbound": [
-        "/docs/analytics/plugins",
-        "/docs/analytics/providers"
-      ],
+      "outbound": ["/docs/analytics/plugins", "/docs/analytics/providers"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/analytics/plugins",
-        "/docs/api/analytics"
-      ]
+      "inbound": ["/docs/analytics/plugins", "/docs/api/analytics"]
     },
     {
       "url": "/docs/analytics/providers",
       "file": "content/docs/analytics/providers/index.mdx",
       "section": "analytics",
       "title": "AnalyticsProvider",
-      "outbound": [
-        "/docs/analytics/hooks",
-        "/docs/analytics/plugins",
-        "/docs/analytics/types"
-      ],
+      "outbound": ["/docs/analytics/hooks", "/docs/analytics/plugins", "/docs/analytics/types"],
       "inboundCount": 10,
       "inbound": [
         "/docs/analytics/hooks",
@@ -715,28 +611,18 @@
       "file": "content/docs/announcements/changelog-component.mdx",
       "section": "announcements",
       "title": "ChangelogPage Component",
-      "outbound": [
-        "/docs/announcements/changelog",
-        "/docs/media"
-      ],
+      "outbound": ["/docs/announcements/changelog", "/docs/media"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/announcements/changelog"
-      ]
+      "inbound": ["/docs/announcements/changelog"]
     },
     {
       "url": "/docs/announcements/changelog",
       "file": "content/docs/announcements/changelog.mdx",
       "section": "announcements",
       "title": "Changelog",
-      "outbound": [
-        "/docs/announcements/changelog-component"
-      ],
+      "outbound": ["/docs/announcements/changelog-component"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/announcements/changelog-component",
-        "/docs/api/announcements"
-      ]
+      "inbound": ["/docs/announcements/changelog-component", "/docs/api/announcements"]
     },
     {
       "url": "/docs/announcements/components/banner",
@@ -845,13 +731,9 @@
       "file": "content/docs/announcements/components/variants.mdx",
       "section": "announcements",
       "title": "Variants",
-      "outbound": [
-        "/docs/announcements/types"
-      ],
+      "outbound": ["/docs/announcements/types"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/announcements/components"
-      ]
+      "inbound": ["/docs/announcements/components"]
     },
     {
       "url": "/docs/announcements/configuration/audience",
@@ -1136,9 +1018,7 @@
         "/docs/announcements/hooks/use-announcement-queue"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/announcements/types"
-      ]
+      "inbound": ["/docs/announcements/types"]
     },
     {
       "url": "/docs/announcements/hooks/use-announcements",
@@ -1164,10 +1044,7 @@
       "file": "content/docs/announcements/hooks/use-filtered-announcements.mdx",
       "section": "announcements",
       "title": "useFilteredAnnouncements",
-      "outbound": [
-        "/docs/guides/segmentation",
-        "/docs/announcements/types"
-      ],
+      "outbound": ["/docs/guides/segmentation", "/docs/announcements/types"],
       "inboundCount": 0,
       "inbound": []
     },
@@ -1281,11 +1158,7 @@
         "/docs/guides/adoption-analytics"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/adoption",
-        "/docs/api",
-        "/docs/guides/adoption-analytics"
-      ]
+      "inbound": ["/docs/adoption", "/docs/api", "/docs/guides/adoption-analytics"]
     },
     {
       "url": "/docs/api/ai",
@@ -1302,11 +1175,7 @@
         "/docs/api"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/ai/components",
-        "/docs/ai/hooks",
-        "/docs/api"
-      ]
+      "inbound": ["/docs/ai/components", "/docs/ai/hooks", "/docs/api"]
     },
     {
       "url": "/docs/api/analytics",
@@ -1366,10 +1235,7 @@
         "/docs/announcements/configuration/queue"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api",
-        "/docs/guides/announcements-scheduling"
-      ]
+      "inbound": ["/docs/api", "/docs/guides/announcements-scheduling"]
     },
     {
       "url": "/docs/api/checklists",
@@ -1400,10 +1266,7 @@
         "/docs/guides/checklists-tours"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api",
-        "/docs/guides/checklists-tours"
-      ]
+      "inbound": ["/docs/api", "/docs/guides/checklists-tours"]
     },
     {
       "url": "/docs/api/core",
@@ -1472,9 +1335,7 @@
         "/docs/hints/persistence"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api"
-      ]
+      "inbound": ["/docs/api"]
     },
     {
       "url": "/docs/api",
@@ -1526,11 +1387,7 @@
       "file": "content/docs/api/license.mdx",
       "section": "api",
       "title": "@tour-kit/license API",
-      "outbound": [
-        "/docs/licensing",
-        "/docs/licensing/trial",
-        "/docs/api"
-      ],
+      "outbound": ["/docs/licensing", "/docs/licensing/trial", "/docs/api"],
       "inboundCount": 4,
       "inbound": [
         "/docs/api",
@@ -1566,9 +1423,7 @@
         "/docs/guides/reduced-motion"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api"
-      ]
+      "inbound": ["/docs/api"]
     },
     {
       "url": "/docs/api/react",
@@ -1636,24 +1491,16 @@
         "/docs/guides/announcements-scheduling"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api",
-        "/docs/guides/announcements-scheduling",
-        "/docs/scheduling"
-      ]
+      "inbound": ["/docs/api", "/docs/guides/announcements-scheduling", "/docs/scheduling"]
     },
     {
       "url": "/docs/build-with-llms",
       "file": "content/docs/build-with-llms/index.mdx",
       "section": "build-with-llms",
       "title": "Build with LLMs",
-      "outbound": [
-        "/docs/ai"
-      ],
+      "outbound": ["/docs/ai"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs"
-      ]
+      "inbound": ["/docs"]
     },
     {
       "url": "/docs/checklists/components/checklist-launcher",
@@ -1710,10 +1557,7 @@
       "file": "content/docs/checklists/components/checklist-task.mdx",
       "section": "checklists",
       "title": "ChecklistTask",
-      "outbound": [
-        "/docs/checklists/hooks/use-task",
-        "/docs/checklists/components/checklist"
-      ],
+      "outbound": ["/docs/checklists/hooks/use-task", "/docs/checklists/components/checklist"],
       "inboundCount": 4,
       "inbound": [
         "/docs/api/checklists",
@@ -1755,24 +1599,16 @@
         "/docs/checklists/components/checklist-panel"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/checklists",
-        "/docs/checklists/headless",
-        "/docs/checklists"
-      ]
+      "inbound": ["/docs/api/checklists", "/docs/checklists/headless", "/docs/checklists"]
     },
     {
       "url": "/docs/checklists/components/variants",
       "file": "content/docs/checklists/components/variants.mdx",
       "section": "checklists",
       "title": "Variants",
-      "outbound": [
-        "/docs/checklists/types"
-      ],
+      "outbound": ["/docs/checklists/types"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/checklists/types"
-      ]
+      "inbound": ["/docs/checklists/types"]
     },
     {
       "url": "/docs/checklists/headless/checklist-headless",
@@ -1802,11 +1638,7 @@
         "/docs/checklists/headless/task-headless"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/checklists",
-        "/docs/checklists/components",
-        "/docs/checklists"
-      ]
+      "inbound": ["/docs/api/checklists", "/docs/checklists/components", "/docs/checklists"]
     },
     {
       "url": "/docs/checklists/headless/task-headless",
@@ -1978,15 +1810,9 @@
       "file": "content/docs/checklists/utilities/create-checklist.mdx",
       "section": "checklists",
       "title": "createChecklist & createTask",
-      "outbound": [
-        "/docs/checklists/providers/checklist-provider",
-        "/docs/checklists/types"
-      ],
+      "outbound": ["/docs/checklists/providers/checklist-provider", "/docs/checklists/types"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/checklists",
-        "/docs/checklists/utilities"
-      ]
+      "inbound": ["/docs/api/checklists", "/docs/checklists/utilities"]
     },
     {
       "url": "/docs/checklists/utilities/dependencies",
@@ -1998,10 +1824,7 @@
         "/docs/checklists/hooks/use-task"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/checklists",
-        "/docs/checklists/utilities"
-      ]
+      "inbound": ["/docs/api/checklists", "/docs/checklists/utilities"]
     },
     {
       "url": "/docs/checklists/utilities",
@@ -2014,10 +1837,7 @@
         "/docs/checklists/utilities/dependencies"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/checklists",
-        "/docs/checklists"
-      ]
+      "inbound": ["/docs/api/checklists", "/docs/checklists"]
     },
     {
       "url": "/docs/checklists/utilities/progress",
@@ -2029,10 +1849,7 @@
         "/docs/checklists/hooks/use-checklists-progress"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/checklists",
-        "/docs/checklists/utilities"
-      ]
+      "inbound": ["/docs/api/checklists", "/docs/checklists/utilities"]
     },
     {
       "url": "/docs/core/diagnostic",
@@ -2116,10 +1933,7 @@
       "file": "content/docs/core/hooks/use-element-position.mdx",
       "section": "core",
       "title": "useElementPosition",
-      "outbound": [
-        "/docs/core/hooks/use-spotlight",
-        "/docs/react/components/tour-overlay"
-      ],
+      "outbound": ["/docs/core/hooks/use-spotlight", "/docs/react/components/tour-overlay"],
       "inboundCount": 9,
       "inbound": [
         "/docs/announcements/headless/spotlight",
@@ -2303,9 +2117,7 @@
         "/docs/guides/segmentation"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api/core"
-      ]
+      "inbound": ["/docs/api/core"]
     },
     {
       "url": "/docs/core/hooks/use-spotlight",
@@ -2360,10 +2172,7 @@
       "file": "content/docs/core/hooks/use-tour-context.mdx",
       "section": "core",
       "title": "useTourContext",
-      "outbound": [
-        "/docs/core/hooks/use-tour",
-        "/docs/core/types"
-      ],
+      "outbound": ["/docs/core/hooks/use-tour", "/docs/core/types"],
       "inboundCount": 3,
       "inbound": [
         "/docs/core/hooks/use-tour",
@@ -2376,9 +2185,7 @@
       "file": "content/docs/core/hooks/use-tour-kit-context.mdx",
       "section": "core",
       "title": "useTourKitContext",
-      "outbound": [
-        "/docs/core/hooks/use-direction"
-      ],
+      "outbound": ["/docs/core/hooks/use-direction"],
       "inboundCount": 3,
       "inbound": [
         "/docs/core/hooks/use-direction",
@@ -2522,11 +2329,7 @@
         "/docs/api/core"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/core/diagnostic",
-        "/docs/core",
-        "/docs/core/utilities/create-tour"
-      ]
+      "inbound": ["/docs/core/diagnostic", "/docs/core", "/docs/core/utilities/create-tour"]
     },
     {
       "url": "/docs/core/types/config-types",
@@ -2538,11 +2341,7 @@
         "/docs/core/hooks/use-element-position"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/core",
-        "/docs/core/providers/tour-kit-provider",
-        "/docs/core/types"
-      ]
+      "inbound": ["/docs/api/core", "/docs/core/providers/tour-kit-provider", "/docs/core/types"]
     },
     {
       "url": "/docs/core/types",
@@ -2570,10 +2369,7 @@
       "file": "content/docs/core/types/step-types.mdx",
       "section": "core",
       "title": "Step Types",
-      "outbound": [
-        "/docs/core/hooks/use-branch",
-        "/docs/guides/branching"
-      ],
+      "outbound": ["/docs/core/hooks/use-branch", "/docs/guides/branching"],
       "inboundCount": 9,
       "inbound": [
         "/docs/core/hooks/use-branch",
@@ -2623,10 +2419,7 @@
         "/docs/guides/accessibility"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/core",
-        "/docs/guides/accessibility"
-      ]
+      "inbound": ["/docs/api/core", "/docs/guides/accessibility"]
     },
     {
       "url": "/docs/core/utilities/create-step",
@@ -2699,10 +2492,7 @@
         "/docs/api/core"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/core/utilities/dom",
-        "/docs/guides/i18n"
-      ]
+      "inbound": ["/docs/core/utilities/dom", "/docs/guides/i18n"]
     },
     {
       "url": "/docs/core/utilities/logger",
@@ -2715,9 +2505,7 @@
         "/docs/core/hooks/use-route-persistence"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api/core"
-      ]
+      "inbound": ["/docs/api/core"]
     },
     {
       "url": "/docs/core/utilities/position",
@@ -2730,11 +2518,7 @@
         "/docs/core/utilities/dom"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/core",
-        "/docs/core/utilities/dom",
-        "/docs/core/utilities/helpers"
-      ]
+      "inbound": ["/docs/api/core", "/docs/core/utilities/dom", "/docs/core/utilities/helpers"]
     },
     {
       "url": "/docs/core/utilities/scroll",
@@ -2783,9 +2567,7 @@
         "/docs/api/analytics"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/core/utilities/helpers"
-      ]
+      "inbound": ["/docs/core/utilities/helpers"]
     },
     {
       "url": "/docs/examples/basic-tour",
@@ -2812,10 +2594,7 @@
       "file": "content/docs/examples/cross-page-tour.mdx",
       "section": "examples",
       "title": "Cross-page Tour",
-      "outbound": [
-        "/docs/guides/router-integration",
-        "/docs/guides/persistence"
-      ],
+      "outbound": ["/docs/guides/router-integration", "/docs/guides/persistence"],
       "inboundCount": 3,
       "inbound": [
         "/docs/guides/persistence",
@@ -2828,13 +2607,9 @@
       "file": "content/docs/examples/dashboard.mdx",
       "section": "examples",
       "title": "Dashboard (full integration)",
-      "outbound": [
-        "/docs/troubleshooting"
-      ],
+      "outbound": ["/docs/troubleshooting"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/react/styling/tailwind"
-      ]
+      "inbound": ["/docs/react/styling/tailwind"]
     },
     {
       "url": "/docs/examples/headless-custom",
@@ -2865,9 +2640,7 @@
         "/docs/examples/headless-custom"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/guides/vite"
-      ]
+      "inbound": ["/docs/guides/vite"]
     },
     {
       "url": "/docs/examples/onboarding-flow",
@@ -2892,15 +2665,9 @@
       "file": "content/docs/examples/progress-variants.mdx",
       "section": "examples",
       "title": "Progress Variants",
-      "outbound": [
-        "/docs/guides/animations",
-        "/docs/react/components/tour-progress"
-      ],
+      "outbound": ["/docs/guides/animations", "/docs/react/components/tour-progress"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/guides/animations",
-        "/docs/react/components/tour-progress"
-      ]
+      "inbound": ["/docs/guides/animations", "/docs/react/components/tour-progress"]
     },
     {
       "url": "/docs/getting-started",
@@ -2916,9 +2683,7 @@
         "/docs/migration/driver"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs"
-      ]
+      "inbound": ["/docs"]
     },
     {
       "url": "/docs/getting-started/installation",
@@ -2946,10 +2711,7 @@
       "file": "content/docs/getting-started/quick-start.mdx",
       "section": "getting-started",
       "title": "Quick Start",
-      "outbound": [
-        "/docs/react/components/tour",
-        "/docs/core/hooks/use-keyboard"
-      ],
+      "outbound": ["/docs/react/components/tour", "/docs/core/hooks/use-keyboard"],
       "inboundCount": 14,
       "inbound": [
         "/docs/api/core",
@@ -2983,11 +2745,7 @@
         "/docs/getting-started/quick-start"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/core",
-        "/docs/getting-started",
-        "/docs/getting-started/installation"
-      ]
+      "inbound": ["/docs/api/core", "/docs/getting-started", "/docs/getting-started/installation"]
     },
     {
       "url": "/docs/guides/accessibility",
@@ -3085,16 +2843,9 @@
       "file": "content/docs/guides/announcements-scheduling.mdx",
       "section": "guides",
       "title": "Time-Based Announcements",
-      "outbound": [
-        "/docs/api/announcements",
-        "/docs/api/scheduling"
-      ],
+      "outbound": ["/docs/api/announcements", "/docs/api/scheduling"],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/announcements",
-        "/docs/api/scheduling",
-        "/docs/guides"
-      ]
+      "inbound": ["/docs/api/announcements", "/docs/api/scheduling", "/docs/guides"]
     },
     {
       "url": "/docs/guides/base-ui",
@@ -3109,10 +2860,7 @@
         "/docs/api/react"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/guides",
-        "/docs/guides/unified-slot"
-      ]
+      "inbound": ["/docs/guides", "/docs/guides/unified-slot"]
     },
     {
       "url": "/docs/guides/branching",
@@ -3137,17 +2885,9 @@
       "file": "content/docs/guides/checklists-tours.mdx",
       "section": "guides",
       "title": "Checklists with Tours",
-      "outbound": [
-        "/docs/api/checklists",
-        "/docs/api/react",
-        "/docs/guides/analytics-integration"
-      ],
+      "outbound": ["/docs/api/checklists", "/docs/api/react", "/docs/guides/analytics-integration"],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/checklists",
-        "/docs/guides/analytics-integration",
-        "/docs/guides"
-      ]
+      "inbound": ["/docs/api/checklists", "/docs/guides/analytics-integration", "/docs/guides"]
     },
     {
       "url": "/docs/guides/hidden-steps",
@@ -3232,23 +2972,16 @@
         "/docs/guides/checklists-tours"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs"
-      ]
+      "inbound": ["/docs"]
     },
     {
       "url": "/docs/guides/multi-tab",
       "file": "content/docs/guides/multi-tab.mdx",
       "section": "guides",
       "title": "Multi-tab Tours",
-      "outbound": [
-        "/docs/guides/persistence"
-      ],
+      "outbound": ["/docs/guides/persistence"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/core/hooks/use-persistence",
-        "/docs/guides/persistence"
-      ]
+      "inbound": ["/docs/core/hooks/use-persistence", "/docs/guides/persistence"]
     },
     {
       "url": "/docs/guides/nextjs",
@@ -3303,14 +3036,9 @@
       "file": "content/docs/guides/playwright.mdx",
       "section": "guides",
       "title": "Playwright",
-      "outbound": [
-        "/docs/core/diagnostic",
-        "/docs/guides/testing"
-      ],
+      "outbound": ["/docs/core/diagnostic", "/docs/guides/testing"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/guides/testing"
-      ]
+      "inbound": ["/docs/guides/testing"]
     },
     {
       "url": "/docs/guides/reduced-motion",
@@ -3336,10 +3064,7 @@
       "file": "content/docs/guides/router-integration.mdx",
       "section": "guides",
       "title": "Router Integration",
-      "outbound": [
-        "/docs/guides/persistence",
-        "/docs/examples/cross-page-tour"
-      ],
+      "outbound": ["/docs/guides/persistence", "/docs/examples/cross-page-tour"],
       "inboundCount": 8,
       "inbound": [
         "/docs/api/react",
@@ -3387,9 +3112,7 @@
         "/docs/react/headless/examples"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/guides/playwright"
-      ]
+      "inbound": ["/docs/guides/playwright"]
     },
     {
       "url": "/docs/guides/theme-variations",
@@ -3463,11 +3186,7 @@
       "file": "content/docs/guides/vite.mdx",
       "section": "guides",
       "title": "Vite Integration",
-      "outbound": [
-        "/docs/guides/nextjs",
-        "/docs/guides/router-integration",
-        "/docs/examples"
-      ],
+      "outbound": ["/docs/guides/nextjs", "/docs/guides/router-integration", "/docs/examples"],
       "inboundCount": 4,
       "inbound": [
         "/docs/guides",
@@ -3481,11 +3200,7 @@
       "file": "content/docs/hints/components.mdx",
       "section": "hints",
       "title": "Components",
-      "outbound": [
-        "/docs/hints/hooks",
-        "/docs/hints/persistence",
-        "/docs/hints/headless"
-      ],
+      "outbound": ["/docs/hints/hooks", "/docs/hints/persistence", "/docs/hints/headless"],
       "inboundCount": 10,
       "inbound": [
         "/docs/api/hints",
@@ -3581,11 +3296,7 @@
       "file": "content/docs/hints/hooks.mdx",
       "section": "hints",
       "title": "Hooks",
-      "outbound": [
-        "/docs/hints/components",
-        "/docs/hints/persistence",
-        "/docs/hints/headless"
-      ],
+      "outbound": ["/docs/hints/components", "/docs/hints/persistence", "/docs/hints/headless"],
       "inboundCount": 7,
       "inbound": [
         "/docs/api/hints",
@@ -3626,33 +3337,18 @@
       "file": "content/docs/hints/persistence.mdx",
       "section": "hints",
       "title": "Persistence",
-      "outbound": [
-        "/docs/hints/components",
-        "/docs/hints/hooks",
-        "/docs/core/utilities/storage"
-      ],
+      "outbound": ["/docs/hints/components", "/docs/hints/hooks", "/docs/core/utilities/storage"],
       "inboundCount": 4,
-      "inbound": [
-        "/docs/api/hints",
-        "/docs/hints/components",
-        "/docs/hints/hooks",
-        "/docs/hints"
-      ]
+      "inbound": ["/docs/api/hints", "/docs/hints/components", "/docs/hints/hooks", "/docs/hints"]
     },
     {
       "url": "/docs/hints/types",
       "file": "content/docs/hints/types.mdx",
       "section": "hints",
       "title": "Types",
-      "outbound": [
-        "/docs/hints/hooks",
-        "/docs/guides/unified-slot"
-      ],
+      "outbound": ["/docs/hints/hooks", "/docs/guides/unified-slot"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/hints",
-        "/docs/hints/variants"
-      ]
+      "inbound": ["/docs/api/hints", "/docs/hints/variants"]
     },
     {
       "url": "/docs/hints/variants",
@@ -3667,9 +3363,7 @@
         "/docs/hints/types"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api/hints"
-      ]
+      "inbound": ["/docs/api/hints"]
     },
     {
       "url": "/docs",
@@ -3733,10 +3427,7 @@
         "/docs/scheduling"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/license",
-        "/docs/licensing"
-      ]
+      "inbound": ["/docs/api/license", "/docs/licensing"]
     },
     {
       "url": "/docs/media/components/gif-player",
@@ -3913,13 +3604,9 @@
       "file": "content/docs/media/headless/index.mdx",
       "section": "media",
       "title": "Headless API",
-      "outbound": [
-        "/docs/media/headless/media-headless"
-      ],
+      "outbound": ["/docs/media/headless/media-headless"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api/media"
-      ]
+      "inbound": ["/docs/api/media"]
     },
     {
       "url": "/docs/media/headless/media-headless",
@@ -3979,10 +3666,7 @@
         "/docs/media/headless/media-headless"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/media",
-        "/docs/media/hooks/use-media-events"
-      ]
+      "inbound": ["/docs/api/media", "/docs/media/hooks/use-media-events"]
     },
     {
       "url": "/docs/media/hooks/use-responsive-source",
@@ -3995,10 +3679,7 @@
         "/docs/media/hooks/use-media-events"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/media",
-        "/docs/media/components/native-video"
-      ]
+      "inbound": ["/docs/api/media", "/docs/media/components/native-video"]
     },
     {
       "url": "/docs/media",
@@ -4034,9 +3715,7 @@
         "/docs/media/utilities/url-parsing"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api/media"
-      ]
+      "inbound": ["/docs/api/media"]
     },
     {
       "url": "/docs/media/utilities/embed-urls",
@@ -4210,10 +3889,7 @@
         "/docs/react/adapters"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/react",
-        "/docs/react/adapters"
-      ]
+      "inbound": ["/docs/api/react", "/docs/react/adapters"]
     },
     {
       "url": "/docs/react/adapters/react-router",
@@ -4226,24 +3902,16 @@
         "/docs/react/providers/multi-tour-kit-provider"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/react",
-        "/docs/react/adapters"
-      ]
+      "inbound": ["/docs/api/react", "/docs/react/adapters"]
     },
     {
       "url": "/docs/react/components/tour-card-migration",
       "file": "content/docs/react/components/tour-card-migration.mdx",
       "section": "react",
       "title": "TourCard Migration (Refresh → Classic Opt-Out)",
-      "outbound": [
-        "/docs/react/components/tour-card",
-        "/docs/guides/accessibility"
-      ],
+      "outbound": ["/docs/react/components/tour-card", "/docs/guides/accessibility"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/react/components/tour-card"
-      ]
+      "inbound": ["/docs/react/components/tour-card"]
     },
     {
       "url": "/docs/react/components/tour-card",
@@ -4385,10 +4053,7 @@
         "/docs/examples/cross-page-tour"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/react/adapters",
-        "/docs/react"
-      ]
+      "inbound": ["/docs/react/adapters", "/docs/react"]
     },
     {
       "url": "/docs/react/components/tour-step",
@@ -4556,9 +4221,7 @@
         "/docs/react/components/tour"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api/react"
-      ]
+      "inbound": ["/docs/api/react"]
     },
     {
       "url": "/docs/react/hooks/use-tour-route",
@@ -4730,10 +4393,7 @@
         "/docs/core/types/step-types"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/react/components/tour-step",
-        "/docs/react"
-      ]
+      "inbound": ["/docs/react/components/tour-step", "/docs/react"]
     },
     {
       "url": "/docs/react/types",
@@ -4748,24 +4408,16 @@
         "/docs/react/adapters"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/getting-started/typescript",
-        "/docs/react/target-prop"
-      ]
+      "inbound": ["/docs/getting-started/typescript", "/docs/react/target-prop"]
     },
     {
       "url": "/docs/scheduling/components",
       "file": "content/docs/scheduling/components.mdx",
       "section": "scheduling",
       "title": "Components",
-      "outbound": [
-        "/docs/licensing",
-        "/docs/api/license"
-      ],
+      "outbound": ["/docs/licensing", "/docs/api/license"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/scheduling"
-      ]
+      "inbound": ["/docs/scheduling"]
     },
     {
       "url": "/docs/scheduling/hooks",
@@ -4778,10 +4430,7 @@
         "/docs/scheduling/hooks/use-user-timezone"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/api/scheduling",
-        "/docs/scheduling/types"
-      ]
+      "inbound": ["/docs/api/scheduling", "/docs/scheduling/types"]
     },
     {
       "url": "/docs/scheduling/hooks/use-schedule-status",
@@ -4825,10 +4474,7 @@
       "file": "content/docs/scheduling/hooks/use-user-timezone.mdx",
       "section": "scheduling",
       "title": "useUserTimezone",
-      "outbound": [
-        "/docs/scheduling/utilities/timezone",
-        "/docs/scheduling/types"
-      ],
+      "outbound": ["/docs/scheduling/utilities/timezone", "/docs/scheduling/types"],
       "inboundCount": 4,
       "inbound": [
         "/docs/api/scheduling",
@@ -4892,10 +4538,7 @@
       "file": "content/docs/scheduling/types.mdx",
       "section": "scheduling",
       "title": "Types Reference",
-      "outbound": [
-        "/docs/scheduling/utilities/schedule-evaluation",
-        "/docs/scheduling/hooks"
-      ],
+      "outbound": ["/docs/scheduling/utilities/schedule-evaluation", "/docs/scheduling/hooks"],
       "inboundCount": 14,
       "inbound": [
         "/docs/api/scheduling",
@@ -4919,16 +4562,9 @@
       "file": "content/docs/scheduling/utilities/blackouts.mdx",
       "section": "scheduling",
       "title": "Blackout Utilities",
-      "outbound": [
-        "/docs/scheduling/types",
-        "/docs/scheduling/utilities/schedule-evaluation"
-      ],
+      "outbound": ["/docs/scheduling/types", "/docs/scheduling/utilities/schedule-evaluation"],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/scheduling",
-        "/docs/scheduling",
-        "/docs/scheduling/utilities"
-      ]
+      "inbound": ["/docs/api/scheduling", "/docs/scheduling", "/docs/scheduling/utilities"]
     },
     {
       "url": "/docs/scheduling/utilities/business-hours",
@@ -4954,25 +4590,16 @@
       "file": "content/docs/scheduling/utilities/date-range.mdx",
       "section": "scheduling",
       "title": "Date Range Utilities",
-      "outbound": [
-        "/docs/scheduling/types"
-      ],
+      "outbound": ["/docs/scheduling/types"],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/scheduling",
-        "/docs/scheduling",
-        "/docs/scheduling/utilities"
-      ]
+      "inbound": ["/docs/api/scheduling", "/docs/scheduling", "/docs/scheduling/utilities"]
     },
     {
       "url": "/docs/scheduling/utilities/day-of-week",
       "file": "content/docs/scheduling/utilities/day-of-week.mdx",
       "section": "scheduling",
       "title": "Day of Week Utilities",
-      "outbound": [
-        "/docs/scheduling/types",
-        "/docs/scheduling/presets"
-      ],
+      "outbound": ["/docs/scheduling/types", "/docs/scheduling/presets"],
       "inboundCount": 5,
       "inbound": [
         "/docs/api/scheduling",
@@ -4998,35 +4625,23 @@
         "/docs/scheduling/utilities/recurring"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api/scheduling"
-      ]
+      "inbound": ["/docs/api/scheduling"]
     },
     {
       "url": "/docs/scheduling/utilities/recurring",
       "file": "content/docs/scheduling/utilities/recurring.mdx",
       "section": "scheduling",
       "title": "Recurring Pattern Utilities",
-      "outbound": [
-        "/docs/scheduling/types",
-        "/docs/scheduling/utilities/day-of-week"
-      ],
+      "outbound": ["/docs/scheduling/types", "/docs/scheduling/utilities/day-of-week"],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/api/scheduling",
-        "/docs/scheduling",
-        "/docs/scheduling/utilities"
-      ]
+      "inbound": ["/docs/api/scheduling", "/docs/scheduling", "/docs/scheduling/utilities"]
     },
     {
       "url": "/docs/scheduling/utilities/schedule-evaluation",
       "file": "content/docs/scheduling/utilities/schedule-evaluation.mdx",
       "section": "scheduling",
       "title": "Schedule Evaluation",
-      "outbound": [
-        "/docs/scheduling/hooks/use-schedule",
-        "/docs/scheduling/types"
-      ],
+      "outbound": ["/docs/scheduling/hooks/use-schedule", "/docs/scheduling/types"],
       "inboundCount": 7,
       "inbound": [
         "/docs/api/scheduling",
@@ -5043,10 +4658,7 @@
       "file": "content/docs/scheduling/utilities/time-range.mdx",
       "section": "scheduling",
       "title": "Time Range Utilities",
-      "outbound": [
-        "/docs/scheduling/types",
-        "/docs/scheduling/utilities/business-hours"
-      ],
+      "outbound": ["/docs/scheduling/types", "/docs/scheduling/utilities/business-hours"],
       "inboundCount": 4,
       "inbound": [
         "/docs/api/scheduling",
@@ -5060,10 +4672,7 @@
       "file": "content/docs/scheduling/utilities/timezone.mdx",
       "section": "scheduling",
       "title": "Timezone Utilities",
-      "outbound": [
-        "/docs/scheduling/hooks/use-user-timezone",
-        "/docs/scheduling/types"
-      ],
+      "outbound": ["/docs/scheduling/hooks/use-user-timezone", "/docs/scheduling/types"],
       "inboundCount": 4,
       "inbound": [
         "/docs/api/scheduling",
@@ -5092,9 +4701,7 @@
         "/docs/surveys/components/survey-progress"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/surveys"
-      ]
+      "inbound": ["/docs/surveys"]
     },
     {
       "url": "/docs/surveys/components/question-boolean",
@@ -5117,9 +4724,7 @@
       "file": "content/docs/surveys/components/question-media.mdx",
       "section": "surveys",
       "title": "QuestionMedia",
-      "outbound": [
-        "/docs/media"
-      ],
+      "outbound": ["/docs/media"],
       "inboundCount": 0,
       "inbound": []
     },
@@ -5145,10 +4750,7 @@
       "file": "content/docs/surveys/components/question-select.mdx",
       "section": "surveys",
       "title": "QuestionSelect",
-      "outbound": [
-        "/docs/surveys/headless/headless-question-select",
-        "/docs/surveys/types"
-      ],
+      "outbound": ["/docs/surveys/headless/headless-question-select", "/docs/surveys/types"],
       "inboundCount": 3,
       "inbound": [
         "/docs/surveys/components",
@@ -5166,40 +4768,25 @@
         "/docs/surveys/components/question-select"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/surveys/components",
-        "/docs/surveys/headless/headless-question-text"
-      ]
+      "inbound": ["/docs/surveys/components", "/docs/surveys/headless/headless-question-text"]
     },
     {
       "url": "/docs/surveys/components/survey-banner",
       "file": "content/docs/surveys/components/survey-banner.mdx",
       "section": "surveys",
       "title": "SurveyBanner",
-      "outbound": [
-        "/docs/surveys/components/survey-inline",
-        "/docs/surveys/types"
-      ],
+      "outbound": ["/docs/surveys/components/survey-inline", "/docs/surveys/types"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/surveys/components",
-        "/docs/surveys/components/survey-inline"
-      ]
+      "inbound": ["/docs/surveys/components", "/docs/surveys/components/survey-inline"]
     },
     {
       "url": "/docs/surveys/components/survey-inline",
       "file": "content/docs/surveys/components/survey-inline.mdx",
       "section": "surveys",
       "title": "SurveyInline",
-      "outbound": [
-        "/docs/surveys/components/survey-banner",
-        "/docs/surveys/hooks/use-survey"
-      ],
+      "outbound": ["/docs/surveys/components/survey-banner", "/docs/surveys/hooks/use-survey"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/surveys/components",
-        "/docs/surveys/components/survey-banner"
-      ]
+      "inbound": ["/docs/surveys/components", "/docs/surveys/components/survey-banner"]
     },
     {
       "url": "/docs/surveys/components/survey-modal",
@@ -5225,43 +4812,27 @@
       "file": "content/docs/surveys/components/survey-popover.mdx",
       "section": "surveys",
       "title": "SurveyPopover",
-      "outbound": [
-        "/docs/surveys/components/survey-modal",
-        "/docs/surveys/types"
-      ],
+      "outbound": ["/docs/surveys/components/survey-modal", "/docs/surveys/types"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/surveys/components"
-      ]
+      "inbound": ["/docs/surveys/components"]
     },
     {
       "url": "/docs/surveys/components/survey-progress",
       "file": "content/docs/surveys/components/survey-progress.mdx",
       "section": "surveys",
       "title": "SurveyProgress",
-      "outbound": [
-        "/docs/surveys/hooks/use-survey",
-        "/docs/surveys/components/survey-modal"
-      ],
+      "outbound": ["/docs/surveys/hooks/use-survey", "/docs/surveys/components/survey-modal"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/surveys/components"
-      ]
+      "inbound": ["/docs/surveys/components"]
     },
     {
       "url": "/docs/surveys/components/survey-slideout",
       "file": "content/docs/surveys/components/survey-slideout.mdx",
       "section": "surveys",
       "title": "SurveySlideout",
-      "outbound": [
-        "/docs/surveys/components/survey-modal",
-        "/docs/surveys/types"
-      ],
+      "outbound": ["/docs/surveys/components/survey-modal", "/docs/surveys/types"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/surveys/components",
-        "/docs/surveys/components/survey-modal"
-      ]
+      "inbound": ["/docs/surveys/components", "/docs/surveys/components/survey-modal"]
     },
     {
       "url": "/docs/surveys/components/turnkey-modals",
@@ -5274,9 +4845,7 @@
         "/docs/surveys/hooks/use-survey"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/surveys/components"
-      ]
+      "inbound": ["/docs/surveys/components"]
     },
     {
       "url": "/docs/surveys/headless/headless-question-boolean",
@@ -5288,10 +4857,7 @@
         "/docs/surveys/headless/headless-survey"
       ],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/surveys/components/question-boolean",
-        "/docs/surveys/headless"
-      ]
+      "inbound": ["/docs/surveys/components/question-boolean", "/docs/surveys/headless"]
     },
     {
       "url": "/docs/surveys/headless/headless-question-rating",
@@ -5314,29 +4880,18 @@
       "file": "content/docs/surveys/headless/headless-question-select.mdx",
       "section": "surveys",
       "title": "HeadlessQuestionSelect",
-      "outbound": [
-        "/docs/surveys/components/question-select",
-        "/docs/surveys/types"
-      ],
+      "outbound": ["/docs/surveys/components/question-select", "/docs/surveys/types"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/surveys/components/question-select",
-        "/docs/surveys/headless"
-      ]
+      "inbound": ["/docs/surveys/components/question-select", "/docs/surveys/headless"]
     },
     {
       "url": "/docs/surveys/headless/headless-question-text",
       "file": "content/docs/surveys/headless/headless-question-text.mdx",
       "section": "surveys",
       "title": "HeadlessQuestionText",
-      "outbound": [
-        "/docs/surveys/components/question-text"
-      ],
+      "outbound": ["/docs/surveys/components/question-text"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/surveys/components/question-text",
-        "/docs/surveys/headless"
-      ]
+      "inbound": ["/docs/surveys/components/question-text", "/docs/surveys/headless"]
     },
     {
       "url": "/docs/surveys/headless/headless-survey",
@@ -5387,9 +4942,7 @@
         "/docs/surveys/types"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/surveys/utilities/calculate-nps"
-      ]
+      "inbound": ["/docs/surveys/utilities/calculate-nps"]
     },
     {
       "url": "/docs/surveys/hooks/use-survey",
@@ -5419,15 +4972,9 @@
       "file": "content/docs/surveys/hooks/use-surveys.mdx",
       "section": "surveys",
       "title": "useSurveys",
-      "outbound": [
-        "/docs/surveys/hooks/use-survey",
-        "/docs/surveys/providers/surveys-provider"
-      ],
+      "outbound": ["/docs/surveys/hooks/use-survey", "/docs/surveys/providers/surveys-provider"],
       "inboundCount": 2,
-      "inbound": [
-        "/docs/surveys/hooks/use-survey",
-        "/docs/surveys/providers/surveys-provider"
-      ]
+      "inbound": ["/docs/surveys/hooks/use-survey", "/docs/surveys/providers/surveys-provider"]
     },
     {
       "url": "/docs/surveys",
@@ -5445,22 +4992,16 @@
         "/docs/surveys/types"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/api"
-      ]
+      "inbound": ["/docs/api"]
     },
     {
       "url": "/docs/surveys/providers",
       "file": "content/docs/surveys/providers/index.mdx",
       "section": "surveys",
       "title": "Providers",
-      "outbound": [
-        "/docs/surveys/providers/surveys-provider"
-      ],
+      "outbound": ["/docs/surveys/providers/surveys-provider"],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/surveys"
-      ]
+      "inbound": ["/docs/surveys"]
     },
     {
       "url": "/docs/surveys/providers/surveys-provider",
@@ -5573,11 +5114,7 @@
         "/docs/surveys/utilities/calculate-ces"
       ],
       "inboundCount": 3,
-      "inbound": [
-        "/docs/surveys/hooks/use-survey-scoring",
-        "/docs/surveys",
-        "/docs/surveys/types"
-      ]
+      "inbound": ["/docs/surveys/hooks/use-survey-scoring", "/docs/surveys", "/docs/surveys/types"]
     },
     {
       "url": "/docs/troubleshooting",
@@ -5612,9 +5149,7 @@
         "/docs/getting-started/installation"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/use-cases"
-      ]
+      "inbound": ["/docs/use-cases"]
     },
     {
       "url": "/docs/use-cases",
@@ -5627,9 +5162,7 @@
         "/docs/use-cases/feature-announcements"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs"
-      ]
+      "inbound": ["/docs"]
     },
     {
       "url": "/docs/use-cases/saas-onboarding",
@@ -5646,9 +5179,7 @@
         "/docs/getting-started/installation"
       ],
       "inboundCount": 1,
-      "inbound": [
-        "/docs/use-cases"
-      ]
+      "inbound": ["/docs/use-cases"]
     }
   ],
   "sectionStats": {

@@ -1,10 +1,18 @@
 # @tour-kit/license
 
+## 1.3.1
+
+### Patch Changes
+
+- Updated dependencies [a17322c]
+  - @tour-kit/core@1.0.1
+
 ## 1.3.0
 
 ### Minor Changes
 
 - Add `apiBase` override for the Polar → tourkit-dash issuer migration (`tour-kit-cloud` plan/15f).
+
   - **New `apiBase?: string` prop on `<LicenseProvider>`** — points the validate/activate/deactivate flow at a non-Polar issuer without bumping the SDK major.
   - **New `options.apiBase` on `validateLicenseKey`, `validateKey`, `activateKey`, `deactivateKey`** — additive 4th positional arg on the low-level functions; existing positional callers are unaffected.
   - **New `resolveApiBase(override?)` export** (from `@tour-kit/license` and `@tour-kit/license/headless`) implementing the precedence chain: explicit override > `NEXT_PUBLIC_TOUR_KIT_LICENSE_API_BASE` env > `TOUR_KIT_LICENSE_API_BASE` env > Polar default.
