@@ -1,0 +1,52 @@
+---
+title: useSegmentationContext
+description: >-
+  Low-level hook returning the raw SegmentationContextValue — registered
+  segments, userContext, and currentUserId. Use useSegment / useSegments for
+  typical lookups.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Direct access to the raw `SegmentationContextValue`. Most consumers should reach for [`useSegment`](/docs/core/hooks/use-segment) (single segment) or `useSegments` (bulk read) — this hook is the escape hatch for custom integrations, headless filters, and debug panels.
+
+## Usage
+
+```tsx
+import { useSegmentationContext } from '@tour-kit/core';
+
+function SegmentDebugPanel() {
+  const { segments, userContext, currentUserId } = useSegmentationContext();
+  return (
+    <aside>
+      <p>User: {currentUserId ?? 'anonymous'}</p>
+      <p>Registered segments: {Object.keys(segments).join(', ')}</p>
+      <pre>{JSON.stringify(userContext, null, 2)}</pre>
+    </aside>
+  );
+}
+```
+
+`useSegmentationContext` never throws — when no `<SegmentationProvider>` is mounted it returns the default context (`segments: {}`, `userContext: undefined`, `currentUserId: undefined`). Anonymous-user code paths stay stable.
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `segments` | `Record<string, SegmentSource>` | Registered segments. Each value is either a `SegmentDefinition` (condition array, AND-joined) or a `StaticSegment` (user-id roster). |
+| `userContext` | `Record<string, unknown> \| undefined` | Audience targeting context — same shape used by [`useResolvedText`](/docs/core/hooks/use-resolved-text) for interpolation. |
+| `currentUserId` | `string \| undefined` | Resolved against `StaticSegment.userIds`; required for static-cohort lookups. |
+
+## Internal use
+
+Tour Kit packages call `useSegmentationContext` to thread `userContext` into [`useResolvedText`](/docs/core/hooks/use-resolved-text) and [`useResolveLocalizedText`](/docs/core/hooks/use-resolve-localized-text), so consumer-authored `'Hi {{user.name}}'` templates interpolate against the same data driving audience matching.
+
+<Callout type="info">
+For typical segment membership checks, prefer [`useSegment`](/docs/core/hooks/use-segment) — it returns a boolean and tracks segment registration changes. Use `useSegmentationContext` only when you need the whole context (debug UIs, custom filters, headless integrations).
+</Callout>
+
+## Related
+
+- [SegmentationProvider](/docs/core/providers/segmentation-provider)
+- [Segmentation guide](/docs/guides/segmentation)
+- [useResolvedText](/docs/core/hooks/use-resolved-text)

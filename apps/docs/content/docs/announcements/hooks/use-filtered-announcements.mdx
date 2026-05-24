@@ -1,0 +1,57 @@
+---
+title: useFilteredAnnouncements
+description: >-
+  Filter a list of AnnouncementConfig by their `audience` prop. Bulk segment
+  evaluation that is safe under dynamic lists.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Filter a list of `AnnouncementConfig` objects by their `audience` prop. Returns a new array containing only the announcements whose audience passes the current segmentation context.
+
+## Usage
+
+```tsx
+import { useFilteredAnnouncements } from '@tour-kit/announcements';
+
+function ChangelogList({ announcements }: { announcements: AnnouncementConfig[] }) {
+  const visible = useFilteredAnnouncements(announcements);
+  return (
+    <ul>
+      {visible.map((a) => (
+        <li key={a.id}>{a.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Signature
+
+```ts
+function useFilteredAnnouncements(
+  announcements: AnnouncementConfig[]
+): AnnouncementConfig[]
+```
+
+## Audience evaluation rules
+
+| Audience shape | Behavior |
+|----------------|----------|
+| `undefined` | Let through (always visible). |
+| `AudienceCondition[]` | Let through — forwarded to the scheduler, which re-checks against the provider's `userContext` prop. |
+| `{ segment: string }` | Evaluated here via [`useSegments`](/docs/core/hooks/use-segments). Filtered out if the segment is `false`. |
+
+<Callout type="info">
+Only segment-shape audiences are filtered at this seam — array-shape audiences pass through because they require the provider's `userContext`, which the framework-agnostic scheduler owns. See the [segmentation guide](/docs/guides/segmentation) for the full evaluation pipeline.
+</Callout>
+
+## Why bulk?
+
+The hook reads all segments once at the top via `useSegments()` and reuses that map inside the filter callback. This is safe under dynamic announcement lists — never call `useSegment` (the single-segment hook) inside a `.filter()` body; that violates the rules of hooks.
+
+## Related
+
+- [evaluateAnnouncementAudience](/docs/announcements/types) — underlying single-item evaluator
+- [Audience targeting](/docs/announcements/configuration) — audience prop reference
+- [Segmentation guide](/docs/guides/segmentation)

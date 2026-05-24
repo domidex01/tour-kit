@@ -1,0 +1,40 @@
+---
+title: QuestionMedia
+description: >-
+  Render <MediaSlot> above a question when the question has a `media?` field.
+  No-op for questions without media, so consumers can mount it unconditionally.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Renders a `<MediaSlot>` from `@tour-kit/media` above a question prompt when the question config carries a `media?` field. Returns `null` when no media is configured — mount it unconditionally above your `Question*` component and it stays out of the way for plain text questions.
+
+## Usage
+
+```tsx
+import { QuestionMedia, QuestionRating } from '@tour-kit/surveys';
+
+function CurrentQuestion({ question }: { question: QuestionConfig }) {
+  return (
+    <>
+      <QuestionMedia question={question} />
+      <QuestionRating question={question} />
+    </>
+  );
+}
+```
+
+## Props
+
+```tsx
+interface QuestionMediaProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** The question whose `media?` should render. No-op when absent. */
+  question: Pick<QuestionConfig, 'media'>;
+}
+```
+
+Forwards refs (`React.forwardRef<HTMLDivElement>`) and accepts arbitrary `<div>` attributes. Rendered with `data-slot="question-media"` for styling hooks.
+
+<Callout type="info">
+Configure `question.media` once on your survey config; this component handles detection and rendering. See the [Media package](/docs/media) for supported URL formats (YouTube, Vimeo, Loom, Wistia, raw video, GIF, Lottie, image).
+</Callout>

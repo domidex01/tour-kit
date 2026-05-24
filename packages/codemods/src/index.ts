@@ -1,4 +1,4 @@
-export { default as fromJoyride, parser as fromJoyrideParser } from './transforms/from-joyride'
-export { mapStepObject, type StepMapping } from './lib/step-mapper'
-export { emitTodo, todoToComment, type Todo } from './lib/todo-emitter'
-export { runMigrate, type CliOptions } from './cli'
+// `@tour-kit/codemods` is CLI-only. Run the migrator with:
+//   npx tour-kit-migrate <transform> <paths...>
+// Programmatic imports of internal helpers were removed in v0.4.
+export {}

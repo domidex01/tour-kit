@@ -1,0 +1,47 @@
+---
+title: useLocale
+description: >-
+  Read the current LocaleContextValue (locale, messages, direction, optional
+  host-side t override) from the nearest LocaleProvider.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Read the active locale, translation dictionary, and text direction inside any component tree wrapped with `<LocaleProvider>`. Drives the i18n pipeline shared by tour copy, hint labels, announcement bodies, and any consumer code that resolves [`LocalizedText`](/docs/core/types).
+
+## Usage
+
+```tsx
+import { useLocale } from '@tour-kit/core';
+
+function DirectionAwareCard() {
+  const { locale, direction } = useLocale();
+  return (
+    <article dir={direction} lang={locale}>
+      {/* ... */}
+    </article>
+  );
+}
+```
+
+`useLocale` never throws — when no `<LocaleProvider>` is mounted it returns the default context (`locale: 'en'`, `messages: {}`, no override `t`, derived `direction`).
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `locale` | `string` | Active locale tag (e.g. `'en'`, `'pt-BR'`). |
+| `messages` | `Messages` | Flat key → string dictionary used by [`useT`](/docs/core/hooks/use-t). |
+| `t` | `TranslateFn \| undefined` | Optional host-app translate override; when set, [`useT`](/docs/core/hooks/use-t) delegates to it instead of looking up `messages`. |
+| `direction` | `'ltr' \| 'rtl'` | Derived from the locale's primary subtag (`ar`, `he`, `fa`, `ur` → `rtl`); override via the `direction` prop on `<LocaleProvider>`. |
+
+<Callout type="info">
+For resolving a single `LocalizedText` value, prefer [`useResolvedText`](/docs/core/hooks/use-resolved-text) (returns `ReactNode`) or [`useResolveLocalizedText`](/docs/core/hooks/use-resolve-localized-text) (returns `string`). See the [i18n guide](/docs/guides/i18n) for the full pipeline.
+</Callout>
+
+## Related
+
+- [LocaleProvider](/docs/core/providers/locale-provider) — wrap your tree
+- [useResolvedText](/docs/core/hooks/use-resolved-text) — resolve `LocalizedText` to `ReactNode`
+- [useResolveLocalizedText](/docs/core/hooks/use-resolve-localized-text) — resolve `LocalizedText` to `string`
+- [i18n guide](/docs/guides/i18n) — end-to-end internationalization

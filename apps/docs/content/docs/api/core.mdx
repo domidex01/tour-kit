@@ -524,6 +524,175 @@ interface MultiPagePersistenceConfig {
 }
 ```
 
+### Step Visibility & Targets
+
+```tsx
+// Discriminated union for filtered step lists. See useStep / useTour.
+type VisibleTourStep = TourStep & { __visible: true };
+type HiddenTourStep = TourStep & { __visible: false };
+
+function isVisibleStep(step: TourStep): step is VisibleTourStep;
+
+// Target resolution types
+type TourTargetRef = React.RefObject<HTMLElement | null>;
+type TourTargetGetter = () => HTMLElement | null;
+
+// Step media — image / video / lottie attached to a step
+interface TourStepMedia {
+  type: 'image' | 'video' | 'lottie';
+  src: string;
+  alt?: string;
+  poster?: string;
+}
+```
+
+### Target Waiting
+
+```tsx
+interface WaitForStepTargetOptions {
+  timeoutMs?: number;       // default: 5000
+  pollIntervalMs?: number;  // default: 50
+  signal?: AbortSignal;
+}
+
+// Resolves when a step's target appears in the DOM, rejects on timeout/abort.
+function waitForStepTarget(
+  step: TourStep,
+  options?: WaitForStepTargetOptions
+): Promise<HTMLElement>;
+```
+
+### i18n Types
+
+```tsx
+interface LocaleContextValue {
+  locale: string;
+  messages: Messages;
+  t?: TranslateFn;
+  direction?: 'ltr' | 'rtl';
+}
+
+interface LocaleProviderProps extends Partial<LocaleContextValue> {
+  children: React.ReactNode;
+}
+
+type TranslateFn = (key: string, vars?: Record<string, unknown>) => string;
+
+// Type guard for `LocalizedText`'s key-shape branch
+function isI18nKey(value: unknown): value is { key: string };
+```
+
+See [LocaleProvider](/docs/core/providers/locale-provider), [useLocale](/docs/core/hooks/use-locale), and the [i18n guide](/docs/guides/i18n).
+
+### Segmentation & Audience Types
+
+```tsx
+// Segments registered on <SegmentationProvider>
+type SegmentDefinition = AudienceCondition[];                    // AND-joined
+
+interface StaticSegment {
+  type: 'static';
+  userIds: ReadonlyArray<string>;
+}
+
+type SegmentSource = SegmentDefinition | StaticSegment;
+
+interface SegmentationContextValue {
+  segments: Record<string, SegmentSource>;
+  userContext?: Record<string, unknown>;
+  currentUserId?: string;
+}
+
+interface SegmentationProviderProps extends SegmentationContextValue {
+  children: React.ReactNode;
+}
+
+// Audience prop accepted on tours, hints, announcements
+type AudienceProp = AudienceCondition[] | { segment: string };
+
+// Type guard for the segment-shape branch
+function isSegmentAudience(audience: AudienceProp): audience is { segment: string };
+
+// Headless audience evaluator (re-exports in @tour-kit/react too)
+function evaluateAudience(
+  audience: AudienceProp | undefined,
+  segments: Record<string, boolean>,
+  userContext: Record<string, unknown> | undefined,
+  source?: string
+): boolean;
+
+// Returns a human-readable explanation of why an audience did/didn't match
+function explainAudience(
+  audience: AudienceProp,
+  segments: Record<string, boolean>,
+  userContext?: Record<string, unknown>
+): string;
+```
+
+See [Segmentation guide](/docs/guides/segmentation) and [useSegmentationContext](/docs/core/hooks/use-segmentation-context).
+
+### Diagnostic Types
+
+```tsx
+// All built-in gates evaluated by the can-show pipeline, in declared order
+const BUILTIN_GATE_ORDER: readonly GateName[];
+
+// Stable identifiers used by diagnostics and analytics events
+type GateName =
+  | 'audience' | 'segment' | 'frequency' | 'schedule'
+  | 'persistence' | 'capacity' | 'custom';
+
+type GateCode = 'pass' | 'fail' | 'skipped' | 'error';
+
+// Context passed to diagnostic listeners (eventbus, devtools)
+interface DiagnosticContext {
+  source: 'tour' | 'hint' | 'announcement' | 'checklist';
+  id: string;
+  gate: GateName;
+  code: GateCode;
+  reason?: string;
+}
+```
+
+See [Diagnostic guide](/docs/core/diagnostic).
+
+### Flow Session
+
+```tsx
+interface UseFlowSessionConfig {
+  flowId: string;
+  storage?: 'localStorage' | 'sessionStorage' | 'memory';
+  ttlMs?: number;
+}
+
+interface FlowSessionConfig extends UseFlowSessionConfig {
+  initialState?: Record<string, unknown>;
+}
+
+interface UseFlowSessionReturn<TState = Record<string, unknown>> {
+  state: TState;
+  setState: (next: Partial<TState>) => void;
+  clear: () => void;
+  isRestored: boolean;
+}
+```
+
+### Broadcast & Frequency
+
+```tsx
+interface UseBroadcastReturn {
+  broadcast: (event: string, payload?: unknown) => void;
+  subscribe: (event: string, handler: (payload: unknown) => void) => () => void;
+}
+
+interface FrequencyState {
+  lastShownAt?: number;
+  shownCount: number;
+  dismissedAt?: number;
+  completedAt?: number;
+}
+```
+
 ---
 
 ## Default Configurations

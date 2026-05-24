@@ -376,7 +376,20 @@ type TaskAction =
 type TaskCompletionCondition =
   | { event: string }
   | { selector: string }
-  | { custom: (ctx: ChecklistContext) => boolean };
+  | { custom: (ctx: ChecklistContext) => boolean }
+  | UrlVisitCompletion;
+```
+
+### UrlVisitCompletion
+
+Marks a task as complete the first time the user visits a matching URL.
+
+```tsx
+type UrlVisitCompletion = {
+  type: 'urlVisit';
+  /** String compared via startsWith, or a RegExp matched against location.pathname */
+  urlPattern: string | RegExp;
+};
 ```
 
 ### ChecklistProgress

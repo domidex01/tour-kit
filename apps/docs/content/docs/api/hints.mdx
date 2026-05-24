@@ -394,6 +394,45 @@ type Placement =
   | 'right' | 'right-start' | 'right-end' | 'right-center';
 ```
 
+### Hotspot Variants & Props
+
+Three built-in hotspot variants ship with `@tour-kit/hints`. Select one via `<HintHotspot variant="badge" />` or render the variant components directly.
+
+```tsx
+// Variant name discriminator
+type HintHotspotVariantName = 'badge' | 'beacon-with-label' | 'what-s-new-pill';
+
+interface HintBadgeProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> {
+  targetRect: DOMRect;
+  position: HotspotPosition;
+  /** Numeric badge value (clamps to "99+" above 99) */
+  count?: number;
+  isOpen?: boolean;
+  asChild?: boolean;
+}
+
+interface HintBeaconWithLabelProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> {
+  targetRect: DOMRect;
+  position: HotspotPosition;
+  /** Visible label adjacent to the beacon — also surfaced via aria-label */
+  label: string;
+  /** Which side the label sits on; defaults to "right" */
+  side?: 'left' | 'right';
+  isOpen?: boolean;
+  asChild?: boolean;
+}
+
+interface HintWhatsNewPillProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> {
+  targetRect: DOMRect;
+  position: HotspotPosition;
+  label: string;
+  isOpen?: boolean;
+  asChild?: boolean;
+}
+```
+
+See [Hint variants](/docs/hints/variants).
+
 ---
 
 ## Utilities

@@ -171,6 +171,75 @@ try {
 | `goToStep(stepId)` | Jumps to a non-adjacent step. Requires `<HookProbe />` in the provider tree. |
 | `virtualTarget(rect?, contextElement?)` | Returns a Floating UI virtual element with a merged DOMRect. |
 | `setupTourKitTesting(opts?)` | One-shot orchestrator; default touches nothing, `positionShim: true` lazy-loads `jsdom-testing-mocks`. |
+| `getActiveTourHandle()` | Returns the active `useTour()` result from inside `<HookProbe />`, or `null` when no tour is running. Imperative escape hatch for assertions that step over the public DOM. |
+| `fireEvent`, `render`, `screen`, `waitFor`, `act`, `cleanup` | Re-exported from `@testing-library/react` so you can import everything from one place. |
+
+### Option types
+
+All helpers accept a typed options object. Import them when typing fixtures or shared test utilities:
+
+```ts
+import type {
+  AdvanceTourOptions,
+  CompleteTourOptions,
+  ExpectStepVisibleOptions,
+  PreviousTourOptions,
+  SetupOptions,
+  SkipTourOptions,
+  TourKitTestingErrorOptions,
+  VirtualTarget,
+} from '@tour-kit/testing-library';
+```
+
+```ts
+interface AdvanceTourOptions {
+  /** Number of times to click Next. Defaults to 1. */
+  steps?: number;
+  /** Reuse an existing userEvent instance (recommended for multi-helper tests). */
+  user?: UserEvent;
+}
+
+interface PreviousTourOptions {
+  steps?: number;
+  user?: UserEvent;
+}
+
+interface SkipTourOptions {
+  user?: UserEvent;
+}
+
+interface CompleteTourOptions {
+  /** Overall deadline. Defaults to 5000ms. */
+  timeout?: number;
+  /** Hard cap on click iterations. Defaults to 50. */
+  maxSteps?: number;
+  user?: UserEvent;
+}
+
+interface ExpectStepVisibleOptions {
+  /** Override the polling deadline. Defaults to 1000ms. */
+  timeout?: number;
+  /** Scope queries to a subtree. Defaults to document.body (the portal root). */
+  container?: HTMLElement;
+}
+
+interface SetupOptions {
+  /** Lazy-load jsdom-testing-mocks for getBoundingClientRect coverage. */
+  positionShim?: boolean;
+}
+
+interface TourKitTestingErrorOptions {
+  cause?: unknown;
+  stepId?: string;
+  tourId?: string;
+}
+
+interface VirtualTarget {
+  /** Floating UI virtual-element contract. */
+  getBoundingClientRect: () => DOMRect;
+  contextElement?: Element;
+}
+```
 
 ## Browser-positioning tests live elsewhere
 

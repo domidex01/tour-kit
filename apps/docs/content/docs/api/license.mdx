@@ -382,6 +382,61 @@ type LicenseWarningProps = {
 };
 ```
 
+### Trial Types
+
+Trial mode lets gated packages run for a limited time before requiring activation.
+
+```tsx
+interface TrialConfig {
+  durationDays: number;
+  startsAt?: Date;             // defaults to first activation
+  /** Optional grace window after expiry before gating closes */
+  graceDays?: number;
+  /** Storage namespace; defaults to '@tour-kit/license:trial' */
+  storageKey?: string;
+}
+
+interface TrialContextValue {
+  isTrialing: boolean;
+  daysRemaining: number;
+  expiresAt: Date | null;
+  isExpired: boolean;
+  start: () => void;
+  end: () => void;
+}
+
+interface TrialBadgeRenderProps {
+  daysRemaining: number;
+  isExpired: boolean;
+  expiresAt: Date | null;
+}
+
+interface TrialBadgeProps {
+  className?: string;
+  pricingUrl?: string;
+  /** Render-prop override for custom badge UI */
+  children?: (state: TrialBadgeRenderProps) => React.ReactNode;
+}
+```
+
+See [Trial guide](/docs/licensing/trial).
+
+### Debug Components
+
+```tsx
+interface LicenseDebugPanelProps {
+  /** Position the floating panel; defaults to 'bottom-right' */
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  className?: string;
+}
+
+interface LicenseTestModeProps {
+  /** Force a tier without making network calls (dev only) */
+  forceTier?: 'free' | 'pro';
+  children: React.ReactNode;
+}
+```
+
 ### Polar Response Types
 
 Raw Polar API response shapes (after camelCase transform). Subject to upstream Polar SDK changes.

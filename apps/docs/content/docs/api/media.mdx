@@ -418,6 +418,33 @@ interface ResponsiveSource {
 }
 ```
 
+### Media Slot Detection
+
+`<MediaSlot src="...">` auto-detects which player to render based on the URL. The detection layer is exported for advanced use (custom slots, URL validation).
+
+```tsx
+// All media slot types (`auto` is the unresolved discriminator)
+type MediaSlotType =
+  | 'auto'
+  | 'youtube'
+  | 'vimeo'
+  | 'loom'
+  | 'wistia'
+  | 'video'
+  | 'gif'
+  | 'lottie'
+  | 'image';
+
+// Concrete (post-detection) slot type
+type ResolvedMediaSlotType = Exclude<MediaSlotType, 'auto'>;
+
+// URL-pattern → slot-type pairs evaluated in declared order
+const MEDIA_SLOT_PATTERNS: ReadonlyArray<readonly [RegExp, ResolvedMediaSlotType]>;
+
+// Run the detection pipeline against a single URL
+function detectMediaSlotType(src: string): ResolvedMediaSlotType;
+```
+
 ---
 
 ## See also

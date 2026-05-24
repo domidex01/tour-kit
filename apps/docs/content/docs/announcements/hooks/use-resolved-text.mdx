@@ -1,0 +1,23 @@
+---
+title: useResolvedText
+description: >-
+  Re-export of @tour-kit/core's useResolvedText for ergonomic in-package
+  access. Resolves LocalizedText | ReactNode into a ReactNode.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Re-exported from [`@tour-kit/core`](/docs/core/hooks/use-resolved-text) so consumers using `@tour-kit/announcements` can import it from the same package as the rest of the API.
+
+```tsx
+import { useResolvedText } from '@tour-kit/announcements';
+
+function AnnouncementBody({ body }: { body: LocalizedText | React.ReactNode }) {
+  const resolved = useResolvedText(body);
+  return <div>{resolved}</div>;
+}
+```
+
+<Callout type="info">
+The canonical implementation lives in `@tour-kit/core`. See the [core docs](/docs/core/hooks/use-resolved-text) for the full signature, resolution rules, and the relationship with [`useResolveLocalizedText`](/docs/core/hooks/use-resolve-localized-text).
+</Callout>
