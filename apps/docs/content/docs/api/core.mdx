@@ -9,11 +9,13 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 Complete API reference for the core package. This package provides framework-agnostic logic for tours.
 
+For prose-style documentation of each symbol, see the [`@tour-kit/core` package overview](/docs/core), or jump to a specific [hook](/docs/core/hooks), [provider](/docs/core/providers), [type](/docs/core/types), or [utility](/docs/core/utilities).
+
 ---
 
 ## Providers
 
-### TourKitProvider
+### [TourKitProvider](/docs/core/providers/tour-kit-provider)
 
 Global configuration provider for tour-kit.
 
@@ -34,7 +36,7 @@ import { TourKitProvider } from '@tour-kit/core';
 | `onTourSkip` | `(tourId: string, stepIndex: number) => void` | Called when any tour is skipped |
 | `onStepView` | `(tourId: string, stepId: string, stepIndex: number) => void` | Called when a step is viewed |
 
-### TourProvider
+### [TourProvider](/docs/core/providers/tour-provider)
 
 Provider for a single tour instance.
 
@@ -59,7 +61,7 @@ import { TourProvider } from '@tour-kit/core';
 
 ## Hooks
 
-### useTour
+### [useTour](/docs/core/hooks/use-tour)
 
 Main hook for tour control. Returns tour state and actions.
 
@@ -109,7 +111,7 @@ const {
 | `isStepActive` | `(stepId: string) => boolean` | Check if step is active |
 | `getStep` | `(stepId: string) => TourStep \| undefined` | Get step by ID |
 
-### useStep
+### [useStep](/docs/core/hooks/use-step)
 
 Hook for individual step control.
 
@@ -119,7 +121,7 @@ import { useStep } from '@tour-kit/core';
 const { isActive, isVisible, hasCompleted, targetElement, targetRect } = useStep(stepId);
 ```
 
-### useSpotlight
+### [useSpotlight](/docs/core/hooks/use-spotlight)
 
 Hook for spotlight overlay control.
 
@@ -129,7 +131,7 @@ import { useSpotlight } from '@tour-kit/core';
 const { isVisible, targetRect, overlayStyle, cutoutStyle, show, hide, update } = useSpotlight();
 ```
 
-### useElementPosition
+### [useElementPosition](/docs/core/hooks/use-element-position)
 
 Hook for tracking element position.
 
@@ -139,7 +141,7 @@ import { useElementPosition } from '@tour-kit/core';
 const { element, rect, scrollParent, update } = useElementPosition(target);
 ```
 
-### useKeyboardNavigation
+### [useKeyboardNavigation](/docs/core/hooks/use-keyboard)
 
 Hook for keyboard navigation setup.
 
@@ -149,7 +151,7 @@ import { useKeyboardNavigation } from '@tour-kit/core';
 useKeyboardNavigation(config?);
 ```
 
-### useFocusTrap
+### [useFocusTrap](/docs/core/hooks/use-focus-trap)
 
 Hook for focus trap management.
 
@@ -159,7 +161,7 @@ import { useFocusTrap } from '@tour-kit/core';
 const { containerRef, activate, deactivate } = useFocusTrap(enabled?);
 ```
 
-### usePersistence
+### [usePersistence](/docs/core/hooks/use-persistence)
 
 Hook for tour state persistence.
 
@@ -179,7 +181,7 @@ const {
 } = usePersistence(config?);
 ```
 
-### useRoutePersistence
+### [useRoutePersistence](/docs/core/hooks/use-route-persistence)
 
 Hook for multi-page tour persistence.
 
@@ -189,7 +191,7 @@ import { useRoutePersistence } from '@tour-kit/core';
 const { save, load, clear, isStale } = useRoutePersistence(config);
 ```
 
-### useMediaQuery
+### [useMediaQuery](/docs/core/hooks/use-media-query)
 
 Hook for responsive media query tracking.
 
@@ -209,7 +211,7 @@ import { usePrefersReducedMotion } from '@tour-kit/core';
 const prefersReducedMotion = usePrefersReducedMotion();
 ```
 
-### useAdvanceOn
+### [useAdvanceOn](/docs/core/hooks/use-advance-on)
 
 Hook for event-based step advancement.
 
@@ -227,7 +229,7 @@ useAdvanceOn({
 
 ## Utilities
 
-### Tour Creation
+### [Tour Creation](/docs/core/utilities/create-tour)
 
 ```tsx
 import { createTour, createNamedTour, createStep, createNamedStep } from '@tour-kit/core';
@@ -245,7 +247,7 @@ const step = createStep(target, content, options?);
 const namedStep = createNamedStep('step-1', target, content, options?);
 ```
 
-### Storage
+### [Storage](/docs/core/utilities/storage)
 
 ```tsx
 import {
@@ -272,7 +274,7 @@ const noop = createNoopStorage();
 const data = safeJSONParse<MyType>(json, defaultValue);
 ```
 
-### DOM Utilities
+### [DOM Utilities](/docs/core/utilities/dom)
 
 ```tsx
 import {
@@ -301,7 +303,7 @@ const focusable = getFocusableElements(container);
 const scrollParent = getScrollParent(element);
 ```
 
-### Position Utilities
+### [Position Utilities](/docs/core/utilities/position)
 
 ```tsx
 import {
@@ -329,7 +331,7 @@ const { side, alignment } = parsePlacement('bottom-start');
 const rtlPlacement = mirrorPlacementForRTL('left-start', true);
 ```
 
-### Scroll Utilities
+### [Scroll Utilities](/docs/core/utilities/scroll)
 
 ```tsx
 import {
@@ -354,7 +356,7 @@ const unlock = lockScroll();
 unlock();
 ```
 
-### Accessibility Utilities
+### [Accessibility Utilities](/docs/core/utilities/a11y)
 
 ```tsx
 import {
@@ -377,7 +379,7 @@ const reduced = prefersReducedMotion();
 const text = getStepAnnouncement('Welcome', 1, 5); // "Step 1 of 5: Welcome"
 ```
 
-### Logger
+### [Logger](/docs/core/utilities/logger)
 
 ```tsx
 import { logger } from '@tour-kit/core';
@@ -396,7 +398,7 @@ logger.error('Error message');
 
 ## Types
 
-### Configuration Types
+### [Configuration Types](/docs/core/types/config-types)
 
 ```tsx
 interface TourKitConfig {
@@ -451,7 +453,7 @@ interface ScrollConfig {
 }
 ```
 
-### Tour Types
+### [Tour Types](/docs/core/types/tour-types)
 
 ```tsx
 interface Tour {
@@ -539,3 +541,12 @@ import {
 <Callout type="info">
 For detailed documentation on each export, see the individual pages in the [@tour-kit/core](/docs/core) section.
 </Callout>
+
+---
+
+## See also
+
+- [`@tour-kit/core` package overview](/docs/core) — prose-style docs and recipes for each export above.
+- [API reference index](/docs/api) — browse other package references (`@tour-kit/react`, `@tour-kit/hints`, …).
+- [Quick start](/docs/getting-started/quick-start) — use these primitives in a working app.
+- [TypeScript guide](/docs/getting-started/typescript) — set up strict types for the symbols documented here.

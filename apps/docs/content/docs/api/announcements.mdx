@@ -9,11 +9,13 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 Complete API reference for the announcements package. This package provides multi-variant product announcements.
 
+For prose-style docs and recipes, see the [`@tour-kit/announcements` package overview](/docs/announcements), or jump to [components](/docs/announcements/components), [headless primitives](/docs/announcements/headless), [hooks](/docs/announcements/hooks), [provider](/docs/announcements/providers/announcements-provider), or [frequency / audience config](/docs/announcements/configuration/frequency).
+
 ---
 
 ## Providers
 
-### AnnouncementsProvider
+### [AnnouncementsProvider](/docs/announcements/providers/announcements-provider)
 
 Provider for announcements.
 
@@ -43,7 +45,7 @@ import { AnnouncementsProvider } from '@tour-kit/announcements';
 
 ## Hooks
 
-### useAnnouncement
+### [useAnnouncement](/docs/announcements/hooks/use-announcement)
 
 Hook for single announcement control.
 
@@ -67,7 +69,7 @@ const {
 | `dismiss` | `(reason?: DismissalReason) => void` | Dismiss the announcement |
 | `complete` | `() => void` | Mark as completed |
 
-### useAnnouncements
+### [useAnnouncements](/docs/announcements/hooks/use-announcements)
 
 Hook for all announcements.
 
@@ -82,7 +84,7 @@ const {
 } = useAnnouncements();
 ```
 
-### useAnnouncementQueue
+### [useAnnouncementQueue](/docs/announcements/hooks/use-announcement-queue)
 
 Hook for queue management.
 
@@ -101,7 +103,7 @@ const {
 
 ## Components
 
-### AnnouncementModal
+### [AnnouncementModal](/docs/announcements/components/modal)
 
 Centered dialog variant.
 
@@ -117,7 +119,7 @@ import { AnnouncementModal } from '@tour-kit/announcements';
 | `size` | `'sm' \| 'md' \| 'lg'` | Modal size |
 | `closeOnOverlay` | `boolean` | Close when clicking overlay |
 
-### AnnouncementSlideout
+### [AnnouncementSlideout](/docs/announcements/components/slideout)
 
 Side panel variant.
 
@@ -133,7 +135,7 @@ import { AnnouncementSlideout } from '@tour-kit/announcements';
 | `position` | `'left' \| 'right'` | Slide from direction |
 | `width` | `string` | Panel width |
 
-### AnnouncementBanner
+### [AnnouncementBanner](/docs/announcements/components/banner)
 
 Top/bottom strip variant.
 
@@ -149,7 +151,7 @@ import { AnnouncementBanner } from '@tour-kit/announcements';
 | `position` | `'top' \| 'bottom'` | Banner position |
 | `dismissible` | `boolean` | Show close button |
 
-### AnnouncementToast
+### [AnnouncementToast](/docs/announcements/components/toast)
 
 Corner notification variant.
 
@@ -165,7 +167,7 @@ import { AnnouncementToast } from '@tour-kit/announcements';
 | `position` | `string` | Toast position |
 | `duration` | `number` | Auto-dismiss duration (ms) |
 
-### AnnouncementSpotlight
+### [AnnouncementSpotlight](/docs/announcements/components/spotlight)
 
 Element highlight with overlay.
 
@@ -194,7 +196,9 @@ import {
 
 ---
 
-## Headless Components
+## [Headless Components](/docs/announcements/headless)
+
+Per-variant headless docs: [`<HeadlessModal>`](/docs/announcements/headless/modal), [`<HeadlessSlideout>`](/docs/announcements/headless/slideout), [`<HeadlessBanner>`](/docs/announcements/headless/banner), [`<HeadlessToast>`](/docs/announcements/headless/toast), [`<HeadlessSpotlight>`](/docs/announcements/headless/spotlight).
 
 ```tsx
 import {
@@ -216,7 +220,7 @@ import {
 
 ## Configuration
 
-### Frequency Rules
+### [Frequency Rules](/docs/announcements/configuration/frequency)
 
 ```tsx
 // Show only once ever
@@ -235,7 +239,7 @@ frequency: { type: 'times', count: 3 }
 frequency: { type: 'interval', days: 7 }
 ```
 
-### Audience Targeting
+### [Audience Targeting](/docs/announcements/configuration/audience)
 
 ```tsx
 audience: [
@@ -320,3 +324,12 @@ interface AnnouncementState {
   completedAt: Date | null;
 }
 ```
+
+---
+
+## See also
+
+- [`@tour-kit/announcements` package overview](/docs/announcements) — prose docs and recipes for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Announcements & scheduling guide](/docs/guides/announcements-scheduling) — wire announcements into `@tour-kit/scheduling` for time-based rollouts.
+- [Queue configuration](/docs/announcements/configuration/queue) — priority and ordering when multiple announcements are eligible.

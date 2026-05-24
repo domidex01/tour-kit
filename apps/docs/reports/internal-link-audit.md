@@ -2,18 +2,18 @@
 
 > Minimum threshold: **3 internal links per page**
 
-Total MDX files scanned: **504**
-Files below threshold: **290** (57.5%)
-Files with **zero** internal links: **193**
+Total MDX files scanned: **576**
+Files below threshold: **329** (57.1%)
+Files with **zero** internal links: **197**
 
 ## By collection
 
 | Collection | Total | Below threshold |
 | --- | ---: | ---: |
 | alternatives | 3 | 3 |
-| blog | 284 | 183 |
+| blog | 286 | 182 |
 | compare | 13 | 13 |
-| docs | 204 | 91 |
+| docs | 274 | 131 |
 
 ## Files below threshold
 
@@ -23,7 +23,6 @@ Files with **zero** internal links: **193**
 | blog | `content/blog/animation-performance-product-tours-raf-vs-css.mdx` | [/blog/animation-performance-product-tours-raf-vs-css](/blog/animation-performance-product-tours-raf-vs-css) | 0 |
 | blog | `content/blog/behavioral-triggers-product-tours-event-based-onboarding.mdx` | [/blog/behavioral-triggers-product-tours-event-based-onboarding](/blog/behavioral-triggers-product-tours-event-based-onboarding) | 0 |
 | blog | `content/blog/best-digital-adoption-platforms-startups.mdx` | [/blog/best-digital-adoption-platforms-startups](/blog/best-digital-adoption-platforms-startups) | 0 |
-| blog | `content/blog/best-free-product-tour-libraries-open-source.mdx` | [/blog/best-free-product-tour-libraries-open-source](/blog/best-free-product-tour-libraries-open-source) | 0 |
 | blog | `content/blog/best-headless-ui-libraries-onboarding.mdx` | [/blog/best-headless-ui-libraries-onboarding](/blog/best-headless-ui-libraries-onboarding) | 0 |
 | blog | `content/blog/best-in-app-guidance-tools-saas.mdx` | [/blog/best-in-app-guidance-tools-saas](/blog/best-in-app-guidance-tools-saas) | 0 |
 | blog | `content/blog/best-intercom-product-tour-alternatives.mdx` | [/blog/best-intercom-product-tour-alternatives](/blog/best-intercom-product-tour-alternatives) | 0 |
@@ -71,7 +70,6 @@ Files with **zero** internal links: **193**
 | blog | `content/blog/onboarding-tool-best-free-tier.mdx` | [/blog/onboarding-tool-best-free-tier](/blog/onboarding-tool-best-free-tier) | 0 |
 | blog | `content/blog/onboarding-tool-core-web-vitals.mdx` | [/blog/onboarding-tool-core-web-vitals](/blog/onboarding-tool-core-web-vitals) | 0 |
 | blog | `content/blog/one-time-license-vs-subscription-math-bootstrapped-teams.mdx` | [/blog/one-time-license-vs-subscription-math-bootstrapped-teams](/blog/one-time-license-vs-subscription-math-bootstrapped-teams) | 0 |
-| blog | `content/blog/open-source-business-model-developer-libraries.mdx` | [/blog/open-source-business-model-developer-libraries](/blog/open-source-business-model-developer-libraries) | 0 |
 | blog | `content/blog/open-source-onboarding-cost-developer-time.mdx` | [/blog/open-source-onboarding-cost-developer-time](/blog/open-source-onboarding-cost-developer-time) | 0 |
 | blog | `content/blog/pendo-cost-startup.mdx` | [/blog/pendo-cost-startup](/blog/pendo-cost-startup) | 0 |
 | blog | `content/blog/plg-without-expensive-tools.mdx` | [/blog/plg-without-expensive-tools](/blog/plg-without-expensive-tools) | 0 |
@@ -145,6 +143,7 @@ Files with **zero** internal links: **193**
 | blog | `content/blog/ab-test-onboarding-statsig.mdx` | [/blog/ab-test-onboarding-statsig](/blog/ab-test-onboarding-statsig) | 1 |
 | blog | `content/blog/b2b-saas-product-tour.mdx` | [/blog/b2b-saas-product-tour](/blog/b2b-saas-product-tour) | 1 |
 | blog | `content/blog/best-appcues-alternatives-developers.mdx` | [/blog/best-appcues-alternatives-developers](/blog/best-appcues-alternatives-developers) | 1 |
+| blog | `content/blog/best-free-product-tour-libraries-open-source.mdx` | [/blog/best-free-product-tour-libraries-open-source](/blog/best-free-product-tour-libraries-open-source) | 1 |
 | blog | `content/blog/best-onboarding-tool-reviews.mdx` | [/blog/best-onboarding-tool-reviews](/blog/best-onboarding-tool-reviews) | 1 |
 | blog | `content/blog/best-product-tour-library-ssr.mdx` | [/blog/best-product-tour-library-ssr](/blog/best-product-tour-library-ssr) | 1 |
 | blog | `content/blog/css-container-queries-responsive-product-tours.mdx` | [/blog/css-container-queries-responsive-product-tours](/blog/css-container-queries-responsive-product-tours) | 1 |
@@ -154,6 +153,7 @@ Files with **zero** internal links: **193**
 | blog | `content/blog/github-stars-playbook-tour-kit.mdx` | [/blog/github-stars-playbook-tour-kit](/blog/github-stars-playbook-tour-kit) | 1 |
 | blog | `content/blog/mixpanel-product-tour-funnel.mdx` | [/blog/mixpanel-product-tour-funnel](/blog/mixpanel-product-tour-funnel) | 1 |
 | blog | `content/blog/onboarding-nps-survey.mdx` | [/blog/onboarding-nps-survey](/blog/onboarding-nps-survey) | 1 |
+| blog | `content/blog/open-source-business-model-developer-libraries.mdx` | [/blog/open-source-business-model-developer-libraries](/blog/open-source-business-model-developer-libraries) | 1 |
 | blog | `content/blog/product-tour-analytics-open-source-byo-stack.mdx` | [/blog/product-tour-analytics-open-source-byo-stack](/blog/product-tour-analytics-open-source-byo-stack) | 1 |
 | blog | `content/blog/product-tour-drop-off-tracking.mdx` | [/blog/product-tour-drop-off-tracking](/blog/product-tour-drop-off-tracking) | 1 |
 | blog | `content/blog/product-tour-ux-patterns-2026.mdx` | [/blog/product-tour-ux-patterns-2026](/blog/product-tour-ux-patterns-2026) | 1 |
@@ -181,7 +181,6 @@ Files with **zero** internal links: **193**
 | blog | `content/blog/empty-states-that-convert-onboarding-design-patterns.mdx` | [/blog/empty-states-that-convert-onboarding-design-patterns](/blog/empty-states-that-convert-onboarding-design-patterns) | 2 |
 | blog | `content/blog/github-stars-business.mdx` | [/blog/github-stars-business](/blog/github-stars-business) | 2 |
 | blog | `content/blog/measure-onboarding-success-metrics.mdx` | [/blog/measure-onboarding-success-metrics](/blog/measure-onboarding-success-metrics) | 2 |
-| blog | `content/blog/migrate-shepherd-js-tour-kit.mdx` | [/blog/migrate-shepherd-js-tour-kit](/blog/migrate-shepherd-js-tour-kit) | 2 |
 | blog | `content/blog/nextjs-app-router-product-tour.mdx` | [/blog/nextjs-app-router-product-tour](/blog/nextjs-app-router-product-tour) | 2 |
 | blog | `content/blog/onboarding-saas-tax.mdx` | [/blog/onboarding-saas-tax](/blog/onboarding-saas-tax) | 2 |
 | blog | `content/blog/plausible-analytics-product-tour.mdx` | [/blog/plausible-analytics-product-tour](/blog/plausible-analytics-product-tour) | 2 |
@@ -220,11 +219,6 @@ Files with **zero** internal links: **193**
 | alternatives | `content/alternatives/shepherd-js-alternatives.mdx` | [/alternatives/shepherd-js-alternatives](/alternatives/shepherd-js-alternatives) | 0 |
 | docs | `content/docs/adoption/dashboard/index.mdx` | [/docs/adoption/dashboard](/docs/adoption/dashboard) | 0 |
 | docs | `content/docs/adoption/index.mdx` | [/docs/adoption](/docs/adoption) | 0 |
-| docs | `content/docs/ai/api-reference.mdx` | [/docs/ai/api-reference](/docs/ai/api-reference) | 0 |
-| docs | `content/docs/ai/cag-guide.mdx` | [/docs/ai/cag-guide](/docs/ai/cag-guide) | 0 |
-| docs | `content/docs/ai/components.mdx` | [/docs/ai/components](/docs/ai/components) | 0 |
-| docs | `content/docs/ai/rag-guide.mdx` | [/docs/ai/rag-guide](/docs/ai/rag-guide) | 0 |
-| docs | `content/docs/ai/tour-integration.mdx` | [/docs/ai/tour-integration](/docs/ai/tour-integration) | 0 |
 | docs | `content/docs/analytics/index.mdx` | [/docs/analytics](/docs/analytics) | 0 |
 | docs | `content/docs/announcements/headless/banner.mdx` | [/docs/announcements/headless/banner](/docs/announcements/headless/banner) | 0 |
 | docs | `content/docs/announcements/headless/modal.mdx` | [/docs/announcements/headless/modal](/docs/announcements/headless/modal) | 0 |
@@ -238,6 +232,8 @@ Files with **zero** internal links: **193**
 | docs | `content/docs/api/media.mdx` | [/docs/api/media](/docs/api/media) | 0 |
 | docs | `content/docs/api/scheduling.mdx` | [/docs/api/scheduling](/docs/api/scheduling) | 0 |
 | docs | `content/docs/checklists/utilities/index.mdx` | [/docs/checklists/utilities](/docs/checklists/utilities) | 0 |
+| docs | `content/docs/core/diagnostic.mdx` | [/docs/core/diagnostic](/docs/core/diagnostic) | 0 |
+| docs | `content/docs/core/hooks/use-direction.mdx` | [/docs/core/hooks/use-direction](/docs/core/hooks/use-direction) | 0 |
 | docs | `content/docs/core/hooks/use-focus-trap.mdx` | [/docs/core/hooks/use-focus-trap](/docs/core/hooks/use-focus-trap) | 0 |
 | docs | `content/docs/core/hooks/use-keyboard.mdx` | [/docs/core/hooks/use-keyboard](/docs/core/hooks/use-keyboard) | 0 |
 | docs | `content/docs/core/hooks/use-persistence.mdx` | [/docs/core/hooks/use-persistence](/docs/core/hooks/use-persistence) | 0 |
@@ -246,24 +242,28 @@ Files with **zero** internal links: **193**
 | docs | `content/docs/core/hooks/use-tour.mdx` | [/docs/core/hooks/use-tour](/docs/core/hooks/use-tour) | 0 |
 | docs | `content/docs/core/providers/tour-kit-provider.mdx` | [/docs/core/providers/tour-kit-provider](/docs/core/providers/tour-kit-provider) | 0 |
 | docs | `content/docs/core/providers/tour-provider.mdx` | [/docs/core/providers/tour-provider](/docs/core/providers/tour-provider) | 0 |
-| docs | `content/docs/core/types/config-types.mdx` | [/docs/core/types/config-types](/docs/core/types/config-types) | 0 |
-| docs | `content/docs/core/types/tour-types.mdx` | [/docs/core/types/tour-types](/docs/core/types/tour-types) | 0 |
+| docs | `content/docs/core/schemas.mdx` | [/docs/core/schemas](/docs/core/schemas) | 0 |
 | docs | `content/docs/core/utilities/create-step.mdx` | [/docs/core/utilities/create-step](/docs/core/utilities/create-step) | 0 |
 | docs | `content/docs/core/utilities/create-tour.mdx` | [/docs/core/utilities/create-tour](/docs/core/utilities/create-tour) | 0 |
 | docs | `content/docs/core/utilities/helpers.mdx` | [/docs/core/utilities/helpers](/docs/core/utilities/helpers) | 0 |
 | docs | `content/docs/getting-started/installation.mdx` | [/docs/getting-started/installation](/docs/getting-started/installation) | 0 |
 | docs | `content/docs/getting-started/typescript.mdx` | [/docs/getting-started/typescript](/docs/getting-started/typescript) | 0 |
 | docs | `content/docs/guides/base-ui.mdx` | [/docs/guides/base-ui](/docs/guides/base-ui) | 0 |
-| docs | `content/docs/guides/router-integration.mdx` | [/docs/guides/router-integration](/docs/guides/router-integration) | 0 |
+| docs | `content/docs/guides/i18n.mdx` | [/docs/guides/i18n](/docs/guides/i18n) | 0 |
+| docs | `content/docs/guides/segmentation.mdx` | [/docs/guides/segmentation](/docs/guides/segmentation) | 0 |
 | docs | `content/docs/guides/troubleshooting.mdx` | [/docs/guides/troubleshooting](/docs/guides/troubleshooting) | 0 |
+| docs | `content/docs/hints/variants.mdx` | [/docs/hints/variants](/docs/hints/variants) | 0 |
 | docs | `content/docs/licensing/index.mdx` | [/docs/licensing](/docs/licensing) | 0 |
+| docs | `content/docs/licensing/trial.mdx` | [/docs/licensing/trial](/docs/licensing/trial) | 0 |
 | docs | `content/docs/media/headless/index.mdx` | [/docs/media/headless](/docs/media/headless) | 0 |
 | docs | `content/docs/media/index.mdx` | [/docs/media](/docs/media) | 0 |
+| docs | `content/docs/migration/driver.mdx` | [/docs/migration/driver](/docs/migration/driver) | 0 |
 | docs | `content/docs/react/components/tour-card.mdx` | [/docs/react/components/tour-card](/docs/react/components/tour-card) | 0 |
 | docs | `content/docs/react/components/tour-close.mdx` | [/docs/react/components/tour-close](/docs/react/components/tour-close) | 0 |
 | docs | `content/docs/react/components/tour-navigation.mdx` | [/docs/react/components/tour-navigation](/docs/react/components/tour-navigation) | 0 |
 | docs | `content/docs/react/components/tour-overlay.mdx` | [/docs/react/components/tour-overlay](/docs/react/components/tour-overlay) | 0 |
 | docs | `content/docs/react/components/tour-progress.mdx` | [/docs/react/components/tour-progress](/docs/react/components/tour-progress) | 0 |
+| docs | `content/docs/react/components/tour-route-prompt.mdx` | [/docs/react/components/tour-route-prompt](/docs/react/components/tour-route-prompt) | 0 |
 | docs | `content/docs/react/components/tour-step.mdx` | [/docs/react/components/tour-step](/docs/react/components/tour-step) | 0 |
 | docs | `content/docs/react/components/tour.mdx` | [/docs/react/components/tour](/docs/react/components/tour) | 0 |
 | docs | `content/docs/react/headless/examples.mdx` | [/docs/react/headless/examples](/docs/react/headless/examples) | 0 |
@@ -273,24 +273,45 @@ Files with **zero** internal links: **193**
 | docs | `content/docs/react/styling/css-variables.mdx` | [/docs/react/styling/css-variables](/docs/react/styling/css-variables) | 0 |
 | docs | `content/docs/react/styling/custom-components.mdx` | [/docs/react/styling/custom-components](/docs/react/styling/custom-components) | 0 |
 | docs | `content/docs/react/styling/tailwind.mdx` | [/docs/react/styling/tailwind](/docs/react/styling/tailwind) | 0 |
+| docs | `content/docs/react/target-prop.mdx` | [/docs/react/target-prop](/docs/react/target-prop) | 0 |
+| docs | `content/docs/surveys/headless/index.mdx` | [/docs/surveys/headless](/docs/surveys/headless) | 0 |
+| docs | `content/docs/surveys/providers/index.mdx` | [/docs/surveys/providers](/docs/surveys/providers) | 0 |
+| docs | `content/docs/surveys/utilities/index.mdx` | [/docs/surveys/utilities](/docs/surveys/utilities) | 0 |
+| docs | `content/docs/troubleshooting.mdx` | [/docs/troubleshooting](/docs/troubleshooting) | 0 |
 | docs | `content/docs/api/core.mdx` | [/docs/api/core](/docs/api/core) | 1 |
 | docs | `content/docs/api/hints.mdx` | [/docs/api/hints](/docs/api/hints) | 1 |
 | docs | `content/docs/api/index.mdx` | [/docs/api](/docs/api) | 1 |
+| docs | `content/docs/api/license.mdx` | [/docs/api/license](/docs/api/license) | 1 |
 | docs | `content/docs/api/react.mdx` | [/docs/api/react](/docs/api/react) | 1 |
+| docs | `content/docs/checklists/components/variants.mdx` | [/docs/checklists/components/variants](/docs/checklists/components/variants) | 1 |
 | docs | `content/docs/core/index.mdx` | [/docs/core](/docs/core) | 1 |
+| docs | `content/docs/examples/dashboard.mdx` | [/docs/examples/dashboard](/docs/examples/dashboard) | 1 |
+| docs | `content/docs/guides/hidden-steps.mdx` | [/docs/guides/hidden-steps](/docs/guides/hidden-steps) | 1 |
+| docs | `content/docs/guides/testing.mdx` | [/docs/guides/testing](/docs/guides/testing) | 1 |
+| docs | `content/docs/guides/unified-slot.mdx` | [/docs/guides/unified-slot](/docs/guides/unified-slot) | 1 |
+| docs | `content/docs/migration/joyride.mdx` | [/docs/migration/joyride](/docs/migration/joyride) | 1 |
+| docs | `content/docs/migration/shepherd.mdx` | [/docs/migration/shepherd](/docs/migration/shepherd) | 1 |
 | docs | `content/docs/react/index.mdx` | [/docs/react](/docs/react) | 1 |
+| docs | `content/docs/surveys/components/index.mdx` | [/docs/surveys/components](/docs/surveys/components) | 1 |
+| docs | `content/docs/surveys/headless/headless-question-text.mdx` | [/docs/surveys/headless/headless-question-text](/docs/surveys/headless/headless-question-text) | 1 |
 | docs | `content/docs/use-cases/index.mdx` | [/docs/use-cases](/docs/use-cases) | 1 |
 | docs | `content/docs/adoption/dashboard/charts.mdx` | [/docs/adoption/dashboard/charts](/docs/adoption/dashboard/charts) | 2 |
 | docs | `content/docs/adoption/dashboard/stats.mdx` | [/docs/adoption/dashboard/stats](/docs/adoption/dashboard/stats) | 2 |
 | docs | `content/docs/adoption/dashboard/table.mdx` | [/docs/adoption/dashboard/table](/docs/adoption/dashboard/table) | 2 |
+| docs | `content/docs/adoption/hooks/use-funnel-data.mdx` | [/docs/adoption/hooks/use-funnel-data](/docs/adoption/hooks/use-funnel-data) | 2 |
+| docs | `content/docs/ai/api-reference.mdx` | [/docs/ai/api-reference](/docs/ai/api-reference) | 2 |
+| docs | `content/docs/ai/components.mdx` | [/docs/ai/components](/docs/ai/components) | 2 |
 | docs | `content/docs/analytics/plugins/amplitude.mdx` | [/docs/analytics/plugins/amplitude](/docs/analytics/plugins/amplitude) | 2 |
 | docs | `content/docs/analytics/plugins/google-analytics.mdx` | [/docs/analytics/plugins/google-analytics](/docs/analytics/plugins/google-analytics) | 2 |
 | docs | `content/docs/analytics/plugins/mixpanel.mdx` | [/docs/analytics/plugins/mixpanel](/docs/analytics/plugins/mixpanel) | 2 |
 | docs | `content/docs/analytics/plugins/posthog.mdx` | [/docs/analytics/plugins/posthog](/docs/analytics/plugins/posthog) | 2 |
+| docs | `content/docs/announcements/changelog-component.mdx` | [/docs/announcements/changelog-component](/docs/announcements/changelog-component) | 2 |
+| docs | `content/docs/announcements/changelog.mdx` | [/docs/announcements/changelog](/docs/announcements/changelog) | 2 |
 | docs | `content/docs/announcements/components/banner.mdx` | [/docs/announcements/components/banner](/docs/announcements/components/banner) | 2 |
 | docs | `content/docs/announcements/components/slideout.mdx` | [/docs/announcements/components/slideout](/docs/announcements/components/slideout) | 2 |
 | docs | `content/docs/announcements/components/spotlight.mdx` | [/docs/announcements/components/spotlight](/docs/announcements/components/spotlight) | 2 |
 | docs | `content/docs/announcements/components/toast.mdx` | [/docs/announcements/components/toast](/docs/announcements/components/toast) | 2 |
+| docs | `content/docs/announcements/components/variants.mdx` | [/docs/announcements/components/variants](/docs/announcements/components/variants) | 2 |
 | docs | `content/docs/checklists/components/checklist-launcher.mdx` | [/docs/checklists/components/checklist-launcher](/docs/checklists/components/checklist-launcher) | 2 |
 | docs | `content/docs/checklists/components/checklist-progress.mdx` | [/docs/checklists/components/checklist-progress](/docs/checklists/components/checklist-progress) | 2 |
 | docs | `content/docs/checklists/components/checklist-task.mdx` | [/docs/checklists/components/checklist-task](/docs/checklists/components/checklist-task) | 2 |
@@ -299,16 +320,34 @@ Files with **zero** internal links: **193**
 | docs | `content/docs/checklists/headless/index.mdx` | [/docs/checklists/headless](/docs/checklists/headless) | 2 |
 | docs | `content/docs/checklists/headless/task-headless.mdx` | [/docs/checklists/headless/task-headless](/docs/checklists/headless/task-headless) | 2 |
 | docs | `content/docs/checklists/hooks/use-checklist-persistence.mdx` | [/docs/checklists/hooks/use-checklist-persistence](/docs/checklists/hooks/use-checklist-persistence) | 2 |
-| docs | `content/docs/checklists/types.mdx` | [/docs/checklists/types](/docs/checklists/types) | 2 |
 | docs | `content/docs/checklists/utilities/create-checklist.mdx` | [/docs/checklists/utilities/create-checklist](/docs/checklists/utilities/create-checklist) | 2 |
 | docs | `content/docs/checklists/utilities/dependencies.mdx` | [/docs/checklists/utilities/dependencies](/docs/checklists/utilities/dependencies) | 2 |
 | docs | `content/docs/checklists/utilities/progress.mdx` | [/docs/checklists/utilities/progress](/docs/checklists/utilities/progress) | 2 |
 | docs | `content/docs/core/hooks/use-element-position.mdx` | [/docs/core/hooks/use-element-position](/docs/core/hooks/use-element-position) | 2 |
+| docs | `content/docs/core/hooks/use-tour-kit-context.mdx` | [/docs/core/hooks/use-tour-kit-context](/docs/core/hooks/use-tour-kit-context) | 2 |
+| docs | `content/docs/core/types/config-types.mdx` | [/docs/core/types/config-types](/docs/core/types/config-types) | 2 |
 | docs | `content/docs/core/types/step-types.mdx` | [/docs/core/types/step-types](/docs/core/types/step-types) | 2 |
+| docs | `content/docs/examples/progress-variants.mdx` | [/docs/examples/progress-variants](/docs/examples/progress-variants) | 2 |
+| docs | `content/docs/guides/router-integration.mdx` | [/docs/guides/router-integration](/docs/guides/router-integration) | 2 |
+| docs | `content/docs/guides/theme-variations.mdx` | [/docs/guides/theme-variations](/docs/guides/theme-variations) | 2 |
 | docs | `content/docs/hints/index.mdx` | [/docs/hints](/docs/hints) | 2 |
-| docs | `content/docs/index.mdx` | [/docs](/docs) | 2 |
+| docs | `content/docs/scheduling/components.mdx` | [/docs/scheduling/components](/docs/scheduling/components) | 2 |
 | docs | `content/docs/scheduling/types.mdx` | [/docs/scheduling/types](/docs/scheduling/types) | 2 |
 | docs | `content/docs/scheduling/utilities/timezone.mdx` | [/docs/scheduling/utilities/timezone](/docs/scheduling/utilities/timezone) | 2 |
+| docs | `content/docs/surveys/components/question-boolean.mdx` | [/docs/surveys/components/question-boolean](/docs/surveys/components/question-boolean) | 2 |
+| docs | `content/docs/surveys/components/question-rating.mdx` | [/docs/surveys/components/question-rating](/docs/surveys/components/question-rating) | 2 |
+| docs | `content/docs/surveys/components/question-select.mdx` | [/docs/surveys/components/question-select](/docs/surveys/components/question-select) | 2 |
+| docs | `content/docs/surveys/components/question-text.mdx` | [/docs/surveys/components/question-text](/docs/surveys/components/question-text) | 2 |
+| docs | `content/docs/surveys/components/survey-banner.mdx` | [/docs/surveys/components/survey-banner](/docs/surveys/components/survey-banner) | 2 |
+| docs | `content/docs/surveys/components/survey-inline.mdx` | [/docs/surveys/components/survey-inline](/docs/surveys/components/survey-inline) | 2 |
+| docs | `content/docs/surveys/components/survey-popover.mdx` | [/docs/surveys/components/survey-popover](/docs/surveys/components/survey-popover) | 2 |
+| docs | `content/docs/surveys/components/survey-progress.mdx` | [/docs/surveys/components/survey-progress](/docs/surveys/components/survey-progress) | 2 |
+| docs | `content/docs/surveys/components/survey-slideout.mdx` | [/docs/surveys/components/survey-slideout](/docs/surveys/components/survey-slideout) | 2 |
+| docs | `content/docs/surveys/headless/headless-question-boolean.mdx` | [/docs/surveys/headless/headless-question-boolean](/docs/surveys/headless/headless-question-boolean) | 2 |
+| docs | `content/docs/surveys/headless/headless-question-rating.mdx` | [/docs/surveys/headless/headless-question-rating](/docs/surveys/headless/headless-question-rating) | 2 |
+| docs | `content/docs/surveys/headless/headless-question-select.mdx` | [/docs/surveys/headless/headless-question-select](/docs/surveys/headless/headless-question-select) | 2 |
+| docs | `content/docs/surveys/hooks/use-surveys.mdx` | [/docs/surveys/hooks/use-surveys](/docs/surveys/hooks/use-surveys) | 2 |
+| docs | `content/docs/surveys/index.mdx` | [/docs/surveys](/docs/surveys) | 2 |
 
 ## Remediation notes
 

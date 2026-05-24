@@ -13,11 +13,13 @@ Complete API reference for the React package. This package provides styled and h
 This package re-exports all of `@tour-kit/core`. Import everything from `@tour-kit/react` to avoid duplicate dependencies.
 </Callout>
 
+For prose-style docs and recipes, see the [`@tour-kit/react` package overview](/docs/react), or jump to [components](/docs/react/components/tour), [headless primitives](/docs/react/headless), [hooks](/docs/react/hooks), [providers](/docs/react/providers/multi-tour-kit-provider), [adapters](/docs/react/adapters), or [styling](/docs/react/styling/tailwind).
+
 ---
 
 ## Styled Components
 
-### Tour
+### [Tour](/docs/react/components/tour)
 
 Wrapper component for declarative tour definition.
 
@@ -38,7 +40,7 @@ import { Tour } from '@tour-kit/react';
 </Tour>
 ```
 
-### TourStep
+### [TourStep](/docs/react/components/tour-step)
 
 Declarative step definition (must be child of Tour).
 
@@ -60,7 +62,7 @@ import { TourStep } from '@tour-kit/react';
 />
 ```
 
-### TourCard (Compound)
+### [TourCard (Compound)](/docs/react/components/tour-card)
 
 Main tooltip card with compound components.
 
@@ -91,7 +93,7 @@ import {
 | `TourCardContent` | `spacing?: 'default' \| 'compact' \| 'none'`, `content?` |
 | `TourCardFooter` | `justify?: 'between' \| 'end' \| 'start'`, `spacing?: 'default' \| 'compact' \| 'none'` |
 
-### TourOverlay
+### [TourOverlay](/docs/react/components/tour-overlay)
 
 Spotlight overlay with cutout.
 
@@ -111,7 +113,7 @@ import { TourOverlay } from '@tour-kit/react';
 | `className` | `string` | - | Custom CSS class |
 | `onClick` | `() => void` | - | Click handler |
 
-### TourNavigation
+### [TourNavigation](/docs/react/components/tour-navigation)
 
 Navigation buttons component.
 
@@ -128,7 +130,7 @@ import { TourNavigation } from '@tour-kit/react';
 />
 ```
 
-### TourProgress
+### [TourProgress](/docs/react/components/tour-progress)
 
 Progress indicator component.
 
@@ -140,7 +142,7 @@ import { TourProgress } from '@tour-kit/react';
 <TourProgress variant="text" />
 ```
 
-### TourClose
+### [TourClose](/docs/react/components/tour-close)
 
 Close/skip button.
 
@@ -176,11 +178,11 @@ import { TourArrow } from '@tour-kit/react';
 
 ---
 
-## Headless Components
+## [Headless Components](/docs/react/headless)
 
 Import from `@tour-kit/react/headless`:
 
-### TourCardHeadless
+### [TourCardHeadless](/docs/react/headless/headless-card)
 
 ```tsx
 import { TourCardHeadless } from '@tour-kit/react/headless';
@@ -208,7 +210,7 @@ import { TourCardHeadless } from '@tour-kit/react/headless';
 />
 ```
 
-### TourOverlayHeadless
+### [TourOverlayHeadless](/docs/react/headless/headless-overlay)
 
 ```tsx
 import { TourOverlayHeadless } from '@tour-kit/react/headless';
@@ -275,7 +277,7 @@ import { TourCloseHeadless } from '@tour-kit/react/headless';
 
 ## Provider Components
 
-### MultiTourKitProvider
+### [MultiTourKitProvider](/docs/react/providers/multi-tour-kit-provider)
 
 Provider for managing multiple tours.
 
@@ -301,7 +303,7 @@ import { MultiTourKitProvider } from '@tour-kit/react';
 
 ## Hooks
 
-### useTours
+### [useTours](/docs/react/hooks/use-tours)
 
 Access all registered tours.
 
@@ -320,7 +322,7 @@ const {
 } = useTours();
 ```
 
-### useTourRoute
+### [useTourRoute](/docs/react/hooks/use-tour-route)
 
 Route-aware tour control.
 
@@ -339,9 +341,9 @@ const {
 
 ---
 
-## Router Adapters
+## [Router Adapters](/docs/react/adapters)
 
-### Next.js App Router
+### [Next.js App Router](/docs/react/adapters/next-app-router)
 
 ```tsx
 import { useNextAppRouter, createNextAppRouterAdapter } from '@tour-kit/react';
@@ -355,7 +357,7 @@ const createRouter = createNextAppRouterAdapter(usePathname, useRouter);
 const router = createRouter();
 ```
 
-### Next.js Pages Router
+### [Next.js Pages Router](/docs/react/adapters/next-pages-router)
 
 ```tsx
 import { useNextPagesRouter, createNextPagesRouterAdapter } from '@tour-kit/react';
@@ -368,7 +370,7 @@ import { useRouter } from 'next/router';
 const createRouter = createNextPagesRouterAdapter(useRouter);
 ```
 
-### React Router
+### [React Router](/docs/react/adapters/react-router)
 
 ```tsx
 import { useReactRouter, createReactRouterAdapter } from '@tour-kit/react';
@@ -511,3 +513,14 @@ export type {
 <Callout type="info">
 For detailed documentation on each component, see the individual pages in the [@tour-kit/react](/docs/react) section.
 </Callout>
+
+---
+
+## See also
+
+- [`@tour-kit/react` package overview](/docs/react) — prose docs, recipes, and patterns for every export above.
+- [`@tour-kit/core` API reference](/docs/api/core) — the framework-agnostic primitives this package re-exports.
+- [API reference index](/docs/api) — browse other package references.
+- [`<Tour>` component](/docs/react/components/tour) — the most-used entry point for declarative tours.
+- [Quick start](/docs/getting-started/quick-start) — minimal working app built on these exports.
+- [Router integration guide](/docs/guides/router-integration) — wire `MultiTourKitProvider` into Next.js or React Router.

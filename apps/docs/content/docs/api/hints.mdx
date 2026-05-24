@@ -9,11 +9,13 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 Complete API reference for the hints package. This package provides persistent hints and hotspots for feature discovery.
 
+For prose-style docs and recipes, see the [`@tour-kit/hints` package overview](/docs/hints), or jump to [components](/docs/hints/components), [headless primitives](/docs/hints/headless), [hooks](/docs/hints/hooks), [variants](/docs/hints/variants), or [types](/docs/hints/types).
+
 ---
 
 ## Styled Components
 
-### Hint
+### [Hint](/docs/hints/components)
 
 Main hint component combining hotspot and tooltip.
 
@@ -60,7 +62,7 @@ import { Hint } from '@tour-kit/hints';
 | `onShow` | `() => void` | - | Show callback |
 | `onDismiss` | `() => void` | - | Dismiss callback |
 
-### HintHotspot
+### [HintHotspot](/docs/hints/components)
 
 Standalone pulsing indicator.
 
@@ -92,7 +94,7 @@ import { HintHotspot } from '@tour-kit/hints';
 | `pulse` | `boolean` | `true` | Enable pulse |
 | `zIndex` | `'default' \| 'high'` | `'default'` | z-index |
 
-### HintTooltip
+### [HintTooltip](/docs/hints/components)
 
 Floating tooltip component.
 
@@ -129,7 +131,7 @@ import { HintTooltip } from '@tour-kit/hints';
 
 Import from `@tour-kit/hints/headless`:
 
-### HintHeadless
+### [HintHeadless](/docs/hints/headless/hint-headless)
 
 ```tsx
 import { HintHeadless } from '@tour-kit/hints/headless';
@@ -162,7 +164,7 @@ import { HintHeadless } from '@tour-kit/hints/headless';
 />
 ```
 
-### HintHotspotHeadless
+### [HintHotspotHeadless](/docs/hints/headless/hint-hotspot-headless)
 
 ```tsx
 import { HintHotspotHeadless } from '@tour-kit/hints/headless';
@@ -181,7 +183,7 @@ import { HintHotspotHeadless } from '@tour-kit/hints/headless';
 />
 ```
 
-### HintTooltipHeadless
+### [HintTooltipHeadless](/docs/hints/headless/hint-tooltip-headless)
 
 ```tsx
 import { HintTooltipHeadless } from '@tour-kit/hints/headless';
@@ -208,7 +210,7 @@ import { HintTooltipHeadless } from '@tour-kit/hints/headless';
 
 ## Provider
 
-### HintsProvider
+### [HintsProvider](/docs/hints)
 
 Context provider for hint state management.
 
@@ -224,7 +226,7 @@ import { HintsProvider } from '@tour-kit/hints';
 
 ## Hooks
 
-### useHint
+### [useHint](/docs/hints/hooks)
 
 Control a single hint by ID.
 
@@ -241,7 +243,7 @@ const {
 } = useHint('hint-id');
 ```
 
-### useHints
+### [useHints](/docs/hints/hooks)
 
 Access and control all hints.
 
@@ -261,7 +263,7 @@ const {
 } = useHints();
 ```
 
-### useHintsContext
+### [useHintsContext](/docs/hints/hooks)
 
 Low-level context access.
 
@@ -273,7 +275,7 @@ const context = useHintsContext(); // HintsContextValue
 
 ---
 
-## UI Variants
+## [UI Variants](/docs/hints/variants)
 
 CVA variant exports for customization:
 
@@ -323,7 +325,7 @@ import type {
 
 ---
 
-## Types
+## [Types](/docs/hints/types)
 
 ### HintConfig
 
@@ -445,3 +447,12 @@ import type { HintConfig, HintState, HotspotPosition, Placement } from '@tour-ki
 <Callout type="info">
 For detailed documentation on each component, see the individual pages in the [@tour-kit/hints](/docs/hints) section.
 </Callout>
+
+---
+
+## See also
+
+- [`@tour-kit/hints` package overview](/docs/hints) — prose docs, recipes, and the lifecycle / persistence chapters.
+- [API reference index](/docs/api) — browse other package references.
+- [`@tour-kit/hints` hooks](/docs/hints/hooks) and [persistence](/docs/hints/persistence) — dive into hint state.
+- [Hint headless primitives](/docs/hints/headless) — build fully custom hint UIs.

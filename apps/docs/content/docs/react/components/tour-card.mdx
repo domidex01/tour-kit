@@ -138,3 +138,12 @@ For simpler use cases:
   {/* Renders default layout with title, content, and navigation */}
 </TourCard>
 ```
+
+## Related
+
+- [`<Tour>`](/docs/react/components/tour) — the wrapper `<TourCard>` must live inside.
+- [`<TourNavigation>`](/docs/react/components/tour-navigation), [`<TourProgress>`](/docs/react/components/tour-progress), [`<TourClose>`](/docs/react/components/tour-close) — the slot components composed inside `<TourCardFooter>` / `<TourCardHeader>`.
+- [`<TourOverlay>`](/docs/react/components/tour-overlay) — the spotlight overlay that sits beneath the card.
+- [Headless `<TourCard>`](/docs/react/headless/headless-card) — render-prop variant for full UI control.
+- [Tailwind styling](/docs/react/styling/tailwind) and [CSS variables](/docs/react/styling/css-variables) — restyle the default card.
+- [`TourCard` migration notes](/docs/react/components/tour-card-migration) — if you used the pre-compound API.

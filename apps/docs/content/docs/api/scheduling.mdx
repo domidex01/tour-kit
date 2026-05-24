@@ -9,11 +9,13 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 Complete API reference for the scheduling package. This package provides time-based scheduling utilities.
 
+For prose-style docs and recipes, see the [`@tour-kit/scheduling` package overview](/docs/scheduling), or jump to [hooks](/docs/scheduling/hooks), [utilities](/docs/scheduling/utilities), or [types](/docs/scheduling/types).
+
 ---
 
 ## Hooks
 
-### useSchedule
+### [useSchedule](/docs/scheduling/hooks/use-schedule)
 
 Hook to check if schedule is active.
 
@@ -30,7 +32,7 @@ const isActive = useSchedule(schedule, {
 | `schedule` | `Schedule` | Schedule configuration |
 | `options.refreshInterval` | `number` | Refresh interval (ms) |
 
-### useScheduleStatus
+### [useScheduleStatus](/docs/scheduling/hooks/use-schedule-status)
 
 Hook for detailed schedule status.
 
@@ -52,7 +54,7 @@ const {
 | `reason` | `ScheduleInactiveReason \| null` | Why inactive |
 | `nextCheck` | `number` | Ms until next status change |
 
-### useUserTimezone
+### [useUserTimezone](/docs/scheduling/hooks/use-user-timezone)
 
 Hook to detect user's timezone.
 
@@ -74,7 +76,7 @@ const {
 
 ---
 
-## Core Functions
+## [Core Functions](/docs/scheduling/utilities/schedule-evaluation)
 
 ### checkSchedule
 
@@ -112,7 +114,7 @@ const { isActive, reason } = getScheduleStatus(schedule);
 
 ---
 
-## Timezone Utilities
+## [Timezone Utilities](/docs/scheduling/utilities/timezone)
 
 ```tsx
 import {
@@ -150,7 +152,7 @@ const { hours, minutes } = parseTimeString('09:30');
 
 ## Date/Time Utilities
 
-### Date Range
+### [Date Range](/docs/scheduling/utilities/date-range)
 
 ```tsx
 import { isWithinDateRange } from '@tour-kit/scheduling';
@@ -162,7 +164,7 @@ const inRange = isWithinDateRange(
 );
 ```
 
-### Time Range
+### [Time Range](/docs/scheduling/utilities/time-range)
 
 ```tsx
 import { isWithinTimeRange, isWithinAnyTimeRange } from '@tour-kit/scheduling';
@@ -179,7 +181,7 @@ const inAnyRange = isWithinAnyTimeRange(new Date(), [
 ]);
 ```
 
-### Day of Week
+### [Day of Week](/docs/scheduling/utilities/day-of-week)
 
 ```tsx
 import {
@@ -209,7 +211,7 @@ DAY_GROUPS.weekend;  // [0, 6]
 
 ---
 
-## Blackout Utilities
+## [Blackout Utilities](/docs/scheduling/utilities/blackouts)
 
 ```tsx
 import {
@@ -239,7 +241,7 @@ const endTime = getBlackoutEndTime(new Date(), blackouts);
 
 ---
 
-## Business Hours
+## [Business Hours](/docs/scheduling/utilities/business-hours)
 
 ```tsx
 import {
@@ -277,7 +279,7 @@ BUSINESS_HOURS_PRESETS.extended; // 8-8 M-Sa
 
 ---
 
-## Recurring Patterns
+## [Recurring Patterns](/docs/scheduling/utilities/recurring)
 
 ```tsx
 import { matchesRecurringPattern } from '@tour-kit/scheduling';
@@ -429,3 +431,12 @@ interface ScheduleStatus {
   reason?: ScheduleInactiveReason;
 }
 ```
+
+---
+
+## See also
+
+- [`@tour-kit/scheduling` package overview](/docs/scheduling) — prose docs and recipes for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Scheduling types reference](/docs/scheduling/types) — every field on `Schedule`, `RecurringPattern`, `BusinessHours`.
+- [Announcements + scheduling guide](/docs/guides/announcements-scheduling) — wire schedules into time-based announcement rollouts.

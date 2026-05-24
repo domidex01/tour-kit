@@ -220,3 +220,11 @@ const traits = useMemo<AppTraits>(() => ({ plan: user.plan }), [user.plan])
 | `ThemeMatcher` | type | Discriminated union of all five matcher kinds |
 
 See also: [Router integration](./router-integration), [Animations](./animations).
+
+## Related
+
+- [Tailwind styling](/docs/react/styling/tailwind) and [CSS variables](/docs/react/styling/css-variables) — the tokens `<ThemeProvider>` flips between.
+- [Custom components guide](/docs/react/styling/custom-components) — go further than tokens by swapping the component shell.
+- [Router adapters](/docs/react/adapters) — the `RouterAdapter` interface the URL matcher consumes.
+- [Audience segmentation](/docs/guides/segmentation) — predicate-based theme matchers often mirror audience conditions.
+- [Reduced motion guide](/docs/guides/reduced-motion) — pair theme variation with motion-pref-aware tokens.

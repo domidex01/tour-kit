@@ -261,7 +261,7 @@ slot component (`<TourNavigation prevLabel="..." nextLabel="..." />`).
 ### debug
 
 Joyride's `debug` mode dumped state to the console. Tour Kit's `<TourProvider diagnose>`
-prop is the equivalent — see the [Diagnostics guide](/docs/guides) for usage.
+prop is the equivalent — see the [diagnostic mode reference](/docs/core/diagnostic) for usage.
 
 ### disablecloseonesc
 
@@ -293,3 +293,11 @@ npx tour-kit-migrate --from joyride --dry-run ./src
 
 If the dry-run prints clean diffs and exits 0, run again without `--dry-run` to
 write the changes.
+
+## Related
+
+- [Migrate from shepherd.js](/docs/migration/shepherd) — the class-chain pattern (`new Shepherd.Tour`).
+- [Migrate from driver.js](/docs/migration/driver) — the function-call pattern (`driver({...}).drive()`).
+- [`<Tour>`](/docs/react/components/tour) and [`<TourStep>`](/docs/react/components/tour-step) — the destination shape your migrated code lands on.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `useJoyride().controls`.
+- [Quick start](/docs/getting-started/quick-start) — wire the migrated tour into a working app in 5 minutes.

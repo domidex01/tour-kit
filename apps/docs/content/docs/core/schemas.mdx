@@ -177,3 +177,10 @@ Both the main entry and the schemas subpath have CI-enforced size budgets:
 The schemas bundle stays tiny because `zod` is `external` in `tsup` — the
 consumer pulls Zod from their own `node_modules`, not from us. The size-limit
 entry ignores `zod` to measure only the code we ship.
+
+## Related
+
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — accepts the parsed `TourDefinition` plus the runtime-only fields you attach.
+- [Diagnostic engine](/docs/core/diagnostic) — surfaces `STRUCTURE_INVALID` when a malformed payload reaches the provider.
+- [Tour types reference](/docs/core/types/tour-types) and [step types](/docs/core/types/step-types) — the runtime-shape counterparts of the JSON-safe definitions.
+- [`@tour-kit/core` API reference](/docs/api/core) — surfaces all exports including the `/schemas` subpath.

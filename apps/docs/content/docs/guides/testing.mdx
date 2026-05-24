@@ -174,4 +174,12 @@ try {
 
 ## Browser-positioning tests live elsewhere
 
-This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use [`@tour-kit/playwright`](./playwright) — it ships a `test.extend({ tour })` fixture backed by the opt-in `window.__tourKit__` bridge. Phase 5 helpers stop at the jsdom boundary by design.
+This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use [`@tour-kit/playwright`](/docs/guides/playwright) — it ships a `test.extend({ tour })` fixture backed by the opt-in `window.__tourKit__` bridge. Phase 5 helpers stop at the jsdom boundary by design.
+
+## Related
+
+- [Playwright integration](/docs/guides/playwright) — browser-level placement, click, and a11y assertions.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — the provider wrapped in `render(...)` above.
+- [`useTour`](/docs/core/hooks/use-tour) — what the `AutoStart` helper and `HookProbe` read from.
+- [Diagnostic engine](/docs/core/diagnostic) — surfaces *why* a step failed to mount in CI runs.
+- [Headless examples](/docs/react/headless/examples) — patterns for custom UIs that need their own tests.

@@ -139,3 +139,10 @@ The component includes proper ARIA attributes:
 <TourClose ariaLabel="Dismiss tutorial" />
 // Renders with aria-label="Dismiss tutorial"
 ```
+
+## Related
+
+- [`<TourCard>`](/docs/react/components/tour-card) — typically composed inside `<TourCardHeader>` next to this button.
+- [`<TourNavigation>`](/docs/react/components/tour-navigation) — sibling slot for prev/next/complete buttons.
+- [`useTour`](/docs/core/hooks/use-tour) — call `skip()` or `complete()` directly when building a custom close button.
+- [Accessibility guide](/docs/guides/accessibility) — keyboard and screen-reader expectations for dismiss buttons.

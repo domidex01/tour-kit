@@ -9,11 +9,13 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 Complete API reference for the checklists package. This package provides interactive checklists with task dependencies.
 
+For prose-style docs and recipes, see the [`@tour-kit/checklists` package overview](/docs/checklists), or jump to [components](/docs/checklists/components), [headless primitives](/docs/checklists/headless), [hooks](/docs/checklists/hooks), [provider](/docs/checklists/providers/checklist-provider), or [utilities](/docs/checklists/utilities).
+
 ---
 
 ## Providers
 
-### ChecklistProvider
+### [ChecklistProvider](/docs/checklists/providers/checklist-provider)
 
 Provider for checklists.
 
@@ -39,7 +41,7 @@ import { ChecklistProvider } from '@tour-kit/checklists';
 
 ## Hooks
 
-### useChecklist
+### [useChecklist](/docs/checklists/hooks/use-checklist)
 
 Hook for single checklist control.
 
@@ -69,7 +71,7 @@ const {
 | `dismiss` | `() => void` | Dismiss checklist |
 | `reset` | `() => void` | Reset checklist |
 
-### useTask
+### [useTask](/docs/checklists/hooks/use-task)
 
 Hook for single task control.
 
@@ -95,7 +97,7 @@ const {
 | `complete` | `() => void` | Mark task complete |
 | `execute` | `() => void` | Execute task action |
 
-### useChecklistPersistence
+### [useChecklistPersistence](/docs/checklists/hooks/use-checklist-persistence)
 
 Hook for persistence control.
 
@@ -105,7 +107,7 @@ import { useChecklistPersistence } from '@tour-kit/checklists';
 const { save, load, clear } = useChecklistPersistence('onboarding');
 ```
 
-### useChecklistsProgress
+### [useChecklistsProgress](/docs/checklists/hooks/use-checklists-progress)
 
 Hook for all checklists progress.
 
@@ -120,7 +122,7 @@ const progress = useChecklistsProgress();
 
 ## Components
 
-### Checklist
+### [Checklist](/docs/checklists/components/checklist)
 
 Container component for checklist.
 
@@ -135,7 +137,7 @@ import { Checklist } from '@tour-kit/checklists';
 </Checklist>
 ```
 
-### ChecklistTask
+### [ChecklistTask](/docs/checklists/components/checklist-task)
 
 Individual task item.
 
@@ -157,7 +159,7 @@ import { ChecklistTask } from '@tour-kit/checklists';
 | `showIcon` | `boolean` | Show task icon |
 | `showDescription` | `boolean` | Show task description |
 
-### ChecklistProgress
+### [ChecklistProgress](/docs/checklists/components/checklist-progress)
 
 Progress bar/indicator.
 
@@ -171,7 +173,7 @@ import { ChecklistProgress } from '@tour-kit/checklists';
 />
 ```
 
-### ChecklistLauncher
+### [ChecklistLauncher](/docs/checklists/components/checklist-launcher)
 
 Button to launch checklist.
 
@@ -183,7 +185,7 @@ import { ChecklistLauncher } from '@tour-kit/checklists';
 </ChecklistLauncher>
 ```
 
-### ChecklistPanel
+### [ChecklistPanel](/docs/checklists/components/checklist-panel)
 
 Full panel UI with all features.
 
@@ -207,7 +209,9 @@ import { ChecklistPanel } from '@tour-kit/checklists';
 
 ---
 
-## Headless Components
+## [Headless Components](/docs/checklists/headless)
+
+Per-component headless docs: [`<ChecklistHeadless>`](/docs/checklists/headless/checklist-headless), [`<TaskHeadless>`](/docs/checklists/headless/task-headless).
 
 ```tsx
 import { ChecklistHeadless, TaskHeadless } from '@tour-kit/checklists/headless';
@@ -229,7 +233,7 @@ import { ChecklistHeadless, TaskHeadless } from '@tour-kit/checklists/headless';
 
 ## Utilities
 
-### createChecklist
+### [createChecklist](/docs/checklists/utilities/create-checklist)
 
 Factory function for checklist creation.
 
@@ -243,7 +247,7 @@ const checklist = createChecklist({
 });
 ```
 
-### createTask
+### [createTask](/docs/checklists/utilities/create-checklist)
 
 Factory function for task creation.
 
@@ -257,7 +261,7 @@ const task = createTask({
 });
 ```
 
-### calculateProgress
+### [calculateProgress](/docs/checklists/utilities/progress)
 
 Calculate progress from state.
 
@@ -267,7 +271,7 @@ import { calculateProgress } from '@tour-kit/checklists';
 const { completed, total, percentage, remaining } = calculateProgress(state);
 ```
 
-### getNextTask
+### [getNextTask](/docs/checklists/utilities/progress)
 
 Get first incomplete unlocked task.
 
@@ -277,7 +281,7 @@ import { getNextTask } from '@tour-kit/checklists';
 const next = getNextTask(state);
 ```
 
-### getLockedTasks
+### [getLockedTasks](/docs/checklists/utilities/dependencies)
 
 Get tasks blocked by dependencies.
 
@@ -287,7 +291,7 @@ import { getLockedTasks } from '@tour-kit/checklists';
 const locked = getLockedTasks(state);
 ```
 
-### canCompleteTask
+### [canCompleteTask](/docs/checklists/utilities/dependencies)
 
 Check if task dependencies are met.
 
@@ -297,7 +301,7 @@ import { canCompleteTask } from '@tour-kit/checklists';
 const canComplete = canCompleteTask('task-id', state);
 ```
 
-### resolveTaskDependencies
+### [resolveTaskDependencies](/docs/checklists/utilities/dependencies)
 
 Get topological sort of tasks.
 
@@ -307,7 +311,7 @@ import { resolveTaskDependencies } from '@tour-kit/checklists';
 const order = resolveTaskDependencies(tasks);
 ```
 
-### hasCircularDependency
+### [hasCircularDependency](/docs/checklists/utilities/dependencies)
 
 Detect circular dependencies.
 
@@ -385,3 +389,12 @@ interface ChecklistProgress {
   remaining: number;
 }
 ```
+
+---
+
+## See also
+
+- [`@tour-kit/checklists` package overview](/docs/checklists) — prose docs and recipes for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Checklists + tours guide](/docs/guides/checklists-tours) — coordinate checklist tasks with tour completion.
+- [Progress utility](/docs/checklists/utilities/progress) — helpers that back the `<ChecklistProgress>` component.

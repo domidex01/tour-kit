@@ -152,3 +152,10 @@ extensions, as `_THREW` reasons.
 - Median **&lt;0.001ms** per call over 100 iterations (5-step tour, no extensions)
 - With `diagnose: false` the diagnostic module tree-shakes out of the consumer
   bundle. The size-limit budget asserts this.
+
+## Related
+
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — the provider whose `diagnose` prop enables this engine.
+- [Schemas reference](/docs/core/schemas) — validate JSON-authored tours before they reach the diagnostic gates.
+- [Troubleshooting guide](/docs/guides/troubleshooting) — common reasons tours don't fire, mapped to gate failure codes.
+- [Troubleshooting reference](/docs/troubleshooting) — runtime error catalogue.

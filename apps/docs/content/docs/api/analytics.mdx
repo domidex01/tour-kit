@@ -9,11 +9,13 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 Complete API reference for the analytics package. This package provides plugin-based analytics integration.
 
+For prose-style docs and recipes, see the [`@tour-kit/analytics` package overview](/docs/analytics), or jump to the [hooks](/docs/analytics/hooks), [provider](/docs/analytics/providers), or [built-in plugins](/docs/analytics/plugins).
+
 ---
 
 ## Core
 
-### createAnalytics
+### [createAnalytics](/docs/analytics)
 
 Factory function to create an analytics instance.
 
@@ -31,7 +33,7 @@ const analytics = createAnalytics({
 | `plugins` | `AnalyticsPlugin[]` | Array of analytics plugins |
 | `defaultProperties` | `Record<string, unknown>` | Properties added to all events |
 
-### TourAnalytics
+### [TourAnalytics](/docs/analytics)
 
 Main analytics tracker class.
 
@@ -66,7 +68,7 @@ analytics.destroy();
 
 ## Providers
 
-### AnalyticsProvider
+### [AnalyticsProvider](/docs/analytics/providers)
 
 React context provider for analytics.
 
@@ -86,7 +88,7 @@ import { AnalyticsProvider } from '@tour-kit/analytics';
 
 ## Hooks
 
-### useAnalytics
+### [useAnalytics](/docs/analytics/hooks)
 
 Hook to access analytics. Throws if not available.
 
@@ -97,7 +99,7 @@ const analytics = useAnalytics();
 analytics.track('custom_event', { key: 'value' });
 ```
 
-### useAnalyticsOptional
+### [useAnalyticsOptional](/docs/analytics/hooks)
 
 Safe hook that returns null if analytics not available.
 
@@ -112,7 +114,7 @@ analytics?.track('custom_event', { key: 'value' });
 
 ## Plugins
 
-### consolePlugin
+### [consolePlugin](/docs/analytics/plugins/console)
 
 Debug logging to console.
 
@@ -125,7 +127,7 @@ consolePlugin({
 });
 ```
 
-### posthogPlugin
+### [posthogPlugin](/docs/analytics/plugins/posthog)
 
 PostHog integration.
 
@@ -135,7 +137,7 @@ import { posthogPlugin } from '@tour-kit/analytics';
 posthogPlugin(); // Uses window.posthog
 ```
 
-### mixpanelPlugin
+### [mixpanelPlugin](/docs/analytics/plugins/mixpanel)
 
 Mixpanel integration.
 
@@ -145,7 +147,7 @@ import { mixpanelPlugin } from '@tour-kit/analytics';
 mixpanelPlugin(); // Uses window.mixpanel
 ```
 
-### amplitudePlugin
+### [amplitudePlugin](/docs/analytics/plugins/amplitude)
 
 Amplitude integration.
 
@@ -155,7 +157,7 @@ import { amplitudePlugin } from '@tour-kit/analytics';
 amplitudePlugin(); // Uses window.amplitude
 ```
 
-### googleAnalyticsPlugin
+### [googleAnalyticsPlugin](/docs/analytics/plugins/google-analytics)
 
 Google Analytics 4 integration.
 
@@ -167,7 +169,7 @@ googleAnalyticsPlugin(); // Uses gtag()
 
 ---
 
-## Custom Plugin
+## [Custom Plugin](/docs/analytics/plugins/custom)
 
 Create your own analytics plugin:
 
@@ -380,3 +382,11 @@ useEffect(() => {
 <Callout type="info">
 Batching only affects event delivery timing, not event accuracy. All events are eventually sent.
 </Callout>
+
+---
+
+## See also
+
+- [`@tour-kit/analytics` package overview](/docs/analytics) — installation, plugin lineup, and integration recipes.
+- [API reference index](/docs/api) — browse other package references.
+- [Analytics integration guide](/docs/guides/analytics-integration) — end-to-end wiring with PostHog, Mixpanel, GA4, and custom backends.

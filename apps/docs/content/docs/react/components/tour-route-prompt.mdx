@@ -59,3 +59,11 @@ Pair with `<MultiTourKitProvider autoNavigate={false}>` so the runtime defers th
 <Callout type="info">
 For automatic navigation (default behavior), leave `autoNavigate` unset on `MultiTourKitProvider` and omit this component. Use `TourRoutePrompt` only when you need to gate cross-page transitions behind explicit user consent.
 </Callout>
+
+## Related
+
+- [`<MultiTourKitProvider>`](/docs/react/providers/multi-tour-kit-provider) — the provider whose `autoNavigate={false}` opts in to this prompt.
+- [`useTourRoute`](/docs/react/hooks/use-tour-route) — the hook this component reads pending-navigation state from.
+- [Router adapters](/docs/react/adapters) — `useNextAppRouter`, `useNextPagesRouter`, `useReactRouter` for the `router` prop.
+- [Router integration guide](/docs/guides/router-integration) — patterns for multi-page tours end-to-end.
+- [Cross-page tour example](/docs/examples/cross-page-tour) — see this prompt in a working flow.

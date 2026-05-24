@@ -131,3 +131,13 @@ Access custom data in your components:
 const { currentStep } = useTour('my-tour');
 const videoUrl = currentStep?.data?.videoUrl;
 ```
+
+## Related
+
+- [`<Tour>`](/docs/react/components/tour) — the wrapper `<TourStep>` must live inside.
+- [`<TourCard>`](/docs/react/components/tour-card) — the tooltip that renders each step's `title` + `content`.
+- [`target` prop deep-dive](/docs/react/target-prop) — selector string vs. `RefObject` vs. getter function, with the resolution order.
+- [`useStep`](/docs/core/hooks/use-step) — read step state from inside `content` ReactNodes.
+- [Hidden steps guide](/docs/guides/hidden-steps) — use `when` and `waitForTarget` to skip steps conditionally.
+- [Branching guide](/docs/guides/branching) — author tours that diverge based on user choice.
+- [Step types reference](/docs/core/types/step-types) — every field on `TourStep`.

@@ -428,3 +428,11 @@ function FullyCustomTour({ tourId }: { tourId: string }) {
 3. **Add ARIA attributes** - Use `role="dialog"` and `aria-modal="true"`
 4. **Handle edge cases** - Check `isFirstStep`, `isLastStep`, and `totalSteps`
 5. **Test with screen readers** - Ensure announcements work correctly
+
+## Related
+
+- [`<HeadlessTourCard>`](/docs/react/headless/headless-card) and [`<HeadlessTourOverlay>`](/docs/react/headless/headless-overlay) — the primitives composed in these examples.
+- [Headless overview](/docs/react/headless) — when to reach for headless vs. styled components.
+- [`useKeyboard`](/docs/core/hooks/use-keyboard) and [`useFocusTrap`](/docs/core/hooks/use-focus-trap) — keyboard + focus a11y, mandatory for custom UIs.
+- [Accessibility guide](/docs/guides/accessibility) — WCAG 2.1 AA checklist your custom UI must satisfy.
+- [Headless custom example](/docs/examples/headless-custom) — full working app built on these patterns.

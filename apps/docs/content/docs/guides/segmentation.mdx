@@ -197,3 +197,11 @@ For provider-scoped tests, render under `<SegmentationProvider>` with the cohort
 <Callout type="info" title="Operator reference">
 `AudienceCondition.operator` accepts: `equals`, `not_equals`, `contains`, `not_contains`, `in`, `not_in`, `exists`, `not_exists`. The `value` field is required for everything except `exists` / `not_exists`. `key` supports dot notation for nested `userContext` (e.g. `'profile.plan'`).
 </Callout>
+
+## Related
+
+- [Audience targeting reference](/docs/announcements/configuration/audience) — the same operator set applied to announcements.
+- [`<TourStep>` reference](/docs/react/components/tour-step) — accepts an `audience` prop that resolves through `<SegmentationProvider>`.
+- [i18n guide](/docs/guides/i18n) — pair localized copy with audience-targeted tours.
+- [Imperative control guide](/docs/guides/imperative-control) — `forceShow` bypasses these gates for admin previews.
+- [Adoption analytics guide](/docs/guides/adoption-analytics) — segment-aware funnel measurement.

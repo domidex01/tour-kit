@@ -32,9 +32,9 @@ interface CliArgs {
 
 function parseArgs(argv: string[]): CliArgs {
   const minArg = argv.find((a) => a.startsWith('--min='))
-  const min = minArg ? Number(minArg.split('=')[1]) : 3
+  const min = minArg ? Number(minArg.split('=')[1]) : 4
   return {
-    min: Number.isFinite(min) && min > 0 ? min : 3,
+    min: Number.isFinite(min) && min > 0 ? min : 4,
     json: argv.includes('--json'),
   }
 }

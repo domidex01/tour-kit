@@ -1,4 +1,4 @@
-# userTourKit v0.14.0 — Generated 2026-05-22T08:01:18Z
+# userTourKit v1.0.0 — Generated 2026-05-24T04:42:02Z
 
 # Feature Adoption Tracking
 
@@ -6150,142 +6150,6 @@ This ensures server-only code (API keys, vector stores) never leaks into the bro
 
 ---
 
-# AI Assistants
-
-> Documentation resources optimized for AI coding assistants — llms.txt, context files, and MCP server for userTourKit integration
-
-userTourKit provides machine-readable documentation files following the [llms.txt standard](https://llmstxt.org) for AI coding assistants and LLMs.
-
-## Claude Code Plugin
-
-The fastest way to use userTourKit with Claude Code is the [`user-tour-kit`](https://github.com/domidex01/tour-kit) plugin — it ships **6 task-specific skills** that recognize phrases like *"add an onboarding tour"* or *"build a getting-started checklist"* and walk Claude through the right install + provider setup using the matching `@tour-kit/*` package.
-
-### Install (Claude Code)
-
-Run these inside a Claude Code session (the same prompt where you'd type `/help`) — **not** in your shell. Run them **one at a time**, pressing Enter between commands.
-
-**1. Add the marketplace**
-
-```text
-/plugin marketplace add domidex01/tour-kit
-```
-
-**2. Install the plugin** (after step 1 finishes)
-
-```text
-/plugin install user-tour-kit@user-tour-kit
-```
-
-After install, all 6 skills appear under the `user-tour-kit:` namespace in `/help`.
-
-### Available skills
-
-| Skill | Triggers on |
-|---|---|
-| `/user-tour-kit:add-product-tour` | "add a tour", "user tour", "onboarding walkthrough", "FTUE" |
-| `/user-tour-kit:add-onboarding-checklist` | "onboarding checklist", "getting-started panel", "Stripe-style activation" |
-| `/user-tour-kit:add-product-announcement` | "what's new modal", "in-app changelog", "promotional banner" |
-| `/user-tour-kit:add-feature-hint` | "hotspot", "beacon", "pulsing dot", "single tooltip" |
-| `/user-tour-kit:add-adoption-tracking` | "feature adoption", "feature usage tracking", "Pendo-style adoption" |
-| `/user-tour-kit:add-ai-tour-assistant` | "AI onboarding chat", "tour copilot", "RAG over docs for onboarding" |
-
-### Other AI tools (Cursor, Cline, etc.)
-
-The skills follow the open [Agent Skills](https://agentskills.io) standard. Clone the repo and point your tool at the `user-tour-kit/skills/` directory:
-
-```bash
-git clone https://github.com/domidex01/tour-kit
-# Each subdirectory of tour-kit/user-tour-kit/skills/ is a self-contained
-# SKILL.md that any Agent-Skills-compatible tool can load.
-```
-
-For ChatGPT/Claude.ai/Gemini (no plugin support), use the [llms.txt files](#available-files) below instead.
-
-## Available Files
-
-### llms.txt — Documentation Index
-
-A structured index of all userTourKit documentation pages, following the [llmstxt.org](https://llmstxt.org) standard format. Contains section headings with links and descriptions for every page.
-
-**URL:** [`/llms.txt`](/llms.txt)
-
-### llms-full.txt — Complete Documentation
-
-The full content of all userTourKit documentation in a single file. Use this when you need the AI to have comprehensive knowledge of the entire library.
-
-**URL:** [`/llms-full.txt`](/llms-full.txt)
-
-## Usage with AI Tools
-
-### ChatGPT
-
-Paste the llms-full.txt URL into your conversation:
-
-```
-Read https://usertourkit.com/llms-full.txt and use it as context for userTourKit questions
-```
-
-Or create a Custom GPT with the file as a knowledge source.
-
-### Claude
-
-In Claude Code, reference the documentation:
-
-```
-Fetch https://usertourkit.com/llms.txt to understand the userTourKit API
-```
-
-In Claude.ai, paste the content of llms-full.txt into your conversation for full context.
-
-### Cursor / Windsurf
-
-Add the llms.txt URL to your project's AI context:
-
-1. Download `/llms.txt` to your project root
-2. Reference it in your editor's AI context settings
-3. The AI will use userTourKit's documentation for code suggestions
-
-### Gemini
-
-Google Gemini with grounding can discover userTourKit documentation via search. The llms.txt file and sitemap help Gemini index our docs accurately.
-
-### Programmatic Access
-
-```bash
-# Documentation index (llmstxt.org format)
-curl https://usertourkit.com/llms.txt
-
-# Complete documentation
-curl https://usertourkit.com/llms-full.txt
-```
-
-{/* per-package-context-files */}
-## Per-Package Context Files
-
-For targeted assistance with a specific package, paste the corresponding context file
-into your LLM conversation. Each file contains the complete API surface, type definitions,
-and usage examples — optimized to fit within a single paste.
-
-| Package | Context File | Size |
-|---------|-------------|------|
-| @tour-kit/core | [core.txt](/context/core.txt) | ~243 lines |
-| @tour-kit/react | [react.txt](/context/react.txt) | ~551 lines |
-| @tour-kit/hints | [hints.txt](/context/hints.txt) | ~231 lines |
-| @tour-kit/adoption | [adoption.txt](/context/adoption.txt) | ~438 lines |
-| @tour-kit/analytics | [analytics.txt](/context/analytics.txt) | ~288 lines |
-| @tour-kit/announcements | [announcements.txt](/context/announcements.txt) | ~104 lines |
-| @tour-kit/checklists | [checklists.txt](/context/checklists.txt) | ~264 lines |
-| @tour-kit/media | [media.txt](/context/media.txt) | ~201 lines |
-| @tour-kit/scheduling | [scheduling.txt](/context/scheduling.txt) | ~158 lines |
-
-### How to Use
-
-1. Download the context file for the package you need help with
-2. Paste the file contents at the start of your conversation with ChatGPT, Claude, or Gemini
-3. Ask your question — the LLM will have accurate API knowledge to generate correct code
-
----
-
 # API Reference
 
 > Complete API reference for @tour-kit/ai: client hooks, server utilities, chat components, and configuration types
@@ -11602,6 +11466,93 @@ All announcement components are built with accessibility in mind:
 ---
 
 # Changelog
+
+> Release history for the @tour-kit/announcements package — version-by-version log of breaking changes, new features, and bug fixes. Autogenerated from Changesets.
+
+Release history for the `@tour-kit/announcements` package. Every entry below is
+auto-generated by [Changesets](https://github.com/changesets/changesets) from a
+PR-attached changeset file — the same source of truth that drives semver bumps
+and npm publishes. The authoritative copy lives at
+[`packages/announcements/CHANGELOG.md`](https://github.com/domidex01/tour-kit/blob/main/packages/announcements/CHANGELOG.md)
+in the repository.
+
+## How to read this changelog
+
+- **Major** (e.g. `4.0.0` → `5.0.0`) — breaking changes. Read the migration note
+  in the release entry before upgrading.
+- **Minor** (e.g. `4.0.0` → `4.1.0`) — new features, backward compatible.
+- **Patch** (e.g. `4.1.0` → `4.1.1`) — bug fixes and internal cleanup, no API
+  changes.
+- **Updated dependencies** lines mean the version bump was triggered by a
+  dependency (usually `@tour-kit/core`) — the announcement package itself
+  hasn't shipped behavior changes in that release.
+
+## Where to find the entries
+
+- **GitHub Releases** —
+  [github.com/domidex01/tour-kit/releases](https://github.com/domidex01/tour-kit/releases)
+  has every release with the rendered changeset, tag, and diff against the
+  previous version.
+- **Full repo file** —
+  [`packages/announcements/CHANGELOG.md`](https://github.com/domidex01/tour-kit/blob/main/packages/announcements/CHANGELOG.md)
+  — full version log, including patch and dependency-only releases.
+- **npm versions page** —
+  [npmjs.com/package/@tour-kit/announcements?activeTab=versions](https://www.npmjs.com/package/@tour-kit/announcements?activeTab=versions)
+  — install any past version, with publish timestamps.
+
+## Latest highlights
+
+The most recent intentional behavior changes worth knowing about:
+
+### 4.1.0 — Priority queue comparator fix
+
+Custom `priorityWeights` and `priorityOrder: 'fifo' | 'lifo'` from
+`QueueConfig` now actually drive auto-show ordering. Before 4.1.0 an inline
+comparator hardcoded `{ critical: 0, high: 1, normal: 2, low: 3 }` and silently
+ignored both options. This is a **behavior fix** — if you had configured these
+options before 4.1.0 and the order looked wrong, this release is why.
+
+New helpers exposed: `createAnnouncementComparator(order, weights, sequenceById)`
+and `AnnouncementScheduler.queueConfig` getter.
+
+### 4.0.0 — AnnouncementSpotlight visual breaking + Sonner adapter
+
+- `<AnnouncementSpotlight>` cutout switched from soft radial gradient to a 2px
+  inset stroke + directional arrow. Passes WCAG 2.1 AA contrast on white,
+  off-white, and light-gray backgrounds. Opt back into the legacy look with
+  `variant="legacy-spotlight"` (kept until v5).
+- New `@tour-kit/announcements/adapters/sonner` peer-optional adapter for
+  `variant="toast"`. Pass `toastAdapter={sonnerAdapter}` to the provider. No
+  Sonner bytes ship in the main bundle.
+
+### 3.0.0 — Dashboard QA pass
+
+- New `TourEventName` analytics events:
+  `announcement_shown`, `announcement_dismissed`, `announcement_completed`.
+- `<AnnouncementModal>` now forwards `aria-describedby` and renders with
+  `asDialogContent` so Radix's title/description requirements are satisfied
+  — eliminates the `DialogTitle is required` console warning.
+- Install graph: `@tour-kit/analytics` moved from optional peer to direct
+  dependency. No more manual install for analytics events.
+
+## Migration guides
+
+When a release introduces a breaking change, the changeset entry itself contains
+the migration steps. For larger structural changes, see the dedicated guides:
+
+- [Migration overview](/docs/migration) — global cross-package migration
+  notes between major versions.
+
+## Need an older release's entry?
+
+The full file is at
+[`packages/announcements/CHANGELOG.md`](https://github.com/domidex01/tour-kit/blob/main/packages/announcements/CHANGELOG.md).
+Anything older than ~6 months is mirrored to GitHub Releases only and not
+re-rendered here.
+
+---
+
+# ChangelogPage Component
 
 > Render a public changelog page in React and serialize the same entries as RSS 2.0 + JSON Feed 1.1.
 
@@ -22962,6 +22913,142 @@ interface ScheduleStatus {
   reason?: ScheduleInactiveReason;
 }
 ```
+
+---
+
+# Build with LLMs
+
+> Use Claude Code, ChatGPT, Cursor, and other LLM coding assistants to build with userTourKit faster — Claude Code plugin, llms.txt, per-package context files, and MCP.
+
+userTourKit provides machine-readable documentation files following the [llms.txt standard](https://llmstxt.org) for AI coding assistants and LLMs.
+
+## Claude Code Plugin
+
+The fastest way to use userTourKit with Claude Code is the [`user-tour-kit`](https://github.com/domidex01/tour-kit) plugin — it ships **6 task-specific skills** that recognize phrases like *"add an onboarding tour"* or *"build a getting-started checklist"* and walk Claude through the right install + provider setup using the matching `@tour-kit/*` package.
+
+### Install (Claude Code)
+
+Run these inside a Claude Code session (the same prompt where you'd type `/help`) — **not** in your shell. Run them **one at a time**, pressing Enter between commands.
+
+**1. Add the marketplace**
+
+```text
+/plugin marketplace add domidex01/tour-kit
+```
+
+**2. Install the plugin** (after step 1 finishes)
+
+```text
+/plugin install user-tour-kit@user-tour-kit
+```
+
+After install, all 6 skills appear under the `user-tour-kit:` namespace in `/help`.
+
+### Available skills
+
+| Skill | Triggers on |
+|---|---|
+| `/user-tour-kit:add-product-tour` | "add a tour", "user tour", "onboarding walkthrough", "FTUE" |
+| `/user-tour-kit:add-onboarding-checklist` | "onboarding checklist", "getting-started panel", "Stripe-style activation" |
+| `/user-tour-kit:add-product-announcement` | "what's new modal", "in-app changelog", "promotional banner" |
+| `/user-tour-kit:add-feature-hint` | "hotspot", "beacon", "pulsing dot", "single tooltip" |
+| `/user-tour-kit:add-adoption-tracking` | "feature adoption", "feature usage tracking", "Pendo-style adoption" |
+| `/user-tour-kit:add-ai-tour-assistant` | "AI onboarding chat", "tour copilot", "RAG over docs for onboarding" |
+
+### Other AI tools (Cursor, Cline, etc.)
+
+The skills follow the open [Agent Skills](https://agentskills.io) standard. Clone the repo and point your tool at the `user-tour-kit/skills/` directory:
+
+```bash
+git clone https://github.com/domidex01/tour-kit
+# Each subdirectory of tour-kit/user-tour-kit/skills/ is a self-contained
+# SKILL.md that any Agent-Skills-compatible tool can load.
+```
+
+For ChatGPT/Claude.ai/Gemini (no plugin support), use the [llms.txt files](#available-files) below instead.
+
+## Available Files
+
+### llms.txt — Documentation Index
+
+A structured index of all userTourKit documentation pages, following the [llmstxt.org](https://llmstxt.org) standard format. Contains section headings with links and descriptions for every page.
+
+**URL:** [`/llms.txt`](/llms.txt)
+
+### llms-full.txt — Complete Documentation
+
+The full content of all userTourKit documentation in a single file. Use this when you need the AI to have comprehensive knowledge of the entire library.
+
+**URL:** [`/llms-full.txt`](/llms-full.txt)
+
+## Usage with AI Tools
+
+### ChatGPT
+
+Paste the llms-full.txt URL into your conversation:
+
+```
+Read https://usertourkit.com/llms-full.txt and use it as context for userTourKit questions
+```
+
+Or create a Custom GPT with the file as a knowledge source.
+
+### Claude
+
+In Claude Code, reference the documentation:
+
+```
+Fetch https://usertourkit.com/llms.txt to understand the userTourKit API
+```
+
+In Claude.ai, paste the content of llms-full.txt into your conversation for full context.
+
+### Cursor / Windsurf
+
+Add the llms.txt URL to your project's AI context:
+
+1. Download `/llms.txt` to your project root
+2. Reference it in your editor's AI context settings
+3. The AI will use userTourKit's documentation for code suggestions
+
+### Gemini
+
+Google Gemini with grounding can discover userTourKit documentation via search. The llms.txt file and sitemap help Gemini index our docs accurately.
+
+### Programmatic Access
+
+```bash
+# Documentation index (llmstxt.org format)
+curl https://usertourkit.com/llms.txt
+
+# Complete documentation
+curl https://usertourkit.com/llms-full.txt
+```
+
+{/* per-package-context-files */}
+## Per-Package Context Files
+
+For targeted assistance with a specific package, paste the corresponding context file
+into your LLM conversation. Each file contains the complete API surface, type definitions,
+and usage examples — optimized to fit within a single paste.
+
+| Package | Context File | Size |
+|---------|-------------|------|
+| @tour-kit/core | [core.txt](/context/core.txt) | ~243 lines |
+| @tour-kit/react | [react.txt](/context/react.txt) | ~551 lines |
+| @tour-kit/hints | [hints.txt](/context/hints.txt) | ~231 lines |
+| @tour-kit/adoption | [adoption.txt](/context/adoption.txt) | ~438 lines |
+| @tour-kit/analytics | [analytics.txt](/context/analytics.txt) | ~288 lines |
+| @tour-kit/announcements | [announcements.txt](/context/announcements.txt) | ~104 lines |
+| @tour-kit/checklists | [checklists.txt](/context/checklists.txt) | ~264 lines |
+| @tour-kit/media | [media.txt](/context/media.txt) | ~201 lines |
+| @tour-kit/scheduling | [scheduling.txt](/context/scheduling.txt) | ~158 lines |
+
+### How to Use
+
+1. Download the context file for the package you need help with
+2. Paste the file contents at the start of your conversation with ChatGPT, Claude, or Gemini
+3. Ask your question — the LLM will have accurate API knowledge to generate correct code
 
 ---
 
@@ -72594,7 +72681,7 @@ Data verified April 2026. Sources: npm, GitHub, bundlephobia, official docs.
 
 userTourKit ships 10 composable packages under a single MIT license with no asterisks. The core weighs under 8KB gzipped. You install only the packages you need -- tours, hints, checklists, announcements, analytics, scheduling -- so your production bundle carries zero dead code. The headless architecture renders with your existing components (shadcn/ui, Radix, Tailwind, anything) rather than forcing its own opinions.
 
-**The cost picture:** MIT license means unrestricted commercial use. The Pro tier ($99 one-time) unlocks adoption tracking, analytics, announcements, checklists, media, and scheduling. Unlike SaaS models, there's no monthly bill that grows with your team. The trade-off: it's a younger project, so community resources (Stack Overflow threads, blog tutorials) are thinner than React Joyride's. You're investing in a smaller ecosystem with a bet on its growth trajectory.
+**The cost picture:** MIT license means unrestricted commercial use. The [Pro tier ($99 one-time)](/pricing) unlocks adoption tracking, analytics, announcements, checklists, media, and scheduling. Unlike SaaS models, there's no monthly bill that grows with your team. The trade-off: it's a younger project, so community resources (Stack Overflow threads, blog tutorials) are thinner than React Joyride's. You're investing in a smaller ecosystem with a bet on its growth trajectory.
 
 **Strengths:**
 - Zero licensing risk: MIT with no commercial restrictions, no copyleft clauses
@@ -81242,7 +81329,7 @@ Year-one costs tell a misleading story because they hide the maintenance multipl
     <tr>
       <td>License / subscription</td>
       <td>$0</td>
-      <td>$0 (MIT) or $99 one-time (Tour Kit Pro)</td>
+      <td>$0 (MIT) or [$99 one-time (Tour Kit Pro)](/pricing)</td>
       <td>$2,988-$10,548/yr (Appcues) or $15K-$48K/yr (Pendo)</td>
     </tr>
     <tr>
@@ -105182,7 +105269,7 @@ Tour Kit handles guides and onboarding, not analytics. It fires typed event call
 
 ### How much does a Pendo migration save?
 
-A mid-market Pendo contract runs $40K-$80K per year with 5-20% annual renewal increases. Tour Kit's core packages are MIT-licensed and free. Pro features (adoption tracking, scheduling, surveys) are a one-time $99 purchase. Even accounting for 40 hours of developer time at $150/hour ($6,000), the migration pays for itself within the first quarter.
+A mid-market Pendo contract runs $40K-$80K per year with 5-20% annual renewal increases. Tour Kit's core packages are MIT-licensed and free. [Pro features](/pricing) (adoption tracking, scheduling, surveys) are a one-time $99 purchase. Even accounting for 40 hours of developer time at $150/hour ($6,000), the migration pays for itself within the first quarter.
 
 ### What about Pendo's mobile SDK?
 
@@ -105636,7 +105723,7 @@ React Joyride renders pulsing beacon dots before showing each step. Tour Kit doe
 
 ### Is Tour Kit free to use?
 
-Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT licensed and free. Extended packages like analytics, checklists, and announcements require a Pro license at $99 one-time. The free tier covers everything needed for a standard React Joyride migration.
+Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT licensed and free. Extended packages like analytics, checklists, and announcements require a [Pro license at $99 one-time](/pricing). The free tier covers everything needed for a standard React Joyride migration.
 
 ---
 
@@ -105727,7 +105814,7 @@ Google [completely prohibits AGPL-licensed software internally](https://www.open
 
 The licensing situation gets confusing because `react-shepherd` is published under MIT. But it depends on `shepherd.js` core, which is AGPL-3.0. AGPL obligations cascade through dependencies. A [FossID analysis](https://fossid.com/articles/how-react-component-became-licensing-time-bomb/) documented how React component libraries become "licensing time bombs" through exactly this pattern: an MIT wrapper around a restrictively licensed core.
 
-Tour Kit's entire codebase (all 10 packages) uses the MIT license. No dual licensing, no commercial tiers for the core functionality. Tour Kit Pro exists at $99 one-time for extended packages, but the core tour engine is MIT forever.
+Tour Kit's entire codebase (all 10 packages) uses the MIT license. No dual licensing, no commercial tiers for the core functionality. [Tour Kit Pro](/pricing) exists at $99 one-time for extended packages, but the core tour engine is MIT forever.
 
 ### The React 19 compatibility gap
 
@@ -115024,7 +115111,7 @@ Tour Kit uses open core. Three packages are MIT-licensed and always will be: `@t
 
 Seven extended packages are proprietary and require a Pro license: adoption tracking, analytics, announcements, checklists, media embedding, scheduling, and surveys. These are features a solo developer building a side project doesn't need. They're features a product team onboarding 10,000 users per month does need.
 
-The price is $99 one-time. Not per seat, not per month. One payment, lifetime access, all future updates.
+The price is [$99 one-time](/pricing). Not per seat, not per month. One payment, lifetime access, all future updates.
 
 Why one-time instead of subscription? Because the library runs in your bundle, not on my server. There's no ongoing cloud cost for me to cover. Charging monthly for code that ships statically felt dishonest.
 
@@ -147452,7 +147539,7 @@ Money matters. These articles break down the real costs, not just sticker prices
 | [Cheapest product tour tool (2026)](/blog/cheapest-product-tour-tool-2026) | Price as the primary filter |
 | [Free trial vs freemium onboarding](/blog/free-trial-vs-freemium-onboarding) | Onboarding strategy, not tour tools |
 
-Tour Kit's pricing model is simple. The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed and free forever. The seven extended packages require a one-time $99 Pro license. No monthly fees. No per-MAU pricing.
+Tour Kit's pricing model is simple. The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed and free forever. The seven extended packages require a one-time [$99 Pro license](/pricing). No monthly fees. No per-MAU pricing.
 
 ## How to choose the right comparison
 
@@ -152441,7 +152528,7 @@ The response includes `status`, `limit_activations`, `usage`, and `expires_at`. 
 
 ## The honest cost breakdown
 
-We built Tour Kit as a solo developer project, so every dollar in fees matters. Here's what Polar actually costs at different revenue levels for a $99 one-time license:
+We built Tour Kit as a solo developer project, so every dollar in fees matters. Here's what Polar actually costs at different revenue levels for a [$99 one-time license](/pricing):
 
 <table>
 <thead>

@@ -65,3 +65,12 @@ function App() {
   <App />
 </TourProvider>
 ```
+
+## Related
+
+- [`<TourKitProvider>`](/docs/core/providers/tour-kit-provider) — global wrapper for multiple tours; nest `<TourProvider>` inside.
+- [`useTour`](/docs/core/hooks/use-tour) — read tour state and call actions from descendants of this provider.
+- [`useTourContext`](/docs/core/hooks/use-tour-context) — low-level context accessor when you need more than `useTour` exposes.
+- [Diagnostic engine](/docs/core/diagnostic) — set `diagnose` on this provider to see why a tour didn't fire.
+- [Tour types reference](/docs/core/types/tour-types) — every field on the `tour` prop.
+- [Persistence guide](/docs/guides/persistence) — configure how completion state survives reloads.

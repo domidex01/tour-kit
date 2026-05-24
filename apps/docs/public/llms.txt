@@ -1,4 +1,4 @@
-# userTourKit v0.14.0 — Generated 2026-05-22T08:01:18Z
+# userTourKit v1.0.0 — Generated 2026-05-24T04:42:02Z
 
 # userTourKit
 
@@ -282,7 +282,7 @@
 
 ## Build with LLMs
 
-- [Build with LLMs](https://usertourkit.com/docs/build-with-llms): Use Claude Code, ChatGPT, Cursor, and other LLM coding assistants to build with userTourKit faster — Claude Code plugin, llms.txt, per-package context files, and MCP
+- [Build with LLMs](https://usertourkit.com/docs/build-with-llms): Use Claude Code, ChatGPT, Cursor, and other LLM coding assistants to build with userTourKit faster — Claude Code plugin, llms.txt, per-package context files, and MCP.
 
 ## Index
 

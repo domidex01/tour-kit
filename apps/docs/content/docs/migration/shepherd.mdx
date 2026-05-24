@@ -219,3 +219,12 @@ npx tour-kit-migrate --from shepherd --dry-run ./src
 
 If the dry-run prints clean diffs and exits 0, run again without `--dry-run`
 to write the changes.
+
+## Related
+
+- [Migrate from react-joyride](/docs/migration/joyride) — the JSX + `useJoyride` pattern.
+- [Migrate from driver.js](/docs/migration/driver) — the function-call pattern (`driver({...}).drive()`).
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — register the migrated tour shape here.
+- [`<TourCard>`](/docs/react/components/tour-card) — the headless slot that replaces shepherd's `buttons` array.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `tour.next()` / `.back()` / `.show()`.
+- [Quick start](/docs/getting-started/quick-start) — wire the migrated tour into a working app.

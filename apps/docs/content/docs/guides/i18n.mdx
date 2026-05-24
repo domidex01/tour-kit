@@ -160,3 +160,11 @@ For provider-scoped tests, render under `<LocaleProvider>` with a stub `messages
 <Callout type="info" title="One provider, one tree">
 Mount `<LocaleProvider>` once at or above the deepest Tour Kit consumer. Multiple nested providers compose (innermost wins per key) but add useless re-render cost — prefer a single root-level provider.
 </Callout>
+
+## Related
+
+- [`useDirection`](/docs/core/hooks/use-direction) — read the RTL/LTR direction `<LocaleProvider>` resolves.
+- [`<TourKitProvider>`](/docs/core/providers/tour-kit-provider) — set `dir` here when not using `<LocaleProvider>`'s automatic resolution.
+- [Audience segmentation](/docs/guides/segmentation) — pair localized copy with audience-targeted tours.
+- [Theme variations](/docs/guides/theme-variations) — locale-driven theme switching is one matcher path.
+- [Helper utilities](/docs/core/utilities/helpers) — `mirrorSide`, `mirrorAlignment`, and `mirrorPlacementForRTL`.

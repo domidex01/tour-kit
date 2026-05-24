@@ -290,3 +290,12 @@ npx tour-kit-migrate --from driver --dry-run ./src
 
 If the dry-run prints clean diffs and exits 0, run again without `--dry-run`
 to write the changes.
+
+## Related
+
+- [Migrate from react-joyride](/docs/migration/joyride) — the JSX + `useJoyride` pattern.
+- [Migrate from shepherd.js](/docs/migration/shepherd) — the class-chain pattern (`new Shepherd.Tour`).
+- [`<Tour>`](/docs/react/components/tour) and [`<TourStep>`](/docs/react/components/tour-step) — the destination shape your migrated code lands on.
+- [`<TourOverlay>`](/docs/react/components/tour-overlay) — where driver's spotlight padding / radius config goes.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `d.moveNext()` / `.movePrevious()` / `.moveTo()`.
+- [`<HintHotspot>`](/docs/hints) — single-step replacement for driver's `d.highlight()`.

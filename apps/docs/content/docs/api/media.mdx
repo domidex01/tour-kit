@@ -9,11 +9,13 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 Complete API reference for the media package. This package provides video, GIF, and Lottie animation embeds.
 
+For prose-style docs and recipes, see the [`@tour-kit/media` package overview](/docs/media), or jump to [components](/docs/media/components), [headless primitives](/docs/media/headless), [hooks](/docs/media/hooks), [utilities](/docs/media/utilities), or [types](/docs/media/types).
+
 ---
 
 ## Main Component
 
-### TourMedia
+### [TourMedia](/docs/media/components/tour-media)
 
 Auto-detecting media component.
 
@@ -54,7 +56,7 @@ import { TourMedia } from '@tour-kit/media';
 
 ## Embed Components
 
-### YouTubeEmbed
+### [YouTubeEmbed](/docs/media/components/youtube-embed)
 
 YouTube iframe embed.
 
@@ -77,7 +79,7 @@ import { YouTubeEmbed } from '@tour-kit/media';
 | `startTime` | `number` | Start time (seconds) |
 | `controls` | `boolean` | Show controls |
 
-### VimeoEmbed
+### [VimeoEmbed](/docs/media/components/vimeo-embed)
 
 Vimeo iframe embed.
 
@@ -91,7 +93,7 @@ import { VimeoEmbed } from '@tour-kit/media';
 />
 ```
 
-### LoomEmbed
+### [LoomEmbed](/docs/media/components/loom-embed)
 
 Loom iframe embed.
 
@@ -105,7 +107,7 @@ import { LoomEmbed } from '@tour-kit/media';
 />
 ```
 
-### WistiaEmbed
+### [WistiaEmbed](/docs/media/components/wistia-embed)
 
 Wistia iframe embed.
 
@@ -118,7 +120,7 @@ import { WistiaEmbed } from '@tour-kit/media';
 />
 ```
 
-### NativeVideo
+### [NativeVideo](/docs/media/components/native-video)
 
 HTML5 video element.
 
@@ -135,7 +137,7 @@ import { NativeVideo } from '@tour-kit/media';
 />
 ```
 
-### GifPlayer
+### [GifPlayer](/docs/media/components/gif-player)
 
 GIF with play/pause controls.
 
@@ -157,7 +159,7 @@ import { GifPlayer } from '@tour-kit/media';
 | `playOnHover` | `boolean` | Play on hover |
 | `showControls` | `boolean` | Show play/pause |
 
-### LottiePlayer
+### [LottiePlayer](/docs/media/components/lottie-player)
 
 Lottie animation player.
 
@@ -185,7 +187,7 @@ Lottie requires optional peer dependency: `@lottiefiles/react-lottie-player`
 
 ---
 
-## Headless Components
+## [Headless Components](/docs/media/headless/media-headless)
 
 ```tsx
 import { MediaHeadless } from '@tour-kit/media/headless';
@@ -216,7 +218,7 @@ import { MediaHeadless } from '@tour-kit/media/headless';
 
 ## Hooks
 
-### useMediaEvents
+### [useMediaEvents](/docs/media/hooks/use-media-events)
 
 Hook for media event handling.
 
@@ -238,7 +240,7 @@ const {
 });
 ```
 
-### usePrefersReducedMotion
+### [usePrefersReducedMotion](/docs/media/hooks/use-prefers-reduced-motion)
 
 Hook for motion preference.
 
@@ -248,7 +250,7 @@ import { usePrefersReducedMotion } from '@tour-kit/media';
 const prefersReducedMotion = usePrefersReducedMotion();
 ```
 
-### useResponsiveSource
+### [useResponsiveSource](/docs/media/hooks/use-responsive-source)
 
 Hook for responsive source selection.
 
@@ -265,7 +267,7 @@ const source = useResponsiveSource([
 
 ## Utilities
 
-### URL Detection
+### [URL Detection](/docs/media/utilities/url-parsing)
 
 ```tsx
 import {
@@ -301,7 +303,7 @@ const id = extractYouTubeId('https://youtu.be/abc123');
 // 'abc123'
 ```
 
-### Embed URL Builders
+### [Embed URL Builders](/docs/media/utilities/embed-urls)
 
 ```tsx
 import {
@@ -415,3 +417,12 @@ interface ResponsiveSource {
   type?: string;
 }
 ```
+
+---
+
+## See also
+
+- [`@tour-kit/media` package overview](/docs/media) — prose docs and recipes for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Media types reference](/docs/media/types) — every `MediaType`, `CaptionTrack`, and `TourMediaConfig` field.
+- [Reduced motion guide](/docs/guides/reduced-motion) — how `reducedMotionFallback` is honored.

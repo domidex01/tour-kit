@@ -225,3 +225,11 @@ class TourValidationError extends Error {
 
 function validateTour(tour: Tour): void;
 ```
+
+## Related
+
+- [Branching tours guide](/docs/guides/branching) — visible decision points, the counterpart to hidden steps.
+- [`<TourStep>` reference](/docs/react/components/tour-step) — the component you mark with `kind: 'hidden'`.
+- [Imperative control guide](/docs/guides/imperative-control) — drive `next()` from `onNext` handlers.
+- [Diagnostic engine](/docs/core/diagnostic) — surfaces `STRUCTURE_INVALID` when hidden-step validation fails.
+- [Step types reference](/docs/core/types/step-types) — every `TourStep` field including `kind` and `onEnter`.

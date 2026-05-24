@@ -17,11 +17,13 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 Complete API reference for the adoption package. This package provides feature adoption tracking with automatic nudging.
 
+For prose-style guides and recipes, see the [`@tour-kit/adoption` package overview](/docs/adoption), or jump to a specific [component](/docs/adoption/components), [hook](/docs/adoption/hooks), [provider](/docs/adoption/providers), or [dashboard widget](/docs/adoption/dashboard).
+
 ---
 
 ## Providers
 
-### AdoptionProvider
+### [AdoptionProvider](/docs/adoption/providers/adoption-provider)
 
 Provider for feature adoption tracking.
 
@@ -54,7 +56,7 @@ import { AdoptionProvider } from '@tour-kit/adoption';
 
 ## Hooks
 
-### useFeature
+### [useFeature](/docs/adoption/hooks/use-feature)
 
 Hook for tracking single feature adoption.
 
@@ -80,7 +82,7 @@ const {
 | `useCount` | `number` | Number of times feature was used |
 | `trackUsage` | `() => void` | Manually track a usage |
 
-### useAdoptionStats
+### [useAdoptionStats](/docs/adoption/hooks/use-adoption-stats)
 
 Hook for aggregate adoption statistics.
 
@@ -104,7 +106,7 @@ const {
 | `byCategory` | `Record<string, CategoryStats>` | Stats grouped by category |
 | `byStatus` | `Record<AdoptionStatus, number>` | Counts by status |
 
-### useNudge
+### [useNudge](/docs/adoption/hooks/use-nudge)
 
 Hook for controlling nudge queue.
 
@@ -128,7 +130,7 @@ const {
 | `dismiss` | `() => void` | Dismiss current nudge |
 | `skip` | `() => void` | Skip current nudge |
 
-### useAdoptionAnalytics
+### [useAdoptionAnalytics](/docs/adoption/analytics)
 
 Hook for analytics integration.
 
@@ -142,7 +144,7 @@ const analytics = useAdoptionAnalytics();
 
 ## Components
 
-### AdoptionNudge
+### [AdoptionNudge](/docs/adoption/components/adoption-nudge)
 
 Auto-shows nudges for unadopted features.
 
@@ -165,7 +167,7 @@ import { AdoptionNudge } from '@tour-kit/adoption';
 | `render` | `(props) => ReactNode` | Custom render function |
 | `asChild` | `boolean` | Merge props to child element |
 
-### FeatureButton
+### [FeatureButton](/docs/adoption/components/feature-button)
 
 Button with automatic usage tracking.
 
@@ -187,7 +189,7 @@ import { FeatureButton } from '@tour-kit/adoption';
 | `onClick` | `() => void` | Click handler |
 | `variant` | `string` | Button variant |
 
-### IfNotAdopted / IfAdopted
+### [IfNotAdopted / IfAdopted](/docs/adoption/components/conditional)
 
 Conditional rendering based on adoption status.
 
@@ -203,7 +205,7 @@ import { IfNotAdopted, IfAdopted } from '@tour-kit/adoption';
 </IfAdopted>
 ```
 
-### NewFeatureBadge
+### [NewFeatureBadge](/docs/adoption/components/new-feature-badge)
 
 Badge component for new features.
 
@@ -226,7 +228,7 @@ import { NewFeatureBadge } from '@tour-kit/adoption';
 
 ## Dashboard Components
 
-### AdoptionDashboard
+### [AdoptionDashboard](/docs/adoption/dashboard/adoption-dashboard)
 
 Full admin dashboard for adoption metrics.
 
@@ -236,7 +238,7 @@ import { AdoptionDashboard } from '@tour-kit/adoption';
 <AdoptionDashboard features={features} />
 ```
 
-### AdoptionStatsGrid
+### [AdoptionStatsGrid](/docs/adoption/dashboard/stats)
 
 Grid of stat cards.
 
@@ -246,7 +248,7 @@ import { AdoptionStatsGrid } from '@tour-kit/adoption';
 <AdoptionStatsGrid />
 ```
 
-### AdoptionTable
+### [AdoptionTable](/docs/adoption/dashboard/table)
 
 Sortable, filterable table of features.
 
@@ -260,7 +262,7 @@ import { AdoptionTable } from '@tour-kit/adoption';
 />
 ```
 
-### AdoptionCategoryChart
+### [AdoptionCategoryChart](/docs/adoption/dashboard/charts)
 
 Chart showing adoption by category.
 
@@ -272,7 +274,7 @@ import { AdoptionCategoryChart } from '@tour-kit/adoption';
 
 ---
 
-## Types
+## [Types](/docs/adoption/types)
 
 ### Feature
 
@@ -317,3 +319,12 @@ interface FeatureUsage {
   adoptedAt: Date | null;
 }
 ```
+
+---
+
+## See also
+
+- [`@tour-kit/adoption` package overview](/docs/adoption) — prose docs, recipes, and patterns for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Analytics integration](/docs/adoption/analytics) — wire adoption events into `@tour-kit/analytics`.
+- [Adoption analytics guide](/docs/guides/adoption-analytics) — funnel and retention patterns built on these primitives.

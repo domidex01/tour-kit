@@ -173,8 +173,11 @@ If your dashboard counts "real user views," filter `metadata.trigger !== 'forced
 
 ---
 
-## Related guides
+## Related
 
-- [Animations](./animations) — frequency rules and cooldowns that `forceShow` bypasses
-- [Segmentation](./segmentation) — audience targeting that `forceShow` ignores
-- [Analytics integration](./analytics-integration) — filtering forced previews from real-user telemetry
+- [`useTour`](/docs/core/hooks/use-tour) — the in-tree hook `useTourActions` mirrors via the singleton registry.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — registers tours into the registry on mount.
+- [`<AnnouncementsProvider>`](/docs/announcements/providers/announcements-provider) and [`useAnnouncement`](/docs/announcements/hooks/use-announcement) — provider and hook backing `forceShow`.
+- [Audience segmentation](/docs/guides/segmentation) — gates that `forceShow` bypasses for admin previews.
+- [Analytics integration](/docs/guides/analytics-integration) — filter `metadata.trigger === 'forced'` from real-user metrics.
+- [Frequency configuration](/docs/announcements/configuration/frequency) — rules that `forceShow` ignores.

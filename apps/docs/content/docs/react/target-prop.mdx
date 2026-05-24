@@ -132,3 +132,11 @@ When the rewrite is ambiguous (no matching ref in scope), the codemod leaves
 the attribute untouched and inserts a `TODO(tour-kit): target-to-ref` comment
 above the JSX element. Re-running the codemod on a migrated file produces a
 zero-diff second pass.
+
+## Related
+
+- [`<TourStep>`](/docs/react/components/tour-step) — the component whose `target` prop this page documents.
+- [`useElementPosition`](/docs/core/hooks/use-element-position) — the hook the runtime resolver delegates to.
+- [Hidden steps guide](/docs/guides/hidden-steps) — `waitForTarget` patterns for asynchronously-mounted nodes.
+- [React types reference](/docs/react/types) — `TourTarget` and related public types.
+- [Step types reference](/docs/core/types/step-types) — every other field on `TourStep`.
