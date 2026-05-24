@@ -1,16 +1,16 @@
 # Docs internal-link graph audit
 
-Scanned **274** MDX pages under `content/docs`.
+Scanned **282** MDX pages under `content/docs`.
 
 ## Top-line metrics
 
-- Total docs→docs edges: **1247**
-- Avg outbound docs-links per page: **4.55**
-- Avg inbound docs-links per page: **4.55**
-- Orphans (0 inbound): **0** (0.0%)
+- Total docs→docs edges: **1276**
+- Avg outbound docs-links per page: **4.52**
+- Avg inbound docs-links per page: **4.52**
+- Orphans (0 inbound): **3** (1.1%)
 - Dead-ends (0 outbound): **0** (0.0%)
-- Low-inbound (1 inbound): **35**
-- Natural-link candidates: **1002** across **256** pages
+- Low-inbound (1 inbound): **36**
+- Natural-link candidates: **1015** across **262** pages
 
 ## Per-section health
 
@@ -20,21 +20,21 @@ Scanned **274** MDX pages under `content/docs`.
 | adoption | 19 | 0 | 0 | 3.53 | 4.26 |
 | ai | 8 | 0 | 0 | 3.38 | 4.25 |
 | analytics | 11 | 0 | 0 | 3.09 | 4.45 |
-| announcements | 25 | 0 | 0 | 4.48 | 5.28 |
-| api | 12 | 0 | 0 | 16.83 | 3.75 |
+| announcements | 27 | 2 | 0 | 4.3 | 4.96 |
+| api | 12 | 0 | 0 | 17.5 | 3.75 |
 | build-with-llms | 1 | 0 | 0 | 1 | 1 |
 | checklists | 21 | 0 | 0 | 3.05 | 4 |
-| core | 33 | 0 | 0 | 4 | 5.67 |
+| core | 37 | 0 | 0 | 3.92 | 5.43 |
 | examples | 7 | 0 | 0 | 2.86 | 2.57 |
 | getting-started | 4 | 0 | 0 | 5.25 | 5.5 |
-| guides | 24 | 0 | 0 | 4.33 | 4.63 |
+| guides | 24 | 0 | 0 | 4.33 | 4.96 |
 | hints | 10 | 0 | 0 | 3.7 | 4.8 |
 | licensing | 2 | 0 | 0 | 8.5 | 3 |
-| media | 17 | 0 | 0 | 4 | 5.18 |
+| media | 17 | 0 | 0 | 4 | 5.24 |
 | migration | 3 | 0 | 0 | 6.67 | 6 |
-| react | 26 | 0 | 0 | 5.46 | 5.92 |
+| react | 27 | 0 | 0 | 5.37 | 5.85 |
 | scheduling | 17 | 0 | 0 | 3.35 | 4.41 |
-| surveys | 29 | 0 | 0 | 3.07 | 3.03 |
+| surveys | 30 | 1 | 0 | 3 | 2.93 |
 | troubleshooting | 1 | 0 | 0 | 6 | 3 |
 | use-cases | 3 | 0 | 0 | 5 | 1 |
 
@@ -52,16 +52,16 @@ Scanned **274** MDX pages under `content/docs`.
 | [/docs/scheduling/types](/docs/scheduling/types) | 14 |
 | [/docs/core/providers/tour-provider](/docs/core/providers/tour-provider) | 13 |
 | [/docs/react/components/tour-overlay](/docs/react/components/tour-overlay) | 13 |
+| [/docs/react/components/tour](/docs/react/components/tour) | 13 |
 | [/docs/surveys/types](/docs/surveys/types) | 13 |
-| [/docs/react/components/tour](/docs/react/components/tour) | 12 |
 | [/docs/announcements/providers/announcements-provider](/docs/announcements/providers/announcements-provider) | 11 |
 | [/docs/api](/docs/api) | 11 |
 | [/docs/core/hooks/use-spotlight](/docs/core/hooks/use-spotlight) | 11 |
 | [/docs/react/components/tour-step](/docs/react/components/tour-step) | 11 |
 | [/docs/analytics/plugins](/docs/analytics/plugins) | 10 |
 | [/docs/analytics/providers](/docs/analytics/providers) | 10 |
+| [/docs/core/diagnostic](/docs/core/diagnostic) | 10 |
 | [/docs/guides/unified-slot](/docs/guides/unified-slot) | 10 |
-| [/docs/hints/components](/docs/hints/components) | 10 |
 
 ## Orphan pages (0 inbound docs links)
 
@@ -69,6 +69,9 @@ Pages no other doc page points to. The section index page is usually the right h
 
 | Section | URL | Outbound |
 | --- | --- | ---: |
+| announcements | [/docs/announcements/hooks/use-filtered-announcements](/docs/announcements/hooks/use-filtered-announcements) | 2 |
+| announcements | [/docs/announcements/hooks/use-resolved-text](/docs/announcements/hooks/use-resolved-text) | 2 |
+| surveys | [/docs/surveys/components/question-media](/docs/surveys/components/question-media) | 1 |
 
 ## Dead-end pages (0 outbound docs links)
 
@@ -493,14 +496,14 @@ Pages whose prose mentions API symbols (hooks, components, packages) that are no
 | `Examples` | [/docs/react/headless/examples](/docs/react/headless/examples) | …y reminders - Recurring promotions ### Examples ### How It Works The interval starts from the last time… |
 | `Recurring` | [/docs/scheduling/utilities/recurring](/docs/scheduling/utilities/recurring) | …tes - Weekly tips - Monthly reminders - Recurring promotions ### Examples ### How It Works The interval… |
 
-### `/docs/api/core` (7 candidates)
+### `/docs/api/adoption` (7 candidates)
 
 | Symbol mention | Suggested link | Excerpt |
 | --- | --- | --- |
-| `Progress` | [/docs/checklists/utilities/progress](/docs/checklists/utilities/progress) | …n last step \| \| `progress` \| `number` \| Progress percentage (0-100) \| \| `isLoading` \| `boolean` \| Whether to… |
-| `progress` | [/docs/checklists/utilities/progress](/docs/checklists/utilities/progress) | …\| `boolean` \| Whether on last step \| \| `progress` \| `number` \| Progress percentage (0-100) \| \| `isLoading` \|… |
-| `usePrefersReducedMotion` | [/docs/media/hooks/use-prefers-reduced-motion](/docs/media/hooks/use-prefers-reduced-motion) | …responsive media query tracking. ### usePrefersReducedMotion Hook for motion preference detection. ### [useAdvanceOn… |
-| `TourStep` | [/docs/react/components/tour-step](/docs/react/components/tour-step) | …is skipped \| \| `onStepChange` \| `(step: TourStep, index: number) => void` \| Called on step change \| --- ##… |
-| `Tour` | [/docs/react/components/tour](/docs/react/components/tour) | …----\|------\|-------------\| \| `tours` \| `Tour[]` \| Array of tour definitions \| \| `router` \| `RouterAdapte… |
-| `@tour-kit/react` | [/docs/react](/docs/react) | …pi) — browse other package references (`@tour-kit/react`, `@tour-kit/hints`, …). - [Quick start](/docs/getting-star… |
-| `@tour-kit/hints` | [/docs/hints](/docs/hints) | …package references (`@tour-kit/react`, `@tour-kit/hints`, …). - [Quick start](/docs/getting-started/quick-start) —… |
+| `useFunnelData` | [/docs/adoption/hooks/use-funnel-data](/docs/adoption/hooks/use-funnel-data) | …s ### UseFunnelDataInput Used by `useFunnelData()` to derive a current-state funnel from `useAdoptionStats`… |
+| `Custom` | [/docs/analytics/plugins/custom](/docs/analytics/plugins/custom) | …\| \| `render` \| `(props) => ReactNode` \| Custom render function \| \| `asChild` \| `boolean` \| Merge props to… |
+| `Position` | [/docs/core/utilities/position](/docs/core/utilities/position) | …------------\| \| `position` \| `string` \| Position of nudge \| \| `delay` \| `number` \| Delay before showing (ms)… |
+| `position` | [/docs/core/utilities/position](/docs/core/utilities/position) | …tion \| \|------\|------\|-------------\| \| `position` \| `string` \| Position of nudge \| \| `delay` \| `number` \| De… |
+| `Storage` | [/docs/core/utilities/storage](/docs/core/utilities/storage) | …tions \| \| `storage` \| `StorageConfig` \| Storage configuration \| \| `nudge` \| `NudgeConfig` \| Nudge configura… |
+| `storage` | [/docs/core/utilities/storage](/docs/core/utilities/storage) | …[]` \| Array of feature definitions \| \| `storage` \| `StorageConfig` \| Storage configuration \| \| `nudge` \| `N… |
+| `@tour-kit/analytics` | [/docs/analytics](/docs/analytics) | …analytics) — wire adoption events into `@tour-kit/analytics`. - [Adoption analytics guide](/docs/guides/adoption-analyt… |

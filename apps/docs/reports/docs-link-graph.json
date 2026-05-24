@@ -732,9 +732,10 @@
       "outbound": [
         "/docs/announcements/changelog-component"
       ],
-      "inboundCount": 1,
+      "inboundCount": 2,
       "inbound": [
-        "/docs/announcements/changelog-component"
+        "/docs/announcements/changelog-component",
+        "/docs/api/announcements"
       ]
     },
     {
@@ -1159,6 +1160,30 @@
       ]
     },
     {
+      "url": "/docs/announcements/hooks/use-filtered-announcements",
+      "file": "content/docs/announcements/hooks/use-filtered-announcements.mdx",
+      "section": "announcements",
+      "title": "useFilteredAnnouncements",
+      "outbound": [
+        "/docs/guides/segmentation",
+        "/docs/announcements/types"
+      ],
+      "inboundCount": 0,
+      "inbound": []
+    },
+    {
+      "url": "/docs/announcements/hooks/use-resolved-text",
+      "file": "content/docs/announcements/hooks/use-resolved-text.mdx",
+      "section": "announcements",
+      "title": "useResolvedText",
+      "outbound": [
+        "/docs/core/hooks/use-resolved-text",
+        "/docs/core/hooks/use-resolve-localized-text"
+      ],
+      "inboundCount": 0,
+      "inbound": []
+    },
+    {
       "url": "/docs/announcements",
       "file": "content/docs/announcements/index.mdx",
       "section": "announcements",
@@ -1222,10 +1247,11 @@
         "/docs/announcements/hooks/use-announcement",
         "/docs/announcements/headless"
       ],
-      "inboundCount": 3,
+      "inboundCount": 4,
       "inbound": [
         "/docs/announcements/components/variants",
         "/docs/announcements/configuration/queue",
+        "/docs/announcements/hooks/use-filtered-announcements",
         "/docs/announcements"
       ]
     },
@@ -1334,6 +1360,7 @@
         "/docs/announcements/headless/toast",
         "/docs/announcements/headless/spotlight",
         "/docs/announcements/configuration/audience",
+        "/docs/announcements/changelog",
         "/docs/api",
         "/docs/guides/announcements-scheduling",
         "/docs/announcements/configuration/queue"
@@ -1407,6 +1434,11 @@
         "/docs/core/utilities/logger",
         "/docs/core/types/config-types",
         "/docs/core/types/tour-types",
+        "/docs/core/hooks/use-locale",
+        "/docs/guides/i18n",
+        "/docs/guides/segmentation",
+        "/docs/core/hooks/use-segmentation-context",
+        "/docs/core/diagnostic",
         "/docs/api",
         "/docs/getting-started/quick-start",
         "/docs/getting-started/typescript"
@@ -1563,6 +1595,8 @@
         "/docs/react/adapters/next-app-router",
         "/docs/react/adapters/next-pages-router",
         "/docs/react/adapters/react-router",
+        "/docs/react/hooks/use-tour-registry-context",
+        "/docs/guides/theme-variations",
         "/docs/api/core",
         "/docs/api",
         "/docs/getting-started/quick-start",
@@ -2011,8 +2045,9 @@
         "/docs/guides/troubleshooting",
         "/docs/troubleshooting"
       ],
-      "inboundCount": 9,
+      "inboundCount": 10,
       "inbound": [
+        "/docs/api/core",
         "/docs/core",
         "/docs/core/providers/tour-provider",
         "/docs/core/schemas",
@@ -2143,6 +2178,24 @@
       ]
     },
     {
+      "url": "/docs/core/hooks/use-locale",
+      "file": "content/docs/core/hooks/use-locale.mdx",
+      "section": "core",
+      "title": "useLocale",
+      "outbound": [
+        "/docs/core/types",
+        "/docs/core/hooks/use-resolved-text",
+        "/docs/core/hooks/use-resolve-localized-text",
+        "/docs/guides/i18n"
+      ],
+      "inboundCount": 3,
+      "inbound": [
+        "/docs/api/core",
+        "/docs/core/hooks/use-resolve-localized-text",
+        "/docs/core/hooks/use-resolved-text"
+      ]
+    },
+    {
       "url": "/docs/core/hooks/use-media-query",
       "file": "content/docs/core/hooks/use-media-query.mdx",
       "section": "core",
@@ -2183,6 +2236,42 @@
       ]
     },
     {
+      "url": "/docs/core/hooks/use-resolve-localized-text",
+      "file": "content/docs/core/hooks/use-resolve-localized-text.mdx",
+      "section": "core",
+      "title": "useResolveLocalizedText",
+      "outbound": [
+        "/docs/core/hooks/use-resolved-text",
+        "/docs/core/hooks/use-locale",
+        "/docs/guides/i18n"
+      ],
+      "inboundCount": 4,
+      "inbound": [
+        "/docs/announcements/hooks/use-resolved-text",
+        "/docs/core/hooks/use-locale",
+        "/docs/core/hooks/use-resolved-text",
+        "/docs/core/hooks/use-segmentation-context"
+      ]
+    },
+    {
+      "url": "/docs/core/hooks/use-resolved-text",
+      "file": "content/docs/core/hooks/use-resolved-text.mdx",
+      "section": "core",
+      "title": "useResolvedText",
+      "outbound": [
+        "/docs/core/hooks/use-resolve-localized-text",
+        "/docs/core/hooks/use-locale",
+        "/docs/guides/i18n"
+      ],
+      "inboundCount": 4,
+      "inbound": [
+        "/docs/announcements/hooks/use-resolved-text",
+        "/docs/core/hooks/use-locale",
+        "/docs/core/hooks/use-resolve-localized-text",
+        "/docs/core/hooks/use-segmentation-context"
+      ]
+    },
+    {
       "url": "/docs/core/hooks/use-route-persistence",
       "file": "content/docs/core/hooks/use-route-persistence.mdx",
       "section": "core",
@@ -2201,6 +2290,21 @@
         "/docs/core/utilities/storage",
         "/docs/guides/persistence",
         "/docs/react/hooks/use-tour-route"
+      ]
+    },
+    {
+      "url": "/docs/core/hooks/use-segmentation-context",
+      "file": "content/docs/core/hooks/use-segmentation-context.mdx",
+      "section": "core",
+      "title": "useSegmentationContext",
+      "outbound": [
+        "/docs/core/hooks/use-resolved-text",
+        "/docs/core/hooks/use-resolve-localized-text",
+        "/docs/guides/segmentation"
+      ],
+      "inboundCount": 1,
+      "inbound": [
+        "/docs/api/core"
       ]
     },
     {
@@ -2450,9 +2554,10 @@
         "/docs/core/types/step-types",
         "/docs/core/types/config-types"
       ],
-      "inboundCount": 6,
+      "inboundCount": 7,
       "inbound": [
         "/docs/api/core",
+        "/docs/core/hooks/use-locale",
         "/docs/core/hooks/use-tour-context",
         "/docs/core",
         "/docs/getting-started/typescript",
@@ -3075,9 +3180,13 @@
         "/docs/guides/theme-variations",
         "/docs/core/utilities/helpers"
       ],
-      "inboundCount": 2,
+      "inboundCount": 6,
       "inbound": [
+        "/docs/api/core",
         "/docs/core/hooks/use-direction",
+        "/docs/core/hooks/use-locale",
+        "/docs/core/hooks/use-resolve-localized-text",
+        "/docs/core/hooks/use-resolved-text",
         "/docs/guides/segmentation"
       ]
     },
@@ -3255,8 +3364,11 @@
         "/docs/guides/imperative-control",
         "/docs/guides/adoption-analytics"
       ],
-      "inboundCount": 3,
+      "inboundCount": 6,
       "inbound": [
+        "/docs/announcements/hooks/use-filtered-announcements",
+        "/docs/api/core",
+        "/docs/core/hooks/use-segmentation-context",
         "/docs/guides/i18n",
         "/docs/guides/imperative-control",
         "/docs/guides/theme-variations"
@@ -3292,8 +3404,9 @@
         "/docs/guides/segmentation",
         "/docs/guides/reduced-motion"
       ],
-      "inboundCount": 3,
+      "inboundCount": 4,
       "inbound": [
+        "/docs/api/react",
         "/docs/guides/i18n",
         "/docs/react/styling/css-variables",
         "/docs/react/styling/tailwind"
@@ -3898,13 +4011,14 @@
         "/docs/media/headless/media-headless",
         "/docs/media/hooks/use-media-events"
       ],
-      "inboundCount": 5,
+      "inboundCount": 6,
       "inbound": [
         "/docs/announcements/changelog-component",
         "/docs/api",
         "/docs/api/media",
         "/docs/licensing",
-        "/docs/licensing/trial"
+        "/docs/licensing/trial",
+        "/docs/surveys/components/question-media"
       ]
     },
     {
@@ -4320,7 +4434,7 @@
         "/docs/migration/shepherd",
         "/docs/migration/driver"
       ],
-      "inboundCount": 12,
+      "inboundCount": 13,
       "inbound": [
         "/docs/api/react",
         "/docs/core/hooks/use-tour",
@@ -4331,6 +4445,7 @@
         "/docs/react/components/tour-card",
         "/docs/react/components/tour-overlay",
         "/docs/react/components/tour-step",
+        "/docs/react/hooks/use-tour-registry-context",
         "/docs/react/hooks/use-tours",
         "/docs/react",
         "/docs/react/providers/multi-tour-kit-provider"
@@ -4431,6 +4546,21 @@
       ]
     },
     {
+      "url": "/docs/react/hooks/use-tour-registry-context",
+      "file": "content/docs/react/hooks/use-tour-registry-context.mdx",
+      "section": "react",
+      "title": "useTourRegistryContext",
+      "outbound": [
+        "/docs/react/providers/multi-tour-kit-provider",
+        "/docs/react/hooks/use-tours",
+        "/docs/react/components/tour"
+      ],
+      "inboundCount": 1,
+      "inbound": [
+        "/docs/api/react"
+      ]
+    },
+    {
       "url": "/docs/react/hooks/use-tour-route",
       "file": "content/docs/react/hooks/use-tour-route.mdx",
       "section": "react",
@@ -4457,9 +4587,10 @@
         "/docs/react/providers/multi-tour-kit-provider",
         "/docs/react/components/tour"
       ],
-      "inboundCount": 3,
+      "inboundCount": 4,
       "inbound": [
         "/docs/api/react",
+        "/docs/react/hooks/use-tour-registry-context",
         "/docs/react/providers/multi-tour-kit-provider",
         "/docs/react/types"
       ]
@@ -4507,12 +4638,13 @@
         "/docs/react/hooks/use-tours",
         "/docs/react/adapters"
       ],
-      "inboundCount": 6,
+      "inboundCount": 7,
       "inbound": [
         "/docs/api/react",
         "/docs/react/adapters/next-app-router",
         "/docs/react/adapters/react-router",
         "/docs/react/components/tour-route-prompt",
+        "/docs/react/hooks/use-tour-registry-context",
         "/docs/react/hooks/use-tour-route",
         "/docs/react/hooks/use-tours"
       ]
@@ -4979,6 +5111,17 @@
         "/docs/surveys/components/question-rating",
         "/docs/surveys/headless/headless-question-boolean"
       ]
+    },
+    {
+      "url": "/docs/surveys/components/question-media",
+      "file": "content/docs/surveys/components/question-media.mdx",
+      "section": "surveys",
+      "title": "QuestionMedia",
+      "outbound": [
+        "/docs/media"
+      ],
+      "inboundCount": 0,
+      "inbound": []
     },
     {
       "url": "/docs/surveys/components/question-rating",
@@ -5531,17 +5674,17 @@
       "inboundAvg": 4.45
     },
     "announcements": {
-      "total": 25,
-      "orphan": 0,
+      "total": 27,
+      "orphan": 2,
       "dead": 0,
-      "outboundAvg": 4.48,
-      "inboundAvg": 5.28
+      "outboundAvg": 4.3,
+      "inboundAvg": 4.96
     },
     "api": {
       "total": 12,
       "orphan": 0,
       "dead": 0,
-      "outboundAvg": 16.83,
+      "outboundAvg": 17.5,
       "inboundAvg": 3.75
     },
     "build-with-llms": {
@@ -5559,11 +5702,11 @@
       "inboundAvg": 4
     },
     "core": {
-      "total": 33,
+      "total": 37,
       "orphan": 0,
       "dead": 0,
-      "outboundAvg": 4,
-      "inboundAvg": 5.67
+      "outboundAvg": 3.92,
+      "inboundAvg": 5.43
     },
     "examples": {
       "total": 7,
@@ -5584,7 +5727,7 @@
       "orphan": 0,
       "dead": 0,
       "outboundAvg": 4.33,
-      "inboundAvg": 4.63
+      "inboundAvg": 4.96
     },
     "hints": {
       "total": 10,
@@ -5612,7 +5755,7 @@
       "orphan": 0,
       "dead": 0,
       "outboundAvg": 4,
-      "inboundAvg": 5.18
+      "inboundAvg": 5.24
     },
     "migration": {
       "total": 3,
@@ -5622,11 +5765,11 @@
       "inboundAvg": 6
     },
     "react": {
-      "total": 26,
+      "total": 27,
       "orphan": 0,
       "dead": 0,
-      "outboundAvg": 5.46,
-      "inboundAvg": 5.92
+      "outboundAvg": 5.37,
+      "inboundAvg": 5.85
     },
     "scheduling": {
       "total": 17,
@@ -5636,11 +5779,11 @@
       "inboundAvg": 4.41
     },
     "surveys": {
-      "total": 29,
-      "orphan": 0,
+      "total": 30,
+      "orphan": 1,
       "dead": 0,
-      "outboundAvg": 3.07,
-      "inboundAvg": 3.03
+      "outboundAvg": 3,
+      "inboundAvg": 2.93
     },
     "troubleshooting": {
       "total": 1,
@@ -5657,7 +5800,11 @@
       "inboundAvg": 1
     }
   },
-  "orphans": [],
+  "orphans": [
+    "/docs/announcements/hooks/use-filtered-announcements",
+    "/docs/announcements/hooks/use-resolved-text",
+    "/docs/surveys/components/question-media"
+  ],
   "deadEnds": [],
   "naturalLinkCandidates": [
     {
@@ -7082,6 +7229,20 @@
       "excerpt": "ays to access announcements: --- ## Examples ### Display All Announcements ### Filter by Variant"
     },
     {
+      "symbol": "@tour-kit/core",
+      "target": "/docs/core",
+      "fromUrl": "/docs/announcements/hooks/use-resolved-text",
+      "fromFile": "content/docs/announcements/hooks/use-resolved-text.mdx",
+      "excerpt": "omponents/callout'; Re-exported from [`@tour-kit/core`](/docs/core/hooks/use-resolved-text) so consumers using `@"
+    },
+    {
+      "symbol": "@tour-kit/announcements",
+      "target": "/docs/announcements",
+      "fromUrl": "/docs/announcements/hooks/use-resolved-text",
+      "fromFile": "content/docs/announcements/hooks/use-resolved-text.mdx",
+      "excerpt": "/use-resolved-text) so consumers using `@tour-kit/announcements` can import it from the same package as the rest of the API"
+    },
+    {
       "symbol": "custom",
       "target": "/docs/analytics/plugins/custom",
       "fromUrl": "/docs/announcements",
@@ -7227,6 +7388,13 @@
       "fromUrl": "/docs/announcements/types",
       "fromFile": "content/docs/announcements/types.mdx",
       "excerpt": "ntent Types ### AnnouncementMedia **Examples:** ### AnnouncementAction **Example:** --- ## Fre"
+    },
+    {
+      "symbol": "useFunnelData",
+      "target": "/docs/adoption/hooks/use-funnel-data",
+      "fromUrl": "/docs/api/adoption",
+      "fromFile": "content/docs/api/adoption.mdx",
+      "excerpt": "s ### UseFunnelDataInput Used by `useFunnelData()` to derive a current-state funnel from `useAdoptionStats`"
     },
     {
       "symbol": "Custom",
@@ -7436,7 +7604,7 @@
       "target": "/docs/core",
       "fromUrl": "/docs/api/hints",
       "fromFile": "content/docs/api/hints.mdx",
-      "excerpt": "lue ### Placement Re-exported from `@tour-kit/core`: --- ## Utilities ### cn Class name utility. ###"
+      "excerpt": "lue ### Placement Re-exported from `@tour-kit/core`: ### Hotspot Variants & Props Three built-in hotspot v"
     },
     {
       "symbol": "useFeature",
@@ -7584,6 +7752,13 @@
       "fromUrl": "/docs/api/license",
       "fromFile": "content/docs/api/license.mdx",
       "excerpt": "(`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) never need this package. </Callout> --- ## Providers #"
+    },
+    {
+      "symbol": "custom",
+      "target": "/docs/analytics/plugins/custom",
+      "fromUrl": "/docs/api/media",
+      "fromFile": "content/docs/api/media.mdx",
+      "excerpt": "ion layer is exported for advanced use (custom slots, URL validation). --- ## See also - [`@tour-kit/"
     },
     {
       "symbol": "Custom",
@@ -8503,6 +8678,41 @@
       "excerpt": "ation ## Custom Storage ## Resume Tour ## Related - [`useRoutePersistence`](/docs/core/hooks/u"
     },
     {
+      "symbol": "useSegmentationContext",
+      "target": "/docs/core/hooks/use-segmentation-context",
+      "fromUrl": "/docs/core/hooks/use-resolve-localized-text",
+      "fromFile": "content/docs/core/hooks/use-resolve-localized-text.mdx",
+      "excerpt": "o a string) | `vars` are sourced from `useSegmentationContext().userContext` — the same shape that drives audience target"
+    },
+    {
+      "symbol": "useSegmentationContext",
+      "target": "/docs/core/hooks/use-segmentation-context",
+      "fromUrl": "/docs/core/hooks/use-resolved-text",
+      "fromFile": "content/docs/core/hooks/use-resolved-text.mdx",
+      "excerpt": "age By default `vars` falls back to `useSegmentationContext().userContext`, so any consumer that wires `userContext` fo"
+    },
+    {
+      "symbol": "@tour-kit/react",
+      "target": "/docs/react",
+      "fromUrl": "/docs/core/hooks/use-resolved-text",
+      "fromFile": "content/docs/core/hooks/use-resolved-text.mdx",
+      "excerpt": "t'; Unified text pipeline used across `@tour-kit/react`, `@tour-kit/hints`, and `@tour-kit/announcements`. Given a"
+    },
+    {
+      "symbol": "@tour-kit/hints",
+      "target": "/docs/hints",
+      "fromUrl": "/docs/core/hooks/use-resolved-text",
+      "fromFile": "content/docs/core/hooks/use-resolved-text.mdx",
+      "excerpt": "ipeline used across `@tour-kit/react`, `@tour-kit/hints`, and `@tour-kit/announcements`. Given a `LocalizedText | R"
+    },
+    {
+      "symbol": "@tour-kit/announcements",
+      "target": "/docs/announcements",
+      "fromUrl": "/docs/core/hooks/use-resolved-text",
+      "fromFile": "content/docs/core/hooks/use-resolved-text.mdx",
+      "excerpt": "our-kit/react`, `@tour-kit/hints`, and `@tour-kit/announcements`. Given a `LocalizedText | ReactNode`, returns a `ReactNode"
+    },
+    {
       "symbol": "Storage",
       "target": "/docs/core/utilities/storage",
       "fromUrl": "/docs/core/hooks/use-route-persistence",
@@ -8522,6 +8732,20 @@
       "fromUrl": "/docs/core/hooks/use-route-persistence",
       "fromFile": "content/docs/core/hooks/use-route-persistence.mdx",
       "excerpt": "y\"> </Tab> </Tabs> --- ## Multi-Page Tour Example --- ## Cross-Tab Synchronization When `syncTab"
+    },
+    {
+      "symbol": "custom",
+      "target": "/docs/analytics/plugins/custom",
+      "fromUrl": "/docs/core/hooks/use-segmentation-context",
+      "fromFile": "content/docs/core/hooks/use-segmentation-context.mdx",
+      "excerpt": "ad) — this hook is the escape hatch for custom integrations, headless filters, and debug panels. ## Usage"
+    },
+    {
+      "symbol": "Tour",
+      "target": "/docs/react/components/tour",
+      "fromUrl": "/docs/core/hooks/use-segmentation-context",
+      "fromFile": "content/docs/core/hooks/use-segmentation-context.mdx",
+      "excerpt": "tic-cohort lookups. | ## Internal use Tour Kit packages call `useSegmentationContext` to thread `userC"
     },
     {
       "symbol": "Custom",
@@ -10013,6 +10237,13 @@
       "fromUrl": "/docs/guides/playwright",
       "fromFile": "content/docs/guides/playwright.mdx",
       "excerpt": "pment, the provider also logs a single `console.warn` per mount reminding you the bridge is on. Production"
+    },
+    {
+      "symbol": "custom",
+      "target": "/docs/analytics/plugins/custom",
+      "fromUrl": "/docs/guides/playwright",
+      "fromFile": "content/docs/guides/playwright.mdx",
+      "excerpt": "face is exported for fixture typing and custom helpers: ## 3 — Diagnostic integration Mount the provid"
     },
     {
       "symbol": "helpers",
@@ -11511,6 +11742,13 @@
       "fromUrl": "/docs/react/headless",
       "fromFile": "content/docs/react/headless/index.mdx",
       "excerpt": "-|-------------| | `HeadlessTourCard` | Tour card container with step data | | `HeadlessTourOverlay` | S"
+    },
+    {
+      "symbol": "custom",
+      "target": "/docs/analytics/plugins/custom",
+      "fromUrl": "/docs/react/hooks/use-tour-registry-context",
+      "fromFile": "content/docs/react/hooks/use-tour-registry-context.mdx",
+      "excerpt": "egistryContext` is the escape hatch for custom registry integrations (declarative `<Tour>` mounting, tour"
     },
     {
       "symbol": "custom",
