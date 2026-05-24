@@ -5,6 +5,7 @@ import { baseOptions } from '@/lib/layout.shared'
 import { BreadcrumbJsonLd, ItemListJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 const COMPARE_TITLE = 'Compare userTourKit — Side-by-Side Comparisons'
 const COMPARE_DESC =
@@ -68,6 +69,23 @@ export default function CompareHub() {
             mappings, behavioral differences, and the gotchas that bite once you start replacing
             code in production. No marketing language — just the trade-offs that actually inform a
             tooling choice.
+          </p>
+          <p className="mt-3 text-[14px] text-fd-muted-foreground">
+            See{' '}
+            <Link
+              href="/how-we-test"
+              className="underline decoration-dotted underline-offset-4 hover:decoration-solid"
+            >
+              how we test
+            </Link>{' '}
+            for the methodology behind every benchmark and feature claim on these pages, and{' '}
+            <Link
+              href="/pricing"
+              className="underline decoration-dotted underline-offset-4 hover:decoration-solid"
+            >
+              pricing
+            </Link>{' '}
+            for what the Free vs Pro split costs.
           </p>
         </header>
 
