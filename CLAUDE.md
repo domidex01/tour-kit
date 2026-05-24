@@ -116,6 +116,8 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
 - **Plan before acting:** For any task touching 3+ files or requiring debugging, state your plan in 2-3 bullet points BEFORE writing code. Wait for approval.
 - **Structured debugging:** State your hypothesis before each fix attempt. Max 3 attempts before stepping back and asking for more context. Never shotgun-fix.
 - **No rabbit holes:** Never spend more than 2 consecutive tool calls exploring/reading without producing output (code, a plan, or a concrete finding).
+- **Load wiki-tech before coding a package:** before writing or editing under `packages/<name>/`, read `wiki-tech/packages/<name>.md` plus any relevant `wiki-tech/concepts/*.md` it links to. The wiki is the answer; `packages/` is the evidence. If the wiki disagrees with the code, the disagreement *is* the finding — fix the right side and update the other in the same change (see `wiki-tech/CLAUDE.md` "Code a package" workflow).
+- **Cross-repo work (cloud-facing changes):** if the task touches license issuance, analytics ingestion, audience-rule sync, billing, or the dashboard read path, load `wiki-tech/sources/tourkit-dash.md` first to pick the right `tourkit-dash-wiki/tour-kit-integration/<name>.md` page. Never restate cloud-side facts; cross-link to dash.
 
 ## Content Pipeline Rules
 
