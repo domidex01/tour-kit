@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { TourEvent } from '../../types/events'
 
 const sdk = vi.hoisted(() => {
@@ -30,16 +30,6 @@ function mockTourEvent(overrides: Partial<TourEvent> = {}): TourEvent {
 }
 
 describe('amplitudePlugin externalization (B-2)', () => {
-  beforeEach(() => {
-    sdk.init.mockClear()
-    sdk.track.mockClear()
-    sdk.flush.mockClear()
-  })
-
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
   describe('with peer installed (mocked SDK)', () => {
     it('initializes the SDK exactly once with the configured api key (US-5/US-6)', async () => {
       const { amplitudePlugin } = await import('../../plugins/amplitude')
@@ -90,16 +80,18 @@ describe('amplitudePlugin externalization (B-2)', () => {
       })
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-      const { amplitudePlugin } = await import('../../plugins/amplitude')
-      const plugin = amplitudePlugin({ apiKey: 'k' })
+      try {
+        const { amplitudePlugin } = await import('../../plugins/amplitude')
+        const plugin = amplitudePlugin({ apiKey: 'k' })
 
-      await expect(plugin.init?.()).resolves.not.toThrow()
-      expect(() => plugin.track?.(mockTourEvent())).not.toThrow()
-      // Documented graceful degradation: at least one warning fired.
-      expect(warn).toHaveBeenCalled()
-
-      warn.mockRestore()
-      vi.doUnmock('@amplitude/analytics-browser')
+        await expect(plugin.init?.()).resolves.toBeUndefined()
+        expect(() => plugin.track?.(mockTourEvent())).not.toThrow()
+        // Documented graceful degradation: at least one warning fired.
+        expect(warn).toHaveBeenCalled()
+      } finally {
+        warn.mockRestore()
+        vi.doUnmock('@amplitude/analytics-browser')
+      }
     })
   })
 })
