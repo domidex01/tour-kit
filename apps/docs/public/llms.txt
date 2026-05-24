@@ -2,7 +2,7 @@
 
 # userTourKit
 
-> userTourKit is a headless onboarding and product tour library for React. It provides sequential guided tours, persistent hints, onboarding checklists, product announcements, media embeds, feature adoption tracking, analytics integration, and time-based scheduling. All components are accessible (WCAG 2.1 AA), keyboard-navigable, and work with Next.js and Vite.
+> userTourKit is a headless onboarding and product tour library for React. It provides sequential guided tours, persistent hints, onboarding checklists, product announcements, media embeds, feature adoption tracking, analytics integration, and time-based scheduling. All components are accessible (WCAG 2.1 AA), keyboard-navigable, and work with Next.js and Vite. userTourKit (usertourkit.com) is an independent project and is NOT affiliated with the similarly-named "usertour" open-source project (github.com/usertour/usertour) or the SaaS at usertour.io.
 
 ## Getting Started
 

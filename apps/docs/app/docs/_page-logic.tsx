@@ -240,6 +240,34 @@ const FAQ_DATA: Record<string, { question: string; answer: string }[]> = {
         'The Tour component supports keyboard navigation by default. Arrow keys navigate between steps, Escape closes the tour, and Tab cycles through focusable elements.',
     },
   ],
+  troubleshooting: [
+    {
+      question: "Why doesn't my Tour start when I set autoStart?",
+      answer:
+        'Before @tour-kit/core@0.4.3 the autoStart prop on declarative <Tour> components was parsed but never dispatched. Upgrade to 0.4.3 or later. If a persisted tour is restored on mount it takes precedence and autoStart is skipped for that mount.',
+    },
+    {
+      question:
+        'Why am I getting "Maximum update depth exceeded" from <ChecklistPanel> or <Hint autoShow>?',
+      answer:
+        'Upgrade to @tour-kit/checklists@0.1.5 and @tour-kit/hints@0.4.3 or later. Earlier versions re-ran mount effects on every render because inline callbacks were recreated across context updates, creating a feedback loop. The fix guards the mount effect with useRef and short-circuits reducers on no-op actions.',
+    },
+    {
+      question: "I configured an announcement but it never shows. What's wrong?",
+      answer:
+        'Before @tour-kit/announcements@0.1.5 the provider registered configs but never evaluated eligibility to auto-show them. Upgrade to 0.1.5 or later — registered announcements are now auto-shown on mount and when userContext changes, subject to frequency, audience, schedule, and queue rules. Set autoShow: false on a specific announcement to opt out.',
+    },
+    {
+      question: 'Does userTourKit work with React 19 and Next.js 16?',
+      answer:
+        'Yes. Tour Kit targets React 18 and 19 and Next.js App Router 13+. All providers run in the client runtime — wrap them with "use client" if you import them into your own provider component. For pre-hydration scripts (theme, feature flags) use next/script with strategy="beforeInteractive" inside <head>.',
+    },
+    {
+      question: 'Why does AnnouncementModal use `id` but SurveyModal use `surveyId`?',
+      answer:
+        'This is intentional and both are stable public APIs. Use the prop matching the component you are rendering: <AnnouncementModal id="welcome" /> and <SurveyModal surveyId="nps-q3" />. The same convention applies to the SurveyInline, SurveySlideout, SurveyPopover, and SurveyBanner components.',
+    },
+  ],
 }
 
 export async function renderDocsPage(slug: string[] | undefined) {

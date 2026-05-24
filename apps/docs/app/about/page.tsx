@@ -233,6 +233,50 @@ export default function AboutPage() {
             sold as a one-time commercial license. See <Link href="/pricing">pricing</Link>.
           </p>
 
+          <h2>What if the maintainer disappears tomorrow?</h2>
+          <p>
+            userTourKit is a single-maintainer project today, which is a fair question for anyone
+            betting their onboarding flow on it. Three structural answers:
+          </p>
+          <ul>
+            <li>
+              <strong>The MIT core is forkable forever.</strong> The three MIT packages (
+              <code>@tour-kit/core</code>, <code>@tour-kit/react</code>,{' '}
+              <code>@tour-kit/hints</code>) are licensed under the MIT license. If maintenance ever
+              stops, any team can fork the version they have and ship indefinitely. No license
+              server, no phone-home, no kill switch.
+            </li>
+            <li>
+              <strong>The Pro license is perpetual.</strong> The $99 Pro license activates the
+              version you bought, forever. There is no recurring fee and no auto-expiry — your build
+              keeps working on the schedule you control, not ours.
+            </li>
+            <li>
+              <strong>Everything is in the open.</strong> Source, CI, benchmarks, and the docs site
+              all live in one public monorepo. Builds are reproducible from a clean checkout. There
+              is no hosted service to switch off.
+            </li>
+          </ul>
+
+          <h2>Not affiliated with usertour.io</h2>
+          <p>
+            userTourKit (this site, hosted at <code>usertourkit.com</code>) is an independent
+            developer-first React library. It is{' '}
+            <strong>
+              not affiliated with the similarly-named open-source project &quot;usertour&quot;
+            </strong>{' '}
+            at{' '}
+            <a
+              href="https://github.com/usertour/usertour"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              github.com/usertour/usertour
+            </a>{' '}
+            or the SaaS at <code>usertour.io</code>. The names are similar by coincidence — the two
+            projects share no code, contributors, or commercial relationship.
+          </p>
+
           <h2>How to get in touch</h2>
           <p>
             For bugs, feature requests, and general questions, please use{' '}
