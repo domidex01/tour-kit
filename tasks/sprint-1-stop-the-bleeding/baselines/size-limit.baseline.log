@@ -1,0 +1,61 @@
+ WARN  Issue while reading "/home/domidex/projects/tour-kit/.npmrc". Failed to replace env in config: ${NPM_TOKEN}
+ WARN  Issue while reading "/home/domidex/projects/tour-kit/.npmrc". Failed to replace env in config: ${NPM_TOKEN}
+[33m-[39m Adding to empty esbuild project
+[32m✔[39m Adding to empty esbuild project
+  
+  [1m@tour-kit/core[22m
+  Size limit: [32m[1m26 kB[22m[39m
+  Size:       [32m[1m25.62 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/core (useTour-only consumer)[22m
+  Size limit: [32m[1m8 kB[22m[39m
+  Size:       [32m[1m4.58 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/core/schemas[22m
+  Size limit: [32m[1m12 kB[22m[39m
+  Size:       [32m[1m467 B[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/react[22m
+  Size limit: [32m[1m175 kB[22m[39m
+  Size:       [32m[1m169.76 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/hints[22m
+  Size limit: [32m[1m170 kB[22m[39m
+  Size:       [32m[1m161.58 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/adoption[22m
+  Size limit: [32m[1m146 kB[22m[39m
+  Size:       [32m[1m125.65 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/checklists[22m
+  Size limit: [32m[1m175 kB[22m[39m
+  Size:       [32m[1m165.97 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/announcements[22m
+  Size limit: [32m[1m175 kB[22m[39m
+  Size:       [32m[1m170.65 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/media[22m
+  Size limit: [32m[1m169 kB[22m[39m
+  Size:       [32m[1m144.56 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/surveys[22m
+  Size limit: [32m[1m180 kB[22m[39m
+  Size:       [32m[1m172.77 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/analytics[22m
+  Size limit: [32m[1m287 kB[22m[39m
+  Size:       [32m[1m242.02 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/scheduling[22m
+  Size limit: [32m[1m70 kB[22m[39m
+  Size:       [32m[1m60.66 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/license[22m
+  Size limit: [32m[1m69 kB[22m[39m
+  Size:       [32m[1m60.85 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  
+  [1m@tour-kit/ai[22m
+  Size limit: [32m[1m112 kB[22m[39m
+  Size:       [32m[1m95.98 kB[22m[39m [90mwith all dependencies, minified and brotlied[39m
+  

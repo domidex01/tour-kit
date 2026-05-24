@@ -22,6 +22,9 @@ Thumbs.db
 *.log
 npm-debug.log*
 pnpm-debug.log*
+# Exception: Sprint 1 Phase 0 captured log baselines are committed deliverables
+# read by tasks/sprint-1-stop-the-bleeding/verify-baselines.sh.
+!tasks/sprint-1-stop-the-bleeding/baselines/*.log
 
 # Test coverage
 coverage/
