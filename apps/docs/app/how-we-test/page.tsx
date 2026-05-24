@@ -4,6 +4,7 @@ import { baseOptions } from '@/lib/layout.shared'
 import {
   BreadcrumbJsonLd,
   DEFAULT_SPEAKABLE_SELECTORS,
+  FAQJsonLd,
   SpeakableJsonLd,
 } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
@@ -14,9 +15,45 @@ const TITLE = 'How We Test'
 const DESCRIPTION =
   'The methodology behind userTourKit benchmarks, bundle-size claims, accessibility scores, and comparison data — how measurements are produced, which versions are tested, and how to reproduce them.'
 
+const HOW_WE_TEST_FAQS = [
+  {
+    question: 'How does userTourKit measure React product tour library bundle sizes?',
+    answer:
+      'Reported sizes are gzipped measurements of the production tsup build, inspected from bundlephobia.com or measured locally with size-limit against the package public entry points. Tree-shaken sizes (subset imports) are labeled separately. Competitor bundles are compared with the same tooling on the same day against each library published npm version — never a stale figure from a blog post.',
+  },
+  {
+    question: 'How are React tour library benchmarks made reproducible?',
+    answer:
+      'Performance comparisons (render time, time-to-first-step, memory usage) run on a deterministic harness with fixed CPU throttling in a headless Chromium session. Each scenario runs at least 10 iterations and reports the median and p95, not the single fastest run. The harness source and raw results are committed alongside every benchmark so a reader can rerun them.',
+  },
+  {
+    question: 'What does userTourKit do to test accessibility?',
+    answer:
+      'Every release targets WCAG 2.1 AA. Components are spot-checked with axe-core and a screen reader (VoiceOver or NVDA). Keyboard navigation, focus traps, ARIA live regions, and screen-reader labels are verified on every interactive primitive. Lighthouse Accessibility 100 on the docs site is a release gate.',
+  },
+  {
+    question: 'How do you compare userTourKit to React Joyride, Shepherd.js, and SaaS platforms?',
+    answer:
+      'For each comparison page we read the competitor current official docs (version and access date footnoted), map every feature-matrix row to a linkable evidence URL, mark subjective claims as opinion with a concrete example, and bracket commercial bias in a labeled "From the authors" note so readers can weigh it.',
+  },
+  {
+    question: 'What automated quality gates run on every userTourKit pull request?',
+    answer:
+      'TypeScript strict typecheck across all packages, Vitest unit + integration tests targeting >80% meaningful coverage, full tsup ESM+CJS production build, per-package bundle-size budgets (core <8 KB, react <12 KB, hints <5 KB gzipped), and Biome linting. If any gate fails, the PR cannot merge.',
+  },
+]
+
 export const metadata: Metadata = {
   title: `${TITLE} — userTourKit`,
   description: DESCRIPTION,
+  keywords: [
+    'how we test product tour libraries',
+    'tour kit testing methodology',
+    'react tour library benchmarking',
+    'comparison methodology',
+    'react onboarding accessibility testing',
+    'bundle size measurement methodology',
+  ],
   alternates: { canonical: '/how-we-test' },
   openGraph: {
     title: TITLE,
@@ -52,6 +89,7 @@ export default function HowWeTestPage() {
         ]}
       />
       <SpeakableJsonLd url="/how-we-test" cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]} />
+      <FAQJsonLd items={HOW_WE_TEST_FAQS} />
       <main
         id="main-content"
         className="mx-auto w-full max-w-[820px] px-6 py-16 sm:px-8 sm:py-20 lg:px-12"
@@ -220,6 +258,27 @@ export default function HowWeTestPage() {
             sourced, reviewed, corrected, and disclosed.
           </p>
         </article>
+
+        <section aria-labelledby="how-we-test-faq-heading" className="mt-16">
+          <h2
+            id="how-we-test-faq-heading"
+            className="mb-2 text-2xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-3xl"
+          >
+            Frequently asked questions
+          </h2>
+          <p className="mb-8 text-[14px] text-fd-muted-foreground">
+            Bundle-size methodology, benchmark reproducibility, accessibility testing, comparison
+            sourcing, and the CI gates that run on every PR.
+          </p>
+          <dl className="space-y-6">
+            {HOW_WE_TEST_FAQS.map((faq) => (
+              <div key={faq.question}>
+                <dt className="font-semibold text-fd-foreground">{faq.question}</dt>
+                <dd className="mt-2 text-fd-muted-foreground">{faq.answer}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       </main>
     </HomeLayout>
   )

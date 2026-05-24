@@ -3,55 +3,98 @@ title: RAG Guide
 description: >-
   Retrieval-Augmented Generation guide: use vector search over documentation for
   scalable AI chat with large content sets
+keywords:
+  - tour kit ai rag guide
+  - retrieval augmented generation react
+  - rag react chat
+  - vector search ai chat
+  - "@tour-kit/ai rag"
+  - embedding model react
 ---
 
-RAG enables your AI assistant to search over large documentation sets using vector embeddings. Instead of stuffing all context into the prompt, it retrieves only the most relevant documents for each query.
+Retrieval-Augmented Generation (RAG) is the right pattern when your documentation is too big to stuff into every prompt. Instead of sending the whole corpus, `@tour-kit/ai` embeds your documents into a vector store at index time and retrieves only the most relevant chunks at query time. This keeps token cost roughly constant as your knowledge base grows, makes content updates cheap (re-embed one doc, not redeploy), and avoids leaking unrelated content across tenants.
 
-## When to Use RAG
+If you have not read [the CAG guide](/docs/ai/cag-guide), start there — many integrations should ship CAG first and migrate later. RAG is the bigger commitment.
 
-- You have a large documentation set (> 20 pages)
-- You want precise, relevant answers from specific documents
-- You need to scale beyond what fits in a single context window
+## When to use RAG
+
+- Documentation > 50 KB or > 20 distinct docs
+- Multi-product / multi-tenant — retrieval can be filtered per request
+- Frequent content updates (daily / weekly) you don't want to redeploy
+- Per-request token budget needs to stay roughly constant as docs grow
+- You need a citation trail — RAG returns matched chunks, so the response can be linked back to a specific source
+
+## When NOT to use RAG
+
+- Corpus fits in a model context window AND budget is OK — use [CAG](/docs/ai/cag-guide) instead
+- No infrastructure budget — you need somewhere to store embeddings (in-memory, pgvector, Pinecone, Chroma)
+- Strict determinism requirements — retrieval introduces variance; the same question can return different chunks
+- Real-time data — RAG retrieves from a snapshot, not live state. For live data, use tool calling, not RAG.
+
+## Pick an embedding model
+
+The embedding model converts your documents (and the user's question) into vectors so similar text lands near each other in vector space. `@tour-kit/ai` uses the Vercel AI SDK's embedding interface, so any AI-SDK-compatible embedding model works.
+
+| Model | Provider | Dimensions | Cost / 1M tokens | When it fits |
+|-------|----------|------------|-------------------|--------------|
+| `text-embedding-3-small` | OpenAI | 1536 | $0.02 | Default for most projects — best price/quality balance |
+| `text-embedding-3-large` | OpenAI | 3072 | $0.13 | Higher accuracy when retrieval quality matters more than cost |
+| `voyage-3-lite` | Voyage AI | 512 | $0.02 | Smaller embeddings, faster query, lower storage |
+| `voyage-3` | Voyage AI | 1024 | $0.06 | Recommended for technical docs (often beats OpenAI on code/API content) |
+| `embed-english-v3.0` | Cohere | 1024 | $0.10 | Strong on retrieval benchmarks; good if you already use Cohere |
+
+**Default recommendation:** start with `text-embedding-3-small`. Re-embedding the corpus to migrate to another model is cheap and one-time.
+
+## Pick a vector store
+
+| Store | Best for | Notes |
+|-------|----------|-------|
+| `createInMemoryVectorStore()` (built-in) | Prototypes, < 1k chunks, single-process apps | Recomputed on every server restart. Not for production. |
+| pgvector (Postgres extension) | You already use Postgres | Lowest operational overhead. ANN index via HNSW. |
+| Pinecone | Managed, no ops | Generous free tier. Pay-per-query past that. |
+| Chroma | Self-hosted, open source | Local dev parity with prod. Good for small/medium teams. |
+| Weaviate / Qdrant | Self-hosted at scale | More features (filters, hybrid search) when you need them. |
+
+**Default recommendation:** start with `createInMemoryVectorStore()` for local dev, then move to pgvector when you ship to staging (it deploys to any Postgres host with no extra service).
 
 ## Setup
 
-### 1. Create a Vector Store
+### 1. Index your documents
 
 ```ts
 import {
-  createInMemoryVectorStore,
-  createAiSdkEmbedding,
   chunkDocuments,
+  createAiSdkEmbedding,
+  createInMemoryVectorStore,
 } from '@tour-kit/ai/server'
 
 const vectorStore = createInMemoryVectorStore()
 const embedding = createAiSdkEmbedding({ model: 'text-embedding-3-small' })
 
-// Index your documents
 const documents = [
-  { id: 'doc-1', content: 'How to create a tour...', metadata: { title: 'Creating Tours' } },
-  { id: 'doc-2', content: 'Tour step configuration...', metadata: { title: 'Step Config' } },
+  {
+    id: 'creating-tours',
+    content: 'How to create a tour: import Tour and TourStep from @tour-kit/react...',
+    metadata: { title: 'Creating Tours', section: 'docs' },
+  },
+  {
+    id: 'step-config',
+    content: 'Tour step configuration: target accepts a CSS selector or React ref...',
+    metadata: { title: 'Step Config', section: 'docs' },
+  },
 ]
 
+// Split long docs into retrievable chunks. 512-token chunks with 50-token overlap
+// is the conservative default — bigger chunks preserve context but cost more per
+// retrieved hit; smaller chunks improve precision at the cost of fragmentation.
 const chunks = chunkDocuments(documents, { chunkSize: 512, overlap: 50 })
 await vectorStore.upsert(chunks, embedding)
 ```
 
-### 2. Create a Retriever
+### 2. Wire the route handler
 
 ```ts
-import { createRetriever } from '@tour-kit/ai/server'
-
-const retriever = createRetriever({
-  vectorStore,
-  embedding,
-  topK: 5,
-})
-```
-
-### 3. Create a Route Handler with RAG
-
-```ts
+// app/api/chat/route.ts
 import { createChatRouteHandler } from '@tour-kit/ai/server'
 import { openai } from '@ai-sdk/openai'
 
@@ -64,39 +107,97 @@ const { POST } = createChatRouteHandler({
     vectorStore,
     topK: 5,
   },
+  instructions: {
+    productName: 'Acme App',
+    tone: 'friendly',
+    boundaries: ['Only answer using the retrieved documentation.'],
+  },
 })
 
 export { POST }
 ```
 
-### 4. Client Configuration
+`topK` controls how many chunks are retrieved per query. 3–5 is the standard range — higher values give the model more context to reason over but increase token cost linearly.
+
+### 3. Client stays unchanged
 
 ```tsx
-<AiChatProvider
-  config={{
-    endpoint: '/api/chat',
-  }}
->
+import { AiChatProvider } from '@tour-kit/ai'
+
+<AiChatProvider config={{ endpoint: '/api/chat' }}>
   <YourApp />
 </AiChatProvider>
 ```
 
-## Custom Vector Store
+This is the win of `@tour-kit/ai`'s split design — migrating from CAG to RAG is a server-side change only.
 
-Implement the `VectorStoreAdapter` interface to use your own vector database:
+## How RAG works under the hood
+
+```text
+Index time (one-time, or whenever content changes):
+   docs[] ──► chunkDocuments() ──► embedding.embed() ──► vectorStore.upsert()
+
+Query time (every request):
+   user message
+        │
+        ▼
+   ┌────────────────────────────────────────┐
+   │ embed(user message)                    │
+   └────────────────────────────────────────┘
+        │
+        ▼
+   ┌────────────────────────────────────────┐
+   │ vectorStore.query(vec, topK)           │
+   │  → returns top-K matched chunks        │
+   └────────────────────────────────────────┘
+        │
+        ▼
+   ┌────────────────────────────────────────┐
+   │ System prompt =                        │
+   │   instructions + matched chunks only   │
+   │ Model sees only relevant context       │
+   └────────────────────────────────────────┘
+```
+
+## Custom vector store
+
+Implement the `VectorStoreAdapter` interface to plug in any vector DB:
 
 ```ts
 import type { VectorStoreAdapter } from '@tour-kit/ai'
 
 const customStore: VectorStoreAdapter = {
-  upsert: async (documents, embedding) => { /* ... */ },
-  query: async (query, embedding, topK) => { /* ... */ },
-  delete: async (ids) => { /* ... */ },
+  upsert: async (documents, embedding) => {
+    /* persist to your vector DB */
+  },
+  query: async (query, embedding, topK) => {
+    /* return top-K matches as { id, content, score, metadata } */
+  },
+  delete: async (ids) => {
+    /* remove by id */
+  },
 }
 ```
 
-## Performance Tips
+## Tuning checklist
 
-- Use appropriate chunk sizes (256-1024 tokens)
-- Set `topK` between 3-10 for best relevance/cost balance
-- Pre-compute embeddings at build time for static content
+- **Chunk size 256–1024 tokens.** Smaller = precise, more index overhead. Larger = more context per hit, less precision.
+- **Chunk overlap 10–20% of chunk size.** Prevents semantically-meaningful sentences from being split across chunk boundaries.
+- **topK 3–10.** Start at 5. Higher topK → higher cost + risk of irrelevant chunks polluting context.
+- **Pre-embed at build time** when content is static (docs, marketing pages). Saves the embed cost on every server boot.
+- **Add metadata filters** (e.g. `tenant_id`, `language`) to your `VectorStoreAdapter.query` call to avoid cross-tenant leakage.
+
+## Cost comparison vs CAG
+
+For a 100 KB corpus (~25k tokens), gpt-4o-mini at $0.15/1M input, 10k requests/month:
+
+- **CAG** would send all 25k tokens per request → 25,000 × 10,000 = 250M tokens = **~$37.50/mo just for context**.
+- **RAG** sends only retrieved chunks (~5 × 512 = ~2.5k tokens) → 25M tokens = **~$3.75/mo for context**.
+
+The 10× savings widens further as the corpus grows. Below ~50 KB total docs, the cost gap is too small to justify RAG's operational overhead — that's why we recommend starting with CAG.
+
+## Next steps
+
+- [CAG Guide](/docs/ai/cag-guide) — the simpler alternative; ship CAG first if your corpus is small
+- [Tour Integration](/docs/ai/tour-integration) — combine RAG with live tour state via `useTourAssistant`
+- [API Reference](/docs/ai/api-reference) — full `createChatRouteHandler`, `chunkDocuments`, `createRetriever` options

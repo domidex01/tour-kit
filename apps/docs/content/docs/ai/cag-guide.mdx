@@ -3,21 +3,50 @@ title: CAG Guide
 description: >-
   Context-Augmented Generation guide: inject tour documentation directly into AI
   prompts for fast, deterministic responses
+keywords:
+  - tour kit ai cag guide
+  - context augmented generation react
+  - cag vs rag
+  - context stuffing llm
+  - tour context ai chat
+  - "@tour-kit/ai cag"
 ---
 
-CAG is the simplest way to make your AI assistant tour-aware. It works by stuffing relevant tour context directly into the system prompt sent to the LLM.
+Context-Augmented Generation (CAG) is the simplest way to make an AI assistant tour-aware. Every chat request includes the relevant tour documentation in the system prompt, so the model can answer accurately without a vector database, embedding pipeline, or retrieval step. This page covers when CAG is the right call, how to wire it up, the failure modes, and when to migrate to [RAG](/docs/ai/rag-guide).
 
-## When to Use CAG
+## CAG vs RAG — the decision in one table
 
-- Your tour has fewer than ~20 steps
-- You want a quick setup with no infrastructure
-- Your context fits within the model's context window
+| Signal | Pick CAG | Pick RAG |
+|--------|----------|----------|
+| Total documentation size | Under ~50 KB / ~12k tokens | Over 50 KB |
+| Document count | < 20 docs / tour steps | > 20 docs |
+| Update cadence | Infrequent (every release) | Frequent (daily content updates) |
+| Infrastructure budget | Zero — no DB, no embeddings | OK with vector store + embedding job |
+| Cost sensitivity | OK with 3–8k tokens per request | Need to cap at retrieved-chunk size |
+| Determinism | Important — same context every time | OK with retrieval variance |
+
+**Rule of thumb:** if your entire docs corpus fits inside the model's context window (gpt-4o-mini = 128k, Claude Sonnet = 200k) AND total tokens stay under your per-request cost ceiling, CAG is the right call. Migrate to RAG when either constraint breaks.
+
+## When to use CAG
+
+- A focused onboarding flow under ~20 steps
+- A single product with stable documentation
+- Quick prototypes — you can ship CAG in 15 minutes and migrate later
+- Strict determinism requirements (legal review wants the same context every request)
+- Air-gapped environments where you can't run a vector DB
+
+## When NOT to use CAG
+
+- Documentation > 50 KB (token cost dominates per-request bill)
+- Multi-product or multi-tenant setups (sending all products' docs leaks context across tenants)
+- Frequently-changing knowledge bases — CAG redeploys whenever docs change
+- Context-window limits matter for response quality — the model has less room for reasoning when half the window is stuffed
 
 ## Setup
 
-### Client Configuration
+### Client configuration
 
-Enable `tourContext` in your provider config so tour state is sent with each request:
+Wrap your tree with `AiChatProvider` and enable `tourContext` so the current tour state is forwarded with every request:
 
 ```tsx
 import { AiChatProvider } from '@tour-kit/ai'
@@ -36,11 +65,12 @@ function App() {
 }
 ```
 
-### Server Configuration
+### Server configuration
 
-Use `createSystemPrompt` to build a context-rich system prompt:
+Use `createChatRouteHandler` with `strategy: 'context-stuffing'`. Provide your documents inline — they are injected into the system prompt on every request:
 
 ```ts
+// app/api/chat/route.ts
 import { createChatRouteHandler } from '@tour-kit/ai/server'
 import { openai } from '@ai-sdk/openai'
 
@@ -49,28 +79,109 @@ const { POST } = createChatRouteHandler({
   context: {
     strategy: 'context-stuffing',
     documents: [
-      { id: 'guide', content: 'Step 1: Click the button...' },
+      {
+        id: 'onboarding-overview',
+        content:
+          'The Welcome tour introduces three concepts: workspaces, projects, and the activity feed. ' +
+          'Workspaces are top-level containers shared with your team. Projects live inside a workspace. ' +
+          'The activity feed shows realtime updates from every project you have access to.',
+      },
+      {
+        id: 'billing-faq',
+        content:
+          'Plans: Free (1 workspace, 3 projects), Pro ($12/user/mo, unlimited), Enterprise (contact sales). ' +
+          'Upgrading is instant; downgrading takes effect at the next billing cycle.',
+      },
     ],
   },
   instructions: {
-    productName: 'My App',
+    productName: 'Acme App',
     tone: 'friendly',
-    boundaries: ['Only answer questions about onboarding'],
+    boundaries: [
+      'Only answer questions about Acme App onboarding and billing.',
+      'If asked about competitors, decline politely.',
+      'Never invent feature names. If unsure, suggest contacting support.',
+    ],
   },
 })
 
 export { POST }
 ```
 
-## How It Works
+## How CAG works under the hood
 
-1. The client collects tour context (steps, progress, current step)
-2. Context is serialized and sent with each chat request
-3. The server injects this context into the system prompt
-4. The LLM receives the full tour context and can answer questions about it
+```text
+   User asks: "What is a workspace?"
+                │
+                ▼
+   ┌──────────────────────────────────┐
+   │ AiChatProvider (client)          │
+   │  · collects tour state           │
+   │  · POSTs {messages, tourContext} │
+   └──────────────────────────────────┘
+                │
+                ▼
+   ┌──────────────────────────────────┐
+   │ createChatRouteHandler (server)  │
+   │  1. Build system prompt:         │
+   │     instructions + ALL docs[]    │
+   │     + tourContext                │
+   │  2. Forward to model             │
+   │  3. Stream response back         │
+   └──────────────────────────────────┘
+                │
+                ▼
+   Model sees the full corpus in its context window
+   and answers with grounded responses.
+```
 
-## Limitations
+The server rebuilds the same system prompt on every request. There is no caching, no retrieval, no chunking — the trade-off for simplicity is that every request pays for every document's tokens.
 
-- Context size grows linearly with tour complexity
-- Not suitable for large documentation sets (use RAG instead)
-- Each request sends the full context, increasing token usage
+## Token-cost math
+
+Estimating a CAG bill is straightforward:
+
+```text
+per_request_tokens = system_prompt_tokens
+                   + sum(all documents)
+                   + user_message_tokens
+                   + model_response_tokens
+
+monthly_cost ≈ per_request_tokens * requests_per_month * price_per_token
+```
+
+Worked example with 4 KB of docs (~1k tokens), a 0.5k system prompt, 100-token user messages, 300-token responses, gpt-4o-mini at $0.15/1M input + $0.60/1M output:
+
+- Per request: 1,600 input + 300 output = ~$0.00042
+- 10,000 requests/month = **~$4.20/month**
+
+Now scale to 20 KB of docs (~5k tokens), same traffic:
+
+- Per request: 5,600 input + 300 output = ~$0.00102
+- 10,000 requests/month = **~$10.20/month**
+
+That linear scaling is the headline reason to migrate to RAG once your corpus gets large — RAG only sends retrieved chunks (typically 1–3 KB) regardless of total docs.
+
+## Common failure modes
+
+- **Context drift.** When you update a document, redeploy the server route. CAG has no live data source — the docs are baked into the deployed bundle.
+- **Token budget exceeded.** Models silently drop earlier context past their window. Check the model's max input tokens against `sum(documents) + system_prompt + conversation_history`.
+- **Cross-tenant leakage.** If your route is shared across customers, each request sees every customer's documents. Either scope `documents` per request (pull from a database in the route) or use RAG.
+- **Stale answers after a release.** A user on an old client may still ask about removed features. Add a version line to your `documents` array or the `instructions.boundaries`.
+
+## Migration path to RAG
+
+When you outgrow CAG, the migration is mostly server-side:
+
+1. Set up a vector store (Pinecone, pgvector, Chroma — see [RAG Guide](/docs/ai/rag-guide))
+2. Embed your existing `documents[]` and load them into the store
+3. Swap `strategy: 'context-stuffing'` → `strategy: 'rag'` in `createChatRouteHandler`
+4. Provide the retriever / store reference instead of inline documents
+
+The client code (`AiChatProvider`, `useAiChat`, your chat UI) does not change.
+
+## Next steps
+
+- [RAG Guide](/docs/ai/rag-guide) — when CAG hits its ceiling
+- [Tour Integration](/docs/ai/tour-integration) — wire tour state into CAG with `useTourAssistant`
+- [API Reference](/docs/ai/api-reference) — full `createChatRouteHandler` options

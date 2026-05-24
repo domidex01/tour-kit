@@ -6,6 +6,7 @@ export const docs = defineDocs({
   docs: {
     schema: frontmatterSchema.extend({
       howto: z.boolean().optional(),
+      keywords: z.array(z.string()).optional(),
     }),
     postprocess: {
       includeProcessedMarkdown: true,

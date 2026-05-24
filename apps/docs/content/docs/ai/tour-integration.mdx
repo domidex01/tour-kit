@@ -3,56 +3,192 @@ title: Tour Integration
 description: >-
   Connect AI chat to active tour state: context-aware assistance that knows the
   current step, tour progress, and user actions
+keywords:
+  - tour kit ai tour integration
+  - tour aware ai chat
+  - useTourAssistant
+  - ai assistant onboarding
+  - "@tour-kit/ai tour"
+  - context-aware chat react
 ---
 
-The `useTourAssistant` hook connects the AI chat to your active tours, giving the assistant real-time awareness of tour state, progress, and step content.
+Tour integration is the differentiator for `@tour-kit/ai`. A generic chat widget answers "how do I save a file?" — the integrated assistant answers "you are on step 3 of the Welcome tour, the Save button is the blue icon in the top-right, here's why you need to click it now." This page covers the wiring, the three highest-value use cases, and the failure modes when tour state and AI context get out of sync.
 
-## Basic Usage
+## What `useTourAssistant` gives you on top of `useAiChat`
+
+`useTourAssistant` extends `useAiChat` with three additions:
+
+1. **`tourContext`** — a structured snapshot of the active tour (id, name, current step index, total steps, completed tours, checklist progress). Re-assembled on every render.
+2. **`askAboutStep()`** — sends a pre-built prompt asking the assistant to explain the current step. No-op when there is no active step.
+3. **`askForHelp(topic?)`** — sends a help prompt with the current tour context attached, optionally scoped to a topic.
+
+Everything from `useAiChat` (`messages`, `sendMessage`, `status`, `open`, `close`, `toggle`) is still available on the same return value — `useTourAssistant` is a superset.
+
+## Wiring it up (3-line change from `useAiChat`)
 
 ```tsx
 import { useTourAssistant } from '@tour-kit/ai'
 
-function TourChat() {
-  const { tourContext, sendMessage, messages, askAboutStep, askForHelp } = useTourAssistant()
+function HelpButton() {
+  const { askAboutStep, tourContext } = useTourAssistant()
+  const stepLabel = tourContext.activeStep?.title
 
   return (
-    <div>
-      {tourContext.activeTour && (
-        <p>
-          Step {tourContext.activeTour.currentStep + 1} of {tourContext.activeTour.totalSteps}
-          {' — '}{tourContext.activeStep?.title}
-        </p>
-      )}
-
-      {messages.map((msg) => (
-        <div key={msg.id}>{msg.content}</div>
-      ))}
-
-      <button onClick={askAboutStep}>Ask about this step</button>
-      <button onClick={() => askForHelp('navigation')}>Help with navigation</button>
-      <button onClick={() => sendMessage({ text: 'What should I do next?' })}>
-        Ask for help
-      </button>
-    </div>
+    <button onClick={askAboutStep} disabled={!tourContext.activeStep}>
+      {stepLabel ? `Explain "${stepLabel}"` : 'Pick a tour first'}
+    </button>
   )
 }
 ```
 
-## How It Works
+This works because the `@tour-kit/react` `TourProvider` exposes the active tour via context, and `useTourAssistant` reads from it automatically — no prop drilling.
 
-1. `useTourAssistant` reads the current tour state from `@tour-kit/react` providers
-2. Tour context (steps, progress, current step) is assembled automatically
-3. Context is included with each message sent to the AI
-4. The assistant can reference specific steps, suggest next actions, and explain UI elements
+## The three use cases that justify tour integration
 
-## Context Assembly
+### 1. "Explain this step" — confused users mid-tour
 
-The `assembleTourContext` function gathers tour information:
+```tsx
+function StepExplainer() {
+  const { askAboutStep, tourContext, messages } = useTourAssistant()
+
+  if (!tourContext.activeTour) return null
+
+  return (
+    <aside>
+      <p>
+        Step {tourContext.activeTour.currentStep + 1} of {tourContext.activeTour.totalSteps}
+        {tourContext.activeStep ? ` — ${tourContext.activeStep.title}` : null}
+      </p>
+      <button type="button" onClick={askAboutStep}>
+        I don't understand this step
+      </button>
+      <ul>
+        {messages.map((m) => (
+          <li key={m.id}>{m.content}</li>
+        ))}
+      </ul>
+    </aside>
+  )
+}
+```
+
+The prompt that `askAboutStep` sends includes the step's id, title, and content, so the model can give a grounded answer without the user having to retype anything.
+
+### 2. "What does this button do?" — context-aware UI explainer
+
+Combine `useTourAssistant` with a tooltip or right-click handler so any UI element can be "explained" with the current tour as context.
+
+```tsx
+function ExplainableButton({ label, action, children }: Props) {
+  const { sendMessage, tourContext, open } = useTourAssistant()
+  const tourId = tourContext.activeTour?.id ?? 'no-tour'
+
+  return (
+    <button
+      onClick={action}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        open()
+        sendMessage({
+          text: `In the context of the ${tourId} tour, what does the "${label}" button do?`,
+        })
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+```
+
+Right-clicking the button opens the chat and pre-populates a context-aware question.
+
+### 3. "Skip to step N" — assistant as a navigation surface
+
+Combine with `useTour` from `@tour-kit/react` to let the assistant drive tour navigation in response to user requests:
+
+```tsx
+import { useTour } from '@tour-kit/react'
+import { useTourAssistant } from '@tour-kit/ai'
+
+function SkipToStep() {
+  const { sendMessage, tourContext } = useTourAssistant()
+  const { goToStep } = useTour(tourContext.activeTour?.id ?? '')
+
+  return (
+    <button
+      onClick={() =>
+        sendMessage({
+          text: 'Skip me to the most important step in this tour.',
+        })
+      }
+    >
+      Take me to the important part
+    </button>
+  )
+}
+```
+
+(For the model's response to actually drive `goToStep`, you need tool calling — see the [AI SDK tool-calling docs](https://sdk.vercel.ai/docs/foundations/tools).)
+
+## How tour context flows end-to-end
+
+```text
+   ┌──────────────────────────┐
+   │ TourProvider             │  active tour state
+   │  (@tour-kit/react)       │  (id, currentStep, ...)
+   └──────────────────────────┘
+              │
+              ▼
+   ┌──────────────────────────┐
+   │ useTourAssistant         │  reads via context,
+   │                          │  builds TourAssistantContext
+   └──────────────────────────┘
+              │
+              ▼  every sendMessage()
+   ┌──────────────────────────┐
+   │ AiChatProvider           │  serializes tourContext into the
+   │  config.tourContext=true │  POST body alongside the messages
+   └──────────────────────────┘
+              │
+              ▼
+   ┌──────────────────────────┐
+   │ /api/chat route handler  │  injects tourContext into the
+   │  createChatRouteHandler  │  system prompt
+   └──────────────────────────┘
+```
+
+If you forget to set `tourContext: true` on the provider, the hook works fine for typing but the server never sees the tour state — the most common failure mode.
+
+## Tour context shape
+
+```ts
+interface TourAssistantContext {
+  activeTour: {
+    id: string
+    name: string
+    currentStep: number      // zero-indexed
+    totalSteps: number
+  } | null
+  activeStep: {
+    id: string
+    title: string
+    content: string
+  } | null
+  completedTours: string[]
+  checklistProgress: { completed: number; total: number } | null
+}
+```
+
+`activeTour` and `activeStep` are `null` when no tour is running. Always guard before using.
+
+## Manual assembly for tests
+
+You don't need a `TourProvider` to build a `TourAssistantContext` — `assembleTourContext` accepts a tour-state object directly. Useful in tests or in custom hosts:
 
 ```ts
 import { assembleTourContext } from '@tour-kit/ai'
 
-const context = assembleTourContext({
+const ctx = assembleTourContext({
   isActive: true,
   tourId: 'onboarding',
   tour: { id: 'onboarding', name: 'Onboarding Tour', steps: [] },
@@ -63,34 +199,30 @@ const context = assembleTourContext({
 })
 ```
 
-## Combining with CAG
+Returns `null`-shaped context when `isActive` is false or `tourState` is missing.
 
-For the best experience with small tours, combine `useTourAssistant` with CAG:
+## Combining with CAG vs RAG
+
+Tour integration works with both retrieval strategies — pick CAG or RAG based on documentation size (see [CAG Guide](/docs/ai/cag-guide) and [RAG Guide](/docs/ai/rag-guide)). The client config is identical in both cases:
 
 ```tsx
-<AiChatProvider
-  config={{
-    endpoint: '/api/chat',
-    tourContext: true,
-  }}
->
-  <TourChat />
+<AiChatProvider config={{ endpoint: '/api/chat', tourContext: true }}>
+  <YourApp />
 </AiChatProvider>
 ```
 
-## Combining with RAG
+The tour context is sent as structured JSON alongside the messages, so it composes with either retrieval strategy on the server.
 
-For large documentation sites, use RAG alongside tour context:
+## Failure modes
 
-```tsx
-<AiChatProvider
-  config={{
-    endpoint: '/api/chat',
-    tourContext: true,
-  }}
->
-  <TourChat />
-</AiChatProvider>
-```
+- **`tourContext: true` not set on provider.** Hook returns valid data, but the server never sees it. Symptom: assistant answers generically, ignoring tour state.
+- **Step content too large.** If a step's `content` is itself a long-form React tree, the serialized version sent to the model can blow past the context window. Either trim the content sent to the model or store the explainer text separately.
+- **Stale context after a step jump.** `useTourAssistant` reads on render. If you advance the tour imperatively (e.g. inside a `setTimeout`), make sure the React tree re-renders before sending the next message, or pull `tourContext` fresh each time.
+- **Multi-tour ambiguity.** If two tours are active at once (rare but possible with overlapping providers), `tourContext.activeTour` reflects the innermost provider. Scope explicitly with a separate `useTour(tourId)` call if you need a specific one.
 
-The tour context is always sent as structured metadata, while RAG handles the documentation search.
+## Next steps
+
+- [Hooks](/docs/ai/hooks) — full `useTourAssistant` signature and the rest of the public hook surface
+- [CAG Guide](/docs/ai/cag-guide) — server-side wiring for small docs
+- [RAG Guide](/docs/ai/rag-guide) — server-side wiring for large docs
+- [API Reference](/docs/ai/api-reference) — `TourAssistantContext`, `assembleTourContext`, and provider config

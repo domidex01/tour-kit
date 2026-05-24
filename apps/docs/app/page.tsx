@@ -24,6 +24,16 @@ const HOME_DESC =
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },
   description: HOME_DESC,
+  keywords: [
+    'react product tour library',
+    'usertourkit',
+    'headless react onboarding',
+    'react onboarding library',
+    'shadcn ui tour',
+    'open source product tour',
+    'product tour library',
+    'react walkthrough library',
+  ],
   alternates: { canonical: '/' },
   openGraph: {
     title: HOME_TITLE,

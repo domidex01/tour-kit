@@ -397,6 +397,9 @@ export async function getDocsMetadata(slug: string[] | undefined): Promise<Metad
   return {
     title: page.data.title,
     description: page.data.description,
+    ...(page.data.keywords && page.data.keywords.length > 0
+      ? { keywords: page.data.keywords }
+      : {}),
     alternates: { canonical: page.url },
     robots: {
       index: true,

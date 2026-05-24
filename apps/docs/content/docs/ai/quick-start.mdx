@@ -3,7 +3,19 @@ title: Quick Start
 description: >-
   Set up @tour-kit/ai in under 5 minutes: install the package, configure your AI
   provider, and add the chat widget to React
+howto: true
+keywords:
+  - tour kit ai quick start
+  - "@tour-kit/ai install"
+  - react ai chat setup
+  - vercel ai sdk quickstart
+  - ai chat widget react
+  - openai react chat
 ---
+
+Five steps to a working AI chat widget in a React app: install the package, wrap your tree with the provider, drop in a chat UI, mount a server route, and verify the round-trip. Total time ~5 minutes assuming you already have a Next.js app and an OpenAI API key. If you don't have an API key, [grab one from platform.openai.com](https://platform.openai.com/api-keys) first — `@tour-kit/ai` works with any Vercel AI SDK provider but OpenAI's `gpt-4o-mini` is the cheapest path to "working".
+
+This guide ships the no-context variant — the assistant has no product knowledge yet. After you confirm the round-trip works, move on to the [CAG Guide](/docs/ai/cag-guide) (small docs) or [RAG Guide](/docs/ai/rag-guide) (large docs) to give the model real product context.
 
 ## Installation
 
@@ -97,8 +109,26 @@ Set your API key in `.env.local`:
 OPENAI_API_KEY=sk-...
 ```
 
+## Verify Your Setup
+
+Render `ChatWidget` somewhere visible, type a message, and confirm three things:
+
+1. The user message appears in the list immediately (client-side optimistic update).
+2. The `status` transitions through `submitted` → `streaming` → `ready`.
+3. An assistant reply streams in token-by-token (not all at once at the end).
+
+If all three work, the round-trip is healthy. The most common failures:
+
+| Symptom | Likely cause |
+|---------|--------------|
+| 401/403 from `/api/chat` | `OPENAI_API_KEY` missing or wrong in the server environment (restart `next dev` after editing `.env.local`) |
+| Stuck at `submitted`, no streaming | Route handler returning JSON instead of SSE — make sure you're using `createChatRouteHandler`, not a custom handler |
+| `useAiChat must be used within an <AiChatProvider>` thrown | Component is rendered outside the provider tree |
+| Streaming works but assistant says "I don't know" to everything | Expected — you have not configured CAG or RAG yet. Continue to the guides below. |
+
 ## Next Steps
 
-- [CAG Guide](/docs/ai/cag-guide) — Learn about context-augmented generation
-- [RAG Guide](/docs/ai/rag-guide) — Set up retrieval-augmented generation
-- [Tour Integration](/docs/ai/tour-integration) — Connect chat to your tours
+- [CAG Guide](/docs/ai/cag-guide) — give the assistant product knowledge by injecting docs into every prompt (small docs)
+- [RAG Guide](/docs/ai/rag-guide) — vector-search retrieval for large documentation sets
+- [Tour Integration](/docs/ai/tour-integration) — connect the assistant to live tour state via `useTourAssistant`
+- [Components](/docs/ai/components) — swap the custom UI for the pre-built `<AiChatPanel>` + `<AiChatToggle>` combo

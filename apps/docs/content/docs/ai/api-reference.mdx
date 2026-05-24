@@ -3,23 +3,51 @@ title: API Reference
 description: >-
   Complete API reference for @tour-kit/ai: client hooks, server utilities, chat
   components, and configuration types
+keywords:
+  - tour kit ai api reference
+  - "@tour-kit/ai api"
+  - AiChatProvider
+  - useAiChat
+  - createChatRouteHandler
+  - react ai chat api
 ---
+
+Complete public API surface for `@tour-kit/ai`, split by entry point. Server-only utilities live under `@tour-kit/ai/server` so they don't leak into the browser bundle. Types referenced here are exported from the same entry point unless otherwise noted.
+
+## Entry points
+
+| Import path | Runs in | Contains |
+|-------------|---------|----------|
+| `@tour-kit/ai` | Browser + Node | Provider, hooks, components, types, client-side rate limiter |
+| `@tour-kit/ai/server` | Node / Edge only | `createChatRouteHandler`, RAG pipeline, embedding utilities, server rate limiter |
+| `@tour-kit/ai/headless` | Browser + Node | Headless primitive variants (no styling) |
 
 ## Client Exports (`@tour-kit/ai`)
 
+### Provider
+
+#### `<AiChatProvider config={...}>`
+
+Root provider. Must wrap any component that uses `useAiChat` or `useTourAssistant`. Connects to the server route specified in `config.endpoint`.
+
+| Config field | Type | Default | Notes |
+|--------------|------|---------|-------|
+| `endpoint` | `string` | — | Required. URL of the `createChatRouteHandler` route (e.g. `/api/chat`). |
+| `tourContext` | `boolean` | `false` | When `true`, includes the active tour's `TourAssistantContext` in every request. Required for `useTourAssistant` server-side context. |
+| `initialMessages` | `UIMessage[]` | `[]` | Pre-populate the chat history. |
+| `rateLimiter` | `SlidingWindowRateLimiter \| null` | `null` | Optional client-side rate limiter. Returns 429 to `sendMessage` when over budget. |
+
 ### Hooks
 
-#### `useAiChat()`
+#### `useAiChat(): UseAiChatReturn`
 
 Core chat hook. Must be used within `AiChatProvider`.
-
-Returns `UseAiChatReturn`:
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `messages` | `UIMessage[]` | Chat message history |
 | `sendMessage` | `(input: { text: string }) => void` | Send a user message |
-| `status` | `ChatStatus` | Current chat status (`'ready'`, `'submitted'`, `'streaming'`, `'error'`) |
+| `status` | `ChatStatus` | `'ready' \| 'submitted' \| 'streaming' \| 'error'` |
 | `error` | `Error \| null` | Current error, if any |
 | `stop` | `() => void` | Stop the current generation |
 | `reload` | `() => void` | Regenerate the last response |
@@ -28,6 +56,12 @@ Returns `UseAiChatReturn`:
 | `open` | `() => void` | Open the chat panel |
 | `close` | `() => void` | Close the chat panel |
 | `toggle` | `() => void` | Toggle the chat panel |
+
+Throws if called outside an `<AiChatProvider>`.
+
+#### `useAiChatContext(): AiChatContextValue`
+
+Lower-level escape hatch — returns the raw context value. Use `useAiChat` instead unless you're building a custom hook.
 
 #### `useTourAssistant()`
 
@@ -44,40 +78,79 @@ Returns `UseTourAssistantReturn` (extends `UseAiChatReturn`):
 | `askForHelp` | `(topic?: string) => void` | Ask for help, optionally on a topic |
 | _...all `UseAiChatReturn` properties_ | | |
 
-#### `useSuggestions()`
+#### `useSuggestions(): UseSuggestionsReturn`
 
-AI-generated follow-up suggestions.
-
-Returns `UseSuggestionsReturn`:
+AI-generated follow-up suggestions based on the current conversation. Throws if no provider is mounted.
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `suggestions` | `string[]` | Current suggestions |
 | `isLoading` | `boolean` | Loading state |
 
-### Utilities
+#### `useOptionalSuggestions(): UseSuggestionsReturn | null`
+
+Same as `useSuggestions` but returns `null` instead of throwing when no provider is mounted. Use in optional/conditional UI.
+
+### Components
+
+All components are shadcn/ui-compatible and accept standard `className` overrides.
+
+| Component | Purpose |
+|-----------|---------|
+| `<AiChatPanel>` | Full chat surface — header, message list, input, suggestions |
+| `<AiChatToggle>` | Floating button that toggles the panel |
+| `<AiChatHeader>` | Header bar — title, close button, optional menu |
+| `<AiChatMessageList>` | Renders `messages[]` with autoscroll |
+| `<AiChatMessage>` | Single message row (user or assistant) |
+| `<AiChatInput>` | Text input + send button + status indicator |
+| `<AiChatSuggestions>` | Renders suggested follow-up chips |
+| `<AiChatPortal>` | Portal wrapper for the panel (used internally by `<AiChatPanel>`) |
+
+See [Components](/docs/ai/components) for prop tables.
+
+### Client utilities
 
 #### `SlidingWindowRateLimiter`
 
-Client-side rate limiter using a sliding window algorithm.
+Class implementing sliding-window rate limiting. Pass an instance to `AiChatProvider.config.rateLimiter` to enforce per-user limits before the request leaves the browser.
 
-#### `createRateLimiter(config)`
+#### `createRateLimiter(config): SlidingWindowRateLimiter`
 
-Factory function for creating a rate limiter instance.
+Factory function. `config` accepts `{ maxRequests, windowMs }`.
 
 #### `createAnalyticsBridge(config)`
 
-Bridges AI chat events to `@tour-kit/analytics`.
+Subscribes to AI chat events (`message_sent`, `message_received`, `error`) and forwards them to the `@tour-kit/analytics` tracker.
 
 ## Server Exports (`@tour-kit/ai/server`)
 
-### Route Handling
+### Route handling
 
-#### `createChatRouteHandler(options)`
+#### `createChatRouteHandler(options): { POST }`
 
-Creates an API route handler for chat requests.
+Returns an object with a Next.js / Edge-compatible `POST` handler. The handler:
+
+1. Parses the incoming `{ messages, tourContext? }` payload.
+2. Runs the configured rate limiter (if any).
+3. Builds the system prompt from `instructions` + retrieved context.
+4. Streams the model response back as Server-Sent Events.
+
+| Option | Type | Required | Notes |
+|--------|------|----------|-------|
+| `model` | `LanguageModelV1` | yes | Any AI SDK model — `openai('gpt-4o-mini')`, `anthropic('claude-sonnet-4-5')`, etc. |
+| `context.strategy` | `'context-stuffing' \| 'rag'` | yes | Picks CAG or RAG mode. |
+| `context.documents` | `Document[]` | yes for CAG | All docs to inject (CAG) or to index (RAG seed). |
+| `context.embedding` | `Embedding` | yes for RAG | Output of `createAiSdkEmbedding`. |
+| `context.vectorStore` | `VectorStoreAdapter` | yes for RAG | Output of `createInMemoryVectorStore` or your own adapter. |
+| `context.topK` | `number` | no (RAG only) | Chunks to retrieve per query. Default 5. |
+| `instructions.productName` | `string` | no | Used in the default system prompt. |
+| `instructions.tone` | `'friendly' \| 'professional' \| 'concise'` | no | Hints to the model. |
+| `instructions.boundaries` | `string[]` | no | Hard rules ("only answer X", "never reveal Y"). |
+| `rateLimiter` | `ServerRateLimiter` | no | Pre-check before model call. Returns 429 when exceeded. |
 
 ```ts
+// app/api/chat/route.ts
+import { createChatRouteHandler } from '@tour-kit/ai/server'
 import { openai } from '@ai-sdk/openai'
 
 const { POST } = createChatRouteHandler({
@@ -89,50 +162,80 @@ const { POST } = createChatRouteHandler({
   instructions: {
     productName: 'My App',
     tone: 'friendly',
+    boundaries: ['Only answer questions about My App onboarding.'],
   },
 })
+
+export { POST }
 ```
 
-### RAG Pipeline
+### RAG pipeline
 
-#### `createInMemoryVectorStore()`
+#### `createInMemoryVectorStore(): VectorStoreAdapter`
 
-Creates an in-memory vector store for development and testing.
+In-memory vector store. Re-built on every server restart — for dev and prototypes only. Implements the `VectorStoreAdapter` interface so it's swappable with pgvector, Pinecone, or your own store.
 
-#### `createAiSdkEmbedding(options)`
+#### `createAiSdkEmbedding(options): Embedding`
 
-Creates an embedding adapter using the AI SDK.
+Embedding adapter wrapping the AI SDK's embedding API. Options:
 
-#### `createRetriever(options)`
+| Option | Type | Notes |
+|--------|------|-------|
+| `model` | `string` | Embedding model id (e.g. `'text-embedding-3-small'`). See the [RAG guide](/docs/ai/rag-guide#pick-an-embedding-model) for recommendations. |
+| `provider` | `EmbeddingProvider` | Optional explicit provider; defaults to OpenAI. |
 
-Creates a document retriever from a vector store.
+#### `createRetriever(options): Retriever`
+
+Convenience wrapper around `{ vectorStore, embedding, topK }` for use outside `createChatRouteHandler` (e.g. background jobs that surface "you might be interested in" suggestions).
 
 #### `chunkDocument(doc, options)` / `chunkDocuments(docs, options)`
 
-Splits documents into chunks for embedding.
+Splits documents into chunks suitable for embedding. Options: `{ chunkSize, overlap }`. Recommended starting values: `chunkSize: 512`, `overlap: 50`.
 
 #### `createRAGMiddleware(options)`
 
-Creates middleware that adds retrieved context to chat requests.
+Lower-level building block — produces middleware that injects retrieved context into a chat request. Use when you need to compose RAG with custom request handling outside `createChatRouteHandler`.
 
-### Utilities
+### Server utilities
 
-#### `createSystemPrompt(config)`
+#### `createSystemPrompt(config): string`
 
-Builds a structured system prompt from configuration.
+Builds the structured system prompt that `createChatRouteHandler` uses internally. Export it if you want to log, audit, or modify the final prompt before forwarding to the model.
 
-#### `createServerRateLimiter(config)`
+#### `createServerRateLimiter(config): ServerRateLimiter`
 
-Server-side rate limiter.
+Server-side rate limiter. Pass an instance to `createChatRouteHandler.rateLimiter`. Pairs with `createInMemoryRateLimitStore` or your own Redis-backed store.
 
-#### `createInMemoryRateLimitStore()`
+#### `createInMemoryRateLimitStore(): RateLimitStore`
 
-In-memory store for server rate limiting.
+In-memory rate-limit store. Scoped to a single Node process — for production use a Redis-backed store across instances.
 
 #### `generateSuggestions(options)` / `parseSuggestions(text)`
 
-Generate and parse AI follow-up suggestions.
+Generate and parse AI follow-up suggestion chips. `generateSuggestions` calls the model with a structured prompt; `parseSuggestions` extracts the suggestion array from a raw response.
 
 ## Types
 
-See the full type definitions in the [source code](https://github.com/domidex01/tour-kit/tree/main/packages/ai/src/types).
+The full type definitions live in [`packages/ai/src/types`](https://github.com/domidex01/tour-kit/tree/main/packages/ai/src/types). The most commonly imported types:
+
+```ts
+import type {
+  // Provider config
+  AiChatConfig,
+  // Hook returns
+  UseAiChatReturn,
+  UseTourAssistantReturn,
+  UseSuggestionsReturn,
+  // Context shapes
+  AiChatContextValue,
+  TourAssistantContext,
+  // Server
+  ChatRouteHandlerOptions,
+  VectorStoreAdapter,
+  Document,
+  Embedding,
+  Retriever,
+  // Status
+  ChatStatus,
+} from '@tour-kit/ai'
+```

@@ -2,7 +2,12 @@ import { ArticleCard } from '@/components/article/article-card'
 import { Footer } from '@/components/landing/footer'
 import { getComparisonsByCategory, getPublishedComparisons } from '@/lib/comparisons'
 import { baseOptions } from '@/lib/layout.shared'
-import { BreadcrumbJsonLd, ItemListJsonLd, OrganizationJsonLd } from '@/lib/structured-data'
+import {
+  BreadcrumbJsonLd,
+  FAQJsonLd,
+  ItemListJsonLd,
+  OrganizationJsonLd,
+} from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -12,9 +17,47 @@ const COMPARE_DESC =
   'Compare userTourKit with Shepherd.js, React Joyride, Driver.js, Intro.js, Appcues, Pendo, WalkMe, and more. Side-by-side feature, pricing, and performance comparisons.'
 const COMPARE_OG_IMAGE = `/api/og?title=${encodeURIComponent('Compare')}&category=COMPARE`
 
+const COMPARE_FAQS = [
+  {
+    question: 'How does userTourKit compare to React Joyride and Shepherd.js?',
+    answer:
+      'userTourKit is headless-first and ships under 8 KB for the core. React Joyride is the most established React-specific library but is heavier and uses its own UI runtime. Shepherd.js is framework-agnostic with strong popper-based positioning but no React-native primitives. See the head-to-head comparison pages for feature parity, bundle weight, and migration paths.',
+  },
+  {
+    question: 'How does userTourKit compare to SaaS platforms like Appcues, Pendo, and WalkMe?',
+    answer:
+      'SaaS platforms ship a no-code builder, hosted analytics, and an account-level dashboard for non-engineers — at a monthly per-MAU price that typically lands between $300 and $2,000+ for small teams. userTourKit is a code-first React library: lower running cost (free MIT core or $99 one-time Pro), full control over rendering and data, but no no-code builder. The comparison pages map use cases to the right tool.',
+  },
+  {
+    question: 'What methodology do these comparisons use?',
+    answer:
+      "Every feature claim is sourced from the competitor's current official docs (with version + access date footnoted), every bundle figure is measured from a published npm version with the same tooling on the same day, and every benchmark publishes its harness. The full methodology is documented at /how-we-test.",
+  },
+  {
+    question: 'Are these comparisons biased? userTourKit is your own product.',
+    answer:
+      'Yes, we sell userTourKit Pro. Every comparison page brackets the bias in a labeled "From the authors" note so readers can weigh it. Comparison rows map to evidence URLs on the competitor site, and subjective claims are marked as opinion with concrete examples. See /editorial-policy for the full disclosure.',
+  },
+  {
+    question: 'Which React product tour library should I pick?',
+    answer:
+      'If you need a no-code builder, hosted analytics, or non-engineer authoring: an SaaS platform. If you need full control, low cost, accessibility-first defaults, and shadcn/Radix composability: userTourKit. If you have an existing React Joyride or Shepherd.js integration that ships fine: keep it. Each comparison page includes a TL;DR recommendation in the first 200 words.',
+  },
+]
+
 export const metadata: Metadata = {
   title: COMPARE_TITLE,
   description: COMPARE_DESC,
+  keywords: [
+    'tour kit comparisons',
+    'react tour library comparison',
+    'usertourkit vs alternatives',
+    'product tour library comparison',
+    'react joyride alternatives',
+    'shepherd.js alternatives',
+    'appcues alternatives',
+    'pendo alternatives',
+  ],
   alternates: { canonical: '/compare' },
   openGraph: {
     title: COMPARE_TITLE,
@@ -55,6 +98,7 @@ export default function CompareHub() {
           name: `userTourKit vs ${c.competitor}`,
         }))}
       />
+      <FAQJsonLd items={COMPARE_FAQS} />
       <main id="main-content" className="mx-auto w-full max-w-[1120px] px-6 py-16 sm:px-8 lg:px-12">
         <header className="mb-16 max-w-2xl">
           <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-fd-foreground sm:text-4xl">
@@ -138,6 +182,26 @@ export default function CompareHub() {
             ))}
           </Section>
         )}
+
+        <section aria-labelledby="compare-faq-heading" className="mt-8 max-w-3xl">
+          <h2
+            id="compare-faq-heading"
+            className="mb-2 text-2xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-3xl"
+          >
+            Frequently asked questions
+          </h2>
+          <p className="mb-8 text-[14px] text-fd-muted-foreground">
+            Methodology, bias disclosure, and when an SaaS platform beats a React library.
+          </p>
+          <dl className="space-y-6">
+            {COMPARE_FAQS.map((faq) => (
+              <div key={faq.question}>
+                <dt className="font-semibold text-fd-foreground">{faq.question}</dt>
+                <dd className="mt-2 text-fd-muted-foreground">{faq.answer}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       </main>
       <Footer />
     </HomeLayout>

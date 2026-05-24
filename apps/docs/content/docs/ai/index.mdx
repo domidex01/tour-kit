@@ -3,41 +3,76 @@ title: '@tour-kit/ai'
 description: >-
   AI-powered chat assistant for product tours — context-aware conversation with
   RAG and CAG documentation retrieval modes
+keywords:
+  - tour kit ai
+  - "@tour-kit/ai"
+  - react ai chat
+  - tour-aware ai assistant
+  - rag react
+  - cag react
+  - vercel ai sdk react
+  - ai onboarding chat
 ---
 
-Add a conversational AI layer to your product tours. `@tour-kit/ai` provides hooks, providers, and server utilities that let users ask questions and get context-aware answers about your onboarding flows.
+`@tour-kit/ai` adds a conversational AI layer on top of your product tours. It ships React hooks, drop-in chat components, and a route-handler factory that connects to OpenAI, Anthropic, Google, or any other model exposed through the [Vercel AI SDK](https://sdk.vercel.ai/). Tours, checklists, and announcements that the user is currently looking at are passed to the model automatically, so the assistant can answer questions like "what does this step do?" or "how do I skip ahead?" without any extra wiring.
 
-## Features
+This is a Pro-tier package. The free `@tour-kit/core` and `@tour-kit/react` packages do not include AI chat.
 
-- **Context-Augmented Generation (CAG)** — Inject tour context directly into prompts for simple setups
-- **Retrieval-Augmented Generation (RAG)** — Vector search over documentation for large knowledge bases
-- **Tour Integration** — Automatically understands active tour steps, progress, and state
-- **Client/Server Split** — Browser-safe client code, Node.js server utilities in separate entry points
-- **Rate Limiting** — Built-in client and server-side rate limiting
-- **Suggestions** — AI-generated follow-up question chips
+## Pick a retrieval strategy first
+
+Every `@tour-kit/ai` integration has to answer one question: how does the model know about your product? Three approaches, ranked from simplest to most scalable:
+
+| Strategy | Best for | Setup time | Per-request cost | Scales to |
+|----------|----------|------------|-------------------|-----------|
+| **No context** — bare `useAiChat` | Generic chat widget, no product knowledge needed | 5 min | ~1–2k tokens | n/a |
+| **CAG** — context stuffing via `strategy: 'context-stuffing'` | Tours under ~20 steps, single product, small docs | 15 min | ~3–8k tokens (full context every request) | ~50 docs |
+| **RAG** — vector search via `strategy: 'rag'` | Large documentation sets, multi-product, evolving content | 1–2 hours | ~2–4k tokens (retrieved chunks only) | Thousands of docs |
+
+If you are unsure: start with CAG. The migration to RAG only requires swapping the server-side `strategy` field and adding an embedding store — your client code does not change.
 
 ## Architecture
 
-The package is split into two entry points:
+The package is split into two entry points to keep server-only secrets (API keys, vector stores, embedding clients) out of the browser bundle:
 
-```
+```text
 @tour-kit/ai          # Client: React hooks, providers, components
-@tour-kit/ai/server   # Server: Route handlers, RAG pipeline, embeddings
+@tour-kit/ai/server   # Server: route handler factory, RAG pipeline, embeddings
 ```
 
-This ensures server-only code (API keys, vector stores) never leaks into the browser bundle.
+A minimal integration looks like this:
 
-## When to Use
+```text
+   ┌────────────────────────┐         ┌──────────────────────────┐
+   │ AiChatProvider         │         │ createChatRouteHandler   │
+   │  · useAiChat           │  POST   │  · model: openai/...     │
+   │  · useTourAssistant    │ ──────► │  · strategy: cag | rag   │
+   │  · AiChatPanel         │         │  · instructions: {...}   │
+   └────────────────────────┘         └──────────────────────────┘
+            React app                       Next.js / API route
+```
 
-| Scenario | Recommendation |
-|----------|----------------|
-| Small tour (< 20 steps) | Use CAG — simpler, no vector store needed |
-| Large documentation site | Use RAG — scales to thousands of documents |
-| Interactive onboarding | Combine with `useTourAssistant` for tour-aware chat |
+## What ships in the package
 
-## Next Steps
+**Hooks** (client) — `useAiChat`, `useAiChatContext`, `useTourAssistant`, `useSuggestions`, `useOptionalSuggestions`. See the [Hooks reference](/docs/ai/hooks).
 
-- [Quick Start](/docs/ai/quick-start) — Get up and running in 5 minutes
-- [CAG Guide](/docs/ai/cag-guide) — Context-augmented generation setup
-- [RAG Guide](/docs/ai/rag-guide) — Retrieval-augmented generation setup
-- [Tour Integration](/docs/ai/tour-integration) — Connect AI chat to active tours
+**Components** (client) — `AiChatProvider`, `AiChatPanel`, `AiChatToggle`, `AiChatHeader`, `AiChatMessageList`, `AiChatMessage`, `AiChatInput`, `AiChatSuggestions`, `AiChatPortal`. All shadcn/ui-compatible. See [Components](/docs/ai/components).
+
+**Server** (Node.js / Edge) — `createChatRouteHandler`, embedding/retrieval utilities for the RAG pipeline, configurable instructions (tone, boundaries, product name).
+
+**Built-ins** — Client-side and server-side rate limiting, AI-generated follow-up question chips via `useSuggestions`, and automatic tour-state context assembly via `useTourAssistant`.
+
+## When NOT to use this package
+
+- **You only need a "Get help" link.** A plain mailto: link or a Discord invite is free, deterministic, and won't hallucinate. AI chat is worth the cost when self-serve answers are bottlenecking your activation funnel.
+- **Your product is regulated (healthcare, finance, legal).** LLMs hallucinate. Use `@tour-kit/ai` for non-binding guidance only; route account-changing actions through a human or a deterministic workflow.
+- **You can't run a server route.** `@tour-kit/ai` requires a server entry point to hold the model API key. Pure static sites or client-only React apps need a third-party proxy (Vercel, Cloudflare Workers, your own backend).
+
+## Next steps
+
+- [Quick Start](/docs/ai/quick-start) — install, configure a provider, and ship a working chat widget in five minutes
+- [CAG Guide](/docs/ai/cag-guide) — context-augmented generation, with decision criteria vs RAG and token-cost math
+- [RAG Guide](/docs/ai/rag-guide) — retrieval-augmented generation, with embedding-model and vector-store options
+- [Tour Integration](/docs/ai/tour-integration) — connect the assistant to live tour state with `useTourAssistant`
+- [Components](/docs/ai/components) — drop-in shadcn/ui chat UI
+- [Hooks](/docs/ai/hooks) — every public hook with signatures and examples
+- [API Reference](/docs/ai/api-reference) — complete public API surface

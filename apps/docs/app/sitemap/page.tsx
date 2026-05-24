@@ -18,6 +18,12 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: `${TITLE} — userTourKit`,
   description: DESCRIPTION,
+  keywords: [
+    'tour kit sitemap',
+    'usertourkit pages',
+    'usertourkit site index',
+    'react tour library sitemap',
+  ],
   alternates: { canonical: '/sitemap' },
   openGraph: {
     title: TITLE,

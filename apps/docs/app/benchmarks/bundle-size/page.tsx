@@ -39,6 +39,16 @@ const PAGE_DESCRIPTION =
 export const metadata: Metadata = {
   title: `${TITLE} — userTourKit benchmarks`,
   description: PAGE_DESCRIPTION,
+  keywords: [
+    'react tour library bundle size',
+    'tour kit bundle size',
+    'react joyride vs shepherd bundle size',
+    'lightweight react tour library',
+    'driver.js bundle size',
+    'intro.js bundle size',
+    'reactour bundle size',
+    'onborda bundle size',
+  ],
   alternates: { canonical: '/benchmarks/bundle-size' },
   openGraph: {
     title: TITLE,

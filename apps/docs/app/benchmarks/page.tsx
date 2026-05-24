@@ -16,6 +16,14 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: `${TITLE} — userTourKit`,
   description: DESCRIPTION,
+  keywords: [
+    'react tour library benchmarks',
+    'tour kit benchmarks',
+    'react onboarding bundle size comparison',
+    'product tour performance comparison',
+    'react joyride bundle size',
+    'shepherd.js benchmark',
+  ],
   alternates: { canonical: '/benchmarks' },
   openGraph: {
     title: TITLE,

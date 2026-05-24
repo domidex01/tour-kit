@@ -3,6 +3,7 @@ import { baseOptions } from '@/lib/layout.shared'
 import {
   BreadcrumbJsonLd,
   DEFAULT_SPEAKABLE_SELECTORS,
+  FAQJsonLd,
   PersonJsonLd,
   SpeakableJsonLd,
 } from '@/lib/structured-data'
@@ -19,9 +20,45 @@ const author = AUTHORS.domidex
 const AUTHOR_BIO =
   'Dominique Degottex (domidex01) is a software engineer who builds open-source developer tools focused on accessible React components and product onboarding. He created userTourKit to ship a genuinely headless tour library that composes with shadcn/ui, Radix, and Base UI rather than fighting them. He maintains the eleven-package userTourKit monorepo (core, react, hints, adoption, analytics, announcements, checklists, media, scheduling, surveys, and AI integrations) and writes about onboarding architecture, schema/SEO, and headless component design on this site’s blog. Active in open source on GitHub at github.com/domidex01.'
 
+const ABOUT_FAQS = [
+  {
+    question: 'What is userTourKit?',
+    answer:
+      'userTourKit is an open-source, headless React product tour library. It ships three MIT-licensed core packages (tours, React bindings, hints) under 25 KB combined, plus an optional one-time $99 Pro suite of eight extended packages (analytics, checklists, adoption, announcements, media, scheduling, surveys, AI chat).',
+  },
+  {
+    question: 'Who maintains userTourKit?',
+    answer:
+      'userTourKit is built and maintained by Dominique Degottex (domidex01), a software engineer who builds accessible React components and developer tooling. Verifiable profiles are linked on this page (GitHub, LinkedIn, X). The project is solo-maintained and developed in the open at github.com/domidex01/tour-kit.',
+  },
+  {
+    question: 'Is userTourKit affiliated with usertour.io?',
+    answer:
+      'No. userTourKit (this site at usertourkit.com) is an independent React library. It shares no code, contributors, or commercial relationship with the similarly-named usertour project at github.com/usertour/usertour or the SaaS at usertour.io. The naming similarity is coincidental.',
+  },
+  {
+    question: 'What happens if the maintainer disappears?',
+    answer:
+      'Three structural answers. (1) The MIT core (@tour-kit/core, @tour-kit/react, @tour-kit/hints) is forkable forever — any team can fork the version they have and ship indefinitely with no kill switch. (2) The Pro license is perpetual — the version you bought activates forever with no recurring fee. (3) Source, CI, benchmarks, and docs all live in one public monorepo, so builds are reproducible from a clean checkout.',
+  },
+  {
+    question: 'How do I report a bug or request a feature in userTourKit?',
+    answer:
+      'Open an issue at github.com/domidex01/tour-kit/issues with the page URL and the specific claim or expected behavior. For Pro license support, include your order ID. Editorial corrections are acknowledged within 7 days and substantive fixes ship within 30 days when possible.',
+  },
+]
+
 export const metadata: Metadata = {
   title: `${TITLE} — userTourKit`,
   description: DESCRIPTION,
+  keywords: [
+    'about usertourkit',
+    'tour kit company',
+    'open source react onboarding',
+    'usertourkit maintainer',
+    'react product tour library author',
+    'usertourkit vs usertour.io',
+  ],
   alternates: { canonical: '/about' },
   openGraph: {
     title: TITLE,
@@ -91,6 +128,7 @@ export default function AboutPage() {
         ]}
       />
       <SpeakableJsonLd url="/about" cssSelectors={[...DEFAULT_SPEAKABLE_SELECTORS]} />
+      <FAQJsonLd items={ABOUT_FAQS} />
       <PersonJsonLd
         name={author.name}
         legalName={author.legalName}
@@ -290,6 +328,26 @@ export default function AboutPage() {
             . For Pro license support, include your order ID.
           </p>
         </article>
+
+        <section aria-labelledby="about-faq-heading" className="mt-16">
+          <h2
+            id="about-faq-heading"
+            className="mb-2 text-2xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-3xl"
+          >
+            Frequently asked questions
+          </h2>
+          <p className="mb-8 text-[14px] text-fd-muted-foreground">
+            What userTourKit is, who builds it, and what happens if the maintainer disappears.
+          </p>
+          <dl className="space-y-6">
+            {ABOUT_FAQS.map((faq) => (
+              <div key={faq.question}>
+                <dt className="font-semibold text-fd-foreground">{faq.question}</dt>
+                <dd className="mt-2 text-fd-muted-foreground">{faq.answer}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       </main>
     </HomeLayout>
   )
