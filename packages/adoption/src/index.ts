@@ -97,6 +97,7 @@ export {
   AdoptionCategoryChart,
   AdoptionStatusBadge,
   AdoptionFilters,
+  AdoptionFunnel,
 } from './components/dashboard'
 
 export type {
