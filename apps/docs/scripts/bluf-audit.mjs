@@ -192,7 +192,7 @@ function suggestPattern(relativePath) {
   if (/\/getting-started\//.test(p)) return 'Conceptual';
   if (/\/examples\//.test(p)) return 'Conceptual';
   if (/\/licensing\//.test(p)) return 'Conceptual';
-  if (/\/ai-assistants\//.test(p)) return 'Conceptual';
+  if (/\/build-with-llms\//.test(p)) return 'Conceptual';
   if (/\/ai\//.test(p)) return 'Conceptual';
   if (/\/use-cases\//.test(p)) return 'Conceptual';
   if (/\/hints\//.test(p)) return 'Conceptual';

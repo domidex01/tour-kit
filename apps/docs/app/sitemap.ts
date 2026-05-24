@@ -21,7 +21,7 @@ const SITE_URL = 'https://usertourkit.com'
  */
 const DOC_SECTION_FALLBACKS: Record<string, string> = {
   adoption: '2026-04-27',
-  'ai-assistants': '2026-04-27',
+  'build-with-llms': '2026-05-24',
   ai: '2026-04-27',
   analytics: '2026-04-03',
   announcements: '2026-05-05',

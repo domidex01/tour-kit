@@ -9,6 +9,7 @@
     "headless",
     "configuration",
     "changelog",
+    "changelog-component",
     "types"
   ]
 }

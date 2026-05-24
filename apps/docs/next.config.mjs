@@ -34,6 +34,13 @@ const config = {
         destination: 'https://usertourkit.com/:path*',
         permanent: true,
       },
+      {
+        // Renamed 2026-05 to disambiguate from /docs/ai (runtime AI chat package).
+        // This page documents LLM coding tools that *build* with Tour Kit.
+        source: '/docs/ai-assistants',
+        destination: '/docs/build-with-llms',
+        permanent: true,
+      },
     ]
   },
   async headers() {

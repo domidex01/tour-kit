@@ -427,9 +427,9 @@ const updates: Record<string, string> = {
   'content/docs/ai/tour-integration.mdx':
     'Connect AI chat to active tour state: context-aware assistance that knows the current step, tour progress, and user actions',
 
-  // ── AI Assistants ──
-  'content/docs/ai-assistants/index.mdx':
-    'Documentation resources optimized for AI coding assistants — llms.txt, context files, and MCP server for userTourKit integration',
+  // ── Build with LLMs ──
+  'content/docs/build-with-llms/index.mdx':
+    'Use Claude Code, ChatGPT, Cursor, and other LLM coding assistants to build with userTourKit faster — Claude Code plugin, llms.txt, per-package context files, and MCP',
 }
 
 let updated = 0

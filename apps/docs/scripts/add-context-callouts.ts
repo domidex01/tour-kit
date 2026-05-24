@@ -87,9 +87,9 @@ function addCalloutToPackagePage(pkg: string): boolean {
 }
 
 function updateAIAssistantsPage(): boolean {
-  const aiPath = path.join(CONTENT_DIR, 'ai-assistants', 'index.mdx')
+  const aiPath = path.join(CONTENT_DIR, 'build-with-llms', 'index.mdx')
   if (!fs.existsSync(aiPath)) {
-    console.log('  SKIP: ai-assistants/index.mdx not found')
+    console.log('  SKIP: build-with-llms/index.mdx not found')
     return false
   }
 
@@ -97,7 +97,7 @@ function updateAIAssistantsPage(): boolean {
   const SECTION_MARKER = '<!-- per-package-context-files -->'
 
   if (content.includes(SECTION_MARKER)) {
-    console.log('  SKIP: ai-assistants/index.mdx already has context files section')
+    console.log('  SKIP: build-with-llms/index.mdx already has context files section')
     return false
   }
 
@@ -127,7 +127,7 @@ ${rows}
 
   content = `${content.trimEnd()}\n${section}\n`
   fs.writeFileSync(aiPath, content, 'utf-8')
-  console.log('  OK: ai-assistants/index.mdx')
+  console.log('  OK: build-with-llms/index.mdx')
   return true
 }
 
