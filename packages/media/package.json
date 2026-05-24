@@ -74,16 +74,16 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-slot": "catalog:",
     "@tour-kit/core": "workspace:*",
     "@tour-kit/license": "workspace:*",
-    "class-variance-authority": "^0.7.1"
+    "class-variance-authority": "catalog:"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "@lottiefiles/react-lottie-player": "^3.5.0",
-    "@mui/base": "^5.0.0-beta.0"
+    "@mui/base": "catalog:"
   },
   "peerDependenciesMeta": {
     "@lottiefiles/react-lottie-player": {

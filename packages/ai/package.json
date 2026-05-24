@@ -97,7 +97,7 @@
   "dependencies": {
     "@tour-kit/core": "workspace:*",
     "@tour-kit/license": "workspace:*",
-    "class-variance-authority": "^0.7.1"
+    "class-variance-authority": "catalog:"
   },
   "peerDependencies": {
     "@ai-sdk/react": "^2.0.0",
