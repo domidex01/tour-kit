@@ -35,30 +35,61 @@ done
 # ─────────────────────────────────────────────────────────────────────────────
 # US-2: lockfile resolution unchanged vs baseline.
 #
-# "Resolution drift" = a library resolves to a different version. The catalog
-# move adds bookkeeping noise we must ignore:
-#   - the new `catalogs.default` block at top of lockfile
-#   - `specifier: ^x.y.z` → `specifier: 'catalog:'` rewrites (both halves)
-#   - fumadocs cache-key bumps (hash recomputed when specifier strings change)
+# "Resolution drift" = a library resolves to a different version. To detect
+# that and only that, we strip and filter three categories of noise the
+# catalog move legitimately introduces:
 #
-# What we keep: a *new* `version: x.y.z` for a package that already existed
-# (i.e. the version actually changed).
+#   1. The contiguous `catalogs:` block at top of the lockfile (new entries).
+#   2. `specifier: 'catalog:'` ↔ `specifier: ^x.y.z` rewrites for the 7 libs.
+#   3. Peer-hash churn: lines like `version: 14.2.11(2ixb…)` ↔
+#      `version: 14.2.11(28d3…)` where the version *number* is identical and
+#      only the parenthetical peer-resolution hash differs. pnpm recomputes
+#      these hashes when specifier strings change, even though the resolved
+#      version is unchanged. We use a paired-line awk filter so this CANNOT
+#      mask a real version regression (e.g. `14.2.11` → `14.3.0`).
 # ─────────────────────────────────────────────────────────────────────────────
 if [ -f "$BASELINE_LOCK" ]; then
-  CATALOG_LIBS_RE='@floating-ui/react|class-variance-authority|@radix-ui/react-slot|@radix-ui/react-dialog|@mui/base|clsx|tailwind-merge'
+  # Drop the contiguous `catalogs:` block (until the next top-level key).
+  strip_catalogs() {
+    awk '
+      /^catalogs:/ { skip=1; next }
+      skip && /^[a-z]/ { skip=0 }
+      !skip
+    ' "$1"
+  }
+  # Drop paired < / > version lines where only the parenthetical hash differs.
+  drop_peer_hash_churn() {
+    awk '
+      function ver_of(s,   t) {
+        t = s
+        sub(/^[<>][[:space:]]+version: /, "", t)
+        sub(/\(.*$/, "", t)
+        return t
+      }
+      /^<[[:space:]]+version: .+\(.+\)/ {
+        held = $0
+        held_ver = ver_of($0)
+        next
+      }
+      held != "" && /^>[[:space:]]+version: .+\(.+\)/ {
+        if (ver_of($0) == held_ver) { held = ""; next }
+        print held; print $0; held = ""; next
+      }
+      { if (held != "") { print held; held = "" } print }
+      END { if (held != "") print held }
+    '
+  }
   drift=$(
-    diff "$BASELINE_LOCK" pnpm-lock.yaml \
+    diff <(strip_catalogs "$BASELINE_LOCK") <(strip_catalogs pnpm-lock.yaml) \
       | grep -E '^[<>] ' \
-      | grep -v 'catalog' \
-      | grep -vE "^[<>][[:space:]]+specifier: \^" \
-      | grep -vE "^[<>][[:space:]]+'?(${CATALOG_LIBS_RE})'?:[[:space:]]*$" \
-      | grep -vE "^[<>][[:space:]]+version: [0-9]" \
+      | grep -vE "^[<>][[:space:]]+specifier: ('catalog:'|\^)" \
       | grep -vE "^[<>][[:space:]]+fumadocs-(mdx|ui)@" \
+      | drop_peer_hash_churn \
       | wc -l | tr -d ' '
   )
   gate "[ '$drift' -lt 20 ]" \
-    "US-2: lockfile resolution drift < 20 non-bookkeeping lines (got $drift)" \
-    "diff '$BASELINE_LOCK' pnpm-lock.yaml | grep -E '^[<>] ' | grep -v catalog | head -30"
+    "US-2: lockfile resolution drift < 20 lines outside catalog bookkeeping (got $drift)" \
+    "diff <(strip_catalogs '$BASELINE_LOCK') <(strip_catalogs pnpm-lock.yaml) | grep -E '^[<>] ' | head -30"
 else
   echo "✗ US-2: $BASELINE_LOCK missing — re-run Phase 0"
   fails=$((fails + 1))

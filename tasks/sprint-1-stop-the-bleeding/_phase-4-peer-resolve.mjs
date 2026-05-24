@@ -7,30 +7,29 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
-function parseCatalogBlock(yamlText) {
-  // Find the `catalog:` block and collect `  key: value` (one indent level).
-  const lines = yamlText.split(/\r?\n/)
-  const catalog = {}
+function parseCatalogKeys(yamlText) {
+  // Collect the set of package names listed under the `catalog:` block.
+  // We only care about presence — the resolved version is pnpm's job.
+  const keys = new Set()
   let inCatalog = false
-  for (const line of lines) {
+  for (const line of yamlText.split(/\r?\n/)) {
     if (/^catalog:\s*$/.test(line)) {
       inCatalog = true
       continue
     }
     if (!inCatalog) continue
     if (/^\S/.test(line)) {
-      // Top-level key — left the catalog block.
       inCatalog = false
       continue
     }
-    // Match `  "@scope/pkg": ^1.2.3` or `  pkg: ^1.2.3` (no nested objects in catalog).
-    const m = line.match(/^\s+"?([^"\s:]+)"?:\s*(.+?)\s*$/)
-    if (m) catalog[m[1]] = m[2].replace(/^["']|["']$/g, '')
+    // Match `  "@scope/pkg":` or `  pkg:` — the value side is ignored.
+    const m = line.match(/^\s+"?([^"\s:]+)"?:/)
+    if (m) keys.add(m[1])
   }
-  return catalog
+  return keys
 }
 
-const catalog = parseCatalogBlock(readFileSync('pnpm-workspace.yaml', 'utf8'))
+const catalogKeys = parseCatalogKeys(readFileSync('pnpm-workspace.yaml', 'utf8'))
 
 const pkgDirs = readdirSync('packages').filter(
   (d) =>
@@ -48,9 +47,10 @@ for (const dir of pkgDirs) {
       for (const [name, range] of Object.entries(block)) {
         if (range === 'catalog:') {
           checked++
-          if (!catalog[name]) {
+          if (!catalogKeys.has(name)) {
+            const known = [...catalogKeys].join(', ')
             process.stderr.write(
-              `FAIL ${pkgPath} ${section}.${name}: catalog: but no catalog entry in pnpm-workspace.yaml\n`
+              `FAIL ${pkgPath} ${section}.${name}: catalog: but no entry in pnpm-workspace.yaml (known: ${known})\n`
             )
             fails++
           }
