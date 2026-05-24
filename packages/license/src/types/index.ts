@@ -155,6 +155,16 @@ export type LicenseProviderProps = {
   licenseKey: string
   organizationId?: string
   /**
+   * Override the issuer base URL. Precedence: this prop > the
+   * `NEXT_PUBLIC_TOUR_KIT_LICENSE_API_BASE` env var >
+   * `TOUR_KIT_LICENSE_API_BASE` env var > Polar default. Load-bearing for the
+   * Polar → tourkit-dash issuer migration (plan/15f) — v1.x customers on
+   * tourkit-dash set this prop (or the env var) without upgrading the SDK.
+   * v2.x customers will get tourkit-dash as the default and only need this
+   * prop for self-host or test environments.
+   */
+  apiBase?: string
+  /**
    * Optional trial length in days. When set, `<LicenseProvider>` exposes a
    * `trial` slice on the context and `<TrialBadge>` renders a countdown.
    * Trial state is CLIENT-DERIVED from `issuedAt + trialDays` because Polar's

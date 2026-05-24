@@ -37,6 +37,7 @@ export const LicenseRenderContext = createContext<string | undefined>(undefined)
 export function LicenseProvider({
   licenseKey,
   organizationId,
+  apiBase,
   trialDays,
   trialIssuedAt,
   children,
@@ -75,9 +76,20 @@ export function LicenseProvider({
     }
 
     try {
-      const result = organizationId
-        ? await validateLicenseKey(normalizedKey, organizationId)
-        : await validateLicenseKey(normalizedKey)
+      // Preserve back-compat call shape: when no apiBase override is in play,
+      // call with the same positional surface v1.2.x consumers (and existing
+      // tests) expect. Only widen to the 3-arg form when an apiBase override
+      // is set, since that's the only case that needs it.
+      let result: LicenseState
+      if (apiBase) {
+        result = organizationId
+          ? await validateLicenseKey(normalizedKey, organizationId, { apiBase })
+          : await validateLicenseKey(normalizedKey, undefined, { apiBase })
+      } else if (organizationId) {
+        result = await validateLicenseKey(normalizedKey, organizationId)
+      } else {
+        result = await validateLicenseKey(normalizedKey)
+      }
       setState(result)
       onValidateRef.current?.(result)
     } catch (error) {
@@ -95,7 +107,7 @@ export function LicenseProvider({
       setState(errorState)
       onErrorRef.current?.(error instanceof Error ? error : new Error(String(error)))
     }
-  }, [licenseKey, organizationId])
+  }, [licenseKey, organizationId, apiBase])
 
   useEffect(() => {
     validate()

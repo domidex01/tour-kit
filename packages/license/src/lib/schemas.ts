@@ -2,8 +2,17 @@ import { z } from 'zod'
 
 /**
  * Polar validate response schema — snake_case matching wire format.
+ *
+ * `.passthrough()` is load-bearing for forward-compat during the Polar →
+ * tourkit-dash issuer migration (plan/15c §"additive `tk_tier`"). The
+ * tourkit-dash issuer will eventually add fields like `tk_tier`,
+ * `tk_issuer_id`, and `tk_claim_status`; v1.x SDKs must parse and ignore
+ * them so customers on v1.x continue to function while v2.x readers pick up
+ * the new semantics. The companion regression test
+ * `schema-no-tier.regression.test.ts` pins that **Polar itself** still does
+ * not emit `tier`; unknown additive fields from either issuer are allowed.
  */
-export const PolarValidateResponseSchema = z.object({
+export const PolarValidateResponseSchema = z.looseObject({
   id: z.string(),
   organization_id: z.string(),
   status: z.enum(['granted', 'revoked', 'disabled']),
@@ -14,7 +23,7 @@ export const PolarValidateResponseSchema = z.object({
   last_validated_at: z.string(),
   expires_at: z.string().nullable(),
   activation: z
-    .object({
+    .looseObject({
       id: z.string(),
       license_key_id: z.string(),
       label: z.string(),
@@ -27,15 +36,20 @@ export const PolarValidateResponseSchema = z.object({
 
 /**
  * Polar activate response schema — snake_case matching wire format.
+ *
+ * Same `.passthrough()` discipline as the validate response. The tourkit-dash
+ * `/v1/license/activate` endpoint is wire-compatible with Polar's
+ * `/customer-portal/license-keys/activate` per plan/15e §"byte-equality"; any
+ * additive `tk_*` fields land transparently for v1.x readers.
  */
-export const PolarActivateResponseSchema = z.object({
+export const PolarActivateResponseSchema = z.looseObject({
   id: z.string(),
   license_key_id: z.string(),
   label: z.string(),
   meta: z.record(z.string(), z.unknown()),
   created_at: z.string(),
   modified_at: z.string().nullable(),
-  license_key: z.object({
+  license_key: z.looseObject({
     id: z.string(),
     organization_id: z.string(),
     status: z.enum(['granted', 'revoked', 'disabled']),

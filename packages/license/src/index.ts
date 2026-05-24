@@ -41,6 +41,8 @@ export type { LicenseGateResult } from './hooks/use-license-gate'
 
 // Headless utilities (re-exported for convenience)
 export { validateLicenseKey } from './lib/polar-client'
+export type { ValidateOptions } from './lib/polar-client'
+export { resolveApiBase, DEFAULT_API_BASE } from './lib/resolve-api-base'
 export { isDevEnvironment, getCurrentDomain } from './lib/domain'
 export { getDaysLeft } from './lib/trial'
 export type { TrialConfig } from './lib/trial'

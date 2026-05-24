@@ -3,9 +3,19 @@ import type { LicenseState, PolarActivateResponse, PolarValidateResponse } from 
 import { readCache, writeCache } from './cache'
 import { getCurrentDomain, isDevEnvironment } from './domain'
 import { createDevBypassState, createUnlicensedState, normalizeLicenseKey } from './license-state'
+import { resolveApiBase } from './resolve-api-base'
 import { PolarActivateResponseSchema, PolarValidateResponseSchema } from './schemas'
 
-const POLAR_API_BASE = 'https://api.polar.sh/v1/customer-portal/license-keys'
+/**
+ * Options bag accepted by every low-level Polar call and by `validateLicenseKey`.
+ *
+ * `apiBase` is the load-bearing knob for the Polar → tourkit-dash issuer
+ * migration (plan/15f). When omitted the call falls through `resolveApiBase()`
+ * to the env-var chain and finally the Polar default.
+ */
+export type ValidateOptions = {
+  apiBase?: string
+}
 
 // ---------------------------------------------------------------------------
 // Error classes
@@ -89,7 +99,8 @@ function transformActivateResponse(
 export async function validateKey(
   key: string,
   organizationId: string,
-  activationId?: string
+  activationId?: string,
+  options?: ValidateOptions
 ): Promise<PolarValidateResponse> {
   const body: Record<string, string> = {
     key,
@@ -99,7 +110,7 @@ export async function validateKey(
     body.activation_id = activationId
   }
 
-  const res = await fetch(`${POLAR_API_BASE}/validate`, {
+  const res = await fetch(`${resolveApiBase(options?.apiBase)}/validate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -121,9 +132,10 @@ export async function validateKey(
 export async function activateKey(
   key: string,
   organizationId: string,
-  label: string
+  label: string,
+  options?: ValidateOptions
 ): Promise<PolarActivateResponse> {
-  const res = await fetch(`${POLAR_API_BASE}/activate`, {
+  const res = await fetch(`${resolveApiBase(options?.apiBase)}/activate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -149,9 +161,10 @@ export async function activateKey(
 export async function deactivateKey(
   key: string,
   organizationId: string,
-  activationId: string
+  activationId: string,
+  options?: ValidateOptions
 ): Promise<void> {
-  const res = await fetch(`${POLAR_API_BASE}/deactivate`, {
+  const res = await fetch(`${resolveApiBase(options?.apiBase)}/deactivate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -186,7 +199,8 @@ function generateRenderKey(key: string, domain: string | null): string {
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: orchestrator with multiple validation paths
 export async function validateLicenseKey(
   key: string,
-  organizationId?: string
+  organizationId?: string,
+  options?: ValidateOptions
 ): Promise<LicenseState> {
   const domain = getCurrentDomain()
   const orgId = organizationId ?? ''
@@ -214,8 +228,10 @@ export async function validateLicenseKey(
   }
 
   try {
-    // 3. Validate against Polar API
-    const response = await validateKey(normalizedKey, orgId)
+    // 3. Validate against the issuer (Polar by default; tourkit-dash when
+    //    `options.apiBase` or the TOUR_KIT_LICENSE_API_BASE env var overrides
+    //    the default — see plan/15f).
+    const response = await validateKey(normalizedKey, orgId, undefined, options)
 
     // 4. Map Polar status to LicenseState
     const serverValidatedAt = response.lastValidatedAt
@@ -259,7 +275,7 @@ export async function validateLicenseKey(
     let usage = response.usage
 
     if (!response.activation && domain) {
-      const activateResponse = await activateKey(normalizedKey, orgId, domain)
+      const activateResponse = await activateKey(normalizedKey, orgId, domain, options)
       activationLabel = activateResponse.label
       usage = activateResponse.licenseKey.usage
     }

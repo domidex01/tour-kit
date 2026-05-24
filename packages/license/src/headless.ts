@@ -18,6 +18,10 @@ export {
   PolarApiError,
   PolarParseError,
 } from './lib/polar-client'
+export type { ValidateOptions } from './lib/polar-client'
+
+// Issuer URL resolver (plan/15f Polar → tourkit-dash migration seam)
+export { resolveApiBase, DEFAULT_API_BASE } from './lib/resolve-api-base'
 
 // Cache
 export { readCache, writeCache, clearCache, hasFreshCache } from './lib/cache'

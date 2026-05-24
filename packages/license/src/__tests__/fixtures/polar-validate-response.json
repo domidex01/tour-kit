@@ -1,0 +1,19 @@
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "organization_id": "00000000-0000-0000-0000-0000000000aa",
+  "status": "granted",
+  "key": "TOURKIT-FIXTURE-XXXX-XXXX-XXXX-XXXX-XXXX",
+  "limit_activations": 5,
+  "usage": 1,
+  "validations": 7,
+  "last_validated_at": "2026-05-23T12:00:00.000Z",
+  "expires_at": "2027-05-23T12:00:00.000Z",
+  "activation": {
+    "id": "00000000-0000-0000-0000-0000000000bb",
+    "license_key_id": "00000000-0000-0000-0000-000000000001",
+    "label": "fixtures.example.com",
+    "meta": {},
+    "created_at": "2026-05-01T00:00:00.000Z",
+    "modified_at": null
+  }
+}

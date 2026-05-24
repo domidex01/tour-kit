@@ -1,5 +1,19 @@
 # @tour-kit/license
 
+## 1.3.0
+
+### Minor Changes
+
+- Add `apiBase` override for the Polar → tourkit-dash issuer migration (`tour-kit-cloud` plan/15f).
+  - **New `apiBase?: string` prop on `<LicenseProvider>`** — points the validate/activate/deactivate flow at a non-Polar issuer without bumping the SDK major.
+  - **New `options.apiBase` on `validateLicenseKey`, `validateKey`, `activateKey`, `deactivateKey`** — additive 4th positional arg on the low-level functions; existing positional callers are unaffected.
+  - **New `resolveApiBase(override?)` export** (from `@tour-kit/license` and `@tour-kit/license/headless`) implementing the precedence chain: explicit override > `NEXT_PUBLIC_TOUR_KIT_LICENSE_API_BASE` env > `TOUR_KIT_LICENSE_API_BASE` env > Polar default.
+  - **New `DEFAULT_API_BASE` export** holds the Polar URL string. v2.0.0 will flip this constant at T+90 per plan/15m.
+  - **`PolarValidateResponseSchema` and `PolarActivateResponseSchema` switched to `z.looseObject`** (Zod 4's non-deprecated `.passthrough()` replacement) so the tourkit-dash issuer can add additive `tk_*` fields like `tk_tier` without breaking v1.x parsers. The `schema-no-tier.regression.test.ts` pin still holds: **Polar itself** does not emit `tier`; the looseObject change permits but does not require additive fields.
+  - **New fixture** `src/__tests__/fixtures/polar-validate-response.json` — the canonical SDK-side counterpart to `tour-kit-cloud`'s byte-equality test (plan/15c §"Polar passthrough byte-equality").
+
+  Zero behavior change for callers who don't opt in. Default issuer is still Polar; existing tests pass unchanged.
+
 ## 1.2.0
 
 ### Minor Changes
