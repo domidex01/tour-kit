@@ -128,7 +128,10 @@ describe('AnnouncementSpotlight — WCAG AA contrast on light backgrounds (US-4)
       })
       expect(results).toHaveNoViolations()
       expect(container).toBeTruthy()
-    })
+      // axe scanning the full document.body is CPU-heavy and reliably exceeds
+      // vitest's 5000ms default on shared CI runners. Give it generous headroom
+      // so this a11y check is not flaky under load.
+    }, 20000)
   }
 })
 
