@@ -70,12 +70,21 @@ const EXIT_NO_FILES = 3
 
 class UsageError extends Error {}
 
+// An explicit `--help` / `-h` request is a success, not a usage error. Carrying
+// it as a distinct signal lets runMigrate print usage once to stdout and return
+// EXIT_OK, matching every well-behaved CLI (git, npm, node).
+class HelpRequested extends Error {}
+
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: top-level CLI dispatch — one branch per flag/exit-code; splitting hides the contract
 export async function runMigrate(argv: readonly string[]): Promise<number> {
   let opts: CliOptions
   try {
     opts = parseArgs(argv)
   } catch (e) {
+    if (e instanceof HelpRequested) {
+      console.log(usageMessage())
+      return EXIT_OK
+    }
     if (e instanceof UsageError) {
       console.error(`usage error: ${e.message}`)
       console.error(usageMessage())
@@ -210,8 +219,7 @@ function parseArgs(argv: readonly string[]): CliOptions {
       continue
     }
     if (arg === '--help' || arg === '-h') {
-      console.log(usageMessage())
-      throw new UsageError('help requested')
+      throw new HelpRequested()
     }
     if (arg.startsWith('--')) {
       throw new UsageError(`unrecognized flag: ${arg}`)
