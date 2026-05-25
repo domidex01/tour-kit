@@ -1,10 +1,4 @@
 {
   "title": "Codemods",
-  "pages": [
-    "index",
-    "---",
-    "from-shepherd",
-    "from-driver",
-    "from-joyride"
-  ]
+  "pages": ["index", "---", "from-shepherd", "from-driver", "from-joyride"]
 }
