@@ -37,7 +37,32 @@ function renderTour(tours: TourConfig[], tourId: string, targets: React.ReactNod
     </>,
   )
 }
+
+// A two-step demo tour, reused by several recipes below.
+const tours: TourConfig[] = [
+  {
+    id: 'demo',
+    steps: [
+      { id: 's1', target: '#a', content: 'First' },
+      { id: 's2', target: '#b', content: 'Second' },
+    ],
+  },
+]
+
+// A five-step tour for the "jump to a non-adjacent step" recipe.
+const longTour: TourConfig = {
+  id: 'long',
+  steps: ['s1', 's2', 's3', 's4', 's5'].map((id) => ({
+    id,
+    target: `#${id}`,
+    content: id,
+  })),
+}
 ```
+
+Each recipe below renders DOM targets for the steps it drives — the `#a` /
+`#b` / `#s1`… `<div>`s you'll see passed to `renderTour` — so the card has a
+real element to anchor to.
 
 ## 1. Asserting that a tour starts on mount
 
@@ -58,7 +83,7 @@ it('autostarts the welcome tour', async () => {
 ## 2. Driving a tour through every step
 
 ```tsx
-import { render, advanceTour, completeTour, expectStepVisible, HookProbe } from '@tour-kit/testing-library'
+import { advanceTour, completeTour, expectStepVisible } from '@tour-kit/testing-library'
 
 it('walks step 1 → 2 → done', async () => {
   renderTour(tours, 'demo', <>
@@ -79,12 +104,19 @@ it('walks step 1 → 2 → done', async () => {
 ## 3. Skipping mid-tour
 
 ```tsx
-import { skipTour } from '@tour-kit/testing-library'
+import { vi } from 'vitest'
+import { expectStepVisible, skipTour } from '@tour-kit/testing-library'
 
 it('skip mid-tour invokes onSkip', async () => {
   const onSkip = vi.fn()
-  renderTour([{ ...tours[0], onSkip }], 'demo')
+  renderTour([{ ...tours[0], onSkip }], 'demo', <>
+    <div id="a" />
+    <div id="b" />
+  </>)
 
+  // Wait for the card (and its Skip button) to mount before skipping —
+  // skipTour() queries synchronously and start() settles asynchronously.
+  await expectStepVisible('s1')
   await skipTour()
   expect(onSkip).toHaveBeenCalledOnce()
 })
@@ -99,7 +131,15 @@ the tour handle.
 import { goToStep, expectStepVisible } from '@tour-kit/testing-library'
 
 it('jumps from step 1 to step 5', async () => {
-  renderTour(tours, 'long')
+  renderTour(
+    [longTour],
+    'long',
+    <>
+      {['s1', 's2', 's3', 's4', 's5'].map((id) => (
+        <div key={id} id={id} />
+      ))}
+    </>,
+  )
 
   await expectStepVisible('s1')
   await goToStep('s5')
