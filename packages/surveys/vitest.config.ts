@@ -8,6 +8,11 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./vitest.setup.ts', './src/__tests__/setup.ts'],
+    // Render-heavy modal suites (CSAT/NPS turnkey modals with Floating UI +
+    // portals) flake at vitest's 5000ms default on shared CI runners while
+    // passing locally. Raise the package-wide timeout so they aren't flaky
+    // under load — same remedy as packages/announcements.
+    testTimeout: 20000,
     coverage: {
       provider: 'v8',
       include: [
