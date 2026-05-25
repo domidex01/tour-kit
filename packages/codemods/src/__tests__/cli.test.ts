@@ -49,6 +49,60 @@ describe('CLI exit codes', () => {
   })
 })
 
+describe('CLI --help', () => {
+  function captureConsole() {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const join = (spy: typeof log) => spy.mock.calls.map((c) => c.map(String).join(' ')).join('\n')
+    return {
+      get stdout(): string {
+        return join(log)
+      },
+      get stderr(): string {
+        return join(error)
+      },
+      restore: () => {
+        log.mockRestore()
+        error.mockRestore()
+      },
+    }
+  }
+
+  it('exits 0 on --help (help is success, not a usage error)', async () => {
+    const c = captureConsole()
+    const code = await runMigrate(['--help'])
+    c.restore()
+    expect(code).toBe(0)
+  })
+
+  it('exits 0 on the -h alias', async () => {
+    const c = captureConsole()
+    const code = await runMigrate(['-h'])
+    c.restore()
+    expect(code).toBe(0)
+  })
+
+  it('short-circuits before --from is required', async () => {
+    // `--help` with no `--from` must still exit 0, not 2 (bad args).
+    const c = captureConsole()
+    const code = await runMigrate(['--help'])
+    c.restore()
+    expect(code).toBe(0)
+  })
+
+  it('prints usage once to stdout and nothing to stderr', async () => {
+    const c = captureConsole()
+    await runMigrate(['--help'])
+    const { stdout, stderr } = c
+    c.restore()
+    expect(stdout).toMatch(/Usage: tour-kit-migrate/)
+    // Regression guard: the old path threw UsageError and re-printed usage to
+    // stderr with a spurious "usage error: help requested" line.
+    expect(stderr).toBe('')
+    expect(stdout.match(/Usage: tour-kit-migrate/g)).toHaveLength(1)
+  })
+})
+
 describe('CLI --dry-run safety (SHA comparison)', () => {
   it('does not modify any file on disk', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'tk-dry-'))

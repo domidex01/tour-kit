@@ -38,4 +38,11 @@ describe('bin smoke (gated on dist/bin/tour-kit-migrate.cjs existing)', () => {
     const r = run(['--from', 'joyride'])
     expect(r.code).toBe(3)
   })
+
+  skipUnlessBuilt('exits 0 on --help and prints usage to stdout', () => {
+    const r = run(['--help'])
+    expect(r.code).toBe(0)
+    expect(r.stdout).toMatch(/Usage: tour-kit-migrate/)
+    expect(r.stderr).toBe('')
+  })
 })
