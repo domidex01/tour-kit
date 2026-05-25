@@ -62,3 +62,22 @@ export function ThreeStepFixture() {
     </>
   )
 }
+
+/**
+ * Two-step tour wired with an `onSkip` callback. Backs the recipe §3 guard —
+ * skipping mid-tour must invoke the tour's `onSkip`.
+ */
+export function SkipFixture({ onSkip }: { onSkip: Tour['onSkip'] }) {
+  const tour: Tour = { ...twoStepTour, id: 'skip-demo', onSkip }
+  return (
+    <>
+      <div data-test="welcome-target">welcome target</div>
+      <div data-test="pricing-target">pricing target</div>
+      <TourProvider tours={[tour]}>
+        <AutoStart tourId="skip-demo" />
+        <TourCard />
+        <HookProbe />
+      </TourProvider>
+    </>
+  )
+}
