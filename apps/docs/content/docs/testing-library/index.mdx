@@ -1,0 +1,152 @@
+---
+title: Testing Library
+description: Tour Kit's test helpers for Vitest, Jest, and React Testing Library.
+---
+
+`@tour-kit/testing-library` is a thin layer of test helpers on top of
+[`@testing-library/react`](https://testing-library.com/docs/react-testing-library/intro/).
+It exists so you can assert against tour state without reaching into
+provider internals or scraping the DOM by hand.
+
+## Install
+
+```bash
+pnpm add -D @tour-kit/testing-library @testing-library/react vitest
+# or npm install --save-dev ...
+```
+
+## Setup
+
+Call `setupTourKitTesting()` once in your test setup file (e.g.
+`vitest.setup.ts`). It registers cleanup hooks and configures
+`@testing-library/react` for tour-kit's portal layout.
+
+```ts
+// vitest.setup.ts
+import { setupTourKitTesting } from '@tour-kit/testing-library/setup'
+
+setupTourKitTesting()
+```
+
+> Use the `/setup` subpath to keep your setup file free of the RTL
+> dependency graph until tests actually need it.
+
+In `vitest.config.ts`:
+
+```ts
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+  },
+})
+```
+
+## Quick example
+
+```tsx
+import { describe, it, expect } from 'vitest'
+import {
+  render,
+  expectStepVisible,
+  advanceTour,
+  HookProbe,
+} from '@tour-kit/testing-library'
+import { TourProvider, TourCard, useTour } from '@tour-kit/react'
+import * as React from 'react'
+
+const tours = [
+  {
+    id: 'demo',
+    steps: [
+      { id: 's1', target: '#a', content: 'First' },
+      { id: 's2', target: '#b', content: 'Second' },
+    ],
+  },
+]
+
+function AutoStart({ tourId }: { tourId: string }) {
+  const { start } = useTour()
+  const started = React.useRef(false)
+  // Start exactly once. `useTour().start` changes identity as provider state
+  // updates, so guard against re-running the effect and restarting the tour.
+  React.useEffect(() => {
+    if (started.current) return
+    started.current = true
+    void start(tourId)
+  }, [start, tourId])
+  return null
+}
+
+describe('demo tour', () => {
+  it('walks step 1 → step 2', async () => {
+    render(
+      <>
+        <div id="a">A</div>
+        <div id="b">B</div>
+        <TourProvider tours={tours}>
+          <AutoStart tourId="demo" />
+          <TourCard />
+          <HookProbe />
+        </TourProvider>
+      </>,
+    )
+
+    await expectStepVisible('s1')
+    await advanceTour()
+    await expectStepVisible('s2')
+  })
+})
+```
+
+The key bits:
+
+- **`<TourCard />`** — renders the current visible step. `TourProvider`
+  owns state but does not render a card by itself.
+- **`<HookProbe />`** — mount this inside `<TourProvider>` so helpers like
+  `goToStep` can reach the active tour handle.
+- **`expectStepVisible(id)`** — waits for the step's card to render
+  (handles portal mount delay) and asserts visibility.
+- **`advanceTour()`** — synthetic equivalent of clicking "Next."
+  Drives the same actions hook your UI uses.
+
+## Available helpers
+
+| Helper                          | Purpose                                          |
+|---------------------------------|--------------------------------------------------|
+| `setupTourKitTesting(opts?)`    | Global setup (call once in test setup file)      |
+| `virtualTarget(rect?, contextElement?)` | Create a Floating UI virtual reference for low-level positioning tests |
+| `expectStepVisible(id, opts?)`  | Wait + assert the step's card is visible         |
+| `advanceTour(opts?)`            | Click-equivalent "Next"                          |
+| `previousTour(opts?)`           | Click-equivalent "Back"                          |
+| `skipTour(opts?)`               | Click-equivalent "Skip"                          |
+| `completeTour(tourId, opts?)`   | Click-equivalent flow through the named tour until done |
+| `goToStep(id)`                  | Jump to step `id` (requires `<HookProbe />`)     |
+| `HookProbe`                     | Bridge component — mount inside `<TourProvider>` |
+| `getActiveTourHandle()`         | Escape hatch — returns the live tour handle      |
+| `TourKitTestingError`           | Typed error thrown by all helpers                |
+
+Plus re-exported from `@testing-library/react` for convenience:
+`render`, `screen`, `fireEvent`, `waitFor`, `act`, `cleanup`.
+
+## Why these helpers?
+
+Without them, you'd be:
+
+- Polling for portal mount by reading from `document.body` directly.
+- Calling `userEvent.click` on a button whose selector depends on
+  Tour Kit's internal DOM (brittle).
+- Reaching into the provider context with `useContext()` from a test
+  helper component you wrote yourself.
+
+The helpers normalize against the provider's actual state — if Tour Kit
+changes how a step renders, the helpers update with it; your tests don't.
+
+## See also
+
+- [Recipes](/docs/testing-library/recipes) — copy-paste patterns for
+  common test scenarios.
+- [`@tour-kit/react` reference](/docs/react) — `TourProvider`, `TourCard`,
+  and the `useTour` hook used throughout these examples.

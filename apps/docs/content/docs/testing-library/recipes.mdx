@@ -1,0 +1,171 @@
+---
+title: Recipes
+description: Copy-paste test patterns for Tour Kit.
+---
+
+Patterns that come up over and over in tour testing. Copy, adapt, ship.
+
+The snippets below assume this tiny harness:
+
+```tsx
+import { HookProbe, render } from '@tour-kit/testing-library'
+import { TourProvider, TourCard, useTour, type TourConfig } from '@tour-kit/react'
+import * as React from 'react'
+
+function AutoStart({ tourId }: { tourId: string }) {
+  const { start } = useTour()
+  const started = React.useRef(false)
+  // Start exactly once. `useTour().start` changes identity as provider state
+  // updates, so guard against re-running the effect and restarting the tour.
+  React.useEffect(() => {
+    if (started.current) return
+    started.current = true
+    void start(tourId)
+  }, [start, tourId])
+  return null
+}
+
+function renderTour(tours: TourConfig[], tourId: string, targets: React.ReactNode = null) {
+  return render(
+    <>
+      {targets}
+      <TourProvider tours={tours}>
+        <AutoStart tourId={tourId} />
+        <TourCard />
+        <HookProbe />
+      </TourProvider>
+    </>,
+  )
+}
+```
+
+## 1. Asserting that a tour starts on mount
+
+```tsx
+import { expectStepVisible } from '@tour-kit/testing-library'
+
+it('autostarts the welcome tour', async () => {
+  renderTour(
+    [{ id: 'welcome', steps: [{ id: 'hi', target: '#hi', content: 'Hi' }] }],
+    'welcome',
+    <div id="hi" />,
+  )
+
+  await expectStepVisible('hi')
+})
+```
+
+## 2. Driving a tour through every step
+
+```tsx
+import { render, advanceTour, completeTour, expectStepVisible, HookProbe } from '@tour-kit/testing-library'
+
+it('walks step 1 → 2 → done', async () => {
+  renderTour(tours, 'demo', <>
+    <div id="a" />
+    <div id="b" />
+  </>)
+
+  await expectStepVisible('s1')
+  await advanceTour()
+  await expectStepVisible('s2')
+  await completeTour('demo')
+
+  // Tour is done — no step should be visible:
+  expect(document.querySelector('[data-tour-step]')).toBeNull()
+})
+```
+
+## 3. Skipping mid-tour
+
+```tsx
+import { skipTour } from '@tour-kit/testing-library'
+
+it('skip mid-tour invokes onSkip', async () => {
+  const onSkip = vi.fn()
+  renderTour([{ ...tours[0], onSkip }], 'demo')
+
+  await skipTour()
+  expect(onSkip).toHaveBeenCalledOnce()
+})
+```
+
+## 4. Jumping to a non-adjacent step
+
+`goToStep` requires the `<HookProbe />` because it needs direct access to
+the tour handle.
+
+```tsx
+import { goToStep, expectStepVisible } from '@tour-kit/testing-library'
+
+it('jumps from step 1 to step 5', async () => {
+  renderTour(tours, 'long')
+
+  await expectStepVisible('s1')
+  await goToStep('s5')
+  await expectStepVisible('s5')
+})
+```
+
+## 5. Testing target positioning helpers
+
+Use `virtualTarget` for low-level Floating UI positioning tests. It does not
+create a selector-backed DOM element for `TourStep.target`; for full TourCard
+tests, render a real DOM target or pass a ref/getter.
+
+```tsx
+import { virtualTarget } from '@tour-kit/testing-library'
+
+it('creates a stable virtual rect', () => {
+  const target = virtualTarget({ width: 320, height: 180 })
+  expect(target.getBoundingClientRect().width).toBe(320)
+})
+```
+
+## 6. Asserting against the active tour handle directly
+
+For complex assertions, drop to the handle:
+
+```tsx
+import { getActiveTourHandle, waitFor } from '@tour-kit/testing-library'
+
+it('exposes step metadata via the handle', async () => {
+  renderTour(tours, 'demo')
+
+  // `start()` settles asynchronously, so wait for the handle to reflect it
+  // before reading. (`waitFor` is re-exported from the testing library.)
+  await waitFor(() => {
+    expect(getActiveTourHandle()?.currentStep?.id).toBe('s1')
+  })
+  expect(getActiveTourHandle()?.totalSteps).toBe(2)
+})
+```
+
+## 7. Mocking storage between tests
+
+Tour Kit persists progress to localStorage by default. If your tests
+care about a fresh state per test, clear it in `beforeEach`:
+
+```ts
+import { beforeEach } from 'vitest'
+
+beforeEach(() => {
+  localStorage.clear()
+})
+```
+
+Or pass an in-memory storage adapter to the provider — see the
+[persistence guide](/docs/guides/persistence).
+
+## 8. Testing portal-rendered cards
+
+Cards render into a portal mounted on `document.body`. The helpers handle
+this for you, but if you bypass them and use `screen.getByText`, scope
+your query to the portal root:
+
+```tsx
+import { within } from '@testing-library/react'
+
+const text = within(document.body).getByText(/welcome/i)
+expect(text).toBeVisible()
+```
