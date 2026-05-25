@@ -1,0 +1,119 @@
+---
+title: Codemods
+description: >-
+  Automated jscodeshift codemods to migrate from React Joyride, Shepherd.js,
+  and Driver.js to Tour Kit using the tour-kit-migrate CLI.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+`@tour-kit/codemods` ships [jscodeshift](https://github.com/facebook/jscodeshift)
+transforms that rewrite Joyride, Shepherd.js, and Driver.js call sites into
+their Tour Kit equivalents. They handle the mechanical parts of a migration —
+step-list reshaping, prop renames, import swaps — so you can focus on the parts
+that need product judgment.
+
+The transforms are conservative by design: anything a codemod can't represent
+safely is kept in place and annotated with a `// TODO:` comment that links to
+the matching migration guide. A transform that mangles your code is worse than
+no transform.
+
+## When to use a codemod
+
+- **You have a working tour in another library** and want to evaluate Tour Kit
+  without hand-rewriting every step list.
+- **You're migrating a non-trivial app** (10+ tours). Hand-edits scale badly.
+- **You want a starting point.** Codemods aren't a one-shot drop-in; expect to
+  manually adjust the output. They get you past the boilerplate.
+
+If your app has one tour with three steps, hand-editing is faster.
+
+## Install
+
+Run it once with `npx` (no install), or add it as a dev dependency:
+
+```bash
+# One-off, no install
+npx tour-kit-migrate --from shepherd --dry-run ./src
+
+# Or add it to the project
+pnpm add -D @tour-kit/codemods   # or: npm install -D / bun add -D
+```
+
+Always start with `--dry-run` to preview the diff, then re-run without it to
+write the changes:
+
+```bash
+npx tour-kit-migrate --from shepherd --dry-run ./src
+npx tour-kit-migrate --from shepherd ./src
+```
+
+(Substitute `--from driver` or `--from joyride` as needed.)
+
+### Flags
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--from <source>` | required | One of `joyride`, `shepherd`, `driver` |
+| `--parser <parser>` | `tsx` | `tsx` / `ts` / `babel` |
+| `--dry-run` | off | Print diffs, don't write files |
+| `--print` | off | Write transformed source to stdout |
+| `--extensions <list>` | `ts,tsx,js,jsx` | Comma-separated extension list |
+| `--verbose` | off | Log every file action |
+| `--help`, `-h` | — | Print usage and exit |
+
+Print the full reference any time:
+
+```bash
+npx tour-kit-migrate --help
+```
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success (or `--help`) |
+| 1 | Parse error during transform |
+| 2 | Bad CLI args |
+| 3 | No files matched |
+
+## Available transforms
+
+- [from-shepherd](/docs/codemods/from-shepherd) — Shepherd.js v10+ → Tour Kit.
+- [from-driver](/docs/codemods/from-driver) — Driver.js v1+ → Tour Kit.
+- [from-joyride](/docs/codemods/from-joyride) — React Joyride v2 → Tour Kit.
+
+## After running a codemod
+
+1. **Review the diff.** The transform comments every construct it can't migrate
+   with a `// TODO:` that links to the matching migration guide — search the
+   output for `TODO`.
+2. **Run your tests.** Codemods don't preserve runtime behavior for 100% of
+   edge cases; the remainder is on you.
+3. **Format the output** (`prettier --write` or `biome format --write`).
+4. **Open the matching guide** for the library you migrated from
+   ([/docs/migration/shepherd](/docs/migration/shepherd),
+   [/docs/migration/driver](/docs/migration/driver),
+   [/docs/migration/joyride](/docs/migration/joyride)) for the hand-port context
+   the codemod can't infer.
+
+<Callout type="warn">
+The codemod produces a Tour Kit tour shape — a `{ id, steps }` object literal —
+but it does **not** decide where to mount `<TourProvider>` or wire imperative
+calls. You register the migrated tour at a [`<TourProvider>`](/docs/core/providers/tour-provider)
+ancestor and call [`useTour()`](/docs/core/hooks/use-tour) from a descendant.
+Those steps are flagged with `// TODO:` comments.
+</Callout>
+
+## Limitations
+
+Codemods operate on the AST. They cannot infer:
+
+- **Dynamically constructed step lists** (e.g. `steps.push(...)` driven by
+  runtime data) — these are left as a `// TODO:`.
+- **Custom themes / styles** — port these manually against the Tour Kit
+  theming setup.
+- **Server-rendered tours** (Next.js App Router) — add `'use client'` to the
+  migrated module yourself.
+
+When in doubt, search the output for `TODO` markers.

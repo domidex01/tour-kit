@@ -1,0 +1,122 @@
+---
+title: from-shepherd
+description: >-
+  Migrate a Shepherd.js v10+ codebase to Tour Kit with the
+  tour-kit-migrate --from shepherd codemod.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Rewrites the `new Shepherd.Tour({...})` + `.addStep({...})` + `.start()`
+imperative chain into a single Tour Kit tour-shaped object literal.
+
+## Run
+
+```bash
+npx tour-kit-migrate --from shepherd --dry-run ./src
+npx tour-kit-migrate --from shepherd ./src
+```
+
+<Callout type="info">
+Run with `--dry-run` to preview the diff without writing. Run with `--print` to
+write transformed source to stdout. Add `--verbose` to log every file action.
+</Callout>
+
+## What it changes
+
+| Shepherd.js | Tour Kit |
+| --- | --- |
+| `import Shepherd from 'shepherd.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| `import { Tour } from 'shepherd.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| `new Shepherd.Tour({...})` | `{ id: 'migrated-tour', steps: [...] }` literal + `// TODO:` to register at `<TourProvider>` |
+| `.addStep({ id, text, attachTo })` chain | merged into the `steps: [...]` array |
+| `attachTo.element` (selector) | `target` |
+| `attachTo.on` (placement) | `placement` |
+| `Step.text` | `content` |
+| `tour.start()` | `// TODO:` → `useTour().start()` |
+| `tour.cancel()` | `// TODO:` → `useTour().skip()` |
+| `tour.complete()` | `// TODO:` → `useTour().complete()` |
+| `tour.next()` / `.back()` / `.show()` | `// TODO:` → `useTour().next()` / `.prev()` / `.goTo()` |
+
+## What it does NOT handle
+
+- **`buttons` arrays.** Shepherd's button array is open-ended; the codemod drops
+  it and leaves a `// TODO:`. Tour Kit ships fixed [`<TourCard>`](/docs/react/components/tour-card)
+  slots (Next / Prev / Skip / Close) — wire any custom button action through
+  the card's children.
+- **`classes`, `scrollTo`, `when`, `advanceOn`, `beforeShowPromise`.** Each is
+  preserved as a `// TODO:` linking to the matching anchor in the
+  [Shepherd.js migration guide](/docs/migration/shepherd).
+- **Dynamic `attachTo` or `addStep` arguments** (spread/variable, not an inline
+  object) — the codemod can't inline the shape, so it leaves a `// TODO:`.
+- **Multiple parallel `Tour` instances.** Tour Kit's multi-tour registry handles
+  this differently — see [`<TourProvider>`](/docs/core/providers/tour-provider).
+
+## Example
+
+**Before:**
+
+```ts
+import Shepherd from 'shepherd.js'
+
+const tour = new Shepherd.Tour({
+  defaultStepOptions: { scrollTo: true, cancelIcon: { enabled: true } },
+})
+
+tour.addStep({
+  id: 'welcome',
+  text: 'Welcome!',
+  attachTo: { element: '#header', on: 'bottom' },
+})
+
+tour.addStep({
+  id: 'cta',
+  text: 'Click here to begin.',
+  attachTo: { element: '#cta-button', on: 'top' },
+})
+
+tour.start()
+```
+
+**After codemod:**
+
+```tsx
+import { TourProvider } from '@tour-kit/react'
+
+// TODO: register this tour at a <TourProvider> ancestor — see
+// /docs/migration/shepherd#tour-constructor
+const tour = {
+  id: 'migrated-tour',
+  steps: [
+    { id: 'welcome', content: 'Welcome!', target: '#header', placement: 'bottom' },
+    { id: 'cta', content: 'Click here to begin.', target: '#cta-button', placement: 'top' },
+  ],
+}
+
+// TODO: the migrated tour has no .start() — call useTour().start() from a
+// descendant of the <TourProvider> that registers it.
+// /docs/migration/shepherd#start
+```
+
+Wire it up by hand:
+
+```tsx
+import { TourProvider, useTour } from '@tour-kit/react'
+
+function App({ children }) {
+  return <TourProvider tours={[tour]}>{children}</TourProvider>
+}
+
+function StartButton() {
+  const { start } = useTour()
+  return <button onClick={() => start()}>Take the tour</button>
+}
+```
+
+## See also
+
+- [Migration guide: Shepherd.js → Tour Kit](/docs/migration/shepherd) — the
+  per-anchor hand-port reference for everything the codemod leaves as a TODO.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — register the migrated tour shape here.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `tour.start()` / `.cancel()` / `.next()`.
+- [`<TourCard>`](/docs/react/components/tour-card) — the slot that replaces Shepherd's `buttons` array.

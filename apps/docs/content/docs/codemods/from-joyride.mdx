@@ -1,0 +1,104 @@
+---
+title: from-joyride
+description: >-
+  Migrate a React Joyride v2 codebase to Tour Kit with the
+  tour-kit-migrate --from joyride codemod.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Rewrites the `react-joyride` imports plus both the legacy `<Joyride>` JSX form
+and the modern `useJoyride()` hook form. Joyride's step shape
+(`{ target, content }`) already matches Tour Kit, so step lists carry over
+unchanged.
+
+## Run
+
+```bash
+npx tour-kit-migrate --from joyride --dry-run ./src
+npx tour-kit-migrate --from joyride ./src
+```
+
+<Callout type="info">
+Run with `--dry-run` to preview the diff without writing. Run with `--print` to
+write transformed source to stdout. Add `--verbose` to log every file action.
+</Callout>
+
+## What it changes
+
+| React Joyride | Tour Kit |
+| --- | --- |
+| `import Joyride from 'react-joyride'` | `import { TourProvider } from '@tour-kit/react'` |
+| `import { useJoyride } from 'react-joyride'` | `import { useTour } from '@tour-kit/react'` |
+| `<Joyride steps={...} />` | `<TourProvider tours={[{ id: 'migrated-tour', steps }]} />` |
+| `{ target: '.x', content: '...' }` | same shape — no change |
+| `const { Tour, controls } = useJoyride({ steps })` | `const controls = useTour()` + `// TODO:` to register the tour |
+| `<Tour />` | `null` + `// TODO:` to render via a `<TourProvider>` ancestor |
+
+## What it does NOT handle
+
+- **Joyride-only props** (`callback`, `run`, `stepIndex`, `showProgress`,
+  `showSkipButton`, `continuous`, `disableBeacon`, …) are preserved next to the
+  output with a `// TODO:` linking to the matching anchor in the
+  [React Joyride migration guide](/docs/migration/joyride). For example
+  `continuous` is the default in Tour Kit and can be dropped, while `run` maps
+  to calling `useTour().start()`.
+- **`Step.styles` / `Step.tooltipComponent`** — custom tooltip rendering ports
+  to [`<TourCard>`](/docs/react/components/tour-card) children, not a prop.
+- **`useJoyride` control wiring.** The hook is swapped for `useTour()`, but
+  registering the tour at a `<TourProvider>` ancestor is left as a `// TODO:`.
+
+## Example
+
+**Before:**
+
+```tsx
+import Joyride from 'react-joyride'
+
+function App() {
+  return (
+    <Joyride
+      steps={[
+        { target: '.step-1', content: 'Welcome!' },
+        { target: '.step-2', content: 'Next up.' },
+      ]}
+      run
+      continuous
+    />
+  )
+}
+```
+
+**After codemod:**
+
+```tsx
+import { TourProvider } from '@tour-kit/react'
+
+function App() {
+  return (
+    <TourProvider
+      tours={[
+        {
+          id: 'migrated-tour',
+          steps: [
+            { target: '.step-1', content: 'Welcome!' },
+            { target: '.step-2', content: 'Next up.' },
+          ],
+        },
+      ]}
+      // TODO: `run` had no direct prop — call useTour().start() to begin.
+      // /docs/migration/joyride#run
+      // TODO: `continuous` is the Tour Kit default — drop it.
+      // /docs/migration/joyride#continuous
+    />
+  )
+}
+```
+
+## See also
+
+- [Migration guide: React Joyride → Tour Kit](/docs/migration/joyride) — the
+  per-anchor hand-port reference for everything the codemod leaves as a TODO.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — where the migrated `tours` array is registered.
+- [`useTour`](/docs/core/hooks/use-tour) — the replacement for `useJoyride()`.
+- [Quick start](/docs/getting-started/quick-start) — wire the migrated tour into a working app.

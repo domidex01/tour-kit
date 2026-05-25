@@ -1,0 +1,118 @@
+---
+title: from-driver
+description: >-
+  Migrate a Driver.js v1+ codebase to Tour Kit with the
+  tour-kit-migrate --from driver codemod.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Reshapes `driver({...})` config objects into a Tour Kit tour-shaped object
+literal and turns the `.drive()` chain into a `// TODO:` pointing at `useTour()`.
+
+## Run
+
+```bash
+npx tour-kit-migrate --from driver --dry-run ./src
+npx tour-kit-migrate --from driver ./src
+```
+
+<Callout type="info">
+Run with `--dry-run` to preview the diff without writing. Run with `--print` to
+write transformed source to stdout. Add `--verbose` to log every file action.
+</Callout>
+
+## What it changes
+
+| Driver.js | Tour Kit |
+| --- | --- |
+| `import { driver } from 'driver.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| `driver({ steps: [...] })` | `{ id: 'migrated-tour', steps: [...] }` literal + `// TODO:` to register at `<TourProvider>` |
+| `Step.element` (selector) | `target` |
+| `popover.title` | `title` |
+| `popover.description` | `content` |
+| `popover.side` | `placement` |
+| `popover.align` | folded into compound placement (`top-start`, `top-end`, …) + `// TODO:` |
+| `d.drive()` | `// TODO:` → `useTour().start()` |
+| `d.destroy()` | `// TODO:` → `useTour().stop()` |
+| `d.moveNext()` / `.movePrevious()` / `.moveTo(i)` | `// TODO:` → `useTour().next()` / `.prev()` / `.goTo(i)` |
+
+## What it does NOT handle
+
+- **Tour-level styling config** (`overlayColor`, `overlayOpacity`, `stagePadding`,
+  `stageRadius`, `popoverClass`) — each is preserved as a `// TODO:`; port via
+  your theme tokens and overlay slot.
+- **Per-step button overrides** (`doneBtnText`, `showButtons`, `onNextClick`, …)
+  — Tour Kit composes buttons through [`<TourCard>`](/docs/react/components/tour-card)
+  slots; the codemod leaves a `// TODO:` for each.
+- **`d.highlight()`** (single popover, no tour) — there's no single-step
+  highlight in `@tour-kit/react`; the codemod points you at `<HintHotspot>` from
+  `@tour-kit/hints`.
+- **Dynamic config / DOM-element targets** (`element: () => ...`, captured
+  `HTMLElement`) — left as a `// TODO:` against the
+  [Driver.js migration guide](/docs/migration/driver).
+
+## Example
+
+**Before:**
+
+```ts
+import { driver } from 'driver.js'
+
+const tour = driver({
+  steps: [
+    {
+      element: '#header',
+      popover: { title: 'Welcome', description: 'Get started.', side: 'bottom' },
+    },
+  ],
+})
+
+tour.drive()
+```
+
+**After codemod:**
+
+```tsx
+import { TourProvider } from '@tour-kit/react'
+
+// TODO: register this tour at a <TourProvider> ancestor — see
+// /docs/migration/driver#driver-call
+const tour = {
+  id: 'migrated-tour',
+  steps: [
+    {
+      target: '#header',
+      title: 'Welcome',
+      content: 'Get started.',
+      placement: 'bottom',
+    },
+  ],
+}
+
+// TODO: the migrated tour has no .drive() — call useTour().start() from a
+// descendant of the <TourProvider> that registers it.
+// /docs/migration/driver#drive
+```
+
+Wire it up by hand:
+
+```tsx
+import { TourProvider, useTour } from '@tour-kit/react'
+
+function App({ children }) {
+  return <TourProvider tours={[tour]}>{children}</TourProvider>
+}
+
+function StartButton() {
+  const { start } = useTour()
+  return <button onClick={() => start()}>Take the tour</button>
+}
+```
+
+## See also
+
+- [Migration guide: Driver.js → Tour Kit](/docs/migration/driver) — the
+  per-anchor hand-port reference for everything the codemod leaves as a TODO.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — register the migrated tour shape here.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `d.drive()` / `.moveNext()` / `.moveTo()`.
