@@ -1,5 +1,51 @@
 # @tour-kit/adoption
 
+## 2.1.5
+
+### Patch Changes
+
+- b65a49f: fix(adoption): export `AdoptionFunnel` from the main entry
+
+  `AdoptionFunnel` was reachable via the dashboard barrel
+  (`@tour-kit/adoption/components/dashboard`) but missing from the main
+  entry's value re-export block — only `AdoptionFunnelProps` (the type)
+  made it through. Consumers writing
+  `import { AdoptionFunnel } from '@tour-kit/adoption'` got `undefined`
+  at runtime.
+
+  Adds `AdoptionFunnel` to the dashboard value re-export and a regression
+  test that walks every dashboard component name through the main entry
+  plus the built `dist/index.d.{ts,cts}` declaration files.
+
+  Fixes #75.
+
+- 13edfb9: Add `"sideEffects": false` so bundlers can tree-shake unused exports.
+
+  Matches the convention used by sibling packages in the repo. Consumers
+  importing a subset of `@tour-kit/adoption` exports (e.g. only `useAdoption`)
+  will now have the other named exports eliminated from their bundle.
+
+  Side benefit: tsup/esbuild also reads this hint at build time, which
+  reduces the package's own ESM dist by ~8% (`dist/index.js` 28066 → 25665
+  bytes). No runtime behavior changes.
+
+  Refs: audit B-5.
+
+- ef31ce6: chore: move 7 runtime dependencies into the pnpm catalog
+
+  `@floating-ui/react`, `class-variance-authority`, `@radix-ui/react-slot`,
+  `@radix-ui/react-dialog`, `@mui/base`, `clsx`, `tailwind-merge` are now
+  resolved via `catalog:` in `pnpm-workspace.yaml`. No version changes; no
+  behavior changes. Cuts future bumps from a 9-file find-and-replace to a
+  one-line edit and prevents accidental drift.
+
+  Refs: audit R-3.
+
+- Updated dependencies [ef31ce6]
+  - @tour-kit/core@1.0.2
+  - @tour-kit/analytics@0.11.5
+  - @tour-kit/license@1.3.2
+
 ## 2.1.4
 
 ### Patch Changes

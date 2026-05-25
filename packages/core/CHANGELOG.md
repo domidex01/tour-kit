@@ -1,5 +1,19 @@
 # @tour-kit/core
 
+## 1.0.2
+
+### Patch Changes
+
+- ef31ce6: chore: move 7 runtime dependencies into the pnpm catalog
+
+  `@floating-ui/react`, `class-variance-authority`, `@radix-ui/react-slot`,
+  `@radix-ui/react-dialog`, `@mui/base`, `clsx`, `tailwind-merge` are now
+  resolved via `catalog:` in `pnpm-workspace.yaml`. No version changes; no
+  behavior changes. Cuts future bumps from a 9-file find-and-replace to a
+  one-line edit and prevents accidental drift.
+
+  Refs: audit R-3.
+
 ## 1.0.1
 
 ### Patch Changes

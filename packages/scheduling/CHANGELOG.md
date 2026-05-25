@@ -1,5 +1,12 @@
 # @tour-kit/scheduling
 
+## 0.11.5
+
+### Patch Changes
+
+- @tour-kit/analytics@0.11.5
+- @tour-kit/license@1.3.2
+
 ## 0.11.4
 
 ### Patch Changes
