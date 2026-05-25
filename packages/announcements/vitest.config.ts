@@ -8,6 +8,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts', './src/__tests__/setup.tsx'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // Several render-heavy suites (spotlight axe scans, turnkey modals with
+    // Floating UI + portals) exceed vitest's 5000ms default on shared CI
+    // runners while passing comfortably locally. Raise the package-wide
+    // timeout so these a11y/interaction tests are not flaky under load.
+    testTimeout: 20000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
