@@ -1,5 +1,5 @@
 /// <reference types="vitest-axe/extend-expect" />
-import { render } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { axe } from 'vitest-axe'
 import { TourKitTestingError } from '../error'
@@ -7,10 +7,11 @@ import { advanceTour } from '../helpers/advance-tour'
 import { completeTour } from '../helpers/complete-tour'
 import { expectStepVisible } from '../helpers/expect-step-visible'
 import { goToStep } from '../helpers/go-to-step'
+import { getActiveTourHandle } from '../helpers/hook-probe'
 import { previousTour } from '../helpers/previous-tour'
 import { skipTour } from '../helpers/skip-tour'
 import { setupTourKitTesting } from '../setup'
-import { ThreeStepFixture, TwoStepFixture } from './_fixtures'
+import { SkipFixture, ThreeStepFixture, TwoStepFixture } from './_fixtures'
 
 // Spy on the dynamic `import('jsdom-testing-mocks')` inside setupTourKitTesting.
 // The factory body fires once per resolved import per vitest module cache slot.
@@ -124,5 +125,27 @@ describe('@tour-kit/testing-library — integration against real <TourCard>', ()
       rules: { region: { enabled: false } },
     })
     expect(results).toHaveNoViolations()
+  })
+
+  // --- Documentation recipe guards (apps/docs/.../testing-library/recipes.mdx) ---
+  // These mirror the recipes that the floating-ui cases above don't already
+  // cover, so the published sample code can't silently rot.
+
+  it('getActiveTourHandle exposes currentStep + totalSteps (recipe §6)', async () => {
+    render(<TwoStepFixture />)
+    // start() settles asynchronously, so wait for the handle to reflect it.
+    await waitFor(() => {
+      expect(getActiveTourHandle()?.currentStep?.id).toBe('welcome')
+    })
+    expect(getActiveTourHandle()?.totalSteps).toBe(2)
+  })
+
+  it('skipTour fires the tour onSkip callback (recipe §3)', async () => {
+    const onSkip = vi.fn()
+    render(<SkipFixture onSkip={onSkip} />)
+    // The card (and its Skip button) must mount before skipTour queries it.
+    await expectStepVisible('welcome')
+    await skipTour()
+    expect(onSkip).toHaveBeenCalledOnce()
   })
 })
