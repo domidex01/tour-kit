@@ -24,6 +24,11 @@
       "dependsOn": ["build"],
       "outputs": []
     },
+    "bundlesize": {
+      "dependsOn": ["^build", "build"],
+      "cache": false,
+      "outputs": []
+    },
     "bench": {
       "dependsOn": ["build"],
       "outputs": ["benchmark-results.json"]

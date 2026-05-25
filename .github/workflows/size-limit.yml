@@ -19,7 +19,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 10.26.1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -33,10 +33,18 @@ jobs:
       - name: Build packages
         run: pnpm build:packages
 
-      # Direct invocation (no third-party action) — `andresz1/size-limit-action@v1`
-      # tries to compute a diff against the base branch and fails when scripts
-      # introduced in the PR aren't yet on main. The load-bearing test for this
-      # gate is "fails on budget breach"; that works perfectly fine with a plain
-      # CLI call. Trade-off: no PR comment with the diff. Acceptable.
-      - name: Check size
+      # BINDING merge gate: raw dist-gzip budgets (audit F-2 unit). A breach
+      # here fails the job and blocks the PR. Packages are already built above.
+      - name: Bundle size gate (binding — raw dist gzip)
+        run: node tooling/bundle-check/check-dist-gzip.mjs
+
+      # Secondary smoke signal: size-limit reports bundled-with-deps + brotli,
+      # a different unit calibrated independently in /.size-limit.json. It is
+      # informational only — `continue-on-error` keeps a size-limit breach from
+      # blocking merge (per the Sprint-1 load-bearing-gate decision). Direct CLI
+      # invocation (no `andresz1/size-limit-action@v1`, which fails computing a
+      # base-branch diff for scripts introduced in the PR); trade-off: no diff
+      # comment, acceptable since the binding gate above is the real check.
+      - name: size-limit (informational smoke signal)
         run: pnpm exec size-limit
+        continue-on-error: true

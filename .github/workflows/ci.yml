@@ -26,7 +26,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 10.26.1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -55,10 +55,8 @@ jobs:
       - name: Test docs
         run: pnpm --filter @tour-kit/docs test
 
-  # TODO: Re-enable when tooling/bundle-check package exists
-  # size:
-  #   name: Bundle Size Check
-  #   ...
+  # Bundle size gate runs in .github/workflows/size-limit.yml on every PR
+  # (binding raw dist-gzip checker + informational size-limit smoke signal).
 
   # TODO: Re-enable when LLM file generation is deterministic across environments
   # llm-freshness:

@@ -107,7 +107,20 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
 
 - TypeScript strict mode enabled
 - Test coverage > 80%
-- Bundle sizes: core < 8KB, react < 12KB, hints < 5KB (gzipped)
+- Bundle sizes (gzipped): enforced by `tooling/bundle-check/check-dist-gzip.mjs`
+  (the binding merge gate, raw `dist/index.js` gzip bytes — run `pnpm dist:size`).
+  `size-limit` (root [`/.size-limit.json`](/.size-limit.json)) is a secondary
+  smoke signal in a bundled-with-deps + brotli unit, run `pnpm bundlesize`.
+  Per-package raw dist-gzip budgets:
+  - core <20 KB (target <8 KB; tracked as audit B-1)
+  - react <12 KB
+  - hints <5 KB
+  - analytics <4 KB (root; per-plugin <1.5 KB each)
+  - adoption, checklists <10 KB
+  - announcements, surveys, license <8 KB
+  - media <6 KB
+  - ai <5 KB (client), <8 KB (server)
+  - scheduling <4 KB
 - Lighthouse Accessibility: 100
 - WCAG 2.1 AA compliant
 
