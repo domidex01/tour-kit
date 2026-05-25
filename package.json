@@ -30,6 +30,8 @@
     "example:next": "turbo run dev --filter=next-tour-kit-demo",
     "bench": "turbo run bench",
     "bench:core": "turbo run bench --filter=@tour-kit/core",
+    "bundlesize": "pnpm build --filter='./packages/*' && pnpm exec size-limit",
+    "dist:size": "pnpm build --filter='./packages/*' && node tooling/bundle-check/check-dist-gzip.mjs",
     "e2e": "playwright test",
     "e2e:vite": "playwright test --project=vite-localhost --project=vite-production",
     "e2e:next": "playwright test --project=next-localhost --project=next-production",

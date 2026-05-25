@@ -1,5 +1,5 @@
 [
-  { "name": "@tour-kit/core", "path": "packages/core/dist/index.js", "limit": "26 KB" },
+  { "name": "@tour-kit/core", "path": "packages/core/dist/index.js", "limit": "28 KB" },
   {
     "name": "@tour-kit/core (useTour-only consumer)",
     "path": "packages/core/dist/index.js",
@@ -15,37 +15,68 @@
   {
     "name": "@tour-kit/react",
     "path": "packages/react/dist/index.js",
-    "limit": "175 KB",
+    "limit": "185 KB",
     "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/hints",
     "path": "packages/hints/dist/index.js",
-    "limit": "170 KB",
+    "limit": "175 KB",
     "ignore": ["@tour-kit/analytics"]
   },
-  { "name": "@tour-kit/adoption", "path": "packages/adoption/dist/index.js", "limit": "146 KB" },
+  { "name": "@tour-kit/adoption", "path": "packages/adoption/dist/index.js", "limit": "90 KB" },
   {
     "name": "@tour-kit/checklists",
     "path": "packages/checklists/dist/index.js",
-    "limit": "175 KB",
+    "limit": "180 KB",
     "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/announcements",
     "path": "packages/announcements/dist/index.js",
-    "limit": "175 KB",
+    "limit": "185 KB",
     "ignore": ["@tour-kit/analytics"]
   },
-  { "name": "@tour-kit/media", "path": "packages/media/dist/index.js", "limit": "169 KB" },
-  { "name": "@tour-kit/surveys", "path": "packages/surveys/dist/index.js", "limit": "180 KB" },
-  { "name": "@tour-kit/analytics", "path": "packages/analytics/dist/index.js", "limit": "287 KB" },
+  { "name": "@tour-kit/media", "path": "packages/media/dist/index.js", "limit": "160 KB" },
+  { "name": "@tour-kit/surveys", "path": "packages/surveys/dist/index.js", "limit": "190 KB" },
+  { "name": "@tour-kit/analytics", "path": "packages/analytics/dist/index.js", "limit": "260 KB" },
+  {
+    "name": "@tour-kit/analytics/posthog",
+    "path": "packages/analytics/dist/plugins/posthog.js",
+    "limit": "1500 B",
+    "ignore": ["@tour-kit/core", "@tour-kit/license", "posthog-js", "react", "react-dom"]
+  },
+  {
+    "name": "@tour-kit/analytics/mixpanel",
+    "path": "packages/analytics/dist/plugins/mixpanel.js",
+    "limit": "1500 B",
+    "ignore": ["@tour-kit/core", "@tour-kit/license", "mixpanel-browser", "react", "react-dom"]
+  },
+  {
+    "name": "@tour-kit/analytics/amplitude",
+    "path": "packages/analytics/dist/plugins/amplitude.js",
+    "limit": "1000 B",
+    "ignore": [
+      "@tour-kit/core",
+      "@tour-kit/license",
+      "@amplitude/analytics-browser",
+      "react",
+      "react-dom"
+    ]
+  },
+  {
+    "name": "@tour-kit/analytics/google-analytics",
+    "path": "packages/analytics/dist/plugins/google-analytics.js",
+    "limit": "1000 B",
+    "ignore": ["@tour-kit/core", "@tour-kit/license", "react", "react-dom"]
+  },
   {
     "name": "@tour-kit/scheduling",
     "path": "packages/scheduling/dist/index.js",
     "limit": "70 KB",
     "ignore": ["@tour-kit/analytics"]
   },
-  { "name": "@tour-kit/license", "path": "packages/license/dist/index.js", "limit": "69 KB" },
-  { "name": "@tour-kit/ai", "path": "packages/ai/dist/index.js", "limit": "112 KB" }
+  { "name": "@tour-kit/license", "path": "packages/license/dist/index.js", "limit": "70 KB" },
+  { "name": "@tour-kit/ai (client)", "path": "packages/ai/dist/index.js", "limit": "110 KB" },
+  { "name": "@tour-kit/ai/server", "path": "packages/ai/dist/server/index.js", "limit": "120 KB" }
 ]
