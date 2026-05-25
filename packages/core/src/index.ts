@@ -55,6 +55,12 @@ export type {
   HintsContextValue,
   RouterAdapter,
   MultiPagePersistenceConfig,
+  AnalyticsConfig,
+  AnalyticsPlugin,
+  AnalyticsTracker,
+  TourEvent,
+  TourEventData,
+  TourEventName,
 } from './types'
 
 // Type defaults (runtime values)
@@ -82,8 +88,16 @@ export {
   useTourContext,
   useTourContextOptional,
   TourProvider,
+  AnalyticsProvider,
+  useAnalytics,
+  useAnalyticsOptional,
 } from './context'
-export type { TourKitContextValue, TourKitProviderProps, TourProviderProps } from './context'
+export type {
+  TourKitContextValue,
+  TourKitProviderProps,
+  TourProviderProps,
+  AnalyticsProviderProps,
+} from './context'
 
 // Hooks
 export {

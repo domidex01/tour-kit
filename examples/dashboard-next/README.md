@@ -100,8 +100,6 @@ LicenseProvider
   here immediately on the next `pnpm --filter dashboard-next dev` run.
 - `ai@^5` pairs with `@tour-kit/ai`'s peer dep. `@ai-sdk/openai@^2` matches.
   Bumping either without the other fails typecheck (`LanguageModelV2` vs `V3`).
-- `@mui/base@5.0.0-beta.70` is a peer dep of `@tour-kit/*` — deprecated on
-  npm but still works. Separate from `@base-ui/react` (which powers shadcn).
 - `@lottiefiles/react-lottie-player` is a runtime-only dynamic import in
   `@tour-kit/media`; Turbopack needs it installed even if unused.
 - The root layout sets `suppressHydrationWarning` because `next-themes`

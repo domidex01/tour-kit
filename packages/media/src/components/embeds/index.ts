@@ -1,6 +1,3 @@
-import { LicenseGate } from '@tour-kit/license'
-import * as React from 'react'
-
 // ============================================
 // PLATFORM EMBEDS
 // ============================================
@@ -12,24 +9,10 @@ import { type YouTubeEmbedProps, YouTubeEmbed as _YouTubeEmbed } from './youtube
 
 export type { YouTubeEmbedProps, VimeoEmbedProps, LoomEmbedProps, WistiaEmbedProps }
 
-function withLicenseGate<P extends object>(
-  Component: React.ComponentType<P>,
-  displayName: string
-): React.FC<P> {
-  const Wrapped: React.FC<P> = (props) =>
-    React.createElement(LicenseGate, {
-      require: 'pro',
-      // biome-ignore lint/correctness/noChildrenProp: LicenseGateProps requires children in the props object
-      children: React.createElement<P>(Component, props),
-    })
-  Wrapped.displayName = `Licensed(${displayName})`
-  return Wrapped
-}
-
-export const YouTubeEmbed = withLicenseGate(_YouTubeEmbed, 'YouTubeEmbed')
-export const VimeoEmbed = withLicenseGate(_VimeoEmbed, 'VimeoEmbed')
-export const LoomEmbed = withLicenseGate(_LoomEmbed, 'LoomEmbed')
-export const WistiaEmbed = withLicenseGate(_WistiaEmbed, 'WistiaEmbed')
+export const YouTubeEmbed = _YouTubeEmbed
+export const VimeoEmbed = _VimeoEmbed
+export const LoomEmbed = _LoomEmbed
+export const WistiaEmbed = _WistiaEmbed
 
 // ============================================
 // NATIVE MEDIA
@@ -41,6 +24,6 @@ import { type NativeVideoProps, NativeVideo as _NativeVideo } from './native-vid
 
 export type { NativeVideoProps, GifPlayerProps, LottiePlayerProps }
 
-export const NativeVideo = withLicenseGate(_NativeVideo, 'NativeVideo')
-export const GifPlayer = withLicenseGate(_GifPlayer, 'GifPlayer')
-export const LottiePlayer = withLicenseGate(_LottiePlayer, 'LottiePlayer')
+export const NativeVideo = _NativeVideo
+export const GifPlayer = _GifPlayer
+export const LottiePlayer = _LottiePlayer

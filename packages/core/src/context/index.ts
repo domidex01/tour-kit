@@ -7,3 +7,9 @@ export {
 export { TourKitProvider, type TourKitProviderProps } from './tourkit-provider'
 export { TourContext, useTourContext, useTourContextOptional } from './tour-context'
 export { TourProvider, type TourProviderProps } from './tour-provider'
+export {
+  AnalyticsProvider,
+  useAnalytics,
+  useAnalyticsOptional,
+  type AnalyticsProviderProps,
+} from './analytics-context'

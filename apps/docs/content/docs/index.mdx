@@ -19,11 +19,12 @@ import { Cards, Card } from 'fumadocs-ui/components/card';
 import { Code2, Accessibility, FileCode, Package } from 'lucide-react';
 
 userTourKit is an open-source headless React library for building product tours, onboarding
-checklists, hints, announcements, and in-app messaging. It ships three packages — a framework-agnostic
-core under 8KB gzipped, a React component layer under 12KB, and a hints/hotspot layer under 5KB —
-all under the MIT license. WCAG 2.1 AA accessibility, TypeScript-strict types, and Lighthouse 100
-scores come built in. The optional Pro tier adds adoption tracking, analytics, announcements,
-checklists, media, scheduling, and AI chat as a one-time purchase.
+checklists, hints, announcements, media-rich steps, and in-app messaging. It ships four MIT
+packages — a framework-agnostic core under 8KB gzipped, a React component layer under 12KB,
+a hints/hotspot layer under 5KB, and reusable media embeds. WCAG 2.1 AA accessibility,
+TypeScript-strict types, and Lighthouse 100 scores come built in. The optional Pro tier adds
+adoption tracking, analytics, announcements, checklists, scheduling, surveys, and AI chat as a
+one-time purchase.
 
 These docs are written for React developers integrating onboarding into a Next.js, Remix, or
 plain-CRA app, especially teams already on shadcn/ui, Radix, or Base UI. If you're evaluating
@@ -72,6 +73,7 @@ the [user onboarding handbook](/blog/user-onboarding-handbook). Otherwise, jump 
 | `@tour-kit/core` | Headless hooks & logic | < 8KB |
 | `@tour-kit/react` | Pre-styled React components | < 12KB |
 | `@tour-kit/hints` | Persistent hints/hotspots | < 5KB |
+| `@tour-kit/media` | Responsive media embeds | < 8KB |
 
 ## Quick Start
 
@@ -124,4 +126,3 @@ Drop-in codemods to rewrite an existing codebase to Tour Kit in one command:
 - [Guides](/docs/guides) — accessibility, persistence, router integration, i18n, segmentation, animations, theme variations, and more.
 - [Use cases](/docs/use-cases) — full onboarding patterns assembled from the primitives above.
 - [Build with LLMs](/docs/build-with-llms) — drop the per-package context files into ChatGPT, Claude, or Cursor for accurate code generation.
-

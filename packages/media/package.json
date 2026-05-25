@@ -3,7 +3,7 @@
   "version": "0.12.5",
   "description": "React video & media embeds — YouTube, Vimeo, Loom, Wistia, HTML5, GIF, Lottie with captions and reduced-motion fallbacks.",
   "author": "Tour Kit Team",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
@@ -76,20 +76,15 @@
   "dependencies": {
     "@radix-ui/react-slot": "catalog:",
     "@tour-kit/core": "workspace:*",
-    "@tour-kit/license": "workspace:*",
     "class-variance-authority": "catalog:"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
-    "@lottiefiles/react-lottie-player": "^3.5.0",
-    "@mui/base": "catalog:"
+    "@lottiefiles/react-lottie-player": "^3.5.0"
   },
   "peerDependenciesMeta": {
     "@lottiefiles/react-lottie-player": {
-      "optional": true
-    },
-    "@mui/base": {
       "optional": true
     }
   },

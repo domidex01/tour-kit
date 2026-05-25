@@ -11,7 +11,7 @@ export default defineConfig([
     format: ['cjs', 'esm'],
     dts: true,
     clean: true,
-    external: ['react', 'react-dom', '@lottiefiles/react-lottie-player', '@tour-kit/license'],
+    external: ['react', 'react-dom', '@lottiefiles/react-lottie-player', '@tour-kit/core'],
     treeshake: true,
     splitting: true,
     minify: true,

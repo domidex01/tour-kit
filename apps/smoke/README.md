@@ -42,7 +42,7 @@ Passes when the probe finds `data-smoke-ok` in the page HTML.
   page (`TypeError: Cannot read properties of null (reading 'useContext')` inside
   `OuterLayoutRouter`). Unrelated to tour-kit — reproduces on a vanilla
   `create-next-app`. Revisit when Next ships a fix.
-- Optional peers (`@lottiefiles/react-lottie-player`, `@mui/base`, `ai`,
+- Optional peers (`@lottiefiles/react-lottie-player`, `ai`,
   `@ai-sdk/react`) are declared as regular dependencies here so bundlers can
   resolve the dynamic imports. Consumers who don't use Lottie/AI features
   don't need these — document this in the public install instructions.

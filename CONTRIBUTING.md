@@ -13,21 +13,21 @@ This project follows the [Contributor Covenant 2.1](./CODE_OF_CONDUCT.md). By pa
 ### Prerequisites
 
 - **Node.js** ≥ 18
-- **pnpm** ≥ 10 (recommended) or **bun** ≥ 1.1
+- **pnpm** ≥ 10
 
 ### Clone & install
 
 ```bash
 git clone https://github.com/domidex01/tour-kit.git
 cd tour-kit
-pnpm install   # or: bun install
+pnpm install
 ```
 
 ### Run locally
 
 ```bash
 # Watch all packages
-pnpm dev       # or: bun run dev
+pnpm dev
 
 # Build all packages
 pnpm build

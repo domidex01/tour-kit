@@ -20,6 +20,8 @@ jobs:
     name: Install + run against published tarballs
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     # Skip when the triggering Release run failed — no new tarballs to test.
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
@@ -35,6 +37,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: 'https://registry.npmjs.org'
 
       # Intentionally NOT using frozen-lockfile or the workspace cache: we want
       # the install to re-resolve against the current npm registry and expose

@@ -15,9 +15,6 @@ jobs:
     name: Build & Test
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      # Required for installing restricted @tour-kit/* pro packages
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
       - name: Checkout
@@ -39,6 +36,9 @@ jobs:
 
       - name: Check for leaked server secrets
         run: pnpm --filter @tour-kit/docs check:secrets
+
+      - name: Check MIT dependency closure
+        run: pnpm check:mit-closure
 
       - name: Lint
         run: pnpm lint

@@ -1,11 +1,12 @@
+import {
+  AnalyticsProvider as CoreAnalyticsProvider,
+  useAnalytics,
+  useAnalyticsOptional,
+} from '@tour-kit/core'
 import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import type { AnalyticsConfig } from '../types/plugin'
 import { type TourAnalytics, createAnalytics } from './tracker'
-
-const AnalyticsContext = React.createContext<TourAnalytics | null>(null)
-
-AnalyticsContext.displayName = 'TourKitAnalyticsContext'
 
 interface AnalyticsProviderProps {
   /** Analytics configuration. Captured at mount; later changes do not rebuild the tracker. */
@@ -43,25 +44,9 @@ export function AnalyticsProvider({ config, children }: AnalyticsProviderProps) 
 
   return (
     <LicenseGate require="pro">
-      <AnalyticsContext.Provider value={analytics}>{children}</AnalyticsContext.Provider>
+      <CoreAnalyticsProvider analytics={analytics}>{children}</CoreAnalyticsProvider>
     </LicenseGate>
   )
 }
 
-/**
- * Hook to access analytics tracker
- */
-export function useAnalytics(): TourAnalytics {
-  const analytics = React.useContext(AnalyticsContext)
-  if (!analytics) {
-    throw new Error('useAnalytics must be used within an AnalyticsProvider')
-  }
-  return analytics
-}
-
-/**
- * Hook to optionally access analytics (returns null if not in provider)
- */
-export function useAnalyticsOptional(): TourAnalytics | null {
-  return React.useContext(AnalyticsContext)
-}
+export { useAnalytics, useAnalyticsOptional }

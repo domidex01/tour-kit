@@ -16,7 +16,6 @@ export default defineConfig({
     'react',
     'react-dom',
     '@tour-kit/core',
-    '@tour-kit/analytics',
     '@floating-ui/react',
     'tailwindcss',
     'tailwindcss/plugin',

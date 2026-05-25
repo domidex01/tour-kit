@@ -177,15 +177,12 @@ export default function RootLayout({ children }) {
 }
 ```
 
-### `@mui/base` (Base UI) peer
+### Base UI render-prop mode
 
-The optional Base UI rendering path depends on `@mui/base`, which shipped a
-preview that was subsequently deprecated in favor of the new `@base-ui-components/react`.
-If you don't opt into Base UI (default), this is not a concern. If you do,
-pin to the last supported `@mui/base` preview or follow the migration to
-`@base-ui-components/react` once we add first-class support. Track progress in
-the canonical `UnifiedSlot` source at `@tour-kit/core/lib/unified-slot.tsx`
-(re-exported by `lib/slot.tsx` in the UI packages).
+Tour Kit does not require an `@mui/base` peer. The optional Base UI rendering
+path is handled by `UnifiedSlot`, which accepts render-prop children without
+importing Base UI. If your app uses Base UI components directly, install the
+current `@base-ui-components/react` package in your app.
 
 ## Prop name differences between variants
 

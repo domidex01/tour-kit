@@ -73,6 +73,7 @@ Tour Kit is a monorepo of 12 packages. Three are MIT-licensed and free; nine are
 | [`@tour-kit/core`](packages/core) | Framework-agnostic hooks, types, position engine, storage adapters | < 8 KB |
 | [`@tour-kit/react`](packages/react) | Tour, TourStep, TourCard, TourOverlay, router adapters, multi-tour registry | < 12 KB |
 | [`@tour-kit/hints`](packages/hints) | Persistent hint beacons, hotspots, tooltips | < 5 KB |
+| [`@tour-kit/media`](packages/media) | YouTube, Vimeo, Loom, Wistia, GIF, and Lottie embeds | < 8 KB |
 
 ### Commercial packages
 
@@ -84,7 +85,6 @@ Tour Kit is a monorepo of 12 packages. Three are MIT-licensed and free; nine are
 | [`@tour-kit/announcements`](packages/announcements) | Modal, slideout, banner, toast, spotlight + queue & frequency rules |
 | [`@tour-kit/checklists`](packages/checklists) | Onboarding checklists with task dependencies and tour integration |
 | [`@tour-kit/license`](packages/license) | License-key validation for premium features |
-| [`@tour-kit/media`](packages/media) | YouTube, Vimeo, Loom, Wistia, GIF, and Lottie embeds |
 | [`@tour-kit/scheduling`](packages/scheduling) | Time-based scheduling with timezone, business hours, and blackout support |
 | [`@tour-kit/surveys`](packages/surveys) | NPS, CSAT, CES, and custom microsurveys with fatigue prevention |
 
@@ -96,11 +96,12 @@ Buy a commercial license at <https://usertourkit.com/pricing>.
 # Free / open-source (MIT)
 pnpm add @tour-kit/core @tour-kit/react   # styled tours
 pnpm add @tour-kit/hints                  # persistent hints
+pnpm add @tour-kit/media                  # responsive media embeds
 
 # Commercial packages (require a license key)
 pnpm add @tour-kit/checklists @tour-kit/announcements @tour-kit/surveys
 pnpm add @tour-kit/adoption @tour-kit/analytics
-pnpm add @tour-kit/media @tour-kit/scheduling @tour-kit/ai
+pnpm add @tour-kit/scheduling @tour-kit/ai
 ```
 
 `bun add` and `npm install` work too. Tour Kit requires **React 18 or 19** and **Node 18+**.
@@ -258,8 +259,8 @@ Yes — Tour Kit is framework-agnostic. Router adapters are provided for Next.js
 
 Tour Kit uses a **dual licensing model** — see [`NOTICE.md`](./NOTICE.md) for the per-package breakdown.
 
-- **MIT (free, open-source):** `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints` — covered by the root [`LICENSE`](./LICENSE).
-- **Commercial (proprietary, paid):** `@tour-kit/adoption`, `@tour-kit/ai`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/license`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/surveys`
+- **MIT (free, open-source):** `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, `@tour-kit/media` — covered by the root [`LICENSE`](./LICENSE).
+- **Commercial (proprietary, paid):** `@tour-kit/adoption`, `@tour-kit/ai`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/license`, `@tour-kit/scheduling`, `@tour-kit/surveys`
 
 Each commercial package has a `LICENSE.md` describing its terms. Buy a license at <https://usertourkit.com/pricing>.
 

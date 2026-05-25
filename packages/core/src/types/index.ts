@@ -80,3 +80,13 @@ export type {
 
 // Router types
 export type { RouterAdapter, MultiPagePersistenceConfig } from './router'
+
+// Analytics seam
+export type {
+  AnalyticsConfig,
+  AnalyticsPlugin,
+  AnalyticsTracker,
+  TourEvent,
+  TourEventData,
+  TourEventName,
+} from './analytics'

@@ -1,10 +1,10 @@
 'use client'
 
-import { useAnalyticsOptional } from '@tour-kit/analytics'
 import {
   TourProvider,
   type TourStep as TourStepType,
   type Tour as TourType,
+  useAnalyticsOptional,
   useSegmentationContext,
   useSegments,
 } from '@tour-kit/core'

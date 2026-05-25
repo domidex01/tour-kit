@@ -311,8 +311,10 @@ export default function BaseUIPage() {
           <h2 className="text-xl font-bold mb-4">Getting Started</h2>
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium mb-2">1. Install Base UI (optional)</h3>
-              <pre className="text-sm bg-background p-2 rounded">pnpm add @mui/base</pre>
+              <h3 className="font-medium mb-2">1. Install Base UI components (optional)</h3>
+              <pre className="text-sm bg-background p-2 rounded">
+                pnpm add @base-ui-components/react
+              </pre>
             </div>
             <div>
               <h3 className="font-medium mb-2">2. Wrap your app with UILibraryProvider</h3>

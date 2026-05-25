@@ -9,8 +9,6 @@
 
 Auto-detecting **React video embeds** and **rich media** for product demos, onboarding videos, announcement modals, and feature walkthroughs. Pass any URL — TourMedia detects YouTube / Vimeo / Loom / Wistia / native HTML5 / GIF / Lottie and renders the right player with captions, responsive sources, and reduced-motion fallbacks.
 
-> **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
-
 **Use this for:** product demo videos, onboarding walkthroughs (Loom-style), in-app feature explainers, animated illustrations (Lottie), GIF tutorials.
 
 ## Features
@@ -22,15 +20,15 @@ Auto-detecting **React video embeds** and **rich media** for product demos, onbo
 - **Reduced motion** — auto-falls back to a static poster when `prefers-reduced-motion`
 - **Lottie** — opt-in animated vector support (peer dep)
 - **Headless variant** — `MediaHeadless` with render-prop API
-- **Standalone** — does not depend on `@tour-kit/core`; embed in any React app
+- **MIT-licensed** — no license key or Pro setup required
 - **TypeScript-first**, supports React 18 & 19
 
 ## Installation
 
 ```bash
-npm install @tour-kit/media @tour-kit/license
+npm install @tour-kit/media
 # or
-pnpm add @tour-kit/media @tour-kit/license
+pnpm add @tour-kit/media
 
 # Optional: Lottie support
 pnpm add @lottiefiles/react-lottie-player
@@ -39,20 +37,17 @@ pnpm add @lottiefiles/react-lottie-player
 ## Quick Start
 
 ```tsx
-import { LicenseProvider } from '@tour-kit/license'
 import { TourMedia } from '@tour-kit/media'
 
 function ProductDemo() {
   return (
-    <LicenseProvider licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE!}>
-      <TourMedia
-        src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-        title="Product walkthrough"
-        autoplay
-        muted
-        captions={[{ src: '/captions/en.vtt', srclang: 'en', label: 'English' }]}
-      />
-    </LicenseProvider>
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      title="Product walkthrough"
+      autoplay
+      muted
+      captions={[{ src: '/captions/en.vtt', srclang: 'en', label: 'English' }]}
+    />
   )
 }
 ```
@@ -180,13 +175,12 @@ import type {
 - **Autoplay needs `muted`** — Chrome, Safari, and Firefox all block unmuted autoplay. Pass `autoplay` *and* `muted` together.
 - **Lottie is opt-in** — install `@lottiefiles/react-lottie-player` to use `LottiePlayer`.
 - **`prefers-reduced-motion` falls back to a poster** — autoplaying video and animated GIFs become a static image when the user prefers reduced motion.
-- **Standalone** — `@tour-kit/media` does **not** depend on `@tour-kit/core`. You can use it on its own.
+- **Core dependency** — `@tour-kit/media` shares utilities with `@tour-kit/core`; install `@tour-kit/media` and your package manager resolves the workspace dependency.
 
 ## Related packages
 
 - [`@tour-kit/announcements`](https://www.npmjs.com/package/@tour-kit/announcements) — embed media in announcement modals / slideouts
 - [`@tour-kit/react`](https://www.npmjs.com/package/@tour-kit/react) — embed media in tour step content
-- [`@tour-kit/license`](https://www.npmjs.com/package/@tour-kit/license) — required Pro license validation
 
 ## Documentation
 
@@ -194,4 +188,4 @@ Full documentation: [https://usertourkit.com/docs/media](https://usertourkit.com
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+MIT — see [LICENSE.md](./LICENSE.md).

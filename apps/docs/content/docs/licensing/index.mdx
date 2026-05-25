@@ -10,11 +10,11 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
 userTourKit uses a **Free + Pro** licensing model:
 
-- **Free packages** (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and never require a license key.
-- **Pro packages** (`@tour-kit/adoption`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/ai`) require a valid license key for production use.
+- **Free packages** (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, `@tour-kit/media`) are MIT-licensed and never require a license key.
+- **Pro packages** (`@tour-kit/adoption`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/scheduling`, `@tour-kit/ai`) require a valid license key for production use.
 
 <Callout type="info">
-Free packages never require a license key. You can use `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` without any licensing setup.
+Free packages never require a license key. You can use `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, and `@tour-kit/media` without any licensing setup.
 </Callout>
 
 Without a valid license, pro packages still render and function normally but display an "UNLICENSED" watermark overlay and a console warning. There is never a crash or blank screen.
@@ -239,7 +239,7 @@ const isPro = useIsPro()
 
 ### Do free packages need a license?
 
-No. `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` are MIT-licensed and work without any license key.
+No. `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, and `@tour-kit/media` are MIT-licensed and work without any license key.
 
 ### What happens if my key expires?
 
@@ -265,4 +265,4 @@ All userTourKit license keys issued via Polar.sh have a `TOURKIT-` prefix. This 
 
 - [Trial countdown & test mode](/docs/licensing/trial) — `<TrialBadge>`, `<LicenseTestMode>`, and the dev bypass.
 - [`@tour-kit/license` API reference](/docs/api/license) — every exported provider, component, hook, and utility.
-- Pro packages that consume `<LicenseGate>`: [`@tour-kit/adoption`](/docs/adoption), [`@tour-kit/analytics`](/docs/analytics), [`@tour-kit/announcements`](/docs/announcements), [`@tour-kit/checklists`](/docs/checklists), [`@tour-kit/media`](/docs/media), [`@tour-kit/scheduling`](/docs/scheduling), [`@tour-kit/ai`](/docs/ai).
+- Pro packages that consume `<LicenseGate>`: [`@tour-kit/adoption`](/docs/adoption), [`@tour-kit/analytics`](/docs/analytics), [`@tour-kit/announcements`](/docs/announcements), [`@tour-kit/checklists`](/docs/checklists), [`@tour-kit/scheduling`](/docs/scheduling), [`@tour-kit/ai`](/docs/ai).

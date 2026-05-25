@@ -8,28 +8,28 @@ Tour Kit is a headless onboarding and product tour library for React. It's desig
 
 ## Commands
 
-Both `pnpm` and `bun` are supported. Use whichever you prefer.
+Use `pnpm` for this workspace. The monorepo relies on pnpm catalogs in `pnpm-workspace.yaml`; Bun does not resolve those `catalog:` specs here.
 
 ```bash
 # Install dependencies
-pnpm install   # or: bun install
+pnpm install
 
 # Build all packages
-pnpm build     # or: bun run build
+pnpm build
 
 # Run development mode (watch for changes)
-pnpm dev       # or: bun run dev
+pnpm dev
 
 # Type checking
-pnpm typecheck # or: bun run typecheck
+pnpm typecheck
 
 # Run single package commands (via turbo)
-pnpm build --filter=@tour-kit/core   # or: bun run build --filter=@tour-kit/core
+pnpm build --filter=@tour-kit/core
 ```
 
 ## Releasing
 
-Uses Changesets for version management. All three packages are linked for versioning.
+Uses Changesets for version management. `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` are currently linked; other packages float independently unless `.changeset/config.json` changes.
 
 ```bash
 # Create a changeset (for documenting changes)
@@ -197,7 +197,7 @@ When adding new animations, prefix with `motion-safe:` if it's a `tailwindcss-an
 @tour-kit/surveys ──────┘
 ```
 
-Note: `@tour-kit/scheduling` is an optional peer dependency for `@tour-kit/announcements`. `@tour-kit/license` is the runtime validator the other Pro packages consult.
+Note: `@tour-kit/media` is MIT-licensed and depends on `@tour-kit/core`; it is safe in the free package closure. `@tour-kit/scheduling` is an optional peer dependency for `@tour-kit/announcements`. `@tour-kit/license` is the runtime validator the Pro packages consult.
 
 ## Package-Specific Documentation
 

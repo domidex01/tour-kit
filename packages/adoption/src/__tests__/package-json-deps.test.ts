@@ -40,7 +40,7 @@ describe('package.json — peerDependencies hygiene', () => {
   it('peerDependencies match the locked Phase 4 snapshot', () => {
     // Snapshot of the legal peers as of Phase 4 — Phase 0 chart decision locked
     // these. Adding a new peer requires an explicit code change + decision log.
-    const expected = new Set(['react', 'react-dom', 'tailwindcss', '@mui/base'])
+    const expected = new Set(['react', 'react-dom', 'tailwindcss'])
     const actual = new Set(Object.keys(pkg.peerDependencies ?? {}))
     expect(actual).toEqual(expected)
   })

@@ -77,13 +77,7 @@
   "peerDependencies": {
     "@tour-kit/analytics": "workspace:*",
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0",
-    "@mui/base": "catalog:"
-  },
-  "peerDependenciesMeta": {
-    "@mui/base": {
-      "optional": true
-    }
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "catalog:",
