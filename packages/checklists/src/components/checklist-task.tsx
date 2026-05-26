@@ -136,12 +136,15 @@ export const ChecklistTask = React.forwardRef<HTMLDivElement, ChecklistTaskProps
         data-tk-completing={phase === 'completing' ? 'true' : undefined}
         {...props}
       >
-        {/* Checkbox */}
+        {/* Checkbox — exposes completion as a toggle so SR users hear the
+            checked state, not just the action label. */}
         <button
           type="button"
           onClick={handleToggle}
           className={taskCheckboxVariants({ size, state })}
           disabled={locked}
+          role="checkbox"
+          aria-checked={completed}
           aria-label={checkboxLabel}
         >
           {completed && (

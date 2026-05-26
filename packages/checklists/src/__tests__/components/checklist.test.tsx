@@ -192,7 +192,7 @@ describe('Checklist', () => {
       renderChecklist('no-deps-checklist', {}, [mockNoDepsChecklist])
 
       // Complete all tasks
-      const checkboxes = screen.getAllByRole('button', { name: /mark as complete/i })
+      const checkboxes = screen.getAllByRole('checkbox', { name: /mark as complete/i })
       for (const checkbox of checkboxes) {
         await user.click(checkbox)
       }
@@ -272,7 +272,7 @@ describe('Checklist', () => {
 
       expect(screen.getByText('0/3')).toBeInTheDocument()
 
-      const checkbox = screen.getAllByRole('button', { name: /mark as complete/i })[0]
+      const checkbox = screen.getAllByRole('checkbox', { name: /mark as complete/i })[0]
       await user.click(checkbox)
 
       expect(screen.getByText('1/3')).toBeInTheDocument()

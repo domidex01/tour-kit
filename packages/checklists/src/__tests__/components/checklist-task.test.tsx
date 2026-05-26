@@ -121,7 +121,7 @@ describe('ChecklistTask', () => {
 
       render(<ChecklistTask task={task} onToggle={onToggle} />)
 
-      const checkbox = screen.getByRole('button', { name: /mark as complete/i })
+      const checkbox = screen.getByRole('checkbox', { name: /mark as complete/i })
       await user.click(checkbox)
 
       expect(onToggle).toHaveBeenCalled()
@@ -135,7 +135,7 @@ describe('ChecklistTask', () => {
 
       render(<ChecklistTask task={task} onClick={onClick} onToggle={onToggle} />)
 
-      const checkbox = screen.getByRole('button', { name: /mark as complete/i })
+      const checkbox = screen.getByRole('checkbox', { name: /mark as complete/i })
       await user.click(checkbox)
 
       expect(onToggle).toHaveBeenCalled()
@@ -196,7 +196,7 @@ describe('ChecklistTask', () => {
 
       render(<ChecklistTask task={task} />)
 
-      const checkbox = screen.getByRole('button', { name: /mark as complete/i })
+      const checkbox = screen.getByRole('checkbox', { name: /mark as complete/i })
       expect(checkbox).toBeDisabled()
     })
   })
@@ -272,19 +272,27 @@ describe('ChecklistTask', () => {
 
       render(<ChecklistTask task={task} />)
 
-      expect(screen.getByRole('button', { name: /mark as complete/i })).toBeInTheDocument()
+      expect(screen.getByRole('checkbox', { name: /mark as complete/i })).toBeInTheDocument()
     })
 
     it('checkbox aria-label changes based on completed state', () => {
       const incompleteTask = createMockTaskState({ completed: false })
       const { rerender } = render(<ChecklistTask task={incompleteTask} />)
 
-      expect(screen.getByRole('button', { name: /mark as complete/i })).toBeInTheDocument()
+      expect(screen.getByRole('checkbox', { name: /mark as complete/i })).toBeInTheDocument()
 
       const completedTask = createMockTaskState({ completed: true })
       rerender(<ChecklistTask task={completedTask} />)
 
-      expect(screen.getByRole('button', { name: /mark as incomplete/i })).toBeInTheDocument()
+      expect(screen.getByRole('checkbox', { name: /mark as incomplete/i })).toBeInTheDocument()
+    })
+
+    it('checkbox exposes completion via aria-checked', () => {
+      const { rerender } = render(<ChecklistTask task={createMockTaskState({ completed: false })} />)
+      expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'false')
+
+      rerender(<ChecklistTask task={createMockTaskState({ completed: true })} />)
+      expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'true')
     })
   })
 

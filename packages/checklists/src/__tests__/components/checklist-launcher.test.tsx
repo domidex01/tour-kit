@@ -59,7 +59,7 @@ describe('ChecklistLauncher', () => {
       // Complete all tasks via the panel UI.
       await user.click(screen.getByRole('button', { name: /open checklist/i }))
       // Each task renders a toggle checkbox with this aria-label.
-      const toggles = await screen.findAllByRole('button', { name: /mark as complete/i })
+      const toggles = await screen.findAllByRole('checkbox', { name: /mark as complete/i })
       for (const toggle of toggles) {
         await user.click(toggle)
       }
@@ -151,6 +151,21 @@ describe('ChecklistLauncher', () => {
       const panel = document.getElementById(controlsId as string)
       expect(panel).not.toBeNull()
       expect(panel).toContainElement(screen.getByText('No Dependencies Checklist'))
+    })
+
+    it('dialog panel has an accessible name via aria-labelledby', async () => {
+      const user = userEvent.setup()
+      renderLauncher('no-deps-checklist')
+
+      await user.click(screen.getByRole('button', { name: /open checklist/i }))
+
+      // The dialog must be reachable by its accessible name (the heading).
+      const dialog = screen.getByRole('dialog', { name: 'No Dependencies Checklist' })
+      const labelledBy = dialog.getAttribute('aria-labelledby')
+      expect(labelledBy).toBeTruthy()
+      expect(document.getElementById(labelledBy as string)).toHaveTextContent(
+        'No Dependencies Checklist'
+      )
     })
   })
 
