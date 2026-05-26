@@ -653,6 +653,11 @@ export function AnnouncementsProvider({
           queueTimersRef.current.delete(timer)
           const nextId = schedulerRef.current.getNext()
           if (nextId) {
+            // `getNext()` dequeued `nextId` from the scheduler, so re-sync
+            // `state.queue` before showing it — otherwise the promoted (now
+            // visible) announcement keeps appearing in the reported queue.
+            // Mirrors `showNext()`.
+            dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
             show(nextId)
           }
         }, schedulerRef.current.delayBetween)
@@ -695,6 +700,11 @@ export function AnnouncementsProvider({
           queueTimersRef.current.delete(timer)
           const nextId = schedulerRef.current.getNext()
           if (nextId) {
+            // `getNext()` dequeued `nextId` from the scheduler, so re-sync
+            // `state.queue` before showing it — otherwise the promoted (now
+            // visible) announcement keeps appearing in the reported queue.
+            // Mirrors `showNext()`.
+            dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
             show(nextId)
           }
         }, schedulerRef.current.delayBetween)

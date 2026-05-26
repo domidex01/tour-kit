@@ -324,4 +324,95 @@ describe('AnnouncementsProvider — autoShow', () => {
       expect(onShow).toHaveBeenCalledTimes(1)
     })
   })
+
+  // Regression: when the active announcement is dismissed/completed and the
+  // next queued one auto-promotes, `getNext()` dequeues it from the scheduler —
+  // but the dismiss/complete auto-advance path used to set `state.queue` BEFORE
+  // calling `getNext()`, leaving the now-visible announcement still listed in
+  // the reported queue. The fix re-syncs `state.queue` after `getNext()`,
+  // mirroring `showNext()`.
+  describe('auto-advance keeps queue in sync', () => {
+    const first: AnnouncementConfig = {
+      id: 'first',
+      variant: 'modal',
+      title: 'First',
+      priority: 'critical',
+    }
+    const second: AnnouncementConfig = {
+      id: 'second',
+      variant: 'modal',
+      title: 'Second',
+      priority: 'high',
+    }
+
+    it('removes the promoted announcement from the queue after dismiss', async () => {
+      const { result } = renderHook(() => useAnnouncementsContext(), {
+        wrapper: makeWrapper([first, second], {
+          queueConfig: { maxConcurrent: 1, stackBehavior: 'queue', delayBetween: 0 },
+        }),
+      })
+
+      await waitFor(() => {
+        expect(result.current.activeAnnouncement).toBe('first')
+      })
+      expect(result.current.queue).toContain('second')
+
+      act(() => {
+        result.current.dismiss('first')
+      })
+
+      await waitFor(() => {
+        expect(result.current.activeAnnouncement).toBe('second')
+      })
+      expect(result.current.queue).not.toContain('second')
+      expect(result.current.queue).toHaveLength(0)
+    })
+
+    it('removes the promoted announcement from the queue after complete', async () => {
+      const { result } = renderHook(() => useAnnouncementsContext(), {
+        wrapper: makeWrapper([first, second], {
+          queueConfig: { maxConcurrent: 1, stackBehavior: 'queue', delayBetween: 0 },
+        }),
+      })
+
+      await waitFor(() => {
+        expect(result.current.activeAnnouncement).toBe('first')
+      })
+      expect(result.current.queue).toContain('second')
+
+      act(() => {
+        result.current.complete('first')
+      })
+
+      // `second` promotes; the completed `first` must NOT re-show (completion is
+      // terminal, like dismissal — see scheduler.canShow).
+      await waitFor(() => {
+        expect(result.current.activeAnnouncement).toBe('second')
+      })
+      expect(result.current.queue).not.toContain('second')
+      expect(result.current.queue).toHaveLength(0)
+    })
+
+    it('does not re-show a completed announcement (completion is terminal)', async () => {
+      // Single 'always'-frequency announcement: completing it must keep it from
+      // being re-shown by the mount auto-show effect.
+      const { result } = renderHook(() => useAnnouncementsContext(), {
+        wrapper: makeWrapper([{ ...first, frequency: 'always' }]),
+      })
+
+      await waitFor(() => {
+        expect(result.current.activeAnnouncement).toBe('first')
+      })
+
+      act(() => {
+        result.current.complete('first')
+      })
+
+      await waitFor(() => {
+        expect(result.current.activeAnnouncement).toBeNull()
+      })
+      expect(result.current.getState('first')?.isVisible).toBe(false)
+      expect(result.current.getState('first')?.completedAt).not.toBeNull()
+    })
+  })
 })
