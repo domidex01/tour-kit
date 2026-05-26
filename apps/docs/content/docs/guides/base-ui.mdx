@@ -18,28 +18,35 @@ First, install Base UI as an additional dependency:
 <Tabs items={['pnpm', 'npm', 'yarn', 'bun']}>
   <Tab value='pnpm'>
     ```bash
-    pnpm add @mui/base
+    pnpm add @base-ui-components/react
     ```
   </Tab>
   <Tab value='npm'>
     ```bash
-    npm install @mui/base
+    npm install @base-ui-components/react
     ```
   </Tab>
   <Tab value='yarn'>
     ```bash
-    yarn add @mui/base
+    yarn add @base-ui-components/react
     ```
   </Tab>
   <Tab value='bun'>
     ```bash
-    bun add @mui/base
+    bun add @base-ui-components/react
     ```
   </Tab>
 </Tabs>
 
 <Callout type="info">
   Base UI is an optional peer dependency. Radix UI remains the default and works without any additional setup.
+</Callout>
+
+<Callout type="warn">
+  `@base-ui-components/react` is the current Base UI package. The earlier
+  `@mui/base` preview was deprecated and renamed — if you still depend on it, see
+  the [troubleshooting note](/docs/troubleshooting#mui-base-base-ui-peer). The
+  `UnifiedSlot` render-prop pattern is library-agnostic, so either works.
 </Callout>
 
 ## Enabling Base UI Mode
@@ -155,7 +162,7 @@ No changes needed - Radix UI is the default behavior.
 
 ### To Base UI
 
-1. Install `@mui/base`
+1. Install `@base-ui-components/react`
 2. Wrap your app with `UILibraryProvider`:
 
 ```tsx
