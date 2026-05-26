@@ -37,6 +37,7 @@ describe('HintHotspot', () => {
     expect(container.firstChild).toMatchInlineSnapshot(`
       <button
         aria-expanded="false"
+        aria-haspopup="dialog"
         aria-label="Show hint"
         class="fixed rounded-full border-2 border-background shadow-md cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-3 w-3 bg-primary z-50"
         style="top: 96px; left: 296px;"
@@ -59,6 +60,22 @@ describe('HintHotspot', () => {
     rerender(<HintHotspot {...defaultProps} isOpen={true} />)
 
     expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('declares aria-haspopup so SR users know a popup opens (all variants)', () => {
+    const variants = ['badge', 'beacon-with-label', 'what-s-new-pill'] as const
+    for (const variant of variants) {
+      const { unmount } = render(
+        <HintHotspot {...defaultProps} variant={variant} count={1} label="New" />
+      )
+      expect(screen.getByRole('button')).toHaveAttribute('aria-haspopup', 'dialog')
+      unmount()
+    }
+  })
+
+  it('forwards aria-controls to the hotspot button', () => {
+    render(<HintHotspot {...defaultProps} aria-controls="tk-hint-tooltip-x" />)
+    expect(screen.getByRole('button')).toHaveAttribute('aria-controls', 'tk-hint-tooltip-x')
   })
 
   it('positions at top-right corner', () => {

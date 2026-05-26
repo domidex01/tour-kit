@@ -133,6 +133,11 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
       return null
     }
 
+    // Stable id linking the hotspot button to its popover so SR users know
+    // which element the trigger controls (aria-controls) and that activating it
+    // opens a popup (aria-haspopup, set on the hotspot variants).
+    const tooltipId = `tk-hint-tooltip-${id}`
+
     return (
       <>
         <HintHotspot
@@ -146,9 +151,11 @@ export const Hint = React.forwardRef<HTMLButtonElement, HintProps>(
           color={color}
           zIndex={zIndex}
           className={hotspotClassName}
+          aria-controls={tooltipId}
         />
         {isOpen && hotspotRef.current && (
           <HintTooltip
+            id={tooltipId}
             target={hotspotRef.current}
             placement={tooltipPlacement}
             onClose={handleDismiss}

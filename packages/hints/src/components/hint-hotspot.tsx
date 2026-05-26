@@ -125,6 +125,7 @@ const LegacyHintHotspot = React.forwardRef<HTMLButtonElement, LegacyHintHotspotP
           left: pos.left,
         }}
         aria-label="Show hint"
+        aria-haspopup="dialog"
         aria-expanded={isOpen}
         {...props}
       >

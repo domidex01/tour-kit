@@ -88,6 +88,7 @@ export const HintWhatsNewPill = React.forwardRef<HTMLButtonElement, HintWhatsNew
         )}
         style={{ top: pos.top, left: pos.left }}
         aria-label={label}
+        aria-haspopup="dialog"
         aria-expanded={isOpen}
         onPointerDown={handlePointerDown as React.PointerEventHandler<HTMLElement>}
         onFocus={handleFocus as React.FocusEventHandler<HTMLElement>}
