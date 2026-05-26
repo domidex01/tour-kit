@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/react Context File
-Version: 1.0.0 | Generated: 2026-05-24
+Version: 1.0.2 | Generated: 2026-05-26
 Paste this into your LLM to get accurate answers about @tour-kit/react.
 =========================================================================
 
@@ -17,7 +17,7 @@ Peer dependencies:
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
     tailwindcss: ^3.4.0 || ^4.0.0
-    @mui/base: ^5.0.0-beta.0
+    @mui/base: catalog:
     @tour-kit/analytics: workspace:*
     next: ^13.0.0 || ^14.0.0 || ^15.0.0
     react-router: ^6.0.0 || ^7.0.0
