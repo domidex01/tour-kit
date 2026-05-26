@@ -2,6 +2,7 @@ import { render, renderHook, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import type * as React from 'react'
+import { createPortal } from 'react-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFocusTrap } from '../../hooks/use-focus-trap'
 import {
@@ -317,5 +318,132 @@ describe('useFocusTrap - memory leak prevention', () => {
 
     unmount()
     tracker.assertNoLeaks()
+  })
+})
+
+describe('useFocusTrap - inert background (modal semantics)', () => {
+  // The trapped container is portaled to document.body (like TourCard). The
+  // testing-library render root is a separate body child standing in for the
+  // app background.
+  function PortaledTrap({
+    enabled = true,
+    inert = true,
+  }: {
+    enabled?: boolean
+    inert?: boolean
+  }) {
+    const { containerRef, activate, deactivate } = useFocusTrap(enabled, {
+      inertBackground: inert,
+    })
+    return (
+      <div data-testid="background">
+        <button type="button" data-testid="bg-trigger" onClick={activate}>
+          Open
+        </button>
+        <button type="button" data-testid="bg-close" onClick={deactivate}>
+          Close
+        </button>
+        {createPortal(
+          <div ref={containerRef as React.RefObject<HTMLDivElement>} data-testid="trap">
+            <button type="button" data-testid="trap-first">
+              First
+            </button>
+          </div>,
+          document.body
+        )}
+      </div>
+    )
+  }
+
+  beforeEach(() => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+  })
+
+  it('marks background body children inert + aria-hidden on activate and restores on deactivate', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<PortaledTrap />)
+    // testing-library appends `container` directly to document.body, so it is
+    // the background body child (the portaled trap is a separate body child).
+    const backgroundRoot = container
+    expect(backgroundRoot.hasAttribute('inert')).toBe(false)
+
+    await user.click(screen.getByTestId('bg-trigger'))
+    expect(backgroundRoot.hasAttribute('inert')).toBe(true)
+    expect(backgroundRoot.getAttribute('aria-hidden')).toBe('true')
+
+    await user.click(screen.getByTestId('bg-close'))
+    expect(backgroundRoot.hasAttribute('inert')).toBe(false)
+    expect(backgroundRoot.hasAttribute('aria-hidden')).toBe(false)
+  })
+
+  it('does not touch the background when inertBackground is false', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<PortaledTrap inert={false} />)
+    const backgroundRoot = container
+
+    await user.click(screen.getByTestId('bg-trigger'))
+    expect(backgroundRoot.hasAttribute('inert')).toBe(false)
+    expect(backgroundRoot.hasAttribute('aria-hidden')).toBe(false)
+
+    await user.click(screen.getByTestId('bg-close'))
+  })
+
+  it('does not inert the portal subtree that contains the trap', async () => {
+    const user = userEvent.setup()
+    render(<PortaledTrap />)
+
+    await user.click(screen.getByTestId('bg-trigger'))
+    const trap = screen.getByTestId('trap')
+    // Walk up from the trap to its body-level ancestor; it must stay interactive.
+    let portalRoot: HTMLElement | null = trap
+    while (portalRoot?.parentElement && portalRoot.parentElement !== document.body) {
+      portalRoot = portalRoot.parentElement
+    }
+    expect(portalRoot?.hasAttribute('inert')).toBe(false)
+
+    await user.click(screen.getByTestId('bg-close'))
+  })
+})
+
+describe('useFocusTrap - pulls drifting focus back', () => {
+  it('returns focus into the container when Tab is pressed from outside', async () => {
+    const user = userEvent.setup()
+
+    function Drifter() {
+      const { containerRef, activate } = useFocusTrap(true)
+      return (
+        <>
+          <button type="button" data-testid="outside-1">
+            Outside 1
+          </button>
+          <button type="button" data-testid="open" onClick={activate}>
+            Open
+          </button>
+          <div ref={containerRef as React.RefObject<HTMLDivElement>} data-testid="container">
+            <button type="button" data-testid="inside-first">
+              Inside First
+            </button>
+            <button type="button" data-testid="inside-last">
+              Inside Last
+            </button>
+          </div>
+        </>
+      )
+    }
+
+    render(<Drifter />)
+    await user.click(screen.getByTestId('open'))
+    expect(screen.getByTestId('inside-first')).toHaveFocus()
+
+    // Programmatically move focus outside the container, then Tab: the trap
+    // should pull focus back to the first focusable instead of letting it
+    // continue into the background.
+    screen.getByTestId('outside-1').focus()
+    expect(screen.getByTestId('outside-1')).toHaveFocus()
+
+    await user.tab()
+    expect(screen.getByTestId('inside-first')).toHaveFocus()
   })
 })

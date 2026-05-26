@@ -83,15 +83,30 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
       isLastStep,
     } = useTour()
 
-    const arrowRef = React.useRef<SVGSVGElement>(null)
-    const reducedMotion = useReducedMotion()
-    const { containerRef, activate, deactivate } = useFocusTrap(isActive)
-
     // Phase 3 (refactor train) — TourStep is now a discriminated union;
     // hidden steps don't render UI so we narrow to the visible branch here
     // and bail out below. The provider already skips hidden steps on advance,
     // so this is a defensive narrow for typing rather than a runtime gate.
     const visibleStep = currentStep && isVisibleStep(currentStep) ? currentStep : null
+
+    // A step is truly "modal" only when it does NOT opt into spotlight
+    // interaction. Interactive steps intentionally let keyboard/pointer users
+    // reach the highlighted target (e.g. branching tours), so we must not trap
+    // focus, claim `aria-modal`, or inert the background for them.
+    const isModal = isActive && visibleStep !== null && !visibleStep.interactive
+
+    const arrowRef = React.useRef<SVGSVGElement>(null)
+    const reducedMotion = useReducedMotion()
+    const { containerRef, activate, deactivate } = useFocusTrap(isModal, {
+      inertBackground: true,
+    })
+
+    // TourPortal mounts its node lazily (after its own mount effect), so the
+    // card div is not in the DOM on the first render where the tour activates.
+    // Track the mounted node in state so the focus-trap effect re-runs once the
+    // node exists — otherwise activate() bails on a null container and the trap
+    // never engages (and the focused element is never captured for restore).
+    const [cardNode, setCardNode] = React.useState<HTMLDivElement | null>(null)
 
     const targetElement = React.useMemo(() => {
       if (!visibleStep?.target) return null
@@ -117,12 +132,11 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
     }, [targetElement, refs])
 
     React.useEffect(() => {
-      if (isActive) {
+      if (isModal && cardNode) {
         activate()
-      } else {
-        deactivate()
+        return () => deactivate()
       }
-    }, [isActive, activate, deactivate])
+    }, [isModal, cardNode, activate, deactivate])
 
     // Emit deprecation warning once per step id when classic variant is in use.
     React.useEffect(() => {
@@ -161,6 +175,9 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
             if (containerRef) {
               containerRef.current = node
             }
+            // Track the mounted node so the focus-trap effect re-runs once the
+            // portal child exists (see cardNode note above).
+            setCardNode(node)
             // Forward the ref
             if (typeof ref === 'function') {
               ref(node)
@@ -183,7 +200,10 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
           // overridable — keep them AFTER the spread.
           // biome-ignore lint/a11y/useSemanticElements: Native dialog has default centering/backdrop incompatible with floating-ui
           role="dialog"
-          aria-modal="true"
+          // Only claim modal semantics when the step is actually modal. For
+          // interactive steps the background stays reachable by design, so
+          // `aria-modal` is omitted (non-modal dialog) and focus is not trapped.
+          aria-modal={isModal ? 'true' : undefined}
           aria-label={ariaLabel}
           data-tour-step={visibleStep.id}
           data-tour-variant={variant}

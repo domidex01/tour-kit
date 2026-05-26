@@ -295,6 +295,110 @@ describe('TourCard Accessibility', () => {
     expect(finishButton).toBeInTheDocument()
   })
 
+  it('restores focus to the invoking trigger when the tour is closed', async () => {
+    const user = userEvent.setup()
+
+    function Starter() {
+      const { start } = useTour()
+      return (
+        <button type="button" onClick={() => start()}>
+          Start
+        </button>
+      )
+    }
+
+    render(
+      <TourProvider tours={[testTour]}>
+        <TourCard />
+        <Starter />
+      </TourProvider>
+    )
+
+    const trigger = screen.getByText('Start')
+    await user.click(trigger)
+    await screen.findByRole('dialog')
+
+    // Dismiss via the X (which calls skip()).
+    await user.click(screen.getByRole('button', { name: /close/i }))
+
+    expect(screen.queryByRole('dialog')).toBeNull()
+    // WCAG 2.4.3 — focus returns to the trigger, not <body>.
+    expect(trigger).toHaveFocus()
+  })
+
+  it('traps focus inside the dialog for modal steps', async () => {
+    const user = userEvent.setup()
+
+    function Starter() {
+      const { start } = useTour()
+      return (
+        <button type="button" onClick={() => start()}>
+          Start
+        </button>
+      )
+    }
+
+    render(
+      <TourProvider tours={[testTour]}>
+        <TourCard />
+        <Starter />
+      </TourProvider>
+    )
+
+    await user.click(screen.getByText('Start'))
+    const dialog = await screen.findByRole('dialog')
+
+    // Activating the trap moves focus into the dialog.
+    expect(dialog.contains(document.activeElement)).toBe(true)
+
+    // Tab many times — focus must never escape the dialog.
+    for (let i = 0; i < 8; i++) {
+      await user.tab()
+      expect(dialog.contains(document.activeElement)).toBe(true)
+    }
+  })
+
+  it('does not declare aria-modal or trap focus for interactive steps', async () => {
+    const interactiveTour: Tour = {
+      id: 'test',
+      steps: [
+        {
+          id: 's1',
+          target: '#target',
+          title: 'Pick one',
+          content: 'Choose a path',
+          interactive: true,
+        },
+      ],
+    }
+
+    const user = userEvent.setup()
+
+    function Starter() {
+      const { start } = useTour()
+      return (
+        <button type="button" onClick={() => start()}>
+          Start
+        </button>
+      )
+    }
+
+    render(
+      <TourProvider tours={[interactiveTour]}>
+        <TourCard />
+        <Starter />
+      </TourProvider>
+    )
+
+    await user.click(screen.getByText('Start'))
+    const dialog = await screen.findByRole('dialog')
+
+    // Interactive steps are non-modal: no aria-modal, background stays reachable.
+    expect(dialog).not.toHaveAttribute('aria-modal')
+    // The render root (background) must not be inerted for interactive steps.
+    expect(document.querySelectorAll('[inert]').length).toBe(0)
+  })
+
   it('heading has correct level', async () => {
     const user = userEvent.setup()
 
