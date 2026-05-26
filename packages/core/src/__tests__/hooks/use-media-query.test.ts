@@ -46,10 +46,13 @@ describe('useMediaQuery', () => {
   it('updates when media query changes', () => {
     let changeHandler: ((e: MediaQueryListEvent) => void) | undefined
 
-    vi.mocked(window.matchMedia).mockReturnValue({
+    // `useSyncExternalStore` re-reads `matchMedia(query).matches` (the source of
+    // truth) when notified, so the mock must mutate `.matches` the way a real
+    // MediaQueryList does before dispatching the change event.
+    const mql = {
       matches: false,
       media: '(min-width: 768px)',
-      addEventListener: vi.fn((event, handler) => {
+      addEventListener: vi.fn((event: string, handler: unknown) => {
         if (event === 'change') changeHandler = handler as (e: MediaQueryListEvent) => void
       }),
       removeEventListener: vi.fn(),
@@ -57,16 +60,44 @@ describe('useMediaQuery', () => {
       removeListener: vi.fn(),
       onchange: null,
       dispatchEvent: vi.fn(),
-    } as unknown as MediaQueryList)
+    }
+    vi.mocked(window.matchMedia).mockReturnValue(mql as unknown as MediaQueryList)
 
     const { result } = renderHook(() => useMediaQuery('(min-width: 768px)'))
     expect(result.current).toBe(false)
 
     act(() => {
+      mql.matches = true
       changeHandler?.({ matches: true } as MediaQueryListEvent)
     })
 
     expect(result.current).toBe(true)
+  })
+
+  it('returns false from the server snapshot (no hydration mismatch)', async () => {
+    const React = await import('react')
+    const { renderToString } = await import('react-dom/server')
+
+    // Even if matchMedia would report `true`, SSR must use the server snapshot
+    // (`false`) so the first client render matches the server markup.
+    vi.mocked(window.matchMedia).mockReturnValue({
+      matches: true,
+      media: '(min-width: 768px)',
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+    } as unknown as MediaQueryList)
+
+    function Probe() {
+      const matches = useMediaQuery('(min-width: 768px)')
+      return React.createElement('span', { 'data-matches': String(matches) })
+    }
+
+    const html = renderToString(React.createElement(Probe))
+    expect(html).toContain('data-matches="false"')
   })
 
   it('cleans up event listener on unmount', () => {
@@ -191,10 +222,10 @@ describe('useReducedMotion (SSR-safe-default-true)', () => {
   it('responds to matchMedia change events', () => {
     let changeHandler: ((e: MediaQueryListEvent) => void) | undefined
 
-    vi.mocked(window.matchMedia).mockReturnValue({
+    const mql = {
       matches: false,
       media: '(prefers-reduced-motion: reduce)',
-      addEventListener: vi.fn((event, handler) => {
+      addEventListener: vi.fn((event: string, handler: unknown) => {
         if (event === 'change') changeHandler = handler as (e: MediaQueryListEvent) => void
       }),
       removeEventListener: vi.fn(),
@@ -202,12 +233,14 @@ describe('useReducedMotion (SSR-safe-default-true)', () => {
       removeListener: vi.fn(),
       onchange: null,
       dispatchEvent: vi.fn(),
-    } as unknown as MediaQueryList)
+    }
+    vi.mocked(window.matchMedia).mockReturnValue(mql as unknown as MediaQueryList)
 
     const { result } = renderHook(() => useReducedMotion())
     expect(result.current).toBe(false)
 
     act(() => {
+      mql.matches = true
       changeHandler?.({ matches: true } as MediaQueryListEvent)
     })
 
