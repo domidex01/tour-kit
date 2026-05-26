@@ -399,6 +399,60 @@ describe('TourCard Accessibility', () => {
     expect(document.querySelectorAll('[inert]').length).toBe(0)
   })
 
+  it('dismisses the tour on Escape by default (closeOnEscape)', async () => {
+    const user = userEvent.setup()
+
+    function Starter() {
+      const { start } = useTour()
+      return (
+        <button type="button" onClick={() => start()}>
+          Start
+        </button>
+      )
+    }
+
+    render(
+      <TourProvider tours={[testTour]}>
+        <TourCard />
+        <Starter />
+      </TourProvider>
+    )
+
+    await user.click(screen.getByText('Start'))
+    await screen.findByRole('dialog')
+
+    await user.keyboard('{Escape}')
+
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('does not dismiss on Escape when closeOnEscape is false', async () => {
+    const user = userEvent.setup()
+
+    function Starter() {
+      const { start } = useTour()
+      return (
+        <button type="button" onClick={() => start()}>
+          Start
+        </button>
+      )
+    }
+
+    render(
+      <TourProvider tours={[testTour]}>
+        <TourCard closeOnEscape={false} />
+        <Starter />
+      </TourProvider>
+    )
+
+    await user.click(screen.getByText('Start'))
+    await screen.findByRole('dialog')
+
+    await user.keyboard('{Escape}')
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
   it('heading has correct level', async () => {
     const user = userEvent.setup()
 

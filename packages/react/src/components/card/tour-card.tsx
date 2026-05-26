@@ -15,6 +15,7 @@ import {
   logger,
   resolveTarget,
   useFocusTrap,
+  useKeyboardNavigation,
   useReducedMotion,
   useTour,
 } from '@tour-kit/core'
@@ -46,6 +47,12 @@ export interface TourCardProps
   showStepIndicator?: boolean
   /** Floating UI arrow size in pixels. Default: 8. */
   arrowSize?: number
+  /**
+   * Dismiss the tour when the user presses Escape (standard dialog
+   * convention). Default: `true`. Only Escape is wired here — for full
+   * keyboard navigation (arrows/Enter) use `useKeyboardNavigation`.
+   */
+  closeOnEscape?: boolean
 }
 
 /**
@@ -70,7 +77,10 @@ export interface TourCardProps
  * @see {@link tourCardVariants} for available variants
  */
 export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
-  ({ className, size, variant = 'refreshed', showStepIndicator, arrowSize, ...props }, ref) => {
+  (
+    { className, size, variant = 'refreshed', showStepIndicator, arrowSize, closeOnEscape = true, ...props },
+    ref
+  ) => {
     const {
       isActive,
       currentStep,
@@ -99,6 +109,17 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
     const reducedMotion = useReducedMotion()
     const { containerRef, activate, deactivate } = useFocusTrap(isModal, {
       inertBackground: true,
+    })
+
+    // Esc-to-dismiss (standard dialog convention). Wires only Escape — empty
+    // next/prev key lists leave arrow/Enter navigation to consumers who opt
+    // into `useKeyboardNavigation` themselves. The hook no-ops when the tour
+    // is inactive and ignores keypresses while typing in form fields.
+    useKeyboardNavigation({
+      enabled: closeOnEscape,
+      nextKeys: [],
+      prevKeys: [],
+      exitKeys: ['Escape'],
     })
 
     // TourPortal mounts its node lazily (after its own mount effect), so the
