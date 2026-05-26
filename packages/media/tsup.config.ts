@@ -37,4 +37,20 @@ export default defineConfig([
       }
     },
   },
+  // Tailwind plugin/preset — a build-time Node module, so no "use client"
+  // banner and no client React externals.
+  {
+    entry: {
+      'tailwind/index': 'src/tailwind/index.ts',
+    },
+    format: ['cjs', 'esm'],
+    dts: true,
+    clean: false,
+    external: ['tailwindcss', 'tailwindcss/plugin'],
+    treeshake: true,
+    minify: true,
+    sourcemap: true,
+    target: 'es2020',
+    outDir: 'dist',
+  },
 ])
