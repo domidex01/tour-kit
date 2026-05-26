@@ -22,41 +22,65 @@ export interface UseFocusTrapReturn {
 }
 
 /**
+ * Module-level ref-count of the `inert` + `aria-hidden` applied to background
+ * elements. Concurrent/nested inert-background traps may touch the same element;
+ * each records the ORIGINAL (pre-any-trap) state once and increments a count,
+ * and the original is only restored when the last trap releases. Without this,
+ * the later trap's restore could re-apply `aria-hidden` after the first removed
+ * it, stranding the background hidden from assistive tech.
+ */
+interface InertRecord {
+  count: number
+  originalInert: boolean
+  originalAriaHidden: string | null
+}
+const inertRegistry = new WeakMap<HTMLElement, InertRecord>()
+
+/**
  * Marks every direct child of `document.body` that does not contain `container`
- * as `inert` + `aria-hidden`, returning a function that restores the previous
- * state. `container` is typically inside a portal appended to `body`, so its
- * own portal root is skipped and stays interactive.
+ * as `inert` + `aria-hidden`, returning a function that releases this trap's
+ * hold (restoring the original state once no trap needs the element hidden).
+ * `container` is typically inside a portal appended to `body`, so its own portal
+ * root is skipped and stays interactive.
  */
 function applyBackgroundInert(container: HTMLElement): () => void {
   if (typeof document === 'undefined' || !document.body) return () => {}
 
-  const modified: Array<{
-    el: HTMLElement
-    hadInert: boolean
-    prevAriaHidden: string | null
-  }> = []
+  const affected: HTMLElement[] = []
 
   for (const child of Array.from(document.body.children)) {
     if (!(child instanceof HTMLElement)) continue
     // Leave the subtree that owns the trapped container interactive.
     if (child === container || child.contains(container)) continue
 
-    modified.push({
-      el: child,
-      hadInert: child.hasAttribute('inert'),
-      prevAriaHidden: child.getAttribute('aria-hidden'),
-    })
-    child.setAttribute('inert', '')
-    child.setAttribute('aria-hidden', 'true')
+    affected.push(child)
+    const existing = inertRegistry.get(child)
+    if (existing) {
+      existing.count += 1
+    } else {
+      inertRegistry.set(child, {
+        count: 1,
+        originalInert: child.hasAttribute('inert'),
+        originalAriaHidden: child.getAttribute('aria-hidden'),
+      })
+      child.setAttribute('inert', '')
+      child.setAttribute('aria-hidden', 'true')
+    }
   }
 
   return () => {
-    for (const { el, hadInert, prevAriaHidden } of modified) {
-      if (!hadInert) el.removeAttribute('inert')
-      if (prevAriaHidden === null) {
+    for (const el of affected) {
+      const record = inertRegistry.get(el)
+      if (!record) continue
+      record.count -= 1
+      if (record.count > 0) continue
+      // Last trap released — restore the original (pre-trap) state.
+      inertRegistry.delete(el)
+      if (!record.originalInert) el.removeAttribute('inert')
+      if (record.originalAriaHidden === null) {
         el.removeAttribute('aria-hidden')
       } else {
-        el.setAttribute('aria-hidden', prevAriaHidden)
+        el.setAttribute('aria-hidden', record.originalAriaHidden)
       }
     }
   }

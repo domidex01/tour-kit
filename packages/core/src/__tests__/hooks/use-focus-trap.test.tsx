@@ -405,6 +405,63 @@ describe('useFocusTrap - inert background (modal semantics)', () => {
 
     await user.click(screen.getByTestId('bg-close'))
   })
+
+  // Two concurrent inert-background traps both hide the shared render root.
+  // The original state must only be restored when the LAST trap releases, and
+  // never re-applied after the first releases.
+  function ConcurrentTraps() {
+    const a = useFocusTrap(true, { inertBackground: true })
+    const b = useFocusTrap(true, { inertBackground: true })
+    return (
+      <div data-testid="bg">
+        <button type="button" data-testid="a-activate" onClick={a.activate}>
+          a activate
+        </button>
+        <button type="button" data-testid="a-deactivate" onClick={a.deactivate}>
+          a deactivate
+        </button>
+        <button type="button" data-testid="b-activate" onClick={b.activate}>
+          b activate
+        </button>
+        <button type="button" data-testid="b-deactivate" onClick={b.deactivate}>
+          b deactivate
+        </button>
+        {createPortal(
+          <div ref={a.containerRef as React.RefObject<HTMLDivElement>}>
+            <button type="button">a inside</button>
+          </div>,
+          document.body
+        )}
+        {createPortal(
+          <div ref={b.containerRef as React.RefObject<HTMLDivElement>}>
+            <button type="button">b inside</button>
+          </div>,
+          document.body
+        )}
+      </div>
+    )
+  }
+
+  it('ref-counts inert across concurrent traps (no premature/stranded attrs)', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<ConcurrentTraps />)
+    const bg = container // render root — a background body child for both traps
+
+    await user.click(screen.getByTestId('a-activate'))
+    await user.click(screen.getByTestId('b-activate'))
+    expect(bg.hasAttribute('inert')).toBe(true)
+    expect(bg.getAttribute('aria-hidden')).toBe('true')
+
+    // First release: the other trap still holds, so it must stay hidden.
+    await user.click(screen.getByTestId('a-deactivate'))
+    expect(bg.hasAttribute('inert')).toBe(true)
+    expect(bg.getAttribute('aria-hidden')).toBe('true')
+
+    // Last release: original (un-hidden) state restored, not re-applied.
+    await user.click(screen.getByTestId('b-deactivate'))
+    expect(bg.hasAttribute('inert')).toBe(false)
+    expect(bg.hasAttribute('aria-hidden')).toBe(false)
+  })
 })
 
 describe('useFocusTrap - does not restore a stale trigger', () => {
