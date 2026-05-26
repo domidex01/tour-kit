@@ -78,7 +78,15 @@ export interface TourCardProps
  */
 export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
   (
-    { className, size, variant = 'refreshed', showStepIndicator, arrowSize, closeOnEscape = true, ...props },
+    {
+      className,
+      size,
+      variant = 'refreshed',
+      showStepIndicator,
+      arrowSize,
+      closeOnEscape = true,
+      ...props
+    },
     ref
   ) => {
     const {

@@ -482,10 +482,7 @@ describe('useFocusTrap - does not restore a stale trigger', () => {
         <button type="button" data-testid="trigger-b">
           Trigger B
         </button>
-        <div
-          ref={trap.containerRef as React.RefObject<HTMLDivElement>}
-          data-testid="container"
-        >
+        <div ref={trap.containerRef as React.RefObject<HTMLDivElement>} data-testid="container">
           <button type="button" data-testid="inside">
             Inside
           </button>

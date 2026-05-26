@@ -181,8 +181,8 @@ function SchedulingDemo() {
         <div>
           <h2 className="text-lg font-semibold">Scheduling</h2>
           <p className="text-sm text-muted-foreground">
-            Your timezone: <code className="rounded bg-muted px-1">{mounted ? timezone : '…'}</code>.
-            Schedules are evaluated reactively and re-check on an interval.
+            Your timezone: <code className="rounded bg-muted px-1">{mounted ? timezone : '…'}</code>
+            . Schedules are evaluated reactively and re-check on an interval.
           </p>
         </div>
 
@@ -256,7 +256,9 @@ export default function AnnouncementsPage() {
     <div className="min-h-screen bg-background p-8">
       <div className="mx-auto max-w-4xl space-y-8">
         <header id="announcements-header">
-          <h1 className="mb-2 text-3xl font-bold text-foreground">Announcements &amp; Scheduling</h1>
+          <h1 className="mb-2 text-3xl font-bold text-foreground">
+            Announcements &amp; Scheduling
+          </h1>
           <p className="text-muted-foreground">
             Five display variants, a priority queue, frequency caps, audience targeting, and
             time-based scheduling. Open the console to see the lifecycle callbacks fire.

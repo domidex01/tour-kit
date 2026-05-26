@@ -86,7 +86,10 @@ function applyBackgroundInert(container: HTMLElement): () => void {
   }
 }
 
-export function useFocusTrap(enabled = true, options: UseFocusTrapOptions = {}): UseFocusTrapReturn {
+export function useFocusTrap(
+  enabled = true,
+  options: UseFocusTrapOptions = {}
+): UseFocusTrapReturn {
   const { inertBackground = false } = options
 
   const containerRef = useRef<HTMLElement | null>(null)

@@ -288,7 +288,9 @@ describe('ChecklistTask', () => {
     })
 
     it('checkbox exposes completion via aria-checked', () => {
-      const { rerender } = render(<ChecklistTask task={createMockTaskState({ completed: false })} />)
+      const { rerender } = render(
+        <ChecklistTask task={createMockTaskState({ completed: false })} />
+      )
       expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'false')
 
       rerender(<ChecklistTask task={createMockTaskState({ completed: true })} />)

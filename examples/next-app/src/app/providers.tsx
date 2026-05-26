@@ -125,7 +125,11 @@ const demoAnnouncements: AnnouncementConfig[] = [
     description: 'Highlights a specific element on the page with floating content.',
     frequency: 'always',
     autoShow: false,
-    spotlightOptions: { targetSelector: '#announce-spotlight-target', placement: 'bottom', offset: 12 },
+    spotlightOptions: {
+      targetSelector: '#announce-spotlight-target',
+      placement: 'bottom',
+      offset: 12,
+    },
   },
   {
     id: 'demo-once',
