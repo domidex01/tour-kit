@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@tour-kit/core'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useAiChat } from '../hooks/use-ai-chat'
 import { aiChatToggleVariants } from './ui/chat-variants'
 
@@ -10,6 +10,12 @@ export interface AiChatToggleProps {
   position?: 'bottom-right' | 'bottom-left'
   icon?: ReactNode
   className?: string
+  /**
+   * Style overrides merged over the fixed-position defaults. Use this to nudge
+   * the launcher away from other bottom-corner UI (e.g. framework dev
+   * indicators or another floating action button), e.g. `{ bottom: '4rem' }`.
+   */
+  style?: CSSProperties
 }
 
 function ChatIcon() {
@@ -52,6 +58,7 @@ export function AiChatToggle({
   position = 'bottom-right',
   icon,
   className,
+  style,
 }: AiChatToggleProps) {
   const { isOpen, toggle } = useAiChat()
 
@@ -64,7 +71,7 @@ export function AiChatToggle({
     <button
       type="button"
       onClick={toggle}
-      style={positionStyle}
+      style={{ ...positionStyle, ...style }}
       className={cn(aiChatToggleVariants({ size }), className)}
       aria-label={isOpen ? 'Close chat' : 'Open chat'}
     >

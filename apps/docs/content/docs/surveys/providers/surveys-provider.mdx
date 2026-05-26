@@ -125,6 +125,14 @@ export function App() {
   }}
 />
 
+<Callout type="warn">
+  `onSurveyAnswer` / `onQuestionAnswered` fire on **every** answer change. For
+  `text` and `textarea` questions that means once per keystroke (the inputs are
+  controlled). If you forward these straight to an analytics provider, debounce
+  the call (e.g. 300–500ms) or send only on completion via `onSurveyComplete` —
+  otherwise you'll record one event per character.
+</Callout>
+
 ## Persistence
 
 The provider persists full survey state to storage on every state change and hydrates on mount. The stored JSON includes `isCompleted`, `isDismissed`, `isSnoozed`, `snoozeUntil`, `viewCount`, `lastViewedAt`, `responses`, and the current queue.

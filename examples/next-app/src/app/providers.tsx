@@ -504,7 +504,9 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
         title="Tour Kit Assistant"
         emptyState="Ask me anything about Tour Kit!"
       />
-      <AiChatToggle position="bottom-left" />
+      {/* Lift the launcher above the Next.js dev indicator (bottom-left) so it
+          stays clickable in development. */}
+      <AiChatToggle position="bottom-left" style={{ bottom: '4rem' }} />
     </MultiTourKitProvider>
   )
 }
