@@ -114,7 +114,16 @@ export function useFocusTrap(enabled = true, options: UseFocusTrapOptions = {}):
     // trapping (e.g. an effect firing twice under React Strict Mode).
     if (isTrapping.current) return
 
-    previousActiveElement.current = document.activeElement as HTMLElement
+    // Prefer the element captured when the trap was enabled (see effect below).
+    // Falling back to `document.activeElement` here is a last resort — by the
+    // time activate() runs (often several renders later, once a lazy portal has
+    // mounted), focus may already have drifted to <body>.
+    if (!previousActiveElement.current) {
+      const active = document.activeElement as HTMLElement | null
+      if (active && active !== document.body) {
+        previousActiveElement.current = active
+      }
+    }
     isTrapping.current = true
 
     if (inertBackground) {
@@ -143,6 +152,19 @@ export function useFocusTrap(enabled = true, options: UseFocusTrapOptions = {}):
     previousActiveElement.current = null
     isTrapping.current = false
   }, [handleKeyDown])
+
+  // Capture the element to restore focus to as soon as the trap becomes
+  // enabled — before the portal mounts or `inert`/focus moves shift
+  // `document.activeElement` to <body>. activate() can run several renders
+  // later (once a lazy portal node exists), by which point the trigger is no
+  // longer the active element. Capturing here makes focus restoration reliable.
+  useEffect(() => {
+    if (!enabled || previousActiveElement.current) return
+    const active = document.activeElement as HTMLElement | null
+    if (active && active !== document.body) {
+      previousActiveElement.current = active
+    }
+  }, [enabled])
 
   useEffect(() => {
     return () => {
