@@ -227,6 +227,12 @@ TYPES
       showStepIndicator?: boolean
       /** Floating UI arrow size in pixels. Default: 8. */
       arrowSize?: number
+      /**
+       * Dismiss the tour when the user presses Escape (standard dialog
+       * convention). Default: `true`. Only Escape is wired here — for full
+       * keyboard navigation (arrows/Enter) use `useKeyboardNavigation`.
+       */
+      closeOnEscape?: boolean
     }
 
     export interface TourCardHeaderProps
@@ -337,26 +343,7 @@ TYPES
       stepCount: number
     }
 
-    export interface UseToursReturn {
-      /** All registered tours */
-      tours: TourInfo[]
-      /** Currently active tour ID */
-      activeTourId: string | null
-      /** Check if any tour is active */
-      isAnyTourActive: boolean
-      /** Completed tour IDs */
-      completedTours: string[]
-      /** Skipped tour IDs */
-      skippedTours: string[]
-      /** Check if a tour was completed */
-      isTourCompleted: (tourId: string) => boolean
-      /** Check if a tour was skipped */
-      isTourSkipped: (tourId: string) => boolean
-      /** Get tour info by ID */
-      getTour: (tourId: string) => TourInfo | undefined
-    }
-
-    ... and 1 more types. See source for full definitions.
+    ... and 2 more types. See source for full definitions.
 
 HOOKS
 -----
