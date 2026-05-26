@@ -19,5 +19,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['src/__tests__/**/*.test.{ts,tsx}'],
+    // The integration suite renders a real <TourCard> (Floating UI autoUpdate,
+    // focus trap, inert background, portal), which exceeds vitest's 5s default
+    // on slower CI runners. Match the @tour-kit/announcements precedent.
+    testTimeout: 20000,
   },
 })
