@@ -58,6 +58,7 @@ export const HintBeaconWithLabel = React.forwardRef<HTMLButtonElement, HintBeaco
         )}
         style={{ top: pos.top, left: pos.left }}
         aria-label="Show hint"
+        aria-haspopup="dialog"
         aria-expanded={isOpen}
         {...props}
       >

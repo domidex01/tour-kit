@@ -1,4 +1,4 @@
-# userTourKit v1.0.2 — Generated 2026-05-26T04:28:15Z
+# userTourKit v1.0.2 — Generated 2026-05-26T08:56:46Z
 
 # Feature Adoption Tracking
 
@@ -39405,7 +39405,7 @@ No changes needed - Radix UI is the default behavior.
 
 ### To Base UI
 
-1. Install `@mui/base`
+1. Install `@base-ui-components/react`
 2. Wrap your app with `UILibraryProvider`:
 
 ```tsx

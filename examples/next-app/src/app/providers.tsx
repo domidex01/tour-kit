@@ -11,6 +11,7 @@ import {
   posthogPlugin,
   useAnalytics,
 } from '@tour-kit/analytics'
+import { type AnnouncementConfig, AnnouncementsProvider } from '@tour-kit/announcements'
 import { type ChecklistConfig, ChecklistLauncher, ChecklistProvider } from '@tour-kit/checklists'
 import { HintsProvider } from '@tour-kit/hints'
 import { LicenseProvider } from '@tour-kit/license'
@@ -62,6 +63,112 @@ const onboardingChecklist: ChecklistConfig = {
     },
   ],
 }
+
+// Demo announcements — one of each variant, with a range of priorities and
+// frequency rules so the /announcements route can exercise the queue, priority
+// ordering, frequency caps, audience targeting, and scheduling integration.
+// All are autoShow:false so they only fire when triggered from the demo route.
+const demoAnnouncements: AnnouncementConfig[] = [
+  {
+    id: 'demo-modal',
+    variant: 'modal',
+    priority: 'critical',
+    title: '🎉 Welcome to TourKit',
+    description:
+      'Modal announcements block the UI for high-importance messages. This one is priority "critical" — it jumps to the front of the queue.',
+    frequency: 'always',
+    autoShow: false,
+    modalOptions: { size: 'md', closeOnEscape: true, showCloseButton: true },
+  },
+  {
+    id: 'demo-slideout',
+    variant: 'slideout',
+    priority: 'high',
+    title: "What's new in TourKit",
+    description:
+      'A non-blocking side panel for changelogs and longer release notes. Priority "high".',
+    frequency: 'always',
+    autoShow: false,
+    slideoutOptions: { position: 'right', size: 'md', showCloseButton: true },
+  },
+  {
+    id: 'demo-banner',
+    variant: 'banner',
+    priority: 'normal',
+    title: 'A normal-priority banner',
+    description: 'Persistent top strip for ongoing messages. Dismissable.',
+    frequency: 'always',
+    autoShow: false,
+    bannerOptions: { position: 'top', dismissable: true, intent: 'info' },
+  },
+  {
+    id: 'demo-toast',
+    variant: 'toast',
+    priority: 'low',
+    title: 'Saved',
+    description: 'A low-priority corner toast that auto-dismisses after 5s.',
+    frequency: 'always',
+    autoShow: false,
+    toastOptions: {
+      position: 'bottom-right',
+      autoDismiss: true,
+      autoDismissDelay: 5000,
+      showProgress: true,
+      intent: 'success',
+    },
+  },
+  {
+    id: 'demo-spotlight',
+    variant: 'spotlight',
+    priority: 'normal',
+    title: 'Spotlight a feature',
+    description: 'Highlights a specific element on the page with floating content.',
+    frequency: 'always',
+    autoShow: false,
+    spotlightOptions: {
+      targetSelector: '#announce-spotlight-target',
+      placement: 'bottom',
+      offset: 12,
+    },
+  },
+  {
+    id: 'demo-once',
+    variant: 'toast',
+    priority: 'normal',
+    title: 'Shown once, ever',
+    description: 'frequency: "once" — reload the page and this one will not show again.',
+    frequency: 'once',
+    autoShow: false,
+    toastOptions: {
+      position: 'bottom-left',
+      autoDismiss: true,
+      autoDismissDelay: 6000,
+      intent: 'info',
+    },
+  },
+  {
+    id: 'demo-pro-only',
+    variant: 'banner',
+    priority: 'high',
+    title: 'Pro-only announcement',
+    description: 'Audience-targeted — only renders when userContext.plan === "pro".',
+    frequency: 'always',
+    autoShow: false,
+    audience: [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }],
+    bannerOptions: { position: 'bottom', dismissable: true, intent: 'success' },
+  },
+  {
+    id: 'demo-scheduled',
+    variant: 'banner',
+    priority: 'normal',
+    title: 'Business-hours banner',
+    description:
+      'Gated by @tour-kit/scheduling — only shows Mon–Fri, 09:00–17:00 in your local timezone.',
+    frequency: 'always',
+    autoShow: false,
+    bannerOptions: { position: 'top', dismissable: true, intent: 'warning' },
+  },
+]
 
 function ChecklistWrapper({ children }: { children: React.ReactNode }) {
   const { start: startTour } = useTour('onboarding-tour')
@@ -401,7 +508,9 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
         title="Tour Kit Assistant"
         emptyState="Ask me anything about Tour Kit!"
       />
-      <AiChatToggle position="bottom-left" />
+      {/* Lift the launcher above the Next.js dev indicator (bottom-left) so it
+          stays clickable in development. */}
+      <AiChatToggle position="bottom-left" style={{ bottom: '4rem' }} />
     </MultiTourKitProvider>
   )
 }
@@ -423,7 +532,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
         }}
       >
         <AnalyticsProvider config={analyticsConfig}>
-          <ProvidersInner>{children}</ProvidersInner>
+          <AnnouncementsProvider
+            announcements={demoAnnouncements}
+            userContext={{ plan: 'pro', role: 'admin' }}
+            onAnnouncementShow={(id) => console.log('📣 [announcement] shown:', id)}
+            onAnnouncementDismiss={(id, reason) =>
+              console.log('📣 [announcement] dismissed:', id, reason)
+            }
+            onAnnouncementComplete={(id) => console.log('📣 [announcement] completed:', id)}
+          >
+            <ProvidersInner>{children}</ProvidersInner>
+          </AnnouncementsProvider>
         </AnalyticsProvider>
       </AiChatProvider>
     </LicenseProvider>

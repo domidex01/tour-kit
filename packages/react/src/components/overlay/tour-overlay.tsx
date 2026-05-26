@@ -55,6 +55,12 @@ export const TourOverlay = React.forwardRef<HTMLDivElement, TourOverlayProps>(
           className={cn(tourOverlayVariants({ zIndex }), className)}
           style={{
             ...overlayStyle,
+            // The dim comes from the cutout's huge box-shadow, which only
+            // exists while there's a target rect. For target-less (centered)
+            // steps — or a transient frame where the rect hasn't resolved — fall
+            // back to dimming the overlay itself so the backdrop never goes
+            // fully bright mid-tour.
+            backgroundColor: targetRect ? overlayStyle.backgroundColor : 'rgba(0, 0, 0, 0.5)',
             // When interactive, allow clicks to pass through the overlay to page elements
             pointerEvents: visibleStep?.interactive ? 'none' : overlayStyle.pointerEvents,
           }}

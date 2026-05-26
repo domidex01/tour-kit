@@ -56,6 +56,16 @@
         "default": "./dist/headless.cjs"
       }
     },
+    "./tailwind": {
+      "import": {
+        "types": "./dist/tailwind/index.d.ts",
+        "default": "./dist/tailwind/index.js"
+      },
+      "require": {
+        "types": "./dist/tailwind/index.d.cts",
+        "default": "./dist/tailwind/index.cjs"
+      }
+    },
     "./styles.css": "./dist/styles/variables.css",
     "./package.json": "./package.json"
   },
@@ -83,13 +93,17 @@
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "@lottiefiles/react-lottie-player": "^3.5.0",
-    "@mui/base": "catalog:"
+    "@mui/base": "catalog:",
+    "tailwindcss": "^3.4.0 || ^4.0.0"
   },
   "peerDependenciesMeta": {
     "@lottiefiles/react-lottie-player": {
       "optional": true
     },
     "@mui/base": {
+      "optional": true
+    },
+    "tailwindcss": {
       "optional": true
     }
   },
@@ -104,6 +118,7 @@
     "jsdom": "catalog:",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.8",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",

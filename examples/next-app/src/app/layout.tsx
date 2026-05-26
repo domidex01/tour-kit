@@ -65,6 +65,12 @@ function Navigation() {
             Surveys
           </Link>
           <Link
+            href="/announcements"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Announcements
+          </Link>
+          <Link
             href="/base-ui"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >

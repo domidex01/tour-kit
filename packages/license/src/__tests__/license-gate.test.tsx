@@ -3,6 +3,7 @@ import { useContext } from 'react'
 import { renderToString } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { LicenseGate } from '../components/license-gate'
+import { __resetLicenseWarningForTests } from '../components/license-warning'
 import { LicenseProvider, LicenseRenderContext } from '../context/license-context'
 import type { LicenseState } from '../types'
 
@@ -70,6 +71,9 @@ describe('LicenseGate', () => {
     vi.clearAllMocks()
     mockIsDev.mockReturnValue(false)
     document.body.innerHTML = ''
+    // <LicenseWarning> dedupes to once per session via a module-level guard;
+    // reset between tests so each render observes the warning.
+    __resetLicenseWarningForTests()
   })
 
   afterEach(() => {

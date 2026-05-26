@@ -24,6 +24,11 @@ export interface ChecklistProps extends React.ComponentPropsWithoutRef<'div'>, C
   showDismiss?: boolean
   /** Use as child element */
   asChild?: boolean
+  /**
+   * Optional id applied to the heading element, so a wrapping dialog (e.g.
+   * `ChecklistLauncher`'s panel) can reference it via `aria-labelledby`.
+   */
+  titleId?: string
   /** Custom task renderer */
   renderTask?: (
     task: ReturnType<typeof useChecklist>['visibleTasks'][0],
@@ -57,6 +62,7 @@ export const Checklist = React.forwardRef<HTMLDivElement, ChecklistProps>(
       showProgress = true,
       showDismiss = true,
       asChild = false,
+      titleId,
       renderTask,
       children,
       ...props
@@ -93,7 +99,9 @@ export const Checklist = React.forwardRef<HTMLDivElement, ChecklistProps>(
         {showHeader && (
           <div className={checklistHeaderVariants({})}>
             <div>
-              <h3 className="font-semibold">{resolvedTitle}</h3>
+              <h3 className="font-semibold" id={titleId}>
+                {resolvedTitle}
+              </h3>
               {resolvedDescription && (
                 <p className="text-sm text-muted-foreground">{resolvedDescription}</p>
               )}

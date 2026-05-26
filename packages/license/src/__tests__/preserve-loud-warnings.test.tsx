@@ -15,13 +15,16 @@ import { render } from '@testing-library/react'
 import { logger } from '@tour-kit/core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { LicenseTestMode } from '../components/license-test-mode'
-import { LicenseWarning } from '../components/license-warning'
+import { LicenseWarning, __resetLicenseWarningForTests } from '../components/license-warning'
 
 describe('License preserve-bucket warnings bypass logger.configure', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>
   let errorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
+    // <LicenseWarning> dedupes to once per session via a module-level guard;
+    // reset it so this test observes the warning fire.
+    __resetLicenseWarningForTests()
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     logger.configure({ level: 'silent' })

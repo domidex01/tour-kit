@@ -46,7 +46,10 @@ export const adoptionTableRowVariants = cva('border-b transition-colors', {
     },
   },
   defaultVariants: {
-    hover: true,
+    // The dashboard table is display-only (no row click handler), so rows do
+    // not get a hover highlight by default — that affordance reads as
+    // "clickable". Opt in with `hover` where rows are genuinely interactive.
+    hover: false,
   },
 })
 

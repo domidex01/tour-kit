@@ -30,6 +30,15 @@ export class AnnouncementScheduler {
       return false
     }
 
+    // Completion is terminal, same as dismissal — a completed announcement must
+    // not re-show until `reset()` clears `completedAt`. Without this, completing
+    // an announcement whose frequency permits re-show (e.g. `'always'`, the
+    // default) lets the auto-show effect immediately re-display it. `forceShow()`
+    // bypasses this gate by design.
+    if (state.completedAt) {
+      return false
+    }
+
     // Check frequency rules
     if (!canShowByFrequency(state, config.frequency)) {
       return false

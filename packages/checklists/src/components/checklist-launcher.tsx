@@ -74,6 +74,8 @@ export const ChecklistLauncher = React.forwardRef<HTMLButtonElement, ChecklistLa
   ) => {
     const [isOpen, setIsOpen] = React.useState(false)
     const panelId = React.useId()
+    // Accessible name for the dialog panel — links to the checklist heading.
+    const titleId = `${panelId}-title`
     const { checklist, progress, isDismissed, isComplete } = useChecklist(checklistId)
 
     const { refs, floatingStyles, context } = useFloating({
@@ -152,8 +154,9 @@ export const ChecklistLauncher = React.forwardRef<HTMLButtonElement, ChecklistLa
               className={cn('w-80 z-50', panelClassName)}
               {...getFloatingProps()}
               id={panelId}
+              aria-labelledby={titleId}
             >
-              <Checklist checklistId={checklistId} />
+              <Checklist checklistId={checklistId} titleId={titleId} />
             </div>
           </FloatingFocusManager>
         )}

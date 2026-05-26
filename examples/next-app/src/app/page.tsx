@@ -36,9 +36,14 @@ export default function HomePage() {
             </button>
             <button
               type="button"
-              onClick={() => start()}
-              disabled={isActive}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+              // Don't `disabled` while active — a disabled button is blurred by
+              // the browser, so focus can't be restored to it when the tour
+              // closes (WCAG 2.4.3). Guard re-entry in the handler instead.
+              onClick={() => {
+                if (!isActive) start()
+              }}
+              aria-disabled={isActive}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors aria-disabled:opacity-50"
             >
               {isActive ? 'Tour in Progress...' : 'Start Multi-Page Tour'}
             </button>

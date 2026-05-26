@@ -1,4 +1,5 @@
 import { hintsPlugin } from '@tour-kit/hints/tailwind'
+import { mediaPlugin } from '@tour-kit/media/tailwind'
 import { tourKitPlugin } from '@tour-kit/react/tailwind'
 import type { Config } from 'tailwindcss'
 
@@ -10,6 +11,9 @@ export default {
     '../../packages/checklists/dist/**/*.js',
     '../../packages/adoption/dist/**/*.js',
     '../../packages/ai/dist/**/*.js',
+    '../../packages/media/dist/**/*.js',
+    '../../packages/announcements/dist/**/*.js',
+    '../../packages/surveys/dist/**/*.js',
   ],
   theme: {
     extend: {
@@ -56,5 +60,5 @@ export default {
     },
   },
   // biome-ignore lint/suspicious/noExplicitAny: Tailwind v3/v4 plugin type compatibility
-  plugins: [tourKitPlugin as any, hintsPlugin as any],
+  plugins: [tourKitPlugin as any, hintsPlugin as any, mediaPlugin as any],
 } satisfies Config

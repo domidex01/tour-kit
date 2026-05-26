@@ -6,9 +6,12 @@ import { useTour } from '../../hooks/use-tour'
 import { useTourDiagnostic } from '../../hooks/use-tour-diagnostic'
 import type { DiagnosticGate } from '../../types/diagnostic'
 import type { RouterAdapter } from '../../types/router'
-import { TourProvider } from '../tour-provider'
+import { TourProvider, __resetDiagnoseHintForTests } from '../tour-provider'
 
 beforeEach(() => {
+  // The dev `diagnose` tip is deduped once per session via a module-level
+  // guard; reset it so each test sees the first-mount behavior.
+  __resetDiagnoseHintForTests()
   window.localStorage.clear()
   window.sessionStorage.clear()
 })

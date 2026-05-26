@@ -1,34 +1,22 @@
 'use client'
 
-import * as React from 'react'
+import { useReducedMotion } from '@tour-kit/core'
 
 /**
- * Hook to detect user's reduced motion preference
+ * Hook to detect the user's reduced-motion preference.
+ *
+ * SSR-safe: delegates to core's {@link useReducedMotion}, which defaults to
+ * `true` (assume reduce) on the server and first client render, then flips to
+ * the real `matchMedia` value after hydration. Defaulting to "reduce" ensures
+ * users who prefer reduced motion never see a frame of animated content before
+ * the static fallback resolves.
+ *
+ * Previously this read `window.matchMedia(...).matches` in a `useState` lazy
+ * initializer, which returned `false` on the server but the real value on the
+ * client — producing a hydration mismatch for reduced-motion users.
  *
  * @returns Whether the user prefers reduced motion
  */
 export function usePrefersReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  })
-
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-
-    // Update state on mount (for SSR hydration)
-    setPrefersReducedMotion(mediaQuery.matches)
-
-    // Listen for changes
-    const handleChange = (event: MediaQueryListEvent) => {
-      setPrefersReducedMotion(event.matches)
-    }
-
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [])
-
-  return prefersReducedMotion
+  return useReducedMotion()
 }

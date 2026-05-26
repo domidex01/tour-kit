@@ -40,6 +40,7 @@ export const HintBadge = React.forwardRef<HTMLButtonElement, HintBadgeProps>(
         className={cn(hintHotspotVariants({ variant: 'badge', pulse: false }), className)}
         style={{ top: pos.top, left: pos.left }}
         aria-label="Show hint"
+        aria-haspopup="dialog"
         aria-expanded={isOpen}
         {...props}
       >

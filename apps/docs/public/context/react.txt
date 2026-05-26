@@ -227,6 +227,12 @@ TYPES
       showStepIndicator?: boolean
       /** Floating UI arrow size in pixels. Default: 8. */
       arrowSize?: number
+      /**
+       * Dismiss the tour when the user presses Escape (standard dialog
+       * convention). Default: `true`. Only Escape is wired here — for full
+       * keyboard navigation (arrows/Enter) use `useKeyboardNavigation`.
+       */
+      closeOnEscape?: boolean
     }
 
     export interface TourCardHeaderProps
@@ -337,26 +343,7 @@ TYPES
       stepCount: number
     }
 
-    export interface UseToursReturn {
-      /** All registered tours */
-      tours: TourInfo[]
-      /** Currently active tour ID */
-      activeTourId: string | null
-      /** Check if any tour is active */
-      isAnyTourActive: boolean
-      /** Completed tour IDs */
-      completedTours: string[]
-      /** Skipped tour IDs */
-      skippedTours: string[]
-      /** Check if a tour was completed */
-      isTourCompleted: (tourId: string) => boolean
-      /** Check if a tour was skipped */
-      isTourSkipped: (tourId: string) => boolean
-      /** Get tour info by ID */
-      getTour: (tourId: string) => TourInfo | undefined
-    }
-
-    ... and 1 more types. See source for full definitions.
+    ... and 2 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -420,63 +407,48 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: TourProps
+Example 1: Selector string (legacy)
 
-    interface TourProps {
-      id: string
-      autoStart?: boolean
-      startAt?: number
-      config?: Omit<Tour, 'id' | 'steps'>
-      onStart?: () => void
-      onComplete?: () => void
-      onSkip?: () => void
-      onStepChange?: (step: TourStep, index: number) => void
-      children: React.ReactNode
-    }
-
-Example 2: TourCardHeaderProps / TourCardContentProps / TourCardFooterProps
-
-    interface TourCardHeaderProps
-      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'title'>,
-        TourCardHeaderVariants {
-      title?: React.ReactNode
-      /** ID for accessibility (aria-labelledby) */
-      titleId: string
-      showClose?: boolean
-    }
+    import { Tour, TourStep } from '@tour-kit/react'
     
-    interface TourCardContentProps
-      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
-        TourCardContentVariants {
-      content?: React.ReactNode
+    export function Demo() {
+      return (
+        <Tour id="legacy">
+          <TourStep id="welcome" target="#welcome" title="Welcome" content="…" />
+          <button id="welcome" type="button">Click me</button>
+        </Tour>
+      )
     }
+
+Example 2: RefObject (recommended)
+
+    import { Tour, TourStep } from '@tour-kit/react'
+    import { useRef } from 'react'
     
-    interface TourCardFooterProps
-      extends React.ComponentPropsWithoutRef<'div'>,
-        TourCardFooterVariants {
-      currentStep: number
-      totalSteps: number
-      showNavigation?: boolean
-      showProgress?: boolean
-      isFirstStep: boolean
-      isLastStep: boolean
-      onPrev: () => void
-      onNext: () => void
-      onSkip: () => void
+    export function Demo() {
+      const welcomeRef = useRef<HTMLButtonElement>(null)
+    
+      return (
+        <Tour id="ref-mode">
+          <TourStep id="welcome" target={welcomeRef} title="Welcome" content="…" />
+          <button ref={welcomeRef} type="button">Click me</button>
+        </Tour>
+      )
     }
 
-Example 3: TourNavigationProps
+Example 3: Getter function (escape hatch)
 
-    interface TourNavigationProps extends React.ComponentPropsWithoutRef<'div'> {
-      isFirstStep: boolean
-      isLastStep: boolean
-      onPrev: () => void
-      onNext: () => void
-      onSkip?: () => void
-      prevLabel?: string
-      nextLabel?: string
-      finishLabel?: string
-      skipLabel?: string
-      prevVariant?: TourButtonVariants['variant']
-      nextVariant?: TourButtonVariants['variant']
+    import { Tour, TourStep } from '@tour-kit/react'
+    
+    export function Demo() {
+      return (
+        <Tour id="thunk-mode">
+          <TourStep
+            id="cta"
+            target={() => document.querySelector<HTMLElement>('[data-cy="cta"]')}
+            title="Call to action"
+            content="…"
+          />
+        </Tour>
+      )
     }

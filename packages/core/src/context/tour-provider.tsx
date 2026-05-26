@@ -266,6 +266,15 @@ interface CrossTabActiveMessage {
   ts: number
 }
 
+// Module-level guard so the dev `diagnose` tip prints once per page/session,
+// regardless of how many TourProvider instances mount.
+let diagnoseHintFired = false
+
+/** Test-only: reset the once-per-session `diagnose` hint guard. */
+export function __resetDiagnoseHintForTests(): void {
+  diagnoseHintFired = false
+}
+
 export function TourProvider({
   children,
   tours = [],
@@ -288,15 +297,16 @@ export function TourProvider({
 
   const [diagnostics, setDiagnostics] = React.useState<Record<string, EligibilityReport>>({})
 
-  // Dev-mode hint: fire once per provider mount when `diagnose` is unset.
-  // Gated on NODE_ENV !== 'production' so prod builds stay silent.
-  const diagnoseHintFiredRef = React.useRef(false)
+  // Dev-mode hint: fire once per page/session when `diagnose` is unset. Uses a
+  // module-level guard (see `diagnoseHintFired`) so multiple TourProvider
+  // instances — e.g. several tours under MultiTourKitProvider — don't each
+  // print the tip. Gated on NODE_ENV !== 'production' so prod builds stay silent.
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount-once warning, not a reactive concern
   React.useEffect(() => {
     if (diagnose) return
-    if (diagnoseHintFiredRef.current) return
+    if (diagnoseHintFired) return
     if (typeof process === 'undefined' || process.env?.NODE_ENV === 'production') return
-    diagnoseHintFiredRef.current = true
+    diagnoseHintFired = true
     logger.warn(
       'Tip: pass <TourProvider diagnose> in dev to see why a tour did not fire. https://tourkit.dev/docs/core/diagnostic'
     )

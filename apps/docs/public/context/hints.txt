@@ -250,32 +250,48 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: badge
+Example 1: Basic Usage
 
-    import { HintHotspot } from '@tour-kit/hints';
+    import { HintsProvider, Hint } from '@tour-kit/hints';
     
-    <HintHotspot
-      variant="badge"
-      count={3}
-      targetRect={anchor.getBoundingClientRect()}
-      position="top-right"
-    />
+    function App() {
+      return (
+        <HintsProvider>
+          <Hint
+            id="new-feature"
+            target="#export-button"
+            content="New! Export your data to CSV or PDF"
+          />
+    
+          <button id="export-button">Export</button>
+        </HintsProvider>
+      );
+    }
 
-Example 2: beacon-with-label
+Example 2: Styling Variants
 
-    <HintHotspot
-      variant="beacon-with-label"
-      label="New"
-      side="right"
-      targetRect={anchor.getBoundingClientRect()}
-      position="top-right"
-    />
+    // Small - subtle indicators
+    <Hint id="subtle" target="#element" content="..." size="sm" />
+    
+    // Default - standard size
+    <Hint id="normal" target="#element" content="..." size="default" />
+    
+    // Large - prominent indicators
+    <Hint id="prominent" target="#element" content="..." size="lg" />
 
-Example 3: what-s-new-pill
+Example 3: Styling Variants
 
-    <HintHotspot
-      variant="what-s-new-pill"
-      label="What's new"
-      targetRect={anchor.getBoundingClientRect()}
-      position="top-right"
-    />
+    // Primary (default)
+    <Hint id="primary" target="#element" content="..." color="default" />
+    
+    // Secondary
+    <Hint id="secondary" target="#element" content="..." color="secondary" />
+    
+    // Success - for positive features
+    <Hint id="success" target="#element" content="New!" color="success" />
+    
+    // Warning - for important features
+    <Hint id="warning" target="#element" content="Required" color="warning" />
+    
+    // Destructive - for dangerous actions
+    <Hint id="danger" target="#element" content="Caution" color="destructive" />
