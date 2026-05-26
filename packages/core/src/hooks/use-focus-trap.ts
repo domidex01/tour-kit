@@ -159,7 +159,15 @@ export function useFocusTrap(enabled = true, options: UseFocusTrapOptions = {}):
   // later (once a lazy portal node exists), by which point the trigger is no
   // longer the active element. Capturing here makes focus restoration reliable.
   useEffect(() => {
-    if (!enabled || previousActiveElement.current) return
+    if (!enabled) {
+      // Enabled→false without a deactivate() (e.g. the trap was enabled but its
+      // consumer never activated because a lazy portal never mounted). Clear the
+      // captured element so the next enable re-captures the correct trigger
+      // instead of restoring focus to a stale one.
+      if (!isTrapping.current) previousActiveElement.current = null
+      return
+    }
+    if (previousActiveElement.current) return
     const active = document.activeElement as HTMLElement | null
     if (active && active !== document.body) {
       previousActiveElement.current = active

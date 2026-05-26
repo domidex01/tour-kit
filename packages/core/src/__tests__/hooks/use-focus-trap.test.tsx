@@ -407,6 +407,56 @@ describe('useFocusTrap - inert background (modal semantics)', () => {
   })
 })
 
+describe('useFocusTrap - does not restore a stale trigger', () => {
+  // `enabled` is driven via rerender (not a click, which would steal focus) and
+  // activate/deactivate are called directly, so the captured element is exactly
+  // the programmatically-focused trigger. This mimics a consumer that enabled
+  // the trap but never activated it (lazy portal never mounted) before it was
+  // disabled, then enabled again from a different trigger.
+  let api: { activate: () => void; deactivate: () => void } | null = null
+  function Harness({ enabled }: { enabled: boolean }) {
+    const trap = useFocusTrap(enabled)
+    api = { activate: trap.activate, deactivate: trap.deactivate }
+    return (
+      <>
+        <button type="button" data-testid="trigger-a">
+          Trigger A
+        </button>
+        <button type="button" data-testid="trigger-b">
+          Trigger B
+        </button>
+        <div
+          ref={trap.containerRef as React.RefObject<HTMLDivElement>}
+          data-testid="container"
+        >
+          <button type="button" data-testid="inside">
+            Inside
+          </button>
+        </div>
+      </>
+    )
+  }
+
+  it('re-captures the trigger when re-enabled after an enable that never activated', () => {
+    const { rerender } = render(<Harness enabled={false} />)
+
+    // Cycle 1: focus A, enable (captures A), then disable WITHOUT activating.
+    screen.getByTestId('trigger-a').focus()
+    rerender(<Harness enabled={true} />)
+    rerender(<Harness enabled={false} />)
+
+    // Cycle 2: focus B, enable (must re-capture B, not the stale A), then run a
+    // full activate/deactivate — focus must restore to B.
+    screen.getByTestId('trigger-b').focus()
+    rerender(<Harness enabled={true} />)
+    // activate/deactivate are imperative (focus + listeners, no setState).
+    api?.activate()
+    api?.deactivate()
+
+    expect(screen.getByTestId('trigger-b')).toHaveFocus()
+  })
+})
+
 describe('useFocusTrap - pulls drifting focus back', () => {
   it('returns focus into the container when Tab is pressed from outside', async () => {
     const user = userEvent.setup()
