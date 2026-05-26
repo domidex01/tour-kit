@@ -1,6 +1,6 @@
 import type { DateString, RecurringPattern } from '../types'
 import { getDayOfWeek } from './day-of-week'
-import { getDateInTimezone, parseDateString } from './timezone'
+import { formatDateString, getDateInTimezone, parseDateString } from './timezone'
 
 /**
  * Check if a date matches a recurring pattern
@@ -16,10 +16,12 @@ export function matchesRecurringPattern(
   timezone: string,
   startDate?: DateString | Date
 ): boolean {
-  // Check end date
+  // Check end date. Compare date-only strings in the schedule's timezone so the
+  // end date is inclusive of the whole day (matching `isWithinDateRange`). A raw
+  // `date > parseDateString(endDate)` would treat endDate as UTC midnight and
+  // reject the entire final day except that one instant — and ignore `timezone`.
   if (pattern.endDate) {
-    const endDate = parseDateString(pattern.endDate)
-    if (date > endDate) {
+    if (formatDateString(date, timezone) > pattern.endDate) {
       return false
     }
   }

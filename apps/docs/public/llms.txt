@@ -1,4 +1,4 @@
-# userTourKit v1.0.0 — Generated 2026-05-24T04:42:02Z
+# userTourKit v1.0.2 — Generated 2026-05-26T04:28:15Z
 
 # userTourKit
 
@@ -21,9 +21,13 @@
 - [useElementPosition](https://usertourkit.com/docs/core/hooks/use-element-position): useElementPosition hook: track DOM element position with automatic updates on scroll, resize, and layout changes
 - [useFocusTrap](https://usertourkit.com/docs/core/hooks/use-focus-trap): useFocusTrap hook: trap keyboard focus within tour step elements for WCAG 2.1 AA accessible navigation
 - [useKeyboard](https://usertourkit.com/docs/core/hooks/use-keyboard): useKeyboard hook: add arrow key navigation, Escape to close, and custom keyboard shortcuts to product tours
+- [useLocale](https://usertourkit.com/docs/core/hooks/use-locale): Read the current LocaleContextValue (locale, messages, direction, optional host-side t override) from the nearest LocaleProvider.
 - [useMediaQuery](https://usertourkit.com/docs/core/hooks/use-media-query): useMediaQuery hook: respond to viewport changes and prefers-reduced-motion for responsive, accessible product tours
 - [usePersistence](https://usertourkit.com/docs/core/hooks/use-persistence): usePersistence hook: save and restore tour completion state across browser sessions with localStorage or custom adapters
+- [useResolveLocalizedText](https://usertourkit.com/docs/core/hooks/use-resolve-localized-text): Returns a memoized (value) => string resolver. Use for consumer-authored copy that must be a string — aria-label, title, Dialog.Title.
+- [useResolvedText](https://usertourkit.com/docs/core/hooks/use-resolved-text): Resolve a LocalizedText | ReactNode value into a ReactNode. Handles string interpolation, i18n key lookup, and ReactNode pass-through with one call.
 - [useRoutePersistence](https://usertourkit.com/docs/core/hooks/use-route-persistence): useRoutePersistence hook: maintain tour progress when users navigate between pages in multi-page applications
+- [useSegmentationContext](https://usertourkit.com/docs/core/hooks/use-segmentation-context): Low-level hook returning the raw SegmentationContextValue — registered segments, userContext, and currentUserId. Use useSegment / useSegments for typical lookups.
 - [useSpotlight](https://usertourkit.com/docs/core/hooks/use-spotlight): useSpotlight hook: control spotlight overlay visibility, padding, border radius, and animation for tour steps
 - [useStep](https://usertourkit.com/docs/core/hooks/use-step): useStep hook: access current step data, index, progress percentage, and isFirst/isLast flags in tour components
 - [useTour](https://usertourkit.com/docs/core/hooks/use-tour): useTour hook: control tour state with start, next, prev, skip, and complete actions plus step tracking in React
@@ -67,6 +71,7 @@
 - [Headless Examples](https://usertourkit.com/docs/react/headless/examples): Headless component examples: build custom tooltip cards, overlays, and navigation using userTourKit render props
 - [HeadlessTourCard](https://usertourkit.com/docs/react/headless/headless-card): HeadlessTourCard: unstyled card primitive exposing step data, actions, and positioning via render props for custom UIs
 - [HeadlessTourOverlay](https://usertourkit.com/docs/react/headless/headless-overlay): HeadlessTourOverlay: unstyled overlay primitive with spotlight cutout positioning exposed via render props
+- [useTourRegistryContext](https://usertourkit.com/docs/react/hooks/use-tour-registry-context): Low-level hooks for reading the registered tour list inside MultiTourKitProvider. Use useTours for ergonomic access.
 - [useTourRoute](https://usertourkit.com/docs/react/hooks/use-tour-route): useTourRoute hook: synchronize tour progress with router state for multi-page tours in Next.js and React Router
 - [useTours](https://usertourkit.com/docs/react/hooks/use-tours): useTours hook: access all registered tour instances, check active states, and manage multiple tours from one place
 - [MultiTourKitProvider](https://usertourkit.com/docs/react/providers/multi-tour-kit-provider): MultiTourKitProvider: manage multiple independent tours with shared configuration, analytics, and storage settings
@@ -150,6 +155,8 @@
 - [useAnnouncementQueue](https://usertourkit.com/docs/announcements/hooks/use-announcement-queue): useAnnouncementQueue hook: manage priority-based display ordering and automatic scheduling of queued announcements
 - [useAnnouncements](https://usertourkit.com/docs/announcements/hooks/use-announcements): useAnnouncements hook: query all announcements, filter by status or variant, and manage the announcement collection state
 - [useAnnouncementsContext](https://usertourkit.com/docs/announcements/hooks/use-announcements-context): Low-level hook returning the raw AnnouncementsProvider context — registered announcements, queue, queue config, and the full action surface
+- [useFilteredAnnouncements](https://usertourkit.com/docs/announcements/hooks/use-filtered-announcements): Filter a list of AnnouncementConfig by their `audience` prop. Bulk segment evaluation that is safe under dynamic lists.
+- [useResolvedText](https://usertourkit.com/docs/announcements/hooks/use-resolved-text): Re-export of @tour-kit/core's useResolvedText for ergonomic in-package access. Resolves LocalizedText | ReactNode into a ReactNode.
 - [AnnouncementsProvider](https://usertourkit.com/docs/announcements/providers/announcements-provider): AnnouncementsProvider: configure announcement storage, queue behavior, frequency rules, and audience targeting at app level
 - [Type Reference](https://usertourkit.com/docs/announcements/types): TypeScript types for Announcement, AnnouncementVariant, QueueConfig, AudienceRule, and the full announcements API surface
 
@@ -284,6 +291,13 @@
 
 - [Build with LLMs](https://usertourkit.com/docs/build-with-llms): Use Claude Code, ChatGPT, Cursor, and other LLM coding assistants to build with userTourKit faster — Claude Code plugin, llms.txt, per-package context files, and MCP.
 
+## Codemods
+
+- [Codemods](https://usertourkit.com/docs/codemods): Automated jscodeshift codemods to migrate from React Joyride, Shepherd.js, and Driver.js to Tour Kit using the tour-kit-migrate CLI.
+- [from-driver](https://usertourkit.com/docs/codemods/from-driver): Migrate a Driver.js v1+ codebase to Tour Kit with the tour-kit-migrate --from driver codemod.
+- [from-joyride](https://usertourkit.com/docs/codemods/from-joyride): Migrate a React Joyride v2 codebase to Tour Kit with the tour-kit-migrate --from joyride codemod.
+- [from-shepherd](https://usertourkit.com/docs/codemods/from-shepherd): Migrate a Shepherd.js v10+ codebase to Tour Kit with the tour-kit-migrate --from shepherd codemod.
+
 ## Index
 
 - [Tour Kit Docs — React Onboarding Library](https://usertourkit.com/docs/index): Documentation for userTourKit — install, configure, and build accessible product tours, hints, and onboarding flows in React with shadcn/ui and TypeScript-strict types.
@@ -304,6 +318,7 @@
 - [@tour-kit/surveys](https://usertourkit.com/docs/surveys): In-app microsurveys: NPS, CSAT, CES, and custom question flows with fatigue prevention, skip logic, and five display modes for React apps
 - [Components](https://usertourkit.com/docs/surveys/components): Pre-styled display and question components: five survey containers and four accessible question input types with CVA variant support
 - [QuestionBoolean](https://usertourkit.com/docs/surveys/components/question-boolean): Yes / No toggle pair implemented as an accessible radiogroup with configurable labels, size variants, and roving tabindex
+- [QuestionMedia](https://usertourkit.com/docs/surveys/components/question-media): Render <MediaSlot> above a question when the question has a `media?` field. No-op for questions without media, so consumers can mount it unconditionally.
 - [QuestionRating](https://usertourkit.com/docs/surveys/components/question-rating): Numeric, star, or emoji rating scale implemented as an accessible radiogroup with roving tabindex and configurable min/max
 - [QuestionSelect](https://usertourkit.com/docs/surveys/components/question-select): Single-select (radiogroup) or multi-select (group of checkboxes) option list with roving tabindex, disabled option support, and size variants
 - [QuestionText](https://usertourkit.com/docs/surveys/components/question-text): Single-line input or resizable textarea with optional character count, size variants, and autofocus support
@@ -330,6 +345,11 @@
 - [calculateCES](https://usertourkit.com/docs/surveys/utilities/calculate-ces): Calculate Customer Effort Score as the average of 1–7 ratings, with easy, difficult, and neutral counts based on fixed thresholds
 - [calculateCSAT](https://usertourkit.com/docs/surveys/utilities/calculate-csat): Calculate Customer Satisfaction Score as the percentage of responses at or above a configurable threshold value
 - [calculateNPS](https://usertourkit.com/docs/surveys/utilities/calculate-nps): Calculate Net Promoter Score from an array of 0–10 ratings, returning score, promoter/passive/detractor counts, and percentages
+
+## Testing library
+
+- [Testing Library](https://usertourkit.com/docs/testing-library): Tour Kit's test helpers for Vitest, Jest, and React Testing Library.
+- [Recipes](https://usertourkit.com/docs/testing-library/recipes): Copy-paste test patterns for Tour Kit.
 
 ## Troubleshooting
 

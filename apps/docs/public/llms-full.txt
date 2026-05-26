@@ -1,4 +1,4 @@
-# userTourKit v1.0.0 — Generated 2026-05-24T04:42:02Z
+# userTourKit v1.0.2 — Generated 2026-05-26T04:28:15Z
 
 # Feature Adoption Tracking
 
@@ -264,6 +264,15 @@ Full provider configuration:
     <p>Visualize adoption metrics with built-in components</p>
   </a>
 </div>
+
+## Related
+
+- [`<AdoptionProvider>` reference](/docs/adoption/providers/adoption-provider) — every config option for the provider above.
+- [`useFeature`](/docs/adoption/hooks/use-feature), [`useNudge`](/docs/adoption/hooks/use-nudge), [`useAdoptionStats`](/docs/adoption/hooks/use-adoption-stats), [`useAdoptionContext`](/docs/adoption/hooks/use-adoption-context) — full hook surface.
+- [Dashboard components](/docs/adoption/dashboard) — `AdoptionDashboard`, [funnel](/docs/adoption/dashboard/funnel), [stats grid](/docs/adoption/dashboard/stats), [table](/docs/adoption/dashboard/table).
+- [Analytics integration](/docs/adoption/analytics) — wire adoption events into `@tour-kit/analytics`.
+- [Adoption analytics guide](/docs/guides/adoption-analytics) — funnel and retention patterns.
+- [`@tour-kit/adoption` API reference](/docs/api/adoption) — full export surface.
 
 ---
 
@@ -3182,6 +3191,8 @@ CSS custom properties for theming:
   dashboard component
 - [useAdoptionStats](/docs/adoption/hooks/use-adoption-stats) — underlying
   per-feature stats hook
+- [useFunnelData](/docs/adoption/hooks/use-funnel-data) — in-provider hook
+  used in the second example above
 - [Reduced-motion guide](/docs/guides/reduced-motion) — cross-package
   motion contract
 
@@ -6111,42 +6122,68 @@ type Size = AdoptionNudgeVariants['size'] // 'default' | 'sm' | 'lg' | ...
 
 > AI-powered chat assistant for product tours — context-aware conversation with RAG and CAG documentation retrieval modes
 
-Add a conversational AI layer to your product tours. `@tour-kit/ai` provides hooks, providers, and server utilities that let users ask questions and get context-aware answers about your onboarding flows.
+`@tour-kit/ai` adds a conversational AI layer on top of your product tours. It ships React hooks, drop-in chat components, and a route-handler factory that connects to OpenAI, Anthropic, Google, or any other model exposed through the [Vercel AI SDK](https://sdk.vercel.ai/). Tours, checklists, and announcements that the user is currently looking at are passed to the model automatically, so the assistant can answer questions like "what does this step do?" or "how do I skip ahead?" without any extra wiring.
 
-## Features
+This is a Pro-tier package. The free `@tour-kit/core` and `@tour-kit/react` packages do not include AI chat.
 
-- **Context-Augmented Generation (CAG)** — Inject tour context directly into prompts for simple setups
-- **Retrieval-Augmented Generation (RAG)** — Vector search over documentation for large knowledge bases
-- **Tour Integration** — Automatically understands active tour steps, progress, and state
-- **Client/Server Split** — Browser-safe client code, Node.js server utilities in separate entry points
-- **Rate Limiting** — Built-in client and server-side rate limiting
-- **Suggestions** — AI-generated follow-up question chips
+## Pick a retrieval strategy first
+
+Every `@tour-kit/ai` integration has to answer one question: how does the model know about your product? Three approaches, ranked from simplest to most scalable:
+
+| Strategy | Best for | Setup time | Per-request cost | Scales to |
+|----------|----------|------------|-------------------|-----------|
+| **No context** — bare `useAiChat` | Generic chat widget, no product knowledge needed | 5 min | ~1–2k tokens | n/a |
+| **CAG** — context stuffing via `strategy: 'context-stuffing'` | Tours under ~20 steps, single product, small docs | 15 min | ~3–8k tokens (full context every request) | ~50 docs |
+| **RAG** — vector search via `strategy: 'rag'` | Large documentation sets, multi-product, evolving content | 1–2 hours | ~2–4k tokens (retrieved chunks only) | Thousands of docs |
+
+If you are unsure: start with CAG. The migration to RAG only requires swapping the server-side `strategy` field and adding an embedding store — your client code does not change.
 
 ## Architecture
 
-The package is split into two entry points:
+The package is split into two entry points to keep server-only secrets (API keys, vector stores, embedding clients) out of the browser bundle:
 
-```
+```text
 @tour-kit/ai          # Client: React hooks, providers, components
-@tour-kit/ai/server   # Server: Route handlers, RAG pipeline, embeddings
+@tour-kit/ai/server   # Server: route handler factory, RAG pipeline, embeddings
 ```
 
-This ensures server-only code (API keys, vector stores) never leaks into the browser bundle.
+A minimal integration looks like this:
 
-## When to Use
+```text
+   ┌────────────────────────┐         ┌──────────────────────────┐
+   │ AiChatProvider         │         │ createChatRouteHandler   │
+   │  · useAiChat           │  POST   │  · model: openai/...     │
+   │  · useTourAssistant    │ ──────► │  · strategy: cag | rag   │
+   │  · AiChatPanel         │         │  · instructions: {...}   │
+   └────────────────────────┘         └──────────────────────────┘
+            React app                       Next.js / API route
+```
 
-| Scenario | Recommendation |
-|----------|----------------|
-| Small tour (< 20 steps) | Use CAG — simpler, no vector store needed |
-| Large documentation site | Use RAG — scales to thousands of documents |
-| Interactive onboarding | Combine with `useTourAssistant` for tour-aware chat |
+## What ships in the package
 
-## Next Steps
+**Hooks** (client) — `useAiChat`, `useAiChatContext`, `useTourAssistant`, `useSuggestions`, `useOptionalSuggestions`. See the [Hooks reference](/docs/ai/hooks).
 
-- [Quick Start](/docs/ai/quick-start) — Get up and running in 5 minutes
-- [CAG Guide](/docs/ai/cag-guide) — Context-augmented generation setup
-- [RAG Guide](/docs/ai/rag-guide) — Retrieval-augmented generation setup
-- [Tour Integration](/docs/ai/tour-integration) — Connect AI chat to active tours
+**Components** (client) — `AiChatProvider`, `AiChatPanel`, `AiChatToggle`, `AiChatHeader`, `AiChatMessageList`, `AiChatMessage`, `AiChatInput`, `AiChatSuggestions`, `AiChatPortal`. All shadcn/ui-compatible. See [Components](/docs/ai/components).
+
+**Server** (Node.js / Edge) — `createChatRouteHandler`, embedding/retrieval utilities for the RAG pipeline, configurable instructions (tone, boundaries, product name).
+
+**Built-ins** — Client-side and server-side rate limiting, AI-generated follow-up question chips via `useSuggestions`, and automatic tour-state context assembly via `useTourAssistant`.
+
+## When NOT to use this package
+
+- **You only need a "Get help" link.** A plain mailto: link or a Discord invite is free, deterministic, and won't hallucinate. AI chat is worth the cost when self-serve answers are bottlenecking your activation funnel.
+- **Your product is regulated (healthcare, finance, legal).** LLMs hallucinate. Use `@tour-kit/ai` for non-binding guidance only; route account-changing actions through a human or a deterministic workflow.
+- **You can't run a server route.** `@tour-kit/ai` requires a server entry point to hold the model API key. Pure static sites or client-only React apps need a third-party proxy (Vercel, Cloudflare Workers, your own backend).
+
+## Next steps
+
+- [Quick Start](/docs/ai/quick-start) — install, configure a provider, and ship a working chat widget in five minutes
+- [CAG Guide](/docs/ai/cag-guide) — context-augmented generation, with decision criteria vs RAG and token-cost math
+- [RAG Guide](/docs/ai/rag-guide) — retrieval-augmented generation, with embedding-model and vector-store options
+- [Tour Integration](/docs/ai/tour-integration) — connect the assistant to live tour state with `useTourAssistant`
+- [Components](/docs/ai/components) — drop-in shadcn/ui chat UI
+- [Hooks](/docs/ai/hooks) — every public hook with signatures and examples
+- [API Reference](/docs/ai/api-reference) — complete public API surface
 
 ---
 
@@ -6154,21 +6191,42 @@ This ensures server-only code (API keys, vector stores) never leaks into the bro
 
 > Complete API reference for @tour-kit/ai: client hooks, server utilities, chat components, and configuration types
 
+Complete public API surface for `@tour-kit/ai`, split by entry point. Server-only utilities live under `@tour-kit/ai/server` so they don't leak into the browser bundle. Types referenced here are exported from the same entry point unless otherwise noted.
+
+## Entry points
+
+| Import path | Runs in | Contains |
+|-------------|---------|----------|
+| `@tour-kit/ai` | Browser + Node | Provider, hooks, components, types, client-side rate limiter |
+| `@tour-kit/ai/server` | Node / Edge only | `createChatRouteHandler`, RAG pipeline, embedding utilities, server rate limiter |
+| `@tour-kit/ai/headless` | Browser + Node | Headless primitive variants (no styling) |
+
 ## Client Exports (`@tour-kit/ai`)
+
+### Provider
+
+#### `<AiChatProvider config={...}>`
+
+Root provider. Must wrap any component that uses `useAiChat` or `useTourAssistant`. Connects to the server route specified in `config.endpoint`.
+
+| Config field | Type | Default | Notes |
+|--------------|------|---------|-------|
+| `endpoint` | `string` | — | Required. URL of the `createChatRouteHandler` route (e.g. `/api/chat`). |
+| `tourContext` | `boolean` | `false` | When `true`, includes the active tour's `TourAssistantContext` in every request. Required for `useTourAssistant` server-side context. |
+| `initialMessages` | `UIMessage[]` | `[]` | Pre-populate the chat history. |
+| `rateLimiter` | `SlidingWindowRateLimiter \| null` | `null` | Optional client-side rate limiter. Returns 429 to `sendMessage` when over budget. |
 
 ### Hooks
 
-#### `useAiChat()`
+#### `useAiChat(): UseAiChatReturn`
 
 Core chat hook. Must be used within `AiChatProvider`.
-
-Returns `UseAiChatReturn`:
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `messages` | `UIMessage[]` | Chat message history |
 | `sendMessage` | `(input: { text: string }) => void` | Send a user message |
-| `status` | `ChatStatus` | Current chat status (`'ready'`, `'submitted'`, `'streaming'`, `'error'`) |
+| `status` | `ChatStatus` | `'ready' \| 'submitted' \| 'streaming' \| 'error'` |
 | `error` | `Error \| null` | Current error, if any |
 | `stop` | `() => void` | Stop the current generation |
 | `reload` | `() => void` | Regenerate the last response |
@@ -6177,6 +6235,12 @@ Returns `UseAiChatReturn`:
 | `open` | `() => void` | Open the chat panel |
 | `close` | `() => void` | Close the chat panel |
 | `toggle` | `() => void` | Toggle the chat panel |
+
+Throws if called outside an `<AiChatProvider>`.
+
+#### `useAiChatContext(): AiChatContextValue`
+
+Lower-level escape hatch — returns the raw context value. Use `useAiChat` instead unless you're building a custom hook.
 
 #### `useTourAssistant()`
 
@@ -6193,40 +6257,79 @@ Returns `UseTourAssistantReturn` (extends `UseAiChatReturn`):
 | `askForHelp` | `(topic?: string) => void` | Ask for help, optionally on a topic |
 | _...all `UseAiChatReturn` properties_ | | |
 
-#### `useSuggestions()`
+#### `useSuggestions(): UseSuggestionsReturn`
 
-AI-generated follow-up suggestions.
-
-Returns `UseSuggestionsReturn`:
+AI-generated follow-up suggestions based on the current conversation. Throws if no provider is mounted.
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `suggestions` | `string[]` | Current suggestions |
 | `isLoading` | `boolean` | Loading state |
 
-### Utilities
+#### `useOptionalSuggestions(): UseSuggestionsReturn | null`
+
+Same as `useSuggestions` but returns `null` instead of throwing when no provider is mounted. Use in optional/conditional UI.
+
+### Components
+
+All components are shadcn/ui-compatible and accept standard `className` overrides.
+
+| Component | Purpose |
+|-----------|---------|
+| `<AiChatPanel>` | Full chat surface — header, message list, input, suggestions |
+| `<AiChatToggle>` | Floating button that toggles the panel |
+| `<AiChatHeader>` | Header bar — title, close button, optional menu |
+| `<AiChatMessageList>` | Renders `messages[]` with autoscroll |
+| `<AiChatMessage>` | Single message row (user or assistant) |
+| `<AiChatInput>` | Text input + send button + status indicator |
+| `<AiChatSuggestions>` | Renders suggested follow-up chips |
+| `<AiChatPortal>` | Portal wrapper for the panel (used internally by `<AiChatPanel>`) |
+
+See [Components](/docs/ai/components) for prop tables.
+
+### Client utilities
 
 #### `SlidingWindowRateLimiter`
 
-Client-side rate limiter using a sliding window algorithm.
+Class implementing sliding-window rate limiting. Pass an instance to `AiChatProvider.config.rateLimiter` to enforce per-user limits before the request leaves the browser.
 
-#### `createRateLimiter(config)`
+#### `createRateLimiter(config): SlidingWindowRateLimiter`
 
-Factory function for creating a rate limiter instance.
+Factory function. `config` accepts `{ maxRequests, windowMs }`.
 
 #### `createAnalyticsBridge(config)`
 
-Bridges AI chat events to `@tour-kit/analytics`.
+Subscribes to AI chat events (`message_sent`, `message_received`, `error`) and forwards them to the `@tour-kit/analytics` tracker.
 
 ## Server Exports (`@tour-kit/ai/server`)
 
-### Route Handling
+### Route handling
 
-#### `createChatRouteHandler(options)`
+#### `createChatRouteHandler(options): { POST }`
 
-Creates an API route handler for chat requests.
+Returns an object with a Next.js / Edge-compatible `POST` handler. The handler:
+
+1. Parses the incoming `{ messages, tourContext? }` payload.
+2. Runs the configured rate limiter (if any).
+3. Builds the system prompt from `instructions` + retrieved context.
+4. Streams the model response back as Server-Sent Events.
+
+| Option | Type | Required | Notes |
+|--------|------|----------|-------|
+| `model` | `LanguageModelV1` | yes | Any AI SDK model — `openai('gpt-4o-mini')`, `anthropic('claude-sonnet-4-5')`, etc. |
+| `context.strategy` | `'context-stuffing' \| 'rag'` | yes | Picks CAG or RAG mode. |
+| `context.documents` | `Document[]` | yes for CAG | All docs to inject (CAG) or to index (RAG seed). |
+| `context.embedding` | `Embedding` | yes for RAG | Output of `createAiSdkEmbedding`. |
+| `context.vectorStore` | `VectorStoreAdapter` | yes for RAG | Output of `createInMemoryVectorStore` or your own adapter. |
+| `context.topK` | `number` | no (RAG only) | Chunks to retrieve per query. Default 5. |
+| `instructions.productName` | `string` | no | Used in the default system prompt. |
+| `instructions.tone` | `'friendly' \| 'professional' \| 'concise'` | no | Hints to the model. |
+| `instructions.boundaries` | `string[]` | no | Hard rules ("only answer X", "never reveal Y"). |
+| `rateLimiter` | `ServerRateLimiter` | no | Pre-check before model call. Returns 429 when exceeded. |
 
 ```ts
+// app/api/chat/route.ts
+import { createChatRouteHandler } from '@tour-kit/ai/server'
 import { openai } from '@ai-sdk/openai'
 
 const { POST } = createChatRouteHandler({
@@ -6238,53 +6341,83 @@ const { POST } = createChatRouteHandler({
   instructions: {
     productName: 'My App',
     tone: 'friendly',
+    boundaries: ['Only answer questions about My App onboarding.'],
   },
 })
+
+export { POST }
 ```
 
-### RAG Pipeline
+### RAG pipeline
 
-#### `createInMemoryVectorStore()`
+#### `createInMemoryVectorStore(): VectorStoreAdapter`
 
-Creates an in-memory vector store for development and testing.
+In-memory vector store. Re-built on every server restart — for dev and prototypes only. Implements the `VectorStoreAdapter` interface so it's swappable with pgvector, Pinecone, or your own store.
 
-#### `createAiSdkEmbedding(options)`
+#### `createAiSdkEmbedding(options): Embedding`
 
-Creates an embedding adapter using the AI SDK.
+Embedding adapter wrapping the AI SDK's embedding API. Options:
 
-#### `createRetriever(options)`
+| Option | Type | Notes |
+|--------|------|-------|
+| `model` | `string` | Embedding model id (e.g. `'text-embedding-3-small'`). See the [RAG guide](/docs/ai/rag-guide#pick-an-embedding-model) for recommendations. |
+| `provider` | `EmbeddingProvider` | Optional explicit provider; defaults to OpenAI. |
 
-Creates a document retriever from a vector store.
+#### `createRetriever(options): Retriever`
+
+Convenience wrapper around `{ vectorStore, embedding, topK }` for use outside `createChatRouteHandler` (e.g. background jobs that surface "you might be interested in" suggestions).
 
 #### `chunkDocument(doc, options)` / `chunkDocuments(docs, options)`
 
-Splits documents into chunks for embedding.
+Splits documents into chunks suitable for embedding. Options: `{ chunkSize, overlap }`. Recommended starting values: `chunkSize: 512`, `overlap: 50`.
 
 #### `createRAGMiddleware(options)`
 
-Creates middleware that adds retrieved context to chat requests.
+Lower-level building block — produces middleware that injects retrieved context into a chat request. Use when you need to compose RAG with custom request handling outside `createChatRouteHandler`.
 
-### Utilities
+### Server utilities
 
-#### `createSystemPrompt(config)`
+#### `createSystemPrompt(config): string`
 
-Builds a structured system prompt from configuration.
+Builds the structured system prompt that `createChatRouteHandler` uses internally. Export it if you want to log, audit, or modify the final prompt before forwarding to the model.
 
-#### `createServerRateLimiter(config)`
+#### `createServerRateLimiter(config): ServerRateLimiter`
 
-Server-side rate limiter.
+Server-side rate limiter. Pass an instance to `createChatRouteHandler.rateLimiter`. Pairs with `createInMemoryRateLimitStore` or your own Redis-backed store.
 
-#### `createInMemoryRateLimitStore()`
+#### `createInMemoryRateLimitStore(): RateLimitStore`
 
-In-memory store for server rate limiting.
+In-memory rate-limit store. Scoped to a single Node process — for production use a Redis-backed store across instances.
 
 #### `generateSuggestions(options)` / `parseSuggestions(text)`
 
-Generate and parse AI follow-up suggestions.
+Generate and parse AI follow-up suggestion chips. `generateSuggestions` calls the model with a structured prompt; `parseSuggestions` extracts the suggestion array from a raw response.
 
 ## Types
 
-See the full type definitions in the [source code](https://github.com/domidex01/tour-kit/tree/main/packages/ai/src/types).
+The full type definitions live in [`packages/ai/src/types`](https://github.com/domidex01/tour-kit/tree/main/packages/ai/src/types). The most commonly imported types:
+
+```ts
+import type {
+  // Provider config
+  AiChatConfig,
+  // Hook returns
+  UseAiChatReturn,
+  UseTourAssistantReturn,
+  UseSuggestionsReturn,
+  // Context shapes
+  AiChatContextValue,
+  TourAssistantContext,
+  // Server
+  ChatRouteHandlerOptions,
+  VectorStoreAdapter,
+  Document,
+  Embedding,
+  Retriever,
+  // Status
+  ChatStatus,
+} from '@tour-kit/ai'
+```
 
 ---
 
@@ -6292,19 +6425,41 @@ See the full type definitions in the [source code](https://github.com/domidex01/
 
 > Context-Augmented Generation guide: inject tour documentation directly into AI prompts for fast, deterministic responses
 
-CAG is the simplest way to make your AI assistant tour-aware. It works by stuffing relevant tour context directly into the system prompt sent to the LLM.
+Context-Augmented Generation (CAG) is the simplest way to make an AI assistant tour-aware. Every chat request includes the relevant tour documentation in the system prompt, so the model can answer accurately without a vector database, embedding pipeline, or retrieval step. This page covers when CAG is the right call, how to wire it up, the failure modes, and when to migrate to [RAG](/docs/ai/rag-guide).
 
-## When to Use CAG
+## CAG vs RAG — the decision in one table
 
-- Your tour has fewer than ~20 steps
-- You want a quick setup with no infrastructure
-- Your context fits within the model's context window
+| Signal | Pick CAG | Pick RAG |
+|--------|----------|----------|
+| Total documentation size | Under ~50 KB / ~12k tokens | Over 50 KB |
+| Document count | < 20 docs / tour steps | > 20 docs |
+| Update cadence | Infrequent (every release) | Frequent (daily content updates) |
+| Infrastructure budget | Zero — no DB, no embeddings | OK with vector store + embedding job |
+| Cost sensitivity | OK with 3–8k tokens per request | Need to cap at retrieved-chunk size |
+| Determinism | Important — same context every time | OK with retrieval variance |
+
+**Rule of thumb:** if your entire docs corpus fits inside the model's context window (gpt-4o-mini = 128k, Claude Sonnet = 200k) AND total tokens stay under your per-request cost ceiling, CAG is the right call. Migrate to RAG when either constraint breaks.
+
+## When to use CAG
+
+- A focused onboarding flow under ~20 steps
+- A single product with stable documentation
+- Quick prototypes — you can ship CAG in 15 minutes and migrate later
+- Strict determinism requirements (legal review wants the same context every request)
+- Air-gapped environments where you can't run a vector DB
+
+## When NOT to use CAG
+
+- Documentation > 50 KB (token cost dominates per-request bill)
+- Multi-product or multi-tenant setups (sending all products' docs leaks context across tenants)
+- Frequently-changing knowledge bases — CAG redeploys whenever docs change
+- Context-window limits matter for response quality — the model has less room for reasoning when half the window is stuffed
 
 ## Setup
 
-### Client Configuration
+### Client configuration
 
-Enable `tourContext` in your provider config so tour state is sent with each request:
+Wrap your tree with `AiChatProvider` and enable `tourContext` so the current tour state is forwarded with every request:
 
 ```tsx
 import { AiChatProvider } from '@tour-kit/ai'
@@ -6323,11 +6478,12 @@ function App() {
 }
 ```
 
-### Server Configuration
+### Server configuration
 
-Use `createSystemPrompt` to build a context-rich system prompt:
+Use `createChatRouteHandler` with `strategy: 'context-stuffing'`. Provide your documents inline — they are injected into the system prompt on every request:
 
 ```ts
+// app/api/chat/route.ts
 import { createChatRouteHandler } from '@tour-kit/ai/server'
 import { openai } from '@ai-sdk/openai'
 
@@ -6336,31 +6492,112 @@ const { POST } = createChatRouteHandler({
   context: {
     strategy: 'context-stuffing',
     documents: [
-      { id: 'guide', content: 'Step 1: Click the button...' },
+      {
+        id: 'onboarding-overview',
+        content:
+          'The Welcome tour introduces three concepts: workspaces, projects, and the activity feed. ' +
+          'Workspaces are top-level containers shared with your team. Projects live inside a workspace. ' +
+          'The activity feed shows realtime updates from every project you have access to.',
+      },
+      {
+        id: 'billing-faq',
+        content:
+          'Plans: Free (1 workspace, 3 projects), Pro ($12/user/mo, unlimited), Enterprise (contact sales). ' +
+          'Upgrading is instant; downgrading takes effect at the next billing cycle.',
+      },
     ],
   },
   instructions: {
-    productName: 'My App',
+    productName: 'Acme App',
     tone: 'friendly',
-    boundaries: ['Only answer questions about onboarding'],
+    boundaries: [
+      'Only answer questions about Acme App onboarding and billing.',
+      'If asked about competitors, decline politely.',
+      'Never invent feature names. If unsure, suggest contacting support.',
+    ],
   },
 })
 
 export { POST }
 ```
 
-## How It Works
+## How CAG works under the hood
 
-1. The client collects tour context (steps, progress, current step)
-2. Context is serialized and sent with each chat request
-3. The server injects this context into the system prompt
-4. The LLM receives the full tour context and can answer questions about it
+```text
+   User asks: "What is a workspace?"
+                │
+                ▼
+   ┌──────────────────────────────────┐
+   │ AiChatProvider (client)          │
+   │  · collects tour state           │
+   │  · POSTs {messages, tourContext} │
+   └──────────────────────────────────┘
+                │
+                ▼
+   ┌──────────────────────────────────┐
+   │ createChatRouteHandler (server)  │
+   │  1. Build system prompt:         │
+   │     instructions + ALL docs[]    │
+   │     + tourContext                │
+   │  2. Forward to model             │
+   │  3. Stream response back         │
+   └──────────────────────────────────┘
+                │
+                ▼
+   Model sees the full corpus in its context window
+   and answers with grounded responses.
+```
 
-## Limitations
+The server rebuilds the same system prompt on every request. There is no caching, no retrieval, no chunking — the trade-off for simplicity is that every request pays for every document's tokens.
 
-- Context size grows linearly with tour complexity
-- Not suitable for large documentation sets (use RAG instead)
-- Each request sends the full context, increasing token usage
+## Token-cost math
+
+Estimating a CAG bill is straightforward:
+
+```text
+per_request_tokens = system_prompt_tokens
+                   + sum(all documents)
+                   + user_message_tokens
+                   + model_response_tokens
+
+monthly_cost ≈ per_request_tokens * requests_per_month * price_per_token
+```
+
+Worked example with 4 KB of docs (~1k tokens), a 0.5k system prompt, 100-token user messages, 300-token responses, gpt-4o-mini at $0.15/1M input + $0.60/1M output:
+
+- Per request: 1,600 input + 300 output = ~$0.00042
+- 10,000 requests/month = **~$4.20/month**
+
+Now scale to 20 KB of docs (~5k tokens), same traffic:
+
+- Per request: 5,600 input + 300 output = ~$0.00102
+- 10,000 requests/month = **~$10.20/month**
+
+That linear scaling is the headline reason to migrate to RAG once your corpus gets large — RAG only sends retrieved chunks (typically 1–3 KB) regardless of total docs.
+
+## Common failure modes
+
+- **Context drift.** When you update a document, redeploy the server route. CAG has no live data source — the docs are baked into the deployed bundle.
+- **Token budget exceeded.** Models silently drop earlier context past their window. Check the model's max input tokens against `sum(documents) + system_prompt + conversation_history`.
+- **Cross-tenant leakage.** If your route is shared across customers, each request sees every customer's documents. Either scope `documents` per request (pull from a database in the route) or use RAG.
+- **Stale answers after a release.** A user on an old client may still ask about removed features. Add a version line to your `documents` array or the `instructions.boundaries`.
+
+## Migration path to RAG
+
+When you outgrow CAG, the migration is mostly server-side:
+
+1. Set up a vector store (Pinecone, pgvector, Chroma — see [RAG Guide](/docs/ai/rag-guide))
+2. Embed your existing `documents[]` and load them into the store
+3. Swap `strategy: 'context-stuffing'` → `strategy: 'rag'` in `createChatRouteHandler`
+4. Provide the retriever / store reference instead of inline documents
+
+The client code (`AiChatProvider`, `useAiChat`, your chat UI) does not change.
+
+## Next steps
+
+- [RAG Guide](/docs/ai/rag-guide) — when CAG hits its ceiling
+- [Tour Integration](/docs/ai/tour-integration) — wire tour state into CAG with `useTourAssistant`
+- [API Reference](/docs/ai/api-reference) — full `createChatRouteHandler` options
 
 ---
 
@@ -6731,6 +6968,10 @@ Returns `UseTourAssistantReturn`, which extends `UseAiChatReturn` with `isLoadin
 
 > Set up @tour-kit/ai in under 5 minutes: install the package, configure your AI provider, and add the chat widget to React
 
+Five steps to a working AI chat widget in a React app: install the package, wrap your tree with the provider, drop in a chat UI, mount a server route, and verify the round-trip. Total time ~5 minutes assuming you already have a Next.js app and an OpenAI API key. If you don't have an API key, [grab one from platform.openai.com](https://platform.openai.com/api-keys) first — `@tour-kit/ai` works with any Vercel AI SDK provider but OpenAI's `gpt-4o-mini` is the cheapest path to "working".
+
+This guide ships the no-context variant — the assistant has no product knowledge yet. After you confirm the round-trip works, move on to the [CAG Guide](/docs/ai/cag-guide) (small docs) or [RAG Guide](/docs/ai/rag-guide) (large docs) to give the model real product context.
+
 ## Installation
 
 ```bash
@@ -6823,11 +7064,29 @@ Set your API key in `.env.local`:
 OPENAI_API_KEY=sk-...
 ```
 
+## Verify Your Setup
+
+Render `ChatWidget` somewhere visible, type a message, and confirm three things:
+
+1. The user message appears in the list immediately (client-side optimistic update).
+2. The `status` transitions through `submitted` → `streaming` → `ready`.
+3. An assistant reply streams in token-by-token (not all at once at the end).
+
+If all three work, the round-trip is healthy. The most common failures:
+
+| Symptom | Likely cause |
+|---------|--------------|
+| 401/403 from `/api/chat` | `OPENAI_API_KEY` missing or wrong in the server environment (restart `next dev` after editing `.env.local`) |
+| Stuck at `submitted`, no streaming | Route handler returning JSON instead of SSE — make sure you're using `createChatRouteHandler`, not a custom handler |
+| `useAiChat must be used within an <AiChatProvider>` thrown | Component is rendered outside the provider tree |
+| Streaming works but assistant says "I don't know" to everything | Expected — you have not configured CAG or RAG yet. Continue to the guides below. |
+
 ## Next Steps
 
-- [CAG Guide](/docs/ai/cag-guide) — Learn about context-augmented generation
-- [RAG Guide](/docs/ai/rag-guide) — Set up retrieval-augmented generation
-- [Tour Integration](/docs/ai/tour-integration) — Connect chat to your tours
+- [CAG Guide](/docs/ai/cag-guide) — give the assistant product knowledge by injecting docs into every prompt (small docs)
+- [RAG Guide](/docs/ai/rag-guide) — vector-search retrieval for large documentation sets
+- [Tour Integration](/docs/ai/tour-integration) — connect the assistant to live tour state via `useTourAssistant`
+- [Components](/docs/ai/components) — swap the custom UI for the pre-built `<AiChatPanel>` + `<AiChatToggle>` combo
 
 ---
 
@@ -6835,53 +7094,89 @@ OPENAI_API_KEY=sk-...
 
 > Retrieval-Augmented Generation guide: use vector search over documentation for scalable AI chat with large content sets
 
-RAG enables your AI assistant to search over large documentation sets using vector embeddings. Instead of stuffing all context into the prompt, it retrieves only the most relevant documents for each query.
+Retrieval-Augmented Generation (RAG) is the right pattern when your documentation is too big to stuff into every prompt. Instead of sending the whole corpus, `@tour-kit/ai` embeds your documents into a vector store at index time and retrieves only the most relevant chunks at query time. This keeps token cost roughly constant as your knowledge base grows, makes content updates cheap (re-embed one doc, not redeploy), and avoids leaking unrelated content across tenants.
 
-## When to Use RAG
+If you have not read [the CAG guide](/docs/ai/cag-guide), start there — many integrations should ship CAG first and migrate later. RAG is the bigger commitment.
 
-- You have a large documentation set (> 20 pages)
-- You want precise, relevant answers from specific documents
-- You need to scale beyond what fits in a single context window
+## When to use RAG
+
+- Documentation > 50 KB or > 20 distinct docs
+- Multi-product / multi-tenant — retrieval can be filtered per request
+- Frequent content updates (daily / weekly) you don't want to redeploy
+- Per-request token budget needs to stay roughly constant as docs grow
+- You need a citation trail — RAG returns matched chunks, so the response can be linked back to a specific source
+
+## When NOT to use RAG
+
+- Corpus fits in a model context window AND budget is OK — use [CAG](/docs/ai/cag-guide) instead
+- No infrastructure budget — you need somewhere to store embeddings (in-memory, pgvector, Pinecone, Chroma)
+- Strict determinism requirements — retrieval introduces variance; the same question can return different chunks
+- Real-time data — RAG retrieves from a snapshot, not live state. For live data, use tool calling, not RAG.
+
+## Pick an embedding model
+
+The embedding model converts your documents (and the user's question) into vectors so similar text lands near each other in vector space. `@tour-kit/ai` uses the Vercel AI SDK's embedding interface, so any AI-SDK-compatible embedding model works.
+
+| Model | Provider | Dimensions | Cost / 1M tokens | When it fits |
+|-------|----------|------------|-------------------|--------------|
+| `text-embedding-3-small` | OpenAI | 1536 | $0.02 | Default for most projects — best price/quality balance |
+| `text-embedding-3-large` | OpenAI | 3072 | $0.13 | Higher accuracy when retrieval quality matters more than cost |
+| `voyage-3-lite` | Voyage AI | 512 | $0.02 | Smaller embeddings, faster query, lower storage |
+| `voyage-3` | Voyage AI | 1024 | $0.06 | Recommended for technical docs (often beats OpenAI on code/API content) |
+| `embed-english-v3.0` | Cohere | 1024 | $0.10 | Strong on retrieval benchmarks; good if you already use Cohere |
+
+**Default recommendation:** start with `text-embedding-3-small`. Re-embedding the corpus to migrate to another model is cheap and one-time.
+
+## Pick a vector store
+
+| Store | Best for | Notes |
+|-------|----------|-------|
+| `createInMemoryVectorStore()` (built-in) | Prototypes, < 1k chunks, single-process apps | Recomputed on every server restart. Not for production. |
+| pgvector (Postgres extension) | You already use Postgres | Lowest operational overhead. ANN index via HNSW. |
+| Pinecone | Managed, no ops | Generous free tier. Pay-per-query past that. |
+| Chroma | Self-hosted, open source | Local dev parity with prod. Good for small/medium teams. |
+| Weaviate / Qdrant | Self-hosted at scale | More features (filters, hybrid search) when you need them. |
+
+**Default recommendation:** start with `createInMemoryVectorStore()` for local dev, then move to pgvector when you ship to staging (it deploys to any Postgres host with no extra service).
 
 ## Setup
 
-### 1. Create a Vector Store
+### 1. Index your documents
 
 ```ts
 import {
-  createInMemoryVectorStore,
-  createAiSdkEmbedding,
   chunkDocuments,
+  createAiSdkEmbedding,
+  createInMemoryVectorStore,
 } from '@tour-kit/ai/server'
 
 const vectorStore = createInMemoryVectorStore()
 const embedding = createAiSdkEmbedding({ model: 'text-embedding-3-small' })
 
-// Index your documents
 const documents = [
-  { id: 'doc-1', content: 'How to create a tour...', metadata: { title: 'Creating Tours' } },
-  { id: 'doc-2', content: 'Tour step configuration...', metadata: { title: 'Step Config' } },
+  {
+    id: 'creating-tours',
+    content: 'How to create a tour: import Tour and TourStep from @tour-kit/react...',
+    metadata: { title: 'Creating Tours', section: 'docs' },
+  },
+  {
+    id: 'step-config',
+    content: 'Tour step configuration: target accepts a CSS selector or React ref...',
+    metadata: { title: 'Step Config', section: 'docs' },
+  },
 ]
 
+// Split long docs into retrievable chunks. 512-token chunks with 50-token overlap
+// is the conservative default — bigger chunks preserve context but cost more per
+// retrieved hit; smaller chunks improve precision at the cost of fragmentation.
 const chunks = chunkDocuments(documents, { chunkSize: 512, overlap: 50 })
 await vectorStore.upsert(chunks, embedding)
 ```
 
-### 2. Create a Retriever
+### 2. Wire the route handler
 
 ```ts
-import { createRetriever } from '@tour-kit/ai/server'
-
-const retriever = createRetriever({
-  vectorStore,
-  embedding,
-  topK: 5,
-})
-```
-
-### 3. Create a Route Handler with RAG
-
-```ts
+// app/api/chat/route.ts
 import { createChatRouteHandler } from '@tour-kit/ai/server'
 import { openai } from '@ai-sdk/openai'
 
@@ -6894,42 +7189,100 @@ const { POST } = createChatRouteHandler({
     vectorStore,
     topK: 5,
   },
+  instructions: {
+    productName: 'Acme App',
+    tone: 'friendly',
+    boundaries: ['Only answer using the retrieved documentation.'],
+  },
 })
 
 export { POST }
 ```
 
-### 4. Client Configuration
+`topK` controls how many chunks are retrieved per query. 3–5 is the standard range — higher values give the model more context to reason over but increase token cost linearly.
+
+### 3. Client stays unchanged
 
 ```tsx
-<AiChatProvider
-  config={{
-    endpoint: '/api/chat',
-  }}
->
+import { AiChatProvider } from '@tour-kit/ai'
+
+<AiChatProvider config={{ endpoint: '/api/chat' }}>
   <YourApp />
 </AiChatProvider>
 ```
 
-## Custom Vector Store
+This is the win of `@tour-kit/ai`'s split design — migrating from CAG to RAG is a server-side change only.
 
-Implement the `VectorStoreAdapter` interface to use your own vector database:
+## How RAG works under the hood
+
+```text
+Index time (one-time, or whenever content changes):
+   docs[] ──► chunkDocuments() ──► embedding.embed() ──► vectorStore.upsert()
+
+Query time (every request):
+   user message
+        │
+        ▼
+   ┌────────────────────────────────────────┐
+   │ embed(user message)                    │
+   └────────────────────────────────────────┘
+        │
+        ▼
+   ┌────────────────────────────────────────┐
+   │ vectorStore.query(vec, topK)           │
+   │  → returns top-K matched chunks        │
+   └────────────────────────────────────────┘
+        │
+        ▼
+   ┌────────────────────────────────────────┐
+   │ System prompt =                        │
+   │   instructions + matched chunks only   │
+   │ Model sees only relevant context       │
+   └────────────────────────────────────────┘
+```
+
+## Custom vector store
+
+Implement the `VectorStoreAdapter` interface to plug in any vector DB:
 
 ```ts
 import type { VectorStoreAdapter } from '@tour-kit/ai'
 
 const customStore: VectorStoreAdapter = {
-  upsert: async (documents, embedding) => { /* ... */ },
-  query: async (query, embedding, topK) => { /* ... */ },
-  delete: async (ids) => { /* ... */ },
+  upsert: async (documents, embedding) => {
+    /* persist to your vector DB */
+  },
+  query: async (query, embedding, topK) => {
+    /* return top-K matches as { id, content, score, metadata } */
+  },
+  delete: async (ids) => {
+    /* remove by id */
+  },
 }
 ```
 
-## Performance Tips
+## Tuning checklist
 
-- Use appropriate chunk sizes (256-1024 tokens)
-- Set `topK` between 3-10 for best relevance/cost balance
-- Pre-compute embeddings at build time for static content
+- **Chunk size 256–1024 tokens.** Smaller = precise, more index overhead. Larger = more context per hit, less precision.
+- **Chunk overlap 10–20% of chunk size.** Prevents semantically-meaningful sentences from being split across chunk boundaries.
+- **topK 3–10.** Start at 5. Higher topK → higher cost + risk of irrelevant chunks polluting context.
+- **Pre-embed at build time** when content is static (docs, marketing pages). Saves the embed cost on every server boot.
+- **Add metadata filters** (e.g. `tenant_id`, `language`) to your `VectorStoreAdapter.query` call to avoid cross-tenant leakage.
+
+## Cost comparison vs CAG
+
+For a 100 KB corpus (~25k tokens), gpt-4o-mini at $0.15/1M input, 10k requests/month:
+
+- **CAG** would send all 25k tokens per request → 25,000 × 10,000 = 250M tokens = **~$37.50/mo just for context**.
+- **RAG** sends only retrieved chunks (~5 × 512 = ~2.5k tokens) → 25M tokens = **~$3.75/mo for context**.
+
+The 10× savings widens further as the corpus grows. Below ~50 KB total docs, the cost gap is too small to justify RAG's operational overhead — that's why we recommend starting with CAG.
+
+## Next steps
+
+- [CAG Guide](/docs/ai/cag-guide) — the simpler alternative; ship CAG first if your corpus is small
+- [Tour Integration](/docs/ai/tour-integration) — combine RAG with live tour state via `useTourAssistant`
+- [API Reference](/docs/ai/api-reference) — full `createChatRouteHandler`, `chunkDocuments`, `createRetriever` options
 
 ---
 
@@ -6937,54 +7290,183 @@ const customStore: VectorStoreAdapter = {
 
 > Connect AI chat to active tour state: context-aware assistance that knows the current step, tour progress, and user actions
 
-The `useTourAssistant` hook connects the AI chat to your active tours, giving the assistant real-time awareness of tour state, progress, and step content.
+Tour integration is the differentiator for `@tour-kit/ai`. A generic chat widget answers "how do I save a file?" — the integrated assistant answers "you are on step 3 of the Welcome tour, the Save button is the blue icon in the top-right, here's why you need to click it now." This page covers the wiring, the three highest-value use cases, and the failure modes when tour state and AI context get out of sync.
 
-## Basic Usage
+## What `useTourAssistant` gives you on top of `useAiChat`
+
+`useTourAssistant` extends `useAiChat` with three additions:
+
+1. **`tourContext`** — a structured snapshot of the active tour (id, name, current step index, total steps, completed tours, checklist progress). Re-assembled on every render.
+2. **`askAboutStep()`** — sends a pre-built prompt asking the assistant to explain the current step. No-op when there is no active step.
+3. **`askForHelp(topic?)`** — sends a help prompt with the current tour context attached, optionally scoped to a topic.
+
+Everything from `useAiChat` (`messages`, `sendMessage`, `status`, `open`, `close`, `toggle`) is still available on the same return value — `useTourAssistant` is a superset.
+
+## Wiring it up (3-line change from `useAiChat`)
 
 ```tsx
 import { useTourAssistant } from '@tour-kit/ai'
 
-function TourChat() {
-  const { tourContext, sendMessage, messages, askAboutStep, askForHelp } = useTourAssistant()
+function HelpButton() {
+  const { askAboutStep, tourContext } = useTourAssistant()
+  const stepLabel = tourContext.activeStep?.title
 
   return (
-    <div>
-      {tourContext.activeTour && (
-        <p>
-          Step {tourContext.activeTour.currentStep + 1} of {tourContext.activeTour.totalSteps}
-          {' — '}{tourContext.activeStep?.title}
-        </p>
-      )}
-
-      {messages.map((msg) => (
-        <div key={msg.id}>{msg.content}</div>
-      ))}
-
-      <button onClick={askAboutStep}>Ask about this step</button>
-      <button onClick={() => askForHelp('navigation')}>Help with navigation</button>
-      <button onClick={() => sendMessage({ text: 'What should I do next?' })}>
-        Ask for help
-      </button>
-    </div>
+    <button onClick={askAboutStep} disabled={!tourContext.activeStep}>
+      {stepLabel ? `Explain "${stepLabel}"` : 'Pick a tour first'}
+    </button>
   )
 }
 ```
 
-## How It Works
+This works because the `@tour-kit/react` `TourProvider` exposes the active tour via context, and `useTourAssistant` reads from it automatically — no prop drilling.
 
-1. `useTourAssistant` reads the current tour state from `@tour-kit/react` providers
-2. Tour context (steps, progress, current step) is assembled automatically
-3. Context is included with each message sent to the AI
-4. The assistant can reference specific steps, suggest next actions, and explain UI elements
+## The three use cases that justify tour integration
 
-## Context Assembly
+### 1. "Explain this step" — confused users mid-tour
 
-The `assembleTourContext` function gathers tour information:
+```tsx
+function StepExplainer() {
+  const { askAboutStep, tourContext, messages } = useTourAssistant()
+
+  if (!tourContext.activeTour) return null
+
+  return (
+    <aside>
+      <p>
+        Step {tourContext.activeTour.currentStep + 1} of {tourContext.activeTour.totalSteps}
+        {tourContext.activeStep ? ` — ${tourContext.activeStep.title}` : null}
+      </p>
+      <button type="button" onClick={askAboutStep}>
+        I don't understand this step
+      </button>
+      <ul>
+        {messages.map((m) => (
+          <li key={m.id}>{m.content}</li>
+        ))}
+      </ul>
+    </aside>
+  )
+}
+```
+
+The prompt that `askAboutStep` sends includes the step's id, title, and content, so the model can give a grounded answer without the user having to retype anything.
+
+### 2. "What does this button do?" — context-aware UI explainer
+
+Combine `useTourAssistant` with a tooltip or right-click handler so any UI element can be "explained" with the current tour as context.
+
+```tsx
+function ExplainableButton({ label, action, children }: Props) {
+  const { sendMessage, tourContext, open } = useTourAssistant()
+  const tourId = tourContext.activeTour?.id ?? 'no-tour'
+
+  return (
+    <button
+      onClick={action}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        open()
+        sendMessage({
+          text: `In the context of the ${tourId} tour, what does the "${label}" button do?`,
+        })
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+```
+
+Right-clicking the button opens the chat and pre-populates a context-aware question.
+
+### 3. "Skip to step N" — assistant as a navigation surface
+
+Combine with `useTour` from `@tour-kit/react` to let the assistant drive tour navigation in response to user requests:
+
+```tsx
+import { useTour } from '@tour-kit/react'
+import { useTourAssistant } from '@tour-kit/ai'
+
+function SkipToStep() {
+  const { sendMessage, tourContext } = useTourAssistant()
+  const { goToStep } = useTour(tourContext.activeTour?.id ?? '')
+
+  return (
+    <button
+      onClick={() =>
+        sendMessage({
+          text: 'Skip me to the most important step in this tour.',
+        })
+      }
+    >
+      Take me to the important part
+    </button>
+  )
+}
+```
+
+(For the model's response to actually drive `goToStep`, you need tool calling — see the [AI SDK tool-calling docs](https://sdk.vercel.ai/docs/foundations/tools).)
+
+## How tour context flows end-to-end
+
+```text
+   ┌──────────────────────────┐
+   │ TourProvider             │  active tour state
+   │  (@tour-kit/react)       │  (id, currentStep, ...)
+   └──────────────────────────┘
+              │
+              ▼
+   ┌──────────────────────────┐
+   │ useTourAssistant         │  reads via context,
+   │                          │  builds TourAssistantContext
+   └──────────────────────────┘
+              │
+              ▼  every sendMessage()
+   ┌──────────────────────────┐
+   │ AiChatProvider           │  serializes tourContext into the
+   │  config.tourContext=true │  POST body alongside the messages
+   └──────────────────────────┘
+              │
+              ▼
+   ┌──────────────────────────┐
+   │ /api/chat route handler  │  injects tourContext into the
+   │  createChatRouteHandler  │  system prompt
+   └──────────────────────────┘
+```
+
+If you forget to set `tourContext: true` on the provider, the hook works fine for typing but the server never sees the tour state — the most common failure mode.
+
+## Tour context shape
+
+```ts
+interface TourAssistantContext {
+  activeTour: {
+    id: string
+    name: string
+    currentStep: number      // zero-indexed
+    totalSteps: number
+  } | null
+  activeStep: {
+    id: string
+    title: string
+    content: string
+  } | null
+  completedTours: string[]
+  checklistProgress: { completed: number; total: number } | null
+}
+```
+
+`activeTour` and `activeStep` are `null` when no tour is running. Always guard before using.
+
+## Manual assembly for tests
+
+You don't need a `TourProvider` to build a `TourAssistantContext` — `assembleTourContext` accepts a tour-state object directly. Useful in tests or in custom hosts:
 
 ```ts
 import { assembleTourContext } from '@tour-kit/ai'
 
-const context = assembleTourContext({
+const ctx = assembleTourContext({
   isActive: true,
   tourId: 'onboarding',
   tour: { id: 'onboarding', name: 'Onboarding Tour', steps: [] },
@@ -6995,37 +7477,33 @@ const context = assembleTourContext({
 })
 ```
 
-## Combining with CAG
+Returns `null`-shaped context when `isActive` is false or `tourState` is missing.
 
-For the best experience with small tours, combine `useTourAssistant` with CAG:
+## Combining with CAG vs RAG
+
+Tour integration works with both retrieval strategies — pick CAG or RAG based on documentation size (see [CAG Guide](/docs/ai/cag-guide) and [RAG Guide](/docs/ai/rag-guide)). The client config is identical in both cases:
 
 ```tsx
-<AiChatProvider
-  config={{
-    endpoint: '/api/chat',
-    tourContext: true,
-  }}
->
-  <TourChat />
+<AiChatProvider config={{ endpoint: '/api/chat', tourContext: true }}>
+  <YourApp />
 </AiChatProvider>
 ```
 
-## Combining with RAG
+The tour context is sent as structured JSON alongside the messages, so it composes with either retrieval strategy on the server.
 
-For large documentation sites, use RAG alongside tour context:
+## Failure modes
 
-```tsx
-<AiChatProvider
-  config={{
-    endpoint: '/api/chat',
-    tourContext: true,
-  }}
->
-  <TourChat />
-</AiChatProvider>
-```
+- **`tourContext: true` not set on provider.** Hook returns valid data, but the server never sees it. Symptom: assistant answers generically, ignoring tour state.
+- **Step content too large.** If a step's `content` is itself a long-form React tree, the serialized version sent to the model can blow past the context window. Either trim the content sent to the model or store the explainer text separately.
+- **Stale context after a step jump.** `useTourAssistant` reads on render. If you advance the tour imperatively (e.g. inside a `setTimeout`), make sure the React tree re-renders before sending the next message, or pull `tourContext` fresh each time.
+- **Multi-tour ambiguity.** If two tours are active at once (rare but possible with overlapping providers), `tourContext.activeTour` reflects the innermost provider. Scope explicitly with a separate `useTour(tourId)` call if you need a specific one.
 
-The tour context is always sent as structured metadata, while RAG handles the documentation search.
+## Next steps
+
+- [Hooks](/docs/ai/hooks) — full `useTourAssistant` signature and the rest of the public hook surface
+- [CAG Guide](/docs/ai/cag-guide) — server-side wiring for small docs
+- [RAG Guide](/docs/ai/rag-guide) — server-side wiring for large docs
+- [API Reference](/docs/ai/api-reference) — `TourAssistantContext`, `assembleTourContext`, and provider config
 
 ---
 
@@ -11960,6 +12438,7 @@ Explore each component variant for detailed props and examples:
 - [Banner](/docs/announcements/components/banner) - Top/bottom bar
 - [Toast](/docs/announcements/components/toast) - Corner notification
 - [Spotlight](/docs/announcements/components/spotlight) - Element highlight
+- [CVA variants reference](/docs/announcements/components/variants) - Variant exports for customization
 
 ---
 
@@ -14767,6 +15246,14 @@ import { HeadlessBanner } from '@tour-kit/announcements/headless';
 />
 ```
 
+## Related
+
+- [`<Banner>`](/docs/announcements/components/banner) — styled counterpart with default theming and dismiss UI.
+- [`<HeadlessModal>`](/docs/announcements/headless/modal), [`<HeadlessSlideout>`](/docs/announcements/headless/slideout), [`<HeadlessToast>`](/docs/announcements/headless/toast), [`<HeadlessSpotlight>`](/docs/announcements/headless/spotlight) — sibling headless primitives for the other display variants.
+- [Headless overview](/docs/announcements/headless) — when to reach for headless vs. styled.
+- [`useAnnouncement`](/docs/announcements/hooks/use-announcement) — the hook this primitive exposes via render props.
+- [`<AnnouncementsProvider>`](/docs/announcements/providers/announcements-provider) — required ancestor.
+
 ---
 
 # HeadlessModal
@@ -14822,6 +15309,15 @@ import { HeadlessModal } from '@tour-kit/announcements/headless';
 />
 ```
 
+## Related
+
+- [`<Modal>`](/docs/announcements/components/modal) — styled counterpart with default backdrop, focus trap, and Escape handling.
+- [`<HeadlessBanner>`](/docs/announcements/headless/banner), [`<HeadlessSlideout>`](/docs/announcements/headless/slideout), [`<HeadlessToast>`](/docs/announcements/headless/toast), [`<HeadlessSpotlight>`](/docs/announcements/headless/spotlight) — sibling headless primitives for the other display variants.
+- [Headless overview](/docs/announcements/headless) — when to reach for headless vs. styled.
+- [`useAnnouncement`](/docs/announcements/hooks/use-announcement) — the hook this primitive exposes via render props.
+- [`useFocusTrap`](/docs/core/hooks/use-focus-trap) — mandatory for custom modal implementations.
+- [Accessibility guide](/docs/guides/accessibility) — `role="dialog"` and `aria-modal` requirements.
+
 ---
 
 # HeadlessSlideout
@@ -14858,6 +15354,14 @@ import { HeadlessSlideout } from '@tour-kit/announcements/headless';
   }}
 />
 ```
+
+## Related
+
+- [`<Slideout>`](/docs/announcements/components/slideout) — styled counterpart with built-in slide animation.
+- [`<HeadlessBanner>`](/docs/announcements/headless/banner), [`<HeadlessModal>`](/docs/announcements/headless/modal), [`<HeadlessToast>`](/docs/announcements/headless/toast), [`<HeadlessSpotlight>`](/docs/announcements/headless/spotlight) — sibling headless primitives for the other display variants.
+- [Headless overview](/docs/announcements/headless) — when to reach for headless vs. styled.
+- [`useAnnouncement`](/docs/announcements/hooks/use-announcement) — the hook this primitive exposes via render props.
+- [`<AnnouncementsProvider>`](/docs/announcements/providers/announcements-provider) — required ancestor.
 
 ---
 
@@ -14907,6 +15411,15 @@ import { HeadlessSpotlight } from '@tour-kit/announcements/headless';
 />
 ```
 
+## Related
+
+- [`<Spotlight>`](/docs/announcements/components/spotlight) — styled counterpart with default overlay and cutout.
+- [`<HeadlessBanner>`](/docs/announcements/headless/banner), [`<HeadlessModal>`](/docs/announcements/headless/modal), [`<HeadlessSlideout>`](/docs/announcements/headless/slideout), [`<HeadlessToast>`](/docs/announcements/headless/toast) — sibling headless primitives for the other display variants.
+- [Headless overview](/docs/announcements/headless) — when to reach for headless vs. styled.
+- [`useAnnouncement`](/docs/announcements/hooks/use-announcement) — the hook this primitive exposes via render props.
+- [`useSpotlight`](/docs/core/hooks/use-spotlight) and [`useElementPosition`](/docs/core/hooks/use-element-position) — sibling hooks for the spotlight positioning math.
+- [Tour `<TourOverlay>`](/docs/react/components/tour-overlay) — the tour-side analog for the same overlay UX.
+
 ---
 
 # HeadlessToast
@@ -14945,6 +15458,14 @@ import { HeadlessToast } from '@tour-kit/announcements/headless';
   }}
 />
 ```
+
+## Related
+
+- [`<Toast>`](/docs/announcements/components/toast) — styled counterpart with default auto-dismiss timer and positioning.
+- [`<HeadlessBanner>`](/docs/announcements/headless/banner), [`<HeadlessModal>`](/docs/announcements/headless/modal), [`<HeadlessSlideout>`](/docs/announcements/headless/slideout), [`<HeadlessSpotlight>`](/docs/announcements/headless/spotlight) — sibling headless primitives for the other display variants.
+- [Headless overview](/docs/announcements/headless) — when to reach for headless vs. styled.
+- [`useAnnouncement`](/docs/announcements/hooks/use-announcement) and [`useAnnouncementQueue`](/docs/announcements/hooks/use-announcement-queue) — the hooks this primitive exposes via render props.
+- [Frequency configuration](/docs/announcements/configuration/frequency) — control how often the toast re-appears.
 
 ---
 
@@ -16565,6 +17086,74 @@ function QueueDebugger() {
 | `canShow` | `(id) => boolean` | Frequency/schedule/audience evaluation |
 | `showNext` | `() => void` | Pop next from the queue |
 | `clearQueue` | `() => void` | Drop all queued announcements |
+
+---
+
+# useFilteredAnnouncements
+
+> Filter a list of AnnouncementConfig by their `audience` prop. Bulk segment evaluation that is safe under dynamic lists.
+
+Filter a list of `AnnouncementConfig` objects by their `audience` prop. Returns a new array containing only the announcements whose audience passes the current segmentation context.
+
+## Usage
+
+```tsx
+import { useFilteredAnnouncements } from '@tour-kit/announcements';
+
+function ChangelogList({ announcements }: { announcements: AnnouncementConfig[] }) {
+  const visible = useFilteredAnnouncements(announcements);
+  return (
+    <ul>
+      {visible.map((a) => (
+        <li key={a.id}>{a.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Signature
+
+```ts
+function useFilteredAnnouncements(
+  announcements: AnnouncementConfig[]
+): AnnouncementConfig[]
+```
+
+## Audience evaluation rules
+
+| Audience shape | Behavior |
+|----------------|----------|
+| `undefined` | Let through (always visible). |
+| `AudienceCondition[]` | Let through — forwarded to the scheduler, which re-checks against the provider's `userContext` prop. |
+| `{ segment: string }` | Evaluated here via [`useSegments`](/docs/core/hooks/use-segments). Filtered out if the segment is `false`. |
+
+## Why bulk?
+
+The hook reads all segments once at the top via `useSegments()` and reuses that map inside the filter callback. This is safe under dynamic announcement lists — never call `useSegment` (the single-segment hook) inside a `.filter()` body; that violates the rules of hooks.
+
+## Related
+
+- [evaluateAnnouncementAudience](/docs/announcements/types) — underlying single-item evaluator
+- [Audience targeting](/docs/announcements/configuration) — audience prop reference
+- [Segmentation guide](/docs/guides/segmentation)
+
+---
+
+# useResolvedText
+
+> Re-export of @tour-kit/core's useResolvedText for ergonomic in-package access. Resolves LocalizedText | ReactNode into a ReactNode.
+
+Re-exported from [`@tour-kit/core`](/docs/core/hooks/use-resolved-text) so consumers using `@tour-kit/announcements` can import it from the same package as the rest of the API.
+
+```tsx
+import { useResolvedText } from '@tour-kit/announcements';
+
+function AnnouncementBody({ body }: { body: LocalizedText | React.ReactNode }) {
+  const resolved = useResolvedText(body);
+  return <div>{resolved}</div>;
+}
+```
 
 ---
 
@@ -18290,17 +18879,38 @@ import type {
 
 ---
 
+## See also
+
+Each package's prose-style docs section sits next to its API reference:
+
+- Core: [`@tour-kit/core` overview](/docs/core) ↔ [`/docs/api/core`](/docs/api/core)
+- React: [`@tour-kit/react` overview](/docs/react) ↔ [`/docs/api/react`](/docs/api/react)
+- Hints: [`@tour-kit/hints` overview](/docs/hints) ↔ [`/docs/api/hints`](/docs/api/hints)
+- Adoption: [`@tour-kit/adoption` overview](/docs/adoption) ↔ [`/docs/api/adoption`](/docs/api/adoption)
+- Analytics: [`@tour-kit/analytics` overview](/docs/analytics) ↔ [`/docs/api/analytics`](/docs/api/analytics)
+- Announcements: [`@tour-kit/announcements` overview](/docs/announcements) ↔ [`/docs/api/announcements`](/docs/api/announcements)
+- Checklists: [`@tour-kit/checklists` overview](/docs/checklists) ↔ [`/docs/api/checklists`](/docs/api/checklists)
+- Media: [`@tour-kit/media` overview](/docs/media) ↔ [`/docs/api/media`](/docs/api/media)
+- Scheduling: [`@tour-kit/scheduling` overview](/docs/scheduling) ↔ [`/docs/api/scheduling`](/docs/api/scheduling)
+- Surveys: [`@tour-kit/surveys` overview](/docs/surveys)
+- AI: [`@tour-kit/ai` overview](/docs/ai) ↔ [`/docs/api/ai`](/docs/api/ai)
+- Licensing: [Licensing](/docs/licensing) ↔ [`/docs/api/license`](/docs/api/license)
+
+---
+
 # @tour-kit/adoption API
 
 > API reference for @tour-kit/adoption: AdoptionProvider, useFeature, useNudge, useAdoptionStats, and dashboard exports
 
 Complete API reference for the adoption package. This package provides feature adoption tracking with automatic nudging.
 
+For prose-style guides and recipes, see the [`@tour-kit/adoption` package overview](/docs/adoption), or jump to a specific [component](/docs/adoption/components), [hook](/docs/adoption/hooks), [provider](/docs/adoption/providers), or [dashboard widget](/docs/adoption/dashboard).
+
 ---
 
 ## Providers
 
-### AdoptionProvider
+### [AdoptionProvider](/docs/adoption/providers/adoption-provider)
 
 Provider for feature adoption tracking.
 
@@ -18333,7 +18943,7 @@ import { AdoptionProvider } from '@tour-kit/adoption';
 
 ## Hooks
 
-### useFeature
+### [useFeature](/docs/adoption/hooks/use-feature)
 
 Hook for tracking single feature adoption.
 
@@ -18359,7 +18969,7 @@ const {
 | `useCount` | `number` | Number of times feature was used |
 | `trackUsage` | `() => void` | Manually track a usage |
 
-### useAdoptionStats
+### [useAdoptionStats](/docs/adoption/hooks/use-adoption-stats)
 
 Hook for aggregate adoption statistics.
 
@@ -18383,7 +18993,7 @@ const {
 | `byCategory` | `Record<string, CategoryStats>` | Stats grouped by category |
 | `byStatus` | `Record<AdoptionStatus, number>` | Counts by status |
 
-### useNudge
+### [useNudge](/docs/adoption/hooks/use-nudge)
 
 Hook for controlling nudge queue.
 
@@ -18407,7 +19017,7 @@ const {
 | `dismiss` | `() => void` | Dismiss current nudge |
 | `skip` | `() => void` | Skip current nudge |
 
-### useAdoptionAnalytics
+### [useAdoptionAnalytics](/docs/adoption/analytics)
 
 Hook for analytics integration.
 
@@ -18421,7 +19031,7 @@ const analytics = useAdoptionAnalytics();
 
 ## Components
 
-### AdoptionNudge
+### [AdoptionNudge](/docs/adoption/components/adoption-nudge)
 
 Auto-shows nudges for unadopted features.
 
@@ -18444,7 +19054,7 @@ import { AdoptionNudge } from '@tour-kit/adoption';
 | `render` | `(props) => ReactNode` | Custom render function |
 | `asChild` | `boolean` | Merge props to child element |
 
-### FeatureButton
+### [FeatureButton](/docs/adoption/components/feature-button)
 
 Button with automatic usage tracking.
 
@@ -18466,7 +19076,7 @@ import { FeatureButton } from '@tour-kit/adoption';
 | `onClick` | `() => void` | Click handler |
 | `variant` | `string` | Button variant |
 
-### IfNotAdopted / IfAdopted
+### [IfNotAdopted / IfAdopted](/docs/adoption/components/conditional)
 
 Conditional rendering based on adoption status.
 
@@ -18482,7 +19092,7 @@ import { IfNotAdopted, IfAdopted } from '@tour-kit/adoption';
 </IfAdopted>
 ```
 
-### NewFeatureBadge
+### [NewFeatureBadge](/docs/adoption/components/new-feature-badge)
 
 Badge component for new features.
 
@@ -18505,7 +19115,7 @@ import { NewFeatureBadge } from '@tour-kit/adoption';
 
 ## Dashboard Components
 
-### AdoptionDashboard
+### [AdoptionDashboard](/docs/adoption/dashboard/adoption-dashboard)
 
 Full admin dashboard for adoption metrics.
 
@@ -18515,7 +19125,7 @@ import { AdoptionDashboard } from '@tour-kit/adoption';
 <AdoptionDashboard features={features} />
 ```
 
-### AdoptionStatsGrid
+### [AdoptionStatsGrid](/docs/adoption/dashboard/stats)
 
 Grid of stat cards.
 
@@ -18525,7 +19135,7 @@ import { AdoptionStatsGrid } from '@tour-kit/adoption';
 <AdoptionStatsGrid />
 ```
 
-### AdoptionTable
+### [AdoptionTable](/docs/adoption/dashboard/table)
 
 Sortable, filterable table of features.
 
@@ -18539,7 +19149,7 @@ import { AdoptionTable } from '@tour-kit/adoption';
 />
 ```
 
-### AdoptionCategoryChart
+### [AdoptionCategoryChart](/docs/adoption/dashboard/charts)
 
 Chart showing adoption by category.
 
@@ -18551,7 +19161,7 @@ import { AdoptionCategoryChart } from '@tour-kit/adoption';
 
 ---
 
-## Types
+## [Types](/docs/adoption/types)
 
 ### Feature
 
@@ -18596,6 +19206,46 @@ interface FeatureUsage {
   adoptedAt: Date | null;
 }
 ```
+
+### AdoptionFunnelProps
+
+```tsx
+interface AdoptionFunnelProps
+  extends Omit<React.ComponentPropsWithoutRef<'div'>, 'role' | 'aria-label' | 'children' | 'title'> {
+  /** Pre-computed funnel data, in display order */
+  steps: readonly FunnelStep[];
+  /** Optional header rendered above the bars */
+  title?: React.ReactNode;
+  /** Click/keyboard activation handler. When omitted, steps are not focusable */
+  onStepClick?: (step: FunnelStep, index: number) => void;
+  /** Replaces the default "No funnel data yet." message when steps is empty */
+  emptyState?: React.ReactNode;
+  /** Override the auto-generated chart summary on the role="img" element */
+  ariaLabel?: string;
+}
+```
+
+### UseFunnelDataInput
+
+```tsx
+interface UseFunnelDataInput {
+  /** Feature IDs in funnel order */
+  featureIds: readonly string[];
+  /** Optional label overrides keyed by feature id */
+  labels?: Partial<Record<string, string>>;
+}
+```
+
+Used by `useFunnelData()` to derive a current-state funnel from `useAdoptionStats`. For aggregated, date-ranged funnels, pass pre-computed data directly to `<AdoptionFunnel steps={...}>`.
+
+---
+
+## See also
+
+- [`@tour-kit/adoption` package overview](/docs/adoption) — prose docs, recipes, and patterns for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Analytics integration](/docs/adoption/analytics) — wire adoption events into `@tour-kit/analytics`.
+- [Adoption analytics guide](/docs/guides/adoption-analytics) — funnel and retention patterns built on these primitives.
 
 ---
 
@@ -19082,17 +19732,28 @@ interface EmbeddingAdapter {
 
 ---
 
+## See also
+
+- [`@tour-kit/ai` package overview](/docs/ai) — installation, model setup, and end-to-end tutorials.
+- [API reference index](/docs/api) — browse other package references.
+- [Quick start](/docs/ai/quick-start), [CAG guide](/docs/ai/cag-guide), [RAG guide](/docs/ai/rag-guide) — prose tutorials for each context strategy.
+- [Components reference](/docs/ai/components) and [Hooks reference](/docs/ai/hooks) — prop tables and usage examples.
+
+---
+
 # @tour-kit/analytics API
 
 > API reference for @tour-kit/analytics: AnalyticsProvider, useAnalytics, plugin interface, and built-in integrations
 
 Complete API reference for the analytics package. This package provides plugin-based analytics integration.
 
+For prose-style docs and recipes, see the [`@tour-kit/analytics` package overview](/docs/analytics), or jump to the [hooks](/docs/analytics/hooks), [provider](/docs/analytics/providers), or [built-in plugins](/docs/analytics/plugins).
+
 ---
 
 ## Core
 
-### createAnalytics
+### [createAnalytics](/docs/analytics)
 
 Factory function to create an analytics instance.
 
@@ -19110,7 +19771,7 @@ const analytics = createAnalytics({
 | `plugins` | `AnalyticsPlugin[]` | Array of analytics plugins |
 | `defaultProperties` | `Record<string, unknown>` | Properties added to all events |
 
-### TourAnalytics
+### [TourAnalytics](/docs/analytics)
 
 Main analytics tracker class.
 
@@ -19145,7 +19806,7 @@ analytics.destroy();
 
 ## Providers
 
-### AnalyticsProvider
+### [AnalyticsProvider](/docs/analytics/providers)
 
 React context provider for analytics.
 
@@ -19165,7 +19826,7 @@ import { AnalyticsProvider } from '@tour-kit/analytics';
 
 ## Hooks
 
-### useAnalytics
+### [useAnalytics](/docs/analytics/hooks)
 
 Hook to access analytics. Throws if not available.
 
@@ -19176,7 +19837,7 @@ const analytics = useAnalytics();
 analytics.track('custom_event', { key: 'value' });
 ```
 
-### useAnalyticsOptional
+### [useAnalyticsOptional](/docs/analytics/hooks)
 
 Safe hook that returns null if analytics not available.
 
@@ -19191,7 +19852,7 @@ analytics?.track('custom_event', { key: 'value' });
 
 ## Plugins
 
-### consolePlugin
+### [consolePlugin](/docs/analytics/plugins/console)
 
 Debug logging to console.
 
@@ -19204,7 +19865,7 @@ consolePlugin({
 });
 ```
 
-### posthogPlugin
+### [posthogPlugin](/docs/analytics/plugins/posthog)
 
 PostHog integration.
 
@@ -19214,7 +19875,7 @@ import { posthogPlugin } from '@tour-kit/analytics';
 posthogPlugin(); // Uses window.posthog
 ```
 
-### mixpanelPlugin
+### [mixpanelPlugin](/docs/analytics/plugins/mixpanel)
 
 Mixpanel integration.
 
@@ -19224,7 +19885,7 @@ import { mixpanelPlugin } from '@tour-kit/analytics';
 mixpanelPlugin(); // Uses window.mixpanel
 ```
 
-### amplitudePlugin
+### [amplitudePlugin](/docs/analytics/plugins/amplitude)
 
 Amplitude integration.
 
@@ -19234,7 +19895,7 @@ import { amplitudePlugin } from '@tour-kit/analytics';
 amplitudePlugin(); // Uses window.amplitude
 ```
 
-### googleAnalyticsPlugin
+### [googleAnalyticsPlugin](/docs/analytics/plugins/google-analytics)
 
 Google Analytics 4 integration.
 
@@ -19246,7 +19907,7 @@ googleAnalyticsPlugin(); // Uses gtag()
 
 ---
 
-## Custom Plugin
+## [Custom Plugin](/docs/analytics/plugins/custom)
 
 Create your own analytics plugin:
 
@@ -19458,17 +20119,27 @@ useEffect(() => {
 
 ---
 
+## See also
+
+- [`@tour-kit/analytics` package overview](/docs/analytics) — installation, plugin lineup, and integration recipes.
+- [API reference index](/docs/api) — browse other package references.
+- [Analytics integration guide](/docs/guides/analytics-integration) — end-to-end wiring with PostHog, Mixpanel, GA4, and custom backends.
+
+---
+
 # @tour-kit/announcements API
 
 > API reference for @tour-kit/announcements: Modal, Toast, Banner, Slideout, Spotlight, queue hooks, and provider config
 
 Complete API reference for the announcements package. This package provides multi-variant product announcements.
 
+For prose-style docs and recipes, see the [`@tour-kit/announcements` package overview](/docs/announcements), or jump to [components](/docs/announcements/components), [headless primitives](/docs/announcements/headless), [hooks](/docs/announcements/hooks), [provider](/docs/announcements/providers/announcements-provider), or [frequency / audience config](/docs/announcements/configuration/frequency).
+
 ---
 
 ## Providers
 
-### AnnouncementsProvider
+### [AnnouncementsProvider](/docs/announcements/providers/announcements-provider)
 
 Provider for announcements.
 
@@ -19498,7 +20169,7 @@ import { AnnouncementsProvider } from '@tour-kit/announcements';
 
 ## Hooks
 
-### useAnnouncement
+### [useAnnouncement](/docs/announcements/hooks/use-announcement)
 
 Hook for single announcement control.
 
@@ -19522,7 +20193,7 @@ const {
 | `dismiss` | `(reason?: DismissalReason) => void` | Dismiss the announcement |
 | `complete` | `() => void` | Mark as completed |
 
-### useAnnouncements
+### [useAnnouncements](/docs/announcements/hooks/use-announcements)
 
 Hook for all announcements.
 
@@ -19537,7 +20208,7 @@ const {
 } = useAnnouncements();
 ```
 
-### useAnnouncementQueue
+### [useAnnouncementQueue](/docs/announcements/hooks/use-announcement-queue)
 
 Hook for queue management.
 
@@ -19556,7 +20227,7 @@ const {
 
 ## Components
 
-### AnnouncementModal
+### [AnnouncementModal](/docs/announcements/components/modal)
 
 Centered dialog variant.
 
@@ -19572,7 +20243,7 @@ import { AnnouncementModal } from '@tour-kit/announcements';
 | `size` | `'sm' \| 'md' \| 'lg'` | Modal size |
 | `closeOnOverlay` | `boolean` | Close when clicking overlay |
 
-### AnnouncementSlideout
+### [AnnouncementSlideout](/docs/announcements/components/slideout)
 
 Side panel variant.
 
@@ -19588,7 +20259,7 @@ import { AnnouncementSlideout } from '@tour-kit/announcements';
 | `position` | `'left' \| 'right'` | Slide from direction |
 | `width` | `string` | Panel width |
 
-### AnnouncementBanner
+### [AnnouncementBanner](/docs/announcements/components/banner)
 
 Top/bottom strip variant.
 
@@ -19604,7 +20275,7 @@ import { AnnouncementBanner } from '@tour-kit/announcements';
 | `position` | `'top' \| 'bottom'` | Banner position |
 | `dismissible` | `boolean` | Show close button |
 
-### AnnouncementToast
+### [AnnouncementToast](/docs/announcements/components/toast)
 
 Corner notification variant.
 
@@ -19620,7 +20291,7 @@ import { AnnouncementToast } from '@tour-kit/announcements';
 | `position` | `string` | Toast position |
 | `duration` | `number` | Auto-dismiss duration (ms) |
 
-### AnnouncementSpotlight
+### [AnnouncementSpotlight](/docs/announcements/components/spotlight)
 
 Element highlight with overlay.
 
@@ -19649,7 +20320,9 @@ import {
 
 ---
 
-## Headless Components
+## [Headless Components](/docs/announcements/headless)
+
+Per-variant headless docs: [`<HeadlessModal>`](/docs/announcements/headless/modal), [`<HeadlessSlideout>`](/docs/announcements/headless/slideout), [`<HeadlessBanner>`](/docs/announcements/headless/banner), [`<HeadlessToast>`](/docs/announcements/headless/toast), [`<HeadlessSpotlight>`](/docs/announcements/headless/spotlight).
 
 ```tsx
 import {
@@ -19671,7 +20344,7 @@ import {
 
 ## Configuration
 
-### Frequency Rules
+### [Frequency Rules](/docs/announcements/configuration/frequency)
 
 ```tsx
 // Show only once ever
@@ -19690,7 +20363,7 @@ frequency: { type: 'times', count: 3 }
 frequency: { type: 'interval', days: 7 }
 ```
 
-### Audience Targeting
+### [Audience Targeting](/docs/announcements/configuration/audience)
 
 ```tsx
 audience: [
@@ -19776,6 +20449,114 @@ interface AnnouncementState {
 }
 ```
 
+### AudienceProp
+
+```tsx
+// Audience prop accepted by AnnouncementConfig.audience
+type AudienceProp = AudienceCondition[] | { segment: string };
+
+// Re-exported from @tour-kit/core
+import { isSegmentAudience } from '@tour-kit/announcements';
+isSegmentAudience(audience): audience is { segment: string };
+```
+
+### Audience Evaluator
+
+```tsx
+import { evaluateAnnouncementAudience } from '@tour-kit/announcements';
+
+// Single-item evaluator used by useFilteredAnnouncements. Returns `true` for
+// undefined and array-shape audiences (deferred to the scheduler); evaluates
+// the segment branch against the current segments map.
+evaluateAnnouncementAudience(
+  audience: AudienceProp | undefined,
+  segments: Record<string, boolean>
+): boolean;
+```
+
+### ForceShowBypassKey
+
+```tsx
+// Storage key used by useAnnouncement(id, { forceShow: true }) to bypass
+// frequency / schedule / persistence gates during development.
+const ForceShowBypassKey: string;
+```
+
+### Reactions
+
+```tsx
+type Reaction = '👍' | '👎' | '🎉' | '🚀' | '❤️' | '🤔';
+
+interface ReactionsProps {
+  announcementId: string;
+  available?: Reaction[];           // default: all
+  onReact?: (reaction: Reaction) => void;
+  className?: string;
+}
+```
+
+### Changelog Components
+
+```tsx
+interface ChangelogPageProps {
+  announcements: AnnouncementConfig[];
+  title?: string;
+  description?: string;
+  filters?: ChangelogFilterProps['filters'];
+  className?: string;
+}
+
+interface ChangelogFilterProps {
+  filters: Array<{ id: string; label: string; predicate: (a: AnnouncementConfig) => boolean }>;
+  value: string | null;
+  onChange: (next: string | null) => void;
+}
+
+interface ChangelogEntryProps {
+  announcement: AnnouncementConfig;
+  className?: string;
+}
+```
+
+See [Changelog page](/docs/announcements/changelog).
+
+### Toast Adapter
+
+Plug a host-app toast library (sonner, react-hot-toast, etc.) into `@tour-kit/announcements` instead of using the built-in toast variant.
+
+```tsx
+interface ToastAdapterRenderArgs {
+  id: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  variant?: 'default' | 'success' | 'warning' | 'destructive';
+  duration?: number;
+  onDismiss?: () => void;
+  onAction?: () => void;
+}
+
+interface ToastAdapterHandle {
+  /** Dismiss the toast programmatically. */
+  dismiss: () => void;
+}
+
+interface ToastAdapter {
+  /** Show a toast and return a handle the provider can use to dismiss it. */
+  show: (args: ToastAdapterRenderArgs) => ToastAdapterHandle;
+}
+```
+
+Pass `<AnnouncementsProvider toastAdapter={...}>` to route toast-variant announcements through your adapter.
+
+---
+
+## See also
+
+- [`@tour-kit/announcements` package overview](/docs/announcements) — prose docs and recipes for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Announcements & scheduling guide](/docs/guides/announcements-scheduling) — wire announcements into `@tour-kit/scheduling` for time-based rollouts.
+- [Queue configuration](/docs/announcements/configuration/queue) — priority and ordering when multiple announcements are eligible.
+
 ---
 
 # @tour-kit/checklists API
@@ -19784,11 +20565,13 @@ interface AnnouncementState {
 
 Complete API reference for the checklists package. This package provides interactive checklists with task dependencies.
 
+For prose-style docs and recipes, see the [`@tour-kit/checklists` package overview](/docs/checklists), or jump to [components](/docs/checklists/components), [headless primitives](/docs/checklists/headless), [hooks](/docs/checklists/hooks), [provider](/docs/checklists/providers/checklist-provider), or [utilities](/docs/checklists/utilities).
+
 ---
 
 ## Providers
 
-### ChecklistProvider
+### [ChecklistProvider](/docs/checklists/providers/checklist-provider)
 
 Provider for checklists.
 
@@ -19814,7 +20597,7 @@ import { ChecklistProvider } from '@tour-kit/checklists';
 
 ## Hooks
 
-### useChecklist
+### [useChecklist](/docs/checklists/hooks/use-checklist)
 
 Hook for single checklist control.
 
@@ -19844,7 +20627,7 @@ const {
 | `dismiss` | `() => void` | Dismiss checklist |
 | `reset` | `() => void` | Reset checklist |
 
-### useTask
+### [useTask](/docs/checklists/hooks/use-task)
 
 Hook for single task control.
 
@@ -19870,7 +20653,7 @@ const {
 | `complete` | `() => void` | Mark task complete |
 | `execute` | `() => void` | Execute task action |
 
-### useChecklistPersistence
+### [useChecklistPersistence](/docs/checklists/hooks/use-checklist-persistence)
 
 Hook for persistence control.
 
@@ -19880,7 +20663,7 @@ import { useChecklistPersistence } from '@tour-kit/checklists';
 const { save, load, clear } = useChecklistPersistence('onboarding');
 ```
 
-### useChecklistsProgress
+### [useChecklistsProgress](/docs/checklists/hooks/use-checklists-progress)
 
 Hook for all checklists progress.
 
@@ -19895,7 +20678,7 @@ const progress = useChecklistsProgress();
 
 ## Components
 
-### Checklist
+### [Checklist](/docs/checklists/components/checklist)
 
 Container component for checklist.
 
@@ -19910,7 +20693,7 @@ import { Checklist } from '@tour-kit/checklists';
 </Checklist>
 ```
 
-### ChecklistTask
+### [ChecklistTask](/docs/checklists/components/checklist-task)
 
 Individual task item.
 
@@ -19932,7 +20715,7 @@ import { ChecklistTask } from '@tour-kit/checklists';
 | `showIcon` | `boolean` | Show task icon |
 | `showDescription` | `boolean` | Show task description |
 
-### ChecklistProgress
+### [ChecklistProgress](/docs/checklists/components/checklist-progress)
 
 Progress bar/indicator.
 
@@ -19946,7 +20729,7 @@ import { ChecklistProgress } from '@tour-kit/checklists';
 />
 ```
 
-### ChecklistLauncher
+### [ChecklistLauncher](/docs/checklists/components/checklist-launcher)
 
 Button to launch checklist.
 
@@ -19958,7 +20741,7 @@ import { ChecklistLauncher } from '@tour-kit/checklists';
 </ChecklistLauncher>
 ```
 
-### ChecklistPanel
+### [ChecklistPanel](/docs/checklists/components/checklist-panel)
 
 Full panel UI with all features.
 
@@ -19982,7 +20765,9 @@ import { ChecklistPanel } from '@tour-kit/checklists';
 
 ---
 
-## Headless Components
+## [Headless Components](/docs/checklists/headless)
+
+Per-component headless docs: [`<ChecklistHeadless>`](/docs/checklists/headless/checklist-headless), [`<TaskHeadless>`](/docs/checklists/headless/task-headless).
 
 ```tsx
 import { ChecklistHeadless, TaskHeadless } from '@tour-kit/checklists/headless';
@@ -20004,7 +20789,7 @@ import { ChecklistHeadless, TaskHeadless } from '@tour-kit/checklists/headless';
 
 ## Utilities
 
-### createChecklist
+### [createChecklist](/docs/checklists/utilities/create-checklist)
 
 Factory function for checklist creation.
 
@@ -20018,7 +20803,7 @@ const checklist = createChecklist({
 });
 ```
 
-### createTask
+### [createTask](/docs/checklists/utilities/create-checklist)
 
 Factory function for task creation.
 
@@ -20032,7 +20817,7 @@ const task = createTask({
 });
 ```
 
-### calculateProgress
+### [calculateProgress](/docs/checklists/utilities/progress)
 
 Calculate progress from state.
 
@@ -20042,7 +20827,7 @@ import { calculateProgress } from '@tour-kit/checklists';
 const { completed, total, percentage, remaining } = calculateProgress(state);
 ```
 
-### getNextTask
+### [getNextTask](/docs/checklists/utilities/progress)
 
 Get first incomplete unlocked task.
 
@@ -20052,7 +20837,7 @@ import { getNextTask } from '@tour-kit/checklists';
 const next = getNextTask(state);
 ```
 
-### getLockedTasks
+### [getLockedTasks](/docs/checklists/utilities/dependencies)
 
 Get tasks blocked by dependencies.
 
@@ -20062,7 +20847,7 @@ import { getLockedTasks } from '@tour-kit/checklists';
 const locked = getLockedTasks(state);
 ```
 
-### canCompleteTask
+### [canCompleteTask](/docs/checklists/utilities/dependencies)
 
 Check if task dependencies are met.
 
@@ -20072,7 +20857,7 @@ import { canCompleteTask } from '@tour-kit/checklists';
 const canComplete = canCompleteTask('task-id', state);
 ```
 
-### resolveTaskDependencies
+### [resolveTaskDependencies](/docs/checklists/utilities/dependencies)
 
 Get topological sort of tasks.
 
@@ -20082,7 +20867,7 @@ import { resolveTaskDependencies } from '@tour-kit/checklists';
 const order = resolveTaskDependencies(tasks);
 ```
 
-### hasCircularDependency
+### [hasCircularDependency](/docs/checklists/utilities/dependencies)
 
 Detect circular dependencies.
 
@@ -20147,7 +20932,20 @@ type TaskAction =
 type TaskCompletionCondition =
   | { event: string }
   | { selector: string }
-  | { custom: (ctx: ChecklistContext) => boolean };
+  | { custom: (ctx: ChecklistContext) => boolean }
+  | UrlVisitCompletion;
+```
+
+### UrlVisitCompletion
+
+Marks a task as complete the first time the user visits a matching URL.
+
+```tsx
+type UrlVisitCompletion = {
+  type: 'urlVisit';
+  /** String compared via startsWith, or a RegExp matched against location.pathname */
+  urlPattern: string | RegExp;
+};
 ```
 
 ### ChecklistProgress
@@ -20163,17 +20961,28 @@ interface ChecklistProgress {
 
 ---
 
+## See also
+
+- [`@tour-kit/checklists` package overview](/docs/checklists) — prose docs and recipes for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Checklists + tours guide](/docs/guides/checklists-tours) — coordinate checklist tasks with tour completion.
+- [Progress utility](/docs/checklists/utilities/progress) — helpers that back the `<ChecklistProgress>` component.
+
+---
+
 # @tour-kit/core API
 
 > API reference for @tour-kit/core: useTour, useStep, useFocusTrap, createTour, createStep, and all utility exports
 
 Complete API reference for the core package. This package provides framework-agnostic logic for tours.
 
+For prose-style documentation of each symbol, see the [`@tour-kit/core` package overview](/docs/core), or jump to a specific [hook](/docs/core/hooks), [provider](/docs/core/providers), [type](/docs/core/types), or [utility](/docs/core/utilities).
+
 ---
 
 ## Providers
 
-### TourKitProvider
+### [TourKitProvider](/docs/core/providers/tour-kit-provider)
 
 Global configuration provider for tour-kit.
 
@@ -20194,7 +21003,7 @@ import { TourKitProvider } from '@tour-kit/core';
 | `onTourSkip` | `(tourId: string, stepIndex: number) => void` | Called when any tour is skipped |
 | `onStepView` | `(tourId: string, stepId: string, stepIndex: number) => void` | Called when a step is viewed |
 
-### TourProvider
+### [TourProvider](/docs/core/providers/tour-provider)
 
 Provider for a single tour instance.
 
@@ -20219,7 +21028,7 @@ import { TourProvider } from '@tour-kit/core';
 
 ## Hooks
 
-### useTour
+### [useTour](/docs/core/hooks/use-tour)
 
 Main hook for tour control. Returns tour state and actions.
 
@@ -20269,7 +21078,7 @@ const {
 | `isStepActive` | `(stepId: string) => boolean` | Check if step is active |
 | `getStep` | `(stepId: string) => TourStep \| undefined` | Get step by ID |
 
-### useStep
+### [useStep](/docs/core/hooks/use-step)
 
 Hook for individual step control.
 
@@ -20279,7 +21088,7 @@ import { useStep } from '@tour-kit/core';
 const { isActive, isVisible, hasCompleted, targetElement, targetRect } = useStep(stepId);
 ```
 
-### useSpotlight
+### [useSpotlight](/docs/core/hooks/use-spotlight)
 
 Hook for spotlight overlay control.
 
@@ -20289,7 +21098,7 @@ import { useSpotlight } from '@tour-kit/core';
 const { isVisible, targetRect, overlayStyle, cutoutStyle, show, hide, update } = useSpotlight();
 ```
 
-### useElementPosition
+### [useElementPosition](/docs/core/hooks/use-element-position)
 
 Hook for tracking element position.
 
@@ -20299,7 +21108,7 @@ import { useElementPosition } from '@tour-kit/core';
 const { element, rect, scrollParent, update } = useElementPosition(target);
 ```
 
-### useKeyboardNavigation
+### [useKeyboardNavigation](/docs/core/hooks/use-keyboard)
 
 Hook for keyboard navigation setup.
 
@@ -20309,7 +21118,7 @@ import { useKeyboardNavigation } from '@tour-kit/core';
 useKeyboardNavigation(config?);
 ```
 
-### useFocusTrap
+### [useFocusTrap](/docs/core/hooks/use-focus-trap)
 
 Hook for focus trap management.
 
@@ -20319,7 +21128,7 @@ import { useFocusTrap } from '@tour-kit/core';
 const { containerRef, activate, deactivate } = useFocusTrap(enabled?);
 ```
 
-### usePersistence
+### [usePersistence](/docs/core/hooks/use-persistence)
 
 Hook for tour state persistence.
 
@@ -20339,7 +21148,7 @@ const {
 } = usePersistence(config?);
 ```
 
-### useRoutePersistence
+### [useRoutePersistence](/docs/core/hooks/use-route-persistence)
 
 Hook for multi-page tour persistence.
 
@@ -20349,7 +21158,7 @@ import { useRoutePersistence } from '@tour-kit/core';
 const { save, load, clear, isStale } = useRoutePersistence(config);
 ```
 
-### useMediaQuery
+### [useMediaQuery](/docs/core/hooks/use-media-query)
 
 Hook for responsive media query tracking.
 
@@ -20369,7 +21178,7 @@ import { usePrefersReducedMotion } from '@tour-kit/core';
 const prefersReducedMotion = usePrefersReducedMotion();
 ```
 
-### useAdvanceOn
+### [useAdvanceOn](/docs/core/hooks/use-advance-on)
 
 Hook for event-based step advancement.
 
@@ -20387,7 +21196,7 @@ useAdvanceOn({
 
 ## Utilities
 
-### Tour Creation
+### [Tour Creation](/docs/core/utilities/create-tour)
 
 ```tsx
 import { createTour, createNamedTour, createStep, createNamedStep } from '@tour-kit/core';
@@ -20405,7 +21214,7 @@ const step = createStep(target, content, options?);
 const namedStep = createNamedStep('step-1', target, content, options?);
 ```
 
-### Storage
+### [Storage](/docs/core/utilities/storage)
 
 ```tsx
 import {
@@ -20432,7 +21241,7 @@ const noop = createNoopStorage();
 const data = safeJSONParse<MyType>(json, defaultValue);
 ```
 
-### DOM Utilities
+### [DOM Utilities](/docs/core/utilities/dom)
 
 ```tsx
 import {
@@ -20461,7 +21270,7 @@ const focusable = getFocusableElements(container);
 const scrollParent = getScrollParent(element);
 ```
 
-### Position Utilities
+### [Position Utilities](/docs/core/utilities/position)
 
 ```tsx
 import {
@@ -20489,7 +21298,7 @@ const { side, alignment } = parsePlacement('bottom-start');
 const rtlPlacement = mirrorPlacementForRTL('left-start', true);
 ```
 
-### Scroll Utilities
+### [Scroll Utilities](/docs/core/utilities/scroll)
 
 ```tsx
 import {
@@ -20514,7 +21323,7 @@ const unlock = lockScroll();
 unlock();
 ```
 
-### Accessibility Utilities
+### [Accessibility Utilities](/docs/core/utilities/a11y)
 
 ```tsx
 import {
@@ -20537,7 +21346,7 @@ const reduced = prefersReducedMotion();
 const text = getStepAnnouncement('Welcome', 1, 5); // "Step 1 of 5: Welcome"
 ```
 
-### Logger
+### [Logger](/docs/core/utilities/logger)
 
 ```tsx
 import { logger } from '@tour-kit/core';
@@ -20556,7 +21365,7 @@ logger.error('Error message');
 
 ## Types
 
-### Configuration Types
+### [Configuration Types](/docs/core/types/config-types)
 
 ```tsx
 interface TourKitConfig {
@@ -20611,7 +21420,7 @@ interface ScrollConfig {
 }
 ```
 
-### Tour Types
+### [Tour Types](/docs/core/types/tour-types)
 
 ```tsx
 interface Tour {
@@ -20682,6 +21491,175 @@ interface MultiPagePersistenceConfig {
 }
 ```
 
+### Step Visibility & Targets
+
+```tsx
+// Discriminated union for filtered step lists. See useStep / useTour.
+type VisibleTourStep = TourStep & { __visible: true };
+type HiddenTourStep = TourStep & { __visible: false };
+
+function isVisibleStep(step: TourStep): step is VisibleTourStep;
+
+// Target resolution types
+type TourTargetRef = React.RefObject<HTMLElement | null>;
+type TourTargetGetter = () => HTMLElement | null;
+
+// Step media — image / video / lottie attached to a step
+interface TourStepMedia {
+  type: 'image' | 'video' | 'lottie';
+  src: string;
+  alt?: string;
+  poster?: string;
+}
+```
+
+### Target Waiting
+
+```tsx
+interface WaitForStepTargetOptions {
+  timeoutMs?: number;       // default: 5000
+  pollIntervalMs?: number;  // default: 50
+  signal?: AbortSignal;
+}
+
+// Resolves when a step's target appears in the DOM, rejects on timeout/abort.
+function waitForStepTarget(
+  step: TourStep,
+  options?: WaitForStepTargetOptions
+): Promise<HTMLElement>;
+```
+
+### i18n Types
+
+```tsx
+interface LocaleContextValue {
+  locale: string;
+  messages: Messages;
+  t?: TranslateFn;
+  direction?: 'ltr' | 'rtl';
+}
+
+interface LocaleProviderProps extends Partial<LocaleContextValue> {
+  children: React.ReactNode;
+}
+
+type TranslateFn = (key: string, vars?: Record<string, unknown>) => string;
+
+// Type guard for `LocalizedText`'s key-shape branch
+function isI18nKey(value: unknown): value is { key: string };
+```
+
+See [LocaleProvider](/docs/core/providers/locale-provider), [useLocale](/docs/core/hooks/use-locale), and the [i18n guide](/docs/guides/i18n).
+
+### Segmentation & Audience Types
+
+```tsx
+// Segments registered on <SegmentationProvider>
+type SegmentDefinition = AudienceCondition[];                    // AND-joined
+
+interface StaticSegment {
+  type: 'static';
+  userIds: ReadonlyArray<string>;
+}
+
+type SegmentSource = SegmentDefinition | StaticSegment;
+
+interface SegmentationContextValue {
+  segments: Record<string, SegmentSource>;
+  userContext?: Record<string, unknown>;
+  currentUserId?: string;
+}
+
+interface SegmentationProviderProps extends SegmentationContextValue {
+  children: React.ReactNode;
+}
+
+// Audience prop accepted on tours, hints, announcements
+type AudienceProp = AudienceCondition[] | { segment: string };
+
+// Type guard for the segment-shape branch
+function isSegmentAudience(audience: AudienceProp): audience is { segment: string };
+
+// Headless audience evaluator (re-exports in @tour-kit/react too)
+function evaluateAudience(
+  audience: AudienceProp | undefined,
+  segments: Record<string, boolean>,
+  userContext: Record<string, unknown> | undefined,
+  source?: string
+): boolean;
+
+// Returns a human-readable explanation of why an audience did/didn't match
+function explainAudience(
+  audience: AudienceProp,
+  segments: Record<string, boolean>,
+  userContext?: Record<string, unknown>
+): string;
+```
+
+See [Segmentation guide](/docs/guides/segmentation) and [useSegmentationContext](/docs/core/hooks/use-segmentation-context).
+
+### Diagnostic Types
+
+```tsx
+// All built-in gates evaluated by the can-show pipeline, in declared order
+const BUILTIN_GATE_ORDER: readonly GateName[];
+
+// Stable identifiers used by diagnostics and analytics events
+type GateName =
+  | 'audience' | 'segment' | 'frequency' | 'schedule'
+  | 'persistence' | 'capacity' | 'custom';
+
+type GateCode = 'pass' | 'fail' | 'skipped' | 'error';
+
+// Context passed to diagnostic listeners (eventbus, devtools)
+interface DiagnosticContext {
+  source: 'tour' | 'hint' | 'announcement' | 'checklist';
+  id: string;
+  gate: GateName;
+  code: GateCode;
+  reason?: string;
+}
+```
+
+See [Diagnostic guide](/docs/core/diagnostic).
+
+### Flow Session
+
+```tsx
+interface UseFlowSessionConfig {
+  flowId: string;
+  storage?: 'localStorage' | 'sessionStorage' | 'memory';
+  ttlMs?: number;
+}
+
+interface FlowSessionConfig extends UseFlowSessionConfig {
+  initialState?: Record<string, unknown>;
+}
+
+interface UseFlowSessionReturn<TState = Record<string, unknown>> {
+  state: TState;
+  setState: (next: Partial<TState>) => void;
+  clear: () => void;
+  isRestored: boolean;
+}
+```
+
+### Broadcast & Frequency
+
+```tsx
+interface UseBroadcastReturn {
+  broadcast: (event: string, payload?: unknown) => void;
+  subscribe: (event: string, handler: (payload: unknown) => void) => () => void;
+}
+
+interface FrequencyState {
+  lastShownAt?: number;
+  shownCount: number;
+  dismissedAt?: number;
+  completedAt?: number;
+}
+```
+
 ---
 
 ## Default Configurations
@@ -20698,17 +21676,28 @@ import {
 
 ---
 
+## See also
+
+- [`@tour-kit/core` package overview](/docs/core) — prose-style docs and recipes for each export above.
+- [API reference index](/docs/api) — browse other package references (`@tour-kit/react`, `@tour-kit/hints`, …).
+- [Quick start](/docs/getting-started/quick-start) — use these primitives in a working app.
+- [TypeScript guide](/docs/getting-started/typescript) — set up strict types for the symbols documented here.
+
+---
+
 # @tour-kit/hints API
 
 > API reference for @tour-kit/hints: Hint, HintHotspot, HintTooltip, useHints, useHint, and headless hint primitives
 
 Complete API reference for the hints package. This package provides persistent hints and hotspots for feature discovery.
 
+For prose-style docs and recipes, see the [`@tour-kit/hints` package overview](/docs/hints), or jump to [components](/docs/hints/components), [headless primitives](/docs/hints/headless), [hooks](/docs/hints/hooks), [variants](/docs/hints/variants), or [types](/docs/hints/types).
+
 ---
 
 ## Styled Components
 
-### Hint
+### [Hint](/docs/hints/components)
 
 Main hint component combining hotspot and tooltip.
 
@@ -20755,7 +21744,7 @@ import { Hint } from '@tour-kit/hints';
 | `onShow` | `() => void` | - | Show callback |
 | `onDismiss` | `() => void` | - | Dismiss callback |
 
-### HintHotspot
+### [HintHotspot](/docs/hints/components)
 
 Standalone pulsing indicator.
 
@@ -20787,7 +21776,7 @@ import { HintHotspot } from '@tour-kit/hints';
 | `pulse` | `boolean` | `true` | Enable pulse |
 | `zIndex` | `'default' \| 'high'` | `'default'` | z-index |
 
-### HintTooltip
+### [HintTooltip](/docs/hints/components)
 
 Floating tooltip component.
 
@@ -20824,7 +21813,7 @@ import { HintTooltip } from '@tour-kit/hints';
 
 Import from `@tour-kit/hints/headless`:
 
-### HintHeadless
+### [HintHeadless](/docs/hints/headless/hint-headless)
 
 ```tsx
 import { HintHeadless } from '@tour-kit/hints/headless';
@@ -20857,7 +21846,7 @@ import { HintHeadless } from '@tour-kit/hints/headless';
 />
 ```
 
-### HintHotspotHeadless
+### [HintHotspotHeadless](/docs/hints/headless/hint-hotspot-headless)
 
 ```tsx
 import { HintHotspotHeadless } from '@tour-kit/hints/headless';
@@ -20876,7 +21865,7 @@ import { HintHotspotHeadless } from '@tour-kit/hints/headless';
 />
 ```
 
-### HintTooltipHeadless
+### [HintTooltipHeadless](/docs/hints/headless/hint-tooltip-headless)
 
 ```tsx
 import { HintTooltipHeadless } from '@tour-kit/hints/headless';
@@ -20903,7 +21892,7 @@ import { HintTooltipHeadless } from '@tour-kit/hints/headless';
 
 ## Provider
 
-### HintsProvider
+### [HintsProvider](/docs/hints)
 
 Context provider for hint state management.
 
@@ -20919,7 +21908,7 @@ import { HintsProvider } from '@tour-kit/hints';
 
 ## Hooks
 
-### useHint
+### [useHint](/docs/hints/hooks)
 
 Control a single hint by ID.
 
@@ -20936,7 +21925,7 @@ const {
 } = useHint('hint-id');
 ```
 
-### useHints
+### [useHints](/docs/hints/hooks)
 
 Access and control all hints.
 
@@ -20956,7 +21945,7 @@ const {
 } = useHints();
 ```
 
-### useHintsContext
+### [useHintsContext](/docs/hints/hooks)
 
 Low-level context access.
 
@@ -20968,7 +21957,7 @@ const context = useHintsContext(); // HintsContextValue
 
 ---
 
-## UI Variants
+## [UI Variants](/docs/hints/variants)
 
 CVA variant exports for customization:
 
@@ -21018,7 +22007,7 @@ import type {
 
 ---
 
-## Types
+## [Types](/docs/hints/types)
 
 ### HintConfig
 
@@ -21087,6 +22076,45 @@ type Placement =
   | 'right' | 'right-start' | 'right-end' | 'right-center';
 ```
 
+### Hotspot Variants & Props
+
+Three built-in hotspot variants ship with `@tour-kit/hints`. Select one via `<HintHotspot variant="badge" />` or render the variant components directly.
+
+```tsx
+// Variant name discriminator
+type HintHotspotVariantName = 'badge' | 'beacon-with-label' | 'what-s-new-pill';
+
+interface HintBadgeProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> {
+  targetRect: DOMRect;
+  position: HotspotPosition;
+  /** Numeric badge value (clamps to "99+" above 99) */
+  count?: number;
+  isOpen?: boolean;
+  asChild?: boolean;
+}
+
+interface HintBeaconWithLabelProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> {
+  targetRect: DOMRect;
+  position: HotspotPosition;
+  /** Visible label adjacent to the beacon — also surfaced via aria-label */
+  label: string;
+  /** Which side the label sits on; defaults to "right" */
+  side?: 'left' | 'right';
+  isOpen?: boolean;
+  asChild?: boolean;
+}
+
+interface HintWhatsNewPillProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> {
+  targetRect: DOMRect;
+  position: HotspotPosition;
+  label: string;
+  isOpen?: boolean;
+  asChild?: boolean;
+}
+```
+
+See [Hint variants](/docs/hints/variants).
+
 ---
 
 ## Utilities
@@ -21136,6 +22164,15 @@ import { hintHotspotVariants, hintTooltipVariants } from '@tour-kit/hints';
 // Types
 import type { HintConfig, HintState, HotspotPosition, Placement } from '@tour-kit/hints';
 ```
+
+---
+
+## See also
+
+- [`@tour-kit/hints` package overview](/docs/hints) — prose docs, recipes, and the lifecycle / persistence chapters.
+- [API reference index](/docs/api) — browse other package references.
+- [`@tour-kit/hints` hooks](/docs/hints/hooks) and [persistence](/docs/hints/persistence) — dive into hint state.
+- [Hint headless primitives](/docs/hints/headless) — build fully custom hint UIs.
 
 ---
 
@@ -21514,6 +22551,61 @@ type LicenseWarningProps = {
 };
 ```
 
+### Trial Types
+
+Trial mode lets gated packages run for a limited time before requiring activation.
+
+```tsx
+interface TrialConfig {
+  durationDays: number;
+  startsAt?: Date;             // defaults to first activation
+  /** Optional grace window after expiry before gating closes */
+  graceDays?: number;
+  /** Storage namespace; defaults to '@tour-kit/license:trial' */
+  storageKey?: string;
+}
+
+interface TrialContextValue {
+  isTrialing: boolean;
+  daysRemaining: number;
+  expiresAt: Date | null;
+  isExpired: boolean;
+  start: () => void;
+  end: () => void;
+}
+
+interface TrialBadgeRenderProps {
+  daysRemaining: number;
+  isExpired: boolean;
+  expiresAt: Date | null;
+}
+
+interface TrialBadgeProps {
+  className?: string;
+  pricingUrl?: string;
+  /** Render-prop override for custom badge UI */
+  children?: (state: TrialBadgeRenderProps) => React.ReactNode;
+}
+```
+
+See [Trial guide](/docs/licensing/trial).
+
+### Debug Components
+
+```tsx
+interface LicenseDebugPanelProps {
+  /** Position the floating panel; defaults to 'bottom-right' */
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  className?: string;
+}
+
+interface LicenseTestModeProps {
+  /** Force a tier without making network calls (dev only) */
+  forceTier?: 'free' | 'pro';
+  children: React.ReactNode;
+}
+```
+
 ### Polar Response Types
 
 Raw Polar API response shapes (after camelCase transform). Subject to upstream Polar SDK changes.
@@ -21573,17 +22665,27 @@ These are exported for advanced use; most consumers should not need them.
 
 ---
 
+## See also
+
+- [Licensing overview](/docs/licensing) — Polar setup, pricing tiers, and environment variables.
+- [Trial mode](/docs/licensing/trial) — evaluate Pro packages locally without a key.
+- [API reference index](/docs/api) — browse other package references.
+
+---
+
 # @tour-kit/media API
 
 > API reference for @tour-kit/media: YouTubeEmbed, VimeoEmbed, LoomEmbed, GifPlayer, LottiePlayer, and TourMedia
 
 Complete API reference for the media package. This package provides video, GIF, and Lottie animation embeds.
 
+For prose-style docs and recipes, see the [`@tour-kit/media` package overview](/docs/media), or jump to [components](/docs/media/components), [headless primitives](/docs/media/headless), [hooks](/docs/media/hooks), [utilities](/docs/media/utilities), or [types](/docs/media/types).
+
 ---
 
 ## Main Component
 
-### TourMedia
+### [TourMedia](/docs/media/components/tour-media)
 
 Auto-detecting media component.
 
@@ -21624,7 +22726,7 @@ import { TourMedia } from '@tour-kit/media';
 
 ## Embed Components
 
-### YouTubeEmbed
+### [YouTubeEmbed](/docs/media/components/youtube-embed)
 
 YouTube iframe embed.
 
@@ -21647,7 +22749,7 @@ import { YouTubeEmbed } from '@tour-kit/media';
 | `startTime` | `number` | Start time (seconds) |
 | `controls` | `boolean` | Show controls |
 
-### VimeoEmbed
+### [VimeoEmbed](/docs/media/components/vimeo-embed)
 
 Vimeo iframe embed.
 
@@ -21661,7 +22763,7 @@ import { VimeoEmbed } from '@tour-kit/media';
 />
 ```
 
-### LoomEmbed
+### [LoomEmbed](/docs/media/components/loom-embed)
 
 Loom iframe embed.
 
@@ -21675,7 +22777,7 @@ import { LoomEmbed } from '@tour-kit/media';
 />
 ```
 
-### WistiaEmbed
+### [WistiaEmbed](/docs/media/components/wistia-embed)
 
 Wistia iframe embed.
 
@@ -21688,7 +22790,7 @@ import { WistiaEmbed } from '@tour-kit/media';
 />
 ```
 
-### NativeVideo
+### [NativeVideo](/docs/media/components/native-video)
 
 HTML5 video element.
 
@@ -21705,7 +22807,7 @@ import { NativeVideo } from '@tour-kit/media';
 />
 ```
 
-### GifPlayer
+### [GifPlayer](/docs/media/components/gif-player)
 
 GIF with play/pause controls.
 
@@ -21727,7 +22829,7 @@ import { GifPlayer } from '@tour-kit/media';
 | `playOnHover` | `boolean` | Play on hover |
 | `showControls` | `boolean` | Show play/pause |
 
-### LottiePlayer
+### [LottiePlayer](/docs/media/components/lottie-player)
 
 Lottie animation player.
 
@@ -21751,7 +22853,7 @@ import { LottiePlayer } from '@tour-kit/media';
 
 ---
 
-## Headless Components
+## [Headless Components](/docs/media/headless/media-headless)
 
 ```tsx
 import { MediaHeadless } from '@tour-kit/media/headless';
@@ -21782,7 +22884,7 @@ import { MediaHeadless } from '@tour-kit/media/headless';
 
 ## Hooks
 
-### useMediaEvents
+### [useMediaEvents](/docs/media/hooks/use-media-events)
 
 Hook for media event handling.
 
@@ -21804,7 +22906,7 @@ const {
 });
 ```
 
-### usePrefersReducedMotion
+### [usePrefersReducedMotion](/docs/media/hooks/use-prefers-reduced-motion)
 
 Hook for motion preference.
 
@@ -21814,7 +22916,7 @@ import { usePrefersReducedMotion } from '@tour-kit/media';
 const prefersReducedMotion = usePrefersReducedMotion();
 ```
 
-### useResponsiveSource
+### [useResponsiveSource](/docs/media/hooks/use-responsive-source)
 
 Hook for responsive source selection.
 
@@ -21831,7 +22933,7 @@ const source = useResponsiveSource([
 
 ## Utilities
 
-### URL Detection
+### [URL Detection](/docs/media/utilities/url-parsing)
 
 ```tsx
 import {
@@ -21867,7 +22969,7 @@ const id = extractYouTubeId('https://youtu.be/abc123');
 // 'abc123'
 ```
 
-### Embed URL Builders
+### [Embed URL Builders](/docs/media/utilities/embed-urls)
 
 ```tsx
 import {
@@ -21982,6 +23084,42 @@ interface ResponsiveSource {
 }
 ```
 
+### Media Slot Detection
+
+`<MediaSlot src="...">` auto-detects which player to render based on the URL. The detection layer is exported for advanced use (custom slots, URL validation).
+
+```tsx
+// All media slot types (`auto` is the unresolved discriminator)
+type MediaSlotType =
+  | 'auto'
+  | 'youtube'
+  | 'vimeo'
+  | 'loom'
+  | 'wistia'
+  | 'video'
+  | 'gif'
+  | 'lottie'
+  | 'image';
+
+// Concrete (post-detection) slot type
+type ResolvedMediaSlotType = Exclude<MediaSlotType, 'auto'>;
+
+// URL-pattern → slot-type pairs evaluated in declared order
+const MEDIA_SLOT_PATTERNS: ReadonlyArray<readonly [RegExp, ResolvedMediaSlotType]>;
+
+// Run the detection pipeline against a single URL
+function detectMediaSlotType(src: string): ResolvedMediaSlotType;
+```
+
+---
+
+## See also
+
+- [`@tour-kit/media` package overview](/docs/media) — prose docs and recipes for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Media types reference](/docs/media/types) — every `MediaType`, `CaptionTrack`, and `TourMediaConfig` field.
+- [Reduced motion guide](/docs/guides/reduced-motion) — how `reducedMotionFallback` is honored.
+
 ---
 
 # @tour-kit/react API
@@ -21990,11 +23128,13 @@ interface ResponsiveSource {
 
 Complete API reference for the React package. This package provides styled and headless React components for tours.
 
+For prose-style docs and recipes, see the [`@tour-kit/react` package overview](/docs/react), or jump to [components](/docs/react/components/tour), [headless primitives](/docs/react/headless), [hooks](/docs/react/hooks), [providers](/docs/react/providers/multi-tour-kit-provider), [adapters](/docs/react/adapters), or [styling](/docs/react/styling/tailwind).
+
 ---
 
 ## Styled Components
 
-### Tour
+### [Tour](/docs/react/components/tour)
 
 Wrapper component for declarative tour definition.
 
@@ -22015,7 +23155,7 @@ import { Tour } from '@tour-kit/react';
 </Tour>
 ```
 
-### TourStep
+### [TourStep](/docs/react/components/tour-step)
 
 Declarative step definition (must be child of Tour).
 
@@ -22037,7 +23177,7 @@ import { TourStep } from '@tour-kit/react';
 />
 ```
 
-### TourCard (Compound)
+### [TourCard (Compound)](/docs/react/components/tour-card)
 
 Main tooltip card with compound components.
 
@@ -22068,7 +23208,7 @@ import {
 | `TourCardContent` | `spacing?: 'default' \| 'compact' \| 'none'`, `content?` |
 | `TourCardFooter` | `justify?: 'between' \| 'end' \| 'start'`, `spacing?: 'default' \| 'compact' \| 'none'` |
 
-### TourOverlay
+### [TourOverlay](/docs/react/components/tour-overlay)
 
 Spotlight overlay with cutout.
 
@@ -22088,7 +23228,7 @@ import { TourOverlay } from '@tour-kit/react';
 | `className` | `string` | - | Custom CSS class |
 | `onClick` | `() => void` | - | Click handler |
 
-### TourNavigation
+### [TourNavigation](/docs/react/components/tour-navigation)
 
 Navigation buttons component.
 
@@ -22105,7 +23245,7 @@ import { TourNavigation } from '@tour-kit/react';
 />
 ```
 
-### TourProgress
+### [TourProgress](/docs/react/components/tour-progress)
 
 Progress indicator component.
 
@@ -22117,7 +23257,7 @@ import { TourProgress } from '@tour-kit/react';
 <TourProgress variant="text" />
 ```
 
-### TourClose
+### [TourClose](/docs/react/components/tour-close)
 
 Close/skip button.
 
@@ -22153,11 +23293,11 @@ import { TourArrow } from '@tour-kit/react';
 
 ---
 
-## Headless Components
+## [Headless Components](/docs/react/headless)
 
 Import from `@tour-kit/react/headless`:
 
-### TourCardHeadless
+### [TourCardHeadless](/docs/react/headless/headless-card)
 
 ```tsx
 import { TourCardHeadless } from '@tour-kit/react/headless';
@@ -22185,7 +23325,7 @@ import { TourCardHeadless } from '@tour-kit/react/headless';
 />
 ```
 
-### TourOverlayHeadless
+### [TourOverlayHeadless](/docs/react/headless/headless-overlay)
 
 ```tsx
 import { TourOverlayHeadless } from '@tour-kit/react/headless';
@@ -22252,7 +23392,7 @@ import { TourCloseHeadless } from '@tour-kit/react/headless';
 
 ## Provider Components
 
-### MultiTourKitProvider
+### [MultiTourKitProvider](/docs/react/providers/multi-tour-kit-provider)
 
 Provider for managing multiple tours.
 
@@ -22278,7 +23418,7 @@ import { MultiTourKitProvider } from '@tour-kit/react';
 
 ## Hooks
 
-### useTours
+### [useTours](/docs/react/hooks/use-tours)
 
 Access all registered tours.
 
@@ -22297,7 +23437,7 @@ const {
 } = useTours();
 ```
 
-### useTourRoute
+### [useTourRoute](/docs/react/hooks/use-tour-route)
 
 Route-aware tour control.
 
@@ -22316,9 +23456,9 @@ const {
 
 ---
 
-## Router Adapters
+## [Router Adapters](/docs/react/adapters)
 
-### Next.js App Router
+### [Next.js App Router](/docs/react/adapters/next-app-router)
 
 ```tsx
 import { useNextAppRouter, createNextAppRouterAdapter } from '@tour-kit/react';
@@ -22332,7 +23472,7 @@ const createRouter = createNextAppRouterAdapter(usePathname, useRouter);
 const router = createRouter();
 ```
 
-### Next.js Pages Router
+### [Next.js Pages Router](/docs/react/adapters/next-pages-router)
 
 ```tsx
 import { useNextPagesRouter, createNextPagesRouterAdapter } from '@tour-kit/react';
@@ -22345,7 +23485,7 @@ import { useRouter } from 'next/router';
 const createRouter = createNextPagesRouterAdapter(useRouter);
 ```
 
-### React Router
+### [React Router](/docs/react/adapters/react-router)
 
 ```tsx
 import { useReactRouter, createReactRouterAdapter } from '@tour-kit/react';
@@ -22422,6 +23562,78 @@ import { UILibraryProvider, useUILibrary } from '@tour-kit/react';
 const library = useUILibrary(); // 'radix' | 'base-ui'
 ```
 
+### Audience Utilities
+
+```tsx
+import { explainAudience, matchUrl } from '@tour-kit/react';
+
+// Human-readable explanation of an audience match (debug panels, devtools)
+explainAudience(audience, segments, userContext): string;
+
+// URL pattern matcher used by router-aware steps (segments, glob, exact)
+matchUrl(pattern: string, route: string, mode?: 'exact' | 'startsWith' | 'contains'): boolean;
+```
+
+### Tour Registry Hooks
+
+```tsx
+import {
+  useTourRegistryContext,
+  useTourRegistryContextOptional,
+} from '@tour-kit/react';
+```
+
+Low-level access to the registry inside `MultiTourKitProvider`. See [useTourRegistryContext](/docs/react/hooks/use-tour-registry-context). Prefer [useTours](/docs/react/hooks/use-tours) for the ergonomic surface.
+
+### Theme Variation Types
+
+```tsx
+interface ThemeTokens {
+  colors: Record<string, string>;
+  radius?: string;
+  shadow?: string;
+  font?: string;
+}
+
+interface ThemeContextValue {
+  theme: ThemeTokens;
+  resolve: (token: string) => string;
+}
+
+interface ThemeResolveContext {
+  variation?: string;
+  variables?: Record<string, string>;
+}
+
+interface ThemeProviderProps {
+  tokens: ThemeTokens;
+  variation?: string;
+  children: React.ReactNode;
+}
+
+interface UseThemeVariationReturn {
+  variation: string | undefined;
+  setVariation: (next: string | undefined) => void;
+  resolved: Record<string, string>;
+}
+```
+
+See [Theme variations guide](/docs/guides/theme-variations).
+
+### Diagnostic Re-exports
+
+```tsx
+// Re-exported from @tour-kit/core for ergonomic in-package access
+import {
+  BUILTIN_GATE_ORDER,
+  type DiagnosticContext,
+  type GateCode,
+  type GateName,
+} from '@tour-kit/react';
+```
+
+See [Diagnostic types](/docs/api/core#diagnostic-types) for the full reference.
+
 ---
 
 ## Re-exports from @tour-kit/core
@@ -22487,17 +23699,30 @@ export type {
 
 ---
 
+## See also
+
+- [`@tour-kit/react` package overview](/docs/react) — prose docs, recipes, and patterns for every export above.
+- [`@tour-kit/core` API reference](/docs/api/core) — the framework-agnostic primitives this package re-exports.
+- [API reference index](/docs/api) — browse other package references.
+- [`<Tour>` component](/docs/react/components/tour) — the most-used entry point for declarative tours.
+- [Quick start](/docs/getting-started/quick-start) — minimal working app built on these exports.
+- [Router integration guide](/docs/guides/router-integration) — wire `MultiTourKitProvider` into Next.js or React Router.
+
+---
+
 # @tour-kit/scheduling API
 
 > API reference for @tour-kit/scheduling: useSchedule, evaluateSchedule, timezone utilities, and preset configurations
 
 Complete API reference for the scheduling package. This package provides time-based scheduling utilities.
 
+For prose-style docs and recipes, see the [`@tour-kit/scheduling` package overview](/docs/scheduling), or jump to [hooks](/docs/scheduling/hooks), [utilities](/docs/scheduling/utilities), or [types](/docs/scheduling/types).
+
 ---
 
 ## Hooks
 
-### useSchedule
+### [useSchedule](/docs/scheduling/hooks/use-schedule)
 
 Hook to check if schedule is active.
 
@@ -22514,7 +23739,7 @@ const isActive = useSchedule(schedule, {
 | `schedule` | `Schedule` | Schedule configuration |
 | `options.refreshInterval` | `number` | Refresh interval (ms) |
 
-### useScheduleStatus
+### [useScheduleStatus](/docs/scheduling/hooks/use-schedule-status)
 
 Hook for detailed schedule status.
 
@@ -22536,7 +23761,7 @@ const {
 | `reason` | `ScheduleInactiveReason \| null` | Why inactive |
 | `nextCheck` | `number` | Ms until next status change |
 
-### useUserTimezone
+### [useUserTimezone](/docs/scheduling/hooks/use-user-timezone)
 
 Hook to detect user's timezone.
 
@@ -22558,7 +23783,7 @@ const {
 
 ---
 
-## Core Functions
+## [Core Functions](/docs/scheduling/utilities/schedule-evaluation)
 
 ### checkSchedule
 
@@ -22596,7 +23821,7 @@ const { isActive, reason } = getScheduleStatus(schedule);
 
 ---
 
-## Timezone Utilities
+## [Timezone Utilities](/docs/scheduling/utilities/timezone)
 
 ```tsx
 import {
@@ -22634,7 +23859,7 @@ const { hours, minutes } = parseTimeString('09:30');
 
 ## Date/Time Utilities
 
-### Date Range
+### [Date Range](/docs/scheduling/utilities/date-range)
 
 ```tsx
 import { isWithinDateRange } from '@tour-kit/scheduling';
@@ -22646,7 +23871,7 @@ const inRange = isWithinDateRange(
 );
 ```
 
-### Time Range
+### [Time Range](/docs/scheduling/utilities/time-range)
 
 ```tsx
 import { isWithinTimeRange, isWithinAnyTimeRange } from '@tour-kit/scheduling';
@@ -22663,7 +23888,7 @@ const inAnyRange = isWithinAnyTimeRange(new Date(), [
 ]);
 ```
 
-### Day of Week
+### [Day of Week](/docs/scheduling/utilities/day-of-week)
 
 ```tsx
 import {
@@ -22693,7 +23918,7 @@ DAY_GROUPS.weekend;  // [0, 6]
 
 ---
 
-## Blackout Utilities
+## [Blackout Utilities](/docs/scheduling/utilities/blackouts)
 
 ```tsx
 import {
@@ -22723,7 +23948,7 @@ const endTime = getBlackoutEndTime(new Date(), blackouts);
 
 ---
 
-## Business Hours
+## [Business Hours](/docs/scheduling/utilities/business-hours)
 
 ```tsx
 import {
@@ -22761,7 +23986,7 @@ BUSINESS_HOURS_PRESETS.extended; // 8-8 M-Sa
 
 ---
 
-## Recurring Patterns
+## [Recurring Patterns](/docs/scheduling/utilities/recurring)
 
 ```tsx
 import { matchesRecurringPattern } from '@tour-kit/scheduling';
@@ -22913,6 +24138,15 @@ interface ScheduleStatus {
   reason?: ScheduleInactiveReason;
 }
 ```
+
+---
+
+## See also
+
+- [`@tour-kit/scheduling` package overview](/docs/scheduling) — prose docs and recipes for every symbol above.
+- [API reference index](/docs/api) — browse other package references.
+- [Scheduling types reference](/docs/scheduling/types) — every field on `Schedule`, `RecurringPattern`, `BusinessHours`.
+- [Announcements + scheduling guide](/docs/guides/announcements-scheduling) — wire schedules into time-based announcement rollouts.
 
 ---
 
@@ -27699,6 +28933,438 @@ console.log(`${locked.length} tasks locked`);
 
 ---
 
+# Codemods
+
+> Automated jscodeshift codemods to migrate from React Joyride, Shepherd.js, and Driver.js to Tour Kit using the tour-kit-migrate CLI.
+
+`@tour-kit/codemods` ships [jscodeshift](https://github.com/facebook/jscodeshift)
+transforms that rewrite Joyride, Shepherd.js, and Driver.js call sites into
+their Tour Kit equivalents. They handle the mechanical parts of a migration —
+step-list reshaping, prop renames, import swaps — so you can focus on the parts
+that need product judgment.
+
+The transforms are conservative by design: anything a codemod can't represent
+safely is kept in place and annotated with a `// TODO:` comment that links to
+the matching migration guide. A transform that mangles your code is worse than
+no transform.
+
+## When to use a codemod
+
+- **You have a working tour in another library** and want to evaluate Tour Kit
+  without hand-rewriting every step list.
+- **You're migrating a non-trivial app** (10+ tours). Hand-edits scale badly.
+- **You want a starting point.** Codemods aren't a one-shot drop-in; expect to
+  manually adjust the output. They get you past the boilerplate.
+
+If your app has one tour with three steps, hand-editing is faster.
+
+## Install
+
+Run it once with `npx` (no install), or add it as a dev dependency:
+
+```bash
+# One-off, no install
+npx tour-kit-migrate --from shepherd --dry-run ./src
+
+# Or add it to the project
+pnpm add -D @tour-kit/codemods   # or: npm install -D / bun add -D
+```
+
+Always start with `--dry-run` to preview the diff, then re-run without it to
+write the changes:
+
+```bash
+npx tour-kit-migrate --from shepherd --dry-run ./src
+npx tour-kit-migrate --from shepherd ./src
+```
+
+(Substitute `--from driver` or `--from joyride` as needed.)
+
+### Flags
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--from <source>` | required | One of `joyride`, `shepherd`, `driver` |
+| `--parser <parser>` | `tsx` | `tsx` / `ts` / `babel` |
+| `--dry-run` | off | Print diffs, don't write files |
+| `--print` | off | Write transformed source to stdout |
+| `--extensions <list>` | `ts,tsx,js,jsx` | Comma-separated extension list |
+| `--verbose` | off | Log every file action |
+| `--help`, `-h` | — | Print usage and exit |
+
+Print the full reference any time:
+
+```bash
+npx tour-kit-migrate --help
+```
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success (or `--help`) |
+| 1 | Parse error during transform |
+| 2 | Bad CLI args |
+| 3 | No files matched |
+
+## Available transforms
+
+- [from-shepherd](/docs/codemods/from-shepherd) — Shepherd.js v10+ → Tour Kit.
+- [from-driver](/docs/codemods/from-driver) — Driver.js v1+ → Tour Kit.
+- [from-joyride](/docs/codemods/from-joyride) — React Joyride v2 → Tour Kit.
+
+## After running a codemod
+
+1. **Review the diff.** The transform comments every construct it can't migrate
+   with a `// TODO:` that links to the matching migration guide — search the
+   output for `TODO`.
+2. **Run your tests.** Codemods don't preserve runtime behavior for 100% of
+   edge cases; the remainder is on you.
+3. **Format the output** (`prettier --write` or `biome format --write`).
+4. **Open the matching guide** for the library you migrated from
+   ([/docs/migration/shepherd](/docs/migration/shepherd),
+   [/docs/migration/driver](/docs/migration/driver),
+   [/docs/migration/joyride](/docs/migration/joyride)) for the hand-port context
+   the codemod can't infer.
+
+## Limitations
+
+Codemods operate on the AST. They cannot infer:
+
+- **Dynamically constructed step lists** (e.g. `steps.push(...)` driven by
+  runtime data) — these are left as a `// TODO:`.
+- **Custom themes / styles** — port these manually against the Tour Kit
+  theming setup.
+- **Server-rendered tours** (Next.js App Router) — add `'use client'` to the
+  migrated module yourself.
+
+When in doubt, search the output for `TODO` markers.
+
+---
+
+# from-driver
+
+> Migrate a Driver.js v1+ codebase to Tour Kit with the tour-kit-migrate --from driver codemod.
+
+Reshapes `driver({...})` config objects into a Tour Kit tour-shaped object
+literal and turns the `.drive()` chain into a `// TODO:` pointing at `useTour()`.
+
+## Run
+
+```bash
+npx tour-kit-migrate --from driver --dry-run ./src
+npx tour-kit-migrate --from driver ./src
+```
+
+## What it changes
+
+| Driver.js | Tour Kit |
+| --- | --- |
+| `import { driver } from 'driver.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| `driver({ steps: [...] })` | `{ id: 'migrated-tour', steps: [...] }` literal + `// TODO:` to register at `<TourProvider>` |
+| `Step.element` (selector) | `target` |
+| `popover.title` | `title` |
+| `popover.description` | `content` |
+| `popover.side` | `placement` |
+| `popover.align` | folded into compound placement (`top-start`, `top-end`, …) + `// TODO:` |
+| `d.drive()` | `// TODO:` → `useTour().start()` |
+| `d.destroy()` | `// TODO:` → `useTour().stop()` |
+| `d.moveNext()` / `.movePrevious()` / `.moveTo(i)` | `// TODO:` → `useTour().next()` / `.prev()` / `.goTo(i)` |
+
+## What it does NOT handle
+
+- **Tour-level styling config** (`overlayColor`, `overlayOpacity`, `stagePadding`,
+  `stageRadius`, `popoverClass`) — each is preserved as a `// TODO:`; port via
+  your theme tokens and overlay slot.
+- **Per-step button overrides** (`doneBtnText`, `showButtons`, `onNextClick`, …)
+  — Tour Kit composes buttons through [`<TourCard>`](/docs/react/components/tour-card)
+  slots; the codemod leaves a `// TODO:` for each.
+- **`d.highlight()`** (single popover, no tour) — there's no single-step
+  highlight in `@tour-kit/react`; the codemod points you at `<HintHotspot>` from
+  `@tour-kit/hints`.
+- **Dynamic config / DOM-element targets** (`element: () => ...`, captured
+  `HTMLElement`) — left as a `// TODO:` against the
+  [Driver.js migration guide](/docs/migration/driver).
+
+## Example
+
+**Before:**
+
+```ts
+import { driver } from 'driver.js'
+
+const tour = driver({
+  steps: [
+    {
+      element: '#header',
+      popover: { title: 'Welcome', description: 'Get started.', side: 'bottom' },
+    },
+  ],
+})
+
+tour.drive()
+```
+
+**After codemod:**
+
+```tsx
+import { TourProvider } from '@tour-kit/react'
+
+// TODO: register this tour at a <TourProvider> ancestor — see
+// /docs/migration/driver#driver-call
+const tour = {
+  id: 'migrated-tour',
+  steps: [
+    {
+      target: '#header',
+      title: 'Welcome',
+      content: 'Get started.',
+      placement: 'bottom',
+    },
+  ],
+}
+
+// TODO: the migrated tour has no .drive() — call useTour().start() from a
+// descendant of the <TourProvider> that registers it.
+// /docs/migration/driver#drive
+```
+
+Wire it up by hand:
+
+```tsx
+import { TourProvider, useTour } from '@tour-kit/react'
+
+function App({ children }) {
+  return <TourProvider tours={[tour]}>{children}</TourProvider>
+}
+
+function StartButton() {
+  const { start } = useTour()
+  return <button onClick={() => start()}>Take the tour</button>
+}
+```
+
+## See also
+
+- [Migration guide: Driver.js → Tour Kit](/docs/migration/driver) — the
+  per-anchor hand-port reference for everything the codemod leaves as a TODO.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — register the migrated tour shape here.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `d.drive()` / `.moveNext()` / `.moveTo()`.
+
+---
+
+# from-joyride
+
+> Migrate a React Joyride v2 codebase to Tour Kit with the tour-kit-migrate --from joyride codemod.
+
+Rewrites the `react-joyride` imports plus both the legacy `<Joyride>` JSX form
+and the modern `useJoyride()` hook form. Joyride's step shape
+(`{ target, content }`) already matches Tour Kit, so step lists carry over
+unchanged.
+
+## Run
+
+```bash
+npx tour-kit-migrate --from joyride --dry-run ./src
+npx tour-kit-migrate --from joyride ./src
+```
+
+## What it changes
+
+| React Joyride | Tour Kit |
+| --- | --- |
+| `import Joyride from 'react-joyride'` | `import { TourProvider } from '@tour-kit/react'` |
+| `import { useJoyride } from 'react-joyride'` | `import { useTour } from '@tour-kit/react'` |
+| `<Joyride steps={...} />` | `<TourProvider tours={[{ id: 'migrated-tour', steps }]} />` |
+| `{ target: '.x', content: '...' }` | same shape — no change |
+| `const { Tour, controls } = useJoyride({ steps })` | `const controls = useTour()` + `// TODO:` to register the tour |
+| `<Tour />` | `null` + `// TODO:` to render via a `<TourProvider>` ancestor |
+
+## What it does NOT handle
+
+- **Joyride-only props** (`callback`, `run`, `stepIndex`, `showProgress`,
+  `showSkipButton`, `continuous`, `disableBeacon`, …) are preserved next to the
+  output with a `// TODO:` linking to the matching anchor in the
+  [React Joyride migration guide](/docs/migration/joyride). For example
+  `continuous` is the default in Tour Kit and can be dropped, while `run` maps
+  to calling `useTour().start()`.
+- **`Step.styles` / `Step.tooltipComponent`** — custom tooltip rendering ports
+  to [`<TourCard>`](/docs/react/components/tour-card) children, not a prop.
+- **`useJoyride` control wiring.** The hook is swapped for `useTour()`, but
+  registering the tour at a `<TourProvider>` ancestor is left as a `// TODO:`.
+
+## Example
+
+**Before:**
+
+```tsx
+import Joyride from 'react-joyride'
+
+function App() {
+  return (
+    <Joyride
+      steps={[
+        { target: '.step-1', content: 'Welcome!' },
+        { target: '.step-2', content: 'Next up.' },
+      ]}
+      run
+      continuous
+    />
+  )
+}
+```
+
+**After codemod:**
+
+```tsx
+import { TourProvider } from '@tour-kit/react'
+
+function App() {
+  return (
+    <TourProvider
+      tours={[
+        {
+          id: 'migrated-tour',
+          steps: [
+            { target: '.step-1', content: 'Welcome!' },
+            { target: '.step-2', content: 'Next up.' },
+          ],
+        },
+      ]}
+      // TODO: `run` had no direct prop — call useTour().start() to begin.
+      // /docs/migration/joyride#run
+      // TODO: `continuous` is the Tour Kit default — drop it.
+      // /docs/migration/joyride#continuous
+    />
+  )
+}
+```
+
+## See also
+
+- [Migration guide: React Joyride → Tour Kit](/docs/migration/joyride) — the
+  per-anchor hand-port reference for everything the codemod leaves as a TODO.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — where the migrated `tours` array is registered.
+- [`useTour`](/docs/core/hooks/use-tour) — the replacement for `useJoyride()`.
+- [Quick start](/docs/getting-started/quick-start) — wire the migrated tour into a working app.
+
+---
+
+# from-shepherd
+
+> Migrate a Shepherd.js v10+ codebase to Tour Kit with the tour-kit-migrate --from shepherd codemod.
+
+Rewrites the `new Shepherd.Tour({...})` + `.addStep({...})` + `.start()`
+imperative chain into a single Tour Kit tour-shaped object literal.
+
+## Run
+
+```bash
+npx tour-kit-migrate --from shepherd --dry-run ./src
+npx tour-kit-migrate --from shepherd ./src
+```
+
+## What it changes
+
+| Shepherd.js | Tour Kit |
+| --- | --- |
+| `import Shepherd from 'shepherd.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| `import { Tour } from 'shepherd.js'` | `import { TourProvider } from '@tour-kit/react'` |
+| `new Shepherd.Tour({...})` | `{ id: 'migrated-tour', steps: [...] }` literal + `// TODO:` to register at `<TourProvider>` |
+| `.addStep({ id, text, attachTo })` chain | merged into the `steps: [...]` array |
+| `attachTo.element` (selector) | `target` |
+| `attachTo.on` (placement) | `placement` |
+| `Step.text` | `content` |
+| `tour.start()` | `// TODO:` → `useTour().start()` |
+| `tour.cancel()` | `// TODO:` → `useTour().skip()` |
+| `tour.complete()` | `// TODO:` → `useTour().complete()` |
+| `tour.next()` / `.back()` / `.show()` | `// TODO:` → `useTour().next()` / `.prev()` / `.goTo()` |
+
+## What it does NOT handle
+
+- **`buttons` arrays.** Shepherd's button array is open-ended; the codemod drops
+  it and leaves a `// TODO:`. Tour Kit ships fixed [`<TourCard>`](/docs/react/components/tour-card)
+  slots (Next / Prev / Skip / Close) — wire any custom button action through
+  the card's children.
+- **`classes`, `scrollTo`, `when`, `advanceOn`, `beforeShowPromise`.** Each is
+  preserved as a `// TODO:` linking to the matching anchor in the
+  [Shepherd.js migration guide](/docs/migration/shepherd).
+- **Dynamic `attachTo` or `addStep` arguments** (spread/variable, not an inline
+  object) — the codemod can't inline the shape, so it leaves a `// TODO:`.
+- **Multiple parallel `Tour` instances.** Tour Kit's multi-tour registry handles
+  this differently — see [`<TourProvider>`](/docs/core/providers/tour-provider).
+
+## Example
+
+**Before:**
+
+```ts
+import Shepherd from 'shepherd.js'
+
+const tour = new Shepherd.Tour({
+  defaultStepOptions: { scrollTo: true, cancelIcon: { enabled: true } },
+})
+
+tour.addStep({
+  id: 'welcome',
+  text: 'Welcome!',
+  attachTo: { element: '#header', on: 'bottom' },
+})
+
+tour.addStep({
+  id: 'cta',
+  text: 'Click here to begin.',
+  attachTo: { element: '#cta-button', on: 'top' },
+})
+
+tour.start()
+```
+
+**After codemod:**
+
+```tsx
+import { TourProvider } from '@tour-kit/react'
+
+// TODO: register this tour at a <TourProvider> ancestor — see
+// /docs/migration/shepherd#tour-constructor
+const tour = {
+  id: 'migrated-tour',
+  steps: [
+    { id: 'welcome', content: 'Welcome!', target: '#header', placement: 'bottom' },
+    { id: 'cta', content: 'Click here to begin.', target: '#cta-button', placement: 'top' },
+  ],
+}
+
+// TODO: the migrated tour has no .start() — call useTour().start() from a
+// descendant of the <TourProvider> that registers it.
+// /docs/migration/shepherd#start
+```
+
+Wire it up by hand:
+
+```tsx
+import { TourProvider, useTour } from '@tour-kit/react'
+
+function App({ children }) {
+  return <TourProvider tours={[tour]}>{children}</TourProvider>
+}
+
+function StartButton() {
+  const { start } = useTour()
+  return <button onClick={() => start()}>Take the tour</button>
+}
+```
+
+## See also
+
+- [Migration guide: Shepherd.js → Tour Kit](/docs/migration/shepherd) — the
+  per-anchor hand-port reference for everything the codemod leaves as a TODO.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — register the migrated tour shape here.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `tour.start()` / `.cancel()` / `.next()`.
+- [`<TourCard>`](/docs/react/components/tour-card) — the slot that replaces Shepherd's `buttons` array.
+
+---
+
 # @tour-kit/core
 
 > Framework-agnostic hooks and utilities for building product tours — state management, positioning, and accessibility
@@ -27719,10 +29385,18 @@ pnpm add @tour-kit/core
 
 This package provides:
 
-- **Providers** - TourProvider, TourKitProvider
-- **Hooks** - useTour, useStep, useSpotlight, etc.
-- **Utilities** - createTour, createStep, scroll helpers
-- **Types** - Full TypeScript definitions
+- **Providers** - [TourProvider](/docs/core/providers/tour-provider), [TourKitProvider](/docs/core/providers/tour-kit-provider)
+- **Hooks** - [useTour](/docs/core/hooks/use-tour), [useStep](/docs/core/hooks/use-step), [useSpotlight](/docs/core/hooks/use-spotlight), and more in [hooks index](/docs/core/hooks)
+- **Utilities** - [createTour](/docs/core/utilities/create-tour), [createStep](/docs/core/utilities/create-step), [scroll helpers](/docs/core/utilities/scroll), and more in [utilities index](/docs/core/utilities)
+- **Types** - Full TypeScript definitions in [types index](/docs/core/types)
+
+## Related
+
+- [`@tour-kit/core` API reference](/docs/api/core) — full export surface in one page.
+- [`@tour-kit/react`](/docs/react) — pre-styled components built on these primitives.
+- [Diagnostic engine](/docs/core/diagnostic) — opt-in eligibility report for tours.
+- [Schemas reference](/docs/core/schemas) — validate JSON-authored tours.
+- [Quick start](/docs/getting-started/quick-start) — see these primitives in a working app.
 
 ---
 
@@ -27857,6 +29531,13 @@ extensions, as `_THREW` reasons.
 - Median **&lt;0.001ms** per call over 100 iterations (5-step tour, no extensions)
 - With `diagnose: false` the diagnostic module tree-shakes out of the consumer
   bundle. The size-limit budget asserts this.
+
+## Related
+
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — the provider whose `diagnose` prop enables this engine.
+- [Schemas reference](/docs/core/schemas) — validate JSON-authored tours before they reach the diagnostic gates.
+- [Troubleshooting guide](/docs/guides/troubleshooting) — common reasons tours don't fire, mapped to gate failure codes.
+- [Troubleshooting reference](/docs/troubleshooting) — runtime error catalogue.
 
 ---
 
@@ -28452,6 +30133,12 @@ function MirroredCard() {
 
 `useDirection` requires a `<TourKitProvider>` in the tree — it will throw otherwise.
 
+## Related
+
+- [`useTourKitContext`](/docs/core/hooks/use-tour-kit-context) — read the full context that `useDirection` is a thin wrapper over.
+- [`<TourKitProvider>`](/docs/core/providers/tour-kit-provider) — the provider whose `dir` prop this hook resolves.
+- [i18n guide](/docs/guides/i18n) — patterns for RTL languages and translated tour copy.
+
 ---
 
 # useElementPosition
@@ -28713,6 +30400,13 @@ useEffect(() => {
 }, [isActive]);
 ```
 
+## Related
+
+- [`useKeyboard`](/docs/core/hooks/use-keyboard) — pair with focus trap for full keyboard a11y inside a tour step.
+- [`useSpotlight`](/docs/core/hooks/use-spotlight) — the visual side of `role="dialog"` UX.
+- [Accessibility guide](/docs/guides/accessibility) — WCAG 2.1 AA checklist for tour UI.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — set `a11y.focusTrap` here to enable automatically.
+
 ---
 
 # useKeyboard
@@ -28772,6 +30466,54 @@ useKeyboard({
 // Or conditionally
 useKeyboard({ enabled: !isInputFocused });
 ```
+
+## Related
+
+- [`useFocusTrap`](/docs/core/hooks/use-focus-trap) — pair with this hook for full keyboard a11y inside `role="dialog"`.
+- [`useAdvanceOn`](/docs/core/hooks/use-advance-on) — programmatic step advance triggered by non-keyboard events.
+- [Accessibility guide](/docs/guides/accessibility) — WCAG keyboard requirements.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — set `keyboard` config globally instead of per-step.
+
+---
+
+# useLocale
+
+> Read the current LocaleContextValue (locale, messages, direction, optional host-side t override) from the nearest LocaleProvider.
+
+Read the active locale, translation dictionary, and text direction inside any component tree wrapped with `<LocaleProvider>`. Drives the i18n pipeline shared by tour copy, hint labels, announcement bodies, and any consumer code that resolves [`LocalizedText`](/docs/core/types).
+
+## Usage
+
+```tsx
+import { useLocale } from '@tour-kit/core';
+
+function DirectionAwareCard() {
+  const { locale, direction } = useLocale();
+  return (
+    <article dir={direction} lang={locale}>
+      {/* ... */}
+    </article>
+  );
+}
+```
+
+`useLocale` never throws — when no `<LocaleProvider>` is mounted it returns the default context (`locale: 'en'`, `messages: {}`, no override `t`, derived `direction`).
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `locale` | `string` | Active locale tag (e.g. `'en'`, `'pt-BR'`). |
+| `messages` | `Messages` | Flat key → string dictionary used by [`useT`](/docs/core/hooks/use-t). |
+| `t` | `TranslateFn \| undefined` | Optional host-app translate override; when set, [`useT`](/docs/core/hooks/use-t) delegates to it instead of looking up `messages`. |
+| `direction` | `'ltr' \| 'rtl'` | Derived from the locale's primary subtag (`ar`, `he`, `fa`, `ur` → `rtl`); override via the `direction` prop on `<LocaleProvider>`. |
+
+## Related
+
+- [LocaleProvider](/docs/core/providers/locale-provider) — wrap your tree
+- [useResolvedText](/docs/core/hooks/use-resolved-text) — resolve `LocalizedText` to `ReactNode`
+- [useResolveLocalizedText](/docs/core/hooks/use-resolve-localized-text) — resolve `LocalizedText` to `string`
+- [i18n guide](/docs/guides/i18n) — end-to-end internationalization
 
 ---
 
@@ -29117,6 +30859,109 @@ useEffect(() => {
 }, []);
 ```
 
+## Related
+
+- [`useRoutePersistence`](/docs/core/hooks/use-route-persistence) — multi-page extension that resumes across navigations.
+- [Persistence guide](/docs/guides/persistence) — strategy comparison and migration patterns.
+- [Multi-tab guide](/docs/guides/multi-tab) — synchronize completion state across browser tabs.
+- [Storage utilities](/docs/core/utilities/storage) — adapters (`localStorage`, `sessionStorage`, cookies, custom) that back this hook.
+
+---
+
+# useResolveLocalizedText
+
+> Returns a memoized (value) => string resolver. Use for consumer-authored copy that must be a string — aria-label, title, Dialog.Title.
+
+String-only sibling of [`useResolvedText`](/docs/core/hooks/use-resolved-text). Returns a memoized resolver:
+
+```ts
+function useResolveLocalizedText(): (value: LocalizedText | undefined) => string
+```
+
+Use it whenever the surface you're handing copy to requires a `string` (not a `ReactNode`) — `aria-label`, `title` attributes, `Dialog.Title` text, `document.title` updates, etc.
+
+## Usage
+
+```tsx
+import { useResolveLocalizedText } from '@tour-kit/core';
+
+function TaskRow({ task }: { task: ChecklistTaskConfig }) {
+  const resolveText = useResolveLocalizedText();
+  return (
+    <li aria-label={resolveText(task.title)}>
+      {/* ... */}
+    </li>
+  );
+}
+```
+
+## Resolution rules
+
+| Input | Result |
+|-------|--------|
+| `undefined` / `null` | `''` |
+| `string` | `interpolate(value, userContext, { warnOnMissing: false })` |
+| `{ key }` | `useT()(value.key, userContext)` |
+| any other `ReactNode` | `''` (JSX cannot render to a string) |
+
+`vars` are sourced from `useSegmentationContext().userContext` — the same shape that drives audience targeting. Without a `<SegmentationProvider>`, `userContext` is `undefined` and templates fall back to `{{x | default}}` rules.
+
+## Related
+
+- [useResolvedText](/docs/core/hooks/use-resolved-text)
+- [useLocale](/docs/core/hooks/use-locale)
+- [i18n guide](/docs/guides/i18n)
+
+---
+
+# useResolvedText
+
+> Resolve a LocalizedText | ReactNode value into a ReactNode. Handles string interpolation, i18n key lookup, and ReactNode pass-through with one call.
+
+Unified text pipeline used across `@tour-kit/react`, `@tour-kit/hints`, and `@tour-kit/announcements`. Given a `LocalizedText | ReactNode`, returns a `ReactNode` ready to render:
+
+- `string` → interpolated against `vars` (`'Hi {{user.name}}'`)
+- `{ key }` → translated via [`useT`](/docs/core/hooks/use-t)
+- any other `ReactNode` → returned as-is (JSX pass-through)
+
+## Usage
+
+```tsx
+import { useResolvedText } from '@tour-kit/core';
+
+function StepBody({ body }: { body: LocalizedText | React.ReactNode }) {
+  const resolved = useResolvedText(body);
+  return <div>{resolved}</div>;
+}
+```
+
+By default `vars` falls back to `useSegmentationContext().userContext`, so any consumer that wires `userContext` for audience targeting gets interpolation against the same shape for free.
+
+```tsx
+const resolved = useResolvedText('Welcome back, {{user.name}}');
+// With userContext = { user: { name: 'Ada' } } → "Welcome back, Ada"
+```
+
+## Signature
+
+```ts
+function useResolvedText(
+  value: ReactNode | LocalizedText | undefined,
+  vars?: Record<string, unknown>
+): ReactNode
+```
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `value` | `ReactNode \| LocalizedText \| undefined` | Source value. Returned as-is for non-string non-key inputs. |
+| `vars` | `Record<string, unknown>` | Optional override; defaults to `useSegmentationContext().userContext`. |
+
+## Related
+
+- [useResolveLocalizedText](/docs/core/hooks/use-resolve-localized-text) — string-only variant for ARIA attributes
+- [useLocale](/docs/core/hooks/use-locale) — read raw locale context
+- [i18n guide](/docs/guides/i18n)
+
 ---
 
 # useRoutePersistence
@@ -29360,6 +31205,51 @@ persistence.load(); // Returns null, logs warning
 
 ---
 
+# useSegmentationContext
+
+> Low-level hook returning the raw SegmentationContextValue — registered segments, userContext, and currentUserId. Use useSegment / useSegments for typical lookups.
+
+Direct access to the raw `SegmentationContextValue`. Most consumers should reach for [`useSegment`](/docs/core/hooks/use-segment) (single segment) or `useSegments` (bulk read) — this hook is the escape hatch for custom integrations, headless filters, and debug panels.
+
+## Usage
+
+```tsx
+import { useSegmentationContext } from '@tour-kit/core';
+
+function SegmentDebugPanel() {
+  const { segments, userContext, currentUserId } = useSegmentationContext();
+  return (
+    <aside>
+      <p>User: {currentUserId ?? 'anonymous'}</p>
+      <p>Registered segments: {Object.keys(segments).join(', ')}</p>
+      <pre>{JSON.stringify(userContext, null, 2)}</pre>
+    </aside>
+  );
+}
+```
+
+`useSegmentationContext` never throws — when no `<SegmentationProvider>` is mounted it returns the default context (`segments: {}`, `userContext: undefined`, `currentUserId: undefined`). Anonymous-user code paths stay stable.
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `segments` | `Record<string, SegmentSource>` | Registered segments. Each value is either a `SegmentDefinition` (condition array, AND-joined) or a `StaticSegment` (user-id roster). |
+| `userContext` | `Record<string, unknown> \| undefined` | Audience targeting context — same shape used by [`useResolvedText`](/docs/core/hooks/use-resolved-text) for interpolation. |
+| `currentUserId` | `string \| undefined` | Resolved against `StaticSegment.userIds`; required for static-cohort lookups. |
+
+## Internal use
+
+Tour Kit packages call `useSegmentationContext` to thread `userContext` into [`useResolvedText`](/docs/core/hooks/use-resolved-text) and [`useResolveLocalizedText`](/docs/core/hooks/use-resolve-localized-text), so consumer-authored `'Hi {{user.name}}'` templates interpolate against the same data driving audience matching.
+
+## Related
+
+- [SegmentationProvider](/docs/core/providers/segmentation-provider)
+- [Segmentation guide](/docs/guides/segmentation)
+- [useResolvedText](/docs/core/hooks/use-resolved-text)
+
+---
+
 # useSpotlight
 
 > useSpotlight hook: control spotlight overlay visibility, padding, border radius, and animation for tour steps
@@ -29433,6 +31323,13 @@ function CustomSpotlight() {
 }
 ```
 
+## Related
+
+- [`<TourOverlay>`](/docs/react/components/tour-overlay) — the styled component this hook powers.
+- [`<HeadlessTourOverlay>`](/docs/react/headless/headless-overlay) — render-prop variant that wraps this hook for headless UIs.
+- [`useElementPosition`](/docs/core/hooks/use-element-position) — sibling hook for raw target rect tracking without the overlay.
+- [Animations guide](/docs/guides/animations) — how the spotlight transition respects `prefers-reduced-motion`.
+
 ---
 
 # useStep
@@ -29479,6 +31376,13 @@ useEffect(() => {
   }
 }, [targetElement]);
 ```
+
+## Related
+
+- [`useTour`](/docs/core/hooks/use-tour) — broader tour-level state when you need step plus tour controls.
+- [`useElementPosition`](/docs/core/hooks/use-element-position) — raw target rect tracking outside an active tour.
+- [`<TourStep>` component](/docs/react/components/tour-step) — declarative way to register the step this hook reads.
+- [Hidden steps guide](/docs/guides/hidden-steps) — skip or conditionally render steps from within `content`.
 
 ---
 
@@ -29556,6 +31460,15 @@ function handleNext() {
   }
 }
 ```
+
+## Related
+
+- [`useStep`](/docs/core/hooks/use-step) — single-step state and visibility, when `useTour` is broader than you need.
+- [`useTourContext`](/docs/core/hooks/use-tour-context) — low-level context accessor `useTour` is built on.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — must be an ancestor for this hook to work.
+- [`<Tour>` component](/docs/react/components/tour) — declarative wrapper most React apps use instead of calling this hook directly.
+- [Imperative control guide](/docs/guides/imperative-control) — patterns for driving the tour from outside React events.
+- [`@tour-kit/core` API reference](/docs/api/core) — full surface area of the core package.
 
 ---
 
@@ -29720,6 +31633,14 @@ When using `TourKitProvider`, you can define multiple tours:
 </TourKitProvider>
 ```
 
+## Related
+
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — wrap individual tours inside this global provider.
+- [`useTourKitContext`](/docs/core/hooks/use-tour-kit-context) — read the resolved global config from descendants.
+- [`useDirection`](/docs/core/hooks/use-direction) — convenience hook for the resolved `dir` value.
+- [Configuration types](/docs/core/types/config-types) — every field that goes into `defaultConfig`.
+- [Quick start](/docs/getting-started/quick-start) — see this provider wired into a working app.
+
 ---
 
 # TourProvider
@@ -29769,6 +31690,15 @@ function App() {
   <App />
 </TourProvider>
 ```
+
+## Related
+
+- [`<TourKitProvider>`](/docs/core/providers/tour-kit-provider) — global wrapper for multiple tours; nest `<TourProvider>` inside.
+- [`useTour`](/docs/core/hooks/use-tour) — read tour state and call actions from descendants of this provider.
+- [`useTourContext`](/docs/core/hooks/use-tour-context) — low-level context accessor when you need more than `useTour` exposes.
+- [Diagnostic engine](/docs/core/diagnostic) — set `diagnose` on this provider to see why a tour didn't fire.
+- [Tour types reference](/docs/core/types/tour-types) — every field on the `tour` prop.
+- [Persistence guide](/docs/guides/persistence) — configure how completion state survives reloads.
 
 ---
 
@@ -29926,6 +31856,13 @@ Both the main entry and the schemas subpath have CI-enforced size budgets:
 The schemas bundle stays tiny because `zod` is `external` in `tsup` — the
 consumer pulls Zod from their own `node_modules`, not from us. The size-limit
 entry ignores `zod` to measure only the code we ship.
+
+## Related
+
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — accepts the parsed `TourDefinition` plus the runtime-only fields you attach.
+- [Diagnostic engine](/docs/core/diagnostic) — surfaces `STRUCTURE_INVALID` when a malformed payload reaches the provider.
+- [Tour types reference](/docs/core/types/tour-types) and [step types](/docs/core/types/step-types) — the runtime-shape counterparts of the JSON-safe definitions.
+- [`@tour-kit/core` API reference](/docs/api/core) — surfaces all exports including the `/schemas` subpath.
 
 ---
 
@@ -30940,6 +32877,13 @@ const tour = createTour({
 });
 ```
 
+## Related
+
+- [`createTour`](/docs/core/utilities/create-tour) — pair this with `createStep` to assemble a typed tour shape.
+- [`<TourStep>` component](/docs/react/components/tour-step) — declarative alternative when you'd rather author steps in JSX.
+- [Step types reference](/docs/core/types/step-types) — every field on the returned `TourStep`.
+- [`useStep`](/docs/core/hooks/use-step) — read the created step's state from inside the tour.
+
 ---
 
 # createTour
@@ -31029,6 +32973,14 @@ Returns a `TourConfig` object that can be passed directly to `TourProvider`:
   <App />
 </TourProvider>
 ```
+
+## Related
+
+- [`createStep`](/docs/core/utilities/create-step) — build the typed `steps` array this factory wraps.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — the provider that consumes the returned `TourConfig`.
+- [`useTour`](/docs/core/hooks/use-tour) — drive the registered tour imperatively.
+- [Tour types reference](/docs/core/types/tour-types) — every field the factory accepts.
+- [Schemas reference](/docs/core/schemas) — JSON-safe alternative when tours come from a CMS.
 
 ---
 
@@ -31328,6 +33280,8 @@ async function showTourStep(target: string) {
 - [useElementPosition](/docs/core/hooks/use-element-position) - React hook for element tracking
 - [Scroll Utilities](/docs/core/utilities/scroll) - Scroll manipulation
 - [useFocusTrap](/docs/core/hooks/use-focus-trap) - Focus trapping hook
+- [Helper functions](/docs/core/utilities/helpers) - `mergeConfig`, RTL helpers, branch type-guards built on these primitives
+- [Position utilities](/docs/core/utilities/position) - Placement math that consumes `getElement` rects
 
 ---
 
@@ -31535,6 +33489,14 @@ import type { TourState } from '@tour-kit/core';
 
 const state: TourState = { ...initialTourState };
 ```
+
+## Related
+
+- [Position utilities](/docs/core/utilities/position) — placement math used by `calculatePlacement` above.
+- [Scroll utilities](/docs/core/utilities/scroll) — companion module for `scrollToElement`.
+- [`throttle`](/docs/core/utilities/throttle) — rate-limit handlers around these helpers (e.g. resize listeners feeding `calculatePlacement`).
+- [DOM utilities](/docs/core/utilities/dom) — the `getElement` / `waitForElement` / `isElementVisible` primitives.
+- [`@tour-kit/core` API reference](/docs/api/core) — full export surface.
 
 ---
 
@@ -34327,6 +36289,14 @@ userTourKit provides a flexible foundation for building:
 - [Quick Start](/docs/getting-started/quick-start) - Build your first tour
 - [TypeScript](/docs/getting-started/typescript) - TypeScript configuration
 
+## Coming from another library?
+
+If you already have tours written in another library, the `tour-kit-migrate` codemod will rewrite them automatically:
+
+- [Migrate from react-joyride](/docs/migration/joyride)
+- [Migrate from shepherd.js](/docs/migration/shepherd)
+- [Migrate from driver.js](/docs/migration/driver)
+
 ---
 
 # Installation
@@ -34355,6 +36325,13 @@ userTourKit requires React 18 or 19:
   }
 }
 ```
+
+## Related
+
+- [Quick start](/docs/getting-started/quick-start) — build your first tour in 5 minutes.
+- [TypeScript guide](/docs/getting-started/typescript) — strict-mode types, typed step IDs, generic step data.
+- [`@tour-kit/react` overview](/docs/react) — components, hooks, and provider you'll wire next.
+- Coming from another library? [Migrate from react-joyride](/docs/migration/joyride), [shepherd.js](/docs/migration/shepherd), or [driver.js](/docs/migration/driver).
 
 ---
 
@@ -34523,6 +36500,14 @@ userTourKit is fully compatible with React Strict Mode and follows all TypeScrip
   }
 }
 ```
+
+## Related
+
+- [Core types reference](/docs/core/types) — every public TypeScript export from `@tour-kit/core`.
+- [React types reference](/docs/react/types) — hook return types and `<Tour>` / `<TourStep>` prop types.
+- [`createTour`](/docs/core/utilities/create-tour) and [`createStep`](/docs/core/utilities/create-step) — factories that drive the inference patterns above.
+- [Step types reference](/docs/core/types/step-types) and [tour types reference](/docs/core/types/tour-types) — every field on `TourStep` and `Tour`.
+- [Quick start](/docs/getting-started/quick-start) — see typed tours in a working app.
 
 ---
 
@@ -37465,6 +39450,13 @@ You can nest providers to use different libraries in different parts of your app
 </UILibraryProvider>
 ```
 
+## Related
+
+- [Unified Slot deep-dive](/docs/guides/unified-slot) — the `UnifiedSlot` primitive behind every `asChild` prop.
+- [Custom components guide](/docs/react/styling/custom-components) — go beyond `asChild` to fully replace the component shell.
+- [`<TourClose>`](/docs/react/components/tour-close), [`<HintHotspot>`](/docs/hints/components) — examples of components that support both libraries.
+- [`@tour-kit/react` API reference](/docs/api/react) — full `UnifiedSlot` / `UILibraryProvider` / `useUILibrary` exports.
+
 ---
 
 # Branching Tours
@@ -38459,6 +40451,14 @@ class TourValidationError extends Error {
 function validateTour(tour: Tour): void;
 ```
 
+## Related
+
+- [Branching tours guide](/docs/guides/branching) — visible decision points, the counterpart to hidden steps.
+- [`<TourStep>` reference](/docs/react/components/tour-step) — the component you mark with `kind: 'hidden'`.
+- [Imperative control guide](/docs/guides/imperative-control) — drive `next()` from `onNext` handlers.
+- [Diagnostic engine](/docs/core/diagnostic) — surfaces `STRUCTURE_INVALID` when hidden-step validation fails.
+- [Step types reference](/docs/core/types/step-types) — every `TourStep` field including `kind` and `onEnter`.
+
 ---
 
 # Internationalization (i18n)
@@ -38614,6 +40614,14 @@ describe('welcome string', () => {
 ```
 
 For provider-scoped tests, render under `<LocaleProvider>` with a stub `messages` map — no network, no async setup.
+
+## Related
+
+- [`useDirection`](/docs/core/hooks/use-direction) — read the RTL/LTR direction `<LocaleProvider>` resolves.
+- [`<TourKitProvider>`](/docs/core/providers/tour-kit-provider) — set `dir` here when not using `<LocaleProvider>`'s automatic resolution.
+- [Audience segmentation](/docs/guides/segmentation) — pair localized copy with audience-targeted tours.
+- [Theme variations](/docs/guides/theme-variations) — locale-driven theme switching is one matcher path.
+- [Helper utilities](/docs/core/utilities/helpers) — `mirrorSide`, `mirrorAlignment`, and `mirrorPlacementForRTL`.
 
 ---
 
@@ -38779,11 +40787,14 @@ If your dashboard counts "real user views," filter `metadata.trigger !== 'forced
 
 ---
 
-## Related guides
+## Related
 
-- [Animations](./animations) — frequency rules and cooldowns that `forceShow` bypasses
-- [Segmentation](./segmentation) — audience targeting that `forceShow` ignores
-- [Analytics integration](./analytics-integration) — filtering forced previews from real-user telemetry
+- [`useTour`](/docs/core/hooks/use-tour) — the in-tree hook `useTourActions` mirrors via the singleton registry.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — registers tours into the registry on mount.
+- [`<AnnouncementsProvider>`](/docs/announcements/providers/announcements-provider) and [`useAnnouncement`](/docs/announcements/hooks/use-announcement) — provider and hook backing `forceShow`.
+- [Audience segmentation](/docs/guides/segmentation) — gates that `forceShow` bypasses for admin previews.
+- [Analytics integration](/docs/guides/analytics-integration) — filter `metadata.trigger === 'forced'` from real-user metrics.
+- [Frequency configuration](/docs/announcements/configuration/frequency) — rules that `forceShow` ignores.
 
 ---
 
@@ -39946,6 +41957,25 @@ Every helper short-circuits with a clear error pointing at
 `enableTestBridge` if the bridge is missing — saving you ten minutes of
 confused debugging.
 
+#### TourHelpers type
+
+The full interface is exported for fixture typing and custom helpers:
+
+```ts
+import type { TourHelpers } from '@tour-kit/playwright';
+
+interface TourHelpers {
+  start: (tourId: string) => Promise<void>;
+  waitForStep: (stepId: string, opts?: { timeout?: number }) => Promise<void>;
+  next: () => Promise<void>;
+  previous: () => Promise<void>;
+  complete: () => Promise<void>;
+  skip: () => Promise<void>;
+  goToStep: (stepId: string) => Promise<void>;
+  getDiagnostic: (tourId: string) => Promise<EligibilityReport | null>;
+}
+```
+
 ## 3 — Diagnostic integration
 
 Mount the provider with both `diagnose` and `enableTestBridge` to surface
@@ -40715,6 +42745,14 @@ describe('eu-pro segment', () => {
 
 For provider-scoped tests, render under `<SegmentationProvider>` with the cohort you want to exercise — segments are pure functions of `userContext` and `currentUserId`, so the harness needs no async setup.
 
+## Related
+
+- [Audience targeting reference](/docs/announcements/configuration/audience) — the same operator set applied to announcements.
+- [`<TourStep>` reference](/docs/react/components/tour-step) — accepts an `audience` prop that resolves through `<SegmentationProvider>`.
+- [i18n guide](/docs/guides/i18n) — pair localized copy with audience-targeted tours.
+- [Imperative control guide](/docs/guides/imperative-control) — `forceShow` bypasses these gates for admin previews.
+- [Adoption analytics guide](/docs/guides/adoption-analytics) — segment-aware funnel measurement.
+
 ---
 
 # Testing with React Testing Library
@@ -40872,10 +42910,87 @@ try {
 | `goToStep(stepId)` | Jumps to a non-adjacent step. Requires `<HookProbe />` in the provider tree. |
 | `virtualTarget(rect?, contextElement?)` | Returns a Floating UI virtual element with a merged DOMRect. |
 | `setupTourKitTesting(opts?)` | One-shot orchestrator; default touches nothing, `positionShim: true` lazy-loads `jsdom-testing-mocks`. |
+| `getActiveTourHandle()` | Returns the active `useTour()` result from inside `<HookProbe />`, or `null` when no tour is running. Imperative escape hatch for assertions that step over the public DOM. |
+| `fireEvent`, `render`, `screen`, `waitFor`, `act`, `cleanup` | Re-exported from `@testing-library/react` so you can import everything from one place. |
+
+### Option types
+
+All helpers accept a typed options object. Import them when typing fixtures or shared test utilities:
+
+```ts
+import type {
+  AdvanceTourOptions,
+  CompleteTourOptions,
+  ExpectStepVisibleOptions,
+  PreviousTourOptions,
+  SetupOptions,
+  SkipTourOptions,
+  TourKitTestingErrorOptions,
+  VirtualTarget,
+} from '@tour-kit/testing-library';
+```
+
+```ts
+interface AdvanceTourOptions {
+  /** Number of times to click Next. Defaults to 1. */
+  steps?: number;
+  /** Reuse an existing userEvent instance (recommended for multi-helper tests). */
+  user?: UserEvent;
+}
+
+interface PreviousTourOptions {
+  steps?: number;
+  user?: UserEvent;
+}
+
+interface SkipTourOptions {
+  user?: UserEvent;
+}
+
+interface CompleteTourOptions {
+  /** Overall deadline. Defaults to 5000ms. */
+  timeout?: number;
+  /** Hard cap on click iterations. Defaults to 50. */
+  maxSteps?: number;
+  user?: UserEvent;
+}
+
+interface ExpectStepVisibleOptions {
+  /** Override the polling deadline. Defaults to 1000ms. */
+  timeout?: number;
+  /** Scope queries to a subtree. Defaults to document.body (the portal root). */
+  container?: HTMLElement;
+}
+
+interface SetupOptions {
+  /** Lazy-load jsdom-testing-mocks for getBoundingClientRect coverage. */
+  positionShim?: boolean;
+}
+
+interface TourKitTestingErrorOptions {
+  cause?: unknown;
+  stepId?: string;
+  tourId?: string;
+}
+
+interface VirtualTarget {
+  /** Floating UI virtual-element contract. */
+  getBoundingClientRect: () => DOMRect;
+  contextElement?: Element;
+}
+```
 
 ## Browser-positioning tests live elsewhere
 
-This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use [`@tour-kit/playwright`](./playwright) — it ships a `test.extend({ tour })` fixture backed by the opt-in `window.__tourKit__` bridge. Phase 5 helpers stop at the jsdom boundary by design.
+This package asserts on **presence** — "did the step mount?", "did Next advance?" — not **position**. For pixel-perfect placement assertions, use [`@tour-kit/playwright`](/docs/guides/playwright) — it ships a `test.extend({ tour })` fixture backed by the opt-in `window.__tourKit__` bridge. Phase 5 helpers stop at the jsdom boundary by design.
+
+## Related
+
+- [Playwright integration](/docs/guides/playwright) — browser-level placement, click, and a11y assertions.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — the provider wrapped in `render(...)` above.
+- [`useTour`](/docs/core/hooks/use-tour) — what the `AutoStart` helper and `HookProbe` read from.
+- [Diagnostic engine](/docs/core/diagnostic) — surfaces *why* a step failed to mount in CI runs.
+- [Headless examples](/docs/react/headless/examples) — patterns for custom UIs that need their own tests.
 
 ---
 
@@ -41068,6 +43183,14 @@ const traits = useMemo<AppTraits>(() => ({ plan: user.plan }), [user.plan])
 | `ThemeMatcher` | type | Discriminated union of all five matcher kinds |
 
 See also: [Router integration](./router-integration), [Animations](./animations).
+
+## Related
+
+- [Tailwind styling](/docs/react/styling/tailwind) and [CSS variables](/docs/react/styling/css-variables) — the tokens `<ThemeProvider>` flips between.
+- [Custom components guide](/docs/react/styling/custom-components) — go further than tokens by swapping the component shell.
+- [Router adapters](/docs/react/adapters) — the `RouterAdapter` interface the URL matcher consumes.
+- [Audience segmentation](/docs/guides/segmentation) — predicate-based theme matchers often mirror audience conditions.
+- [Reduced motion guide](/docs/guides/reduced-motion) — pair theme variation with motion-pref-aware tokens.
 
 ---
 
@@ -41467,6 +43590,14 @@ createStep({
 
 No, userTourKit cannot target elements inside iframes due to browser security restrictions.
 
+## Related
+
+- [Troubleshooting reference](/docs/troubleshooting) — versioned bug fixes and release-note-style entries.
+- [Diagnostic engine](/docs/core/diagnostic) — `<TourProvider diagnose>` surfaces *why* a tour didn't fire.
+- [Accessibility guide](/docs/guides/accessibility) — focus-trap, keyboard, and screen-reader expectations.
+- [Persistence guide](/docs/guides/persistence) — fix "tour already completed" issues by clearing state correctly.
+- [Next.js integration](/docs/guides/nextjs) — App Router `'use client'` boundary gotchas.
+
 ---
 
 # Unified Slot (Radix UI + Base UI)
@@ -41582,6 +43713,13 @@ import { UnifiedSlot } from '@tour-kit/announcements' // same
 - **Don't lose refs.** When writing a custom slot consumer, forward refs through both branches.
 - **No double-wrapping.** Don't pass `asChild` and a render-prop `children` simultaneously — one wins and the other drops silently.
 - **`UILibraryProvider` is opt-in.** Components default to Radix-style cloning even without the provider; only set `library="base-ui"` when you actually need it.
+
+## Related
+
+- [Base UI support guide](/docs/guides/base-ui) — turn-key recipe for `<UILibraryProvider library="base-ui">`.
+- [Custom components guide](/docs/react/styling/custom-components) — go further than `asChild` by replacing the component shell.
+- [`<TourClose>`](/docs/react/components/tour-close), [`<HintHotspot>`](/docs/hints/components) — examples of `asChild`-aware components.
+- [`@tour-kit/react` API reference](/docs/api/react) — full `UnifiedSlot` / `UILibraryProvider` exports.
 
 ---
 
@@ -44357,6 +46495,14 @@ import { HintBadge, HintBeaconWithLabel, HintWhatsNewPill } from '@tour-kit/hint
 
 The recommended path is the discriminated `variant` prop on `<HintHotspot>` — it auto-narrows the variant-specific extras (`count`, `label`, `side`) at the call site.
 
+## Related
+
+- [`<HintHotspot>` reference](/docs/hints/components) — base component these variants extend.
+- [`@tour-kit/hints` overview](/docs/hints) — when to use hints vs. tours vs. announcements.
+- [Headless hint primitives](/docs/hints/headless) — build a fully custom variant from scratch.
+- [Reduced motion guide](/docs/guides/reduced-motion) — three-tier defense the variants participate in.
+- [Hint types reference](/docs/hints/types) — `HintConfig`, `HotspotPosition`, and variant prop types.
+
 ---
 
 # Tour Kit Docs — React Onboarding Library
@@ -44415,6 +46561,20 @@ function App() {
 ```
 
 ## Next Steps
+
+## Migrating from another tour library?
+
+Drop-in codemods to rewrite an existing codebase to Tour Kit in one command:
+
+- [Migrate from react-joyride](/docs/migration/joyride) — `<Joyride>` JSX + `useJoyride()` hook.
+- [Migrate from shepherd.js](/docs/migration/shepherd) — `new Shepherd.Tour({...}).addStep(...).start()`.
+- [Migrate from driver.js](/docs/migration/driver) — `driver({...}).drive()` config calls.
+
+## Going further
+
+- [Guides](/docs/guides) — accessibility, persistence, router integration, i18n, segmentation, animations, theme variations, and more.
+- [Use cases](/docs/use-cases) — full onboarding patterns assembled from the primitives above.
+- [Build with LLMs](/docs/build-with-llms) — drop the per-package context files into ChatGPT, Claude, or Cursor for accurate code generation.
 
 ---
 
@@ -44606,6 +46766,12 @@ Yes. Each environment uses a separate domain activation. For example, `staging.e
 
 All userTourKit license keys issued via Polar.sh have a `TOURKIT-` prefix. This prefix is required for validation to work.
 
+## Related
+
+- [Trial countdown & test mode](/docs/licensing/trial) — `<TrialBadge>`, `<LicenseTestMode>`, and the dev bypass.
+- [`@tour-kit/license` API reference](/docs/api/license) — every exported provider, component, hook, and utility.
+- Pro packages that consume `<LicenseGate>`: [`@tour-kit/adoption`](/docs/adoption), [`@tour-kit/analytics`](/docs/analytics), [`@tour-kit/announcements`](/docs/announcements), [`@tour-kit/checklists`](/docs/checklists), [`@tour-kit/media`](/docs/media), [`@tour-kit/scheduling`](/docs/scheduling), [`@tour-kit/ai`](/docs/ai).
+
 ---
 
 # Trial countdown & test mode
@@ -44735,6 +46901,12 @@ API revision, the integration will be additive and non-breaking:
 
 The override point is marked with `// FUTURE:` in
 `packages/license/src/lib/trial.ts` so the follow-up PR is one focused diff.
+
+## Related
+
+- [Licensing overview](/docs/licensing) — installation, Polar setup, watermark behavior, and CI/CD.
+- [`@tour-kit/license` API reference](/docs/api/license) — `<TrialBadge>`, `<LicenseTestMode>`, `<LicenseDebugPanel>` prop tables.
+- Pro packages that consume `<LicenseGate>`: [`@tour-kit/adoption`](/docs/adoption), [`@tour-kit/analytics`](/docs/analytics), [`@tour-kit/announcements`](/docs/announcements), [`@tour-kit/checklists`](/docs/checklists), [`@tour-kit/media`](/docs/media), [`@tour-kit/scheduling`](/docs/scheduling).
 
 ---
 
@@ -52206,6 +54378,15 @@ npx tour-kit-migrate --from driver --dry-run ./src
 If the dry-run prints clean diffs and exits 0, run again without `--dry-run`
 to write the changes.
 
+## Related
+
+- [Migrate from react-joyride](/docs/migration/joyride) — the JSX + `useJoyride` pattern.
+- [Migrate from shepherd.js](/docs/migration/shepherd) — the class-chain pattern (`new Shepherd.Tour`).
+- [`<Tour>`](/docs/react/components/tour) and [`<TourStep>`](/docs/react/components/tour-step) — the destination shape your migrated code lands on.
+- [`<TourOverlay>`](/docs/react/components/tour-overlay) — where driver's spotlight padding / radius config goes.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `d.moveNext()` / `.movePrevious()` / `.moveTo()`.
+- [`<HintHotspot>`](/docs/hints) — single-step replacement for driver's `d.highlight()`.
+
 ---
 
 # Migrate from react-joyride
@@ -52459,7 +54640,7 @@ slot component (`<TourNavigation prevLabel="..." nextLabel="..." />`).
 ### debug
 
 Joyride's `debug` mode dumped state to the console. Tour Kit's `<TourProvider diagnose>`
-prop is the equivalent — see the [Diagnostics guide](/docs/guides) for usage.
+prop is the equivalent — see the [diagnostic mode reference](/docs/core/diagnostic) for usage.
 
 ### disablecloseonesc
 
@@ -52491,6 +54672,14 @@ npx tour-kit-migrate --from joyride --dry-run ./src
 
 If the dry-run prints clean diffs and exits 0, run again without `--dry-run` to
 write the changes.
+
+## Related
+
+- [Migrate from shepherd.js](/docs/migration/shepherd) — the class-chain pattern (`new Shepherd.Tour`).
+- [Migrate from driver.js](/docs/migration/driver) — the function-call pattern (`driver({...}).drive()`).
+- [`<Tour>`](/docs/react/components/tour) and [`<TourStep>`](/docs/react/components/tour-step) — the destination shape your migrated code lands on.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `useJoyride().controls`.
+- [Quick start](/docs/getting-started/quick-start) — wire the migrated tour into a working app in 5 minutes.
 
 ---
 
@@ -52705,6 +54894,15 @@ npx tour-kit-migrate --from shepherd --dry-run ./src
 If the dry-run prints clean diffs and exits 0, run again without `--dry-run`
 to write the changes.
 
+## Related
+
+- [Migrate from react-joyride](/docs/migration/joyride) — the JSX + `useJoyride` pattern.
+- [Migrate from driver.js](/docs/migration/driver) — the function-call pattern (`driver({...}).drive()`).
+- [`<TourProvider>`](/docs/core/providers/tour-provider) — register the migrated tour shape here.
+- [`<TourCard>`](/docs/react/components/tour-card) — the headless slot that replaces shepherd's `buttons` array.
+- [`useTour`](/docs/core/hooks/use-tour) — the imperative replacement for `tour.next()` / `.back()` / `.show()`.
+- [Quick start](/docs/getting-started/quick-start) — wire the migrated tour into a working app.
+
 ---
 
 # @tour-kit/react
@@ -52725,12 +54923,23 @@ pnpm add @tour-kit/react
 
 ## Components
 
-- **Tour** - Main tour wrapper
-- **TourStep** - Step definition
-- **TourCard** - Tooltip card
-- **TourOverlay** - Spotlight overlay
-- **TourNavigation** - Next/prev buttons
-- **TourProgress** - Progress indicator
+- **[Tour](/docs/react/components/tour)** - Main tour wrapper
+- **[TourStep](/docs/react/components/tour-step)** - Step definition (see also the [`target` prop deep-dive](/docs/react/target-prop))
+- **[TourCard](/docs/react/components/tour-card)** - Tooltip card
+- **[TourOverlay](/docs/react/components/tour-overlay)** - Spotlight overlay
+- **[TourNavigation](/docs/react/components/tour-navigation)** - Next/prev buttons
+- **[TourProgress](/docs/react/components/tour-progress)** - Progress indicator
+- **[TourClose](/docs/react/components/tour-close)** - Skip / complete button
+- **[TourRoutePrompt](/docs/react/components/tour-route-prompt)** - Multi-page navigation prompt
+
+## Related
+
+- [`@tour-kit/react` API reference](/docs/api/react) — full export surface in one page.
+- [`@tour-kit/core`](/docs/core) — the framework-agnostic primitives this package re-exports.
+- [Headless components](/docs/react/headless) — render-prop primitives for fully custom UI.
+- [Styling](/docs/react/styling/tailwind) — Tailwind, CSS variables, and custom components.
+- [Router adapters](/docs/react/adapters) — multi-page tours with Next.js or React Router.
+- [Quick start](/docs/getting-started/quick-start) — minimal working app.
 
 ---
 
@@ -52944,6 +55153,8 @@ function App() {
 - [Next.js Integration](/docs/guides/nextjs) - Complete Next.js setup guide
 - [Vite Integration](/docs/guides/vite) - Vite with React Router setup
 - [Router Integration Guide](/docs/guides/router-integration) - Deep dive into multi-page tours
+- [`<TourRoutePrompt>`](/docs/react/components/tour-route-prompt) - Explicit "continue / skip" UI when `autoNavigate={false}`
+- [`useTourRoute`](/docs/react/hooks/use-tour-route) - Hook backing the route prompt
 
 ---
 
@@ -53884,6 +56095,15 @@ function StartButton() {
 }
 ```
 
+## Related
+
+- [`<TourStep>`](/docs/react/components/tour-step) — declare an individual step inside `<Tour>`.
+- [`<TourCard>`](/docs/react/components/tour-card) — the compound tooltip card rendered for each step.
+- [`<TourOverlay>`](/docs/react/components/tour-overlay) — the spotlight overlay rendered behind the card.
+- [`useTour`](/docs/core/hooks/use-tour) — programmatic control (`start`, `next`, `prev`, `skip`).
+- [Quick start](/docs/getting-started/quick-start) — see `<Tour>` in a complete working app.
+- Migrating from another library? [react-joyride](/docs/migration/joyride), [shepherd.js](/docs/migration/shepherd), [driver.js](/docs/migration/driver).
+
 ---
 
 # TourCard
@@ -54013,6 +56233,15 @@ For simpler use cases:
   {/* Renders default layout with title, content, and navigation */}
 </TourCard>
 ```
+
+## Related
+
+- [`<Tour>`](/docs/react/components/tour) — the wrapper `<TourCard>` must live inside.
+- [`<TourNavigation>`](/docs/react/components/tour-navigation), [`<TourProgress>`](/docs/react/components/tour-progress), [`<TourClose>`](/docs/react/components/tour-close) — the slot components composed inside `<TourCardFooter>` / `<TourCardHeader>`.
+- [`<TourOverlay>`](/docs/react/components/tour-overlay) — the spotlight overlay that sits beneath the card.
+- [Headless `<TourCard>`](/docs/react/headless/headless-card) — render-prop variant for full UI control.
+- [Tailwind styling](/docs/react/styling/tailwind) and [CSS variables](/docs/react/styling/css-variables) — restyle the default card.
+- [`TourCard` migration notes](/docs/react/components/tour-card-migration) — if you used the pre-compound API.
 
 ---
 
@@ -54249,6 +56478,13 @@ The component includes proper ARIA attributes:
 // Renders with aria-label="Dismiss tutorial"
 ```
 
+## Related
+
+- [`<TourCard>`](/docs/react/components/tour-card) — typically composed inside `<TourCardHeader>` next to this button.
+- [`<TourNavigation>`](/docs/react/components/tour-navigation) — sibling slot for prev/next/complete buttons.
+- [`useTour`](/docs/core/hooks/use-tour) — call `skip()` or `complete()` directly when building a custom close button.
+- [Accessibility guide](/docs/guides/accessibility) — keyboard and screen-reader expectations for dismiss buttons.
+
 ---
 
 # TourNavigation
@@ -54367,6 +56603,14 @@ function CustomNavigation() {
   );
 }
 ```
+
+## Related
+
+- [`<TourCard>`](/docs/react/components/tour-card) — the compound card that usually wraps this slot.
+- [`<TourProgress>`](/docs/react/components/tour-progress) — sibling footer slot that pairs naturally with navigation.
+- [`<TourClose>`](/docs/react/components/tour-close) — skip/complete control commonly rendered alongside.
+- [`useTour`](/docs/core/hooks/use-tour) — the hook a fully custom navigation component would call.
+- [Imperative control guide](/docs/guides/imperative-control) — patterns for driving navigation outside this component.
 
 ---
 
@@ -54498,6 +56742,14 @@ function CustomOverlay() {
   );
 }
 ```
+
+## Related
+
+- [`<Tour>`](/docs/react/components/tour) — the wrapper this overlay must live inside.
+- [`<TourCard>`](/docs/react/components/tour-card) — the tooltip card that sits above the spotlight.
+- [`useSpotlight`](/docs/core/hooks/use-spotlight) — the hook this component is a styled wrapper over.
+- [`<HeadlessTourOverlay>`](/docs/react/headless/headless-overlay) — render-prop variant for fully custom overlays.
+- [Animations guide](/docs/guides/animations) — how the spotlight transition respects `prefers-reduced-motion`.
 
 ---
 
@@ -54678,6 +56930,13 @@ function CustomProgress() {
 }
 ```
 
+## Related
+
+- [`<TourCard>`](/docs/react/components/tour-card) — the compound card whose footer this typically lives in.
+- [`<TourNavigation>`](/docs/react/components/tour-navigation) — sibling slot that pairs naturally with progress.
+- [Progress variants gallery](/docs/examples/progress-variants) — preview every `variant` rendered side-by-side.
+- [`useTour`](/docs/core/hooks/use-tour) — read `currentStepIndex` and `totalSteps` for a fully custom progress UI.
+
 ---
 
 # TourRoutePrompt
@@ -54731,6 +56990,14 @@ Pair with `<MultiTourKitProvider autoNavigate={false}>` so the runtime defers th
 | `cancelText` | `string` | Skip-button label |
 | `onNavigate` | `(route: string) => void` | Called when the user confirms navigation |
 | `onSkip` | `() => void` | Called when the user skips the tour |
+
+## Related
+
+- [`<MultiTourKitProvider>`](/docs/react/providers/multi-tour-kit-provider) — the provider whose `autoNavigate={false}` opts in to this prompt.
+- [`useTourRoute`](/docs/react/hooks/use-tour-route) — the hook this component reads pending-navigation state from.
+- [Router adapters](/docs/react/adapters) — `useNextAppRouter`, `useNextPagesRouter`, `useReactRouter` for the `router` prop.
+- [Router integration guide](/docs/guides/router-integration) — patterns for multi-page tours end-to-end.
+- [Cross-page tour example](/docs/examples/cross-page-tour) — see this prompt in a working flow.
 
 ---
 
@@ -54863,6 +57130,16 @@ const { currentStep } = useTour('my-tour');
 const videoUrl = currentStep?.data?.videoUrl;
 ```
 
+## Related
+
+- [`<Tour>`](/docs/react/components/tour) — the wrapper `<TourStep>` must live inside.
+- [`<TourCard>`](/docs/react/components/tour-card) — the tooltip that renders each step's `title` + `content`.
+- [`target` prop deep-dive](/docs/react/target-prop) — selector string vs. `RefObject` vs. getter function, with the resolution order.
+- [`useStep`](/docs/core/hooks/use-step) — read step state from inside `content` ReactNodes.
+- [Hidden steps guide](/docs/guides/hidden-steps) — use `when` and `waitForTarget` to skip steps conditionally.
+- [Branching guide](/docs/guides/branching) — author tours that diverge based on user choice.
+- [Step types reference](/docs/core/types/step-types) — every field on `TourStep`.
+
 ---
 
 # Headless Components
@@ -54965,6 +57242,15 @@ import { HeadlessTourCard } from '@tour-kit/react/headless';
   </HeadlessTourCard>
 </Tour>
 ```
+
+## Related
+
+- [`<HeadlessTourCard>`](/docs/react/headless/headless-card) — render-prop primitive for fully custom tooltip UI.
+- [`<HeadlessTourOverlay>`](/docs/react/headless/headless-overlay) — render-prop primitive for the spotlight.
+- [Headless examples](/docs/react/headless/examples) — Tailwind, Framer Motion, shadcn/ui patterns.
+- [Unified Slot guide](/docs/guides/unified-slot) — `asChild` pattern shared with Radix / Base UI.
+- [Custom components guide](/docs/react/styling/custom-components) — when to reach for headless vs. CSS overrides.
+- Styled counterparts: [`<TourCard>`](/docs/react/components/tour-card), [`<TourOverlay>`](/docs/react/components/tour-overlay).
 
 ---
 
@@ -55396,6 +57682,14 @@ function FullyCustomTour({ tourId }: { tourId: string }) {
 4. **Handle edge cases** - Check `isFirstStep`, `isLastStep`, and `totalSteps`
 5. **Test with screen readers** - Ensure announcements work correctly
 
+## Related
+
+- [`<HeadlessTourCard>`](/docs/react/headless/headless-card) and [`<HeadlessTourOverlay>`](/docs/react/headless/headless-overlay) — the primitives composed in these examples.
+- [Headless overview](/docs/react/headless) — when to reach for headless vs. styled components.
+- [`useKeyboard`](/docs/core/hooks/use-keyboard) and [`useFocusTrap`](/docs/core/hooks/use-focus-trap) — keyboard + focus a11y, mandatory for custom UIs.
+- [Accessibility guide](/docs/guides/accessibility) — WCAG 2.1 AA checklist your custom UI must satisfy.
+- [Headless custom example](/docs/examples/headless-custom) — full working app built on these patterns.
+
 ---
 
 # HeadlessTourCard
@@ -55538,6 +57832,14 @@ Use `targetRect` to position the card:
   }}
 </HeadlessTourCard>
 ```
+
+## Related
+
+- [`<TourCard>`](/docs/react/components/tour-card) — styled counterpart with compound `Header` / `Content` / `Footer` slots.
+- [`<HeadlessTourOverlay>`](/docs/react/headless/headless-overlay) — pair these for a fully custom tour UI.
+- [Headless examples](/docs/react/headless/examples) — Framer Motion, shadcn/ui, mobile swipe patterns.
+- [`useTour`](/docs/core/hooks/use-tour) and [`useStep`](/docs/core/hooks/use-step) — the hooks behind the render-prop arguments.
+- [Unified Slot guide](/docs/guides/unified-slot) — `asChild` pattern shared with Radix / Base UI.
 
 ---
 
@@ -55741,6 +58043,65 @@ For complex effects:
   }}
 </HeadlessTourOverlay>
 ```
+
+## Related
+
+- [`<TourOverlay>`](/docs/react/components/tour-overlay) — styled counterpart for the standard spotlight UI.
+- [`<HeadlessTourCard>`](/docs/react/headless/headless-card) — pair these for a fully custom tour UI.
+- [`useSpotlight`](/docs/core/hooks/use-spotlight) — the hook this primitive exposes via render props.
+- [Headless examples](/docs/react/headless/examples) — Framer Motion and SVG-mask overlay patterns.
+- [Animations guide](/docs/guides/animations) — respect `prefers-reduced-motion` in custom overlays.
+
+---
+
+# useTourRegistryContext
+
+> Low-level hooks for reading the registered tour list inside MultiTourKitProvider. Use useTours for ergonomic access.
+
+Low-level access to the tour registry exposed by [`MultiTourKitProvider`](/docs/react/providers/multi-tour-kit-provider). Most consumers should use [`useTours`](/docs/react/hooks/use-tours) — `useTourRegistryContext` is the escape hatch for custom registry integrations (declarative `<Tour>` mounting, tour deduplication, debug panels).
+
+## Usage
+
+```tsx
+import { useTourRegistryContext } from '@tour-kit/react';
+
+function RegistrySize() {
+  const { tours } = useTourRegistryContext();
+  return <span>Registered tours: {tours.length}</span>;
+}
+```
+
+`useTourRegistryContext` throws if no `<MultiTourKitProvider>` is mounted above. Use `useTourRegistryContextOptional` if rendering inside a tree that may or may not have a provider.
+
+## Return Value
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tours` | `Tour[]` | All currently registered tours. |
+| `registerTour` | `(tour: Tour) => void` | Add a tour to the registry. Called internally by `<Tour>` on mount. |
+| `unregisterTour` | `(tourId: string) => void` | Remove a tour from the registry. Called internally by `<Tour>` on unmount. |
+
+## useTourRegistryContextOptional
+
+Same as `useTourRegistryContext` but returns `null` instead of throwing when no provider is present. Useful for components that may render outside a `MultiTourKitProvider`.
+
+```tsx
+import { useTourRegistryContextOptional } from '@tour-kit/react';
+
+function ContextAwareLauncher() {
+  const ctx = useTourRegistryContextOptional();
+  if (!ctx) return <button>Help</button>; // standalone mode
+  return <TourSelector tours={ctx.tours} />;
+}
+```
+
+Returns `TourRegistryContextValue | null`.
+
+## Related
+
+- [useTours](/docs/react/hooks/use-tours)
+- [MultiTourKitProvider](/docs/react/providers/multi-tour-kit-provider)
+- [Tour](/docs/react/components/tour)
 
 ---
 
@@ -56649,6 +59010,13 @@ Reset to defaults:
 }
 ```
 
+## Related
+
+- [Tailwind CSS guide](/docs/react/styling/tailwind) — how the default classes consume these variables.
+- [Custom components guide](/docs/react/styling/custom-components) — reach further than variables by swapping the component shell.
+- [`<TourCard>`](/docs/react/components/tour-card) and [`<TourOverlay>`](/docs/react/components/tour-overlay) — the styled components these variables target.
+- [Theme variations guide](/docs/guides/theme-variations) — recipes for branded, glassmorphism, and other looks.
+
 ---
 
 # Custom Components
@@ -56878,6 +59246,13 @@ function App() {
 }
 ```
 
+## Related
+
+- [Headless components](/docs/react/headless) and [headless examples](/docs/react/headless/examples) — render-prop primitives this guide is built on.
+- [CSS variables](/docs/react/styling/css-variables) and [Tailwind CSS](/docs/react/styling/tailwind) — lighter-touch alternatives when full custom components are overkill.
+- [Unified Slot guide](/docs/guides/unified-slot) — `asChild` pattern for swapping individual slots without rewriting the whole shell.
+- [`useTour`](/docs/core/hooks/use-tour) and [`useSpotlight`](/docs/core/hooks/use-spotlight) — the primary hooks for fully custom UIs.
+
 ---
 
 # Tailwind CSS
@@ -57027,6 +59402,14 @@ export function TourCard({ className, ...props }) {
 }
 ```
 
+## Related
+
+- [CSS variables reference](/docs/react/styling/css-variables) — every variable Tailwind utilities consume.
+- [Custom components guide](/docs/react/styling/custom-components) — when Tailwind classes aren't enough.
+- [`<TourCard>`](/docs/react/components/tour-card) — the styled component whose defaults are listed here.
+- [Theme variations guide](/docs/guides/theme-variations) — pre-baked recipes (glass, brand, dark).
+- [Dashboard example](/docs/examples/dashboard) — full app showing Tailwind + shadcn/ui composition.
+
 ---
 
 # target Prop
@@ -57142,6 +59525,14 @@ When the rewrite is ambiguous (no matching ref in scope), the codemod leaves
 the attribute untouched and inserts a `TODO(tour-kit): target-to-ref` comment
 above the JSX element. Re-running the codemod on a migrated file produces a
 zero-diff second pass.
+
+## Related
+
+- [`<TourStep>`](/docs/react/components/tour-step) — the component whose `target` prop this page documents.
+- [`useElementPosition`](/docs/core/hooks/use-element-position) — the hook the runtime resolver delegates to.
+- [Hidden steps guide](/docs/guides/hidden-steps) — `waitForTarget` patterns for asynchronously-mounted nodes.
+- [React types reference](/docs/react/types) — `TourTarget` and related public types.
+- [Step types reference](/docs/core/types/step-types) — every other field on `TourStep`.
 
 ---
 
@@ -57619,7 +60010,9 @@ const schedule = {
 
 - [useSchedule Hook](/docs/scheduling/hooks/use-schedule) - Start using reactive scheduling
 - [Schedule Evaluation](/docs/scheduling/utilities/schedule-evaluation) - Understand how schedules are evaluated
+- [Components](/docs/scheduling/components) - Schedule-aware display components
 - [Types Reference](/docs/scheduling/types) - Explore all available types
+- [`@tour-kit/scheduling` API reference](/docs/api/scheduling) - Full export surface in one page
 
 ---
 
@@ -61938,6 +64331,10 @@ import {
 } from '@tour-kit/surveys';
 ```
 
+## Turn-key recipes
+
+For ready-made NPS / CSAT / CES modals with pre-wired scoring, see [turn-key modals](/docs/surveys/components/turnkey-modals).
+
 ## Headless alternative
 
 If you need full control over markup and styling, use the [headless components](/docs/surveys/headless) instead.
@@ -62067,6 +64464,40 @@ Size maps to button height: `sm` → `h-8`, `md` → `h-10`, `lg` → `h-12`.
 
 - [HeadlessQuestionBoolean](/docs/surveys/headless/headless-question-boolean)
 - [QuestionRating](/docs/surveys/components/question-rating)
+
+---
+
+# QuestionMedia
+
+> Render <MediaSlot> above a question when the question has a `media?` field. No-op for questions without media, so consumers can mount it unconditionally.
+
+Renders a `<MediaSlot>` from `@tour-kit/media` above a question prompt when the question config carries a `media?` field. Returns `null` when no media is configured — mount it unconditionally above your `Question*` component and it stays out of the way for plain text questions.
+
+## Usage
+
+```tsx
+import { QuestionMedia, QuestionRating } from '@tour-kit/surveys';
+
+function CurrentQuestion({ question }: { question: QuestionConfig }) {
+  return (
+    <>
+      <QuestionMedia question={question} />
+      <QuestionRating question={question} />
+    </>
+  );
+}
+```
+
+## Props
+
+```tsx
+interface QuestionMediaProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** The question whose `media?` should render. No-op when absent. */
+  question: Pick<QuestionConfig, 'media'>;
+}
+```
+
+Forwards refs (`React.forwardRef<HTMLDivElement>`) and accepts arbitrary `<div>` attributes. Rendered with `data-slot="question-media"` for styling hooks.
 
 ---
 
@@ -63188,6 +65619,42 @@ The category is computed by the pure helper `computeCesCategory(score)`:
 - The modal closes automatically after Submit or Skip; supply `open` + `onOpenChange` for fully controlled state.
 - Reduced motion is inherited from `SurveyModal` via the `motion-safe:` Tailwind prefix — no extra setup required.
 - Each modal is tree-shakeable: importing only `CsatModal` does not pull `NpsModal` or `CesModal`.
+
+## Props
+
+All three share the same base — they extend `SurveyModalProps` (excluding `surveyId`, `children`, `onSubmit`, `onSelect`) and add their own submit signature.
+
+```tsx
+interface CsatModalProps extends Omit<SurveyModalProps, 'surveyId' | 'children' | 'onSubmit' | 'onSelect'> {
+  surveyId?: string;        // defaults to React.useId()
+  question: string;
+  ratingScale?: RatingScale;  // default: 1–5 numeric
+  lowLabel?: string;
+  highLabel?: string;
+  onSubmit: (rating: number) => void;
+  onSkip?: () => void;
+}
+
+interface NpsModalProps extends Omit<SurveyModalProps, 'surveyId' | 'children' | 'onSubmit' | 'onSelect'> {
+  surveyId?: string;
+  question: string;
+  ratingScale?: RatingScale;  // default: 0–10
+  lowLabel?: string;
+  highLabel?: string;
+  onSubmit: (score: number, category: NpsCategory) => void;
+  onSkip?: () => void;
+}
+
+interface CesModalProps extends Omit<SurveyModalProps, 'surveyId' | 'children' | 'onSubmit' | 'onSelect'> {
+  surveyId?: string;
+  question: string;
+  ratingScale?: RatingScale;  // default: 1–7
+  lowLabel?: string;
+  highLabel?: string;
+  onSubmit: (score: number, category: CesCategory) => void;
+  onSkip?: () => void;
+}
+```
 
 ## Related
 
@@ -65471,6 +67938,373 @@ function NPSResult() {
 
 ---
 
+# Testing Library
+
+> Tour Kit's test helpers for Vitest, Jest, and React Testing Library.
+
+`@tour-kit/testing-library` is a thin layer of test helpers on top of
+[`@testing-library/react`](https://testing-library.com/docs/react-testing-library/intro/).
+It exists so you can assert against tour state without reaching into
+provider internals or scraping the DOM by hand.
+
+## Install
+
+```bash
+pnpm add -D @tour-kit/testing-library @testing-library/react vitest
+# or npm install --save-dev ...
+```
+
+## Setup
+
+Call `setupTourKitTesting()` once in your test setup file (e.g.
+`vitest.setup.ts`). It registers cleanup hooks and configures
+`@testing-library/react` for tour-kit's portal layout.
+
+```ts
+// vitest.setup.ts
+import { setupTourKitTesting } from '@tour-kit/testing-library/setup'
+
+setupTourKitTesting()
+```
+
+> Use the `/setup` subpath to keep your setup file free of the RTL
+> dependency graph until tests actually need it.
+
+In `vitest.config.ts`:
+
+```ts
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+  },
+})
+```
+
+## Quick example
+
+```tsx
+import { describe, it, expect } from 'vitest'
+import {
+  render,
+  expectStepVisible,
+  advanceTour,
+  HookProbe,
+} from '@tour-kit/testing-library'
+import { TourProvider, TourCard, useTour } from '@tour-kit/react'
+import * as React from 'react'
+
+const tours = [
+  {
+    id: 'demo',
+    steps: [
+      { id: 's1', target: '#a', content: 'First' },
+      { id: 's2', target: '#b', content: 'Second' },
+    ],
+  },
+]
+
+function AutoStart({ tourId }: { tourId: string }) {
+  const { start } = useTour()
+  const started = React.useRef(false)
+  // Start exactly once. `useTour().start` changes identity as provider state
+  // updates, so guard against re-running the effect and restarting the tour.
+  React.useEffect(() => {
+    if (started.current) return
+    started.current = true
+    void start(tourId)
+  }, [start, tourId])
+  return null
+}
+
+describe('demo tour', () => {
+  it('walks step 1 → step 2', async () => {
+    render(
+      <>
+        <div id="a">A</div>
+        <div id="b">B</div>
+        <TourProvider tours={tours}>
+          <AutoStart tourId="demo" />
+          <TourCard />
+          <HookProbe />
+        </TourProvider>
+      </>,
+    )
+
+    await expectStepVisible('s1')
+    await advanceTour()
+    await expectStepVisible('s2')
+  })
+})
+```
+
+The key bits:
+
+- **`<TourCard />`** — renders the current visible step. `TourProvider`
+  owns state but does not render a card by itself.
+- **`<HookProbe />`** — mount this inside `<TourProvider>` so helpers like
+  `goToStep` can reach the active tour handle.
+- **`expectStepVisible(id)`** — waits for the step's card to render
+  (handles portal mount delay) and asserts visibility.
+- **`advanceTour()`** — synthetic equivalent of clicking "Next."
+  Drives the same actions hook your UI uses.
+
+## Available helpers
+
+| Helper                          | Purpose                                          |
+|---------------------------------|--------------------------------------------------|
+| `setupTourKitTesting(opts?)`    | Global setup (call once in test setup file)      |
+| `virtualTarget(rect?, contextElement?)` | Create a Floating UI virtual reference for low-level positioning tests |
+| `expectStepVisible(id, opts?)`  | Wait + assert the step's card is visible         |
+| `advanceTour(opts?)`            | Click-equivalent "Next"                          |
+| `previousTour(opts?)`           | Click-equivalent "Back"                          |
+| `skipTour(opts?)`               | Click-equivalent "Skip"                          |
+| `completeTour(tourId, opts?)`   | Click-equivalent flow through the named tour until done |
+| `goToStep(id)`                  | Jump to step `id` (requires `<HookProbe />`)     |
+| `HookProbe`                     | Bridge component — mount inside `<TourProvider>` |
+| `getActiveTourHandle()`         | Escape hatch — returns the live tour handle      |
+| `TourKitTestingError`           | Typed error thrown by all helpers                |
+
+Plus re-exported from `@testing-library/react` for convenience:
+`render`, `screen`, `fireEvent`, `waitFor`, `act`, `cleanup`.
+
+## Why these helpers?
+
+Without them, you'd be:
+
+- Polling for portal mount by reading from `document.body` directly.
+- Calling `userEvent.click` on a button whose selector depends on
+  Tour Kit's internal DOM (brittle).
+- Reaching into the provider context with `useContext()` from a test
+  helper component you wrote yourself.
+
+The helpers normalize against the provider's actual state — if Tour Kit
+changes how a step renders, the helpers update with it; your tests don't.
+
+## See also
+
+- [Recipes](/docs/testing-library/recipes) — copy-paste patterns for
+  common test scenarios.
+- [`@tour-kit/react` reference](/docs/react) — `TourProvider`, `TourCard`,
+  and the `useTour` hook used throughout these examples.
+
+---
+
+# Recipes
+
+> Copy-paste test patterns for Tour Kit.
+
+Patterns that come up over and over in tour testing. Copy, adapt, ship.
+
+The snippets below assume this tiny harness:
+
+```tsx
+import { HookProbe, render } from '@tour-kit/testing-library'
+import { TourProvider, TourCard, useTour, type TourConfig } from '@tour-kit/react'
+import * as React from 'react'
+
+function AutoStart({ tourId }: { tourId: string }) {
+  const { start } = useTour()
+  const started = React.useRef(false)
+  // Start exactly once. `useTour().start` changes identity as provider state
+  // updates, so guard against re-running the effect and restarting the tour.
+  React.useEffect(() => {
+    if (started.current) return
+    started.current = true
+    void start(tourId)
+  }, [start, tourId])
+  return null
+}
+
+function renderTour(tours: TourConfig[], tourId: string, targets: React.ReactNode = null) {
+  return render(
+    <>
+      {targets}
+      <TourProvider tours={tours}>
+        <AutoStart tourId={tourId} />
+        <TourCard />
+        <HookProbe />
+      </TourProvider>
+    </>,
+  )
+}
+
+// A two-step demo tour, reused by several recipes below.
+const tours: TourConfig[] = [
+  {
+    id: 'demo',
+    steps: [
+      { id: 's1', target: '#a', content: 'First' },
+      { id: 's2', target: '#b', content: 'Second' },
+    ],
+  },
+]
+
+// A five-step tour for the "jump to a non-adjacent step" recipe.
+const longTour: TourConfig = {
+  id: 'long',
+  steps: ['s1', 's2', 's3', 's4', 's5'].map((id) => ({
+    id,
+    target: `#${id}`,
+    content: id,
+  })),
+}
+```
+
+Each recipe below renders DOM targets for the steps it drives — the `#a` /
+`#b` / `#s1`… `<div>`s you'll see passed to `renderTour` — so the card has a
+real element to anchor to.
+
+## 1. Asserting that a tour starts on mount
+
+```tsx
+import { expectStepVisible } from '@tour-kit/testing-library'
+
+it('autostarts the welcome tour', async () => {
+  renderTour(
+    [{ id: 'welcome', steps: [{ id: 'hi', target: '#hi', content: 'Hi' }] }],
+    'welcome',
+    <div id="hi" />,
+  )
+
+  await expectStepVisible('hi')
+})
+```
+
+## 2. Driving a tour through every step
+
+```tsx
+import { advanceTour, completeTour, expectStepVisible } from '@tour-kit/testing-library'
+
+it('walks step 1 → 2 → done', async () => {
+  renderTour(tours, 'demo', <>
+    <div id="a" />
+    <div id="b" />
+  </>)
+
+  await expectStepVisible('s1')
+  await advanceTour()
+  await expectStepVisible('s2')
+  await completeTour('demo')
+
+  // Tour is done — no step should be visible:
+  expect(document.querySelector('[data-tour-step]')).toBeNull()
+})
+```
+
+## 3. Skipping mid-tour
+
+```tsx
+import { vi } from 'vitest'
+import { expectStepVisible, skipTour } from '@tour-kit/testing-library'
+
+it('skip mid-tour invokes onSkip', async () => {
+  const onSkip = vi.fn()
+  renderTour([{ ...tours[0], onSkip }], 'demo', <>
+    <div id="a" />
+    <div id="b" />
+  </>)
+
+  // Wait for the card (and its Skip button) to mount before skipping —
+  // skipTour() queries synchronously and start() settles asynchronously.
+  await expectStepVisible('s1')
+  await skipTour()
+  expect(onSkip).toHaveBeenCalledOnce()
+})
+```
+
+## 4. Jumping to a non-adjacent step
+
+`goToStep` requires the `<HookProbe />` because it needs direct access to
+the tour handle.
+
+```tsx
+import { goToStep, expectStepVisible } from '@tour-kit/testing-library'
+
+it('jumps from step 1 to step 5', async () => {
+  renderTour(
+    [longTour],
+    'long',
+    <>
+      {['s1', 's2', 's3', 's4', 's5'].map((id) => (
+        <div key={id} id={id} />
+      ))}
+    </>,
+  )
+
+  await expectStepVisible('s1')
+  await goToStep('s5')
+  await expectStepVisible('s5')
+})
+```
+
+## 5. Testing target positioning helpers
+
+Use `virtualTarget` for low-level Floating UI positioning tests. It does not
+create a selector-backed DOM element for `TourStep.target`; for full TourCard
+tests, render a real DOM target or pass a ref/getter.
+
+```tsx
+import { virtualTarget } from '@tour-kit/testing-library'
+
+it('creates a stable virtual rect', () => {
+  const target = virtualTarget({ width: 320, height: 180 })
+  expect(target.getBoundingClientRect().width).toBe(320)
+})
+```
+
+## 6. Asserting against the active tour handle directly
+
+For complex assertions, drop to the handle:
+
+```tsx
+import { getActiveTourHandle, waitFor } from '@tour-kit/testing-library'
+
+it('exposes step metadata via the handle', async () => {
+  renderTour(tours, 'demo')
+
+  // `start()` settles asynchronously, so wait for the handle to reflect it
+  // before reading. (`waitFor` is re-exported from the testing library.)
+  await waitFor(() => {
+    expect(getActiveTourHandle()?.currentStep?.id).toBe('s1')
+  })
+  expect(getActiveTourHandle()?.totalSteps).toBe(2)
+})
+```
+
+## 7. Mocking storage between tests
+
+Tour Kit persists progress to localStorage by default. If your tests
+care about a fresh state per test, clear it in `beforeEach`:
+
+```ts
+import { beforeEach } from 'vitest'
+
+beforeEach(() => {
+  localStorage.clear()
+})
+```
+
+Or pass an in-memory storage adapter to the provider — see the
+[persistence guide](/docs/guides/persistence).
+
+## 8. Testing portal-rendered cards
+
+Cards render into a portal mounted on `document.body`. The helpers handle
+this for you, but if you bypass them and use `screen.getByText`, scope
+your query to the portal root:
+
+```tsx
+import { within } from '@testing-library/react'
+
+const text = within(document.body).getByText(/welcome/i)
+expect(text).toBeVisible()
+```
+
+---
+
 # Troubleshooting
 
 > Common integration issues with Tour Kit and how to fix them.
@@ -65663,6 +68497,13 @@ the prop matching the component you're rendering.
 <AnnouncementModal id="welcome" />
 <SurveyModal surveyId="nps-q3" />
 ```
+
+## Related
+
+- [Troubleshooting guide](/docs/guides/troubleshooting) — symptom→cause→fix entries for common integration issues.
+- [Diagnostic engine](/docs/core/diagnostic) — `<TourProvider diagnose>` surfaces *why* a tour didn't fire.
+- [`<TourProvider>`](/docs/core/providers/tour-provider) and [`<AnnouncementsProvider>`](/docs/announcements/providers/announcements-provider) — common misconfigurations live on these props.
+- [Accessibility guide](/docs/guides/accessibility) and [reduced-motion guide](/docs/guides/reduced-motion) — for "feature works but feels broken" reports.
 
 ---
 
