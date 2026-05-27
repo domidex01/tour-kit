@@ -1,27 +1,22 @@
 'use client'
 
-import { ArrowRight, Check, Code2, Sparkles, X, Zap } from 'lucide-react'
+import {
+  ArrowRight,
+  Check,
+  Code2,
+  Download,
+  Scale,
+  ShieldCheck,
+  Sparkles,
+  X,
+  Zap,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
 import { TrackedBuyButton } from '@/components/analytics/tracked-buy-button'
 import { POLAR_CHECKOUT_URL } from '@/lib/polar-config'
-
-function FAQJsonLdInline({ items }: { items: { q: string; a: string }[] }) {
-  const data = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: items.map((item) => ({
-      '@type': 'Question',
-      name: item.q,
-      acceptedAnswer: { '@type': 'Answer', text: item.a },
-    })),
-  }
-  return (
-    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD requires innerHTML
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
-  )
-}
+import { PRICING_FAQS } from '@/lib/pricing-faqs'
 
 const FREE_FEATURES = [
   'Product tours & steps',
@@ -62,10 +57,40 @@ const COMPARISON_ROWS = [
   { feature: 'License', free: 'MIT', pro: 'Commercial' },
 ]
 
+// Verifiable social proof only. Source: npmjs.org last-month downloads for
+// @tour-kit/core = 4,144/mo on 2026-05-27 (~8,600/mo across core+react+hints).
+// Refresh quarterly. Deliberately no GitHub star count (4 — would hurt) and no
+// testimonials (none yet). See marketing-strategy/funnel-strategy-20260527.md (A1).
+const MONTHLY_INSTALLS = '4,000+'
+
 export function Pricing() {
   return (
     <section className="px-6 pb-20 sm:px-8 md:pb-28 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
+        {/* Social proof strip — A1: verifiable trust signals as pills (matches homepage SocialProof) */}
+        <ul className="mx-auto mb-12 flex max-w-2xl flex-wrap items-center justify-center gap-2.5">
+          <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
+            <Download
+              className="h-3.5 w-3.5 shrink-0 text-[var(--tk-primary)]"
+              aria-hidden="true"
+            />
+            <span>
+              <strong className="font-semibold text-fd-foreground">{MONTHLY_INSTALLS}</strong>{' '}
+              monthly npm installs
+            </span>
+          </li>
+          <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
+            <Scale className="h-3.5 w-3.5 shrink-0 text-[var(--tk-primary)]" aria-hidden="true" />
+            <span>MIT-licensed core — no lock-in</span>
+          </li>
+          <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
+            <ShieldCheck
+              className="h-3.5 w-3.5 shrink-0 text-[var(--tk-primary)]"
+              aria-hidden="true"
+            />
+            <span>Secure checkout via Polar</span>
+          </li>
+        </ul>
         {/* Pricing cards */}
         <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 md:gap-8">
           {/* Free tier */}
@@ -134,7 +159,7 @@ export function Pricing() {
               </div>
             </div>
 
-            <div className="mb-8">
+            <div className="mb-2">
               <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
                 $99
               </span>
@@ -142,6 +167,11 @@ export function Pricing() {
                 one-time / 5 sites
               </span>
             </div>
+
+            {/* Honest price anchor — most onboarding SaaS bills monthly; we charge once */}
+            <p className="mb-8 text-[13px] leading-snug text-fd-muted-foreground">
+              Less than one month of most onboarding SaaS — paid once, not monthly.
+            </p>
 
             <div className="mb-6 rounded-lg border border-[var(--tk-primary)]/20 bg-[var(--tk-primary)]/5 px-4 py-2.5">
               <p className="text-[13px] font-medium text-fd-foreground">
@@ -172,6 +202,15 @@ export function Pricing() {
               Buy Pro License
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </TrackedBuyButton>
+
+            {/* Risk reversal — A2: surface the 14-day guarantee at the decision point */}
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[13px] text-fd-muted-foreground">
+              <ShieldCheck
+                className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                aria-hidden="true"
+              />
+              14-day money-back guarantee · No subscription, ever
+            </p>
           </div>
         </div>
 
@@ -185,9 +224,20 @@ export function Pricing() {
               Feature comparison
             </h3>
           </div>
-          <div className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-fd-border">
-            <table className="w-full text-sm">
+          <div className="overflow-hidden rounded-xl border border-fd-border">
+            {/* The global `table{display:block}` rule (globals.css) is unlayered and beats
+                Tailwind utilities in the cascade, so force real table layout inline to fill
+                the card width. Fixed 50/25/25 columns via colgroup. */}
+            <table
+              className="text-sm"
+              style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}
+            >
               <caption className="sr-only">Feature comparison between Free and Pro tiers.</caption>
+              <colgroup>
+                <col style={{ width: '50%' }} />
+                <col style={{ width: '25%' }} />
+                <col style={{ width: '25%' }} />
+              </colgroup>
               <thead>
                 <tr className="border-b border-fd-border bg-fd-muted/50">
                   <th
@@ -240,8 +290,6 @@ export function Pricing() {
 
         {/* License & fulfillment — H5 expansion (license terms, refund, Polar fulfillment) */}
         <LicenseTerms />
-
-        <FAQJsonLdInline items={FAQ_ITEMS} />
 
         <p className="mt-12 text-center text-[13px] text-fd-muted-foreground">
           Already a customer?{' '}
@@ -380,12 +428,12 @@ function FAQ() {
         </h3>
       </div>
       <div className="mx-auto max-w-3xl divide-y divide-fd-border overflow-hidden rounded-xl border border-fd-border">
-        {FAQ_ITEMS.map((item, i) => {
+        {PRICING_FAQS.map((item, i) => {
           const isOpen = openIndex === i
           const panelId = `faq-panel-${i}`
           const triggerId = `faq-trigger-${i}`
           return (
-            <div key={item.q}>
+            <div key={item.question}>
               <button
                 type="button"
                 id={triggerId}
@@ -394,7 +442,7 @@ function FAQ() {
                 onClick={() => setOpenIndex(isOpen ? null : i)}
                 className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
               >
-                {item.q}
+                {item.question}
                 <svg
                   className={`h-4 w-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                   viewBox="0 0 24 24"
@@ -418,7 +466,7 @@ function FAQ() {
               >
                 <div className="overflow-hidden">
                   <p className="px-6 pb-5 text-[14px] leading-relaxed text-fd-muted-foreground">
-                    {item.a}
+                    {item.answer}
                   </p>
                 </div>
               </div>
@@ -429,42 +477,3 @@ function FAQ() {
     </div>
   )
 }
-
-const FAQ_ITEMS = [
-  {
-    q: 'Is the free tier really free forever?',
-    a: 'Yes. The core, react, and hints packages are MIT licensed with no usage limits, no time limits, and no feature gates. Use them in as many projects as you want.',
-  },
-  {
-    q: 'What does "5 sites" mean?',
-    a: "Your Pro license key can be activated on up to 5 production domains. localhost and development environments don't count. You can deactivate and reassign domains anytime from your Polar dashboard.",
-  },
-  {
-    q: 'Do I need to pay again for updates?',
-    a: 'No. The Pro license is a one-time purchase that includes all future updates to the extended packages. No subscriptions, no renewal fees.',
-  },
-  {
-    q: "What happens if I don't have a license?",
-    a: 'Pro packages still render fully — your real UI ships with a small "Tour Kit · Unlicensed" badge in the bottom-right and a dev-only console warning. Nothing crashes, nothing is hidden behind a placeholder, and your app keeps working.',
-  },
-  {
-    q: 'Can I try Pro features before buying?',
-    a: 'Yes. Pro packages are fully functional on localhost (no badge) and on preview/staging URLs (with the small badge). You can build, demo, and QA the complete onboarding flow before purchasing — license key only suppresses the badge on production hosts.',
-  },
-  {
-    q: 'How does activation work?',
-    a: 'Add your license key as an environment variable. On the first production page load, your domain is automatically activated (using 1 of 5 slots). No manual activation steps required.',
-  },
-  {
-    q: 'Can I get a refund?',
-    a: 'Yes. We offer a 14-day refund window from the date of purchase. Email hello@usertourkit.com from your purchase address with your order ID. Refunds are processed by Polar within 5–10 business days.',
-  },
-  {
-    q: 'Do you handle VAT and sales tax?',
-    a: 'Yes. Polar acts as merchant of record and calculates, collects, and remits the correct VAT, GST, or sales tax based on your billing country. The price you see at checkout is the final price.',
-  },
-  {
-    q: 'Can I get a business invoice?',
-    a: 'Polar generates a tax-compliant invoice automatically and emails it with the receipt. You can update the company name, billing address, and VAT number during checkout or anytime from your Polar customer portal.',
-  },
-]
