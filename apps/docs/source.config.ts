@@ -7,6 +7,20 @@ export const docs = defineDocs({
     schema: frontmatterSchema.extend({
       howto: z.boolean().optional(),
       keywords: z.array(z.string()).optional(),
+      // Cross-sell a Pro package from a free-package docs page. Renders an
+      // inline <ProCallout> mid-article (see app/docs/_page-logic.tsx).
+      proCrossSell: z
+        .enum([
+          'adoption',
+          'announcements',
+          'checklists',
+          'surveys',
+          'ai',
+          'media',
+          'analytics',
+          'scheduling',
+        ])
+        .optional(),
     }),
     postprocess: {
       includeProcessedMarkdown: true,

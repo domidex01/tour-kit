@@ -5,7 +5,7 @@ import { ArrowRight, Terminal } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const installCmd = 'pnpm add @tour-kit/react'
+const installCmd = 'pnpm add @tour-kit/core'
 
 const steps = [
   {
@@ -288,7 +288,7 @@ export function Hero() {
             </div>
 
             <p className="font-mono text-[13px] font-bold text-[#02182b]/60 dark:text-white/60">
-              pnpm add @tour-kit/react <span className="mx-1 opacity-40">&middot;</span> {'<'} 8KB
+              pnpm add @tour-kit/core <span className="mx-1 opacity-40">&middot;</span> {'<'} 8KB
               gzipped <span className="mx-1 opacity-40">&middot;</span> TypeScript strict{' '}
               <span className="mx-1 opacity-40">&middot;</span> own your code
             </p>

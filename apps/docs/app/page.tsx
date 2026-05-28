@@ -1,4 +1,5 @@
 import { BlogPreview } from '@/components/landing/blog-preview'
+import { CtaBand } from '@/components/landing/cta-band'
 import { Features } from '@/components/landing/features'
 import { Footer } from '@/components/landing/footer'
 import { Hero } from '@/components/landing/hero'
@@ -143,6 +144,14 @@ export default function HomePage() {
         <DemoTour />
         <QuickStart />
         <Features />
+        <CtaBand
+          placement="home_after_features"
+          eyebrow="Free & open source"
+          heading="Ready to build your first tour?"
+          subtext="MIT core, free forever. Pro packages run unlicensed in dev — pay once ($99) when you ship."
+          ctaLabel="Build my first tour"
+          reassurance="Free & MIT-licensed — no signup, no credit card."
+        />
         <Packages />
         <ComparisonTable />
         <CompareGrid />
@@ -196,7 +205,7 @@ export default function HomePage() {
               {/* Install command */}
               <div className="mx-auto mb-8 inline-flex items-center gap-3 rounded-lg border border-fd-border/50 bg-fd-muted/30 px-6 py-3 font-mono text-[14px] backdrop-blur-sm">
                 <span className="select-none text-fd-muted-foreground/50">$</span>
-                <span className="text-fd-foreground/70">pnpm add @tour-kit/react</span>
+                <span className="text-fd-foreground/70">pnpm add @tour-kit/core</span>
               </div>
 
               <div className="flex justify-center">

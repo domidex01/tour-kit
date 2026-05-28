@@ -1,6 +1,7 @@
 import { ArticleCard } from '@/components/article/article-card'
 import { BlogPostCrossLinks } from '@/components/article/article-cross-links'
 import { ArticleLayout } from '@/components/article/article-layout'
+import { BlogCta } from '@/components/blog/blog-cta'
 import { ReadingProgress } from '@/components/blog/reading-progress'
 import { BlogTableOfContents } from '@/components/blog/table-of-contents'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
@@ -295,27 +296,8 @@ export default async function BlogPostPage({ params }: PageProps) {
         )}
 
         {/* ── CTA ── */}
-        <div className="not-prose mt-12 rounded-lg border border-fd-border bg-fd-muted/30 p-8 text-center">
-          <p className="mb-4 text-[15px] font-semibold text-fd-foreground">
-            Ready to try userTourKit?
-          </p>
-          <div className="mb-4 inline-flex items-center gap-2 rounded-md bg-fd-background px-4 py-2 font-mono text-[13px]">
-            <span className="text-fd-muted-foreground">$</span> pnpm add @tour-kit/react
-          </div>
-          <div className="flex justify-center gap-4">
-            <Link
-              href="/docs/getting-started"
-              className="rounded-lg bg-[#0197f6] px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-110"
-            >
-              Get started
-            </Link>
-            <Link
-              href="/pricing"
-              className="rounded-lg border border-fd-border px-5 py-2.5 text-[13px] font-semibold text-fd-foreground transition-all hover:bg-fd-muted"
-            >
-              View pricing
-            </Link>
-          </div>
+        <div className="not-prose">
+          <BlogCta variant="band" placement="blog_post_footer" />
         </div>
 
         {/* ── Related posts ── */}

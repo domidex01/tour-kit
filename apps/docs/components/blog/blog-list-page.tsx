@@ -1,3 +1,4 @@
+import { BlogCta } from '@/components/blog/blog-cta'
 import { BlogPagination } from '@/components/blog/pagination'
 import { Footer } from '@/components/landing/footer'
 import {
@@ -154,23 +155,30 @@ export function BlogListPage({ page }: BlogListPageProps) {
           </section>
         )}
 
-        {/* Card grid */}
+        {/* Card grid — a native CTA card is spliced in after the 6th post on page 1 */}
         <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-          {posts.map((post) => (
-            <BlogCard
-              key={post.slug}
-              slug={post.slug}
-              title={post.title}
-              description={post.description}
-              category={post.category}
-              image={post.ogImage}
-              publishedAt={post.publishedAt}
-              readingTime={getReadingTime(post.slug)}
-            />
-          ))}
+          {posts.flatMap((post, i) => {
+            const card = (
+              <BlogCard
+                key={post.slug}
+                slug={post.slug}
+                title={post.title}
+                description={post.description}
+                category={post.category}
+                image={post.ogImage}
+                publishedAt={post.publishedAt}
+                readingTime={getReadingTime(post.slug)}
+              />
+            )
+            return currentPage === 1 && i === 5
+              ? [card, <BlogCta key="cta-grid" variant="card" placement="blog_index_grid" />]
+              : [card]
+          })}
         </div>
 
         <BlogPagination currentPage={currentPage} totalPages={totalPages} />
+
+        <BlogCta variant="band" placement="blog_index_footer" />
       </main>
       <Footer />
     </HomeLayout>

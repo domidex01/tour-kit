@@ -22,7 +22,15 @@ export default function Layout({ children }: { children: ReactNode }) {
         ),
       }}
     >
-      <main id="main-content" className="flex flex-1 flex-col [grid-area:main]">
+      {/*
+        `display: contents` (not a grid box): DocsPage renders both the article
+        and the TOC, each with its own grid-area. Wrapping them in a single
+        `[grid-area:main]` box trapped the TOC inside the content column (it fell
+        to the bottom-left and left the right rail empty). `contents` lets the
+        article + TOC participate directly in DocsLayout's grid. We keep
+        <main id="main-content"> for the skip-link target.
+      */}
+      <main id="main-content" className="contents">
         {children}
       </main>
     </DocsLayout>

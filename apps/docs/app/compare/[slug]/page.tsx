@@ -312,7 +312,7 @@ export default async function ComparisonPage({ params }: PageProps) {
           Ready to try userTourKit?
         </p>
         <div className="mb-4 inline-flex items-center gap-2 rounded-md bg-fd-background px-4 py-2 font-mono text-[13px]">
-          <span className="text-fd-muted-foreground">$</span> pnpm add @tour-kit/react
+          <span className="text-fd-muted-foreground">$</span> pnpm add @tour-kit/core
         </div>
         <div className="flex justify-center gap-4">
           <Link

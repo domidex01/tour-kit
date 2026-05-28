@@ -169,8 +169,20 @@ export function Pricing() {
             </div>
 
             {/* Honest price anchor — most onboarding SaaS bills monthly; we charge once */}
-            <p className="mb-8 text-[13px] leading-snug text-fd-muted-foreground">
+            <p className="mb-2 text-[13px] leading-snug text-fd-muted-foreground">
               Less than one month of most onboarding SaaS — paid once, not monthly.
+            </p>
+            {/* Named-competitor anchor — links to /compare for sourced pricing rather than
+                hardcoding figures that go stale */}
+            <p className="mb-8 text-[13px] leading-snug text-fd-muted-foreground">
+              Appcues, Pendo &amp; WalkMe bill monthly, per seat.{' '}
+              <Link
+                href="/compare"
+                className="font-medium text-[var(--tk-primary)] underline-offset-2 hover:underline"
+              >
+                See the comparison
+              </Link>
+              .
             </p>
 
             <div className="mb-6 rounded-lg border border-[var(--tk-primary)]/20 bg-[var(--tk-primary)]/5 px-4 py-2.5">

@@ -1,5 +1,7 @@
 import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/ai/page-actions'
 import { DocsByline } from '@/components/article/docs-byline'
+import { DocsCta } from '@/components/article/docs-cta'
+import { ProCallout } from '@/components/article/pro-callout'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
 import { SITE_LAUNCH_FALLBACK, getGitFirstCommitted, getGitLastModified } from '@/lib/git-dates'
 import { source } from '@/lib/source'
@@ -354,7 +356,9 @@ export async function renderDocsPage(slug: string[] | undefined) {
       </div>
       <DocsBody>
         <MDXContent components={{ ...defaultMdxComponents, Tab, Tabs }} />
+        {page.data.proCrossSell ? <ProCallout package={page.data.proCrossSell} /> : null}
       </DocsBody>
+      <DocsCta />
     </DocsPage>
   )
 }
