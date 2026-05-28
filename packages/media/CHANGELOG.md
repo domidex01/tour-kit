@@ -1,5 +1,43 @@
 # @tour-kit/media
 
+## 0.13.0
+
+### Minor Changes
+
+- 8a443fb: Add a `@tour-kit/media/tailwind` entry point (`mediaPlugin`, `mediaSafelist`,
+  `tourKitMediaPreset`) so embeds are never invisible.
+
+  Previously, if a consumer's Tailwind `content` globs did not scan
+  `@tour-kit/media`'s `dist`, the aspect-ratio and positioning utilities the
+  embeds rely on were purged — the container collapsed to `height: 0` and every
+  iframe/video rendered invisibly. `mediaPlugin` force-emits those layout
+  utilities (and the five supported aspect ratios) through the plugin API, so
+  they survive purging without adding the package to `content` globs, mirroring
+  `@tour-kit/react`'s `tourKitPlugin` and `@tour-kit/hints`'s `hintsPlugin`.
+  `mediaSafelist` covers runtime-computed `aspect-[w/h]` arbitrary values.
+
+### Patch Changes
+
+- 8a443fb: Fix SSR hydration mismatch in reduced-motion detection.
+
+  `@tour-kit/core`'s `useMediaQuery` (and the `usePrefersReducedMotion` /
+  `useReducedMotion` hooks built on it) now use `useSyncExternalStore` with a
+  server snapshot of `false`, so the first client render always matches the
+  server markup before flipping to the real `matchMedia` value after hydration.
+
+  `@tour-kit/media`'s `usePrefersReducedMotion` no longer reads `matchMedia` in a
+  `useState` initializer (which returned `false` on the server but `true` on the
+  client for reduced-motion users, causing a hydration mismatch in `TourMedia`
+  and `MediaHeadless`). It now delegates to core's SSR-safe `useReducedMotion`,
+  matching `MediaSlot`.
+
+- Updated dependencies [8a443fb]
+- Updated dependencies [d5e0ef1]
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+  - @tour-kit/license@1.3.3
+  - @tour-kit/core@1.0.3
+
 ## 0.12.6
 
 ### Patch Changes

@@ -1,5 +1,26 @@
 # @tour-kit/announcements
 
+## 4.1.3
+
+### Patch Changes
+
+- 8a443fb: Fix two related queue bugs in the dismiss/complete auto-advance:
+
+  - `useAnnouncementQueue().queue` (and `.size`) over-reported by one. `scheduler.getNext()` dequeues the promoted item, but the auto-advance timer set `state.queue` _before_ calling `getNext()`, leaving the now-visible announcement still listed until the next queue mutation. The timer now re-syncs `state.queue` from the scheduler after `getNext()`, mirroring `showNext()`.
+  - Completion is now terminal in `scheduler.canShow()`: a completed announcement no longer re-shows until `reset()` clears `completedAt`. Previously `canShow` gated on `isDismissed` but ignored `completedAt`, so completing an announcement whose frequency permits re-show (e.g. `'always'`, the default) let the auto-show effect immediately re-display it. `forceShow()` still bypasses the gate by design.
+
+- Updated dependencies [8a443fb]
+- Updated dependencies [d5e0ef1]
+- Updated dependencies [8a443fb]
+- Updated dependencies [7fde599]
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+  - @tour-kit/license@1.3.3
+  - @tour-kit/core@1.0.3
+  - @tour-kit/media@0.13.0
+  - @tour-kit/scheduling@0.11.6
+  - @tour-kit/analytics@0.11.6
+
 ## 4.1.2
 
 ### Patch Changes

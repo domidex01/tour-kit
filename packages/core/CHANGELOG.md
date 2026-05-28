@@ -1,5 +1,49 @@
 # @tour-kit/core
 
+## 1.0.3
+
+### Patch Changes
+
+- 8a443fb: Dedupe noisy dev-only warnings to once per page/session.
+
+  The unlicensed `[TourKit] … without a valid license` warning previously logged
+  once per mounted Pro package (≈9–10× on a page using several). `<LicenseWarning>`
+  now prints at most once per session. Likewise, `<TourProvider>`'s dev
+  `diagnose` tip now fires once per session instead of once per provider instance
+  (it printed twice on pages with multiple tours).
+
+- 8a443fb: Fix SSR hydration mismatch in reduced-motion detection.
+
+  `@tour-kit/core`'s `useMediaQuery` (and the `usePrefersReducedMotion` /
+  `useReducedMotion` hooks built on it) now use `useSyncExternalStore` with a
+  server snapshot of `false`, so the first client render always matches the
+  server markup before flipping to the real `matchMedia` value after hydration.
+
+  `@tour-kit/media`'s `usePrefersReducedMotion` no longer reads `matchMedia` in a
+  `useState` initializer (which returned `false` on the server but `true` on the
+  client for reduced-motion users, causing a hydration mismatch in `TourMedia`
+  and `MediaHeadless`). It now delegates to core's SSR-safe `useReducedMotion`,
+  matching `MediaSlot`.
+
+- 8a443fb: Fix `TourCard` focus management (WCAG 2.4.3).
+
+  `TourCard` declared `aria-modal="true"` but never trapped focus or restored it
+  on close — keyboard/screen-reader users could Tab into the dimmed background and
+  were dumped to `<body>` when the tour closed. Root cause: `TourPortal` mounts
+  its node lazily, so the focus trap's `activate()` ran against a null container
+  and silently bailed (never capturing the element to restore focus to).
+
+  `TourCard` now tracks the portaled node in state so the trap engages once the
+  card mounts, restores focus to the invoking trigger on close (X and Skip), and
+  marks the background `inert` for true modal semantics. Crucially, `aria-modal`,
+  the focus trap, and the inert background are now applied **only to modal steps**
+  — steps with `interactive: true` (spotlight/branching) stay non-modal so
+  keyboard users can still reach the highlighted target.
+
+  `@tour-kit/core`'s `useFocusTrap` gains an opt-in `{ inertBackground }` option,
+  pulls drifting focus back into the container, and is idempotent across Strict
+  Mode double-invocations.
+
 ## 1.0.2
 
 ### Patch Changes

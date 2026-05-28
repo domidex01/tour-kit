@@ -1,5 +1,14 @@
 # @tour-kit/playwright
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+  - @tour-kit/core@1.0.3
+
 ## 0.1.6
 
 ### Patch Changes
