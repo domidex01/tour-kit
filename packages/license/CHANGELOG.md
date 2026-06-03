@@ -1,5 +1,23 @@
 # @tour-kit/license
 
+## 1.3.3
+
+### Patch Changes
+
+- 8a443fb: Dedupe noisy dev-only warnings to once per page/session.
+
+  The unlicensed `[TourKit] … without a valid license` warning previously logged
+  once per mounted Pro package (≈9–10× on a page using several). `<LicenseWarning>`
+  now prints at most once per session. Likewise, `<TourProvider>`'s dev
+  `diagnose` tip now fires once per session instead of once per provider instance
+  (it printed twice on pages with multiple tours).
+
+- d5e0ef1: Reword the unlicensed watermark badge CTA from "Buy license" to "Remove for $99". The new copy names the benefit (remove the badge) and the one-time price, and the `aria-label` now reads "remove this badge with a one-time $99 license" — higher-intent CTA framing for the production watermark, which is the primary in-app conversion surface for Tour Kit Pro. Behavior, link target, and the `unlicensed_badge_clicked` event are unchanged.
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+  - @tour-kit/core@1.0.3
+
 ## 1.3.2
 
 ### Patch Changes

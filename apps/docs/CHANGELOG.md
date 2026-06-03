@@ -1,5 +1,18 @@
 # @tour-kit/docs
 
+## 0.0.17
+
+### Patch Changes
+
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+  - @tour-kit/core@1.0.3
+  - @tour-kit/hints@1.0.3
+  - @tour-kit/react@1.0.3
+
 ## 0.0.16
 
 ### Patch Changes

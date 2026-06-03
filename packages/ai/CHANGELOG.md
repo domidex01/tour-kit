@@ -1,5 +1,27 @@
 # @tour-kit/ai
 
+## 0.12.0
+
+### Minor Changes
+
+- 8a443fb: `AiChatToggle` accepts a `style` prop merged over its fixed-position defaults,
+  so the launcher can be nudged away from other bottom-corner UI (framework dev
+  indicators, another FAB) without re-implementing it.
+
+  `AdoptionTable` rows no longer show a hover-background highlight by default —
+  the table is display-only (no row click handler) and the highlight read as
+  "clickable". Opt back in with the row variant's `hover` where rows are
+  genuinely interactive.
+
+### Patch Changes
+
+- Updated dependencies [8a443fb]
+- Updated dependencies [d5e0ef1]
+- Updated dependencies [8a443fb]
+- Updated dependencies [8a443fb]
+  - @tour-kit/license@1.3.3
+  - @tour-kit/core@1.0.3
+
 ## 0.11.5
 
 ### Patch Changes
