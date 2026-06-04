@@ -10,9 +10,17 @@ interface TrackedBuyButtonProps {
   placement: BuyButtonPlacement
   className?: string
   children: ReactNode
+  /** Price (USD) reported to GA as the conversion value. Defaults to 99. */
+  value?: number
 }
 
-export function TrackedBuyButton({ href, placement, className, children }: TrackedBuyButtonProps) {
+export function TrackedBuyButton({
+  href,
+  placement,
+  className,
+  children,
+  value = 99,
+}: TrackedBuyButtonProps) {
   return (
     <a
       href={href}
@@ -23,7 +31,7 @@ export function TrackedBuyButton({ href, placement, className, children }: Track
         sendGAEvent('event', 'pricing_buy_clicked', {
           placement,
           destination: href,
-          value: 99,
+          value,
           currency: 'USD',
         })
       }}

@@ -1,5 +1,6 @@
 'use client'
 
+import { HeroSaleCountdown } from '@/components/landing/sale-countdown'
 import { CopyButton } from '@/components/ui/copy-button'
 import { ArrowRight, Terminal } from 'lucide-react'
 import Link from 'next/link'
@@ -292,6 +293,8 @@ export function Hero() {
               gzipped <span className="mx-1 opacity-40">&middot;</span> TypeScript strict{' '}
               <span className="mx-1 opacity-40">&middot;</span> own your code
             </p>
+
+            <HeroSaleCountdown />
           </div>
 
           {/* Right — animated mini app mockup */}

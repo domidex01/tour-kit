@@ -8,6 +8,7 @@ import {
   Scale,
   ShieldCheck,
   Sparkles,
+  Timer,
   X,
   Zap,
 } from 'lucide-react'
@@ -15,7 +16,9 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 import { TrackedBuyButton } from '@/components/analytics/tracked-buy-button'
+import { SaleCountdown, useSaleCountdown } from '@/components/landing/sale-countdown'
 import { POLAR_CHECKOUT_URL } from '@/lib/polar-config'
+import { DISCOUNT_PERCENT, REGULAR_PRICE, SALE_PRICE } from '@/lib/pricing'
 import { PRICING_FAQS } from '@/lib/pricing-faqs'
 
 const FREE_FEATURES = [
@@ -64,9 +67,25 @@ const COMPARISON_ROWS = [
 const MONTHLY_INSTALLS = '4,000+'
 
 export function Pricing() {
+  const sale = useSaleCountdown()
+
   return (
     <section className="px-6 pb-20 sm:px-8 md:pb-28 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
+        {/* Launch promo banner — live countdown. Hidden once the window closes. */}
+        {!sale.expired && (
+          <div className="mx-auto mb-10 flex max-w-2xl flex-col items-center justify-center gap-3.5 rounded-xl border border-[var(--tk-primary)]/30 bg-gradient-to-r from-[var(--tk-primary)]/10 via-[var(--tk-primary)]/5 to-[var(--tk-primary)]/10 px-6 py-5 sm:flex-row sm:gap-6">
+            <div className="flex items-center gap-2 text-center sm:text-left">
+              <Timer className="h-5 w-5 shrink-0 text-[var(--tk-primary)]" aria-hidden="true" />
+              <p className="text-[15px] font-semibold text-fd-foreground">
+                Launch sale —{' '}
+                <span className="text-[var(--tk-primary)]">{DISCOUNT_PERCENT}% off</span> the Pro
+                suite
+              </p>
+            </div>
+            <SaleCountdown remaining={sale.remaining} mounted={sale.mounted} />
+          </div>
+        )}
         {/* Social proof strip — A1: verifiable trust signals as pills (matches homepage SocialProof) */}
         <ul className="mx-auto mb-12 flex max-w-2xl flex-wrap items-center justify-center gap-2.5">
           <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
@@ -160,12 +179,33 @@ export function Pricing() {
             </div>
 
             <div className="mb-2">
-              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
-                $99
-              </span>
-              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">
-                one-time / 5 sites
-              </span>
+              {sale.expired ? (
+                <>
+                  <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
+                    ${REGULAR_PRICE}
+                  </span>
+                  <span className="ml-1.5 text-[15px] text-fd-muted-foreground">
+                    one-time / 5 sites
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                    <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
+                      ${SALE_PRICE}
+                    </span>
+                    <span className="text-xl font-semibold text-fd-muted-foreground line-through decoration-2">
+                      ${REGULAR_PRICE}
+                    </span>
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                      {DISCOUNT_PERCENT}% off
+                    </span>
+                  </div>
+                  <span className="text-[15px] text-fd-muted-foreground">
+                    one-time / 5 sites · limited launch price
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Honest price anchor — most onboarding SaaS bills monthly; we charge once */}
@@ -209,9 +249,10 @@ export function Pricing() {
             <TrackedBuyButton
               href={POLAR_CHECKOUT_URL}
               placement="pricing_page"
+              value={sale.expired ? REGULAR_PRICE : SALE_PRICE}
               className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
             >
-              Buy Pro License
+              {sale.expired ? 'Buy Pro License' : `Get Pro — $${SALE_PRICE}`}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </TrackedBuyButton>
 
