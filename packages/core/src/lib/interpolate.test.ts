@@ -126,10 +126,12 @@ describe('interpolate', () => {
       const start = performance.now()
       for (let i = 0; i < 10_000; i++) interpolate(template, vars)
       const duration = performance.now() - start
-      // 100 ms ceiling — generous to survive jsdom + WSL cold start while
-      // still catching a 10× regression (typical baseline ≈ 30–60 ms).
+      // 300 ms ceiling — catches a ~10× regression at the typical 30–60 ms
+      // baseline. The previous 100 ms ceiling flaked on slow shared CI
+      // runners (observed 117–134 ms on healthy code, 2026-06-06) because
+      // it only allowed ~1.7× headroom over the upper baseline.
       // Sub-ms perf tracking lives in interpolate.bench.ts.
-      expect(duration).toBeLessThan(100)
+      expect(duration).toBeLessThan(300)
     })
   })
 })
