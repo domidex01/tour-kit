@@ -65,6 +65,46 @@ const config = {
         ],
       },
       {
+        // Markdown for Agents (proxy.ts): these paths serve HTML or markdown
+        // from the same URL based on Accept, so caches must key on it.
+        // Set here (not only in proxy.ts) because Next overwrites the Vary
+        // header on page responses returned through NextResponse.next().
+        source: '/',
+        headers: [{ key: 'Vary', value: 'Accept' }],
+      },
+      {
+        source: '/docs/:path*',
+        headers: [{ key: 'Vary', value: 'Accept' }],
+      },
+      {
+        source: '/blog/:path*',
+        headers: [{ key: 'Vary', value: 'Accept' }],
+      },
+      {
+        // Agent discovery (RFC 8288 Link relations; RFC 9727 api-catalog).
+        source: '/',
+        headers: [
+          {
+            key: 'Link',
+            value: [
+              '</.well-known/api-catalog>; rel="api-catalog"',
+              '</openapi.json>; rel="service-desc"; type="application/openapi+json"',
+              '</docs/api>; rel="service-doc"',
+              '</.well-known/mcp/server-card.json>; rel="service-meta"; type="application/json"',
+              '</llms.txt>; rel="describedby"; type="text/plain"',
+            ].join(', '),
+          },
+        ],
+      },
+      {
+        // RFC 9727 well-known API catalog (static linkset in public/).
+        source: '/.well-known/api-catalog',
+        headers: [
+          { key: 'Content-Type', value: 'application/linkset+json' },
+          { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
+        ],
+      },
+      {
         source: '/context/:path*',
         headers: [
           { key: 'Last-Modified', value: buildDate },

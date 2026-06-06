@@ -1,6 +1,7 @@
 import './globals.css'
 import { YandexMetrika } from '@/components/analytics/yandex-metrika'
 import { SkipNav } from '@/components/skip-nav'
+import { WebMcp } from '@/components/webmcp'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import { GeistMono } from 'geist/font/mono'
@@ -84,6 +85,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         }}
       >
         <SkipNav />
+        <WebMcp />
         <RootProvider>{children}</RootProvider>
       </body>
       {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}

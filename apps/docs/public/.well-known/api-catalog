@@ -1,0 +1,19 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://usertourkit.com/api/docs",
+      "service-desc": [
+        { "href": "https://usertourkit.com/openapi.json", "type": "application/openapi+json" }
+      ],
+      "service-doc": [
+        { "href": "https://usertourkit.com/docs/api", "type": "text/html" }
+      ],
+      "describedby": [
+        { "href": "https://usertourkit.com/llms.txt", "type": "text/plain" }
+      ],
+      "service-meta": [
+        { "href": "https://usertourkit.com/.well-known/mcp/server-card.json", "type": "application/json" }
+      ]
+    }
+  ]
+}

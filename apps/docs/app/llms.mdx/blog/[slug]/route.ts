@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { getBlogPost, getPublishedBlogPosts } from '@/lib/comparisons'
+import { markdownHeaders } from '@/lib/markdown-response'
 import { notFound } from 'next/navigation'
 
 export const revalidate = false
@@ -28,10 +29,9 @@ ${post.description}
 ${content}`
 
     return new Response(markdown, {
-      headers: {
-        'Content-Type': 'text/markdown; charset=utf-8',
+      headers: markdownHeaders(markdown, {
         'Cache-Control': 'public, max-age=3600, s-maxage=3600',
-      },
+      }),
     })
   } catch {
     notFound()

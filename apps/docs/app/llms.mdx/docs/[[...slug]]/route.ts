@@ -1,4 +1,5 @@
 import { getLLMText } from '@/lib/get-llm-text'
+import { markdownHeaders } from '@/lib/markdown-response'
 import { source } from '@/lib/source'
 import { notFound } from 'next/navigation'
 
@@ -9,11 +10,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug?: 
   const page = source.getPage(slug)
   if (!page) notFound()
 
-  return new Response(await getLLMText(page), {
-    headers: {
-      'Content-Type': 'text/markdown',
-    },
-  })
+  const body = await getLLMText(page)
+  return new Response(body, { headers: markdownHeaders(body) })
 }
 
 export function generateStaticParams() {

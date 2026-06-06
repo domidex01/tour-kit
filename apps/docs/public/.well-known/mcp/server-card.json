@@ -1,0 +1,25 @@
+{
+  "serverInfo": {
+    "name": "tour-kit-docs",
+    "title": "Tour Kit Documentation",
+    "version": "0.1.0"
+  },
+  "description": "Search and read Tour Kit documentation — a headless onboarding and product tour library for React. Tools: search_docs (ranked keyword search), get_page (full markdown page by slug), list_sections (documentation structure), get_code_examples (code snippets per package).",
+  "url": "https://usertourkit.com/api/mcp",
+  "transport": {
+    "type": "streamable-http",
+    "endpoint": "https://usertourkit.com/api/mcp"
+  },
+  "capabilities": {
+    "tools": true
+  },
+  "distributions": {
+    "npm": {
+      "package": "@tour-kit/docs-mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" }
+    }
+  },
+  "documentation": "https://usertourkit.com/docs/api",
+  "websiteUrl": "https://usertourkit.com"
+}
