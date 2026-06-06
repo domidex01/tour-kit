@@ -1,5 +1,6 @@
 import './globals.css'
 import { YandexMetrika } from '@/components/analytics/yandex-metrika'
+import { SaleAnnouncementBanner } from '@/components/sale-announcement-banner'
 import { SkipNav } from '@/components/skip-nav'
 import { WebMcp } from '@/components/webmcp'
 import { GoogleAnalytics } from '@next/third-parties/google'
@@ -86,6 +87,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       >
         <SkipNav />
         <WebMcp />
+        <SaleAnnouncementBanner />
         <RootProvider>{children}</RootProvider>
       </body>
       {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}

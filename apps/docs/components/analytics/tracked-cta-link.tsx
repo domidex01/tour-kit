@@ -20,6 +20,7 @@ export type CtaPlacement =
   | 'home_after_compare'
   | 'docs_footer'
   | 'docs_pro_callout'
+  | 'site_banner'
 
 interface TrackedCtaLinkProps {
   href: string
