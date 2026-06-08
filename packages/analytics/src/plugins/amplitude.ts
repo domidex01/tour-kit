@@ -49,7 +49,9 @@ export function amplitudePlugin(options: AmplitudePluginOptions): AnalyticsPlugi
       if (typeof window === 'undefined') return
 
       try {
-        const amp = await import('@amplitude/analytics-browser')
+        const amp = await import(
+          /* webpackIgnore: true */ /* @vite-ignore */ '@amplitude/analytics-browser'
+        )
         // @amplitude/analytics-browser exports its namespace directly (no default);
         // at runtime the namespace matches our AmplitudeInstance shape.
         amplitude = amp as unknown as AmplitudeInstance

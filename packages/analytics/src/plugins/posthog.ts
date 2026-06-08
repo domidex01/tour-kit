@@ -45,7 +45,9 @@ export function posthogPlugin(options: PostHogPluginOptions): AnalyticsPlugin {
       if (typeof window === 'undefined') return
 
       try {
-        const { default: ph } = await import('posthog-js')
+        const { default: ph } = await import(
+          /* webpackIgnore: true */ /* @vite-ignore */ 'posthog-js'
+        )
         // posthog-js's default export is typed loosely by the vendor; at runtime
         // it matches our PostHogInstance shape (init/capture/identify/reset).
         posthog = ph as unknown as PostHogInstance

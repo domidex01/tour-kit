@@ -46,7 +46,7 @@ export function mixpanelPlugin(options: MixpanelPluginOptions): AnalyticsPlugin 
       if (typeof window === 'undefined') return
 
       try {
-        const mp = await import('mixpanel-browser')
+        const mp = await import(/* webpackIgnore: true */ /* @vite-ignore */ 'mixpanel-browser')
         mixpanel = (mp.default || mp) as MixpanelInstance
 
         mixpanel.init(options.token, {
