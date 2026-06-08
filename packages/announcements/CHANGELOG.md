@@ -1,5 +1,13 @@
 # @tour-kit/announcements
 
+## 4.1.4
+
+### Patch Changes
+
+- Updated dependencies [50e6889]
+  - @tour-kit/analytics@0.11.7
+  - @tour-kit/scheduling@0.11.7
+
 ## 4.1.3
 
 ### Patch Changes

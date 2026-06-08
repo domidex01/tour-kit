@@ -1,5 +1,12 @@
 # @tour-kit/checklists
 
+## 0.13.7
+
+### Patch Changes
+
+- Updated dependencies [50e6889]
+  - @tour-kit/analytics@0.11.7
+
 ## 0.13.6
 
 ### Patch Changes

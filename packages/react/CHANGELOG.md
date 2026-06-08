@@ -1,5 +1,12 @@
 # @tour-kit/react
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [50e6889]
+  - @tour-kit/analytics@0.11.7
+
 ## 1.0.3
 
 ### Patch Changes
