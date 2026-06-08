@@ -1,5 +1,11 @@
 # @tour-kit/surveys
 
+## 3.0.7
+
+### Patch Changes
+
+- @tour-kit/scheduling@0.11.7
+
 ## 3.0.6
 
 ### Patch Changes
