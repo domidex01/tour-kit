@@ -54,6 +54,17 @@ function resolveWebpack(): WebpackFn | null {
 const webpack = resolveWebpack()
 const distBuilt = existsSync(distIndex)
 
+// Make a skip loud: a silently-skipped guard reads as "verified" on a green
+// run. If the dist is built but no bundler could be resolved, the end-to-end
+// build guard did NOT run — surface that so a future CI image change (Next's
+// compiled-webpack path moving, apps/docs absent) can't hide zero coverage.
+// The always-on `optional-imports.bundler-guard.test.ts` remains the backstop.
+if (distBuilt && !webpack) {
+  console.warn(
+    '[optional-imports.webpack-smoke] No bundler resolved (Next compiled webpack / `webpack` devDep absent) — the end-to-end build guard was SKIPPED. Dist magic-comment guard still covers the regression.'
+  )
+}
+
 const EXTERNALS = {
   react: 'module react',
   'react-dom': 'module react-dom',
