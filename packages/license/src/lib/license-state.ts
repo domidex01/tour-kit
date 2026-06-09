@@ -59,3 +59,25 @@ export function createDevBypassState(now: number = Date.now()): LicenseState {
     renderKey: 'dev_bypass',
   }
 }
+
+/**
+ * Canonical preview-bypass state. Returned on ephemeral / preview hosts
+ * (Vercel/Netlify/Cloudflare preview URLs, tunnels, raw IPs — see
+ * `isEphemeralHost`). Like the dev bypass it unlocks Pro and skips Polar so a
+ * throwaway deploy URL never consumes one of the key's finite activation slots.
+ * A distinct `renderKey` keeps the debug panel and any anti-bypass consumer
+ * able to tell a preview bypass apart from a localhost dev bypass.
+ */
+export function createPreviewBypassState(now: number = Date.now()): LicenseState {
+  return {
+    status: 'valid',
+    tier: 'pro',
+    activations: 0,
+    maxActivations: 0,
+    domain: null,
+    expiresAt: null,
+    validatedAt: now,
+    serverValidatedAt: null,
+    renderKey: 'preview_bypass',
+  }
+}

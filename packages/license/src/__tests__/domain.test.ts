@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentDomain, isDevEnvironment, validateDomainAtRender } from '../lib/domain'
+import {
+  getCurrentDomain,
+  isDevEnvironment,
+  isEphemeralHost,
+  validateDomainAtRender,
+} from '../lib/domain'
 
 beforeEach(() => {
   vi.stubGlobal('window', globalThis)
@@ -89,5 +94,42 @@ describe('validateDomainAtRender', () => {
   it('returns true for 127.0.0.1 (dev bypass)', () => {
     vi.stubGlobal('location', { hostname: '127.0.0.1' })
     expect(validateDomainAtRender('production.com')).toBe(true)
+  })
+})
+
+describe('isEphemeralHost', () => {
+  it.each([
+    'acme-git-main-team.vercel.app',
+    'acme-9f2a3b7c1-team.vercel.app',
+    'feat-login--my-site.netlify.app',
+    'deploy-preview-42--my-site.netlify.app',
+    'a1b2c3d4.my-project.pages.dev',
+    'abc123.ngrok-free.app',
+    'demo.ngrok.io',
+    'tunnel.loca.lt',
+    'random.trycloudflare.com',
+    '203.0.113.7',
+    '[2001:db8::1]',
+  ])('returns true for ephemeral/preview host %s', (host) => {
+    expect(isEphemeralHost(host)).toBe(true)
+  })
+
+  it.each([
+    'usertourkit.com',
+    'app.acme.com',
+    'acme.vercel.app', // bare production alias — must still require a license
+    'my-site.netlify.app', // bare production alias
+    'docs.pages.dev',
+  ])('returns false for stable production host %s', (host) => {
+    expect(isEphemeralHost(host)).toBe(false)
+  })
+
+  it('returns false for null / SSR', () => {
+    expect(isEphemeralHost(null)).toBe(false)
+  })
+
+  it('reads window.location.hostname when no argument is given', () => {
+    vi.stubGlobal('location', { hostname: 'x-git-branch-team.vercel.app' })
+    expect(isEphemeralHost()).toBe(true)
   })
 })

@@ -1,8 +1,13 @@
 import type { ZodError } from 'zod'
 import type { LicenseState, PolarActivateResponse, PolarValidateResponse } from '../types'
 import { readCache, writeCache } from './cache'
-import { getCurrentDomain, isDevEnvironment } from './domain'
-import { createDevBypassState, createUnlicensedState, normalizeLicenseKey } from './license-state'
+import { getCurrentDomain, isDevEnvironment, isEphemeralHost } from './domain'
+import {
+  createDevBypassState,
+  createPreviewBypassState,
+  createUnlicensedState,
+  normalizeLicenseKey,
+} from './license-state'
 import { resolveApiBase } from './resolve-api-base'
 import { PolarActivateResponseSchema, PolarValidateResponseSchema } from './schemas'
 
@@ -192,6 +197,18 @@ function generateRenderKey(key: string, domain: string | null): string {
   return `lk_${Math.abs(hash).toString(36)}`
 }
 
+// Dedupe the over-limit warning so a re-validation storm does not spam the
+// console. One line per domain per session is enough to be actionable.
+const warnedDomains = new Set<string>()
+
+function warnActivationLimitReached(domain: string): void {
+  if (warnedDomains.has(domain)) return
+  warnedDomains.add(domain)
+  console.warn(
+    `[tour-kit/license] License valid, but its activation limit is reached, so "${domain}" could not claim a slot. Tour Kit Pro stays unlocked here. Free a slot or raise the activation limit for this key in your Polar dashboard. Tip: preview/throwaway deploy URLs are skipped automatically and do not consume slots.`
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Orchestrator — single public entry point
 // ---------------------------------------------------------------------------
@@ -219,6 +236,14 @@ export async function validateLicenseKey(
   //    because that would consume Polar activation slots during normal dev.
   if (isDevEnvironment()) {
     return createDevBypassState(now)
+  }
+
+  // 1b. Ephemeral / preview hosts (Vercel/Netlify/Cloudflare preview URLs,
+  //     tunnels, raw IPs). Skip Polar entirely so a throwaway deploy URL never
+  //     consumes one of the key's finite activation slots. Pro stays unlocked
+  //     (no watermark); stable production hosts fall through to validation.
+  if (domain && isEphemeralHost(domain)) {
+    return createPreviewBypassState(now)
   }
 
   // 2. Cache check (bound to current key — switching licenseKey invalidates)
@@ -275,9 +300,35 @@ export async function validateLicenseKey(
     let usage = response.usage
 
     if (!response.activation && domain) {
-      const activateResponse = await activateKey(normalizedKey, orgId, domain, options)
-      activationLabel = activateResponse.label
-      usage = activateResponse.licenseKey.usage
+      try {
+        const activateResponse = await activateKey(normalizedKey, orgId, domain, options)
+        activationLabel = activateResponse.label
+        usage = activateResponse.licenseKey.usage
+      } catch (activationError) {
+        // 5a. Activation limit reached (403). The key itself is `granted` — the
+        //     customer paid; they just have more live domains than slots (very
+        //     common once Vercel/Netlify preview URLs pile up). Punishing a
+        //     paying customer's production site with the "Unlicensed" watermark
+        //     is a false positive, so treat this as a valid Pro license, warn
+        //     once, and let the over-activation surface server-side instead.
+        if (activationError instanceof PolarApiError && activationError.statusCode === 403) {
+          warnActivationLimitReached(domain)
+          const overLimitState: LicenseState = {
+            status: 'valid',
+            tier: 'pro',
+            activations: response.usage,
+            maxActivations: response.limitActivations ?? 0,
+            domain,
+            expiresAt: response.expiresAt,
+            validatedAt: now,
+            serverValidatedAt,
+            renderKey: generateRenderKey(normalizedKey, domain),
+          }
+          writeCache(domain, overLimitState, normalizedKey)
+          return overLimitState
+        }
+        throw activationError
+      }
     }
 
     // 6. Guard: if still no activation (SSR with no prior activation), return error

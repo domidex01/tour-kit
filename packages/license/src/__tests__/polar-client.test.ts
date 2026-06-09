@@ -259,12 +259,35 @@ describe('validateLicenseKey', () => {
     expect(result.renderKey).toBeUndefined()
   })
 
-  it('returns invalid state for 403 (activation limit)', async () => {
+  it('keeps a granted key valid when activation limit is reached (403 → no watermark)', async () => {
+    // The key validates as `granted`; only the activate step 403s because the
+    // customer has more domains than slots. A paying customer must NOT be
+    // watermarked — Pro stays unlocked on this domain.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     mockFetch
       .mockResolvedValueOnce(mockFetchResponse(VALID_VALIDATE_RESPONSE_NO_ACTIVATION))
       .mockResolvedValueOnce(mockFetchResponse({ detail: 'Limit reached' }, 403))
+
     const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
-    expect(result.status).toBe('invalid')
+
+    expect(result.status).toBe('valid')
+    expect(result.tier).toBe('pro')
+    expect(result.domain).toBe('example.com')
+    expect(result.renderKey).toBeDefined()
+    expect(result.renderKey).not.toBe('dev_bypass')
+    expect(warn).toHaveBeenCalledOnce()
+    // The valid over-limit state is cached so subsequent loads do not re-hit Polar.
+    expect(localStorage.setItem).toHaveBeenCalled()
+  })
+
+  it('skips Polar entirely on an ephemeral preview host (no slot consumed)', async () => {
+    vi.stubGlobal('location', { hostname: 'acme-git-feat-x-team.vercel.app' })
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
+    expect(mockFetch).not.toHaveBeenCalled()
+    expect(localStorage.setItem).not.toHaveBeenCalled()
+    expect(result.status).toBe('valid')
+    expect(result.tier).toBe('pro')
+    expect(result.renderKey).toBe('preview_bypass')
   })
 
   it('returns error state for fetch failure', async () => {

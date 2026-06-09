@@ -30,6 +30,7 @@ export { readCache, writeCache, clearCache, hasFreshCache } from './lib/cache'
 export {
   getCurrentDomain,
   isDevEnvironment,
+  isEphemeralHost,
   validateDomainAtRender,
 } from './lib/domain'
 
