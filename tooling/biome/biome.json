@@ -79,6 +79,7 @@
         "packages/license/src/components/license-warning.tsx",
         "packages/license/src/components/pro-gate.tsx",
         "packages/license/src/lib/domain.ts",
+        "packages/license/src/lib/polar-client.ts",
         "packages/codemods/src/cli.ts",
         "packages/codemods/src/bin/**",
         "tooling/bundle-check/**"

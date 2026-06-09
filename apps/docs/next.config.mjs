@@ -143,7 +143,7 @@ const config = {
               "style-src-attr 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://github.com https://avatars.githubusercontent.com https://usertourkit.com https://www.google-analytics.com https://www.googletagmanager.com https://*.google.com https://mc.yandex.ru",
               "font-src 'self' data:",
-              "connect-src 'self' https://vercel.live https://vitals.vercel-analytics.com https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://www.google.com https://*.google.com https://mc.yandex.ru",
+              "connect-src 'self' https://api.polar.sh https://vercel.live https://vitals.vercel-analytics.com https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://www.google.com https://*.google.com https://mc.yandex.ru",
               "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://fast.wistia.net",
               "base-uri 'self'",
               "form-action 'self' https://buy.polar.sh",
