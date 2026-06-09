@@ -1,5 +1,22 @@
 # next-tour-kit-demo
 
+## 0.0.22
+
+### Patch Changes
+
+- Updated dependencies [2b9e527]
+  - @tour-kit/license@1.3.4
+  - @tour-kit/adoption@2.1.8
+  - @tour-kit/ai@0.12.1
+  - @tour-kit/analytics@0.11.8
+  - @tour-kit/announcements@4.1.5
+  - @tour-kit/checklists@0.13.8
+  - @tour-kit/media@0.13.1
+  - @tour-kit/scheduling@0.11.8
+  - @tour-kit/surveys@3.0.8
+  - @tour-kit/hints@1.0.5
+  - @tour-kit/react@1.0.5
+
 ## 0.0.21
 
 ### Patch Changes
