@@ -1,5 +1,12 @@
 # @tour-kit/media
 
+## 0.13.1
+
+### Patch Changes
+
+- Updated dependencies [2b9e527]
+  - @tour-kit/license@1.3.4
+
 ## 0.13.0
 
 ### Minor Changes

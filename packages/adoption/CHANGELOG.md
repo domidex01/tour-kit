@@ -1,5 +1,13 @@
 # @tour-kit/adoption
 
+## 2.1.8
+
+### Patch Changes
+
+- Updated dependencies [2b9e527]
+  - @tour-kit/license@1.3.4
+  - @tour-kit/analytics@0.11.8
+
 ## 2.1.7
 
 ### Patch Changes

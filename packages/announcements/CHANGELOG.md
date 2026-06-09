@@ -1,5 +1,15 @@
 # @tour-kit/announcements
 
+## 4.1.5
+
+### Patch Changes
+
+- Updated dependencies [2b9e527]
+  - @tour-kit/license@1.3.4
+  - @tour-kit/analytics@0.11.8
+  - @tour-kit/media@0.13.1
+  - @tour-kit/scheduling@0.11.8
+
 ## 4.1.4
 
 ### Patch Changes

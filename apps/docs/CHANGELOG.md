@@ -1,5 +1,15 @@
 # @tour-kit/docs
 
+## 0.0.19
+
+### Patch Changes
+
+- Updated dependencies [2b9e527]
+  - @tour-kit/license@1.3.4
+  - @tour-kit/announcements@4.1.5
+  - @tour-kit/hints@1.0.5
+  - @tour-kit/react@1.0.5
+
 ## 0.0.18
 
 ### Patch Changes
