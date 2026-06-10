@@ -29,7 +29,7 @@ const versions = Object.fromEntries(
     const v = publishedVersion(name)
     console.log(`  @tour-kit/${name.padEnd(13)} -> ${v}`)
     return [name, v]
-  }),
+  })
 )
 
 for (const app of apps) {

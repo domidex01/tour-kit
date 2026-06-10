@@ -22,11 +22,9 @@ const toBuild = requested.length ? requested : [...TK_PACKAGES]
 
 mkdirSync(TARBALL_DIR, { recursive: true })
 
-const run = (cmd, args, cwd) =>
-  execFileSync(cmd, args, { cwd, stdio: 'inherit' })
+const run = (cmd, args, cwd) => execFileSync(cmd, args, { cwd, stdio: 'inherit' })
 
-const tarballFor = (name) =>
-  readdirSync(TARBALL_DIR).find((f) => f.startsWith(`tour-kit-${name}-`))
+const tarballFor = (name) => readdirSync(TARBALL_DIR).find((f) => f.startsWith(`tour-kit-${name}-`))
 
 function buildAndPack(name) {
   console.log(`\n[qa-harness] build + pack @tour-kit/${name}…`)
