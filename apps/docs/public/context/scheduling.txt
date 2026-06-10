@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/scheduling Context File
-Version: 0.11.5 | Generated: 2026-05-26
+Version: 0.11.9 | Generated: 2026-06-10
 Paste this into your LLM to get accurate answers about @tour-kit/scheduling.
 =========================================================================
 
