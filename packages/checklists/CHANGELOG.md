@@ -1,5 +1,32 @@
 # @tour-kit/checklists
 
+## 0.13.9
+
+### Patch Changes
+
+- d870c32: Fix an SSR hydration mismatch on the `ChecklistLauncher` `aria-controls` attribute. The panel id is now derived deterministically from the `checklistId` prop instead of `useId()`, so the server and client render the same id even when a client-only branch higher in the tour/provider tree drifts the `useId` counter.
+- d870c32: Ship the `'use client'` directive in published dists. tsup's `banner` option is
+  stripped by the rollup treeshake pass (and by `minify: true`), so every package
+  relying on it published client entries without the directive — importing them from a
+  Next.js App-Router Server Component evaluated React-stateful code in the react-server
+  layer and crashed `next build` with `createContext is not a function`. All client
+  entries now get the directive injected post-build (shared
+  `tooling/build/use-client.ts`); server-safe entries (`license/headless`,
+  `ai/server`, tailwind plugin entries) intentionally stay directive-free.
+
+  Also fixes `@tour-kit/media/tailwind` shipping without type declarations: the
+  package's second tsup config raced the first one's DTS step, which deleted
+  `dist/tailwind/index.d.ts` after it was emitted. Media now builds from a single
+  config.
+
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+  - @tour-kit/core@1.0.6
+  - @tour-kit/media@0.13.2
+  - @tour-kit/analytics@0.11.9
+  - @tour-kit/license@1.3.5
+
 ## 0.13.8
 
 ### Patch Changes

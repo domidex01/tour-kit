@@ -1,5 +1,39 @@
 # @tour-kit/react
 
+## 1.0.6
+
+### Patch Changes
+
+- d870c32: `TourCard` now lazy-loads `@tour-kit/media` (`React.lazy` + `Suspense`)
+  instead of importing it statically. Bundlers split the media stack into its
+  own async chunk, fetched only when a step with `media` first renders — tour
+  consumers without media steps no longer pay for it in their initial bundle.
+  The embed mounts one tick after the card; `@tour-kit/media` remains a regular
+  dependency so installed-case resolution keeps working in every bundler
+  (`webpackIgnore`-style optional imports would leave a bare specifier browsers
+  cannot resolve).
+- d870c32: Widen the `react-router-dom` peer dependency to `^6.0.0 || ^7.0.0` so consumers on React Router 7 (the current major) can `npm install` without an `ERESOLVE`/peer conflict. The router adapter already supports v7 (it imports from `react-router` first); only the `react-router-dom` peer range was still pinned to v6.
+- d870c32: Ship the `'use client'` directive in published dists. tsup's `banner` option is
+  stripped by the rollup treeshake pass (and by `minify: true`), so every package
+  relying on it published client entries without the directive — importing them from a
+  Next.js App-Router Server Component evaluated React-stateful code in the react-server
+  layer and crashed `next build` with `createContext is not a function`. All client
+  entries now get the directive injected post-build (shared
+  `tooling/build/use-client.ts`); server-safe entries (`license/headless`,
+  `ai/server`, tailwind plugin entries) intentionally stay directive-free.
+
+  Also fixes `@tour-kit/media/tailwind` shipping without type declarations: the
+  package's second tsup config raced the first one's DTS step, which deleted
+  `dist/tailwind/index.d.ts` after it was emitted. Media now builds from a single
+  config.
+
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+  - @tour-kit/core@1.0.6
+  - @tour-kit/media@0.13.2
+  - @tour-kit/analytics@0.11.9
+
 ## 1.0.5
 
 ### Patch Changes

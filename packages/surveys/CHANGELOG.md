@@ -1,5 +1,39 @@
 # @tour-kit/surveys
 
+## 3.0.9
+
+### Patch Changes
+
+- d870c32: Storage hydration no longer wipes registered surveys. `REGISTER` runs
+  synchronously on mount while the persisted blob loads asynchronously; the
+  `HYDRATE` action replaced the whole survey-state map, so any configured survey
+  missing from the blob was silently deleted — stale state written by a
+  different survey set on the same origin blanked every freshly-configured
+  survey (no cards, no errors). `HYDRATE` now merges: persisted entries win for
+  matching ids (they carry viewCount/completion history), registered-but-
+  unpersisted surveys survive.
+- d870c32: Ship the `'use client'` directive in published dists. tsup's `banner` option is
+  stripped by the rollup treeshake pass (and by `minify: true`), so every package
+  relying on it published client entries without the directive — importing them from a
+  Next.js App-Router Server Component evaluated React-stateful code in the react-server
+  layer and crashed `next build` with `createContext is not a function`. All client
+  entries now get the directive injected post-build (shared
+  `tooling/build/use-client.ts`); server-safe entries (`license/headless`,
+  `ai/server`, tailwind plugin entries) intentionally stay directive-free.
+
+  Also fixes `@tour-kit/media/tailwind` shipping without type declarations: the
+  package's second tsup config raced the first one's DTS step, which deleted
+  `dist/tailwind/index.d.ts` after it was emitted. Media now builds from a single
+  config.
+
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+  - @tour-kit/core@1.0.6
+  - @tour-kit/media@0.13.2
+  - @tour-kit/license@1.3.5
+  - @tour-kit/scheduling@0.11.9
+
 ## 3.0.8
 
 ### Patch Changes
