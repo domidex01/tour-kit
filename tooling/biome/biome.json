@@ -82,7 +82,8 @@
         "packages/license/src/lib/polar-client.ts",
         "packages/codemods/src/cli.ts",
         "packages/codemods/src/bin/**",
-        "tooling/bundle-check/**"
+        "tooling/bundle-check/**",
+        "tooling/qa-harness/**"
       ],
       "linter": {
         "rules": {

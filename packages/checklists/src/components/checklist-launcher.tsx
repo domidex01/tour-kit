@@ -73,7 +73,13 @@ export const ChecklistLauncher = React.forwardRef<HTMLButtonElement, ChecklistLa
     ref
   ) => {
     const [isOpen, setIsOpen] = React.useState(false)
-    const panelId = React.useId()
+    // Stable, deterministic panel id derived from the unique checklistId, so the
+    // server and client render the same `aria-controls`/`id`. A bare
+    // `React.useId()` here is sensitive to useId-counter drift caused by
+    // client-only branches higher in the tour/provider tree (route persistence,
+    // active-flow restore), which surfaced as an `aria-controls` hydration
+    // mismatch on this launcher.
+    const panelId = `tk-checklist-panel-${checklistId}`
     // Accessible name for the dialog panel — links to the checklist heading.
     const titleId = `${panelId}-title`
     const { checklist, progress, isDismissed, isComplete } = useChecklist(checklistId)

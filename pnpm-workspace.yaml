@@ -4,6 +4,10 @@ packages:
   - "!apps/smoke"
   - "tooling/*"
   - "examples/*"
+  # QA consumer dashboards install from npm/local tarballs (not workspace symlinks).
+  # Excluded so root `pnpm install` does not link @tour-kit/* deps as workspace:*.
+  - "!examples/qa-next"
+  - "!examples/qa-vite"
 
 catalog:
   vitest: ^4.1.0

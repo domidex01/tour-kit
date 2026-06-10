@@ -125,7 +125,7 @@
     "@tour-kit/analytics": "workspace:*",
     "next": "^13.0.0 || ^14.0.0 || ^15.0.0",
     "react-router": "^6.0.0 || ^7.0.0",
-    "react-router-dom": "^6.0.0"
+    "react-router-dom": "^6.0.0 || ^7.0.0"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {

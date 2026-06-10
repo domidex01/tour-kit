@@ -230,8 +230,20 @@ function surveysReducer(state: SurveysReducerState, action: SurveysAction): Surv
       return { ...state, surveys, activeSurvey: null, queue: [] }
     }
 
-    case 'HYDRATE':
-      return { ...state, surveys: action.surveys, queue: action.queue }
+    case 'HYDRATE': {
+      // Merge, never replace: REGISTER runs synchronously on mount while
+      // HYDRATE lands later from an async storage read. Replacing the map
+      // wiped every registered survey missing from the persisted blob —
+      // e.g. stale state written by another survey set on the same origin
+      // blanked all freshly-configured surveys (and REGISTER never re-runs
+      // unless the config ids change). Persisted entries win for matching
+      // ids since they carry viewCount/completion history.
+      const surveys = new Map(state.surveys)
+      for (const [id, hydrated] of action.surveys) {
+        surveys.set(id, hydrated)
+      }
+      return { ...state, surveys, queue: action.queue }
+    }
 
     default:
       return state

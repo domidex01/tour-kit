@@ -3,6 +3,7 @@
 import { cn } from '@tour-kit/core'
 import { useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
+import { claimUsageEvent } from '../engine/usage-tracker'
 import { useFeature } from '../hooks'
 import { Slot, UnifiedSlot } from '../lib/slot'
 import { type FeatureButtonVariants, featureButtonVariants } from './ui/button-variants'
@@ -42,10 +43,16 @@ export const FeatureButton = React.forwardRef<HTMLButtonElement, FeatureButtonPr
 
     const handleClick = React.useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
-        trackUsage()
+        // Skip if the feature's selector-trigger listener (capture phase,
+        // runs first) already counted this exact native event — otherwise a
+        // FeatureButton matching its own feature's `trigger` double-counts
+        // every click.
+        if (claimUsageEvent(e.nativeEvent, featureId)) {
+          trackUsage()
+        }
         onClick?.(e)
       },
-      [trackUsage, onClick]
+      [trackUsage, onClick, featureId]
     )
 
     const Comp = asChild ? (library === 'base-ui' ? UnifiedSlot : Slot) : 'button'

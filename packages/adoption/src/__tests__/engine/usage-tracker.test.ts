@@ -5,7 +5,7 @@
  * These tests require JSDOM environment for DOM event testing.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { emitFeatureEvent, setupFeatureTracking } from '../../engine/usage-tracker'
+import { claimUsageEvent, emitFeatureEvent, setupFeatureTracking } from '../../engine/usage-tracker'
 import type { Feature } from '../../types'
 
 // -----------------------------------------------------------------------------
@@ -209,6 +209,65 @@ describe('setupFeatureTracking', () => {
       // Should not throw
       expect(() => cleanup()).not.toThrow()
     })
+  })
+})
+
+const cleanupListeners: Array<() => void> = []
+
+describe('claimUsageEvent (one native event = one usage)', () => {
+  afterEach(() => {
+    while (cleanupListeners.length) cleanupListeners.pop()?.()
+    document.body.innerHTML = ''
+  })
+
+  it('first claim wins, repeat claims for the same feature are rejected', () => {
+    const event = new MouseEvent('click')
+    expect(claimUsageEvent(event, 'feature-a')).toBe(true)
+    expect(claimUsageEvent(event, 'feature-a')).toBe(false)
+    // A different feature observing the same event still gets its claim.
+    expect(claimUsageEvent(event, 'feature-b')).toBe(true)
+  })
+
+  it('a click tracked by the selector trigger is not double-counted by a manual path', () => {
+    // Regression (QA 2026-06-10): a <FeatureButton> whose DOM node also
+    // matches the feature's `trigger` selector counted every click twice —
+    // once via the capture-phase selector listener, once via the button's
+    // own onClick trackUsage. One click must equal one usage.
+    const onUsage = vi.fn()
+    const feature = createMockFeature({ trigger: '#test-button' })
+    document.body.innerHTML = '<button id="test-button">Click me</button>'
+    const button = document.getElementById('test-button') as HTMLButtonElement
+
+    cleanupListeners.push(setupFeatureTracking(feature, onUsage))
+
+    // Simulate FeatureButton's bubble-phase onClick (React attaches at the
+    // root in the bubble phase, after the document capture listener ran).
+    const manualHandler = (event: Event) => {
+      if (claimUsageEvent(event, feature.id)) onUsage(feature.id)
+    }
+    button.addEventListener('click', manualHandler)
+    cleanupListeners.push(() => button.removeEventListener('click', manualHandler))
+
+    button.click()
+
+    expect(onUsage).toHaveBeenCalledTimes(1)
+  })
+
+  it('the manual path still tracks when no selector trigger matches', () => {
+    const onUsage = vi.fn()
+    document.body.innerHTML = '<button id="standalone">Click me</button>'
+    const button = document.getElementById('standalone') as HTMLButtonElement
+
+    const manualHandler = (event: Event) => {
+      if (claimUsageEvent(event, 'manual-feature')) onUsage('manual-feature')
+    }
+    button.addEventListener('click', manualHandler)
+    cleanupListeners.push(() => button.removeEventListener('click', manualHandler))
+
+    button.click()
+    button.click()
+
+    expect(onUsage).toHaveBeenCalledTimes(2)
   })
 })
 
