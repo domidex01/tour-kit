@@ -32,7 +32,7 @@ export function injectUseClient(entryNames: string[], distDir = 'dist'): void {
     if (patchedOrPresent === 0) {
       // Correctness-critical (RSC compatibility) — fail loud on entry drift.
       throw new Error(
-        `injectUseClient: no dist file found for entry "${name}" (expected ${distDir}/${name}.js|.cjs)`,
+        `injectUseClient: no dist file found for entry "${name}" (expected ${distDir}/${name}.js|.cjs)`
       )
     }
   }
