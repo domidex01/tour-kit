@@ -1,0 +1,118 @@
+import type { Metadata } from 'next'
+import Script from 'next/script'
+import './globals.css'
+import Link from 'next/link'
+import { Providers } from './providers'
+
+export const metadata: Metadata = {
+  title: 'TourKit Next.js Demo',
+  description: 'Demo of TourKit Multi-Page Tours in Next.js App Router',
+}
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+
+function Navigation() {
+  return (
+    <nav
+      id="main-nav"
+      className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
+      <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <Link href="/" className="font-bold text-lg">
+          TourKit Demo
+        </Link>
+        <div className="flex items-center gap-6">
+          <Link
+            href="/"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Home
+          </Link>
+          <Link
+            href="/features"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Features
+          </Link>
+          <Link
+            href="/pricing"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Pricing
+          </Link>
+          <Link
+            href="/contact"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Contact
+          </Link>
+          <Link
+            href="/adoption"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Adoption
+          </Link>
+          <Link
+            href="/branching"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Branching
+          </Link>
+          <Link
+            href="/surveys"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Surveys
+          </Link>
+          <Link
+            href="/announcements"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Announcements
+          </Link>
+          <Link
+            href="/base-ui"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Base UI
+          </Link>
+        </div>
+      </div>
+    </nav>
+  )
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  return (
+    <html lang="en">
+      <head>
+        {GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        )}
+      </head>
+      <body suppressHydrationWarning>
+        <Providers>
+          <Navigation />
+          {children}
+        </Providers>
+      </body>
+    </html>
+  )
+}

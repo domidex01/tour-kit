@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "packageManager": "pnpm@10.26.1",
-  "workspaces": ["packages/*", "apps/*", "tooling/*", "examples/*"],
+  "workspaces": ["packages/*", "apps/*", "tooling/*", "examples/*", "!examples/qa-next", "!examples/qa-vite"],
   "engines": {
     "node": ">=18"
   },

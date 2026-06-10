@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@tour-kit/react": ["../../packages/react/dist/index.d.ts"],
+      "@tour-kit/core": ["../../packages/core/dist/index.d.ts"],
+      "@tour-kit/checklists": ["../../packages/checklists/dist/index.d.ts"],
+      "@tour-kit/hints": ["../../packages/hints/dist/index.d.ts"],
+      "@tour-kit/analytics": ["../../packages/analytics/dist/index.d.ts"],
+      "@tour-kit/adoption": ["../../packages/adoption/dist/index.d.ts"],
+      "@tour-kit/surveys": ["../../packages/surveys/dist/index.d.ts"],
+      "@tour-kit/license": ["../../packages/license/dist/index.d.ts"],
+      "@tour-kit/ai": ["../../packages/ai/dist/index.d.ts"],
+      "@tour-kit/media": ["../../packages/media/dist/index.d.ts"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
