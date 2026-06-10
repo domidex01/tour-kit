@@ -1,13 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowRight, Check, Layers, Shield, Zap } from 'lucide-react'
+import { ArrowRight, BarChart3, Check, Compass, Shield, Zap } from 'lucide-react'
 import Link from 'next/link'
 
 const features = [
   {
-    icon: Layers,
-    title: 'Every tool in one place',
-    description: 'Projects, kanban, team, and notifications in a single opinionated workspace.',
+    icon: BarChart3,
+    title: 'Every metric in one place',
+    description: 'MRR, activation, retention, and project health in a single opinionated workspace.',
   },
   {
     icon: Zap,
@@ -38,10 +38,10 @@ export default function LandingPage() {
 
       <header className="flex h-16 items-center justify-between px-6 md:px-10">
         <div className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground text-sm font-semibold shadow-sm">
-            S
+          <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+            <Compass className="h-4 w-4" />
           </div>
-          <span className="text-base font-semibold tracking-tight">Stacks</span>
+          <span className="text-base font-semibold tracking-tight">Helm</span>
         </div>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
           <a href="#features" className="hover:text-foreground">
@@ -69,14 +69,14 @@ export default function LandingPage() {
             Now in beta — every @tour-kit/* package wired up
           </span>
           <h1 className="max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
-            The team workspace that actually{' '}
+            The project-analytics workspace that actually{' '}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               onboards your team
             </span>
           </h1>
           <p className="max-w-xl text-balance text-muted-foreground sm:text-lg">
-            Stacks is the opinionated collaboration layer for product teams — with product tours,
-            in-app help, and AI assistance built in.
+            Helm is the opinionated analytics layer for product teams — with product tours, in-app
+            help, and AI assistance built in.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button
@@ -104,7 +104,7 @@ export default function LandingPage() {
                 <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
                 <span className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
                 <span className="ml-3 text-[11px] text-muted-foreground">
-                  stacks.app / dashboard
+                  helm.app / dashboard
                 </span>
               </div>
               <div className="grid grid-cols-4 gap-0 text-left">
@@ -177,7 +177,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t px-6 py-8 text-center text-xs text-muted-foreground">
-        © 2026 Stacks, Inc. — demo app, no real data.
+        © 2026 Helm, Inc. — demo app, no real data.
       </footer>
     </div>
   )

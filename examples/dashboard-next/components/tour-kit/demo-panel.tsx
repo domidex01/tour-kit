@@ -26,7 +26,7 @@ import { useState } from 'react'
 
 const TOUR_KIT_LS_PREFIXES = ['tour-kit:', 'tourkit-', 'tourkit:', 'tk-', 'tk:']
 
-function resetAllDemoState() {
+export function resetAllDemoState() {
   if (typeof window === 'undefined') return
   const toRemove: string[] = []
   for (let i = 0; i < window.localStorage.length; i++) {

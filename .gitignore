@@ -81,3 +81,6 @@ __pycache__/
 /wiki-tech/
 /reports/
 /specs/
+
+# Vercel CLI local project state (org/project ids, build diagnostics)
+.vercel/

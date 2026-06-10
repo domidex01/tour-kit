@@ -1,52 +1,41 @@
 'use client'
 
 import { Tour, TourStep } from '@tour-kit/react'
-import { useSurvey } from '@tour-kit/surveys'
-import { useEffect, useState } from 'react'
 
+/**
+ * The headless onboarding tour (Director cue 1). Walks the sidebar:
+ * Projects → Analytics → Team. Targets the stable `#nav-*` anchors so it
+ * works on any dashboard route without navigation.
+ *
+ * Rendered inside <ToursHost>'s MultiTourKitProvider, so this acts as a
+ * registrar — the shared <TourCard>/<TourOverlay> render the active step.
+ */
 export function OnboardingTour() {
-  const [mounted, setMounted] = useState(false)
-  const csat = useSurvey('onboarding-csat')
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const id = requestAnimationFrame(() => setMounted(true))
-    return () => cancelAnimationFrame(id)
-  }, [])
-
-  if (!mounted) return null
-
   return (
-    <Tour id="dashboard-onboarding" onComplete={() => csat.show()}>
+    <Tour id="dashboard-onboarding">
       <TourStep
         id="nav"
         target="#sidebar-nav"
-        title="Your navigation lives here"
-        content="Jump between projects, team, settings, and help."
+        title="Welcome to Helm"
+        content="Your whole workspace lives in this rail. Let's take the three-stop tour."
       />
       <TourStep
-        id="new-project"
-        target="#new-project-btn"
-        title="Start a new project anytime"
-        content="Projects group kanban cards, teammates, and discussions."
+        id="projects"
+        target="#nav-projects"
+        title="Projects"
+        content="Every initiative you track, with live health scores and owners."
       />
       <TourStep
-        id="search"
-        target="#search-input"
-        title="⌘K opens global search"
-        content="Find any project, person, or setting without clicking through."
+        id="analytics"
+        target="#nav-analytics"
+        title="Analytics"
+        content="MRR, activation, retention — the numbers that matter, in one place."
       />
       <TourStep
-        id="notifications"
-        target="#notifications-btn"
-        title="Check what changed while you were away"
-        content="Mentions, replies, and card moves land here."
-      />
-      <TourStep
-        id="user-menu"
-        target="#user-menu"
-        title="Settings and billing live under your avatar"
-        content="Switch themes, invite teammates, manage your plan."
+        id="team"
+        target="#nav-team"
+        title="Team"
+        content="Invite teammates and manage roles. That's the tour — you're set."
       />
     </Tour>
   )

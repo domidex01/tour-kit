@@ -17,6 +17,8 @@ import { toast } from 'sonner'
 
 export const TURNKEY_NPS_EVENT = 'tour-kit-demo:turnkey-nps'
 export const TURNKEY_CES_EVENT = 'tour-kit-demo:turnkey-ces'
+/** Director "clear stage" — dismiss both turnkey modals. */
+export const TURNKEY_CLOSE_EVENT = 'tour-kit-demo:turnkey-close'
 
 export function TurnkeySurveyHosts() {
   const [showNps, setShowNps] = useState(false)
@@ -25,11 +27,17 @@ export function TurnkeySurveyHosts() {
   useEffect(() => {
     const openNps = () => setShowNps(true)
     const openCes = () => setShowCes(true)
+    const closeBoth = () => {
+      setShowNps(false)
+      setShowCes(false)
+    }
     window.addEventListener(TURNKEY_NPS_EVENT, openNps)
     window.addEventListener(TURNKEY_CES_EVENT, openCes)
+    window.addEventListener(TURNKEY_CLOSE_EVENT, closeBoth)
     return () => {
       window.removeEventListener(TURNKEY_NPS_EVENT, openNps)
       window.removeEventListener(TURNKEY_CES_EVENT, openCes)
+      window.removeEventListener(TURNKEY_CLOSE_EVENT, closeBoth)
     }
   }, [])
 
@@ -37,7 +45,7 @@ export function TurnkeySurveyHosts() {
     <>
       {showNps && (
         <NpsModal
-          question="How likely are you to recommend Stacks?"
+          question="How likely are you to recommend Helm?"
           onSubmit={(score: number, category: NpsCategory) => {
             toast.success(`NPS captured: ${score} → ${category}`)
             setShowNps(false)

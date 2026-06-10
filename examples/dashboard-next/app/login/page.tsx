@@ -17,7 +17,7 @@ import { useState } from 'react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('demo@stacks.app')
+  const [email, setEmail] = useState('demo@helm.app')
   const [password, setPassword] = useState('••••••••')
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -29,7 +29,7 @@ export default function LoginPage() {
     <div className="flex min-h-svh items-center justify-center bg-muted/30 px-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Sign in to Stacks</CardTitle>
+          <CardTitle>Sign in to Helm</CardTitle>
           <CardDescription>Any credentials work — this is a demo.</CardDescription>
         </CardHeader>
         <form onSubmit={onSubmit}>

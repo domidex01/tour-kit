@@ -4,8 +4,9 @@ import { AiChatHost } from '@/components/tour-kit/ai-chat-host'
 import { AnnouncementsHost } from '@/components/tour-kit/announcements-host'
 import { ChecklistDock } from '@/components/tour-kit/checklist-dock'
 import { CsatSurveyHost } from '@/components/tour-kit/csat-survey-host'
+import { DirectorMode } from '@/components/tour-kit/director-mode'
 import { DarkModeHint } from '@/components/tour-kit/hints'
-import { OnboardingTour } from '@/components/tour-kit/onboarding-tour'
+import { ToursHost } from '@/components/tour-kit/tours-host'
 import { TurnkeySurveyHosts } from '@/components/tour-kit/turnkey-survey-hosts'
 import type { ReactNode } from 'react'
 
@@ -19,12 +20,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </div>
 
       <AnnouncementsHost />
-      <OnboardingTour />
+      <ToursHost />
       <ChecklistDock />
       <DarkModeHint />
       <CsatSurveyHost />
       <TurnkeySurveyHosts />
       <AiChatHost />
+      <DirectorMode />
     </div>
   )
 }

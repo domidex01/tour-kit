@@ -1,5 +1,6 @@
 'use client'
 
+import { useDirector } from '@/components/tour-kit/director-context'
 import { LicenseDebugPanel } from '@/components/tour-kit/license-debug-panel'
 import { UpgradePromptCard } from '@/components/tour-kit/upgrade-prompt-card'
 import { Button } from '@/components/ui/button'
@@ -34,6 +35,7 @@ function AdvancedBillingControls() {
 }
 
 export default function SettingsPage() {
+  const { enabled } = useDirector()
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-6">
       <div>
@@ -64,7 +66,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="contact-email">Email</Label>
-                <Input id="contact-email" type="email" defaultValue="demo@stacks.app" />
+                <Input id="contact-email" type="email" defaultValue="demo@helm.app" />
               </div>
             </CardContent>
           </Card>
@@ -74,7 +76,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Notifications</CardTitle>
-              <CardDescription>Choose when Stacks should interrupt you.</CardDescription>
+              <CardDescription>Choose when Helm should interrupt you.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {[
@@ -109,14 +111,15 @@ export default function SettingsPage() {
             <AdvancedBillingControls />
           </LicenseGate>
 
-          <LicenseDebugPanel />
+          {/* Dev chrome — revealed only in Director mode (`~`). */}
+          {enabled && <LicenseDebugPanel />}
         </TabsContent>
 
         <TabsContent value="integrations" className="space-y-4 pt-4">
           <Card>
             <CardHeader>
               <CardTitle>Integrations</CardTitle>
-              <CardDescription>Connect Stacks to the tools you already use.</CardDescription>
+              <CardDescription>Connect Helm to the tools you already use.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
               {['Slack', 'Linear', 'GitHub', 'Figma'].map((name) => (

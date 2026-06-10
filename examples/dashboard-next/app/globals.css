@@ -55,6 +55,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-pro: var(--pro);
+  --color-pro-foreground: var(--pro-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -64,83 +66,101 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ── Helm brand palette ──────────────────────────────────────────────
+   The app defaults to dark on load (see the inline boot script in
+   app/layout.tsx). Light mode keeps the same brand accents on neutral
+   surfaces so the soft-blue primary and amber "Pro" lockups stay
+   consistent across both themes.
+   Primary  = Soft Blue   #5c9aff (buttons / links / focus rings)
+   Pro      = Golden Amber #c9a033 (anything labeled "Pro")
+   ──────────────────────────────────────────────────────────────────── */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: #ffffff;
+  --foreground: #1a1c1f;
+  --card: #ffffff;
+  --card-foreground: #1a1c1f;
+  --popover: #ffffff;
+  --popover-foreground: #1a1c1f;
+  --primary: #2f74ff;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f3f6;
+  --secondary-foreground: #1a1c1f;
+  --muted: #f1f3f6;
+  --muted-foreground: #5d626b;
+  --accent: #eaf1ff;
+  --accent-foreground: #1a1c1f;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: #e2e5ea;
+  --input: #e2e5ea;
+  --ring: #2f74ff;
+  --pro: #b88a1f;
+  --pro-foreground: #ffffff;
+  --chart-1: #5c9aff;
+  --chart-2: #c9a033;
+  --chart-3: #6ee7b7;
+  --chart-4: #a78bfa;
+  --chart-5: #f472b6;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #f7f8fa;
+  --sidebar-foreground: #1a1c1f;
+  --sidebar-primary: #2f74ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eaf1ff;
+  --sidebar-accent-foreground: #1a1c1f;
+  --sidebar-border: #e2e5ea;
+  --sidebar-ring: #2f74ff;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #151618;
+  --foreground: #edeef2;
+  --card: #1e2023;
+  --card-foreground: #edeef2;
+  --popover: #1e2023;
+  --popover-foreground: #edeef2;
+  --primary: #5c9aff;
+  --primary-foreground: #0a0f1a;
+  --secondary: #26282c;
+  --secondary-foreground: #edeef2;
+  --muted: #26282c;
+  --muted-foreground: #9b9ea5;
+  --accent: #2a2d31;
+  --accent-foreground: #edeef2;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --border: #45484d;
+  --input: #45484d;
+  --ring: #5c9aff;
+  --pro: #c9a033;
+  --pro-foreground: #1a1407;
+  --chart-1: #5c9aff;
+  --chart-2: #c9a033;
+  --chart-3: #34d399;
+  --chart-4: #a78bfa;
+  --chart-5: #f472b6;
+  --sidebar: #181a1c;
+  --sidebar-foreground: #edeef2;
+  --sidebar-primary: #5c9aff;
+  --sidebar-primary-foreground: #0a0f1a;
+  --sidebar-accent: #2a2d31;
+  --sidebar-accent-foreground: #edeef2;
+  --sidebar-border: #2f3236;
+  --sidebar-ring: #5c9aff;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
   }
   html {
     @apply font-sans;
+  }
+  /* A visible 2px soft-blue focus ring so tour highlights & keyboard focus
+     read clearly on camera. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 }

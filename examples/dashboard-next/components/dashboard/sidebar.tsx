@@ -2,16 +2,25 @@
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { FolderKanban, HelpCircle, LayoutDashboard, Settings, Users } from 'lucide-react'
+import {
+  BarChart3,
+  Compass,
+  CreditCard,
+  FolderKanban,
+  LayoutDashboard,
+  Settings,
+  Users,
+} from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const nav = [
-  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { href: '/dashboard/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/dashboard/team', label: 'Team', icon: Users },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
-  { href: '/dashboard/help', label: 'Help', icon: HelpCircle },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tour: 'dashboard' },
+  { href: '/dashboard/projects', label: 'Projects', icon: FolderKanban, tour: 'projects' },
+  { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3, tour: 'analytics' },
+  { href: '/dashboard/team', label: 'Team', icon: Users, tour: 'team' },
+  { href: '/dashboard/billing', label: 'Billing', icon: CreditCard, tour: 'billing' },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings, tour: 'settings' },
 ]
 
 export function DashboardSidebar() {
@@ -19,15 +28,15 @@ export function DashboardSidebar() {
   return (
     <aside
       id="sidebar-nav"
-      className="hidden w-64 flex-col border-r bg-card/60 backdrop-blur md:flex"
+      className="hidden w-64 flex-col border-r bg-sidebar text-sidebar-foreground md:flex"
     >
       <div className="flex h-14 items-center gap-2.5 border-b px-5">
-        <div className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground text-sm font-semibold shadow-sm">
-          S
+        <div className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+          <Compass className="h-4 w-4" />
         </div>
         <div className="flex flex-col leading-tight">
-          <span className="text-sm font-semibold tracking-tight">Stacks</span>
-          <span className="text-[10px] text-muted-foreground">Demo workspace</span>
+          <span className="text-sm font-semibold tracking-tight">Helm</span>
+          <span className="text-[10px] text-muted-foreground">Project analytics</span>
         </div>
       </div>
 
@@ -35,17 +44,19 @@ export function DashboardSidebar() {
         <p className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
           Workspace
         </p>
-        {nav.map(({ href, label, icon: Icon }) => {
+        {nav.map(({ href, label, icon: Icon, tour }) => {
           const active = href === '/dashboard' ? pathname === href : pathname.startsWith(href)
           return (
             <Link
               key={href}
               href={href}
+              id={`nav-${tour}`}
+              data-tour={`nav-${tour}`}
               className={cn(
                 'group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition',
                 active
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                  : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
               )}
             >
               {active && (
@@ -65,12 +76,12 @@ export function DashboardSidebar() {
 
       <div className="border-t p-3">
         <div className="flex items-center gap-3 rounded-md bg-background/60 px-2 py-2">
-          <Avatar className="h-8 w-8 ring-2 ring-primary/10">
+          <Avatar className="h-8 w-8 ring-2 ring-primary/20">
             <AvatarFallback className="text-[11px]">DM</AvatarFallback>
           </Avatar>
           <div className="flex min-w-0 flex-col leading-tight">
             <span className="truncate text-sm font-medium">Demo user</span>
-            <span className="truncate text-xs text-muted-foreground">demo@stacks.app</span>
+            <span className="truncate text-xs text-muted-foreground">demo@helm.app</span>
           </div>
         </div>
       </div>

@@ -13,17 +13,17 @@ const handler = hasKey
         strategy: 'context-stuffing',
         documents: [
           {
-            id: 'stacks-overview',
+            id: 'helm-overview',
             content:
-              'Stacks is a demo team workspace. Routes: /dashboard, /dashboard/projects, /dashboard/team, /dashboard/settings, /dashboard/help. Export CSV lives on the project kanban page.',
+              'Helm is a demo B2B project-analytics workspace. Routes: /dashboard, /dashboard/projects, /dashboard/analytics, /dashboard/team, /dashboard/billing, /dashboard/settings. To invite a teammate, open Team and click Invite. Export CSV lives on the Analytics page.',
           },
         ],
       },
       instructions: {
-        productName: 'Stacks',
+        productName: 'Helm',
         tone: 'friendly',
         custom:
-          'You are the Stacks assistant. Keep answers short and grounded in the demo dashboard.',
+          'You are the Helm assistant. Keep answers short and grounded in the demo dashboard.',
       },
     })
   : null
