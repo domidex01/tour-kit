@@ -118,6 +118,13 @@ function handleReset(state: TourReducerState, tourId?: string): TourReducerState
   }
 }
 
+/** First registered `autoStart` tour the user hasn't already completed. */
+function findAutoStartTour(tours: Tour[], completedTours: string[]): Tour | undefined {
+  const auto = tours.find((t) => t.autoStart)
+  if (!auto || completedTours.includes(auto.id)) return undefined
+  return auto
+}
+
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: reducer handles many action variants in one switch
 function tourReducer(state: TourReducerState, action: TourAction): TourReducerState {
   switch (action.type) {
@@ -633,16 +640,14 @@ export function TourProvider({
   const autoStartAttemptedRef = React.useRef(false)
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount-once autoStart trigger (ref-guarded), deferred until flow.ready
   React.useEffect(() => {
-    if (autoStartAttemptedRef.current) return
-    if (!flow.ready) return
+    if (autoStartAttemptedRef.current || !flow.ready) return
     if (flow.session && !flow.isStale) return
     autoStartAttemptedRef.current = true
     const persisted = load()
     if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) return
-    const auto = tours.find((t) => t.autoStart)
-    if (!auto) return
     const completedTours = persistTerminalTours ? getCompletedTours() : state.completedTours
-    if (completedTours.includes(auto.id)) return
+    const auto = findAutoStartTour(tours, completedTours)
+    if (!auto) return
     dispatch({
       type: 'START_TOUR',
       tourId: auto.id,
