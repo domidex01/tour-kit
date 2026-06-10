@@ -107,4 +107,50 @@ describe('Storage persistence', () => {
     expect(state?.isDismissed).toBe(true)
     expect(state?.viewCount).toBe(3)
   })
+
+  it('hydration merges with registered surveys instead of wiping them', async () => {
+    // Regression (QA 2026-06-10): stale persisted state written by a DIFFERENT
+    // survey set on the same origin must not blank freshly-configured surveys.
+    // REGISTER runs synchronously on mount; the async HYDRATE used to replace
+    // the whole map, deleting every registered id missing from the blob.
+    sharedStore.set(
+      'test-storage:state',
+      JSON.stringify({
+        surveys: [
+          [
+            'foreign-survey',
+            {
+              id: 'foreign-survey',
+              isActive: false,
+              isVisible: false,
+              isDismissed: false,
+              isSnoozed: false,
+              isCompleted: true,
+              viewCount: 1,
+              lastViewedAt: new Date().toISOString(),
+              dismissedAt: null,
+              dismissalReason: null,
+              completedAt: new Date().toISOString(),
+              snoozeCount: 0,
+              snoozeUntil: null,
+              currentStep: 0,
+              responses: [],
+            },
+          ],
+        ],
+        queue: [],
+        lastShownAt: null,
+      })
+    )
+
+    const { result } = renderHook(() => useSurveys(), { wrapper })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    // The configured survey survives hydration…
+    expect(result.current.getState('persisted')).toBeTruthy()
+    // …and the foreign persisted history is retained too.
+    expect(result.current.getState('foreign-survey')?.isCompleted).toBe(true)
+  })
 })

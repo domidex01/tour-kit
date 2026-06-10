@@ -33,9 +33,13 @@ export function TourKitProvider({
   onTourSkip,
   onStepView,
 }: TourKitProviderProps) {
-  // Resolve direction on mount and when config changes
+  // Hydration safety: only an explicit config.dir may influence the first
+  // render. 'auto' (or undefined) reads document.dir, which SSR can't see —
+  // seeding it in the initializer makes the first client render diverge from
+  // the server HTML on RTL pages. The effect below resolves the real
+  // direction immediately after mount.
   const [direction, setDirection] = React.useState<'ltr' | 'rtl'>(() =>
-    resolveDirection(config.dir)
+    config.dir === 'ltr' || config.dir === 'rtl' ? config.dir : 'ltr'
   )
 
   // Update direction when config changes or document dir changes

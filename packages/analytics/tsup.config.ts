@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsup'
+import { injectUseClient } from '../../tooling/build/use-client'
 
 export default defineConfig({
   entry: {
@@ -38,8 +39,16 @@ export default defineConfig({
     options.minifyIdentifiers = true
     options.minifySyntax = true
     options.minifyWhitespace = false
-    options.banner = {
-      js: '"use client";',
-    }
+  },
+  async onSuccess() {
+    // esbuild's `banner: '"use client"'` is stripped by the treeshake pass —
+    // inject post-build instead (tooling/build/use-client.ts).
+    injectUseClient([
+      'index',
+      'plugins/posthog',
+      'plugins/mixpanel',
+      'plugins/amplitude',
+      'plugins/google-analytics',
+    ])
   },
 })

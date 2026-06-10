@@ -69,7 +69,12 @@ export const LottiePlayer = React.forwardRef<HTMLDivElement, LottiePlayerProps>(
     React.useEffect(() => {
       let isMounted = true
 
-      import('@lottiefiles/react-lottie-player')
+      // Optional peer dependency: keep the specifier out of build-time module
+      // resolution so consumers who don't install the Lottie player still build.
+      // Bare `import('@lottiefiles/react-lottie-player')` is otherwise resolved
+      // eagerly by webpack/Vite and hard-fails the build when the peer is absent.
+      // Mirrors @tour-kit/analytics' optional-SDK import guard.
+      import(/* webpackIgnore: true */ /* @vite-ignore */ '@lottiefiles/react-lottie-player')
         .then((module) => {
           if (isMounted) {
             // Use type assertion to handle the component type properly

@@ -27,6 +27,7 @@ export type TourAction =
   | { type: 'SET_TRANSITIONING'; isTransitioning: boolean }
   | { type: 'ADD_COMPLETED'; tourId: string }
   | { type: 'ADD_SKIPPED'; tourId: string }
+  | { type: 'HYDRATE_TERMINAL_TOURS'; completedTours: string[]; skippedTours: string[] }
   | { type: 'RESET'; tourId?: string }
   | { type: 'UPDATE_TOURS'; tours: Tour[] }
   | { type: 'TRACK_STEP_VISIT'; stepId: string; previousStepId: string | null }

@@ -21,6 +21,13 @@ export interface UseFlowSessionReturn {
   save: (stepIndex: number, currentRoute?: string) => void
   clear: () => void
   isStale: boolean
+  /**
+   * `true` once the post-mount storage read has run (immediately when the
+   * hook is disabled). `session` is `null` until then — consumers that give
+   * the flow session precedence over other restore paths must wait for
+   * `ready` instead of treating the initial `null` as "no session".
+   */
+  ready: boolean
 }
 
 export interface UseFlowSessionConfig extends FlowSessionConfig {
@@ -33,6 +40,7 @@ const NOOP_RETURN: UseFlowSessionReturn = {
   save: () => {},
   clear: () => {},
   isStale: false,
+  ready: true,
 }
 
 function getDefaultTtl(storage: FlowSessionConfig['storage']): number {
@@ -94,12 +102,20 @@ export function useFlowSession(
     }
   }, [storage, storageKey, ttlMs])
 
-  const [session, setSession] = React.useState<FlowSessionV2 | null>(() => readSession())
+  // Hydration safety: the initial value must be `null` (matching SSR), never a
+  // render-time storage read. Seeding `session` in the useState initializer
+  // made the first client render differ from the server-rendered HTML, which
+  // shifts React's useId tree positions and surfaces as hydration mismatches
+  // in unrelated downstream useId consumers (e.g. the checklists launcher's
+  // aria-controls). The blob loads in the mount effect below instead.
+  const [session, setSession] = React.useState<FlowSessionV2 | null>(null)
+  const [ready, setReady] = React.useState(false)
 
-  // Re-read when storage identity changes (e.g. config.storage swap)
+  // Load on mount and re-read when storage identity changes (e.g. config.storage swap)
   // biome-ignore lint/correctness/useExhaustiveDependencies: only re-load on storage identity change
   React.useEffect(() => {
     setSession(readSession())
+    setReady(true)
   }, [storage])
 
   // Latest values ref — keeps the throttled callback identity stable while
@@ -177,5 +193,6 @@ export function useFlowSession(
     save,
     clear,
     isStale: session ? isExpired(session, ttlMs) : false,
+    ready,
   }
 }

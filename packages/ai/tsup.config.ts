@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsup'
+import { injectUseClient } from '../../tooling/build/use-client'
 
 export default defineConfig({
   entry: {
@@ -29,4 +30,11 @@ export default defineConfig({
   sourcemap: true,
   target: 'es2020',
   outDir: 'dist',
+  async onSuccess() {
+    // index + headless are the React client surfaces and need the RSC
+    // directive (tooling/build/use-client.ts). server/index and
+    // tailwind/index must stay directive-free — they are imported from
+    // server/build contexts.
+    injectUseClient(['index', 'headless'])
+  },
 })

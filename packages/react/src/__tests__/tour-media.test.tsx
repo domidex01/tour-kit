@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useTour } from '@tour-kit/core'
 import { describe, expect, it } from 'vitest'
@@ -37,7 +37,11 @@ describe('TourCard renders MediaSlot when step.media is set', () => {
     const card = document.querySelector('[role="dialog"]')
     expect(card).not.toBeNull()
     expect(card?.querySelector('[data-slot="tour-card-media"]')).not.toBeNull()
-    expect(card?.querySelector('iframe')).not.toBeNull()
+    // MediaSlot is lazy-loaded (React.lazy) so the embed mounts a tick after
+    // the card — await it instead of asserting synchronously.
+    await waitFor(() => {
+      expect(card?.querySelector('iframe')).not.toBeNull()
+    })
   })
 
   it('renders no media slot when step.media is absent', async () => {

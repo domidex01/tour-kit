@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsup'
+import { injectUseClient } from '../../tooling/build/use-client'
 
 export default defineConfig({
   entry: ['src/index.ts'],
@@ -17,9 +18,9 @@ export default defineConfig({
   treeshake: true,
   minify: true,
   target: 'es2020',
-  esbuildOptions(options) {
-    options.banner = {
-      js: '"use client";',
-    }
+  async onSuccess() {
+    // esbuild's `banner: '"use client"'` is stripped by the treeshake pass and
+    // by minify — inject post-build instead (tooling/build/use-client.ts).
+    injectUseClient(['index'])
   },
 })

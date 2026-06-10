@@ -145,6 +145,14 @@ function tourReducer(state: TourReducerState, action: TourAction): TourReducerSt
       return state.skippedTours.includes(action.tourId)
         ? state
         : { ...state, skippedTours: [...state.skippedTours, action.tourId] }
+    case 'HYDRATE_TERMINAL_TOURS': {
+      // Post-mount load of persisted terminal tours (see the hydrate effect in
+      // TourProvider). Union-merge so an ADD_COMPLETED/ADD_SKIPPED dispatched
+      // before hydration lands is never lost.
+      const completedTours = [...new Set([...action.completedTours, ...state.completedTours])]
+      const skippedTours = [...new Set([...action.skippedTours, ...state.skippedTours])]
+      return { ...state, completedTours, skippedTours }
+    }
     case 'RESET':
       return handleReset(state, action.tourId)
     case 'UPDATE_TOURS': {
@@ -335,8 +343,13 @@ export function TourProvider({
     totalSteps: 0,
     isLoading: false,
     isTransitioning: false,
-    completedTours: persistTerminalTours ? getCompletedTours() : [],
-    skippedTours: persistTerminalTours ? getSkippedTours() : [],
+    // Hydration safety: do NOT seed these from storage here. A render-time
+    // getCompletedTours() read makes the first client render differ from SSR
+    // (server has no storage), which shifts useId tree positions and breaks
+    // hydration for downstream useId consumers. Loaded post-mount via
+    // HYDRATE_TERMINAL_TOURS below.
+    completedTours: [],
+    skippedTours: [],
     visitedSteps: [],
     stepVisitCount: new Map(),
     previousStepId: null,
@@ -344,6 +357,16 @@ export function TourProvider({
   }
 
   const [state, dispatch] = React.useReducer(tourReducer, initialState)
+
+  // Load persisted terminal tours after mount so the first client render
+  // matches the server-rendered HTML exactly (standard SSR reconcile pattern).
+  React.useEffect(() => {
+    if (!persistTerminalTours) return
+    const completedTours = getCompletedTours()
+    const skippedTours = getSkippedTours()
+    if (completedTours.length === 0 && skippedTours.length === 0) return
+    dispatch({ type: 'HYDRATE_TERMINAL_TOURS', completedTours, skippedTours })
+  }, [persistTerminalTours, getCompletedTours, getSkippedTours])
 
   // ─── Diagnostic engine wiring (Phase 3) ──────────────────────────────────
   // Runs after the reducer is declared so the persistence gate can read live
@@ -490,9 +513,11 @@ export function TourProvider({
   // the target before dispatching START_TOUR. On any failure, clear the
   // session — a stale/wrong route will never recover on its own.
   const flowRestoreAttemptedRef = React.useRef(false)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: idempotent via flowRestoreAttemptedRef; we only re-run when `tours` populates
+  // biome-ignore lint/correctness/useExhaustiveDependencies: idempotent via flowRestoreAttemptedRef; re-runs when `tours` populates or the deferred session load completes (flow.ready)
   React.useEffect(() => {
     if (flowRestoreAttemptedRef.current) return
+    // The session blob loads post-mount (hydration safety) — wait for it.
+    if (!flow.ready) return
     const restored = flow.session
     if (!restored || flow.isStale) return
     if (tours.length === 0) return // wait for declarative <Tour> children
@@ -578,12 +603,15 @@ export function TourProvider({
     return () => {
       cancelled = true
     }
-  }, [tours])
+  }, [tours, flow.ready])
 
-  // Restore persisted state on mount — and re-run when another tab writes
-  // (externalVersion bumps whenever `syncTabs` is on and the storage key changes).
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Only run on mount / external sync
+  // Restore persisted state once flow readiness is known — and re-run when
+  // another tab writes (externalVersion bumps whenever `syncTabs` is on and
+  // the storage key changes). Gated on flow.ready so the flowSession-restore
+  // precedence check below sees the loaded session, not the pre-load `null`.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only run on flow readiness / external sync
   React.useEffect(() => {
+    if (!flow.ready) return
     // flowSession restore (above) wins — skip route restore if it already
     // dispatched START_TOUR.
     if (flow.session && !flow.isStale) return
@@ -595,14 +623,20 @@ export function TourProvider({
         stepIndex: persisted.stepIndex,
       })
     }
-  }, [externalVersion])
+  }, [externalVersion, flow.ready])
 
-  // Auto-start tours declaring autoStart on mount
+  // Auto-start tours declaring autoStart on mount.
   // Persistence restore takes precedence — read persisted state synchronously
-  // so we don't double-dispatch in the same mount batch.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only autoStart trigger
+  // so we don't double-dispatch in the same mount batch. Waits for flow.ready
+  // (post-mount session load) before deciding; the ref keeps it mount-once so
+  // the ready flip can't double-fire it.
+  const autoStartAttemptedRef = React.useRef(false)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-once autoStart trigger (ref-guarded), deferred until flow.ready
   React.useEffect(() => {
+    if (autoStartAttemptedRef.current) return
+    if (!flow.ready) return
     if (flow.session && !flow.isStale) return
+    autoStartAttemptedRef.current = true
     const persisted = load()
     if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) return
     const auto = tours.find((t) => t.autoStart)
@@ -614,7 +648,7 @@ export function TourProvider({
       tourId: auto.id,
       stepIndex: auto.startAt ?? 0,
     })
-  }, [])
+  }, [flow.ready])
 
   // Save state on changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally only save on specific state changes

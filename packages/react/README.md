@@ -252,6 +252,14 @@ import type {
 
 Always import from `@tour-kit/react`. Do **not** mix `@tour-kit/core` and `@tour-kit/react` imports in the same file — react re-exports nearly the full core surface to keep your imports flat.
 
+## Step media is lazy-loaded
+
+`TourCard` renders step `media` through `@tour-kit/media`, but loads it with
+`React.lazy` — bundlers split it into its own async chunk that is only fetched
+the first time a step with `media` renders. Tours without media steps never
+ship the media stack in their initial bundle. No setup needed; the embed
+mounts one tick after the card (wrapped in `<Suspense fallback={null}>`).
+
 ## Related packages
 
 - [`@tour-kit/core`](https://www.npmjs.com/package/@tour-kit/core) — headless engine (re-exported here)

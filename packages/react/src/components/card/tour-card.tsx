@@ -20,7 +20,6 @@ import {
   useTour,
 } from '@tour-kit/core'
 import { cn } from '@tour-kit/core'
-import { MediaSlot } from '@tour-kit/media'
 import * as React from 'react'
 import { useResolvedText } from '../../hooks/use-resolved-text'
 import { TourArrow } from '../primitives/tour-arrow'
@@ -39,6 +38,18 @@ function toFloatingPlacement(placement?: Placement): FloatingPlacement {
 // Module-level dedup so `variant="classic"` warns once per step id even
 // across re-renders. Reset between tests via `vi.resetModules()`.
 const warnedClassicStepIds = new Set<string>()
+
+// Lazy-load the media stack: @tour-kit/media is only fetched when a step
+// actually declares `media`, so tour consumers without media steps never ship
+// it in their initial bundle (bundlers split the dynamic import into its own
+// async chunk). Deliberately NO `webpackIgnore`/`@vite-ignore` magic comments
+// here — those would leave a bare specifier the browser cannot resolve at
+// runtime, breaking media for every bundled consumer. Step media is required
+// UX (unlike the analytics/Lottie optional-SDK pattern), so the import must
+// stay bundler-resolvable.
+const LazyMediaSlot = React.lazy(() =>
+  import('@tour-kit/media').then((mod) => ({ default: mod.MediaSlot }))
+)
 
 export interface TourCardProps
   extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
@@ -246,7 +257,9 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
 
           {visibleStep.media && (
             <div className="px-4" data-slot="tour-card-media">
-              <MediaSlot {...visibleStep.media} />
+              <React.Suspense fallback={null}>
+                <LazyMediaSlot {...visibleStep.media} />
+              </React.Suspense>
             </div>
           )}
 
