@@ -1,5 +1,19 @@
 # @tour-kit/docs
 
+## 0.0.20
+
+### Patch Changes
+
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+  - @tour-kit/core@1.0.6
+  - @tour-kit/react@1.0.6
+  - @tour-kit/hints@1.0.6
+  - @tour-kit/announcements@4.1.6
+  - @tour-kit/license@1.3.5
+
 ## 0.0.19
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # @tour-kit/adoption
 
+## 2.1.9
+
+### Patch Changes
+
+- d870c32: One click now counts as one usage. A `<FeatureButton>` whose DOM node also
+  matches its feature's `trigger` CSS selector was double-counted: the
+  capture-phase selector listener and the button's own onClick `trackUsage()`
+  both fired for the same native event. Tracking paths now claim the native
+  event per feature (`claimUsageEvent`) — the selector listener claims first
+  (capture phase), and the manual button path skips events already counted.
+- Updated dependencies [d870c32]
+- Updated dependencies [d870c32]
+  - @tour-kit/core@1.0.6
+  - @tour-kit/analytics@0.11.9
+  - @tour-kit/license@1.3.5
+
 ## 2.1.8
 
 ### Patch Changes
