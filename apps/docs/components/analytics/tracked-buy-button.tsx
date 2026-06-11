@@ -1,9 +1,10 @@
 'use client'
 
+import type { CapabilitySlug } from '@/components/capability/types'
 import { sendGAEvent } from '@next/third-parties/google'
 import type { ReactNode } from 'react'
 
-export type BuyButtonPlacement = 'pricing_page' | 'home_teaser'
+export type BuyButtonPlacement = 'pricing_page' | 'home_teaser' | `${CapabilitySlug}_teaser`
 
 interface TrackedBuyButtonProps {
   href: string
