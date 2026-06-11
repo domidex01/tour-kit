@@ -47,6 +47,9 @@ test-results/
 # Turbo
 .turbo/
 
+# Vercel CLI project link (local machine state)
+.vercel/
+
 # Package tarballs (from npm pack)
 *.tgz
 #tour kit plan
