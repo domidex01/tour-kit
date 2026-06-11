@@ -21,7 +21,9 @@ const PAGE_PATH = '/product-announcements'
 const PAGE_TITLE = 'In-App Announcements for React | userTourKit'
 const PAGE_DESC =
   'In-app announcements for React — modal, banner, toast, slideout, spotlight — with scheduling, audience rules, and a priority queue. $99 once to ship.'
-const OG_IMAGE = `/api/og?title=${encodeURIComponent('In-App Announcements')}&category=ANNOUNCEMENTS`
+// File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
+// which blocks Twitter/Facebook crawlers from fetching share images.
+const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
@@ -40,13 +42,13 @@ export const metadata: Metadata = {
     description: PAGE_DESC,
     type: 'website',
     url: PAGE_PATH,
-    images: [OG_IMAGE],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: PAGE_TITLE }],
   },
   twitter: {
     card: 'summary_large_image',
     title: PAGE_TITLE,
     description: PAGE_DESC,
-    images: [OG_IMAGE],
+    images: [{ url: OG_IMAGE, alt: PAGE_TITLE }],
   },
 }
 

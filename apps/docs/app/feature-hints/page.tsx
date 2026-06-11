@@ -21,7 +21,9 @@ const PAGE_PATH = '/feature-hints'
 const PAGE_TITLE = 'Feature Hints & Beacons for React | userTourKit'
 const PAGE_DESC =
   'React feature hints, tooltips, and pulsing beacons for feature discovery — free and MIT licensed, under 5KB, headless or pre-styled, WCAG 2.1 AA.'
-const OG_IMAGE = `/api/og?title=${encodeURIComponent('Feature Hints & Beacons')}&category=HINTS`
+// File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
+// which blocks Twitter/Facebook crawlers from fetching share images.
+const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
@@ -40,13 +42,13 @@ export const metadata: Metadata = {
     description: PAGE_DESC,
     type: 'website',
     url: PAGE_PATH,
-    images: [OG_IMAGE],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: PAGE_TITLE }],
   },
   twitter: {
     card: 'summary_large_image',
     title: PAGE_TITLE,
     description: PAGE_DESC,
-    images: [OG_IMAGE],
+    images: [{ url: OG_IMAGE, alt: PAGE_TITLE }],
   },
 }
 

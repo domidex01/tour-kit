@@ -203,6 +203,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
+    images: [`${SITE_URL}/${slug}/opengraph-image`],
   }))
 
   const trustPages: MetadataRoute.Sitemap = [

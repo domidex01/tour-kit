@@ -22,7 +22,9 @@ const PAGE_PATH = '/product-tours'
 const PAGE_TITLE = 'Product Tours for React — Headless & Accessible | userTourKit'
 const PAGE_DESC =
   'React product tour library with headless hooks, pre-styled components, router adapters, and WCAG 2.1 AA accessibility. Free and MIT licensed.'
-const OG_IMAGE = `/api/og?title=${encodeURIComponent('Product Tours for React')}&category=TOURS`
+// File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
+// which blocks Twitter/Facebook crawlers from fetching share images.
+const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
@@ -41,13 +43,13 @@ export const metadata: Metadata = {
     description: PAGE_DESC,
     type: 'website',
     url: PAGE_PATH,
-    images: [OG_IMAGE],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: PAGE_TITLE }],
   },
   twitter: {
     card: 'summary_large_image',
     title: PAGE_TITLE,
     description: PAGE_DESC,
-    images: [OG_IMAGE],
+    images: [{ url: OG_IMAGE, alt: PAGE_TITLE }],
   },
 }
 
