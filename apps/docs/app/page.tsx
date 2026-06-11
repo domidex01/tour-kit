@@ -18,22 +18,29 @@ import type { Metadata } from 'next'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 
-const HOME_TITLE = 'userTourKit - Product Tours for React'
+/**
+ * Home owns the brand + umbrella cluster ("react onboarding toolkit");
+ * the specific commercial clusters live on the capability pages
+ * (/product-tours owns "react product tour library", etc). Re-anchored
+ * 2026-06-11 when /product-tours shipped — see
+ * utk-studio/plan/marketing-package-pages.md §3.1.
+ */
+const HOME_TITLE = 'userTourKit — Product Tours, Checklists & In-App Messaging for React'
 const HOME_DESC =
-  'The most developer-friendly, accessible product tour library for React. Headless hooks and pre-styled components.'
+  'The open-source onboarding toolkit for React: product tours, feature hints, checklists, announcements, and surveys. Headless, accessible, yours.'
 
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },
   description: HOME_DESC,
   keywords: [
-    'react product tour library',
     'usertourkit',
-    'headless react onboarding',
+    'react onboarding toolkit',
     'react onboarding library',
+    'headless react onboarding',
+    'in-app messaging react',
     'shadcn ui tour',
-    'open source product tour',
-    'product tour library',
-    'react walkthrough library',
+    'open source onboarding library',
+    'user onboarding react',
   ],
   alternates: { canonical: '/' },
   openGraph: {
