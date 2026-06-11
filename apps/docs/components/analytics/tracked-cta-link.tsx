@@ -1,5 +1,6 @@
 'use client'
 
+import type { CapabilityCtaPlacement } from '@/components/capability/types'
 import { sendGAEvent } from '@next/third-parties/google'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
@@ -21,6 +22,7 @@ export type CtaPlacement =
   | 'docs_footer'
   | 'docs_pro_callout'
   | 'site_banner'
+  | CapabilityCtaPlacement
 
 interface TrackedCtaLinkProps {
   href: string

@@ -54,7 +54,24 @@ const TRUST_PAGE_FALLBACKS: Record<string, string> = {
   benchmarks: '2026-04-20',
   'benchmarks/bundle-size': '2026-04-20',
   demo: '2026-04-27',
+  'product-tours': '2026-06-11',
+  'feature-hints': '2026-06-11',
+  'onboarding-checklists': '2026-06-11',
+  'product-announcements': '2026-06-11',
+  'in-app-surveys': '2026-06-11',
 }
+
+/**
+ * Capability marketing pages (one per buyer intent). Priority 0.8 — below
+ * home/pricing, level with compare/alternatives per the SEO plan.
+ */
+const CAPABILITY_PAGES = [
+  'product-tours',
+  'feature-hints',
+  'onboarding-checklists',
+  'product-announcements',
+  'in-app-surveys',
+] as const
 
 function mdxPath(collection: 'blog' | 'compare' | 'alternatives', slug: string): string {
   return path.join(process.cwd(), 'content', collection, `${slug}.mdx`)
@@ -178,6 +195,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }))
 
+  const capabilityEntries: MetadataRoute.Sitemap = CAPABILITY_PAGES.map((slug) => ({
+    url: `${SITE_URL}/${slug}`,
+    lastModified: resolveTrustPageLastModified(
+      path.join(process.cwd(), `app/${slug}/page.tsx`),
+      slug
+    ),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+    images: [`${SITE_URL}/${slug}/opengraph-image`],
+  }))
+
   const trustPages: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/pricing`,
@@ -257,6 +285,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // updates instead of the build clock.
   const allEntries = [
     ...trustPages,
+    ...capabilityEntries,
     ...docEntries,
     ...blogEntries,
     ...compareEntries,
@@ -281,6 +310,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.4,
     },
     ...trustPages,
+    ...capabilityEntries,
     ...docEntries,
     ...blogEntries,
     ...compareEntries,

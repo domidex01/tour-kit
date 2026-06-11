@@ -1,4 +1,4 @@
-import { TrackedCtaLink } from '@/components/analytics/tracked-cta-link'
+import { type CtaPlacement, TrackedCtaLink } from '@/components/analytics/tracked-cta-link'
 import { ArrowRight, Sparkles } from 'lucide-react'
 
 interface CtaBandProps {
@@ -7,7 +7,10 @@ interface CtaBandProps {
    * band's pull can be measured separately. Distinct from the blog placements
    * in `CtaPlacement`.
    */
-  placement: 'home_after_features' | 'home_after_compare'
+  placement: Extract<
+    CtaPlacement,
+    'home_after_features' | 'home_after_compare' | `${string}_after_features`
+  >
   /** Short uppercase pill label above the heading. */
   eyebrow: string
   heading: string
@@ -24,6 +27,12 @@ interface CtaBandProps {
    * card, no subscription").
    */
   reassurance: string
+  /** Primary button destination. Defaults to the getting-started docs. */
+  primaryHref?: string
+  /** Secondary button destination. Defaults to /pricing. */
+  secondaryHref?: string
+  /** Secondary button label. Defaults to "See pricing". */
+  secondaryLabel?: string
 }
 
 /**
@@ -40,6 +49,9 @@ export function CtaBand({
   subtext,
   ctaLabel,
   reassurance,
+  primaryHref = '/docs/getting-started',
+  secondaryHref = '/pricing',
+  secondaryLabel = 'See pricing',
 }: CtaBandProps) {
   return (
     <section className="px-6 py-8 sm:px-8 lg:px-12">
@@ -97,7 +109,7 @@ export function CtaBand({
             <div className="flex shrink-0 flex-col items-center gap-2.5 sm:items-end">
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <TrackedCtaLink
-                  href="/docs/getting-started"
+                  href={primaryHref}
                   placement={placement}
                   className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-6 py-3 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/25 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
                 >
@@ -108,11 +120,11 @@ export function CtaBand({
                   />
                 </TrackedCtaLink>
                 <TrackedCtaLink
-                  href="/pricing"
+                  href={secondaryHref}
                   placement={placement}
                   className="inline-flex items-center rounded-lg border border-fd-border bg-fd-background/70 px-6 py-3 text-[14px] font-semibold text-fd-foreground backdrop-blur-sm transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
                 >
-                  See pricing
+                  {secondaryLabel}
                 </TrackedCtaLink>
               </div>
               <p className="text-[12px] text-fd-muted-foreground">{reassurance}</p>

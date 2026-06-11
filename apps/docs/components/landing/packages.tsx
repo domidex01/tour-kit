@@ -1,5 +1,10 @@
 import Link from 'next/link'
 
+/**
+ * Capability entries link to the marketing pages (commercial intent lives
+ * there — plan §3.2); supporting packages keep their docs links. `linkLabel`
+ * distinguishes the two destinations.
+ */
 const corePackages = [
   {
     name: '@tour-kit/core',
@@ -8,6 +13,7 @@ const corePackages = [
     size: '< 8 KB',
     install: 'pnpm add @tour-kit/core',
     href: '/docs/core',
+    linkLabel: 'Docs',
     features: ['useTour hook', 'Position engine', 'Focus trap', 'Keyboard nav', 'Storage adapters'],
   },
   {
@@ -15,7 +21,8 @@ const corePackages = [
     description: 'Pre-styled, composable React components. Drop in and go.',
     size: '< 12 KB',
     install: 'pnpm add @tour-kit/react',
-    href: '/docs/react',
+    href: '/product-tours',
+    linkLabel: 'Product tours',
     features: ['Tour component', 'TourStep', 'Router adapters', 'Headless variants'],
   },
   {
@@ -23,7 +30,8 @@ const corePackages = [
     description: 'Persistent contextual hints and pulsing beacons.',
     size: '< 5 KB',
     install: 'pnpm add @tour-kit/hints',
-    href: '/docs/hints',
+    href: '/feature-hints',
+    linkLabel: 'Feature hints',
     features: ['Pulsing beacons', 'Contextual tips', 'Dismissal tracking'],
   },
 ]
@@ -33,13 +41,19 @@ const extensions = [
     name: '@tour-kit/announcements',
     description: 'Modals, toasts, banners, slideouts',
     install: 'pnpm add @tour-kit/announcements',
-    href: '/docs/announcements',
+    href: '/product-announcements',
   },
   {
     name: '@tour-kit/checklists',
     description: 'Onboarding tasks with dependencies',
     install: 'pnpm add @tour-kit/checklists',
-    href: '/docs/checklists',
+    href: '/onboarding-checklists',
+  },
+  {
+    name: '@tour-kit/surveys',
+    description: 'NPS, CSAT & CES microsurveys',
+    install: 'pnpm add @tour-kit/surveys',
+    href: '/in-app-surveys',
   },
   {
     name: '@tour-kit/analytics',
@@ -76,7 +90,7 @@ export function Packages() {
           <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
             One install.
             <br />
-            Nine packages.
+            Ten packages.
           </h2>
           <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
             Start with the free core. Add analytics, checklists, or scheduling when you need them —
@@ -119,7 +133,7 @@ export function Packages() {
                   href={pkg.href}
                   className="font-mono text-[12px] font-semibold text-[var(--landing-accent)] transition-colors hover:opacity-80"
                 >
-                  Docs &rarr;
+                  {pkg.linkLabel} &rarr;
                 </Link>
               </div>
             </div>
