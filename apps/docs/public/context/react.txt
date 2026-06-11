@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/react Context File
-Version: 1.0.2 | Generated: 2026-05-26
+Version: 1.0.6 | Generated: 2026-06-11
 Paste this into your LLM to get accurate answers about @tour-kit/react.
 =========================================================================
 
@@ -21,7 +21,7 @@ Peer dependencies:
     @tour-kit/analytics: workspace:*
     next: ^13.0.0 || ^14.0.0 || ^15.0.0
     react-router: ^6.0.0 || ^7.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.0.0 || ^7.0.0
 
 EXPORTS
 -------
@@ -407,48 +407,63 @@ COMPONENTS
 EXAMPLES
 --------
 
-Example 1: Selector string (legacy)
+Example 1: TourProps
 
-    import { Tour, TourStep } from '@tour-kit/react'
-    
-    export function Demo() {
-      return (
-        <Tour id="legacy">
-          <TourStep id="welcome" target="#welcome" title="Welcome" content="…" />
-          <button id="welcome" type="button">Click me</button>
-        </Tour>
-      )
+    interface TourProps {
+      id: string
+      autoStart?: boolean
+      startAt?: number
+      config?: Omit<Tour, 'id' | 'steps'>
+      onStart?: () => void
+      onComplete?: () => void
+      onSkip?: () => void
+      onStepChange?: (step: TourStep, index: number) => void
+      children: React.ReactNode
     }
 
-Example 2: RefObject (recommended)
+Example 2: TourCardHeaderProps / TourCardContentProps / TourCardFooterProps
 
-    import { Tour, TourStep } from '@tour-kit/react'
-    import { useRef } from 'react'
+    interface TourCardHeaderProps
+      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'title'>,
+        TourCardHeaderVariants {
+      title?: React.ReactNode
+      /** ID for accessibility (aria-labelledby) */
+      titleId: string
+      showClose?: boolean
+    }
     
-    export function Demo() {
-      const welcomeRef = useRef<HTMLButtonElement>(null)
+    interface TourCardContentProps
+      extends Omit<React.ComponentPropsWithoutRef<'div'>, 'content'>,
+        TourCardContentVariants {
+      content?: React.ReactNode
+    }
     
-      return (
-        <Tour id="ref-mode">
-          <TourStep id="welcome" target={welcomeRef} title="Welcome" content="…" />
-          <button ref={welcomeRef} type="button">Click me</button>
-        </Tour>
-      )
+    interface TourCardFooterProps
+      extends React.ComponentPropsWithoutRef<'div'>,
+        TourCardFooterVariants {
+      currentStep: number
+      totalSteps: number
+      showNavigation?: boolean
+      showProgress?: boolean
+      isFirstStep: boolean
+      isLastStep: boolean
+      onPrev: () => void
+      onNext: () => void
+      onSkip: () => void
     }
 
-Example 3: Getter function (escape hatch)
+Example 3: TourNavigationProps
 
-    import { Tour, TourStep } from '@tour-kit/react'
-    
-    export function Demo() {
-      return (
-        <Tour id="thunk-mode">
-          <TourStep
-            id="cta"
-            target={() => document.querySelector<HTMLElement>('[data-cy="cta"]')}
-            title="Call to action"
-            content="…"
-          />
-        </Tour>
-      )
+    interface TourNavigationProps extends React.ComponentPropsWithoutRef<'div'> {
+      isFirstStep: boolean
+      isLastStep: boolean
+      onPrev: () => void
+      onNext: () => void
+      onSkip?: () => void
+      prevLabel?: string
+      nextLabel?: string
+      finishLabel?: string
+      skipLabel?: string
+      prevVariant?: TourButtonVariants['variant']
+      nextVariant?: TourButtonVariants['variant']
     }

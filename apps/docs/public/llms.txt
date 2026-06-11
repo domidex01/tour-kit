@@ -1,4 +1,4 @@
-# userTourKit v1.0.2 — Generated 2026-05-26T08:56:46Z
+# userTourKit v1.0.6 — Generated 2026-06-11T07:31:35Z
 
 # userTourKit
 
@@ -74,6 +74,7 @@
 - [useTourRegistryContext](https://usertourkit.com/docs/react/hooks/use-tour-registry-context): Low-level hooks for reading the registered tour list inside MultiTourKitProvider. Use useTours for ergonomic access.
 - [useTourRoute](https://usertourkit.com/docs/react/hooks/use-tour-route): useTourRoute hook: synchronize tour progress with router state for multi-page tours in Next.js and React Router
 - [useTours](https://usertourkit.com/docs/react/hooks/use-tours): useTours hook: access all registered tour instances, check active states, and manage multiple tours from one place
+- [Lazy Loading](https://usertourkit.com/docs/react/lazy): Code-split tour UI out of your initial bundle with @tour-kit/react/lazy — lazy components, TourSuspense, and preload functions
 - [MultiTourKitProvider](https://usertourkit.com/docs/react/providers/multi-tour-kit-provider): MultiTourKitProvider: manage multiple independent tours with shared configuration, analytics, and storage settings
 - [CSS Variables](https://usertourkit.com/docs/react/styling/css-variables): Customize userTourKit appearance with CSS custom properties for colors, spacing, border radius, and shadow values
 - [Custom Components](https://usertourkit.com/docs/react/styling/custom-components): Build fully custom tour card, overlay, and navigation components using Tour Kit hooks and headless primitives

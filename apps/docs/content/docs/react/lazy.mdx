@@ -1,0 +1,186 @@
+---
+title: Lazy Loading
+description: >-
+  Code-split tour UI out of your initial bundle with @tour-kit/react/lazy —
+  lazy components, TourSuspense, and preload functions
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+Most users never see a tour on their first page load. The standard `@tour-kit/react` import bundles the entire tour UI — card, overlay, Floating UI positioning — into your initial chunk regardless. The `/lazy` entry point splits that UI into a separate chunk that loads only when a tour actually runs.
+
+This is especially useful for apps with strict [bundle-size budgets](/docs/react) where the tour components would add noticeable weight to the initial paint.
+
+<Callout type="info">
+  The lazy components are **drop-in equivalents** of their eager counterparts. They accept identical props and behave identically — the only difference is that they suspend on first render until the chunk has loaded. You still need the providers (`TourKitProvider`, `TourProvider`) from the main `@tour-kit/react` entry point.
+</Callout>
+
+## Basic Usage
+
+Wrap lazy components in `<TourSuspense>` instead of a bare `<React.Suspense>`. The `fallback` prop is optional — omitting it renders nothing while the chunk loads, which is usually correct for tours that mount after interaction.
+
+```tsx title="app/onboarding.tsx"
+import { TourKitProvider } from '@tour-kit/react'
+import {
+  TourSuspense,
+  LazyTour,
+  LazyTourStep,
+  LazyTourCard,
+  LazyTourOverlay,
+  LazyTourNavigation,
+  LazyTourProgress,
+  LazyTourClose,
+} from '@tour-kit/react/lazy'
+
+export function OnboardingTour() {
+  return (
+    <TourKitProvider>
+      <TourSuspense>
+        <LazyTour id="onboarding">
+          <LazyTourStep target="#dashboard" title="Your dashboard" content="Everything starts here." />
+          <LazyTourStep target="#settings" title="Settings" content="Configure your workspace." />
+
+          <LazyTourOverlay />
+
+          <LazyTourCard>
+            <LazyTourClose />
+            <LazyTourNavigation />
+            <LazyTourProgress />
+          </LazyTourCard>
+        </LazyTour>
+      </TourSuspense>
+    </TourKitProvider>
+  )
+}
+```
+
+Compare this to the eager import — the only change is the import path and the `<TourSuspense>` wrapper:
+
+```tsx title="Before (eager)"
+import { Tour, TourStep, TourCard, TourOverlay, TourNavigation, TourProgress, TourClose } from '@tour-kit/react'
+```
+
+```tsx title="After (lazy)"
+import { TourSuspense, LazyTour, LazyTourStep, LazyTourCard, LazyTourOverlay, LazyTourNavigation, LazyTourProgress, LazyTourClose } from '@tour-kit/react/lazy'
+```
+
+## Preloading
+
+When you know a tour is coming — user hovers a "Start tour" button, a route is entered — call a preload function to warm the chunk ahead of time. The tour then mounts without any visible suspense fallback.
+
+### Preload on hover
+
+```tsx title="components/start-tour-button.tsx"
+import { preloadTour, preloadTourCard, preloadTourOverlay } from '@tour-kit/react/lazy'
+import { useTourActions } from '@tour-kit/react'
+
+export function StartTourButton() {
+  const { start } = useTourActions('onboarding')
+
+  return (
+    <button
+      onMouseEnter={() => {
+        // Warm the chunk while the user is still deciding to click
+        preloadTour()
+        preloadTourCard()
+        preloadTourOverlay()
+      }}
+      onClick={() => start()}
+    >
+      Take the tour
+    </button>
+  )
+}
+```
+
+### Preload everything at once
+
+If you want all tour components warmed in one call — for example during an idle callback after the page loads — use `preloadAllTourComponents`:
+
+```tsx title="app/layout.tsx"
+import { useEffect } from 'react'
+import { preloadAllTourComponents } from '@tour-kit/react/lazy'
+
+export function AppLayout({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    // Warm all tour chunks during idle time, before any tour is triggered
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => preloadAllTourComponents())
+    } else {
+      preloadAllTourComponents()
+    }
+  }, [])
+
+  return <>{children}</>
+}
+```
+
+### Preload on route enter
+
+With Next.js App Router, preload when a layout that contains a tour mounts:
+
+```tsx title="app/dashboard/layout.tsx"
+'use client'
+
+import { useEffect } from 'react'
+import { preloadAllTourComponents } from '@tour-kit/react/lazy'
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    preloadAllTourComponents()
+  }, [])
+
+  return <>{children}</>
+}
+```
+
+<Callout type="info">
+  Each preload function is idempotent — calling `preloadTour()` multiple times resolves the same cached promise. There is no cost to calling it more than once.
+</Callout>
+
+## TourSuspense Props
+
+<TypeTable
+  type={{
+    children: {
+      type: 'ReactNode',
+      required: true,
+      description: 'The lazy tour components to render inside the Suspense boundary.',
+    },
+    fallback: {
+      type: 'ReactNode',
+      required: false,
+      default: 'undefined',
+      description: 'UI to show while the tour chunk is loading. Omit to render nothing during load.',
+    },
+  }}
+/>
+
+## Exports Reference
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `TourSuspense` | Component | Convenience `React.Suspense` wrapper for lazy tour components. |
+| `TourSuspenseProps` | Type | Props type for `TourSuspense`. |
+| `LazyTour` | Lazy component | Lazy equivalent of `Tour`. |
+| `LazyTourStep` | Lazy component | Lazy equivalent of `TourStep`. |
+| `LazyTourCard` | Lazy component | Lazy equivalent of `TourCard`. |
+| `LazyTourOverlay` | Lazy component | Lazy equivalent of `TourOverlay`. |
+| `LazyTourNavigation` | Lazy component | Lazy equivalent of `TourNavigation`. |
+| `LazyTourProgress` | Lazy component | Lazy equivalent of `TourProgress`. |
+| `LazyTourClose` | Lazy component | Lazy equivalent of `TourClose`. |
+| `preloadTour` | Function | Preloads the `Tour` chunk. Returns a `Promise`. |
+| `preloadTourStep` | Function | Preloads the `TourStep` chunk. Returns a `Promise`. |
+| `preloadTourCard` | Function | Preloads the `TourCard` chunk. Returns a `Promise`. |
+| `preloadTourOverlay` | Function | Preloads the `TourOverlay` chunk. Returns a `Promise`. |
+| `preloadTourNavigation` | Function | Preloads the `TourNavigation` chunk. Returns a `Promise`. |
+| `preloadTourProgress` | Function | Preloads the `TourProgress` chunk. Returns a `Promise`. |
+| `preloadTourClose` | Function | Preloads the `TourClose` chunk. Returns a `Promise`. |
+| `preloadAllTourComponents` | Function | Preloads all of the above at once. Returns a `Promise` that resolves when all chunks are ready. |
+
+## Related
+
+- [Components](/docs/react/components/tour) — the eager component API these lazy wrappers mirror.
+- [`@tour-kit/react` overview](/docs/react) — providers and the main entry point you still need alongside `/lazy`.
+- [Styling](/docs/react/styling/tailwind) — lazy components accept the same `className` props as their eager equivalents.
