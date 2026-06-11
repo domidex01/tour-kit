@@ -16,8 +16,9 @@ interface CapabilityHeroProps {
   /** Primary CTA — install/Studio for free pages, try-in-dev for Pro. */
   primaryLabel: string
   primaryHref: string
-  /** Secondary always reads the docs ("Read the docs →"). */
-  docsHref: string
+  /** Secondary CTA — "Read the docs →" (free) or "See pricing" (Pro). */
+  secondaryLabel: string
+  secondaryHref: string
   /**
    * Free pages: the `pnpm add @tour-kit/<pkg>` mono block (home pattern).
    * Pro pages omit it and show the reassurance line instead.
@@ -45,7 +46,8 @@ export function CapabilityHero({
   subhead,
   primaryLabel,
   primaryHref,
-  docsHref,
+  secondaryLabel,
+  secondaryHref,
   installCmd,
   reassurance,
   factsLine,
@@ -114,10 +116,10 @@ export function CapabilityHero({
               />
             </TrackedCtaLink>
             <Link
-              href={docsHref}
+              href={secondaryHref}
               className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-5 py-3 text-[14px] font-semibold text-[#02182b] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md dark:text-white"
             >
-              Read the docs &rarr;
+              {secondaryLabel}
             </Link>
           </div>
 
