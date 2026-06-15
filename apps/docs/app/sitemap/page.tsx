@@ -149,7 +149,7 @@ export default function SitemapPage() {
 
         <nav aria-label="All pages" className="flex flex-col gap-4">
           {/* ── Top-level pages ── */}
-          <SitemapSection title="Top pages" count={9} defaultOpen>
+          <SitemapSection title="Top pages" count={10} defaultOpen>
             <ul className="grid gap-2 sm:grid-cols-2">
               <li>
                 <Link href="/" className="text-fd-foreground hover:underline">
@@ -165,6 +165,13 @@ export default function SitemapPage() {
                 <Link href="/demo" className="text-fd-foreground hover:underline">
                   Live demo
                 </Link>
+              </li>
+              <li>
+                {/* The Studio is a separate app deployed at /builder — plain <a>
+                    so it hard-navigates instead of attempting in-app routing. */}
+                <a href="/builder" className="text-fd-foreground hover:underline">
+                  Studio (visual builder)
+                </a>
               </li>
               <li>
                 <Link href="/blog" className="text-fd-foreground hover:underline">

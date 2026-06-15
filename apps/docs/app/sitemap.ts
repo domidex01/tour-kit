@@ -279,6 +279,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
+    {
+      // The Studio (utk-studio, a separate app deployed at /builder). It lives
+      // outside this repo, so the app/<x>/page.tsx mtime helper doesn't apply —
+      // pin a static date instead of broadcasting the build clock.
+      url: `${SITE_URL}/builder`,
+      lastModified: new Date('2026-06-15'),
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
   ]
 
   // Compute the freshest content date once so homepage + /sitemap track real
