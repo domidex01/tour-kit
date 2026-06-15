@@ -1,5 +1,60 @@
+import { getBlogCategories, slugifyCategory } from '@/lib/blog'
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared'
-import { BookOpen, Code2, CreditCard, GitCompareArrows, Layers, PenLine } from 'lucide-react'
+import {
+  Activity,
+  BookMarked,
+  BookOpen,
+  Bot,
+  Brain,
+  Briefcase,
+  Building2,
+  ClipboardList,
+  Code2,
+  CreditCard,
+  Factory,
+  GitCompareArrows,
+  GraduationCap,
+  Landmark,
+  Layers,
+  Lightbulb,
+  List,
+  ListChecks,
+  ListOrdered,
+  Megaphone,
+  Microscope,
+  Newspaper,
+  PenLine,
+  PencilRuler,
+  Plug,
+  Rocket,
+  Route,
+  Scale,
+  Tag,
+  TrendingUp,
+} from 'lucide-react'
+import type { ReactNode } from 'react'
+
+/** Icon per blog category slug for the Resources mega menu. */
+const BLOG_CATEGORY_ICONS: Record<string, ReactNode> = {
+  'build-vs-buy': <Scale />,
+  comparison: <GitCompareArrows />,
+  'deep-dives': <Microscope />,
+  geo: <Bot />,
+  glossary: <BookMarked />,
+  industry: <Factory />,
+  'industry-guides': <Building2 />,
+  integrations: <Plug />,
+  listicle: <List />,
+  listicles: <ListOrdered />,
+  metrics: <TrendingUp />,
+  'metrics-analytics': <Activity />,
+  'pillar-pages': <Landmark />,
+  releases: <Tag />,
+  'thought-leadership': <Brain />,
+  tutorial: <GraduationCap />,
+  tutorials: <GraduationCap />,
+  'use-cases': <Briefcase />,
+}
 
 export function TourKitLogo({ className }: { className?: string }) {
   return (
@@ -89,14 +144,78 @@ export function baseOptions(): BaseLayoutProps {
         icon: <Layers className="w-4 h-4" />,
       },
       {
-        text: 'Compare',
-        url: '/compare',
-        icon: <GitCompareArrows className="w-4 h-4" />,
+        // The visual builder app, deployed at /builder (utk-studio).
+        text: 'Studio',
+        url: '/builder',
+        icon: <PencilRuler className="w-4 h-4" />,
       },
       {
-        text: 'Blog',
+        type: 'menu',
+        text: 'Packages',
+        items: [
+          {
+            text: 'Product Tours',
+            description: 'Spotlight-guided walkthroughs that show users around your app',
+            url: '/product-tours',
+            icon: <Route />,
+          },
+          {
+            text: 'Feature Hints',
+            description: 'Pulsing beacons and tooltips that surface features in context',
+            url: '/feature-hints',
+            icon: <Lightbulb />,
+          },
+          {
+            text: 'Onboarding Checklists',
+            description: 'Task lists with progress tracking that drive activation',
+            url: '/onboarding-checklists',
+            icon: <ListChecks />,
+          },
+          {
+            text: 'Product Announcements',
+            description: 'Modals, banners, toasts and slideouts for product news',
+            url: '/product-announcements',
+            icon: <Megaphone />,
+          },
+          {
+            text: 'In-App Surveys',
+            description: 'NPS, CSAT and CES microsurveys with fatigue prevention',
+            url: '/in-app-surveys',
+            icon: <ClipboardList />,
+          },
+          {
+            text: 'Get Started',
+            description: 'Install userTourKit and ship your first tour in minutes',
+            url: '/docs/getting-started',
+            icon: <Rocket />,
+          },
+        ],
+      },
+      {
+        type: 'menu',
+        text: 'Resources',
         url: '/blog',
-        icon: <PenLine className="w-4 h-4" />,
+        items: [
+          {
+            text: 'Blog',
+            description: 'Tutorials, deep-dives, comparisons and metrics guides — 280+ articles',
+            url: '/blog',
+            icon: <PenLine />,
+            menu: { className: 'lg:col-span-2' },
+          },
+          {
+            text: 'Compare',
+            description: 'userTourKit vs Joyride, Shepherd, Appcues and more',
+            url: '/compare',
+            icon: <GitCompareArrows />,
+          },
+          ...getBlogCategories().map((category) => ({
+            text: category,
+            url: `/blog/category/${slugifyCategory(category)}`,
+            icon: BLOG_CATEGORY_ICONS[slugifyCategory(category)] ?? <Newspaper />,
+            menu: { className: 'flex-row items-center gap-3' },
+          })),
+        ],
       },
       {
         text: 'Pricing',
