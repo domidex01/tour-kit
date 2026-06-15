@@ -22,6 +22,7 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { DEFAULT_PRESET_ID, StyleSwitcher } from './style-switcher'
 
 /* ═══════════════════════════════════════════
    Shared: mock app chrome
@@ -144,7 +145,7 @@ function TourDemo() {
         {/* Tour tooltip */}
         {active && (
           <div
-            className="absolute z-10 w-64 rounded-xl border border-fd-border bg-fd-background p-4 shadow-xl transition-all duration-300"
+            className="tk-card absolute z-10 w-64 p-4 transition-all duration-300"
             style={{
               ...(step === 0 ? { top: 60, left: 180 } : {}),
               ...(step === 1 ? { top: 160, left: '50%', transform: 'translateX(-20%)' } : {}),
@@ -153,19 +154,15 @@ function TourDemo() {
           >
             {/* Arrow */}
             <div
-              className="absolute h-3 w-3 rotate-45 bg-fd-background"
+              className="tk-card-arrow absolute h-3 w-3 rotate-45"
               style={{
                 ...(step === 0 ? { top: 16, left: -6 } : {}),
                 ...(step === 1 ? { top: -6, left: 24 } : {}),
                 ...(step === 2 ? { top: -6, right: 24 } : {}),
               }}
             />
-            <p className="mb-1 text-[13px] font-bold text-fd-foreground">
-              {tourSteps[step ?? 0].title}
-            </p>
-            <p className="mb-3 text-[12px] text-fd-muted-foreground">
-              {tourSteps[step ?? 0].content}
-            </p>
+            <p className="tk-card-title mb-1 text-[13px] font-bold">{tourSteps[step ?? 0].title}</p>
+            <p className="tk-card-muted mb-3 text-[12px]">{tourSteps[step ?? 0].content}</p>
             <div className="flex items-center justify-between">
               <div className="flex gap-1">
                 {tourSteps.map((s, i) => (
@@ -183,7 +180,7 @@ function TourDemo() {
                     type="button"
                     onClick={() => setStep((s) => (s ?? 1) - 1)}
                     aria-label="Previous step"
-                    className="flex h-6 w-6 items-center justify-center rounded-md border border-fd-border text-fd-muted-foreground hover:bg-fd-muted"
+                    className="tk-btn-outline flex h-6 w-6 items-center justify-center hover:bg-fd-muted"
                   >
                     <ChevronLeft className="h-3 w-3" aria-hidden="true" />
                   </button>
@@ -191,7 +188,7 @@ function TourDemo() {
                 <button
                   type="button"
                   onClick={() => setStep((s) => (s !== null && s < 2 ? s + 1 : null))}
-                  className="flex h-6 items-center gap-1 rounded-md bg-[var(--tk-primary)] px-2.5 text-[11px] font-semibold text-white hover:brightness-110"
+                  className="tk-btn flex h-6 items-center gap-1 px-2.5 text-[11px] font-semibold"
                 >
                   {step === 2 ? 'Done' : 'Next'}
                   {step !== 2 && <ChevronRight className="h-2.5 w-2.5" />}
@@ -209,7 +206,7 @@ function TourDemo() {
           <button
             type="button"
             onClick={() => setStep(0)}
-            className="absolute bottom-4 right-4 inline-flex items-center gap-1.5 rounded-lg bg-[var(--tk-primary)] px-4 py-2 text-[12px] font-semibold text-white shadow-md transition-all hover:brightness-110"
+            className="tk-btn absolute bottom-4 right-4 inline-flex items-center gap-1.5 px-4 py-2 text-[12px] font-semibold shadow-md"
           >
             <Play className="h-3.5 w-3.5" />
             Start tour
@@ -290,11 +287,9 @@ function HintsDemo() {
 
             {/* Hint tooltip */}
             {activeHint === row.id && (
-              <div className="absolute -top-2 right-10 z-10 w-56 -translate-y-full rounded-lg border border-fd-border bg-fd-background p-3 shadow-xl">
-                <div className="absolute -bottom-1.5 right-4 h-3 w-3 rotate-45 border-b border-r border-fd-border bg-fd-background" />
-                <p className="mb-2 text-[12px] leading-relaxed text-fd-muted-foreground">
-                  {row.hint}
-                </p>
+              <div className="tk-card absolute -top-2 right-10 z-10 w-56 -translate-y-full p-3">
+                <div className="tk-card-arrow absolute -bottom-1.5 right-4 h-3 w-3 rotate-45 border-b border-r" />
+                <p className="tk-card-muted mb-2 text-[12px] leading-relaxed">{row.hint}</p>
                 <button
                   type="button"
                   onClick={() => dismiss(row.id)}
@@ -366,7 +361,7 @@ function AnnouncementsDemo() {
 
         {/* Banner */}
         {variant === 'banner' && (
-          <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between bg-[#0197f6] px-4 py-2.5">
+          <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between bg-[var(--tk-primary)] px-4 py-2.5">
             <p className="text-[12px] font-medium text-white">
               Version 2.0 is here — check out the new features!
             </p>
@@ -383,9 +378,9 @@ function AnnouncementsDemo() {
 
         {/* Toast */}
         {variant === 'toast' && (
-          <div className="absolute bottom-14 right-4 z-10 w-64 rounded-xl border border-fd-border bg-fd-background p-4 shadow-xl">
+          <div className="tk-card absolute bottom-14 right-4 z-10 w-64 p-4">
             <div className="mb-1 flex items-start justify-between">
-              <p className="text-[13px] font-bold text-fd-foreground">New: Dark mode</p>
+              <p className="tk-card-title text-[13px] font-bold">New: Dark mode</p>
               <button
                 type="button"
                 onClick={() => setVariant(null)}
@@ -395,7 +390,7 @@ function AnnouncementsDemo() {
                 <X className="h-3 w-3" aria-hidden="true" />
               </button>
             </div>
-            <p className="mb-2 text-[12px] text-fd-muted-foreground">
+            <p className="tk-card-muted mb-2 text-[12px]">
               Toggle between light and dark themes in settings.
             </p>
             <button
@@ -413,12 +408,12 @@ function AnnouncementsDemo() {
           <>
             <div className="absolute inset-0 z-10 bg-fd-foreground/20" />
             <div className="absolute inset-0 z-20 flex items-center justify-center p-8">
-              <div className="w-72 rounded-2xl border border-fd-border bg-fd-background p-6 shadow-2xl">
+              <div className="tk-card w-72 p-6">
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--tk-primary)]/10">
                   <Bell className="h-5 w-5 text-[var(--tk-primary)]" />
                 </div>
-                <h4 className="mb-1.5 text-[15px] font-bold text-fd-foreground">What&apos;s new</h4>
-                <p className="mb-4 text-[12px] leading-relaxed text-fd-muted-foreground">
+                <h4 className="tk-card-title mb-1.5 text-[15px] font-bold">What&apos;s new</h4>
+                <p className="tk-card-muted mb-4 text-[12px] leading-relaxed">
                   We shipped 3 new features this week: real-time collaboration, API v2, and custom
                   themes.
                 </p>
@@ -426,14 +421,14 @@ function AnnouncementsDemo() {
                   <button
                     type="button"
                     onClick={() => setVariant(null)}
-                    className="flex-1 rounded-lg bg-[var(--tk-primary)] py-2 text-[12px] font-semibold text-white hover:brightness-110"
+                    className="tk-btn flex-1 py-2 text-[12px] font-semibold"
                   >
                     See details
                   </button>
                   <button
                     type="button"
                     onClick={() => setVariant(null)}
-                    className="flex-1 rounded-lg border border-fd-border py-2 text-[12px] font-semibold text-fd-muted-foreground hover:bg-fd-muted"
+                    className="tk-btn-outline flex-1 py-2 text-[12px] font-semibold hover:bg-fd-muted"
                   >
                     Dismiss
                   </button>
@@ -572,9 +567,9 @@ function MediaDemo() {
         {/* Tour step with embedded media */}
         <div className="absolute inset-0 z-10 bg-fd-foreground/10" />
         <div className="absolute inset-x-4 top-12 bottom-4 z-20 flex items-start justify-center sm:inset-x-6">
-          <div className="w-full max-w-xl rounded-2xl border border-fd-border bg-fd-background p-4 shadow-2xl sm:p-5">
-            <p className="mb-1 text-[13px] font-bold text-fd-foreground">See it in action</p>
-            <p className="mb-3 text-[12px] text-fd-muted-foreground">
+          <div className="tk-card w-full max-w-xl p-4 sm:p-5">
+            <p className="tk-card-title mb-1 text-[13px] font-bold">See it in action</p>
+            <p className="tk-card-muted mb-3 text-[12px]">
               Watch a quick walkthrough of the new export feature.
             </p>
 
@@ -592,18 +587,15 @@ function MediaDemo() {
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-fd-muted-foreground">Step 2 of 4</span>
+              <span className="tk-card-muted text-[11px]">Step 2 of 4</span>
               <div className="flex gap-1.5">
                 <button
                   type="button"
-                  className="rounded-lg border border-fd-border px-3 py-1.5 text-[11px] font-semibold text-fd-muted-foreground hover:bg-fd-muted"
+                  className="tk-btn-outline px-3 py-1.5 text-[11px] font-semibold hover:bg-fd-muted"
                 >
                   Skip
                 </button>
-                <button
-                  type="button"
-                  className="rounded-lg bg-[var(--tk-primary)] px-3 py-1.5 text-[11px] font-semibold text-white hover:brightness-110"
-                >
+                <button type="button" className="tk-btn px-3 py-1.5 text-[11px] font-semibold">
                   Next step
                 </button>
               </div>
@@ -1101,10 +1093,10 @@ function SurveysDemo() {
         </div>
 
         {/* Survey card */}
-        <div className="mx-auto max-w-md rounded-xl border border-fd-border bg-fd-background p-5 shadow-sm">
+        <div className="tk-card mx-auto max-w-md p-5">
           {!submitted ? (
             <>
-              <p className="mb-4 text-[13px] font-semibold leading-snug text-fd-foreground">
+              <p className="tk-card-title mb-4 text-[13px] font-semibold leading-snug">
                 {current.question}
               </p>
 
@@ -1152,8 +1144,8 @@ function SurveysDemo() {
                         onClick={() => setRating(n)}
                         className={`rounded-md border py-1.5 text-[12px] font-semibold transition-all ${
                           isSelected
-                            ? 'border-[var(--tk-primary)] bg-[var(--tk-primary)] text-white'
-                            : `border-fd-border text-fd-muted-foreground ${tone}`
+                            ? 'border-[var(--tk-primary)] bg-[var(--tk-primary)] text-[var(--tk-on-primary)]'
+                            : `tk-card-muted border-fd-border ${tone}`
                         }`}
                       >
                         {n}
@@ -1163,7 +1155,7 @@ function SurveysDemo() {
                 </div>
               )}
 
-              <div className="mb-4 flex justify-between text-[10px] text-fd-muted-foreground">
+              <div className="tk-card-muted mb-4 flex justify-between text-[10px]">
                 <span>{current.lowLabel}</span>
                 <span>{current.highLabel}</span>
               </div>
@@ -1172,7 +1164,7 @@ function SurveysDemo() {
                 type="button"
                 onClick={() => rating !== null && setSubmitted(true)}
                 disabled={rating === null}
-                className="w-full rounded-lg bg-[var(--tk-primary)] py-2 text-[12px] font-semibold text-white transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                className="tk-btn w-full py-2 text-[12px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Submit
               </button>
@@ -1182,12 +1174,8 @@ function SurveysDemo() {
               <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" aria-hidden="true" />
               </div>
-              <p className="mb-1 text-[13px] font-bold text-fd-foreground">
-                Thanks for the feedback
-              </p>
-              <p className="text-[11px] text-fd-muted-foreground">
-                Score logged &middot; routed to PostHog
-              </p>
+              <p className="tk-card-title mb-1 text-[13px] font-bold">Thanks for the feedback</p>
+              <p className="tk-card-muted text-[11px]">Score logged &middot; routed to PostHog</p>
             </div>
           )}
         </div>
@@ -1442,6 +1430,7 @@ const tabs = [
 
 export function DemoTour() {
   const [activeTab, setActiveTab] = useState('tours')
+  const [styleId, setStyleId] = useState(DEFAULT_PRESET_ID)
   const active = tabs.find((t) => t.id === activeTab) ?? tabs[0]
   const ActiveComponent = active.component
 
@@ -1516,8 +1505,18 @@ export function DemoTour() {
           )}
         </div>
 
-        {/* Demo area */}
-        <div className="mx-auto max-w-3xl">
+        {/* Theme switcher — re-skins whichever package demo is active, live */}
+        <div className="mb-5 flex justify-center">
+          <StyleSwitcher value={styleId} onChange={setStyleId} />
+        </div>
+
+        {/* Demo area — data-tk-theme defines the vars (mode-aware via .dark in
+            globals.css); they cascade to the demo, and the font shifts too */}
+        <div
+          data-tk-theme={styleId}
+          className="mx-auto max-w-3xl"
+          style={{ fontFamily: 'var(--tk-font)' }}
+        >
           <ActiveComponent />
         </div>
 

@@ -217,7 +217,7 @@ export default function HomePage() {
 
               <div className="flex justify-center">
                 <Link
-                  href="/docs/getting-started"
+                  href="/builder"
                   className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-7 py-3.5 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30"
                 >
                   Get started

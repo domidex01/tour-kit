@@ -47,7 +47,7 @@ export function DocsCta() {
       </p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <TrackedCtaLink
-          href="/docs/getting-started"
+          href="/builder"
           placement="docs_footer"
           className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-6 py-3 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
         >

@@ -81,7 +81,7 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
             </ul>
 
             <Link
-              href="/docs/getting-started"
+              href="/builder"
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
             >
               Start free

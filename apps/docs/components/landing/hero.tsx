@@ -1,6 +1,7 @@
 'use client'
 
 import { HeroSaleCountdown } from '@/components/landing/sale-countdown'
+import { DEFAULT_PRESET_ID, StyleSwitcher } from '@/components/landing/style-switcher'
 import { CopyButton } from '@/components/ui/copy-button'
 import { ArrowRight, Terminal } from 'lucide-react'
 import Link from 'next/link'
@@ -57,6 +58,7 @@ function BackgroundPattern() {
 
 function HeroDemo() {
   const [step, setStep] = useState(0)
+  const [styleId, setStyleId] = useState(DEFAULT_PRESET_ID)
   const [tooltipTop, setTooltipTop] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const targetRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -88,7 +90,15 @@ function HeroDemo() {
 
   return (
     <div className="animate-fade-in-up-delay-2">
-      <div className="overflow-hidden rounded-xl border border-white/20 bg-fd-card/80 shadow-2xl shadow-[#02182b]/10 backdrop-blur-xl dark:border-white/10">
+      {/* Theme switcher — six swatches that re-skin the tour below, live */}
+      <div className="mb-4 flex justify-start">
+        <StyleSwitcher value={styleId} onChange={setStyleId} />
+      </div>
+
+      <div
+        data-tk-theme={styleId}
+        className="overflow-hidden rounded-xl border border-white/20 bg-fd-card/80 shadow-2xl shadow-[#02182b]/10 backdrop-blur-xl dark:border-white/10"
+      >
         {/* Browser chrome */}
         <div className="flex items-center gap-2 border-b border-fd-border/50 bg-fd-muted/30 px-4 py-2.5 backdrop-blur-sm">
           <div className="flex gap-1.5">
@@ -106,7 +116,7 @@ function HeroDemo() {
           {/* Top bar — step 0 target */}
           <div
             ref={setTargetRef(0)}
-            className={`mb-4 flex items-center justify-between rounded-lg p-2 transition-all duration-500 ${step === 0 ? 'border-2 border-[#0197f6]/30 bg-[#0197f6]/5' : 'border-2 border-transparent'}`}
+            className={`mb-4 flex items-center justify-between rounded-lg p-2 transition-all duration-500 ${step === 0 ? 'border-2 border-[var(--tk-primary)]/30 bg-[var(--tk-primary)]/5' : 'border-2 border-transparent'}`}
           >
             <div className="h-3 w-24 rounded bg-fd-foreground/10" />
             <div className="flex gap-2">
@@ -118,10 +128,10 @@ function HeroDemo() {
           {/* Card element — step 1 target */}
           <div
             ref={setTargetRef(1)}
-            className={`mb-3 rounded-lg p-3 transition-all duration-500 ${step === 1 ? 'border-2 border-[#0197f6]/30 bg-[#0197f6]/5' : 'border-2 border-transparent'}`}
+            className={`mb-3 rounded-lg p-3 transition-all duration-500 ${step === 1 ? 'border-2 border-[var(--tk-primary)]/30 bg-[var(--tk-primary)]/5' : 'border-2 border-transparent'}`}
           >
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#0197f6]/15" />
+              <div className="h-8 w-8 rounded-lg bg-[var(--tk-primary)]/15" />
               <div className="flex-1 space-y-1.5">
                 <div className="h-2.5 w-20 rounded bg-fd-foreground/10" />
                 <div className="h-2 w-32 rounded bg-fd-foreground/5" />
@@ -132,7 +142,7 @@ function HeroDemo() {
           {/* Content rows — step 2 target */}
           <div
             ref={setTargetRef(2)}
-            className={`mb-3 space-y-2 rounded-lg p-2 transition-all duration-500 ${step === 2 ? 'border-2 border-[#0197f6]/30 bg-[#0197f6]/5' : 'border-2 border-transparent'}`}
+            className={`mb-3 space-y-2 rounded-lg p-2 transition-all duration-500 ${step === 2 ? 'border-2 border-[var(--tk-primary)]/30 bg-[var(--tk-primary)]/5' : 'border-2 border-transparent'}`}
           >
             <div className="h-2.5 w-full rounded bg-fd-foreground/5" />
             <div className="h-2.5 w-4/5 rounded bg-fd-foreground/5" />
@@ -150,13 +160,35 @@ function HeroDemo() {
             className="absolute left-4 right-4 z-10 transition-all duration-500 ease-in-out"
             style={{ top: tooltipTop || 80 }}
           >
-            <div className="relative rounded-xl border border-fd-border/50 bg-fd-background/95 p-4 shadow-lg backdrop-blur-md">
-              {/* Arrow pointing up */}
-              <div className="absolute -top-1.5 left-8 h-3 w-3 rotate-45 border-l border-t border-fd-border/50 bg-fd-background/95" />
-              <p className="mb-1 text-[13px] font-bold text-fd-foreground">{current.title}</p>
-              <p className="mb-3 text-[12px] text-fd-muted-foreground">{current.content}</p>
+            <div
+              className="relative p-4 backdrop-blur-md transition-all duration-300 ease-out"
+              style={{
+                borderRadius: 'var(--tk-radius)',
+                borderStyle: 'solid',
+                borderWidth: 'var(--tk-card-border-width)',
+                borderColor: 'var(--tk-card-border)',
+                background: 'var(--tk-card-bg)',
+                color: 'var(--tk-card-fg)',
+                boxShadow: 'var(--tk-card-shadow)',
+                fontFamily: 'var(--tk-font)',
+              }}
+            >
+              {/* Arrow pointing up — inherits the card surface + border */}
+              <div
+                className="absolute -top-1.5 left-8 h-3 w-3 rotate-45 border-l border-t"
+                style={{
+                  background: 'var(--tk-card-bg)',
+                  borderColor: 'var(--tk-card-border)',
+                }}
+              />
+              <p className="mb-1 text-[13px] font-bold" style={{ color: 'var(--tk-card-fg)' }}>
+                {current.title}
+              </p>
+              <p className="mb-3 text-[12px]" style={{ color: 'var(--tk-card-muted)' }}>
+                {current.content}
+              </p>
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-fd-muted-foreground">
+                <span className="text-[11px]" style={{ color: 'var(--tk-card-muted)' }}>
                   {current.step} / {steps.length}
                 </span>
                 <div className="flex gap-1.5">
@@ -164,14 +196,19 @@ function HeroDemo() {
                     <div
                       key={s.step}
                       className={`rounded-full transition-all duration-300 ${
-                        i === step ? 'h-1.5 w-4 bg-[#0197f6]' : 'h-1.5 w-1.5 bg-fd-muted'
+                        i === step ? 'h-1.5 w-4 bg-[var(--tk-primary)]' : 'h-1.5 w-1.5 bg-fd-muted'
                       }`}
                     />
                   ))}
                 </div>
                 <button
                   type="button"
-                  className="rounded-lg bg-[#0197f6] px-3 py-1 text-[11px] font-semibold text-white"
+                  className="px-3 py-1 text-[11px] font-semibold transition-all"
+                  style={{
+                    borderRadius: 'var(--tk-radius)',
+                    background: 'var(--tk-primary)',
+                    color: 'var(--tk-on-primary)',
+                  }}
                 >
                   {step === steps.length - 1 ? 'Done' : 'Next'}
                 </button>
@@ -274,7 +311,7 @@ export function Hero() {
 
             <div className="mb-6 flex flex-wrap items-center gap-3">
               <Link
-                href="/docs/getting-started"
+                href="/builder"
                 className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-6 py-3 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30"
               >
                 Get started

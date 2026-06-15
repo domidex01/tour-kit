@@ -241,7 +241,7 @@ export default function ProductAnnouncementsPage() {
           subtext="Full functionality in development and on localhost, no key required. One $99 license unlocks production for all Pro packages."
           ctaLabel="Build my announcement"
           reassurance="No signup, no credit card — install and go."
-          primaryHref="/docs/announcements"
+          primaryHref="/builder"
         />
 
         <PricingTeaser placement="announcements_teaser" />
@@ -276,7 +276,7 @@ export default function ProductAnnouncementsPage() {
           subtext="Install now, run it free in dev, license it when it ships."
           installCmd="pnpm add @tour-kit/announcements"
           primaryLabel="Get started"
-          primaryHref="/docs/announcements"
+          primaryHref="/builder"
           siblings={[
             {
               label: 'Feature hints',
