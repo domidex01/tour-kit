@@ -119,7 +119,7 @@ export default function FeatureHintsPage() {
           headingAccent="without a tour."
           subhead="Persistent hints, tooltips, and pulsing beacons for React feature discovery. Each hint lives independently until dismissed — no sequence, no modal takeover."
           primaryLabel="Build my first hint"
-          primaryHref="/docs/hints"
+          primaryHref="/builder"
           secondaryLabel="View on GitHub"
           secondaryHref="https://github.com/domidex01/tour-kit"
           installCmd="pnpm add @tour-kit/hints"
@@ -226,7 +226,7 @@ export default function FeatureHintsPage() {
           subtext="Install the package and ship a beacon today. Pro packages add checklists, announcements, and surveys when you need them."
           ctaLabel="Build my first hint"
           reassurance="Free & MIT-licensed — no signup, no credit card."
-          primaryHref="/docs/hints"
+          primaryHref="/builder"
         />
 
         <ComparisonTeaser
@@ -254,7 +254,7 @@ export default function FeatureHintsPage() {
           subtext="Free, MIT, under 5KB. The fastest feature-discovery win in your backlog."
           installCmd="pnpm add @tour-kit/hints"
           primaryLabel="Get started"
-          primaryHref="/docs/hints"
+          primaryHref="/builder"
           siblings={[
             {
               label: 'Product tours',

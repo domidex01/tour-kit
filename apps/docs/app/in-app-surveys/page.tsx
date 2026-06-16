@@ -237,7 +237,7 @@ export default function InAppSurveysPage() {
           subtext="Full functionality in development and on localhost, no key required. One $99 license unlocks production for all Pro packages."
           ctaLabel="Build my first survey"
           reassurance="No signup, no credit card — install and go."
-          primaryHref="/docs/surveys"
+          primaryHref="/builder"
         />
 
         <PricingTeaser placement="surveys_teaser" />
@@ -272,7 +272,7 @@ export default function InAppSurveysPage() {
           subtext="Install now, run it free in dev, license it when it ships."
           installCmd="pnpm add @tour-kit/surveys"
           primaryLabel="Get started"
-          primaryHref="/docs/surveys"
+          primaryHref="/builder"
           siblings={[
             {
               label: 'Onboarding checklists',

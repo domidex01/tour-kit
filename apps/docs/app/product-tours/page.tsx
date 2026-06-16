@@ -124,7 +124,7 @@ export default function ProductToursPage() {
           headingAccent="actually finish."
           subhead="A React product tour library built headless-first — spotlight overlays, router-aware steps, and WCAG 2.1 AA accessibility, styled by your design system."
           primaryLabel="Build my first tour"
-          primaryHref="/docs/getting-started"
+          primaryHref="/builder"
           secondaryLabel="View on GitHub"
           secondaryHref="https://github.com/domidex01/tour-kit"
           installCmd="pnpm add @tour-kit/react"
@@ -311,7 +311,7 @@ export default function ProductToursPage() {
           subtext="Free, MIT, under 8KB. The tour library you'd have built with three spare weeks."
           installCmd="pnpm add @tour-kit/react"
           primaryLabel="Get started"
-          primaryHref="/docs/getting-started"
+          primaryHref="/builder"
           siblings={[
             {
               label: 'Feature hints',

@@ -316,7 +316,7 @@ export default async function ComparisonPage({ params }: PageProps) {
         </div>
         <div className="flex justify-center gap-4">
           <Link
-            href="/docs/getting-started"
+            href="/builder"
             className="rounded-lg bg-[#0197f6] px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-110"
           >
             Get started

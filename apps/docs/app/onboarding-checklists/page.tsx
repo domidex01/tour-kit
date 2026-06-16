@@ -240,7 +240,7 @@ export default function OnboardingChecklistsPage() {
           subtext="Full functionality in development and on localhost, no key required. One $99 license unlocks production for all Pro packages."
           ctaLabel="Build my checklist"
           reassurance="No signup, no credit card — install and go."
-          primaryHref="/docs/checklists"
+          primaryHref="/builder"
         />
 
         <PricingTeaser placement="checklists_teaser" />
@@ -275,7 +275,7 @@ export default function OnboardingChecklistsPage() {
           subtext="Install now, watch it run free in dev, license it when it ships."
           installCmd="pnpm add @tour-kit/checklists"
           primaryLabel="Get started"
-          primaryHref="/docs/checklists"
+          primaryHref="/builder"
           siblings={[
             {
               label: 'Product tours',

@@ -246,6 +246,134 @@ img {
 }
 
 /* ========================================
+   THEME PRESETS (the 6 demo swatches)
+
+   Variables are split: mode-agnostic ones (accent,
+   radius, font, border width) sit on the base
+   [data-tk-theme] rule; surface colors get a LIGHT
+   default here and a DARK override under `.dark`, so
+   the tour cards follow the site's light/dark mode.
+   Driven by `data-tk-theme="<id>"` on a wrapper.
+   See components/landing/style-switcher.tsx.
+   ======================================== */
+[data-tk-theme="ocean"] {
+  --tk-primary: #0197f6;
+  --tk-on-primary: #ffffff;
+  --tk-radius: 0.75rem;
+  --tk-card-border-width: 1px;
+  --tk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tk-card-bg: #ffffff;
+  --tk-card-fg: #0b1f2e;
+  --tk-card-muted: #57687a;
+  --tk-card-border: rgb(2 24 43 / 0.1);
+  --tk-card-shadow: 0 14px 36px -14px rgb(2 24 43 / 0.22);
+}
+.dark [data-tk-theme="ocean"] {
+  --tk-card-bg: rgb(13 23 35 / 0.92);
+  --tk-card-fg: #ffffff;
+  --tk-card-muted: rgb(255 255 255 / 0.64);
+  --tk-card-border: rgb(255 255 255 / 0.12);
+  --tk-card-shadow: 0 14px 36px -14px rgb(0 0 0 / 0.65);
+}
+
+[data-tk-theme="iris"] {
+  --tk-primary: #6366f1;
+  --tk-on-primary: #ffffff;
+  --tk-radius: 1rem;
+  --tk-card-border-width: 1px;
+  --tk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tk-card-bg: #ffffff;
+  --tk-card-fg: #1e1b35;
+  --tk-card-muted: #6b6790;
+  --tk-card-border: rgb(99 102 241 / 0.28);
+  --tk-card-shadow: 0 24px 48px -16px rgb(99 102 241 / 0.35);
+}
+.dark [data-tk-theme="iris"] {
+  --tk-card-bg: rgb(24 22 46 / 0.94);
+  --tk-card-fg: #ffffff;
+  --tk-card-muted: rgb(199 196 255 / 0.72);
+  --tk-card-border: rgb(129 123 255 / 0.38);
+  --tk-card-shadow: 0 26px 50px -16px rgb(99 102 241 / 0.55);
+}
+
+/* Forest is the "always-light" friendly card — the same in both modes,
+   which is exactly why it pops dramatically against a dark site. */
+[data-tk-theme="forest"] {
+  --tk-primary: #10b981;
+  --tk-on-primary: #ffffff;
+  --tk-radius: 0.625rem;
+  --tk-card-border-width: 1px;
+  --tk-font: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+  --tk-card-bg: #ffffff;
+  --tk-card-fg: #0b1f17;
+  --tk-card-muted: #5b6b63;
+  --tk-card-border: rgb(16 185 129 / 0.3);
+  --tk-card-shadow: 0 16px 32px -14px rgb(16 185 129 / 0.28);
+}
+.dark [data-tk-theme="forest"] {
+  --tk-card-border: rgb(16 185 129 / 0.32);
+  --tk-card-shadow: 0 18px 36px -14px rgb(16 185 129 / 0.4);
+}
+
+[data-tk-theme="crimson"] {
+  --tk-primary: #ef4444;
+  --tk-on-primary: #ffffff;
+  --tk-radius: 0.5rem;
+  --tk-card-border-width: 1.5px;
+  --tk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tk-card-bg: #fff5f5;
+  --tk-card-fg: #3b0a0a;
+  --tk-card-muted: #9a5a5a;
+  --tk-card-border: #ef4444;
+  --tk-card-shadow: 0 0 0 1px rgb(239 68 68 / 0.22), 0 22px 46px -14px rgb(239 68 68 / 0.32);
+}
+.dark [data-tk-theme="crimson"] {
+  --tk-card-bg: #1a0c0e;
+  --tk-card-fg: #fff5f5;
+  --tk-card-muted: rgb(254 205 205 / 0.78);
+  --tk-card-shadow: 0 0 0 1px rgb(239 68 68 / 0.3), 0 22px 46px -12px rgb(239 68 68 / 0.55);
+}
+
+/* Brutalist: paper card in light, near-black in dark — bold border + hard
+   amber offset shadow in both. */
+[data-tk-theme="ember"] {
+  --tk-primary: #f59e0b;
+  --tk-on-primary: #1a1205;
+  --tk-radius: 0rem;
+  --tk-card-border-width: 2px;
+  --tk-font: ui-monospace, "SF Mono", "Cascadia Code", "Fira Code", monospace;
+  --tk-card-bg: #fffdf5;
+  --tk-card-fg: #1a1205;
+  --tk-card-muted: #6b5a2a;
+  --tk-card-border: #f59e0b;
+  --tk-card-shadow: 5px 5px 0 0 #f59e0b;
+}
+.dark [data-tk-theme="ember"] {
+  --tk-card-bg: #0b0b0c;
+  --tk-card-fg: #fff7ed;
+  --tk-card-muted: rgb(253 230 138 / 0.72);
+}
+
+[data-tk-theme="graphite"] {
+  --tk-primary: #64748b;
+  --tk-on-primary: #ffffff;
+  --tk-radius: 0.375rem;
+  --tk-card-border-width: 1px;
+  --tk-font: ui-serif, Georgia, "Times New Roman", serif;
+  --tk-card-bg: #ffffff;
+  --tk-card-fg: #1e293b;
+  --tk-card-muted: #64748b;
+  --tk-card-border: rgb(100 116 139 / 0.25);
+  --tk-card-shadow: none;
+}
+.dark [data-tk-theme="graphite"] {
+  --tk-card-bg: rgb(17 19 24 / 0.92);
+  --tk-card-fg: #f1f5f9;
+  --tk-card-muted: rgb(148 163 184 / 0.82);
+  --tk-card-border: rgb(148 163 184 / 0.22);
+}
+
+/* ========================================
    CUSTOM COMPONENT STYLES
    ======================================== */
 @layer components {
@@ -307,6 +435,54 @@ img {
   .btn-outline:hover {
     background-color: var(--tk-container);
     border-color: var(--tk-primary);
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+     Themeable demo surfaces — driven by the --tk-* preset vars set
+     by `presetVars()` on a wrapper. Swap a preset → these re-skin.
+     Fallbacks keep them sane outside a themed wrapper.
+     ────────────────────────────────────────────────────────────── */
+  .tk-card {
+    border-radius: var(--tk-radius, 0.75rem);
+    border: var(--tk-card-border-width, 1px) solid var(--tk-card-border, var(--color-fd-border));
+    background: var(--tk-card-bg, var(--color-fd-background));
+    color: var(--tk-card-fg, var(--color-fd-foreground));
+    box-shadow: var(--tk-card-shadow, 0 14px 36px -14px rgb(0 0 0 / 0.5));
+    font-family: var(--tk-font, inherit);
+  }
+
+  .tk-card-title {
+    color: var(--tk-card-fg, var(--color-fd-foreground));
+  }
+
+  .tk-card-muted {
+    color: var(--tk-card-muted, var(--color-fd-muted-foreground));
+  }
+
+  /* Tooltip arrow — inherits the card surface + border color */
+  .tk-card-arrow {
+    background: var(--tk-card-bg, var(--color-fd-background));
+    border-color: var(--tk-card-border, var(--color-fd-border));
+  }
+
+  /* Primary action — accent fill + accent-aware text + themed radius */
+  .tk-btn {
+    background: var(--tk-primary);
+    color: var(--tk-on-primary, #fff);
+    border-radius: var(--tk-radius, 0.5rem);
+    transition: filter 0.2s;
+  }
+
+  .tk-btn:hover {
+    filter: brightness(1.1);
+  }
+
+  /* Secondary action — outline that tracks the card border + muted text */
+  .tk-btn-outline {
+    border: 1px solid var(--tk-card-border, var(--color-fd-border));
+    color: var(--tk-card-muted, var(--color-fd-muted-foreground));
+    border-radius: var(--tk-radius, 0.5rem);
+    transition: background-color 0.2s;
   }
 
   /* Code block customization */

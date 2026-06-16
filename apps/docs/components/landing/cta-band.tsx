@@ -49,7 +49,7 @@ export function CtaBand({
   subtext,
   ctaLabel,
   reassurance,
-  primaryHref = '/docs/getting-started',
+  primaryHref = '/builder',
   secondaryHref = '/pricing',
   secondaryLabel = 'See pricing',
 }: CtaBandProps) {

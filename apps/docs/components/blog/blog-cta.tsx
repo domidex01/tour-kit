@@ -36,7 +36,7 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
           </p>
         </div>
         <TrackedCtaLink
-          href="/docs/getting-started"
+          href="/builder"
           placement={placement}
           className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[#0197f6] transition-opacity hover:opacity-80"
         >
@@ -99,7 +99,7 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
 
         <div className="flex flex-wrap items-center justify-center gap-3">
           <TrackedCtaLink
-            href="/docs/getting-started"
+            href="/builder"
             placement={placement}
             className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-7 py-3.5 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
           >
