@@ -70,9 +70,9 @@ describe('credibility surface — scratch spikes are gone', () => {
 
 describe('credibility surface — floating-ui keyword dropped from core', () => {
   it('core/package.json keywords does not advertise floating-ui (core has no such dep)', () => {
-    const pkg = JSON.parse(
-      readFileSync(join(REPO_ROOT, 'packages/core/package.json'), 'utf8')
-    ) as { keywords?: string[] }
+    const pkg = JSON.parse(readFileSync(join(REPO_ROOT, 'packages/core/package.json'), 'utf8')) as {
+      keywords?: string[]
+    }
     expect(pkg.keywords ?? []).not.toContain('floating-ui')
   })
 })

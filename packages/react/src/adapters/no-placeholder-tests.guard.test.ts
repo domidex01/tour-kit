@@ -33,9 +33,8 @@ describe('adapter test hygiene — no placeholder assertions', () => {
       .filter((f) => f.endsWith('.test.ts') && basename(f) !== SELF)
       .filter((f) => PLACEHOLDER.test(readFileSync(join(ADAPTERS_DIR, f), 'utf8')))
 
-    expect(
-      offenders,
-      `placeholder assertions still present in:\n${offenders.join('\n')}`
-    ).toEqual([])
+    expect(offenders, `placeholder assertions still present in:\n${offenders.join('\n')}`).toEqual(
+      []
+    )
   })
 })

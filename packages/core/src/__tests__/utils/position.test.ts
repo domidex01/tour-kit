@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  getOppositeSide,
-  getViewportDimensions,
-  parsePlacement,
-} from '../../utils/position'
+import { getOppositeSide, getViewportDimensions, parsePlacement } from '../../utils/position'
 
 describe('Position Utilities', () => {
   describe('parsePlacement', () => {
