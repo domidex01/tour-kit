@@ -6,7 +6,7 @@ import { TourProvider } from '@tour-kit/react'
 
 export function ProductTour() {
   useEffect(() => {
-    const d = // TODO: driver.js config — register via <TourProvider tours={[migratedTour]}> in an ancestor; call useTour().start() to begin — see https://tourkit.dev/migration/driver#driver-call
+    const d = // TODO: driver.js config — register via <TourProvider tours={[migratedTour]}> in an ancestor; call useTour().start() to begin — see https://usertourkit.com/migration/driver#driver-call
     {
       id: 'migrated-tour',
 
@@ -23,7 +23,7 @@ export function ProductTour() {
       }],
     }
 
-    // TODO: driver.js .drive() → call useTour().start() from a descendant of <TourProvider> — see https://tourkit.dev/migration/driver#drive
+    // TODO: driver.js .drive() → call useTour().start() from a descendant of <TourProvider> — see https://usertourkit.com/migration/driver#drive
 
   }, [])
   return null

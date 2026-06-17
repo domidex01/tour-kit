@@ -15,10 +15,10 @@ export function OnboardingTour() {
   const [run, setRun] = useState(true)
 
   return (
-    // TODO: <Joyride run> — Tour Kit is imperative; call useTour().start() from a descendant — see https://tourkit.dev/migration/joyride#run-prop
-    // TODO: <Joyride continuous> is the default in Tour Kit (no opt-in needed) — see https://tourkit.dev/migration/joyride#continuous
-    // TODO: <Joyride showSkipButton> → render <TourClose /> inside <TourCard /> — see https://tourkit.dev/migration/joyride#show-skip-button
-    // TODO: <Joyride callback> splits into onTourEnd / onTourSkip / onStepAdvance — see https://tourkit.dev/migration/joyride#callback
+    // TODO: <Joyride run> — Tour Kit is imperative; call useTour().start() from a descendant — see https://usertourkit.com/migration/joyride#run-prop
+    // TODO: <Joyride continuous> is the default in Tour Kit (no opt-in needed) — see https://usertourkit.com/migration/joyride#continuous
+    // TODO: <Joyride showSkipButton> → render <TourClose /> inside <TourCard /> — see https://usertourkit.com/migration/joyride#show-skip-button
+    // TODO: <Joyride callback> splits into onTourEnd / onTourSkip / onStepAdvance — see https://usertourkit.com/migration/joyride#callback
     <TourProvider
       tours={[{
         id: 'migrated-tour',

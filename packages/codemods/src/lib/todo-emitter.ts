@@ -14,7 +14,7 @@ export function emitTodo(message: string, anchor: string, source: TodoSource = '
 
 export function todoToComment(t: Todo): string {
   const src = t.source ?? 'joyride'
-  return `// TODO: ${t.message} — see https://tourkit.dev/migration/${src}#${t.anchor}`
+  return `// TODO: ${t.message} — see https://usertourkit.com/migration/${src}#${t.anchor}`
 }
 
 export interface LineComment {

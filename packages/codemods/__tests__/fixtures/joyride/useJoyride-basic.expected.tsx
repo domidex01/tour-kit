@@ -12,8 +12,8 @@ const steps = [
 ]
 
 export function ProductTour() {
-  // TODO: useJoyride() collapsed to useTour() — register the tour at a parent: <TourProvider tours={[{ id: "migrated-tour", steps }]}> — see https://tourkit.dev/migration/joyride#use-joyride-hook
-  // TODO: Joyride controls.start/.next/.previous/.skip map to Tour Kit useTour() returns; verify each call site — see https://tourkit.dev/migration/joyride#controls-api
+  // TODO: useJoyride() collapsed to useTour() — register the tour at a parent: <TourProvider tours={[{ id: "migrated-tour", steps }]}> — see https://usertourkit.com/migration/joyride#use-joyride-hook
+  // TODO: Joyride controls.start/.next/.previous/.skip map to Tour Kit useTour() returns; verify each call site — see https://usertourkit.com/migration/joyride#controls-api
   const controls = useTour();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function ProductTour() {
   }, [controls])
 
   return (
-    // TODO: <Tour /> from useJoyride was rendered inline — Tour Kit renders via <TourProvider> + <TourCard /> in an ancestor — see https://tourkit.dev/migration/joyride#tour-component
+    // TODO: <Tour /> from useJoyride was rendered inline — Tour Kit renders via <TourProvider> + <TourCard /> in an ancestor — see https://usertourkit.com/migration/joyride#tour-component
     null
   );
 }
