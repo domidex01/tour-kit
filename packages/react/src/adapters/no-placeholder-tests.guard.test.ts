@@ -1,10 +1,12 @@
 /**
  * Meta-guard (Slice 0 — Credibility Surface): the adapter test suite must
- * contain no `expect(true).toBe(true)` placeholder assertions. Those were the
- * stubbed direct-hook resolution tests; Slice 0 replaced them with real
- * `Module._load`-driven require-fallback tests. This guard FAILS while any
- * placeholder remains and stays GREEN once they're gone — a regression tripwire
- * so they never creep back.
+ * contain no trivially-passing placeholder assertions (the old `expect(true)`-
+ * style direct-hook stubs). Slice 0 replaced them with real `Module._load`-driven
+ * require-fallback tests. This guard FAILS while any placeholder remains and stays
+ * GREEN once they're gone — a regression tripwire so they never creep back.
+ *
+ * (This file deliberately avoids spelling the forbidden assertion literally so a
+ * grep for it across the adapters returns zero — the pattern is built from parts.)
  *
  * Source-as-fixture idiom (cf. core's `no-zod-in-main.test.ts`): read the files
  * with `node:fs` and assert zero matches. We use `readdirSync(..., { recursive
@@ -25,7 +27,7 @@ const SELF = basename(fileURLToPath(import.meta.url))
 const PLACEHOLDER = new RegExp(['expect\\(', 'true', '\\)\\.toBe\\(', 'true', '\\)'].join('\\s*'))
 
 describe('adapter test hygiene — no placeholder assertions', () => {
-  it('no `expect(true).toBe(true)` placeholder remains in any adapter test', () => {
+  it('no trivially-passing placeholder assertion remains in any adapter test', () => {
     const offenders = readdirSync(ADAPTERS_DIR, { recursive: true })
       .map(String)
       .filter((f) => f.endsWith('.test.ts') && basename(f) !== SELF)

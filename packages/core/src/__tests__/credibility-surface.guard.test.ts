@@ -33,7 +33,7 @@ function collect(dir: string, exts: readonly string[]): string[] {
 }
 
 describe('credibility surface — wrong-domain links are gone', () => {
-  it('no deprecated tourkit.dev domain in core/codemods source or codemods README', () => {
+  it('no deprecated marketing domain in core/codemods source or codemods README', () => {
     // Built from parts so this guard's own source never contains the literal
     // string it forbids (which would make it match itself).
     const DEPRECATED_DOMAIN = new RegExp(['tourkit', 'dev'].join('\\.'))
