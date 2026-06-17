@@ -109,7 +109,8 @@ export function createEventQueue(config: EventQueueConfig): EventQueue {
 
     queue.push(event)
 
-    // Check if we've reached batch size
+    // At capacity → flush now; otherwise debounce so a partial batch still
+    // ships on the timer instead of waiting indefinitely for a full batch.
     if (queue.length >= batchSize) {
       flushQueue()
     } else {

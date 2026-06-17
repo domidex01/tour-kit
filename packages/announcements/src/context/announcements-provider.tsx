@@ -526,12 +526,10 @@ export function AnnouncementsProvider({
         return
       }
 
-      // Check if can show
       if (!schedulerRef.current.canShow(config, announcementState, userContext)) {
         return
       }
 
-      // Check if should queue
       if (schedulerRef.current.shouldQueue(config, announcementState, userContext)) {
         schedulerRef.current.enqueue(config)
         dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
