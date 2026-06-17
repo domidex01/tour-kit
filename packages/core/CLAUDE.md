@@ -9,9 +9,13 @@ Framework-agnostic foundation layer. Contains all business logic - UI packages a
 - This allows tree-shaking while maintaining a clean public API
 
 ### Position Engine
-- Uses `@floating-ui/react` for positioning calculations
-- `calculatePosition()` in `utils/position.ts` handles element positioning
-- Always falls back gracefully when target elements aren't found
+- Core ships **RTL/placement helpers only** (`parsePlacement`, `mirrorPlacementForRTL`,
+  `getElementRect`, `getViewportDimensions`, `getDocumentDirection`) in `utils/position.ts`.
+- Core has **no** `@floating-ui` dependency. Actual collision/floating positioning lives in
+  the UI packages (`react`, `announcements`, `hints`, `surveys`, `checklists`), which depend
+  on `@floating-ui/react` directly.
+- The old hand-rolled `calculatePosition()`/collision engine was removed in Slice 0 (dead,
+  barrel-private).
 
 ### Storage Adapters
 - `createStorageAdapter()` - Factory for custom storage backends
