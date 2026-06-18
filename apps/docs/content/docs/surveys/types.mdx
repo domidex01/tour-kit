@@ -229,6 +229,10 @@ error is also readable via `getValidationError(surveyId, questionId)` on the
 context — or `validationError(questionId)` from `useSurvey`. Errors are transient
 UI state and are never persisted, so a reload starts clean.
 
+The value passed to `validation` is the answer recorded so far, which is
+`undefined` until the question is answered — that's the case to guard for a
+required field. Handle a falsy value rather than assuming a populated answer.
+
 ```tsx
 const question: QuestionConfig = {
   id: 'email',

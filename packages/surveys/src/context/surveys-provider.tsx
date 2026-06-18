@@ -607,6 +607,11 @@ export function SurveysProvider({
     const config = configsRef.current.find((c) => c.id === surveyId)
     const question = config?.questions?.[survey?.currentStep ?? 0]
     if (question?.validation && survey) {
+      // `value` is `AnswerValue | undefined` — undefined when the question is
+      // unanswered, which is exactly the case `validation` exists to catch (a
+      // required field). The cast bridges to the public `(value: AnswerValue)`
+      // signature, which can't be widened to `| undefined` without a breaking
+      // change to that frozen shape. Validation authors must handle a falsy value.
       const value = survey.responses.get(question.id)
       const error = question.validation(value as AnswerValue)
       if (error != null) {
