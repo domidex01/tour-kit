@@ -110,3 +110,54 @@ describe('Route handler — tourContext parsing', () => {
     expect(prompt).not.toContain('Current User Context')
   })
 })
+
+// US-5: parseTourContext() is the untrusted-input boundary — its truncation
+// guards (title>500 / content>2000 → reject the whole context) are only
+// reachable THROUGH the handler, so assert them at the streamText system prompt.
+describe('Route handler — parseTourContext truncation guard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  async function postWithTourContext(tourContext: unknown): Promise<string> {
+    const { streamText } = await import('ai')
+    const handler = createChatRouteHandler({
+      model: {} as Parameters<typeof createChatRouteHandler>[0]['model'],
+      context: { strategy: 'context-stuffing', documents: [] },
+    })
+    await handler.POST(
+      new Request('http://localhost/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ id: '1', role: 'user', parts: [{ type: 'text', text: 'Hi' }] }],
+          tourContext,
+        }),
+      })
+    )
+    const call = (streamText as ReturnType<typeof vi.fn>).mock.calls[0][0]
+    return call.system as string
+  }
+
+  it('drops the whole tourContext when activeStep.title exceeds 500 chars', async () => {
+    const system = await postWithTourContext({
+      ...tourContextPayload,
+      activeStep: { id: 'step-connect', title: 'x'.repeat(501), content: 'ok' },
+    })
+    expect(system).not.toContain('Current User Context')
+  })
+
+  it('drops the whole tourContext when activeStep.content exceeds 2000 chars', async () => {
+    const system = await postWithTourContext({
+      ...tourContextPayload,
+      activeStep: { id: 'step-connect', title: 'Connect', content: 'y'.repeat(2001) },
+    })
+    expect(system).not.toContain('Current User Context')
+  })
+
+  it('keeps a tourContext whose fields are within the guards', async () => {
+    const system = await postWithTourContext(tourContextPayload)
+    expect(system).toContain('Current User Context')
+    expect(system).toContain('Onboarding Tour')
+  })
+})
