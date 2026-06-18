@@ -87,9 +87,9 @@ export default function PricingPage() {
               Tour Kit ships three MIT-licensed core packages — tours, React bindings, and hints —
               that are free forever for any project, commercial or otherwise. The Pro suite adds
               eight extended packages (analytics, checklists, adoption tracking, announcements,
-              media embeds, scheduling, surveys, and AI chat) for a single $99 purchase. No
-              subscriptions, no per-seat fees, no upgrade fees. Activation covers up to five
-              production domains; localhost and preview environments are unrestricted.
+              media embeds, business-hours scheduling, surveys, and AI chat) for a single $99
+              purchase. No subscriptions, no per-seat fees, no upgrade fees. Activation covers up to
+              five production domains; localhost and preview environments are unrestricted.
             </p>
           </div>
           <div

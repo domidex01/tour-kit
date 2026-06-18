@@ -1,5 +1,6 @@
 import type { Schedule, ScheduleEvaluationOptions, ScheduleResult } from '../types'
 import { isInAnyBlackout } from './blackout'
+import { isWithinBusinessHours } from './business-hours'
 import { isWithinDateRange } from './date-range'
 import { isAllowedDay } from './day-of-week'
 import { matchesRecurringPattern } from './recurring'
@@ -15,6 +16,7 @@ import { getUserTimezone } from './timezone'
  * 3. Check blackout periods
  * 4. Check day of week
  * 5. Check time of day
+ * 5.5. Check business hours (if defined; independent of time of day)
  * 6. Check recurring pattern
  *
  * @param schedule - The schedule configuration to evaluate
@@ -60,6 +62,15 @@ export function isScheduleActive(
   if (schedule.timeOfDay) {
     if (!isWithinTimeRange(now, schedule.timeOfDay, timezone)) {
       return { isActive: false, reason: 'wrong_time' }
+    }
+  }
+
+  // 5.5. Check business hours (independent of time of day; both must pass).
+  // businessHours.timezone takes precedence over the schedule-resolved tz.
+  if (schedule.businessHours) {
+    const bhTimezone = schedule.businessHours.timezone ?? timezone
+    if (!isWithinBusinessHours(now, schedule.businessHours, bhTimezone)) {
+      return { isActive: false, reason: 'outside_business_hours' }
     }
   }
 

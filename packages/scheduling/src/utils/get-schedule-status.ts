@@ -184,6 +184,10 @@ function predictNextActiveTime(
       }
       return undefined
 
+    // outside_business_hours: next-open prediction is not computed (it requires a
+    // multi-day search across the business-hours window). The reason + message
+    // ('Outside of business hours') are surfaced; nextActiveAt is intentionally
+    // left undefined rather than faked.
     default:
       return undefined
   }

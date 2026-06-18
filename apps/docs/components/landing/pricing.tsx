@@ -38,7 +38,7 @@ const PRO_FEATURES = [
   'Onboarding checklists',
   'Feature adoption tracking',
   'Media embedding (YouTube, Loom, Lottie)',
-  'Time-based scheduling',
+  'Business-hours scheduling (timezone-aware)',
   'AI chat assistant',
   'Priority GitHub issues',
 ]
@@ -54,7 +54,7 @@ const COMPARISON_ROWS = [
   { feature: 'Checklists', free: false, pro: true },
   { feature: 'Adoption tracking', free: false, pro: true },
   { feature: 'Media embedding', free: false, pro: true },
-  { feature: 'Scheduling', free: false, pro: true },
+  { feature: 'Scheduling (business hours, timezones)', free: false, pro: true },
   { feature: 'AI assistant', free: false, pro: true },
   { feature: 'Sites', free: 'Unlimited', pro: '5 included' },
   { feature: 'License', free: 'MIT', pro: 'Commercial' },
