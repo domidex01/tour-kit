@@ -1,3 +1,4 @@
+import Module from 'node:module'
 import { act, renderHook } from '@testing-library/react'
 import { TourProvider, type TourRouteError, useTour } from '@tour-kit/core'
 import * as React from 'react'
@@ -461,16 +462,73 @@ describe('createNextAppRouterAdapter', () => {
   })
 })
 
-describe('useNextAppRouter (direct hook)', () => {
-  // Note: Testing the direct hook requires mocking the require() call.
-  // In a real test environment, we would need to mock 'next/navigation' module.
-  // These tests document the expected behavior.
+// -----------------------------------------------------------------------------
+// useNextAppRouter (direct hook) — require() resolution
+// -----------------------------------------------------------------------------
+//
+// The direct hook does a single `require('next/navigation')` (no fallback) and
+// memoizes the resolved factory in module-level `_useNextAppRouter`. We patch
+// Node's CJS loader (`Module._load`) to control that resolution: under
+// vite-node the adapter's `require` is a module-local native binding that
+// vi.mock/vi.doMock cannot reach, and `next` is installed in the workspace, so
+// a real require would always win and the "absent" branch would be untestable.
+// The factory contract is already proven by the `createNextAppRouterAdapter`
+// suite above — these cover only resolution + the throw-when-absent path.
 
-  it('should throw if next/navigation is not available', () => {
-    // The direct hook uses dynamic require which is difficult to mock in Vitest
-    // This test documents the expected behavior
-    // In production, this would throw: "Cannot find module 'next/navigation'"
-    expect(true).toBe(true) // Placeholder - see integration tests for real behavior
+type CjsLoad = (request: string, parent: unknown, isMain: boolean) => unknown
+const moduleApi = Module as unknown as { _load: CjsLoad }
+
+function mockRequire(routes: Record<string, (() => unknown) | 'absent'>): () => void {
+  const original = moduleApi._load
+  moduleApi._load = (request, parent, isMain) => {
+    const route = routes[request]
+    if (route === 'absent') throw new Error(`Cannot find module '${request}'`)
+    if (route) return route()
+    return original(request, parent, isMain)
+  }
+  return () => {
+    moduleApi._load = original
+  }
+}
+
+describe('useNextAppRouter (direct hook) — module resolution', () => {
+  beforeEach(() => {
+    // Fresh module instance per case → module-level `_useNextAppRouter` is null.
+    vi.resetModules()
+  })
+
+  it('resolves next/navigation and returns the RouterAdapter contract', async () => {
+    const restore = mockRequire({
+      'next/navigation': () => ({
+        usePathname: () => '/app-route',
+        useRouter: () => ({ push: vi.fn() }),
+      }),
+    })
+    try {
+      const { useNextAppRouter } = await import('./next-app-router')
+      const { result } = renderHook(() => useNextAppRouter())
+
+      expect(typeof result.current.getCurrentRoute).toBe('function')
+      expect(typeof result.current.navigate).toBe('function')
+      expect(typeof result.current.matchRoute).toBe('function')
+      expect(typeof result.current.onRouteChange).toBe('function')
+      // getCurrentRoute() reflects the mocked usePathname.
+      expect(result.current.getCurrentRoute()).toBe('/app-route')
+    } finally {
+      restore()
+    }
+  })
+
+  it('throws when next/navigation is not available', async () => {
+    const restore = mockRequire({ 'next/navigation': 'absent' })
+    try {
+      const { useNextAppRouter } = await import('./next-app-router')
+      // No TourKit-specific message here: the adapter lets the require error
+      // propagate, so we assert it throws rather than matching an exact string.
+      expect(() => renderHook(() => useNextAppRouter())).toThrow()
+    } finally {
+      restore()
+    }
   })
 })
 

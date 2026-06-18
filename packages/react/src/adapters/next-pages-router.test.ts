@@ -1,3 +1,4 @@
+import Module from 'node:module'
 import { act, renderHook } from '@testing-library/react'
 import { TourProvider, type TourRouteError, useTour } from '@tour-kit/core'
 import * as React from 'react'
@@ -575,14 +576,76 @@ describe('createNextPagesRouterAdapter', () => {
   })
 })
 
-describe('useNextPagesRouter (direct hook)', () => {
-  // Note: Testing the direct hook requires mocking the require() call.
-  // These tests document the expected behavior.
+// -----------------------------------------------------------------------------
+// useNextPagesRouter (direct hook) — require() resolution
+// -----------------------------------------------------------------------------
+//
+// The direct hook does a single `require('next/router')` (no fallback) and
+// memoizes the resolved factory in module-level `_useNextPagesRouter`. We patch
+// Node's CJS loader (`Module._load`) to control resolution: under vite-node the
+// adapter's `require` is a module-local native binding that vi.mock/vi.doMock
+// cannot reach, and `next` is installed in the workspace, so a real require
+// would always win and the "absent" branch would be untestable. The factory
+// contract is already proven by the `createNextPagesRouterAdapter` suite above
+// — these cover only resolution + the throw-when-absent path.
 
-  it('should throw if next/router is not available', () => {
-    // The direct hook uses dynamic require which is difficult to mock in Vitest
-    // This test documents the expected behavior
-    expect(true).toBe(true) // Placeholder - see integration tests
+type CjsLoad = (request: string, parent: unknown, isMain: boolean) => unknown
+const moduleApi = Module as unknown as { _load: CjsLoad }
+
+function mockRequire(routes: Record<string, (() => unknown) | 'absent'>): () => void {
+  const original = moduleApi._load
+  moduleApi._load = (request, parent, isMain) => {
+    const route = routes[request]
+    if (route === 'absent') throw new Error(`Cannot find module '${request}'`)
+    if (route) return route()
+    return original(request, parent, isMain)
+  }
+  return () => {
+    moduleApi._load = original
+  }
+}
+
+describe('useNextPagesRouter (direct hook) — module resolution', () => {
+  beforeEach(() => {
+    // Fresh module instance per case → module-level `_useNextPagesRouter` null.
+    vi.resetModules()
+  })
+
+  it('resolves next/router and returns the RouterAdapter contract', async () => {
+    const restore = mockRequire({
+      'next/router': () => ({
+        useRouter: () => ({
+          pathname: '/pages-route',
+          push: vi.fn(async () => true),
+          events: { on: vi.fn(), off: vi.fn() },
+        }),
+      }),
+    })
+    try {
+      const { useNextPagesRouter } = await import('./next-pages-router')
+      const { result } = renderHook(() => useNextPagesRouter())
+
+      expect(typeof result.current.getCurrentRoute).toBe('function')
+      expect(typeof result.current.navigate).toBe('function')
+      expect(typeof result.current.matchRoute).toBe('function')
+      expect(typeof result.current.onRouteChange).toBe('function')
+      // getCurrentRoute() reflects the mocked router.pathname.
+      expect(result.current.getCurrentRoute()).toBe('/pages-route')
+    } finally {
+      restore()
+    }
+  })
+
+  it('throws when next/router is not available', async () => {
+    const restore = mockRequire({ 'next/router': 'absent' })
+    try {
+      const { useNextPagesRouter } = await import('./next-pages-router')
+      // No TourKit-specific message: the adapter lets the require error
+      // propagate, so we assert it throws rather than matching an exact string.
+      expect(() => renderHook(() => useNextPagesRouter())).toThrow()
+    } finally {
+      restore()
+    }
   })
 })
 

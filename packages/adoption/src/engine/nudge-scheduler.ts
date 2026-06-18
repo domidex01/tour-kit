@@ -52,12 +52,12 @@ export function selectFeaturesForNudge(
         return false
       }
 
-      // Check if dismissed
       if (nudgeState.dismissed.includes(feature.id)) {
         return false
       }
 
-      // Check if snoozed
+      // A snooze only suppresses while its expiry is still in the future — an
+      // expired snooze falls through and the feature becomes nudgeable again.
       const snoozeExpiry = nudgeState.snoozed[feature.id]
       if (snoozeExpiry && new Date(snoozeExpiry) > new Date()) {
         return false

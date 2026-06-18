@@ -112,6 +112,6 @@ describe('mapStepObject — silent no-op fields', () => {
 describe('todoToComment — fixed template', () => {
   it('renders the canonical Tour Kit migration anchor template', () => {
     const c = todoToComment({ message: 'hi', anchor: 'thing' })
-    expect(c).toBe('// TODO: hi — see https://tourkit.dev/migration/joyride#thing')
+    expect(c).toBe('// TODO: hi — see https://usertourkit.com/migration/joyride#thing')
   })
 })

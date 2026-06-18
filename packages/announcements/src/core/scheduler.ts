@@ -25,7 +25,6 @@ export class AnnouncementScheduler {
     state: AnnouncementState,
     userContext?: Record<string, unknown>
   ): boolean {
-    // Check if already dismissed
     if (state.isDismissed) {
       return false
     }

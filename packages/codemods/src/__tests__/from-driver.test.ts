@@ -47,7 +47,7 @@ driver({ steps: [{ element: el, popover: { description: 'X' } }] }).drive()
 `
     )
     expect(out).toMatch(/\/\/ TODO:.*element.*Element/i)
-    expect(out).toMatch(/https:\/\/tourkit\.dev\/migration\/driver#/)
+    expect(out).toMatch(/https:\/\/usertourkit\.com\/migration\/driver#/)
   })
 
   it('emits a TODO for tour-level showProgress and forwards step-level content', () => {

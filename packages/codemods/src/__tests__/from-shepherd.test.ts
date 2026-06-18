@@ -51,7 +51,7 @@ t.start()
 `
     )
     expect(out).toMatch(/\/\/ TODO:.*attachTo.*element.*function/i)
-    expect(out).toMatch(/https:\/\/tourkit\.dev\/migration\/shepherd#/)
+    expect(out).toMatch(/https:\/\/usertourkit\.com\/migration\/shepherd#/)
   })
 
   it('emits TODO for buttons array (no Tour Kit equivalent of free-form buttons)', () => {
@@ -69,7 +69,7 @@ t.start()
 `
     )
     expect(out).toMatch(/\/\/ TODO:.*buttons/i)
-    expect(out).toMatch(/https:\/\/tourkit\.dev\/migration\/shepherd#buttons/)
+    expect(out).toMatch(/https:\/\/usertourkit\.com\/migration\/shepherd#buttons/)
   })
 
   it('supports the named { Tour } import as well as the default Shepherd import', () => {

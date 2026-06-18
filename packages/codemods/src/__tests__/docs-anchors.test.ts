@@ -63,7 +63,7 @@ for (const src of SOURCES) {
       )
 
       const anchorPattern = new RegExp(
-        `\\/\\/ TODO:.*?https:\\/\\/tourkit\\.dev\\/migration\\/${src.name}#([a-z0-9-]+)`,
+        `\\/\\/ TODO:.*?https:\\/\\/usertourkit\\.com\\/migration\\/${src.name}#([a-z0-9-]+)`,
         'g'
       )
 

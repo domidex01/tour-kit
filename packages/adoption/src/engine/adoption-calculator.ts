@@ -23,7 +23,6 @@ export function calculateAdoptionStatus(
     return 'not_started'
   }
 
-  // Check if meets minimum uses
   const meetsMinUses = usage.useCount >= minUses
 
   // Check recency

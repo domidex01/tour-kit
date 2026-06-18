@@ -106,7 +106,11 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
 ### Quality Gates
 
 - TypeScript strict mode enabled
-- Test coverage > 80%
+- Test coverage: thresholds are **per-package** (`packages/*/vitest.config.ts`), not a blanket
+  80%. Most packages enforce ≥80% statements/functions/lines (core branches 65); the following
+  are temporarily lowered and are scheduled to be restored toward 80% in **Slice 7** (issue #13),
+  given as statements/branches/functions/lines: `announcements` 70/60/70/70, `surveys` 72/64/67/74,
+  `scheduling` 51/39/65/51, `media` 50/41/31/50. `ai` has no per-key threshold yet.
 - Bundle sizes (gzipped): enforced by `tooling/bundle-check/check-dist-gzip.mjs`
   (the binding merge gate, raw `dist/index.js` gzip bytes — run `pnpm dist:size`).
   `size-limit` (root [`/.size-limit.json`](/.size-limit.json)) is a secondary

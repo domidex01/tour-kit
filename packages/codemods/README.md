@@ -86,7 +86,7 @@ warning to stderr the first time `--from <source>` is invoked:
 Every Joyride-only pattern (callback, run, stepIndex, showProgress,
 showSkipButton, continuous, Step.styles, Step.tooltipComponent, …) is preserved
 with a `// TODO:` comment linking to a heading in the
-[migration guide](https://tourkit.dev/docs/migration/joyride).
+[migration guide](https://usertourkit.com/docs/migration/joyride).
 
 ### Shepherd.js (`--from shepherd`)
 
@@ -102,7 +102,7 @@ with a `// TODO:` comment linking to a heading in the
 
 Every Shepherd-only pattern (buttons, classes, beforeShowPromise, advanceOn,
 scrollTo, …) is preserved with a `// TODO:` comment linking to the
-[migration guide](https://tourkit.dev/docs/migration/shepherd).
+[migration guide](https://usertourkit.com/docs/migration/shepherd).
 
 ### Driver.js (`--from driver`)
 
@@ -117,7 +117,7 @@ scrollTo, …) is preserved with a `// TODO:` comment linking to the
 
 Every driver-only pattern (showProgress, allowClose, button-label overrides,
 onHighlightStarted, popoverClass, …) is preserved with a `// TODO:` comment
-linking to the [migration guide](https://tourkit.dev/docs/migration/driver).
+linking to the [migration guide](https://usertourkit.com/docs/migration/driver).
 
 ## What doesn't migrate
 
@@ -130,9 +130,9 @@ port — never silently dropped.
 See the per-source migration guides for the supported patterns and the
 manual-port path for everything else:
 
-- [Joyride migration guide](https://tourkit.dev/docs/migration/joyride)
-- [Shepherd.js migration guide](https://tourkit.dev/docs/migration/shepherd)
-- [Driver.js migration guide](https://tourkit.dev/docs/migration/driver)
+- [Joyride migration guide](https://usertourkit.com/docs/migration/joyride)
+- [Shepherd.js migration guide](https://usertourkit.com/docs/migration/shepherd)
+- [Driver.js migration guide](https://usertourkit.com/docs/migration/driver)
 
 ## License
 

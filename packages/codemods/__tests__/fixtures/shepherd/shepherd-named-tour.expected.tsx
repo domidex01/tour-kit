@@ -4,7 +4,7 @@
 import { TourProvider } from '@tour-kit/react'
 
 export function startProductTour() {
-  const tour = // TODO: Shepherd Tour constructed — register via <TourProvider tours={[migratedTour]}> in an ancestor and call useTour().start() to begin — see https://tourkit.dev/migration/shepherd#tour-constructor
+  const tour = // TODO: Shepherd Tour constructed — register via <TourProvider tours={[migratedTour]}> in an ancestor and call useTour().start() to begin — see https://usertourkit.com/migration/shepherd#tour-constructor
   {
     id: 'migrated-tour',
 
@@ -26,6 +26,6 @@ export function startProductTour() {
     }],
   }
 
-  // TODO: Shepherd tour.start() → call useTour().start() from a descendant of <TourProvider> — see https://tourkit.dev/migration/shepherd#start
+  // TODO: Shepherd tour.start() → call useTour().start() from a descendant of <TourProvider> — see https://usertourkit.com/migration/shepherd#start
 
 }

@@ -114,9 +114,17 @@ All contributions must follow the rules in [`tour-kit/rules/`](./tour-kit/rules/
 6. **Open a PR** against `main`. Fill out the PR template. Link the issue. Keep PRs focused — one logical change per PR.
 7. **CI must be green**. Maintainers will review; expect a round or two of feedback.
 
+### Comment voice
+
+Comments explain **why**, not **what**. `// Check if dismissed` above `if (state.dismissed)` is
+noise — delete it. Reserve comments for non-obvious intent, ordering constraints, and gotchas
+(e.g. why an expired snooze still nudges, why a partial batch flushes on a timer).
+
 ### Commit style
 
-We don't enforce conventional commits, but a short imperative subject helps reviewers:
+We don't enforce conventional commits, but a short imperative subject helps reviewers. Describe the
+change, not a generic intent — avoid "Refactor code structure for improved readability and
+maintainability"-style messages that name no actual change:
 
 ```
 fix(core): guard SSR access in useFocusTrap

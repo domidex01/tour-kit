@@ -1,3 +1,4 @@
+import Module from 'node:module'
 import { act, renderHook } from '@testing-library/react'
 import { TourProvider, type TourRouteError, useTour } from '@tour-kit/core'
 import * as React from 'react'
@@ -515,33 +516,137 @@ describe('createReactRouterAdapter', () => {
   })
 })
 
-describe('useReactRouter (direct hook)', () => {
-  // Note: Testing the direct hook requires mocking the require() call.
-  // These tests document the expected behavior.
+// -----------------------------------------------------------------------------
+// useReactRouter (direct hook) — require()-fallback resolution
+// -----------------------------------------------------------------------------
+//
+// The direct hook resolves `react-router` (v7) first, then falls back to
+// `react-router-dom` (v6), and throws a clear install error when neither is
+// present (see react-router.ts:150-171). The resolved factory is memoized in a
+// module-level `let _useReactRouter`.
+//
+// HOW WE MOCK THE require(): the adapter calls a bare `require(...)`. Under
+// vite-node, that `require` is a module-local binding (createRequire) that
+// resolves NATIVELY — `vi.mock` / `vi.doMock` / `vi.stubGlobal` cannot reach
+// it, and `react-router` is installed in the workspace, so a real require would
+// always win and the fallback/throw branches would be untestable. The seam that
+// works is patching Node's CJS loader (`Module._load`), which that local
+// require delegates to. `mockRequire()` does exactly that, per case. A fresh
+// `vi.resetModules()` + dynamic `import('./react-router')` re-runs the module so
+// `_useReactRouter` starts null each time, defeating the cache between cases.
+//
+// The factory CONTRACT (getCurrentRoute/navigate/matchRoute/onRouteChange
+// semantics) is already proven by the `createReactRouterAdapter` suite above —
+// these tests cover only the resolution + caching path the placeholders skipped.
 
-  describe('module resolution', () => {
-    it('should try react-router first (v7)', () => {
-      // The direct hook tries 'react-router' before 'react-router-dom'
-      // This test documents the expected behavior
-      expect(true).toBe(true) // Placeholder - see integration tests
-    })
+type CjsLoad = (request: string, parent: unknown, isMain: boolean) => unknown
+const moduleApi = Module as unknown as { _load: CjsLoad }
 
-    it('should fall back to react-router-dom (v6)', () => {
-      // If 'react-router' is not available, it falls back to 'react-router-dom'
-      expect(true).toBe(true) // Placeholder - see integration tests
-    })
+/**
+ * Patch the native CJS loader so the adapter's runtime `require()` resolves to
+ * our fakes. `routes` maps a module id to a factory (resolve) or the literal
+ * `'absent'` (simulate a failed require). Anything else delegates to the real
+ * loader so React / @tour-kit/core still load. Returns a restore fn.
+ */
+function mockRequire(routes: Record<string, (() => unknown) | 'absent'>): () => void {
+  const original = moduleApi._load
+  moduleApi._load = (request, parent, isMain) => {
+    const route = routes[request]
+    if (route === 'absent') throw new Error(`Cannot find module '${request}'`)
+    if (route) return route()
+    return original(request, parent, isMain)
+  }
+  return () => {
+    moduleApi._load = original
+  }
+}
 
-    it('should throw clear error if neither is available', () => {
-      // Expected error message:
-      // "[TourKit] Neither react-router nor react-router-dom found. " +
-      // "Please install one of them to use useReactRouter."
-      expect(true).toBe(true) // Placeholder - see integration tests
-    })
+describe('useReactRouter (direct hook) — module resolution', () => {
+  // A minimal mock of the router module: `useLocation`/`useNavigate` as the
+  // adapter consumes them. `useLocation` returns a fixed pathname so the
+  // resolved getCurrentRoute() reveals WHICH module won resolution.
+  const routerModule = (pathname: string) => ({
+    useLocation: () => ({ pathname }),
+    useNavigate: () => vi.fn(),
+  })
 
-    it('should cache adapter after first call', () => {
-      // The _useReactRouter variable caches the adapter factory
-      expect(true).toBe(true) // Placeholder - see integration tests
+  beforeEach(() => {
+    // Fresh module instance per case → module-level `_useReactRouter` is null.
+    vi.resetModules()
+  })
+
+  it('resolves react-router first (v7)', async () => {
+    const restore = mockRequire({
+      'react-router': () => routerModule('/v7-route'),
+      'react-router-dom': () => routerModule('/v6-route'),
     })
+    try {
+      const { useReactRouter } = await import('./react-router')
+      const { result } = renderHook(() => useReactRouter())
+
+      // Full RouterAdapter contract resolved through the v7 module.
+      expect(typeof result.current.getCurrentRoute).toBe('function')
+      expect(typeof result.current.navigate).toBe('function')
+      expect(typeof result.current.matchRoute).toBe('function')
+      expect(typeof result.current.onRouteChange).toBe('function')
+      // The v7 module's useLocation is the one wired in — not the dom fallback.
+      expect(result.current.getCurrentRoute()).toBe('/v7-route')
+    } finally {
+      restore()
+    }
+  })
+
+  it('falls back to react-router-dom (v6) when react-router is absent', async () => {
+    const restore = mockRequire({
+      'react-router': 'absent',
+      'react-router-dom': () => routerModule('/v6-route'),
+    })
+    try {
+      const { useReactRouter } = await import('./react-router')
+      const { result } = renderHook(() => useReactRouter())
+
+      expect(typeof result.current.getCurrentRoute).toBe('function')
+      // The dom (v6) module won resolution after the v7 require threw.
+      expect(result.current.getCurrentRoute()).toBe('/v6-route')
+    } finally {
+      restore()
+    }
+  })
+
+  it('throws a clear install error when neither package is available', async () => {
+    const restore = mockRequire({ 'react-router': 'absent', 'react-router-dom': 'absent' })
+    try {
+      const { useReactRouter } = await import('./react-router')
+      expect(() => renderHook(() => useReactRouter())).toThrow(
+        '[TourKit] Neither react-router nor react-router-dom found. ' +
+          'Please install one of them to use useReactRouter.'
+      )
+    } finally {
+      restore()
+    }
+  })
+
+  it('memoizes the resolved factory across renders (require runs once)', async () => {
+    let requireCount = 0
+    const restore = mockRequire({
+      'react-router': () => {
+        requireCount++
+        return routerModule('/first')
+      },
+    })
+    try {
+      const { useReactRouter } = await import('./react-router')
+      const first = renderHook(() => useReactRouter())
+      const second = renderHook(() => useReactRouter())
+
+      expect(first.result.current.getCurrentRoute()).toBe('/first')
+      expect(second.result.current.getCurrentRoute()).toBe('/first')
+      // Resolution ran exactly once — the module-level `_useReactRouter` cache
+      // means the second render reuses the factory instead of re-requiring.
+      expect(requireCount).toBe(1)
+    } finally {
+      restore()
+    }
   })
 })
 

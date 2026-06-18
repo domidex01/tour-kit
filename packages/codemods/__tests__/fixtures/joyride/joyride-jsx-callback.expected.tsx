@@ -5,9 +5,9 @@
 import { useCallback, useState } from 'react'
 import { TourProvider } from '@tour-kit/react';
 
-// TODO: Import 'CallBackProps' has no Tour Kit equivalent — remove this import and rework references — see https://tourkit.dev/migration/joyride#callbackprops
-// TODO: Import 'ACTIONS' has no Tour Kit equivalent — remove this import and rework references — see https://tourkit.dev/migration/joyride#actions
-// TODO: Import 'STATUS' has no Tour Kit equivalent — remove this import and rework references — see https://tourkit.dev/migration/joyride#status
+// TODO: Import 'CallBackProps' has no Tour Kit equivalent — remove this import and rework references — see https://usertourkit.com/migration/joyride#callbackprops
+// TODO: Import 'ACTIONS' has no Tour Kit equivalent — remove this import and rework references — see https://usertourkit.com/migration/joyride#actions
+// TODO: Import 'STATUS' has no Tour Kit equivalent — remove this import and rework references — see https://usertourkit.com/migration/joyride#status
 import { type CallBackProps, ACTIONS, STATUS } from 'react-joyride';
 
 const steps = [
@@ -38,12 +38,12 @@ export function DashboardTour() {
   }, [])
 
   return (
-    // TODO: <Joyride run> — Tour Kit is imperative; call useTour().start() from a descendant — see https://tourkit.dev/migration/joyride#run-prop
-    // TODO: <Joyride stepIndex> — Tour Kit owns step index internally; use useTour().goTo() — see https://tourkit.dev/migration/joyride#step-index
-    // TODO: <Joyride continuous> is the default in Tour Kit (no opt-in needed) — see https://tourkit.dev/migration/joyride#continuous
-    // TODO: <Joyride showProgress> → render <TourProgress /> inside <TourCard /> — see https://tourkit.dev/migration/joyride#show-progress
-    // TODO: <Joyride showSkipButton> → render <TourClose /> inside <TourCard /> — see https://tourkit.dev/migration/joyride#show-skip-button
-    // TODO: <Joyride callback> splits into onTourEnd / onTourSkip / onStepAdvance — see https://tourkit.dev/migration/joyride#callback
+    // TODO: <Joyride run> — Tour Kit is imperative; call useTour().start() from a descendant — see https://usertourkit.com/migration/joyride#run-prop
+    // TODO: <Joyride stepIndex> — Tour Kit owns step index internally; use useTour().goTo() — see https://usertourkit.com/migration/joyride#step-index
+    // TODO: <Joyride continuous> is the default in Tour Kit (no opt-in needed) — see https://usertourkit.com/migration/joyride#continuous
+    // TODO: <Joyride showProgress> → render <TourProgress /> inside <TourCard /> — see https://usertourkit.com/migration/joyride#show-progress
+    // TODO: <Joyride showSkipButton> → render <TourClose /> inside <TourCard /> — see https://usertourkit.com/migration/joyride#show-skip-button
+    // TODO: <Joyride callback> splits into onTourEnd / onTourSkip / onStepAdvance — see https://usertourkit.com/migration/joyride#callback
     <TourProvider
       tours={[{
         id: 'migrated-tour',
