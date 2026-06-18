@@ -1,5 +1,20 @@
 # @tour-kit/scheduling
 
+## 0.12.0
+
+### Minor Changes
+
+- fd0e9a4: Wire business-hours evaluation into the schedule engine. `Schedule` now accepts
+  an optional `businessHours` field; `isScheduleActive` evaluates it (timezone-aware,
+  with `businessHours.timezone` taking precedence over the schedule timezone) and
+  surfaces the `outside_business_hours` status reason. Additive, non-breaking.
+  dist gz: 3546/4000.
+
+### Patch Changes
+
+- @tour-kit/analytics@0.11.10
+- @tour-kit/license@1.3.6
+
 ## 0.11.9
 
 ### Patch Changes

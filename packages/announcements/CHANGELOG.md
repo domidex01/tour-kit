@@ -1,5 +1,17 @@
 # @tour-kit/announcements
 
+## 5.0.0
+
+### Patch Changes
+
+- Updated dependencies [fd0e9a4]
+- Updated dependencies [3138481]
+  - @tour-kit/scheduling@0.12.0
+  - @tour-kit/core@1.0.7
+  - @tour-kit/analytics@0.11.10
+  - @tour-kit/license@1.3.6
+  - @tour-kit/media@0.13.3
+
 ## 4.1.6
 
 ### Patch Changes
