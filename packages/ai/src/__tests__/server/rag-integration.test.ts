@@ -173,14 +173,22 @@ describe('RAG Pipeline Integration', () => {
     ]
 
     // Retriever carries the option; middleware also passes it explicitly to search().
-    const retriever = createRetriever({ documents: docs, embedding, vectorStore: store, minScore: 0.42 })
+    const retriever = createRetriever({
+      documents: docs,
+      embedding,
+      vectorStore: store,
+      minScore: 0.42,
+    })
     const middleware = createRAGMiddleware({ retriever, topK: 2, minScore: 0.42 })
 
     await middleware.transformParams?.({
       type: 'generate' as const,
       params: {
         prompt: [
-          { role: 'user' as const, content: [{ type: 'text' as const, text: 'How do tours work?' }] },
+          {
+            role: 'user' as const,
+            content: [{ type: 'text' as const, text: 'How do tours work?' }],
+          },
         ],
       },
       model: {} as never,

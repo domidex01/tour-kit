@@ -158,7 +158,12 @@ describe('createRAGMiddleware', () => {
 // so an unset minScore keeps today's retrieval behavior.
 describe('createRAGMiddleware — minScore (US-1)', () => {
   const HITS: RetrievedDocument[] = [
-    { id: 'd1', content: 'Tour Kit supports branching.', score: 0.95, metadata: { title: 'Branching' } },
+    {
+      id: 'd1',
+      content: 'Tour Kit supports branching.',
+      score: 0.95,
+      metadata: { title: 'Branching' },
+    },
     { id: 'd2', content: 'Use useTour for state.', score: 0.4, metadata: { source: 'hooks' } },
   ]
 
