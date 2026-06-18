@@ -3,7 +3,7 @@ import { useSurveysContext } from '../context/surveys-context'
 import type { AnswerValue } from '../types/question'
 import type { DismissalReason, SurveyConfig, SurveyState } from '../types/survey'
 
-interface UseSurveyReturn {
+export interface UseSurveyReturn {
   state: SurveyState | undefined
   config: SurveyConfig | undefined
   show: () => void
