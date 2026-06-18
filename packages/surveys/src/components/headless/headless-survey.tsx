@@ -1,24 +1,13 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useSurvey } from '../../hooks/use-survey'
-import type { AnswerValue } from '../../types/question'
-import type { DismissalReason, SurveyConfig, SurveyState } from '../../types/survey'
+import { type UseSurveyReturn, useSurvey } from '../../hooks/use-survey'
 
-export interface HeadlessSurveyRenderProps {
+// Mirrors the single-survey control surface of `useSurvey`, plus the survey id.
+// Derived from `UseSurveyReturn` so the two can't drift — adding a method to the
+// hook automatically flows here.
+export interface HeadlessSurveyRenderProps extends UseSurveyReturn {
   surveyId: string
-  state: SurveyState | undefined
-  config: SurveyConfig | undefined
-  canShow: boolean
-  show: () => void
-  hide: () => void
-  dismiss: (reason?: DismissalReason) => void
-  snooze: () => void
-  answer: (questionId: string, value: AnswerValue) => void
-  nextQuestion: () => void
-  prevQuestion: () => void
-  complete: () => void
-  reset: () => void
 }
 
 export interface HeadlessSurveyProps {

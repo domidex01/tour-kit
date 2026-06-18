@@ -100,8 +100,9 @@ function NPSSurvey() {
       description: 'Record an answer. Persists immediately to storage.',
     },
     nextQuestion: {
-      type: '() => void',
-      description: 'Increment currentStep by 1.',
+      type: '() => string | null',
+      description:
+        'Advance to the next question. If the current question has a `validation` function that returns a non-null string, the survey does NOT advance and that string is returned; otherwise advances and returns null.',
     },
     prevQuestion: {
       type: '() => void',
@@ -114,6 +115,11 @@ function NPSSurvey() {
     reset: {
       type: '() => void',
       description: 'Reset the survey to its initial state, clearing all responses and flags.',
+    },
+    validationError: {
+      type: '(questionId: string) => string | undefined',
+      description:
+        'Read the transient validation error for a question, or undefined if it currently validates. Cleared on a passing nextQuestion.',
     },
   }}
 />

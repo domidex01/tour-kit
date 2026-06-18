@@ -76,6 +76,8 @@ interface SurveyState {
   snoozeUntil: Date | null;
   currentStep: number;
   responses: Map<string, AnswerValue>;
+  /** Transient per-question validation errors — never persisted. */
+  validationErrors: Map<string, string>;
 }
 ```
 
@@ -185,6 +187,18 @@ interface RatingScale {
 }
 ```
 
+`step` controls the increment between rating options (default `1`). The scale renders
+every value from `min` to `max` inclusive, stepping by `step` — so `{ min: 0, max: 10, step: 5 }`
+renders exactly three options: `0`, `5`, `10`.
+
+```tsx
+<QuestionRating
+  id="effort"
+  label="How much effort did that take?"
+  ratingScale={{ min: 0, max: 10, step: 5 }} // → 0, 5, 10
+/>
+```
+
 ### SelectOption
 
 ```ts
@@ -203,6 +217,43 @@ interface SkipLogic {
   condition: (answer: AnswerValue) => boolean;
   skipTo: string;
 }
+```
+
+### Validation
+
+`QuestionConfig.validation` runs at the **advance** boundary (when you call
+`nextQuestion`), not on every keystroke. Return a string to block advancing and
+surface it as a field error; return `null` or `undefined` to allow the survey to
+move on. `nextQuestion` returns that same string (or `null` on success), and the
+error is also readable via `getValidationError(surveyId, questionId)` on the
+context — or `validationError(questionId)` from `useSurvey`. Errors are transient
+UI state and are never persisted, so a reload starts clean.
+
+The value passed to `validation` is the answer recorded so far, which is
+`undefined` until the question is answered — that's the case to guard for a
+required field. Handle a falsy value rather than assuming a populated answer.
+
+```tsx
+const question: QuestionConfig = {
+  id: 'email',
+  type: 'text',
+  text: 'Work email',
+  required: true,
+  validation: (value) =>
+    typeof value === 'string' && value.includes('@') ? null : 'Enter a valid email',
+};
+
+// In a question UI built on the headless hook:
+const { nextQuestion, validationError } = useSurvey('signup');
+const error = validationError('email'); // string while invalid, undefined once it passes
+
+<input
+  aria-invalid={error ? true : undefined}
+  aria-describedby={error ? 'email-error' : undefined}
+  onChange={(e) => answer('email', e.target.value)}
+/>;
+{error && <p id="email-error" role="alert">{error}</p>}
+<button onClick={() => nextQuestion()}>Next</button>; // stays put until `value` validates
 ```
 
 ---
@@ -269,12 +320,14 @@ interface SurveysContextValue {
   dismiss: (id: string, reason?: DismissalReason) => void;
   snooze: (id: string) => void;
   answer: (surveyId: string, questionId: string, value: AnswerValue) => void;
-  nextQuestion: (surveyId: string) => void;
+  /** Returns the validation error string when the current question blocks advance, else `null`. */
+  nextQuestion: (surveyId: string) => string | null;
   prevQuestion: (surveyId: string) => void;
   complete: (surveyId: string) => void;
   reset: (id: string) => void;
   resetAll: () => void;
   getState: (id: string) => SurveyState | undefined;
+  getValidationError: (surveyId: string, questionId: string) => string | undefined;
   getConfig: (id: string) => SurveyConfig | undefined;
   canShow: (id: string) => boolean;
 }

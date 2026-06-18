@@ -48,6 +48,13 @@ export interface SurveyState {
   snoozeUntil: Date | null
   currentStep: number
   responses: Map<string, import('./question').AnswerValue>
+  /**
+   * Transient per-question validation errors keyed by question id. Populated by
+   * `nextQuestion` when a `QuestionConfig.validation` returns a non-null string;
+   * cleared on a passing advance. NOT persisted — errors are UI state and must
+   * never resurface after a reload.
+   */
+  validationErrors: Map<string, string>
 }
 
 /** Position options for slideout variant */
