@@ -86,7 +86,11 @@ const QuestionRating = React.forwardRef<HTMLDivElement, QuestionRatingProps>(
 
     // Per-field precedence matches min/max/style above: `ratingScale` wins, else 1.
     // The Studio already emits `ratingScale.step`; consuming it makes that output truthful.
-    const step = ratingScale?.step ?? 1
+    // Guard non-positive / NaN steps — a hand-authored `step: 0` (or negative/NaN) would make
+    // the `i += step` loop below never terminate. `> 0` keeps valid fractional steps (e.g. 0.5)
+    // intact, unlike `Math.max(1, step)` which would clamp them up to 1.
+    const rawStep = ratingScale?.step ?? 1
+    const step = rawStep > 0 ? rawStep : 1
     const options: number[] = React.useMemo(() => {
       const result: number[] = []
       for (let i = min; i <= max; i += step) {

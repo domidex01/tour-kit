@@ -272,6 +272,22 @@ describe('step (RatingScale.step honored)', () => {
     expect(screen.getAllByRole('radio')).toHaveLength(11)
   })
 
+  it('step:0 is guarded to 1 (a non-positive step must not infinite-loop the render)', () => {
+    render(<QuestionRating {...labelProps} ratingScale={{ min: 0, max: 3, step: 0 }} />)
+    expect(screen.getAllByRole('radio')).toHaveLength(4) // [0, 1, 2, 3]
+  })
+
+  it('fractional step:0.5 is preserved (guards must not clamp valid sub-1 steps up to 1)', () => {
+    render(<QuestionRating {...labelProps} ratingScale={{ min: 0, max: 1, step: 0.5 }} />)
+    const radios = screen.getAllByRole('radio')
+    expect(radios).toHaveLength(3)
+    expect(radios.map((r) => r.getAttribute('aria-label'))).toEqual([
+      'Rate 0 out of 1',
+      'Rate 0.5 out of 1',
+      'Rate 1 out of 1',
+    ])
+  })
+
   it('shape-freeze: RatingScale.step stays optional number — Studio contract', () => {
     // Compiled by vitest's esbuild; this case fails to TYPECHECK if `step` is
     // reshaped (made required, or typed string/object). Both literals must compile.
