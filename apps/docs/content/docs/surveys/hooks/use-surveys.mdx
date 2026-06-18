@@ -88,8 +88,9 @@ function SurveyDebugPanel() {
       description: 'Record an answer. Persists immediately.',
     },
     nextQuestion: {
-      type: '(surveyId: string) => void',
-      description: 'Advance the survey one step.',
+      type: '(surveyId: string) => string | null',
+      description:
+        'Advance the survey one step. Returns the validation error string if the current question blocks advancing, otherwise null.',
     },
     prevQuestion: {
       type: '(surveyId: string) => void',
@@ -110,6 +111,11 @@ function SurveyDebugPanel() {
     getState: {
       type: '(id: string) => SurveyState | undefined',
       description: 'Get state for a specific survey.',
+    },
+    getValidationError: {
+      type: '(surveyId: string, questionId: string) => string | undefined',
+      description:
+        'Read the transient validation error for a question, or undefined if it currently validates.',
     },
     getConfig: {
       type: '(id: string) => SurveyConfig | undefined',
