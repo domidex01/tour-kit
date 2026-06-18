@@ -1,3 +1,5 @@
+import type { BusinessHours } from './business-hours'
+
 /**
  * Days of the week (0 = Sunday, 6 = Saturday)
  */
@@ -109,6 +111,14 @@ export interface Schedule {
 
   /** Recurring pattern for the schedule */
   recurring?: RecurringPattern
+
+  /**
+   * Business-hours window the schedule must fall within to be active.
+   * Independent of `timeOfDay` — both may be set and both must pass.
+   * Evaluated in the schedule's resolved timezone unless
+   * `businessHours.timezone` overrides it.
+   */
+  businessHours?: BusinessHours
 
   /** Custom metadata */
   metadata?: Record<string, unknown>

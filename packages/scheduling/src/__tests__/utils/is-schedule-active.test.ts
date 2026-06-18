@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Schedule } from '../../types'
+import { BUSINESS_HOURS_PRESETS } from '../../types/business-hours'
 import { isScheduleActive } from '../../utils/is-schedule-active'
 
 describe('isScheduleActive', () => {
@@ -120,6 +121,71 @@ describe('isScheduleActive', () => {
       }
       const result = isScheduleActive(schedule, { now: fixedDate, userTimezone: 'UTC' })
       expect(result.isActive).toBe(true)
+    })
+  })
+
+  describe('business hours', () => {
+    // Same UTC instant, evaluated in two timezones, must yield opposite verdicts.
+    const MON_1430Z = new Date('2025-06-16T14:30:00Z') // Mon — NY 10:30 (in), Tokyo 23:30 (out)
+    const SUN_1430Z = new Date('2025-06-15T14:30:00Z') // Sun — closed under default { open: false }
+    const DST_MON = new Date('2025-03-10T14:30:00Z') // Mon after US spring-forward — NY 10:30 EDT
+
+    it('active in-window for New York', () => {
+      const schedule: Schedule = {
+        businessHours: BUSINESS_HOURS_PRESETS.standard,
+        timezone: 'America/New_York',
+      }
+      expect(isScheduleActive(schedule, { now: MON_1430Z }).isActive).toBe(true)
+    })
+
+    it('INACTIVE for the SAME instant in Tokyo → outside_business_hours', () => {
+      const schedule: Schedule = {
+        businessHours: BUSINESS_HOURS_PRESETS.standard,
+        timezone: 'Asia/Tokyo',
+      }
+      const result = isScheduleActive(schedule, { now: MON_1430Z })
+      expect(result.isActive).toBe(false)
+      expect(result.reason).toBe('outside_business_hours') // verdict flips vs NY
+    })
+
+    it('businessHours.timezone overrides schedule.timezone', () => {
+      const schedule: Schedule = {
+        timezone: 'Asia/Tokyo', // schedule says "out"…
+        businessHours: { ...BUSINESS_HOURS_PRESETS.standard, timezone: 'America/New_York' }, // …bh pins NY → "in"
+      }
+      expect(isScheduleActive(schedule, { now: MON_1430Z }).isActive).toBe(true)
+    })
+
+    it('closed day: Sunday under standard preset → outside_business_hours', () => {
+      const schedule: Schedule = {
+        businessHours: BUSINESS_HOURS_PRESETS.standard, // default { open: false }
+        timezone: 'UTC',
+      }
+      const result = isScheduleActive(schedule, { now: SUN_1430Z })
+      expect(result.isActive).toBe(false)
+      expect(result.reason).toBe('outside_business_hours')
+    })
+
+    it('businessHours and timeOfDay are independent (timeOfDay precedence: wrong_time first)', () => {
+      const schedule: Schedule = {
+        timezone: 'America/New_York',
+        timeOfDay: { start: '00:00', end: '01:00' }, // 10:30 NY is outside this
+        businessHours: BUSINESS_HOURS_PRESETS.standard,
+      }
+      // timeOfDay (step 5) is checked before business hours (step 5.5)
+      expect(isScheduleActive(schedule, { now: MON_1430Z }).reason).toBe('wrong_time')
+    })
+
+    it('DST edge: NY window holds across spring-forward', () => {
+      const schedule: Schedule = {
+        businessHours: BUSINESS_HOURS_PRESETS.standard,
+        timezone: 'America/New_York',
+      }
+      expect(isScheduleActive(schedule, { now: DST_MON }).isActive).toBe(true)
+    })
+
+    it('no businessHours field → behavior unchanged (active)', () => {
+      expect(isScheduleActive({}, { now: MON_1430Z }).isActive).toBe(true)
     })
   })
 
