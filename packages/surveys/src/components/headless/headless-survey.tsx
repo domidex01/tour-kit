@@ -15,10 +15,12 @@ export interface HeadlessSurveyRenderProps {
   dismiss: (reason?: DismissalReason) => void
   snooze: () => void
   answer: (questionId: string, value: AnswerValue) => void
-  nextQuestion: () => void
+  nextQuestion: () => string | null
   prevQuestion: () => void
   complete: () => void
   reset: () => void
+  /** Transient validation error for a question, or `undefined` if it validates. */
+  validationError: (questionId: string) => string | undefined
 }
 
 export interface HeadlessSurveyProps {

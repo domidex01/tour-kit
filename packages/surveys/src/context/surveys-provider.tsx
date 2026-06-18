@@ -30,6 +30,8 @@ type SurveysAction =
   | { type: 'ANSWER'; id: string; questionId: string; value: AnswerValue }
   | { type: 'NEXT_QUESTION'; id: string }
   | { type: 'PREV_QUESTION'; id: string }
+  | { type: 'SET_VALIDATION_ERROR'; id: string; questionId: string; error: string }
+  | { type: 'CLEAR_VALIDATION_ERROR'; id: string; questionId: string }
   | { type: 'COMPLETE'; id: string; drain: boolean }
   | { type: 'RESET'; id: string }
   | { type: 'RESET_ALL' }
@@ -58,6 +60,7 @@ function createInitialSurveyState(id: string): SurveyState {
     snoozeUntil: null,
     currentStep: 0,
     responses: new Map(),
+    validationErrors: new Map(),
   }
 }
 
@@ -203,6 +206,21 @@ function surveysReducer(state: SurveysReducerState, action: SurveysAction): Surv
         currentStep: Math.max(0, e.currentStep - 1),
       }))
 
+    case 'SET_VALIDATION_ERROR':
+      return updateSurvey(state, action.id, (e) => {
+        const validationErrors = new Map(e.validationErrors)
+        validationErrors.set(action.questionId, action.error)
+        return { ...e, validationErrors }
+      })
+
+    case 'CLEAR_VALIDATION_ERROR':
+      return updateSurvey(state, action.id, (e) => {
+        if (!e.validationErrors.has(action.questionId)) return e
+        const validationErrors = new Map(e.validationErrors)
+        validationErrors.delete(action.questionId)
+        return { ...e, validationErrors }
+      })
+
     case 'COMPLETE': {
       const next = updateSurvey(state, action.id, (e) => ({
         ...e,
@@ -282,14 +300,27 @@ function serializeState(
   lastShownAt: Date | null
 ): string {
   const payload: SerializedState = {
+    // Build each entry explicitly (not `{ ...s }`) so transient runtime-only
+    // fields — `validationErrors` — can never leak into the blob. A spread would
+    // silently carry new SurveyState fields into storage; enumeration makes the
+    // persisted shape a deliberate allow-list that matches SerializedSurveyState.
     surveys: Array.from(surveys.entries()).map(([id, s]) => [
       id,
       {
-        ...s,
+        id: s.id,
+        isActive: s.isActive,
+        isVisible: s.isVisible,
+        isDismissed: s.isDismissed,
+        isSnoozed: s.isSnoozed,
+        isCompleted: s.isCompleted,
+        viewCount: s.viewCount,
         lastViewedAt: s.lastViewedAt?.toISOString() ?? null,
         dismissedAt: s.dismissedAt?.toISOString() ?? null,
+        dismissalReason: s.dismissalReason,
         completedAt: s.completedAt?.toISOString() ?? null,
+        snoozeCount: s.snoozeCount,
         snoozeUntil: s.snoozeUntil?.toISOString() ?? null,
+        currentStep: s.currentStep,
         responses: Array.from(s.responses.entries()),
       },
     ]),
@@ -325,6 +356,9 @@ function deserializeState(raw: string | null): {
         snoozeUntil: s.snoozeUntil ? new Date(s.snoozeUntil) : null,
         currentStep: s.currentStep,
         responses: new Map(s.responses),
+        // Transient — never serialized. Old blobs have no such key; a fresh
+        // empty Map is the back-compat default so a stale error never resurfaces.
+        validationErrors: new Map(),
       })
     }
     return {
@@ -566,8 +600,28 @@ export function SurveysProvider({
     [onQuestionAnswered, onSurveyAnswer]
   )
 
-  const handleNextQuestion = useCallback((surveyId: string) => {
+  const handleNextQuestion = useCallback((surveyId: string): string | null => {
+    // Read latest state/config off refs (same idiom as handleComplete/handleAnswer)
+    // so the gate sees the most recent answer recorded in this render cycle.
+    const survey = stateRef.current.surveys.get(surveyId)
+    const config = configsRef.current.find((c) => c.id === surveyId)
+    const question = config?.questions?.[survey?.currentStep ?? 0]
+    if (question?.validation && survey) {
+      const value = survey.responses.get(question.id)
+      const error = question.validation(value as AnswerValue)
+      if (error != null) {
+        dispatch({
+          type: 'SET_VALIDATION_ERROR',
+          id: surveyId,
+          questionId: question.id,
+          error,
+        })
+        return error
+      }
+      dispatch({ type: 'CLEAR_VALIDATION_ERROR', id: surveyId, questionId: question.id })
+    }
     dispatch({ type: 'NEXT_QUESTION', id: surveyId })
+    return null
   }, [])
 
   const handlePrevQuestion = useCallback((surveyId: string) => {
@@ -627,6 +681,11 @@ export function SurveysProvider({
 
   const getState = useCallback((id: string) => state.surveys.get(id), [state.surveys])
 
+  const getValidationError = useCallback(
+    (id: string, questionId: string) => state.surveys.get(id)?.validationErrors.get(questionId),
+    [state.surveys]
+  )
+
   const getConfig = useCallback((id: string) => configsRef.current.find((s) => s.id === id), [])
 
   const value = useMemo<SurveysContextValue>(
@@ -647,6 +706,7 @@ export function SurveysProvider({
       reset: handleReset,
       resetAll: handleResetAll,
       getState,
+      getValidationError,
       getConfig,
       canShow: canShowInternal,
     }),
@@ -667,6 +727,7 @@ export function SurveysProvider({
       handleReset,
       handleResetAll,
       getState,
+      getValidationError,
       getConfig,
       canShowInternal,
     ]

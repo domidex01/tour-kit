@@ -35,11 +35,22 @@ export interface SurveysContextValue {
   /** Record an answer for a question */
   answer: (surveyId: string, questionId: string, value: AnswerValue) => void
 
-  /** Advance to the next question */
-  nextQuestion: (surveyId: string) => void
+  /**
+   * Advance to the next question. If the current question declares a
+   * `validation` function and it returns a non-null string, the survey does
+   * NOT advance and that string is returned (and surfaced via
+   * `getValidationError`). Returns `null` when the advance succeeds.
+   */
+  nextQuestion: (surveyId: string) => string | null
 
   /** Go back to the previous question */
   prevQuestion: (surveyId: string) => void
+
+  /**
+   * Read the transient validation error for a question, or `undefined` if the
+   * question currently validates. Cleared on a passing `nextQuestion`.
+   */
+  getValidationError: (surveyId: string, questionId: string) => string | undefined
 
   /** Mark a survey as completed */
   complete: (surveyId: string) => void

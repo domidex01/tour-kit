@@ -11,11 +11,13 @@ interface UseSurveyReturn {
   dismiss: (reason?: DismissalReason) => void
   snooze: () => void
   answer: (questionId: string, value: AnswerValue) => void
-  nextQuestion: () => void
+  nextQuestion: () => string | null
   prevQuestion: () => void
   complete: () => void
   reset: () => void
   canShow: boolean
+  /** Transient validation error for a question, or `undefined` if it validates. */
+  validationError: (questionId: string) => string | undefined
 }
 
 /**
@@ -39,6 +41,7 @@ export function useSurvey(surveyId: string): UseSurveyReturn {
       complete: () => ctx.complete(surveyId),
       reset: () => ctx.reset(surveyId),
       canShow: ctx.canShow(surveyId),
+      validationError: (questionId: string) => ctx.getValidationError(surveyId, questionId),
     }),
     [ctx, surveyId]
   )
