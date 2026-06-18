@@ -3,7 +3,7 @@
 import type { UIMessage } from 'ai'
 import { useContext } from 'react'
 import { AiChatContext } from '../context/ai-chat-context'
-import type { ChatStatus } from '../types'
+import type { AiChatStrings, ChatStatus } from '../types'
 
 export interface UseAiChatReturn {
   messages: UIMessage[]
@@ -17,6 +17,8 @@ export interface UseAiChatReturn {
   open(): void
   close(): void
   toggle(): void
+  /** Fully-resolved UI strings (config.strings merged over defaults). */
+  strings: AiChatStrings
 }
 
 export function useAiChat(): UseAiChatReturn {
@@ -41,5 +43,6 @@ export function useAiChat(): UseAiChatReturn {
     open: context.open,
     close: context.close,
     toggle: context.toggle,
+    strings: context.strings,
   }
 }

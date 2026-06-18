@@ -1,4 +1,5 @@
 import { vi } from 'vitest'
+import { DEFAULT_STRINGS } from '../../core/strings'
 import type { UseAiChatReturn } from '../../hooks/use-ai-chat'
 
 export function createMockUseAiChatReturn(
@@ -16,6 +17,7 @@ export function createMockUseAiChatReturn(
     toggle: vi.fn(),
     error: null,
     status: 'ready',
+    strings: DEFAULT_STRINGS,
     ...overrides,
   }
 }

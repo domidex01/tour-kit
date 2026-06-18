@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { DEFAULT_STRINGS } from '../../core/strings'
 import type { UseAiChatReturn } from '../../hooks/use-ai-chat'
 
 // Mock the context module so AiChatSuggestions can render outside a provider
@@ -33,6 +34,7 @@ function buildChatState(overrides: Partial<UseAiChatReturn> = {}): UseAiChatRetu
     open: vi.fn(),
     close: vi.fn(),
     toggle: vi.fn(),
+    strings: DEFAULT_STRINGS,
     ...overrides,
   }
 }
