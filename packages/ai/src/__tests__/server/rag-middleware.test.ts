@@ -149,26 +149,67 @@ describe('createRAGMiddleware', () => {
       expect(systemContent).toContain('[1] (Branching)')
       expect(systemContent).toContain('[2] (hooks-guide)')
     })
+  })
+})
 
-    it('retrieves topK * 2 results when rerank is configured', async () => {
-      let searchTopK = 0
-      const retriever = {
-        ...createMockRetriever(mockResults),
-        async search(_query: string, topK?: number) {
-          searchTopK = topK ?? 5
-          return mockResults
-        },
-      }
+// US-1 (guard + earned): the configured RAGConfig.minScore must reach the
+// retriever instead of the hardcoded -1 that rag-middleware.ts used to pass.
+// RED before Task 4.1; GREEN after the wire. The default stays -1 (match-all)
+// so an unset minScore keeps today's retrieval behavior.
+describe('createRAGMiddleware — minScore (US-1)', () => {
+  const HITS: RetrievedDocument[] = [
+    { id: 'd1', content: 'Tour Kit supports branching.', score: 0.95, metadata: { title: 'Branching' } },
+    { id: 'd2', content: 'Use useTour for state.', score: 0.4, metadata: { source: 'hooks' } },
+  ]
 
-      const middleware = createRAGMiddleware({
-        retriever,
-        topK: 3,
-        rerank: { model: 'rerank-model', topN: 2 },
-      })
+  it('threads the CONFIGURED minScore to retriever.search (not hardcoded -1)', async () => {
+    let received: number | undefined = Number.NaN
+    const retriever = {
+      ...createMockRetriever(HITS),
+      async search(_q: string, topK?: number, minScore?: number) {
+        received = minScore
+        return HITS.slice(0, topK ?? 5)
+      },
+    }
 
-      await middleware.transformParams?.(createMockParams('test'))
+    const middleware = createRAGMiddleware({ retriever, minScore: 0.5 })
+    await middleware.transformParams?.(createMockParams('How does branching work?'))
 
-      expect(searchTopK).toBe(6) // topK * 2 = 3 * 2
-    })
+    expect(received).toBe(0.5)
+  })
+
+  it("unset minScore keeps today's behavior (default -1, match-all)", async () => {
+    let received: number | undefined = Number.NaN
+    const retriever = {
+      ...createMockRetriever(HITS),
+      async search(_q: string, topK?: number, minScore?: number) {
+        received = minScore
+        return HITS.slice(0, topK ?? 5)
+      },
+    }
+
+    const middleware = createRAGMiddleware({ retriever })
+    await middleware.transformParams?.(createMockParams('test'))
+
+    expect(received).toBe(-1)
+  })
+
+  it('a minScore above every score ⇒ empty results ⇒ params returned unchanged', async () => {
+    const retriever = {
+      ...createMockRetriever(HITS),
+      async search(_q: string, _topK?: number, minScore?: number) {
+        return HITS.filter((h) => h.score >= (minScore ?? -1))
+      },
+    }
+
+    const middleware = createRAGMiddleware({ retriever, minScore: 0.99 })
+    const result = await middleware.transformParams?.(createMockParams('test'))
+
+    // No doc cleared the bar → no "Relevant context…" system message prepended.
+    expect(result?.prompt).toHaveLength(2)
+    expect(result?.prompt[0].role).toBe('system')
+    expect((result?.prompt[0] as { role: 'system'; content: string }).content).not.toContain(
+      'Relevant context from documentation'
+    )
   })
 })

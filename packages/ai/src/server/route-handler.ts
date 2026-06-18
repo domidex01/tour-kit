@@ -87,12 +87,13 @@ export function createChatRouteHandler(options: ChatRouteHandlerOptions): {
       vectorStore: ragConfig.vectorStore,
       chunkSize: ragConfig.chunkSize,
       chunkOverlap: ragConfig.chunkOverlap,
+      minScore: ragConfig.minScore,
     })
 
     const ragMiddleware = createRAGMiddleware({
       retriever,
       topK: ragConfig.topK,
-      rerank: ragConfig.rerank,
+      minScore: ragConfig.minScore,
     })
 
     resolvedModel = wrapLanguageModel({

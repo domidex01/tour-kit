@@ -128,6 +128,10 @@ export function createRetriever(options: RetrieverOptions): Retriever {
     vectorStore = createInMemoryVectorStore(),
     chunkSize = 512,
     chunkOverlap = 50,
+    // The option becomes the default threshold for search(). Stays 0.7 when
+    // unset so a standalone retriever keeps its existing match behavior; the
+    // RAG middleware passes its own value explicitly per request.
+    minScore: defaultMinScore = 0.7,
   } = options
 
   let indexed = false
@@ -152,7 +156,7 @@ export function createRetriever(options: RetrieverOptions): Retriever {
       await indexingPromise
     },
 
-    async search(query: string, topK = 5, minScore = 0.7) {
+    async search(query: string, topK = 5, minScore = defaultMinScore) {
       // Auto-index on first search
       if (!indexed) {
         if (!indexingPromise) {
