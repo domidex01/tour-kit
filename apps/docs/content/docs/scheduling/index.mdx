@@ -73,6 +73,7 @@ interface Schedule {
   timezone?: string
   blackouts?: BlackoutPeriod[]
   recurring?: RecurringPattern
+  businessHours?: BusinessHours
   metadata?: Record<string, unknown>
 }
 ```
@@ -225,14 +226,24 @@ const schedule = {
 
 ### Business Hours
 
+Attach a `businessHours` window and the schedule is active only inside that
+window, evaluated in the schedule's timezone. The `standard` preset opens
+Monday–Friday 9:00–17:00 and is closed on weekends.
+
 ```tsx
 import { BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
 
 const schedule = {
-  timeOfDay: BUSINESS_HOURS_PRESETS.standard.days[1].hours[0],
-  // { start: '09:00', end: '17:00' }
+  businessHours: BUSINESS_HOURS_PRESETS.standard, // Mon–Fri 9:00–17:00
+  timezone: 'America/New_York',
 }
+// Active at 10:30 in New York; inactive at the same instant in Tokyo (23:30),
+// outside the window → reason: 'outside_business_hours'.
 ```
+
+`businessHours` is independent of `timeOfDay` — set both and a schedule must
+satisfy both to be active. To pin a store's hours regardless of the schedule's
+timezone, set `businessHours.timezone`; it takes precedence.
 
 ### Limited-Time Campaign
 
