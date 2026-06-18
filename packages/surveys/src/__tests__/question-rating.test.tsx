@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { axe } from 'vitest-axe'
 import { QuestionRating } from '../components/question-rating'
+import type { RatingScale } from '../types/question'
 
 vi.mock('@tour-kit/license', () => ({
   LicenseGate: ({ children }: { children: React.ReactNode }) => children,
@@ -228,5 +229,65 @@ describe('QuestionRating', () => {
     for (const button of buttons) {
       expect(button).toHaveAttribute('type', 'button')
     }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Slice 3 — RatingScale.step honored (was hardcoded `const step = 1`)
+// RED before question-rating.tsx reads `ratingScale?.step` and adds it to the
+// useMemo deps. Today step:5 over 0..10 still renders 11 radios.
+// ---------------------------------------------------------------------------
+
+describe('step (RatingScale.step honored)', () => {
+  const labelProps = { id: 'rating-step', label: 'Rate this feature' }
+
+  it('step:5 over min 0 / max 10 → exactly 3 radios [0, 5, 10]', () => {
+    render(<QuestionRating {...labelProps} ratingScale={{ min: 0, max: 10, step: 5 }} />)
+    const radios = screen.getAllByRole('radio')
+    expect(radios).toHaveLength(3)
+    expect(radios[0]).toHaveAttribute('aria-label', 'Rate 0 out of 10')
+    expect(radios[1]).toHaveAttribute('aria-label', 'Rate 5 out of 10')
+    expect(radios[2]).toHaveAttribute('aria-label', 'Rate 10 out of 10')
+  })
+
+  it('step:2 over min 0 / max 6 → [0, 2, 4, 6] (4 radios)', () => {
+    render(<QuestionRating {...labelProps} ratingScale={{ min: 0, max: 6, step: 2 }} />)
+    const radios = screen.getAllByRole('radio')
+    expect(radios).toHaveLength(4)
+    expect(radios.map((r) => r.getAttribute('aria-label'))).toEqual([
+      'Rate 0 out of 6',
+      'Rate 2 out of 6',
+      'Rate 4 out of 6',
+      'Rate 6 out of 6',
+    ])
+  })
+
+  it('no step on ratingScale → default 1 (no regression)', () => {
+    render(<QuestionRating {...labelProps} ratingScale={{ min: 1, max: 5 }} />)
+    expect(screen.getAllByRole('radio')).toHaveLength(5)
+  })
+
+  it('no ratingScale at all → default 0..10 step 1 (11 radios)', () => {
+    render(<QuestionRating {...labelProps} />)
+    expect(screen.getAllByRole('radio')).toHaveLength(11)
+  })
+
+  it('shape-freeze: RatingScale.step stays optional number — Studio contract', () => {
+    // Compiled by vitest's esbuild; this case fails to TYPECHECK if `step` is
+    // reshaped (made required, or typed string/object). Both literals must compile.
+    const withStep: RatingScale = { min: 0, max: 10, step: 5 }
+    const withoutStep: RatingScale = { min: 1, max: 5 } // step omitted is valid
+    expect(withStep.step).toBe(5)
+    expect(withoutStep.step).toBeUndefined()
+    // @ts-expect-error — step must be a number, not a string (locks the shape)
+    const _bad: RatingScale = { min: 0, max: 10, step: '5' }
+    void _bad
+  })
+
+  it('axe: a stepped scale has no violations', async () => {
+    const { container } = render(
+      <QuestionRating {...labelProps} ratingScale={{ min: 0, max: 10, step: 5 }} />
+    )
+    expect(await axe(container)).toHaveNoViolations()
   })
 })
