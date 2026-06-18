@@ -39,7 +39,7 @@ const PRO_FEATURES = [
   'Feature adoption tracking',
   'Media embedding (YouTube, Loom, Lottie)',
   'Business-hours scheduling (timezone-aware)',
-  'AI chat assistant',
+  'AI chat assistant (RAG + tour context)',
   'Priority GitHub issues',
 ]
 
@@ -55,7 +55,7 @@ const COMPARISON_ROWS = [
   { feature: 'Adoption tracking', free: false, pro: true },
   { feature: 'Media embedding', free: false, pro: true },
   { feature: 'Scheduling (business hours, timezones)', free: false, pro: true },
-  { feature: 'AI assistant', free: false, pro: true },
+  { feature: 'AI chat assistant (RAG + tour context)', free: false, pro: true },
   { feature: 'Sites', free: 'Unlimited', pro: '5 included' },
   { feature: 'License', free: 'MIT', pro: 'Commercial' },
 ]

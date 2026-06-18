@@ -19619,10 +19619,13 @@ interface ChatRouteHandlerOptions {
   rateLimit?: ServerRateLimitConfig
   beforeSend?(message): Promise<UIMessage | null> | UIMessage | null
   beforeResponse?(response): Promise<string> | string
-  maxDuration?: number // default 30
   onEvent?(event: AiChatEvent): void | Promise<void>
 }
 ```
+
+Request timeout is a Next.js route-segment export, not a handler option. Set
+`export const maxDuration = 30` in your route module — it is read by the
+platform, not by `createChatRouteHandler`.
 
 ### ContextConfig
 
@@ -19640,10 +19643,9 @@ interface RAGConfig {
   embedding: EmbeddingAdapter
   vectorStore?: VectorStoreAdapter
   topK?: number
-  minScore?: number
+  minScore?: number // retrieval threshold (default: -1, match-all)
   chunkSize?: number
   chunkOverlap?: number
-  rerank?: { model: string; topN?: number }
 }
 ```
 

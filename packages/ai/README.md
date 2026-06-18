@@ -7,7 +7,7 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@tour-kit/ai?label=gzip)](https://bundlephobia.com/package/@tour-kit/ai)
 [![types](https://img.shields.io/npm/types/@tour-kit/ai.svg)](https://www.npmjs.com/package/@tour-kit/ai)
 
-Drop-in **AI chat assistant** for React onboarding flows — adds a conversational layer that understands your tour structure, guides users through setup, and answers product questions. Powered by [Vercel AI SDK](https://sdk.vercel.ai/) with built-in **RAG**, **CAG**, vector search, suggestion chips, and rate limiting.
+Drop-in **AI chat assistant** for React onboarding flows — a **UI + orchestration layer** over the [Vercel AI SDK](https://sdk.vercel.ai/). This package owns the chat UI, document chunking, prompt assembly, and the RAG/CAG wiring; embeddings (`embedMany`), similarity (`cosineSimilarity`), and generation (`streamText`) are delegated to the SDK. RAG runs over an **in-memory vector store** (a linear cosine scan — no index, no persistence); bring your own persistent backend via a custom `VectorStoreAdapter` for production scale.
 
 > **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
 
@@ -17,9 +17,10 @@ Drop-in **AI chat assistant** for React onboarding flows — adds a conversation
 
 - **Tour-aware** — `useTourAssistant()` injects current tour step into the system prompt
 - **CAG** (Context-Augmented Generation) — stuff tour context directly into the prompt
-- **RAG** (Retrieval-Augmented Generation) — vector search over your docs with `createInMemoryVectorStore` or a custom adapter
+- **RAG** (Retrieval-Augmented Generation) — retrieval over an in-memory vector store (linear cosine search) via `createInMemoryVectorStore`; swap in a persistent backend with a custom `VectorStoreAdapter`
 - **Suggestion chips** — AI-generated follow-up prompts
-- **Rate limiting** — both client and server-side, sliding window
+- **Rate limiting** — sliding window on both the client (`AiChatConfig.rateLimit`, UX protection) and the server (`options.rateLimit`, cost protection)
+- **Configurable UI strings** — override any label via `AiChatConfig.strings` (English defaults otherwise)
 - **Strict client/server split** — server entry never imports React or browser APIs
 - **Vercel AI SDK** — works with OpenAI, Anthropic, Google, Mistral, and any AI SDK provider
 - **TypeScript-first**, supports React 18 & 19
@@ -101,27 +102,34 @@ export const { POST } = createChatRouteHandler({
 })
 ```
 
-For RAG with vector search:
+> **Request timeout** is a Next.js route-segment export, not a handler option.
+> Set it in your own route module:
+>
+> ```ts
+> // app/api/chat/route.ts
+> export const maxDuration = 30 // seconds — read by the platform, not by this handler
+> export const { POST } = createChatRouteHandler({ /* … */ })
+> ```
+
+For RAG, pass a `strategy: 'rag'` context — the handler chunks, embeds, and indexes your documents into an in-memory vector store on the first request, then retrieves per query:
 
 ```ts
 // app/api/chat/route.ts
-import {
-  createChatRouteHandler,
-  createInMemoryVectorStore,
-  createAiSdkEmbedding,
-  createRAGMiddleware,
-} from '@tour-kit/ai/server'
+import { createChatRouteHandler, createAiSdkEmbedding } from '@tour-kit/ai/server'
 import { openai } from '@ai-sdk/openai'
 
 const embedding = createAiSdkEmbedding({ model: openai.embedding('text-embedding-3-small') })
-const vectorStore = createInMemoryVectorStore({ embedding })
-await vectorStore.addDocuments(myDocuments)
 
 export const { POST } = createChatRouteHandler({
+  // RAG requires a model instance, not a string ID.
   model: openai('gpt-4o-mini'),
   context: {
     strategy: 'rag',
-    middleware: createRAGMiddleware({ vectorStore, topK: 4 }),
+    documents: myDocuments,
+    embedding,
+    topK: 4,
+    minScore: 0.5, // optional retrieval threshold (default: -1 = match-all)
+    // vectorStore: myAdapter, // optional — supply a persistent VectorStoreAdapter
   },
 })
 ```
