@@ -50,6 +50,22 @@ describe('chunkDocument', () => {
     })
   })
 
+  it('carries the trailing chunkOverlap chars into the start of the next chunk', () => {
+    // Two paragraphs that cannot share one 120-char chunk. The boundary is
+    // deterministic, so the last `overlap` chars of chunk 0 must reappear at the
+    // head of chunk 1 — this is the actual overlap behavior, not just chunk count.
+    const a = 'A'.repeat(100)
+    const b = 'B'.repeat(100)
+    const doc: Document = { id: 'doc-1', content: `${a}\n\n${b}` }
+
+    const chunks = chunkDocument(doc, 120, 20)
+
+    expect(chunks.length).toBe(2)
+    const overlap = chunks[0].content.slice(-20)
+    expect(overlap).toBe('A'.repeat(20))
+    expect(chunks[1].content.startsWith(overlap)).toBe(true)
+  })
+
   it('splits at paragraph boundaries (\\n\\n)', () => {
     const content =
       'Paragraph one about cats.\n\nParagraph two about dogs.\n\nParagraph three about birds.'
@@ -314,6 +330,38 @@ describe('createRetriever', () => {
 
       expect(mockVectorStore.searchCalls[0].topK).toBe(5)
       expect(mockVectorStore.searchCalls[0].minScore).toBe(0.7)
+    })
+
+    it('uses the configured RetrieverOptions.minScore as the search() default', async () => {
+      const docs: Document[] = [{ id: 'doc-1', content: 'Content.' }]
+
+      const retriever = createRetriever({
+        documents: docs,
+        embedding: mockEmbedding,
+        vectorStore: mockVectorStore,
+        minScore: 0.33,
+      })
+
+      await retriever.index()
+      await retriever.search('query') // no explicit per-call minScore
+
+      expect(mockVectorStore.searchCalls[0].minScore).toBe(0.33)
+    })
+
+    it('lets an explicit per-call minScore override the option default', async () => {
+      const docs: Document[] = [{ id: 'doc-1', content: 'Content.' }]
+
+      const retriever = createRetriever({
+        documents: docs,
+        embedding: mockEmbedding,
+        vectorStore: mockVectorStore,
+        minScore: 0.33,
+      })
+
+      await retriever.index()
+      await retriever.search('query', 5, 0.9)
+
+      expect(mockVectorStore.searchCalls[0].minScore).toBe(0.9)
     })
   })
 })

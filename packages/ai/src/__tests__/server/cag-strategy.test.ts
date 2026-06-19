@@ -7,6 +7,8 @@ const mockStreamResult = createMockStreamResult()
 vi.mock('ai', () => ({
   streamText: vi.fn(() => mockStreamResult),
   convertToModelMessages: vi.fn((msgs: unknown[]) => msgs),
+  // Only the RAG branch wraps the model; CAG must never touch it.
+  wrapLanguageModel: vi.fn((opts: { model: unknown }) => opts.model),
 }))
 
 describe('CAG Strategy — US-4', () => {
@@ -45,6 +47,33 @@ describe('CAG Strategy — US-4', () => {
     expect(systemPrompt).toContain('Tour Kit supports React 18 and 19.')
     expect(systemPrompt).toContain('Install with pnpm add @tour-kit/core.')
     expect(systemPrompt).toContain('WCAG 2.1 AA compliance is built-in.')
+  })
+
+  it('runs no retrieval pipeline under context-stuffing (no model wrapping)', async () => {
+    const { createChatRouteHandler } = await import('../../server/route-handler')
+    const { wrapLanguageModel } = await import('ai')
+
+    const handler = createChatRouteHandler({
+      model: 'openai/gpt-4o-mini',
+      context: {
+        strategy: 'context-stuffing',
+        documents: [createTestDocument({ content: 'Stuffed, not retrieved.' })],
+      },
+    })
+
+    await handler.POST(
+      new Request('http://localhost/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          messages: [{ id: '1', role: 'user', parts: [{ type: 'text', text: 'Hi' }] }],
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+    )
+
+    // CAG stuffs documents straight into the system prompt — no retriever,
+    // no embedding, no RAG middleware wrapping the model.
+    expect(wrapLanguageModel).not.toHaveBeenCalled()
   })
 
   it('handles empty documents array gracefully', async () => {

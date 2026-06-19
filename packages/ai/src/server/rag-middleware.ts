@@ -11,7 +11,7 @@ function defaultFormatContext(docs: RetrievedDocument[]): string {
 }
 
 export function createRAGMiddleware(options: RAGMiddlewareOptions): LanguageModelMiddleware {
-  const { retriever, topK = 5, rerank, formatContext = defaultFormatContext } = options
+  const { retriever, topK = 5, minScore = -1, formatContext = defaultFormatContext } = options
 
   return {
     transformParams: async ({ params }) => {
@@ -27,22 +27,11 @@ export function createRAGMiddleware(options: RAGMiddlewareOptions): LanguageMode
 
       if (!text.trim()) return params
 
-      // Search with more results if reranking
-      const searchTopK = rerank ? topK * 2 : topK
-      const results = await retriever.search(text, searchTopK, -1)
+      const results = await retriever.search(text, topK, minScore)
 
       if (results.length === 0) return params
 
-      // Optional reranking — simple score-based re-ordering
-      let finalResults: RetrievedDocument[]
-      if (rerank) {
-        const topN = rerank.topN ?? topK
-        // Re-score by combining original score with position weight
-        finalResults = results.sort((a, b) => b.score - a.score).slice(0, topN)
-      } else {
-        finalResults = results.slice(0, topK)
-      }
-
+      const finalResults = results.slice(0, topK)
       const contextString = formatContext(finalResults)
 
       // Prepend a system message with the retrieved context

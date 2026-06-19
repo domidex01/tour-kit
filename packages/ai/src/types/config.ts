@@ -103,8 +103,6 @@ export interface ChatRouteHandlerOptions {
   beforeSend?(message: UIMessage): Promise<UIMessage | null> | UIMessage | null
   /** Hook: runs before response is returned (output filtering) */
   beforeResponse?(response: string): Promise<string> | string
-  /** Max request duration in seconds (default: 30) */
-  maxDuration?: number
   /** Server-side event callback */
   onEvent?(event: AiChatEvent): void | Promise<void>
 }
@@ -125,7 +123,6 @@ export interface RAGConfig {
   minScore?: number
   chunkSize?: number
   chunkOverlap?: number
-  rerank?: { model: string; topN?: number }
 }
 
 export interface InstructionsConfig {
@@ -181,6 +178,8 @@ export interface RetrieverOptions {
   vectorStore?: VectorStoreAdapter
   chunkSize?: number
   chunkOverlap?: number
+  /** Default retrieval threshold for `search()` when no per-call value is passed (default: 0.7). */
+  minScore?: number
 }
 
 export interface Retriever {
@@ -191,6 +190,7 @@ export interface Retriever {
 export interface RAGMiddlewareOptions {
   retriever: Retriever
   topK?: number
-  rerank?: { model: string; topN?: number }
+  /** Minimum similarity score for a chunk to be retrieved (default: -1, match-all). */
+  minScore?: number
   formatContext?(docs: RetrievedDocument[]): string
 }

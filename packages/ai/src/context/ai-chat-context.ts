@@ -1,6 +1,6 @@
 import type { UIMessage } from 'ai'
 import { createContext, useContext } from 'react'
-import type { AiChatConfig, ChatStatus } from '../types'
+import type { AiChatConfig, AiChatStrings, ChatStatus } from '../types'
 
 export interface AiChatContextValue {
   messages: UIMessage[]
@@ -18,6 +18,9 @@ export interface AiChatContextValue {
   toggle(): void
 
   config: AiChatConfig
+
+  /** Fully-resolved UI strings (config.strings merged over DEFAULT_STRINGS). */
+  strings: AiChatStrings
 
   /** Tour context value from @tour-kit/core (null when not available) */
   tourContextValue: unknown

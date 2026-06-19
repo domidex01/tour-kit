@@ -20,6 +20,7 @@ import { createRetriever } from '../../server/retriever'
 import type { Document, VectorStoreAdapter } from '../../types'
 import { createTestDocuments } from '../helpers/factories'
 import { createMockEmbedding } from '../helpers/mock-embedding'
+import { createMockVectorStore } from '../helpers/mock-vector-store'
 
 describe('RAG Pipeline Integration', () => {
   it('indexes documents and retrieves relevant results for a query', async () => {
@@ -159,23 +160,28 @@ describe('RAG Pipeline Integration', () => {
     expect(results.length).toBeGreaterThan(0)
   })
 
-  it('handles rerank option in middleware', async () => {
+  it('threads a configured minScore end-to-end to the vector store (US-1)', async () => {
+    // Replaces the old "handles rerank option" test. rerank was an AI-SDK-6-only
+    // knob that never ran on the ai@5 pin — removed in 0.13.0. minScore is the
+    // real retrieval lever, so prove the WHOLE chain delivers it:
+    //   RAGConfig.minScore → createRetriever option → search() default → store.search()
     const embedding = createMockEmbedding()
+    const store = createMockVectorStore()
     const docs: Document[] = [
       { id: 'doc-1', content: 'First document about tours.', metadata: { title: 'Tours' } },
       { id: 'doc-2', content: 'Second document about hooks.', metadata: { title: 'Hooks' } },
-      { id: 'doc-3', content: 'Third document about state.', metadata: { title: 'State' } },
     ]
 
-    const retriever = createRetriever({ documents: docs, embedding })
-
-    const middleware = createRAGMiddleware({
-      retriever,
-      topK: 2,
-      rerank: { model: 'rerank-model', topN: 1 },
+    // Retriever carries the option; middleware also passes it explicitly to search().
+    const retriever = createRetriever({
+      documents: docs,
+      embedding,
+      vectorStore: store,
+      minScore: 0.42,
     })
+    const middleware = createRAGMiddleware({ retriever, topK: 2, minScore: 0.42 })
 
-    const params = {
+    await middleware.transformParams?.({
       type: 'generate' as const,
       params: {
         prompt: [
@@ -186,12 +192,10 @@ describe('RAG Pipeline Integration', () => {
         ],
       },
       model: {} as never,
-    }
+    })
 
-    const result = await middleware.transformParams?.(params)
-
-    // Should have injected context
-    expect(result?.prompt[0].role).toBe('system')
+    expect(store.searchCalls).toHaveLength(1)
+    expect(store.searchCalls[0].minScore).toBe(0.42)
   })
 
   it('lazy indexes on first search — no upfront blocking', async () => {

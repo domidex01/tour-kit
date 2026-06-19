@@ -10,13 +10,11 @@ export interface AiChatInputProps {
   disabled?: boolean
 }
 
-export function AiChatInput({
-  className,
-  placeholder = 'Type a message...',
-  disabled,
-}: AiChatInputProps) {
-  const { sendMessage, stop, status } = useAiChat()
+export function AiChatInput({ className, placeholder, disabled }: AiChatInputProps) {
+  const { sendMessage, stop, status, strings } = useAiChat()
   const [value, setValue] = useState('')
+  // Explicit prop wins; otherwise fall back to the resolved config string.
+  const resolvedPlaceholder = placeholder ?? strings.placeholder
 
   const isStreaming = status === 'streaming'
   const isDisabled = disabled || status === 'submitted'
@@ -35,7 +33,7 @@ export function AiChatInput({
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         disabled={isDisabled}
         className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
         aria-label="Chat message"
@@ -45,7 +43,7 @@ export function AiChatInput({
           type="button"
           onClick={stop}
           className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Stop generating"
+          aria-label={strings.stopGenerating}
         >
           <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
             <rect x="2" y="2" width="10" height="10" rx="1" />

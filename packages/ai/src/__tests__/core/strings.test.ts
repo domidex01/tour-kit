@@ -29,12 +29,12 @@ describe('DEFAULT_STRINGS', () => {
     }
   })
 
-  it('has English defaults', () => {
-    expect(DEFAULT_STRINGS.placeholder).toBe('Ask a question...')
+  it('has English defaults that mirror the shipped UI literals', () => {
+    expect(DEFAULT_STRINGS.placeholder).toBe('Type a message...')
     expect(DEFAULT_STRINGS.send).toBe('Send')
     expect(DEFAULT_STRINGS.errorMessage).toBe('Something went wrong. Please try again.')
     expect(DEFAULT_STRINGS.emptyState).toBe('How can I help you?')
-    expect(DEFAULT_STRINGS.title).toBe('Chat')
+    expect(DEFAULT_STRINGS.title).toBe('AI Assistant')
   })
 })
 
@@ -62,7 +62,7 @@ describe('resolveStrings', () => {
     expect(strings.emptyState).toBe('How can I help you?')
     expect(strings.stopGenerating).toBe('Stop generating')
     expect(strings.retry).toBe('Retry')
-    expect(strings.title).toBe('Chat')
+    expect(strings.title).toBe('AI Assistant')
     expect(strings.closeLabel).toBe('Close chat')
     expect(strings.ratePositiveLabel).toBe('Helpful')
     expect(strings.rateNegativeLabel).toBe('Not helpful')

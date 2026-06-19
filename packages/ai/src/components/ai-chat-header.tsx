@@ -14,18 +14,20 @@ export interface AiChatHeaderProps {
 }
 
 export function AiChatHeader({
-  title = 'AI Assistant',
+  title,
   showClose = true,
   onClose,
   className,
   children,
 }: AiChatHeaderProps) {
-  const { close } = useAiChat()
+  const { close, strings } = useAiChat()
   const handleClose = onClose ?? close
+  // Explicit prop wins; otherwise fall back to the resolved config string.
+  const resolvedTitle = title ?? strings.title
 
   return (
     <div className={cn(aiChatHeaderVariants(), className)}>
-      <h3 className="text-sm font-semibold">{title}</h3>
+      <h3 className="text-sm font-semibold">{resolvedTitle}</h3>
       <div className="flex items-center gap-1">
         {children}
         {showClose && (
@@ -33,7 +35,7 @@ export function AiChatHeader({
             type="button"
             onClick={handleClose}
             className="rounded-sm p-0.5 opacity-70 transition-opacity hover:opacity-100"
-            aria-label="Close chat"
+            aria-label={strings.closeLabel}
           >
             <svg
               width="12"

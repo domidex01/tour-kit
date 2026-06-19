@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { SlidingWindowRateLimiter, createRateLimiter } from '../../core/rate-limiter'
 
+// This is the CLIENT-side limiter (UX/cost protection in the browser), wired
+// into AiChatProvider in Slice 4 — distinct from the server-side
+// createServerRateLimiter (cost protection at the route). Different
+// implementations; never share an instance.
 describe('SlidingWindowRateLimiter', () => {
   beforeEach(() => {
     vi.useFakeTimers()
