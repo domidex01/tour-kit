@@ -3,6 +3,7 @@ import type { QueueConfig } from '../types/queue'
 import { matchesAudience } from './audience'
 import { canShowByFrequency } from './frequency'
 import { PriorityQueue } from './priority-queue'
+import { resolveScheduleActive } from './resolve-schedule'
 
 /**
  * Announcement scheduler manages the queue and determines when announcements should show
@@ -23,7 +24,8 @@ export class AnnouncementScheduler {
   canShow(
     config: AnnouncementConfig,
     state: AnnouncementState,
-    userContext?: Record<string, unknown>
+    userContext?: Record<string, unknown>,
+    now: Date = new Date()
   ): boolean {
     if (state.isDismissed) {
       return false
@@ -52,8 +54,12 @@ export class AnnouncementScheduler {
       return false
     }
 
-    // Schedule check would be done externally with @tour-kit/scheduling
-    // The provider handles that integration
+    // Schedule gating via the optional @tour-kit/scheduling peer. The resolver
+    // degrades open (returns true) when the peer is absent, so wiring this never
+    // turns scheduling into a hard dependency.
+    if (config.schedule && !resolveScheduleActive(config.schedule, now)) {
+      return false
+    }
 
     return true
   }
