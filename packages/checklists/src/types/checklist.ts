@@ -98,8 +98,6 @@ export interface ChecklistTaskState {
   locked: boolean
   /** Whether task is visible (when condition met) */
   visible: boolean
-  /** Whether task is currently active/in-progress */
-  active: boolean
   /** Completion timestamp */
   completedAt?: number
 }
