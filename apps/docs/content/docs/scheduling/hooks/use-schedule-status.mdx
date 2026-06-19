@@ -68,8 +68,6 @@ interface UseScheduleStatusReturn extends ScheduleStatus {
   message?: string
   /** When the schedule will next become active */
   nextActiveAt?: Date
-  /** When the schedule will next become inactive */
-  nextInactiveAt?: Date
   /** Current blackout period if in one */
   currentBlackout?: {
     id: string
@@ -141,12 +139,13 @@ function NextActiveDisplay() {
 
 ```tsx
 function TourCountdown() {
-  const { isActive, nextActiveAt, nextInactiveAt } = useScheduleStatus(schedule, {
+  const { isActive, nextActiveAt } = useScheduleStatus(schedule, {
     refreshInterval: 1000, // Update every second
   })
 
-  const targetTime = isActive ? nextInactiveAt : nextActiveAt
-  if (!targetTime) return null
+  // Counts down to when the schedule next becomes active.
+  if (isActive || !nextActiveAt) return null
+  const targetTime = nextActiveAt
 
   const now = new Date()
   const msRemaining = targetTime.getTime() - now.getTime()
@@ -249,12 +248,6 @@ function TourScheduleDashboard({ tourId, schedule }: Props) {
       {status.nextActiveAt && (
         <div>
           <strong>Next Active:</strong> {status.nextActiveAt.toLocaleString()}
-        </div>
-      )}
-
-      {status.nextInactiveAt && (
-        <div>
-          <strong>Next Inactive:</strong> {status.nextInactiveAt.toLocaleString()}
         </div>
       )}
 
