@@ -1,6 +1,6 @@
 # @tour-kit/ai
 
-> React AI chat widget with RAG & tour context — drop-in conversational assistant powered by Vercel AI SDK with vector search.
+> React AI chat widget with RAG & tour context — a drop-in conversational assistant, built as a UI + orchestration layer over the Vercel AI SDK.
 
 [![npm version](https://img.shields.io/npm/v/@tour-kit/ai.svg)](https://www.npmjs.com/package/@tour-kit/ai)
 [![npm downloads](https://img.shields.io/npm/dm/@tour-kit/ai.svg)](https://www.npmjs.com/package/@tour-kit/ai)
