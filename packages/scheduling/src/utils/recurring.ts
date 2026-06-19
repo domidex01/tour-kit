@@ -26,6 +26,27 @@ export function matchesRecurringPattern(
     }
   }
 
+  // Cap by maxOccurrences, counted from startDate in the schedule timezone.
+  // Needs an anchor to count from — without startDate the cap can't apply.
+  if (pattern.maxOccurrences !== undefined && startDate !== undefined) {
+    if (countOccurrencesBefore(date, pattern, timezone, startDate) >= pattern.maxOccurrences) {
+      return false
+    }
+  }
+
+  return matchesPatternType(date, pattern, timezone, startDate)
+}
+
+/**
+ * Match a date against the pattern's per-type rule (day/week/month/year).
+ * `endDate` and `maxOccurrences` are handled by `matchesRecurringPattern`.
+ */
+function matchesPatternType(
+  date: Date,
+  pattern: RecurringPattern,
+  timezone: string,
+  startDate?: DateString | Date
+): boolean {
   const { day, month } = getDateInTimezone(date, timezone)
   const dayOfWeek = getDayOfWeek(date, timezone)
 
@@ -45,6 +66,45 @@ export function matchesRecurringPattern(
     default:
       return false
   }
+}
+
+const MS_PER_DAY = 86_400_000
+
+/**
+ * Count pattern occurrences strictly before `date`, starting from `startDate`,
+ * evaluated in the schedule timezone.
+ *
+ * The window [start, date) is derived from timezone-local calendar-date strings,
+ * and each candidate day is matched in UTC — where its UTC components equal that
+ * calendar date — so the existing per-type interval math stays correct across
+ * timezones. The walk short-circuits once the count reaches `maxOccurrences`
+ * (we only need to know whether the cap is hit), so it allocates nothing and
+ * never enumerates a full date array — the 483 B byte budget depends on this.
+ */
+function countOccurrencesBefore(
+  date: Date,
+  pattern: RecurringPattern,
+  timezone: string,
+  startDate: DateString | Date
+): number {
+  // `formatDateString` yields a valid YYYY-MM-DD, so the narrowing to
+  // `DateString` is sound (it just isn't inferable from the `string` return).
+  const startStr = (
+    typeof startDate === 'string' ? startDate : formatDateString(startDate, timezone)
+  ) as DateString
+  const startMidnight = parseDateString(startStr)
+  const targetMidnight = parseDateString(formatDateString(date, timezone))
+  const dayDiff = Math.round((targetMidnight.getTime() - startMidnight.getTime()) / MS_PER_DAY)
+  const max = pattern.maxOccurrences ?? Number.POSITIVE_INFINITY
+
+  let count = 0
+  for (let offset = 0; offset < dayDiff && count < max; offset++) {
+    const candidate = new Date(startMidnight.getTime() + offset * MS_PER_DAY)
+    if (matchesPatternType(candidate, pattern, 'UTC', startStr)) {
+      count++
+    }
+  }
+  return count
 }
 
 /**
