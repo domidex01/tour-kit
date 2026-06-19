@@ -7,7 +7,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { type SlidingWindowRateLimiter, createRateLimiter } from '../core/rate-limiter'
 import { resolveStrings } from '../core/strings'
 import { usePersistence } from '../hooks/use-persistence'
-import type { AiChatConfig, AiChatStrings, ChatStatus } from '../types'
+import type { AiChatConfig, AiChatEvent, AiChatStrings, ChatStatus } from '../types'
 import { AiChatContext, type AiChatContextValue } from './ai-chat-context'
 
 interface AiChatProviderProps {
@@ -40,30 +40,23 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
     [config.endpoint]
   )
 
-  const chatHelpers = useChat({
-    transport,
-    onFinish: ({ message }) => {
+  // Single funnel for every analytics event: stamp the timestamp and swallow any
+  // onEvent error so a misbehaving callback can never break the chat.
+  const emit = useCallback(
+    (type: AiChatEvent['type'], data: Record<string, unknown>) => {
       try {
-        config.onEvent?.({
-          type: 'response_received',
-          data: { messageId: message.id },
-          timestamp: new Date(),
-        })
+        config.onEvent?.({ type, data, timestamp: new Date() })
       } catch {
         // onEvent errors must never break chat
       }
     },
-    onError: (error) => {
-      try {
-        config.onEvent?.({
-          type: 'error',
-          data: { message: error.message },
-          timestamp: new Date(),
-        })
-      } catch {
-        // swallow
-      }
-    },
+    [config]
+  )
+
+  const chatHelpers = useChat({
+    transport,
+    onFinish: ({ message }) => emit('response_received', { messageId: message.id }),
+    onError: (error) => emit('error', { message: error.message }),
   })
 
   // Keep a ref to chatHelpers so callbacks always use the latest version.
@@ -124,29 +117,13 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
       // Client rate limit: when at cap, surface a rate-limited error and do not
       // forward to the transport (protects the user's API spend / UX).
       if (limiterRef.current && !limiterRef.current.recordMessage()) {
-        try {
-          config.onEvent?.({
-            type: 'error',
-            data: { reason: 'rate_limited', message: strings.errorMessage },
-            timestamp: new Date(),
-          })
-        } catch {
-          // onEvent errors must never break chat
-        }
+        emit('error', { reason: 'rate_limited', message: strings.errorMessage })
         return
       }
-      try {
-        config.onEvent?.({
-          type: 'message_sent',
-          data: { text: input.text },
-          timestamp: new Date(),
-        })
-      } catch {
-        // onEvent errors must never break chat
-      }
+      emit('message_sent', { text: input.text })
       helpersRef.current.sendMessage({ text: input.text })
     },
-    [config, strings]
+    [emit, strings]
   )
 
   const stop = useCallback(() => {
@@ -169,29 +146,13 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
 
   const open = useCallback(() => {
     setIsOpen(true)
-    try {
-      config.onEvent?.({
-        type: 'chat_opened',
-        data: {},
-        timestamp: new Date(),
-      })
-    } catch {
-      // swallow
-    }
-  }, [config])
+    emit('chat_opened', {})
+  }, [emit])
 
   const close = useCallback(() => {
     setIsOpen(false)
-    try {
-      config.onEvent?.({
-        type: 'chat_closed',
-        data: {},
-        timestamp: new Date(),
-      })
-    } catch {
-      // swallow
-    }
-  }, [config])
+    emit('chat_closed', {})
+  }, [emit])
 
   const toggle = useCallback(() => {
     setIsOpen((prev) => !prev)
