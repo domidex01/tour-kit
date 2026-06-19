@@ -58,9 +58,6 @@ export interface TourEvent {
   /** User identifier (if known) */
   userId?: string
 
-  /** Additional user properties */
-  userProperties?: Record<string, unknown>
-
   /** Duration in milliseconds */
   duration?: number
 
