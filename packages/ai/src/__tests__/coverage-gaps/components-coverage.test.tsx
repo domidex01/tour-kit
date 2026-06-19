@@ -184,4 +184,48 @@ describe('Component coverage gaps', () => {
       expect(container.querySelector('[role="log"]')).toBeNull()
     })
   })
+
+  // Guards that the components READ the resolved strings instead of hardcoding
+  // them — a regression that re-inlines a literal passes every provider test
+  // (those check resolution) but fails here (these check consumption).
+  describe('wired strings consumption (guard)', () => {
+    it('AiChatInput labels the send button from strings.send', async () => {
+      mockUseAiChat.mockReturnValue(
+        buildChatState({ status: 'ready', strings: { ...DEFAULT_STRINGS, send: 'Envoyer' } })
+      )
+      const { AiChatInput } = await import('../../components/ai-chat-input')
+      render(<AiChatInput />)
+
+      // Icon-only submit button — its accessible name must come from config.
+      expect(screen.getByRole('button', { name: 'Envoyer' })).toBeDefined()
+    })
+
+    it('AiChatPanel falls back to strings.emptyState when no prop is given', async () => {
+      mockUseAiChat.mockReturnValue(
+        buildChatState({
+          isOpen: true,
+          messages: [],
+          strings: { ...DEFAULT_STRINGS, emptyState: 'Comment puis-je aider ?' },
+        })
+      )
+      const { AiChatPanel } = await import('../../components/ai-chat-panel')
+      render(<AiChatPanel showSuggestions={false} />)
+
+      expect(await screen.findByText('Comment puis-je aider ?')).toBeDefined()
+    })
+
+    it('AiChatPanel: an explicit emptyState prop still wins over strings', async () => {
+      mockUseAiChat.mockReturnValue(
+        buildChatState({
+          isOpen: true,
+          messages: [],
+          strings: { ...DEFAULT_STRINGS, emptyState: 'from-strings' },
+        })
+      )
+      const { AiChatPanel } = await import('../../components/ai-chat-panel')
+      render(<AiChatPanel showSuggestions={false} emptyState="from-prop" />)
+
+      expect(await screen.findByText('from-prop')).toBeDefined()
+    })
+  })
 })

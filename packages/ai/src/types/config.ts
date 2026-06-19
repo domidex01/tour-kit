@@ -51,26 +51,20 @@ export interface ClientRateLimitConfig {
 }
 
 export interface AiChatStrings {
-  /** Input placeholder text */
+  /** Input placeholder text (`AiChatInput`) */
   placeholder: string
-  /** Send button label */
+  /** Send button accessible name (`AiChatInput`, icon-only button) */
   send: string
-  /** Error message shown to user */
+  /** Error message shown to the user (also used for rate-limit errors) */
   errorMessage: string
-  /** Empty state message */
+  /** Empty-state message (`AiChatPanel` default before any messages) */
   emptyState: string
-  /** Stop generating button label */
+  /** Stop generating button accessible name (`AiChatInput`) */
   stopGenerating: string
-  /** Retry button label */
-  retry: string
-  /** Chat panel title */
+  /** Chat panel title (`AiChatHeader`) */
   title: string
-  /** Close button aria-label */
+  /** Close button accessible name (`AiChatHeader`) */
   closeLabel: string
-  /** Rating positive aria-label */
-  ratePositiveLabel: string
-  /** Rating negative aria-label */
-  rateNegativeLabel: string
 }
 
 // ── Chat State ──

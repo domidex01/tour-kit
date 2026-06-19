@@ -1,6 +1,6 @@
 # @tour-kit/ai
 
-> React AI chat widget with RAG & tour context — drop-in conversational assistant powered by Vercel AI SDK with vector search.
+> React AI chat widget with RAG & tour context — a drop-in conversational assistant, built as a UI + orchestration layer over the Vercel AI SDK.
 
 [![npm version](https://img.shields.io/npm/v/@tour-kit/ai.svg)](https://www.npmjs.com/package/@tour-kit/ai)
 [![npm downloads](https://img.shields.io/npm/dm/@tour-kit/ai.svg)](https://www.npmjs.com/package/@tour-kit/ai)
@@ -20,7 +20,7 @@ Drop-in **AI chat assistant** for React onboarding flows — a **UI + orchestrat
 - **RAG** (Retrieval-Augmented Generation) — retrieval over an in-memory vector store (linear cosine search) via `createInMemoryVectorStore`; swap in a persistent backend with a custom `VectorStoreAdapter`
 - **Suggestion chips** — AI-generated follow-up prompts
 - **Rate limiting** — sliding window on both the client (`AiChatConfig.rateLimit`, UX protection) and the server (`options.rateLimit`, cost protection)
-- **Configurable UI strings** — override any label via `AiChatConfig.strings` (English defaults otherwise)
+- **Configurable UI strings** — override the built-in chat labels (placeholder, title, send, close, stop, empty state, error) via `AiChatConfig.strings` (English defaults otherwise)
 - **Strict client/server split** — server entry never imports React or browser APIs
 - **Vercel AI SDK** — works with OpenAI, Anthropic, Google, Mistral, and any AI SDK provider
 - **TypeScript-first**, supports React 18 & 19

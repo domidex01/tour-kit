@@ -54,7 +54,7 @@ export function AiChatInput({ className, placeholder, disabled }: AiChatInputPro
           type="submit"
           disabled={isDisabled || !value.trim()}
           className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
-          aria-label="Send message"
+          aria-label={strings.send}
         >
           <svg
             width="12"
