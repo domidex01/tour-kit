@@ -75,7 +75,7 @@ describe('AiChatProvider — client trio WIRE (US-4)', () => {
     expect(result.current.strings.title).toBe('Helpdesk')
     expect(result.current.strings.placeholder).toBe('Ask away')
     // …unset keys fall back to DEFAULT_STRINGS (today's shipped text)
-    expect(result.current.strings.send).toBe('Send')
+    expect(result.current.strings.send).toBe('Send message')
     expect(result.current.strings.closeLabel).toBe('Close chat')
   })
 

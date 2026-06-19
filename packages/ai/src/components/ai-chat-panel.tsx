@@ -27,13 +27,15 @@ export function AiChatPanel({
   size = 'default',
   position = 'bottom-right',
   title,
-  emptyState = 'Ask me anything!',
+  emptyState,
   showSuggestions = true,
   className,
   children,
   renderMessage,
 }: AiChatPanelProps) {
-  const { isOpen, close } = useAiChat()
+  const { isOpen, close, strings } = useAiChat()
+  // Explicit prop wins; otherwise fall back to the resolved config string.
+  const resolvedEmptyState = emptyState ?? strings.emptyState
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -69,7 +71,7 @@ export function AiChatPanel({
           <>
             <AiChatHeader title={title} />
             <div className="py-3">
-              <AiChatMessageList emptyState={emptyState} renderMessage={renderMessage} />
+              <AiChatMessageList emptyState={resolvedEmptyState} renderMessage={renderMessage} />
             </div>
             {showSuggestions && <AiChatSuggestions className="px-0 pb-2" />}
             <div className="border-t pt-3">

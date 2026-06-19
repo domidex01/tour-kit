@@ -1,19 +1,17 @@
 import type { AiChatStrings } from '../types'
 
-// Single source of truth for the chat UI's English copy. Values mirror what the
-// components shipped as inline literals before Slice 4 wired this in, so an
-// unset `config.strings` renders exactly today's text.
+// Single source of truth for the chat UI's English copy. Every key maps to a
+// label the shipped components actually render; values mirror the inline
+// literals from before Slice 4 wired this in, so an unset `config.strings`
+// renders exactly today's text.
 export const DEFAULT_STRINGS: AiChatStrings = {
   placeholder: 'Type a message...',
-  send: 'Send',
+  send: 'Send message',
   errorMessage: 'Something went wrong. Please try again.',
-  emptyState: 'How can I help you?',
+  emptyState: 'Ask me anything!',
   stopGenerating: 'Stop generating',
-  retry: 'Retry',
   title: 'AI Assistant',
   closeLabel: 'Close chat',
-  ratePositiveLabel: 'Helpful',
-  rateNegativeLabel: 'Not helpful',
 }
 
 /**

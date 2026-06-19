@@ -19450,16 +19450,13 @@ interface AnalyticsBridgeConfig {
 
 ```tsx
 interface AiChatStrings {
-  placeholder: string
-  send: string
-  errorMessage: string
-  emptyState: string
-  stopGenerating: string
-  retry: string
-  title: string
-  closeLabel: string
-  ratePositiveLabel: string
-  rateNegativeLabel: string
+  placeholder: string // AiChatInput placeholder
+  send: string // AiChatInput send button accessible name
+  errorMessage: string // shown on error / rate-limit
+  emptyState: string // AiChatPanel empty state
+  stopGenerating: string // AiChatInput stop button accessible name
+  title: string // AiChatHeader title
+  closeLabel: string // AiChatHeader close button accessible name
 }
 ```
 

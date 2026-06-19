@@ -11,11 +11,8 @@ describe('DEFAULT_STRINGS', () => {
       'errorMessage',
       'emptyState',
       'stopGenerating',
-      'retry',
       'title',
       'closeLabel',
-      'ratePositiveLabel',
-      'rateNegativeLabel',
     ]
     for (const key of requiredKeys) {
       expect(DEFAULT_STRINGS).toHaveProperty(key)
@@ -31,9 +28,9 @@ describe('DEFAULT_STRINGS', () => {
 
   it('has English defaults that mirror the shipped UI literals', () => {
     expect(DEFAULT_STRINGS.placeholder).toBe('Type a message...')
-    expect(DEFAULT_STRINGS.send).toBe('Send')
+    expect(DEFAULT_STRINGS.send).toBe('Send message')
     expect(DEFAULT_STRINGS.errorMessage).toBe('Something went wrong. Please try again.')
-    expect(DEFAULT_STRINGS.emptyState).toBe('How can I help you?')
+    expect(DEFAULT_STRINGS.emptyState).toBe('Ask me anything!')
     expect(DEFAULT_STRINGS.title).toBe('AI Assistant')
   })
 })
@@ -57,15 +54,12 @@ describe('resolveStrings', () => {
   it('overrides a single field while keeping all other defaults', () => {
     const strings = resolveStrings({ placeholder: 'Custom placeholder' })
     expect(strings.placeholder).toBe('Custom placeholder')
-    expect(strings.send).toBe('Send')
+    expect(strings.send).toBe('Send message')
     expect(strings.errorMessage).toBe('Something went wrong. Please try again.')
-    expect(strings.emptyState).toBe('How can I help you?')
+    expect(strings.emptyState).toBe('Ask me anything!')
     expect(strings.stopGenerating).toBe('Stop generating')
-    expect(strings.retry).toBe('Retry')
     expect(strings.title).toBe('AI Assistant')
     expect(strings.closeLabel).toBe('Close chat')
-    expect(strings.ratePositiveLabel).toBe('Helpful')
-    expect(strings.rateNegativeLabel).toBe('Not helpful')
   })
 
   it('overrides multiple fields simultaneously', () => {
@@ -78,7 +72,7 @@ describe('resolveStrings', () => {
     expect(strings.send).toBe('Submit')
     expect(strings.title).toBe('Help')
     expect(strings.errorMessage).toBe(DEFAULT_STRINGS.errorMessage)
-    expect(strings.retry).toBe(DEFAULT_STRINGS.retry)
+    expect(strings.emptyState).toBe(DEFAULT_STRINGS.emptyState)
   })
 
   it('overrides all fields at once', () => {
@@ -88,11 +82,8 @@ describe('resolveStrings', () => {
       errorMessage: 'e',
       emptyState: 'em',
       stopGenerating: 'sg',
-      retry: 'r',
       title: 't',
       closeLabel: 'cl',
-      ratePositiveLabel: 'rp',
-      rateNegativeLabel: 'rn',
     }
     const strings = resolveStrings(custom)
     expect(strings).toEqual(custom)
