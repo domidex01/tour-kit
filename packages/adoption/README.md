@@ -230,7 +230,6 @@ import type {
   Feature,
   FeatureTrigger,
   AdoptionCriteria,
-  FeatureResources,
   FeatureUsage,
   AdoptionStatus,
   FeatureWithUsage,

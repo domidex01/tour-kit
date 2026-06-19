@@ -24,7 +24,6 @@ interface Feature {
   name: string
   trigger: FeatureTrigger
   adoptionCriteria?: AdoptionCriteria
-  resources?: FeatureResources
   priority?: number
   category?: string
   description?: string
@@ -52,10 +51,6 @@ interface Feature {
     adoptionCriteria: {
       type: 'AdoptionCriteria',
       description: 'When feature is considered adopted',
-    },
-    resources: {
-      type: 'FeatureResources',
-      description: 'Related tour/hint resources',
     },
     priority: {
       type: 'number',
@@ -127,28 +122,6 @@ interface AdoptionCriteria {
     custom: {
       type: '(usage: FeatureUsage) => boolean',
       description: 'Custom adoption logic',
-    },
-  }}
-/>
-
-### FeatureResources
-
-```ts
-interface FeatureResources {
-  tourId?: string
-  hintIds?: string[]
-}
-```
-
-<TypeTable
-  type={{
-    tourId: {
-      type: 'string',
-      description: 'Tour ID from @tour-kit/react',
-    },
-    hintIds: {
-      type: 'string[]',
-      description: 'Hint IDs from @tour-kit/hints',
     },
   }}
 />
