@@ -1,5 +1,12 @@
 # dashboard-next
 
+## 0.1.22
+
+### Patch Changes
+
+- Updated dependencies [3f929b1]
+  - @tour-kit/ai@0.13.1
+
 ## 0.1.21
 
 ### Patch Changes
