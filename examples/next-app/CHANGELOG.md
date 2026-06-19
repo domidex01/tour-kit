@@ -1,5 +1,12 @@
 # next-tour-kit-demo
 
+## 0.0.25
+
+### Patch Changes
+
+- Updated dependencies [809d07a]
+  - @tour-kit/surveys@4.1.0
+
 ## 0.0.24
 
 ### Patch Changes

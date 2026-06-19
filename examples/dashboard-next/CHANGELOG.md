@@ -1,5 +1,12 @@
 # dashboard-next
 
+## 0.1.20
+
+### Patch Changes
+
+- Updated dependencies [809d07a]
+  - @tour-kit/surveys@4.1.0
+
 ## 0.1.19
 
 ### Patch Changes
