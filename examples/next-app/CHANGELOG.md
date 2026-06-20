@@ -1,5 +1,12 @@
 # next-tour-kit-demo
 
+## 0.0.27
+
+### Patch Changes
+
+- Updated dependencies [3f929b1]
+  - @tour-kit/ai@0.13.1
+
 ## 0.0.26
 
 ### Patch Changes
