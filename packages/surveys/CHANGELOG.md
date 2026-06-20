@@ -1,5 +1,16 @@
 # @tour-kit/surveys
 
+## 5.0.0
+
+### Minor Changes
+
+- 2305f35: Type and wire `SurveyConfig.schedule`. It was declared `unknown` and never consulted; it is now typed `Schedule` (from the optional `@tour-kit/scheduling` peer) and evaluated in `SurveyScheduler.canShow` — an inactive schedule now suppresses the survey. The peer is resolved lazily and degrades open (content still shows) when scheduling isn't installed, so it remains a true optional peer. Additive change.
+
+### Patch Changes
+
+- Updated dependencies [e4f5b5b]
+  - @tour-kit/scheduling@1.0.0
+
 ## 4.1.0
 
 ### Minor Changes

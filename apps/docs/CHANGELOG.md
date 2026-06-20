@@ -1,5 +1,18 @@
 # @tour-kit/docs
 
+## 0.0.23
+
+### Patch Changes
+
+- Updated dependencies [08a9ea7]
+- Updated dependencies [6b9c6d2]
+- Updated dependencies [2305f35]
+  - @tour-kit/announcements@6.0.0
+  - @tour-kit/checklists@1.0.0
+  - @tour-kit/surveys@5.0.0
+  - @tour-kit/hints@2.0.0
+  - @tour-kit/react@2.0.0
+
 ## 0.0.22
 
 ### Patch Changes

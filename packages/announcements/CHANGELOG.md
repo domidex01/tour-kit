@@ -1,5 +1,18 @@
 # @tour-kit/announcements
 
+## 6.0.0
+
+### Minor Changes
+
+- 08a9ea7: Type and wire `AnnouncementConfig.schedule`. It was declared `unknown` with a comment claiming "the provider handles that integration" — it didn't. It is now typed `Schedule` (from the optional `@tour-kit/scheduling` peer) and evaluated in `AnnouncementScheduler.canShow`, which gains an optional `now` parameter. The peer is resolved lazily and degrades open when scheduling isn't installed, so it remains a true optional peer. Additive change.
+
+### Patch Changes
+
+- Updated dependencies [6653ba1]
+- Updated dependencies [e4f5b5b]
+  - @tour-kit/analytics@0.12.0
+  - @tour-kit/scheduling@1.0.0
+
 ## 5.0.0
 
 ### Patch Changes
