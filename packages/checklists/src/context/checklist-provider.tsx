@@ -59,7 +59,6 @@ function createInitialTaskState(
     completed,
     locked,
     visible,
-    active: false,
     completedAt: completed ? completedAtMap?.[task.id] : undefined,
   }
 }

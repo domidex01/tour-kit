@@ -185,8 +185,6 @@ interface ScheduleStatus {
   message?: string
   /** When the schedule will next become active */
   nextActiveAt?: Date
-  /** When the schedule will next become inactive */
-  nextInactiveAt?: Date
   /** Current blackout period if in one */
   currentBlackout?: {
     id: string
@@ -210,7 +208,7 @@ interface ScheduleStatus {
 const status = getScheduleStatus(schedule)
 
 if (status.isActive) {
-  console.log('Active until:', status.nextInactiveAt)
+  console.log('Active now')
 } else {
   console.log(status.message)
   console.log('Available again:', status.nextActiveAt)

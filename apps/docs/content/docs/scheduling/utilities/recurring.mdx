@@ -190,7 +190,7 @@ const schedule = {
 }
 ```
 
-Note: `maxOccurrences` is not currently implemented in the evaluation but is part of the type for future use.
+`maxOccurrences` caps the recurrence: once the pattern has fired that many times from the schedule's `startAt`, `matchesRecurringPattern` stops matching. Occurrences are counted in the schedule's timezone, so the cap honors the same timezone as the rest of the schedule. It requires a start date to count from (the schedule's `startAt`).
 
 ### End Date
 

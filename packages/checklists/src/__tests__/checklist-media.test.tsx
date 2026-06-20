@@ -16,7 +16,6 @@ function makeTaskState(overrides: Partial<ChecklistTaskState['config']>): Checkl
     completed: false,
     locked: false,
     visible: true,
-    active: false,
   }
 }
 

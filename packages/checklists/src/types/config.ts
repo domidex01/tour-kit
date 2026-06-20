@@ -52,6 +52,4 @@ export interface ChecklistProviderConfig {
   onChecklistDismiss?: (checklistId: string) => void
   /** Callback when task action is triggered */
   onTaskAction?: (checklistId: string, taskId: string, action: unknown) => void
-  /** Integration with TourKit */
-  tourKitIntegration?: boolean
 }

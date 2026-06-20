@@ -205,7 +205,6 @@ export function createMockTaskState(
     completed: false,
     locked: false,
     visible: true,
-    active: false,
     ...stateOverrides,
   }
 }
@@ -432,7 +431,6 @@ export function expectTaskState(
     completed?: boolean
     locked?: boolean
     visible?: boolean
-    active?: boolean
   }
 ) {
   expect(task).toBeDefined()
@@ -446,9 +444,6 @@ export function expectTaskState(
   }
   if (expected.visible !== undefined) {
     expect(task.visible).toBe(expected.visible)
-  }
-  if (expected.active !== undefined) {
-    expect(task.active).toBe(expected.active)
   }
 }
 

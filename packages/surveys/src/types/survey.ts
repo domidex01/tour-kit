@@ -128,7 +128,7 @@ export interface SurveyConfig {
   frequency?: FrequencyRule
 
   /** Schedule configuration (requires @tour-kit/scheduling) */
-  schedule?: unknown
+  schedule?: import('@tour-kit/scheduling').Schedule
 
   /** Audience targeting conditions */
   audience?: AudienceCondition[]

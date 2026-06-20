@@ -76,4 +76,66 @@ describe('matchesRecurringPattern', () => {
       expect(matchesRecurringPattern(instant, pattern, 'UTC')).toBe(false)
     })
   })
+
+  // Slice 5 (I1) — `maxOccurrences` was typed but never enforced; the Studio
+  // emits it from the ScheduleEditor. Count-and-cap, in the schedule timezone.
+  describe('maxOccurrences cap', () => {
+    const START = '2025-06-01' // recurrence start (DateString); counted from here
+
+    it('daily { maxOccurrences: 3 }: matches occurrences 0,1,2 and NOT 3+', () => {
+      const pattern: RecurringPattern = { type: 'daily', maxOccurrences: 3 }
+      expect(matchesRecurringPattern(new Date('2025-06-01T12:00:00Z'), pattern, 'UTC', START)).toBe(
+        true
+      ) // #0
+      expect(matchesRecurringPattern(new Date('2025-06-02T12:00:00Z'), pattern, 'UTC', START)).toBe(
+        true
+      ) // #1
+      expect(matchesRecurringPattern(new Date('2025-06-03T12:00:00Z'), pattern, 'UTC', START)).toBe(
+        true
+      ) // #2
+      expect(matchesRecurringPattern(new Date('2025-06-04T12:00:00Z'), pattern, 'UTC', START)).toBe(
+        false
+      ) // #3
+      expect(matchesRecurringPattern(new Date('2025-06-10T12:00:00Z'), pattern, 'UTC', START)).toBe(
+        false
+      ) // far
+    })
+
+    it('weekly { daysOfWeek:[1], maxOccurrences: 2 }: matches the first two Mondays only', () => {
+      // 2025-06-02, 06-09 are the first two Mondays from START; 06-16 is the third.
+      const pattern: RecurringPattern = { type: 'weekly', daysOfWeek: [1], maxOccurrences: 2 }
+      expect(matchesRecurringPattern(new Date('2025-06-02T12:00:00Z'), pattern, 'UTC', START)).toBe(
+        true
+      ) // Mon #0
+      expect(matchesRecurringPattern(new Date('2025-06-09T12:00:00Z'), pattern, 'UTC', START)).toBe(
+        true
+      ) // Mon #1
+      expect(matchesRecurringPattern(new Date('2025-06-16T12:00:00Z'), pattern, 'UTC', START)).toBe(
+        false
+      ) // Mon #2
+    })
+
+    it('maxOccurrences undefined ⇒ behavior unchanged (regression guard)', () => {
+      const pattern: RecurringPattern = { type: 'daily' }
+      expect(matchesRecurringPattern(new Date('2025-12-31T12:00:00Z'), pattern, 'UTC', START)).toBe(
+        true
+      )
+    })
+
+    it('no-op when startDate is omitted (cannot count occurrences)', () => {
+      const pattern: RecurringPattern = { type: 'daily', maxOccurrences: 1 }
+      // Without a start there is no anchor to count from → cap cannot apply.
+      expect(matchesRecurringPattern(new Date('2025-12-31T12:00:00Z'), pattern, 'UTC')).toBe(true)
+    })
+
+    it('counts occurrences in the schedule timezone, not UTC', () => {
+      // 2025-06-04T03:00:00Z is 2025-06-03 23:00 in America/New_York (UTC-4 in June),
+      // so under START=2025-06-01 it is occurrence #2 in NY (within cap 3 → true)
+      // but occurrence #3 in UTC (count 3 >= 3 → capped → false). The verdict flips.
+      const pattern: RecurringPattern = { type: 'daily', maxOccurrences: 3 }
+      const instant = new Date('2025-06-04T03:00:00Z')
+      expect(matchesRecurringPattern(instant, pattern, 'America/New_York', START)).toBe(true)
+      expect(matchesRecurringPattern(instant, pattern, 'UTC', START)).toBe(false)
+    })
+  })
 })

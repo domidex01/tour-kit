@@ -36,7 +36,7 @@ interface SurveyConfig {
   description?: string | ReactNode;
   questions: QuestionConfig[];
   frequency?: FrequencyRule;
-  schedule?: unknown;           // requires @tour-kit/scheduling
+  schedule?: Schedule;          // from @tour-kit/scheduling (optional peer)
   audience?: AudienceCondition[];
   globalCooldownDays?: number;
   samplingRate?: number;        // 0–1

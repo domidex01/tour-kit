@@ -27,9 +27,6 @@ export interface ScheduleStatus {
   /** When the schedule will next become active (if predictable) */
   nextActiveAt?: Date
 
-  /** When the schedule will next become inactive (if currently active) */
-  nextInactiveAt?: Date
-
   /** Current blackout period if in one */
   currentBlackout?: {
     id: string

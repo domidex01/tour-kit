@@ -37,9 +37,6 @@ export interface AnalyticsConfig {
   /** Enable debug logging to console */
   debug?: boolean
 
-  /** Queue events when offline */
-  offlineQueue?: boolean
-
   /** Batch events before sending */
   batchSize?: number
 

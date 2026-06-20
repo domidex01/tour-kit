@@ -32,16 +32,6 @@ export interface AdoptionCriteria {
 }
 
 /**
- * Related TourKit resources for this feature
- */
-export interface FeatureResources {
-  /** Tour ID to trigger for feature discovery */
-  tourId?: string
-  /** Hint IDs to show as nudges */
-  hintIds?: string[]
-}
-
-/**
  * Feature definition
  */
 export interface Feature {
@@ -56,9 +46,6 @@ export interface Feature {
 
   /** When is feature considered adopted */
   adoptionCriteria?: AdoptionCriteria
-
-  /** Related tours/hints */
-  resources?: FeatureResources
 
   /**
    * Feature priority for nudging (higher = more important)

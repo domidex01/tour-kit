@@ -3,6 +3,7 @@ import type { SurveyConfig, SurveyState } from '../types/survey'
 import { matchesAudience } from './audience'
 import { canShowByFrequency } from './frequency'
 import { SurveyPriorityQueue } from './priority-queue'
+import { resolveScheduleActive } from './resolve-schedule'
 
 export class SurveyScheduler {
   private queue: SurveyPriorityQueue
@@ -23,6 +24,7 @@ export class SurveyScheduler {
     if (state.isCompleted || state.isDismissed) return false
     if (!canShowByFrequency(state, config.frequency, now)) return false
     if (!matchesAudience(config.audience, userContext)) return false
+    if (config.schedule && !resolveScheduleActive(config.schedule, now)) return false
     return true
   }
 

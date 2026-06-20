@@ -183,7 +183,7 @@ export interface AnnouncementConfig {
   frequency?: FrequencyRule
 
   /** Schedule configuration (requires @tour-kit/scheduling) */
-  schedule?: unknown // Will be Schedule type from @tour-kit/scheduling
+  schedule?: import('@tour-kit/scheduling').Schedule
 
   /**
    * Audience targeting. Accepts either an inline `AudienceCondition[]` (legacy)

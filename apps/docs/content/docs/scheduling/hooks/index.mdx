@@ -93,7 +93,7 @@ function FeatureAnnouncement() {
 import { useScheduleStatus } from '@tour-kit/scheduling'
 
 function TourScheduleStatus() {
-  const { isActive, message, nextActiveAt, nextInactiveAt } = useScheduleStatus(schedule, {
+  const { isActive, message, nextActiveAt } = useScheduleStatus(schedule, {
     debug: true,
   })
 
@@ -102,7 +102,6 @@ function TourScheduleStatus() {
       <p>Status: {isActive ? 'Active' : 'Inactive'}</p>
       {message && <p>{message}</p>}
       {nextActiveAt && <p>Next active: {nextActiveAt.toLocaleString()}</p>}
-      {nextInactiveAt && <p>Next inactive: {nextInactiveAt.toLocaleString()}</p>}
     </div>
   )
 }
