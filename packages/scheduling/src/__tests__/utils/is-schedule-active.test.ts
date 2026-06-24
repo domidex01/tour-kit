@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Schedule } from '../../types'
 import { BUSINESS_HOURS_PRESETS } from '../../types/business-hours'
-import { isScheduleActive } from '../../utils/is-schedule-active'
+import { checkSchedule, isScheduleActive } from '../../utils/is-schedule-active'
 
 describe('isScheduleActive', () => {
   const fixedDate = new Date('2025-06-15T14:30:00Z') // Sunday, June 15, 2025, 2:30 PM UTC
@@ -186,6 +186,38 @@ describe('isScheduleActive', () => {
 
     it('no businessHours field → behavior unchanged (active)', () => {
       expect(isScheduleActive({}, { now: MON_1430Z }).isActive).toBe(true)
+    })
+  })
+
+  describe('recurring pattern integration', () => {
+    it('returns recurring_mismatch when the pattern excludes the day', () => {
+      // fixedDate is Sunday (0); pattern only allows Monday (1).
+      const schedule: Schedule = {
+        recurring: { type: 'weekly', daysOfWeek: [1] },
+      }
+      const result = isScheduleActive(schedule, { now: fixedDate, userTimezone: 'UTC' })
+      expect(result.isActive).toBe(false)
+      expect(result.reason).toBe('recurring_mismatch')
+    })
+
+    it('returns active when the recurring pattern matches', () => {
+      // fixedDate is Sunday (0); allow Sunday.
+      const schedule: Schedule = {
+        recurring: { type: 'weekly', daysOfWeek: [0] },
+      }
+      const result = isScheduleActive(schedule, { now: fixedDate, userTimezone: 'UTC' })
+      expect(result.isActive).toBe(true)
+    })
+  })
+
+  describe('checkSchedule (boolean wrapper)', () => {
+    it('returns the isActive boolean directly', () => {
+      expect(checkSchedule({}, { now: fixedDate, userTimezone: 'UTC' })).toBe(true)
+      expect(checkSchedule({ enabled: false }, { now: fixedDate })).toBe(false)
+    })
+
+    it('works without an options argument', () => {
+      expect(checkSchedule({ enabled: false })).toBe(false)
     })
   })
 

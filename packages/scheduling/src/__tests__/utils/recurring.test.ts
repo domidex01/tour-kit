@@ -52,6 +52,63 @@ describe('matchesRecurringPattern', () => {
     })
   })
 
+  describe('interval > 1 (weekly / monthly / yearly)', () => {
+    it('weekly interval 2 matches only on even week boundaries from start', () => {
+      // start Sun 2025-06-01; +14 days = 2025-06-15 (week 2 → match), +7 = 06-08 (week 1 → no).
+      const pattern: RecurringPattern = { type: 'weekly', interval: 2 }
+      expect(
+        matchesRecurringPattern(new Date('2025-06-15T12:00:00Z'), pattern, 'UTC', '2025-06-01')
+      ).toBe(true)
+      expect(
+        matchesRecurringPattern(new Date('2025-06-08T12:00:00Z'), pattern, 'UTC', '2025-06-01')
+      ).toBe(false)
+    })
+
+    it('weekly interval honors daysOfWeek mismatch before interval', () => {
+      // 2025-06-16 is Monday(1); pattern allows only Sunday(0) → mismatch regardless of interval.
+      const pattern: RecurringPattern = { type: 'weekly', interval: 2, daysOfWeek: [0] }
+      expect(
+        matchesRecurringPattern(new Date('2025-06-16T12:00:00Z'), pattern, 'UTC', '2025-06-01')
+      ).toBe(false)
+    })
+
+    it('monthly interval 2 matches every other month from start', () => {
+      const pattern: RecurringPattern = { type: 'monthly', interval: 2 }
+      // start June 2025; August (+2 months) matches, July (+1) does not.
+      expect(
+        matchesRecurringPattern(new Date('2025-08-10T12:00:00Z'), pattern, 'UTC', '2025-06-01')
+      ).toBe(true)
+      expect(
+        matchesRecurringPattern(new Date('2025-07-10T12:00:00Z'), pattern, 'UTC', '2025-06-01')
+      ).toBe(false)
+    })
+
+    it('monthly dayOfMonth mismatch fails before interval check', () => {
+      const pattern: RecurringPattern = { type: 'monthly', interval: 2, dayOfMonth: 15 }
+      // Day 10 != configured 15 → mismatch even on a matching month.
+      expect(
+        matchesRecurringPattern(new Date('2025-08-10T12:00:00Z'), pattern, 'UTC', '2025-06-01')
+      ).toBe(false)
+    })
+
+    it('yearly interval 2 matches every other year from start', () => {
+      const pattern: RecurringPattern = { type: 'yearly', interval: 2 }
+      // start 2025; 2027 (+2 years) matches, 2026 (+1) does not.
+      expect(
+        matchesRecurringPattern(new Date('2027-06-01T12:00:00Z'), pattern, 'UTC', '2025-06-01')
+      ).toBe(true)
+      expect(
+        matchesRecurringPattern(new Date('2026-06-01T12:00:00Z'), pattern, 'UTC', '2025-06-01')
+      ).toBe(false)
+    })
+
+    it('yearly month mismatch fails before day/interval', () => {
+      const pattern: RecurringPattern = { type: 'yearly', month: 6, dayOfMonth: 15 }
+      // July (month 7) != configured June → mismatch.
+      expect(matchesRecurringPattern(new Date('2025-07-15T12:00:00Z'), pattern, 'UTC')).toBe(false)
+    })
+  })
+
   describe('endDate (inclusive, timezone-aware)', () => {
     it('matches throughout the whole end-date day, not just at midnight UTC', () => {
       // Regression: a raw `date > parseDateString(endDate)` rejected any time
