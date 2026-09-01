@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/hints",
-  "version": "1.0.7",
+  "version": "2.0.0",
   "description": "React feature hints, hotspots & beacons — pulse-animated indicators with dismissal tracking, works with or without Tailwind.",
   "author": "Tour Kit Team",
   "license": "MIT",

@@ -1,5 +1,16 @@
 # @tour-kit/checklists
 
+## 1.0.0
+
+### Minor Changes
+
+- 6b9c6d2: Remove two typed-but-dead fields: `ChecklistTaskState.active` (always `false` — the provider hardcoded it and no updater ever set it true) and `ChecklistProviderConfig.tourKitIntegration` (never read by the provider). The `{ type: 'tour' }` task action and its handler are unaffected. Pre-1.0, so this breaking type-surface change ships as a minor.
+
+### Patch Changes
+
+- Updated dependencies [6653ba1]
+  - @tour-kit/analytics@0.12.0
+
 ## 0.13.10
 
 ### Patch Changes
