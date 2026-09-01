@@ -106,11 +106,14 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
 ### Quality Gates
 
 - TypeScript strict mode enabled
-- Test coverage: thresholds are **per-package** (`packages/*/vitest.config.ts`), not a blanket
-  80%. Most packages enforce ≥80% statements/functions/lines (core branches 65); the following
-  are temporarily lowered and are scheduled to be restored toward 80% in **Slice 7** (issue #13),
-  given as statements/branches/functions/lines: `announcements` 70/60/70/70, `surveys` 72/64/67/74,
-  `scheduling` 51/39/65/51, `media` 50/41/31/50. `ai` has no per-key threshold yet.
+- Test coverage: thresholds are enforced **per-package** in each `packages/*/vitest.config.ts`,
+  not as a blanket repo number. Eight packages hold the canonical floor — ≥80% statements,
+  functions, and lines with ≥75% branches: `core`, `react`, `hints`, `adoption`, `checklists`,
+  `analytics`, `license`, and `surveys`. Three feature packages enforce honest, earned floors
+  below canonical (statements/branches/functions/lines): `announcements` 75/70/80/75,
+  `scheduling` 75/65/80/75, and `media` 70/60/70/70. `ai` has no per-key threshold yet. Slice 7
+  raised these from the temporary phase-5 lows with real behavior tests, and measured coverage
+  exceeds every enforced floor (kept in sync by `coverage-claim-alignment.test.ts`).
 - Bundle sizes (gzipped): enforced by `tooling/bundle-check/check-dist-gzip.mjs`
   (the binding merge gate, raw `dist/index.js` gzip bytes — run `pnpm dist:size`).
   `size-limit` (root [`/.size-limit.json`](/.size-limit.json)) is a secondary

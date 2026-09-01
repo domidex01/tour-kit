@@ -23,11 +23,20 @@ const PACKAGES = [
 const REPO_ROOT = join(__dirname, '..', '..', '..', '..')
 const NON_AI = PACKAGES.filter((p) => p !== 'ai')
 
-// Packages with thresholds temporarily lowered in Phase 5; each must carry a
-// `Follow-up: https://github.com/.../issues/<N>` comment in its vitest.config.ts.
-// See plan/code-health-coverage-snapshot.md.
-const PHASE_5_LOWERED = new Set<string>(['core', 'announcements', 'surveys', 'media', 'scheduling'])
-const CANONICAL_THRESHOLDS = NON_AI.filter((p) => !PHASE_5_LOWERED.has(p))
+// Slice 7 (coverage truth) raised the phase-5 lows. Three feature packages
+// enforce honest, below-canonical floors backed by real behavior tests; everyone
+// else — including core and surveys, both restored — holds the canonical
+// 80/75/80/80. `coverage-claim-alignment.test.ts` is the forward guard that keeps
+// the CLAUDE.md claim in sync with these enforced numbers.
+const REDUCED_FLOORS: Record<
+  string,
+  { statements: number; branches: number; functions: number; lines: number }
+> = {
+  announcements: { statements: 75, branches: 70, functions: 80, lines: 75 },
+  scheduling: { statements: 75, branches: 65, functions: 80, lines: 75 },
+  media: { statements: 70, branches: 60, functions: 70, lines: 70 },
+}
+const CANONICAL_THRESHOLDS = NON_AI.filter((p) => !(p in REDUCED_FLOORS))
 
 function readConfig(pkg: string): string {
   return readFileSync(join(REPO_ROOT, 'packages', pkg, 'vitest.config.ts'), 'utf8')
@@ -52,12 +61,26 @@ describe('Phase 4 — vitest config alignment', () => {
       expect(cfg).toMatch(/lines:\s*80\b/)
     })
 
-    it.each([...PHASE_5_LOWERED])(
-      '%s has Phase 5 follow-up issue link in vitest.config.ts',
+    it.each(Object.entries(REDUCED_FLOORS))(
+      '%s enforces its Slice-7 earned floor',
+      (pkg, floor) => {
+        const cfg = readConfig(pkg)
+        expect(cfg).toMatch(new RegExp(`statements:\\s*${floor.statements}\\b`))
+        expect(cfg).toMatch(new RegExp(`branches:\\s*${floor.branches}\\b`))
+        expect(cfg).toMatch(new RegExp(`functions:\\s*${floor.functions}\\b`))
+        expect(cfg).toMatch(new RegExp(`lines:\\s*${floor.lines}\\b`))
+      }
+    )
+
+    it.each(NON_AI)(
+      '%s no longer carries a phase-5 "temporarily lowered" / follow-up comment',
       (pkg) => {
         const cfg = readConfig(pkg)
-        expect(cfg, `${pkg} missing follow-up issue comment`).toMatch(
-          /Follow-up:\s*https:\/\/github\.com\/[^\s]+\/issues\/\d+/
+        expect(cfg, `${pkg} still carries a phase-5 lowered comment`).not.toMatch(
+          /temporarily lowered/i
+        )
+        expect(cfg, `${pkg} still carries a stale issues/13 follow-up link`).not.toMatch(
+          /Follow-up:\s*https:\/\/github\.com\/[^\s]+\/issues\/13\b/
         )
       }
     )

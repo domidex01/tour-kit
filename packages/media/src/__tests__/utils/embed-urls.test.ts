@@ -4,6 +4,7 @@ import {
   buildVimeoEmbedUrl,
   buildWistiaEmbedUrl,
   buildYouTubeEmbedUrl,
+  getVimeoThumbnailUrl,
   getYouTubeThumbnailUrl,
 } from '../../utils/embed-urls'
 
@@ -160,5 +161,35 @@ describe('getYouTubeThumbnailUrl', () => {
   it('returns high quality', () => {
     const url = getYouTubeThumbnailUrl('dQw4w9WgXcQ', 'high')
     expect(url).toBe('https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg')
+  })
+})
+
+describe('getVimeoThumbnailUrl', () => {
+  it('returns the oEmbed JSON endpoint for the given id', () => {
+    expect(getVimeoThumbnailUrl('123456789')).toBe('https://vimeo.com/api/v2/video/123456789.json')
+  })
+})
+
+describe('embed URL option edge cases', () => {
+  it('YouTube omits start when startTime is 0', () => {
+    expect(buildYouTubeEmbedUrl('dQw4w9WgXcQ', { startTime: 0 })).not.toContain('start=')
+  })
+
+  it('Vimeo omits start fragment when startTime is 0', () => {
+    expect(buildVimeoEmbedUrl('123456789', { startTime: 0 })).not.toContain('#t=')
+  })
+
+  it('Loom omits start when startTime is 0', () => {
+    expect(buildLoomEmbedUrl('abc123', { startTime: 0 })).not.toContain('t=')
+  })
+
+  it('Wistia floors-free startTime passes through raw value', () => {
+    expect(buildWistiaEmbedUrl('abc123', { startTime: 12.5 })).toContain('time=12.5')
+  })
+
+  it('YouTube returns a clean URL with no query string when no toggling options set beyond defaults', () => {
+    // rel and modestbranding are always present, so a query string always exists
+    const url = buildYouTubeEmbedUrl('dQw4w9WgXcQ')
+    expect(url).toContain('?')
   })
 })

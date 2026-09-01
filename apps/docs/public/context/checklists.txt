@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/checklists Context File
-Version: 0.13.9 | Generated: 2026-06-11
+Version: 0.13.10 | Generated: 2026-06-20
 Paste this into your LLM to get accurate answers about @tour-kit/checklists.
 =========================================================================
 

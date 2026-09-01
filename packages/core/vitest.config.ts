@@ -12,9 +12,9 @@ export default defineConfig({
       exclude: ['node_modules/', 'src/__tests__/', 'dist/', '**/*.d.ts'],
       thresholds: {
         statements: 80,
-        // Temporarily lowered from 75 — actual 70.34% on chore/code-health-phase-5.
-        // Follow-up: https://github.com/domidex01/tour-kit/issues/13
-        branches: 65,
+        // Slice 7 coverage-truth: branches restored to canonical 75
+        // (dead position.ts engine removed in S0 shrank the uncovered denominator).
+        branches: 75,
         functions: 80,
         lines: 80,
       },

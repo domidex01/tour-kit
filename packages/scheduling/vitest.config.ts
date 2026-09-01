@@ -12,15 +12,14 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'src/__tests__/', 'dist/', '**/*.d.ts'],
-      // Thresholds temporarily lowered from 80/75/80/80 — actuals on
-      // chore/code-health-phase-5: stmts 56.60 / branches 44.58 / funcs 70.45 /
-      // lines 56.65. Case-(c): branches <50.
-      // Follow-up: https://github.com/domidex01/tour-kit/issues/13
+      // Slice 7 coverage-truth floor (raised from the phase-5 lows with
+      // business-hours / schedule-status / maxOccurrences behavior tests).
+      // Earned actuals well above these; see CLAUDE.md coverage claim.
       thresholds: {
-        statements: 51,
-        branches: 39,
-        functions: 65,
-        lines: 51,
+        statements: 75,
+        branches: 65,
+        functions: 80,
+        lines: 75,
       },
     },
   },

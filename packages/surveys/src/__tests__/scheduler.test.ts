@@ -115,3 +115,55 @@ describe('SurveyScheduler enqueue/getNext', () => {
     expect(s.canShowMore()).toBe(true)
   })
 })
+
+describe('SurveyScheduler queue introspection & lifecycle', () => {
+  it('peekNext, isQueued, getQueuedIds, queueSize and remove reflect queue contents', () => {
+    const s = new SurveyScheduler(DEFAULT_SURVEY_QUEUE_CONFIG)
+    expect(s.queueSize).toBe(0)
+    expect(s.peekNext()).toBeUndefined()
+
+    s.enqueue(makeConfig({ id: 'a', priority: 'normal' }))
+    s.enqueue(makeConfig({ id: 'b', priority: 'critical' }))
+
+    expect(s.queueSize).toBe(2)
+    expect(s.peekNext()).toBe('b') // critical sits at the head, not dequeued
+    expect(s.queueSize).toBe(2)
+    expect(s.isQueued('a')).toBe(true)
+    expect(s.isQueued('missing')).toBe(false)
+    expect(s.getQueuedIds()).toEqual(['b', 'a'])
+
+    expect(s.remove('a')).toBe(true)
+    expect(s.isQueued('a')).toBe(false)
+    expect(s.remove('a')).toBe(false)
+    expect(s.queueSize).toBe(1)
+  })
+
+  it('currentActiveCount, resetActive and clearQueue reset lifecycle state', () => {
+    const s = new SurveyScheduler(DEFAULT_SURVEY_QUEUE_CONFIG)
+    s.markActive()
+    s.markActive()
+    expect(s.currentActiveCount).toBe(2)
+    s.resetActive()
+    expect(s.currentActiveCount).toBe(0)
+
+    s.enqueue(makeConfig({ id: 'x' }))
+    expect(s.queueSize).toBe(1)
+    s.clearQueue()
+    expect(s.queueSize).toBe(0)
+  })
+
+  it('exposes config getters and updateConfig swaps them', () => {
+    const s = new SurveyScheduler(DEFAULT_SURVEY_QUEUE_CONFIG)
+    expect(s.delayBetween).toBe(DEFAULT_SURVEY_QUEUE_CONFIG.delayBetween)
+    expect(s.autoShow).toBe(DEFAULT_SURVEY_QUEUE_CONFIG.autoShow)
+    expect(s.stackBehavior).toBe(DEFAULT_SURVEY_QUEUE_CONFIG.stackBehavior)
+
+    s.updateConfig({
+      ...DEFAULT_SURVEY_QUEUE_CONFIG,
+      delayBetween: 9999,
+      autoShow: !DEFAULT_SURVEY_QUEUE_CONFIG.autoShow,
+    })
+    expect(s.delayBetween).toBe(9999)
+    expect(s.autoShow).toBe(!DEFAULT_SURVEY_QUEUE_CONFIG.autoShow)
+  })
+})

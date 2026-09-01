@@ -1,4 +1,4 @@
-# userTourKit v1.0.6 — Generated 2026-06-11T07:31:35Z
+# userTourKit v1.0.7 — Generated 2026-06-20T03:32:00Z
 
 # Feature Adoption Tracking
 
@@ -5699,7 +5699,6 @@ interface Feature {
   name: string
   trigger: FeatureTrigger
   adoptionCriteria?: AdoptionCriteria
-  resources?: FeatureResources
   priority?: number
   category?: string
   description?: string
@@ -5759,15 +5758,6 @@ interface AdoptionCriteria {
     },
   }}
 />
-
-### FeatureResources
-
-```ts
-interface FeatureResources {
-  tourId?: string
-  hintIds?: string[]
-}
-```
 
 ### FeatureUsage
 
@@ -10691,11 +10681,6 @@ export default function RootLayout({ children }) {
       default: 'false',
       description: 'Enable debug logging to console'
     },
-    offlineQueue: {
-      type: 'boolean',
-      default: 'false',
-      description: 'Queue events when offline and send when reconnected'
-    },
     batchSize: {
       type: 'number',
       default: 'undefined',
@@ -11025,9 +11010,6 @@ interface TourEvent {
   /** User identifier (if known) */
   userId?: string
 
-  /** Additional user properties */
-  userProperties?: Record<string, unknown>
-
   /** Duration in milliseconds */
   duration?: number
 
@@ -11145,9 +11127,6 @@ interface AnalyticsConfig {
 
   /** Enable debug logging to console */
   debug?: boolean
-
-  /** Queue events when offline */
-  offlineQueue?: boolean
 
   /** Batch events before sending */
   batchSize?: number
@@ -19173,7 +19152,6 @@ interface Feature {
   name: string;
   trigger: string | { event: string } | (() => void);
   adoptionCriteria?: AdoptionCriteria;
-  resources?: FeatureResources;
   priority?: number;
   category?: string;
   description?: string;
@@ -26141,7 +26119,6 @@ interface ChecklistTaskState {
   completed: boolean;           // Completion status
   locked: boolean;              // Whether dependencies are met
   visible: boolean;             // Whether when condition passed
-  active: boolean;              // Currently in progress (future)
   completedAt?: number;         // Timestamp of completion
 }
 ```
@@ -28373,7 +28350,6 @@ interface ChecklistTaskState {
   completed: boolean;
   locked: boolean;
   visible: boolean;
-  active: boolean;
   completedAt?: number;
 }
 ```
@@ -59991,6 +59967,7 @@ interface Schedule {
   timezone?: string
   blackouts?: BlackoutPeriod[]
   recurring?: RecurringPattern
+  businessHours?: BusinessHours
   metadata?: Record<string, unknown>
 }
 ```
@@ -60143,14 +60120,24 @@ const schedule = {
 
 ### Business Hours
 
+Attach a `businessHours` window and the schedule is active only inside that
+window, evaluated in the schedule's timezone. The `standard` preset opens
+Monday–Friday 9:00–17:00 and is closed on weekends.
+
 ```tsx
 import { BUSINESS_HOURS_PRESETS } from '@tour-kit/scheduling'
 
 const schedule = {
-  timeOfDay: BUSINESS_HOURS_PRESETS.standard.days[1].hours[0],
-  // { start: '09:00', end: '17:00' }
+  businessHours: BUSINESS_HOURS_PRESETS.standard, // Mon–Fri 9:00–17:00
+  timezone: 'America/New_York',
 }
+// Active at 10:30 in New York; inactive at the same instant in Tokyo (23:30),
+// outside the window → reason: 'outside_business_hours'.
 ```
+
+`businessHours` is independent of `timeOfDay` — set both and a schedule must
+satisfy both to be active. To pin a store's hours regardless of the schedule's
+timezone, set `businessHours.timezone`; it takes precedence.
 
 ### Limited-Time Campaign
 
@@ -60322,7 +60309,7 @@ function FeatureAnnouncement() {
 import { useScheduleStatus } from '@tour-kit/scheduling'
 
 function TourScheduleStatus() {
-  const { isActive, message, nextActiveAt, nextInactiveAt } = useScheduleStatus(schedule, {
+  const { isActive, message, nextActiveAt } = useScheduleStatus(schedule, {
     debug: true,
   })
 
@@ -60331,7 +60318,6 @@ function TourScheduleStatus() {
       <p>Status: {isActive ? 'Active' : 'Inactive'}</p>
       {message && <p>{message}</p>}
       {nextActiveAt && <p>Next active: {nextActiveAt.toLocaleString()}</p>}
-      {nextInactiveAt && <p>Next inactive: {nextInactiveAt.toLocaleString()}</p>}
     </div>
   )
 }
@@ -60657,8 +60643,6 @@ interface UseScheduleStatusReturn extends ScheduleStatus {
   message?: string
   /** When the schedule will next become active */
   nextActiveAt?: Date
-  /** When the schedule will next become inactive */
-  nextInactiveAt?: Date
   /** Current blackout period if in one */
   currentBlackout?: {
     id: string
@@ -60730,12 +60714,13 @@ function NextActiveDisplay() {
 
 ```tsx
 function TourCountdown() {
-  const { isActive, nextActiveAt, nextInactiveAt } = useScheduleStatus(schedule, {
+  const { isActive, nextActiveAt } = useScheduleStatus(schedule, {
     refreshInterval: 1000, // Update every second
   })
 
-  const targetTime = isActive ? nextInactiveAt : nextActiveAt
-  if (!targetTime) return null
+  // Counts down to when the schedule next becomes active.
+  if (isActive || !nextActiveAt) return null
+  const targetTime = nextActiveAt
 
   const now = new Date()
   const msRemaining = targetTime.getTime() - now.getTime()
@@ -60838,12 +60823,6 @@ function TourScheduleDashboard({ tourId, schedule }: Props) {
       {status.nextActiveAt && (
         <div>
           <strong>Next Active:</strong> {status.nextActiveAt.toLocaleString()}
-        </div>
-      )}
-
-      {status.nextInactiveAt && (
-        <div>
-          <strong>Next Inactive:</strong> {status.nextInactiveAt.toLocaleString()}
         </div>
       )}
 
@@ -61726,9 +61705,6 @@ interface ScheduleStatus {
 
   /** When the schedule will next become active */
   nextActiveAt?: Date
-
-  /** When the schedule will next become inactive */
-  nextInactiveAt?: Date
 
   /** Current blackout period if in one */
   currentBlackout?: {
@@ -63373,7 +63349,7 @@ const schedule = {
 }
 ```
 
-Note: `maxOccurrences` is not currently implemented in the evaluation but is part of the type for future use.
+`maxOccurrences` caps the recurrence: once the pattern has fired that many times from the schedule's `startAt`, `matchesRecurringPattern` stops matching. Occurrences are counted in the schedule's timezone, so the cap honors the same timezone as the rest of the schedule. It requires a start date to count from (the schedule's `startAt`).
 
 ### End Date
 
@@ -63706,8 +63682,6 @@ interface ScheduleStatus {
   message?: string
   /** When the schedule will next become active */
   nextActiveAt?: Date
-  /** When the schedule will next become inactive */
-  nextInactiveAt?: Date
   /** Current blackout period if in one */
   currentBlackout?: {
     id: string
@@ -63731,7 +63705,7 @@ interface ScheduleStatus {
 const status = getScheduleStatus(schedule)
 
 if (status.isActive) {
-  console.log('Active until:', status.nextInactiveAt)
+  console.log('Active now')
 } else {
   console.log(status.message)
   console.log('Available again:', status.nextActiveAt)
@@ -66688,8 +66662,9 @@ function NPSSurvey() {
       description: 'Record an answer. Persists immediately to storage.',
     },
     nextQuestion: {
-      type: '() => void',
-      description: 'Increment currentStep by 1.',
+      type: '() => string | null',
+      description:
+        'Advance to the next question. If the current question has a `validation` function that returns a non-null string, the survey does NOT advance and that string is returned; otherwise advances and returns null.',
     },
     prevQuestion: {
       type: '() => void',
@@ -66702,6 +66677,11 @@ function NPSSurvey() {
     reset: {
       type: '() => void',
       description: 'Reset the survey to its initial state, clearing all responses and flags.',
+    },
+    validationError: {
+      type: '(questionId: string) => string | undefined',
+      description:
+        'Read the transient validation error for a question, or undefined if it currently validates. Cleared on a passing nextQuestion.',
     },
   }}
 />
@@ -66972,8 +66952,9 @@ function SurveyDebugPanel() {
       description: 'Record an answer. Persists immediately.',
     },
     nextQuestion: {
-      type: '(surveyId: string) => void',
-      description: 'Advance the survey one step.',
+      type: '(surveyId: string) => string | null',
+      description:
+        'Advance the survey one step. Returns the validation error string if the current question blocks advancing, otherwise null.',
     },
     prevQuestion: {
       type: '(surveyId: string) => void',
@@ -66994,6 +66975,11 @@ function SurveyDebugPanel() {
     getState: {
       type: '(id: string) => SurveyState | undefined',
       description: 'Get state for a specific survey.',
+    },
+    getValidationError: {
+      type: '(surveyId: string, questionId: string) => string | undefined',
+      description:
+        'Read the transient validation error for a question, or undefined if it currently validates.',
     },
     getConfig: {
       type: '(id: string) => SurveyConfig | undefined',
@@ -67265,7 +67251,7 @@ interface SurveyConfig {
   description?: string | ReactNode;
   questions: QuestionConfig[];
   frequency?: FrequencyRule;
-  schedule?: unknown;           // requires @tour-kit/scheduling
+  schedule?: Schedule;          // from @tour-kit/scheduling (optional peer)
   audience?: AudienceCondition[];
   globalCooldownDays?: number;
   samplingRate?: number;        // 0–1
@@ -67305,6 +67291,8 @@ interface SurveyState {
   snoozeUntil: Date | null;
   currentStep: number;
   responses: Map<string, AnswerValue>;
+  /** Transient per-question validation errors — never persisted. */
+  validationErrors: Map<string, string>;
 }
 ```
 
@@ -67414,6 +67402,18 @@ interface RatingScale {
 }
 ```
 
+`step` controls the increment between rating options (default `1`). The scale renders
+every value from `min` to `max` inclusive, stepping by `step` — so `{ min: 0, max: 10, step: 5 }`
+renders exactly three options: `0`, `5`, `10`.
+
+```tsx
+<QuestionRating
+  id="effort"
+  label="How much effort did that take?"
+  ratingScale={{ min: 0, max: 10, step: 5 }} // → 0, 5, 10
+/>
+```
+
 ### SelectOption
 
 ```ts
@@ -67432,6 +67432,43 @@ interface SkipLogic {
   condition: (answer: AnswerValue) => boolean;
   skipTo: string;
 }
+```
+
+### Validation
+
+`QuestionConfig.validation` runs at the **advance** boundary (when you call
+`nextQuestion`), not on every keystroke. Return a string to block advancing and
+surface it as a field error; return `null` or `undefined` to allow the survey to
+move on. `nextQuestion` returns that same string (or `null` on success), and the
+error is also readable via `getValidationError(surveyId, questionId)` on the
+context — or `validationError(questionId)` from `useSurvey`. Errors are transient
+UI state and are never persisted, so a reload starts clean.
+
+The value passed to `validation` is the answer recorded so far, which is
+`undefined` until the question is answered — that's the case to guard for a
+required field. Handle a falsy value rather than assuming a populated answer.
+
+```tsx
+const question: QuestionConfig = {
+  id: 'email',
+  type: 'text',
+  text: 'Work email',
+  required: true,
+  validation: (value) =>
+    typeof value === 'string' && value.includes('@') ? null : 'Enter a valid email',
+};
+
+// In a question UI built on the headless hook:
+const { nextQuestion, validationError } = useSurvey('signup');
+const error = validationError('email'); // string while invalid, undefined once it passes
+
+<input
+  aria-invalid={error ? true : undefined}
+  aria-describedby={error ? 'email-error' : undefined}
+  onChange={(e) => answer('email', e.target.value)}
+/>;
+{error && <p id="email-error" role="alert">{error}</p>}
+<button onClick={() => nextQuestion()}>Next</button>; // stays put until `value` validates
 ```
 
 ---
@@ -67498,12 +67535,14 @@ interface SurveysContextValue {
   dismiss: (id: string, reason?: DismissalReason) => void;
   snooze: (id: string) => void;
   answer: (surveyId: string, questionId: string, value: AnswerValue) => void;
-  nextQuestion: (surveyId: string) => void;
+  /** Returns the validation error string when the current question blocks advance, else `null`. */
+  nextQuestion: (surveyId: string) => string | null;
   prevQuestion: (surveyId: string) => void;
   complete: (surveyId: string) => void;
   reset: (id: string) => void;
   resetAll: () => void;
   getState: (id: string) => SurveyState | undefined;
+  getValidationError: (surveyId: string, questionId: string) => string | undefined;
   getConfig: (id: string) => SurveyConfig | undefined;
   canShow: (id: string) => boolean;
 }

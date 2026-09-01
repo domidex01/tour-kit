@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/analytics Context File
-Version: 0.11.9 | Generated: 2026-06-11
+Version: 0.11.10 | Generated: 2026-06-20
 Paste this into your LLM to get accurate answers about @tour-kit/analytics.
 =========================================================================
 
@@ -109,9 +109,6 @@ TYPES
       /** User identifier (if known) */
       userId?: string
     
-      /** Additional user properties */
-      userProperties?: Record<string, unknown>
-    
       /** Duration in milliseconds */
       duration?: number
     
@@ -154,7 +151,50 @@ TYPES
       // Scheduling events
       | 'schedule_evaluated'
 
-    ... and 2 more types. See source for full definitions.
+    /**
+     * Tour analytics event payload
+     */
+    export interface TourEvent {
+      /** Event type */
+      eventName: TourEventName
+    
+      /** Unix timestamp */
+      timestamp: number
+    
+      /** Unique session identifier */
+      sessionId: string
+    
+      /** Tour identifier */
+      tourId: string
+    
+      /** Current step identifier */
+      stepId?: string
+    
+      /** Current step index (0-based) */
+      stepIndex?: number
+    
+      /** Total number of steps in tour */
+      totalSteps?: number
+    
+      /** User identifier (if known) */
+      userId?: string
+    
+      /** Duration in milliseconds */
+      duration?: number
+    
+      /** Number of interactions during step */
+      interactionCount?: number
+    
+      /** Custom metadata */
+      metadata?: Record<string, unknown>
+    }
+    
+    /**
+     * Event data without auto-generated fields
+     */
+    export type TourEventData = Omit<TourEvent, 'timestamp' | 'sessionId' | 'eventName'>
+
+    ... and 1 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -220,9 +260,6 @@ Example 2: TourEvent
     
       /** User identifier (if known) */
       userId?: string
-    
-      /** Additional user properties */
-      userProperties?: Record<string, unknown>
     
       /** Duration in milliseconds */
       duration?: number

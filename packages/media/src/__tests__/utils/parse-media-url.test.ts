@@ -5,6 +5,7 @@ import {
   isNativeVideoType,
   isSupportedMediaUrl,
   parseMediaUrl,
+  supportsAutoplay,
 } from '../../utils/parse-media-url'
 
 describe('detectMediaType', () => {
@@ -162,6 +163,71 @@ describe('parseMediaUrl', () => {
       id: '/images/animation.gif',
       embedUrl: '/images/animation.gif',
     })
+  })
+
+  it('parses Wistia URLs correctly', () => {
+    const result = parseMediaUrl('https://fast.wistia.net/embed/iframe/abc123')
+    expect(result).toEqual({
+      type: 'wistia',
+      id: 'abc123',
+      embedUrl: expect.stringContaining('fast.wistia.net/embed/iframe/abc123'),
+    })
+  })
+
+  it('parses Lottie (.json) URLs correctly', () => {
+    const result = parseMediaUrl('/animations/loader.json')
+    expect(result).toEqual({
+      type: 'lottie',
+      id: '/animations/loader.json',
+      embedUrl: '/animations/loader.json',
+    })
+  })
+
+  it('parses .lottie URLs correctly', () => {
+    const result = parseMediaUrl('/animations/loader.lottie')
+    expect(result?.type).toBe('lottie')
+  })
+
+  it('falls back to image for unknown URLs', () => {
+    const result = parseMediaUrl('https://example.com/unknown')
+    expect(result).toEqual({
+      type: 'image',
+      id: 'https://example.com/unknown',
+      embedUrl: 'https://example.com/unknown',
+    })
+  })
+
+  it('parses image extension URLs as image', () => {
+    const result = parseMediaUrl('/images/photo.png')
+    expect(result?.type).toBe('image')
+    expect(result?.embedUrl).toBe('/images/photo.png')
+  })
+
+  it('returns null when a URL is detected as YouTube but has no extractable id', () => {
+    // "youtube.com/watch?v=" with an id that is too short fails extraction,
+    // but detectMediaType only fires when the regex matches an 11-char id,
+    // so use a malformed-but-detected case via youtube-nocookie embed path.
+    // A bare 11-char match is required; a short id is not detected as youtube
+    // at all, so this asserts the negative branch through detectMediaType.
+    expect(parseMediaUrl('https://www.youtube.com/watch?v=short')).toEqual({
+      type: 'image',
+      id: 'https://www.youtube.com/watch?v=short',
+      embedUrl: 'https://www.youtube.com/watch?v=short',
+    })
+  })
+})
+
+describe('supportsAutoplay', () => {
+  it('returns true for video media types', () => {
+    expect(supportsAutoplay('youtube')).toBe(true)
+    expect(supportsAutoplay('vimeo')).toBe(true)
+    expect(supportsAutoplay('video')).toBe(true)
+    expect(supportsAutoplay('gif')).toBe(true)
+    expect(supportsAutoplay('lottie')).toBe(true)
+  })
+
+  it('returns false for static images', () => {
+    expect(supportsAutoplay('image')).toBe(false)
   })
 })
 

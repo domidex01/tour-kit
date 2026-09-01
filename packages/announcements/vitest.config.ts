@@ -17,15 +17,14 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'src/__tests__/', 'dist/', '**/*.d.ts', '**/index.ts'],
-      // Thresholds temporarily lowered from 80/75/80/80 — actuals on
-      // chore/code-health-phase-5: stmts 74.70 / branches 64.61 / funcs 75.82 /
-      // lines 74.81. Phase 5 deferred per failure protocol.
-      // Follow-up: https://github.com/domidex01/tour-kit/issues/13
+      // Slice 7 coverage-truth floor (raised from the phase-5 lows with wired
+      // schedule-$ref / frequency / spotlight-merge / hook / headless + variant
+      // render behavior tests). Earned actuals well above these.
       thresholds: {
-        statements: 70,
-        branches: 60,
-        functions: 70,
-        lines: 70,
+        statements: 75,
+        branches: 70,
+        functions: 80,
+        lines: 75,
       },
     },
   },
