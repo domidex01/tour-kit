@@ -1,20 +1,21 @@
 'use client'
 
 import type * as React from 'react'
+import type { TourNode } from '../../types/primitives'
 import { interpolate } from '../interpolate'
 import { type LocalizedText, isI18nKey } from '../localized-text'
 import { useSegmentationContext } from '../segmentation/segmentation-context'
 import { useT } from './use-t'
 
 /**
- * Resolve a `LocalizedText | ReactNode` value into a `ReactNode`. Drives the
+ * Resolve a `LocalizedText | TourNode` value into a `ReactNode`. Drives the
  * Phase 3a unified text pipeline (promoted to core in Phase 1 of the refactor
  * train — previously duplicated in `@tour-kit/react`, `@tour-kit/hints`, and
  * `@tour-kit/announcements`).
  *
  *   - `string` → `interpolate(value, vars)` (templated literal)
  *   - `{ key }` → `useT()(value.key, vars)` (i18n dictionary)
- *   - any other `ReactNode` → returned as-is
+ *   - any other `TourNode` → returned as-is
  *
  * `vars` defaults to `useSegmentationContext().userContext` so consumers
  * authoring `'Hi {{user.name}}'` get interpolation against the same context
@@ -28,7 +29,7 @@ import { useT } from './use-t'
  * ReactNode pass-through branch.
  */
 export function useResolvedText(
-  value: React.ReactNode | LocalizedText | undefined,
+  value: TourNode | LocalizedText | undefined,
   vars?: Record<string, unknown>
 ): React.ReactNode {
   const t = useT()

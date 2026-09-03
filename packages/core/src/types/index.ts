@@ -38,6 +38,9 @@ export {
   defaultScrollConfig,
 } from './config'
 
+// React-free structural primitives (v2 §1.1)
+export type { TourNode, TourElementLike, TourRef, TourDispatch } from './primitives'
+
 // Step types
 export type {
   TourStep,

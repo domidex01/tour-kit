@@ -2,7 +2,7 @@
 
 issue:  not created
 branch: refactor/v2-1-1-react-free-core-types
-status: tests-red
+status: green
 
 <!-- ============ PLANNER owns below. Everyone else: read only. ============ -->
 
@@ -247,7 +247,7 @@ plus one cast.
 
 ## TEST WRITER
 
-status: tests-red
+status: implementing
 
 ### files
 
@@ -430,3 +430,144 @@ file.
 failures on this machine), repo-wide `pnpm typecheck`, `pnpm --filter
 @tour-kit/core typecheck:types`, the `e2e/next` + `e2e/vite` Playwright specs,
 and `biome check packages/`. Both new files are already biome-clean.
+
+<!-- ============ CODER owns below. Planner + test-writer sections untouched. ============ -->
+
+## CODER
+
+status: green
+
+### what shipped
+
+Exactly the plan's file list, no additions to the source diff. `TourNode` over
+plain `unknown`, as recommended — the drift guard is what made that affordable,
+and it is now proven to bite (see *the guards actually bite*).
+
+- `packages/core/src/types/primitives.ts` — **new, 55 lines, zero imports.**
+  `TourElementLike`, `TourNode`, `TourRef<T>`, `TourDispatch<A>`.
+- `types/step.ts`, `types/hints.ts`, `types/target.ts`,
+  `lib/tour-engine/context.ts` — react import dropped, fields repointed.
+- `lib/segmentation/types.ts` — `SegmentationProviderProps` **moved** to
+  `segmentation-context.tsx` (its only consumer, already React-importing) and
+  `lib/segmentation/index.ts` repointed. No new type. Rung 1, as planned.
+- `types/index.ts` + `src/index.ts` — the four primitives exported (additive).
+- `lib/i18n/use-resolved-text.ts` — param widened to
+  `TourNode | LocalizedText | undefined`; return stays `React.ReactNode` and
+  the file keeps its React import, deliberately.
+- `packages/react/src/components/card/tour-card.tsx:266` — the one boundary
+  cast, commented, pointing at `parse.ts`.
+- `wiki-tech/packages/core.md` — §Types group added, one §Architectural
+  decisions bullet ("React types are structurally mirrored, not imported"),
+  `src/types` added to `sources:`, `updated:` bumped to 2026-09-03.
+
+### acceptance, closed
+
+Every bullet the test-writer mapped is now green, by the test they named.
+Bullets 3, 5 and the runtime half of 4 and 6 were already-green pins and were
+**not** weakened — they still assert what they asserted before.
+
+| # | Bullet | Closed by | Note |
+|---|---|---|---|
+| 1 | Five files import no `react` | `no-react-in-engine-types.test.ts`, 5/5 green | |
+| 2 | Authoring errors survive, valid authoring compiles | `tour-node-parity.test-d.ts` | mutation-tested, below |
+| 3 | JSX `content` renders identically in `<TourCard>` | existing `tour-card-content.test.tsx` | untouched, green |
+| 4 | React 18/19 `useRef` still a valid `target` | type half green; `types/target.test.ts` untouched | 18 shape still hand-written — see *still open* |
+| 5 | `HiddenTourStep` rejects `content`/`title` | existing `hidden-step.test-d.ts` | untouched, green |
+| 6 | `SegmentationProviderProps` still exported, still takes `children` | type half green; `segmentation.test.tsx` untouched | survives the file move |
+| 7 | Build fails if `ReactNode` outgrows `TourNode` | drift guard green | mutation-tested, below |
+| 8 | Five nets | below | 4 fully green, e2e partial — see *e2e* |
+
+`phase-0-harness.test.ts > typecheck:types exits 0` went green on its own the
+moment the type test compiled, exactly as the test-writer's heads-up predicted.
+It was not edited and the new file was not excluded.
+
+### the guards actually bite
+
+The test-writer's honest caveat was that four of the five red type errors were
+`TS2305` module-resolution — proof the names were missing, not proof the guards
+work. Closed by mutation-testing `primitives.ts` against the finished suite:
+
+- Comment out `| TourElementLike` → the drift guard fires (`TS2344` at line 29,
+  `ReactNode` no longer extends `TourNode`) plus `TS2322` at lines 44/46/53
+  where JSX authoring stops compiling.
+- Collapse the union to `unknown` → all three `@ts-expect-error` directives go
+  unused (`TS2578` at 56/59/64): `content: Symbol()`, `content: () => {}` and
+  `{ key: 'welcome' }` all start compiling.
+
+Both mutations restored, suite re-verified clean. The guards are live.
+
+### the finding: runtime output is unchanged, provably
+
+The planner's root-cause claim — *all five imports are `import type`, so nothing
+ships today* — predicts the built JS should not move at all. It doesn't, and
+that is worth more than any assertion in the suite, because it retires the
+entire "did this break something at runtime?" question for every consumer.
+
+Built `dist/index.js` before and after, token-diffed:
+
+- **core** — 26,703 tokens before, 26,703 after. All 50 differing hunks are a
+  single minifier identifier permutation (`M`↔`N` and their suffixed forms
+  `Mt`/`Nt`, `Me`/`Ne`, `Mr`/`Nr`). Zero hunks are anything else.
+- **react** — entry and all 11 chunks token-identical. Two chunk *filenames*
+  moved (`RWECTWZT`→`TDEYCHEY`, `GQLGUUVS`→`VEDES2UF`) and the only in-file
+  differences are those names referring to themselves. The hash moved because
+  the JSX comment changed the sourcemap input, not the code.
+- **hints** — `dist/index.js` byte-identical (same md5).
+
+### nets
+
+| Net | Result |
+|---|---|
+| `npx turbo run test --concurrency=3` | **37 successful, 37 total** (core 87 files / 1013 passed + 3 skipped; react 40 files / 485 passed) |
+| `pnpm typecheck` (repo-wide) | **29 successful, 29 total** |
+| `pnpm --filter @tour-kit/core typecheck:types` | **exit 0** |
+| `npx biome check packages/` | **1028 files, 0 errors**, 16 warnings — all pre-existing, none in this diff |
+| Playwright `e2e/next` + `e2e/vite` | **partial — see below** |
+
+The repo typecheck is the net that earned its place: it caught the single
+`tour-card.tsx:266` `TS2322`, and nothing else anywhere in `react`, `apps/docs`,
+`examples` or `dashboard-next`. The widening's blast radius really is one line.
+
+### e2e — partial, and why
+
+`vite-localhost` + `next-localhost`: **22 passed, 5 failed, 1 flaky.**
+
+The 5 failures are **pre-existing and unrelated**, verified rather than assumed:
+the working tree was stashed, the packages rebuilt from the clean tree, and the
+same two specs re-run — **identical 5 failures, same assertions, same counts.**
+
+- 3 × `next/localhost-bypass.spec.ts` — `[data-tourkit-watermark]` expected 0,
+  got 1, on valid-license / invalid-key / no-provider. Next-only; the four
+  equivalent `vite/localhost-bypass` cases pass, as does Next's own
+  `empty key … shows watermark`. A license-gating issue, no contact with types.
+- 2 × `next/hint-variants` `whats-new-pill` snapshots — 5,178 px (0.05) light,
+  2,116 px (0.02) dark. Playwright browsers were not installed on this machine
+  at all (the first run was 28/28 failures for that reason alone); the
+  committed baselines predate the Chromium 147 that got installed. `badge` and
+  `beacon-with-label` still match, so this is not a blanket rendering shift.
+- 1 flaky — `cross-page-resume-localhost` timed out on the 200 ms throttle poll,
+  passed on retry.
+
+`vite-production` + `next-production` (7 specs) were **not run**: they need
+`127.0.0.1 tourkit-test.dev` in `/etc/hosts`, which is absent on this machine
+and needs sudo. Left for the user rather than edited unasked. They exercise
+license watermarking against a non-localhost origin — no contact with this
+task's surface, but that is reasoning, not a green run.
+
+Also unrelated: `pnpm build` fails at `@tour-kit/docs#build` with exit 137 (OOM
+kill). All 20 package builds succeed. Known local-only WSL2 docs-build break.
+
+### still open
+
+- **React 18 is still a hand-written stand-in.** No `@types/react@18` in the
+  workspace, so the drift guard runs against 19.x only. Unchanged from the
+  test-writer's note; installing 18 and compiling the type tests against both
+  is its own task.
+- **`dist/index.d.ts` still opens with `import * as React$1 from 'react'`.** By
+  design — hooks and providers keep React. That guarantee is §1.2's, and the
+  five files this task freed are exactly the ones §1.2 needs.
+- The three "Seen but out of scope" bugs are untouched.
+- **Not part of this task, do not commit:** `apps/docs/public/context/*.txt`,
+  `apps/docs/public/llms*.txt`, `apps/docs/components/landing/sale-countdown.tsx`
+  and the untracked `apps/docs/components/landing/__tests__/` were already
+  dirty in the working tree when this task started.

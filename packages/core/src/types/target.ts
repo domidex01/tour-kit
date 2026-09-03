@@ -1,6 +1,6 @@
-import type * as React from 'react'
+import type { TourRef } from './primitives'
 
-export type TourTargetRef = React.RefObject<HTMLElement | null>
+export type TourTargetRef = TourRef<HTMLElement | null>
 export type TourTargetGetter = () => HTMLElement | null
 
 /**

@@ -41,6 +41,11 @@ export type {
   TourTarget,
   TourTargetRef,
   TourTargetGetter,
+  // React-free structural primitives
+  TourNode,
+  TourElementLike,
+  TourRef,
+  TourDispatch,
   Tour,
   TourOptions,
   TourState,

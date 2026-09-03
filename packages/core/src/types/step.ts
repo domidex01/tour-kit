@@ -1,8 +1,8 @@
-import type React from 'react'
 import type { LocalizedText } from '../lib/localized-text'
 import type { AudienceCondition } from './audience'
 import type { Branch } from './branch'
 import type { Placement } from './config'
+import type { TourNode } from './primitives'
 import type { TourCallbackContext } from './state'
 import type { TourTarget } from './target'
 
@@ -124,16 +124,16 @@ export interface VisibleTourStep<TId extends string = string> extends BaseTourSt
   /**
    * Step title. Accepts a plain string (interpolated via `interpolate`),
    * a `{ key: string }` dictionary lookup (resolved via `useT()`), or any
-   * `ReactNode` for arbitrary JSX. Strings without `{{var}}` tokens render
+   * `TourNode` for arbitrary JSX. Strings without `{{var}}` tokens render
    * unchanged — the widening is back-compat-safe.
    */
-  title?: React.ReactNode | LocalizedText
+  title?: TourNode | LocalizedText
   /**
    * Optional short description rendered above `content`. i18n-friendly:
    * accepts string (interpolated) or `{ key }` (translated).
    */
   description?: LocalizedText
-  content: React.ReactNode
+  content: TourNode
   /**
    * Optional media (video / GIF / Lottie / image) rendered above the step
    * description by `<TourCard>`. Auto-detects the embed provider via URL

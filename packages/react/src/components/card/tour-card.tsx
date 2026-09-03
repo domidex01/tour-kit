@@ -263,7 +263,13 @@ export const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
             </div>
           )}
 
-          <TourCardContent content={visibleStep.content} description={resolvedDescription} />
+          {/* `TourNode` is a React-free supertype of `ReactNode`, so nothing
+              assigns back without a cast. Same boundary-cast convention as
+              `@tour-kit/core`'s `lib/schemas/parse.ts`: cast once, here. */}
+          <TourCardContent
+            content={visibleStep.content as React.ReactNode}
+            description={resolvedDescription}
+          />
 
           <TourCardFooter
             currentStep={currentStepIndex + 1}
