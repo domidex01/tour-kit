@@ -93,3 +93,38 @@ describe('@tour-kit/core dist artifact (Phase 1 surface)', () => {
     }
   )
 })
+
+/**
+ * v2 §1.2 — the main entry is ADDITIVE-ONLY across the engine carve.
+ *
+ * The engine subpath re-exports a subset of what `@tour-kit/core` already
+ * ships. Nothing moves out. This matters more than usual here: the
+ * closed-source dashboard pins core EXACT and calls these names server-side,
+ * so "we only added a subpath" has to be literally true, and the changeset
+ * says minor on that basis.
+ *
+ * A floor rather than a snapshot on purpose — additions are expected and
+ * should not churn this test; a REMOVAL is the regression.
+ */
+describe('v2 §1.2 — main entry surface survives the engine carve', () => {
+  it.each(['matchesAudience', 'validateConditions', 'canShowByFrequency'])(
+    'still exports %s from @tour-kit/core (dashboard calls it server-side)',
+    (name) => {
+      expect(typeof (core as Record<string, unknown>)[name]).toBe('function')
+    }
+  )
+
+  it('still type-checks Tour, TourStep and TourState from the main entry', () => {
+    const step: import('../index').TourStep = { id: 's1', target: '#a', content: 'hi' }
+    const tour: import('../index').Tour = { id: 't1', steps: [step] }
+    const state: import('../index').TourState = core.initialTourState
+    expect(tour.steps[0]?.id).toBe('s1')
+    expect(state.isActive).toBe(false)
+  })
+
+  it('does not shrink: at least 109 runtime exports (2026-09-03 baseline)', () => {
+    // 109 = the src barrel and `dist/index.js` agree, measured 2026-09-03.
+    // Raise the floor when you add exports; never lower it without a major.
+    expect(Object.keys(core).length).toBeGreaterThanOrEqual(109)
+  })
+})
