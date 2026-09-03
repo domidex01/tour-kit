@@ -1,4 +1,4 @@
-import type * as React from 'react'
+import type { TourDispatch, TourRef } from '../../types/primitives'
 import type { RouterAdapter } from '../../types/router'
 import type { Tour } from '../../types/tour'
 import type { TourAction, TourReducerState } from '../../types/tour-reducer'
@@ -38,10 +38,10 @@ export interface TourEngineContext {
   getStepIdMap: () => Map<string, number>
 
   // ─── Dispatch + refs ─────────────────────────────────────────────────────
-  dispatch: React.Dispatch<TourAction>
-  abortControllerRef: React.RefObject<AbortController | null>
-  completedTourIdRef: React.RefObject<string | null>
-  skippedTourIdRef: React.RefObject<string | null>
+  dispatch: TourDispatch<TourAction>
+  abortControllerRef: TourRef<AbortController | null>
+  completedTourIdRef: TourRef<string | null>
+  skippedTourIdRef: TourRef<string | null>
 
   // ─── Config (static for the provider's lifetime) ─────────────────────────
   router?: RouterAdapter

@@ -4,6 +4,7 @@ import type {
   HotspotPosition,
   LocalizedText,
   Placement,
+  TourNode,
 } from '@tour-kit/core'
 import type { MediaSlotProps } from '@tour-kit/media'
 import type * as React from 'react'
@@ -19,10 +20,14 @@ export interface HintConfig {
   title?: LocalizedText
   /**
    * Tooltip body. Accepts a string (interpolated), a `{ key }` dictionary
-   * lookup, or any `ReactNode` for arbitrary JSX. The original
+   * lookup, or any `TourNode` for arbitrary JSX. The original
    * `React.ReactNode`-only contract stays assignable.
+   *
+   * This type is a near-copy of `@tour-kit/core`'s `HintConfig` (they differ
+   * on `target` and `media`); `content` is kept in step with core's so the two
+   * published shapes don't drift further. Reconciling them is its own task.
    */
-  content: React.ReactNode | LocalizedText
+  content: TourNode | LocalizedText
   position?: HotspotPosition
   tooltipPlacement?: Placement
   pulse?: boolean

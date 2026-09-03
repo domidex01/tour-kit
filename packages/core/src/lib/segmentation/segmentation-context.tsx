@@ -1,6 +1,11 @@
 'use client'
+import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo } from 'react'
-import type { SegmentationContextValue, SegmentationProviderProps } from './types'
+import type { SegmentationContextValue } from './types'
+
+export interface SegmentationProviderProps extends SegmentationContextValue {
+  children: ReactNode
+}
 
 const Ctx = createContext<SegmentationContextValue>({ segments: {} })
 

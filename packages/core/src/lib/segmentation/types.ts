@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import type { AudienceCondition } from '../../types/audience'
 
 /**
@@ -44,8 +43,4 @@ export interface SegmentationContextValue {
   segments: Record<string, SegmentSource>
   userContext?: Record<string, unknown>
   currentUserId?: string
-}
-
-export interface SegmentationProviderProps extends SegmentationContextValue {
-  children: ReactNode
 }

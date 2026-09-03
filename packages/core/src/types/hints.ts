@@ -1,7 +1,7 @@
-import type React from 'react'
 import type { FrequencyRule } from '../lib/frequency'
 import type { LocalizedText } from '../lib/localized-text'
 import type { Placement } from './config'
+import type { TourNode } from './primitives'
 import type { AudienceProp } from './step'
 import type { TourTarget } from './target'
 
@@ -12,7 +12,7 @@ export interface HintConfig {
   target: TourTarget
   /** Optional title rendered above the content (Phase 3a). */
   title?: LocalizedText
-  content: React.ReactNode | LocalizedText
+  content: TourNode | LocalizedText
   position?: HotspotPosition
   tooltipPlacement?: Placement
   pulse?: boolean
