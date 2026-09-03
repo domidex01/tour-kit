@@ -13,7 +13,7 @@
  * because hooks and providers legitimately keep it. The consumer-level
  * guarantee belongs to §1.2, once the engine subpath exists.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
@@ -46,6 +46,64 @@ describe('v2 §1.1 — engine type files are React-free at the source level', ()
 
     // Assert on the offending lines, not the file body — a failure should read
     // as "this import has to go", not as a wall of source.
+    expect(offending).toEqual([])
+  })
+})
+
+/**
+ * v2 §1.2 — the same guarantee one level up, on the barrel that becomes
+ * `@tour-kit/core/engine`.
+ *
+ * Two barrels inside core are traps: `lib/i18n/index.ts` re-exports
+ * `LocaleProvider`/`useT` beside the pure `resolvePlural`, and
+ * `lib/segmentation/index.ts` re-exports `SegmentationProvider`/`useSegment`
+ * beside the pure `parseUserIdsFromCsv`. Re-exporting either from the engine
+ * barrel drags React into the shared chunk. The dist scan
+ * (`no-react-in-engine-dist.test.ts`) catches that too, but only after a build
+ * — this catches it in the editor, on the line that caused it.
+ */
+describe('v2 §1.2 — the engine barrel imports leaves, not the mixed barrels', () => {
+  const ENGINE_BARREL = join(SRC_ROOT, 'engine', 'index.ts')
+
+  /** Barrels that mix React and non-React exports. Import their leaves instead. */
+  const TRAP_BARRELS = [
+    { specifier: './lib/i18n', instead: './lib/i18n/plural' },
+    { specifier: '../lib/i18n', instead: '../lib/i18n/plural' },
+    { specifier: './lib/segmentation', instead: './lib/segmentation/csv' },
+    { specifier: '../lib/segmentation', instead: '../lib/segmentation/csv' },
+  ] as const
+
+  it('exists', () => {
+    expect(existsSync(ENGINE_BARREL), `${ENGINE_BARREL} is missing`).toBe(true)
+  })
+
+  it('does not import from react', () => {
+    const lines = readFileSync(ENGINE_BARREL, 'utf8').split('\n')
+    expect(
+      lines.filter((line) => REACT_MODULE_SPECIFIER.test(line) || REACT_REQUIRE.test(line))
+    ).toEqual([])
+  })
+
+  it.each(TRAP_BARRELS)(
+    'does not re-export the mixed $specifier barrel (use $instead)',
+    ({ specifier }) => {
+      const source = readFileSync(ENGINE_BARREL, 'utf8')
+      const escaped = specifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`from\\s*["']${escaped}["']`)
+      expect(pattern.test(source)).toBe(false)
+    }
+  )
+
+  it('is re-exports and comments only — no logic, no side effects', () => {
+    // `sideEffects: false` is a promise the barrel keeps or breaks. A bare
+    // `import './x'` (a side-effect import, like the `window-augment` one the
+    // main barrel deliberately has) or any declaration here makes it a lie —
+    // and turns a ~50-line door into a file with behaviour to test.
+    const DISALLOWED =
+      /^\s*(?:import\s+["']|const\s|let\s|var\s|function\s|class\s|if\s*\(|for\s*\(|while\s*\()/
+    const offending = readFileSync(ENGINE_BARREL, 'utf8')
+      .split('\n')
+      .filter((line) => DISALLOWED.test(line))
     expect(offending).toEqual([])
   })
 })

@@ -13,6 +13,11 @@
     "ignore": ["zod"]
   },
   {
+    "name": "@tour-kit/core/engine",
+    "path": "packages/core/dist/engine/index.js",
+    "limit": "8 KB"
+  },
+  {
     "name": "@tour-kit/react",
     "path": "packages/react/dist/index.js",
     "limit": "185 KB",

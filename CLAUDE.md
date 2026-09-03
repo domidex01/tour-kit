@@ -115,19 +115,31 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   raised these from the temporary phase-5 lows with real behavior tests, and measured coverage
   exceeds every enforced floor (kept in sync by `coverage-claim-alignment.test.ts`).
 - Bundle sizes (gzipped): enforced by `tooling/bundle-check/check-dist-gzip.mjs`
-  (the binding merge gate, raw `dist/index.js` gzip bytes — run `pnpm dist:size`).
-  `size-limit` (root [`/.size-limit.json`](/.size-limit.json)) is a secondary
-  smoke signal in a bundled-with-deps + brotli unit, run `pnpm bundlesize`.
-  Per-package raw dist-gzip budgets:
-  - core <20 KB (target <8 KB; tracked as audit B-1)
+  (the binding merge gate — run `pnpm dist:size`). It measures an entry's
+  **import closure**: the entry file plus every `chunk-*.js` it statically
+  imports, each gzipped and summed. Reading the entry file alone under-counts
+  any package that emits more than one tsup entry, because `splitting: true`
+  turns the entry into a re-export shell — v2 §1.2 found six packages being
+  measured that way. `size-limit` (root [`/.size-limit.json`](/.size-limit.json))
+  is a secondary smoke signal in a bundled-with-deps + brotli unit, run
+  `pnpm bundlesize`. Per-package dist-gzip closure budgets:
+  - core <21 KB (target <8 KB; tracked as audit B-1 — the §1.2 subpath did
+    **not** move the main entry toward it, that is §1.4's to earn)
+  - core/engine subpath <9 KB (the non-React consumer's cost: an ~800-byte
+    door plus the shared chunk it and the main entry both read)
   - react <12 KB
-  - hints <5 KB
+  - hints <6 KB
   - analytics <4 KB (root; per-plugin <1.5 KB each)
   - adoption, checklists <10 KB
-  - announcements, surveys, license <8 KB
-  - media <6 KB
-  - ai <5 KB (client), <8 KB (server)
+  - announcements <14 KB, surveys <12.5 KB, license <8 KB
+  - media <9 KB
+  - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
+
+  The hints / announcements / surveys / media / ai numbers rose in v2 §1.2
+  **without a byte being added**: they all ship a `headless` entry, so the gate
+  had been reading their shell. Compare them to pre-§1.2 numbers only if you
+  re-measure the old build the new way.
 - Lighthouse Accessibility: 100
 - WCAG 2.1 AA compliant
 

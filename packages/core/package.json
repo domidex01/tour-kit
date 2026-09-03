@@ -54,6 +54,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./engine": {
+      "import": {
+        "types": "./dist/engine/index.d.ts",
+        "default": "./dist/engine/index.js"
+      },
+      "require": {
+        "types": "./dist/engine/index.d.cts",
+        "default": "./dist/engine/index.cjs"
+      }
+    },
     "./schemas": {
       "import": {
         "types": "./dist/schemas/index.d.ts",
@@ -92,6 +102,12 @@
     "zod": "^3.25.0 || ^4.0.0"
   },
   "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
     "zod": {
       "optional": true
     }

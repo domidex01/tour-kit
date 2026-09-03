@@ -33,6 +33,29 @@ pnpm add @tour-kit/core
 yarn add @tour-kit/core
 ```
 
+`react` and `react-dom` are **optional** peers, so npm and bun will not pull
+React into a project that does not already have it. If you install
+`@tour-kit/core` directly and use the providers or hooks, install React
+yourself — you will otherwise get a runtime error rather than an install-time
+warning. Consumers of `@tour-kit/react` or `@tour-kit/hints` are unaffected;
+those declare their own React peers.
+
+### The React-free subpath
+
+`@tour-kit/core/engine` re-exports the parts of core that never touch React —
+types, DOM/storage/a11y helpers, audience and frequency predicates,
+`validateTour`, `interpolate`, `explainTour`. Its type declarations name no
+`react`, `clsx` or `zod`, so it typechecks in a Vue, Svelte or Node project with
+none of them installed:
+
+```ts
+import { type TourStep, matchesAudience, validateTour } from '@tour-kit/core/engine'
+```
+
+It is a subset of what `@tour-kit/core` already exports at the same paths —
+nothing moved. Note that it currently has no way to *run* a tour; that arrives
+with `createTourEngine()`.
+
 ## Quick Start
 
 ```tsx
