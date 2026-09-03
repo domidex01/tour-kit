@@ -5,8 +5,9 @@
  * before the package has been built.
  */
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { closureOf } from '../../../../tooling/bundle-check/closure.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -40,14 +41,6 @@ export function distExists(): boolean {
   return existsSync(MAIN_MJS) && existsSync(SCHEMAS_MJS) && existsSync(SCHEMAS_CJS)
 }
 
-/**
- * Matches a relative module specifier in built output, in every form tsup
- * emits: `from"./chunk-X.js"`, `require("./chunk-X.cjs")`, `import("./x.js")`
- * and the `export … from` variant. Minified output drops the space after
- * `from`, hence `\s*`.
- */
-const RELATIVE_SPECIFIER = /(?:from\s*|import\s*\(\s*|require\s*\(\s*)["'](\.[^"']*)["']/g
-
 export interface Closure {
   /** Every file reached, entry first. */
   files: string[]
@@ -62,44 +55,15 @@ export interface Closure {
  * re-export shell that would pass a `react` grep forever, even the day a React
  * import lands in the chunk beside it.
  *
+ * The walk itself lives in `tooling/bundle-check/closure.mjs` — the same module
+ * the merge gate runs, so the gate and these scans cannot disagree about what a
+ * closure is. It throws on a missing entry; an empty closure would pass every
+ * assertion below vacuously.
+ *
  * Externals (`react`, `zod`, …) are bare specifiers and are never followed —
  * they stay in `source` for the scan to find, which is the point.
  */
-/**
- * tsup writes `.js` specifiers inside emitted `.d.ts` files even though the
- * chunk on disk is `config-XXX.d.ts`. Follow the declaration graph by trying
- * the declaration twin when the literal path is absent; returns null for a
- * specifier that resolves to nothing (a bare external never reaches here).
- */
-function resolveEmitted(path: string): string | null {
-  const candidates = [path]
-  if (path.endsWith('.js')) candidates.push(path.replace(/\.js$/, '.d.ts'))
-  if (path.endsWith('.cjs')) candidates.push(path.replace(/\.cjs$/, '.d.cts'))
-  return candidates.find((c) => existsSync(c)) ?? null
-}
-
 export function readClosure(entry: string): Closure {
-  // Throw rather than return an empty closure: a scan of a file that was never
-  // emitted passes every "does X leak in?" assertion vacuously, which is the
-  // exact failure this helper exists to prevent.
-  if (resolveEmitted(resolve(entry)) === null) {
-    throw new Error(`Run \`pnpm --filter @tour-kit/core build\` first — ${entry} missing.`)
-  }
-
-  const seen = new Set<string>()
-  const sources: string[] = []
-  const queue = [resolve(entry)]
-
-  while (queue.length > 0) {
-    const file = resolveEmitted(queue.shift() as string)
-    if (file === null || seen.has(file)) continue
-    seen.add(file)
-    const source = readFileSync(file, 'utf8')
-    sources.push(source)
-    for (const [, specifier] of source.matchAll(RELATIVE_SPECIFIER)) {
-      queue.push(resolve(dirname(file), specifier))
-    }
-  }
-
-  return { files: [...seen], source: sources.join('\n') }
+  const files = closureOf(entry)
+  return { files, source: files.map((f) => readFileSync(f, 'utf8')).join('\n') }
 }

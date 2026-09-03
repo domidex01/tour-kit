@@ -17,8 +17,11 @@
  *    bottom asserts the same scanner DOES find React in the main entry's
  *    closure, so a broken regex fails loudly instead of going quietly green.
  */
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+// The same matcher the merge gate walks with — one definition, so a scan here
+// and a measurement there cannot disagree about what a specifier is.
+import { specifierPattern } from '../../../../tooling/bundle-check/closure.mjs'
 import {
   ENGINE_CJS,
   ENGINE_DCTS,
@@ -33,17 +36,6 @@ import {
 
 /** A Vue consumer installs none of these. */
 const FORBIDDEN = ['react', 'react-dom', 'clsx', 'tailwind-merge', 'zod'] as const
-
-/**
- * Matches the package as a MODULE SPECIFIER only — `from "react"`,
- * `require("react")`, `import("react/jsx-runtime")` — never a minified
- * identifier or the word in a comment. `react` does not match `"react-dom"`:
- * the char after `react` must be `/` or the closing quote.
- */
-function specifierPattern(pkg: string): RegExp {
-  const escaped = pkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return new RegExp(`(?:from\\s*|import\\s*\\(\\s*|require\\s*\\(\\s*)["']${escaped}(/[^"']*)?["']`)
-}
 
 /** Every offending line, so a failure reads as "this import has to go". */
 function offendingLines(source: string, pkg: string): string[] {
@@ -92,22 +84,27 @@ describe.skipIf(!distExists()).each(ENGINE_ENTRIES)(
 describe.skipIf(!distExists())(
   "v2 §1.2 — the 'use client' directive lands on the React entry only",
   () => {
-    const startsWithDirective = (source: string) => /^['"]use client['"];?/.test(source)
+    // Deliberately NOT `readClosure`: the directive is a property of ONE
+    // file's first bytes. Feeding a concatenated closure to a `^` anchor only
+    // works because the entry happens to land first in the walk order, which
+    // is not what this test means to assert.
+    const startsWithDirective = (path: string) =>
+      /^['"]use client['"];?/.test(readFileSync(path, 'utf8'))
 
     it('dist/engine/index.js does NOT start with it', () => {
-      expect(startsWithDirective(readClosure(ENGINE_MJS).source)).toBe(false)
+      expect(startsWithDirective(ENGINE_MJS)).toBe(false)
     })
 
     it('dist/engine/index.cjs does NOT start with it', () => {
-      expect(startsWithDirective(readClosure(ENGINE_CJS).source)).toBe(false)
+      expect(startsWithDirective(ENGINE_CJS)).toBe(false)
     })
 
     it('dist/index.js STILL starts with it', () => {
-      expect(startsWithDirective(readClosure(MAIN_MJS).source)).toBe(true)
+      expect(startsWithDirective(MAIN_MJS)).toBe(true)
     })
 
     it('dist/index.cjs STILL starts with it', () => {
-      expect(startsWithDirective(readClosure(MAIN_CJS).source)).toBe(true)
+      expect(startsWithDirective(MAIN_CJS)).toBe(true)
     })
   }
 )
