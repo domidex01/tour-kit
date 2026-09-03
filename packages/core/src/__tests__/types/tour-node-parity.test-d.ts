@@ -64,6 +64,13 @@ const _functionContent: VisibleTourStep = { id: 'b2', target: '#x', content: () 
 // @ts-expect-error — `{ key }` is LocalizedText, not renderable content
 const _keyedIsNotANode: TourNode = { key: 'welcome' }
 
+// The promise arm must not launder an excluded type one level down: React's
+// own arm is `Promise<AwaitedReactNode>`, so `PromiseLike<TourNode>` still
+// satisfies the drift guard above while rejecting a promise of a non-node.
+const _promisedNode: TourNode = Promise.resolve('text')
+// @ts-expect-error — a promise of a symbol is not renderable content
+const _promisedSymbol: TourNode = Promise.resolve(Symbol())
+
 // ─── A useRef from React 18 *or* React 19 is still a valid step target ──────
 // React 19's shape, as returned by `useRef<HTMLDivElement | null>(null)`.
 declare const ref19: RefObject<HTMLDivElement | null>
@@ -86,5 +93,7 @@ void _jsxTitle
 void _symbolContent
 void _functionContent
 void _keyedIsNotANode
+void _promisedNode
+void _promisedSymbol
 void _target19
 void _target18

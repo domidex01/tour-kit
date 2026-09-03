@@ -571,3 +571,65 @@ kill). All 20 package builds succeed. Known local-only WSL2 docs-build break.
   `apps/docs/public/llms*.txt`, `apps/docs/components/landing/sale-countdown.tsx`
   and the untracked `apps/docs/components/landing/__tests__/` were already
   dirty in the working tree when this task started.
+
+### review follow-ups (thermo-nuclear pass)
+
+Five findings from the quality review of PR #117. Four fixed here; one is a
+correction to a claim, which belongs in this section because the planner's is
+read-only.
+
+1. **There were two boundary casts, not one — and the undocumented one was the
+   load-bearing one.** `lib/i18n/use-resolved-text.ts:42`'s
+   `value as React.ReactNode` did not break, so nothing flagged it, but it
+   *changed meaning*: on `main` the residue after the `string` and `{ key }`
+   branches genuinely was a `ReactNode`, so the cast was cosmetic; after the
+   widening the residue is `TourElementLike | Iterable<TourNode> |
+   PromiseLike<TourNode> | number | bigint | boolean`, and the cast launders it.
+   This is the wider surface of the two — `useResolvedText` is core's canonical
+   text pipeline with 17 call sites across `announcements`, `hints` and `react`,
+   and `TourStep.title` reaches React through *this* path, not through
+   `<TourCard>`'s `content` prop. **Fixed:** the invariant is now stated in the
+   function's doc comment and the cast carries the same `parse.ts` boundary note
+   as `tour-card.tsx`. Two casts, both named.
+2. **"A property of the type system, not of this design" (Approach, above) is
+   too strong.** A third option exists that the decision record does not name:
+   parameterise the node type. The repo already uses that idiom on an adjacent
+   axis — `TourStep<TId extends string = string>` is generic over id and
+   `types/tour.ts` threads `Tour<TStep = TourStep>` — so `TourStep<TId, TNode>`
+   is the same move on the content axis, and it would delete the mirror, the
+   drift guard, `TourElementLike` and both casts. **Not taken, deliberately:**
+   with a default of `TourNode` the provider chain still hands back the default
+   instantiation, so the cast returns unless `TourContextValue` and `useTourKit`
+   are parameterised too — which means threading a generic through the
+   1,431-line `context/tour-provider.tsx`. Worse trade. But the claim should
+   read *a property of this design*, not of the type system.
+3. **The new primitives didn't reach the front door.** `TourNode` is in the
+   signature of `TourStep.content`, yet neither `@tour-kit/react` nor
+   `@tour-kit/hints` re-exported it — a consumer of the documented front door
+   could name every type in that signature except the new one. Against the
+   Consumer rule in `CLAUDE.md` / `wiki-tech/packages/core.md`. **Fixed:** all
+   four forwarded from both barrels.
+4. **The duplicate `HintConfig` gap was being widened, not just left alone.**
+   `packages/hints/src/types/index.ts` keeps its own near-copy (it differs on
+   `target` and `media`) and `hint.tsx` renders *that* one, so core's widening
+   bought nothing where hints actually renders while making two same-named
+   published types differ on a new axis. Merging them stays out of scope.
+   **Fixed narrowly:** hints' `content` now tracks core's `TourNode`, so this
+   task leaves the divergence no worse than it found it.
+5. **`PromiseLike<unknown>` was a hole in "authoring errors survive".**
+   `content: Promise.resolve(Symbol())` compiled — the excluded type laundered
+   one level down. **Fixed:** the arm is `PromiseLike<TourNode>`, which still
+   satisfies the drift guard (React's own arm is `Promise<AwaitedReactNode>`),
+   verified rather than assumed. Both directions pinned in the parity test.
+
+Re-verified after the fixes: `turbo run test --concurrency=3` 37/37 (core 1013,
+react 485, hints 295), `pnpm typecheck` 29/29, `typecheck:types` exit 0,
+`biome check packages/` 0 errors, `pnpm dist:size` all green (react +1 gz byte
+from a chunk-hash character; core and hints unchanged).
+
+**Noted, not fixed:** the drift guard reaches CI only transitively — CI runs
+`pnpm test`, core's vitest includes `__tests__/phase-0/phase-0-harness.test.ts`,
+and that shells out to `typecheck:types`. CI never invokes `typecheck:types`
+directly, so the guard goes silent if that harness test is ever moved or
+skipped. Adding it as an explicit CI step is a one-line change that belongs
+with §1.2.

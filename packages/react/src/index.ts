@@ -196,6 +196,11 @@ export type {
   A11yConfig,
   ScrollConfig,
   Storage,
+  // React-free structural primitives (the type of `TourStep.content`)
+  TourNode,
+  TourElementLike,
+  TourRef,
+  TourDispatch,
   // Step types
   TourStep as TourStepConfig,
   StepOptions,

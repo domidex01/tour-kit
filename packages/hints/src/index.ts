@@ -59,6 +59,9 @@ export {
 // Accessibility hooks (re-exported for ergonomic in-package access)
 export { useReducedMotion } from '@tour-kit/core'
 
+// React-free structural primitives (the type of `HintConfig.content`)
+export type { TourNode, TourElementLike, TourRef, TourDispatch } from '@tour-kit/core'
+
 // ============================================
 // TYPES
 // ============================================

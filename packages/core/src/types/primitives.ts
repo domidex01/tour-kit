@@ -33,7 +33,10 @@ export interface TourElementLike {
  *
  * Deliberately excludes `symbol` and bare functions so authoring errors in
  * `TourStep.content` stay compile errors, and excludes plain `{ key: string }`
- * so `TourNode | LocalizedText` keeps discriminating for `isI18nKey`.
+ * so `TourNode | LocalizedText` keeps discriminating for `isI18nKey`. The
+ * promise arm is `PromiseLike<TourNode>` rather than `PromiseLike<unknown>`
+ * for the same reason — otherwise `content: Promise.resolve(Symbol())` would
+ * compile and defeat the exclusions one level down.
  */
 export type TourNode =
   | string
@@ -44,7 +47,7 @@ export type TourNode =
   | undefined
   | TourElementLike
   | Iterable<TourNode>
-  | PromiseLike<unknown>
+  | PromiseLike<TourNode>
 
 /** Structural equal of `React.RefObject<T>`. */
 export interface TourRef<T> {
