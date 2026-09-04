@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/hints Context File
-Version: 1.0.7 | Generated: 2026-06-20
+Version: 2.0.0 | Generated: 2026-09-03
 Paste this into your LLM to get accurate answers about @tour-kit/hints.
 =========================================================================
 
@@ -36,6 +36,10 @@ Types:
     HintCloseVariants
     UnifiedSlotProps
     UILibraryProviderProps
+    TourNode
+    TourElementLike
+    TourRef
+    TourDispatch
     HintConfig
     HintState
     HotspotPosition
@@ -174,10 +178,14 @@ TYPES
       title?: LocalizedText
       /**
        * Tooltip body. Accepts a string (interpolated), a `{ key }` dictionary
-       * lookup, or any `ReactNode` for arbitrary JSX. The original
+       * lookup, or any `TourNode` for arbitrary JSX. The original
        * `React.ReactNode`-only contract stays assignable.
+       *
+       * This type is a near-copy of `@tour-kit/core`'s `HintConfig` (they differ
+       * on `target` and `media`); `content` is kept in step with core's so the two
+       * published shapes don't drift further. Reconciling them is its own task.
        */
-      content: React.ReactNode | LocalizedText
+      content: TourNode | LocalizedText
       position?: HotspotPosition
       tooltipPlacement?: Placement
       pulse?: boolean
@@ -211,17 +219,7 @@ TYPES
       isDismissed: boolean
     }
 
-    export interface HintsContextValue {
-      hints: Map<string, HintState>
-      activeHint: string | null
-      registerHint: (id: string) => void
-      unregisterHint: (id: string) => void
-      showHint: (id: string) => void
-      hideHint: (id: string) => void
-      dismissHint: (id: string) => void
-      resetHint: (id: string) => void
-      resetAllHints: () => void
-    }
+    ... and 1 more types. See source for full definitions.
 
 HOOKS
 -----
