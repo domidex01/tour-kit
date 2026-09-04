@@ -14,8 +14,7 @@
  * they guard twice: a ref against a synchronous stale-closure double-call, and
  * `state.isActive` against re-firing after COMPLETE_TOUR.
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { TourEngineAnalytics } from '../context'
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Tour } from '../../../types/tour'
 import { logger } from '../../../utils/logger'
 import {
@@ -32,6 +31,7 @@ import {
   stopImpl,
   triggerBranchActionImpl,
 } from '../actions'
+import type { TourEngineAnalytics } from '../context'
 import { createFakeEngineContext } from './_helpers/fake-engine-context'
 import { hiddenStep, makeTour, visibleStep } from './_helpers/make-tour'
 
@@ -192,10 +192,10 @@ describe('next', () => {
 
 describe('terminal paths fire exactly once', () => {
   let handle: Handle
-  let onComplete: ReturnType<typeof vi.fn>
+  let onComplete: Mock<NonNullable<Tour['onComplete']>>
 
   beforeEach(() => {
-    onComplete = vi.fn() as unknown as ReturnType<typeof vi.fn>
+    onComplete = vi.fn()
     handle = on(makeTour('t', [visibleStep('a'), visibleStep('b')], { onComplete }), 1, {
       persistTerminalTours: true,
     })
@@ -357,7 +357,12 @@ describe('startTour', () => {
   it('resolves a string step id to its index in the TARGET tour', async () => {
     const other = makeTour('other', [visibleStep('o1'), visibleStep('o2')])
     const handle = on(THREE, 0)
-    handle.setState({ tours: new Map([['t', THREE], ['other', other]]) })
+    handle.setState({
+      tours: new Map([
+        ['t', THREE],
+        ['other', other],
+      ]),
+    })
 
     await startTourImpl(handle.ctx, 'other', 'o2')
 
@@ -369,7 +374,12 @@ describe('startTour', () => {
   it('accepts a numeric step index unchanged', async () => {
     const other = makeTour('other', [visibleStep('o1'), visibleStep('o2')])
     const handle = on(THREE, 0)
-    handle.setState({ tours: new Map([['t', THREE], ['other', other]]) })
+    handle.setState({
+      tours: new Map([
+        ['t', THREE],
+        ['other', other],
+      ]),
+    })
 
     await startTourImpl(handle.ctx, 'other', 1)
 

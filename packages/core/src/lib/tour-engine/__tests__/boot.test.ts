@@ -14,9 +14,12 @@ import { createFakeEngineContext } from './_helpers/fake-engine-context'
 import { hiddenStep, makeTour, visibleStep } from './_helpers/make-tour'
 
 describe('resolveBootStart — precedence truth table', () => {
-  it.each(BOOT_ROWS)(
-    'row %i: flow=%s route=%s auto=%s',
-    (_n, flow, route, auto, expected, extra) => {
+  // A plain loop, not `it.each`: `each` widens a heterogeneous readonly tuple
+  // to a union of all its element types, so every parameter arrives as
+  // `string | number | boolean | object | null | undefined` and the row loses
+  // exactly the typing that makes it a truth table.
+  for (const [n, flow, route, auto, expected, extra] of BOOT_ROWS) {
+    it(`row ${n}: flow=${flow} route=${route} auto=${auto}`, () => {
       const result = resolveBootStart({
         flowSession: flowForRow(flow),
         flowIsStale: flow === 'stale',
@@ -30,8 +33,8 @@ describe('resolveBootStart — precedence truth table', () => {
       } else {
         expect(result).toMatchObject(expected)
       }
-    }
-  )
+    })
+  }
 
   it('carries the flow blob stepIndex through, not the tour startAt', () => {
     expect(

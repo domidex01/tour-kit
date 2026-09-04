@@ -1,7 +1,7 @@
+import type { BranchTarget } from '../../types/branch'
 import type { TourDispatch, TourRef } from '../../types/primitives'
 import type { RouterAdapter } from '../../types/router'
 import type { Tour } from '../../types/tour'
-import type { BranchTarget } from '../../types/branch'
 import type { TourAction, TourReducerState } from '../../types/tour-reducer'
 import type { TourRouteError } from '../wait-for-step-target'
 
@@ -18,12 +18,7 @@ export interface TourEngineAnalytics {
   // call sites behind the port, so the port has to declare them.
   onTourComplete?: (tourId: string) => void
   onTourSkip?: (tourId: string, stepIndex: number) => void
-  onBranchAction?: (
-    tourId: string,
-    stepId: string,
-    actionId: string,
-    target: BranchTarget
-  ) => void
+  onBranchAction?: (tourId: string, stepId: string, actionId: string, target: BranchTarget) => void
 }
 
 /**
