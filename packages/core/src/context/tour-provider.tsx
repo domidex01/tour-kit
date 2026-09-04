@@ -607,6 +607,11 @@ export function TourProvider({
     skipTour,
     setData,
     navigateToStep,
+    persistTerminalTours,
+    markCompleted,
+    markSkipped,
+    resetPersistence,
+    clearRouteState: clear,
     tourKitContext: tourKitContext satisfies TourEngineAnalytics | null,
   }
 

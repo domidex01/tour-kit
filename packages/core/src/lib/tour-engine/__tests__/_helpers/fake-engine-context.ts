@@ -13,6 +13,7 @@ export interface FakeEngineOverrides {
   autoNavigate?: boolean
   maxHiddenChain?: number
   tourKitContext?: TourEngineAnalytics | null
+  persistTerminalTours?: boolean
   onNavigationRequired?: TourEngineContext['onNavigationRequired']
   onStepError?: TourEngineContext['onStepError']
   abortSignal?: AbortSignal | null
@@ -35,6 +36,10 @@ export interface FakeEngineHandle {
     skipTour: ReturnType<typeof vi.fn>
     setData: ReturnType<typeof vi.fn>
     navigateToStep: ReturnType<typeof vi.fn>
+    markCompleted: ReturnType<typeof vi.fn>
+    markSkipped: ReturnType<typeof vi.fn>
+    resetPersistence: ReturnType<typeof vi.fn>
+    clearRouteState: ReturnType<typeof vi.fn>
     router: FakeRouterMock
     onNavigationRequired: ReturnType<typeof vi.fn>
     onStepError: ReturnType<typeof vi.fn>
@@ -110,6 +115,14 @@ export function createFakeEngineContext(overrides: FakeEngineOverrides = {}): Fa
     overrides.navigateToStep ?? ((_idx: number) => Promise.resolve(true))
   )
 
+  // v2 §1.3d — the terminal-store / route-store seams. Spies, not stores: the
+  // adapters have their own suites; what actions.ts owes is calling them at
+  // the right moment with the right id.
+  const markCompleted = vi.fn()
+  const markSkipped = vi.fn()
+  const resetPersistence = vi.fn()
+  const clearRouteState = vi.fn()
+
   const ctx: TourEngineContext = {
     getState: () => state,
     getCurrentTour: () => currentTour,
@@ -128,6 +141,11 @@ export function createFakeEngineContext(overrides: FakeEngineOverrides = {}): Fa
     skipTour,
     setData,
     navigateToStep,
+    persistTerminalTours: overrides.persistTerminalTours ?? false,
+    markCompleted,
+    markSkipped,
+    resetPersistence,
+    clearRouteState,
     tourKitContext: overrides.tourKitContext ?? null,
   }
 
@@ -139,6 +157,10 @@ export function createFakeEngineContext(overrides: FakeEngineOverrides = {}): Fa
       skipTour,
       setData,
       navigateToStep,
+      markCompleted,
+      markSkipped,
+      resetPersistence,
+      clearRouteState,
       router,
       onNavigationRequired,
       onStepError,

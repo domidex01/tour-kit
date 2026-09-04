@@ -1,6 +1,7 @@
 import type { TourDispatch, TourRef } from '../../types/primitives'
 import type { RouterAdapter } from '../../types/router'
 import type { Tour } from '../../types/tour'
+import type { BranchTarget } from '../../types/branch'
 import type { TourAction, TourReducerState } from '../../types/tour-reducer'
 import type { TourRouteError } from '../wait-for-step-target'
 
@@ -13,6 +14,16 @@ export interface TourEngineAnalytics {
   onStepView?: (tourId: string, stepId: string, stepIndex: number) => void
   onTourStart?: (tourId: string) => void
   onTourBranch?: (fromTourId: string, toTourId: string, stepId: string) => void
+  // The provider has always fanned out to these three as well; §1.3d moves the
+  // call sites behind the port, so the port has to declare them.
+  onTourComplete?: (tourId: string) => void
+  onTourSkip?: (tourId: string, stepIndex: number) => void
+  onBranchAction?: (
+    tourId: string,
+    stepId: string,
+    actionId: string,
+    target: BranchTarget
+  ) => void
 }
 
 /**
@@ -56,6 +67,17 @@ export interface TourEngineContext {
   completeTour: () => void
   skipTour: () => void
   setData: (key: string, value: unknown) => void
+
+  // ─── Terminal-tour persistence (v2 §1.3d) ────────────────────────────────
+  // The engine decides *whether* to persist; the adapter behind these decides
+  // *where*. `persistTerminalTours` mirrors the provider's merged
+  // enabled && trackCompleted gate.
+  persistTerminalTours: boolean
+  markCompleted: (tourId: string) => void
+  markSkipped: (tourId: string) => void
+  resetPersistence: (tourId?: string) => void
+  /** Drop the multi-page route blob — a finished tour must not resume. */
+  clearRouteState: () => void
 
   // ─── Cross-extraction call (handleBranchTarget → navigateToStep) ─────────
   navigateToStep: (stepIndex: number) => Promise<boolean>
