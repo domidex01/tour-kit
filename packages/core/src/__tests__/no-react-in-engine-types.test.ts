@@ -13,21 +13,53 @@
  * because hooks and providers legitimately keep it. The consumer-level
  * guarantee belongs to §1.2, once the engine subpath exists.
  */
-import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 const SRC_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 /** The five files named in the §1.1 acceptance criteria. */
-const ENGINE_TYPE_FILES = [
+const ENGINE_TYPE_SEEDS = [
   'types/step.ts',
   'types/hints.ts',
   'types/target.ts',
   'lib/tour-engine/context.ts',
   'lib/segmentation/types.ts',
 ] as const
+
+/**
+ * Every `.ts` under `lib/tour-engine/`, excluding `__tests__/`.
+ *
+ * v2 §1.3 widened the guard from the fixed five to the whole directory: the
+ * reducer, boot resolver, actions, transition effects and the engine factory
+ * all land here, and `createTourEngine()` is the front door a Vue/Svelte/Node
+ * consumer imports. One React specifier anywhere in the tree ends that.
+ */
+function engineSourceFiles(): string[] {
+  const root = join(SRC_ROOT, 'lib', 'tour-engine')
+  const out: string[] = []
+  const walk = (dir: string) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name)
+      if (entry.isDirectory()) {
+        if (entry.name === '__tests__') continue
+        walk(full)
+        continue
+      }
+      if (entry.name.endsWith('.ts') && !entry.name.endsWith('.d.ts')) {
+        out.push(relative(SRC_ROOT, full))
+      }
+    }
+  }
+  walk(root)
+  return out.sort()
+}
+
+const ENGINE_TYPE_FILES = [
+  ...new Set([...ENGINE_TYPE_SEEDS, ...engineSourceFiles()]),
+] as readonly string[]
 
 /**
  * Matches `from 'react'`, `from "react/jsx-runtime"`, and the `import type`
@@ -37,7 +69,13 @@ const ENGINE_TYPE_FILES = [
 const REACT_MODULE_SPECIFIER = /from\s+["']react(\/[^"']*)?["']/
 const REACT_REQUIRE = /require\(\s*["']react(\/[^"']*)?["']\s*\)/
 
-describe('v2 §1.1 — engine type files are React-free at the source level', () => {
+describe('v2 §1.1/§1.3 — the engine source tree is React-free at the source level', () => {
+  it('scans the whole lib/tour-engine directory, not just the seed list', () => {
+    // A glob that silently matches nothing is a guard that passes forever.
+    expect(ENGINE_TYPE_FILES.length).toBeGreaterThan(ENGINE_TYPE_SEEDS.length)
+    expect(ENGINE_TYPE_FILES).toContain('lib/tour-engine/helpers.ts')
+  })
+
   it.each(ENGINE_TYPE_FILES)('%s does not import from react', (relPath) => {
     const lines = readFileSync(join(SRC_ROOT, relPath), 'utf8').split('\n')
     const offending = lines.filter(
