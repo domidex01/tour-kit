@@ -5,6 +5,7 @@ import { useFlowSession } from '../hooks/use-flow-session'
 import { usePersistence } from '../hooks/use-persistence'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
 import { explainTour } from '../lib/diagnostic'
+import { resolveBootStart, runBootStart } from '../lib/tour-engine/boot'
 import type { TourEngineAnalytics, TourEngineContext } from '../lib/tour-engine/context'
 import { handleBranchTargetImpl } from '../lib/tour-engine/handle-branch-target'
 import {
@@ -14,9 +15,8 @@ import {
   findNextVisibleStepIndex,
 } from '../lib/tour-engine/helpers'
 import { navigateToStepImpl } from '../lib/tour-engine/navigate-to-step'
-import { MAX_HIDDEN_CHAIN, findAutoStartTour, tourReducer } from '../lib/tour-engine/reducer'
+import { MAX_HIDDEN_CHAIN, tourReducer } from '../lib/tour-engine/reducer'
 import { validateTour } from '../lib/validate-tour'
-import { waitForStepTarget } from '../lib/wait-for-step-target'
 import type { TourRouteError } from '../lib/wait-for-step-target'
 import { tourRegistry } from '../registry/tour-registry'
 import type {
@@ -29,7 +29,6 @@ import type {
 import { defaultPersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
-import { isVisibleStep } from '../types/step'
 import type { TestBridge } from '../types/test-bridge'
 import type { TourReducerState } from '../types/tour-reducer'
 import { resolveBranch } from '../utils/branch'
@@ -328,153 +327,70 @@ export function TourProvider({
   // Get current tour
   const currentTour = state.tourId ? (state.tours.get(state.tourId) ?? null) : null
 
-  // flowSession-restore: takes precedence over useRoutePersistence — it's
-  // tour-scoped (single active tour) vs the route-state's multi-tour scope.
-  // Runs once per mount, but waits for the tour list to be populated. The
-  // declarative `<Tour>` registration path (via `MultiTourKitProvider`)
-  // mounts children AFTER the parent's first effect tick, so a strict
-  // mount-only effect with `[]` deps would bail with `tours = []`. The ref
-  // guard makes it idempotent across the inevitable tours-change re-runs.
+  // ─── Boot precedence (v2 §1.3c) ──────────────────────────────────────────
+  // Three effects used to live here — flow-session restore, route-state
+  // restore and autostart — each re-deriving whether the earlier one had
+  // already fired, via two ref latches and a `flow.ready` gate. The order was
+  // implicit in React's effect scheduling.
   //
-  // Phase 1.3 — cross-page resume: if the restored blob has a `currentRoute`
-  // that differs from the current router pathname, navigate first and await
-  // the target before dispatching START_TOUR. On any failure, clear the
-  // session — a stale/wrong route will never recover on its own.
-  const flowRestoreAttemptedRef = React.useRef(false)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: idempotent via flowRestoreAttemptedRef; re-runs when `tours` populates or the deferred session load completes (flow.ready)
+  // It is now one ordered rule in `lib/tour-engine/boot.ts`:
+  // `resolveBootStart()` says WHICH tour wins (pure, a truth table), and
+  // `runBootStart()` executes it — including the cross-page case where the
+  // restored blob names a different route, so we navigate, await the target
+  // and only then dispatch. `boot.parity.test.tsx` runs the same 13 rows
+  // through this mounted provider to prove the pure rule and the React one
+  // agree.
+  const bootPhaseRef = React.useRef<'idle' | 'booting' | 'ready'>('idle')
+  // biome-ignore lint/correctness/useExhaustiveDependencies: latched via bootPhaseRef; re-runs when `tours` populates, when the deferred session load completes (flow.ready), or when another tab writes (externalVersion)
   React.useEffect(() => {
-    if (flowRestoreAttemptedRef.current) return
-    // The session blob loads post-mount (hydration safety) — wait for it.
+    // The session blob loads post-mount (hydration safety) — the pre-load
+    // `null` must never be read as "no session".
     if (!flow.ready) return
-    const restored = flow.session
-    if (!restored || flow.isStale) return
-    if (tours.length === 0) return // wait for declarative <Tour> children
-    const restoredTour = tours.find((t) => t.id === restored.tourId)
-    flowRestoreAttemptedRef.current = true
-    if (!restoredTour) return
+    // No tours registered yet. The declarative `<Tour>` path (via
+    // `MultiTourKitProvider`) mounts children AFTER the parent's first effect
+    // tick, so this is "not yet", not "never" — return WITHOUT latching so the
+    // next `tours` change retries.
+    if (tours.length === 0) return
 
-    // `flow-restore` timer — visible in DevTools / Playwright's console
-    // listener, lets consumers verify the hard-refresh resume budget. The
-    // phase-1.3 target is < 200ms wall time from mount to `START_TOUR`.
-    // Instrumented on BOTH paths (sync same-route restore and async
-    // navigate-then-wait) so the metric fires for the common case too.
-    const startTimer = () => {
-      if (typeof console !== 'undefined' && typeof console.time === 'function') {
-        console.time('flow-restore')
-      }
-    }
-    let timerEnded = false
-    const endTimer = () => {
-      if (timerEnded) return
-      timerEnded = true
-      if (typeof console !== 'undefined' && typeof console.timeEnd === 'function') {
-        console.timeEnd('flow-restore')
-      }
+    const decision = resolveBootStart({
+      flowSession: flow.session,
+      flowIsStale: flow.isStale,
+      routeState: load(),
+      tours,
+      completedTours: persistTerminalTours ? getCompletedTours() : state.completedTours,
+    })
+
+    // Route restore is the one source allowed to run more than once:
+    // `externalVersion` bumps when another tab writes the key, and
+    // re-hydrating from it is the whole point of `syncTabs`. Flow restore and
+    // autostart are once per mount.
+    const repeatable = decision?.source === 'route'
+    if (!repeatable) {
+      if (bootPhaseRef.current !== 'idle') return
+      bootPhaseRef.current = 'booting'
     }
 
-    const dispatchStart = () => {
-      dispatch({
-        type: 'START_TOUR',
-        tourId: restored.tourId,
-        stepIndex: restored.stepIndex,
-      })
-    }
-
-    const needsRouteRestore =
-      restored.currentRoute && router && restored.currentRoute !== router.getCurrentRoute()
-
-    if (!needsRouteRestore) {
-      startTimer()
-      dispatchStart()
-      endTimer()
+    if (!decision) {
+      bootPhaseRef.current = 'ready'
       return
     }
 
-    const targetStep = restoredTour.steps[restored.stepIndex]
-    // Narrowing: `needsRouteRestore` proved `currentRoute` is a string.
-    const route = restored.currentRoute as string
-    // Cancellation: the restore IIFE awaits async work (navigate +
-    // MutationObserver). If the provider unmounts mid-await, dispatch /
-    // flow.clear would mutate a dead instance and write to storage on
-    // behalf of a tour the user has already left.
-    let cancelled = false
-    startTimer()
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: restore orchestrator (navigate + wait + cancellation guards)
-    void (async () => {
-      try {
-        await router.navigate(route)
-        if (cancelled) {
-          endTimer()
-          return
-        }
-        if (targetStep && isVisibleStep(targetStep)) {
-          await waitForStepTarget(targetStep, {
-            route,
-            timeoutMs: targetStep.waitTimeout ?? 3000,
-          })
-          if (cancelled) {
-            endTimer()
-            return
-          }
-        }
-        dispatchStart()
-        endTimer()
-      } catch {
-        endTimer()
-        if (cancelled) return
-        // Stale session (route 404, target missing). Clear so the next mount
-        // doesn't loop on the same broken state.
-        flow.clear()
-      }
-    })()
-
-    return () => {
-      cancelled = true
-    }
-  }, [tours, flow.ready])
-
-  // Restore persisted state once flow readiness is known — and re-run when
-  // another tab writes (externalVersion bumps whenever `syncTabs` is on and
-  // the storage key changes). Gated on flow.ready so the flowSession-restore
-  // precedence check below sees the loaded session, not the pre-load `null`.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Only run on flow readiness / external sync
-  React.useEffect(() => {
-    if (!flow.ready) return
-    // flowSession restore (above) wins — skip route restore if it already
-    // dispatched START_TOUR.
-    if (flow.session && !flow.isStale) return
-    const persisted = load()
-    if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) {
-      dispatch({
-        type: 'START_TOUR',
-        tourId: persisted.tourId,
-        stepIndex: persisted.stepIndex,
-      })
-    }
-  }, [externalVersion, flow.ready])
-
-  // Auto-start tours declaring autoStart on mount.
-  // Persistence restore takes precedence — read persisted state synchronously
-  // so we don't double-dispatch in the same mount batch. Waits for flow.ready
-  // (post-mount session load) before deciding; the ref keeps it mount-once so
-  // the ready flip can't double-fire it.
-  const autoStartAttemptedRef = React.useRef(false)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-once autoStart trigger (ref-guarded), deferred until flow.ready
-  React.useEffect(() => {
-    if (autoStartAttemptedRef.current || !flow.ready) return
-    if (flow.session && !flow.isStale) return
-    autoStartAttemptedRef.current = true
-    const persisted = load()
-    if (persisted?.tourId && tours.some((t) => t.id === persisted.tourId)) return
-    const completedTours = persistTerminalTours ? getCompletedTours() : state.completedTours
-    const auto = findAutoStartTour(tours, completedTours)
-    if (!auto) return
-    dispatch({
-      type: 'START_TOUR',
-      tourId: auto.id,
-      stepIndex: auto.startAt ?? 0,
+    // Cancellation: the restore may await a navigate plus a MutationObserver.
+    // If the provider unmounts mid-await, dispatching or clearing would mutate
+    // a dead instance and write storage for a tour the user has left.
+    const abort = new AbortController()
+    void runBootStart(engineContextRef.current as TourEngineContext, decision, {
+      // Only the flow blob records a route; route restore and autostart are
+      // always same-page.
+      currentRoute: decision.source === 'flow' ? flow.session?.currentRoute : undefined,
+      signal: abort.signal,
+      onClear: flow.clear,
+    }).finally(() => {
+      bootPhaseRef.current = 'ready'
     })
-  }, [flow.ready])
+
+    return () => abort.abort()
+  }, [tours, flow.ready, externalVersion])
 
   // Save state on changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally only save on specific state changes

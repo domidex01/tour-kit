@@ -7,11 +7,11 @@ const COMPLEXITY_IGNORE = /noExcessiveCognitiveComplexity/g
 describe('Phase 5 — provider complexity ignores (M5 gate)', () => {
   // Ratchet, not a floor. v2 §1.3 walks this down as engine logic leaves the
   // provider: the reducer's ignore went with it in §1.3a (3 -> 2), the
-  // flow-restore effect's goes in §1.3c, `prev`'s in §1.3d. Lower it with each
-  // slice; never raise it.
-  it('tour-provider keeps exactly 2 noExcessiveCognitiveComplexity ignores (flow restore, prev)', () => {
+  // flow-restore effect's in §1.3c (2 -> 1), `prev`'s in §1.3d. Lower it with
+  // each slice; never raise it.
+  it('tour-provider keeps exactly 1 noExcessiveCognitiveComplexity ignore (prev)', () => {
     const src = readFileSync(resolve(__dirname, '../../context/tour-provider.tsx'), 'utf-8')
     const matches = src.match(COMPLEXITY_IGNORE) ?? []
-    expect(matches.length, 'expected flow-restore + prev only').toBe(2)
+    expect(matches.length, 'expected prev only').toBe(1)
   })
 })

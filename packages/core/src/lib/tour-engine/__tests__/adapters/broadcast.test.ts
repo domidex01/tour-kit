@@ -17,8 +17,18 @@ interface Msg {
 
 const msg = (tabId: string): Msg => ({ type: 'tour:active', tourId: 't', tabId, ts: Date.now() })
 
-/** jsdom posts through MessageChannel microtasks — let them run. */
-const drain = () => new Promise((r) => setTimeout(r, 0))
+/**
+ * jsdom posts through MessageChannel microtasks — let them run.
+ *
+ * Two ticks, not one: under parallel file load on WSL2 a single macrotask
+ * turn is occasionally scheduled before the port's task lands, which showed up
+ * as a flaky "delivers a posted message" failure in the full-suite run and
+ * never in isolation.
+ */
+const drain = async () => {
+  await new Promise((r) => setTimeout(r, 0))
+  await new Promise((r) => setTimeout(r, 0))
+}
 
 const open: BroadcastStore<Msg>[] = []
 function channel(name = 'tourkit:test'): BroadcastStore<Msg> {

@@ -117,7 +117,9 @@ describe('runBootStart', () => {
   let timeEndSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
-    document.body.innerHTML = '<div id="f1"></div>'
+    // `visibleStep()` defaults every step's target to `#x`, so this is the
+    // element `waitForStepTarget` looks for on the navigate-then-wait path.
+    document.body.innerHTML = '<div id="x"></div>'
     timeSpy = vi.spyOn(console, 'time').mockImplementation(() => {})
     timeEndSpy = vi.spyOn(console, 'timeEnd').mockImplementation(() => {})
   })

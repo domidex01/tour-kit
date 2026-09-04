@@ -74,6 +74,7 @@
         "packages/core/src/utils/logger.ts",
         "packages/core/src/lib/interpolate.ts",
         "packages/core/src/context/tour-provider.tsx",
+        "packages/core/src/lib/tour-engine/boot.ts",
         "packages/analytics/src/plugins/console.ts",
         "packages/license/src/components/license-test-mode.tsx",
         "packages/license/src/components/license-warning.tsx",

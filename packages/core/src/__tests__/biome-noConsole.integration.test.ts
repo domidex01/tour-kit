@@ -48,6 +48,10 @@ describe('Biome noConsole rule + overrides (integration)', () => {
     expect(config).toMatch(/packages\/core\/src\/utils\/logger\.ts/)
     expect(config).toMatch(/packages\/core\/src\/lib\/interpolate\.ts/)
     expect(config).toMatch(/packages\/core\/src\/context\/tour-provider\.tsx/)
+    // v2 §1.3c — the `flow-restore` console.time/timeEnd pair moved here with
+    // the boot resolver. Playwright's console listener reads it for the
+    // <200 ms hard-refresh resume budget, so it is loud by design.
+    expect(config).toMatch(/packages\/core\/src\/lib\/tour-engine\/boot\.ts/)
     expect(config).toMatch(/packages\/analytics\/src\/plugins\/console\.ts/)
     expect(config).toMatch(/packages\/license\/src\/components\/license-test-mode\.tsx/)
     expect(config).toMatch(/packages\/license\/src\/components\/license-warning\.tsx/)
