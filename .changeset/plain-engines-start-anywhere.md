@@ -24,7 +24,7 @@ Node, in a Vue or Svelte component, or behind a `<script>` tag.
 **Nothing moved and nothing changed for existing users.** `<TourProvider>`
 behaves exactly as before; this release is additive. Internally the engine moved
 out from under React behind a port that already existed, and the provider became
-a second adapter for it — 1 431 lines down to 795, with the twenty `useEffect`s
+a second adapter for it — 1 431 lines down to 755, with the twenty `useEffect`s
 and seventeen `useRef`s reduced accordingly. The whole React test suite passes
 unmodified, which is the evidence for "no behaviour change": the provider's own
 tests were the oracle and were never edited.

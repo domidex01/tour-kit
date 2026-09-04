@@ -394,19 +394,11 @@ export function TourProvider({
   // They are one call to `applyTransitionEffects(ctx, prev, next)` now. The
   // "before" snapshot is held in a ref rather than re-derived, so "only on the
   // true -> false edge" is a comparison instead of hand-kept bookkeeping.
+  // The effect itself is declared after the registry lifecycle effect below —
+  // see the note there for why the order matters.
   const abortControllerRef = React.useRef<AbortController | null>(null)
   const crossTabRef = React.useRef<{ lastAnnounceTs: number | null }>({ lastAnnounceTs: null })
   const prevSnapshotRef = React.useRef<TourCallbackContext | null>(null)
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: runs on every commit; the transition is decided by comparing snapshots, not by a dep array
-  React.useEffect(() => {
-    const ctx = engineContextRef.current
-    if (!ctx) return
-    const next = buildCallbackContext(state, currentTour, data)
-    const prev = prevSnapshotRef.current ?? next
-    prevSnapshotRef.current = next
-    applyTransitionEffects(ctx, prev, next)
-  })
 
   // Final teardown on unmount — independent of the activeness swap above so
   // the abort always fires once even when the component unmounts mid-tour.
@@ -575,11 +567,13 @@ export function TourProvider({
   // Two effects below:
   //   1. Lifecycle effect — registers one entry per tour on mount, unregisters
   //      on unmount. Stable key is the NUL-joined ids so inline `tours={[...]}`
-  //      props don't re-register every render.
-  //   2. State-mirror effect — replaces each entry's `state` slice when the
-  //      reducer fires. The registry only notifies subscribers when the slice
-  //      actually changed, so spurious renders are clamped to one per real
-  //      transition.
+  //      props don't re-register every render. Entries start from the zero
+  //      slice; the transition effect re-syncs them in the same commit.
+  //   2. Transition effect — one `applyTransitionEffects(ctx, prev, next)` per
+  //      commit (v2 §1.3e), which includes the registry state mirror. It is
+  //      declared AFTER the lifecycle effect on purpose: effects run in
+  //      declaration order, so a re-registration (which resets the entry to
+  //      the zero slice) is re-mirrored before anyone can observe it.
   //
   // No latest-state ref here any more. Every action is a `[]`-dep delegation
   // to lib/tour-engine/actions, so its identity is stable for the provider's
@@ -610,29 +604,15 @@ export function TourProvider({
     }
   }, [tourIdsKey])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs on every commit; the transition is decided by comparing snapshots, not by a dep array
   React.useEffect(() => {
-    if (tourIdsKey.length === 0) return
-    const ids = tourIdsKey.split('\x00').filter(Boolean)
-    for (const id of ids) {
-      const isThisTourActive = state.isActive && state.tourId === id
-      const progress =
-        isThisTourActive && state.totalSteps > 0
-          ? (state.currentStepIndex + 1) / state.totalSteps
-          : 0
-      tourRegistry.update(id, {
-        isActive: isThisTourActive,
-        currentStepId: isThisTourActive ? (state.currentStep?.id ?? null) : null,
-        progress,
-      })
-    }
-  }, [
-    tourIdsKey,
-    state.isActive,
-    state.tourId,
-    state.currentStep,
-    state.currentStepIndex,
-    state.totalSteps,
-  ])
+    const ctx = engineContextRef.current
+    if (!ctx) return
+    const next = buildCallbackContext(state, currentTour, data)
+    const prev = prevSnapshotRef.current ?? next
+    prevSnapshotRef.current = next
+    applyTransitionEffects(ctx, prev, next)
+  })
 
   // ─── Test bridge wiring (Phase 6, issue #86) ─────────────────────────────
   // `enableTestBridge` opts in to `window.__tourKit__` — used by Playwright

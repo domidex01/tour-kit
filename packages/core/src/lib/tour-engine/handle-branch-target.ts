@@ -8,7 +8,12 @@ import {
 } from '../../utils/branch'
 import { logger } from '../../utils/logger'
 import type { TourEngineContext } from './context'
-import { buildCallbackContext, evaluateStepWhen, findNextVisibleStepIndex } from './helpers'
+import {
+  buildCallbackContext,
+  evaluateStepWhen,
+  findNextVisibleStepIndex,
+  invokeCallback,
+} from './helpers'
 
 /**
  * Resolve a `BranchTarget` to its effect on the active tour. Mirrors the
@@ -109,7 +114,7 @@ export async function handleBranchTargetImpl(
 
     ctx.dispatch({ type: 'START_TOUR', tourId: target.tour, stepIndex: newStepIndex })
     ctx.tourKitContext?.onTourStart?.(target.tour)
-    toTour.onStart?.({ ...state, tour: toTour, data })
+    invokeCallback('onStart', () => toTour.onStart?.({ ...state, tour: toTour, data }))
     return
   }
 
@@ -182,11 +187,9 @@ export async function handleBranchTargetImpl(
           previousStepId: currentStepId,
         })
         ctx.tourKitContext?.onStepView?.(currentTour.id, step.id, visibleIndex)
-        currentTour.onStepChange?.(step, visibleIndex, {
-          ...state,
-          tour: currentTour,
-          data,
-        })
+        invokeCallback('onStepChange', () =>
+          currentTour.onStepChange?.(step, visibleIndex, { ...state, tour: currentTour, data })
+        )
       }
       return
     }
@@ -205,10 +208,8 @@ export async function handleBranchTargetImpl(
       previousStepId: currentStepId,
     })
     ctx.tourKitContext?.onStepView?.(currentTour.id, targetStep.id, targetIndex)
-    currentTour.onStepChange?.(targetStep, targetIndex, {
-      ...state,
-      tour: currentTour,
-      data,
-    })
+    invokeCallback('onStepChange', () =>
+      currentTour.onStepChange?.(targetStep, targetIndex, { ...state, tour: currentTour, data })
+    )
   }
 }

@@ -19,6 +19,7 @@ import {
   evaluateStepWhen,
   findNearestVisibleStepIndex,
   findNextVisibleStepIndex,
+  invokeCallback,
 } from './helpers'
 
 /** The `{ ...state, tour, data }` shape every tour-level callback receives. */
@@ -56,7 +57,9 @@ export function completeTourImpl(ctx: TourEngineContext): void {
   ctx.dispatch({ type: 'COMPLETE_TOUR' })
   ctx.clearRouteState()
   ctx.tourKitContext?.onTourComplete?.(currentTour.id)
-  currentTour.onComplete?.({ ...state, tour: currentTour, data: ctx.getData() })
+  invokeCallback('onComplete', () =>
+    currentTour.onComplete?.({ ...state, tour: currentTour, data: ctx.getData() })
+  )
 }
 
 /** Mirrors `completeTourImpl` for skip semantics. */
@@ -72,7 +75,9 @@ export function skipTourImpl(ctx: TourEngineContext): void {
   ctx.dispatch({ type: 'SKIP_TOUR' })
   ctx.clearRouteState()
   ctx.tourKitContext?.onTourSkip?.(currentTour.id, state.currentStepIndex)
-  currentTour.onSkip?.({ ...state, tour: currentTour, data: ctx.getData() })
+  invokeCallback('onSkip', () =>
+    currentTour.onSkip?.({ ...state, tour: currentTour, data: ctx.getData() })
+  )
 }
 
 export async function startImpl(
@@ -119,7 +124,7 @@ export async function startImpl(
 
   ctx.dispatch({ type: 'START_TOUR', tourId: id, stepIndex: visibleIndex })
   ctx.tourKitContext?.onTourStart?.(id)
-  tour.onStart?.({ ...state, tour, data })
+  invokeCallback('onStart', () => tour.onStart?.({ ...state, tour, data }))
 }
 
 export async function nextImpl(ctx: TourEngineContext): Promise<void> {
@@ -178,7 +183,9 @@ export async function nextImpl(ctx: TourEngineContext): Promise<void> {
       previousStepId: currentStep?.id ?? null,
     })
     ctx.tourKitContext?.onStepView?.(currentTour.id, nextStep.id, nextStepIndex)
-    currentTour.onStepChange?.(nextStep, nextStepIndex, { ...state, tour: currentTour, data })
+    invokeCallback('onStepChange', () =>
+      currentTour.onStepChange?.(nextStep, nextStepIndex, { ...state, tour: currentTour, data })
+    )
   }
 }
 
@@ -234,7 +241,9 @@ export async function prevImpl(ctx: TourEngineContext): Promise<void> {
       previousStepId: currentStep?.id ?? null,
     })
     ctx.tourKitContext?.onStepView?.(currentTour.id, prevStep.id, prevStepIndex)
-    currentTour.onStepChange?.(prevStep, prevStepIndex, { ...state, tour: currentTour, data })
+    invokeCallback('onStepChange', () =>
+      currentTour.onStepChange?.(prevStep, prevStepIndex, { ...state, tour: currentTour, data })
+    )
   }
 }
 
@@ -275,7 +284,9 @@ export async function goToImpl(ctx: TourEngineContext, stepIndex: number): Promi
   const step = currentTour.steps[targetIndex]
   if (step) {
     ctx.tourKitContext?.onStepView?.(currentTour.id, step.id, targetIndex)
-    currentTour.onStepChange?.(step, targetIndex, { ...state, tour: currentTour, data })
+    invokeCallback('onStepChange', () =>
+      currentTour.onStepChange?.(step, targetIndex, { ...state, tour: currentTour, data })
+    )
   }
 }
 

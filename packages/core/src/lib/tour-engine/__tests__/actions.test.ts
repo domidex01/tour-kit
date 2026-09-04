@@ -190,6 +190,26 @@ describe('next', () => {
   })
 })
 
+describe('consumer callbacks that throw are logged, not propagated', () => {
+  it('a throwing onComplete still completes the tour and warns', () => {
+    const warn = vi.spyOn(logger, 'warn').mockImplementation(() => {})
+    const boom = new Error('consumer bug')
+    const handle = on(
+      makeTour('t', [visibleStep('a')], {
+        onComplete: () => {
+          throw boom
+        },
+      })
+    )
+
+    expect(() => completeTourImpl(handle.ctx)).not.toThrow()
+
+    expect(handle.mocks.dispatch).toHaveBeenCalledWith({ type: 'COMPLETE_TOUR' })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('onComplete'), boom)
+    warn.mockRestore()
+  })
+})
+
 describe('terminal paths fire exactly once', () => {
   let handle: Handle
   let onComplete: Mock<NonNullable<Tour['onComplete']>>
