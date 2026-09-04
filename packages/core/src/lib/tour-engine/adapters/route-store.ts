@@ -5,7 +5,7 @@
  * existed so a `useEffect` dep could notice a cross-tab write. The factory
  * exposes the subscription itself and the hook turns it back into a counter.
  */
-import type { TourState } from '../../../types'
+import type { Storage as StorageAdapter, TourState } from '../../../types'
 import type { MultiPagePersistenceConfig } from '../../../types/router'
 import { logger } from '../../../utils/logger'
 import { createMemoryStorage } from '../../../utils/storage'
@@ -38,12 +38,12 @@ export interface RouteStore {
 
 export function createRouteStore(
   config: MultiPagePersistenceConfig,
-  storage?: Storage
+  storage?: StorageAdapter
 ): RouteStore {
   const storageKey = config.key ?? DEFAULT_KEY
   const expiryMs = config.expiryMs ?? DEFAULT_EXPIRY_MS
 
-  const getStorage = (): Storage => {
+  const getStorage = (): StorageAdapter => {
     if (storage) return storage
     if (typeof window === 'undefined') return memoryStorage
 
@@ -62,7 +62,14 @@ export function createRouteStore(
 
     const store = getStorage()
     try {
-      const raw = store.getItem(storageKey)
+      // These stores are synchronous by construction — `load()` is called
+      // from a render path and from `boot()`'s precedence resolver, neither of
+      // which can await. The package's `Storage` type permits a Promise-
+      // returning `getItem` for async backends; such a backend is not usable
+      // here and would land as an unparseable value. Same narrowing as
+      // `flow-session-store.ts`. A real async backend needs an async load
+      // path, which is a §1.4 question, not a cast.
+      const raw = store.getItem(storageKey) as string | null
       if (!raw) return null
 
       const data: PersistedRouteState = JSON.parse(raw)

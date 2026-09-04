@@ -11,7 +11,7 @@
  *    calls it from the constructor.
  * 2. **`setItem` failures are swallowed.** A full quota must not end the tour.
  */
-import type { FlowSessionConfig } from '../../../types/config'
+import type { FlowSessionConfig, Storage as StorageAdapter } from '../../../types/config'
 import { logger } from '../../../utils/logger'
 import { createPrefixedStorage, createStorageAdapter } from '../../../utils/storage'
 import { throttleTime } from '../../../utils/throttle'
@@ -61,7 +61,7 @@ const NOOP_STORE: FlowSessionStore = {
  */
 export function createFlowSession(
   config?: CreateFlowSessionConfig,
-  storage?: Storage,
+  storage?: StorageAdapter,
   onWrite?: (session: FlowSessionV2) => void
 ): FlowSessionStore {
   // No config means the feature is off; no `window` and no injected backend

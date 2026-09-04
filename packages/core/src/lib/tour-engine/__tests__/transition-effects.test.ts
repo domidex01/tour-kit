@@ -107,6 +107,54 @@ describe('flow-session save', () => {
   })
 })
 
+describe('an unchanged prev -> next is inert', () => {
+  // The regression this pins: adapter A calls applyTransitionEffects on EVERY
+  // commit, not once per reducer transition. Before the gates, a re-render
+  // that changed nothing about the tour still wrote storage and announced to
+  // every other tab — and because `subscribeCrossTabPause` stops any tab whose
+  // own announce is older, a re-rendering tab paused tours in other tabs.
+  const everythingOn = {
+    routePersistenceEnabled: true,
+    flowSessionEnabled: true,
+    router: { getCurrentRoute: () => '/pricing' },
+  }
+
+  it('writes no storage and announces nothing when the snapshot did not move', () => {
+    const { ctx, mocks } = createFakeEngineContext(everythingOn)
+    const steady = active(1)
+
+    // Five inert commits, exactly as five React re-renders would produce.
+    for (let i = 0; i < 5; i++) applyTransitionEffects(ctx, steady, steady)
+
+    expect(mocks.saveRouteState).not.toHaveBeenCalled()
+    expect(mocks.saveFlowSession).not.toHaveBeenCalled()
+    expect(mocks.announce).not.toHaveBeenCalled()
+  })
+
+  it('still fires once when the step actually advances', () => {
+    const { ctx, mocks } = createFakeEngineContext(everythingOn)
+
+    applyTransitionEffects(ctx, active(1), active(1))
+    applyTransitionEffects(ctx, active(1), active(2))
+    applyTransitionEffects(ctx, active(2), active(2))
+
+    expect(mocks.saveRouteState).toHaveBeenCalledTimes(1)
+    expect(mocks.saveFlowSession).toHaveBeenCalledExactlyOnceWith(2, '/pricing')
+  })
+
+  it('announces on activation, not on every commit while active', () => {
+    const { ctx, mocks } = createFakeEngineContext(everythingOn)
+
+    applyTransitionEffects(ctx, snap(), active(0))
+    applyTransitionEffects(ctx, active(0), active(0))
+    applyTransitionEffects(ctx, active(0), active(1))
+
+    // Activation announces. A step move does not re-announce — ownership did
+    // not change, and re-announcing perturbs the cross-tab tie-break.
+    expect(mocks.announce).toHaveBeenCalledTimes(1)
+  })
+})
+
 describe('flow-blob clear fires only on the true → false edge', () => {
   it('clears when an active tour becomes inactive', () => {
     const { ctx, mocks } = createFakeEngineContext({ flowSessionEnabled: true })

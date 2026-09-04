@@ -25,22 +25,36 @@ export function applyTransitionEffects(
   prev: TourCallbackContext,
   next: TourCallbackContext
 ): void {
+  // Every side-effect below is gated on a real prev -> next change.
+  //
+  // Adapter B calls this once per reducer transition, where the comparison is
+  // redundant. Adapter A calls it on EVERY commit — the transition is decided
+  // by comparing snapshots, not by a dep array — so without these gates an
+  // inert re-render re-writes storage and re-announces to every other tab.
+  // That is not merely wasteful: a fresh announce carries a fresh timestamp,
+  // and `subscribeCrossTabPause` stops any tab whose own announce is older, so
+  // a re-rendering tab would repeatedly pause tours in other tabs.
+  //
+  // The gates below reproduce the dep arrays the seven pre-§1.3e effects had.
+  const identityChanged = prev.tourId !== next.tourId || prev.isActive !== next.isActive
+  const positionChanged = identityChanged || prev.currentStepIndex !== next.currentStepIndex
+
   // ─── Route-state save ───────────────────────────────────────────────────
-  if (next.isActive && ctx.routePersistenceEnabled) {
+  if (next.isActive && ctx.routePersistenceEnabled && positionChanged) {
     ctx.saveRouteState(next)
   }
 
   // ─── Throttled flow-session save ────────────────────────────────────────
   // `currentRoute` rides along so a hard refresh mid-multi-page-tour resumes
   // on the right URL.
-  if (next.isActive && next.tourId && ctx.flowSessionEnabled) {
+  if (next.isActive && next.tourId && ctx.flowSessionEnabled && positionChanged) {
     ctx.saveFlowSession(next.currentStepIndex, ctx.router?.getCurrentRoute())
   }
 
   // ─── AbortController swap on tour identity ──────────────────────────────
   // Lets `waitForStepTarget` cancel cleanly instead of resolving a stale
   // navigation onto a tour the user has left.
-  if (prev.tourId !== next.tourId || prev.isActive !== next.isActive) {
+  if (identityChanged) {
     ctx.abortControllerRef.current?.abort()
     ctx.abortControllerRef.current = next.isActive ? new AbortController() : null
   }
@@ -54,7 +68,7 @@ export function applyTransitionEffects(
   }
 
   // ─── Cross-tab announce ─────────────────────────────────────────────────
-  if (next.isActive && next.tourId) {
+  if (next.isActive && next.tourId && identityChanged) {
     ctx.crossTab.lastAnnounceTs = Date.now()
     ctx.announce({
       type: 'tour:active',
@@ -65,8 +79,11 @@ export function applyTransitionEffects(
   }
 
   // ─── Registry state mirror ──────────────────────────────────────────────
-  // The registry only notifies when the slice actually changed, so spurious
-  // renders stay clamped to one per real transition.
+  // Deliberately ungated: this must also pick up a tours-set change, which
+  // neither `identityChanged` nor `positionChanged` sees. It is cheap and
+  // self-de-duplicating — `tourRegistry.update` compares the slice field by
+  // field and notifies only on a real change, so an inert commit costs a Map
+  // walk and no subscriber renders.
   mirrorToRegistry(ctx, next)
 }
 

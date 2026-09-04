@@ -22,7 +22,7 @@
  *     and turns every method into a no-op.
  */
 import { tourRegistry } from '../../registry/tour-registry'
-import type { PersistenceConfig } from '../../types'
+import type { PersistenceConfig, Storage as StorageAdapter } from '../../types'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../../types/router'
 import type { TourCallbackContext } from '../../types/state'
 import type { Tour } from '../../types/tour'
@@ -63,8 +63,13 @@ export interface CreateTourEngineOptions {
   /**
    * Explicit storage backend for every adapter. Tests pass
    * `createMemoryStorage()`; leaving it unset selects from the configs.
+   *
+   * This is the package's own 3-method adapter contract (`types/config.ts`),
+   * NOT the DOM `Storage` — a bare `Storage` here resolves to `lib.dom` and
+   * silently demands `length` / `clear` / `key`, rejecting the very shape the
+   * docs tell consumers to implement.
    */
-  storage?: Storage
+  storage?: StorageAdapter
   analytics?: TourEngineAnalytics
   onTourPaused?: (tourId: string, reason: 'cross-tab') => void
   onNavigationRequired?: (route: string, stepId: string) => void

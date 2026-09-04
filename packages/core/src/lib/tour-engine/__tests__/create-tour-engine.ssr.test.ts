@@ -8,11 +8,15 @@
  * Here there is genuinely no `window`, which is what a Next.js server render
  * or a Node script actually sees.
  */
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createTourEngine } from '../create-tour-engine'
 import { makeTour, visibleStep } from './_helpers/make-tour'
 
 const TOUR = makeTour('t', [visibleStep('a'), visibleStep('b')])
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 describe('SSR construction', () => {
   it('there really is no window here', () => {
@@ -22,6 +26,35 @@ describe('SSR construction', () => {
 
   it('constructs without touching storage, window or BroadcastChannel', () => {
     expect(() => createTourEngine({ tours: [TOUR] })).not.toThrow()
+  })
+
+  it('opens NO BroadcastChannel, even with cross-tab enabled', () => {
+    // `not.toThrow()` is not enough to prove this and never was: Node 18+
+    // ships a global BroadcastChannel, so the constructor happily opened a
+    // real one here — and an open channel refs the event loop, which hung any
+    // Node process that built an engine and never called destroy().
+    const opened: string[] = []
+    class CountingChannel {
+      constructor(name: string) {
+        opened.push(name)
+      }
+      postMessage() {}
+      addEventListener() {}
+      removeEventListener() {}
+      close() {}
+    }
+    vi.stubGlobal('BroadcastChannel', CountingChannel)
+
+    createTourEngine({
+      tours: [TOUR],
+      routePersistence: {
+        enabled: true,
+        storage: 'localStorage',
+        crossTab: { enabled: true },
+      },
+    })
+
+    expect(opened).toEqual([])
   })
 
   it('constructs with every persistence option turned on', () => {

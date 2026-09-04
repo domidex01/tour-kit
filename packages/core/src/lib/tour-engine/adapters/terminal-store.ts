@@ -5,7 +5,7 @@
  * over a prefixed adapter were the only React in it. `boot()` reads this store
  * for the completed/skipped lists, so the engine cannot start without it.
  */
-import type { PersistenceConfig } from '../../../types'
+import type { PersistenceConfig, Storage as StorageAdapter } from '../../../types'
 import { defaultPersistenceConfig } from '../../../types/config'
 import { createPrefixedStorage, createStorageAdapter, safeJSONParse } from '../../../utils/storage'
 
@@ -26,7 +26,10 @@ export interface TerminalStore {
  * @param storage - Explicit backend, overriding `config.storage`. Injected by
  *   tests (`createMemoryStorage()`) and by `createTourEngine({ storage })`.
  */
-export function createTerminalStore(config?: PersistenceConfig, storage?: Storage): TerminalStore {
+export function createTerminalStore(
+  config?: PersistenceConfig,
+  storage?: StorageAdapter
+): TerminalStore {
   const merged = { ...defaultPersistenceConfig, ...config }
   const adapter = storage ?? createStorageAdapter(merged.storage)
   const store = createPrefixedStorage(adapter, merged.keyPrefix ?? 'tourkit')

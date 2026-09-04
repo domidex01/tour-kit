@@ -16,7 +16,9 @@
 import { readFileSync } from 'node:fs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { tourRegistry } from '../../../registry/tour-registry'
+import type { Storage as TourKitStorage } from '../../../types/config'
 import { TourValidationError } from '../../validate-tour'
+import { createTourEngine } from '../create-tour-engine'
 import type { TourEngine } from '../create-tour-engine'
 import { makeEngine } from './_helpers/make-engine'
 import { hiddenStep, makeTour, visibleStep } from './_helpers/make-tour'
@@ -158,6 +160,39 @@ describe('validation happens in the factory', () => {
     const { engine } = engineFor({ tours: [THREE] })
 
     expect(() => engine.setTours([invalid()])).toThrow(TourValidationError)
+  })
+})
+
+describe('the published storage option takes the documented adapter', () => {
+  // A compile-time guard as much as a runtime one. `storage?: Storage` without
+  // an explicit import resolves to the DOM `Storage`, which demands `length`,
+  // `clear` and `key` — so the 3-method shape the docs tell consumers to
+  // implement was a type error against a just-published entry point. If that
+  // regresses, this file stops typechecking.
+  it('accepts a hand-written 3-method Storage and reads through it', async () => {
+    const backing = new Map<string, string>()
+    const custom: TourKitStorage = {
+      getItem: (key) => backing.get(key) ?? null,
+      setItem: (key, value) => {
+        backing.set(key, value)
+      },
+      removeItem: (key) => {
+        backing.delete(key)
+      },
+    }
+
+    const engine = createTourEngine({
+      tours: [THREE],
+      storage: custom,
+      persistence: { enabled: true, storage: 'localStorage' },
+    })
+    live.push(engine)
+
+    await engine.start('t')
+    engine.complete()
+
+    // The completion landed in OUR map, not in a DOM storage.
+    expect([...backing.values()].join()).toContain('t')
   })
 })
 

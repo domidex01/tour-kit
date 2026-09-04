@@ -26,7 +26,13 @@ export function createBroadcast<TMsg>(
   options?: { enabled?: boolean }
 ): BroadcastStore<TMsg> {
   const enabled = options?.enabled ?? true
-  if (!enabled || typeof BroadcastChannel === 'undefined') {
+  // `typeof BroadcastChannel === 'undefined'` is NOT enough on its own: Node
+  // 18+ ships a global BroadcastChannel, and an open channel refs the event
+  // loop, so a server-side `createTourEngine()` would construct a live channel
+  // and hang the process until `destroy()` — which SSR never calls. The
+  // `window` check is what makes the constructor genuinely inert off-browser.
+  const canBroadcast = typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined'
+  if (!enabled || !canBroadcast) {
     return NOOP_STORE as BroadcastStore<TMsg>
   }
 
