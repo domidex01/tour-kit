@@ -303,12 +303,6 @@ export function TourProvider({
     { enabled: !!routePersistence.crossTab?.enabled }
   )
 
-  // Stable callback ref for cross-tab pause notification
-  const onTourPausedRef = React.useRef(onTourPaused)
-  React.useEffect(() => {
-    onTourPausedRef.current = onTourPaused
-  })
-
   // Idempotency guards: track the last tour for which the terminal callback
   // (onComplete / onSkip) has already fired. Prevents double-firing inside the
   // same React commit phase, where reducer state is still closure-stale.
@@ -517,7 +511,7 @@ export function TourProvider({
     tabId,
     announce: broadcast.post,
     crossTab: crossTabRef.current,
-    onTourPaused: onTourPausedRef.current,
+    onTourPaused,
     tourKitContext: tourKitContext satisfies TourEngineAnalytics | null,
   }
 
@@ -587,15 +581,9 @@ export function TourProvider({
   //      actually changed, so spurious renders are clamped to one per real
   //      transition.
   //
-  // Action methods are wired through latest-state refs (`controllerRef`) so
-  // entries can be created once and the closures stay valid as the controller
-  // identity churns on every state change. This mirrors the `bridgeMethodsRef`
-  // pattern below and keeps the registry entry stable for the lifetime of the
-  // tour.
-  const controllerRef = React.useRef({ start, stop, next, prev, goToStep })
-  React.useEffect(() => {
-    controllerRef.current = { start, stop, next, prev, goToStep }
-  })
+  // No latest-state ref here any more. Every action is a `[]`-dep delegation
+  // to lib/tour-engine/actions, so its identity is stable for the provider's
+  // lifetime and the registry entry can close over it directly (v2 §1.3d).
 
   // `tourIdsKey` is declared earlier (diagnostic engine block) — reuse it here.
   React.useEffect(() => {
@@ -607,24 +595,12 @@ export function TourProvider({
         id,
         state: { isActive: false, currentStepId: null, progress: 0 },
         actions: {
-          start: () => {
-            void controllerRef.current.start(id)
-          },
-          stop: () => {
-            controllerRef.current.stop()
-          },
-          restart: () => {
-            void controllerRef.current.start(id, 0)
-          },
-          next: () => {
-            void controllerRef.current.next()
-          },
-          prev: () => {
-            void controllerRef.current.prev()
-          },
-          goToStep: (stepId) => {
-            void controllerRef.current.goToStep(stepId)
-          },
+          start: () => void start(id),
+          stop,
+          restart: () => void start(id, 0),
+          next: () => void next(),
+          prev: () => void prev(),
+          goToStep: (stepId) => void goToStep(stepId),
         },
       })
       unregisters.push(unregister)
@@ -682,6 +658,10 @@ export function TourProvider({
     skip,
     diagnostics,
   }
+  // Kept, unlike `controllerRef`: the bridge exposes `diagnostics`, which IS
+  // per-render state, so the entry installed on `window` once must read the
+  // latest through a ref. The action methods on it are stable; the diagnostics
+  // map is not.
   const bridgeMethodsRef = React.useRef(bridgeMethods)
   bridgeMethodsRef.current = bridgeMethods
 

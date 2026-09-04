@@ -21,16 +21,17 @@
  * - **No `cn`, no zod schemas.** `cn` pulls `clsx` + `tailwind-merge`; the
  *   schemas already have their own door at `@tour-kit/core/schemas`.
  *
- * Deliberately absent, and not an oversight: `lib/tour-engine/*`
- * (`navigateToStepImpl`, `handleBranchTargetImpl`, `TourEngineContext`) and
- * `lib/flow-session`'s `serialize`/`parse`. Both are React-free and tempting,
- * but they are internal shapes that §1.3 redesigns when `createTourEngine()`
- * lands — publishing them now would freeze an API a week before it changes.
+ * Since v2 §1.3 this entry can *run* a tour: `createTourEngine()` returns a
+ * plain-JavaScript engine with no React, no DOM and no bundler required.
+ * §1.2 shipped the door; §1.3 is what made it a capability rather than
+ * infrastructure.
  *
- * Scope note: until §1.3 adds `createTourEngine()`, this entry exports types,
- * DOM helpers, predicates and validators — no way to *run* a tour. It is
- * infrastructure for §1.3, landed early because it is cheap and additive, not
- * a shippable framework-agnostic capability.
+ * Still deliberately absent, and not an oversight: the port itself
+ * (`TourEngineContext`), the four persistence/broadcast factories, and the
+ * impls behind it (`navigateToStepImpl`, `handleBranchTargetImpl`,
+ * `applyTransitionEffects`). They are the seam two adapters implement, not a
+ * consumer API — §1.4 and §1.5 will say which parts a binding actually needs,
+ * and publishing them before then freezes shapes those slices still move.
  */
 
 // ── Types (type-only; erased at runtime) ────────────────────────────────────
@@ -222,3 +223,19 @@ export type {
 
 // ── Diagnostics ─────────────────────────────────────────────────────────────
 export { BUILTIN_GATE_ORDER, explainTour } from '../lib/diagnostic'
+
+// ── The engine (v2 §1.3) ────────────────────────────────────────────────────
+// LEAF imports. `../lib/tour-engine/create-tour-engine` pulls the reducer,
+// boot resolver, actions, transition effects and the four storage adapters —
+// all React-free, all guarded by no-react-in-engine-{dist,types}.
+export { createTourEngine } from '../lib/tour-engine/create-tour-engine'
+export type {
+  CreateTourEngineOptions,
+  TourEngine,
+} from '../lib/tour-engine/create-tour-engine'
+export { resolveBootStart } from '../lib/tour-engine/boot'
+export type {
+  BootDecision,
+  BootSource,
+  ResolveBootStartInput,
+} from '../lib/tour-engine/boot'

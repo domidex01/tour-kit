@@ -123,10 +123,17 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   measured that way. `size-limit` (root [`/.size-limit.json`](/.size-limit.json))
   is a secondary smoke signal in a bundled-with-deps + brotli unit, run
   `pnpm bundlesize`. Per-package dist-gzip closure budgets:
-  - core <21 KB (target <8 KB; tracked as audit B-1 — the §1.2 subpath did
-    **not** move the main entry toward it, that is §1.4's to earn)
-  - core/engine subpath <9 KB (the non-React consumer's cost: an ~800-byte
-    door plus the shared chunk it and the main entry both read)
+  - core <21.5 KB (target <8 KB; tracked as audit B-1 — neither the §1.2
+    subpath nor the §1.3 engine moved the main entry toward it, that is
+    §1.4's to earn. §1.3 raised this from 21 KB against a measured 21 271:
+    the +446 B is the module-boundary cost of moving 636 lines out of
+    `tour-provider.tsx`, not engine runtime leaking in —
+    `engine-not-in-main-closure.test.ts` guards that)
+  - core/engine subpath <16 KB (the non-React consumer's worst case: the
+    engine — reducer, boot resolver, actions, transition effects, four
+    storage adapters — plus the chunk it and the main entry both read. Was
+    <9 KB while this was a types-and-predicates door with no way to run a
+    tour; a type-only consumer still ships zero)
   - react <12 KB
   - hints <6 KB
   - analytics <4 KB (root; per-plugin <1.5 KB each)
