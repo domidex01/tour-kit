@@ -24,15 +24,28 @@
  *
  * Budgets = the 2026-05-23 audit's raw dist gzip measurement + ~20% headroom.
  * Exceptions documented inline:
- *   - core: 21 KB ceiling, measuring the closure (13.5 KB entry + 7.3 KB shared
- *     chunk = 20.8 KB). NOT a relaxation of the old 20 KB: that number measured
- *     a self-contained entry that no longer exists. The CLAUDE.md target is
- *     <8 KB, tracked as audit B-1 — and the engine subpath did NOT move the
- *     main entry toward it. B-1 is §1.4's to earn, when the hooks stop pulling
- *     the whole provider.
- *   - core:engine: 9 KB against a measured 8.1 KB (797 B door + the same
- *     7.3 KB chunk). This is the non-React consumer's real cost; the 797-byte
- *     entry file on its own would measure the plumbing, not the engine.
+ *   - core: 21.5 KB ceiling, measuring the closure (8.5 KB entry + 12.8 KB
+ *     shared chunk = 21.3 KB). NOT a relaxation of the old 20 KB: that number
+ *     measured a self-contained entry that no longer exists. The CLAUDE.md
+ *     target is <8 KB, tracked as audit B-1 — still §1.4's to earn, when the
+ *     hooks stop pulling the whole provider.
+ *
+ *     Raised from 21 000 in v2 §1.3 against a measured 21 271, up from 20 825.
+ *     The +446 B is the module-boundary cost of the port/adapter split: 636
+ *     lines left `tour-provider.tsx` for six modules, and esbuild can no longer
+ *     inline what used to be same-file calls. It is NOT engine runtime leaking
+ *     into the main entry — `engine-not-in-main-closure.test.ts` proves
+ *     `createTourEngine` stays out, matching on a string literal rather than
+ *     the identifier because `minify: true` renames the function and the
+ *     obvious grep passes either way.
+ *   - core:engine: 16 KB against a measured 15.3 KB (2.5 KB entry + the same
+ *     12.8 KB chunk), up from 8.1 KB when this was a types-and-predicates door.
+ *     The difference is a working tour engine: reducer, boot resolver, actions,
+ *     transition effects and four storage adapters. §1.3's plan expected
+ *     13–14 KB; the measured number is the number. A type-only consumer still
+ *     ships zero (types erase, the barrel is re-exports-only and
+ *     `sideEffects: false`), so this row is the worst case — import everything
+ *     — not the common one.
  *   - hints, announcements, surveys, media, ai:client: re-baselined in v2 §1.2
  *     WITHOUT a byte being added. All five ship a `headless` entry alongside
  *     `index`, so they have been split since long before core was, and the
@@ -54,8 +67,8 @@
  * @type {Array<[name: string, relPath: string, budgetBytes: number]>}
  */
 export const budgets = [
-  ['core', 'packages/core/dist/index.js', 21000],
-  ['core:engine', 'packages/core/dist/engine/index.js', 9000],
+  ['core', 'packages/core/dist/index.js', 21500],
+  ['core:engine', 'packages/core/dist/engine/index.js', 16000],
   ['react', 'packages/react/dist/index.js', 12000],
   ['hints', 'packages/hints/dist/index.js', 6000],
   ['analytics:main', 'packages/analytics/dist/index.js', 4000],

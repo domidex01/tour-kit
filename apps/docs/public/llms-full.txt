@@ -1,4 +1,4 @@
-# userTourKit v1.0.7 — Generated 2026-06-20T03:32:00Z
+# userTourKit v1.0.7 — Generated 2026-09-03T14:34:30Z
 
 # Feature Adoption Tracking
 
@@ -19597,10 +19597,6 @@ interface ChatRouteHandlerOptions {
   onEvent?(event: AiChatEvent): void | Promise<void>
 }
 ```
-
-Request timeout is a Next.js route-segment export, not a handler option. Set
-`export const maxDuration = 30` in your route module — it is read by the
-platform, not by `createChatRouteHandler`.
 
 ### ContextConfig
 

@@ -66,6 +66,20 @@ export async function evaluateStepWhen(
 }
 
 /**
+ * Run a consumer lifecycle callback (`onStart` / `onStepChange` /
+ * `onComplete` / `onSkip`). A throw is logged and swallowed — the same
+ * treatment `evaluateStepWhen` gives `when` — so a buggy callback cannot brick
+ * the tour or reject the `next()` promise that fired it (v2 §1.3 fail-safe).
+ */
+export function invokeCallback(name: string, fn: () => void): void {
+  try {
+    fn()
+  } catch (error) {
+    logger.warn(`Error in ${name} callback:`, error)
+  }
+}
+
+/**
  * Walk steps in `direction` from `startIndex` (inclusive) until a step's
  * `when` predicate returns true or the array boundary is reached.
  *

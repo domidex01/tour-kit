@@ -6,6 +6,10 @@ const withMDX = createMDX()
 
 /** @type {import('next').NextConfig} */
 const config = {
+  // Cap static-generation workers: on the 16-vCPU WSL box the default spawned ~12
+  // workers at ~1GB each next to a 7-10GB build process and exhausted the VM
+  // (2026-09-03, see ~/.local/state/wsl-memguard.log).
+  experimental: { cpus: 4 },
   output: 'standalone',
   reactStrictMode: true,
   trailingSlash: false,

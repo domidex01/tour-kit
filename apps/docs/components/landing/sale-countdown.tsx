@@ -4,7 +4,7 @@ import { Timer } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import { DISCOUNT_PERCENT, type TimeRemaining, getTimeRemaining } from '@/lib/pricing'
+import { DISCOUNT_PERCENT, type TimeRemaining, getTimeRemaining, isSaleActive } from '@/lib/pricing'
 
 interface SaleState {
   /** False during SSR and the first hydration render; true after mount. */
@@ -18,11 +18,10 @@ interface SaleState {
 /**
  * Live launch-promo state. Ticks once per second on the client.
  *
- * SSR and the first hydration render return `mounted: false` so the markup is
- * deterministic (no hydration mismatch on the live digits); the real numbers
- * only appear after the mount effect runs. During the promo window the static
- * build optimistically shows the sale, then the effect confirms (or, post-promo,
- * flips the price back to regular).
+ * `mounted` stays false through SSR and the first hydration render so the live
+ * digits are deterministic (no hydration mismatch). `expired`, by contrast, is
+ * computed from SALE_END_ISO on every render — server and client agree, so an
+ * ended promo never reaches the HTML at all.
  */
 export function useSaleCountdown(): SaleState {
   const [mounted, setMounted] = useState(false)
@@ -36,7 +35,12 @@ export function useSaleCountdown(): SaleState {
     return () => clearInterval(id)
   }, [])
 
-  return { mounted, remaining, expired: mounted && remaining === null }
+  // Expiry is derived from SALE_END_ISO on every render so the server-rendered
+  // HTML and the first client render agree. Deriving it from `mounted` made
+  // `expired` false during SSR, which shipped a "49% off" banner with `--`
+  // placeholder digits for an already-ended sale until hydration removed it.
+  // Only the live digits still wait for `mounted`.
+  return { mounted, remaining, expired: !isSaleActive() }
 }
 
 const UNITS: { key: keyof TimeRemaining; label: string }[] = [
