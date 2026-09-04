@@ -12,9 +12,9 @@
  * cross-page case that navigates, waits for the target and dispatches.
  */
 import type { Tour } from '../../types/tour'
+import type { FlowSessionV2 } from '../flow-session'
 import type { PersistedRouteState } from './adapters/route-store'
 import type { TourEngineContext } from './context'
-import type { FlowSessionV2 } from '../flow-session'
 
 export type BootSource = 'flow' | 'route' | 'auto'
 

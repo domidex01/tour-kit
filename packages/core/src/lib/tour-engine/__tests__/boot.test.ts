@@ -9,13 +9,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { PersistedRouteState } from '../adapters/route-store'
 import { type BootDecision, resolveBootStart, runBootStart } from '../boot'
-import {
-  BOOT_ROWS,
-  FLOW_TOUR,
-  flowForRow,
-  routeForRow,
-  toursForRow,
-} from './_helpers/boot-rows'
+import { BOOT_ROWS, FLOW_TOUR, flowForRow, routeForRow, toursForRow } from './_helpers/boot-rows'
 import { createFakeEngineContext } from './_helpers/fake-engine-context'
 import { hiddenStep, makeTour, visibleStep } from './_helpers/make-tour'
 
@@ -164,10 +158,14 @@ describe('runBootStart', () => {
   it('navigates first, then dispatches, when the recorded route differs', async () => {
     const { ctx, mocks } = ctxFor({ router: { getCurrentRoute: () => '/home' } })
 
-    await runBootStart(ctx, { ...decision, source: 'flow' }, {
-      currentRoute: '/pricing',
-      onClear: vi.fn(),
-    })
+    await runBootStart(
+      ctx,
+      { ...decision, source: 'flow' },
+      {
+        currentRoute: '/pricing',
+        onClear: vi.fn(),
+      }
+    )
 
     expect(mocks.router.navigate).toHaveBeenCalledWith('/pricing')
     expect(mocks.dispatch).toHaveBeenCalledWith({

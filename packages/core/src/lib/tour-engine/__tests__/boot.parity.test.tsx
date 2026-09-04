@@ -17,12 +17,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { useTourContext } from '../../../context/tour-context'
 import { TourProvider } from '../../../context/tour-provider'
 import type { Tour } from '../../../types'
-import {
-  type AutoKind,
-  BOOT_ROWS,
-  type FlowKind,
-  toursForRow,
-} from './_helpers/boot-rows'
+import { type AutoKind, BOOT_ROWS, type FlowKind, toursForRow } from './_helpers/boot-rows'
 import { stageFlow, stageRoute } from './_helpers/stage-storage'
 
 let seen: { tourId: string | null; currentStepIndex: number; isActive: boolean } = {

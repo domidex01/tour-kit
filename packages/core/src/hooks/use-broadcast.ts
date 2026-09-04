@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { type BroadcastStore, createBroadcast } from '../lib/tour-engine/adapters/broadcast'
 
 export interface UseBroadcastReturn<TMsg> {
   /** Post a message to all other tabs subscribing to the same channel name. */
@@ -10,21 +11,17 @@ export interface UseBroadcastReturn<TMsg> {
   subscribe: (handler: (msg: TMsg) => void) => () => void
 }
 
-const NOOP_RETURN: UseBroadcastReturn<unknown> = {
-  post: () => {},
-  subscribe: () => () => {},
-}
-
 /**
- * Typed wrapper around `BroadcastChannel` for cross-tab pub/sub.
+ * React wrapper over `createBroadcast` (v2 §1.3b).
  *
- * Lazy-initializes the channel and closes it on unmount. When the runtime
- * does not provide `BroadcastChannel` (e.g. older Safari) or when
- * `options.enabled === false`, both `post` and `subscribe` are no-ops so
- * consumers do not need to branch.
+ * Typed wrapper around `BroadcastChannel` for cross-tab pub/sub. The factory
+ * lazily opens the channel and no-ops when the runtime lacks
+ * `BroadcastChannel` (e.g. older Safari) or when `options.enabled === false`,
+ * so consumers do not need to branch. All that stays here is closing the
+ * channel on unmount.
  *
- * Self-message filtering is the consumer's responsibility — attach a
- * `tabId` to your messages and ignore matching ones.
+ * Self-message filtering is the consumer's responsibility — attach a `tabId`
+ * to your messages and ignore matching ones.
  *
  * @typeParam TMsg - Discriminated union of message shapes for this channel.
  */
@@ -33,44 +30,15 @@ export function useBroadcast<TMsg>(
   options?: { enabled?: boolean }
 ): UseBroadcastReturn<TMsg> {
   const enabled = options?.enabled ?? true
-  const isAvailable = typeof BroadcastChannel !== 'undefined'
 
-  const channel = React.useMemo(() => {
-    if (!enabled || !isAvailable) return null
-    return new BroadcastChannel(channelName)
-  }, [enabled, isAvailable, channelName])
-
-  React.useEffect(() => {
-    return () => channel?.close()
-  }, [channel])
-
-  const post = React.useCallback(
-    (msg: TMsg) => {
-      channel?.postMessage(msg)
-    },
-    [channel]
+  const store = React.useMemo<BroadcastStore<TMsg>>(
+    () => createBroadcast<TMsg>(channelName, { enabled }),
+    [channelName, enabled]
   )
 
-  const subscribe = React.useCallback(
-    (handler: (msg: TMsg) => void) => {
-      if (!channel) return () => {}
-      const wrapped = (e: MessageEvent) => handler(e.data as TMsg)
-      channel.addEventListener('message', wrapped)
-      return () => channel.removeEventListener('message', wrapped)
-    },
-    [channel]
-  )
+  React.useEffect(() => () => store.close(), [store])
 
-  // Memoize return value so consumers can safely use the hook result in
-  // effect dep arrays without re-running on every render.
-  const value = React.useMemo<UseBroadcastReturn<TMsg>>(
-    () => ({ post, subscribe }),
-    [post, subscribe]
-  )
-
-  if (!enabled || !isAvailable) {
-    return NOOP_RETURN as UseBroadcastReturn<TMsg>
-  }
-
-  return value
+  // Memoized so consumers can put the result in effect dep arrays without
+  // re-running every render.
+  return React.useMemo(() => ({ post: store.post, subscribe: store.subscribe }), [store])
 }

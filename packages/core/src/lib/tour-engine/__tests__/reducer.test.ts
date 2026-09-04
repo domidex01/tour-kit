@@ -198,9 +198,9 @@ describe('SET_LOADING / SET_TRANSITIONING', () => {
 
 describe('ADD_COMPLETED / ADD_SKIPPED', () => {
   it('ADD_COMPLETED appends an unseen id', () => {
-    expect(tourReducer(baseState(), { type: 'ADD_COMPLETED', tourId: 'a' }).completedTours).toEqual([
-      'a',
-    ])
+    expect(tourReducer(baseState(), { type: 'ADD_COMPLETED', tourId: 'a' }).completedTours).toEqual(
+      ['a']
+    )
   })
 
   it('ADD_COMPLETED returns the same reference for an id already present', () => {

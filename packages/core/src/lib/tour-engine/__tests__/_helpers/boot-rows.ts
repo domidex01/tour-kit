@@ -1,3 +1,4 @@
+import type { Tour } from '../../../../types/tour'
 /**
  * v2 §1.3c — the boot-precedence truth table, defined once.
  *
@@ -12,7 +13,6 @@
  * duplicated suites.)
  */
 import type { FlowSessionV2 } from '../../../flow-session'
-import type { Tour } from '../../../../types/tour'
 import type { PersistedRouteState } from '../../adapters/route-store'
 import type { BootSource } from '../../boot'
 import { makeTour, visibleStep } from './make-tour'

@@ -81,7 +81,13 @@ describe('load', () => {
     const now = Date.now()
     storage.setItem(
       KEY,
-      JSON.stringify({ schemaVersion: 1, tourId: 't', stepIndex: 1, startedAt: now, lastUpdatedAt: now })
+      JSON.stringify({
+        schemaVersion: 1,
+        tourId: 't',
+        stepIndex: 1,
+        startedAt: now,
+        lastUpdatedAt: now,
+      })
     )
 
     expect(store.load()).toMatchObject({ schemaVersion: 2, currentRoute: undefined })
@@ -103,7 +109,7 @@ describe('load', () => {
 
   it('uses the 24h default TTL for localStorage', () => {
     const local = createFlowSession({ storage: 'localStorage' }, storage)
-    stage({ lastUpdatedAt: Date.now() - (2 * HOUR_MS) })
+    stage({ lastUpdatedAt: Date.now() - 2 * HOUR_MS })
 
     // Two hours is past sessionStorage's 1h default but well inside 24h.
     expect(local.load()).not.toBeNull()

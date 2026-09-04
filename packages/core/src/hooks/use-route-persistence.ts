@@ -1,19 +1,7 @@
 import * as React from 'react'
+import { type PersistedRouteState, createRouteStore } from '../lib/tour-engine/adapters/route-store'
 import type { TourState } from '../types'
 import type { MultiPagePersistenceConfig } from '../types/router'
-import { logger } from '../utils/logger'
-import { createMemoryStorage } from '../utils/storage'
-
-interface PersistedRouteState {
-  tourId: string | null
-  stepIndex: number
-  completedTours: string[]
-  skippedTours: string[]
-  timestamp: number
-}
-
-const DEFAULT_KEY = 'tourkit-route-state'
-const DEFAULT_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24 hours
 
 export interface UseRoutePersistenceReturn {
   /** Save current tour state */
@@ -32,114 +20,32 @@ export interface UseRoutePersistenceReturn {
   externalVersion: number
 }
 
-// Single module-scope memory store, used as SSR / `storage: 'memory'` fallback.
-// Promoted to `@tour-kit/core`'s `createMemoryStorage()` in Phase 1 of the
-// refactor train — single source of the DOM `Storage` shape across packages.
-const memoryStorage = createMemoryStorage()
-
 /**
- * Hook for persisting tour state across page navigations.
- * Extends base persistence with route-specific handling.
+ * React wrapper over `createRouteStore` (v2 §1.3b).
  *
- * @remarks
- * Uses existing storage utilities from @tour-kit/core.
- * Handles SSR gracefully by checking for window availability.
+ * The factory owns the storage shape; the only thing left here is turning its
+ * `subscribeStorage` callback back into the version counter consumers put in
+ * effect dep arrays.
  */
 export function useRoutePersistence(config: MultiPagePersistenceConfig): UseRoutePersistenceReturn {
-  const storageKey = config.key ?? DEFAULT_KEY
-  const expiryMs = config.expiryMs ?? DEFAULT_EXPIRY_MS
-
-  const getStorage = React.useCallback(() => {
-    if (typeof window === 'undefined') return memoryStorage
-
-    switch (config.storage) {
-      case 'sessionStorage':
-        return window.sessionStorage
-      case 'memory':
-        return memoryStorage
-      default:
-        return window.localStorage
-    }
-  }, [config.storage])
-
-  const save = React.useCallback(
-    (state: Partial<TourState>) => {
-      if (!config.enabled) return
-
-      const storage = getStorage()
-
-      const data: PersistedRouteState = {
-        tourId: state.tourId ?? null,
-        stepIndex: state.currentStepIndex ?? 0,
-        completedTours: state.completedTours ?? [],
-        skippedTours: state.skippedTours ?? [],
-        timestamp: Date.now(),
-      }
-
-      try {
-        storage.setItem(storageKey, JSON.stringify(data))
-        // Browsers automatically fire `storage` events on other tabs when
-        // localStorage is written; no manual dispatch is needed (and firing
-        // one on the writing tab is a no-op in terms of real cross-tab sync).
-      } catch (e) {
-        logger.warn('Failed to save route state:', e)
-      }
-    },
-    [config.enabled, getStorage, storageKey]
+  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed by the fields that decide storage identity — consumers pass inline object literals
+  const store = React.useMemo(
+    () => createRouteStore(config),
+    [config.enabled, config.storage, config.key, config.expiryMs, config.syncTabs]
   )
 
-  const load = React.useCallback((): PersistedRouteState | null => {
-    if (!config.enabled) return null
-
-    const storage = getStorage()
-
-    try {
-      const raw = storage.getItem(storageKey)
-      if (!raw) return null
-
-      const data: PersistedRouteState = JSON.parse(raw)
-
-      // Check expiry
-      if (Date.now() - data.timestamp > expiryMs) {
-        storage.removeItem(storageKey)
-        return null
-      }
-
-      return data
-    } catch (e) {
-      logger.warn('Failed to load route state:', e)
-      return null
-    }
-  }, [config.enabled, getStorage, storageKey, expiryMs])
-
-  const clear = React.useCallback(() => {
-    const storage = getStorage()
-    storage.removeItem(storageKey)
-  }, [getStorage, storageKey])
-
-  const isStale = React.useCallback(() => {
-    const data = load()
-    if (!data) return true
-    return Date.now() - data.timestamp > expiryMs
-  }, [load, expiryMs])
-
-  // Listen for cross-tab sync — bump a version counter on writes to our key
-  // so consumers can subscribe via a useEffect dep and re-load().
   const [externalVersion, setExternalVersion] = React.useState(0)
 
-  React.useEffect(() => {
-    if (!config.syncTabs || config.storage !== 'localStorage') return
-    if (typeof window === 'undefined') return
+  React.useEffect(() => store.subscribeStorage(() => setExternalVersion((v) => v + 1)), [store])
 
-    const handler = (e: StorageEvent) => {
-      if (e.key === storageKey) {
-        setExternalVersion((v) => v + 1)
-      }
-    }
-
-    window.addEventListener('storage', handler)
-    return () => window.removeEventListener('storage', handler)
-  }, [config.syncTabs, config.storage, storageKey])
-
-  return { save, load, clear, isStale, externalVersion }
+  return React.useMemo(
+    () => ({
+      save: store.save,
+      load: store.load,
+      clear: store.clear,
+      isStale: store.isStale,
+      externalVersion,
+    }),
+    [store, externalVersion]
+  )
 }
