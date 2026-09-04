@@ -1,5 +1,14 @@
 # @tour-kit/analytics
 
+## 0.12.1
+
+### Patch Changes
+
+- Updated dependencies [dcce333]
+- Updated dependencies [a68699f]
+  - @tour-kit/core@2.1.0
+  - @tour-kit/license@1.3.7
+
 ## 0.12.0
 
 ### Minor Changes
