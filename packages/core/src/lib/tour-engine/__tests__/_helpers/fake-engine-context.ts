@@ -14,6 +14,10 @@ export interface FakeEngineOverrides {
   maxHiddenChain?: number
   tourKitContext?: TourEngineAnalytics | null
   persistTerminalTours?: boolean
+  routePersistenceEnabled?: boolean
+  flowSessionEnabled?: boolean
+  tabId?: string
+  onTourPaused?: TourEngineContext['onTourPaused']
   onNavigationRequired?: TourEngineContext['onNavigationRequired']
   onStepError?: TourEngineContext['onStepError']
   abortSignal?: AbortSignal | null
@@ -40,6 +44,11 @@ export interface FakeEngineHandle {
     markSkipped: ReturnType<typeof vi.fn>
     resetPersistence: ReturnType<typeof vi.fn>
     clearRouteState: ReturnType<typeof vi.fn>
+    saveRouteState: ReturnType<typeof vi.fn>
+    saveFlowSession: ReturnType<typeof vi.fn>
+    clearFlowSession: ReturnType<typeof vi.fn>
+    announce: ReturnType<typeof vi.fn>
+    onTourPaused: ReturnType<typeof vi.fn>
     router: FakeRouterMock
     onNavigationRequired: ReturnType<typeof vi.fn>
     onStepError: ReturnType<typeof vi.fn>
@@ -123,6 +132,13 @@ export function createFakeEngineContext(overrides: FakeEngineOverrides = {}): Fa
   const resetPersistence = vi.fn()
   const clearRouteState = vi.fn()
 
+  // v2 §1.3e — the transition sinks.
+  const saveRouteState = vi.fn()
+  const saveFlowSession = vi.fn()
+  const clearFlowSession = vi.fn()
+  const announce = vi.fn()
+  const onTourPaused = vi.fn(overrides.onTourPaused ?? (() => {}))
+
   const ctx: TourEngineContext = {
     getState: () => state,
     getCurrentTour: () => currentTour,
@@ -146,6 +162,15 @@ export function createFakeEngineContext(overrides: FakeEngineOverrides = {}): Fa
     markSkipped,
     resetPersistence,
     clearRouteState,
+    saveRouteState,
+    saveFlowSession,
+    clearFlowSession,
+    routePersistenceEnabled: overrides.routePersistenceEnabled ?? false,
+    flowSessionEnabled: overrides.flowSessionEnabled ?? false,
+    tabId: overrides.tabId ?? 'tab-fake',
+    announce,
+    crossTab: { lastAnnounceTs: null },
+    onTourPaused,
     tourKitContext: overrides.tourKitContext ?? null,
   }
 
@@ -161,6 +186,11 @@ export function createFakeEngineContext(overrides: FakeEngineOverrides = {}): Fa
       markSkipped,
       resetPersistence,
       clearRouteState,
+      saveRouteState,
+      saveFlowSession,
+      clearFlowSession,
+      announce,
+      onTourPaused,
       router,
       onNavigationRequired,
       onStepError,

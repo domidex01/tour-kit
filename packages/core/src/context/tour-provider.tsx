@@ -21,12 +21,17 @@ import {
 } from '../lib/tour-engine/actions'
 import { resolveBootStart, runBootStart } from '../lib/tour-engine/boot'
 import type { TourEngineAnalytics, TourEngineContext } from '../lib/tour-engine/context'
+import { buildCallbackContext } from '../lib/tour-engine/helpers'
 import { navigateToStepImpl } from '../lib/tour-engine/navigate-to-step'
 import { MAX_HIDDEN_CHAIN, tourReducer } from '../lib/tour-engine/reducer'
+import {
+  applyTransitionEffects,
+  subscribeCrossTabPause,
+} from '../lib/tour-engine/transition-effects'
 import { validateTour } from '../lib/validate-tour'
 import type { TourRouteError } from '../lib/wait-for-step-target'
 import { tourRegistry } from '../registry/tour-registry'
-import type { Tour, TourContextValue } from '../types'
+import type { Tour, TourCallbackContext, TourContextValue } from '../types'
 import { defaultPersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
@@ -304,14 +309,6 @@ export function TourProvider({
     onTourPausedRef.current = onTourPaused
   })
 
-  // Latest-state ref consumed by the cross-tab subscribe handler so it can
-  // read isActive/tourId at fire time without re-subscribing on every state
-  // change (which would risk dropping in-flight messages).
-  const currentActiveRef = React.useRef<{ isActive: boolean; tourId: string | null }>({
-    isActive: false,
-    tourId: null,
-  })
-
   // Idempotency guards: track the last tour for which the terminal callback
   // (onComplete / onSkip) has already fired. Prevents double-firing inside the
   // same React commit phase, where reducer state is still closure-stale.
@@ -392,98 +389,43 @@ export function TourProvider({
     return () => abort.abort()
   }, [tours, flow.ready, externalVersion])
 
-  // Save state on changes
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally only save on specific state changes
-  React.useEffect(() => {
-    if (state.isActive && routePersistence.enabled) {
-      save(state)
-    }
-  }, [state.tourId, state.currentStepIndex, state.isActive, save, routePersistence.enabled])
-
-  // Throttled flowSession save on step change while active. Deps are
-  // exhaustive — the throttle inside `flow.save` handles coalescing.
-  // `currentRoute` is included so a hard-refresh during a multi-page tour
-  // resumes on the right URL (Phase 1.3 — FlowSessionV2).
-  React.useEffect(() => {
-    if (state.isActive && state.tourId && routePersistence.flowSession) {
-      flow.save(state.currentStepIndex, router?.getCurrentRoute())
-    }
-  }, [
-    state.currentStepIndex,
-    state.isActive,
-    state.tourId,
-    flow.save,
-    routePersistence.flowSession,
-    router,
-  ])
-
-  // AbortController scoped to the active tour. Lets `waitForStepTarget`
-  // cancel cleanly on STOP_TOUR and on unmount instead of resolving a stale
-  // navigation onto a torn-down tree. Reset on every tour-id change.
+  // ─── Transition side-effects (v2 §1.3e) ─────────────────────────────────
+  // Seven effects used to live here — route-state save, throttled flow save,
+  // AbortController swap on tour identity, flow-blob clear on the isActive
+  // true -> false edge, cross-tab announce, cross-tab subscribe and the
+  // registry state mirror. Each watched an overlapping slice of state and
+  // decided for itself whether its edge had been crossed, which is what
+  // `wasActiveRef` was for.
+  //
+  // They are one call to `applyTransitionEffects(ctx, prev, next)` now. The
+  // "before" snapshot is held in a ref rather than re-derived, so "only on the
+  // true -> false edge" is a comparison instead of hand-kept bookkeeping.
   const abortControllerRef = React.useRef<AbortController | null>(null)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: tour-scoped — only swap on tour identity / activeness
+  const crossTabRef = React.useRef<{ lastAnnounceTs: number | null }>({ lastAnnounceTs: null })
+  const prevSnapshotRef = React.useRef<TourCallbackContext | null>(null)
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs on every commit; the transition is decided by comparing snapshots, not by a dep array
   React.useEffect(() => {
-    abortControllerRef.current?.abort()
-    abortControllerRef.current = state.isActive ? new AbortController() : null
-  }, [state.tourId, state.isActive])
+    const ctx = engineContextRef.current
+    if (!ctx) return
+    const next = buildCallbackContext(state, currentTour, data)
+    const prev = prevSnapshotRef.current ?? next
+    prevSnapshotRef.current = next
+    applyTransitionEffects(ctx, prev, next)
+  })
+
   // Final teardown on unmount — independent of the activeness swap above so
   // the abort always fires once even when the component unmounts mid-tour.
   React.useEffect(() => () => abortControllerRef.current?.abort(), [])
 
-  // Clear flowSession blob ONLY on a true → false transition (tour ended).
-  // The initial mount has `state.isActive === false`; without this guard
-  // we would wipe a freshly restored blob right after the restore effect
-  // dispatched START_TOUR (saved by the leading-edge throttle re-write,
-  // but fragile and an unnecessary storage churn).
-  const wasActiveRef = React.useRef(false)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: only react to isActive flip
-  React.useEffect(() => {
-    if (wasActiveRef.current && !state.isActive && routePersistence.flowSession) {
-      flow.clear()
-    }
-    wasActiveRef.current = state.isActive
-  }, [state.isActive])
-
-  // Keep the latest-state ref in sync (read by the cross-tab subscriber).
-  React.useEffect(() => {
-    currentActiveRef.current = { isActive: state.isActive, tourId: state.tourId }
-  })
-
-  // Last-announce timestamp — also used as tie-breaker when two tabs
-  // simultaneously announce (e.g., both restoring from the same persisted
-  // session at cold start). The later announce wins; the earlier one yields.
-  const announceTsRef = React.useRef<number | null>(null)
-
-  // Cross-tab announce: whenever this tab activates a tour, post to the channel.
-  React.useEffect(() => {
-    if (state.isActive && state.tourId) {
-      announceTsRef.current = Date.now()
-      broadcast.post({
-        type: 'tour:active',
-        tourId: state.tourId,
-        tabId,
-        ts: announceTsRef.current,
-      })
-    }
-  }, [state.isActive, state.tourId, tabId, broadcast])
-
-  // Cross-tab subscribe: pause our active tour when another tab announces.
-  React.useEffect(() => {
-    return broadcast.subscribe((msg) => {
-      if (msg.type !== 'tour:active') return
-      if (msg.tabId === tabId) return
-      const pausedTourId = currentActiveRef.current.tourId
-      if (!currentActiveRef.current.isActive || !pausedTourId) return
-      // Tie-break: if we announced AFTER the incoming message, we are the
-      // newer owner and should keep running. Otherwise yield. Without this,
-      // two tabs cold-restoring the same flow.session at the same instant
-      // pause each other and the user sees no tour anywhere.
-      const myTs = announceTsRef.current
-      if (myTs !== null && myTs > msg.ts) return
-      dispatch({ type: 'STOP_TOUR' })
-      onTourPausedRef.current?.(pausedTourId, 'cross-tab')
-    })
-  }, [broadcast, tabId])
+  // Cross-tab subscribe is a lifecycle concern, not a transition: installed
+  // once, torn down on unmount.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: install-once; the handler reads live state through the ctx getters
+  React.useEffect(
+    () =>
+      subscribeCrossTabPause(engineContextRef.current as TourEngineContext, broadcast.subscribe),
+    [broadcast]
+  )
 
   // setData is hoisted above navigateToStep so the hidden-step branch
   // resolver can access it without depending on a later closure.
@@ -567,6 +509,15 @@ export function TourProvider({
     markSkipped,
     resetPersistence,
     clearRouteState: clear,
+    saveRouteState: save,
+    saveFlowSession: flow.save,
+    clearFlowSession: flow.clear,
+    routePersistenceEnabled: !!routePersistence.enabled,
+    flowSessionEnabled: !!routePersistence.flowSession,
+    tabId,
+    announce: broadcast.post,
+    crossTab: crossTabRef.current,
+    onTourPaused: onTourPausedRef.current,
     tourKitContext: tourKitContext satisfies TourEngineAnalytics | null,
   }
 

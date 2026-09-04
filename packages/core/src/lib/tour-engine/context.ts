@@ -1,9 +1,18 @@
 import type { BranchTarget } from '../../types/branch'
 import type { TourDispatch, TourRef } from '../../types/primitives'
 import type { RouterAdapter } from '../../types/router'
+import type { TourState } from '../../types/state'
 import type { Tour } from '../../types/tour'
 import type { TourAction, TourReducerState } from '../../types/tour-reducer'
 import type { TourRouteError } from '../wait-for-step-target'
+
+/** Cross-tab "I am running a tour" announcement. */
+export interface CrossTabActiveMessage {
+  type: 'tour:active'
+  tourId: string
+  tabId: string
+  ts: number
+}
 
 /**
  * Minimal slice of `TourKitContextValue` consumed by engine functions for
@@ -73,6 +82,29 @@ export interface TourEngineContext {
   resetPersistence: (tourId?: string) => void
   /** Drop the multi-page route blob — a finished tour must not resume. */
   clearRouteState: () => void
+
+  // ─── Transition sinks (v2 §1.3e) ─────────────────────────────────────────
+  // Where `applyTransitionEffects` writes. Kept as flat callbacks rather than
+  // stores so the React adapter can pass its hook results straight through and
+  // the plain-store adapter can pass its factories'.
+  saveRouteState: (state: TourState) => void
+  saveFlowSession: (stepIndex: number, currentRoute?: string) => void
+  clearFlowSession: () => void
+  routePersistenceEnabled: boolean
+  flowSessionEnabled: boolean
+
+  // ─── Cross-tab (v2 §1.3e) ────────────────────────────────────────────────
+  /** This engine's identity on the channel — used to drop our own echoes. */
+  tabId: string
+  announce: (msg: CrossTabActiveMessage) => void
+  /**
+   * Mutable, and deliberately so. `lastAnnounceTs` is the tie-break: if we
+   * announced AFTER an incoming message, we are the newer owner and keep
+   * running. Without it, two tabs cold-restoring the same session at the same
+   * instant pause each other and the user sees no tour anywhere.
+   */
+  crossTab: { lastAnnounceTs: number | null }
+  onTourPaused?: (tourId: string, reason: 'cross-tab') => void
 
   // ─── Cross-extraction call (handleBranchTarget → navigateToStep) ─────────
   navigateToStep: (stepIndex: number) => Promise<boolean>
