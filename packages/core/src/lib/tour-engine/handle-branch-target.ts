@@ -64,7 +64,16 @@ export async function handleBranchTargetImpl(
 
       case 'restart': {
         ctx.dispatch({ type: 'CLEAR_VISIT_TRACKING' })
-        ctx.dispatch({ type: 'GO_TO_STEP', stepIndex: 0 })
+        // Through navigateToStep, not a raw GO_TO_STEP: landing on step 0 is
+        // a landing like any other, so it owes the same hidden-step walk,
+        // route navigation and lifecycle guards. The raw dispatch also put
+        // the tour on step 0 unconditionally — including when step 0 is
+        // hidden or lives on another route (#121).
+        const navigated = await ctx.navigateToStep(0)
+        if (!navigated) {
+          ctx.dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+          return
+        }
         const firstStep = currentTour.steps[0]
         if (firstStep) {
           ctx.dispatch({
