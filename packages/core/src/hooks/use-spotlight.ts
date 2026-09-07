@@ -24,7 +24,11 @@ export function useSpotlight(): UseSpotlightReturn {
   const [isVisible, setIsVisible] = useState(false)
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
   const [config, setConfig] = useState<SpotlightConfig>(defaultSpotlightConfig)
+  // The same node twice, on purpose. The ref is what `updateRect` reads, so
+  // that callback can stay identity-stable across renders; the state slot is
+  // what keys the tracking effect, so a retarget re-runs it.
   const targetRef = useRef<HTMLElement | null>(null)
+  const [target, setTarget] = useState<HTMLElement | null>(null)
 
   const updateRect = useCallback(() => {
     if (targetRef.current) {
@@ -33,24 +37,31 @@ export function useSpotlight(): UseSpotlightReturn {
   }, [])
 
   useEffect(() => {
-    const el = targetRef.current
-    // The null check is for the type (`trackRect` takes a non-null element) and
-    // for `hide()`, which nulls the ref. No attach-time read: `show()` has
-    // already seeded the rect, and reading again would cost a render.
-    if (!isVisible || !el) return
-    return trackRect(el, setTargetRect).stop
-  }, [isVisible])
+    // Keyed on `target`, not just `isVisible`: `TourOverlay` advances a step by
+    // calling `show(newTarget)` with no `hide()` in between, so `isVisible`
+    // never flips and an effect keyed on it alone would keep tracking the
+    // previous step's element. (Before §1.3b the handler re-read the ref on
+    // every scroll and followed the swap for free; `trackRect` takes a concrete
+    // element, so the re-run has to be explicit.)
+    //
+    // No attach-time read: `show()` has already seeded the rect, and reading
+    // again would cost a render.
+    if (!isVisible || !target) return
+    return trackRect(target, setTargetRect).stop
+  }, [isVisible, target])
 
-  const show = useCallback((target: HTMLElement, spotlightConfig?: SpotlightConfig) => {
-    targetRef.current = target
+  const show = useCallback((next: HTMLElement, spotlightConfig?: SpotlightConfig) => {
+    targetRef.current = next
+    setTarget(next)
     setConfig({ ...defaultSpotlightConfig, ...spotlightConfig })
-    setTargetRect(target.getBoundingClientRect())
+    setTargetRect(next.getBoundingClientRect())
     setIsVisible(true)
   }, [])
 
   const hide = useCallback(() => {
     setIsVisible(false)
     targetRef.current = null
+    setTarget(null)
     setTargetRect(null)
   }, [])
 
