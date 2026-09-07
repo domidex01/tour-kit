@@ -481,7 +481,7 @@ interface TourStep {
   offset?: [number, number];
   route?: string;
   routeMatch?: 'exact' | 'startsWith' | 'contains';
-  when?: () => boolean;
+  when?: (context: TourCallbackContext) => boolean | Promise<boolean>;
   advanceOn?: AdvanceOnConfig;
   waitForTarget?: boolean;
   waitTimeout?: number;
@@ -492,10 +492,15 @@ interface TourStep {
   showProgress?: boolean;
   showClose?: boolean;
   className?: string;
-  onBeforeShow?: () => void | Promise<void>;
-  onAfterShow?: () => void;
-  onBeforeHide?: () => void | Promise<void>;
-  onAfterHide?: () => void;
+  onBeforeShow?: (
+    context: TourCallbackContext
+  ) => boolean | undefined | Promise<boolean | undefined>;
+  onEnter?: (context: TourCallbackContext) => void | Promise<void>;
+  onShow?: (context: TourCallbackContext) => void;
+  onBeforeHide?: (
+    context: TourCallbackContext
+  ) => boolean | undefined | Promise<boolean | undefined>;
+  onHide?: (context: TourCallbackContext) => void;
 }
 
 type Placement =
@@ -504,6 +509,78 @@ type Placement =
   | 'left' | 'left-start' | 'left-end' | 'left-center'
   | 'right' | 'right-start' | 'right-end' | 'right-center';
 ```
+
+### Step lifecycle
+
+Every app-initiated transition — `next()`, `prev()`, `goTo()`, `start()` and a
+branch to another tour — runs the step hooks in this order:
+
+```
+onBeforeHide(outgoing) → onBeforeShow(incoming) → onEnter(incoming)
+                       → [the step commits] →
+                         onHide(outgoing) → onShow(incoming)
+```
+
+The two `onBefore*` hooks run **before** the commit and can cancel it. The two
+notifications run after, and cannot.
+
+**Cancelling.** Return a literal `false` from `onBeforeShow` or `onBeforeHide`
+to veto the transition. The tour stays exactly where it is, and the call that
+triggered it resolves having changed nothing. Every other return value —
+including `undefined`, `null`, `0` and `''` — proceeds. Both guards are
+awaited, so an `async` guard that resolves `false` cancels too.
+
+```tsx
+{
+  id: 'confirm-step',
+  target: '#editor',
+  content: 'Save before you continue',
+  onBeforeHide: async ({ data }) => {
+    if (!data.saved) {
+      return false // stay on this step
+    }
+  },
+}
+```
+
+**A throwing callback never cancels anything.** Any hook that throws is logged
+and ignored, and the transition continues. This is deliberate and differs from
+`when`, where a throw skips the step: skipping a step is always safe, while a
+guard that threw on every call would trap the user with no way forward or back.
+No step callback can brick a tour.
+
+**Where the exceptions are:**
+
+- Hidden steps (`kind: 'hidden'`) run `onEnter` and `onShow` only. They never
+  mount, so `onBeforeShow`, `onBeforeHide` and `onHide` are ignored on them.
+- A tour restored from a saved session runs `onEnter` and `onShow`, but never
+  `onBeforeShow` — a veto during a cold restore would strand the user mid-tour.
+- `onHide` also fires when the tour **ends** on a step, through `stop()`,
+  `skip()`, `complete()` or `reset()`. The step did leave the screen.
+- `next()` on the last step completes the tour, so it fires `onHide` and no
+  incoming hooks — there is no step to show.
+
+**Waiting for a late target.** Set `waitForTarget: true` on a step whose target
+is rendered after a fetch or a lazy mount, and the step waits for it to appear
+before committing. It applies on the step's own route; a step with a different
+`route` always waits for its target after the router hop regardless. The flag
+needs a `target` to observe and is ignored without one. `waitTimeout`
+(default `3000`) bounds both waits; on timeout `onStepError` fires with
+`TourRouteError({ code: 'TARGET_NOT_FOUND' })` and the tour stops.
+
+```tsx
+{
+  id: 'chart',
+  target: '#revenue-chart',
+  content: 'Your revenue at a glance',
+  waitForTarget: true,
+  waitTimeout: 5000,
+}
+```
+
+Every hook receives the same `TourCallbackContext` the tour-level callbacks
+get, with `currentStep` and `currentStepIndex` pointing at the step the hook
+belongs to.
 
 ### Router Types
 

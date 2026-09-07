@@ -212,7 +212,7 @@ import { TourKitProvider, Tour, TourCard, TourCardContent,
 
 **Step 3: Replace lifecycle hooks**
 
-Driver.js's `onNextClick` and `onPrevClick` map to userTourKit's step-level `onBeforeShow` and `onNext` callbacks. The `onPopoverRender` DOM manipulation hook has no userTourKit equivalent because you control the rendering directly through JSX.
+Driver.js's `onNextClick` and `onPrevClick` intercept a step you are leaving, so they map to userTourKit's step-level `onBeforeHide` — return `false` to cancel the move, the equivalent of not calling `driverObj.moveNext()`. To redirect rather than cancel, use `onNext` / `onPrev`. The `onPopoverRender` DOM manipulation hook has no userTourKit equivalent because you control the rendering directly through JSX.
 
 **Step 4: Remove Driver.js CSS**
 

@@ -267,3 +267,92 @@ describe('runBootStart', () => {
     expect(timeEndSpy).toHaveBeenCalledExactlyOnceWith('flow-restore')
   })
 })
+
+/**
+ * Issue #121 — session restore fires `onEnter`, and only `onEnter`.
+ *
+ * No `onBeforeShow`: a veto on a cold restore would strand the user mid-tour
+ * with no way to continue, and `boot()` is not cancellable.
+ */
+describe('runBootStart — step lifecycle on restore (#121)', () => {
+  const decision: BootDecision = { tourId: 'r', stepIndex: 0, source: 'flow' }
+  const callOrder: string[] = []
+
+  beforeEach(() => {
+    callOrder.length = 0
+    document.body.innerHTML = '<div id="x"></div>'
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  function ctxWith(step: Parameters<typeof visibleStep>[1]) {
+    const handle = createFakeEngineContext()
+    handle.setCurrentTour(makeTour('r', [visibleStep('r1', step)]))
+    return handle
+  }
+
+  it('the no-callback same-route path stays synchronous', async () => {
+    // The existing "dispatches START_TOUR synchronously" case awaits the whole
+    // call before asserting, so it cannot see a lost tick. This one can: the
+    // guard around the await is what keeps the flow-restore timing budget.
+    const { ctx, mocks } = ctxWith({})
+
+    const promise = runBootStart(ctx, decision, { currentRoute: '/', onClear: vi.fn() })
+
+    expect(mocks.dispatch).toHaveBeenCalledWith({
+      type: 'START_TOUR',
+      tourId: 'r',
+      stepIndex: 0,
+    })
+    await promise
+  })
+
+  it('awaits onEnter before dispatching START_TOUR', async () => {
+    const { ctx, mocks } = ctxWith({
+      onEnter: async () => {
+        await Promise.resolve()
+        callOrder.push('onEnter:r1')
+      },
+    })
+    mocks.dispatch.mockImplementation((action: { type: string }) => {
+      callOrder.push(`dispatch:${action.type}`)
+    })
+
+    await runBootStart(ctx, decision, { currentRoute: '/', onClear: vi.fn() })
+
+    expect(callOrder).toEqual(['onEnter:r1', 'dispatch:START_TOUR'])
+  })
+
+  it('never asks onBeforeShow on a restore', async () => {
+    const onBeforeShow = vi.fn()
+    const { ctx, mocks } = ctxWith({ onBeforeShow })
+
+    await runBootStart(ctx, decision, { currentRoute: '/', onClear: vi.fn() })
+
+    expect(onBeforeShow).not.toHaveBeenCalled()
+    expect(mocks.dispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'START_TOUR' }))
+  })
+
+  it('runs onEnter on the cross-route path too, after the target resolves', async () => {
+    const { ctx, mocks } = ctxWith({
+      target: '#x',
+      onEnter: () => {
+        callOrder.push('onEnter:r1')
+      },
+    })
+    mocks.router.getCurrentRoute.mockReturnValue('/home')
+    mocks.router.navigate.mockImplementation(async () => {
+      callOrder.push('navigate')
+      return undefined
+    })
+    mocks.dispatch.mockImplementation((action: { type: string }) => {
+      callOrder.push(`dispatch:${action.type}`)
+    })
+
+    await runBootStart(ctx, decision, { currentRoute: '/pricing', onClear: vi.fn() })
+
+    expect(callOrder).toEqual(['navigate', 'onEnter:r1', 'dispatch:START_TOUR'])
+  })
+})

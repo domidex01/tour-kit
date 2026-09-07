@@ -504,3 +504,83 @@ describe('hidden steps', () => {
     expect(mocks.dispatch).toHaveBeenCalledWith(expect.objectContaining({ stepIndex: 0 }))
   })
 })
+
+/**
+ * Issue #121 — `startImpl` is one of four paths that commit a step without
+ * going through `navigateToStep`, so it needs the incoming guard itself.
+ *
+ * What is real in this unit and what is not: `ctx.navigateToStep` is a
+ * `vi.fn`, so Group A never executes here and nothing in this file can see the
+ * pinned order or a `next()`/`prev()` veto. That lives in
+ * `create-tour-engine.test.ts`, against the real dispatch.
+ */
+describe('start — step lifecycle guards (#121)', () => {
+  const callOrder: string[] = []
+
+  beforeEach(() => {
+    callOrder.length = 0
+  })
+
+  it('a vetoing onBeforeShow never starts the tour', async () => {
+    const onStart = vi.fn()
+    const tour = makeTour('t', [visibleStep('a', { onBeforeShow: () => false as const })], {
+      onStart,
+    })
+    const { ctx, mocks } = on(tour, 0)
+
+    await startImpl(ctx, 't')
+
+    expect(mocks.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'START_TOUR' }))
+    expect(onStart).not.toHaveBeenCalled()
+  })
+
+  it('a veto leaves the terminal-callback guards untouched', async () => {
+    // The re-arm at actions.ts:122-123 happens BEFORE the dispatch. A guard
+    // placed one line too low would leave START_TOUR undispatched (test green)
+    // while having already wiped the terminal state (bug shipped).
+    const tour = makeTour('t', [visibleStep('a', { onBeforeShow: () => false as const })])
+    const { ctx } = on(tour, 0)
+    ctx.completedTourIdRef.current = 'sentinel'
+    ctx.skippedTourIdRef.current = 'sentinel'
+
+    await startImpl(ctx, 't')
+
+    expect(ctx.completedTourIdRef.current).toBe('sentinel')
+    expect(ctx.skippedTourIdRef.current).toBe('sentinel')
+  })
+
+  it('runs onEnter before dispatching START_TOUR', async () => {
+    const tour = makeTour('t', [
+      visibleStep('a', {
+        onEnter: async () => {
+          await Promise.resolve()
+          callOrder.push('onEnter:a')
+        },
+      }),
+    ])
+    const { ctx, mocks } = on(tour, 0)
+    mocks.dispatch.mockImplementation((action: { type: string }) => {
+      callOrder.push(`dispatch:${action.type}`)
+    })
+
+    await startImpl(ctx, 't')
+
+    expect(callOrder).toEqual(['onEnter:a', 'dispatch:START_TOUR'])
+  })
+
+  it('guards the first VISIBLE step, not the requested index', async () => {
+    // `when` filtering resolves the real landing step first; the guard must be
+    // asked about the step the user will actually see.
+    const skipped = vi.fn()
+    const tour = makeTour('t', [
+      visibleStep('a', { when: () => false, onBeforeShow: skipped }),
+      visibleStep('b', { onBeforeShow: () => false as const }),
+    ])
+    const { ctx, mocks } = on(tour, 0)
+
+    await startImpl(ctx, 't')
+
+    expect(skipped).not.toHaveBeenCalled()
+    expect(mocks.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'START_TOUR' }))
+  })
+})

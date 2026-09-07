@@ -71,18 +71,92 @@ interface BaseTourStep<TId extends string = string> {
    * @default 'auto'
    */
   routeChangeStrategy?: 'auto' | 'prompt' | 'manual'
+  /**
+   * Filter this step out when the predicate resolves false — the step is
+   * walked past, not shown.
+   *
+   * Unlike the guards below, a **throw is treated as `false`** (skip): passing
+   * over a step is always safe, so a buggy predicate hides the step rather
+   * than bricking the tour.
+   */
   when?: (context: TourCallbackContext) => boolean | Promise<boolean>
+  /**
+   * Wait for `target` to exist in the DOM before the step commits, for a
+   * target rendered after a fetch or a lazy mount.
+   *
+   * Applies on the step's **own** route; a step with a different `route`
+   * always waits for its target after the router hop regardless of this flag.
+   * Requires a `target` — the flag is ignored on a targetless step, because
+   * there would be nothing to observe and the wait would fail instantly.
+   *
+   * On timeout, `onStepError` fires with
+   * `TourRouteError({ code: 'TARGET_NOT_FOUND' })` and the tour stops.
+   *
+   * @default false
+   */
   waitForTarget?: boolean
+  /**
+   * Milliseconds to wait for `target` before giving up, used by both
+   * `waitForTarget` and the route-change wait.
+   *
+   * @default 3000
+   */
   waitTimeout?: number
+  /**
+   * Guard: runs **before** the step commits, and can cancel the transition.
+   *
+   * Return a **literal `false`** to veto — the tour stays where it is and the
+   * verb that fired it (`next()`, `prev()`, `goTo()`, `start()`) resolves
+   * having changed nothing. Every other return value (including `undefined`,
+   * `null`, `0` and `''`) proceeds. Awaited, so a `Promise<false>` vetoes too.
+   *
+   * A **throw is "no opinion"**: it is logged and the transition proceeds. A
+   * guard that always throws must not be able to trap the user on one step.
+   *
+   * Runs before the router navigates, so a veto leaves the user on the page
+   * they are on. Not called on a hidden step, and not called when a tour is
+   * restored from a saved session (a veto on a cold restore would strand the
+   * user mid-tour with no way to continue).
+   */
   onBeforeShow?: (
     context: TourCallbackContext
   ) => boolean | undefined | Promise<boolean | undefined>
-  /** Runs before the step mounts (visible) or auto-advances (hidden). */
+  /**
+   * Runs after the transition is committed to but before the step mounts —
+   * after any route navigation and target wait, so it sees the page the step
+   * is about to mount on. Awaited; a throw is logged and ignored.
+   *
+   * Fires on hidden steps (which never mount) and on session restore.
+   */
   onEnter?: (context: TourCallbackContext) => void | Promise<void>
+  /**
+   * Notification: the step is now the current step. Post-commit, so it cannot
+   * cancel anything, and deferred by a microtask — calling `next()` from here
+   * is safe.
+   *
+   * Fires on hidden steps and on session restore. A throw is logged and
+   * ignored.
+   */
   onShow?: (context: TourCallbackContext) => void
+  /**
+   * Guard: runs **before** the current step is left, and can cancel the
+   * transition. Same contract as {@link BaseTourStep.onBeforeShow}: only a
+   * literal `false` vetoes and a throw is "no opinion". It runs first, so a
+   * veto walks no hidden steps and navigates nowhere.
+   *
+   * Ignored on hidden steps.
+   */
   onBeforeHide?: (
     context: TourCallbackContext
   ) => boolean | undefined | Promise<boolean | undefined>
+  /**
+   * Notification: the step has left the screen. Post-commit and
+   * microtask-deferred, like {@link BaseTourStep.onShow}.
+   *
+   * Also fires when the **tour ends** on this step — `stop()`, `skip()`,
+   * `complete()` and `reset()` — because the step did leave. Ignored on hidden
+   * steps. A throw is logged and ignored.
+   */
   onHide?: (context: TourCallbackContext) => void
   /**
    * Override the next navigation behavior

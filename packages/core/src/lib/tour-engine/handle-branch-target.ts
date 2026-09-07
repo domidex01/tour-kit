@@ -14,6 +14,7 @@ import {
   findNextVisibleStepIndex,
   invokeCallback,
 } from './helpers'
+import { askStepGuards, commitStart } from './start-tour'
 
 /**
  * Resolve a `BranchTarget` to its effect on the active tour. Mirrors the
@@ -63,7 +64,16 @@ export async function handleBranchTargetImpl(
 
       case 'restart': {
         ctx.dispatch({ type: 'CLEAR_VISIT_TRACKING' })
-        ctx.dispatch({ type: 'GO_TO_STEP', stepIndex: 0 })
+        // Through navigateToStep, not a raw GO_TO_STEP: landing on step 0 is
+        // a landing like any other, so it owes the same hidden-step walk,
+        // route navigation and lifecycle guards. The raw dispatch also put
+        // the tour on step 0 unconditionally — including when step 0 is
+        // hidden or lives on another route (#121).
+        const navigated = await ctx.navigateToStep(0)
+        if (!navigated) {
+          ctx.dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+          return
+        }
         const firstStep = currentTour.steps[0]
         if (firstStep) {
           ctx.dispatch({
@@ -92,11 +102,10 @@ export async function handleBranchTargetImpl(
       return
     }
 
-    ctx.tourKitContext?.onTourBranch?.(currentTour.id, target.tour, currentStepId)
-    currentTour.onTourBranch?.(target.tour, currentStepId)
-
-    ctx.dispatch({ type: 'STOP_TOUR' })
-
+    // Resolved BEFORE anything is announced or stopped: the guard needs the
+    // landing index, and a veto has to leave the current tour running and
+    // silent. Asking after STOP_TOUR would strand the user with no tour at
+    // all (#121).
     let newStepIndex = 0
     if (target.step !== undefined) {
       if (typeof target.step === 'number') {
@@ -108,13 +117,20 @@ export async function handleBranchTargetImpl(
       }
     }
 
-    // Re-arm terminal-callback guards for the new tour
-    ctx.completedTourIdRef.current = null
-    ctx.skippedTourIdRef.current = null
+    if (!(await askStepGuards(ctx, toTour, newStepIndex, data))) {
+      ctx.dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+      return
+    }
 
-    ctx.dispatch({ type: 'START_TOUR', tourId: target.tour, stepIndex: newStepIndex })
-    ctx.tourKitContext?.onTourStart?.(target.tour)
-    invokeCallback('onStart', () => toTour.onStart?.({ ...state, tour: toTour, data }))
+    // Only now has the branch actually happened. Announcing above the guard
+    // emitted a "branched from A to B" event for a branch a veto then
+    // cancelled — a false analytics event and a consumer callback for
+    // something that did not occur.
+    ctx.tourKitContext?.onTourBranch?.(currentTour.id, target.tour, currentStepId)
+    invokeCallback('onTourBranch', () => currentTour.onTourBranch?.(target.tour, currentStepId))
+
+    ctx.dispatch({ type: 'STOP_TOUR' })
+    commitStart(ctx, toTour, newStepIndex, state, data)
     return
   }
 

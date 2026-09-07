@@ -21,6 +21,7 @@ import {
   findNextVisibleStepIndex,
   invokeCallback,
 } from './helpers'
+import { askStepGuards, commitStart } from './start-tour'
 
 /** The `{ ...state, tour, data }` shape every tour-level callback receives. */
 function snapshot(ctx: TourEngineContext): TourCallbackContext {
@@ -118,13 +119,8 @@ export async function startImpl(
     return
   }
 
-  // Re-arm terminal-callback guards for the (re)started tour.
-  ctx.completedTourIdRef.current = null
-  ctx.skippedTourIdRef.current = null
-
-  ctx.dispatch({ type: 'START_TOUR', tourId: id, stepIndex: visibleIndex })
-  ctx.tourKitContext?.onTourStart?.(id)
-  invokeCallback('onStart', () => tour.onStart?.({ ...state, tour, data }))
+  if (!(await askStepGuards(ctx, tour, visibleIndex, data))) return
+  commitStart(ctx, tour, visibleIndex, state, data)
 }
 
 export async function nextImpl(ctx: TourEngineContext): Promise<void> {

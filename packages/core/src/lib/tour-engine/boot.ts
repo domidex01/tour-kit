@@ -17,6 +17,7 @@ import type { FlowSessionV2 } from '../flow-session'
 import { waitForStepTarget } from '../wait-for-step-target'
 import type { PersistedRouteState } from './adapters/route-store'
 import type { TourEngineContext } from './context'
+import { buildCallbackContext, invokeAsyncCallback } from './helpers'
 import { findAutoStartTour } from './reducer'
 
 export type BootSource = 'flow' | 'route' | 'auto'
@@ -129,14 +130,39 @@ export async function runBootStart(
   const { router } = ctx
 
   const endTimer = createRestoreTimer(decision.source)
-  const dispatchStart = () => {
+  const targetTour = ctx.getState().tours.get(decision.tourId) ?? null
+  const targetStep = targetTour?.steps[decision.stepIndex]
+
+  /**
+   * A restore runs the step's `onEnter` but never its `onBeforeShow` (#121):
+   * a veto on a cold restore would strand the user mid-tour, and `boot()` is
+   * not cancellable. `onShow` arrives on its own through the transition
+   * effects once START_TOUR lands.
+   *
+   * The `onEnter` guard keeps the no-callback path synchronous. That is the
+   * common case and it has a timing budget — awaiting unconditionally would
+   * cost every restore a tick for a callback almost no tour defines.
+   */
+  const dispatchStart = async () => {
+    if (targetStep?.onEnter) {
+      await invokeAsyncCallback('onEnter', () =>
+        targetStep.onEnter?.({
+          ...buildCallbackContext(ctx.getState(), targetTour, ctx.getData()),
+          tourId: decision.tourId,
+          isActive: true,
+          currentStepIndex: decision.stepIndex,
+          currentStep: targetStep,
+          totalSteps: targetTour?.steps.length ?? 0,
+        })
+      )
+    }
     ctx.dispatch({ type: 'START_TOUR', tourId: decision.tourId, stepIndex: decision.stepIndex })
   }
 
   const needsRouteRestore = !!currentRoute && !!router && currentRoute !== router.getCurrentRoute()
 
   if (!needsRouteRestore) {
-    dispatchStart()
+    await dispatchStart()
     endTimer()
     return
   }
@@ -144,8 +170,6 @@ export async function runBootStart(
   // Narrowing: `needsRouteRestore` proved both of these.
   const route = currentRoute as string
   const nav = router as NonNullable<typeof router>
-
-  const targetStep = ctx.getState().tours.get(decision.tourId)?.steps[decision.stepIndex]
 
   try {
     await nav.navigate(route)
@@ -158,7 +182,7 @@ export async function runBootStart(
       if (signal?.aborted) return endTimer()
     }
 
-    dispatchStart()
+    await dispatchStart()
     endTimer()
   } catch {
     endTimer()

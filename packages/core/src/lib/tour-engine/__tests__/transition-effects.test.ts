@@ -17,6 +17,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { tourRegistry } from '../../../registry/tour-registry'
 import type { TourCallbackContext } from '../../../types/state'
 import type { Tour } from '../../../types/tour'
+import { logger } from '../../../utils/logger'
 import { createBroadcast } from '../adapters/broadcast'
 import type { CrossTabActiveMessage } from '../context'
 import { applyTransitionEffects, subscribeCrossTabPause } from '../transition-effects'
@@ -408,5 +409,98 @@ describe('cross-tab pause', () => {
     await drain()
 
     expect(us.mocks.dispatch).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * Issue #121 — Group B: the post-commit notifications.
+ *
+ * `onHide`/`onShow` are deferred by a `queueMicrotask` because this function
+ * runs inside `dispatch` and a consumer's `onShow` may call `next()`. Every
+ * assertion therefore comes after an explicit `await Promise.resolve()` —
+ * a synchronous call here does not cross the microtask boundary on its own.
+ */
+describe('step lifecycle notifications (#121)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('fires onHide(prev) and onShow(next) on a position change', async () => {
+    const onHide = vi.fn()
+    const onShow = vi.fn()
+    const tour = makeTour('t', [visibleStep('a', { onHide }), visibleStep('b', { onShow })])
+    const { ctx } = createFakeEngineContext({ currentTour: tour })
+
+    applyTransitionEffects(ctx, active(0, tour), active(1, tour))
+    await Promise.resolve()
+
+    // Each receives its OWN snapshot — the one it is leaving / arriving in.
+    expect(onHide).toHaveBeenCalledTimes(1)
+    expect(onHide.mock.calls[0]?.[0]).toMatchObject({ currentStepIndex: 0 })
+    expect(onShow).toHaveBeenCalledTimes(1)
+    expect(onShow.mock.calls[0]?.[0]).toMatchObject({ currentStepIndex: 1 })
+  })
+
+  it('is silent on an inert re-apply — adapter A calls this on every commit', async () => {
+    const onHide = vi.fn()
+    const onShow = vi.fn()
+    const tour = makeTour('t', [visibleStep('a', { onHide, onShow })])
+    const { ctx } = createFakeEngineContext({ currentTour: tour })
+    const same = active(0, tour)
+
+    applyTransitionEffects(ctx, same, same)
+    await Promise.resolve()
+
+    expect(onHide).not.toHaveBeenCalled()
+    expect(onShow).not.toHaveBeenCalled()
+  })
+
+  it('fires only onHide when the tour ends', async () => {
+    const onHide = vi.fn()
+    const tour = makeTour('t', [visibleStep('a'), visibleStep('b', { onHide })])
+    const { ctx } = createFakeEngineContext({ currentTour: tour })
+
+    applyTransitionEffects(ctx, active(1, tour), snap())
+    await Promise.resolve()
+
+    expect(onHide).toHaveBeenCalledTimes(1)
+  })
+
+  it('never fires onShow into an inactive snapshot', async () => {
+    // The only case that can see the `next.isActive` gate. Through the real
+    // engine it is unobservable: `createStoppedState` nulls `currentStep` as
+    // well as clearing `isActive`, so the gate would hold with it deleted.
+    const onShow = vi.fn()
+    const tour = makeTour('t', [visibleStep('a'), visibleStep('b', { onShow })])
+    const { ctx } = createFakeEngineContext({ currentTour: tour })
+
+    applyTransitionEffects(
+      ctx,
+      active(0, tour),
+      snap({ isActive: false, currentStep: tour.steps[1] ?? null })
+    )
+    await Promise.resolve()
+
+    expect(onShow).not.toHaveBeenCalled()
+  })
+
+  it('a throwing onHide is logged and does not prevent onShow', async () => {
+    const warn = vi.spyOn(logger, 'warn').mockImplementation(() => {})
+    const onShow = vi.fn()
+    const tour = makeTour('t', [
+      visibleStep('a', {
+        onHide: () => {
+          throw new Error('consumer bug')
+        },
+      }),
+      visibleStep('b', { onShow }),
+    ])
+    const { ctx } = createFakeEngineContext({ currentTour: tour })
+
+    applyTransitionEffects(ctx, active(0, tour), active(1, tour))
+    await Promise.resolve()
+
+    expect(warn).toHaveBeenCalled()
+    expect(onShow).toHaveBeenCalledTimes(1)
   })
 })

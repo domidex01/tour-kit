@@ -376,8 +376,8 @@ createStep({
   id: 'dynamic-step',
   route: '/dashboard',
   target: '#dynamic-widget',
-  waitForTarget: true, // Wait up to 5 seconds for element
-  waitForTargetTimeout: 5000,
+  waitForTarget: true, // Wait for the element to appear
+  waitTimeout: 5000, // ...for up to 5 seconds (default 3000)
 })
 ```
 

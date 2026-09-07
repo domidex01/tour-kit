@@ -204,8 +204,11 @@ to your `<TourOverlay />` slot.
 
 ### on-highlight-started
 
-`Step.onHighlightStarted` and `onHighlighted` fired when the spotlight moved.
-Port to `onShow` on the migrated step.
+`Step.onHighlightStarted` fired as the spotlight began moving to a step.
+Port to `onBeforeShow` (which can also cancel the move by returning `false`)
+or to `onEnter`, which runs after any navigation and just before the step
+mounts. `onHighlighted` — the "spotlight has landed" event — is `onShow`. See
+[Step lifecycle](/docs/api/core#step-lifecycle).
 
 ### on-highlighted
 

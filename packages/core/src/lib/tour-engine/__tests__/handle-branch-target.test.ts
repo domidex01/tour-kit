@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { BranchContext } from '../../../types'
+import type { Tour } from '../../../types/tour'
 import { handleBranchTargetImpl } from '../handle-branch-target'
 import { createFakeEngineContext } from './_helpers/fake-engine-context'
 import { makeTour, visibleStep } from './_helpers/make-tour'
@@ -60,7 +61,7 @@ describe('handleBranchTargetImpl', () => {
       expect(handle.mocks.completeTour).not.toHaveBeenCalled()
     })
 
-    it('"restart" dispatches GO_TO_STEP 0 and tracks step visit', async () => {
+    it('"restart" navigates to step 0 and tracks step visit', async () => {
       const tour = makeTour('t1', [visibleStep('first'), visibleStep('second')])
       const onStepView = vi.fn()
       const handle = createFakeEngineContext({
@@ -72,7 +73,10 @@ describe('handleBranchTargetImpl', () => {
       await handleBranchTargetImpl(handle.ctx, 'restart', noopBranchCtx)
 
       expect(handle.mocks.dispatch).toHaveBeenCalledWith({ type: 'CLEAR_VISIT_TRACKING' })
-      expect(handle.mocks.dispatch).toHaveBeenCalledWith({ type: 'GO_TO_STEP', stepIndex: 0 })
+      // #121: restart routes through navigateToStep so step 0's `when`,
+      // `route` and lifecycle guards are honoured like any other landing.
+      // The mocked navigateToStep resolves true without dispatching.
+      expect(handle.mocks.navigateToStep).toHaveBeenCalledWith(0)
       expect(handle.mocks.dispatch).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'TRACK_STEP_VISIT', stepId: 'first' })
       )
@@ -379,6 +383,154 @@ describe('handleBranchTargetImpl', () => {
       const capturedCtx = handle.ctx
       handle.setState({ currentStepIndex: 1 })
       expect(capturedCtx.getState().currentStepIndex).toBe(1)
+    })
+  })
+})
+
+/**
+ * Issue #121 — the two branch paths that commit a step without going through
+ * `navigateToStep`, and the one that now does.
+ */
+describe('handleBranchTargetImpl — step lifecycle guards (#121)', () => {
+  const callOrder: string[] = []
+
+  beforeEach(() => {
+    callOrder.length = 0
+  })
+
+  describe('"restart"', () => {
+    it('unwinds when navigateToStep declines', async () => {
+      const tour = makeTour('t1', [visibleStep('first'), visibleStep('second')])
+      const onStepView = vi.fn()
+      const handle = createFakeEngineContext({
+        currentTour: tour,
+        state: { currentStep: tour.steps[1] ?? null, currentStepIndex: 1 },
+        navigateToStep: () => Promise.resolve(false),
+        tourKitContext: { onStepView },
+      })
+
+      await handleBranchTargetImpl(handle.ctx, 'restart', noopBranchCtx)
+
+      expect(handle.mocks.dispatch).toHaveBeenCalledWith({
+        type: 'SET_TRANSITIONING',
+        isTransitioning: false,
+      })
+      expect(handle.mocks.dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'TRACK_STEP_VISIT' })
+      )
+      expect(onStepView).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('BranchToTour', () => {
+    /** Two tours registered, sitting on `t1` step 0. */
+    function crossTour(target: Tour, extras: Parameters<typeof createFakeEngineContext>[0] = {}) {
+      const source = makeTour('t1', [visibleStep('a')])
+      return createFakeEngineContext({
+        currentTour: source,
+        state: {
+          currentStep: source.steps[0] ?? null,
+          tours: new Map([
+            ['t1', source],
+            [target.id, target],
+          ]),
+        },
+        ...extras,
+      })
+    }
+
+    it('a vetoing first step leaves the current tour running', async () => {
+      // The only observable proof that `newStepIndex` is resolved BEFORE the
+      // STOP_TOUR dispatch: without that hoist the index is unknown at guard
+      // time, so the guard could only run after the stop — and a veto then
+      // strands the user with no tour at all.
+      const target = makeTour('t2', [
+        visibleStep('x'),
+        visibleStep('y', { onBeforeShow: () => false as const }),
+      ])
+      const handle = crossTour(target)
+
+      await handleBranchTargetImpl(handle.ctx, { tour: 't2', step: 'y' }, noopBranchCtx)
+
+      expect(handle.mocks.dispatch).not.toHaveBeenCalledWith({ type: 'STOP_TOUR' })
+      expect(handle.mocks.dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'START_TOUR' })
+      )
+      expect(handle.mocks.dispatch).toHaveBeenCalledWith({
+        type: 'SET_TRANSITIONING',
+        isTransitioning: false,
+      })
+    })
+
+    it('a vetoing first step announces nothing', async () => {
+      // Absence-of-dispatch is NOT proof that nothing happened. `onTourBranch`
+      // fires above the dispatches, so the case above passed while a cancelled
+      // branch still emitted a "branched from t1 to t2" analytics event and
+      // called the author's own callback for a branch that never occurred.
+      const onTourBranch = vi.fn()
+      const tourOnBranch = vi.fn()
+      const target = makeTour('t2', [visibleStep('x', { onBeforeShow: () => false as const })])
+      const handle = crossTour(target, { tourKitContext: { onTourBranch } })
+      const source = handle.ctx.getCurrentTour()
+      if (source) source.onTourBranch = tourOnBranch
+
+      await handleBranchTargetImpl(handle.ctx, { tour: 't2' }, noopBranchCtx)
+
+      expect(onTourBranch).not.toHaveBeenCalled()
+      expect(tourOnBranch).not.toHaveBeenCalled()
+    })
+
+    it('announces the branch once it actually happens', async () => {
+      const onTourBranch = vi.fn()
+      const target = makeTour('t2', [visibleStep('x')])
+      const handle = crossTour(target, { tourKitContext: { onTourBranch } })
+
+      await handleBranchTargetImpl(handle.ctx, { tour: 't2' }, noopBranchCtx)
+
+      expect(onTourBranch).toHaveBeenCalledWith('t1', 't2', 'a')
+    })
+
+    it('a throwing onTourBranch does not reject the caller', async () => {
+      const target = makeTour('t2', [visibleStep('x')])
+      const handle = crossTour(target)
+      const source = handle.ctx.getCurrentTour()
+      if (source) {
+        source.onTourBranch = () => {
+          throw new Error('consumer bug')
+        }
+      }
+
+      await expect(
+        handleBranchTargetImpl(handle.ctx, { tour: 't2' }, noopBranchCtx)
+      ).resolves.toBeUndefined()
+      expect(handle.mocks.dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'START_TOUR' })
+      )
+    })
+
+    it('runs onEnter on the destination step before START_TOUR', async () => {
+      const onStart = vi.fn()
+      const target = makeTour(
+        't2',
+        [
+          visibleStep('x', {
+            onEnter: async () => {
+              await Promise.resolve()
+              callOrder.push('onEnter:x')
+            },
+          }),
+        ],
+        { onStart }
+      )
+      const handle = crossTour(target)
+      handle.mocks.dispatch.mockImplementation((action: { type: string }) => {
+        callOrder.push(`dispatch:${action.type}`)
+      })
+
+      await handleBranchTargetImpl(handle.ctx, { tour: 't2' }, noopBranchCtx)
+
+      expect(callOrder).toEqual(['onEnter:x', 'dispatch:STOP_TOUR', 'dispatch:START_TOUR'])
+      expect(onStart).toHaveBeenCalledTimes(1)
     })
   })
 })
