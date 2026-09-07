@@ -91,31 +91,40 @@ export function applyTransitionEffects(
   // walk and no subscriber renders.
   mirrorToRegistry(ctx, next)
 
-  // ─── Step lifecycle notifications (#121) ────────────────────────────────
-  // Post-commit by definition, and this is the one place every commit passes
-  // — including the four paths that bypass `navigateToStep` (start, boot
-  // restore, 'restart', a cross-tour branch) and every way a tour ends.
-  //
-  // Deferred by a microtask because this function runs inside `dispatch` and
-  // may not dispatch: a consumer's `onShow` calling `next()` is ordinary
-  // usage. The microtask is enqueued before `navigateToStepImpl` returns, so
-  // it still runs ahead of the caller's continuation — `onShow` precedes
-  // TRACK_STEP_VISIT and the tour-level `onStepChange` in the engine. One
-  // firing after `destroy()` is harmless: both snapshots are already captured
-  // and nothing here dispatches.
-  //
-  // The `isActive` reads are what make tour end fire `onHide` and never a
-  // phantom `onShow`, whatever `createStoppedState` chooses to retain.
-  if (positionChanged) {
-    const hide = prev.isActive ? prev.currentStep : null
-    const show = next.isActive ? next.currentStep : null
-    if (hide?.onHide || show?.onShow) {
-      queueMicrotask(() => {
-        if (hide?.onHide) invokeCallback('onHide', () => hide.onHide?.(prev))
-        if (show?.onShow) invokeCallback('onShow', () => show.onShow?.(next))
-      })
-    }
-  }
+  notifyStepChange(prev, next, positionChanged)
+}
+
+/**
+ * The two consumer step notifications (#121) — post-commit by definition, and
+ * this is the one place every commit passes, including the four paths that
+ * bypass `navigateToStep` and every way a tour ends.
+ *
+ * Deferred by a microtask because `applyTransitionEffects` runs inside
+ * `dispatch` and may not dispatch: a consumer's `onShow` calling `next()` is
+ * ordinary usage. The microtask is enqueued before `navigateToStepImpl`
+ * returns, so it still runs ahead of the caller's continuation — `onShow`
+ * precedes `TRACK_STEP_VISIT` and the tour-level `onStepChange` in the engine.
+ * One firing after `destroy()` is harmless: both snapshots are captured and
+ * nothing here dispatches.
+ *
+ * The `isActive` reads are what make a tour end fire `onHide` and never a
+ * phantom `onShow`, whatever `createStoppedState` chooses to retain.
+ */
+function notifyStepChange(
+  prev: TourCallbackContext,
+  next: TourCallbackContext,
+  positionChanged: boolean
+): void {
+  if (!positionChanged) return
+
+  const hide = prev.isActive ? prev.currentStep : null
+  const show = next.isActive ? next.currentStep : null
+  if (!(hide?.onHide || show?.onShow)) return
+
+  queueMicrotask(() => {
+    if (hide?.onHide) invokeCallback('onHide', () => hide.onHide?.(prev))
+    if (show?.onShow) invokeCallback('onShow', () => show.onShow?.(next))
+  })
 }
 
 function mirrorToRegistry(ctx: TourEngineContext, next: TourCallbackContext): void {

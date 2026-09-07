@@ -42,12 +42,12 @@
  *     That note came due. §1.3b left this row 43 bytes under 21 500 and said
  *     the next change to touch the main entry would trip it. Issue #121 —
  *     wiring the five dead step lifecycle callbacks — did, at a measured
- *     21 845, so the ceiling is now 22 000.
+ *     21 851, so the ceiling is now 22 000.
  *
  *     The +416 B is Group A in `navigateToStepImpl` (three guard call sites
  *     plus the `awaitTarget` helper), `commitStart` in `actions.ts`, and the
  *     five-line Group B block in `transition-effects.ts`. `core:engine` moved
- *     by the SAME 416 B (17 030 -> 17 446) because every file involved lives
+ *     by the SAME 416 B (17 030 -> 17 451) because every file involved lives
  *     in the chunk both entries read — a delta that appeared on only one of
  *     the two rows would mean something else happened.
  *

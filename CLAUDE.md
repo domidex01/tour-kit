@@ -131,7 +131,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     `engine-not-in-main-closure.test.ts` guards that. §1.3b left it at 21.5 KB
     against a measured 21 457 — 43 bytes, knowingly at the line. Issue #121
     tripped it, exactly as that note predicted: wiring the five dead step
-    lifecycle callbacks measured 21 845, so the row is now 22 KB. The +416 B
+    lifecycle callbacks measured 21 851, so the row is now 22 KB. The +416 B
     is the guards in `navigateToStepImpl`, `commitStart` in `actions.ts` and
     the Group B block in `transition-effects.ts`)
   - core/engine subpath <18 KB (the non-React consumer's worst case: the
@@ -144,7 +144,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     still ships zero. §1.3b raised this from 16 KB against a measured 17 033
     — the ~1.6 KB is the code that left the five view hooks, which is why
     `core` did not move: it lands in the shared chunk both entries read.
-    Issue #121 took it to 17 446, still inside 18 KB; that +416 B is the same
+    Issue #121 took it to 17 451, still inside 18 KB; that +416 B is the same
     +416 B `core` saw, because both rows read the chunk it landed in)
   - react <12 KB
   - hints <6 KB

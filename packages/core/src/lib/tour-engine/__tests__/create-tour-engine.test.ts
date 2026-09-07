@@ -607,18 +607,21 @@ describe('step lifecycle callbacks — issue #121', () => {
     it('an onShow that calls next() advances exactly once more and settles', async () => {
       // applyTransitionEffects runs INSIDE dispatch and must not dispatch.
       // Without the queueMicrotask this re-enters the reducer mid-transition.
-      let engine!: TourEngine
+      // The step needs the engine that is built from it, so the callback
+      // reaches it through a holder rather than a forward-declared binding.
+      const live: { current: TourEngine | null } = { current: null }
       const tour = makeTour('t', [
         visibleStep('a'),
         visibleStep('b', {
           onShow: () => {
             callOrder.push('onShow:b')
-            void engine.next()
+            void live.current?.next()
           },
         }),
         visibleStep('c', { onShow: note('onShow', 'c') }),
       ])
-      engine = engineFor({ tours: [tour] }).engine
+      const { engine } = engineFor({ tours: [tour] })
+      live.current = engine
 
       await engine.start('t')
       await engine.next()
