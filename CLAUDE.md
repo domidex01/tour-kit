@@ -131,7 +131,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     `engine-not-in-main-closure.test.ts` guards that. §1.3b left it at 21.5 KB
     against a measured 21 457 — 43 bytes, knowingly at the line. Issue #121
     tripped it, exactly as that note predicted: wiring the five dead step
-    lifecycle callbacks measured 21 849, so the row is now 22 KB. The +416 B
+    lifecycle callbacks measured 21 845, so the row is now 22 KB. The +416 B
     is the guards in `navigateToStepImpl`, `commitStart` in `actions.ts` and
     the Group B block in `transition-effects.ts`)
   - core/engine subpath <18 KB (the non-React consumer's worst case: the

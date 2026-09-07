@@ -1,5 +1,5 @@
 import type { BranchContext, TourCallbackContext } from '../../types'
-import type { TourStep, VisibleTourStep } from '../../types/step'
+import { type TourStep, type VisibleTourStep, isVisibleStep } from '../../types/step'
 import type { Tour } from '../../types/tour'
 import { resolveBranch, resolveTargetToIndex } from '../../utils/branch'
 import { TourValidationError } from '../validate-tour'
@@ -46,6 +46,122 @@ async function advancePastHiddenStep(
 
   const idx = resolveTargetToIndex(target, cursor, stepIdLookup, tour.steps.length)
   return idx ?? cursor + 1
+}
+
+/**
+ * The route hop a step needs before it can mount, or `null` when the step
+ * mounts on the route the user is already on.
+ *
+ * Deliberately a nullable pair rather than a `sameRoute` boolean: a flag
+ * answers the question but discards the two values that answered it, and every
+ * later use then has to assert them back with `as`.
+ */
+type RouteHop = { route: string; router: NonNullable<TourEngineContext['router']> }
+
+function resolveRouteHop(ctx: TourEngineContext, step: VisibleTourStep): RouteHop | null {
+  const { needed } = isNavigationNeeded(step, ctx.router)
+  if (!needed || !step.route || !ctx.router) return null
+  return { route: step.route, router: ctx.router }
+}
+
+/**
+ * Drive the router to the step's route. `NAVIGATION_REJECTED` and an abort are
+ * the only outcomes that are not a throw.
+ *
+ * @returns `false` when the caller should unwind.
+ */
+async function runRouteHop(
+  ctx: TourEngineContext,
+  hop: RouteHop,
+  step: VisibleTourStep
+): Promise<boolean> {
+  try {
+    const navResult = await hop.router.navigate(hop.route)
+    if (navResult === false) {
+      throw new TourRouteError({
+        code: 'NAVIGATION_REJECTED',
+        route: hop.route,
+        message: `Router rejected navigation to "${hop.route}".`,
+      })
+    }
+
+    if (step.routeDelay && step.routeDelay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, step.routeDelay))
+    }
+    return true
+  } catch (err) {
+    if (ctx.abortControllerRef.current?.signal.aborted) return false
+    if (err instanceof TourRouteError) {
+      ctx.onStepError?.(err)
+      ctx.dispatch({ type: 'STOP_TOUR' })
+      return false
+    }
+    throw err
+  }
+}
+
+/**
+ * Everything between "the hidden walk found a mountable step" and
+ * `GO_TO_STEP`: the navigation strategy, the incoming guard, the route hop,
+ * the target wait and `onEnter`.
+ *
+ * It lives outside the hidden-walk loop because it is that loop's *exit* —
+ * every path here returns, so it runs at most once per navigation.
+ *
+ * @returns `true` when the step was committed.
+ */
+async function commitVisibleStep(
+  ctx: TourEngineContext,
+  step: VisibleTourStep,
+  cursor: number,
+  tour: Tour
+): Promise<boolean> {
+  const hop = resolveRouteHop(ctx, step)
+
+  // The deferred strategies come first: the transition is postponed, not
+  // decided, so asking the incoming step's guard would be premature.
+  //
+  // ponytail: a prompt/manual step therefore runs `onBeforeHide` once on the
+  // deferred attempt and again when the consumer re-drives it — visible to a
+  // guard that shows a confirm dialog. Ceiling: the landing step is only known
+  // after the hidden walk, so the outgoing guard cannot be deferred past this
+  // check without letting hidden side effects run ahead of a veto, which is
+  // worse. Upgrade path: have the prompt/manual return carry the resolved
+  // cursor so the consumer's re-drive resumes here instead of re-entering at
+  // the top.
+  if (hop) {
+    if (!ctx.autoNavigate || step.routeChangeStrategy === 'prompt') {
+      ctx.onNavigationRequired?.(hop.route, step.id)
+      return false
+    }
+    if (step.routeChangeStrategy === 'manual') return false
+  }
+
+  const stepCtx: TourCallbackContext = {
+    ...buildCallbackContext(ctx.getState(), tour, ctx.getData()),
+    currentStepIndex: cursor,
+    currentStep: step,
+  }
+
+  if ((await invokeAsyncCallback('onBeforeShow', () => step.onBeforeShow?.(stepCtx))) === false) {
+    return false
+  }
+
+  if (hop && !(await runRouteHop(ctx, hop, step))) return false
+
+  // A route change always waits — the target cannot exist before the
+  // navigation. On the step's own route the author opts in, and only with a
+  // target to observe: `waitForStepTarget` fails synchronously on a null
+  // resolve, so a targetless modal step carrying the flag would otherwise stop
+  // the tour instantly.
+  if (hop || (step.waitForTarget && step.target)) {
+    const route = hop?.route ?? ctx.router?.getCurrentRoute() ?? ''
+    if (!(await awaitTarget(ctx, step, route))) return false
+  }
+
+  await invokeAsyncCallback('onEnter', () => step.onEnter?.(stepCtx))
+  ctx.dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
+  return true
 }
 
 /**
@@ -109,7 +225,6 @@ async function awaitTarget(
  *   when navigation is deferred to the consumer or aborted, throws on a
  *   hidden-step loop.
  */
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: hidden-traversal + route navigation in one orchestrator
 export async function navigateToStepImpl(
   ctx: TourEngineContext,
   stepIndex: number
@@ -123,7 +238,7 @@ export async function navigateToStepImpl(
   // The outgoing guard runs first, before the hidden walk and before any
   // navigation, so a veto is genuinely a no-op rather than a half-transition.
   const outgoing = ctx.getState().currentStep
-  if (outgoing && outgoing.kind !== 'hidden') {
+  if (outgoing && isVisibleStep(outgoing)) {
     const outgoingCtx = buildCallbackContext(ctx.getState(), currentTour, ctx.getData())
     const vetoed = await invokeAsyncCallback('onBeforeHide', () =>
       outgoing.onBeforeHide?.(outgoingCtx)
@@ -142,76 +257,7 @@ export async function navigateToStepImpl(
       return false
     }
 
-    if (step.kind !== 'hidden') {
-      const { needed } = isNavigationNeeded(step, ctx.router)
-      const sameRoute = !needed || !step.route || !ctx.router
-
-      // The deferred strategies come first: the transition is postponed, not
-      // decided, so asking the incoming step's guard would be premature.
-      // ponytail: a prompt/manual step therefore runs `onBeforeHide` once on
-      // the deferred attempt and again when the consumer re-drives it. The
-      // alternative — deferring the outgoing guard past the strategy check —
-      // would let a hidden walk run ahead of a veto, which is worse.
-      if (!sameRoute) {
-        if (!ctx.autoNavigate || step.routeChangeStrategy === 'prompt') {
-          ctx.onNavigationRequired?.(step.route as string, step.id)
-          return false
-        }
-        if (step.routeChangeStrategy === 'manual') return false
-      }
-
-      const stepCtx: TourCallbackContext = {
-        ...buildCallbackContext(ctx.getState(), currentTour, ctx.getData()),
-        currentStepIndex: cursor,
-        currentStep: step,
-      }
-
-      if (
-        (await invokeAsyncCallback('onBeforeShow', () => step.onBeforeShow?.(stepCtx))) === false
-      ) {
-        return false
-      }
-
-      if (!sameRoute) {
-        const route = step.route as string
-        try {
-          const navResult = await (ctx.router as NonNullable<typeof ctx.router>).navigate(route)
-          if (navResult === false) {
-            throw new TourRouteError({
-              code: 'NAVIGATION_REJECTED',
-              route,
-              message: `Router rejected navigation to "${route}".`,
-            })
-          }
-
-          if (step.routeDelay && step.routeDelay > 0) {
-            await new Promise((resolve) => setTimeout(resolve, step.routeDelay))
-          }
-        } catch (err) {
-          if (ctx.abortControllerRef.current?.signal.aborted) return false
-          if (err instanceof TourRouteError) {
-            ctx.onStepError?.(err)
-            ctx.dispatch({ type: 'STOP_TOUR' })
-            return false
-          }
-          throw err
-        }
-      }
-
-      // A route change always waits — the target cannot exist before the
-      // navigation. On the step's own route the author opts in, and only with
-      // a target to observe: `waitForStepTarget` fails synchronously on a null
-      // resolve, so a targetless modal step carrying the flag would otherwise
-      // stop the tour instantly.
-      if (!sameRoute || (step.waitForTarget && step.target)) {
-        const route = sameRoute ? (ctx.router?.getCurrentRoute() ?? '') : (step.route as string)
-        if (!(await awaitTarget(ctx, step, route))) return false
-      }
-
-      await invokeAsyncCallback('onEnter', () => step.onEnter?.(stepCtx))
-      ctx.dispatch({ type: 'GO_TO_STEP', stepIndex: cursor })
-      return true
-    }
+    if (isVisibleStep(step)) return commitVisibleStep(ctx, step, cursor, currentTour)
 
     const next = await advancePastHiddenStep(ctx, step, cursor, currentTour, localStepIdMap)
     if (next === 'terminate') {

@@ -42,7 +42,7 @@
  *     That note came due. §1.3b left this row 43 bytes under 21 500 and said
  *     the next change to touch the main entry would trip it. Issue #121 —
  *     wiring the five dead step lifecycle callbacks — did, at a measured
- *     21 849, so the ceiling is now 22 000.
+ *     21 845, so the ceiling is now 22 000.
  *
  *     The +416 B is Group A in `navigateToStepImpl` (three guard call sites
  *     plus the `awaitTarget` helper), `commitStart` in `actions.ts`, and the
