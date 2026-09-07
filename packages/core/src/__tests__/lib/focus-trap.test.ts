@@ -134,21 +134,42 @@ describe('the two-phase contract', () => {
 })
 
 describe('forget()', () => {
-  it('clears the captured element when not trapping', () => {
-    const { container, buttons } = makeContainer()
+  it('clears the record so the next capture() takes the CURRENT trigger', () => {
+    // enabled -> false with no activate() in between: a lazy portal that never
+    // mounted. Without forget(), the next enable would restore focus to a
+    // trigger that is no longer the one the user came from.
+    const { container } = makeContainer()
+    const other = document.createElement('button')
+    document.body.appendChild(other)
     const trap = createFocusTrap(() => container)
 
     trigger.focus()
     trap.capture()
     trap.forget()
 
-    // Nothing recorded, so deactivate() has nowhere to send focus back to and
-    // the first focusable keeps it.
+    other.focus()
+    trap.capture()
     trap.activate()
-    buttons[0].focus()
     trap.deactivate()
 
-    expect(document.activeElement).toBe(buttons[0])
+    expect(document.activeElement).toBe(other)
+  })
+
+  it('without forget(), the first captured trigger still wins', () => {
+    const { container } = makeContainer()
+    const other = document.createElement('button')
+    document.body.appendChild(other)
+    const trap = createFocusTrap(() => container)
+
+    trigger.focus()
+    trap.capture()
+
+    other.focus()
+    trap.capture()
+    trap.activate()
+    trap.deactivate()
+
+    expect(document.activeElement).toBe(trigger)
   })
 
   it('is a no-op while trapping', () => {
