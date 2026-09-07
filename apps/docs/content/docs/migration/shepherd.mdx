@@ -189,8 +189,10 @@ Wire `useTour().next()` from your own event handler.
 ### before-show-promise
 
 `Step.beforeShowPromise` returned a Promise that resolved before the step
-showed. Await it before calling `useTour().goTo()`, or move the deferred
-logic into a custom `onShow` handler.
+showed. Port it to `onBeforeShow`, which is awaited before the step commits —
+and which can also cancel the transition by returning `false`, something
+`beforeShowPromise` could not do. See
+[Step lifecycle](/docs/api/core#step-lifecycle).
 
 ### show-on
 

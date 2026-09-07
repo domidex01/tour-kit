@@ -226,6 +226,29 @@ class TourValidationError extends Error {
 function validateTour(tour: Tour): void;
 ```
 
+## Waiting for a late target
+
+A hidden step is for a step that should not be *shown*. A step that should be
+shown, just not yet — because its target is rendered after a fetch or a lazy
+mount — wants `waitForTarget: true` instead:
+
+```tsx
+createStep({
+  id: 'revenue',
+  target: '#revenue-chart',
+  content: 'Your revenue at a glance',
+  waitForTarget: true,
+  waitTimeout: 5000, // default 3000
+})
+```
+
+The step waits for the node to appear before it commits, on its own route as
+well as after a router hop. If it never appears, `onStepError` fires with
+`TourRouteError({ code: 'TARGET_NOT_FOUND' })` and the tour stops rather than
+pointing at nothing. The flag needs a `target` to observe and is ignored
+without one. Full semantics, and the rest of the step lifecycle, are in
+[Step lifecycle](/docs/api/core#step-lifecycle).
+
 ## Related
 
 - [Branching tours guide](/docs/guides/branching) — visible decision points, the counterpart to hidden steps.
@@ -233,3 +256,4 @@ function validateTour(tour: Tour): void;
 - [Imperative control guide](/docs/guides/imperative-control) — drive `next()` from `onNext` handlers.
 - [Diagnostic engine](/docs/core/diagnostic) — surfaces `STRUCTURE_INVALID` when hidden-step validation fails.
 - [Step types reference](/docs/core/types/step-types) — every `TourStep` field including `kind` and `onEnter`.
+- [Step lifecycle](/docs/api/core#step-lifecycle) — the order every hook fires in, and how `onBeforeShow` / `onBeforeHide` cancel a transition.
