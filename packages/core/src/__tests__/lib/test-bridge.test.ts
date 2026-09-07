@@ -22,7 +22,9 @@ function makeTarget(extras: Partial<TestBridgeTarget> = {}): TestBridgeTarget & 
   const record =
     (name: string) =>
     (...args: unknown[]) => {
-      ;(calls[name] ??= []).push(args)
+      const bucket = calls[name] ?? []
+      bucket.push(args)
+      calls[name] = bucket
     }
   return {
     calls,
@@ -43,7 +45,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  delete window.__tourKit__
+  Reflect.deleteProperty(window, '__tourKit__')
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
 })

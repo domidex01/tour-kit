@@ -5,6 +5,7 @@ import { useFlowSession } from '../hooks/use-flow-session'
 import { usePersistence } from '../hooks/use-persistence'
 import { useRoutePersistence } from '../hooks/use-route-persistence'
 import { explainTour } from '../lib/diagnostic'
+import { attachTestBridge } from '../lib/test-bridge'
 import {
   completeTourImpl,
   goToImpl,
@@ -35,7 +36,6 @@ import type { Tour, TourCallbackContext, TourContextValue } from '../types'
 import { defaultPersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
-import type { TestBridge } from '../types/test-bridge'
 import type { TourReducerState } from '../types/tour-reducer'
 import { logger } from '../utils/logger'
 import { TourContext } from './tour-context'
@@ -649,46 +649,24 @@ export function TourProvider({
 
   React.useEffect(() => {
     if (!enableTestBridge) return
-    if (typeof window === 'undefined') return
+    const methods = bridgeMethodsRef
+    // The once-per-mount guard stays here, not in `attachTestBridge`: a
+    // module-level flag in the plain function would leak across tests.
+    const warn = !testBridgeWarnedRef.current
+    testBridgeWarnedRef.current = true
 
-    if (typeof process === 'undefined' || process.env?.NODE_ENV !== 'production') {
-      if (!testBridgeWarnedRef.current) {
-        testBridgeWarnedRef.current = true
-        console.warn('[Tour Kit] Test bridge enabled. Disable for production.')
-      }
-    }
-
-    const bridge: TestBridge = {
-      start: (tourId) => {
-        void bridgeMethodsRef.current.start(tourId)
+    return attachTestBridge(
+      {
+        start: (tourId) => methods.current.start(tourId),
+        next: () => methods.current.next(),
+        prev: () => methods.current.previous(),
+        goToStep: (stepId) => methods.current.goToStep(stepId),
+        complete: () => methods.current.complete(),
+        skip: () => methods.current.skip(),
+        getDiagnostic: (tourId) => methods.current.diagnostics[tourId] ?? null,
       },
-      next: () => {
-        void bridgeMethodsRef.current.next()
-      },
-      previous: () => {
-        void bridgeMethodsRef.current.previous()
-      },
-      goToStep: (stepId) => {
-        void bridgeMethodsRef.current.goToStep(stepId)
-      },
-      complete: () => {
-        bridgeMethodsRef.current.complete()
-      },
-      skip: () => {
-        bridgeMethodsRef.current.skip()
-      },
-      getDiagnostic: (tourId) => bridgeMethodsRef.current.diagnostics[tourId] ?? null,
-    }
-    window.__tourKit__ = bridge
-
-    return () => {
-      // Identity check defends against another library reassigning the global
-      // between our mount and unmount — see the cleanup-safety unit test.
-      if (window.__tourKit__ === bridge) {
-        // biome-ignore lint/performance/noDelete: full removal mirrors the absent-by-default invariant — `= undefined` would leave an own property and break consumer `'__tourKit__' in window` checks
-        delete window.__tourKit__
-      }
-    }
+      { warn }
+    )
   }, [enableTestBridge])
 
   const contextValue = React.useMemo<TourContextValue>(
