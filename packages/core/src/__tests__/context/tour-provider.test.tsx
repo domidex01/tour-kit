@@ -1,4 +1,4 @@
-import { act, render, renderHook, screen } from '@testing-library/react'
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react'
 import type * as React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { useTourContext } from '../../context/tour-context'
@@ -563,5 +563,99 @@ describe('useTourContext', () => {
 
     expect(result.current).toBeDefined()
     expect(result.current.isActive).toBe(false)
+  })
+})
+
+/**
+ * Issue #121 — the React seat inherits the step lifecycle without an edit.
+ *
+ * `<TourProvider>` calls `applyTransitionEffects` from a no-deps effect, and
+ * the pre-commit guards live in the shared `navigateToStepImpl`. So the
+ * headless engine and the provider must produce the same order — docs written
+ * once are true twice. If this case ever fails, the effect at
+ * `tour-provider.tsx:607-615` is the first place to look.
+ *
+ * Only the five step hooks are asserted. The tour-level `onStepChange` sits
+ * *before* `onHide`/`onShow` here and *after* them in the engine; pinning it
+ * would pin a divergence this phase is not fixing.
+ */
+describe('TourProvider — step lifecycle order (#121)', () => {
+  const callOrder: string[] = []
+  const note = (name: string, id: string) => () => {
+    callOrder.push(`${name}:${id}`)
+    return undefined
+  }
+
+  const hookedTours: Tour[] = [
+    {
+      id: 'hooked',
+      steps: [
+        {
+          id: 'a',
+          target: '#t1',
+          content: 'Step A',
+          onBeforeHide: note('onBeforeHide', 'a'),
+          onHide: note('onHide', 'a'),
+        },
+        {
+          id: 'b',
+          target: '#t2',
+          content: 'Step B',
+          onBeforeShow: note('onBeforeShow', 'b'),
+          onEnter: note('onEnter', 'b'),
+          onShow: note('onShow', 'b'),
+        },
+      ],
+    },
+  ]
+
+  it('gives the same five-element order as the headless engine', async () => {
+    const wrapper = createWrapper(hookedTours)
+    const { result } = renderHook(() => useTour(), { wrapper })
+
+    await act(async () => {
+      await result.current.start('hooked')
+    })
+    callOrder.length = 0
+
+    await act(async () => {
+      await result.current.next()
+    })
+
+    // Group B lands in a microtask inside a passive effect, so a bare
+    // assertion here reads a short array.
+    await waitFor(() =>
+      expect(callOrder).toEqual([
+        'onBeforeHide:a',
+        'onBeforeShow:b',
+        'onEnter:b',
+        'onHide:a',
+        'onShow:b',
+      ])
+    )
+  })
+
+  it('honours a veto from a step guard', async () => {
+    const vetoTours: Tour[] = [
+      {
+        id: 'vetoed',
+        steps: [
+          { id: 'a', target: '#t1', content: 'A', onBeforeHide: () => false as const },
+          { id: 'b', target: '#t2', content: 'B' },
+        ],
+      },
+    ]
+    const wrapper = createWrapper(vetoTours)
+    const { result } = renderHook(() => useTour(), { wrapper })
+
+    await act(async () => {
+      await result.current.start('vetoed')
+    })
+    await act(async () => {
+      await result.current.next()
+    })
+
+    expect(result.current.currentStepIndex).toBe(0)
+    expect(result.current.isTransitioning).toBe(false)
   })
 })

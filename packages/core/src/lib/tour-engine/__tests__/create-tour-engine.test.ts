@@ -511,3 +511,304 @@ describe('US-1 guard', () => {
     expect(source).not.toMatch(/from ['"](react|react-dom|@testing-library)/)
   })
 })
+
+/**
+ * Issue #121 — the five typed-but-dead step hooks, wired.
+ *
+ * This is the ORDER ORACLE. `applyTransitionEffects` runs inside the engine's
+ * synchronous `dispatch`, and the microtask carrying `onHide`/`onShow` is
+ * enqueued there — so the pinned order is only observable through a real
+ * engine. An order assertion against `createFakeEngineContext` would be
+ * asserting against a `vi.fn`, i.e. against the test's own arrangement.
+ */
+describe('step lifecycle callbacks — issue #121', () => {
+  const callOrder: string[] = []
+
+  /** Records the call and has no opinion — `undefined` ⇒ proceed. */
+  const note = (name: string, id: string) => () => {
+    callOrder.push(`${name}:${id}`)
+    return undefined
+  }
+
+  /** Records the call and vetoes — a literal `false` ⇒ do not commit. */
+  const veto = (name: string, id: string) => () => {
+    callOrder.push(`${name}:${id}`)
+    return false as const
+  }
+
+  /** Two visible steps with every hook wired. No `waitForTarget` — `visibleStep` hard-codes `target: '#x'`, which never exists here. */
+  const hooked = () =>
+    makeTour('t', [
+      visibleStep('a', {
+        onBeforeShow: note('onBeforeShow', 'a'),
+        onEnter: note('onEnter', 'a'),
+        onShow: note('onShow', 'a'),
+        onBeforeHide: note('onBeforeHide', 'a'),
+        onHide: note('onHide', 'a'),
+      }),
+      visibleStep('b', {
+        onBeforeShow: note('onBeforeShow', 'b'),
+        onEnter: note('onEnter', 'b'),
+        onShow: note('onShow', 'b'),
+        onBeforeHide: note('onBeforeHide', 'b'),
+        onHide: note('onHide', 'b'),
+      }),
+    ])
+
+  beforeEach(() => {
+    callOrder.length = 0
+  })
+
+  describe('the pinned order', () => {
+    it('next() runs beforeHide → beforeShow → enter → [commit] → hide → show', async () => {
+      const { engine } = engineFor({ tours: [hooked()] })
+      await engine.start('t')
+      callOrder.length = 0 // start() fires its own onBeforeShow/onEnter/onShow for `a`
+
+      await engine.next()
+
+      expect(callOrder).toEqual([
+        'onBeforeHide:a',
+        'onBeforeShow:b',
+        'onEnter:b',
+        'onHide:a',
+        'onShow:b',
+      ])
+    })
+
+    it('prev() runs the same order in the other direction', async () => {
+      // prevImpl returns early at currentStepIndex <= 0, so start AT 1 rather
+      // than start() + next() — the arrange must not run the act's hooks.
+      const { engine } = engineFor({ tours: [hooked()] })
+      await engine.start('t', 1)
+      callOrder.length = 0
+
+      await engine.prev()
+
+      expect(callOrder).toEqual([
+        'onBeforeHide:b',
+        'onBeforeShow:a',
+        'onEnter:a',
+        'onHide:b',
+        'onShow:a',
+      ])
+    })
+
+    it('start() runs onBeforeShow → onEnter → [commit] → onShow for the first step', async () => {
+      const { engine } = engineFor({ tours: [hooked()] })
+
+      await engine.start('t')
+
+      expect(callOrder).toEqual(['onBeforeShow:a', 'onEnter:a', 'onShow:a'])
+    })
+  })
+
+  describe('re-entrancy — the reason Group B is deferred', () => {
+    it('an onShow that calls next() advances exactly once more and settles', async () => {
+      // applyTransitionEffects runs INSIDE dispatch and must not dispatch.
+      // Without the queueMicrotask this re-enters the reducer mid-transition.
+      let engine!: TourEngine
+      const tour = makeTour('t', [
+        visibleStep('a'),
+        visibleStep('b', {
+          onShow: () => {
+            callOrder.push('onShow:b')
+            void engine.next()
+          },
+        }),
+        visibleStep('c', { onShow: note('onShow', 'c') }),
+      ])
+      engine = engineFor({ tours: [tour] }).engine
+
+      await engine.start('t')
+      await engine.next()
+      await vi.waitFor(() => expect(engine.getState().currentStep?.id).toBe('c'))
+
+      expect(engine.getState().isTransitioning).toBe(false)
+      expect(callOrder).toEqual(['onShow:b', 'onShow:c'])
+    })
+  })
+
+  describe('fail-safe — a buggy callback is inert', () => {
+    it('a throwing onShow does not reject next() and leaves the tour running', async () => {
+      const tour = makeTour('t', [
+        visibleStep('a'),
+        visibleStep('b', {
+          onShow: () => {
+            throw new Error('consumer bug')
+          },
+        }),
+      ])
+      const { engine } = engineFor({ tours: [tour] })
+      await engine.start('t')
+
+      await expect(engine.next()).resolves.toBeUndefined()
+      await Promise.resolve()
+
+      expect(engine.getState().isActive).toBe(true)
+      expect(engine.getState().currentStep?.id).toBe('b')
+      expect(engine.getState().isTransitioning).toBe(false)
+    })
+
+    it('a throwing onBeforeShow is "no opinion", not a veto', async () => {
+      // Deliberately unlike evaluateStepWhen (throw ⇒ skip): blocking a
+      // transition on a buggy guard is exactly the bricked tour D5 forbids.
+      const tour = makeTour('t', [
+        visibleStep('a'),
+        visibleStep('b', {
+          onBeforeShow: () => {
+            throw new Error('consumer bug')
+          },
+        }),
+      ])
+      const { engine } = engineFor({ tours: [tour] })
+      await engine.start('t')
+
+      await engine.next()
+
+      expect(engine.getState().currentStep?.id).toBe('b')
+    })
+
+    it('a falsy non-false return is not a veto', async () => {
+      // `undefined`, `null`, `0` and `''` all mean "proceed" — only a literal
+      // `false` vetoes.
+      const tour = makeTour('t', [
+        visibleStep('a', { onBeforeHide: () => undefined }),
+        visibleStep('b', { onBeforeShow: () => undefined }),
+      ])
+      const { engine } = engineFor({ tours: [tour] })
+      await engine.start('t')
+
+      await engine.next()
+
+      expect(engine.getState().currentStepIndex).toBe(1)
+    })
+  })
+
+  describe('vetoes unwind through the real dispatch', () => {
+    it('onBeforeHide false on next() changes nothing', async () => {
+      const onStepChange = vi.fn()
+      const tour = makeTour(
+        't',
+        [visibleStep('a', { onBeforeHide: veto('onBeforeHide', 'a') }), visibleStep('b')],
+        { onStepChange }
+      )
+      const { engine } = engineFor({ tours: [tour] })
+      await engine.start('t')
+      callOrder.length = 0
+
+      await engine.next()
+
+      expect(engine.getState().currentStepIndex).toBe(0)
+      expect(engine.getState().isTransitioning).toBe(false) // the free unwind at actions.ts:174
+      expect(onStepChange).not.toHaveBeenCalled()
+      expect(callOrder).toEqual(['onBeforeHide:a'])
+    })
+
+    it('onBeforeHide false on prev() changes nothing — the reporter’s case', async () => {
+      const tour = makeTour('t', [
+        visibleStep('a'),
+        visibleStep('b', { onBeforeHide: veto('onBeforeHide', 'b') }),
+      ])
+      const { engine } = engineFor({ tours: [tour] })
+      await engine.start('t', 1)
+      callOrder.length = 0
+
+      await engine.prev()
+
+      expect(engine.getState().currentStepIndex).toBe(1)
+      expect(engine.getState().isTransitioning).toBe(false)
+    })
+
+    it('onBeforeShow false on goTo() changes nothing', async () => {
+      const tour = makeTour('t', [
+        visibleStep('a'),
+        visibleStep('b'),
+        visibleStep('c', { onBeforeShow: veto('onBeforeShow', 'c') }),
+      ])
+      const { engine } = engineFor({ tours: [tour] })
+      await engine.start('t')
+      callOrder.length = 0
+
+      await engine.goTo(2)
+
+      expect(engine.getState().currentStepIndex).toBe(0)
+      expect(engine.getState().isTransitioning).toBe(false)
+      expect(callOrder).toEqual(['onBeforeShow:c'])
+    })
+
+    it('onBeforeShow false on start() never starts the tour', async () => {
+      const tour = makeTour('t', [
+        visibleStep('a', { onBeforeShow: veto('onBeforeShow', 'a') }),
+        visibleStep('b'),
+      ])
+      const { engine } = engineFor({ tours: [tour] })
+
+      await engine.start('t')
+
+      expect(engine.getState().isActive).toBe(false)
+      expect(callOrder).toEqual(['onBeforeShow:a'])
+    })
+
+    it('an async Promise<false> vetoes too — the guard is awaited', async () => {
+      const tour = makeTour('t', [
+        visibleStep('a', { onBeforeHide: async () => false as const }),
+        visibleStep('b'),
+      ])
+      const { engine } = engineFor({ tours: [tour] })
+      await engine.start('t')
+
+      await engine.next()
+
+      expect(engine.getState().currentStepIndex).toBe(0)
+    })
+  })
+
+  describe('the paths that bypass navigateToStep', () => {
+    it('boot restore fires onEnter and onShow, never onBeforeShow', async () => {
+      // A flow session only exists when `routePersistence.flowSession` is set.
+      const { engine, storage } = engineFor({
+        tours: [hooked()],
+        routePersistence: {
+          enabled: true,
+          storage: 'sessionStorage',
+          flowSession: { storage: 'sessionStorage' },
+        },
+      })
+      stageFlow(storage, { tourId: 't', stepIndex: 1 }) // no currentRoute ⇒ sync path
+
+      await engine.boot()
+      await Promise.resolve()
+
+      expect(engine.getState().currentStep?.id).toBe('b')
+      expect(callOrder).toEqual(['onEnter:b', 'onShow:b'])
+      expect(callOrder).not.toContain('onBeforeShow:b')
+    })
+
+    it('stop() fires onHide for the step that left, and no onShow', async () => {
+      const { engine } = engineFor({ tours: [hooked()] })
+      await engine.start('t')
+      callOrder.length = 0
+
+      engine.stop()
+      await Promise.resolve() // stop() is synchronous; Group B is a microtask away
+
+      expect(callOrder).toEqual(['onHide:a'])
+    })
+
+    it('next() on the last step completes and fires onHide only', async () => {
+      // `next()` at the last step calls completeTour() and returns before any
+      // Group A hook (actions.ts:145-148) — correct, there is no incoming
+      // step, but a silent asymmetry with stop(). Pinned so nobody "fixes" it.
+      const { engine } = engineFor({ tours: [hooked()] })
+      await engine.start('t', 1)
+      callOrder.length = 0
+
+      await engine.next()
+      await Promise.resolve()
+
+      expect(engine.getState().isActive).toBe(false)
+      expect(callOrder).toEqual(['onHide:b'])
+    })
+  })
+})
