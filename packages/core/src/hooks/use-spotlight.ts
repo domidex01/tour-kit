@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { computeSpotlight } from '../lib/spotlight'
 import { trackRect } from '../lib/track-rect'
 import type { SpotlightConfig } from '../types'
@@ -15,26 +15,26 @@ export interface UseSpotlightReturn {
 }
 
 /**
- * React wrapper over `trackRect` + `computeSpotlight` (`lib/`). The state, the
- * target ref and the returned `update` stay here: `update` must work while the
- * spotlight is hidden (no tracker exists then), which a tracker handle created
- * inside an effect cannot provide.
+ * React wrapper over `trackRect` + `computeSpotlight` (`lib/`). The state and
+ * the returned `update` stay here: `update` must work while the spotlight is
+ * hidden (no tracker exists then), which a tracker handle created inside an
+ * effect cannot provide.
  */
 export function useSpotlight(): UseSpotlightReturn {
   const [isVisible, setIsVisible] = useState(false)
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
   const [config, setConfig] = useState<SpotlightConfig>(defaultSpotlightConfig)
-  // The same node twice, on purpose. The ref is what `updateRect` reads, so
-  // that callback can stay identity-stable across renders; the state slot is
-  // what keys the tracking effect, so a retarget re-runs it.
-  const targetRef = useRef<HTMLElement | null>(null)
+  // ONE source of truth for the current target. `show(a)` then `show(b)` with
+  // no `hide()` between is a real flow (`TourOverlay` advances that way), and
+  // holding the node in two places is what let the tracker keep following the
+  // previous step's element.
   const [target, setTarget] = useState<HTMLElement | null>(null)
 
   const updateRect = useCallback(() => {
-    if (targetRef.current) {
-      setTargetRect(targetRef.current.getBoundingClientRect())
+    if (target) {
+      setTargetRect(target.getBoundingClientRect())
     }
-  }, [])
+  }, [target])
 
   useEffect(() => {
     // Keyed on `target`, not just `isVisible`: `TourOverlay` advances a step by
@@ -51,7 +51,6 @@ export function useSpotlight(): UseSpotlightReturn {
   }, [isVisible, target])
 
   const show = useCallback((next: HTMLElement, spotlightConfig?: SpotlightConfig) => {
-    targetRef.current = next
     setTarget(next)
     setConfig({ ...defaultSpotlightConfig, ...spotlightConfig })
     setTargetRect(next.getBoundingClientRect())
@@ -60,7 +59,6 @@ export function useSpotlight(): UseSpotlightReturn {
 
   const hide = useCallback(() => {
     setIsVisible(false)
-    targetRef.current = null
     setTarget(null)
     setTargetRect(null)
   }, [])

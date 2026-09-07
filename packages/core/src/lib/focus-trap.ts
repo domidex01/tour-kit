@@ -45,7 +45,10 @@ export interface FocusTrap {
   activate(): void
   /** Remove the handler, restore inert, restore focus to the captured element. */
   deactivate(): void
-  /** Teardown without focus restore — the unmount path. Idempotent. */
+  /**
+   * Teardown without focus restore — the unmount path. Idempotent, and
+   * re-armable: a later `activate()` engages the trap again.
+   */
   release(): void
 }
 
@@ -230,6 +233,13 @@ export function createFocusTrap(
       isTrapping = false
     },
 
-    release: teardown,
+    release: () => {
+      teardown()
+      // Reset the flag, or `activate()` bails on its idempotence guard and
+      // the trap is silently dead. Harmless while this was a hook (unmount
+      // threw the closure away); not harmless now that a binding drives
+      // release/re-activate cycles through `/engine`.
+      isTrapping = false
+    },
   }
 }

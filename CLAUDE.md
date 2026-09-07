@@ -128,7 +128,9 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     §1.4's to earn. §1.3 raised this from 21 KB against a measured 21 271:
     the +446 B is the module-boundary cost of moving 636 lines out of
     `tour-provider.tsx`, not engine runtime leaking in —
-    `engine-not-in-main-closure.test.ts` guards that)
+    `engine-not-in-main-closure.test.ts` guards that. §1.3b left it at 21.5 KB
+    against a measured 21 457 — 43 bytes. The row is knowingly at the line;
+    §1.4 is expected to trip it and re-baseline with its own measurement)
   - core/engine subpath <18 KB (the non-React consumer's worst case: the
     engine — reducer, boot resolver, actions, transition effects, four
     storage adapters — plus the v2 §1.3b DOM behaviours (focus trap,

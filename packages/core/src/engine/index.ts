@@ -262,5 +262,6 @@ export type {
   SpotlightStyles,
 } from '../lib/spotlight'
 export { attachAdvanceOn, bindStepAdvance, dispatchAdvanceEvent } from '../lib/advance-on'
+export type { AdvanceOnTarget } from '../lib/advance-on'
 export { attachTestBridge } from '../lib/test-bridge'
 export type { AttachTestBridgeOptions, TestBridgeTarget } from '../lib/test-bridge'

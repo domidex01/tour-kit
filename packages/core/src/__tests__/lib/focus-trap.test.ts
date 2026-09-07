@@ -384,6 +384,31 @@ describe('release()', () => {
       trap.release()
     }).not.toThrow()
   })
+
+  it('leaves the trap re-armable — activate() after release() engages again', () => {
+    // A binding that wires close -> release() and open -> activate() must get a
+    // live trap the second time. `activate()` bails on its own idempotence
+    // guard, so release() has to clear the trapping flag or the reopened card
+    // has no focus move, no Tab handler and no inert — failing silently.
+    const { container, buttons } = makeContainer(2)
+    const trap = createFocusTrap(() => container)
+
+    trap.activate()
+    trap.release()
+    trigger.focus()
+
+    trap.activate()
+    expect(document.activeElement).toBe(buttons[0])
+
+    // The Tab handler is live again, not just the focus move.
+    buttons[1].focus()
+    tab()
+    expect(document.activeElement).toBe(buttons[0])
+
+    // afterEach clears the body but not document-level listeners — a trap left
+    // armed here would preventDefault the next case's Tab.
+    trap.release()
+  })
 })
 
 describe('deactivate()', () => {

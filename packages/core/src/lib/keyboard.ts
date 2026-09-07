@@ -1,12 +1,18 @@
 /**
  * v2 §1.3b — `use-keyboard.ts`'s body as a plain, React-free function.
  *
- * **Gating is a predicate, not a subscription** (§1.3b Decision 2). The hook
- * attaches inside an effect keyed on `isActive`, so it simply does not listen
- * while a tour is idle. A plain function has no idea when a tour is active, and
- * subscribing here would give `lib/` something to leak and an ordering to
- * state. Instead `isEnabled?.()` is read inside the handler: a binding attaches
- * once at mount and passes `() => engine.getState().isActive`.
+ * **Gating is a predicate, not a subscription** (§1.3b Decision 2), because
+ * nothing here has to be rebuilt when the tour changes: the listener sits on
+ * `document` and the three actions are stable, so knowing whether a tour is
+ * live is the only per-event question. `isEnabled?.()` answers it inside the
+ * handler — a binding attaches once at mount and passes
+ * `() => engine.getState().isActive`. Contrast `attachAdvanceOn`, which DOES
+ * subscribe: its listener hangs off the current step's target element, so a
+ * step change forces a genuine rebind and there is nothing a predicate could
+ * do about it.
+ *
+ * The React wrapper uses neither, because an effect keyed on `isActive`
+ * already detaches while the tour is idle.
  *
  * @module keyboard
  */

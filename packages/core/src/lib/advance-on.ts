@@ -13,7 +13,6 @@
 import type { TourStep } from '../types/step'
 import { getElement } from '../utils/dom'
 import { logger } from '../utils/logger'
-import type { TourEngine } from './tour-engine/create-tour-engine'
 
 /** Reset delay for the re-entrancy flag, in ms. */
 const ADVANCE_DEBOUNCE_MS = 100
@@ -88,13 +87,25 @@ export function bindStepAdvance(step: TourStep, next: () => unknown): () => void
 }
 
 /**
- * Keep one step binding in sync with an engine's current step.
+ * What this needs from whoever owns the tour. Structural, like
+ * `KeyboardActions` and `TestBridgeTarget` — a `TourEngine` satisfies it, and
+ * so does anything else that can report a current step and advance. Declared
+ * here rather than `Pick<TourEngine, ...>` so this leaf keeps no edge into
+ * `lib/tour-engine/`.
+ */
+export interface AdvanceOnTarget {
+  /** Listeners take no arguments and read `getState()` themselves. */
+  subscribe(listener: () => void): () => void
+  getState(): { isActive: boolean; currentStep: TourStep | null }
+  next(): unknown
+}
+
+/**
+ * Keep one step binding in sync with a target's current step.
  *
  * @returns Detach — unsubscribes and cleans up the live binding. Idempotent.
  */
-export function attachAdvanceOn(
-  engine: Pick<TourEngine, 'subscribe' | 'getState' | 'next'>
-): () => void {
+export function attachAdvanceOn(engine: AdvanceOnTarget): () => void {
   let cleanup = noop
   let bound: TourStep | null = null
 

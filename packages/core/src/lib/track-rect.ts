@@ -14,6 +14,11 @@
  * `getBoundingClientRect` calls, so this asymmetry is pinned in
  * `__tests__/lib/track-rect.test.ts` and nowhere else.
  *
+ * **No `typeof window` guard, unlike the other leaves.** The `element`
+ * parameter is the guard: a caller that holds a live `HTMLElement` is in a
+ * document by definition, so a server-side call is a resolution bug worth
+ * throwing on rather than swallowing into a silent no-op tracker.
+ *
  * @module track-rect
  */
 import { getScrollParent } from '../utils/dom'
