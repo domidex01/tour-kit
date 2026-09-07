@@ -462,6 +462,52 @@ describe('handleBranchTargetImpl — step lifecycle guards (#121)', () => {
       })
     })
 
+    it('a vetoing first step announces nothing', async () => {
+      // Absence-of-dispatch is NOT proof that nothing happened. `onTourBranch`
+      // fires above the dispatches, so the case above passed while a cancelled
+      // branch still emitted a "branched from t1 to t2" analytics event and
+      // called the author's own callback for a branch that never occurred.
+      const onTourBranch = vi.fn()
+      const tourOnBranch = vi.fn()
+      const target = makeTour('t2', [visibleStep('x', { onBeforeShow: () => false as const })])
+      const handle = crossTour(target, { tourKitContext: { onTourBranch } })
+      const source = handle.ctx.getCurrentTour()
+      if (source) source.onTourBranch = tourOnBranch
+
+      await handleBranchTargetImpl(handle.ctx, { tour: 't2' }, noopBranchCtx)
+
+      expect(onTourBranch).not.toHaveBeenCalled()
+      expect(tourOnBranch).not.toHaveBeenCalled()
+    })
+
+    it('announces the branch once it actually happens', async () => {
+      const onTourBranch = vi.fn()
+      const target = makeTour('t2', [visibleStep('x')])
+      const handle = crossTour(target, { tourKitContext: { onTourBranch } })
+
+      await handleBranchTargetImpl(handle.ctx, { tour: 't2' }, noopBranchCtx)
+
+      expect(onTourBranch).toHaveBeenCalledWith('t1', 't2', 'a')
+    })
+
+    it('a throwing onTourBranch does not reject the caller', async () => {
+      const target = makeTour('t2', [visibleStep('x')])
+      const handle = crossTour(target)
+      const source = handle.ctx.getCurrentTour()
+      if (source) {
+        source.onTourBranch = () => {
+          throw new Error('consumer bug')
+        }
+      }
+
+      await expect(
+        handleBranchTargetImpl(handle.ctx, { tour: 't2' }, noopBranchCtx)
+      ).resolves.toBeUndefined()
+      expect(handle.mocks.dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'START_TOUR' })
+      )
+    })
+
     it('runs onEnter on the destination step before START_TOUR', async () => {
       const onStart = vi.fn()
       const target = makeTour(

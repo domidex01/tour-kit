@@ -10,8 +10,6 @@
  */
 import type { BranchContext } from '../../types/branch'
 import type { TourCallbackContext } from '../../types/state'
-import type { Tour } from '../../types/tour'
-import type { TourReducerState } from '../../types/tour-reducer'
 import { resolveBranch } from '../../utils/branch'
 import { logger } from '../../utils/logger'
 import type { TourEngineContext } from './context'
@@ -21,9 +19,9 @@ import {
   evaluateStepWhen,
   findNearestVisibleStepIndex,
   findNextVisibleStepIndex,
-  invokeAsyncCallback,
   invokeCallback,
 } from './helpers'
+import { askStepGuards, commitStart } from './start-tour'
 
 /** The `{ ...state, tour, data }` shape every tour-level callback receives. */
 function snapshot(ctx: TourEngineContext): TourCallbackContext {
@@ -121,64 +119,8 @@ export async function startImpl(
     return
   }
 
-  await commitStart(ctx, tour, visibleIndex, state, data)
-}
-
-/**
- * The commit tail shared by `startImpl` and the cross-tour branch: ask the
- * landing step's guard, run its `onEnter`, re-arm the terminal-callback
- * guards, dispatch `START_TOUR`, fire the start callbacks.
- *
- * It exists because both callers commit a step *without* going through
- * `navigateToStep`, so both owe the incoming half of the step lifecycle
- * (#121) — and the re-arm/dispatch/analytics/onStart block was already
- * duplicated verbatim between them. One copy, one place to get the ordering
- * right.
- *
- * The re-arm happens only after the guard has passed. It runs before the
- * dispatch, so a guard placed below it would leave START_TOUR undispatched
- * while having already wiped the terminal state.
- *
- * `opts.beforeDispatch` runs after the guard has passed and before
- * `START_TOUR` — the cross-tour branch uses it to stop the outgoing tour,
- * which must not happen if the destination step vetoes.
- *
- * @returns `false` when the step's `onBeforeShow` vetoed; the caller unwinds.
- */
-export async function commitStart(
-  ctx: TourEngineContext,
-  tour: Tour,
-  stepIndex: number,
-  state: TourCallbackContext | TourReducerState,
-  data: Record<string, unknown>,
-  opts?: { beforeDispatch?: () => void }
-): Promise<boolean> {
-  const step = tour.steps[stepIndex]
-  if (step) {
-    const stepCtx: TourCallbackContext = {
-      ...buildCallbackContext(ctx.getState(), tour, data),
-      tourId: tour.id,
-      isActive: true,
-      totalSteps: tour.steps.length,
-      currentStepIndex: stepIndex,
-      currentStep: step,
-    }
-    if ((await invokeAsyncCallback('onBeforeShow', () => step.onBeforeShow?.(stepCtx))) === false) {
-      return false
-    }
-    await invokeAsyncCallback('onEnter', () => step.onEnter?.(stepCtx))
-  }
-
-  opts?.beforeDispatch?.()
-
-  // Re-arm terminal-callback guards for the (re)started tour.
-  ctx.completedTourIdRef.current = null
-  ctx.skippedTourIdRef.current = null
-
-  ctx.dispatch({ type: 'START_TOUR', tourId: tour.id, stepIndex })
-  ctx.tourKitContext?.onTourStart?.(tour.id)
-  invokeCallback('onStart', () => tour.onStart?.({ ...state, tour, data }))
-  return true
+  if (!(await askStepGuards(ctx, tour, visibleIndex, data))) return
+  commitStart(ctx, tour, visibleIndex, state, data)
 }
 
 export async function nextImpl(ctx: TourEngineContext): Promise<void> {

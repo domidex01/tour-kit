@@ -7,7 +7,6 @@ import {
   resolveTargetToIndex,
 } from '../../utils/branch'
 import { logger } from '../../utils/logger'
-import { commitStart } from './actions'
 import type { TourEngineContext } from './context'
 import {
   buildCallbackContext,
@@ -15,6 +14,7 @@ import {
   findNextVisibleStepIndex,
   invokeCallback,
 } from './helpers'
+import { askStepGuards, commitStart } from './start-tour'
 
 /**
  * Resolve a `BranchTarget` to its effect on the active tour. Mirrors the
@@ -102,14 +102,10 @@ export async function handleBranchTargetImpl(
       return
     }
 
-    ctx.tourKitContext?.onTourBranch?.(currentTour.id, target.tour, currentStepId)
-    currentTour.onTourBranch?.(target.tour, currentStepId)
-
-    // Resolved BEFORE the stop: `commitStart` needs the landing index to ask
-    // the destination step's guard, and a veto has to leave the current tour
-    // running. Asking after STOP_TOUR would strand the user with no tour at
-    // all (#121). The move is a pure reorder — nothing here reads state the
-    // stop would have changed.
+    // Resolved BEFORE anything is announced or stopped: the guard needs the
+    // landing index, and a veto has to leave the current tour running and
+    // silent. Asking after STOP_TOUR would strand the user with no tour at
+    // all (#121).
     let newStepIndex = 0
     if (target.step !== undefined) {
       if (typeof target.step === 'number') {
@@ -121,12 +117,20 @@ export async function handleBranchTargetImpl(
       }
     }
 
-    const started = await commitStart(ctx, toTour, newStepIndex, state, data, {
-      beforeDispatch: () => ctx.dispatch({ type: 'STOP_TOUR' }),
-    })
-    if (!started) {
+    if (!(await askStepGuards(ctx, toTour, newStepIndex, data))) {
       ctx.dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+      return
     }
+
+    // Only now has the branch actually happened. Announcing above the guard
+    // emitted a "branched from A to B" event for a branch a veto then
+    // cancelled — a false analytics event and a consumer callback for
+    // something that did not occur.
+    ctx.tourKitContext?.onTourBranch?.(currentTour.id, target.tour, currentStepId)
+    invokeCallback('onTourBranch', () => currentTour.onTourBranch?.(target.tour, currentStepId))
+
+    ctx.dispatch({ type: 'STOP_TOUR' })
+    commitStart(ctx, toTour, newStepIndex, state, data)
     return
   }
 
