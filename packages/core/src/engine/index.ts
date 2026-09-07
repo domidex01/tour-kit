@@ -24,7 +24,10 @@
  * Since v2 §1.3 this entry can *run* a tour: `createTourEngine()` returns a
  * plain-JavaScript engine with no React, no DOM and no bundler required.
  * §1.2 shipped the door; §1.3 is what made it a capability rather than
- * infrastructure.
+ * infrastructure. §1.3b added what a binding needs to *show* one — trap focus
+ * in a card, wire the keys, follow the target through scroll and resize, cut
+ * the spotlight hole and auto-advance on a click — as plain functions a Vue,
+ * Svelte or vanilla binding attaches around its own rendering.
  *
  * Still deliberately absent, and not an oversight: the port itself
  * (`TourEngineContext`), the four persistence/broadcast factories, and the
@@ -239,3 +242,26 @@ export type {
   BootSource,
   ResolveBootStartInput,
 } from '../lib/tour-engine/boot'
+
+// ── DOM behaviours (v2 §1.3b) ───────────────────────────────────────────────
+// LEAF imports. These are view behaviours a binding ATTACHES, not engine
+// state, which is why they live as flat `lib/` leaves rather than under
+// `lib/tour-engine/`. Every one is React-free and DOM-only; each returns a
+// detach/stop/release that is safe to call twice, and none subscribes to
+// anything except `attachAdvanceOn`, which returns its own unsubscribe.
+export { createFocusTrap } from '../lib/focus-trap'
+export type { FocusTrap, FocusTrapOptions } from '../lib/focus-trap'
+export { attachKeyboard } from '../lib/keyboard'
+export type { AttachKeyboardOptions, KeyboardActions } from '../lib/keyboard'
+export { trackRect } from '../lib/track-rect'
+export type { RectTracker, TrackRectOptions } from '../lib/track-rect'
+export { computeSpotlight } from '../lib/spotlight'
+export type {
+  SpotlightCutoutStyle,
+  SpotlightOverlayStyle,
+  SpotlightStyles,
+} from '../lib/spotlight'
+export { attachAdvanceOn, bindStepAdvance, dispatchAdvanceEvent } from '../lib/advance-on'
+export type { AdvanceOnTarget } from '../lib/advance-on'
+export { attachTestBridge } from '../lib/test-bridge'
+export type { AttachTestBridgeOptions, TestBridgeTarget } from '../lib/test-bridge'

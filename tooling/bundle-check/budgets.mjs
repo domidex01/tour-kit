@@ -38,14 +38,28 @@
  *     `createTourEngine` stays out, matching on a string literal rather than
  *     the identifier because `minify: true` renames the function and the
  *     obvious grep passes either way.
- *   - core:engine: 16 KB against a measured 15.3 KB (2.5 KB entry + the same
- *     12.8 KB chunk), up from 8.1 KB when this was a types-and-predicates door.
- *     The difference is a working tour engine: reducer, boot resolver, actions,
- *     transition effects and four storage adapters. §1.3's plan expected
- *     13–14 KB; the measured number is the number. A type-only consumer still
- *     ships zero (types erase, the barrel is re-exports-only and
- *     `sideEffects: false`), so this row is the worst case — import everything
- *     — not the common one.
+ *
+ *     KNOWINGLY AT THE LINE. v2 §1.3b measured 21 457 against this 21 500 —
+ *     43 bytes, 0.2%. The ceiling was deliberately NOT re-baselined (§1.3b's
+ *     plan pre-authorised <=22 000 and the breach never came), so the next
+ *     change to touch the main entry — §1.4, which wires the provider to the
+ *     engine — will trip this row. That is the intended behaviour: §1.4 raises
+ *     it with its own measurement, or earns the B-1 target back down. A red
+ *     row here is not a mystery, it is this note coming due.
+ *   - core:engine: 18 KB against a measured 17.0 KB, up from 8.1 KB when this
+ *     was a types-and-predicates door and 15.3 KB after §1.3. The difference
+ *     is first a working tour engine (reducer, boot resolver, actions,
+ *     transition effects, four storage adapters) and then, in v2 §1.3b, the
+ *     DOM behaviours: focus trap, keyboard, rect tracker, spotlight,
+ *     advance-on and the test bridge. Those ~1.6 KB are exactly the code that
+ *     left the five view hooks, which is why `core` did NOT move — it lands in
+ *     the shared chunk both entries already read.
+ *
+ *     Do NOT split a `/engine/dom` entry to keep this number flat: the row
+ *     measures the import-everything worst case, a bundler tree-shakes the
+ *     rest (`sideEffects: false`), and the only consumer who pays all of it is
+ *     the §1.6 IIFE — where shipping focus/keyboard/spotlight is the point. A
+ *     type-only consumer still ships zero.
  *   - hints, announcements, surveys, media, ai:client: re-baselined in v2 §1.2
  *     WITHOUT a byte being added. All five ship a `headless` entry alongside
  *     `index`, so they have been split since long before core was, and the
@@ -68,7 +82,7 @@
  */
 export const budgets = [
   ['core', 'packages/core/dist/index.js', 21500],
-  ['core:engine', 'packages/core/dist/engine/index.js', 16000],
+  ['core:engine', 'packages/core/dist/engine/index.js', 18000],
   ['react', 'packages/react/dist/index.js', 12000],
   ['hints', 'packages/hints/dist/index.js', 6000],
   ['analytics:main', 'packages/analytics/dist/index.js', 4000],

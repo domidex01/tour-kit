@@ -1,15 +1,20 @@
 /**
- * v2 §1.3c — boot parity: the mounted provider is the oracle.
+ * v2 §1.3c — boot wiring, end to end through a mounted provider.
  *
- * This file must be GREEN before any of the three boot effects
- * (`tour-provider.tsx:524`, `:620`, `:642`) is touched. It stages each row of
- * the truth table into real jsdom storage, mounts the *current* `<TourProvider>`
- * and asserts the settled tour matches what `resolveBootStart` claims the rule
- * is. A disagreeing row is the React-timing coupling the handoff warned about,
- * and is a finding to report — not a row to edit.
+ * **This is a regression test, not a parity proof.** It was written as one: the
+ * mounted `<TourProvider>` was an independent second implementation of the boot
+ * precedence rule, and every row here cross-checked it against
+ * `resolveBootStart`. Since `b0019461` the provider calls `resolveBootStart`
+ * itself, so both sides of the comparison are now the same implementation and
+ * a row can no longer disagree on the *rule* — only on the *wiring* that gets
+ * storage into it and its decision back out into React state.
  *
- * It is allowed to be slower and uglier than `boot.test.ts`. Its only job is to
- * make a row-by-row disagreement impossible to miss.
+ * That wiring is still worth a net, which is why the file stays: it stages each
+ * row of the truth table into real jsdom storage, mounts the provider, and
+ * asserts the settled tour. A red row means the effects, the storage adapters
+ * or the dispatch path broke — not that the precedence rule drifted.
+ *
+ * It is allowed to be slower and uglier than `boot.test.ts`.
  */
 import { render, waitFor } from '@testing-library/react'
 import type * as React from 'react'

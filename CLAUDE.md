@@ -128,12 +128,19 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     §1.4's to earn. §1.3 raised this from 21 KB against a measured 21 271:
     the +446 B is the module-boundary cost of moving 636 lines out of
     `tour-provider.tsx`, not engine runtime leaking in —
-    `engine-not-in-main-closure.test.ts` guards that)
-  - core/engine subpath <16 KB (the non-React consumer's worst case: the
+    `engine-not-in-main-closure.test.ts` guards that. §1.3b left it at 21.5 KB
+    against a measured 21 457 — 43 bytes. The row is knowingly at the line;
+    §1.4 is expected to trip it and re-baseline with its own measurement)
+  - core/engine subpath <18 KB (the non-React consumer's worst case: the
     engine — reducer, boot resolver, actions, transition effects, four
-    storage adapters — plus the chunk it and the main entry both read. Was
-    <9 KB while this was a types-and-predicates door with no way to run a
-    tour; a type-only consumer still ships zero)
+    storage adapters — plus the v2 §1.3b DOM behaviours (focus trap,
+    keyboard, rect tracker, spotlight, advance-on, test bridge) and the chunk
+    it and the main entry both read. Was <9 KB while this was a
+    types-and-predicates door with no way to run a tour, and <16 KB after
+    §1.3 gave it a way to run one but not to show one; a type-only consumer
+    still ships zero. §1.3b raised this from 16 KB against a measured 17 033
+    — the ~1.6 KB is the code that left the five view hooks, which is why
+    `core` did not move: it lands in the shared chunk both entries read)
   - react <12 KB
   - hints <6 KB
   - analytics <4 KB (root; per-plugin <1.5 KB each)

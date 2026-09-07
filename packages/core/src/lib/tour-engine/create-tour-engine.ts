@@ -167,10 +167,13 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
 
   const listeners = new Set<() => void>()
   const abortControllerRef: { current: AbortController | null } = { current: null }
+  const bootAbortRef: { current: AbortController | null } = { current: null }
   const completedTourIdRef: { current: string | null } = { current: null }
   const skippedTourIdRef: { current: string | null } = { current: null }
   const crossTab: { lastAnnounceTs: number | null } = { lastAnnounceTs: null }
   const teardown: Array<() => void> = []
+  /** Registry id -> the unregister fn `tourRegistry.register` handed back. */
+  const registered = new Map<string, () => void>()
 
   const currentTour = () => (state.tourId ? (state.tours.get(state.tourId) ?? null) : null)
 
@@ -266,6 +269,14 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
     if (destroyed || bootPhase !== 'idle') return
     bootPhase = 'booting'
 
+    // Boot owns its own controller. `abortControllerRef` is written only by
+    // `applyTransitionEffects` on a tour-identity change, so it is null here
+    // and every `signal?.aborted` check inside `runBootStart` would be dead —
+    // a `destroy()` mid-restore would still fall into the catch and clear a
+    // flow session the user is in the middle of.
+    const bootAbort = new AbortController()
+    bootAbortRef.current = bootAbort
+
     try {
       // Terminal tours first: the autostart rule reads completedTours.
       if (persistTerminalTours) {
@@ -292,35 +303,58 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
       flowSession.setTourId(decision.tourId)
       await runBootStart(ctx, decision, {
         currentRoute: decision.source === 'flow' ? flowBlob?.currentRoute : undefined,
-        signal: abortControllerRef.current?.signal,
+        signal: bootAbort.signal,
         onClear: flowSession.clear,
       })
     } finally {
       bootPhase = 'ready'
+      if (bootAbortRef.current === bootAbort) bootAbortRef.current = null
     }
   }
 
   // Cross-tab pause and registry membership are lifecycle, not transition.
   teardown.push(subscribeCrossTabPause(ctx, broadcast.subscribe))
-  teardown.push(registerTours(options.tours))
+  syncRegistry(options.tours)
+  teardown.push(() => {
+    for (const unregister of registered.values()) unregister()
+    registered.clear()
+  })
 
-  function registerTours(tours: Tour[]): () => void {
-    const unregisters = tours.map((tour) =>
-      tourRegistry.register({
-        id: tour.id,
-        state: { isActive: false, currentStepId: null, progress: 0 },
-        actions: {
-          start: () => void engine.start(tour.id),
-          stop: () => engine.stop(),
-          restart: () => void engine.start(tour.id, 0),
-          next: () => void engine.next(),
-          prev: () => void engine.prev(),
-          goToStep: (stepId) => void engine.goToStep(stepId),
-        },
-      })
-    )
-    return () => {
-      for (const unregister of unregisters) unregister()
+  /**
+   * Bring registry membership in line with `tours`, by id.
+   *
+   * An id-diff and NOT unregister-all-and-re-register, even though that is the
+   * shorter patch: `transition-effects.ts` mirrors `isActive` /
+   * `currentStepId` / `progress` into the registry on every transition and
+   * `register()` seeds `isActive: false`, so re-registering the running tour
+   * would zero its mirror until the next transition moved it.
+   */
+  function syncRegistry(tours: Tour[]): void {
+    const nextIds = new Set(tours.map((tour) => tour.id))
+
+    for (const [id, unregister] of registered) {
+      if (nextIds.has(id)) continue
+      unregister()
+      registered.delete(id)
+    }
+
+    for (const tour of tours) {
+      if (registered.has(tour.id)) continue
+      registered.set(
+        tour.id,
+        tourRegistry.register({
+          id: tour.id,
+          state: { isActive: false, currentStepId: null, progress: 0 },
+          actions: {
+            start: () => void engine.start(tour.id),
+            stop: () => engine.stop(),
+            restart: () => void engine.start(tour.id, 0),
+            next: () => void engine.next(),
+            prev: () => void engine.prev(),
+            goToStep: (stepId) => void engine.goToStep(stepId),
+          },
+        })
+      )
     }
   }
 
@@ -361,6 +395,10 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
     setTours: (tours: Tour[]) => {
       if (destroyed) return
       for (const tour of tours) validateTour(tour)
+      // Registry first: `dispatch` runs `applyTransitionEffects`, whose
+      // registry mirror walks the NEW tour set, so a tour added here gets its
+      // first mirror write in the same turn instead of the next transition.
+      syncRegistry(tours)
       dispatch({ type: 'UPDATE_TOURS', tours })
     },
 
@@ -384,6 +422,8 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
       destroyed = true
       abortControllerRef.current?.abort()
       abortControllerRef.current = null
+      bootAbortRef.current?.abort()
+      bootAbortRef.current = null
       flowSession.flush()
       broadcast.close()
       for (const off of teardown.splice(0)) off()

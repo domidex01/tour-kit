@@ -22,6 +22,7 @@ import { createTourEngine } from '../create-tour-engine'
 import type { TourEngine } from '../create-tour-engine'
 import { makeEngine } from './_helpers/make-engine'
 import { hiddenStep, makeTour, visibleStep } from './_helpers/make-tour'
+import { stageFlow } from './_helpers/stage-storage'
 
 const THREE = makeTour('t', [visibleStep('a'), visibleStep('b'), visibleStep('c')])
 
@@ -253,6 +254,89 @@ describe('destroy is terminal, not a pause', () => {
     engine.destroy()
 
     expect(tourRegistry.get('t')).toBeNull()
+  })
+})
+
+describe('boot() is cancellable — v2 §1.3b-0', () => {
+  it('destroy() during an in-flight boot leaves the staged flow session alone', async () => {
+    // The discriminator is rejecting AFTER destroy(). A `navigate` left pending
+    // hangs the await inside runBootStart, so its catch — and the onClear()
+    // that wipes the session — is never reached, and the assertion would pass
+    // against the very bug it exists to catch.
+    let rejectNavigation: (reason: Error) => void = () => {}
+    const navigate = vi.fn(
+      () =>
+        new Promise<boolean | undefined>((_resolve, reject) => {
+          rejectNavigation = reject
+        })
+    )
+
+    const { engine, storage } = engineFor({
+      tours: [makeTour('t', [visibleStep('a')])],
+      router: {
+        getCurrentRoute: () => '/home',
+        navigate,
+        matchRoute: () => false,
+        onRouteChange: () => () => {},
+      },
+      routePersistence: {
+        enabled: true,
+        storage: 'sessionStorage',
+        flowSession: { storage: 'sessionStorage' },
+      },
+    })
+    stageFlow(storage, { tourId: 't', currentRoute: '/pricing' })
+
+    const booting = engine.boot()
+    engine.destroy()
+    rejectNavigation(new Error('route 404'))
+    await booting
+
+    expect(storage.getItem('tourkit:flow:active')).not.toBeNull()
+  })
+})
+
+describe('setTours() keeps the tour registry in sync — v2 §1.3b-0', () => {
+  const extra = makeTour('extra', [visibleStep('x')])
+
+  it('registers a tour added after construction', () => {
+    const { engine } = engineFor({ tours: [THREE] })
+    expect(tourRegistry.get('extra')).toBeNull()
+
+    engine.setTours([THREE, extra])
+
+    expect(tourRegistry.get('extra')).not.toBeNull()
+  })
+
+  it('unregisters a tour that setTours dropped', () => {
+    const { engine } = engineFor({ tours: [THREE, extra] })
+
+    engine.setTours([THREE])
+
+    expect(tourRegistry.get('extra')).toBeNull()
+    expect(tourRegistry.get('t')).not.toBeNull()
+  })
+
+  it('leaves the running tour registry mirror intact', async () => {
+    // Id-diff, not unregister-all-and-re-register: `register()` seeds
+    // `isActive: false` and `mirrorToRegistry` writes only on a transition, so
+    // re-registering the running tour would zero its mirror until the next one.
+    const { engine } = engineFor({ tours: [THREE] })
+    await engine.start('t')
+    expect(tourRegistry.get('t')?.state.isActive).toBe(true)
+
+    engine.setTours([THREE, extra])
+
+    expect(tourRegistry.get('t')?.state.isActive).toBe(true)
+  })
+
+  it('unregisters setTours-added tours on destroy()', () => {
+    const { engine } = engineFor({ tours: [THREE] })
+    engine.setTours([THREE, extra])
+
+    engine.destroy()
+
+    expect(tourRegistry.get('extra')).toBeNull()
   })
 })
 

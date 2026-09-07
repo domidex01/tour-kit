@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { computeSpotlight } from '../lib/spotlight'
+import { trackRect } from '../lib/track-rect'
 import type { SpotlightConfig } from '../types'
 import { defaultSpotlightConfig } from '../types/config'
-import { throttleRAF } from '../utils/throttle'
 
 export interface UseSpotlightReturn {
   isVisible: boolean
@@ -13,83 +14,66 @@ export interface UseSpotlightReturn {
   update: () => void
 }
 
+/**
+ * React wrapper over `trackRect` + `computeSpotlight` (`lib/`). The state and
+ * the returned `update` stay here: `update` must work while the spotlight is
+ * hidden (no tracker exists then), which a tracker handle created inside an
+ * effect cannot provide.
+ */
 export function useSpotlight(): UseSpotlightReturn {
   const [isVisible, setIsVisible] = useState(false)
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
   const [config, setConfig] = useState<SpotlightConfig>(defaultSpotlightConfig)
-  const targetRef = useRef<HTMLElement | null>(null)
+  // ONE source of truth for the current target. `show(a)` then `show(b)` with
+  // no `hide()` between is a real flow (`TourOverlay` advances that way), and
+  // holding the node in two places is what let the tracker keep following the
+  // previous step's element.
+  const [target, setTarget] = useState<HTMLElement | null>(null)
 
   const updateRect = useCallback(() => {
-    if (targetRef.current) {
-      setTargetRect(targetRef.current.getBoundingClientRect())
+    if (target) {
+      setTargetRect(target.getBoundingClientRect())
     }
-  }, [])
-
-  // Throttle updates to RAF for smooth 60fps during scroll/resize
-  const throttledUpdateRect = useMemo(() => throttleRAF(updateRect), [updateRect])
+  }, [target])
 
   useEffect(() => {
-    if (!isVisible) return
+    // Keyed on `target`, not just `isVisible`: `TourOverlay` advances a step by
+    // calling `show(newTarget)` with no `hide()` in between, so `isVisible`
+    // never flips and an effect keyed on it alone would keep tracking the
+    // previous step's element. (Before §1.3b the handler re-read the ref on
+    // every scroll and followed the swap for free; `trackRect` takes a concrete
+    // element, so the re-run has to be explicit.)
+    //
+    // No attach-time read: `show()` has already seeded the rect, and reading
+    // again would cost a render.
+    if (!isVisible || !target) return
+    return trackRect(target, setTargetRect).stop
+  }, [isVisible, target])
 
-    window.addEventListener('scroll', throttledUpdateRect, { passive: true, capture: true })
-    window.addEventListener('resize', throttledUpdateRect, { passive: true })
-
-    return () => {
-      throttledUpdateRect.cancel()
-      window.removeEventListener('scroll', throttledUpdateRect, true)
-      window.removeEventListener('resize', throttledUpdateRect)
-    }
-  }, [isVisible, throttledUpdateRect])
-
-  const show = useCallback((target: HTMLElement, spotlightConfig?: SpotlightConfig) => {
-    targetRef.current = target
+  const show = useCallback((next: HTMLElement, spotlightConfig?: SpotlightConfig) => {
+    setTarget(next)
     setConfig({ ...defaultSpotlightConfig, ...spotlightConfig })
-    setTargetRect(target.getBoundingClientRect())
+    setTargetRect(next.getBoundingClientRect())
     setIsVisible(true)
   }, [])
 
   const hide = useCallback(() => {
     setIsVisible(false)
-    targetRef.current = null
+    setTarget(null)
     setTargetRect(null)
   }, [])
 
-  const overlayStyle = useMemo<React.CSSProperties>(
-    () => ({
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'transparent',
-      transition: config.animate ? `all ${config.animationDuration ?? 300}ms ease-out` : undefined,
-      pointerEvents: 'auto',
-    }),
-    [config]
+  const { overlayStyle, cutoutStyle } = useMemo(
+    () => computeSpotlight(targetRect, config),
+    [targetRect, config]
   )
-
-  const cutoutStyle = useMemo<React.CSSProperties>(() => {
-    if (!targetRect) return {}
-
-    const padding = config.padding ?? 8
-    const borderRadius = config.borderRadius ?? 4
-
-    return {
-      position: 'absolute',
-      top: targetRect.top - padding,
-      left: targetRect.left - padding,
-      width: targetRect.width + padding * 2,
-      height: targetRect.height + padding * 2,
-      borderRadius,
-      boxShadow: `0 0 0 9999px ${config.color ?? 'rgba(0, 0, 0, 0.5)'}`,
-      transition: config.animate ? `all ${config.animationDuration ?? 300}ms ease-out` : undefined,
-      pointerEvents: 'none',
-    }
-  }, [targetRect, config])
 
   return useMemo(
     () => ({
       isVisible,
       targetRect,
       overlayStyle,
-      cutoutStyle,
+      cutoutStyle: cutoutStyle ?? {},
       show,
       hide,
       update: updateRect,

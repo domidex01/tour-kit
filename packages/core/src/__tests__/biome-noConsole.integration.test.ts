@@ -52,6 +52,11 @@ describe('Biome noConsole rule + overrides (integration)', () => {
     // the boot resolver. Playwright's console listener reads it for the
     // <200 ms hard-refresh resume budget, so it is loud by design.
     expect(config).toMatch(/packages\/core\/src\/lib\/tour-engine\/boot\.ts/)
+    // v2 §1.3b — the test bridge's "disable for production" nudge moved here
+    // out of tour-provider.tsx. Routing it through `logger` would prefix the
+    // message and break the exact-string assertion in
+    // `context/__tests__/test-bridge.test.tsx`.
+    expect(config).toMatch(/packages\/core\/src\/lib\/test-bridge\.ts/)
     expect(config).toMatch(/packages\/analytics\/src\/plugins\/console\.ts/)
     expect(config).toMatch(/packages\/license\/src\/components\/license-test-mode\.tsx/)
     expect(config).toMatch(/packages\/license\/src\/components\/license-warning\.tsx/)

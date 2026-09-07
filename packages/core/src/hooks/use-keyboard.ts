@@ -1,8 +1,14 @@
 import { useContext, useEffect, useMemo } from 'react'
 import { TourContext } from '../context/tour-context'
+import { attachKeyboard } from '../lib/keyboard'
 import type { KeyboardConfig } from '../types'
 import { defaultKeyboardConfig } from '../types/config'
 
+/**
+ * React wrapper over `attachKeyboard` (`lib/keyboard.ts`). The effect's
+ * `isActive` dep is the gate — the factory's `isEnabled` predicate exists for
+ * bindings that attach once and never re-run.
+ */
 export function useKeyboardNavigation(config?: KeyboardConfig): void {
   const context = useContext(TourContext)
 
@@ -15,35 +21,6 @@ export function useKeyboardNavigation(config?: KeyboardConfig): void {
 
   useEffect(() => {
     if (!isActive || !mergedConfig.enabled) return
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const { key } = event
-
-      // Ignore if user is typing in an input, select, or editable region
-      const active = document.activeElement as HTMLElement | null
-      if (
-        active instanceof HTMLInputElement ||
-        active instanceof HTMLTextAreaElement ||
-        active instanceof HTMLSelectElement ||
-        active?.isContentEditable ||
-        active?.getAttribute('role') === 'textbox'
-      ) {
-        return
-      }
-
-      if (mergedConfig.nextKeys?.includes(key)) {
-        event.preventDefault()
-        next()
-      } else if (mergedConfig.prevKeys?.includes(key)) {
-        event.preventDefault()
-        prev()
-      } else if (mergedConfig.exitKeys?.includes(key)) {
-        event.preventDefault()
-        skip()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    return attachKeyboard({ next, prev, skip }, mergedConfig)
   }, [isActive, mergedConfig, next, prev, skip])
 }

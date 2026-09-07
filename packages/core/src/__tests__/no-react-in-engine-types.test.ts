@@ -20,13 +20,28 @@ import { describe, expect, it } from 'vitest'
 
 const SRC_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
-/** The five files named in the §1.1 acceptance criteria. */
+/**
+ * The five files named in the §1.1 acceptance criteria, plus the six flat
+ * `lib/` leaves v2 §1.3b published from `/engine`.
+ *
+ * The leaves have to be seeded by hand: `engineSourceFiles()` walks only
+ * `lib/tour-engine/`, so a flat `lib/` file is invisible to it. They are DOM
+ * behaviours a binding attaches, not engine state, which is why they are not
+ * in that directory.
+ */
 const ENGINE_TYPE_SEEDS = [
   'types/step.ts',
   'types/hints.ts',
   'types/target.ts',
   'lib/tour-engine/context.ts',
   'lib/segmentation/types.ts',
+  // v2 §1.3b — DOM behaviours
+  'lib/focus-trap.ts',
+  'lib/keyboard.ts',
+  'lib/track-rect.ts',
+  'lib/spotlight.ts',
+  'lib/advance-on.ts',
+  'lib/test-bridge.ts',
 ] as const
 
 /**
