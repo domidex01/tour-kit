@@ -139,14 +139,19 @@ export async function startImpl(
  * dispatch, so a guard placed below it would leave START_TOUR undispatched
  * while having already wiped the terminal state.
  *
+ * `opts.beforeDispatch` runs after the guard has passed and before
+ * `START_TOUR` — the cross-tour branch uses it to stop the outgoing tour,
+ * which must not happen if the destination step vetoes.
+ *
  * @returns `false` when the step's `onBeforeShow` vetoed; the caller unwinds.
  */
-async function commitStart(
+export async function commitStart(
   ctx: TourEngineContext,
   tour: Tour,
   stepIndex: number,
   state: TourCallbackContext | TourReducerState,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
+  opts?: { beforeDispatch?: () => void }
 ): Promise<boolean> {
   const step = tour.steps[stepIndex]
   if (step) {
@@ -163,6 +168,8 @@ async function commitStart(
     }
     await invokeAsyncCallback('onEnter', () => step.onEnter?.(stepCtx))
   }
+
+  opts?.beforeDispatch?.()
 
   // Re-arm terminal-callback guards for the (re)started tour.
   ctx.completedTourIdRef.current = null

@@ -7,6 +7,7 @@ import {
   resolveTargetToIndex,
 } from '../../utils/branch'
 import { logger } from '../../utils/logger'
+import { commitStart } from './actions'
 import type { TourEngineContext } from './context'
 import {
   buildCallbackContext,
@@ -95,8 +96,11 @@ export async function handleBranchTargetImpl(
     ctx.tourKitContext?.onTourBranch?.(currentTour.id, target.tour, currentStepId)
     currentTour.onTourBranch?.(target.tour, currentStepId)
 
-    ctx.dispatch({ type: 'STOP_TOUR' })
-
+    // Resolved BEFORE the stop: `commitStart` needs the landing index to ask
+    // the destination step's guard, and a veto has to leave the current tour
+    // running. Asking after STOP_TOUR would strand the user with no tour at
+    // all (#121). The move is a pure reorder — nothing here reads state the
+    // stop would have changed.
     let newStepIndex = 0
     if (target.step !== undefined) {
       if (typeof target.step === 'number') {
@@ -108,13 +112,12 @@ export async function handleBranchTargetImpl(
       }
     }
 
-    // Re-arm terminal-callback guards for the new tour
-    ctx.completedTourIdRef.current = null
-    ctx.skippedTourIdRef.current = null
-
-    ctx.dispatch({ type: 'START_TOUR', tourId: target.tour, stepIndex: newStepIndex })
-    ctx.tourKitContext?.onTourStart?.(target.tour)
-    invokeCallback('onStart', () => toTour.onStart?.({ ...state, tour: toTour, data }))
+    const started = await commitStart(ctx, toTour, newStepIndex, state, data, {
+      beforeDispatch: () => ctx.dispatch({ type: 'STOP_TOUR' }),
+    })
+    if (!started) {
+      ctx.dispatch({ type: 'SET_TRANSITIONING', isTransitioning: false })
+    }
     return
   }
 
