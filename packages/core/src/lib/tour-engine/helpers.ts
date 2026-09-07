@@ -80,6 +80,29 @@ export function invokeCallback(name: string, fn: () => void): void {
 }
 
 /**
+ * Async sibling of `invokeCallback` for the step guards (`onBeforeShow`,
+ * `onBeforeHide`) and `onEnter`.
+ *
+ * Resolves to the callback's value, or `undefined` when it throws (logged).
+ * A guard vetoes a transition only with a **literal `false`**; a throw is
+ * "no opinion" and the transition proceeds.
+ *
+ * Deliberately unlike `evaluateStepWhen`, which treats a throw as `false`:
+ * skipping a step is always safe, blocking a transition is not. An
+ * `onBeforeHide` that throws on every call would otherwise block both
+ * `next()` and `prev()` — the bricked tour the `invokeCallback` contract
+ * exists to prevent (issue #121, D5).
+ */
+export async function invokeAsyncCallback(name: string, fn: () => unknown): Promise<unknown> {
+  try {
+    return await fn()
+  } catch (error) {
+    logger.warn(`Error in ${name} callback:`, error)
+    return undefined
+  }
+}
+
+/**
  * Walk steps in `direction` from `startIndex` (inclusive) until a step's
  * `when` predicate returns true or the array boundary is reached.
  *
