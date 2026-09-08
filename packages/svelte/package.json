@@ -1,0 +1,83 @@
+{
+  "name": "@tour-kit/svelte",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Headless Svelte 5 binding for the Tour Kit engine — product tours with no React installed.",
+  "author": "Tour Kit Team",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "homepage": "https://usertourkit.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domidex01/tour-kit.git",
+    "directory": "packages/svelte"
+  },
+  "bugs": {
+    "url": "https://github.com/domidex01/tour-kit/issues"
+  },
+  "keywords": [
+    "svelte",
+    "svelte5",
+    "sveltekit",
+    "onboarding",
+    "product-tour",
+    "guided-tour",
+    "walkthrough",
+    "headless",
+    "runes",
+    "tour-kit"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@tour-kit/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@sveltejs/kit": "^2.0.0",
+    "svelte": "^5.7.0"
+  },
+  "peerDependenciesMeta": {
+    "@sveltejs/kit": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@testing-library/svelte": "^5.2.6",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "svelte": "^5.37.0",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "vitest-axe": "catalog:"
+  }
+}

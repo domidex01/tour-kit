@@ -116,21 +116,23 @@ onScopeDispose(stopPositioning)
     <p data-testid="tour-card-content">{{ step.content }}</p>
 
     <!--
-      `@click.stop` on the row is load-bearing, not cosmetic. Step 2 is
-      document-bound, and `bindStepAdvance` has no card guard: without this,
-      clicking Back would ALSO advance the tour.
+      `.stop` is load-bearing, not cosmetic. Step 2 is document-bound and
+      `bindStepAdvance` has no card guard, so without it clicking Back would
+      ALSO advance the tour. It lives on each button rather than on a wrapper
+      div because a click handler on a non-interactive element is an a11y
+      failure.
     -->
-    <div class="tk-actions" @click.stop>
+    <div class="tk-actions">
       <button
         v-if="!isFirst"
         data-testid="tour-back"
         type="button"
-        @click="tour.prev()"
+        @click.stop="tour.prev()"
       >
         Back
       </button>
-      <button data-testid="tour-next" type="button" @click="tour.next()">Next</button>
-      <button data-testid="tour-skip" type="button" @click="tour.skip()">Skip</button>
+      <button data-testid="tour-next" type="button" @click.stop="tour.next()">Next</button>
+      <button data-testid="tour-skip" type="button" @click.stop="tour.skip()">Skip</button>
     </div>
 
     <div ref="arrowRef" class="tk-arrow" />

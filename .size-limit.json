@@ -121,5 +121,11 @@
     "path": "packages/vue/dist/index.js",
     "limit": "3 KB",
     "ignore": ["@tour-kit/core", "vue"]
+  },
+  {
+    "name": "@tour-kit/svelte",
+    "path": "packages/svelte/dist/index.js",
+    "limit": "3 KB",
+    "ignore": ["@tour-kit/core", "svelte"]
   }
 ]
