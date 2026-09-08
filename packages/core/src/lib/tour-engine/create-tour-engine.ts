@@ -191,7 +191,14 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
   const terminalStore = createTerminalStore(options.persistence, options.storage)
   const routeStore = createRouteStore(routePersistence, options.storage)
   const flowSession = createFlowSession(
-    routePersistence.flowSession,
+    // `keyPrefix` from the route key, exactly as the provider composed it
+    // (was `tour-provider.tsx:288`). Without it a consumer who namespaced
+    // their route state with `key` had the flow blob written to
+    // `tourkit:flow:active` instead of `<key>:flow:active` — an in-flight
+    // resume silently lost on upgrade.
+    routePersistence.flowSession
+      ? { ...routePersistence.flowSession, keyPrefix: routePersistence.key }
+      : undefined,
     options.storage,
     // The engine has no render pass to mirror into; the factory's own copy is
     // the only one.
@@ -247,6 +254,13 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
 
   function rebuildSnapshot(): void {
     snapshot = buildCallbackContext(state, currentTour(), data)
+    // The flow store stamps this id into every blob it writes, and `''`
+    // disables writes entirely. The provider got it reactively —
+    // `useFlowSession(state.tourId ?? '')` — so ANY start armed the resume,
+    // whether it came from boot, a button, `startTour` or a cross-tour branch.
+    // Setting it only in `boot()` meant a hand-started tour wrote nothing and
+    // a hard reload resumed nothing, which is the entire feature.
+    flowSession.setTourId(state.tourId ?? '')
   }
 
   function notify(): void {

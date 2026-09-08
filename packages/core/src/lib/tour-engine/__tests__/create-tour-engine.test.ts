@@ -1036,3 +1036,49 @@ describe('setDontShowAgain() — v2 §1.4a row 5', () => {
     expect(engine.getState()).toBe(before)
   })
 })
+
+describe('flow session parity — v2 §1.4a rows 6 and 7', () => {
+  const TWO = makeTour('t', [visibleStep('a'), visibleStep('b')])
+  const AUTO = makeTour('auto', [visibleStep('a'), visibleStep('b')], { autoStart: true })
+  const FLOW = {
+    enabled: true,
+    storage: 'localStorage',
+    key: 'myapp',
+    flowSession: { storage: 'localStorage' },
+  } as const
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="x"></div>'
+  })
+
+  it('scopes the flow blob under routePersistence.key, as the provider does', async () => {
+    // Row 6, found while writing the binding and not in the plan: the provider
+    // builds its flow session with `{ ...flowSession, keyPrefix:
+    // routePersistence.key }` (was `tour-provider.tsx:288`); the engine passed
+    // the config straight through. A consumer who namespaced their route state
+    // with `key` had the in-flight resume blob move to `tourkit:flow:active` —
+    // silent data loss for exactly the multi-page tours the key exists for.
+    const { engine, storage } = engineFor({ tours: [AUTO], routePersistence: FLOW })
+
+    await engine.boot()
+    engine.destroy() // flushes the 200 ms throttled save
+
+    expect(storage.getItem('myapp:flow:active')).not.toBeNull()
+    expect(storage.getItem('tourkit:flow:active')).toBeNull()
+  })
+
+  it('writes a resume blob for a tour started by hand, not only a booted one', async () => {
+    // Row 7, and the sharper of the two. `useFlowSession(state.tourId ?? '')`
+    // gave the provider the id REACTIVELY, so any start — a button, a
+    // cross-tour branch, `startTour` — enabled the write. The engine called
+    // `setTourId` only inside `boot()`, so a tour the user started by clicking
+    // wrote nothing and a hard reload resumed nothing. That is the whole
+    // feature.
+    const { engine, storage } = engineFor({ tours: [TWO], routePersistence: FLOW })
+
+    await engine.start('t')
+    engine.destroy()
+
+    expect(storage.getItem('myapp:flow:active')).not.toBeNull()
+  })
+})
