@@ -29,6 +29,12 @@ export const ENGINE_CJS = join(PKG_ROOT, 'dist', 'engine', 'index.cjs')
 export const ENGINE_DTS = join(PKG_ROOT, 'dist', 'engine', 'index.d.ts')
 export const ENGINE_DCTS = join(PKG_ROOT, 'dist', 'engine', 'index.d.cts')
 
+// v2 §1.6 — the CDN door. Same subpath, one self-contained IIFE: this is the
+// exact path `unpkg`/`jsdelivr` serve out of the tarball, so the constant and
+// those two package.json fields have to agree (asserted in
+// `engine-iife-dist.test.ts`'s manifest describe).
+export const ENGINE_IIFE = join(PKG_ROOT, 'dist', 'engine', 'index.global.js')
+
 /**
  * Is the package built at all? Guards `it.skipIf` on a fresh clone.
  *
