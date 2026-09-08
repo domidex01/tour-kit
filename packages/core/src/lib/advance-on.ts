@@ -108,6 +108,12 @@ export interface AdvanceOnTarget {
 export function attachAdvanceOn(engine: AdvanceOnTarget): () => void {
   let cleanup = noop
   let bound: TourStep | null = null
+  let pending: ReturnType<typeof setTimeout> | null = null
+
+  const bind = () => {
+    pending = null
+    if (bound) cleanup = bindStepAdvance(bound, () => engine.next())
+  }
 
   const sync = () => {
     const { isActive, currentStep } = engine.getState()
@@ -116,17 +122,39 @@ export function attachAdvanceOn(engine: AdvanceOnTarget): () => void {
     // id via setTours, and the binding has to follow.
     if (wanted === bound) return
 
+    // Detach NOW, mid-dispatch. The DOM honours a removal during dispatch, so
+    // the click that caused this transition cannot reach the outgoing step's
+    // listener — a document-bound step would otherwise re-advance on the
+    // card's own Next.
     cleanup()
     cleanup = noop
+    if (pending !== null) {
+      clearTimeout(pending)
+      pending = null
+    }
     bound = wanted
-    if (wanted) cleanup = bindStepAdvance(wanted, () => engine.next())
+    // Bind LATER, one macrotask on. A microtask checkpoint runs between two
+    // listeners of the same real click, so a bind inside `notify()` would let
+    // an incoming step whose `advanceOn` falls back to `document` receive the
+    // click that advanced onto it. React's post-commit effect timing bought
+    // `useAdvanceOn` the same gap; this buys it for every other binding.
+    // (Unobservable in jsdom, which runs no checkpoint between listeners of a
+    // synthetic click — the Playwright lanes are the proof.)
+    if (wanted) pending = setTimeout(bind, 0)
   }
 
+  // The initial sync takes the same path, so a caller attaching to an already
+  // active engine gets its first binding one macrotask later too — one code
+  // path, no special case.
   sync()
   const unsubscribe = engine.subscribe(sync)
 
   return () => {
     unsubscribe()
+    if (pending !== null) {
+      clearTimeout(pending)
+      pending = null
+    }
     cleanup()
     cleanup = noop
     bound = null

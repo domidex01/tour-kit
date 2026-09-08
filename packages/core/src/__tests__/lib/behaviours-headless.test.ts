@@ -80,6 +80,10 @@ describe('a binding drives the engine with no React', () => {
   it('a click on the step target advances through attachAdvanceOn', async () => {
     detachers.push(attachAdvanceOn(engine))
     await engine.start('t')
+    // v2 §1.5: `attachAdvanceOn` binds the incoming step one macrotask later
+    // (detach eagerly, bind late), so the first binding is not live until the
+    // timer fires.
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     document.querySelector<HTMLButtonElement>('#a')?.click()
 

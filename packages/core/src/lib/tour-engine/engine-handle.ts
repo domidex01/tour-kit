@@ -26,8 +26,9 @@
  * engine away and the next verb re-attaches a single fan-out to its
  * replacement without any subscriber noticing.
  *
- * Not exported from `@tour-kit/core/engine`: §1.5 names what a binding needs,
- * and the handle joins the port and the persistence factories on that list.
+ * Exported from `@tour-kit/core/engine` since v2 §1.5: two non-React bindings
+ * needed exactly the handle and `pickActions`, and nothing else off this list —
+ * the port and the persistence factories stay unexported.
  */
 import { initialTourState } from '../../types/state'
 import type { TourActions, TourCallbackContext } from '../../types/state'
@@ -179,8 +180,8 @@ export function createEngineHandle(factory: () => TourEngine): EngineHandle {
  *
  * Lives here rather than in the React provider — where the §1.4 plan put it —
  * so the claim it makes can be stated in a `.test-d.ts` without exporting a
- * new symbol from `context/`. It is React-free and not re-exported from
- * `@tour-kit/core/engine`, so no public surface moves either way.
+ * new symbol from `context/`. It is React-free, and v2 §1.5 re-exported it
+ * from `@tour-kit/core/engine`: every binding spreads it onto its own kit.
  *
  * Every value is the handle's own closure, so the result is stable for the
  * handle's lifetime and safe to spread into a memoised context value.

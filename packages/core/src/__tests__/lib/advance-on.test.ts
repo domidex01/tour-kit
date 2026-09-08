@@ -14,7 +14,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { attachAdvanceOn, bindStepAdvance, dispatchAdvanceEvent } from '../../lib/advance-on'
-import { createTourEngine } from '../../lib/tour-engine/create-tour-engine'
+import { type TourEngine, createTourEngine } from '../../lib/tour-engine/create-tour-engine'
 import type { TourStep, VisibleTourStep } from '../../types/step'
 import { logger } from '../../utils/logger'
 import { createMemoryStorage } from '../../utils/storage'
@@ -29,6 +29,31 @@ function target(id = 'target'): HTMLButtonElement {
   document.body.appendChild(el)
   return el
 }
+
+/**
+ * Resolve on the first notify that satisfies `pred`, WITHOUT yielding a macrotask.
+ *
+ * `vi.waitFor` polls on a real interval, so awaiting it runs the macrotask queue
+ * and fires the very `setTimeout(bind, 0)` these cases exist to observe (measured:
+ * 2 polls, timer fired). The engine calls its listeners synchronously inside
+ * `notify()`, and a click-advance settles in microtasks (measured: the target step
+ * lands between the 3rd and 7th drain), so this resolves in the same microtask
+ * checkpoint the transition completes in.
+ */
+function settled(engine: TourEngine, pred: () => boolean): Promise<void> {
+  return new Promise((resolve) => {
+    if (pred()) return resolve()
+    const off = engine.subscribe(() => {
+      if (pred()) {
+        off()
+        resolve()
+      }
+    })
+  })
+}
+
+/** One macrotask — the deferred bind's own clock. Real timers only. */
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 afterEach(() => {
   document.body.innerHTML = ''
@@ -253,12 +278,118 @@ describe('attachAdvanceOn — the engine-level watcher', () => {
     return { engine, a, b }
   }
 
+  function engineWithThreeTargets() {
+    const a = target('a')
+    const b = target('b')
+    const c = target('c')
+    const engine = createTourEngine({
+      storage: createMemoryStorage(),
+      tours: [
+        {
+          id: 't3',
+          steps: [
+            { id: 'a', target: '#a', content: 'a', advanceOn: { event: 'click', selector: '#a' } },
+            { id: 'b', target: '#b', content: 'b', advanceOn: { event: 'click', selector: '#b' } },
+            { id: 'c', target: '#c', content: 'c', advanceOn: { event: 'click', selector: '#c' } },
+          ],
+        },
+      ],
+    })
+    return { engine, a, b, c }
+  }
+
+  it('detaches the outgoing listener synchronously and binds the incoming one a macrotask later', async () => {
+    const { engine, a, b } = engineWithTwoTargets()
+    const detach = attachAdvanceOn(engine)
+
+    await engine.start('t')
+    // The FIRST bind is deferred too — one code path, no special case at attach.
+    // Without this the click below lands on nothing and the test times out.
+    await tick()
+
+    a.click()
+    // NOT vi.waitFor: it polls on a real interval, so awaiting it would run the
+    // very macrotask the deferred bind is queued on and destroy both assertions
+    // below.
+    await settled(engine, () => engine.getState().currentStep?.id === 'b')
+
+    // Half 1 — eager detach. The click that caused the transition can no longer
+    // reach step a's listener. (Already true before the fix; asserted so a
+    // regression shows.)
+    a.click()
+    expect(engine.getState().currentStep?.id).toBe('b')
+
+    // Half 2 — late bind. Against the unfixed file, step b's listener was
+    // attached synchronously inside notify(), so this click advances again and,
+    // b being the last step, completes the tour: `currentStep` is undefined.
+    b.click()
+    expect(engine.getState().currentStep?.id).toBe('b')
+
+    // One macrotask on, the incoming listener is live.
+    await tick()
+    b.click()
+    await settled(engine, () => engine.getState().isActive === false)
+    expect(engine.getState().isActive).toBe(false)
+
+    detach()
+    engine.destroy()
+  })
+
+  it('a detach before the deferred bind fires leaves no timer and no listener', async () => {
+    // Fake timers for the whole case: vi.getTimerCount() throws with real ones,
+    // and `tick()` would never resolve, so the macrotask is advanced explicitly.
+    vi.useFakeTimers()
+    const { engine, b } = engineWithTwoTargets()
+
+    await engine.start('t')
+    const detach = attachAdvanceOn(engine)
+
+    // The "1 before" half stops this going vacuously green if `bind` is never
+    // scheduled at all.
+    expect(vi.getTimerCount()).toBe(1)
+    detach()
+    expect(vi.getTimerCount()).toBe(0)
+
+    await vi.advanceTimersByTimeAsync(1)
+    b.click()
+    expect(engine.getState().currentStep?.id).toBe('a')
+
+    engine.destroy()
+    vi.useRealTimers()
+  })
+
+  it('two transitions inside one macrotask bind only the last step', async () => {
+    const { engine, a, b, c } = engineWithThreeTargets()
+    const detach = attachAdvanceOn(engine)
+
+    await engine.start('t3')
+    await tick()
+    await engine.next()
+    await engine.goTo(2) // both land before any tick
+    await tick()
+
+    a.click()
+    b.click()
+    expect(engine.getState().currentStep?.id).toBe('c') // neither stale listener survived
+
+    c.click()
+    await settled(engine, () => engine.getState().isActive === false)
+    expect(engine.getState().isActive).toBe(false)
+
+    detach()
+    engine.destroy()
+  })
+
   it('rebinds as the current step changes', async () => {
     // No fake engine: Decision 1's claim is that the REAL TourEngine satisfies
     // Pick<TourEngine, 'subscribe' | 'getState' | 'next'> structurally.
     const { engine, a, b } = engineWithTwoTargets()
     const detach = attachAdvanceOn(engine)
     await engine.start('t')
+    // The first bind is deferred by one macrotask now, so the click below needs
+    // it to have fired. `vi.waitFor` below already runs the macrotask queue, so
+    // step b's listener is live when it resolves — no second wait needed.
+    await tick()
 
     a.click()
     await vi.waitFor(() => expect(engine.getState().currentStep?.id).toBe('b'))
