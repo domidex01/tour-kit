@@ -2,12 +2,13 @@ import * as React from 'react'
 import { useAdvanceOn } from '../hooks/use-advance-on'
 import { explainTour } from '../lib/diagnostic'
 import { attachTestBridge } from '../lib/test-bridge'
-import type { TourEngineAnalytics } from '../lib/tour-engine/context'
 import {
-  type CreateTourEngineOptions,
-  type TourEngineLiveOptions,
-  createTourEngine,
-} from '../lib/tour-engine/create-tour-engine'
+  type BindingOptions,
+  engineOptionsFrom,
+  liveOptionsFrom,
+} from '../lib/tour-engine/binding-options'
+import type { TourEngineAnalytics } from '../lib/tour-engine/context'
+import { createTourEngine } from '../lib/tour-engine/create-tour-engine'
 import {
   type EngineHandle,
   createEngineHandle,
@@ -16,7 +17,6 @@ import {
 import { validateTour } from '../lib/validate-tour'
 import type { TourRouteError } from '../lib/wait-for-step-target'
 import type { Tour, TourContextValue } from '../types'
-import type { PersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
 import { logger } from '../utils/logger'
@@ -79,55 +79,6 @@ export interface TourProviderProps {
    * Tree-shakes when the prop is a literal `false`.
    */
   enableTestBridge?: boolean
-}
-
-/**
- * Everything the engine is built from or told about, snapshotted per render.
- *
- * Split in two on the way out: {@link optionsFrom} is read once, at
- * construction; {@link liveFrom} is pushed on every commit.
- */
-interface EngineOptionsSource {
-  tours: Tour[]
-  router?: RouterAdapter
-  routePersistence: MultiPagePersistenceConfig
-  persistence?: PersistenceConfig
-  autoNavigate: boolean
-  analytics: TourEngineAnalytics | null
-  onNavigationRequired?: (route: string, stepId: string) => void
-  onStepError?: (err: TourRouteError) => void
-  onTourPaused?: (tourId: string, reason: 'cross-tab') => void
-}
-
-function optionsFrom(src: EngineOptionsSource): CreateTourEngineOptions {
-  return {
-    tours: src.tours,
-    router: src.router,
-    routePersistence: src.routePersistence,
-    // ponytail: `persistence` and `routePersistence` are read once, here. The
-    // engine builds four storage adapters from them at construction and they
-    // carry pending throttled writes, so honouring a mid-tour config swap
-    // means rebuilding all four and deciding what happens to those writes.
-    // Nobody has asked; the docs never suggest it. Upgrade path if they do:
-    // `engine.setPersistence(config)` alongside `setOptions`.
-    persistence: src.persistence,
-    autoNavigate: src.autoNavigate,
-    analytics: src.analytics ?? undefined,
-    onNavigationRequired: src.onNavigationRequired,
-    onStepError: src.onStepError,
-    onTourPaused: src.onTourPaused,
-  }
-}
-
-function liveFrom(src: EngineOptionsSource): TourEngineLiveOptions {
-  return {
-    router: src.router,
-    autoNavigate: src.autoNavigate,
-    analytics: src.analytics ?? undefined,
-    onNavigationRequired: src.onNavigationRequired,
-    onStepError: src.onStepError,
-    onTourPaused: src.onTourPaused,
-  }
 }
 
 // Module-level guard so the dev `diagnose` tip prints once per page/session,
@@ -206,13 +157,13 @@ export function TourProvider({
   // refs. The engine reads `router`, the callbacks and the analytics fan-out
   // through accessors, and the `setOptions` effect below pushes them; this ref
   // is what that effect and the lazy factory read from.
-  const source: EngineOptionsSource = {
+  const source: BindingOptions = {
     tours,
     router,
     routePersistence,
     persistence: tourKitContext?.config.persistence,
     autoNavigate,
-    analytics: tourKitContext satisfies TourEngineAnalytics | null,
+    analytics: (tourKitContext satisfies TourEngineAnalytics | null) ?? undefined,
     onNavigationRequired,
     onStepError,
     onTourPaused,
@@ -224,7 +175,7 @@ export function TourProvider({
   // The handle is inert — building one touches no storage and no registry —
   // so StrictMode discarding a duplicate costs an object.
   const [handle] = React.useState<EngineHandle>(() =>
-    createEngineHandle(() => createTourEngine(optionsFrom(latest.current)))
+    createEngineHandle(() => createTourEngine(engineOptionsFrom(latest.current)))
   )
 
   const snapshot = React.useSyncExternalStore(
@@ -239,7 +190,7 @@ export function TourProvider({
   // are cheaper than the deps that would guard them, and every built-in router
   // adapter changes identity on a route change.
   React.useEffect(() => {
-    handle.setOptions(liveFrom(latest.current))
+    handle.setOptions(liveOptionsFrom(latest.current))
   })
 
   React.useEffect(() => {

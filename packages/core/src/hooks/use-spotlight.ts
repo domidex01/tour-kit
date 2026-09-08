@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { computeSpotlight } from '../lib/spotlight'
-import { trackRect } from '../lib/track-rect'
+import { useEffect, useMemo, useState } from 'react'
+import { type SpotlightController, createSpotlight } from '../lib/spotlight'
 import type { SpotlightConfig } from '../types'
-import { defaultSpotlightConfig } from '../types/config'
 
 export interface UseSpotlightReturn {
   isVisible: boolean
@@ -15,69 +13,46 @@ export interface UseSpotlightReturn {
 }
 
 /**
- * React wrapper over `trackRect` + `computeSpotlight` (`lib/`). The state and
- * the returned `update` stay here: `update` must work while the spotlight is
- * hidden (no tracker exists then), which a tracker handle created inside an
- * effect cannot provide.
+ * React wrapper over `createSpotlight()` (`lib/spotlight.ts`).
+ *
+ * The state machine — four fields, the one-tracker-at-a-time retarget rule,
+ * the `computeSpotlight` call — lives in the controller, so this is a
+ * subscription and nothing else. It used to be four `useState`s, an effect
+ * keyed on `[isVisible, target]` and a `useMemo`; v2 §1.5f moved all of it down
+ * after `@tour-kit/vue` and `@tour-kit/svelte` proved the machine was
+ * framework-agnostic by reimplementing it twice.
+ *
+ * `useSyncExternalStore` would be the idiomatic bridge, but it is React 18+ and
+ * this package still supports React 17 consumers through its peer range. A
+ * subscribe-and-bump effect is the same thing with a wider floor: the
+ * controller's snapshot is reference-stable, so the render below is driven by
+ * identity exactly as `useSyncExternalStore` would drive it.
  */
 export function useSpotlight(): UseSpotlightReturn {
-  const [isVisible, setIsVisible] = useState(false)
-  const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
-  const [config, setConfig] = useState<SpotlightConfig>(defaultSpotlightConfig)
-  // ONE source of truth for the current target. `show(a)` then `show(b)` with
-  // no `hide()` between is a real flow (`TourOverlay` advances that way), and
-  // holding the node in two places is what let the tracker keep following the
-  // previous step's element.
-  const [target, setTarget] = useState<HTMLElement | null>(null)
-
-  const updateRect = useCallback(() => {
-    if (target) {
-      setTargetRect(target.getBoundingClientRect())
-    }
-  }, [target])
+  const controller: SpotlightController = useMemo(() => createSpotlight(), [])
+  const [snapshot, setSnapshot] = useState(controller.getState)
 
   useEffect(() => {
-    // Keyed on `target`, not just `isVisible`: `TourOverlay` advances a step by
-    // calling `show(newTarget)` with no `hide()` in between, so `isVisible`
-    // never flips and an effect keyed on it alone would keep tracking the
-    // previous step's element. (Before §1.3b the handler re-read the ref on
-    // every scroll and followed the swap for free; `trackRect` takes a concrete
-    // element, so the re-run has to be explicit.)
-    //
-    // No attach-time read: `show()` has already seeded the rect, and reading
-    // again would cost a render.
-    if (!isVisible || !target) return
-    return trackRect(target, setTargetRect).stop
-  }, [isVisible, target])
-
-  const show = useCallback((next: HTMLElement, spotlightConfig?: SpotlightConfig) => {
-    setTarget(next)
-    setConfig({ ...defaultSpotlightConfig, ...spotlightConfig })
-    setTargetRect(next.getBoundingClientRect())
-    setIsVisible(true)
-  }, [])
-
-  const hide = useCallback(() => {
-    setIsVisible(false)
-    setTarget(null)
-    setTargetRect(null)
-  }, [])
-
-  const { overlayStyle, cutoutStyle } = useMemo(
-    () => computeSpotlight(targetRect, config),
-    [targetRect, config]
-  )
+    // Sync once on mount: `show()` can be called from a layout effect below
+    // this component, which runs before this effect subscribes.
+    setSnapshot(controller.getState())
+    const unsubscribe = controller.subscribe(() => setSnapshot(controller.getState()))
+    return () => {
+      unsubscribe()
+      controller.destroy()
+    }
+  }, [controller])
 
   return useMemo(
     () => ({
-      isVisible,
-      targetRect,
-      overlayStyle,
-      cutoutStyle: cutoutStyle ?? {},
-      show,
-      hide,
-      update: updateRect,
+      isVisible: snapshot.isVisible,
+      targetRect: snapshot.targetRect,
+      overlayStyle: snapshot.overlayStyle,
+      cutoutStyle: snapshot.cutoutStyle,
+      show: controller.show,
+      hide: controller.hide,
+      update: controller.update,
     }),
-    [isVisible, targetRect, overlayStyle, cutoutStyle, show, hide, updateRect]
+    [snapshot, controller]
   )
 }

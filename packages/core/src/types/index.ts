@@ -82,4 +82,4 @@ export type {
 } from './hints'
 
 // Router types
-export type { RouterAdapter, MultiPagePersistenceConfig } from './router'
+export type { RouterAdapter, RouteMatchMode, MultiPagePersistenceConfig } from './router'
