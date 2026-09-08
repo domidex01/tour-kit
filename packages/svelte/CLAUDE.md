@@ -51,6 +51,11 @@ overlay, no `@floating-ui/*`. The consumer renders their own card — see
   add a source alias. The same applies to the example app — after changing this
   package's source, rebuild it before running e2e, or the browser gets the old
   bundle.
+- **A naive `grep -cE "react" packages/svelte/dist/index.js` returns 1, and that
+  is a FALSE POSITIVE**: `svelte/reactivity` contains the substring. The real
+  gate is `no-react-in-dist.test.ts`, which uses `specifierPattern` from
+  `tooling/bundle-check/closure.mjs` and matches only actual import specifiers.
+  Do not "fix" the substring.
 - **`private: true` until the v2 licence lands (§3.2).**
 
 ## Commands
