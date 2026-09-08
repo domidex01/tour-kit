@@ -15,16 +15,11 @@
  * @module provide-tour-kit
  */
 import {
-  type KeyboardConfig,
-  type MultiPagePersistenceConfig,
-  type PersistenceConfig,
-  type RouterAdapter,
-  type Tour,
-  type TourEngineAnalytics,
-  type TourRouteError,
+  type BindingOptions,
   attachAdvanceOn,
   attachKeyboard,
   attachTestBridge,
+  engineOptionsFrom,
   validateTour,
 } from '@tour-kit/core/engine'
 import { getContext, onMount, setContext } from 'svelte'
@@ -32,41 +27,15 @@ import { type TourKit, createTourKit } from './create-tour-kit'
 
 export const TOUR_KIT_KEY: symbol = Symbol('tour-kit')
 
-/** Everything `provideTourKit` accepts. Mirrors the Vue binding's bag exactly. */
-export interface TourKitOptions {
-  tours: Tour[]
-  router?: RouterAdapter
-  routePersistence?: MultiPagePersistenceConfig
-  persistence?: PersistenceConfig
-  autoNavigate?: boolean
-  analytics?: TourEngineAnalytics
-  onNavigationRequired?: (route: string, stepId: string) => void
-  onStepError?: (err: TourRouteError) => void
-  onTourPaused?: (tourId: string, reason: 'cross-tab') => void
-  /**
-   * `false` disables keyboard navigation; an object customises it. Default: on.
-   *
-   * A headless consumer renders their own card, so the binding wires the keys
-   * or nobody does.
-   */
-  keyboard?: boolean | KeyboardConfig
-  /** Dev-only `window.__tourKit__`. Default `false`. */
-  enableTestBridge?: boolean
-}
-
-function optionsFrom(src: TourKitOptions) {
-  return {
-    tours: src.tours,
-    router: src.router,
-    routePersistence: src.routePersistence,
-    persistence: src.persistence,
-    autoNavigate: src.autoNavigate,
-    analytics: src.analytics,
-    onNavigationRequired: src.onNavigationRequired,
-    onStepError: src.onStepError,
-    onTourPaused: src.onTourPaused,
-  }
-}
+/**
+ * Everything `provideTourKit` accepts.
+ *
+ * `BindingOptions` is core's — derived from `CreateTourEngineOptions`, so a new
+ * engine option arrives here without an edit and a renamed one stops compiling.
+ * Re-exported under the binding's own name because that is what a Svelte
+ * consumer will look for; it is an alias, not a second declaration.
+ */
+export type TourKitOptions = BindingOptions
 
 /**
  * Provide a tour kit to this component's subtree.
@@ -80,7 +49,7 @@ export function provideTourKit(options: TourKitOptions): TourKit {
   // construction, which is the real trust boundary.
   for (const tour of options.tours) validateTour(tour)
 
-  const kit = createTourKit(() => optionsFrom(options))
+  const kit = createTourKit(() => engineOptionsFrom(options))
   setContext(TOUR_KIT_KEY, kit)
 
   onMount(() => {

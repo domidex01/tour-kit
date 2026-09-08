@@ -172,7 +172,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
   - vue <1.5 KB
-  - svelte <1.6 KB
+  - svelte <1.3 KB
 
   The hints / announcements / surveys / media / ai numbers rose in v2 §1.2
   **without a byte being added**: they all ship a `headless` entry, so the gate

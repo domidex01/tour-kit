@@ -4,6 +4,7 @@ node_modules/
 
 # Build outputs
 dist/
+.svelte-kit/
 *.tsbuildinfo
 .next/
 tsup.config.bundled_*

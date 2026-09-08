@@ -21,7 +21,13 @@ overlay, no `@floating-ui/*`. The consumer renders their own card — see
 5. **Never import `@tour-kit/core` bare.** The bare specifier pulls React into
    the `.d.ts` chain. `src/__tests__/no-react-in-dist.test.ts` enforces it on
    both the built files and the source, with a positive control.
-6. **Options are read ONCE**, because a `<script>` runs once. `setOptions` and
+6. **State machines live in core; this package holds bridges.** `createSpotlight`
+   is a `createSubscriber` over core's controller, and `createTourKit` the same
+   over the engine handle — one concept, twice. If something here grows fields
+   and transitions of its own, that logic belongs in `@tour-kit/core/engine`
+   where the Vue binding and the React hook can share it. §1.5 shipped the
+   spotlight machine three times before §1.5f pushed it down.
+7. **Options are read ONCE**, because a `<script>` runs once. `setOptions` and
    `setTours` are the escape hatch; there is no Vue-style watcher here, and
    inventing reactivity the framework does not have would be the wrong shape.
 

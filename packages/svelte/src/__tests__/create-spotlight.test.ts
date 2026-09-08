@@ -1,10 +1,12 @@
 /**
- * The retarget regression first. `show(a)` then `show(b)` with no `hide()` is a
- * real flow, and the §1.3b execution shipped a version that kept tracking the
- * first node.
+ * The BRIDGE, not the machine.
  *
- * A leaked tracker is only observable AFTER `hide()`: before it, both trackers
- * fire in registration order and the current one's write lands last either way.
+ * Since v2 §1.5f the spotlight state machine lives in core's
+ * `createSpotlight()` and has its own direct suite there — including the §1.3b
+ * retarget regression. Re-asserting it here would be a slow duplicate of a test
+ * that already exists, and if the two ever disagreed core's would be right.
+ * What is this binding's to prove is the Svelte half: the `createSubscriber`
+ * getters read through to the controller, and `destroy` reaches it.
  */
 import { afterEach, describe, expect, it } from 'vitest'
 import { createSpotlight } from '../create-spotlight'
@@ -13,16 +15,7 @@ function el(id: string, top: number) {
   const node = document.createElement('div')
   node.id = id
   node.getBoundingClientRect = () =>
-    ({
-      top,
-      left: 0,
-      width: 100,
-      height: 20,
-      right: 100,
-      bottom: top + 20,
-      x: 0,
-      y: top,
-    }) as DOMRect
+    ({ top, left: 0, width: 100, height: 20, right: 100, bottom: top + 20 }) as DOMRect
   document.body.appendChild(node)
   return node
 }
@@ -33,64 +26,63 @@ afterEach(() => {
   document.body.innerHTML = ''
 })
 
-describe('createSpotlight', () => {
-  it('show() seeds the rect synchronously and hide() clears it', () => {
+describe('createSpotlight — the Svelte bridge', () => {
+  it('the getters read the controller snapshot', () => {
     const s = createSpotlight()
 
     expect(s.isVisible).toBe(false)
     expect(s.targetRect).toBeNull()
+    expect(s.cutoutStyle).toEqual({})
 
     s.show(el('a', 10))
+
     expect(s.isVisible).toBe(true)
     expect(s.targetRect?.top).toBe(10)
+    expect(s.overlayStyle).toMatchObject({ position: 'fixed' })
+    expect(s.cutoutStyle).toMatchObject({ position: 'absolute' })
 
+    s.destroy()
+  })
+
+  it('hide() reaches the controller', () => {
+    const s = createSpotlight()
+    s.show(el('a', 10))
     s.hide()
+
     expect(s.isVisible).toBe(false)
     expect(s.targetRect).toBeNull()
 
     s.destroy()
   })
 
-  it('show(a) then show(b) stops tracking a — the §1.3b retarget regression', async () => {
+  it('a tracked rect change is visible through the getters', async () => {
     const s = createSpotlight()
     const a = el('a', 10)
-    const b = el('b', 80)
-
     s.show(a)
-    s.show(b)
-    expect(s.targetRect?.top).toBe(80)
 
-    s.hide()
-    expect(s.targetRect).toBeNull()
-
-    a.getBoundingClientRect = () => ({ top: 999 }) as DOMRect
-    b.getBoundingClientRect = () => ({ top: 888 }) as DOMRect
+    a.getBoundingClientRect = () => ({ top: 55, left: 0, width: 1, height: 1 }) as DOMRect
     window.dispatchEvent(new Event('scroll'))
     await raf()
 
-    expect(s.targetRect).toBeNull()
+    expect(s.targetRect?.top).toBe(55)
     s.destroy()
   })
 
-  it('update() works while a target is set, and computeSpotlight drives the styles', () => {
+  it('update() re-reads the current target', () => {
     const s = createSpotlight()
     const a = el('a', 10)
-
     s.show(a)
-    expect(s.overlayStyle).toBeTruthy()
-    expect(s.cutoutStyle).toBeTruthy()
 
     a.getBoundingClientRect = () => ({ top: 42, left: 0, width: 1, height: 1 }) as DOMRect
     s.update()
-    expect(s.targetRect?.top).toBe(42)
 
+    expect(s.targetRect?.top).toBe(42)
     s.destroy()
   })
 
   it('destroy() stops the tracker', async () => {
     const s = createSpotlight()
     const a = el('a', 10)
-
     s.show(a)
     s.destroy()
 

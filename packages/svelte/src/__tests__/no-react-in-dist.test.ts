@@ -22,12 +22,27 @@ const DTS = join(PKG_ROOT, 'dist', 'index.d.ts')
  * `splitting: false` and one entry, so `dist/index.js` IS the whole closure —
  * no `closureOf` walk needed. Core's `_dist.ts` `distExists()` checks core's
  * schemas entry and is useless here.
+ *
+ * This gates on the DIRECTORY, not on the three files, and that distinction is
+ * the whole point. `it.skipIf(!distExists())` turns a wrong path into a SILENT
+ * SKIP — measured on the Vue copy: a bogus filename left the suite reporting
+ * "3 skipped" and green, with the positive control disarmed along with
+ * everything it protects. Gating on `dist/` means a genuine no-build run still
+ * skips, while a wrong filename fails the first case below.
  */
-const distExists = () => existsSync(ESM) && existsSync(CJS) && existsSync(DTS)
+const DIST = join(PKG_ROOT, 'dist')
+const distExists = () => existsSync(DIST)
 
 const FORBIDDEN = ['react', 'react-dom', 'clsx', 'tailwind-merge', 'zod']
 
 describe('@tour-kit/svelte ships no React', () => {
+  it.skipIf(!distExists())('names the three built entry files', () => {
+    // The guard against `distExists()` silently disarming everything below.
+    for (const file of [ESM, CJS, DTS]) {
+      expect(existsSync(file), `${file} missing — the scan below would skip`).toBe(true)
+    }
+  })
+
   it.skipIf(!distExists())('CONTROL — the built files name `svelte`, so the scan works', () => {
     for (const file of [ESM, CJS, DTS]) {
       expect(

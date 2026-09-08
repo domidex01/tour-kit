@@ -1,31 +1,32 @@
 /**
- * The spotlight, as a `createSubscriber`-backed object.
+ * `createSpotlight()` (core) behind a `createSubscriber` getter.
  *
- * Callable from a component `<script>`; the getters are reactive inside
- * `$derived` / `$effect` / a template and plain reads elsewhere, exactly like
- * `createTourKit`'s `state`.
+ * The state machine — the four fields, the one-tracker-at-a-time retarget rule,
+ * the `computeSpotlight` call — lives in core since v2 §1.5f, because this
+ * binding and the Vue one proved it was framework-agnostic by implementing it
+ * identically. What is left here is the bridge, and it is the same bridge
+ * `create-tour-kit.ts` uses over the engine: one `createSubscriber` over a
+ * reference-stable `getState()`.
  *
- * One tracker at a time. `show(a)` then `show(b)` with no `hide()` between is a
- * real flow — an overlay advances a step that way — and the §1.3b execution
- * shipped a version that kept tracking the first node.
+ * The getters are reactive inside `$derived` / `$effect` / a template and plain
+ * reads elsewhere. `start` runs for the first subscriber and its cleanup when
+ * the last is destroyed, so a component that never renders the spotlight never
+ * subscribes.
  *
  * @module create-spotlight
  */
 import {
   type SpotlightConfig,
-  type SpotlightCutoutStyle,
-  type SpotlightOverlayStyle,
-  computeSpotlight,
-  defaultSpotlightConfig,
-  trackRect,
+  type SpotlightSnapshot,
+  createSpotlight as createSpotlightController,
 } from '@tour-kit/core/engine'
 import { createSubscriber } from 'svelte/reactivity'
 
 export interface Spotlight {
   readonly isVisible: boolean
-  readonly targetRect: DOMRect | null
-  readonly overlayStyle: SpotlightOverlayStyle
-  readonly cutoutStyle: SpotlightCutoutStyle | Record<string, never>
+  readonly targetRect: SpotlightSnapshot['targetRect']
+  readonly overlayStyle: SpotlightSnapshot['overlayStyle']
+  readonly cutoutStyle: SpotlightSnapshot['cutoutStyle']
   show: (target: HTMLElement, config?: SpotlightConfig) => void
   hide: () => void
   /** Re-read the current target. Works while hidden, where no tracker exists. */
@@ -35,76 +36,29 @@ export interface Spotlight {
 }
 
 export function createSpotlight(): Spotlight {
-  let visible = false
-  let rect: DOMRect | null = null
-  let config: SpotlightConfig = defaultSpotlightConfig
-  let target: HTMLElement | null = null
-  let stop: (() => void) | null = null
-
-  let notify: (() => void) | null = null
-  const subscribe = createSubscriber((update) => {
-    notify = update
-    return () => {
-      notify = null
-    }
-  })
-
-  const stopTracking = () => {
-    stop?.()
-    stop = null
+  const controller = createSpotlightController()
+  const subscribe = createSubscriber((update) => controller.subscribe(update))
+  const read = (): SpotlightSnapshot => {
+    subscribe()
+    return controller.getState()
   }
-
-  const styles = () => computeSpotlight(rect, config)
 
   return {
     get isVisible() {
-      subscribe()
-      return visible
+      return read().isVisible
     },
     get targetRect() {
-      subscribe()
-      return rect
+      return read().targetRect
     },
     get overlayStyle() {
-      subscribe()
-      return styles().overlayStyle
+      return read().overlayStyle
     },
     get cutoutStyle() {
-      subscribe()
-      return styles().cutoutStyle ?? {}
+      return read().cutoutStyle
     },
-
-    show(next, spotlightConfig) {
-      // Retarget: the previous tracker has to go before the new one starts, or
-      // the spotlight follows the step the tour has already left.
-      stopTracking()
-      target = next
-      config = { ...defaultSpotlightConfig, ...spotlightConfig }
-      // Seeded synchronously so the tracker never needs an attach-time read.
-      rect = next.getBoundingClientRect()
-      visible = true
-      stop = trackRect(next, (r) => {
-        rect = r
-        notify?.()
-      }).stop
-      notify?.()
-    },
-
-    hide() {
-      stopTracking()
-      target = null
-      rect = null
-      visible = false
-      notify?.()
-    },
-
-    update() {
-      if (target) {
-        rect = target.getBoundingClientRect()
-        notify?.()
-      }
-    },
-
-    destroy: stopTracking,
+    show: controller.show,
+    hide: controller.hide,
+    update: controller.update,
+    destroy: controller.destroy,
   }
 }

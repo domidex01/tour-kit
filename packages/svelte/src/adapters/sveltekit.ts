@@ -21,7 +21,7 @@
  *
  * @module adapters/sveltekit
  */
-import type { RouterAdapter } from '@tour-kit/core/engine'
+import { type RouterAdapter, matchRoutePattern } from '@tour-kit/core/engine'
 
 export interface SvelteKitRouterAdapterInput {
   goto: (url: string) => Promise<void>
@@ -52,17 +52,7 @@ export function createSvelteKitRouterAdapter(input: SvelteKitRouterAdapterInput)
     // "navigated" (only a resolved `false` is NAVIGATION_REJECTED).
     navigate: (route) => input.goto(route).then(() => undefined),
 
-    matchRoute: (pattern, mode = 'exact') => {
-      const currentPath = input.getPathname()
-      switch (mode) {
-        case 'startsWith':
-          return currentPath.startsWith(pattern)
-        case 'contains':
-          return currentPath.includes(pattern)
-        default:
-          return currentPath === pattern
-      }
-    },
+    matchRoute: (pattern, mode) => matchRoutePattern(input.getPathname(), pattern, mode),
 
     onRouteChange: (cb) => {
       listeners.add(cb)
