@@ -1,6 +1,6 @@
 {
   "name": "@tour-kit/playwright",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Playwright fixtures for Tour Kit — test.extend({ tour }) against window.__tourKit__",
   "author": "Tour Kit Team",
   "license": "MIT",

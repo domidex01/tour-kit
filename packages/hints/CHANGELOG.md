@@ -1,5 +1,21 @@
 # @tour-kit/hints
 
+## 2.1.0
+
+### Patch Changes
+
+- Updated dependencies [c9293ff]
+- Updated dependencies [b032980]
+- Updated dependencies [2c065cf]
+- Updated dependencies [d9cac78]
+- Updated dependencies [dcce333]
+- Updated dependencies [d985ec5]
+- Updated dependencies [c6953d8]
+- Updated dependencies [a68699f]
+  - @tour-kit/core@2.1.0
+  - @tour-kit/analytics@0.12.1
+  - @tour-kit/media@0.13.4
+
 ## 2.0.0
 
 ### Patch Changes

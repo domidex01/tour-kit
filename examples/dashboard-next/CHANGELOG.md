@@ -1,5 +1,30 @@
 # dashboard-next
 
+## 0.1.24
+
+### Patch Changes
+
+- Updated dependencies [c9293ff]
+- Updated dependencies [b032980]
+- Updated dependencies [2c065cf]
+- Updated dependencies [d9cac78]
+- Updated dependencies [dcce333]
+- Updated dependencies [d985ec5]
+- Updated dependencies [c6953d8]
+- Updated dependencies [a68699f]
+  - @tour-kit/core@2.1.0
+  - @tour-kit/adoption@3.0.1
+  - @tour-kit/ai@0.13.2
+  - @tour-kit/analytics@0.12.1
+  - @tour-kit/announcements@6.0.1
+  - @tour-kit/checklists@1.0.1
+  - @tour-kit/hints@2.1.0
+  - @tour-kit/license@1.3.7
+  - @tour-kit/media@0.13.4
+  - @tour-kit/react@2.1.0
+  - @tour-kit/surveys@5.0.1
+  - @tour-kit/scheduling@1.0.1
+
 ## 0.1.23
 
 ### Patch Changes
