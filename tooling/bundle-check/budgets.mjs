@@ -91,6 +91,20 @@
  *     rest (`sideEffects: false`), and the only consumer who pays all of it is
  *     the §1.6 IIFE — where shipping focus/keyboard/spotlight is the point. A
  *     type-only consumer still ships zero.
+ *   - core:engine:iife: 18.5 KB against a measured 17 492 — the SAME ceiling as
+ *     `core:engine`, deliberately, not the repo's measured-x1.2 convention.
+ *     This row is the same source in one format: rollup drops the chunk
+ *     boundary, so the IIFE is 606 B SMALLER than the two-file ESM closure it
+ *     mirrors (17 492 vs 18 098). It moves in lockstep with the row above, so
+ *     it should trip at the same time; x1.2 would put it near 21 000 and leave
+ *     3.5 KB nobody would notice drift into. The vue/svelte rows got x1.2
+ *     because they have no sibling row to track.
+ *
+ *     This is also the answer to the prediction in the row above — "the §1.6
+ *     IIFE is the consumer who pays all of it". It did, and it fit: no
+ *     re-baseline, ~1 KB of headroom. If this row and `core:engine` ever
+ *     diverge by more than ~600 B, one of the two builds changed shape
+ *     (a lost treeshake, a new format flag), not the source.
  *   - hints, announcements, surveys, media, ai:client: re-baselined in v2 §1.2
  *     WITHOUT a byte being added. All five ship a `headless` entry alongside
  *     `index`, so they have been split since long before core was, and the
@@ -114,6 +128,7 @@
 export const budgets = [
   ['core', 'packages/core/dist/index.js', 23000],
   ['core:engine', 'packages/core/dist/engine/index.js', 18500],
+  ['core:engine:iife', 'packages/core/dist/engine/index.global.js', 18500],
   ['react', 'packages/react/dist/index.js', 12000],
   ['hints', 'packages/hints/dist/index.js', 6000],
   ['analytics:main', 'packages/analytics/dist/index.js', 4000],

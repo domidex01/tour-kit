@@ -22,6 +22,11 @@
     "limit": "15 KB"
   },
   {
+    "name": "@tour-kit/core/engine (IIFE)",
+    "path": "packages/core/dist/engine/index.global.js",
+    "limit": "16 KB"
+  },
+  {
     "name": "@tour-kit/react",
     "path": "packages/react/dist/index.js",
     "limit": "185 KB",
