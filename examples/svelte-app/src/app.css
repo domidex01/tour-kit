@@ -1,0 +1,77 @@
+/* Plain CSS on purpose. A Tailwind purge config once made embeds invisible in
+   this repo's QA; the proof must not depend on one. */
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 2rem;
+  background: #fbfbfd;
+  color: #16161a;
+}
+
+nav {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+nav a {
+  color: #3730a3;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #c7c7d1;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.tk-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: max-content;
+  max-width: 20rem;
+  padding: 1rem;
+  border: 1px solid #d4d4dd;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 12%);
+}
+
+.tk-card h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.tk-card p {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+}
+
+.tk-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tk-arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border: 1px solid #d4d4dd;
+  transform: rotate(45deg);
+}
+
+.tk-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+}

@@ -107,9 +107,9 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
 
 - TypeScript strict mode enabled
 - Test coverage: thresholds are enforced **per-package** in each `packages/*/vitest.config.ts`,
-  not as a blanket repo number. Nine packages hold the canonical floor — ≥80% statements,
+  not as a blanket repo number. Ten packages hold the canonical floor — ≥80% statements,
   functions, and lines with ≥75% branches: `core`, `react`, `hints`, `adoption`, `checklists`,
-  `analytics`, `license`, `surveys`, and `vue`. Three feature packages enforce honest, earned floors
+  `analytics`, `license`, `surveys`, `vue`, and `svelte`. Three feature packages enforce honest, earned floors
   below canonical (statements/branches/functions/lines): `announcements` 75/70/80/75,
   `scheduling` 75/65/80/75, and `media` 70/60/70/70. `ai` has no per-key threshold yet. Slice 7
   raised these from the temporary phase-5 lows with real behavior tests, and measured coverage
@@ -172,6 +172,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
   - vue <1.5 KB
+  - svelte <1.3 KB
 
   The hints / announcements / surveys / media / ai numbers rose in v2 §1.2
   **without a byte being added**: they all ship a `headless` entry, so the gate
@@ -264,12 +265,14 @@ When adding new animations, prefix with `motion-safe:` if it's a `tailwindcss-an
 @tour-kit/media ────────┤
 @tour-kit/scheduling ───┤
 @tour-kit/surveys ──────┤
-@tour-kit/vue ──────────┘
+@tour-kit/vue ──────────┤
+@tour-kit/svelte ───────┘
 ```
 
-`@tour-kit/vue` is the odd one out on that arrow: it imports the
-`@tour-kit/core/engine` subpath only, never the main entry, so no React reaches
-its `.d.ts` chain. A per-package `no-react-in-dist.test.ts` enforces it.
+`@tour-kit/vue` and `@tour-kit/svelte` are the odd ones out on that arrow: they
+import the `@tour-kit/core/engine` subpath only, never the main entry, so no
+React reaches their `.d.ts` chains. A per-package `no-react-in-dist.test.ts`
+enforces it, with a positive control so a broken scan fails loudly.
 
 Note: `@tour-kit/scheduling` is an optional peer dependency for `@tour-kit/announcements`. `@tour-kit/license` is the runtime validator the other Pro packages consult.
 
@@ -290,6 +293,7 @@ Each package has its own CLAUDE.md with domain-specific guidance:
 | `packages/scheduling/CLAUDE.md` | Schedule evaluation, timezone handling, recurring patterns |
 | `packages/surveys/CLAUDE.md` | Survey types, scoring engine, fatigue prevention, context awareness |
 | `packages/vue/CLAUDE.md` | Vue binding: `watch` not `watchEffect`, SSR rule, lazy `ensure()` |
+| `packages/svelte/CLAUDE.md` | Svelte binding: `createSubscriber`, `resolve.conditions`, `svelte-kit sync` |
 | `apps/docs/CLAUDE.md` | MDX conventions, Fumadocs patterns |
 
 ## Documentation Site

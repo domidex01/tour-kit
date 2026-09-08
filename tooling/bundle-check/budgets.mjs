@@ -135,4 +135,5 @@ export const budgets = [
   // provider lifecycle, two view helpers and a router adapter. Measured then
   // gated at ~x1.2, the repo convention.
   ['vue', 'packages/vue/dist/index.js', 1500],
+  ['svelte', 'packages/svelte/dist/index.js', 1300],
 ]

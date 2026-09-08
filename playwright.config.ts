@@ -83,5 +83,11 @@ export default defineConfig({
       reuseExistingServer: true,
       timeout: 60_000,
     },
+    {
+      command: 'pnpm --filter svelte-tour-kit-demo dev',
+      port: 5176,
+      reuseExistingServer: true,
+      timeout: 60_000,
+    },
   ],
 })

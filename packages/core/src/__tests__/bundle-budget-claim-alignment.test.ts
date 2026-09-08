@@ -72,6 +72,7 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
   // Anchored like `media` and `scheduling`: an unanchored /vue/ would match the
   // word anywhere else in CLAUDE.md and read the wrong number.
   vue: { pattern: /^\s*-\s*vue\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
+  svelte: { pattern: /^\s*-\s*svelte\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
 }
 
 describe('v2 §1.2 — the bundle-size gate measures the engine entry too', () => {

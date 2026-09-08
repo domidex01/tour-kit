@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 const PACKAGES_ROOT = path.resolve(__dirname, '..')
 // v2 §1.5 — `vue` and `svelte` join the free tier: the handoff's "do not
 // runtime-gate the AGPL packages" applies to a binding as much as to core.
-const FREE_PACKAGES = ['core', 'react', 'hints', 'vue']
+const FREE_PACKAGES = ['core', 'react', 'hints', 'vue', 'svelte']
 
 function getAllFiles(dir: string, extensions: string[]): string[] {
   const results: string[] = []
