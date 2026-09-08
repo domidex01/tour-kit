@@ -1,9 +1,14 @@
-/**
- * The retarget regression FIRST. `show(a)` then `show(b)` with no `hide()` is a
- * real flow — an overlay advances a step that way — and the §1.3b execution
- * shipped a version that kept tracking the first node.
- */
 import { afterEach, describe, expect, it } from 'vitest'
+/**
+ * The BRIDGE, not the machine.
+ *
+ * Since v2 §1.5f the spotlight state machine lives in core's
+ * `createSpotlight()` and has its own direct suite there — including the §1.3b
+ * retarget regression. Re-asserting it here would be a slow duplicate of a test
+ * that already exists, and if the two ever disagreed core's would be right.
+ * What is this binding's to prove is the Vue half: a `shallowRef` write per
+ * controller notification, and a scope dispose that unsubscribes AND destroys.
+ */
 import { effectScope, nextTick } from 'vue'
 import { useSpotlight } from '../use-spotlight'
 
@@ -11,90 +16,55 @@ function el(id: string, top: number) {
   const node = document.createElement('div')
   node.id = id
   node.getBoundingClientRect = () =>
-    ({
-      top,
-      left: 0,
-      width: 100,
-      height: 20,
-      right: 100,
-      bottom: top + 20,
-      x: 0,
-      y: top,
-    }) as DOMRect
+    ({ top, left: 0, width: 100, height: 20, right: 100, bottom: top + 20 }) as DOMRect
   document.body.appendChild(node)
   return node
 }
+
+const raf = () => new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
 
 afterEach(() => {
   document.body.innerHTML = ''
 })
 
-describe('useSpotlight', () => {
-  it('show() seeds the rect synchronously and hide() clears it', () => {
+describe('useSpotlight — the Vue bridge', () => {
+  it('mirrors the controller snapshot into reactive refs', () => {
     const scope = effectScope()
     const s = scope.run(() => useSpotlight())
     if (!s) throw new Error('scope did not run')
 
     expect(s.isVisible.value).toBe(false)
     expect(s.targetRect.value).toBeNull()
+    expect(s.cutoutStyle.value).toEqual({})
 
     s.show(el('a', 10))
+
     expect(s.isVisible.value).toBe(true)
     expect(s.targetRect.value?.top).toBe(10)
-
-    s.hide()
-    expect(s.isVisible.value).toBe(false)
-    expect(s.targetRect.value).toBeNull()
+    expect(s.overlayStyle.value).toMatchObject({ position: 'fixed' })
+    expect(s.cutoutStyle.value).toMatchObject({ position: 'absolute' })
 
     scope.stop()
   })
 
-  it('show(a) then show(b) stops tracking a — the §1.3b retarget regression', async () => {
+  it('a tracked rect change reaches the refs', async () => {
     const scope = effectScope()
     const s = scope.run(() => useSpotlight())
     if (!s) throw new Error('scope did not run')
 
     const a = el('a', 10)
-    const b = el('b', 80)
     s.show(a)
-    s.show(b)
-    expect(s.targetRect.value?.top).toBe(80)
 
-    // `hide()` stops the tracker the kit is holding — ONE handle, so a leaked
-    // tracker for `a` survives it. Asserting on a scroll *before* hide proves
-    // nothing: both trackers would fire in registration order and b's write
-    // would land last either way. After hide, any write at all is the leak.
-    s.hide()
-    expect(s.targetRect.value).toBeNull()
-
-    a.getBoundingClientRect = () => ({ top: 999 }) as DOMRect
-    b.getBoundingClientRect = () => ({ top: 888 }) as DOMRect
+    a.getBoundingClientRect = () => ({ top: 55, left: 0, width: 1, height: 1 }) as DOMRect
     window.dispatchEvent(new Event('scroll'))
-    await new Promise((r) => requestAnimationFrame(() => r(null)))
+    await raf()
     await nextTick()
 
-    expect(s.targetRect.value).toBeNull()
+    expect(s.targetRect.value?.top).toBe(55)
     scope.stop()
   })
 
-  it('update() works while hidden, and computeSpotlight drives the styles', () => {
-    const scope = effectScope()
-    const s = scope.run(() => useSpotlight())
-    if (!s) throw new Error('scope did not run')
-
-    const a = el('a', 10)
-    s.show(a)
-    expect(s.overlayStyle.value).toBeTruthy()
-    expect(s.cutoutStyle.value).toBeTruthy()
-
-    a.getBoundingClientRect = () => ({ top: 42, left: 0, width: 1, height: 1 }) as DOMRect
-    s.update()
-    expect(s.targetRect.value?.top).toBe(42)
-
-    scope.stop()
-  })
-
-  it('stopping the scope stops the tracker', async () => {
+  it('stopping the scope unsubscribes AND destroys the controller', async () => {
     const scope = effectScope()
     const s = scope.run(() => useSpotlight())
     if (!s) throw new Error('scope did not run')
@@ -103,9 +73,13 @@ describe('useSpotlight', () => {
     s.show(a)
     scope.stop()
 
+    // Destroy stops the tracker, so a scroll cannot move the last snapshot the
+    // ref saw. A bridge that unsubscribed but leaked the controller would leave
+    // a live rAF-throttled listener behind for the life of the page.
     a.getBoundingClientRect = () => ({ top: 777 }) as DOMRect
     window.dispatchEvent(new Event('scroll'))
-    await new Promise((r) => requestAnimationFrame(() => r(null)))
+    await raf()
+    await nextTick()
 
     expect(s.targetRect.value?.top).toBe(10)
   })

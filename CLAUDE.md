@@ -159,9 +159,10 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     closure for the first time, because `/engine` now publishes the binding
     contract two non-React bindings sit on. §1.5f raised the ceiling from 18 KB
     to 18.5 KB at a measured 18 098 (+366 B) for `createSpotlight()`, the
-    spotlight state machine that §1.5 had shipped in three copies. Those bytes
-    MOVED rather than appeared — a Vue consumer ships engine + binding, and
-    that total went 19 187 → 19 191)
+    spotlight state machine that §1.5 had shipped in three copies. Most of
+    those bytes MOVED rather than appeared — a Vue consumer ships engine +
+    binding, and that total went 19 187 → 19 341, so +154 B net for deleting
+    two of the three implementations)
   - react <12 KB
   - hints <6 KB
   - analytics <4 KB (root; per-plugin <1.5 KB each)
@@ -170,7 +171,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   - media <9 KB
   - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
-  - vue <1.8 KB
+  - vue <1.5 KB
 
   The hints / announcements / surveys / media / ai numbers rose in v2 §1.2
   **without a byte being added**: they all ship a `headless` entry, so the gate

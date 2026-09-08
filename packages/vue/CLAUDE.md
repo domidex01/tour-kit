@@ -28,6 +28,12 @@ no `@floating-ui/*`. The consumer renders their own card — see
 6. **`shallowRef`, never `ref`, for the snapshot and for any `DOMRect`.** A deep
    `ref` proxies the `stepVisitCount` Map and the `tour` object, and every
    downstream `Object.is` breaks against the proxy.
+7. **State machines live in core; this package holds bridges.** `useSpotlight`
+   is a `shallowRef` over `createSpotlight()`, and `useTour` a `shallowRef` over
+   the engine handle — the same bridge twice. If a composable here grows fields
+   and transitions of its own, that logic belongs in `@tour-kit/core/engine`
+   where the Svelte binding and the React hook can share it. §1.5 shipped the
+   spotlight machine three times before §1.5f pushed it down.
 
 ## Gotchas
 
@@ -43,6 +49,10 @@ no `@floating-ui/*`. The consumer renders their own card — see
 - **The card owns `deactivate()`, not the binding.** `useFocusTrap`'s `enabled`
   gate only decides whether `activate()` does anything — same as the React hook.
   Restoring focus when the tour ends is the card's effect cleanup.
+- **`it.skipIf(!distExists())` gates on the `dist/` DIRECTORY, not the files.**
+  Gating on the files turns a wrong path into a silent skip — the suite reports
+  green with the guards disarmed. `no-react-in-dist.test.ts` asserts the three
+  entry files exist as its first case for exactly that reason.
 - **Tests read core from `dist`.** That is the claim under test: the *published*
   `/engine` subpath is sufficient. Run through turbo (`turbo run test
   --filter=@tour-kit/vue`) so core builds first; do not add a source alias, which

@@ -1,85 +1,54 @@
 /**
- * `hooks/use-spotlight.ts`'s shape on `shallowRef`s.
+ * `createSpotlight()` (core) behind a Vue `shallowRef`.
  *
- * `shallowRef` for the rect, deliberately: a `DOMRect` behind a deep `ref` is a
- * Proxy, and every `Object.is` comparison downstream breaks against it.
+ * The state machine — the four fields, the one-tracker-at-a-time retarget rule,
+ * the `computeSpotlight` call — lives in core since v2 §1.5f, because this
+ * binding and the Svelte one proved it was framework-agnostic by implementing
+ * it identically. What is left here is the bridge, and it is the same bridge
+ * `create-tour-kit.ts` uses over the engine: one `shallowRef` mirroring a
+ * reference-stable `getState()`.
  *
- * One tracker at a time. `show(a)` then `show(b)` with no `hide()` between is a
- * real flow — an overlay advances a step that way — and the §1.3b execution
- * shipped a regression where the second `show()` kept tracking the first node.
+ * `shallowRef` and not `ref`: the snapshot holds a `DOMRect`, and a deep `ref`
+ * would proxy it so every downstream `Object.is` breaks against the proxy.
  *
  * @module use-spotlight
  */
 import {
   type SpotlightConfig,
-  type SpotlightCutoutStyle,
-  type SpotlightOverlayStyle,
-  computeSpotlight,
-  defaultSpotlightConfig,
-  trackRect,
+  type SpotlightSnapshot,
+  createSpotlight,
 } from '@tour-kit/core/engine'
 import { type ComputedRef, type ShallowRef, computed, onScopeDispose, shallowRef } from 'vue'
 
 export interface UseSpotlightReturn {
-  isVisible: Readonly<ShallowRef<boolean>>
-  targetRect: Readonly<ShallowRef<DOMRect | null>>
-  overlayStyle: ComputedRef<SpotlightOverlayStyle>
-  cutoutStyle: ComputedRef<SpotlightCutoutStyle | Record<string, never>>
+  isVisible: ComputedRef<boolean>
+  targetRect: ComputedRef<SpotlightSnapshot['targetRect']>
+  overlayStyle: ComputedRef<SpotlightSnapshot['overlayStyle']>
+  cutoutStyle: ComputedRef<SpotlightSnapshot['cutoutStyle']>
   show: (target: HTMLElement, config?: SpotlightConfig) => void
   hide: () => void
   update: () => void
 }
 
 export function useSpotlight(): UseSpotlightReturn {
-  const isVisible = shallowRef(false)
-  const targetRect = shallowRef<DOMRect | null>(null)
-  const config = shallowRef<SpotlightConfig>(defaultSpotlightConfig)
+  const controller = createSpotlight()
+  const state: ShallowRef<SpotlightSnapshot> = shallowRef(controller.getState())
+  const unsubscribe = controller.subscribe(() => {
+    state.value = controller.getState()
+  })
 
-  let target: HTMLElement | null = null
-  let stop: (() => void) | null = null
-
-  const stopTracking = () => {
-    stop?.()
-    stop = null
-  }
-
-  const show = (next: HTMLElement, spotlightConfig?: SpotlightConfig) => {
-    // Retarget: the previous tracker has to go before the new one starts, or
-    // the spotlight follows the step the tour has already left.
-    stopTracking()
-    target = next
-    config.value = { ...defaultSpotlightConfig, ...spotlightConfig }
-    // Seeded synchronously so the tracker never needs an attach-time read.
-    targetRect.value = next.getBoundingClientRect()
-    isVisible.value = true
-    stop = trackRect(next, (rect) => {
-      targetRect.value = rect
-    }).stop
-  }
-
-  const hide = () => {
-    stopTracking()
-    target = null
-    targetRect.value = null
-    isVisible.value = false
-  }
-
-  /** Works while hidden too — there is no tracker then, and there is a target. */
-  const update = () => {
-    if (target) targetRect.value = target.getBoundingClientRect()
-  }
-
-  const styles = computed(() => computeSpotlight(targetRect.value, config.value))
-
-  onScopeDispose(stopTracking)
+  onScopeDispose(() => {
+    unsubscribe()
+    controller.destroy()
+  })
 
   return {
-    isVisible,
-    targetRect,
-    overlayStyle: computed(() => styles.value.overlayStyle),
-    cutoutStyle: computed(() => styles.value.cutoutStyle ?? {}),
-    show,
-    hide,
-    update,
+    isVisible: computed(() => state.value.isVisible),
+    targetRect: computed(() => state.value.targetRect),
+    overlayStyle: computed(() => state.value.overlayStyle),
+    cutoutStyle: computed(() => state.value.cutoutStyle),
+    show: controller.show,
+    hide: controller.hide,
+    update: controller.update,
   }
 }
