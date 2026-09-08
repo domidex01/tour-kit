@@ -20,6 +20,7 @@ import type { Storage as TourKitStorage } from '../../../types/config'
 import { TourValidationError } from '../../validate-tour'
 import { createTourEngine } from '../create-tour-engine'
 import type { TourEngine } from '../create-tour-engine'
+import { fireCrossTabWrite } from './_helpers/cross-tab'
 import { makeEngine } from './_helpers/make-engine'
 import { hiddenStep, makeTour, visibleStep } from './_helpers/make-tour'
 import { stageFlow } from './_helpers/stage-storage'
@@ -813,5 +814,225 @@ describe('step lifecycle callbacks — issue #121', () => {
       expect(engine.getState().isActive).toBe(false)
       expect(callOrder).toEqual(['onHide:b'])
     })
+  })
+})
+
+/**
+ * v2 §1.4a — the five adapter-A/B divergences, closed in the engine.
+ *
+ * Each of these is a behaviour `<TourProvider>` has had all along and
+ * `createTourEngine` did not. Shipping the §1.4 swap without them would have
+ * been a silent regression for every React user, so they land first, on their
+ * own PR, with the engine as the only thing under test.
+ */
+describe('persistence default — v2 §1.4a row 1', () => {
+  const ONE = makeTour('t', [visibleStep('a')])
+
+  it('persists a completed tour with NO persistence option at all', async () => {
+    // `defaultPersistenceConfig.enabled` is `true` (types/config.ts:195) and
+    // the provider has always merged it. The engine read
+    // `options.persistence?.enabled ?? false`, so a direct engine consumer
+    // silently lost "don't show me this again" across a reload.
+    const { engine, storage } = engineFor({ tours: [ONE] })
+    await engine.start('t')
+    engine.complete()
+
+    // Prefixed by `createTerminalStore` — `tourkit:` + `completed`.
+    expect(storage.getItem('tourkit:completed')).toBe(JSON.stringify(['t']))
+  })
+
+  it('writes nothing when persistence is explicitly disabled', async () => {
+    const { engine, storage } = engineFor({ tours: [ONE], persistence: { enabled: false } })
+    await engine.start('t')
+    engine.complete()
+
+    expect(storage.getItem('tourkit:completed')).toBeNull()
+  })
+
+  it('writes nothing when trackCompleted is off — the gate is an AND of two merged defaults', async () => {
+    const { engine, storage } = engineFor({
+      tours: [ONE],
+      persistence: { enabled: true, trackCompleted: false },
+    })
+    await engine.start('t')
+    engine.complete()
+
+    expect(storage.getItem('tourkit:completed')).toBeNull()
+  })
+})
+
+describe('setOptions() — v2 §1.4a rows 4', () => {
+  const ROUTED = makeTour('t', [visibleStep('a'), visibleStep('b', { route: '/b' })])
+
+  const makeRouter = (current: string) => ({
+    getCurrentRoute: () => current,
+    navigate: vi.fn(() => undefined),
+    matchRoute: (pattern: string) => pattern === current,
+    onRouteChange: () => () => {},
+  })
+
+  beforeEach(() => {
+    // `visibleStep()` hard-codes `target: '#x'`, and a route hop always awaits
+    // the target before committing.
+    document.body.innerHTML = '<div id="x"></div>'
+  })
+
+  it('routes the next cross-route hop through the NEW router', async () => {
+    // Every built-in adapter's identity changes after a route change
+    // (`createReactRouterAdapter`'s navigate closes over `useNavigate()`), so
+    // an engine that froze the router at construction navigates through a dead
+    // one for the rest of the tour.
+    const router1 = makeRouter('/a')
+    const router2 = makeRouter('/a')
+    const { engine } = engineFor({ tours: [ROUTED], router: router1 })
+    await engine.start('t')
+
+    engine.setOptions({ router: router2 })
+    await engine.next()
+
+    expect(router2.navigate).toHaveBeenCalledWith('/b')
+    expect(router1.navigate).not.toHaveBeenCalled()
+  })
+
+  it('fans out to the NEW analytics sink', async () => {
+    const onStepView1 = vi.fn()
+    const onStepView2 = vi.fn()
+    const { engine } = engineFor({
+      tours: [makeTour('t', [visibleStep('a'), visibleStep('b')])],
+      analytics: { onStepView: onStepView1 },
+    })
+    await engine.start('t')
+    onStepView1.mockClear()
+
+    engine.setOptions({ analytics: { onStepView: onStepView2 } })
+    await engine.next()
+
+    expect(onStepView2).toHaveBeenCalledWith('t', 'b', 1)
+    expect(onStepView1).not.toHaveBeenCalled()
+  })
+
+  it('honours a live autoNavigate flip', async () => {
+    const router = makeRouter('/a')
+    const onNavigationRequired = vi.fn()
+    const { engine } = engineFor({ tours: [ROUTED], router })
+    await engine.start('t')
+
+    engine.setOptions({ autoNavigate: false, onNavigationRequired })
+    await engine.next()
+
+    expect(onNavigationRequired).toHaveBeenCalledWith('/b', 'b')
+    expect(router.navigate).not.toHaveBeenCalled()
+  })
+
+  it('is a silent no-op after destroy()', async () => {
+    const router2 = makeRouter('/a')
+    const { engine } = engineFor({ tours: [ROUTED], router: makeRouter('/a') })
+    await engine.start('t')
+    const before = engine.getState()
+
+    engine.destroy()
+
+    expect(() => engine.setOptions({ router: router2 })).not.toThrow()
+    expect(engine.getState()).toBe(before)
+  })
+})
+
+describe('boot() defers on an empty tour list — v2 §1.4a row 2', () => {
+  const AUTO = makeTour('auto', [visibleStep('a1')], { autoStart: true })
+
+  it('re-arms when setTours() finally supplies tours', async () => {
+    // The `MultiTourKitProvider` + declarative `<Tour>` shape: children
+    // register AFTER the parent's first effect. The provider has always
+    // returned without latching here; the engine latched `ready` in its
+    // `finally` and the late tour never started.
+    const { engine } = engineFor({ tours: [] })
+
+    await engine.boot()
+    expect(engine.getState().isActive).toBe(false)
+
+    engine.setTours([AUTO])
+    await vi.waitFor(() => expect(engine.getState().isActive).toBe(true))
+    expect(engine.getState().tourId).toBe('auto')
+  })
+
+  it('does NOT start anything when setTours() lands on an engine nobody booted', async () => {
+    // Without this pair, "auto-boot on every setTours" — a different and wrong
+    // behaviour — satisfies the case above. `bootRequested` is closure-private,
+    // so the pair is the only way to see it from outside.
+    const { engine } = engineFor({ tours: [] })
+
+    engine.setTours([AUTO])
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(engine.getState().isActive).toBe(false)
+  })
+})
+
+describe('syncTabs re-hydrates from a cross-tab route write — v2 §1.4a row 3', () => {
+  const TWO_PLUS = makeTour('t', [visibleStep('a'), visibleStep('b'), visibleStep('c')])
+  const SYNCED = {
+    enabled: true,
+    storage: 'localStorage',
+    key: 'k',
+    syncTabs: true,
+  } as const
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="x"></div>'
+  })
+
+  it('restores at the step the other tab persisted', async () => {
+    const { engine, storage } = engineFor({ tours: [TWO_PLUS], routePersistence: SYNCED })
+    await engine.boot()
+    expect(engine.getState().isActive).toBe(false)
+
+    fireCrossTabWrite(storage, 'k', { tourId: 't', stepIndex: 2 })
+
+    await vi.waitFor(() => expect(engine.getState().currentStepIndex).toBe(2))
+    expect(engine.getState().tourId).toBe('t')
+  })
+
+  it('ignores the event after destroy()', async () => {
+    const { engine, storage } = engineFor({ tours: [TWO_PLUS], routePersistence: SYNCED })
+    await engine.boot()
+    engine.destroy()
+
+    fireCrossTabWrite(storage, 'k', { tourId: 't', stepIndex: 2 })
+    await Promise.resolve()
+
+    expect(engine.getState().isActive).toBe(false)
+  })
+
+  it('never subscribes when syncTabs is off', async () => {
+    const { engine, storage } = engineFor({
+      tours: [TWO_PLUS],
+      routePersistence: { enabled: true, storage: 'localStorage', key: 'k' },
+    })
+    await engine.boot()
+
+    fireCrossTabWrite(storage, 'k', { tourId: 't', stepIndex: 2 })
+    await Promise.resolve()
+
+    expect(engine.getState().isActive).toBe(false)
+  })
+})
+
+describe('setDontShowAgain() — v2 §1.4a row 5', () => {
+  it('exists, does not throw, and does not notify', async () => {
+    // `TourActions` has it and `TourEngine` did not, so `pickActions(handle)`
+    // in §1.4c could not have type-checked. Still a no-op body by Decision 8 —
+    // wiring it is the first post-1.4 item, not part of a swap.
+    const { engine } = engineFor({ tours: [THREE] })
+    await engine.start('t')
+    const listener = vi.fn()
+    engine.subscribe(listener)
+    const before = engine.getState()
+
+    expect(typeof engine.setDontShowAgain).toBe('function')
+    expect(() => engine.setDontShowAgain('t', true)).not.toThrow()
+
+    expect(listener).not.toHaveBeenCalled()
+    expect(engine.getState()).toBe(before)
   })
 })

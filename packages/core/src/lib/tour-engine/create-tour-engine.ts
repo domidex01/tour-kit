@@ -23,6 +23,7 @@
  */
 import { tourRegistry } from '../../registry/tour-registry'
 import type { PersistenceConfig, Storage as StorageAdapter } from '../../types'
+import { defaultPersistenceConfig } from '../../types/config'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../../types/router'
 import type { TourCallbackContext } from '../../types/state'
 import type { Tour } from '../../types/tour'
@@ -37,6 +38,7 @@ import {
   nextImpl,
   prevImpl,
   resetImpl,
+  setDontShowAgainImpl,
   skipTourImpl,
   startImpl,
   startTourImpl,
@@ -88,7 +90,13 @@ export interface TourEngine {
   destroy: () => void
 
   // ─── Parity with TourActions, required by §1.4 ──────────────────────────
-  /** Run the restore chain. Idempotent, and a no-op after `destroy()`. */
+  /**
+   * Run the restore chain. Idempotent, and a no-op after `destroy()`.
+   *
+   * A boot on an engine with no tours does NOT latch — it is deferred until
+   * `setTours()` supplies some, because the declarative `<Tour>` path
+   * registers children after the parent's first effect.
+   */
   boot: () => Promise<void>
   goToStep: (stepId: string) => Promise<void>
   startTour: (tourId: string, stepId?: string | number) => Promise<void>
@@ -99,7 +107,37 @@ export interface TourEngine {
   reset: (tourId?: string) => void
   setData: (key: string, value: unknown) => void
   setTours: (tours: Tour[]) => void
+  /**
+   * Still a no-op body (`setDontShowAgainImpl`), and present only so the
+   * engine covers all thirteen `TourActions` keys — the React binding selects
+   * its context value straight off this object. Wiring it is the first
+   * post-1.4 item.
+   */
+  setDontShowAgain: (tourId: string, value: boolean) => void
+  /**
+   * Push the props that legitimately change identity after mount.
+   *
+   * A binding re-runs this every commit: every built-in router adapter is a
+   * `useMemo` over the host router's hook results, so freezing `router` at
+   * construction navigates through a dead adapter after the first route
+   * change. Not live, deliberately: `tours` (that is `setTours`), `storage`,
+   * `persistence` and `routePersistence` — their adapters are built once.
+   *
+   * A no-op after `destroy()`.
+   */
+  setOptions: (patch: Partial<TourEngineLiveOptions>) => void
 }
+
+/**
+ * The options a binding may change after construction.
+ *
+ * Derived from `CreateTourEngineOptions` rather than declared, so it cannot
+ * drift from the options it mirrors.
+ */
+export type TourEngineLiveOptions = Pick<
+  CreateTourEngineOptions,
+  'router' | 'autoNavigate' | 'analytics' | 'onNavigationRequired' | 'onStepError' | 'onTourPaused'
+>
 
 type BootPhase = 'idle' | 'booting' | 'ready'
 
@@ -140,7 +178,13 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
     enabled: false,
     storage: 'localStorage',
   }
-  const persistTerminalTours = options.persistence?.enabled ?? false
+  // The provider's expression, verbatim (was `tour-provider.tsx:164`).
+  // `defaultPersistenceConfig.enabled` is `true`, so terminal-tour memory is
+  // ON unless a consumer turns it off — a bare `?? false` here silently lost
+  // every React user's completed-tour list on reload.
+  const persistTerminalTours =
+    (options.persistence?.enabled ?? defaultPersistenceConfig.enabled) &&
+    (options.persistence?.trackCompleted ?? defaultPersistenceConfig.trackCompleted)
 
   // Adapters. Constructing these reads nothing — the flow session's
   // no-read-on-construct contract is what makes the whole factory SSR-safe.
@@ -158,12 +202,30 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
     { enabled: !!routePersistence.crossTab?.enabled }
   )
 
+  /**
+   * The props a binding may replace after construction (`setOptions`). Read
+   * through accessors on `ctx` below, so every impl's `ctx.router` stays the
+   * plain field read it has always been.
+   */
+  const liveOptions: TourEngineLiveOptions = {
+    router: options.router,
+    autoNavigate: options.autoNavigate ?? true,
+    analytics: options.analytics,
+    onNavigationRequired: options.onNavigationRequired,
+    onStepError: options.onStepError,
+    onTourPaused: options.onTourPaused,
+  }
+
   // ─── Engine state ────────────────────────────────────────────────────────
   let state = initialReducerState(options.tours)
   let data: Record<string, unknown> = {}
   let snapshot: TourCallbackContext = buildCallbackContext(state, null, data)
   let destroyed = false
   let bootPhase: BootPhase = 'idle'
+  /** A `boot()` that found no tours and is waiting for `setTours` to supply some. */
+  let bootRequested = false
+  /** The cross-tab route listener is installed on the first real boot, once. */
+  let storageSubscribed = false
 
   const listeners = new Set<() => void>()
   const abortControllerRef: { current: AbortController | null } = { current: null }
@@ -227,11 +289,23 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
     abortControllerRef,
     completedTourIdRef,
     skippedTourIdRef,
-    router: options.router,
-    autoNavigate: options.autoNavigate ?? true,
+    // Accessors, not fields: `TourEngineContext` is an interface of plain
+    // properties and an object literal with getters satisfies it structurally,
+    // so every `ctx.router` read stays what it was while `setOptions` can move
+    // the value underneath it.
+    get router() {
+      return liveOptions.router
+    },
+    get autoNavigate() {
+      return liveOptions.autoNavigate ?? true
+    },
     maxHiddenChain: MAX_HIDDEN_CHAIN,
-    onNavigationRequired: options.onNavigationRequired,
-    onStepError: options.onStepError,
+    get onNavigationRequired() {
+      return liveOptions.onNavigationRequired
+    },
+    get onStepError() {
+      return liveOptions.onStepError
+    },
     completeTour: () => completeTourImpl(ctx),
     skipTour: () => skipTourImpl(ctx),
     setData: (key, value) => engineSetData(key, value),
@@ -249,8 +323,12 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
     tabId: makeTabId(),
     announce: broadcast.post,
     crossTab,
-    onTourPaused: options.onTourPaused,
-    tourKitContext: options.analytics ?? null,
+    get onTourPaused() {
+      return liveOptions.onTourPaused
+    },
+    get tourKitContext() {
+      return liveOptions.analytics ?? null
+    },
   }
 
   /**
@@ -265,9 +343,55 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
     notify()
   }
 
+  /**
+   * Re-run the precedence rule for a *route* restore only, after another tab
+   * wrote our key.
+   *
+   * Route restore is the one boot source allowed to run more than once — the
+   * provider re-ran its boot effect on `externalVersion` and that is the whole
+   * point of `syncTabs`. Flow restore and autostart stay once per engine.
+   */
+  async function rehydrateFromRoute(): Promise<void> {
+    if (destroyed) return
+
+    const decision = resolveBootStart({
+      flowSession: flowSession.load(),
+      flowIsStale: flowSession.isStale(),
+      routeState: routeStore.load(),
+      tours: [...state.tours.values()],
+      completedTours: persistTerminalTours
+        ? terminalStore.getCompletedTours()
+        : state.completedTours,
+    })
+
+    if (decision?.source !== 'route') return
+
+    // Same-route only, as the provider's was: the blob a sibling tab wrote
+    // carries no route of its own.
+    await runBootStart(ctx, decision, {
+      signal: new AbortController().signal,
+      onClear: flowSession.clear,
+    })
+  }
+
   async function boot(): Promise<void> {
     if (destroyed || bootPhase !== 'idle') return
+
+    // Not a latch: the declarative `<Tour>` path (via `MultiTourKitProvider`)
+    // registers children AFTER the parent's first effect, so an empty engine
+    // is "not yet", not "never". `setTours` re-arms it. The provider has
+    // always returned here without latching (was `tour-provider.tsx:344`).
+    if (state.tours.size === 0) {
+      bootRequested = true
+      return
+    }
+
     bootPhase = 'booting'
+
+    if (routePersistence.syncTabs && !storageSubscribed) {
+      storageSubscribed = true
+      teardown.push(routeStore.subscribeStorage(() => void rehydrateFromRoute()))
+    }
 
     // Boot owns its own controller. `abortControllerRef` is written only by
     // `applyTransitionEffects` on a tour-identity change, so it is null here
@@ -392,6 +516,14 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
     },
     setData: engineSetData,
 
+    setDontShowAgain: (tourId: string, value: boolean) => {
+      if (!destroyed) setDontShowAgainImpl(ctx, tourId, value)
+    },
+
+    setOptions: (patch: Partial<TourEngineLiveOptions>) => {
+      if (!destroyed) Object.assign(liveOptions, patch)
+    },
+
     setTours: (tours: Tour[]) => {
       if (destroyed) return
       for (const tour of tours) validateTour(tour)
@@ -400,6 +532,14 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
       // first mirror write in the same turn instead of the next transition.
       syncRegistry(tours)
       dispatch({ type: 'UPDATE_TOURS', tours })
+
+      // The deferred boot, re-armed. Gated on `bootRequested` and NOT on
+      // "tours arrived": auto-booting every `setTours` would start a tour on
+      // an engine whose owner never asked to boot at all.
+      if (bootRequested && bootPhase === 'idle' && tours.length > 0) {
+        bootRequested = false
+        void boot()
+      }
     },
 
     getState: () => snapshot,
