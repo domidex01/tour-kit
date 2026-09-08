@@ -53,8 +53,28 @@ import { type TourStep, matchesAudience, validateTour } from '@tour-kit/core/eng
 ```
 
 It is a subset of what `@tour-kit/core` already exports at the same paths —
-nothing moved. Note that it currently has no way to *run* a tour; that arrives
-with `createTourEngine()`.
+nothing moved. It runs tours too: `createTourEngine()` plus the DOM behaviours
+(`createFocusTrap`, `attachKeyboard`, `trackRect`, `createSpotlight`,
+`attachAdvanceOn`) need no React at all.
+
+#### From a CDN, no bundler
+
+The same subpath ships as a self-contained script that defines `window.TourKit`:
+
+```html
+<script src="https://unpkg.com/@tour-kit/core@2/dist/engine/index.global.js"></script>
+<script>
+  const { createTourEngine } = TourKit
+  const engine = createTourEngine({
+    tours: [{ id: 'welcome', steps: [{ id: 'a', target: '#a', content: 'Hi' }] }],
+  })
+  engine.start('welcome')
+</script>
+```
+
+It is the engine only — state, navigation, persistence, focus/keyboard/spotlight
+helpers — and renders nothing; the card is yours. `@tour-kit/react` has no CDN
+build.
 
 ## Quick Start
 
