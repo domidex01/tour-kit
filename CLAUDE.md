@@ -163,6 +163,15 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     those bytes MOVED rather than appeared — a Vue consumer ships engine +
     binding, and that total went 19 187 → 19 341, so +154 B net for deleting
     two of the three implementations)
+  - core/engine IIFE (`dist/engine/index.global.js`, the CDN door) <18.5 KB,
+    measured 17 492. It is the engine closure in one file — same source, one
+    format — so it shares `core/engine`'s ceiling instead of the measured-×1.2
+    convention, and trips at the same time; rollup drops the chunk boundary,
+    which is why it is 606 B *smaller* than the two-file ESM closure it
+    mirrors. `platform: 'browser'` on its own tsup item is why it contains no
+    `process.env`: without it esbuild leaves four reads, two unguarded, and a
+    browser throws `ReferenceError: process is not defined` on the first
+    `interpolate()` or segment audience.
   - react <12 KB
   - hints <6 KB
   - analytics <4 KB (root; per-plugin <1.5 KB each)

@@ -11,6 +11,10 @@ Its job: catch "broken tarball" bugs that `examples/dashboard-next` can't see be
 - Undeclared or mis-declared peer dependencies
 - Named-export drift between TypeScript types and the shipped JS
 - Runtime errors on module load (SSR dispatcher misuse, hooks at top level, etc.)
+- CDN build breakage — `dist/engine/index.global.js` missing from the tarball,
+  the `unpkg`/`jsdelivr` fields drifting off it, or the file failing to define
+  `TourKit` and run a tour (`pnpm probe:cdn`, the only step here that executes
+  the published JavaScript — the page probe is `curl`)
 
 ## What it doesn't catch
 

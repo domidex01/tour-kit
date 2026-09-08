@@ -32,6 +32,12 @@ node -e "const l = require('@tour-kit/license'); console.log('ProGate:', typeof 
 node -e "const l = require('@tour-kit/license'); console.log('useLicenseGate:', typeof l.useLicenseGate === 'function' ? 'OK' : 'MISSING')"
 node -e "const l = require('@tour-kit/license'); console.log('LicenseProvider:', typeof l.LicenseProvider === 'function' ? 'OK' : 'MISSING')"
 
+# v2 §1.6 — the CDN door, asked of the REAL cdn. The only place in the repo that
+# does: this script is manual and post-publish, so propagation lag or an unpkg
+# outage costs nothing. CI never asks.
+echo "unpkg serves the engine IIFE:"
+curl -sfI "https://unpkg.com/@tour-kit/core/dist/engine/index.global.js" | head -1
+
 echo ""
 echo "=== Dependency Verification ==="
 for pkg in adoption ai analytics announcements checklists media scheduling; do

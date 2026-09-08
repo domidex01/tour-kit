@@ -52,7 +52,14 @@ const SIZE_LIMIT = '.size-limit.json'
  */
 const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
   core: { pattern: /^\s*-\s*core\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
-  'core:engine': { pattern: /core\/engine[^\n]*?<\s*([\d.]+)\s*KB/, mode: 'exact' },
+  // Both anchored on the word that distinguishes them. The `core:engine`
+  // pattern used to be a bare /core\/engine[^\n]*?<…/ — unanchored and
+  // first-match, which was fine while it was the only `core/engine … <N KB`
+  // bullet in the file. v2 §1.6 adds the second one, so an unanchored pattern
+  // would read whichever bullet comes first; both claim 18.5 today, so the two
+  // rows could silently swap and nothing would notice until they diverged.
+  'core:engine': { pattern: /core\/engine subpath[^\n]*?<\s*([\d.]+)\s*KB/, mode: 'exact' },
+  'core:engine:iife': { pattern: /core\/engine IIFE[^\n]*?<\s*([\d.]+)\s*KB/, mode: 'exact' },
   react: { pattern: /^\s*-\s*react\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   hints: { pattern: /^\s*-\s*hints\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   'analytics:main': { pattern: /^\s*-\s*analytics\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },

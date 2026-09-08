@@ -43,6 +43,8 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/engine/index.global.js",
+  "jsdelivr": "./dist/engine/index.global.js",
   "exports": {
     ".": {
       "import": {

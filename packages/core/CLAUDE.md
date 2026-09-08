@@ -17,6 +17,24 @@ Framework-agnostic foundation layer. Contains all business logic - UI packages a
 - The old hand-rolled `calculatePosition()`/collision engine was removed in Slice 0 (dead,
   barrel-private).
 
+### The CDN build (v2 §1.6)
+- `tsup.config.ts` is `defineConfig([main, iife])`. The IIFE
+  (`dist/engine/index.global.js`, `window.TourKit`, what `unpkg`/`jsdelivr`
+  serve) is its OWN item and must stay that way: adding `'iife'` to the main
+  item's `format` would also emit IIFEs of `index` and `schemas`, whose
+  externals become a `__require("react")` shim that throws on load.
+- `platform: 'browser'` on that item is load-bearing, not cosmetic. esbuild
+  defines `process.env.NODE_ENV` itself only under that platform; without it the
+  file keeps four `process.env` reads — two guarded, two not (`interpolate`'s
+  `warnOnMissing` default parameter, `audience`'s segment warning) — and a
+  browser throws `ReferenceError: process is not defined` on the first call.
+  The file LOADS either way, so the guard is two cases in
+  `engine-iife-dist.test.ts`: a `process.env` grep, and a run inside a `vm`
+  realm with no `process`. vitest's jsdom HAS `process`, so a jsdom run is blind
+  to this.
+- The main item's `clean` is therefore `['!**/*.global.js*']`, not `true` —
+  tsup builds array items in parallel and each cleans on its own.
+
 ### Storage Adapters
 - `createStorageAdapter()` - Factory for custom storage backends
 - `createPrefixedStorage()` - Namespaces keys to avoid collisions
