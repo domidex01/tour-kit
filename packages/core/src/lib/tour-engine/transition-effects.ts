@@ -53,7 +53,7 @@ export function applyTransitionEffects(
   // `currentRoute` rides along so a hard refresh mid-multi-page-tour resumes
   // on the right URL.
   if (next.isActive && next.tourId && ctx.flowSessionEnabled && positionChanged) {
-    ctx.saveFlowSession(next.currentStepIndex, ctx.router?.getCurrentRoute())
+    ctx.saveFlowSession(next.tourId, next.currentStepIndex, ctx.router?.getCurrentRoute())
   }
 
   // ─── AbortController swap on tour identity ──────────────────────────────

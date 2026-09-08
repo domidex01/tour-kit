@@ -96,7 +96,7 @@ describe('flow-session save', () => {
 
     applyTransitionEffects(ctx, active(0), active(2))
 
-    expect(mocks.saveFlowSession).toHaveBeenCalledWith(2, '/pricing')
+    expect(mocks.saveFlowSession).toHaveBeenCalledWith('t', 2, '/pricing')
   })
 
   it('does not save when the flow session is not configured', () => {
@@ -140,7 +140,7 @@ describe('an unchanged prev -> next is inert', () => {
     applyTransitionEffects(ctx, active(2), active(2))
 
     expect(mocks.saveRouteState).toHaveBeenCalledTimes(1)
-    expect(mocks.saveFlowSession).toHaveBeenCalledExactlyOnceWith(2, '/pricing')
+    expect(mocks.saveFlowSession).toHaveBeenCalledExactlyOnceWith('t', 2, '/pricing')
   })
 
   it('announces on activation, not on every commit while active', () => {

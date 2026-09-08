@@ -1068,17 +1068,55 @@ describe('flow session parity — v2 §1.4a rows 6 and 7', () => {
   })
 
   it('writes a resume blob for a tour started by hand, not only a booted one', async () => {
-    // Row 7, and the sharper of the two. `useFlowSession(state.tourId ?? '')`
-    // gave the provider the id REACTIVELY, so any start — a button, a
-    // cross-tour branch, `startTour` — enabled the write. The engine called
-    // `setTourId` only inside `boot()`, so a tour the user started by clicking
-    // wrote nothing and a hard reload resumed nothing. That is the whole
-    // feature.
+    // Row 7, and the sharper of the two. The flow store used to hold the tour
+    // id as mutable state that each caller had to keep in sync: the provider
+    // did it reactively, the engine only inside `boot()`. So a tour the user
+    // started by clicking wrote nothing and a hard reload resumed nothing —
+    // the whole feature, lost to a sync point nobody could see.
+    //
+    // The id now travels as an argument to `save()`, so this falls out of the
+    // design rather than out of remembering. Kept as a behaviour pin: any
+    // start must arm the resume, whoever triggered it.
     const { engine, storage } = engineFor({ tours: [TWO], routePersistence: FLOW })
 
     await engine.start('t')
     engine.destroy()
 
     expect(storage.getItem('myapp:flow:active')).not.toBeNull()
+  })
+})
+
+describe('flush() — v2 §1.4b, the synchronous half of a release', () => {
+  it('writes the pending throttled flow-session save without destroying the engine', async () => {
+    // `save()` is trailing-edge throttled at 200 ms, so the blob on disk lags
+    // the tour by up to one step. `destroy()` has always flushed it; the React
+    // binding needs the same guarantee WITHOUT the teardown, because a
+    // StrictMode remount tears the effect down and re-runs it in one tick and
+    // must be able to take the teardown back. An unmount immediately followed
+    // by a remount — a fast client-side route change — is the case that
+    // breaks when the write lands too late: the new provider boots and reads
+    // the previous step.
+    const { engine, storage } = engineFor({
+      tours: [makeTour('t', [visibleStep('a'), visibleStep('b'), visibleStep('c')])],
+      routePersistence: { enabled: true, flowSession: { storage: 'sessionStorage' } },
+    })
+    document.body.innerHTML = '<div id="x"></div>'
+    await engine.start('t')
+    await engine.next()
+
+    engine.flush()
+
+    const blob = JSON.parse(storage.getItem('tourkit:flow:active') as string)
+    expect(blob.stepIndex).toBe(1)
+    // Still live afterwards — that is the whole difference from destroy().
+    await engine.next()
+    expect(engine.getState().currentStepIndex).toBe(2)
+  })
+
+  it('is a no-op after destroy()', () => {
+    const { engine } = engineFor({ tours: [THREE] })
+    engine.destroy()
+
+    expect(() => engine.flush()).not.toThrow()
   })
 })

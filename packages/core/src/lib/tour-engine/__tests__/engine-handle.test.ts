@@ -31,8 +31,9 @@ beforeEach(() => {
   handle = createEngineHandle(factory)
 })
 
-afterEach(() => {
+afterEach(async () => {
   handle.release()
+  await Promise.resolve()
 })
 
 describe('render is inert', () => {
@@ -81,21 +82,44 @@ describe('construction is once, on demand', () => {
   })
 })
 
-describe('release() forgets the engine but keeps the listeners', () => {
+describe('release() is deferred by one microtask', () => {
   it('destroys the engine and drops its registry membership', async () => {
     await handle.start('t')
     expect(tourRegistry.get('t')).not.toBeNull()
 
     handle.release()
+    // Not synchronous, and deliberately — see the next case.
+    expect(tourRegistry.get('t')).not.toBeNull()
+    await Promise.resolve()
 
     expect(tourRegistry.get('t')).toBeNull()
     expect(factory).toHaveBeenCalledTimes(1)
     expect(handle.getState()).toBe(INITIAL_SNAPSHOT)
   })
 
-  it('a verb after release() builds a second engine', async () => {
+  it('a verb in the SAME tick takes the release back', async () => {
+    // This is the entire reason the destroy is deferred. React tears an effect
+    // down and re-runs it inside one synchronous commit, so release-then-verb
+    // in one tick is a StrictMode REMOUNT, not an unmount. Destroying there
+    // throws away the engine's state, and the replacement has to boot again —
+    // firing onEnter, onStart and the analytics onTourStart a second time,
+    // which adapter A never did.
+    await handle.start('t')
+    const engine = handle.ensure()
+
+    handle.release()
+    expect(handle.ensure()).toBe(engine)
+
+    await Promise.resolve()
+    expect(factory).toHaveBeenCalledTimes(1)
+    expect(handle.getState().isActive).toBe(true)
+  })
+
+  it('a verb after the microtask builds a second engine', async () => {
     await handle.start('t')
     handle.release()
+    await Promise.resolve()
+
     await handle.start('t')
 
     expect(factory).toHaveBeenCalledTimes(2)
@@ -116,6 +140,7 @@ describe('release() forgets the engine but keeps the listeners', () => {
     expect(afterFirst).toBeGreaterThan(0)
 
     handle.release()
+    await Promise.resolve()
     await handle.start('t')
 
     expect(calls.length).toBeGreaterThan(afterFirst)
@@ -128,16 +153,28 @@ describe('release() forgets the engine but keeps the listeners', () => {
 
     await handle.start('t')
     handle.release()
+    await Promise.resolve()
     await handle.start('t')
 
     expect(calls).toHaveLength(0)
   })
 
-  it('is idempotent', () => {
+  it('is idempotent', async () => {
     handle.release()
 
     expect(() => handle.release()).not.toThrow()
+    await Promise.resolve()
     expect(factory).toHaveBeenCalledTimes(0)
+  })
+
+  it('a second release() after the destroy landed does not throw', async () => {
+    await handle.start('t')
+    handle.release()
+    await Promise.resolve()
+
+    expect(() => handle.release()).not.toThrow()
+    await Promise.resolve()
+    expect(handle.getState()).toBe(INITIAL_SNAPSHOT)
   })
 })
 

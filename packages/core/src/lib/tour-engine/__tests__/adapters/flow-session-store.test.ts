@@ -38,7 +38,6 @@ function stage(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   storage = createMemoryStorage()
   store = createFlowSession({ storage: 'sessionStorage' }, storage)
-  store.setTourId('t')
 })
 
 afterEach(() => {
@@ -132,7 +131,7 @@ describe('save', () => {
   })
 
   it('writes a V2 blob carrying the tour id, step index and route', () => {
-    store.save(3, '/pricing')
+    store.save('t', 3, '/pricing')
     store.flush()
 
     expect(JSON.parse(storage.getItem(KEY) ?? 'null')).toMatchObject({
@@ -151,7 +150,7 @@ describe('save', () => {
     // survive an instant reload.)
     const setItem = vi.spyOn(storage, 'setItem')
 
-    for (let i = 0; i < 5; i++) store.save(i)
+    for (let i = 0; i < 5; i++) store.save('t', i)
     expect(setItem).toHaveBeenCalledTimes(1)
 
     vi.advanceTimersByTime(200)
@@ -159,15 +158,15 @@ describe('save', () => {
   })
 
   it('the coalesced write carries the LAST value in the burst', () => {
-    for (let i = 0; i < 5; i++) store.save(i)
+    for (let i = 0; i < 5; i++) store.save('t', i)
     vi.advanceTimersByTime(200)
 
     expect(JSON.parse(storage.getItem(KEY) ?? 'null').stepIndex).toBe(4)
   })
 
   it('flush() writes the pending trailing value immediately', () => {
-    store.save(0)
-    store.save(7)
+    store.save('t', 0)
+    store.save('t', 7)
     store.flush()
 
     expect(JSON.parse(storage.getItem(KEY) ?? 'null').stepIndex).toBe(7)
@@ -178,16 +177,18 @@ describe('save', () => {
     stage({ startedAt })
     store.load()
 
-    store.save(2)
+    store.save('t', 2)
     store.flush()
 
     expect(JSON.parse(storage.getItem(KEY) ?? 'null').startedAt).toBe(startedAt)
   })
 
-  it('writes nothing when no tour id is set', () => {
-    const anonymous = createFlowSession({ storage: 'sessionStorage' }, storage)
-    anonymous.save(1)
-    anonymous.flush()
+  it('writes nothing when the save carries no tour id', () => {
+    // The disabled-writes path. It used to be reached by never calling
+    // `setTourId`; it is now reached by passing the empty id, which is what a
+    // binding with no active tour has to hand.
+    store.save('', 1)
+    store.flush()
 
     expect(storage.getItem(KEY)).toBeNull()
   })
@@ -200,7 +201,7 @@ describe('save', () => {
     })
 
     expect(() => {
-      store.save(1)
+      store.save('t', 1)
       store.flush()
     }).not.toThrow()
     expect(warn).toHaveBeenCalled()
@@ -217,8 +218,8 @@ describe('clear', () => {
 
   it('cancels a pending throttled save so it cannot resurrect the blob', () => {
     vi.useFakeTimers()
-    store.save(0)
-    store.save(1)
+    store.save('t', 0)
+    store.save('t', 1)
     store.clear()
 
     vi.advanceTimersByTime(200)
@@ -247,5 +248,30 @@ describe('isStale', () => {
     vi.useFakeTimers()
     vi.setSystemTime(Date.now() + 2000)
     expect(store.isStale()).toBe(true)
+  })
+})
+
+describe('the tour id travels with the write, not beside it', () => {
+  it('a trailing-edge save stamps the tour that was current WHEN IT WAS CALLED', () => {
+    // `throttleTime` keeps the last call's arguments and replays them on the
+    // trailing edge — but the tour id used to be read from closure state at
+    // FIRE time. Switch tours inside the 200 ms window and the queued write
+    // lands the new tour's id on the old tour's step index: a resume blob for
+    // a tour the user is no longer in, pointing at a step number that means
+    // nothing there.
+    //
+    // Passing the id as an argument makes the triple atomic by construction.
+    vi.useFakeTimers()
+
+    store.save('tour-a', 5)
+    vi.advanceTimersByTime(50)
+    store.save('tour-a', 6)
+
+    // The user branches to another tour before the trailing edge fires.
+    vi.advanceTimersByTime(250)
+
+    const blob = JSON.parse(storage.getItem(KEY) as string)
+    expect(blob.tourId).toBe('tour-a')
+    expect(blob.stepIndex).toBe(6)
   })
 })

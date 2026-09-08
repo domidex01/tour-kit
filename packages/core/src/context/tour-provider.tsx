@@ -1,42 +1,24 @@
 import * as React from 'react'
 import { useAdvanceOn } from '../hooks/use-advance-on'
-import { useBroadcast } from '../hooks/use-broadcast'
-import { useFlowSession } from '../hooks/use-flow-session'
-import { usePersistence } from '../hooks/use-persistence'
-import { useRoutePersistence } from '../hooks/use-route-persistence'
 import { explainTour } from '../lib/diagnostic'
 import { attachTestBridge } from '../lib/test-bridge'
+import type { TourEngineAnalytics } from '../lib/tour-engine/context'
 import {
-  completeTourImpl,
-  goToImpl,
-  goToStepImpl,
-  nextImpl,
-  prevImpl,
-  resetImpl,
-  setDontShowAgainImpl,
-  skipTourImpl,
-  startImpl,
-  startTourImpl,
-  stopImpl,
-  triggerBranchActionImpl,
-} from '../lib/tour-engine/actions'
-import { resolveBootStart, runBootStart } from '../lib/tour-engine/boot'
-import type { TourEngineAnalytics, TourEngineContext } from '../lib/tour-engine/context'
-import { buildCallbackContext } from '../lib/tour-engine/helpers'
-import { navigateToStepImpl } from '../lib/tour-engine/navigate-to-step'
-import { MAX_HIDDEN_CHAIN, tourReducer } from '../lib/tour-engine/reducer'
+  type CreateTourEngineOptions,
+  type TourEngineLiveOptions,
+  createTourEngine,
+} from '../lib/tour-engine/create-tour-engine'
 import {
-  applyTransitionEffects,
-  subscribeCrossTabPause,
-} from '../lib/tour-engine/transition-effects'
+  type EngineHandle,
+  createEngineHandle,
+  pickActions,
+} from '../lib/tour-engine/engine-handle'
 import { validateTour } from '../lib/validate-tour'
 import type { TourRouteError } from '../lib/wait-for-step-target'
-import { tourRegistry } from '../registry/tour-registry'
-import type { Tour, TourCallbackContext, TourContextValue } from '../types'
-import { defaultPersistenceConfig } from '../types/config'
+import type { Tour, TourContextValue } from '../types'
+import type { PersistenceConfig } from '../types/config'
 import type { DiagnosticContext, DiagnosticGate, EligibilityReport } from '../types/diagnostic'
 import type { MultiPagePersistenceConfig, RouterAdapter } from '../types/router'
-import type { TourReducerState } from '../types/tour-reducer'
 import { logger } from '../utils/logger'
 import { TourContext } from './tour-context'
 import { TourKitContext } from './tourkit-context'
@@ -99,11 +81,53 @@ export interface TourProviderProps {
   enableTestBridge?: boolean
 }
 
-interface CrossTabActiveMessage {
-  type: 'tour:active'
-  tourId: string
-  tabId: string
-  ts: number
+/**
+ * Everything the engine is built from or told about, snapshotted per render.
+ *
+ * Split in two on the way out: {@link optionsFrom} is read once, at
+ * construction; {@link liveFrom} is pushed on every commit.
+ */
+interface EngineOptionsSource {
+  tours: Tour[]
+  router?: RouterAdapter
+  routePersistence: MultiPagePersistenceConfig
+  persistence?: PersistenceConfig
+  autoNavigate: boolean
+  analytics: TourEngineAnalytics | null
+  onNavigationRequired?: (route: string, stepId: string) => void
+  onStepError?: (err: TourRouteError) => void
+  onTourPaused?: (tourId: string, reason: 'cross-tab') => void
+}
+
+function optionsFrom(src: EngineOptionsSource): CreateTourEngineOptions {
+  return {
+    tours: src.tours,
+    router: src.router,
+    routePersistence: src.routePersistence,
+    // ponytail: `persistence` and `routePersistence` are read once, here. The
+    // engine builds four storage adapters from them at construction and they
+    // carry pending throttled writes, so honouring a mid-tour config swap
+    // means rebuilding all four and deciding what happens to those writes.
+    // Nobody has asked; the docs never suggest it. Upgrade path if they do:
+    // `engine.setPersistence(config)` alongside `setOptions`.
+    persistence: src.persistence,
+    autoNavigate: src.autoNavigate,
+    analytics: src.analytics ?? undefined,
+    onNavigationRequired: src.onNavigationRequired,
+    onStepError: src.onStepError,
+    onTourPaused: src.onTourPaused,
+  }
+}
+
+function liveFrom(src: EngineOptionsSource): TourEngineLiveOptions {
+  return {
+    router: src.router,
+    autoNavigate: src.autoNavigate,
+    analytics: src.analytics ?? undefined,
+    onNavigationRequired: src.onNavigationRequired,
+    onStepError: src.onStepError,
+    onTourPaused: src.onTourPaused,
+  }
 }
 
 // Module-level guard so the dev `diagnose` tip prints once per page/session,
@@ -115,6 +139,28 @@ export function __resetDiagnoseHintForTests(): void {
   diagnoseHintFired = false
 }
 
+/**
+ * The React binding over `createTourEngine()` (v2 §1.4).
+ *
+ * This component used to be a second engine implementation — a reducer, five
+ * "live" refs refreshed every render, four persistence hooks, and ten effects
+ * whose declaration order encoded the boot and transition rules. All of that
+ * is `lib/tour-engine/` now, and what is left is the binding: one engine
+ * behind a handle, one `useSyncExternalStore`, three effects.
+ *
+ * Two rules the shape depends on:
+ *
+ *  - **Nothing constructs an engine during render.** `handle.getState()` and
+ *    `handle.subscribe()` are the only members render may touch, and neither
+ *    constructs. StrictMode double-invokes initialisers and the engine
+ *    registers with `tourRegistry` at construction, so building one in render
+ *    logs `registered twice` and leaks.
+ *  - **`release()` in the boot effect's cleanup, never `destroy()` on a
+ *    memoised engine.** Under StrictMode that cleanup runs between two mounts,
+ *    and a child's mount effect calling `start()` runs before the provider's
+ *    own effect on both passes. The handle absorbs that; a bare engine does
+ *    not.
+ */
 export function TourProvider({
   children,
   tours = [],
@@ -132,7 +178,8 @@ export function TourProvider({
   // Validate synchronously at render time so misconfigured hidden steps throw
   // at the caller's render() instead of leaking into runtime. Cheap: just a
   // shallow loop over the steps. Must run before any hook so a thrown error
-  // doesn't leave React with a partial hook order.
+  // doesn't leave React with a partial hook order. (The engine validates
+  // again at construction — a shallow loop, twice.)
   for (const tour of tours) validateTour(tour)
 
   const [diagnostics, setDiagnostics] = React.useState<Record<string, EligibilityReport>>({})
@@ -153,72 +200,70 @@ export function TourProvider({
   }, [])
 
   const tourKitContext = React.useContext(TourKitContext)
-  const persistenceConfig = tourKitContext?.config.persistence
-  const {
-    getCompletedTours,
-    getSkippedTours,
-    markCompleted,
-    markSkipped,
-    reset: resetPersistence,
-  } = usePersistence(persistenceConfig)
-  const persistTerminalTours =
-    (persistenceConfig?.enabled ?? defaultPersistenceConfig.enabled) &&
-    (persistenceConfig?.trackCompleted ?? defaultPersistenceConfig.trackCompleted)
-  const [data, setDataState] = React.useState<Record<string, unknown>>({})
-  const { save, load, clear, externalVersion } = useRoutePersistence(routePersistence)
 
-  const initialState: TourReducerState = {
-    tourId: null,
-    isActive: false,
-    currentStepIndex: 0,
-    currentStep: null,
-    totalSteps: 0,
-    isLoading: false,
-    isTransitioning: false,
-    // Hydration safety: do NOT seed these from storage here. A render-time
-    // getCompletedTours() read makes the first client render differ from SSR
-    // (server has no storage), which shifts useId tree positions and breaks
-    // hydration for downstream useId consumers. Loaded post-mount via
-    // HYDRATE_TERMINAL_TOURS below.
-    completedTours: [],
-    skippedTours: [],
-    visitedSteps: [],
-    stepVisitCount: new Map(),
-    previousStepId: null,
-    tours: new Map(tours.map((t) => [t.id, t])),
+  // ─── The one render-time write ───────────────────────────────────────────
+  // The "latest props" idiom, and all that survives of adapter A's five live
+  // refs. The engine reads `router`, the callbacks and the analytics fan-out
+  // through accessors, and the `setOptions` effect below pushes them; this ref
+  // is what that effect and the lazy factory read from.
+  const source: EngineOptionsSource = {
+    tours,
+    router,
+    routePersistence,
+    persistence: tourKitContext?.config.persistence,
+    autoNavigate,
+    analytics: tourKitContext satisfies TourEngineAnalytics | null,
+    onNavigationRequired,
+    onStepError,
+    onTourPaused,
   }
+  const latest = React.useRef(source)
+  latest.current = source
 
-  const [state, dispatch] = React.useReducer(tourReducer, initialState)
+  // Never `useState(() => createTourEngine(...))`: that constructs in render.
+  // The handle is inert — building one touches no storage and no registry —
+  // so StrictMode discarding a duplicate costs an object.
+  const [handle] = React.useState<EngineHandle>(() =>
+    createEngineHandle(() => createTourEngine(optionsFrom(latest.current)))
+  )
 
-  // Load persisted terminal tours after mount so the first client render
-  // matches the server-rendered HTML exactly (standard SSR reconcile pattern).
+  const snapshot = React.useSyncExternalStore(
+    handle.subscribe,
+    handle.getState,
+    // No effect ever runs on the server, so nothing is constructed and this
+    // returns the module constant — identical to the first client render.
+    handle.getState
+  )
+
+  // Every commit, deliberately without a dependency array: six property writes
+  // are cheaper than the deps that would guard them, and every built-in router
+  // adapter changes identity on a route change.
   React.useEffect(() => {
-    if (!persistTerminalTours) return
-    const completedTours = getCompletedTours()
-    const skippedTours = getSkippedTours()
-    if (completedTours.length === 0 && skippedTours.length === 0) return
-    dispatch({ type: 'HYDRATE_TERMINAL_TOURS', completedTours, skippedTours })
-  }, [persistTerminalTours, getCompletedTours, getSkippedTours])
+    handle.setOptions(liveFrom(latest.current))
+  })
+
+  React.useEffect(() => {
+    handle.setTours(tours)
+  }, [handle, tours])
+
+  // `boot()` is once-only inside the engine, and defers rather than latching
+  // when `tours` is still empty — the declarative `<Tour>` path registers
+  // children after this effect, and `setTours` re-arms it.
+  React.useEffect(() => {
+    void handle.boot()
+    return () => handle.release()
+  }, [handle])
 
   // ─── Diagnostic engine wiring (Phase 3) ──────────────────────────────────
-  // Runs after the reducer is declared so the persistence gate can read live
-  // `state.completedTours` / `state.skippedTours`. Only fires when
-  // `diagnose === true`, so opted-out consumers pay zero runtime cost (and
-  // the orchestrator import tree-shakes out of their bundle).
+  // Stays React: it drives React state, not tour state. Only fires when
+  // `diagnose === true`, so opted-out consumers pay zero runtime cost (and the
+  // orchestrator import tree-shakes out of their bundle).
   //
-  // Stability keys: `userContext`, `diagnosticGates`, and `router` are
-  // reference types, so we derive primitive keys that survive identity
-  // churn from inline-literal props.
-  //
-  // - `userContextKey`: JSON-stringified content (try/catch around it — a
-  //   circular reference in a user-supplied object must NEVER crash the host
-  //   render path; we degrade to a stable sentinel instead).
-  // - `diagnosticGatesKey`: gate ids joined with NUL so kebab-case ids
-  //   cannot collide regardless of payload.
-  // - `tourIdsKey`: same NUL-joined shape as the gates key.
-  // - `currentRouteKey`: the router's current path as a string, so route
-  //   changes inside a stable router re-evaluate the route gate, and inline
-  //   router instances don't reference-thrash the effect.
+  // Stability keys: `userContext`, `diagnosticGates` and `router` are
+  // reference types, so primitive keys derived from their content replace them
+  // in the dep array and survive identity churn from inline-literal props.
+  // `currentRouteKey` is the router's path, so a route change inside a stable
+  // router still re-evaluates the route gate.
   const userContextKey = React.useMemo(() => {
     if (!userContext) return ''
     try {
@@ -234,7 +279,8 @@ export function TourProvider({
   const diagnosticGatesKey = (diagnosticGates ?? []).map((g) => g.id).join('\x00')
   const tourIdsKey = tours.map((t) => t.id).join('\x00')
   const currentRouteKey = router?.getCurrentRoute() ?? ''
-  // biome-ignore lint/correctness/useExhaustiveDependencies: stability keys (userContextKey, diagnosticGatesKey, tourIdsKey, currentRouteKey) replace the reference deps; state.completedTours/skippedTours are tracked as live refs
+  const { completedTours, skippedTours } = snapshot
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stability keys (userContextKey, diagnosticGatesKey, tourIdsKey, currentRouteKey) replace the reference deps
   React.useEffect(() => {
     if (!diagnose) return
     let cancelled = false
@@ -246,8 +292,8 @@ export function TourProvider({
         const stepRoute = firstVisibleStep?.route
         const ctx: DiagnosticContext = {
           userContext,
-          completedTours: state.completedTours,
-          skippedTours: state.skippedTours,
+          completedTours,
+          skippedTours,
           route:
             stepRoute && currentRoute !== undefined
               ? {
@@ -273,346 +319,10 @@ export function TourProvider({
     tourIdsKey,
     userContextKey,
     diagnosticGatesKey,
-    state.completedTours,
-    state.skippedTours,
+    completedTours,
+    skippedTours,
     currentRouteKey,
   ])
-
-  // flowSession-restore: tour-scoped resume after reload. The hook uses a
-  // single fixed key (`flow:active`) so we discover the persisted tourId on
-  // mount without needing to know it up front; subsequent saves write the
-  // current state.tourId.
-  const flow = useFlowSession(
-    state.tourId ?? '',
-    routePersistence.flowSession
-      ? { ...routePersistence.flowSession, keyPrefix: routePersistence.key }
-      : undefined
-  )
-
-  const tabId = React.useMemo(() => {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return crypto.randomUUID()
-    }
-    // Random-enough fallback for runtimes without crypto.randomUUID.
-    // A literal sentinel like 'ssr' would collide between tabs and silently
-    // disable the cross-tab self-message filter.
-    return `tab-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
-  }, [])
-  const broadcast = useBroadcast<CrossTabActiveMessage>(
-    routePersistence.crossTab?.channel ?? 'tourkit:active-flow',
-    { enabled: !!routePersistence.crossTab?.enabled }
-  )
-
-  // Idempotency guards: track the last tour for which the terminal callback
-  // (onComplete / onSkip) has already fired. Prevents double-firing inside the
-  // same React commit phase, where reducer state is still closure-stale.
-  // Reset inside start() / handleStartTour-equivalent paths (see below).
-  const completedTourIdRef = React.useRef<string | null>(null)
-  const skippedTourIdRef = React.useRef<string | null>(null)
-
-  // Sync tours prop with reducer state when tours are registered/unregistered
-  React.useEffect(() => {
-    dispatch({ type: 'UPDATE_TOURS', tours })
-  }, [tours])
-
-  // Get current tour
-  const currentTour = state.tourId ? (state.tours.get(state.tourId) ?? null) : null
-
-  // ─── Boot precedence (v2 §1.3c) ──────────────────────────────────────────
-  // Three effects used to live here — flow-session restore, route-state
-  // restore and autostart — each re-deriving whether the earlier one had
-  // already fired, via two ref latches and a `flow.ready` gate. The order was
-  // implicit in React's effect scheduling.
-  //
-  // It is now one ordered rule in `lib/tour-engine/boot.ts`:
-  // `resolveBootStart()` says WHICH tour wins (pure, a truth table), and
-  // `runBootStart()` executes it — including the cross-page case where the
-  // restored blob names a different route, so we navigate, await the target
-  // and only then dispatch. `boot.parity.test.tsx` runs the same 13 rows
-  // through this mounted provider to prove the pure rule and the React one
-  // agree.
-  const bootPhaseRef = React.useRef<'idle' | 'booting' | 'ready'>('idle')
-  // biome-ignore lint/correctness/useExhaustiveDependencies: latched via bootPhaseRef; re-runs when `tours` populates, when the deferred session load completes (flow.ready), or when another tab writes (externalVersion)
-  React.useEffect(() => {
-    // The session blob loads post-mount (hydration safety) — the pre-load
-    // `null` must never be read as "no session".
-    if (!flow.ready) return
-    // No tours registered yet. The declarative `<Tour>` path (via
-    // `MultiTourKitProvider`) mounts children AFTER the parent's first effect
-    // tick, so this is "not yet", not "never" — return WITHOUT latching so the
-    // next `tours` change retries.
-    if (tours.length === 0) return
-
-    const decision = resolveBootStart({
-      flowSession: flow.session,
-      flowIsStale: flow.isStale,
-      routeState: load(),
-      tours,
-      completedTours: persistTerminalTours ? getCompletedTours() : state.completedTours,
-    })
-
-    // Route restore is the one source allowed to run more than once:
-    // `externalVersion` bumps when another tab writes the key, and
-    // re-hydrating from it is the whole point of `syncTabs`. Flow restore and
-    // autostart are once per mount.
-    const repeatable = decision?.source === 'route'
-    if (!repeatable) {
-      if (bootPhaseRef.current !== 'idle') return
-      bootPhaseRef.current = 'booting'
-    }
-
-    if (!decision) {
-      bootPhaseRef.current = 'ready'
-      return
-    }
-
-    // Cancellation: the restore may await a navigate plus a MutationObserver.
-    // If the provider unmounts mid-await, dispatching or clearing would mutate
-    // a dead instance and write storage for a tour the user has left.
-    const abort = new AbortController()
-    void runBootStart(engineContextRef.current as TourEngineContext, decision, {
-      // Only the flow blob records a route; route restore and autostart are
-      // always same-page.
-      currentRoute: decision.source === 'flow' ? flow.session?.currentRoute : undefined,
-      signal: abort.signal,
-      onClear: flow.clear,
-    }).finally(() => {
-      bootPhaseRef.current = 'ready'
-    })
-
-    return () => abort.abort()
-  }, [tours, flow.ready, externalVersion])
-
-  // ─── Transition side-effects (v2 §1.3e) ─────────────────────────────────
-  // Seven effects used to live here — route-state save, throttled flow save,
-  // AbortController swap on tour identity, flow-blob clear on the isActive
-  // true -> false edge, cross-tab announce, cross-tab subscribe and the
-  // registry state mirror. Each watched an overlapping slice of state and
-  // decided for itself whether its edge had been crossed, which is what
-  // `wasActiveRef` was for.
-  //
-  // They are one call to `applyTransitionEffects(ctx, prev, next)` now. The
-  // "before" snapshot is held in a ref rather than re-derived, so "only on the
-  // true -> false edge" is a comparison instead of hand-kept bookkeeping.
-  // The effect itself is declared after the registry lifecycle effect below —
-  // see the note there for why the order matters.
-  const abortControllerRef = React.useRef<AbortController | null>(null)
-  const crossTabRef = React.useRef<{ lastAnnounceTs: number | null }>({ lastAnnounceTs: null })
-  const prevSnapshotRef = React.useRef<TourCallbackContext | null>(null)
-
-  // Final teardown on unmount — independent of the activeness swap above so
-  // the abort always fires once even when the component unmounts mid-tour.
-  React.useEffect(() => () => abortControllerRef.current?.abort(), [])
-
-  // Cross-tab subscribe is a lifecycle concern, not a transition: installed
-  // once, torn down on unmount.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: install-once; the handler reads live state through the ctx getters
-  React.useEffect(
-    () =>
-      subscribeCrossTabPause(engineContextRef.current as TourEngineContext, broadcast.subscribe),
-    [broadcast]
-  )
-
-  // setData is hoisted above navigateToStep so the hidden-step branch
-  // resolver can access it without depending on a later closure.
-  const setData = React.useCallback((key: string, value: unknown) => {
-    setDataState((prev) => ({ ...prev, [key]: value }))
-  }, [])
-
-  // ─── Engine context wiring ───────────────────────────────────────────────
-  // `navigateToStep` and `handleBranchTarget` live in `../lib/tour-engine/`.
-  //
-  // Engine impls are awaited across microtask boundaries. To avoid the stale-
-  // closure trap, the engine context's accessors route through a set of
-  // "live" refs that mirror the latest committed state. Even if an impl
-  // captures `ctx` from render N, calling `ctx.getState()` from render N+1
-  // reads through `stateRef.current` which has already been refreshed.
-  //
-  // `engineContextRef` itself is rebuilt each render so non-getter fields
-  // (router, callbacks) stay current; the getters all read through the same
-  // long-lived refs.
-  const stateRef = React.useRef<TourReducerState>(state)
-  const currentTourLiveRef = React.useRef<Tour | null>(null)
-  const dataRef = React.useRef<Record<string, unknown>>(data)
-  const stepIdMapRef = React.useRef<Map<string, number>>(new Map())
-  const engineContextRef = React.useRef<TourEngineContext | null>(null)
-
-  const navigateToStep = React.useCallback((stepIndex: number): Promise<boolean> => {
-    const ctx = engineContextRef.current
-    if (!ctx) return Promise.resolve(false)
-    return navigateToStepImpl(ctx, stepIndex)
-  }, [])
-
-  // Step ID to index map for branch resolution
-  const stepIdMap = React.useMemo(() => {
-    const map = new Map<string, number>()
-    currentTour?.steps.forEach((step, index) => {
-      map.set(step.id, index)
-    })
-    return map
-  }, [currentTour])
-
-  // Delegations to ../lib/tour-engine/actions. Every body reads live state
-  // through `engineContextRef.current`'s getters, so these need no dependency
-  // arrays and cannot go stale across an await.
-  const completeTour = React.useCallback(() => {
-    completeTourImpl(engineContextRef.current as TourEngineContext)
-  }, [])
-
-  const skipTour = React.useCallback(() => {
-    skipTourImpl(engineContextRef.current as TourEngineContext)
-  }, [])
-
-  // Refresh the live refs synchronously each render so engine getters always
-  // resolve to the latest committed state, even when called through a `ctx`
-  // captured during an earlier render (e.g. a BranchWait recursion that
-  // resumes after a state-changing dispatch).
-  stateRef.current = state
-  currentTourLiveRef.current = currentTour
-  dataRef.current = data
-  stepIdMapRef.current = stepIdMap
-
-  engineContextRef.current = {
-    getState: () => stateRef.current,
-    getCurrentTour: () => currentTourLiveRef.current,
-    getData: () => dataRef.current,
-    getStepIdMap: () => stepIdMapRef.current,
-    dispatch,
-    abortControllerRef,
-    completedTourIdRef,
-    skippedTourIdRef,
-    router,
-    autoNavigate,
-    maxHiddenChain: MAX_HIDDEN_CHAIN,
-    onNavigationRequired,
-    onStepError,
-    completeTour,
-    skipTour,
-    setData,
-    navigateToStep,
-    persistTerminalTours,
-    markCompleted,
-    markSkipped,
-    resetPersistence,
-    clearRouteState: clear,
-    saveRouteState: save,
-    saveFlowSession: flow.save,
-    clearFlowSession: flow.clear,
-    routePersistenceEnabled: !!routePersistence.enabled,
-    flowSessionEnabled: !!routePersistence.flowSession,
-    tabId,
-    announce: broadcast.post,
-    crossTab: crossTabRef.current,
-    onTourPaused,
-    tourKitContext: tourKitContext satisfies TourEngineAnalytics | null,
-  }
-
-  // ─── Actions (v2 §1.3d) ──────────────────────────────────────────────────
-  // Twelve bodies moved to ../lib/tour-engine/actions.ts. What is left is the
-  // React shape: stable identities so consumers can put them in dep arrays.
-  const start = React.useCallback(
-    (tourId?: string, stepIndex?: number) =>
-      startImpl(engineContextRef.current as TourEngineContext, tourId, stepIndex),
-    []
-  )
-
-  const next = React.useCallback(() => nextImpl(engineContextRef.current as TourEngineContext), [])
-
-  const prev = React.useCallback(() => prevImpl(engineContextRef.current as TourEngineContext), [])
-
-  const goTo = React.useCallback(
-    (stepIndex: number) => goToImpl(engineContextRef.current as TourEngineContext, stepIndex),
-    []
-  )
-
-  const skip = skipTour
-  const complete = completeTour
-
-  const stop = React.useCallback(() => {
-    stopImpl(engineContextRef.current as TourEngineContext)
-  }, [])
-
-  const setDontShowAgain = React.useCallback((tourId: string, value: boolean) => {
-    setDontShowAgainImpl(engineContextRef.current as TourEngineContext, tourId, value)
-  }, [])
-
-  const reset = React.useCallback((tourId?: string) => {
-    resetImpl(engineContextRef.current as TourEngineContext, tourId)
-  }, [])
-
-  const goToStep = React.useCallback(
-    (stepId: string) => goToStepImpl(engineContextRef.current as TourEngineContext, stepId),
-    []
-  )
-
-  const startTour = React.useCallback(
-    (tourId: string, stepId?: string | number) =>
-      startTourImpl(engineContextRef.current as TourEngineContext, tourId, stepId),
-    []
-  )
-
-  const triggerBranchAction = React.useCallback(
-    (actionId: string, payload?: unknown) =>
-      triggerBranchActionImpl(engineContextRef.current as TourEngineContext, actionId, payload),
-    []
-  )
-
-  // ─── Tour registry wiring (Phase 1, useTourActions) ──────────────────────
-  // Every tour in `tours` self-registers in the module-level `tourRegistry` so
-  // a sibling subtree can call `useTourActions(id).start()` without prop
-  // drilling or window-event workarounds. The registry is decoupled from the
-  // React tree (module-level Map<string, WeakRef<RegistryEntry>>), so the
-  // sibling consumer does NOT need to be inside this provider.
-  //
-  // Two effects below:
-  //   1. Lifecycle effect — registers one entry per tour on mount, unregisters
-  //      on unmount. Stable key is the NUL-joined ids so inline `tours={[...]}`
-  //      props don't re-register every render. Entries start from the zero
-  //      slice; the transition effect re-syncs them in the same commit.
-  //   2. Transition effect — one `applyTransitionEffects(ctx, prev, next)` per
-  //      commit (v2 §1.3e), which includes the registry state mirror. It is
-  //      declared AFTER the lifecycle effect on purpose: effects run in
-  //      declaration order, so a re-registration (which resets the entry to
-  //      the zero slice) is re-mirrored before anyone can observe it.
-  //
-  // No latest-state ref here any more. Every action is a `[]`-dep delegation
-  // to lib/tour-engine/actions, so its identity is stable for the provider's
-  // lifetime and the registry entry can close over it directly (v2 §1.3d).
-
-  // `tourIdsKey` is declared earlier (diagnostic engine block) — reuse it here.
-  React.useEffect(() => {
-    if (tourIdsKey.length === 0) return
-    const ids = tourIdsKey.split('\x00').filter(Boolean)
-    const unregisters: Array<() => void> = []
-    for (const id of ids) {
-      const unregister = tourRegistry.register({
-        id,
-        state: { isActive: false, currentStepId: null, progress: 0 },
-        actions: {
-          start: () => void start(id),
-          stop,
-          restart: () => void start(id, 0),
-          next: () => void next(),
-          prev: () => void prev(),
-          goToStep: (stepId) => void goToStep(stepId),
-        },
-      })
-      unregisters.push(unregister)
-    }
-    return () => {
-      for (const u of unregisters) u()
-    }
-  }, [tourIdsKey])
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: runs on every commit; the transition is decided by comparing snapshots, not by a dep array
-  React.useEffect(() => {
-    const ctx = engineContextRef.current
-    if (!ctx) return
-    const next = buildCallbackContext(state, currentTour, data)
-    const prev = prevSnapshotRef.current ?? next
-    prevSnapshotRef.current = next
-    applyTransitionEffects(ctx, prev, next)
-  })
 
   // ─── Test bridge wiring (Phase 6, issue #86) ─────────────────────────────
   // `enableTestBridge` opts in to `window.__tourKit__` — used by Playwright
@@ -620,36 +330,16 @@ export function TourProvider({
   // production never leaks the surface. The effect short-circuits at the top
   // when disabled, making the bridge body dead-code under a literal `false`.
   //
-  // Why a methods ref:
-  // - The bridge identity is stable per mount, but each call must dispatch
-  //   through the LATEST `start`/`next`/etc. closures. A ref avoids
-  //   re-creating (and re-publishing) the bridge on every controller-method
-  //   identity change, which would invalidate any cached helper closures in
-  //   long-running Playwright contexts.
-  // Build the latest-methods snapshot once per render, then publish to the ref.
-  // The ref initial value uses the same object so the first effect run sees a
-  // populated `current` even before this render's assignment commits.
-  const bridgeMethods = {
-    start,
-    next,
-    previous: prev,
-    goToStep,
-    complete,
-    skip,
-    diagnostics,
-  }
-  // Kept, unlike `controllerRef`: the bridge exposes `diagnostics`, which IS
-  // per-render state, so the entry installed on `window` once must read the
-  // latest through a ref. The action methods on it are stable; the diagnostics
-  // map is not.
-  const bridgeMethodsRef = React.useRef(bridgeMethods)
-  bridgeMethodsRef.current = bridgeMethods
+  // The handle's verbs have stable identity, so only `diagnostics` — which is
+  // per-render React state — still needs a ref for the bridge installed on
+  // `window` once to read the latest.
+  const diagnosticsRef = React.useRef(diagnostics)
+  diagnosticsRef.current = diagnostics
 
   const testBridgeWarnedRef = React.useRef(false)
 
   React.useEffect(() => {
     if (!enableTestBridge) return
-    const methods = bridgeMethodsRef
     // The once-per-mount guard stays here, not in `attachTestBridge`: a
     // module-level flag in the plain function would leak across tests.
     const warn = !testBridgeWarnedRef.current
@@ -657,61 +347,28 @@ export function TourProvider({
 
     return attachTestBridge(
       {
-        start: (tourId) => methods.current.start(tourId),
-        next: () => methods.current.next(),
-        prev: () => methods.current.previous(),
-        goToStep: (stepId) => methods.current.goToStep(stepId),
-        complete: () => methods.current.complete(),
-        skip: () => methods.current.skip(),
-        getDiagnostic: (tourId) => methods.current.diagnostics[tourId] ?? null,
+        start: (tourId) => handle.start(tourId),
+        next: () => handle.next(),
+        prev: () => handle.prev(),
+        goToStep: (stepId) => handle.goToStep(stepId),
+        complete: () => handle.complete(),
+        skip: () => handle.skip(),
+        getDiagnostic: (tourId) => diagnosticsRef.current[tourId] ?? null,
       },
       { warn }
     )
-  }, [enableTestBridge])
+  }, [enableTestBridge, handle])
 
   const contextValue = React.useMemo<TourContextValue>(
     () => ({
-      ...state,
-      tour: currentTour,
-      data,
-      start,
-      next,
-      prev,
-      goTo,
-      skip,
-      complete,
-      stop,
-      setDontShowAgain,
-      reset,
-      setData,
-      goToStep,
-      startTour,
-      triggerBranchAction,
+      ...snapshot,
+      ...pickActions(handle),
       // Only attach the diagnostics field when `diagnose` is on — keeps
       // `ctx.diagnostics` strictly undefined for opted-out consumers so the
       // hook's `null` branch is observable.
       ...(diagnose ? { diagnostics } : {}),
     }),
-    [
-      state,
-      currentTour,
-      data,
-      start,
-      next,
-      prev,
-      goTo,
-      skip,
-      complete,
-      stop,
-      setDontShowAgain,
-      reset,
-      setData,
-      goToStep,
-      startTour,
-      triggerBranchAction,
-      diagnose,
-      diagnostics,
-    ]
+    [snapshot, handle, diagnose, diagnostics]
   )
 
   return (
@@ -726,6 +383,13 @@ export function TourProvider({
  * Internal component to handle advanceOn behavior
  * This needs to be a separate component because hooks can't be called
  * conditionally, and useAdvanceOn needs access to the TourContext
+ *
+ * Deliberately still a hook rather than `attachAdvanceOn(handle)` in the boot
+ * effect: the hook rebinds after React's commit, while an engine-level watcher
+ * rebinds synchronously inside `notify()`. `GO_TO_STEP` always lands in a
+ * microtask, and a microtask checkpoint runs between listeners of the same DOM
+ * event — so a step whose `advanceOn` falls back to `document` could receive
+ * the very click that advanced onto it and advance again.
  */
 function AdvanceOnEffect() {
   useAdvanceOn()
