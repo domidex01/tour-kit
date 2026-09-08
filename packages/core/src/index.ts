@@ -59,6 +59,7 @@ export type {
   HintsActions,
   HintsContextValue,
   RouterAdapter,
+  RouteMatchMode,
   MultiPagePersistenceConfig,
 } from './types'
 
@@ -187,6 +188,9 @@ export { cn } from './lib/utils'
 export { TourValidationError, validateTour } from './lib/validate-tour'
 
 // Cross-page navigation: typed error + thin wrapper over `waitForElement`
+// The one `matchRoute` comparison — every built-in adapter delegates to it
+// rather than carrying its own copy of the three-way switch (v2 §1.5f).
+export { matchRoutePattern } from './lib/match-route'
 export { TourRouteError, waitForStepTarget } from './lib/wait-for-step-target'
 export type { WaitForStepTargetOptions } from './lib/wait-for-step-target'
 

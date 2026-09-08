@@ -141,7 +141,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     in §1.4e; the invariant that still holds is `no-react-in-engine-dist`.
     v2 §1.5 took it to 22 621 (+47 B) — the six binding-contract re-exports
     on `/engine` plus `attachAdvanceOn`'s deferred bind)
-  - core/engine subpath <18 KB (the non-React consumer's worst case: the
+  - core/engine subpath <18.5 KB (the non-React consumer's worst case: the
     engine — reducer, boot resolver, actions, transition effects, four
     storage adapters — plus the v2 §1.3b DOM behaviours (focus trap,
     keyboard, rect tracker, spotlight, advance-on, test bridge) and the chunk
@@ -157,8 +157,12 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     code the main entry now reads out of the chunk the engine also reads. v2
     §1.5 took it to 17 732 (+445 B): `engine-handle.ts` enters the engine's
     closure for the first time, because `/engine` now publishes the binding
-    contract two non-React bindings sit on. That leaves ~268 B of headroom,
-    and §1.6's IIFE is the consumer who pays all of it)
+    contract two non-React bindings sit on. §1.5f raised the ceiling from 18 KB
+    to 18.5 KB at a measured 18 098 (+366 B) for `createSpotlight()`, the
+    spotlight state machine that §1.5 had shipped in three copies. Most of
+    those bytes MOVED rather than appeared — a Vue consumer ships engine +
+    binding, and that total went 19 187 → 19 341, so +154 B net for deleting
+    two of the three implementations)
   - react <12 KB
   - hints <6 KB
   - analytics <4 KB (root; per-plugin <1.5 KB each)
@@ -167,7 +171,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   - media <9 KB
   - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
-  - vue <1.8 KB
+  - vue <1.5 KB
   - svelte <1.6 KB
 
   The hints / announcements / surveys / media / ai numbers rose in v2 §1.2

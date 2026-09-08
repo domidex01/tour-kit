@@ -8,7 +8,7 @@
  *
  * @module adapters/vue-router
  */
-import type { RouterAdapter } from '@tour-kit/core/engine'
+import { type RouterAdapter, matchRoutePattern } from '@tour-kit/core/engine'
 
 /**
  * What this adapter needs from a `Router`, and nothing more.
@@ -29,17 +29,7 @@ export function createVueRouterAdapter(router: VueRouterLike): RouterAdapter {
 
     navigate: (route) => router.push(route).then((failure) => !failure),
 
-    matchRoute: (pattern, mode = 'exact') => {
-      const currentPath = router.currentRoute.value.path
-      switch (mode) {
-        case 'startsWith':
-          return currentPath.startsWith(pattern)
-        case 'contains':
-          return currentPath.includes(pattern)
-        default:
-          return currentPath === pattern
-      }
-    },
+    matchRoute: (pattern, mode) => matchRoutePattern(router.currentRoute.value.path, pattern, mode),
 
     onRouteChange: (cb) => {
       // Fires immediately with the current route, matching every existing
