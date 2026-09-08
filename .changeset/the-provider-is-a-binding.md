@@ -14,3 +14,5 @@ Two things get better in the process:
 - **StrictMode behaves.** An autostarted tour starts once, its `onEnter` and the analytics `onTourStart` fire once, and a child's `useEffect(() => start('t'), [])` still works across React's dev-mode remount.
 
 `createTourEngine` also gains `flush()`, which commits the pending throttled flow-session write while leaving the engine live — what a binding needs when an unmount is immediately followed by a remount.
+
+One internal contract changed with it: the flow-session store takes the tour id per write instead of holding it as mutable state a caller had to keep in sync. That drift was a real bug — a tour you started by clicking wrote no resume blob at all — and it also fixes a narrower one, where switching tours inside the 200 ms save window stamped the new tour's id onto the old tour's step index.
