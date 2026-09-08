@@ -384,12 +384,16 @@ export function TourProvider({
  * This needs to be a separate component because hooks can't be called
  * conditionally, and useAdvanceOn needs access to the TourContext
  *
- * Deliberately still a hook rather than `attachAdvanceOn(handle)` in the boot
- * effect: the hook rebinds after React's commit, while an engine-level watcher
- * rebinds synchronously inside `notify()`. `GO_TO_STEP` always lands in a
- * microtask, and a microtask checkpoint runs between listeners of the same DOM
- * event — so a step whose `advanceOn` falls back to `document` could receive
- * the very click that advanced onto it and advance again.
+ * Still a hook rather than `attachAdvanceOn(handle)` in the boot effect, but
+ * no longer because it has to be. The hazard was that the hook rebinds after
+ * React's commit while the engine-level watcher rebound synchronously inside
+ * `notify()`: `GO_TO_STEP` lands in a microtask, a microtask checkpoint runs
+ * between listeners of the same DOM event, and a step whose `advanceOn` falls
+ * back to `document` could receive the very click that advanced onto it and
+ * advance again. v2 §1.5 fixed that in `attachAdvanceOn` itself — it detaches
+ * the outgoing step's listener synchronously and binds the incoming one one
+ * macrotask later — so the two are now equivalent and a later slice can
+ * collapse them.
  */
 function AdvanceOnEffect() {
   useAdvanceOn()
