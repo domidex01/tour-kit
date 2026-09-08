@@ -4,7 +4,7 @@
 
 `createTourEngine` gains `setOptions()` and `setDontShowAgain()`, persists terminal tours by default, defers `boot()` on an empty tour list until `setTours()` supplies one, and re-hydrates from cross-tab route writes when `syncTabs` is on.
 
-These are the places `createTourEngine` behaved differently from `<TourProvider>`, which drives the same reducer through the same port. Nothing changes for React consumers — the provider already did all four — but a direct `@tour-kit/core/engine` consumer gets behaviour it was quietly missing:
+These are the places `createTourEngine` behaved differently from `<TourProvider>`, which drives the same reducer through the same port. Nothing changes for React consumers — the provider already did all of them — but a direct `@tour-kit/core/engine` consumer gets behaviour it was quietly missing:
 
 - **Completed tours are remembered by default.** The engine read `persistence?.enabled ?? false` while the provider merges `defaultPersistenceConfig`, where `enabled` is `true`, and ANDs it with `trackCompleted`. Pass `persistence: { enabled: false }` to keep the old behaviour.
 - **`setOptions({ router, autoNavigate, analytics, onNavigationRequired, onStepError, onTourPaused })`** replaces any of the six props that legitimately change identity after construction. Every router adapter is a memo over its host router's hooks, so an engine that froze `router` at construction navigated through a dead adapter after the first route change.
