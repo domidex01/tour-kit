@@ -38,6 +38,12 @@ done
 log "probing http://localhost:3100/"
 if pnpm probe; then
   log "OK — smoke page rendered with data-smoke-ok marker"
+  # v2 §1.6 — the CDN build. `probe` above is curl, which executes no
+  # JavaScript, so this is the only thing here that actually RUNS the tarball.
+  # `set -e` is in force inside this branch (it is suspended only for the
+  # command in the `if` condition), so a non-zero exit aborts the script.
+  log "probing the CDN build"
+  pnpm probe:cdn
   exit 0
 else
   log "FAIL — smoke probe could not find data-smoke-ok marker"
