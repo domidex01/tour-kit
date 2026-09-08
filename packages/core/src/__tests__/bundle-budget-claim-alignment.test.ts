@@ -69,6 +69,9 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
   'ai:client': { pattern: /-\s*ai\s*<\s*([\d.]+)\s*KB\s*\(client\)/, mode: 'exact' },
   'ai:server': { pattern: /<\s*([\d.]+)\s*KB\s*\(server\)/, mode: 'exact' },
   scheduling: { pattern: /^\s*-\s*scheduling\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
+  // Anchored like `media` and `scheduling`: an unanchored /vue/ would match the
+  // word anywhere else in CLAUDE.md and read the wrong number.
+  vue: { pattern: /^\s*-\s*vue\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
 }
 
 describe('v2 §1.2 — the bundle-size gate measures the engine entry too', () => {

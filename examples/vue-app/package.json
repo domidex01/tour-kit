@@ -1,0 +1,24 @@
+{
+  "name": "vue-tour-kit-demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5175 --strictPort",
+    "build": "vite build",
+    "preview": "vite preview --port 5175",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.7.6",
+    "@tour-kit/vue": "workspace:*",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "catalog:",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.10"
+  }
+}

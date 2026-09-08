@@ -1,0 +1,81 @@
+{
+  "name": "@tour-kit/vue",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Headless Vue 3 binding for the Tour Kit engine — product tours with no React installed.",
+  "author": "Tour Kit Team",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "homepage": "https://usertourkit.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domidex01/tour-kit.git",
+    "directory": "packages/vue"
+  },
+  "bugs": {
+    "url": "https://github.com/domidex01/tour-kit/issues"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "onboarding",
+    "product-tour",
+    "guided-tour",
+    "walkthrough",
+    "headless",
+    "composable",
+    "tour-kit"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@tour-kit/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0",
+    "vue-router": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vue-router": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "catalog:",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "vitest-axe": "catalog:",
+    "vue": "^3.5.13"
+  }
+}

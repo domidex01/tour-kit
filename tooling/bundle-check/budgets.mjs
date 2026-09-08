@@ -77,11 +77,14 @@
  *     spotlight state machine down here after §1.5 shipped three copies of it
  *     — the React hook, `@tour-kit/vue` and `@tour-kit/svelte` — that differed
  *     only in reactivity primitive. Read the row together with the binding
- *     rows before calling it a regression: the bytes did not appear, they
- *     MOVED. A Vue consumer shipped engine 17 732 + vue 1 455 = 19 187 before
- *     and engine 18 098 + vue 1 093 = 19 191 after. The engine row alone looks
- *     worse; the thing a consumer downloads did not change, and there is now
- *     one implementation instead of three.
+ *     rows before calling it a regression: most of the bytes did not appear,
+ *     they MOVED. A Vue consumer ships engine + binding: 17 732 + 1 455 =
+ *     19 187 before, 18 098 + 1 243 = 19 341 after. So +154 B for that
+ *     consumer, not the zero an earlier estimate in the §1.5f commit message
+ *     guessed — the controller carries a listener set and an explicit snapshot
+ *     the three inlined copies did not. 154 B to delete two of three
+ *     implementations is the trade, and it is worth stating plainly rather
+ *     than rounding to "free".
  *
  *     Do NOT split a `/engine/dom` entry to keep this number flat: the row
  *     measures the import-everything worst case, a bundler tree-shakes the
@@ -127,4 +130,9 @@ export const budgets = [
   ['ai:server', 'packages/ai/dist/server/index.js', 8000],
   ['scheduling', 'packages/scheduling/dist/index.js', 4000],
   ['license', 'packages/license/dist/index.js', 8000],
+  // v2 §1.5 — the two non-React bindings. Both are `external: ['@tour-kit/core',
+  // <framework>]`, so these rows measure the binding's own bytes: state bridge,
+  // provider lifecycle, two view helpers and a router adapter. Measured then
+  // gated at ~x1.2, the repo convention.
+  ['vue', 'packages/vue/dist/index.js', 1500],
 ]

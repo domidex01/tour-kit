@@ -107,9 +107,9 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
 
 - TypeScript strict mode enabled
 - Test coverage: thresholds are enforced **per-package** in each `packages/*/vitest.config.ts`,
-  not as a blanket repo number. Eight packages hold the canonical floor — ≥80% statements,
+  not as a blanket repo number. Nine packages hold the canonical floor — ≥80% statements,
   functions, and lines with ≥75% branches: `core`, `react`, `hints`, `adoption`, `checklists`,
-  `analytics`, `license`, and `surveys`. Three feature packages enforce honest, earned floors
+  `analytics`, `license`, `surveys`, and `vue`. Three feature packages enforce honest, earned floors
   below canonical (statements/branches/functions/lines): `announcements` 75/70/80/75,
   `scheduling` 75/65/80/75, and `media` 70/60/70/70. `ai` has no per-key threshold yet. Slice 7
   raised these from the temporary phase-5 lows with real behavior tests, and measured coverage
@@ -159,9 +159,10 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     closure for the first time, because `/engine` now publishes the binding
     contract two non-React bindings sit on. §1.5f raised the ceiling from 18 KB
     to 18.5 KB at a measured 18 098 (+366 B) for `createSpotlight()`, the
-    spotlight state machine that §1.5 had shipped in three copies. Those bytes
-    MOVED rather than appeared — a Vue consumer ships engine + binding, and
-    that total went 19 187 → 19 191)
+    spotlight state machine that §1.5 had shipped in three copies. Most of
+    those bytes MOVED rather than appeared — a Vue consumer ships engine +
+    binding, and that total went 19 187 → 19 341, so +154 B net for deleting
+    two of the three implementations)
   - react <12 KB
   - hints <6 KB
   - analytics <4 KB (root; per-plugin <1.5 KB each)
@@ -170,6 +171,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   - media <9 KB
   - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
+  - vue <1.5 KB
 
   The hints / announcements / surveys / media / ai numbers rose in v2 §1.2
   **without a byte being added**: they all ship a `headless` entry, so the gate
@@ -261,8 +263,13 @@ When adding new animations, prefix with `motion-safe:` if it's a `tailwindcss-an
 @tour-kit/license ──────┤
 @tour-kit/media ────────┤
 @tour-kit/scheduling ───┤
-@tour-kit/surveys ──────┘
+@tour-kit/surveys ──────┤
+@tour-kit/vue ──────────┘
 ```
+
+`@tour-kit/vue` is the odd one out on that arrow: it imports the
+`@tour-kit/core/engine` subpath only, never the main entry, so no React reaches
+its `.d.ts` chain. A per-package `no-react-in-dist.test.ts` enforces it.
 
 Note: `@tour-kit/scheduling` is an optional peer dependency for `@tour-kit/announcements`. `@tour-kit/license` is the runtime validator the other Pro packages consult.
 
@@ -282,6 +289,7 @@ Each package has its own CLAUDE.md with domain-specific guidance:
 | `packages/media/CLAUDE.md` | Embed components, URL parsing, accessibility |
 | `packages/scheduling/CLAUDE.md` | Schedule evaluation, timezone handling, recurring patterns |
 | `packages/surveys/CLAUDE.md` | Survey types, scoring engine, fatigue prevention, context awareness |
+| `packages/vue/CLAUDE.md` | Vue binding: `watch` not `watchEffect`, SSR rule, lazy `ensure()` |
 | `apps/docs/CLAUDE.md` | MDX conventions, Fumadocs patterns |
 
 ## Documentation Site
