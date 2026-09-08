@@ -24,35 +24,33 @@
  *
  * Budgets = the 2026-05-23 audit's raw dist gzip measurement + ~20% headroom.
  * Exceptions documented inline:
- *   - core: 21.5 KB ceiling, measuring the closure (8.5 KB entry + 12.8 KB
- *     shared chunk = 21.3 KB). NOT a relaxation of the old 20 KB: that number
- *     measured a self-contained entry that no longer exists. The CLAUDE.md
- *     target is <8 KB, tracked as audit B-1 — still §1.4's to earn, when the
- *     hooks stop pulling the whole provider.
+ *   - core: 23 KB ceiling against a measured 22 576, measuring the closure.
+ *     NOT a relaxation of the old 20 KB: that number measured a self-contained
+ *     entry that no longer exists.
  *
- *     Raised from 21 000 in v2 §1.3 against a measured 21 271, up from 20 825.
- *     The +446 B is the module-boundary cost of the port/adapter split: 636
- *     lines left `tour-provider.tsx` for six modules, and esbuild can no longer
- *     inline what used to be same-file calls. It is NOT engine runtime leaking
- *     into the main entry — `engine-not-in-main-closure.test.ts` proves
- *     `createTourEngine` stays out, matching on a string literal rather than
- *     the identifier because `minify: true` renames the function and the
- *     obvious grep passes either way.
+ *     The history, because each step was paid for by something specific:
+ *     20 825 -> 21 271 in v2 §1.3 (the module-boundary cost of 636 lines
+ *     leaving `tour-provider.tsx` for six modules, which esbuild can no longer
+ *     inline); 21 271 -> 21 851 with issue #121 (Group A in
+ *     `navigateToStepImpl`, `commitStart` in `actions.ts`, the Group B block
+ *     in `transition-effects.ts`); 21 851 -> 22 576 in v2 §1.4.
  *
- *     That note came due. §1.3b left this row 43 bytes under 21 500 and said
- *     the next change to touch the main entry would trip it. Issue #121 —
- *     wiring the five dead step lifecycle callbacks — did, at a measured
- *     21 851, so the ceiling is now 22 000.
+ *     §1.4's +725 B is the closure FLIPPING, by design. `<TourProvider>` is a
+ *     binding over `createTourEngine()` now, so the factory and the engine
+ *     handle are genuinely in the main entry's closure — the ~350 lines of
+ *     adapter A the provider deleted do not cover the factory it gained.
+ *     `engine-not-in-main-closure.test.ts` asserted the opposite and was
+ *     DELETED in §1.4e, not skipped. The invariant that still matters is
+ *     `no-react-in-engine-dist.test.ts`: the engine subpath must stay
+ *     React-free, and it does.
  *
- *     The +416 B is Group A in `navigateToStepImpl` (three guard call sites
- *     plus the `awaitTarget` helper), `commitStart` in `actions.ts`, and the
- *     five-line Group B block in `transition-effects.ts`. `core:engine` moved
- *     by the SAME 416 B (17 030 -> 17 451) because every file involved lives
- *     in the chunk both entries read — a delta that appeared on only one of
- *     the two rows would mean something else happened.
- *
- *     Still not engine runtime leaking in: `engine-not-in-main-closure.test.ts`
- *     is green. The <8 KB B-1 target remains §1.4's to earn.
+ *     The CLAUDE.md <8 KB target (audit B-1) is NOT §1.4's to earn, and the
+ *     sentence that said so has been retired everywhere. The main entry's
+ *     closure is the main barrel — providers, fourteen hooks, `cn`,
+ *     `UnifiedSlot`, i18n, segmentation, diagnostics — and §1.4 leaves that
+ *     barrel untouched by definition. Reaching 8 KB means trimming the barrel,
+ *     which is a breaking change; it rides with the 7.0.0 unification (§3.7),
+ *     not with any engine slice.
  *   - core:engine: 18 KB against a measured 17.0 KB, up from 8.1 KB when this
  *     was a types-and-predicates door and 15.3 KB after §1.3. The difference
  *     is first a working tour engine (reducer, boot resolver, actions,
@@ -88,7 +86,7 @@
  * @type {Array<[name: string, relPath: string, budgetBytes: number]>}
  */
 export const budgets = [
-  ['core', 'packages/core/dist/index.js', 22000],
+  ['core', 'packages/core/dist/index.js', 23000],
   ['core:engine', 'packages/core/dist/engine/index.js', 18000],
   ['react', 'packages/react/dist/index.js', 12000],
   ['hints', 'packages/hints/dist/index.js', 6000],

@@ -30,7 +30,7 @@
  * and the handle joins the port and the persistence factories on that list.
  */
 import { initialTourState } from '../../types/state'
-import type { TourCallbackContext } from '../../types/state'
+import type { TourActions, TourCallbackContext } from '../../types/state'
 import type { TourEngine } from './create-tour-engine'
 
 /**
@@ -61,9 +61,13 @@ export interface EngineHandle extends Omit<TourEngine, 'destroy'> {
   /** `INITIAL_SNAPSHOT` until the first `ensure()`; then the engine's cached snapshot. */
   getState: () => TourCallbackContext
   /**
-   * `destroy()` the current engine, if any, and forget it. Subscribers
-   * survive, so the next verb builds a replacement and re-attaches them.
-   * Idempotent.
+   * Stop being the live engine.
+   *
+   * Pending writes are flushed synchronously; the `destroy()` itself lands one
+   * microtask later, so a verb or `ensure()` in the same tick — React tearing
+   * an effect down and re-running it — takes the release back and keeps the
+   * engine, its state and its completed boot. Subscribers survive either way,
+   * so a genuinely new engine re-attaches them. Idempotent.
    */
   release: () => void
 }
@@ -71,6 +75,7 @@ export interface EngineHandle extends Omit<TourEngine, 'destroy'> {
 export function createEngineHandle(factory: () => TourEngine): EngineHandle {
   let engine: TourEngine | null = null
   let off: (() => void) | null = null
+  let pendingRelease = false
   const listeners = new Set<() => void>()
 
   const fanOut = (): void => {
@@ -78,6 +83,9 @@ export function createEngineHandle(factory: () => TourEngine): EngineHandle {
   }
 
   const ensure = (): TourEngine => {
+    // A release scheduled earlier in this same tick was React tearing the
+    // effect down before re-running it. Take it back.
+    pendingRelease = false
     if (engine) return engine
     engine = factory()
     off = engine.subscribe(fanOut)
@@ -101,13 +109,43 @@ export function createEngineHandle(factory: () => TourEngine): EngineHandle {
       }
     },
 
+    /**
+     * Deferred by one microtask, and that is the whole StrictMode story.
+     *
+     * React tears an effect down and re-runs it inside one synchronous commit,
+     * so a release followed by an `ensure()` in the same tick is a remount,
+     * not an unmount. Destroying eagerly there is a real dev-mode regression,
+     * not a cosmetic one: the engine's state dies with it, so the replacement
+     * has to boot again and every restore side effect — `onEnter`, `onStart`,
+     * the analytics `onTourStart` — fires a second time. Adapter A never had
+     * this, because its `bootPhaseRef` and its reducer state both outlived the
+     * remount; the engine's do not.
+     *
+     * A real unmount has nothing to take it back, so the destroy lands on the
+     * next microtask: in-flight work aborted, channel closed, registry entries
+     * dropped. Anything asserting on that after an `unmount()` needs one
+     * `await`.
+     *
+     * The one thing that cannot wait is the pending throttled write, so
+     * `flush()` runs NOW. The flow-session save is trailing-edge throttled at
+     * 200 ms, and an unmount immediately followed by a remount — a fast
+     * client-side route change — would otherwise let the new engine boot and
+     * read the step the old one had already left.
+     *
+     * No fan-out either way: the binding is either leaving or about to re-read.
+     */
     release: () => {
-      off?.()
-      off = null
-      engine?.destroy()
-      engine = null
-      // No fan-out: after a release the binding is either unmounting or about
-      // to `ensure()` again, and both re-read on their own.
+      if (!engine || pendingRelease) return
+      engine.flush()
+      pendingRelease = true
+      queueMicrotask(() => {
+        if (!pendingRelease) return
+        pendingRelease = false
+        off?.()
+        off = null
+        engine?.destroy()
+        engine = null
+      })
     },
 
     boot: (...a) => ensure().boot(...a),
@@ -126,5 +164,41 @@ export function createEngineHandle(factory: () => TourEngine): EngineHandle {
     setTours: (...a) => ensure().setTours(...a),
     setDontShowAgain: (...a) => ensure().setDontShowAgain(...a),
     setOptions: (...a) => ensure().setOptions(...a),
+    flush: (...a) => ensure().flush(...a),
+  }
+}
+
+/**
+ * Narrow a handle to exactly the thirteen `TourActions` keys.
+ *
+ * A binding's context value is `{ ...snapshot, ...pickActions(handle) }`, and
+ * without this `setOptions`, `boot`, `ensure`, `release` and `subscribe` would
+ * all leak into it. The return type is the contract: if `TourActions` grows a
+ * key this stops compiling, which is how `setDontShowAgain` was found missing
+ * from `TourEngine` in the first place.
+ *
+ * Lives here rather than in the React provider — where the §1.4 plan put it —
+ * so the claim it makes can be stated in a `.test-d.ts` without exporting a
+ * new symbol from `context/`. It is React-free and not re-exported from
+ * `@tour-kit/core/engine`, so no public surface moves either way.
+ *
+ * Every value is the handle's own closure, so the result is stable for the
+ * handle's lifetime and safe to spread into a memoised context value.
+ */
+export function pickActions(handle: EngineHandle): TourActions {
+  return {
+    start: handle.start,
+    next: handle.next,
+    prev: handle.prev,
+    goTo: handle.goTo,
+    skip: handle.skip,
+    complete: handle.complete,
+    stop: handle.stop,
+    setDontShowAgain: handle.setDontShowAgain,
+    reset: handle.reset,
+    setData: handle.setData,
+    goToStep: handle.goToStep,
+    startTour: handle.startTour,
+    triggerBranchAction: handle.triggerBranchAction,
   }
 }

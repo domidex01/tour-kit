@@ -1082,3 +1082,38 @@ describe('flow session parity — v2 §1.4a rows 6 and 7', () => {
     expect(storage.getItem('myapp:flow:active')).not.toBeNull()
   })
 })
+
+describe('flush() — v2 §1.4b, the synchronous half of a release', () => {
+  it('writes the pending throttled flow-session save without destroying the engine', async () => {
+    // `save()` is trailing-edge throttled at 200 ms, so the blob on disk lags
+    // the tour by up to one step. `destroy()` has always flushed it; the React
+    // binding needs the same guarantee WITHOUT the teardown, because a
+    // StrictMode remount tears the effect down and re-runs it in one tick and
+    // must be able to take the teardown back. An unmount immediately followed
+    // by a remount — a fast client-side route change — is the case that
+    // breaks when the write lands too late: the new provider boots and reads
+    // the previous step.
+    const { engine, storage } = engineFor({
+      tours: [makeTour('t', [visibleStep('a'), visibleStep('b'), visibleStep('c')])],
+      routePersistence: { enabled: true, flowSession: { storage: 'sessionStorage' } },
+    })
+    document.body.innerHTML = '<div id="x"></div>'
+    await engine.start('t')
+    await engine.next()
+
+    engine.flush()
+
+    const blob = JSON.parse(storage.getItem('tourkit:flow:active') as string)
+    expect(blob.stepIndex).toBe(1)
+    // Still live afterwards — that is the whole difference from destroy().
+    await engine.next()
+    expect(engine.getState().currentStepIndex).toBe(2)
+  })
+
+  it('is a no-op after destroy()', () => {
+    const { engine } = engineFor({ tours: [THREE] })
+    engine.destroy()
+
+    expect(() => engine.flush()).not.toThrow()
+  })
+})

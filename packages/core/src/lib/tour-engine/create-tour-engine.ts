@@ -108,6 +108,18 @@ export interface TourEngine {
   setData: (key: string, value: unknown) => void
   setTours: (tours: Tour[]) => void
   /**
+   * Commit any pending throttled write immediately, leaving the engine live.
+   *
+   * `destroy()` has always done this on the way out. A binding needs it on its
+   * own because the flow-session save is trailing-edge throttled at 200 ms: an
+   * unmount immediately followed by a remount — a fast client-side route
+   * change, or React tearing an effect down and re-running it — otherwise lets
+   * the new engine boot and read a step the old one had already left.
+   *
+   * A no-op after `destroy()`.
+   */
+  flush: () => void
+  /**
    * Still a no-op body (`setDontShowAgainImpl`), and present only so the
    * engine covers all thirteen `TourActions` keys — the React binding selects
    * its context value straight off this object. Wiring it is the first
@@ -529,6 +541,10 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
       if (!destroyed) resetImpl(ctx, tourId)
     },
     setData: engineSetData,
+
+    flush: () => {
+      if (!destroyed) flowSession.flush()
+    },
 
     setDontShowAgain: (tourId: string, value: boolean) => {
       if (!destroyed) setDontShowAgainImpl(ctx, tourId, value)

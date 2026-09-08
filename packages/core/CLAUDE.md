@@ -29,6 +29,17 @@ Framework-agnostic foundation layer. Contains all business logic - UI packages a
 
 ## Gotchas
 
+- **TourProvider is a binding, not an engine** (v2 §1.4): it holds one
+  `createTourEngine()` behind `createEngineHandle` and one
+  `useSyncExternalStore`. The engine is constructed in the first effect or the
+  first action, **never in render** — the factory registers every tour with
+  `tourRegistry` at construction, so a render-time build logs
+  `registered twice` under StrictMode and leaks a dead `WeakRef`. Do not
+  memoise an engine in `useState`, and do not make the handle's `release()`
+  eager: it flushes pending writes synchronously but defers the `destroy()` by
+  one microtask, so React tearing an effect down and re-running it can take it
+  back. Without that, the replacement engine re-boots and every restore side
+  effect fires twice in dev.
 - **Context null checks**: All context hooks throw if used outside provider - this is intentional
 - **SSR**: Hooks handle SSR by checking `typeof window` before accessing DOM APIs
 - **Refs over state**: Position-related values use refs to avoid re-render cascades
