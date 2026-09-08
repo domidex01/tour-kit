@@ -53,7 +53,7 @@
  *     barrel untouched by definition. Reaching 8 KB means trimming the barrel,
  *     which is a breaking change; it rides with the 7.0.0 unification (§3.7),
  *     not with any engine slice.
- *   - core:engine: 18 KB against a measured 17 732, up from 8.1 KB when this
+ *   - core:engine: 18.5 KB against a measured 18 098, up from 8.1 KB when this
  *     was a types-and-predicates door and 15.3 KB after §1.3. The difference
  *     is first a working tour engine (reducer, boot resolver, actions,
  *     transition effects, four storage adapters) and then, in v2 §1.3b, the
@@ -71,6 +71,17 @@
  *     §1.6 IIFE is the consumer who pays all of it; re-baseline there, with
  *     the measured number, rather than shaving the contract two shipped
  *     bindings depend on.
+ *
+ *     v2 §1.5f took the ceiling to 18.5 KB (open question 7 pre-authorised
+ *     exactly this) for the last +366 B: `createSpotlight()` moved the
+ *     spotlight state machine down here after §1.5 shipped three copies of it
+ *     — the React hook, `@tour-kit/vue` and `@tour-kit/svelte` — that differed
+ *     only in reactivity primitive. Read the row together with the binding
+ *     rows before calling it a regression: the bytes did not appear, they
+ *     MOVED. A Vue consumer shipped engine 17 732 + vue 1 455 = 19 187 before
+ *     and engine 18 098 + vue 1 093 = 19 191 after. The engine row alone looks
+ *     worse; the thing a consumer downloads did not change, and there is now
+ *     one implementation instead of three.
  *
  *     Do NOT split a `/engine/dom` entry to keep this number flat: the row
  *     measures the import-everything worst case, a bundler tree-shakes the
@@ -99,7 +110,7 @@
  */
 export const budgets = [
   ['core', 'packages/core/dist/index.js', 23000],
-  ['core:engine', 'packages/core/dist/engine/index.js', 18000],
+  ['core:engine', 'packages/core/dist/engine/index.js', 18500],
   ['react', 'packages/react/dist/index.js', 12000],
   ['hints', 'packages/hints/dist/index.js', 6000],
   ['analytics:main', 'packages/analytics/dist/index.js', 4000],

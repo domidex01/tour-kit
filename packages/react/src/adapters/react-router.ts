@@ -1,5 +1,6 @@
 'use client'
 
+import { matchRoutePattern } from '@tour-kit/core'
 import type { RouterAdapter } from '@tour-kit/core'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
@@ -101,17 +102,7 @@ export function createReactRouterAdapter(
 
     const matchRoute = useCallback(
       (pattern: string, mode: 'exact' | 'startsWith' | 'contains' = 'exact') => {
-        const currentPath = pathnameRef.current
-        switch (mode) {
-          case 'exact':
-            return currentPath === pattern
-          case 'startsWith':
-            return currentPath.startsWith(pattern)
-          case 'contains':
-            return currentPath.includes(pattern)
-          default:
-            return currentPath === pattern
-        }
+        return matchRoutePattern(pathnameRef.current, pattern, mode)
       },
       []
     )

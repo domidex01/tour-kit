@@ -7,6 +7,9 @@
  * - Next.js Pages Router (next/router)
  * - React Router v6/v7 (react-router / react-router-dom)
  */
+/** How `matchRoute` compares the current path with a pattern. */
+export type RouteMatchMode = 'exact' | 'startsWith' | 'contains'
+
 export interface RouterAdapter {
   /**
    * Get current route/pathname
@@ -29,7 +32,7 @@ export interface RouterAdapter {
    * @param pattern - Route pattern to match
    * @param mode - Matching mode (default: 'exact')
    */
-  matchRoute(pattern: string, mode?: 'exact' | 'startsWith' | 'contains'): boolean
+  matchRoute(pattern: string, mode?: RouteMatchMode): boolean
 
   /**
    * Subscribe to route changes.

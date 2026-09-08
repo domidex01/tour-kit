@@ -102,6 +102,7 @@ export type {
   HintsContextValue,
   // Router
   RouterAdapter,
+  RouteMatchMode,
   MultiPagePersistenceConfig,
 } from '../types'
 
@@ -262,6 +263,13 @@ export {
 export type { EngineHandle } from '../lib/tour-engine/engine-handle'
 export type { TourEngineLiveOptions } from '../lib/tour-engine/create-tour-engine'
 export type { TourEngineAnalytics } from '../lib/tour-engine/context'
+// The option bag all three bindings take, and the two splits it feeds the
+// engine. Derived from `CreateTourEngineOptions`, never redeclared — §1.5
+// shipped three hand-maintained copies of these field lists before §1.5f.
+export { engineOptionsFrom, liveOptionsFrom } from '../lib/tour-engine/binding-options'
+export type { BindingOptions } from '../lib/tour-engine/binding-options'
+// The one `matchRoute` comparison. Five adapters had their own copy.
+export { matchRoutePattern } from '../lib/match-route'
 
 // ── DOM behaviours (v2 §1.3b) ───────────────────────────────────────────────
 // LEAF imports. These are view behaviours a binding ATTACHES, not engine
@@ -275,8 +283,10 @@ export { attachKeyboard } from '../lib/keyboard'
 export type { AttachKeyboardOptions, KeyboardActions } from '../lib/keyboard'
 export { trackRect } from '../lib/track-rect'
 export type { RectTracker, TrackRectOptions } from '../lib/track-rect'
-export { computeSpotlight } from '../lib/spotlight'
+export { computeSpotlight, createSpotlight } from '../lib/spotlight'
 export type {
+  SpotlightController,
+  SpotlightSnapshot,
   SpotlightCutoutStyle,
   SpotlightOverlayStyle,
   SpotlightStyles,
