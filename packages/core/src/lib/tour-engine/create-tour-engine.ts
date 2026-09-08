@@ -6,8 +6,12 @@
  * the other exists, and both drive the identical reducer, boot resolver,
  * actions and transition effects.
  *
- * It is assembly, not new logic. Every part it composes already has its own
- * suite.
+ * Mostly assembly — the reducer, boot resolver, actions and transition effects
+ * each have their own suite. What it owns outright, and what therefore has to
+ * be read here rather than assumed: the boot lifecycle (the `bootPhase` latch,
+ * the empty-tours deferral and its `setTours` re-arm), the cross-tab route
+ * re-hydration, and the `liveOptions` accessor layer `setOptions` writes
+ * through.
  *
  * Three contracts the bindings depend on:
  *
@@ -266,13 +270,6 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
 
   function rebuildSnapshot(): void {
     snapshot = buildCallbackContext(state, currentTour(), data)
-    // The flow store stamps this id into every blob it writes, and `''`
-    // disables writes entirely. The provider got it reactively —
-    // `useFlowSession(state.tourId ?? '')` — so ANY start armed the resume,
-    // whether it came from boot, a button, `startTour` or a cross-tour branch.
-    // Setting it only in `boot()` meant a hand-started tour wrote nothing and
-    // a hard reload resumed nothing, which is the entire feature.
-    flowSession.setTourId(state.tourId ?? '')
   }
 
   function notify(): void {
@@ -370,6 +367,25 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
   }
 
   /**
+   * The input `resolveBootStart` needs, in one place.
+   *
+   * Both callers below used to build this literal themselves, four of the five
+   * fields byte-identical. A change to the precedence input that updated one
+   * and not the other is exactly the adapter-drift class §1.4a exists to
+   * close, so it does not get to live here.
+   *
+   * `boot()` passes its already-loaded blob because it needs
+   * `flowBlob?.currentRoute` afterwards; nobody else does.
+   */
+  const bootInput = (flowBlob = flowSession.load()) => ({
+    flowSession: flowBlob,
+    flowIsStale: flowSession.isStale(),
+    routeState: routeStore.load(),
+    tours: [...state.tours.values()],
+    completedTours: persistTerminalTours ? terminalStore.getCompletedTours() : state.completedTours,
+  })
+
+  /**
    * Re-run the precedence rule for a *route* restore only, after another tab
    * wrote our key.
    *
@@ -380,15 +396,7 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
   async function rehydrateFromRoute(): Promise<void> {
     if (destroyed) return
 
-    const decision = resolveBootStart({
-      flowSession: flowSession.load(),
-      flowIsStale: flowSession.isStale(),
-      routeState: routeStore.load(),
-      tours: [...state.tours.values()],
-      completedTours: persistTerminalTours
-        ? terminalStore.getCompletedTours()
-        : state.completedTours,
-    })
+    const decision = resolveBootStart(bootInput())
 
     if (decision?.source !== 'route') return
 
@@ -438,19 +446,10 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
       }
 
       const flowBlob = flowSession.load()
-      const decision = resolveBootStart({
-        flowSession: flowBlob,
-        flowIsStale: flowSession.isStale(),
-        routeState: routeStore.load(),
-        tours: [...state.tours.values()],
-        completedTours: persistTerminalTours
-          ? terminalStore.getCompletedTours()
-          : state.completedTours,
-      })
+      const decision = resolveBootStart(bootInput(flowBlob))
 
       if (!decision) return
 
-      flowSession.setTourId(decision.tourId)
       await runBootStart(ctx, decision, {
         currentRoute: decision.source === 'flow' ? flowBlob?.currentRoute : undefined,
         signal: bootAbort.signal,

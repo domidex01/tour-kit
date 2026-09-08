@@ -15,13 +15,18 @@
  * the second.
  *
  * ONE STRUCTURAL RULE, and it is load-bearing: `<React.StrictMode>` must be
- * the ROOT of the `render()` call. Measured here on React 19.2.4 — when it is
- * nested inside another component (an RTL `renderHook` wrapper, or any
- * `<Tree>` that returns it), the effect cleanup never runs and this whole file
- * silently stops testing the remount. Found by mutating the handle so
- * `release()` was terminal: with StrictMode nested, every case passed against
- * the bug; with it at the root, they fail. Do not refactor these into a shared
- * wrapper component.
+ * the ROOT ELEMENT passed to `render()`. Measured on React 19.2.4 — when it is
+ * nested inside a COMPONENT (an RTL `renderHook` wrapper, or any `<Tree/>`
+ * that returns it), the effect cleanup never runs and this whole file silently
+ * stops testing the remount. Found by mutating the handle so `release()` was
+ * eager: with StrictMode nested, every case passed against the bug.
+ *
+ * `strictTree()` below is a plain FUNCTION returning the element, not a
+ * component, so `render()` still receives `<React.StrictMode>` itself as the
+ * root. Verified the same way it was broken: with the factory in place and
+ * `release()` reverted to eager, the `onEnter`-once case still fails
+ * (`expected 1, got 2`). Deduplicate through the factory; never through a
+ * component.
  */
 import { act, render, waitFor } from '@testing-library/react'
 import * as React from 'react'
@@ -50,6 +55,20 @@ function Probe() {
   ctx = useTourContext()
   return null
 }
+
+/**
+ * The tree under test. A function, NOT a component — see the file header.
+ * `extra` is rendered before `<Probe/>` so a child mount-effect runs first,
+ * which is the ordering the whole handle design exists for.
+ */
+const strictTree = (tours: Tour[], extra?: React.ReactNode) => (
+  <React.StrictMode>
+    <TourProvider tours={tours}>
+      {extra}
+      <Probe />
+    </TourProvider>
+  </React.StrictMode>
+)
 
 beforeEach(() => {
   ctx = null
@@ -81,13 +100,7 @@ describe('autostart is exactly once', () => {
     const onEnter = vi.fn()
     const tours = [{ ...AUTO, steps: [{ ...AUTO.steps[0], onEnter }, AUTO.steps[1]] } as Tour]
 
-    render(
-      <React.StrictMode>
-        <TourProvider tours={tours}>
-          <Probe />
-        </TourProvider>
-      </React.StrictMode>
-    )
+    render(strictTree(tours))
 
     await waitFor(() => expect(ctx?.isActive).toBe(true))
     // Let a second boot, if the remount armed one, land before counting.
@@ -111,14 +124,7 @@ describe('autostart is exactly once', () => {
     // something a refactor gets to change.
     const onStart = vi.fn()
 
-    render(
-      <React.StrictMode>
-        <TourProvider tours={[{ ...TOUR, onStart }]}>
-          <StartOnMount tourId="t" />
-          <Probe />
-        </TourProvider>
-      </React.StrictMode>
-    )
+    render(strictTree([{ ...TOUR, onStart }], <StartOnMount tourId="t" />))
 
     await waitFor(() => expect(ctx?.isActive).toBe(true))
     await act(async () => {
@@ -132,13 +138,7 @@ describe('autostart is exactly once', () => {
     // The signature of an engine constructed during render: React 18/19
     // double-invoke the initialiser and discard one result, and the discarded
     // engine has already registered.
-    render(
-      <React.StrictMode>
-        <TourProvider tours={[AUTO]}>
-          <Probe />
-        </TourProvider>
-      </React.StrictMode>
-    )
+    render(strictTree([AUTO]))
     await waitFor(() => expect(ctx?.isActive).toBe(true))
 
     expect(registeredTwiceCalls()).toHaveLength(0)
@@ -147,13 +147,7 @@ describe('autostart is exactly once', () => {
   it('fires onComplete exactly once', async () => {
     const onComplete = vi.fn()
 
-    render(
-      <React.StrictMode>
-        <TourProvider tours={[{ ...AUTO, onComplete }]}>
-          <Probe />
-        </TourProvider>
-      </React.StrictMode>
-    )
+    render(strictTree([{ ...AUTO, onComplete }]))
     await waitFor(() => expect(ctx?.isActive).toBe(true))
 
     await act(async () => {
@@ -170,14 +164,7 @@ describe("a child's mount effect survives the remount", () => {
     // before the provider's boot effect on both passes. The second pass runs
     // after the provider's cleanup released engine 1 — if the handle did not
     // rebuild on demand, this is where the tour silently disappears.
-    render(
-      <React.StrictMode>
-        <TourProvider tours={[TOUR]}>
-          <StartOnMount tourId="t" />
-          <Probe />
-        </TourProvider>
-      </React.StrictMode>
-    )
+    render(strictTree([TOUR], <StartOnMount tourId="t" />))
 
     await waitFor(() => expect(ctx?.isActive).toBe(true))
     expect(ctx?.tourId).toBe('t')
@@ -190,14 +177,7 @@ describe("a child's mount effect survives the remount", () => {
     // place, `getState()` keeps replaying its last snapshot, and the tour
     // reads as running while every verb is a silent no-op. Driving it is the
     // only way to tell the two apart.
-    render(
-      <React.StrictMode>
-        <TourProvider tours={[TOUR]}>
-          <StartOnMount tourId="t" />
-          <Probe />
-        </TourProvider>
-      </React.StrictMode>
-    )
+    render(strictTree([TOUR], <StartOnMount tourId="t" />))
     await waitFor(() => expect(ctx?.isActive).toBe(true))
 
     await act(async () => {
@@ -210,13 +190,7 @@ describe("a child's mount effect survives the remount", () => {
 
 describe('the registry is left clean', () => {
   it('holds nothing after unmount', async () => {
-    const { unmount } = render(
-      <React.StrictMode>
-        <TourProvider tours={[AUTO]}>
-          <Probe />
-        </TourProvider>
-      </React.StrictMode>
-    )
+    const { unmount } = render(strictTree([AUTO]))
     await waitFor(() => expect(ctx?.isActive).toBe(true))
 
     unmount()
@@ -242,6 +216,8 @@ describe('the registry is left clean', () => {
       )
     }
 
+    // Inline rather than `strictTree()`: the sibling has to sit OUTSIDE the
+    // provider, which is the whole point of the case.
     const { getByText } = render(
       <React.StrictMode>
         <Sibling />

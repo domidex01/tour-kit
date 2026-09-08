@@ -65,10 +65,6 @@ export function useFlowSession(
     [enabled, config?.storage, config?.keyPrefix, config?.key, config?.ttlMs]
   )
 
-  // Keep the tour id the factory stamps into new blobs current without
-  // rebuilding the store (which would drop a pending throttled save).
-  store.setTourId(enabled ? tourId : '')
-
   React.useEffect(() => {
     setSession(store.load())
     setReady(true)
@@ -84,7 +80,18 @@ export function useFlowSession(
     setSession(null)
   }, [store])
 
+  // The store takes the tour id per write, so the hook binds its own rather
+  // than mutating the memoised store during render (which is what this used
+  // to do, and what let the store's idea of the current tour drift from the
+  // caller's).
+  const save = React.useCallback(
+    (stepIndex: number, currentRoute?: string) => {
+      store.save(enabled ? tourId : '', stepIndex, currentRoute)
+    },
+    [store, enabled, tourId]
+  )
+
   if (!enabled) return NOOP_RETURN
 
-  return { session, save: store.save, clear, isStale: store.isStale(), ready }
+  return { session, save, clear, isStale: store.isStale(), ready }
 }

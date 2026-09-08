@@ -30,15 +30,21 @@ export interface CreateFlowSessionConfig extends FlowSessionConfig {
 export interface FlowSessionStore {
   /** The only storage read. Never called during construction. */
   load: () => FlowSessionV2 | null
-  /** Trailing-edge throttled at 200 ms. A burst coalesces into one write. */
-  save: (stepIndex: number, currentRoute?: string) => void
+  /**
+   * Trailing-edge throttled at 200 ms. A burst coalesces into one write.
+   *
+   * `tourId` is an argument rather than store state so the whole triple is
+   * captured at CALL time and replayed together on the trailing edge. Held as
+   * a mutable field it was read at FIRE time instead, so switching tours
+   * inside the window stamped the new id onto the old tour's step index. An
+   * empty id writes nothing.
+   */
+  save: (tourId: string, stepIndex: number, currentRoute?: string) => void
   clear: () => void
   /** True when the last loaded/saved session is past its TTL. */
   isStale: () => boolean
   /** Write any pending throttled save immediately. Call on teardown. */
   flush: () => void
-  /** The tour id `save()` stamps into new blobs. `''` disables writes. */
-  setTourId: (tourId: string) => void
 }
 
 function getDefaultTtl(storage: FlowSessionConfig['storage']): number {
@@ -51,7 +57,6 @@ const NOOP_STORE: FlowSessionStore = {
   clear: () => {},
   isStale: () => false,
   flush: () => {},
-  setTourId: () => {},
 }
 
 /**
@@ -76,12 +81,12 @@ export function createFlowSession(
     config.keyPrefix ?? 'tourkit'
   )
 
-  let tourId = ''
   let session: FlowSessionV2 | null = null
 
   const throttledSave = throttleTime((...args: unknown[]) => {
-    const stepIndex = args[0] as number
-    const currentRoute = args[1] as string | undefined
+    const tourId = args[0] as string
+    const stepIndex = args[1] as number
+    const currentRoute = args[2] as string | undefined
     if (!tourId) return
 
     const now = Date.now()
@@ -124,8 +129,8 @@ export function createFlowSession(
       }
     },
 
-    save: (stepIndex, currentRoute) => {
-      throttledSave(stepIndex, currentRoute)
+    save: (tourId, stepIndex, currentRoute) => {
+      throttledSave(tourId, stepIndex, currentRoute)
     },
 
     clear: () => {
@@ -141,9 +146,5 @@ export function createFlowSession(
     isStale: () => (session ? isExpired(session, ttlMs) : false),
 
     flush: () => throttledSave.flush(),
-
-    setTourId: (next) => {
-      tourId = next
-    },
   }
 }

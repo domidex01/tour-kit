@@ -1068,12 +1068,15 @@ describe('flow session parity — v2 §1.4a rows 6 and 7', () => {
   })
 
   it('writes a resume blob for a tour started by hand, not only a booted one', async () => {
-    // Row 7, and the sharper of the two. `useFlowSession(state.tourId ?? '')`
-    // gave the provider the id REACTIVELY, so any start — a button, a
-    // cross-tour branch, `startTour` — enabled the write. The engine called
-    // `setTourId` only inside `boot()`, so a tour the user started by clicking
-    // wrote nothing and a hard reload resumed nothing. That is the whole
-    // feature.
+    // Row 7, and the sharper of the two. The flow store used to hold the tour
+    // id as mutable state that each caller had to keep in sync: the provider
+    // did it reactively, the engine only inside `boot()`. So a tour the user
+    // started by clicking wrote nothing and a hard reload resumed nothing —
+    // the whole feature, lost to a sync point nobody could see.
+    //
+    // The id now travels as an argument to `save()`, so this falls out of the
+    // design rather than out of remembering. Kept as a behaviour pin: any
+    // start must arm the resume, whoever triggered it.
     const { engine, storage } = engineFor({ tours: [TWO], routePersistence: FLOW })
 
     await engine.start('t')

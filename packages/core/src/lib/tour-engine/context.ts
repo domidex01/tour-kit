@@ -88,7 +88,7 @@ export interface TourEngineContext {
   // stores so the React adapter can pass its hook results straight through and
   // the plain-store adapter can pass its factories'.
   saveRouteState: (state: TourState) => void
-  saveFlowSession: (stepIndex: number, currentRoute?: string) => void
+  saveFlowSession: (tourId: string, stepIndex: number, currentRoute?: string) => void
   clearFlowSession: () => void
   routePersistenceEnabled: boolean
   flowSessionEnabled: boolean
