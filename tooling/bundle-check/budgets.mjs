@@ -116,4 +116,9 @@ export const budgets = [
   ['ai:server', 'packages/ai/dist/server/index.js', 8000],
   ['scheduling', 'packages/scheduling/dist/index.js', 4000],
   ['license', 'packages/license/dist/index.js', 8000],
+  // v2 §1.5 — the two non-React bindings. Both are `external: ['@tour-kit/core',
+  // <framework>]`, so these rows measure the binding's own bytes: state bridge,
+  // provider lifecycle, two view helpers and a router adapter. Measured then
+  // gated at ~x1.2, the repo convention.
+  ['vue', 'packages/vue/dist/index.js', 1800],
 ]

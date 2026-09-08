@@ -18,6 +18,8 @@ const PACKAGES = [
   'scheduling',
   'license',
   'ai',
+  // v2 §1.5 — the two bindings hold the canonical floor, ENFORCED not stated.
+  'vue',
 ] as const
 
 const REPO_ROOT = join(__dirname, '..', '..', '..', '..')

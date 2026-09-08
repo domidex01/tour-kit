@@ -16,7 +16,9 @@
       "**/__tests__/fixtures/**",
       "**/scripts/**",
       "**/test-results/**",
-      "**/playwright-report/**"
+      "**/playwright-report/**",
+      "**/*.vue",
+      "**/*.svelte"
     ]
   }
 }

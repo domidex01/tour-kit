@@ -1,5 +1,9 @@
 [
-  { "name": "@tour-kit/core", "path": "packages/core/dist/index.js", "limit": "28 KB" },
+  {
+    "name": "@tour-kit/core",
+    "path": "packages/core/dist/index.js",
+    "limit": "28 KB"
+  },
   {
     "name": "@tour-kit/core (useTour-only consumer)",
     "path": "packages/core/dist/index.js",
@@ -29,7 +33,11 @@
     "limit": "175 KB",
     "ignore": ["@tour-kit/analytics"]
   },
-  { "name": "@tour-kit/adoption", "path": "packages/adoption/dist/index.js", "limit": "90 KB" },
+  {
+    "name": "@tour-kit/adoption",
+    "path": "packages/adoption/dist/index.js",
+    "limit": "90 KB"
+  },
   {
     "name": "@tour-kit/checklists",
     "path": "packages/checklists/dist/index.js",
@@ -42,9 +50,21 @@
     "limit": "185 KB",
     "ignore": ["@tour-kit/analytics"]
   },
-  { "name": "@tour-kit/media", "path": "packages/media/dist/index.js", "limit": "160 KB" },
-  { "name": "@tour-kit/surveys", "path": "packages/surveys/dist/index.js", "limit": "190 KB" },
-  { "name": "@tour-kit/analytics", "path": "packages/analytics/dist/index.js", "limit": "260 KB" },
+  {
+    "name": "@tour-kit/media",
+    "path": "packages/media/dist/index.js",
+    "limit": "160 KB"
+  },
+  {
+    "name": "@tour-kit/surveys",
+    "path": "packages/surveys/dist/index.js",
+    "limit": "190 KB"
+  },
+  {
+    "name": "@tour-kit/analytics",
+    "path": "packages/analytics/dist/index.js",
+    "limit": "260 KB"
+  },
   {
     "name": "@tour-kit/analytics/posthog",
     "path": "packages/analytics/dist/plugins/posthog.js",
@@ -81,7 +101,25 @@
     "limit": "70 KB",
     "ignore": ["@tour-kit/analytics"]
   },
-  { "name": "@tour-kit/license", "path": "packages/license/dist/index.js", "limit": "70 KB" },
-  { "name": "@tour-kit/ai (client)", "path": "packages/ai/dist/index.js", "limit": "110 KB" },
-  { "name": "@tour-kit/ai/server", "path": "packages/ai/dist/server/index.js", "limit": "120 KB" }
+  {
+    "name": "@tour-kit/license",
+    "path": "packages/license/dist/index.js",
+    "limit": "70 KB"
+  },
+  {
+    "name": "@tour-kit/ai (client)",
+    "path": "packages/ai/dist/index.js",
+    "limit": "110 KB"
+  },
+  {
+    "name": "@tour-kit/ai/server",
+    "path": "packages/ai/dist/server/index.js",
+    "limit": "120 KB"
+  },
+  {
+    "name": "@tour-kit/vue",
+    "path": "packages/vue/dist/index.js",
+    "limit": "3 KB",
+    "ignore": ["@tour-kit/core", "vue"]
+  }
 ]
