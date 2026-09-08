@@ -57,6 +57,11 @@ describe('@tour-kit/core/engine subpath resolution', () => {
     expect(typeof mod.defaultKeyboardConfig).toBe('object') // types (runtime default)
     expect(typeof mod.getElement).toBe('function') // utils
     expect(typeof mod.createTour).toBe('function') // utils
+    // v2 §1.5 — the binding contract. Two non-React bindings sit on exactly
+    // these three, so a barrel that forgets them breaks every one of them.
+    expect(typeof mod.createEngineHandle).toBe('function') // lib/tour-engine/engine-handle
+    expect(typeof mod.pickActions).toBe('function') // lib/tour-engine/engine-handle
+    expect(mod.INITIAL_SNAPSHOT).toMatchObject({ isActive: false })
   })
 
   it.skipIf(!distExists())('resolves via `require()` in a child Node process (CJS)', () => {
@@ -64,11 +69,11 @@ describe('@tour-kit/core/engine subpath resolution', () => {
       process.execPath,
       [
         '-e',
-        "const m = require('@tour-kit/core/engine'); console.log(typeof m.matchesAudience, typeof m.validateTour, Array.isArray(m.BUILTIN_GATE_ORDER));",
+        "const m = require('@tour-kit/core/engine'); console.log(typeof m.matchesAudience, typeof m.validateTour, Array.isArray(m.BUILTIN_GATE_ORDER), typeof m.createEngineHandle, typeof m.pickActions, m.INITIAL_SNAPSHOT.isActive);",
       ],
       { encoding: 'utf8' }
     )
-    expect(stdout.trim()).toBe('function function true')
+    expect(stdout.trim()).toBe('function function true function function false')
   })
 
   /**

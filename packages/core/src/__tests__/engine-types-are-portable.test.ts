@@ -105,11 +105,17 @@ describe.skipIf(!distExists())('v2 §1.2 — engine types compile without React 
         'engine',
         'probe.ts',
         [
-          "import { type TourStep, matchesAudience, validateTour } from '@tour-kit/core/engine'",
+          // v2 §1.5 — the binding contract types travel too. `EngineHandle` and
+          // `TourEngineLiveOptions` are what a Vue/Svelte provider types its
+          // own kit and `setOptions` with; if either dragged React into the
+          // .d.ts chain this compile would fail with `skipLibCheck: false`.
+          "import { type EngineHandle, type TourEngineLiveOptions, type TourStep, createEngineHandle, matchesAudience, pickActions, validateTour } from '@tour-kit/core/engine'",
           '',
           "const step: TourStep = { id: 'welcome', target: '#app', content: 'hi' }",
+          'declare const handle: EngineHandle',
+          'const live: Partial<TourEngineLiveOptions> = { autoNavigate: true }',
           '',
-          'export const surface = { step, matchesAudience, validateTour }',
+          'export const surface = { step, handle, live, matchesAudience, validateTour, createEngineHandle, pickActions }',
           '',
         ].join('\n'),
         { module: 'esnext', moduleResolution: 'bundler' }

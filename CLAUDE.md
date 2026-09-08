@@ -123,7 +123,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   measured that way. `size-limit` (root [`/.size-limit.json`](/.size-limit.json))
   is a secondary smoke signal in a bundled-with-deps + brotli unit, run
   `pnpm bundlesize`. Per-package dist-gzip closure budgets:
-  - core <23 KB, measured 22 576. Target <8 KB, tracked as audit B-1 — and
+  - core <23 KB, measured 22 621. Target <8 KB, tracked as audit B-1 — and
     B-1 is **not** an engine slice's to earn. The main entry's closure is the
     main barrel (providers, fourteen hooks, `cn`, `UnifiedSlot`, i18n,
     segmentation, diagnostics); reaching 8 KB means trimming that barrel,
@@ -133,12 +133,14 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     §1.3b left it 43 bytes under 21.5 KB; issue #121 tripped that at 21 851
     (+416 B for the guards in `navigateToStepImpl`, `commitStart` in
     `actions.ts` and the Group B block in `transition-effects.ts`); v2 §1.4
-    took it to 22 576. §1.4's +725 B is the import closure FLIPPING by design
+    took it to 22 574. §1.4's +725 B is the import closure FLIPPING by design
     — `<TourProvider>` is a binding over `createTourEngine()` now, so the
     factory and the engine handle really are in the main closure, and the
     ~350 deleted lines of the old adapter do not cover them.
     `engine-not-in-main-closure.test.ts` asserted the opposite and was deleted
-    in §1.4e; the invariant that still holds is `no-react-in-engine-dist`)
+    in §1.4e; the invariant that still holds is `no-react-in-engine-dist`.
+    v2 §1.5 took it to 22 621 (+47 B) — the six binding-contract re-exports
+    on `/engine` plus `attachAdvanceOn`'s deferred bind)
   - core/engine subpath <18 KB (the non-React consumer's worst case: the
     engine — reducer, boot resolver, actions, transition effects, four
     storage adapters — plus the v2 §1.3b DOM behaviours (focus trap,
@@ -151,8 +153,12 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     `core` did not move: it lands in the shared chunk both entries read.
     Issue #121 took it to 17 451, still inside 18 KB; that +416 B is the same
     +416 B `core` saw, because both rows read the chunk it landed in. v2 §1.4
-    settled it at 17 298 — slightly DOWN, because the binding pulled shared
-    code the main entry now reads out of the chunk the engine also reads)
+    settled it at 17 287 — slightly DOWN, because the binding pulled shared
+    code the main entry now reads out of the chunk the engine also reads. v2
+    §1.5 took it to 17 732 (+445 B): `engine-handle.ts` enters the engine's
+    closure for the first time, because `/engine` now publishes the binding
+    contract two non-React bindings sit on. That leaves ~268 B of headroom,
+    and §1.6's IIFE is the consumer who pays all of it)
   - react <12 KB
   - hints <6 KB
   - analytics <4 KB (root; per-plugin <1.5 KB each)

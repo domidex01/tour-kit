@@ -24,7 +24,7 @@
  *
  * Budgets = the 2026-05-23 audit's raw dist gzip measurement + ~20% headroom.
  * Exceptions documented inline:
- *   - core: 23 KB ceiling against a measured 22 576, measuring the closure.
+ *   - core: 23 KB ceiling against a measured 22 621, measuring the closure.
  *     NOT a relaxation of the old 20 KB: that number measured a self-contained
  *     entry that no longer exists.
  *
@@ -33,7 +33,9 @@
  *     leaving `tour-provider.tsx` for six modules, which esbuild can no longer
  *     inline); 21 271 -> 21 851 with issue #121 (Group A in
  *     `navigateToStepImpl`, `commitStart` in `actions.ts`, the Group B block
- *     in `transition-effects.ts`); 21 851 -> 22 576 in v2 §1.4.
+ *     in `transition-effects.ts`); 21 851 -> 22 574 in v2 §1.4; 22 574 ->
+ *     22 621 in v2 §1.5 (the six binding-contract re-exports on `/engine`
+ *     plus `attachAdvanceOn`'s deferred bind).
  *
  *     §1.4's +725 B is the closure FLIPPING, by design. `<TourProvider>` is a
  *     binding over `createTourEngine()` now, so the factory and the engine
@@ -51,7 +53,7 @@
  *     barrel untouched by definition. Reaching 8 KB means trimming the barrel,
  *     which is a breaking change; it rides with the 7.0.0 unification (§3.7),
  *     not with any engine slice.
- *   - core:engine: 18 KB against a measured 17.0 KB, up from 8.1 KB when this
+ *   - core:engine: 18 KB against a measured 17 732, up from 8.1 KB when this
  *     was a types-and-predicates door and 15.3 KB after §1.3. The difference
  *     is first a working tour engine (reducer, boot resolver, actions,
  *     transition effects, four storage adapters) and then, in v2 §1.3b, the
@@ -59,6 +61,16 @@
  *     advance-on and the test bridge. Those ~1.6 KB are exactly the code that
  *     left the five view hooks, which is why `core` did NOT move — it lands in
  *     the shared chunk both entries already read.
+ *
+ *     v2 §1.5 added 445 B (17 287 -> 17 732) for one reason: `/engine` now
+ *     publishes the binding contract (`createEngineHandle`, `pickActions`,
+ *     `INITIAL_SNAPSHOT`, `EngineHandle`, `TourEngineLiveOptions`,
+ *     `TourEngineAnalytics`), so `engine-handle.ts` is in the ENGINE's closure
+ *     for the first time — it was main-entry-only while the React provider was
+ *     its only importer. That leaves ~268 B of headroom on this row, and the
+ *     §1.6 IIFE is the consumer who pays all of it; re-baseline there, with
+ *     the measured number, rather than shaving the contract two shipped
+ *     bindings depend on.
  *
  *     Do NOT split a `/engine/dom` entry to keep this number flat: the row
  *     measures the import-everything worst case, a bundler tree-shakes the

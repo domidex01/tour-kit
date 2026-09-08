@@ -29,12 +29,17 @@
  * the spotlight hole and auto-advance on a click — as plain functions a Vue,
  * Svelte or vanilla binding attaches around its own rendering.
  *
+ * Since v2 §1.5 it also publishes the *binding contract*: `createEngineHandle`
+ * and `pickActions`, the two pieces every one of the three providers is built
+ * from. §1.5 is what named them — two non-React bindings needed exactly this
+ * and nothing more.
+ *
  * Still deliberately absent, and not an oversight: the port itself
  * (`TourEngineContext`), the four persistence/broadcast factories, and the
  * impls behind it (`navigateToStepImpl`, `handleBranchTargetImpl`,
  * `applyTransitionEffects`). They are the seam two adapters implement, not a
- * consumer API — §1.4 and §1.5 will say which parts a binding actually needs,
- * and publishing them before then freezes shapes those slices still move.
+ * consumer API — §1.4 and §1.5 said which parts a binding actually needs, and
+ * these were not on the list.
  */
 
 // ── Types (type-only; erased at runtime) ────────────────────────────────────
@@ -242,6 +247,21 @@ export type {
   BootSource,
   ResolveBootStartInput,
 } from '../lib/tour-engine/boot'
+
+// ── The binding contract (v2 §1.5) ──────────────────────────────────────────
+// What §1.4's React provider and §1.5's Vue/Svelte providers all sit on. The
+// handle is React-free (it imports only `initialTourState` and types), and its
+// three rules — nothing constructs during setup, `release()` not `destroy()`,
+// stable verb identity — are the rules every binding needs, not React's alone.
+// See `lib/tour-engine/engine-handle.ts` for why.
+export {
+  INITIAL_SNAPSHOT,
+  createEngineHandle,
+  pickActions,
+} from '../lib/tour-engine/engine-handle'
+export type { EngineHandle } from '../lib/tour-engine/engine-handle'
+export type { TourEngineLiveOptions } from '../lib/tour-engine/create-tour-engine'
+export type { TourEngineAnalytics } from '../lib/tour-engine/context'
 
 // ── DOM behaviours (v2 §1.3b) ───────────────────────────────────────────────
 // LEAF imports. These are view behaviours a binding ATTACHES, not engine
