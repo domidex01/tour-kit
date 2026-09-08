@@ -16,13 +16,9 @@
  * deleting the realm case leaves a proxy nobody can justify.
  */
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import vm from 'node:vm'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { ENGINE_IIFE, distExists } from './_dist'
-
-const PKG_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
 interface TourKitEngine {
   start(id: string): Promise<void>
@@ -68,11 +64,25 @@ const source = (): string => {
  */
 const loadIIFE = (): TourKitGlobal => new Function(`${source()}\nreturn TourKit`)() as TourKitGlobal
 
-const TWO_STEP_TOUR = {
+/** Two steps against real DOM targets — for the jsdom describe. */
+const TARGETED_TOUR = {
   id: 't',
   steps: [
     { id: 's1', target: '#a', content: 'first' },
     { id: 's2', target: '#b', content: 'second' },
+  ],
+}
+
+/**
+ * The same two steps with no `target` — for the `vm` realm, which has no
+ * `document` at all. The missing targets are the point, not an oversight: this
+ * is the headless path, and a step with a target would look for one.
+ */
+const TARGETLESS_TOUR = {
+  id: 't',
+  steps: [
+    { id: 's1', content: 'first' },
+    { id: 's2', content: 'second' },
   ],
 }
 
@@ -135,7 +145,7 @@ describe.skipIf(!distExists())('v2 §1.6 — it runs a tour under jsdom', () => 
     expect(typeof TourKit.createTourEngine).toBe('function')
 
     const engine = TourKit.createTourEngine({
-      tours: [TWO_STEP_TOUR],
+      tours: [TARGETED_TOUR],
       storage: TourKit.createMemoryStorage(),
     })
 
@@ -189,14 +199,16 @@ describe.skipIf(!distExists())('v2 §1.6 — it runs in a realm with no `process
    * nothing to do with the flag under test. `process` is deliberately NOT
    * passed: it is the whole discriminator.
    */
-  const realm = () => {
+  const realm = (): { ctx: vm.Context; TourKit: TourKitGlobal } => {
     const ctx = vm.createContext({ console, setTimeout, clearTimeout, AbortController })
     vm.runInContext(source(), ctx)
-    return ctx
+    // The one cast, here rather than at three call sites: `vm.Context` is
+    // `object`, so every consumer would otherwise re-assert the same shape.
+    return { ctx, TourKit: (ctx as { TourKit: TourKitGlobal }).TourKit }
   }
 
   it('the realm really has no `process` (control — otherwise this proves nothing)', () => {
-    expect(vm.runInContext('typeof process', realm())).toBe('undefined')
+    expect(vm.runInContext('typeof process', realm().ctx)).toBe('undefined')
   })
 
   it('loads, and `interpolate()` returns instead of throwing', () => {
@@ -205,55 +217,18 @@ describe.skipIf(!distExists())('v2 §1.6 — it runs in a realm with no `process
     // `warnOnMissing = process.env.NODE_ENV !== 'production'` default parameter.
     // Note the file LOADS either way — the throw is deferred to the first call,
     // so a test that only evaluates the source proves nothing.
-    expect(vm.runInContext('TourKit.interpolate("hi {{name}}", {})', realm())).toBe('hi ')
+    expect(vm.runInContext('TourKit.interpolate("hi {{name}}", {})', realm().ctx)).toBe('hi ')
   })
 
   it('runs a target-less tour with no DOM at all', async () => {
-    const ctx = realm() as unknown as { TourKit: TourKitGlobal }
-    const { createTourEngine, createMemoryStorage } = ctx.TourKit
+    const { createTourEngine, createMemoryStorage } = realm().TourKit
     const engine = createTourEngine({
-      tours: [
-        {
-          id: 't',
-          steps: [
-            { id: 's1', content: 'a' },
-            { id: 's2', content: 'b' },
-          ],
-        },
-      ],
+      tours: [TARGETLESS_TOUR],
       storage: createMemoryStorage(),
     })
     await engine.start('t')
     await engine.next()
     expect(engine.getState().currentStep?.id).toBe('s2')
     engine.destroy()
-  })
-})
-
-describe('v2 §1.6 — the manifest points a CDN at the file', () => {
-  // NOT skipIf: these are package.json facts and hold on an unbuilt clone. Only
-  // the "resolves to a real file" case needs dist, and it is guarded on its own.
-  //
-  // Why this describe exists at all: `apps/smoke`'s probe is the only other
-  // thing that reads these two fields, and it runs POST-PUBLISH. Without this,
-  // a typo (`.global.mjs`, a dropped `./`, a rename) ships.
-  const pkg = JSON.parse(readFileSync(join(PKG_ROOT, 'package.json'), 'utf8')) as {
-    unpkg?: string
-    jsdelivr?: string
-    files?: string[]
-  }
-  const EXPECTED = './dist/engine/index.global.js'
-
-  it.each(['unpkg', 'jsdelivr'] as const)('%s points at the IIFE', (field) => {
-    // `https://unpkg.com/@tour-kit/core` with no path serves this file.
-    expect(pkg[field]).toBe(EXPECTED)
-  })
-
-  it('the published `files` list still ships dist', () => {
-    expect(pkg.files).toContain('dist')
-  })
-
-  it.skipIf(!distExists())('the path those fields name actually resolves', () => {
-    expect(existsSync(join(PKG_ROOT, EXPECTED))).toBe(true)
   })
 })

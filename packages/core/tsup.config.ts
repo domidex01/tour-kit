@@ -1,8 +1,34 @@
 import * as fs from 'node:fs'
 import { defineConfig } from 'tsup'
 
+/**
+ * The specifiers core never bundles. ONE list, spread into both items below.
+ *
+ * Stating it twice is the drift this file exists to prevent: a sixth external
+ * added to the main item alone would be BUNDLED into the IIFE — not emitted as
+ * the throwing `__require()` shim the item comment warns about, just silently
+ * inlined, where the `require(` guard cannot see it and the `core:engine:iife`
+ * size row absorbs the bytes without a word.
+ */
+const EXTERNAL = ['react', 'react-dom', 'clsx', 'tailwind-merge', 'zod']
+
+/**
+ * Output policy both items share. They differ in entry, format, platform and
+ * clean — everything a reader needs to compare is therefore in the two items,
+ * and everything that must not diverge is here.
+ */
+const SHARED = {
+  external: EXTERNAL,
+  outDir: 'dist',
+  treeshake: true,
+  minify: true,
+  sourcemap: true,
+  target: 'es2020',
+} as const
+
 export default defineConfig([
   {
+    ...SHARED,
     entry: {
       index: 'src/index.ts',
       'schemas/index': 'src/lib/schemas/index.ts',
@@ -25,13 +51,7 @@ export default defineConfig([
     // Consequence to know: this also protects a STALE `.global.js` forever. If
     // the IIFE entry is ever renamed, check `ls dist/engine/` shows exactly one.
     clean: ['!**/*.global.js*'],
-    external: ['react', 'react-dom', 'clsx', 'tailwind-merge', 'zod'],
-    treeshake: true,
     splitting: true,
-    minify: true,
-    sourcemap: true,
-    target: 'es2020',
-    outDir: 'dist',
     // esbuild's banner option is stripped by minify (the directive is treated
     // as a dead expression once it follows other code). Prepend in onSuccess
     // so the 'use client' directive survives — required for the React-stateful
@@ -61,6 +81,7 @@ export default defineConfig([
     // esbuild turns their externals into a `__require("react")` shim that
     // throws `Dynamic require of "react" is not supported` on load. Two
     // landmines in the tarball for a file nobody asked for.
+    ...SHARED,
     entry: { 'engine/index': 'src/engine/index.ts' },
     format: ['iife'],
     globalName: 'TourKit',
@@ -74,17 +95,11 @@ export default defineConfig([
     // `engine-iife-dist.test.ts` both greps for `process.env` and runs the file
     // in a `vm` realm that has no `process`.
     platform: 'browser',
-    outDir: 'dist',
     // The main item cleans (with the negative glob above); both build in
     // parallel, so a second clean here would be the race that guards nothing.
     clean: false,
     // A classic script has no types to resolve; `dist/engine/index.d.ts`
     // already serves every consumer who typechecks.
     dts: false,
-    external: ['react', 'react-dom', 'clsx', 'tailwind-merge', 'zod'],
-    treeshake: true,
-    minify: true,
-    sourcemap: true,
-    target: 'es2020',
   },
 ])
