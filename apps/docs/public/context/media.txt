@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/media Context File
-Version: 0.13.3 | Generated: 2026-09-03
+Version: 0.13.3 | Generated: 2026-09-08
 Paste this into your LLM to get accurate answers about @tour-kit/media.
 =========================================================================
 

@@ -17,6 +17,15 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# v2 §1.6 — the CDN build, checked FIRST. It reads a file out of the installed
+# tarball and runs it in a `vm`: no port, no page, no dev server. Gating it
+# behind `next dev` would invert the failure mode — a release that breaks the
+# app's boot is exactly when you want to know whether the tarball is intact, and
+# behind the boot you would learn nothing. It is also the only step in this
+# script that executes the published JavaScript; `probe` below is curl.
+log "probing the CDN build"
+pnpm probe:cdn
+
 log "booting next dev on :3100"
 pnpm dev > /tmp/tour-kit-smoke-dev.log 2>&1 &
 DEV_PID=$!

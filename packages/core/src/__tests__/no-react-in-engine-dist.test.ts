@@ -26,6 +26,7 @@ import {
   ENGINE_CJS,
   ENGINE_DCTS,
   ENGINE_DTS,
+  ENGINE_IIFE,
   ENGINE_MJS,
   MAIN_CJS,
   MAIN_DTS,
@@ -51,6 +52,13 @@ const ENGINE_ENTRIES: Array<[label: string, path: string]> = [
   ['dist/engine/index.cjs (CJS runtime)', ENGINE_CJS],
   ['dist/engine/index.d.ts (ESM types)', ENGINE_DTS],
   ['dist/engine/index.d.cts (CJS types)', ENGINE_DCTS],
+  // v2 §1.6 — the CDN build. Its closure is one file (it has no relative
+  // imports to follow), so the five scans below read a haystack that is empty
+  // of all five today. Not theatre: the failure mode here is not a relative
+  // import, it is an EXTERNAL — the day `clsx` enters the engine barrel,
+  // esbuild emits `__require("clsx")` into this file and both this scan and
+  // `engine-iife-dist.test.ts`'s `require(` guard catch it independently.
+  ['dist/engine/index.global.js (IIFE)', ENGINE_IIFE],
 ]
 
 describe.skipIf(!distExists())('v2 §1.2 — the engine entry is emitted at all', () => {
@@ -97,6 +105,10 @@ describe.skipIf(!distExists())(
 
     it('dist/engine/index.cjs does NOT start with it', () => {
       expect(startsWithDirective(ENGINE_CJS)).toBe(false)
+    })
+
+    it('dist/engine/index.global.js does NOT start with it', () => {
+      expect(startsWithDirective(ENGINE_IIFE)).toBe(false)
     })
 
     it('dist/index.js STILL starts with it', () => {

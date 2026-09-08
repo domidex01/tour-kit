@@ -10,6 +10,7 @@
     "start": "next start -p 3100",
     "typecheck": "tsc --noEmit",
     "probe": "curl -sf --max-time 60 --retry 20 --retry-delay 2 --retry-all-errors --retry-connrefused http://localhost:3100/ | grep -q 'data-smoke-ok'",
+    "probe:cdn": "node ./scripts/probe-cdn.mjs",
     "smoke": "pnpm install:npm && pnpm typecheck && bash ./scripts/run-smoke.sh"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/core Context File
-Version: 1.0.7 | Generated: 2026-09-03
+Version: 1.0.7 | Generated: 2026-09-08
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -75,6 +75,7 @@ Types:
     HintsActions
     HintsContextValue
     RouterAdapter
+    RouteMatchMode
     MultiPagePersistenceConfig
     TourKitContextValue
     TourKitProviderProps
@@ -228,6 +229,7 @@ Utilities:
     throttleLeading
     cn
     validateTour
+    matchRoutePattern
     waitForStepTarget
     interpolate
     evaluateAudience
