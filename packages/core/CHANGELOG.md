@@ -1,5 +1,223 @@
 # @tour-kit/core
 
+## 2.1.0
+
+### Minor Changes
+
+- c9293ff: `@tour-kit/core/engine` publishes the binding contract, and `attachAdvanceOn` no longer rebinds mid-dispatch.
+
+  The engine subpath now exports `createEngineHandle`, `pickActions`, `INITIAL_SNAPSHOT`, and the
+  `EngineHandle`, `TourEngineLiveOptions` and `TourEngineAnalytics` types — the pieces every binding
+  over `createTourEngine()` is built from. The port (`TourEngineContext`) and the persistence
+  factories stay unexported.
+
+  `attachAdvanceOn` now detaches the outgoing step's listener **synchronously** on a transition and
+  binds the incoming step's listener **one macrotask later**. Previously it rebound synchronously
+  inside `notify()`, so a step whose `advanceOn` falls back to `document` could receive the very
+  real click that advanced onto it and advance again. No React consumer is affected: `<TourProvider>`
+  drives `advanceOn` through the hook, whose post-commit timing already had the gap.
+
+- b032980: Publish the DOM behaviours from `@tour-kit/core/engine`: `createFocusTrap`, `attachKeyboard`, `trackRect`, `computeSpotlight`, `bindStepAdvance` / `attachAdvanceOn` / `dispatchAdvanceEvent`, and `attachTestBridge`.
+
+  `@tour-kit/core/engine` could already _run_ a tour without React; it can now _show_ one. A Vue, Svelte or vanilla binding gets focus trapping, keyboard navigation, target tracking through scroll and resize, the spotlight geometry and auto-advance as plain functions it attaches around its own rendering.
+
+  Nothing changes for React consumers. `useFocusTrap`, `useKeyboardNavigation`, `useSpotlight`, `useElementPosition` and `useAdvanceOn` keep their exact signatures and behaviour — they are now thin wrappers over the same functions, and all 82 of their existing tests pass unmodified.
+
+- 2c065cf: `@tour-kit/core/engine` ships as a CDN build.
+
+  `dist/engine/index.global.js` is the engine subpath as one self-contained
+  script that defines `window.TourKit` with everything that subpath exports —
+  `createTourEngine`, the DOM behaviours, the storage adapters, the predicates.
+  The new `unpkg` and `jsdelivr` fields point at it, so
+  `https://unpkg.com/@tour-kit/core` serves it with no path:
+
+  ```html
+  <script src="https://unpkg.com/@tour-kit/core@2/dist/engine/index.global.js"></script>
+  <script>
+    TourKit.createTourEngine({
+      tours: [
+        /* … */
+      ],
+    }).start("welcome");
+  </script>
+  ```
+
+  It is the engine only and renders nothing; the card is yours. `@tour-kit/react`
+  has no CDN build. No API change, and `exports` is untouched.
+
+- d9cac78: `createTourEngine` gains `setOptions()` and `setDontShowAgain()`, persists terminal tours by default, defers `boot()` on an empty tour list until `setTours()` supplies one, and re-hydrates from cross-tab route writes when `syncTabs` is on.
+
+  These are the places `createTourEngine` behaved differently from `<TourProvider>`, which drives the same reducer through the same port. Nothing changes for React consumers — the provider already did all of them — but a direct `@tour-kit/core/engine` consumer gets behaviour it was quietly missing:
+
+  - **Completed tours are remembered by default.** The engine read `persistence?.enabled ?? false` while the provider merges `defaultPersistenceConfig`, where `enabled` is `true`, and ANDs it with `trackCompleted`. Pass `persistence: { enabled: false }` to keep the old behaviour.
+  - **`setOptions({ router, autoNavigate, analytics, onNavigationRequired, onStepError, onTourPaused })`** replaces any of the six props that legitimately change identity after construction. Every router adapter is a memo over its host router's hooks, so an engine that froze `router` at construction navigated through a dead adapter after the first route change.
+  - **`boot()` on an engine with no tours no longer latches.** It defers until `setTours()` supplies some — the shape a declarative registration path produces, where children register after the parent's first pass.
+  - **`syncTabs` re-hydrates.** `routeStore.subscribeStorage` was built and never called; the first `boot()` now installs it, so another tab's route write restores the tour at its persisted step.
+  - **`setDontShowAgain(tourId, value)`** is present on `TourEngine`, matching `TourActions`. Its body is still a no-op.
+  - **The flow session resumes what you actually started.** Its tour id is now kept in sync with engine state rather than set only inside `boot()`, so a tour started from a button, from `startTour()` or by a cross-tour branch writes a resume blob like an autostarted one does. Its storage key is also scoped by `routePersistence.key`, matching the provider — a consumer who set `key` was writing to `tourkit:flow:active` instead of `<key>:flow:active`.
+
+- dcce333: Add `createTourEngine()` — run a tour with no React.
+
+  ```js
+  import { createTourEngine } from "@tour-kit/core/engine";
+
+  const engine = createTourEngine({ tours });
+  await engine.boot();
+  engine.subscribe(() => render(engine.getState()));
+  await engine.start("onboarding");
+  ```
+
+  The previous release added `@tour-kit/core/engine` as a types-and-predicates
+  door and said, in so many words, that it was "not yet framework-agnostic tour
+  support, and should not be announced as such". **This is the release that flips
+  that sentence.** The subpath now carries a working engine — state, navigation,
+  branching, `when` conditions, hidden steps, persistence, route restore and
+  cross-tab sync — with no React, no DOM and no bundler required. It runs in
+  Node, in a Vue or Svelte component, or behind a `<script>` tag.
+
+  **Nothing moved and nothing changed for existing users.** `<TourProvider>`
+  behaves exactly as before; this release is additive. Internally the engine moved
+  out from under React behind a port that already existed, and the provider became
+  a second adapter for it — 1 431 lines down to 755, with the twenty `useEffect`s
+  and seventeen `useRef`s reduced accordingly. The whole React test suite passes
+  unmodified, which is the evidence for "no behaviour change": the provider's own
+  tests were the oracle and were never edited.
+
+  ### The API
+
+  `createTourEngine(options)` returns an object with `start`, `next`, `prev`,
+  `goTo`, `goToStep`, `startTour`, `triggerBranchAction`, `skip`, `complete`,
+  `stop`, `reset`, `setData`, `setTours`, `boot`, `subscribe`, `getState` and
+  `destroy`. Options: `tours`, `router`, `routePersistence`, `persistence`,
+  `autoNavigate`, `storage`, `analytics`, `onTourPaused`, `onNavigationRequired`,
+  `onStepError`.
+
+  Three contracts worth knowing if you are writing a binding:
+
+  - **`getState()` is reference-stable between transitions.** It returns the
+    existing `TourCallbackContext`, cached, so it satisfies React's
+    `useSyncExternalStore` directly. A dispatch the reducer returns unchanged
+    produces no new snapshot and does not notify.
+  - **The constructor is inert.** No storage, no `window`, no `BroadcastChannel`
+    until you call `boot()`, so the factory is safe to run during SSR.
+    `validateTour()` still throws synchronously from it.
+  - **`destroy()` is terminal, not a pause.** It aborts in-flight work, closes the
+    channel, flushes the throttled save, unregisters, and leaves every method a
+    no-op. Under React 18 StrictMode, create and destroy the engine inside the
+    same effect.
+
+  `resolveBootStart()` is exported too: the pure restore-precedence rule
+  (flow session > route state > autostart) as a function you can test as a truth
+  table instead of inferring from effect ordering.
+
+  ### Bundle sizes
+
+  `@tour-kit/core/engine`'s worst-case import closure goes from 8.1 KB to 15.3 KB
+  gzipped — that difference is the engine itself. A type-only consumer still ships
+  zero: the barrel is re-exports-only with `sideEffects: false`, so a bundler
+  takes only what you import.
+
+  The main `@tour-kit/core` entry grows 446 bytes (20.8 KB → 21.3 KB gzipped).
+  That is the cost of the code moving out of one big file into modules, not the
+  new engine riding along — a test asserts `createTourEngine` stays out of the
+  main entry's import closure, so a React consumer does not pay for the
+  plain-JavaScript adapter.
+
+  Still internal, and deliberately: the `TourEngineContext` port, the storage and
+  broadcast factories, and the implementations behind them. They are the seam two
+  adapters share, not a consumer API, and the upcoming React-binding work will
+  decide which parts a binding actually needs.
+
+- d985ec5: Implement the step lifecycle callbacks (#121)
+
+  `onBeforeShow`, `onBeforeHide`, `onHide`, `onEnter`/`onShow` on visible steps
+  and `waitForTarget` on same-route steps were declared on `BaseTourStep` and
+  documented, but never called. They work now, in this order on every
+  app-initiated transition:
+
+  `onBeforeHide(prev) → onBeforeShow(next) → onEnter(next) → [commit] → onHide(prev) → onShow(next)`
+
+  - **`onBeforeShow` / `onBeforeHide` can cancel a transition.** Return a literal
+    `false` — including from an `async` guard — and the tour stays where it is.
+    Works on `next()`, `prev()` (the reported case), `goTo()`, `start()` and a
+    branch to another tour.
+  - **`waitForTarget: true` now waits on the step's own route**, not only after a
+    router hop, for targets rendered after a fetch. Bounded by `waitTimeout`
+    (default 3000); on timeout `onStepError` fires with `TARGET_NOT_FOUND`.
+  - **`onHide` also fires when a tour ends** on a step — `stop()`, `skip()`,
+    `complete()`, `reset()`.
+  - **A callback that throws is logged and ignored, never a veto**, so a buggy
+    guard cannot trap a user on one step. This also fixes hidden-step
+    `onEnter`/`onShow`, which previously rejected the caller's `next()` promise.
+
+  `'restart'` now navigates to step 0 rather than jumping there, so it honours a
+  hidden or route-bearing first step.
+
+- c6953d8: `TourProvider` now runs on `createTourEngine()` through `useSyncExternalStore`. No React API changes.
+
+  The provider was a second implementation of the tour engine — a reducer, five "live" refs refreshed every render, four persistence hooks, and ten effects whose declaration order encoded the boot and transition rules. All of that already existed in `@tour-kit/core/engine`; the provider now consumes it instead of duplicating it, and drops from 733 lines to under 400.
+
+  Nothing moves for consumers: not `TourProvider`'s props, not `TourContextValue`, not one of the fourteen hooks, not `useTourActions`, not `window.__tourKit__`. The 119 existing provider tests, the 13 boot-parity rows, the hook suites and every `@tour-kit/react` test that mounts the provider pass unmodified — that was the merge gate for this change.
+
+  Two things get better in the process:
+
+  - **A prop that changes after mount now reaches the engine.** Every router adapter is a memo over its host router's hooks, so the tour follows the current one instead of the one it mounted with.
+  - **StrictMode behaves.** An autostarted tour starts once, its `onEnter` and the analytics `onTourStart` fire once, and a child's `useEffect(() => start('t'), [])` still works across React's dev-mode remount.
+
+  `createTourEngine` also gains `flush()`, which commits the pending throttled flow-session write while leaving the engine live — what a binding needs when an unmount is immediately followed by a remount.
+
+  One internal contract changed with it: the flow-session store takes the tour id per write instead of holding it as mutable state a caller had to keep in sync. That drift was a real bug — a tour you started by clicking wrote no resume blob at all — and it also fixes a narrower one, where switching tours inside the 200 ms save window stamped the new tour's id onto the old tour's step index.
+
+- a68699f: Add the `@tour-kit/core/engine` subpath — the React-free door.
+
+  `@tour-kit/core/engine` re-exports the parts of core that never touch React:
+  the types, the DOM/storage/a11y utilities, the audience and frequency
+  predicates, `validateTour`, `waitForStepTarget`, `interpolate`, `resolvePlural`,
+  `parseUserIdsFromCsv` and `explainTour`. Its declarations name no `react`,
+  `react-dom`, `clsx`, `tailwind-merge` or `zod`, so a Vue, Svelte or plain-Node
+  consumer can typecheck against it with `skipLibCheck: false` and none of those
+  installed. Importing types from `@tour-kit/core` in that situation fails today
+  with eight errors (`Cannot find module 'react'`, `'react/jsx-runtime'`,
+  `'clsx'`, and four `Cannot find namespace 'React'`); from
+  `@tour-kit/core/engine` it compiles.
+
+  **Additive only.** Nothing moved. Every export of `@tour-kit/core` is still at
+  the same path with the same signature — including `matchesAudience`,
+  `validateConditions`, `canShowByFrequency` and the `Tour` / `TourStep` /
+  `TourState` types, which are pinned by a test because downstream consumers call
+  them server-side. Upgrading changes nothing for existing code.
+
+  `react` and `react-dom` are now **optional** peer dependencies. npm 7+ and bun
+  will stop auto-installing React into a project that does not use it. The peer
+  ranges are unchanged, so a React consumer on an unsupported major is still
+  warned. The one trade: install `@tour-kit/core` directly, use the providers and
+  forget React, and you now get a runtime error rather than an install-time
+  warning.
+
+  Scope, honestly: this subpath exports types, helpers and predicates — there is
+  no way to _run_ a tour through it yet, because the engine still lives inside
+  `TourProvider`. It is infrastructure for the upcoming `createTourEngine()`,
+  landed early because it is cheap and additive. It is not yet framework-agnostic
+  tour support, and should not be announced as such.
+
+  Two build-side notes for anyone tracking bundle numbers. Core now emits a
+  shared `dist/chunk-*.js` (a second entry turns on code splitting), so
+  `dist/index.js` alone is smaller while the bytes a main-entry consumer actually
+  resolves are unchanged in a real bundler — the split re-export lists tree-shake
+  away. Accordingly the repo's dist-gzip gate now measures an entry's whole
+  **import closure** instead of the entry file. That correction also revealed five
+  packages (`hints`, `announcements`, `surveys`, `media`, `ai` client) that ship a
+  `headless` entry and had been measured as re-export shells for months; their
+  budgets were re-baselined to the honest figure. No bytes were added to any of
+  them.
+
+  Version note for anyone pinning core: `core`, `react` and `hints` are `linked`
+  in `.changeset/config.json`, so this minor lands the whole group on the same
+  number — and that number is **2.1.0**, not 1.1.0. `linked` bumps from the
+  group's highest current version (react and hints are at 2.0.0) rather than
+  each package's own, so core jumps 1.0.7 → 2.1.0 on a minor changeset. Nothing
+  breaking is implied by the major digit; it is the group moving in step.
+
 ## 1.0.7
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # no-tailwind-test
 
+## 0.0.23
+
+### Patch Changes
+
+- Updated dependencies [c9293ff]
+- Updated dependencies [b032980]
+- Updated dependencies [2c065cf]
+- Updated dependencies [d9cac78]
+- Updated dependencies [dcce333]
+- Updated dependencies [d985ec5]
+- Updated dependencies [c6953d8]
+- Updated dependencies [a68699f]
+  - @tour-kit/core@2.1.0
+  - @tour-kit/hints@2.1.0
+  - @tour-kit/react@2.1.0
+
 ## 0.0.22
 
 ### Patch Changes
