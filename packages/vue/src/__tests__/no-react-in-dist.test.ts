@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 /**
@@ -71,11 +71,21 @@ describe('@tour-kit/vue ships no React', () => {
     }
   })
 
-  it('the source never imports the bare main entry either', async () => {
-    const { globSync } = await import('node:fs')
-    const files = globSync('src/**/*.ts', { cwd: PKG_ROOT })
-    for (const rel of files) {
-      const source = readFileSync(join(PKG_ROOT, rel), 'utf8')
+  it('the source never imports the bare main entry either', () => {
+    // `readdirSync(..., { recursive: true })`, NOT `fs.globSync`: globSync
+    // landed in Node 22 and CI runs Node 20, so the glob version passed on
+    // every modern local machine and could only ever fail in CI —
+    // `TypeError: globSync is not a function`. Recursive readdir has been in
+    // Node since 18.17 and returns the identical set (verified: 18 files here).
+    const files = readdirSync(join(PKG_ROOT, 'src'), { recursive: true, encoding: 'utf8' })
+    const sources = files.filter((f) => f.endsWith('.ts'))
+    // This file's whole thesis is that a scan which cannot fail proves nothing.
+    // An empty list — wrong join, moved directory — would pass every assertion
+    // below it forever, so say out loud that there was something to scan.
+    expect(sources.length, 'no source files found to scan').toBeGreaterThan(0)
+
+    for (const rel of sources) {
+      const source = readFileSync(join(PKG_ROOT, 'src', rel), 'utf8')
       expect(/from\s*["']@tour-kit\/core["']/.test(source), `${rel} imports bare core`).toBe(false)
       expect(/from\s*["']react["']/.test(source), `${rel} imports react`).toBe(false)
     }
