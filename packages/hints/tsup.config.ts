@@ -8,6 +8,12 @@ export default defineConfig({
     index: 'src/index.ts',
     headless: 'src/headless.ts',
     'tailwind/index': 'src/tailwind/index.ts',
+    // v3 Phase 1 — the React-free door. Deliberately absent from the
+    // `injectUseClient(['index', 'headless'])` call below: stamping 'use client'
+    // here would mark a framework-agnostic entry client-only. `splitting: true`
+    // puts the engine in a `chunk-*.js` beside this shell — measure and scan
+    // the import closure, never this file (no-react-in-engine-dist.test.ts).
+    'engine/index': 'src/engine/index.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,

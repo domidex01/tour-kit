@@ -57,6 +57,16 @@
         "default": "./dist/headless.cjs"
       }
     },
+    "./engine": {
+      "import": {
+        "types": "./dist/engine/index.d.ts",
+        "default": "./dist/engine/index.js"
+      },
+      "require": {
+        "types": "./dist/engine/index.d.cts",
+        "default": "./dist/engine/index.cjs"
+      }
+    },
     "./tailwind": {
       "import": {
         "types": "./dist/tailwind/index.d.ts",
@@ -105,6 +115,12 @@
       "optional": true
     },
     "@mui/base": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
       "optional": true
     }
   },

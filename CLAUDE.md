@@ -178,7 +178,16 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     browser throws `ReferenceError: process is not defined` on the first
     `interpolate()` or segment audience.
   - react <12 KB
-  - hints <6 KB
+  - hints <6.5 KB, measured 6 231. v3 Phase 1 raised this from 6 KB at 5 543:
+    the +688 B is the module-boundary cost of the reducer, persistence, engine
+    and handle leaving `hints-provider.tsx` for `lib/hints-engine/` (core §1.3
+    paid +446 B for the same shape). The provider is a binding over
+    `createHintsHandle` now.
+  - hints/engine subpath <2.5 KB, measured 2 195 — the hints state machine,
+    its persistence, `createHintsHandle` and `getHotspotPosition`; the
+    components, hooks and context stay on the main entry. Built with
+    `splitting: true`, so the row is the shell plus the two React-free chunks
+    it imports, and a guard that read the shell alone would pass forever.
   - analytics <4 KB (root; per-plugin <1.5 KB each)
   - analytics/engine subpath <4 KB, measured 3 312 — the tracker and the five
     plugins with no React, no jsx-runtime and no licence gate; it shares the

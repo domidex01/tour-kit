@@ -128,6 +128,49 @@ Available headless components:
 - `HintHotspotHeadless`
 - `HintTooltipHeadless`
 
+## React-free subpath
+
+`@tour-kit/hints/engine` is the hints state machine with no React in it — no
+`react`, no `react/jsx-runtime`, no `@tour-kit/media`, no `@floating-ui/react`,
+no `@radix-ui/react-slot`, in neither the runtime nor the `.d.ts` closure. A
+Vue, Svelte or vanilla app runs hints with none of them installed and renders
+the dot and the tooltip itself.
+
+```ts
+import { createHintsEngine, createHintsHandle, getHotspotPosition } from '@tour-kit/hints/engine'
+
+const engine = createHintsEngine({ storage: localStorage })
+engine.setHints([{ id: 'export', frequency: 'once' }])
+engine.boot() // resolves storage and hydrates persisted frequency state
+
+engine.subscribe(() => render(engine.getState()))
+engine.showHint('export') // suppressed if a `once` dismissal is persisted
+```
+
+The constructor touches nothing — no `window`, no storage, no timer — so it is
+safe to build on the server and `boot()` on the client. `createHintsHandle` is
+the same object a binding wraps: lazy construction on the first verb, and a
+`release()` whose destroy is deferred a microtask so a framework tearing an
+effect down and re-running it does not lose the engine's state.
+
+**`/engine` and `headless` are different things.** "Headless" in this package
+means *unstyled React* (`@tour-kit/hints/headless` — render props, no CSS);
+`/engine` is the React-free one. Say `/engine` when you mean React-free.
+
+Exports: `createHintsEngine`, `createHintsHandle`, `INITIAL_HINTS_STATE`,
+`getHotspotPosition`, and the types `CreateHintsEngineOptions`, `HintsEngine`,
+`HintsHandle`, `HintEngineConfig`, `HintsEngineState`, `HintsStorage`, plus
+`FrequencyRule`, `FrequencyState`, `HintState`, `HintsActions` and
+`HotspotPosition` re-exported from `@tour-kit/core/engine`. The reducer stays
+internal.
+
+One caveat, honestly: `react` and `react-dom` are **optional** peers, so no
+package manager will auto-install them for you — but `@tour-kit/hints` still
+hard-depends on `@tour-kit/media`, which lists React as a required peer. React
+therefore lands in your `node_modules`. It does **not** land in your bundle:
+nothing `/engine` imports reaches it, which is what
+`no-react-in-engine-dist.test.ts` asserts against the built bytes on every run.
+
 ## API Reference
 
 ### Components
