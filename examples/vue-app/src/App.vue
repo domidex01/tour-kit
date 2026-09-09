@@ -2,6 +2,7 @@
 import { createVueRouterAdapter, provideTourKit } from '@tour-kit/vue'
 import { useRouter } from 'vue-router'
 import TourCard from './components/TourCard.vue'
+import { provideHintsEngine } from './composables/useHintsEngine'
 import { tours } from './tours'
 
 const router = useRouter()
@@ -17,6 +18,10 @@ const kit = provideTourKit({
   routePersistence: { enabled: true, flowSession: { storage: 'sessionStorage' } },
   enableTestBridge: true,
 })
+
+// The hints engine, provided the same way the tour kit is. `'once'` makes the
+// dismissal sticky and persisted, which is what the reload e2e case proves.
+provideHintsEngine([{ id: 'export', frequency: 'once' }])
 
 const start = () => {
   void kit.start('proof')
