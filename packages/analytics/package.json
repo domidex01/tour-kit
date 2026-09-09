@@ -44,6 +44,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./engine": {
+      "import": {
+        "types": "./dist/engine/index.d.ts",
+        "default": "./dist/engine/index.js"
+      },
+      "require": {
+        "types": "./dist/engine/index.d.cts",
+        "default": "./dist/engine/index.cjs"
+      }
+    },
     "./posthog": {
       "import": {
         "types": "./dist/plugins/posthog.d.ts",

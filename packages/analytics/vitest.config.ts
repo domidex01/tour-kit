@@ -17,6 +17,8 @@ export default defineConfig({
         '**/*.config.ts',
         'src/types/',
         'src/index.ts',
+        // re-export barrel: no statements to cover (v3 Phase 0)
+        'src/engine/index.ts',
         'src/hooks/',
         'src/plugins/index.ts',
       ],
