@@ -112,6 +112,20 @@ Every event payload includes `timestamp` and `sessionId`; tour events also inclu
 
 ## API Reference
 
+### The React-free subpath
+
+`@tour-kit/analytics/engine` gives a Vue, Svelte or Node consumer the tracker
+and the five plugins with no `react`, no `react/jsx-runtime` and no
+`@tour-kit/license` in its runtime or its type declarations:
+
+```ts
+import { createAnalytics, consolePlugin } from '@tour-kit/analytics/engine'
+```
+
+It is a strict subset of the main entry — nothing moved, every name is at the
+same path with the same signature. `AnalyticsProvider`, `useAnalytics` and
+`useAnalyticsOptional` stay on the main entry, because they are React.
+
 ### Provider & hooks
 
 | Export | Description |
