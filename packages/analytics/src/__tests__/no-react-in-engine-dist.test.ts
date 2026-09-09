@@ -25,6 +25,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   RELATIVE_SPECIFIER,
+  SPECIFIER_PREFIX,
   closureOf,
   specifierPattern,
 } from '../../../../tooling/bundle-check/closure.mjs'
@@ -43,6 +44,24 @@ const MAIN_JS = join(DIST, 'index.js')
 const MAIN_DTS = join(DIST, 'index.d.ts')
 
 const FORBIDDEN = ['react', 'react-dom', '@tour-kit/license'] as const
+
+/**
+ * The BARE `@tour-kit/core`, in every call shape a bundler emits.
+ *
+ * Built from `SPECIFIER_PREFIX` rather than hand-rolled, because the hand-rolled
+ * version covered `from` and `require(` and silently missed `import(` — and this
+ * repo reaches bare specifiers that way on purpose: the four vendor plugins load
+ * `posthog-js`, `mixpanel-browser` and `@amplitude/analytics-browser` through
+ * lazy `import()` behind magic comments, and all three appear in this package's
+ * engine dist. A guard that cannot see the shape its own package uses most is
+ * not a guard.
+ *
+ * The closing quote sits immediately after `core`, so `@tour-kit/core/engine`
+ * does NOT match — which is the whole point of this check, and why
+ * `specifierPattern('@tour-kit/core')` cannot serve here: it allows a
+ * `/subpath` and so can only ever prove presence.
+ */
+const BARE_CORE = new RegExp(`${SPECIFIER_PREFIX}["']@tour-kit/core["']`)
 
 const read = (p: string) => readFileSync(p, 'utf8')
 // rollup-plugin-dts chunks shared declarations even with `splitting: false`
@@ -85,25 +104,17 @@ describe('@tour-kit/analytics/engine ships no React', () => {
 
   it.skipIf(!distExists())('imports @tour-kit/core/engine, never the bare main entry', () => {
     // `specifierPattern('@tour-kit/core')` matches the `/engine` form too, so it
-    // can only prove PRESENCE. Absence of the bare form needs its own literal
-    // regex, in both the `from` and `require(` spellings.
+    // can only prove PRESENCE. Absence of the bare form needs `BARE_CORE`.
     for (const f of [ENGINE_JS, ENGINE_CJS]) {
       const source = read(f)
-      expect(/from\s*["']@tour-kit\/core["']/.test(source), `${f} imports bare core`).toBe(false)
-      expect(
-        /require\(\s*["']@tour-kit\/core["']\s*\)/.test(source),
-        `${f} requires bare core`
-      ).toBe(false)
+      expect(BARE_CORE.test(source), `${f} imports bare core`).toBe(false)
       expect(
         specifierPattern('@tour-kit/core').test(source),
         `${f} should import core/engine`
       ).toBe(true)
     }
     for (const entry of [ENGINE_DTS, ENGINE_DCTS]) {
-      expect(
-        /from\s*["']@tour-kit\/core["']/.test(readDts(entry)),
-        `${entry} names bare core`
-      ).toBe(false)
+      expect(BARE_CORE.test(readDts(entry)), `${entry} names bare core`).toBe(false)
     }
   })
 
