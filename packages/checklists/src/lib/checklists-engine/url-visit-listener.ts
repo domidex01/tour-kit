@@ -134,8 +134,9 @@ export function registerUrlVisitTask(
 
 /**
  * Test-only helper: clears module-level singleton state. Not exported via
- * the public package barrel — vitest specs import from
- * `../engine/url-visit-listener` directly.
+ * the public package barrel — vitest specs reach it through the
+ * `src/engine/url-visit-listener` re-export, which shares this module
+ * instance and therefore this one singleton registry.
  */
 export function __resetForTests(): void {
   state.registry.clear()
