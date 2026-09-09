@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import type { HotspotPosition } from '../../types'
+import { getHotspotPosition } from '../hotspot-position'
 
 export interface HintHotspotHeadlessProps extends React.ComponentPropsWithoutRef<'button'> {
   /** Target element's bounding rect */
@@ -18,28 +19,6 @@ export interface HintHotspotRenderProps {
   position: { top: number; left: number }
   isOpen: boolean
   targetRect: DOMRect
-}
-
-function getHotspotPosition(position: HotspotPosition, rect: DOMRect) {
-  const offset = 4
-
-  switch (position) {
-    case 'top-left':
-      return { top: rect.top - offset, left: rect.left - offset }
-    case 'top-right':
-      return { top: rect.top - offset, left: rect.right - offset }
-    case 'bottom-left':
-      return { top: rect.bottom - offset, left: rect.left - offset }
-    case 'bottom-right':
-      return { top: rect.bottom - offset, left: rect.right - offset }
-    case 'center':
-      return {
-        top: rect.top + rect.height / 2 - 6,
-        left: rect.left + rect.width / 2 - 6,
-      }
-    default:
-      return { top: rect.top - offset, left: rect.right - offset }
-  }
 }
 
 export const HintHotspotHeadless = React.forwardRef<HTMLButtonElement, HintHotspotHeadlessProps>(
