@@ -139,7 +139,22 @@ export const budgets = [
   ['core:engine', 'packages/core/dist/engine/index.js', 18500],
   ['core:engine:iife', 'packages/core/dist/engine/index.global.js', 18500],
   ['react', 'packages/react/dist/index.js', 12000],
-  ['hints', 'packages/hints/dist/index.js', 6000],
+  // v3 Phase 1 — re-baselined 6 000 -> 6 500 at a measured 6 231 (was 5 543).
+  // The +688 B is the module-boundary cost of the reducer, persistence, engine
+  // and handle leaving `hints-provider.tsx` for six `lib/hints-engine/` modules
+  // plus the chunk seams esbuild can no longer inline across — the same shape
+  // as core §1.3's +446 B for 636 lines leaving `tour-provider.tsx`. The plan
+  // priced this at 6 100; the extra ~130 B is the third chunk (see the
+  // `hints:engine` row). 6 500 keeps ~4 % headroom. Do not raise it a second
+  // time: if this row moves again, the binding grew, not the extraction.
+  ['hints', 'packages/hints/dist/index.js', 6500],
+  // v3 Phase 1 — the React-free door. Measured 2 195 by this gate: the shell
+  // plus the two chunks it imports (reducer, persistence, engine, handle,
+  // getHotspotPosition), 0 x react. 2 500 is the round 2.5 KB claim. NOT
+  // shared with `hints`: the engine is a subset, but `hints` needed its own
+  // re-baseline above and sharing would leave ~4 KB nobody would notice drift
+  // into.
+  ['hints:engine', 'packages/hints/dist/engine/index.js', 2500],
   ['analytics:main', 'packages/analytics/dist/index.js', 4000],
   ['analytics:posthog', 'packages/analytics/dist/plugins/posthog.js', 1500],
   ['analytics:mixpanel', 'packages/analytics/dist/plugins/mixpanel.js', 1500],

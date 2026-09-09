@@ -62,6 +62,13 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
   'core:engine:iife': { pattern: /core\/engine IIFE[^\n]*?<\s*([\d.]+)\s*KB/, mode: 'exact' },
   react: { pattern: /^\s*-\s*react\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   hints: { pattern: /^\s*-\s*hints\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
+  // v3 Phase 1 — anchored on `hints/engine subpath`. The sibling `hints`
+  // pattern is `/^\s*-\s*hints\s*<…/m`, so a bullet beginning `- hints/engine`
+  // cannot satisfy it (the character after `hints` is `/`, not whitespace).
+  'hints:engine': {
+    pattern: /hints\/engine subpath[^\n]*?<\s*([\d.]+)\s*KB/,
+    mode: 'exact',
+  },
   'analytics:main': { pattern: /^\s*-\s*analytics\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   'analytics:posthog': { pattern: /per-plugin\s*<\s*([\d.]+)\s*KB/, mode: 'ceiling' },
   'analytics:mixpanel': { pattern: /per-plugin\s*<\s*([\d.]+)\s*KB/, mode: 'ceiling' },

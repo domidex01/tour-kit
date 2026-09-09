@@ -39,6 +39,12 @@
     "ignore": ["@tour-kit/analytics"]
   },
   {
+    "name": "@tour-kit/hints/engine",
+    "path": "packages/hints/dist/engine/index.js",
+    "limit": "3.2 KB",
+    "ignore": ["@tour-kit/analytics"]
+  },
+  {
     "name": "@tour-kit/adoption",
     "path": "packages/adoption/dist/index.js",
     "limit": "90 KB"
