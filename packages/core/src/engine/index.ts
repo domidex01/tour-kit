@@ -266,6 +266,13 @@ export type { EngineHandle } from '../lib/tour-engine/engine-handle'
 // checklists…) composes `createHandle` with its own instead of writing a
 // second lifecycle.
 export { createHandle } from '../lib/tour-engine/engine-handle'
+// The subscriber set every engine keeps. Exported because a package engine
+// (`@tour-kit/hints/engine`, and `checklists`/`announcements`/`surveys` next)
+// needs the same fault-isolated fan-out — a throwing subscriber must not abort
+// the notify loop and leave later subscribers reading state that storage no
+// longer agrees with.
+export { createListeners } from '../lib/tour-engine/listeners'
+export type { ListenerSet } from '../lib/tour-engine/listeners'
 export type { EngineLike, Handle } from '../lib/tour-engine/engine-handle'
 export type { TourEngineLiveOptions } from '../lib/tour-engine/create-tour-engine'
 export type { TourEngineAnalytics } from '../lib/tour-engine/context'

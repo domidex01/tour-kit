@@ -20,7 +20,12 @@
  * whole reducer state including `frequencyState`; and a dispatch notifies
  * per action rather than per React commit. Observable state is identical.
  */
-import { canShowAfterDismissal, canShowByFrequency, logger } from '@tour-kit/core/engine'
+import {
+  canShowAfterDismissal,
+  canShowByFrequency,
+  createListeners,
+  logger,
+} from '@tour-kit/core/engine'
 import type { FrequencyRule, HintsActions } from '@tour-kit/core/engine'
 import { readPersistedEntries, resolveStorage, syncStorage } from './persistence'
 import { emptyFrequencyState, hintsReducer } from './reducer'
@@ -58,7 +63,7 @@ export function createHintsEngine(options: CreateHintsEngineOptions = {}): Hints
   let configs: ReadonlyMap<string, HintEngineConfig> = new Map()
   const registered = new Set<string>()
   const hydrated = new Set<string>()
-  const listeners = new Set<() => void>()
+  const listeners = createListeners('createHintsEngine')
 
   function dispatch(action: HintsAction): void {
     if (destroyed) return
@@ -71,7 +76,11 @@ export function createHintsEngine(options: CreateHintsEngineOptions = {}): Hints
     if (storage && prev.frequencyState !== next.frequencyState) {
       syncStorage(storage, prev.frequencyState, next.frequencyState, hydrated)
     }
-    for (const listener of listeners) listener()
+    // Fault-isolated: a throwing subscriber must not abort the fan-out. The
+    // storage write above has already landed, so a listener that took the loop
+    // down would leave later subscribers reading state that storage no longer
+    // agrees with.
+    listeners.notify()
   }
 
   function hydrate(): void {
@@ -126,10 +135,7 @@ export function createHintsEngine(options: CreateHintsEngineOptions = {}): Hints
     getState: () => state,
     subscribe: (listener) => {
       if (destroyed) return () => {}
-      listeners.add(listener)
-      return () => {
-        listeners.delete(listener)
-      }
+      return listeners.add(listener)
     },
     boot,
     setHints,
