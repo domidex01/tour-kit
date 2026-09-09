@@ -2,47 +2,17 @@
 
 import {
   type FrequencyRule,
-  type FrequencyState,
   canShowAfterDismissal,
   canShowByFrequency,
-  createPrefixedStorage,
   logger,
-  safeJSONParse,
 } from '@tour-kit/core'
 import * as React from 'react'
 import { useHintFilter } from '../hooks/use-hint-filter'
+import { readPersistedEntries, resolveStorage, syncStorage } from '../lib/hints-engine/persistence'
 import { emptyFrequencyState, hintsReducer } from '../lib/hints-engine/reducer'
+import type { HintsStorage } from '../lib/hints-engine/types'
 import type { HintConfig, HintsContextValue } from '../types'
 import { HintsContext } from './hints-context'
-
-const FREQ_KEY_PREFIX = 'hint:freq:'
-
-interface PersistedFrequencyState {
-  viewCount: number
-  isDismissed: boolean
-  /** ISO string — `null` for never-viewed. */
-  lastViewedAt: string | null
-}
-
-function freqKey(id: string): string {
-  return `${FREQ_KEY_PREFIX}${id}`
-}
-
-function freezeState(state: FrequencyState): PersistedFrequencyState {
-  return {
-    viewCount: state.viewCount,
-    isDismissed: state.isDismissed,
-    lastViewedAt: state.lastViewedAt ? state.lastViewedAt.toISOString() : null,
-  }
-}
-
-function thawState(persisted: PersistedFrequencyState): FrequencyState {
-  return {
-    viewCount: persisted.viewCount ?? 0,
-    isDismissed: persisted.isDismissed ?? false,
-    lastViewedAt: persisted.lastViewedAt ? new Date(persisted.lastViewedAt) : null,
-  }
-}
 
 export interface HintsProviderProps {
   children: React.ReactNode
@@ -61,85 +31,6 @@ export interface HintsProviderProps {
   storage?: Storage
 }
 
-/**
- * The minimal subset of the DOM `Storage` interface used by the persistence
- * effect. Both `window.localStorage` (DOM `Storage`) and the result of
- * `createPrefixedStorage` (core's narrower `Storage` shape) satisfy it, so
- * we can avoid casting between the two types.
- *
- * NOTE: callers must pass a SYNCHRONOUS adapter — the persistence effect
- * reads `getItem` synchronously. Core's `Storage` declares `string | null
- * | Promise<…>` for async adapters, but those won't work here. localStorage
- * and the in-memory test mock are both synchronous.
- */
-interface PersistAdapter {
-  getItem(key: string): string | null
-  setItem(key: string, value: string): void
-  removeItem(key: string): void
-}
-
-function getDefaultStorage(): Storage | null {
-  if (typeof window === 'undefined') return null
-  try {
-    return window.localStorage
-  } catch {
-    return null
-  }
-}
-
-/**
- * Read persisted frequency state for any hint id not already hydrated.
- * Returns the entries to dispatch via `HYDRATE_FREQUENCY` and mutates
- * `hydratedIds` to record which ids were touched.
- */
-function readPersistedEntries(
-  storage: PersistAdapter,
-  ids: ReadonlyArray<string>,
-  hydratedIds: Set<string>
-): Array<[string, FrequencyState]> {
-  const entries: Array<[string, FrequencyState]> = []
-  for (const id of ids) {
-    if (hydratedIds.has(id)) continue
-    hydratedIds.add(id)
-    const raw = storage.getItem(freqKey(id))
-    if (!raw) continue
-    const persisted = safeJSONParse<PersistedFrequencyState | null>(raw, null)
-    if (!persisted) continue
-    entries.push([id, thawState(persisted)])
-  }
-  return entries
-}
-
-/**
- * Diff two frequency-state Maps against storage. Removes keys present in
- * `prev` but not in `next`; writes every entry in `next`. Failures (quota,
- * serialization) are swallowed — frequency rules degrade gracefully when
- * storage is unavailable.
- */
-function syncStorage(
-  storage: PersistAdapter,
-  prev: ReadonlyMap<string, FrequencyState>,
-  next: ReadonlyMap<string, FrequencyState>,
-  hydratedIds: Set<string>
-): void {
-  for (const id of prev.keys()) {
-    if (next.has(id)) continue
-    try {
-      storage.removeItem(freqKey(id))
-    } catch {
-      // ignore
-    }
-    hydratedIds.delete(id)
-  }
-  for (const [id, value] of next) {
-    try {
-      storage.setItem(freqKey(id), JSON.stringify(freezeState(value)))
-    } catch {
-      // ignore
-    }
-  }
-}
-
 export function HintsProvider({ children, hints, storage }: HintsProviderProps) {
   const filteredHints = useHintFilter(hints ?? [])
   const hintsById = React.useMemo(() => {
@@ -155,11 +46,10 @@ export function HintsProvider({ children, hints, storage }: HintsProviderProps) 
   // this provider relies on. Both DOM `localStorage` and the in-memory test
   // mock are synchronous; passing an async adapter would silently break the
   // persistence effect (it reads getItem synchronously).
-  const prefixedStorage = React.useMemo<PersistAdapter | null>(() => {
-    const raw = storage ?? getDefaultStorage()
-    if (!raw) return null
-    return createPrefixedStorage(raw, 'tourkit') as PersistAdapter
-  }, [storage])
+  const prefixedStorage = React.useMemo<HintsStorage | null>(
+    () => resolveStorage(storage),
+    [storage]
+  )
 
   const [state, dispatch] = React.useReducer(hintsReducer, {
     hints: new Map(),

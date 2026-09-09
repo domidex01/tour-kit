@@ -29,16 +29,24 @@ vi.mock('@floating-ui/react', () => ({
   })),
 }))
 
+// Everything below patches the DOM, and the whole file runs for every test —
+// including a `// @vitest-environment node` one (`persistence.ssr.test.ts` and
+// `create-hints-engine.ssr.test.ts` are the first, v3 Phase 1). Bail out rather
+// than throwing on the first `window` read; under node there is nothing to
+// patch and nothing that wants it patched. Core's setup has carried the same
+// guard since its own SSR test landed.
+const hasDOM = typeof window !== 'undefined'
+
 // Cleanup after each test
 afterEach(() => {
-  cleanup()
+  if (hasDOM) cleanup()
   vi.clearAllMocks()
   // Clear all timers more aggressively for cross-package test isolation
   if (vi.isFakeTimers?.()) {
     vi.clearAllTimers()
     vi.useRealTimers()
   }
-  document.body.innerHTML = ''
+  if (hasDOM) document.body.innerHTML = ''
 })
 
 // Mock ResizeObserver
@@ -48,36 +56,38 @@ class ResizeObserverMock {
   disconnect = vi.fn()
 }
 
-vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+if (hasDOM) {
+  vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 
-// Mock matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-})
+  // Mock matchMedia
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
 
-// Mock scrollTo
-window.scrollTo = vi.fn()
-Element.prototype.scrollIntoView = vi.fn()
+  // Mock scrollTo
+  window.scrollTo = vi.fn()
+  Element.prototype.scrollIntoView = vi.fn()
 
-// Mock offsetParent for jsdom (it's always null in jsdom but we need it for visibility checks)
-Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
-  get() {
-    // Return body for most elements (simulates visible elements)
-    // Elements with display:none or not in DOM will still have null
-    if (this.style?.display === 'none' || !this.isConnected) {
-      return null
-    }
-    return document.body
-  },
-  configurable: true,
-})
+  // Mock offsetParent for jsdom (it's always null in jsdom but we need it for visibility checks)
+  Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
+    get() {
+      // Return body for most elements (simulates visible elements)
+      // Elements with display:none or not in DOM will still have null
+      if (this.style?.display === 'none' || !this.isConnected) {
+        return null
+      }
+      return document.body
+    },
+    configurable: true,
+  })
+}
