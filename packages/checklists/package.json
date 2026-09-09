@@ -1,7 +1,7 @@
 {
   "name": "@tour-kit/checklists",
   "version": "1.0.1",
-  "description": "React onboarding checklists with task dependencies, progress tracking & persistence \u2014 for getting-started flows and activation.",
+  "description": "React onboarding checklists with task dependencies, progress tracking & persistence — for getting-started flows and activation.",
   "author": "Tour Kit Team",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://usertourkit.com/",
@@ -62,12 +62,7 @@
     "./styles/animations.css": "./src/styles/animations.css",
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "src/styles",
-    "README.md",
-    "CHANGELOG.md"
-  ],
+  "files": ["dist", "src/styles", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",

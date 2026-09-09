@@ -14,9 +14,7 @@
     "name": "@tour-kit/core/schemas",
     "path": "packages/core/dist/schemas/index.js",
     "limit": "12 KB",
-    "ignore": [
-      "zod"
-    ]
+    "ignore": ["zod"]
   },
   {
     "name": "@tour-kit/core/engine",
@@ -32,25 +30,19 @@
     "name": "@tour-kit/react",
     "path": "packages/react/dist/index.js",
     "limit": "185 KB",
-    "ignore": [
-      "@tour-kit/analytics"
-    ]
+    "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/hints",
     "path": "packages/hints/dist/index.js",
     "limit": "175 KB",
-    "ignore": [
-      "@tour-kit/analytics"
-    ]
+    "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/hints/engine",
     "path": "packages/hints/dist/engine/index.js",
     "limit": "3.2 KB",
-    "ignore": [
-      "@tour-kit/analytics"
-    ]
+    "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/adoption",
@@ -61,25 +53,19 @@
     "name": "@tour-kit/checklists",
     "path": "packages/checklists/dist/index.js",
     "limit": "180 KB",
-    "ignore": [
-      "@tour-kit/analytics"
-    ]
+    "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/checklists/engine",
     "path": "packages/checklists/dist/engine/index.js",
     "limit": "5 KB",
-    "ignore": [
-      "@tour-kit/analytics"
-    ]
+    "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/announcements",
     "path": "packages/announcements/dist/index.js",
     "limit": "185 KB",
-    "ignore": [
-      "@tour-kit/analytics"
-    ]
+    "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/media",
@@ -105,25 +91,13 @@
     "name": "@tour-kit/analytics/posthog",
     "path": "packages/analytics/dist/plugins/posthog.js",
     "limit": "1500 B",
-    "ignore": [
-      "@tour-kit/core",
-      "@tour-kit/license",
-      "posthog-js",
-      "react",
-      "react-dom"
-    ]
+    "ignore": ["@tour-kit/core", "@tour-kit/license", "posthog-js", "react", "react-dom"]
   },
   {
     "name": "@tour-kit/analytics/mixpanel",
     "path": "packages/analytics/dist/plugins/mixpanel.js",
     "limit": "1500 B",
-    "ignore": [
-      "@tour-kit/core",
-      "@tour-kit/license",
-      "mixpanel-browser",
-      "react",
-      "react-dom"
-    ]
+    "ignore": ["@tour-kit/core", "@tour-kit/license", "mixpanel-browser", "react", "react-dom"]
   },
   {
     "name": "@tour-kit/analytics/amplitude",
@@ -141,28 +115,19 @@
     "name": "@tour-kit/analytics/google-analytics",
     "path": "packages/analytics/dist/plugins/google-analytics.js",
     "limit": "1000 B",
-    "ignore": [
-      "@tour-kit/core",
-      "@tour-kit/license",
-      "react",
-      "react-dom"
-    ]
+    "ignore": ["@tour-kit/core", "@tour-kit/license", "react", "react-dom"]
   },
   {
     "name": "@tour-kit/scheduling",
     "path": "packages/scheduling/dist/index.js",
     "limit": "70 KB",
-    "ignore": [
-      "@tour-kit/analytics"
-    ]
+    "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/scheduling/engine",
     "path": "packages/scheduling/dist/engine/index.js",
     "limit": "3 KB",
-    "ignore": [
-      "@tour-kit/analytics"
-    ]
+    "ignore": ["@tour-kit/analytics"]
   },
   {
     "name": "@tour-kit/license",
@@ -183,18 +148,12 @@
     "name": "@tour-kit/vue",
     "path": "packages/vue/dist/index.js",
     "limit": "3 KB",
-    "ignore": [
-      "@tour-kit/core",
-      "vue"
-    ]
+    "ignore": ["@tour-kit/core", "vue"]
   },
   {
     "name": "@tour-kit/svelte",
     "path": "packages/svelte/dist/index.js",
     "limit": "3 KB",
-    "ignore": [
-      "@tour-kit/core",
-      "svelte"
-    ]
+    "ignore": ["@tour-kit/core", "svelte"]
   }
 ]
