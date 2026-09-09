@@ -1,69 +1,28 @@
-import type { LocalizedText } from '@tour-kit/core'
 import type { MediaSlotProps } from '@tour-kit/media'
 import type { ReactNode } from 'react'
+import type {
+  ChecklistContextData,
+  EngineChecklistConfig,
+  EngineChecklistState,
+  EngineTaskConfig,
+  EngineTaskState,
+} from '../lib/checklists-engine/types'
+
+// The React-free half is declared once, in the engine, and re-exported here so
+// the public names do not move. v3 Phase 2.
+export type {
+  ChecklistProgress,
+  TaskAction,
+  TaskCompletionCondition,
+  UrlVisitCompletion,
+} from '../lib/checklists-engine/types'
+export type { ChecklistContextData as ChecklistContext } from '../lib/checklists-engine/types'
 
 /**
- * Task action types
+ * Individual task definition — the engine's task config plus the two fields
+ * only a React renderer can use.
  */
-export type TaskAction =
-  | { type: 'navigate'; url: string; external?: boolean }
-  | { type: 'callback'; handler: () => void | Promise<void> }
-  | { type: 'tour'; tourId: string }
-  | { type: 'modal'; modalId: string }
-  | { type: 'custom'; data: unknown }
-
-/**
- * Built-in completion shape for tasks that auto-complete when the user
- * navigates to a matching URL. Browser-only; SSR-safe (the listener no-ops
- * outside `window`).
- *
- * - `urlPattern: string` → substring match against `location.pathname`
- *   (e.g. `'/dashboard'` matches `'/dashboard/main'`).
- * - `urlPattern: RegExp` → regex test against `location.pathname`
- *   (e.g. `/^\/billing/` matches `'/billing/plan'` only).
- *
- * Consumers needing non-standard routing (hash routing, in-app sub-paths)
- * should use `{ custom: (ctx) => ... }` instead.
- */
-export type UrlVisitCompletion = {
-  type: 'urlVisit'
-  urlPattern: string | RegExp
-}
-
-/**
- * Condition for automatic task completion
- */
-export type TaskCompletionCondition =
-  | { tourCompleted: string }
-  | { tourStarted: string }
-  | { custom: (context: ChecklistContext) => boolean }
-  | UrlVisitCompletion
-
-/**
- * Context available in task conditions
- */
-export interface ChecklistContext {
-  /** User data passed to provider */
-  user: Record<string, unknown>
-  /** Custom data passed to provider */
-  data: Record<string, unknown>
-  /** Completed task IDs in this checklist */
-  completedTasks: string[]
-  /** All completed tour IDs */
-  completedTours: string[]
-}
-
-/**
- * Individual task definition
- */
-export interface ChecklistTaskConfig {
-  /** Unique task identifier */
-  id: string
-  /** Task title — accepts plain string templates (interpolated against
-   *  `LocaleProvider.userContext`) or `{ key: string }` for i18n lookup. */
-  title: LocalizedText
-  /** Task description — same `LocalizedText` shape as `title`. */
-  description?: LocalizedText
+export interface ChecklistTaskConfig extends EngineTaskConfig {
   /**
    * Optional media (video / GIF / Lottie / image) rendered inside the task
    * row, below the description. Auto-detects the embed provider via URL
@@ -72,94 +31,20 @@ export interface ChecklistTaskConfig {
   media?: MediaSlotProps
   /** Icon name or component */
   icon?: string | ReactNode
-  /** Action to perform when task is clicked */
-  action?: TaskAction
-  /** Task IDs that must be completed first */
-  dependsOn?: string[]
-  /** Condition for showing this task */
-  when?: (context: ChecklistContext) => boolean
-  /** Auto-complete condition */
-  completedWhen?: TaskCompletionCondition
-  /** Whether task can be manually completed */
-  manualComplete?: boolean
-  /** Custom metadata */
-  meta?: Record<string, unknown>
 }
 
-/**
- * Runtime task state
- */
-export interface ChecklistTaskState {
-  /** Task configuration */
-  config: ChecklistTaskConfig
-  /** Whether task is completed */
-  completed: boolean
-  /** Whether task is locked (dependencies not met) */
-  locked: boolean
-  /** Whether task is visible (when condition met) */
-  visible: boolean
-  /** Completion timestamp */
-  completedAt?: number
-}
-
-/**
- * Checklist definition
- */
-export interface ChecklistConfig {
-  /** Unique checklist identifier */
-  id: string
-  /** Checklist title — `LocalizedText` (string template or `{ key }`). */
-  title: LocalizedText
-  /** Checklist description — same `LocalizedText` shape as `title`. */
-  description?: LocalizedText
+/** Checklist definition */
+export interface ChecklistConfig extends EngineChecklistConfig {
   /** Icon name or component */
   icon?: string | ReactNode
   /** Tasks in this checklist */
   tasks: ChecklistTaskConfig[]
-  /** Callback when all tasks completed */
-  onComplete?: () => void
-  /** Callback when checklist is dismissed */
-  onDismiss?: () => void
-  /** Whether checklist can be dismissed */
-  dismissible?: boolean
-  /** Whether to show checklist after completion */
-  hideOnComplete?: boolean
-  /** Custom metadata */
-  meta?: Record<string, unknown>
 }
 
-/**
- * Runtime checklist state
- */
-export interface ChecklistState {
-  /** Checklist configuration */
-  config: ChecklistConfig
-  /** Task states */
-  tasks: ChecklistTaskState[]
-  /** Progress percentage (0-100) */
-  progress: number
-  /** Number of completed tasks */
-  completedCount: number
-  /** Total number of visible tasks */
-  totalCount: number
-  /** Whether all tasks are completed */
-  isComplete: boolean
-  /** Whether checklist is dismissed */
-  isDismissed: boolean
-  /** Whether checklist is expanded (for collapsible UI) */
-  isExpanded: boolean
-}
+/** Runtime task state */
+export type ChecklistTaskState = EngineTaskState<ChecklistTaskConfig>
 
-/**
- * Progress information
- */
-export interface ChecklistProgress {
-  /** Number of completed tasks */
-  completed: number
-  /** Total number of tasks */
-  total: number
-  /** Progress percentage (0-100) */
-  percentage: number
-  /** Remaining tasks */
-  remaining: number
-}
+/** Runtime checklist state */
+export type ChecklistState = EngineChecklistState<ChecklistConfig>
+
+export type { ChecklistContextData }
