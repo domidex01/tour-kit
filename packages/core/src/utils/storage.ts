@@ -3,6 +3,25 @@
 import type { PersistenceConfig, Storage as StorageAdapter } from '../types'
 
 /**
+ * The SYNCHRONOUS three-method subset of the storage adapter.
+ *
+ * Core's `Storage` permits `Promise`-returning methods for async adapters;
+ * several code paths cannot use those because they read `getItem` inline. Those
+ * paths had each re-declared this shape locally — `@tour-kit/hints`'
+ * persistence layer, and the option types in `@tour-kit/announcements` and
+ * `@tour-kit/surveys`. One declaration, here, so `createPrefixedStorage` can
+ * promise to hand a synchronous adapter back.
+ *
+ * `window.localStorage`, `createMemoryStorage()` and the in-memory test shims
+ * all satisfy it structurally.
+ */
+export interface SyncStorage {
+  getItem(key: string): string | null
+  setItem(key: string, value: string): void
+  removeItem(key: string): void
+}
+
+/**
  * Create storage adapter from config
  */
 export function createStorageAdapter(storageType: PersistenceConfig['storage']): StorageAdapter {
@@ -25,9 +44,14 @@ export function createStorageAdapter(storageType: PersistenceConfig['storage']):
 }
 
 /**
- * No-op storage for SSR
+ * No-op storage for SSR.
+ *
+ * Typed `SyncStorage` rather than the wide `Storage`: every method here is
+ * synchronous, and declaring it wide made it unusable as the stand-in for a
+ * synchronous adapter — which is its whole purpose. Narrowing a return type is
+ * safe for existing callers.
  */
-export function createNoopStorage(): StorageAdapter {
+export function createNoopStorage(): SyncStorage {
   return {
     getItem: () => null,
     setItem: () => {},
@@ -86,8 +110,23 @@ export function safeJSONParse<T>(value: string | null, fallback: T): T {
 }
 
 /**
- * Create storage with key prefix
+ * Create storage with key prefix.
+ *
+ * Overloaded rather than generic, because this is a pure pass-through:
+ * `getItem` returns exactly what the inner `getItem` returned, so a caller
+ * holding a SYNCHRONOUS adapter must get a synchronous one back. Returning the
+ * wide `Storage` — which permits `Promise`-returning methods — forced every
+ * synchronous consumer to re-narrow with an `as` cast; `@tour-kit/hints`'
+ * persistence layer had one until the v3 Phase 1 review.
+ *
+ * NOT `<S extends Storage>(storage: S) => S`: that promises to return the
+ * caller's exact type, which would oblige the wrapper to carry a DOM
+ * `Storage`'s `length`, `key()` and `clear()` too — and spreading them copies
+ * `length` as a number frozen at wrap time rather than a live getter. The
+ * wrapper deliberately returns the three-method adapter and nothing else.
  */
+export function createPrefixedStorage(storage: SyncStorage, prefix: string): SyncStorage
+export function createPrefixedStorage(storage: StorageAdapter, prefix: string): StorageAdapter
 export function createPrefixedStorage(storage: StorageAdapter, prefix: string): StorageAdapter {
   const prefixKey = (key: string) => `${prefix}:${key}`
 

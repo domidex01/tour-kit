@@ -1,6 +1,7 @@
 import type {
   AudienceProp,
   FrequencyRule,
+  HintState,
   HotspotPosition,
   LocalizedText,
   Placement,
@@ -12,6 +13,13 @@ import type * as React from 'react'
 // Re-export Placement from core for convenience
 export type { Placement }
 export type { HotspotPosition }
+// Core owns `HintState`, as it owns `HotspotPosition` above. This package
+// declared its own byte-identical copy until the v3 Phase 1 review: with the
+// engine subpath publishing core's, `@tour-kit/hints` and
+// `@tour-kit/hints/engine` were exporting two different declarations under one
+// name. Identical today, so it compiled — and the day either grew a field, a
+// consumer mixing the two entry points got an inscrutable `Map` variance error.
+export type { HintState }
 
 export interface HintConfig {
   id: string
@@ -53,12 +61,6 @@ export interface HintConfig {
   onClick?: () => void
   onShow?: () => void
   onDismiss?: () => void
-}
-
-export interface HintState {
-  id: string
-  isOpen: boolean
-  isDismissed: boolean
 }
 
 export interface HintsContextValue {

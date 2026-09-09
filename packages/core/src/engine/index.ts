@@ -188,6 +188,7 @@ export {
   throttleTime,
   throttleLeading,
 } from '../utils'
+export type { SyncStorage } from '../utils'
 export type {
   LogLevel,
   LoggerConfig,

@@ -10,7 +10,7 @@
  * The `'tourkit'` prefix and the `hint:freq:<id>` key shape do NOT move, so
  * blobs written by 2.1.0 read back unchanged.
  */
-import { createPrefixedStorage, safeJSONParse } from '@tour-kit/core/engine'
+import { createNoopStorage, createPrefixedStorage, safeJSONParse } from '@tour-kit/core/engine'
 import type { FrequencyState } from '@tour-kit/core/engine'
 import type { HintsStorage } from './types'
 
@@ -96,25 +96,29 @@ export function syncStorage(
   }
 }
 
-function defaultStorage(): HintsStorage | null {
-  if (typeof window === 'undefined') return null
+function defaultStorage(): HintsStorage {
+  if (typeof window === 'undefined') return createNoopStorage()
   try {
     return window.localStorage
   } catch {
-    return null
+    // Private browsing throws on access, not on use.
+    return createNoopStorage()
   }
 }
 
 /**
- * `undefined` selects `window.localStorage`; no window (SSR) selects nothing.
+ * `undefined` selects `window.localStorage`; no window (SSR) selects a no-op.
  *
- * The cast narrows core's `Storage` — which permits Promise-returning adapters
- * — down to the synchronous three-method shape this path reads. Both
- * `localStorage` and the in-memory test mock are synchronous; an async adapter
- * would silently break hydration.
+ * No cast: `createPrefixedStorage` is overloaded to hand a synchronous adapter
+ * back when given one, so the sync shape survives the wrap. It used to return
+ * core's wide `Storage` and every synchronous consumer re-narrowed with `as`.
+ *
+ * Never null. `createNoopStorage()` is core's answer to "there is no storage
+ * here" and it keeps the engine's `storage` field non-nullable, which deletes
+ * two branches at its call sites. The engine still must not HYDRATE before
+ * `boot()` — but that is a lifecycle rule, guarded by `booted`, not something
+ * to encode as a null.
  */
-export function resolveStorage(storage: HintsStorage | undefined): HintsStorage | null {
-  const raw = storage ?? defaultStorage()
-  if (!raw) return null
-  return createPrefixedStorage(raw, 'tourkit') as HintsStorage
+export function resolveStorage(storage: HintsStorage | undefined): HintsStorage {
+  return createPrefixedStorage(storage ?? defaultStorage(), 'tourkit')
 }
