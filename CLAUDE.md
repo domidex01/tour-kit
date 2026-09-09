@@ -195,7 +195,18 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   - analytics/engine subpath <4 KB, measured 3 312 — the tracker and the five
     plugins with no React, no jsx-runtime and no licence gate; it shares the
     root row's ceiling because it is a strict subset of the root entry.
-  - adoption, checklists <10 KB
+  - adoption <10 KB, measured 8 552
+  - checklists <10.5 KB, measured 10 090. v3 Phase 2 raised this from 10 KB at
+    8 604: the reducer, persistence and the three `utils/` leaves moved into
+    `lib/checklists-engine/`, and the `engine/index` entry turns on the chunk
+    split. The provider is a binding over `createChecklistsHandle` now.
+  - checklists/engine subpath <4.5 KB, measured 4 347 — the reducer, the
+    dependency graph, progress, persistence, the urlVisit listener and its
+    attach leaf, `createChecklistsEngine` and `createChecklistsHandle`; the
+    components, hooks, context and the licence gate stay on the main entry.
+    Built with `splitting: true`, so the row is the re-export shell plus the
+    one React-free chunk it shares with the main entry — a guard that read the
+    shell alone would pass forever.
   - announcements <14 KB, surveys <12.5 KB, license <8 KB
   - media <9 KB
   - ai <7 KB (client), <8 KB (server)

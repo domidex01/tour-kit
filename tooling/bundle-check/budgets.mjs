@@ -181,7 +181,16 @@ export const budgets = [
   // rounds to the same place anyway.
   ['analytics:engine', 'packages/analytics/dist/engine/index.js', 4000],
   ['adoption', 'packages/adoption/dist/index.js', 10000],
-  ['checklists', 'packages/checklists/dist/index.js', 10000],
+  // v3 Phase 2 raised this from 10 000 at 8 604. Measured 10 090 after the
+  // extraction: the reducer, persistence and the three `utils/` leaves moving
+  // into `lib/checklists-engine/` cost module boundaries, and the second tsup
+  // entry turns on the chunk split. 10 500 keeps 410 B of headroom.
+  // `adoption` keeps 10 000 — the shared CLAUDE.md bullet was split in this
+  // same commit so this row could move alone.
+  ['checklists', 'packages/checklists/dist/index.js', 10500],
+  // The engine and the main entry read the SAME chunk, so this row is
+  // shell + chunk and cannot drift independently of `checklists`.
+  ['checklists:engine', 'packages/checklists/dist/engine/index.js', 4500],
   ['announcements', 'packages/announcements/dist/index.js', 14000],
   ['surveys', 'packages/surveys/dist/index.js', 12500],
   ['media', 'packages/media/dist/index.js', 9000],
