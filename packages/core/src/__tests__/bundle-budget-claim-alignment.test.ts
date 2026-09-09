@@ -67,6 +67,14 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
   'analytics:mixpanel': { pattern: /per-plugin\s*<\s*([\d.]+)\s*KB/, mode: 'ceiling' },
   'analytics:amplitude': { pattern: /per-plugin\s*<\s*([\d.]+)\s*KB/, mode: 'ceiling' },
   'analytics:ga': { pattern: /per-plugin\s*<\s*([\d.]+)\s*KB/, mode: 'ceiling' },
+  // v3 Phase 0 — anchored on `analytics/engine subpath` exactly as `core:engine`
+  // is on `core/engine subpath`. The sibling `analytics:main` pattern is
+  // `/^\s*-\s*analytics\s*<…/m`, so a bullet beginning `- analytics/engine`
+  // cannot satisfy it (the character after the name is `/`, not whitespace).
+  'analytics:engine': {
+    pattern: /analytics\/engine subpath[^\n]*?<\s*([\d.]+)\s*KB/,
+    mode: 'exact',
+  },
   adoption: { pattern: /adoption,\s*checklists\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },
   checklists: { pattern: /adoption,\s*checklists\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },
   announcements: { pattern: /announcements\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },

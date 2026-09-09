@@ -70,6 +70,14 @@ const EXTERNALS = {
   'react-dom': 'module react-dom',
   'react/jsx-runtime': 'module react/jsx-runtime',
   '@tour-kit/core': 'module @tour-kit/core',
+  // v3 Phase 0 — tracker.ts and the four vendor plugins import `logger` from the
+  // engine subpath now. webpack object-externals match EXACTLY (which is why the
+  // three `react*` keys above are listed separately), so the subpath needs its
+  // own entry or the compile reports `Module not found` for a specifier a real
+  // consumer resolves fine — `@tour-kit/core` is a hard dependency and its
+  // `exports` map has `./engine`. This mirrors the built file's import list; it
+  // weakens no assertion.
+  '@tour-kit/core/engine': 'module @tour-kit/core/engine',
   '@tour-kit/license': 'module @tour-kit/license',
 }
 

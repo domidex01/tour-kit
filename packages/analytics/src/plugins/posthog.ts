@@ -1,4 +1,4 @@
-import { logger } from '@tour-kit/core'
+import { logger } from '@tour-kit/core/engine'
 import type { TourEvent } from '../types/events'
 import type { AnalyticsPlugin } from '../types/plugin'
 
