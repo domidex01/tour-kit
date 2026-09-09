@@ -20,30 +20,29 @@
  * and one `import type … from '../../types'` in a lib file would put both in the
  * declaration closure.
  */
-import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { SPECIFIER_PREFIX, specifierPattern } from '../../../../tooling/bundle-check/closure.mjs'
 import {
-  RELATIVE_SPECIFIER,
-  SPECIFIER_PREFIX,
-  closureOf,
-  specifierPattern,
-} from '../../../../tooling/bundle-check/closure.mjs'
+  assertClosureIsNotTheShell,
+  assertEngineExportsResolve,
+  assertEngineFilesExist,
+  assertEngineNotInInjectUseClient,
+  closureSrc,
+  enginePaths,
+  distExists as pkgDistExists,
+  reachableFrom,
+  read,
+  startsWithClientDirective,
+} from '../../../../tooling/bundle-check/engine-guard.mjs'
 
 const PKG_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const DIST = join(PKG_ROOT, 'dist')
+const P = enginePaths(PKG_ROOT)
 // The DIRECTORY, not the files: gating on a filename turns a typo into a
 // silent skip (measured in v2 §1.5 — "3 skipped", green, proving nothing).
-const distExists = () => existsSync(DIST)
-
-const ENGINE_JS = join(DIST, 'engine', 'index.js')
-const ENGINE_CJS = join(DIST, 'engine', 'index.cjs')
-const ENGINE_DTS = join(DIST, 'engine', 'index.d.ts')
-const ENGINE_DCTS = join(DIST, 'engine', 'index.d.cts')
-const MAIN_JS = join(DIST, 'index.js')
-const MAIN_CJS = join(DIST, 'index.cjs')
-const MAIN_DTS = join(DIST, 'index.d.ts')
+const distExists = () => pkgDistExists(PKG_ROOT)
+const BARREL = join(PKG_ROOT, 'src', 'engine', 'index.ts')
 
 /**
  * Everything that must never follow the state machine through the engine door.
@@ -95,60 +94,16 @@ const CONTROL_DTS = [
  */
 const BARE_CORE = new RegExp(`${SPECIFIER_PREFIX}["']@tour-kit/core["']`)
 
-const read = (p: string) => readFileSync(p, 'utf8')
-/**
- * The closure, never the entry. Under `splitting: true` the engine entry is a
- * re-export shell; reading it makes every scan below vacuous. `closureOf` maps
- * `.js → .d.ts` / `.cjs → .d.cts` and tries the literal path first, so this
- * over-includes for declarations. That is a superset scan and it is stronger.
- */
-const closureSrc = (entry: string) => closureOf(entry).map(read).join('\n')
-
-/**
- * Every source file reachable from `entry` through relative imports, to
- * fixpoint. `.ts` first, then `/index.ts`, then `.tsx` — a `.tsx` leaking in is
- * caught by the assertions rather than by failing to resolve.
- *
- * `RELATIVE_SPECIFIER` is a module-level /g regex: `matchAll` only, never
- * `.test`, which would carry `lastIndex` between calls.
- */
-function reachableFrom(entry: string): string[] {
-  const seen = new Set<string>()
-  const queue = [entry]
-  while (queue.length > 0) {
-    const file = queue.shift() as string
-    if (seen.has(file)) continue
-    seen.add(file)
-    for (const [, spec] of read(file).matchAll(RELATIVE_SPECIFIER)) {
-      const base = resolve(dirname(file), spec)
-      const next = [`${base}.ts`, join(base, 'index.ts'), `${base}.tsx`].find(existsSync)
-      if (!next) throw new Error(`${file}: cannot resolve ${spec}`)
-      queue.push(next)
-    }
-  }
-  return [...seen]
-}
-
 describe('@tour-kit/hints/engine ships no React', () => {
   it.skipIf(!distExists())('names the four built engine files', () => {
-    for (const f of [ENGINE_JS, ENGINE_CJS, ENGINE_DTS, ENGINE_DCTS]) {
-      expect(existsSync(f), `${f} missing — every scan below would be vacuous`).toBe(true)
-    }
+    assertEngineFilesExist(expect, P)
   })
 
   it.skipIf(!distExists())('ANTI-VACUITY — the engine closure is more than the shell', () => {
     // Two files is the NORMAL shape for a split package (the main closure is
-    // four), so the file count discriminates almost nothing. The byte count is
-    // the load-bearing half: the shell alone is ~200 B, a real closure is ~6 KB.
-    for (const entry of [ENGINE_JS, ENGINE_CJS]) {
-      const files = closureOf(entry)
-      expect(files.length, `${entry}: closureOf followed nothing`).toBeGreaterThanOrEqual(2)
-      const bytes = files.reduce((n, f) => n + readFileSync(f).length, 0)
-      expect(
-        bytes,
-        `expected the engine closure to exceed 2 000 raw bytes — got ${bytes}; closureOf followed nothing and is reading the re-export shell`
-      ).toBeGreaterThan(2000)
-    }
+    // four), so the file count discriminates almost nothing. The BYTE count is
+    // the load-bearing half: the shell alone is ~200 B, a real closure ~6 KB.
+    for (const entry of [P.engineJs, P.engineCjs]) assertClosureIsNotTheShell(expect, entry)
   })
 
   it.skipIf(!distExists())('CONTROL — the main closure trips the same matchers', () => {
@@ -157,12 +112,12 @@ describe('@tour-kit/hints/engine ships no React', () => {
     // tripping, the matcher broke or the package changed shape — both deserve
     // a red, because a broken matcher turns every assertion below into a
     // vacuous pass.
-    for (const src of [closureSrc(MAIN_JS), closureSrc(MAIN_CJS)]) {
+    for (const src of [closureSrc(P.mainJs), closureSrc(P.mainCjs)]) {
       for (const pkg of CONTROL_JS) {
         expect(specifierPattern(pkg).test(src), `main should name ${pkg}`).toBe(true)
       }
     }
-    const dts = closureSrc(MAIN_DTS)
+    const dts = closureSrc(P.mainDts)
     for (const pkg of CONTROL_DTS) {
       expect(specifierPattern(pkg).test(dts), `main .d.ts should name ${pkg}`).toBe(true)
     }
@@ -170,11 +125,11 @@ describe('@tour-kit/hints/engine ships no React', () => {
     // imports bare `@tour-kit/core` (twenty source files do). Without this, a
     // BARE_CORE that silently stopped matching would turn the engine's
     // "never bare core" case into a vacuous pass.
-    expect(BARE_CORE.test(closureSrc(MAIN_JS)), 'BARE_CORE stopped matching').toBe(true)
+    expect(BARE_CORE.test(closureSrc(P.mainJs)), 'BARE_CORE stopped matching').toBe(true)
   })
 
   it.skipIf(!distExists())('the engine JS closure names none of the React-side specifiers', () => {
-    for (const entry of [ENGINE_JS, ENGINE_CJS]) {
+    for (const entry of [P.engineJs, P.engineCjs]) {
       const src = closureSrc(entry)
       for (const pkg of FORBIDDEN) {
         expect(specifierPattern(pkg).test(src), `${entry} closure imports ${pkg}`).toBe(false)
@@ -183,7 +138,7 @@ describe('@tour-kit/hints/engine ships no React', () => {
   })
 
   it.skipIf(!distExists())('the engine .d.ts closure names none of them either', () => {
-    for (const entry of [ENGINE_DTS, ENGINE_DCTS]) {
+    for (const entry of [P.engineDts, P.engineDcts]) {
       const src = closureSrc(entry)
       for (const pkg of FORBIDDEN) {
         expect(specifierPattern(pkg).test(src), `${entry} closure names ${pkg}`).toBe(false)
@@ -197,7 +152,7 @@ describe('@tour-kit/hints/engine ships no React', () => {
     // names one — so this is the narrower claim: it reaches core through the
     // React-free door only. Bare `@tour-kit/core` would pull the main barrel's
     // providers, fourteen hooks and `UnifiedSlot` into a Vue consumer's graph.
-    for (const entry of [ENGINE_JS, ENGINE_CJS, ENGINE_DTS, ENGINE_DCTS]) {
+    for (const entry of [P.engineJs, P.engineCjs, P.engineDts, P.engineDcts]) {
       const src = closureSrc(entry)
       expect(BARE_CORE.test(src), `${entry} closure imports bare @tour-kit/core`).toBe(false)
       expect(
@@ -213,50 +168,29 @@ describe('@tour-kit/hints/engine ships no React', () => {
     // entry is a shell and the case would be vacuous forever.
     // `createTourEngine` is a core symbol hints imports nowhere, so its
     // appearance means core's source was inlined rather than externalised.
-    for (const entry of [ENGINE_JS, ENGINE_CJS]) {
+    for (const entry of [P.engineJs, P.engineCjs]) {
       expect(closureSrc(entry), `${entry} inlined core`).not.toMatch(/createTourEngine/)
     }
-    expect(closureSrc(MAIN_JS), 'main inlined core').not.toMatch(/createTourEngine/)
+    expect(closureSrc(P.mainJs), 'main inlined core').not.toMatch(/createTourEngine/)
   })
 
   it.skipIf(!distExists())("'use client' lands on the React entries only", () => {
-    const startsWithDirective = (p: string) => /^['"]use client['"];?/.test(read(p))
-    expect(startsWithDirective(ENGINE_JS)).toBe(false)
-    expect(startsWithDirective(ENGINE_CJS)).toBe(false)
+    expect(startsWithClientDirective(P.engineJs)).toBe(false)
+    expect(startsWithClientDirective(P.engineCjs)).toBe(false)
     // Both halves, and `headless` too: losing the directive on either React
     // entry is equally a break.
-    expect(startsWithDirective(MAIN_JS)).toBe(true)
-    expect(startsWithDirective(MAIN_CJS)).toBe(true)
-    expect(startsWithDirective(join(DIST, 'headless.js'))).toBe(true)
-    expect(startsWithDirective(join(DIST, 'headless.cjs'))).toBe(true)
+    expect(startsWithClientDirective(P.mainJs)).toBe(true)
+    expect(startsWithClientDirective(P.mainCjs)).toBe(true)
+    expect(startsWithClientDirective(join(P.dist, 'headless.js'))).toBe(true)
+    expect(startsWithClientDirective(join(P.dist, 'headless.cjs'))).toBe(true)
   })
 
   it.skipIf(!distExists())('every path the ./engine exports block names resolves', () => {
-    // The `types` condition of an `exports` block is never exercised by an
-    // `import()`. A `.d.mts` typo, a dropped `./`, or a `.d.ts`/`.d.cts` swap is
-    // invisible to every other case here and breaks a consumer's typecheck
-    // rather than their build.
-    const pkg = JSON.parse(read(join(PKG_ROOT, 'package.json'))) as {
-      exports: Record<string, { import: Record<string, string>; require: Record<string, string> }>
-    }
-    const block = pkg.exports['./engine']
-    expect(block, 'package.json has no "./engine" exports key').toBeDefined()
-
-    const paths = [
-      block.import.types,
-      block.import.default,
-      block.require.types,
-      block.require.default,
-    ]
-    expect(paths.filter(Boolean)).toHaveLength(4)
-    for (const rel of paths) {
-      expect(rel.startsWith('./'), `${rel} is not a relative exports target`).toBe(true)
-      expect(existsSync(join(PKG_ROOT, rel)), `${rel} does not exist on disk`).toBe(true)
-    }
+    assertEngineExportsResolve(expect, PKG_ROOT)
   })
 
   it('every source file the engine barrel reaches lives under lib/hints-engine/', () => {
-    const files = reachableFrom(join(PKG_ROOT, 'src', 'engine', 'index.ts'))
+    const files = reachableFrom(BARREL)
     // A silently-empty walk passes every assertion below it forever. Say out
     // loud what it must have found: the barrel plus six lib modules is today's
     // exact count — a floor, not a target.
@@ -264,7 +198,6 @@ describe('@tour-kit/hints/engine ships no React', () => {
     expect(files.some((f) => f.endsWith('lib/hints-engine/create-hints-engine.ts'))).toBe(true)
     expect(files.length).toBeGreaterThanOrEqual(7)
 
-    const barrel = join(PKG_ROOT, 'src', 'engine', 'index.ts')
     for (const file of files) {
       const source = read(file)
       expect(file.endsWith('.tsx'), `${file} is a React file`).toBe(false)
@@ -272,7 +205,7 @@ describe('@tour-kit/hints/engine ships no React', () => {
       // @tour-kit/media, so one `import type … from '../../types'` in a lib
       // file would put both in the declaration closure — and a TYPE import
       // leaves no trace in the JS, so only this case would catch it.
-      if (file !== barrel) {
+      if (file !== BARREL) {
         expect(
           file.includes(`${join('lib', 'hints-engine')}`),
           `${file} is reachable from the engine barrel but is not under lib/hints-engine/`
@@ -288,13 +221,9 @@ describe('@tour-kit/hints/engine ships no React', () => {
   })
 
   it('the engine entry is never stamped with a client directive', () => {
-    // The source half of the `'use client'` case above: `injectUseClient` is
-    // called in tsup's `onSuccess`, and adding `'engine/index'` to its list is
-    // a one-word change that only the built-bytes case would otherwise catch —
-    // and only after a rebuild.
-    const config = read(join(PKG_ROOT, 'tsup.config.ts'))
-    const call = config.match(/injectUseClient\(\[([^\]]*)\]\)/)
-    expect(call, 'injectUseClient call not found in tsup.config.ts').not.toBeNull()
-    expect(call?.[1]).not.toMatch(/engine/)
+    // The source half of the `'use client'` byte case above: adding the engine
+    // entry to `injectUseClient` is a one-word change that the built-bytes case
+    // only catches after a rebuild.
+    assertEngineNotInInjectUseClient(expect, PKG_ROOT)
   })
 })
