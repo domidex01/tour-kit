@@ -5,16 +5,16 @@ import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import { registerUrlVisitTask } from '../engine/url-visit-listener'
 import { useChecklistPersistence } from '../hooks/use-checklist-persistence'
+import { checklistsReducer, createChecklistState } from '../lib/checklists-engine/reducer'
+import type { ChecklistsAction, ChecklistsEngineState } from '../lib/checklists-engine/types'
 import type {
   ChecklistConfig,
   ChecklistContext as ChecklistContextType,
   ChecklistProgress,
   ChecklistProviderConfig,
   ChecklistState,
-  ChecklistTaskState,
   PersistedChecklistState,
 } from '../types'
-import { canCompleteTask } from '../utils/dependencies'
 import { calculateProgress } from '../utils/progress'
 import { ChecklistContext, type ChecklistContextValue } from './checklist-context'
 
@@ -22,306 +22,12 @@ interface ChecklistProviderProps extends ChecklistProviderConfig {
   children: React.ReactNode
 }
 
-type ChecklistAction =
-  | { type: 'COMPLETE_TASK'; checklistId: string; taskId: string; at: number }
-  | { type: 'UNCOMPLETE_TASK'; checklistId: string; taskId: string }
-  | { type: 'DISMISS_CHECKLIST'; checklistId: string }
-  | { type: 'RESTORE_CHECKLIST'; checklistId: string }
-  | { type: 'SET_EXPANDED'; checklistId: string; expanded: boolean }
-  | { type: 'RESET_CHECKLIST'; checklistId: string }
-  | { type: 'RESET_ALL' }
-  | { type: 'LOAD_PERSISTED'; state: PersistedChecklistState }
-  | { type: 'MARK_NOTIFIED_COMPLETE'; checklistId: string }
-
-interface ChecklistReducerState {
-  checklists: Map<string, ChecklistState>
-  completed: Record<string, Set<string>>
-  dismissed: Set<string>
-  /** Per-task completion timestamps — the source of truth for ChecklistTaskState.completedAt */
-  completedAt: Record<string, Record<string, number>>
-  /** Checklist IDs for which onComplete has already fired — persisted to prevent re-firing across reloads */
-  notifiedComplete: Set<string>
-}
-
-function createInitialTaskState(
-  task: ChecklistConfig['tasks'][0],
-  context: ChecklistContextType,
-  completedTasks: Set<string>,
-  allTasks: ChecklistConfig['tasks'],
-  completedAtMap: Record<string, number> | undefined
-): ChecklistTaskState {
-  const visible = task.when ? task.when(context) : true
-  const locked = !canCompleteTask(task, completedTasks, allTasks)
-  const completed = completedTasks.has(task.id)
-
-  return {
-    config: task,
-    completed,
-    locked,
-    visible,
-    completedAt: completed ? completedAtMap?.[task.id] : undefined,
-  }
-}
-
-function createChecklistState(
-  config: ChecklistConfig,
-  context: ChecklistContextType,
-  completedTasks: Set<string>,
-  isDismissed: boolean,
-  isExpanded: boolean,
-  completedAtMap: Record<string, number> | undefined
-): ChecklistState {
-  const tasks = config.tasks.map((task) =>
-    createInitialTaskState(task, context, completedTasks, config.tasks, completedAtMap)
-  )
-
-  const visibleTasks = tasks.filter((t) => t.visible)
-  const completedCount = visibleTasks.filter((t) => t.completed).length
-  const totalCount = visibleTasks.length
-  const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
-
-  return {
-    config,
-    tasks,
-    progress,
-    completedCount,
-    totalCount,
-    isComplete: completedCount === totalCount && totalCount > 0,
-    isDismissed,
-    isExpanded,
-  }
-}
-
-interface ReducerContext {
-  configs: ChecklistConfig[]
-  context: ChecklistContextType
-}
-
-function handleTaskCompletion(
-  state: ChecklistReducerState,
-  checklistId: string,
-  taskId: string,
-  complete: boolean,
-  at: number | undefined,
-  { configs, context }: ReducerContext
-): ChecklistReducerState {
-  const existing = state.completed[checklistId] ?? new Set<string>()
-  const alreadyComplete = existing.has(taskId)
-  if (complete === alreadyComplete) return state
-
-  const newCompleted = { ...state.completed }
-  const tasks = new Set(existing)
-  if (complete) {
-    tasks.add(taskId)
-  } else {
-    tasks.delete(taskId)
-  }
-  newCompleted[checklistId] = tasks
-
-  const newCompletedAt = { ...state.completedAt }
-  const checklistCompletedAt = { ...(newCompletedAt[checklistId] ?? {}) }
-  if (complete && at !== undefined) {
-    checklistCompletedAt[taskId] = at
-  } else {
-    delete checklistCompletedAt[taskId]
-  }
-  newCompletedAt[checklistId] = checklistCompletedAt
-
-  const config = configs.find((c) => c.id === checklistId)
-  if (!config) return state
-
-  const newChecklists = new Map(state.checklists)
-  newChecklists.set(
-    checklistId,
-    createChecklistState(
-      config,
-      { ...context, completedTasks: Array.from(tasks) },
-      tasks,
-      state.dismissed.has(checklistId),
-      state.checklists.get(checklistId)?.isExpanded ?? true,
-      checklistCompletedAt
-    )
-  )
-
-  return {
-    ...state,
-    completed: newCompleted,
-    completedAt: newCompletedAt,
-    checklists: newChecklists,
-  }
-}
-
-function handleDismissRestore(
-  state: ChecklistReducerState,
-  checklistId: string,
-  dismiss: boolean
-): ChecklistReducerState {
-  const newDismissed = new Set(state.dismissed)
-  if (dismiss) {
-    newDismissed.add(checklistId)
-  } else {
-    newDismissed.delete(checklistId)
-  }
-
-  const newChecklists = new Map(state.checklists)
-  const existing = newChecklists.get(checklistId)
-  if (existing) {
-    newChecklists.set(checklistId, { ...existing, isDismissed: dismiss })
-  }
-
-  return { ...state, dismissed: newDismissed, checklists: newChecklists }
-}
-
-function handleLoadPersisted(
-  state: PersistedChecklistState,
-  { configs, context }: ReducerContext
-): ChecklistReducerState {
-  const newCompleted: Record<string, Set<string>> = {}
-  for (const [id, tasks] of Object.entries(state.completed)) {
-    newCompleted[id] = new Set(tasks)
-  }
-  const newDismissed = new Set(state.dismissed)
-  const newCompletedAt: Record<string, Record<string, number>> = {}
-  for (const [id, map] of Object.entries(state.completedAt ?? {})) {
-    newCompletedAt[id] = { ...map }
-  }
-  const newNotifiedComplete = new Set(state.notifiedComplete ?? [])
-
-  const newChecklists = new Map<string, ChecklistState>()
-  for (const config of configs) {
-    const tasks = newCompleted[config.id] ?? new Set()
-    newChecklists.set(
-      config.id,
-      createChecklistState(
-        config,
-        { ...context, completedTasks: Array.from(tasks) },
-        tasks,
-        newDismissed.has(config.id),
-        true,
-        newCompletedAt[config.id]
-      )
-    )
-  }
-
-  return {
-    completed: newCompleted,
-    dismissed: newDismissed,
-    checklists: newChecklists,
-    completedAt: newCompletedAt,
-    notifiedComplete: newNotifiedComplete,
-  }
-}
-
-function checklistReducer(
-  state: ChecklistReducerState,
-  action: ChecklistAction,
-  configs: ChecklistConfig[],
-  context: ChecklistContextType
-): ChecklistReducerState {
-  const reducerCtx: ReducerContext = { configs, context }
-
-  switch (action.type) {
-    case 'COMPLETE_TASK':
-      return handleTaskCompletion(
-        state,
-        action.checklistId,
-        action.taskId,
-        true,
-        action.at,
-        reducerCtx
-      )
-
-    case 'UNCOMPLETE_TASK':
-      return handleTaskCompletion(
-        state,
-        action.checklistId,
-        action.taskId,
-        false,
-        undefined,
-        reducerCtx
-      )
-
-    case 'DISMISS_CHECKLIST': {
-      if (state.dismissed.has(action.checklistId)) return state
-      return handleDismissRestore(state, action.checklistId, true)
-    }
-
-    case 'RESTORE_CHECKLIST': {
-      if (!state.dismissed.has(action.checklistId)) return state
-      return handleDismissRestore(state, action.checklistId, false)
-    }
-
-    case 'SET_EXPANDED': {
-      const existing = state.checklists.get(action.checklistId)
-      if (!existing) return state
-      if (existing.isExpanded === action.expanded) return state
-      const newChecklists = new Map(state.checklists)
-      newChecklists.set(action.checklistId, { ...existing, isExpanded: action.expanded })
-      return { ...state, checklists: newChecklists }
-    }
-
-    case 'RESET_CHECKLIST': {
-      const config = configs.find((c) => c.id === action.checklistId)
-      if (!config) return state
-
-      const newCompleted = { ...state.completed }
-      delete newCompleted[action.checklistId]
-
-      const newDismissed = new Set(state.dismissed)
-      newDismissed.delete(action.checklistId)
-
-      const newCompletedAt = { ...state.completedAt }
-      delete newCompletedAt[action.checklistId]
-
-      const newNotifiedComplete = new Set(state.notifiedComplete)
-      newNotifiedComplete.delete(action.checklistId)
-
-      const newChecklists = new Map(state.checklists)
-      newChecklists.set(
-        action.checklistId,
-        createChecklistState(config, context, new Set(), false, true, undefined)
-      )
-
-      return {
-        completed: newCompleted,
-        dismissed: newDismissed,
-        checklists: newChecklists,
-        completedAt: newCompletedAt,
-        notifiedComplete: newNotifiedComplete,
-      }
-    }
-
-    case 'RESET_ALL': {
-      const newChecklists = new Map<string, ChecklistState>()
-      for (const config of configs) {
-        newChecklists.set(
-          config.id,
-          createChecklistState(config, context, new Set(), false, true, undefined)
-        )
-      }
-      return {
-        completed: {},
-        dismissed: new Set(),
-        checklists: newChecklists,
-        completedAt: {},
-        notifiedComplete: new Set(),
-      }
-    }
-
-    case 'LOAD_PERSISTED':
-      return handleLoadPersisted(action.state, reducerCtx)
-
-    case 'MARK_NOTIFIED_COMPLETE': {
-      if (state.notifiedComplete.has(action.checklistId)) return state
-      const next = new Set(state.notifiedComplete)
-      next.add(action.checklistId)
-      return { ...state, notifiedComplete: next }
-    }
-
-    default:
-      return state
-  }
-}
+// v3 Phase 2 — the reducer, its five helpers and the state shape moved to
+// `lib/checklists-engine/reducer.ts` (this file's former `:25-324`). The
+// provider still drives them through `useReducer`; only the currying is
+// explicit now. These two aliases keep the rest of this file unchanged.
+type ChecklistAction = ChecklistsAction
+type ChecklistReducerState = ChecklistsEngineState<ChecklistConfig>
 
 export function ChecklistProvider({
   children,
@@ -367,7 +73,7 @@ export function ChecklistProvider({
 
   const [state, dispatch] = React.useReducer(
     (s: ChecklistReducerState, a: ChecklistAction) =>
-      checklistReducer(s, a, checklistConfigs, checklistContext),
+      checklistsReducer(s, a, { configs: checklistConfigs, context: checklistContext }),
     initialState
   )
 
