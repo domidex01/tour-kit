@@ -31,6 +31,37 @@ Persistent hints/hotspots that exist outside the tour flow.
 - `hide()` - Close temporarily (can reopen)
 - Dismissal state persists via storage adapter
 
+## Engine (`@tour-kit/hints/engine`, v3 Phase 1)
+
+The state machine lives in `src/lib/hints-engine/` and is published React-free
+at `@tour-kit/hints/engine`: `createHintsEngine`, `createHintsHandle`,
+`INITIAL_HINTS_STATE`, `getHotspotPosition`. `HintsProvider` is a **binding**
+over it — one handle in `useState`, one `useSyncExternalStore`, two effects.
+
+Rules that bite:
+
+- **Every file under `src/lib/hints-engine/` imports core as
+  `@tour-kit/core/engine`, never bare `@tour-kit/core`, and never `../../types`,
+  `../../hooks`, `../../context` or `../../components`.** `src/types/index.ts`
+  imports `react` and `@tour-kit/media`; one type import from it puts both in
+  the engine's declaration closure. A TYPE import leaves no trace in the built
+  bytes, so only the source-walk case in `no-react-in-engine-dist.test.ts`
+  catches it.
+- **The engine is inert until `boot()`.** No `window`, no storage, no clock in
+  the constructor. Storage resolves at `boot()` and is read once.
+- **Seed the factory.** `<Hint autoShow>` and `useHint` call verbs from their own
+  mount effects, which run *before* the provider's. The factory handed to
+  `createHintsHandle` must construct, `setHints` and `boot()`, or the first verb
+  runs against an engine with no configs and no storage. Pinned by
+  `src/__tests__/integration/hint-autoshow-frequency.test.tsx`.
+- **Never add `'engine/index'` to `injectUseClient`.** It would mark a
+  framework-agnostic entry client-only. Asserted on both the built bytes and the
+  tsup config.
+- **Guards read the import CLOSURE, never the entry.** This package builds with
+  `splitting: true`, so `dist/engine/index.js` is a re-export shell; a scan of it
+  passes forever.
+- `hintsReducer` stays internal, as core withholds `tourReducer`.
+
 ## Gotchas
 
 - **Hint vs Tour**: Don't use hints for sequential onboarding - use tours
