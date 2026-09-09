@@ -58,6 +58,16 @@ Framework-agnostic foundation layer. Contains all business logic - UI packages a
   one microtask, so React tearing an effect down and re-running it can take it
   back. Without that, the replacement engine re-boots and every restore side
   effect fires twice in dev.
+- **`createEngineHandle` is a facade, `createHandle` is the primitive** (v3
+  Phase 1): the lifecycle half — lazy `ensure()`, the listener set that
+  outlives any one engine, the construction fan-out, the deferred `release()` —
+  is `createHandle<E, S>(factory, initial)` and knows nothing about tours;
+  `createEngineHandle` is it plus the seventeen tour verbs. Both are on
+  `/engine`. A package with its own engine composes `createHandle` rather than
+  re-implementing the lifecycle. `EngineLike`'s `flush` is optional, so a
+  synchronous engine needs none. `createEngineHandle`'s signature must not
+  drift: `src/__tests__/types/engine-handle.test-d.ts` pins it and only
+  `pnpm typecheck:types` runs that file — no vitest run reports it.
 - **Context null checks**: All context hooks throw if used outside provider - this is intentional
 - **SSR**: Hooks handle SSR by checking `typeof window` before accessing DOM APIs
 - **Refs over state**: Position-related values use refs to avoid re-render cascades

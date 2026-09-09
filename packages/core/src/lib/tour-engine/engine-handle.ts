@@ -50,31 +50,37 @@ export const INITIAL_SNAPSHOT: TourCallbackContext = Object.freeze({
   data: {},
 })
 
-export interface EngineHandle extends Omit<TourEngine, 'destroy'> {
-  /**
-   * Construct on the first call and return the live engine.
-   *
-   * Never call this from render — that is the `registered twice` hazard. The
-   * provider's own mount effect is the latest it can happen; a child's verb is
-   * the earliest.
-   */
-  ensure: () => TourEngine
-  /** `INITIAL_SNAPSHOT` until the first `ensure()`; then the engine's cached snapshot. */
-  getState: () => TourCallbackContext
-  /**
-   * Stop being the live engine.
-   *
-   * Pending writes are flushed synchronously; the `destroy()` itself lands one
-   * microtask later, so a verb or `ensure()` in the same tick — React tearing
-   * an effect down and re-running it — takes the release back and keeps the
-   * engine, its state and its completed boot. Subscribers survive either way,
-   * so a genuinely new engine re-attaches them. Idempotent.
-   */
+/**
+ * v3 Phase 1 — the engine-agnostic half of the handle.
+ *
+ * Lazy `ensure()`, a listener set that outlives any one engine, one fan-out on
+ * construction, and a microtask-deferred `release()`. Nothing here knows what a
+ * tour is; `createEngineHandle` below is this plus the seventeen tour verbs.
+ * `flush` is optional because an engine whose writes are synchronous has
+ * nothing to flush.
+ */
+export interface EngineLike<S> {
+  getState: () => S
+  subscribe: (listener: () => void) => () => void
+  destroy: () => void
+  flush?: () => void
+}
+
+export interface Handle<E extends EngineLike<S>, S> {
+  /** Construct on the first call and return the live engine. Never from render. */
+  ensure: () => E
+  /** `initial` until the first `ensure()`; then the engine's own snapshot. */
+  getState: () => S
+  subscribe: (listener: () => void) => () => void
+  /** Flush now; destroy one microtask later unless a verb takes it back. Idempotent. */
   release: () => void
 }
 
-export function createEngineHandle(factory: () => TourEngine): EngineHandle {
-  let engine: TourEngine | null = null
+export function createHandle<E extends EngineLike<S>, S>(
+  factory: () => E,
+  initial: S
+): Handle<E, S> {
+  let engine: E | null = null
   let off: (() => void) | null = null
   let pendingRelease = false
   const listeners = new Set<() => void>()
@@ -83,7 +89,7 @@ export function createEngineHandle(factory: () => TourEngine): EngineHandle {
     for (const listener of listeners) listener()
   }
 
-  const ensure = (): TourEngine => {
+  const ensure = (): E => {
     // A release scheduled earlier in this same tick was React tearing the
     // effect down before re-running it. Take it back.
     pendingRelease = false
@@ -91,9 +97,9 @@ export function createEngineHandle(factory: () => TourEngine): EngineHandle {
     engine = factory()
     off = engine.subscribe(fanOut)
     // One fan-out on construction: the snapshot identity just moved from the
-    // module constant to the engine's, so `useSyncExternalStore` has to
-    // re-read even though the values are equal. That extra render is the price
-    // of not constructing during render.
+    // constant to the engine's, so a store subscriber has to re-read even
+    // though the values are equal. That extra render is the price of not
+    // constructing during render.
     fanOut()
     return engine
   }
@@ -101,7 +107,7 @@ export function createEngineHandle(factory: () => TourEngine): EngineHandle {
   return {
     ensure,
 
-    getState: () => engine?.getState() ?? INITIAL_SNAPSHOT,
+    getState: () => (engine ? engine.getState() : initial),
 
     subscribe: (listener: () => void) => {
       listeners.add(listener)
@@ -127,17 +133,18 @@ export function createEngineHandle(factory: () => TourEngine): EngineHandle {
      * dropped. Anything asserting on that after an `unmount()` needs one
      * `await`.
      *
-     * The one thing that cannot wait is the pending throttled write, so
-     * `flush()` runs NOW. The flow-session save is trailing-edge throttled at
-     * 200 ms, and an unmount immediately followed by a remount — a fast
+     * The one thing that cannot wait is a pending throttled write, so
+     * `flush()` runs NOW. Core's flow-session save is trailing-edge throttled
+     * at 200 ms, and an unmount immediately followed by a remount — a fast
      * client-side route change — would otherwise let the new engine boot and
-     * read the step the old one had already left.
+     * read the step the old one had already left. `flush` is optional on
+     * `EngineLike`: an engine whose writes are synchronous has none pending.
      *
      * No fan-out either way: the binding is either leaving or about to re-read.
      */
     release: () => {
       if (!engine || pendingRelease) return
-      engine.flush()
+      engine.flush?.()
       pendingRelease = true
       queueMicrotask(() => {
         if (!pendingRelease) return
@@ -148,6 +155,37 @@ export function createEngineHandle(factory: () => TourEngine): EngineHandle {
         engine = null
       })
     },
+  }
+}
+
+export interface EngineHandle extends Omit<TourEngine, 'destroy'> {
+  /**
+   * Construct on the first call and return the live engine.
+   *
+   * Never call this from render — that is the `registered twice` hazard. The
+   * provider's own mount effect is the latest it can happen; a child's verb is
+   * the earliest.
+   */
+  ensure: () => TourEngine
+  /** `INITIAL_SNAPSHOT` until the first `ensure()`; then the engine's cached snapshot. */
+  getState: () => TourCallbackContext
+  /**
+   * Stop being the live engine.
+   *
+   * Pending writes are flushed synchronously; the `destroy()` itself lands one
+   * microtask later, so a verb or `ensure()` in the same tick — React tearing
+   * an effect down and re-running it — takes the release back and keeps the
+   * engine, its state and its completed boot. Subscribers survive either way,
+   * so a genuinely new engine re-attaches them. Idempotent.
+   */
+  release: () => void
+}
+
+export function createEngineHandle(factory: () => TourEngine): EngineHandle {
+  const h = createHandle<TourEngine, TourCallbackContext>(factory, INITIAL_SNAPSHOT)
+  const ensure = h.ensure
+  return {
+    ...h,
 
     boot: (...a) => ensure().boot(...a),
     start: (...a) => ensure().start(...a),

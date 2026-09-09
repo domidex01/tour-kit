@@ -261,6 +261,12 @@ export {
   pickActions,
 } from '../lib/tour-engine/engine-handle'
 export type { EngineHandle } from '../lib/tour-engine/engine-handle'
+// v3 Phase 1 — the engine-agnostic half of the handle. `createEngineHandle` is
+// this plus the seventeen tour verbs; a package with its own engine (hints,
+// checklists…) composes `createHandle` with its own instead of writing a
+// second lifecycle.
+export { createHandle } from '../lib/tour-engine/engine-handle'
+export type { EngineLike, Handle } from '../lib/tour-engine/engine-handle'
 export type { TourEngineLiveOptions } from '../lib/tour-engine/create-tour-engine'
 export type { TourEngineAnalytics } from '../lib/tour-engine/context'
 // The option bag all three bindings take, and the two splits it feeds the

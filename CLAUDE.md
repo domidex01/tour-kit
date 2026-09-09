@@ -140,7 +140,9 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     `engine-not-in-main-closure.test.ts` asserted the opposite and was deleted
     in §1.4e; the invariant that still holds is `no-react-in-engine-dist`.
     v2 §1.5 took it to 22 621 (+47 B) — the six binding-contract re-exports
-    on `/engine` plus `attachAdvanceOn`'s deferred bind)
+    on `/engine` plus `attachAdvanceOn`'s deferred bind. v3 Phase 1 took it to
+    22 879 (+20 B over the 22 857 the gate actually printed before it) for
+    `createHandle`, the engine-agnostic half of `createEngineHandle`)
   - core/engine subpath <18.5 KB (the non-React consumer's worst case: the
     engine — reducer, boot resolver, actions, transition effects, four
     storage adapters — plus the v2 §1.3b DOM behaviours (focus trap,
@@ -162,7 +164,10 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     spotlight state machine that §1.5 had shipped in three copies. Most of
     those bytes MOVED rather than appeared — a Vue consumer ships engine +
     binding, and that total went 19 187 → 19 341, so +154 B net for deleting
-    two of the three implementations)
+    two of the three implementations. v3 Phase 1 took it to 18 124 (+25 B):
+    `createHandle` plus its `EngineLike`/`Handle` types, which a package with
+    its own engine composes instead of writing a second lifecycle —
+    `@tour-kit/hints/engine` is the first)
   - core/engine IIFE (`dist/engine/index.global.js`, the CDN door) <18.5 KB,
     measured 17 492. It is the engine closure in one file — same source, one
     format — so it shares `core/engine`'s ceiling instead of the measured-×1.2
