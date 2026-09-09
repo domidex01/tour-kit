@@ -36,6 +36,16 @@ export interface CreateChecklistsEngineOptions<TConfig extends EngineChecklistCo
   checklists?: TConfig[]
   context?: Partial<ChecklistContextData>
   persistence?: ChecklistPersistenceConfig
+  /**
+   * The state to start from, instead of deriving one from `checklists`.
+   *
+   * A binding that also seeds its handle passes the SAME object to both, so
+   * that `handle.getState()` is identity-stable across the first `ensure()`.
+   * Without it the construction fan-out hands `useSyncExternalStore` an equal
+   * but distinct snapshot and every consumer renders a second time — measured
+   * against `checklist.test.tsx`, which counts `renderTask` calls.
+   */
+  initialState?: ChecklistsEngineState<TConfig>
 }
 
 export interface ChecklistsEngine<TConfig extends EngineChecklistConfig = EngineChecklistConfig> {
@@ -319,7 +329,7 @@ export function createChecklistsEngine<
     },
   }
 
-  state = seedChecklistsState<TConfig>(configs, options.context)
+  state = options.initialState ?? seedChecklistsState<TConfig>(configs, options.context)
 
   return api
 }
