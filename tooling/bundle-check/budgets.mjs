@@ -35,7 +35,9 @@
  *     `navigateToStepImpl`, `commitStart` in `actions.ts`, the Group B block
  *     in `transition-effects.ts`); 21 851 -> 22 574 in v2 §1.4; 22 574 ->
  *     22 621 in v2 §1.5 (the six binding-contract re-exports on `/engine`
- *     plus `attachAdvanceOn`'s deferred bind).
+ *     plus `attachAdvanceOn`'s deferred bind); 22 857 -> 22 879 in v3 Phase 1
+ *     (+20 B for `createHandle`, the engine-agnostic half of
+ *     `createEngineHandle`, and its two type exports on `/engine`).
  *
  *     §1.4's +725 B is the closure FLIPPING, by design. `<TourProvider>` is a
  *     binding over `createTourEngine()` now, so the factory and the engine
@@ -85,6 +87,13 @@
  *     the three inlined copies did not. 154 B to delete two of three
  *     implementations is the trade, and it is worth stating plainly rather
  *     than rounding to "free".
+ *
+ *     v3 Phase 1 added 25 B (18 098 -> 18 124): `createHandle`, the
+ *     engine-agnostic half of `createEngineHandle` (lazy `ensure()`, the
+ *     listener set, the microtask-deferred `release()`), plus its `EngineLike`
+ *     and `Handle` types. It is on `/engine` because a package with its own
+ *     engine composes it rather than writing a second lifecycle —
+ *     `@tour-kit/hints/engine` is the first.
  *
  *     Do NOT split a `/engine/dom` entry to keep this number flat: the row
  *     measures the import-everything worst case, a bundler tree-shakes the

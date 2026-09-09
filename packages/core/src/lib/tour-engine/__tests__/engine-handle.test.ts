@@ -12,7 +12,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { tourRegistry } from '../../../registry/tour-registry'
-import { INITIAL_SNAPSHOT, createEngineHandle } from '../engine-handle'
+import { INITIAL_SNAPSHOT, createEngineHandle, createHandle } from '../engine-handle'
 import type { EngineHandle } from '../engine-handle'
 import { countingFactory } from './_helpers/counting-factory'
 import { makeTour, visibleStep } from './_helpers/make-tour'
@@ -187,5 +187,117 @@ describe('verb identity is the handle lifetime', () => {
 
     expect(handle.start).toBe(before)
     expect(handle.next).toBe(handle.next)
+  })
+})
+
+/**
+ * v3 Phase 1 — `createHandle` is the engine-agnostic half.
+ *
+ * Everything above drives it through `createEngineHandle` and a real
+ * `TourEngine`, which cannot distinguish "the lifecycle is generic" from "the
+ * lifecycle happens to work for tours". So these six drive it over a fake
+ * `EngineLike` that is not a tour engine and deliberately has **no `flush`** —
+ * that optional member is what lets a package whose writes are synchronous
+ * (hints) compose the same handle.
+ */
+function fakeEngine() {
+  let constructed = 0
+  const listeners = new Set<() => void>()
+  const state = { n: 0 }
+  const factory = () => {
+    constructed++
+    return {
+      getState: () => state,
+      subscribe: (l: () => void) => {
+        listeners.add(l)
+        return () => {
+          listeners.delete(l)
+        }
+      },
+      destroy: () => {
+        listeners.clear()
+      },
+      // no `flush` — release() must not throw
+    }
+  }
+  return { factory, state, count: () => constructed }
+}
+
+describe('createHandle is engine-agnostic', () => {
+  // Annotated, not inferred: `Object.freeze({ n: -1 })` widens to `Readonly<{ n: -1 }>`
+  // and the fake's `{ n: number }` state is then not assignable to `EngineLike<S>`.
+  const INITIAL: { n: number } = Object.freeze({ n: -1 })
+
+  it('getState() before ensure() returns the `initial` argument by reference', () => {
+    const fake = fakeEngine()
+    const h = createHandle(fake.factory, INITIAL)
+
+    expect(h.getState()).toBe(INITIAL)
+    expect(fake.count(), 'getState() constructed the engine').toBe(0)
+  })
+
+  it('subscribe() alone constructs nothing', () => {
+    const fake = fakeEngine()
+    const h = createHandle(fake.factory, INITIAL)
+
+    const off = h.subscribe(() => {})
+    off()
+
+    expect(fake.count()).toBe(0)
+  })
+
+  it('ensure() constructs once and fans out once', () => {
+    const fake = fakeEngine()
+    const h = createHandle(fake.factory, INITIAL)
+    let notified = 0
+    h.subscribe(() => notified++)
+
+    const first = h.ensure()
+    const second = h.ensure()
+
+    expect(fake.count()).toBe(1)
+    expect(second).toBe(first)
+    expect(notified, 'the second ensure() fanned out again').toBe(1)
+    expect(h.getState()).toBe(fake.state)
+  })
+
+  it('release() is deferred one microtask, and ensure() in the same tick takes it back', async () => {
+    const fake = fakeEngine()
+    const h = createHandle(fake.factory, INITIAL)
+    const engine = h.ensure()
+
+    h.release()
+    expect(h.ensure(), 'the release was not taken back').toBe(engine)
+    await Promise.resolve()
+    expect(fake.count(), 'the deferred destroy fired anyway').toBe(1)
+    expect(h.getState()).toBe(fake.state)
+
+    // A release with nothing to take it back really does land.
+    h.release()
+    await Promise.resolve()
+    expect(h.getState()).toBe(INITIAL)
+    expect(h.ensure(), 'the replacement is a new engine').not.toBe(engine)
+    expect(fake.count()).toBe(2)
+  })
+
+  it('release() on an engine with no `flush` does not throw', async () => {
+    const fake = fakeEngine()
+    const h = createHandle(fake.factory, INITIAL)
+    h.ensure()
+
+    expect(() => h.release()).not.toThrow()
+    await Promise.resolve()
+    expect(h.getState()).toBe(INITIAL)
+  })
+
+  it('a listener subscribed before construction fires on the construction fan-out', () => {
+    const fake = fakeEngine()
+    const h = createHandle(fake.factory, INITIAL)
+    let notified = 0
+    h.subscribe(() => notified++)
+
+    expect(notified).toBe(0)
+    h.ensure()
+    expect(notified).toBe(1)
   })
 })
