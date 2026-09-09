@@ -1,16 +1,9 @@
 'use client'
 
-import {
-  type FrequencyRule,
-  canShowAfterDismissal,
-  canShowByFrequency,
-  logger,
-} from '@tour-kit/core'
 import * as React from 'react'
 import { useHintFilter } from '../hooks/use-hint-filter'
-import { readPersistedEntries, resolveStorage, syncStorage } from '../lib/hints-engine/persistence'
-import { emptyFrequencyState, hintsReducer } from '../lib/hints-engine/reducer'
-import type { HintsStorage } from '../lib/hints-engine/types'
+import { createHintsEngine } from '../lib/hints-engine/create-hints-engine'
+import { createHintsHandle } from '../lib/hints-engine/handle'
 import type { HintConfig, HintsContextValue } from '../types'
 import { HintsContext } from './hints-context'
 
@@ -24,160 +17,65 @@ export interface HintsProviderProps {
    */
   hints?: HintConfig[]
   /**
-   * Backing storage for hint frequency persistence (Phase 3a). Defaults to
-   * `localStorage`. Tests inject an in-memory mock to keep jsdom global state
-   * untouched. Keys are namespaced as `tourkit:hint:freq:<hintId>`.
+   * Backing storage for hint frequency persistence. Defaults to
+   * `localStorage`, resolved by the engine at boot. Keys are namespaced as
+   * `tourkit:hint:freq:<hintId>`. Must be SYNCHRONOUS. Read once.
    */
   storage?: Storage
 }
 
+/**
+ * A binding over `createHintsEngine()` (v3 Phase 1): one handle, one
+ * `useSyncExternalStore`, two effects. The HANDLE is held in `useState` — it
+ * constructs nothing, so StrictMode's discarded initialiser is an inert
+ * object; the engine itself is built on the first verb or in the boot effect,
+ * never in render. `release()`, never `destroy()`, in the cleanup: the destroy
+ * is deferred a microtask so an effect teardown-and-rerun takes it back.
+ *
+ * The factory SEEDS the engine — configs, storage, boot — before the first
+ * verb. A child's `useHint` / `autoShow` effect runs before this provider's
+ * own effects (engine-handle.ts, rule 1), so anything a child verb can read
+ * must exist at `ensure()`. The two effects below are idempotent no-ops on
+ * mount and only matter on later prop changes; their order is still
+ * load-bearing for those: `setHints` before `boot`.
+ */
 export function HintsProvider({ children, hints, storage }: HintsProviderProps) {
   const filteredHints = useHintFilter(hints ?? [])
-  const hintsById = React.useMemo(() => {
-    const m = new Map<string, HintConfig>()
-    for (const h of filteredHints) m.set(h.id, h)
-    return m
-  }, [filteredHints])
+  const latest = React.useRef({ storage, hints: hints ? filteredHints : undefined })
+  latest.current = { storage, hints: hints ? filteredHints : undefined }
 
-  // Resolve storage once per mount. Wrapped via createPrefixedStorage so
-  // every persisted key carries the `tourkit:` namespace consistently.
-  // The cast narrows core's Storage type — which permits async adapters
-  // (Promise-returning getItem/setItem) — down to the sync `PersistAdapter`
-  // this provider relies on. Both DOM `localStorage` and the in-memory test
-  // mock are synchronous; passing an async adapter would silently break the
-  // persistence effect (it reads getItem synchronously).
-  const prefixedStorage = React.useMemo<HintsStorage | null>(
-    () => resolveStorage(storage),
-    [storage]
+  const [handle] = React.useState(() =>
+    createHintsHandle(() => {
+      const engine = createHintsEngine({ storage: latest.current.storage })
+      if (latest.current.hints) engine.setHints(latest.current.hints)
+      engine.boot()
+      return engine
+    })
   )
+  const snapshot = React.useSyncExternalStore(handle.subscribe, handle.getState, handle.getState)
 
-  const [state, dispatch] = React.useReducer(hintsReducer, {
-    hints: new Map(),
-    activeHint: null,
-    frequencyState: new Map(),
-  })
-
-  // Auto-register every config-driven hint, unregister when the list shrinks.
-  const registeredIds = React.useRef(new Set<string>())
   React.useEffect(() => {
-    if (!hints) return
-    const next = new Set(filteredHints.map((h) => h.id))
-    for (const id of next) {
-      if (!registeredIds.current.has(id)) {
-        dispatch({ type: 'REGISTER', id })
-      }
-    }
-    for (const id of registeredIds.current) {
-      if (!next.has(id)) {
-        dispatch({ type: 'UNREGISTER', id })
-      }
-    }
-    registeredIds.current = next
-  }, [hints, filteredHints])
+    if (hints) handle.setHints(filteredHints)
+  }, [handle, hints, filteredHints])
 
-  // Hydrate frequency state ONCE per provider mount + lazily for
-  // newly-added hint ids. Re-running on every userContext change would
-  // round-trip storage (read → dispatch → write back) and clobber any
-  // in-flight RECORD_VIEW / DISMISS that landed between mount and the
-  // userContext change.
-  const hydratedIdsRef = React.useRef<Set<string>>(new Set())
   React.useEffect(() => {
-    if (!prefixedStorage || !hints) return
-    const entries = readPersistedEntries(
-      prefixedStorage,
-      filteredHints.map((h) => h.id),
-      hydratedIdsRef.current
-    )
-    if (entries.length > 0) {
-      dispatch({ type: 'HYDRATE_FREQUENCY', entries })
-    }
-  }, [hints, filteredHints, prefixedStorage])
-
-  // Persist on every frequency change. The diff against the previous Map
-  // ensures removed ids (resetHint / resetAllHints) get deleted from
-  // storage — otherwise a remount would re-hydrate the dropped state and
-  // silently undo the reset.
-  const lastPersistedRef = React.useRef(state.frequencyState)
-  React.useEffect(() => {
-    if (!prefixedStorage) return
-    const prev = lastPersistedRef.current
-    if (prev === state.frequencyState) return
-    lastPersistedRef.current = state.frequencyState
-    syncStorage(prefixedStorage, prev, state.frequencyState, hydratedIdsRef.current)
-  }, [state.frequencyState, prefixedStorage])
-
-  const registerHint = React.useCallback((id: string) => dispatch({ type: 'REGISTER', id }), [])
-  const unregisterHint = React.useCallback((id: string) => dispatch({ type: 'UNREGISTER', id }), [])
-  const hideHint = React.useCallback((id: string) => dispatch({ type: 'HIDE', id }), [])
-  const dismissHint = React.useCallback((id: string) => dispatch({ type: 'DISMISS', id }), [])
-  const resetHint = React.useCallback((id: string) => dispatch({ type: 'RESET', id }), [])
-  const resetAllHints = React.useCallback(() => dispatch({ type: 'RESET_ALL' }), [])
-
-  // Stable refs over hintsById + frequencyState so `showHint`'s own
-  // identity is invariant — otherwise dispatching `RECORD_VIEW` from inside
-  // showHint would change its identity, retriggering downstream effects
-  // (e.g. <Hint autoShow>) that depend on it. Refs are updated in an
-  // effect (not during render) for concurrent-mode safety; showHint is
-  // event-driven, so a microtask of staleness is inconsequential.
-  const hintsByIdRef = React.useRef(hintsById)
-  const frequencyStateRef = React.useRef(state.frequencyState)
-  React.useEffect(() => {
-    hintsByIdRef.current = hintsById
-    frequencyStateRef.current = state.frequencyState
-  })
-
-  // Gate `showHint` on frequency rules when a config exists for the id.
-  // No config (= legacy imperative caller) → fall through to plain SHOW.
-  // RECORD_VIEW is dispatched only when a frequency rule is in play; this
-  // keeps the legacy path's behavior byte-identical and avoids waking the
-  // persistence effect for callers that never opted in to frequency.
-  const showHint = React.useCallback((id: string) => {
-    const config = hintsByIdRef.current.get(id)
-    const rule: FrequencyRule | undefined = config?.frequency
-    const persistedState = frequencyStateRef.current.get(id) ?? emptyFrequencyState()
-    if (rule && !canShowByFrequency(persistedState, rule)) {
-      if (process.env.NODE_ENV !== 'production') {
-        logger.debug(`showHint("${id}") suppressed by frequency rule ${JSON.stringify(rule)}`)
-      }
-      return
-    }
-    // For rules that permit re-showing after dismissal (`times`, `interval`,
-    // `always`), clear the per-hint dismissed flag before SHOW — handleShow
-    // would otherwise treat the hint as permanently dismissed and no-op.
-    // `'once'` / `'session'` are NOT auto-reset; their dismissal is sticky
-    // by design.
-    if (rule && canShowAfterDismissal(rule)) {
-      dispatch({ type: 'CLEAR_DISMISSAL', id })
-    }
-    dispatch({ type: 'SHOW', id })
-    if (rule) {
-      dispatch({ type: 'RECORD_VIEW', id })
-    }
-  }, [])
+    handle.boot()
+    return () => handle.release()
+  }, [handle])
 
   const contextValue = React.useMemo<HintsContextValue>(
     () => ({
-      hints: state.hints,
-      activeHint: state.activeHint,
-      registerHint,
-      unregisterHint,
-      showHint,
-      hideHint,
-      dismissHint,
-      resetHint,
-      resetAllHints,
+      hints: snapshot.hints,
+      activeHint: snapshot.activeHint,
+      registerHint: handle.registerHint,
+      unregisterHint: handle.unregisterHint,
+      showHint: handle.showHint,
+      hideHint: handle.hideHint,
+      dismissHint: handle.dismissHint,
+      resetHint: handle.resetHint,
+      resetAllHints: handle.resetAllHints,
     }),
-    [
-      state.hints,
-      state.activeHint,
-      registerHint,
-      unregisterHint,
-      showHint,
-      hideHint,
-      dismissHint,
-      resetHint,
-      resetAllHints,
-    ]
+    [handle, snapshot.hints, snapshot.activeHint]
   )
 
   return <HintsContext.Provider value={contextValue}>{children}</HintsContext.Provider>
