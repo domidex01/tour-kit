@@ -71,6 +71,11 @@
     "limit": "260 KB"
   },
   {
+    "name": "@tour-kit/analytics/engine",
+    "path": "packages/analytics/dist/engine/index.js",
+    "limit": "225 KB"
+  },
+  {
     "name": "@tour-kit/analytics/posthog",
     "path": "packages/analytics/dist/plugins/posthog.js",
     "limit": "1500 B",

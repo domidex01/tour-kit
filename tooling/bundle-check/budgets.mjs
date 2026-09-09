@@ -136,6 +136,14 @@ export const budgets = [
   ['analytics:mixpanel', 'packages/analytics/dist/plugins/mixpanel.js', 1500],
   ['analytics:amplitude', 'packages/analytics/dist/plugins/amplitude.js', 1000],
   ['analytics:ga', 'packages/analytics/dist/plugins/google-analytics.js', 1000],
+  // v3 Phase 0 — the React-free door. Measured 3 312 by this gate (main is
+  // 3 659; the difference is `core/context.tsx`, the LicenseGate wrapper and
+  // React's jsx-runtime import). It shares `analytics:main`'s 4 000 ceiling
+  // DELIBERATELY: the engine is a strict SUBSET of main, so a subset that
+  // outgrows its superset's budget is a build-shape bug (core bundled in, an
+  // external lost), not a size regression to re-baseline. 3 312 x 1.2 = 3 974
+  // rounds to the same place anyway.
+  ['analytics:engine', 'packages/analytics/dist/engine/index.js', 4000],
   ['adoption', 'packages/adoption/dist/index.js', 10000],
   ['checklists', 'packages/checklists/dist/index.js', 10000],
   ['announcements', 'packages/announcements/dist/index.js', 14000],

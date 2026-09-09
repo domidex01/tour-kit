@@ -175,6 +175,9 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   - react <12 KB
   - hints <6 KB
   - analytics <4 KB (root; per-plugin <1.5 KB each)
+  - analytics/engine subpath <4 KB, measured 3 312 — the tracker and the five
+    plugins with no React, no jsx-runtime and no licence gate; it shares the
+    root row's ceiling because it is a strict subset of the root entry.
   - adoption, checklists <10 KB
   - announcements <14 KB, surveys <12.5 KB, license <8 KB
   - media <9 KB
