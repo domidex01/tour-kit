@@ -183,6 +183,9 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
   - media <9 KB
   - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
+  - scheduling/engine subpath <3.6 KB, measured 3 039 — twenty-four evaluation
+    functions and three constants; the hooks, the gate and the analytics peer
+    stay on the main entry.
   - vue <1.5 KB
   - svelte <1.3 KB
 

@@ -152,6 +152,14 @@ export const budgets = [
   ['ai:client', 'packages/ai/dist/index.js', 7000],
   ['ai:server', 'packages/ai/dist/server/index.js', 8000],
   ['scheduling', 'packages/scheduling/dist/index.js', 4000],
+  // v3 Phase 0 — the React-free door. Measured 3 039 by this gate; the three
+  // hooks, <ScheduleGate> and the `@tour-kit/analytics` peer behind them are
+  // the 670 B difference from the main row (3 709). Unlike `analytics:engine`,
+  // this does NOT share its sibling's ceiling: `scheduling` sits at 4 000 with
+  // only 291 B of headroom, so sharing would leave ~1 KB nobody would notice
+  // drift into. 3 039 x 1.2 = 3 647, and 3 600 is a hair under that (561 B,
+  // 18 % headroom) for a round 3.6 KB claim.
+  ['scheduling:engine', 'packages/scheduling/dist/engine/index.js', 3600],
   ['license', 'packages/license/dist/index.js', 8000],
   // v2 §1.5 — the two non-React bindings. Both are `external: ['@tour-kit/core',
   // <framework>]`, so these rows measure the binding's own bytes: state bridge,

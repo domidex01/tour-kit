@@ -144,6 +144,20 @@ If all checks pass → schedule is **active**.
 
 ## API Reference
 
+### The React-free subpath
+
+`@tour-kit/scheduling/engine` gives a Vue, Svelte or Node consumer every
+evaluation function and constant with no `react`, no `@tour-kit/license` and no
+`@tour-kit/analytics` in its runtime or its type declarations:
+
+```ts
+import { checkSchedule, isWithinBusinessHours } from '@tour-kit/scheduling/engine'
+```
+
+It is a strict subset of the main entry — nothing moved. `<ScheduleGate>` and
+the three hooks stay on the main entry, because they are React.
+
+
 ### Component
 
 ```ts

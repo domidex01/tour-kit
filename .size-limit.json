@@ -112,6 +112,12 @@
     "ignore": ["@tour-kit/analytics"]
   },
   {
+    "name": "@tour-kit/scheduling/engine",
+    "path": "packages/scheduling/dist/engine/index.js",
+    "limit": "3 KB",
+    "ignore": ["@tour-kit/analytics"]
+  },
+  {
     "name": "@tour-kit/license",
     "path": "packages/license/dist/index.js",
     "limit": "70 KB"

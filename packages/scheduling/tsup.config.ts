@@ -2,7 +2,14 @@ import { defineConfig } from 'tsup'
 import { injectUseClient } from '../../tooling/build/use-client'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: {
+    index: 'src/index.ts',
+    // v3 Phase 0 — the React-free door. Deliberately absent from the
+    // `injectUseClient(['index'])` call below: stamping 'use client' here would
+    // mark a framework-agnostic entry client-only. Both halves are asserted in
+    // `src/__tests__/no-react-in-engine-dist.test.ts`.
+    'engine/index': 'src/engine/index.ts',
+  },
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
