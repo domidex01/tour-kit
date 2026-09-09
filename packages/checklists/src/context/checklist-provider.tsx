@@ -5,6 +5,7 @@ import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import { registerUrlVisitTask } from '../engine/url-visit-listener'
 import { useChecklistPersistence } from '../hooks/use-checklist-persistence'
+import { freezeState } from '../lib/checklists-engine/persistence'
 import { checklistsReducer, createChecklistState } from '../lib/checklists-engine/reducer'
 import type { ChecklistsAction, ChecklistsEngineState } from '../lib/checklists-engine/types'
 import type {
@@ -13,7 +14,6 @@ import type {
   ChecklistProgress,
   ChecklistProviderConfig,
   ChecklistState,
-  PersistedChecklistState,
 } from '../types'
 import { calculateProgress } from '../utils/progress'
 import { ChecklistContext, type ChecklistContextValue } from './checklist-context'
@@ -102,19 +102,13 @@ export function ChecklistProvider({
     return undefined
   }, [])
 
-  // Save state changes
+  // Save state changes. Destructured so the effect depends on exactly the four
+  // persisted slices — passing `state` whole would also re-save on every
+  // expand/collapse, which is a write the pre-extraction provider never made.
+  const { completed, dismissed, completedAt, notifiedComplete } = state
   React.useEffect(() => {
-    const persistedState: PersistedChecklistState = {
-      completed: Object.fromEntries(
-        Object.entries(state.completed).map(([k, v]) => [k, Array.from(v)])
-      ),
-      dismissed: Array.from(state.dismissed),
-      timestamp: Date.now(),
-      completedAt: state.completedAt,
-      notifiedComplete: Array.from(state.notifiedComplete),
-    }
-    save(persistedState)
-  }, [state.completed, state.dismissed, state.completedAt, state.notifiedComplete, save])
+    save(freezeState({ completed, dismissed, completedAt, notifiedComplete }))
+  }, [completed, dismissed, completedAt, notifiedComplete, save])
 
   // Check for checklist completion
   React.useEffect(() => {
