@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   RELATIVE_SPECIFIER,
+  SPECIFIER_PREFIX,
   closureOf,
   specifierPattern,
 } from '../../../../tooling/bundle-check/closure.mjs'
@@ -57,6 +58,13 @@ const FORBIDDEN = ['react', 'react-dom', '@tour-kit/license', '@tour-kit/analyti
  * demonstrably contains.
  */
 const CONTROL_SPECIFIERS = ['react', '@tour-kit/license', '@tour-kit/analytics'] as const
+
+/**
+ * Any BARE specifier, in every call shape a bundler emits — `from`, `import(`
+ * and `require(`. The leading `[^"'.]` excludes relative paths, which all start
+ * with `.`; everything else is a package.
+ */
+const BARE_SPECIFIER = new RegExp(`${SPECIFIER_PREFIX}["'][^"'.]`)
 
 const read = (p: string) => readFileSync(p, 'utf8')
 // rollup-plugin-dts chunks shared declarations even with `splitting: false`,
@@ -105,15 +113,20 @@ describe('@tour-kit/scheduling/engine ships no React', () => {
     // must not import, pin the stronger property: every specifier it emits is
     // relative. A new dependency of any kind — not just a React-side one —
     // fails here, which is the case analytics spends on `@tour-kit/core/engine`.
-    const bareFrom = /from\s*["'][^"'.]/
-    const bareRequire = /require\(\s*["'][^"'.]/
+    //
+    // Built from `SPECIFIER_PREFIX`, not hand-rolled. The hand-rolled version
+    // was two regexes covering `from` and `require(`, which left `import(`
+    // unguarded — and a lazy `import('some-package')` is precisely how a bare
+    // specifier enters a bundle in this repo (analytics' four vendor plugins
+    // load their SDKs that way). A case that claims NO bare specifier AT ALL
+    // has to mean all three call shapes, or the title is a lie.
     for (const f of [ENGINE_JS, ENGINE_CJS]) {
-      expect(bareFrom.test(read(f)), `${f} imports a bare specifier`).toBe(false)
-      expect(bareRequire.test(read(f)), `${f} requires a bare specifier`).toBe(false)
+      expect(BARE_SPECIFIER.test(read(f)), `${f} names a bare specifier`).toBe(false)
     }
     for (const entry of [ENGINE_DTS, ENGINE_DCTS]) {
-      const source = readDts(entry)
-      expect(bareFrom.test(source), `${entry} closure names a bare specifier`).toBe(false)
+      expect(BARE_SPECIFIER.test(readDts(entry)), `${entry} closure names a bare specifier`).toBe(
+        false
+      )
     }
   })
 
