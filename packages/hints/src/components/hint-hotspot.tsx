@@ -2,12 +2,12 @@
 
 import { cn, useReducedMotion, useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
+import { getHotspotPosition } from '../lib/hints-engine/hotspot-position'
 import { Slot, UnifiedSlot } from '../lib/slot'
 import type { HotspotPosition } from '../types'
 import { HintBadge } from '../variants/badge'
 import { HintBeaconWithLabel } from '../variants/beacon-with-label'
 import { HintWhatsNewPill } from '../variants/whats-new-pill'
-import { getHotspotPosition } from './hotspot-position'
 import {
   type HintHotspotVariantName,
   type HintHotspotVariants,

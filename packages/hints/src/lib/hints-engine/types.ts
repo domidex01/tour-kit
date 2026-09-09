@@ -7,7 +7,7 @@
  * thing the subpath exists to avoid. Every type the engine needs is either
  * declared here or imported from `@tour-kit/core/engine`.
  */
-import type { FrequencyRule, FrequencyState, HintState } from '@tour-kit/core/engine'
+import type { FrequencyRule, FrequencyState, HintState, SyncStorage } from '@tour-kit/core/engine'
 
 /** The slice of a hint config the engine reads. `HintConfig` is assignable to it. */
 export interface HintEngineConfig {
@@ -34,12 +34,11 @@ export type HintsAction =
   | { type: 'HYDRATE_FREQUENCY'; entries: ReadonlyArray<readonly [string, FrequencyState]> }
 
 /**
- * The SYNCHRONOUS 3-method subset of DOM `Storage` the persistence path reads.
- * `window.localStorage` and the in-memory test mock both satisfy it. Core's
- * `Storage` type permits Promise-returning adapters; those do not work here.
+ * The SYNCHRONOUS 3-method subset of the storage adapter this engine reads.
+ *
+ * An alias, not a declaration: core owns the shape as `SyncStorage`. The name
+ * stays because `@tour-kit/hints/engine` publishes it. Core's wide `Storage`
+ * permits Promise-returning adapters; those do not work here, because the
+ * hydration path reads `getItem` inline.
  */
-export interface HintsStorage {
-  getItem(key: string): string | null
-  setItem(key: string, value: string): void
-  removeItem(key: string): void
-}
+export type HintsStorage = SyncStorage

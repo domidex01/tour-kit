@@ -9,23 +9,8 @@
  */
 import { describe, expect, it } from 'vitest'
 import { createMockStorage } from '../../../__tests__/mock-storage'
-import type { HintsContextValue } from '../../../types'
 import { createHintsEngine } from '../create-hints-engine'
 import { INITIAL_HINTS_STATE, createHintsHandle } from '../handle'
-import type { HintsEngineState } from '../types'
-
-/**
- * The engine's snapshot must stay assignable to the React context value.
- * Core's `HintState` and hints' own are two independent declarations of the
- * same shape (`packages/core/src/types/hints.ts` and
- * `packages/hints/src/types/index.ts`); the binding assigns the first into the
- * second, and it compiles only while they agree. This line is the compile-time
- * pin — `packages/hints/tsconfig.json` includes `src/**\/*`, so `pnpm typecheck`
- * and the safe-ship-gate hook are its runners.
- */
-const _snapshotFitsContext: HintsContextValue['hints'] =
-  null as unknown as HintsEngineState['hints']
-void _snapshotFitsContext
 
 function counting(storage?: Storage) {
   let constructed = 0

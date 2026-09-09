@@ -24,6 +24,7 @@ import {
   canShowAfterDismissal,
   canShowByFrequency,
   createListeners,
+  createNoopStorage,
   logger,
 } from '@tour-kit/core/engine'
 import type { FrequencyRule, HintsActions } from '@tour-kit/core/engine'
@@ -59,7 +60,11 @@ export function createHintsEngine(options: CreateHintsEngineOptions = {}): Hints
   let state: HintsEngineState = { hints: new Map(), activeHint: null, frequencyState: new Map() }
   let destroyed = false
   let booted = false
-  let storage: HintsStorage | null = null
+  // Never null: `resolveStorage` hands back a no-op when there is no window,
+  // and a no-op stands in until `boot()` resolves the real one. What must not
+  // happen before boot is HYDRATION, and that is guarded by `booted` below —
+  // the invariant is a lifecycle one, not a nullability one.
+  let storage: HintsStorage = createNoopStorage()
   let configs: ReadonlyMap<string, HintEngineConfig> = new Map()
   const registered = new Set<string>()
   const hydrated = new Set<string>()
@@ -73,7 +78,7 @@ export function createHintsEngine(options: CreateHintsEngineOptions = {}): Hints
     state = next
     // The provider's persist effect, minus React's post-commit delay: same
     // condition, same diff, same swallowed failures.
-    if (storage && prev.frequencyState !== next.frequencyState) {
+    if (prev.frequencyState !== next.frequencyState) {
       syncStorage(storage, prev.frequencyState, next.frequencyState, hydrated)
     }
     // Fault-isolated: a throwing subscriber must not abort the fan-out. The
@@ -84,7 +89,11 @@ export function createHintsEngine(options: CreateHintsEngineOptions = {}): Hints
   }
 
   function hydrate(): void {
-    if (!storage) return
+    // Before `boot()` there is no real storage yet, and `readPersistedEntries`
+    // MARKS every id it looks at as hydrated. Running it early would therefore
+    // burn the ids and make the real hydrate at boot skip them all — which is
+    // why this guard is `booted` and not a null-check on `storage`.
+    if (!booted) return
     const entries = readPersistedEntries(storage, [...configs.keys()], hydrated)
     if (entries.length > 0) dispatch({ type: 'HYDRATE_FREQUENCY', entries })
   }
@@ -150,7 +159,7 @@ export function createHintsEngine(options: CreateHintsEngineOptions = {}): Hints
       if (destroyed) return
       destroyed = true
       listeners.clear()
-      storage = null
+      storage = createNoopStorage()
     },
   }
 }

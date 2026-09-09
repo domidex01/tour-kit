@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
+import { getHotspotPosition } from '../../lib/hints-engine/hotspot-position'
 import type { HotspotPosition } from '../../types'
-import { getHotspotPosition } from '../hotspot-position'
 
 export interface HintHotspotHeadlessProps extends React.ComponentPropsWithoutRef<'button'> {
   /** Target element's bounding rect */

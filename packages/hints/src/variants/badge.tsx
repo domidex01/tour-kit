@@ -3,8 +3,8 @@
 import { cn, useUILibrary } from '@tour-kit/core'
 import * as React from 'react'
 
-import { getHotspotPosition } from '../components/hotspot-position'
 import { hintHotspotVariants } from '../components/ui/hint-variants'
+import { getHotspotPosition } from '../lib/hints-engine/hotspot-position'
 import { Slot, UnifiedSlot } from '../lib/slot'
 import type { HotspotPosition } from '../types'
 

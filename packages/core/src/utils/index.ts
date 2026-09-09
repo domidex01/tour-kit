@@ -33,6 +33,7 @@ export {
   safeJSONParse,
   createPrefixedStorage,
 } from './storage'
+export type { SyncStorage } from './storage'
 
 export {
   announce,
