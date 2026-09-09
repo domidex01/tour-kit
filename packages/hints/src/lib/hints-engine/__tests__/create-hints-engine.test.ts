@@ -97,6 +97,32 @@ describe('createHintsEngine — the contract', () => {
     expect(spy.mock.calls.length, 'the second boot() re-read storage').toBe(reads)
   })
 
+  it('a throwing subscriber does not abort the fan-out, and storage stays in step', () => {
+    // Regression, v3 Phase 1 review. This engine re-derived core's notify loop
+    // and dropped its per-listener try/catch, so one broken subscriber aborted
+    // the fan-out — while the storage write inside `dispatch` had ALREADY
+    // landed. Every listener after the thrower then read state that storage no
+    // longer agreed with. `/engine` exists for third-party subscribers, so this
+    // is reachable by design, not hypothetically.
+    const e = createHintsEngine({ storage })
+    e.setHints([{ id: ID, frequency: { type: 'times', count: 3 } }])
+    e.boot()
+
+    const seen: string[] = []
+    e.subscribe(() => seen.push('before'))
+    e.subscribe(() => {
+      throw new Error('subscriber is broken')
+    })
+    e.subscribe(() => seen.push('after'))
+
+    expect(() => e.showHint(ID)).not.toThrow()
+    expect(seen, 'the fan-out aborted at the throwing listener').toContain('after')
+    // The write landed and the surviving subscribers can see the state it
+    // describes — that is the desync the try/catch prevents.
+    expect(storage.getItem(KEY)).toContain('"viewCount":1')
+    expect(e.getState().activeHint).toBe(ID)
+  })
+
   it('a verb before setHints is UNGATED and a verb before boot() is UNPERSISTED', () => {
     // Engine semantics, pinned deliberately: one writer for configs, storage at
     // boot. It is the BINDING that closes this window by seeding its factory

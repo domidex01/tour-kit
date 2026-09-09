@@ -142,7 +142,10 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     v2 §1.5 took it to 22 621 (+47 B) — the six binding-contract re-exports
     on `/engine` plus `attachAdvanceOn`'s deferred bind. v3 Phase 1 took it to
     22 879 (+20 B over the 22 857 the gate actually printed before it) for
-    `createHandle`, the engine-agnostic half of `createEngineHandle`)
+    `createHandle`, the engine-agnostic half of `createEngineHandle`. The
+    Phase 1 review took it to 22 924 for `createListeners`, the fault-isolated
+    subscriber fan-out both engines share — leaving only **76 B of headroom**,
+    so Phase 2 must re-baseline this row deliberately rather than discover it)
   - core/engine subpath <18.5 KB (the non-React consumer's worst case: the
     engine — reducer, boot resolver, actions, transition effects, four
     storage adapters — plus the v2 §1.3b DOM behaviours (focus trap,

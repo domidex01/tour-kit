@@ -95,6 +95,18 @@
  *     engine composes it rather than writing a second lifecycle —
  *     `@tour-kit/hints/engine` is the first.
  *
+ *     The v3 Phase 1 REVIEW added 55 B more (18 123 -> 18 178) for
+ *     `createListeners`: the fault-isolated subscriber fan-out both engines
+ *     now share. `createHintsEngine` had re-derived core's notify loop and
+ *     dropped its per-listener try/catch, so a throwing subscriber aborted the
+ *     fan-out after the storage write had landed. Three more package engines
+ *     land in Phases 2-3; this is the shared home rather than five copies.
+ *
+ *     NOTE for Phase 2: `core` is now at 22 924 against 23 000 — **76 B of
+ *     headroom**. Do not assume room on that row. A slice that needs more must
+ *     re-baseline it deliberately, with the measured number, not discover it
+ *     as a CI failure.
+ *
  *     Do NOT split a `/engine/dom` entry to keep this number flat: the row
  *     measures the import-everything worst case, a bundler tree-shakes the
  *     rest (`sideEffects: false`), and the only consumer who pays all of it is

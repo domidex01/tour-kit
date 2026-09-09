@@ -32,7 +32,6 @@ import type { MultiPagePersistenceConfig, RouterAdapter } from '../../types/rout
 import type { TourCallbackContext } from '../../types/state'
 import type { Tour } from '../../types/tour'
 import type { TourAction, TourReducerState } from '../../types/tour-reducer'
-import { logger } from '../../utils/logger'
 import { validateTour } from '../validate-tour'
 import type { TourRouteError } from '../wait-for-step-target'
 import {
@@ -56,6 +55,7 @@ import { createTerminalStore } from './adapters/terminal-store'
 import { resolveBootStart, runBootStart } from './boot'
 import type { CrossTabActiveMessage, TourEngineAnalytics, TourEngineContext } from './context'
 import { buildCallbackContext } from './helpers'
+import { createListeners } from './listeners'
 import { navigateToStepImpl } from './navigate-to-step'
 import { MAX_HIDDEN_CHAIN, tourReducer } from './reducer'
 import { applyTransitionEffects, subscribeCrossTabPause } from './transition-effects'
@@ -250,7 +250,7 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
   /** The cross-tab route listener is installed on the first real boot, once. */
   let storageSubscribed = false
 
-  const listeners = new Set<() => void>()
+  const listeners = createListeners('createTourEngine')
   const abortControllerRef: { current: AbortController | null } = { current: null }
   const bootAbortRef: { current: AbortController | null } = { current: null }
   const completedTourIdRef: { current: string | null } = { current: null }
@@ -272,20 +272,12 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
     snapshot = buildCallbackContext(state, currentTour(), data)
   }
 
-  function notify(): void {
-    // Synchronous, and deliberately: §1.4's useSyncExternalStore collapses the
-    // renders, and a microtask-coalesced notify would make getState() stale
-    // immediately after a synchronous dispatch — which is exactly what the
-    // direct-drive tests rely on.
-    for (const listener of listeners) {
-      try {
-        listener()
-      } catch (err) {
-        // A broken subscriber must not take the tour down with it.
-        logger.warn('createTourEngine: listener threw', err)
-      }
-    }
-  }
+  // Synchronous, and deliberately: §1.4's useSyncExternalStore collapses the
+  // renders, and a microtask-coalesced notify would make getState() stale
+  // immediately after a synchronous dispatch — which is exactly what the
+  // direct-drive tests rely on. The per-listener try/catch that keeps a broken
+  // subscriber from taking the tour down lives in `createListeners`.
+  const notify = listeners.notify
 
   function dispatch(action: TourAction): void {
     if (destroyed) return
@@ -575,10 +567,7 @@ export function createTourEngine(options: CreateTourEngineOptions): TourEngine {
 
     subscribe: (listener: () => void) => {
       if (destroyed) return () => {}
-      listeners.add(listener)
-      return () => {
-        listeners.delete(listener)
-      }
+      return listeners.add(listener)
     },
 
     // Terminal, idempotent, and NOT a pause. React 18 StrictMode runs
