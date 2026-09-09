@@ -76,6 +76,13 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
   'ai:client': { pattern: /-\s*ai\s*<\s*([\d.]+)\s*KB\s*\(client\)/, mode: 'exact' },
   'ai:server': { pattern: /<\s*([\d.]+)\s*KB\s*\(server\)/, mode: 'exact' },
   scheduling: { pattern: /^\s*-\s*scheduling\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
+  // v3 Phase 0 — anchored on `scheduling/engine subpath`. The sibling
+  // `scheduling` pattern is `/^\s*-\s*scheduling\s*<…/m`, so a bullet
+  // beginning `- scheduling/engine` cannot satisfy it.
+  'scheduling:engine': {
+    pattern: /scheduling\/engine subpath[^\n]*?<\s*([\d.]+)\s*KB/,
+    mode: 'exact',
+  },
   // Anchored like `media` and `scheduling`: an unanchored /vue/ would match the
   // word anywhere else in CLAUDE.md and read the wrong number.
   vue: { pattern: /^\s*-\s*vue\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
