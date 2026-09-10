@@ -183,20 +183,29 @@ export interface SurveysEngineState {
   queue: string[]
 }
 
-/** The reducer's action union, discriminated on `type`. */
+/**
+ * The reducer's action union, discriminated on `type`.
+ *
+ * Every arm that stamps a timestamp — and every arm that can DRAIN, because
+ * draining promotes a survey and stamps its `lastViewedAt` — carries `at`, so
+ * the engine's injected clock is the only clock. Before this the reducer used
+ * `new Date()` (and `Date.now()` in the snooze arm) while the gates compared
+ * against the injected `now`, so `core/frequency.ts` was measuring an interval
+ * between two different clocks.
+ */
 export type SurveysAction =
   | { type: 'REGISTER'; config: EngineSurveyConfig }
   | { type: 'UNREGISTER'; id: string }
-  | { type: 'SHOW'; id: string }
-  | { type: 'HIDE'; id: string; drain: boolean }
-  | { type: 'DISMISS'; id: string; reason: DismissalReason; drain: boolean }
-  | { type: 'SNOOZE'; id: string; delayDays?: number; drain: boolean }
+  | { type: 'SHOW'; id: string; at: Date }
+  | { type: 'HIDE'; id: string; drain: boolean; at: Date }
+  | { type: 'DISMISS'; id: string; reason: DismissalReason; drain: boolean; at: Date }
+  | { type: 'SNOOZE'; id: string; delayDays?: number; drain: boolean; at: Date }
   | { type: 'ANSWER'; id: string; questionId: string; value: AnswerValue }
   | { type: 'NEXT_QUESTION'; id: string }
   | { type: 'PREV_QUESTION'; id: string }
   | { type: 'SET_VALIDATION_ERROR'; id: string; questionId: string; error: string }
   | { type: 'CLEAR_VALIDATION_ERROR'; id: string; questionId: string }
-  | { type: 'COMPLETE'; id: string; drain: boolean }
+  | { type: 'COMPLETE'; id: string; drain: boolean; at: Date }
   | { type: 'RESET'; id: string }
   | { type: 'RESET_ALL' }
   | { type: 'HYDRATE'; surveys: Map<string, SurveyState>; queue: string[] }

@@ -13,6 +13,9 @@ import { createInitialSurveyState, drainQueue, surveysReducer } from '../reducer
 import type { EngineSurveyConfig, SurveysEngineState } from '../types'
 
 const cfg = (id: string): EngineSurveyConfig => ({ id, type: 'nps', displayMode: 'modal' })
+/** One fixed instant, so every timestamp assertion below is exact. */
+const AT = new Date('2026-09-10T12:00:00.000Z')
+
 const empty = (): SurveysEngineState => ({ surveys: new Map(), activeSurvey: null, queue: [] })
 
 const register = (state: SurveysEngineState, ...ids: string[]) =>
@@ -37,14 +40,14 @@ describe('createInitialSurveyState', () => {
 describe('surveysReducer', () => {
   it('REGISTER is idempotent — a second one keeps the existing state', () => {
     let s = register(empty(), 'a')
-    s = surveysReducer(s, { type: 'SHOW', id: 'a' })
+    s = surveysReducer(s, { type: 'SHOW', id: 'a', at: AT })
     const again = surveysReducer(s, { type: 'REGISTER', config: cfg('a') })
     expect(again).toBe(s)
     expect(again.surveys.get('a')?.viewCount).toBe(1)
   })
 
   it('SHOW activates and counts; UNREGISTER removes and clears the active id', () => {
-    let s = surveysReducer(register(empty(), 'a'), { type: 'SHOW', id: 'a' })
+    let s = surveysReducer(register(empty(), 'a'), { type: 'SHOW', id: 'a', at: AT })
     expect(s).toMatchObject({ activeSurvey: 'a' })
     expect(s.surveys.get('a')).toMatchObject({ isVisible: true, viewCount: 1 })
     s = surveysReducer(s, { type: 'UNREGISTER', id: 'a' })
@@ -84,15 +87,25 @@ describe('surveysReducer', () => {
       id: 'a',
       delayDays: 3,
       drain: false,
+      at: AT,
     })
     expect(s.surveys.get('a')).toMatchObject({ isSnoozed: true, snoozeCount: 1 })
-    expect(s.surveys.get('a')?.snoozeUntil).toBeInstanceOf(Date)
+    // 3 days from the INJECTED instant, not from the wall clock.
+    expect(s.surveys.get('a')?.snoozeUntil?.toISOString()).toBe(
+      new Date(AT.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString()
+    )
   })
 
   it('RESET and RESET_ALL clear the terminal flags', () => {
     let s = register(empty(), 'a', 'b')
-    s = surveysReducer(s, { type: 'COMPLETE', id: 'a', drain: false })
-    s = surveysReducer(s, { type: 'DISMISS', id: 'b', reason: 'close_button', drain: false })
+    s = surveysReducer(s, { type: 'COMPLETE', id: 'a', drain: false, at: AT })
+    s = surveysReducer(s, {
+      type: 'DISMISS',
+      id: 'b',
+      reason: 'close_button',
+      drain: false,
+      at: AT,
+    })
 
     const one = surveysReducer(s, { type: 'RESET', id: 'a' })
     expect(one.surveys.get('a')?.isCompleted).toBe(false)
@@ -113,9 +126,9 @@ describe('surveysReducer', () => {
   it('returns the IDENTICAL object for every no-op arm', () => {
     const s = register(empty(), 'a')
     for (const action of [
-      { type: 'SHOW', id: 'missing' },
-      { type: 'HIDE', id: 'missing', drain: false },
-      { type: 'COMPLETE', id: 'missing', drain: false },
+      { type: 'SHOW', id: 'missing', at: AT },
+      { type: 'HIDE', id: 'missing', drain: false, at: AT },
+      { type: 'COMPLETE', id: 'missing', drain: false, at: AT },
       { type: 'ANSWER', id: 'missing', questionId: 'q', value: 1 },
       { type: 'RESET', id: 'missing' },
     ] as const) {
@@ -136,8 +149,14 @@ describe('drainQueue is atomic by construction (Decision 5)', () => {
 
   it('skips completed and dismissed entries without a second pass', () => {
     let s = register(empty(), 'done', 'gone', 'live')
-    s = surveysReducer(s, { type: 'COMPLETE', id: 'done', drain: false })
-    s = surveysReducer(s, { type: 'DISMISS', id: 'gone', reason: 'close_button', drain: false })
+    s = surveysReducer(s, { type: 'COMPLETE', id: 'done', drain: false, at: AT })
+    s = surveysReducer(s, {
+      type: 'DISMISS',
+      id: 'gone',
+      reason: 'close_button',
+      drain: false,
+      at: AT,
+    })
     const next = drainQueue({ ...s, queue: ['done', 'gone', 'live'] })
     expect(next.activeSurvey).toBe('live')
     expect(next.queue).toEqual([])
@@ -151,7 +170,7 @@ describe('drainQueue is atomic by construction (Decision 5)', () => {
 
   it('clears the active survey when nothing is left to promote', () => {
     let s = register(empty(), 'a')
-    s = surveysReducer(s, { type: 'SHOW', id: 'a' })
+    s = surveysReducer(s, { type: 'SHOW', id: 'a', at: AT })
     const next = drainQueue({ ...s, queue: [] })
     expect(next.activeSurvey).toBeNull()
   })
@@ -160,13 +179,13 @@ describe('drainQueue is atomic by construction (Decision 5)', () => {
     // The structural claim: these four arms drain INSIDE the reducer, so the
     // promotion is part of the same transition rather than a follow-up dispatch.
     for (const action of [
-      { type: 'HIDE', id: 'a', drain: true },
-      { type: 'DISMISS', id: 'a', reason: 'close_button', drain: true },
-      { type: 'SNOOZE', id: 'a', drain: true },
-      { type: 'COMPLETE', id: 'a', drain: true },
+      { type: 'HIDE', id: 'a', drain: true, at: AT },
+      { type: 'DISMISS', id: 'a', reason: 'close_button', drain: true, at: AT },
+      { type: 'SNOOZE', id: 'a', drain: true, at: AT },
+      { type: 'COMPLETE', id: 'a', drain: true, at: AT },
     ] as const) {
       let s = register(empty(), 'a', 'b')
-      s = surveysReducer(s, { type: 'SHOW', id: 'a' })
+      s = surveysReducer(s, { type: 'SHOW', id: 'a', at: AT })
       s = { ...s, queue: ['b'] }
       const next = surveysReducer(s, action)
       expect(next.activeSurvey, action.type).toBe('b')
