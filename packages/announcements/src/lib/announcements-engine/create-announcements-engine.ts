@@ -118,6 +118,7 @@ const EMPTY_STATE: AnnouncementsEngineState<never> = Object.freeze({
   configs: new Map<string, never>(),
   activeAnnouncement: null,
   queue: [] as string[],
+  eligibleIds: new Set<string>() as ReadonlySet<string>,
 })
 
 export function emptyAnnouncementsState<
@@ -132,11 +133,17 @@ export function emptyAnnouncementsState<
  * `seedChecklistsState`.
  */
 export function seedAnnouncementsState<TConfig extends EngineAnnouncementConfig>(
-  configs: TConfig[]
+  configs: TConfig[],
+  segments: Record<string, boolean> = {}
 ): AnnouncementsEngineState<TConfig> {
   let state = emptyAnnouncementsState<TConfig>()
   for (const config of configs) state = announcementsReducer(state, { type: 'REGISTER', config })
-  return state
+  // Seeded here rather than aligned afterwards: the handle serves THIS object as
+  // its pre-verb snapshot and hands the SAME one to the engine, so any later
+  // `{ ...state }` would break that identity and make every consumer render twice.
+  return configs.length > 0
+    ? { ...state, eligibleIds: computeEligibleIds(configs, segments) }
+    : state
 }
 
 export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConfig>(
@@ -158,14 +165,14 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
   let userContext = options.userContext
   let segments = options.segments ?? {}
   let queueConfig: QueueConfig = { ...DEFAULT_QUEUE_CONFIG, ...options.queueConfig }
-  let eligibleIds = computeEligibleIds(configs, segments)
+  let eligibleIds: ReadonlySet<string> = computeEligibleIds(configs, segments)
 
   // Inert: `new AnnouncementScheduler` allocates a PriorityQueue and nothing else.
   const scheduler = new AnnouncementScheduler(queueConfig, isScheduleActive)
   const listeners = createListeners('announcements-engine')
   const timers = new Set<ReturnType<typeof setTimeout>>()
 
-  let state = options.initialState ?? seedAnnouncementsState<TConfig>(configs)
+  let state = options.initialState ?? seedAnnouncementsState<TConfig>(configs, segments)
   let booted = false
   let destroyed = false
 
@@ -322,8 +329,28 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
     timers.add(timer)
   }
 
+  /**
+   * Recompute the eligible set and notify if it MOVED.
+   *
+   * Eligibility is engine state a consumer renders — "can I show this?" is a
+   * question the Vue example puts on screen — but it does not live in the
+   * reducer, so a `dispatch` cannot carry it. Without this diff, revoking a
+   * segment recomputes correctly and tells nobody: `autoShow()` has nothing to
+   * do, no reducer action fires, no subscriber runs, and the UI keeps showing
+   * the stale answer. Found by the Vue e2e, which is exactly the consumer this
+   * subpath exists for. The diff keeps it from notifying on every no-op.
+   */
   const recomputeEligibility = (): void => {
-    eligibleIds = computeEligibleIds(configs, segments)
+    const next = computeEligibleIds(configs, segments)
+    const changed = next.size !== eligibleIds.size || [...next].some((id) => !eligibleIds.has(id))
+    eligibleIds = next
+    if (!changed || destroyed) return
+    // A NEW state object, not just a notify. `useSyncExternalStore` compares
+    // with `Object.is` and Vue's `shallowRef` does the same, so notifying while
+    // handing back the identical reference is a no-op at every consumer. The
+    // diff above is what keeps this from allocating on every no-op call.
+    state = { ...state, eligibleIds: next }
+    listeners.notify()
   }
 
   /** The auto-show pass — the engine port of the provider's `:432` effect. */
@@ -529,6 +556,6 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
       dispatch({ type: 'ADVANCE_QUEUE', queue: [], at: now() })
     },
 
-    getEligibleIds: () => eligibleIds,
+    getEligibleIds: () => state.eligibleIds,
   }
 }

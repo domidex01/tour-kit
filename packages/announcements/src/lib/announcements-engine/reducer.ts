@@ -35,6 +35,9 @@ export const FORCE_SHOW_BYPASS = [
 
 export type ForceShowBypassKey = (typeof FORCE_SHOW_BYPASS)[number]
 
+/** A fresh, segment-closed engine state. Every arm below spreads `...state`,
+ * so `eligibleIds` rides along untouched — it is written only by the engine's
+ * own `recomputeEligibility`, never by an action. */
 export function createInitialState(id: string): AnnouncementState {
   return {
     id,

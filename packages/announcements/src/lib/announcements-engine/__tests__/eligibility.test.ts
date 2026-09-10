@@ -128,3 +128,33 @@ describe('the engine refuses a segment-gated show until setSegments admits it', 
     e.destroy()
   })
 })
+
+describe('setSegments notifies when the eligible set moves', () => {
+  it('tells subscribers on admit AND on revoke, but not on a no-op', () => {
+    // Eligibility is state a consumer renders, and it does not live in the
+    // reducer — so a dispatch cannot carry it. Found by the Vue e2e: revoking a
+    // segment recomputed correctly and told nobody, so the page kept showing
+    // the stale answer.
+    const e = createAnnouncementsEngine({
+      announcements: [
+        { id: 'a', variant: 'modal', audience: { segment: 'admins' }, autoShow: false },
+      ] as EngineAnnouncementConfig[],
+      storage: createFakeStorage(),
+    })
+    e.boot()
+    const seen = vi.fn()
+    e.subscribe(seen)
+
+    e.setSegments({ admins: true })
+    expect(seen, 'admit did not notify').toHaveBeenCalledTimes(1)
+    expect(e.canShow('a')).toBe(true)
+
+    e.setSegments({ admins: true }) // same answer
+    expect(seen, 'a no-op notified').toHaveBeenCalledTimes(1)
+
+    e.setSegments({ admins: false })
+    expect(seen, 'revoke did not notify').toHaveBeenCalledTimes(2)
+    expect(e.canShow('a')).toBe(false)
+    e.destroy()
+  })
+})

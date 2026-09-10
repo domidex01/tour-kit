@@ -645,9 +645,18 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.7.6
         version: 1.7.6
+      '@tour-kit/announcements':
+        specifier: workspace:*
+        version: link:../../packages/announcements
       '@tour-kit/hints':
         specifier: workspace:*
         version: link:../../packages/hints
+      '@tour-kit/scheduling':
+        specifier: workspace:*
+        version: link:../../packages/scheduling
+      '@tour-kit/surveys':
+        specifier: workspace:*
+        version: link:../../packages/surveys
       '@tour-kit/vue':
         specifier: workspace:*
         version: link:../../packages/vue

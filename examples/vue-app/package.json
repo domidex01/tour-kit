@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
+    "@tour-kit/announcements": "workspace:*",
     "@tour-kit/hints": "workspace:*",
+    "@tour-kit/scheduling": "workspace:*",
+    "@tour-kit/surveys": "workspace:*",
     "@tour-kit/vue": "workspace:*",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"

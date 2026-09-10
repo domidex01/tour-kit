@@ -34,7 +34,7 @@ export function createAnnouncementsHandle<TConfig extends EngineAnnouncementConf
   // own initial state. Phase 2 found that building two makes every consumer
   // render twice: the values are equal but `Object.is` is false, so
   // `useSyncExternalStore` re-renders the moment the engine is constructed.
-  const seed = seedAnnouncementsState<TConfig>(options.announcements ?? [])
+  const seed = seedAnnouncementsState<TConfig>(options.announcements ?? [], options.segments)
 
   return createHandle<AnnouncementsEngine<TConfig>, AnnouncementsEngineState<TConfig>>(
     () => createAnnouncementsEngine({ ...options, initialState: seed }),
