@@ -50,6 +50,14 @@ const SIZE_LIMIT = '.size-limit.json'
  * Loose on wording, strict on the number: the regexes match the claim, not the
  * prose around it.
  */
+/**
+ * The per-plugin ceiling is a parenthetical inside the analytics bullet, not a
+ * bullet of its own: `- analytics <4 KB (root; per-plugin <1.5 KB each)`. Bind
+ * it to that bullet so a stray "per-plugin <N KB" in prose cannot be read as a
+ * budget row (v3 Phase 3 — the four rows below shared one unanchored pattern).
+ */
+const PER_PLUGIN = /^\s*-\s*analytics\s*<[^\n]*per-plugin\s*<\s*([\d.]+)\s*KB/m
+
 const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
   core: { pattern: /^\s*-\s*core\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   // Both anchored on the word that distinguishes them. The `core:engine`
@@ -70,10 +78,13 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
     mode: 'exact',
   },
   'analytics:main': { pattern: /^\s*-\s*analytics\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
-  'analytics:posthog': { pattern: /per-plugin\s*<\s*([\d.]+)\s*KB/, mode: 'ceiling' },
-  'analytics:mixpanel': { pattern: /per-plugin\s*<\s*([\d.]+)\s*KB/, mode: 'ceiling' },
-  'analytics:amplitude': { pattern: /per-plugin\s*<\s*([\d.]+)\s*KB/, mode: 'ceiling' },
-  'analytics:ga': { pattern: /per-plugin\s*<\s*([\d.]+)\s*KB/, mode: 'ceiling' },
+  // The four per-plugin rows read one claim, and it is a parenthetical inside
+  // the `- analytics <4 KB (root; per-plugin <1.5 KB each)` bullet rather than a
+  // bullet of its own — so it is anchored to that bullet's start, not to `-`.
+  'analytics:posthog': { pattern: PER_PLUGIN, mode: 'ceiling' },
+  'analytics:mixpanel': { pattern: PER_PLUGIN, mode: 'ceiling' },
+  'analytics:amplitude': { pattern: PER_PLUGIN, mode: 'ceiling' },
+  'analytics:ga': { pattern: PER_PLUGIN, mode: 'ceiling' },
   // v3 Phase 0 — anchored on `analytics/engine subpath` exactly as `core:engine`
   // is on `core/engine subpath`. The sibling `analytics:main` pattern is
   // `/^\s*-\s*analytics\s*<…/m`, so a bullet beginning `- analytics/engine`
@@ -92,9 +103,19 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
     pattern: /checklists\/engine subpath\s*<\s*([\d.]+)\s*KB/,
     mode: 'exact',
   },
-  announcements: { pattern: /announcements\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },
-  surveys: { pattern: /surveys\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },
-  license: { pattern: /license\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },
+  // Anchored in v3 Phase 3, and the bullet they shared was split three ways in
+  // the same commit — `- announcements <14 KB, surveys <12.5 KB, license <8 KB`
+  // gave all three patterns the SAME line to match, so an unanchored
+  // /surveys\s*<…/ read the announcements number and raising one raised all
+  // three. `license` is the sharp edge the recipe calls out: prose elsewhere in
+  // CLAUDE.md must say "licence gate", never "license <", or this first-match
+  // scan reads a sentence instead of a budget row (:196 and :206 already do).
+  announcements: {
+    pattern: /^\s*-\s*announcements\s*<\s*([\d.]+)\s*KB/m,
+    mode: 'exact',
+  },
+  surveys: { pattern: /^\s*-\s*surveys\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
+  license: { pattern: /^\s*-\s*license\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   media: { pattern: /^\s*-\s*media\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   'ai:client': { pattern: /-\s*ai\s*<\s*([\d.]+)\s*KB\s*\(client\)/, mode: 'exact' },
   'ai:server': { pattern: /<\s*([\d.]+)\s*KB\s*\(server\)/, mode: 'exact' },

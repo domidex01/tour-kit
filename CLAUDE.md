@@ -207,7 +207,9 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     Built with `splitting: true`, so the row is the re-export shell plus the
     one React-free chunk it shares with the main entry — a guard that read the
     shell alone would pass forever.
-  - announcements <14 KB, surveys <12.5 KB, license <8 KB
+  - announcements <14 KB
+  - surveys <12.5 KB
+  - license <8 KB
   - media <9 KB
   - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
