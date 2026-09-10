@@ -23,6 +23,7 @@ const empty = (): AnnouncementsEngineState => ({
   configs: new Map(),
   activeAnnouncement: null,
   queue: [],
+  eligibleIds: new Set<string>(),
 })
 
 const withOne = (id = 'a', over: Partial<EngineAnnouncementConfig> = {}) =>

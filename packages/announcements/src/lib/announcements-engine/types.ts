@@ -154,6 +154,16 @@ export interface AnnouncementsEngineState<
   configs: Map<string, TConfig>
   activeAnnouncement: string | null
   queue: string[]
+  /**
+   * The ids the current segment map admits (plan Decision 7a).
+   *
+   * In the SNAPSHOT rather than beside it, because a consumer renders it —
+   * "can I show this?" is a question the Vue example puts on screen. Notifying
+   * without a new state object is not enough: `getState()` would return the
+   * same reference and both `useSyncExternalStore` (Object.is) and Vue's
+   * `shallowRef` would ignore it. Found by the Vue e2e.
+   */
+  eligibleIds: ReadonlySet<string>
 }
 
 /** The reducer's action union, discriminated on `type`. */
