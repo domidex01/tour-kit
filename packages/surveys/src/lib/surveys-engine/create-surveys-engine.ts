@@ -23,15 +23,15 @@
  * and one signal is forwarded by the binding: `setTourActive()`.
  */
 import { createListeners } from '@tour-kit/core/engine'
-import { calculateCES, calculateCSAT, calculateNPS } from '../../core/scoring'
 import { SurveyScheduler } from '../../core/scheduler'
+import { calculateCES, calculateCSAT, calculateNPS } from '../../core/scoring'
 import type { CESResult, CSATResult, NPSResult } from '../../types/scoring'
 import { passesFrequencyGates } from './frequency'
 import { deserializeState, serializeState } from './persistence'
 import { surveysReducer } from './reducer'
 import {
-  DEFAULT_SURVEY_QUEUE_CONFIG,
   type AnswerValue,
+  DEFAULT_SURVEY_QUEUE_CONFIG,
   type DismissalReason,
   type EngineSurveyConfig,
   type IsScheduleActive,
@@ -107,9 +107,9 @@ export interface SurveysEngine<TConfig extends EngineSurveyConfig = EngineSurvey
   complete: (surveyId: string) => void
   reset: (id: string) => void
   resetAll: () => void
-  getSurveyState: (id: string) => SurveysEngineState['surveys'] extends Map<string, infer S>
-    ? S | undefined
-    : never
+  getSurveyState: (
+    id: string
+  ) => SurveysEngineState['surveys'] extends Map<string, infer S> ? S | undefined : never
   getConfig: (id: string) => TConfig | undefined
   canShow: (id: string) => boolean
 }
@@ -170,7 +170,8 @@ export function createSurveysEngine<TConfig extends EngineSurveyConfig = EngineS
   // `useState(() => Math.random())`, which draws once per mount.
   const userRoll = random()
 
-  let state = options.initialState ?? (options.surveys ? seedSurveysState(configs) : initialSurveysState)
+  let state =
+    options.initialState ?? (options.surveys ? seedSurveysState(configs) : initialSurveysState)
   let hydrated = false
   let booted = false
   let destroyed = false
@@ -375,7 +376,8 @@ export function createSurveysEngine<TConfig extends EngineSurveyConfig = EngineS
     reset: (id) => dispatch({ type: 'RESET', id }),
     resetAll: () => dispatch({ type: 'RESET_ALL' }),
 
-    getSurveyState: ((id: string) => state.surveys.get(id)) as SurveysEngine<TConfig>['getSurveyState'],
+    getSurveyState: ((id: string) =>
+      state.surveys.get(id)) as SurveysEngine<TConfig>['getSurveyState'],
     getConfig: (id) => configOf(id),
     canShow: canShowInternal,
   }

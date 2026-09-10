@@ -71,7 +71,10 @@ export function updateSurvey(
 }
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: switch-based reducer; each case is small and self-contained — splitting would obscure state transitions
-export function surveysReducer(state: SurveysEngineState, action: SurveysAction): SurveysEngineState {
+export function surveysReducer(
+  state: SurveysEngineState,
+  action: SurveysAction
+): SurveysEngineState {
   switch (action.type) {
     case 'REGISTER': {
       if (state.surveys.has(action.config.id)) return state

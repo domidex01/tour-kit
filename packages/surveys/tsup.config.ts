@@ -7,6 +7,10 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     headless: 'src/headless.ts',
+    // v3 Phase 3 — the React-free door. Deliberately absent from
+    // `injectUseClient` below: a `'use client'` directive on it would make a
+    // Node or Vue consumer's bundler treat it as a client component.
+    'engine/index': 'src/engine/index.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,

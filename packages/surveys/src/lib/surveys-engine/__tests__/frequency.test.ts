@@ -84,9 +84,15 @@ describe('passesFrequencyGates', () => {
   it('takes the MINIMUM of provider and config sampling rate', () => {
     // The stricter of the two wins, so a provider-wide 10% cannot be widened
     // by a survey asking for 100%.
-    expect(passesFrequencyGates(base({ samplingRate: 1 }, { providerSamplingRate: 0.1, userRoll: 0.5 }))).toBe(false)
-    expect(passesFrequencyGates(base({ samplingRate: 0.1 }, { providerSamplingRate: 1, userRoll: 0.5 }))).toBe(false)
-    expect(passesFrequencyGates(base({ samplingRate: 1 }, { providerSamplingRate: 1, userRoll: 0.5 }))).toBe(true)
+    expect(
+      passesFrequencyGates(base({ samplingRate: 1 }, { providerSamplingRate: 0.1, userRoll: 0.5 }))
+    ).toBe(false)
+    expect(
+      passesFrequencyGates(base({ samplingRate: 0.1 }, { providerSamplingRate: 1, userRoll: 0.5 }))
+    ).toBe(false)
+    expect(
+      passesFrequencyGates(base({ samplingRate: 1 }, { providerSamplingRate: 1, userRoll: 0.5 }))
+    ).toBe(true)
   })
 
   it('lets the CONFIG override the provider for cooldown and session limit', () => {

@@ -128,6 +128,11 @@ export function assertClosureIsNotTheShell(expect, entry, minBytes = 2000) {
  *
  * `RELATIVE_SPECIFIER` is a module-level /g regex: `matchAll` only, never
  * `.test`, which would carry `lastIndex` between calls.
+ *
+ * Reads through `readCode`, not `read`: a doc comment that names a module the
+ * file does NOT import — `types.ts` explaining why `AnswerValue` moved out of
+ * `./question`, say — otherwise makes the walk throw `cannot resolve` on a
+ * perfectly correct file. Measured in v3 Phase 3.
  */
 export function reachableFrom(entry) {
   const seen = new Set()
@@ -136,7 +141,7 @@ export function reachableFrom(entry) {
     const file = queue.shift()
     if (seen.has(file)) continue
     seen.add(file)
-    for (const [, spec] of read(file).matchAll(RELATIVE_SPECIFIER)) {
+    for (const [, spec] of readCode(file).matchAll(RELATIVE_SPECIFIER)) {
       const base = resolve(dirname(file), spec)
       const next = [`${base}.ts`, join(base, 'index.ts'), `${base}.tsx`].find(existsSync)
       if (!next) throw new Error(`${file}: cannot resolve ${spec}`)

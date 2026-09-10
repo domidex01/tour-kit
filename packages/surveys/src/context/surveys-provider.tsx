@@ -1,31 +1,31 @@
+'use client'
+
 import { createStorageAdapter, useTourContextOptional } from '@tour-kit/core'
 import { LicenseGate } from '@tour-kit/license'
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from 'react'
-import { SurveyScheduler } from '../core/scheduler'
-import { calculateCES, calculateCSAT, calculateNPS } from '../core/scoring'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSyncExternalStore } from 'react'
+import type { StepValidation } from '../lib/surveys-engine/create-surveys-engine'
+import { createSurveysHandle } from '../lib/surveys-engine/create-surveys-handle'
 import type { SurveysContextValue, SurveysProviderProps } from '../types/context'
 import type { AnswerValue } from '../types/question'
-import { DEFAULT_SURVEY_QUEUE_CONFIG, type SurveyQueueConfig } from '../types/queue'
-import type { CESResult, CSATResult, NPSResult } from '../types/scoring'
 import type { DismissalReason, SurveyConfig } from '../types/survey'
-import { deserializeState, serializeState } from '../lib/surveys-engine/persistence'
-import { passesFrequencyGates } from '../lib/surveys-engine/frequency'
-import { surveysReducer } from '../lib/surveys-engine/reducer'
 import { SurveysContext } from './surveys-context'
 
-// ── The pure layer moved to `../lib/surveys-engine/` (v3 Phase 3, Task 3.7):
-// the reducer and its atomic `drainQueue`, serialize/deserialize, and the six
-// fatigue gates. 401 lines, no React in any of them.
-// ── Provider ───────────────────────────────────────────────
-
+/**
+ * v3 Phase 3 — this provider is a BINDING over `@tour-kit/surveys/engine`.
+ *
+ * 401 lines of reducer, persistence and fatigue gates now live in
+ * `lib/surveys-engine/` and run with no React at all. What is left is the four
+ * things only React can do: build the storage adapter and read the tour context
+ * (two things the engine cannot), subscribe a tree to the engine's snapshot,
+ * forward prop changes as verbs, and wrap in the licence gate.
+ *
+ * The storage adapter is built HERE and passed in, not resolved in the engine.
+ * Six existing suites stub `createStorageAdapter` through `vi.mock` on core's
+ * main barrel, and `vi.mock` does not intercept the `/engine` subpath — an
+ * engine that resolved its own would leave all six silently running against
+ * real jsdom `localStorage`, still green and no longer testing anything.
+ */
 export function SurveysProvider({
   children,
   surveys: surveyConfigs = [],
@@ -44,302 +44,160 @@ export function SurveysProvider({
   onQuestionAnswered,
   onScoreCalculated,
 }: SurveysProviderProps): ReactNode {
-  const [state, dispatch] = useReducer(surveysReducer, {
-    surveys: new Map(),
-    activeSurvey: null,
-    queue: [],
-  })
-
-  const configsRef = useRef(surveyConfigs)
-  configsRef.current = surveyConfigs
-
-  const stateRef = useRef(state)
-  stateRef.current = state
-
-  const mergedQueueConfig = useMemo<SurveyQueueConfig>(
-    () => ({ ...DEFAULT_SURVEY_QUEUE_CONFIG, ...queueConfig }),
-    [queueConfig]
-  )
-
-  const schedulerRef = useRef<SurveyScheduler | null>(null)
-  if (schedulerRef.current === null) {
-    schedulerRef.current = new SurveyScheduler(mergedQueueConfig)
-  }
-  useEffect(() => {
-    schedulerRef.current?.updateConfig(mergedQueueConfig)
-  }, [mergedQueueConfig])
-
   const storage = useMemo(() => {
     if (storageProp === null) return null
     return createStorageAdapter(storageProp ?? 'localStorage')
   }, [storageProp])
 
-  const storageStateKey = `${storageKey}:state`
-  const hydratedRef = useRef(false)
-  const lastShownAtRef = useRef<Date | null>(null)
-  const sessionShowCountRef = useRef(0)
+  // The engine reads these through stable callbacks, so a changed handler never
+  // rebuilds it.
+  const live = useRef({
+    configs: surveyConfigs,
+    onSurveyShow,
+    onSurveyDismiss,
+    onSurveyComplete,
+    onSurveyAnswer,
+    onSurveySnooze,
+    onQuestionAnswered,
+    onScoreCalculated,
+  })
+  live.current = {
+    configs: surveyConfigs,
+    onSurveyShow,
+    onSurveyDismiss,
+    onSurveyComplete,
+    onSurveyAnswer,
+    onSurveySnooze,
+    onQuestionAnswered,
+    onScoreCalculated,
+  }
 
-  const [userRoll] = useState(() => Math.random())
-
-  // Hydrate from storage on mount
-  useEffect(() => {
-    if (hydratedRef.current || !storage) {
-      hydratedRef.current = true
-      return
-    }
-    let cancelled = false
-    Promise.resolve(storage.getItem(storageStateKey)).then((raw) => {
-      if (cancelled) return
-      const hydrated = deserializeState(raw)
-      if (hydrated) {
-        dispatch({ type: 'HYDRATE', surveys: hydrated.surveys, queue: hydrated.queue })
-        lastShownAtRef.current = hydrated.lastShownAt
-      }
-      hydratedRef.current = true
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [storage, storageStateKey])
-
-  // Register configs after hydration; re-run when the set of config ids changes.
-  const ids = useMemo(() => surveyConfigs.map((c) => c.id).join('|'), [surveyConfigs])
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `ids` is a stable re-run trigger; effect body reads the mutable ref.
-  useEffect(() => {
-    for (const config of configsRef.current) {
-      dispatch({ type: 'REGISTER', config })
-    }
-  }, [ids])
-
-  // Persist on state change
-  useEffect(() => {
-    if (!storage || !hydratedRef.current) return
-    const serialized = serializeState(state.surveys, state.queue, lastShownAtRef.current)
-    storage.setItem(storageStateKey, serialized)
-  }, [state.surveys, state.queue, storage, storageStateKey])
-
-  // Suppress surveys while a tour is active
-  const tourContext = useTourContextOptional()
-  const isTourActive = tourContext?.isActive ?? false
-
-  useEffect(() => {
-    if (isTourActive && state.activeSurvey) {
-      dispatch({ type: 'HIDE', id: state.activeSurvey, drain: false })
-    }
-  }, [isTourActive, state.activeSurvey])
-
-  // ── Gate: can this survey be shown right now? ──
-
-  const canShowInternal = useCallback(
-    (id: string): boolean => {
-      if (isTourActive) return false
-      const config = configsRef.current.find((c) => c.id === id)
-      const surveyState = stateRef.current.surveys.get(id)
-      if (!config || !surveyState) return false
-
-      const scheduler = schedulerRef.current
-      if (scheduler && !scheduler.canShow(config, surveyState, userContext)) return false
-
-      return passesFrequencyGates({
-        config,
-        surveyState,
-        userRoll,
-        providerSamplingRate: samplingRate,
-        providerGlobalCooldownDays: globalCooldownDays,
-        providerMaxPerSession: maxPerSession,
-        lastShownAt: lastShownAtRef.current,
-        sessionShowCount: sessionShowCountRef.current,
-        now: new Date(),
-      })
-    },
-    [isTourActive, userContext, samplingRate, globalCooldownDays, maxPerSession, userRoll]
-  )
-
-  // ── Action handlers ──
-
-  const handleShow = useCallback(
-    (id: string) => {
-      if (!canShowInternal(id)) return
-      dispatch({ type: 'SHOW', id })
-      lastShownAtRef.current = new Date()
-      sessionShowCountRef.current += 1
-      onSurveyShow?.(id)
-      const cfg = configsRef.current.find((c) => c.id === id)
-      cfg?.onShow?.()
-    },
-    [canShowInternal, onSurveyShow]
-  )
-
-  const handleHide = useCallback((id: string) => {
-    dispatch({ type: 'HIDE', id, drain: true })
-  }, [])
-
-  const handleDismiss = useCallback(
-    (id: string, reason: DismissalReason = 'programmatic') => {
-      dispatch({ type: 'DISMISS', id, reason, drain: true })
-      onSurveyDismiss?.(id, reason)
-      const cfg = configsRef.current.find((c) => c.id === id)
-      cfg?.onDismiss?.(reason)
-    },
-    [onSurveyDismiss]
-  )
-
-  const handleSnooze = useCallback(
-    (id: string) => {
-      const cfg = configsRef.current.find((c) => c.id === id)
-      dispatch({ type: 'SNOOZE', id, delayDays: cfg?.snoozeDelayDays, drain: true })
-      onSurveySnooze?.(id)
-    },
-    [onSurveySnooze]
-  )
-
-  const handleAnswer = useCallback(
-    (surveyId: string, questionId: string, value: AnswerValue) => {
-      dispatch({ type: 'ANSWER', id: surveyId, questionId, value })
-      onQuestionAnswered?.(surveyId, questionId, value)
-      onSurveyAnswer?.(surveyId, questionId, value)
-      const cfg = configsRef.current.find((c) => c.id === surveyId)
-      cfg?.onAnswer?.(questionId, value)
-    },
-    [onQuestionAnswered, onSurveyAnswer]
-  )
-
-  const handleNextQuestion = useCallback((surveyId: string): string | null => {
-    // Read latest state/config off refs (same idiom as handleComplete/handleAnswer)
-    // so the gate sees the most recent answer recorded in this render cycle.
-    const survey = stateRef.current.surveys.get(surveyId)
-    const config = configsRef.current.find((c) => c.id === surveyId)
-    const question = config?.questions?.[survey?.currentStep ?? 0]
-    if (question?.validation && survey) {
+  /**
+   * Which question sits at a step, and what its validator says.
+   *
+   * `QuestionConfig` carries `MediaSlotProps`, so it cannot enter the engine —
+   * but the ORDER (validate, record or clear the error, advance only on a pass)
+   * is engine logic and stays there. This is the seam between the two.
+   */
+  const validateStep = useCallback(
+    (
+      surveyId: string,
+      step: number,
+      responses: Map<string, AnswerValue>
+    ): StepValidation | null => {
+      const config = live.current.configs.find((c) => c.id === surveyId)
+      const question = config?.questions?.[step]
+      if (!question?.validation) return null
       // `value` is `AnswerValue | undefined` — undefined when the question is
       // unanswered, which is exactly the case `validation` exists to catch (a
       // required field). The cast bridges to the public `(value: AnswerValue)`
-      // signature, which can't be widened to `| undefined` without a breaking
-      // change to that frozen shape. Validation authors must handle a falsy value.
-      const value = survey.responses.get(question.id)
-      const error = question.validation(value as AnswerValue)
-      if (error != null) {
-        dispatch({
-          type: 'SET_VALIDATION_ERROR',
-          id: surveyId,
-          questionId: question.id,
-          error,
-        })
-        return error
-      }
-      dispatch({ type: 'CLEAR_VALIDATION_ERROR', id: surveyId, questionId: question.id })
-    }
-    dispatch({ type: 'NEXT_QUESTION', id: surveyId })
-    return null
-  }, [])
-
-  const handlePrevQuestion = useCallback((surveyId: string) => {
-    dispatch({ type: 'PREV_QUESTION', id: surveyId })
-  }, [])
-
-  const handleComplete = useCallback(
-    (surveyId: string) => {
-      const surveyState = stateRef.current.surveys.get(surveyId)
-      const responses = surveyState?.responses ?? new Map<string, AnswerValue>()
-
-      dispatch({ type: 'COMPLETE', id: surveyId, drain: true })
-      onSurveyComplete?.(surveyId, responses)
-
-      const config = configsRef.current.find((s) => s.id === surveyId)
-      config?.onComplete?.(responses)
-
-      if (config?.type && config.type !== 'custom' && onScoreCalculated) {
-        const values = Array.from(responses.values()).filter(
-          (v): v is number => typeof v === 'number'
-        )
-        if (values.length > 0) {
-          let result: NPSResult | CSATResult | CESResult
-          switch (config.type) {
-            case 'nps':
-              result = calculateNPS(values)
-              break
-            case 'csat':
-              result = calculateCSAT(values)
-              break
-            case 'ces':
-              result = calculateCES(values)
-              break
-          }
-          onScoreCalculated(surveyId, config.type, result)
-        }
-      }
+      // signature, which can't be widened without a breaking change to that
+      // frozen shape. Validation authors must handle a falsy value.
+      const value = responses.get(question.id)
+      return { questionId: question.id, error: question.validation(value as AnswerValue) }
     },
-    [onSurveyComplete, onScoreCalculated]
+    []
   )
 
-  const handleRegister = useCallback((config: SurveyConfig) => {
-    dispatch({ type: 'REGISTER', config })
-  }, [])
-
-  const handleUnregister = useCallback((id: string) => {
-    dispatch({ type: 'UNREGISTER', id })
-  }, [])
-
-  const handleReset = useCallback((id: string) => {
-    dispatch({ type: 'RESET', id })
-  }, [])
-
-  const handleResetAll = useCallback(() => {
-    dispatch({ type: 'RESET_ALL' })
-  }, [])
-
-  const getState = useCallback((id: string) => state.surveys.get(id), [state.surveys])
-
-  const getValidationError = useCallback(
-    (id: string, questionId: string) => state.surveys.get(id)?.validationErrors.get(questionId),
-    [state.surveys]
+  // Construct the HANDLE in render (inert) but never the engine: `createHandle`
+  // builds that on the first verb, which is what keeps StrictMode's double
+  // render from producing two engines.
+  const [handle] = useState(() =>
+    createSurveysHandle<SurveyConfig>({
+      surveys: surveyConfigs,
+      queueConfig,
+      storage,
+      storageKey,
+      userContext,
+      globalCooldownDays,
+      samplingRate,
+      maxPerSession,
+      validateStep,
+      onShow: (id) => live.current.onSurveyShow?.(id),
+      onDismiss: (id, reason) => live.current.onSurveyDismiss?.(id, reason),
+      onSnooze: (id) => live.current.onSurveySnooze?.(id),
+      onAnswer: (surveyId, questionId, value) => {
+        live.current.onQuestionAnswered?.(surveyId, questionId, value)
+        live.current.onSurveyAnswer?.(surveyId, questionId, value)
+      },
+      onComplete: (surveyId, responses) => live.current.onSurveyComplete?.(surveyId, responses),
+      onScoreCalculated: (surveyId, type, result) =>
+        live.current.onScoreCalculated?.(surveyId, type, result),
+    })
   )
 
-  const getConfig = useCallback((id: string) => configsRef.current.find((s) => s.id === id), [])
+  const state = useSyncExternalStore(handle.subscribe, handle.getState, handle.getState)
+
+  useEffect(() => {
+    void handle.ensure().boot()
+    return () => handle.release()
+  }, [handle])
+
+  // Prop → verb, guarded against the first run: `boot()` already registered
+  // these exact configs, so an unguarded effect would re-register on mount.
+  const ids = useMemo(() => surveyConfigs.map((c) => c.id).join('|'), [surveyConfigs])
+  const mounted = useRef(false)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `ids` is a stable re-run trigger; the body reads the mutable ref.
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true
+      return
+    }
+    handle.ensure().setSurveys(live.current.configs)
+  }, [handle, ids])
+
+  const synced = useRef(false)
+  useEffect(() => {
+    if (!synced.current) {
+      synced.current = true
+      return
+    }
+    const engine = handle.ensure()
+    engine.setUserContext(userContext)
+    if (queueConfig) engine.setQueueConfig(queueConfig)
+  }, [handle, userContext, queueConfig])
+
+  // The engine cannot read a React context, so the binding forwards the signal
+  // (plan Decision 7). The coupling stops being implicit, and a Vue consumer
+  // can wire the same thing from its own tour state.
+  const isTourActive = useTourContextOptional()?.isActive ?? false
+  useEffect(() => {
+    handle.ensure().setTourActive(isTourActive)
+  }, [handle, isTourActive])
+
+  const verbs = useMemo(
+    () => ({
+      register: (config: SurveyConfig) => handle.ensure().register(config),
+      unregister: (id: string) => handle.ensure().unregister(id),
+      show: (id: string) => handle.ensure().show(id),
+      hide: (id: string) => handle.ensure().hide(id),
+      dismiss: (id: string, reason: DismissalReason = 'programmatic') =>
+        handle.ensure().dismiss(id, reason),
+      snooze: (id: string) => handle.ensure().snooze(id),
+      answer: (surveyId: string, questionId: string, value: AnswerValue) =>
+        handle.ensure().answer(surveyId, questionId, value),
+      nextQuestion: (surveyId: string) => handle.ensure().nextQuestion(surveyId),
+      prevQuestion: (surveyId: string) => handle.ensure().prevQuestion(surveyId),
+      complete: (surveyId: string) => handle.ensure().complete(surveyId),
+      reset: (id: string) => handle.ensure().reset(id),
+      resetAll: () => handle.ensure().resetAll(),
+      getConfig: (id: string) => handle.ensure().getConfig(id),
+      canShow: (id: string) => handle.ensure().canShow(id),
+    }),
+    [handle]
+  )
 
   const value = useMemo<SurveysContextValue>(
     () => ({
       surveys: state.surveys,
       activeSurvey: state.activeSurvey,
       queue: state.queue,
-      register: handleRegister,
-      unregister: handleUnregister,
-      show: handleShow,
-      hide: handleHide,
-      dismiss: handleDismiss,
-      snooze: handleSnooze,
-      answer: handleAnswer,
-      nextQuestion: handleNextQuestion,
-      prevQuestion: handlePrevQuestion,
-      complete: handleComplete,
-      reset: handleReset,
-      resetAll: handleResetAll,
-      getState,
-      getValidationError,
-      getConfig,
-      canShow: canShowInternal,
+      ...verbs,
+      getState: (id: string) => state.surveys.get(id),
+      getValidationError: (id: string, questionId: string) =>
+        state.surveys.get(id)?.validationErrors.get(questionId),
     }),
-    [
-      state.surveys,
-      state.activeSurvey,
-      state.queue,
-      handleRegister,
-      handleUnregister,
-      handleShow,
-      handleHide,
-      handleDismiss,
-      handleSnooze,
-      handleAnswer,
-      handleNextQuestion,
-      handlePrevQuestion,
-      handleComplete,
-      handleReset,
-      handleResetAll,
-      getState,
-      getValidationError,
-      getConfig,
-      canShowInternal,
-    ]
+    [state, verbs]
   )
 
   return (

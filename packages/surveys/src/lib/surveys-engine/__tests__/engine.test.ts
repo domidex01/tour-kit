@@ -48,8 +48,11 @@ describe('boot() is cancellable', () => {
     // The provider carried a `cancelled` flag at :486 for exactly this. Core's
     // own boot() still has this hole; the port deliberately does not inherit it.
     let release: (v: string | null) => void = () => {}
+    const pending = new Promise<string | null>((resolve) => {
+      release = resolve
+    })
     const storage = {
-      getItem: () => new Promise<string | null>((r) => (release = r)) as unknown as string | null,
+      getItem: () => pending as unknown as string | null,
       setItem: () => {},
       removeItem: () => {},
     }
@@ -57,7 +60,9 @@ describe('boot() is cancellable', () => {
     const booting = e.boot()
 
     e.destroy() // teardown while the read is in flight
-    release(serializeState(new Map([['a', { ...createInitialSurveyState('a'), viewCount: 9 }]]), [], null))
+    release(
+      serializeState(new Map([['a', { ...createInitialSurveyState('a'), viewCount: 9 }]]), [], null)
+    )
     await booting
 
     expect(e.getState().surveys.get('a')?.viewCount ?? 0).not.toBe(9)
@@ -164,7 +169,11 @@ describe('scoring fires on complete', () => {
     e.answer('a', 'q2', 3)
     e.complete('a')
 
-    expect(onScoreCalculated).toHaveBeenCalledWith('a', 'nps', expect.objectContaining({ score: expect.any(Number) }))
+    expect(onScoreCalculated).toHaveBeenCalledWith(
+      'a',
+      'nps',
+      expect.objectContaining({ score: expect.any(Number) })
+    )
     e.destroy()
   })
 

@@ -59,6 +59,16 @@
         "default": "./dist/headless.cjs"
       }
     },
+    "./engine": {
+      "import": {
+        "types": "./dist/engine/index.d.ts",
+        "default": "./dist/engine/index.js"
+      },
+      "require": {
+        "types": "./dist/engine/index.d.cts",
+        "default": "./dist/engine/index.cjs"
+      }
+    },
     "./styles/variables.css": "./src/styles/variables.css",
     "./styles.css": "./dist/styles/variables.css",
     "./package.json": "./package.json"

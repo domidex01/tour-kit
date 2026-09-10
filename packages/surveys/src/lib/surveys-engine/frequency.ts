@@ -27,11 +27,17 @@ export function passesGlobalCooldown(
   return daysBetween(lastShownAt, now) >= effectiveCooldownDays
 }
 
-export function passesSessionLimit(effectiveMax: number | undefined, sessionShowCount: number): boolean {
+export function passesSessionLimit(
+  effectiveMax: number | undefined,
+  sessionShowCount: number
+): boolean {
   return effectiveMax === undefined || sessionShowCount < effectiveMax
 }
 
-export function passesSnoozeLimit(maxSnoozeCount: number | undefined, snoozeCount: number): boolean {
+export function passesSnoozeLimit(
+  maxSnoozeCount: number | undefined,
+  snoozeCount: number
+): boolean {
   return maxSnoozeCount === undefined || snoozeCount < maxSnoozeCount
 }
 

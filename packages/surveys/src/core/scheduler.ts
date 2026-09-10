@@ -1,6 +1,6 @@
 import type {
-  EngineSurveyConfig as SurveyConfig,
   IsScheduleActive,
+  EngineSurveyConfig as SurveyConfig,
   SurveyQueueConfig,
   SurveyState,
 } from '../lib/surveys-engine/types'

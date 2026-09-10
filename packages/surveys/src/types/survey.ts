@@ -23,7 +23,6 @@ export type {
   SurveyType,
 } from '../lib/surveys-engine/types'
 
-
 /** Position options for slideout variant */
 export type SlideoutPosition = 'left' | 'right'
 
@@ -79,7 +78,6 @@ export interface SurveyConfig extends EngineSurveyConfig {
   /** Display mode variant */
   displayMode: DisplayMode
 
-
   /** Survey title */
   title?: string
 
@@ -91,7 +89,6 @@ export interface SurveyConfig extends EngineSurveyConfig {
 
   /** Frequency rule for showing this survey */
   frequency?: FrequencyRule
-
 
   /** Audience targeting conditions */
   audience?: AudienceCondition[]

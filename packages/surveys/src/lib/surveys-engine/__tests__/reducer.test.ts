@@ -67,7 +67,12 @@ describe('surveysReducer', () => {
 
   it('validation errors set and clear, and are never persisted state', () => {
     let s = register(empty(), 'a')
-    s = surveysReducer(s, { type: 'SET_VALIDATION_ERROR', id: 'a', questionId: 'q1', error: 'required' })
+    s = surveysReducer(s, {
+      type: 'SET_VALIDATION_ERROR',
+      id: 'a',
+      questionId: 'q1',
+      error: 'required',
+    })
     expect(s.surveys.get('a')?.validationErrors.get('q1')).toBe('required')
     s = surveysReducer(s, { type: 'CLEAR_VALIDATION_ERROR', id: 'a', questionId: 'q1' })
     expect(s.surveys.get('a')?.validationErrors.size).toBe(0)

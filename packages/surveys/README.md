@@ -257,3 +257,54 @@ Full documentation: [https://usertourkit.com/docs/surveys](https://usertourkit.c
 ## License
 
 Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+
+## `@tour-kit/surveys/engine` — the React-free subpath
+
+Everything that decides *whether, when and to whom* a survey shows — the queue,
+the six fatigue gates, the audience, the schedule, persistence and NPS/CSAT/CES
+scoring — is available with no React installed:
+
+```ts
+import { createSurveysEngine } from '@tour-kit/surveys/engine'
+
+const engine = createSurveysEngine({
+  surveys: [{ id: 'nps-q3', type: 'nps' }],
+  storage: localStorage,
+  onScoreCalculated: (id, type, result) => report(type, result.score),
+})
+
+engine.subscribe(() => render(engine.getState()))
+await engine.boot()
+```
+
+It resolves under ESM and CJS, runs in plain Node, and pulls in no React, no
+JSX runtime and no DOM. Render whatever you like from `getState()`.
+
+**Four seams worth knowing about.**
+
+`boot()` is async — it hydrates from storage — and it is cancellable: a
+`destroy()` while the read is in flight never lands a stale state.
+
+`storage` is an adapter *you* pass, not one the engine resolves. Anything with
+`getItem`/`setItem`/`removeItem` works, sync or async.
+
+`setTourActive(true)` suppresses surveys while something else is running, and
+hides whatever is currently visible without promoting the next one. In React,
+`<SurveysProvider>` wires this from the tour context for you.
+
+`config.schedule` needs the optional `@tour-kit/scheduling` peer, reached
+through a call-time `require`. That degrades *open* — a survey is never
+suppressed just because the peer is missing — but an ESM bundle gets no gating
+unless you inject the evaluator:
+
+```ts
+import { isScheduleActive } from '@tour-kit/scheduling/engine'
+
+createSurveysEngine({ surveys, isScheduleActive })
+```
+
+`samplingRate` reads a roll drawn once at construction; pass `random` to make
+it deterministic in tests.
+
+> The engine path is currently **ungated**: the Pro licence check lives in
+> `<SurveysProvider>`, not in the engine.

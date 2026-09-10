@@ -202,6 +202,10 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
     }
   }
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: field-by-field
+  // narrowing of an untrusted `localStorage` blob. The `??` fallbacks and the
+  // ternaries ARE the validation — collapsing them into a helper would hide the
+  // allow-list this deliberately spells out. Moved verbatim from the provider.
   const restore = (id: string): Partial<AnnouncementState> | null => {
     if (!storage) return null
     try {
@@ -319,6 +323,10 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
   }
 
   /** The auto-show pass — the engine port of the provider's `:432` effect. */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: orchestrates
+  // eligibility filtering, the priority sort and the queue/show dispatch —
+  // splitting would fragment the scheduler contract. Carried over from the
+  // provider effect it replaces, which had the same suppression.
   const autoShow = (): void => {
     if (state.announcements.size === 0) return
 

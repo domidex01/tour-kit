@@ -1,6 +1,6 @@
 import type { LocalizedText } from '@tour-kit/core'
-import type { AnswerValue } from '../lib/surveys-engine/types'
 import type { MediaSlotProps } from '@tour-kit/media'
+import type { AnswerValue } from '../lib/surveys-engine/types'
 
 /** Question input types */
 export type QuestionType =

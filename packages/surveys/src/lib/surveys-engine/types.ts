@@ -202,10 +202,7 @@ export type SurveysAction =
   | { type: 'HYDRATE'; surveys: Map<string, SurveyState>; queue: string[] }
 
 /** The optional-peer seam (plan Decision 7b). */
-export type IsScheduleActive = (
-  schedule: Schedule,
-  options: { now: Date }
-) => { isActive: boolean }
+export type IsScheduleActive = (schedule: Schedule, options: { now: Date }) => { isActive: boolean }
 
 /**
  * The storage shape the engine writes through.
@@ -219,7 +216,13 @@ export type IsScheduleActive = (
  * stays live and no existing test moves.
  */
 export interface SurveyStorageAdapter {
-  getItem(key: string): string | null
-  setItem(key: string, value: string): void
-  removeItem(key: string): void
+  /**
+   * May be async. core's `createStorageAdapter` can return a promise (that is
+   * why `boot()` is async and cancellable in the first place), so this must not
+   * be narrowed to the synchronous case — narrowing it would force a cast at
+   * the binding boundary, which is the one place a cast must never appear.
+   */
+  getItem(key: string): string | null | Promise<string | null>
+  setItem(key: string, value: string): void | Promise<void>
+  removeItem(key: string): void | Promise<void>
 }
