@@ -1,302 +1,32 @@
+'use client'
+
 import { useAnalyticsOptional } from '@tour-kit/analytics'
+import { useSegments } from '@tour-kit/core'
 import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
-import { createAnnouncementComparator } from '../core/priority-queue'
-import { AnnouncementScheduler } from '../core/scheduler'
-import { useFilteredAnnouncements } from '../hooks/use-filtered-announcements'
-import {
-  type AnnouncementConfig,
-  type AnnouncementState,
-  type DismissalReason,
-  isSegmentAudience,
-} from '../types/announcement'
+import { createAnnouncementsHandle } from '../lib/announcements-engine/create-announcements-handle'
+import { STORAGE_KEY_PREFIX } from '../lib/announcements-engine/persistence'
+import type { AnnouncementConfig, DismissalReason } from '../types/announcement'
 import type { AnnouncementsContextValue, AnnouncementsProviderProps } from '../types/context'
-import type { QueueConfig } from '../types/queue'
-import { DEFAULT_QUEUE_CONFIG } from '../types/queue'
+import { DEFAULT_QUEUE_CONFIG, type QueueConfig } from '../types/queue'
 import { AnnouncementsContext } from './announcements-context'
 
 /**
- * Whitelist of gates `forceShow(id)` may bypass.
+ * v3 Phase 3 — this provider is a BINDING over `@tour-kit/announcements/engine`.
  *
- * Phase 0 §4 sign-off; pinned by a literal-array test in
- * `__tests__/force-show.test.tsx`. New gates added to `show()` MUST default to
- * "respect, don't bypass" — adding a gate name here is a deliberate API change
- * and breaks the pinned test, forcing a review.
+ * Everything that was 831 lines of reducer, scheduler orchestration, queue
+ * timers, persistence and eligibility now lives in `lib/announcements-engine/`
+ * and runs with no React at all. What is left here is the four things only
+ * React can do: read the two hooks the engine cannot (`useSegments`,
+ * `useAnalyticsOptional`), subscribe a component tree to the engine's snapshot,
+ * forward prop changes as verbs, and wrap the tree in the licence gate.
  *
- * The `<LicenseGate require="pro">` wrapper is intentionally NOT a member of
- * this list — `forceShow` must not strip the license soft-gate watermark. See
- * `apps/docs/content/docs/guides/imperative-control.mdx`.
+ * `FORCE_SHOW_BYPASS` is re-exported from THIS module path under the same name
+ * on purpose: `__tests__/force-show.test.tsx:11` imports it from
+ * `'../context/announcements-provider'` and pins it with a literal array. A
+ * moved import path would be a test edit, and Decision 11 forbids that.
  */
-export const FORCE_SHOW_BYPASS = [
-  'frequency',
-  'cooldown',
-  'viewCount',
-  'isDismissed',
-  'audience',
-] as const
-
-export type ForceShowBypassKey = (typeof FORCE_SHOW_BYPASS)[number]
-
-// Action types
-type AnnouncementsAction =
-  | { type: 'REGISTER'; config: AnnouncementConfig }
-  | { type: 'UNREGISTER'; id: string }
-  | { type: 'SHOW'; id: string }
-  | { type: 'FORCE_SHOW'; id: string }
-  | { type: 'HIDE'; id: string }
-  | { type: 'DISMISS'; id: string; reason: DismissalReason }
-  | { type: 'COMPLETE'; id: string }
-  | { type: 'RESET'; id: string }
-  | { type: 'RESET_ALL' }
-  | { type: 'SET_ACTIVE'; id: string | null }
-  | { type: 'UPDATE_QUEUE'; queue: string[] }
-  | { type: 'RESTORE_STATE'; states: Map<string, Partial<AnnouncementState>> }
-
-interface AnnouncementsState {
-  announcements: Map<string, AnnouncementState>
-  configs: Map<string, AnnouncementConfig>
-  activeAnnouncement: string | null
-  queue: string[]
-}
-
-function createInitialState(id: string): AnnouncementState {
-  return {
-    id,
-    isActive: false,
-    isVisible: false,
-    isDismissed: false,
-    viewCount: 0,
-    lastViewedAt: null,
-    dismissedAt: null,
-    dismissalReason: null,
-    completedAt: null,
-  }
-}
-
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: reducer handling multiple action types
-function announcementsReducer(
-  state: AnnouncementsState,
-  action: AnnouncementsAction
-): AnnouncementsState {
-  switch (action.type) {
-    case 'REGISTER': {
-      const newAnnouncements = new Map(state.announcements)
-      const newConfigs = new Map(state.configs)
-
-      if (!newAnnouncements.has(action.config.id)) {
-        newAnnouncements.set(action.config.id, createInitialState(action.config.id))
-      }
-      newConfigs.set(action.config.id, action.config)
-
-      return { ...state, announcements: newAnnouncements, configs: newConfigs }
-    }
-
-    case 'UNREGISTER': {
-      const newAnnouncements = new Map(state.announcements)
-      const newConfigs = new Map(state.configs)
-      newAnnouncements.delete(action.id)
-      newConfigs.delete(action.id)
-
-      return {
-        ...state,
-        announcements: newAnnouncements,
-        configs: newConfigs,
-        activeAnnouncement:
-          state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
-        queue: state.queue.filter((id) => id !== action.id),
-      }
-    }
-
-    case 'SHOW': {
-      const newAnnouncements = new Map(state.announcements)
-      const announcement = newAnnouncements.get(action.id)
-
-      if (announcement && !announcement.isDismissed) {
-        newAnnouncements.set(action.id, {
-          ...announcement,
-          isActive: true,
-          isVisible: true,
-          viewCount: announcement.viewCount + 1,
-          lastViewedAt: new Date(),
-        })
-        return {
-          ...state,
-          announcements: newAnnouncements,
-          activeAnnouncement: action.id,
-        }
-      }
-      return state
-    }
-
-    case 'FORCE_SHOW': {
-      // Mirror SHOW but bypass the isDismissed guard and clear the dismissal
-      // record. Every other gate (frequency/cooldown/viewCount/audience) is
-      // enforced in `show()` and skipped by `forceShow()` per Phase 0 §4.
-      const newAnnouncements = new Map(state.announcements)
-      const announcement = newAnnouncements.get(action.id)
-
-      if (!announcement) return state
-
-      newAnnouncements.set(action.id, {
-        ...announcement,
-        isActive: true,
-        isVisible: true,
-        viewCount: announcement.viewCount + 1,
-        lastViewedAt: new Date(),
-        isDismissed: false,
-        dismissedAt: null,
-        dismissalReason: null,
-      })
-      return {
-        ...state,
-        announcements: newAnnouncements,
-        activeAnnouncement: action.id,
-      }
-    }
-
-    case 'HIDE': {
-      const newAnnouncements = new Map(state.announcements)
-      const announcement = newAnnouncements.get(action.id)
-
-      if (announcement) {
-        newAnnouncements.set(action.id, {
-          ...announcement,
-          isActive: false,
-          isVisible: false,
-        })
-        return {
-          ...state,
-          announcements: newAnnouncements,
-          activeAnnouncement:
-            state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
-        }
-      }
-      return state
-    }
-
-    case 'DISMISS': {
-      const newAnnouncements = new Map(state.announcements)
-      const announcement = newAnnouncements.get(action.id)
-
-      if (announcement) {
-        newAnnouncements.set(action.id, {
-          ...announcement,
-          isActive: false,
-          isVisible: false,
-          isDismissed: true,
-          dismissedAt: new Date(),
-          dismissalReason: action.reason,
-        })
-        return {
-          ...state,
-          announcements: newAnnouncements,
-          activeAnnouncement:
-            state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
-          queue: state.queue.filter((id) => id !== action.id),
-        }
-      }
-      return state
-    }
-
-    case 'COMPLETE': {
-      const newAnnouncements = new Map(state.announcements)
-      const announcement = newAnnouncements.get(action.id)
-
-      if (announcement) {
-        newAnnouncements.set(action.id, {
-          ...announcement,
-          isActive: false,
-          isVisible: false,
-          completedAt: new Date(),
-        })
-        return {
-          ...state,
-          announcements: newAnnouncements,
-          activeAnnouncement:
-            state.activeAnnouncement === action.id ? null : state.activeAnnouncement,
-        }
-      }
-      return state
-    }
-
-    case 'RESET': {
-      const newAnnouncements = new Map(state.announcements)
-      const announcement = newAnnouncements.get(action.id)
-
-      if (announcement) {
-        newAnnouncements.set(action.id, {
-          ...announcement,
-          isDismissed: false,
-          dismissedAt: null,
-          dismissalReason: null,
-          viewCount: 0,
-          lastViewedAt: null,
-          completedAt: null,
-        })
-        return { ...state, announcements: newAnnouncements }
-      }
-      return state
-    }
-
-    case 'RESET_ALL': {
-      const newAnnouncements = new Map(state.announcements)
-      newAnnouncements.forEach((announcement, id) => {
-        newAnnouncements.set(id, {
-          ...announcement,
-          isDismissed: false,
-          dismissedAt: null,
-          dismissalReason: null,
-          viewCount: 0,
-          lastViewedAt: null,
-          completedAt: null,
-        })
-      })
-      return { ...state, announcements: newAnnouncements }
-    }
-
-    case 'SET_ACTIVE': {
-      return { ...state, activeAnnouncement: action.id }
-    }
-
-    case 'UPDATE_QUEUE': {
-      return { ...state, queue: action.queue }
-    }
-
-    case 'RESTORE_STATE': {
-      const newAnnouncements = new Map(state.announcements)
-      action.states.forEach((partialState, id) => {
-        const current = newAnnouncements.get(id)
-        if (current) {
-          newAnnouncements.set(id, { ...current, ...partialState })
-        }
-      })
-      return { ...state, announcements: newAnnouncements }
-    }
-
-    default:
-      return state
-  }
-}
-
-const STORAGE_KEY_PREFIX = 'tour-kit:announcements:'
-
-function getStorageKey(prefix: string, id: string): string {
-  return `${prefix}${id}`
-}
-
-function getAnnouncementAnalyticsMetadata(
-  config: AnnouncementConfig,
-  metadata?: Record<string, unknown>
-): Record<string, unknown> {
-  return {
-    announcementId: config.id,
-    variant: config.variant,
-    priority: config.priority ?? 'normal',
-    category: config.category,
-    announcementMetadata: config.metadata,
-    ...metadata,
-  }
-}
+export { FORCE_SHOW_BYPASS, type ForceShowBypassKey } from '../lib/announcements-engine/reducer'
 
 export function AnnouncementsProvider({
   children,
@@ -311,472 +41,100 @@ export function AnnouncementsProvider({
   toastAdapter,
 }: AnnouncementsProviderProps) {
   const analytics = useAnalyticsOptional()
+  // Decision 7a — the engine owns eligibility; the binding forwards ONE signal.
+  // `useSegments()` is a React hook from core's main barrel and cannot enter a
+  // React-free engine, but the filtering cannot live here either: `REGISTER`
+  // is unfiltered, so an excluded announcement must still answer `getConfig`.
+  const segments = useSegments()
+
   const queueConfig: QueueConfig = React.useMemo(
     () => ({ ...DEFAULT_QUEUE_CONFIG, ...queueConfigOverrides }),
     [queueConfigOverrides]
   )
 
-  // Phase 3c — filter announcements by audience (segment + array shapes) once
-  // at the top of the provider so the scheduler / auto-show / canShow
-  // eligibility paths only see eligible candidates. The array-shape audience
-  // is also re-checked downstream by the scheduler for backward compat.
-  const filteredAnnouncements = useFilteredAnnouncements(initialAnnouncements)
-
-  // Set of segment-eligible IDs — used to gate imperative `show(id)` and
-  // `canShow(id)` against segment-shape audiences. Without this, an
-  // `audience: { segment: 'admins' }` announcement could be shown via
-  // `useAnnouncement(id).show()` to non-admins because the scheduler only
-  // evaluates the array-shape branch.
-  const filteredIds = React.useMemo(
-    () => new Set(filteredAnnouncements.map((a) => a.id)),
-    [filteredAnnouncements]
-  )
-
-  const [state, dispatch] = React.useReducer(announcementsReducer, {
-    announcements: new Map(),
-    configs: new Map(),
-    activeAnnouncement: null,
-    queue: [],
-  })
-
-  const schedulerRef = React.useRef<AnnouncementScheduler>(new AnnouncementScheduler(queueConfig))
-
-  // Tracks pending "show next in queue" timers so they can be cleared on unmount.
-  const queueTimersRef = React.useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
-
-  // Update scheduler config when it changes
-  React.useEffect(() => {
-    schedulerRef.current.updateConfig(queueConfig)
-  }, [queueConfig])
-
-  // Clear any pending queue advance timers when the provider unmounts.
-  React.useEffect(() => {
-    const timers = queueTimersRef.current
-    return () => {
-      for (const t of timers) clearTimeout(t)
-      timers.clear()
-    }
-  }, [])
-
-  // Persist state to storage
-  const persistState = React.useCallback(
-    (id: string, announcementState: AnnouncementState) => {
-      if (!storage) return
-
-      try {
-        const key = getStorageKey(storageKey, id)
-        const data = {
-          viewCount: announcementState.viewCount,
-          lastViewedAt: announcementState.lastViewedAt?.toISOString() ?? null,
-          isDismissed: announcementState.isDismissed,
-          dismissedAt: announcementState.dismissedAt?.toISOString() ?? null,
-          dismissalReason: announcementState.dismissalReason,
-          completedAt: announcementState.completedAt?.toISOString() ?? null,
-        }
-        storage.setItem(key, JSON.stringify(data))
-      } catch {
-        // Storage might be full or unavailable
-      }
-    },
-    [storage, storageKey]
-  )
-
-  // Restore state from storage
-  const restoreState = React.useCallback(
-    (id: string): Partial<AnnouncementState> | null => {
-      if (!storage) return null
-
-      try {
-        const key = getStorageKey(storageKey, id)
-        const data = storage.getItem(key)
-        if (!data) return null
-
-        const parsed = JSON.parse(data)
-        return {
-          viewCount: parsed.viewCount ?? 0,
-          lastViewedAt: parsed.lastViewedAt ? new Date(parsed.lastViewedAt) : null,
-          isDismissed: parsed.isDismissed ?? false,
-          dismissedAt: parsed.dismissedAt ? new Date(parsed.dismissedAt) : null,
-          dismissalReason: parsed.dismissalReason ?? null,
-          completedAt: parsed.completedAt ? new Date(parsed.completedAt) : null,
-        }
-      } catch {
-        return null
-      }
-    },
-    [storage, storageKey]
-  )
-
-  // Register initial announcements
-  React.useEffect(() => {
-    const statesToRestore = new Map<string, Partial<AnnouncementState>>()
-
-    for (const config of initialAnnouncements) {
-      dispatch({ type: 'REGISTER', config })
-
-      const restored = restoreState(config.id)
-      if (restored) {
-        statesToRestore.set(config.id, restored)
-      }
-    }
-
-    if (statesToRestore.size > 0) {
-      dispatch({ type: 'RESTORE_STATE', states: statesToRestore })
-    }
-  }, [initialAnnouncements, restoreState])
-
-  // Auto-show eligible announcements after registration / on userContext change.
-  // Respects priority queueing via the scheduler.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: evaluates on register + audience changes
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: orchestrates eligibility filtering, priority sort, and queue/show dispatch — splitting would fragment the scheduler contract
-  React.useEffect(() => {
-    if (state.announcements.size === 0) return
-
-    // Collect eligible candidates first so we can show highest-priority immediately
-    // and queue the rest. `filteredAnnouncements` already excludes anything
-    // ruled out by audience (segment + array shapes) so the scheduler only
-    // re-checks the array path for backward-compat semantics.
-    const eligible: AnnouncementConfig[] = []
-    for (const config of filteredAnnouncements) {
-      if (config.autoShow === false) continue
-      const st = state.announcements.get(config.id)
-      if (!st) continue
-      // Skip already active / visible / queued
-      if (st.isActive || st.isVisible) continue
-      if (schedulerRef.current.isQueued(config.id)) continue
-      if (!schedulerRef.current.canShow(config, st, userContext)) continue
-      eligible.push(config)
-    }
-
-    if (eligible.length === 0) return
-
-    // Phase 3 (refactor train) — sort auto-show candidates by the configured
-    // `priorityOrder` + `priorityWeights` (no more hardcoded critical/high/
-    // normal/low literal). `sequenceById` carries the insertion order from
-    // `filteredAnnouncements` so fifo / lifo break ties deterministically.
-    const queueCfg = schedulerRef.current.queueConfig
-    const sequenceById = new Map(filteredAnnouncements.map((a, index) => [a.id, index]))
-    eligible.sort(
-      createAnnouncementComparator(queueCfg.priorityOrder, queueCfg.priorityWeights, sequenceById)
-    )
-
-    for (const config of eligible) {
-      const st = state.announcements.get(config.id)
-      if (!st) continue
-
-      if (schedulerRef.current.shouldQueue(config, st, userContext)) {
-        schedulerRef.current.enqueue(config)
-        dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
-        continue
-      }
-
-      schedulerRef.current.markActive()
-      dispatch({ type: 'SHOW', id: config.id })
-
-      const updatedState: AnnouncementState = {
-        ...st,
-        isActive: true,
-        isVisible: true,
-        viewCount: st.viewCount + 1,
-        lastViewedAt: new Date(),
-      }
-      persistState(config.id, updatedState)
-
-      analytics?.track('announcement_shown', {
-        tourId: config.id,
-        metadata: getAnnouncementAnalyticsMetadata(config, {
-          trigger: 'auto',
-          viewCount: updatedState.viewCount,
-        }),
-      })
-      config.onShow?.()
-      onAnnouncementShow?.(config.id)
-    }
-  }, [
-    state.announcements,
-    userContext,
-    filteredAnnouncements,
-    persistState,
+  // The engine is constructed once and reads these through stable callbacks, so
+  // a changed `analytics` or a changed `onAnnouncementShow` never rebuilds it.
+  const live = React.useRef({
     analytics,
     onAnnouncementShow,
-  ])
+    onAnnouncementDismiss,
+    onAnnouncementComplete,
+  })
+  live.current = { analytics, onAnnouncementShow, onAnnouncementDismiss, onAnnouncementComplete }
 
-  // Context methods
-  const register = React.useCallback((config: AnnouncementConfig) => {
-    dispatch({ type: 'REGISTER', config })
-  }, [])
-
-  const unregister = React.useCallback((id: string) => {
-    dispatch({ type: 'UNREGISTER', id })
-    schedulerRef.current.remove(id)
-  }, [])
-
-  const show = React.useCallback(
-    (id: string) => {
-      const announcementState = state.announcements.get(id)
-      const config = state.configs.get(id)
-
-      if (!announcementState || !config) return
-
-      // Phase 3c — gate imperative show on segment-shape audience eligibility.
-      // The scheduler only evaluates array-shape audiences; segment shapes
-      // are resolved by `useFilteredAnnouncements` upstream and exposed here
-      // via `filteredIds`.
-      if (config.audience && isSegmentAudience(config.audience) && !filteredIds.has(id)) {
-        return
-      }
-
-      if (!schedulerRef.current.canShow(config, announcementState, userContext)) {
-        return
-      }
-
-      if (schedulerRef.current.shouldQueue(config, announcementState, userContext)) {
-        schedulerRef.current.enqueue(config)
-        dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
-        return
-      }
-
-      // Show immediately
-      schedulerRef.current.markActive()
-      dispatch({ type: 'SHOW', id })
-
-      const updatedState = {
-        ...announcementState,
-        isActive: true,
-        isVisible: true,
-        viewCount: announcementState.viewCount + 1,
-        lastViewedAt: new Date(),
-      }
-      persistState(id, updatedState)
-
-      analytics?.track('announcement_shown', {
-        tourId: id,
-        metadata: getAnnouncementAnalyticsMetadata(config, {
-          trigger: 'manual',
-          viewCount: updatedState.viewCount,
-        }),
-      })
-      config.onShow?.()
-      onAnnouncementShow?.(id)
-    },
-    [
-      state.announcements,
-      state.configs,
+  // Construct the HANDLE in render (cheap, inert, allocates nothing that
+  // matters) but never the engine: `createHandle` builds that on the first
+  // verb, which is what keeps StrictMode's double render and child-effects-
+  // before-parent-effects from producing two engines.
+  const [handle] = React.useState(() =>
+    createAnnouncementsHandle<AnnouncementConfig>({
+      announcements: initialAnnouncements,
+      queueConfig: queueConfigOverrides,
+      storage,
+      storageKey,
       userContext,
-      persistState,
-      analytics,
-      onAnnouncementShow,
-      filteredIds,
-    ]
+      segments,
+      analytics: {
+        track: (event, payload) => live.current.analytics?.track(event, payload),
+      },
+      onShow: (id) => live.current.onAnnouncementShow?.(id),
+      onDismiss: (id, reason) => live.current.onAnnouncementDismiss?.(id, reason),
+      onComplete: (id) => live.current.onAnnouncementComplete?.(id),
+    })
   )
 
-  // Phase 1 (v2 polish) — admin/demo bypass. Skips every gate listed in
-  // `FORCE_SHOW_BYPASS`; the LicenseGate soft wrapper still enforces the
-  // unlicensed watermark/warning. Increments `viewCount` and stamps the
-  // analytics event with `metadata.trigger="forced"` so dashboards can
-  // filter forced previews out of real-user counts.
-  const forceShow = React.useCallback(
-    (id: string) => {
-      const announcementState = state.announcements.get(id)
-      const config = state.configs.get(id)
-      if (!announcementState || !config) return
+  const state = React.useSyncExternalStore(handle.subscribe, handle.getState, handle.getState)
 
-      schedulerRef.current.markActive()
-      dispatch({ type: 'FORCE_SHOW', id })
+  React.useEffect(() => {
+    handle.ensure().boot()
+    return () => handle.release()
+  }, [handle])
 
-      const updatedState: AnnouncementState = {
-        ...announcementState,
-        isActive: true,
-        isVisible: true,
-        viewCount: announcementState.viewCount + 1,
-        lastViewedAt: new Date(),
-        isDismissed: false,
-        dismissedAt: null,
-        dismissalReason: null,
-      }
-      persistState(id, updatedState)
-
-      analytics?.track('announcement_shown', {
-        tourId: id,
-        metadata: getAnnouncementAnalyticsMetadata(config, {
-          trigger: 'forced',
-          viewCount: updatedState.viewCount,
-        }),
-      })
-      config.onShow?.()
-      onAnnouncementShow?.(id)
-    },
-    [state.announcements, state.configs, persistState, analytics, onAnnouncementShow]
-  )
-
-  const hide = React.useCallback((id: string) => {
-    dispatch({ type: 'HIDE', id })
-    schedulerRef.current.markInactive()
-  }, [])
-
-  const dismiss = React.useCallback(
-    (id: string, reason: DismissalReason = 'programmatic') => {
-      const announcementState = state.announcements.get(id)
-      const config = state.configs.get(id)
-
-      if (!announcementState) return
-
-      dispatch({ type: 'DISMISS', id, reason })
-      schedulerRef.current.markInactive()
-      schedulerRef.current.remove(id)
-      dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
-
-      const updatedState = {
-        ...announcementState,
-        isActive: false,
-        isVisible: false,
-        isDismissed: true,
-        dismissedAt: new Date(),
-        dismissalReason: reason,
-      }
-      persistState(id, updatedState)
-
-      if (config) {
-        analytics?.track('announcement_dismissed', {
-          tourId: id,
-          metadata: getAnnouncementAnalyticsMetadata(config, { reason }),
-        })
-      }
-      config?.onDismiss?.(reason)
-      onAnnouncementDismiss?.(id, reason)
-
-      // Show next in queue after delay
-      if (schedulerRef.current.autoShow && schedulerRef.current.queueSize > 0) {
-        const timer = setTimeout(() => {
-          queueTimersRef.current.delete(timer)
-          const nextId = schedulerRef.current.getNext()
-          if (nextId) {
-            // `getNext()` dequeued `nextId` from the scheduler, so re-sync
-            // `state.queue` before showing it — otherwise the promoted (now
-            // visible) announcement keeps appearing in the reported queue.
-            // Mirrors `showNext()`.
-            dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
-            show(nextId)
-          }
-        }, schedulerRef.current.delayBetween)
-        queueTimersRef.current.add(timer)
-      }
-    },
-    [state.announcements, state.configs, persistState, analytics, onAnnouncementDismiss, show]
-  )
-
-  const complete = React.useCallback(
-    (id: string) => {
-      const announcementState = state.announcements.get(id)
-      const config = state.configs.get(id)
-
-      if (!announcementState) return
-
-      dispatch({ type: 'COMPLETE', id })
-      schedulerRef.current.markInactive()
-
-      const updatedState = {
-        ...announcementState,
-        isActive: false,
-        isVisible: false,
-        completedAt: new Date(),
-      }
-      persistState(id, updatedState)
-
-      if (config) {
-        analytics?.track('announcement_completed', {
-          tourId: id,
-          metadata: getAnnouncementAnalyticsMetadata(config),
-        })
-      }
-      config?.onComplete?.()
-      onAnnouncementComplete?.(id)
-
-      // Show next in queue after delay
-      if (schedulerRef.current.autoShow && schedulerRef.current.queueSize > 0) {
-        const timer = setTimeout(() => {
-          queueTimersRef.current.delete(timer)
-          const nextId = schedulerRef.current.getNext()
-          if (nextId) {
-            // `getNext()` dequeued `nextId` from the scheduler, so re-sync
-            // `state.queue` before showing it — otherwise the promoted (now
-            // visible) announcement keeps appearing in the reported queue.
-            // Mirrors `showNext()`.
-            dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
-            show(nextId)
-          }
-        }, schedulerRef.current.delayBetween)
-        queueTimersRef.current.add(timer)
-      }
-    },
-    [state.announcements, state.configs, persistState, analytics, onAnnouncementComplete, show]
-  )
-
-  const reset = React.useCallback(
-    (id: string) => {
-      dispatch({ type: 'RESET', id })
-
-      if (storage) {
-        try {
-          storage.removeItem(getStorageKey(storageKey, id))
-        } catch {
-          // Ignore storage errors
-        }
-      }
-    },
-    [storage, storageKey]
-  )
-
-  const resetAll = React.useCallback(() => {
-    dispatch({ type: 'RESET_ALL' })
-
-    if (storage) {
-      state.announcements.forEach((_, id) => {
-        try {
-          storage.removeItem(getStorageKey(storageKey, id))
-        } catch {
-          // Ignore storage errors
-        }
-      })
+  // Prop → verb. Each is guarded against its first run: `boot()` above already
+  // registered, restored and ran the auto-show pass with these exact values, so
+  // an unguarded effect would run the whole pass a second time on mount.
+  const mounted = React.useRef(false)
+  React.useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true
+      return
     }
-  }, [storage, storageKey, state.announcements])
+    const engine = handle.ensure()
+    engine.setAnnouncements(initialAnnouncements)
+  }, [handle, initialAnnouncements])
 
-  const getState = React.useCallback(
-    (id: string) => state.announcements.get(id),
-    [state.announcements]
-  )
-
-  const getConfig = React.useCallback((id: string) => state.configs.get(id), [state.configs])
-
-  const canShow = React.useCallback(
-    (id: string): boolean => {
-      const announcementState = state.announcements.get(id)
-      const config = state.configs.get(id)
-
-      if (!announcementState || !config) return false
-
-      // Phase 3c — segment-shape audience eligibility (mirrors `show()`).
-      if (config.audience && isSegmentAudience(config.audience) && !filteredIds.has(id)) {
-        return false
-      }
-
-      return schedulerRef.current.canShow(config, announcementState, userContext)
-    },
-    [state.announcements, state.configs, userContext, filteredIds]
-  )
-
-  const showNext = React.useCallback(() => {
-    const nextId = schedulerRef.current.getNext()
-    if (nextId) {
-      dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
-      show(nextId)
+  const synced = React.useRef(false)
+  React.useEffect(() => {
+    if (!synced.current) {
+      synced.current = true
+      return
     }
-  }, [show])
+    const engine = handle.ensure()
+    engine.setSegments(segments)
+    engine.setUserContext(userContext)
+    engine.setQueueConfig(queueConfig)
+  }, [handle, segments, userContext, queueConfig])
 
-  const clearQueue = React.useCallback(() => {
-    schedulerRef.current.clearQueue()
-    dispatch({ type: 'UPDATE_QUEUE', queue: [] })
-  }, [])
+  const verbs = React.useMemo(
+    () => ({
+      register: (config: AnnouncementConfig) => handle.ensure().register(config),
+      unregister: (id: string) => handle.ensure().unregister(id),
+      show: (id: string) => handle.ensure().show(id),
+      forceShow: (id: string) => handle.ensure().forceShow(id),
+      hide: (id: string) => handle.ensure().hide(id),
+      dismiss: (id: string, reason: DismissalReason = 'programmatic') =>
+        handle.ensure().dismiss(id, reason),
+      complete: (id: string) => handle.ensure().complete(id),
+      reset: (id: string) => handle.ensure().reset(id),
+      resetAll: () => handle.ensure().resetAll(),
+      getState: (id: string) => handle.ensure().getAnnouncementState(id),
+      getConfig: (id: string) => handle.ensure().getConfig(id),
+      canShow: (id: string) => handle.ensure().canShow(id),
+      showNext: () => handle.ensure().showNext(),
+      clearQueue: () => handle.ensure().clearQueue(),
+    }),
+    [handle]
+  )
 
   const contextValue = React.useMemo<AnnouncementsContextValue>(
     () => ({
@@ -784,43 +142,10 @@ export function AnnouncementsProvider({
       activeAnnouncement: state.activeAnnouncement,
       queue: state.queue,
       queueConfig,
-      register,
-      unregister,
-      show,
-      forceShow,
-      hide,
-      dismiss,
-      complete,
-      reset,
-      resetAll,
-      getState,
-      getConfig,
-      canShow,
-      showNext,
-      clearQueue,
+      ...verbs,
       toastAdapter: toastAdapter ?? null,
     }),
-    [
-      state.announcements,
-      state.activeAnnouncement,
-      state.queue,
-      queueConfig,
-      register,
-      unregister,
-      show,
-      forceShow,
-      hide,
-      dismiss,
-      complete,
-      reset,
-      resetAll,
-      getState,
-      getConfig,
-      canShow,
-      showNext,
-      clearQueue,
-      toastAdapter,
-    ]
+    [state, queueConfig, verbs, toastAdapter]
   )
 
   return (

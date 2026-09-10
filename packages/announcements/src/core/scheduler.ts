@@ -1,5 +1,9 @@
-import type { AnnouncementConfig, AnnouncementState } from '../types/announcement'
-import type { QueueConfig } from '../types/queue'
+import type {
+  EngineAnnouncementConfig as AnnouncementConfig,
+  AnnouncementState,
+  IsScheduleActive,
+  QueueConfig,
+} from '../lib/announcements-engine/types'
 import { matchesAudience } from './audience'
 import { canShowByFrequency } from './frequency'
 import { PriorityQueue } from './priority-queue'
@@ -12,10 +16,28 @@ export class AnnouncementScheduler {
   private queue: PriorityQueue
   private config: QueueConfig
   private activeCount = 0
+  /** Injected optional-peer loader; `undefined` keeps the default require path. */
+  private loadScheduling: (() => { isScheduleActive: IsScheduleActive }) | undefined
 
-  constructor(config: QueueConfig) {
+  /**
+   * `isScheduleActive` is the optional `@tour-kit/scheduling` peer, injected
+   * (v3 Phase 3, plan Decision 7b). It is a SECOND, optional argument so every
+   * existing caller and the existing scheduler suites are untouched.
+   *
+   * Left undefined, `resolveScheduleActive` falls back to its call-time
+   * `require('@tour-kit/scheduling')` — which degrades OPEN whenever `require`
+   * is absent, i.e. in every ESM build. An ESM consumer of `/engine` passes
+   * `isScheduleActive` from `@tour-kit/scheduling/engine` to get real gating.
+   */
+  constructor(config: QueueConfig, isScheduleActive?: IsScheduleActive) {
     this.config = config
     this.queue = new PriorityQueue(config)
+    // NOTE: `resolveScheduleActive`'s third parameter is a LOADER, not an
+    // `IsScheduleActive` (§0 C15). Passing the function directly would have
+    // `load()` call it with no arguments; it throws on `schedule.type`, the
+    // resolver's `catch` swallows it and the gate silently degrades open —
+    // exactly the always-active failure this seam exists to eliminate.
+    this.loadScheduling = isScheduleActive ? () => ({ isScheduleActive }) : undefined
   }
 
   /**
@@ -57,7 +79,7 @@ export class AnnouncementScheduler {
     // Schedule gating via the optional @tour-kit/scheduling peer. The resolver
     // degrades open (returns true) when the peer is absent, so wiring this never
     // turns scheduling into a hard dependency.
-    if (config.schedule && !resolveScheduleActive(config.schedule, now)) {
+    if (config.schedule && !resolveScheduleActive(config.schedule, now, this.loadScheduling)) {
       return false
     }
 

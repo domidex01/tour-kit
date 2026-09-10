@@ -7,4 +7,4 @@
  * from `@tour-kit/core`) — keep importing it from there to avoid duplicate
  * barrel exports through the headless entry point.
  */
-export { matchesAudience, validateConditions } from '@tour-kit/core'
+export { matchesAudience, validateConditions } from '@tour-kit/core/engine'

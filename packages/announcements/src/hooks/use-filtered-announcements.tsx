@@ -1,39 +1,22 @@
 'use client'
 
-import { evaluateAudience as coreEvaluateAudience, useSegments } from '@tour-kit/core'
+import { useSegments } from '@tour-kit/core'
 import * as React from 'react'
-import type { AnnouncementConfig, AudienceProp } from '../types/announcement'
+import { evaluateAnnouncementAudience as evaluate } from '../lib/announcements-engine/eligibility'
+import type { AnnouncementConfig } from '../types/announcement'
 
 /**
- * Resolve a single announcement's audience for the segment-shape branch only.
+ * Segment-audience resolution lives in the ENGINE — `lib/announcements-engine/
+ * eligibility.ts` — because the engine owns eligibility (plan Decision 7a) and
+ * must answer `show()` / `canShow()` with no React present. Re-exported here
+ * under the same name so `import { evaluateAnnouncementAudience } from
+ * '@tour-kit/announcements'` is unchanged for consumers.
  *
- * Returns `true` (let through) for `undefined` and array-shape audiences —
- * the array branch is re-checked downstream by the scheduler against the
- * `<AnnouncementsProvider userContext>` prop, which is the legacy contract
- * we must preserve. Only segment-shape audiences are filtered here, because
- * those require `<SegmentationProvider>` and can't be evaluated in the
- * scheduler (which is framework-agnostic).
- *
- * **Why this wraps `core.evaluateAudience` instead of using it directly:**
- * the core helper evaluates array audiences via `matchesAudience` — that
- * would require a `userContext` we don't have at this seam. Short-circuit
- * the array branch before delegating so the scheduler stays the single
- * authority on `userContext`-driven matching.
+ * One implementation, deliberately: a second copy on this side would let the
+ * hook and the engine disagree about what "segment-eligible" means inside a
+ * single package.
  */
-export function evaluateAnnouncementAudience(
-  audience: AudienceProp | undefined,
-  segments: Record<string, boolean>
-): boolean {
-  if (!audience) return true
-  // Array-shape audiences are forwarded to the scheduler unchanged — it owns
-  // the legacy `matchesAudience(audience, userContext)` evaluation against the
-  // provider's `userContext` prop. (See memory #204 / phase-1 Open Question 1.)
-  if (Array.isArray(audience)) return true
-  // After the two guards above, `AudienceProp = AudienceCondition[] | { segment: string }`
-  // narrows to the segment branch — delegate to core for warn-once + segment lookup.
-  // `userContext` is intentionally `undefined`; arrays never reach here.
-  return coreEvaluateAudience(audience, segments, undefined, 'useFilteredAnnouncements')
-}
+export { evaluateAnnouncementAudience } from '../lib/announcements-engine/eligibility'
 
 /**
  * Filter a list of announcement configs by their `audience` prop. Mirror of
@@ -48,7 +31,7 @@ export function useFilteredAnnouncements(
 ): AnnouncementConfig[] {
   const segments = useSegments()
   return React.useMemo(
-    () => announcements.filter((a) => evaluateAnnouncementAudience(a.audience, segments)),
+    () => announcements.filter((a) => evaluate(a.audience, segments)),
     [announcements, segments]
   )
 }

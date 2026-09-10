@@ -191,7 +191,21 @@ export const budgets = [
   // The engine and the main entry read the SAME chunk, so this row is
   // shell + chunk and cannot drift independently of `checklists`.
   ['checklists:engine', 'packages/checklists/dist/engine/index.js', 4500],
-  ['announcements', 'packages/announcements/dist/index.js', 14000],
+  // v3 Phase 3 raised this from 14 000 at 13 322 (pre-authorised in the phase
+  // plan, landed at 14 513 — +1 191 B, between checklists' +1 486 and hints'
+  // +688). The +1 191 is the module-boundary cost of 282 provider lines moving
+  // to `lib/announcements-engine/` PLUS the sixth tsup entry re-cutting every
+  // chunk boundary in the package. `<AnnouncementsProvider>` is a binding over
+  // `createAnnouncementsHandle` now: 831 lines → 151.
+  ['announcements', 'packages/announcements/dist/index.js', 15000],
+  // The reducer, the atomic queue advance, eligibility, persistence, the
+  // scheduler, the priority queue, frequency, audience, the schedule resolver,
+  // the factory and the handle; the components, hooks, context, the toast
+  // adapter and the licence gate stay on the main entry. Measured 4 313.
+  // Built with `splitting: true`, so this row is the re-export shell plus the
+  // two React-free chunks it imports — a guard that read the shell alone would
+  // pass forever.
+  ['announcements:engine', 'packages/announcements/dist/engine/index.js', 4500],
   ['surveys', 'packages/surveys/dist/index.js', 12500],
   ['media', 'packages/media/dist/index.js', 9000],
   ['ai:client', 'packages/ai/dist/index.js', 7000],

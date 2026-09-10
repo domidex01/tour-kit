@@ -10,6 +10,10 @@ export default defineConfig({
     'tailwind/index': 'src/tailwind/index.ts',
     'changelog/index': 'src/changelog/index.ts',
     'adapters/sonner': 'src/adapters/sonner.ts',
+    // v3 Phase 3 — the React-free door. Deliberately absent from
+    // `injectUseClient` below: a `'use client'` directive on it would make a
+    // Node or Vue consumer's bundler treat it as a client component.
+    'engine/index': 'src/engine/index.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,

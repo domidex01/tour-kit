@@ -13,8 +13,8 @@ import {
   canShowAfterDismissal as coreCanShowAfterDismissal,
   canShowByFrequency as coreCanShowByFrequency,
   getViewLimit as coreGetViewLimit,
-} from '@tour-kit/core'
-import type { AnnouncementState } from '../types/announcement'
+} from '@tour-kit/core/engine'
+import type { AnnouncementState } from '../lib/announcements-engine/types'
 
 export function canShowByFrequency(
   state: AnnouncementState,

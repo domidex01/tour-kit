@@ -38,6 +38,30 @@ import { RELATIVE_SPECIFIER, closureOf } from './closure.mjs'
 export const read = (p) => readFileSync(p, 'utf8')
 
 /**
+ * Read a SOURCE file with its comments stripped.
+ *
+ * v3 Phase 3. A specifier matcher run over source cannot tell an import from a
+ * doc comment that quotes one, and this repo's engine-reachable files are full
+ * of the latter: `core/frequency.ts` carries an `@deprecated Prefer
+ * `import … from '@tour-kit/core'`` note, `core/scheduler.ts` documents the
+ * optional-peer require, and a `types.ts` header explained the ReactNode trap
+ * by quoting it. All three tripped a correct guard, three times in one sitting.
+ *
+ * Comments are the wrong thing to assert on either way: the invariant is what
+ * the module IMPORTS. Built JS never showed this because minify strips
+ * comments — but rollup-dts preserves them, so a `.d.ts` closure scan has the
+ * same exposure and `closureSrc` is not enough on its own.
+ *
+ * Deliberately naive: block comments and whole-line `//`. Good enough because
+ * the only false negative it can create is an import written inside a string,
+ * which is not a thing any of these files does.
+ */
+export const readCode = (p) =>
+  read(p)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|\n)\s*\/\/[^\n]*/g, '$1')
+
+/**
  * The four built files an `/engine` subpath must emit, plus the sibling main
  * entry every guard uses as its positive control.
  */

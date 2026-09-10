@@ -1,6 +1,6 @@
 'use client'
 
-import { logger } from '@tour-kit/core'
+import { logger } from '@tour-kit/core/engine'
 import * as React from 'react'
 import type {
   ToastAdapter,

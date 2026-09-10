@@ -1,4 +1,4 @@
-import type { Schedule } from '@tour-kit/scheduling'
+import type { Schedule } from '@tour-kit/scheduling/engine'
 
 /**
  * Resolve an `AnnouncementConfig.schedule` $ref to a real schedule evaluation.
