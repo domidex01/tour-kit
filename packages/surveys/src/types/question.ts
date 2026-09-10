@@ -1,4 +1,5 @@
 import type { LocalizedText } from '@tour-kit/core'
+import type { AnswerValue } from '../lib/surveys-engine/types'
 import type { MediaSlotProps } from '@tour-kit/media'
 
 /** Question input types */
@@ -10,8 +11,17 @@ export type QuestionType =
   | 'multi-select'
   | 'boolean'
 
-/** Answer value union covering all question types */
-export type AnswerValue = string | number | boolean | string[]
+/**
+ * Answer value union covering all question types.
+ *
+ * v3 Phase 3 (§0 C3) — the definition moved to `../lib/surveys-engine/types`.
+ * `SurveyState.responses` referenced it through inline `import('./question')`
+ * type imports, and THIS file imports `MediaSlotProps` from `@tour-kit/media`,
+ * whose declarations name React — so the engine's state type reached React
+ * through four inline imports that leave no trace in the emitted JS.
+ * `QuestionConfig` genuinely carries media and stays here.
+ */
+export type { AnswerValue } from '../lib/surveys-engine/types'
 
 /**
  * Preset rating shapes that fill in `min`/`max`/`style`/`emojiMap` defaults

@@ -1,5 +1,8 @@
-import type { SurveyQueueConfig } from '../types/queue'
-import type { SurveyConfig, SurveyState } from '../types/survey'
+import type {
+  EngineSurveyConfig as SurveyConfig,
+  SurveyQueueConfig,
+  SurveyState,
+} from '../lib/surveys-engine/types'
 import { matchesAudience } from './audience'
 import { canShowByFrequency } from './frequency'
 import { SurveyPriorityQueue } from './priority-queue'

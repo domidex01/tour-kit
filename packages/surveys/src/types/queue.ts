@@ -1,47 +1,14 @@
-import type { SurveyPriority } from './survey'
-
-/** Queue priority ordering strategy */
-export type PriorityOrder = 'priority' | 'fifo' | 'lifo'
-
-/** Behavior when a new survey is added while one is active */
-export type StackBehavior = 'queue' | 'replace' | 'stack'
-
-/** Survey queue configuration */
-export interface SurveyQueueConfig {
-  /** Maximum concurrent surveys (default: 1) */
-  maxConcurrent: number
-  /** Queue ordering strategy */
-  priorityOrder: PriorityOrder
-  /** Behavior when adding surveys while one is active */
-  stackBehavior: StackBehavior
-  /** Delay in ms between consecutive surveys */
-  delayBetween: number
-  /** Priority weights for ordering */
-  priorityWeights: Record<SurveyPriority, number>
-  /** Whether to auto-show queued surveys */
-  autoShow: boolean
-}
-
-/** Default queue configuration */
-export const DEFAULT_SURVEY_QUEUE_CONFIG: SurveyQueueConfig = {
-  maxConcurrent: 1,
-  priorityOrder: 'priority',
-  stackBehavior: 'queue',
-  delayBetween: 500,
-  priorityWeights: {
-    critical: 1000,
-    high: 100,
-    normal: 10,
-    low: 1,
-  },
-  autoShow: true,
-}
-
-/** Queue item with metadata */
-export interface SurveyQueueItem {
-  id: string
-  priority: SurveyPriority
-  addedAt: number
-  weight: number
-  sequence: number
-}
+/**
+ * Queue types. The definitions moved to `../lib/surveys-engine/types` in v3
+ * Phase 3 — `core/priority-queue.ts` and `core/scheduler.ts` are inside the
+ * engine barrel's closure and this file used to reach `./survey`, which
+ * type-imports ReactNode (recipe gap 18). This barrel is kept so
+ * `import { SurveyQueueConfig } from '@tour-kit/surveys'` still resolves.
+ */
+export type {
+  PriorityOrder,
+  StackBehavior,
+  SurveyQueueConfig,
+  SurveyQueueItem,
+} from '../lib/surveys-engine/types'
+export { DEFAULT_SURVEY_QUEUE_CONFIG } from '../lib/surveys-engine/types'
