@@ -1,5 +1,34 @@
 # @tour-kit/scheduling
 
+## 2.0.0
+
+### Minor Changes
+
+- 912d223: Add `@tour-kit/scheduling/engine`, a React-free subpath exposing every schedule
+  evaluation function and constant for non-React consumers.
+
+  ```ts
+  import {
+    checkSchedule,
+    isWithinBusinessHours,
+  } from "@tour-kit/scheduling/engine";
+  ```
+
+  The built entry names no bare specifier at all — this package depends on
+  nothing at runtime — so a Vue, Svelte or Node project can evaluate a schedule
+  with neither React, `@tour-kit/license` nor `@tour-kit/analytics` installed.
+  `<ScheduleGate>`, `useSchedule`, `useScheduleStatus` and `useUserTimezone` stay
+  on the main entry.
+
+  No source moved and no behaviour changed; the main entry is byte-for-byte the
+  same size as before.
+
+### Patch Changes
+
+- Updated dependencies [db05873]
+  - @tour-kit/analytics@0.13.0
+  - @tour-kit/license@1.3.8
+
 ## 1.0.1
 
 ### Patch Changes
