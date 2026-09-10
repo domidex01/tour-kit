@@ -1,6 +1,6 @@
 import type {
-  AnnouncementState,
   EngineAnnouncementConfig as AnnouncementConfig,
+  AnnouncementState,
   IsScheduleActive,
   QueueConfig,
 } from '../lib/announcements-engine/types'

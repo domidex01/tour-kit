@@ -114,6 +114,15 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
     pattern: /^\s*-\s*announcements\s*<\s*([\d.]+)\s*KB/m,
     mode: 'exact',
   },
+  // v3 Phase 3 — anchored on `announcements/engine subpath`, exactly as
+  // `checklists:engine` is. The sibling `announcements` pattern is
+  // `/^\s*-\s*announcements\s*<…/m`, so a bullet beginning
+  // `- announcements/engine` cannot satisfy it (the character after the name is
+  // `/`, not whitespace).
+  'announcements:engine': {
+    pattern: /announcements\/engine subpath\s*<\s*([\d.]+)\s*KB/,
+    mode: 'exact',
+  },
   surveys: { pattern: /^\s*-\s*surveys\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   license: { pattern: /^\s*-\s*license\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   media: { pattern: /^\s*-\s*media\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },

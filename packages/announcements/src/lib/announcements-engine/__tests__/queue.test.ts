@@ -152,10 +152,7 @@ describe('advanceQueue is a single transition', () => {
     // file". Resolve from `process.cwd()` (the package root) instead.
     const { readFileSync } = await import('node:fs')
     const { join } = await import('node:path')
-    const src = readFileSync(
-      join(process.cwd(), 'src/lib/announcements-engine/reducer.ts'),
-      'utf8'
-    )
+    const src = readFileSync(join(process.cwd(), 'src/lib/announcements-engine/reducer.ts'), 'utf8')
     expect(src, 'reducer still writes state.queue outside advanceQueue').not.toMatch(
       /case 'UPDATE_QUEUE'/
     )

@@ -31,6 +31,12 @@ export interface EnginePaths {
 /** Read a built file as UTF-8. */
 export declare function read(path: string): string
 
+/**
+ * Read a SOURCE file with comments stripped. A specifier matcher run over
+ * source cannot tell an import from a doc comment quoting one.
+ */
+export declare function readCode(path: string): string
+
 /** The four built engine files plus the sibling main entry used as control. */
 export declare function enginePaths(pkgRoot: string): EnginePaths
 

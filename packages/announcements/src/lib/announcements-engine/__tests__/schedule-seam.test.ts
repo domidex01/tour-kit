@@ -69,7 +69,9 @@ describe('the injected isScheduleActive gates show()', () => {
 
   it('an unscheduled announcement never consults the gate at all', () => {
     const e = createAnnouncementsEngine({
-      announcements: [{ id: 'plain', variant: 'modal', autoShow: false }] as EngineAnnouncementConfig[],
+      announcements: [
+        { id: 'plain', variant: 'modal', autoShow: false },
+      ] as EngineAnnouncementConfig[],
       storage: createFakeStorage(),
       isScheduleActive: fakeIsScheduleActive(false),
     })

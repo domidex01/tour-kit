@@ -22,20 +22,34 @@ import { computeEligibleIds } from './eligibility'
 import { STORAGE_KEY_PREFIX, getStorageKey } from './persistence'
 import { announcementsReducer } from './reducer'
 import {
-  DEFAULT_QUEUE_CONFIG,
   type AnnouncementState,
   type AnnouncementStorageAdapter,
   type AnnouncementsAction,
   type AnnouncementsEngineState,
+  DEFAULT_QUEUE_CONFIG,
   type DismissalReason,
   type EngineAnnouncementConfig,
   type IsScheduleActive,
   type QueueConfig,
 } from './types'
 
+/**
+ * The three events the engine emits. A literal union rather than `string`, so
+ * the binding can forward straight into `@tour-kit/analytics`' `track` —
+ * whose parameter is the narrower `TourEventName` — with no cast at the
+ * boundary. (All three are members of that union; measured.)
+ */
+export type AnnouncementsAnalyticsEvent =
+  | 'announcement_shown'
+  | 'announcement_dismissed'
+  | 'announcement_completed'
+
 /** The analytics shape the engine needs — a callback, not a package. */
 export interface AnnouncementsAnalytics {
-  track(event: string, payload: { tourId: string; metadata: Record<string, unknown> }): void
+  track(
+    event: AnnouncementsAnalyticsEvent,
+    payload: { tourId: string; metadata: Record<string, unknown> }
+  ): void
 }
 
 export interface AnnouncementsEngineOptions<TConfig extends EngineAnnouncementConfig> {
@@ -58,6 +72,13 @@ export interface AnnouncementsEngineOptions<TConfig extends EngineAnnouncementCo
   onShow?: (id: string) => void
   onDismiss?: (id: string, reason: DismissalReason) => void
   onComplete?: (id: string) => void
+  /**
+   * A pre-built seed. `createAnnouncementsHandle` passes the SAME object it
+   * serves as its pre-verb snapshot — two equal-but-distinct objects make
+   * `Object.is` false and every consumer renders twice on construction
+   * (Phase 2's finding).
+   */
+  initialState?: AnnouncementsEngineState<TConfig>
 }
 
 export interface AnnouncementsEngine<TConfig extends EngineAnnouncementConfig> {
@@ -144,11 +165,17 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
   const listeners = createListeners('announcements-engine')
   const timers = new Set<ReturnType<typeof setTimeout>>()
 
-  let state = seedAnnouncementsState<TConfig>(configs)
+  let state = options.initialState ?? seedAnnouncementsState<TConfig>(configs)
   let booted = false
   let destroyed = false
 
   const dispatch = (action: AnnouncementsAction<TConfig>): void => {
+    // `destroy()` is TERMINAL, and that means for verbs, not just for the
+    // fan-out. Clearing the listener set alone leaves `show()` still mutating
+    // state after teardown: nobody is told, but the next `getState()` reports
+    // it — a torn-down engine that keeps changing its answer. Caught by the
+    // plain-Node case in `subpath-resolution.test.ts`.
+    if (destroyed) return
     const next = announcementsReducer(state, action)
     if (next === state) return
     state = next
@@ -257,7 +284,12 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
 
     // Every refusal path still re-syncs the queue, because `getNext()` already
     // dequeued — dropping the re-sync is the original desync.
-    if (!before || !config || !segmentAdmits(config) || !scheduler.canShow(config, before, userContext)) {
+    if (
+      !before ||
+      !config ||
+      !segmentAdmits(config) ||
+      !scheduler.canShow(config, before, userContext)
+    ) {
       dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds() })
       return
     }
@@ -305,7 +337,9 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
 
     const cfg = scheduler.queueConfig
     const sequenceById = new Map(configs.map((a, index) => [a.id, index]))
-    eligible.sort(createAnnouncementComparator(cfg.priorityOrder, cfg.priorityWeights, sequenceById))
+    eligible.sort(
+      createAnnouncementComparator(cfg.priorityOrder, cfg.priorityWeights, sequenceById)
+    )
 
     for (const config of eligible) {
       const st = state.announcements.get(config.id)

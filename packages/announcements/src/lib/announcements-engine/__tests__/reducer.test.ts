@@ -9,7 +9,10 @@ import { describe, expect, it } from 'vitest'
 import { announcementsReducer, createInitialState } from '../reducer'
 import type { AnnouncementsEngineState, EngineAnnouncementConfig } from '../types'
 
-const cfg = (id: string, over: Partial<EngineAnnouncementConfig> = {}): EngineAnnouncementConfig => ({
+const cfg = (
+  id: string,
+  over: Partial<EngineAnnouncementConfig> = {}
+): EngineAnnouncementConfig => ({
   id,
   variant: 'modal',
   ...over,
@@ -48,7 +51,10 @@ describe('announcementsReducer', () => {
     expect(once.configs.get('a')?.variant).toBe('modal')
 
     const shown = announcementsReducer(once, { type: 'SHOW', id: 'a' })
-    const again = announcementsReducer(shown, { type: 'REGISTER', config: cfg('a', { priority: 'high' }) })
+    const again = announcementsReducer(shown, {
+      type: 'REGISTER',
+      config: cfg('a', { priority: 'high' }),
+    })
     // The view count survives a re-register; only the config is replaced.
     expect(again.announcements.get('a')?.viewCount).toBe(1)
     expect(again.configs.get('a')?.priority).toBe('high')
@@ -67,7 +73,11 @@ describe('announcementsReducer', () => {
 
   it('SHOW activates, increments viewCount and stamps lastViewedAt', () => {
     const s = announcementsReducer(withOne('a'), { type: 'SHOW', id: 'a' })
-    expect(s.announcements.get('a')).toMatchObject({ isActive: true, isVisible: true, viewCount: 1 })
+    expect(s.announcements.get('a')).toMatchObject({
+      isActive: true,
+      isVisible: true,
+      viewCount: 1,
+    })
     expect(s.announcements.get('a')?.lastViewedAt).toBeInstanceOf(Date)
     expect(s.activeAnnouncement).toBe('a')
   })
@@ -90,7 +100,11 @@ describe('announcementsReducer', () => {
   it('HIDE clears visibility and the active id but keeps the view count', () => {
     let s = announcementsReducer(withOne('a'), { type: 'SHOW', id: 'a' })
     s = announcementsReducer(s, { type: 'HIDE', id: 'a' })
-    expect(s.announcements.get('a')).toMatchObject({ isActive: false, isVisible: false, viewCount: 1 })
+    expect(s.announcements.get('a')).toMatchObject({
+      isActive: false,
+      isVisible: false,
+      viewCount: 1,
+    })
     expect(s.activeAnnouncement).toBeNull()
   })
 
@@ -98,7 +112,10 @@ describe('announcementsReducer', () => {
     let s = withOne('a')
     s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a'] })
     s = announcementsReducer(s, { type: 'DISMISS', id: 'a', reason: 'escape_key' })
-    expect(s.announcements.get('a')).toMatchObject({ isDismissed: true, dismissalReason: 'escape_key' })
+    expect(s.announcements.get('a')).toMatchObject({
+      isDismissed: true,
+      dismissalReason: 'escape_key',
+    })
     expect(s.announcements.get('a')?.dismissedAt).toBeInstanceOf(Date)
     expect(s.queue).toEqual([])
   })

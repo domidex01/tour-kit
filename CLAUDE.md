@@ -207,7 +207,24 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     Built with `splitting: true`, so the row is the re-export shell plus the
     one React-free chunk it shares with the main entry — a guard that read the
     shell alone would pass forever.
-  - announcements <14 KB
+  - announcements <15 KB, measured 14 513. v3 Phase 3 raised this from 14 KB at
+    13 322: the +1 191 B is the module-boundary cost of 282 provider lines
+    moving into `lib/announcements-engine/`, plus a sixth tsup entry re-cutting
+    every chunk boundary in the package (hints paid +688 B and checklists
+    +1 486 B for the same shape). The provider is a binding over
+    `createAnnouncementsHandle` now — 831 lines to 151.
+  - announcements/engine subpath <4.5 KB, measured 4 313 — the reducer, the
+    single-transition queue advance, segment eligibility, persistence, the
+    scheduler, the priority queue, frequency, audience, the optional-peer
+    schedule resolver, `createAnnouncementsEngine` and
+    `createAnnouncementsHandle`; the five display variants, the hooks, the
+    context, the toast adapter and the licence gate stay on the main entry.
+    Built with `splitting: true`, so the row is the re-export shell plus the two
+    React-free chunks it imports, and a guard that read the shell alone would
+    pass forever. The optional `@tour-kit/scheduling` peer is measured-PRESENT
+    in this closure, never forbidden — it is React-free at its own `/engine`
+    subpath and is reached through a call-time `require` that `minify: true`
+    renames, so the guard asserts it as a raw substring.
   - surveys <12.5 KB
   - license <8 KB
   - media <9 KB

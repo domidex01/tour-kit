@@ -33,7 +33,10 @@ describe('getAnnouncementAnalyticsMetadata', () => {
 
   it('lets call-site metadata override the derived fields', () => {
     // `...metadata` is last in the spread, so a caller can correct a field.
-    const out = getAnnouncementAnalyticsMetadata({ id: 'a', priority: 'low' }, { priority: 'critical', extra: 1 })
+    const out = getAnnouncementAnalyticsMetadata(
+      { id: 'a', priority: 'low' },
+      { priority: 'critical', extra: 1 }
+    )
     expect(out).toMatchObject({ announcementId: 'a', priority: 'critical', extra: 1 })
   })
 })

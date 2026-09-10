@@ -68,6 +68,12 @@
     "ignore": ["@tour-kit/analytics"]
   },
   {
+    "name": "@tour-kit/announcements/engine",
+    "path": "packages/announcements/dist/engine/index.js",
+    "limit": "8 KB",
+    "ignore": ["@tour-kit/analytics"]
+  },
+  {
     "name": "@tour-kit/media",
     "path": "packages/media/dist/index.js",
     "limit": "160 KB"

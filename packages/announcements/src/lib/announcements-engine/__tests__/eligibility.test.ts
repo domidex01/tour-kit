@@ -24,9 +24,12 @@ describe('evaluateAnnouncementAudience', () => {
   it('lets an ARRAY audience through — the scheduler owns userContext matching', () => {
     // The legacy contract: array shapes are re-checked downstream against the
     // provider's `userContext` prop, which this seam has no access to.
-    expect(evaluateAnnouncementAudience([{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }], {})).toBe(
-      true
-    )
+    expect(
+      evaluateAnnouncementAudience(
+        [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }],
+        {}
+      )
+    ).toBe(true)
   })
 
   it('fails a segment audience CLOSED until the segment map admits it', () => {
@@ -40,7 +43,10 @@ describe('computeEligibleIds', () => {
   const configs: EngineAnnouncementConfig[] = [
     { id: 'open' },
     { id: 'gated', audience: { segment: 'admins' } },
-    { id: 'legacy', audience: [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }] },
+    {
+      id: 'legacy',
+      audience: [{ type: 'user_property', key: 'plan', operator: 'equals', value: 'pro' }],
+    },
   ]
 
   it('admits the ungated and the array-shaped, and refuses the segment-shaped', () => {

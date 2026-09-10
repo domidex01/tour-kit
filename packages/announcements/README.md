@@ -226,3 +226,45 @@ Full documentation: [https://usertourkit.com/docs/announcements](https://usertou
 ## License
 
 Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+
+## `@tour-kit/announcements/engine` — the React-free subpath
+
+Everything that decides *whether, when and in what order* an announcement
+shows — the queue, the priority ordering, the frequency rules, the audience,
+the schedule and persistence — is available with no React installed:
+
+```ts
+import { createAnnouncementsEngine } from '@tour-kit/announcements/engine'
+
+const engine = createAnnouncementsEngine({
+  announcements: [{ id: 'welcome', autoShow: true }],
+  storage: localStorage,
+})
+
+engine.subscribe(() => render(engine.getState()))
+engine.boot()
+```
+
+It resolves under ESM and CJS, runs in plain Node, and pulls in no React, no
+JSX runtime and no DOM. Render whatever you like from `getState()`.
+
+**Two seams worth knowing about.**
+
+Segment audiences are evaluated by the engine and fail *closed* until you say
+otherwise — `engine.setSegments({ admins: true })` is what admits an
+`audience: { segment: 'admins' }` announcement. In React,
+`<AnnouncementsProvider>` forwards `useSegments()` for you.
+
+`config.schedule` needs the optional `@tour-kit/scheduling` peer, which the
+scheduler reaches through a call-time `require`. That degrades *open* — content
+is never suppressed just because the peer is missing — but it means an ESM
+bundle gets no schedule gating at all unless you inject the evaluator:
+
+```ts
+import { isScheduleActive } from '@tour-kit/scheduling/engine'
+
+createAnnouncementsEngine({ announcements, isScheduleActive })
+```
+
+> The engine path is currently **ungated**: the Pro licence check lives in
+> `<AnnouncementsProvider>`, not in the engine.

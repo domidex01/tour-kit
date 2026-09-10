@@ -197,4 +197,3 @@ export interface AnnouncementConfig extends EngineAnnouncementConfig {
   /** Callback when primary action is completed */
   onComplete?: () => void
 }
-

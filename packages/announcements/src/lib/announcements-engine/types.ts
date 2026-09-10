@@ -2,11 +2,15 @@
  * React-free type surface for `@tour-kit/announcements/engine`.
  *
  * v3 Phase 3, Task 3.1. Every type the engine barrel reaches lives here, and
- * nothing here may reach `../../types/` — that barrel's first line is
- * `import type { ReactNode } from 'react'`, and a type import leaves no trace
- * in the emitted JS, so a `dist:size` gate and a JS closure scan both stay
- * green while `react` sits in the declaration chain (recipe gap 18). The
- * source walk in `no-react-in-engine-dist.test.ts` is what catches it.
+ * nothing here may reach `../../types/` — that barrel type-imports ReactNode,
+ * and a type import leaves no trace in the emitted JS, so a `dist:size` gate
+ * and a JS closure scan both stay green while React sits in the declaration
+ * chain (recipe gap 18). The source walk in `no-react-in-engine-dist.test.ts`
+ * is what catches it.
+ *
+ * NOTE — do not write the bare specifier in prose here. rollup-dts preserves
+ * doc comments into `dist/engine/index.d.ts`, so a comment quoting it trips
+ * the declaration-closure guard. Measured 2026-09-10: this very block did.
  *
  * The direction of dependency is the point: `../../types/announcement.ts`
  * imports FROM here and widens `title`/`description` to `ReactNode`. The
@@ -153,7 +157,9 @@ export interface AnnouncementsEngineState<
 }
 
 /** The reducer's action union, discriminated on `type`. */
-export type AnnouncementsAction<TConfig extends EngineAnnouncementConfig = EngineAnnouncementConfig> =
+export type AnnouncementsAction<
+  TConfig extends EngineAnnouncementConfig = EngineAnnouncementConfig,
+> =
   | { type: 'REGISTER'; config: TConfig }
   | { type: 'UNREGISTER'; id: string }
   | { type: 'SHOW'; id: string }
@@ -180,10 +186,7 @@ export type AnnouncementsAction<TConfig extends EngineAnnouncementConfig = Engin
  * parameter is optional — so that export is assignable here and a consumer
  * passes it straight through with no adapter.
  */
-export type IsScheduleActive = (
-  schedule: Schedule,
-  options: { now: Date }
-) => { isActive: boolean }
+export type IsScheduleActive = (schedule: Schedule, options: { now: Date }) => { isActive: boolean }
 
 /** Storage adapter interface for persistence — a subset of `Storage`. */
 export interface AnnouncementStorageAdapter {

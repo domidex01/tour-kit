@@ -1,6 +1,6 @@
 import type {
-  AnnouncementPriority,
   EngineAnnouncementConfig as AnnouncementConfig,
+  AnnouncementPriority,
   PriorityOrder,
   QueueConfig,
   QueueItem,

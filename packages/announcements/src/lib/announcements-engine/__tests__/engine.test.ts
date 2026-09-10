@@ -13,7 +13,10 @@ import {
 } from '../create-announcements-engine'
 import type { EngineAnnouncementConfig } from '../types'
 
-const cfg = (id: string, over: Partial<EngineAnnouncementConfig> = {}): EngineAnnouncementConfig => ({
+const cfg = (
+  id: string,
+  over: Partial<EngineAnnouncementConfig> = {}
+): EngineAnnouncementConfig => ({
   id,
   variant: 'modal',
   autoShow: false,
@@ -115,6 +118,24 @@ describe('destroy is terminal', () => {
     e.destroy()
     e.show('a')
     expect(listener).not.toHaveBeenCalled()
+  })
+
+  it('freezes state — a verb after destroy() changes nothing', () => {
+    // Clearing the listener set is NOT enough: without a guard in `dispatch`,
+    // `show()` still mutates and the next `getState()` reports a change nobody
+    // was told about. A torn-down engine must keep its last answer.
+    const e = createAnnouncementsEngine({
+      announcements: [cfg('a'), cfg('b')],
+      storage: null,
+    })
+    e.boot()
+    e.show('a')
+    const last = e.getState()
+    e.destroy()
+    e.show('b')
+    e.dismiss('a')
+    e.resetAll()
+    expect(e.getState()).toBe(last)
   })
 
   it('boot() after destroy() does nothing', () => {
