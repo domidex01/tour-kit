@@ -93,7 +93,7 @@ export function announcementsReducer<TConfig extends EngineAnnouncementConfig>(
           isActive: true,
           isVisible: true,
           viewCount: announcement.viewCount + 1,
-          lastViewedAt: new Date(),
+          lastViewedAt: action.at,
         })
         return {
           ...state,
@@ -118,7 +118,7 @@ export function announcementsReducer<TConfig extends EngineAnnouncementConfig>(
         isActive: true,
         isVisible: true,
         viewCount: announcement.viewCount + 1,
-        lastViewedAt: new Date(),
+        lastViewedAt: action.at,
         isDismissed: false,
         dismissedAt: null,
         dismissalReason: null,
@@ -160,7 +160,7 @@ export function announcementsReducer<TConfig extends EngineAnnouncementConfig>(
           isActive: false,
           isVisible: false,
           isDismissed: true,
-          dismissedAt: new Date(),
+          dismissedAt: action.at,
           dismissalReason: action.reason,
         })
         return {
@@ -183,7 +183,7 @@ export function announcementsReducer<TConfig extends EngineAnnouncementConfig>(
           ...announcement,
           isActive: false,
           isVisible: false,
-          completedAt: new Date(),
+          completedAt: action.at,
         })
         return {
           ...state,
@@ -257,7 +257,7 @@ export function announcementsReducer<TConfig extends EngineAnnouncementConfig>(
         isActive: true,
         isVisible: true,
         viewCount: announcement.viewCount + 1,
-        lastViewedAt: new Date(),
+        lastViewedAt: action.at,
       })
       return {
         ...state,

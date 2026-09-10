@@ -18,6 +18,9 @@ const cfg = (
   ...over,
 })
 
+/** One fixed instant, so every timestamp assertion below is exact. */
+const AT = new Date('2026-09-10T12:00:00.000Z')
+
 const empty = (): AnnouncementsEngineState => ({
   announcements: new Map(),
   configs: new Map(),
@@ -50,7 +53,7 @@ describe('announcementsReducer', () => {
     expect(once.announcements.get('a')?.viewCount).toBe(0)
     expect(once.configs.get('a')?.variant).toBe('modal')
 
-    const shown = announcementsReducer(once, { type: 'SHOW', id: 'a' })
+    const shown = announcementsReducer(once, { type: 'SHOW', id: 'a', at: AT })
     const again = announcementsReducer(shown, {
       type: 'REGISTER',
       config: cfg('a', { priority: 'high' }),
@@ -62,8 +65,8 @@ describe('announcementsReducer', () => {
 
   it('UNREGISTER drops state, config, the active id and the queue entry', () => {
     let s = withOne('a')
-    s = announcementsReducer(s, { type: 'SHOW', id: 'a' })
-    s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a', 'b'] })
+    s = announcementsReducer(s, { type: 'SHOW', id: 'a', at: AT })
+    s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a', 'b'], at: AT })
     s = announcementsReducer(s, { type: 'UNREGISTER', id: 'a' })
     expect(s.announcements.has('a')).toBe(false)
     expect(s.configs.has('a')).toBe(false)
@@ -72,23 +75,23 @@ describe('announcementsReducer', () => {
   })
 
   it('SHOW activates, increments viewCount and stamps lastViewedAt', () => {
-    const s = announcementsReducer(withOne('a'), { type: 'SHOW', id: 'a' })
+    const s = announcementsReducer(withOne('a'), { type: 'SHOW', id: 'a', at: AT })
     expect(s.announcements.get('a')).toMatchObject({
       isActive: true,
       isVisible: true,
       viewCount: 1,
     })
-    expect(s.announcements.get('a')?.lastViewedAt).toBeInstanceOf(Date)
+    expect(s.announcements.get('a')?.lastViewedAt).toBe(AT)
     expect(s.activeAnnouncement).toBe('a')
   })
 
   it('SHOW refuses a dismissed announcement; FORCE_SHOW clears the dismissal', () => {
     let s = withOne('a')
-    s = announcementsReducer(s, { type: 'DISMISS', id: 'a', reason: 'close_button' })
-    const refused = announcementsReducer(s, { type: 'SHOW', id: 'a' })
+    s = announcementsReducer(s, { type: 'DISMISS', id: 'a', reason: 'close_button', at: AT })
+    const refused = announcementsReducer(s, { type: 'SHOW', id: 'a', at: AT })
     expect(refused).toBe(s) // identity: nothing changed
 
-    const forced = announcementsReducer(s, { type: 'FORCE_SHOW', id: 'a' })
+    const forced = announcementsReducer(s, { type: 'FORCE_SHOW', id: 'a', at: AT })
     expect(forced.announcements.get('a')).toMatchObject({
       isVisible: true,
       isDismissed: false,
@@ -98,7 +101,7 @@ describe('announcementsReducer', () => {
   })
 
   it('HIDE clears visibility and the active id but keeps the view count', () => {
-    let s = announcementsReducer(withOne('a'), { type: 'SHOW', id: 'a' })
+    let s = announcementsReducer(withOne('a'), { type: 'SHOW', id: 'a', at: AT })
     s = announcementsReducer(s, { type: 'HIDE', id: 'a' })
     expect(s.announcements.get('a')).toMatchObject({
       isActive: false,
@@ -110,27 +113,27 @@ describe('announcementsReducer', () => {
 
   it('DISMISS records the reason and removes the id from the queue', () => {
     let s = withOne('a')
-    s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a'] })
-    s = announcementsReducer(s, { type: 'DISMISS', id: 'a', reason: 'escape_key' })
+    s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a'], at: AT })
+    s = announcementsReducer(s, { type: 'DISMISS', id: 'a', reason: 'escape_key', at: AT })
     expect(s.announcements.get('a')).toMatchObject({
       isDismissed: true,
       dismissalReason: 'escape_key',
     })
-    expect(s.announcements.get('a')?.dismissedAt).toBeInstanceOf(Date)
+    expect(s.announcements.get('a')?.dismissedAt).toBe(AT)
     expect(s.queue).toEqual([])
   })
 
   it('COMPLETE stamps completedAt without marking dismissed', () => {
-    const s = announcementsReducer(withOne('a'), { type: 'COMPLETE', id: 'a' })
-    expect(s.announcements.get('a')?.completedAt).toBeInstanceOf(Date)
+    const s = announcementsReducer(withOne('a'), { type: 'COMPLETE', id: 'a', at: AT })
+    expect(s.announcements.get('a')?.completedAt).toBe(AT)
     expect(s.announcements.get('a')?.isDismissed).toBe(false)
   })
 
   it('RESET and RESET_ALL clear dismissal and counters', () => {
     let s = withOne('a')
     s = announcementsReducer(s, { type: 'REGISTER', config: cfg('b') })
-    s = announcementsReducer(s, { type: 'SHOW', id: 'a' })
-    s = announcementsReducer(s, { type: 'DISMISS', id: 'b', reason: 'auto_dismiss' })
+    s = announcementsReducer(s, { type: 'SHOW', id: 'a', at: AT })
+    s = announcementsReducer(s, { type: 'DISMISS', id: 'b', reason: 'auto_dismiss', at: AT })
 
     const one = announcementsReducer(s, { type: 'RESET', id: 'a' })
     expect(one.announcements.get('a')).toMatchObject({ viewCount: 0, lastViewedAt: null })
@@ -148,7 +151,7 @@ describe('announcementsReducer', () => {
 
   describe('ADVANCE_QUEUE — the single writer of state.queue (Decision 5)', () => {
     it('writes the queue alone when no id is being promoted', () => {
-      const s = announcementsReducer(withOne('a'), { type: 'ADVANCE_QUEUE', queue: ['x'] })
+      const s = announcementsReducer(withOne('a'), { type: 'ADVANCE_QUEUE', queue: ['x'], at: AT })
       expect(s.queue).toEqual(['x'])
       expect(s.activeAnnouncement).toBeNull()
     })
@@ -156,9 +159,14 @@ describe('announcementsReducer', () => {
     it('promotes and re-syncs in ONE pass when `show` is set', () => {
       let s = withOne('a')
       s = announcementsReducer(s, { type: 'REGISTER', config: cfg('b') })
-      s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a', 'b'] })
+      s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a', 'b'], at: AT })
 
-      const next = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['b'], show: 'a' })
+      const next = announcementsReducer(s, {
+        type: 'ADVANCE_QUEUE',
+        queue: ['b'],
+        show: 'a',
+        at: AT,
+      })
       // Both halves land together — there is no snapshot between them.
       expect(next.activeAnnouncement).toBe('a')
       expect(next.queue).toEqual(['b'])
@@ -168,15 +176,15 @@ describe('announcementsReducer', () => {
     it('still re-syncs the queue when the promoted id is dismissed', () => {
       // `getNext()` already dequeued it, so dropping the re-sync IS the desync.
       let s = withOne('a')
-      s = announcementsReducer(s, { type: 'DISMISS', id: 'a', reason: 'programmatic' })
-      const next = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: [], show: 'a' })
+      s = announcementsReducer(s, { type: 'DISMISS', id: 'a', reason: 'programmatic', at: AT })
+      const next = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: [], show: 'a', at: AT })
       expect(next.activeAnnouncement).toBeNull()
       expect(next.announcements.get('a')?.isVisible).toBe(false)
     })
 
     it('returns the identical object when the queue is unchanged and nothing promotes', () => {
-      const s = announcementsReducer(withOne('a'), { type: 'ADVANCE_QUEUE', queue: [] })
-      expect(announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: [] })).toBe(s)
+      const s = announcementsReducer(withOne('a'), { type: 'ADVANCE_QUEUE', queue: [], at: AT })
+      expect(announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: [], at: AT })).toBe(s)
     })
   })
 
@@ -195,12 +203,12 @@ describe('announcementsReducer', () => {
   it('returns the IDENTICAL object for every no-op arm', () => {
     const s = withOne('a')
     for (const action of [
-      { type: 'SHOW', id: 'missing' },
+      { type: 'SHOW', id: 'missing', at: AT },
       { type: 'HIDE', id: 'missing' },
-      { type: 'DISMISS', id: 'missing', reason: 'programmatic' },
-      { type: 'COMPLETE', id: 'missing' },
+      { type: 'DISMISS', id: 'missing', reason: 'programmatic', at: AT },
+      { type: 'COMPLETE', id: 'missing', at: AT },
       { type: 'RESET', id: 'missing' },
-      { type: 'FORCE_SHOW', id: 'missing' },
+      { type: 'FORCE_SHOW', id: 'missing', at: AT },
     ] as const) {
       expect(announcementsReducer(s, action), `${action.type} on a missing id`).toBe(s)
     }
