@@ -66,6 +66,61 @@ describe('the constructor is inert', () => {
   })
 })
 
+describe('there is exactly ONE clock', () => {
+  const AT = new Date('2026-09-10T12:00:00.000Z')
+
+  it('the injected `now` reaches STATE, not just storage', () => {
+    // Regression: the reducer stamped `new Date()` while the engine stamped
+    // `now()` for the same three fields, so `getState()` reported the real wall
+    // clock while the persisted blob held the injected time. They disagreed
+    // until a reload, then swapped — and frequency rules read `lastViewedAt`
+    // from STATE, so injecting `now` silently controlled nothing they see.
+    const storage = createFakeStorage()
+    const e = createAnnouncementsEngine({
+      announcements: [cfg('a')],
+      storage,
+      now: () => AT,
+    })
+    e.boot()
+    e.show('a')
+
+    expect(e.getAnnouncementState('a')?.lastViewedAt).toEqual(AT)
+    // …and storage agrees, because it is the same value, not a second reading.
+    const blob = JSON.parse(storage.snapshot()['tour-kit:announcements:a'])
+    expect(blob.lastViewedAt).toBe(AT.toISOString())
+    e.destroy()
+  })
+
+  it('dismiss and complete stamp the injected clock in state too', () => {
+    const e = createAnnouncementsEngine({
+      announcements: [cfg('d'), cfg('c')],
+      storage: null,
+      now: () => AT,
+    })
+    e.boot()
+    e.dismiss('d', 'close_button')
+    e.complete('c')
+    expect(e.getAnnouncementState('d')?.dismissedAt).toEqual(AT)
+    expect(e.getAnnouncementState('c')?.completedAt).toEqual(AT)
+    e.destroy()
+  })
+
+  it('what is persisted IS the state object, never a rebuilt copy', () => {
+    // The four hand-rolled "after" objects are gone; storage now receives what
+    // the reducer produced. If they ever diverge again, this is what catches it.
+    const storage = createFakeStorage()
+    const e = createAnnouncementsEngine({ announcements: [cfg('a')], storage, now: () => AT })
+    e.boot()
+    e.show('a')
+    const inState = e.getAnnouncementState('a')
+    const stored = JSON.parse(storage.snapshot()['tour-kit:announcements:a'])
+    expect(stored.viewCount).toBe(inState?.viewCount)
+    expect(stored.lastViewedAt).toBe(inState?.lastViewedAt?.toISOString())
+    expect(stored.isDismissed).toBe(inState?.isDismissed)
+    e.destroy()
+  })
+})
+
 describe('getState is reference-stable', () => {
   it('returns the identical object across no-op verbs', () => {
     const e = createAnnouncementsEngine({ announcements: [cfg('a')], storage: null })

@@ -34,7 +34,7 @@ export function createInitialSurveyState(id: string): SurveyState {
   }
 }
 
-export function drainQueue(state: SurveysEngineState): SurveysEngineState {
+export function drainQueue(state: SurveysEngineState, at: Date): SurveysEngineState {
   if (state.queue.length === 0) {
     return { ...state, activeSurvey: null }
   }
@@ -42,10 +42,10 @@ export function drainQueue(state: SurveysEngineState): SurveysEngineState {
   if (!nextId) return { ...state, activeSurvey: null, queue: rest }
   const existing = state.surveys.get(nextId)
   if (!existing) {
-    return drainQueue({ ...state, queue: rest })
+    return drainQueue({ ...state, queue: rest }, at)
   }
   if (existing.isCompleted || existing.isDismissed) {
-    return drainQueue({ ...state, queue: rest })
+    return drainQueue({ ...state, queue: rest }, at)
   }
   const surveys = new Map(state.surveys)
   surveys.set(nextId, {
@@ -53,7 +53,7 @@ export function drainQueue(state: SurveysEngineState): SurveysEngineState {
     isActive: true,
     isVisible: true,
     viewCount: existing.viewCount + 1,
-    lastViewedAt: new Date(),
+    lastViewedAt: at,
   })
   return { ...state, surveys, activeSurvey: nextId, queue: rest }
 }
@@ -112,7 +112,7 @@ export function surveysReducer(
         isActive: true,
         isVisible: true,
         viewCount: existing.viewCount + 1,
-        lastViewedAt: new Date(),
+        lastViewedAt: action.at,
       })
       return { ...state, surveys, activeSurvey: action.id }
     }
@@ -124,7 +124,7 @@ export function surveysReducer(
         isVisible: false,
       }))
       if (state.activeSurvey !== action.id) return next
-      return action.drain ? drainQueue(next) : { ...next, activeSurvey: null }
+      return action.drain ? drainQueue(next, action.at) : { ...next, activeSurvey: null }
     }
 
     case 'DISMISS': {
@@ -133,15 +133,18 @@ export function surveysReducer(
         isActive: false,
         isVisible: false,
         isDismissed: true,
-        dismissedAt: new Date(),
+        dismissedAt: action.at,
         dismissalReason: action.reason,
       }))
       if (state.activeSurvey !== action.id) return next
       return action.drain
-        ? drainQueue({
-            ...next,
-            queue: next.queue.filter((qid) => qid !== action.id),
-          })
+        ? drainQueue(
+            {
+              ...next,
+              queue: next.queue.filter((qid) => qid !== action.id),
+            },
+            action.at
+          )
         : { ...next, activeSurvey: null }
     }
 
@@ -154,10 +157,12 @@ export function surveysReducer(
         isSnoozed: true,
         snoozeCount: e.snoozeCount + 1,
         snoozeUntil:
-          days !== undefined ? new Date(Date.now() + days * 24 * 60 * 60 * 1000) : e.snoozeUntil,
+          days !== undefined
+            ? new Date(action.at.getTime() + days * 24 * 60 * 60 * 1000)
+            : e.snoozeUntil,
       }))
       if (state.activeSurvey !== action.id) return next
-      return action.drain ? drainQueue(next) : { ...next, activeSurvey: null }
+      return action.drain ? drainQueue(next, action.at) : { ...next, activeSurvey: null }
     }
 
     case 'ANSWER':
@@ -200,10 +205,10 @@ export function surveysReducer(
         isActive: false,
         isVisible: false,
         isCompleted: true,
-        completedAt: new Date(),
+        completedAt: action.at,
       }))
       if (state.activeSurvey !== action.id) return next
-      return action.drain ? drainQueue(next) : { ...next, activeSurvey: null }
+      return action.drain ? drainQueue(next, action.at) : { ...next, activeSurvey: null }
     }
 
     case 'RESET': {

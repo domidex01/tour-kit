@@ -95,6 +95,52 @@ describe('boot() is cancellable', () => {
   })
 })
 
+describe('there is exactly ONE clock', () => {
+  const AT = new Date('2026-09-10T12:00:00.000Z')
+
+  it('the injected `now` reaches STATE, and the gates read it back', async () => {
+    // Regression: the reducer stamped `new Date()` (and `Date.now()` in the
+    // snooze arm) while `passesFrequencyGates` was handed the injected `now`.
+    // `core/frequency.ts:35` does `daysBetween(state.lastViewedAt, now)` — so
+    // the interval gate was measuring between two different clocks, and a test
+    // injecting `now` was not testing the thing it named.
+    const e = createSurveysEngine({ surveys: [cfg('a')], storage: null, now: () => AT })
+    await e.boot()
+    e.show('a')
+    expect(e.getSurveyState('a')?.lastViewedAt).toEqual(AT)
+    e.destroy()
+  })
+
+  it('snoozeUntil is measured from the injected instant, not the wall clock', async () => {
+    const e = createSurveysEngine({
+      surveys: [cfg('a', { snoozeDelayDays: 3 })],
+      storage: null,
+      now: () => AT,
+    })
+    await e.boot()
+    e.show('a')
+    e.snooze('a')
+    expect(e.getSurveyState('a')?.snoozeUntil?.toISOString()).toBe(
+      new Date(AT.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString()
+    )
+    e.destroy()
+  })
+
+  it('a survey promoted by drainQueue is stamped with the same clock', async () => {
+    // The drain path stamps `lastViewedAt` on whatever it promotes, so it needs
+    // the instant threaded through it too — a reducer-internal helper is still
+    // the reducer.
+    const e = createSurveysEngine({ surveys: [cfg('a'), cfg('b')], storage: null, now: () => AT })
+    await e.boot()
+    e.show('a')
+    e.dismiss('a', 'close_button')
+    if (e.getState().activeSurvey === 'b') {
+      expect(e.getSurveyState('b')?.lastViewedAt).toEqual(AT)
+    }
+    e.destroy()
+  })
+})
+
 describe('setTourActive suppresses surveys (plan Decision 7)', () => {
   it('refuses show() while a tour runs, and admits it afterwards', async () => {
     const e = createSurveysEngine({ surveys: [cfg('a')], storage: null })

@@ -36,6 +36,7 @@ import {
   type EngineSurveyConfig,
   type IsScheduleActive,
   type SurveyQueueConfig,
+  type SurveyState,
   type SurveyStorageAdapter,
   type SurveysAction,
   type SurveysEngineState,
@@ -107,9 +108,7 @@ export interface SurveysEngine<TConfig extends EngineSurveyConfig = EngineSurvey
   complete: (surveyId: string) => void
   reset: (id: string) => void
   resetAll: () => void
-  getSurveyState: (
-    id: string
-  ) => SurveysEngineState['surveys'] extends Map<string, infer S> ? S | undefined : never
+  getSurveyState: (id: string) => SurveyState | undefined
   getConfig: (id: string) => TConfig | undefined
   canShow: (id: string) => boolean
 }
@@ -284,7 +283,7 @@ export function createSurveysEngine<TConfig extends EngineSurveyConfig = EngineS
       // `drain: false` — a tour is a suppression, not a completion, so nothing
       // is promoted behind it.
       if (active && state.activeSurvey) {
-        dispatch({ type: 'HIDE', id: state.activeSurvey, drain: false })
+        dispatch({ type: 'HIDE', id: state.activeSurvey, drain: false, at: now() })
       }
     },
 
@@ -292,21 +291,27 @@ export function createSurveysEngine<TConfig extends EngineSurveyConfig = EngineS
       if (!canShowInternal(id)) return
       lastShownAt = now()
       sessionShowCount += 1
-      dispatch({ type: 'SHOW', id })
+      dispatch({ type: 'SHOW', id, at: now() })
       onShow?.(id)
       configOf(id)?.onShow?.()
     },
 
-    hide: (id) => dispatch({ type: 'HIDE', id, drain: true }),
+    hide: (id) => dispatch({ type: 'HIDE', id, drain: true, at: now() }),
 
     dismiss: (id, reason: DismissalReason = 'programmatic') => {
-      dispatch({ type: 'DISMISS', id, reason, drain: true })
+      dispatch({ type: 'DISMISS', id, reason, drain: true, at: now() })
       onDismiss?.(id, reason)
       configOf(id)?.onDismiss?.(reason)
     },
 
     snooze: (id) => {
-      dispatch({ type: 'SNOOZE', id, delayDays: configOf(id)?.snoozeDelayDays, drain: true })
+      dispatch({
+        type: 'SNOOZE',
+        id,
+        delayDays: configOf(id)?.snoozeDelayDays,
+        drain: true,
+        at: now(),
+      })
       onSnooze?.(id)
     },
 
@@ -345,7 +350,7 @@ export function createSurveysEngine<TConfig extends EngineSurveyConfig = EngineS
 
     complete: (surveyId) => {
       const responses = state.surveys.get(surveyId)?.responses ?? new Map<string, AnswerValue>()
-      dispatch({ type: 'COMPLETE', id: surveyId, drain: true })
+      dispatch({ type: 'COMPLETE', id: surveyId, drain: true, at: now() })
       onComplete?.(surveyId, responses)
 
       const config = configOf(surveyId)
@@ -376,8 +381,7 @@ export function createSurveysEngine<TConfig extends EngineSurveyConfig = EngineS
     reset: (id) => dispatch({ type: 'RESET', id }),
     resetAll: () => dispatch({ type: 'RESET_ALL' }),
 
-    getSurveyState: ((id: string) =>
-      state.surveys.get(id)) as SurveysEngine<TConfig>['getSurveyState'],
+    getSurveyState: (id) => state.surveys.get(id),
     getConfig: (id) => configOf(id),
     canShow: canShowInternal,
   }
