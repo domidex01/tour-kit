@@ -1,5 +1,10 @@
-import type { AnnouncementConfig, AnnouncementPriority } from '../types/announcement'
-import type { PriorityOrder, QueueConfig, QueueItem } from '../types/queue'
+import type {
+  AnnouncementPriority,
+  EngineAnnouncementConfig as AnnouncementConfig,
+  PriorityOrder,
+  QueueConfig,
+  QueueItem,
+} from '../lib/announcements-engine/types'
 
 /**
  * Priority queue implementation for announcement ordering

@@ -1,5 +1,8 @@
-import type { AnnouncementConfig, AnnouncementState } from '../types/announcement'
-import type { QueueConfig } from '../types/queue'
+import type {
+  AnnouncementState,
+  EngineAnnouncementConfig as AnnouncementConfig,
+  QueueConfig,
+} from '../lib/announcements-engine/types'
 import { matchesAudience } from './audience'
 import { canShowByFrequency } from './frequency'
 import { PriorityQueue } from './priority-queue'

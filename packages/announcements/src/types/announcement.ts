@@ -7,8 +7,22 @@ import type { ReactNode } from 'react'
 // consumers continue to work without source changes.
 import type { AudienceCondition, AudienceProp, FrequencyRule, LocalizedText } from '@tour-kit/core'
 import type { MediaSlotType } from '@tour-kit/media'
+// v3 Phase 3 — the React-free half of this barrel lives in the engine now, and
+// the dependency runs THIS way: the engine never learns that `title` exists.
+import type {
+  AnnouncementVariant,
+  DismissalReason,
+  EngineAnnouncementConfig,
+} from '../lib/announcements-engine/types'
 
 export type { AudienceCondition, AudienceProp, FrequencyRule }
+export type {
+  AnnouncementPriority,
+  AnnouncementState,
+  AnnouncementStorageAdapter,
+  AnnouncementVariant,
+  DismissalReason,
+} from '../lib/announcements-engine/types'
 
 // Phase 5a — re-export changelog types for discoverability. Source-of-truth
 // definitions live in `../changelog/feed.ts`; this barrel keeps the
@@ -18,43 +32,6 @@ export type { ChangelogEntry, SerializeFeedOptions } from '../changelog/feed'
 // Phase 1 hoist — segment-audience type guard now lives in @tour-kit/core.
 // Re-export preserves the public `@tour-kit/announcements` surface.
 export { isSegmentAudience } from '@tour-kit/core'
-
-/**
- * Announcement display variants
- */
-export type AnnouncementVariant = 'modal' | 'slideout' | 'banner' | 'toast' | 'spotlight'
-
-/**
- * Announcement priority levels
- */
-export type AnnouncementPriority = 'low' | 'normal' | 'high' | 'critical'
-
-/**
- * Dismissal reasons for analytics and state tracking
- */
-export type DismissalReason =
-  | 'close_button'
-  | 'overlay_click'
-  | 'escape_key'
-  | 'primary_action'
-  | 'secondary_action'
-  | 'auto_dismiss'
-  | 'programmatic'
-
-/**
- * Announcement state
- */
-export interface AnnouncementState {
-  id: string
-  isActive: boolean
-  isVisible: boolean
-  isDismissed: boolean
-  viewCount: number
-  lastViewedAt: Date | null
-  dismissedAt: Date | null
-  dismissalReason: DismissalReason | null
-  completedAt: Date | null
-}
 
 /**
  * Action button configuration
@@ -145,15 +122,15 @@ export interface SpotlightOptions {
 /**
  * Main announcement configuration
  */
-export interface AnnouncementConfig {
+export interface AnnouncementConfig extends EngineAnnouncementConfig {
   /** Unique identifier for the announcement */
   id: string
 
-  /** Display variant */
+  /**
+   * Display variant. Required here, optional on `EngineAnnouncementConfig` —
+   * an engine-only consumer renders its own UI and has no variant to pick.
+   */
   variant: AnnouncementVariant
-
-  /** Priority for queue ordering */
-  priority?: AnnouncementPriority
 
   /**
    * Title of the announcement. Supports plain strings (interpolated against
@@ -178,12 +155,6 @@ export interface AnnouncementConfig {
 
   /** Secondary action button */
   secondaryAction?: AnnouncementAction
-
-  /** Frequency rule for showing this announcement */
-  frequency?: FrequencyRule
-
-  /** Schedule configuration (requires @tour-kit/scheduling) */
-  schedule?: import('@tour-kit/scheduling').Schedule
 
   /**
    * Audience targeting. Accepts either an inline `AudienceCondition[]` (legacy)
@@ -227,11 +198,3 @@ export interface AnnouncementConfig {
   onComplete?: () => void
 }
 
-/**
- * Storage adapter interface for persistence
- */
-export interface AnnouncementStorageAdapter {
-  getItem(key: string): string | null | Promise<string | null>
-  setItem(key: string, value: string): void | Promise<void>
-  removeItem(key: string): void | Promise<void>
-}

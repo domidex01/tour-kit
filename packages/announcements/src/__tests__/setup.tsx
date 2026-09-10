@@ -57,6 +57,10 @@ afterEach(() => {
     vi.useRealTimers()
   }
   document.body.innerHTML = ''
+  // v3 Phase 3 (§0 C8): the localStorage mock installed below is module scope
+  // and was NEVER cleared, so a blob one case persisted was read by the next.
+  // Measured 2026-09-10 — no existing test depended on the leak.
+  window.localStorage.clear()
 })
 
 // Mock ResizeObserver
