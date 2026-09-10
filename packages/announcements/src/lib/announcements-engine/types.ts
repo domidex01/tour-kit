@@ -164,7 +164,13 @@ export type AnnouncementsAction<TConfig extends EngineAnnouncementConfig = Engin
   | { type: 'RESET'; id: string }
   | { type: 'RESET_ALL' }
   | { type: 'SET_ACTIVE'; id: string | null }
-  | { type: 'UPDATE_QUEUE'; queue: string[] }
+  /**
+   * The single writer of `state.queue` (plan Decision 5). Carries the id to
+   * promote so the re-sync and the SHOW land in ONE reducer pass — a two-step
+   * advance leaves a frame where the promoted id is neither queued nor active,
+   * and that frame is what a binding renders.
+   */
+  | { type: 'ADVANCE_QUEUE'; queue: string[]; show?: string | null }
   | { type: 'RESTORE_STATE'; states: Map<string, Partial<AnnouncementState>> }
 
 /**

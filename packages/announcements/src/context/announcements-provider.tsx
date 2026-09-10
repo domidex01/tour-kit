@@ -199,7 +199,7 @@ export function AnnouncementsProvider({
 
       if (schedulerRef.current.shouldQueue(config, st, userContext)) {
         schedulerRef.current.enqueue(config)
-        dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
+        dispatch({ type: 'ADVANCE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
         continue
       }
 
@@ -265,7 +265,7 @@ export function AnnouncementsProvider({
 
       if (schedulerRef.current.shouldQueue(config, announcementState, userContext)) {
         schedulerRef.current.enqueue(config)
-        dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
+        dispatch({ type: 'ADVANCE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
         return
       }
 
@@ -357,7 +357,7 @@ export function AnnouncementsProvider({
       dispatch({ type: 'DISMISS', id, reason })
       schedulerRef.current.markInactive()
       schedulerRef.current.remove(id)
-      dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
+      dispatch({ type: 'ADVANCE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
 
       const updatedState = {
         ...announcementState,
@@ -388,7 +388,7 @@ export function AnnouncementsProvider({
             // `state.queue` before showing it — otherwise the promoted (now
             // visible) announcement keeps appearing in the reported queue.
             // Mirrors `showNext()`.
-            dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
+            dispatch({ type: 'ADVANCE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
             show(nextId)
           }
         }, schedulerRef.current.delayBetween)
@@ -435,7 +435,7 @@ export function AnnouncementsProvider({
             // `state.queue` before showing it — otherwise the promoted (now
             // visible) announcement keeps appearing in the reported queue.
             // Mirrors `showNext()`.
-            dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
+            dispatch({ type: 'ADVANCE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
             show(nextId)
           }
         }, schedulerRef.current.delayBetween)
@@ -501,14 +501,14 @@ export function AnnouncementsProvider({
   const showNext = React.useCallback(() => {
     const nextId = schedulerRef.current.getNext()
     if (nextId) {
-      dispatch({ type: 'UPDATE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
+      dispatch({ type: 'ADVANCE_QUEUE', queue: schedulerRef.current.getQueuedIds() })
       show(nextId)
     }
   }, [show])
 
   const clearQueue = React.useCallback(() => {
     schedulerRef.current.clearQueue()
-    dispatch({ type: 'UPDATE_QUEUE', queue: [] })
+    dispatch({ type: 'ADVANCE_QUEUE', queue: [] })
   }, [])
 
   const contextValue = React.useMemo<AnnouncementsContextValue>(

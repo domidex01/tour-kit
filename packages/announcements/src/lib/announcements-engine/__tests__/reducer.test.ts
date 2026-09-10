@@ -57,7 +57,7 @@ describe('announcementsReducer', () => {
   it('UNREGISTER drops state, config, the active id and the queue entry', () => {
     let s = withOne('a')
     s = announcementsReducer(s, { type: 'SHOW', id: 'a' })
-    s = announcementsReducer(s, { type: 'UPDATE_QUEUE', queue: ['a', 'b'] })
+    s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a', 'b'] })
     s = announcementsReducer(s, { type: 'UNREGISTER', id: 'a' })
     expect(s.announcements.has('a')).toBe(false)
     expect(s.configs.has('a')).toBe(false)
@@ -96,7 +96,7 @@ describe('announcementsReducer', () => {
 
   it('DISMISS records the reason and removes the id from the queue', () => {
     let s = withOne('a')
-    s = announcementsReducer(s, { type: 'UPDATE_QUEUE', queue: ['a'] })
+    s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a'] })
     s = announcementsReducer(s, { type: 'DISMISS', id: 'a', reason: 'escape_key' })
     expect(s.announcements.get('a')).toMatchObject({ isDismissed: true, dismissalReason: 'escape_key' })
     expect(s.announcements.get('a')?.dismissedAt).toBeInstanceOf(Date)
@@ -124,10 +124,43 @@ describe('announcementsReducer', () => {
     expect(all.announcements.get('a')?.viewCount).toBe(0)
   })
 
-  it('SET_ACTIVE and UPDATE_QUEUE write exactly their own field', () => {
+  it('SET_ACTIVE writes exactly its own field', () => {
     const s = announcementsReducer(withOne('a'), { type: 'SET_ACTIVE', id: 'a' })
     expect(s.activeAnnouncement).toBe('a')
-    expect(announcementsReducer(s, { type: 'UPDATE_QUEUE', queue: ['x'] }).queue).toEqual(['x'])
+  })
+
+  describe('ADVANCE_QUEUE — the single writer of state.queue (Decision 5)', () => {
+    it('writes the queue alone when no id is being promoted', () => {
+      const s = announcementsReducer(withOne('a'), { type: 'ADVANCE_QUEUE', queue: ['x'] })
+      expect(s.queue).toEqual(['x'])
+      expect(s.activeAnnouncement).toBeNull()
+    })
+
+    it('promotes and re-syncs in ONE pass when `show` is set', () => {
+      let s = withOne('a')
+      s = announcementsReducer(s, { type: 'REGISTER', config: cfg('b') })
+      s = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['a', 'b'] })
+
+      const next = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: ['b'], show: 'a' })
+      // Both halves land together — there is no snapshot between them.
+      expect(next.activeAnnouncement).toBe('a')
+      expect(next.queue).toEqual(['b'])
+      expect(next.announcements.get('a')).toMatchObject({ isVisible: true, viewCount: 1 })
+    })
+
+    it('still re-syncs the queue when the promoted id is dismissed', () => {
+      // `getNext()` already dequeued it, so dropping the re-sync IS the desync.
+      let s = withOne('a')
+      s = announcementsReducer(s, { type: 'DISMISS', id: 'a', reason: 'programmatic' })
+      const next = announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: [], show: 'a' })
+      expect(next.activeAnnouncement).toBeNull()
+      expect(next.announcements.get('a')?.isVisible).toBe(false)
+    })
+
+    it('returns the identical object when the queue is unchanged and nothing promotes', () => {
+      const s = announcementsReducer(withOne('a'), { type: 'ADVANCE_QUEUE', queue: [] })
+      expect(announcementsReducer(s, { type: 'ADVANCE_QUEUE', queue: [] })).toBe(s)
+    })
   })
 
   it('RESTORE_STATE merges partials onto registered ids and ignores unknown ones', () => {

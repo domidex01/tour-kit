@@ -234,8 +234,37 @@ export function announcementsReducer<TConfig extends EngineAnnouncementConfig>(
       return { ...state, activeAnnouncement: action.id }
     }
 
-    case 'UPDATE_QUEUE': {
-      return { ...state, queue: action.queue }
+    case 'ADVANCE_QUEUE': {
+      // The ONLY arm that writes `state.queue` (plan Decision 5). When `show`
+      // is set it applies the promotion in the SAME pass, so no snapshot ever
+      // exists in which the promoted id has left the queue without arriving.
+      const queueChanged =
+        state.queue.length !== action.queue.length ||
+        state.queue.some((id, i) => id !== action.queue[i])
+
+      if (!action.show) {
+        return queueChanged ? { ...state, queue: action.queue } : state
+      }
+
+      const newAnnouncements = new Map(state.announcements)
+      const announcement = newAnnouncements.get(action.show)
+      if (!announcement || announcement.isDismissed) {
+        return queueChanged ? { ...state, queue: action.queue } : state
+      }
+
+      newAnnouncements.set(action.show, {
+        ...announcement,
+        isActive: true,
+        isVisible: true,
+        viewCount: announcement.viewCount + 1,
+        lastViewedAt: new Date(),
+      })
+      return {
+        ...state,
+        announcements: newAnnouncements,
+        activeAnnouncement: action.show,
+        queue: action.queue,
+      }
     }
 
     case 'RESTORE_STATE': {
