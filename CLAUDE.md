@@ -225,7 +225,19 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     in this closure, never forbidden — it is React-free at its own `/engine`
     subpath and is reached through a call-time `require` that `minify: true`
     renames, so the guard asserts it as a raw substring.
-  - surveys <12.5 KB
+  - surveys <13 KB, measured 12 570. v3 Phase 3 raised this from 12.5 KB at
+    11 535: the +1 035 B is 401 provider lines moving into `lib/surveys-engine/`
+    plus a third tsup entry re-cutting the chunk boundaries. The provider is a
+    binding over `createSurveysHandle` now — 746 lines to 204.
+  - surveys/engine subpath <5 KB, measured 4 552 — the reducer with its atomic
+    `drainQueue`, persistence, the six fatigue gates, the scheduler, the
+    priority queue, audience, NPS/CSAT/CES scoring, the optional-peer schedule
+    resolver, `createSurveysEngine` and `createSurveysHandle`; the components,
+    hooks, context and the licence gate stay on the main entry. Storage is an
+    INJECTED adapter rather than one the engine resolves: six existing suites
+    stub `createStorageAdapter` through `vi.mock` on core's main barrel, and
+    `vi.mock` does not intercept a `/engine` subpath, so an engine that resolved
+    its own would silently disarm all six.
   - license <8 KB
   - media <9 KB
   - ai <7 KB (client), <8 KB (server)

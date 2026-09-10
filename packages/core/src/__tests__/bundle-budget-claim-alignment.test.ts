@@ -124,6 +124,13 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
     mode: 'exact',
   },
   surveys: { pattern: /^\s*-\s*surveys\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
+  // v3 Phase 3 — anchored on `surveys/engine subpath`, as `checklists:engine`
+  // is. The sibling `surveys` pattern is `/^\s*-\s*surveys\s*<…/m`, so a
+  // bullet beginning `- surveys/engine` cannot satisfy it.
+  'surveys:engine': {
+    pattern: /surveys\/engine subpath\s*<\s*([\d.]+)\s*KB/,
+    mode: 'exact',
+  },
   license: { pattern: /^\s*-\s*license\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   media: { pattern: /^\s*-\s*media\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   'ai:client': { pattern: /-\s*ai\s*<\s*([\d.]+)\s*KB\s*\(client\)/, mode: 'exact' },

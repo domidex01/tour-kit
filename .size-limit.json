@@ -84,6 +84,11 @@
     "limit": "190 KB"
   },
   {
+    "name": "@tour-kit/surveys/engine",
+    "path": "packages/surveys/dist/engine/index.js",
+    "limit": "8 KB"
+  },
+  {
     "name": "@tour-kit/analytics",
     "path": "packages/analytics/dist/index.js",
     "limit": "260 KB"

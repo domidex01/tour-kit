@@ -3,59 +3,25 @@
 // type-equivalent and existing consumers keep their import path.
 import type { AudienceCondition } from '@tour-kit/core'
 import type { ReactNode } from 'react'
+// v3 Phase 3 — the React-free half of this barrel lives in the engine now, and
+// the dependency runs THIS way: the engine never learns that `description`
+// carries ReactNode or that `questions` carry media.
+import type {
+  DismissalReason,
+  DisplayMode,
+  EngineSurveyConfig,
+  FrequencyRule,
+  SurveyType,
+} from '../lib/surveys-engine/types'
 export type { AudienceCondition }
-
-/** Survey measurement types */
-export type SurveyType = 'nps' | 'csat' | 'ces' | 'custom'
-
-/** Display mode variants */
-export type DisplayMode = 'popover' | 'modal' | 'slideout' | 'banner' | 'inline'
-
-/** Survey priority levels for queue ordering */
-export type SurveyPriority = 'critical' | 'high' | 'normal' | 'low'
-
-/** Frequency rules for how often a survey can be shown */
-export type FrequencyRule =
-  | 'once'
-  | 'session'
-  | 'always'
-  | { type: 'times'; count: number }
-  | { type: 'interval'; days: number }
-
-/** Reasons a survey was dismissed */
-export type DismissalReason =
-  | 'close_button'
-  | 'overlay_click'
-  | 'escape_key'
-  | 'snooze'
-  | 'completed'
-  | 'programmatic'
-
-/** Runtime state for a single survey */
-export interface SurveyState {
-  id: string
-  isActive: boolean
-  isVisible: boolean
-  isDismissed: boolean
-  isSnoozed: boolean
-  isCompleted: boolean
-  viewCount: number
-  lastViewedAt: Date | null
-  dismissedAt: Date | null
-  dismissalReason: DismissalReason | null
-  completedAt: Date | null
-  snoozeCount: number
-  snoozeUntil: Date | null
-  currentStep: number
-  responses: Map<string, import('./question').AnswerValue>
-  /**
-   * Transient per-question validation errors keyed by question id. Populated by
-   * `nextQuestion` when a `QuestionConfig.validation` returns a non-null string;
-   * cleared on a passing advance. NOT persisted — errors are UI state and must
-   * never resurface after a reload.
-   */
-  validationErrors: Map<string, string>
-}
+export type {
+  DismissalReason,
+  DisplayMode,
+  FrequencyRule,
+  SurveyPriority,
+  SurveyState,
+  SurveyType,
+} from '../lib/surveys-engine/types'
 
 /** Position options for slideout variant */
 export type SlideoutPosition = 'left' | 'right'
@@ -102,7 +68,7 @@ export interface PopoverOptions {
 // this file (Phase 1 refactor train) — the surveys-local copy is gone.
 
 /** Main survey configuration */
-export interface SurveyConfig {
+export interface SurveyConfig extends EngineSurveyConfig {
   /** Unique identifier for the survey */
   id: string
 
@@ -111,9 +77,6 @@ export interface SurveyConfig {
 
   /** Display mode variant */
   displayMode: DisplayMode
-
-  /** Priority for queue ordering */
-  priority?: SurveyPriority
 
   /** Survey title */
   title?: string
@@ -126,9 +89,6 @@ export interface SurveyConfig {
 
   /** Frequency rule for showing this survey */
   frequency?: FrequencyRule
-
-  /** Schedule configuration (requires @tour-kit/scheduling) */
-  schedule?: import('@tour-kit/scheduling').Schedule
 
   /** Audience targeting conditions */
   audience?: AudienceCondition[]

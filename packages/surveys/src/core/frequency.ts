@@ -1,4 +1,4 @@
-import type { FrequencyRule, SurveyState } from '../types/survey'
+import type { FrequencyRule, SurveyState } from '../lib/surveys-engine/types'
 
 export function canShowByFrequency(
   state: SurveyState,
