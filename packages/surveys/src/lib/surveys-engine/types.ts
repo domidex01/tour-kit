@@ -166,6 +166,14 @@ export interface EngineSurveyConfig {
   maxPerSession?: number
   /** Custom metadata */
   metadata?: Record<string, unknown>
+  /** Callback when this survey is shown */
+  onShow?: () => void
+  /** Callback when this survey is dismissed */
+  onDismiss?: (reason: DismissalReason) => void
+  /** Callback when this survey is completed, with every recorded response */
+  onComplete?: (responses: Map<string, AnswerValue>) => void
+  /** Callback for each answer recorded */
+  onAnswer?: (questionId: string, value: AnswerValue) => void
 }
 
 /** Engine state. NO generic parameter — it holds no config (plan Decision 4). */
