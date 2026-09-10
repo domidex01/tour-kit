@@ -156,17 +156,26 @@ export interface AnnouncementsEngineState<
   queue: string[]
 }
 
-/** The reducer's action union, discriminated on `type`. */
+/**
+ * The reducer's action union, discriminated on `type`.
+ *
+ * Every arm that stamps a timestamp carries `at`, so the ENGINE's injected
+ * clock is the only clock. Before this, the reducer called `new Date()` while
+ * the engine called `now()` for the SAME three fields — `lastViewedAt`,
+ * `dismissedAt`, `completedAt` — so state and the persisted blob recorded
+ * different times for one event, and an injected `now` silently controlled
+ * nothing a frequency rule reads.
+ */
 export type AnnouncementsAction<
   TConfig extends EngineAnnouncementConfig = EngineAnnouncementConfig,
 > =
   | { type: 'REGISTER'; config: TConfig }
   | { type: 'UNREGISTER'; id: string }
-  | { type: 'SHOW'; id: string }
-  | { type: 'FORCE_SHOW'; id: string }
+  | { type: 'SHOW'; id: string; at: Date }
+  | { type: 'FORCE_SHOW'; id: string; at: Date }
   | { type: 'HIDE'; id: string }
-  | { type: 'DISMISS'; id: string; reason: DismissalReason }
-  | { type: 'COMPLETE'; id: string }
+  | { type: 'DISMISS'; id: string; reason: DismissalReason; at: Date }
+  | { type: 'COMPLETE'; id: string; at: Date }
   | { type: 'RESET'; id: string }
   | { type: 'RESET_ALL' }
   | { type: 'SET_ACTIVE'; id: string | null }
@@ -176,7 +185,7 @@ export type AnnouncementsAction<
    * advance leaves a frame where the promoted id is neither queued nor active,
    * and that frame is what a binding renders.
    */
-  | { type: 'ADVANCE_QUEUE'; queue: string[]; show?: string | null }
+  | { type: 'ADVANCE_QUEUE'; queue: string[]; show?: string | null; at: Date }
   | { type: 'RESTORE_STATE'; states: Map<string, Partial<AnnouncementState>> }
 
 /**

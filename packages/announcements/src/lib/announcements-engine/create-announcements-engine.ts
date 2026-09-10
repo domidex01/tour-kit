@@ -226,20 +226,28 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
   }
 
   // ── the show pipeline's side effects, shared by every entry point ──────────
-  const emitShown = (config: TConfig, before: AnnouncementState, trigger: string): void => {
-    const after: AnnouncementState = {
-      ...before,
-      isActive: true,
-      isVisible: true,
-      viewCount: before.viewCount + 1,
-      lastViewedAt: now(),
-    }
-    persist(config.id, after)
+  /**
+   * Persist whatever the reducer just produced for `id`.
+   *
+   * The engine used to rebuild the post-dispatch state by hand in four places
+   * — the show pipeline, `forceShow`, `dismiss` and `complete` — which meant
+   * the same transition was computed twice, once authoritatively in the
+   * reducer and once here for storage. Two computations of one fact is the
+   * shape of the desync this phase exists to remove; now there is one.
+   */
+  const persistCurrent = (id: string): void => {
+    const current = state.announcements.get(id)
+    if (current) persist(id, current)
+  }
+
+  /** The side effects that follow a SHOW. Call AFTER the dispatch. */
+  const emitShown = (config: TConfig, trigger: string): void => {
+    persistCurrent(config.id)
     analytics?.track('announcement_shown', {
       tourId: config.id,
       metadata: getAnnouncementAnalyticsMetadata(config, {
         trigger,
-        viewCount: after.viewCount,
+        viewCount: state.announcements.get(config.id)?.viewCount ?? 0,
       }),
     })
     config.onShow?.()
@@ -259,13 +267,13 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
 
     if (scheduler.shouldQueue(config, before, userContext)) {
       scheduler.enqueue(config)
-      dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds() })
+      dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds(), at: now() })
       return false
     }
 
     scheduler.markActive()
-    dispatch({ type: 'SHOW', id })
-    emitShown(config, before, trigger)
+    dispatch({ type: 'SHOW', id, at: now() })
+    emitShown(config, trigger)
     return true
   }
 
@@ -294,19 +302,19 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
       !segmentAdmits(config) ||
       !scheduler.canShow(config, before, userContext)
     ) {
-      dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds() })
+      dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds(), at: now() })
       return
     }
 
     if (scheduler.shouldQueue(config, before, userContext)) {
       scheduler.enqueue(config)
-      dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds() })
+      dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds(), at: now() })
       return
     }
 
     scheduler.markActive()
-    dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds(), show: nextId })
-    emitShown(config, before, 'queue')
+    dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds(), show: nextId, at: now() })
+    emitShown(config, 'queue')
   }
 
   const scheduleAdvance = (): void => {
@@ -354,12 +362,12 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
       if (!st) continue
       if (scheduler.shouldQueue(config, st, userContext)) {
         scheduler.enqueue(config)
-        dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds() })
+        dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds(), at: now() })
         continue
       }
       scheduler.markActive()
-      dispatch({ type: 'SHOW', id: config.id })
-      emitShown(config, st, 'auto')
+      dispatch({ type: 'SHOW', id: config.id, at: now() })
+      emitShown(config, 'auto')
     }
   }
 
@@ -434,31 +442,14 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
     show: (id) => void showInternal(id, 'manual'),
 
     forceShow: (id) => {
-      const before = state.announcements.get(id)
+      // The dismissal-clearing half lives in the reducer's FORCE_SHOW arm; the
+      // side effects are the same ones every other show path runs.
+      if (!state.announcements.has(id)) return
       const config = state.configs.get(id)
-      if (!before || !config) return
+      if (!config) return
       scheduler.markActive()
-      dispatch({ type: 'FORCE_SHOW', id })
-      const after: AnnouncementState = {
-        ...before,
-        isActive: true,
-        isVisible: true,
-        viewCount: before.viewCount + 1,
-        lastViewedAt: now(),
-        isDismissed: false,
-        dismissedAt: null,
-        dismissalReason: null,
-      }
-      persist(id, after)
-      analytics?.track('announcement_shown', {
-        tourId: id,
-        metadata: getAnnouncementAnalyticsMetadata(config, {
-          trigger: 'forced',
-          viewCount: after.viewCount,
-        }),
-      })
-      config.onShow?.()
-      onShow?.(id)
+      dispatch({ type: 'FORCE_SHOW', id, at: now() })
+      emitShown(config, 'forced')
     },
 
     hide: (id) => {
@@ -471,19 +462,12 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
       const config = state.configs.get(id)
       if (!before) return
 
-      dispatch({ type: 'DISMISS', id, reason })
+      dispatch({ type: 'DISMISS', id, reason, at: now() })
       scheduler.markInactive()
       scheduler.remove(id)
-      dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds() })
+      dispatch({ type: 'ADVANCE_QUEUE', queue: scheduler.getQueuedIds(), at: now() })
 
-      persist(id, {
-        ...before,
-        isActive: false,
-        isVisible: false,
-        isDismissed: true,
-        dismissedAt: now(),
-        dismissalReason: reason,
-      })
+      persistCurrent(id)
       if (config) {
         analytics?.track('announcement_dismissed', {
           tourId: id,
@@ -500,9 +484,9 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
       const config = state.configs.get(id)
       if (!before) return
 
-      dispatch({ type: 'COMPLETE', id })
+      dispatch({ type: 'COMPLETE', id, at: now() })
       scheduler.markInactive()
-      persist(id, { ...before, isActive: false, isVisible: false, completedAt: now() })
+      persistCurrent(id)
       if (config) {
         analytics?.track('announcement_completed', {
           tourId: id,
@@ -550,7 +534,7 @@ export function createAnnouncementsEngine<TConfig extends EngineAnnouncementConf
 
     clearQueue: () => {
       scheduler.clearQueue()
-      dispatch({ type: 'ADVANCE_QUEUE', queue: [] })
+      dispatch({ type: 'ADVANCE_QUEUE', queue: [], at: now() })
     },
 
     getEligibleIds: () => eligibleIds,
