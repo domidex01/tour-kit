@@ -217,6 +217,36 @@ function handleSetChecklists<TConfig extends EngineChecklistConfig>(
   return { ...state, checklists: newChecklists }
 }
 
+/**
+ * Record every checklist that is complete and not yet recorded.
+ *
+ * Applied by the engine immediately after the reducer, as a separate step, so
+ * that the ids it ADDS are exactly the checklists that completed just now. The
+ * engine fires `onChecklistComplete` for that difference instead of dispatching
+ * a second action from inside the first — which used to notify subscribers a
+ * second time, costing every consumer two renders on a completing verb where a
+ * non-completing one cost a single render.
+ *
+ * It has to be separate from `LOAD_PERSISTED`'s own write: hydration restores a
+ * whole `notifiedComplete` set from storage, and those are records of past
+ * completions, not new ones. Diffing against the pre-mark state is what keeps a
+ * reload silent.
+ *
+ * Returns the SAME object when nothing changed, so the identity no-ops hold.
+ */
+export function markNewlyComplete<TConfig extends EngineChecklistConfig>(
+  state: ChecklistsEngineState<TConfig>
+): ChecklistsEngineState<TConfig> {
+  let notified: Set<string> | null = null
+  for (const [id, checklist] of state.checklists) {
+    if (checklist.isComplete && !state.notifiedComplete.has(id)) {
+      notified ??= new Set(state.notifiedComplete)
+      notified.add(id)
+    }
+  }
+  return notified ? { ...state, notifiedComplete: notified } : state
+}
+
 export function checklistsReducer<TConfig extends EngineChecklistConfig>(
   state: ChecklistsEngineState<TConfig>,
   action: ChecklistsAction,
@@ -314,13 +344,6 @@ export function checklistsReducer<TConfig extends EngineChecklistConfig>(
 
     case 'LOAD_PERSISTED':
       return handleLoadPersisted(state, action.state, reducerCtx)
-
-    case 'MARK_NOTIFIED_COMPLETE': {
-      if (state.notifiedComplete.has(action.checklistId)) return state
-      const next = new Set(state.notifiedComplete)
-      next.add(action.checklistId)
-      return { ...state, notifiedComplete: next }
-    }
 
     case 'SET_CHECKLISTS':
       return handleSetChecklists(state, reducerCtx)

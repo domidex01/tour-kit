@@ -4,16 +4,18 @@
  * three functions; nothing here touches React.
  */
 import { createMemoryStorage, logger } from '@tour-kit/core/engine'
+import type { SyncStorage } from '@tour-kit/core/engine'
 import type { ChecklistPersistenceConfig, PersistedChecklistState } from './types'
 
 export const DEFAULT_KEY = 'tourkit-checklists'
 
-/** The synchronous slice of the DOM `Storage` shape this package uses. */
-export interface ChecklistsStorage {
-  getItem: (key: string) => string | null
-  setItem: (key: string, value: string) => void
-  removeItem: (key: string) => void
-}
+/**
+ * The synchronous slice of the DOM `Storage` shape this package uses — core's,
+ * not a second declaration of it. `hints` aliases the same type for the same
+ * reason (PR #138, "one sync storage type"): two byte-identical declarations
+ * compile fine and diverge the day either grows a field.
+ */
+export type ChecklistsStorage = SyncStorage
 
 // Single module-scope memory store, used as SSR / `storage: 'memory'` fallback.
 const memoryStorage = createMemoryStorage()

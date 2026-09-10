@@ -48,18 +48,12 @@ export function ChecklistProvider({
     [userContext]
   )
 
-  const latest = React.useRef({
-    checklists: checklistConfigs,
-    context: engineContext,
-    persistence,
-    analytics,
-    onTaskComplete,
-    onTaskUncomplete,
-    onChecklistComplete,
-    onChecklistDismiss,
-    onTaskAction,
-  })
-  latest.current = {
+  // ONE literal, referenced twice. Written during render on purpose: a child's
+  // layout effect can call a verb before this provider's effects run, so the
+  // factory must already see this render's props. Two literals here would be a
+  // silent bug the types cannot catch — add a key to one and not the other and
+  // the factory reads `undefined` on first construction.
+  const current = {
     checklists: checklistConfigs,
     context: engineContext,
     persistence,
@@ -70,6 +64,8 @@ export function ChecklistProvider({
     onChecklistDismiss,
     onTaskAction,
   }
+  const latest = React.useRef(current)
+  latest.current = current
 
   // Two seeds, and they are not the same seed.
   //

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { type ReducerContext, checklistsReducer, createChecklistState } from '../reducer'
+import {
+  type ReducerContext,
+  checklistsReducer,
+  createChecklistState,
+  markNewlyComplete,
+} from '../reducer'
 import type {
   ChecklistContextData,
   ChecklistsEngineState,
@@ -114,13 +119,24 @@ describe('checklistsReducer — one case per action', () => {
     expect(c1(open).isExpanded).toBe(true)
   })
 
-  it('MARK_NOTIFIED_COMPLETE records the checklist once', () => {
-    const s = checklistsReducer(
-      seeded(),
-      { type: 'MARK_NOTIFIED_COMPLETE', checklistId: 'c1' },
+  it('completion is recorded by markNewlyComplete, not by an action', () => {
+    // The reducer arm alone leaves `notifiedComplete` untouched — recording is a
+    // separate step so the engine can tell a fresh completion from a hydrated
+    // one. See `markNewlyComplete`.
+    const done = checklistsReducer(
+      checklistsReducer(
+        seeded(),
+        { type: 'COMPLETE_TASK', checklistId: 'c1', taskId: 't1', at: 1 },
+        rctx
+      ),
+      { type: 'COMPLETE_TASK', checklistId: 'c1', taskId: 't2', at: 2 },
       rctx
     )
-    expect(s.notifiedComplete.has('c1')).toBe(true)
+    expect(c1(done).isComplete).toBe(true)
+    expect(done.notifiedComplete.has('c1')).toBe(false)
+
+    const marked = markNewlyComplete(done)
+    expect(marked.notifiedComplete.has('c1')).toBe(true)
   })
 
   it('an unknown action returns the same object', () => {
@@ -173,15 +189,44 @@ describe('checklistsReducer — the identity no-ops return the SAME object', () 
     expect(checklistsReducer(s, { type: 'RESTORE_CHECKLIST', checklistId: 'c1' }, rctx)).toBe(s)
   })
 
-  it('MARK_NOTIFIED_COMPLETE twice', () => {
-    const once = checklistsReducer(
+  it('markNewlyComplete twice', () => {
+    const once = markNewlyComplete(
+      checklistsReducer(
+        checklistsReducer(
+          seeded(),
+          { type: 'COMPLETE_TASK', checklistId: 'c1', taskId: 't1', at: 1 },
+          rctx
+        ),
+        { type: 'COMPLETE_TASK', checklistId: 'c1', taskId: 't2', at: 2 },
+        rctx
+      )
+    )
+    expect(markNewlyComplete(once)).toBe(once)
+  })
+
+  it('markNewlyComplete is the SAME object when nothing is complete', () => {
+    const s = seeded()
+    expect(markNewlyComplete(s)).toBe(s)
+  })
+
+  // The property the engine's reload silence rests on: a hydrated
+  // `notifiedComplete` is left alone, so the diff across this step is empty.
+  it('markNewlyComplete adds nothing to a checklist hydrated as already notified', () => {
+    const hydrated = checklistsReducer(
       seeded(),
-      { type: 'MARK_NOTIFIED_COMPLETE', checklistId: 'c1' },
+      {
+        type: 'LOAD_PERSISTED',
+        state: {
+          completed: { c1: ['t1', 't2'] },
+          dismissed: [],
+          timestamp: 1,
+          notifiedComplete: ['c1'],
+        },
+      },
       rctx
     )
-    expect(
-      checklistsReducer(once, { type: 'MARK_NOTIFIED_COMPLETE', checklistId: 'c1' }, rctx)
-    ).toBe(once)
+    expect(c1(hydrated).isComplete).toBe(true)
+    expect(markNewlyComplete(hydrated)).toBe(hydrated)
   })
 
   it('UNCOMPLETE_TASK on a task that was never completed', () => {
@@ -258,7 +303,7 @@ describe('the RESET arms deliberately force isExpanded back to true (quirk 15.1)
         { type: 'SET_EXPANDED', checklistId: 'c1', expanded: false },
         rctx
       ),
-      { type: 'MARK_NOTIFIED_COMPLETE', checklistId: 'c1' },
+      { type: 'COMPLETE_TASK', checklistId: 'c1', taskId: 't2', at: 2 },
       rctx
     )
     const s = checklistsReducer(

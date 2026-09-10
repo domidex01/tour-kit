@@ -13,8 +13,9 @@
  * `getState()`, which is the seeded (or empty) snapshot until a verb runs.
  */
 import { createHandle } from '@tour-kit/core/engine'
+import type { Handle } from '@tour-kit/core/engine'
 import { type ChecklistsEngine, initialChecklistsState } from './create-checklists-engine'
-import { calculateProgress } from './progress'
+import { progressOf } from './progress'
 import type {
   ChecklistProgress,
   ChecklistsEngineState,
@@ -22,11 +23,14 @@ import type {
   EngineChecklistState,
 } from './types'
 
-export interface ChecklistsHandle<TConfig extends EngineChecklistConfig = EngineChecklistConfig> {
-  ensure: () => ChecklistsEngine<TConfig>
-  getState: () => ChecklistsEngineState<TConfig>
-  subscribe: (listener: () => void) => () => void
-  release: () => void
+/**
+ * `Handle` supplies `ensure`/`getState`/`subscribe`/`release`; everything below
+ * is the checklists half. Extending rather than re-declaring is what keeps this
+ * tracking core — `hints` does the same, and a member added to `Handle` (there
+ * is already an optional `flush` on `EngineLike`) reaches both automatically.
+ */
+export interface ChecklistsHandle<TConfig extends EngineChecklistConfig = EngineChecklistConfig>
+  extends Handle<ChecklistsEngine<TConfig>, ChecklistsEngineState<TConfig>> {
   boot: () => void
   setChecklists: (checklists: TConfig[]) => void
   setContext: (context: Parameters<ChecklistsEngine<TConfig>['setContext']>[0]) => void
@@ -64,10 +68,7 @@ export function createChecklistsHandle<TConfig extends EngineChecklistConfig>(
   )
 
   return {
-    ensure: handle.ensure,
-    getState: handle.getState,
-    subscribe: handle.subscribe,
-    release: handle.release,
+    ...handle,
 
     boot: () => {
       handle.ensure().boot()
@@ -85,10 +86,6 @@ export function createChecklistsHandle<TConfig extends EngineChecklistConfig>(
     resetAll: () => handle.ensure().resetAll(),
 
     getChecklist: (id) => handle.getState().checklists.get(id),
-    getProgress: (checklistId) => {
-      const checklist = handle.getState().checklists.get(checklistId)
-      if (!checklist) return { completed: 0, total: 0, percentage: 0, remaining: 0 }
-      return calculateProgress(checklist)
-    },
+    getProgress: (checklistId) => progressOf(handle.getState(), checklistId),
   }
 }

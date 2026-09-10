@@ -18,8 +18,8 @@
  */
 import { createListeners } from '@tour-kit/core/engine'
 import { freezeState, loadState, saveState } from './persistence'
-import { calculateProgress } from './progress'
-import { checklistsReducer } from './reducer'
+import { progressOf } from './progress'
+import { checklistsReducer, markNewlyComplete } from './reducer'
 import type {
   ChecklistContextData,
   ChecklistPersistenceConfig,
@@ -148,6 +148,22 @@ const sameContext = (a: ChecklistContextData, b: ChecklistContextData): boolean 
   shallowEqual(a.data, b.data) &&
   a.completedTours.join(',') === b.completedTours.join(',')
 
+/**
+ * The ids `markNewlyComplete` added — i.e. the checklists that completed in
+ * this transition.
+ *
+ * Diffing the post-mark set against the PRE-mark one is what keeps a reload
+ * silent: `LOAD_PERSISTED` restores a whole `notifiedComplete` set from
+ * storage, and those are records of past completions, not new ones. Diffing
+ * against the previous state instead would re-fire every one of them on boot.
+ */
+const addedTo = (before: ReadonlySet<string>, after: ReadonlySet<string>): string[] => {
+  if (before === after) return []
+  const added: string[] = []
+  for (const id of after) if (!before.has(id)) added.push(id)
+  return added
+}
+
 export function createChecklistsEngine<
   TConfig extends EngineChecklistConfig = EngineChecklistConfig,
 >(options: CreateChecklistsEngineOptions<TConfig> = {}): ChecklistsEngine<TConfig> {
@@ -168,29 +184,24 @@ export function createChecklistsEngine<
     return state !== before
   }
 
-  const notifyCompletions = (): void => {
-    for (const [id, checklist] of state.checklists) {
-      if (checklist.isComplete && !state.notifiedComplete.has(id)) {
-        dispatch({ type: 'MARK_NOTIFIED_COMPLETE', checklistId: id })
-        options.onChecklistComplete?.(id)
-        checklist.config.onComplete?.()
-      }
-    }
-  }
-
-  function dispatch(action: ChecklistsAction): void {
+  const dispatch = (action: ChecklistsAction): void => {
     if (destroyed) return
-    const next = checklistsReducer(state, action, { configs, context })
+    const reduced = checklistsReducer(state, action, { configs, context })
+    const next = markNewlyComplete(reduced)
     if (next === state) return
     const persistedSlicesChanged =
       next.completed !== state.completed ||
       next.dismissed !== state.dismissed ||
       next.completedAt !== state.completedAt ||
       next.notifiedComplete !== state.notifiedComplete
+    const newlyComplete = addedTo(reduced.notifiedComplete, next.notifiedComplete)
     state = next
     if (booted && persistedSlicesChanged) saveState(persistence, freezeState(state))
     listeners.notify()
-    notifyCompletions()
+    for (const id of newlyComplete) {
+      options.onChecklistComplete?.(id)
+      state.checklists.get(id)?.config.onComplete?.()
+    }
   }
 
   const api: ChecklistsEngine<TConfig> = {
@@ -316,11 +327,7 @@ export function createChecklistsEngine<
 
     getChecklist: (id) => state.checklists.get(id),
 
-    getProgress: (checklistId) => {
-      const checklist = state.checklists.get(checklistId)
-      if (!checklist) return { completed: 0, total: 0, percentage: 0, remaining: 0 }
-      return calculateProgress(checklist)
-    },
+    getProgress: (checklistId) => progressOf(state, checklistId),
 
     destroy: () => {
       if (destroyed) return

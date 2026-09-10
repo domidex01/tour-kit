@@ -434,6 +434,28 @@ describe('completion notification', () => {
 })
 
 describe('Decision 16 — the four silent regressions', () => {
+  // The completion path used to dispatch a second action from inside the first,
+  // so a verb that completed a checklist notified subscribers TWICE while every
+  // other verb notified once — every consumer rendered twice on completion.
+  // Recording completion inside the transition made it uniform.
+  it('every verb notifies exactly once, completion included', () => {
+    const completing = createChecklistsEngine({
+      checklists: [{ id: 'c1', title: 'C', tasks: [{ id: 't1', title: 'T' }] }],
+    })
+    const a = vi.fn()
+    completing.subscribe(a)
+    completing.completeTask('c1', 't1')
+    expect(completing.getChecklist('c1')?.isComplete).toBe(true)
+    expect(a).toHaveBeenCalledTimes(1)
+
+    const partial = createChecklistsEngine({ checklists: [two()] })
+    const b = vi.fn()
+    partial.subscribe(b)
+    partial.completeTask('c1', 't1')
+    expect(partial.getChecklist('c1')?.isComplete).toBe(false)
+    expect(b).toHaveBeenCalledTimes(1)
+  })
+
   it('a throwing subscriber does not stop the ones after it', () => {
     const engine = createChecklistsEngine({ checklists: [two()] })
     const after = vi.fn()

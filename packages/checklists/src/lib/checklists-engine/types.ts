@@ -134,7 +134,9 @@ export type ChecklistsAction =
   | { type: 'RESET_CHECKLIST'; checklistId: string }
   | { type: 'RESET_ALL' }
   | { type: 'LOAD_PERSISTED'; state: PersistedChecklistState }
-  | { type: 'MARK_NOTIFIED_COMPLETE'; checklistId: string }
+  // No `MARK_NOTIFIED_COMPLETE`: completion is not a verb a caller dispatches.
+  // The reducer records it as part of whichever transition caused it, and the
+  // engine fires the callbacks for the difference. See `markNewlyComplete`.
   | { type: 'SET_CHECKLISTS' }
 
 /**
