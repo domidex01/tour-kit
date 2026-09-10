@@ -206,6 +206,68 @@ import type {
 } from '@tour-kit/checklists'
 ```
 
+## React-free subpath
+
+`@tour-kit/checklists/engine` is the checklists state machine with no React in
+it — no `react`, no `react/jsx-runtime`, no `@tour-kit/media`, no
+`@tour-kit/analytics`, no `@tour-kit/license`, no `@floating-ui/react`, no
+`@radix-ui/react-slot`, in neither the runtime nor the `.d.ts` closure. A Vue,
+Svelte or vanilla app runs checklists with none of them installed and renders
+the list itself.
+
+```ts
+import { createChecklistsEngine, attachUrlVisitTasks } from '@tour-kit/checklists/engine'
+
+const engine = createChecklistsEngine({
+  checklists: [{
+    id: 'onboarding',
+    title: 'Get started',
+    tasks: [
+      { id: 'profile', title: 'Complete your profile' },
+      { id: 'invite', title: 'Invite a teammate', dependsOn: ['profile'] },
+    ],
+  }],
+  persistence: { enabled: true },
+})
+
+engine.boot()                                   // resolves storage and hydrates
+const detach = attachUrlVisitTasks(engine)      // urlVisit auto-completion
+
+engine.subscribe(() => render(engine.getState()))
+engine.completeTask('onboarding', 'profile')    // unlocks `invite`
+engine.getProgress('onboarding')                // { completed: 1, total: 2, percentage: 50, remaining: 1 }
+```
+
+The constructor touches nothing — no `window`, no storage, no listener — so it
+is safe to build on the server and `boot()` on the client. `getState()` is
+reference-stable, `subscribe()` fans out synchronously and survives a throwing
+subscriber, and `destroy()` is terminal for callbacks as well as state.
+
+`createChecklistsHandle` is the object a binding wraps: lazy construction on
+the first verb, reads that never construct, and a `release()` whose destroy is
+deferred a microtask so a framework tearing an effect down and re-running it
+does not lose the engine's state. Pass `seedChecklistsState(configs)` as its
+second argument if you render on a server — no verb runs there, so without a
+seed every read answers from the empty snapshot.
+
+Exports: `createChecklistsEngine`, `createChecklistsHandle`,
+`initialChecklistsState`, `seedChecklistsState`, `attachUrlVisitTasks`,
+`registerUrlVisitTask`, `matchesPattern`, `LOCATION_CHANGE_EVENT`,
+`canCompleteTask`, `resolveTaskDependencies`, `hasCircularDependency`,
+`calculateProgress`, `getNextTask`, `getLockedTasks`, `createChecklist`,
+`createTask`, plus the engine types. The reducer stays internal.
+
+**React-free is not a licence bypass.** `@tour-kit/checklists` is a Pro
+package; the `/engine` subpath simply has no React layer for `LicenseGate` to
+live in, and using it is subject to the same licence as the rest of the
+package.
+
+One caveat, honestly: `@tour-kit/checklists` still hard-depends on
+`@tour-kit/media` and `@tour-kit/license`, which list React as a required peer,
+so React lands in your `node_modules`. It does **not** land in your bundle:
+nothing `/engine` imports reaches it, which
+`no-react-in-engine-dist.test.ts` asserts against the built bytes on every run.
+
 ## Task completion conditions
 
 ```ts

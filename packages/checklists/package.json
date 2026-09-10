@@ -49,6 +49,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./engine": {
+      "import": {
+        "types": "./dist/engine/index.d.ts",
+        "default": "./dist/engine/index.js"
+      },
+      "require": {
+        "types": "./dist/engine/index.d.cts",
+        "default": "./dist/engine/index.cjs"
+      }
+    },
     "./styles/animations.css": "./src/styles/animations.css",
     "./package.json": "./package.json"
   },

@@ -56,6 +56,12 @@
     "ignore": ["@tour-kit/analytics"]
   },
   {
+    "name": "@tour-kit/checklists/engine",
+    "path": "packages/checklists/dist/engine/index.js",
+    "limit": "5 KB",
+    "ignore": ["@tour-kit/analytics"]
+  },
+  {
     "name": "@tour-kit/announcements",
     "path": "packages/announcements/dist/index.js",
     "limit": "185 KB",

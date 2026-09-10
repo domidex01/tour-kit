@@ -82,8 +82,16 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
     pattern: /analytics\/engine subpath[^\n]*?<\s*([\d.]+)\s*KB/,
     mode: 'exact',
   },
-  adoption: { pattern: /adoption,\s*checklists\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },
-  checklists: { pattern: /adoption,\s*checklists\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },
+  // Anchored in v3 Phase 2: `adoption` and `checklists` shared one bullet and
+  // one unanchored pattern, so raising either raised both. The `^\s*-\s*` is
+  // load-bearing — an unanchored pattern is a first-match scan of the whole
+  // file, so the two rows would read whichever bullet came first.
+  adoption: { pattern: /^\s*-\s*adoption\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
+  checklists: { pattern: /^\s*-\s*checklists\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
+  'checklists:engine': {
+    pattern: /checklists\/engine subpath\s*<\s*([\d.]+)\s*KB/,
+    mode: 'exact',
+  },
   announcements: { pattern: /announcements\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },
   surveys: { pattern: /surveys\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },
   license: { pattern: /license\s*<\s*([\d.]+)\s*KB/, mode: 'exact' },

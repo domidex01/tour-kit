@@ -3,324 +3,18 @@
 import { useAnalyticsOptional } from '@tour-kit/analytics'
 import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
-import { registerUrlVisitTask } from '../engine/url-visit-listener'
-import { useChecklistPersistence } from '../hooks/use-checklist-persistence'
-import type {
-  ChecklistConfig,
-  ChecklistContext as ChecklistContextType,
-  ChecklistProgress,
-  ChecklistProviderConfig,
-  ChecklistState,
-  ChecklistTaskState,
-  PersistedChecklistState,
-} from '../types'
-import { canCompleteTask } from '../utils/dependencies'
-import { calculateProgress } from '../utils/progress'
+import {
+  type ChecklistsEngine,
+  createChecklistsEngine,
+  seedChecklistsState,
+} from '../lib/checklists-engine/create-checklists-engine'
+import { createChecklistsHandle } from '../lib/checklists-engine/handle'
+import { attachUrlVisitTasks } from '../lib/checklists-engine/url-visit-tasks'
+import type { ChecklistConfig, ChecklistProviderConfig } from '../types'
 import { ChecklistContext, type ChecklistContextValue } from './checklist-context'
 
 interface ChecklistProviderProps extends ChecklistProviderConfig {
   children: React.ReactNode
-}
-
-type ChecklistAction =
-  | { type: 'COMPLETE_TASK'; checklistId: string; taskId: string; at: number }
-  | { type: 'UNCOMPLETE_TASK'; checklistId: string; taskId: string }
-  | { type: 'DISMISS_CHECKLIST'; checklistId: string }
-  | { type: 'RESTORE_CHECKLIST'; checklistId: string }
-  | { type: 'SET_EXPANDED'; checklistId: string; expanded: boolean }
-  | { type: 'RESET_CHECKLIST'; checklistId: string }
-  | { type: 'RESET_ALL' }
-  | { type: 'LOAD_PERSISTED'; state: PersistedChecklistState }
-  | { type: 'MARK_NOTIFIED_COMPLETE'; checklistId: string }
-
-interface ChecklistReducerState {
-  checklists: Map<string, ChecklistState>
-  completed: Record<string, Set<string>>
-  dismissed: Set<string>
-  /** Per-task completion timestamps — the source of truth for ChecklistTaskState.completedAt */
-  completedAt: Record<string, Record<string, number>>
-  /** Checklist IDs for which onComplete has already fired — persisted to prevent re-firing across reloads */
-  notifiedComplete: Set<string>
-}
-
-function createInitialTaskState(
-  task: ChecklistConfig['tasks'][0],
-  context: ChecklistContextType,
-  completedTasks: Set<string>,
-  allTasks: ChecklistConfig['tasks'],
-  completedAtMap: Record<string, number> | undefined
-): ChecklistTaskState {
-  const visible = task.when ? task.when(context) : true
-  const locked = !canCompleteTask(task, completedTasks, allTasks)
-  const completed = completedTasks.has(task.id)
-
-  return {
-    config: task,
-    completed,
-    locked,
-    visible,
-    completedAt: completed ? completedAtMap?.[task.id] : undefined,
-  }
-}
-
-function createChecklistState(
-  config: ChecklistConfig,
-  context: ChecklistContextType,
-  completedTasks: Set<string>,
-  isDismissed: boolean,
-  isExpanded: boolean,
-  completedAtMap: Record<string, number> | undefined
-): ChecklistState {
-  const tasks = config.tasks.map((task) =>
-    createInitialTaskState(task, context, completedTasks, config.tasks, completedAtMap)
-  )
-
-  const visibleTasks = tasks.filter((t) => t.visible)
-  const completedCount = visibleTasks.filter((t) => t.completed).length
-  const totalCount = visibleTasks.length
-  const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
-
-  return {
-    config,
-    tasks,
-    progress,
-    completedCount,
-    totalCount,
-    isComplete: completedCount === totalCount && totalCount > 0,
-    isDismissed,
-    isExpanded,
-  }
-}
-
-interface ReducerContext {
-  configs: ChecklistConfig[]
-  context: ChecklistContextType
-}
-
-function handleTaskCompletion(
-  state: ChecklistReducerState,
-  checklistId: string,
-  taskId: string,
-  complete: boolean,
-  at: number | undefined,
-  { configs, context }: ReducerContext
-): ChecklistReducerState {
-  const existing = state.completed[checklistId] ?? new Set<string>()
-  const alreadyComplete = existing.has(taskId)
-  if (complete === alreadyComplete) return state
-
-  const newCompleted = { ...state.completed }
-  const tasks = new Set(existing)
-  if (complete) {
-    tasks.add(taskId)
-  } else {
-    tasks.delete(taskId)
-  }
-  newCompleted[checklistId] = tasks
-
-  const newCompletedAt = { ...state.completedAt }
-  const checklistCompletedAt = { ...(newCompletedAt[checklistId] ?? {}) }
-  if (complete && at !== undefined) {
-    checklistCompletedAt[taskId] = at
-  } else {
-    delete checklistCompletedAt[taskId]
-  }
-  newCompletedAt[checklistId] = checklistCompletedAt
-
-  const config = configs.find((c) => c.id === checklistId)
-  if (!config) return state
-
-  const newChecklists = new Map(state.checklists)
-  newChecklists.set(
-    checklistId,
-    createChecklistState(
-      config,
-      { ...context, completedTasks: Array.from(tasks) },
-      tasks,
-      state.dismissed.has(checklistId),
-      state.checklists.get(checklistId)?.isExpanded ?? true,
-      checklistCompletedAt
-    )
-  )
-
-  return {
-    ...state,
-    completed: newCompleted,
-    completedAt: newCompletedAt,
-    checklists: newChecklists,
-  }
-}
-
-function handleDismissRestore(
-  state: ChecklistReducerState,
-  checklistId: string,
-  dismiss: boolean
-): ChecklistReducerState {
-  const newDismissed = new Set(state.dismissed)
-  if (dismiss) {
-    newDismissed.add(checklistId)
-  } else {
-    newDismissed.delete(checklistId)
-  }
-
-  const newChecklists = new Map(state.checklists)
-  const existing = newChecklists.get(checklistId)
-  if (existing) {
-    newChecklists.set(checklistId, { ...existing, isDismissed: dismiss })
-  }
-
-  return { ...state, dismissed: newDismissed, checklists: newChecklists }
-}
-
-function handleLoadPersisted(
-  state: PersistedChecklistState,
-  { configs, context }: ReducerContext
-): ChecklistReducerState {
-  const newCompleted: Record<string, Set<string>> = {}
-  for (const [id, tasks] of Object.entries(state.completed)) {
-    newCompleted[id] = new Set(tasks)
-  }
-  const newDismissed = new Set(state.dismissed)
-  const newCompletedAt: Record<string, Record<string, number>> = {}
-  for (const [id, map] of Object.entries(state.completedAt ?? {})) {
-    newCompletedAt[id] = { ...map }
-  }
-  const newNotifiedComplete = new Set(state.notifiedComplete ?? [])
-
-  const newChecklists = new Map<string, ChecklistState>()
-  for (const config of configs) {
-    const tasks = newCompleted[config.id] ?? new Set()
-    newChecklists.set(
-      config.id,
-      createChecklistState(
-        config,
-        { ...context, completedTasks: Array.from(tasks) },
-        tasks,
-        newDismissed.has(config.id),
-        true,
-        newCompletedAt[config.id]
-      )
-    )
-  }
-
-  return {
-    completed: newCompleted,
-    dismissed: newDismissed,
-    checklists: newChecklists,
-    completedAt: newCompletedAt,
-    notifiedComplete: newNotifiedComplete,
-  }
-}
-
-function checklistReducer(
-  state: ChecklistReducerState,
-  action: ChecklistAction,
-  configs: ChecklistConfig[],
-  context: ChecklistContextType
-): ChecklistReducerState {
-  const reducerCtx: ReducerContext = { configs, context }
-
-  switch (action.type) {
-    case 'COMPLETE_TASK':
-      return handleTaskCompletion(
-        state,
-        action.checklistId,
-        action.taskId,
-        true,
-        action.at,
-        reducerCtx
-      )
-
-    case 'UNCOMPLETE_TASK':
-      return handleTaskCompletion(
-        state,
-        action.checklistId,
-        action.taskId,
-        false,
-        undefined,
-        reducerCtx
-      )
-
-    case 'DISMISS_CHECKLIST': {
-      if (state.dismissed.has(action.checklistId)) return state
-      return handleDismissRestore(state, action.checklistId, true)
-    }
-
-    case 'RESTORE_CHECKLIST': {
-      if (!state.dismissed.has(action.checklistId)) return state
-      return handleDismissRestore(state, action.checklistId, false)
-    }
-
-    case 'SET_EXPANDED': {
-      const existing = state.checklists.get(action.checklistId)
-      if (!existing) return state
-      if (existing.isExpanded === action.expanded) return state
-      const newChecklists = new Map(state.checklists)
-      newChecklists.set(action.checklistId, { ...existing, isExpanded: action.expanded })
-      return { ...state, checklists: newChecklists }
-    }
-
-    case 'RESET_CHECKLIST': {
-      const config = configs.find((c) => c.id === action.checklistId)
-      if (!config) return state
-
-      const newCompleted = { ...state.completed }
-      delete newCompleted[action.checklistId]
-
-      const newDismissed = new Set(state.dismissed)
-      newDismissed.delete(action.checklistId)
-
-      const newCompletedAt = { ...state.completedAt }
-      delete newCompletedAt[action.checklistId]
-
-      const newNotifiedComplete = new Set(state.notifiedComplete)
-      newNotifiedComplete.delete(action.checklistId)
-
-      const newChecklists = new Map(state.checklists)
-      newChecklists.set(
-        action.checklistId,
-        createChecklistState(config, context, new Set(), false, true, undefined)
-      )
-
-      return {
-        completed: newCompleted,
-        dismissed: newDismissed,
-        checklists: newChecklists,
-        completedAt: newCompletedAt,
-        notifiedComplete: newNotifiedComplete,
-      }
-    }
-
-    case 'RESET_ALL': {
-      const newChecklists = new Map<string, ChecklistState>()
-      for (const config of configs) {
-        newChecklists.set(
-          config.id,
-          createChecklistState(config, context, new Set(), false, true, undefined)
-        )
-      }
-      return {
-        completed: {},
-        dismissed: new Set(),
-        checklists: newChecklists,
-        completedAt: {},
-        notifiedComplete: new Set(),
-      }
-    }
-
-    case 'LOAD_PERSISTED':
-      return handleLoadPersisted(action.state, reducerCtx)
-
-    case 'MARK_NOTIFIED_COMPLETE': {
-      if (state.notifiedComplete.has(action.checklistId)) return state
-      const next = new Set(state.notifiedComplete)
-      next.add(action.checklistId)
-      return { ...state, notifiedComplete: next }
-    }
-
-    default:
-      return state
-  }
 }
 
 export function ChecklistProvider({
@@ -336,275 +30,170 @@ export function ChecklistProvider({
 }: ChecklistProviderProps) {
   const analytics = useAnalyticsOptional()
 
-  // Build context
-  const checklistContext: ChecklistContextType = React.useMemo(
+  // Every value the engine may read back through a callback, kept fresh
+  // without rebuilding the engine. The factory below closes over this ref, not
+  // over the props, so the engine is constructed exactly once per mount.
+  // `completedTours` is pinned to [] here, not forwarded: the provider has
+  // hard-coded it since forever and nothing in the package reads it except a
+  // consumer's own `when(context)` predicate, so forwarding it would un-hide
+  // tasks on a MINOR bump. Quirk 15.6 — the engine itself honours the field
+  // for consumers with no legacy to preserve.
+  const engineContext = React.useMemo(
     () => ({
       user: userContext.user ?? {},
       data: userContext.data ?? {},
-      completedTasks: [],
-      completedTours: [],
+      completedTasks: [] as string[],
+      completedTours: [] as string[],
     }),
     [userContext]
   )
 
-  // Initialize state
-  const initialState = React.useMemo<ChecklistReducerState>(() => {
-    const checklists = new Map<string, ChecklistState>()
-    for (const config of checklistConfigs) {
-      checklists.set(
-        config.id,
-        createChecklistState(config, checklistContext, new Set(), false, true, undefined)
-      )
-    }
-    return {
-      checklists,
-      completed: {},
-      dismissed: new Set(),
-      completedAt: {},
-      notifiedComplete: new Set(),
-    }
-  }, [checklistConfigs, checklistContext])
+  // ONE literal, referenced twice. Written during render on purpose: a child's
+  // layout effect can call a verb before this provider's effects run, so the
+  // factory must already see this render's props. Two literals here would be a
+  // silent bug the types cannot catch — add a key to one and not the other and
+  // the factory reads `undefined` on first construction.
+  const current = {
+    checklists: checklistConfigs,
+    context: engineContext,
+    persistence,
+    analytics,
+    onTaskComplete,
+    onTaskUncomplete,
+    onChecklistComplete,
+    onChecklistDismiss,
+    onTaskAction,
+  }
+  const latest = React.useRef(current)
+  latest.current = current
 
-  const [state, dispatch] = React.useReducer(
-    (s: ChecklistReducerState, a: ChecklistAction) =>
-      checklistReducer(s, a, checklistConfigs, checklistContext),
-    initialState
-  )
-
-  // Persistence
-  const { save, load } = useChecklistPersistence(persistence)
-
-  // Load persisted state on mount (only once — re-running on consumer callback
-  // ref changes causes race conditions with in-progress user edits).
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally mount-only
-  React.useEffect(() => {
-    const result = load()
-    if (result instanceof Promise) {
-      let cancelled = false
-      result.then((persisted) => {
-        if (!cancelled && persisted) {
-          dispatch({ type: 'LOAD_PERSISTED', state: persisted })
-        }
-      })
-      return () => {
-        cancelled = true
-      }
-    }
-    if (result) {
-      dispatch({ type: 'LOAD_PERSISTED', state: result })
-    }
-    return undefined
-  }, [])
-
-  // Save state changes
-  React.useEffect(() => {
-    const persistedState: PersistedChecklistState = {
-      completed: Object.fromEntries(
-        Object.entries(state.completed).map(([k, v]) => [k, Array.from(v)])
-      ),
-      dismissed: Array.from(state.dismissed),
-      timestamp: Date.now(),
-      completedAt: state.completedAt,
-      notifiedComplete: Array.from(state.notifiedComplete),
-    }
-    save(persistedState)
-  }, [state.completed, state.dismissed, state.completedAt, state.notifiedComplete, save])
-
-  // Check for checklist completion
-  React.useEffect(() => {
-    for (const [id, checklist] of state.checklists) {
-      if (checklist.isComplete && !state.notifiedComplete.has(id)) {
-        dispatch({ type: 'MARK_NOTIFIED_COMPLETE', checklistId: id })
-        analytics?.track('checklist_completed', {
-          tourId: id,
-          metadata: {
-            checklistId: id,
-            completedCount: checklist.completedCount,
-            totalCount: checklist.totalCount,
-          },
-        })
-        onChecklistComplete?.(id)
-        checklist.config.onComplete?.()
-      }
-    }
-  }, [state.checklists, state.notifiedComplete, analytics, onChecklistComplete])
-
-  // Actions
-  const completeTask = React.useCallback(
-    (checklistId: string, taskId: string) => {
-      const checklist = state.checklists.get(checklistId)
-      const task = checklist?.tasks.find((candidate) => candidate.config.id === taskId)
-
-      dispatch({ type: 'COMPLETE_TASK', checklistId, taskId, at: Date.now() })
-      if (checklist && task && !task.completed) {
-        analytics?.track('checklist_task_completed', {
-          tourId: checklistId,
-          metadata: {
-            checklistId,
-            taskId,
-            taskTitle: task.config.title,
-            completedCount: checklist.completedCount + 1,
-            totalCount: checklist.totalCount,
-          },
-        })
-      }
-      onTaskComplete?.(checklistId, taskId)
-    },
-    [state.checklists, analytics, onTaskComplete]
-  )
-
-  // Register `urlVisit` completions with the module-level listener.
-  // Re-runs when configs change or when persistence loads (state.completed
-  // shifts) so already-completed tasks aren't re-registered.
-  React.useEffect(() => {
-    const cleanups: Array<() => void> = []
-    for (const checklist of checklistConfigs) {
-      const completedSet = state.completed[checklist.id]
-      for (const task of checklist.tasks) {
-        const cw = task.completedWhen
-        if (!cw || !('type' in cw) || cw.type !== 'urlVisit') continue
-        if (completedSet?.has(task.id)) continue
-        const compositeId = `${checklist.id}:${task.id}`
-        cleanups.push(
-          registerUrlVisitTask(compositeId, cw.urlPattern, () =>
-            completeTask(checklist.id, task.id)
-          )
-        )
-      }
-    }
-    return () => {
-      for (const fn of cleanups) fn()
-    }
-  }, [checklistConfigs, state.completed, completeTask])
-
-  const uncompleteTask = React.useCallback(
-    (checklistId: string, taskId: string) => {
-      dispatch({ type: 'UNCOMPLETE_TASK', checklistId, taskId })
-      onTaskUncomplete?.(checklistId, taskId)
-    },
-    [onTaskUncomplete]
-  )
-
-  const executeAction = React.useCallback(
-    (checklistId: string, taskId: string) => {
-      const checklist = state.checklists.get(checklistId)
-      const task = checklist?.tasks.find((t) => t.config.id === taskId)
-      if (!task?.config.action) return
-
-      onTaskAction?.(checklistId, taskId, task.config.action)
-
-      const action = task.config.action
-      switch (action.type) {
-        case 'navigate':
-          if (action.external) {
-            window.open(action.url, '_blank')
-          } else {
-            window.location.href = action.url
+  // Two seeds, and they are not the same seed.
+  //
+  // The FACTORY seeds the engine: a child's layout effect (`<ChecklistPanel>`
+  // calls `setExpanded(defaultExpanded)`) runs before this provider's own
+  // effects, so everything a child verb can read has to exist at `ensure()`.
+  // `boot()` is NOT called here — it reads storage, and this package is
+  // SSR-hydrated (see `handle.ts`).
+  //
+  // The HANDLE seeds the pre-verb SNAPSHOT: `createHandle` is lazy by contract
+  // and NO verb runs on a server, so without `seedChecklistsState` every read
+  // during the server render answers from the empty constant and every
+  // `<ChecklistPanel>` returns null — the checklist would simply stop being in
+  // the HTML we send. Decision 5a; `ssr-render.test.tsx` pins it. Computed in
+  // this initializer so it is ONE object for the life of the mount —
+  // `useSyncExternalStore` compares with `Object.is`.
+  const [handle] = React.useState(() => {
+    // ONE seed object, handed to both the handle and the engine. If the engine
+    // derived its own, `handle.getState()` would return an equal-but-distinct
+    // object after the first `ensure()`, the construction fan-out would look
+    // like a state change, and every consumer would render twice.
+    const seed = seedChecklistsState<ChecklistConfig>(
+      latest.current.checklists,
+      latest.current.context
+    )
+    return createChecklistsHandle<ChecklistConfig>(() => {
+      const engine: ChecklistsEngine<ChecklistConfig> = createChecklistsEngine<ChecklistConfig>({
+        checklists: latest.current.checklists,
+        context: latest.current.context,
+        persistence: latest.current.persistence,
+        initialState: seed,
+        onTaskComplete: (checklistId, taskId, changed) => {
+          const checklist = engine.getState().checklists.get(checklistId)
+          const task = checklist?.tasks.find((t) => t.config.id === taskId)
+          // `changed` is the provider's old `!task.completed` guard, which a
+          // post-dispatch read cannot reconstruct. Without it a redundant
+          // `completeTask` double-fires the event — a bug this repo has
+          // shipped before. `completedCount` needs no `+ 1` here: the old
+          // guard read a PRE-dispatch snapshot, this reads the post-dispatch
+          // one, so the number is already the same.
+          if (changed && checklist && task) {
+            latest.current.analytics?.track('checklist_task_completed', {
+              tourId: checklistId,
+              metadata: {
+                checklistId,
+                taskId,
+                taskTitle: task.config.title,
+                completedCount: checklist.completedCount,
+                totalCount: checklist.totalCount,
+              },
+            })
           }
-          break
-        case 'callback':
-          action.handler()
-          break
-        case 'tour':
-          // Integration with TourKit
-          // Will be handled by tour integration if enabled
-          break
-        case 'modal':
-          // Custom modal handling
-          break
-        case 'custom':
-          // Custom handling via onTaskAction
-          break
-      }
+          latest.current.onTaskComplete?.(checklistId, taskId)
+        },
+        onTaskUncomplete: (checklistId, taskId) =>
+          latest.current.onTaskUncomplete?.(checklistId, taskId),
+        // Note both of these forward WITHOUT `changed`: the consumer's props
+        // fire unconditionally today and must keep doing so. Only analytics
+        // reads the flag.
+        onChecklistComplete: (checklistId) => {
+          const checklist = engine.getState().checklists.get(checklistId)
+          latest.current.analytics?.track('checklist_completed', {
+            tourId: checklistId,
+            metadata: {
+              checklistId,
+              completedCount: checklist?.completedCount ?? 0,
+              totalCount: checklist?.totalCount ?? 0,
+            },
+          })
+          latest.current.onChecklistComplete?.(checklistId)
+        },
+        onChecklistDismiss: (checklistId) => latest.current.onChecklistDismiss?.(checklistId),
+        onTaskAction: (checklistId, taskId, action) =>
+          latest.current.onTaskAction?.(checklistId, taskId, action),
+      })
+      return engine
+    }, seed)
+  })
 
-      // Auto-complete if manualComplete is true (default)
-      if (task.config.manualComplete !== false) {
-        completeTask(checklistId, taskId)
-      }
-    },
-    [state.checklists, onTaskAction, completeTask]
-  )
+  const snapshot = React.useSyncExternalStore(handle.subscribe, handle.getState, handle.getState)
 
-  const dismissChecklist = React.useCallback(
-    (checklistId: string) => {
-      dispatch({ type: 'DISMISS_CHECKLIST', checklistId })
-      onChecklistDismiss?.(checklistId)
-      state.checklists.get(checklistId)?.config.onDismiss?.()
-    },
-    [onChecklistDismiss, state.checklists]
-  )
+  // Config / context changes after mount. The provider had no equivalent — a
+  // `useReducer` closure just read the new value on the next dispatch — so
+  // these two are new, and both would fire on EVERY render if they were not
+  // guarded: `checklists={[…]}` is an inline literal in every example and doc
+  // in this repo, and `context` defaults to a fresh `{}`. The guard lives in
+  // the engine (`setChecklists`/`setContext` diff by value and return before
+  // dispatching), so an identity-only change costs one string compare and
+  // notifies nobody. Decision 16.
+  React.useEffect(() => {
+    handle.setChecklists(checklistConfigs)
+  }, [checklistConfigs, handle])
 
-  const restoreChecklist = React.useCallback((checklistId: string) => {
-    dispatch({ type: 'RESTORE_CHECKLIST', checklistId })
-  }, [])
+  React.useEffect(() => {
+    handle.setContext(engineContext)
+  }, [engineContext, handle])
 
-  const toggleExpanded = React.useCallback(
-    (checklistId: string) => {
-      const current = state.checklists.get(checklistId)?.isExpanded ?? true
-      dispatch({ type: 'SET_EXPANDED', checklistId, expanded: !current })
-    },
-    [state.checklists]
-  )
+  React.useEffect(() => {
+    handle.boot()
+    // The urlVisit behaviour is attached by the binding, not by `boot()`:
+    // `release()` defers `destroy()` by a microtask, and this teardown has to
+    // land in the same tick as the unmount.
+    const detachUrlVisit = attachUrlVisitTasks(handle.ensure())
+    return () => {
+      detachUrlVisit()
+      handle.release()
+    }
+  }, [handle])
 
-  const setExpanded = React.useCallback((checklistId: string, expanded: boolean) => {
-    dispatch({ type: 'SET_EXPANDED', checklistId, expanded })
-  }, [])
-
-  const resetChecklist = React.useCallback((checklistId: string) => {
-    dispatch({ type: 'RESET_CHECKLIST', checklistId })
-  }, [])
-
-  const resetAll = React.useCallback(() => {
-    dispatch({ type: 'RESET_ALL' })
-  }, [])
-
-  const getChecklist = React.useCallback(
-    (id: string) => state.checklists.get(id),
-    [state.checklists]
-  )
-
-  const getProgress = React.useCallback(
-    (checklistId: string): ChecklistProgress => {
-      const checklist = state.checklists.get(checklistId)
-      if (!checklist) {
-        return { completed: 0, total: 0, percentage: 0, remaining: 0 }
-      }
-      return calculateProgress(checklist)
-    },
-    [state.checklists]
-  )
-
+  // Same object the engine got — one memo, not two, and `completedTours` is
+  // `[]` on both sides exactly as the pre-extraction provider had it.
   const contextValue = React.useMemo<ChecklistContextValue>(
     () => ({
-      checklists: state.checklists,
-      context: checklistContext,
-      getChecklist,
-      completeTask,
-      uncompleteTask,
-      executeAction,
-      dismissChecklist,
-      restoreChecklist,
-      toggleExpanded,
-      setExpanded,
-      resetChecklist,
-      resetAll,
-      getProgress,
+      checklists: snapshot.checklists,
+      context: engineContext,
+      getChecklist: handle.getChecklist,
+      completeTask: handle.completeTask,
+      uncompleteTask: handle.uncompleteTask,
+      executeAction: handle.executeAction,
+      dismissChecklist: handle.dismissChecklist,
+      restoreChecklist: handle.restoreChecklist,
+      toggleExpanded: handle.toggleExpanded,
+      setExpanded: handle.setExpanded,
+      resetChecklist: handle.resetChecklist,
+      resetAll: handle.resetAll,
+      getProgress: handle.getProgress,
     }),
-    [
-      state.checklists,
-      checklistContext,
-      getChecklist,
-      completeTask,
-      uncompleteTask,
-      executeAction,
-      dismissChecklist,
-      restoreChecklist,
-      toggleExpanded,
-      setExpanded,
-      resetChecklist,
-      resetAll,
-      getProgress,
-    ]
+    [snapshot.checklists, engineContext, handle]
   )
 
   return (

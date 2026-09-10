@@ -13,14 +13,22 @@ import { describe, expect, it } from 'vitest'
  *
  * Proven by source scan (the package `typecheck` excludes tests, so an
  * `@ts-expect-error` here would be an unenforced false-green).
+ *
+ * v3 Phase 2: the two cases below that used to read `../checklist.ts` now read
+ * `../../lib/checklists-engine/types.ts`, because that is where the engine
+ * extraction moved `ChecklistTaskState` (now `EngineTaskState`) and
+ * `TaskAction`. The paths follow the declaration; no assertion is weakened.
+ * Re-proven by re-adding `active: boolean` to `EngineTaskState` and seeing the
+ * first case go red — against the OLD path it stayed green and vacuous, since
+ * a file that no longer declares the field cannot fail a `not.toMatch`.
  */
 
 const here = dirname(fileURLToPath(import.meta.url))
 const read = (rel: string) => readFileSync(join(here, rel), 'utf8')
 
 describe('Slice 5 deletion guards — checklists dead fields (D4/D5)', () => {
-  it('ChecklistTaskState no longer declares active (checklist.ts)', () => {
-    expect(read('../checklist.ts')).not.toMatch(/^\s*active:\s*boolean/m)
+  it('ChecklistTaskState no longer declares active (engine types.ts)', () => {
+    expect(read('../../lib/checklists-engine/types.ts')).not.toMatch(/^\s*active:\s*boolean/m)
   })
 
   it('the provider no longer seeds active: false (checklist-provider.tsx)', () => {
@@ -31,9 +39,9 @@ describe('Slice 5 deletion guards — checklists dead fields (D4/D5)', () => {
     expect(read('../config.ts')).not.toMatch(/tourKitIntegration/)
   })
 
-  it('keeps the tour task-action arm intact (different symbol)', () => {
+  it('keeps the tour task-action arm intact (different symbol, engine types.ts)', () => {
     // The dead config flag is gone, but `{ type: 'tour'; tourId: string }` and
     // its `case 'tour':` handler are a real task-action type — must remain.
-    expect(read('../checklist.ts')).toMatch(/type:\s*'tour'/)
+    expect(read('../../lib/checklists-engine/types.ts')).toMatch(/type:\s*'tour'/)
   })
 })
