@@ -164,7 +164,7 @@ export type AnnouncementsAction<TConfig extends EngineAnnouncementConfig = Engin
   | { type: 'RESET'; id: string }
   | { type: 'RESET_ALL' }
   | { type: 'SET_ACTIVE'; id: string | null }
-  | { type: 'ADVANCE_QUEUE'; queue: string[]; show?: string | null }
+  | { type: 'UPDATE_QUEUE'; queue: string[] }
   | { type: 'RESTORE_STATE'; states: Map<string, Partial<AnnouncementState>> }
 
 /**
