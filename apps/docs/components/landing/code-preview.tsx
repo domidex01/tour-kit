@@ -354,7 +354,8 @@ export function CodePreview() {
       <div className="mx-auto max-w-[1120px]">
         <div className="mb-12 max-w-lg">
           <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            A few lines of code. <span className="text-[#0197f6]">A complete tour.</span>
+            A few lines of code.{' '}
+            <span className="text-[var(--color-fd-primary)]">A complete tour.</span>
           </h2>
           <p className="text-[16px] leading-relaxed text-fd-muted-foreground">
             Wrap your app with{' '}
@@ -396,7 +397,7 @@ export function CodePreview() {
               >
                 {tab.label}
                 {activeTab === tab.id && (
-                  <div className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-[#0197f6]" />
+                  <div className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-[var(--color-fd-primary)]" />
                 )}
               </button>
             ))}

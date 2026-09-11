@@ -15,7 +15,7 @@ export function CompareGrid() {
     <section className="px-6 py-20 sm:px-8 md:py-28 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
         <div className="mb-12 max-w-2xl">
-          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0197f6]">
+          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
             Compare
           </p>
           <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
@@ -60,7 +60,7 @@ export function CompareGrid() {
         <div className="mt-4">
           <Link
             href="/compare"
-            className="group inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[#0197f6] underline underline-offset-4 transition-colors hover:opacity-80"
+            className="group inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[var(--color-fd-primary)] underline underline-offset-4 transition-colors hover:opacity-80"
           >
             See all comparisons
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />

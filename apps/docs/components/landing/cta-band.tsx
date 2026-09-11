@@ -90,14 +90,14 @@ export function CtaBand({
         {/* Soft brand glow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#0197f6]/20 blur-3xl"
+          className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[var(--color-fd-primary)]/20 blur-3xl"
         />
 
         {/* Frosted-glass content card, floating over the backdrop */}
         <div className="relative px-5 py-20 sm:px-10 sm:py-28 lg:py-36">
           <div className="mx-auto flex max-w-[960px] flex-col items-start gap-7 rounded-2xl border border-fd-border/50 bg-fd-background/55 p-8 shadow-xl backdrop-blur-xl sm:p-10 lg:flex-row lg:items-center lg:justify-between lg:gap-10 dark:bg-fd-background/50">
             <div className="max-w-xl">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#0197f6]/30 bg-[#0197f6]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#0197f6]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-fd-primary)]/30 bg-[var(--color-fd-primary)]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-fd-primary)]">
                 <Sparkles className="h-3 w-3" aria-hidden="true" />
                 {eyebrow}
               </span>
@@ -111,7 +111,7 @@ export function CtaBand({
                 <TrackedCtaLink
                   href={primaryHref}
                   placement={placement}
-                  className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-6 py-3 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/25 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+                  className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-6 py-3 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/25 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
                 >
                   {ctaLabel}
                   <ArrowRight
@@ -122,7 +122,7 @@ export function CtaBand({
                 <TrackedCtaLink
                   href={secondaryHref}
                   placement={placement}
-                  className="inline-flex items-center rounded-lg border border-fd-border bg-fd-background/70 px-6 py-3 text-[14px] font-semibold text-fd-foreground backdrop-blur-sm transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+                  className="inline-flex items-center rounded-lg border border-fd-border bg-fd-background/70 px-6 py-3 text-[14px] font-semibold text-fd-foreground backdrop-blur-sm transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
                 >
                   {secondaryLabel}
                 </TrackedCtaLink>

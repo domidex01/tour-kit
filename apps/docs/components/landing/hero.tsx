@@ -97,7 +97,7 @@ function HeroDemo() {
 
       <div
         data-tk-theme={styleId}
-        className="overflow-hidden rounded-xl border border-white/20 bg-fd-card/80 shadow-2xl shadow-[#02182b]/10 backdrop-blur-xl dark:border-white/10"
+        className="overflow-hidden rounded-xl border border-white/20 bg-fd-card/80 shadow-2xl shadow-[color:var(--color-fd-foreground)]/10 backdrop-blur-xl dark:border-white/10"
       >
         {/* Browser chrome */}
         <div className="flex items-center gap-2 border-b border-fd-border/50 bg-fd-muted/30 px-4 py-2.5 backdrop-blur-sm">
@@ -253,9 +253,9 @@ export function Hero() {
           {/* Left — copy */}
           <div className="animate-fade-in-up">
             <div className="mb-5 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-semibold text-[#02182b] backdrop-blur-sm dark:text-white">
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-semibold text-[var(--color-fd-foreground)] backdrop-blur-sm dark:text-white">
                 <svg
-                  className="h-3.5 w-3.5 text-[#0197f6]"
+                  className="h-3.5 w-3.5 text-[var(--color-fd-primary)]"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -270,7 +270,7 @@ export function Hero() {
                 </svg>
                 WCAG 2.1 AA accessible
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-semibold text-[#02182b] backdrop-blur-sm dark:text-white">
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-semibold text-[var(--color-fd-foreground)] backdrop-blur-sm dark:text-white">
                 <svg
                   className="h-3.5 w-3.5 text-fd-muted-foreground"
                   viewBox="0 0 24 24"
@@ -294,16 +294,16 @@ export function Hero() {
 
             <h1
               data-speakable="headline"
-              className="mb-6 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-[#02182b] dark:text-white"
+              className="mb-6 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-[var(--color-fd-foreground)] dark:text-white"
             >
               The onboarding library
               <br />
-              <span className="text-[#0197f6]">you wish you'd built.</span>
+              <span className="text-[var(--color-fd-primary)]">you wish you'd built.</span>
             </h1>
 
             <p
               data-speakable="summary"
-              className="mb-8 max-w-[540px] text-[17px] leading-[1.7] text-[#02182b]/80 dark:text-white/80"
+              className="mb-8 max-w-[540px] text-[17px] leading-[1.7] text-[var(--color-fd-foreground)]/80 dark:text-white/80"
             >
               The open-source onboarding toolkit for React. Headless hooks, composable components,
               and WCAG 2.1 AA accessibility — all in under 8KB. Works with shadcn/ui out of the box.
@@ -312,20 +312,20 @@ export function Hero() {
             <div className="mb-6 flex flex-wrap items-center gap-3">
               <Link
                 href="/builder"
-                className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-6 py-3 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30"
+                className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-6 py-3 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30"
               >
                 Get started
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
                 href="https://github.com/domidex01/tour-kit"
-                className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-5 py-3 text-[14px] font-semibold text-[#02182b] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md dark:text-white"
+                className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-5 py-3 text-[14px] font-semibold text-[var(--color-fd-foreground)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md dark:text-white"
               >
                 View on GitHub
               </Link>
             </div>
 
-            <p className="font-mono text-[13px] font-bold text-[#02182b]/60 dark:text-white/60">
+            <p className="font-mono text-[13px] font-bold text-[var(--color-fd-foreground)]/60 dark:text-white/60">
               pnpm add @tour-kit/core <span className="mx-1 opacity-40">&middot;</span> {'<'} 8KB
               gzipped <span className="mx-1 opacity-40">&middot;</span> TypeScript strict{' '}
               <span className="mx-1 opacity-40">&middot;</span> own your code

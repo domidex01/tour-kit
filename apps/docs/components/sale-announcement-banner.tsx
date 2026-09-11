@@ -71,7 +71,7 @@ export function SaleAnnouncementBanner() {
           id={BANNER_ID}
           useConfig={false}
           sticky={false}
-          className="border-transparent bg-[#0197f6] text-white dark:border-transparent dark:bg-[#0197f6] dark:text-white"
+          className="border-transparent bg-[var(--tk-cta)] text-[var(--tk-cta-ink)] dark:border-transparent dark:bg-[var(--tk-cta)] dark:text-[var(--tk-cta-ink)]"
         >
           <TrackedCtaLink
             href="/pricing"

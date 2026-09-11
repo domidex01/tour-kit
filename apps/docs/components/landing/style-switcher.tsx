@@ -32,7 +32,7 @@ export type StylePreset = {
  * different product. That's the pitch: the library adapts to *any* style.
  */
 export const STYLE_PRESETS: readonly StylePreset[] = [
-  { id: 'ocean', label: 'Ocean', accent: '#0197f6' },
+  { id: 'ocean', label: 'Ocean', accent: 'var(--color-fd-primary)' },
   { id: 'iris', label: 'Iris', accent: '#6366f1' },
   { id: 'forest', label: 'Forest', accent: '#10b981' },
   { id: 'crimson', label: 'Crimson', accent: '#ef4444' },

@@ -89,17 +89,17 @@ export function CapabilityHero({
 
       <div className="mx-auto max-w-[1120px]">
         <div className="max-w-[680px]">
-          <p className="mb-5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0197f6]">
+          <p className="mb-5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
             {eyebrow}
           </p>
 
-          <h1 className="mb-6 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-[#02182b] dark:text-white">
+          <h1 className="mb-6 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-[var(--color-fd-foreground)] dark:text-white">
             {heading}
             <br />
-            <span className="text-[#0197f6]">{headingAccent}</span>
+            <span className="text-[var(--color-fd-primary)]">{headingAccent}</span>
           </h1>
 
-          <p className="mb-8 max-w-[560px] text-[17px] leading-[1.7] text-[#02182b]/80 dark:text-white/80">
+          <p className="mb-8 max-w-[560px] text-[17px] leading-[1.7] text-[var(--color-fd-foreground)]/80 dark:text-white/80">
             {subhead}
           </p>
 
@@ -107,7 +107,7 @@ export function CapabilityHero({
             <TrackedCtaLink
               href={primaryHref}
               placement={placement}
-              className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-6 py-3 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+              className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-6 py-3 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
             >
               {primaryLabel}
               <ArrowRight
@@ -117,14 +117,16 @@ export function CapabilityHero({
             </TrackedCtaLink>
             <Link
               href={secondaryHref}
-              className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-5 py-3 text-[14px] font-semibold text-[#02182b] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md dark:text-white"
+              className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-5 py-3 text-[14px] font-semibold text-[var(--color-fd-foreground)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md dark:text-white"
             >
               {secondaryLabel}
             </Link>
           </div>
 
           {reassurance ? (
-            <p className="mb-6 text-[13px] text-[#02182b]/70 dark:text-white/70">{reassurance}</p>
+            <p className="mb-6 text-[13px] text-[var(--color-fd-foreground)]/70 dark:text-white/70">
+              {reassurance}
+            </p>
           ) : null}
 
           {installCmd ? (
@@ -141,7 +143,7 @@ export function CapabilityHero({
             </div>
           ) : null}
 
-          <p className="font-mono text-[13px] font-bold text-[#02182b]/60 dark:text-white/60">
+          <p className="font-mono text-[13px] font-bold text-[var(--color-fd-foreground)]/60 dark:text-white/60">
             {factsLine}
           </p>
         </div>

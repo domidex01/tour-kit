@@ -91,10 +91,10 @@ export default function BenchmarksIndexPage() {
             href="/benchmarks/bundle-size"
             className="group flex flex-col rounded-lg border border-fd-border bg-fd-card/40 p-6 transition-colors hover:bg-fd-muted/40"
           >
-            <span className="text-[11px] font-mono font-semibold uppercase tracking-[0.08em] text-[#0197f6]">
+            <span className="text-[11px] font-mono font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
               Available
             </span>
-            <h2 className="mt-2 text-[18px] font-semibold text-fd-foreground group-hover:text-[#0197f6]">
+            <h2 className="mt-2 text-[18px] font-semibold text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
               Bundle size
             </h2>
             <p className="mt-2 text-[14px] leading-relaxed text-fd-muted-foreground">

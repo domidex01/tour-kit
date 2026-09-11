@@ -29,14 +29,14 @@ export function DocsCta() {
   return (
     <section
       aria-labelledby="docs-cta-heading"
-      className="relative mt-12 overflow-hidden rounded-2xl border border-[#0197f6]/30 bg-gradient-to-br from-[#0197f6]/5 to-transparent p-6 dark:from-[#0197f6]/10 sm:p-8"
+      className="relative mt-12 overflow-hidden rounded-2xl border border-[var(--color-fd-primary)]/30 bg-gradient-to-br from-[var(--color-fd-primary)]/5 to-transparent p-6 dark:from-[var(--color-fd-primary)]/10 sm:p-8"
     >
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-[#0197f6]">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-fd-primary)]">
         Free &amp; open source
       </span>
       <h2
         id="docs-cta-heading"
-        className="mt-2 text-xl font-extrabold leading-tight tracking-[-0.02em] text-[#02182b] dark:text-white sm:text-2xl"
+        className="mt-2 text-xl font-extrabold leading-tight tracking-[-0.02em] text-[var(--color-fd-foreground)] dark:text-white sm:text-2xl"
       >
         Ship onboarding, not config.
       </h2>
@@ -49,7 +49,7 @@ export function DocsCta() {
         <TrackedCtaLink
           href="/builder"
           placement="docs_footer"
-          className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-6 py-3 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+          className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-6 py-3 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
         >
           Build my first tour
           <ArrowRight
@@ -60,7 +60,7 @@ export function DocsCta() {
         <TrackedCtaLink
           href="/pricing"
           placement="docs_footer"
-          className="inline-flex items-center rounded-lg border border-fd-border bg-fd-background/50 px-6 py-3 text-[14px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+          className="inline-flex items-center rounded-lg border border-fd-border bg-fd-background/50 px-6 py-3 text-[14px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
         >
           See pricing
         </TrackedCtaLink>

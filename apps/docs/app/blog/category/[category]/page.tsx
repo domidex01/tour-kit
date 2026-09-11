@@ -178,7 +178,7 @@ export default async function CategoryPage({ params }: PageProps) {
                 <span className="mt-1.5 text-sm leading-relaxed text-fd-muted-foreground line-clamp-2 group-hover:text-fd-accent-foreground/70">
                   {post.description}
                 </span>
-                <span className="mt-auto pt-4 text-xs text-[#0197f6]">
+                <span className="mt-auto pt-4 text-xs text-[var(--color-fd-primary)]">
                   {formattedDate}
                   {formattedDate && rt && ' · '}
                   {rt}

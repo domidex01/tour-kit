@@ -73,7 +73,7 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="mb-4 inline-flex items-center gap-2">
-              <TourKitLogo className="h-8 w-8 text-[#0197f6]" />
+              <TourKitLogo className="h-8 w-8 text-[var(--color-fd-primary)]" />
               <span className="text-[15px] font-semibold text-fd-foreground">userTourKit</span>
             </Link>
             <p className="mt-3 max-w-[240px] text-[13px] leading-[1.6] text-fd-muted-foreground">

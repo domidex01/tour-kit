@@ -1461,7 +1461,7 @@ export function DemoTour() {
                 aria-pressed={isActive}
                 className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
                   isActive
-                    ? 'bg-[#0197f6] text-white shadow-sm'
+                    ? 'bg-[var(--tk-cta)] text-[var(--tk-cta-ink)] shadow-sm'
                     : 'text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
                 }`}
               >

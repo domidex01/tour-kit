@@ -13,9 +13,9 @@ const TRUST_CHIPS = [
 
 export function SocialProof() {
   return (
-    <section className="border-y border-fd-border bg-[#EDF6FB] dark:bg-fd-muted/20 px-6 py-16 sm:px-8 lg:px-12">
+    <section className="border-y border-fd-border bg-[var(--color-fd-muted)] dark:bg-fd-muted/20 px-6 py-16 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px] text-center">
-        <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0197f6]">
+        <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
           The honest pitch
         </p>
         <h2 className="mb-4 text-2xl font-bold tracking-[-0.01em] text-fd-foreground sm:text-3xl">

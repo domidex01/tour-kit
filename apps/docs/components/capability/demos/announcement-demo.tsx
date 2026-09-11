@@ -60,7 +60,7 @@ function DemoTriggers() {
         <button
           type="button"
           onClick={() => modal.show()}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+          className="inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-5 py-2.5 text-[13px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
         >
           <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
           Show modal announcement
@@ -68,7 +68,7 @@ function DemoTriggers() {
         <button
           type="button"
           onClick={() => toast.show()}
-          className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background px-5 py-2.5 text-[13px] font-semibold text-fd-foreground transition-all hover:-translate-y-0.5 hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+          className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background px-5 py-2.5 text-[13px] font-semibold text-fd-foreground transition-all hover:-translate-y-0.5 hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
         >
           <Bell className="h-3.5 w-3.5" aria-hidden="true" />
           Show toast

@@ -59,13 +59,13 @@ export function ArticleCard({
             />
           </div>
         )}
-        <h3 className="mb-2 text-[15px] font-semibold text-fd-foreground group-hover:text-[#0197f6]">
+        <h3 className="mb-2 text-[15px] font-semibold text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
           {title}
         </h3>
         <p className="mb-4 flex-1 text-[11px] leading-relaxed text-fd-muted-foreground">
           {description}
         </p>
-        <span className="inline-flex items-center gap-1 text-[13px] font-medium text-[#0197f6]">
+        <span className="inline-flex items-center gap-1 text-[13px] font-medium text-[var(--color-fd-primary)]">
           Read article
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </span>

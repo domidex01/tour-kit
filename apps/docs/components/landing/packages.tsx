@@ -83,7 +83,7 @@ const extensions = [
 
 export function Packages() {
   return (
-    <section className="bg-[#EDF6FB] dark:bg-fd-muted/30 px-6 py-28 sm:px-8 md:py-36 lg:px-12">
+    <section className="bg-[var(--color-fd-muted)] dark:bg-fd-muted/30 px-6 py-28 sm:px-8 md:py-36 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
         {/* Header — right-aligned for contrast with previous left-aligned sections */}
         <div className="mb-16 ml-auto max-w-lg text-right">

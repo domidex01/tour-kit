@@ -183,7 +183,7 @@ export default function ProductToursPage() {
         />
 
         {/* core vs react — one buyer intent, two install styles (plan §2) */}
-        <section className="bg-[#EDF6FB] px-6 py-20 sm:px-8 md:py-28 lg:px-12 dark:bg-fd-muted/30">
+        <section className="bg-[var(--color-fd-muted)] px-6 py-20 sm:px-8 md:py-28 lg:px-12 dark:bg-fd-muted/30">
           <div className="mx-auto max-w-[1120px]">
             <div className="mb-14 max-w-lg">
               <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
@@ -209,7 +209,7 @@ export default function ProductToursPage() {
                 </p>
                 <Link
                   href="/docs/react"
-                  className="inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[#0197f6] transition-colors hover:opacity-80"
+                  className="inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[var(--color-fd-primary)] transition-colors hover:opacity-80"
                 >
                   React docs
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -229,7 +229,7 @@ export default function ProductToursPage() {
                 </p>
                 <Link
                   href="/docs/core"
-                  className="inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[#0197f6] transition-colors hover:opacity-80"
+                  className="inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[var(--color-fd-primary)] transition-colors hover:opacity-80"
                 >
                   Core docs
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

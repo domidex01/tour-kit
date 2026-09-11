@@ -151,7 +151,7 @@ function DemoSurveyCard() {
               type="button"
               onClick={isLastQuestion ? handleComplete : nextQuestion}
               disabled={currentQuestion.required && !hasAnswer}
-              className="rounded-lg bg-[#0197f6] px-4 py-2 text-[13px] font-semibold text-white shadow-sm transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+              className="rounded-lg bg-[var(--tk-cta)] px-4 py-2 text-[13px] font-semibold text-[var(--tk-cta-ink)] shadow-sm transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
             >
               {isLastQuestion ? 'Submit' : 'Next'}
             </button>
@@ -176,7 +176,7 @@ function DemoSurveyCard() {
           <button
             type="button"
             onClick={handleReset}
-            className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-2.5 py-1.5 font-mono text-[11px] font-semibold text-fd-muted-foreground transition-colors hover:bg-fd-muted hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+            className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-2.5 py-1.5 font-mono text-[11px] font-semibold text-fd-muted-foreground transition-colors hover:bg-fd-muted hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
           >
             <RotateCcw className="h-3 w-3" aria-hidden="true" />
             Retake demo

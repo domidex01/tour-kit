@@ -201,8 +201,9 @@ export default function HomePage() {
 
           <div className="relative mx-auto max-w-[1120px]">
             <div className="mx-auto max-w-xl rounded-2xl border border-fd-border/50 bg-fd-background/40 p-10 text-center shadow-2xl backdrop-blur-xl dark:bg-fd-background/40 sm:p-12">
-              <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-[#02182b] dark:text-white sm:text-4xl">
-                Own your onboarding. <span className="text-[#0197f6]">Ship it today.</span>
+              <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-[var(--color-fd-foreground)] dark:text-white sm:text-4xl">
+                Own your onboarding.{' '}
+                <span className="text-[var(--color-fd-primary)]">Ship it today.</span>
               </h2>
 
               <p className="mb-10 text-[16px] text-fd-muted-foreground">
@@ -218,7 +219,7 @@ export default function HomePage() {
               <div className="flex justify-center">
                 <Link
                   href="/builder"
-                  className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-7 py-3.5 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30"
+                  className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-7 py-3.5 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30"
                 >
                   Get started
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

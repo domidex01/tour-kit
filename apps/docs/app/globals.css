@@ -36,6 +36,24 @@
 @theme {
   --animate-tour-pulse: tour-pulse 1.5s ease-in-out infinite;
 
+  /* Hero reveal. `hero.tsx` has always asked for these two classes but no
+     keyframes were ever declared, so the elements simply rendered static
+     (STYLEGUIDE.md "Known Issues" #2). Both are wrapped for reduced motion
+     below. */
+  --animate-fade-in-up: fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in-up-delay-2: fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   @keyframes tour-pulse {
     0%,
     100% {
@@ -67,9 +85,16 @@
   --color-ring: var(--color-fd-ring);
 }
 
-/* Apply Geist fonts */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-fade-in-up-delay-2 {
+    animation: none;
+  }
+}
+
+/* Fonts: Host Grotesk for text + display, Geist Mono for code */
 body {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-host-grotesk), system-ui, sans-serif;
 }
 
 code,
@@ -101,148 +126,167 @@ img {
   height: auto;
 }
 
-@layer base {
-  :root {
-    /* ========================================
-       PRIMARY COLORS
-       ======================================== */
-    --color-fd-primary: #0056ff;
-    --color-fd-primary-foreground: #fff;
+/* NOTE ON THE CASCADE — do not wrap this in @layer.
+   fumadocs-ui/css/lib/default-colors.css declares its own `:root` and `.dark`
+   UNLAYERED, and unlayered CSS beats every layered rule regardless of source
+   order. These overrides used to sit in `@layer base`, which meant they lost
+   silently: the site rendered fumadocs' neutral greys while globals.css looked
+   like it was setting the brand. That is why the old landing page hardcoded
+   #0197f6 everywhere instead of using the token. Declared unlayered, these win
+   on source order because the fumadocs @import sits at the top of this file. */
 
-    /* ========================================
-       BACKGROUND & SURFACE
-       ======================================== */
-    --color-fd-background: #fbfcfe;
-    --color-fd-foreground: #000023;
+/* ==========================================================================
+   DESIGN TOKENS — userTourKit
+   Source: Figma "TailwindCSS v4 Design System (Community)"
+     file 6VwCdAiNHSTOHaOWOB0Zmo
+     · 3945:1460  Home · Dark   — the canonical style
+     · 3792:1460  Home · Light
+     · 3830:1460  Pricing · Light
 
-    /* ========================================
-       MUTED
-       ======================================== */
-    --color-fd-muted: #f3f4f6;
-    --color-fd-muted-foreground: #2b2e33;
+   The palette is Tailwind v4's own `slate` + `indigo` defaults, so every
+   value here is a stock Tailwind colour — there is no bespoke ramp to keep
+   in sync. Hex is written out rather than referenced so the tokens survive
+   a Tailwind major without silently shifting.
 
-    /* ========================================
-       CARDS & POPOVERS
-       ======================================== */
-    --color-fd-card: #f8f9fb;
-    --color-fd-card-foreground: #000023;
-    --color-fd-popover: #fbfcfe;
-    --color-fd-popover-foreground: #000023;
+   LIGHT lives on :root, DARK under `.dark`. Dark is what the site boots in
+   (see RootProvider in app/layout.tsx); light is the toggle.
+   ========================================================================== */
+:root {
+  /* ---- Brand -------------------------------------------------------- */
+  --color-fd-primary: #4f39f6; /* indigo-600 — links, accents, ring */
+  --color-fd-primary-foreground: #ffffff; /* 6.5:1 on indigo-600 */
 
-    /* ========================================
-       BORDERS & RINGS
-       ======================================== */
-    --color-fd-border: #d0d3d8;
-    --color-fd-ring: #0056ff;
+  /* ---- Ground & ink -------------------------------------------------- */
+  --color-fd-background: #ffffff;
+  --color-fd-foreground: #020618; /* slate-950 — 20.2:1 on white */
 
-    /* ========================================
-       SECONDARY (Light Blue)
-       ======================================== */
-    --color-fd-secondary: #e8f1ff;
-    --color-fd-secondary-foreground: #0056ff;
+  /* ---- Muted: section bands + secondary copy -------------------------- */
+  --color-fd-muted: #f8fafc; /* slate-50 */
+  --color-fd-muted-foreground: #62748e; /* slate-500 — 4.8:1 on white */
 
-    /* ========================================
-       ACCENT
-       ======================================== */
-    --color-fd-accent: #f0f6ff;
-    --color-fd-accent-foreground: #000023;
+  /* ---- Raised surfaces ------------------------------------------------ */
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: #020618;
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: #020618;
 
-    /* ========================================
-       DESTRUCTIVE
-       ======================================== */
-    --color-fd-destructive: #861309;
-    --color-fd-destructive-foreground: #fff;
+  /* ---- Lines ----------------------------------------------------------
+     Two tiers, because the design uses two: `border` is the quiet divider
+     between content, `hairline` is the visible edge on a control (button,
+     input, badge, kbd) where WCAG 1.4.11 wants 3:1 against the ground. */
+  --color-fd-border: #e2e8f0; /* slate-200 — dividers */
+  --tk-hairline: #62748e; /* slate-500 — control edges, 4.8:1 */
+  --color-fd-ring: #4f39f6;
 
-    /* ========================================
-       CUSTOM TOURKIT TOKENS
-       ======================================== */
-    --tk-primary: #0197f6;
-    --tk-primary-container: #c6dfff;
-    --tk-secondary: #a1790d;
-    --tk-tertiary: #d5ba8a;
-    --tk-surface: #fbfcfe;
-    --tk-surface-variant: #f8f9fb;
-    --tk-container: #f8f9fb;
-    --tk-container-dim: #f3f4f6;
-    --tk-outline: #45484d;
-    --tk-outline-variant: #9b9ea5;
-    --tk-error: #861309;
-    --tk-success: #005900;
-    --tk-warning: #835c00;
-    --tk-on-surface: #000023;
-    --tk-on-surface-variant: #2b2e33;
-  }
+  /* ---- Tinted brand surfaces ------------------------------------------ */
+  --color-fd-secondary: #c6d2ff; /* indigo-200 */
+  --color-fd-secondary-foreground: #372aac; /* indigo-800 — 7.4:1 on above */
+  --color-fd-accent: #f1f5f9; /* slate-100 */
+  --color-fd-accent-foreground: #020618;
 
-  .dark {
-    /* ========================================
-       PRIMARY COLORS (Dark)
-       ======================================== */
-    --color-fd-primary: #5c9aff;
-    --color-fd-primary-foreground: #000023;
+  --color-fd-destructive: #9f0712; /* red-800 — 8.2:1 on white */
+  --color-fd-destructive-foreground: #ffffff;
 
-    /* ========================================
-       BACKGROUND & SURFACE (Dark)
-       ======================================== */
-    --color-fd-background: #151618;
-    --color-fd-foreground: #edeef2;
+  /* ---- Solid CTA ------------------------------------------------------
+     Split from --color-fd-primary on purpose. The brand ink and the CTA
+     fill cannot be the same colour in both themes and still clear 4.5:1:
+     a fill light enough to carry white text is too dark to read as a link
+     on a dark ground, and vice versa. See the .dark block. */
+  --tk-cta: #4f39f6; /* indigo-600 — white text at 6.5:1 */
+  --tk-cta-ink: #ffffff;
 
-    /* ========================================
-       MUTED (Dark)
-       ======================================== */
-    --color-fd-muted: #292c30;
-    --color-fd-muted-foreground: #9b9ea5;
+  /* ---- Decorative glow (hero / CTA washes) ---------------------------- */
+  --tk-glow: rgb(79 57 246 / 0.12);
 
-    /* ========================================
-       CARDS & POPOVERS (Dark)
-       ======================================== */
-    --color-fd-card: #1e2023;
-    --color-fd-card-foreground: #edeef2;
-    --color-fd-popover: #1e2023;
-    --color-fd-popover-foreground: #edeef2;
+  /* ---- Legacy --tk-* surface tokens ------------------------------------
+     Still read by ~110 call sites across the landing and capability
+     components. Re-pointed at the indigo system so those flip with the
+     rest of the site instead of stranding the old blue. */
+  --tk-primary: #4f39f6;
+  --tk-primary-container: #e0e7ff; /* indigo-100 */
+  --tk-secondary: #a1790d;
+  --tk-tertiary: #d5ba8a;
+  --tk-surface: #ffffff;
+  --tk-surface-variant: #f8fafc;
+  --tk-container: #f8fafc;
+  --tk-container-dim: #f1f5f9;
+  --tk-outline: #62748e;
+  --tk-outline-variant: #cad5e2;
+  --tk-error: #9f0712;
+  --tk-success: #007a55; /* emerald-700 — 4.6:1 on white */
+  --tk-warning: #835c00;
+  --tk-on-surface: #020618;
+  --tk-on-surface-variant: #62748e;
 
-    /* ========================================
-       BORDERS & RINGS (Dark)
-       ======================================== */
-    --color-fd-border: #d3d3d5;
-    --color-fd-ring: #5c9aff;
+  /* Was referenced in features / packages / comparison-table / social-proof
+     but never declared, so those accents rendered colourless. */
+  --landing-accent: var(--color-fd-primary);
+}
 
-    /* ========================================
-       SECONDARY (Dark - Golden Amber)
-       ======================================== */
-    --color-fd-secondary: #edeef2;
-    --color-fd-secondary-foreground: #000;
+.dark {
+  /* ---- Brand -------------------------------------------------------- */
+  /* indigo-400. Reads at 6.5:1 on the slate-950 ground, where the light
+     theme's indigo-600 would fall to 1.5:1. */
+  --color-fd-primary: #7c86ff;
+  --color-fd-primary-foreground: #020618; /* 6.5:1 on indigo-400 */
 
-    /* ========================================
-       ACCENT (Dark)
-       ======================================== */
-    --color-fd-accent: #1a3a5c;
-    --color-fd-accent-foreground: #c6dfff;
+  /* ---- Ground & ink -------------------------------------------------- */
+  --color-fd-background: #020618; /* slate-950 */
+  --color-fd-foreground: #ebebeb; /* 16.4:1 */
 
-    /* ========================================
-       DESTRUCTIVE (Dark)
-       ======================================== */
-    --color-fd-destructive: #ff6b6b;
-    --color-fd-destructive-foreground: #151618;
+  /* ---- Muted: section bands + secondary copy -------------------------- */
+  --color-fd-muted: #0f172b; /* slate-900 */
+  --color-fd-muted-foreground: #b3b3b3; /* 9.4:1 */
 
-    /* ========================================
-       CUSTOM TOURKIT TOKENS (Dark)
-       ======================================== */
-    --tk-primary: #0197f6;
-    --tk-primary-container: #1a3a5c;
-    --tk-secondary: #c9a033;
-    --tk-tertiary: #e8d4b0;
-    --tk-surface: #151618;
-    --tk-surface-variant: #1e2023;
-    --tk-container: #1e2023;
-    --tk-container-dim: #292c30;
-    --tk-outline: #9b9ea5;
-    --tk-outline-variant: #45484d;
-    --tk-error: #ff6b6b;
-    --tk-success: #4caf50;
-    --tk-warning: #f5b800;
-    --tk-on-surface: #edeef2;
-    --tk-on-surface-variant: #9b9ea5;
-  }
+  /* ---- Raised surfaces ------------------------------------------------ */
+  --color-fd-card: #0f172b; /* slate-900 */
+  --color-fd-card-foreground: #ebebeb;
+  --color-fd-popover: #0f172b;
+  --color-fd-popover-foreground: #ebebeb;
+
+  /* ---- Lines ----------------------------------------------------------- */
+  --color-fd-border: #314158; /* slate-700 — dividers */
+  --tk-hairline: #62748e; /* slate-500 — control edges, 4.3:1 */
+  --color-fd-ring: #7c86ff;
+
+  /* ---- Tinted brand surfaces ------------------------------------------ */
+  --color-fd-secondary: #1d293d; /* slate-800 */
+  --color-fd-secondary-foreground: #ebebeb;
+  --color-fd-accent: #312c85; /* indigo-900 */
+  --color-fd-accent-foreground: #c6d2ff; /* indigo-200 — 8.0:1 */
+
+  --color-fd-destructive: #ff6467; /* red-400 — 6.6:1 on slate-950 */
+  --color-fd-destructive-foreground: #020618;
+
+  /* ---- Solid CTA -------------------------------------------------------
+     indigo-500, not the indigo-400 the mockup fills with: white on
+     indigo-400 measures 3.1:1, which fails AA for a 14px semibold label.
+     indigo-500 is the lightest step that clears 4.5:1 and is visually a
+     hair's breadth from the mockup. */
+  --tk-cta: #615fff; /* 4.6:1 with white */
+  --tk-cta-ink: #ffffff;
+
+  /* ---- Decorative glow -------------------------------------------------- */
+  --tk-glow: rgb(124 134 255 / 0.16);
+
+  /* ---- Legacy --tk-* surface tokens ------------------------------------ */
+  --tk-primary: #7c86ff;
+  --tk-primary-container: #312c85; /* indigo-900 */
+  --tk-secondary: #c9a033;
+  --tk-tertiary: #e8d4b0;
+  --tk-surface: #020618;
+  --tk-surface-variant: #0f172b;
+  --tk-container: #0f172b;
+  --tk-container-dim: #1d293d;
+  --tk-outline: #62748e;
+  --tk-outline-variant: #314158;
+  --tk-error: #ff6467;
+  --tk-success: #5ee9b5; /* emerald-300 — 11.9:1 on slate-950 */
+  --tk-warning: #f5b800;
+  --tk-on-surface: #ebebeb;
+  --tk-on-surface-variant: #b3b3b3;
+
+  --landing-accent: var(--color-fd-primary);
 }
 
 /* ========================================

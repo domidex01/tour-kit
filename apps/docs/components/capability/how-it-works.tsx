@@ -103,7 +103,7 @@ export function HowItWorks({
               className="flex flex-col rounded-xl border border-fd-border bg-fd-card p-6"
             >
               <div className="mb-4 flex items-center gap-3">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#0197f6] font-mono text-[13px] font-bold text-white">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--tk-cta)] font-mono text-[13px] font-bold text-[var(--tk-cta-ink)]">
                   {i + 1}
                 </span>
                 <h3 className="text-[16px] font-bold text-fd-foreground">{step.title}</h3>
@@ -127,7 +127,7 @@ export function HowItWorks({
               {step.href ? (
                 <Link
                   href={step.href}
-                  className="mt-auto inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[#0197f6] transition-colors hover:opacity-80"
+                  className="mt-auto inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[var(--color-fd-primary)] transition-colors hover:opacity-80"
                 >
                   {step.linkLabel}
                   <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />

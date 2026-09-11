@@ -107,14 +107,16 @@ export function QuickStart() {
                   {/* Vertical active indicator (desktop only) */}
                   <div
                     className={`absolute left-0 top-3 hidden h-[calc(100%-24px)] w-[3px] rounded-r-full transition-colors lg:block ${
-                      isActive ? 'bg-[#0197f6]' : 'bg-transparent'
+                      isActive ? 'bg-[var(--color-fd-primary)]' : 'bg-transparent'
                     }`}
                   />
 
                   {/* Step number */}
                   <span
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-[13px] font-bold transition-colors ${
-                      isActive ? 'bg-[#0197f6] text-white' : 'bg-fd-muted text-fd-muted-foreground'
+                      isActive
+                        ? 'bg-[var(--tk-cta)] text-[var(--tk-cta-ink)]'
+                        : 'bg-fd-muted text-fd-muted-foreground'
                     }`}
                   >
                     {s.number}

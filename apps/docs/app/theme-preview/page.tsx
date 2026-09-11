@@ -21,7 +21,7 @@ export default function ThemePreview() {
             <div className="w-24 h-24 bg-tk-primary rounded-xl shadow-lg flex items-center justify-center text-white text-xs font-medium">
               Primary
             </div>
-            <span className="mt-2 text-xs text-tk-on-surface-variant">#0056ff</span>
+            <span className="mt-2 text-xs text-tk-on-surface-variant">var(--color-fd-primary)</span>
           </div>
           <div className="flex flex-col items-center">
             <div className="w-24 h-24 bg-tk-primary-container rounded-xl shadow-lg flex items-center justify-center text-xs font-medium">

@@ -14,7 +14,7 @@ interface PainOutcomeStripProps {
  */
 export function PainOutcomeStrip({ heading, subtext, items }: PainOutcomeStripProps) {
   return (
-    <section className="bg-[#EDF6FB] px-6 py-20 sm:px-8 md:py-28 lg:px-12 dark:bg-fd-muted/30">
+    <section className="bg-[var(--color-fd-muted)] px-6 py-20 sm:px-8 md:py-28 lg:px-12 dark:bg-fd-muted/30">
       <div className="mx-auto max-w-[1120px]">
         <div className="mb-14 max-w-lg">
           <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
@@ -47,10 +47,10 @@ export function PainOutcomeStrip({ heading, subtext, items }: PainOutcomeStripPr
                 aria-hidden="true"
               />
 
-              <div className="mt-auto rounded-lg border border-[#0197f6]/20 bg-[#0197f6]/5 p-4">
+              <div className="mt-auto rounded-lg border border-[var(--color-fd-primary)]/20 bg-[var(--color-fd-primary)]/5 p-4">
                 <p className="mb-1.5 flex items-start gap-2 text-[15px] font-semibold text-fd-foreground">
                   <CheckCircle2
-                    className="mt-0.5 h-4 w-4 shrink-0 text-[#0197f6]"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-fd-primary)]"
                     aria-hidden="true"
                   />
                   {item.outcome}

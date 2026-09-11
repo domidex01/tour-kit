@@ -67,8 +67,8 @@ export function FinalCta({
 
       <div className="relative mx-auto max-w-[1120px]">
         <div className="mx-auto max-w-xl rounded-2xl border border-fd-border/50 bg-fd-background/40 p-10 text-center shadow-2xl backdrop-blur-xl sm:p-12 dark:bg-fd-background/40">
-          <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-[#02182b] sm:text-4xl dark:text-white">
-            {heading} <span className="text-[#0197f6]">{headingAccent}</span>
+          <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-[var(--color-fd-foreground)] sm:text-4xl dark:text-white">
+            {heading} <span className="text-[var(--color-fd-primary)]">{headingAccent}</span>
           </h2>
 
           <p className="mb-10 text-[16px] text-fd-muted-foreground">{subtext}</p>
@@ -84,7 +84,7 @@ export function FinalCta({
             <TrackedCtaLink
               href={primaryHref}
               placement={placement}
-              className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-7 py-3.5 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+              className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-7 py-3.5 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
             >
               {primaryLabel}
               <ArrowRight
@@ -110,7 +110,7 @@ export function FinalCta({
                 <span className="flex items-center justify-between text-[14px] font-semibold text-fd-foreground">
                   {sibling.label}
                   <ArrowRight
-                    className="h-3.5 w-3.5 text-[#0197f6] transition-transform group-hover:translate-x-0.5"
+                    className="h-3.5 w-3.5 text-[var(--color-fd-primary)] transition-transform group-hover:translate-x-0.5"
                     aria-hidden="true"
                   />
                 </span>

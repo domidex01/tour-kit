@@ -136,7 +136,7 @@ export function BlogListPage({ page }: BlogListPageProps) {
         {featured.length > 0 && (
           <section className="mb-10">
             <div className="mb-4 flex items-center gap-2">
-              <Star className="h-4 w-4 text-[#0197f6]" aria-hidden="true" />
+              <Star className="h-4 w-4 text-[var(--color-fd-primary)]" aria-hidden="true" />
               <h2 className="text-sm font-semibold text-fd-foreground">Featured</h2>
             </div>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -203,9 +203,11 @@ function FeaturedCard({
   return (
     <Link
       href={`/blog/${slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-[#0197f6]/30 bg-gradient-to-b from-[#0197f6]/5 to-transparent p-4 transition-all hover:border-[#0197f6]/50 hover:shadow-md hover:shadow-[#0197f6]/5 dark:from-[#0197f6]/10"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-fd-primary)]/30 bg-gradient-to-b from-[var(--color-fd-primary)]/5 to-transparent p-4 transition-all hover:border-[var(--color-fd-primary)]/50 hover:shadow-md hover:shadow-[color:var(--color-fd-primary)]/5 dark:from-[var(--color-fd-primary)]/10"
     >
-      <span className="mb-2 text-[11px] font-semibold text-[#0197f6]">{category}</span>
+      <span className="mb-2 text-[11px] font-semibold text-[var(--color-fd-primary)]">
+        {category}
+      </span>
       {image && (
         <div className="relative mb-3 aspect-[1200/630] w-full overflow-hidden rounded-lg">
           <Image
@@ -221,7 +223,7 @@ function FeaturedCard({
       <span className="mt-1.5 text-sm leading-relaxed text-fd-muted-foreground line-clamp-2">
         {description}
       </span>
-      <span className="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-medium text-[#0197f6]">
+      <span className="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-medium text-[var(--color-fd-primary)]">
         Read article
         <ArrowRight
           className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
@@ -282,7 +284,7 @@ function BlogCard({
       <span className="mt-1.5 text-sm leading-relaxed text-fd-muted-foreground line-clamp-2 group-hover:text-fd-accent-foreground/70">
         {description}
       </span>
-      <span className="mt-auto pt-4 text-xs text-[#0197f6]">
+      <span className="mt-auto pt-4 text-xs text-[var(--color-fd-primary)]">
         {formattedDate}
         {formattedDate && readingTime && ' · '}
         {readingTime}

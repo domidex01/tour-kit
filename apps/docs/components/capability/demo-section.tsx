@@ -24,7 +24,7 @@ export function DemoSection({
     <section className="px-6 py-16 sm:px-8 md:py-24 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
         <div className="mb-10 max-w-lg">
-          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0197f6]">
+          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
             {eyebrow}
           </p>
           <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">

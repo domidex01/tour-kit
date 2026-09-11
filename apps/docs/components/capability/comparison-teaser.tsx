@@ -12,7 +12,7 @@ function Cell({ value, isTourKit = false }: { value: string; isTourKit?: boolean
   if (value === 'yes') {
     return (
       <span
-        className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-emerald-600 dark:text-emerald-400'}`}
+        className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[var(--color-fd-primary)]' : 'text-emerald-600 dark:text-emerald-400'}`}
       >
         &#10003;
       </span>
@@ -26,7 +26,7 @@ function Cell({ value, isTourKit = false }: { value: string; isTourKit?: boolean
   }
   return (
     <span
-      className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-fd-muted-foreground'}`}
+      className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[var(--color-fd-primary)]' : 'text-fd-muted-foreground'}`}
     >
       {value}
     </span>
@@ -49,8 +49,8 @@ export function ComparisonTeaser({ heading, rows }: ComparisonTeaserProps) {
             <thead>
               <tr className="border-b border-fd-border">
                 <th className="w-[40%] py-3 pr-6 text-left font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-fd-muted-foreground" />
-                <th className="w-[20%] bg-[#0197f6]/5 px-5 py-3 text-center">
-                  <span className="font-mono text-[13px] font-bold text-[#0197f6]">
+                <th className="w-[20%] bg-[var(--color-fd-primary)]/5 px-5 py-3 text-center">
+                  <span className="font-mono text-[13px] font-bold text-[var(--color-fd-primary)]">
                     userTourKit
                   </span>
                 </th>
@@ -71,7 +71,7 @@ export function ComparisonTeaser({ heading, rows }: ComparisonTeaserProps) {
                   <td className="py-4 pr-6 text-[14px] font-medium text-fd-foreground">
                     {row.label}
                   </td>
-                  <td className="bg-[#0197f6]/5 px-5 py-4 text-center">
+                  <td className="bg-[var(--color-fd-primary)]/5 px-5 py-4 text-center">
                     <Cell value={row.tourKit} isTourKit />
                   </td>
                   <td className="px-5 py-4 text-center">
@@ -89,7 +89,7 @@ export function ComparisonTeaser({ heading, rows }: ComparisonTeaserProps) {
         <div className="mt-6">
           <Link
             href="/compare"
-            className="font-mono text-[13px] font-semibold text-[#0197f6] underline underline-offset-4 transition-colors hover:opacity-80"
+            className="font-mono text-[13px] font-semibold text-[var(--color-fd-primary)] underline underline-offset-4 transition-colors hover:opacity-80"
           >
             Full comparison &rarr;
           </Link>

@@ -85,7 +85,7 @@ export function BlogTableOfContents({ items }: BlogTocProps) {
                   href={item.url}
                   className={`-ml-px block border-l-2 py-1 pl-3 text-[12px] leading-snug transition-colors ${
                     isActive
-                      ? 'border-[#0197f6] text-fd-foreground'
+                      ? 'border-[var(--color-fd-primary)] text-fd-foreground'
                       : 'border-transparent text-fd-muted-foreground hover:text-fd-foreground'
                   }`}
                 >

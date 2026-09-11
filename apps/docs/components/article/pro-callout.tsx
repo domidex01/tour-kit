@@ -93,10 +93,10 @@ export function ProCallout({ package: pkg }: ProCalloutProps) {
   return (
     <aside
       aria-label={`Pro package: ${cross.name}`}
-      className="not-prose my-8 rounded-xl border border-[#0197f6]/30 bg-gradient-to-br from-[#0197f6]/5 to-transparent p-5 dark:from-[#0197f6]/10"
+      className="not-prose my-8 rounded-xl border border-[var(--color-fd-primary)]/30 bg-gradient-to-br from-[var(--color-fd-primary)]/5 to-transparent p-5 dark:from-[var(--color-fd-primary)]/10"
     >
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center rounded-full bg-[#0197f6] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+        <span className="inline-flex items-center rounded-full bg-[var(--tk-cta)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--tk-cta-ink)]">
           Pro
         </span>
         <code className="text-[12px] text-fd-muted-foreground">{cross.name}</code>
@@ -110,7 +110,7 @@ export function ProCallout({ package: pkg }: ProCalloutProps) {
       <TrackedCtaLink
         href={`/docs/${pkg}`}
         placement="docs_pro_callout"
-        className="mt-3 inline-flex items-center gap-1 text-[13px] font-semibold text-[#0197f6] transition-opacity hover:opacity-80"
+        className="mt-3 inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--color-fd-primary)] transition-opacity hover:opacity-80"
       >
         Explore {cross.name}
         <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

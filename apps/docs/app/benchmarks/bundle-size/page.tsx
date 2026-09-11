@@ -225,13 +225,13 @@ export default function BundleSizeBenchmarkPage() {
                 {sortedByGzip.map((r) => (
                   <tr
                     key={r.name}
-                    className={`border-b border-fd-border/60 ${r.isOurs ? 'bg-[#0197f6]/5' : ''}`}
+                    className={`border-b border-fd-border/60 ${r.isOurs ? 'bg-[var(--color-fd-primary)]/5' : ''}`}
                   >
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
                         {r.isOurs && (
                           <span
-                            className="rounded bg-[#0197f6]/15 px-1.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-[#0197f6]"
+                            className="rounded bg-[var(--color-fd-primary)]/15 px-1.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-[var(--color-fd-primary)]"
                             title="userTourKit package"
                           >
                             ours

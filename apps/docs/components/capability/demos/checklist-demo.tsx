@@ -67,7 +67,7 @@ function DemoChecklistCard() {
         <button
           type="button"
           onClick={reset}
-          className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-2.5 py-1.5 font-mono text-[11px] font-semibold text-fd-muted-foreground transition-colors hover:bg-fd-muted hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+          className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-2.5 py-1.5 font-mono text-[11px] font-semibold text-fd-muted-foreground transition-colors hover:bg-fd-muted hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
         >
           <RotateCcw className="h-3 w-3" aria-hidden="true" />
           Reset demo

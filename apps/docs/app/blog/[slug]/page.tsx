@@ -333,7 +333,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 className="group flex flex-col rounded-lg border border-fd-border p-4 transition-colors hover:bg-fd-muted/50"
               >
                 <span className="mb-1 text-[12px] text-fd-muted-foreground">&larr; Previous</span>
-                <span className="text-[14px] font-medium text-fd-foreground group-hover:text-[#0197f6]">
+                <span className="text-[14px] font-medium text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
                   {prev.title}
                 </span>
               </Link>
@@ -346,7 +346,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 className="group flex flex-col items-end rounded-lg border border-fd-border p-4 text-right transition-colors hover:bg-fd-muted/50"
               >
                 <span className="mb-1 text-[12px] text-fd-muted-foreground">Next &rarr;</span>
-                <span className="text-[14px] font-medium text-fd-foreground group-hover:text-[#0197f6]">
+                <span className="text-[14px] font-medium text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
                   {next.title}
                 </span>
               </Link>

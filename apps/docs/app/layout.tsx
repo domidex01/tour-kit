@@ -6,9 +6,20 @@ import { WebMcp } from '@/components/webmcp'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import { GeistMono } from 'geist/font/mono'
-import { GeistSans } from 'geist/font/sans'
 import type { Metadata } from 'next'
+import { Host_Grotesk } from 'next/font/google'
 import type { ReactNode } from 'react'
+
+/**
+ * Host Grotesk is the display + text face of the redesign (Figma 3945:1460).
+ * It ships as a variable font over 300-800, so the 400/600/800 the design
+ * uses come out of one file — no per-weight requests to declare.
+ */
+const hostGrotesk = Host_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-host-grotesk',
+  display: 'swap',
+})
 
 const GA_ID =
   process.env.NEXT_PUBLIC_GA_ID ??
@@ -72,7 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${hostGrotesk.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -88,7 +99,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <SkipNav />
         <WebMcp />
         <SaleAnnouncementBanner />
-        <RootProvider>{children}</RootProvider>
+        <RootProvider theme={{ defaultTheme: 'dark', enableSystem: false }}>
+          {children}
+        </RootProvider>
       </body>
       {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
       {YANDEX_METRIKA_ID ? <YandexMetrika id={YANDEX_METRIKA_ID} /> : null}

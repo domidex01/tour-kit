@@ -41,7 +41,7 @@ export function BlogSearch({ posts }: { posts: SearchablePost[] }) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search articles..."
           aria-label="Search articles"
-          className="h-10 w-full rounded-xl border border-fd-border/50 bg-fd-card pl-10 pr-10 text-[14px] text-fd-foreground placeholder:text-fd-muted-foreground focus:border-[#0197f6] focus:outline-none focus:ring-1 focus:ring-[#0197f6] dark:border-fd-border"
+          className="h-10 w-full rounded-xl border border-fd-border/50 bg-fd-card pl-10 pr-10 text-[14px] text-fd-foreground placeholder:text-fd-muted-foreground focus:border-[var(--color-fd-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-fd-primary)] dark:border-fd-border"
         />
         {query && (
           <button

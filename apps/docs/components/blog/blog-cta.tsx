@@ -22,9 +22,11 @@ interface BlogCtaProps {
 export function BlogCta({ variant, placement }: BlogCtaProps) {
   if (variant === 'card') {
     return (
-      <div className="flex flex-col justify-between rounded-2xl border border-[#0197f6]/30 bg-gradient-to-b from-[#0197f6]/5 to-transparent p-4 dark:from-[#0197f6]/10">
+      <div className="flex flex-col justify-between rounded-2xl border border-[var(--color-fd-primary)]/30 bg-gradient-to-b from-[var(--color-fd-primary)]/5 to-transparent p-4 dark:from-[var(--color-fd-primary)]/10">
         <div>
-          <span className="text-[11px] font-semibold text-[#0197f6]">Get started</span>
+          <span className="text-[11px] font-semibold text-[var(--color-fd-primary)]">
+            Get started
+          </span>
           <p className="mt-2 font-medium leading-snug text-fd-foreground">
             Ship onboarding, not config.
           </p>
@@ -38,7 +40,7 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
         <TrackedCtaLink
           href="/builder"
           placement={placement}
-          className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[#0197f6] transition-opacity hover:opacity-80"
+          className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-fd-primary)] transition-opacity hover:opacity-80"
         >
           Start free
           <ArrowRight className="h-3 w-3" aria-hidden="true" />
@@ -83,8 +85,9 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
       />
 
       <div className="relative mx-auto max-w-xl rounded-2xl border border-fd-border/50 bg-fd-background/40 p-8 text-center shadow-2xl backdrop-blur-xl dark:bg-fd-background/40 sm:p-12">
-        <h2 className="mb-4 text-2xl font-extrabold leading-tight tracking-[-0.02em] text-[#02182b] dark:text-white sm:text-3xl">
-          Own your onboarding. <span className="text-[#0197f6]">Ship it today.</span>
+        <h2 className="mb-4 text-2xl font-extrabold leading-tight tracking-[-0.02em] text-[var(--color-fd-foreground)] dark:text-white sm:text-3xl">
+          Own your onboarding.{' '}
+          <span className="text-[var(--color-fd-primary)]">Ship it today.</span>
         </h2>
 
         <p className="mb-8 text-[15px] text-fd-muted-foreground">
@@ -101,7 +104,7 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
           <TrackedCtaLink
             href="/builder"
             placement={placement}
-            className="group inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-7 py-3.5 text-[14px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[#0197f6]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+            className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-7 py-3.5 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
           >
             Get started
             <ArrowRight
@@ -112,7 +115,7 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
           <TrackedCtaLink
             href="/pricing"
             placement={placement}
-            className="inline-flex items-center rounded-lg border border-fd-border bg-fd-background/50 px-7 py-3.5 text-[14px] font-semibold text-fd-foreground backdrop-blur-sm transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+            className="inline-flex items-center rounded-lg border border-fd-border bg-fd-background/50 px-7 py-3.5 text-[14px] font-semibold text-fd-foreground backdrop-blur-sm transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
           >
             See pricing
           </TrackedCtaLink>
