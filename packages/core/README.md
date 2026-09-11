@@ -6,7 +6,12 @@
 [![npm downloads](https://img.shields.io/npm/dm/@tour-kit/core.svg)](https://www.npmjs.com/package/@tour-kit/core)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@tour-kit/core?label=gzip)](https://bundlephobia.com/package/@tour-kit/core)
 [![types](https://img.shields.io/npm/types/@tour-kit/core.svg)](https://www.npmjs.com/package/@tour-kit/core)
-[![license](https://img.shields.io/npm/l/@tour-kit/core.svg)](https://github.com/domidex01/tour-kit/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/@tour-kit/core.svg)](https://github.com/domidex01/tour-kit/blob/main/LICENSE.md)
+
+> **Licence** — free in development, a key in production. Tour Kit is source-available under
+> BSL 1.1: use it freely for development, evaluation, CI and anything non-production. A
+> production deployment needs a licence key, from $9.99 one-time. Each release converts to MIT
+> on its Change Date. → [usertourkit.com/pricing](https://usertourkit.com/pricing)
 
 The headless engine that powers **React onboarding** flows, **product tours**, **guided walkthroughs**, and step-by-step **onboarding wizards**. Ship the logic without prebuilt UI — bring your own components, or use [`@tour-kit/react`](https://www.npmjs.com/package/@tour-kit/react) for accessible defaults.
 
@@ -130,7 +135,7 @@ function WelcomeButton() {
 | Bundle (gzip) | < 8 KB | ~24 KB | ~16 KB | ~10 KB | ~5 KB |
 | `prefers-reduced-motion` | ✅ | ❌ | ❌ | ❌ | ❌ |
 | RTL support | ✅ | ❌ | ❌ | ❌ | ❌ |
-| License | MIT | MIT | GPL/Commercial | MIT | MIT |
+| License | BSL 1.1 (free in dev) | MIT | GPL/Commercial | MIT | MIT |
 | Framework | Any React | React | Vanilla + wrappers | Any | Vanilla |
 
 ## API Reference
@@ -306,4 +311,13 @@ Full documentation: [https://usertourkit.com/docs/core](https://usertourkit.com/
 
 ## License
 
-MIT © Tour Kit Team
+Business Source License 1.1 (`BUSL-1.1`) — **free in development, a key in production.**
+
+Use Tour Kit freely for development, evaluation, testing, CI and any other non-production
+purpose. Serving it to end users of a deployed application needs a Tour Kit Pro licence key,
+from **$9.99 one-time** — [usertourkit.com/pricing](https://usertourkit.com/pricing). Each published version converts to the MIT licence on its
+Change Date (2030-09-11). Full terms in [LICENSE.md](./LICENSE.md).
+
+Copyright © 2026 domidex01.
+
+Non-React entry points are covered by the same licence and render no badge.

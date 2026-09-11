@@ -1,10 +1,9 @@
 {
   "name": "@tour-kit/vue",
   "version": "0.1.1",
-  "private": true,
   "description": "Headless Vue 3 binding for the Tour Kit engine — product tours with no React installed.",
   "author": "Tour Kit Team",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "BUSL-1.1",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

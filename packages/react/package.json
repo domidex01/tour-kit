@@ -3,7 +3,7 @@
   "version": "3.0.0",
   "description": "React onboarding & product tour components — accessible, headless, Tailwind & shadcn-ready, with Next.js, React Router, TanStack adapters.",
   "author": "Tour Kit Team",
-  "license": "MIT",
+  "license": "BUSL-1.1",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

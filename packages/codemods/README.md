@@ -136,4 +136,8 @@ manual-port path for everything else:
 
 ## License
 
-MIT
+MIT. `@tour-kit/codemods` runs at migration and test time, which is development, and development
+is free — so this package stays MIT. See [LICENSE](./LICENSE).
+
+The Tour Kit runtime packages are source-available under BSL 1.1: free in development, a licence
+key in production, from $9.99 one-time. [usertourkit.com/pricing](https://usertourkit.com/pricing)

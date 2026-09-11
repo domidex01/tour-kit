@@ -3,7 +3,7 @@
   "version": "3.0.2",
   "description": "React feature adoption tracking — measure which features users actually adopt and re-engage them with contextual nudges.",
   "author": "Tour Kit Team",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "BUSL-1.1",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

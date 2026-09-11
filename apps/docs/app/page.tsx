@@ -153,11 +153,11 @@ export default function HomePage() {
         <Features />
         <CtaBand
           placement="home_after_features"
-          eyebrow="Free & open source"
+          eyebrow="Free in development"
           heading="Ready to build your first tour?"
-          subtext="MIT core, free forever. Pro packages run unlicensed in dev — pay once ($99) when you ship."
+          subtext="Source-available under BSL 1.1 — free for development, evaluation and CI. Pay once when you ship to production."
           ctaLabel="Build my first tour"
-          reassurance="Free & MIT-licensed — no signup, no credit card."
+          reassurance="Free in development — no signup, no credit card."
         />
         <Packages />
         <ComparisonTable />
