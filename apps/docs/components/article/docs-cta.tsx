@@ -15,11 +15,11 @@ import { ArrowRight } from 'lucide-react'
  * - Friction-reducers sit *directly under* the CTA, not buried in body copy:
  *   for a dev tool the objection is commitment, not price, so we lead with the
  *   absences ("no signup, no credit card").
- * - Honest trust signal only (MIT / open source) — no fabricated "10k+ users"
+ * - Honest trust signal only (source-available, free in dev) — no fabricated "10k+ users"
  *   social proof; the library is pre-1.0 and we don't invent numbers.
  *
  * Same free-first voice as the blog/home CTAs: lead with `npm install` and
- * reframe the one-time $99 as "pay when you ship" — the Pro suite runs
+ * reframe the one-time licence as "pay when you ship" — every package runs
  * unlicensed, and the production watermark is what converts later, inside the
  * reader's own codebase. Unlike `BlogCta`'s full-bleed (`min-h-screen`) band,
  * this is sized for the narrow docs content column: a compact bordered card
@@ -42,8 +42,8 @@ export function DocsCta() {
       </h2>
       <p className="mt-2 max-w-prose text-[15px] leading-relaxed text-fd-muted-foreground">
         <code className="rounded bg-fd-muted px-1 py-0.5 text-[13px]">npm i @tour-kit/core</code> is
-        MIT and free. The Pro packages work unlicensed too — a one-time $99 license removes the
-        production watermark when you ship.
+        free while you build. Every package works unlicensed in development — a one-time licence
+        from $9.99 removes the production watermark when you ship.
       </p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <TrackedCtaLink
@@ -69,7 +69,7 @@ export function DocsCta() {
           homepage band's reassurance line, with the docs-specific "pay when you
           ship" reframe of the one-time license. */}
       <p className="mt-4 text-[13px] text-fd-muted-foreground">
-        MIT-licensed — no signup, no credit card. Pay once, only when you ship.
+        Free in development — no signup, no credit card. Pay once, only when you ship.
       </p>
     </section>
   )

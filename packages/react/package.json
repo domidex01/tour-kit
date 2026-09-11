@@ -112,6 +112,7 @@
   },
   "dependencies": {
     "@tour-kit/core": "workspace:*",
+    "@tour-kit/license": "workspace:*",
     "@tour-kit/media": "workspace:*",
     "@floating-ui/react": "catalog:",
     "@radix-ui/react-slot": "catalog:",

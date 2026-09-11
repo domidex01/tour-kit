@@ -3,51 +3,73 @@
  *
  * IMPORTANT: the *charged* price lives in Polar (merchant of record) — these
  * constants only control what the site DISPLAYS. They must be kept in sync with
- * the Polar product price / discount, otherwise the page will advertise a price
- * the checkout doesn't honor. See the "Changing the price in Polar" runbook
- * (docs PR description) before editing these values.
+ * the Polar products, otherwise the page advertises a price the checkout does
+ * not honor.
+ *
+ * The model: every @tour-kit/* package is source-available under BSL 1.1. Free
+ * for development, evaluation, testing and CI; a key to serve it to end users
+ * of a deployed application. Tiers differ only in how many projects one key
+ * covers — a "project" is a registrable domain, so `app.foo.com` and
+ * `www.foo.com` are one project (see `toRegistrableDomain` in
+ * `@tour-kit/license`).
  */
 
-/** Standard Pro list price, in whole USD. */
-export const REGULAR_PRICE = 99
-
-/** Discounted Pro price during the launch promo, in whole USD (≈49% off $99). */
-export const SALE_PRICE = 49
-
-/** Headline discount percentage shown in the promo badge/banner. */
-export const DISCOUNT_PERCENT = 49
-
-/**
- * When the launch promo ends (inclusive end-of-day, UTC). After this instant
- * the site reverts to {@link REGULAR_PRICE} and the countdown disappears.
- * Window: 2026-06-04 → +2 weeks.
- */
-export const SALE_END_ISO = '2026-06-18T23:59:59Z'
-
-const SALE_END_MS = new Date(SALE_END_ISO).getTime()
-
-export interface TimeRemaining {
-  days: number
-  hours: number
-  minutes: number
-  seconds: number
-}
-
-/** True while the launch promo is still running. */
-export function isSaleActive(now: number = Date.now()): boolean {
-  return now < SALE_END_MS
+export interface PricingTier {
+  /** Stable id. Also the key of the checkout-URL map in `polar-config.ts`. */
+  readonly id: string
+  readonly name: string
+  /** Display price in whole-and-cents USD, one-time. */
+  readonly price: number
+  /** How many projects (registrable domains) one key activates. */
+  readonly projects: number | 'unlimited'
+  readonly blurb: string
+  readonly highlight: boolean
 }
 
 /**
- * Time left until {@link SALE_END_ISO}, or `null` once the promo has ended.
+ * `as const` so `TierId` below is a literal union rather than `string`. That is
+ * what makes the checkout-URL map exhaustive: drop a tier from the map and
+ * `pnpm --filter docs typecheck` fails instead of the button going dead.
  */
-export function getTimeRemaining(now: number = Date.now()): TimeRemaining | null {
-  const diff = SALE_END_MS - now
-  if (diff <= 0) return null
-  return {
-    days: Math.floor(diff / 86_400_000),
-    hours: Math.floor((diff % 86_400_000) / 3_600_000),
-    minutes: Math.floor((diff % 3_600_000) / 60_000),
-    seconds: Math.floor((diff % 60_000) / 1_000),
-  }
+export const TIERS = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    price: 9.99,
+    projects: 1,
+    blurb: 'One production project. The whole library, not a cut-down tier.',
+    highlight: false,
+  },
+  {
+    id: 'business',
+    name: 'Business',
+    price: 49.99,
+    projects: 5,
+    blurb: 'Five production projects. For an agency or a small portfolio.',
+    highlight: true,
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    price: 299.99,
+    projects: 'unlimited',
+    blurb: 'Unlimited production projects, forever, on the versions you buy.',
+    highlight: false,
+  },
+] as const satisfies readonly PricingTier[]
+
+export type TierId = (typeof TIERS)[number]['id']
+
+/** The entry price, for the many places that say "from $X". */
+export const STARTER_PRICE = TIERS[0].price
+
+/** Formats a tier price the way every surface should show it: `$9.99`. */
+export function formatPrice(price: number): string {
+  return `$${price.toFixed(2)}`
+}
+
+/** `1 project` / `5 projects` / `Unlimited projects`. */
+export function formatProjects(projects: PricingTier['projects']): string {
+  if (projects === 'unlimited') return 'Unlimited projects'
+  return projects === 1 ? '1 project' : `${projects} projects`
 }

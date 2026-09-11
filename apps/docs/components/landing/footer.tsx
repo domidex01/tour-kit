@@ -157,7 +157,8 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-fd-border pt-6">
           <p className="text-[12px] text-fd-muted-foreground">
-            &copy; {new Date().getFullYear()} userTourKit. MIT Licensed.
+            &copy; {new Date().getFullYear()} userTourKit. Source-available under BSL 1.1 — free in
+            development, a licence key in production.
           </p>
           <div className="flex items-center gap-4">
             <Link

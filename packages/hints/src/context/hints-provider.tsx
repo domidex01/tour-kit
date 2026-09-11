@@ -1,5 +1,6 @@
 'use client'
 
+import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import { useHintFilter } from '../hooks/use-hint-filter'
 import { createHintsEngine } from '../lib/hints-engine/create-hints-engine'
@@ -78,5 +79,13 @@ export function HintsProvider({ children, hints, storage }: HintsProviderProps) 
     [handle, snapshot.hints, snapshot.activeHint]
   )
 
-  return <HintsContext.Provider value={contextValue}>{children}</HintsContext.Provider>
+  // `LicenseGate` renders children unconditionally and layers a badge on a
+  // non-development host with no valid key, so nothing here can fail to render
+  // because a key is missing. `LicenseWatermark` elects a single owner across
+  // packages, so hints + react + a Pro package still shows exactly one badge.
+  return (
+    <LicenseGate require="pro">
+      <HintsContext.Provider value={contextValue}>{children}</HintsContext.Provider>
+    </LicenseGate>
+  )
 }

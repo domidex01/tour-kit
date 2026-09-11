@@ -5,20 +5,21 @@ import {
   type BuyButtonPlacement,
   TrackedBuyButton,
 } from '@/components/analytics/tracked-buy-button'
-import { POLAR_CHECKOUT_URL } from '@/lib/polar-config'
+import { checkoutUrl } from '@/lib/polar-config'
+import { STARTER_PRICE, formatPrice } from '@/lib/pricing'
 
-const FREE_HIGHLIGHTS = [
-  'Product tours & spotlight overlays',
-  'Persistent hints & beacons',
-  'Full TypeScript, WCAG 2.1 AA',
-  'Unlimited sites — MIT licensed',
+const DEV_HIGHLIGHTS = [
+  'Every package — no feature gates',
+  'Local development & evaluation',
+  'CI, tests & preview deploys',
+  'Read and modify the source',
 ]
 
-const PRO_HIGHLIGHTS = [
-  'Everything in Free',
-  'Analytics, checklists, announcements',
-  'Feature adoption & scheduling',
+const PROD_HIGHLIGHTS = [
+  'Serve it to end users, no badge',
+  '1, 5 or unlimited projects',
   'All future updates — no subscription',
+  'Converts to MIT on its Change Date',
 ]
 
 interface PricingTeaserProps {
@@ -35,13 +36,15 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
           <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
             Own your code.
             <br />
-            Pay once, not forever.
+            Pay once, when you ship.
           </h2>
           <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-            Three MIT packages cover most tours, hints, and onboarding. Need analytics, checklists,
-            or announcements? The full suite is a{' '}
-            <strong className="text-fd-foreground">$99 one-time</strong> license — not a monthly
-            invoice.
+            Every package is free while you build — development, evaluation, CI, the lot. A licence
+            is for serving it to end users, and it is a{' '}
+            <strong className="text-fd-foreground">
+              one-time purchase from {formatPrice(STARTER_PRICE)}
+            </strong>{' '}
+            — not a monthly invoice.
           </p>
         </div>
 
@@ -53,8 +56,8 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
                 <Code2 className="h-5 w-5 text-fd-muted-foreground" aria-hidden="true" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-fd-foreground">Free forever</h3>
-                <p className="text-[13px] text-fd-muted-foreground">3 MIT packages</p>
+                <h3 className="text-lg font-bold text-fd-foreground">In development</h3>
+                <p className="text-[13px] text-fd-muted-foreground">Every package, no key</p>
               </div>
             </div>
 
@@ -62,11 +65,11 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
               <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
                 $0
               </span>
-              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">unlimited sites</span>
+              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">always</span>
             </div>
 
             <ul className="mb-8 flex-1 space-y-3">
-              {FREE_HIGHLIGHTS.map((item) => (
+              {DEV_HIGHLIGHTS.map((item) => (
                 <li
                   key={item}
                   className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
@@ -101,20 +104,21 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
                 <Zap className="h-5 w-5 text-[var(--tk-primary)]" aria-hidden="true" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-fd-foreground">Pro</h3>
-                <p className="text-[13px] text-fd-muted-foreground">8 extended packages</p>
+                <h3 className="text-lg font-bold text-fd-foreground">In production</h3>
+                <p className="text-[13px] text-fd-muted-foreground">Three one-time tiers</p>
               </div>
             </div>
 
             <div className="mb-6">
-              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
-                $99
+              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">from</span>
+              <span className="ml-1.5 text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
+                {formatPrice(STARTER_PRICE)}
               </span>
-              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">5 sites included</span>
+              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">one-time</span>
             </div>
 
             <ul className="mb-8 flex-1 space-y-3">
-              {PRO_HIGHLIGHTS.map((item) => (
+              {PROD_HIGHLIGHTS.map((item) => (
                 <li
                   key={item}
                   className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
@@ -129,11 +133,11 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
             </ul>
 
             <TrackedBuyButton
-              href={POLAR_CHECKOUT_URL}
+              href={checkoutUrl('starter')}
               placement={placement}
               className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
             >
-              Buy Pro license
+              Get a licence
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </TrackedBuyButton>
           </div>

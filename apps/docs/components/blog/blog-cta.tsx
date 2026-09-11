@@ -15,9 +15,9 @@ interface BlogCtaProps {
 /**
  * Free-first blog CTA. The job here is install intent, not revenue: the Pro
  * suite runs free in local development (dev bypass) and the production
- * watermark — removed by the one-time $99 license — is what actually converts
+ * badge — removed by the one-time licence — is what actually converts
  * later, inside the reader's own codebase. So we lead with `npm install` and
- * reframe $99 as "pay when you ship", not "pay to start".
+ * reframe the price as "pay when you ship", not "pay to start".
  */
 export function BlogCta({ variant, placement }: BlogCtaProps) {
   if (variant === 'card') {
@@ -32,7 +32,8 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
             <code className="rounded bg-fd-muted px-1 py-0.5 text-[12px]">
               npm i @tour-kit/core
             </code>{' '}
-            — MIT and free. Pro packages work unlicensed too; one-time $99 removes the watermark.
+            — free while you build. Every package works unlicensed in development; a one-time
+            licence from $9.99 removes the badge.
           </p>
         </div>
         <TrackedCtaLink

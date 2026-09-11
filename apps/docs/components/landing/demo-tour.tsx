@@ -1495,12 +1495,12 @@ export function DemoTour() {
           {active.tier === 'pro' ? (
             <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-500">
               <Sparkles className="h-3 w-3" aria-hidden="true" />
-              Pro &middot; $99 one-time
+              Pro &middot; from $9.99 one-time
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-500">
               <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-              Free &middot; MIT
+              Free in development
             </span>
           )}
         </div>

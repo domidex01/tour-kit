@@ -182,13 +182,13 @@ export function LicenseWatermark() {
         rel="noopener noreferrer"
         style={linkStyle}
         onClick={dispatchClickEvent}
-        aria-label="userTourKit unlicensed — remove this badge with a one-time $99 license"
+        aria-label="userTourKit unlicensed — remove this badge with a one-time licence, from $9.99"
       >
         <UserTourKitLogo />
         <span style={labelStyle}>userTourKit</span>
         <span aria-hidden="true">·</span>
         <span>Unlicensed</span>
-        <span style={ctaStyle}>Remove for $99</span>
+        <span style={ctaStyle}>Remove from $9.99</span>
       </a>
     </section>,
     document.body

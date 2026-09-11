@@ -122,3 +122,65 @@ describe('useLicenseGate', () => {
     expect(result.current).toEqual({ isGated: true, isLoading: false })
   })
 })
+
+describe('useLicenseGate — activation-grace (Starter makes a 403 likely)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockIsDev.mockReturnValue(false)
+  })
+
+  // A Polar 403 means "the key is granted, but this domain could not claim a
+  // slot" — the customer paid. `validateLicenseKey` turns that into a VALID
+  // state on purpose (polar-client.ts step 5a) rather than an invalid one, and
+  // this asserts the consequence a paying customer actually feels: no gate,
+  // therefore no badge. On the old 5-slot key this was rare; on a Starter tier
+  // with `maxActivations: 1` a second live domain trips it immediately.
+  it('leaves isGated false when the activation limit is reached', async () => {
+    mockValidate.mockResolvedValue({
+      status: 'valid',
+      tier: 'pro',
+      activations: 1,
+      maxActivations: 1,
+      domain: 'example.com',
+      expiresAt: null,
+      validatedAt: Date.now(),
+      serverValidatedAt: Date.now(),
+      renderKey: 'lk_over_limit_hash',
+    })
+
+    const { result } = renderHook(() => useLicenseGate(), {
+      wrapper: withProvider('TK-PAID-KEY'),
+    })
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.isGated).toBe(false)
+  })
+
+  // The other half of the grace: a transient network error gates only when
+  // there is no fresh cache entry to fall back on.
+  it('leaves isGated false on an error state while a fresh cache entry exists', async () => {
+    const { hasFreshCache } = await import('../lib/cache')
+    vi.mocked(hasFreshCache).mockReturnValue(true)
+    mockValidate.mockResolvedValue({
+      status: 'error',
+      tier: 'free',
+      activations: 0,
+      maxActivations: 0,
+      domain: null,
+      expiresAt: null,
+      validatedAt: Date.now(),
+    } as LicenseState)
+
+    const { result } = renderHook(() => useLicenseGate(), {
+      wrapper: withProvider('TK-PAID-KEY'),
+    })
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    // `useLicenseGate` deliberately returns only { isGated, isLoading };
+    // `gracePeriodActive` lives on the context for the debug panel. What
+    // matters to a paying customer is this line: not gated, so no badge.
+    expect(result.current.isGated).toBe(false)
+
+    vi.mocked(hasFreshCache).mockReturnValue(false)
+  })
+})

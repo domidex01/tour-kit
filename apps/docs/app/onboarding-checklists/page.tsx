@@ -20,7 +20,7 @@ import dynamic from 'next/dynamic'
 const PAGE_PATH = '/onboarding-checklists'
 const PAGE_TITLE = 'Onboarding Checklists for React | userTourKit'
 const PAGE_DESC =
-  'React onboarding checklist component with task dependencies, progress persistence, and your design system. Runs free in dev — $99 once when you ship.'
+  'React onboarding checklist component with task dependencies, progress persistence, and your design system. Runs free in dev — from $9.99 once when you ship.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -103,7 +103,7 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'What happens before I buy a license?',
     answer:
-      'Everything works. @tour-kit/checklists runs unlicensed in development and on localhost with full functionality; production shows a small watermark until you activate a $99 lifetime license. Activation precedes purchase by design — ship the checklist first, pay when it earns its keep.',
+      'Everything works. @tour-kit/checklists runs unlicensed in development and on localhost with full functionality — no feature gates. Production shows a small badge until you activate a one-time licence key, from $9.99 for a single project, which covers every Tour Kit package.',
   },
 ]
 
@@ -137,7 +137,7 @@ export default function OnboardingChecklistsPage() {
           primaryHref="/docs/checklists"
           secondaryLabel="See pricing"
           secondaryHref="/pricing"
-          reassurance="Runs free in dev — pay once ($99) when you ship."
+          reassurance="Runs free in dev — one-time from $9.99 when you ship."
           factsLine="< 10KB gzipped · TypeScript strict · WCAG 2.1 AA · your repo, your code"
         />
 
@@ -237,7 +237,7 @@ export default function OnboardingChecklistsPage() {
           placement="checklists_after_features"
           eyebrow="Pro package"
           heading="Try it free in dev — watermark until you license."
-          subtext="Full functionality in development and on localhost, no key required. One $99 license unlocks production for all Pro packages."
+          subtext="Full functionality in development and on localhost, no key required. One licence from $9.99 unlocks production for every package."
           ctaLabel="Build my checklist"
           reassurance="No signup, no credit card — install and go."
           primaryHref="/builder"
@@ -248,7 +248,7 @@ export default function OnboardingChecklistsPage() {
         <ComparisonTeaser
           heading="Checklists without the platform tax"
           rows={[
-            { label: 'Cost', tourKit: '$99 once', saas: '$200–900/mo', oss: 'DIY time' },
+            { label: 'Cost', tourKit: 'From $9.99 once', saas: '$200–900/mo', oss: 'DIY time' },
             { label: 'Task dependencies', tourKit: 'yes', saas: 'partial', oss: 'no' },
             {
               label: 'Design system fit',

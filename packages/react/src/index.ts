@@ -121,12 +121,12 @@ export {
 // ============================================
 
 // Context & Providers
-export {
-  TourContext,
-  TourProvider,
-  TourKitContext,
-  TourKitProvider,
-} from '@tour-kit/core'
+export { TourContext, TourKitContext } from '@tour-kit/core'
+
+// `TourProvider` and `TourKitProvider` are react-owned shims over core's, so
+// the documented single-tour quickstart carries the licence badge. Same props,
+// same behaviour — see components/provider/licensed-providers.tsx.
+export { TourProvider, TourKitProvider } from './components/provider/licensed-providers'
 
 // Hooks
 export {

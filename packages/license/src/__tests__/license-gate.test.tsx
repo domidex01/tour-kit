@@ -237,7 +237,12 @@ describe('LicenseGate', () => {
     warnSpy.mockRestore()
   })
 
-  it('provider + empty key + localhost renders children and one watermark', async () => {
+  // The licence grants development, evaluation, testing and CI use without
+  // charge, so a dev host never carries the badge — not even with a provider
+  // mounted and no key. The dev-only console warning is the half that stays:
+  // it tells a developer their env var is missing without the runtime
+  // contradicting the terms the package ships under.
+  it('provider + empty key + localhost renders children and NO watermark', async () => {
     mockIsDev.mockReturnValue(true)
 
     render(
@@ -250,14 +255,35 @@ describe('LicenseGate', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('pro-content')).toBeInTheDocument()
-      expect(findWatermark()).not.toBeNull()
     })
 
+    expect(findWatermark()).toBeNull()
     expect(mockValidate).not.toHaveBeenCalled()
   })
 
+  it('still warns in the console on a dev host with no key', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    __resetLicenseWarningForTests()
+    mockIsDev.mockReturnValue(true)
+
+    render(
+      <LicenseProvider licenseKey="">
+        <LicenseGate require="pro">
+          <div data-testid="pro-content">Pro Feature</div>
+        </LicenseGate>
+      </LicenseProvider>
+    )
+
+    await waitFor(() => {
+      expect(warnSpy).toHaveBeenCalled()
+    })
+    const message = warnSpy.mock.calls.map((c) => String(c[0])).join('\n')
+    expect(message).toContain('without a valid license')
+    warnSpy.mockRestore()
+  })
+
   it.each(['   ', '\t\n'])(
-    'provider + whitespace key (%j) + localhost renders children and one watermark',
+    'provider + whitespace key (%j) + localhost renders children and NO watermark',
     async (key) => {
       mockIsDev.mockReturnValue(true)
 
@@ -271,8 +297,9 @@ describe('LicenseGate', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('pro-content')).toBeInTheDocument()
-        expect(findWatermark()).not.toBeNull()
       })
+
+      expect(findWatermark()).toBeNull()
     }
   )
 
