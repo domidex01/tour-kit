@@ -169,7 +169,7 @@ function TourDemo() {
                   <div
                     key={s.target}
                     className={`h-1.5 rounded-full transition-all ${
-                      i === step ? 'w-4 bg-[var(--tk-primary)]' : 'w-1.5 bg-fd-muted'
+                      i === step ? 'w-4 bg-[var(--tk-primary)]' : 'w-1.5 bg-[var(--tk-card-dot)]'
                     }`}
                   />
                 ))}

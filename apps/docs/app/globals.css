@@ -324,9 +324,30 @@ img {
    Driven by `data-tk-theme="<id>"` on a wrapper.
    See components/landing/style-switcher.tsx.
    ======================================== */
+/* Each preset is a whole design language, not a recolour: surface, radius,
+   border weight, shadow behaviour and typeface all move together. Four of the
+   six used to be a white card with a different button, which is not much of a
+   demo for "it adapts to any style".
+
+   --tk-on-primary is chosen per preset, and per mode where the hue needs it, so
+   the 11px Next label clears 4.5:1 everywhere. Light hues (forest's emerald,
+   ember's amber) take dark ink; dark hues take white. Three presets used to
+   fail: forest at 2.54:1, crimson 3.76:1, iris 4.47:1. Held by
+   design-tokens.test.ts.
+
+   --tk-card-dot is the INACTIVE progress dot. It used to be the site's
+   --color-fd-muted, a site token on a themed card, which made the dots
+   invisible on ember in both modes. */
+
+/* Soft modern SaaS — the brand preset and the hero's default. This is the card
+   the Figma hero frames draw, so its values are pinned to them. */
 [data-tk-theme="ocean"] {
-  --tk-primary: #0197f6;
-  --tk-on-primary: #ffffff;
+  /* --tk-cta, not --color-fd-primary: this fill carries the white 11px Next
+     label, and the mockup's indigo-400 measures 3.1:1 there. --tk-cta is the
+     token that exists for exactly that — indigo-600 light, indigo-500 dark,
+     both clearing 4.5:1 — and is a hair's breadth from the mockup. */
+  --tk-primary: var(--tk-cta);
+  --tk-on-primary: var(--tk-cta-ink);
   --tk-radius: 0.75rem;
   --tk-card-border-width: 1px;
   --tk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -335,6 +356,7 @@ img {
   --tk-card-muted: #57687a;
   --tk-card-border: rgb(2 24 43 / 0.1);
   --tk-card-shadow: 0 14px 36px -14px rgb(2 24 43 / 0.22);
+  --tk-card-dot: rgb(2 24 43 / 0.14);
 }
 .dark [data-tk-theme="ocean"] {
   --tk-card-bg: rgb(13 23 35 / 0.92);
@@ -342,68 +364,88 @@ img {
   --tk-card-muted: rgb(255 255 255 / 0.64);
   --tk-card-border: rgb(255 255 255 / 0.12);
   --tk-card-shadow: 0 14px 36px -14px rgb(0 0 0 / 0.65);
+  --tk-card-dot: rgb(255 255 255 / 0.2);
 }
 
+/* Glass — the widest radius, a tinted lavender surface rather than white, and a
+   bright inner edge instead of a border, floating on a large violet bloom.
+   Violet, not indigo: as indigo it was a straight clone of ocean. */
 [data-tk-theme="iris"] {
-  --tk-primary: #6366f1;
+  --tk-primary: #7c3aed;
   --tk-on-primary: #ffffff;
   --tk-radius: 1rem;
   --tk-card-border-width: 1px;
   --tk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --tk-card-bg: #ffffff;
-  --tk-card-fg: #1e1b35;
-  --tk-card-muted: #6b6790;
-  --tk-card-border: rgb(99 102 241 / 0.28);
-  --tk-card-shadow: 0 24px 48px -16px rgb(99 102 241 / 0.35);
+  --tk-card-bg: #f6f4ff;
+  --tk-card-fg: #241a4d;
+  --tk-card-muted: #6d64a0;
+  --tk-card-border: rgb(255 255 255 / 0.9);
+  --tk-card-shadow: 0 28px 60px -20px rgb(124 58 237 / 0.45), 0 2px 10px -2px rgb(124 58 237 / 0.16);
+  --tk-card-dot: rgb(124 58 237 / 0.22);
 }
 .dark [data-tk-theme="iris"] {
-  --tk-card-bg: rgb(24 22 46 / 0.94);
-  --tk-card-fg: #ffffff;
-  --tk-card-muted: rgb(199 196 255 / 0.72);
-  --tk-card-border: rgb(129 123 255 / 0.38);
-  --tk-card-shadow: 0 26px 50px -16px rgb(99 102 241 / 0.55);
+  --tk-primary: #a78bfa;
+  --tk-on-primary: #1a1036;
+  --tk-card-bg: rgb(30 24 58 / 0.95);
+  --tk-card-fg: #f4f1ff;
+  --tk-card-muted: rgb(203 195 255 / 0.74);
+  --tk-card-border: rgb(167 139 250 / 0.3);
+  --tk-card-shadow: 0 30px 64px -20px rgb(124 58 237 / 0.65);
+  --tk-card-dot: rgb(167 139 250 / 0.28);
 }
 
-/* Forest is the "always-light" friendly card — the same in both modes,
-   which is exactly why it pops dramatically against a dark site. */
+/* Friendly — the "always-light" card, identical in both modes, which is exactly
+   why it pops against a dark site. Mint surface, generous radius, green ring.
+   The rounded face only resolves on Apple platforms; elsewhere the tint and the
+   geometry carry the identity. */
 [data-tk-theme="forest"] {
   --tk-primary: #10b981;
-  --tk-on-primary: #ffffff;
-  --tk-radius: 0.625rem;
+  --tk-on-primary: #04291d;
+  --tk-radius: 0.875rem;
   --tk-card-border-width: 1px;
-  --tk-font: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
-  --tk-card-bg: #ffffff;
-  --tk-card-fg: #0b1f17;
-  --tk-card-muted: #5b6b63;
-  --tk-card-border: rgb(16 185 129 / 0.3);
-  --tk-card-shadow: 0 16px 32px -14px rgb(16 185 129 / 0.28);
+  --tk-font: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", Quicksand, Nunito, system-ui,
+    sans-serif;
+  --tk-card-bg: #f0fdf6;
+  --tk-card-fg: #04291d;
+  --tk-card-muted: #4a6b5e;
+  --tk-card-border: rgb(16 185 129 / 0.35);
+  --tk-card-shadow: 0 14px 34px -12px rgb(16 185 129 / 0.35);
+  --tk-card-dot: rgb(4 41 29 / 0.16);
 }
 .dark [data-tk-theme="forest"] {
-  --tk-card-border: rgb(16 185 129 / 0.32);
-  --tk-card-shadow: 0 18px 36px -14px rgb(16 185 129 / 0.4);
+  --tk-card-border: rgb(16 185 129 / 0.45);
+  --tk-card-shadow: 0 18px 40px -12px rgb(16 185 129 / 0.45);
 }
 
+/* Bold — tight radius, a full-strength 2px accent border and a short hard
+   shadow. Reads as confident rather than as an error state. */
 [data-tk-theme="crimson"] {
-  --tk-primary: #ef4444;
+  --tk-primary: #dc2626;
   --tk-on-primary: #ffffff;
-  --tk-radius: 0.5rem;
-  --tk-card-border-width: 1.5px;
+  --tk-radius: 0.375rem;
+  --tk-card-border-width: 2px;
   --tk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --tk-card-bg: #fff5f5;
-  --tk-card-fg: #3b0a0a;
-  --tk-card-muted: #9a5a5a;
-  --tk-card-border: #ef4444;
-  --tk-card-shadow: 0 0 0 1px rgb(239 68 68 / 0.22), 0 22px 46px -14px rgb(239 68 68 / 0.32);
+  --tk-card-bg: #fff1f1;
+  --tk-card-fg: #450a0a;
+  --tk-card-muted: #8f4b4b;
+  --tk-card-border: #dc2626;
+  --tk-card-shadow: 0 16px 34px -16px rgb(220 38 38 / 0.45);
+  --tk-card-dot: rgb(69 10 10 / 0.18);
 }
 .dark [data-tk-theme="crimson"] {
-  --tk-card-bg: #1a0c0e;
-  --tk-card-fg: #fff5f5;
+  --tk-primary: #f87171;
+  --tk-on-primary: #3f0a0a;
+  --tk-card-bg: #1c0b0d;
+  --tk-card-fg: #ffecec;
   --tk-card-muted: rgb(254 205 205 / 0.78);
-  --tk-card-shadow: 0 0 0 1px rgb(239 68 68 / 0.3), 0 22px 46px -12px rgb(239 68 68 / 0.55);
+  --tk-card-border: #f87171;
+  --tk-card-shadow: 0 18px 38px -14px rgb(248 113 113 / 0.5);
+  --tk-card-dot: rgb(255 236 236 / 0.22);
 }
 
-/* Brutalist: paper card in light, near-black in dark — bold border + hard
-   amber offset shadow in both. */
+/* Brutalist — square corners, a 2px ink border and a hard amber offset with no
+   blur. The border is the ink colour, not the accent, so the offset shadow is
+   the only amber on the card's edge and the effect stays sharp. */
 [data-tk-theme="ember"] {
   --tk-primary: #f59e0b;
   --tk-on-primary: #1a1205;
@@ -413,32 +455,44 @@ img {
   --tk-card-bg: #fffdf5;
   --tk-card-fg: #1a1205;
   --tk-card-muted: #6b5a2a;
-  --tk-card-border: #f59e0b;
+  --tk-card-border: #1a1205;
   --tk-card-shadow: 5px 5px 0 0 #f59e0b;
+  --tk-card-dot: rgb(26 18 5 / 0.2);
 }
 .dark [data-tk-theme="ember"] {
   --tk-card-bg: #0b0b0c;
   --tk-card-fg: #fff7ed;
   --tk-card-muted: rgb(253 230 138 / 0.72);
+  --tk-card-border: #fff7ed;
+  --tk-card-shadow: 5px 5px 0 0 #f59e0b;
+  --tk-card-dot: rgb(255 247 237 / 0.25);
 }
 
+/* Editorial — serif, almost square, a hairline rule and no shadow at all, so it
+   sits on the page rather than floating. The accent is ink, not slate: at
+   slate-500 the Next button read as disabled. */
 [data-tk-theme="graphite"] {
-  --tk-primary: #64748b;
+  --tk-primary: #1e293b;
   --tk-on-primary: #ffffff;
-  --tk-radius: 0.375rem;
+  --tk-radius: 0.125rem;
   --tk-card-border-width: 1px;
   --tk-font: ui-serif, Georgia, "Times New Roman", serif;
   --tk-card-bg: #ffffff;
-  --tk-card-fg: #1e293b;
-  --tk-card-muted: #64748b;
-  --tk-card-border: rgb(100 116 139 / 0.25);
+  --tk-card-fg: #16181d;
+  --tk-card-muted: #5c6672;
+  --tk-card-border: rgb(22 24 29 / 0.18);
   --tk-card-shadow: none;
+  --tk-card-dot: rgb(22 24 29 / 0.16);
 }
 .dark [data-tk-theme="graphite"] {
-  --tk-card-bg: rgb(17 19 24 / 0.92);
+  --tk-primary: #e2e8f0;
+  --tk-on-primary: #0f172b;
+  --tk-card-bg: rgb(17 19 24 / 0.95);
   --tk-card-fg: #f1f5f9;
   --tk-card-muted: rgb(148 163 184 / 0.82);
-  --tk-card-border: rgb(148 163 184 / 0.22);
+  --tk-card-border: rgb(226 232 240 / 0.22);
+  --tk-card-shadow: none;
+  --tk-card-dot: rgb(226 232 240 / 0.22);
 }
 
 /* ========================================

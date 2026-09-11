@@ -26,33 +26,94 @@ const steps = [
 function BackgroundPattern() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {/* React 19 hoists these <link> tags to <head>, scoped by color-scheme so
-          we only download the variant the user will actually see. */}
-      <link
-        rel="preload"
-        as="image"
-        href="/tourkit-lighthouse.avif"
-        media="(prefers-color-scheme: light)"
+      {/* The lighthouse photo that used to fill this layer is gone: both Figma
+          frames (3945:1529 / 3792:1529) draw the hero on the flat page ground
+          with only the wash and the line art over it. Its two <link rel=preload>
+          tags went with it, so the hero's LCP is now text. */}
+
+      {/* Indigo wash centred on the preview column (Figma 3945:1530 — a 433x589
+          ellipse under a ~200px blur, which is a radial-gradient here rather
+          than a fourth image request). --tk-glow was declared for exactly this
+          and had no call site until now; two stops of the one token rather than
+          a second colour, since the mockup's ellipse is more saturated than a
+          single pass of it. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: [
+            'radial-gradient(ellipse 33% 70% at 73% 49%, var(--tk-glow), transparent 72%)',
+            'radial-gradient(ellipse 20% 42% at 73% 49%, var(--tk-glow), transparent 80%)',
+          ].join(','),
+        }}
       />
-      <link rel="preload" as="image" href="/hero-dark.avif" media="(prefers-color-scheme: dark)" />
-      <img
-        src="/tourkit-lighthouse.avif"
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="async"
-        fetchPriority="high"
-        className="absolute inset-0 h-full w-full object-cover opacity-90 dark:hidden"
-      />
-      <img
-        src="/hero-dark.avif"
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="async"
-        className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
+
+      {/* Concentric line art bleeding in from the right (Figma 3945:1531): the
+          1067x1046 art centred on the right edge and turned 121.54deg, so only
+          its left corners reach into the frame. One file for both themes — the
+          SVG is a mask, so only its alpha matters and the tint is a token. */}
+      <div
+        className="absolute top-1/2 left-full h-[1046px] w-[1067px] -translate-x-1/2 -translate-y-1/2 rotate-[121.54deg] opacity-40"
+        style={{
+          background: 'var(--tk-primary-container)',
+          maskImage: 'url(/hero-pattern.svg)',
+          maskSize: '100% 100%',
+          maskRepeat: 'no-repeat',
+        }}
       />
     </div>
+  )
+}
+
+/**
+ * Framework logos under a top-and-bottom rule (Figma 3945:1566).
+ *
+ * Each logo ships as two SVGs because the wordmark is a flat fill, not
+ * `currentColor` — an `<img>` cannot inherit ink, and inlining four vendor
+ * logos as JSX would put ~35KB of path data in the client bundle. Sizes are
+ * the exported viewBox of each asset, so none is stretched.
+ */
+const frameworks = [
+  { name: 'React', file: 'react', width: 100, height: 30 },
+  { name: 'Next.js', file: 'nextjs', width: 100, height: 20 },
+  { name: 'Vue.js', file: 'vue', width: 80, height: 28 },
+  { name: 'Svelte', file: 'svelte', width: 100, height: 28 },
+] as const
+
+function FrameworkStrip() {
+  return (
+    <>
+      <p className="text-[22px] leading-10 tracking-[-0.033em] text-fd-foreground">Work with</p>
+      <div className="mt-6 w-full max-w-[546px] border-[var(--tk-outline-variant)] border-t border-b py-4">
+        <ul className="flex flex-wrap items-center justify-center gap-x-[38px] gap-y-4 px-6">
+          {frameworks.map((f) => (
+            <li key={f.file} className="flex items-center">
+              {/* Light and dark differ only in wordmark ink; the mark keeps its
+                  brand colour in both. */}
+              <img
+                src={`/frameworks/${f.file}-light.svg`}
+                alt={f.name}
+                width={f.width}
+                height={f.height}
+                loading="lazy"
+                decoding="async"
+                className="dark:hidden"
+                style={{ width: f.width, height: f.height }}
+              />
+              <img
+                src={`/frameworks/${f.file}-dark.svg`}
+                alt={f.name}
+                width={f.width}
+                height={f.height}
+                loading="lazy"
+                decoding="async"
+                className="hidden dark:block"
+                style={{ width: f.width, height: f.height }}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
   )
 }
 
@@ -97,16 +158,16 @@ function HeroDemo() {
 
       <div
         data-tk-theme={styleId}
-        className="overflow-hidden rounded-xl border border-white/20 bg-fd-card/80 shadow-2xl shadow-[color:var(--color-fd-foreground)]/10 backdrop-blur-xl dark:border-white/10"
+        className="overflow-hidden rounded-xl border border-fd-foreground/10 bg-fd-muted/80 shadow-xl shadow-[color:var(--color-fd-foreground)]/10 backdrop-blur-xl"
       >
-        {/* Browser chrome */}
-        <div className="flex items-center gap-2 border-b border-fd-border/50 bg-fd-muted/30 px-4 py-2.5 backdrop-blur-sm">
+        {/* Browser chrome — 45px bar, three 10px lights on a 6px rhythm (42px) */}
+        <div className="flex h-[45px] items-center gap-2 border-b border-[var(--tk-hairline)] bg-fd-secondary px-4 py-2.5 backdrop-blur-sm">
           <div className="flex gap-1.5">
             <div className="h-2.5 w-2.5 rounded-full bg-[#d7263d]/80" />
             <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]/80" />
             <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]/80" />
           </div>
-          <div className="ml-2 flex-1 rounded-md bg-fd-background/50 px-3 py-1 text-[11px] text-fd-muted-foreground">
+          <div className="ml-2 flex-1 rounded-md bg-fd-background px-3 py-1 text-[11px] text-fd-muted-foreground">
             your-app.com
           </div>
         </div>
@@ -116,22 +177,22 @@ function HeroDemo() {
           {/* Top bar — step 0 target */}
           <div
             ref={setTargetRef(0)}
-            className={`mb-4 flex items-center justify-between rounded-lg p-2 transition-all duration-500 ${step === 0 ? 'border-2 border-[var(--tk-primary)]/30 bg-[var(--tk-primary)]/5' : 'border-2 border-transparent'}`}
+            className={`mb-4 flex items-center justify-between rounded-lg p-2 transition-all duration-500 ${step === 0 ? 'border-[1.6px] border-[var(--tk-primary)]/30 bg-[var(--tk-primary)]/5' : 'border-[1.6px] border-transparent'}`}
           >
             <div className="h-3 w-24 rounded bg-fd-foreground/10" />
             <div className="flex gap-2">
-              <div className="h-7 w-7 rounded-lg bg-fd-muted/80" />
-              <div className="h-7 w-7 rounded-lg bg-fd-muted/80" />
+              <div className="h-7 w-7 rounded-lg bg-fd-secondary" />
+              <div className="h-7 w-7 rounded-lg bg-fd-secondary" />
             </div>
           </div>
 
           {/* Card element — step 1 target */}
           <div
             ref={setTargetRef(1)}
-            className={`mb-3 rounded-lg p-3 transition-all duration-500 ${step === 1 ? 'border-2 border-[var(--tk-primary)]/30 bg-[var(--tk-primary)]/5' : 'border-2 border-transparent'}`}
+            className={`mb-3 rounded-lg p-3 transition-all duration-500 ${step === 1 ? 'border-[1.6px] border-[var(--tk-primary)]/30 bg-[var(--tk-primary)]/5' : 'border-[1.6px] border-transparent'}`}
           >
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[var(--tk-primary)]/15" />
+              <div className="h-8 w-8 rounded-lg bg-[var(--tk-primary)]" />
               <div className="flex-1 space-y-1.5">
                 <div className="h-2.5 w-20 rounded bg-fd-foreground/10" />
                 <div className="h-2 w-32 rounded bg-fd-foreground/5" />
@@ -142,7 +203,7 @@ function HeroDemo() {
           {/* Content rows — step 2 target */}
           <div
             ref={setTargetRef(2)}
-            className={`mb-3 space-y-2 rounded-lg p-2 transition-all duration-500 ${step === 2 ? 'border-2 border-[var(--tk-primary)]/30 bg-[var(--tk-primary)]/5' : 'border-2 border-transparent'}`}
+            className={`mb-3 space-y-2 rounded-lg p-2 transition-all duration-500 ${step === 2 ? 'border-[1.6px] border-[var(--tk-primary)]/30 bg-[var(--tk-primary)]/5' : 'border-[1.6px] border-transparent'}`}
           >
             <div className="h-2.5 w-full rounded bg-fd-foreground/5" />
             <div className="h-2.5 w-4/5 rounded bg-fd-foreground/5" />
@@ -173,12 +234,16 @@ function HeroDemo() {
                 fontFamily: 'var(--tk-font)',
               }}
             >
-              {/* Arrow pointing up — inherits the card surface + border */}
+              {/* Arrow pointing up — inherits the card surface + border, weight
+                  included: crimson and ember draw a 2px edge, and a nub pinned
+                  to 1px reads as a seam against it. */}
               <div
                 className="absolute -top-1.5 left-8 h-3 w-3 rotate-45 border-l border-t"
                 style={{
                   background: 'var(--tk-card-bg)',
                   borderColor: 'var(--tk-card-border)',
+                  borderLeftWidth: 'var(--tk-card-border-width)',
+                  borderTopWidth: 'var(--tk-card-border-width)',
                 }}
               />
               <p className="mb-1 text-[13px] font-bold" style={{ color: 'var(--tk-card-fg)' }}>
@@ -196,7 +261,9 @@ function HeroDemo() {
                     <div
                       key={s.step}
                       className={`rounded-full transition-all duration-300 ${
-                        i === step ? 'h-1.5 w-4 bg-[var(--tk-primary)]' : 'h-1.5 w-1.5 bg-fd-muted'
+                        i === step
+                          ? 'h-1.5 w-4 bg-[var(--tk-primary)]'
+                          : 'h-1.5 w-1.5 bg-[var(--tk-card-dot)]'
                       }`}
                     />
                   ))}
@@ -219,7 +286,7 @@ function HeroDemo() {
       </div>
 
       {/* Install command below the mockup */}
-      <div className="mt-4 flex items-center gap-2 rounded-lg border border-fd-border/50 bg-fd-card/60 px-4 py-2.5 backdrop-blur-sm">
+      <div className="mt-4 flex items-center gap-2 rounded-lg border border-[var(--tk-hairline)] bg-fd-muted/80 px-4 py-2.5 backdrop-blur-sm">
         <Terminal className="h-3.5 w-3.5 text-fd-muted-foreground" />
         <code className="flex-1 font-mono text-[14px] text-fd-muted-foreground sm:text-[12px]">
           <span className="select-none opacity-40">$ </span>
@@ -253,7 +320,7 @@ export function Hero() {
           {/* Left — copy */}
           <div className="animate-fade-in-up">
             <div className="mb-5 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-semibold text-[var(--color-fd-foreground)] backdrop-blur-sm dark:text-white">
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--tk-hairline)] bg-fd-muted px-2.5 py-[5px] text-[12px] font-semibold leading-[18px] text-fd-foreground backdrop-blur-sm">
                 <svg
                   className="h-3.5 w-3.5 text-[var(--color-fd-primary)]"
                   viewBox="0 0 24 24"
@@ -270,7 +337,7 @@ export function Hero() {
                 </svg>
                 WCAG 2.1 AA accessible
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-semibold text-[var(--color-fd-foreground)] backdrop-blur-sm dark:text-white">
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--tk-hairline)] bg-fd-muted px-2.5 py-[5px] text-[12px] font-semibold leading-[18px] text-fd-foreground backdrop-blur-sm">
                 <svg
                   className="h-3.5 w-3.5 text-fd-muted-foreground"
                   viewBox="0 0 24 24"
@@ -294,7 +361,7 @@ export function Hero() {
 
             <h1
               data-speakable="headline"
-              className="mb-6 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-[var(--color-fd-foreground)] dark:text-white"
+              className="mb-6 text-[clamp(2.25rem,5vw,3.75rem)] font-extrabold leading-[1] tracking-[-0.024em] text-fd-foreground"
             >
               The onboarding library
               <br />
@@ -303,10 +370,11 @@ export function Hero() {
 
             <p
               data-speakable="summary"
-              className="mb-8 max-w-[540px] text-[17px] leading-[1.7] text-[var(--color-fd-foreground)]/80 dark:text-white/80"
+              className="mb-8 max-w-[540px] text-[17px] leading-[1.7] text-fd-foreground/80"
             >
-              The open-source onboarding toolkit for React. Headless hooks, composable components,
-              and WCAG 2.1 AA accessibility — all in under 8KB. Works with shadcn/ui out of the box.
+              The open-source onboarding toolkit for React, Vue and Svelte. A headless core,
+              composable components, and WCAG 2.1 AA accessibility — all in under 8KB. Works with
+              shadcn/ui out of the box.
             </p>
 
             <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -319,17 +387,13 @@ export function Hero() {
               </Link>
               <Link
                 href="https://github.com/domidex01/tour-kit"
-                className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-5 py-3 text-[14px] font-semibold text-[var(--color-fd-foreground)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md dark:text-white"
+                className="inline-flex items-center gap-2 rounded-lg border border-[var(--tk-hairline)] bg-fd-background px-5 py-3 text-[14px] font-semibold text-fd-foreground backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-fd-secondary hover:shadow-md"
               >
                 View on GitHub
               </Link>
             </div>
 
-            <p className="font-mono text-[13px] font-bold text-[var(--color-fd-foreground)]/60 dark:text-white/60">
-              pnpm add @tour-kit/core <span className="mx-1 opacity-40">&middot;</span> {'<'} 8KB
-              gzipped <span className="mx-1 opacity-40">&middot;</span> TypeScript strict{' '}
-              <span className="mx-1 opacity-40">&middot;</span> own your code
-            </p>
+            <FrameworkStrip />
 
             <HeroSaleCountdown />
           </div>

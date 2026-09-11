@@ -62,7 +62,15 @@ function flatten(rgba: string, groundHex: string): string {
  * override under @layer utilities), so callers disambiguate with `mustContain`.
  */
 function tokensIn(selector: string, mustContain: string): Record<string, string> {
-  const blocks = [...CSS.matchAll(new RegExp(`${selector}\\s*\\{([^}]*)\\}`, 'g'))]
+  // Comments go first. A note inside a block that names a token and follows it
+  // with a colon — "--tk-cta, not --color-fd-primary: this fill carries…" —
+  // otherwise parses as a declaration whose value runs to the next `;`,
+  // swallowing the real declaration after it.
+  const declarations = CSS.replace(/\/\*[\s\S]*?\*\//g, '')
+  // `m`, so a caller can anchor with `^` to distinguish a bare selector from the
+  // `.dark `-prefixed one — `[data-tk-theme="ocean"]` is a substring of
+  // `.dark [data-tk-theme="ocean"]` and unanchored would match both.
+  const blocks = [...declarations.matchAll(new RegExp(`${selector}\\s*\\{([^}]*)\\}`, 'gm'))]
     .map((m) => m[1])
     .filter((body) => body.includes(mustContain))
   expect(blocks, `no ${selector} block containing ${mustContain}`).toHaveLength(1)
@@ -195,20 +203,72 @@ describe.each([
   )
 })
 
+/**
+ * The six tour-card presets. Each is a whole design language, and each paints
+ * its own Next button — an 11px semibold label on --tk-primary. Three of them
+ * used to fail AA there (forest 2.54:1, crimson 3.76:1, iris 4.47:1), which is
+ * invisible in review because the button looks fine until you measure it.
+ *
+ * A preset may declare --tk-primary / --tk-on-primary once for both modes, or
+ * override either under `.dark`. Both arrangements are legitimate, so the pair
+ * is resolved per mode before measuring.
+ */
+describe('tour-card theme presets', () => {
+  const PRESETS = ['ocean', 'iris', 'forest', 'crimson', 'ember', 'graphite']
+
+  /** Resolves one preset's tokens for a mode, layering `.dark` over the base. */
+  function preset(id: string, mode: 'light' | 'dark'): Record<string, string> {
+    const base = tokensIn(`^\\[data-tk-theme="${id}"\\]`, '--tk-primary')
+    if (mode === 'light') return base
+    return { ...base, ...tokensIn(`^\\.dark \\[data-tk-theme="${id}"\\]`, '--tk-card-') }
+  }
+
+  /** `var(--tk-cta)` and friends, resolved against the theme's own token block. */
+  function deref(value: string, theme: Record<string, string>): string {
+    const ref = value.match(/^var\((--[\w-]+)\)$/)
+    return ref ? theme[ref[1]] : value
+  }
+
+  describe.each(PRESETS)('%s', (id) => {
+    it.each([
+      ['light', light],
+      ['dark', dark],
+    ])('reaches AA for its Next label in %s mode', (mode, siteTokens) => {
+      const t = preset(id, mode as 'light' | 'dark')
+      const fill = deref(t['--tk-primary'], siteTokens)
+      const ink = deref(t['--tk-on-primary'], siteTokens)
+      expect(contrast(ink, fill)).toBeGreaterThanOrEqual(AA_TEXT)
+    })
+
+    // The inactive progress dot used to be the site's --color-fd-muted, a site
+    // token on a themed card, which rendered it invisible on ember in both
+    // modes. Every preset owns the value now.
+    it('declares its own inactive progress dot', () => {
+      expect(preset(id, 'light')['--tk-card-dot']).toBeDefined()
+    })
+  })
+})
+
 describe('the retired brand palette', () => {
   it('is gone from the token layer', () => {
-    // #0197f6 survives in exactly one place by design: the "ocean" swatch in
-    // the tour-card theme presets, which is demo content showing what a
-    // consumer can theme *their* tour to — not site chrome.
+    // #0197f6 used to survive in the "ocean" tour-card preset, carved out here
+    // as demo content. That carve-out is gone: ocean is the hero demo's default
+    // and the Figma hero frames draw its card in brand indigo, so the preset now
+    // reads --tk-cta and no retired hex is left anywhere in the file.
     // Comments are stripped first: the notes above the token block explain why
     // the old hex was retired and necessarily name it, which is documentation,
     // not a live declaration.
     const declarations = CSS.replace(/\/\*[\s\S]*?\*\//g, '')
-    const split = declarations.indexOf('[data-tk-theme="ocean"]')
-    const oceanPreset = declarations.slice(split)
-    const chrome = declarations.slice(0, split)
-    expect(chrome).not.toMatch(/#0197f6|#0056ff|#02182b|#edf6fb/i)
-    expect(oceanPreset).toMatch(/#0197f6/i)
+    expect(declarations).not.toMatch(/#0197f6|#0056ff|#02182b|#edf6fb/i)
+  })
+
+  // The swatch in style-switcher.tsx is drawn from --color-fd-primary, so a
+  // preset whose --tk-primary is a literal paints a card that does not match
+  // the dot the user clicked. This is the pairing the hero frames show.
+  it('paints the default tour preset from the brand, not a literal', () => {
+    const ocean = tokensIn('\\[data-tk-theme="ocean"\\]', '--tk-primary')
+    expect(ocean['--tk-primary']).toBe('var(--tk-cta)')
+    expect(ocean['--tk-on-primary']).toBe('var(--tk-cta-ink)')
   })
 
   it('is gone from every component and route', () => {
