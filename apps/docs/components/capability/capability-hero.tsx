@@ -25,7 +25,7 @@ interface CapabilityHeroProps {
    */
   installCmd?: string
   /**
-   * Pro pages: "Runs free in dev — pay once ($99) when you ship." under the
+   * Pro pages: "Runs free in dev — one-time from $9.99 when you ship." under the
    * buttons. The licensing model means activation precedes purchase.
    */
   reassurance?: string

@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 
 const PRICING_TITLE = 'Pricing — userTourKit'
 const PRICING_DESCRIPTION =
-  'Simple one-time pricing for userTourKit Pro. Free MIT core packages, $99 for the full extended suite. No subscriptions, lifetime updates, 5-site activation.'
+  'One-time pricing for userTourKit: $9.99, $49.99 or $299.99 for 1, 5 or unlimited projects. Free in development under BSL 1.1, a licence key in production. No subscriptions, and every version converts to MIT on its Change Date.'
 const PRICING_OG_IMAGE = `/api/og?title=${encodeURIComponent('Pricing')}&category=PRICING`
 const SITE_URL = 'https://usertourkit.com'
 
@@ -84,12 +84,13 @@ export default function PricingPage() {
               Simple, one-time pricing
             </h1>
             <p className="mx-auto max-w-3xl text-[16px] leading-[1.6] text-fd-muted-foreground">
-              Tour Kit ships three MIT-licensed core packages — tours, React bindings, and hints —
-              that are free forever for any project, commercial or otherwise. The Pro suite adds
-              eight extended packages (analytics, checklists, adoption tracking, announcements,
-              media embeds, business-hours scheduling, surveys, and AI chat) for a single $99
-              purchase. No subscriptions, no per-seat fees, no upgrade fees. Activation covers up to
-              five production domains; localhost and preview environments are unrestricted.
+              <strong>Free in development, a licence key in production.</strong> Every Tour Kit
+              package is source-available under the Business Source License 1.1: use it without
+              charge for development, evaluation, testing and CI, on localhost and in preview
+              environments. Serving it to end users of a deployed application needs a key. Each
+              published version converts to the MIT licence on its Change Date, so nothing you
+              install can be taken away. Every tier gets the whole library — they differ only in how
+              many projects one key covers.
             </p>
           </div>
           <div

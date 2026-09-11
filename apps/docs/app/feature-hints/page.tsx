@@ -20,7 +20,7 @@ import dynamic from 'next/dynamic'
 const PAGE_PATH = '/feature-hints'
 const PAGE_TITLE = 'Feature Hints & Beacons for React | userTourKit'
 const PAGE_DESC =
-  'React feature hints, tooltips, and pulsing beacons for feature discovery — free and MIT licensed, under 5KB, headless or pre-styled, WCAG 2.1 AA.'
+  'React feature hints, tooltips, and pulsing beacons for feature discovery — free in development, under 5KB, headless or pre-styled, WCAG 2.1 AA.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -73,7 +73,7 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'Is @tour-kit/hints really free?',
     answer:
-      'Yes — MIT licensed, free forever, commercial use included, no watermark, no feature gates. It is one of the three free core packages alongside @tour-kit/core and @tour-kit/react.',
+      'Free while you build it — development, evaluation, testing and CI cost nothing, with no feature gates. Serving it to end users of a deployed application needs a one-time licence key, from $9.99, which covers every Tour Kit package.',
   },
   {
     question: 'Do dismissed hints stay dismissed?',
@@ -114,7 +114,7 @@ export default function FeatureHintsPage() {
       <main id="main-content" className="flex flex-1 flex-col">
         <CapabilityHero
           slug="hints"
-          eyebrow="@tour-kit/hints · Free & MIT"
+          eyebrow="@tour-kit/hints · Free in development"
           heading="Point users to what's new —"
           headingAccent="without a tour."
           subhead="Persistent hints, tooltips, and pulsing beacons for React feature discovery. Each hint lives independently until dismissed — no sequence, no modal takeover."
@@ -123,7 +123,7 @@ export default function FeatureHintsPage() {
           secondaryLabel="View on GitHub"
           secondaryHref="https://github.com/domidex01/tour-kit"
           installCmd="pnpm add @tour-kit/hints"
-          factsLine="< 5KB gzipped · MIT licensed · TypeScript strict · WCAG 2.1 AA"
+          factsLine="< 5KB gzipped · BSL 1.1 · TypeScript strict · WCAG 2.1 AA"
         />
 
         <DemoSection
@@ -199,7 +199,7 @@ export default function FeatureHintsPage() {
             {
               title: 'The code lands in your repo',
               description:
-                'MIT licensed, free forever. No embed script, no usage caps, no watermark — fork it if you ever want to.',
+                'Free while you build. No embed script, no usage caps, no MAU tiers — and the source is yours to fork.',
             },
             {
               title: 'Four hint variants',
@@ -222,17 +222,17 @@ export default function FeatureHintsPage() {
         <CtaBand
           placement="hints_after_features"
           eyebrow="Free & open source"
-          heading="Build your first hint — free & MIT, no signup."
+          heading="Build your first hint — free in development, no signup."
           subtext="Install the package and ship a beacon today. Pro packages add checklists, announcements, and surveys when you need them."
           ctaLabel="Build my first hint"
-          reassurance="Free & MIT-licensed — no signup, no credit card."
+          reassurance="Free in development — no signup, no credit card."
           primaryHref="/builder"
         />
 
         <ComparisonTeaser
           heading="Feature discovery without the baggage"
           rows={[
-            { label: 'Cost', tourKit: 'Free (MIT)', saas: '$200–900/mo', oss: 'Free' },
+            { label: 'Cost', tourKit: 'Free in dev, from $9.99', saas: '$200–900/mo', oss: 'Free' },
             { label: 'Bundle impact', tourKit: '< 5KB', saas: 'External script', oss: '30–50KB' },
             { label: 'Accessibility', tourKit: 'WCAG 2.1 AA', saas: 'partial', oss: 'no' },
           ]}
@@ -251,7 +251,7 @@ export default function FeatureHintsPage() {
           slug="hints"
           heading="Ship a beacon"
           headingAccent="before lunch."
-          subtext="Free, MIT, under 5KB. The fastest feature-discovery win in your backlog."
+          subtext="Free in development, under 5KB. The fastest feature-discovery win in your backlog."
           installCmd="pnpm add @tour-kit/hints"
           primaryLabel="Get started"
           primaryHref="/builder"

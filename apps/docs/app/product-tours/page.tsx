@@ -21,7 +21,7 @@ import Link from 'next/link'
 const PAGE_PATH = '/product-tours'
 const PAGE_TITLE = 'Product Tours for React — Headless & Accessible | userTourKit'
 const PAGE_DESC =
-  'React product tour library with headless hooks, pre-styled components, router adapters, and WCAG 2.1 AA accessibility. Free and MIT licensed.'
+  'React product tour library with headless hooks, pre-styled components, router adapters, and WCAG 2.1 AA accessibility. Free in development, one-time from $9.99 to ship.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -73,7 +73,7 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'Is the product tour library really free for commercial use?',
     answer:
-      '@tour-kit/core and @tour-kit/react are MIT licensed — free forever, commercial use included, no watermark, no MAU caps. Pro packages (checklists, announcements, surveys, analytics) are a separate $99 one-time license when you need them.',
+      'Tour Kit is source-available under BSL 1.1: free for development, evaluation, testing and CI, with no feature gates and no MAU caps. A production deployment needs a one-time licence key, from $9.99 for a single project.',
   },
   {
     question: 'Does it survive route changes and async-mounted targets?',
@@ -119,7 +119,7 @@ export default function ProductToursPage() {
       <main id="main-content" className="flex flex-1 flex-col">
         <CapabilityHero
           slug="tours"
-          eyebrow="@tour-kit/core + @tour-kit/react · Free & MIT"
+          eyebrow="@tour-kit/core + @tour-kit/react · Free in development"
           heading="Product tours your users"
           headingAccent="actually finish."
           subhead="A React product tour library built headless-first — spotlight overlays, router-aware steps, and WCAG 2.1 AA accessibility, styled by your design system."
@@ -191,7 +191,7 @@ export default function ProductToursPage() {
               </h2>
               <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
                 Start with the styled components and eject to headless when the design team comes
-                knocking — both packages share the same core and the same MIT license.
+                knocking — both packages share the same core and the same licence.
               </p>
             </div>
 
@@ -256,7 +256,7 @@ export default function ProductToursPage() {
             {
               title: 'The code lands in your repo',
               description:
-                'MIT licensed, free forever. Tours are TypeScript in your bundle, not a script tag from a vendor.',
+                'Free while you build, one-time when you ship. Tours are TypeScript in your bundle, not a script tag from a vendor.',
             },
             {
               title: 'Router adapters',
@@ -280,16 +280,16 @@ export default function ProductToursPage() {
         <CtaBand
           placement="tours_after_features"
           eyebrow="Free & open source"
-          heading="Build your first tour — free & MIT, no signup."
+          heading="Build your first tour — free in development, no signup."
           subtext="Install the package and ship a tour today. Pro packages add checklists, announcements, and surveys when you need them."
           ctaLabel="Build my first tour"
-          reassurance="Free & MIT-licensed — no signup, no credit card."
+          reassurance="Free in development — no signup, no credit card."
         />
 
         <ComparisonTeaser
           heading="The third option between SaaS and DIY"
           rows={[
-            { label: 'Cost', tourKit: 'Free (MIT)', saas: '$200–900/mo', oss: 'Free' },
+            { label: 'Cost', tourKit: 'Free in dev, from $9.99', saas: '$200–900/mo', oss: 'Free' },
             { label: 'Bundle impact', tourKit: '< 8KB', saas: 'External script', oss: '30–50KB' },
             { label: 'Headless mode', tourKit: 'yes', saas: 'no', oss: 'no' },
           ]}
@@ -308,7 +308,7 @@ export default function ProductToursPage() {
           slug="tours"
           heading="Own your onboarding."
           headingAccent="Ship it today."
-          subtext="Free, MIT, under 8KB. The tour library you'd have built with three spare weeks."
+          subtext="Free in development, under 8KB. The tour library you'd have built with three spare weeks."
           installCmd="pnpm add @tour-kit/react"
           primaryLabel="Get started"
           primaryHref="/builder"

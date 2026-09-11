@@ -347,7 +347,7 @@ export function SoftwareSourceCodeJsonLd({
     programmingLanguage,
     ...(runtimePlatform && { runtimePlatform }),
     codeRepository: 'https://github.com/domidex01/tour-kit',
-    license: 'https://opensource.org/licenses/MIT',
+    license: 'https://github.com/domidex01/tour-kit/blob/main/LICENSE.md',
   }
 
   return (

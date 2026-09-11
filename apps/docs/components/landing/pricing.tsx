@@ -302,9 +302,12 @@ function LicenseTerms() {
         <div>
           <dt className="mb-1 font-semibold text-fd-foreground">License grant</dt>
           <dd>
-            A non-exclusive, non-transferable commercial license to use the eight Pro packages in up
-            to five production domains. Includes all future updates to those packages. The MIT-core
-            packages remain MIT-licensed and unrestricted regardless of Pro purchase.
+            A non-exclusive, non-transferable commercial licence to use every Tour Kit package in
+            production, on the number of projects your tier covers. A project is a registrable
+            domain, so <code>foo.com</code> and <code>app.foo.com</code> count once. Includes all
+            future updates. Development, evaluation, testing and CI stay free under BSL 1.1 whether
+            you buy or not, and each published version converts to the MIT licence on its Change
+            Date.
           </dd>
         </div>
         <div>
