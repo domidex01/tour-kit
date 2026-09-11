@@ -1,5 +1,14 @@
 # @tour-kit/vue
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [e70e310]
+- Updated dependencies [9d1cba1]
+- Updated dependencies [978338b]
+  - @tour-kit/core@3.0.0
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,5 +1,50 @@
 # @tour-kit/hints
 
+## 3.0.0
+
+### Minor Changes
+
+- 1fe330e: `@tour-kit/hints/engine` — the React-free subpath.
+
+  The hints state machine, its frequency persistence, `createHintsHandle` and `getHotspotPosition`, with no `react`, `react/jsx-runtime`, `@tour-kit/media`, `@floating-ui/react` or `@radix-ui/react-slot` anywhere in the runtime or `.d.ts` closure. A Vue, Svelte or vanilla app can now run hints with none of them installed and render the dot and the tooltip itself:
+
+  ```ts
+  import {
+    createHintsEngine,
+    getHotspotPosition,
+  } from "@tour-kit/hints/engine";
+  ```
+
+  The engine is inert until `boot()` — the constructor reads no `window`, no storage and no clock — so it is safe to construct on the server. `react` and `react-dom` are optional peers now, so no package manager will auto-install them.
+
+  `HintsProvider`, `useHint`, `useHints`, `HintsContextValue` and every component are unchanged; `HintsProvider` is a binding over the engine internally.
+
+  **One behaviour change, and it is a fix:** `autoShow` hints now honour persisted frequency state on first mount. A persisted dismissal or an exhausted `times` count suppresses the auto-show, and the auto-show's view is no longer overwritten by hydration. Previously the hydrate effect ran _after_ the child's auto-show effect, so a `once` hint the user had already dismissed could re-appear on the next page load. Note that a suppressed auto-show still emits `analytics.hintShown` — that is unchanged.
+
+  Two notes for non-React consumers: `"headless"` in this package means _unstyled React_ (`@tour-kit/hints/headless`); `/engine` is the React-free one. And `@tour-kit/hints` still hard-depends on `@tour-kit/media`, which lists React as a required peer, so React lands in `node_modules` even though nothing `/engine` imports reaches it.
+
+### Patch Changes
+
+- 9d1cba1: Fix: a throwing subscriber no longer aborts `createHintsEngine`'s notify loop.
+
+  `@tour-kit/hints/engine` re-derived core's fan-out without its per-listener `try`/`catch`, so one broken subscriber stopped every listener registered after it from firing — while the frequency-state write to storage inside the same dispatch had already landed. Surviving subscribers were left reading state that storage no longer agreed with, and nothing reported the cause. The engine now uses core's shared `createListeners`, which logs the faulting subscriber and keeps going.
+
+  This is reachable by design rather than in theory: the `/engine` subpath exists so non-React consumers can subscribe directly.
+
+- 978338b: Fix: `@tour-kit/hints` and `@tour-kit/hints/engine` exported two different `HintState` types.
+
+  The package declared its own `HintState` while the engine subpath published core's. The two were byte-identical, so it compiled — but a consumer importing the type from both entry points held two unrelated declarations, and the day either grew a field that would have surfaced as an inscrutable `Map` variance error. `@tour-kit/hints` now re-exports core's, as it already did for `HotspotPosition`. No shape change.
+
+  `HintsStorage` is now an alias of core's new `SyncStorage` rather than a third local copy of the same three methods, and `resolveStorage()` returns core's no-op adapter instead of `null` when there is no `window` — the engine's storage field is non-nullable as a result. Neither is visible to a React consumer.
+
+- Updated dependencies [db05873]
+- Updated dependencies [e70e310]
+- Updated dependencies [9d1cba1]
+- Updated dependencies [978338b]
+  - @tour-kit/analytics@0.13.0
+  - @tour-kit/core@3.0.0
+  - @tour-kit/media@0.13.5
+
 ## 2.1.0
 
 ### Patch Changes

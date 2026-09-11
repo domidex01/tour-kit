@@ -6,7 +6,12 @@
 [![npm downloads](https://img.shields.io/npm/dm/@tour-kit/react.svg)](https://www.npmjs.com/package/@tour-kit/react)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@tour-kit/react?label=gzip)](https://bundlephobia.com/package/@tour-kit/react)
 [![types](https://img.shields.io/npm/types/@tour-kit/react.svg)](https://www.npmjs.com/package/@tour-kit/react)
-[![license](https://img.shields.io/npm/l/@tour-kit/react.svg)](https://github.com/domidex01/tour-kit/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/@tour-kit/react.svg)](https://github.com/domidex01/tour-kit/blob/main/LICENSE.md)
+
+> **Licence** — free in development, a key in production. Tour Kit is source-available under
+> BSL 1.1: use it freely for development, evaluation, CI and anything non-production. A
+> production deployment needs a licence key, from $9.99 one-time. Each release converts to MIT
+> on its Change Date. → [usertourkit.com/pricing](https://usertourkit.com/pricing)
 
 The components layer for **React onboarding**, **product tours**, **guided walkthroughs**, and **onboarding wizards**. Ships accessible defaults plus headless render-prop variants — works with **Tailwind**, **shadcn/ui**, **Radix UI**, or **Base UI**, and includes router adapters for **Next.js** (App + Pages), **React Router**, and **TanStack Router**.
 
@@ -92,7 +97,7 @@ import { Tour, TourStep, TourKitProvider } from '@tour-kit/react'
 | `prefers-reduced-motion` | ✅ | ❌ | ❌ | ❌ | ❌ |
 | RTL support | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Tailwind preset | ✅ | ❌ | ❌ | ❌ | ❌ |
-| License | MIT | MIT | MIT | MIT | MIT |
+| License | BSL 1.1 (free in dev) | MIT | MIT | MIT | MIT |
 
 ## Tailwind CSS setup
 
@@ -276,4 +281,11 @@ See [Troubleshooting](https://usertourkit.com/docs/troubleshooting) for React 19
 
 ## License
 
-MIT © Tour Kit Team
+Business Source License 1.1 (`BUSL-1.1`) — **free in development, a key in production.**
+
+Use Tour Kit freely for development, evaluation, testing, CI and any other non-production
+purpose. Serving it to end users of a deployed application needs a Tour Kit Pro licence key,
+from **$9.99 one-time** — [usertourkit.com/pricing](https://usertourkit.com/pricing). Each published version converts to the MIT licence on its
+Change Date (2030-09-11). Full terms in [LICENSE.md](./LICENSE.md).
+
+Copyright © 2026 domidex01.

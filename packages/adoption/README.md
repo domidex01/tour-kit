@@ -258,4 +258,11 @@ Full documentation: [https://usertourkit.com/docs/adoption](https://usertourkit.
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+Business Source License 1.1 (`BUSL-1.1`) — **free in development, a key in production.**
+
+Use Tour Kit freely for development, evaluation, testing, CI and any other non-production
+purpose. Serving it to end users of a deployed application needs a Tour Kit Pro licence key,
+from **$9.99 one-time** — [usertourkit.com/pricing](https://usertourkit.com/pricing). Each published version converts to the MIT licence on its
+Change Date (2030-09-11). Full terms in [LICENSE.md](./LICENSE.md).
+
+Copyright © 2026 domidex01.

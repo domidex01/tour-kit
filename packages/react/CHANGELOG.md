@@ -1,5 +1,17 @@
 # @tour-kit/react
 
+## 3.0.0
+
+### Patch Changes
+
+- Updated dependencies [db05873]
+- Updated dependencies [e70e310]
+- Updated dependencies [9d1cba1]
+- Updated dependencies [978338b]
+  - @tour-kit/analytics@0.13.0
+  - @tour-kit/core@3.0.0
+  - @tour-kit/media@0.13.5
+
 ## 2.1.0
 
 ### Patch Changes
