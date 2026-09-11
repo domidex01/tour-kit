@@ -1109,6 +1109,9 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
+      '@tour-kit/license':
+        specifier: workspace:*
+        version: link:../license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../media
@@ -1332,6 +1335,9 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
+      '@tour-kit/license':
+        specifier: workspace:*
+        version: link:../license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../media

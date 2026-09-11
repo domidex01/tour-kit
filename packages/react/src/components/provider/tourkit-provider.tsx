@@ -8,6 +8,7 @@ import {
   TourProvider,
   type Tour as TourType,
 } from '@tour-kit/core'
+import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 
 interface TourRegistryContextValue {
@@ -120,25 +121,30 @@ export function MultiTourKitProvider({
     [registerTour, unregisterTour, tours]
   )
 
+  // The multi-tour path gets the badge too. `LicenseWatermark` elects a single
+  // owner across instances, so mounting this alongside <TourProvider> or a Pro
+  // package still renders exactly one.
   return (
-    <TourRegistryContext.Provider value={registryValue}>
-      <CoreTourKitProvider
-        config={config}
-        onTourStart={onTourStart}
-        onTourComplete={onTourComplete}
-        onTourSkip={onTourSkip}
-        onStepView={onStepView}
-      >
-        <TourProvider
-          tours={tours}
-          router={router}
-          routePersistence={routePersistence}
-          autoNavigate={autoNavigate}
-          onNavigationRequired={onNavigationRequired}
+    <LicenseGate require="pro">
+      <TourRegistryContext.Provider value={registryValue}>
+        <CoreTourKitProvider
+          config={config}
+          onTourStart={onTourStart}
+          onTourComplete={onTourComplete}
+          onTourSkip={onTourSkip}
+          onStepView={onStepView}
         >
-          {children}
-        </TourProvider>
-      </CoreTourKitProvider>
-    </TourRegistryContext.Provider>
+          <TourProvider
+            tours={tours}
+            router={router}
+            routePersistence={routePersistence}
+            autoNavigate={autoNavigate}
+            onNavigationRequired={onNavigationRequired}
+          >
+            {children}
+          </TourProvider>
+        </CoreTourKitProvider>
+      </TourRegistryContext.Provider>
+    </LicenseGate>
   )
 }
