@@ -137,7 +137,7 @@ export function Packages() {
               </div>
 
               <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--tk-card-edge)] pt-4">
-                <code className="truncate font-mono text-[11px] leading-[17px] text-fd-muted-foreground">
+                <code className="truncate font-mono text-[11px] leading-[17px] text-fd-muted-foreground lg:overflow-visible lg:whitespace-nowrap">
                   <span className="select-none opacity-40">$ </span>
                   {pkg.install}
                 </code>

@@ -247,8 +247,14 @@ img {
   --tk-cta: #4f39f6; /* indigo-600 — white text at 6.5:1 */
   --tk-cta-ink: #ffffff;
 
-  /* ---- Decorative glow (hero / CTA washes) ---------------------------- */
-  --tk-glow: rgb(79 57 246 / 0.12);
+  /* ---- Decorative glow (hero / CTA washes) ----------------------------
+     The PEAK of the blurred ellipses behind the hero, CTA, pricing and
+     closing bands, solved off the rendered frames rather than guessed: at the
+     ellipse core, sampled across the CTA band, the light frame ramps from
+     a≈0.34 at x=0 to a≈0.05 by x=260 and reaches 0 near the middle. It was
+     0.12, which rendered the washes about a third as strong as the design
+     draws them, peaking 270px inside the edge instead of on it. */
+  --tk-glow: rgb(79 57 246 / 0.34);
 
   /* ---- Legacy --tk-* surface tokens ------------------------------------
      Still read by ~110 call sites across the landing and capability
@@ -342,8 +348,12 @@ img {
   --tk-cta: #615fff; /* 4.6:1 with white */
   --tk-cta-ink: #ffffff;
 
-  /* ---- Decorative glow -------------------------------------------------- */
-  --tk-glow: rgb(124 134 255 / 0.16);
+  /* ---- Decorative glow --------------------------------------------------
+     Same solve on the dark frame: a≈0.49 at x=0 falling to a≈0.05 by x=260,
+     on the SAME hue as light — indigo-600, not the indigo-400 the rest of the
+     dark theme uses. A decorative bloom is not ink, so it keeps the saturated
+     brand hue in both themes. */
+  --tk-glow: rgb(79 57 246 / 0.49);
 
   /* ---- Legacy --tk-* surface tokens ------------------------------------ */
   --tk-primary: #7c86ff;

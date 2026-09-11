@@ -164,29 +164,32 @@ export default function HomePage() {
         <BlogPreview />
         <FAQ />
 
-        {/* Closing CTA (Figma 3792:2747) */}
-        <section className="relative px-6 py-32 sm:px-8 lg:px-12">
+        {/* Closing CTA — Figma 3945:2747. Section 578 tall with the content
+            block (190) centred, so 194px of air each side. The heading is
+            48px ExtraBold on a 45px leading, which is tighter than its own
+            font size; the three blocks sit 24px apart. */}
+        <section className="relative px-6 py-24 sm:px-8 lg:px-12 lg:py-[194px]">
           <SectionBackdrop />
 
-          <div className="mx-auto max-w-[1120px] text-center">
-            <h2 className="text-[clamp(1.75rem,3.6vw,2.5rem)] font-bold leading-[1.125] tracking-[-0.015em] text-balance text-fd-foreground">
+          <div className="mx-auto flex max-w-[1120px] flex-col items-center gap-6 text-center">
+            <h2 className="text-[clamp(2rem,3.9vw,3rem)] font-extrabold leading-[0.94] tracking-[-0.015em] text-balance text-fd-foreground">
               Own your onboarding.{' '}
               <span className="text-[var(--color-fd-primary)]">Ship it today.</span>
             </h2>
 
-            <p className="mx-auto mt-4 max-w-[480px] text-[16px] leading-[1.5] text-fd-muted-foreground">
+            <p className="max-w-[478px] text-[16px] leading-6 text-fd-muted-foreground">
               No vendor lock-in. No monthly invoice. Just code you control and users who convert.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <code className="inline-flex items-center gap-3 rounded-lg border border-[var(--tk-card-edge)] bg-fd-muted px-5 py-3 font-mono text-[14px] text-fd-muted-foreground">
-                <span className="select-none opacity-50">$</span>
+            <div className="flex flex-wrap items-center justify-center gap-8">
+              <code className="inline-flex h-[47px] items-center gap-3 rounded-lg border border-[var(--tk-hairline)] bg-fd-secondary px-6 font-mono text-[14px] leading-[21px] text-fd-foreground/65">
+                <span className="select-none text-fd-muted-foreground/40">$</span>
                 pnpm add @tour-kit/core
               </code>
 
               <Link
                 href="/builder"
-                className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-6 py-3.5 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
+                className="group inline-flex h-[49px] items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-7 text-[14px] font-semibold leading-5 text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
               >
                 Get started
                 <ArrowRight

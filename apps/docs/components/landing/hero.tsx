@@ -25,24 +25,31 @@ const steps = [
 
 function BackgroundPattern() {
   return (
-    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-x-clip">
       {/* The lighthouse photo that used to fill this layer is gone: both Figma
           frames (3945:1529 / 3792:1529) draw the hero on the flat page ground
           with only the wash and the line art over it. Its two <link rel=preload>
           tags went with it, so the hero's LCP is now text. */}
 
-      {/* Indigo wash centred on the preview column (Figma 3945:1530 — a 433x589
-          ellipse under a ~200px blur, which is a radial-gradient here rather
-          than a fourth image request). --tk-glow was declared for exactly this
-          and had no call site until now; two stops of the one token rather than
-          a second colour, since the mockup's ellipse is more saturated than a
-          single pass of it. */}
+      {/* Indigo wash centred on the preview column (Figma 3945:1530 — a
+          433x589 ellipse under a ~200px blur, which is a radial-gradient here
+          rather than a fourth image request).
+
+          ONE stop, and deliberately weaker than --tk-glow's own alpha. A
+          horizontal sample of the dark frame across the hero peaks at a≈0.23
+          around x=1050 and is flat zero left of x=500; the token carries 0.49,
+          which is the strength the CTA/pricing edge blooms are drawn at. Two
+          stacked passes of the full token composited to ~0.74 — three times
+          the design. color-mix keeps the one token and scales it. */}
       <div
         className="absolute inset-0"
         style={{
           background: [
-            'radial-gradient(ellipse 33% 70% at 73% 49%, var(--tk-glow), transparent 72%)',
-            'radial-gradient(ellipse 20% 42% at 73% 49%, var(--tk-glow), transparent 80%)',
+            // A blurred ellipse has long tails a single linear radial stop
+            // cannot follow, so this is a wide tail plus a tighter core, fitted
+            // to the dark frame at (1050, 100) / (1050, 756) / (1430, 756).
+            'radial-gradient(ellipse 42% 100% at 73% 55%, color-mix(in srgb, var(--tk-glow) 37%, transparent), transparent)',
+            'radial-gradient(ellipse 24% 45% at 73% 72%, color-mix(in srgb, var(--tk-glow) 49%, transparent), transparent)',
           ].join(','),
         }}
       />

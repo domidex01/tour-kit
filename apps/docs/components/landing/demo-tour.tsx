@@ -1436,7 +1436,7 @@ export function DemoTour() {
   const ActiveComponent = active.component
 
   return (
-    <section className="px-6 py-32 sm:px-8 lg:px-12">
+    <section className="px-6 pt-32 pb-32 sm:px-8 lg:px-12 lg:pb-[229px]">
       {/* 1152px here, not the 1120 the rest of the page uses — the tab row
           needs the extra width to hold eleven packages on two lines
           (Figma 3792:1684). */}

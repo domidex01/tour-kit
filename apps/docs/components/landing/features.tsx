@@ -18,7 +18,7 @@ return <div style={tour.tooltipProps.style}>
   {tour.currentStep.title}
 </div>;`,
     label: 'useTour',
-    crop: 'center 18%',
+    crop: '50% 12%',
   },
   {
     title: 'Accessible by default',
@@ -36,7 +36,7 @@ return <div style={tour.tooltipProps.style}>
   />
 </Tour>`,
     label: '<Tour />',
-    crop: 'center 62%',
+    crop: '50% 58%',
   },
   {
     title: 'Tree-shakeable & tiny',
@@ -52,7 +52,7 @@ import { Tour, TourStep } from '@tour-kit/react';
 // vs. react-joyride → 47.2 KB
 // vs. shepherd.js  → 35.1 KB`,
     label: 'import',
-    crop: 'center 88%',
+    crop: '50% 24%',
   },
   {
     title: 'TypeScript native',
@@ -72,7 +72,7 @@ const tour = useTour<MyStepData>('setup', {
   },
 });`,
     label: 'type-safe',
-    crop: 'center 40%',
+    crop: '50% 74%',
   },
 ]
 
@@ -115,23 +115,25 @@ export function Features() {
                 </p>
               </div>
 
-              {/* The code window sits on a 24px ring of photograph. One image
-                  serves all four rows at four different crops — the design
-                  uses four separate twilight stills, which would be four more
-                  requests on a page that already carries the hero and the CTA
-                  island for the same amount of colour. */}
-              <div className="relative overflow-hidden rounded-3xl p-6 lg:w-[528px] lg:shrink-0">
-                <img
-                  src="/feature-card-bg.avif"
-                  alt=""
-                  aria-hidden="true"
-                  loading="lazy"
-                  decoding="async"
-                  width={768}
-                  height={768}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  style={{ objectPosition: feature.crop }}
-                />
+              {/* The code window sits on a 24px ring of photograph.
+
+                  One image serves all four rows where the design uses four
+                  separate twilight stills — four more requests for the same
+                  amount of colour. It is painted as a BACKGROUND at 300%
+                  height rather than an object-cover <img>: covering a 528x376
+                  box with a square source already shows 71% of it, so
+                  object-position has only 29% to travel and all four rows came
+                  out the same blue. At 300% each row sees a third of the
+                  frame, which is what puts row 2 and row 4 on the pink horizon
+                  the way the frames do. */}
+              <div
+                className="relative overflow-hidden rounded-3xl p-6 lg:w-[528px] lg:shrink-0"
+                style={{
+                  backgroundImage: 'url(/feature-card-bg.avif)',
+                  backgroundSize: 'auto 300%',
+                  backgroundPosition: feature.crop,
+                }}
+              >
                 <div
                   aria-hidden="true"
                   className="absolute inset-0 bg-[rgb(15_23_43/0.2)] dark:bg-[rgb(2_6_24/0.45)]"
