@@ -12,7 +12,7 @@ userTourKit is a headless React library with tours, hints, checklists, announcem
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and a $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and a $9.99 one-time Pro upgrade.
 
 ## What is Onborda?
 
@@ -38,7 +38,7 @@ userTourKit ships `@tour-kit/hints` (under 5KB gzipped, MIT licensed) with `Hint
 
 Not available in Onborda. No task tracking, no progress persistence.
 
-userTourKit's `@tour-kit/checklists` package (Pro, $99 one-time) handles task dependencies with circular dependency detection. Three completion types: manual, event-based, custom check functions. The `ChecklistPanel` component gives you a working onboarding checklist without stitching together multiple npm packages.
+userTourKit's `@tour-kit/checklists` package (Pro, $9.99 one-time) handles task dependencies with circular dependency detection. Three completion types: manual, event-based, custom check functions. The `ChecklistPanel` component gives you a working onboarding checklist without stitching together multiple npm packages.
 
 ### Announcements and banners
 
@@ -62,7 +62,7 @@ userTourKit's `@tour-kit/scheduling` package handles time-based display with IAN
 
 Onborda is a Next.js-focused tour library. It handles step-based onboarding flows but doesn't include adoption tracking, usage analytics, or nudging. Feature adoption measurement is entirely outside its scope.
 
-userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($9.99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
 
 userTourKit's adoption tracking is code-first — configuration lives in TypeScript, not a visual editor. Teams wanting non-developers to define adoption thresholds will need to build a settings UI on top of the API.
 
@@ -70,7 +70,7 @@ userTourKit's adoption tracking is code-first — configuration lives in TypeScr
 
 Onborda step content supports React components, so video embeds are technically possible by rendering your own iframe. But there's no media component, no URL parsing, no platform detection, and no motion-preference handling built in.
 
-userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($9.99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 For onboarding flows that rely on video demos or animated walkthroughs, userTourKit eliminates the per-platform iframe boilerplate. If you only need a single static video, a plain iframe inside your step content works fine without an extra package.
 
@@ -102,7 +102,7 @@ userTourKit's core is framework-agnostic. `@tour-kit/react` provides router adap
 
 ### Licensing and pricing
 
-Both libraries use MIT licensing for their core code. Onborda is fully MIT with no paid tier. userTourKit's free tier (core, react, hints) is MIT, while the Pro packages cost $99 as a one-time purchase.
+Both libraries use MIT licensing for their core code. Onborda is fully MIT with no paid tier. userTourKit's free tier (core, react, hints) is MIT, while the Pro packages cost $9.99 as a one-time purchase.
 
 Onborda's fully-free model is genuinely attractive for budget-constrained projects. But free doesn't mean maintained. With no funding model and no releases since December 2024, Onborda's long-term sustainability depends entirely on volunteer effort from a single developer.
 
@@ -114,7 +114,7 @@ userTourKit's Pro tier funds ongoing development. Your mileage may vary on which
 |---|---|---|
 | Product tours | ✅ Built-in (core) | ✅ Built-in |
 | Hints/hotspots | ✅ Built-in (&lt;5KB) | 🚫 Not available |
-| Onboarding checklists | ✅ Pro ($99 one-time) | 🚫 Not available |
+| Onboarding checklists | ✅ Pro ($9.99 one-time) | 🚫 Not available |
 | Announcements | ✅ Pro | 🚫 Not available |
 | Analytics | ✅ Pro (5 plugins) | 🚫 Not available |
 | Scheduling | ✅ Pro | 🚫 Not available |
@@ -133,7 +133,7 @@ userTourKit's Pro tier funds ongoing development. Your mileage may vary on which
 | Framework support | Next.js, Vite, Remix, Astro, CRA | Next.js only |
 | shadcn/ui integration | ✅ Native UnifiedSlot | ⚙️ Compatible (manual) |
 | TypeScript | Strict mode, full inference | TypeScript, no strict evidence |
-| License | MIT (free) + $99 Pro | MIT |
+| License | MIT (free) + $9.99 Pro | MIT |
 | Last release | Active | Dec 22, 2024 |
 | GitHub stars | — | ~1,400 |
 
@@ -232,7 +232,7 @@ NextStepjs, a fork that explicitly credits Onborda for "inspiration and some cod
 ## Frequently asked questions
 
 **Is userTourKit free?**
-The core packages (tours, hints, react components) are MIT licensed and free. Pro packages (analytics, checklists, announcements, media, scheduling) cost $99 one-time. No subscriptions, no per-seat fees.
+The core packages (tours, hints, react components) are MIT licensed and free. Pro packages (analytics, checklists, announcements, media, scheduling) cost $9.99 one-time. No subscriptions, no per-seat fees.
 
 **What is the difference between userTourKit and Onborda?**
 userTourKit is a headless React library spanning nine packages: tours, hints, checklists, announcements, analytics, scheduling. Onborda is a Next.js-only tour library powered by Framer Motion that covers tours only. userTourKit ships WCAG 2.1 AA accessibility by default. Onborda has none.

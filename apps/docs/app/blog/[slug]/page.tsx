@@ -2,6 +2,7 @@ import { ArticleCard } from '@/components/article/article-card'
 import { BlogPostCrossLinks } from '@/components/article/article-cross-links'
 import { ArticleLayout } from '@/components/article/article-layout'
 import { BlogCta } from '@/components/blog/blog-cta'
+import { LicenceChangeNote } from '@/components/blog/licence-change-note'
 import { ReadingProgress } from '@/components/blog/reading-progress'
 import { BlogTableOfContents } from '@/components/blog/table-of-contents'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
@@ -185,6 +186,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             priority
           />
         )}
+
+        <LicenceChangeNote publishedAt={post.publishedAt} />
 
         {hasMdxContent ? (
           <>

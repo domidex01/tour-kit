@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library offering tours, hints, checklists, announcements, and five more packages in a &lt;8KB core bundle for a $99 one-time fee. Appcues is a no-code onboarding platform starting at $750/month. userTourKit suits React teams wanting code ownership and tiny bundles. Appcues is better when non-technical PMs need to build tours without developers.
+userTourKit is a headless React library offering tours, hints, checklists, announcements, and five more packages in a &lt;8KB core bundle for a $9.99 one-time fee. Appcues is a no-code onboarding platform starting at $750/month. userTourKit suits React teams wanting code ownership and tiny bundles. Appcues is better when non-technical PMs need to build tours without developers.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
 
 ## What is Appcues?
 
@@ -40,13 +40,13 @@ Hints aren't sequential like tour steps. They suit feature discovery better than
 
 Appcues offers checklists, but only on their Growth plan at $750+/month. They're built in the visual editor with task items that can link to Appcues flows. The catch: checklists aren't available on the cheaper tier at all. As of March 2026, Appcues has consolidated to two plans (Grow and Enterprise), and checklists require Grow.
 
-userTourKit's `@tour-kit/checklists` package ($99 one-time, Pro) supports task dependencies with circular dependency detection. Three completion types: manual, event-based, custom check function. Progress calculation accounts for locked tasks, and every component (`Checklist`, `ChecklistTask`, `ChecklistProgress`, `ChecklistPanel`) has a headless variant for full UI control.
+userTourKit's `@tour-kit/checklists` package ($9.99 one-time, Pro) supports task dependencies with circular dependency detection. Three completion types: manual, event-based, custom check function. Progress calculation accounts for locked tasks, and every component (`Checklist`, `ChecklistTask`, `ChecklistProgress`, `ChecklistPanel`) has a headless variant for full UI control.
 
 ### Announcements and banners
 
 Appcues handles announcements through its modal and banner flow types. Banners, modals, slideouts are all configurable in the builder, and Appcues added a "Flows in Workflows" feature in January 2026 that coordinates in-app messages with emails, push notifications, and delays on a single canvas.
 
-userTourKit's `@tour-kit/announcements` ($99 Pro) ships five display variants: modal (sm/md/lg/xl/full), toast (6 positions with auto-dismiss), banner (top/bottom sticky with intent levels), slideout (left/right drawer), and spotlight targeting a DOM element with overlay. Frequency rules support `once`, `session`, `always`, count-limited, and interval-based display. A priority queue handles concurrent announcements with FIFO, replace, or stack strategies depending on how aggressive you want the messaging cadence to be.
+userTourKit's `@tour-kit/announcements` ($9.99 Pro) ships five display variants: modal (sm/md/lg/xl/full), toast (6 positions with auto-dismiss), banner (top/bottom sticky with intent levels), slideout (left/right drawer), and spotlight targeting a DOM element with overlay. Frequency rules support `once`, `session`, `always`, count-limited, and interval-based display. A priority queue handles concurrent announcements with FIFO, replace, or stack strategies depending on how aggressive you want the messaging cadence to be.
 
 userTourKit doesn't do email or push. That's a real gap if multi-channel orchestration matters to your team.
 
@@ -54,7 +54,7 @@ userTourKit doesn't do email or push. That's a real gap if multi-channel orchest
 
 Appcues includes basic flow analytics (completion rates, drop-off by step) on all plans, with more advanced event tracking on Growth. One Capterra reviewer switched from Appcues to Pendo specifically because "as we grew as a company, we needed deeper analytics and insight into our users." Appcues doesn't offer cohort analysis, path analysis, or session recordings.
 
-userTourKit's `@tour-kit/analytics` ($99 Pro) takes a plugin approach. Five built-in plugins cover PostHog, Mixpanel, Amplitude, Google Analytics, and a console logger. Custom plugins? Three lines: a name, a `track` function, and optionally `identify`. Event types cover the full lifecycle: `tour_started`, `tour_completed`, `step_viewed`, `hint_dismissed`, `checklist_completed`.
+userTourKit's `@tour-kit/analytics` ($9.99 Pro) takes a plugin approach. Five built-in plugins cover PostHog, Mixpanel, Amplitude, Google Analytics, and a console logger. Custom plugins? Three lines: a name, a `track` function, and optionally `identify`. Event types cover the full lifecycle: `tour_started`, `tour_completed`, `step_viewed`, `hint_dismissed`, `checklist_completed`.
 
 You own the data pipeline. But you're also responsible for building dashboards yourself.
 
@@ -62,7 +62,7 @@ You own the data pipeline. But you're also responsible for building dashboards y
 
 Appcues has built-in user segmentation with property-based and event-based targeting. You can show different flows to different user segments, limit frequency, and control when flows appear. Segmentation is one of Appcues' genuine strengths, though the Essentials plan caps you at 5 segments.
 
-userTourKit's `@tour-kit/scheduling` ($99 Pro) handles time-based display: start/end dates, time-of-day windows, day-of-week rules, recurring patterns, and blackout periods with IANA timezone support. The `ScheduleGate` component conditionally renders children based on schedule state.
+userTourKit's `@tour-kit/scheduling` ($9.99 Pro) handles time-based display: start/end dates, time-of-day windows, day-of-week rules, recurring patterns, and blackout periods with IANA timezone support. The `ScheduleGate` component conditionally renders children based on schedule state.
 
 But userTourKit doesn't include a user segmentation engine. If you need to show different onboarding to different user cohorts based on behavioral data, you'll build that logic yourself or pull it from your existing product analytics.
 
@@ -70,7 +70,7 @@ But userTourKit doesn't include a user segmentation engine. If you need to show 
 
 Appcues doesn't offer dedicated feature adoption tracking. Their analytics surface flow completion rates and drop-off points, but there's no way to define adoption criteria per feature, track usage patterns over time, or automatically nudge users toward underused capabilities. Teams that need adoption insights typically bolt on a separate product analytics tool like Pendo or Heap.
 
-userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count versus required threshold, time since first use versus adoption window, and recency of use versus churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature, while `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($9.99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count versus required threshold, time since first use versus adoption window, and recency of use versus churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature, while `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
 
 The trade-off: userTourKit's adoption tracking is code-driven and lives in your React app. Appcues users who want adoption analytics without developer involvement will still need a third-party tool.
 
@@ -78,7 +78,7 @@ The trade-off: userTourKit's adoption tracking is code-driven and lives in your 
 
 Appcues supports embedding videos in flows through their visual builder — paste a YouTube or Vimeo URL into a tooltip or modal and it renders inline. But there's no unified media component, no platform auto-detection, no support for GIF players or Lottie animations, and no accessibility fallbacks for users who prefer reduced motion.
 
-userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and animation directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($9.99 Pro) embeds video and animation directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 If your media needs are limited to YouTube clips in tooltips, Appcues handles that through the builder. userTourKit covers more platforms and adds accessibility handling, but requires a developer to configure.
 
@@ -112,7 +112,7 @@ Vendr purchase intelligence shows negotiated contracts between $42,000 and $84,0
 
 A G2 reviewer put it bluntly: "They've gotten insanely expensive. I love the features... But nobody should have to pay $500+/month for this stuff."
 
-userTourKit's free tier (MIT) includes core, React bindings, and hints. The $99 one-time Pro license adds analytics, announcements, checklists, adoption tracking, media embedding, and scheduling. Three-year total cost of ownership at 10,000 MAUs: Appcues runs $90,000 to $120,000+. userTourKit is $99.
+userTourKit's free tier (MIT) includes core, React bindings, and hints. The $9.99 one-time Pro license adds analytics, announcements, checklists, adoption tracking, media embedding, and scheduling. Three-year total cost of ownership at 10,000 MAUs: Appcues runs $90,000 to $120,000+. userTourKit is $9.99.
 
 ## Side-by-side comparison table
 
@@ -120,8 +120,8 @@ userTourKit's free tier (MIT) includes core, React bindings, and hints. The $99 
 |---|---|---|
 | Product tours | ✅ Built-in (core, MIT) | ✅ WYSIWYG builder |
 | Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ✅ Pins |
-| Onboarding checklists | ✅ Pro ($99 one-time) | ⚠️ Grow plan only ($750+/mo) |
-| Announcements | ✅ Pro ($99 one-time) | ✅ Built-in |
+| Onboarding checklists | ✅ Pro ($9.99 one-time) | ⚠️ Grow plan only ($750+/mo) |
+| Announcements | ✅ Pro ($9.99 one-time) | ✅ Built-in |
 | Analytics | ✅ Pro (plugin-based) | ✅ Basic (advanced on Grow) |
 | Scheduling | ✅ Pro (timezone-aware) | ✅ Frequency controls |
 | Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Requires third-party analytics |
@@ -142,7 +142,7 @@ userTourKit's free tier (MIT) includes core, React bindings, and hints. The $99 
 | Multi-channel (email/push) | 🚫 Not available | ✅ Workflows (Grow+) |
 | Integrations | ⚙️ Plugin API, build your own | ✅ 20+ pre-built |
 | License | MIT (free tier) | Proprietary SaaS |
-| Pricing | Free + $99 one-time Pro | $750/mo+ (MAU-based) |
+| Pricing | Free + $9.99 one-time Pro | $750/mo+ (MAU-based) |
 
 Data verified March 2026. Sources: official documentation, npm, GitHub, Appcues pricing page, Vendr.
 
@@ -160,7 +160,7 @@ If you're running shadcn/ui, Radix, or Tailwind, userTourKit's components render
 
 Testing is another angle where userTourKit pulls ahead significantly compared to any cloud-hosted onboarding tool. Write a Playwright or Cypress test that verifies your tour works after a UI refactor. With Appcues, flows live in their cloud. There's no programmatic way to verify they still work after you push a change.
 
-And the math: if you're a startup with 5,000 MAUs spending $3,500/year on Appcues Essentials (now likely more on Grow), the $99 one-time Pro license pays for itself before your first monthly invoice arrives.
+And the math: if you're a startup with 5,000 MAUs spending $3,500/year on Appcues Essentials (now likely more on Grow), the $9.99 one-time Pro license pays for itself before your first monthly invoice arrives.
 
 ## Migration path from Appcues to userTourKit
 
@@ -237,10 +237,10 @@ We built userTourKit, so take these comparisons with appropriate skepticism. But
 ## Frequently asked questions
 
 **Is userTourKit free?**
-The core package, React bindings, and hints are MIT licensed and free forever. The Pro upgrade ($99, one-time payment) adds analytics, announcements, checklists, adoption tracking, media embedding, and scheduling. No MAU limits. No recurring fees.
+The core package, React bindings, and hints are MIT licensed and free forever. The Pro upgrade ($9.99, one-time payment) adds analytics, announcements, checklists, adoption tracking, media embedding, and scheduling. No MAU limits. No recurring fees.
 
 **What is the difference between userTourKit and Appcues?**
-userTourKit is a code-first React component library. Appcues is a no-code SaaS platform with a visual builder. userTourKit renders inside your React tree using your design tokens; Appcues injects external DOM elements and iframes over your application. userTourKit costs $99 once, Appcues starts at $750/month.
+userTourKit is a code-first React component library. Appcues is a no-code SaaS platform with a visual builder. userTourKit renders inside your React tree using your design tokens; Appcues injects external DOM elements and iframes over your application. userTourKit costs $9.99 once, Appcues starts at $750/month.
 
 **Can I migrate from Appcues to userTourKit?**
 Yes. Export your Appcues flow definitions, then recreate them as userTourKit step configs in JSX. The architectural shift means you're rewriting flows in code rather than moving them between tools. Most teams with under 10 flows migrate in a week or less.
@@ -262,4 +262,4 @@ Appcues has stronger enterprise features today: SOC 2, SSO/SAML, EU hosting (lau
 
 ## Final verdict
 
-For React teams that own their frontend, userTourKit gives you onboarding components that match your design system, pass WCAG 2.1 AA with Lighthouse 100, and cost $99 total. Appcues makes sense when PMs need to ship without developers, when mobile onboarding matters, or when enterprise compliance is non-negotiable. Your mileage may vary depending on team size and technical capacity.
+For React teams that own their frontend, userTourKit gives you onboarding components that match your design system, pass WCAG 2.1 AA with Lighthouse 100, and cost $9.99 total. Appcues makes sense when PMs need to ship without developers, when mobile onboarding matters, or when enterprise compliance is non-negotiable. Your mileage may vary depending on team size and technical capacity.

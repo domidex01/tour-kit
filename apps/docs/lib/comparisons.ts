@@ -151,7 +151,7 @@ export const COMPARISONS: ComparisonMeta[] = [
     title: 'userTourKit vs Appcues: Which Onboarding Tool Should You Choose in 2026?',
     metaTitle: 'userTourKit vs Appcues: 2026 Comparison for React Teams',
     description:
-      'Compare userTourKit vs Appcues for product onboarding. $99 one-time vs $300+/month. See features, pricing, and developer experience side-by-side in 2026.',
+      'Compare userTourKit vs Appcues for product onboarding. One-time from $9.99 vs $300+/month. See features, pricing, and developer experience side-by-side in 2026.',
     keywords: [
       'usertourkit',
       'appcues',
@@ -3237,7 +3237,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Can you use Tour Kit without the Pro license? (free vs Pro breakdown)',
     metaTitle: 'Can you use Tour Kit without the Pro license? (free vs Pro b',
     description:
-      "See exactly what Tour Kit's free MIT packages include and when the $99 Pro license becomes worth it. Package-by-package comparison with code examples.",
+      'See exactly what Tour Kit gives you free in development and what a production licence adds. Package-by-package comparison with code examples.',
     keywords: [
       'tour kit free vs pro',
       'tour kit pricing breakdown',
@@ -3367,7 +3367,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: "How we set Tour Kit's price at $99 (building in public)",
     metaTitle: "How we set Tour Kit's price at $99 (building in public)",
     description:
-      "The real pricing decision behind Tour Kit's $99 one-time license. Unit economics, anchoring psychology, and why we left subscription revenue on the table.",
+      "The real pricing decision behind Tour Kit's original $99 one-time license — since superseded by a three-tier ladder from $9.99. Unit economics, anchoring psychology, and why we left subscription revenue on the table.",
     keywords: [
       'tour kit pricing decision',
       'open source pricing strategy',
@@ -3377,7 +3377,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-09-11',
     ogImage: '/og-images/tour-kit-pricing-decision-building-in-public.png',
   },
   {
@@ -3855,7 +3855,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'What is the cheapest product tour tool in 2026?',
     metaTitle: 'What is the cheapest product tour tool in 2026?',
     description:
-      'Compare every product tour tool by real cost in 2026. SaaS starts at $468/year, enterprise hits $140K. Tour Kit costs $99 once. See the full breakdown.',
+      'Compare every product tour tool by real cost in 2026. SaaS starts at $468/year, enterprise hits $140K. Tour Kit is free in development and starts at $9.99 once. See the full breakdown.',
     keywords: [
       'cheapest product tour tool',
       'affordable onboarding software',
@@ -5789,7 +5789,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Why I chose $99 one-time over $300/month recurring',
     metaTitle: 'Why I chose $99 one-time over $300/month recurring',
     description:
-      "A solo developer explains the pricing decision behind Tour Kit's $99 one-time Pro license. Real numbers, real tradeoffs, and why subscription models felt wrong.",
+      "A solo developer explains the pricing decision behind Tour Kit's original $99 one-time license — since superseded by a three-tier ladder from $9.99. Real numbers, real tradeoffs, and why subscription models felt wrong.",
     keywords: [
       'one-time pricing vs subscription developer tool',
       'developer tool pricing strategy',
@@ -5800,7 +5800,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-09-11',
     ogImage: '/og-images/why-i-chose-99-one-time-over-300-month-recurring.png',
   },
   {

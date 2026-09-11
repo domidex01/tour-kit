@@ -12,7 +12,7 @@ userTourKit is a headless React library shipping tours, hints, checklists, annou
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
 
 ## What is Driver.js?
 
@@ -40,7 +40,7 @@ The `useHint` hook gives you per-hint control: `isVisible`, `isDismissed`, `show
 
 Driver.js doesn't offer checklists. GitHub issue [#511](https://github.com/kamranahmedse/driver.js/issues/511) shows users requesting even basic "don't show again" functionality, which hints at demand for stateful onboarding that the library doesn't address.
 
-userTourKit's `@tour-kit/checklists` package (Pro, $99 one-time) provides task dependencies with circular dependency detection. Three completion types: manual, event-based, custom check functions. Progress persists across sessions.
+userTourKit's `@tour-kit/checklists` package (Pro, $9.99 one-time) provides task dependencies with circular dependency detection. Three completion types: manual, event-based, custom check functions. Progress persists across sessions.
 
 Components include `Checklist`, `ChecklistTask`, `ChecklistProgress`, `ChecklistPanel`, all with headless variants.
 
@@ -66,7 +66,7 @@ userTourKit's `@tour-kit/scheduling` package handles time-based scheduling with 
 
 Driver.js focuses exclusively on element highlighting and step-based tours. No adoption tracking, no usage analytics, no nudge system. Feature adoption requires a completely separate solution.
 
-userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($9.99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
 
 The trade-off: userTourKit's adoption system is developer-facing. There's no drag-and-drop dashboard a product manager can use independently. You write code to define adoption criteria and render nudges.
 
@@ -74,7 +74,7 @@ The trade-off: userTourKit's adoption system is developer-facing. There's no dra
 
 Driver.js doesn't handle media. Step content accepts HTML strings, so you can manually embed an iframe, but there's no media component, no URL parsing, no platform detection, and no motion preference handling. Each video embed is DIY.
 
-userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($9.99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 ### Accessibility and WCAG compliance
 
@@ -110,9 +110,9 @@ userTourKit requires React 18 or later. If you're on React 16 or 17, or using Vu
 
 Both libraries use the MIT license for their core functionality. Driver.js is entirely MIT — no paid tier, no restrictions.
 
-userTourKit's three core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. The extended packages (adoption, analytics, announcements, checklists, media, scheduling) require a one-time $99 Pro license. No subscriptions, no per-seat pricing.
+userTourKit's three core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. The extended packages (adoption, analytics, announcements, checklists, media, scheduling) require a one-time $9.99 Pro license. No subscriptions, no per-seat pricing.
 
-For teams that only need tours and highlighting, Driver.js costs nothing. For teams that need checklists, analytics, or announcements, the choice is between Driver.js plus building those yourself, or userTourKit Pro at $99.
+For teams that only need tours and highlighting, Driver.js costs nothing. For teams that need checklists, analytics, or announcements, the choice is between Driver.js plus building those yourself, or userTourKit Pro at $9.99.
 
 ## Side-by-side comparison table
 
@@ -120,10 +120,10 @@ For teams that only need tours and highlighting, Driver.js costs nothing. For te
 |---|---|---|
 | Product tours | ✅ Built-in (core) | ✅ Built-in |
 | Hints / hotspots | ✅ Built-in (&lt;5KB) | 🚫 Not available |
-| Onboarding checklists | ⚠️ Pro ($99 one-time) | 🚫 Not available |
-| Announcements | ⚠️ Pro ($99 one-time) | 🚫 Not available |
-| Analytics plugins | ⚠️ Pro ($99 one-time) | ⚙️ Manual via lifecycle hooks |
-| Scheduling / targeting | ⚠️ Pro ($99 one-time) | 🚫 Not available |
+| Onboarding checklists | ⚠️ Pro ($9.99 one-time) | 🚫 Not available |
+| Announcements | ⚠️ Pro ($9.99 one-time) | 🚫 Not available |
+| Analytics plugins | ⚠️ Pro ($9.99 one-time) | ⚙️ Manual via lifecycle hooks |
+| Scheduling / targeting | ⚠️ Pro ($9.99 one-time) | 🚫 Not available |
 | Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Not available |
 | Media embedding | ✅ Pro (7 platforms) | 🚫 Not available |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ⚙️ Partial, open failures (#434) |
@@ -137,7 +137,7 @@ For teams that only need tours and highlighting, Driver.js costs nothing. For te
 | Core bundle (gzipped) | &lt;8KB | ~5KB |
 | Dependencies | React 18+ (peer) | Zero |
 | License | MIT (free tier) | MIT |
-| Pricing | Free + $99 one-time Pro | Free |
+| Pricing | Free + $9.99 one-time Pro | Free |
 | Framework support | React only | Any framework |
 
 Data verified March 2026. Sources: official documentation, npm, GitHub.
@@ -235,7 +235,7 @@ We built userTourKit, so take our perspective with appropriate skepticism. The n
 ## Frequently asked questions
 
 **Is userTourKit free?**
-The three core packages (@tour-kit/core, @tour-kit/react, @tour-kit/hints) are MIT-licensed and free. Extended packages for analytics, checklists, announcements, media, and scheduling require a one-time $99 Pro license. No subscriptions, no MAU caps.
+The three core packages (@tour-kit/core, @tour-kit/react, @tour-kit/hints) are MIT-licensed and free. Extended packages for analytics, checklists, announcements, media, and scheduling require a one-time $9.99 Pro license. No subscriptions, no MAU caps.
 
 **What is the difference between userTourKit and Driver.js?**
 userTourKit is a React-specific headless library covering tours, hints, checklists, announcements, analytics, and scheduling. Driver.js is a framework-agnostic tour-and-highlight library. The core architectural difference: userTourKit uses React hooks and components, Driver.js uses imperative DOM manipulation.

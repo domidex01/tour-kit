@@ -474,7 +474,7 @@ Third gotcha: Lemon Squeezy sends webhooks with an `x-signature` header (not `x-
 
 This covers validate-on-load, cache, and webhook revocation. A few production additions worth considering:
 
-Add a license key input UI so users can enter their key from within the app instead of an env variable. Filter validation responses by `productId` to match the correct tier (Tour Kit Pro at $99 one-time vs a hypothetical Enterprise tier). And add rate limiting on your API route: Lemon Squeezy's License API has a 60 requests per minute rate limit (stricter than the main API's 300/min).
+Add a license key input UI so users can enter their key from within the app instead of an env variable. Filter validation responses by `productId` to match the correct tier (Tour Kit Pro at $9.99 one-time vs a hypothetical Enterprise tier). And add rate limiting on your API route: Lemon Squeezy's License API has a 60 requests per minute rate limit (stricter than the main API's 300/min).
 
 Tour Kit's 3 free packages (`@tourkit/core` at under 8KB gzipped, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed and work without validation. The 8 Pro packages show a watermark on invalid licenses but keep working. Tour Kit is our project, so take this guide knowing we're showing how to protect our own Pro tier. But the pattern works for any React library with a free/paid split. You can see the full free vs Pro breakdown at [usertourkit.com](https://usertourkit.com/).
 

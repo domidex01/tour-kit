@@ -20,7 +20,7 @@ userTourKit is a headless React library with tours, hints, checklists, announcem
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and a $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and a $9.99 one-time Pro upgrade.
 
 ## What is Shepherd.js?
 
@@ -46,7 +46,7 @@ userTourKit ships a dedicated `@tour-kit/hints` package (under 5KB gzipped, MIT 
 
 Shepherd.js is a tour library, not an onboarding platform. No checklists, no task tracking, no progress persistence.
 
-userTourKit's `@tour-kit/checklists` package (Pro, $99 one-time) handles task dependencies with circular dependency detection and three completion types: manual, event-based, and custom check functions. Progress calculation accounts for locked tasks. The `ChecklistProvider` and `ChecklistPanel` components give you a working onboarding checklist without stitching together multiple npm packages.
+userTourKit's `@tour-kit/checklists` package (Pro, $9.99 one-time) handles task dependencies with circular dependency detection and three completion types: manual, event-based, and custom check functions. Progress calculation accounts for locked tasks. The `ChecklistProvider` and `ChecklistPanel` components give you a working onboarding checklist without stitching together multiple npm packages.
 
 ### Announcements and banners
 
@@ -70,7 +70,7 @@ userTourKit's `@tour-kit/scheduling` package handles time-based scheduling with 
 
 Shepherd.js is a tour library -- it guides users through steps but doesn't track whether they actually adopt the features being shown. No usage tracking, no adoption criteria, no nudge scheduler. You'd pair Shepherd with a separate analytics tool to measure feature adoption.
 
-userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($9.99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
 
 Worth noting: userTourKit's adoption tracking is code-driven. There's no no-code dashboard you can hand to a product manager without engineering support. The data and logic are there, but surfacing it requires building on top of the provided components and hooks.
 
@@ -78,7 +78,7 @@ Worth noting: userTourKit's adoption tracking is code-driven. There's no no-code
 
 Shepherd.js step content accepts arbitrary HTML, so you can drop in an iframe manually. But there's no dedicated media component, no URL auto-detection, no platform-specific embed optimization, and no accessibility handling for video content. Every embed is custom HTML you maintain yourself.
 
-userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($9.99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 ### Accessibility and WCAG compliance
 
@@ -114,7 +114,7 @@ Google explicitly bans AGPL-licensed code internally. Drupal CMS downgraded from
 
 Shepherd's commercial licenses are reasonable: $50 lifetime for up to 5 projects, $300 lifetime for unlimited. No recurring fees. But the friction isn't the price. It's the procurement approval and legal review that AGPL triggers at companies with blanket copyleft policies.
 
-userTourKit's free tier (core, React bindings, hints) is MIT licensed. No legal review needed. The Pro tier costs $99 one-time for all seven additional packages. Not recurring.
+userTourKit's free tier (core, React bindings, hints) is MIT licensed. No legal review needed. The Pro tier costs $9.99 one-time for all seven additional packages. Not recurring.
 
 ## Side-by-side comparison table
 
@@ -122,7 +122,7 @@ userTourKit's free tier (core, React bindings, hints) is MIT licensed. No legal 
 |---|---|---|
 | Product tours | Built-in (core) | Built-in |
 | Hints/hotspots | Built-in, under 5KB | Not available |
-| Onboarding checklists | Pro ($99 one-time) | Not available |
+| Onboarding checklists | Pro ($9.99 one-time) | Not available |
 | Announcements | Pro | Not available |
 | Analytics | Pro (5 plugins) | Events only, custom code required |
 | Scheduling | Pro | Not available |
@@ -214,7 +214,7 @@ As of March 2026, GitHub issue #3102 on `react-shepherd` (17+ thumbs-up reaction
 
 ### Is userTourKit free?
 
-The core library, React bindings, and hints are all free under the MIT license. The Pro tier costs $99 one-time (not recurring) and adds seven packages: adoption tracking, analytics, announcements, checklists, media embedding, scheduling, and more. No MAU limits on either tier.
+The core library, React bindings, and hints are all free under the MIT license. The Pro tier costs $9.99 one-time (not recurring) and adds seven packages: adoption tracking, analytics, announcements, checklists, media embedding, scheduling, and more. No MAU limits on either tier.
 
 ### What is the difference between userTourKit and Shepherd.js?
 
