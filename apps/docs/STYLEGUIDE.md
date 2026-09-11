@@ -9,10 +9,10 @@ Design reference for the userTourKit landing page (`apps/docs/app/page.tsx`).
 twins. The palette is Tailwind v4's stock `slate` + `indigo`, so there is no
 bespoke colour ramp to maintain.
 
-> **Redesign in progress.** Phase 1 (tokens, type, theme default) has landed and
-> is what this document describes. Section-by-section anatomy below still
-> describes the *previous* layout and is rewritten per phase as each section is
-> rebuilt.
+> **Redesign in progress.** Phases 1 (tokens, type, theme default) and 2
+> (navbar + footer) have landed and are what this document describes.
+> Section-by-section anatomy below still describes the *previous* layout and is
+> rewritten per phase as each section is rebuilt.
 
 ---
 
@@ -185,12 +185,54 @@ rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-se
 
 ---
 
+## Chrome (phase 2)
+
+### Navbar — Figma `3945:1461`
+
+Fumadocs already renders the design's geometry, so almost nothing was rebuilt:
+the 56px bar, the 240x35 search pill with its Ctrl/K chips, the 60x34 theme
+toggle and the Discord/npm/GitHub icons all come out of `baseOptions()` in
+`lib/layout.shared.tsx`, whose seven links match the Figma nav exactly.
+
+The only override is edge colour, in `globals.css` under "NAVBAR CHROME": the
+design draws *controls* with the slate-500 hairline and keeps slate-700 for
+dividers, while Fumadocs uses `--color-fd-border` for both. The bar's own bottom
+rule deliberately keeps `--color-fd-border` — it reads as a divider, and
+slate-500 across the full width is heavy in light mode. `kbd` drops to 12px.
+
+Fumadocs' navbar is translucent (`bg-fd-background/80` + `backdrop-blur-lg`)
+where the mockup is flat slate-950. That is kept: a static mockup cannot show a
+blur, and the colour underneath already matches.
+
+### Footer — Figma `3945:2766`
+
+Four columns on the 1120px container — PRODUCT, PACKAGES, COMPANY, INFORMATION —
+then a rule-bound copyright bar, then an oversized wordmark.
+
+| Element | Spec |
+|---|---|
+| Column heading | Sans **bold** 11px, uppercase, `tracking-[0.08em]`, `fd-foreground` |
+| Column link | Sans 12px, `fd-muted-foreground`, 24px row height |
+| Socials | 24px icons, `gap-4`, in the INFORMATION column |
+| Copyright bar | `border-y` in `--tk-hairline`, `py-6`, 12px muted |
+| Wordmark | Lighthouse + "userTourKit" at `clamp(3rem, 14.6vw, 210px)`, semibold, `bg-gradient-to-b from-indigo-300 from-[14%] to-slate-500/50 to-[112%]` clipped to text |
+
+The wordmark is `aria-hidden` and `pointer-events-none`: it is decorative, the
+brand is already in the navbar and the copyright line, and the bottom of the
+gradient is intentionally below AA. The footer is `overflow-hidden` so the mark
+can bleed past the container and clip at narrow widths.
+
+The old brand column (logo + "The open-source onboarding toolkit for React…"
+tagline) is gone — the design replaces it with INFORMATION and lets the wordmark
+carry the brand.
+
+---
+
 ## Action Items
 
-Phase 1 closed the three that stood here (undeclared `--landing-accent`,
-undeclared `animate-fade-in-up`, two competing blues). Remaining, by phase:
+Phases 1 and 2 closed the four that stood here (undeclared `--landing-accent`,
+undeclared `animate-fade-in-up`, two competing blues, and the chrome). Remaining:
 
-2. **Chrome** — navbar (search pill + Ctrl K, theme toggle, socials) and footer.
 3. **Templates** — Home (14 sections), Pricing, Blog, and the capability
    template that serves all five `/product-tours`-style pages.
 4. **Sweep** — compare, alternatives, about, legal and the docs routes against

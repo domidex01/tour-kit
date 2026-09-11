@@ -592,6 +592,29 @@ img {
 }
 
 /* ========================================
+   NAVBAR CHROME — Figma 3945:1461
+   ========================================
+   Fumadocs already renders the design's geometry: a 56px bar, a 240x35 search
+   pill, 6px kbd chips and a 60x34 theme toggle. The only delta is the edge
+   colour. The design draws *controls* with the slate-500 hairline and keeps
+   the darker slate-700 for content dividers, whereas Fumadocs uses
+   --color-fd-border for both.
+
+   The bar's own bottom rule deliberately keeps --color-fd-border: it reads as
+   a divider rather than a control, and slate-500 across the full width is
+   heavy-handed in light mode. */
+#nd-nav button,
+#nd-nav kbd {
+  border-color: var(--tk-hairline);
+}
+
+/* The design's kbd chips are 12px; they would otherwise inherit the 14px
+   search-field size. */
+#nd-nav kbd {
+  font-size: 12px;
+}
+
+/* ========================================
    NAVBAR MEGA MENU — floating card
    ======================================== */
 /* Desktop only: reposition the navbar NavigationMenu viewport from a
