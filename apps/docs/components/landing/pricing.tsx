@@ -8,7 +8,6 @@ import {
   Scale,
   ShieldCheck,
   Sparkles,
-  Timer,
   X,
   Zap,
 } from 'lucide-react'
@@ -16,48 +15,34 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 import { TrackedBuyButton } from '@/components/analytics/tracked-buy-button'
-import { SaleCountdown, useSaleCountdown } from '@/components/landing/sale-countdown'
-import { POLAR_CHECKOUT_URL } from '@/lib/polar-config'
-import { DISCOUNT_PERCENT, REGULAR_PRICE, SALE_PRICE } from '@/lib/pricing'
+import { checkoutUrl } from '@/lib/polar-config'
+import { TIERS, formatPrice, formatProjects } from '@/lib/pricing'
 import { PRICING_FAQS } from '@/lib/pricing-faqs'
 
-const FREE_FEATURES = [
-  'Product tours & steps',
-  'Spotlight overlays',
-  'Keyboard navigation',
+const EVERY_TIER_FEATURES = [
+  'Product tours, steps & spotlight overlays',
   'Persistent hints & beacons',
-  'Full TypeScript support',
-  'shadcn/ui compatible',
-  'MIT licensed — unlimited sites',
-]
-
-const PRO_FEATURES = [
-  'Everything in Free',
   'Analytics integration',
   'Product announcements',
   'Onboarding checklists',
   'Feature adoption tracking',
   'Media embedding (YouTube, Loom, Lottie)',
   'Business-hours scheduling (timezone-aware)',
+  'In-app surveys (NPS, CSAT, CES)',
   'AI chat assistant (RAG + tour context)',
-  'Priority GitHub issues',
+  'Vue and Svelte bindings, and a CDN build',
+  'Full TypeScript support, shadcn/ui compatible',
 ]
 
 const COMPARISON_ROWS = [
-  { feature: 'Product tours', free: true, pro: true },
-  { feature: 'Hints & beacons', free: true, pro: true },
-  { feature: 'Spotlight overlays', free: true, pro: true },
-  { feature: 'Keyboard navigation', free: true, pro: true },
-  { feature: 'TypeScript', free: true, pro: true },
-  { feature: 'Analytics', free: false, pro: true },
-  { feature: 'Announcements', free: false, pro: true },
-  { feature: 'Checklists', free: false, pro: true },
-  { feature: 'Adoption tracking', free: false, pro: true },
-  { feature: 'Media embedding', free: false, pro: true },
-  { feature: 'Scheduling (business hours, timezones)', free: false, pro: true },
-  { feature: 'AI chat assistant (RAG + tour context)', free: false, pro: true },
-  { feature: 'Sites', free: 'Unlimited', pro: '5 included' },
-  { feature: 'License', free: 'MIT', pro: 'Commercial' },
+  { feature: 'Every package, no feature gates', free: true, pro: true },
+  { feature: 'Local development & evaluation', free: true, pro: true },
+  { feature: 'CI, tests & preview deploys', free: true, pro: true },
+  { feature: 'Reading and modifying the source', free: true, pro: true },
+  { feature: 'Serving to end users of a deployed app', free: false, pro: true },
+  { feature: 'No "Unlicensed" badge in production', free: false, pro: true },
+  { feature: 'Projects covered', free: 'Unlimited', pro: '1 / 5 / unlimited' },
+  { feature: 'Converts to MIT on its Change Date', free: true, pro: true },
 ]
 
 // Verifiable social proof only. Source: npmjs.org last-month downloads for
@@ -67,26 +52,22 @@ const COMPARISON_ROWS = [
 const MONTHLY_INSTALLS = '4,000+'
 
 export function Pricing() {
-  const sale = useSaleCountdown()
-
   return (
     <section className="px-6 pb-20 sm:px-8 md:pb-28 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        {/* Launch promo banner — live countdown. Hidden once the window closes. */}
-        {!sale.expired && (
-          <div className="mx-auto mb-10 flex max-w-2xl flex-col items-center justify-center gap-3.5 rounded-xl border border-[var(--tk-primary)]/30 bg-gradient-to-r from-[var(--tk-primary)]/10 via-[var(--tk-primary)]/5 to-[var(--tk-primary)]/10 px-6 py-5 sm:flex-row sm:gap-6">
-            <div className="flex items-center gap-2 text-center sm:text-left">
-              <Timer className="h-5 w-5 shrink-0 text-[var(--tk-primary)]" aria-hidden="true" />
-              <p className="text-[15px] font-semibold text-fd-foreground">
-                Launch sale —{' '}
-                <span className="text-[var(--tk-primary)]">{DISCOUNT_PERCENT}% off</span> the Pro
-                suite
-              </p>
-            </div>
-            <SaleCountdown remaining={sale.remaining} mounted={sale.mounted} />
-          </div>
-        )}
-        {/* Social proof strip — A1: verifiable trust signals as pills (matches homepage SocialProof) */}
+        {/* The model, stated before the cards. Lead with the free half. */}
+        <div className="mx-auto mb-10 max-w-2xl rounded-xl border border-fd-border bg-fd-card px-6 py-5 text-center">
+          <p className="text-[15px] leading-[1.6] text-fd-muted-foreground">
+            <strong className="font-semibold text-fd-foreground">
+              Free in development, a key in production.
+            </strong>{' '}
+            Every package is source-available under BSL&nbsp;1.1 — build, evaluate, test and run CI
+            without paying anything. A key is for serving it to end users of a deployed app. Every
+            tier gets the whole library; they differ only in how many projects one key covers.
+          </p>
+        </div>
+
+        {/* Social proof strip — verifiable signals only */}
         <ul className="mx-auto mb-12 flex max-w-2xl flex-wrap items-center justify-center gap-2.5">
           <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
             <Download
@@ -100,7 +81,7 @@ export function Pricing() {
           </li>
           <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
             <Scale className="h-3.5 w-3.5 shrink-0 text-[var(--tk-primary)]" aria-hidden="true" />
-            <span>MIT-licensed core — no lock-in</span>
+            <span>Converts to MIT on its Change Date</span>
           </li>
           <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
             <ShieldCheck
@@ -110,162 +91,108 @@ export function Pricing() {
             <span>Secure checkout via Polar</span>
           </li>
         </ul>
-        {/* Pricing cards */}
-        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 md:gap-8">
-          {/* Free tier */}
-          <div className="group order-2 flex flex-col rounded-xl border border-fd-border bg-fd-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md md:order-1">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-fd-border bg-fd-muted">
-                <Code2 className="h-5 w-5 text-fd-muted-foreground" aria-hidden="true" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-fd-foreground">Free</h3>
-                <p className="text-[13px] text-fd-muted-foreground">Open source core</p>
-              </div>
-            </div>
 
-            <div className="mb-8">
-              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
-                $0
-              </span>
-              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">forever</span>
-            </div>
-
-            <div className="mb-6 rounded-lg border border-dashed border-fd-border bg-fd-muted/30 px-4 py-2.5">
-              <p className="text-[13px] font-medium text-fd-muted-foreground">
-                3 MIT packages — unlimited sites, no restrictions
-              </p>
-            </div>
-
-            <ul className="mb-8 flex-1 space-y-3">
-              {FREE_FEATURES.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
-                >
-                  <Check
-                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
-                    aria-hidden="true"
-                  />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-
-            <Link
-              href="/builder"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
+        {/* Three tiers. Same library in each — only the project count moves. */}
+        <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3 md:gap-6">
+          {TIERS.map((tier) => (
+            <div
+              key={tier.id}
+              className={
+                tier.highlight
+                  ? 'group relative flex flex-col rounded-xl border-2 border-[var(--tk-primary)] bg-fd-card p-7 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'
+                  : 'group relative flex flex-col rounded-xl border border-fd-border bg-fd-card p-7 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md'
+              }
             >
-              Get started
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </div>
-
-          {/* Pro tier */}
-          <div className="group relative order-1 flex flex-col rounded-xl border-2 border-[var(--tk-primary)] bg-fd-card p-8 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg md:order-2">
-            <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-primary)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-[var(--tk-primary)]/20">
-              <Sparkles className="h-3 w-3" aria-hidden="true" />
-              One-time purchase
-            </div>
-
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--tk-primary)]/10 ring-1 ring-[var(--tk-primary)]/20">
-                <Zap className="h-5 w-5 text-[var(--tk-primary)]" aria-hidden="true" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-fd-foreground">Pro</h3>
-                <p className="text-[13px] text-fd-muted-foreground">Full onboarding suite</p>
-              </div>
-            </div>
-
-            <div className="mb-2">
-              {sale.expired ? (
-                <>
-                  <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
-                    ${REGULAR_PRICE}
-                  </span>
-                  <span className="ml-1.5 text-[15px] text-fd-muted-foreground">
-                    one-time / 5 sites
-                  </span>
-                </>
-              ) : (
-                <>
-                  <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                    <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
-                      ${SALE_PRICE}
-                    </span>
-                    <span className="text-xl font-semibold text-fd-muted-foreground line-through decoration-2">
-                      ${REGULAR_PRICE}
-                    </span>
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
-                      {DISCOUNT_PERCENT}% off
-                    </span>
-                  </div>
-                  <span className="text-[15px] text-fd-muted-foreground">
-                    one-time / 5 sites · limited launch price
-                  </span>
-                </>
+              {tier.highlight && (
+                <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-primary)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-[var(--tk-primary)]/20">
+                  <Sparkles className="h-3 w-3" aria-hidden="true" />
+                  Most popular
+                </div>
               )}
-            </div>
 
-            {/* Honest price anchor — most onboarding SaaS bills monthly; we charge once */}
-            <p className="mb-2 text-[13px] leading-snug text-fd-muted-foreground">
-              Less than one month of most onboarding SaaS — paid once, not monthly.
-            </p>
-            {/* Named-competitor anchor — links to /compare for sourced pricing rather than
-                hardcoding figures that go stale */}
-            <p className="mb-8 text-[13px] leading-snug text-fd-muted-foreground">
-              Appcues, Pendo &amp; WalkMe bill monthly, per seat.{' '}
-              <Link
-                href="/compare"
-                className="font-medium text-[var(--tk-primary)] underline-offset-2 hover:underline"
-              >
-                See the comparison
-              </Link>
-              .
-            </p>
-
-            <div className="mb-6 rounded-lg border border-[var(--tk-primary)]/20 bg-[var(--tk-primary)]/5 px-4 py-2.5">
-              <p className="text-[13px] font-medium text-fd-foreground">
-                8 extended packages — analytics, checklists, AI & more
-              </p>
-            </div>
-
-            <ul className="mb-8 flex-1 space-y-3">
-              {PRO_FEATURES.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
+              <div className="mb-5 flex items-center gap-3">
+                <div
+                  className={
+                    tier.highlight
+                      ? 'flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--tk-primary)]/10 ring-1 ring-[var(--tk-primary)]/20'
+                      : 'flex h-10 w-10 items-center justify-center rounded-lg border border-fd-border bg-fd-muted'
+                  }
                 >
-                  <Check
-                    className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tk-primary)]"
-                    aria-hidden="true"
-                  />
-                  {feature}
-                </li>
-              ))}
-            </ul>
+                  {tier.highlight ? (
+                    <Zap className="h-5 w-5 text-[var(--tk-primary)]" aria-hidden="true" />
+                  ) : (
+                    <Code2 className="h-5 w-5 text-fd-muted-foreground" aria-hidden="true" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-fd-foreground">{tier.name}</h3>
+                  <p className="text-[13px] text-fd-muted-foreground">
+                    {formatProjects(tier.projects)}
+                  </p>
+                </div>
+              </div>
 
-            <TrackedBuyButton
-              href={POLAR_CHECKOUT_URL}
-              placement="pricing_page"
-              value={sale.expired ? REGULAR_PRICE : SALE_PRICE}
-              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
-            >
-              {sale.expired ? 'Buy Pro License' : `Get Pro — $${SALE_PRICE}`}
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </TrackedBuyButton>
+              <div className="mb-2">
+                <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
+                  {formatPrice(tier.price)}
+                </span>
+                <span className="ml-1.5 text-[15px] text-fd-muted-foreground">one-time</span>
+              </div>
 
-            {/* Risk reversal — A2: surface the 14-day guarantee at the decision point */}
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[13px] text-fd-muted-foreground">
-              <ShieldCheck
-                className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
-                aria-hidden="true"
-              />
-              14-day money-back guarantee · No subscription, ever
-            </p>
-          </div>
+              <p className="mb-6 text-[13px] leading-snug text-fd-muted-foreground">{tier.blurb}</p>
+
+              <ul className="mb-8 flex-1 space-y-2.5">
+                {EVERY_TIER_FEATURES.map((feature) => (
+                  <li
+                    key={feature}
+                    className="flex items-start gap-2.5 text-[13px] text-fd-muted-foreground"
+                  >
+                    <Check
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                      aria-hidden="true"
+                    />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <TrackedBuyButton
+                href={checkoutUrl(tier.id)}
+                placement={`pricing_page_${tier.id}`}
+                value={tier.price}
+                className={
+                  tier.highlight
+                    ? 'inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]'
+                    : 'inline-flex items-center justify-center gap-2.5 rounded-lg border border-fd-border bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]'
+                }
+              >
+                Get {tier.name} — {formatPrice(tier.price)}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </TrackedBuyButton>
+            </div>
+          ))}
         </div>
+
+        {/* Risk reversal, once — it applies to all three tiers */}
+        <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-[13px] text-fd-muted-foreground">
+          <ShieldCheck
+            className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+            aria-hidden="true"
+          />
+          14-day money-back guarantee · No subscription, ever
+        </p>
+
+        {/* Honest anchor — most onboarding SaaS bills monthly; we charge once */}
+        <p className="mx-auto mt-4 max-w-xl text-center text-[13px] leading-snug text-fd-muted-foreground">
+          Appcues, Pendo &amp; WalkMe bill monthly, per seat.{' '}
+          <Link
+            href="/compare"
+            className="font-medium text-[var(--tk-primary)] underline-offset-2 hover:underline"
+          >
+            See the comparison
+          </Link>
+          .
+        </p>
 
         {/* Comparison table */}
         <div className="mt-20">
@@ -274,7 +201,7 @@ export function Pricing() {
               Compare
             </p>
             <h3 className="text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
-              Feature comparison
+              What the key is actually for
             </h3>
           </div>
           <div className="overflow-hidden rounded-xl border border-fd-border">
@@ -285,7 +212,9 @@ export function Pricing() {
               className="text-sm"
               style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}
             >
-              <caption className="sr-only">Feature comparison between Free and Pro tiers.</caption>
+              <caption className="sr-only">
+                What Tour Kit allows in development versus in production.
+              </caption>
               <colgroup>
                 <col style={{ width: '50%' }} />
                 <col style={{ width: '25%' }} />
@@ -303,13 +232,13 @@ export function Pricing() {
                     scope="col"
                     className="px-6 py-3.5 text-center text-[13px] font-semibold text-fd-foreground"
                   >
-                    Free
+                    In development
                   </th>
                   <th
                     scope="col"
                     className="px-6 py-3.5 text-center text-[13px] font-semibold text-[var(--tk-primary)]"
                   >
-                    Pro
+                    In production
                   </th>
                 </tr>
               </thead>

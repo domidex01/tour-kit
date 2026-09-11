@@ -9,18 +9,17 @@ import { LicenseProvider } from '@tour-kit/license'
 import type { ReactNode } from 'react'
 
 import { TrackedCtaLink } from '@/components/analytics/tracked-cta-link'
-import { useSaleCountdown } from '@/components/landing/sale-countdown'
-import { DISCOUNT_PERCENT } from '@/lib/pricing'
+import { STARTER_PRICE, formatPrice } from '@/lib/pricing'
 
-const BANNER_ID = 'launch-sale-2026-06'
+const BANNER_ID = 'licence-model-2026-09'
 
 /**
- * Launch-promo banner config, dogfooding @tour-kit/announcements on our own
- * site. `frequency: 'session'` + the sessionStorage adapter below means a
- * dismissal hides the banner for the current browser session only — it
- * returns on the next visit while the promo window (lib/pricing.ts) is open.
+ * Banner config, dogfooding @tour-kit/announcements on our own site.
+ * `frequency: 'session'` + the sessionStorage adapter below means a dismissal
+ * hides the banner for the current browser session only — it returns on the
+ * next visit.
  */
-const SALE_ANNOUNCEMENTS: AnnouncementConfig[] = [
+const BANNER_ANNOUNCEMENTS: AnnouncementConfig[] = [
   {
     id: BANNER_ID,
     variant: 'banner',
@@ -49,21 +48,23 @@ function MaybeLicensed({ children }: { children: ReactNode }) {
 }
 
 /**
- * Brand-blue launch-sale strip rendered at the top of every page (mounted in
- * app/layout.tsx). Renders nothing once the promo ends (SALE_END_ISO).
+ * Brand-blue strip rendered at the top of every page (mounted in
+ * app/layout.tsx), stating the licence model.
+ *
+ * It used to be the launch-sale banner and returned `null` on every render
+ * from 2026-06-18 to 2026-09-11 because the promo had expired — the site-wide
+ * banner slot was silently empty for three months. There is no expiry here to
+ * fall off.
  *
  * SSR renders null — the announcement only becomes visible after the
  * provider's auto-show effect runs on the client, so there is no hydration
- * mismatch and no banner in the static HTML after the sale.
+ * mismatch.
  */
 export function SaleAnnouncementBanner() {
-  const sale = useSaleCountdown()
-  if (sale.expired) return null
-
   return (
     <MaybeLicensed>
       <AnnouncementsProvider
-        announcements={SALE_ANNOUNCEMENTS}
+        announcements={BANNER_ANNOUNCEMENTS}
         storage={typeof window === 'undefined' ? null : window.sessionStorage}
         storageKey="utk-docs-announcements"
       >
@@ -79,16 +80,11 @@ export function SaleAnnouncementBanner() {
             className="group flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] font-medium"
           >
             <span>
-              Launch sale — <strong className="font-semibold">{DISCOUNT_PERCENT}% off</strong> Tour
-              Kit Pro
+              Tour Kit is <strong className="font-semibold">free in development</strong> —{' '}
+              {formatPrice(STARTER_PRICE)} one-time when you ship
             </span>
-            {sale.mounted && sale.remaining ? (
-              <span className="hidden text-white/80 sm:inline">
-                · ends in {sale.remaining.days}d {sale.remaining.hours}h
-              </span>
-            ) : null}
             <span className="underline underline-offset-4 group-hover:no-underline">
-              Get the deal →
+              See the tiers →
             </span>
           </TrackedCtaLink>
         </AnnouncementBanner>
