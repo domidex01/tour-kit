@@ -7,10 +7,10 @@ License text copyright (c) 2017 MariaDB Corporation Ab, All Rights Reserved.
 
 ## Parameters
 
-**Licensor:** domidex01
+**Licensor:** Dominique Degottex (domidex01)
 
 **Licensed Work:** Tour Kit
-The Licensed Work is (c) 2026 domidex01
+The Licensed Work is (c) 2026 Dominique Degottex
 
 **Additional Use Grant:** You may use the Licensed Work for development,
 evaluation, testing, continuous integration, and any other non-production
