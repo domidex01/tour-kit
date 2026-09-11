@@ -4,6 +4,7 @@
   "description": "React AI chat widget with RAG & tour context — drop-in conversational assistant powered by Vercel AI SDK with vector search.",
   "author": "Tour Kit Team",
   "license": "BUSL-1.1",
+  "funding": "https://usertourkit.com/pricing",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

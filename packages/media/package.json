@@ -4,6 +4,7 @@
   "description": "React video & media embeds — YouTube, Vimeo, Loom, Wistia, HTML5, GIF, Lottie with captions and reduced-motion fallbacks.",
   "author": "Tour Kit Team",
   "license": "BUSL-1.1",
+  "funding": "https://usertourkit.com/pricing",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

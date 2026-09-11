@@ -4,6 +4,7 @@
   "description": "React in-app microsurveys — NPS, CSAT, CES with skip logic, audience targeting, fatigue prevention and 5 display modes.",
   "author": "Tour Kit Team",
   "license": "BUSL-1.1",
+  "funding": "https://usertourkit.com/pricing",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

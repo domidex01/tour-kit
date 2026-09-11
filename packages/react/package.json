@@ -4,6 +4,7 @@
   "description": "React onboarding & product tour components — accessible, headless, Tailwind & shadcn-ready, with Next.js, React Router, TanStack adapters.",
   "author": "Tour Kit Team",
   "license": "BUSL-1.1",
+  "funding": "https://usertourkit.com/pricing",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

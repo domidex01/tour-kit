@@ -4,6 +4,7 @@
   "description": "React scheduling hooks with IANA timezones, business hours, blackouts & recurring patterns — show UI on a schedule.",
   "author": "Tour Kit Team",
   "license": "BUSL-1.1",
+  "funding": "https://usertourkit.com/pricing",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

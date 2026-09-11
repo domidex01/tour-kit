@@ -4,6 +4,7 @@
   "description": "React Testing Library helpers for Tour Kit — virtual-element Floating UI pattern + act() flush wrapped once, so consumer tests don't repeat the boilerplate.",
   "author": "Tour Kit Team",
   "license": "MIT",
+  "funding": "https://usertourkit.com/pricing",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

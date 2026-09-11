@@ -4,6 +4,7 @@
   "description": "Headless Svelte 5 binding for the Tour Kit engine — product tours with no React installed.",
   "author": "Tour Kit Team",
   "license": "BUSL-1.1",
+  "funding": "https://usertourkit.com/pricing",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

@@ -4,6 +4,7 @@
   "description": "Plugin-based analytics for React tours & onboarding — ship events to PostHog, Mixpanel, Amplitude, GA4 or any custom backend.",
   "author": "Tour Kit Team",
   "license": "BUSL-1.1",
+  "funding": "https://usertourkit.com/pricing",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",

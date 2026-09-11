@@ -4,6 +4,7 @@
   "description": "React onboarding checklists with task dependencies, progress tracking & persistence — for getting-started flows and activation.",
   "author": "Tour Kit Team",
   "license": "BUSL-1.1",
+  "funding": "https://usertourkit.com/pricing",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
