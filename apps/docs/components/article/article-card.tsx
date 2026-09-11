@@ -31,12 +31,12 @@ export function ArticleCard({
   return (
     <Link
       href={href}
-      className="group flex flex-col overflow-hidden rounded-lg border border-fd-border bg-fd-card transition-all hover:border-fd-border/80 hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--tk-card-edge)] bg-fd-muted transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-3 flex items-center gap-2">
           {badge && (
-            <span className="inline-flex w-fit items-center rounded-full bg-fd-muted px-2.5 py-0.5 text-[11px] font-medium text-fd-muted-foreground">
+            <span className="inline-flex w-fit items-center rounded-full bg-fd-secondary px-2.5 py-0.5 text-[11px] font-medium text-fd-muted-foreground">
               {badge}
             </span>
           )}
@@ -59,13 +59,13 @@ export function ArticleCard({
             />
           </div>
         )}
-        <h3 className="mb-2 text-[15px] font-semibold text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
+        <h3 className="mb-2 text-[15px] font-semibold leading-snug text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
           {title}
         </h3>
-        <p className="mb-4 flex-1 text-[11px] leading-relaxed text-fd-muted-foreground">
+        <p className="mb-4 flex-1 text-[13px] leading-relaxed text-fd-muted-foreground">
           {description}
         </p>
-        <span className="inline-flex items-center gap-1 text-[13px] font-medium text-[var(--color-fd-primary)]">
+        <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--color-fd-primary)]">
           Read article
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </span>

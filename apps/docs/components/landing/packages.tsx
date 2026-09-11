@@ -1,3 +1,4 @@
+import { SectionHead } from '@/components/landing/section-head'
 import Link from 'next/link'
 
 /**
@@ -83,55 +84,66 @@ const extensions = [
 
 export function Packages() {
   return (
-    <section className="bg-[var(--color-fd-muted)] dark:bg-fd-muted/30 px-6 py-28 sm:px-8 md:py-36 lg:px-12">
+    <section className="px-6 py-36 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        {/* Header — right-aligned for contrast with previous left-aligned sections */}
-        <div className="mb-16 ml-auto max-w-lg text-right">
-          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            One install.
-            <br />
-            Ten packages.
-          </h2>
-          <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-            Start with the free core. Add analytics, checklists, or scheduling when you need them —
-            each package is independently tree-shakeable.
-          </p>
-        </div>
+        {/* Right-aligned, for contrast with the left-aligned bands around it
+            (Figma 3792:2081 sets the head at x=608 in a 1120 container). */}
+        <SectionHead
+          align="end"
+          title={
+            <>
+              One install.
+              <br />
+              Ten packages.
+            </>
+          }
+        >
+          Start with the free core. Add analytics, checklists, or scheduling when you need them —
+          each package is independently tree-shakeable.
+        </SectionHead>
 
-        {/* Core packages — featured layout: first one large, rest smaller */}
-        <div className="mb-8 grid gap-4 md:grid-cols-[1.2fr_1fr_1fr]">
-          {corePackages.map((pkg, i) => (
+        {/* 408 / 340 / 340 on a 16px gutter — the design gives core the wider
+            card because it carries five capability tags to the others' three.
+            Three across only from `lg`: at the `md` breakpoint the columns are
+            ~240px and both the install command and the tag row clip. */}
+        <div className="mt-16 grid gap-4 lg:grid-cols-[408fr_340fr_340fr]">
+          {corePackages.map((pkg) => (
             <div
               key={pkg.name}
-              className={`rounded-lg border border-fd-border bg-fd-card p-6 transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                i === 0 ? 'md:row-span-1' : ''
-              }`}
+              className="flex flex-col rounded-3xl border border-[var(--tk-card-edge)] bg-fd-muted p-6 transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-mono text-[14px] font-bold text-fd-foreground">{pkg.name}</h3>
-                <span className="font-mono text-[11px] text-fd-muted-foreground">{pkg.size}</span>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-[18px] font-bold leading-[21px] text-fd-foreground">
+                  {pkg.name}
+                </h3>
+                <span className="shrink-0 text-[11px] leading-[17px] text-fd-muted-foreground">
+                  {pkg.size}
+                </span>
               </div>
-              <p className="mb-4 text-[14px] leading-[1.6] text-fd-muted-foreground">
+
+              <p className="mt-4 text-[14px] leading-[1.6] text-fd-muted-foreground">
                 {pkg.description}
               </p>
-              <div className="mb-5 flex flex-wrap gap-1.5">
+
+              <div className="mt-4 flex flex-wrap gap-x-1.5 gap-y-[5px]">
                 {pkg.features.map((f) => (
                   <span
                     key={f}
-                    className="rounded bg-fd-muted px-2 py-0.5 font-mono text-[11px] text-fd-muted-foreground"
+                    className="rounded bg-fd-secondary px-2 py-0.5 text-[11px] leading-[17px] text-fd-muted-foreground"
                   >
                     {f}
                   </span>
                 ))}
               </div>
-              <div className="flex items-center justify-between border-t border-fd-border pt-4">
-                <code className="font-mono text-[11px] text-fd-muted-foreground">
-                  <span className="select-none opacity-30">$ </span>
+
+              <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--tk-card-edge)] pt-4">
+                <code className="truncate font-mono text-[11px] leading-[17px] text-fd-muted-foreground">
+                  <span className="select-none opacity-40">$ </span>
                   {pkg.install}
                 </code>
                 <Link
                   href={pkg.href}
-                  className="font-mono text-[12px] font-semibold text-[var(--landing-accent)] transition-colors hover:opacity-80"
+                  className="shrink-0 text-[12px] font-bold leading-[18px] text-fd-foreground transition-colors hover:text-[var(--color-fd-primary)]"
                 >
                   {pkg.linkLabel} &rarr;
                 </Link>
@@ -140,33 +152,29 @@ export function Packages() {
           ))}
         </div>
 
-        {/* Divider */}
-        <div className="mb-8 flex items-center gap-4">
-          <div className="h-px flex-1 border-t border-dashed border-fd-border" />
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-fd-muted-foreground">
+        {/* rule — label — rule (Figma 3792:2148). Solid slate-400 hairlines. */}
+        <div className="mt-8 flex items-center gap-4">
+          <div className="h-px flex-1 bg-[var(--tk-card-edge)]" />
+          <span className="text-[11px] font-semibold uppercase leading-[17px] tracking-[0.05em] text-fd-muted-foreground">
             Extensions
           </span>
-          <div className="h-px flex-1 border-t border-dashed border-fd-border" />
+          <div className="h-px flex-1 bg-[var(--tk-card-edge)]" />
         </div>
 
-        {/* Extensions — compact grid */}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {extensions.map((pkg) => (
-            <div
+            <Link
               key={pkg.name}
-              className="group flex items-center justify-between rounded-lg border border-dashed border-fd-border bg-fd-card px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-solid hover:shadow-sm"
+              href={pkg.href}
+              className="flex flex-col gap-4 rounded-2xl border border-dashed border-[var(--tk-card-edge)] bg-fd-muted px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-solid hover:shadow-sm"
             >
-              <div className="min-w-0">
-                <h3 className="font-mono text-[12px] font-bold text-fd-foreground">{pkg.name}</h3>
-                <p className="text-[12px] text-fd-muted-foreground">{pkg.description}</p>
-              </div>
-              <Link
-                href={pkg.href}
-                className="ml-4 shrink-0 font-mono text-[11px] font-semibold text-[var(--landing-accent)] opacity-0 transition-opacity group-hover:opacity-100"
-              >
-                &rarr;
-              </Link>
-            </div>
+              <span className="text-[18px] font-bold leading-[18px] text-fd-foreground">
+                {pkg.name}
+              </span>
+              <span className="text-[12px] leading-[18px] text-fd-muted-foreground">
+                {pkg.description}
+              </span>
+            </Link>
           ))}
         </div>
       </div>

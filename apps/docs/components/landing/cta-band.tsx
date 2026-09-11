@@ -1,4 +1,5 @@
 import { type CtaPlacement, TrackedCtaLink } from '@/components/analytics/tracked-cta-link'
+import { SectionBackdrop } from '@/components/landing/section-backdrop'
 import { ArrowRight, Sparkles } from 'lucide-react'
 
 interface CtaBandProps {
@@ -54,10 +55,15 @@ export function CtaBand({
   secondaryLabel = 'See pricing',
 }: CtaBandProps) {
   return (
-    <section className="px-6 py-8 sm:px-8 lg:px-12">
-      <div className="relative mx-auto max-w-[1120px] overflow-hidden rounded-3xl border border-fd-border/50 shadow-2xl">
+    <section className="relative px-6 py-8 sm:px-8 lg:px-12">
+      <SectionBackdrop />
+      <div className="relative mx-auto max-w-[1120px] overflow-hidden rounded-3xl border border-[var(--tk-card-edge)] shadow-2xl">
         {/* Background images — cute 3D lighthouse diorama, day for light mode
-            and twilight for dark mode */}
+            and twilight for dark mode. The twilight plate carries far more
+            saturation than the day one, so it runs at a lower opacity: at a
+            matched 0.5 the aurora reads as the subject of the band, where the
+            dark frame (3945:2052) draws it as a texture under a near-flat
+            panel. */}
         <div className="pointer-events-none absolute inset-0">
           <img
             src="/cta-island-day.avif"
@@ -73,19 +79,9 @@ export function CtaBand({
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
+            className="absolute inset-0 hidden h-full w-full object-cover opacity-[0.28] dark:block"
           />
         </div>
-
-        {/* Dot grid overlay */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-[0.3]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, var(--color-fd-border) 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
 
         {/* Soft brand glow */}
         <div
@@ -94,17 +90,17 @@ export function CtaBand({
         />
 
         {/* Frosted-glass content card, floating over the backdrop */}
-        <div className="relative px-5 py-20 sm:px-10 sm:py-28 lg:py-36">
-          <div className="mx-auto flex max-w-[960px] flex-col items-start gap-7 rounded-2xl border border-fd-border/50 bg-fd-background/55 p-8 shadow-xl backdrop-blur-xl sm:p-10 lg:flex-row lg:items-center lg:justify-between lg:gap-10 dark:bg-fd-background/50">
-            <div className="max-w-xl">
+        <div className="relative px-5 py-16 sm:px-10 sm:py-20">
+          <div className="mx-auto flex max-w-[1002px] flex-col items-start gap-8 rounded-2xl border border-[var(--tk-card-edge)] bg-fd-background/55 p-8 shadow-xl backdrop-blur-xl sm:p-10 lg:flex-row lg:items-center lg:justify-between lg:gap-10 dark:bg-fd-background/50">
+            <div className="max-w-[509px]">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-fd-primary)]/30 bg-[var(--color-fd-primary)]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-fd-primary)]">
                 <Sparkles className="h-3 w-3" aria-hidden="true" />
                 {eyebrow}
               </span>
-              <h2 className="mt-3 text-2xl font-extrabold tracking-[-0.02em] text-fd-foreground sm:text-3xl">
+              <h2 className="mt-3 text-[clamp(1.75rem,4vw,3rem)] font-bold leading-[1.042] tracking-[-0.015em] text-fd-foreground">
                 {heading}
               </h2>
-              <p className="mt-2 text-[15px] leading-relaxed text-fd-muted-foreground">{subtext}</p>
+              <p className="mt-2 text-[16px] leading-[1.53] text-fd-muted-foreground">{subtext}</p>
             </div>
             <div className="flex shrink-0 flex-col items-center gap-2.5 sm:items-end">
               <div className="flex flex-wrap items-center justify-center gap-3">
@@ -122,7 +118,7 @@ export function CtaBand({
                 <TrackedCtaLink
                   href={secondaryHref}
                   placement={placement}
-                  className="inline-flex items-center rounded-lg border border-fd-border bg-fd-background/70 px-6 py-3 text-[14px] font-semibold text-fd-foreground backdrop-blur-sm transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
+                  className="inline-flex items-center rounded-lg border border-[var(--tk-hairline)] bg-fd-background/70 px-6 py-3 text-[14px] font-semibold text-fd-foreground backdrop-blur-sm transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
                 >
                   {secondaryLabel}
                 </TrackedCtaLink>

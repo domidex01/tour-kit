@@ -192,6 +192,38 @@ img {
   --tk-navbar-edge: rgb(144 161 185 / 0.25); /* slate-400 @25% */
   --tk-nav-link: rgb(69 85 108 / 0.93); /* slate-600 @93% — 6.3:1 on white */
 
+  /* ---- Card edges ------------------------------------------------------
+     Every card on the home page — package, plan, blog, compare, extension,
+     FAQ rule — is drawn with a slate-400 edge at low alpha. Read off the
+     RENDERED frame, not the code export: the export reports the layer as a
+     solid slate-400 (#90a1b9) because it drops layer opacity, while the
+     pixels measure #dde3eb on the light ground and #20293e on the dark one.
+     Those are that same slate-400 at 25% and 20%.
+
+     Not --color-fd-border: that one also edges Fumadocs' own chrome through
+     the docs, and its dark value (#314158) is a visible step heavier than the
+     design draws here. Not --tk-navbar-edge either — the same value today,
+     but that token is pinned to the navbar and free to move with it. */
+  --tk-card-edge: rgb(144 161 185 / 0.25); /* slate-400 @25% */
+
+  /* ---- Code ink --------------------------------------------------------
+     The landing page's own highlighter (components/landing/syntax-highlight)
+     shipped one hardcoded dark ramp, which was right while every code panel
+     was a dark window floating on the page. The Figma frames draw those
+     panels on the page ground — slate-50 in light mode, where that ramp's
+     plain token measures 1.4:1 — so the ramp flips with the theme now.
+     Every value below clears 4.5:1 on slate-50. */
+  --tk-code-plain: #334155; /* slate-700 — 9.6:1 */
+  --tk-code-keyword: #7c3aed; /* violet-600 — 5.8:1 */
+  --tk-code-string: #047857; /* emerald-700 — 5.1:1 */
+  --tk-code-comment: #64748b; /* slate-500 — 4.6:1 */
+  --tk-code-component: #2563eb; /* blue-600 — 5.2:1 */
+  --tk-code-tag: #0e7490; /* cyan-700 — 5.0:1 */
+  --tk-code-attr: #9333ea; /* purple-600 — 5.0:1 */
+  --tk-code-func: #b45309; /* amber-700 — 4.9:1 */
+  --tk-code-number: #c2410c; /* orange-700 — 5.4:1 */
+  --tk-code-bracket: #64748b; /* slate-500 — punctuation is still text */
+
   /* ---- Raised control surfaces ------------------------------------------
      `secondary` is a control at rest (the search pill, a secondary button),
      `accent` is that same control one step up on hover or when selected.
@@ -272,6 +304,26 @@ img {
   /* ---- Navbar chrome --------------------------------------------------- */
   --tk-navbar-edge: rgb(98 116 142 / 0.2); /* slate-500 @20% */
   --tk-nav-link: rgb(179 179 179 / 0.8); /* 5.8:1 on slate-950 */
+
+  /* ---- Card edges ------------------------------------------------------
+     slate-400 @20%, which composites to the #20293e the dark frame measures.
+     Slate-400 and not the navbar's slate-500: at the same alpha slate-500
+     lands on #171d33, a step too dim to read as an edge on slate-950. */
+  --tk-card-edge: rgb(144 161 185 / 0.2);
+
+  /* ---- Code ink --------------------------------------------------------
+     The original ramp, unchanged — it was authored against a dark panel and
+     this is the theme that still has one. */
+  --tk-code-plain: #abb2bf;
+  --tk-code-keyword: #c4a7e7;
+  --tk-code-string: #a8cc8c;
+  --tk-code-comment: #8b93a3; /* was #5c6370 — 2.4:1 on the panel it sits on */
+  --tk-code-component: #89b4fa;
+  --tk-code-tag: #7fb4ca;
+  --tk-code-attr: #cba6f7;
+  --tk-code-func: #e2cca9;
+  --tk-code-number: #f5a97f;
+  --tk-code-bracket: #8b93a3; /* was #5a5a6e — 2.2:1 */
 
   /* ---- Raised control surfaces ----------------------------------------- */
   --color-fd-secondary: #1d293d; /* slate-800 — 11.7:1 with the ink below */

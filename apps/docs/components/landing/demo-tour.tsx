@@ -22,6 +22,7 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { SectionHead } from './section-head'
 import { DEFAULT_PRESET_ID, StyleSwitcher } from './style-switcher'
 
 /* ═══════════════════════════════════════════
@@ -1435,17 +1436,20 @@ export function DemoTour() {
   const ActiveComponent = active.component
 
   return (
-    <section className="px-6 py-24 sm:px-8 md:py-32 lg:px-12">
+    <section className="px-6 py-32 sm:px-8 lg:px-12">
+      {/* 1152px here, not the 1120 the rest of the page uses — the tab row
+          needs the extra width to hold eleven packages on two lines
+          (Figma 3792:1684). */}
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12 text-center">
-          <h2 className="mb-5 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            Try before you install
-          </h2>
-          <p className="mx-auto max-w-lg text-[16px] text-fd-muted-foreground">
-            Interactive demos for every package. No signup, no sandbox — just click through and see
-            what ships.
-          </p>
-        </div>
+        <SectionHead
+          align="center"
+          className="mb-12"
+          measure="max-w-[512px]"
+          title="Try before you install"
+        >
+          Interactive demos for every package. No signup, no sandbox — just click through and see
+          what ships.
+        </SectionHead>
 
         {/* Tab bar */}
         <div className="mb-6 flex flex-wrap justify-center gap-1.5">

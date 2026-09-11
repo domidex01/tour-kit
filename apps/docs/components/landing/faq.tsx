@@ -1,5 +1,6 @@
 'use client'
 
+import { SectionHead } from '@/components/landing/section-head'
 import { useState } from 'react'
 
 const FAQ_ITEMS = [
@@ -53,18 +54,16 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
-    <section className="px-6 py-28 sm:px-8 md:py-36 lg:px-12">
+    <section className="px-6 py-36 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        <div className="mx-auto mb-12 max-w-lg text-center">
-          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            The honest answers.
-          </h2>
-          <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-            What every developer asks before adding another dependency. No marketing spin.
-          </p>
-        </div>
+        <SectionHead align="center" title="The honest answers.">
+          What every developer asks before adding another dependency. No marketing spin.
+        </SectionHead>
 
-        <div className="mx-auto max-w-3xl divide-y divide-fd-border overflow-hidden rounded-xl border border-fd-border bg-fd-card">
+        {/* No card around the list in the redesign (Figma 3792:2689): the
+            questions sit on the page ground, separated by hairlines, on a
+            720px measure centred in the 1120 container. */}
+        <div className="mx-auto mt-[72px] max-w-[720px] divide-y divide-[var(--tk-card-edge)] border-y border-[var(--tk-card-edge)]">
           {FAQ_ITEMS.map((item, i) => {
             const isOpen = openIndex === i
             const panelId = `home-faq-panel-${i}`
@@ -77,7 +76,7 @@ export function FAQ() {
                   aria-expanded={isOpen}
                   aria-controls={panelId}
                   onClick={() => setOpenIndex(isOpen ? null : i)}
-                  className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
+                  className="flex w-full cursor-pointer items-center justify-between gap-4 py-8 text-left text-[15px] font-semibold leading-6 text-fd-foreground transition-colors hover:text-[var(--color-fd-primary)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
                 >
                   {item.q}
                   <svg
@@ -100,7 +99,7 @@ export function FAQ() {
                   className={`grid transition-all duration-200 ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
                 >
                   <div className="overflow-hidden">
-                    <p className="px-6 pb-5 text-[14px] leading-relaxed text-fd-muted-foreground">
+                    <p className="pb-8 text-[14px] leading-[1.6] text-fd-muted-foreground">
                       {item.a}
                     </p>
                   </div>

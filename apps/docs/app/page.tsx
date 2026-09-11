@@ -5,6 +5,7 @@ import { Footer } from '@/components/landing/footer'
 import { Hero } from '@/components/landing/hero'
 import { Packages } from '@/components/landing/packages'
 import { QuickStart } from '@/components/landing/quick-start'
+import { SectionBackdrop } from '@/components/landing/section-backdrop'
 import { baseOptions } from '@/lib/layout.shared'
 import {
   OrganizationJsonLd,
@@ -95,18 +96,6 @@ const CompareGrid = dynamic(
   }
 )
 
-const SocialProof = dynamic(
-  () => import('@/components/landing/social-proof').then((m) => ({ default: m.SocialProof })),
-  {
-    loading: () => (
-      <div
-        aria-hidden="true"
-        className="mx-auto my-12 h-[360px] w-full max-w-[1120px] animate-pulse rounded-2xl bg-fd-muted/30"
-      />
-    ),
-  }
-)
-
 const PricingTeaser = dynamic(
   () => import('@/components/landing/pricing-teaser').then((m) => ({ default: m.PricingTeaser })),
   {
@@ -160,71 +149,51 @@ export default function HomePage() {
           reassurance="Free & MIT-licensed — no signup, no credit card."
         />
         <Packages />
-        <ComparisonTable />
+
+        {/* Pricing and the ownership table share ONE backdrop. In the frames
+            the pricing section's line art and edge glows are 1237px tall and
+            overflow into the table below it, so drawing a backdrop per section
+            would put a seam where the design has none (Figma 3792:2177). */}
+        <div className="relative">
+          <SectionBackdrop />
+          <PricingTeaser />
+          <ComparisonTable />
+        </div>
+
         <CompareGrid />
-        <PricingTeaser />
-        <SocialProof />
         <BlogPreview />
         <FAQ />
 
-        {/* CTA Footer */}
-        <section className="relative overflow-hidden px-6 py-24 sm:px-8 md:py-32 lg:px-12">
-          {/* Background images - same as hero */}
-          <div className="pointer-events-none absolute inset-0 -z-10">
-            <img
-              src="/tourkit-lighthouse.avif"
-              alt=""
-              aria-hidden="true"
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 h-full w-full object-cover dark:hidden"
-            />
-            <img
-              src="/hero-dark.avif"
-              alt=""
-              aria-hidden="true"
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
-            />
-          </div>
+        {/* Closing CTA (Figma 3792:2747) */}
+        <section className="relative px-6 py-32 sm:px-8 lg:px-12">
+          <SectionBackdrop />
 
-          {/* Dot grid overlay */}
-          <div
-            className="pointer-events-none absolute inset-0 -z-10 opacity-[0.35]"
-            style={{
-              backgroundImage:
-                'radial-gradient(circle, var(--color-fd-border) 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
-            }}
-          />
+          <div className="mx-auto max-w-[1120px] text-center">
+            <h2 className="text-[clamp(1.75rem,3.6vw,2.5rem)] font-bold leading-[1.125] tracking-[-0.015em] text-balance text-fd-foreground">
+              Own your onboarding.{' '}
+              <span className="text-[var(--color-fd-primary)]">Ship it today.</span>
+            </h2>
 
-          <div className="relative mx-auto max-w-[1120px]">
-            <div className="mx-auto max-w-xl rounded-2xl border border-fd-border/50 bg-fd-background/40 p-10 text-center shadow-2xl backdrop-blur-xl dark:bg-fd-background/40 sm:p-12">
-              <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-[-0.02em] text-[var(--color-fd-foreground)] dark:text-white sm:text-4xl">
-                Own your onboarding.{' '}
-                <span className="text-[var(--color-fd-primary)]">Ship it today.</span>
-              </h2>
+            <p className="mx-auto mt-4 max-w-[480px] text-[16px] leading-[1.5] text-fd-muted-foreground">
+              No vendor lock-in. No monthly invoice. Just code you control and users who convert.
+            </p>
 
-              <p className="mb-10 text-[16px] text-fd-muted-foreground">
-                No vendor lock-in. No monthly invoice. Just code you control and users who convert.
-              </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <code className="inline-flex items-center gap-3 rounded-lg border border-[var(--tk-card-edge)] bg-fd-muted px-5 py-3 font-mono text-[14px] text-fd-muted-foreground">
+                <span className="select-none opacity-50">$</span>
+                pnpm add @tour-kit/core
+              </code>
 
-              {/* Install command */}
-              <div className="mx-auto mb-8 inline-flex items-center gap-3 rounded-lg border border-fd-border/50 bg-fd-muted/30 px-6 py-3 font-mono text-[14px] backdrop-blur-sm">
-                <span className="select-none text-fd-muted-foreground/50">$</span>
-                <span className="text-fd-foreground/70">pnpm add @tour-kit/core</span>
-              </div>
-
-              <div className="flex justify-center">
-                <Link
-                  href="/builder"
-                  className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-7 py-3.5 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30"
-                >
-                  Get started
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </div>
+              <Link
+                href="/builder"
+                className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-6 py-3.5 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
+              >
+                Get started
+                <ArrowRight
+                  className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </Link>
             </div>
           </div>
         </section>

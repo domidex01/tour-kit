@@ -132,6 +132,7 @@ describe.each([
       '--color-fd-destructive-foreground',
       '--tk-hairline',
       '--tk-navbar-edge',
+      '--tk-card-edge',
       '--tk-nav-link',
       '--tk-cta',
       '--tk-cta-ink',
@@ -189,6 +190,16 @@ describe.each([
   it('keeps the navbar edge a wash, not a full-strength hairline', () => {
     const alpha = t['--tk-navbar-edge'].match(/\/\s*([\d.]+)\s*\)/)?.[1]
     expect(alpha, `${t['--tk-navbar-edge']} declares no alpha`).toBeDefined()
+    expect(Number(alpha)).toBeLessThan(0.5)
+  })
+
+  // The card edge is a wash for the same reason and read the same way — off
+  // the rendered frame, because the export drops the layer's opacity and calls
+  // it a solid slate-400. Declared opaque it would ring every card on the home
+  // page in a hard grey the design never draws.
+  it('keeps the card edge a wash, not a full-strength hairline', () => {
+    const alpha = t['--tk-card-edge'].match(/\/\s*([\d.]+)\s*\)/)?.[1]
+    expect(alpha, `${t['--tk-card-edge']} declares no alpha`).toBeDefined()
     expect(Number(alpha)).toBeLessThan(0.5)
   })
 
