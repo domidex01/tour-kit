@@ -33,8 +33,8 @@ export function ArticleCard({
       href={href}
       className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--tk-card-edge)] bg-fd-muted transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="flex flex-1 flex-col p-6">
-        <div className="mb-3 flex items-center gap-2">
+      <div className="flex flex-1 flex-col p-5">
+        <div className="mb-2.5 flex items-center gap-2">
           {badge && (
             <span className="inline-flex w-fit items-center rounded-full bg-fd-secondary px-2.5 py-0.5 text-[11px] font-medium text-fd-muted-foreground">
               {badge}
@@ -62,7 +62,7 @@ export function ArticleCard({
         <h3 className="mb-2 text-[15px] font-semibold leading-snug text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
           {title}
         </h3>
-        <p className="mb-4 flex-1 text-[13px] leading-relaxed text-fd-muted-foreground">
+        <p className="mb-3.5 flex-1 text-[13px] leading-[1.55] text-fd-muted-foreground">
           {description}
         </p>
         <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--color-fd-primary)]">
