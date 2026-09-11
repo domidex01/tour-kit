@@ -33,8 +33,10 @@ fails if one drifts.
 | **Card / popover** | `#ffffff` | `#0f172b` slate-900 | `--color-fd-card`, `--color-fd-popover` |
 | **Border** | `#e2e8f0` slate-200 | `#314158` slate-700 | `--color-fd-border` — quiet dividers, card edges |
 | **Hairline** | `#62748e` slate-500 | `#62748e` slate-500 | `--tk-hairline` — the visible edge on a *control* (button, input, badge, kbd), where WCAG 1.4.11 wants 3:1 |
-| **Secondary** | `#c6d2ff` indigo-200 | `#1d293d` slate-800 | `--color-fd-secondary` |
-| **Accent** | `#f1f5f9` slate-100 | `#312c85` indigo-900 | `--color-fd-accent` |
+| **Navbar edge** | `rgb(144 161 185 / 0.25)` | `rgb(98 116 142 / 0.2)` | `--tk-navbar-edge` — every edge on the bar: bottom rule, search pill, kbd chips, toggle |
+| **Nav-link ink** | `rgb(69 85 108 / 0.93)` | `rgb(179 179 179 / 0.8)` | `--tk-nav-link` — navbar links sit back from the wordmark on an alpha, not a second grey |
+| **Secondary** | `#f1f5f9` slate-100 | `#1d293d` slate-800 | `--color-fd-secondary` — a raised control at rest |
+| **Accent** | `#e2e8f0` slate-200 | `#314158` slate-700 | `--color-fd-accent` — that same control on hover or when selected |
 | **Destructive** | `#9f0712` red-800 | `#ff6467` red-400 | `--color-fd-destructive` |
 | **Success** | `#007a55` emerald-700 | `#5ee9b5` emerald-300 | `--tk-success` — comparison-table checks |
 | **Logo lamp** | `#FFE20A` | `#FFE20A` | Hardcoded in `TourKitLogo`; the 8 body paths are `currentColor` and follow the brand token |
@@ -187,22 +189,65 @@ rounded-md border border-fd-border bg-fd-card/80 px-2.5 py-1 text-[12px] font-se
 
 ## Chrome (phase 2)
 
-### Navbar — Figma `3945:1461`
+### Navbar — Figma `3945:1461` (dark) · `3830:1599` (light)
 
-Fumadocs already renders the design's geometry, so almost nothing was rebuilt:
-the 56px bar, the 240x35 search pill with its Ctrl/K chips, the 60x34 theme
-toggle and the Discord/npm/GitHub icons all come out of `baseOptions()` in
-`lib/layout.shared.tsx`, whose seven links match the Figma nav exactly.
+Fumadocs renders the design's geometry, so the navbar has no component of its
+own: the 56px bar, the 240x35 search pill with its Ctrl/K chips, the 60x34
+theme toggle and the 32px Discord/npm/GitHub hit areas all come out of
+`baseOptions()` in `lib/layout.shared.tsx`, whose seven links match the Figma
+nav exactly. What the navbar needs is for each control to read the colour the
+design gives it, which is the "NAVBAR CHROME" block in `globals.css`.
 
-The only override is edge colour, in `globals.css` under "NAVBAR CHROME": the
-design draws *controls* with the slate-500 hairline and keeps slate-700 for
-dividers, while Fumadocs uses `--color-fd-border` for both. The bar's own bottom
-rule deliberately keeps `--color-fd-border` — it reads as a divider, and
-slate-500 across the full width is heavy in light mode. `kbd` drops to 12px.
+> **Read the frame, not the export.** `get_design_context` reports a layer's
+> colour but not its opacity, so it called every navbar edge a solid slate-400
+> / slate-500 and the search pill a solid slate-100 / slate-800. The rendered
+> PNG says otherwise: the edges are that colour at 20-25%, and the pill is that
+> fill at ~50%. The values below are sampled pixels.
 
-Fumadocs' navbar is translucent (`bg-fd-background/80` + `backdrop-blur-lg`)
-where the mockup is flat slate-950. That is kept: a static mockup cannot show a
+| Element | Dark | Light |
+|---|---|---|
+| Every edge — bar rule, pill, chips, toggle | slate-500 @20% → `#161c2f` | slate-400 @25% → `#e2e7ed` |
+| Nav-link ink (`nav > ul`) | `rgb(179 179 179 / 0.8)` → `#8f9094` | `rgb(69 85 108 / 0.93)` → `#516076` |
+| Search pill fill (`[data-search-full]`) | slate-800 @50% → `#0f172a` | slate-100 @50% → `#f8fafc` |
+| kbd chip | slate-950 fill, 12px, sans | white fill, 12px, sans |
+| Toggle selected half | slate-800, solid | slate-100, solid |
+| Social glyphs (`a[aria-label]`) | `#7c86ff` indigo-400 | `#4f39f6` indigo-600 |
+
+Four things to know about that block:
+
+- **It hangs off stable hooks** — `[data-search-full]`, `[data-theme-toggle]`,
+  `nav > ul`, `a[aria-label]` — not off Tailwind class names and not off a
+  blanket `#nd-nav button`, which also caught the hamburger, the menu triggers
+  and the social links. The mega-menu cards keep `--color-fd-border` on
+  purpose: they are content inside a panel, not chrome on the bar.
+- **`a[aria-label]` is exactly the icon links.** Fumadocs sets `aria-label`
+  only for `type: 'icon'` items and every text link carries its name as text,
+  so the selector is precise — and `app/__tests__/nav-links.test.ts` pins that
+  every icon item declares a `label`, so it cannot go quietly empty.
+- **Two rules re-point a variable rather than set a property.** Nav links set
+  `--color-fd-muted-foreground` on the list so Fumadocs' own hover and
+  `data-[active]` branches keep resolving; the theme toggle re-points
+  `--color-fd-accent` at `--color-fd-secondary` for that one control, because
+  Fumadocs marks the selected half with `bg-fd-accent` and exposes no attribute
+  to select it on.
+- **The search pill has no fill rule at all.** Fumadocs ships
+  `bg-fd-secondary/50`, which is the wash the design renders. It only ever
+  looked wrong because the token underneath was indigo.
+
+Note the navbar edge is deliberately *not* `--tk-hairline`. That token stays at
+full strength because it edges controls elsewhere on the site that have no fill
+of their own, and WCAG 1.4.11 wants 3:1 for a boundary that is the only thing
+identifying a control. Every navbar control is identified by its own fill — the
+pill, the chips, the toggle's selected half — so its edge is free to whisper.
+
+One deviation stands: Fumadocs' navbar is translucent (`bg-fd-background/80` +
+`backdrop-blur-lg`) where the mockup is flat. A static mockup cannot show a
 blur, and the colour underneath already matches.
+
+Docs routes have no navbar at all: `DocsLayout` puts the logo, search, links
+and theme toggle in `#nd-sidebar`. That surface is not this Figma node, so the
+block above is scoped to `#nd-nav` and leaves it alone — it picks up the
+corrected `secondary`/`accent` tokens like everything else.
 
 ### Footer — Figma `3945:2766`
 

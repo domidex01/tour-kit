@@ -39,6 +39,24 @@ function contrast(fg: string, bg: string): number {
 }
 
 /**
+ * Flattens an `rgb(r g b / a)` token onto an opaque hex ground, so a token
+ * carrying alpha can be measured. luminance() only understands hex.
+ */
+function flatten(rgba: string, groundHex: string): string {
+  const m = rgba.match(/rgb\(\s*(\d+)\s+(\d+)\s+(\d+)\s*\/\s*([\d.]+)\s*\)/)
+  expect(m, `${rgba} is not an \`rgb(r g b / a)\` token`).not.toBeNull()
+  const alpha = Number((m as RegExpMatchArray)[4])
+  const ground = groundHex.replace('#', '')
+  const channels = [0, 2, 4].map((i, k) =>
+    Math.round(
+      Number((m as RegExpMatchArray)[k + 1]) * alpha +
+        Number.parseInt(ground.slice(i, i + 2), 16) * (1 - alpha)
+    )
+  )
+  return `#${channels.map((c) => c.toString(16).padStart(2, '0')).join('')}`
+}
+
+/**
  * Pulls one flat `selector { ... }` declaration block out of globals.css.
  * `:root` appears more than once (the base tokens, and a `--fd-layout-width`
  * override under @layer utilities), so callers disambiguate with `mustContain`.
@@ -62,6 +80,21 @@ const dark = tokensIn('\\.dark', '--color-fd-background')
 /** WCAG AA: 4.5:1 for body text, 3:1 for UI component boundaries. */
 const AA_TEXT = 4.5
 const AA_NON_TEXT = 3
+
+/** Tailwind v4's stock `slate`, which is the design's neutral ramp. */
+const SLATE_RAMP = [
+  '#f8fafc',
+  '#f1f5f9',
+  '#e2e8f0',
+  '#cad5e2',
+  '#90a1b9',
+  '#62748e',
+  '#45556c',
+  '#314158',
+  '#1d293d',
+  '#0f172b',
+  '#020618',
+]
 
 describe.each([
   ['light', light],
@@ -90,6 +123,8 @@ describe.each([
       '--color-fd-destructive',
       '--color-fd-destructive-foreground',
       '--tk-hairline',
+      '--tk-navbar-edge',
+      '--tk-nav-link',
       '--tk-cta',
       '--tk-cta-ink',
       '--landing-accent',
@@ -119,6 +154,45 @@ describe.each([
   ])('reaches AA non-text contrast for %s', (_label, fg, bg) => {
     expect(contrast(t[fg], t[bg])).toBeGreaterThanOrEqual(AA_NON_TEXT)
   })
+
+  // The navbar links are the site's primary navigation and are drawn on an
+  // alpha (Figma 3945:1461 / 3830:1599), so dialling that alpha down is the
+  // easy way to make them unreadable without touching a colour.
+  it('reaches AA for a navbar link once its alpha is composited', () => {
+    expect(
+      contrast(flatten(t['--tk-nav-link'], t['--color-fd-background']), t['--color-fd-background'])
+    ).toBeGreaterThanOrEqual(AA_TEXT)
+  })
+
+  // A raised control at rest and the same control on hover have to be
+  // distinguishable, which they are not if `secondary` and `accent` collapse
+  // to one value — the shape this block was in before, only mirrored.
+  it('keeps a control distinguishable from its own hover state', () => {
+    expect(t['--color-fd-secondary']).not.toBe(t['--color-fd-accent'])
+  })
+
+  // The navbar edge is a wash (slate @20-25%), read off the rendered Figma
+  // frame — the code export reports the layer's colour without its opacity and
+  // so calls it a solid slate-400/500. Anyone reading the WCAG 1.4.11 note on
+  // --tk-hairline and "fixing" this one to match will fail here: every navbar
+  // control is identified by its own fill, so its edge is free to whisper,
+  // while --tk-hairline keeps full strength for controls elsewhere that have
+  // no fill. That token is still held to 3:1 above.
+  it('keeps the navbar edge a wash, not a full-strength hairline', () => {
+    const alpha = t['--tk-navbar-edge'].match(/\/\s*([\d.]+)\s*\)/)?.[1]
+    expect(alpha, `${t['--tk-navbar-edge']} declares no alpha`).toBeDefined()
+    expect(Number(alpha)).toBeLessThan(0.5)
+  })
+
+  // Both surfaces are slate in the design; indigo is reserved for ink and the
+  // CTA fill. These two were theme-swapped, which is why the light-mode search
+  // pill rendered lavender and the dark-mode theme toggle rendered purple.
+  it.each(['--color-fd-secondary', '--color-fd-accent'])(
+    'draws %s from the neutral ramp, not the brand ramp',
+    (token) => {
+      expect(SLATE_RAMP).toContain(t[token].toLowerCase())
+    }
+  )
 })
 
 describe('the retired brand palette', () => {

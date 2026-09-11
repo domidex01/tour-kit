@@ -178,10 +178,30 @@ img {
   --tk-hairline: #62748e; /* slate-500 — control edges, 4.8:1 */
   --color-fd-ring: #4f39f6;
 
-  /* ---- Tinted brand surfaces ------------------------------------------ */
-  --color-fd-secondary: #c6d2ff; /* indigo-200 */
-  --color-fd-secondary-foreground: #372aac; /* indigo-800 — 7.4:1 on above */
-  --color-fd-accent: #f1f5f9; /* slate-100 */
+  /* ---- Navbar chrome (Figma 3830:1599 · light, 3945:1461 · dark) --------
+     Both values are read off the *rendered* Figma frame, not its code export:
+     the export reports a layer's colour but not its opacity, so it calls
+     every navbar edge a solid slate-400 when the pixels are slate-400 at 25%.
+     Sampled #e2e7ed here and #161c2f in dark, on the bar rule, the kbd chips
+     and the theme toggle alike — one wash for all four.
+
+     This is deliberately NOT --tk-hairline, which stays at full strength
+     because it edges controls elsewhere on the site that have no fill of
+     their own. Every navbar control is identified by its fill (the pill, the
+     chips, the toggle's selected half), so the edge is free to whisper. */
+  --tk-navbar-edge: rgb(144 161 185 / 0.25); /* slate-400 @25% */
+  --tk-nav-link: rgb(69 85 108 / 0.93); /* slate-600 @93% — 6.3:1 on white */
+
+  /* ---- Raised control surfaces ------------------------------------------
+     `secondary` is a control at rest (the search pill, a secondary button),
+     `accent` is that same control one step up on hover or when selected.
+     Both are slate, not indigo: the design draws every raised control in the
+     neutral ramp and reserves indigo for ink and the CTA fill. These two used
+     to be theme-swapped — indigo-200 here and slate-800 in `.dark` — which is
+     why the light-mode search pill rendered lavender. */
+  --color-fd-secondary: #f1f5f9; /* slate-100 — 16.9:1 with the ink below */
+  --color-fd-secondary-foreground: #020618; /* slate-950 */
+  --color-fd-accent: #e2e8f0; /* slate-200 — hover, 15.0:1 */
   --color-fd-accent-foreground: #020618;
 
   --color-fd-destructive: #9f0712; /* red-800 — 8.2:1 on white */
@@ -249,11 +269,15 @@ img {
   --tk-hairline: #62748e; /* slate-500 — control edges, 4.3:1 */
   --color-fd-ring: #7c86ff;
 
-  /* ---- Tinted brand surfaces ------------------------------------------ */
-  --color-fd-secondary: #1d293d; /* slate-800 */
+  /* ---- Navbar chrome --------------------------------------------------- */
+  --tk-navbar-edge: rgb(98 116 142 / 0.2); /* slate-500 @20% */
+  --tk-nav-link: rgb(179 179 179 / 0.8); /* 5.8:1 on slate-950 */
+
+  /* ---- Raised control surfaces ----------------------------------------- */
+  --color-fd-secondary: #1d293d; /* slate-800 — 11.7:1 with the ink below */
   --color-fd-secondary-foreground: #ebebeb;
-  --color-fd-accent: #312c85; /* indigo-900 */
-  --color-fd-accent-foreground: #c6d2ff; /* indigo-200 — 8.0:1 */
+  --color-fd-accent: #314158; /* slate-700 — hover, 8.0:1 */
+  --color-fd-accent-foreground: #ebebeb;
 
   --color-fd-destructive: #ff6467; /* red-400 — 6.6:1 on slate-950 */
   --color-fd-destructive-foreground: #020618;
@@ -592,26 +616,78 @@ img {
 }
 
 /* ========================================
-   NAVBAR CHROME — Figma 3945:1461
+   NAVBAR CHROME — Figma 3945:1461 (dark) · 3830:1599 (light)
    ========================================
-   Fumadocs already renders the design's geometry: a 56px bar, a 240x35 search
-   pill, 6px kbd chips and a 60x34 theme toggle. The only delta is the edge
-   colour. The design draws *controls* with the slate-500 hairline and keeps
-   the darker slate-700 for content dividers, whereas Fumadocs uses
-   --color-fd-border for both.
+   Fumadocs already renders the design's geometry — a 56px bar, a 240x35
+   search pill, 6px kbd chips, a 60x34 theme toggle, 32px social hit areas —
+   and baseOptions() already carries the same seven links and three icons,
+   because the design was drawn from this site's own IA. So the navbar needs
+   no component of its own; what it needs is for each control to read the
+   colour the design gives it.
 
-   The bar's own bottom rule deliberately keeps --color-fd-border: it reads as
-   a divider rather than a control, and slate-500 across the full width is
-   heavy-handed in light mode. */
-#nd-nav button,
+   Every rule below is pinned to a stable hook — [data-search-full],
+   [data-theme-toggle], `nav > ul`, a[aria-label] — rather than to a Tailwind
+   class or a blanket `#nd-nav button`, which also caught the hamburger, the menu
+   triggers and the social links and said nothing about which control it
+   meant. The mega-menu cards keep --color-fd-border on purpose: they are
+   content inside a panel, not chrome on the bar. */
+
+/* Every edge on the bar — its bottom rule, the search pill, the kbd chips and
+   the theme toggle — is one wash, which is how the design draws it. */
+#nd-nav > div,
+#nd-nav [data-search-full],
+#nd-nav [data-theme-toggle],
 #nd-nav kbd {
-  border-color: var(--tk-hairline);
+  border-color: var(--tk-navbar-edge);
 }
 
-/* The design's kbd chips are 12px; they would otherwise inherit the 14px
-   search-field size. */
+/* Nav links sit back from the wordmark. Redefining the variable on the list
+   (rather than setting `color`) keeps Fumadocs' own hover and data-[active]
+   branches intact — they resolve against this value. `nav > ul` is only the
+   primary list; the secondary icon list is nested a level deeper. */
+#nd-nav nav > ul {
+  --color-fd-muted-foreground: var(--tk-nav-link);
+}
+
+/* The search pill needs no fill rule. Fumadocs ships `bg-fd-secondary/50` and
+   the design renders slate-800 at 48.5% (dark) / slate-100 at 61% (light) —
+   the same wash. Only the token underneath was wrong, and that is fixed above.
+
+   kbd chips: 12px, and sans — the design sets them in Host Grotesk, while the
+   global `code, pre, kbd, samp` rule would otherwise put them in Geist Mono.
+   Docs-body kbd is untouched. */
 #nd-nav kbd {
+  font-family: inherit;
   font-size: 12px;
+}
+
+/* Theme toggle. The design fills the selected half with the same surface as
+   the search pill, so `accent` is re-pointed at `secondary` for this control
+   only — Fumadocs marks the active half with bg-fd-accent and there is no
+   attribute to select it on. Padding drops 6px -> 5px because the glyph is
+   16px in the design and `size-6.5 p-1.5` leaves 14px in a 26px box. */
+#nd-nav [data-theme-toggle] {
+  --color-fd-accent: var(--color-fd-secondary);
+  --color-fd-accent-foreground: var(--color-fd-secondary-foreground);
+}
+
+#nd-nav [data-theme-toggle] > svg {
+  padding: 5px;
+}
+
+/* Social glyphs are brand ink, not foreground — sampled #7c86ff (dark) and
+   #4f39f6 (light) off the rendered frame, which is exactly
+   --color-fd-primary in each theme. They are the only coloured thing on the
+   right of the bar, which is what keeps the wordmark and the icon row reading
+   as one pair.
+
+   `a[aria-label]` is exactly the icon links and nothing else: Fumadocs sets
+   aria-label only for `type: 'icon'` items, and every text link in the bar
+   carries its name as text instead. app/__tests__/nav-links.test.ts pins that
+   every icon item declares a label, so this selector cannot go quietly empty.
+   It catches the mobile menu's copies of the same three icons too. */
+#nd-nav a[aria-label] {
+  color: var(--color-fd-primary);
 }
 
 /* ========================================

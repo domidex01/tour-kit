@@ -242,7 +242,11 @@ export function baseOptions(): BaseLayoutProps {
       },
       {
         type: 'icon',
+        // `text` is never rendered for an icon item and the glyph is
+        // aria-hidden, so without `label` these links reach the accessibility
+        // tree with no name at all. Fumadocs reads `label` for the aria-label.
         text: 'Discord',
+        label: 'Discord',
         url: 'https://discord.com/channels/1515937013277265930/1515937474659225630',
         icon: <DiscordIcon className="w-5 h-5" />,
         external: true,
@@ -251,6 +255,7 @@ export function baseOptions(): BaseLayoutProps {
       {
         type: 'icon',
         text: 'npm',
+        label: 'npm',
         url: 'https://www.npmjs.com/package/@tour-kit/core',
         icon: <NpmIcon className="w-5 h-5" />,
         external: true,
