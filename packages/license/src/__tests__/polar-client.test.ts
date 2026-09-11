@@ -228,6 +228,39 @@ describe('validateLicenseKey', () => {
     expect(result.domain).toBe('example.com')
   })
 
+  it('auto-activates on the registrable domain, not the raw hostname', async () => {
+    // `foo.com` and `app.foo.com` are one project on /pricing, so they must be
+    // one activation slot — on Starter, which has exactly one, a subdomain that
+    // burned a second slot would watermark the customer's own site.
+    vi.stubGlobal('location', { hostname: 'app.foo.com' })
+    mockFetch
+      .mockResolvedValueOnce(mockFetchResponse(VALID_VALIDATE_RESPONSE_NO_ACTIVATION))
+      .mockResolvedValueOnce(mockFetchResponse({ ...VALID_ACTIVATE_RESPONSE, label: 'foo.com' }))
+
+    await validateLicenseKey('TK-XXXX', 'org_test_456')
+
+    const activateCall = mockFetch.mock.calls[1]
+    const body = JSON.parse((activateCall?.[1] as RequestInit).body as string)
+    expect(body.label).toBe('foo.com')
+    expect(body.label).not.toBe('app.foo.com')
+  })
+
+  it('activates a *.vercel.app production alias on its own full host', async () => {
+    // The suffix table's other direction: a bare project alias must NOT
+    // normalise to `vercel.app`, or one key would cover every deployment.
+    vi.stubGlobal('location', { hostname: 'myapp.vercel.app' })
+    mockFetch
+      .mockResolvedValueOnce(mockFetchResponse(VALID_VALIDATE_RESPONSE_NO_ACTIVATION))
+      .mockResolvedValueOnce(
+        mockFetchResponse({ ...VALID_ACTIVATE_RESPONSE, label: 'myapp.vercel.app' })
+      )
+
+    await validateLicenseKey('TK-XXXX', 'org_test_456')
+
+    const body = JSON.parse((mockFetch.mock.calls[1]?.[1] as RequestInit).body as string)
+    expect(body.label).toBe('myapp.vercel.app')
+  })
+
   it('returns valid with existing activation (no auto-activate)', async () => {
     mockFetch.mockResolvedValue(mockFetchResponse(VALID_VALIDATE_RESPONSE))
     const result = await validateLicenseKey('TK-XXXX', 'org_test_456')

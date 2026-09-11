@@ -1,7 +1,7 @@
 import type { ZodError } from 'zod'
 import type { LicenseState, PolarActivateResponse, PolarValidateResponse } from '../types'
 import { readCache, writeCache } from './cache'
-import { getCurrentDomain, isDevEnvironment, isEphemeralHost } from './domain'
+import { getCurrentDomain, isDevEnvironment, isEphemeralHost, toRegistrableDomain } from './domain'
 import {
   createDevBypassState,
   createPreviewBypassState,
@@ -301,7 +301,18 @@ export async function validateLicenseKey(
 
     if (!response.activation && domain) {
       try {
-        const activateResponse = await activateKey(normalizedKey, orgId, domain, options)
+        // Activate on the registrable domain, not the raw hostname: `foo.com`
+        // and `app.foo.com` are one project on the pricing page, so they must
+        // be one activation slot. The ephemeral-host bypass above still reads
+        // the raw hostname — normalising first would turn
+        // `<hash>.<project>.pages.dev` into `<project>.pages.dev` and stop it
+        // matching the preview pattern.
+        const activateResponse = await activateKey(
+          normalizedKey,
+          orgId,
+          toRegistrableDomain(domain),
+          options
+        )
         activationLabel = activateResponse.label
         usage = activateResponse.licenseKey.usage
       } catch (activationError) {

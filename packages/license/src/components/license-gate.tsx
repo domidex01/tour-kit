@@ -39,6 +39,25 @@ export function LicenseGate({ require: _require, children, fallback, loading }: 
   if (!context.isGated) return <>{children}</>
   if (fallback) return <>{fallback}</>
 
+  // Gated, but on a development host: keep the console warning, drop the badge.
+  // The licence grants development, evaluation, testing and CI use without
+  // charge, so badging a dev host would have the runtime contradict the terms
+  // the package ships under. The warning is the half worth keeping — it tells a
+  // developer their key is missing before they deploy.
+  //
+  // Guarded here rather than inside <LicenseWatermark> on purpose: that
+  // component is also mounted directly by <LicenseTestMode>, whose documented
+  // job is previewing the badge locally. A host check inside it would defeat
+  // the one workflow that needs the badge on localhost.
+  if (isDevEnvironment()) {
+    return (
+      <>
+        {children}
+        <LicenseWarning />
+      </>
+    )
+  }
+
   return (
     <>
       {children}

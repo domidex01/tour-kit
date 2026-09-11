@@ -19,7 +19,7 @@ export function LicenseWarning() {
     hasWarned = true
 
     console.warn(
-      '%c[TourKit]%c This application is using Tour Kit Pro without a valid license.\nPurchase a license at https://usertourkit.com/pricing',
+      '%c[TourKit]%c This application is using Tour Kit Pro without a valid license.\nA production licence is a one-time purchase from $9.99 — https://usertourkit.com/pricing',
       'color: #e74c3c; font-weight: bold',
       'color: inherit'
     )
