@@ -10,6 +10,12 @@ interface BlogCtaProps {
    * scanners mid-scroll without an interstitial.
    */
   variant: 'band' | 'card'
+  /**
+   * The index draws this band full-bleed (BlogHero's frame, 3880:2040, runs
+   * the backdrop art out to both edges below the pagination); a post keeps it
+   * inside its reading column.
+   */
+  fullBleed?: boolean
   placement: 'blog_index_footer' | 'blog_index_grid' | 'blog_post_footer'
 }
 
@@ -20,7 +26,7 @@ interface BlogCtaProps {
  * later, inside the reader's own codebase. So we lead with `npm install` and
  * reframe $99 as "pay when you ship", not "pay to start".
  */
-export function BlogCta({ variant, placement }: BlogCtaProps) {
+export function BlogCta({ variant, placement, fullBleed = false }: BlogCtaProps) {
   if (variant === 'card') {
     return (
       <div className="flex flex-col justify-between rounded-2xl border border-[var(--color-fd-primary)]/30 bg-gradient-to-b from-[var(--color-fd-primary)]/5 to-transparent p-4 dark:from-[var(--color-fd-primary)]/10">
@@ -52,10 +58,12 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
 
   // Conversion band closing the list and each post. Same anatomy as the home
   // page's closing CTA (Figma 3945:2747) so the blog and the landing page
-  // close on one note, with an added pricing button the homepage omits. It is
-  // the one caller that is not full-bleed — it sits inside a reading column,
-  // so it keeps a rounded edge and trades the frame's 194px of vertical air
-  // for something a column can carry.
+  // close on one note, with an added pricing button the homepage omits.
+  //
+  // Boxed by default: on a post it sits inside a reading column, so it keeps a
+  // rounded edge and trades the frame's 194px of vertical air for something a
+  // column can carry. `fullBleed` drops both and lets it close the page the
+  // way every other ClosingCta does.
   return (
     <ClosingCta
       heading="Own your onboarding."
@@ -67,7 +75,11 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
       secondaryLabel="See pricing"
       secondaryHref="/pricing"
       placement={placement}
-      className="mt-12 overflow-hidden rounded-2xl border border-[var(--tk-card-edge)] py-16 sm:py-20 lg:px-8 lg:py-20"
+      className={
+        fullBleed
+          ? undefined
+          : 'mt-12 overflow-hidden rounded-2xl border border-[var(--tk-card-edge)] py-16 sm:py-20 lg:px-8 lg:py-20'
+      }
     />
   )
 }

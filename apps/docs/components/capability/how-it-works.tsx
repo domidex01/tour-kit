@@ -1,3 +1,4 @@
+import { SectionHead } from '@/components/landing/section-head'
 import { highlightCode } from '@/components/landing/syntax-highlight'
 import { CopyButton } from '@/components/ui/copy-button'
 import { ArrowUpRight } from 'lucide-react'
@@ -85,22 +86,17 @@ export function HowItWorks({
         ]
 
   return (
-    <section className="px-6 py-20 sm:px-8 md:py-28 lg:px-12">
+    <section className="px-6 py-36 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        <div className="mb-14 ml-auto max-w-lg text-right">
-          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            Three steps to production
-          </h2>
-          <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-            No iframe embeds, no script tags, no vendor dashboard. The code lands in your repo.
-          </p>
-        </div>
+        <SectionHead align="end" size="section" title="Three steps to production">
+          No iframe embeds, no script tags, no vendor dashboard. The code lands in your repo.
+        </SectionHead>
 
-        <ol className="grid gap-6 md:grid-cols-3">
+        <ol className="mt-14 grid gap-6 md:grid-cols-3">
           {steps.map((step, i) => (
             <li
               key={step.title}
-              className="flex flex-col rounded-xl border border-fd-border bg-fd-card p-6"
+              className="flex flex-col rounded-xl border border-[var(--tk-card-edge)] bg-fd-card p-6"
             >
               <div className="mb-4 flex items-center gap-3">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--tk-cta)] font-mono text-[13px] font-bold text-[var(--tk-cta-ink)]">
@@ -112,13 +108,23 @@ export function HowItWorks({
                 {step.description}
               </p>
 
+              {/* The panel's own chrome is one bar: sampled off the frame its
+                  header is rgb(29 41 61) — slate-800, `fd-secondary` — and its
+                  body is rgb(15 23 43), flush with the card face it sits on.
+                  The three hardcoded near-blacks this used to ship predate the
+                  token ramp and only worked inside a dark window. */}
               {step.code ? (
-                <div className="mt-auto overflow-hidden rounded-lg border border-white/[0.08]">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] bg-[#16171a] px-3 py-2">
-                    <span className="font-mono text-[11px] text-white/30">{step.filename}</span>
-                    <CopyButton text={step.code} className="text-white/20 hover:text-white/60" />
+                <div className="mt-auto overflow-hidden rounded-lg border border-[var(--tk-card-edge)]">
+                  <div className="flex items-center justify-between border-b border-[var(--tk-card-edge)] bg-fd-secondary px-3 py-2">
+                    <span className="font-mono text-[11px] text-fd-muted-foreground">
+                      {step.filename}
+                    </span>
+                    <CopyButton
+                      text={step.code}
+                      className="text-fd-muted-foreground/60 hover:text-fd-foreground"
+                    />
                   </div>
-                  <pre className="overflow-x-auto bg-[#0d0e11] px-3 py-3 font-mono text-[12px] leading-[1.7]">
+                  <pre className="overflow-x-auto bg-fd-muted px-3 py-3 font-mono text-[12px] leading-[1.7]">
                     <code>{highlightCode(step.code)}</code>
                   </pre>
                 </div>

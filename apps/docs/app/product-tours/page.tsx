@@ -9,6 +9,7 @@ import type { CapabilityFaqItem } from '@/components/capability/types'
 import { CapabilityWebPageJsonLd } from '@/components/capability/web-page-json-ld'
 import { CtaBand } from '@/components/landing/cta-band'
 import { Footer } from '@/components/landing/footer'
+import { SectionHead } from '@/components/landing/section-head'
 import { SocialProof } from '@/components/landing/social-proof'
 import { baseOptions } from '@/lib/layout.shared'
 import { BreadcrumbJsonLd, FAQJsonLd, ProductJsonLd } from '@/lib/structured-data'
@@ -183,20 +184,15 @@ export default function ProductToursPage() {
         />
 
         {/* core vs react — one buyer intent, two install styles (plan §2) */}
-        <section className="bg-[var(--color-fd-muted)] px-6 py-20 sm:px-8 md:py-28 lg:px-12 dark:bg-fd-muted/30">
+        <section className="px-6 py-36 sm:px-8 lg:px-12">
           <div className="mx-auto max-w-[1120px]">
-            <div className="mb-14 max-w-lg">
-              <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-                Two ways in. Same engine.
-              </h2>
-              <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-                Start with the styled components and eject to headless when the design team comes
-                knocking — both packages share the same core and the same MIT license.
-              </p>
-            </div>
+            <SectionHead size="section" title="Two ways in. Same engine.">
+              Start with the styled components and eject to headless when the design team comes
+              knocking — both packages share the same core and the same MIT license.
+            </SectionHead>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-xl border border-fd-border bg-fd-card p-7 transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <div className="mt-14 grid gap-6 md:grid-cols-2">
+              <div className="rounded-xl border border-[var(--tk-card-edge)] bg-fd-card p-7 transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <h3 className="mb-1 font-mono text-[14px] font-bold text-fd-foreground">
                   @tour-kit/react
                 </h3>
@@ -216,7 +212,7 @@ export default function ProductToursPage() {
                 </Link>
               </div>
 
-              <div className="rounded-xl border border-fd-border bg-fd-card p-7 transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <div className="rounded-xl border border-[var(--tk-card-edge)] bg-fd-card p-7 transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <h3 className="mb-1 font-mono text-[14px] font-bold text-fd-foreground">
                   @tour-kit/core
                 </h3>

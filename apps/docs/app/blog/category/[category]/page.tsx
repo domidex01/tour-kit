@@ -1,4 +1,5 @@
 import { Footer } from '@/components/landing/footer'
+import { PageHero } from '@/components/landing/page-hero'
 import {
   getBlogCategories,
   getCategoryDisplayName,
@@ -48,6 +49,31 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
+function articleCount(n: number): string {
+  return `${n} article${n !== 1 ? 's' : ''}`
+}
+
+/**
+ * The band's trailing slot, where /blog puts its RSS link. The count moves
+ * here whenever the category has an intro, so the intro gets the summary line
+ * to itself rather than sharing it with a one-line stat.
+ */
+function CategoryMeta({ count, hasIntro }: { count: number; hasIntro: boolean }) {
+  return (
+    <span className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-fd-muted-foreground">
+      <Link href="/blog" className="transition-colors hover:text-fd-foreground">
+        &larr; All articles
+      </Link>
+      {hasIntro ? (
+        <>
+          <span aria-hidden="true">&middot;</span>
+          <span>{articleCount(count)}</span>
+        </>
+      ) : null}
+    </span>
+  )
+}
+
 export default async function CategoryPage({ params }: PageProps) {
   const { category } = await params
   const display = getCategoryDisplayName(category) ?? category
@@ -72,76 +98,14 @@ export default async function CategoryPage({ params }: PageProps) {
         }))}
       />
 
-      {/* Hero banner */}
-      <div className="relative overflow-hidden border-b border-fd-border/50 dark:border-fd-border">
-        <div className="relative z-10 mx-auto max-w-[1400px] px-6 pb-16 pt-24 sm:px-8 sm:pb-20 sm:pt-32 lg:px-12">
-          <Link
-            href="/blog"
-            className="mb-4 inline-flex text-[13px] text-fd-muted-foreground transition-colors hover:text-fd-foreground"
-          >
-            &larr; All articles
-          </Link>
-          <h1 className="mb-2 text-3xl font-bold text-fd-foreground sm:text-4xl">{display}</h1>
-          {(() => {
-            const intro = getCategoryIntro(category)
-            if (intro) {
-              return (
-                <>
-                  <p className="max-w-2xl text-[15px] leading-relaxed text-fd-muted-foreground">
-                    {intro}
-                  </p>
-                  <p className="mt-3 text-[13px] text-fd-muted-foreground">
-                    {posts.length} article{posts.length !== 1 ? 's' : ''}
-                  </p>
-                </>
-              )
-            }
-            return (
-              <p className="text-[15px] text-fd-muted-foreground">
-                {posts.length} article{posts.length !== 1 ? 's' : ''}
-              </p>
-            )
-          })()}
-        </div>
-        <div
-          className="pointer-events-none absolute inset-0 -z-0"
-          style={{
-            maskImage: 'linear-gradient(to bottom, white 40%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to bottom, white 40%, transparent)',
-          }}
-        >
-          <link
-            rel="preload"
-            as="image"
-            href="/blog-hero-light.avif"
-            media="(prefers-color-scheme: light)"
-          />
-          <link
-            rel="preload"
-            as="image"
-            href="/blog-hero-dark.avif"
-            media="(prefers-color-scheme: dark)"
-          />
-          <img
-            src="/blog-hero-light.avif"
-            alt=""
-            aria-hidden="true"
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="h-full w-full object-cover opacity-60 dark:hidden"
-          />
-          <img
-            src="/blog-hero-dark.avif"
-            alt=""
-            aria-hidden="true"
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="hidden h-full w-full object-cover opacity-60 dark:block"
-          />
-        </div>
-      </div>
+      <PageHero
+        heading={display}
+        footer={
+          <CategoryMeta count={posts.length} hasIntro={Boolean(getCategoryIntro(category))} />
+        }
+      >
+        {getCategoryIntro(category) ?? articleCount(posts.length)}
+      </PageHero>
 
       <main id="main-content" className="mx-auto w-full max-w-[1400px] px-6 py-10 sm:px-8 lg:px-12">
         <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">

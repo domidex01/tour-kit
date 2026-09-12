@@ -1,4 +1,5 @@
 import { Footer } from '@/components/landing/footer'
+import { PageHero } from '@/components/landing/page-hero'
 import { Pricing } from '@/components/landing/pricing'
 import { baseOptions } from '@/lib/layout.shared'
 import { PRICING_FAQS } from '@/lib/pricing-faqs'
@@ -74,63 +75,18 @@ export default function PricingPage() {
       <ProductJsonLd />
       <FAQJsonLd items={PRICING_FAQS} />
       <main id="main-content" className="flex flex-1 flex-col">
-        {/* Hero banner — image-bg treatment matching /blog */}
-        <div className="relative mb-8 overflow-hidden border-b border-fd-border/50 dark:border-fd-border">
-          <div className="relative z-10 mx-auto max-w-[1280px] px-6 pb-10 pt-20 text-center sm:px-8 sm:pb-14 md:pt-28 lg:px-12">
-            <p className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tk-primary)]">
-              Pricing
-            </p>
-            <h1 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-              Simple, one-time pricing
-            </h1>
-            <p className="mx-auto max-w-3xl text-[16px] leading-[1.6] text-fd-muted-foreground">
-              Tour Kit ships three MIT-licensed core packages — tours, React bindings, and hints —
-              that are free forever for any project, commercial or otherwise. The Pro suite adds
-              eight extended packages (analytics, checklists, adoption tracking, announcements,
-              media embeds, business-hours scheduling, surveys, and AI chat) for a single $99
-              purchase. No subscriptions, no per-seat fees, no upgrade fees. Activation covers up to
-              five production domains; localhost and preview environments are unrestricted.
-            </p>
-          </div>
-          <div
-            className="pointer-events-none absolute inset-0 -z-0"
-            style={{
-              maskImage: 'linear-gradient(to bottom, white 40%, transparent)',
-              WebkitMaskImage: 'linear-gradient(to bottom, white 40%, transparent)',
-            }}
-          >
-            <link
-              rel="preload"
-              as="image"
-              href="/blog-hero-light.avif"
-              media="(prefers-color-scheme: light)"
-            />
-            <link
-              rel="preload"
-              as="image"
-              href="/blog-hero-dark.avif"
-              media="(prefers-color-scheme: dark)"
-            />
-            <img
-              src="/blog-hero-light.avif"
-              alt=""
-              aria-hidden="true"
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-              className="h-full w-full object-cover opacity-60 dark:hidden"
-            />
-            <img
-              src="/blog-hero-dark.avif"
-              alt=""
-              aria-hidden="true"
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-              className="hidden h-full w-full object-cover opacity-60 dark:block"
-            />
-          </div>
-        </div>
+        <PageHero eyebrow="Pricing" heading="Simple, one-time pricing">
+          Tour Kit ships three MIT-licensed core packages — tours, React bindings, and hints — that
+          are free forever for any project, commercial or otherwise. The Pro suite adds eight
+          extended packages (analytics, checklists, adoption tracking, announcements, media embeds,
+          business-hours scheduling, surveys, and AI chat) for a single $99 purchase. No
+          subscriptions, no per-seat fees, no upgrade fees. Activation covers up to five production
+          domains; localhost and preview environments are unrestricted.
+        </PageHero>
+
+        {/* Gap/hero-body 3880:1536 — a flat 32px between the band and the chips. */}
+        <div className="h-8" />
+
         <Pricing />
       </main>
       <Footer />

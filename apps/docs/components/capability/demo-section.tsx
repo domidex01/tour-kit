@@ -1,7 +1,8 @@
+import { SectionHead } from '@/components/landing/section-head'
 import type { ReactNode } from 'react'
 
 interface DemoSectionProps {
-  /** Mono uppercase label ("LIVE DEMO"). */
+  /** Uppercase label ("LIVE DEMO"). */
   eyebrow?: string
   heading: string
   /** Names the proof: this is the real component, not a video. */
@@ -21,18 +22,15 @@ export function DemoSection({
   children,
 }: DemoSectionProps) {
   return (
-    <section className="px-6 py-16 sm:px-8 md:py-24 lg:px-12">
+    <section className="px-6 py-24 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        <div className="mb-10 max-w-lg">
-          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
-            {eyebrow}
-          </p>
-          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            {heading}
-          </h2>
-          <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">{subtext}</p>
-        </div>
-        {children}
+        <p className="mb-3 text-[11px] font-semibold uppercase leading-[16.5px] tracking-[0.08em] text-[var(--color-fd-primary)]">
+          {eyebrow}
+        </p>
+        <SectionHead size="section" title={heading}>
+          {subtext}
+        </SectionHead>
+        <div className="mt-10">{children}</div>
       </div>
     </section>
   )

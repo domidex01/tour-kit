@@ -70,17 +70,20 @@ export function Pricing() {
   const sale = useSaleCountdown()
 
   return (
-    <section className="px-6 pb-20 sm:px-8 md:pb-28 lg:px-12">
+    <section className="px-6 pb-36 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
         {/* Launch promo banner — live countdown. Hidden once the window closes. */}
         {!sale.expired && (
-          <div className="mx-auto mb-10 flex max-w-2xl flex-col items-center justify-center gap-3.5 rounded-xl border border-[var(--tk-primary)]/30 bg-gradient-to-r from-[var(--tk-primary)]/10 via-[var(--tk-primary)]/5 to-[var(--tk-primary)]/10 px-6 py-5 sm:flex-row sm:gap-6">
+          <div className="mx-auto mb-10 flex max-w-2xl flex-col items-center justify-center gap-3.5 rounded-xl border border-[var(--color-fd-primary)]/30 bg-gradient-to-r from-[var(--color-fd-primary)]/10 via-[var(--color-fd-primary)]/5 to-[var(--color-fd-primary)]/10 px-6 py-5 sm:flex-row sm:gap-6">
             <div className="flex items-center gap-2 text-center sm:text-left">
-              <Timer className="h-5 w-5 shrink-0 text-[var(--tk-primary)]" aria-hidden="true" />
+              <Timer
+                className="h-5 w-5 shrink-0 text-[var(--color-fd-primary)]"
+                aria-hidden="true"
+              />
               <p className="text-[15px] font-semibold text-fd-foreground">
                 Launch sale —{' '}
-                <span className="text-[var(--tk-primary)]">{DISCOUNT_PERCENT}% off</span> the Pro
-                suite
+                <span className="text-[var(--color-fd-primary)]">{DISCOUNT_PERCENT}% off</span> the
+                Pro suite
               </p>
             </div>
             <SaleCountdown remaining={sale.remaining} mounted={sale.mounted} />
@@ -88,9 +91,9 @@ export function Pricing() {
         )}
         {/* Social proof strip — A1: verifiable trust signals as pills (matches homepage SocialProof) */}
         <ul className="mx-auto mb-12 flex max-w-2xl flex-wrap items-center justify-center gap-2.5">
-          <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
+          <li className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-card-edge)] bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
             <Download
-              className="h-3.5 w-3.5 shrink-0 text-[var(--tk-primary)]"
+              className="h-3.5 w-3.5 shrink-0 text-[var(--color-fd-primary)]"
               aria-hidden="true"
             />
             <span>
@@ -98,13 +101,16 @@ export function Pricing() {
               monthly npm installs
             </span>
           </li>
-          <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
-            <Scale className="h-3.5 w-3.5 shrink-0 text-[var(--tk-primary)]" aria-hidden="true" />
+          <li className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-card-edge)] bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
+            <Scale
+              className="h-3.5 w-3.5 shrink-0 text-[var(--color-fd-primary)]"
+              aria-hidden="true"
+            />
             <span>MIT-licensed core — no lock-in</span>
           </li>
-          <li className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
+          <li className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-card-edge)] bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
             <ShieldCheck
-              className="h-3.5 w-3.5 shrink-0 text-[var(--tk-primary)]"
+              className="h-3.5 w-3.5 shrink-0 text-[var(--color-fd-primary)]"
               aria-hidden="true"
             />
             <span>Secure checkout via Polar</span>
@@ -113,9 +119,9 @@ export function Pricing() {
         {/* Pricing cards */}
         <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 md:gap-8">
           {/* Free tier */}
-          <div className="group order-2 flex flex-col rounded-xl border border-fd-border bg-fd-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md md:order-1">
+          <div className="group order-2 flex flex-col rounded-xl border border-[var(--tk-card-edge)] bg-fd-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md md:order-1">
             <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-fd-border bg-fd-muted">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--tk-card-edge)] bg-fd-muted">
                 <Code2 className="h-5 w-5 text-fd-muted-foreground" aria-hidden="true" />
               </div>
               <div>
@@ -131,7 +137,7 @@ export function Pricing() {
               <span className="ml-1.5 text-[15px] text-fd-muted-foreground">forever</span>
             </div>
 
-            <div className="mb-6 rounded-lg border border-dashed border-fd-border bg-fd-muted/30 px-4 py-2.5">
+            <div className="mb-6 rounded-lg border border-dashed border-[var(--tk-card-edge)] bg-fd-muted/30 px-4 py-2.5">
               <p className="text-[13px] font-medium text-fd-muted-foreground">
                 3 MIT packages — unlimited sites, no restrictions
               </p>
@@ -154,7 +160,7 @@ export function Pricing() {
 
             <Link
               href="/builder"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--tk-card-edge)] bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
             >
               Get started
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -162,15 +168,15 @@ export function Pricing() {
           </div>
 
           {/* Pro tier */}
-          <div className="group relative order-1 flex flex-col rounded-xl border-2 border-[var(--tk-primary)] bg-fd-card p-8 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg md:order-2">
-            <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-primary)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-[color:var(--tk-primary)]/20">
+          <div className="group relative order-1 flex flex-col rounded-xl border-2 border-[var(--color-fd-primary)] bg-fd-card p-8 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg md:order-2">
+            <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-cta)] px-3 py-1 text-[11px] font-semibold text-[var(--tk-cta-ink)] shadow-sm shadow-[color:var(--color-fd-primary)]/20">
               <Sparkles className="h-3 w-3" aria-hidden="true" />
               One-time purchase
             </div>
 
             <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--tk-primary)]/10 ring-1 ring-[var(--tk-primary)]/20">
-                <Zap className="h-5 w-5 text-[var(--tk-primary)]" aria-hidden="true" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--color-fd-primary)]/10 ring-1 ring-[var(--color-fd-primary)]/20">
+                <Zap className="h-5 w-5 text-[var(--color-fd-primary)]" aria-hidden="true" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-fd-foreground">Pro</h3>
@@ -218,14 +224,14 @@ export function Pricing() {
               Appcues, Pendo &amp; WalkMe bill monthly, per seat.{' '}
               <Link
                 href="/compare"
-                className="font-medium text-[var(--tk-primary)] underline-offset-2 hover:underline"
+                className="font-medium text-[var(--color-fd-primary)] underline-offset-2 hover:underline"
               >
                 See the comparison
               </Link>
               .
             </p>
 
-            <div className="mb-6 rounded-lg border border-[var(--tk-primary)]/20 bg-[var(--tk-primary)]/5 px-4 py-2.5">
+            <div className="mb-6 rounded-lg border border-[var(--color-fd-primary)]/20 bg-[var(--color-fd-primary)]/5 px-4 py-2.5">
               <p className="text-[13px] font-medium text-fd-foreground">
                 8 extended packages — analytics, checklists, AI & more
               </p>
@@ -238,7 +244,7 @@ export function Pricing() {
                   className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
                 >
                   <Check
-                    className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tk-primary)]"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-fd-primary)]"
                     aria-hidden="true"
                   />
                   {feature}
@@ -250,7 +256,7 @@ export function Pricing() {
               href={POLAR_CHECKOUT_URL}
               placement="pricing_page"
               value={sale.expired ? REGULAR_PRICE : SALE_PRICE}
-              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[color:var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--tk-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
+              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-cta)] px-6 py-3 text-[15px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
             >
               {sale.expired ? 'Buy Pro License' : `Get Pro — $${SALE_PRICE}`}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -270,14 +276,14 @@ export function Pricing() {
         {/* Comparison table */}
         <div className="mt-20">
           <div className="mb-8 text-center">
-            <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tk-primary)]">
+            <p className="mb-3 text-[11px] font-semibold uppercase leading-[16.5px] tracking-[0.08em] text-[var(--color-fd-primary)]">
               Compare
             </p>
             <h3 className="text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
               Feature comparison
             </h3>
           </div>
-          <div className="overflow-hidden rounded-xl border border-fd-border">
+          <div className="overflow-hidden rounded-xl border border-[var(--tk-card-edge)]">
             {/* The global `table{display:block}` rule (globals.css) is unlayered and beats
                 Tailwind utilities in the cascade, so force real table layout inline to fill
                 the card width. Fixed 50/25/25 columns via colgroup. */}
@@ -292,7 +298,7 @@ export function Pricing() {
                 <col style={{ width: '25%' }} />
               </colgroup>
               <thead>
-                <tr className="border-b border-fd-border bg-fd-muted/50">
+                <tr className="border-b border-[var(--tk-card-edge)] bg-fd-card">
                   <th
                     scope="col"
                     className="px-6 py-3.5 text-left text-[13px] font-semibold text-fd-foreground"
@@ -307,7 +313,7 @@ export function Pricing() {
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-center text-[13px] font-semibold text-[var(--tk-primary)]"
+                    className="px-6 py-3.5 text-center text-[13px] font-semibold text-[var(--color-fd-primary)]"
                   >
                     Pro
                   </th>
@@ -317,7 +323,7 @@ export function Pricing() {
                 {COMPARISON_ROWS.map((row) => (
                   <tr
                     key={row.feature}
-                    className="border-b border-fd-border transition-colors last:border-b-0 hover:bg-fd-muted/30"
+                    className="border-b border-[var(--tk-card-edge)]/70 transition-colors last:border-b-0 hover:bg-fd-muted/30"
                   >
                     <th
                       scope="row"
@@ -362,7 +368,7 @@ function LicenseTerms() {
   return (
     <div className="mx-auto mt-20 max-w-3xl">
       <div className="mb-8 text-center">
-        <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tk-primary)]">
+        <p className="mb-3 text-[11px] font-semibold uppercase leading-[16.5px] tracking-[0.08em] text-[var(--color-fd-primary)]">
           License &amp; fulfillment
         </p>
         <h3 className="text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
@@ -452,7 +458,7 @@ function ComparisonCell({
         <Check
           aria-hidden="true"
           className={`mx-auto h-4 w-4 ${
-            isPro ? 'text-[var(--tk-primary)]' : 'text-emerald-600 dark:text-emerald-400'
+            isPro ? 'text-[var(--color-fd-primary)]' : 'text-emerald-600 dark:text-emerald-400'
           }`}
         />
         <span className="sr-only">Included</span>
@@ -473,14 +479,14 @@ function FAQ() {
   return (
     <div className="mt-20">
       <div className="mb-8 text-center">
-        <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tk-primary)]">
+        <p className="mb-3 text-[11px] font-semibold uppercase leading-[16.5px] tracking-[0.08em] text-[var(--color-fd-primary)]">
           FAQ
         </p>
         <h3 className="text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
           Frequently asked questions
         </h3>
       </div>
-      <div className="mx-auto max-w-3xl divide-y divide-fd-border overflow-hidden rounded-xl border border-fd-border">
+      <div className="mx-auto max-w-3xl divide-y divide-fd-border overflow-hidden rounded-xl border border-[var(--tk-card-edge)]">
         {PRICING_FAQS.map((item, i) => {
           const isOpen = openIndex === i
           const panelId = `faq-panel-${i}`
@@ -493,7 +499,7 @@ function FAQ() {
                 aria-expanded={isOpen}
                 aria-controls={panelId}
                 onClick={() => setOpenIndex(isOpen ? null : i)}
-                className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
+                className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
               >
                 {item.question}
                 <svg

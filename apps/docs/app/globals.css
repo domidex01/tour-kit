@@ -256,6 +256,14 @@ img {
      draws them, peaking 270px inside the edge instead of on it. */
   --tk-glow: rgb(79 57 246 / 0.34);
 
+  /* The capability-page hero (ToursHero 3880:2674 and its four siblings) is
+     the one band drawn STRONGER than --tk-glow: a 545x589 ellipse under a
+     400px blur, median-sampled off the dark frame at a≈0.64 peak against
+     --tk-glow's 0.49. It sits where the home hero puts its preview panel, so
+     there is nothing for it to wash out. Scaled here by the same 0.34/0.49
+     the light frame applies to the CTA bloom. */
+  --tk-hero-glow: rgb(79 57 246 / 0.44);
+
   /* ---- Legacy --tk-* surface tokens ------------------------------------
      Still read by ~110 call sites across the landing and capability
      components. Re-pointed at the indigo system so those flip with the
@@ -354,6 +362,8 @@ img {
      dark theme uses. A decorative bloom is not ink, so it keeps the saturated
      brand hue in both themes. */
   --tk-glow: rgb(79 57 246 / 0.49);
+  /* Measured peak of the capability hero's ellipse — see the light block. */
+  --tk-hero-glow: rgb(79 57 246 / 0.64);
 
   /* ---- Legacy --tk-* surface tokens ------------------------------------ */
   --tk-primary: #7c86ff;
