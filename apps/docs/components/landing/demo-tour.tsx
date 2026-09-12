@@ -1437,9 +1437,11 @@ export function DemoTour() {
 
   return (
     <section className="px-6 pt-32 pb-32 sm:px-8 lg:px-12 lg:pb-[229px]">
-      {/* 1152px here, not the 1120 the rest of the page uses — the tab row
-          needs the extra width to hold eleven packages on two lines
-          (Figma 3792:1684). */}
+      {/* 1152px here, not the 1120 the rest of the page uses (Figma
+          3792:1684). This used to be justified by the tab row needing the
+          extra width to hold the packages on two lines; the row carries its
+          own 896px measure now, so what is left on 1152 is the demo panel
+          below. */}
       <div className="mx-auto max-w-6xl">
         <SectionHead
           align="center"
@@ -1451,43 +1453,58 @@ export function DemoTour() {
           what ships.
         </SectionHead>
 
-        {/* Tab bar */}
-        <div className="mb-6 flex flex-wrap justify-center gap-1.5">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id
-            const isPro = tab.tier === 'pro'
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                aria-label={`${tab.label}${isPro ? ' (Pro)' : ''}`}
-                aria-pressed={isActive}
-                className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
-                  isActive
-                    ? 'bg-[var(--tk-cta)] text-[var(--tk-cta-ink)] shadow-sm'
-                    : 'text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
-                }`}
-              >
-                <tab.icon
-                  aria-hidden="true"
-                  className={`h-3.5 w-3.5 ${isActive ? '' : tab.color}`}
-                />
-                <span className="hidden sm:inline">{tab.label}</span>
-                {isPro && (
-                  <span
-                    className={`inline-flex items-center gap-0.5 rounded-[4px] px-1 py-px text-[9px] font-bold uppercase tracking-wide ${
-                      isActive ? 'bg-white/25 text-white' : 'bg-violet-500/10 text-violet-500'
+        {/* Tab bar — two rows of five, on a narrower measure than the demo
+            panel below it.
+
+            The rows are SPLIT rather than left to `flex-wrap`, because the
+            window where wrapping lands on 5+5 by itself is 28px wide and would
+            not survive a font swap: measured at 1152, the ten tabs run 84 / 83
+            / 201 / 163 / 136 / 157 / 156 / 167 / 147 / 174 with a 6px gap, so
+            the first five need 690px, the last five 824px, and the sixth tab
+            joins row one at 853px. Free-wrapping at the old full 1152 gave
+            7 + 3. 896 clears the wider row by 72px and still lets either row
+            wrap on its own on a narrow viewport, where the labels are hidden
+            anyway. */}
+        <div className="mx-auto mb-6 flex max-w-[896px] flex-col gap-1.5">
+          {[tabs.slice(0, 5), tabs.slice(5)].map((row) => (
+            <div key={row[0].id} className="flex flex-wrap justify-center gap-1.5">
+              {row.map((tab) => {
+                const isActive = activeTab === tab.id
+                const isPro = tab.tier === 'pro'
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    aria-label={`${tab.label}${isPro ? ' (Pro)' : ''}`}
+                    aria-pressed={isActive}
+                    className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
+                      isActive
+                        ? 'bg-[var(--tk-cta)] text-[var(--tk-cta-ink)] shadow-sm'
+                        : 'text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
                     }`}
-                    aria-hidden="true"
                   >
-                    <Sparkles className="h-2 w-2" aria-hidden="true" />
-                    Pro
-                  </span>
-                )}
-              </button>
-            )
-          })}
+                    <tab.icon
+                      aria-hidden="true"
+                      className={`h-3.5 w-3.5 ${isActive ? '' : tab.color}`}
+                    />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    {isPro && (
+                      <span
+                        className={`inline-flex items-center gap-0.5 rounded-[4px] px-1 py-px text-[9px] font-bold uppercase tracking-wide ${
+                          isActive ? 'bg-white/25 text-white' : 'bg-violet-500/10 text-violet-500'
+                        }`}
+                        aria-hidden="true"
+                      >
+                        <Sparkles className="h-2 w-2" aria-hidden="true" />
+                        Pro
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          ))}
         </div>
 
         {/* Package name label */}
