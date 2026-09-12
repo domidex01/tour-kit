@@ -1,4 +1,5 @@
 import { TrackedCtaLink } from '@/components/analytics/tracked-cta-link'
+import { ClosingCta } from '@/components/landing/closing-cta'
 import { ArrowRight } from 'lucide-react'
 
 interface BlogCtaProps {
@@ -49,78 +50,24 @@ export function BlogCta({ variant, placement }: BlogCtaProps) {
     )
   }
 
-  // Full-width conversion band — mirrors the homepage CTA footer (glass card
-  // over the lighthouse/hero backdrop) so the blog and landing page close on
-  // the same note, with an added pricing button the homepage omits.
+  // Conversion band closing the list and each post. Same anatomy as the home
+  // page's closing CTA (Figma 3945:2747) so the blog and the landing page
+  // close on one note, with an added pricing button the homepage omits. It is
+  // the one caller that is not full-bleed — it sits inside a reading column,
+  // so it keeps a rounded edge and trades the frame's 194px of vertical air
+  // for something a column can carry.
   return (
-    <section className="relative mt-12 flex min-h-screen items-center justify-center overflow-hidden rounded-2xl border border-fd-border/50 px-6 py-16 sm:px-8 sm:py-20">
-      {/* Background images — cute 3D lighthouse diorama, matching the homepage
-          CTA band: day for light mode, twilight for dark mode */}
-      <div className="pointer-events-none absolute inset-0">
-        <img
-          src="/cta-island-day.avif"
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 h-full! w-full object-cover opacity-50 dark:hidden"
-        />
-        <img
-          src="/cta-island-twilight.avif"
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 hidden h-full! w-full object-cover opacity-50 dark:block"
-        />
-      </div>
-
-      {/* Dot grid overlay */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.35]"
-        style={{
-          backgroundImage: 'radial-gradient(circle, var(--color-fd-border) 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-        }}
-      />
-
-      <div className="relative mx-auto max-w-xl rounded-2xl border border-fd-border/50 bg-fd-background/40 p-8 text-center shadow-2xl backdrop-blur-xl dark:bg-fd-background/40 sm:p-12">
-        <h2 className="mb-4 text-2xl font-extrabold leading-tight tracking-[-0.02em] text-[var(--color-fd-foreground)] dark:text-white sm:text-3xl">
-          Own your onboarding.{' '}
-          <span className="text-[var(--color-fd-primary)]">Ship it today.</span>
-        </h2>
-
-        <p className="mb-8 text-[15px] text-fd-muted-foreground">
-          No vendor lock-in. No monthly invoice. Just code you control and users who convert.
-        </p>
-
-        {/* Install command */}
-        <div className="mx-auto mb-8 inline-flex items-center gap-3 rounded-lg border border-fd-border/50 bg-fd-muted/30 px-6 py-3 font-mono text-[14px] backdrop-blur-sm">
-          <span className="select-none text-fd-muted-foreground/50">$</span>
-          <span className="text-fd-foreground/70">pnpm add @tour-kit/core</span>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <TrackedCtaLink
-            href="/builder"
-            placement={placement}
-            className="group inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-7 py-3.5 text-[14px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
-          >
-            Get started
-            <ArrowRight
-              className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-              aria-hidden="true"
-            />
-          </TrackedCtaLink>
-          <TrackedCtaLink
-            href="/pricing"
-            placement={placement}
-            className="inline-flex items-center rounded-lg border border-fd-border bg-fd-background/50 px-7 py-3.5 text-[14px] font-semibold text-fd-foreground backdrop-blur-sm transition-colors hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
-          >
-            See pricing
-          </TrackedCtaLink>
-        </div>
-      </div>
-    </section>
+    <ClosingCta
+      heading="Own your onboarding."
+      headingAccent="Ship it today."
+      subtext="No vendor lock-in. No monthly invoice. Just code you control and users who convert."
+      installCmd="pnpm add @tour-kit/core"
+      ctaLabel="Get started"
+      ctaHref="/builder"
+      secondaryLabel="See pricing"
+      secondaryHref="/pricing"
+      placement={placement}
+      className="mt-12 overflow-hidden rounded-2xl border border-[var(--tk-card-edge)] py-16 sm:py-20 lg:px-8 lg:py-20"
+    />
   )
 }

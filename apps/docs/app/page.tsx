@@ -1,4 +1,5 @@
 import { BlogPreview } from '@/components/landing/blog-preview'
+import { ClosingCta } from '@/components/landing/closing-cta'
 import { CtaBand } from '@/components/landing/cta-band'
 import { Features } from '@/components/landing/features'
 import { Footer } from '@/components/landing/footer'
@@ -14,10 +15,8 @@ import {
   WebSiteJsonLd,
 } from '@/lib/structured-data'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
-import { ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
 
 /**
  * Home owns the brand + umbrella cluster ("react onboarding toolkit");
@@ -153,9 +152,15 @@ export default function HomePage() {
         {/* Pricing and the ownership table share ONE backdrop. In the frames
             the pricing section's line art and edge glows are 1237px tall and
             overflow into the table below it, so drawing a backdrop per section
-            would put a seam where the design has none (Figma 3792:2177). */}
+            would put a seam where the design has none (Figma 3792:2177).
+
+            `placement` matters here: the pricing frame rides its art 852px
+            below the section's top, against 232 for a CTA band, so the default
+            put it far too high. The offset is measured from this wrapper's top,
+            which is the pricing section's top — the table's extra height below
+            is just more room for the art to bleed into. */}
         <div className="relative">
-          <SectionBackdrop />
+          <SectionBackdrop placement="pricing" />
           <PricingTeaser />
           <ComparisonTable />
         </div>
@@ -164,42 +169,14 @@ export default function HomePage() {
         <BlogPreview />
         <FAQ />
 
-        {/* Closing CTA — Figma 3945:2747. Section 578 tall with the content
-            block (190) centred, so 194px of air each side. The heading is
-            48px ExtraBold on a 45px leading, which is tighter than its own
-            font size; the three blocks sit 24px apart. */}
-        <section className="relative px-6 py-24 sm:px-8 lg:px-12 lg:py-[194px]">
-          <SectionBackdrop />
-
-          <div className="mx-auto flex max-w-[1120px] flex-col items-center gap-6 text-center">
-            <h2 className="text-[clamp(2rem,3.9vw,3rem)] font-extrabold leading-[0.94] tracking-[-0.015em] text-balance text-fd-foreground">
-              Own your onboarding.{' '}
-              <span className="text-[var(--color-fd-primary)]">Ship it today.</span>
-            </h2>
-
-            <p className="max-w-[478px] text-[16px] leading-6 text-fd-muted-foreground">
-              No vendor lock-in. No monthly invoice. Just code you control and users who convert.
-            </p>
-
-            <div className="flex flex-wrap items-center justify-center gap-8">
-              <code className="inline-flex h-[47px] items-center gap-3 rounded-lg border border-[var(--tk-hairline)] bg-fd-secondary px-6 font-mono text-[14px] leading-[21px] text-fd-foreground/65">
-                <span className="select-none text-fd-muted-foreground/40">$</span>
-                pnpm add @tour-kit/core
-              </code>
-
-              <Link
-                href="/builder"
-                className="group inline-flex h-[49px] items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-7 text-[14px] font-semibold leading-5 text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
-              >
-                Get started
-                <ArrowRight
-                  className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-                  aria-hidden="true"
-                />
-              </Link>
-            </div>
-          </div>
-        </section>
+        <ClosingCta
+          heading="Own your onboarding."
+          headingAccent="Ship it today."
+          subtext="No vendor lock-in. No monthly invoice. Just code you control and users who convert."
+          installCmd="pnpm add @tour-kit/core"
+          ctaLabel="Get started"
+          ctaHref="/builder"
+        />
       </main>
       <Footer />
     </HomeLayout>
