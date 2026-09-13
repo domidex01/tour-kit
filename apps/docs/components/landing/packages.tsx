@@ -29,7 +29,7 @@ const corePackages = [
   {
     name: '@tour-kit/hints',
     description: 'Persistent contextual hints and pulsing beacons.',
-    size: '< 5 KB',
+    size: '< 6.5 KB',
     install: 'pnpm add @tour-kit/hints',
     href: '/feature-hints',
     linkLabel: 'Feature hints',

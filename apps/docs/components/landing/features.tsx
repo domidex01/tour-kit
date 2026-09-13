@@ -44,13 +44,10 @@ return <div style={tour.tooltipProps.style}>
       'Import one hook and you ship under 4 KB of core — the rest tree-shakes away. A monolithic tour component ships its whole surface whether you use it or not.',
     code: `// Only imports what you use
 import { useTour } from '@tour-kit/core';
-// → 3.9 KB brotli
+// → 3.9 KB brotli, enforced by a CI budget
 
-import { Tour, TourStep } from '@tour-kit/react';
-// → 7.4 KB
-
-// vs. react-joyride → 47.2 KB
-// vs. shepherd.js  → 35.1 KB`,
+// A monolithic tour component ships its entire
+// surface whether you use one piece of it or all.`,
     label: 'import',
     crop: '50% 24%',
   },
