@@ -1,5 +1,4 @@
 import './globals.css'
-import { YandexMetrika } from '@/components/analytics/yandex-metrika'
 import { SaleAnnouncementBanner } from '@/components/sale-announcement-banner'
 import { SkipNav } from '@/components/skip-nav'
 import { WebMcp } from '@/components/webmcp'
@@ -24,10 +23,6 @@ const hostGrotesk = Host_Grotesk({
 const GA_ID =
   process.env.NEXT_PUBLIC_GA_ID ??
   (process.env.NODE_ENV === 'production' ? 'G-CLV830MRY4' : undefined)
-
-const YANDEX_METRIKA_ID =
-  process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID ??
-  (process.env.NODE_ENV === 'production' ? '109195720' : undefined)
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://usertourkit.com'),
@@ -104,7 +99,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </RootProvider>
       </body>
       {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
-      {YANDEX_METRIKA_ID ? <YandexMetrika id={YANDEX_METRIKA_ID} /> : null}
     </html>
   )
 }
