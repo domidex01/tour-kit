@@ -21,7 +21,7 @@ const COMPARE_FAQS = [
   {
     question: 'How does userTourKit compare to React Joyride and Shepherd.js?',
     answer:
-      'userTourKit is headless-first and ships under 8 KB for the core. React Joyride is the most established React-specific library but is heavier and uses its own UI runtime. Shepherd.js is framework-agnostic with strong popper-based positioning but no React-native primitives. See the head-to-head comparison pages for feature parity, bundle weight, and migration paths.',
+      'userTourKit is headless-first and tree-shakeable — importing one hook ships under 4 KB of core. React Joyride is the most established React-specific library; Shepherd.js is framework-agnostic with strong popper-based positioning but no React-native primitives. See the head-to-head comparison pages for feature parity, the measured bundle table at /benchmarks/bundle-size, and migration paths.',
   },
   {
     question: 'How does userTourKit compare to SaaS platforms like Appcues, Pendo, and WalkMe?',

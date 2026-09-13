@@ -118,7 +118,7 @@ const FAQ = dynamic(() => import('@/components/landing/faq').then((m) => ({ defa
 
 const HOMEPAGE_NAME = 'userTourKit'
 const HOMEPAGE_DESCRIPTION =
-  'Headless, accessible product tours, onboarding flows, and in-app messaging for React. Open-source core with optional Pro packages.'
+  'Headless, accessible product tours, onboarding flows, and in-app messaging for React. Free in development, a one-time licence to ship.'
 
 export default function HomePage() {
   return (

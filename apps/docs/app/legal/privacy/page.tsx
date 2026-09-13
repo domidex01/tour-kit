@@ -45,9 +45,9 @@ export default function PrivacyPage() {
         <article className="prose prose-neutral dark:prose-invert max-w-none">
           <h2>Summary</h2>
           <p>
-            This site is the documentation and marketing homepage for the userTourKit open-source
-            library. We collect the minimum data needed to operate the site, bill Pro licenses, and
-            understand which pages are useful.
+            This site is the documentation and marketing homepage for the userTourKit library. We
+            collect the minimum data needed to operate the site, bill Pro licenses, and understand
+            which pages are useful.
           </p>
 
           <h2>What we collect</h2>

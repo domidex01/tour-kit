@@ -39,7 +39,7 @@ const HOW_WE_TEST_FAQS = [
   {
     question: 'What automated quality gates run on every userTourKit pull request?',
     answer:
-      'TypeScript strict typecheck across all packages, Vitest unit + integration tests targeting >80% meaningful coverage, full tsup ESM+CJS production build, per-package bundle-size budgets (core <8 KB, react <12 KB, hints <5 KB gzipped), and Biome linting. If any gate fails, the PR cannot merge.',
+      'TypeScript strict typecheck across all packages, Vitest unit + integration tests targeting >80% meaningful coverage, full tsup ESM+CJS production build, per-package bundle-size budgets (core <23 KB, react <12 KB, hints <6.5 KB gzipped), and Biome linting. If any gate fails, the PR cannot merge.',
   },
 ]
 
@@ -151,9 +151,9 @@ export default function HowWeTestPage() {
             </li>
             <li>
               <strong>Bundle-size budgets</strong> are defined per package:{' '}
-              <code>@tour-kit/core</code> &lt; 8 KB gzipped, <code>@tour-kit/react</code> &lt; 12
-              KB, <code>@tour-kit/hints</code> &lt; 5 KB. When a PR pushes a bundle over budget, we
-              either reduce scope or justify the increase in the changeset.
+              <code>@tour-kit/core</code> &lt; 23 KB gzipped, <code>@tour-kit/react</code> &lt; 12
+              KB, <code>@tour-kit/hints</code> &lt; 6.5 KB. When a PR pushes a bundle over budget,
+              we either reduce scope or justify the increase in the changeset.
             </li>
             <li>
               <strong>Linting</strong> via Biome for consistency and basic correctness (unused vars,

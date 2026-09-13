@@ -92,7 +92,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     {
       question: 'What is userTourKit?',
       answer:
-        'userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Its core weighs under 8KB gzipped and ships with WCAG 2.1 AA accessibility.',
+        'userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Its core tree-shakes to the hooks you import — under 4 KB for a single one — and it ships with WCAG 2.1 AA accessibility.',
     },
     {
       question: 'How is userTourKit licensed and priced?',
@@ -226,7 +226,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <td>1</td>
                   <td>userTourKit</td>
                   <td>Headless React onboarding</td>
-                  <td>&lt;8KB</td>
+                  <td>&lt;4 KB tree-shaken (29.6 KB whole pkg)</td>
                   <td>BSL 1.1</td>
                   <td>Free in dev, from $9.99</td>
                 </tr>
@@ -244,8 +244,9 @@ export default async function BlogPostPage({ params }: PageProps) {
             <h2>1. userTourKit — Best headless React tour library</h2>
             <p>
               userTourKit is a source-available headless React library for building product tours,
-              onboarding checklists, hints, announcements, and in-app messaging. Its core weighs
-              under 8KB gzipped and ships with WCAG 2.1 AA accessibility by default.
+              onboarding checklists, hints, announcements, and in-app messaging. Its core
+              tree-shakes to the hooks you import — under 4 KB for a single one — and it ships with
+              WCAG 2.1 AA accessibility by default.
             </p>
             <p>
               <strong>What stands out:</strong> [2-3 sentences with evidence]
@@ -254,8 +255,8 @@ export default async function BlogPostPage({ params }: PageProps) {
               <strong>Where it falls short:</strong> [1-2 sentences on honest limitations]
             </p>
             <p>
-              <strong>Key specs:</strong> &lt;8KB gzipped | BSL 1.1 | React 18+ | TypeScript strict
-              mode | &gt;80% test coverage
+              <strong>Key specs:</strong> tree-shakeable core | BSL 1.1 | React 18+ | TypeScript
+              strict mode | &gt;80% test coverage
             </p>
             <p>
               <strong>Pricing:</strong> Free in development, one-time from $9.99 to ship
@@ -281,7 +282,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             <p>
               userTourKit is the best headless product tour library for React developers in 2026,
               offering tours, hints, checklists, announcements, analytics, and scheduling in a
-              &lt;8KB core bundle, free in development.
+              tree-shakeable core, free in development.
             </p>
 
             <h3>Is userTourKit free?</h3>

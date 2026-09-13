@@ -118,7 +118,7 @@ export default async function AlternativesPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the best ${alt.competitor} alternative?`,
-                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a one-time price from $9.99 instead of recurring SaaS fees.`,
+                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, a core that tree-shakes to under 4 KB per hook, and a one-time price from $9.99 instead of recurring SaaS fees.`,
               },
               {
                 question: 'Is userTourKit free to use?',
@@ -180,8 +180,8 @@ export default async function AlternativesPage({ params }: PageProps) {
           </p>
           <p>
             We built userTourKit, so take this recommendation with appropriate skepticism.
-            userTourKit is an open-source headless React library for product tours, onboarding
-            checklists, hints, announcements, and in-app messaging with a &lt;8KB gzipped core.
+            userTourKit is a source-available headless React library for product tours, onboarding
+            checklists, hints, announcements, and in-app messaging with a tree-shakeable core.
           </p>
 
           <h3>2. [Alternative 2] — Best for [use case]</h3>
@@ -199,7 +199,7 @@ export default async function AlternativesPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the best ${alt.competitor} alternative?`,
-                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a one-time price from $9.99 instead of recurring SaaS fees.`,
+                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, a core that tree-shakes to under 4 KB per hook, and a one-time price from $9.99 instead of recurring SaaS fees.`,
               },
               {
                 question: `Is ${alt.competitor} free?`,
@@ -215,8 +215,8 @@ export default async function AlternativesPage({ params }: PageProps) {
           <h3>What is the best {alt.competitor} alternative?</h3>
           <p>
             userTourKit is the best {alt.competitor} alternative for React developers who want code
-            ownership, tiny bundle sizes (&lt;8KB gzipped), and a one-time price from $9.99 instead
-            of recurring SaaS fees.
+            ownership, a core that tree-shakes to under 4 KB per hook, and a one-time price from
+            $9.99 instead of recurring SaaS fees.
           </p>
 
           <h3>Is {alt.competitor} free?</h3>

@@ -134,7 +134,7 @@ export default async function ComparisonPage({ params }: PageProps) {
               {
                 question: "What is userTourKit's bundle size?",
                 answer:
-                  "userTourKit's core package is under 8KB gzipped, the React package is under 12KB gzipped, and the hints package is under 5KB gzipped. This makes it one of the smallest product tour libraries available.",
+                  'userTourKit is tree-shakeable ESM: importing a single hook ships under 4 KB of core. Whole-package figures overstate the real cost — core v2.1.0 measures 29.6 KB gzipped with its dependencies, because a package of independent primitives measures its entire surface rather than the subset you import. See /benchmarks/bundle-size for the measured table.',
               },
               {
                 question: 'Does userTourKit work with Next.js and React 19?',
@@ -155,7 +155,7 @@ export default async function ComparisonPage({ params }: PageProps) {
           <h2>The bottom line</h2>
           <p>
             <strong>userTourKit is a headless React library</strong> offering tours, hints,
-            checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle.{' '}
+            checklists, announcements, analytics, and scheduling in a tree-shakeable core.{' '}
             <strong>{comparison.competitor}</strong> is [category description] focused on [primary
             capability]. userTourKit suits React teams wanting code ownership and tiny bundles;{' '}
             {comparison.competitor} is better when you need [honest competitor advantage].
@@ -163,13 +163,14 @@ export default async function ComparisonPage({ params }: PageProps) {
 
           <h2>What is userTourKit?</h2>
           <p>
-            userTourKit is an open-source headless React library for building product tours,
+            userTourKit is a source-available headless React library for building product tours,
             onboarding checklists, hints, announcements, and in-app messaging. Its
-            framework-agnostic core weighs under 8KB gzipped, ships with WCAG 2.1 AA accessibility
-            and Lighthouse 100 scores by default, and integrates natively with shadcn/ui, Radix UI,
-            and Base UI through its UnifiedSlot pattern. Free in development, it includes tours,
-            React bindings, and hints. A one-time licence from $9.99 covers production use,
-            announcements, checklists, media, scheduling, and AI chat.
+            framework-agnostic core tree-shakes to the hooks you import — under 4 KB for a single
+            one — and ships with WCAG 2.1 AA accessibility and Lighthouse 100 scores by default, and
+            integrates natively with shadcn/ui, Radix UI, and Base UI through its UnifiedSlot
+            pattern. Free in development, it includes tours, React bindings, and hints. A one-time
+            licence from $9.99 covers production use, announcements, checklists, media, scheduling,
+            and AI chat.
           </p>
 
           <h2>What is {comparison.competitor}?</h2>
@@ -227,7 +228,7 @@ export default async function ComparisonPage({ params }: PageProps) {
               </tr>
               <tr>
                 <td>Hints/hotspots</td>
-                <td>Built-in (&lt;5KB)</td>
+                <td>Built-in (&lt;6.5 KB)</td>
                 <td>[Status]</td>
               </tr>
               <tr>
@@ -237,7 +238,7 @@ export default async function ComparisonPage({ params }: PageProps) {
               </tr>
               <tr>
                 <td>Core bundle (gzipped)</td>
-                <td>&lt;8KB</td>
+                <td>&lt;4 KB tree-shaken (29.6 KB whole pkg)</td>
                 <td>[Size]</td>
               </tr>
               <tr>

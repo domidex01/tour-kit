@@ -5,7 +5,12 @@ type Support = 'yes' | 'no' | 'partial' | string
 
 const rows: { label: string; tourKit: Support; saas: Support; oss: Support }[] = [
   { label: 'Cost', tourKit: 'Free core', saas: '$200–900/mo', oss: 'Free' },
-  { label: 'Bundle impact', tourKit: '< 8KB', saas: 'External script', oss: '30–50KB' },
+  {
+    label: 'Bundle impact',
+    tourKit: 'Under 4 KB per hook',
+    saas: 'External script',
+    oss: '30–50KB',
+  },
   {
     label: 'Customization',
     tourKit: 'Your components',

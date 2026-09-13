@@ -11,7 +11,7 @@ const corePackages = [
     name: '@tour-kit/core',
     description:
       'The headless engine. Hooks, positioning, focus management, and state — all framework-agnostic.',
-    size: '< 8 KB',
+    size: 'under 4 KB tree-shaken',
     install: 'pnpm add @tour-kit/core',
     href: '/docs/core',
     linkLabel: 'Docs',

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 const TRUST_CHIPS = [
-  '< 8KB core gzipped',
+  'Under 4 KB tree-shaken',
   'WCAG 2.1 AA',
   'Lighthouse a11y 100',
   'TypeScript strict',

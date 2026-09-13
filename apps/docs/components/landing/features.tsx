@@ -41,10 +41,10 @@ return <div style={tour.tooltipProps.style}>
   {
     title: 'Tree-shakeable & tiny',
     description:
-      'Core is under 8KB gzipped — 6x smaller than react-joyride. Import one hook or the full library. You only ship what you use.',
+      'Import one hook and you ship under 4 KB of core — the rest tree-shakes away. A monolithic tour component ships its whole surface whether you use it or not.',
     code: `// Only imports what you use
 import { useTour } from '@tour-kit/core';
-// → 3.2 KB
+// → 3.9 KB brotli
 
 import { Tour, TourStep } from '@tour-kit/react';
 // → 7.4 KB

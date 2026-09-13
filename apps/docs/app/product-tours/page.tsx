@@ -94,7 +94,7 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'How big is it, and what does that cost my users?',
     answer:
-      'The core engine is under 8KB gzipped and the React components under 12KB — roughly a sixth of react-joyride. Tours code-split cleanly because everything is tree-shakeable ESM.',
+      'Everything is tree-shakeable ESM: import one hook and you ship under 4 KB of core, and the React components stay under 12 KB gzipped. Tours code-split cleanly behind a dynamic import, so a route that never shows a tour never downloads one.',
   },
 ]
 
@@ -129,7 +129,7 @@ export default function ProductToursPage() {
           secondaryLabel="View on GitHub"
           secondaryHref="https://github.com/domidex01/tour-kit"
           installCmd="pnpm add @tour-kit/react"
-          factsLine="< 8KB core gzipped · TypeScript strict · WCAG 2.1 AA · own your code"
+          factsLine="Tree-shakeable core · TypeScript strict · WCAG 2.1 AA · own your code"
         />
 
         {/* Live demo — the real Tour running on this page */}
@@ -151,9 +151,9 @@ export default function ProductToursPage() {
               pain: '47KB to show three tooltips',
               painDetail:
                 'Legacy tour libraries ship more JavaScript than React itself — and your users pay the download.',
-              outcome: 'Under 8KB, tree-shakeable',
+              outcome: 'Under 4 KB tree-shaken',
               outcomeDetail:
-                'The headless core is < 8KB gzipped; styled components add < 12KB. Code-splits cleanly behind a dynamic import.',
+                'Import one hook from the headless core and you ship under 4 KB; the rest tree-shakes away. Styled components stay under 12 KB gzipped. Code-splits cleanly behind a dynamic import.',
             },
             {
               pain: 'Looks like a browser extension',
@@ -275,7 +275,7 @@ export default function ProductToursPage() {
 
         <CtaBand
           placement="tours_after_features"
-          eyebrow="Free & open source"
+          eyebrow="Free in development"
           heading="Build your first tour — free in development, no signup."
           subtext="Install the package and ship a tour today. Pro packages add checklists, announcements, and surveys when you need them."
           ctaLabel="Build my first tour"
@@ -286,7 +286,12 @@ export default function ProductToursPage() {
           heading="The third option between SaaS and DIY"
           rows={[
             { label: 'Cost', tourKit: 'Free in dev, from $9.99', saas: '$200–900/mo', oss: 'Free' },
-            { label: 'Bundle impact', tourKit: '< 8KB', saas: 'External script', oss: '30–50KB' },
+            {
+              label: 'Bundle impact',
+              tourKit: 'Under 4 KB per hook',
+              saas: 'External script',
+              oss: '30–50KB',
+            },
             { label: 'Headless mode', tourKit: 'yes', saas: 'no', oss: 'no' },
           ]}
         />
@@ -304,7 +309,7 @@ export default function ProductToursPage() {
           slug="tours"
           heading="Own your onboarding."
           headingAccent="Ship it today."
-          subtext="Free in development, under 8KB. The tour library you'd have built with three spare weeks."
+          subtext="Free in development, tree-shakeable to the hook you call. The tour library you'd have built with three spare weeks."
           installCmd="pnpm add @tour-kit/react"
           primaryLabel="Get started"
           primaryHref="/builder"
