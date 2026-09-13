@@ -379,9 +379,8 @@ export function Hero() {
               data-speakable="summary"
               className="mb-8 max-w-[540px] text-[17px] leading-[1.7] text-fd-foreground/80"
             >
-              The open-source onboarding toolkit for React, Vue and Svelte. A headless core,
-              composable components, and WCAG 2.1 AA accessibility — all in under 8KB. Works with
-              shadcn/ui out of the box.
+              The onboarding toolkit for React, Vue and Svelte. A headless core, composable
+              components, and WCAG 2.1 AA accessibility. Works with shadcn/ui out of the box.
             </p>
 
             <div className="mb-6 flex flex-wrap items-center gap-3">
